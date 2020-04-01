@@ -18,6 +18,8 @@ const objectToText = (obj, removeAttrs = []) => {
     }
   });
 
+  objWithoutRemoved.data = replaceAll(objWithoutRemoved.data, ['"'], "'");
+
   // handle object as text
   let asText = JSON.stringify(objWithoutRemoved);
   const keys = Object.keys(objWithoutRemoved);
@@ -65,7 +67,8 @@ module.exports = async function upload(nodes, edges) {
   const nodesAll = nodes.length;
 
   await asyncForEach(nodes, async node => {
-    node._id = sanitizeId(node.id);
+    node.id = sanitizeId(node.id);
+    //delete node.id;
 
     // inform about progress
     nodesFinished += 1;
@@ -90,16 +93,6 @@ module.exports = async function upload(nodes, edges) {
   const edgesAll = edges.length;
 
   await asyncForEach(edges, async edge => {
-    // inform about progress
-    edgesFinished += 1;
-    if (!(edgesFinished % 100)) {
-      console.log(
-        "uploading edges to db",
-        edgesFinished + "/" + edgesAll,
-        (edgesFinished / edgesAll) * 100 + "%"
-      );
-    }
-
     // process id values
     const fromId = sanitizeId(edge.from);
     const toId = sanitizeId(edge.to);
@@ -109,10 +102,20 @@ module.exports = async function upload(nodes, edges) {
 
     // create relationship between `from` and `to` nodes
     await runQuery(
-      `MATCH (a), (b) WHERE a._id ='${fromId}' AND b._id = '${toId}' CREATE (a)-[r:${edge.type} ` +
+      `MATCH (a), (b) WHERE a.id ='${fromId}' AND b.id = '${toId}' CREATE (a)-[r:${edge.type} ` +
         edgeAsText +
         "]->(b)"
     );
+
+    // inform about progress
+    edgesFinished += 1;
+    if (!(edgesFinished % 100)) {
+      console.log(
+        "uploading edges to db",
+        edgesFinished + "/" + edgesAll,
+        (edgesFinished / edgesAll) * 100 + "%"
+      );
+    }
   });
 
   driver.close();
