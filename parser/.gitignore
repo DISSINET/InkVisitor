@@ -1,0 +1,12 @@
+# dependencies
+node_modules
+
+# google apis files
+token.json
+credentials.json
+
+# config files
+.vscode
+
+# db config
+config.json

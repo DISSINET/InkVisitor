@@ -1,0 +1,18 @@
+{
+  "meta": {
+    "actions": {
+      "id": "1vzY6opQeR9hZVW6fmuZu2sgy_izF8vqGGhBQDxqT_eQ",
+      "sheets": {
+        "main": "Statements"
+      }
+    },
+    "sources": {
+      "id": "13eVorFf7J9R8YzO7TmJRVLzIIwRJS737r7eFbH1boyE",
+      "sheets": {
+        "texts": "Texts",
+        "manuscripts": "Manuscripts",
+        "others": "Resources"
+      }
+    }
+  }
+}

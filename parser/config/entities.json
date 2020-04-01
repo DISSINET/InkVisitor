@@ -1,0 +1,13 @@
+{
+  "A": "actions",
+  "P": "persons",
+  "L": "locations",
+  "G": "groups",
+  "E": "events",
+  "C": "concepts",
+  "O": "objects",
+  "V": "values",
+  "R": "resources",
+  "M": "resources",
+  "T": "texts"
+}

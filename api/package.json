@@ -1,0 +1,44 @@
+{
+  "name": "dissinet.ddb-api",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "npm-run-all --parallel build serve",
+    "build": "parcel ./src/index.ts --out-dir ./dist --no-source-maps --target node",
+    "serve": "npx nodemon --watch dist dist/index.js",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "run-db": "sudo docker start neo4jtest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DISSINET/dissinet.DDB-api.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/DISSINET/dissinet.DDB-api/issues"
+  },
+  "homepage": "https://github.com/DISSINET/dissinet.DDB-api#readme",
+  "dependencies": {
+    "@types/node": "^13.9.3",
+    "apollo-server": "^2.11.0",
+    "body-parser": "^1.19.0",
+    "cors": "^2.8.5",
+    "express": "^4.17.1",
+    "express-graphql": "^0.9.0",
+    "graphql-server-express": "^1.4.1",
+    "graphql-tools": "^4.0.7",
+    "neo4j-driver": "^4.0.2",
+    "parcel": "^1.12.4"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.9.0",
+    "@babel/preset-typescript": "^7.9.0",
+    "graphql": "^14.6.0",
+    "neo4j-graphql-js": "^2.13.0",
+    "nodemon": "^2.0.2",
+    "npm-run-all": "^4.1.5",
+    "typescript": "^3.8.3"
+  }
+}

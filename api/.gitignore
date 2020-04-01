@@ -1,0 +1,6 @@
+# parcel folders
+dist
+.cache
+
+# npm
+node_modules
