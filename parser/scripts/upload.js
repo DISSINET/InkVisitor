@@ -1,5 +1,5 @@
 const { replaceAll, asyncForEach } = require("./../../common/util/base");
-const { runQuery } = require("./../../common/util/db");
+const { runQuery, close } = require("./../../common/util/db");
 
 const objectToText = (obj, removeAttrs = []) => {
   // remove attributes from object
@@ -88,5 +88,5 @@ module.exports.upload = async function upload(nodes, edges) {
     }
   });
 
-  driver.close();
+  close();
 };

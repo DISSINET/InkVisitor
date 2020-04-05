@@ -14,6 +14,11 @@ var getDriver = () => {
   return driver;
 };
 
+exports.close = function() {
+  driver = getDriver();
+  driver.close();
+};
+
 /*
  * take query and run it on db
  */
