@@ -11,4 +11,8 @@ credentials.json
 # db config
 config.json
 
+# parcel folders
 .cache
+
+# dist folders
+dist
