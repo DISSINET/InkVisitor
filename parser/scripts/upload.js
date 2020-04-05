@@ -1,13 +1,5 @@
-var neo4j = require("neo4j-driver");
-var config = require("./../config.json").neo4j.local;
-
-const { replaceAll } = require("./../util/base");
-
-// setting the driver
-var driver = neo4j.driver(
-  "bolt://" + config.host,
-  neo4j.auth.basic(config.username, config.password)
-);
+const { replaceAll, asyncForEach } = require("./../../common/util/base");
+const { runQuery } = require("./../../common/util/db");
 
 const objectToText = (obj, removeAttrs = []) => {
   // remove attributes from object
@@ -30,29 +22,6 @@ const objectToText = (obj, removeAttrs = []) => {
   return asText;
 };
 
-/*
- * take query and run it on db
- */
-async function runQuery(query, params = {}) {
-  const session = driver.session({
-    defaultAccessMode: neo4j.session.WRITE
-  });
-  const result = await session.run(query, params).catch(e => {
-    console.log(e);
-  });
-  session.close();
-  if (!result || !result.records || result.records.length === 0) {
-    return false;
-  }
-  return result.records[0].get(0);
-}
-
-async function asyncForEach(array, callback) {
-  for (let index = 0; index < array.length; index++) {
-    await callback(array[index], index, array);
-  }
-}
-
 const sanitizeId = id => {
   return replaceAll(id, ["-"], "_");
 };
@@ -60,7 +29,7 @@ const sanitizeId = id => {
 /*
  * take nodes and edges and upload them to neo4j server
  */
-module.exports = async function upload(nodes, edges) {
+module.exports.upload = async function upload(nodes, edges) {
   // remove everything
   await runQuery("MATCH (n) DETACH DELETE n");
 

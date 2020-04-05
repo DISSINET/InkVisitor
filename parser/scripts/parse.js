@@ -1,16 +1,16 @@
-var loadSheet = require("./../util/loadsheet.js");
-var upload = require("./upload.js");
-const sheets = require("./../config/sheets");
+var { loadSheet } = require("./loadsheet.js");
 
-var columnsToCheck = require("./../config/columns");
-var relationTypes = require("./../config/relations");
+var sheets = require("./../../common/config/sheets");
+var columnsToCheck = require("./../../common/config/columns");
+var relationTypes = require("./../../common/config/relations");
 
 const {
   replaceAll,
   uuid,
   charToEntity,
-  entityToChar
-} = require("./../util/base");
+  entityToChar,
+  asyncForEach
+} = require("./../../common/util/base");
 
 var nodes = [];
 var edges = [];
@@ -48,6 +48,15 @@ const addNode = (id, entity, label, data = {}) => {
   } else {
     console.error("there is already a node with the id", id);
   }
+};
+
+module.exports.parse = async texts => {
+  const meta = await loadMeta();
+
+  await asyncForEach(texts, async text => {
+    await processText(meta, text);
+  });
+  return [nodes, edges];
 };
 
 var loadMeta = async () => {
@@ -126,7 +135,7 @@ var loadMeta = async () => {
   };
 };
 
-const processText = async (meta, textId) => {
+var processText = async (meta, textId) => {
   const text = meta.texts.find(t => t.id === textId);
 
   if (text && text.resources) {
@@ -433,22 +442,3 @@ const processText = async (meta, textId) => {
     });
   }
 };
-
-var load = async () => {
-  /*
-   * load meta sheets {sources, actions}
-   */
-  const meta = await loadMeta();
-
-  /*
-   * guglielmites dataset
-   */
-  await processText(meta, "T107");
-
-  /*
-   * send nodes and edges to upload function
-   */
-  await upload(nodes, edges);
-};
-
-load();
