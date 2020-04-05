@@ -5,6 +5,9 @@
   "main": "index.js",
   "scripts": {
     "parser:start": "cd ./parser && node ./scripts",
+    "api:start": "npm-run-all --parallel api:nodemon api:build",
+    "api:build": "parcel api/src/index.ts --out-dir api/dist --no-source-maps --target node",
+    "api:nodemon": "npx nodemon --watch api/dist api/dist/index.js ",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {

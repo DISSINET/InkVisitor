@@ -120,125 +120,18 @@ parcelRequire = (function (modules, cache, entry, globalName) {
 })({"index.ts":[function(require,module,exports) {
 "use strict";
 
-var __importDefault = this && this.__importDefault || function (mod) {
-  return mod && mod.__esModule ? mod : {
-    "default": mod
-  };
-};
-
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var neo4j_graphql_js_1 = require("neo4j-graphql-js");
+var express = require("express");
 
-var apollo_server_1 = require("apollo-server");
-
-var neo4j_driver_1 = __importDefault(require("neo4j-driver"));
-
-var driver = neo4j_driver_1.default.driver("bolt://0.0.0.0:7687", neo4j_driver_1.default.auth.basic("neo4j", "test")); //@cypher(statement: "MATCH (this)-[:HAS_ACTANT]-(a) RETURN a")
-// Initialize a GraphQL schema
-
-var typeDefs = "\n  union Actant = P | C\n\n  type HasActants @relation(name: \"HAS_ACTANT\") {\n    from: A\n    data: String\n    to: P!\n  }\n\n  interface Node {\n    id: String!\n    label: String\n    entity: String\n    data: String\n    actantOf: [A]\n  }\n  \n  type A {\n    id: String!\n    label: String\n    entity: String\n    data: String\n    actantOf: [A]\n    actantR: [HasActants]\n  }\n\n  type P  {\n    id: String!\n    label: String\n    entity: String\n    data: String\n    actantOf: [A]\n  }\n\n  type C  {\n    id: String!\n    label: String\n    entity: String\n    data: String\n    actantOf: [A]\n  }\n";
-/*
-
-type E implements Entity {
-    id: String!
-    label: String
-    entity: String
-    data: String
-    actantOf: [A]
-  }
-  type G implements Entity {
-    id: String!
-    label: String
-    entity: String
-    data: String
-    actantOf: [A]
-  }
-  type L implements Entity {
-    id: String!
-    label: String
-    entity: String
-    data: String
-    actantOf: [A]
-  }
-  type O implements Entity {
-    id: String!
-    label: String
-    entity: String
-    data: String
-    actantOf: [A]
-  }
-
-  type R implements Entity {
-    id: String!
-    label: String
-    entity: String
-    data: String
-    actantOf: [A]
-  }
-  type T implements Entity {
-    id: String!
-    label: String
-    entity: String
-    data: String
-    actions: [A] @cypher(statement: "MATCH (this)-[:ORIGINATES_IN]-(s:A) RETURN s")
-    texts: [T] @relation(name: "IS_PART_OF", direction:"OUT")
-    actantOf: [A]
-  }
-  type V implements Entity {
-    id: String!
-    label: String
-    entity: String
-    data: String
-    actantOf: [A]
-  }
-  type Query {
-    ActionsByTextId(textId: ID): [A] @cypher(statement: "MATCH (a:A)-[:ORIGINATES_IN]-(t:T) WHERE t.id = $textId RETURN a")
-    }
-*/
-
-var resolvers = {// root entry point to GraphQL service
-
-  /*
-  Query: {
-    async ActionsByTextId(object, params, ctx, resolveInfo) {
-      const rawResults = await neo4jgraphql(
-        object,
-        params,
-        ctx,
-        resolveInfo,
-        true
-      );
-  
-      const results = rawResults.map(record => {
-        try {
-          record.data = JSON.parse(replaceAll(record.data, ["'"], '"'));
-        } catch (e) {}
-        return record;
-      });
-  
-      return results;
-    }
-  }
-  */
-};
-var schema = neo4j_graphql_js_1.makeAugmentedSchema({
-  typeDefs: typeDefs,
-  resolvers: resolvers
+var app = express();
+var port = 3000;
+app.get("/", function (req, res) {
+  return res.send("Hello!");
 });
-var server = new apollo_server_1.ApolloServer({
-  context: {
-    driver: driver
-  },
-  schema: schema,
-  resolvers: resolvers,
-  tracing: true,
-  engine: true
-});
-server.listen(3003, "0.0.0.0").then(function (_a) {
-  var url = _a.url;
-  console.log("\uD83D\uDE80 Server ready at " + url);
+app.listen(port, function () {
+  return console.log("Example app listening at http://localhost:" + port);
 });
 },{}]},{},["index.ts"], null)

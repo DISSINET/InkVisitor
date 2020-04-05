@@ -1,12 +1,11 @@
-import neo4j from "neo4j-driver";
-
+var express = require("express");
 import { replaceAll } from "../../common/util/base";
 
-var driver = neo4j.driver(
-  "bolt://0.0.0.0:7687",
-  neo4j.auth.basic("neo4j", "test")
-);
+const app = express();
+const port = 3000;
 
-server.listen(3003, "0.0.0.0").then(({ url }) => {
-  console.log(`🚀 Server ready at ${url}`);
-});
+app.get("/", (req, res) => res.send("Hello!"));
+
+app.listen(port, () =>
+  console.log(`Example app listening at http://localhost:${port}`)
+);
