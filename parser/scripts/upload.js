@@ -1,7 +1,7 @@
 var neo4j = require("neo4j-driver");
 var config = require("./../config.json").neo4j.local;
 
-const { replaceAll } = require("./base");
+const { replaceAll } = require("./../util/base");
 
 // setting the driver
 var driver = neo4j.driver(
@@ -18,7 +18,8 @@ const objectToText = (obj, removeAttrs = []) => {
     }
   });
 
-  objWithoutRemoved.data = replaceAll(objWithoutRemoved.data, ['"'], "'");
+  objWithoutRemoved.data = replaceAll(objWithoutRemoved.data, ['"'], '\\"');
+  objWithoutRemoved.data = replaceAll(objWithoutRemoved.data, ["\\"], "");
 
   // handle object as text
   let asText = JSON.stringify(objWithoutRemoved);

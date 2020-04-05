@@ -1,11 +1,16 @@
-var loadSheet = require("./util/loadsheet.js");
-var upload = require("./util/upload.js");
-const sheets = require("./config/sheets");
+var loadSheet = require("./../util/loadsheet.js");
+var upload = require("./upload.js");
+const sheets = require("./../config/sheets");
 
-var columnsToCheck = require("./config/columns");
-var relationTypes = require("./config/relations");
+var columnsToCheck = require("./../config/columns");
+var relationTypes = require("./../config/relations");
 
-const { replaceAll, uuid, charToEntity, entityToChar } = require("./util/base");
+const {
+  replaceAll,
+  uuid,
+  charToEntity,
+  entityToChar
+} = require("./../util/base");
 
 var nodes = [];
 var edges = [];
@@ -200,10 +205,13 @@ const processText = async (meta, textId) => {
                 const attributeValueId = entity.resource + "_" + uuid();
 
                 // has attribute action
-                addNode(attributeActionId, "A", "A0093" + "|" + columnName);
+                addNode(attributeActionId, "A", "A0093" + "|" + columnName, {
+                  type: "A0093",
+                  typeModifier: columnName
+                });
 
                 // value node
-                addNode(attributeValueId, "V", value);
+                addNode(attributeValueId, "V", value, { value });
 
                 // link between entity node and hasAttribute action
                 addEdge(attributeActionId, entityNodeId, "actant", {
@@ -240,6 +248,8 @@ const processText = async (meta, textId) => {
           "|" +
           action.modifier_action_or_relation,
         {
+          type: action["id_action_or_relation"],
+          typeModifier: action.modifier_action_or_relation,
           modality: action.modality,
           parentId: action.parent_id,
           text: action.text,
@@ -368,7 +378,7 @@ const processText = async (meta, textId) => {
                   // create `has same location` action
                   addNode(
                     hasLocationActionId,
-                    "E",
+                    "A",
                     "A0188|" + checkColumn.modifier
                   );
 
@@ -379,7 +389,7 @@ const processText = async (meta, textId) => {
                   // create `has location` action
                   addNode(
                     hasLocationActionId,
-                    "E",
+                    "A",
                     "A0187|" + checkColumn.modifier
                   );
                   addEdge(hasLocationActionId, id, "actant", {
