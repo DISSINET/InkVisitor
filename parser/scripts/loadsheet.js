@@ -7,11 +7,12 @@ const readline = require("readline");
 const { google } = require("googleapis");
 
 const SCOPES = ["https://www.googleapis.com/auth/spreadsheets.readonly"];
-const TOKEN_PATH = "token.json";
+const TOKEN_PATH = "./config/token.json";
+const CREDENTIALS_PATH = "./config/credentials.json";
 
 // Load client secrets from a local file.
 module.exports.loadSheet = async ({ spread, sheet }) => {
-  const credentials = fs.readFileSync("credentials.json");
+  const credentials = fs.readFileSync(CREDENTIALS_PATH);
 
   const auth = authorize(JSON.parse(credentials));
   const sheets = google.sheets({ version: "v4", auth });
