@@ -10,3 +10,5 @@ credentials.json
 
 # db config
 config.json
+
+.cache
