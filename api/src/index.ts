@@ -4,102 +4,139 @@ import { neo4jgraphql, makeAugmentedSchema } from "neo4j-graphql-js";
 import { ApolloServer } from "apollo-server";
 import neo4j from "neo4j-driver";
 
+import { replaceAll } from "./../../util/base";
+
 var driver = neo4j.driver(
   "bolt://0.0.0.0:7687",
   neo4j.auth.basic("neo4j", "test")
 );
 
+//@cypher(statement: "MATCH (this)-[:HAS_ACTANT]-(a) RETURN a")
+
 // Initialize a GraphQL schema
 var typeDefs = `
-  interface Entity {
-    id: ID
-    _id: String
-    label: String  
-    entity: String
+  union Actant = P | C
+
+  type HasActants @relation(name: "HAS_ACTANT") {
+    from: A
+    data: String
+    to: Actant
   }
-  
-  type A implements Entity {
-    id: ID
-    _id: String
+
+  interface Node {
+    id: String!
     label: String
     entity: String
-    type: String
-    type_modifier: String
-    subjects: [Entity] @cypher(statement: "MATCH (this)-[:HAS_ACTANT { position: 'subject' }]-(s) RETURN s")
-    actants1: [Entity] @cypher(statement: "MATCH (this)-[:HAS_ACTANT { position: 'actant1' }]-(s) RETURN s")
-    actants2: [Entity] @cypher(statement: "MATCH (this)-[:HAS_ACTANT { position: 'actant2' }]-(s) RETURN s")
+    data: String
+    actantOf: [A]
   }
-  type C implements Entity {
-    id: ID
-    _id: String
-    label: String  
+  
+  type A {
+    id: String!
+    label: String
     entity: String
+    data: String
+    actantOf: [A]
+    actantR: [HasActants]
   }
-  type E implements Entity {
-    id: ID
-    _id: String
-    label: String  
+
+  type P  {
+    id: String!
+    label: String
     entity: String
+    data: String
+    actantOf: [A]
+  }
+
+  type C  {
+    id: String!
+    label: String
+    entity: String
+    data: String
+    actantOf: [A]
+  }
+
+type E implements Entity {
+    id: String!
+    label: String
+    entity: String
+    data: String
+    actantOf: [A]
   }
   type G implements Entity {
-    id: ID
-    _id: String
-    label: String  
+    id: String!
+    label: String
     entity: String
+    data: String
+    actantOf: [A]
   }
   type L implements Entity {
-    id: ID
-    _id: String
-    label: String  
+    id: String!
+    label: String
     entity: String
+    data: String
+    actantOf: [A]
   }
   type O implements Entity {
-    id: ID
-    _id: String
-    label: String 
-    entity: String 
-  }
-  type P implements Entity {
-    id: ID
-    _id: String
-    label: String  
+    id: String!
+    label: String
     entity: String
+    data: String
+    actantOf: [A]
   }
+
   type R implements Entity {
-    id: ID
-    _id: String
-    label: String  
+    id: String!
+    label: String
     entity: String
+    data: String
+    actantOf: [A]
   }
   type T implements Entity {
-    id: ID
-    _id: String
-    label: String  
+    id: String!
+    label: String
     entity: String
+    data: String
     actions: [A] @cypher(statement: "MATCH (this)-[:ORIGINATES_IN]-(s:A) RETURN s")
     texts: [T] @relation(name: "IS_PART_OF", direction:"OUT")
+    actantOf: [A]
   }
   type V implements Entity {
-    id: ID
-    value: String
-    _id: String
-    label: String  
+    id: String!
+    label: String
     entity: String
+    data: String
+    actantOf: [A]
   }
   type Query {
-    ActionsByTextId(textId: ID): [A]
+    ActionsByTextId(textId: ID): [A] @cypher(statement: "MATCH (a:A)-[:ORIGINATES_IN]-(t:T) WHERE t.id = $textId RETURN a")
 	}
-
 `;
 
 const resolvers = {
   // root entry point to GraphQL service
+  /*
   Query: {
-    ActionsByTextId(object, params, ctx, resolveInfo) {
-      const res = neo4jgraphql(object, params, ctx, resolveInfo, true);
-      return res;
+    async ActionsByTextId(object, params, ctx, resolveInfo) {
+      const rawResults = await neo4jgraphql(
+        object,
+        params,
+        ctx,
+        resolveInfo,
+        true
+      );
+
+      const results = rawResults.map(record => {
+        try {
+          record.data = JSON.parse(replaceAll(record.data, ["'"], '"'));
+        } catch (e) {}
+        return record;
+      });
+
+      return results;
     }
   }
+  */
 };
 
 var schema = makeAugmentedSchema({
