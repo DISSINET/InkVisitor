@@ -26,7 +26,7 @@ const addEdge = (from, to, type, data = {}) => {
         from,
         to,
         type: relationTypes[type].name,
-        data: JSON.stringify(data)
+        ...data
       });
     } else {
       console.error("wrong relation type", type);
@@ -43,7 +43,7 @@ const addNode = (id, entity, label, data = {}) => {
       id,
       label,
       entity,
-      data: JSON.stringify(data)
+      ...data
     });
   } else {
     console.error("there is already a node with the id", id);

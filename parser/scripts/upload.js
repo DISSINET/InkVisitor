@@ -10,9 +10,6 @@ const objectToText = (obj, removeAttrs = []) => {
     }
   });
 
-  objWithoutRemoved.data = replaceAll(objWithoutRemoved.data, ['"'], '\\"');
-  objWithoutRemoved.data = replaceAll(objWithoutRemoved.data, ["\\"], "");
-
   // handle object as text
   let asText = JSON.stringify(objWithoutRemoved);
   const keys = Object.keys(objWithoutRemoved);
