@@ -1,7 +1,7 @@
 import React, { MouseEventHandler } from "react";
 import classNames from "classnames";
 
-import { Colors } from "components/types";
+import { Colors } from "types";
 
 interface ButtonProps {
   label?: string;
