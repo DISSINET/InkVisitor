@@ -1,6 +1,7 @@
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const { CleanWebpackPlugin } = require("clean-webpack-plugin");
 const FaviconsWebpackPlugin = require("favicons-webpack-plugin");
+const postcssPresetEnv = require("postcss-preset-env");
 const path = require("path");
 
 module.exports = {
@@ -22,20 +23,7 @@ module.exports = {
               importLoaders: 1,
             },
           },
-          {
-            loader: "postcss-loader",
-            options: {
-              ident: "postcss",
-              plugins: [
-                require("tailwindcss"),
-                require("autoprefixer"),
-                require("postcss-import"),
-                require("postcss-nested"),
-                require("postcss-custom-properties"),
-                require("postcss-preset-env")({ stage: 1 }),
-              ],
-            },
-          },
+          "postcss-loader",
         ],
       },
       {
