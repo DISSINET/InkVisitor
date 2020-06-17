@@ -15,4 +15,4 @@ config.json
 .cache
 
 # dist folders
-dist
+**/dist
