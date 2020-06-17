@@ -3,14 +3,14 @@ import classNames from "classnames";
 
 import { Colors } from "components/types";
 
-interface AppProps {
+interface ButtonProps {
   label?: string;
   inverted?: Boolean;
   color?: typeof Colors[number];
   onClick?: MouseEventHandler<HTMLElement>;
 }
 
-export const Button: React.FC<AppProps> = ({
+export const Button: React.FC<ButtonProps> = ({
   label,
   inverted,
   color,

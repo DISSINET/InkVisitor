@@ -33,6 +33,7 @@ export const Input: React.FC<InputProps> = ({
     "border-primary",
     "text-left",
     "p-2",
+    "resize-none",
     {
       "bg-primary": inverted,
       "text-white": inverted,
@@ -53,7 +54,7 @@ export const Input: React.FC<InputProps> = ({
           cols={cols}
         />
       )}
-      {type === "select" && (
+      {type === "select" && options && (
         <select className={valueClasses} defaultValue={value}>
           {options.map((option, oi) => (
             <option key={oi}>{option}</option>
