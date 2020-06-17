@@ -6,5 +6,5 @@ html {
 }
 
 .btn {
-  @apply m-4 px-2 py-1 text-white border-none font-bold rounded bg-secondary;
+  @apply m-4 px-2 py-1 text-white border-none font-bold rounded bg-primary;
 }
