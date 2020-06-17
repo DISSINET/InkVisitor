@@ -1,7 +1,9 @@
 import * as React from "react";
 
-interface AppProps {}
+interface AppProps {
+  label: string;
+}
 
-export const Button: React.FC<AppProps> = () => {
-  return <button className="btn">button</button>;
+export const Button: React.FC<AppProps> = ({ label }) => {
+  return <button className="btn">{label}</button>;
 };
