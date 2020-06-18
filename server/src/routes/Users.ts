@@ -13,11 +13,8 @@ const router = Router().use(adminMW);
 const userDao = new UserDao();
 
 
-/******************************************************************************
- *                      Get All Users - "GET /api/users/all"
- ******************************************************************************/
-
-router.get('/all', async (req: Request, res: Response) => {
+// Get All Users - "GET /api/users/all"
+ router.get('/all', async (req: Request, res: Response) => {
     const users = await userDao.getAll();
     return res.status(OK).json({users});
 });
