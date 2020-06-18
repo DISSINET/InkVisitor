@@ -1,27 +1,22 @@
 {
-  "actant": {
-    "from": ["A"],
-    "to": ["T", "A", "P", "L", "G", "E", "C", "O", "V"],
-    "name": "HAS_ACTANT"
-  },
-  "reference": {
-    "from": ["A"],
-    "to": ["R"],
-    "name": "HAS_REFERENCE_IN"
-  },
-  "origin": {
-    "from": ["A"],
-    "to": ["T"],
-    "name": "ORIGINATES_IN"
-  },
-  "concern": {
-    "from": ["R"],
-    "to": ["T"],
-    "name": "CONCERNS"
-  },
   "part": {
     "from": ["T"],
     "to": ["T"],
-    "name": "IS_PART_OF"
+    "name": "HAS_PART"
+  },
+  "statement": {
+    "from": ["R", "M", "T"],
+    "to": ["S"],
+    "name": "HAS_STATEMENT"
+  },
+  "action": {
+    "from": ["S"],
+    "to": ["A"],
+    "name": "HAS_ACTION"
+  },
+  "actant": {
+    "from": ["A"],
+    "to": ["T", "A", "P", "L", "G", "E", "C", "O", "V", "R", "M"],
+    "name": "HAS_ACTANT"
   }
 }

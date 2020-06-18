@@ -384,7 +384,7 @@ app.get("/text/:textId", function (req, res) {
           actions = _b.sent();
           return [4
           /*yield*/
-          , db_1.runQuery("MATCH (text:T{id: '" + req.params.textId + "'})-[:ORIGINATES_IN]-(:A)-[:HAS_ACTANT]-(actant) RETURN actant")];
+          , db_1.runQuery("MERGE (text:T{id: '" + req.params.textId + "'})-[:ORIGINATES_IN]-(:A)-[:HAS_ACTANT]-(actant) RETURN actant")];
 
         case 4:
           actants = _b.sent();
@@ -403,9 +403,9 @@ app.get("/text/:textId", function (req, res) {
           texts = (_a.up = _b.sent(), _a);
           db_1.close();
           res.send({
+            actants: actants,
             texts: texts,
             actions: actions,
-            actants: actants,
             ations_resources: ations_resources,
             actions_actants: actions_actants
           });

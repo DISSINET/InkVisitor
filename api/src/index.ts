@@ -23,7 +23,7 @@ app.get("/text/:textId", async (req, res) => {
       "'})-[:ORIGINATES_IN]-(action:A) RETURN action"
   );
   const actants = await runQuery(
-    "MATCH (text:T{id: '" +
+    "MERGE (text:T{id: '" +
       req.params.textId +
       "'})-[:ORIGINATES_IN]-(:A)-[:HAS_ACTANT]-(actant) RETURN actant"
   );
@@ -42,9 +42,9 @@ app.get("/text/:textId", async (req, res) => {
 
   close();
   res.send({
+    actants,
     texts,
     actions,
-    actants,
     ations_resources,
     actions_actants
   });
