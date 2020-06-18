@@ -1,5 +1,5 @@
 {
-  "name": "dissinet.ddb",
+  "name": "dissinet.ddb.server",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -16,7 +16,5 @@
     "url": "https://github.com/DISSINET/dissinet.DDB/issues"
   },
   "homepage": "https://github.com/DISSINET/dissinet.DDB#readme",
-  "dependencies": {
-    "dissinet.ddb.gui": "file:client"
-  }
+  "dependencies": {}
 }
