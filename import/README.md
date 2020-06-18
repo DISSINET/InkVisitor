@@ -1,7 +1,7 @@
 # DISSINET DDB Sellan registers mockup data
 Mockup data taken from Sellan Coding and Sellan master tables (Persons, Locations, Objects) and General concept table.
 
-In './source_data' there are two source excel files aggregated from source google sheet tables.
+In './source_data' there are two excel files which aggregate data from original google sheet coding tables.
 
 Jupyter book 'From statement in coding-excel-table  to statement json mockup.ipynb' transforms source files to mockupdata.
 
