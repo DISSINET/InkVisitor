@@ -1,8 +1,0 @@
-{
-  "local": {
-    "host": "localhost",
-    "port": 7687,
-    "username": "neo4j",
-    "password": "test"
-  }
-}
