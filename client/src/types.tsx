@@ -73,3 +73,11 @@ export const Entities = {
 };
 
 export type EntityKeys = keyof typeof Entities;
+
+export interface Statement {
+  id: string;
+  content: object;
+}
+export interface Statements {
+  statements: Statement[];
+}
