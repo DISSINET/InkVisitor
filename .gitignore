@@ -16,3 +16,7 @@ config.json
 
 # dist folders
 **/dist
+import/.ipynb_checkpoints/From statement in coding-excel-table  to statement json mockup-checkpoint.ipynb
+import/source_data/~$DDB Mockup ACTANTS (entities Person, Concepts, Locations, Objects from Sellan).xlsx
+import/source_data/~$DDB Sellan Coding source.xlsx
+import/~$actants.xlsx
