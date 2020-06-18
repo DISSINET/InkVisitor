@@ -1,0 +1,16 @@
+version: '3.1'
+
+services:
+    storage:
+      image: postgres:10
+      container_name: "dissinet-postgres"
+      restart: always
+      environment:
+        - POSTGRES_DB=dissinet
+        - POSTGRES_USER=postgres
+        - POSTGRES_PASSWORD=postgres
+      volumes:
+        - ./schema/schema.sql:/docker-entrypoint-initdb.d/schema.sql
+      ports:
+        - 5000:5432
+      
