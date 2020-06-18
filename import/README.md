@@ -1,3 +1,10 @@
+...not actual ....
+
+
+
+
+------------------------------------------------------------
+
 # DISSINET DDB-parser
 dissinet.cz
 The first part of the DDB infrastructure that parser spreadsheet tables to the DDB ontology.
