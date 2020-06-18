@@ -13,17 +13,13 @@ const router = Router().use(adminMW);
 const userDao = new UserDao();
 
 
-// Get All Users - "GET /api/users/all"
+// Get all users `GET /api/users/`
  router.get('/all', async (req: Request, res: Response) => {
     const users = await userDao.getAll();
     return res.status(OK).json({users});
 });
 
-
-/******************************************************************************
- *                       Add One - "POST /api/users/add"
- ******************************************************************************/
-
+ // Create the user `POST /api/users/`
 router.post('/add', async (req: Request, res: Response) => {
     // Check parameters
     const { user } = req.body;
@@ -39,10 +35,8 @@ router.post('/add', async (req: Request, res: Response) => {
 });
 
 
-/******************************************************************************
- *                       Update - "PUT /api/users/update"
- ******************************************************************************/
 
+// Update - "PUT /api/users/update"
 router.put('/update', async (req: Request, res: Response) => {
     // Check Parameters
     const { user } = req.body;
@@ -57,20 +51,11 @@ router.put('/update', async (req: Request, res: Response) => {
     return res.status(OK).end();
 });
 
-
-/******************************************************************************
- *                    Delete - "DELETE /api/users/delete/:id"
- ******************************************************************************/
-
+// Delete - "DELETE /api/users/delete/:id"
 router.delete('/delete/:id', async (req: Request, res: Response) => {
     const { id } = req.params as ParamsDictionary;
     await userDao.delete(Number(id));
     return res.status(OK).end();
 });
-
-
-/******************************************************************************
- *                                     Export
- ******************************************************************************/
 
 export default router;
