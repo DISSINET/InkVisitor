@@ -4,7 +4,7 @@ import { getStatement } from "api/getStatement";
 import { FETCH_STATEMENT, StatementAction } from "redux/types";
 import { Statement } from "types";
 
-export const fetchPerson = (id: string) => (
+export const fetchStatement = (id: string) => (
   dispatch: Dispatch<StatementAction>
 ): Promise<void> => {
   getStatement(id).then((data: Statement) =>
