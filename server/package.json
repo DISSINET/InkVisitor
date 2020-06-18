@@ -15,5 +15,8 @@
   "bugs": {
     "url": "https://github.com/DISSINET/dissinet.DDB/issues"
   },
-  "homepage": "https://github.com/DISSINET/dissinet.DDB#readme"
+  "homepage": "https://github.com/DISSINET/dissinet.DDB#readme",
+  "dependencies": {
+    "dissinet.ddb.gui": "file:client"
+  }
 }
