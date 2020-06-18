@@ -6,7 +6,7 @@ create extension if not exists "uuid-ossp";
 
 create table statements 
 ( id uuid primary key default uuid_generate_v4()
-, nodes json
+, tree json
 );
 
 comment on table statements is 'statement table comment';
@@ -49,4 +49,4 @@ create table actions
 -- Records
 --
 
-insert into  statements (nodes) values ('{"a": 1, "b": 2, "c": 3}');
+insert into  statements (tree) values ('{"a": 1, "b": 2, "c": 3}');
