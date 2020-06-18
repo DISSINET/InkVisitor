@@ -1,1132 +1,1132 @@
 ,codeid,label,type,uuid
-0,P0001,Ademarius Civada,PERSON,c4947a57-0baf-468a-b756-84b7c965e2f3
-1,P0002,Ademarius de La Roca,PERSON,7345a915-2a01-46cf-bcd0-3422374338dc
-2,P0003,Ademarius de Ladeumia,PERSON,aac8b234-e2fe-4c4b-8984-4169ba7a0c25
-3,P0004,Ademarius Lanterii,PERSON,328b908e-9407-4bb0-bd43-9da35f35d923
-4,P0005,Ademarus Ramundi,PERSON,ae376717-9738-46bc-a489-ce2df0d6d31f
-5,P0006,Agnes,PERSON,56d05e32-f2a7-4297-bc66-a83773108ce8
-6,P0007,Aimericus Golesma de Milhac,PERSON,a1a79c25-29ab-4b2e-b029-9cb454adfabe
-7,P0008,Aladasia d'Engolesme,PERSON,f90a6409-abf4-4483-a32b-414560707c8e
-8,P0009,Alaitz,PERSON,f0bde672-7c21-41c6-a1a3-044a62138ff5
-9,P0010,Alaix,PERSON,2b81b8e4-effa-4628-a791-7144ec7220c6
-10,P0011,Alazaisia,PERSON,aaad6baa-1cba-4b4b-8f82-4e057647d3b7
-11,P0012,Alazais Blanqua,PERSON,5c0634f9-1fd2-4473-845f-9349fb553060
-12,P0013,Alazaicis de Laquiebra,PERSON,3e6d8b11-4fd9-4c38-ac64-a3410ba40605
-13,P0014,Algaia,PERSON,eba4d6f4-cdfe-4f2b-8622-314cd6ac79cf
-14,P0015,Amalvinus de Fenelor,PERSON,8fdf7f67-6b22-433c-8bdf-6529e2f95bc0
-15,P0017,Amelia,PERSON,812d79b5-9546-4df9-9dd1-83f336c4112c
-16,P0018,Amelius Boichel,PERSON,f1b5e773-3f9a-48f0-9814-c90b6b0bdfff
-17,P0019,Angelica,PERSON,fc08aa4d-15cb-4f9a-adac-f83dd0ecaec8
-18,P0020,Arnalda,PERSON,98ea0b3e-0a89-42b5-b4f0-96bdc15f45fb
-19,P0021,Armandus Olivier,PERSON,dd6483a6-9f20-43df-a4d5-882d8676499f
-20,P0022,Karlmanda de Balens,PERSON,488d39df-e664-44f3-8d80-d921ae365817
-21,P0023,Arnaldus,PERSON,e88b2f03-a525-4b56-8e73-2f14e689098d
-22,P0024,Arnaldus Bertrandi,PERSON,8147f93e-a686-4944-9f8d-802ab52793af
-23,P0025,Arnaldus Capra,PERSON,78241786-f891-411f-8117-7636d834c18b
-24,P0026,Arnaldus Cassa,PERSON,32dc9c4c-fbf3-4bae-b28b-f936d88af7d6
-25,P0027,Arnaldus Cedus de Godor,PERSON,b8004f7d-927e-4c55-86ba-8d0e6d1de42a
-26,P0028,Arnaldus Gonducs,PERSON,19bdc178-8a92-4a6c-a7ed-111a677a27a8
-27,P0029,Arnaldus de Avinione,PERSON,e3758c82-e477-468b-bff6-2d4b05807882
-28,P0030,Arnaldus de Bellopodio,PERSON,419d3e00-a486-40a6-b357-2c6c84ac5ae7
-29,P0031,Arnaldus de Castillo,PERSON,b9095067-93ad-46cb-ade3-2bf1a68982db
-30,P0032,Arnaldus de Lafargua,PERSON,8b71dd69-3092-4bd4-a326-a74e466e789f
-31,P0033,Arnaldus de la Mota,PERSON,d485a875-da9c-4f00-865c-5030a4711467
-32,P0034,Arnaus de la Mora,PERSON,7e63d6e3-dcef-4e7e-bcea-5302031b30e5
-33,P0035,Arnaldus de Rupe,PERSON,74b8311e-6d5b-45af-a048-f84312729074
-34,P0036,Arnaldus de Lasala,PERSON,92c7a7c8-0c07-4f70-b890-38a8c0c9659c
-35,P0037,Arnaldus de Peyre,PERSON,1676a045-37e3-4112-b6ea-e2966af7b9c8
-36,P0038,Arnaldus de Primos,PERSON,ff3fad1a-6eeb-4542-a68b-8f718bd77785
-37,P0039,Arnaldus de Rigaut,PERSON,7c16091d-5fd1-47c0-bd4c-7c915649e623
-38,P0040,Arnaldus de Sapiac,PERSON,8897e066-f42e-4126-87d7-afd0fc380e5f
-39,P0041,Arnaldus de Sapiac,PERSON,99b278d8-8107-4de6-bdb7-8624adda90eb
-40,P0042,Arnaldus Johannis Davi,PERSON,8bcbcab5-8671-4152-b769-f158c02b626e
-41,P0044,Arnaldus del Clusel,PERSON,fbaa7e68-6a06-4a64-a7c1-77a38256ae63
-42,P0045,Arnaldus del Huc,PERSON,a40000fc-c03a-4498-91c7-19b54cbb52a8
-43,P0046,Arnaldus Dosici,PERSON,fa3af37f-5324-4319-a2a8-5de4fea8e661
-44,P0047,Arnaldus Fabri,PERSON,c9033681-1c73-4fce-b537-61f38a198ebc
-45,P0048,Arnaldus Folcautz,PERSON,3730d0e6-8e4e-4739-be6f-45d5397e0d6d
-46,P0049,S. Arnaldus Folcautz,PERSON,698d6bd2-9a56-4313-bca6-a18648351fd4
-47,P0050,Arnaldus Guillelmi de La Viga,PERSON,07369bf1-2b3e-4a64-8a83-bf619f12fae7
-48,P0051,Arnaldus Juliani,PERSON,8decbb59-da4f-44c7-a725-94f61b386d3a
-49,P0052,Arnaldus Later,PERSON,689e0c1f-d80c-4980-9db7-e0a2b93ada17
-50,P0053,Arnaldus Medicus,PERSON,aed47700-cdf2-4e2c-bba3-3f837dea3191
-51,P0054,Arnaldus Maurini,PERSON,78aaf260-2bc4-451e-81e6-d60589568d65
-52,P0055,Arnaldus Olier,PERSON,001c74a4-a8ac-4404-8ffb-9463eef23b14
-53,P0056,Arnaldus Pitavini,PERSON,aa8bdfc7-a901-4f6c-bb50-ab2d5f699f95
-54,P0057,Arnaldus Peregrini,PERSON,651ddccc-3731-41ac-b6e8-0450d5e3ce77
-55,P0058,Arnaldus Rector,PERSON,0a02ce8b-0996-44cb-a38e-e06853332a03
-56,P0059,Arnaldus Rufet,PERSON,ce522306-6bcd-4b1d-95b6-3789b35d06f2
-57,P0060,Arnaldus Sarrailhier,PERSON,1026df53-d647-425b-a4e9-84f6536f9a8b
-58,P0061,Arnaldus Tabast,PERSON,d33d1325-7251-4341-b1af-522bb1e52de5
-59,P0062,[wife of Arnaldus Tabast],PERSON,50492420-307c-4cdb-bc65-3d42e9e7acfa
-60,P0063,Arnaldus Verrani,PERSON,5e4fa914-53cc-445c-9b5c-a1b819301aef
-61,P0064,Arnaldus Vitalis,PERSON,4ef6ff8d-d5e7-4695-9ee1-bf40ae1f9216
-62,P0065,Arnalda,PERSON,5fbf2d4c-0c32-4132-8a21-7e916381688a
-63,P0067,Arnalda,PERSON,f3eb10de-d3e7-41bf-9893-00b24e9b5a55
-64,P0068,Arnalda de Joset,PERSON,c6b4bb93-85f9-4428-942d-5cf3df095a3d
-65,P0069,Arnalda de La Besseda,PERSON,946f796f-e540-4fc7-97bd-15d29240eb8d
-66,P0070,Arnalda de Lacosta,PERSON,65bd5ecc-4c22-403f-950e-55c6ca89c2d4
-67,P0071,Arnalda de Lagarriga,PERSON,5c97a467-87f1-4ac8-bec3-2d46c5c12b32
-68,P0072,Arnalda de Pestilhac,PERSON,8c841538-75ab-4604-a3e1-e25973adf2ba
-69,P0073,Arnalda de Villanova,PERSON,c8ca7d1a-647e-4ee3-b5bc-0eb7bd56b34a
-70,P0074,Arnalda Fabrissa,PERSON,c50b37f4-51f0-410f-afed-6d6a80f8ff51
-71,P0075,Arnalda Sabateira,PERSON,d4f6df4b-3d58-497f-8cf6-2a40c3766ce8
-72,P0076,Arnalda Textrix,PERSON,19e5bf5c-666e-4704-8c29-221ce25522d6
-73,P0077,Arsemblaena,PERSON,969098f0-6c40-458e-b97a-b9d3838fd45a
-74,P0078,Audiardis Autinadina,PERSON,1bdb44a9-fb39-44e1-951e-1fff248d1b57
-75,P0079,Audiart de Font Morla,PERSON,13fa9120-4d5f-4a64-8d86-6d7cd94cb0ee
-76,P0080,Aurianda,PERSON,bf37168f-1018-48c6-92b3-8a28d60a0ccd
-77,P0081,Austorga de Caors,PERSON,ac0fc4af-0795-4177-a6e1-ab62496d9ad6
-78,P0082,Austorga de Gascho,PERSON,388d8ddd-f4e2-47e3-bcde-e08e5c2e9dac
-79,P0083,Austorga de Lamota,PERSON,f5435e24-2106-4ba5-9f6c-76e055bf5a75
-80,P0084,Bartholomeus de Cabanolas,PERSON,6a7d2814-05cf-4c7f-8ef8-52c920c43056
-81,P0085,Bartholomeus de Carcassona,PERSON,f5dd219c-0d5a-4ca4-adb2-172543b7061c
-82,P0086,Bartholomeus de Pousaque,PERSON,f37ab257-e54b-4808-b329-0cbc990007bb
-83,P0087,[wife of Bartholomeus de Posaca],PERSON,ab34eb79-3333-4787-8bb9-b32786078848
-84,P0088,Beneit Ioculator,PERSON,bddc66d6-7873-454a-8087-f45380b8d1b7
-85,P0089,Bernardus,PERSON,8ed02598-d91e-4167-81f4-3e6b66989855
-86,P0090,Arnaldus Bernardi de Roset,PERSON,a9abd9cc-e0d0-4eaa-9b2a-3d4711c36a7e
-87,P0091,Bernardus Arnaldus Ebrard,PERSON,8e51eb2e-0470-4ab1-8602-c1c04484b00a
-88,P0092,Bernardus Belazer,PERSON,8e8ac2c0-d5f4-4ec0-83fe-87880fe56603
-89,P0093,Bernardus Bonaldi,PERSON,db6073d6-da4b-4bd7-87b1-bf2bd94bdcff
-90,P0094,Bernardus Bort de Cambisa,PERSON,ec44ef2b-6312-4463-b2f3-07018e49bf9a
-91,P0095,Bernardus Bors,PERSON,b82a7357-ed7a-4b0a-89b7-83a6723660d6
-92,P0096,Bernardus Capel,PERSON,70e3ccfd-0ce4-45eb-9e83-0dd16af0f01e
-93,P0097,Bernardus Claris,PERSON,94aeec6d-92d0-4599-8a2f-4b387ff3cac6
-94,P0098,Bernardus Clavelz,PERSON,35b73141-d6ed-4e5d-b875-005774414112
-95,P0099,Bernardus d'Olms,PERSON,7e885d02-5b1a-4e99-90de-2d440cbdfc45
-96,P0100,Bernardus de Balat,PERSON,12fc5a25-a5ee-4068-a14e-a55843a4d4c9
-97,P0101,Bernardus de Bressolz,PERSON,d113b9a9-153c-46f4-90ad-1e1488389be4
-98,P0102,Bernardus de Caraves,PERSON,38f6f07b-16af-4d9d-a781-bfb38f6d2217
-99,P0103,Bernardus de Castillo,PERSON,311ef3fb-4ee8-4f84-a6b0-69044ed7b237
-100,P0104,Bernardus de Caselas,PERSON,7a08ab4a-d6bc-430e-9fe6-4d6530924c06
-101,P0105,Bernardus de Cepfag,PERSON,b6058314-3480-4fa7-ae8a-eeece04f542d
-102,P0106,Bernardus de Gordo,PERSON,89c7eb21-9c22-465a-9fc6-fbac744051c2
-103,P0107,Bernardus de La Brossol,PERSON,f4473174-22c6-48a4-9d6b-0233b4566837
-104,P0108,Bernardus de la Capella,PERSON,171e4d15-67f6-438a-84d4-8ff0b76e46e3
-105,P0109,Bernardus de Lamota,PERSON,1c935c63-bb5d-4c40-80d8-e902f213ac50
-106,P0110,Bernardus de Lasala de Malaveilha,PERSON,f37f734e-23b9-4a4b-85ca-2042bea6ef36
-107,P0111,Bernardus de Las Matras,PERSON,b7561ee5-ac5a-4284-865a-909a8ec2cdfe
-108,P0112,Bernardus de Lator,PERSON,99a135ae-bc84-4628-a110-c7f202de8684
-109,P0113,Bernardus de Pezet de Villanova,PERSON,63a0d532-50a8-4db8-8c83-5370ee571844
-110,P0114,Bernardus de Caerci,PERSON,7809c3d2-ea8a-41e4-9ca7-39d333acf8b8
-111,P0115,Bernardus de Sancto Genesio,PERSON,5dbef05a-5ab7-41d9-b59e-62ae783cb4f1
-112,P0116,Bernardus de Sapiac,PERSON,dcc80257-cb90-42b6-a7e5-0b8195af0ed7
-113,P0117,Bernardus de Tornaco,PERSON,d11fc015-585a-4bbd-9eb9-777202363c14
-114,P0118,Bernardus de Valcel,PERSON,a5e05a14-64f1-4c09-a7ef-cad36bc525d7
-115,P0119,Bernardus Joannes Sabater,PERSON,682827ba-10f6-4ad4-87aa-5b2b4700053d
-116,P0120,Bernardus del Pozet de Villanova,PERSON,2c25a464-4d95-4345-8ca0-b2559a4a5943
-117,P0121,Bernardus del Poiet,PERSON,a6ee5065-16f2-4172-94f9-345118c866c4
-118,P0122,Bernardus Durans,PERSON,a4d049a3-4dc8-4d2e-9269-2e38fad4cdec
-119,P0123,Bernardus Stephani,PERSON,b574e188-31de-467a-aef3-1dc8cc31c78b
-120,P0124,Bernardus Fabri,PERSON,86a7bd63-9908-4d65-bf6b-49f89ea88ca1
-121,P0125,Bernardus Guiraldi,PERSON,24baa603-8f1e-4237-a01e-b2ce18965143
-122,P0126,Bernardus Loquerii,PERSON,4d36389c-7208-493b-9725-544e46883d03
-123,P0127,Bernardus Manha,PERSON,c04b4db8-7301-42e5-9b80-988c0bc7dc3b
-124,P0128,Bernardus Petrus Clavelz,PERSON,464be6c5-be76-4e93-869b-9e4ccd66e876
-125,P0129,Bernardus Remon,PERSON,416ed8d1-13a5-4de0-9982-cd081be5937c
-126,P0130,Bernardus Raimundi Arquer,PERSON,6cc55a5a-2b9c-48ae-8186-13ddac820702
-127,P0131,Bernardus Ruffy,PERSON,0526d99e-bb6a-40d4-85a2-a8751284ea47
-128,P0132,Bernardus Sabater,PERSON,db5a9c78-96de-4d84-84b9-4d082a098b16
-129,P0133,Bernardus Sancii,PERSON,fd9630d0-96d7-4d91-b7be-2a16d0c8d1fc
-130,P0134,Bernardus Textor de Calciata,PERSON,39530d42-ee3c-479a-9636-093772cad842
-131,P0135,Bernardus Tessender,PERSON,66ed2907-d796-4767-89c3-3de584dda0fe
-132,P0136,Bernardus Vigerii,PERSON,1bc6a7ef-77b4-474c-85ba-9081e1305e2b
-133,P0137,Bernarda,PERSON,b31d222d-0598-445c-b19e-db5dfb85cfdd
-134,P0138,Bernarda,PERSON,9d3bc731-111a-42f6-835f-1684ec58dc50
-135,P0139,Bernarda,PERSON,23e967b7-34c7-4457-9926-2c323c5d0ea3
-136,P0140,Bernarda,PERSON,c1e01850-e721-4bf1-9d8d-06b415e0ea6b
-137,P0141,Bernarda,PERSON,6a9639fd-684b-49ba-b1d1-1af9da0ec2fd
-138,P0142,Bernarda,PERSON,2bc434ba-673c-4312-b96d-be784099a72d
-139,P0143,Bernarda,PERSON,aa7e8a9b-0fc2-46ef-9c20-6215f5d958f2
-140,P0144,Bernarda de Cassaco,PERSON,8c9e7783-15b6-43d0-b648-0eb1b796e82f
-141,P0145,Bernarda de Cratern,PERSON,137fc44b-5f13-47c3-a1a3-7ed672710128
-142,P0146,Bernarda de Lariba,PERSON,8147613c-3764-43ef-8d5a-a2d81e0d2a2e
-143,P0147,Bernarda de Quatre,PERSON,b2800fb8-82dc-403e-993e-b89caa2998a6
-144,P0148,Bernarda de Ribeira,PERSON,a4a69a77-9e8b-455a-85f3-ab3090c1b8d5
-145,P0149,Bernarda de Ro,PERSON,9b5835dc-63ce-4ad1-b6dc-8c19dd4911a6
-146,P0150,Bernarda de Sancto Juliano,PERSON,dce67394-fdd8-4fb6-ba96-dc0f140970fa
-147,P0151,Bernarda de Valtorel,PERSON,b26a04e3-fb78-4ce1-8335-c2c919a1ef11
-148,P0152,Bernarda Fabrissa,PERSON,d7dc1814-b7c1-4645-b2c1-8269135b4055
-149,P0153,Bernarda Mela,PERSON,02257714-e939-4aac-b412-d57cfbe33f43
-150,P0154,Bernarda Rubea,PERSON,23145327-5c7c-4f01-9e3e-92823de02f5e
-151,P0155,Bertrandus Audeberti,PERSON,61b9512c-c8e9-447f-8426-2d8f5e91e516
-152,P0156,Bertrandus Auriols,PERSON,a132a2c1-0e04-4cb6-a7ba-225481f4ba84
-153,P0157,Bertrandus Bodo,PERSON,e1d35f7d-2e1e-472b-9e2d-8ccbba937b88
-154,P0158,Bertrandus Breserii,PERSON,0ffe20bf-934b-43d8-89d3-2afd4ed1d34c
-155,P0159,Bertrandus de Braulens,PERSON,207f5ddb-9b28-4e21-9638-1b762d8273a0
-156,P0160,Bertrandus de Rupe de Montcuquo,PERSON,563003ab-80c4-4eb4-ba5c-eb00e7313100
-157,P0161,Bertrandus de Lamota,PERSON,6f46f5bc-5a9a-4478-be07-7f98e41f8244
-158,P0162,Bertrandus de Lautar,PERSON,3207c8e2-b6b2-41e3-b9c8-d100b06208b2
-159,P0163,Bertrandus de Lascroa,PERSON,77374468-0294-409c-860f-c45f10ad5a4b
-160,P0164,Bertrandus de Monteacuto,PERSON,90f1235c-5e6f-4204-bb66-472220440f9d
-161,P0165,Bertrandus de Montepesato,PERSON,3f4f2e1e-9099-44b1-82a1-e22db7959d28
-162,P0166,Bertrandus de Sancto Claro de Milhac,PERSON,def4e3ed-e53c-426b-84a9-a3dce4be2b10
-163,P0167,Bertrandus de Sancto Genesio,PERSON,70a6c7ab-0be4-486e-90ed-53af7c78d002
-164,P0168,Bertrandus de Valeta,PERSON,0c295814-f190-4fd6-9151-fd15b1669414
-165,P0169,Bertranda d'Ayverno,PERSON,d5c7cd99-98a0-4334-b662-1cd78818809b
-166,P0170,Bertranda de Cossada,PERSON,339dabb5-5379-479b-922a-5b7da432f2af
-167,P0171,Bertranda de Daubanas,PERSON,9d823e9e-ac4c-4061-a70a-6c8afeacf061
-168,P0172,Bigordana,PERSON,e8deec6c-58e6-48b3-9bc7-fa3600206c6b
-169,P0173,Bitorta,PERSON,a382e2cd-1353-4cf3-8323-9a63eedb8d9f
-170,P0174,Blancha,PERSON,ccf4e45b-c4c5-4e96-ad71-0bab5cb70820
-171,P0175,Bonus de Sapiac,PERSON,a6289668-012a-4a04-b27f-84a568cd57c9
-172,P0176,Boneta,PERSON,e2433819-8e9c-4000-a6ca-33684e54e96d
-173,P0177,Caerlis de Vilario,PERSON,b6742271-87b5-4bd5-9434-d15b0eafdb9b
-174,P0178,[bishop of Cahors],PERSON,1ed2af91-823b-4f72-9366-b359de684f45
-175,P0179,Caturcinus Cabatiers,PERSON,a9b164ab-6b03-4517-8e21-02315a1a7f94
-176,P0180,Caturcinus de La Vernha,PERSON,8ae567b0-7ca2-4759-9e22-9de6763a88e0
-177,P0181,Caorcinus de Nautris,PERSON,410f8330-a913-40ca-b196-b5203afa1e74
-178,P0182,Caturcinus textor,PERSON,7dae01ee-dd22-457d-aa73-c533dab2ec61
-179,P0183,Caturcinus Rigaudi,PERSON,f46cd6a0-0b61-4f45-b4ed-d77060db577c
-180,P0184,Caercina,PERSON,a4c29629-32d6-4f42-b582-0e84a62f1558
-181,P0185,Caercina,PERSON,a6a818e2-c173-4590-908a-491b3b776960
-182,P0186,Carbonella,PERSON,74fe94b2-94e0-4426-81f7-feb43b8286f5
-183,P0187,Cavaler de Biolet,PERSON,ef600269-610d-4899-946c-8b7be7d2d352
-184,P0188,[Unknown] de Coutes,PERSON,1d92cace-d62c-4095-acc3-da4bc81ef55a
-185,P0189,Coxunta,PERSON,2710cabb-70d8-46fa-a750-b2b0b1349bc8
-186,P0190,Nichier,PERSON,44c9e2ac-82a0-40f5-8cea-122c626bd75a
-187,P0191,[Unknown] del Terret,PERSON,5bc04ba8-0e19-4a0f-ac49-173d09ab576c
-188,P0192,Domestica,PERSON,cb53e9c3-3fbc-4734-83d1-56e36b9627d5
-189,P0193,Domestica de Cabanoles,PERSON,e821533f-53ff-4d5b-816b-7586861a67a5
-190,P0194,Donadeu Turto,PERSON,cf6252e4-031c-416e-ab7f-22a0a9ea38e9
-191,P0195,Dulcia,PERSON,e6d77285-6c4a-47b1-aeb4-0baddeb766b3
-192,P0196,Durantia [Espitalier],PERSON,7d6372c8-85dd-42df-8e99-b54a0d3c6847
-193,P0197,[Durandus] Abit,PERSON,2400c1d6-402a-4b28-97f1-e424d12b8cb6
-194,P0198,Durandus de Bosco,PERSON,c9adf925-c40c-4857-b699-1962af8d9be7
-195,P0199,Duran de Broille,PERSON,364fbfb2-22f3-4c95-aa8c-ee7626ac4883
-196,P0200,Duran de Broille,PERSON,faf15cc4-6bea-4fd5-943b-05b5dddc02fa
-197,P0201,Duran Guillelmus Minaldi,PERSON,7c08cb74-7750-4f64-a8de-df97d1013320
-198,P0202,Durandus Ratier,PERSON,81e23140-560d-4ac4-9b37-ce3ef497785b
-199,P0203,Durandus Toset,PERSON,7653bbf5-56e8-4cfc-af44-e53a2632dc99
-200,P0204,Durandus Vairet,PERSON,fa03b761-5d44-473c-b7bb-15613c071aea
-201,P0205,Durandus Curto,PERSON,be055db3-383e-4a3e-8a8b-99c09414512b
-202,P0206,Durandus Roberti,PERSON,4471c300-fab6-4c51-a1a8-5aedffc2c8c9
-203,P0207,Durannus Trohler,PERSON,57774203-2de9-4aa3-9db2-16d9424f1185
-204,P0208,En Gorssas,PERSON,143d0bb1-0ef6-4e83-aeae-46b7da7d2838
-205,P0209,[Unknown] d'[En Ponfaurc],PERSON,c466fabc-a4a4-4086-b9d5-2b0030bba620
-206,P0210,En Rochas,PERSON,5dbaa1db-e437-4ede-93cd-729f730d0cfc
-207,P0211,Engibaldus,PERSON,f984b6e6-1f88-42e6-b522-d9a477348d28
-208,P0212,Ermengars,PERSON,b94666a3-9ba1-4653-9a94-67ab24797d15
-209,P0213,Ermengarda Estaca,PERSON,71ce0244-3e34-48eb-a0f7-b89c6de4e4b5
-210,P0214,Stephanus de Bragairac,PERSON,96cc3b31-5c79-4b65-b22a-19c26731d7ca
-211,P0215,Stephanus de Canselada,PERSON,86e4a5eb-9a81-4b37-aa63-73fb3a1ed01b
-212,P0216,Stephanus de Lacomba,PERSON,4687a68c-6ccf-402e-a5c1-3cbf2bc7a48f
-213,P0217,Bertrandus de Sancto Genesio Auriols,PERSON,d6597180-1ec5-4fd2-942f-326c863620cc
-214,P0218,Stephanus de Na Ramunda,PERSON,cd6855e4-1cdd-41fd-a1f6-b60050a07da7
-215,P0219,Stephanus de Rupeforti,PERSON,e9b51022-526d-46cb-bb81-5d2160a8c810
-216,P0220,Stephanus Fabri,PERSON,a7825b5e-a12d-4ea6-8657-41f3b496f734
-217,P0221,Stephanus Folcaut,PERSON,5cf5f5a9-e92e-48bb-94b2-793590fe2ac0
-218,P0222,Stephanus Forcaldi,PERSON,d5cebe6b-02e7-4d9a-92fe-59da9c3a6d0e
-219,P0223,Stephanus Galterii,PERSON,dcd97735-a35c-45c1-82d7-ced996b70360
-220,P0224,Stephanus Gombert,PERSON,4bb684aa-681e-4cd0-b3cd-387094a727b1
-221,P0225,Stephanus Gras,PERSON,2aab69f5-2c7b-4fdb-ba46-29762a82a299
-222,P0226,Stephanus Guiraldi,PERSON,7c0796f9-7a2f-4a84-af72-66561a8561c2
-223,P0227,Stephanus Mazelers,PERSON,4e9c28e3-885f-4fb7-ac08-f7338a3c2d56
-224,P0228,Stephanus Palmerii,PERSON,2e312727-d0f7-44cc-9c84-dd3fb94044b2
-225,P0229,Stephanus Raimundi,PERSON,1a097116-f373-47bb-b783-f2d3f2660ad0
-226,P0230,Stephanus Sobressen,PERSON,ec36cc26-f884-44f9-9ec6-2f464cab8edf
-227,P0231,Stephanus Vaires,PERSON,77eec0c6-fb4d-4f7f-be4c-dbd9ece8131d
-228,P0232,Ostaca,PERSON,0a2cee73-c0c1-428f-bbb7-7336b8798b77
-229,P0233,Fais de Sapiac,PERSON,8d6fbf98-5e50-4e75-b47a-07e35aed8127
-230,P0234,[Unknown],PERSON,f92868b4-49df-4368-b0aa-cc10602355f7
-231,P0235,Fabressa de Sapiac,PERSON,319b01f2-f9ff-4577-90f1-0ec702bbbbf9
-232,P0236,Fortanerius de Gordonio,PERSON,9a1cdbd0-b882-48f2-8b11-1d19c02c92d4
-233,P0237,Fulco,PERSON,61cc56c7-4b8c-45a2-9332-8ac2e0970c3d
-234,P0238,Fulco de Sorris,PERSON,4a76fdf6-3e87-46b8-a749-3e5f4addf61e
-235,P0239,Franciscus [clericus],PERSON,4b08bd43-8462-4b0b-b59a-9b4dc6f4551f
-236,P0240,Gallardus d'Auteiac,PERSON,7261c359-ff78-4267-83cb-581a55508e84
-237,P0241,Gaillardus de Narces,PERSON,374475e0-df35-4a88-9b0b-959ccbaaaf22
-238,P0242,Gaillardus de Godor,PERSON,fd625abe-6a0d-466b-900d-b9670264da44
-239,P0243,Gaillarda,PERSON,ac1f0b92-b738-4232-9a5e-073422c3418e
-240,P0244,Guaillarda,PERSON,31b51a85-cd74-49c2-b0ca-3bc3bdc548a2
-241,P0245,Gaillarda de Lagarda,PERSON,6b4dd73c-69d7-4c69-9211-41b5f5b9f2b6
-242,P0246,Gariels,PERSON,8069e559-3abe-4218-80f0-ed654f2a1760
-243,P0247,Galterius Archambaudi,PERSON,7aef1b18-1fdf-4f24-b124-13dab6443ba8
-244,P0248,Galterius Peregrini,PERSON,8cedfb2d-f934-4ef2-b2d1-1fcdd304775d
-245,P0249,Garcia de Bonafous,PERSON,a1106690-3638-4012-9f33-1ad1bcdaa6bb
-246,P0250,Garsen Esquivada,PERSON,7b9d9453-5c9b-4e5a-832e-c6ce81ad914f
-247,P0251,Garsilio le Corder,PERSON,b4e8a620-7fa3-447d-8223-2deb8e0684be
-248,P0252,Gauberga de Quillo,PERSON,79f7ac27-d529-4e97-b038-efae6b8a48d5
-249,P0253,Gausberga de Senivol,PERSON,4524ea4d-fc5d-4ca8-bab1-35ad576d79ec
-250,P0254,Gaubertus,PERSON,7e004489-3ae0-45b4-b41f-cfe14b2f7a98
-251,P0255,Gaubertus Carbonelz,PERSON,b7283bf2-8e69-483d-b5cc-b77097c30ea3
-252,P0256,Gaubertus d'Auteiac,PERSON,9d35dd5a-ec99-460f-90b7-3ef25db76034
-253,P0257,Gaubertus d'Aremeia,PERSON,7778b4bc-589e-45f9-b2e5-13e7dfb7bb5c
-254,P0258,Gaubertus de Cairol,PERSON,a9ab12e9-ba6c-4c71-8e47-a719e8a36b2c
-255,P0259,Gaubertus de La Barra,PERSON,dbf4ea3b-17be-49f7-b289-51969ffd8f06
-256,P0260,Gaubertus de Lacosta,PERSON,d5c4955d-d9ab-4c8f-99a4-00a73587b063
-257,P0261,Gaubert de Mosati,PERSON,801f1529-73b4-4b9c-94bc-2ae19b9661ab
-258,P0262,Bertrandus de Gordonio,PERSON,5b8d79d7-525e-44fe-aee7-549fba613af8
-259,P0263,Gaubertus del Clusel,PERSON,6423b53d-e7c9-41a3-843b-d20136ae9f3d
-260,P0264,Gaubertus del Cluzel,PERSON,e1de9a49-475e-4d68-9830-6269e80d9abb
-261,P0265,Gaubertus de Podio,PERSON,b3c51328-96ba-46ca-9539-17a026536e67
-262,P0266,Gaubertus Galterii,PERSON,37065f43-d8b4-4239-94fa-9a38bf68e517
-263,P0267,Gaubertus Gaut,PERSON,d4462410-9b2a-419f-bf1e-9c3516f0bfa6
-264,P0268,Gaubertus Guiralda,PERSON,ec726a30-4cf1-4572-a262-906586af17fe
-265,P0269,[mother of Gaubertus Guiralda],PERSON,222df96f-51cd-4c3a-8f57-a1d802c463a3
-266,P0270,Gaubert Ranulphi,PERSON,d2124fba-10ce-491a-be62-28080c9b96ce
-267,P0271,Gaubert Sicart de Coranda,PERSON,e19c0883-d27a-46a3-89bd-e66f04ad4459
-268,P0272,Gaucelma,PERSON,af2222db-0e63-4cbe-8103-b376fe6635ad
-269,P0273,Gaucelma Faidita,PERSON,b47eec47-2088-48d3-87da-9175f134f306
-270,P0274,Gaucelinus Esquivo,PERSON,7af27050-5af3-4e7a-a826-9f4260d394c5
-271,P0275,Geralda,PERSON,6b792887-b44a-496c-b306-ea261a53f48f
-272,P0276,Geralda,PERSON,778c556c-fe1d-48d7-92a2-bbc0e2711da5
-273,P0277,Geraldus de Lautarz,PERSON,144d5ce4-7790-4b18-98cc-f544cea23670
-274,P0278,Geraldus de Maureg,PERSON,792ad634-9f57-4008-b202-4333c7124e47
-275,P0279,Geralda,PERSON,cdbdc627-a56f-4539-bbca-d6e862fee218
-276,P0280,Geralda,PERSON,4a1301ac-a48d-4b26-bf47-1814eb40bc73
-277,P0281,Geralda,PERSON,88352ce7-568a-4d33-afc3-a1e2cb311194
-278,P0282,Geralda,PERSON,4dae8cd9-964e-4b3e-8ea9-30f48b5c8397
-279,P0283,Geralda,PERSON,730c3a89-780a-498d-8b94-6227cc8916f3
-280,P0284,Geralda,PERSON,1b8e2430-32b7-4e45-860c-10c7e5619945
-281,P0285,Geralda,PERSON,7f4f49c7-4cbd-46d0-9453-e45d466f83f3
-282,P0286,Geralda,PERSON,ef3ca2bf-1e16-4759-8b61-04c8f1849ebe
-283,P0287,Geralda de Biele,PERSON,13a71819-3f99-4970-ba30-3dd4cdab62ff
-284,P0288,[sister of Geralda de Biele],PERSON,59a88092-9ab8-4f54-9cec-99307e8720c6
-285,P0289,[niece of Geralda de Biele],PERSON,57146e38-c55a-474f-8733-40aa424a6d46
-286,P0290,Geralda de Bugat,PERSON,46e10362-d48c-4eb7-bc7a-85dab88abbc3
-287,P0291,Geralda de Cassaco,PERSON,67d57217-8883-4193-8390-d0f324add4c3
-288,P0292,Geralda de Rupe,PERSON,d0d764a9-72ee-44cb-9a73-b08edbc593c3
-289,P0293,Geralda de Lacosta,PERSON,3930a918-49ea-41a2-8961-3634b679a75a
-290,P0294,Guiralda de La Grassa,PERSON,d376590e-864e-483c-9596-7bf16405e360
-291,P0295,Geralda de Mathol,PERSON,8e96e987-e211-4b8a-a887-efdc4a7bf8e4
-292,P0296,Geralda de Riberia,PERSON,efe0677f-8fbd-4d3f-99f7-d4e15ce937b5
-293,P0297,Geralda de Rupeforti,PERSON,0e7714ff-b287-479a-827a-f37d06bd1e3f
-294,P0298,Geralda Ogeira,PERSON,ff273050-fa9d-4b26-bc72-cce59f836bc1
-295,P0299,Geralda Viquera,PERSON,dc689953-1c04-4234-a83d-86aa4a91cd80
-296,P0300,Giraldus de Podio Blairair,PERSON,e44edfd8-2b53-4326-b589-dda1f3f71902
-297,P0301,Guiralda Vesiada,PERSON,99a69328-fec5-43f7-a703-ae27a1584eec
-298,P0302,Gobertus,PERSON,babf88d2-f22f-4eb9-b738-7d80dd2b3d6e
-299,P0303,Gilabert de Castris,PERSON,3ac18b63-5c53-4004-85bb-a400a3889ee4
-300,P0304,[socius of Gilabert de Castris],PERSON,0c3264ba-243c-4ae0-abd4-c12a816fcb94
-301,P0305,Guillelmus Albas,PERSON,453884ee-d8d6-4f9e-b4c4-3e90a4f6c189
-302,P0306,Guillelmus Augerii,PERSON,b3c2f061-31d5-4edb-a8bf-db1d4fd35403
-303,P0307,Guillelmus Aymericus,PERSON,eb1ab30d-0efa-4e59-81dd-2f3daf66e320
-304,P0308,Guillelmus Verrera,PERSON,15446e77-09e2-48e8-bdaf-ba3880363c84
-305,P0309,Guillelmus Bastard,PERSON,5bb972ab-da9b-43ad-8392-2911d064cba9
-306,P0310,Guillelme Bernardi de Narces,PERSON,053b5094-5295-4432-9e29-9cff2daeb577
-307,P0311,Guillelmus Bernardi de Lamota,PERSON,4cea2668-ae45-4794-a725-cac41fd535cc
-308,P0312,Guillelmus Bernat Boca,PERSON,196c22a5-6f52-4b9c-9f32-216346439cd7
-309,P0313,Guillelmus Bertrans de Montecuquo,PERSON,3a99434d-a54d-4a39-9590-45bb1f98130f
-310,P0314,Guillelmus Bonafos,PERSON,69094e15-d42a-4d1a-aed3-b7f6b83ccdcf
-311,P0315,Guillelmus Bonaldi,PERSON,75395c56-3bf0-4b4e-b5a0-6897a72dcd0a
-312,P0316,Guillelmus Bos,PERSON,db8654a4-10c7-4265-9af7-6d3f47d0483f
-313,P0317,Guillelmus Cabat,PERSON,cb6ba827-8f67-44dc-a82f-71e7c008d724
-314,P0318,Guillelmus Carbonelz,PERSON,0c448ced-4c25-40a7-bf6c-5768d958aa9e
-315,P0319,Guillermus Cassa,PERSON,1660db2d-2a6e-4183-be8c-cba7378c8500
-316,P0320,Guillelmus Cogorssa,PERSON,96d1b29b-fbbf-42d3-91c5-3f087f5eb595
-317,P0321,Guillelmus Cosels,PERSON,0ab59afe-2c91-4b69-afb0-c85133566e07
-318,P0322,Guillelmus d'Auteiac,PERSON,e3820b9e-31ff-4ae1-a77b-33200d79649e
-319,P0323,Guillelmus de Eisses,PERSON,7b813462-c76d-4d6f-9c92-bdcd5f392786
-320,P0324,Guillelmus de Yches,PERSON,1959be2b-0e43-4677-8854-d695f28b7e81
-321,P0325,Guillelmus de Bairs,PERSON,9c32ceca-58c4-4d1b-9d39-ed78c1301699
-322,P0326,Guillelmus de Barba,PERSON,b9e3b8f9-357a-4ae0-b1fc-488ea042d000
-323,P0327,Guillelmus de Bernat,PERSON,b1156764-4f13-43b2-9bb7-ec001db35687
-324,P0328,Guillelmus de Baussano,PERSON,f07fc56f-e084-4758-a1b5-b619df0406da
-325,P0329,Guillelmus de Belvais,PERSON,cb5ea06b-da36-47aa-a299-7f6e18c8829b
-326,P0330,Guillelmus de Berencs,PERSON,115a6959-effc-44f5-82f5-971982e5e282
-327,P0331,Guillelmus de Braute,PERSON,f3eec998-9a1d-41ea-ab7b-a2e62f8cc157
-328,P0332,Guillelmus de Brecas,PERSON,8d5eca62-48d3-48ab-8f23-e4991292d798
-329,P0333,Guillelmus de Broile,PERSON,3d9d14d2-1e1b-4d37-b5c5-ccf8310bc75b
-330,P0334,Guillelmus de Burc,PERSON,332e5ccf-01c5-4bc7-81b7-67d10c85ca35
-331,P0335,Guillelmus de Cabanolas,PERSON,45a4b78c-ac79-426f-a791-f61e095a39cf
-332,P0336,Guillelmus de Cassaco,PERSON,ac1fa76f-6d08-4280-b09f-8c72f344fb9f
-333,P0337,Guillelmus de Catus,PERSON,61c1d6be-1065-494c-9b10-643355928d08
-334,P0338,[brother of Guillelmus de Catus],PERSON,9a63614f-4c2f-4dfd-9f50-c6f9ea0e521e
-335,P0339,Guillelmus de Calciata,PERSON,c317e31e-f59b-4e4a-a7ac-a2d58d14d3a3
-336,P0340,Guillelmus de Cavaroca,PERSON,c4e1d58c-884d-480b-a5c0-93b967d8853b
-337,P0341,Guillelmus de Favars,PERSON,1435aaae-5e48-4618-8e77-ac4c2fef3b9e
-338,P0342,Guillelmus de Peirans,PERSON,de62fd8d-54c2-4152-8a6a-47d509514b7c
-339,P0343,Guillelmus de Frussenet,PERSON,b756e4a5-14af-401f-b097-a83bf80aef23
-340,P0344,Guillelmus d'Engolesma,PERSON,a3b06a38-d226-418a-80e7-627a4c1919b7
-341,P0345,Guillelmus de Gordo de Salvaterra,PERSON,fce54ecb-f57b-496b-b1cd-b942f92de814
-342,P0346,Guillelmus de Hospital,PERSON,8032943d-1ddf-45c0-93bb-cc077dc26c08
-343,P0347,Guillelmus de La Cordella,PERSON,d345a572-4b7f-421e-84c0-6a36a217c212
-344,P0348,Guillelmus de Lagorsa,PERSON,7946ad43-97d1-4017-95cc-a77df8aab9d1
-345,P0349,Guillelmus de La Raimunda,PERSON,0c6d69dd-6986-429c-9950-89a94c257627
-346,P0350,Guillelmus de Labarta,PERSON,28012b25-263b-4303-8f84-668fadcaf9cb
-347,P0351,Guillelmus de La Mota,PERSON,14e6e90c-4d59-45b5-8741-0e0629615326
-348,P0352,Guillelmus de Lantar,PERSON,5bfeb705-e7f6-413d-88fb-82596b417c84
-349,P0353,Guillelmus de Latania,PERSON,61b56f82-600f-480b-82c7-b18cd5eba8d7
-350,P0354,Guillelmus Raimundi de Lespinassa,PERSON,1a4c763c-24ab-4b49-8f32-34f7d05b6b5f
-351,P0355,Guillelmus de Limos,PERSON,5ffb605b-4fd8-4ba3-9978-0115f037d199
-352,P0356,Guillelmus de Montegalhardo,PERSON,96cbc5cb-9aa9-47d0-901a-cbbd7fc90094
-353,P0357,Guillelmus de Naperier,PERSON,4cc6e71c-ce74-495a-a94b-27a64da3f95b
-354,P0358,Guillelmus Pradeils,PERSON,aac7dfc8-cc9b-499d-bf3a-adf9e720ab1c
-355,P0359,Guillelmus de Reiac,PERSON,29878ece-cb74-49d2-97fb-34fed7fbd5c1
-356,P0360,Guillelmus de Sancto Clemente,PERSON,fa83cfa9-1c5b-4f01-95e8-bab671acd5bc
-357,P0361,Guillelmus de Sancto Guinesio,PERSON,1b2e676a-7a40-42fe-906e-67626b0aa44e
-358,P0362,Guillelmus de Sancto Michaele,PERSON,c0cef5da-9cd0-4838-8a23-279d5e89bc83
-359,P0363,Guillelmus de Solario,PERSON,e95c52e9-043b-4ea4-b7d2-e1f5e1f7f89d
-360,P0364,Guillelmus delz Pratz,PERSON,31036256-8801-49df-971c-98fb80c8c0b9
-361,P0365,Guillelmus de Moli,PERSON,9e4cecf7-0922-4116-9b2a-cbac0a9ad045
-362,P0366,Guillelmus Faiditi,PERSON,c16a81f0-9ad6-460b-828d-da412dfd26e3
-363,P0367,Guillelmus Fabri,PERSON,8182fd59-e782-460a-8fc6-a0edbbf92c1b
-364,P0368,Guillelmus Geral,PERSON,60deffe4-cfcc-4f6b-b79e-61c48faccc5b
-365,P0369,Guillelmus Geraldi,PERSON,5998ecb8-6f9e-4993-89c3-43e4c00bda2d
-366,P0370,Guillelmus Geraldi,PERSON,44b12ef1-f3d8-4fa8-bbc0-1196f8103b5d
-367,P0371,Guillelmus Guitart,PERSON,4c318b20-f1c3-480a-85df-6cbac0502a8d
-368,P0372,[brother of Guillelmus Guitart],PERSON,7d9f729d-717e-49e3-946a-9f61cc753f08
-369,P0373,Guillelmus Helix,PERSON,073e0c40-f6a8-44fe-8555-c66dead54084
-370,P0374,Guillelmus Ychier,PERSON,cc07d24e-2103-4ce8-a888-a335497b393b
-371,P0375,Guillelmus Devinis,PERSON,fc470664-aced-4a24-86b8-a008646fc279
-372,P0376,Guillelmus Laurencii,PERSON,27eaf4e2-613c-4983-a2f2-7ae2f4d92f9e
-373,P0377,Guillelmus [medicus],PERSON,2cbf4a73-bdac-4a11-81d9-eac23838be28
-374,P0378,Guillelmus Macips,PERSON,76fa349a-a473-4cc4-b581-57d1388a9c5f
-375,P0379,Guillelmus Matfredi,PERSON,3e8ba674-0186-47c4-8175-d8bd692b3283
-376,P0380,Guillelmus Matfredi Reilon,PERSON,9a80cd98-eeae-4e38-960a-797473a9897d
-377,P0381,Guillelmus Martini,PERSON,aa9a9826-0c42-457a-b946-2efc915d2141
-378,P0382,Guillelmus Maurelli,PERSON,5b6a0880-d78e-4b76-a34e-3fd77c15528a
-379,P0383,Guillelmus Molinerii,PERSON,0c4c992c-8a35-4615-a5b3-a55d0c3359c7
-380,P0384,Guillelmus Paga,PERSON,777b164a-affe-4b69-a643-11e2a318938c
-381,P0385,Guillelmus Palmerii,PERSON,13e49af1-8baa-4dc0-89a1-01ae67626ad0
-382,P0386,Guillelmus Pasaire,PERSON,a146884a-8d66-459a-b63c-9102f33fa8d0
-383,P0387,Guillermus Peregrini,PERSON,bf9f4b79-cbc8-4632-bd3d-c120df218a1f
-384,P0388,Guillelmus Ricard,PERSON,c7392485-8366-4e52-b9e8-da279c4122b8
-385,P0389,Guillelmus Rodat,PERSON,1bb94714-5dd8-46db-8951-39bac0096f1d
-386,P0391,Guilhamassa,PERSON,294043c7-437b-47ee-a059-f6c09dc74a09
-387,P0392,Guillerma,PERSON,db44c3f4-65cd-45db-9939-ee43a0512368
-388,P0393,Guillelma,PERSON,db1f6555-0d06-491e-8204-90270de07a35
-389,P0394,Guillelma,PERSON,4d492d82-44f9-430b-8f83-ebd27f8164a0
-390,P0395,Guillelma,PERSON,dce31a13-0ffa-4ad6-a5a2-812f2e8119ce
-391,P0396,Guillerma,PERSON,9dad02f6-6592-45d3-a4ab-809f81448ac4
-392,P0397,Guillelma,PERSON,d4c619c1-53f3-49b9-8993-c354d21eec9f
-393,P0398,Guillelma,PERSON,a6840fce-8dd8-4c2d-a29e-1bbb774f476c
-394,P0399,Guillelma,PERSON,f298803e-793e-456f-a726-bb961e5c0be1
-395,P0400,Guillelma,PERSON,276f80fa-bc69-4b43-bdc5-895876570234
-396,P0401,Guillelma,PERSON,812aa188-90c5-49b7-8ab6-cbd070622af0
-397,P0402,Guillelma Cota,PERSON,20550815-0ca1-409b-88cc-4b49afda1aea
-398,P0403,Guillelma den Golesma,PERSON,54f3edcb-f9ef-4982-97b9-9937b7e29de7
-399,P0404,Guillelma de Beneig,PERSON,bbe7faa9-4ddf-49c6-8fd2-d6d4dfef633b
-400,P0405,Guillelma de Bonoloco,PERSON,4d23689f-8c99-4af8-b97f-7d6970202d28
-401,P0406,Guillelma de Cantarida,PERSON,0479422b-d297-418e-b8c3-b8775a9cfce1
-402,P0407,Guillelma de Franquet,PERSON,fe71e962-f6f9-44d3-b86c-08cc3d59a691
-403,P0408,Guillelma de Galhat,PERSON,d5f16274-6e02-4a5b-b52c-fdbf64c23df2
-404,P0409,Guillelma de La Barta,PERSON,095d318f-b29b-460a-99bc-ea80deed53c7
-405,P0410,Guillelme de Lagarda,PERSON,c700b22c-d191-4818-bd5d-95f75d939df7
-406,P0411,Guillelma de Lamassa,PERSON,9991905c-b2d8-4d77-8d77-fda370548c17
-407,P0412,Guillelma de Lariba,PERSON,47926634-8998-4501-a3ff-b55c0276efe1
-408,P0413,Guillelma de Vina,PERSON,38162cc3-5de2-403e-bcaa-1298eec63723
-409,P0414,Guillerma de Maiestre,PERSON,be124537-8787-44b6-88b6-9d87c96d29ae
-410,P0415,Guillelma de Rocafort,PERSON,a5cbe14a-b709-4ffb-a864-8d337ad3a6a4
-411,P0416,Guillelma de Sapiac,PERSON,db4d1f64-a9bf-44e7-956e-8e6dd54bd9ec
-412,P0417,Guillelma de Solacrop,PERSON,4d918356-2529-4455-8e78-1dc7c7df8cd3
-413,P0418,Guillerma de Via,PERSON,8d8a719b-c08e-4243-9894-45d153cd6c67
-414,P0419,Guillelma de Villabergonh,PERSON,45e623d7-85ab-4fb5-bca5-856003145ee9
-415,P0420,Guillelma de Pinu,PERSON,754e5b6f-53c8-421c-827b-7c3a4f97ac87
-416,P0421,Guillelma Faidita,PERSON,61b53e28-2d69-4aba-a7e0-122e5ab3ca7f
-417,P0422,Guillelma Forneria,PERSON,33cad0bc-e48c-4f56-8ca9-262ba2ec39ed
-418,P0423,Guillelma Gatina,PERSON,98236fe8-6382-48ab-b0bb-324d43af8aaf
-419,P0424,Guillelma Gaudiana,PERSON,377fab7c-0435-458c-949c-80c0f145d7eb
-420,P0425,[Guillelma] Lauterii,PERSON,e1153578-2314-4c7a-bd92-38600f7cf596
-421,P0426,Guillelma Martina,PERSON,7740d47c-db02-4e00-8cd7-282db3182527
-422,P0427,Guillelma Maurina,PERSON,411bb739-cd00-4365-b8a6-f1bc06dad5a9
-423,P0428,Guillelma Paga,PERSON,46ece7dd-1774-4664-9e99-1e3e00bf50db
-424,P0429,Guillelma Pradeira,PERSON,67f372a7-fb15-4b55-bed1-237523141b61
-425,P0430,Guillelma Rasona,PERSON,34e896e2-a8a1-443f-bb1b-c4483711ed68
-426,P0431,Guillelma Vesiada,PERSON,54f8595a-33cd-4b6b-ae46-5d89eb9c6e00
-427,P0432,[Guiraldus],PERSON,3b05c280-d930-48f4-8e92-22ae5a68979d
-428,P0433,Guiraldus d'Engolesme,PERSON,541e9bf0-09dd-4d95-a9e4-75d53979fd51
-429,P0434,Guiraudus de Mairoch,PERSON,4a773a89-1851-4083-8d1e-cfc68ffbf9a0
-430,P0435,Guiraudus Molinerii,PERSON,1ddb676c-421b-423b-bb9a-46a11bc65c8c
-431,P0436,Guiralda del Riu,PERSON,6b2edd9c-f862-4889-9df6-a31d325fb60f
-432,P0437,Helias de La Valada,PERSON,1c7bf245-7962-4f02-a47a-8ab23e725695
-433,P0438,Helias mercer,PERSON,4bed1c79-0637-4bc3-b0ff-89484f803024
-434,P0439,Helyas,PERSON,d4fd2eed-57b1-47fc-9367-13f118bf270c
-435,P0440,Herica,PERSON,2eabcdea-34f4-4b0d-acb5-a9ab8d89eb44
-436,P0441,Hugo Auberti,PERSON,39d79241-9ba3-4579-949a-6fb11c926d1d
-437,P0442,Hugo d'Auteiac,PERSON,df54fbcc-e0d1-49db-8d5c-2ccf3247cbf7
-438,P0443,Hugo de Faias de Pereilha,PERSON,0b360f0f-8ce1-4363-b8a5-63c7f4e2e024
-439,P0444,Hugo de Fayas,PERSON,a3e3bcc4-46dd-4da6-ad12-247235ea1176
-440,P0445,Hugo de La mota,PERSON,bba1d962-9dd4-4954-b561-2c2a481c4397
-441,P0446,Hugo de Podio,PERSON,a6c2a571-3725-4a01-823c-3a1cf81a9bee
-442,P0447,Hugo de Portu,PERSON,0df26e9f-4fe6-405c-a9fa-c5adec9d19a2
-443,P0448,Hugo Falqueti,PERSON,b5176b6e-72f9-4f9f-885d-75f9d92bc0e4
-444,P0449,Hugo Gaufredi,PERSON,da24c82a-2bc7-4708-a4e4-d42e534f0ffb
-445,P0450,Hugo Ros,PERSON,ce1855ab-67e2-4b67-b2e9-d87e96b85fa4
-446,P0451,Hugo Geraldi,PERSON,6a642d69-325a-4960-ab80-3610e51e728c
-447,P0452,Huga,PERSON,2bbff87d-e1cd-48ee-84ec-e382a473c54e
-448,P0453,Huga,PERSON,53f5062d-d4ec-4b5b-930c-b54c8f0560c1
-449,P0454,Huga,PERSON,926b9e68-95d3-43cf-b02d-cdaf68b500a0
-450,P0455,Huga,PERSON,6b1e0615-17da-4f56-8355-cd67412d7f20
-451,P0456,Huga de La Baraudia,PERSON,6f63640c-ec1b-4198-8094-e929c9bb9663
-452,P0457,Huga Maurina,PERSON,5cd90221-5900-4b59-b39d-59959c90e89b
-453,P0458,Humberga Palina,PERSON,856378ec-e442-4bfc-8512-d478a5537f07
-454,P0459,Hymbert Escuder,PERSON,9ad70b52-1d7f-4639-abcd-ce6d978d27ab
-455,P0460,Isarnus Pontonier,PERSON,f191720b-d724-4c6e-876e-c3a32a1a91e3
-456,P0461,Jacobus Carbonnel,PERSON,9cad53fe-238f-4283-b24d-e22f80811f76
-457,P0462,Gaufridus de Calciata,PERSON,5b812ca8-585b-446b-a702-9c7150180c78
-458,P0463,Gaufrida,PERSON,396a81f0-1082-4f0e-8e5c-6c1226093f03
-459,P0464,Joannes Austorcs,PERSON,c2373a8e-7c1f-4979-962d-4e86d433e1b1
-460,P0465,Joannes de Avinione,PERSON,95837d2d-fe4a-4a74-ac25-c324df1f6f24
-461,P0466,Joannes de Capadeli,PERSON,317f21e5-fc48-4e15-967f-03910b686d4b
-462,P0467,Joannes de Capel,PERSON,1a5966ea-9de2-40ec-9f3e-e214bbdb426b
-463,P0468,Joannes de Castilho,PERSON,9766a113-cbe4-4b3f-b3bf-4203dbb21c6d
-464,P0469,Joannes de Gailhac,PERSON,b2dbc8c1-c22b-4c76-ad59-afbd6d78eb4e
-465,P0470,Joannes de Lolivia,PERSON,46523852-e985-4f68-9a2a-cc2d6d79c5ca
-466,P0471,Joannes de La Garda,PERSON,f44674ba-8c97-45c3-8873-133b426a8112
-467,P0472,Joannes de La Junqueira,PERSON,da451946-d957-430b-acf3-0c85c7539e2e
-468,P0473,Joannes de Rupe,PERSON,40aea3ee-895e-4c12-bc32-27ba4a7e3f58
-469,P0474,Joannes de Novenargas,PERSON,7c65c5d7-035b-4870-84ea-f91df4c1df72
-470,P0475,Joannes de Podio de Milhac,PERSON,690496fc-1c7f-4c00-b79b-7f993d158466
-471,P0476,Joannes de Villanova,PERSON,779b65a3-55d7-4d75-8ddb-14fc60a563e0
-472,P0477,Joannes del Pradal,PERSON,bb204bb8-0cbe-44e6-90f9-9d8f69e1489b
-473,P0478,Joannes Fornerfabri,PERSON,0174bb92-793d-4f82-972e-4c649b0c92ce
-474,P0479,Joannes Saturnini,PERSON,cb1cba4b-549d-4364-ab26-a08561ca5119
-475,P0480,Joannes Torner,PERSON,474b6ecf-01aa-4af8-b231-e2b12a036482
-476,P0481,Joannes Toset,PERSON,15f4f186-f2df-429c-bd65-2cfb58e9443a
-477,P0482,Joanna,PERSON,9db502fc-0389-4975-aa42-a7d339d0876f
-478,P0483,Joanna,PERSON,a81d3e20-e2aa-417b-b041-73a5fc44e4dc
-479,P0484,Joanna,PERSON,faf93d84-5780-4660-9ae9-88949cbf3d4f
-480,P0485,Joanna de Avinione,PERSON,6392c4c8-e930-48f5-a945-8d591d2bf4fc
-481,P0486,Joanna de Castronovo,PERSON,f785da4e-c0d2-4ad6-90ee-a3c4664400aa
-482,P0487,Joanna de Gordo,PERSON,c70f7e66-b2e8-423c-87f1-9143bfe6ea28
-483,P0488,Joanna de Riberia,PERSON,52e03e22-6989-4fca-b3fb-656f3a6be1a6
-484,P0489,Julianus,PERSON,890f1f0f-510c-4494-b38d-4015d290af48
-485,P0490,[wife of Julia],PERSON,df1fa5bc-2f85-44ca-9694-2ede2dfab7cc
-486,P0491,[sister-in-law of Julia],PERSON,b632db6c-0bb9-42ad-b534-e71615c8a92e
-487,P0492,Laurencia,PERSON,920405df-82ea-441c-b939-d7f2caee64b7
-488,P0493,[Unknown] de Lauzerant,PERSON,5b444410-f842-4af9-b167-b327e62abb5c
-489,P0494,Juvenis de Lastroa,PERSON,e3835e60-f36f-436e-b8cf-c491d59350fa
-490,P0495,Lombarda,PERSON,8bf5d42e-1689-4e36-9101-debde0abe675
-491,P0496,Lobaix,PERSON,1e519172-d13e-484b-ad39-778cb4012cc6
-492,P0497,Luxia,PERSON,7c693911-abde-4957-a04d-8d17e51330b4
-493,P0498,Maenza,PERSON,c7c778b6-a6fe-4224-ad7e-327b8f14dc5e
-494,P0499,Maria,PERSON,ad664040-b636-449b-a6ae-013ba3428214
-495,P0500,Marta,PERSON,a01a3188-45ca-40c3-ad27-2f3ea4325201
-496,P0501,Martinus de Tore,PERSON,b2998edb-360c-413b-bb04-dbb9a91c2586
-497,P0502,Miravale,PERSON,9549806b-c115-4278-b027-f0ff328caaba
-498,P0503,Nalgartz de Villario,PERSON,07360f33-078d-4eb9-b29d-59716d4cf721
-499,P0504,Nefales,PERSON,c39f9059-497a-4c73-89e1-efc22bfef9b6
-500,P0505,Nassaga,PERSON,74955960-c461-4431-a2f1-29cdd73e6712
-501,P0506,Naufressa,PERSON,7d8eeac0-d5f1-4d32-b9b0-188f01525a96
-502,P0507,Naurimunda,PERSON,8d6f6258-f529-46b9-a3af-d256fde217ed
-503,P0508,N'Aymara de Montelhassu,PERSON,159cf21e-c6fe-4cec-83f4-ddbce2f7edc7
-504,P0509,Na Azoffreta,PERSON,12012677-e646-45c8-b9eb-b7e51bea6a6e
-505,P0510,Na Babilonia,PERSON,ad840cab-2231-4823-a1eb-289694a5dad8
-506,P0511,Na Berengueria,PERSON,4fa9a91b-e659-49bd-bb49-eb943bfdcc9c
-507,P0512,Na Bona,PERSON,da99a2af-94dd-4363-9e61-14113d25bd60
-508,P0513,Nacuidalz de Goire,PERSON,8ca39e55-9daf-45e7-b806-46efde64b0f4
-509,P0514,Na Elays,PERSON,b313e88c-015f-4520-9523-4a0e5db00ba0
-510,P0515,Na Sclarmunda,PERSON,eda167a2-d3c4-4dde-a316-779ec20afad9
-511,P0516,Na Fauressa de Jovengas,PERSON,0f1d2c9e-fb0d-4630-95d9-233f6dabd634
-512,P0517,Na Finas,PERSON,a70a0524-3773-491b-b89f-03364f4bfe56
-513,P0518,Na Finas de Moteilz,PERSON,c7417c39-0f3e-4f52-b359-73d54bb1c3d8
-514,P0519,Na Folcauda,PERSON,19ed7396-5ff4-4478-bf81-5d9ace148ce5
-515,P0520,Na Francia,PERSON,900c7740-d532-4be6-a76b-f093833a21e2
-516,P0521,Na Francia de Rigaut,PERSON,a3f93594-2ad8-4d9a-a9be-dc0d5ff0aab2
-517,P0522,Gairels,PERSON,708c9e61-b6db-4a2f-ba35-fc189792b5cf
-518,P0523,Na Garriga,PERSON,5e3ecc57-d9a7-4af9-9216-49258f0ac2fc
-519,P0524,Na Gassacs de La Mota,PERSON,80d3889e-8fa6-4433-bea3-684cbe83c94e
-520,P0525,Na Guias,PERSON,e5c61569-6f29-4c5c-b75c-03cec9b9bc23
-521,P0526,Na Lorda,PERSON,d1eccac2-5a5b-4807-93e4-8fa317001920
-522,P0527,Na Maenza,PERSON,70f59006-3290-45f8-8d29-6d94e13ae06c
-523,P0528,Na Mairada d'Albafolia,PERSON,319006d1-72ff-4423-a0bf-d71593508fa9
-524,P0529,Na Manenta,PERSON,6543791b-fb58-4a2d-9774-16ef70a2f289
-525,P0530,Na Marauda,PERSON,8bbbd570-73d0-46a6-ab71-3d81e9672e9a
-526,P0531,Na Marquesa,PERSON,02b52c03-4847-43ab-b1ea-8fc64ee4f259
-527,P0532,Na Nomais de Belpoch,PERSON,792be1c0-59c9-4146-85be-7fa513ec4761
-528,P0533,Na Pros,PERSON,8313863e-f0b6-4009-9e64-3868eb5d4cdf
-529,P0534,Naremunda d'Estivalz,PERSON,5332adba-b59c-4735-86c0-b06096858686
-530,P0535,Na Sauriz,PERSON,a9e52344-2403-4b09-bd5e-bd7d44122080
-531,P0536,P. Abit,PERSON,92f598b9-1c97-43ae-8177-10b6cdbe3782
-532,P0537,,PERSON,30396b66-855b-46fb-a95b-4c1d24b4e26d
-533,P0538,Petrona,PERSON,b2edd407-acd4-4a94-89a2-e9f70d2405aa
-534,P0539,Peyrona de Carental,PERSON,4994e4da-96e9-4edb-b793-fe5a8c4d5c79
-535,P0540,Petrona de Prestis,PERSON,8400eea9-5414-47a8-90c5-c6db6745146a
-536,P0541,Petrona Pencheneria,PERSON,a7d6be97-1f56-41bc-b97d-cf469c5ebecd
-537,P0542,Petrona Remona,PERSON,69790ee9-de00-4062-8b7a-aca9224c617e
-538,P0543,Petrona,PERSON,0a860d66-8771-4f06-9d98-dbb9d6dcb911
-539,P0544,Pictavinus,PERSON,33da2cbd-2085-4a93-940a-30f8636eafe8
-540,P0545,Pictavinus d'Ausac,PERSON,d7735e79-9309-40e6-bafc-fd3e3bdda1dd
-541,P0546,[wife of Pictavinus d'Ausac],PERSON,566dba7a-434d-49b1-bd86-30c22a3e7b66
-542,P0547,Petronilla de Gathard,PERSON,2777fd7d-f490-4f90-8fb7-c181a0e40281
-543,P0548,Petronilla de Fabrica,PERSON,54e0d014-7047-493f-a41b-a3079a0d45f2
-544,P0549,[husband of Petronilla de Fabrica],PERSON,0e40c904-370d-47ff-a689-8bedb2741c9e
-545,P0550,[son of Petronilla de Fabrica],PERSON,8b04f1b6-1222-4f59-a59a-6a0c77f40f0d
-546,P0551,Petronilla de P. S.,PERSON,0de48462-3705-4261-9c85-b97a732c9916
-547,P0552,Philippus Donadeu,PERSON,fc5e4666-348a-43e1-b228-cc3565565fac
-548,P0553,Petrus,PERSON,23e1765c-a2c1-4277-8cc3-7769fb422df1
-549,P0554,Petrus Arnaus,PERSON,db100e12-d2e7-43bf-8593-c5143972daa5
-550,P0555,Petrus Arnaus del Batut,PERSON,ff4cc97d-bbd7-4766-8947-fd85604a1d88
-551,P0556,Petrus [Arnaus] de Montepesato,PERSON,2b88464c-3f5f-412d-98d9-e5b9c0c22a5b
-552,P0557,Petrus Auriol,PERSON,dabc480e-7b5e-4c15-bbc7-83a871e10d72
-553,P0558,Petrus Austorcs,PERSON,4a07dd0c-7c87-46a4-b811-e98ee08fac0b
-554,P0559,Petrus Baco,PERSON,790d28fa-7a80-4ec2-b952-e5a718aa3974
-555,P0560,Petrus Berals,PERSON,f3335203-fbb1-4a61-b284-c5cb02b160e5
-556,P0561,Petrus Bernart,PERSON,395b32b0-f87d-466b-aa82-8f195b33b842
-557,P0562,Petrus Bernardus Sabater,PERSON,632406f7-a17d-4870-a2da-c2df2efd3b5f
-558,P0563,Petrus Botas,PERSON,bbb15b86-cf34-4ea9-82b2-7036544af707
-559,P0564,Petrus Bonusfilius,PERSON,9b49ecb9-ba06-42a0-a0d7-daa6bc256ac9
-560,P0565,Petrus Broas,PERSON,9efb1f75-f7fa-4fcb-a979-adb39dea4dd8
-561,P0566,Petrus Cadels,PERSON,3240ea32-6ef9-4307-8758-31772759e708
-562,P0567,Petrus Carbonelli,PERSON,1cfc2965-08a7-4e03-a378-8665809967d1
-563,P0568,Petrus Carbonelz,PERSON,677dcd20-aefd-44e6-b431-8c2f455e0b5b
-564,P0569,Petrus Caudier,PERSON,5aa17d3b-9a13-4a16-a802-c31ada99fa3b
-565,P0570,Petrus [Sillani],PERSON,97d05e4c-aef7-4f78-99d5-6107f7a61c32
-566,P0571,Petrus d'Aussach,PERSON,1527a363-2a2a-4e54-acc6-445ee1cc4afc
-567,P0572,Petrus de Belfort,PERSON,f1380caf-5018-4d7a-adc3-1ba33be92d31
-568,P0573,Petrus de Canasolas,PERSON,664e78b3-4ff9-4357-9c93-9eb0cccc3572
-569,P0574,Petrus de Castillo,PERSON,d0f27073-01b9-40d2-9f69-58094c22e64e
-570,P0575,Petrus de Gaulenas,PERSON,671e2995-e9d4-4e1f-9969-a97b60797177
-571,P0576,Petrus d'Engolesme de Milhac,PERSON,a3d2a6cd-149d-4c02-8598-694da9dbd678
-572,P0577,Petrus de La Barreira,PERSON,c7c970c9-c5c9-4a0a-9b59-171063fa2c07
-573,P0578,Petrus de La Costa,PERSON,d7a59716-aa40-4cbc-99d8-18449e1294cf
-574,P0579,Petrus de La Garda,PERSON,ae24c325-ab3e-4d98-9060-cf0f8b90bb57
-575,P0580,Petrus de La Gorsa,PERSON,6a1d0c5e-6fb5-41f5-824a-98216bb33187
-576,P0581,Petrus de Pomareda,PERSON,2c8a36be-8cc8-4b82-960a-4edff623218f
-577,P0582,Petrus de Lacomba,PERSON,6f8c29e4-abb9-4eca-9213-e968158d380a
-578,P0583,Petrus de Lanes,PERSON,54af315b-d397-4528-a3c4-2bcfd5b329a9
-579,P0584,Petrus de Las Oleiras,PERSON,bf981728-f834-4e15-82a0-0f88b4fc6a00
-580,P0585,Petrus de Monteacuto,PERSON,46061c51-c18f-4ee3-a1c2-523c87f0df2e
-581,P0586,Petrus de Montpezat,PERSON,a9619153-fd99-4193-85c0-3358e9082983
-582,P0587,Petrus de Penna,PERSON,686bd34b-3c56-43a3-9759-212a32c34ca9
-583,P0588,Petrus de Petragor,PERSON,686d1490-18bb-43c7-9acc-2b4d018512f2
-584,P0589,Petrus de Rotival,PERSON,c673c2a6-d1bf-4f9e-9928-a59572f5c67f
-585,P0590,Petrus de Tinha,PERSON,ff2e384b-4b19-4b3b-b2d4-38bd6a3ab515
-586,P0591,Petrus de Vallibus,PERSON,b8eef955-7b26-400d-8a8d-0c376125c7ec
-587,P0592,Petrus de Vernolio,PERSON,3facbf6d-13ab-4631-8048-af429379b616
-588,P0593,Petrus de Bruhl,PERSON,083779b4-4086-4428-b145-536605cd36f0
-589,P0594,Petrus dels Pratz,PERSON,1dec25a3-d290-4594-a9df-5f58d74eebd8
-590,P0595,Petrus Durandi,PERSON,f1ff7e37-8ccf-4ec3-83d7-dbc3313a04a5
-591,P0596,Petrus Stephani,PERSON,c1c363e5-b021-458a-919b-af27ef027a51
-592,P0597,Petrus Gauraldi,PERSON,a8de1088-f341-45fd-885c-09bc24e3f20a
-593,P0598,Petrus Geraldi,PERSON,7639cabe-b590-44d6-b309-9b88aafa38f3
-594,P0599,Petrus Guillelmi de Godor,PERSON,6c8eba15-a8eb-428b-8568-396c11fe2c57
-595,P0600,Petrus Guillelmi,PERSON,dc58dfba-ef22-4e42-93dc-e164dbef299a
-596,P0601,Petrus [Guillelmi],PERSON,4630c811-9dc9-4ca5-b6e8-da1a8c088f60
-597,P0602,Petrus Lanes,PERSON,549ed10b-eda5-49f2-90d0-fe6bcd3be3c4
-598,P0603,Petrus Magis,PERSON,5052c23f-7135-47d9-91f6-65ccf29a2a38
-599,P0604,Petrus Peregrini,PERSON,cb19cec3-a1d2-4993-99eb-81751046486d
-600,P0605,Petrus [Raimundus],PERSON,29303603-0575-4708-a706-d704f84a18e0
-601,P0606,Petrus [Raimundus] Roca,PERSON,7b8bf8e5-d400-4959-bd71-6ce8668a1e3f
-602,P0607,Petrus Rigaldi,PERSON,40239e0b-bb06-411e-89ea-a38d7d6b3b63
-603,P0608,Petrus Rossel,PERSON,79a674b8-cdd6-4b5e-a0df-dff41b9f37c7
-604,P0609,Petrus Saliners,PERSON,fa45ac4a-d2b2-4dda-918f-b0d12daa7aec
-605,P0610,Petrus Teires,PERSON,678ce5f5-9b42-4d6d-87b1-276866bbcba6
-606,P0611,Petrus V. de Valtauren,PERSON,ac09b16b-96f6-444c-aea6-63b2a84508f9
-607,P0612,Poncia,PERSON,6cdea3f4-7e5f-4d27-8471-48b714127edb
-608,P0613,Poncia,PERSON,bdf86df6-8de7-4aac-85eb-17a9ace37042
-609,P0614,Poncia,PERSON,18fe52e8-e7e4-4783-945a-afd59f915cdf
-610,P0615,Poncius Archaubal,PERSON,bb00b3e5-f774-4433-b53d-44403db1af2d
-611,P0616,Poncius Boneta,PERSON,e6fa6784-980e-4445-97a5-85ba6a388600
-612,P0617,Poncius d'Arquembal,PERSON,3568edeb-e57e-4fee-8620-9190ea0667a2
-613,P0618,Poncius de Coltz,PERSON,a7f9092d-b1f1-4804-baef-5463393e767e
-614,P0619,Poncius de La Junqueria,PERSON,7761d9df-9296-4817-9436-ebba36673bd7
-615,P0620,Poncius de La Lonqueira,PERSON,5bac1361-79a8-4a51-9e15-e9849f395e8e
-616,P0621,Poncius de Mairot,PERSON,6aedb3b4-88ec-45da-8682-e1059483bcde
-617,P0622,Poncius de Vacaressa,PERSON,19f1b4f9-4448-4d2e-a44c-dbfac1426403
-618,P0623,Poncius,PERSON,2a6dfb0c-5150-432c-9c22-8d46f8da5765
-619,P0624,Poncius Faucoaire,PERSON,351af5c9-e923-4586-b38e-4c2910b4e748
-620,P0625,Poncius Guillelmus,PERSON,c3f6c928-fb0a-4c45-a203-907d114d3307
-621,P0626,Poncius Lemovicensis,PERSON,fa4d13ce-875e-4169-9ae4-485ca8deed55
-622,P0627,Poncius Pelliparii,PERSON,473e9bd0-f3cf-4bbf-bf74-c811da85fb32
-623,P0628,Poncius Seguini,PERSON,4f7fbc4b-0c7a-4adc-89eb-d8971ef480e1
-624,P0629,R. A. Marla,PERSON,36fcc246-071e-4f78-818b-68554c891538
-625,P0630,R. Giraudi,PERSON,5a6f7637-2430-4ae3-a676-1c60a0830692
-626,P0631,Ramon de Roffilhac,PERSON,0cbfebc2-10d0-454f-93ce-7909da9328ac
-627,P0632,[Raimundus] Affortiz,PERSON,681e60f2-fad8-4971-93e6-cb6f9472efe4
-628,P0633,[Raimundus] Alegres,PERSON,e8d4ffee-d6fe-4709-be09-5a481b39b424
-629,P0634,[Raimundus] [Arnaldus] de Bos,PERSON,4cdc3233-db9c-4b33-80ee-dc21c60c27db
-630,P0635,Raimundus Auriol,PERSON,85ff47af-0df3-416e-8732-2043cd86010a
-631,P0636,Raimundus Bernardi,PERSON,d7ff6290-0c1e-4825-b700-f6c666ad28ee
-632,P0637,[Raimundus] [Bernardi] de Castilho,PERSON,c95e2db7-6a20-4225-87bc-9d5840bfc8a4
-633,P0638,[Raimundus] [Bernardi] de Gaulenas,PERSON,9da425f1-bdf3-49f2-87e9-f2ab76f84f4a
-634,P0639,[Raimundus] Bernardus de Pereilha,PERSON,369ad2a5-382b-429a-a367-04e4e0d99d96
-635,P0640,[Raimundus] [Bernardi] Divis Arnaldi,PERSON,48ad4e06-0d3e-424e-8f2e-e2d783097f69
-636,P0641,[Raimundus] Canels,PERSON,9957c937-cf48-49e1-bf6d-542c6adf6bb6
-637,P0642,Ramon Carbonel,PERSON,35303704-7b7c-4dab-a1b3-00271289a33a
-638,P0643,Ramon Carbonel,PERSON,dff62b42-243f-46d0-b878-e7f98fe72412
-639,P0644,Raimundus de Acha,PERSON,f9ce7ee4-6f5d-4a20-8cf4-935520106a89
-640,P0645,Raimundus David,PERSON,832b3c4b-a45f-4129-9dde-819872e3d486
-641,P0646,[Raimundus] de Barnac,PERSON,57b18785-8100-4c5a-a8c5-f973237367d7
-642,P0647,Ramon de Benag,PERSON,fd5866ec-1db1-489c-9849-45f0ef87fab3
-643,P0648,Raimundus de Bernali,PERSON,462cef4e-232f-4cda-a48d-69c48a0385a3
-644,P0649,[Raimundus] de Castronovo,PERSON,690843ca-9eb8-4597-b1ad-2f2d3697e055
-645,P0650,Raymundus de Galhat,PERSON,54d9d494-4f49-4cfe-88af-b4a1693f51fb
-646,P0651,Raimundus de Gaillard,PERSON,578eb820-ff88-4fcb-8eb1-dd474e2be2ff
-647,P0652,Ramon de Lagarda,PERSON,482e2ad2-e8e6-4e1b-9309-698ad4fc9b07
-648,P0653,Ramon de la Mota,PERSON,9ee3cd8f-6b54-4f56-80e8-87f5bf013dad
-649,P0654,[Raimundus] de Ramunderia,PERSON,0d768ad2-7075-408e-9373-ac88bfbcb867
-650,P0655,[Raimundus] de La Ribeira,PERSON,087396e8-0a37-43af-8561-534e93df41df
-651,P0656,[Raimundus] de Lagarriga,PERSON,20ff6d3a-5591-4141-814b-8e3fbf0007bc
-652,P0657,Raimundus de Lascroas Ropic,PERSON,b75ed01f-66a5-4613-bb3a-18d67a71873a
-653,P0658,[Raimundus] de Loc,PERSON,757fe9ff-142a-4cbd-83a1-4e4105c624bc
-654,P0659,Raimundus de Manenti,PERSON,38a1c6f3-b526-4058-809f-357e2ff16b4b
-655,P0660,Raimundus de Monteacuto,PERSON,a9e8e761-2b98-4813-b529-f39f6361af2a
-656,P0661,Raimundus de Perela,PERSON,83b5ac1b-0f4b-450d-b39f-8458c41ebf8a
-657,P0662,[Raimundus] de Pratz,PERSON,c5300e33-19aa-41e9-8032-74496a601398
-658,P0663,Raimundus de Sancto Ilaro,PERSON,37ea62ba-75bb-4d51-8f61-94864f96676b
-659,P0664,Raimundus Joannis,PERSON,7e4b1519-eb1d-45da-81fb-b57b6f9ad73d
-660,P0665,[Raimundus] del Volve,PERSON,400f6d5b-e050-4286-936f-a87305090020
-661,P0666,[Raimundus] Donat,PERSON,95c3ad35-b5a2-4df2-94c0-f57f1954c375
-662,P0667,[Raimundus] Dorno,PERSON,d51a0ca8-1194-41a7-a3c6-c344638e8b86
-663,P0668,[Raimundus] de Broell,PERSON,865ea6f0-e37d-4788-8072-029dc007cbb8
-664,P0669,[Raimundus] Durandi,PERSON,bb60287d-c5c0-4220-b021-9c9b3742ca2a
-665,P0670,[Raimundus] Duranti de Gaulenas,PERSON,356d87ab-c751-41fc-b7d0-987b1aa981e5
-666,P0671,Raymundus Escuder,PERSON,9fac2a9e-6777-4613-8a3b-d731aff285fd
-667,P0672,Raimundus Falqueti,PERSON,0b914e5f-7c02-40a7-be80-6b25c85fc09a
-668,P0673,Raimundus Fabri,PERSON,0b622631-a427-4e63-a86f-e7058737c1c1
-669,P0674,[Raimundus] Forner,PERSON,9d6d9f63-2fd6-4217-9a68-fc90fdf223f5
-670,P0675,[Raimundus] Gastaudz,PERSON,3ad3215e-b6f9-4805-b610-e12009aa3e4b
-671,P0676,Ramundus Gauberti,PERSON,1dfb6d93-276d-4a96-9600-16cfc4b83fad
-672,P0677,[Raimundus] Gauterii,PERSON,1cc85729-a13e-41c2-a2c1-f51dab66581b
-673,P0678,Ramon Guiraud,PERSON,8d8a3b9c-96fe-4c46-bfdb-8cbb185bed72
-674,P0679,[Raimundus] Huc,PERSON,2142e480-d66a-4490-af7e-49b95c120d6a
-675,P0680,Raimundus Laterda,PERSON,8cdcedfa-3c17-4f0d-8522-3b7c85786b87
-676,P0681,[Raimundus] Lauterii,PERSON,d81c0fec-43df-4b33-a04d-c1d255fbaf2a
-677,P0682,[Raimundus] de Nava,PERSON,b24a9154-2177-49a6-923b-ff18cd5572b9
-678,P0683,[Raimundus] Textor,PERSON,0510196b-0577-4bc0-bee0-615093f362c8
-679,P0684,Raimundus Liuterii,PERSON,5485833b-c03f-41e9-ab7c-9d2b43bf159a
-680,P0685,Raimundus Moliner,PERSON,aac941de-27d6-46c3-96fc-a9830914250a
-681,P0686,Raimundus Obrieri,PERSON,33187c3a-1f98-41a6-82db-42b1eac26c53
-682,P0687,[Raimundus] Paira,PERSON,3401fd18-c47b-4f30-b7ff-315af8b1a1d7
-683,P0688,[Raimundus] Paire,PERSON,48ebef60-2da5-4268-bd95-a47762bf1631
-684,P0689,Raimundus Pelegri,PERSON,3cc8c859-7954-48b3-bf65-8d1c650a111f
-685,P0690,[Raimundus] Pomels,PERSON,4f061977-5c56-439f-9e60-c6c244447123
-686,P0691,[Raimundus] Roger,PERSON,0d7e402e-6166-40ea-8e98-86af89500e52
-687,P0692,[Raimundus] Rufet,PERSON,caf8f1c4-3053-4dd6-8b9e-82d82118f619
-688,P0693,[Raimundus] Sanz,PERSON,7edad78f-8533-407a-b492-d20ad0e9dbf2
-689,P0694,[Raimundus] Sicart,PERSON,57be6dd5-a353-4d81-9542-d11f58aef70a
-690,P0695,[father of Raimundus Sicart],PERSON,fc438788-b202-478c-88c2-b1de1a29d963
-691,P0696,[Raimundus] Tavernas,PERSON,19a1d935-8d19-41c5-a82c-3be904cad626
-692,P0697,"one of three brothers - first given the initial P, then G. Probably a scribal or transciption mistake",PERSON,c7005399-cc55-44eb-885d-d962bca6d1a5
-693,P0698,[Petrus] [Tessender],PERSON,63e2a0c2-00e0-41f7-97aa-b27ed2598672
-694,P0699,[Raimundus] Toseti,PERSON,665e296c-b630-4cc2-9034-02dd9d3bbc13
-695,P0700,Raimundus Trollier,PERSON,02c0aeaf-b885-4959-b84b-4215ee2b5041
-696,P0701,Raimunda,PERSON,51431b5d-4c0d-46c5-8e0a-566f75129248
-697,P0702,Alautor,PERSON,c01bc38c-73a4-4e38-ae98-78d86c106150
-698,P0703,Raimunda,PERSON,d20d63b1-6a0c-4101-b01d-7e3a04449e61
-699,P0704,Raimunda,PERSON,2d3bc021-c50a-4da9-b92a-c9f0a5465cec
-700,P0705,Ramunda,PERSON,8af7e2cc-ddf5-4915-8861-5cf7ebdc7cdf
-701,P0706,Raimunda,PERSON,5f1f88ba-48a8-46e5-a1ab-c6fc29e298a9
-702,P0707,[Unknown] de Bosolens,PERSON,746d7bc8-d805-4f6a-a7db-574cd1bf2925
-703,P0708,Raimunda,PERSON,65860c87-621b-4052-bd75-926e32eff486
-704,P0709,Ramunda,PERSON,748ff2a0-c27e-4457-bb3c-53b825c60e67
-705,P0710,Raimunda,PERSON,16523ce7-3a13-4654-867c-42d49d20ab9d
-706,P0711,Raimunda,PERSON,27ca25ad-a6aa-474a-8850-8a776e45b00d
-707,P0712,Raimunda,PERSON,f416164b-1912-4138-8086-5ef362ebffcf
-708,P0713,Raimunda,PERSON,afe3a7f9-749d-4202-9942-c5b2d685ec61
-709,P0714,Ramunda,PERSON,dfa26ee6-4e2c-4b64-8c15-d5ee50660899
-710,P0715,Raimunda,PERSON,3b153b0f-cc93-4611-8480-235aec29b790
-711,P0716,Raimunda Bega,PERSON,cc9093bd-f2e1-487a-8aa5-a0b7ab95ad54
-712,P0717,Raimunda d'Arcmeia,PERSON,1687198b-aedd-48a5-91c5-73c2855a1429
-713,P0718,Raimunda de Bornato,PERSON,441895a8-230f-476a-945c-ad490728fece
-714,P0719,Raimunda de Corn,PERSON,d9889838-57c6-4a79-a7cb-3c3ef23c6a2e
-715,P0720,Raimunda de Godaria,PERSON,e4d5d58e-14a6-4733-b586-cc049b993b93
-716,P0721,Raimunda de Charitate,PERSON,646efb8c-61f4-4c63-b3a1-f921a3204532
-717,P0722,Raimunda de Matfres,PERSON,d2c9a44b-e5e9-4a62-bde0-e772b26bf136
-718,P0723,Ramunda de Mazerac,PERSON,1f13b146-bdbd-45f7-8158-1d25749a997b
-719,P0724,Raimunda de Vairac,PERSON,c0c437dd-1517-4cd7-ba01-90282752fb34
-720,P0725,Raimunda Salinera,PERSON,88abf01c-cc5f-4d4a-9be2-fb4d7898e814
-721,P0726,Raimundina,PERSON,4fd2c8f1-c567-461c-b3dc-94be6728c2de
-722,P0727,Rainalda,PERSON,a28b54a4-ab68-4897-a318-d4b1cda24452
-723,P0728,Ranerius Arpa,PERSON,c71841ea-a112-4ccb-81b2-729a239d5ea4
-724,P0729,Ranulphus den Golesma,PERSON,8a089ffe-2b41-4a2a-926d-7b09303d7219
-725,P0730,Ranulphus Giraudos,PERSON,4669f308-fbdf-46a5-a2de-32628872e90d
-726,P0731,Raimundus Arpa,PERSON,8ad0baa8-c34b-4840-affd-8bc0bfe708e3
-727,P0732,Ricarda de Lautarz,PERSON,5e4b7ab5-df9d-4e91-ac64-5723bdab137c
-728,P0733,Ricardis,PERSON,03708f35-4332-4ea1-a012-7dfeb3ebf54f
-729,P0734,Ricarda,PERSON,fdc0010b-77d2-412d-9a51-52d07b2f4d6a
-730,P0735,Ricarda,PERSON,8e7f7857-2c31-45ef-87f0-e72b5e34e8f9
-731,P0736,Ricarda,PERSON,a5513fbc-b007-48c4-89f0-bee95f5afa9d
-732,P0737,Ricarda,PERSON,9c533e25-d120-4a01-857a-aa6e96adbc9f
-733,P0738,Ricarda del Brosset,PERSON,244727da-587b-4a61-bc24-9fc3b1004135
-734,P0739,Ricardis Fabrissa del Pruliaco,PERSON,b0b58fd2-9752-4401-bb76-b22370025b6e
-735,P0740,Ricardis Tessendeira,PERSON,8526bec3-607e-4bb5-bbe2-783603928c03
-736,P0741,Rigaldus de Spoli,PERSON,7ef1e724-ad93-46e3-a06a-8ec738e0db96
-737,P0742,Rixendis de Luzegio,PERSON,c4c38e90-e1e0-45ec-a87f-8cfa66a4506a
-738,P0743,Robertus del Porcho,PERSON,2ef52207-53bf-4e38-8e4b-eaea1339286f
-739,P0744,Roms de Sapiac,PERSON,bf462992-0905-4a22-9a4f-7a7dd264503f
-740,P0745,[Son of Roms de Sapiac],PERSON,3cb847ed-92a8-4cb1-827f-64656b51dec6
-741,P0746,[Wife of Roms de Sapiac],PERSON,9a4c3623-3143-4198-afc5-266c64f4f543
-742,P0747,Petrus [Raimundus],PERSON,7ad17144-4c22-42ad-ad1d-f8207c0f5ab1
-743,P0748,S. Geraldi,PERSON,b755eab5-0dec-46e1-9668-93805cd76ab4
-744,P0749,S. [Guillelmus],PERSON,00b1f789-1844-405b-86fc-1de9dd17e908
-745,P0750,Sedeira,PERSON,9ded2128-9e79-43ba-9f6a-8b01543896c8
-746,P0751,Serena,PERSON,62e1d2ac-b50f-4005-bbaa-b73578fc4373
-747,P0752,Sebilia de Lafaia,PERSON,e00ebf11-b01a-4fd9-abe1-abcb5e24af5e
-748,P0753,Sebilia de Lagarda,PERSON,4016d4d8-c28e-46cd-9a77-2f2facc106f7
-749,P0754,Sebilia de Montecuquo,PERSON,a665fe65-8d72-4ebf-91ce-fe6a066fc1d0
-750,P0755,Simeon Agulher,PERSON,e9e2b37d-9fd5-4bce-959c-890734fa8fb1
-751,P0756,Stephana,PERSON,e3900d63-62e2-4e8a-9404-d31a112ebe7f
-752,P0757,Stephana,PERSON,e3372493-3d3b-4e23-9cf8-d3314a06da39
-753,P0758,Stephana,PERSON,62401248-5fe2-4b4f-9401-e452aa030473
-754,P0759,Stephana Donzela,PERSON,edb81e54-4036-4021-a4a2-131527c4ca57
-755,P0760,Stephana Filhola,PERSON,85390b5b-56e1-4e82-8c9d-455342ba595b
-756,P0761,Tolera,PERSON,27647f7c-a630-4056-82b6-14a1df0155e8
-757,P0762,Tholosani,PERSON,802c0aa9-c2dd-43cb-9908-83b884f1d047
-758,P0763,Toset de Noges,PERSON,262c0a5e-da0a-4093-983a-529b2524c334
-759,P0764,Vaus,PERSON,42e619f4-2ffd-4345-935f-b43bf2c70fef
-760,P0765,Vesiada hospitalaria,PERSON,215afab0-cb8e-44a3-a4cf-7c2691537791
-761,P0766,Vigorosus de Labacona,PERSON,1616ce3f-4054-40da-aeca-83665f99c1c6
-762,P0767,Bernardus de Cautio,PERSON,4827694f-ea6a-4cfe-905b-f6e627278b83
-763,P0768,Golesme,PERSON,76e2b47c-4828-44b9-aeda-f83f59101000
-764,P0769,[son of Bertrandus de Braulens],PERSON,adbe5e94-aafb-4f71-86b0-ee74d55f4187
-765,P0770,[sister of Guillemus de Montegalhardo],PERSON,b354eb2d-2b23-4e70-94b0-a49c35209441
-766,P0771,[husband of Guiralda del Riu],PERSON,d037dfdf-1baf-4a7c-9294-a1f2494b376b
-767,P0772,"[father of Guiraldus d'Engolsema, brother of Guillelmus d'Engolesma]",PERSON,567bf30b-9fe1-483b-b1df-e6ebf6c07070
-768,P0773,G. d'Engolesma,PERSON,727c3ddb-5bc8-41a4-8e88-4f3aa858eccf
-769,P0774,[son of Stephana],PERSON,7fa5c8b2-6ef0-4c1e-8983-c144ae5e15c8
-770,P0775,[pediceca of Raimunda],PERSON,86bb22d7-dc1c-4d27-829a-2039461830af
-771,P0776,[puella of Guillelmus de Favars],PERSON,e57172fc-79d2-4cfd-a016-4776a41464e8
-772,P0777,[Man guided to heretication by Petrus de Canasolas],PERSON,9597c16a-f5b2-4c88-ac48-0a48df64fd51
-773,P0778,[wife of Bernardus de Capella],PERSON,238c9794-2769-4453-bcd8-b045e4058e3c
-774,P0779,[son of Bernarda Rubea],PERSON,291c0e2e-4abb-40e6-8c13-4dd6dc18efa0
-775,P0780,[infirm person known to Bernarda Rubea],PERSON,9ff0a75a-59ac-4e0e-a92c-fb0065d47753
-776,P0781,[Husband of Guillelma de Via],PERSON,cf8e3ac6-f486-41ec-afde-70262315964b
-777,P0782,[Mother of Adamarius de La Roca],PERSON,78689282-04ee-4b46-a9ab-3308b6c903c1
-778,C0076,abjuration,CONCEPT,d7738631-00c3-4bf8-9a9d-349cc1c2e64c
-779,C0094,accusation,CONCEPT,f9f22161-c65e-4819-adee-555afac88b19
-780,C0114,Adam (first man),CONCEPT,c9d276db-73b8-483e-afd5-5ff029e2ff4e
-781,C0123,something,CONCEPT,bd005933-b9b1-4657-8e21-168d8aa76fab
-782,C0124,someone,CONCEPT,31bcc84d-c2ae-4e60-a7ce-28450fcc50d0
-783,C0173,soul,CONCEPT,52105745-a79d-4a9b-8fab-ff35a1d8dc2d
-784,C0081,appareillement,CONCEPT,e29d3534-8791-45bc-9870-7f4099fe51b1
-785,C0181,water,CONCEPT,f08a36dc-01c3-4743-bf10-f9aee7330dd8
-786,C0182,holy water,CONCEPT,212a99b5-85d3-487a-a39f-9c63295f7148
-787,C0184,holy water: only water,CONCEPT,061dd1d5-57ab-43de-a9de-972747914f32
-788,C0093,summary of accusation,CONCEPT,15d1b454-1976-441a-8870-9e326246f07f
-789,C0148,Beguin,CONCEPT,9e2b9197-770f-48c8-b9bd-a2b7f10e7287
-790,C0185,blessed,CONCEPT,93cedffe-6e9d-4aa1-b566-bdd2d596bdd6
-791,C0127,property,CONCEPT,6fe4a728-f85c-4552-a931-8aa80fb3be54
-792,C0069,property: all his/her property,CONCEPT,157e9827-f9b6-44be-816c-5455d9cc917e
-793,C0037,the good,CONCEPT,9a56a0a8-a32d-413a-95b5-a916b89ea9ee
-794,C0193,good,CONCEPT,63c1fbc1-e204-4f20-8e6e-6607c6148252
-795,C0163,shoes (pair of),CONCEPT,735a4a99-f740-429e-a31f-ed9d03e8c68b
-796,C0164,shirt,CONCEPT,13f0073f-9e9b-4bd3-95da-6a84de5d1a1b
-797,C0161,canons regular,CONCEPT,aaab5552-b633-421d-aa5b-344b877456d9
-798,C0160,Augustinian Canons Regular,CONCEPT,f3cd15ca-d5fb-42ad-bd84-952e338b7616
-799,C0070,commune of Milan,CONCEPT,521d980b-0421-4d41-891d-8772b26df947
-800,C0098,appearance in court,CONCEPT,95e0d733-6be8-4c17-b4ca-8eb4f646cffd
-801,C0019,believer of the heretics,CONCEPT,c3e7c556-cab4-44ba-9d5b-b3242f5f51fd
-802,C0227,believer [of the heretics],CONCEPT,5edcf55e-f32a-4aad-9d8d-2e7b360b792b
-803,C0092,summary of guilt,CONCEPT,f45471a6-ca3c-4f1b-96dc-3ebc85549495
-804,C0095,denuntiation,CONCEPT,88fd4b7e-8463-4678-9ab5-a30b96a3450a
-805,C0126,depositary of heretics [i.e. Cathars],CONCEPT,69e8e612-8328-44e3-b32a-97330b82580e
-806,C0099,deposition,CONCEPT,3e9e2592-bb17-4f58-bdda-8c7bc7db5ac6
-807,C0110,God the Father,CONCEPT,79a27e90-5a89-47fb-a3fe-4f05a75e9d75
-808,C0196,tell the truth about oneself and others,CONCEPT,5ef009ea-e6db-4947-81d5-fdebedaf14eb
-809,C0068,"tell the truth about oneself and others, both living and dead",CONCEPT,080400f8-2d22-4e68-a3c5-b534ea29b0c7
-810,C0073,deposition,CONCEPT,b65ed7f2-966b-4c94-b4af-97ce62058d48
-811,C0189,teachings/doctrine,CONCEPT,e0e79d57-d5ae-4697-8798-45c514264639
-812,C0169,teachings of the Church,CONCEPT,fbe0568d-3c56-4b65-9ca9-a958e208be7e
-813,C0177,teachings of the Church are worth nothing,CONCEPT,f8fd3dfe-5f65-459d-b2c5-22d1af795645
-814,C0175,teachings of the Church are not profitable to man's soul,CONCEPT,08844af0-e5c7-40ce-9a4d-f73f1448421e
-815,C0054,houses of heretics,CONCEPT,ef87d331-90b7-4cde-9435-84abc0bcdab7
-816,C0053,"houses of heretics: ""houses in which they stayed""",CONCEPT,7cd2bf58-5c66-4ca6-a184-3696f905019c
-817,C0055,"houses of heretics: ""their own houses""",CONCEPT,80c783ab-dc5a-4a1a-9e78-3f687d0c45c8
-818,C0056,"houses of heretics: ""where they stayed publicly""",CONCEPT,c5e28b47-43d7-48d0-a5d9-f3da801d3ccc
-819,C0014,Church,CONCEPT,ae06fd32-26be-4b01-8dae-af025db0a7cb
-820,C0084,churchperson,CONCEPT,f31dbda8-be6f-4a39-b9c3-a65efb77db7e
-821,C0016,churches (buildings),CONCEPT,35f22d7e-343c-4540-82a9-90327aed29c8
-822,C0187,effect,CONCEPT,21131afe-f472-4d08-af77-2770850b5ffe
-823,C0033,almsgiving,CONCEPT,8192ca4b-4cf3-48a4-8aed-4243dfda3afa
-824,C0032,almsgiving: it is good to give alms,CONCEPT,b6aee525-e11f-44b3-8b34-eaf02facc724
-825,C0030,almsgiving: those who give alms to non-heretics do not have merit,CONCEPT,49131ae6-de08-4152-8c30-f56126a36061
-826,C0027,almsgiving: those who give alms to the heretics have merit,CONCEPT,de724e65-4973-4c93-8b57-9d90d7141cdb
-827,C0122,error,CONCEPT,18d480df-5c8d-4769-873d-f7bd4f536a69
-828,C0052,errors,CONCEPT,5af2ac53-d0ce-43e1-9026-32223c559113
-829,C0165,outside the period of grace,CONCEPT,6a900bfb-5d0b-44b2-9e41-8941fb12df88
-830,C0119,beans,CONCEPT,603a3a07-a5ee-490d-9824-de0e0f068a5e
-831,C0011,fact of heresy,CONCEPT,7b26361c-7115-4213-894c-4742f1addc0c
-832,C0007,false witness,CONCEPT,c5945e86-9b4e-4ed5-ad67-73afffcf9cf3
-833,C0171,female,CONCEPT,3eb3f648-6d7c-487c-9538-208796ccf653
-834,C0066,Catholic faith,CONCEPT,b71cfee1-7651-40ec-9fde-5a458f2b2de7
-835,C0111,Son of God,CONCEPT,514bc7d6-9bb6-4e3b-b83c-2d5e4c790efb
-836,C0139,grain,CONCEPT,74f7e321-5442-447f-9733-340b3491cc1f
-837,C0051,heresies,CONCEPT,f318c40b-02b3-4215-bbdb-f85b0290deeb
-838,C0001,heresy,CONCEPT,34ffb61e-44b0-45be-8cb0-32a1d40fb1ff
-839,C0002,heretical depravity,CONCEPT,cbd2a302-a1a5-4f25-ae08-be896b55b5d1
-840,C0082,heretication [Cathar],CONCEPT,b691a25b-b818-4691-9dd0-ae3b1de13610
-841,C0208,heretics,CONCEPT,7fd4ff33-41b9-4d0f-b4a1-8e938de1b836
-842,C0028,heretics [Cathar Good Christians],CONCEPT,91fbadbb-e135-4a27-a741-7f6db9ad647b
-843,C0125,heretics can save,CONCEPT,c6612bc9-8b09-442e-9160-d1da354e99ab
-844,C0057,heretics are good men,CONCEPT,112a6643-063c-4ef7-b29b-f00badea360f
-845,C0026,heretics are in truth and justice,CONCEPT,0297cd54-af95-45d3-be56-08bde8d2f2e4
-846,C0029,vested heretics,CONCEPT,636e2a4c-0f4f-46a7-9c28-dfc098f5a39d
-847,C0067,persecute heretics,CONCEPT,1c45611b-e1b4-47fc-99f7-c43181e8ba66
-848,C0006,heretic,CONCEPT,bead0eec-7120-42ca-a07f-4d00fb02e093
-849,C0132,heretic [Cathar Good Christian],CONCEPT,5ccad445-ec11-4088-a419-dfd430c5816b
-850,C0143,heretic perfect,CONCEPT,9e804ed0-84aa-4f8a-b4b5-2807555ad717
-851,C0022,vested heretic,CONCEPT,f058842f-99b4-497e-bb82-f8c8ab009908
-852,C0036,good: one should do good,CONCEPT,2477d1a5-06d2-4ce3-9424-fdcc10999b84
-853,C0089,holy images,CONCEPT,8f46d3c4-4949-42e5-b348-d137bb9c2683
-854,C0101,images of saints,CONCEPT,eb339c6f-10b3-4ab5-8527-189486321dab
-855,C0085,indulgence,CONCEPT,8fdeb02d-cad0-4161-be12-6b0ba8c794ff
-856,C0020,inquisition,CONCEPT,77491161-6ac0-45c6-b572-b4a136a0ac12
-857,C0003,inquisition of heretical depravity,CONCEPT,16c87e21-854c-4713-be65-7557cb28d204
-858,C0146,inquisitor [in general],CONCEPT,cd5f11c1-fb79-4f2f-898c-5b6f252289d7
-859,C0121,inquisitor [of heretical depravity],CONCEPT,c9fcb164-208a-4f15-bf54-71ce95a0ae9d
-860,C0072,inquisitor of heretical depravity,CONCEPT,e04acbd2-b0f1-413a-92ab-6961df903ad5
-861,C0060,inquisitor of heretics,CONCEPT,17992bd7-4e58-4e2f-bcef-2ebd30071e84
-862,C0010,inquisitors of heretical depravity,CONCEPT,531cecf5-9f0a-4110-b087-57aa91de4b6b
-863,C0078,document (notarial),CONCEPT,ab50bd23-0242-478a-a805-a24edf2c835e
-864,C0097,deposition,CONCEPT,b0a45798-eb57-46c6-a021-e88a492a33ff
-865,C0074,deposition,CONCEPT,728b3ac9-a0e1-41c7-8796-f6c97a166744
-866,C0172,male,CONCEPT,d801b15a-89fd-4d5e-9dbe-19b7ac09ea2c
-867,C0035,lies,CONCEPT,48f13e3e-b9f3-44cd-8698-5b69c80ba55e
-868,C0034,lies: one must not lie,CONCEPT,50e05da4-f5d8-408c-86ac-1bf97e0f0ee0
-869,C0141,knight,CONCEPT,39faf389-4a71-4039-a729-82708f4459ba
-870,C0109,miracles,CONCEPT,50ce5490-bb10-43d4-806d-19e6b52a2cf4
-871,C0137,gift,CONCEPT,5955fc41-7ac2-4527-b895-dbc7f901ae8a
-872,C0138,little gift,CONCEPT,31fd4380-c962-489a-b4ba-4c93321c6902
-873,C0105,nobody,CONCEPT,a9c9bbbe-96e2-4fb4-8387-119c8db9c611
-874,C0233,whoever / anybody,CONCEPT,a8f717a2-2cd1-4966-8889-c49c02e2c5d5
-875,C0104,nothing,CONCEPT,b51e06f3-d8b5-4187-9b90-245ccde05fbc
-876,C0216,more,CONCEPT,844eb187-6060-4133-9d4b-35054cacbbb2
-877,C0106,worth nothing,CONCEPT,00758e9e-2103-4fc7-9865-e90720ecd57b
-878,C0190,not,CONCEPT,4ed41704-3fb9-45e0-b0be-3b0cedbc50ac
-879,C0170,not profitable,CONCEPT,5b7fd1db-9aa9-4555-a4a9-8aeaf239df93
-880,C0168,not profitable to the soul,CONCEPT,2bbee04a-eaf6-4b0c-9244-ae1f20c89405
-881,C0062,notary,CONCEPT,8b1e8f22-7fe0-49a5-87db-3d743c9a4bab
-882,C0063,public notary,CONCEPT,fad6bd7c-1f3f-41be-b6a6-8077d5ab95c3
-883,C0077,obligation,CONCEPT,d22fa6cb-ddff-4ec0-8c8c-76ac182513b9
-884,C0088,offering,CONCEPT,0598fd21-8f0a-4306-a180-20e1fe8c9575
-885,C0086,offerings made before the images,CONCEPT,eac85e74-3e0d-4f3c-b64c-5fb85f629bf3
-886,C0131,office [of inquisition of heretical depravity],CONCEPT,eea264a4-c95d-4014-bf3d-89d35bb455a7
-887,C0004,office of inquisition,CONCEPT,bfa56791-4354-4ae8-8490-44533b9693a3
-888,C0005,office of inquisition of heretical depravity,CONCEPT,df9f69ee-1939-474a-953b-4be1534031cd
-889,C0031,prayer,CONCEPT,56637e39-462d-4de9-a4f4-29503ab5d7a9
-890,C0023,prayer: no believer should pray to God,CONCEPT,49e75658-2465-48d2-b235-e372755165c9
-891,C0115,"prayer: one should pray only to God, not the saints",CONCEPT,b386327f-d23a-429e-acf3-b851de20c5f2
-892,C0025,prayer: only heretics can pray Pater noster,CONCEPT,30fc0f33-1ae8-4b92-89f3-814e8175ebc1
-893,C0162,Order of Carthusians,CONCEPT,24bd5735-1132-4d57-a2de-8ec05024fa5c
-894,C0150,Order of Cistercians,CONCEPT,aec6e2d2-d478-462e-8e31-d36128a6fbe4
-895,C0149,Order of Carmelites,CONCEPT,c26026f0-8cab-4909-8453-7e823b98eeb9
-896,C0103,Order of Saint John (Knights Hospitaller),CONCEPT,91dd8ce0-2dd9-43aa-8e74-3c30e999bf9c
-897,C0140,Order of Friars Minor (Franciscans),CONCEPT,d63cc40d-38fb-42a3-bc38-08cb10b07e80
-898,C0155,Order of Friars of Saint Mary,CONCEPT,8a91394a-74fa-4857-996b-5e9ab01b8025
-899,C0154,Order of Hermits,CONCEPT,9b37180a-96d7-4bbf-9f0c-06db0b87f7a0
-900,C0157,Order of Humiliati,CONCEPT,96dc6426-a678-4c09-b884-da1798e0c014
-901,C0156,Knights of Saint Mary,CONCEPT,6f7ac1bc-c49c-4ec1-813c-95cffaefb406
-902,C0153,Order of Penance,CONCEPT,5e42506f-288a-40ea-bf8b-2a92d7e9603b
-903,C0158,Order of Praemonstratensians,CONCEPT,102ffc5e-a163-4439-9989-fd4fa746efa7
-904,C0059,Order of Preachers (Dominicans),CONCEPT,a2151fd3-df84-4340-818d-d09b2604c640
-905,C0151,Augustinian Friars,CONCEPT,00d6c382-2de2-4344-91ba-6b51f7191ec1
-906,C0159,Order of saint Benedict,CONCEPT,5cc280e7-fdc7-4b7a-a7c6-cddb82295a35
-907,C0152,Order of Servites,CONCEPT,c5c50167-e803-4dc3-a790-bb0220e48402
-908,C0079,kiss of peace [Cathar],CONCEPT,1c36dd8e-2618-4f64-a208-7865b4bc7918
-909,C0120,bread,CONCEPT,2e2c99db-313f-4ff9-a63a-468bfc74ad16
-910,C0136,blessed bread,CONCEPT,13efd28f-4161-4f4e-99d8-576a866db375
-911,C0183,holy bread: only bread,CONCEPT,a2c25442-cb3b-4753-8d6e-92b5439b8d58
-912,C0128,money,CONCEPT,a1730345-c8e4-4cc3-9645-a78abb091513
-913,C0198,imperial pounds???,CONCEPT,0033608d-090d-4942-b433-695c84443bb2
-914,C0129,money: loan,CONCEPT,379f7bc8-1131-4757-8078-128cc43ce2a6
-915,C0038,penalty,CONCEPT,33095199-7d42-40d7-be7d-a810335ef0d2
-916,C0044,penalty: prison (type undefined),CONCEPT,8b148c1b-c985-419f-8422-cb9142c54386
-917,C0224,penalty: prison (type undefined),CONCEPT,43c8e983-bc70-4098-80bc-efdb35788d3a
-918,C0039,penalty: crosses,CONCEPT,b19976b5-a9f1-4c2b-971d-b8340b66741c
-919,C0041,"penalty: crosses (double, i.e. two on each side)",CONCEPT,bfabbb8a-ba6d-41b8-9077-fcbd33602f0b
-920,C0040,"penalty: crosses (simple, i.e. one on each side)",CONCEPT,0a58c8b2-9bff-4ec2-b4d6-da9031a7c9b5
-921,C0071,"penalty: cross (singular, front side only)",CONCEPT,b5759702-d32a-418c-ab08-86cf9e3115b9
-922,C0134,"punishment: cross (1 palm in length, over the shoulders)",CONCEPT,978c9b8d-f41b-4ef3-9b6b-5924c4d085e2
-923,C0135,"punishment: cross (2 palms in length, two digits wide, front side)",CONCEPT,fda4bcb2-4cb7-45d8-9f65-0196fdba3c16
-924,C0142,punishment: two crosses,CONCEPT,2de8ed20-2f41-4a80-b3a0-308e9b3c717b
-925,C0048,penalty: exhumed,CONCEPT,1333347c-2116-4ad0-a264-e7e123803b80
-926,C0049,penalty: exhumed and burnt,CONCEPT,9c0eba87-b09e-4adc-a4d6-631d8f36be57
-927,C0050,penalty: [red] tongues,CONCEPT,0a0fe2ee-4397-462c-ac4f-6709b5a9ce0d
-928,C0133,punishment: penitential stay (in a location),CONCEPT,92633f9e-a6b7-402b-bb0c-e97a889fa843
-929,C0045,penalty: open prison,CONCEPT,e546d071-b597-4fd2-8eb4-0cc4dd903976
-930,C0046,penalty: solitary imprisonment,CONCEPT,230c7b46-bc29-4ee7-ba47-a85cc0441a74
-931,C0058,penalty: maintain a pauper,CONCEPT,cbf34429-8b55-4490-bf33-a5ed436e0bd7
-932,C0042,penalty: pilgrimage (or otherwise unstated penitential journey),CONCEPT,9ea3bbe6-5027-478e-870e-4d4f2344eb0b
-933,C0047,penalty: released to the secular arm,CONCEPT,50ad3a34-4e34-48fe-84b3-39ebd98e63e3
-934,C0080,penalty: maintain a priest,CONCEPT,8bd2ee55-ae5e-4a7e-a3b7-573400525480
-935,C0043,penalty: visitation,CONCEPT,f4d0ba8d-64e3-4436-9da4-689d8c1890da
-936,C0087,punishments,CONCEPT,a7f6dd2d-f965-4f43-be19-568bde036136
-937,C0145,penance,CONCEPT,bfd0de42-f1f8-4bbe-9339-f9038a081a73
-938,C0017,pilgrimages,CONCEPT,bf0662a2-88d8-472d-b930-7662bcf538bb
-939,C0180,,CONCEPT,0bffb5ee-edda-44ba-8383-b17207d74fa5
-940,C0130,prescript,CONCEPT,bae8275e-41b7-489f-8d64-6876c4469481
-941,C0061,preaching,CONCEPT,4eca58b2-7744-4e34-b071-1bdff882685f
-942,C0100,presentation of witnesses (deponents against sb),CONCEPT,7424b3d1-fedf-4ade-8177-8b32e76d3265
-943,C0191,profitable,CONCEPT,8a403a56-0fd6-4d46-9e18-70b83f1bbf55
-944,C0096,response to the accusation,CONCEPT,a39cecb9-5a28-4c75-840c-687ce4247c43
-945,C0194,priest,CONCEPT,fb8e8c22-7c38-44a6-9650-8efc9af90e9f
-946,C0108,priest: they do not have any special power above that of ordinary laypeople,CONCEPT,d095dae1-ad3f-4f22-9b43-962f483768b2
-947,C0018,sacraments,CONCEPT,fe7ee87d-83f8-41d1-beef-3dfd0d33f4ef
-948,C0229,sacrament,CONCEPT,244c5430-d9e0-4192-8b7f-bc92f00a6471
-949,C0176,sacraments are not profitable,CONCEPT,cf5cb3c6-5785-4b7c-960b-b3f59801c02d
-950,C0174,sacraments are not profitable to man's soul,CONCEPT,615427f8-a9c1-4bbe-88dc-bd4d63461616
-951,C0090,sacrament of the altar,CONCEPT,1e4b64d4-cd63-4f1f-8763-bc6130f2508f
-952,C0091,sacrament of the altar: is only bread,CONCEPT,fdfcc8d5-1922-4d0f-9ce4-97d20646ca28
-953,C0107,sacrament of penance,CONCEPT,0c09547a-6fab-447f-b9c0-64f8b143cb72
-954,C0116,sacrament of penance: nothing worth,CONCEPT,621bda49-777c-472d-8ad0-9dd73f1e9e51
-955,C0015,holy Church,CONCEPT,48156314-2260-4fcd-aec1-093b89e9939a
-956,C0102,saints,CONCEPT,827bfcbe-85a8-422c-b412-80067566e309
-957,C0075,sentence,CONCEPT,8857eea2-9916-4e72-80aa-0fefd975bc42
-958,C0013,seven sacraments,CONCEPT,0708f24e-70f7-4c87-9b5d-a02a6efaf52d
-959,C0117,seven sacraments: are nothing worth,CONCEPT,094da645-26c0-4c29-9968-c0f656def220
-960,C0195,sir,CONCEPT,dc4ecad0-8aa0-46f9-b29e-812546d972d7
-961,C0188,without,CONCEPT,d19cd40d-08dd-4072-aedd-01736314ab02
-962,C0167,without effect/of no effect,CONCEPT,41318371-6ea0-4f1e-8413-adbdd04d39bd
-963,C0186,only,CONCEPT,fd898969-b9aa-4552-b2c3-6e5a626847d3
-964,C0112,Holy Spirit,CONCEPT,308f1a0a-1302-4dd5-93da-77c162fa0072
-965,C0065,public notary,CONCEPT,5329994d-c5f9-499c-b088-436a537e8703
-966,C0064,notary,CONCEPT,42f50be9-4389-444a-aba1-ed7fdafbe8c6
-967,C0166,period of grace,CONCEPT,9a434fb6-1d2c-469a-bbc5-88bc8f5ca5d0
-968,C0012,witness [i.e. deponent],CONCEPT,b68def71-fa37-44b1-b6b6-1b641afa98d0
-969,C0144,witness [i.e. assessor],CONCEPT,1bc63d48-f269-42aa-b5cd-e22d9823d470
-970,C0021,fear,CONCEPT,44c30311-40b4-4e0d-9860-c37f46b2b038
-971,C0113,Holy Trinity,CONCEPT,a1a46285-e5f2-4924-a58d-39d185e163b9
-972,C0083,Waldensians,CONCEPT,14963563-9f69-4fec-b37f-44e054847aae
-973,C0008,Waldensian,CONCEPT,f92542cd-7c5f-4608-86b4-22e48ba52b01
-974,C0009,Waldensianism,CONCEPT,a0daed8b-8e9b-4c6e-9ad9-0d6990522adc
-975,C0192,veneration,CONCEPT,ef07e924-7d06-4d1b-85a5-a090fdad3a2a
-976,C0178,worship of the saints,CONCEPT,924a1491-861d-4dea-b1e1-fa0646ab8b81
-977,C0179,worship of the saints: not profitable to the soul,CONCEPT,84396ee7-13fa-4d9d-92cc-31c54734d0fc
-978,C0197,truth,CONCEPT,d18b43d7-1314-49c8-9649-c6b6a0b241c2
-979,C0118,wine,CONCEPT,0dced85c-670c-409c-9184-284f903e657a
-980,C0147,guarantor,CONCEPT,26b616b2-dae6-4dd1-8c40-8655c1d845dd
-981,C0199,sacrament of matrimony,CONCEPT,99159a2f-b508-43f5-bfe3-c488ec8b7e5f
-982,C0200,sacrament of baptism,CONCEPT,ab13c49b-24b6-4f5e-97a4-ab5f2989e0b0
-983,C0201,sacrament of confirmation,CONCEPT,ca23fa7c-bd97-48fb-89f3-459ca292a8a7
-984,C0202,sacrament of baptism: nothing worth,CONCEPT,b6d6d58b-a8e1-4eb4-b650-487ec237350a
-985,C0203,sacrament of confirmation: without effect,CONCEPT,314ec0eb-5adf-4d3c-a7aa-874affece9e6
-986,C0204,marriage: not necessary to solemnise in the church,CONCEPT,b7a89303-8e64-4c3d-b976-9b53cf93f560
-987,C0205,confession: only to God,CONCEPT,6f02dbc0-495f-4885-b3cd-6f2505e6fd94
-988,C0206,confession: to good priests it is good and profitable,CONCEPT,84cc9e20-f084-4749-8fc5-4009828fbf01
-989,C0207,confession: to bad priests it is not good and not profitable,CONCEPT,8ef3328e-b1fd-4c9f-be5e-fb6a07c03464
-990,C0209,evangelist,CONCEPT,3439d442-e844-48f3-bb04-30d35c309b83
-991,C0210,sacrament of matrimony: no effect,CONCEPT,453f03ae-6248-47e9-b4bc-1d99802f0114
-992,C0211,sacrament of extreme unction,CONCEPT,9d70037b-d2bf-4cfd-a754-2df634fa3c1f
-993,C0212,sacrament of extreme unction: worth nothing,CONCEPT,dd24311c-b71a-461e-9af8-50ef29effd40
-994,C0213,cap / bonnet,CONCEPT,a9d96811-ce26-45c9-8ef1-2da177a98637
-995,C0214,little cap / bonnet,CONCEPT,cf39c7f5-4ce2-402d-9606-cb990489723d
-996,C0215,Waldensians are good men,CONCEPT,b2635aae-6597-4bde-8b7a-6e852c0f5589
-997,C0217,fish,CONCEPT,70b0826e-7806-4efc-853e-395f683cd94a
-998,C0218,death,CONCEPT,3ae11f26-6801-4369-8516-517f9edc6135
-999,C0219,pilgrimages: waste of money,CONCEPT,ae5b44de-9895-4e27-a6a1-a01059761c91
-1000,C0220,purgatory,CONCEPT,a211ce79-2906-4e4c-8406-056167c3e2e8
-1001,C0221,prayers of purgatory,CONCEPT,1a0c8f45-2041-4ffa-b15f-c4d3dc6a62aa
-1002,C0222,purgatory: doesn't exist,CONCEPT,333b13dd-a9b5-4796-8f58-9992a8d88293
-1003,C0223,location: where,CONCEPT,205b3b93-535c-4b47-8550-318b11fee450
-1004,C0225,men,CONCEPT,33b61ef3-a4e7-4021-828a-44aef7933f3d
-1005,C0226,women,CONCEPT,9989e668-3e00-4d9c-9247-cb8df7c72916
-1006,C0228,depositary,CONCEPT,f647786a-5b89-40f2-95af-ef3efed649ad
-1007,C0230,location: same,CONCEPT,ffae4f78-90ad-4a48-9bb1-080ed88d4013
-1008,C0231,only heretics can save,CONCEPT,6613a5c9-b922-4fb3-a431-37c13eac2d77
-1009,C0232,Christmas,CONCEPT,eb98c38d-aa68-4c36-a55e-ca2bc765e514
-1010,C0234,sex,CONCEPT,c8cf613e-033b-4761-81a7-c91a8372c5a5
-1011,C0235,idolatry,CONCEPT,9b80a003-5fe4-47f2-9ba6-f1b0f52d1ff8
-1012,C0236,worship of saints: only idolatry,CONCEPT,77d8836f-2846-4b63-91da-1c48160da9d5
-1013,C0237,pilgrimages: only idolatry,CONCEPT,0fc8220f-48ec-4671-a46f-e8f8c22261b6
-1014,C0238,offerings made before the images: waste of money,CONCEPT,9de413fa-c4c9-4057-aa01-b6c3781ed639
-1015,C0239,letter / letters,CONCEPT,7c16e804-39ab-41f6-91f3-28bb44d3ddac
-1016,C0240,"worship of saints: not to be done in church, saints are only in heaven",CONCEPT,93ed63a0-3536-46a2-8f35-d61fad5f1035
-1017,C0241,heaven,CONCEPT,1753d3fc-9116-4efe-b9b9-07a85adcb57d
-1018,C0242,receiver of heretics [Cathar Good Christians],CONCEPT,ebe36d0b-e052-40d0-89ec-fc9d628a47c0
-1019,C0243,host of heretics [Cathar Good Christians],CONCEPT,429ecb22-8213-4805-a50c-18fd9a3ccfc4
-1020,C0244,guide of heretics [Cathar Good Christians],CONCEPT,288aa04f-f5d2-4bc0-8e6e-bd7e8f1f1021
-1021,C0245,faidit (i.e. lord banished during the Albigensian crusade),CONCEPT,168aecd7-0017-47e4-819c-95bbb36538bf
-1022,C0246,messenger of heretics [Cathar Good Christians],CONCEPT,f4cffa13-eb63-43a0-b548-c8157f4535b1
-1023,C0247,servant,CONCEPT,1d8c753f-65cd-494f-898e-364826c13097
-1024,C0248,handmaiden,CONCEPT,7101fbe9-8330-4c26-92e0-a22eacf3117c
-1025,C0249,God: is only in heaven,CONCEPT,226da3b6-44bb-483f-9de5-d99835efb27a
-1026,C0250,marriage / matrimony,CONCEPT,ca4cfc88-b9f0-41ac-a5a9-a203128561ec
-1027,C0251,baptism,CONCEPT,027ebb20-2814-42d3-ba0c-a3f1a4df493f
-1028,C0252,confirmation,CONCEPT,1fa6b3fe-390a-41f1-8ae8-b15a204d4b9c
-1029,C0253,receiver (i.e. houser),CONCEPT,2663b72b-fc1c-41b6-a584-5087d157099f
-1030,C0254,host,CONCEPT,34e74ef2-69a2-4e02-a4a3-52cabfb461dc
-1031,C0255,guide,CONCEPT,e5aa88f6-cfc1-48d1-881b-32e2c2eec120
-1032,C0256,messenger,CONCEPT,bbf93e47-0852-4ce4-b013-f46926e4afe2
-1033,C0257,receiver [of heretics - Cathar Good Christians],CONCEPT,297eaa29-f2b7-4e4b-a789-05916be40bab
-1034,C0258,host [of heretics - Cathar Good Christians],CONCEPT,01315652-7629-407a-9419-19b81a18d7b8
-1035,C0259,guide [of heretics - Cathar Good Christians],CONCEPT,3c4fdcdb-5719-4e84-a34b-b363fdfa467f
-1036,C0260,messenger [of heretics - Cathar Good Christians],CONCEPT,15ad1f50-f8e0-4daf-beca-58c3479ef227
-1037,C0261,oath,CONCEPT,a32440cc-35ec-4ea6-be40-9b90e324503b
-1038,C0262,oath: one must not swear,CONCEPT,80d2d6bc-9eeb-4d05-8962-b415790ad100
-1039,C0263,the gospel,CONCEPT,4220dbd0-d40e-4c20-942b-c2ca1c294b37
-1040,C0264,host of Valdensians,CONCEPT,dccd84a1-20de-43be-9df4-34bd98e2731e
-1041,C0265,host [of Valdensians],CONCEPT,17bbe40a-7e84-4748-a2ef-bc332e9732ce
-1042,C0266,leek,CONCEPT,afe963bd-6514-45f7-97b7-5a551ac84950
-1043,C0267,wheat,CONCEPT,c8bfe4fa-f70d-4cff-b813-50c6a900c9dc
-1044,C0268,heretics are the better men of the world,CONCEPT,308f3f91-ed07-4666-9ba2-43101ce59043
-1045,C0269,comestibles,CONCEPT,e074a062-0a4b-462c-82d9-b1cb974c7180
-1046,C0270,food,CONCEPT,103b44cd-9a69-4168-99d8-214af23c36d0
-1047,C0271,drink,CONCEPT,fb006f5f-5349-4acd-852f-652ac5fd2214
-1048,C0272,believers of the heretics,CONCEPT,44f8b398-6669-4116-9d4d-98597e934372
-1049,C0273,believers [of the heretics],CONCEPT,8dc44229-b7a3-42b2-b59d-1508fb9c9ce0
-1050,C0274,nuts,CONCEPT,786f05e7-17f3-4b42-a7cb-80efd0edcb45
-1051,C0275,infirmity / illness,CONCEPT,bf53b9fa-add1-47c3-9a97-c85188fbf6cd
-1052,C0276,priesthood,CONCEPT,c59bead9-2525-4103-8498-e2a013392acd
-1053,L0001,Gourdon,LOCATION,b3f5ac17-a621-4eb2-8cba-e8169bf15a2a
-1054,L0002,Agen,LOCATION,d338070b-9c39-4812-aafc-594328ba1808
-1055,L0003,Albi,LOCATION,7f4716c0-46d8-4de0-a6da-d2b55aceed85
-1056,L0004,Almont,LOCATION,ead348bc-8c8d-4694-b20c-e7d1a0f3fd97
-1057,L0005,Aussac,LOCATION,218f1ecb-6696-4cfa-ad98-207408c7be45
-1058,L0006,Aussac,LOCATION,14e41b8c-64b1-49e5-b83d-9af091e17656
-1059,L0007,Badafol,LOCATION,b58297f3-e87d-4a8d-9794-92ac670d307b
-1060,L0008,Beaucaire,LOCATION,d5108649-f2d7-4773-8283-596bbcd1289f
-1061,L0009,Belbèse,LOCATION,00f3ba45-99e7-4eb6-9d2f-6010a1e28b80
-1062,L0010,Belcastel,LOCATION,41301ae1-dd36-418b-8f8e-baf7a371d10f
-1063,L0011,Belfort,LOCATION,78978d74-6731-42c8-a86f-4d90bdae2462
-1064,L0012,Belvèse,LOCATION,d2d05dbe-2385-4828-984f-8261ff8553d8
-1065,L0013,Bergogne,LOCATION,d3246977-16fb-4d46-9726-55c49faf988d
-1066,L0014,Bernadi,LOCATION,0d13d890-8488-4fde-bc7f-9110ededbe1a
-1067,L0015,Bouloc,LOCATION,a27cd4aa-7bf1-4372-98af-a69e3b17c77f
-1068,L0016,Le Bourg,LOCATION,7079653c-4561-479d-b240-fcffccb25db1
-1069,L0017,Bournac,LOCATION,e21d4b65-bd5f-48ea-9548-b14381a0f053
-1070,L0018,Lhospitalet,LOCATION,894d10d5-3cb3-45a5-beae-35947bb5d35d
-1071,L0019,Lasmartres,LOCATION,4d75a5ce-746c-4b09-b601-09d0652285f4
-1072,L0020,Bérens,LOCATION,dbb9d528-2cb1-4d96-a710-81115e25eb55
-1073,L0021,Brixol,LOCATION,57d89a06-b75c-458c-9bc3-b0b6242a5b9a
-1074,L0022,Gourdon region,LOCATION,542beb73-eed8-4d4d-8d66-c969ad4392fc
-1075,L0023,Castle of Bertrandus de Gordonio,LOCATION,6b3375c4-a2bf-4d6c-8a98-1e8ae7cfab34
-1076,L0024,House of Bertrandus de Gordonio,LOCATION,5cef046f-d80d-4774-8656-194047e20a04
-1077,L0025,Le Puy-en-Velay,LOCATION,709c5eee-dab6-4b4c-9bd9-ea857e715e26
-1078,L0026,Saint-Gilles abbey,LOCATION,5f93ae8c-0e38-43fb-a5a7-3f9b5082f9be
-1079,L0027,Santiago de Compostela,LOCATION,5e22c0d0-71d7-45ce-8f42-755c0671e6fa
-1080,L0028,Notre Dame du Puy-en-Velay cathedral,LOCATION,0a7b6f59-73aa-4cb4-b970-c8cb9c1fbb67
-1081,L0029,Saint-Gilles,LOCATION,61677965-c177-459c-b1a2-980f977818d2
-1082,L0030,Santiago de Compostela cathedral,LOCATION,b4d2e6b2-4ca9-400d-b9ee-ed79f4ccdf4e
-1083,L0031,Ovideo,LOCATION,e7cd013c-6e1a-4e8b-83aa-bd46861e74b0
-1084,L0032,San Salvador cathedral,LOCATION,35c91e7b-275c-4cf4-9bc3-7f25370dc9c0
-1085,L0033,Limoges,LOCATION,d6ef343e-76b4-4864-a732-e6d742658d5b
-1086,L0034,Saint-Martial abbey,LOCATION,420dab4c-a233-41d5-a39f-1eb4f318ba49
-1087,L0035,Saint-Léonard-de-Noblat,LOCATION,2e1a4fb8-a3e2-4789-9ac3-36d03c1a0cfc
-1088,L0036,Saint-Léonard-de-Noblat abbey,LOCATION,0556268b-06a4-432b-a929-122ffdaf6012
-1089,L0037,Saint-Denis,LOCATION,8294c0fc-8bca-4626-8d9f-8aebe1bf6366
-1090,L0038,Saint-Denis abbey,LOCATION,52cf7923-51b5-4dce-88ba-6d609d769697
-1091,L0039,Canturbury,LOCATION,7b69e65a-044f-4ffc-92ed-00d5781b2afc
-1092,L0040,"Shrine of Saint Thomas, Canturbury Cathedral",LOCATION,f1b5a503-5d4e-45f8-88bc-98ef0a36ca48
-1093,L0041,Constantinople,LOCATION,1292791e-04ee-4de9-8472-efb2646fd5da
-1094,L0042,House of Guillelmus de Montegalhardo,LOCATION,b60c1073-15c8-45fc-8254-23d5f5e9f1f2
-1095,L0043,House of Alazaicis de Laquiebra,LOCATION,d3ab35ee-3b83-4ee9-a4b5-629fc531e19d
-1096,L0044,House of Guillelmus Peregrini,LOCATION,20d83ee8-a29d-499a-920f-a32b85900b06
-1097,L0045,Barn of Petrus Peregrini,LOCATION,0f71d6a0-c32c-4328-bdde-c4c9b16b2c9b
-1098,L0046,House of Petrus Peregrini,LOCATION,1a257bfe-8cdd-4f8c-8cf6-9b0ad1502524
-1099,L0047,House of en Rochas,LOCATION,59eab5a2-91e4-4443-bb43-b177cfeeb945
-1100,L0048,House of Bernarda and Guillermus Cassa,LOCATION,e94150e7-cae2-4e13-bade-54c87030e340
-1101,L0049,House of Coxunta,LOCATION,0158537e-1bf8-4061-ab56-dad275c923d0
-1102,L0050,House of Bertrandus de Braulens,LOCATION,65df05f4-34b0-4a5f-b686-dad88a581227
-1103,L0051,House of Gaubert de Mosati,LOCATION,000a94bb-4f94-4cfc-a891-6b7a44008e43
-1104,L0052,House of Guillelma da Vina,LOCATION,be4e565f-7e24-4dfe-bf2d-6647aba5959b
-1105,L0053,House of Guillelmus de Naperier,LOCATION,a3d1b2e7-6b1a-49bd-9a06-6edcdc8560fa
-1106,L0054,"""Batut"" of Petrus de Lacomba",LOCATION,79ca92da-51a1-4371-824e-9d5ee585f644
-1107,L0055,House of Gaubert Gautier,LOCATION,706404fb-b16e-4299-8255-40fe84114e37
-1108,L0056,House of Stephana,LOCATION,75169d35-0f94-496e-9dab-997fde2765a2
-1109,L0057,House of Ricarda,LOCATION,126152fb-b9d6-473f-8f77-4b8939ce7a24
-1110,L0058,House of Amalvinus de Fenelor,LOCATION,5da074b0-83bf-4e60-9df6-e947bbfae39e
-1111,L0059,Milhac,LOCATION,d4aeff01-4b24-473c-82c7-481f373d275f
-1112,L0060,Castle of Fortanerius de Gordonio,LOCATION,b1e1d7a9-be5c-4588-90ea-f359c0eacad0
-1113,L0061,Toulouse,LOCATION,778a8b28-ecbe-4309-861b-a34a62dda7a6
-1114,L0062,"House of Raimiunda, widow of Ranulphus de Golema",LOCATION,74742d8e-fea8-4647-8c7d-a5be40d76eac
-1115,L0063,House of Bernardus Bonaldi,LOCATION,1a3a42bb-0d47-4439-9e90-901fc8c7aae7
-1116,L0064,House of Guillelmus de Eisses,LOCATION,ceacd234-e7ce-4a41-bf78-ce179deabe4d
-1117,L0065,House of Guillelmus de Favars,LOCATION,8edfc4ba-9350-4d8c-8986-2ab9f4039f13
-1118,L0066,House of Luxia,LOCATION,cee298d4-d0ce-4410-a9e2-18bc7ecbf1a6
-1119,L0067,House of Poncius Archaubal,LOCATION,273bf508-5171-4fc8-8378-46dc9745cd6c
-1120,L0068,House of Stephanus de la Comba,LOCATION,ac880306-ad17-499f-9655-8c930a7d4a98
-1121,L0069,House of Na Guias,LOCATION,f3ad764f-c7c7-41b7-bf72-18842cb92d84
-1122,L0070,"House of Petrona, wife of Raimundus Joannis",LOCATION,6a146a55-11d5-4eec-a65b-60b45f34e45d
-1123,L0071,House of Bernarda Rubea,LOCATION,0fda5af6-02f7-4c9a-a873-e26984313756
-1124,L0072,"House of infirm person, known to Bernarda Rubea",LOCATION,fffc52cf-de6c-4dcd-9888-62de2e8e2cc4
-1125,L0073,House of Guillelma de Via,LOCATION,90ac296f-457c-48bf-8291-ea4202ada2df
-1126,L0074,House of Guillelmus de Hospital,LOCATION,60428f50-8db9-47ae-add8-dda70b129e48
-1127,L0075,Villeneuve (quarter of Gourdon),LOCATION,6877cf54-4761-443a-aba4-440318867cd8
-1128,L0076,La Riviere,LOCATION,701604d9-dc0f-4594-b8f9-eeca1549fd5c
-1129,L0077,House of Geralda de Riberia,LOCATION,56a83dfd-a923-401f-b244-1c3ca3caf075
-1130,O0001,100 solidi Ranulphi den Golesma,OBJECT,b5204b99-f548-4aba-b6ce-dbb63b2f5806
+0,P0001,Ademarius Civada,PERSON,2190f8f5-a438-42a5-906c-0539bb4c440e
+1,P0002,Ademarius de La Roca,PERSON,1e8b7f4b-8dfa-43f8-b5a4-5262e614fb13
+2,P0003,Ademarius de Ladeumia,PERSON,51e00cf4-0f76-4b75-8926-049e2f342fdd
+3,P0004,Ademarius Lanterii,PERSON,4897a7e2-1c06-4bb7-9324-7a503b6f0371
+4,P0005,Ademarus Ramundi,PERSON,309d1d4e-a8ef-466a-820c-fa0b8249e425
+5,P0006,Agnes,PERSON,91492f48-347c-4a7b-8a1b-d2147589e468
+6,P0007,Aimericus Golesma de Milhac,PERSON,2405d98a-1d36-4f0b-a514-960d72a52523
+7,P0008,Aladasia d'Engolesme,PERSON,e56135d4-3da6-493a-a0af-d87921a0cfab
+8,P0009,Alaitz,PERSON,91322cbe-4162-46ac-9463-22ab929ce148
+9,P0010,Alaix,PERSON,05700b2c-7962-4cd7-8204-1898f876d99c
+10,P0011,Alazaisia,PERSON,dda7212b-dce3-4742-bca7-e2d8aa65c6a2
+11,P0012,Alazais Blanqua,PERSON,ddd96a0e-8141-4866-884a-997342ed0aee
+12,P0013,Alazaicis de Laquiebra,PERSON,96e7482f-9cea-4c9c-b820-3eea9d120280
+13,P0014,Algaia,PERSON,f44d5227-87e8-45c0-be6e-a5f6bf287a10
+14,P0015,Amalvinus de Fenelor,PERSON,e2144773-52c0-4a15-a3c2-1a9a00e1624e
+15,P0017,Amelia,PERSON,631294d2-8ed1-4aa5-935d-9a0ef6489665
+16,P0018,Amelius Boichel,PERSON,3dbdb2fb-a248-4ed4-b504-4d7dc9847232
+17,P0019,Angelica,PERSON,ffd0a64d-f314-45db-adc1-f42390e1df67
+18,P0020,Arnalda,PERSON,2149a5be-3f96-4994-8bdb-ed149ee9ab84
+19,P0021,Armandus Olivier,PERSON,5987e592-4f8c-42f5-89ef-e0ebb0715799
+20,P0022,Karlmanda de Balens,PERSON,ebc932d0-35ea-485d-bdfe-5b52afd7c86e
+21,P0023,Arnaldus,PERSON,ee1c2711-ab21-496b-976c-6e520d8608b2
+22,P0024,Arnaldus Bertrandi,PERSON,28cdfc21-b8d6-42f2-918e-e42ac8d9e6d8
+23,P0025,Arnaldus Capra,PERSON,62f26bcc-b3c7-432e-93a3-a2ab7ed50c63
+24,P0026,Arnaldus Cassa,PERSON,c274adf7-b3f1-41ca-8f46-dfe569917a41
+25,P0027,Arnaldus Cedus de Godor,PERSON,16bf4e5c-ad75-4389-9e2b-26ce7f1091a4
+26,P0028,Arnaldus Gonducs,PERSON,9a257fea-8443-4e1e-8c6e-f8c37d9e16d3
+27,P0029,Arnaldus de Avinione,PERSON,36ec314f-109a-4d7f-a0d5-19cd64a2e5ec
+28,P0030,Arnaldus de Bellopodio,PERSON,5150843b-9f98-4ebf-bb94-b993b6c66052
+29,P0031,Arnaldus de Castillo,PERSON,245be356-6ced-4cb9-98df-8aa332f7f41d
+30,P0032,Arnaldus de Lafargua,PERSON,cffae586-1d14-4d27-bbb4-9bb37ada4852
+31,P0033,Arnaldus de la Mota,PERSON,d8e7bfd2-ab4f-4e1c-9f59-1c744d8d39e4
+32,P0034,Arnaus de la Mora,PERSON,919e752a-a2d7-4b9c-970a-30fd0d5a0ddf
+33,P0035,Arnaldus de Rupe,PERSON,27c907b3-9772-45f1-90cd-1a72b6a48f6b
+34,P0036,Arnaldus de Lasala,PERSON,a1cbed1a-42ac-4cf2-a3d8-c2b339ca09fc
+35,P0037,Arnaldus de Peyre,PERSON,4f18f522-0916-449b-98f2-aae4e57f73dc
+36,P0038,Arnaldus de Primos,PERSON,acf40820-34f1-4547-b1aa-d00d9199b0d9
+37,P0039,Arnaldus de Rigaut,PERSON,902b5198-e9f6-4f9e-81c8-2a9d3e07c907
+38,P0040,Arnaldus de Sapiac,PERSON,e5abcc02-5415-46c4-9a00-7ee9dc2f9056
+39,P0041,Arnaldus de Sapiac,PERSON,92c659a4-769b-461e-a2b4-926e5de2e7b5
+40,P0042,Arnaldus Johannis Davi,PERSON,19ccecee-fccf-4b2a-afb5-124a78ddcb61
+41,P0044,Arnaldus del Clusel,PERSON,d572d7ac-3ea8-49d7-92e5-6df5bffd56b5
+42,P0045,Arnaldus del Huc,PERSON,2c5905b9-0fe1-47d2-baf2-aab4fd7f9606
+43,P0046,Arnaldus Dosici,PERSON,b8426eff-9c8f-4643-acd7-55ab375061f6
+44,P0047,Arnaldus Fabri,PERSON,b9b10665-8fbd-4942-b73d-8bf21e174855
+45,P0048,Arnaldus Folcautz,PERSON,7d47c713-d383-44be-938a-4a96956fe567
+46,P0049,S. Arnaldus Folcautz,PERSON,e901660e-b679-453b-8c4e-9ce1fc20d203
+47,P0050,Arnaldus Guillelmi de La Viga,PERSON,7c3084ff-3546-4a93-97dc-dbf0ec6163c5
+48,P0051,Arnaldus Juliani,PERSON,5538e37f-a14f-4867-b7ec-25be9162e15a
+49,P0052,Arnaldus Later,PERSON,1eafd7fa-287a-47e5-b157-19dffba0ad11
+50,P0053,Arnaldus Medicus,PERSON,93091b57-ca68-4eec-bc5a-9c603e10a6e3
+51,P0054,Arnaldus Maurini,PERSON,a58e85a9-fc77-4463-9c09-311dc4c18f27
+52,P0055,Arnaldus Olier,PERSON,c8cc6b33-b087-4969-8156-b0b61839b24b
+53,P0056,Arnaldus Pitavini,PERSON,0cfda196-9cb0-4fc3-98b8-d621977f6af7
+54,P0057,Arnaldus Peregrini,PERSON,e27f21dd-9a09-48ef-82b2-f3350ea281f7
+55,P0058,Arnaldus Rector,PERSON,073acb90-f63c-4a7a-b3eb-0c2cc7ee82f1
+56,P0059,Arnaldus Rufet,PERSON,143dfbe6-20d2-4d91-954b-d32827a7b686
+57,P0060,Arnaldus Sarrailhier,PERSON,54ee1067-bcaf-4ab1-a573-95cb6f6ceae0
+58,P0061,Arnaldus Tabast,PERSON,f610fba3-80d6-4d2b-be2d-083a71addc41
+59,P0062,[wife of Arnaldus Tabast],PERSON,710a46ba-85be-462c-9c26-02068c2b6839
+60,P0063,Arnaldus Verrani,PERSON,05b2bf28-c8bc-4a5a-a2c2-3dcb5140a776
+61,P0064,Arnaldus Vitalis,PERSON,d4b62cd6-b237-4169-8e07-eecc00a4dfa6
+62,P0065,Arnalda,PERSON,97331f19-984b-43c8-926a-93a7204b1d9c
+63,P0067,Arnalda,PERSON,4aa86f6d-e9c0-40cd-8b2f-764c1f5db5ba
+64,P0068,Arnalda de Joset,PERSON,f949d432-01de-497e-aa07-ccf027243333
+65,P0069,Arnalda de La Besseda,PERSON,5103a6d2-55c4-4c4f-852f-f41c9430ee8c
+66,P0070,Arnalda de Lacosta,PERSON,0382563c-bf21-4738-b538-e81c214aeb36
+67,P0071,Arnalda de Lagarriga,PERSON,b50148d3-a1fa-49d2-a033-7e80d55b828b
+68,P0072,Arnalda de Pestilhac,PERSON,4ce20961-f11e-4bcc-b46e-d73692021e1a
+69,P0073,Arnalda de Villanova,PERSON,b7924f91-c119-4f3b-a424-787e492743b5
+70,P0074,Arnalda Fabrissa,PERSON,e168efb7-5eb0-463c-b10a-4308d391d06c
+71,P0075,Arnalda Sabateira,PERSON,be285acd-4e53-4831-9d76-4ff104492c84
+72,P0076,Arnalda Textrix,PERSON,cea8fccd-10c2-49ca-9917-22d201746b11
+73,P0077,Arsemblaena,PERSON,a398ec59-78a7-48eb-b4cc-67c151f77e02
+74,P0078,Audiardis Autinadina,PERSON,1cdb41d2-dfb4-48f2-882c-418c2f16c646
+75,P0079,Audiart de Font Morla,PERSON,e12c13c5-d458-490a-bc0d-c29b86bbc40f
+76,P0080,Aurianda,PERSON,4f1e3ec8-ba5d-4335-ad6f-ebc6b384884f
+77,P0081,Austorga de Caors,PERSON,5f683df7-8ad8-4940-9371-8fddc99af9f8
+78,P0082,Austorga de Gascho,PERSON,10f1aaf5-8de2-4487-9dea-a7f51c45a198
+79,P0083,Austorga de Lamota,PERSON,347d14c4-c453-452a-8226-a3fcb16dab59
+80,P0084,Bartholomeus de Cabanolas,PERSON,5b9d0f24-c651-43c4-9722-4282f718195d
+81,P0085,Bartholomeus de Carcassona,PERSON,9a8251c7-fa92-4fce-b889-235dffbb542e
+82,P0086,Bartholomeus de Pousaque,PERSON,517a3314-5f7b-4201-ac9c-dfa481a4076c
+83,P0087,[wife of Bartholomeus de Posaca],PERSON,3146e9b9-7665-4793-a1c9-450fce28a90a
+84,P0088,Beneit Ioculator,PERSON,8d21e0f1-c63d-4283-a79a-d933ce9cc70c
+85,P0089,Bernardus,PERSON,3abc17b1-ca20-4ac2-9df9-9df02633dad2
+86,P0090,Arnaldus Bernardi de Roset,PERSON,2a84ce05-20c5-4e10-912c-6f2147556834
+87,P0091,Bernardus Arnaldus Ebrard,PERSON,fb7a3f50-4833-4b70-b26a-e550abcabc57
+88,P0092,Bernardus Belazer,PERSON,6f3e61d8-1f0b-435d-bdb8-82747390aa54
+89,P0093,Bernardus Bonaldi,PERSON,0e441f4f-bd4e-48c5-9d55-e032e7b15b37
+90,P0094,Bernardus Bort de Cambisa,PERSON,3fff0290-baa2-4174-bbde-e2519921aae6
+91,P0095,Bernardus Bors,PERSON,4037cd02-8047-47cd-a321-302530c0558a
+92,P0096,Bernardus Capel,PERSON,efc58ff8-9707-490d-ba33-11e8ff049cb6
+93,P0097,Bernardus Claris,PERSON,2f7c4220-f652-4bb8-9472-1091aa1ff71e
+94,P0098,Bernardus Clavelz,PERSON,0830f265-a3e6-423b-89d6-61462f071b2b
+95,P0099,Bernardus d'Olms,PERSON,ee2d9733-a042-4420-850e-270ddbc3b506
+96,P0100,Bernardus de Balat,PERSON,35aaabc3-e77c-448a-8136-2519c1d46100
+97,P0101,Bernardus de Bressolz,PERSON,7c5a111d-d687-4a42-9d6d-27e5a0650943
+98,P0102,Bernardus de Caraves,PERSON,f59ee978-13d4-4f53-95cc-1c555bb7ae5f
+99,P0103,Bernardus de Castillo,PERSON,41044c52-dc00-4b24-aead-4fe9c10dbc9b
+100,P0104,Bernardus de Caselas,PERSON,03f72e42-b18d-427e-b6d6-157c10cac3a8
+101,P0105,Bernardus de Cepfag,PERSON,c33c4aa7-bc6f-4d9d-a5d1-905ff96f1a0e
+102,P0106,Bernardus de Gordo,PERSON,45f6de01-0a65-4880-bc20-9b98cc6e4ce7
+103,P0107,Bernardus de La Brossol,PERSON,bf3a88f1-3209-4887-962b-cdeea524e153
+104,P0108,Bernardus de la Capella,PERSON,1034bb70-2b52-43ab-ab09-50c699f285c7
+105,P0109,Bernardus de Lamota,PERSON,54cc31c0-b514-462c-bcc1-e929a76a54c3
+106,P0110,Bernardus de Lasala de Malaveilha,PERSON,02c18312-34c5-4984-b803-d6b9299249af
+107,P0111,Bernardus de Las Matras,PERSON,c4c0a015-e0a2-45a3-8725-b6ca1c79b4a0
+108,P0112,Bernardus de Lator,PERSON,f52ff66d-0c22-4781-a473-cf75f277e033
+109,P0113,Bernardus de Pezet de Villanova,PERSON,cca62635-2b02-4dac-b3b6-a6207e5b03ce
+110,P0114,Bernardus de Caerci,PERSON,d255509d-3c7d-421e-93a7-e62349c59dac
+111,P0115,Bernardus de Sancto Genesio,PERSON,a40f1ee3-a28d-42da-b704-f4793a26a8b3
+112,P0116,Bernardus de Sapiac,PERSON,022c7814-ee68-4a97-921d-775e02059f7c
+113,P0117,Bernardus de Tornaco,PERSON,308d15ee-74b9-45bd-80a1-30b5541d355f
+114,P0118,Bernardus de Valcel,PERSON,754f0fb5-49b6-48f0-95f9-47bd2fc12e6c
+115,P0119,Bernardus Joannes Sabater,PERSON,50bef5e5-dab5-4a60-8d01-da59c6a3648c
+116,P0120,Bernardus del Pozet de Villanova,PERSON,162fd486-0a71-406f-be3b-2b10654f62a2
+117,P0121,Bernardus del Poiet,PERSON,a151233d-ae6e-4864-aac5-51081ebcfe22
+118,P0122,Bernardus Durans,PERSON,62389bb4-9663-45b4-8957-3bf325ca1b55
+119,P0123,Bernardus Stephani,PERSON,0081f4be-75ad-421e-9f66-cc50b49dec96
+120,P0124,Bernardus Fabri,PERSON,f3c2cc1d-3309-430d-9ae2-0fdf8c9f32a3
+121,P0125,Bernardus Guiraldi,PERSON,b58b4c3d-64f4-4267-8480-2aef45cc7973
+122,P0126,Bernardus Loquerii,PERSON,4d0132b7-9531-4202-84b4-60f97f6ba372
+123,P0127,Bernardus Manha,PERSON,545d879e-10b8-4688-8049-f4e693a0c65a
+124,P0128,Bernardus Petrus Clavelz,PERSON,8d9ff604-0154-44cd-bbc9-d2fbe5328240
+125,P0129,Bernardus Remon,PERSON,015a95d7-c493-4742-92e8-ee6acfe8f8f0
+126,P0130,Bernardus Raimundi Arquer,PERSON,a3ee3e2f-a9c2-4728-8036-43f3a570747c
+127,P0131,Bernardus Ruffy,PERSON,d54f98bf-d65a-4609-bb27-2487efba9ff0
+128,P0132,Bernardus Sabater,PERSON,d316d0fc-d5a0-42b9-b5fc-106a2dd0d15a
+129,P0133,Bernardus Sancii,PERSON,a92dc2d5-7acf-4f31-8e69-c03212dad384
+130,P0134,Bernardus Textor de Calciata,PERSON,31cb4fe5-49ad-4cb6-8094-fd8d3296d752
+131,P0135,Bernardus Tessender,PERSON,48fdc356-ceed-4d2f-91b8-396415079eb9
+132,P0136,Bernardus Vigerii,PERSON,d0d02713-0c5b-445c-96f5-e4a550f70354
+133,P0137,Bernarda,PERSON,7ec97501-18dd-4baa-b8e7-149e28925f17
+134,P0138,Bernarda,PERSON,c4fd28c9-68dd-4e18-97da-253960316c50
+135,P0139,Bernarda,PERSON,ae92c915-4703-4100-be4e-b386debd364d
+136,P0140,Bernarda,PERSON,8e9f3ac5-0717-4fc3-89e9-c1fb459f579f
+137,P0141,Bernarda,PERSON,9d2e7b52-bfcd-4c98-9ec8-acc99e75836f
+138,P0142,Bernarda,PERSON,73f483c6-94a6-4328-8d12-e1d4196ad72b
+139,P0143,Bernarda,PERSON,7d53705a-4b26-43f8-b03a-bb06749e7257
+140,P0144,Bernarda de Cassaco,PERSON,b37ea8ac-113a-470d-b479-aa3d03e10ac8
+141,P0145,Bernarda de Cratern,PERSON,64407b91-e7bf-45a6-9830-ab4d9af51c08
+142,P0146,Bernarda de Lariba,PERSON,837e327d-0872-4ab1-ada5-e35f4b09a8ad
+143,P0147,Bernarda de Quatre,PERSON,860eb8f0-e118-40df-9ca1-447d580987da
+144,P0148,Bernarda de Ribeira,PERSON,2fdc42d7-3db4-4aab-b1bc-47d127b6429f
+145,P0149,Bernarda de Ro,PERSON,987eeab5-3e97-4ad9-8b8f-668fd7e00a89
+146,P0150,Bernarda de Sancto Juliano,PERSON,321f77ac-0987-45e4-8053-3de4684b1f8a
+147,P0151,Bernarda de Valtorel,PERSON,9cae0ebc-99e3-4e4f-8b32-213eee023b71
+148,P0152,Bernarda Fabrissa,PERSON,c2630321-e138-4a49-81d7-bd70238f38b4
+149,P0153,Bernarda Mela,PERSON,37b81b4d-9811-4234-a511-5a828bf601cc
+150,P0154,Bernarda Rubea,PERSON,0aac2799-1e25-4c69-acf2-0050f172d8f2
+151,P0155,Bertrandus Audeberti,PERSON,5b6e0312-06ee-4ccb-9d2b-d8c0652180f3
+152,P0156,Bertrandus Auriols,PERSON,291c4d59-7369-4afa-8955-6db241d3f8ab
+153,P0157,Bertrandus Bodo,PERSON,d20666bc-09cf-4727-8672-cba116ca23d8
+154,P0158,Bertrandus Breserii,PERSON,d9ae7c35-647e-4906-866f-28dd4cd00c1b
+155,P0159,Bertrandus de Braulens,PERSON,887f6ea3-6057-492e-93b0-637db01ee3ef
+156,P0160,Bertrandus de Rupe de Montcuquo,PERSON,11206423-f227-484a-a31c-78796e7966c9
+157,P0161,Bertrandus de Lamota,PERSON,3ff81a03-8f57-486a-a821-32c790b4059f
+158,P0162,Bertrandus de Lautar,PERSON,4854d224-0f6c-4c95-a09c-5e2e66841e6c
+159,P0163,Bertrandus de Lascroa,PERSON,590ef5be-0e6a-4ccf-b840-b949130f889c
+160,P0164,Bertrandus de Monteacuto,PERSON,fb58d2e6-46e7-472c-8aaa-b4e8aa9bf648
+161,P0165,Bertrandus de Montepesato,PERSON,2828c801-ec71-462c-b986-2f4b9c45c145
+162,P0166,Bertrandus de Sancto Claro de Milhac,PERSON,79f93f42-464a-444b-b275-8e3109147878
+163,P0167,Bertrandus de Sancto Genesio,PERSON,49d37786-c6cc-40ae-b767-f258a4ac66a2
+164,P0168,Bertrandus de Valeta,PERSON,ce758671-9236-45dd-9e5d-716b41cb5b80
+165,P0169,Bertranda d'Ayverno,PERSON,ba2b0535-efbb-4ed6-8b85-7b821d7d5efa
+166,P0170,Bertranda de Cossada,PERSON,b07ee2d3-1582-41a1-9a2d-2bc4c0d30c79
+167,P0171,Bertranda de Daubanas,PERSON,96a2f864-3493-4c88-9da9-3216282e1069
+168,P0172,Bigordana,PERSON,45ab268f-6303-4177-8a6e-ca2d1370523c
+169,P0173,Bitorta,PERSON,c53f37d1-d29b-40c9-b583-e653eef0b06f
+170,P0174,Blancha,PERSON,44e745fa-c068-4622-82d1-5c082331eb24
+171,P0175,Bonus de Sapiac,PERSON,741285ec-e36a-4078-99cf-4d0942d86849
+172,P0176,Boneta,PERSON,9bdeb342-135b-498b-b46a-24e5da6044d2
+173,P0177,Caerlis de Vilario,PERSON,713e7fa8-ac98-41b4-ac2f-1e848c8caf18
+174,P0178,[bishop of Cahors],PERSON,7f9e7695-c8cf-48cc-a782-28e314605d6d
+175,P0179,Caturcinus Cabatiers,PERSON,ca0e45aa-c2cb-4009-a1b0-6498bab3975e
+176,P0180,Caturcinus de La Vernha,PERSON,22c72b03-b0cb-4608-babe-9c7d6bfe2979
+177,P0181,Caorcinus de Nautris,PERSON,22fbd32c-2325-45d6-a848-d8a8aba27581
+178,P0182,Caturcinus textor,PERSON,5dfd3095-fbcb-4b54-a5cf-fd424c70c588
+179,P0183,Caturcinus Rigaudi,PERSON,d02269a4-d109-4077-9fa5-1e5bee54d467
+180,P0184,Caercina,PERSON,acca97c7-692d-4a4b-96b7-0bef328bac46
+181,P0185,Caercina,PERSON,f90bb83c-9f0d-435c-8e69-8ec8beb646d0
+182,P0186,Carbonella,PERSON,403e6b2d-d255-45d2-a344-0d8cdaef6f89
+183,P0187,Cavaler de Biolet,PERSON,e1af8f68-445d-4c6d-8605-ed4de8f7da50
+184,P0188,[Unknown] de Coutes,PERSON,4feef667-7712-44e7-b3c2-108f977ecbaf
+185,P0189,Coxunta,PERSON,a0685e16-0cd1-41e9-bae4-54202bb08110
+186,P0190,Nichier,PERSON,cfa287bb-4040-49ac-b5ec-37df87c33a28
+187,P0191,[Unknown] del Terret,PERSON,f0bc5852-3e5d-4cdf-a0e9-bb43877eec80
+188,P0192,Domestica,PERSON,304eeb8b-bb8c-4af9-ae07-37a18fdd1345
+189,P0193,Domestica de Cabanoles,PERSON,a14559e5-e65f-41bf-9bec-c6f58312f66b
+190,P0194,Donadeu Turto,PERSON,abd64570-b320-4c4e-a562-a730b28ec574
+191,P0195,Dulcia,PERSON,9cacc3cb-20be-4090-be5c-1d20f11fdcff
+192,P0196,Durantia [Espitalier],PERSON,5635cc4a-7add-481f-bda8-a2afe83e8ac3
+193,P0197,[Durandus] Abit,PERSON,06375fe6-08f3-4d50-abbc-0dcc5dad2a2d
+194,P0198,Durandus de Bosco,PERSON,bff658c5-ebf7-47cc-b7e7-ed1b6cd6ea49
+195,P0199,Duran de Broille,PERSON,eb389ea6-5280-4b95-a84f-1b096942e6e4
+196,P0200,Duran de Broille,PERSON,b19cb779-93d3-4f2e-b82a-fec46e39c61c
+197,P0201,Duran Guillelmus Minaldi,PERSON,1388f404-f8b4-4e30-ba53-e536fde3d026
+198,P0202,Durandus Ratier,PERSON,d8f2421c-34c5-488d-8977-294ea7df434f
+199,P0203,Durandus Toset,PERSON,f57c997b-4049-46aa-8762-d4d1eb3c1cbd
+200,P0204,Durandus Vairet,PERSON,9cab3ddb-1cee-4199-83ba-02079830b229
+201,P0205,Durandus Curto,PERSON,1482a1c9-38fd-4e96-ae51-b10901b00036
+202,P0206,Durandus Roberti,PERSON,1a030d49-87a8-484d-b73b-21f46b02117f
+203,P0207,Durannus Trohler,PERSON,819aa1ab-651b-4ea8-a9e1-78e9631f0622
+204,P0208,En Gorssas,PERSON,542f45c3-e671-444d-b43c-b5bbbe1a956b
+205,P0209,[Unknown] d'[En Ponfaurc],PERSON,becadbf8-1745-487b-bf19-6714140f364f
+206,P0210,En Rochas,PERSON,54ada0d8-8346-4cf5-9049-48d7ccb10d5e
+207,P0211,Engibaldus,PERSON,4e1355a4-e863-4eed-ba00-793f5ae7bb40
+208,P0212,Ermengars,PERSON,a03b9e47-9aaf-42c1-ae43-f9e73f38238f
+209,P0213,Ermengarda Estaca,PERSON,756ef6ba-00de-4029-bdea-e82a7e560fab
+210,P0214,Stephanus de Bragairac,PERSON,7120cdc2-a67a-4f05-853a-45b200407755
+211,P0215,Stephanus de Canselada,PERSON,2039ff01-b093-4557-b12a-c38e1495dc78
+212,P0216,Stephanus de Lacomba,PERSON,c3f5022a-3365-4128-8e60-25bda3195baf
+213,P0217,Bertrandus de Sancto Genesio Auriols,PERSON,f9f73466-3840-4e30-9e21-3dbf243a947a
+214,P0218,Stephanus de Na Ramunda,PERSON,aa133d4b-3ed8-4811-8467-9414e406a0e8
+215,P0219,Stephanus de Rupeforti,PERSON,4061c82b-4809-445d-8e9f-a4a90e6d50b3
+216,P0220,Stephanus Fabri,PERSON,233b016c-4ef7-42a3-8a6a-6249d2f6ec1c
+217,P0221,Stephanus Folcaut,PERSON,056fe97d-89b8-4d1f-81e6-f892869e4b34
+218,P0222,Stephanus Forcaldi,PERSON,500f6163-a72d-48c6-9035-ff45ab87e498
+219,P0223,Stephanus Galterii,PERSON,b10c0a43-951b-43bf-ac5e-69a14297b0c3
+220,P0224,Stephanus Gombert,PERSON,8e34e7a0-70ec-484b-8d65-870fbf9f94d5
+221,P0225,Stephanus Gras,PERSON,5c1d8147-49ec-48fe-bf53-37fd65582dac
+222,P0226,Stephanus Guiraldi,PERSON,18cae3fe-f1bb-4bf0-8c08-265d4455939a
+223,P0227,Stephanus Mazelers,PERSON,18aa332a-6f85-4354-9c34-098808203028
+224,P0228,Stephanus Palmerii,PERSON,cf323acc-177e-4b49-a364-fe8f00428828
+225,P0229,Stephanus Raimundi,PERSON,9aacd0ec-0130-4a8d-8f21-f79ae3757357
+226,P0230,Stephanus Sobressen,PERSON,e1e06b4a-94a9-4811-8751-77276774cfa3
+227,P0231,Stephanus Vaires,PERSON,cf2578a0-b045-4b64-af85-937c019cbead
+228,P0232,Ostaca,PERSON,edc2644a-54a7-468a-9c20-172346167cf1
+229,P0233,Fais de Sapiac,PERSON,b3aa8319-7488-4800-9b6f-56302834c861
+230,P0234,[Unknown],PERSON,3dba31f3-1a67-426f-9811-eb5d54b1500c
+231,P0235,Fabressa de Sapiac,PERSON,325b8ffe-a873-41f1-905b-70dfaa3efef8
+232,P0236,Fortanerius de Gordonio,PERSON,898debc9-6603-4bc8-a5ad-e1674836cacb
+233,P0237,Fulco,PERSON,b2417058-2740-4b1a-b709-e8eb7ea9d4cf
+234,P0238,Fulco de Sorris,PERSON,2fcd6bdd-94c8-4c87-ae81-95dda537dc4a
+235,P0239,Franciscus [clericus],PERSON,830e7887-a328-4dc4-af8f-94df8a78d14d
+236,P0240,Gallardus d'Auteiac,PERSON,0e2184a1-327d-415d-b284-93db62e2f60f
+237,P0241,Gaillardus de Narces,PERSON,a24f220b-c284-4790-b390-270a111119ef
+238,P0242,Gaillardus de Godor,PERSON,a0a47964-d1cf-4581-9bac-66d84e81709c
+239,P0243,Gaillarda,PERSON,ca6351e9-3899-4a20-9422-ac8d0f10c5e6
+240,P0244,Guaillarda,PERSON,0eb06a4e-4c05-44e6-bc80-ad635c7a88fd
+241,P0245,Gaillarda de Lagarda,PERSON,f60963b4-4a7f-4121-842f-f7010aa5803c
+242,P0246,Gariels,PERSON,f6b5a172-0651-474d-bb19-21b30b5d34f7
+243,P0247,Galterius Archambaudi,PERSON,3ec4d303-960d-4531-8443-e3281c35b7d9
+244,P0248,Galterius Peregrini,PERSON,cbd7e459-ee61-4c91-9ea4-ac7431453bc6
+245,P0249,Garcia de Bonafous,PERSON,bc834460-0457-412e-9d46-c38542b72116
+246,P0250,Garsen Esquivada,PERSON,444c3149-0bf4-4d7f-b84d-20fcd0b9444c
+247,P0251,Garsilio le Corder,PERSON,3d0b71fb-e34e-4980-90b7-c259506b37cb
+248,P0252,Gauberga de Quillo,PERSON,510ef8ce-b0f5-4bd9-b837-b30042462151
+249,P0253,Gausberga de Senivol,PERSON,0ee627ba-45bb-47ff-9010-27a15cfc4858
+250,P0254,Gaubertus,PERSON,e88ac8e8-9a0d-4b02-af5e-8914937aedfc
+251,P0255,Gaubertus Carbonelz,PERSON,f4742483-a8a2-49c3-a242-330fac5af8eb
+252,P0256,Gaubertus d'Auteiac,PERSON,59aab8ad-8baf-4279-b5bd-3de70d14f82d
+253,P0257,Gaubertus d'Aremeia,PERSON,1b36443f-cfdb-4c51-a7f5-82cb4e6de2fc
+254,P0258,Gaubertus de Cairol,PERSON,65f1cc91-f8f0-483f-9ebc-224c1d465166
+255,P0259,Gaubertus de La Barra,PERSON,785d33fb-ad76-4922-9440-f5012a73a7fc
+256,P0260,Gaubertus de Lacosta,PERSON,028db031-d247-426b-ae69-955d3855bb4f
+257,P0261,Gaubert de Mosati,PERSON,82dd8c79-58f9-462d-9d64-b9ade075b806
+258,P0262,Bertrandus de Gordonio,PERSON,b44f29d9-2332-4acf-9dc3-127fb7440645
+259,P0263,Gaubertus del Clusel,PERSON,d101e5fc-f23e-44f4-a10b-dbdd9ce12700
+260,P0264,Gaubertus del Cluzel,PERSON,c370f29f-efcf-4f8b-bbe2-c736df8c76d1
+261,P0265,Gaubertus de Podio,PERSON,fbbf1edf-c24a-4780-8e24-ee7fe132f489
+262,P0266,Gaubertus Galterii,PERSON,1ac8cdf4-826a-46bf-82af-06dda4e29812
+263,P0267,Gaubertus Gaut,PERSON,6e4e55df-2ad1-4452-b8d9-33e9006bd25c
+264,P0268,Gaubertus Guiralda,PERSON,d29c4bd7-ac85-4d2b-a7f0-85b051eef2ba
+265,P0269,[mother of Gaubertus Guiralda],PERSON,4b07c530-6b09-4267-9d72-d138b86862e5
+266,P0270,Gaubert Ranulphi,PERSON,b58a80f0-ce8c-4c72-87a6-074f929d6ad4
+267,P0271,Gaubert Sicart de Coranda,PERSON,226178c8-8b83-4bec-a254-5d5624f1ed4b
+268,P0272,Gaucelma,PERSON,f74fddf3-e2ce-4a6a-8ded-a8d7548324b7
+269,P0273,Gaucelma Faidita,PERSON,777c804e-a6af-4f0b-8652-91e994cb41c7
+270,P0274,Gaucelinus Esquivo,PERSON,1ffde185-a5d4-4443-b63e-5436629f2c7d
+271,P0275,Geralda,PERSON,d0cffa89-258e-40ce-9bd5-6f4601da2738
+272,P0276,Geralda,PERSON,62e0c244-2ccd-4cdc-9bb7-678b3e74b7aa
+273,P0277,Geraldus de Lautarz,PERSON,b430842b-c363-4bff-b0d3-031250b56550
+274,P0278,Geraldus de Maureg,PERSON,177a11c8-b667-4b6b-a9a3-a1acfa1e319a
+275,P0279,Geralda,PERSON,ad23940b-42a7-42a0-b36c-9d4db67536f2
+276,P0280,Geralda,PERSON,d7a1e2b5-b13a-486d-b780-fd546b67639e
+277,P0281,Geralda,PERSON,61a48bc9-8154-418b-af41-dd679f163ce3
+278,P0282,Geralda,PERSON,7b2f462e-7141-4e9f-81fd-441adacb6ed7
+279,P0283,Geralda,PERSON,c7d4c443-be2c-46c1-bc69-777f04cfedee
+280,P0284,Geralda,PERSON,e92194d6-9721-48e9-b5a1-135e6b817564
+281,P0285,Geralda,PERSON,56cd98b8-d9ea-4aad-8f76-2b1dac1f770b
+282,P0286,Geralda,PERSON,3f44ad2d-9498-4d8a-ad2e-09958d237cb5
+283,P0287,Geralda de Biele,PERSON,4c75b806-6c4f-4169-8069-ab3e982ffbff
+284,P0288,[sister of Geralda de Biele],PERSON,f8676b6a-7ef2-4a05-a9ba-3ef137255cce
+285,P0289,[niece of Geralda de Biele],PERSON,086f8257-bb42-4e0d-aa4b-581dc6495a2b
+286,P0290,Geralda de Bugat,PERSON,d8219f31-0c3f-4da0-a5d5-35357f791a29
+287,P0291,Geralda de Cassaco,PERSON,3d876ec5-3996-4df9-94ad-ce5bf27c3258
+288,P0292,Geralda de Rupe,PERSON,678d03fe-653b-4700-ab3d-b4367abffa26
+289,P0293,Geralda de Lacosta,PERSON,d819f80f-0892-4d85-983f-956c07874db6
+290,P0294,Guiralda de La Grassa,PERSON,cb80df6c-3144-4d3c-b658-5d8d9ca08d74
+291,P0295,Geralda de Mathol,PERSON,1d827891-b657-4f85-8044-00df19252478
+292,P0296,Geralda de Riberia,PERSON,3a4c6ead-d4c3-4760-9e00-db102b9fe99b
+293,P0297,Geralda de Rupeforti,PERSON,2358c637-7eaf-494b-8239-c2a16021d265
+294,P0298,Geralda Ogeira,PERSON,72923e64-7ee1-43ef-ac3e-793f2d30820e
+295,P0299,Geralda Viquera,PERSON,c53c47cb-f2f0-41a1-b61e-5f9ea1ce0b8f
+296,P0300,Giraldus de Podio Blairair,PERSON,51d6b9a8-fd47-4089-a3cb-0b44d4222957
+297,P0301,Guiralda Vesiada,PERSON,bcdc5761-0a00-42f5-88e4-fc27d8aefb4b
+298,P0302,Gobertus,PERSON,4b6df2a1-8bbf-431d-b06e-0e7fa409b9d6
+299,P0303,Gilabert de Castris,PERSON,5dbe7d54-2da9-4d5b-bda3-4624692f92b8
+300,P0304,[socius of Gilabert de Castris],PERSON,a821699f-3ce3-4fb7-87fc-0dbe898f5c6d
+301,P0305,Guillelmus Albas,PERSON,92cbd7af-9243-4af1-8df2-ca645845ab4d
+302,P0306,Guillelmus Augerii,PERSON,e1868d71-d682-4be6-8537-30e76b3ac21f
+303,P0307,Guillelmus Aymericus,PERSON,214ff622-f37f-4c2f-b494-bf3b9a83794d
+304,P0308,Guillelmus Verrera,PERSON,f259c48b-92ef-4354-bb27-1ce6322d8c04
+305,P0309,Guillelmus Bastard,PERSON,e6295fa7-ef6c-41cd-abaa-ea748da2dbcf
+306,P0310,Guillelme Bernardi de Narces,PERSON,499f18c2-f279-4fd2-8cf5-7792ad36084d
+307,P0311,Guillelmus Bernardi de Lamota,PERSON,7c38324e-f70f-4a09-8ae0-0c0e2f000c48
+308,P0312,Guillelmus Bernat Boca,PERSON,5aa7ab7c-742c-419b-8c41-ecde331e6a8f
+309,P0313,Guillelmus Bertrans de Montecuquo,PERSON,96024059-a138-49ac-9e61-827fc58f1a34
+310,P0314,Guillelmus Bonafos,PERSON,bd6f3f8c-c4c8-49eb-9683-3560addb451d
+311,P0315,Guillelmus Bonaldi,PERSON,13f54735-24a5-497e-aae1-a3475c59ca24
+312,P0316,Guillelmus Bos,PERSON,5adba018-bd3a-48cd-9ced-3ba0efa75840
+313,P0317,Guillelmus Cabat,PERSON,6fd28674-44a9-4177-bf87-5b17868b7e71
+314,P0318,Guillelmus Carbonelz,PERSON,08917b07-46dc-4e4d-b09e-abfe672264ad
+315,P0319,Guillermus Cassa,PERSON,a0c166d9-b643-4cff-a4c0-b886930f6ee4
+316,P0320,Guillelmus Cogorssa,PERSON,2fef194b-82bc-46e6-8939-4f29897dc6bc
+317,P0321,Guillelmus Cosels,PERSON,f9032c37-deff-4f17-be29-756f7fc8e362
+318,P0322,Guillelmus d'Auteiac,PERSON,46e4ba8a-2f1f-4984-bb95-4b56f9add7df
+319,P0323,Guillelmus de Eisses,PERSON,70f65d6e-bbbc-43be-813b-67608acccd35
+320,P0324,Guillelmus de Yches,PERSON,e198cf19-867a-40dc-8232-229e834b752f
+321,P0325,Guillelmus de Bairs,PERSON,afccb15a-e9f4-45f4-be78-9b6898605765
+322,P0326,Guillelmus de Barba,PERSON,a92def5a-d47a-4f19-886c-46669924d7ec
+323,P0327,Guillelmus de Bernat,PERSON,2875835d-26a1-4154-b852-d7a85eeeeb2e
+324,P0328,Guillelmus de Baussano,PERSON,b8e26852-bb63-417d-95c0-afa51a280802
+325,P0329,Guillelmus de Belvais,PERSON,be19b4f9-37fc-4be1-9e39-030edfde0348
+326,P0330,Guillelmus de Berencs,PERSON,820efcd4-67f4-4d61-99ff-1a6eaa01a396
+327,P0331,Guillelmus de Braute,PERSON,a796c33f-0cf0-4f09-ac42-20bb8da4dc18
+328,P0332,Guillelmus de Brecas,PERSON,31322486-d5f5-416d-b02a-e421d0c7bdfd
+329,P0333,Guillelmus de Broile,PERSON,efda360c-41fe-4f87-94a8-f16ebdb7293c
+330,P0334,Guillelmus de Burc,PERSON,7f83498b-a965-4064-8a59-54145b5cceb8
+331,P0335,Guillelmus de Cabanolas,PERSON,79f4a81d-623b-45f2-a29f-92001249261b
+332,P0336,Guillelmus de Cassaco,PERSON,9e18dfb0-4b60-4e60-95d8-db32b2af888b
+333,P0337,Guillelmus de Catus,PERSON,0cf6e9bd-532d-4341-8462-5a1dd0553578
+334,P0338,[brother of Guillelmus de Catus],PERSON,04459695-6527-47af-9b5b-255b3c5289ec
+335,P0339,Guillelmus de Calciata,PERSON,606118ae-38de-4fef-a5c4-2202cd6f48a7
+336,P0340,Guillelmus de Cavaroca,PERSON,48079b36-4198-423f-8a2a-7b5c5d9bfdab
+337,P0341,Guillelmus de Favars,PERSON,533f1fbf-6066-49c2-bd87-1174049ef5e2
+338,P0342,Guillelmus de Peirans,PERSON,781a9a17-e5e7-41cb-9c5b-aebd72763e5c
+339,P0343,Guillelmus de Frussenet,PERSON,7dfe2d01-8376-4515-9c49-edd9e7e6a3df
+340,P0344,Guillelmus d'Engolesma,PERSON,eee77789-cbbb-494c-888c-170072c9e2c8
+341,P0345,Guillelmus de Gordo de Salvaterra,PERSON,a32687f8-34b8-4e54-b381-9aebeccadb10
+342,P0346,Guillelmus de Hospital,PERSON,5dabd2eb-a9cc-44a3-ab6f-7d5d9043e81d
+343,P0347,Guillelmus de La Cordella,PERSON,45fb1146-eb7d-47a0-947b-b7aa8d62dccc
+344,P0348,Guillelmus de Lagorsa,PERSON,efbf31e0-d67f-427e-aef7-b4d6085d3eec
+345,P0349,Guillelmus de La Raimunda,PERSON,2d68051d-99c6-4fdd-a7ac-16995d1ad0eb
+346,P0350,Guillelmus de Labarta,PERSON,16dbd1b8-bdcc-4d0e-b02b-a5e880830886
+347,P0351,Guillelmus de La Mota,PERSON,4b6053a6-a59a-48f7-8e6f-56e5fc4ae04f
+348,P0352,Guillelmus de Lantar,PERSON,80804968-e79b-4510-aad0-f07d72d66785
+349,P0353,Guillelmus de Latania,PERSON,a379f451-b6a6-4391-8b71-58a95ec63b35
+350,P0354,Guillelmus Raimundi de Lespinassa,PERSON,3ca4de65-9c8c-471a-bee4-5953555cd897
+351,P0355,Guillelmus de Limos,PERSON,38098570-180e-4b56-8966-e3db1f7f4623
+352,P0356,Guillelmus de Montegalhardo,PERSON,a0bdabcc-68dc-4e76-b901-0a3184c1b1d5
+353,P0357,Guillelmus de Naperier,PERSON,231b79bb-aa39-413d-8359-d9240dcf8166
+354,P0358,Guillelmus Pradeils,PERSON,1fc819ac-c071-4749-bd51-a802610b1980
+355,P0359,Guillelmus de Reiac,PERSON,657f1a71-9cc7-4aab-939c-5a7362c6c13c
+356,P0360,Guillelmus de Sancto Clemente,PERSON,8814ae86-1bd8-454d-a3d5-f380aac1945c
+357,P0361,Guillelmus de Sancto Guinesio,PERSON,4f0d25f5-962b-404f-9aa1-d6dace068ad8
+358,P0362,Guillelmus de Sancto Michaele,PERSON,3ec722f0-51dd-464d-9f58-65f8b8de432a
+359,P0363,Guillelmus de Solario,PERSON,cfbf0ceb-98f6-46af-8bc9-f873d6d93031
+360,P0364,Guillelmus delz Pratz,PERSON,e38970cf-3853-45c0-b742-485394d7989e
+361,P0365,Guillelmus de Moli,PERSON,659e8a4c-3337-4b42-88ff-164b76a9e069
+362,P0366,Guillelmus Faiditi,PERSON,83511198-1ca4-476e-9e29-55597e559d46
+363,P0367,Guillelmus Fabri,PERSON,be9d42eb-cdaa-42c7-825a-0f6d53a422b0
+364,P0368,Guillelmus Geral,PERSON,236a961e-9348-4ec2-b1ce-2fd8aebf280c
+365,P0369,Guillelmus Geraldi,PERSON,c0244ee3-4643-4a0b-bc64-fec5d9ba56dd
+366,P0370,Guillelmus Geraldi,PERSON,e364be26-6b48-4142-878f-23c18e1d84ea
+367,P0371,Guillelmus Guitart,PERSON,e215c08d-3933-4fb3-9027-6ab9a9cc3404
+368,P0372,[brother of Guillelmus Guitart],PERSON,3c40406d-13e6-42fb-9f70-042fef38a4de
+369,P0373,Guillelmus Helix,PERSON,562c83be-71bf-4960-94b3-91bf5a1a4de7
+370,P0374,Guillelmus Ychier,PERSON,6638caf1-4262-4657-b2e7-54e4869a5fb6
+371,P0375,Guillelmus Devinis,PERSON,345dfd87-d6b4-4f47-bc53-647d220d08fd
+372,P0376,Guillelmus Laurencii,PERSON,2ea1b8d2-b72c-40d1-a01f-c25ed9214860
+373,P0377,Guillelmus [medicus],PERSON,8aaf0b13-d4dc-4b18-a41b-ee5cb631c475
+374,P0378,Guillelmus Macips,PERSON,28224acf-a6f8-4100-9c5f-9d859fe9479c
+375,P0379,Guillelmus Matfredi,PERSON,cf80bee2-ccab-461a-9fe9-6a360429942a
+376,P0380,Guillelmus Matfredi Reilon,PERSON,36169125-8c93-4e64-b045-91c63b5c7fb0
+377,P0381,Guillelmus Martini,PERSON,2ff3921d-90dd-45e1-bd5c-2d39255fdb38
+378,P0382,Guillelmus Maurelli,PERSON,5a5d2f77-86d2-45e9-b409-716b58ef2ee0
+379,P0383,Guillelmus Molinerii,PERSON,8051106b-dd1b-4139-ad75-b7fccc7721b6
+380,P0384,Guillelmus Paga,PERSON,f122c41b-18ed-4a6e-b9e4-2a3d98b7569a
+381,P0385,Guillelmus Palmerii,PERSON,e10aeff5-0ca2-470b-96df-8553f459130e
+382,P0386,Guillelmus Pasaire,PERSON,91860bac-92f6-4551-a1ae-7beb224faed2
+383,P0387,Guillermus Peregrini,PERSON,b903ec2d-920f-420f-a767-baa08e840ba7
+384,P0388,Guillelmus Ricard,PERSON,d04c211f-af5b-4384-b39a-f318a2d69367
+385,P0389,Guillelmus Rodat,PERSON,92c9d766-9d9f-4344-86f8-279ca4f18d6b
+386,P0391,Guilhamassa,PERSON,4f60da85-f938-4762-92ef-ed531aac388c
+387,P0392,Guillerma,PERSON,a5dd7d4c-67f3-4e69-a7e1-bc68e1419670
+388,P0393,Guillelma,PERSON,bd4e4d61-656d-4479-a310-65942da5a4ed
+389,P0394,Guillelma,PERSON,39d9ff4a-bdb2-4afc-b4d2-503c00622d7d
+390,P0395,Guillelma,PERSON,fb2dbe9d-31d8-4ab0-9bad-9b94ef8ebd82
+391,P0396,Guillerma,PERSON,a6996c90-9cf0-4838-a4cc-df9132446139
+392,P0397,Guillelma,PERSON,18be913a-37c3-46b7-bbff-4633278286e2
+393,P0398,Guillelma,PERSON,3695e772-9703-4b9d-ae9f-39567e0a4706
+394,P0399,Guillelma,PERSON,f7580bac-eb19-4828-887f-79c8d3d23afe
+395,P0400,Guillelma,PERSON,f9651fc4-5e6d-4be5-a3a5-b1b5151b030a
+396,P0401,Guillelma,PERSON,4cdc59d8-2eef-462b-8844-45c9bea8147f
+397,P0402,Guillelma Cota,PERSON,7463fa43-99c7-4e4c-8db7-272c6e3bcd93
+398,P0403,Guillelma den Golesma,PERSON,f935a731-cff6-481c-8370-304d3fac1081
+399,P0404,Guillelma de Beneig,PERSON,9f0b38bc-b55c-4e13-afba-4c4b61022d73
+400,P0405,Guillelma de Bonoloco,PERSON,a58ce7b9-7174-426b-af3b-c7a67b9e0a82
+401,P0406,Guillelma de Cantarida,PERSON,727e3305-0787-4422-a868-c1244b182cc6
+402,P0407,Guillelma de Franquet,PERSON,dacf69f8-e479-4052-91c7-730860474556
+403,P0408,Guillelma de Galhat,PERSON,b889dd70-1800-4e62-839a-2321105c8e17
+404,P0409,Guillelma de La Barta,PERSON,bf8fe6b2-7984-49ec-b6ae-729dad30c1c1
+405,P0410,Guillelme de Lagarda,PERSON,a948d76f-bf40-40a5-96db-70052a1766b8
+406,P0411,Guillelma de Lamassa,PERSON,221a73e4-9967-49aa-b248-0c617fd24ca5
+407,P0412,Guillelma de Lariba,PERSON,e96b563d-31ac-4042-83b3-a15856da3876
+408,P0413,Guillelma de Vina,PERSON,c838e411-2506-4ffd-ae2e-11a05fb3097a
+409,P0414,Guillerma de Maiestre,PERSON,f78e9ee0-2d96-4319-836d-f46a42943128
+410,P0415,Guillelma de Rocafort,PERSON,42bb3da1-ade1-4f69-9b78-184f81a97e01
+411,P0416,Guillelma de Sapiac,PERSON,140cf35f-fe85-4a82-a5f8-4722fc93ea43
+412,P0417,Guillelma de Solacrop,PERSON,2833b2fd-8dfa-49e5-9bdb-f5e2f4848b1c
+413,P0418,Guillerma de Via,PERSON,b6509d38-ffff-46d2-8b06-67ed720a906c
+414,P0419,Guillelma de Villabergonh,PERSON,7567c37f-6398-459e-b1e6-5822f31b917a
+415,P0420,Guillelma de Pinu,PERSON,e079854c-e566-42f7-971f-dcc6ba3e5b9d
+416,P0421,Guillelma Faidita,PERSON,e80de526-4b4d-4122-b0fc-1f07c13757be
+417,P0422,Guillelma Forneria,PERSON,f47dc03c-366c-4c05-b0e5-e1d29a3c9425
+418,P0423,Guillelma Gatina,PERSON,07edeb95-117f-4843-b44f-83ab62ceb17d
+419,P0424,Guillelma Gaudiana,PERSON,ba74cd94-8f61-49a4-850c-16deebe77e51
+420,P0425,[Guillelma] Lauterii,PERSON,c2213ce0-89b9-4b04-a2b3-671bc9baa210
+421,P0426,Guillelma Martina,PERSON,e0b6e694-feeb-4d26-a971-6de2f99c3c17
+422,P0427,Guillelma Maurina,PERSON,753e5548-9b29-4560-96f7-787a55ca3bb4
+423,P0428,Guillelma Paga,PERSON,561a33cb-a64b-46d8-a7e4-80530e4e4098
+424,P0429,Guillelma Pradeira,PERSON,3b23212d-a18d-4748-918e-e877cd09c5a5
+425,P0430,Guillelma Rasona,PERSON,81a72c6d-3fc0-4b7d-b628-9a6450ef4db1
+426,P0431,Guillelma Vesiada,PERSON,af6a08c4-040d-426c-9ecc-1fcaece9ed49
+427,P0432,[Guiraldus],PERSON,6715ec98-859e-4740-a922-a31c893f7c30
+428,P0433,Guiraldus d'Engolesme,PERSON,d1d1fff1-9582-4e6b-bd80-12ddaa3a5cdc
+429,P0434,Guiraudus de Mairoch,PERSON,67d4d214-6e40-43a5-853f-9047fcef3f2b
+430,P0435,Guiraudus Molinerii,PERSON,fa51e1fd-04e1-4073-a1ac-3c8c0c4b8ce4
+431,P0436,Guiralda del Riu,PERSON,fa6fe2c4-8842-4a55-ae2f-2c5f1eab8586
+432,P0437,Helias de La Valada,PERSON,2cfe62b0-d4aa-4db1-9355-9634609e30de
+433,P0438,Helias mercer,PERSON,3ced9953-ec2e-4387-bb0c-adeb555fbd74
+434,P0439,Helyas,PERSON,48b283eb-c386-4f0b-b1ed-19f0fbcf5d31
+435,P0440,Herica,PERSON,ab61031b-e281-4418-9918-4f8afb1158e9
+436,P0441,Hugo Auberti,PERSON,331945ea-c4a3-40bb-bd6f-d45abe383b94
+437,P0442,Hugo d'Auteiac,PERSON,43731ac0-c2ba-4ee1-b465-838dfeced1a4
+438,P0443,Hugo de Faias de Pereilha,PERSON,74b4bb8f-6a0d-4ae0-b04f-8449e73f1609
+439,P0444,Hugo de Fayas,PERSON,a548d999-c4a7-4712-a502-4026d60c6d5a
+440,P0445,Hugo de La mota,PERSON,3d70b4f4-89a1-40db-9a86-eba40226f1ea
+441,P0446,Hugo de Podio,PERSON,ee963b32-289d-47b9-9c9d-483c3a751a90
+442,P0447,Hugo de Portu,PERSON,b72f7295-0d5e-4fcd-8c6b-1e1c920c334e
+443,P0448,Hugo Falqueti,PERSON,d097be31-b369-4207-b745-c62a1d311d86
+444,P0449,Hugo Gaufredi,PERSON,692b7e50-f42b-4324-b709-1051b0106c5c
+445,P0450,Hugo Ros,PERSON,ec99c90c-d8dd-4f8c-83e2-c6b697f0b262
+446,P0451,Hugo Geraldi,PERSON,7b3e1a0e-f368-481e-a368-0b05206fd894
+447,P0452,Huga,PERSON,1fad93ae-b1f6-4173-9b7a-71ac2bfdcfbf
+448,P0453,Huga,PERSON,664060e4-83e6-4974-bb42-cd2239817cd4
+449,P0454,Huga,PERSON,6ed74d1c-5cf1-475b-b402-e058f3fcb059
+450,P0455,Huga,PERSON,4fff1c46-878d-4617-b1cc-ba4b1cdd3893
+451,P0456,Huga de La Baraudia,PERSON,79cda2d9-8eec-40cd-a4a8-0c4e26fe4af8
+452,P0457,Huga Maurina,PERSON,787e9af1-fd10-413d-9fc9-cebef4a1e246
+453,P0458,Humberga Palina,PERSON,691e83d1-c259-493e-a9a3-3256c9496df1
+454,P0459,Hymbert Escuder,PERSON,22deef8a-8d0d-4c60-bfe0-f55d0670ac5b
+455,P0460,Isarnus Pontonier,PERSON,99b714ba-f854-4ec6-8003-f0e8ea5f3c18
+456,P0461,Jacobus Carbonnel,PERSON,505daaf2-e260-43a3-a0d9-4f72a0bd18d6
+457,P0462,Gaufridus de Calciata,PERSON,bf865293-0b44-47f8-97c9-42cfc11e0fab
+458,P0463,Gaufrida,PERSON,0d2211e5-1aa5-4174-bb3d-149d72683a91
+459,P0464,Joannes Austorcs,PERSON,0d3c2571-b034-42e2-9b0f-5cc7cdb53e4f
+460,P0465,Joannes de Avinione,PERSON,4367aa16-e84d-43af-bd99-17f5c168e2c2
+461,P0466,Joannes de Capadeli,PERSON,407a0372-03c0-4a6e-bde1-714b50c20e62
+462,P0467,Joannes de Capel,PERSON,d12317f3-be90-4bba-807a-041c7396f2ad
+463,P0468,Joannes de Castilho,PERSON,40056241-cde0-4eab-847e-c1d657dba05f
+464,P0469,Joannes de Gailhac,PERSON,21794205-9fc4-43f0-adba-637b51567bfc
+465,P0470,Joannes de Lolivia,PERSON,d1819e2b-8b39-4eaf-94a8-3715ca9bab86
+466,P0471,Joannes de La Garda,PERSON,5ac560d6-32d0-4628-9058-ff363d79d80a
+467,P0472,Joannes de La Junqueira,PERSON,62cda82a-769b-4eb9-b795-e6200962f127
+468,P0473,Joannes de Rupe,PERSON,73feb02b-a05d-49a6-b0f7-4843153cc027
+469,P0474,Joannes de Novenargas,PERSON,24f4c14d-e9fc-4a2f-b424-16cee1bed8d4
+470,P0475,Joannes de Podio de Milhac,PERSON,f86c3409-7627-4aec-b8a0-3eba41006004
+471,P0476,Joannes de Villanova,PERSON,bee4a005-2c57-4519-bc2e-02815fe2977e
+472,P0477,Joannes del Pradal,PERSON,71749b8d-f70d-4d95-bbf3-9daa67708aaa
+473,P0478,Joannes Fornerfabri,PERSON,9ed3f1a1-4991-44e6-9ce0-cc4825a4cee4
+474,P0479,Joannes Saturnini,PERSON,03b82b87-c841-4ba8-bdf8-bfbba5819ca3
+475,P0480,Joannes Torner,PERSON,a8cfa0cf-1706-40f9-92fd-1625cc72ef9f
+476,P0481,Joannes Toset,PERSON,b065fed0-6812-4792-a39e-81785b847eaa
+477,P0482,Joanna,PERSON,a03671b2-1a34-4bb0-bb22-0c56eb0b631f
+478,P0483,Joanna,PERSON,14620de1-38e2-4af2-a5a9-e36f0fe3bce1
+479,P0484,Joanna,PERSON,4a44b3f8-8e3b-4fa7-8abb-ed7e016369bc
+480,P0485,Joanna de Avinione,PERSON,4f2f3a6d-3cea-4b9b-a726-c293292b61fa
+481,P0486,Joanna de Castronovo,PERSON,da18ca79-5265-4e94-aec8-efb68b65123d
+482,P0487,Joanna de Gordo,PERSON,3c96d7e9-72e4-400e-9c1c-f9e6d802c6e3
+483,P0488,Joanna de Riberia,PERSON,75108f9c-ba5d-40d5-9125-8395fa9cab89
+484,P0489,Julianus,PERSON,488b9f94-0257-45af-847b-f10cc0bf6fe4
+485,P0490,[wife of Julia],PERSON,13b0f5c9-4b4d-4183-9083-f3fdce60408d
+486,P0491,[sister-in-law of Julia],PERSON,e3144267-1ddd-4f73-86f4-fd9c648c6409
+487,P0492,Laurencia,PERSON,7b3d5156-8aba-442a-ab24-48574b637cf9
+488,P0493,[Unknown] de Lauzerant,PERSON,f4b0b333-d68a-4f30-9319-399b02b9c1cf
+489,P0494,Juvenis de Lastroa,PERSON,1d9cfe3e-b85f-46ea-af57-89c6227a87e0
+490,P0495,Lombarda,PERSON,e56a0bfa-e7dd-4266-beb8-1dd925ac0f7d
+491,P0496,Lobaix,PERSON,18ea502a-ca00-41ec-a63d-4ca71318eec4
+492,P0497,Luxia,PERSON,744aab2d-6e7e-446d-8722-4386ea123298
+493,P0498,Maenza,PERSON,c033ff0c-e7ca-405d-aad3-e060c8e6bb44
+494,P0499,Maria,PERSON,eee33c36-80b7-4192-bb82-0d3f5919aeab
+495,P0500,Marta,PERSON,d4b7d7dd-6757-4d7c-b83f-72d70c3c27ba
+496,P0501,Martinus de Tore,PERSON,fc1c8348-247b-4d96-80fb-09b31b5af1ca
+497,P0502,Miravale,PERSON,004e77d4-043c-4ae3-a4e4-b87e2e364ff6
+498,P0503,Nalgartz de Villario,PERSON,25fe48b6-5f5c-46af-b506-598f7137e09b
+499,P0504,Nefales,PERSON,b197490d-b570-4683-90b5-ea71bf304b5d
+500,P0505,Nassaga,PERSON,d450e917-e85b-490d-89f9-43c8bce3dc62
+501,P0506,Naufressa,PERSON,28c43175-0ca5-440a-8b41-14f666311596
+502,P0507,Naurimunda,PERSON,9b694692-6702-4c05-b770-d2473f81dac4
+503,P0508,N'Aymara de Montelhassu,PERSON,866078ca-f65a-4b84-84e3-a43a15f85205
+504,P0509,Na Azoffreta,PERSON,994c62c9-4e2f-4734-9442-f898b9f92781
+505,P0510,Na Babilonia,PERSON,83ea364b-5f6a-44f1-9856-1db2a8d851e5
+506,P0511,Na Berengueria,PERSON,3675b4c5-d652-4c5b-b9ea-a63f6f6d815e
+507,P0512,Na Bona,PERSON,eb56121f-9d09-4d19-87f1-4eb354bfaaab
+508,P0513,Nacuidalz de Goire,PERSON,1f0005c6-cd91-4c2c-9a7e-973aa188ad9b
+509,P0514,Na Elays,PERSON,2878fea7-ce81-47e1-bc86-2bdd2f2ebb9b
+510,P0515,Na Sclarmunda,PERSON,6af88099-b73f-4745-a0ca-7b829a98c4ce
+511,P0516,Na Fauressa de Jovengas,PERSON,2bff2049-d15c-460b-a2e6-7cbcaab7e2a4
+512,P0517,Na Finas,PERSON,23182159-f80f-4478-b148-7a520ab9b5a0
+513,P0518,Na Finas de Moteilz,PERSON,c01466b6-2cf9-4cfd-9568-5ae09cc9ac88
+514,P0519,Na Folcauda,PERSON,6c462c3b-d84a-45e0-bf18-7ec5838148bb
+515,P0520,Na Francia,PERSON,37c4a98e-93d9-4927-becd-9f22ff5b1ba9
+516,P0521,Na Francia de Rigaut,PERSON,cebad69d-c239-43a5-b94f-7e934159600d
+517,P0522,Gairels,PERSON,fdc45a74-6351-457c-9524-73d1fe98bae3
+518,P0523,Na Garriga,PERSON,c18d060e-d502-4c24-937f-27cf00b98195
+519,P0524,Na Gassacs de La Mota,PERSON,e0690366-2708-44dc-8884-d38ccd8ae2ea
+520,P0525,Na Guias,PERSON,d4f4b359-8144-41a3-ba79-abfef69dd5e7
+521,P0526,Na Lorda,PERSON,86cbebd9-0b5e-438d-8bd9-4ce8171c4398
+522,P0527,Na Maenza,PERSON,9c42f302-054c-41fd-a58d-63005bc1f8ab
+523,P0528,Na Mairada d'Albafolia,PERSON,ee7d553b-ff48-4028-b7a8-cc9a152cd059
+524,P0529,Na Manenta,PERSON,8d63a022-00eb-4411-8971-8071123228a9
+525,P0530,Na Marauda,PERSON,ddfc2eb7-2360-4ec5-9bfd-35867341d53b
+526,P0531,Na Marquesa,PERSON,18e45608-5609-400f-8118-5ce5adb8d951
+527,P0532,Na Nomais de Belpoch,PERSON,ae67a541-311b-444c-a095-70aa00cc35c4
+528,P0533,Na Pros,PERSON,fce551fc-1d00-4c33-af33-e59c9b8afdd0
+529,P0534,Naremunda d'Estivalz,PERSON,605db0b2-c657-44fc-89cf-73062fd34fbe
+530,P0535,Na Sauriz,PERSON,cfc1a582-7b9d-4666-a072-1a32df9f2195
+531,P0536,P. Abit,PERSON,838a7111-8405-4b0b-9181-c83985d07115
+532,P0537,,PERSON,3c0cbfff-9bef-4780-a050-23324d2db36f
+533,P0538,Petrona,PERSON,bfd23257-54d4-447a-9ea8-df956a9d5a40
+534,P0539,Peyrona de Carental,PERSON,870218d4-2be8-4501-b8fc-1226747b9874
+535,P0540,Petrona de Prestis,PERSON,ca79f69c-991f-4d7c-9bfa-ef7b7b940831
+536,P0541,Petrona Pencheneria,PERSON,50865430-b5e9-4402-8e38-255a9f94bef0
+537,P0542,Petrona Remona,PERSON,6b0483b3-f816-4e4b-a018-2382395496d5
+538,P0543,Petrona,PERSON,1470ee2d-a3e3-4499-942b-4ad540fd5257
+539,P0544,Pictavinus,PERSON,4d8a8ee1-c9fe-41a0-8d38-22fc01dbfb2c
+540,P0545,Pictavinus d'Ausac,PERSON,e63ddcc0-1886-4b11-8c64-6dbbefdc3aec
+541,P0546,[wife of Pictavinus d'Ausac],PERSON,947bf001-ada3-47ea-a04c-9615b207b358
+542,P0547,Petronilla de Gathard,PERSON,061cc426-2538-4594-925e-f27e641426d5
+543,P0548,Petronilla de Fabrica,PERSON,f94bddc8-70a8-4e34-ae12-8153d08ed374
+544,P0549,[husband of Petronilla de Fabrica],PERSON,fb6e17be-9208-46f9-986f-c862bf824570
+545,P0550,[son of Petronilla de Fabrica],PERSON,482b161f-1d9f-4af6-a7c8-de9b152897c7
+546,P0551,Petronilla de P. S.,PERSON,79fcca72-775a-455a-a8ab-f7c51dbc0a77
+547,P0552,Philippus Donadeu,PERSON,b365e423-bd96-44ad-ab43-e5acb98c4823
+548,P0553,Petrus,PERSON,458f3a6b-5cff-4964-92b8-ba22e6a70d72
+549,P0554,Petrus Arnaus,PERSON,adfe274d-d68a-412a-a246-d3b92a159521
+550,P0555,Petrus Arnaus del Batut,PERSON,dff855c3-f094-4a8e-81b4-168db57a4502
+551,P0556,Petrus [Arnaus] de Montepesato,PERSON,9a39e62f-c9d4-48b5-a885-1387b145d089
+552,P0557,Petrus Auriol,PERSON,56500c9d-d485-4c2b-8039-c203c6f43f46
+553,P0558,Petrus Austorcs,PERSON,327b5fbf-80f2-4dd4-ade7-c7dbdecff1c9
+554,P0559,Petrus Baco,PERSON,fa1047e1-5188-4a61-a62f-fa3841539423
+555,P0560,Petrus Berals,PERSON,791f6798-3cd5-4f81-bf03-7292ca33b5ff
+556,P0561,Petrus Bernart,PERSON,2242df2a-a8bf-4519-9fec-bb0b804597d3
+557,P0562,Petrus Bernardus Sabater,PERSON,a843ab8e-e032-4bd4-ad4c-b7ec10fb8154
+558,P0563,Petrus Botas,PERSON,f261dcb5-f1b4-4770-a441-a4036276c48a
+559,P0564,Petrus Bonusfilius,PERSON,a697b34d-da15-462e-b910-87581b8847cc
+560,P0565,Petrus Broas,PERSON,fde97c1d-d273-4578-a56d-1da558848b17
+561,P0566,Petrus Cadels,PERSON,ea80d520-e03a-4440-a438-f454f6adbc04
+562,P0567,Petrus Carbonelli,PERSON,a78744e2-c6df-4e2d-9c6f-8eada1c67d38
+563,P0568,Petrus Carbonelz,PERSON,11feb235-bf6f-4af6-92a9-f77b91f595bf
+564,P0569,Petrus Caudier,PERSON,e2977ed1-7b87-4754-a3d8-42fd286ea5c9
+565,P0570,Petrus [Sillani],PERSON,077ba6b0-c974-4ce0-b564-f36a3ffc28b5
+566,P0571,Petrus d'Aussach,PERSON,390aa47e-030e-4986-a1cc-9ba474cb607d
+567,P0572,Petrus de Belfort,PERSON,13ba1649-f675-4361-8e34-ca531fb02157
+568,P0573,Petrus de Canasolas,PERSON,e42d5cdd-3d91-4ad3-a381-df1937d7bc8e
+569,P0574,Petrus de Castillo,PERSON,d7919873-dbf3-47a9-9dad-403662b5918e
+570,P0575,Petrus de Gaulenas,PERSON,3e55d9f3-94c0-4b58-8bfa-30bb26908fb6
+571,P0576,Petrus d'Engolesme de Milhac,PERSON,083394ab-ee60-42d7-ab47-d67c66f0eda4
+572,P0577,Petrus de La Barreira,PERSON,e883834d-092a-459c-b4c5-c944c2d42118
+573,P0578,Petrus de La Costa,PERSON,59bafc23-2b43-449e-ae4a-514035dc792e
+574,P0579,Petrus de La Garda,PERSON,e6fef009-f09b-4e52-aa57-d75c620a8f7e
+575,P0580,Petrus de La Gorsa,PERSON,f79d96a7-f8b4-49c9-9565-a85480b1f90f
+576,P0581,Petrus de Pomareda,PERSON,c82b9f2d-27b1-46b2-b198-2b1881665adc
+577,P0582,Petrus de Lacomba,PERSON,2ffd1d0e-3af3-4184-87e0-041f10fbfaf8
+578,P0583,Petrus de Lanes,PERSON,7b4bde01-c1d7-4dcf-8ec3-683457f2c8e1
+579,P0584,Petrus de Las Oleiras,PERSON,f1482fff-dfbb-45f1-8dc9-3602ab29e9d5
+580,P0585,Petrus de Monteacuto,PERSON,4b33fe56-507d-4857-ac3c-374136fce375
+581,P0586,Petrus de Montpezat,PERSON,fcf98a67-1fbb-4e31-9a54-81c775c5a9b9
+582,P0587,Petrus de Penna,PERSON,b3606aa6-c7aa-440b-aadd-9288d7085160
+583,P0588,Petrus de Petragor,PERSON,3ca836f1-cf14-41e8-b0a2-f1d58050523d
+584,P0589,Petrus de Rotival,PERSON,61db1850-3215-4aab-9a94-5f92390cad59
+585,P0590,Petrus de Tinha,PERSON,8f29bd6e-9410-4d98-9afe-b4438dd7de05
+586,P0591,Petrus de Vallibus,PERSON,50be2806-4796-4901-9b60-473b4769b9cc
+587,P0592,Petrus de Vernolio,PERSON,ffc4891c-f571-4a79-9eb6-61516d6662ac
+588,P0593,Petrus de Bruhl,PERSON,4127d547-6c08-45f3-b79d-1b974870edfd
+589,P0594,Petrus dels Pratz,PERSON,7679eacc-84fc-4e9c-809f-78d4e354d8e0
+590,P0595,Petrus Durandi,PERSON,1f4403f2-d93d-491d-b647-5def8004eff8
+591,P0596,Petrus Stephani,PERSON,ceb7f449-7910-401e-a4c6-ecd12bbfb1e4
+592,P0597,Petrus Gauraldi,PERSON,4710aa31-347c-44af-b8ff-63cc398405b3
+593,P0598,Petrus Geraldi,PERSON,c8f1387a-d7fc-4e43-a396-1b9e66520a1e
+594,P0599,Petrus Guillelmi de Godor,PERSON,384387e1-170b-40e5-9e91-0e462c371813
+595,P0600,Petrus Guillelmi,PERSON,8d8bb8ca-6f51-4e97-af2c-d08ed22c59e1
+596,P0601,Petrus [Guillelmi],PERSON,bce88754-db79-4720-a1c7-7ddb09ccb6d3
+597,P0602,Petrus Lanes,PERSON,ef4ba9e9-faf0-42ad-9b5a-4374685f4636
+598,P0603,Petrus Magis,PERSON,558d8ece-395d-45ec-9bca-d06f1d1952e3
+599,P0604,Petrus Peregrini,PERSON,e9dec5b8-fadb-41ac-8d5c-f1e5e9308800
+600,P0605,Petrus [Raimundus],PERSON,1401267a-cebb-47ce-8b85-cd6871c66b79
+601,P0606,Petrus [Raimundus] Roca,PERSON,6b98de13-c09c-4f5c-8704-5a3399d1623e
+602,P0607,Petrus Rigaldi,PERSON,9906aeef-edce-4209-96e7-ef0a1c0a1ffd
+603,P0608,Petrus Rossel,PERSON,882b26d2-7933-4a86-856c-fd11441e513d
+604,P0609,Petrus Saliners,PERSON,84089298-8d8e-415f-b618-fb83c3917935
+605,P0610,Petrus Teires,PERSON,f25383e2-eb09-418c-bd2d-b8298fd9f31b
+606,P0611,Petrus V. de Valtauren,PERSON,8a6e2caa-cdfa-4a16-9f9a-ac141ee2cd6b
+607,P0612,Poncia,PERSON,fdf3e3f0-6471-4802-8375-52ac6d3acf20
+608,P0613,Poncia,PERSON,80fa925b-34d2-42a9-bf8d-d79929ef0897
+609,P0614,Poncia,PERSON,87a6b4a0-b7b2-4356-b616-0282ae611318
+610,P0615,Poncius Archaubal,PERSON,eee5d3e5-f8f1-49de-bac7-5d378052f8e3
+611,P0616,Poncius Boneta,PERSON,c9d738f4-e623-421f-b40c-a6e616acc0bb
+612,P0617,Poncius d'Arquembal,PERSON,e4e7f6b0-be90-4466-b7e9-e86ba480b782
+613,P0618,Poncius de Coltz,PERSON,5f2e5ab9-f468-43f0-a782-d30c13e9ac5d
+614,P0619,Poncius de La Junqueria,PERSON,e20f0c44-93d3-4270-9560-5e97352568ab
+615,P0620,Poncius de La Lonqueira,PERSON,6e282272-76b6-4993-ab22-7d6388143450
+616,P0621,Poncius de Mairot,PERSON,8741af7e-bf9a-4887-9e87-1fab6b5a0622
+617,P0622,Poncius de Vacaressa,PERSON,3d55c437-f485-4362-adf3-d4ce55380739
+618,P0623,Poncius,PERSON,6ab61915-d20d-4124-8a95-9ebd173df069
+619,P0624,Poncius Faucoaire,PERSON,715e889c-bf47-44e0-9735-cffabaf1a11f
+620,P0625,Poncius Guillelmus,PERSON,f1397773-f4ea-450d-bcf7-cd8fb19dec02
+621,P0626,Poncius Lemovicensis,PERSON,c3ada060-d23c-4317-b8d0-7f77c0cbc655
+622,P0627,Poncius Pelliparii,PERSON,22efac32-7391-4817-bad4-e7e1dcfa09ae
+623,P0628,Poncius Seguini,PERSON,c9c2da9a-38cf-4797-a9b3-7493232f9f8c
+624,P0629,R. A. Marla,PERSON,f56c8bd9-5bdd-46e4-8df9-120d011f64d3
+625,P0630,R. Giraudi,PERSON,a816930d-735c-474a-a566-f35cc0d91756
+626,P0631,Ramon de Roffilhac,PERSON,aa9d44d0-70c0-4cf9-81c3-5d0dd759c2e7
+627,P0632,[Raimundus] Affortiz,PERSON,ccad07b0-35b6-42c2-a971-eca3f90a0917
+628,P0633,[Raimundus] Alegres,PERSON,19b58514-790f-43bf-8e02-5411f4b0c984
+629,P0634,[Raimundus] [Arnaldus] de Bos,PERSON,2640199e-28dc-4347-9231-418d8249c6fe
+630,P0635,Raimundus Auriol,PERSON,fb594264-692f-4896-8477-79addb96a077
+631,P0636,Raimundus Bernardi,PERSON,c6bbfcd9-9485-4d26-84d0-450dd8d0d3f8
+632,P0637,[Raimundus] [Bernardi] de Castilho,PERSON,b47c3f87-7a05-4564-8dd0-5d189c373718
+633,P0638,[Raimundus] [Bernardi] de Gaulenas,PERSON,2e483a77-e67b-42ec-b4ed-07a9285bea15
+634,P0639,[Raimundus] Bernardus de Pereilha,PERSON,2ce6c287-e4aa-47e1-81db-533cff28829b
+635,P0640,[Raimundus] [Bernardi] Divis Arnaldi,PERSON,5f6a5d68-1967-4c95-a569-d21d6767f123
+636,P0641,[Raimundus] Canels,PERSON,f3183f1e-fb2e-47c6-b83c-01efa1f2dd05
+637,P0642,Ramon Carbonel,PERSON,32569288-8513-4b05-8e24-15011b64106f
+638,P0643,Ramon Carbonel,PERSON,cc109932-79e0-439e-85e6-0df7e45e203f
+639,P0644,Raimundus de Acha,PERSON,4d1f3057-1189-4c02-8013-ae6d9657680c
+640,P0645,Raimundus David,PERSON,0422ff76-a49a-452a-8840-810f37365426
+641,P0646,[Raimundus] de Barnac,PERSON,36ac25b6-a2c4-4ea1-b5bb-d3e5bed20e92
+642,P0647,Ramon de Benag,PERSON,99db696d-4dfa-447f-be15-c35db0cd1b9e
+643,P0648,Raimundus de Bernali,PERSON,b4cbcd8d-c7aa-4737-8322-4542fafe8a6d
+644,P0649,[Raimundus] de Castronovo,PERSON,8083ac75-76b7-40d0-91ab-bdb416109bfa
+645,P0650,Raymundus de Galhat,PERSON,fd5e1657-d55c-457d-9a52-a852e07748ce
+646,P0651,Raimundus de Gaillard,PERSON,2928ee0b-f9f0-45ba-a842-8a546c434865
+647,P0652,Ramon de Lagarda,PERSON,abc86e95-ea12-41ef-893a-6d6a536f2b10
+648,P0653,Ramon de la Mota,PERSON,50bd0a66-27af-407b-9d4f-61f5dff72f4e
+649,P0654,[Raimundus] de Ramunderia,PERSON,45de68d4-685a-4ced-87ad-abe34a5be6ca
+650,P0655,[Raimundus] de La Ribeira,PERSON,b08aea90-e891-418b-98d5-932f5d9c0540
+651,P0656,[Raimundus] de Lagarriga,PERSON,b94da64f-5888-4474-a04d-138eea489534
+652,P0657,Raimundus de Lascroas Ropic,PERSON,d460f4cf-c147-4a40-9981-fe24c1577d83
+653,P0658,[Raimundus] de Loc,PERSON,1cc3e308-32b4-48a0-9658-c70c2980ef3e
+654,P0659,Raimundus de Manenti,PERSON,80ae3c0d-4c28-42c5-86a9-353dea31fced
+655,P0660,Raimundus de Monteacuto,PERSON,5938b0db-f316-4e4e-8f12-5d808b5e727c
+656,P0661,Raimundus de Perela,PERSON,238292e1-7cdc-4b1f-8fdd-a0f2dbd54257
+657,P0662,[Raimundus] de Pratz,PERSON,87d9dd89-8454-43cd-a544-b16055cfbdf3
+658,P0663,Raimundus de Sancto Ilaro,PERSON,0a77a794-5076-48f5-b18a-c35c17489f12
+659,P0664,Raimundus Joannis,PERSON,c626118a-815b-4d52-937f-6fda1ab3b86c
+660,P0665,[Raimundus] del Volve,PERSON,794e9964-1d45-4d36-bcda-71ff3b6056c7
+661,P0666,[Raimundus] Donat,PERSON,a0feea7a-ec27-4d6d-8a45-ecad56090372
+662,P0667,[Raimundus] Dorno,PERSON,e27df69d-81ca-4221-bb43-a3d7f864ef9d
+663,P0668,[Raimundus] de Broell,PERSON,8db3f9d7-d246-44a1-a37b-4bf5e12d6698
+664,P0669,[Raimundus] Durandi,PERSON,82020961-0da0-4833-a0b7-89aece0572c8
+665,P0670,[Raimundus] Duranti de Gaulenas,PERSON,8028e492-f5b2-4c24-b7bb-a001ee82f328
+666,P0671,Raymundus Escuder,PERSON,66b81189-9552-44a2-8d7a-ba9c95fe3e7a
+667,P0672,Raimundus Falqueti,PERSON,07503461-c045-497e-a3e6-3b399b565f7d
+668,P0673,Raimundus Fabri,PERSON,e5ca8fcc-4d82-4410-9077-ffec066045a7
+669,P0674,[Raimundus] Forner,PERSON,d26fe39f-b124-4cb4-b3fd-7f3ab30a307f
+670,P0675,[Raimundus] Gastaudz,PERSON,bd342b26-f96e-4204-9e59-add31e301171
+671,P0676,Ramundus Gauberti,PERSON,38352e2e-b946-4302-aeea-613fd6ef5064
+672,P0677,[Raimundus] Gauterii,PERSON,63c77c16-f751-4911-aaca-28a6a449536d
+673,P0678,Ramon Guiraud,PERSON,4c767009-67a2-4bfe-9651-fac674d072cc
+674,P0679,[Raimundus] Huc,PERSON,f220a195-7757-49ac-8447-f255750defc5
+675,P0680,Raimundus Laterda,PERSON,cc04bfbd-a692-4d29-8517-9bb5fad1d5d6
+676,P0681,[Raimundus] Lauterii,PERSON,659eb16f-b954-491e-9799-fdb7a573bc0f
+677,P0682,[Raimundus] de Nava,PERSON,99d56247-47a9-4677-bae3-08bd7901d04f
+678,P0683,[Raimundus] Textor,PERSON,39e2f1ea-8692-464f-9661-c352047076ca
+679,P0684,Raimundus Liuterii,PERSON,313b6a7c-171c-4d25-98e0-b6f187cd4db4
+680,P0685,Raimundus Moliner,PERSON,1183dd11-1c45-4fa7-a5b7-300096162e0c
+681,P0686,Raimundus Obrieri,PERSON,6e3a3fbd-601e-4c48-99aa-72f40f3a5910
+682,P0687,[Raimundus] Paira,PERSON,a628f379-5a35-4d47-94fd-1fe5ad33a1ad
+683,P0688,[Raimundus] Paire,PERSON,fee6ea17-7543-4a5f-a652-12d52e30465e
+684,P0689,Raimundus Pelegri,PERSON,835198b0-1178-41cb-8869-eeb82d5f29b0
+685,P0690,[Raimundus] Pomels,PERSON,06d1246e-9ed4-4155-8f9d-8a1dac5ce786
+686,P0691,[Raimundus] Roger,PERSON,7505f173-e73f-4140-8169-7b8727cd0217
+687,P0692,[Raimundus] Rufet,PERSON,c88f9540-6d24-401f-8e2b-e185fc9af578
+688,P0693,[Raimundus] Sanz,PERSON,86591e87-81f6-47db-b718-ff3c83177a4b
+689,P0694,[Raimundus] Sicart,PERSON,6fb8366e-9456-4f84-b350-321a7bbdf9ef
+690,P0695,[father of Raimundus Sicart],PERSON,a99d9658-b613-4a24-a862-0a03030b507f
+691,P0696,[Raimundus] Tavernas,PERSON,0804b45c-f3f8-4f81-9888-90c26b41860f
+692,P0697,"one of three brothers - first given the initial P, then G. Probably a scribal or transciption mistake",PERSON,38bda116-5da1-4cea-bbad-b35c0dfd9193
+693,P0698,[Petrus] [Tessender],PERSON,402ddd1c-15ea-484a-adfd-1ae4ed4fe495
+694,P0699,[Raimundus] Toseti,PERSON,b0d72771-4974-4c8c-9d92-4525598f364c
+695,P0700,Raimundus Trollier,PERSON,db84f71d-e167-4cdd-b41e-c83ba680e425
+696,P0701,Raimunda,PERSON,2be8a45b-8a4c-460c-9d57-d43b8c9308fa
+697,P0702,Alautor,PERSON,55eb450c-b456-4d8a-a24b-0abb7e35d9b8
+698,P0703,Raimunda,PERSON,606b1971-a2dd-4f9b-8778-d900f174d7a7
+699,P0704,Raimunda,PERSON,ffc2fc3a-e2fe-49fa-be7b-f4cdbba9cc98
+700,P0705,Ramunda,PERSON,22916630-50f4-4b2b-b313-4448d1823f20
+701,P0706,Raimunda,PERSON,18e99a73-41df-4b4d-b12a-aafbd8a9e6f6
+702,P0707,[Unknown] de Bosolens,PERSON,56c89d9f-fe04-4787-af4a-587e7e029a1a
+703,P0708,Raimunda,PERSON,76f29f06-af3b-4a15-8142-31c75f3623d1
+704,P0709,Ramunda,PERSON,d7a8181b-daf9-4452-af81-d5a0306d9aac
+705,P0710,Raimunda,PERSON,3072487e-c388-4bc3-b5df-a3fff6e02a30
+706,P0711,Raimunda,PERSON,319bd931-b27f-41b7-89c9-74087291c486
+707,P0712,Raimunda,PERSON,a9143b61-df6e-4749-a72b-01d5bf5a13d8
+708,P0713,Raimunda,PERSON,4236c19b-86d8-452b-b300-239cb20e3a2b
+709,P0714,Ramunda,PERSON,7c62cf37-6595-42ab-9d2b-17ea014fe6ae
+710,P0715,Raimunda,PERSON,f18790e1-cba0-4a76-9f6f-a3e9e87391b9
+711,P0716,Raimunda Bega,PERSON,4c009092-732a-4e2e-880a-3ade81008853
+712,P0717,Raimunda d'Arcmeia,PERSON,a27ad38a-6586-4da4-80a7-1137bfd0a131
+713,P0718,Raimunda de Bornato,PERSON,1f196d9c-6164-4b16-8f00-216b06402be7
+714,P0719,Raimunda de Corn,PERSON,87c69df1-450f-426b-a33a-351eb6e5fbf7
+715,P0720,Raimunda de Godaria,PERSON,911388af-2508-44fb-babb-32b7ed694eb5
+716,P0721,Raimunda de Charitate,PERSON,e82793f9-7fc7-4da3-a7c6-2bfc07fa1a6b
+717,P0722,Raimunda de Matfres,PERSON,4e5a5ec8-dfbc-4106-b476-1f76fb8c7a07
+718,P0723,Ramunda de Mazerac,PERSON,26717fdf-195e-411a-b480-cea5f1ee9817
+719,P0724,Raimunda de Vairac,PERSON,b6062ec2-c5f8-48cd-b914-bff7bd33040e
+720,P0725,Raimunda Salinera,PERSON,f15e6baf-9d66-425a-82aa-1f9485233203
+721,P0726,Raimundina,PERSON,f71b98a6-a198-4487-8833-2cec0effbdee
+722,P0727,Rainalda,PERSON,c77d564e-f08e-43b6-8391-27be79fb288a
+723,P0728,Ranerius Arpa,PERSON,c87dc032-74d8-4ccc-87c7-b93bdfdd4d75
+724,P0729,Ranulphus den Golesma,PERSON,163cdf62-5a3c-45c4-9010-56a4c10cd2fc
+725,P0730,Ranulphus Giraudos,PERSON,c8a488a9-e144-4f05-be64-5cf3b190dcbe
+726,P0731,Raimundus Arpa,PERSON,f01955d8-8fbb-4bad-891c-b8ade6af4af2
+727,P0732,Ricarda de Lautarz,PERSON,6b4426f1-def1-46d6-b51d-b7ff11d8cb79
+728,P0733,Ricardis,PERSON,c454cb38-85ad-455f-bdee-6fb4bfe08716
+729,P0734,Ricarda,PERSON,f66c0771-8ca3-4ccf-bd13-b9258a9f4a65
+730,P0735,Ricarda,PERSON,d4d347ef-5de9-44ca-b490-c8ec32fdd5d1
+731,P0736,Ricarda,PERSON,7783195f-8bd2-4202-a3e8-e7b4a885b4e2
+732,P0737,Ricarda,PERSON,d6377827-2d59-47f4-9bec-aab8be3ae0a3
+733,P0738,Ricarda del Brosset,PERSON,22054655-7065-4baf-a1d8-4aa95602b94f
+734,P0739,Ricardis Fabrissa del Pruliaco,PERSON,5254f834-342f-47a3-863b-4d693cee34b0
+735,P0740,Ricardis Tessendeira,PERSON,491d77c0-04ec-4b4f-bcd9-98b36e5d0c96
+736,P0741,Rigaldus de Spoli,PERSON,2b34d198-be49-4887-b204-88b79b5343f5
+737,P0742,Rixendis de Luzegio,PERSON,0c4cbc40-0ff3-4034-81f3-570ed87a1a2c
+738,P0743,Robertus del Porcho,PERSON,74aec000-c5bf-47cc-b470-0bcd5f01c443
+739,P0744,Roms de Sapiac,PERSON,98cf3909-8ddd-431c-9d9c-cc25e55ea8a9
+740,P0745,[Son of Roms de Sapiac],PERSON,ef1b0f32-30bc-4f54-a5a9-ae164c19a696
+741,P0746,[Wife of Roms de Sapiac],PERSON,3ec14ee9-9bc3-44f2-a010-477d1d673d73
+742,P0747,Petrus [Raimundus],PERSON,c64e052c-9d04-4e5a-8dde-eb54e44e6cfe
+743,P0748,S. Geraldi,PERSON,f2eee513-cb46-4e76-8c7c-b1a116e4c196
+744,P0749,S. [Guillelmus],PERSON,6fee5e98-cdcb-44e6-965b-915d4a724d19
+745,P0750,Sedeira,PERSON,936857ef-417d-4ccf-af0f-4ccec4baea34
+746,P0751,Serena,PERSON,83e4de9b-8881-459c-9bf1-53f08d968107
+747,P0752,Sebilia de Lafaia,PERSON,f725d02f-da6a-4d98-a148-0db8480f59e8
+748,P0753,Sebilia de Lagarda,PERSON,32411685-a099-4bba-8084-05bcb2f96e1b
+749,P0754,Sebilia de Montecuquo,PERSON,4198dc44-53f6-4af2-9ed4-c44e3074026a
+750,P0755,Simeon Agulher,PERSON,30035a49-f9c6-4621-9c8b-3d71ef4ff46c
+751,P0756,Stephana,PERSON,6b91d5b8-4b83-4dbd-994d-fbb6d5ca5a88
+752,P0757,Stephana,PERSON,43ab290e-16ec-4a8f-840f-a51e33cb42d3
+753,P0758,Stephana,PERSON,e82f92f1-76b8-4b06-93d4-00ea1877db1e
+754,P0759,Stephana Donzela,PERSON,0f9307cc-a722-469b-b1be-55c677cb2a6c
+755,P0760,Stephana Filhola,PERSON,a610df7f-8641-4cae-8552-42c91c2614e3
+756,P0761,Tolera,PERSON,8669a89c-ad33-4212-9b94-5659451b9b7c
+757,P0762,Tholosani,PERSON,37940e0d-ee1a-467c-9e33-e48d7c36f4a8
+758,P0763,Toset de Noges,PERSON,181d70b9-f5af-48e5-bbec-b5f5bde4dacd
+759,P0764,Vaus,PERSON,374a1432-d966-4ee1-bf1a-ee8c79ded200
+760,P0765,Vesiada hospitalaria,PERSON,f88b031d-91c4-4f65-9d65-9fc2079eafd1
+761,P0766,Vigorosus de Labacona,PERSON,56eab99e-1654-4f5c-be78-54b76c876821
+762,P0767,Bernardus de Cautio,PERSON,77b859f5-0b4e-46d3-a324-c032886c8eca
+763,P0768,Golesme,PERSON,ddffaf77-6cc8-4be5-bf4f-889720a1f639
+764,P0769,[son of Bertrandus de Braulens],PERSON,a16440aa-1625-4e40-9fbc-b0a2332f7fcd
+765,P0770,[sister of Guillemus de Montegalhardo],PERSON,7bd74198-a03d-4e45-abc9-c2468e18a713
+766,P0771,[husband of Guiralda del Riu],PERSON,d5de6ee4-6de0-4882-ab86-5bd834bc564c
+767,P0772,"[father of Guiraldus d'Engolsema, brother of Guillelmus d'Engolesma]",PERSON,4703fcbd-c71f-4bf3-93ec-d2ee0d1f2e82
+768,P0773,G. d'Engolesma,PERSON,aa829f71-2169-43a9-93bf-2287698e406d
+769,P0774,[son of Stephana],PERSON,978aa053-cf3b-45b8-b2bb-0625242972fe
+770,P0775,[pediceca of Raimunda],PERSON,99758e9f-d70c-4e26-991e-7b0b88dc2cfc
+771,P0776,[puella of Guillelmus de Favars],PERSON,af12cb49-74eb-484f-9bff-177328b1b716
+772,P0777,[Man guided to heretication by Petrus de Canasolas],PERSON,bb4d0017-5312-4b1e-8776-c7113e9e5c14
+773,P0778,[wife of Bernardus de Capella],PERSON,752f69f3-52a5-4fc8-a625-81bfcd55d208
+774,P0779,[son of Bernarda Rubea],PERSON,988ac54e-f64a-4d16-8789-43772c727185
+775,P0780,[infirm person known to Bernarda Rubea],PERSON,2579c6ff-7bca-4790-bb44-a20eb23daa43
+776,P0781,[Husband of Guillelma de Via],PERSON,2f4d910e-98f9-45ed-959c-186bb24e7eaa
+777,P0782,[Mother of Adamarius de La Roca],PERSON,da8349b5-1cc4-42c4-b4fa-989ed9778cd3
+778,C0076,abjuration,CONCEPT,1b612596-8f30-4541-bd39-1aee8fc2b794
+779,C0094,accusation,CONCEPT,cbf14140-920f-46b2-8e91-bd4f15ef42b4
+780,C0114,Adam (first man),CONCEPT,08cc611a-0fdc-4d59-93a2-c22c844cd0e5
+781,C0123,something,CONCEPT,1fbc9dbd-5b0c-4e9a-a72f-d03938402340
+782,C0124,someone,CONCEPT,226bd251-ac02-4859-9c9d-fe01aab6ac55
+783,C0173,soul,CONCEPT,d5f3abd7-a97c-454b-a322-f4938e1a1034
+784,C0081,appareillement,CONCEPT,cbef3b9d-9c3e-459a-bc1a-117f8d2d4471
+785,C0181,water,CONCEPT,9270c2a5-b492-40f4-a131-f2ef74b22678
+786,C0182,holy water,CONCEPT,26cfc74a-c76a-4856-8378-ba41fad29166
+787,C0184,holy water: only water,CONCEPT,1a7dcdab-ad7a-4cab-a138-1800341312a8
+788,C0093,summary of accusation,CONCEPT,6fbac20d-3343-4814-93b5-7da1a9055cb9
+789,C0148,Beguin,CONCEPT,b02540fd-ebd0-45de-a7a0-b834c87b3ad7
+790,C0185,blessed,CONCEPT,ee6d23e4-a9bc-4fb4-9f08-88ee4e950da6
+791,C0127,property,CONCEPT,6653acf3-3f48-43d9-9ca2-5fa27443245c
+792,C0069,property: all his/her property,CONCEPT,7cfece15-3951-495d-8a6d-d0ecb32eeb2f
+793,C0037,the good,CONCEPT,1de4255a-5a62-4997-8c81-45502dbf9b75
+794,C0193,good,CONCEPT,785e2673-6d78-4091-b184-81eedfda01ba
+795,C0163,shoes (pair of),CONCEPT,8430f1e3-328d-433f-b2eb-2d8e4db4a894
+796,C0164,shirt,CONCEPT,34beef2c-0021-42c9-918d-83307d0238be
+797,C0161,canons regular,CONCEPT,2ae102a1-c7c2-4838-812f-659ff1a8f595
+798,C0160,Augustinian Canons Regular,CONCEPT,b322ee68-0d2c-4bc7-b6d6-2317daf9c23e
+799,C0070,commune of Milan,CONCEPT,af9ad5b4-6a84-44bd-ae6f-cfced513a0da
+800,C0098,appearance in court,CONCEPT,22870305-f86c-49e2-84ec-3d1bc36c9b7c
+801,C0019,believer of the heretics,CONCEPT,032c2934-3ee1-4ec8-a829-ab7bb4a8b001
+802,C0227,believer [of the heretics],CONCEPT,f8f2f32a-6758-4611-a30e-dcd456efd541
+803,C0092,summary of guilt,CONCEPT,17e6c1fb-c9c8-42f8-b6c1-65d605c1f121
+804,C0095,denuntiation,CONCEPT,e908fbeb-c166-4760-a5de-44dd99901a24
+805,C0126,depositary of heretics [i.e. Cathars],CONCEPT,50516ee5-aac2-4cae-ad86-98f913e17418
+806,C0099,deposition,CONCEPT,e8a5fa6a-d2f6-4a9c-a643-1f803631c503
+807,C0110,God the Father,CONCEPT,7b702b30-7df4-49a7-8a51-bb702b7d1da5
+808,C0196,tell the truth about oneself and others,CONCEPT,6316b19f-3e83-4542-8283-a36b9860c9d2
+809,C0068,"tell the truth about oneself and others, both living and dead",CONCEPT,0b6c1c30-fd3a-4e40-ad19-32c3168adcb4
+810,C0073,deposition,CONCEPT,66f3b838-54a1-4559-9404-9cf2a362c587
+811,C0189,teachings/doctrine,CONCEPT,8d06c152-8667-4598-8ee9-636e9b657705
+812,C0169,teachings of the Church,CONCEPT,5b959152-a9b9-4e9b-b3a2-5345654bc0af
+813,C0177,teachings of the Church are worth nothing,CONCEPT,5138cad6-a70e-41ea-a77c-8c989ab7acca
+814,C0175,teachings of the Church are not profitable to man's soul,CONCEPT,655b92cb-1f8c-409a-bfa9-84bd08f56ce0
+815,C0054,houses of heretics,CONCEPT,e02ab7f5-5f78-464d-a31d-9469c445fe58
+816,C0053,"houses of heretics: ""houses in which they stayed""",CONCEPT,1134c179-c81f-402a-aa88-df8a72ed9574
+817,C0055,"houses of heretics: ""their own houses""",CONCEPT,c7866376-794b-490f-868f-e266e1ab3fbe
+818,C0056,"houses of heretics: ""where they stayed publicly""",CONCEPT,b14a50bb-f135-48f2-af01-4ec7843c75cc
+819,C0014,Church,CONCEPT,e1a625e3-b9ba-4f99-bf44-4f2aff9a3846
+820,C0084,churchperson,CONCEPT,60194daa-a3d5-4f41-adb3-365ea485ef8b
+821,C0016,churches (buildings),CONCEPT,f1c8efdf-0881-41d6-8aa2-b90a93f05004
+822,C0187,effect,CONCEPT,ec81683b-3d3c-4da2-8572-394cee8b0b69
+823,C0033,almsgiving,CONCEPT,e85b0206-3e7d-414d-ad4d-bb5b2b27113a
+824,C0032,almsgiving: it is good to give alms,CONCEPT,4118bef3-2845-4a27-9f59-5878d35724ed
+825,C0030,almsgiving: those who give alms to non-heretics do not have merit,CONCEPT,349bfa9a-4597-488b-b4f8-1299f263dc52
+826,C0027,almsgiving: those who give alms to the heretics have merit,CONCEPT,99dfef59-ba85-41f4-8da4-78dd39f7e97a
+827,C0122,error,CONCEPT,11fe8d59-2963-4872-ab54-4bdd2cfb192e
+828,C0052,errors,CONCEPT,2723bb7a-4a78-4839-be0d-22f65f0815f3
+829,C0165,outside the period of grace,CONCEPT,8c44f9f0-d5ed-4f40-9cf3-99ded28749d9
+830,C0119,beans,CONCEPT,4b77120b-d818-4ae2-80b6-0edb2544778b
+831,C0011,fact of heresy,CONCEPT,5a8a07be-c953-4afe-b9db-cbf4b0af2e94
+832,C0007,false witness,CONCEPT,59c83c37-6f0e-42dc-bd0f-fe85d15c18b7
+833,C0171,female,CONCEPT,f3c94b13-5338-4ad2-8397-e2326b150573
+834,C0066,Catholic faith,CONCEPT,55f8b180-f510-4831-ad82-efe1b208c421
+835,C0111,Son of God,CONCEPT,90534bab-4572-48bf-840c-33ed2b83579e
+836,C0139,grain,CONCEPT,812607fd-3302-446a-a9a8-5fae3703ed22
+837,C0051,heresies,CONCEPT,d4f9591e-f1b9-4b00-b434-68334451a2c7
+838,C0001,heresy,CONCEPT,01afbc55-2c24-49c8-a838-546a8c4be3d2
+839,C0002,heretical depravity,CONCEPT,b1bfc461-58ee-4677-a59c-f5d7e553480d
+840,C0082,heretication [Cathar],CONCEPT,3a8e9dd4-613a-41c9-aacc-fba93b7e5f7a
+841,C0208,heretics,CONCEPT,dc71b806-9cf0-4b02-ace6-1586222cabbc
+842,C0028,heretics [Cathar Good Christians],CONCEPT,a2605800-81f7-458b-ba27-cd06a0b89cb4
+843,C0125,heretics can save,CONCEPT,594adc70-2fea-4a5f-8005-6d82e08b82e5
+844,C0057,heretics are good men,CONCEPT,9912c8d9-388d-426f-babf-a9160acd998d
+845,C0026,heretics are in truth and justice,CONCEPT,de05c412-3a3f-4d5f-baca-1fce1e0223d6
+846,C0029,vested heretics,CONCEPT,d69d516d-73d7-4383-a11e-f49efb395836
+847,C0067,persecute heretics,CONCEPT,1d67c97e-1558-4885-8e59-143942ce0eaf
+848,C0006,heretic,CONCEPT,f6af3119-789a-4383-b73d-9e24687d04a4
+849,C0132,heretic [Cathar Good Christian],CONCEPT,70b2f56a-008f-4636-b121-39c9dc9d3fa6
+850,C0143,heretic perfect,CONCEPT,8aafc43e-2311-4b71-b19b-f0923e934927
+851,C0022,vested heretic,CONCEPT,53446c88-b06a-4741-87e3-57c8820d5a4c
+852,C0036,good: one should do good,CONCEPT,8057625e-393c-45bc-a1ae-e9e341f4b98c
+853,C0089,holy images,CONCEPT,4c80d26f-5b3e-4586-8f55-5793cba60f77
+854,C0101,images of saints,CONCEPT,8ee41de9-dabc-443a-89f6-94c655d72ea9
+855,C0085,indulgence,CONCEPT,54e0cc31-23e4-4d4b-84b1-46d06115cfed
+856,C0020,inquisition,CONCEPT,fdd76099-7439-45ad-a95a-d95c3173457c
+857,C0003,inquisition of heretical depravity,CONCEPT,9686452e-17e6-4690-8ab1-9ec60a14a7d6
+858,C0146,inquisitor [in general],CONCEPT,8cc0e03c-5a7c-4e5f-9bb3-6cbfd4661cf8
+859,C0121,inquisitor [of heretical depravity],CONCEPT,3c006112-c4ff-4354-8979-d580592b4fd6
+860,C0072,inquisitor of heretical depravity,CONCEPT,d76ce8f7-9e37-4d80-82fc-578d8aaed118
+861,C0060,inquisitor of heretics,CONCEPT,0900c3de-17e6-4d07-be98-0c28927b7ec5
+862,C0010,inquisitors of heretical depravity,CONCEPT,e2c97dc1-0023-4009-8c3e-bd1c31705a1f
+863,C0078,document (notarial),CONCEPT,65c94679-fc6d-43f4-a56a-43f1d289cd33
+864,C0097,deposition,CONCEPT,2a0c2210-9120-4c32-8dcc-994fe9efbeff
+865,C0074,deposition,CONCEPT,b3a30b49-e5fe-4013-95da-367460113b6f
+866,C0172,male,CONCEPT,7d453f4a-506f-4270-8e70-e0ba4dd3e886
+867,C0035,lies,CONCEPT,0059cfc4-abd0-40c7-854c-87ee5622d9a7
+868,C0034,lies: one must not lie,CONCEPT,45de851a-b825-4a39-9789-51ae285b9909
+869,C0141,knight,CONCEPT,61eb2cee-e099-44fb-943d-8c8c2fd78f01
+870,C0109,miracles,CONCEPT,16c7c7d4-2cca-4013-8185-c00cd6fa1aee
+871,C0137,gift,CONCEPT,9d3fc511-b2bf-4df9-b3c1-27baa2b433cf
+872,C0138,little gift,CONCEPT,33c0575e-9785-479a-8412-fd59f839c912
+873,C0105,nobody,CONCEPT,44c92cbf-377d-42d9-9489-20696750978a
+874,C0233,whoever / anybody,CONCEPT,ad46b274-96ce-46d3-b57e-a616461397b0
+875,C0104,nothing,CONCEPT,ab0d36c6-0886-426a-ae8f-84b65d85f68d
+876,C0216,more,CONCEPT,d2a0be3d-5299-48fc-a2b8-0a059e7251b0
+877,C0106,worth nothing,CONCEPT,4594581e-da50-4952-9fb9-57bb9e1fe643
+878,C0190,not,CONCEPT,e6ed7678-df8b-4a98-aab5-df0a2a0bd48f
+879,C0170,not profitable,CONCEPT,18fd7c4a-aa1e-4f7e-8962-5213310621cd
+880,C0168,not profitable to the soul,CONCEPT,93e5d3e7-8dd1-44dd-be67-1e497409b0f3
+881,C0062,notary,CONCEPT,bda5e023-4a5d-4b91-a0b5-47ec4f561039
+882,C0063,public notary,CONCEPT,ef72e82f-cfc0-42aa-ab44-3ecabade355e
+883,C0077,obligation,CONCEPT,7ffafb7b-5c23-48ab-b0ab-cf5e14e4bfd3
+884,C0088,offering,CONCEPT,434ca62b-e5ec-411b-b0d1-b68fa50cfe9d
+885,C0086,offerings made before the images,CONCEPT,c0453713-37e5-48eb-a3b8-c98fc30771e7
+886,C0131,office [of inquisition of heretical depravity],CONCEPT,1d292045-a393-4c8f-b672-830bf096d1da
+887,C0004,office of inquisition,CONCEPT,093f6730-62ed-46b1-aba9-3f4900b6316b
+888,C0005,office of inquisition of heretical depravity,CONCEPT,716fa2d7-b333-4c52-823c-58b73fdca43c
+889,C0031,prayer,CONCEPT,0e1475da-684d-467a-a67a-0515aedda06f
+890,C0023,prayer: no believer should pray to God,CONCEPT,79ade963-cbea-426c-8d53-b59acbeb8a3e
+891,C0115,"prayer: one should pray only to God, not the saints",CONCEPT,a20cf5cb-41ee-4fe9-85f8-eec6d834173e
+892,C0025,prayer: only heretics can pray Pater noster,CONCEPT,1f346f29-aabf-4a11-a700-e229df88ed32
+893,C0162,Order of Carthusians,CONCEPT,c6ba7b3c-0a37-40a7-8e26-93ef52817323
+894,C0150,Order of Cistercians,CONCEPT,fee9141f-ae61-470f-9064-2778a55a3ce6
+895,C0149,Order of Carmelites,CONCEPT,a481d2e7-13b4-442b-8d81-9c35893ae231
+896,C0103,Order of Saint John (Knights Hospitaller),CONCEPT,1ccb30cb-877d-4da1-9411-b77f5b0de3c6
+897,C0140,Order of Friars Minor (Franciscans),CONCEPT,6f388cd2-4568-4069-8b19-cbbaa53f3299
+898,C0155,Order of Friars of Saint Mary,CONCEPT,e88df96d-8a94-42a9-aa4a-30fc376b7d17
+899,C0154,Order of Hermits,CONCEPT,eecc2133-f052-4a5d-96e1-a8f7fd72cb5d
+900,C0157,Order of Humiliati,CONCEPT,e432cd7e-c175-4709-bb44-c8bce476e6db
+901,C0156,Knights of Saint Mary,CONCEPT,5ec9ff5c-c623-480a-9201-4cf500f240b4
+902,C0153,Order of Penance,CONCEPT,c20a6537-ef88-49c8-b7ae-c61a063347ee
+903,C0158,Order of Praemonstratensians,CONCEPT,900fef76-02f6-4d35-b11e-42d32cae227c
+904,C0059,Order of Preachers (Dominicans),CONCEPT,85129701-48af-4da4-b71f-2e1c4cdd5dd1
+905,C0151,Augustinian Friars,CONCEPT,30ab3f5e-114d-4f84-a9b3-c02d307de2b2
+906,C0159,Order of saint Benedict,CONCEPT,ebd9b6f5-3a3c-485f-a90b-5f5404823e51
+907,C0152,Order of Servites,CONCEPT,4c823759-1771-4a5f-ba09-6a2f3f778bac
+908,C0079,kiss of peace [Cathar],CONCEPT,8d39399b-86b2-4382-853f-63bf65e899f3
+909,C0120,bread,CONCEPT,5d936921-1d3c-4df2-8fd8-ea5f4ac012e7
+910,C0136,blessed bread,CONCEPT,4ae6e6b3-4ebf-4a85-893d-b56924cfa631
+911,C0183,holy bread: only bread,CONCEPT,97396f34-1740-4f91-a5d3-cac62e4b84bf
+912,C0128,money,CONCEPT,d296d56a-dc94-42e2-9d11-768f3c93fa43
+913,C0198,imperial pounds???,CONCEPT,35ad918c-4ea4-44aa-8226-d8994672b375
+914,C0129,money: loan,CONCEPT,1abc82aa-7b47-41d5-a35f-335c5d998e63
+915,C0038,penalty,CONCEPT,6ab4753d-a05a-4c40-a5d8-cf43dc32f926
+916,C0044,penalty: prison (type undefined),CONCEPT,0c0a29af-b031-4ec4-b2e2-8d9149a59d4a
+917,C0224,penalty: prison (type undefined),CONCEPT,c437549e-dbfe-4b04-85a5-6c316a9f97dc
+918,C0039,penalty: crosses,CONCEPT,e9922df7-6182-477b-b485-d4045ab03fdf
+919,C0041,"penalty: crosses (double, i.e. two on each side)",CONCEPT,3e3ef118-5043-49c2-b987-5dbe58a8d756
+920,C0040,"penalty: crosses (simple, i.e. one on each side)",CONCEPT,a4d339c7-0e16-4404-86f4-443bbcbd0e8f
+921,C0071,"penalty: cross (singular, front side only)",CONCEPT,52773f95-719e-4113-883a-25a29caeee5e
+922,C0134,"punishment: cross (1 palm in length, over the shoulders)",CONCEPT,8abe963a-84e9-4fcf-ba41-683c48d51990
+923,C0135,"punishment: cross (2 palms in length, two digits wide, front side)",CONCEPT,a2d44d1f-2e4e-4b13-ab1a-00bca642e924
+924,C0142,punishment: two crosses,CONCEPT,0f1bb1e9-82e0-491f-b3b0-72261be0e39c
+925,C0048,penalty: exhumed,CONCEPT,bc384600-7224-4d24-a0fd-9cc46165c62b
+926,C0049,penalty: exhumed and burnt,CONCEPT,f8c072ab-8571-4ae3-83fc-8259639066f0
+927,C0050,penalty: [red] tongues,CONCEPT,91cf7356-3085-4aec-b62b-c80c30d57f77
+928,C0133,punishment: penitential stay (in a location),CONCEPT,e7bcf370-cd86-415e-8f25-476e7e3b5452
+929,C0045,penalty: open prison,CONCEPT,41565d08-1ff1-4f31-8c60-b06b7cdc26e1
+930,C0046,penalty: solitary imprisonment,CONCEPT,79a3703c-9ea3-49f2-b1b7-5a372ea54818
+931,C0058,penalty: maintain a pauper,CONCEPT,f638268b-b02c-4000-8285-236e28fc18f7
+932,C0042,penalty: pilgrimage (or otherwise unstated penitential journey),CONCEPT,b1b39d00-4b3d-47c6-96e9-76e5e97a99c0
+933,C0047,penalty: released to the secular arm,CONCEPT,e47b895e-b02d-42a6-bb50-0781e050da2c
+934,C0080,penalty: maintain a priest,CONCEPT,20f12c02-6ee4-4b2b-83f7-92dab80ffd13
+935,C0043,penalty: visitation,CONCEPT,252a0a1a-c142-49aa-b2bd-b7758ada7e9e
+936,C0087,punishments,CONCEPT,09c7ddd0-4df4-42a0-884c-b4a51af9ce2c
+937,C0145,penance,CONCEPT,fe9ba32b-6b96-41f3-baa2-6fdb3c3b463a
+938,C0017,pilgrimages,CONCEPT,dddf378b-6bf1-4b4d-ad93-308df5821a00
+939,C0180,,CONCEPT,5d3d2182-f5d4-4bf8-a7b3-aa88e5ee7431
+940,C0130,prescript,CONCEPT,2a1453bc-60f4-4535-8813-d7b7533e6c2b
+941,C0061,preaching,CONCEPT,b33876d1-979c-4370-a1c3-3fc6623a5256
+942,C0100,presentation of witnesses (deponents against sb),CONCEPT,36b328ef-8f9b-4006-ac35-4a9db7d97025
+943,C0191,profitable,CONCEPT,67fbd630-a564-4c45-b8db-83cfbba4caa6
+944,C0096,response to the accusation,CONCEPT,ae5f199c-658f-4cdf-92ce-9351ad47338d
+945,C0194,priest,CONCEPT,3091af08-0922-4b78-8e1d-bb6f5292bdf1
+946,C0108,priest: they do not have any special power above that of ordinary laypeople,CONCEPT,bbd63ddd-33de-44fd-a0ec-e982583d7dc9
+947,C0018,sacraments,CONCEPT,8b19bfaa-25ee-4f62-87cf-1aca41ad1793
+948,C0229,sacrament,CONCEPT,6edcbd21-5b46-490e-a1a6-039fc7ea6591
+949,C0176,sacraments are not profitable,CONCEPT,7721e5da-d686-45b3-8ac1-8ba82c9671fb
+950,C0174,sacraments are not profitable to man's soul,CONCEPT,7efa5759-eb68-4093-9bea-97775b948726
+951,C0090,sacrament of the altar,CONCEPT,bf158d8a-839d-4892-8a80-8e66e9321785
+952,C0091,sacrament of the altar: is only bread,CONCEPT,568f7efe-c9a2-4b57-85f1-ce0a9797250d
+953,C0107,sacrament of penance,CONCEPT,8f14a6e7-3fe2-400a-8fb8-d49650938040
+954,C0116,sacrament of penance: nothing worth,CONCEPT,34c11868-892f-4d9d-a373-498b07dd756b
+955,C0015,holy Church,CONCEPT,0e44a3f7-d89d-494e-98e5-a85a605fe7de
+956,C0102,saints,CONCEPT,b533f3a1-d8b4-4a68-9c51-406e4fc2b090
+957,C0075,sentence,CONCEPT,efc86efa-f3a1-4917-a24f-120966fd1b77
+958,C0013,seven sacraments,CONCEPT,b0ea64ff-33c8-4e93-9399-2aa598126505
+959,C0117,seven sacraments: are nothing worth,CONCEPT,292508eb-c120-4f1b-b03f-12fd44b73763
+960,C0195,sir,CONCEPT,30332db3-ff5d-42bc-8273-dd95b5b534c9
+961,C0188,without,CONCEPT,74a1617f-58af-4aa1-a992-e5e9e1d6e187
+962,C0167,without effect/of no effect,CONCEPT,f4113a96-bb9c-41ad-940e-9ed72be3c18e
+963,C0186,only,CONCEPT,5bd04c29-c9ea-4cd2-ae04-13b038f18705
+964,C0112,Holy Spirit,CONCEPT,643e3593-87c9-4268-9fec-fe0deb0ba550
+965,C0065,public notary,CONCEPT,0cfc1c0e-2642-42e2-a7b8-c211c06c76ce
+966,C0064,notary,CONCEPT,02f3a0ba-333f-4f4f-b6ad-e3a350b17ac7
+967,C0166,period of grace,CONCEPT,5498739e-699d-4f92-a0dc-ffa29dc42d8c
+968,C0012,witness [i.e. deponent],CONCEPT,3014d8c3-54c1-4cbd-afd3-5bf2c2dd55f0
+969,C0144,witness [i.e. assessor],CONCEPT,17ecbe02-4002-4f95-873a-bc1f94fb66f9
+970,C0021,fear,CONCEPT,f1dfcdb6-d07c-4dc4-9aca-35ac2a1afff4
+971,C0113,Holy Trinity,CONCEPT,b1b2532b-0ccd-4f4d-9c64-62983f7d63da
+972,C0083,Waldensians,CONCEPT,b3385b27-2d66-4710-93d8-4106da3a5775
+973,C0008,Waldensian,CONCEPT,3ac95358-547f-4548-9ce9-c603eac7b425
+974,C0009,Waldensianism,CONCEPT,cfa1458d-fef5-4686-b44d-48a7fc237748
+975,C0192,veneration,CONCEPT,e81649a8-1d5c-4878-b222-31e47e356820
+976,C0178,worship of the saints,CONCEPT,9bdab245-72f0-4f4f-8be8-85ec137eaed3
+977,C0179,worship of the saints: not profitable to the soul,CONCEPT,b268b472-db3c-4146-a7ab-5d7ab27e3530
+978,C0197,truth,CONCEPT,607fb284-8440-4cd2-a856-6055a813e50e
+979,C0118,wine,CONCEPT,2decb227-2505-4ec8-bf12-282040d15ad5
+980,C0147,guarantor,CONCEPT,3be7aecd-6392-4770-bfb6-359a03e87151
+981,C0199,sacrament of matrimony,CONCEPT,b5918503-87b7-4a99-bfb6-9dfcc24ba43f
+982,C0200,sacrament of baptism,CONCEPT,a4ac64c7-3e64-4a16-9c1a-86e5c82df55b
+983,C0201,sacrament of confirmation,CONCEPT,0d0ac671-93f5-44e0-9e95-2378939126fb
+984,C0202,sacrament of baptism: nothing worth,CONCEPT,af358997-4f08-43a4-bc38-61bc455b71d7
+985,C0203,sacrament of confirmation: without effect,CONCEPT,0111fab1-4383-4a61-8876-ea5d9d49ab5f
+986,C0204,marriage: not necessary to solemnise in the church,CONCEPT,31160936-c88d-4f22-8819-3cc06e17289c
+987,C0205,confession: only to God,CONCEPT,aee9ffc1-4781-4ad5-a97c-5b94b40eef29
+988,C0206,confession: to good priests it is good and profitable,CONCEPT,8bfaf18c-4a1c-43b8-8bfe-6ead7ae07d29
+989,C0207,confession: to bad priests it is not good and not profitable,CONCEPT,7e1ea765-8579-4269-be96-9b457e233c42
+990,C0209,evangelist,CONCEPT,593c648f-0dbb-4a79-a4a2-b20ab2f1fe53
+991,C0210,sacrament of matrimony: no effect,CONCEPT,58dfec7f-394e-4ac1-941f-692ec4f32328
+992,C0211,sacrament of extreme unction,CONCEPT,d7208efc-8e3b-4362-83ef-c4b565fbe264
+993,C0212,sacrament of extreme unction: worth nothing,CONCEPT,36de6f38-5e06-4023-99d3-6f6185793c18
+994,C0213,cap / bonnet,CONCEPT,98292728-d953-4910-b6d7-c591c21e061f
+995,C0214,little cap / bonnet,CONCEPT,a27fbac4-6b2b-44e5-bac9-4c883b54c8fd
+996,C0215,Waldensians are good men,CONCEPT,371d31e0-09f8-4cbd-8070-26aee9f6bffd
+997,C0217,fish,CONCEPT,e4a3db80-641f-47c6-b921-759856c74bcf
+998,C0218,death,CONCEPT,e2a8c34d-d265-4fe0-905e-e29497e239e3
+999,C0219,pilgrimages: waste of money,CONCEPT,18c3e78f-aa76-4921-bee4-38eb1f3af488
+1000,C0220,purgatory,CONCEPT,76f6b5ee-4936-4894-85a5-08d6a03ac432
+1001,C0221,prayers of purgatory,CONCEPT,a1c8f39d-8aa7-4a99-9e1e-90134bdd26c5
+1002,C0222,purgatory: doesn't exist,CONCEPT,316384b8-977c-4577-97ef-336ab75b2334
+1003,C0223,location: where,CONCEPT,37ccf647-c1d0-436f-a89d-de93075ebddb
+1004,C0225,men,CONCEPT,94feca10-0897-45a0-82b7-eebdd2d29c1c
+1005,C0226,women,CONCEPT,917d39bc-d684-4714-bfa9-49e28cf5db06
+1006,C0228,depositary,CONCEPT,b8460196-95c2-47a7-bde5-f5a33de48bc3
+1007,C0230,location: same,CONCEPT,59b77f4d-3531-4bf9-9d00-500587290671
+1008,C0231,only heretics can save,CONCEPT,102b6bff-a06a-4d49-88a0-2e60920ca531
+1009,C0232,Christmas,CONCEPT,50794dbf-a487-465b-8aa4-98b8848aeebb
+1010,C0234,sex,CONCEPT,500f8ef8-8b1c-4824-b54e-238b95213871
+1011,C0235,idolatry,CONCEPT,86c62a84-2a12-40cd-80c0-bea664ff9254
+1012,C0236,worship of saints: only idolatry,CONCEPT,f4b1bab9-456b-430f-8b79-24ae6669f707
+1013,C0237,pilgrimages: only idolatry,CONCEPT,1563e293-2610-4c39-895b-c3b3e0160962
+1014,C0238,offerings made before the images: waste of money,CONCEPT,50529282-8eea-447f-a004-e5a7158a467e
+1015,C0239,letter / letters,CONCEPT,6c6dd1de-abf6-413f-ae9f-6170c5e1dc51
+1016,C0240,"worship of saints: not to be done in church, saints are only in heaven",CONCEPT,a2a784b5-ff41-41fc-a3cb-f5524bd057c9
+1017,C0241,heaven,CONCEPT,dcf9d734-a734-461d-bc19-78318a1f223d
+1018,C0242,receiver of heretics [Cathar Good Christians],CONCEPT,87321bd7-ff1f-401d-b0fc-8dad5ceb9de6
+1019,C0243,host of heretics [Cathar Good Christians],CONCEPT,e010edb3-fc83-4926-bf37-5cdfa26b185d
+1020,C0244,guide of heretics [Cathar Good Christians],CONCEPT,e80e7eac-ccc4-4e97-adf4-c2237d1c7756
+1021,C0245,faidit (i.e. lord banished during the Albigensian crusade),CONCEPT,2e096590-64d2-4a77-a4af-cfcade890941
+1022,C0246,messenger of heretics [Cathar Good Christians],CONCEPT,4e4ab7cf-0438-45ed-bfb8-79e293cca3e4
+1023,C0247,servant,CONCEPT,e3d3225d-0d2f-4257-ba90-9aa64ae300a9
+1024,C0248,handmaiden,CONCEPT,7cc66468-7dd4-4877-a2fd-5dc370e6af52
+1025,C0249,God: is only in heaven,CONCEPT,439250a5-d846-4bb7-b684-c193b4ce9dac
+1026,C0250,marriage / matrimony,CONCEPT,a2294f94-b6a4-4e0b-95f8-fe48a4ded549
+1027,C0251,baptism,CONCEPT,b587796a-9d92-4532-8b02-3e3ca05c4d2d
+1028,C0252,confirmation,CONCEPT,89ce2ae9-b251-4f2c-b22f-a3a36fdc88ef
+1029,C0253,receiver (i.e. houser),CONCEPT,ab2c1eeb-8a5e-46f7-853f-fad7ae3060e1
+1030,C0254,host,CONCEPT,3e1dcdfe-ea13-453d-98b7-7a1112eb1875
+1031,C0255,guide,CONCEPT,7a75e3ca-43e1-42e4-9fa2-273e7f781579
+1032,C0256,messenger,CONCEPT,81157f7b-394d-4750-aa96-f4696f12bafb
+1033,C0257,receiver [of heretics - Cathar Good Christians],CONCEPT,19522646-cd62-4ad5-a442-26803a88c13a
+1034,C0258,host [of heretics - Cathar Good Christians],CONCEPT,6baefde4-b7c4-4f91-8d9f-556e5bfe46fe
+1035,C0259,guide [of heretics - Cathar Good Christians],CONCEPT,c94a5fd8-2fa0-4e95-a231-fdfd3c84ce36
+1036,C0260,messenger [of heretics - Cathar Good Christians],CONCEPT,e7dc534b-ea1b-4637-aff3-71f7c3215f02
+1037,C0261,oath,CONCEPT,87f6779e-808d-473f-b092-79144c7a3a7e
+1038,C0262,oath: one must not swear,CONCEPT,56c7857f-ecbb-4525-9217-d5cea89fd9f2
+1039,C0263,the gospel,CONCEPT,9660a03a-2281-4a57-b1c5-4cc0464fd764
+1040,C0264,host of Valdensians,CONCEPT,587c1aec-c191-49cd-80e5-23250dfcc412
+1041,C0265,host [of Valdensians],CONCEPT,26fc003d-b2f1-4331-85e2-de1bfe21a865
+1042,C0266,leek,CONCEPT,4ace1de9-4d1a-40cc-b0ec-f550f4fc6277
+1043,C0267,wheat,CONCEPT,f5a4a3b8-f7d5-4aa4-bb1b-abb041820393
+1044,C0268,heretics are the better men of the world,CONCEPT,b0742f9b-6a32-4d2c-99c4-dc79d7e3335d
+1045,C0269,comestibles,CONCEPT,0cc24db2-ef9b-4059-b5e4-ef2245f9ddec
+1046,C0270,food,CONCEPT,c46c3abf-ecb6-4ce3-a5b2-13e8a791526f
+1047,C0271,drink,CONCEPT,fa5983b8-7523-4ded-bebd-944c8cf9cffe
+1048,C0272,believers of the heretics,CONCEPT,92a72d11-89cb-443a-bf7b-6bac7dd75e4b
+1049,C0273,believers [of the heretics],CONCEPT,54b982e3-5745-4b50-ab7d-179ee69d4dc4
+1050,C0274,nuts,CONCEPT,5155deff-4c5b-4637-ab6e-fd571792dd10
+1051,C0275,infirmity / illness,CONCEPT,8bb2fb34-9284-40ab-b2df-a2411b73cffb
+1052,C0276,priesthood,CONCEPT,49437adc-f28d-400c-9594-fa0e3ff162ef
+1053,L0001,Gourdon,LOCATION,07aaf1fb-78c3-4ec1-b425-dcfbc9da3d72
+1054,L0002,Agen,LOCATION,26c27e89-9e1e-4d28-acfd-7d007a6d0322
+1055,L0003,Albi,LOCATION,e4573ab2-902a-4941-8780-c4bf987b7669
+1056,L0004,Almont,LOCATION,38d68ee0-a49e-4547-843f-37ae5a43df6e
+1057,L0005,Aussac,LOCATION,bc785ef3-03e4-4f2f-bef4-f097e95b02fd
+1058,L0006,Aussac,LOCATION,dd002b70-fe92-4867-acd4-b6531969b271
+1059,L0007,Badafol,LOCATION,d46c3b8c-d2e6-4e00-822c-1032a5590c36
+1060,L0008,Beaucaire,LOCATION,b3b939d0-1c9b-475f-ab85-bb37cd00a25e
+1061,L0009,Belbèse,LOCATION,0a90a725-ce42-4fce-9bfa-e35a751b74b6
+1062,L0010,Belcastel,LOCATION,4fafde18-09c1-4b92-8037-a2aea451f8c0
+1063,L0011,Belfort,LOCATION,1d7e94d8-9883-4989-a32b-916c95d947cf
+1064,L0012,Belvèse,LOCATION,3aad61a2-3123-475b-b03e-4e0ca451e9f9
+1065,L0013,Bergogne,LOCATION,bfaad1be-43a9-420f-abbf-0d396232fd99
+1066,L0014,Bernadi,LOCATION,48d3eb0d-5ace-416b-ab04-3000382511b0
+1067,L0015,Bouloc,LOCATION,218bb201-04f5-4395-9ac8-e22e7170d555
+1068,L0016,Le Bourg,LOCATION,b95fac2f-a043-44af-8c52-a18848101de7
+1069,L0017,Bournac,LOCATION,0f0cdc00-4548-4734-9e54-b54e624ee052
+1070,L0018,Lhospitalet,LOCATION,e4225ac1-1503-4e20-8a1e-d5dff3aa89c7
+1071,L0019,Lasmartres,LOCATION,f61b65f6-b5ae-4c77-a3b9-0cc9bee19c19
+1072,L0020,Bérens,LOCATION,e9455ecf-44c5-4a0b-9d18-97db22c9d870
+1073,L0021,Brixol,LOCATION,2034d1c2-6175-48a2-89d6-a78c3a892e29
+1074,L0022,Gourdon region,LOCATION,2661d2bf-a235-468c-95fc-6b637544faf0
+1075,L0023,Castle of Bertrandus de Gordonio,LOCATION,99c579f7-26fc-45e3-860e-528a146316c8
+1076,L0024,House of Bertrandus de Gordonio,LOCATION,c4e34f07-1d92-430b-aec6-5d343679e91c
+1077,L0025,Le Puy-en-Velay,LOCATION,e5e9f267-862b-47bc-8218-df13c6a34ed7
+1078,L0026,Saint-Gilles abbey,LOCATION,f849adb5-2430-4481-9443-d1e65947dd71
+1079,L0027,Santiago de Compostela,LOCATION,4c34723a-3c07-4919-bd61-d4d3dfd5ccfb
+1080,L0028,Notre Dame du Puy-en-Velay cathedral,LOCATION,5d797864-ea3e-4a59-bb80-5610d6a9a7e8
+1081,L0029,Saint-Gilles,LOCATION,cfaab09c-c5bb-4206-aa10-8c5b115a60cf
+1082,L0030,Santiago de Compostela cathedral,LOCATION,776d2eb8-61eb-47c5-bc76-75fbf1a0f58f
+1083,L0031,Ovideo,LOCATION,f963f4cf-cb74-4ba9-ac28-e7f940a220c8
+1084,L0032,San Salvador cathedral,LOCATION,01dbb583-3fc7-47d8-907d-aab696e31e7f
+1085,L0033,Limoges,LOCATION,dafe4ca7-87ed-40fb-b1ef-7fb40a7577fb
+1086,L0034,Saint-Martial abbey,LOCATION,91313191-c3d8-4d12-9bd1-bc56cbab441b
+1087,L0035,Saint-Léonard-de-Noblat,LOCATION,15f0464e-5c86-4c10-bf38-7b77f011c048
+1088,L0036,Saint-Léonard-de-Noblat abbey,LOCATION,f2368217-479f-4e2e-9245-4c3e0e1b16d1
+1089,L0037,Saint-Denis,LOCATION,46d35b49-aebd-435e-8362-7f372fd6bdbe
+1090,L0038,Saint-Denis abbey,LOCATION,a7f08f45-6baa-469f-ba62-106170bb6784
+1091,L0039,Canturbury,LOCATION,68154c4c-8bbe-4b22-a71d-04ffd36a28fc
+1092,L0040,"Shrine of Saint Thomas, Canturbury Cathedral",LOCATION,7ad8b786-2272-426c-b891-49bb931834e3
+1093,L0041,Constantinople,LOCATION,9aecf261-698e-4a60-9da9-1d7a1e0526b7
+1094,L0042,House of Guillelmus de Montegalhardo,LOCATION,98341558-fcab-4e80-a162-eefaa54bd596
+1095,L0043,House of Alazaicis de Laquiebra,LOCATION,35e0e796-ae46-489c-8d65-b1b2d07e39b5
+1096,L0044,House of Guillelmus Peregrini,LOCATION,b34047dc-4799-408c-a445-7b77fa110b1d
+1097,L0045,Barn of Petrus Peregrini,LOCATION,225e61f4-a4e4-4322-86ba-6e96efa8cd90
+1098,L0046,House of Petrus Peregrini,LOCATION,5fdeb841-35f8-4205-b2bb-a5170d1cab20
+1099,L0047,House of en Rochas,LOCATION,8571b6f2-283a-499c-b8c1-bb6ad24b5c4c
+1100,L0048,House of Bernarda and Guillermus Cassa,LOCATION,1c661d5f-3a0e-4b71-8777-9e96f0eccfcb
+1101,L0049,House of Coxunta,LOCATION,c8ef5c6a-35e4-4b2f-9e2f-99158e763f3b
+1102,L0050,House of Bertrandus de Braulens,LOCATION,5e391066-73ef-49d0-a809-2392961617bf
+1103,L0051,House of Gaubert de Mosati,LOCATION,3b5e9c39-9311-4be0-801a-30bdbb0316a3
+1104,L0052,House of Guillelma da Vina,LOCATION,09e90304-cd37-4f42-93f5-503c7021bcc8
+1105,L0053,House of Guillelmus de Naperier,LOCATION,d3e46cad-b351-4898-8376-f908f6bce5af
+1106,L0054,"""Batut"" of Petrus de Lacomba",LOCATION,8160cda8-2e9c-4c7f-a550-75cde9ef0375
+1107,L0055,House of Gaubert Gautier,LOCATION,03776133-860a-4c07-adbf-5e70d5b97478
+1108,L0056,House of Stephana,LOCATION,da95edad-f72e-4ea0-a5e5-93448be7899d
+1109,L0057,House of Ricarda,LOCATION,89ea7016-2fc4-4091-aa7c-d9feb1a31b81
+1110,L0058,House of Amalvinus de Fenelor,LOCATION,a88fcb28-d3bd-4165-98f3-6de0b8d92a50
+1111,L0059,Milhac,LOCATION,7f8491b3-08ee-459e-911a-0e5f76f7974d
+1112,L0060,Castle of Fortanerius de Gordonio,LOCATION,fea38aba-7b48-4909-9d44-2321352f2fc9
+1113,L0061,Toulouse,LOCATION,9317e716-2f14-4acd-86f4-6ff6808557b6
+1114,L0062,"House of Raimiunda, widow of Ranulphus de Golema",LOCATION,264c88cb-3acc-4a49-812c-73014e98c3eb
+1115,L0063,House of Bernardus Bonaldi,LOCATION,d84f0db2-69df-4587-af41-49f636eb9dcc
+1116,L0064,House of Guillelmus de Eisses,LOCATION,60ecee51-14cb-4b98-8ffb-4679a0af1d30
+1117,L0065,House of Guillelmus de Favars,LOCATION,cad10575-9e9a-4aee-9c4a-ca6fae69b887
+1118,L0066,House of Luxia,LOCATION,ff1980f7-f7b1-45dc-8fbd-6d85e4a0ee09
+1119,L0067,House of Poncius Archaubal,LOCATION,81e543c9-72e1-4749-b80c-f24e643949f6
+1120,L0068,House of Stephanus de la Comba,LOCATION,11f3cc2d-9934-4e4d-be09-4f4902d8f35a
+1121,L0069,House of Na Guias,LOCATION,caa7d442-edda-4884-824f-f389d05c8bea
+1122,L0070,"House of Petrona, wife of Raimundus Joannis",LOCATION,c13c53c2-9796-40c1-a3fe-5f1a3dea4d77
+1123,L0071,House of Bernarda Rubea,LOCATION,83207f40-4cf6-461f-a471-9974872e8c9c
+1124,L0072,"House of infirm person, known to Bernarda Rubea",LOCATION,bf469a80-e2ba-4b41-8846-e99313f02e3c
+1125,L0073,House of Guillelma de Via,LOCATION,34bfa2b7-a6f7-49b6-aecd-6b1affe7a0dd
+1126,L0074,House of Guillelmus de Hospital,LOCATION,7c1ae92b-367d-4a2e-9281-54b9e118c3fe
+1127,L0075,Villeneuve (quarter of Gourdon),LOCATION,c37993a0-858e-44fe-bb66-0836008e9b55
+1128,L0076,La Riviere,LOCATION,22ccb8d4-bd32-4bb7-a090-730d3c9f34b2
+1129,L0077,House of Geralda de Riberia,LOCATION,c42ea1cf-341e-4c9f-a6c2-42ca4bc49c2a
+1130,O0001,100 solidi Ranulphi den Golesma,OBJECT,54895f47-0f8b-4364-b036-69fb21f7c2b8
