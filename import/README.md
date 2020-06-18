@@ -5,8 +5,8 @@ In './source_data' there are two source excel files aggregated from source googl
 
 Jupyter book 'From statement in coding-excel-table  to statement json mockup.ipynb' transforms source files to mockupdata.
 
-__JSON structure__
-* statement-json-structure-example.json
+__JSON structure example__
+* statement-json-structure-example.json  for sentence "David, strong friend of Peter, saw Adam in Brno."
 
 __Transformed mockup data__
 * *actants.xlsx  (csv)*  :  actant data with *uuids*

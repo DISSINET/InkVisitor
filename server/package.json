@@ -25,6 +25,7 @@
     "@server": "dist/Server"
   },
   "dependencies": {
+    "@types/uuid": "^8.0.0",
     "bcrypt": "^5.0.0",
     "command-line-args": "^5.1.1",
     "cookie-parser": "^1.4.5",
@@ -37,6 +38,7 @@
     "module-alias": "^2.2.2",
     "morgan": "^1.10.0",
     "randomstring": "^1.1.5",
+    "uuid": "^8.1.0",
     "winston": "^3.2.1"
   },
   "devDependencies": {

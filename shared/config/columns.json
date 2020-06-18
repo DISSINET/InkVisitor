@@ -1,8 +1,0 @@
-[
-  { "column": "id_subject", "type": "subject" },
-  { "column": "id_actant1", "type": "actant1" },
-  { "column": "id_actant2", "type": "actant2" },
-  { "column": "id_location", "type": "locality", "modifier": "where" },
-  { "column": "id_location_from", "type": "locality", "modifier": "from" },
-  { "column": "id_location_to", "type": "locality", "modifier": "to" }
-]
