@@ -1,10 +1,10 @@
 import { FETCH_STATEMENTS, StatementsAction } from "redux/types";
-import { Statements } from "types";
+import { Statement } from "types";
 
-const persons = (
-  state: Statements = [],
+const statements = (
+  state: Statement[] = [],
   action: StatementsAction
-): Statements => {
+): Statement[] => {
   switch (action.type) {
     case FETCH_STATEMENTS:
       return action.payload;
