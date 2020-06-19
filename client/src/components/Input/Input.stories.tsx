@@ -8,16 +8,33 @@ export default {
   },
 };
 
+const onChangeFn = () => {};
+
 export const DefaultInput = () => {
-  return <Input value="default input" />;
+  return <Input value="default input" onChangeFn={onChangeFn} />;
 };
 
 export const TextWithLabel = () => {
-  return <Input type="text" value="default input" label="label" />;
+  return (
+    <Input
+      type="text"
+      value="default input"
+      label="label"
+      onChangeFn={onChangeFn}
+    />
+  );
 };
 
 export const TextInverted = () => {
-  return <Input type="text" value="inverted input" label="inverted" inverted />;
+  return (
+    <Input
+      type="text"
+      value="inverted input"
+      label="inverted"
+      inverted
+      onChangeFn={onChangeFn}
+    />
+  );
 };
 
 export const Select = () => {
@@ -27,6 +44,7 @@ export const Select = () => {
       value=""
       label="select"
       options={["option1", "option2"]}
+      onChangeFn={onChangeFn}
     />
   );
 };
@@ -39,6 +57,7 @@ export const Textarea = () => {
       label="textarea"
       rows={10}
       cols={10}
+      onChangeFn={onChangeFn}
     />
   );
 };
