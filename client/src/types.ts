@@ -78,3 +78,6 @@ export interface Statement {
   id: string;
   tree: object;
 }
+export interface Territories {
+  territories?: object;
+}
