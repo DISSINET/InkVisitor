@@ -7,7 +7,7 @@ interface TagProps {
   label?: string;
   entity: typeof Entities[EntityKeys];
   mode?: string;
-  button: ReactNode;
+  button?: ReactNode;
 }
 
 export const Tag: React.FC<TagProps> = ({ label, entity, mode, button }) => {
@@ -59,5 +59,4 @@ Tag.defaultProps = {
   label: "",
   entity: Entities.T,
   mode: "normal",
-  button: false,
 };
