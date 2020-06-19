@@ -11,7 +11,22 @@ __JSON structure example__
 __Transformed mockup data__
 * *actants.xlsx  (csv)*  :  actant data with *uuids*
 * *statements.json* : json statements records corresponding to original statement rows from coding table; uses uuids from actants for actant objects 
-   
+
+
+------------
+
+__Na co nemyslime__
+(komenty pri promysleni importu a soucaseho stavu prototypy inkVisitora)
+
+* statementy nemaji  primary_reference_part, secondary_reference_part ...
+
+* jak resime tzv. multiples, i.e. multiple subjects, multiple actant1 objects..?
+  * *momentale v selanu jsou multiples resene jako situace A*
+  * a) na root action object jsou v actants skutecne dva objekty s typem subject
+  * b) je treba zdoublit root object
+
+
+
   
 
 
