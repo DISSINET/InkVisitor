@@ -1,16 +1,21 @@
-import * as React from "react";
-
-import { Button } from "components";
+import React from "react";
+import { Provider } from "react-redux";
+import { Switch, Route, BrowserRouter } from "react-router-dom";
 
 import "app.css";
+import store from "redux/store";
+import MainPage from "pages/MainPage";
 
 interface AppProps {}
 
 export const App: React.FC<AppProps> = () => {
   return (
-    <div>
-      <h1>app works</h1>
-      <Button label="hi" />
-    </div>
+    <Provider store={store}>
+      <BrowserRouter>
+        <Switch>
+          <Route exact={true} path="/" component={MainPage} />
+        </Switch>
+      </BrowserRouter>
+    </Provider>
   );
 };

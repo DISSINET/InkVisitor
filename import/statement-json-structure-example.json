@@ -1,7 +1,7 @@
 {
-    "id": 1,
+    "id": "1",
     "text": "David, strong friend of Peter, saw Adam in Brno. ",
-    "node_tree": {
+    "tree": {
         "id": "101",
         "_label": "A: saw (A090)",
         "type": "root",
@@ -45,12 +45,12 @@
             "props": []
         }]
     },
-    "action_id": "A0090",
+    "actionId": "A0090",
     "resources": [],
-    "territories": [],
-    "epistemic_level": "",
-    "certainty": "",
-    "modality": "",
+    "territoryId": "TE1",
+    "epistemicLevel": 1,
+    "certainty": 100,
+    "modality": 1,
     "tags": [],
     "note": "",
     "meta": ""

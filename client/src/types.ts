@@ -73,3 +73,8 @@ export const Entities = {
 };
 
 export type EntityKeys = keyof typeof Entities;
+
+export interface Statement {
+  id: string;
+  tree: object;
+}

@@ -1,96 +1,94 @@
-import {Request, Response, Router} from 'express';
-import {BAD_REQUEST, CREATED, OK} from 'http-status-codes';
-import { v4 as uuid4} from 'uuid';
+import { Request, Response, Router } from 'express';
+import { BAD_REQUEST, CREATED, OK, NOT_FOUND } from 'http-status-codes';
 
+import { IStatement, Statement, IStatementRepository } from "../domain/Statement"
+import { StatementRepository } from "../service/StatementRepository"
+// import { v4 as uuid4 } from 'uuid';
+import { ExceptionHandler } from 'winston';
 import { paramMissingError } from '@shared/constants';
-import { stat } from 'fs';
 
-class Statement {
-    public id : string;
-    public tree: object;
+import { IRepository } from "../domain/Repository"
+import { IEntity } from "../domain/Entity"
 
-    constructor(id: string, tree: object) {
-        this.id = id;
-        this.tree = tree;
-    }
-}
+// >>> Move to standalone file.
+class Controller<T> {
+    private _repository: IRepository<T>;
 
-interface Repository<T> {
-    saveOne(entity: T) : Promise<void>;
-    findAll() : Promise<T[]>;
-    findOne(id: string) : Promise<T | undefined>;
-}
-
-interface IStatementRepository extends Repository<Statement> {
-}
-
-/**
- * The statement entity repository.
- */
-class StatementRepository implements IStatementRepository {
-
-    // Mockups
-    private statements = [
-        new Statement('11111111-1111-1111-1111-111111111111', {}),
-        new Statement('22222222-2222-2222-2222-222222222222', {}),
-        new Statement('33333333-3333-3333-3333-333333333333', {}),
-    ]
-
-    async saveOne(statement: Statement) :Promise<void> { 
-        // if statement in statements raise exception.
-        this.statements.push(statement);
+    constructor(repository: IRepository<T>) {
+        this._repository = repository
     }
 
-    /**
-     * Get the all statements.
-     */
-    async findAll() : Promise<Statement[]> {
-        return [...this.statements];
+    /** 
+      * Get the HTTP status code and JSON result.
+      */
+    static result(response: Response, code: number, message: IEntity | IEntity[] | string) {
+        return response.status(code).json(message);
     }
-    
-    /**
-     * Get the one statement.
-     * @param id 
-     */
-    async findOne(statement_id: string /*UUID*/ ) : Promise<Statement | undefined> {
-        return this.statements.find( ({id}) => id === statement_id);
+}
+// <<<
+
+class StatementController extends Controller<IStatement> {
+    async create(request: Request, response: Response): Promise<void> {
+        // TODO
+    }
+
+    async update(request: Request, response: Response): Promise<void> {
+        // TODO
+    }
+
+    async delete(request: Request, response: Response): Promise<void> {
+        // TODO
     }
 }
 
 const router = Router()
-const repository = new StatementRepository() 
+const repository = new StatementRepository()
 
-/**  
- * Get the statements `GET /api/statements`.
+/**
+ * Create the entity.
  */
-router.get("/", async (request: Request, response: Response) => {
-    const statements = await repository.findAll();
-    return response.status(OK).json(statements);
-})
-
-/** 
- *  Get the statement `GET /api/statements/:id`. 
- */
-router.get("/:uuid", async (request: Request, response: Response) => {
-    const uuid = request.params.uuid;
-    const statement = await repository.findOne(uuid);
-    return response.status(OK).json(statement);
-})
-
-// Create the statement `POST /api/statement/`.
 router.post('/', async (request: Request, response: Response) => {
 
     const { statement } = request.body;
-    
+
     if (!statement) {
         return response.status(BAD_REQUEST).json({
             error: paramMissingError,
         });
     }
 
-    await repository.saveOne(statement);
+    await repository.insertOne(statement);
 
     return response.status(CREATED).end();
 });
+
+/**
+ * Delete the entity.
+ */
+router.delete('/:uuid', async (request: Request, response: Response) => {
+    const uuid: string = request.params.uuid;
+    await repository.removeOne(uuid);
+    return Controller.result(response, OK, `Entity ${uuid} was not deleted.`);
+})
+
+/**  
+ * Get the entity details.
+ */
+router.get("/", async (request: Request, response: Response) => {
+    const filters = request.query //.filter( (x) => !(x in ["offset", "limit"]) )
+    const statements = await repository.findAll(100, 0, filters);
+    return Controller.result(response, OK, statements);
+})
+
+/** 
+ *  Get the entity detail. 
+ */
+router.get("/:uuid", async (request: Request, response: Response) => {
+    const uuid: string = request.params.uuid;
+    const entity: IStatement | undefined = await repository.findOne(uuid);
+    return entity
+        ? Controller.result(response, OK, entity)
+        : Controller.result(response, NOT_FOUND, `Entity ${uuid} was not found.`)
+})
 
 export default router;
