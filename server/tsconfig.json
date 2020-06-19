@@ -12,6 +12,7 @@
     "strict": true,
     "target": "es6",
     "moduleResolution": "node",
+    "resolveJsonModule": true,
     "paths": {
       "@daos/*": [
         "src/daos/*"
