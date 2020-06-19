@@ -9,7 +9,7 @@ __JSON structure example__
 * statement-json-structure-example.json  for sentence "David, strong friend of Peter, saw Adam in Brno."
 
 __Transformed Sellan data__
-* *actants.xlsx  (csv)*  :  actant data with *uuids*
+* *actants.xlsx  (csv, json)*  :  actant data with *uuids*
 * *statements.json* : json statements records corresponding to original statement rows from coding table; uses uuids from actants for actant objects 
 
 
