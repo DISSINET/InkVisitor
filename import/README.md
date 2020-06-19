@@ -20,9 +20,10 @@ __Na co nemyslime__
 
 * statementy nemaji  primary_reference_part, secondary_reference_part ...
 
-* jak resime tzv. multiples, i.e. multiple subjects, multiple actant1 objects..
-  *a)  na root action object jsou v actants skutecne dva objekty s typem subject
-  *b) je treba zdoublikt root object
+* jak resime tzv. multiples, i.e. multiple subjects, multiple actant1 objects..?
+  * *momentale v selanu jsou multiples resene jako situace A*
+  * a) na root action object jsou v actants skutecne dva objekty s typem subject
+  * b) je treba zdoublit root object
 
 
 
