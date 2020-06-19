@@ -1,0 +1,17 @@
+[
+    { "id": "P10", "label": "David", "type": "person" },
+    { "id": "P20", "label": "Adam", "type": "person" },
+    { "id": "P30", "label": "Peter", "type": "person" },
+    { "id": "P40", "label": "John", "type": "person" },
+
+    { "id": "L10", "label": "Brno", "type": "location" },
+    { "id": "L20", "label": "Prague", "type": "location" },
+
+
+    { "id": "C10", "label": "friend of", "type": "concept" },
+    { "id": "C20", "label": "intensity", "type": "concept" },
+    { "id": "C30", "label": "strong", "type": "concept" },
+    { "id": "C40", "label": "distant", "type": "concept" },
+    { "id": "C50", "label": "location_where", "type": "concept" }
+
+]

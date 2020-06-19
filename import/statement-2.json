@@ -1,46 +1,46 @@
 {
-    "id": "1",
-    "text": "David, strong friend of Peter, saw Adam in Brno. ",
+    "id": "20",
+    "text": "Peter, distant friend of John, saw David in Prague. ",
     "tree": {
-        "id": "101",
+        "id": "A2001",
         "_label": "A: saw (A090)",
         "type": "root",
         "actants": [{
-                "id": "P201",
-                "_label": "P: David (P201)",
+                "id": "P30",
+                "_label": "P: Peter (P30)",
                 "type": "subject",
                 "props": [{
-                    "id": "501",
+                    "id": "A2501",
                     "_label": "A:has property",
                     "type": "property",
                     "actants": [{
-                            "id": "C601",
-                            "_label": "C: friend_of (C601)",
+                            "id": "C10",
+                            "_label": "C: friend_of (C10)",
                             "type": "actant1",
                             "props": [{
-                                "id": "501",
+                                "id": "A2502",
                                 "_label": "A:has property",
                                 "type": "property",
                                 "actants": [
-                                    { "id": "C801", "_label": "C: intensity (C801)", "type": "actant1", "props": [] },
-                                    { "id": "C901", "_label": "C: strong (C901)", "type": "actant2", "props": [] }
+                                    { "id": "C20", "_label": "C: intensity (C20)", "type": "actant1", "props": [] },
+                                    { "id": "C30", "_label": "C: strong (C30)", "type": "actant2", "props": [] }
                                 ]
                             }]
                         },
-                        { "id": "P701", "_label": "P: Peter (P701)", "type": "actant2", "props": [] }
+                        { "id": "P40", "_label": "P: John (P40)", "type": "actant2", "props": [] }
                     ],
                     "props": []
                 }]
             },
-            { "id": "P301", "_label": "P: Adam (P301)", "type": "actant1", "props": [] }
+            { "id": "P10", "_label": "P: David (P10)", "type": "actant1", "props": [] }
         ],
         "props": [{
-            "id": "401",
+            "id": "2401",
             "_label": "A: has property",
             "type": "property",
             "actants": [
-                { "id": "C201", "_label": "C: location_where (C201)", "type": "actant1", "props": [] },
-                { "id": "L301", "_label": "L: Brno (L301)", "type": "actant2", "props": [] }
+                { "id": "C50", "_label": "C: location_where (C50)", "type": "actant1", "props": [] },
+                { "id": "L20", "_label": "L: Prague (L20)", "type": "actant2", "props": [] }
             ],
             "props": []
         }]
