@@ -68,7 +68,7 @@ router.get("/", async (request: Request, response: Response) => {
     return response.status(OK).json(statements);
 })
 
-/**
+/** 
  *  Get the statement `GET /api/statements/:id`. 
  */
 router.get("/:uuid", async (request: Request, response: Response) => {
