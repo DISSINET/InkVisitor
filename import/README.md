@@ -15,8 +15,9 @@ __Transformed Sellan data__  in  /import_data/sellan/
 Sellan statement include has_properties action expression for parent root action in __"props" of root__, which contains location information from sellan coding, i.e.  the data column *"id_location" and "id_locaton_to"*  are used for has_propeties action-expression containing location_where/to (a1) and  LOXXX (a2)  as actants. 
 
 
-__Pure mockup data__
-Pure mockup with 5 statements, variations on sentence "David, strong friend of Peter, saw Adam in Brno."
+__Pure mockup data__  in  /import_data/mock/
+
+Pure mockup with 5 statements (manually created), variations on sentence "David, strong friend of Peter, saw Adam in Brno."
 
 * statements.json
 * actants.json (including territories)
