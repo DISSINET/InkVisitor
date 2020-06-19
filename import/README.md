@@ -2,10 +2,8 @@
 
 Contains:
 * json statement example
+* transformed sellan coding to json statements
 * manually created mockup 5 statements
-* transformade sellan coding to json statements
-
-
 
 
 __JSON structure example__
