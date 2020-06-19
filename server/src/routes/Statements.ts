@@ -1,44 +1,61 @@
-import {Request, Response, Router} from 'express';
-import {BAD_REQUEST, CREATED, OK} from 'http-status-codes';
-import { v4 as uuid4} from 'uuid';
+import { Request, Response, Router } from 'express';
+import { BAD_REQUEST, CREATED, OK } from 'http-status-codes';
+import { v4 as uuid4 } from 'uuid';
+
+import * as statementMocks from "../../../import/MockStatements.json";
 
 import { paramMissingError } from '@shared/constants';
 import { stat } from 'fs';
 
+interface IStatement {
+    id: string; //uuid
+    tree: object;
+    territoryId: string; //uuid
+    resources: Array<string>; //uuids
+    actionId: string; //uuid
+    modality: number; //int
+    certainty: number; //int
+    epistemicLevel: number; //int
+    tags: Array<string> //uuids;
+    note: string;
+    meta: string /*or object?*/;
+    text: string;
+}
+
 class Statement {
-    
-    public id : string; //uuid
+
+    public id: string; //uuid
     public tree: object;
     public territoryId: string; //uuid
-    public resources : Array<string>; //uuids
-    public actionId : string; //uuid
-    public modality : number; //int
-    public certainty : number; //int
-    public epistemicLevel : number; //int
+    public resources: Array<string>; //uuids
+    public actionId: string; //uuid
+    public modality: number; //int
+    public certainty: number; //int
+    public epistemicLevel: number; //int
     public tags: Array<string> //uuids;
     public note: string;
     public meta: string /*or object?*/;
     public text: string;
 
-    constructor(
-        id: string, 
-        tree: object,
-        territoryId: string, 
-        resources: Array<string>, 
-        actionId: string, 
-        modality: number, 
-        certainty: number,
-        epistemicLevel: number,
-        tags: Array<string>, 
-        note: string, 
-        meta: string, 
-        text: string
-    ) {
+    constructor({
+        id,
+        tree,
+        territoryId,
+        resources,
+        actionId,
+        modality,
+        certainty,
+        epistemicLevel,
+        tags,
+        note,
+        meta,
+        text
+    }: IStatement) {
         this.id = id;
-        this.tree = tree;    
+        this.tree = tree;
         this.territoryId = territoryId;
         this.resources = resources;
-        this.actionId = actionId; 
+        this.actionId = actionId;
         this.modality = modality;
         this.certainty = certainty;
         this.epistemicLevel = epistemicLevel
@@ -47,33 +64,13 @@ class Statement {
         this.meta = meta;
         this.text = text
     }
-
-    /**
-     * Create a mockup statement.
-     */
-    static createMockup(territoryId: string) : Statement {
-        return new Statement(
-            uuid4(),
-            {},    
-            territoryId,
-            [uuid4(), uuid4(), uuid4()],
-            uuid4(), 
-            1,
-            2,
-            3,
-            [uuid4(), uuid4(), uuid4()],
-            "note",
-            "meta",
-            "text"
-        )
-    }
 }
 
 interface Repository<T> {
-    findAll(limit: number, offset: number, filters : object) : Promise<T[]>;
-    findOne(id: string) : Promise<T | undefined>;
-    insertOne(entity: T) : Promise<void>;
-    removeOne(id: string) : Promise<void>;
+    findAll(limit: number, offset: number, filters: object): Promise<T[]>;
+    findOne(id: string): Promise<T | undefined>;
+    insertOne(entity: T): Promise<void>;
+    removeOne(id: string): Promise<void>;
 }
 
 interface IStatementRepository extends Repository<Statement> {
@@ -84,25 +81,20 @@ interface IStatementRepository extends Repository<Statement> {
  */
 class StatementRepository implements IStatementRepository {
 
-    private statements : Map<string, Statement>;
+    private statements: Map<string, Statement>;
 
     constructor() {
-        // Mockups
-        this.statements = new Map([
-            Statement.createMockup("1"),
-            Statement.createMockup("1"),
-            Statement.createMockup("2"),
-            Statement.createMockup("2"),
-            Statement.createMockup("3"),
-        ].map(statement => [statement.id, statement]))
-    
+        console.log(statementMocks)
+        this.statements = new Map(
+            Object.values(statementMocks).map(_ => [_.id, new Statement(_)])
+        )
     }
 
     /**
      * 
      * @param  
      */
-    async insertOne(statement: Statement) :Promise<void> { 
+    async insertOne(statement: Statement): Promise<void> {
         // if statement in statements raise exception.
         this.statements.set(statement.id, statement);
     }
@@ -111,36 +103,36 @@ class StatementRepository implements IStatementRepository {
      * Remove one statetement.
      * @param statementId
      */
-    async removeOne(statementId: string) : Promise<void> {
+    async removeOne(statementId: string): Promise<void> {
         this.statements.delete(statementId)
     }
 
     /**
      * Get the all statements.
      */
-    async findAll(limit: number, offset: number, filters = {}) : Promise<Statement[]> {
+    async findAll(limit: number, offset: number, filters = {}): Promise<Statement[]> {
         const result = [...this.statements.values()]
-        
+
         console.log(result)
 
         if ("territoryId" in filters) {
             // Only territoryId implemented.
-            return result.filter( _ => filters["territoryId"] === _.territoryId);
+            return result.filter(_ => filters["territoryId"] === _.territoryId);
         }
         return result
     }
-    
+
     /**
      * Get the one statement.
      * @param id 
      */
-    async findOne(statementId: string /*UUID*/ ) : Promise<Statement | undefined> {
-        return [...this.statements.values()].find( ({id}) => id === statementId )
+    async findOne(statementId: string /*UUID*/): Promise<Statement | undefined> {
+        return [...this.statements.values()].find(({ id }) => id === statementId)
     }
 }
 
 const router = Router()
-const repository = new StatementRepository() 
+const repository = new StatementRepository()
 
 /**  
  * Get the statements `GET /api/statements`.
@@ -167,7 +159,7 @@ router.get("/:uuid", async (request: Request, response: Response) => {
 router.post('/', async (request: Request, response: Response) => {
 
     const { statement } = request.body;
-    
+
     if (!statement) {
         return response.status(BAD_REQUEST).json({
             error: paramMissingError,
