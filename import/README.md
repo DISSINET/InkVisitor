@@ -14,7 +14,7 @@ __Transformed Sellan data__  in  /import_data/sellan/
 * *actants.json*  :  actant data with *uuids* , no territories there
 * *statements.json* : json statements records corresponding to original statement rows from coding table; uses uuids from actants for actant objects 
 
-Mockup data taken from Sellan Coding and Sellan master tables (Persons, Locations, Objects) and General concept table.
+Mockup data taken from Sellan Coding and Sellan master tables (Persons, Locations, Objects) and General concept table. [18.6.2020]
 
 In './source_data' there are two excel files which aggregate data from original google sheet coding tables.
 
