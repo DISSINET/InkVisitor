@@ -11,6 +11,7 @@ export const ButtonSet: React.FC<ButtonSetProps> = ({ buttons }) => {
       {buttons.map((button, bi) => {
         return (
           <div
+            key={bi}
             className={classNames("inline", {
               "mr-1": bi !== buttons.length,
             })}

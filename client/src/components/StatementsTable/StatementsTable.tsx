@@ -1,8 +1,7 @@
 import React, { ReactNode, MouseEventHandler } from "react";
-import { useTable } from "react-table";
+import { useTable, Cell } from "react-table";
 import classNames from "classnames";
 
-import { Cell } from "react-table";
 import { Tag, Button } from "components";
 import { EntityKeys, Entities } from "types";
 
