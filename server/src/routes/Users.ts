@@ -7,37 +7,38 @@ import { paramMissingError } from '@shared/constants';
 import { adminMW } from './middleware';
 import { UserRoles } from '@entities/User';
 
-
-// Init shared
 const router = Router().use(adminMW);
 const userDao = new UserDao();
 
-
-// Get all users `GET /api/users/`
- router.get('/all', async (req: Request, res: Response) => {
+/** 
+ * Get the entity `GET /api/users/`. 
+ */
+router.get('/', async (req: Request, res: Response) => {
     const users = await userDao.getAll();
-    return res.status(OK).json({users});
+    return res.status(OK).json({ users });
 });
 
- // Create the user `POST /api/users/`
-router.post('/add', async (req: Request, res: Response) => {
-    // Check parameters
+/** 
+ * Create the entity `POST /api/users`.
+ */
+router.post('/', async (req: Request, res: Response) => {
+    // Check the parameters.
     const { user } = req.body;
     if (!user) {
         return res.status(BAD_REQUEST).json({
             error: paramMissingError,
         });
     }
-    // Add new user
+    // Create new user.
     user.role = UserRoles.Standard;
     await userDao.add(user);
     return res.status(CREATED).end();
 });
 
-
-
-// Update - "PUT /api/users/update"
-router.put('/update', async (req: Request, res: Response) => {
+/**
+ * Update the entity `PUT /api/users`.
+ */
+router.put('/', async (req: Request, res: Response) => {
     // Check Parameters
     const { user } = req.body;
     if (!user) {
@@ -51,8 +52,10 @@ router.put('/update', async (req: Request, res: Response) => {
     return res.status(OK).end();
 });
 
-// Delete - "DELETE /api/users/delete/:id"
-router.delete('/delete/:id', async (req: Request, res: Response) => {
+/** 
+ * Delete the entity `DELETE /api/users/:id`.
+ */
+router.delete('/:id', async (req: Request, res: Response) => {
     const { id } = req.params as ParamsDictionary;
     await userDao.delete(Number(id));
     return res.status(OK).end();

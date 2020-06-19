@@ -12,12 +12,13 @@
     "strict": true,
     "target": "es6",
     "moduleResolution": "node",
+    "resolveJsonModule": true,
     "paths": {
       "@daos/*": [
         "src/daos/*"
       ],
       "@entities/*": [
-        "src/entities/*"
+        "src/domain/*"
       ],
       "@shared/*": [
         "src/shared/*"
