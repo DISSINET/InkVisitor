@@ -13,6 +13,8 @@ __Transformed mockup data__
 * *statements.json* : json statements records corresponding to original statement rows from coding table; uses uuids from actants for actant objects 
 
 
+------------
+
 __Na co nemyslime__
 (komenty pri promysleni importu a soucaseho stavu prototypy inkVisitora)
 
