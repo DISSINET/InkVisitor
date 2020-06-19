@@ -1,4 +1,4 @@
-import React from "react";
+import React, { MouseEventHandler, FormEvent } from "react";
 import classNames from "classnames";
 
 interface InputProps {
@@ -9,6 +9,7 @@ interface InputProps {
   options?: string[];
   rows?: number;
   cols?: number;
+  onChangeFn: Function;
 }
 
 export const Input: React.FC<InputProps> = ({
@@ -19,6 +20,7 @@ export const Input: React.FC<InputProps> = ({
   options,
   rows,
   cols,
+  onChangeFn,
 }) => {
   const labelClasses = classNames(
     "label",
@@ -42,9 +44,15 @@ export const Input: React.FC<InputProps> = ({
 
   return (
     <div className="wrapper">
-      <span className={labelClasses}> {label}</span>
+      {label && <span className={labelClasses}> {label}</span>}
       {type === "text" && (
-        <input className={valueClasses} defaultValue={value} />
+        <input
+          className={valueClasses}
+          defaultValue={value}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+            onChangeFn(e.currentTarget.value);
+          }}
+        />
       )}
       {type === "textarea" && (
         <textarea
@@ -52,10 +60,19 @@ export const Input: React.FC<InputProps> = ({
           defaultValue={value}
           rows={rows}
           cols={cols}
+          onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => {
+            onChangeFn(e.target.value);
+          }}
         />
       )}
       {type === "select" && options && (
-        <select className={valueClasses} defaultValue={value}>
+        <select
+          className={valueClasses + " font-bold"}
+          defaultValue={value}
+          onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
+            onChangeFn(e.target.value);
+          }}
+        >
           {options.map((option, oi) => (
             <option key={oi}>{option}</option>
           ))}
