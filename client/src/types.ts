@@ -79,5 +79,9 @@ export interface Statement {
   tree: object;
 }
 export interface Territories {
-  territories?: object;
+  territories: object;
+}
+export interface TerritoriesTreeProps {
+  expandTreeId: string;
+  selectTreeId: string;
 }

@@ -9,8 +9,9 @@ import {
   FETCH_TERRITORIES,
 } from "redux/types";
 import { Territories } from "types";
+import { getTerritories } from "api/getTerritories";
 
-export const fetchStatements = () => (
+export const fetchTerritories = () => (
   dispatch: Dispatch<FetchTerritoriesAction>
 ): Promise<void> => {
   getTerritories().then((data: Territories) =>
