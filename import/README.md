@@ -26,11 +26,11 @@ Pure mockup with 5 statements, variations on sentence "David, strong friend of P
 __Na co nemyslime__
 (komenty pri promysleni importu a soucaseho stavu prototypy inkVisitora)
 
-* statementy nemaji  primary_reference_part, secondary_reference_part ...
+* SOLVED statementy nemaji  primary_reference_part, secondary_reference_part ... : bude resseno pres territories
 
-* jak resime tzv. multiples, i.e. multiple subjects, multiple actant1 objects..?
+* SOLVED jak resime tzv. multiples, i.e. multiple subjects, multiple actant1 objects..?
   * *momentale v selanu jsou multiples resene jako situace A*
-  * a) na root action object jsou v actants skutecne dva objekty s typem subject
+  * a) na root action object jsou v actants skutecne dva objekty s typem subject : toto je v poradku a prefererovane preseni
   * b) je treba zdoublit root object
 
 
