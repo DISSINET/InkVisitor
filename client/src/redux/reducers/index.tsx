@@ -11,9 +11,11 @@ import {
 const rootReducer = combineReducers({
   statements,
   statement,
-  expandTreeId,
-  selectTreeId,
   territories,
+  territoriesTreeProps: combineReducers({
+    expandTreeId,
+    selectTreeId,
+  }),
 });
 
 export default rootReducer;

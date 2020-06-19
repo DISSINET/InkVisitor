@@ -4,7 +4,7 @@ import { composeWithDevTools } from "redux-devtools-extension";
 
 import rootReducer from "./reducers";
 import { Store } from "redux";
-import { Statement } from "types";
+import { Statement, TerritoriesTreeProps } from "types";
 import {
   StatementsAction,
   StatementAction,
@@ -21,8 +21,8 @@ const store: Store<
   CombinedState<{
     statements: Statement[];
     statement: Statement;
-    expandTreeId: string;
-    selectTreeId: string;
+    territoriesTreeProps: TerritoriesTreeProps;
+    territories: object;
   }>,
   | StatementsAction
   | StatementAction

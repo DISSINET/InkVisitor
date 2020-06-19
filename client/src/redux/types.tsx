@@ -1,4 +1,4 @@
-import { Statement } from "types";
+import { Statement, Territories } from "types";
 
 export const FETCH_STATEMENTS = "FETCH_STATEMENTS";
 export const FETCH_STATEMENT = "FETCH_STATEMENT";
