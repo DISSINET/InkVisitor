@@ -1,6 +1,8 @@
-import { Box } from "components/box/box";
-import { Button } from "components/button/button";
-import { Input } from "components/input/input";
-import { Tag } from "components/tag/tag";
+import { Box } from "components/Box/Box";
+import { Button } from "components/Button/Button";
+import { ButtonSet } from "components/Buttonset/Buttonset";
+import { Input } from "components/Input/Input";
+import { Tag } from "components/Tag/Tag";
+import { StatementsTable } from "components/StatementsTable/StatementsTable";
 
-export { Box, Button, Input, Tag };
+export { Box, Button, ButtonSet, Input, Tag, StatementsTable };
