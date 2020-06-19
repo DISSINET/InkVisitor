@@ -45,10 +45,10 @@
             "props": []
         }]
     },
-    "action_id": "A0090",
+    "actionId": "A0090",
     "resources": [],
-    "territory_id": "TE1",
-    "epistemic_level": 1,
+    "territoryId": "TE1",
+    "epistemicLevel": 1,
     "certainty": 100,
     "modality": 1,
     "tags": [],
