@@ -12,7 +12,7 @@ __JSON structure example__
 * statement-json-structure-example.json  for sentence "David, strong friend of Peter, saw Adam in Brno."
 
 __Transformed Sellan data__  in  /import_data/sellan/
-* *actants.json*  :  actant data with *uuids*
+* *actants.json*  :  actant data with *uuids* , no territories there
 * *statements.json* : json statements records corresponding to original statement rows from coding table; uses uuids from actants for actant objects 
 
 Mockup data taken from Sellan Coding and Sellan master tables (Persons, Locations, Objects) and General concept table.
@@ -21,7 +21,9 @@ In './source_data' there are two excel files which aggregate data from original 
 
 Jupyter book 'From statement in coding-excel-table  to statement json mockup.ipynb' transforms source files to mockupdata.
 
-Sellan statement include has_properties action expression for parent root action in __"props" of root__, which contains location information from sellan coding, i.e.  the data column *"id_location" and "id_locaton_to"*  are used for has_propeties action-expression containing location_where/to (a1) and  LOXXX (a2)  as actants. 
+Notes
+* Sellan statement include has_properties action expression for parent root action in __"props" of root__, which contains location information from sellan coding, i.e.  the data column *"id_location" and "id_locaton_to"*  are used for has_propeties action-expression containing location_where/to (a1) and  LOXXX (a2)  as actants. 
+*  Terrories ids are just text_parts, i.e. "T3-001", territories are not in actants.js.
 
 
 __Pure mockup data__  in  /import_data/mock/
