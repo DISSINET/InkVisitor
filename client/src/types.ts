@@ -82,6 +82,12 @@ export interface Territories {
   territories: object;
 }
 export interface TerritoriesTreeProps {
-  expandTreeId: string;
-  selectTreeId: string;
+  expandedTreeId: string;
+  selectedTreeId: string;
+}
+
+export interface Node {
+  id: string;
+  label: string;
+  children: Array<Node>;
 }
