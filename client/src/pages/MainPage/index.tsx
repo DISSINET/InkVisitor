@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { connect } from "react-redux";
 
-import { Button } from "components";
+import { Button, Box } from "components";
 import { Statement } from "types";
 import { fetchStatements } from "redux/actions/statementsActions";
 import { fetchStatement } from "redux/actions/statementActions";
@@ -24,13 +24,20 @@ const MainPage: React.FC<MainPage> = ({
   }, [fetchStatements]);
 
   return (
-    <div>
-      <h1>app almost works</h1>
+    <>
       <Button
         label="log data"
         onClick={() => console.log("statements", statements)}
       />
-    </div>
+      <div className="flex mb-4">
+        <Box height={750} width={300} label={"Territories"}>
+          {"Territories"}
+        </Box>
+        <Box height={750} width={800} label={"Statements"}>
+          {"Statements"}
+        </Box>
+      </div>
+    </>
   );
 };
 

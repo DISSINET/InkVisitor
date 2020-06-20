@@ -1,4 +1,10 @@
-import { applyMiddleware, createStore, compose, CombinedState } from "redux";
+import {
+  applyMiddleware,
+  createStore,
+  compose,
+  CombinedState,
+  AnyAction,
+} from "redux";
 import thunk from "redux-thunk";
 import { composeWithDevTools } from "redux-devtools-extension";
 
@@ -29,6 +35,7 @@ const store: Store<
   | ExpandTreeAction
   | SelectTreeAction
   | FetchTerritoriesAction
+  | AnyAction
 > = createStore(
   rootReducer,
   initialState,
