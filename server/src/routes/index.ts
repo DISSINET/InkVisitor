@@ -1,7 +1,7 @@
 import { Router } from 'express';
-import UserRouter from './Users';
+import UserRouter from './User';
 import AuthRouter from './Auth';
-import StatementRouter from './Statements';
+import StatementRouter from './Statement';
 
 import cors from "cors";
 

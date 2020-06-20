@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { UNAUTHORIZED } from 'http-status-codes';
 
-import { UserRoles } from '@entities/User';
+import { Role as UserRole } from '@entities/User';
 import { cookieProps } from '@shared/constants';
 import { JwtService } from '@shared/JwtService';
 
@@ -20,7 +20,7 @@ export const adminMW = async (req: Request, res: Response, next: NextFunction) =
         }
         // Make sure user role is an admin
         const clientData = await jwtService.decodeJwt(jwt);
-        if (clientData.role === UserRoles.Admin) {
+        if (clientData.role === UserRole.Admin) {
             res.locals.userId = clientData.id;
             next();
         } else {

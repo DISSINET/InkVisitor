@@ -1,11 +1,10 @@
 import { IUser } from '@entities/User';
 import { getRandomInt } from '@shared/functions';
-import { MockDaoMock } from '../MockDb/MockDao.mock';
-import { IUserDao } from './UserDao';
+import { MockDaoMock } from './MockDB';
 
+import { IUserRepository } from '../domain/User';
 
-class UserDao extends MockDaoMock implements IUserDao {
-
+export class UserRepository extends MockDaoMock implements IUserRepository {
 
     public async getOne(email: string): Promise<IUser | null> {
         try {
@@ -21,7 +20,6 @@ class UserDao extends MockDaoMock implements IUserDao {
         }
     }
 
-
     public async getAll(): Promise<IUser[]> {
         try {
             const db = await super.openDb();
@@ -30,7 +28,6 @@ class UserDao extends MockDaoMock implements IUserDao {
             throw err;
         }
     }
-
 
     public async add(user: IUser): Promise<void> {
         try {
@@ -42,7 +39,6 @@ class UserDao extends MockDaoMock implements IUserDao {
             throw err;
         }
     }
-
 
     public async update(user: IUser): Promise<void> {
         try {
@@ -60,7 +56,6 @@ class UserDao extends MockDaoMock implements IUserDao {
         }
     }
 
-
     public async delete(id: number): Promise<void> {
         try {
             const db = await super.openDb();
@@ -76,6 +71,8 @@ class UserDao extends MockDaoMock implements IUserDao {
             throw err;
         }
     }
-}
 
-export default UserDao;
+    public async create(user: IUser): Promise<void> {
+        // TODO
+    }
+}

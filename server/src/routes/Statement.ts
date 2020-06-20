@@ -7,8 +7,8 @@ import { StatementRepository } from "../service/StatementRepository"
 import { ExceptionHandler } from 'winston';
 import { paramMissingError } from '@shared/constants';
 
-import { IRepository } from "../domain/Repository"
-import { IEntity } from "../domain/Entity"
+import { IEntity } from "../domain/common/Entity"
+import { IRepository } from "../domain/common/Repository"
 
 // >>> Move to standalone file.
 class Controller<T> {

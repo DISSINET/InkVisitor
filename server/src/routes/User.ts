@@ -2,13 +2,13 @@ import { Request, Response, Router } from 'express';
 import { BAD_REQUEST, CREATED, OK } from 'http-status-codes';
 import { ParamsDictionary } from 'express-serve-static-core';
 
-import UserDao from '@daos/User/UserDao.mock';
+import { UserRepository } from '../service/UserRepository';
 import { paramMissingError } from '@shared/constants';
 import { adminMW } from './middleware';
-import { UserRoles } from '@entities/User';
+import { Role as UserRole } from '@entities/User';
 
 const router = Router().use(adminMW);
-const userDao = new UserDao();
+const userDao = new UserRepository();
 
 /** 
  * Get the entity `GET /api/users/`. 
@@ -30,7 +30,7 @@ router.post('/', async (req: Request, res: Response) => {
         });
     }
     // Create new user.
-    user.role = UserRoles.Standard;
+    user.role = UserRole.Standard;
     await userDao.add(user);
     return res.status(CREATED).end();
 });

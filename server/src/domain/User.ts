@@ -1,44 +1,49 @@
-export enum UserRoles {
-    Standard,
+
+export enum Role {
     Admin,
+    Standard,
 }
 
+export type Id = number;
+export type Name = string;
+export type Email = string;
+export type Password = string;
+
 export interface IUser {
-    id: number;
-    name: string;
-    email: string;
-    pwdHash: string;
-    role: UserRoles;
+    id: Id;
+    role: Role;
+    name: Name;
+    email: Email;
+    password: string;
+
 }
 
 export class User implements IUser {
-
-    public id: number;
-    public name: string;
-    public email: string;
-    public role: UserRoles;
-    public pwdHash: string;
-
+    public id: Id;
+    public name: Name;
+    public email: Email;
+    public role: Role;
+    public password: Password;
 
     constructor(
-        nameOrUser?: string | IUser,
-        email?: string,
-        role?: UserRoles,
-        pwdHash?: string,
-        id?: number,
+        id: Id,
+        name: Name,
+        email: Email,
+        role: Role,
+        password: Password,
     ) {
-        if (typeof nameOrUser === 'string' || typeof nameOrUser === 'undefined') {
-            this.name = nameOrUser || '';
-            this.email = email || '';
-            this.role = role || UserRoles.Standard;
-            this.pwdHash = pwdHash || '';
-            this.id = id || -1;
-        } else {
-            this.name = nameOrUser.name;
-            this.email = nameOrUser.email;
-            this.role = nameOrUser.role;
-            this.pwdHash = nameOrUser.pwdHash;
-            this.id = nameOrUser.id;
-        }
+        this.name = name;
+        this.email = email;
+        this.role = role;
+        this.password = password;
+        this.id = id;
     }
+}
+
+export interface IUserRepository {
+    getOne: (email: string) => Promise<IUser | null>;
+    getAll: () => Promise<IUser[]>;
+    create: (user: IUser) => Promise<void>;
+    update: (user: IUser) => Promise<void>;
+    delete: (id: number) => Promise<void>;
 }

@@ -1,5 +1,5 @@
-import { IEntity } from "./Entity"
-import { IRepository } from "./Repository"
+import { IEntity } from "./common"
+import { IRepository } from "./common"
 
 export interface IStatement extends IEntity {
     id: string; //uuid
