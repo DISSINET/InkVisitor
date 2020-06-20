@@ -15,7 +15,7 @@
     "resolveJsonModule": true,
     "paths": {
       "@daos/*": [
-        "src/daos/*"
+        "src/mocks/*"
       ],
       "@entities/*": [
         "src/domain/*"

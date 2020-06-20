@@ -1,11 +1,11 @@
 import { IStatement, Statement } from "../domain/Statement";
-import { IRepository } from "../domain/Repository";
+import { IRepository } from "../domain/common";
 import * as statementMocks from "../../../import/import_data/mock/statements.json";
 
 export interface IStatementRepository extends IRepository<IStatement> { }
 
 /**
- * The statement entity repository.
+ * The statement entity in-memory repository.
  */
 export class StatementRepository implements IStatementRepository {
 
@@ -17,18 +17,11 @@ export class StatementRepository implements IStatementRepository {
         )
     }
 
-    /**
-     * 
-     * @param  
-     */
     async insertOne(entity: IStatement): Promise<void> {
         // if statement in statements raise exception.
         this.statements.set(entity.id, entity);
     }
 
-    /**
-     * Remove the entity.
-     */
     async removeOne(entityId: string): Promise<void> {
         if (!(entityId in this.statements)) {
             throw new Error(`Entity ${entityId} not found.`)
@@ -36,9 +29,6 @@ export class StatementRepository implements IStatementRepository {
         this.statements.delete(entityId);
     }
 
-    /**
-     * Get the entitites.
-     */
     async findAll(limit: number, offset: number, filters = {}): Promise<IStatement[]> {
         const result = [...this.statements.values()]
 
@@ -49,10 +39,6 @@ export class StatementRepository implements IStatementRepository {
         return result
     }
 
-    /**
-     * Get the entity.
-     * @param entityId 
-     */
     async findOne(entityId: string /*UUID*/): Promise<Statement | undefined> {
         return [...this.statements.values()].find(({ id }) => id === entityId)
     }
