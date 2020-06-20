@@ -1,4 +1,4 @@
-import { IStatement, Statement } from "../domain/Statement";
+import { IStatement, Statement } from "../domain/models/Statement";
 import { IRepository } from "../domain/common";
 import * as statementMocks from "../../../import/import_data/mock/statements.json";
 

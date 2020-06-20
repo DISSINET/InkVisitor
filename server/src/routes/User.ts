@@ -5,7 +5,7 @@ import { ParamsDictionary } from 'express-serve-static-core';
 import { UserRepository } from '../service/UserRepository';
 import { paramMissingError } from '@shared/constants';
 import { adminMW } from './middleware';
-import { Role as UserRole } from '@entities/User';
+import { Role as UserRole } from '@entities/models/User';
 
 const router = Router().use(adminMW);
 const userDao = new UserRepository();

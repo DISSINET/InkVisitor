@@ -1,8 +1,8 @@
-import { IUser } from '@entities/User';
+import { IUser } from '@entities/models/User';
 import { getRandomInt } from '@shared/functions';
 import { MockDaoMock } from './MockDB';
 
-import { IUserRepository } from '../domain/User';
+import { IUserRepository } from '../domain/models/User';
 
 export class UserRepository extends MockDaoMock implements IUserRepository {
 

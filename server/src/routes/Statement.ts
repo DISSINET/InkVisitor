@@ -1,7 +1,7 @@
 import { Request, Response, Router } from 'express';
 import { BAD_REQUEST, CREATED, OK, NOT_FOUND } from 'http-status-codes';
 
-import { IStatement, Statement, IStatementRepository } from "../domain/Statement"
+import { IStatement, Statement, IStatementRepository } from "../domain/models/Statement"
 import { StatementRepository } from "../service/StatementRepository"
 // import { v4 as uuid4 } from 'uuid';
 import { ExceptionHandler } from 'winston';
