@@ -51,37 +51,37 @@ const filterSuggestions = (
     : [];
 };
 
-storiesOf("Suggester", module).add(
-  "SimpleSuggester",
-  withState(state)(({ store }) => {
-    const { typed, entityType, suggestions } = store.state;
-    return (
-      <Suggester
-        typed={typed}
-        entityType={entityType}
-        suggestions={suggestions}
-        onType={(newTyped: string) => {
-          store.set({
-            typed: newTyped,
-            suggestions: filterSuggestions(entityType, newTyped),
-          });
-        }}
-        onChangeEntityType={(newEntityTypeId: keyof Entities) => {
-          const newEntityType = Entities[newEntityTypeId];
-          store.set({
-            entityType: newEntityType,
-            suggestions: filterSuggestions(newEntityType, typed),
-          });
-        }}
-        onPick={(suggestion: Suggestion) => {
-          alert("suggestion " + suggestion.id + " picked");
-        }}
-        onCreate={(created: Suggestion) => {
-          alert(
-            "new node " + created.entityType + ": " + created.label + " created"
-          );
-        }}
-      />
-    );
-  })
-);
+// storiesOf("Suggester", module).add(
+//   "SimpleSuggester",
+//   withState(state)(({ store }) => {
+//     const { typed, entityType, suggestions } = store.state;
+//     return (
+//       <Suggester
+//         typed={typed}
+//         entityType={entityType}
+//         suggestions={suggestions}
+//         onType={(newTyped: string) => {
+//           store.set({
+//             typed: newTyped,
+//             suggestions: filterSuggestions(entityType, newTyped),
+//           });
+//         }}
+//         onChangeEntityType={(newEntityTypeId: keyof Entities) => {
+//           const newEntityType = Entities[newEntityTypeId];
+//           store.set({
+//             entityType: newEntityType,
+//             suggestions: filterSuggestions(newEntityType, typed),
+//           });
+//         }}
+//         onPick={(suggestion: Suggestion) => {
+//           alert("suggestion " + suggestion.id + " picked");
+//         }}
+//         onCreate={(created: Suggestion) => {
+//           alert(
+//             "new node " + created.entityType + ": " + created.label + " created"
+//           );
+//         }}
+//       />
+//     );
+//   })
+// );
