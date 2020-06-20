@@ -23,12 +23,12 @@ export const fetchTerritories = () => (
   return Promise.resolve();
 };
 
-export const setTreeExpand = (id: string) => (
+export const setTreeExpandId = (id: string) => (
   dispatch: Dispatch<ExpandTreeAction>
 ): Promise<void> => {
   dispatch({
     type: SET_TREE_EXPAND,
-    expandTreeId: id,
+    expandedTreeId: id,
   });
   return Promise.resolve();
 };
@@ -38,7 +38,7 @@ export const setTreeSelect = (id: string) => (
 ): Promise<void> => {
   dispatch({
     type: SET_TREE_SELECT,
-    selectTreeId: id,
+    selectedTreeId: id,
   });
   return Promise.resolve();
 };

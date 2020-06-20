@@ -16,11 +16,11 @@ export interface StatementsAction {
 }
 export interface ExpandTreeAction {
   type: typeof SET_TREE_EXPAND;
-  expandTreeId: string;
+  expandedTreeId: string;
 }
 export interface SelectTreeAction {
   type: typeof SET_TREE_SELECT;
-  selectTreeId: string;
+  selectedTreeId: string;
 }
 export interface FetchTerritoriesAction {
   type: typeof FETCH_TERRITORIES;
