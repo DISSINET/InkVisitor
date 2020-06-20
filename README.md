@@ -2,11 +2,11 @@
 
 ## Endpoints 
 
-## Actants
+### Actants
 
-## Actions
+### Actions
 
-## Statements
+### Statements
 
 #### CRUD
 
