@@ -3,8 +3,8 @@ import { combineReducers } from "redux";
 import statements from "./statementsReducer";
 import statement from "./statementReducer";
 import {
-  expandTreeId,
-  selectTreeId,
+  expandedTreeId,
+  selectedTreeId,
   territories,
 } from "./territoryTreeReducer";
 
@@ -13,8 +13,8 @@ const rootReducer = combineReducers({
   statement,
   territories,
   territoriesTreeProps: combineReducers({
-    expandTreeId,
-    selectTreeId,
+    expandedTreeId,
+    selectedTreeId,
   }),
 });
 
