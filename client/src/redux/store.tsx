@@ -10,7 +10,7 @@ import { composeWithDevTools } from "redux-devtools-extension";
 
 import rootReducer from "./reducers";
 import { Store } from "redux";
-import { Statement, TerritoriesTreeProps } from "types";
+import { Statement, TerritoriesTreeProps, Node } from "types";
 import {
   StatementsAction,
   StatementAction,
@@ -28,7 +28,7 @@ const store: Store<
     statements: Statement[];
     statement: Statement;
     territoriesTreeProps: TerritoriesTreeProps;
-    territories: object;
+    territories: Node;
   }>,
   | StatementsAction
   | StatementAction

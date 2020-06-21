@@ -1,4 +1,5 @@
-import { Statement, Territories } from "types";
+import { Statement } from "types";
+import { Node } from "types";
 
 export const FETCH_STATEMENTS = "FETCH_STATEMENTS";
 export const FETCH_STATEMENT = "FETCH_STATEMENT";
@@ -24,5 +25,5 @@ export interface SelectTreeAction {
 }
 export interface FetchTerritoriesAction {
   type: typeof FETCH_TERRITORIES;
-  payload: object;
+  payload: Node;
 }
