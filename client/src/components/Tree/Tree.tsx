@@ -15,32 +15,36 @@ export const Tree: React.FC<Tree> = ({
   onNodeExpand,
   territoriesTreeProps,
 }) => {
-  const [expandedTreeNode, setExpandedTreeNode] = useState(treeObject);
-  const [prevNode, setPrevNode] = useState([]);
+  const [prevNodeHistory, setPrevNodeHistory] = useState<Node[]>([treeObject]);
 
   const expandNode = (child: Node) => {
-    // save current node to history
-    // const newPrevNodeArr = prevNode.unshift(expandedTreeNode);
-    // setPrevNode(newPrevNodeArr);
-    // Expand clicked node
+    // save new selected node to history
+    setPrevNodeHistory([child, ...prevNodeHistory]);
     onNodeExpand && onNodeExpand(child.id);
-    setExpandedTreeNode(child);
   };
 
-  // const expandPrevNode = () => {
-  //   onNodeExpand && onNodeExpand(prevNode.shift().id);
-  //   setExpandedTreeNode(prevNode);
-  // };
+  const expandPrevNode = () => {
+    // remove first node from history
+    if (prevNodeHistory.length > 1) {
+      const newHistory = prevNodeHistory.slice(1);
+      setPrevNodeHistory(newHistory);
+      onNodeExpand && onNodeExpand(newHistory[0].id);
+    }
+  };
 
   return (
     <div>
       <Tag
         entity={Entities.T}
-        label={expandedTreeNode && expandedTreeNode.label}
-        button={<Button onClick={() => expandNode(treeObject)} label="<" />}
+        label={prevNodeHistory[0] && prevNodeHistory[0].label}
+        button={
+          prevNodeHistory.length > 1 && (
+            <Button onClick={() => expandPrevNode()} label="<" />
+          )
+        }
       />
       <div className="flex flex-col mt-1">
-        {expandedTreeNode.children.map((child: Node, key) => {
+        {prevNodeHistory[0].children.map((child: Node, key) => {
           return (
             <div className="flex mb-1 ml-8" key={key}>
               <Tag
