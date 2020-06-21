@@ -6,11 +6,12 @@ import {
   FetchTerritoriesAction,
   FETCH_TERRITORIES,
 } from "redux/types";
+import { Node } from "types";
 
 const territories = (
-  state: object = {},
+  state: Node = { id: "", label: "", children: [] },
   action: FetchTerritoriesAction
-): object => {
+): Node => {
   switch (action.type) {
     case FETCH_TERRITORIES:
       return action.payload;

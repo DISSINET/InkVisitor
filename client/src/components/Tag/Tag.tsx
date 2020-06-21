@@ -37,8 +37,7 @@ export const Tag: React.FC<TagProps> = ({ label, entity, mode, button }) => {
     "align-middle",
     "p-2",
     "truncate",
-
-    { "bg-primary": mode === "selected" }
+    { "bg-primary text-white": mode === "selected" }
   );
   const buttonClasses = classNames(
     "tag-button",
