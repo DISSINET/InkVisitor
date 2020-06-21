@@ -10,6 +10,7 @@ import {
 import {
   setTreeExpandId,
   setTreeSelectId,
+  fetchTerritories,
 } from "redux/actions/territoryTreeActions";
 import { Tree } from "components/Tree/Tree";
 import { territories } from "components/Tree/treeData";
@@ -22,6 +23,7 @@ interface MainPage {
   setTreeExpandId: (id: string) => void;
   setTreeSelectId: (id: string) => void;
   territoriesTreeProps: TerritoriesTreeProps;
+  fetchTerritories: () => void;
 }
 
 const MainPage: React.FC<MainPage> = ({
@@ -32,16 +34,18 @@ const MainPage: React.FC<MainPage> = ({
   setTreeExpandId,
   setTreeSelectId,
   territoriesTreeProps,
+  fetchTerritories,
 }) => {
   useEffect(() => {
     fetchStatements();
   }, [fetchStatements]);
+
   useEffect(() => {
     // get tree root and set to redux
     if (territories && territories.id && !territoriesTreeProps.expandedTreeId) {
       setTreeExpandId(territories.id);
     }
-  }, []);
+  }, [territories]);
 
   return (
     <>
@@ -81,6 +85,7 @@ export default connect(mapStateToProps, {
   fetchStatement,
   setTreeExpandId,
   setTreeSelectId,
+  fetchTerritories,
 })(MainPage);
 
 interface StateFromProps {
