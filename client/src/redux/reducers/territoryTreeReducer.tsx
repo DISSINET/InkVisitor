@@ -6,11 +6,12 @@ import {
   FetchTerritoriesAction,
   FETCH_TERRITORIES,
 } from "redux/types";
+import { Node } from "types";
 
 const territories = (
-  state: object = {},
+  state: Node = { id: "", label: "", children: [] },
   action: FetchTerritoriesAction
-): object => {
+): Node => {
   switch (action.type) {
     case FETCH_TERRITORIES:
       return action.payload;
@@ -18,21 +19,27 @@ const territories = (
       return state;
   }
 };
-const expandTreeId = (state: string = "", action: ExpandTreeAction): string => {
+const expandedTreeId = (
+  state: string = "",
+  action: ExpandTreeAction
+): string => {
   switch (action.type) {
     case SET_TREE_EXPAND:
-      return action.expandTreeId;
+      return action.expandedTreeId;
     default:
       return state;
   }
 };
-const selectTreeId = (state: string = "", action: SelectTreeAction): string => {
+const selectedTreeId = (
+  state: string = "",
+  action: SelectTreeAction
+): string => {
   switch (action.type) {
     case SET_TREE_SELECT:
-      return action.selectTreeId;
+      return action.selectedTreeId;
     default:
       return state;
   }
 };
 
-export { expandTreeId, selectTreeId, territories };
+export { expandedTreeId, selectedTreeId, territories };
