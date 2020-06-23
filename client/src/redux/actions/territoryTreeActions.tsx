@@ -8,13 +8,13 @@ import {
   FetchTerritoriesAction,
   FETCH_TERRITORIES,
 } from "redux/types";
-import { Territories } from "types";
+import { Node } from "types";
 import { getTerritories } from "api/getTerritories";
 
 export const fetchTerritories = () => (
   dispatch: Dispatch<FetchTerritoriesAction>
 ): Promise<void> => {
-  getTerritories().then((data: Territories) =>
+  getTerritories().then((data: Node) =>
     dispatch({
       type: FETCH_TERRITORIES,
       payload: data,
@@ -23,22 +23,22 @@ export const fetchTerritories = () => (
   return Promise.resolve();
 };
 
-export const setTreeExpand = (id: string) => (
+export const setTreeExpandId = (id: string) => (
   dispatch: Dispatch<ExpandTreeAction>
 ): Promise<void> => {
   dispatch({
     type: SET_TREE_EXPAND,
-    expandTreeId: id,
+    expandedTreeId: id,
   });
   return Promise.resolve();
 };
 
-export const setTreeSelect = (id: string) => (
+export const setTreeSelectId = (id: string) => (
   dispatch: Dispatch<SelectTreeAction>
 ): Promise<void> => {
   dispatch({
     type: SET_TREE_SELECT,
-    selectTreeId: id,
+    selectedTreeId: id,
   });
   return Promise.resolve();
 };

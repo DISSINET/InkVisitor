@@ -1,4 +1,5 @@
-import { Statement, Territories } from "types";
+import { Statement } from "types";
+import { Node } from "types";
 
 export const FETCH_STATEMENTS = "FETCH_STATEMENTS";
 export const FETCH_STATEMENT = "FETCH_STATEMENT";
@@ -16,13 +17,13 @@ export interface StatementsAction {
 }
 export interface ExpandTreeAction {
   type: typeof SET_TREE_EXPAND;
-  expandTreeId: string;
+  expandedTreeId: string;
 }
 export interface SelectTreeAction {
   type: typeof SET_TREE_SELECT;
-  selectTreeId: string;
+  selectedTreeId: string;
 }
 export interface FetchTerritoriesAction {
   type: typeof FETCH_TERRITORIES;
-  payload: object;
+  payload: Node;
 }
