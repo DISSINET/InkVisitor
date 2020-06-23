@@ -29,18 +29,18 @@ interface IStatement extends IEntity<string>, StatementProps { }
  */
 export class Statement implements IStatement {
     private constructor(
-        public id: string, //uuid
-        public tree: object,
-        public territoryId: string, //uuid
-        public resources: Array<string>, //uuids
-        public actionId: string, //uuid
-        public modality: number, //int
-        public certainty: number, //int
-        public epistemicLevel: number, //int
-        public tags: Array<string>, //uuid
-        public note: string,
-        public meta: string, /*or object?*/
-        public text: string,
+        readonly id: string,
+        readonly tree: object,
+        readonly territoryId: string,
+        readonly resources: Array<string>,
+        readonly actionId: string,
+        readonly modality: number,
+        readonly certainty: number,
+        readonly epistemicLevel: number,
+        readonly tags: Array<string>,
+        readonly note: string,
+        readonly meta: string,
+        readonly text: string,
     ) { }
 
     static create(props: StatementProps) {
