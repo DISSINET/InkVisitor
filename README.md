@@ -1,3 +1,9 @@
+# Dissinet
+
+# Dissinet Client
+
+# Dissinet Database
+
 # Dissinet Server
 
 ## Endpoints 
@@ -28,4 +34,4 @@
 
 - [x] `GET /statements/{id}?territoryId={id}`
 
-## Territories
+### Territories
