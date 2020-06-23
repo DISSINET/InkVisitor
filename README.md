@@ -6,11 +6,18 @@
 
 # Dissinet Server
 
+## Aggregates
+
+### Statement
+
+#### Command/Queries, Events
+
+- CreateStatement | StatementsCreated
+- UpdateStatement | StatementsUodated // This is too generic!
+- FindStatement | StatementFound 
+- DeleteStatement | StatementDeleted
+
 ## Endpoints 
-
-### Actants `/actants`
-
-### Actions `/actions`
 
 ### Statements `/statements`
 
@@ -34,4 +41,10 @@
 
 - [x] `GET /statements/{id}?territoryId={id}`
 
-### Territories
+
+### Actants `/actants`
+
+### Actions `/actions`
+
+### Territories `/territories`
+
