@@ -6,7 +6,7 @@ import { EntityKeys, Entities } from "types";
 interface TagProps {
   label?: string;
   entity: typeof Entities[EntityKeys];
-  mode?: string;
+  mode?: "selected" | false;
   button?: ReactNode;
 }
 
@@ -37,7 +37,7 @@ export const Tag: React.FC<TagProps> = ({ label, entity, mode, button }) => {
     "align-middle",
     "p-2",
     "truncate",
-    "bg-white"
+    { "bg-primary text-white": mode === "selected" }
   );
   const buttonClasses = classNames(
     "tag-button",
@@ -59,5 +59,5 @@ export const Tag: React.FC<TagProps> = ({ label, entity, mode, button }) => {
 Tag.defaultProps = {
   label: "",
   entity: Entities.T,
-  mode: "normal",
+  mode: false,
 };

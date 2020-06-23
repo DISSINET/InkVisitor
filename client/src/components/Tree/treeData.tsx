@@ -1,25 +1,38 @@
-export const tree = {
-  id: 0,
-  name: "root",
-  childNodes: [
+import { Node } from "types";
+
+export const territories: Node = {
+  id: "000rootId",
+  label: "root",
+  children: [
     {
-      id: 1,
-      name: "raz",
-      childNodes: [
-        { id: 3, name: "tri", childNodes: [{}] },
-        { id: 5, name: "pet", childNodes: [{}] },
-        { id: 7, name: "sedm", childNodes: [{}] },
+      id: "1",
+      label: "raz",
+      children: [
+        { id: "3", label: "tri", children: [] },
+        {
+          id: "5",
+          label: "pet",
+          children: [{ id: "10", label: "deset", children: [] }],
+        },
+        {
+          id: "7",
+          label: "sedm",
+          children: [
+            { id: "8", label: "osm", children: [] },
+            { id: "9", label: "devet", children: [] },
+          ],
+        },
       ],
     },
     {
-      id: 2,
-      name: "dva",
-      childNodes: [{ id: 4, name: "štyri", childNodes: [{}] }],
+      id: "2",
+      label: "dva",
+      children: [{ id: "4", label: "štyri", children: [] }],
     },
     {
-      id: 6,
-      name: "sest",
-      childNodes: [{}],
+      id: "6",
+      label: "sest",
+      children: [],
     },
   ],
 };
