@@ -10,7 +10,7 @@ services:
         - POSTGRES_USER=postgres
         - POSTGRES_PASSWORD=postgres
       volumes:
-        - ./schema/schema.sql:/docker-entrypoint-initdb.d/schema.sql
+        - ./database/schema/tables.sql:/docker-entrypoint-initdb.d/tables.sql
       ports:
         - 5000:5432
       
