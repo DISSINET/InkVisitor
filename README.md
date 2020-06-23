@@ -8,11 +8,11 @@
 
 ## Endpoints 
 
-### Actants
+### Actants `/actants`
 
-### Actions
+### Actions `/actions`
 
-### Statements
+### Statements `/statements`
 
 #### CRUD
 
