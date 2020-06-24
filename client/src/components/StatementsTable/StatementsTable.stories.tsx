@@ -3,6 +3,7 @@ import { StatementsTable } from "components";
 
 import { EntityKeys, Entities } from "types";
 
+/*
 export default {
   title: "TableStatements",
   parameters: {
@@ -55,5 +56,8 @@ const defaultData = [
 ];
 
 export const DefaultStatementsTable = () => {
-  return <StatementsTable statements={defaultData} />;
+  return <div> asdasd</div>;
+  //return <StatementsTable data={[]} columns={[]} />;
 };
+
+*/

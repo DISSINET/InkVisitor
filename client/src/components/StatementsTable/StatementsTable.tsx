@@ -1,17 +1,19 @@
-import React from "react";
+import React, { useEffect, useMemo } from "react";
 import { useTable, Cell } from "react-table";
 import classNames from "classnames";
 
 import { Tag, Button } from "components";
-import { EntityKeys, Entities } from "types";
+import { EntityKeys, Entities, Statement } from "types";
 
 interface StatementsTableProps {
-  statements: {
-    subjects: {}[];
-    type: string;
-    actants: {}[];
-    active: boolean;
-  }[];
+  statements: {}[];
+}
+
+interface IActant {
+  id: string;
+  _label: string;
+  type: string;
+  props: {}[];
 }
 
 export const StatementsTable: React.FC<StatementsTableProps> = ({
@@ -20,47 +22,65 @@ export const StatementsTable: React.FC<StatementsTableProps> = ({
   const wrapperClasses = classNames("table-wrapper");
   const tableClasses = classNames("component", "table", "w-full", "table-auto");
 
-  const {
-    getTableProps,
-    getTableBodyProps,
-    allColumns,
-    rows,
-    prepareRow,
-  } = useTable({
-    columns: [
+  console.log(statements);
+
+  const columns = useMemo(
+    () => [
       {
         Header: "Order",
         Cell: () => <div className="table-order">^</div>,
       },
       {
         Header: "Subjects",
-        accessor: () => "subjects",
+        accessor: "tree",
+        Cell: ({ row }: Cell) => {
+          const subjects =
+            row.values.tree && row.values.tree.actants
+              ? row.values.tree.actants.filter(
+                  (a: IActant) => a.type === "subject"
+                )
+              : [];
+
+          return (
+            <div className="table-subjects">
+              {subjects.length
+                ? subjects.map((actant: IActant, si: number) => {
+                    console.log(actant);
+                    return <Tag key={si} entity={Entities[actant.id[0]]}></Tag>;
+                  })
+                : null}
+            </div>
+          );
+        },
+      },
+      {
+        Header: "Type",
+        accessor: "actionId",
         Cell: ({ row }: Cell) => (
-          <div className="table-subjects">
-            {row.values.subjects.map(
-              (
-                subject: { entity: typeof Entities[EntityKeys] },
-                si: number
-              ) => {
-                return <Tag key={si} entity={subject.entity}></Tag>;
-              }
-            )}
-          </div>
+          <div className="table-action-id">{row.values.actionId}</div>
         ),
       },
-      { Header: "Type", accessor: () => "type" },
       {
         Header: "Actants",
-        accessor: () => "actants",
-        Cell: ({ row }: Cell) => (
-          <div className="table-subjects">
-            {row.values.actants.map(
-              (actant: { entity: typeof Entities[EntityKeys] }, si: number) => {
-                return <Tag key={si} entity={actant.entity}></Tag>;
-              }
-            )}
-          </div>
-        ),
+        accessor: () => "tree",
+        Cell: ({ row }: Cell) => {
+          const actants =
+            row.values.tree && row.values.tree.actants
+              ? row.values.tree.actants.filter(
+                  (a: IActant) => a.type === "actant1"
+                )
+              : [];
+
+          return (
+            <div className="table-subjects">
+              {actants.length
+                ? actants.map((actant: IActant, si: number) => {
+                    return <Tag key={si} entity={Entities[actant.id[0]}></Tag>;
+                  })
+                : null}
+            </div>
+          );
+        },
       },
       {
         Header: "Buttons",
@@ -74,6 +94,17 @@ export const StatementsTable: React.FC<StatementsTableProps> = ({
         ),
       },
     ],
+    []
+  );
+
+  const {
+    getTableProps,
+    getTableBodyProps,
+    allColumns,
+    rows,
+    prepareRow,
+  } = useTable({
+    columns,
     data: statements,
   });
 
@@ -90,7 +121,7 @@ export const StatementsTable: React.FC<StatementsTableProps> = ({
           </tr>
         </thead>
         <tbody {...getTableBodyProps()}>
-          {rows.slice(0, 10).map((row, i) => {
+          {rows.map((row, i) => {
             prepareRow(row);
             return (
               <tr
@@ -114,8 +145,4 @@ export const StatementsTable: React.FC<StatementsTableProps> = ({
       </table>
     </div>
   );
-};
-
-StatementsTable.defaultProps = {
-  statements: [],
 };
