@@ -15,6 +15,8 @@ import {
 import { Tree } from "components/Tree/Tree";
 import { territories } from "components/Tree/treeData";
 
+import { MainPageStatementBox } from "./statementsbox";
+
 interface MainPage {
   fetchStatements: () => void;
   fetchStatement: (id: string) => void;
@@ -63,7 +65,7 @@ const MainPage: React.FC<MainPage> = ({
           />
         </Box>
         <Box height={750} width={800} label={"Statements"}>
-          {"Statements"}
+          <MainPageStatementBox statements={statements} />
         </Box>
       </div>
     </>
