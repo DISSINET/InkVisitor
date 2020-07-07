@@ -1,0 +1,24 @@
+id,label,type
+P1,David,P
+P2,Honza,P
+P3,Robert,P
+G1,a group of villagers,G
+O1,3 breads,O
+L1,a house near Dover,L
+L2,Dover,L
+E1,big forest fire,E
+C01,location:where,C
+C02,location:near,C
+C03,time:when,C
+C04,time:during,C
+C05,class,C
+C06,occupation,C
+C07,longitude,C
+C08,latitude,C
+C1,food,C
+C2,fisherman,C
+C3,priest,C
+C4,baker,C
+V1,1217,V
+V2,1.31,V
+V3,51.13,V
