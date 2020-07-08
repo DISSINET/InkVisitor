@@ -1,0 +1,8 @@
+id,statement_id,subject_id,actant1_id,actant2_id,certainty,elvl,is
+1,1,P1,C06,C2,1,1,has
+2,2,P2,C06,C3,1,1,has
+3,2,P3,C06,C4,1,1,has
+4,2,2,C01,L1,1,1,has
+5,2,L1,C02,L2,1,1,is
+6,3,O1,C05,C1,1,1,has
+7,4,4,C04,E1,1,1,has
