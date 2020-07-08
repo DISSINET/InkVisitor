@@ -1,0 +1,533 @@
+[
+  {
+    "id": "T0",
+    "label": "meta level",
+    "class": "T",
+    "data": { "parent": "", "content": "", "type": 0, "language": "Lang1" }
+  },
+  {
+    "id": "T1",
+    "label": "A book of inquisition",
+    "class": "T",
+    "data": { "parent": "T0", "content": "", "type": 0, "language": "Lang1" }
+  },
+  {
+    "id": "T1-1",
+    "label": "Chapter 1",
+    "class": "T",
+    "data": { "parent": "T1", "content": "", "type": 0, "language": "Lang1" }
+  },
+  {
+    "id": "T1-1-1",
+    "label": "Deposition 1",
+    "class": "T",
+    "data": { "parent": "T1-1", "content": "", "type": 0, "language": "Lang1" }
+  },
+  {
+    "id": "T1-1-2",
+    "label": "Deposition 2",
+    "class": "T",
+    "data": { "parent": "T1-1", "content": "", "type": 0, "language": "Lang1" }
+  },
+  {
+    "id": "T1-1-3",
+    "label": "Deposition 3",
+    "class": "T",
+    "data": { "parent": "T1-1", "content": "", "type": 0, "language": "Lang1" }
+  },
+  {
+    "id": "T1-1-4",
+    "label": "Deposition 4",
+    "class": "T",
+    "data": { "parent": "T1-1", "content": "", "type": 0, "language": "Lang1" }
+  },
+  {
+    "id": "T2",
+    "label": "A book of forest fires",
+    "class": "T",
+    "data": { "parent": "T0", "content": "", "type": 0, "language": "Lang1" }
+  },
+  {
+    "id": "T2-1",
+    "label": "Map",
+    "class": "T",
+    "data": { "parent": "T2", "content": "", "type": 0, "language": "Lang1" }
+  },
+  {
+    "id": "T2-2",
+    "label": "Page 1",
+    "class": "T",
+    "data": { "parent": "T2", "content": "", "type": 0, "language": "Lang1" }
+  },
+  {
+    "id": "T3",
+    "label": "Gazetteer",
+    "class": "T",
+    "data": { "parent": "T0", "content": "", "type": 0, "language": "Lang1" }
+  },
+
+  {
+    "id": "R1",
+    "label": "Resource 1",
+    "class": "R",
+    "data": { "content": "", "link": "", "type": 0, "language": "Lang1" }
+  },
+  {
+    "id": "R2",
+    "label": "Resource 2",
+    "class": "R",
+    "data": { "content": "", "link": "", "type": 0, "language": "Lang1" }
+  },
+
+  { "id": "P1", "class": "E", "label": "David", "data": { "entitytype": "P" } },
+  { "id": "P2", "class": "E", "label": "Honza", "data": { "entitytype": "P" } },
+  {
+    "id": "P3",
+    "class": "E",
+    "label": "Robert",
+    "data": { "entitytype": "P" }
+  },
+  {
+    "id": "G1",
+    "class": "E",
+    "label": "a group of villagers",
+    "data": { "entitytype": "G" }
+  },
+  {
+    "id": "O1",
+    "class": "E",
+    "label": "3 breads",
+    "data": { "entitytype": "O" }
+  },
+  {
+    "id": "L1",
+    "class": "E",
+    "label": "a house near Dover",
+    "data": { "entitytype": "L" }
+  },
+  { "id": "L2", "class": "E", "label": "Dover", "data": { "entitytype": "L" } },
+  {
+    "id": "E1",
+    "class": "E",
+    "label": "big forest fire",
+    "data": { "entitytype": "E" }
+  },
+  {
+    "id": "C01",
+    "class": "E",
+    "label": "location:where",
+    "data": { "entitytype": "C" }
+  },
+  {
+    "id": "C02",
+    "class": "E",
+    "label": "location:near",
+    "data": { "entitytype": "C" }
+  },
+  {
+    "id": "C03",
+    "class": "E",
+    "label": "time:when",
+    "data": { "entitytype": "C" }
+  },
+  {
+    "id": "C04",
+    "class": "E",
+    "label": "time:during",
+    "data": { "entitytype": "C" }
+  },
+  {
+    "id": "C05",
+    "class": "E",
+    "label": "class",
+    "data": { "entitytype": "C" }
+  },
+  {
+    "id": "C06",
+    "class": "E",
+    "label": "occupation",
+    "data": { "entitytype": "C" }
+  },
+  {
+    "id": "C07",
+    "class": "E",
+    "label": "longitude",
+    "data": { "entitytype": "C" }
+  },
+  {
+    "id": "C08",
+    "class": "E",
+    "label": "latitude",
+    "data": { "entitytype": "C" }
+  },
+  {
+    "id": "C09",
+    "class": "E",
+    "label": "units",
+    "data": { "entitytype": "C" }
+  },
+  {
+    "id": "C010",
+    "class": "E",
+    "label": "amount",
+    "data": { "entitytype": "C" }
+  },
+  {
+    "id": "C011",
+    "class": "E",
+    "label": "years",
+    "data": { "entitytype": "C" }
+  },
+  { "id": "C1", "class": "E", "label": "food", "data": { "entitytype": "C" } },
+  {
+    "id": "C2",
+    "class": "E",
+    "label": "fisherman",
+    "data": { "entitytype": "C" }
+  },
+  {
+    "id": "C3",
+    "class": "E",
+    "label": "priest",
+    "data": { "entitytype": "C" }
+  },
+  { "id": "C4", "class": "E", "label": "baker", "data": { "entitytype": "C" } },
+  { "id": "V1", "class": "E", "label": "1217", "data": { "entitytype": "V" } },
+  { "id": "V2", "class": "E", "label": "1.31", "data": { "entitytype": "V" } },
+  { "id": "V3", "class": "E", "label": "51.13", "data": { "entitytype": "V" } },
+  { "id": "V4", "class": "E", "label": "2", "data": { "entitytype": "V" } },
+  {
+    "id": "S1",
+    "class": "S",
+    "label": "",
+    "data": {
+      "action_id": "A1",
+      "territory_id": "T1-1-1",
+      "certainty": 1,
+      "elvl": 1,
+      "modality": 1,
+      "text": "Fisherman David said that ...",
+      "note": "",
+      "props": [],
+      "actants": [
+        {
+          "actant_id": "P1",
+          "position": "s",
+          "elvl": 1,
+          "certainty": 1,
+          "props": [
+            {
+              "actant1": "C06",
+              "actant2": "C2",
+              "elvl": 1,
+              "certainty": 1
+            }
+          ]
+        },
+        {
+          "id": "Act2",
+          "actant_id": "S2",
+          "position": "a1",
+          "elvl": 1,
+          "certainty": 1
+        }
+      ],
+      "tags": []
+    }
+  },
+  {
+    "id": "S2",
+    "class": "S",
+    "label": "",
+    "data": {
+      "action_id": "A2",
+      "territory_id": "T1-1-1",
+      "certainty": 1,
+      "elvl": 1,
+      "modality": 1,
+      "text": "...priest Honza, baker Robert, and a group of local villagers performed a ritual in a house near Dover.",
+      "note": "",
+      "props": [
+        {
+          "actant1": "C01",
+          "actant2": "L1",
+          "elvl": 1,
+          "certainty": 1,
+          "props": []
+        },
+        {
+          "actant1": "C01",
+          "actant2": "L1",
+          "elvl": 1,
+          "certainty": 1,
+          "props": []
+        }
+      ],
+      "actants": [
+        {
+          "actant_id": "P2",
+          "position": "s",
+          "elvl": 1,
+          "certainty": 1,
+          "props": [
+            {
+              "actant1": "C06",
+              "actant2": "C3",
+              "elvl": 1,
+              "certainty": 1,
+              "props": []
+            }
+          ]
+        },
+        {
+          "actant_id": "P3",
+          "position": "s",
+          "elvl": 1,
+          "certainty": 1,
+          "props": [
+            {
+              "actant1": "C06",
+              "actant2": "C4",
+              "elvl": 1,
+              "certainty": 1,
+              "props": []
+            }
+          ]
+        },
+        {
+          "actant_id": "G1",
+          "position": "s",
+          "elvl": 1,
+          "certainty": 1,
+          "props": []
+        },
+        {
+          "actant_id": "L1",
+          "position": "f",
+          "elvl": 1,
+          "certainty": 1,
+          "props": [
+            {
+              "actant1": "C02",
+              "actant2": "L2",
+              "elvl": 1,
+              "certainty": 1,
+              "props": []
+            }
+          ]
+        }
+      ],
+      "tags": []
+    }
+  },
+  {
+    "id": "S3",
+    "class": "S",
+    "label": "",
+    "data": {
+      "action_id": "A3",
+      "territory_id": "T1-1-2",
+      "certainty": 1,
+      "elvl": 1,
+      "modality": 1,
+      "text": "Robert brought 3 breads to the ritual.",
+      "note": "",
+      "props": [],
+      "actants": [
+        {
+          "actant_id": "P3",
+          "position": "s",
+          "elvl": 1,
+          "certainty": 1,
+          "props": []
+        },
+        {
+          "actant_id": "01",
+          "position": "a1",
+          "elvl": 1,
+          "certainty": 1,
+          "props": [
+            {
+              "actant1": "C05",
+              "actant2": "C1",
+              "elvl": 1,
+              "certainty": 1,
+              "props": []
+            }
+          ]
+        },
+        {
+          "actant_id": "S2",
+          "position": "a2",
+          "elvl": 1,
+          "certainty": 1,
+          "props": []
+        }
+      ],
+      "tags": []
+    }
+  },
+  {
+    "id": "S4",
+    "class": "S",
+    "label": "",
+    "data": {
+      "action_id": "A3",
+      "territory_id": "T1-1",
+      "certainty": 1,
+      "elvl": 1,
+      "modality": 1,
+      "text": "This house burned down during the big forest fire.",
+      "note": "",
+      "props": [
+        {
+          "actant1": "C03",
+          "actant2": "E1",
+          "elvl": 1,
+          "certainty": 1,
+          "props": [
+            {
+              "actant1": "C09",
+              "actant2": "C011",
+              "elvl": 1,
+              "certainty": 1
+            },
+            {
+              "actant1": "C010",
+              "actant2": "V4",
+              "elvl": 1,
+              "certainty": 1
+            }
+          ]
+        }
+      ],
+      "actants": [
+        {
+          "actant_id": "L1",
+          "position": "s",
+          "elvl": 1,
+          "certainty": 1,
+          "props": []
+        }
+      ],
+      "tags": []
+    }
+  },
+  {
+    "id": "S5",
+    "class": "S",
+    "label": "",
+    "data": {
+      "action_id": "A3",
+      "territory_id": "T2-1",
+      "certainty": 1,
+      "elvl": 1,
+      "modality": 1,
+      "text": "big forest fire happened in 1217",
+      "note": "",
+      "props": [],
+      "actants": [
+        {
+          "actant_id": "E1",
+          "position": "s",
+          "elvl": 1,
+          "certainty": 1,
+          "props": []
+        },
+        {
+          "actant_id": "C03",
+          "position": "a1",
+          "elvl": 1,
+          "certainty": 1,
+          "props": []
+        },
+        {
+          "actant_id": "V1",
+          "position": "a2",
+          "elvl": 1,
+          "certainty": 1,
+          "props": []
+        }
+      ],
+      "tags": []
+    }
+  },
+  {
+    "id": "S6",
+    "class": "S",
+    "label": "",
+    "data": {
+      "action_id": "A3",
+      "territory_id": "T3",
+      "certainty": 1,
+      "elvl": 1,
+      "modality": 1,
+      "text": "Dover has latitude of 51.13",
+      "note": "",
+      "props": [],
+      "actants": [
+        {
+          "actant_id": "L2",
+          "position": "s",
+          "elvl": 1,
+          "certainty": 1,
+          "props": []
+        },
+        {
+          "actant_id": "C08",
+          "position": "a1",
+          "elvl": 1,
+          "certainty": 1,
+          "props": []
+        },
+        {
+          "actant_id": "V3",
+          "position": "a2",
+          "elvl": 1,
+          "certainty": 1,
+          "props": []
+        }
+      ],
+      "tags": []
+    }
+  },
+  {
+    "id": "S7",
+    "class": "S",
+    "label": "",
+    "data": {
+      "action_id": "A3",
+      "territory_id": "T3",
+      "certainty": 1,
+      "elvl": 1,
+      "modality": 1,
+      "text": "Dover has longitude of 1.31",
+      "note": "",
+      "props": [],
+      "actants": [
+        {
+          "actant_id": "L2",
+          "position": "s",
+          "elvl": 1,
+          "certainty": 1,
+          "props": []
+        },
+        {
+          "actant_id": "C07",
+          "position": "a1",
+          "elvl": 1,
+          "certainty": 1,
+          "props": []
+        },
+        {
+          "actant_id": "V2",
+          "position": "a2",
+          "elvl": 1,
+          "certainty": 1,
+          "props": []
+        }
+      ],
+      "tags": []
+    }
+  }
+]
