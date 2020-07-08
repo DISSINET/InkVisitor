@@ -3,7 +3,7 @@
     "id": "T0",
     "label": "meta level",
     "class": "T",
-    "data": { "parent": "", "content": "", "type": 0, "language": "Lang1" }
+    "data": { "parent": false, "content": "", "type": 0, "language": "Lang1" }
   },
   {
     "id": "T1",
@@ -201,8 +201,8 @@
     "class": "S",
     "label": "",
     "data": {
-      "action_id": "A1",
-      "territory_id": "T1-1-1",
+      "actionId": "A1",
+      "territoryId": "T1-1-1",
       "certainty": 1,
       "elvl": 1,
       "modality": 1,
@@ -211,7 +211,7 @@
       "props": [],
       "actants": [
         {
-          "actant_id": "P1",
+          "id": "P1",
           "position": "s",
           "elvl": 1,
           "certainty": 1,
@@ -225,8 +225,7 @@
           ]
         },
         {
-          "id": "Act2",
-          "actant_id": "S2",
+          "id": "S2",
           "position": "a1",
           "elvl": 1,
           "certainty": 1
@@ -240,8 +239,8 @@
     "class": "S",
     "label": "",
     "data": {
-      "action_id": "A2",
-      "territory_id": "T1-1-1",
+      "actionId": "A2",
+      "territoryId": "T1-1-1",
       "certainty": 1,
       "elvl": 1,
       "modality": 1,
@@ -265,7 +264,7 @@
       ],
       "actants": [
         {
-          "actant_id": "P2",
+          "id": "P2",
           "position": "s",
           "elvl": 1,
           "certainty": 1,
@@ -280,7 +279,7 @@
           ]
         },
         {
-          "actant_id": "P3",
+          "id": "P3",
           "position": "s",
           "elvl": 1,
           "certainty": 1,
@@ -295,14 +294,14 @@
           ]
         },
         {
-          "actant_id": "G1",
+          "id": "G1",
           "position": "s",
           "elvl": 1,
           "certainty": 1,
           "props": []
         },
         {
-          "actant_id": "L1",
+          "id": "L1",
           "position": "f",
           "elvl": 1,
           "certainty": 1,
@@ -325,8 +324,8 @@
     "class": "S",
     "label": "",
     "data": {
-      "action_id": "A3",
-      "territory_id": "T1-1-2",
+      "actionId": "A3",
+      "territoryId": "T1-1-2",
       "certainty": 1,
       "elvl": 1,
       "modality": 1,
@@ -335,14 +334,14 @@
       "props": [],
       "actants": [
         {
-          "actant_id": "P3",
+          "id": "P3",
           "position": "s",
           "elvl": 1,
           "certainty": 1,
           "props": []
         },
         {
-          "actant_id": "01",
+          "id": "01",
           "position": "a1",
           "elvl": 1,
           "certainty": 1,
@@ -357,7 +356,7 @@
           ]
         },
         {
-          "actant_id": "S2",
+          "id": "S2",
           "position": "a2",
           "elvl": 1,
           "certainty": 1,
@@ -372,8 +371,8 @@
     "class": "S",
     "label": "",
     "data": {
-      "action_id": "A3",
-      "territory_id": "T1-1",
+      "actionId": "A3",
+      "territoryId": "T1-1",
       "certainty": 1,
       "elvl": 1,
       "modality": 1,
@@ -403,7 +402,7 @@
       ],
       "actants": [
         {
-          "actant_id": "L1",
+          "id": "L1",
           "position": "s",
           "elvl": 1,
           "certainty": 1,
@@ -418,8 +417,8 @@
     "class": "S",
     "label": "",
     "data": {
-      "action_id": "A3",
-      "territory_id": "T2-1",
+      "actionId": "A3",
+      "territoryId": "T2-1",
       "certainty": 1,
       "elvl": 1,
       "modality": 1,
@@ -428,21 +427,21 @@
       "props": [],
       "actants": [
         {
-          "actant_id": "E1",
+          "id": "E1",
           "position": "s",
           "elvl": 1,
           "certainty": 1,
           "props": []
         },
         {
-          "actant_id": "C03",
+          "id": "C03",
           "position": "a1",
           "elvl": 1,
           "certainty": 1,
           "props": []
         },
         {
-          "actant_id": "V1",
+          "id": "V1",
           "position": "a2",
           "elvl": 1,
           "certainty": 1,
@@ -457,8 +456,8 @@
     "class": "S",
     "label": "",
     "data": {
-      "action_id": "A3",
-      "territory_id": "T3",
+      "actionId": "A3",
+      "territoryId": "T3",
       "certainty": 1,
       "elvl": 1,
       "modality": 1,
@@ -467,21 +466,21 @@
       "props": [],
       "actants": [
         {
-          "actant_id": "L2",
+          "id": "L2",
           "position": "s",
           "elvl": 1,
           "certainty": 1,
           "props": []
         },
         {
-          "actant_id": "C08",
+          "id": "C08",
           "position": "a1",
           "elvl": 1,
           "certainty": 1,
           "props": []
         },
         {
-          "actant_id": "V3",
+          "id": "V3",
           "position": "a2",
           "elvl": 1,
           "certainty": 1,
@@ -496,8 +495,8 @@
     "class": "S",
     "label": "",
     "data": {
-      "action_id": "A3",
-      "territory_id": "T3",
+      "actionId": "A3",
+      "territoryId": "T3",
       "certainty": 1,
       "elvl": 1,
       "modality": 1,
@@ -506,21 +505,21 @@
       "props": [],
       "actants": [
         {
-          "actant_id": "L2",
+          "id": "L2",
           "position": "s",
           "elvl": 1,
           "certainty": 1,
           "props": []
         },
         {
-          "actant_id": "C07",
+          "id": "C07",
           "position": "a1",
           "elvl": 1,
           "certainty": 1,
           "props": []
         },
         {
-          "actant_id": "V2",
+          "id": "V2",
           "position": "a2",
           "elvl": 1,
           "certainty": 1,
