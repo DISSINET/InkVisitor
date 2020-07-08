@@ -79,123 +79,123 @@
     "data": { "content": "", "link": "", "type": 0, "language": "Lang1" }
   },
 
-  { "id": "P1", "class": "E", "label": "David", "data": { "entitytype": "P" } },
-  { "id": "P2", "class": "E", "label": "Honza", "data": { "entitytype": "P" } },
+  { "id": "P1", "class": "E", "label": "David", "data": { "type": "P" } },
+  { "id": "P2", "class": "E", "label": "Honza", "data": { "type": "P" } },
   {
     "id": "P3",
     "class": "E",
     "label": "Robert",
-    "data": { "entitytype": "P" }
+    "data": { "type": "P" }
   },
   {
     "id": "G1",
     "class": "E",
     "label": "a group of villagers",
-    "data": { "entitytype": "G" }
+    "data": { "type": "G" }
   },
   {
     "id": "O1",
     "class": "E",
     "label": "3 breads",
-    "data": { "entitytype": "O" }
+    "data": { "type": "O" }
   },
   {
     "id": "L1",
     "class": "E",
     "label": "a house near Dover",
-    "data": { "entitytype": "L" }
+    "data": { "type": "L" }
   },
-  { "id": "L2", "class": "E", "label": "Dover", "data": { "entitytype": "L" } },
+  { "id": "L2", "class": "E", "label": "Dover", "data": { "type": "L" } },
   {
     "id": "E1",
     "class": "E",
     "label": "big forest fire",
-    "data": { "entitytype": "E" }
+    "data": { "type": "E" }
   },
   {
     "id": "C01",
     "class": "E",
     "label": "location:where",
-    "data": { "entitytype": "C" }
+    "data": { "type": "C" }
   },
   {
     "id": "C02",
     "class": "E",
     "label": "location:near",
-    "data": { "entitytype": "C" }
+    "data": { "type": "C" }
   },
   {
     "id": "C03",
     "class": "E",
     "label": "time:when",
-    "data": { "entitytype": "C" }
+    "data": { "type": "C" }
   },
   {
     "id": "C04",
     "class": "E",
     "label": "time:during",
-    "data": { "entitytype": "C" }
+    "data": { "type": "C" }
   },
   {
     "id": "C05",
     "class": "E",
     "label": "class",
-    "data": { "entitytype": "C" }
+    "data": { "type": "C" }
   },
   {
     "id": "C06",
     "class": "E",
     "label": "occupation",
-    "data": { "entitytype": "C" }
+    "data": { "type": "C" }
   },
   {
     "id": "C07",
     "class": "E",
     "label": "longitude",
-    "data": { "entitytype": "C" }
+    "data": { "type": "C" }
   },
   {
     "id": "C08",
     "class": "E",
     "label": "latitude",
-    "data": { "entitytype": "C" }
+    "data": { "type": "C" }
   },
   {
     "id": "C09",
     "class": "E",
     "label": "units",
-    "data": { "entitytype": "C" }
+    "data": { "type": "C" }
   },
   {
     "id": "C010",
     "class": "E",
     "label": "amount",
-    "data": { "entitytype": "C" }
+    "data": { "type": "C" }
   },
   {
     "id": "C011",
     "class": "E",
     "label": "years",
-    "data": { "entitytype": "C" }
+    "data": { "type": "C" }
   },
-  { "id": "C1", "class": "E", "label": "food", "data": { "entitytype": "C" } },
+  { "id": "C1", "class": "E", "label": "food", "data": { "type": "C" } },
   {
     "id": "C2",
     "class": "E",
     "label": "fisherman",
-    "data": { "entitytype": "C" }
+    "data": { "type": "C" }
   },
   {
     "id": "C3",
     "class": "E",
     "label": "priest",
-    "data": { "entitytype": "C" }
+    "data": { "type": "C" }
   },
-  { "id": "C4", "class": "E", "label": "baker", "data": { "entitytype": "C" } },
-  { "id": "V1", "class": "E", "label": "1217", "data": { "entitytype": "V" } },
-  { "id": "V2", "class": "E", "label": "1.31", "data": { "entitytype": "V" } },
-  { "id": "V3", "class": "E", "label": "51.13", "data": { "entitytype": "V" } },
-  { "id": "V4", "class": "E", "label": "2", "data": { "entitytype": "V" } },
+  { "id": "C4", "class": "E", "label": "baker", "data": { "type": "C" } },
+  { "id": "V1", "class": "E", "label": "1217", "data": { "type": "V" } },
+  { "id": "V2", "class": "E", "label": "1.31", "data": { "type": "V" } },
+  { "id": "V3", "class": "E", "label": "51.13", "data": { "type": "V" } },
+  { "id": "V4", "class": "E", "label": "2", "data": { "type": "V" } },
   {
     "id": "S1",
     "class": "S",
