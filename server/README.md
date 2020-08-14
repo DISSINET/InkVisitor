@@ -1,5 +1,20 @@
 # DISSINET SERVER
 
+## Development
+
+Assuming that you are in the project folder.
+
+Start the application server on `localhost:3000`.
+
+    cd server
+    npm install
+    npm run start:dev
+
+Start the container with database server.
+
+    docker-compose up 
+    docker-compose down
+
 ## Entities endpoint
 
 ### `GET /entities`
