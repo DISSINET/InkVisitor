@@ -2,7 +2,7 @@ import { IStatement, Statement } from "../domain/models/Statement";
 import { IRepository } from "../domain/common";
 import * as statementMocks from "../../../database/import/import_data/mock/statements.json";
 
-export interface IStatementRepository extends IRepository<IStatement> {}
+export interface IStatementRepository extends IRepository<IStatement> { }
 
 /**
  * The statement entity in-memory repository.

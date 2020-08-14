@@ -40,6 +40,8 @@
     "module-alias": "^2.2.2",
     "morgan": "^1.10.0",
     "randomstring": "^1.1.5",
+    "rethinkdb": "^2.4.2",
+    "rethinkdb-ts": "^2.4.5",
     "uuid": "^8.1.0",
     "winston": "^3.2.1"
   },
