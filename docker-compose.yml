@@ -1,10 +1,22 @@
-version: '3.1'
+version: '3.4'
+
+x-service: &service
+  restart: always
 
 services:
-    storage:
-      image: postgres:10
-      container_name: "dissinet-postgres"
-      restart: always
+    server:
+      <<: *service
+      image: node:14-buster-slim
+      depends_on: 
+        - storage-1
+        - storage-2
+      ports:
+        - 3000:3000
+      
+    storage-1:
+      <<: *service
+      image: postgres:12-alpine
+      container_name: "dissinet-storage-1"
       environment:
         - POSTGRES_DB=dissinet
         - POSTGRES_USER=postgres
@@ -13,4 +25,13 @@ services:
         - ./database/schema/tables.sql:/docker-entrypoint-initdb.d/tables.sql
       ports:
         - 5000:5432
+    
+    storage-2:
+      <<: *service
+      image: rethinkdb
+      container_name: "dissinet-storage-2"
+      volumes:
+        - ./data:/data  
+      ports:
+        - 6000:8080
       
