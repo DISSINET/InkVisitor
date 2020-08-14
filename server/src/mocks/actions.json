@@ -1,0 +1,77 @@
+[
+    {
+        "id": "A1",
+        "parent": false,
+        "note": "",
+        "labels": [
+            {
+                "label": "said",
+                "language": "Lang1"
+            }
+        ],
+        "types": [],
+        "valencies": [],
+        "rulesActants": [],
+        "rulesProperties": []
+    },
+    {
+        "id": "A2",
+        "parent": false,
+        "note": "",
+        "labels": [
+            {
+                "label": "performed ritual",
+                "language": "Lang1"
+            }
+        ],
+        "types": [],
+        "valencies": [],
+        "rulesActants": [],
+        "rulesProperties": []
+    },
+    {
+        "id": "A3",
+        "parent": false,
+        "note": "",
+        "labels": [
+            {
+                "label": "brought",
+                "language": "Lang1"
+            }
+        ],
+        "types": [],
+        "valencies": [],
+        "rulesActants": [],
+        "rulesProperties": []
+    },
+    {
+        "id": "A4",
+        "parent": false,
+        "note": "",
+        "labels": [
+            {
+                "label": "burned down",
+                "language": "Lang1"
+            }
+        ],
+        "types": [],
+        "valencies": [],
+        "rulesActants": [],
+        "rulesProperties": []
+    },
+    {
+        "id": "A5",
+        "parent": false,
+        "note": "",
+        "labels": [
+            {
+                "label": "has",
+                "language": "Lang1"
+            }
+        ],
+        "types": [],
+        "valencies": [],
+        "rulesActants": [],
+        "rulesProperties": []
+    }
+]
