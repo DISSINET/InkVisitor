@@ -1,6 +1,7 @@
 var inActants = require("./old/actants");
 var inStatements = require("./old/statements");
 
+var fs = require("fs");
 console.log(inActants);
 
 const actants = [];
@@ -53,7 +54,7 @@ inStatements.forEach((inStatement) => {
   });
 
   const statementTerritoryId = inStatement.territoryId;
-  if (statementTerritoryId && !territories.includes(statementTerritoryId)) {
+  if (statementTerritoryId && !territoryIds.includes(statementTerritoryId)) {
     territoryIds.push(statementTerritoryId);
   }
 
@@ -85,7 +86,4 @@ actants.push({
   data: { parent: false, content: "", type: 0, language: "Lang1" },
 });
 
-fs.writeFileSync("actants.json", JSON.stringify(actants));
-
-console.log(territories);
-//console.log(actants);
+fs.writeFileSync("./actants.json", JSON.stringify(actants));
