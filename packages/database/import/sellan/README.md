@@ -1,0 +1,1 @@
+- parsing script to adapt the old sellan data (unknown source) to the new no-sql structure
