@@ -4,6 +4,8 @@
 
 Assuming that you are in the project folder.
 
+### Node
+
 Start the application server on `localhost:3000`.
 
     cd server
@@ -15,13 +17,25 @@ Start the container with database server.
     docker-compose up 
     docker-compose down
 
+### RethinkDB
+
+Go to `localhost:8080` and create tables:
+    
+    entities
+    statements
+    territories
+
+### Insomnia Mocks
+
+Import `insomnia.json` from `database/` folder.
+
 ## Entities endpoint
 
 ### `GET /entities`
 
 Get a collection of entities.
 
-### `GET /entities?label=<label>&type=<type>
+### `GET /entities?label=<label>&type=<type>`
 
 Get a collection of entities with the given label and type.
 

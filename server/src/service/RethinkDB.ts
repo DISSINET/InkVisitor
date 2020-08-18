@@ -10,18 +10,17 @@ declare global {
     }
 }
 
-let rethinkConfig: {
+export const rethinkConfig = {
+    db: "dissinet",
     host: "localhost",
-    port: 6000,
-    authKey: "",
-    db: "dissinet"
+    port: 28015,
+    authKey: ""
 };
-
 
 /**
  * Send back a 500 error.
  */
-function handleErrorMiddleware(response: Response) {
+export function handleErrorMiddleware(response: Response) {
     return (error: any) => {
         const status = 500;
         const message = error.message
@@ -32,7 +31,7 @@ function handleErrorMiddleware(response: Response) {
 /**
  * Open RethinkDB connection and store in `request.rethink`.
  */
-const createConnection = async (request: Request, ressponse: Response, next: NextFunction) => {
+export const createConnection = async (request: Request, response: Response, next: NextFunction) => {
     await rethink.connectPool(rethinkConfig);
     const connection = await rethink.connect(rethinkConfig);
     request.rethink = connection;
@@ -41,6 +40,6 @@ const createConnection = async (request: Request, ressponse: Response, next: Nex
 /*
  * Close the RethinkDB connection stored in `request.rethink`.
  */
-const closeConnection = async (request: Request, ressponse: Response, next: NextFunction) => {
+export const closeConnection = async (request: Request, response: Response, next: NextFunction) => {
     await request.rethink.close();
 }

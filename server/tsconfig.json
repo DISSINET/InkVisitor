@@ -24,8 +24,14 @@
         "src/shared/*"
       ],
       "@server": [
-        "src/Server"
-      ]
+        "src/server"
+      ],
+      "@modules": [
+        "src/modules/*"
+      ],
+      "@service/*": [
+        "src/service/*"
+      ],
     },
     "types": [
       "node"

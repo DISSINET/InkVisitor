@@ -11,7 +11,7 @@ services:
         - storage-1
         - storage-2
       ports:
-        - 3000:3000
+        - 3001:3000
       
     storage-1:
       <<: *service
@@ -33,5 +33,5 @@ services:
       volumes:
         - ./data:/data  
       ports:
-        - 6000:8080
-      
+        - "8080:8080"
+        - "28015:28015"      
