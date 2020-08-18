@@ -1,11 +1,10 @@
-var inActants = require("./old/actants");
-var inStatements = require("./old/statements");
+var inActants = require("./data/actants");
+var inStatements = require("./data/statements");
 
 var fs = require("fs");
-console.log(inActants);
+var csv = require("csv-parser");
 
 const actants = [];
-const actions = [];
 
 // parse actants
 inActants.forEach((inActant) => {
@@ -87,3 +86,30 @@ actants.push({
 });
 
 fs.writeFileSync("./actants.json", JSON.stringify(actants));
+
+// parse actions.tsv
+const actions = [];
+
+fs.createReadStream("data/actions.csv")
+  .pipe(csv())
+  .on("headers", (headers) => {
+    console.log(headers);
+  })
+  .on("data", (data) => {
+    actions.push({
+      id: data["id_action_or_relation"],
+      parent: data["parent_id"] || false,
+      note: data["note"],
+      labels: [
+        { label: data["action_or_relation"], language: "Lang1" },
+        { label: data["action_or_relation_english"], language: "Lang2" },
+      ],
+      types: [],
+      valencies: [],
+      rulesActants: [],
+      rulesProperties: [],
+    });
+  })
+  .on("end", () => {
+    fs.writeFileSync("./actions.json", JSON.stringify(actions));
+  });
