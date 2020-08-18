@@ -1,6 +1,9 @@
 # dependencies
 node_modules
 
+# RethinkDB docker folder
+data
+
 # google apis files
 token.json
 credentials.json

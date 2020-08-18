@@ -9,3 +9,7 @@ The client source code. For more information see https://github.com/DISSINET/ink
 ## Server
 
 The server source code. For more information see https://github.com/DISSINET/inkVisitor/blob/master/server/. 
+
+## Database
+
+The database source code. For more information see https://github.com/DISSINET/inkVisitor/blob/master/database/. 

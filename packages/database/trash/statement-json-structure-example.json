@@ -1,0 +1,57 @@
+{
+    "id": "1",
+    "text": "David, strong friend of Peter, saw Adam in Brno. ",
+    "tree": {
+        "id": "101",
+        "_label": "A: saw (A090)",
+        "type": "root",
+        "actants": [{
+                "id": "P201",
+                "_label": "P: David (P201)",
+                "type": "subject",
+                "props": [{
+                    "id": "501",
+                    "_label": "A:has property",
+                    "type": "property",
+                    "actants": [{
+                            "id": "C601",
+                            "_label": "C: friend_of (C601)",
+                            "type": "actant1",
+                            "props": [{
+                                "id": "501",
+                                "_label": "A:has property",
+                                "type": "property",
+                                "actants": [
+                                    { "id": "C801", "_label": "C: intensity (C801)", "type": "actant1", "props": [] },
+                                    { "id": "C901", "_label": "C: strong (C901)", "type": "actant2", "props": [] }
+                                ]
+                            }]
+                        },
+                        { "id": "P701", "_label": "P: Peter (P701)", "type": "actant2", "props": [] }
+                    ],
+                    "props": []
+                }]
+            },
+            { "id": "P301", "_label": "P: Adam (P301)", "type": "actant1", "props": [] }
+        ],
+        "props": [{
+            "id": "401",
+            "_label": "A: has property",
+            "type": "property",
+            "actants": [
+                { "id": "C201", "_label": "C: location_where (C201)", "type": "actant1", "props": [] },
+                { "id": "L301", "_label": "L: Brno (L301)", "type": "actant2", "props": [] }
+            ],
+            "props": []
+        }]
+    },
+    "actionId": "A0090",
+    "resources": [],
+    "territoryId": "TE1",
+    "epistemicLevel": 1,
+    "certainty": 100,
+    "modality": 1,
+    "tags": [],
+    "note": "",
+    "meta": ""
+}
