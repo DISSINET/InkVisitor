@@ -14,16 +14,12 @@ Start the application server on `localhost:3000`.
 
 Start the container with database server.
 
-    docker-compose up 
+    docker-compose up
     docker-compose down
 
 ### RethinkDB
 
-Go to `localhost:8080` and create tables:
-    
-    entities
-    statements
-    territories
+Use `packages/database/scripts/import-rethinkdb.js`
 
 ### Insomnia Mocks
 
@@ -39,7 +35,7 @@ Get a collection of entities.
 
 Get a collection of entities with the given label and type.
 
-- Allow * in types.
+- Allow \* in types.
 - The given label filter value works not only for the beginning of the entity label.
 - Attach meta object to each entity that will be filled later.
 
@@ -88,7 +84,6 @@ For the HTTP GET `/territories/parent=T1` return:
 }
 ```
 
-
 ## Statements endpoint
 
 ### `GET /statements`
@@ -102,7 +97,7 @@ Get a collection of statemnents.
 For the HTTP GET `/statements?territory=T1-1-1` return:
 
 ```json
-    {
+{
   "statements": [
     {
       "id": "S1",
