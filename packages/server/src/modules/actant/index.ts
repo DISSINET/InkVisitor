@@ -208,58 +208,68 @@ export default Router()
           .filter({ data: { territory: territoryId } })
           .run(conn);
 
-        for (var si = 0; si < statements.length; si++) {
-          const statement = statements[si];
+        // 4.1 find action for all statements
+        const actionIds = statements.map((statement) => statement.data.action);
 
-          // 4.1 find action for all statements
-          statement.data.action = await r
-            .table("actions")
-            .get(statement.data.action)
-            .run(conn);
+        // 4.2 find references for all statements
+        const referenceIds: any[] = [];
+        statements.forEach((statement) => {
+          statement.data.references.forEach((resource: any) =>
+            referenceIds.push(resource.resource)
+          );
+        });
 
-          // 4.2 find references for all statements
-          for (var ri = 0; ri < statement.data.references.length; ri++) {
-            const resourceId = statement.data.references[ri].resource;
-            statement.data.references[ri].resource = await r
-              .table(TABLE_NAME)
-              .get(resourceId)
-              .run(conn);
-          }
+        // 4.3 find tags for all statements
+        const tagIds: any[] = [];
+        statements.forEach((statement) => {
+          statement.data.tags.forEach((tagId: any) => tagIds.push(tagId));
+        });
 
-          // 4.3 find tags for all statements
-          const tags = [];
-          for (var ti = 0; ti < statement.data.tags.length; ti++) {
-            const tagId = statement.data.tags[ti];
-            const tag = await r.table(TABLE_NAME).get(tagId).run(conn);
-            tags.push(tag);
-          }
-          statement.data.tags = tags;
+        // 4.4 find actants for all statements
+        const statementActantIds: any[] = [];
+        statements.forEach((statement) => {
+          statement.data.actants.forEach((actant: any) =>
+            statementActantIds.push(actant.actant)
+          );
+        });
 
-          // 4.4 find actants for all statements
-          for (var ai = 0; ai < statement.data.actants.length; ai++) {
-            const actantId = statement.data.actants[ai].actant;
-            statement.data.actants[ai].actant = await r
-              .table(TABLE_NAME)
-              .get(actantId)
-              .run(conn);
-          }
+        // 4.5 find actants from props for all statements
 
-          // 4.5 find props and actants for all statements
-          for (var pi = 0; pi < statement.data.props.length; pi++) {
-            statement.data.props[pi].actant1 = await r
-              .table(TABLE_NAME)
-              .get(statement.data.props[pi].actant1)
-              .run(conn);
-            statement.data.props[pi].actant2 = await r
-              .table(TABLE_NAME)
-              .get(statement.data.props[pi].actant2)
-              .run(conn);
-            statement.data.props[pi].subject = await r
-              .table(TABLE_NAME)
-              .get(statement.data.props[pi].subject)
-              .run(conn);
-          }
-        }
+        const propActantIds: any[] = [];
+        statements.forEach((statement) => {
+          statement.data.props.forEach((prop: any) => {
+            propActantIds.push(prop.actant1);
+            propActantIds.push(prop.actant2);
+          });
+        });
+
+        console.log("statementActantIds", statementActantIds);
+        console.log("tagIds", tagIds);
+        console.log("referenceIds", referenceIds);
+        console.log("propActantIds", propActantIds);
+        console.log("actionIds", actionIds);
+
+        const allActantIds = [
+          ...new Set([
+            ...statementActantIds,
+            ...tagIds,
+            ...referenceIds,
+            ...propActantIds,
+          ]),
+        ];
+
+        console.log("allActantIds", allActantIds);
+
+        territory.actants = await r
+          .table("actants")
+          .getAll(...allActantIds)
+          .run(conn);
+
+        territory.actions = await r
+          .table("actions")
+          .getAll(...actionIds)
+          .run(conn);
+
         territory.statements = statements;
 
         conn.close();

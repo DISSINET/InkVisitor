@@ -1,5 +1,5 @@
 import { Statement } from "types";
-import { Node } from "types";
+import { Node, Territory } from "types";
 
 export const FETCH_STATEMENTS = "FETCH_STATEMENTS";
 export const FETCH_STATEMENT = "FETCH_STATEMENT";
