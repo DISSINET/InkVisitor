@@ -27,6 +27,10 @@ Import `insomnia.json` from `database/` folder.
 
 ## Entities endpoint
 
+### `GET /actants?class=<class>&label=<label>`
+
+- `/actants?label=location:near`
+
 ### `GET /entities`
 
 Get a collection of entities.
@@ -41,258 +45,279 @@ Get a collection of entities with the given label and type.
 
 ## Teritorries endpoint
 
-### `GET /territories`
+### `GET /territory`
 
-Get a collection of territories.
-
-### `GET /territories?parent=<parentId>`
-
-Get of collection of territories with the given parent id.
-
-- returns both parent territory and children territories.
-- for each territory, return the number of statement in the meta object with that territory id.
+Get a all relevant data for a given territory id.
 
 #### Example
 
-For the HTTP GET `/territories/parent=T1` return:
+For the HTTP GET `http://localhost:3000/api/v1/territory/T1-1` return:
 
 ```json
 {
-  "parent": {
-    "id": "T1",
-    "label": "A book of inquisition",
-    "class": "T",
-    "data": { "parent": "T0", "content": "", "type": 0, "language": "Lang1" },
-    "meta": { "noStatements": 0 }
+  "class": "T",
+  "data": {
+    "content": "",
+    "language": "Lang1",
+    "parent": "T1",
+    "type": 0
   },
+  "id": "T1-1",
+  "label": "Chapter 1",
   "children": [
     {
-      "id": "T1-1",
-      "label": "Chapter 1",
       "class": "T",
-      "data": { "parent": "T1", "content": "", "type": 0, "language": "Lang1" },
-      "meta": { "noStatements": 1 }
+      "data": {
+        "content": "",
+        "language": "Lang1",
+        "parent": "T1-1",
+        "type": 0
+      },
+      "id": "T1-1-4",
+      "label": "Deposition 4"
     },
     {
-      "id": "T1-2",
-      "label": "Chapter 2",
       "class": "T",
-      "data": { "parent": "T2", "content": "", "type": 0, "language": "Lang1" },
-      "meta": { "noStatements": 0 }
+      "data": {
+        "content": "",
+        "language": "Lang1",
+        "parent": "T1-1",
+        "type": 0
+      },
+      "id": "T1-1-3",
+      "label": "Deposition 3"
+    },
+    {
+      "class": "T",
+      "data": {
+        "content": "",
+        "language": "Lang1",
+        "parent": "T1-1",
+        "type": 0
+      },
+      "id": "T1-1-1",
+      "label": "Deposition 1"
+    },
+    {
+      "class": "T",
+      "data": {
+        "content": "",
+        "language": "Lang1",
+        "parent": "T1-1",
+        "type": 0
+      },
+      "id": "T1-1-2",
+      "label": "Deposition 2"
     }
-  ]
-}
-```
-
-## Statements endpoint
-
-### `GET /statements`
-
-Get a collection of statemnents.
-
-### `GET /statements?territory=<territoryId>`
-
-#### Example
-
-For the HTTP GET `/statements?territory=T1-1-1` return:
-
-```json
-{
+  ],
+  "parent": {
+    "class": "T",
+    "data": {
+      "content": "",
+      "language": "Lang1",
+      "parent": "T0",
+      "type": 0
+    },
+    "id": "T1",
+    "label": "A book of inquisition"
+  },
   "statements": [
     {
-      "id": "S1",
       "class": "S",
-      "label": "",
       "data": {
-        "action": "A1",
-        "territory": "T1-1-1",
-        "references": [{ "resource": "R1", "part": "", "type": "p" }],
-        "certainty": 1,
-        "elvl": 1,
-        "modality": 1,
-        "text": "Fisherman David said that ...",
-        "note": "",
-        "props": [],
         "actants": [
           {
-            "id": "P1",
-            "position": "s",
-            "elvl": 1,
+            "actant": {
+              "class": "E",
+              "data": {
+                "type": "L"
+              },
+              "id": "L1",
+              "label": "a house near Dover"
+            },
             "certainty": 1,
-            "props": [
-              {
-                "actant1": "C06",
-                "actant2": "C2",
-                "elvl": 1,
-                "certainty": 1
-              }
-            ]
-          },
-          {
-            "id": "S2",
-            "position": "a1",
             "elvl": 1,
-            "certainty": 1
+            "position": "s"
           }
         ],
-        "tags": []
-      }
-    },
-    {
-      "id": "S2",
-      "class": "S",
-      "label": "",
-      "data": {
-        "action": "A2",
-        "territory": "T1-1-1",
-        "references": [
-          { "resource": "R1", "part": "", "type": "p" },
-          { "resource": "R2", "part": "page 123", "type": "s" }
-        ],
+        "action": {
+          "id": "A3",
+          "labels": [
+            {
+              "label": "brought",
+              "language": "Lang1"
+            }
+          ],
+          "note": "",
+          "parent": false,
+          "rulesActants": [],
+          "rulesProperties": [],
+          "types": [],
+          "valencies": []
+        },
         "certainty": 1,
         "elvl": 1,
         "modality": 1,
-        "text": "...priest Honza, baker Robert, and a group of local villagers performed a ritual in a house near Dover.",
         "note": "",
         "props": [
           {
-            "actant1": "C01",
-            "actant2": "L1",
-            "elvl": 1,
+            "actant1": {
+              "class": "E",
+              "data": {
+                "type": "C"
+              },
+              "id": "C03",
+              "label": "time:when"
+            },
+            "actant2": {
+              "class": "E",
+              "data": {
+                "type": "E"
+              },
+              "id": "E1",
+              "label": "big forest fire"
+            },
             "certainty": 1,
-            "props": []
+            "elvl": 1,
+            "id": "S4-prop1",
+            "subject": {
+              "class": "S",
+              "data": {
+                "actants": [
+                  {
+                    "actant": "L1",
+                    "certainty": 1,
+                    "elvl": 1,
+                    "position": "s"
+                  }
+                ],
+                "action": "A3",
+                "certainty": 1,
+                "elvl": 1,
+                "modality": 1,
+                "note": "",
+                "props": [
+                  {
+                    "actant1": "C03",
+                    "actant2": "E1",
+                    "certainty": 1,
+                    "elvl": 1,
+                    "id": "S4-prop1",
+                    "subject": "S4"
+                  },
+                  {
+                    "actant1": "C09",
+                    "actant2": "C011",
+                    "certainty": 1,
+                    "elvl": 1,
+                    "id": "S4-prop2",
+                    "subject": "S4-prop1"
+                  },
+                  {
+                    "actant1": "C010",
+                    "actant2": "V4",
+                    "certainty": 1,
+                    "elvl": 1,
+                    "id": "S4-prop3",
+                    "subject": "S4-prop1"
+                  }
+                ],
+                "references": [
+                  {
+                    "part": "12-13",
+                    "resource": "R1",
+                    "type": "primary"
+                  }
+                ],
+                "tags": ["T2"],
+                "territory": "T1-1",
+                "text": "This house burned down during the big forest fire."
+              },
+              "id": "S4",
+              "label": ""
+            }
           },
           {
-            "actant1": "C01",
-            "actant2": "L1",
-            "elvl": 1,
+            "actant1": {
+              "class": "E",
+              "data": {
+                "type": "C"
+              },
+              "id": "C09",
+              "label": "units"
+            },
+            "actant2": {
+              "class": "E",
+              "data": {
+                "type": "C"
+              },
+              "id": "C011",
+              "label": "years"
+            },
             "certainty": 1,
-            "props": []
+            "elvl": 1,
+            "id": "S4-prop2",
+            "subject": null
+          },
+          {
+            "actant1": {
+              "class": "E",
+              "data": {
+                "type": "C"
+              },
+              "id": "C010",
+              "label": "amount"
+            },
+            "actant2": {
+              "class": "E",
+              "data": {
+                "type": "V"
+              },
+              "id": "V4",
+              "label": "2"
+            },
+            "certainty": 1,
+            "elvl": 1,
+            "id": "S4-prop3",
+            "subject": null
           }
         ],
-        "actants": [
+        "references": [
           {
-            "id": "P2",
-            "position": "s",
-            "elvl": 1,
-            "certainty": 1,
-            "props": [
-              {
-                "actant1": "C06",
-                "actant2": "C3",
-                "elvl": 1,
-                "certainty": 1,
-                "props": []
-              }
-            ]
-          },
-          {
-            "id": "P3",
-            "position": "s",
-            "elvl": 1,
-            "certainty": 1,
-            "props": [
-              {
-                "actant1": "C06",
-                "actant2": "C4",
-                "elvl": 1,
-                "certainty": 1,
-                "props": []
-              }
-            ]
-          },
-          {
-            "id": "G1",
-            "position": "s",
-            "elvl": 1,
-            "certainty": 1,
-            "props": []
-          },
-          {
-            "id": "L1",
-            "position": "f",
-            "elvl": 1,
-            "certainty": 1,
-            "props": [
-              {
-                "actant1": "C02",
-                "actant2": "L2",
-                "elvl": 1,
-                "certainty": 1,
-                "props": []
-              }
-            ]
+            "part": "12-13",
+            "resource": {
+              "class": "R",
+              "data": {
+                "content": "",
+                "language": "Lang1",
+                "link": "",
+                "type": 0
+              },
+              "id": "R1",
+              "label": "Resource 1"
+            },
+            "type": "primary"
           }
         ],
-        "tags": []
-      }
+        "tags": [
+          {
+            "class": "T",
+            "data": {
+              "content": "",
+              "language": "Lang1",
+              "parent": "T0",
+              "type": 0
+            },
+            "id": "T2",
+            "label": "A book of forest fires"
+          }
+        ],
+        "territory": "T1-1",
+        "text": "This house burned down during the big forest fire."
+      },
+      "id": "S4",
+      "label": ""
     }
-  ],
-  "actants": [
-    {
-      "id": "R1",
-      "label": "Resource 1",
-      "class": "R",
-      "data": { "content": "", "link": "", "type": 0, "language": "Lang1" }
-    },
-    {
-      "id": "R2",
-      "label": "Resource 2",
-      "class": "R",
-      "data": { "content": "", "link": "", "type": 0, "language": "Lang1" }
-    },
-    { "id": "P1", "class": "E", "label": "David", "data": { "type": "P" } },
-    { "id": "P2", "class": "E", "label": "Honza", "data": { "type": "P" } },
-    {
-      "id": "P3",
-      "class": "E",
-      "label": "Robert",
-      "data": { "type": "P" }
-    },
-    {
-      "id": "G1",
-      "class": "E",
-      "label": "a group of villagers",
-      "data": { "type": "G" }
-    },
-    {
-      "id": "L1",
-      "class": "E",
-      "label": "a house near Dover",
-      "data": { "type": "L" }
-    },
-    { "id": "L2", "class": "E", "label": "Dover", "data": { "type": "L" } },
-    {
-      "id": "C01",
-      "class": "E",
-      "label": "location:where",
-      "data": { "type": "C" }
-    },
-    {
-      "id": "C02",
-      "class": "E",
-      "label": "location:near",
-      "data": { "type": "C" }
-    },
-    {
-      "id": "C06",
-      "class": "E",
-      "label": "occupation",
-      "data": { "type": "C" }
-    },
-    {
-      "id": "C2",
-      "class": "E",
-      "label": "fisherman",
-      "data": { "type": "C" }
-    },
-    {
-      "id": "C3",
-      "class": "E",
-      "label": "priest",
-      "data": { "type": "C" }
-    },
-    { "id": "C4", "class": "E", "label": "baker", "data": { "type": "C" } }
   ]
 }
 ```
