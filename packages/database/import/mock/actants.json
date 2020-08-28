@@ -215,24 +215,25 @@
       "modality": 1,
       "text": "Fisherman David said that ...",
       "note": "",
-      "props": [],
+      "props": [
+        {
+          "id": "S1-prop1",
+          "subject": "S1",
+          "actant1": "C06",
+          "actant2": "C2",
+          "elvl": 1,
+          "certainty": 1
+        }
+      ],
       "actants": [
         {
-          "id": "P1",
+          "actant": "P1",
           "position": "s",
           "elvl": 1,
-          "certainty": 1,
-          "props": [
-            {
-              "actant1": "C06",
-              "actant2": "C2",
-              "elvl": 1,
-              "certainty": 1
-            }
-          ]
+          "certainty": 1
         },
         {
-          "id": "S2",
+          "actant": "S2",
           "position": "a1",
           "elvl": 1,
           "certainty": 1
@@ -257,74 +258,73 @@
       "modality": 1,
       "text": "...priest Honza, baker Robert, and a group of local villagers performed a ritual in a house near Dover.",
       "note": "",
+
       "props": [
         {
+          "id": "S2-prop1",
+          "subject": "S2",
           "actant1": "C01",
           "actant2": "L1",
           "elvl": 1,
-          "certainty": 1,
-          "props": []
+          "certainty": 1
         },
         {
+          "id": "S2-prop2",
+          "subject": "S2",
           "actant1": "C01",
           "actant2": "L1",
           "elvl": 1,
-          "certainty": 1,
-          "props": []
+          "certainty": 1
+        },
+        {
+          "id": "S2-prop3",
+          "subject": "P2",
+          "actant1": "C06",
+          "actant2": "C3",
+          "elvl": 1,
+          "certainty": 1
+        },
+        {
+          "id": "S2-prop4",
+          "subject": "P3",
+          "actant1": "C06",
+          "actant2": "C4",
+          "elvl": 1,
+          "certainty": 1
+        },
+        {
+          "id": "S2-prop5",
+          "subject": "L1",
+          "actant1": "C02",
+          "actant2": "L2",
+          "elvl": 1,
+          "certainty": 1
         }
       ],
       "actants": [
         {
-          "id": "P2",
+          "actant": "P2",
           "position": "s",
           "elvl": 1,
-          "certainty": 1,
-          "props": [
-            {
-              "actant1": "C06",
-              "actant2": "C3",
-              "elvl": 1,
-              "certainty": 1,
-              "props": []
-            }
-          ]
+          "certainty": 1
         },
         {
-          "id": "P3",
+          "actant": "P3",
           "position": "s",
           "elvl": 1,
-          "certainty": 1,
-          "props": [
-            {
-              "actant1": "C06",
-              "actant2": "C4",
-              "elvl": 1,
-              "certainty": 1,
-              "props": []
-            }
-          ]
+          "certainty": 1
         },
         {
-          "id": "G1",
+          "actant": "G1",
           "position": "s",
           "elvl": 1,
-          "certainty": 1,
-          "props": []
+          "certainty": 1
         },
         {
-          "id": "L1",
+          "actant": "L1",
           "position": "f",
           "elvl": 1,
-          "certainty": 1,
-          "props": [
-            {
-              "actant1": "C02",
-              "actant2": "L2",
-              "elvl": 1,
-              "certainty": 1,
-              "props": []
-            }
-          ]
+          "certainty": 1
         }
       ],
       "tags": []
@@ -343,32 +343,31 @@
       "modality": 1,
       "text": "Robert brought 3 breads to the ritual.",
       "note": "",
-      "props": [],
+      "props": [
+        {
+          "id": "S3-prop1",
+          "subject": "O1",
+          "actant1": "C05",
+          "actant2": "C1",
+          "elvl": 1,
+          "certainty": 1
+        }
+      ],
       "actants": [
         {
-          "id": "P3",
+          "actant": "P3",
           "position": "s",
           "elvl": 1,
-          "certainty": 1,
-          "props": []
+          "certainty": 1
         },
         {
-          "id": "01",
+          "actant": "01",
           "position": "a1",
           "elvl": 1,
-          "certainty": 1,
-          "props": [
-            {
-              "actant1": "C05",
-              "actant2": "C1",
-              "elvl": 1,
-              "certainty": 1,
-              "props": []
-            }
-          ]
+          "certainty": 1
         },
         {
-          "id": "S2",
+          "actant": "S2",
           "position": "a2",
           "elvl": 1,
           "certainty": 1,
@@ -385,7 +384,13 @@
     "data": {
       "action": "A3",
       "territory": "T1-1",
-      "references": [],
+      "references": [
+        {
+          "part": "12-13",
+          "type": "primary",
+          "resource": "R1"
+        }
+      ],
       "certainty": 1,
       "elvl": 1,
       "modality": 1,
@@ -393,36 +398,39 @@
       "note": "",
       "props": [
         {
+          "id": "S4-prop1",
+          "subject": "S4",
           "actant1": "C03",
           "actant2": "E1",
           "elvl": 1,
-          "certainty": 1,
-          "props": [
-            {
-              "actant1": "C09",
-              "actant2": "C011",
-              "elvl": 1,
-              "certainty": 1
-            },
-            {
-              "actant1": "C010",
-              "actant2": "V4",
-              "elvl": 1,
-              "certainty": 1
-            }
-          ]
+          "certainty": 1
+        },
+        {
+          "id": "S4-prop2",
+          "subject": "S4-prop1",
+          "actant1": "C09",
+          "actant2": "C011",
+          "elvl": 1,
+          "certainty": 1
+        },
+        {
+          "id": "S4-prop3",
+          "subject": "S4-prop1",
+          "actant1": "C010",
+          "actant2": "V4",
+          "elvl": 1,
+          "certainty": 1
         }
       ],
       "actants": [
         {
-          "id": "L1",
+          "actant": "L1",
           "position": "s",
           "elvl": 1,
-          "certainty": 1,
-          "props": []
+          "certainty": 1
         }
       ],
-      "tags": []
+      "tags": ["T2"]
     }
   },
   {
@@ -441,25 +449,22 @@
       "props": [],
       "actants": [
         {
-          "id": "E1",
+          "actant": "E1",
           "position": "s",
           "elvl": 1,
-          "certainty": 1,
-          "props": []
+          "certainty": 1
         },
         {
-          "id": "C03",
+          "actant": "C03",
           "position": "a1",
           "elvl": 1,
-          "certainty": 1,
-          "props": []
+          "certainty": 1
         },
         {
-          "id": "V1",
+          "actant": "V1",
           "position": "a2",
           "elvl": 1,
-          "certainty": 1,
-          "props": []
+          "certainty": 1
         }
       ],
       "tags": []
@@ -481,25 +486,22 @@
       "props": [],
       "actants": [
         {
-          "id": "L2",
+          "actant": "L2",
           "position": "s",
           "elvl": 1,
-          "certainty": 1,
-          "props": []
+          "certainty": 1
         },
         {
-          "id": "C08",
+          "actant": "C08",
           "position": "a1",
           "elvl": 1,
-          "certainty": 1,
-          "props": []
+          "certainty": 1
         },
         {
-          "id": "V3",
+          "actant": "V3",
           "position": "a2",
           "elvl": 1,
-          "certainty": 1,
-          "props": []
+          "certainty": 1
         }
       ],
       "tags": []
@@ -521,25 +523,22 @@
       "props": [],
       "actants": [
         {
-          "id": "L2",
+          "actant": "L2",
           "position": "s",
           "elvl": 1,
-          "certainty": 1,
-          "props": []
+          "certainty": 1
         },
         {
-          "id": "C07",
+          "actant": "C07",
           "position": "a1",
           "elvl": 1,
-          "certainty": 1,
-          "props": []
+          "certainty": 1
         },
         {
-          "id": "V2",
+          "actant": "V2",
           "position": "a2",
           "elvl": 1,
-          "certainty": 1,
-          "props": []
+          "certainty": 1
         }
       ],
       "tags": []
