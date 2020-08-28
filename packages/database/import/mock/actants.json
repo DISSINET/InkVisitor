@@ -3,86 +3,106 @@
     "id": "T0",
     "label": "meta level",
     "class": "T",
-    "data": { "parent": false, "content": "", "type": 0, "language": "Lang1" }
+    "data": { "parent": false, "content": "", "type": "A", "language": "Lang1" }
   },
   {
     "id": "T1",
     "label": "A book of inquisition",
     "class": "T",
-    "data": { "parent": "T0", "content": "", "type": 0, "language": "Lang1" }
+    "data": { "parent": "T0", "content": "", "type": "A", "language": "Lang1" }
   },
   {
     "id": "T1-1",
     "label": "Chapter 1",
     "class": "T",
-    "data": { "parent": "T1", "content": "", "type": 0, "language": "Lang1" }
+    "data": { "parent": "T1", "content": "", "type": "A", "language": "Lang1" }
   },
   {
     "id": "T1-2",
     "label": "Chapter 2",
     "class": "T",
-    "data": { "parent": "T2", "content": "", "type": 0, "language": "Lang1" }
+    "data": { "parent": "T2", "content": "", "type": "A", "language": "Lang1" }
   },
   {
     "id": "T1-1-1",
     "label": "Deposition 1",
     "class": "T",
-    "data": { "parent": "T1-1", "content": "", "type": 0, "language": "Lang1" }
+    "data": {
+      "parent": "T1-1",
+      "content": "",
+      "type": "A",
+      "language": "Lang1"
+    }
   },
   {
     "id": "T1-1-2",
     "label": "Deposition 2",
     "class": "T",
-    "data": { "parent": "T1-1", "content": "", "type": 0, "language": "Lang1" }
+    "data": {
+      "parent": "T1-1",
+      "content": "",
+      "type": "A",
+      "language": "Lang1"
+    }
   },
   {
     "id": "T1-1-3",
     "label": "Deposition 3",
     "class": "T",
-    "data": { "parent": "T1-1", "content": "", "type": 0, "language": "Lang1" }
+    "data": {
+      "parent": "T1-1",
+      "content": "",
+      "type": "A",
+      "language": "Lang1"
+    }
   },
   {
     "id": "T1-1-4",
     "label": "Deposition 4",
     "class": "T",
-    "data": { "parent": "T1-1", "content": "", "type": 0, "language": "Lang1" }
+    "data": {
+      "parent": "T1-1",
+      "content": "",
+      "type": "A",
+      "language": "Lang1"
+    }
   },
   {
     "id": "T2",
     "label": "A book of forest fires",
     "class": "T",
-    "data": { "parent": "T0", "content": "", "type": 0, "language": "Lang1" }
+    "data": { "parent": "T0", "content": "", "type": "A", "language": "Lang1" }
   },
   {
     "id": "T2-1",
     "label": "Map",
     "class": "T",
-    "data": { "parent": "T2", "content": "", "type": 0, "language": "Lang1" }
+    "data": { "parent": "T2", "content": "", "type": "A", "language": "Lang1" }
   },
   {
     "id": "T2-2",
     "label": "Page 1",
     "class": "T",
-    "data": { "parent": "T2", "content": "", "type": 0, "language": "Lang1" }
+    "data": { "parent": "T2", "content": "", "type": "A", "language": "Lang1" }
   },
   {
     "id": "T3",
     "label": "Gazetteer",
     "class": "T",
-    "data": { "parent": "T0", "content": "", "type": 0, "language": "Lang1" }
+    "data": { "parent": "T0", "content": "", "type": "A", "language": "Lang1" }
   },
 
   {
     "id": "R1",
     "label": "Resource 1",
     "class": "R",
-    "data": { "content": "", "link": "", "type": 0, "language": "Lang1" }
+    "data": { "content": "", "link": "", "type": "A", "language": "Lang1" }
   },
   {
     "id": "R2",
     "label": "Resource 2",
     "class": "R",
-    "data": { "content": "", "link": "", "type": 0, "language": "Lang1" }
+    "data": { "content": "", "link": "", "type": "A", "language": "Lang1" }
   },
 
   { "id": "P1", "class": "E", "label": "David", "data": { "type": "P" } },
@@ -210,9 +230,9 @@
       "action": "A1",
       "territory": "T1-1-1",
       "references": [{ "resource": "R1", "part": "", "type": "p" }],
-      "certainty": 1,
-      "elvl": 1,
-      "modality": 1,
+      "certainty": "1",
+      "elvl": "1",
+      "modality": "1",
       "text": "Fisherman David said that ...",
       "note": "",
       "props": [
@@ -221,22 +241,22 @@
           "subject": "S1",
           "actant1": "C06",
           "actant2": "C2",
-          "elvl": 1,
-          "certainty": 1
+          "elvl": "1",
+          "certainty": "1"
         }
       ],
       "actants": [
         {
           "actant": "P1",
           "position": "s",
-          "elvl": 1,
-          "certainty": 1
+          "elvl": "1",
+          "certainty": "1"
         },
         {
           "actant": "S2",
           "position": "a1",
-          "elvl": 1,
-          "certainty": 1
+          "elvl": "1",
+          "certainty": "1"
         }
       ],
       "tags": []
@@ -253,9 +273,9 @@
         { "resource": "R1", "part": "", "type": "p" },
         { "resource": "R2", "part": "page 123", "type": "s" }
       ],
-      "certainty": 1,
-      "elvl": 1,
-      "modality": 1,
+      "certainty": "1",
+      "elvl": "1",
+      "modality": "1",
       "text": "...priest Honza, baker Robert, and a group of local villagers performed a ritual in a house near Dover.",
       "note": "",
 
@@ -265,66 +285,66 @@
           "subject": "S2",
           "actant1": "C01",
           "actant2": "L1",
-          "elvl": 1,
-          "certainty": 1
+          "elvl": "1",
+          "certainty": "1"
         },
         {
           "id": "S2-prop2",
           "subject": "S2",
           "actant1": "C01",
           "actant2": "L1",
-          "elvl": 1,
-          "certainty": 1
+          "elvl": "1",
+          "certainty": "1"
         },
         {
           "id": "S2-prop3",
           "subject": "P2",
           "actant1": "C06",
           "actant2": "C3",
-          "elvl": 1,
-          "certainty": 1
+          "elvl": "1",
+          "certainty": "1"
         },
         {
           "id": "S2-prop4",
           "subject": "P3",
           "actant1": "C06",
           "actant2": "C4",
-          "elvl": 1,
-          "certainty": 1
+          "elvl": "1",
+          "certainty": "1"
         },
         {
           "id": "S2-prop5",
           "subject": "L1",
           "actant1": "C02",
           "actant2": "L2",
-          "elvl": 1,
-          "certainty": 1
+          "elvl": "1",
+          "certainty": "1"
         }
       ],
       "actants": [
         {
           "actant": "P2",
           "position": "s",
-          "elvl": 1,
-          "certainty": 1
+          "elvl": "1",
+          "certainty": "1"
         },
         {
           "actant": "P3",
           "position": "s",
-          "elvl": 1,
-          "certainty": 1
+          "elvl": "1",
+          "certainty": "1"
         },
         {
           "actant": "G1",
           "position": "s",
-          "elvl": 1,
-          "certainty": 1
+          "elvl": "1",
+          "certainty": "1"
         },
         {
           "actant": "L1",
           "position": "f",
-          "elvl": 1,
-          "certainty": 1
+          "elvl": "1",
+          "certainty": "1"
         }
       ],
       "tags": []
@@ -338,9 +358,9 @@
       "action": "A3",
       "territory": "T1-1-2",
       "references": [],
-      "certainty": 1,
-      "elvl": 1,
-      "modality": 1,
+      "certainty": "1",
+      "elvl": "1",
+      "modality": "1",
       "text": "Robert brought 3 breads to the ritual.",
       "note": "",
       "props": [
@@ -349,28 +369,28 @@
           "subject": "O1",
           "actant1": "C05",
           "actant2": "C1",
-          "elvl": 1,
-          "certainty": 1
+          "elvl": "1",
+          "certainty": "1"
         }
       ],
       "actants": [
         {
           "actant": "P3",
           "position": "s",
-          "elvl": 1,
-          "certainty": 1
+          "elvl": "1",
+          "certainty": "1"
         },
         {
           "actant": "01",
           "position": "a1",
-          "elvl": 1,
-          "certainty": 1
+          "elvl": "1",
+          "certainty": "1"
         },
         {
           "actant": "S2",
           "position": "a2",
-          "elvl": 1,
-          "certainty": 1,
+          "elvl": "1",
+          "certainty": "1",
           "props": []
         }
       ],
@@ -391,9 +411,9 @@
           "resource": "R1"
         }
       ],
-      "certainty": 1,
-      "elvl": 1,
-      "modality": 1,
+      "certainty": "1",
+      "elvl": "1",
+      "modality": "1",
       "text": "This house burned down during the big forest fire.",
       "note": "",
       "props": [
@@ -402,32 +422,32 @@
           "subject": "S4",
           "actant1": "C03",
           "actant2": "E1",
-          "elvl": 1,
-          "certainty": 1
+          "elvl": "1",
+          "certainty": "1"
         },
         {
           "id": "S4-prop2",
           "subject": "S4-prop1",
           "actant1": "C09",
           "actant2": "C011",
-          "elvl": 1,
-          "certainty": 1
+          "elvl": "1",
+          "certainty": "1"
         },
         {
           "id": "S4-prop3",
           "subject": "S4-prop1",
           "actant1": "C010",
           "actant2": "V4",
-          "elvl": 1,
-          "certainty": 1
+          "elvl": "1",
+          "certainty": "1"
         }
       ],
       "actants": [
         {
           "actant": "L1",
           "position": "s",
-          "elvl": 1,
-          "certainty": 1
+          "elvl": "1",
+          "certainty": "1"
         }
       ],
       "tags": ["T2"]
@@ -441,9 +461,9 @@
       "action": "A3",
       "territory": "T2-1",
       "references": [],
-      "certainty": 1,
-      "elvl": 1,
-      "modality": 1,
+      "certainty": "1",
+      "elvl": "1",
+      "modality": "1",
       "text": "big forest fire happened in 1217",
       "note": "",
       "props": [],
@@ -451,20 +471,20 @@
         {
           "actant": "E1",
           "position": "s",
-          "elvl": 1,
-          "certainty": 1
+          "elvl": "1",
+          "certainty": "1"
         },
         {
           "actant": "C03",
           "position": "a1",
-          "elvl": 1,
-          "certainty": 1
+          "elvl": "1",
+          "certainty": "1"
         },
         {
           "actant": "V1",
           "position": "a2",
-          "elvl": 1,
-          "certainty": 1
+          "elvl": "1",
+          "certainty": "1"
         }
       ],
       "tags": []
@@ -478,9 +498,9 @@
       "action": "A3",
       "territory": "T3",
       "references": [],
-      "certainty": 1,
-      "elvl": 1,
-      "modality": 1,
+      "certainty": "1",
+      "elvl": "1",
+      "modality": "1",
       "text": "Dover has latitude of 51.13",
       "note": "",
       "props": [],
@@ -488,20 +508,20 @@
         {
           "actant": "L2",
           "position": "s",
-          "elvl": 1,
-          "certainty": 1
+          "elvl": "1",
+          "certainty": "1"
         },
         {
           "actant": "C08",
           "position": "a1",
-          "elvl": 1,
-          "certainty": 1
+          "elvl": "1",
+          "certainty": "1"
         },
         {
           "actant": "V3",
           "position": "a2",
-          "elvl": 1,
-          "certainty": 1
+          "elvl": "1",
+          "certainty": "1"
         }
       ],
       "tags": []
@@ -515,9 +535,9 @@
       "action": "A3",
       "territory": "T3",
       "references": [],
-      "certainty": 1,
-      "elvl": 1,
-      "modality": 1,
+      "certainty": "1",
+      "elvl": "1",
+      "modality": "1",
       "text": "Dover has longitude of 1.31",
       "note": "",
       "props": [],
@@ -525,20 +545,20 @@
         {
           "actant": "L2",
           "position": "s",
-          "elvl": 1,
-          "certainty": 1
+          "elvl": "1",
+          "certainty": "1"
         },
         {
           "actant": "C07",
           "position": "a1",
-          "elvl": 1,
-          "certainty": 1
+          "elvl": "1",
+          "certainty": "1"
         },
         {
           "actant": "V2",
           "position": "a2",
-          "elvl": 1,
-          "certainty": 1
+          "elvl": "1",
+          "certainty": "1"
         }
       ],
       "tags": []
