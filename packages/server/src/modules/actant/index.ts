@@ -178,6 +178,9 @@ export default Router()
 
   /**
    * Retrieve data for a given territory id
+   * TODO: check async functions
+   * TODO: apply types
+   * TODO: validate outcomes, throw exceptions, create messages on problem
    */
   .get(
     "/territory/:territoryId",
@@ -193,7 +196,6 @@ export default Router()
           .filter({ data: { parent: territoryId } })
           .run(conn);
         territory.children = childTerritories;
-        console.log(childTerritories);
 
         // 3. find parent territory
         territory.parent = territory.data.parent
@@ -260,16 +262,16 @@ export default Router()
         }
         territory.statements = statements;
 
+        conn.close();
         return Result(response, OK, territory);
       } else {
+        conn.close();
         return Result(
           response,
           NOT_FOUND,
           `Territory ${territoryId} not found.`
         );
       }
-
-      conn.close();
     }
   )
 
