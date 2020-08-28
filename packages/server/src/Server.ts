@@ -1,19 +1,22 @@
-import cookieParser from 'cookie-parser';
-import morgan from 'morgan';
-import path from 'path';
-import helmet from 'helmet';
+import cookieParser from "cookie-parser";
+import morgan from "morgan";
+import path from "path";
+import helmet from "helmet";
 
-import express, { Request, Response, NextFunction, Router } from 'express';
-import { BAD_REQUEST } from 'http-status-codes';
-import 'express-async-errors';
+import express, { Request, Response, NextFunction, Router } from "express";
+import { BAD_REQUEST } from "http-status-codes";
+import "express-async-errors";
 
-import logger from '@shared/Logger';
-import { cookieProps } from '@shared/constants';
+import logger from "@shared/Logger";
+import { cookieProps } from "@shared/constants";
 
-import StatementRouter from 'src/modules/statement';
-import EntityRouter from 'src/modules/entity';
+import ActantRouter from "src/modules/actant";
 
-import { createConnection, closeConnection, rethinkConfig } from "@service/RethinkDB"
+import {
+  createConnection,
+  closeConnection,
+  rethinkConfig,
+} from "@service/RethinkDB";
 
 const server = express();
 
@@ -25,22 +28,22 @@ server.use(express.urlencoded({ extended: true }));
 server.use(cookieParser(cookieProps.secret));
 
 // Show routes called in console during development
-if (process.env.NODE_ENV === 'development') {
-    server.use(morgan('dev'));
+if (process.env.NODE_ENV === "development") {
+  server.use(morgan("dev"));
 }
 
 // Securing
-if (process.env.NODE_ENV === 'production') {
-    server.use(helmet());
+if (process.env.NODE_ENV === "production") {
+  server.use(helmet());
 }
 
 // Routing
 const routerV1 = Router();
 
-server.use('/api/v1', routerV1);
+server.use("/api/v1", routerV1);
 
-routerV1.use('/statements', StatementRouter);
-routerV1.use('/entities', EntityRouter);
+//routerV1.use('/statements', StatementRouter);
+routerV1.use("/", ActantRouter);
 
 // Errors
 // server.use((err: Error, req: Request, res: Response, next: NextFunction) => {
