@@ -53,7 +53,6 @@ module.exports.loadSheet = async ({ spread, sheet }) => {
      */
     .filter((row) => row.id_action_or_relation || row.label);
 
-  console.log(rows);
   return records;
 };
 
