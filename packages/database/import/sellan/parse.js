@@ -76,55 +76,6 @@ const processActant = (
   }
 };
 
-const addProp = (
-  statement,
-  subjectIdsValue,
-  actant1IdValue,
-  actant2IdValue
-) => {
-  if (
-    checkValidId(subjectIdsValue) &&
-    checkValidId(actant1IdValue) &&
-    checkValidId(actant2IdValue)
-  ) {
-    subjectIdsValue.split(" #").forEach((subjectIdValue) => {
-      const actant1Id = actant1IdValue.includes("~") ? v4() : idActantTextClean;
-    });
-  }
-};
-
-/**
- * add actant to statement
- * 1. check valid value
- * split by #
- * chceck [] -> elvl
- * check ~ -> new actant
- */
-const addStatementActant = (statement, idActantsTextRaw, position) => {
-  if (checkValidId(idActantsTextRaw)) {
-    idActantsTextRaw.split(" #").forEach((idActantTextRaw) => {
-      // asign elvl and certainty
-      let elvl = idActantTextRaw.includes("[") ? "2" : "1";
-      let certainty = idActantTextRaw.includes("[") ? "2" : "1";
-
-      // remove brackets
-      const idActantTextClean = idActantTextRaw
-        .replace("[", "")
-        .replace("]", "");
-
-      // chceck tilda in value and create new actant
-      const actantId = createNewActantIfNeeded() || idActantTextClean;
-
-      statement.data.actants.push({
-        actant: actantId,
-        position: position,
-        elvl: elvl,
-        certainty: certainty,
-      });
-    });
-  }
-};
-
 /**
  * add a new actant when the tilda ~ is present in the value and returns id of that new actant - otherwise return false
  */
