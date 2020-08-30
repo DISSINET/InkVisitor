@@ -3,6 +3,150 @@ var { v4 } = require("uuid");
 
 var fs = require("fs");
 
+/**
+ *
+ * helping methods
+ */
+/**
+ *
+ * split by #
+ * chceck [] -> elvl
+ * check ~ -> new actant
+ */
+
+const checkValidId = (idValue) => {
+  return (
+    idValue &&
+    idValue !== "???" &&
+    idValue !== "NS" &&
+    !idValue.includes("<") &&
+    !idValue.includes(">")
+  );
+};
+
+const processActant = (
+  statement,
+  position,
+  actantIdValues,
+  propActant1Value,
+  propActant2Value
+) => {
+  if (
+    statement &&
+    statement.data &&
+    statement.data.actants &&
+    statement.data.props &&
+    ["s", "a1", "a2"].includes(position)
+  ) {
+    const propActant1Id =
+      createNewActantIfNeeded(propActant1Value) || propActant1Value;
+
+    const propActant2Id =
+      createNewActantIfNeeded(propActant2Value) || propActant2Value;
+
+    actantIdValues.split(" #").forEach((actantIdValue) => {
+      // asign elvl and certainty
+      let elvl = actantIdValue.includes("[") ? "2" : "1";
+      let certainty = actantIdValue.includes("[") ? "2" : "1";
+
+      // remove brackets
+      const actantIdClean = actantIdValue.replace("[", "").replace("]", "");
+
+      // chceck tilda in value and create new actant
+      const actantId = createNewActantIfNeeded(actantIdClean) || actantIdClean;
+
+      statement.data.actants.push({
+        actant: actantId,
+        position: position,
+        elvl: elvl,
+        certainty: certainty,
+      });
+
+      if (propActant1Id && propActant2Id) {
+        statement.data.props.push({
+          id: v4(),
+          subject: actantId,
+          actant1: propActant1Id,
+          actant2: propActant2Id,
+          elvl: "1",
+          certainty: "1",
+        });
+      }
+    });
+  }
+};
+
+const addProp = (
+  statement,
+  subjectIdsValue,
+  actant1IdValue,
+  actant2IdValue
+) => {
+  if (
+    checkValidId(subjectIdsValue) &&
+    checkValidId(actant1IdValue) &&
+    checkValidId(actant2IdValue)
+  ) {
+    subjectIdsValue.split(" #").forEach((subjectIdValue) => {
+      const actant1Id = actant1IdValue.includes("~") ? v4() : idActantTextClean;
+    });
+  }
+};
+
+/**
+ * add actant to statement
+ * 1. check valid value
+ * split by #
+ * chceck [] -> elvl
+ * check ~ -> new actant
+ */
+const addStatementActant = (statement, idActantsTextRaw, position) => {
+  if (checkValidId(idActantsTextRaw)) {
+    idActantsTextRaw.split(" #").forEach((idActantTextRaw) => {
+      // asign elvl and certainty
+      let elvl = idActantTextRaw.includes("[") ? "2" : "1";
+      let certainty = idActantTextRaw.includes("[") ? "2" : "1";
+
+      // remove brackets
+      const idActantTextClean = idActantTextRaw
+        .replace("[", "")
+        .replace("]", "");
+
+      // chceck tilda in value and create new actant
+      const actantId = createNewActantIfNeeded() || idActantTextClean;
+
+      statement.data.actants.push({
+        actant: actantId,
+        position: position,
+        elvl: elvl,
+        certainty: certainty,
+      });
+    });
+  }
+};
+
+/**
+ * add a new actant when the tilda ~ is present in the value and returns id of that new actant - otherwise return false
+ */
+const createNewActantIfNeeded = (actantValue) => {
+  if (actantValue.includes("~")) {
+    const newActantId = v4();
+    const newActantType = actantValue.split("~")[0];
+    const newActantLabel = actantValue.split("~")[1];
+    actants.push({
+      id: newActantId,
+      label: newActantLabel,
+      class: "E",
+      data: {
+        type: newActantType,
+      },
+    });
+    return newActantId;
+  } else {
+    return false;
+  }
+};
+
 var loadTables = async (next) => {
   const tableStatements = await loadSheet({
     spread: "1X6P4jOAqWGXg1sPH4vOxHgl7-1v11AjQoEiJgjrCrmA",
@@ -165,86 +309,52 @@ loadTables((tables) => {
         text: statement.text,
         note: statement.note,
         props: [],
-        actants: [
-          {
-            actant: statement.id_subject,
-            position: "s",
-            elvl: "1",
-            certainty: "1",
-          },
-        ],
+        actants: [],
       },
     };
 
-    /**
-     *
-     * split by #
-     * chceck [] -> elvl
-     * check ~ -> new actant
-     */
-
+    //subject
+    processActant(
+      statementActant,
+      "s",
+      statement.id_subject,
+      statement.subject_property_type_id,
+      statement.subject_property_value_id
+    );
     // actant1
-    if (statement.id_actant1) {
-      statementActant.data.actants.push({
-        actant: statement.id_actant1,
-        position: "a1",
-        elvl: "1",
-        certainty: "1",
-      });
-    }
-
+    processActant(
+      statementActant,
+      "a1",
+      statement.id_actant1,
+      statement.actant1_property_type_id,
+      statement.actant1_property_value_id
+    );
     // actant2
-    if (statement.id_actant2) {
-      statementActant.data.actants.push({
-        actant: statement.id_actant2,
-        position: "a2",
-        elvl: "1",
-        certainty: "1",
-      });
-    }
-
-    // subject property
-    if (statement.subject_property_type_id) {
-      statementActant.data.props.push({
-        id: v4(),
-        subject: statement.id_subject,
-        actant1: statement.subject_property_type_id,
-        actant2: statement.subject_property_value_id,
-        elvl: "1",
-        certainty: "1",
-      });
-    }
+    processActant(
+      statementActant,
+      "a2",
+      statement.id_actant2,
+      statement.actant2_property_type_id,
+      statement.actant2_property_value_id
+    );
 
     // ar property
     if (statement.action_or_relation_property_type_id) {
+      const propActant1Id =
+        createNewActantIfNeeded(
+          statement.action_or_relation_property_type_id
+        ) || statement.action_or_relation_property_type_id;
+
+      const propActant2Id =
+        createNewActantIfNeeded(
+          statement.action_or_relation_property_value_id
+        ) || statement.action_or_relation_property_value_id;
+
       statementActant.data.props.push({
         id: v4(),
         subject: statement.id,
-        actant1: statement.action_or_relation_property_type_id,
-        actant2: statement.action_or_relation_property_value_id,
-        elvl: "1",
-        certainty: "1",
-      });
-    }
-
-    // actant1 property
-    if (statement.actant1_property_type_id) {
-      statementActant.data.props.push({
-        id: v4(),
-        subject: statement.id_actant1,
-        actant1: statement.actant1_property_type_id,
-        actant2: statement.actant1_property_value_id,
-        elvl: "1",
-        certainty: "1",
-      });
-    }
-    // actant2 property
-    if (statement.actant2_property_type_id) {
-      statementActant.data.props.push({
-        id: v4(),
-        subject: statement.id_actant2,
-        actant1: statement.actant2_property_type_id,
-        actant2: statement.actant2_property_value_id,
+        actant1: propActant1Id,
+        actant2: propActant2Id,
         elvl: "1",
         certainty: "1",
       });
