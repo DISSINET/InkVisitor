@@ -5,7 +5,9 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "parse:sellan": "node import/sellan/parse.js"
+    "parse:sellan": "node import/sellan/parse.js",
+    "import:mock": "node scripts/import-rethinkdb.js mock",
+    "import:sellan": "node scripts/import-rethinkdb.js sellan"
   },
   "author": "",
   "license": "ISC",
