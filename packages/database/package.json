@@ -4,11 +4,16 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "parse:sellan": "node import/sellan/parse.js"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "rethinkdb": "^2.4.2"
+    "googleapis": "^59.0.0",
+    "readline": "^1.3.0",
+    "readline-sync": "^1.4.10",
+    "rethinkdb": "^2.4.2",
+    "uuid": "^8.3.0"
   }
 }
