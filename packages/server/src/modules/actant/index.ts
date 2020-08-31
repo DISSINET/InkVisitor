@@ -234,7 +234,6 @@ export default Router()
         });
 
         // 4.5 find actants from props for all statements
-
         const propActantIds: any[] = [];
         statements.forEach((statement) => {
           statement.data.props.forEach((prop: any) => {
