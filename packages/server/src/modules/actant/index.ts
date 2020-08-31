@@ -1,7 +1,7 @@
 import { getOneActant, Result } from "../index";
 
 import { rethinkConfig } from "@service/RethinkDB";
-import { paramMissingError } from "@shared/constants";
+import { paramMissingError } from "@common/constants";
 import { Router, Response, Request, NextFunction } from "express";
 import { BAD_REQUEST, CREATED, OK, NOT_FOUND } from "http-status-codes";
 

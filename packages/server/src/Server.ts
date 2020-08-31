@@ -7,8 +7,8 @@ import express, { Request, Response, NextFunction, Router } from "express";
 import { BAD_REQUEST } from "http-status-codes";
 import "express-async-errors";
 
-import logger from "@shared/Logger";
-import { cookieProps } from "@shared/constants";
+import logger from "@common/Logger";
+import { cookieProps } from "@common/constants";
 
 import ActantRouter from "src/modules/actant";
 
