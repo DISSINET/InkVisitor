@@ -7,7 +7,7 @@ import {
   StatementAction,
   FETCH_STATEMENT,
 } from "redux/types";
-import { Statement } from "@shared/types";
+import { Statement } from "@shared/types/types";
 import { getStatement } from "api/getStatement";
 
 export const fetchStatements = () => (
