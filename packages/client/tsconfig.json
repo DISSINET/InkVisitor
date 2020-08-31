@@ -16,7 +16,10 @@
     "outDir": "./dist/",
     "sourceMap": true,
     "noImplicitAny": true,
-    "baseUrl": "src"
+    "baseUrl": "./src",
+    "paths": {
+      "@shared/*": ["./../../shared/*"]
+    }
   },
   "include": ["src"],
   "exclude": ["node_modules"]

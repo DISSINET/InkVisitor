@@ -1,7 +1,7 @@
 import "./settings"; // Must be the first import
 
 import server from "./Server";
-import logger from "@shared/Logger";
+import logger from "@common/Logger";
 
 // Start the server
 const port = Number(process.env.PORT || 3000);
