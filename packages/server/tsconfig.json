@@ -14,37 +14,17 @@
     "moduleResolution": "node",
     "resolveJsonModule": true,
     "paths": {
-      "@daos/*": [
-        "src/mocks/*"
-      ],
-      "@entities/*": [
-        "src/domain/*"
-      ],
-      "@shared/*": [
-        "src/shared/*"
-      ],
-      "@server": [
-        "src/server"
-      ],
-      "@modules": [
-        "src/modules/*"
-      ],
-      "@service/*": [
-        "src/service/*"
-      ],
+      "@daos/*": ["src/mocks/*"],
+      "@entities/*": ["src/domain/*"],
+      "@common/*": ["src/common/*"],
+      "@shared/*": ["./../shared/*"],
+      "@server": ["src/server"],
+      "@modules": ["src/modules/*"],
+      "@service/*": ["src/service/*"]
     },
-    "types": [
-      "node"
-    ],
-    "typeRoots": [
-      "node_modules/@types"
-    ]
+    "types": ["node"],
+    "typeRoots": ["node_modules/@types"]
   },
-  "include": [
-    "src/**/*.ts",
-    "spec/**/*.ts"
-  ],
-  "exclude": [
-    "src/public/"
-  ]
+  "include": ["src/**/*.ts", "spec/**/*.ts"],
+  "exclude": ["src/public/"]
 }
