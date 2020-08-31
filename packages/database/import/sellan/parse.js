@@ -1,18 +1,6 @@
 var { loadSheet } = require("./../util/loadsheet");
 var { v4 } = require("uuid");
-
 var fs = require("fs");
-
-/**
- *
- * helping methods
- */
-/**
- *
- * split by #
- * chceck [] -> elvl
- * check ~ -> new actant
- */
 
 const checkValidId = (idValue) => {
   return (
@@ -146,6 +134,25 @@ const actions = [];
 loadTables((tables) => {
   console.log(Object.keys(tables));
 
+  // action table
+  tables.actions.forEach((action) => {
+    actions.push({
+      id: action.id_action_or_relation,
+      parent: action.parent_id,
+      note: action.nnote,
+      labels: [
+        {
+          label: action.action_or_relation_english,
+          language: "Lang1",
+        },
+      ],
+      types: [],
+      valencies: [],
+      rulesActants: [],
+      rulesProperties: [],
+    });
+  });
+
   // person table
   tables.persons.forEach((person) => {
     const personActant = {
@@ -272,6 +279,7 @@ loadTables((tables) => {
       statement.subject_property_type_id,
       statement.subject_property_value_id
     );
+
     // actant1
     processActant(
       statementActant,
@@ -280,6 +288,7 @@ loadTables((tables) => {
       statement.actant1_property_type_id,
       statement.actant1_property_value_id
     );
+
     // actant2
     processActant(
       statementActant,
@@ -290,7 +299,10 @@ loadTables((tables) => {
     );
 
     // ar property
-    if (statement.action_or_relation_property_type_id) {
+    if (
+      checkValidId(statement.action_or_relation_property_type_id) &&
+      checkValidId(statement.action_or_relation_property_value_id)
+    ) {
       const propActant1Id =
         createNewActantIfNeeded(
           statement.action_or_relation_property_type_id
@@ -315,4 +327,5 @@ loadTables((tables) => {
   });
 
   fs.writeFileSync("import/sellan/actants.json", JSON.stringify(actants));
+  fs.writeFileSync("import/sellan/actions.json", JSON.stringify(actions));
 });
