@@ -2,11 +2,8 @@ const { table } = require("console");
 const fs = require("fs");
 const r = require("rethinkdb");
 
-const config = {
-  db: "dissinet",
-  host: "localhost",
-  port: 28015,
-  tables: [
+const datasets = {
+  mock: [
     {
       name: "actants",
       path: "import/mock/actants.json",
@@ -16,6 +13,27 @@ const config = {
       path: "import/mock/actions.json",
     },
   ],
+  sellan: [
+    {
+      name: "actants",
+      path: "import/sellan/actants.json",
+    },
+    {
+      name: "actions",
+      path: "import/sellan/actions.json",
+    },
+  ],
+};
+const datasetId = process.argv[2];
+const tablesToImport = datasets[datasetId];
+console.log(`***importing database ${datasetId}***`);
+console.log("");
+
+const config = {
+  db: "dissinet",
+  host: "localhost",
+  port: 28015,
+  tables: tablesToImport,
 };
 
 //-----------------------------------------------------------------------------
@@ -26,13 +44,6 @@ const load = async () => {
 
   try {
     conn = await r.connect(config);
-
-    const db = "";
-
-    // Possible steps:
-    // - drop database if exists
-    // - create a new database
-    //   or drop tables only
 
     // Drop the database.
     try {
@@ -64,7 +75,7 @@ const load = async () => {
   } catch (error) {
     console.log(error);
   } finally {
-    console.log("closing");
+    console.log("closing connection");
     if (conn) {
       conn.close();
     }
