@@ -1,4 +1,4 @@
-export interface Action {
+export interface ActionI {
   id: string;
   parent: false | string;
   note: string;

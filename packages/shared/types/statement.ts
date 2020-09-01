@@ -1,6 +1,6 @@
-import { Actant } from "./";
+import { ActantI } from "./";
 
-export interface Statement extends Actant {
+export interface StatementI extends ActantI {
   class: "S";
   data: {
     action: string;

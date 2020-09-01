@@ -47,9 +47,6 @@ export default Router()
         .filter({ data: { territory: territoryId } })
         .run(conn);
 
-      // 4.1 find action for all statements
-      const actionIds = statements.map((statement) => statement.data.action);
-
       // 4.2 find references for all statements
       const referenceIds: any[] = [];
       statements.forEach((statement) => {
@@ -85,7 +82,6 @@ export default Router()
       console.log("tagIds", tagIds);
       console.log("referenceIds", referenceIds);
       console.log("propActantIds", propActantIds);
-      console.log("actionIds", actionIds);
 
       const allActantIds = [
         ...new Set([
@@ -101,11 +97,6 @@ export default Router()
       territory.actants = await r
         .table("actants")
         .getAll(...allActantIds)
-        .run(conn);
-
-      territory.actions = await r
-        .table("actions")
-        .getAll(...actionIds)
         .run(conn);
 
       territory.statements = statements;
