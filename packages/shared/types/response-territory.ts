@@ -3,7 +3,8 @@
  */
 
 import { ActantI, TerritoryI, StatementI, ActionI } from "./";
-export interface ResponseTerritory extends TerritoryI {
+
+export interface ResponseTerritoryI extends TerritoryI {
   children: TerritoryI[];
   parent: false | TerritoryI;
   statements: StatementI[];
