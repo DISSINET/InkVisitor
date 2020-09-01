@@ -35,6 +35,11 @@ export const Entities = {
     label: "Action",
     color: "entityA",
   },
+  S: {
+    id: "S",
+    label: "Statement",
+    color: "entityS",
+  },
   C: {
     id: "C",
     label: "Concept",
