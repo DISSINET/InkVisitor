@@ -10,6 +10,7 @@ export const Colors = [
   "entityT",
   "entityR",
   "entityA",
+  "entityS",
   "entityC",
   "entityE",
   "entityG",
@@ -19,7 +20,13 @@ export const Colors = [
   "entityV",
 ];
 
-export const Entities = {
+interface IEntity {
+  id: string;
+  label: string;
+  color: typeof Colors[number];
+}
+
+export const Entities: { [key: string]: IEntity } = {
   T: {
     id: "T",
     label: "Territory",
