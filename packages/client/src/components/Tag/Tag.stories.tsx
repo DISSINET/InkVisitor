@@ -11,17 +11,24 @@ export default {
 };
 
 export const DefaultTag = () => {
-  return <Tag entity={Entities["T"]} />;
+  return <Tag category={Entities["T"].id} color={Entities["T"].color} />;
 };
 
 export const TagWithLabel = () => {
-  return <Tag entity={Entities["R"]} label="entity label" />;
+  return (
+    <Tag
+      category={Entities["R"].id}
+      color={Entities["R"].color}
+      label="entity label"
+    />
+  );
 };
 
 export const TagWithLabelAndButton = () => {
   return (
     <Tag
-      entity={Entities["R"]}
+      category={Entities["E"].id}
+      color={Entities["E"].color}
       label="entity label"
       button={<Button label="x" color="danger" />}
     />
@@ -31,7 +38,8 @@ export const TagWithLabelAndButton = () => {
 export const TagWithVeryLongLabel = () => {
   return (
     <Tag
-      entity={Entities["R"]}
+      category={Entities["P"].id}
+      color={Entities["P"].color}
       label="entity label entity label entity label"
       button={<Button label="x" color="danger" />}
     />
