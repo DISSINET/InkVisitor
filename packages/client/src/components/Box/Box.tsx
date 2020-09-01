@@ -25,9 +25,9 @@ export const Box: React.FC<BoxProps> = ({
     `bg-${color}`,
     "text-white",
     "font-bold",
-    "p-4"
+    "p-2"
   );
-  const contentClasses = classNames("box-content", "bg-white", "p-4");
+  const contentClasses = classNames("box-content", "bg-white", "p-2");
 
   return (
     <div className={boxClasses} style={{ width: width, height: height }}>

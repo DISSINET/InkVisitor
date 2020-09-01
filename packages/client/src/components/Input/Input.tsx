@@ -34,7 +34,7 @@ export const Input: React.FC<InputProps> = ({
     "border-2",
     "border-primary",
     "text-left",
-    "p-2",
+    "p-1",
     "resize-none",
     {
       "bg-primary": inverted,
