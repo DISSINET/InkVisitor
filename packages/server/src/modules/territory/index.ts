@@ -19,15 +19,14 @@ const TABLE_NAME = "actants";
 export default Router()
   /**
    * Retrieve data for a given territory id
-   * TODO: check async functions
-   * TODO: apply types
-   * TODO: validate outcomes, throw exceptions, create messages on problem
    */
   .get("/:territoryId", async (request: Request, response: Response) => {
     let conn = await r.connect(rethinkConfig);
     const territoryId: string = request.params.territoryId;
+
     // 1. find territory in actants
     const territory = await r.table(TABLE_NAME).get(territoryId).run(conn);
+
     if (territory) {
       // 2. find all child territories
       const childTerritories = await r
@@ -77,11 +76,7 @@ export default Router()
           propActantIds.push(prop.actant2);
         });
       });
-
-      console.log("statementActantIds", statementActantIds);
-      console.log("tagIds", tagIds);
-      console.log("referenceIds", referenceIds);
-      console.log("propActantIds", propActantIds);
+      territory.statements = statements;
 
       const allActantIds = [
         ...new Set([
@@ -92,14 +87,12 @@ export default Router()
         ]),
       ];
 
-      console.log("allActantIds", allActantIds);
+      //console.log("allActantIds", allActantIds);
 
       territory.actants = await r
         .table("actants")
         .getAll(...allActantIds)
         .run(conn);
-
-      territory.statements = statements;
 
       conn.close();
       return Result(response, OK, territory);
