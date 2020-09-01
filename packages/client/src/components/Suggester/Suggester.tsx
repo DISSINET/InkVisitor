@@ -4,14 +4,15 @@ import classNames from "classnames";
 import { Button, Input, Tag } from "components";
 import { EntityKeys, Entities } from "types";
 
-interface Suggestion {
+export interface SuggestionI {
   id: string;
   label: string;
-  entityType: typeof Entities[EntityKeys];
+  category: string;
+  color: string;
 }
 
 interface SuggesterProps {
-  suggestions: Suggestion[];
+  suggestions: SuggestionI[];
   typed: string;
   entityType: typeof Entities[EntityKeys];
   onType: Function;
@@ -70,7 +71,8 @@ export const Suggester: React.FC<SuggesterProps> = ({
             >
               <Tag
                 label={suggestion.label}
-                entity={suggestion.entityType}
+                category={suggestion.category}
+                color={suggestion.color}
                 button={
                   <Button
                     label=">"

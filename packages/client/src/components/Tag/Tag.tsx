@@ -1,4 +1,4 @@
-import React, { ReactNode, MouseEventHandler } from "react";
+import React, { ReactNode } from "react";
 import classNames from "classnames";
 
 interface TagProps {
