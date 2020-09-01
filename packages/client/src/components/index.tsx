@@ -5,5 +5,6 @@ import { Input } from "components/Input/Input";
 import { Tag } from "components/Tag/Tag";
 import { Suggester } from "components/Suggester/Suggester";
 import { StatementsTable } from "components/StatementsTable/StatementsTable";
+import { Tree } from "components/Tree/Tree";
 
-export { Box, Button, ButtonSet, Input, Tag, StatementsTable, Suggester };
+export { Box, Button, ButtonSet, Input, Tag, StatementsTable, Suggester, Tree };
