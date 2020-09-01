@@ -11,6 +11,8 @@ import logger from "@common/Logger";
 import { cookieProps } from "@common/constants";
 
 import ActantRouter from "src/modules/actant";
+import TerritoryRouter from "src/modules/territory";
+import MetaRouter from "src/modules/meta";
 
 import {
   createConnection,
@@ -43,7 +45,9 @@ const routerV1 = Router();
 server.use("/api/v1", routerV1);
 
 //routerV1.use('/statements', StatementRouter);
-routerV1.use("/", ActantRouter);
+routerV1.use("/actants", ActantRouter);
+routerV1.use("/territory", TerritoryRouter);
+routerV1.use("/meta", MetaRouter);
 
 // Errors
 // server.use((err: Error, req: Request, res: Response, next: NextFunction) => {
