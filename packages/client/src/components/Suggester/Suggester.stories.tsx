@@ -124,6 +124,45 @@ storiesOf("Suggester", module).add(
           typed={typed}
           placeholder="find a person, location or an event"
           category={entityType.id}
+          categories={Object.keys(Entities).map((ek) => Entities[ek].id)}
+          suggestions={suggestions}
+          onType={(newTyped: string) => {
+            store.set({
+              typed: newTyped,
+              suggestions: filterSuggestions(entityType, newTyped),
+            });
+          }}
+          onChangeCategory={(newEntityTypeId: keyof typeof Entities) => {
+            const newEntityType = Entities[newEntityTypeId];
+            store.set({
+              entityType: newEntityType,
+              suggestions: filterSuggestions(newEntityType, typed),
+            });
+          }}
+          onPick={(suggestion: SuggestionI) => {
+            alert("suggestion " + suggestion.id + " picked");
+          }}
+          onCreate={(created: SuggestionI) => {
+            alert(
+              "new node " + created.category + ": " + created.label + " created"
+            );
+          }}
+        />
+      </>
+    );
+  })
+);
+
+storiesOf("Suggester", module).add(
+  "Categories",
+  withState(state)(({ store }) => {
+    const { typed, entityType, suggestions } = store.state;
+    return (
+      <>
+        <Suggester
+          typed={typed}
+          placeholder="find a person, location or an event"
+          category={entityType.id}
           categories={[Entities["E"].id, Entities["L"].id, Entities["P"].id]}
           suggestions={suggestions}
           onType={(newTyped: string) => {
