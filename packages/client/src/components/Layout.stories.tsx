@@ -23,6 +23,11 @@ export const Layout1 = () => {
     <div>
       <Button label="danger" color="danger" />
       <Tag
+        entity={Entities["A"]}
+        label="entity label"
+        button={<Button label="x" color="danger" />}
+      />
+      <Tag
         entity={Entities["R"]}
         label="entity label"
         button={<Button label="x" color="danger" />}

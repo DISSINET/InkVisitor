@@ -58,13 +58,16 @@ export const Suggester: React.FC<SuggesterProps> = ({
             "suggestor-list",
             "bg-grey",
             "absolute",
-            "p-2",
+            "p-1",
             "w-auto"
           )}
-          style={{}}
+          style={{ top: "36px", left: "47px" }}
         >
           {suggestions.map((suggestion, si) => (
-            <div className={classNames("block", "p-0")} key={si}>
+            <div
+              className={classNames("suggestion-line", "block", "p-1")}
+              key={si}
+            >
               <Tag
                 label={suggestion.label}
                 entity={suggestion.entityType}
