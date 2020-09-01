@@ -1,6 +1,6 @@
-import { Actant } from "./actant";
+import { ActantI } from "./actant";
 
-export interface Territory extends Actant {
+export interface TerritoryI extends ActantI {
   class: "T";
   data: {
     content: string;

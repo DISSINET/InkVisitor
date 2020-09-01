@@ -1,6 +1,6 @@
-import { Actant } from "./actant";
+import { ActantI } from "./actant";
 
-export interface Resource extends Actant {
+export interface ResourceI extends ActantI {
   class: "R";
   data: {
     content: string;

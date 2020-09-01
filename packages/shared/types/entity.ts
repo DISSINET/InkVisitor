@@ -1,6 +1,6 @@
-import { Actant } from "./actant";
+import { ActantI } from "./actant";
 
-export interface Entity extends Actant {
+export interface EntityI extends ActantI {
   class: "E";
   data: { type: "P" | "G" | "O" | "C" | "L" | "V" | "E" };
 }

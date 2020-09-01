@@ -1,17 +1,17 @@
-import { Action } from "./action";
-import { Actant } from "./actant";
-import { Entity } from "./entity";
-import { Resource } from "./resource";
-import { ResponseTerritory } from "./response-territory";
-import { Statement } from "./statement";
-import { Territory } from "./territory";
+import { ActionI } from "./action";
+import { ActantI } from "./actant";
+import { EntityI } from "./entity";
+import { ResourceI } from "./resource";
+import { ResponseTerritoryI } from "./response-territory";
+import { StatementI } from "./statement";
+import { TerritoryI } from "./territory";
 
 export {
-  Action,
-  Actant,
-  Entity,
-  Resource,
-  ResponseTerritory,
-  Statement,
-  Territory,
+  ActionI,
+  ActantI,
+  EntityI,
+  ResourceI,
+  ResponseTerritoryI,
+  StatementI,
+  TerritoryI,
 };
