@@ -122,7 +122,9 @@ storiesOf("Suggester", module).add(
       <>
         <Suggester
           typed={typed}
-          entityType={entityType}
+          placeholder="find a person, location or an event"
+          category={entityType.id}
+          categories={[Entities["E"].id, Entities["L"].id, Entities["P"].id]}
           suggestions={suggestions}
           onType={(newTyped: string) => {
             store.set({
@@ -130,7 +132,7 @@ storiesOf("Suggester", module).add(
               suggestions: filterSuggestions(entityType, newTyped),
             });
           }}
-          onChangeEntityType={(newEntityTypeId: keyof typeof Entities) => {
+          onChangeCategory={(newEntityTypeId: keyof typeof Entities) => {
             const newEntityType = Entities[newEntityTypeId];
             store.set({
               entityType: newEntityType,
@@ -145,12 +147,6 @@ storiesOf("Suggester", module).add(
               "new node " + created.category + ": " + created.label + " created"
             );
           }}
-        />
-        <Tag
-          category={Entities["R"].id}
-          color={Entities["R"].color}
-          label="entity label"
-          button={<Button label="x" color="danger" />}
         />
       </>
     );
