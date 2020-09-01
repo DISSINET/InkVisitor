@@ -25,33 +25,29 @@ Use `packages/database/scripts/import-rethinkdb.js`
 
 Import `insomnia.json` from `database/` folder.
 
-## Entities endpoint
+## Endpoints
 
-### `GET /actants?class=<class>&label=<label>`
+**meta**
 
-- `/actants?label=location:near`
+- get all information that are needed before the application is loaded
 
-### `GET /entities`
+  - all actions
+  - all dictionaries
 
-Get a collection of entities.
+- `GET /meta`
 
-### `GET /entities?label=<label>&type=<type>`
+**actant?<filters>**
 
-Get a collection of entities with the given label and type.
+- return all actants passing given filters and (optionally) information about their use:
+  - statements in which this actant was used
+  - territories in which this actant was used
 
-- Allow \* in types.
-- The given label filter value works not only for the beginning of the entity label.
-- Attach meta object to each entity that will be filled later.
+**territory/:territoryId**
 
-## Teritorries endpoint
-
-### `GET /territory`
-
-Get a all relevant data for a given territory id.
-
-#### Example
-
-For the HTTP GET `http://localhost:3000/api/v1/territory/T1-1` return:
+- get the required territory by the given territory id plus:
+  - its parent, and children territories
+  - statements under this territory
+  - all actants used within these statements
 
 ```json
 {
