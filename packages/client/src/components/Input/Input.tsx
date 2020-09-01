@@ -1,4 +1,4 @@
-import React, { MouseEventHandler, FormEvent } from "react";
+import React from "react";
 import classNames from "classnames";
 
 interface InputProps {
@@ -10,6 +10,7 @@ interface InputProps {
   rows?: number;
   cols?: number;
   onChangeFn: Function;
+  placeholder?: string;
 }
 
 export const Input: React.FC<InputProps> = ({
@@ -21,6 +22,7 @@ export const Input: React.FC<InputProps> = ({
   rows,
   cols,
   onChangeFn,
+  placeholder,
 }) => {
   const labelClasses = classNames(
     "label",
@@ -48,6 +50,7 @@ export const Input: React.FC<InputProps> = ({
       {type === "text" && (
         <input
           className={valueClasses}
+          placeholder={placeholder}
           defaultValue={value}
           onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
             onChangeFn(e.currentTarget.value);
@@ -57,6 +60,7 @@ export const Input: React.FC<InputProps> = ({
       {type === "textarea" && (
         <textarea
           className={valueClasses}
+          placeholder={placeholder}
           defaultValue={value}
           rows={rows}
           cols={cols}

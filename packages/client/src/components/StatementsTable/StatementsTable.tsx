@@ -3,7 +3,7 @@ import { useTable, Cell } from "react-table";
 import classNames from "classnames";
 
 import { Tag, Button } from "components";
-import { EntityKeys, Entities, Statement } from "types";
+import { Entities } from "types";
 
 interface StatementsTableProps {
   statements: {}[];
@@ -46,7 +46,13 @@ export const StatementsTable: React.FC<StatementsTableProps> = ({
               {subjects.length
                 ? subjects.map((actant: IActant, si: number) => {
                     console.log(actant);
-                    return <Tag key={si} entity={Entities["P"]}></Tag>;
+                    return (
+                      <Tag
+                        key={si}
+                        category={Entities["P"].id}
+                        color={Entities["P"].color}
+                      ></Tag>
+                    );
                   })
                 : null}
             </div>
@@ -75,7 +81,13 @@ export const StatementsTable: React.FC<StatementsTableProps> = ({
             <div className="table-subjects">
               {actants.length
                 ? actants.map((actant: IActant, si: number) => {
-                    return <Tag key={si} entity={Entities["P"]}></Tag>;
+                    return (
+                      <Tag
+                        key={si}
+                        category={Entities["P"].id}
+                        color={Entities["P"].color}
+                      ></Tag>
+                    );
                   })
                 : null}
             </div>

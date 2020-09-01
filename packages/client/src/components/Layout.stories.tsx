@@ -23,12 +23,14 @@ export const Layout1 = () => {
     <div>
       <Button label="danger" color="danger" />
       <Tag
-        entity={Entities["A"]}
+        category={Entities["T"].id}
+        color={Entities["T"].color}
         label="entity label"
         button={<Button label="x" color="danger" />}
       />
       <Tag
-        entity={Entities["R"]}
+        category={Entities["T"].id}
+        color={Entities["T"].color}
         label="entity label"
         button={<Button label="x" color="danger" />}
       />

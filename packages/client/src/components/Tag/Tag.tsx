@@ -1,16 +1,21 @@
-import React, { ReactNode, MouseEventHandler } from "react";
+import React, { ReactNode } from "react";
 import classNames from "classnames";
-
-import { EntityKeys, Entities } from "types";
 
 interface TagProps {
   label?: string;
-  entity: typeof Entities[EntityKeys];
+  category: string;
+  color: string;
   mode?: "selected" | false;
   button?: ReactNode;
 }
 
-export const Tag: React.FC<TagProps> = ({ label, entity, mode, button }) => {
+export const Tag: React.FC<TagProps> = ({
+  label,
+  category,
+  color,
+  mode,
+  button,
+}) => {
   const tagClasses = classNames(
     "component",
     "tag",
@@ -23,7 +28,7 @@ export const Tag: React.FC<TagProps> = ({ label, entity, mode, button }) => {
   );
 
   const entityClasses = classNames(
-    `bg-${entity.color}`,
+    `bg-${color}`,
     "tag-entity",
     "inline",
     "w-6",
@@ -50,7 +55,7 @@ export const Tag: React.FC<TagProps> = ({ label, entity, mode, button }) => {
 
   return (
     <div className={tagClasses}>
-      <div className={entityClasses}>{entity.id}</div>
+      <div className={entityClasses}>{category}</div>
       {label && <div className={labelClasses}>{label}</div>}
       {button && <div className={buttonClasses}>{button}</div>}
     </div>
@@ -59,6 +64,7 @@ export const Tag: React.FC<TagProps> = ({ label, entity, mode, button }) => {
 
 Tag.defaultProps = {
   label: "",
-  entity: Entities.T,
+  category: "T",
+  color: "black",
   mode: false,
 };
