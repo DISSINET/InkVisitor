@@ -1,34 +1,97 @@
 import React, { useState } from "react";
 import { Suggester, Tag, Button } from "components";
+import { SuggestionI } from "./Suggester";
 
 import { Entities, EntityKeys } from "types";
 
 import { storiesOf } from "@storybook/react";
 import { withState } from "@dump247/storybook-state";
 
-interface Suggestion {
-  id: string;
-  label: string;
-  entityType: typeof Entities[EntityKeys];
-}
-
 interface State {
   typed: string;
   entityType: typeof Entities[EntityKeys];
-  suggestions: Suggestion[];
+  suggestions: SuggestionI[];
 }
 
-const allSuggestion: Suggestion[] = [
-  { entityType: Entities["P"], label: "David", id: "001" },
-  { entityType: Entities["P"], label: "Petr", id: "002" },
-  { entityType: Entities["P"], label: "Adam", id: "003" },
-  { entityType: Entities["P"], label: "Tomáš", id: "004" },
-  { entityType: Entities["L"], label: "Brno", id: "005" },
-  { entityType: Entities["L"], label: "Praha", id: "006" },
-  { entityType: Entities["L"], label: "Wien", id: "007" },
-  { entityType: Entities["L"], label: "Wiener Neustadt", id: "008" },
-  { entityType: Entities["L"], label: "Wiesbaden", id: "009" },
-  { entityType: Entities["L"], label: "Wien, Hauptbahnhof", id: "010" },
+const allSuggestion: SuggestionI[] = [
+  {
+    color: Entities["P"].color,
+    category: Entities["P"].id,
+    label: "David",
+    id: "001",
+  },
+  {
+    color: Entities["P"].color,
+    category: Entities["P"].id,
+    label: "Petr",
+    id: "002",
+  },
+  {
+    color: Entities["P"].color,
+    category: Entities["P"].id,
+    label: "Adam",
+    id: "003",
+  },
+  {
+    color: Entities["P"].color,
+    category: Entities["P"].id,
+    label: "Tomáš",
+    id: "004",
+  },
+  {
+    color: Entities["P"].color,
+    category: Entities["P"].id,
+    label: "Brno",
+    id: "005",
+  },
+  {
+    color: Entities["L"].color,
+    category: Entities["L"].id,
+    label: "Praha",
+    id: "006",
+  },
+  {
+    color: Entities["L"].color,
+    category: Entities["L"].id,
+    label: "Wien",
+    id: "007",
+  },
+  {
+    color: Entities["L"].color,
+    category: Entities["L"].id,
+    label: "Wiener Neustadt",
+    id: "008",
+  },
+  {
+    color: Entities["L"].color,
+    category: Entities["L"].id,
+    label: "Wiesbaden",
+    id: "009",
+  },
+  {
+    color: Entities["L"].color,
+    category: Entities["L"].id,
+    label: "Wien, Hauptbahnhof",
+    id: "010",
+  },
+  {
+    color: Entities["E"].color,
+    category: Entities["E"].id,
+    label: "Festival ABC",
+    id: "011",
+  },
+  {
+    color: Entities["E"].color,
+    category: Entities["E"].id,
+    label: "Festival DEF",
+    id: "012",
+  },
+  {
+    color: Entities["E"].color,
+    category: Entities["E"].id,
+    label: "Festival GHI",
+    id: "013",
+  },
 ];
 
 const state: State = {
@@ -44,7 +107,7 @@ const filterSuggestions = (
   return typed
     ? allSuggestion.filter((suggestion) => {
         return (
-          suggestion.entityType.id === entityType.id &&
+          suggestion.category === entityType.id &&
           suggestion.label.toLowerCase().includes(typed.toLowerCase())
         );
       })
@@ -59,7 +122,9 @@ storiesOf("Suggester", module).add(
       <>
         <Suggester
           typed={typed}
-          entityType={entityType}
+          placeholder="find a person, location or an event"
+          category={entityType.id}
+          categories={Object.keys(Entities).map((ek) => Entities[ek].id)}
           suggestions={suggestions}
           onType={(newTyped: string) => {
             store.set({
@@ -67,30 +132,60 @@ storiesOf("Suggester", module).add(
               suggestions: filterSuggestions(entityType, newTyped),
             });
           }}
-          onChangeEntityType={(newEntityTypeId: keyof typeof Entities) => {
+          onChangeCategory={(newEntityTypeId: keyof typeof Entities) => {
             const newEntityType = Entities[newEntityTypeId];
             store.set({
               entityType: newEntityType,
               suggestions: filterSuggestions(newEntityType, typed),
             });
           }}
-          onPick={(suggestion: Suggestion) => {
+          onPick={(suggestion: SuggestionI) => {
             alert("suggestion " + suggestion.id + " picked");
           }}
-          onCreate={(created: Suggestion) => {
+          onCreate={(created: SuggestionI) => {
             alert(
-              "new node " +
-                created.entityType +
-                ": " +
-                created.label +
-                " created"
+              "new node " + created.category + ": " + created.label + " created"
             );
           }}
         />
-        <Tag
-          entity={Entities["R"]}
-          label="entity label"
-          button={<Button label="x" color="danger" />}
+      </>
+    );
+  })
+);
+
+storiesOf("Suggester", module).add(
+  "Categories",
+  withState(state)(({ store }) => {
+    const { typed, entityType, suggestions } = store.state;
+    return (
+      <>
+        <Suggester
+          typed={typed}
+          placeholder="find a person, location or an event"
+          category={entityType.id}
+          categories={[Entities["E"].id, Entities["L"].id, Entities["P"].id]}
+          suggestions={suggestions}
+          onType={(newTyped: string) => {
+            store.set({
+              typed: newTyped,
+              suggestions: filterSuggestions(entityType, newTyped),
+            });
+          }}
+          onChangeCategory={(newEntityTypeId: keyof typeof Entities) => {
+            const newEntityType = Entities[newEntityTypeId];
+            store.set({
+              entityType: newEntityType,
+              suggestions: filterSuggestions(newEntityType, typed),
+            });
+          }}
+          onPick={(suggestion: SuggestionI) => {
+            alert("suggestion " + suggestion.id + " picked");
+          }}
+          onCreate={(created: SuggestionI) => {
+            alert(
+              "new node " + created.category + ": " + created.label + " created"
+            );
+          }}
         />
       </>
     );

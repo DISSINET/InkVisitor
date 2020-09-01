@@ -4,50 +4,68 @@ import classNames from "classnames";
 import { Button, Input, Tag } from "components";
 import { EntityKeys, Entities } from "types";
 
-interface Suggestion {
+export interface SuggestionI {
   id: string;
   label: string;
-  entityType: typeof Entities[EntityKeys];
+  category: string;
+  color: string;
 }
 
 interface SuggesterProps {
-  suggestions: Suggestion[];
-  typed: string;
-  entityType: typeof Entities[EntityKeys];
+  suggestions: SuggestionI[];
+  placeholder?: string; // text to display when typed === ""
+  typed: string; // input value
+  category: string; // selected category
+  categories: string[]; // all possible categories
+  suggestionListPosition?: string; // todo not implemented yet
+  disabled?: boolean; // todo not implemented yet
+
+  // events
   onType: Function;
-  onChangeEntityType: Function;
+  onChangeCategory: Function;
   onCreate: Function;
   onPick: Function;
+  onDrop?: Function;
 }
 
 export const Suggester: React.FC<SuggesterProps> = ({
   suggestions,
+  placeholder,
   typed,
-  entityType,
-  onChangeEntityType,
+  category,
+  categories,
+  suggestionListPosition,
+  disabled,
+
+  // events
   onType,
+  onChangeCategory,
   onCreate,
   onPick,
+  onDrop,
 }) => {
-  const entityKeys = Object.keys(Entities);
-
   return (
     <div className={classNames("suggestor", "component", "inline-flex")}>
       <div className={classNames("suggestor-input", "inline-flex")}>
         <Input
           type="select"
-          value={entityType.id}
-          options={entityKeys}
+          value={category}
+          options={categories}
           inverted
-          onChangeFn={onChangeEntityType}
+          onChangeFn={onChangeCategory}
         />
-        <Input type="text" value={typed} onChangeFn={onType} />
+        <Input
+          type="text"
+          value={typed}
+          onChangeFn={onType}
+          placeholder={placeholder}
+        />
         <Button
           label="+"
           onClick={() => {
             onCreate({
               label: typed,
-              entityType: entityType,
+              category: category,
             });
           }}
         />
@@ -70,7 +88,8 @@ export const Suggester: React.FC<SuggesterProps> = ({
             >
               <Tag
                 label={suggestion.label}
-                entity={suggestion.entityType}
+                category={suggestion.category}
+                color={suggestion.color}
                 button={
                   <Button
                     label=">"
