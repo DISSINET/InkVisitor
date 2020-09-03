@@ -2,6 +2,119 @@ var { loadSheet } = require("./../util/loadsheet");
 var { v4 } = require("uuid");
 var fs = require("fs");
 
+/**
+ * Parsing props in entity tables
+ */
+
+// person props
+const propsConfig = {
+  person: {
+    name: {
+      type: "value",
+      conceptId: "C0325",
+    },
+    surname: {
+      type: "value",
+      conceptId: "C0324",
+    },
+    occupation_type: {
+      type: "value",
+      conceptId: "C0318",
+    },
+    occupation_general: {
+      type: "value",
+      conceptId: "C0315",
+    },
+    occupation_or_office: {
+      type: "value",
+      conceptId: "C0314",
+    },
+    education: {
+      type: "value",
+      conceptId: "C0319",
+    },
+    sex: {
+      type: "concept",
+      conceptId: "C0320",
+      mappingFn: (tableValue) => {
+        if (tableValue === "m") {
+          return "C0172";
+        } else if (tableValue === "f") {
+          return "C0171";
+        } else {
+          false;
+        }
+      },
+    },
+  },
+  group: {},
+  concept: {},
+  location: {},
+  object: {},
+  event: {},
+};
+
+const parsePropsInRow = (row, entity, territory) => {
+  if (entity in propsConfig) {
+    const entityPropConfig = propsConfig[entity];
+
+    Object.keys(row).forEach((tableProp) => {
+      if (Object.keys(entityPropConfig).includes(tableProp)) {
+        // check empty value
+        if (row[tableProp]) {
+          const { propType } = entityPropConfig[tableProp].type;
+
+          // CONCEPT type
+          if (propType === "concept") {
+            const conceptValueId = entityPropConfig[tableProp].mappingFn(
+              row[tableProp]
+            );
+            createEmptyPropStatement(
+              row.id,
+              entityPropConfig[tableProp].conceptId,
+              conceptValueId,
+              territory
+            );
+            // VALUE type
+          } else if (propType === "value") {
+            const value = row[tableProp];
+            const valueId = v4();
+
+            // add actant
+            actants.push({
+              id: valueId,
+              class: "E",
+              label: value,
+              data: {
+                type: "V",
+              },
+            });
+            // add statement
+            createEmptyPropStatement(
+              row.id,
+              entityPropConfig[tableProp].conceptId,
+              valueId,
+              territory
+            );
+          }
+        }
+      }
+    });
+  } else {
+  }
+};
+
+const addEntityActant = (id, label, type) => {
+  if (id) {
+    actants.push({
+      id,
+      label: label.trim(),
+      class: "E",
+      data: { type },
+    });
+  }
+};
+
 const checkValidId = (idValue) => {
   return (
     idValue &&
@@ -86,12 +199,62 @@ const createNewActantIfNeeded = (actantValue) => {
   }
 };
 
+const createEmptyPropStatement = (
+  idSubject,
+  idActant1,
+  idActant2,
+  territory
+) => {
+  if (idSubject && idActant1 && idActant2) {
+    actants.push({
+      id: v4(),
+      class: "S",
+      label: "",
+      data: {
+        action: "A0093",
+        territory: territory,
+        references: [],
+        tags: [],
+        certainty: "",
+        elvl: "",
+        modality: "",
+        text: "",
+        note: "",
+        props: [],
+        actants: [
+          {
+            actant: idSubject,
+            position: "s",
+            elvl: "1",
+            certainty: "1",
+          },
+          {
+            actant: idActant1,
+            position: "a1",
+            elvl: "1",
+            certainty: "1",
+          },
+          {
+            actant: idActant2,
+            position: "a2",
+            elvl: "1",
+            certainty: "1",
+          },
+        ],
+      },
+    });
+  }
+};
+
 var loadTables = async (next) => {
+  const tableTexts = await loadSheet({
+    spread: "13eVorFf7J9R8YzO7TmJRVLzIIwRJS737r7eFbH1boyE",
+    sheet: "Texts",
+  });
   const tableStatements = await loadSheet({
     spread: "1X6P4jOAqWGXg1sPH4vOxHgl7-1v11AjQoEiJgjrCrmA",
     sheet: "Statements",
   });
-
   const tablePersons = await loadSheet({
     spread: "1kamaBpL3RpKK9r1kEfH2DBY1A0EA6XZOqDSUsBthyEU",
     sheet: "Persons",
@@ -112,14 +275,20 @@ var loadTables = async (next) => {
     spread: "1mal4uGwZlwC7vycLiP5O6sZQgQRdTexBdpp3TF8QFjw",
     sheet: "Events",
   });
+  const tableGroups = await loadSheet({
+    spread: "13QzPZWh1-wm-BPeQDROHNcFprx2c58KSWCl3-3HAn-c",
+    sheet: "Groups",
+  });
   const tableActions = await loadSheet({
     spread: "1vzY6opQeR9hZVW6fmuZu2sgy_izF8vqGGhBQDxqT_eQ",
     sheet: "Statements",
   });
 
   next({
+    texts: tableTexts,
     statements: tableStatements,
     persons: tablePersons,
+    groups: tableGroups,
     concepts: tableConcepts,
     locations: tableLocations,
     objects: tableObjects,
@@ -131,15 +300,31 @@ var loadTables = async (next) => {
 const actants = [];
 const actions = [];
 
+const rootTerritory = "T3";
+
 loadTables((tables) => {
   console.log(Object.keys(tables));
+
+  tables.texts.forEach((text) => {
+    actants.push({
+      id: text.id,
+      label: text.label,
+      class: "T",
+      data: {
+        parent: false,
+        content: text.content,
+        type: "",
+        language: "",
+      },
+    });
+  });
 
   // action table
   tables.actions.forEach((action) => {
     actions.push({
       id: action.id_action_or_relation,
       parent: action.parent_id,
-      note: action.nnote,
+      note: action.note,
       labels: [
         {
           label: action.action_or_relation_english,
@@ -153,69 +338,52 @@ loadTables((tables) => {
     });
   });
 
-  // person table
+  /**
+   * PERSONS table
+   */
   tables.persons.forEach((person) => {
-    const personActant = {
-      id: person.id,
-      label: person.label,
-      class: "E",
-      data: {
-        type: "P",
-      },
-    };
-    actants.push(personActant);
+    addEntityActant(person.id, person.label, "P");
+    parsePropsInRow(person, "person", rootTerritory);
   });
 
-  // concepts table
+  /**
+   * GROUPS table
+   */
+  tables.groups.forEach((group) => {
+    addEntityActant(group.id, group.label, "G");
+    parsePropsInRow(group, "group", rootTerritory);
+  });
+
+  /**
+   * CONCEPTS table
+   */
   tables.concepts.forEach((concept) => {
-    const conceptActant = {
-      id: concept.id,
-      label: concept.label,
-      class: "E",
-      data: {
-        type: "C",
-      },
-    };
-    actants.push(conceptActant);
+    addEntityActant(concept.id, concept.label, "C");
+    parsePropsInRow(concept, "concept", rootTerritory);
   });
 
-  // locations table
+  /**
+   * LOCATIONS table
+   */
   tables.locations.forEach((location) => {
-    const locationActant = {
-      id: location.id,
-      label: location.label,
-      class: "E",
-      data: {
-        type: "L",
-      },
-    };
-    actants.push(locationActant);
+    addEntityActant(location.id, location.label, "L");
+    parsePropsInRow(location, "location", rootTerritory);
   });
 
-  // locations table
+  /**
+   * OBJECTS table
+   */
   tables.objects.forEach((object) => {
-    const objectActant = {
-      id: object.id,
-      label: object.label,
-      class: "E",
-      data: {
-        type: "O",
-      },
-    };
-    actants.push(objectActant);
+    addEntityActant(object.id, object.label, "O");
+    parsePropsInRow(object, "object", rootTerritory);
   });
 
-  // events table
+  /**
+   * EVENTS table
+   */
   tables.events.forEach((event) => {
-    const eventActant = {
-      id: event.id,
-      label: event.label,
-      class: "E",
-      data: {
-        type: "E",
-      },
-    };
-    actants.push(eventActant);
+    addEntityActant(event.id, event.label, "E");
+    parsePropsInRow(event, "event", rootTerritory);
   });
 
   // territories
