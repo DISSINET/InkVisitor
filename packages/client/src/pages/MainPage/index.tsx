@@ -2,12 +2,11 @@ import React, { useEffect } from "react";
 import { connect } from "react-redux";
 
 import { Button, Box } from "components";
-import { TerritoriesTreeProps } from "types";
 import { ResponseTerritoryI } from "@shared/types/response-territory";
 import { fetchMeta } from "redux/actions/metaActions";
 import { fetchTerritory } from "redux/actions/territoryTreeActions";
+import { setActiveStatementId } from "redux/actions/statementActions";
 import { Tree } from "components/Tree/Tree";
-// import { territories } from "components/Tree/treeData";
 import { ResponseMetaI } from "@shared/types/response-meta";
 
 interface MainPage {
@@ -15,9 +14,8 @@ interface MainPage {
   fetchTerritory: (id: string) => void;
   meta: ResponseMetaI;
   territory: ResponseTerritoryI;
-  setTreeExpandId: (id: string) => void;
-  setTreeSelectId: (id: string) => void;
-  territoriesTreeProps: TerritoriesTreeProps;
+  setActiveStatementId: (id: string) => void;
+  activeStatementId: string;
 }
 
 const MainPage: React.FC<MainPage> = ({
@@ -25,9 +23,7 @@ const MainPage: React.FC<MainPage> = ({
   fetchMeta,
   meta,
   territory,
-  setTreeExpandId,
-  setTreeSelectId,
-  territoriesTreeProps,
+  setActiveStatementId,
 }) => {
   useEffect(() => {
     fetchMeta();
@@ -44,10 +40,10 @@ const MainPage: React.FC<MainPage> = ({
 
   return (
     <>
-      {/* <Button
-        label="log data"
-        onClick={() => console.log("statements", statements)}
-      /> */}
+      <Button
+        label="set ID"
+        onClick={() => setActiveStatementId("423dasd-asd2312")}
+      />
       <div className="flex mb-4">
         <Box height={750} width={300} label={"Territories"}>
           {/* <Tree
@@ -65,28 +61,27 @@ const MainPage: React.FC<MainPage> = ({
 const mapStateToProps = ({
   meta,
   territory,
-  territoriesTreeProps,
+  activeStatementId,
 }: StateFromProps): StateToProps => ({
   meta,
   territory,
-  territoriesTreeProps,
+  activeStatementId,
 });
 
 export default connect(mapStateToProps, {
   fetchMeta,
   fetchTerritory,
-  setTreeExpandId,
-  setTreeSelectId,
+  setActiveStatementId,
 })(MainPage);
 
 interface StateFromProps {
   meta: ResponseMetaI;
   territory: ResponseTerritoryI;
-  territoriesTreeProps: TerritoriesTreeProps;
+  activeStatementId: string;
 }
 
 interface StateToProps {
   meta: ResponseMetaI;
   territory: ResponseTerritoryI;
-  territoriesTreeProps: TerritoriesTreeProps;
+  activeStatementId: string;
 }
