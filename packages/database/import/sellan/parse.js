@@ -2,6 +2,97 @@ var { loadSheet } = require("./../util/loadsheet");
 var { v4 } = require("uuid");
 var fs = require("fs");
 
+/**
+ * Parsing props in entity tables
+ */
+
+// person props
+const propsConfig = {
+  person: {
+    name: {
+      type: "value",
+      conceptId: "C0324",
+    },
+    surname: {
+      type: "value",
+      conceptId: "C0324",
+    },
+    sex: {
+      type: "concept",
+      mappingFn: (tableValue) => {
+        if (tableValue === "m") {
+          return "C0172";
+        } else if (tableValue === "f") {
+          return "C0171";
+        } else {
+          false;
+        }
+      },
+    },
+  },
+};
+
+const parsePropsInRow = (row, entity, territory) => {
+  if (entity in propsConfig) {
+    const entityPropConfig = propsConfig[entity];
+
+    Object.keys(row).forEach((tableProp) => {
+      if (Object.keys(entityPropConfig).includes(tableProp)) {
+        // check empty value
+        if (row[tableProp]) {
+          const { propType } = entityPropConfig[tableProp].type;
+
+          // CONCEPT type
+          if (propType === "concept") {
+            const conceptValueId = entityPropConfig[tableProp].mappingFn(
+              row[tableProp]
+            );
+            createEmptyPropStatement(
+              row.id,
+              entityPropConfig[tableProp].conceptId,
+              conceptValueId,
+              territory
+            );
+            // VALUE type
+          } else if (propType === "value") {
+            const value = row[tableProp];
+            const valueId = v4();
+
+            // add actant
+            actants.push({
+              id: valueId,
+              class: "E",
+              label: value,
+              data: {
+                type: "V",
+              },
+            });
+            // add statement
+            createEmptyPropStatement(
+              row.id,
+              entityPropConfig[tableProp].conceptId,
+              valueId,
+              territory
+            );
+          }
+        }
+      }
+    });
+  } else {
+  }
+};
+
+const addEntityActant = (id, label, type) => {
+  if (id) {
+    actants.push({
+      id,
+      label: label.trim(),
+      class: "E",
+      data: { type },
+    });
+  }
+};
+
 const checkValidId = (idValue) => {
   return (
     idValue &&
@@ -206,7 +297,7 @@ loadTables((tables) => {
     actions.push({
       id: action.id_action_or_relation,
       parent: action.parent_id,
-      note: action.nnote,
+      note: action.note,
       labels: [
         {
           label: action.action_or_relation_english,
@@ -221,138 +312,43 @@ loadTables((tables) => {
   });
 
   /**
-   * PERSON table
+   * PERSONS table
    */
   tables.persons.forEach((person) => {
-    const personActant = {
-      id: person.id,
-      label: person.label,
-      class: "E",
-      data: {
-        type: "P",
-      },
-    };
-    actants.push(personActant);
+    addEntityActant(person.id, person.label, "P");
+    parsePropsInRow(person, "person", rootTerritory);
   });
 
-  // person props
-  const personParseProps = {
-    name: {
-      type: "value",
-      conceptId: "C0324",
-    },
-    surname: {
-      type: "value",
-      conceptId: "C0324",
-    },
-    sex: {
-      type: "concept",
-      mappingFn: (tableValue) => {
-        if (tableValue === "m") {
-          return "C0172";
-        } else if (tableValue === "f") {
-          return "C0171";
-        } else {
-          false;
-        }
-      },
-    },
-  };
-
-  tables.persons.forEach((person) => {
-    Object.keys(person).forEach((personProp) => {
-      if (Object.keys(personParseProps).includes(personProp)) {
-        if (person[personProp]) {
-          // type concept
-          if (personParseProps[personProp].type === "concept") {
-            const conceptValueId = personParseProps[personProp].mappingFn(
-              person[personProp]
-            );
-            createEmptyPropStatement(
-              person.id,
-              personParseProps[personProp].conceptId,
-              conceptValueId,
-              rootTerritory
-            );
-          }
-        }
-
-        // type value
-        if (personParseProps[personProp].type === "value") {
-          const value = person[personProp];
-          const valueId = v4();
-
-          // add actant
-          actants.push({
-            id: valueId,
-            class: "E",
-            label: value,
-            data: {
-              type: "V",
-            },
-          });
-          // add statement
-          createEmptyPropStatement(
-            person.id,
-            personParseProps[personProp].conceptId,
-            valueId,
-            rootTerritory
-          );
-        }
-      }
-    });
-  });
-
-  // concepts table
+  /**
+   * CONCEPTS table
+   */
   tables.concepts.forEach((concept) => {
-    const conceptActant = {
-      id: concept.id,
-      label: concept.label,
-      class: "E",
-      data: {
-        type: "C",
-      },
-    };
-    actants.push(conceptActant);
+    addEntityActant(concept.id, concept.label, "C");
+    parsePropsInRow(concept, "concept", rootTerritory);
   });
 
-  // locations table
+  /**
+   * LOCATIONS table
+   */
   tables.locations.forEach((location) => {
-    const locationActant = {
-      id: location.id,
-      label: location.label,
-      class: "E",
-      data: {
-        type: "L",
-      },
-    };
-    actants.push(locationActant);
+    addEntityActant(location.id, location.label, "L");
+    parsePropsInRow(location, "location", rootTerritory);
   });
 
-  // locations table
+  /**
+   * OBJECTS table
+   */
   tables.objects.forEach((object) => {
-    const objectActant = {
-      id: object.id,
-      label: object.label,
-      class: "E",
-      data: {
-        type: "O",
-      },
-    };
-    actants.push(objectActant);
+    addEntityActant(object.id, object.label, "O");
+    parsePropsInRow(object, "object", rootTerritory);
   });
 
-  // events table
+  /**
+   * EVENTS table
+   */
   tables.events.forEach((event) => {
-    const eventActant = {
-      id: event.id,
-      label: event.label,
-      class: "E",
-      data: {
-        type: "E",
-      },
-    };
-    actants.push(eventActant);
+    addEntityActant(event.id, event.label, "E");
+    parsePropsInRow(event, "event", rootTerritory);
   });
 
   // territories
