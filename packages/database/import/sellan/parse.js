@@ -30,6 +30,11 @@ const propsConfig = {
       },
     },
   },
+  group: {},
+  concept: {},
+  location: {},
+  object: {},
+  event: {},
 };
 
 const parsePropsInRow = (row, entity, territory) => {
@@ -253,6 +258,10 @@ var loadTables = async (next) => {
     spread: "1mal4uGwZlwC7vycLiP5O6sZQgQRdTexBdpp3TF8QFjw",
     sheet: "Events",
   });
+  const tableGroups = await loadSheet({
+    spread: "13QzPZWh1-wm-BPeQDROHNcFprx2c58KSWCl3-3HAn-c",
+    sheet: "Groups",
+  });
   const tableActions = await loadSheet({
     spread: "1vzY6opQeR9hZVW6fmuZu2sgy_izF8vqGGhBQDxqT_eQ",
     sheet: "Statements",
@@ -262,6 +271,7 @@ var loadTables = async (next) => {
     texts: tableTexts,
     statements: tableStatements,
     persons: tablePersons,
+    groups: tableGroups,
     concepts: tableConcepts,
     locations: tableLocations,
     objects: tableObjects,
@@ -317,6 +327,14 @@ loadTables((tables) => {
   tables.persons.forEach((person) => {
     addEntityActant(person.id, person.label, "P");
     parsePropsInRow(person, "person", rootTerritory);
+  });
+
+  /**
+   * GROUPS table
+   */
+  tables.groups.forEach((group) => {
+    addEntityActant(group.id, group.label, "G");
+    parsePropsInRow(group, "group", rootTerritory);
   });
 
   /**
