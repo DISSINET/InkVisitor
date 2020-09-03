@@ -86,11 +86,6 @@ export const Entities: { [key: string]: IEntity } = {
 
 export type EntityKeys = keyof typeof Entities;
 
-export interface TerritoriesTreeProps {
-  expandedTreeId: string;
-  selectedTreeId: string;
-}
-
 export interface Node {
   id: string;
   label: string;

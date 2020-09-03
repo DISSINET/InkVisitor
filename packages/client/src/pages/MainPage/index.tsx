@@ -32,12 +32,6 @@ const MainPage: React.FC<MainPage> = ({
     fetchTerritory("T3-1");
   }, [fetchTerritory]);
 
-  // useEffect(() => {
-  //   if (territories && territories.id && !territoriesTreeProps.expandedTreeId) {
-  //     setTreeExpandId(territories.id);
-  //   }
-  // }, [territories]);
-
   return (
     <>
       <Button
