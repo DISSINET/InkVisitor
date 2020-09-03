@@ -87,11 +87,14 @@ const createNewActantIfNeeded = (actantValue) => {
 };
 
 var loadTables = async (next) => {
+  const tableTexts = await loadSheet({
+    spread: "13eVorFf7J9R8YzO7TmJRVLzIIwRJS737r7eFbH1boyE",
+    sheet: "Texts",
+  });
   const tableStatements = await loadSheet({
     spread: "1X6P4jOAqWGXg1sPH4vOxHgl7-1v11AjQoEiJgjrCrmA",
     sheet: "Statements",
   });
-
   const tablePersons = await loadSheet({
     spread: "1kamaBpL3RpKK9r1kEfH2DBY1A0EA6XZOqDSUsBthyEU",
     sheet: "Persons",
@@ -118,6 +121,7 @@ var loadTables = async (next) => {
   });
 
   next({
+    texts: tableTexts,
     statements: tableStatements,
     persons: tablePersons,
     concepts: tableConcepts,
@@ -131,8 +135,24 @@ var loadTables = async (next) => {
 const actants = [];
 const actions = [];
 
+const rootTerritory = "T3";
+
 loadTables((tables) => {
   console.log(Object.keys(tables));
+
+  tables.texts.forEach((text) => {
+    actants.push({
+      id: text.id,
+      label: text.label,
+      class: "T",
+      data: {
+        parent: false,
+        content: text.content,
+        type: "",
+        language: "",
+      },
+    });
+  });
 
   // action table
   tables.actions.forEach((action) => {
@@ -154,6 +174,8 @@ loadTables((tables) => {
   });
 
   // person table
+  const personPropNames = ["name", "name_alternative"];
+
   tables.persons.forEach((person) => {
     const personActant = {
       id: person.id,
