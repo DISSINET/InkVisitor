@@ -3,17 +3,32 @@ import {
   SET_TREE_SELECT,
   ExpandTreeAction,
   SelectTreeAction,
-  FetchTerritoriesAction,
-  FETCH_TERRITORIES,
+  FETCH_TERRITORY,
+  TerritoryAction,
 } from "redux/types";
-import { Node } from "types";
+import { ResponseTerritoryI } from "@shared/types/response-territory";
 
-const territories = (
-  state: Node = { id: "", label: "", children: [] },
-  action: FetchTerritoriesAction
-): Node => {
+const initialState: ResponseTerritoryI = {
+  class: "T",
+  id: "",
+  label: "",
+  data: {
+    content: "",
+    language: "",
+    parent: "",
+    type: "",
+  },
+  children: [],
+  parent: false,
+  statements: [],
+  actants: [],
+};
+const territory = (
+  state: ResponseTerritoryI = initialState,
+  action: TerritoryAction
+): ResponseTerritoryI => {
   switch (action.type) {
-    case FETCH_TERRITORIES:
+    case FETCH_TERRITORY:
       return action.payload;
     default:
       return state;
@@ -42,4 +57,4 @@ const selectedTreeId = (
   }
 };
 
-export { expandedTreeId, selectedTreeId, territories };
+export { expandedTreeId, selectedTreeId, territory };

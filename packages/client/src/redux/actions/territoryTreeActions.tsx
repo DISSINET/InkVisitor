@@ -5,18 +5,18 @@ import {
   SET_TREE_SELECT,
   ExpandTreeAction,
   SelectTreeAction,
-  FetchTerritoriesAction,
-  FETCH_TERRITORIES,
+  TerritoryAction,
+  FETCH_TERRITORY,
 } from "redux/types";
-import { Node } from "types";
-import { getTerritories } from "api/getTerritories";
+import { getTerritory } from "api/getTerritory";
+import { ResponseTerritoryI } from "@shared/types/response-territory";
 
-export const fetchTerritories = () => (
-  dispatch: Dispatch<FetchTerritoriesAction>
+export const fetchTerritory = (id: string) => (
+  dispatch: Dispatch<TerritoryAction>
 ): Promise<void> => {
-  getTerritories().then((data: Node) =>
+  getTerritory(id).then((data: ResponseTerritoryI) =>
     dispatch({
-      type: FETCH_TERRITORIES,
+      type: FETCH_TERRITORY,
       payload: data,
     })
   );
