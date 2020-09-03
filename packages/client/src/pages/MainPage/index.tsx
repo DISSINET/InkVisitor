@@ -11,10 +11,8 @@ import {
   fetchTerritory,
 } from "redux/actions/territoryTreeActions";
 import { Tree } from "components/Tree/Tree";
-import { territories } from "components/Tree/treeData";
+// import { territories } from "components/Tree/treeData";
 import { ResponseMetaI } from "@shared/types/response-meta";
-
-import { MainPageStatementBox } from "./statementsbox";
 
 interface MainPage {
   fetchMeta: () => void;
@@ -42,12 +40,11 @@ const MainPage: React.FC<MainPage> = ({
     fetchTerritory("T3-1");
   }, [fetchTerritory]);
 
-  useEffect(() => {
-    // get tree root and set to redux
-    if (territories && territories.id && !territoriesTreeProps.expandedTreeId) {
-      setTreeExpandId(territories.id);
-    }
-  }, [territories]);
+  // useEffect(() => {
+  //   if (territories && territories.id && !territoriesTreeProps.expandedTreeId) {
+  //     setTreeExpandId(territories.id);
+  //   }
+  // }, [territories]);
 
   return (
     <>
@@ -57,15 +54,14 @@ const MainPage: React.FC<MainPage> = ({
       /> */}
       <div className="flex mb-4">
         <Box height={750} width={300} label={"Territories"}>
-          <Tree
+          {/* <Tree
             treeObject={territories}
             onNodeExpand={setTreeExpandId}
             onNodeSelect={setTreeSelectId}
             territoriesTreeProps={territoriesTreeProps}
-          />
+          /> */}
         </Box>
         {/* <Box height={750} width={800} label={"Statements"}>
-          <MainPageStatementBox statements={statements} />
         </Box> */}
       </div>
     </>
