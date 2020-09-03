@@ -35,7 +35,8 @@ export const Tree: React.FC<Tree> = ({
   return (
     <div>
       <Tag
-        entity={Entities.T}
+        category={Entities.T.id}
+        color={Entities.T.color}
         label={prevNodeHistory[0] && prevNodeHistory[0].label}
         button={
           prevNodeHistory.length > 1 && (
@@ -48,7 +49,8 @@ export const Tree: React.FC<Tree> = ({
           return (
             <div className="flex mb-1 ml-8" key={key}>
               <Tag
-                entity={Entities.T}
+                category={Entities.T.id}
+                color={Entities.T.color}
                 label={child && child.label}
                 mode={
                   child.id === territoriesTreeProps.selectedTreeId && "selected"
@@ -57,11 +59,8 @@ export const Tree: React.FC<Tree> = ({
                   <>
                     <Button
                       onClick={() => onNodeSelect && onNodeSelect(child.id)}
-                      label="O"
+                      label="x"
                     />
-                    {child.children.length > 0 && (
-                      <Button onClick={() => expandNode(child)} label=">" />
-                    )}
                   </>
                 }
               />
