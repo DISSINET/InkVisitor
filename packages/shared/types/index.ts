@@ -6,7 +6,7 @@ import { ResponseTerritoryI } from "./response-territory";
 import { StatementI } from "./statement";
 import { TerritoryI } from "./territory";
 
-export {
+export type {
   ActionI,
   ActantI,
   EntityI,
