@@ -2,7 +2,7 @@
  * type of the /territory endpoint response
  */
 
-import { ActantI, TerritoryI, StatementI, ActionI } from "./";
+import { ActantI, TerritoryI, StatementI } from "./";
 
 export interface ResponseTerritoryI extends TerritoryI {
   children: TerritoryI[];

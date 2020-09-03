@@ -3,6 +3,7 @@ import { ActantI } from "./actant";
 import { EntityI } from "./entity";
 import { ResourceI } from "./resource";
 import { ResponseTerritoryI } from "./response-territory";
+import { ResponseMetaI } from "./response-meta";
 import { StatementI } from "./statement";
 import { TerritoryI } from "./territory";
 
@@ -12,6 +13,7 @@ export {
   EntityI,
   ResourceI,
   ResponseTerritoryI,
+  ResponseMetaI,
   StatementI,
   TerritoryI,
 };
