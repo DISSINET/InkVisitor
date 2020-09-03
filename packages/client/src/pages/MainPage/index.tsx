@@ -5,11 +5,7 @@ import { Button, Box } from "components";
 import { TerritoriesTreeProps } from "types";
 import { ResponseTerritoryI } from "@shared/types/response-territory";
 import { fetchMeta } from "redux/actions/metaActions";
-import {
-  setTreeExpandId,
-  setTreeSelectId,
-  fetchTerritory,
-} from "redux/actions/territoryTreeActions";
+import { fetchTerritory } from "redux/actions/territoryTreeActions";
 import { Tree } from "components/Tree/Tree";
 // import { territories } from "components/Tree/treeData";
 import { ResponseMetaI } from "@shared/types/response-meta";
@@ -61,8 +57,6 @@ const MainPage: React.FC<MainPage> = ({
             territoriesTreeProps={territoriesTreeProps}
           /> */}
         </Box>
-        {/* <Box height={750} width={800} label={"Statements"}>
-        </Box> */}
       </div>
     </>
   );

@@ -1,19 +1,13 @@
 import { combineReducers } from "redux";
 
 import meta from "./metaReducer";
-import {
-  expandedTreeId,
-  selectedTreeId,
-  territory,
-} from "./territoryTreeReducer";
+import { territory } from "./territoryTreeReducer";
+import activeStatementId from "./statementReducer";
 
 const rootReducer = combineReducers({
   meta,
   territory,
-  territoriesTreeProps: combineReducers({
-    expandedTreeId,
-    selectedTreeId,
-  }),
+  activeStatementId,
 });
 
 export default rootReducer;

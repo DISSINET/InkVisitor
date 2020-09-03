@@ -13,12 +13,7 @@ import rootReducer from "./reducers";
 import { TerritoriesTreeProps } from "types";
 import { ResponseTerritoryI } from "@shared/types/response-territory";
 import { ResponseMetaI } from "@shared/types/response-meta";
-import {
-  MetaAction,
-  TerritoryAction,
-  ExpandTreeAction,
-  SelectTreeAction,
-} from "./types";
+import { MetaAction, TerritoryAction, ActiveStatementIdAction } from "./types";
 
 const initialState = {};
 
@@ -28,9 +23,9 @@ const store: Store<
   CombinedState<{
     meta: ResponseMetaI;
     territory: ResponseTerritoryI;
-    territoriesTreeProps: TerritoriesTreeProps;
+    activeStatementId: string;
   }>,
-  MetaAction | TerritoryAction | ExpandTreeAction | SelectTreeAction | AnyAction
+  MetaAction | TerritoryAction | AnyAction | ActiveStatementIdAction
 > = createStore(
   rootReducer,
   initialState,
