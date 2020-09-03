@@ -11,14 +11,31 @@ const propsConfig = {
   person: {
     name: {
       type: "value",
-      conceptId: "C0324",
+      conceptId: "C0325",
     },
     surname: {
       type: "value",
       conceptId: "C0324",
     },
+    occupation_type: {
+      type: "value",
+      conceptId: "C0318",
+    },
+    occupation_general: {
+      type: "value",
+      conceptId: "C0315",
+    },
+    occupation_or_office: {
+      type: "value",
+      conceptId: "C0314",
+    },
+    education: {
+      type: "value",
+      conceptId: "C0319",
+    },
     sex: {
       type: "concept",
+      conceptId: "C0320",
       mappingFn: (tableValue) => {
         if (tableValue === "m") {
           return "C0172";
