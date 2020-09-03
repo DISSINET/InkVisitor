@@ -86,6 +86,53 @@ const createNewActantIfNeeded = (actantValue) => {
   }
 };
 
+const createEmptyPropStatement = (
+  idSubject,
+  idActant1,
+  idActant2,
+  territory
+) => {
+  if (idSubject && idActant1 && idActant2) {
+    actants.push({
+      id: v4(),
+      class: "S",
+      label: "",
+      data: {
+        action: "A0093",
+        territory: territory,
+        references: [],
+        tags: [],
+        certainty: "",
+        elvl: "",
+        modality: "",
+        text: "",
+        note: "",
+        props: [],
+        actants: [
+          {
+            actant: idSubject,
+            position: "s",
+            elvl: "1",
+            certainty: "1",
+          },
+          {
+            actant: idActant1,
+            position: "a1",
+            elvl: "1",
+            certainty: "1",
+          },
+          {
+            actant: idActant2,
+            position: "a2",
+            elvl: "1",
+            certainty: "1",
+          },
+        ],
+      },
+    });
+  }
+};
+
 var loadTables = async (next) => {
   const tableTexts = await loadSheet({
     spread: "13eVorFf7J9R8YzO7TmJRVLzIIwRJS737r7eFbH1boyE",
@@ -173,9 +220,9 @@ loadTables((tables) => {
     });
   });
 
-  // person table
-  const personPropNames = ["name", "name_alternative"];
-
+  /**
+   * PERSON table
+   */
   tables.persons.forEach((person) => {
     const personActant = {
       id: person.id,
@@ -186,6 +233,74 @@ loadTables((tables) => {
       },
     };
     actants.push(personActant);
+  });
+
+  // person props
+  const personParseProps = {
+    name: {
+      type: "value",
+      conceptId: "C0324",
+    },
+    surname: {
+      type: "value",
+      conceptId: "C0324",
+    },
+    sex: {
+      type: "concept",
+      mappingFn: (tableValue) => {
+        if (tableValue === "m") {
+          return "C0172";
+        } else if (tableValue === "f") {
+          return "C0171";
+        } else {
+          false;
+        }
+      },
+    },
+  };
+
+  tables.persons.forEach((person) => {
+    Object.keys(person).forEach((personProp) => {
+      if (Object.keys(personParseProps).includes(personProp)) {
+        if (person[personProp]) {
+          // type concept
+          if (personParseProps[personProp].type === "concept") {
+            const conceptValueId = personParseProps[personProp].mappingFn(
+              person[personProp]
+            );
+            createEmptyPropStatement(
+              person.id,
+              personParseProps[personProp].conceptId,
+              conceptValueId,
+              rootTerritory
+            );
+          }
+        }
+
+        // type value
+        if (personParseProps[personProp].type === "value") {
+          const value = person[personProp];
+          const valueId = v4();
+
+          // add actant
+          actants.push({
+            id: valueId,
+            class: "E",
+            label: value,
+            data: {
+              type: "V",
+            },
+          });
+          // add statement
+          createEmptyPropStatement(
+            person.id,
+            personParseProps[personProp].conceptId,
+            valueId,
+            rootTerritory
+          );
+        }
+      }
+    });
   });
 
   // concepts table
