@@ -8,18 +8,18 @@ Assuming that you are in the project folder.
 
 Start the application server on `localhost:3000`.
 
-    cd server
-    npm install
-    npm run start:dev
-
-Start the container with database server.
-
-    docker-compose up
-    docker-compose down
-
-### RethinkDB
-
-Use `packages/database/scripts/import-rethinkdb.js`
+- Start databases
+  - go to root folder
+  - create folder `data` and folder `database/schema/tables.sql` (David?)
+- Run docker -`docker-compose up` | `-docker-compose down` | `docker-compose up -d` ...
+- Import data
+  - `cd ./packages/database`
+  - `npm install`
+  - `npm run import:sellan`
+- Run server
+  - `cd ./packages/server`
+  - `npm install`
+  - `npm run start:dev`
 
 ### Insomnia Mocks
 
@@ -58,7 +58,7 @@ Import `insomnia.json` from `database/` folder.
     "parent": "T1",
     "type": 0
   },
-  "id": "T1-1",
+  -"id": "T1-1",
   "label": "Chapter 1",
   "children": [
     {
