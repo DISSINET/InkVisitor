@@ -2,70 +2,50 @@ import React, { useEffect } from "react";
 import { connect } from "react-redux";
 
 import { Button, Box } from "components";
-import { Statement, TerritoriesTreeProps } from "types";
-import {
-  fetchStatements,
-  fetchStatement,
-} from "redux/actions/statementsActions";
-import {
-  setTreeExpandId,
-  setTreeSelectId,
-  fetchTerritories,
-} from "redux/actions/territoryTreeActions";
+import { ResponseTerritoryI } from "@shared/types/response-territory";
+import { fetchMeta } from "redux/actions/metaActions";
+import { fetchTerritory } from "redux/actions/territoryTreeActions";
+import { setActiveStatementId } from "redux/actions/statementActions";
 import { Tree } from "components/Tree/Tree";
-import { territories } from "components/Tree/treeData";
-
-import { MainPageStatementBox } from "./statementsbox";
+import { ResponseMetaI } from "@shared/types/response-meta";
 
 interface MainPage {
-  fetchStatements: () => void;
-  fetchStatement: (id: string) => void;
-  statements: Statement[];
-  statement: Statement;
-  setTreeExpandId: (id: string) => void;
-  setTreeSelectId: (id: string) => void;
-  territoriesTreeProps: TerritoriesTreeProps;
-  fetchTerritories: () => void;
+  fetchMeta: () => void;
+  fetchTerritory: (id: string) => void;
+  meta: ResponseMetaI;
+  territory: ResponseTerritoryI;
+  setActiveStatementId: (id: string) => void;
+  activeStatementId: string;
 }
 
 const MainPage: React.FC<MainPage> = ({
-  fetchStatement,
-  fetchStatements,
-  statements,
-  statement,
-  setTreeExpandId,
-  setTreeSelectId,
-  territoriesTreeProps,
-  fetchTerritories,
+  fetchTerritory,
+  fetchMeta,
+  meta,
+  territory,
+  setActiveStatementId,
 }) => {
   useEffect(() => {
-    fetchStatements();
-  }, [fetchStatements]);
-
+    fetchMeta();
+  }, [fetchMeta]);
   useEffect(() => {
-    // get tree root and set to redux
-    if (territories && territories.id && !territoriesTreeProps.expandedTreeId) {
-      setTreeExpandId(territories.id);
-    }
-  }, [territories]);
+    fetchTerritory("T3-1");
+  }, [fetchTerritory]);
 
   return (
     <>
       <Button
-        label="log data"
-        onClick={() => console.log("statements", statements)}
+        label="set ID"
+        onClick={() => setActiveStatementId("423dasd-asd2312")}
       />
       <div className="flex mb-4">
         <Box height={750} width={300} label={"Territories"}>
-          <Tree
+          {/* <Tree
             treeObject={territories}
             onNodeExpand={setTreeExpandId}
             onNodeSelect={setTreeSelectId}
             territoriesTreeProps={territoriesTreeProps}
-          />
-        </Box>
-        <Box height={750} width={800} label={"Statements"}>
-          <MainPageStatementBox statements={statements} />
+          /> */}
         </Box>
       </div>
     </>
@@ -73,31 +53,29 @@ const MainPage: React.FC<MainPage> = ({
 };
 
 const mapStateToProps = ({
-  statements,
-  statement,
-  territoriesTreeProps,
+  meta,
+  territory,
+  activeStatementId,
 }: StateFromProps): StateToProps => ({
-  statements,
-  statement,
-  territoriesTreeProps,
+  meta,
+  territory,
+  activeStatementId,
 });
 
 export default connect(mapStateToProps, {
-  fetchStatements,
-  fetchStatement,
-  setTreeExpandId,
-  setTreeSelectId,
-  fetchTerritories,
+  fetchMeta,
+  fetchTerritory,
+  setActiveStatementId,
 })(MainPage);
 
 interface StateFromProps {
-  statements: Statement[];
-  statement: Statement;
-  territoriesTreeProps: TerritoriesTreeProps;
+  meta: ResponseMetaI;
+  territory: ResponseTerritoryI;
+  activeStatementId: string;
 }
 
 interface StateToProps {
-  statements: Statement[];
-  statement: Statement;
-  territoriesTreeProps: TerritoriesTreeProps;
+  meta: ResponseMetaI;
+  territory: ResponseTerritoryI;
+  activeStatementId: string;
 }

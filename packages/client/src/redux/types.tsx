@@ -1,29 +1,19 @@
-import { Statement } from "types";
-import { Node, Territory } from "types";
+import { ResponseTerritoryI } from "@shared/types/response-territory";
+import { ResponseMetaI } from "@shared/types/response-meta";
 
-export const FETCH_STATEMENTS = "FETCH_STATEMENTS";
-export const FETCH_STATEMENT = "FETCH_STATEMENT";
-export const FETCH_TERRITORIES = "FETCH_TERRITORIES";
-export const SET_TREE_EXPAND = "SET_TREE_EXPAND";
-export const SET_TREE_SELECT = "SET_TREE_SELECT";
+export const FETCH_META = "FETCH_META";
+export const FETCH_TERRITORY = "FETCH_TERRITORY";
+export const SET_ACTIVE_STATEMENT_ID = "SET_ACTIVE_STATEMENT_ID";
 
-export interface StatementAction {
-  type: typeof FETCH_STATEMENT;
-  payload: Statement;
+export interface TerritoryAction {
+  type: typeof FETCH_TERRITORY;
+  payload: ResponseTerritoryI;
 }
-export interface StatementsAction {
-  type: typeof FETCH_STATEMENTS;
-  payload: Statement[];
+export interface MetaAction {
+  type: typeof FETCH_META;
+  payload: ResponseMetaI;
 }
-export interface ExpandTreeAction {
-  type: typeof SET_TREE_EXPAND;
-  expandedTreeId: string;
-}
-export interface SelectTreeAction {
-  type: typeof SET_TREE_SELECT;
-  selectedTreeId: string;
-}
-export interface FetchTerritoriesAction {
-  type: typeof FETCH_TERRITORIES;
-  payload: Node;
+export interface ActiveStatementIdAction {
+  type: typeof SET_ACTIVE_STATEMENT_ID;
+  activeStatementId: string;
 }
