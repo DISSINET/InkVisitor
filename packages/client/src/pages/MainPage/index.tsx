@@ -11,8 +11,8 @@ import { ResponseMetaI } from "@shared/types/response-meta";
 
 interface MainPage {
   fetchMeta: () => void;
-  fetchTerritory: (id: string) => void;
   meta: ResponseMetaI;
+  fetchTerritory: (id: string) => void;
   territory: ResponseTerritoryI;
   setActiveStatementId: (id: string) => void;
   activeStatementId: string;
@@ -28,8 +28,9 @@ const MainPage: React.FC<MainPage> = ({
   useEffect(() => {
     fetchMeta();
   }, [fetchMeta]);
+
   useEffect(() => {
-    fetchTerritory("T3-1");
+    fetchTerritory("T3");
   }, [fetchTerritory]);
 
   return (
@@ -40,12 +41,7 @@ const MainPage: React.FC<MainPage> = ({
       />
       <div className="flex mb-4">
         <Box height={750} width={300} label={"Territories"}>
-          {/* <Tree
-            treeObject={territories}
-            onNodeExpand={setTreeExpandId}
-            onNodeSelect={setTreeSelectId}
-            territoriesTreeProps={territoriesTreeProps}
-          /> */}
+          <Tree territory={territory} fetchTerritory={fetchTerritory} />
         </Box>
       </div>
     </>
