@@ -4,6 +4,7 @@ import path from "path";
 import helmet from "helmet";
 
 import express, { Request, Response, NextFunction, Router } from "express";
+import cors from "cors";
 import { BAD_REQUEST } from "http-status-codes";
 import "express-async-errors";
 
@@ -21,6 +22,7 @@ import {
 } from "@service/RethinkDB";
 
 const server = express();
+server.use(cors());
 
 // Middleware that will open a connection to the database.
 // server.use(createConnection);

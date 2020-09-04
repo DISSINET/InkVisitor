@@ -7,17 +7,13 @@ import {
 } from "redux";
 import thunk from "redux-thunk";
 import { composeWithDevTools } from "redux-devtools-extension";
+import { Store } from "redux";
 
 import rootReducer from "./reducers";
-import { Store } from "redux";
-import { Statement, TerritoriesTreeProps, Node } from "types";
-import {
-  StatementsAction,
-  StatementAction,
-  ExpandTreeAction,
-  SelectTreeAction,
-  FetchTerritoriesAction,
-} from "./types";
+import { TerritoriesTreeProps } from "types";
+import { ResponseTerritoryI } from "@shared/types/response-territory";
+import { ResponseMetaI } from "@shared/types/response-meta";
+import { MetaAction, TerritoryAction, ActiveStatementIdAction } from "./types";
 
 const initialState = {};
 
@@ -25,17 +21,11 @@ const middleWare = [thunk];
 
 const store: Store<
   CombinedState<{
-    statements: Statement[];
-    statement: Statement;
-    territoriesTreeProps: TerritoriesTreeProps;
-    territories: Node;
+    meta: ResponseMetaI;
+    territory: ResponseTerritoryI;
+    activeStatementId: string;
   }>,
-  | StatementsAction
-  | StatementAction
-  | ExpandTreeAction
-  | SelectTreeAction
-  | FetchTerritoriesAction
-  | AnyAction
+  MetaAction | TerritoryAction | AnyAction | ActiveStatementIdAction
 > = createStore(
   rootReducer,
   initialState,
