@@ -1,19 +1,17 @@
 import React, { useState } from "react";
 import { Tag, Button } from "components";
-import { Entities, Node, TerritoriesTreeProps } from "types";
+import { Entities, Node } from "types";
 
 interface Tree {
   treeObject: Node;
   onNodeSelect?: Function;
   onNodeExpand?: Function;
-  territoriesTreeProps: TerritoriesTreeProps;
 }
 
 export const Tree: React.FC<Tree> = ({
   treeObject,
   onNodeSelect,
   onNodeExpand,
-  territoriesTreeProps,
 }) => {
   const [prevNodeHistory, setPrevNodeHistory] = useState<Node[]>([treeObject]);
 
@@ -52,9 +50,6 @@ export const Tree: React.FC<Tree> = ({
                 category={Entities.T.id}
                 color={Entities.T.color}
                 label={child && child.label}
-                mode={
-                  child.id === territoriesTreeProps.selectedTreeId && "selected"
-                }
                 button={
                   <>
                     <Button
