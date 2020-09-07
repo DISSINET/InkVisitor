@@ -19,7 +19,7 @@ export const Button: React.FC<ButtonProps> = ({
   const classes = [
     "component",
     "button",
-    "px-2",
+    "px-3",
     "py-1",
     "font-bold",
     "border-2",
