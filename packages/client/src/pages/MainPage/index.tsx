@@ -8,6 +8,7 @@ import { fetchTerritory } from "redux/actions/territoryTreeActions";
 import { setActiveStatementId } from "redux/actions/statementActions";
 import { Tree } from "pages/MainPage/Containers/Tree/Tree";
 import { ResponseMetaI } from "@shared/types/response-meta";
+import { StatementsTable } from "./Containers/StatementsTable/StatementsTable";
 
 interface MainPage {
   fetchMeta: () => void;
@@ -19,29 +20,33 @@ interface MainPage {
 }
 
 const MainPage: React.FC<MainPage> = ({
-  fetchTerritory,
-  fetchMeta,
   meta,
+  fetchMeta,
+  fetchTerritory,
   territory,
   setActiveStatementId,
+  activeStatementId,
 }) => {
   useEffect(() => {
     fetchMeta();
   }, [fetchMeta]);
 
   useEffect(() => {
-    fetchTerritory("T3");
+    fetchTerritory("T3-1");
   }, [fetchTerritory]);
 
   return (
     <>
-      <Button
-        label="set ID"
-        onClick={() => setActiveStatementId("423dasd-asd2312")}
-      />
       <div className="flex mb-4">
-        <Box height={750} width={300} label={"Territories"}>
+        <Box height={750} width={350} label={"Territories"}>
           <Tree territory={territory} fetchTerritory={fetchTerritory} />
+        </Box>
+        <Box height={750} width={800} label={"Statements"}>
+          <StatementsTable
+            statements={territory.statements}
+            activeStatementId={activeStatementId}
+            setActiveStatementId={setActiveStatementId}
+          />
         </Box>
       </div>
     </>

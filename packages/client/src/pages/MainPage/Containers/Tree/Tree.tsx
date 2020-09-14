@@ -15,17 +15,33 @@ export const Tree: React.FC<Tree> = ({ territory, fetchTerritory }) => {
 
   return (
     <div>
-      <Tag
-        category={Entities.T.id}
-        color={Entities.T.color}
-        label={territory && territory.label}
-        button={
-          territoryParent &&
-          territoryParent.length > 0 && (
-            <Button onClick={() => fetchTerritory(territoryParent)} label="<" />
-          )
-        }
-      />
+      <div className="flex flex-col mt-1">
+        <div className="mb-1">
+          <Tag
+            category={Entities.T.id}
+            color={Entities.T.color}
+            label={territory && territory.label}
+          />
+        </div>
+        {territoryParent && (
+          <div className="ml-4">
+            <Tag
+              category={Entities.T.id}
+              color={Entities.T.color}
+              label={territoryParent && territoryParent}
+              button={
+                territoryParent &&
+                territoryParent.length > 0 && (
+                  <Button
+                    onClick={() => fetchTerritory(territoryParent)}
+                    label="<"
+                  />
+                )
+              }
+            />
+          </div>
+        )}
+      </div>
       <div className="flex flex-col mt-1">
         {territory &&
           territory.children.map((child: TerritoryI, key) => {
