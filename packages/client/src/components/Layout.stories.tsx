@@ -1,15 +1,7 @@
 import * as React from "react";
 import { Entities } from "types";
 
-import {
-  Box,
-  Button,
-  ButtonSet,
-  Input,
-  Suggester,
-  Tag,
-  Tree,
-} from "components";
+import { Box, Button, ButtonSet, Input, Suggester, Tag } from "components";
 
 export default {
   title: "Layout",
