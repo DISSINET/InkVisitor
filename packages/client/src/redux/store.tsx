@@ -10,7 +10,6 @@ import { composeWithDevTools } from "redux-devtools-extension";
 import { Store } from "redux";
 
 import rootReducer from "./reducers";
-import { TerritoriesTreeProps } from "types";
 import { ResponseTerritoryI } from "@shared/types/response-territory";
 import { ResponseMetaI } from "@shared/types/response-meta";
 import { MetaAction, TerritoryAction, ActiveStatementIdAction } from "./types";
