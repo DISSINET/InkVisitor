@@ -39,7 +39,11 @@ const MainPage: React.FC<MainPage> = ({
     <>
       <div className="flex mb-4">
         <Box height={750} width={350} label={"Territories"}>
-          <Tree territory={territory} fetchTerritory={fetchTerritory} />
+          <Tree
+            territory={territory}
+            fetchTerritory={fetchTerritory}
+            setActiveStatementId={setActiveStatementId}
+          />
         </Box>
         <Box height={750} width={800} label={"Statements"}>
           <StatementsTable

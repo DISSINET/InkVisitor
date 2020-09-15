@@ -23,13 +23,25 @@ export const StatementsTable: React.FC<StatementsTableProps> = ({
   setActiveStatementId,
   activeStatementId,
 }) => {
+  const [selectedRowId, setSelectedRowId] = useState("");
+
   const wrapperClasses = classNames("table-wrapper");
   const tableClasses = classNames("component", "table", "w-full", "table-auto");
-  const [selectedRow, setSelectedRow] = useState("");
 
   useEffect(() => {
-    console.log("selectedRow use Effect", selectedRow);
-  }, [selectedRow]);
+    console.log("selectedRowId use Effect", selectedRowId);
+  }, [selectedRowId]);
+
+  const selectRow = (id: string) => {
+    console.log("selectedRowId", selectedRowId);
+    console.log("id", id);
+
+    if (id === selectedRowId) {
+      setSelectedRowId("");
+    } else {
+      setSelectedRowId(id);
+    }
+  };
 
   const columns = useMemo(
     () => [
@@ -130,17 +142,6 @@ export const StatementsTable: React.FC<StatementsTableProps> = ({
     []
   );
 
-  const selectRow = (id: string) => {
-    console.log("selectedRow", selectedRow);
-    console.log("id", id);
-
-    if (id === selectedRow) {
-      setSelectedRow("");
-    } else {
-      setSelectedRow(id);
-    }
-  };
-
   const {
     getTableProps,
     getTableBodyProps,
@@ -168,38 +169,35 @@ export const StatementsTable: React.FC<StatementsTableProps> = ({
           {rows.map((row, i) => {
             prepareRow(row);
             return (
-              <>
-                <tr
-                  {...row.getRowProps()}
-                  className={classNames({
-                    "bg-white": i % 2 == 0,
-                    "bg-grey": i % 2 == 1,
-                    "border-solid border-2 border-black":
-                      row.values.id === activeStatementId,
-                  })}
-                >
-                  {row.cells.map((cell, i) => {
-                    return (
-                      <td className="p-1" {...cell.getCellProps()}>
-                        {cell.render("Cell")}
-                      </td>
-                    );
-                  })}
-                </tr>
-                {row.values.id === selectedRow && (
-                  <tr
-                    style={{
-                      width: "100%",
-                      height: "10rem",
-                      display: "flex",
-                      flexGrow: 1,
-                      backgroundColor: "blue",
-                    }}
-                  >
-                    {/* {"Test"} */}
-                  </tr>
-                )}
-              </>
+              <tr
+                {...row.getRowProps()}
+                className={classNames({
+                  "bg-white": i % 2 == 0,
+                  "bg-grey": i % 2 == 1,
+                  "border-solid border-2 border-black":
+                    row.values.id === activeStatementId,
+                })}
+              >
+                {row.cells.map((cell, i) => {
+                  return (
+                    <td className="p-1" {...cell.getCellProps()}>
+                      {cell.render("Cell")}
+                    </td>
+                  );
+                })}
+              </tr>
+              // {row.values.id === selectedRowId && (
+              //   <tr
+              //     style={{
+              //       width: "100%",
+              //       height: "10rem",
+              //       display: "flex",
+              //       flexGrow: 1,
+              //       backgroundColor: "blue",
+              //     }}
+              //   >
+              //   </tr>
+              // )}
             );
           })}
         </tbody>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 
 import { Tag, Button } from "components";
 import { Entities, Node } from "types";
@@ -8,9 +8,14 @@ import { TerritoryI } from "@shared/types";
 interface Tree {
   territory?: ResponseTerritoryI;
   fetchTerritory: (id: string) => void;
+  setActiveStatementId: (id: string) => void;
 }
 
-export const Tree: React.FC<Tree> = ({ territory, fetchTerritory }) => {
+export const Tree: React.FC<Tree> = ({
+  territory,
+  fetchTerritory,
+  setActiveStatementId,
+}) => {
   const territoryParent = territory && (territory.data.parent as string);
 
   return (
@@ -33,7 +38,10 @@ export const Tree: React.FC<Tree> = ({ territory, fetchTerritory }) => {
                 territoryParent &&
                 territoryParent.length > 0 && (
                   <Button
-                    onClick={() => fetchTerritory(territoryParent)}
+                    onClick={() => {
+                      fetchTerritory(territoryParent);
+                      setActiveStatementId("");
+                    }}
                     label="<"
                   />
                 )
@@ -56,6 +64,7 @@ export const Tree: React.FC<Tree> = ({ territory, fetchTerritory }) => {
                       <Button
                         onClick={() => {
                           fetchTerritory(child.id);
+                          setActiveStatementId("");
                         }}
                         label=">"
                       />
