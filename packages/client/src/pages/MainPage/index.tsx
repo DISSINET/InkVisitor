@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { connect } from "react-redux";
 
-import { Button, Box } from "components";
+import { Box } from "components";
 import { ResponseTerritoryI } from "@shared/types/response-territory";
 import { fetchMeta } from "redux/actions/metaActions";
 import { fetchTerritory } from "redux/actions/territoryTreeActions";
@@ -48,6 +48,7 @@ const MainPage: React.FC<MainPage> = ({
         <Box height={750} width={800} label={"Statements"}>
           <StatementsTable
             statements={territory.statements}
+            actions={meta.actions}
             activeStatementId={activeStatementId}
             setActiveStatementId={setActiveStatementId}
           />
