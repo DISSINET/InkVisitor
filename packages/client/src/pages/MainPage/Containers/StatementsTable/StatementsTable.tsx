@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { useTable, Cell } from "react-table";
+import { useTable, Cell, Row, useExpanded } from "react-table";
 import classNames from "classnames";
 
 import { Tag, Button } from "components";
@@ -21,8 +21,9 @@ interface IActant {
   elvl: string;
   position: string;
 }
+
 // FIXME: I had to retype ActantI, because there is not type attribute on ActantI type in @shared
-export interface ActantITable extends ActantI {
+interface ActantITable extends ActantI {
   data: {
     content: string;
     language: string;
@@ -41,7 +42,13 @@ export const StatementsTable: React.FC<StatementsTableProps> = ({
   const [selectedRowId, setSelectedRowId] = useState("");
 
   const wrapperClasses = classNames("table-wrapper");
-  const tableClasses = classNames("component", "table", "w-full", "table-auto");
+  const tableClasses = classNames(
+    "component",
+    "table",
+    "w-full",
+    "table-auto",
+    "text-sm"
+  );
 
   const selectRow = (id: string) => {
     if (id === selectedRowId) {
@@ -135,14 +142,17 @@ export const StatementsTable: React.FC<StatementsTableProps> = ({
       },
       {
         Header: "Buttons",
+        id: "expander",
         Cell: ({ row }: Cell) => (
           <div className="table-actions">
-            <Button
-              key="i"
-              label="i"
-              color="info"
-              onClick={() => selectRow(row.values.id)}
-            />
+            <span {...row.getToggleRowExpandedProps()}>
+              <Button
+                key="i"
+                label="i"
+                color="info"
+                onClick={() => (row.isExpanded = !row.isExpanded)}
+              />
+            </span>
             <Button
               key="e"
               label="e"
@@ -162,16 +172,34 @@ export const StatementsTable: React.FC<StatementsTableProps> = ({
     [selectedRowId, activeStatementId, statements]
   );
 
+  const renderRowSubComponent = React.useCallback(
+    ({ row }) => (
+      <pre
+        style={{
+          fontSize: "10px",
+        }}
+      >
+        <code>{JSON.stringify({ values: row.values }, null, 2)}</code>
+      </pre>
+    ),
+    []
+  );
+
   const {
     getTableProps,
     getTableBodyProps,
     allColumns,
     rows,
     prepareRow,
-  } = useTable({
-    columns,
-    data: statements,
-  });
+    visibleColumns,
+    state: { expanded },
+  } = useTable(
+    {
+      columns,
+      data: statements,
+    },
+    useExpanded
+  );
 
   return (
     <div className={wrapperClasses}>
@@ -189,9 +217,8 @@ export const StatementsTable: React.FC<StatementsTableProps> = ({
           {rows.map((row, i) => {
             prepareRow(row);
             return (
-              <>
+              <React.Fragment {...row.getRowProps()} key={i}>
                 <tr
-                  {...row.getRowProps()}
                   className={classNames({
                     "bg-white": i % 2 == 0,
                     "bg-grey": i % 2 == 1,
@@ -207,18 +234,14 @@ export const StatementsTable: React.FC<StatementsTableProps> = ({
                     );
                   })}
                 </tr>
-                {row.values.id === selectedRowId && (
-                  <tr
-                    style={{
-                      width: "100%",
-                      height: "10rem",
-                      display: "flex",
-                      flexGrow: 1,
-                      backgroundColor: "blue",
-                    }}
-                  ></tr>
-                )}
-              </>
+                {row.isExpanded ? (
+                  <tr>
+                    <td colSpan={visibleColumns.length}>
+                      {renderRowSubComponent({ row })}
+                    </td>
+                  </tr>
+                ) : null}
+              </React.Fragment>
             );
           })}
         </tbody>
