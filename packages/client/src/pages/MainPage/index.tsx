@@ -9,6 +9,7 @@ import { setActiveStatementId } from "redux/actions/statementActions";
 import { Tree } from "pages/MainPage/Containers/Tree/Tree";
 import { ResponseMetaI } from "@shared/types/response-meta";
 import { StatementsTable } from "./Containers/StatementsTable/StatementsTable";
+import { StatementEditor } from "./Containers/StatementEditor/StatementEditor";
 
 interface MainPage {
   fetchMeta: () => void;
@@ -52,6 +53,19 @@ const MainPage: React.FC<MainPage> = ({
             actants={territory.actants}
             activeStatementId={activeStatementId}
             setActiveStatementId={setActiveStatementId}
+          />
+        </Box>
+        <Box height={750} width={800} label={"Editor"}>
+          <StatementEditor
+            statement={
+              activeStatementId
+                ? territory.statements.find(
+                    (statement) => statement.id === activeStatementId
+                  )
+                : undefined
+            }
+            meta={meta}
+            actants={territory.actants}
           />
         </Box>
       </div>
