@@ -83,12 +83,11 @@ const parsePropsInRow = (row, entity, territory) => {
             // add actant
             actants.push({
               id: valueId,
-              class: "E",
+              class: "V",
               label: value,
-              data: {
-                type: "V",
-              },
+              data: {},
             });
+
             // add statement
             createEmptyPropStatement(
               row.id,
@@ -109,8 +108,8 @@ const addEntityActant = (id, label, type) => {
     actants.push({
       id,
       label: label.trim(),
-      class: "E",
-      data: { type },
+      class: type,
+      data: {},
     });
   }
 };
@@ -188,10 +187,8 @@ const createNewActantIfNeeded = (actantValue) => {
     actants.push({
       id: newActantId,
       label: newActantLabel,
-      class: "E",
-      data: {
-        type: newActantType,
-      },
+      class: newActantType,
+      data: {},
     });
     return newActantId;
   } else {
