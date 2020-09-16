@@ -49,6 +49,7 @@ const MainPage: React.FC<MainPage> = ({
           <StatementsTable
             statements={territory.statements}
             actions={meta.actions}
+            actants={territory.actants}
             activeStatementId={activeStatementId}
             setActiveStatementId={setActiveStatementId}
           />

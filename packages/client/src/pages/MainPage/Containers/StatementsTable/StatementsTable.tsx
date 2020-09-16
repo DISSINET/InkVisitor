@@ -5,10 +5,12 @@ import classNames from "classnames";
 import { Tag, Button } from "components";
 import { Entities } from "types";
 import { ActionI } from "@shared/types/action";
+import { ActantI } from "@shared/types/actant";
 
 interface StatementsTableProps {
   statements: {}[];
   actions: ActionI[];
+  actants: ActantI[];
   activeStatementId: string;
   setActiveStatementId: (id: string) => void;
 }
@@ -19,10 +21,20 @@ interface IActant {
   elvl: string;
   position: string;
 }
+// FIXME: I had to retype ActantI, because there is not type attribute on ActantI type in @shared
+export interface ActantITable extends ActantI {
+  data: {
+    content: string;
+    language: string;
+    parent: string | false;
+    type: string;
+  };
+}
 
 export const StatementsTable: React.FC<StatementsTableProps> = ({
   statements,
   actions,
+  actants,
   setActiveStatementId,
   activeStatementId,
 }) => {
@@ -91,7 +103,7 @@ export const StatementsTable: React.FC<StatementsTableProps> = ({
       {
         Header: "Actants",
         Cell: ({ row }: Cell) => {
-          const actants =
+          const rowActants =
             row.values.data && row.values.data.actants
               ? row.values.data.actants.filter(
                   (a: IActant) => a.position !== "s"
@@ -100,13 +112,19 @@ export const StatementsTable: React.FC<StatementsTableProps> = ({
 
           return (
             <div className="table-subjects">
-              {actants.length
-                ? actants.map((actant: IActant, si: number) => {
+              {rowActants.length
+                ? rowActants.map((actant: IActant, si: number) => {
+                    const actantObject =
+                      actants &&
+                      (actants.find(
+                        (a) => a.id === actant.actant
+                      ) as ActantITable);
+                    const actantLetter = actantObject?.data.type || "P";
                     return (
                       <Tag
                         key={si}
-                        category={Entities["P"].id}
-                        color={Entities["P"].color}
+                        category={Entities[actantLetter].id}
+                        color={Entities[actantLetter].color}
                       ></Tag>
                     );
                   })

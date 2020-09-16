@@ -6,4 +6,4 @@ import { Input } from "components/Input/Input";
 import { Tag } from "components/Tag/Tag";
 import { Suggester } from "components/Suggester/Suggester";
 
-export { Box, Button, ButtonSet, Input, Tag, Suggester };
+export { Arrow, Box, Button, ButtonSet, Input, Tag, Suggester };
