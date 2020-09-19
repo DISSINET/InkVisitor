@@ -37,7 +37,7 @@ export const Header: React.FC<HeaderProps> = ({
       className={classNames(classesWrapper)}
       style={{
         height: height === "auto" ? "auto" : `${height}px`,
-        padding: `${paddingX}px ${paddingY}px`,
+        padding: `${paddingY}px ${paddingX}px`,
       }}
     >
       <div className={classNames(["flex-1", "self-center", "text-left"])}>

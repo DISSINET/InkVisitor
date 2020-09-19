@@ -93,7 +93,7 @@ export const CustomPaddingHeader = () => {
       <Header
         paddingX={20}
         paddingY={0}
-        left={<div className="text-xl">no X padding</div>}
+        left={<div className="text-xl">no Y padding</div>}
         right={<div className="text-sm">left content</div>}
       />
 
@@ -101,7 +101,7 @@ export const CustomPaddingHeader = () => {
       <Header
         paddingX={0}
         paddingY={50}
-        left={<div className="text-xl">no Y padding</div>}
+        left={<div className="text-xl">no X padding</div>}
         right={<div className="text-sm">left content</div>}
       />
     </div>
