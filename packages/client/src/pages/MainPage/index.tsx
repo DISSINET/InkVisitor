@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { connect } from "react-redux";
 
-import { Box } from "components";
+import { Box, Button, Header } from "components";
 import { ResponseTerritoryI } from "@shared/types/response-territory";
 import { fetchMeta } from "redux/actions/metaActions";
 import { fetchTerritory } from "redux/actions/territoryTreeActions";
@@ -38,6 +38,17 @@ const MainPage: React.FC<MainPage> = ({
 
   return (
     <>
+      <Header
+        paddingX={15}
+        paddingY={15}
+        left={<div className="text-4xl">InkVisitor</div>}
+        right={
+          <div className="inline">
+            <div className="text-sm inline m-2">logged as admin</div>
+            <Button label="log out" color="danger" />
+          </div>
+        }
+      />
       <div className="flex mb-4">
         <Box height={750} width={350} label={"Territories"}>
           <Tree
