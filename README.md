@@ -28,13 +28,13 @@ Reusable code shared within other packages. For more information see https://git
 
 The application is displaying data of one case-study. All visual components are prepared for next stages.
 
-- [ ] General: Project architecture + Webpack introduced
-- [ ] General: Interfaces and types for data models
-- [ ] Database: RethinkDB integrated
+- [x] General: Project architecture + Webpack introduced
+- [x] General: Interfaces and types for data models
+- [x] Database: RethinkDB integrated
 - [ ] Database: Data of one case-study are succesfully parsed and imported
-- [ ] Server: Scalable Express and Router architecture
-- [ ] Server: GET routes `/meta`, `/actant` and `/territory`
-- [ ] Client: basic componets + storybooks
+- [x] Server: Scalable Express and Router architecture
+- [x] Server: GET routes `/meta`, `/actant` and `/territory`
+- [x] Client: Basic componets + storybooks
 - [ ] Client: Territory-tree container
 - [ ] Client: Statements-table container
 - [ ] Client: Statement-editor container
@@ -49,6 +49,7 @@ Application allows editing data, integrates metainformation and user authentfica
 - [ ] Server: Dictionaries integrated in `/meta`
 - [ ] Server: User Authentification
 - [ ] Cleint: User Authentification in header
+- [ ] Cleint: Front-end visual refactor
 - [ ] Client: Statement-editor allows editing
 - [ ] Client: Dragging Actants through Tag
 
@@ -64,7 +65,7 @@ All data from spreadsheets are imported into the database, application is deploy
 
 ## Phase 4 - January / February 2021
 
-- Application is tested, new functionalities are integrated and data are continuously imported to the graph database.
+Application is tested, new functionalities are integrated and data are continuously imported to the graph database.
 
 - [ ] General: Page for editing actions
 - [ ] Client: E2E tests created
