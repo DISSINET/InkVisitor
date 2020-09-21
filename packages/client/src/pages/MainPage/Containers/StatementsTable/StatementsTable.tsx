@@ -39,8 +39,6 @@ export const StatementsTable: React.FC<StatementsTableProps> = ({
   setActiveStatementId,
   activeStatementId,
 }) => {
-  const [selectedRowId, setSelectedRowId] = useState("");
-
   const wrapperClasses = classNames("table-wrapper");
   const tableClasses = classNames(
     "component",
@@ -50,24 +48,12 @@ export const StatementsTable: React.FC<StatementsTableProps> = ({
     "text-sm"
   );
 
-  const selectRow = (id: string) => {
-    if (id === selectedRowId) {
-      setSelectedRowId("");
-    } else {
-      setSelectedRowId(id);
-    }
-  };
-
   const columns = useMemo(
     () => [
       {
         Header: "ID",
         accessor: "id",
       },
-      // {
-      //   Header: "Order",
-      //   Cell: () => <div className="table-order">^</div>,
-      // },
       {
         Header: "Subjects",
         accessor: "data",
@@ -88,7 +74,7 @@ export const StatementsTable: React.FC<StatementsTableProps> = ({
                         key={si}
                         category={Entities["P"].id}
                         color={Entities["P"].color}
-                      ></Tag>
+                      />
                     );
                   })
                 : null}
@@ -126,13 +112,13 @@ export const StatementsTable: React.FC<StatementsTableProps> = ({
                       (actants.find(
                         (a) => a.id === actant.actant
                       ) as ActantITable);
-                    const actantLetter = actantObject?.data.type || "P";
+                    const actantLetter = actantObject?.class || "P";
                     return (
                       <Tag
                         key={si}
                         category={Entities[actantLetter].id}
                         color={Entities[actantLetter].color}
-                      ></Tag>
+                      />
                     );
                   })
                 : null}
@@ -169,7 +155,7 @@ export const StatementsTable: React.FC<StatementsTableProps> = ({
         ),
       },
     ],
-    [selectedRowId, activeStatementId, statements]
+    [activeStatementId, statements]
   );
 
   const renderRowSubComponent = React.useCallback(
@@ -188,15 +174,17 @@ export const StatementsTable: React.FC<StatementsTableProps> = ({
   const {
     getTableProps,
     getTableBodyProps,
-    allColumns,
+    headerGroups,
     rows,
     prepareRow,
     visibleColumns,
-    state: { expanded },
   } = useTable(
     {
       columns,
       data: statements,
+      initialState: {
+        hiddenColumns: ["id"],
+      },
     },
     useExpanded
   );
@@ -205,20 +193,27 @@ export const StatementsTable: React.FC<StatementsTableProps> = ({
     <div className={wrapperClasses}>
       <table {...getTableProps()} className={tableClasses}>
         <thead className="border-b-2 border-black">
-          <tr>
-            {allColumns.map((column, i) => (
-              <th className="table-header text-left" key={i}>
-                {column.render("Header")}
-              </th>
-            ))}
-          </tr>
+          {headerGroups.map((headerGroup, key) => (
+            <tr {...headerGroup.getHeaderGroupProps()} key={key}>
+              {headerGroup.headers.map((column, key) => (
+                <th
+                  className="table-header text-left"
+                  {...column.getHeaderProps()}
+                  key={key}
+                >
+                  {column.render("Header")}
+                </th>
+              ))}
+            </tr>
+          ))}
         </thead>
         <tbody {...getTableBodyProps()}>
           {rows.map((row, i) => {
             prepareRow(row);
             return (
-              <React.Fragment {...row.getRowProps()} key={i}>
+              <React.Fragment key={i}>
                 <tr
+                  {...row.getRowProps()}
                   className={classNames({
                     "bg-white": i % 2 == 0,
                     "bg-grey": i % 2 == 1,

@@ -57,7 +57,7 @@ const MainPage: React.FC<MainPage> = ({
             setActiveStatementId={setActiveStatementId}
           />
         </Box>
-        <Box height={750} width={800} label={"Statements"}>
+        <Box height={750} width={1000} label={"Statements"}>
           <StatementsTable
             statements={territory.statements}
             actions={meta.actions}
