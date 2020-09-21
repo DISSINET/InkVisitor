@@ -50,14 +50,14 @@ const MainPage: React.FC<MainPage> = ({
         }
       />
       <div className="flex mb-4">
-        <Box height={750} width={350} label={"Territories"}>
+        <Box height={700} width={350} label={"Territories"}>
           <Tree
             territory={territory}
             fetchTerritory={fetchTerritory}
             setActiveStatementId={setActiveStatementId}
           />
         </Box>
-        <Box height={750} width={1000} label={"Statements"}>
+        <Box height={700} width={1000} label={"Statements"}>
           <StatementsTable
             statements={territory.statements}
             actions={meta.actions}
@@ -66,7 +66,7 @@ const MainPage: React.FC<MainPage> = ({
             setActiveStatementId={setActiveStatementId}
           />
         </Box>
-        <Box height={750} width={800} label={"Editor"}>
+        <Box height={700} width={800} label={"Editor"}>
           <StatementEditor
             statement={
               activeStatementId

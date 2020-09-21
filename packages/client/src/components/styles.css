@@ -1,8 +1,13 @@
-:root {
-}
+:root {}
 
 html {
   font-family: ubuntu;
+}
+
+body {
+  position: fixed;
+  height: 100vh;
+  width: 100%;
 }
 
 .btn {

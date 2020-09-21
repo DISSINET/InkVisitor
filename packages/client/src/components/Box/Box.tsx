@@ -27,7 +27,13 @@ export const Box: React.FC<BoxProps> = ({
     "font-bold",
     "p-2"
   );
-  const contentClasses = classNames("box-content", "bg-white", "p-2");
+  const contentClasses = classNames(
+    "box-content",
+    "bg-white",
+    "p-2",
+    "overflow-auto",
+    "h-full"
+  );
 
   return (
     <div className={boxClasses} style={{ width: width, height: height }}>
