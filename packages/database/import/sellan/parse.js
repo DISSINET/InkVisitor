@@ -4,7 +4,7 @@ var fs = require("fs");
 
 const created = {
   user: "1",
-  time: new Datetime().valueOf(),
+  time: new Date().valueOf(),
 };
 
 const addEntityActant = (id, label, type) => {
@@ -271,6 +271,14 @@ var loadTables = async (next) => {
     spread: "13eVorFf7J9R8YzO7TmJRVLzIIwRJS737r7eFbH1boyE",
     sheet: "Texts",
   });
+  const tableManuscripts = await loadSheet({
+    spread: "13eVorFf7J9R8YzO7TmJRVLzIIwRJS737r7eFbH1boyE",
+    sheet: "Manuscripts",
+  });
+  const tableResources = await loadSheet({
+    spread: "13eVorFf7J9R8YzO7TmJRVLzIIwRJS737r7eFbH1boyE",
+    sheet: "Resources",
+  });
   const tableStatements = await loadSheet({
     spread: "1X6P4jOAqWGXg1sPH4vOxHgl7-1v11AjQoEiJgjrCrmA",
     sheet: "Statements",
@@ -306,6 +314,8 @@ var loadTables = async (next) => {
 
   next({
     texts: tableTexts,
+    manuscripts: tableManuscripts,
+    resources: tableResources,
     statements: tableStatements,
     persons: tablePersons,
     groups: tableGroups,
@@ -332,6 +342,26 @@ loadTables((tables) => {
       parent: false,
       content: text.content,
       type: "",
+      language: "",
+    });
+  });
+
+  // parse resources
+  tables.manuscripts.forEach((manuscript) => {
+    addResourceActant(manuscript.id, {
+      label: manuscript.label,
+      content: "",
+      link: "",
+      type: manuscript.form,
+      language: "",
+    });
+  });
+  tables.resources.forEach((resource) => {
+    addResourceActant(resource.id, {
+      label: resource.label,
+      content: "",
+      link: "",
+      type: resource.type,
       language: "",
     });
   });
