@@ -84,8 +84,9 @@ const parsePropsInRow = (row, entity, territory) => {
             actants.push({
               id: valueId,
               class: "V",
-              label: value,
-              data: {},
+              data: {
+                label: value,
+              },
             });
 
             // add statement
@@ -107,9 +108,10 @@ const addEntityActant = (id, label, type) => {
   if (id) {
     actants.push({
       id,
-      label: label.trim(),
       class: type,
-      data: {},
+      data: {
+        label: label.trim(),
+      },
     });
   }
 };
@@ -186,9 +188,10 @@ const createNewActantIfNeeded = (actantValue) => {
     const newActantLabel = actantValue.split("~")[1];
     actants.push({
       id: newActantId,
-      label: newActantLabel,
       class: newActantType,
-      data: {},
+      data: {
+        label: newActantLabel,
+      },
     });
     return newActantId;
   } else {
@@ -206,8 +209,8 @@ const createEmptyPropStatement = (
     actants.push({
       id: v4(),
       class: "S",
-      label: "",
       data: {
+        label: "",
         action: "A0093",
         territory: territory,
         references: [],
@@ -305,9 +308,9 @@ loadTables((tables) => {
   tables.texts.forEach((text) => {
     actants.push({
       id: text.id,
-      label: text.label,
       class: "T",
       data: {
+        label: text.label,
         parent: false,
         content: text.content,
         type: "",
@@ -391,9 +394,9 @@ loadTables((tables) => {
   territoryIds.forEach((territoryId) => {
     actants.push({
       id: territoryId,
-      label: territoryId,
       class: "T",
       data: {
+        label: territoryId,
         parent: territoryId.includes("-")
           ? territoryId.split("-").slice(0, -1).join("-")
           : false,
@@ -409,8 +412,8 @@ loadTables((tables) => {
     const statementActant = {
       id: statement.id,
       class: "S",
-      label: "",
       data: {
+        label: "",
         action: statement.id_action_or_relation,
         territory: statement.text_part_id,
         references: [
