@@ -2,6 +2,46 @@ var { loadSheet } = require("./../util/loadsheet");
 var { v4 } = require("uuid");
 var fs = require("fs");
 
+const created = {
+  user: "1",
+  time: new Datetime().valueOf(),
+};
+
+const addEntityActant = (id, label, type) => {
+  if (id) {
+    actants.push({
+      id,
+      class: type,
+      data: {
+        label: label.trim(),
+      },
+      meta: { created },
+    });
+  }
+};
+
+const addTerritoryActant = (id, data) => {
+  if (id) {
+    actants.push({
+      id,
+      class: "T",
+      data: data,
+      meta: { created },
+    });
+  }
+};
+
+const addResourceActant = (id, data) => {
+  if (id) {
+    actants.push({
+      id,
+      class: "R",
+      data: data,
+      meta: { created },
+    });
+  }
+};
+
 /**
  * Parsing props in entity tables
  */
@@ -69,6 +109,7 @@ const parsePropsInRow = (row, entity, territory) => {
             const conceptValueId = entityPropConfig[tableProp].mappingFn(
               row[tableProp]
             );
+
             createEmptyPropStatement(
               row.id,
               entityPropConfig[tableProp].conceptId,
@@ -81,13 +122,7 @@ const parsePropsInRow = (row, entity, territory) => {
             const valueId = v4();
 
             // add actant
-            actants.push({
-              id: valueId,
-              class: "V",
-              data: {
-                label: value,
-              },
-            });
+            addEntityActant(valueId, value, "V");
 
             // add statement
             createEmptyPropStatement(
@@ -101,18 +136,6 @@ const parsePropsInRow = (row, entity, territory) => {
       }
     });
   } else {
-  }
-};
-
-const addEntityActant = (id, label, type) => {
-  if (id) {
-    actants.push({
-      id,
-      class: type,
-      data: {
-        label: label.trim(),
-      },
-    });
   }
 };
 
@@ -186,13 +209,9 @@ const createNewActantIfNeeded = (actantValue) => {
     const newActantId = v4();
     const newActantType = actantValue.split("~")[0];
     const newActantLabel = actantValue.split("~")[1];
-    actants.push({
-      id: newActantId,
-      class: newActantType,
-      data: {
-        label: newActantLabel,
-      },
-    });
+
+    addEntityActant(newActantId, newActantLabel, newActantType);
+
     return newActantId;
   } else {
     return false;
@@ -209,6 +228,7 @@ const createEmptyPropStatement = (
     actants.push({
       id: v4(),
       class: "S",
+      meta: { created, updated: [] },
       data: {
         label: "",
         action: "A0093",
@@ -305,17 +325,14 @@ const rootTerritory = "T3";
 loadTables((tables) => {
   console.log(Object.keys(tables));
 
+  // parse table of territories
   tables.texts.forEach((text) => {
-    actants.push({
-      id: text.id,
-      class: "T",
-      data: {
-        label: text.label,
-        parent: false,
-        content: text.content,
-        type: "",
-        language: "",
-      },
+    addTerritoryActant(text.id, {
+      label: text.label,
+      parent: false,
+      content: text.content,
+      type: "",
+      language: "",
     });
   });
 
@@ -391,19 +408,16 @@ loadTables((tables) => {
     ...new Set(tables.statements.map((s) => s.text_part_id).filter((a) => a)),
   ];
 
+  // add sub-territories
   territoryIds.forEach((territoryId) => {
-    actants.push({
-      id: territoryId,
-      class: "T",
-      data: {
-        label: territoryId,
-        parent: territoryId.includes("-")
-          ? territoryId.split("-").slice(0, -1).join("-")
-          : false,
-        content: "",
-        type: "A",
-        language: "Lang1",
-      },
+    addTerritoryActant(territoryId, {
+      label: territoryId,
+      parent: territoryId.includes("-")
+        ? territoryId.split("-").slice(0, -1).join("-")
+        : false,
+      content: "",
+      type: "A",
+      language: "Lang1",
     });
   });
 
@@ -437,6 +451,7 @@ loadTables((tables) => {
         props: [],
         actants: [],
       },
+      meta: { created, updated: [] },
     };
 
     //subject
