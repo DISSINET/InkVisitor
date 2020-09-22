@@ -27,4 +27,15 @@ export interface StatementI extends ActantI {
       certainty: string;
     }[];
   };
+  meta: {
+    created: {
+      user: string;
+      time: string;
+    };
+    updated: {
+      user: string;
+      time: string;
+      value: {};
+    }[];
+  };
 }
