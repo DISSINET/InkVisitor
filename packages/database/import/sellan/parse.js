@@ -462,12 +462,12 @@ loadTables((tables) => {
         territory: statement.text_part_id,
         references: [
           {
-            resource: "R1", // check this
+            resource: statement.primary_reference_id,
             part: statement.primary_reference_part,
             type: "P",
           },
           {
-            resource: "R2", // check this
+            resource: statement.secondary_reference_id,
             part: statement.secondary_reference_part,
             type: "S",
           },
