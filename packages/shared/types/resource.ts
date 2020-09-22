@@ -6,6 +6,13 @@ export interface ResourceI extends ActantI {
     content: string;
     link: string;
     type: string;
+    label: string;
     language: string;
+  };
+  meta: {
+    created: {
+      user: string;
+      time: string;
+    };
   };
 }
