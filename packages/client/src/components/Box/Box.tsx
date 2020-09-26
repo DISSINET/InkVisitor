@@ -7,7 +7,7 @@ interface BoxProps {
   label?: string;
   color?: typeof Colors[number];
   width: number;
-  height: number;
+  height?: number;
   children?: ReactNode;
 }
 
@@ -18,7 +18,12 @@ export const Box: React.FC<BoxProps> = ({
   height,
   children,
 }) => {
-  const boxClasses = classNames(`border-${color}`, "border-2");
+  const boxClasses = classNames(
+    `border-${color}`,
+    "border-2",
+    "flex",
+    "flex-col"
+  );
 
   const headClasses = classNames(
     "box-head",
@@ -32,11 +37,16 @@ export const Box: React.FC<BoxProps> = ({
     "bg-white",
     "p-2",
     "overflow-auto",
-    "h-full"
+    "h-full",
+    "flex",
+    "flex-col"
   );
 
   return (
-    <div className={boxClasses} style={{ width: width, height: height }}>
+    <div
+      className={boxClasses}
+      style={{ width: width, height: height ? height : "100%" }}
+    >
       <div className={headClasses}>{label}</div>
       <div className={contentClasses}>{children}</div>
     </div>

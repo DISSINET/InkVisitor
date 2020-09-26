@@ -20,6 +20,7 @@ interface MainPage {
   activeStatementId: string;
 }
 
+const initTerritory = "T3-1-07";
 const MainPage: React.FC<MainPage> = ({
   meta,
   fetchMeta,
@@ -33,7 +34,7 @@ const MainPage: React.FC<MainPage> = ({
   }, [fetchMeta]);
 
   useEffect(() => {
-    fetchTerritory("T3-1");
+    fetchTerritory(initTerritory);
   }, [fetchTerritory]);
 
   return (

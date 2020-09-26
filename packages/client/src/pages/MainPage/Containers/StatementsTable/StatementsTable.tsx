@@ -130,7 +130,7 @@ export const StatementsTable: React.FC<StatementsTableProps> = ({
         Header: "Buttons",
         id: "expander",
         Cell: ({ row }: Cell) => (
-          <div className="table-actions">
+          <div className="table-actions w-40">
             <span {...row.getToggleRowExpandedProps()}>
               <Button
                 key="i"
