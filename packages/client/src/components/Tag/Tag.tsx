@@ -7,6 +7,7 @@ interface TagProps {
   color: string;
   mode?: "selected" | false;
   button?: ReactNode;
+  marginRight?: boolean;
 }
 
 export const Tag: React.FC<TagProps> = ({
@@ -15,6 +16,7 @@ export const Tag: React.FC<TagProps> = ({
   color,
   mode,
   button,
+  marginRight,
 }) => {
   const tagClasses = classNames(
     "component",
@@ -24,7 +26,8 @@ export const Tag: React.FC<TagProps> = ({
     "inline-flex",
     "rounded-md",
     "overflow-hidden",
-    "max-w-xs"
+    "max-w-xs",
+    marginRight && "mr-1"
   );
 
   const entityClasses = classNames(
@@ -32,7 +35,8 @@ export const Tag: React.FC<TagProps> = ({
     "tag-entity",
     "inline",
     "w-6",
-    "p-1",
+    "py-1",
+    "px-2",
     "text-center",
     "font-bold"
   );
@@ -40,7 +44,8 @@ export const Tag: React.FC<TagProps> = ({
     "tag-label",
     "inline",
     "align-middle",
-    "p-1",
+    "py-1",
+    "px-2",
     "truncate",
     "bg-white",
     { "bg-primary text-white": mode === "selected" }

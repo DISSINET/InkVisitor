@@ -1,7 +1,7 @@
 import React from "react";
 
 import { Tag, Button } from "components";
-import { Entities, Node } from "types";
+import { Entities } from "types";
 import { ResponseTerritoryI } from "@shared/types/response-territory";
 import { TerritoryI } from "@shared/types";
 
@@ -22,6 +22,7 @@ export const Tree: React.FC<Tree> = ({
     <div>
       <div className="flex flex-col mt-1">
         <div className="mb-1">
+          <h3>{"Selected territory: "}</h3>
           <Tag
             category={Entities.T.id}
             color={Entities.T.color}
@@ -29,7 +30,8 @@ export const Tree: React.FC<Tree> = ({
           />
         </div>
         {territoryParent && (
-          <div className="ml-4">
+          <div className="">
+            <h3>{"Parent territory: "}</h3>
             <Tag
               category={Entities.T.id}
               color={Entities.T.color}
@@ -51,10 +53,13 @@ export const Tree: React.FC<Tree> = ({
         )}
       </div>
       <div className="flex flex-col mt-1">
+        {territory && territory.children && territory.children.length > 0 && (
+          <h3>{"Children territories: "}</h3>
+        )}
         {territory &&
           territory.children.map((child: TerritoryI, key) => {
             return (
-              <div className="flex mb-1 ml-8" key={key}>
+              <div className="flex mb-1" key={key}>
                 <Tag
                   category={Entities.T.id}
                   color={Entities.T.color}
