@@ -7,7 +7,7 @@ html {
 body {
   position: absolute;
   min-height: 100vh;
-  width: 100%;
+  min-width: 100%;
 }
 
 .btn {

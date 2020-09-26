@@ -74,6 +74,7 @@ export const StatementsTable: React.FC<StatementsTableProps> = ({
                         key={si}
                         category={Entities["P"].id}
                         color={Entities["P"].color}
+                        marginRight
                       />
                     );
                   })
@@ -90,7 +91,13 @@ export const StatementsTable: React.FC<StatementsTableProps> = ({
             actions &&
             actions.find((action) => action.id === row.values.data.action)
               ?.labels[0].label;
-          return <p>{actionTypeLabel}</p>;
+          return (
+            <p>
+              {actionTypeLabel && actionTypeLabel.length > 55
+                ? `${actionTypeLabel.substring(0, 55)}...`
+                : actionTypeLabel}
+            </p>
+          );
         },
       },
       {
@@ -105,7 +112,7 @@ export const StatementsTable: React.FC<StatementsTableProps> = ({
 
           return (
             <div className="table-subjects">
-              {rowActants.length
+              {rowActants.length > 0
                 ? rowActants.map((actant: IActant, si: number) => {
                     const actantObject =
                       actants &&
@@ -118,6 +125,7 @@ export const StatementsTable: React.FC<StatementsTableProps> = ({
                         key={si}
                         category={Entities[actantLetter].id}
                         color={Entities[actantLetter].color}
+                        marginRight
                       />
                     );
                   })
@@ -130,7 +138,7 @@ export const StatementsTable: React.FC<StatementsTableProps> = ({
         Header: "Buttons",
         id: "expander",
         Cell: ({ row }: Cell) => (
-          <div className="table-actions w-40">
+          <div className="table-actions">
             <span {...row.getToggleRowExpandedProps()}>
               <Button
                 key="i"

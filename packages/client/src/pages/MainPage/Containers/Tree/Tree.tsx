@@ -53,7 +53,9 @@ export const Tree: React.FC<Tree> = ({
         )}
       </div>
       <div className="flex flex-col mt-1">
-        {territory && territory.children && <h3>{"Children territories: "}</h3>}
+        {territory && territory.children && territory.children.length > 0 && (
+          <h3>{"Children territories: "}</h3>
+        )}
         {territory &&
           territory.children.map((child: TerritoryI, key) => {
             return (
