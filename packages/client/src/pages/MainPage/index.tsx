@@ -20,6 +20,8 @@ interface MainPage {
   activeStatementId: string;
 }
 
+const initTerritory = "T3-1";
+
 const MainPage: React.FC<MainPage> = ({
   meta,
   fetchMeta,
@@ -33,7 +35,7 @@ const MainPage: React.FC<MainPage> = ({
   }, [fetchMeta]);
 
   useEffect(() => {
-    fetchTerritory("T3-1");
+    fetchTerritory(initTerritory);
   }, [fetchTerritory]);
 
   return (
@@ -50,14 +52,14 @@ const MainPage: React.FC<MainPage> = ({
         }
       />
       <div className="flex mb-4">
-        <Box height={750} width={350} label={"Territories"}>
+        <Box height={750} width={200} label={"Territories"}>
           <Tree
             territory={territory}
             fetchTerritory={fetchTerritory}
             setActiveStatementId={setActiveStatementId}
           />
         </Box>
-        <Box height={750} width={800} label={"Statements"}>
+        <Box height={750} width={750} label={"Statements"}>
           <StatementsTable
             statements={territory.statements}
             actions={meta.actions}
@@ -66,7 +68,7 @@ const MainPage: React.FC<MainPage> = ({
             setActiveStatementId={setActiveStatementId}
           />
         </Box>
-        <Box height={750} width={800} label={"Editor"}>
+        <Box height={750} width={670} label={"Editor"}>
           <StatementEditor
             statement={
               activeStatementId
@@ -79,6 +81,10 @@ const MainPage: React.FC<MainPage> = ({
             actants={territory.actants}
           />
         </Box>
+        <div className="flex flex-col">
+          <Box height={450} width={300} label={"Search"}></Box>
+          <Box height={300} width={300} label={"Bookmarks"}></Box>
+        </div>
       </div>
     </>
   );

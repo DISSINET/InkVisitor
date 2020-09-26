@@ -7,7 +7,7 @@ interface ButtonSetProps {
 
 export const ButtonSet: React.FC<ButtonSetProps> = ({ buttons }) => {
   return (
-    <div className="component buttonset">
+    <div className="component buttonset w-40">
       {buttons.map((button, bi) => {
         return (
           <div

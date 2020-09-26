@@ -8,6 +8,7 @@ interface ButtonProps {
   inverted?: Boolean;
   color?: typeof Colors[number];
   onClick?: MouseEventHandler<HTMLElement>;
+  marginRight?: boolean;
 }
 
 export const Button: React.FC<ButtonProps> = ({
@@ -15,6 +16,7 @@ export const Button: React.FC<ButtonProps> = ({
   inverted,
   color,
   onClick,
+  marginRight,
 }) => {
   const classes = [
     "component",
@@ -23,6 +25,7 @@ export const Button: React.FC<ButtonProps> = ({
     "py-1",
     "font-bold",
     "border-2",
+    marginRight && "mr-1",
   ];
   if (inverted) {
     classes.push("bg-white");
