@@ -4,12 +4,15 @@ import { ResponseTerritoryI } from "@shared/types/response-territory";
 const initialState: ResponseTerritoryI = {
   class: "T",
   id: "",
-  label: "",
   data: {
+    label: "",
     content: "",
     language: "",
     parent: "",
     type: "",
+  },
+  meta: {
+    created: { user: "", time: "" },
   },
   children: [],
   parent: false,

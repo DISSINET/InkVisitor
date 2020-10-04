@@ -38,10 +38,17 @@ export const Tag: React.FC<TagProps> = ({
     "py-1",
     "px-2",
     "text-center",
-    "font-bold"
+    "text-xs",
+    "font-bold",
+
+    {
+      "border-r-2": !!label,
+      "border-primary": !!label,
+    }
   );
   const labelClasses = classNames(
     "tag-label",
+    "text-xs",
     "inline",
     "align-middle",
     "py-1",
