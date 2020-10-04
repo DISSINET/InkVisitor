@@ -58,7 +58,7 @@ const MainPage: React.FC<MainPage> = ({
           </div>
         }
       />
-      <div className="flex mb-4">
+      <div className="flex">
         <Box height={heightContent} width={200} label={"Territories"}>
           <Tree
             territory={territory}
@@ -97,6 +97,8 @@ const MainPage: React.FC<MainPage> = ({
           ></Box>
         </div>
       </div>
+      {/* footer */}
+      <Header height={heightFooter} paddingY={0} paddingX={10} color="grey" />
     </>
   );
 };
