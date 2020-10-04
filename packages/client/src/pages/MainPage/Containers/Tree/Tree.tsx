@@ -26,7 +26,7 @@ export const Tree: React.FC<Tree> = ({
           <Tag
             category={Entities.T.id}
             color={Entities.T.color}
-            label={territory && territory.label}
+            label={territory && territory.data.label}
           />
         </div>
         {territoryParent && (
@@ -63,7 +63,7 @@ export const Tree: React.FC<Tree> = ({
                 <Tag
                   category={Entities.T.id}
                   color={Entities.T.color}
-                  label={child && child.label}
+                  label={child && child.data.label}
                   button={
                     <>
                       <Button

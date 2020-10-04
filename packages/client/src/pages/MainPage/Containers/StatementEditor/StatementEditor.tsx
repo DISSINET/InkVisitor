@@ -52,7 +52,6 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                   const actant = actants.find(
                     (a) => a.id === statementActant.actant
                   );
-                  console.log(actant, statementActant);
                   return actant ? (
                     <tr>
                       <td key="actants">
@@ -60,7 +59,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                           key={"1"}
                           category={Entities[actant.class].id}
                           color={Entities[actant.class].color}
-                          label={actant.label}
+                          label={actant.data.label}
                         />
                       </td>
                       <td key="position">
@@ -114,7 +113,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                     key={"1"}
                     category={Entities[actant.class].id}
                     color={Entities[actant.class].color}
-                    label={actant.label}
+                    label={actant.data.label}
                   />
                   <table>
                     <thead>
@@ -143,14 +142,14 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                                 <Tag
                                   category={Entities[type.class].id}
                                   color={Entities[type.class].color}
-                                  label={actant.label}
+                                  label={actant.data.label}
                                 />
                               </td>
                               <td key="value">
                                 <Tag
                                   category={Entities[value.class].id}
                                   color={Entities[value.class].color}
-                                  label={actant.label}
+                                  label={actant.data.label}
                                 />
                               </td>
                               <td key="certainty">
