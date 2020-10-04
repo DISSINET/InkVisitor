@@ -14,9 +14,6 @@ export const App: React.FC<AppProps> = () => {
   useLayoutEffect(() => {
     const handleResize = () => {
       setSize([window.innerWidth, window.innerHeight]);
-      console.log(
-        console.log("resized to: ", window.innerWidth, "x", window.innerHeight)
-      );
     };
     window.addEventListener("resize", handleResize);
     handleResize();
