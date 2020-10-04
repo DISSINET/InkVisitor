@@ -18,6 +18,7 @@ interface MainPage {
   territory: ResponseTerritoryI;
   setActiveStatementId: (id: string) => void;
   activeStatementId: string;
+  size: number[];
 }
 
 const initTerritory = "T3-1";
@@ -29,6 +30,7 @@ const MainPage: React.FC<MainPage> = ({
   territory,
   setActiveStatementId,
   activeStatementId,
+  size,
 }) => {
   useEffect(() => {
     fetchMeta();
@@ -38,11 +40,16 @@ const MainPage: React.FC<MainPage> = ({
     fetchTerritory(initTerritory);
   }, [fetchTerritory]);
 
+  const heightHeader = 70;
+  const heightFooter = 40;
+  const heightContent = size[1] - heightHeader - heightFooter;
+
   return (
     <>
       <Header
-        paddingX={15}
-        paddingY={15}
+        height={heightHeader}
+        paddingY={0}
+        paddingX={10}
         left={<div className="text-4xl">InkVisitor</div>}
         right={
           <div className="inline">
@@ -52,14 +59,14 @@ const MainPage: React.FC<MainPage> = ({
         }
       />
       <div className="flex mb-4">
-        <Box height={750} width={200} label={"Territories"}>
+        <Box height={heightContent} width={200} label={"Territories"}>
           <Tree
             territory={territory}
             fetchTerritory={fetchTerritory}
             setActiveStatementId={setActiveStatementId}
           />
         </Box>
-        <Box height={750} width={750} label={"Statements"}>
+        <Box height={heightContent} width={750} label={"Statements"}>
           <StatementsTable
             statements={territory.statements}
             actions={meta.actions}
@@ -68,7 +75,7 @@ const MainPage: React.FC<MainPage> = ({
             setActiveStatementId={setActiveStatementId}
           />
         </Box>
-        <Box height={750} width={670} label={"Editor"}>
+        <Box height={heightContent} width={670} label={"Editor"}>
           <StatementEditor
             statement={
               activeStatementId
@@ -82,8 +89,12 @@ const MainPage: React.FC<MainPage> = ({
           />
         </Box>
         <div className="flex flex-col">
-          <Box height={450} width={300} label={"Search"}></Box>
-          <Box height={300} width={300} label={"Bookmarks"}></Box>
+          <Box height={400} width={300} label={"Search"}></Box>
+          <Box
+            height={heightContent - 400}
+            width={300}
+            label={"Bookmarks"}
+          ></Box>
         </div>
       </div>
     </>

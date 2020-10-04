@@ -3,6 +3,7 @@ import { ActantI } from "./";
 export interface StatementI extends ActantI {
   class: "S";
   data: {
+    label: string;
     action: string;
     territory: string;
     references: { resource: string; part: string; type: string }[];

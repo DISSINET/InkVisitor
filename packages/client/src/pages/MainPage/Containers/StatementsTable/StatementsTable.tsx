@@ -25,6 +25,7 @@ interface IActant {
 // FIXME: I had to retype ActantI, because there is not type attribute on ActantI type in @shared
 interface ActantITable extends ActantI {
   data: {
+    label: string;
     content: string;
     language: string;
     parent: string | false;
