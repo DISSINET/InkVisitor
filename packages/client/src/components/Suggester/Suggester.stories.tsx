@@ -114,6 +114,11 @@ const filterSuggestions = (
     : [];
 };
 
+const categoriesOptions = Object.keys(Entities).map((ek) => ({
+  value: Entities[ek].id,
+  label: Entities[ek].label,
+}));
+
 storiesOf("Suggester", module).add(
   "SimpleSuggester",
   withState(state)(({ store }) => {
@@ -124,7 +129,7 @@ storiesOf("Suggester", module).add(
           typed={typed}
           placeholder="find a person, location or an event"
           category={entityType.id}
-          categories={Object.keys(Entities).map((ek) => Entities[ek].id)}
+          categories={categoriesOptions}
           suggestions={suggestions}
           onType={(newTyped: string) => {
             store.set({
@@ -163,7 +168,7 @@ storiesOf("Suggester", module).add(
           typed={typed}
           placeholder="find a person, location or an event"
           category={entityType.id}
-          categories={[Entities["E"].id, Entities["L"].id, Entities["P"].id]}
+          categories={categoriesOptions}
           suggestions={suggestions}
           onType={(newTyped: string) => {
             store.set({

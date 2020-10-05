@@ -43,7 +43,16 @@ export const Select = () => {
       type="select"
       value=""
       label="select"
-      options={["option1", "option2"]}
+      options={[
+        {
+          value: "1",
+          label: "option 1",
+        },
+        {
+          value: "2",
+          label: "option 2",
+        },
+      ]}
       onChangeFn={onChangeFn}
     />
   );

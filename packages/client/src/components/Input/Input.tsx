@@ -1,12 +1,14 @@
 import React from "react";
 import classNames from "classnames";
 
+import { OptionI } from "@shared/types";
+
 interface InputProps {
   label?: string;
   value?: string;
   inverted?: Boolean;
   type?: "text" | "textarea" | "select";
-  options?: string[];
+  options?: OptionI[];
   rows?: number;
   cols?: number;
   onChangeFn: Function;
@@ -36,6 +38,7 @@ export const Input: React.FC<InputProps> = ({
     "border-2",
     "border-primary",
     "text-left",
+    "text-xs",
     "p-1",
     "resize-none",
     {
@@ -78,7 +81,9 @@ export const Input: React.FC<InputProps> = ({
           }}
         >
           {options.map((option, oi) => (
-            <option key={oi}>{option}</option>
+            <option key={oi} value={option.value}>
+              {option.label}
+            </option>
           ))}
         </select>
       )}
