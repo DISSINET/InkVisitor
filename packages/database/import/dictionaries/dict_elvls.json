@@ -1,0 +1,17 @@
+[
+  {
+    "value": "1",
+    "label": "textual",
+    "info": "translates what is explicitly in the text "
+  },
+  {
+    "value": "2",
+    "label": "interpretative",
+    "info": "interpretation of what is explicitly in the text "
+  },
+  {
+    "value": "3",
+    "label": "ontic",
+    "info": "translates what is explicitly in the text "
+  }
+]
