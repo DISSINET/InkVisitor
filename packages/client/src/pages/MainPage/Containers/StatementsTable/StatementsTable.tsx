@@ -4,12 +4,11 @@ import classNames from "classnames";
 
 import { Tag, Button } from "components";
 import { Entities } from "types";
-import { ActionI } from "@shared/types/action";
-import { ActantI } from "@shared/types/actant";
+import { ResponseMetaI, ActantI } from "@shared/types";
 
 interface StatementsTableProps {
   statements: {}[];
-  actions: ActionI[];
+  meta: ResponseMetaI;
   actants: ActantI[];
   activeStatementId: string;
   setActiveStatementId: (id: string) => void;
@@ -35,7 +34,7 @@ interface ActantITable extends ActantI {
 
 export const StatementsTable: React.FC<StatementsTableProps> = ({
   statements,
-  actions,
+  meta,
   actants,
   setActiveStatementId,
   activeStatementId,
@@ -89,8 +88,9 @@ export const StatementsTable: React.FC<StatementsTableProps> = ({
         accessor: "data.action",
         Cell: ({ row }: Cell) => {
           const actionTypeLabel =
-            actions &&
-            actions.find((action) => action.id === row.values.data.action)
+            meta &&
+            meta.actions &&
+            meta.actions.find((action) => action.id === row.values.data.action)
               ?.labels[0].label;
           return (
             <p>
