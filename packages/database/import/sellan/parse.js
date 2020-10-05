@@ -235,9 +235,9 @@ const createEmptyPropStatement = (
         territory: territory,
         references: [],
         tags: [],
-        certainty: "",
-        elvl: "",
-        modality: "",
+        certainty: "1",
+        elvl: "1",
+        modality: "1",
         text: "",
         note: "",
         props: [],
@@ -342,7 +342,7 @@ loadTables((tables) => {
       parent: false,
       content: text.content,
       type: "",
-      language: "",
+      language: "la",
     });
   });
 
@@ -353,7 +353,7 @@ loadTables((tables) => {
       content: "",
       link: "",
       type: manuscript.form,
-      language: "",
+      language: "la",
     });
   });
   tables.resources.forEach((resource) => {
@@ -362,7 +362,7 @@ loadTables((tables) => {
       content: "",
       link: "",
       type: resource.type,
-      language: "",
+      language: "la",
     });
   });
 
@@ -375,7 +375,11 @@ loadTables((tables) => {
       labels: [
         {
           label: action.action_or_relation_english,
-          language: "Lang1",
+          language: "en",
+        },
+        {
+          label: action.action_or_relation,
+          language: "la",
         },
       ],
       types: [],
@@ -447,7 +451,7 @@ loadTables((tables) => {
         : false,
       content: "",
       type: "A",
-      language: "Lang1",
+      language: "la",
     });
   });
 
@@ -473,9 +477,9 @@ loadTables((tables) => {
           },
         ],
         tags: statement.tags_id.split(" #"),
-        certainty: statement.certainty,
+        certainty: statement.certainty || "1",
         elvl: parseInt(statement.epistemological_level),
-        modality: statement.modality,
+        modality: statement.modality || "1",
         text: statement.text,
         note: statement.note,
         props: [],
