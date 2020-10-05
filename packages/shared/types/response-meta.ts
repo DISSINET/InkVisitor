@@ -2,8 +2,9 @@
  * type of the /territory endpoint response
  */
 
-import { ActionI } from ".";
+import { ActionI, DictionaryEntryI } from ".";
 
 export interface ResponseMetaI {
   actions: ActionI[];
+  dictionaries: { [key: string]: DictionaryEntryI[] };
 }

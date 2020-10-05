@@ -2,7 +2,7 @@ import React, { ReactNode, MouseEventHandler } from "react";
 
 import classNames from "classnames";
 import { Button, Input, Tag } from "components";
-import { EntityKeys, Entities } from "types";
+import { OptionI } from "@shared/types";
 
 export interface SuggestionI {
   id: string;
@@ -16,7 +16,7 @@ interface SuggesterProps {
   placeholder?: string; // text to display when typed === ""
   typed: string; // input value
   category: string; // selected category
-  categories: string[]; // all possible categories
+  categories: OptionI[]; // all possible categories
   suggestionListPosition?: string; // todo not implemented yet
   disabled?: boolean; // todo not implemented yet
 

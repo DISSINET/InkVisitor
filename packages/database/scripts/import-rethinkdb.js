@@ -36,6 +36,17 @@ const config = {
   tables: tablesToImport,
 };
 
+const dictionaries = {
+  certainties: "import/dictionaries/dict_certainties.json",
+  elvls: "import/dictionaries/dict_elvls.json",
+  languages: "import/dictionaries/dict_languages.json",
+  modalities: "import/dictionaries/dict_modalities.json",
+  positions: "import/dictionaries/dict_positions.json",
+  referencetypes: "import/dictionaries/dict_referencetypes.json",
+  resourcetypes: "import/dictionaries/dict_resourcetypes.json",
+  territorytypes: "import/dictionaries/dict_territorytypes.json",
+};
+
 //-----------------------------------------------------------------------------
 // Main
 //-----------------------------------------------------------------------------
@@ -59,6 +70,17 @@ const load = async () => {
       console.log("database created");
     } catch (e) {
       console.log("database not created", e);
+    }
+
+    // Insert dictionaries
+    const dictionaryKeys = Object.keys(dictionaries);
+    for (let i = 0; i < dictionaryKeys.length; i++) {
+      const dictionaryPath = dictionaries[dictionaryKeys[i]];
+      const dictionaryData = JSON.parse(fs.readFileSync(dictionaryPath));
+      const tableName = `dict_${dictionaryKeys[i]}`;
+      await r.tableCreate(tableName).run(conn);
+      await r.table(tableName).insert(dictionaryData).run(conn);
+      await console.log(`data into the dictionary ${tableName} inserted`);
     }
 
     // Insert data to tables.

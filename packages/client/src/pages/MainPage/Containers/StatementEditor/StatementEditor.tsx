@@ -20,12 +20,29 @@ export const StatementEditor: React.FC<StatementEditor> = ({
   return (
     <>
       {statement && (
-        <div>
+        <div key="main">
           <Input
             type="select"
             label="action"
             onChangeFn={() => {}}
-            options={["action1", "action2", "action3", "action4"]}
+            options={[
+              {
+                value: "1",
+                label: "action1",
+              },
+              {
+                value: "2",
+                label: "action2",
+              },
+              {
+                value: "3",
+                label: "action3",
+              },
+              {
+                value: "4",
+                label: "action4",
+              },
+            ]}
           />
           <Input
             type="textarea"
@@ -36,7 +53,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
           {
             // actants
           }
-          <div>
+          <div key="actants">
             <table>
               <thead>
                 <tr>
@@ -48,12 +65,12 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                 </tr>
               </thead>
               <tbody>
-                {statement.data.actants.map((statementActant) => {
+                {statement.data.actants.map((statementActant, sai) => {
                   const actant = actants.find(
                     (a) => a.id === statementActant.actant
                   );
                   return actant ? (
-                    <tr>
+                    <tr key={sai}>
                       <td key="actants">
                         <Tag
                           key={"1"}
@@ -66,7 +83,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                         <Input
                           type="select"
                           onChangeFn={() => {}}
-                          options={["s", "a1", "a2", "a3"]}
+                          options={meta.dictionaries.positions}
                           value={statementActant.position}
                         />
                       </td>
@@ -74,7 +91,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                         <Input
                           type="select"
                           onChangeFn={() => {}}
-                          options={["1", "2", "3"]}
+                          options={meta.dictionaries.certainties}
                           value={statementActant.certainty}
                         />
                       </td>
@@ -82,7 +99,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                         <Input
                           type="select"
                           onChangeFn={() => {}}
-                          options={["1", "2", "3"]}
+                          options={meta.dictionaries.elvls}
                           value={statementActant.elvl}
                         />
                       </td>
@@ -91,7 +108,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                       </td>
                     </tr>
                   ) : (
-                    <tr />
+                    <tr key={sai} />
                   );
                 })}
               </tbody>
@@ -102,13 +119,13 @@ export const StatementEditor: React.FC<StatementEditor> = ({
             // properties
           }
           <h2>Properties (has)</h2>
-          <div>
-            {statement.data.actants.map((statementActant) => {
+          <div key="properties">
+            {statement.data.actants.map((statementActant, sai) => {
               const actant = actants.find(
                 (a) => a.id === statementActant.actant
               );
               return actant ? (
-                <div>
+                <div key={sai}>
                   <Tag
                     key={"1"}
                     category={Entities[actant.class].id}
@@ -128,7 +145,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                     <tbody>
                       {statement.data.props
                         .filter((p) => p.subject === statementActant.actant)
-                        .map((actantProp) => {
+                        .map((actantProp, ap) => {
                           const typeId = actantProp.actant1;
                           const valueId = actantProp.actant2;
 
@@ -137,7 +154,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
 
                           console.log(actantProp);
                           return type && value ? (
-                            <tr>
+                            <tr key={ap}>
                               <td key="type">
                                 <Tag
                                   category={Entities[type.class].id}
@@ -156,7 +173,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                                 <Input
                                   type="select"
                                   onChangeFn={() => {}}
-                                  options={["1", "2", "3"]}
+                                  options={meta.dictionaries.certainties}
                                   value={statementActant.certainty}
                                 />
                               </td>
@@ -164,7 +181,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                                 <Input
                                   type="select"
                                   onChangeFn={() => {}}
-                                  options={["1", "2", "3"]}
+                                  options={meta.dictionaries.elvls}
                                   value={statementActant.elvl}
                                 />
                               </td>

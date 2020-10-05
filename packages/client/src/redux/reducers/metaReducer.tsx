@@ -3,6 +3,7 @@ import { ResponseMetaI } from "@shared/types/response-meta";
 
 const initialState: ResponseMetaI = {
   actions: [],
+  dictionaries: {},
 };
 
 const meta = (
