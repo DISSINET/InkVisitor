@@ -3,6 +3,7 @@ import React, { ReactNode, MouseEventHandler } from "react";
 import classNames from "classnames";
 import { Button, Input, Tag } from "components";
 import { OptionI } from "@shared/types";
+import { useDrop } from "react-dnd";
 
 export interface SuggestionI {
   id: string;
@@ -44,8 +45,12 @@ export const Suggester: React.FC<SuggesterProps> = ({
   onPick,
   onDrop,
 }) => {
+  const [collectedProps, dropRef] = useDrop({
+    accept: "TAG"
+  })
+
   return (
-    <div className={classNames("suggestor", "component", "inline-flex")}>
+    <div ref={dropRef} className={classNames("suggestor", "component", "inline-flex")}>
       <div className={classNames("suggestor-input", "inline-flex")}>
         <Input
           type="select"
