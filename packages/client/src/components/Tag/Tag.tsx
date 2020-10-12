@@ -1,8 +1,8 @@
 import React, { ReactNode } from "react";
 import classNames from "classnames";
-import { useDrag } from 'react-dnd'
+import { useDrag } from "react-dnd";
 
-import { ItemTypes } from 'types'
+import { ItemTypes } from "types";
 
 interface TagProps {
   label?: string;
@@ -21,7 +21,7 @@ export const Tag: React.FC<TagProps> = ({
   mode,
   button,
   marginRight,
-  isDraggable
+  isDraggable,
 }) => {
   const tagClasses = classNames(
     "component",
@@ -45,6 +45,7 @@ export const Tag: React.FC<TagProps> = ({
     "text-center",
     "text-xs",
     "font-bold",
+    isDraggable && "cursor-move",
 
     {
       "border-r-2": !!label,
@@ -74,25 +75,26 @@ export const Tag: React.FC<TagProps> = ({
     item: { type: ItemTypes.TAG, category },
     collect: (monitor) => ({
       opacity: monitor.isDragging() ? 0.5 : 1,
-    })
-  })
+    }),
+  });
 
   return (
     <>
-      {
-        isDraggable ?
+      {isDraggable ? (
         <div className={tagClasses}>
-          <div ref={dragRef} className={entityClasses}>{category}</div>
+          <div ref={dragRef} className={entityClasses}>
+            {category}
+          </div>
           {label && <div className={labelClasses}>{label}</div>}
           {button && <div className={buttonClasses}>{button}</div>}
         </div>
-        :
+      ) : (
         <div className={tagClasses}>
           <div className={entityClasses}>{category}</div>
           {label && <div className={labelClasses}>{label}</div>}
           {button && <div className={buttonClasses}>{button}</div>}
         </div>
-      }
+      )}
     </>
   );
 };

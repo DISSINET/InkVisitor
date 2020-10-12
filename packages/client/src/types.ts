@@ -91,4 +91,4 @@ export interface Node {
   label: string;
   children: Array<Node>;
 }
-export const ItemTypes = {TAG: "TAG"};
+export const ItemTypes = { TAG: "TAG" };

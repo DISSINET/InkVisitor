@@ -1,6 +1,4 @@
 import React from "react";
-import { DndProvider } from "react-dnd";
-import { HTML5Backend } from "react-dnd-html5-backend";
 
 import { Entities } from "types";
 import { Tag, Button, Input, Suggester } from "components";

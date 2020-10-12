@@ -61,7 +61,6 @@ const MainPage: React.FC<MainPage> = ({
         }
       />
       <DndProvider backend={HTML5Backend}>
-
         <div className="flex">
           <Box height={heightContent} width={200} label={"Territories"}>
             <Tree
