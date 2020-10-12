@@ -1,5 +1,8 @@
 import React, { ReactNode } from "react";
 import classNames from "classnames";
+import { useDrag } from 'react-dnd'
+
+import { ItemTypes } from 'types'
 
 interface TagProps {
   label?: string;
@@ -8,6 +11,7 @@ interface TagProps {
   mode?: "selected" | false;
   button?: ReactNode;
   marginRight?: boolean;
+  isDraggable?: boolean;
 }
 
 export const Tag: React.FC<TagProps> = ({
@@ -17,6 +21,7 @@ export const Tag: React.FC<TagProps> = ({
   mode,
   button,
   marginRight,
+  isDraggable
 }) => {
   const tagClasses = classNames(
     "component",
@@ -65,12 +70,30 @@ export const Tag: React.FC<TagProps> = ({
     "align-middle"
   );
 
+  const [{ opacity }, dragRef] = useDrag({
+    item: { type: ItemTypes.TAG, category },
+    collect: (monitor) => ({
+      opacity: monitor.isDragging() ? 0.5 : 1,
+    })
+  })
+
   return (
-    <div className={tagClasses}>
-      <div className={entityClasses}>{category}</div>
-      {label && <div className={labelClasses}>{label}</div>}
-      {button && <div className={buttonClasses}>{button}</div>}
-    </div>
+    <>
+      {
+        isDraggable ?
+        <div className={tagClasses}>
+          <div ref={dragRef} className={entityClasses}>{category}</div>
+          {label && <div className={labelClasses}>{label}</div>}
+          {button && <div className={buttonClasses}>{button}</div>}
+        </div>
+        :
+        <div className={tagClasses}>
+          <div className={entityClasses}>{category}</div>
+          {label && <div className={labelClasses}>{label}</div>}
+          {button && <div className={buttonClasses}>{button}</div>}
+        </div>
+      }
+    </>
   );
 };
 

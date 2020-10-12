@@ -10,6 +10,8 @@ import { Tree } from "pages/MainPage/Containers/Tree/Tree";
 import { ResponseMetaI } from "@shared/types/response-meta";
 import { StatementsTable } from "./Containers/StatementsTable/StatementsTable";
 import { StatementEditor } from "./Containers/StatementEditor/StatementEditor";
+import { DndProvider } from "react-dnd";
+import { HTML5Backend } from "react-dnd-html5-backend";
 
 interface MainPage {
   fetchMeta: () => void;
@@ -58,45 +60,48 @@ const MainPage: React.FC<MainPage> = ({
           </div>
         }
       />
-      <div className="flex">
-        <Box height={heightContent} width={200} label={"Territories"}>
-          <Tree
-            territory={territory}
-            fetchTerritory={fetchTerritory}
-            setActiveStatementId={setActiveStatementId}
-          />
-        </Box>
-        <Box height={heightContent} width={750} label={"Statements"}>
-          <StatementsTable
-            statements={territory.statements}
-            meta={meta}
-            actants={territory.actants}
-            activeStatementId={activeStatementId}
-            setActiveStatementId={setActiveStatementId}
-          />
-        </Box>
-        <Box height={heightContent} width={670} label={"Editor"}>
-          <StatementEditor
-            statement={
-              activeStatementId
-                ? territory.statements.find(
-                    (statement) => statement.id === activeStatementId
-                  )
-                : undefined
-            }
-            meta={meta}
-            actants={territory.actants}
-          />
-        </Box>
-        <div className="flex flex-col">
-          <Box height={400} width={300} label={"Search"}></Box>
-          <Box
-            height={heightContent - 400}
-            width={300}
-            label={"Bookmarks"}
-          ></Box>
+      <DndProvider backend={HTML5Backend}>
+
+        <div className="flex">
+          <Box height={heightContent} width={200} label={"Territories"}>
+            <Tree
+              territory={territory}
+              fetchTerritory={fetchTerritory}
+              setActiveStatementId={setActiveStatementId}
+            />
+          </Box>
+          <Box height={heightContent} width={750} label={"Statements"}>
+            <StatementsTable
+              statements={territory.statements}
+              meta={meta}
+              actants={territory.actants}
+              activeStatementId={activeStatementId}
+              setActiveStatementId={setActiveStatementId}
+            />
+          </Box>
+          <Box height={heightContent} width={670} label={"Editor"}>
+            <StatementEditor
+              statement={
+                activeStatementId
+                  ? territory.statements.find(
+                      (statement) => statement.id === activeStatementId
+                    )
+                  : undefined
+              }
+              meta={meta}
+              actants={territory.actants}
+            />
+          </Box>
+          <div className="flex flex-col">
+            <Box height={400} width={300} label={"Search"}></Box>
+            <Box
+              height={heightContent - 400}
+              width={300}
+              label={"Bookmarks"}
+            ></Box>
+          </div>
         </div>
-      </div>
+      </DndProvider>
       {/* footer */}
       <Header height={heightFooter} paddingY={0} paddingX={10} color="grey" />
     </>

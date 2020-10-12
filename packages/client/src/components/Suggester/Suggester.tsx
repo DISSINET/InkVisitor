@@ -4,6 +4,7 @@ import classNames from "classnames";
 import { Button, Input, Tag } from "components";
 import { OptionI } from "@shared/types";
 import { useDrop } from "react-dnd";
+import { ItemTypes } from "types";
 
 export interface SuggestionI {
   id: string;
@@ -46,7 +47,8 @@ export const Suggester: React.FC<SuggesterProps> = ({
   onDrop,
 }) => {
   const [collectedProps, dropRef] = useDrop({
-    accept: "TAG"
+    accept: ItemTypes.TAG,
+    drop: (item, monitor) => {console.log(item)}
   })
 
   return (
