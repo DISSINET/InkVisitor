@@ -35,6 +35,27 @@ export const StatementEditor: React.FC<StatementEditor> = ({
             value={statement.data.action}
           />
           <Input
+            type="select"
+            label="modality"
+            onChangeFn={() => {}}
+            options={meta.dictionaries.modalities}
+            value={statement.data.modality}
+          />
+          <Input
+            type="select"
+            label="elvl"
+            onChangeFn={() => {}}
+            options={meta.dictionaries.elvls}
+            value={statement.data.elvl}
+          />
+          <Input
+            type="select"
+            label="certainty"
+            onChangeFn={() => {}}
+            options={meta.dictionaries.certainties}
+            value={statement.data.certainty}
+          />
+          <Input
             type="textarea"
             label="text"
             onChangeFn={() => {}}
