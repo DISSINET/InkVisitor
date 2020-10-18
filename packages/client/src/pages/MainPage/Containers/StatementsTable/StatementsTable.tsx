@@ -122,12 +122,13 @@ export const StatementsTable: React.FC<StatementsTableProps> = ({
                       (actants.find(
                         (a) => a.id === actant.actant
                       ) as ActantITable);
-                    return actantObject ? (
+                    const entity = Entities[actantObject.class];
+                    return actantObject && entity ? (
                       <Tag
                         key={si}
                         propId={actantObject && actantObject.id}
-                        category={Entities[actantObject.class].id}
-                        color={Entities[actantObject.class].color}
+                        category={entity.id}
+                        color={entity.color}
                         marginRight
                         isDraggable
                       />
