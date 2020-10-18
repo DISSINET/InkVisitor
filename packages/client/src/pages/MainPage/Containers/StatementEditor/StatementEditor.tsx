@@ -73,6 +73,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                       <td key="actants">
                         <Tag
                           key={"1"}
+                          propId={actant.id}
                           category={Entities[actant.class].id}
                           color={Entities[actant.class].color}
                           label={actant.data.label}
@@ -128,6 +129,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                 <div key={sai}>
                   <Tag
                     key={"1"}
+                    propId={actant.id}
                     category={Entities[actant.class].id}
                     color={Entities[actant.class].color}
                     label={actant.data.label}
@@ -158,6 +160,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                             <tr key={ap}>
                               <td key="type">
                                 <Tag
+                                  propId={actant.id}
                                   category={Entities[type.class].id}
                                   color={Entities[type.class].color}
                                   label={actant.data.label}
@@ -166,6 +169,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                               </td>
                               <td key="value">
                                 <Tag
+                                  propId={actant.id}
                                   category={Entities[value.class].id}
                                   color={Entities[value.class].color}
                                   label={actant.data.label}

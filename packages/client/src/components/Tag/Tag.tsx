@@ -12,6 +12,7 @@ interface TagProps {
   button?: ReactNode;
   marginRight?: boolean;
   isDraggable?: boolean;
+  propId?: string;
 }
 
 export const Tag: React.FC<TagProps> = ({
@@ -22,6 +23,7 @@ export const Tag: React.FC<TagProps> = ({
   button,
   marginRight,
   isDraggable,
+  propId,
 }) => {
   const tagClasses = classNames(
     "component",
@@ -72,7 +74,7 @@ export const Tag: React.FC<TagProps> = ({
   );
 
   const [{ opacity }, dragRef] = useDrag({
-    item: { type: ItemTypes.TAG, category },
+    item: { id: propId, type: ItemTypes.TAG, category },
     collect: (monitor) => ({
       opacity: monitor.isDragging() ? 0.5 : 1,
     }),
