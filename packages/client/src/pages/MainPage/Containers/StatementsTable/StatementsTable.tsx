@@ -72,6 +72,7 @@ export const StatementsTable: React.FC<StatementsTableProps> = ({
                     return (
                       <Tag
                         key={si}
+                        propId={actant.actant}
                         category={Entities["P"].id}
                         color={Entities["P"].color}
                         marginRight
@@ -121,15 +122,17 @@ export const StatementsTable: React.FC<StatementsTableProps> = ({
                       (actants.find(
                         (a) => a.id === actant.actant
                       ) as ActantITable);
-                    const actantLetter = actantObject?.class || "P";
-                    return (
+                    return actantObject ? (
                       <Tag
                         key={si}
-                        category={Entities[actantLetter].id}
-                        color={Entities[actantLetter].color}
+                        propId={actantObject && actantObject.id}
+                        category={Entities[actantObject.class].id}
+                        color={Entities[actantObject.class].color}
                         marginRight
                         isDraggable
                       />
+                    ) : (
+                      <div key={si} />
                     );
                   })
                 : null}

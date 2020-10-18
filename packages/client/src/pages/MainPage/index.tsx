@@ -1,5 +1,7 @@
 import React, { useEffect } from "react";
 import { connect } from "react-redux";
+import { DndProvider } from "react-dnd";
+import { HTML5Backend } from "react-dnd-html5-backend";
 
 import { Box, Button, Header } from "components";
 import { ResponseTerritoryI } from "@shared/types/response-territory";
@@ -10,8 +12,6 @@ import { Tree } from "pages/MainPage/Containers/Tree/Tree";
 import { ResponseMetaI } from "@shared/types/response-meta";
 import { StatementsTable } from "./Containers/StatementsTable/StatementsTable";
 import { StatementEditor } from "./Containers/StatementEditor/StatementEditor";
-import { DndProvider } from "react-dnd";
-import { HTML5Backend } from "react-dnd-html5-backend";
 
 interface MainPage {
   fetchMeta: () => void;
