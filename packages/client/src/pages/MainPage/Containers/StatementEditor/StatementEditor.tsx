@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 
 import { Entities } from "types";
 import { Tag, Button, Input, Suggester } from "components";
@@ -11,37 +11,73 @@ interface StatementEditor {
   actants: ActantI[];
 }
 
+const suggester = () => {
+  return (
+    <Suggester
+      suggestions={[]}
+      typed={""}
+      category={Entities["P"].id}
+      categories={Object.keys(Entities).map((ek) => ({
+        value: Entities[ek].id,
+        label: Entities[ek].id,
+      }))}
+      onType={(newTyped: string) => console.log("newTyped", newTyped)}
+      onChangeCategory={(newEntityTypeId: keyof typeof Entities) => {
+        console.log("newEntityType", newEntityTypeId);
+      }}
+      onCreate={(suggestion: SuggestionI) => {
+        console.log("suggestion " + suggestion.id + " picked");
+      }}
+      onPick={(created: SuggestionI) => {
+        console.log("on picked");
+      }}
+    />
+  );
+};
+
 export const StatementEditor: React.FC<StatementEditor> = ({
   statement,
   meta,
   actants,
 }) => {
+  const actionTypes = meta.actions.map((a) => ({
+    value: a.id,
+    label: a.labels[0].label,
+  }));
+
+  console.log(statement);
+
   return (
     <>
-      {statement && (
-        <div key="main">
+      {statement ? (
+        <div key={statement.id}>
           <Input
             type="select"
             label="action"
             onChangeFn={() => {}}
-            options={[
-              {
-                value: "1",
-                label: "action1",
-              },
-              {
-                value: "2",
-                label: "action2",
-              },
-              {
-                value: "3",
-                label: "action3",
-              },
-              {
-                value: "4",
-                label: "action4",
-              },
-            ]}
+            options={actionTypes}
+            value={statement.data.action}
+          />
+          <Input
+            type="select"
+            label="modality"
+            onChangeFn={() => {}}
+            options={meta.dictionaries.modalities}
+            value={statement.data.modality}
+          />
+          <Input
+            type="select"
+            label="elvl"
+            onChangeFn={() => {}}
+            options={meta.dictionaries.elvls}
+            value={statement.data.elvl}
+          />
+          <Input
+            type="select"
+            label="certainty"
+            onChangeFn={() => {}}
+            options={meta.dictionaries.certainties}
+            value={statement.data.certainty}
           />
           <Input
             type="textarea"
@@ -52,8 +88,11 @@ export const StatementEditor: React.FC<StatementEditor> = ({
           {
             // actants
           }
-          <div key="actants">
-            <table>
+          <h2 className="text-lg font-bold mt-4 border-t-4 border-solid">
+            Actants
+          </h2>
+          <div key="actants" className="mt-4">
+            <table className="w-full">
               <thead>
                 <tr>
                   <th key="actants">Actants</th>
@@ -114,19 +153,27 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                 })}
               </tbody>
             </table>
+            <div className="mt-1">{suggester()}</div>
           </div>
 
           {
             // properties
           }
-          <h2>Properties (has)</h2>
+          <h2 className="text-lg font-bold mt-4 border-t-4 border-solid">
+            Properties (has)
+          </h2>
           <div key="properties">
             {statement.data.actants.map((statementActant, sai) => {
               const actant = actants.find(
                 (a) => a.id === statementActant.actant
               );
+
+              const actantProps = statement.data.props.filter(
+                (p) => p.subject === statementActant.actant
+              );
+
               return actant ? (
-                <div key={sai}>
+                <div key={sai} className="mt-4">
                   <Tag
                     key={"1"}
                     propId={actant.id}
@@ -135,27 +182,26 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                     label={actant.data.label}
                     isDraggable
                   />
-                  <table>
-                    <thead>
-                      <tr>
-                        <th key="type">Type</th>
-                        <th key="value">Value</th>
-                        <th key="certainty">Certainty</th>
-                        <th key="elvl">Elvl</th>
-                        <th key="actions">Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {statement.data.props
-                        .filter((p) => p.subject === statementActant.actant)
-                        .map((actantProp, ap) => {
+
+                  {actantProps.length ? (
+                    <table className="w-full">
+                      <thead>
+                        <tr>
+                          <th key="type">Type</th>
+                          <th key="value">Value</th>
+                          <th key="certainty">Certa inty</th>
+                          <th key="elvl">Elvl</th>
+                          <th key="actions">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {actantProps.map((actantProp, ap) => {
                           const typeId = actantProp.actant1;
                           const valueId = actantProp.actant2;
 
                           const type = actants.find((a) => a.id === typeId);
                           const value = actants.find((a) => a.id === valueId);
 
-                          console.log(actantProp);
                           return type && value ? (
                             <tr key={ap}>
                               <td key="type">
@@ -200,42 +246,43 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                             <tr />
                           );
                         })}
-                    </tbody>
-                  </table>
+                      </tbody>
+                    </table>
+                  ) : null}
+                  <div className="mt-1">{suggester()}</div>
                 </div>
               ) : (
                 <div />
               );
             })}
-
-            <Suggester
-              suggestions={[]}
-              typed={""}
-              category={Entities["P"].id}
-              categories={Object.keys(Entities).map((ek) => ({
-                value: Entities[ek].id,
-                label: Entities[ek].label,
-              }))}
-              onType={(newTyped: string) => console.log("newTyped", newTyped)}
-              onChangeCategory={(newEntityTypeId: keyof typeof Entities) => {
-                const newEntityType = Entities[newEntityTypeId];
-                console.log("newEntityType", newEntityType);
-              }}
-              onCreate={(suggestion: SuggestionI) => {
-                console.log("suggestion " + suggestion.id + " picked");
-              }}
-              onPick={(created: SuggestionI) => {
-                console.log(
-                  "new node " +
-                    created.category +
-                    ": " +
-                    created.label +
-                    " created"
-                );
-              }}
-            />
           </div>
+          {
+            // resources
+          }
+          <h2 className="text-lg font-bold mt-4 border-t-4 border-solid">
+            Resources
+          </h2>
+          {
+            // tags
+          }
+          <h2 className="text-lg font-bold mt-4 border-t-4 border-solid">
+            Tags
+          </h2>
+          {
+            // note
+          }
+          <h2 className="text-lg font-bold mt-4 border-t-4 border-solid">
+            Note
+          </h2>
+          <Input
+            type="textarea"
+            label="note"
+            onChangeFn={() => {}}
+            value={statement.data.note}
+          />
         </div>
+      ) : (
+        <div>no statement selected</div>
       )}
     </>
   );

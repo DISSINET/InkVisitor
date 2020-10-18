@@ -25,6 +25,7 @@ export const Button: React.FC<ButtonProps> = ({
     "py-1",
     "font-bold",
     "border-2",
+    "text-xs",
     marginRight && "mr-1",
   ];
   if (inverted) {

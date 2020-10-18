@@ -23,7 +23,7 @@ interface MainPage {
   size: number[];
 }
 
-const initTerritory = "T3-1";
+const initTerritory = "T40";
 
 const MainPage: React.FC<MainPage> = ({
   meta,
