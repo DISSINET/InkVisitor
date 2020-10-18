@@ -47,11 +47,19 @@ const loadStatementsTables = async (next) => {
   tableTexts.forEach((text) => {
     addTerritoryActant(text.id, {
       label: text.label,
-      parent: false,
+      parent: "T0",
       content: text.content,
       type: "",
       language: "la",
     });
+  });
+
+  addTerritoryActant(rootTerritory, {
+    label: "everything",
+    parent: false,
+    content: "everything",
+    type: "",
+    language: "la",
   });
 
   // parse resources
@@ -189,7 +197,7 @@ const loadStatementsTables = async (next) => {
           ],
           tags: statement.tags_id.split(" #"),
           certainty: statement.certainty || "1",
-          elvl: parseInt(statement.epistemological_level),
+          elvl: statement.epistemological_level || "1",
           modality: statement.modality || "1",
           text: statement.text,
           note: statement.note,
@@ -280,7 +288,7 @@ const loadStatementsTables = async (next) => {
  * HELPERS
  ******************************************************************************
  */
-const rootTerritory = "T3";
+const rootTerritory = "T0";
 
 const created = {
   user: "1",

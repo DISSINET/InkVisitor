@@ -59,7 +59,10 @@ All data from spreadsheets are imported into the database, application is deploy
 
 - [ ] General: Deploy scripts and GitHub actions are running
 - [ ] General: Environment for editing actions
+- [ ] Client: Url parameters
 - [ ] Database: All data from Google spreadsheet are imported into the database
+- [ ] Database: All information in legacy database discussed
+- [ ] Database: All models refactored / rediscussed
 - [ ] Client: Suggester component
 - [ ] Client: Search panel works
 
