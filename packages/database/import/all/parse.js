@@ -121,7 +121,7 @@ const loadStatementsTables = async (next) => {
   /**
    * parse all ENTITY sheets
    */
-  for (var esi = 1; esi < entitySheets.length; esi++) {
+  for (var esi = 0; esi < entitySheets.length; esi++) {
     const entitySheet = entitySheets[esi];
 
     const data = await loadSheet({
@@ -137,6 +137,7 @@ const loadStatementsTables = async (next) => {
       );
       parseEntityPropsInRow(entityRow, entitySheet.entityType, rootTerritory);
     });
+
     entitySheet.texts.forEach((text) => {
       const sheet = codingSheets.find((cs) => cs.textId === text);
       if (sheet) {
@@ -344,36 +345,36 @@ const propsConfig = {
   P: {
     name: {
       type: "value",
-      conceptId: "C0325",
+      conceptId: "R0010_C0325",
     },
     surname: {
       type: "value",
-      conceptId: "C0324",
+      conceptId: "R0010_C0324",
     },
     occupation_type: {
       type: "value",
-      conceptId: "C0318",
+      conceptId: "R0010_C0318",
     },
     occupation_general: {
       type: "value",
-      conceptId: "C0315",
+      conceptId: "R0010_C0315",
     },
     occupation_or_office: {
       type: "value",
-      conceptId: "C0314",
+      conceptId: "R0010_C0314",
     },
     education: {
       type: "value",
-      conceptId: "C0319",
+      conceptId: "R0010_C0319",
     },
     sex: {
       type: "concept",
-      conceptId: "C0320",
+      conceptId: "R0010_C0320",
       mappingFn: (tableValue) => {
         if (tableValue === "m") {
-          return "C0172";
+          return "R0010_C0172";
         } else if (tableValue === "f") {
-          return "C0171";
+          return "R0010_C0171";
         } else {
           false;
         }
