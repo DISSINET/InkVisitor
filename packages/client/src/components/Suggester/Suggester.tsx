@@ -1,8 +1,10 @@
 import React, { ReactNode, MouseEventHandler } from "react";
-
 import classNames from "classnames";
+import { useDrop } from "react-dnd";
+
 import { Button, Input, Tag } from "components";
 import { OptionI } from "@shared/types";
+import { ItemTypes } from "types";
 
 export interface SuggestionI {
   id: string;
@@ -44,8 +46,26 @@ export const Suggester: React.FC<SuggesterProps> = ({
   onPick,
   onDrop,
 }) => {
+  const [{ isOver }, dropRef] = useDrop({
+    accept: ItemTypes.TAG,
+    drop: (item) => {
+      console.log(item);
+    },
+    collect: (monitor) => ({
+      isOver: !!monitor.isOver(),
+    }),
+  });
+
   return (
-    <div className={classNames("suggestor", "component", "inline-flex")}>
+    <div
+      ref={dropRef}
+      className={classNames(
+        "suggestor",
+        "component",
+        "inline-flex",
+        isOver && "opacity-75"
+      )}
+    >
       <div className={classNames("suggestor-input", "inline-flex")}>
         <Input
           type="select"
