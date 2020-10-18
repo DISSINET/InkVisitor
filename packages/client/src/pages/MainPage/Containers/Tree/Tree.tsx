@@ -24,9 +24,10 @@ export const Tree: React.FC<Tree> = ({
         <div className="mb-1">
           <h3>{"Selected territory: "}</h3>
           <Tag
+            propId={territory?.id}
             category={Entities.T.id}
             color={Entities.T.color}
-            label={territory && territory.data.label}
+            label={territory?.data.label}
             isDraggable
           />
         </div>
@@ -49,7 +50,6 @@ export const Tree: React.FC<Tree> = ({
                   />
                 )
               }
-              isDraggable
             />
           </div>
         )}
@@ -63,6 +63,7 @@ export const Tree: React.FC<Tree> = ({
             return (
               <div className="flex mb-1" key={key}>
                 <Tag
+                  propId={child.id}
                   category={Entities.T.id}
                   color={Entities.T.color}
                   label={child && child.data.label}
