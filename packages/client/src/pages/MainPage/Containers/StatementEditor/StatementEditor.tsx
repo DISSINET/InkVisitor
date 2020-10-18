@@ -1,10 +1,9 @@
 import React from "react";
 
-import { Tag, Button, Input } from "components";
-
 import { Entities } from "types";
-
+import { Tag, Button, Input, Suggester } from "components";
 import { StatementI, ResponseMetaI, ActantI } from "@shared/types";
+import { SuggestionI } from "components/Suggester/Suggester";
 
 interface StatementEditor {
   statement: undefined | StatementI;
@@ -77,6 +76,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                           category={Entities[actant.class].id}
                           color={Entities[actant.class].color}
                           label={actant.data.label}
+                          isDraggable
                         />
                       </td>
                       <td key="position">
@@ -131,6 +131,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                     category={Entities[actant.class].id}
                     color={Entities[actant.class].color}
                     label={actant.data.label}
+                    isDraggable
                   />
                   <table>
                     <thead>
@@ -160,6 +161,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                                   category={Entities[type.class].id}
                                   color={Entities[type.class].color}
                                   label={actant.data.label}
+                                  isDraggable
                                 />
                               </td>
                               <td key="value">
@@ -167,6 +169,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                                   category={Entities[value.class].id}
                                   color={Entities[value.class].color}
                                   label={actant.data.label}
+                                  isDraggable
                                 />
                               </td>
                               <td key="certainty">
@@ -200,6 +203,33 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                 <div />
               );
             })}
+
+            <Suggester
+              suggestions={[]}
+              typed={""}
+              category={Entities["P"].id}
+              categories={Object.keys(Entities).map((ek) => ({
+                value: Entities[ek].id,
+                label: Entities[ek].label,
+              }))}
+              onType={(newTyped: string) => console.log("newTyped", newTyped)}
+              onChangeCategory={(newEntityTypeId: keyof typeof Entities) => {
+                const newEntityType = Entities[newEntityTypeId];
+                console.log("newEntityType", newEntityType);
+              }}
+              onCreate={(suggestion: SuggestionI) => {
+                console.log("suggestion " + suggestion.id + " picked");
+              }}
+              onPick={(created: SuggestionI) => {
+                console.log(
+                  "new node " +
+                    created.category +
+                    ": " +
+                    created.label +
+                    " created"
+                );
+              }}
+            />
           </div>
         </div>
       )}
