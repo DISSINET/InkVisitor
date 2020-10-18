@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 
 import { Entities } from "types";
 import { Tag, Button, Input, Suggester } from "components";
@@ -16,32 +16,23 @@ export const StatementEditor: React.FC<StatementEditor> = ({
   meta,
   actants,
 }) => {
+  const actionTypes = meta.actions.map((a) => ({
+    value: a.id,
+    label: a.labels[0].label,
+  }));
+
+  console.log(statement);
+
   return (
     <>
-      {statement && (
-        <div key="main">
+      {statement ? (
+        <div key={statement.id}>
           <Input
             type="select"
             label="action"
             onChangeFn={() => {}}
-            options={[
-              {
-                value: "1",
-                label: "action1",
-              },
-              {
-                value: "2",
-                label: "action2",
-              },
-              {
-                value: "3",
-                label: "action3",
-              },
-              {
-                value: "4",
-                label: "action4",
-              },
-            ]}
+            options={actionTypes}
+            value={statement.data.action}
           />
           <Input
             type="textarea"
@@ -236,6 +227,8 @@ export const StatementEditor: React.FC<StatementEditor> = ({
             />
           </div>
         </div>
+      ) : (
+        <div>no statement selected</div>
       )}
     </>
   );
