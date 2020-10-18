@@ -53,6 +53,7 @@ export const Input: React.FC<InputProps> = ({
       {type === "text" && (
         <input
           className={valueClasses}
+          style={{ lineHeight: "19px" }}
           placeholder={placeholder}
           defaultValue={value}
           onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
