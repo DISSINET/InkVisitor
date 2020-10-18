@@ -5,7 +5,9 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
+    "parse:all": "node import/all/parse.js",
     "parse:sellan": "node import/sellan/parse.js",
+    "import:all": "node scripts/import-rethinkdb.js all",
     "import:mock": "node scripts/import-rethinkdb.js mock",
     "import:sellan": "node scripts/import-rethinkdb.js sellan"
   },

@@ -35,25 +35,25 @@ The application is displaying data of one case-study. All visual components are 
 - [x] Server: Scalable Express and Router architecture
 - [x] Server: GET routes `/meta`, `/actant` and `/territory`
 - [x] Client: Basic componets + storybooks
-- [ ] Client: Territory-tree container
-- [ ] Client: Statements-table container
+- [x] Client: Territory-tree container
+- [x] Client: Statements-table container
 - [ ] Client: Statement-editor container
 
 ## Phase 2 - October / November 2020
 
 Application allows editing data, integrates metainformation and user authentfication.
 
-- [ ] Database: Dictionaries in the database
+- [x] Database: Dictionaries in the database
 - [ ] Database: Metainformation in actants
 - [ ] Server: Routes for Updating / Creating / Removing actants
-- [ ] Server: Dictionaries integrated in `/meta`
+- [x] Server: Dictionaries integrated in `/meta`
 - [ ] Server: User Authentification
-- [ ] Cleint: User Authentification in header
-- [ ] Cleint: Front-end visual refactor
+- [ ] Client: User Authentification in header
+- [ ] Client: Front-end visual refactor
 - [ ] Client: Statement-editor allows editing
 - [ ] Client: Dragging Actants through Tag
 
-## Phase 3 - December 2021
+## Phase 3 - December 2020
 
 All data from spreadsheets are imported into the database, application is deployed on server.
 
@@ -70,6 +70,7 @@ Application is tested, new functionalities are integrated and data are continuou
 - [ ] General: Page for editing actions
 - [ ] Client: E2E tests created
 - [ ] Client: Assisting functions
+- [ ] Client:
 - [ ] Client: Bookmark panel works
 - [ ] Client: User administration panel
 - [ ] Database: Data are exported to the Graph database

@@ -23,6 +23,16 @@ const datasets = {
       path: "import/sellan/actions.json",
     },
   ],
+  all: [
+    {
+      name: "actants",
+      path: "import/all/actants.json",
+    },
+    {
+      name: "actions",
+      path: "import/all/actions.json",
+    },
+  ],
 };
 const datasetId = process.argv[2];
 const tablesToImport = datasets[datasetId];
