@@ -41,6 +41,31 @@ if (process.env.NODE_ENV === "production") {
   server.use(helmet());
 }
 
+//----------------------------------------------------------------------------
+import jwt from "express-jwt";
+import jwks from "jwks-rsa";
+
+const jwtCheck: jwt.RequestHandler = jwt({
+  secret: jwks.expressJwtSecret({
+    cache: true,
+    rateLimit: true,
+    jwksRequestsPerMinute: 5,
+    jwksUri: "https://dissinet.eu.auth0.com/.well-known/jwks.json",
+  }),
+  audience: "Inkvisitor",
+  issuer: "https://dissinet.eu.auth0.com/",
+  algorithms: ["RS256"],
+});
+
+//@ts-ignore
+server.use(jwtCheck);
+
+//----------------------------------------------------------------------------
+
+server.get("/private", function (req, res) {
+  res.send("Private resource");
+});
+
 // Routing
 const routerV1 = Router();
 
