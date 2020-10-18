@@ -12,7 +12,11 @@ const TOKEN_PATH = "import/util/token.json";
 const CREDENTIALS_PATH = "import/util/credentials.json";
 
 // Load client secrets from a local file.
-module.exports.loadSheet = async ({ spread, sheet }) => {
+module.exports.loadSheet = async ({ spread, sheet, raw = false }) => {
+  const tempFileName = spread + "_" + sheet + ".json";
+  if (fs.existsSync("sheetcache/" + tempFileName)) {
+    return JSON.parse(fs.readFileSync("sheetcache/" + tempFileName));
+  }
   const credentials = JSON.parse(fs.readFileSync(CREDENTIALS_PATH));
 
   const auth = await authorize(credentials);
@@ -28,6 +32,10 @@ module.exports.loadSheet = async ({ spread, sheet }) => {
   } catch (e) {
     console.error("error loading table", spread, sheet);
     console.error(e);
+  }
+
+  if (raw) {
+    return res.data.values;
   }
 
   const data = res.data.values.filter(
@@ -53,6 +61,7 @@ module.exports.loadSheet = async ({ spread, sheet }) => {
      */
     .filter((row) => row.id_action_or_relation || row.label);
 
+  fs.writeFileSync("sheetcache/" + tempFileName, JSON.stringify(records));
   return records;
 };
 
