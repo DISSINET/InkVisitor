@@ -46,7 +46,6 @@ const addResourceActant = (id, data) => {
  * Parsing props in entity tables
  */
 
-// person props
 const propsConfig = {
   person: {
     name: {
@@ -436,6 +435,10 @@ loadTables((tables) => {
     addEntityActant(event.id, event.label, "E");
     parsePropsInRow(event, "event", rootTerritory);
   });
+
+  /**
+   * parsing Statements
+   */
 
   // territories
   const territoryIds = [
