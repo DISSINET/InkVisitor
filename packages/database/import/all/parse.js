@@ -189,7 +189,7 @@ const loadStatementsTables = async (next) => {
           ],
           tags: statement.tags_id.split(" #"),
           certainty: statement.certainty || "1",
-          elvl: parseInt(statement.epistemological_level),
+          elvl: statement.epistemological_level || "1",
           modality: statement.modality || "1",
           text: statement.text,
           note: statement.note,
