@@ -2,6 +2,7 @@ import React, { useEffect } from "react";
 import { connect } from "react-redux";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
+import { useAuth0 } from "@auth0/auth0-react";
 
 import { Box, Button, Header } from "components";
 import { ResponseTerritoryI } from "@shared/types/response-territory";
@@ -46,6 +47,12 @@ const MainPage: React.FC<MainPage> = ({
   const heightFooter = 40;
   const heightContent = size[1] - heightHeader - heightFooter;
 
+  const LoginButton = () => {
+    const { loginWithRedirect } = useAuth0();
+
+    return <Button label="Log In" onClick={() => loginWithRedirect()}></Button>;
+  };
+
   return (
     <>
       <Header
@@ -56,6 +63,7 @@ const MainPage: React.FC<MainPage> = ({
         right={
           <div className="inline">
             <div className="text-sm inline m-2">logged as admin</div>
+            {LoginButton()}
             <Button label="log out" color="danger" />
           </div>
         }
