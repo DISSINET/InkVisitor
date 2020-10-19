@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useTable, Cell, Row, useExpanded } from "react-table";
 import classNames from "classnames";
+import { FaInfo, FaPencilAlt, FaTrashAlt, FaClone } from "react-icons/fa";
 
 import { Tag, Button } from "components";
 import { Entities } from "types";
@@ -149,14 +150,14 @@ export const StatementsTable: React.FC<StatementsTableProps> = ({
             <span {...row.getToggleRowExpandedProps()}>
               <Button
                 key="i"
-                label="i"
+                icon={<FaInfo size={14} />}
                 color="info"
                 onClick={() => (row.isExpanded = !row.isExpanded)}
               />
             </span>
             <Button
               key="e"
-              label="e"
+              icon={<FaPencilAlt size={14} />}
               color="primary"
               onClick={() =>
                 activeStatementId === row.values.id
@@ -164,8 +165,8 @@ export const StatementsTable: React.FC<StatementsTableProps> = ({
                   : setActiveStatementId(row.values.id)
               }
             />
-            <Button key="d" label="d" color="warning" />
-            <Button key="r" label="r" color="danger" />
+            <Button key="d" icon={<FaClone size={14} />} color="warning" />
+            <Button key="r" icon={<FaTrashAlt size={14} />} color="danger" />
           </div>
         ),
       },
@@ -178,7 +179,9 @@ export const StatementsTable: React.FC<StatementsTableProps> = ({
       <pre
         style={{
           fontSize: "10px",
+          maxWidth: "100px",
         }}
+        className={"break-words"}
       >
         <code>{JSON.stringify({ values: row.values }, null, 2)}</code>
       </pre>
