@@ -5,6 +5,7 @@ import { Colors } from "types";
 
 interface ButtonProps {
   label?: string;
+  icon?: JSX.Element;
   inverted?: Boolean;
   color?: typeof Colors[number];
   onClick?: MouseEventHandler<HTMLElement>;
@@ -13,6 +14,7 @@ interface ButtonProps {
 
 export const Button: React.FC<ButtonProps> = ({
   label,
+  icon,
   inverted,
   color,
   onClick,
@@ -21,7 +23,7 @@ export const Button: React.FC<ButtonProps> = ({
   const classes = [
     "component",
     "button",
-    "px-3",
+    icon ? "px-2" : "px-3",
     "py-1",
     "font-bold",
     "border-2",
@@ -39,6 +41,7 @@ export const Button: React.FC<ButtonProps> = ({
   }
   return (
     <button onClick={onClick} className={classNames(classes)}>
+      {icon}
       {label}
     </button>
   );
