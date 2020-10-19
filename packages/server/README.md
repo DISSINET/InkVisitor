@@ -20,6 +20,14 @@ Start the application server on `localhost:3000`.
   - `cd ./packages/server`
   - `npm install`
   - `npm run start:dev`
+  
+## Authentication Example
+
+```shell
+curl --request GET \
+  --url http://localhost:3000/api/v1/actants \
+  --header 'authorization: Bearer {TOKEN}'
+```
 
 ### Insomnia Mocks
 
