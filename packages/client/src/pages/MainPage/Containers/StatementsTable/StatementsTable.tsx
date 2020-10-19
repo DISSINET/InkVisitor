@@ -179,7 +179,9 @@ export const StatementsTable: React.FC<StatementsTableProps> = ({
       <pre
         style={{
           fontSize: "10px",
+          maxWidth: "100px",
         }}
+        className={"break-words"}
       >
         <code>{JSON.stringify({ values: row.values }, null, 2)}</code>
       </pre>
