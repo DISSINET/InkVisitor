@@ -35,6 +35,14 @@ const MainPage: React.FC<MainPage> = ({
   activeStatementId,
   size,
 }) => {
+  const {
+    user,
+    isAuthenticated,
+    isLoading,
+    loginWithRedirect,
+    logout,
+  } = useAuth0();
+
   useEffect(() => {
     fetchMeta();
   }, [fetchMeta]);
@@ -47,12 +55,6 @@ const MainPage: React.FC<MainPage> = ({
   const heightFooter = 40;
   const heightContent = size[1] - heightHeader - heightFooter;
 
-  const LoginButton = () => {
-    const { loginWithRedirect } = useAuth0();
-
-    return <Button label="Log In" onClick={() => loginWithRedirect()}></Button>;
-  };
-
   return (
     <>
       <Header
@@ -62,55 +64,73 @@ const MainPage: React.FC<MainPage> = ({
         left={<div className="text-4xl">InkVisitor</div>}
         right={
           <div className="inline">
-            <div className="text-sm inline m-2">logged as admin</div>
-            {LoginButton()}
-            <Button label="log out" color="danger" />
+            {!isAuthenticated && (
+              <Button
+                label="Log In"
+                color="info"
+                onClick={() => loginWithRedirect()}
+              />
+            )}
+            {isAuthenticated && (
+              <>
+                <div className="text-sm inline m-2">logged as {user.name}</div>
+                <Button
+                  label="log out"
+                  color="danger"
+                  onClick={() => logout()}
+                />
+              </>
+            )}
           </div>
         }
       />
       <DndProvider backend={HTML5Backend}>
-        <div className="flex">
-          <Box height={heightContent} width={200} label={"Territories"}>
-            <Tree
-              territory={territory}
-              fetchTerritory={fetchTerritory}
-              setActiveStatementId={setActiveStatementId}
-            />
-          </Box>
-          <Box height={heightContent} width={750} label={"Statements"}>
-            <StatementsTable
-              statements={territory.statements}
-              meta={meta}
-              actants={territory.actants}
-              activeStatementId={activeStatementId}
-              setActiveStatementId={setActiveStatementId}
-            />
-          </Box>
-          <Box height={heightContent} width={670} label={"Editor"}>
-            <StatementEditor
-              statement={
-                activeStatementId
-                  ? territory.statements.find(
-                      (statement) => statement.id === activeStatementId
-                    )
-                  : undefined
-              }
-              meta={meta}
-              actants={territory.actants}
-            />
-          </Box>
-          <div className="flex flex-col">
-            <Box height={400} width={300} label={"Search"}></Box>
-            <Box
-              height={heightContent - 400}
-              width={300}
-              label={"Bookmarks"}
-            ></Box>
+        {isAuthenticated ? (
+          <div className="flex">
+            <Box height={heightContent} width={200} label={"Territories"}>
+              <Tree
+                territory={territory}
+                fetchTerritory={fetchTerritory}
+                setActiveStatementId={setActiveStatementId}
+              />
+            </Box>
+            <Box height={heightContent} width={750} label={"Statements"}>
+              <StatementsTable
+                statements={territory.statements}
+                meta={meta}
+                actants={territory.actants}
+                activeStatementId={activeStatementId}
+                setActiveStatementId={setActiveStatementId}
+              />
+            </Box>
+            <Box height={heightContent} width={670} label={"Editor"}>
+              <StatementEditor
+                statement={
+                  activeStatementId
+                    ? territory.statements.find(
+                        (statement) => statement.id === activeStatementId
+                      )
+                    : undefined
+                }
+                meta={meta}
+                actants={territory.actants}
+              />
+            </Box>
+            <div className="flex flex-col">
+              <Box height={400} width={300} label={"Search"}></Box>
+              <Box
+                height={heightContent - 400}
+                width={300}
+                label={"Bookmarks"}
+              ></Box>
+            </div>
           </div>
-        </div>
+        ) : (
+          <div className="p-5">{"Login to continue.."}</div>
+        )}
       </DndProvider>
       {/* footer */}
-      <Header height={heightFooter} paddingY={0} paddingX={10} color="grey" />
+      {/* <Header height={heightFooter} paddingY={0} paddingX={10} color="grey" /> */}
     </>
   );
 };
