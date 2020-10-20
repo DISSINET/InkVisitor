@@ -22,7 +22,7 @@ export const Tree: React.FC<Tree> = ({
     <div>
       <div className="flex flex-col mt-1">
         <div className="mb-1">
-          <h3>{"Selected territory: "}</h3>
+          <h3 className="font-bold">{"Selected territory: "}</h3>
           <Tag
             propId={territory?.id}
             category={Entities.T.id}

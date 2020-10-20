@@ -30,7 +30,8 @@ export const Box: React.FC<BoxProps> = ({
     `bg-${color}`,
     "text-white",
     "font-bold",
-    "p-2"
+    "p-2",
+    "text-lg"
   );
   const contentClasses = classNames(
     "box-content",

@@ -29,7 +29,9 @@ export const Input: React.FC<InputProps> = ({
   const labelClasses = classNames(
     "label",
     "text-right",
+    "text-s",
     "mr-2",
+    "font-bold",
     "align-top",
     "leading-10"
   );
@@ -48,7 +50,7 @@ export const Input: React.FC<InputProps> = ({
   );
 
   return (
-    <div className="wrapper">
+    <div className="wrapper mt-2">
       {label && <span className={labelClasses}> {label}</span>}
       {type === "text" && (
         <input

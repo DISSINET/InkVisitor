@@ -40,7 +40,7 @@ export const StatementsTable: React.FC<StatementsTableProps> = ({
   setActiveStatementId,
   activeStatementId,
 }) => {
-  const wrapperClasses = classNames("table-wrapper");
+  const wrapperClasses = classNames("table-wrapper", "px-2");
   const tableClasses = classNames(
     "component",
     "table",
@@ -123,7 +123,7 @@ export const StatementsTable: React.FC<StatementsTableProps> = ({
                       (actants.find(
                         (a) => a.id === actant.actant
                       ) as ActantITable);
-                    const entity = Entities[actantObject.class];
+                    const entity = Entities[actantObject?.class];
                     return actantObject && entity ? (
                       <Tag
                         key={si}
@@ -212,7 +212,11 @@ export const StatementsTable: React.FC<StatementsTableProps> = ({
       <table {...getTableProps()} className={tableClasses}>
         <thead className="border-b-2 border-black">
           {headerGroups.map((headerGroup, key) => (
-            <tr {...headerGroup.getHeaderGroupProps()} key={key}>
+            <tr
+              {...headerGroup.getHeaderGroupProps()}
+              key={key}
+              style={{ fontSize: "1rem" }}
+            >
               {headerGroup.headers.map((column, key) => (
                 <th
                   className="table-header text-left"
