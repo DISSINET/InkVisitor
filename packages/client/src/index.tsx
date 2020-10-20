@@ -9,6 +9,8 @@ ReactDOM.render(
     domain="dissinet.eu.auth0.com"
     clientId="d8OXU8e5BLiOG9UDF0iW15aY00dKWLK1"
     redirectUri={window.location.origin}
+    useRefreshTokens={true}
+    cacheLocation="localstorage"
   >
     <App />
   </Auth0Provider>,
