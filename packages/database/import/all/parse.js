@@ -82,16 +82,6 @@ const loadStatementsTables = async (next) => {
     });
   });
 
-  tableResources.forEach((resource) => {
-    addResourceActant(resource.id, {
-      label: resource.label,
-      content: "",
-      link: "",
-      type: resource.type,
-      language: "la",
-    });
-  });
-
   const codingSheets = tableResources
     .filter((row) => row["type"] === "coding sheet")
     .map((row) => {
@@ -121,6 +111,15 @@ const loadStatementsTables = async (next) => {
   /**
    * parse all ENTITY sheets
    */
+
+  addTerritoryActant("entity-tables", {
+    label: "entity tables",
+    parent: "T0",
+    content: "",
+    type: "",
+    language: "la",
+  });
+
   for (var esi = 0; esi < entitySheets.length; esi++) {
     const entitySheet = entitySheets[esi];
 
@@ -129,13 +128,38 @@ const loadStatementsTables = async (next) => {
       sheet: entitySheet.sheet,
     });
 
+    const entitySheetTerritory = "T_" + entitySheet.id;
+
+    addTerritoryActant(entitySheetTerritory, {
+      label: entitySheet.label,
+      parent: "entity-tables",
+      content: "",
+      type: "",
+      language: "la",
+    });
+
     data.forEach((entityRow) => {
+      const entityRowTerritory = entitySheetTerritory + "_" + entityRow.id;
+
+      addTerritoryActant(entityRowTerritory, {
+        label: entitySheet.label + "_" + entityRow.id,
+        parent: entitySheetTerritory,
+        content: "",
+        type: "",
+        language: "la",
+      });
+
       addEntityActant(
         entitySheet.id + "_" + entityRow.id,
         entityRow.label,
         entitySheet.entityType
       );
-      parseEntityPropsInRow(entityRow, entitySheet.entityType, rootTerritory);
+
+      parseEntityPropsInRow(
+        entityRow,
+        entitySheet.entityType,
+        entityRowTerritory
+      );
     });
 
     entitySheet.texts.forEach((text) => {
@@ -320,12 +344,14 @@ const addEntityActant = (id, label, type) => {
 };
 const addTerritoryActant = (id, data) => {
   if (id) {
-    actants.push({
-      id,
-      class: "T",
-      data: data,
-      meta: { created },
-    });
+    if (!actants.some((a) => a.id == id)) {
+      actants.push({
+        id,
+        class: "T",
+        data: data,
+        meta: { created },
+      });
+    }
   }
 };
 const addResourceActant = (id, data) => {
