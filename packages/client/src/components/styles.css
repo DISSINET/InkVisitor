@@ -1,13 +1,14 @@
 :root {}
 
 html {
-  font-family: ubuntu;
 }
 
 body {
   position: absolute;
   min-height: 100vh;
   min-width: 100%;
+  font-family: 'Roboto', sans-serif;
+  letter-spacing: .2px;
 }
 
 .btn {

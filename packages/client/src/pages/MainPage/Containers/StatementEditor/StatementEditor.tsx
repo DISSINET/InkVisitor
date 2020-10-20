@@ -1,4 +1,5 @@
-import React, { useMemo } from "react";
+import React from "react";
+import { FaTrashAlt } from "react-icons/fa";
 
 import { Entities } from "types";
 import { Tag, Button, Input, Suggester } from "components";
@@ -45,7 +46,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
     label: a.labels[0].label,
   }));
 
-  console.log(statement);
+  // console.log(statement);
 
   return (
     <>
@@ -53,48 +54,48 @@ export const StatementEditor: React.FC<StatementEditor> = ({
         <div key={statement.id}>
           <Input
             type="select"
-            label="action"
+            label="Action"
             onChangeFn={() => {}}
             options={actionTypes}
             value={statement.data.action}
           />
           <Input
             type="select"
-            label="modality"
+            label="Modality"
             onChangeFn={() => {}}
             options={meta.dictionaries.modalities}
             value={statement.data.modality}
           />
           <Input
             type="select"
-            label="elvl"
+            label="Elvl"
             onChangeFn={() => {}}
             options={meta.dictionaries.elvls}
             value={statement.data.elvl}
           />
           <Input
             type="select"
-            label="certainty"
+            label="Certainty"
             onChangeFn={() => {}}
             options={meta.dictionaries.certainties}
             value={statement.data.certainty}
           />
           <Input
             type="textarea"
-            label="text"
+            label="Text"
             onChangeFn={() => {}}
             value={statement.data.text}
           />
           {
             // actants
           }
-          <h2 className="text-lg font-bold mt-4 border-t-4 border-solid">
+          <h2 className="text-lg font-bold mt-4 border-t-4 border-solid text-center">
             Actants
           </h2>
           <div key="actants" className="mt-4">
             <table className="w-full">
               <thead>
-                <tr>
+                <tr className="text-left">
                   <th key="actants">Actants</th>
                   <th key="position">Position</th>
                   <th key="certainty">Certainty</th>
@@ -144,7 +145,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                         />
                       </td>
                       <td key="actions">
-                        <Button key="d" label="r" color="danger" />
+                        <Button key="d" icon={<FaTrashAlt />} color="danger" />
                       </td>
                     </tr>
                   ) : (
@@ -159,7 +160,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
           {
             // properties
           }
-          <h2 className="text-lg font-bold mt-4 border-t-4 border-solid">
+          <h2 className="text-lg font-bold mt-4 border-t-4 border-solid text-center">
             Properties (has)
           </h2>
           <div key="properties">
@@ -239,7 +240,11 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                                 />
                               </td>
                               <td key="actions">
-                                <Button key="d" label="r" color="danger" />
+                                <Button
+                                  key="d"
+                                  icon={<FaTrashAlt />}
+                                  color="danger"
+                                />
                               </td>
                             </tr>
                           ) : (
@@ -259,24 +264,24 @@ export const StatementEditor: React.FC<StatementEditor> = ({
           {
             // resources
           }
-          <h2 className="text-lg font-bold mt-4 border-t-4 border-solid">
+          <h2 className="text-lg font-bold mt-4 border-t-4 border-solid text-center">
             Resources
           </h2>
           {
             // tags
           }
-          <h2 className="text-lg font-bold mt-4 border-t-4 border-solid">
+          <h2 className="text-lg font-bold mt-4 border-t-4 border-solid text-center">
             Tags
           </h2>
           {
             // note
           }
-          <h2 className="text-lg font-bold mt-4 border-t-4 border-solid">
+          <h2 className="text-lg font-bold mt-4 border-t-4 border-solid text-center">
             Note
           </h2>
           <Input
             type="textarea"
-            label="note"
+            label="Note"
             onChangeFn={() => {}}
             value={statement.data.note}
           />
