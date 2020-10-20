@@ -40,7 +40,7 @@ export const StatementsTable: React.FC<StatementsTableProps> = ({
   setActiveStatementId,
   activeStatementId,
 }) => {
-  const wrapperClasses = classNames("table-wrapper", "px-2");
+  const wrapperClasses = classNames("table-wrapper", "px-1");
   const tableClasses = classNames(
     "component",
     "table",
@@ -97,8 +97,8 @@ export const StatementsTable: React.FC<StatementsTableProps> = ({
               ?.labels[0].label;
           return (
             <p>
-              {actionTypeLabel && actionTypeLabel.length > 55
-                ? `${actionTypeLabel.substring(0, 55)}...`
+              {actionTypeLabel && actionTypeLabel.length > 40
+                ? `${actionTypeLabel.substring(0, 40)}...`
                 : actionTypeLabel}
             </p>
           );
@@ -115,7 +115,7 @@ export const StatementsTable: React.FC<StatementsTableProps> = ({
               : [];
 
           return (
-            <div className="table-subjects">
+            <div className="table-subjects inline-flex">
               {rowActants.length > 0
                 ? rowActants.map((actant: IActant, si: number) => {
                     const actantObject =
@@ -143,10 +143,10 @@ export const StatementsTable: React.FC<StatementsTableProps> = ({
         },
       },
       {
-        Header: "Buttons",
+        Header: "",
         id: "expander",
         Cell: ({ row }: Cell) => (
-          <div className="table-actions">
+          <div className="table-actions inline-flex float-right">
             <span {...row.getToggleRowExpandedProps()}>
               <Button
                 key="i"
