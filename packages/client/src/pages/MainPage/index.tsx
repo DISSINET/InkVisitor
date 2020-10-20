@@ -64,14 +64,7 @@ const MainPage: React.FC<MainPage> = ({
         left={<div className="text-4xl">InkVisitor</div>}
         right={
           <div className="inline">
-            {!isAuthenticated && (
-              <Button
-                label="Log In"
-                color="info"
-                onClick={() => loginWithRedirect()}
-              />
-            )}
-            {isAuthenticated && (
+            {isAuthenticated ? (
               <>
                 <div className="text-sm inline m-2">logged as {user.name}</div>
                 <Button
@@ -80,6 +73,12 @@ const MainPage: React.FC<MainPage> = ({
                   onClick={() => logout()}
                 />
               </>
+            ) : (
+              <Button
+                label="Log In"
+                color="info"
+                onClick={() => loginWithRedirect()}
+              />
             )}
           </div>
         }
