@@ -23,6 +23,7 @@ body {
     }
     td {
       @apply px-2;
+      @apply align-baseline;
     }
   }
 

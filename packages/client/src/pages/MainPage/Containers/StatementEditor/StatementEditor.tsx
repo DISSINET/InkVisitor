@@ -51,7 +51,6 @@ export const StatementEditor: React.FC<StatementEditor> = ({
       {statement ? (
         <div key={statement.id}>
           <div className="section section-introduction">
-            <h2 className="section-heading">Statement</h2>
             <div className="section-introduction-content">
               <div className="table">
                 <div className="table-row leading-3">
@@ -113,7 +112,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
 
           <div key="actants" className="section section-actants">
             <h2 className="section-heading">Actants</h2>
-            <table className="w-full">
+            <table className="">
               <thead>
                 <tr className="text-left">
                   <th key="actants">Actants</th>
@@ -128,7 +127,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                   const actant = actants.find(
                     (a) => a.id === statementActant.actant
                   );
-                  return actant ? (
+                  return actant && actant.class && Entities[actant.class] ? (
                     <tr key={sai}>
                       <td key="actants">
                         <Tag
