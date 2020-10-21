@@ -220,7 +220,7 @@ const loadStatementsTables = async (next) => {
               type: "S",
             },
           ],
-          tags: statement.tags_id.split(" #"),
+          tags: statement.tags_id.split(" #").filter((t) => t),
           certainty: statement.certainty || "1",
           elvl: statement.epistemological_level || "1",
           modality: statement.modality || "1",
@@ -575,8 +575,8 @@ const processActant = (
 const createNewActantIfNeeded = (actantValue) => {
   if (actantValue.includes("~")) {
     const newActantId = v4();
-    const newActantType = actantValue.split("~")[0];
-    const newActantLabel = actantValue.split("~")[1];
+    const newActantType = actantValue.split("~")[1];
+    const newActantLabel = actantValue.split("~")[2];
 
     addEntityActant(newActantId, newActantLabel, newActantType);
 
