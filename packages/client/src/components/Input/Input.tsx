@@ -43,7 +43,6 @@ export const Input: React.FC<InputProps> = ({
     "text-xs",
     "p-1",
     "resize-none",
-    "max-w-xs",
     {
       "bg-primary": inverted,
       "text-white": inverted,

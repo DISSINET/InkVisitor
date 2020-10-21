@@ -49,70 +49,72 @@ export const StatementEditor: React.FC<StatementEditor> = ({
   // console.log(statement);
 
   return (
-    <>
+    <div className="statement-editor">
       {statement ? (
         <div key={statement.id}>
-          <div className="section-introduction grid grid-cols-2">
-            <div className="table">
-              <div className="table-row leading-3">
-                <div className="table-cell float-right mr-2">Action</div>
-                <div className="table-cell">
-                  <Input
-                    type="select"
-                    onChangeFn={() => {}}
-                    options={actionTypes}
-                    value={statement.data.action}
-                  />
+          <div className="section section-introduction">
+            <h2 className="section-heading">Statement</h2>
+            <div className="section-introduction-content">
+              <div className="table">
+                <div className="table-row leading-3">
+                  <div className="label">Action</div>
+                  <div className="value">
+                    <Input
+                      type="select"
+                      onChangeFn={() => {}}
+                      options={actionTypes}
+                      value={statement.data.action}
+                    />
+                  </div>
+                </div>
+                <div className="table-row">
+                  <div className="label">Modality</div>
+                  <div className="value">
+                    <Input
+                      type="select"
+                      onChangeFn={() => {}}
+                      options={meta.dictionaries.modalities}
+                      value={statement.data.modality}
+                    />
+                  </div>
+                </div>
+                <div className="table-row">
+                  <div className="label">Elvl</div>
+                  <div className="value">
+                    <Input
+                      type="select"
+                      onChangeFn={() => {}}
+                      options={meta.dictionaries.elvls}
+                      value={statement.data.elvl}
+                    />
+                  </div>
+                </div>
+                <div className="table-row">
+                  <div className="label">Certainty</div>
+                  <div className="value">
+                    <Input
+                      type="select"
+                      onChangeFn={() => {}}
+                      options={meta.dictionaries.certainties}
+                      value={statement.data.certainty}
+                    />
+                  </div>
                 </div>
               </div>
-              <div className="table-row leading-3">
-                <div className="table-cell float-right mr-2">Modality</div>
-                <div className="table-cell">
-                  <Input
-                    type="select"
-                    onChangeFn={() => {}}
-                    options={meta.dictionaries.modalities}
-                    value={statement.data.modality}
-                  />
-                </div>
+              <div>
+                <div className="">Statement Text</div>
+                <Input
+                  type="textarea"
+                  cols={55}
+                  onChangeFn={() => {}}
+                  value={statement.data.text}
+                />
               </div>
-              <div className="table-row leading-3">
-                <div className="table-cell float-right mr-2">Elvl</div>
-                <div className="table-cell">
-                  <Input
-                    type="select"
-                    onChangeFn={() => {}}
-                    options={meta.dictionaries.elvls}
-                    value={statement.data.elvl}
-                  />
-                </div>
-              </div>
-              <div className="table-row leading-3">
-                <div className="table-cell float-right mr-2">Certainty</div>
-                <div className="table-cell">
-                  <Input
-                    type="select"
-                    onChangeFn={() => {}}
-                    options={meta.dictionaries.certainties}
-                    value={statement.data.certainty}
-                  />
-                </div>
-              </div>
-            </div>
-            <div>
-              <div className="">Statement Text</div>
-              <Input
-                type="textarea"
-                onChangeFn={() => {}}
-                value={statement.data.text}
-              />
             </div>
           </div>
 
-          <h2 className="text-lg font-bold mt-4 border-t-4 border-solid text-center">
-            Actants
-          </h2>
-          <div key="actants" className="mt-4">
+          <div key="actants" className="section section-actants">
+            <h2 className="section-heading">Actants</h2>
             <table className="w-full">
               <thead>
                 <tr className="text-left">
@@ -180,10 +182,8 @@ export const StatementEditor: React.FC<StatementEditor> = ({
           {
             // properties
           }
-          <h2 className="text-lg font-bold mt-4 border-t-4 border-solid text-center">
-            Properties (has)
-          </h2>
-          <div key="properties">
+          <div key="properties" className="section section-properties">
+            <h2 className="section-heading">Properties (has)</h2>
             {statement.data.actants.map((statementActant, sai) => {
               const actant = actants.find(
                 (a) => a.id === statementActant.actant
@@ -194,7 +194,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
               );
 
               return actant ? (
-                <div key={sai} className="mt-4">
+                <div key={sai} className="property-part">
                   <Tag
                     key={"1"}
                     propId={actant.id}
@@ -274,7 +274,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                       </tbody>
                     </table>
                   ) : null}
-                  <div className="mt-1">{suggester()}</div>
+                  <div className="">{suggester()}</div>
                 </div>
               ) : (
                 <div />
@@ -284,32 +284,46 @@ export const StatementEditor: React.FC<StatementEditor> = ({
           {
             // resources
           }
-          <h2 className="text-lg font-bold mt-4 border-t-4 border-solid text-center">
-            Resources
-          </h2>
+          <div className="section section-resources">
+            <h2 className="section-heading">Resources</h2>
+          </div>
           {
             // tags
           }
-          <h2 className="text-lg font-bold mt-4 border-t-4 border-solid text-center">
-            Tags
-          </h2>
+          <div className="section section-resources">
+            <h2 className="section-heading">Tags</h2>
+          </div>
           {
             // note
           }
-          <h2 className="text-lg font-bold mt-4 border-t-4 border-solid text-center">
-            Note
-          </h2>
-          <Input
-            type="textarea"
-            label="Note"
-            onChangeFn={() => {}}
-            value={statement.data.note}
-          />
-          <Button label="save" />
+          <div className="section section-resources">
+            <h2 className="section-heading">Notes</h2>
+
+            <Input
+              type="textarea"
+              label="Note"
+              onChangeFn={() => {}}
+              value={statement.data.note}
+            />
+          </div>
+          <div className="section section-actions">
+            <h2 className="section-heading">Actions</h2>
+            <div className="action-buttons">
+              <div className="action-button">
+                <Button label="save" color="primary" />
+              </div>
+              <div className="action-button">
+                <Button label="delete" color="danger" />
+              </div>
+              <div className="action-button">
+                <Button label="cancel changes" color="warning" />
+              </div>
+            </div>
+          </div>
         </div>
       ) : (
         <div>no statement selected</div>
       )}
-    </>
+    </div>
   );
 };

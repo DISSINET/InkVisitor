@@ -1,4 +1,5 @@
-:root {}
+:root {
+}
 
 html {
 }
@@ -7,10 +8,64 @@ body {
   position: absolute;
   min-height: 100vh;
   min-width: 100%;
-  font-family: 'Roboto', sans-serif;
-  letter-spacing: .2px;
+  font-family: "Roboto", sans-serif;
+  letter-spacing: 0.2px;
 }
 
 .btn {
   @apply m-4 px-2 py-1 text-white border-none font-bold rounded bg-primary;
+}
+
+.statement-editor {
+  table {
+    th {
+      @apply font-normal;
+    }
+  }
+
+  .section {
+    .section-heading {
+      @apply text-lg font-bold mt-4 border-t-4 border-solid text-center mb-4;
+    }
+  }
+
+  .section-properties {
+    .property-part {
+      @apply ml-8;
+      @apply my-4;
+    }
+  }
+
+  .section-actions {
+    .action-buttons {
+      @apply inline-flex;
+      .action-button {
+        @apply ml-2;
+      }
+    }
+  }
+
+  .section-introduction-content {
+    @apply grid;
+    @apply grid-cols-2;
+
+    .table {
+      .table-row {
+        @apply leading-3;
+
+        .label {
+          @apply table-cell;
+          @apply float-right;
+          @apply mr-2;
+        }
+        .value {
+          @apply table-cell;
+
+          select {
+            @apply max-w-xs;
+          }
+        }
+      }
+    }
+  }
 }
