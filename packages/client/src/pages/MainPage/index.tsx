@@ -94,7 +94,7 @@ const MainPage: React.FC<MainPage> = ({
                 setActiveStatementId={setActiveStatementId}
               />
             </Box>
-            <Box height={heightContent} width={750} label={"Statements"}>
+            <Box height={heightContent} width={500} label={"Statements"}>
               <StatementsTable
                 statements={territory.statements}
                 meta={meta}
@@ -103,7 +103,7 @@ const MainPage: React.FC<MainPage> = ({
                 setActiveStatementId={setActiveStatementId}
               />
             </Box>
-            <Box height={heightContent} width={670} label={"Editor"}>
+            <Box height={heightContent} width={920} label={"Editor"}>
               <StatementEditor
                 statement={
                   activeStatementId
