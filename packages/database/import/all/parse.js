@@ -575,8 +575,8 @@ const processActant = (
 const createNewActantIfNeeded = (actantValue) => {
   if (actantValue.includes("~")) {
     const newActantId = v4();
-    const newActantType = actantValue.split("~")[0];
-    const newActantLabel = actantValue.split("~")[1];
+    const newActantType = actantValue.split("~")[1];
+    const newActantLabel = actantValue.split("~")[2];
 
     addEntityActant(newActantId, newActantLabel, newActantType);
 
