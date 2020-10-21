@@ -40,7 +40,11 @@ export const Button: React.FC<ButtonProps> = ({
     classes.push(`border-${color}`);
   }
   return (
-    <button onClick={onClick} className={classNames(classes)}>
+    <button
+      style={{ fontSize: "11px" }}
+      onClick={onClick}
+      className={classNames(classes)}
+    >
       {icon}
       {label}
     </button>

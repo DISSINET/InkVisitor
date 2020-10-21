@@ -80,15 +80,17 @@ export const Suggester: React.FC<SuggesterProps> = ({
           onChangeFn={onType}
           placeholder={placeholder}
         />
-        <Button
-          label="+"
-          onClick={() => {
-            onCreate({
-              label: typed,
-              category: category,
-            });
-          }}
-        />
+        <div className="suggester-button mt-2">
+          <Button
+            label="+"
+            onClick={() => {
+              onCreate({
+                label: typed,
+                category: category,
+              });
+            }}
+          />
+        </div>
       </div>
       {suggestions.length ? (
         <div

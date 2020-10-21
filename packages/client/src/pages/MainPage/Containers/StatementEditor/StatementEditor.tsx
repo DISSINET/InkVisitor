@@ -52,43 +52,63 @@ export const StatementEditor: React.FC<StatementEditor> = ({
     <>
       {statement ? (
         <div key={statement.id}>
-          <Input
-            type="select"
-            label="Action"
-            onChangeFn={() => {}}
-            options={actionTypes}
-            value={statement.data.action}
-          />
-          <Input
-            type="select"
-            label="Modality"
-            onChangeFn={() => {}}
-            options={meta.dictionaries.modalities}
-            value={statement.data.modality}
-          />
-          <Input
-            type="select"
-            label="Elvl"
-            onChangeFn={() => {}}
-            options={meta.dictionaries.elvls}
-            value={statement.data.elvl}
-          />
-          <Input
-            type="select"
-            label="Certainty"
-            onChangeFn={() => {}}
-            options={meta.dictionaries.certainties}
-            value={statement.data.certainty}
-          />
-          <Input
-            type="textarea"
-            label="Text"
-            onChangeFn={() => {}}
-            value={statement.data.text}
-          />
-          {
-            // actants
-          }
+          <div className="section-introduction grid grid-cols-2">
+            <div className="table">
+              <div className="table-row leading-3">
+                <div className="table-cell float-right mr-2">Action</div>
+                <div className="table-cell">
+                  <Input
+                    type="select"
+                    onChangeFn={() => {}}
+                    options={actionTypes}
+                    value={statement.data.action}
+                  />
+                </div>
+              </div>
+              <div className="table-row leading-3">
+                <div className="table-cell float-right mr-2">Modality</div>
+                <div className="table-cell">
+                  <Input
+                    type="select"
+                    onChangeFn={() => {}}
+                    options={meta.dictionaries.modalities}
+                    value={statement.data.modality}
+                  />
+                </div>
+              </div>
+              <div className="table-row leading-3">
+                <div className="table-cell float-right mr-2">Elvl</div>
+                <div className="table-cell">
+                  <Input
+                    type="select"
+                    onChangeFn={() => {}}
+                    options={meta.dictionaries.elvls}
+                    value={statement.data.elvl}
+                  />
+                </div>
+              </div>
+              <div className="table-row leading-3">
+                <div className="table-cell float-right mr-2">Certainty</div>
+                <div className="table-cell">
+                  <Input
+                    type="select"
+                    onChangeFn={() => {}}
+                    options={meta.dictionaries.certainties}
+                    value={statement.data.certainty}
+                  />
+                </div>
+              </div>
+            </div>
+            <div>
+              <div className="">Statement Text</div>
+              <Input
+                type="textarea"
+                onChangeFn={() => {}}
+                value={statement.data.text}
+              />
+            </div>
+          </div>
+
           <h2 className="text-lg font-bold mt-4 border-t-4 border-solid text-center">
             Actants
           </h2>
@@ -285,6 +305,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
             onChangeFn={() => {}}
             value={statement.data.note}
           />
+          <Button label="save" />
         </div>
       ) : (
         <div>no statement selected</div>

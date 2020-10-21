@@ -43,6 +43,7 @@ export const Input: React.FC<InputProps> = ({
     "text-xs",
     "p-1",
     "resize-none",
+    "max-w-xs",
     {
       "bg-primary": inverted,
       "text-white": inverted,
@@ -55,7 +56,7 @@ export const Input: React.FC<InputProps> = ({
       {type === "text" && (
         <input
           className={valueClasses}
-          style={{ lineHeight: "19px" }}
+          style={{ lineHeight: "16px" }}
           placeholder={placeholder}
           defaultValue={value}
           onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
