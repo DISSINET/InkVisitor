@@ -46,8 +46,6 @@ export const StatementEditor: React.FC<StatementEditor> = ({
     label: a.labels[0].label,
   }));
 
-  // console.log(statement);
-
   return (
     <div className="statement-editor">
       {statement ? (
@@ -205,7 +203,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                   />
 
                   {actantProps.length ? (
-                    <table className="w-full">
+                    <table className="property-table">
                       <thead>
                         <tr>
                           <th key="type">Type</th>
@@ -224,7 +222,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                           const value = actants.find((a) => a.id === valueId);
 
                           return type && value ? (
-                            <tr key={ap}>
+                            <tr key={ap} className="property-row">
                               <td key="type">
                                 <Tag
                                   propId={actant.id}
@@ -282,21 +280,84 @@ export const StatementEditor: React.FC<StatementEditor> = ({
             })}
           </div>
           {
-            // resources
+            // references
           }
-          <div className="section section-resources">
-            <h2 className="section-heading">Resources</h2>
+          <div className="section section-references">
+            <h2 className="section-heading">References</h2>
+            {statement.data.references.length ? (
+              <table className="references-table">
+                <thead>
+                  <tr>
+                    <th key="value">Reference</th>
+                    <th key="part">Part</th>
+                    <th key="type">Type</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {statement.data.references.map((reference) => {
+                    const resource = actants.find(
+                      (a) => a.id === reference.resource
+                    );
+                    return resource ? (
+                      <tr key={resource.id}>
+                        <td>
+                          <Tag
+                            propId={reference.resource}
+                            category={Entities["R"].id}
+                            color={Entities["R"].color}
+                            label={resource.data.label}
+                            isDraggable
+                          />
+                        </td>
+                        <td>
+                          <Input
+                            type="text"
+                            onChangeFn={() => {}}
+                            value={reference.part}
+                          />
+                        </td>
+                        <td>
+                          <Input
+                            type="select"
+                            onChangeFn={() => {}}
+                            options={meta.dictionaries.referencetypes}
+                            value={reference.type}
+                          />
+                        </td>
+                      </tr>
+                    ) : null;
+                  })}
+                </tbody>
+              </table>
+            ) : null}
+            <div className="">{suggester()}</div>
           </div>
           {
             // tags
           }
-          <div className="section section-resources">
+          <div className="section section-tags">
             <h2 className="section-heading">Tags</h2>
+            <div className="tags">
+              {statement.data.tags.map((tagId) => {
+                const tagActant = actants.find((a) => a.id === tagId);
+
+                return tagActant ? (
+                  <Tag
+                    propId={tagId}
+                    category={Entities[tagActant.class].id}
+                    color={Entities[tagActant.class].color}
+                    label={tagActant.data.label}
+                    isDraggable
+                  />
+                ) : null;
+              })}
+            </div>
+            <div className="">{suggester()}</div>
           </div>
           {
             // note
           }
-          <div className="section section-resources">
+          <div className="section section-notes">
             <h2 className="section-heading">Notes</h2>
 
             <Input

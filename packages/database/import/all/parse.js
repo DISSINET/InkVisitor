@@ -220,7 +220,7 @@ const loadStatementsTables = async (next) => {
               type: "S",
             },
           ],
-          tags: statement.tags_id.split(" #"),
+          tags: statement.tags_id.split(" #").filter((t) => t),
           certainty: statement.certainty || "1",
           elvl: statement.epistemological_level || "1",
           modality: statement.modality || "1",

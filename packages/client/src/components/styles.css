@@ -21,6 +21,9 @@ body {
     th {
       @apply font-normal;
     }
+    td {
+      @apply px-2;
+    }
   }
 
   .section {
@@ -31,8 +34,10 @@ body {
 
   .section-properties {
     .property-part {
-      @apply ml-8;
       @apply my-4;
+      .property-table {
+        @apply ml-8;
+      }
     }
   }
 
