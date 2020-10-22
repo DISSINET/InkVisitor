@@ -11,30 +11,6 @@ import MainPage from "pages/MainPage";
 interface AppProps {}
 
 export const App: React.FC<AppProps> = () => {
-  const { getAccessTokenSilently } = useAuth0();
-
-  const callSecureApi = async () => {
-    console.log("calling secure api");
-    try {
-      const token = await getAccessTokenSilently();
-
-      const response = await fetch(
-        `https://dissinet.eu.auth0.com/oauth/token`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      const responseData = await response.json();
-
-      console.log(responseData.message);
-    } catch (error) {
-      console.log(error.message);
-    }
-  };
-
   const [size, setSize] = useState([0, 0]);
 
   useLayoutEffect(() => {
@@ -47,17 +23,17 @@ export const App: React.FC<AppProps> = () => {
   }, []);
 
   return (
-    // <Auth0ProviderWithHistory>
     <Provider store={store}>
       <BrowserRouter>
-        <Switch>
-          <Route
-            exact={true}
-            render={(props) => <MainPage {...props} size={size} />}
-          />
-        </Switch>
+        <Auth0ProviderWithHistory>
+          <Switch>
+            <Route
+              exact={true}
+              render={(props) => <MainPage {...props} size={size} />}
+            />
+          </Switch>
+        </Auth0ProviderWithHistory>
       </BrowserRouter>
     </Provider>
-    // </Auth0ProviderWithHistory>
   );
 };
