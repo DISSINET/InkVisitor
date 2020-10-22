@@ -28,7 +28,6 @@ export const Tree: React.FC<Tree> = ({
             category={Entities.T.id}
             color={Entities.T.color}
             label={territory?.data.label}
-            isDraggable
           />
         </div>
         {territoryParent && (
@@ -78,7 +77,6 @@ export const Tree: React.FC<Tree> = ({
                       />
                     </>
                   }
-                  isDraggable
                 />
               </div>
             );

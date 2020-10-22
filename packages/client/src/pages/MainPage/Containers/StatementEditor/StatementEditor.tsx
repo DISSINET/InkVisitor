@@ -114,7 +114,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
             <h2 className="section-heading">Actants</h2>
             <table className="">
               <thead>
-                <tr className="text-left">
+                <tr>
                   <th key="actants">Actants</th>
                   <th key="position">Position</th>
                   <th key="certainty">Certainty</th>
@@ -136,7 +136,6 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                           category={Entities[actant.class].id}
                           color={Entities[actant.class].color}
                           label={actant.data.label}
-                          isDraggable
                         />
                       </td>
                       <td key="position">
@@ -198,7 +197,6 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                     category={Entities[actant.class].id}
                     color={Entities[actant.class].color}
                     label={actant.data.label}
-                    isDraggable
                   />
 
                   {actantProps.length ? (
@@ -228,7 +226,6 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                                   category={Entities[type.class].id}
                                   color={Entities[type.class].color}
                                   label={actant.data.label}
-                                  isDraggable
                                 />
                               </td>
                               <td key="value">
@@ -237,7 +234,6 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                                   category={Entities[value.class].id}
                                   color={Entities[value.class].color}
                                   label={actant.data.label}
-                                  isDraggable
                                 />
                               </td>
                               <td key="certainty">
@@ -305,7 +301,6 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                             category={Entities["R"].id}
                             color={Entities["R"].color}
                             label={resource.data.label}
-                            isDraggable
                           />
                         </td>
                         <td>
@@ -346,7 +341,6 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                     category={Entities[tagActant.class].id}
                     color={Entities[tagActant.class].color}
                     label={tagActant.data.label}
-                    isDraggable
                   />
                 ) : null;
               })}
