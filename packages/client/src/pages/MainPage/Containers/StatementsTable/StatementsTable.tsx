@@ -77,7 +77,6 @@ export const StatementsTable: React.FC<StatementsTableProps> = ({
                         category={Entities["P"].id}
                         color={Entities["P"].color}
                         marginRight
-                        isDraggable
                       />
                     );
                   })
@@ -131,7 +130,6 @@ export const StatementsTable: React.FC<StatementsTableProps> = ({
                         category={entity.id}
                         color={entity.color}
                         marginRight
-                        isDraggable
                       />
                     ) : (
                       <div key={si} />
