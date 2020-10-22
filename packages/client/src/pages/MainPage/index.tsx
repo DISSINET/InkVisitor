@@ -41,7 +41,17 @@ const MainPage: React.FC<MainPage> = ({
     isLoading,
     loginWithRedirect,
     logout,
+    getAccessTokenSilently,
   } = useAuth0();
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      const token = getAccessTokenSilently().then(
+        (token) => console.log("Use effect token: ", token)
+        // TODO: set token to redux and use when getting data
+      );
+    }
+  }, [isAuthenticated]);
 
   useEffect(() => {
     fetchMeta();
