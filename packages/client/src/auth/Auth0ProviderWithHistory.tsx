@@ -25,6 +25,7 @@ const Auth0ProviderWithHistory: React.FC<Auth0ProviderWithHistory> = ({
       onRedirectCallback={onRedirectCallback}
       useRefreshTokens={true}
       cacheLocation="localstorage"
+      audience="Inkvisitor"
     >
       {children}
     </Auth0Provider>

@@ -12,7 +12,12 @@ import { Store } from "redux";
 import rootReducer from "./reducers";
 import { ResponseTerritoryI } from "@shared/types/response-territory";
 import { ResponseMetaI } from "@shared/types/response-meta";
-import { MetaAction, TerritoryAction, ActiveStatementIdAction } from "./types";
+import {
+  MetaAction,
+  TerritoryAction,
+  ActiveStatementIdAction,
+  AuthTokenAction,
+} from "./types";
 
 const initialState = {};
 
@@ -23,8 +28,13 @@ const store: Store<
     meta: ResponseMetaI;
     territory: ResponseTerritoryI;
     activeStatementId: string;
+    token: string;
   }>,
-  MetaAction | TerritoryAction | AnyAction | ActiveStatementIdAction
+  | MetaAction
+  | TerritoryAction
+  | AnyAction
+  | ActiveStatementIdAction
+  | AuthTokenAction
 > = createStore(
   rootReducer,
   initialState,

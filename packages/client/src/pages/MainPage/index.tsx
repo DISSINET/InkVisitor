@@ -9,18 +9,21 @@ import { ResponseTerritoryI } from "@shared/types/response-territory";
 import { fetchMeta } from "redux/actions/metaActions";
 import { fetchTerritory } from "redux/actions/territoryTreeActions";
 import { setActiveStatementId } from "redux/actions/statementActions";
+import { setAuthToken } from "redux/actions/authActions";
 import { Tree } from "pages/MainPage/Containers/Tree/Tree";
 import { ResponseMetaI } from "@shared/types/response-meta";
 import { StatementsTable } from "./Containers/StatementsTable/StatementsTable";
 import { StatementEditor } from "./Containers/StatementEditor/StatementEditor";
 
 interface MainPage {
-  fetchMeta: () => void;
+  fetchMeta: (token?: string) => void;
   meta: ResponseMetaI;
-  fetchTerritory: (id: string) => void;
+  fetchTerritory: (id: string, token?: string) => void;
   territory: ResponseTerritoryI;
   setActiveStatementId: (id: string) => void;
   activeStatementId: string;
+  setAuthToken: (token: string) => void;
+  token: string;
   size: number[];
 }
 
@@ -33,6 +36,8 @@ const MainPage: React.FC<MainPage> = ({
   territory,
   setActiveStatementId,
   activeStatementId,
+  setAuthToken,
+  token,
   size,
 }) => {
   const {
@@ -46,20 +51,23 @@ const MainPage: React.FC<MainPage> = ({
 
   useEffect(() => {
     if (isAuthenticated) {
-      const token = getAccessTokenSilently().then(
-        (token) => console.log("Use effect token: ", token)
-        // TODO: set token to redux and use when getting data
-      );
+      getAccessTokenSilently().then((token) => {
+        setAuthToken(token);
+      });
     }
   }, [isAuthenticated]);
 
   useEffect(() => {
-    fetchMeta();
-  }, [fetchMeta]);
+    if (isAuthenticated && token) {
+      fetchMeta(token);
+    }
+  }, [fetchMeta, token]);
 
   useEffect(() => {
-    fetchTerritory(initTerritory);
-  }, [fetchTerritory]);
+    if (isAuthenticated && token) {
+      fetchTerritory(initTerritory, token);
+    }
+  }, [fetchTerritory, token]);
 
   const heightHeader = 70;
   const heightFooter = 40;
@@ -101,6 +109,7 @@ const MainPage: React.FC<MainPage> = ({
                 territory={territory}
                 fetchTerritory={fetchTerritory}
                 setActiveStatementId={setActiveStatementId}
+                token={token}
               />
             </Box>
             <Box height={heightContent} width={500} label={"Statements"}>
@@ -148,26 +157,31 @@ const mapStateToProps = ({
   meta,
   territory,
   activeStatementId,
+  token,
 }: StateFromProps): StateToProps => ({
   meta,
   territory,
   activeStatementId,
+  token,
 });
 
 export default connect(mapStateToProps, {
   fetchMeta,
   fetchTerritory,
   setActiveStatementId,
+  setAuthToken,
 })(MainPage);
 
 interface StateFromProps {
   meta: ResponseMetaI;
   territory: ResponseTerritoryI;
   activeStatementId: string;
+  token: string;
 }
 
 interface StateToProps {
   meta: ResponseMetaI;
   territory: ResponseTerritoryI;
   activeStatementId: string;
+  token: string;
 }
