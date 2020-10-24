@@ -9,18 +9,21 @@ import { ResponseTerritoryI } from "@shared/types/response-territory";
 import { fetchMeta } from "redux/actions/metaActions";
 import { fetchTerritory } from "redux/actions/territoryTreeActions";
 import { setActiveStatementId } from "redux/actions/statementActions";
+import { setAuthToken } from "redux/actions/authActions";
 import { Tree } from "pages/MainPage/Containers/Tree/Tree";
 import { ResponseMetaI } from "@shared/types/response-meta";
 import { StatementsTable } from "./Containers/StatementsTable/StatementsTable";
 import { StatementEditor } from "./Containers/StatementEditor/StatementEditor";
 
 interface MainPage {
-  fetchMeta: () => void;
+  fetchMeta: (token?: string) => void;
   meta: ResponseMetaI;
-  fetchTerritory: (id: string) => void;
+  fetchTerritory: (id: string, token?: string) => void;
   territory: ResponseTerritoryI;
   setActiveStatementId: (id: string) => void;
   activeStatementId: string;
+  setAuthToken: (token: string) => void;
+  token: string;
   size: number[];
 }
 
@@ -33,6 +36,8 @@ const MainPage: React.FC<MainPage> = ({
   territory,
   setActiveStatementId,
   activeStatementId,
+  setAuthToken,
+  token,
   size,
 }) => {
   const {
@@ -41,15 +46,28 @@ const MainPage: React.FC<MainPage> = ({
     isLoading,
     loginWithRedirect,
     logout,
+    getAccessTokenSilently,
   } = useAuth0();
 
   useEffect(() => {
-    fetchMeta();
-  }, [fetchMeta]);
+    if (isAuthenticated) {
+      getAccessTokenSilently().then((token) => {
+        setAuthToken(token);
+      });
+    }
+  }, [isAuthenticated]);
 
   useEffect(() => {
-    fetchTerritory(initTerritory);
-  }, [fetchTerritory]);
+    if (isAuthenticated && token) {
+      fetchMeta(token);
+    }
+  }, [fetchMeta, token]);
+
+  useEffect(() => {
+    if (isAuthenticated && token) {
+      fetchTerritory(initTerritory, token);
+    }
+  }, [fetchTerritory, token]);
 
   const heightHeader = 70;
   const heightFooter = 40;
@@ -64,14 +82,7 @@ const MainPage: React.FC<MainPage> = ({
         left={<div className="text-4xl">InkVisitor</div>}
         right={
           <div className="inline">
-            {!isAuthenticated && (
-              <Button
-                label="Log In"
-                color="info"
-                onClick={() => loginWithRedirect()}
-              />
-            )}
-            {isAuthenticated && (
+            {isAuthenticated ? (
               <>
                 <div className="text-sm inline m-2">logged as {user.name}</div>
                 <Button
@@ -80,6 +91,12 @@ const MainPage: React.FC<MainPage> = ({
                   onClick={() => logout()}
                 />
               </>
+            ) : (
+              <Button
+                label="Log In"
+                color="info"
+                onClick={() => loginWithRedirect()}
+              />
             )}
           </div>
         }
@@ -92,6 +109,7 @@ const MainPage: React.FC<MainPage> = ({
                 territory={territory}
                 fetchTerritory={fetchTerritory}
                 setActiveStatementId={setActiveStatementId}
+                token={token}
               />
             </Box>
             <Box height={heightContent} width={500} label={"Statements"}>
@@ -139,26 +157,31 @@ const mapStateToProps = ({
   meta,
   territory,
   activeStatementId,
+  token,
 }: StateFromProps): StateToProps => ({
   meta,
   territory,
   activeStatementId,
+  token,
 });
 
 export default connect(mapStateToProps, {
   fetchMeta,
   fetchTerritory,
   setActiveStatementId,
+  setAuthToken,
 })(MainPage);
 
 interface StateFromProps {
   meta: ResponseMetaI;
   territory: ResponseTerritoryI;
   activeStatementId: string;
+  token: string;
 }
 
 interface StateToProps {
   meta: ResponseMetaI;
   territory: ResponseTerritoryI;
   activeStatementId: string;
+  token: string;
 }

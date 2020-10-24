@@ -7,14 +7,16 @@ import { TerritoryI } from "@shared/types";
 
 interface Tree {
   territory?: ResponseTerritoryI;
-  fetchTerritory: (id: string) => void;
+  fetchTerritory: (id: string, token?: string) => void;
   setActiveStatementId: (id: string) => void;
+  token?: string;
 }
 
 export const Tree: React.FC<Tree> = ({
   territory,
   fetchTerritory,
   setActiveStatementId,
+  token,
 }) => {
   const territoryParent = territory && (territory.data.parent as string);
 
@@ -42,7 +44,7 @@ export const Tree: React.FC<Tree> = ({
                 territoryParent.length > 0 && (
                   <Button
                     onClick={() => {
-                      fetchTerritory(territoryParent);
+                      fetchTerritory(territoryParent, token && token);
                       setActiveStatementId("");
                     }}
                     label="<"
@@ -70,7 +72,7 @@ export const Tree: React.FC<Tree> = ({
                     <>
                       <Button
                         onClick={() => {
-                          fetchTerritory(child.id);
+                          fetchTerritory(child.id, token && token);
                           setActiveStatementId("");
                         }}
                         label=">"
