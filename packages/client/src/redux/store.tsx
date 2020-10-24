@@ -1,10 +1,4 @@
-import {
-  applyMiddleware,
-  createStore,
-  compose,
-  CombinedState,
-  AnyAction,
-} from "redux";
+import { applyMiddleware, createStore, compose, CombinedState } from "redux";
 import thunk from "redux-thunk";
 import { composeWithDevTools } from "redux-devtools-extension";
 import { Store } from "redux";
@@ -30,15 +24,11 @@ const store: Store<
     activeStatementId: string;
     token: string;
   }>,
-  | MetaAction
-  | TerritoryAction
-  | AnyAction
-  | ActiveStatementIdAction
-  | AuthTokenAction
+  MetaAction | TerritoryAction | ActiveStatementIdAction | AuthTokenAction
 > = createStore(
   rootReducer,
   initialState,
-  composeWithDevTools(applyMiddleware(...middleWare))
+  compose(applyMiddleware(...middleWare))
 );
 
 export default store;
