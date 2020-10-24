@@ -71,10 +71,20 @@ export const StatementEditor: React.FC<StatementEditor> = ({
     console.log("statement hook");
   }, [activeStatement]);
 
-  const changeActionType = (newActionType: string) => {
+  const changeDataValue = (
+    newValue: string,
+    propName:
+      | "label"
+      | "action"
+      | "territory"
+      | "certainty"
+      | "elvl"
+      | "modality"
+      | "text"
+      | "note"
+  ) => {
     const newStatement = { ...statement };
-    newStatement.data.action = newActionType;
-    console.log("statement updated", newStatement);
+    newStatement.data[propName] = newValue;
     setStatement(newStatement);
   };
 
@@ -93,7 +103,9 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                   <div className="value">
                     <Input
                       type="select"
-                      onChangeFn={changeActionType}
+                      onChangeFn={(newValue: string) =>
+                        changeDataValue(newValue, "action")
+                      }
                       options={actionTypes}
                       value={statement.data.action}
                     />
@@ -104,7 +116,9 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                   <div className="value">
                     <Input
                       type="select"
-                      onChangeFn={() => {}}
+                      onChangeFn={(newValue: string) =>
+                        changeDataValue(newValue, "modality")
+                      }
                       options={meta.dictionaries.modalities}
                       value={statement.data.modality}
                     />
@@ -115,7 +129,9 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                   <div className="value">
                     <Input
                       type="select"
-                      onChangeFn={() => {}}
+                      onChangeFn={(newValue: string) =>
+                        changeDataValue(newValue, "elvl")
+                      }
                       options={meta.dictionaries.elvls}
                       value={statement.data.elvl}
                     />
@@ -126,7 +142,9 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                   <div className="value">
                     <Input
                       type="select"
-                      onChangeFn={() => {}}
+                      onChangeFn={(newValue: string) =>
+                        changeDataValue(newValue, "certainty")
+                      }
                       options={meta.dictionaries.certainties}
                       value={statement.data.certainty}
                     />
@@ -138,7 +156,9 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                 <Input
                   type="textarea"
                   cols={55}
-                  onChangeFn={() => {}}
+                  onChangeFn={(newValue: string) =>
+                    changeDataValue(newValue, "text")
+                  }
                   value={statement.data.text}
                 />
               </div>
@@ -288,11 +308,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                                 />
                               </td>
                               <td key="actions">
-                                <Button
-                                  key="d"
-                                  icon={<FaTrashAlt />}
-                                  color="danger"
-                                />
+                                <Button icon={<FaTrashAlt />} color="danger" />
                               </td>
                             </tr>
                           ) : (
@@ -321,6 +337,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                     <th key="value">Reference</th>
                     <th key="part">Part</th>
                     <th key="type">Type</th>
+                    <th key="actions"></th>
                   </tr>
                 </thead>
                 <tbody>
@@ -352,6 +369,10 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                             options={meta.dictionaries.referencetypes}
                             value={reference.type}
                           />
+                        </td>
+
+                        <td>
+                          <Button icon={<FaTrashAlt />} color="danger" />
                         </td>
                       </tr>
                     ) : null;
@@ -419,7 +440,9 @@ export const StatementEditor: React.FC<StatementEditor> = ({
             <Input
               type="textarea"
               label="Note"
-              onChangeFn={() => {}}
+              onChangeFn={(newValue: string) =>
+                changeDataValue(newValue, "note")
+              }
               value={statement.data.note}
             />
           </div>
