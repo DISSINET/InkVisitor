@@ -1,6 +1,7 @@
-import React, { useEffect, useState, useLayoutEffect } from "react";
+import React, { useState, useLayoutEffect } from "react";
 import { Provider } from "react-redux";
-import { Switch, Route, BrowserRouter, Redirect } from "react-router-dom";
+import { Switch, Route, BrowserRouter } from "react-router-dom";
+import Auth0ProviderWithHistory from "auth/Auth0ProviderWithHistory";
 
 import "app.css";
 import store from "redux/store";
@@ -23,12 +24,14 @@ export const App: React.FC<AppProps> = () => {
   return (
     <Provider store={store}>
       <BrowserRouter>
-        <Switch>
-          <Route
-            exact={true}
-            render={(props) => <MainPage {...props} size={size} />}
-          />
-        </Switch>
+        <Auth0ProviderWithHistory>
+          <Switch>
+            <Route
+              exact={true}
+              render={(props) => <MainPage {...props} size={size} />}
+            />
+          </Switch>
+        </Auth0ProviderWithHistory>
       </BrowserRouter>
     </Provider>
   );
