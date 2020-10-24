@@ -16,6 +16,8 @@ interface DropDown {
 export const DropDown: React.FC<DropDown> = ({ options, value, onChange }) => {
   return (
     <Select
+      className="react-select-container"
+      classNamePrefix="react-select"
       value={value}
       onChange={onChange}
       options={options}

@@ -112,7 +112,7 @@ const MainPage: React.FC<MainPage> = ({
                 token={token}
               />
             </Box>
-            <Box height={heightContent} width={500} label={"Statements"}>
+            <Box height={heightContent} width={650} label={"Statements"}>
               <StatementsTable
                 statements={territory.statements}
                 meta={meta}
@@ -121,7 +121,7 @@ const MainPage: React.FC<MainPage> = ({
                 setActiveStatementId={setActiveStatementId}
               />
             </Box>
-            <Box height={heightContent} width={920} label={"Editor"}>
+            <Box height={heightContent} width={720} label={"Editor"}>
               <StatementEditor
                 statement={
                   activeStatementId
@@ -135,10 +135,10 @@ const MainPage: React.FC<MainPage> = ({
               />
             </Box>
             <div className="flex flex-col">
-              <Box height={400} width={300} label={"Search"}></Box>
+              <Box height={400} width={350} label={"Search"}></Box>
               <Box
                 height={heightContent - 400}
-                width={300}
+                width={350}
                 label={"Bookmarks"}
               ></Box>
             </div>
