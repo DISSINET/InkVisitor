@@ -78,7 +78,7 @@ export const Input: React.FC<InputProps> = ({
       {type === "select" && options && (
         <select
           className={valueClasses + " font-bold"}
-          defaultValue={value}
+          value={value}
           onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
             onChangeFn(e.target.value);
           }}

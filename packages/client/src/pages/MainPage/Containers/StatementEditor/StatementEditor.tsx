@@ -7,7 +7,7 @@ import { StatementI, ResponseMetaI, ActantI } from "@shared/types";
 import { SuggestionI } from "components/Suggester/Suggester";
 
 interface StatementEditor {
-  statement: undefined | StatementI;
+  activeStatement: StatementI;
   meta: ResponseMetaI;
   actants: ActantI[];
 }
@@ -36,8 +36,12 @@ const suggester = () => {
   );
 };
 
+/**
+ * Setting the statement
+ */
+
 export const StatementEditor: React.FC<StatementEditor> = ({
-  statement,
+  activeStatement,
   meta,
   actants,
 }) => {
@@ -45,6 +49,29 @@ export const StatementEditor: React.FC<StatementEditor> = ({
     value: a.id,
     label: a.labels[0].label,
   }));
+
+  const activeStatementCopy: StatementI = JSON.parse(
+    JSON.stringify(activeStatement)
+  );
+
+  const [statement, setStatement] = React.useState(activeStatementCopy);
+
+  React.useEffect(() => {
+    if (statement !== activeStatement) {
+      setStatement(activeStatementCopy);
+    }
+    console.log("statement hook");
+  }, [activeStatement]);
+
+  const changeActionType = (newActionType: string) => {
+    const newStatement = { ...statement };
+    newStatement.data.action = newActionType;
+    console.log("statement updated", newStatement);
+    setStatement(newStatement);
+  };
+
+  console.log("activeStatement", activeStatement.data.action);
+  console.log("statement", statement.data.action);
 
   return (
     <div className="statement-editor">
@@ -58,7 +85,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                   <div className="value">
                     <Input
                       type="select"
-                      onChangeFn={() => {}}
+                      onChangeFn={changeActionType}
                       options={actionTypes}
                       value={statement.data.action}
                     />
@@ -398,7 +425,13 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                 <Button label="delete" color="danger" />
               </div>
               <div className="action-button">
-                <Button label="cancel changes" color="warning" />
+                <Button
+                  label="cancel changes"
+                  color="warning"
+                  onClick={() => {
+                    setStatement(activeStatementCopy);
+                  }}
+                />
               </div>
             </div>
           </div>

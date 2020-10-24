@@ -24,7 +24,7 @@ interface MainPage {
   size: number[];
 }
 
-const initTerritory = "T40";
+const initTerritory = "T40-02";
 
 const MainPage: React.FC<MainPage> = ({
   meta,
@@ -49,11 +49,18 @@ const MainPage: React.FC<MainPage> = ({
 
   useEffect(() => {
     fetchTerritory(initTerritory);
+    setActiveStatementId("T40-02-00-004");
   }, [fetchTerritory]);
 
   const heightHeader = 70;
   const heightFooter = 40;
   const heightContent = size[1] - heightHeader - heightFooter;
+
+  const activeStatement = activeStatementId
+    ? territory.statements.find(
+        (statement) => statement.id === activeStatementId
+      )
+    : undefined;
 
   return (
     <>
@@ -104,17 +111,13 @@ const MainPage: React.FC<MainPage> = ({
               />
             </Box>
             <Box height={heightContent} width={920} label={"Editor"}>
-              <StatementEditor
-                statement={
-                  activeStatementId
-                    ? territory.statements.find(
-                        (statement) => statement.id === activeStatementId
-                      )
-                    : undefined
-                }
-                meta={meta}
-                actants={territory.actants}
-              />
+              {activeStatement ? (
+                <StatementEditor
+                  activeStatement={activeStatement}
+                  meta={meta}
+                  actants={territory.actants}
+                />
+              ) : null}
             </Box>
             <div className="flex flex-col">
               <Box height={400} width={300} label={"Search"}></Box>
