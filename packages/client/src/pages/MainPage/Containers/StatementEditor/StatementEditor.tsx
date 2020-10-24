@@ -431,9 +431,8 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                   label="save"
                   color="primary"
                   onClick={() => {
-                    updateActant(statement).then(() => {
-                      console.log("updated");
-                    });
+                    updateActant(statement);
+                    fetchTerritory(activeStatementCopy.data.territory);
                   }}
                 />
               </div>
@@ -444,7 +443,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                   onClick={() => {
                     deleteActant(activeStatementCopy.id);
                     setActiveStatementId("");
-                    fetchTerritory(activeStatementCopy.data.territory);
+                    fetchTerritory(statement.data.territory);
                   }}
                 />
               </div>

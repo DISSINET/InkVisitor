@@ -88,11 +88,15 @@ async function saveOne(actant: any): Promise<any> {
 async function updateOne(actant: any): Promise<any> {
   let conn = await r.connect(rethinkConfig);
 
-  //let result = await r.table(TABLE_NAME).get(actant.id).update(actant);
+  let result = await r
+    .table(TABLE_NAME)
+    .get(actant.id)
+    .update(actant)
+    .run(conn);
+
   conn.close();
 
-  //return result;
-  return "updated";
+  return result;
 }
 
 /**
