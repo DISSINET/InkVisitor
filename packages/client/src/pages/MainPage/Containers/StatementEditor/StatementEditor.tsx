@@ -324,7 +324,35 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                 </tbody>
               </table>
             ) : null}
-            <div className="">{suggester()}</div>
+            <div className="">
+              {
+                <Suggester
+                  suggestions={[]}
+                  typed={""}
+                  category={Entities["P"].id}
+                  categories={[
+                    {
+                      value: Entities["R"].id,
+                      label: Entities["R"].id,
+                    },
+                  ]}
+                  onType={(newTyped: string) =>
+                    console.log("newTyped", newTyped)
+                  }
+                  onChangeCategory={(
+                    newEntityTypeId: keyof typeof Entities
+                  ) => {
+                    console.log("newEntityType", newEntityTypeId);
+                  }}
+                  onCreate={(suggestion: SuggestionI) => {
+                    console.log("suggestion " + suggestion.id + " picked");
+                  }}
+                  onPick={(created: SuggestionI) => {
+                    console.log("on picked");
+                  }}
+                />
+              }
+            </div>
           </div>
           {
             // tags
