@@ -80,7 +80,7 @@ export const StatementsTable: React.FC<StatementsTableProps> = ({
                         (a) => a.id === actant.actant
                       ) as ActantITable);
                     const entity = Entities[subjectObject?.class];
-                    return (
+                    return subjectObject && entity ? (
                       <Tag
                         key={si}
                         propId={actant.actant}
@@ -88,7 +88,7 @@ export const StatementsTable: React.FC<StatementsTableProps> = ({
                         color={entity.color}
                         marginRight
                       />
-                    );
+                    ) : null;
                   })
                 : null}
             </div>
