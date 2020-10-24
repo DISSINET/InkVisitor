@@ -88,6 +88,22 @@ export const StatementEditor: React.FC<StatementEditor> = ({
     setStatement(newStatement);
   };
 
+  const removeActant = (actantId: string) => {
+    const newStatement = { ...statement };
+    newStatement.data.actants = newStatement.data.actants.filter(
+      (a) => a.actant !== actantId
+    );
+    setStatement(newStatement);
+  };
+
+  const removeReference = (resourceId: string) => {
+    const newStatement = { ...statement };
+    newStatement.data.references = newStatement.data.references.filter(
+      (r) => r.resource !== resourceId
+    );
+    setStatement(newStatement);
+  };
+
   console.log("activeStatement", activeStatement.data.action);
   console.log("statement", statement.data.action);
 
@@ -218,7 +234,14 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                         />
                       </td>
                       <td key="actions">
-                        <Button key="d" icon={<FaTrashAlt />} color="danger" />
+                        <Button
+                          key="d"
+                          icon={<FaTrashAlt />}
+                          color="danger"
+                          onClick={() => {
+                            removeActant(actant.id);
+                          }}
+                        />
                       </td>
                     </tr>
                   ) : (
@@ -372,7 +395,13 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                         </td>
 
                         <td>
-                          <Button icon={<FaTrashAlt />} color="danger" />
+                          <Button
+                            icon={<FaTrashAlt />}
+                            color="danger"
+                            onClick={() => {
+                              removeReference(resource.id);
+                            }}
+                          />
                         </td>
                       </tr>
                     ) : null;
