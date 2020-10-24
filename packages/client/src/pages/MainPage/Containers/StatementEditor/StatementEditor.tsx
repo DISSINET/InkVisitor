@@ -6,10 +6,16 @@ import { Tag, Button, Input, Suggester } from "components";
 import { StatementI, ResponseMetaI, ActantI } from "@shared/types";
 import { SuggestionI } from "components/Suggester/Suggester";
 
+import { updateActant } from "api/updateActant";
+import { deleteActant } from "api/deleteActant";
+import { createActant } from "api/createActant";
+
 interface StatementEditor {
   activeStatement: StatementI;
   meta: ResponseMetaI;
   actants: ActantI[];
+  setActiveStatementId: (id: string) => void;
+  fetchTerritory: (id: string) => void;
 }
 
 const suggester = () => {
@@ -44,6 +50,8 @@ export const StatementEditor: React.FC<StatementEditor> = ({
   activeStatement,
   meta,
   actants,
+  setActiveStatementId,
+  fetchTerritory,
 }) => {
   const actionTypes = meta.actions.map((a) => ({
     value: a.id,
@@ -419,10 +427,26 @@ export const StatementEditor: React.FC<StatementEditor> = ({
             <h2 className="section-heading">Actions</h2>
             <div className="action-buttons">
               <div className="action-button">
-                <Button label="save" color="primary" />
+                <Button
+                  label="save"
+                  color="primary"
+                  onClick={() => {
+                    updateActant(statement).then(() => {
+                      console.log("updated");
+                    });
+                  }}
+                />
               </div>
               <div className="action-button">
-                <Button label="delete" color="danger" />
+                <Button
+                  label="delete"
+                  color="danger"
+                  onClick={() => {
+                    deleteActant(activeStatementCopy.id);
+                    setActiveStatementId("");
+                    fetchTerritory(activeStatementCopy.data.territory);
+                  }}
+                />
               </div>
               <div className="action-button">
                 <Button

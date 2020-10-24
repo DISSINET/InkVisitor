@@ -24,7 +24,7 @@ interface MainPage {
   size: number[];
 }
 
-const initTerritory = "T40-02";
+const initTerritory = "T40-02-07";
 
 const MainPage: React.FC<MainPage> = ({
   meta,
@@ -107,6 +107,7 @@ const MainPage: React.FC<MainPage> = ({
                 meta={meta}
                 actants={territory.actants}
                 activeStatementId={activeStatementId}
+                fetchTerritory={fetchTerritory}
                 setActiveStatementId={setActiveStatementId}
               />
             </Box>
@@ -116,6 +117,8 @@ const MainPage: React.FC<MainPage> = ({
                   activeStatement={activeStatement}
                   meta={meta}
                   actants={territory.actants}
+                  setActiveStatementId={setActiveStatementId}
+                  fetchTerritory={fetchTerritory}
                 />
               ) : null}
             </Box>

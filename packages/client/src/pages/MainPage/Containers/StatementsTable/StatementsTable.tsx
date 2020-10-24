@@ -7,12 +7,15 @@ import { Tag, Button } from "components";
 import { Entities } from "types";
 import { ResponseMetaI, ActantI } from "@shared/types";
 
+import { deleteActant } from "api/deleteActant";
+
 interface StatementsTableProps {
   statements: {}[];
   meta: ResponseMetaI;
   actants: ActantI[];
   activeStatementId: string;
   setActiveStatementId: (id: string) => void;
+  fetchTerritory: (id: string) => void;
 }
 
 interface IActant {
@@ -39,6 +42,7 @@ export const StatementsTable: React.FC<StatementsTableProps> = ({
   actants,
   setActiveStatementId,
   activeStatementId,
+  fetchTerritory,
 }) => {
   const wrapperClasses = classNames("table-wrapper", "px-1");
   const tableClasses = classNames(
@@ -164,7 +168,17 @@ export const StatementsTable: React.FC<StatementsTableProps> = ({
               }
             />
             <Button key="d" icon={<FaClone size={14} />} color="warning" />
-            <Button key="r" icon={<FaTrashAlt size={14} />} color="danger" />
+            <Button
+              key="r"
+              icon={<FaTrashAlt size={14} />}
+              color="danger"
+              onClick={() => {
+                const territoryId = row.values.data.territory;
+                deleteActant(row.values.id);
+                setActiveStatementId("");
+                fetchTerritory(territoryId);
+              }}
+            />
           </div>
         ),
       },
