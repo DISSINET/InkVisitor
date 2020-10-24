@@ -74,12 +74,18 @@ export const StatementsTable: React.FC<StatementsTableProps> = ({
             <div className="table-subjects">
               {subjects.length
                 ? subjects.map((actant: IActant, si: number) => {
+                    const subjectObject =
+                      actants &&
+                      (actants.find(
+                        (a) => a.id === actant.actant
+                      ) as ActantITable);
+                    const entity = Entities[subjectObject?.class];
                     return (
                       <Tag
                         key={si}
                         propId={actant.actant}
-                        category={Entities["P"].id}
-                        color={Entities["P"].color}
+                        category={entity.id}
+                        color={entity.color}
                         marginRight
                       />
                     );
