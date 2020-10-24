@@ -88,7 +88,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
     setStatement(newStatement);
   };
 
-  const removeActant = (actantId: string) => {
+  const removeStatementActant = (actantId: string) => {
     const newStatement = { ...statement };
     newStatement.data.actants = newStatement.data.actants.filter(
       (a) => a.actant !== actantId
@@ -96,12 +96,42 @@ export const StatementEditor: React.FC<StatementEditor> = ({
     setStatement(newStatement);
   };
 
-  const removeReference = (resourceId: string) => {
+  const removeStatementReference = (resourceId: string) => {
     const newStatement = { ...statement };
     newStatement.data.references = newStatement.data.references.filter(
       (r) => r.resource !== resourceId
     );
     setStatement(newStatement);
+  };
+
+  const updateStatementActant = (
+    actantId: string,
+    propName: "position" | "certainty" | "elvl",
+    newValue: string
+  ) => {
+    const newStatement = { ...statement };
+    const actantToChange = newStatement.data.actants.find(
+      (a) => a.actant === actantId
+    );
+    if (actantToChange) {
+      actantToChange[propName] = newValue;
+      setStatement(newStatement);
+    }
+  };
+
+  const updateStatementReference = (
+    resourceId: string,
+    propName: "part" | "type",
+    newValue: string
+  ) => {
+    const newStatement = { ...statement };
+    const referenceToChange = newStatement.data.references.find(
+      (a) => a.resource === resourceId
+    );
+    if (referenceToChange) {
+      referenceToChange[propName] = newValue;
+      setStatement(newStatement);
+    }
   };
 
   console.log("activeStatement", activeStatement.data.action);
@@ -212,7 +242,13 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                       <td key="position">
                         <Input
                           type="select"
-                          onChangeFn={() => {}}
+                          onChangeFn={(newValue: string) =>
+                            updateStatementActant(
+                              actant.id,
+                              "position",
+                              newValue
+                            )
+                          }
                           options={meta.dictionaries.positions}
                           value={statementActant.position}
                         />
@@ -220,7 +256,13 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                       <td key="certainty">
                         <Input
                           type="select"
-                          onChangeFn={() => {}}
+                          onChangeFn={(newValue: string) =>
+                            updateStatementActant(
+                              actant.id,
+                              "certainty",
+                              newValue
+                            )
+                          }
                           options={meta.dictionaries.certainties}
                           value={statementActant.certainty}
                         />
@@ -228,7 +270,9 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                       <td key="elvl">
                         <Input
                           type="select"
-                          onChangeFn={() => {}}
+                          onChangeFn={(newValue: string) =>
+                            updateStatementActant(actant.id, "elvl", newValue)
+                          }
                           options={meta.dictionaries.elvls}
                           value={statementActant.elvl}
                         />
@@ -239,7 +283,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                           icon={<FaTrashAlt />}
                           color="danger"
                           onClick={() => {
-                            removeActant(actant.id);
+                            removeStatementActant(actant.id);
                           }}
                         />
                       </td>
@@ -317,7 +361,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                               <td key="certainty">
                                 <Input
                                   type="select"
-                                  onChangeFn={() => {}}
+                                  onChangeFn={(newValue: string) => {}}
                                   options={meta.dictionaries.certainties}
                                   value={statementActant.certainty}
                                 />
@@ -381,14 +425,26 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                         <td>
                           <Input
                             type="text"
-                            onChangeFn={() => {}}
+                            onChangeFn={(newValue: string) => {
+                              updateStatementReference(
+                                resource.id,
+                                "part",
+                                newValue
+                              );
+                            }}
                             value={reference.part}
                           />
                         </td>
                         <td>
                           <Input
                             type="select"
-                            onChangeFn={() => {}}
+                            onChangeFn={(newValue: string) => {
+                              updateStatementReference(
+                                resource.id,
+                                "type",
+                                newValue
+                              );
+                            }}
                             options={meta.dictionaries.referencetypes}
                             value={reference.type}
                           />
@@ -399,7 +455,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                             icon={<FaTrashAlt />}
                             color="danger"
                             onClick={() => {
-                              removeReference(resource.id);
+                              removeStatementReference(resource.id);
                             }}
                           />
                         </td>

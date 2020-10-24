@@ -57,7 +57,7 @@ export const Input: React.FC<InputProps> = ({
           className={valueClasses}
           style={{ lineHeight: "16px" }}
           placeholder={placeholder}
-          defaultValue={value}
+          value={value}
           onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
             onChangeFn(e.currentTarget.value);
           }}
@@ -67,7 +67,7 @@ export const Input: React.FC<InputProps> = ({
         <textarea
           className={valueClasses}
           placeholder={placeholder}
-          defaultValue={value}
+          value={value}
           rows={rows}
           cols={cols}
           onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => {
