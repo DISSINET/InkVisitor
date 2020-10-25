@@ -287,9 +287,9 @@ const loadStatementsTables = async (next) => {
 
         mainStatement.data.props.push({
           id: v4(),
-          subject: statement.id,
-          actant1: propActant1Id,
-          actant2: propActant2Id,
+          origin: statement.id,
+          type: propActant1Id,
+          value: propActant2Id,
           elvl: "1",
           certainty: "1",
         });
@@ -458,6 +458,9 @@ const parseEntityPropsInRow = (row, entityId, territory) => {
   }
 };
 
+/**
+ * create simple statement HAS without any props
+ */
 const createEmptyPropStatement = (
   idSubject,
   idActant1,
@@ -483,18 +486,21 @@ const createEmptyPropStatement = (
         props: [],
         actants: [
           {
+            id: v4(),
             actant: idSubject,
             position: "s",
             elvl: "1",
             certainty: "1",
           },
           {
+            id: v4(),
             actant: idActant1,
             position: "a1",
             elvl: "1",
             certainty: "1",
           },
           {
+            id: v4(),
             actant: idActant2,
             position: "a2",
             elvl: "1",
@@ -537,7 +543,9 @@ const processActant = (
         createNewActantIfNeeded(actantIdClean) ||
         addResourceToEntityId(actantIdClean, codingSheetEntities);
 
+      const statementActantId = v4();
       statement.data.actants.push({
+        id: statementActantId,
         actant: actantId,
         position: position,
         elvl: elvl,
@@ -560,9 +568,9 @@ const processActant = (
          */
         statement.data.props.push({
           id: v4(),
-          subject: actantId,
-          actant1: propActant1Id,
-          actant2: propActant2Id,
+          origin: statementActantId,
+          type: propActant1Id,
+          value: propActant2Id,
           elvl: "1",
           certainty: "1",
         });
