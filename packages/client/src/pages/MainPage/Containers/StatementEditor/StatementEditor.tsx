@@ -7,6 +7,8 @@ import { StatementI, ResponseMetaI, ActantI } from "@shared/types";
 import { SuggestionI } from "components/Suggester/Suggester";
 import { OptionTypeBase, ValueType } from "react-select";
 
+import { useAuth0 } from "@auth0/auth0-react";
+
 import { updateActant } from "api/updateActant";
 import { deleteActant } from "api/deleteActant";
 import { createActant } from "api/createActant";
@@ -18,33 +20,8 @@ interface StatementEditor {
   meta: ResponseMetaI;
   actants: ActantI[];
   setActiveStatementId: (id: string) => void;
-  fetchTerritory: (id: string) => void;
+  fetchTerritory: (id: string, token?: string) => void;
 }
-
-const suggester = () => {
-  return (
-    <Suggester
-      suggestions={[]}
-      typed={""}
-      category={Entities["P"].id}
-      categories={Object.keys(Entities).map((ek) => ({
-        value: Entities[ek].id,
-        label: Entities[ek].id,
-      }))}
-      onType={(newTyped: string) => console.log("newTyped", newTyped)}
-      onChangeCategory={(newEntityTypeId: keyof typeof Entities) => {
-        console.log("newEntityType", newEntityTypeId);
-      }}
-      onCreate={(suggestion: SuggestionI) => {
-        console.log("suggestion " + suggestion.id + " picked");
-      }}
-      onPick={(created: SuggestionI) => {
-        console.log("on picked");
-      }}
-      onDrop={(item: {}) => {}}
-    />
-  );
-};
 
 /**
  * Setting the statement
@@ -63,12 +40,21 @@ export const StatementEditor: React.FC<StatementEditor> = ({
   const activeStatementCopy: StatementI = JSON.parse(
     JSON.stringify(activeStatement)
   );
-  const [statement, setStatement] = React.useState(activeStatementCopy);
+  const [statement, setStatement] = useState(activeStatementCopy);
+  const [token, setToken] = useState("");
 
   const actionTypes = meta.actions.map((a) => ({
     value: a.id,
     label: a.labels[0].label,
   }));
+
+  const { getAccessTokenSilently } = useAuth0();
+
+  useEffect(() => {
+    getAccessTokenSilently().then((newToken) => {
+      setToken(newToken);
+    });
+  }, []);
 
   useEffect(() => {
     if (statement?.data.action) {
@@ -82,11 +68,10 @@ export const StatementEditor: React.FC<StatementEditor> = ({
     }
   }, [statement?.data.action]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (statement !== activeStatement) {
       setStatement(activeStatementCopy);
     }
-    console.log("statement hook");
   }, [activeStatement]);
 
   const changeDataValue = (
@@ -136,7 +121,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
   const removeStatementActant = (actantId: string) => {
     const newStatement = { ...statement };
     newStatement.data.actants = newStatement.data.actants.filter(
-      (a) => a.actant !== actantId
+      (a) => a.id !== actantId
     );
     setStatement(newStatement);
   };
@@ -808,8 +793,8 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                   label="save"
                   color="primary"
                   onClick={() => {
-                    updateActant(statement);
-                    fetchTerritory(activeStatementCopy.data.territory);
+                    updateActant(statement, token);
+                    fetchTerritory(activeStatementCopy.data.territory, token);
                   }}
                 />
               </div>
@@ -818,9 +803,9 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                   label="delete"
                   color="danger"
                   onClick={() => {
-                    deleteActant(activeStatementCopy.id);
+                    deleteActant(activeStatementCopy.id, token);
                     setActiveStatementId("");
-                    fetchTerritory(statement.data.territory);
+                    fetchTerritory(statement.data.territory, token);
                   }}
                 />
               </div>
