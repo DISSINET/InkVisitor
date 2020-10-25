@@ -1,0 +1,25 @@
+.react-select__control {
+  border: 2px solid black !important;
+  min-height: 30px !important;
+  max-height: 30px !important;
+}
+.react-select__control--is-focused {
+  box-shadow: none !important;
+}
+.react-select__value-container {
+  padding: 0 0.25rem !important;
+}
+.react-select__single-value {
+  color: black !important;
+}
+.react-select__indicator {
+  color: black !important;
+  padding: 0 0.25rem !important;
+}
+.react-select-container {
+  font-size: 0.75rem;
+  font-weight: bold;
+}
+.react-select__indicator-separator {
+  display: none;
+}
