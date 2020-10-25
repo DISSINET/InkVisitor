@@ -1,10 +1,11 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { FaTrashAlt } from "react-icons/fa";
 
 import { Entities } from "types";
-import { Tag, Button, Input, Suggester } from "components";
+import { Tag, Button, Input, Suggester, DropDown } from "components";
 import { StatementI, ResponseMetaI, ActantI } from "@shared/types";
 import { SuggestionI } from "components/Suggester/Suggester";
+import { OptionTypeBase, ValueType } from "react-select";
 
 interface StatementEditor {
   statement: undefined | StatementI;
@@ -41,10 +42,24 @@ export const StatementEditor: React.FC<StatementEditor> = ({
   meta,
   actants,
 }) => {
+  const [selectedAction, setSelectedAction] = useState<
+    ValueType<OptionTypeBase>
+  >();
   const actionTypes = meta.actions.map((a) => ({
     value: a.id,
     label: a.labels[0].label,
   }));
+  useEffect(() => {
+    if (statement?.data.action) {
+      const actionObject = meta.actions.find(
+        (action) => action.id === statement.data.action
+      );
+      setSelectedAction({
+        value: actionObject?.id,
+        label: actionObject?.labels[0].label,
+      });
+    }
+  }, [statement?.data.action]);
 
   return (
     <div className="statement-editor">
@@ -56,11 +71,18 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                 <div className="table-row leading-3">
                   <div className="label">Action</div>
                   <div className="value">
-                    <Input
+                    {/* <Input
                       type="select"
                       onChangeFn={() => {}}
                       options={actionTypes}
                       value={statement.data.action}
+                    /> */}
+                    <DropDown
+                      value={selectedAction}
+                      onChange={(selectedAction: ValueType<OptionTypeBase>) =>
+                        setSelectedAction(selectedAction)
+                      }
+                      options={actionTypes}
                     />
                   </div>
                 </div>
