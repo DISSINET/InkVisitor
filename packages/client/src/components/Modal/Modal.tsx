@@ -5,8 +5,14 @@ interface Modal {
   children?: ReactNode;
   onClose: Function;
   showModal: boolean;
+  disableBgClick?: boolean;
 }
-export const Modal: React.FC<Modal> = ({ children, onClose, showModal }) => {
+export const Modal: React.FC<Modal> = ({
+  children,
+  onClose,
+  showModal,
+  disableBgClick,
+}) => {
   const modalWrapClasses = classNames(
     showModal ? "flex" : "hidden",
     "flex-col",
@@ -32,7 +38,10 @@ export const Modal: React.FC<Modal> = ({ children, onClose, showModal }) => {
   );
   return (
     <div className={modalWrapClasses}>
-      <div className={backgroundClasses} onClick={(): void => onClose()}></div>
+      <div
+        className={backgroundClasses}
+        onClick={(): void => (disableBgClick ? {} : onClose())}
+      ></div>
       {children}
     </div>
   );
@@ -48,6 +57,7 @@ export const ModalCard: React.FC<ModalCard> = ({ children, fullwidth }) => {
     "flex-col",
     "overflow-hidden",
     "z-50",
+    "my-4",
     fullwidth ? "w-4/5" : "w-2/4"
   );
   return <div className={cardClasses}>{children}</div>;
@@ -67,7 +77,7 @@ export const ModalHeader: React.FC<ModalHeader> = ({ title, onClose }) => {
     "relative",
     "bg-white",
     "border-b-2",
-    "border-gray-600",
+    "border-gray-200",
     "rounded-t-sm"
   );
   const cardTitleClasses = classNames("flex-grow", "flex-shrink-0", "text-2xl");
@@ -91,7 +101,7 @@ export const ModalContent: React.FC<ModalContent> = ({ children }) => {
     "flex-grow",
     "flex-shrink",
     "overflow-auto",
-    "p-16",
+    "p-8",
     "bg-white"
   );
   return <section className={modalContentClasses}>{children}</section>;
@@ -103,7 +113,7 @@ interface ModalFooter {
 export const ModalFooter: React.FC<ModalFooter> = ({ children }) => {
   const modalFooterClasses = classNames(
     "border-t-2",
-    "border-gray-600",
+    "border-gray-200",
     "flex",
     "items-center",
     "bg-white",
