@@ -7,6 +7,7 @@ import { Input } from "components/Input/Input";
 import { Tag } from "components/Tag/Tag";
 import { Suggester } from "components/Suggester/Suggester";
 import { DropDown } from "components/DropDown/DropDown";
+import { Toast } from "components/Toast/Toast";
 
 export {
   Arrow,
@@ -18,4 +19,5 @@ export {
   Tag,
   Suggester,
   DropDown,
+  Toast,
 };

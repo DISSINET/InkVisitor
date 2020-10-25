@@ -2,6 +2,8 @@ import * as React from "react";
 import { Tag, Button } from "components";
 
 import { Entities } from "types";
+import { DndProvider } from "react-dnd";
+import { HTML5Backend } from "react-dnd-html5-backend";
 
 export default {
   title: "Tag",
@@ -11,37 +13,47 @@ export default {
 };
 
 export const DefaultTag = () => {
-  return <Tag category={Entities["T"].id} color={Entities["T"].color} />;
+  return (
+    <DndProvider backend={HTML5Backend}>
+      <Tag category={Entities["T"].id} color={Entities["T"].color} />
+    </DndProvider>
+  );
 };
 
 export const TagWithLabel = () => {
   return (
-    <Tag
-      category={Entities["R"].id}
-      color={Entities["R"].color}
-      label="entity label"
-    />
+    <DndProvider backend={HTML5Backend}>
+      <Tag
+        category={Entities["R"].id}
+        color={Entities["R"].color}
+        label="entity label"
+      />
+    </DndProvider>
   );
 };
 
 export const TagWithLabelAndButton = () => {
   return (
-    <Tag
-      category={Entities["E"].id}
-      color={Entities["E"].color}
-      label="entity label"
-      button={<Button label="x" color="danger" />}
-    />
+    <DndProvider backend={HTML5Backend}>
+      <Tag
+        category={Entities["E"].id}
+        color={Entities["E"].color}
+        label="entity label"
+        button={<Button label="x" color="danger" />}
+      />
+    </DndProvider>
   );
 };
 
 export const TagWithVeryLongLabel = () => {
   return (
-    <Tag
-      category={Entities["P"].id}
-      color={Entities["P"].color}
-      label="entity label entity label entity label"
-      button={<Button label="x" color="danger" />}
-    />
+    <DndProvider backend={HTML5Backend}>
+      <Tag
+        category={Entities["P"].id}
+        color={Entities["P"].color}
+        label="entity label entity label entity label"
+        button={<Button label="x" color="danger" />}
+      />
+    </DndProvider>
   );
 };
