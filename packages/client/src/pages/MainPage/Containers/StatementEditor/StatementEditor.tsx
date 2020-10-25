@@ -71,12 +71,12 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                 <div className="table-row leading-3">
                   <div className="label">Action</div>
                   <div className="value">
-                    <Input
+                    {/* <Input
                       type="select"
                       onChangeFn={() => {}}
                       options={actionTypes}
                       value={statement.data.action}
-                    />
+                    /> */}
                     <DropDown
                       value={selectedAction}
                       onChange={(selectedAction: ValueType<OptionTypeBase>) =>
