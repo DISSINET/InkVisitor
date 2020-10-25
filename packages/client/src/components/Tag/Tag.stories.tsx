@@ -1,9 +1,9 @@
 import * as React from "react";
-import { Tag, Button } from "components";
-
-import { Entities } from "types";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
+
+import { Entities } from "types";
+import { Tag, Button } from "components";
 
 export default {
   title: "Tag",

@@ -8,6 +8,13 @@ import { Tag } from "components/Tag/Tag";
 import { Suggester } from "components/Suggester/Suggester";
 import { DropDown } from "components/DropDown/DropDown";
 import { Toast } from "components/Toast/Toast";
+import {
+  Modal,
+  ModalCard,
+  ModalHeader,
+  ModalContent,
+  ModalFooter,
+} from "components/Modal/Modal";
 
 export {
   Arrow,
@@ -20,4 +27,9 @@ export {
   Suggester,
   DropDown,
   Toast,
+  Modal,
+  ModalCard,
+  ModalHeader,
+  ModalContent,
+  ModalFooter,
 };
