@@ -1,4 +1,3 @@
-
 import { FaTrashAlt, FaPlus } from "react-icons/fa";
 import React, { useEffect, useState } from "react";
 
@@ -61,10 +60,16 @@ export const StatementEditor: React.FC<StatementEditor> = ({
   const [selectedAction, setSelectedAction] = useState<
     ValueType<OptionTypeBase>
   >();
+  const activeStatementCopy: StatementI = JSON.parse(
+    JSON.stringify(activeStatement)
+  );
+  const [statement, setStatement] = React.useState(activeStatementCopy);
+
   const actionTypes = meta.actions.map((a) => ({
     value: a.id,
     label: a.labels[0].label,
   }));
+
   useEffect(() => {
     if (statement?.data.action) {
       const actionObject = meta.actions.find(
@@ -76,12 +81,6 @@ export const StatementEditor: React.FC<StatementEditor> = ({
       });
     }
   }, [statement?.data.action]);
-
-  const activeStatementCopy: StatementI = JSON.parse(
-    JSON.stringify(activeStatement)
-  );
-
-  const [statement, setStatement] = React.useState(activeStatementCopy);
 
   React.useEffect(() => {
     if (statement !== activeStatement) {
@@ -421,74 +420,73 @@ export const StatementEditor: React.FC<StatementEditor> = ({
   return (
     <div className="statement-editor">
       {statement ? (
-        <div key={statement.id}>
-          <div className="section section-introduction">
-            <div className="table">
-              <div className="table-row leading-3">
-                <div className="label">Action</div>
-                <div className="value">
-<DropDown
+        <div>
+          <div key={statement.id}>
+            <div className="section section-introduction">
+              <div className="table">
+                <div className="table-row leading-3">
+                  <div className="label">Action</div>
+                  <div className="value">
+                    <DropDown
                       value={selectedAction}
                       onChange={(selectedAction: ValueType<OptionTypeBase>) =>
                         setSelectedAction(selectedAction)
                       }
                       options={actionTypes}
                     />
-
-                    
                   </div>
                 </div>
-              </div>
-              <div className="table-row">
-                <div className="label">Modality</div>
-                <div className="value">
-                  <Input
-                    type="select"
-                    onChangeFn={(newValue: string) =>
-                      changeDataValue(newValue, "modality")
-                    }
-                    options={meta.dictionaries.modalities}
-                    value={statement.data.modality}
-                  />
+                <div className="table-row">
+                  <div className="label">Modality</div>
+                  <div className="value">
+                    <Input
+                      type="select"
+                      onChangeFn={(newValue: string) =>
+                        changeDataValue(newValue, "modality")
+                      }
+                      options={meta.dictionaries.modalities}
+                      value={statement.data.modality}
+                    />
+                  </div>
                 </div>
-              </div>
-              <div className="table-row">
-                <div className="label">Elvl</div>
-                <div className="value">
-                  <Input
-                    type="select"
-                    onChangeFn={(newValue: string) =>
-                      changeDataValue(newValue, "elvl")
-                    }
-                    options={meta.dictionaries.elvls}
-                    value={statement.data.elvl}
-                  />
+                <div className="table-row">
+                  <div className="label">Elvl</div>
+                  <div className="value">
+                    <Input
+                      type="select"
+                      onChangeFn={(newValue: string) =>
+                        changeDataValue(newValue, "elvl")
+                      }
+                      options={meta.dictionaries.elvls}
+                      value={statement.data.elvl}
+                    />
+                  </div>
                 </div>
-              </div>
-              <div className="table-row">
-                <div className="label">Certainty</div>
-                <div className="value">
-                  <Input
-                    type="select"
-                    onChangeFn={(newValue: string) =>
-                      changeDataValue(newValue, "certainty")
-                    }
-                    options={meta.dictionaries.certainties}
-                    value={statement.data.certainty}
-                  />
+                <div className="table-row">
+                  <div className="label">Certainty</div>
+                  <div className="value">
+                    <Input
+                      type="select"
+                      onChangeFn={(newValue: string) =>
+                        changeDataValue(newValue, "certainty")
+                      }
+                      options={meta.dictionaries.certainties}
+                      value={statement.data.certainty}
+                    />
+                  </div>
                 </div>
-              </div>
-              <div className="table-row">
-                <div className="label">Statement Text</div>
-                <div className="value">
-                  <Input
-                    type="textarea"
-                    cols={55}
-                    onChangeFn={(newValue: string) =>
-                      changeDataValue(newValue, "text")
-                    }
-                    value={statement.data.text}
-                  />
+                <div className="table-row">
+                  <div className="label">Statement Text</div>
+                  <div className="value">
+                    <Input
+                      type="textarea"
+                      cols={55}
+                      onChangeFn={(newValue: string) =>
+                        changeDataValue(newValue, "text")
+                      }
+                      value={statement.data.text}
+                    />
+                  </div>
                 </div>
               </div>
             </div>
@@ -738,7 +736,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                 const tagActant = actants.find((a) => a.id === tagId);
 
                 return tagActant ? (
-                  <div className="tag">
+                  <div className="tag" key={tagId}>
                     <Tag
                       propId={tagId}
                       category={Entities[tagActant.class].id}

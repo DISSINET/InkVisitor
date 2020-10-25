@@ -78,10 +78,7 @@ body {
         .value {
           @apply align-text-top;
           @apply table-cell;
-
-          select {
-            @apply max-w-xs;
-          }
+          min-width: 20em;
         }
       }
     }

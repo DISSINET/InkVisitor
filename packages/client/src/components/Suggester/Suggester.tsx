@@ -6,6 +6,8 @@ import { Button, Input, Tag } from "components";
 import { OptionI } from "@shared/types";
 import { ItemTypes } from "types";
 
+import { FaPlus } from "react-icons/fa";
+
 export interface SuggestionI {
   id: string;
   label: string;
@@ -83,7 +85,8 @@ export const Suggester: React.FC<SuggesterProps> = ({
         />
         <div className="suggester-button mt-2">
           <Button
-            label="+"
+            icon={<FaPlus style={{ fontSize: "16px", padding: "2px" }} />}
+            color="primary"
             onClick={() => {
               onCreate({
                 label: typed,
