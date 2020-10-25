@@ -192,8 +192,21 @@ export const StatementEditor: React.FC<StatementEditor> = ({
     }
   };
 
-  console.log("activeStatement", activeStatement.data.action);
-  console.log("statement", statement);
+  const addNewTag = (actantId: string) => {
+    const newStatement = { ...statement };
+    if (!newStatement.data.tags.find((t) => t == actantId)) {
+      newStatement.data.tags.push(actantId);
+    }
+    setStatement(newStatement);
+  };
+
+  const removeTag = (actantId: string) => {
+    const newStatement = { ...statement };
+    newStatement.data.tags = newStatement.data.tags.filter(
+      (t) => t !== actantId
+    );
+    setStatement(newStatement);
+  };
 
   const renderActantProps = (actant: ActantI | undefined, key: number) => {
     if (actant) {
@@ -235,8 +248,12 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                   const typeId = actantProp.actant1;
                   const valueId = actantProp.actant2;
 
-                  const type = actants.find((a) => a.id === typeId);
-                  const value = actants.find((a) => a.id === valueId);
+                  const type = typeId
+                    ? actants.find((a) => a.id === typeId)
+                    : false;
+                  const value = valueId
+                    ? actants.find((a) => a.id === valueId)
+                    : false;
 
                   return (
                     <tr key={ap} className="property-row">
@@ -703,16 +720,54 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                 const tagActant = actants.find((a) => a.id === tagId);
 
                 return tagActant ? (
-                  <Tag
-                    propId={tagId}
-                    category={Entities[tagActant.class].id}
-                    color={Entities[tagActant.class].color}
-                    label={tagActant.data.label}
-                  />
+                  <div className="tag">
+                    <Tag
+                      propId={tagId}
+                      category={Entities[tagActant.class].id}
+                      color={Entities[tagActant.class].color}
+                      label={tagActant.data.label}
+                      button={
+                        <Button
+                          icon={<FaTrashAlt />}
+                          color="danger"
+                          onClick={() => {
+                            removeTag(tagId);
+                          }}
+                        />
+                      }
+                    />
+                  </div>
                 ) : null;
               })}
             </div>
-            <div className="">{suggester()}</div>
+            <div className="">
+              <Suggester
+                suggestions={[]}
+                typed={""}
+                category={Entities["P"].id}
+                categories={Object.keys(Entities).map((ek) => ({
+                  value: Entities[ek].id,
+                  label: Entities[ek].id,
+                }))}
+                onType={(newTyped: string) => console.log("newTyped", newTyped)}
+                onChangeCategory={(newEntityTypeId: keyof typeof Entities) => {
+                  console.log("newEntityType", newEntityTypeId);
+                }}
+                onCreate={(suggestion: SuggestionI) => {
+                  console.log("suggestion " + suggestion.id + " picked");
+                }}
+                onPick={(created: SuggestionI) => {
+                  console.log("on picked");
+                }}
+                onDrop={(item: {
+                  id: string;
+                  type: string;
+                  category: string;
+                }) => {
+                  addNewTag(item.id);
+                }}
+              />
+            </div>
           </div>
           {
             // note

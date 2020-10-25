@@ -49,6 +49,12 @@ body {
       }
     }
   }
+  .section-tags {
+    .tag {
+      @apply inline-flex;
+      @apply mr-2;
+    }
+  }
 
   .section-actions {
     .action-buttons {
