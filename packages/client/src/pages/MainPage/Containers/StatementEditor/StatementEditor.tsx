@@ -106,12 +106,88 @@ export const StatementEditor: React.FC<StatementEditor> = ({
     setStatement(newStatement);
   };
 
+  const updateStatementActant = (
+    statementActantId: string,
+    propName: "position" | "certainty" | "elvl",
+    newValue: string
+  ) => {
+    const newStatement = { ...statement };
+    const actantToChange = newStatement.data.actants.find(
+      (a) => a.id === statementActantId
+    );
+    if (actantToChange) {
+      actantToChange[propName] = newValue;
+      setStatement(newStatement);
+    }
+  };
+
+  const addNewStatementActant = (actantId: string) => {
+    const newStatement = { ...statement };
+    newStatement.data.actants.push({
+      id: uuidv4(),
+      actant: actantId,
+      position: "s",
+      elvl: "1",
+      certainty: "1",
+    });
+    setStatement(newStatement);
+  };
+
   const removeStatementActant = (actantId: string) => {
     const newStatement = { ...statement };
     newStatement.data.actants = newStatement.data.actants.filter(
       (a) => a.actant !== actantId
     );
     setStatement(newStatement);
+  };
+
+  const addNewProp = (statementActantId: string) => {
+    const newStatement = { ...statement };
+    newStatement.data.props.push({
+      id: uuidv4(),
+      origin: statementActantId,
+      type: "",
+      value: "",
+      elvl: "1",
+      certainty: "1",
+    });
+    setStatement(newStatement);
+  };
+
+  const removeProp = (propId: string) => {
+    const newStatement = { ...statement };
+    newStatement.data.props = newStatement.data.props.filter(
+      (p) => p.id !== propId
+    );
+    setStatement(newStatement);
+  };
+
+  const updateActantProp = (
+    propId: string,
+    propName: "certainty" | "elvl" | "type" | "value",
+    newValue: string
+  ) => {
+    const newStatement = { ...statement };
+    const propToChange = newStatement.data.props.find((a) => a.id === propId);
+    if (propToChange) {
+      propToChange[propName] = newValue;
+      setStatement(newStatement);
+    }
+  };
+
+  const updateStatementReference = (
+    resourceId: string,
+    propName: "part" | "type",
+    newValue: string
+  ) => {
+    const newStatement = { ...statement };
+    const referenceToChange = newStatement.data.references.find(
+      (a) => a.resource === resourceId
+    );
+    if (referenceToChange) {
+      referenceToChange[propName] = newValue;
+      setStatement(newStatement);
+    }
   };
 
   const addNewReference = (resourceId: string) => {
@@ -132,81 +208,6 @@ export const StatementEditor: React.FC<StatementEditor> = ({
     setStatement(newStatement);
   };
 
-  const updateStatementActant = (
-    actantId: string,
-    propName: "position" | "certainty" | "elvl",
-    newValue: string
-  ) => {
-    const newStatement = { ...statement };
-    const actantToChange = newStatement.data.actants.find(
-      (a) => a.actant === actantId
-    );
-    if (actantToChange) {
-      actantToChange[propName] = newValue;
-      setStatement(newStatement);
-    }
-  };
-
-  const updateStatementReference = (
-    resourceId: string,
-    propName: "part" | "type",
-    newValue: string
-  ) => {
-    const newStatement = { ...statement };
-    const referenceToChange = newStatement.data.references.find(
-      (a) => a.resource === resourceId
-    );
-    if (referenceToChange) {
-      referenceToChange[propName] = newValue;
-      setStatement(newStatement);
-    }
-  };
-
-  const addNewStatementActant = (actantId: string) => {
-    const newStatement = { ...statement };
-    newStatement.data.actants.push({
-      actant: actantId,
-      position: "s",
-      elvl: "1",
-      certainty: "1",
-    });
-    setStatement(newStatement);
-  };
-
-  const addNewProp = (actantId: string) => {
-    const newStatement = { ...statement };
-    newStatement.data.props.push({
-      id: uuidv4(),
-      subject: actantId,
-      actant1: "",
-      actant2: "",
-      elvl: "1",
-      certainty: "1",
-    });
-    setStatement(newStatement);
-  };
-
-  const removeProp = (propId: string) => {
-    const newStatement = { ...statement };
-    newStatement.data.props = newStatement.data.props.filter(
-      (p) => p.id !== propId
-    );
-    setStatement(newStatement);
-  };
-
-  const updateActantProp = (
-    propId: string,
-    propName: "certainty" | "elvl" | "actant1" | "actant2",
-    newValue: string
-  ) => {
-    const newStatement = { ...statement };
-    const propToChange = newStatement.data.props.find((a) => a.id === propId);
-    if (propToChange) {
-      propToChange[propName] = newValue;
-      setStatement(newStatement);
-    }
-  };
-
   const addNewTag = (actantId: string) => {
     const newStatement = { ...statement };
     if (!newStatement.data.tags.find((t) => t == actantId)) {
@@ -223,13 +224,13 @@ export const StatementEditor: React.FC<StatementEditor> = ({
     setStatement(newStatement);
   };
 
-  const renderActantProps = (actant: ActantI | undefined, key: number) => {
+  const renderActantProps = (actant: ActantI | undefined, originId: string) => {
     if (actant) {
       const actantProps = statement.data.props.filter(
-        (p) => p.subject === actant.id
+        (p) => p.origin === originId
       );
       return (
-        <div className="property-part" key={key}>
+        <div className="property-part" key={originId}>
           <Tag
             propId={actant.id}
             category={Entities[actant.class].id}
@@ -242,7 +243,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
               icon={<FaPlus />}
               color="primary"
               onClick={() => {
-                addNewProp(actant.id);
+                addNewProp(originId);
               }}
             />
           </div>
@@ -260,8 +261,8 @@ export const StatementEditor: React.FC<StatementEditor> = ({
               </thead>
               <tbody>
                 {actantProps.map((actantProp, ap) => {
-                  const typeId = actantProp.actant1;
-                  const valueId = actantProp.actant2;
+                  const typeId = actantProp.type;
+                  const valueId = actantProp.value;
 
                   const type = typeId
                     ? actants.find((a) => a.id === typeId)
@@ -315,7 +316,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                               if (item.category === "C") {
                                 updateActantProp(
                                   actantProp.id,
-                                  "actant1",
+                                  "type",
                                   item.id
                                 );
                               }
@@ -361,11 +362,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                               type: string;
                               category: string;
                             }) => {
-                              updateActantProp(
-                                actantProp.id,
-                                "actant2",
-                                item.id
-                              );
+                              updateActantProp(actantProp.id, "value", item.id);
                             }}
                           />
                         )}
@@ -510,7 +507,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                     (a) => a.id === statementActant.actant
                   );
                   return actant && actant.class && Entities[actant.class] ? (
-                    <tr key={sai}>
+                    <tr key={statementActant.id}>
                       <td key="actants">
                         <Tag
                           key={"1"}
@@ -525,7 +522,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                           type="select"
                           onChangeFn={(newValue: string) =>
                             updateStatementActant(
-                              actant.id,
+                              statementActant.id,
                               "position",
                               newValue
                             )
@@ -539,7 +536,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                           type="select"
                           onChangeFn={(newValue: string) =>
                             updateStatementActant(
-                              actant.id,
+                              statementActant.id,
                               "certainty",
                               newValue
                             )
@@ -552,7 +549,11 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                         <Input
                           type="select"
                           onChangeFn={(newValue: string) =>
-                            updateStatementActant(actant.id, "elvl", newValue)
+                            updateStatementActant(
+                              statementActant.id,
+                              "elvl",
+                              newValue
+                            )
                           }
                           options={meta.dictionaries.elvls}
                           value={statementActant.elvl}
@@ -564,7 +565,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                           icon={<FaTrashAlt />}
                           color="danger"
                           onClick={() => {
-                            removeStatementActant(actant.id);
+                            removeStatementActant(statementActant.id);
                           }}
                         />
                       </td>
@@ -607,18 +608,17 @@ export const StatementEditor: React.FC<StatementEditor> = ({
 
           {
             // properties
+            // TODO: more systematic way of mapping props
           }
           <div key="properties" className="section section-properties">
             <h2 className="section-heading">Properties (has)</h2>
-            <>{renderActantProps(statement, 0)}</>
-            <>
-              {statement.data.actants.map((statementActant, ai) => {
-                const actant = actants.find(
-                  (a) => a.id === statementActant.actant
-                );
-                return renderActantProps(actant, ai);
-              })}
-            </>
+            {renderActantProps(statement, statement.id)}
+            {statement.data.actants.map((statementActant, ai) => {
+              const originActant = actants.find(
+                (a) => a.id === statementActant.actant
+              );
+              return renderActantProps(originActant, statementActant.id);
+            })}
           </div>
           {
             // references
