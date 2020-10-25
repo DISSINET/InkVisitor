@@ -111,7 +111,7 @@ const MainPage: React.FC<MainPage> = ({
                 setActiveStatementId={setActiveStatementId}
               />
             </Box>
-            <Box height={heightContent} width={920} label={"Editor"}>
+            <Box height={heightContent} width={720} label={"Editor"}>
               {activeStatement ? (
                 <StatementEditor
                   activeStatement={activeStatement}

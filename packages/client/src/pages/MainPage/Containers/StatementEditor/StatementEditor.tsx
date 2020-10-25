@@ -1,5 +1,5 @@
 import React from "react";
-import { FaTrashAlt } from "react-icons/fa";
+import { FaTrashAlt, FaPlus } from "react-icons/fa";
 
 import { Entities } from "types";
 import { Tag, Button, Input, Suggester } from "components";
@@ -9,6 +9,8 @@ import { SuggestionI } from "components/Suggester/Suggester";
 import { updateActant } from "api/updateActant";
 import { deleteActant } from "api/deleteActant";
 import { createActant } from "api/createActant";
+
+import { v4 as uuidv4 } from "uuid";
 
 interface StatementEditor {
   activeStatement: StatementI;
@@ -38,6 +40,7 @@ const suggester = () => {
       onPick={(created: SuggestionI) => {
         console.log("on picked");
       }}
+      onDrop={(item: {}) => {}}
     />
   );
 };
@@ -134,79 +137,312 @@ export const StatementEditor: React.FC<StatementEditor> = ({
     }
   };
 
-  console.log("activeStatement", activeStatement.data.action);
-  console.log("statement", statement.data.action);
+  const addNewStatementActant = (actantId: string) => {
+    const newStatement = { ...statement };
+    newStatement.data.actants.push({
+      actant: actantId,
+      position: "s",
+      elvl: "1",
+      certainty: "1",
+    });
+    setStatement(newStatement);
+  };
 
+  const addNewProp = (actantId: string) => {
+    const newStatement = { ...statement };
+    newStatement.data.props.push({
+      id: uuidv4(),
+      subject: actantId,
+      actant1: "",
+      actant2: "",
+      elvl: "1",
+      certainty: "1",
+    });
+    setStatement(newStatement);
+  };
+
+  const removeProp = (propId: string) => {
+    const newStatement = { ...statement };
+    newStatement.data.props = newStatement.data.props.filter(
+      (p) => p.id !== propId
+    );
+    setStatement(newStatement);
+  };
+
+  const updateActantProp = (
+    propId: string,
+    propName: "certainty" | "elvl" | "actant1" | "actant2",
+    newValue: string
+  ) => {
+    const newStatement = { ...statement };
+    const propToChange = newStatement.data.props.find((a) => a.id === propId);
+    if (propToChange) {
+      propToChange[propName] = newValue;
+      setStatement(newStatement);
+    }
+  };
+
+  console.log("activeStatement", activeStatement.data.action);
+  console.log("statement", statement);
+
+  const renderActantProps = (actant: ActantI | undefined, key: number) => {
+    if (actant) {
+      const actantProps = statement.data.props.filter(
+        (p) => p.subject === actant.id
+      );
+      return (
+        <div className="property-part" key={key}>
+          <Tag
+            propId={actant.id}
+            category={Entities[actant.class].id}
+            color={Entities[actant.class].color}
+            label={actant.data.label}
+          />
+
+          <div className="add-new-property-button">
+            <Button
+              icon={<FaPlus />}
+              color="primary"
+              onClick={() => {
+                addNewProp(actant.id);
+              }}
+            />
+          </div>
+
+          {actantProps.length ? (
+            <table className="property-table">
+              <thead>
+                <tr>
+                  <th key="type">Type</th>
+                  <th key="value">Value</th>
+                  <th key="certainty">Certainty</th>
+                  <th key="elvl">Elvl</th>
+                  <th key="actions"></th>
+                </tr>
+              </thead>
+              <tbody>
+                {actantProps.map((actantProp, ap) => {
+                  const typeId = actantProp.actant1;
+                  const valueId = actantProp.actant2;
+
+                  const type = actants.find((a) => a.id === typeId);
+                  const value = actants.find((a) => a.id === valueId);
+
+                  return (
+                    <tr key={ap} className="property-row">
+                      <td key="type">
+                        {type ? (
+                          <Tag
+                            propId={type.id}
+                            category={Entities[type.class].id}
+                            color={Entities[type.class].color}
+                            label={type.data.label}
+                          />
+                        ) : (
+                          <Suggester
+                            suggestions={[]}
+                            typed={""}
+                            category={Entities["C"].id}
+                            categories={[
+                              {
+                                value: Entities["C"].id,
+                                label: Entities["C"].id,
+                              },
+                            ]}
+                            onType={(newTyped: string) =>
+                              console.log("newTyped", newTyped)
+                            }
+                            onChangeCategory={(
+                              newEntityTypeId: keyof typeof Entities
+                            ) => {
+                              console.log("newEntityType", newEntityTypeId);
+                            }}
+                            onCreate={(suggestion: SuggestionI) => {
+                              console.log(
+                                "suggestion " + suggestion.id + " picked"
+                              );
+                            }}
+                            onPick={(created: SuggestionI) => {
+                              console.log("on picked");
+                            }}
+                            onDrop={(item: {
+                              id: string;
+                              type: string;
+                              category: string;
+                            }) => {
+                              updateActantProp(
+                                actantProp.id,
+                                "actant1",
+                                item.id
+                              );
+                            }}
+                          />
+                        )}
+                      </td>
+                      <td key="value">
+                        {value ? (
+                          <Tag
+                            propId={value.id}
+                            category={Entities[value.class].id}
+                            color={Entities[value.class].color}
+                            label={value.data.label}
+                          />
+                        ) : (
+                          <Suggester
+                            suggestions={[]}
+                            typed={""}
+                            category={Entities["P"].id}
+                            categories={Object.keys(Entities).map((ek) => ({
+                              value: Entities[ek].id,
+                              label: Entities[ek].id,
+                            }))}
+                            onType={(newTyped: string) =>
+                              console.log("newTyped", newTyped)
+                            }
+                            onChangeCategory={(
+                              newEntityTypeId: keyof typeof Entities
+                            ) => {
+                              console.log("newEntityType", newEntityTypeId);
+                            }}
+                            onCreate={(suggestion: SuggestionI) => {
+                              console.log(
+                                "suggestion " + suggestion.id + " picked"
+                              );
+                            }}
+                            onPick={(created: SuggestionI) => {
+                              console.log("on picked");
+                            }}
+                            onDrop={(item: {
+                              id: string;
+                              type: string;
+                              category: string;
+                            }) => {
+                              updateActantProp(
+                                actantProp.id,
+                                "actant2",
+                                item.id
+                              );
+                            }}
+                          />
+                        )}
+                      </td>
+                      <td key="certainty">
+                        <Input
+                          type="select"
+                          onChangeFn={(newValue: string) => {
+                            updateActantProp(
+                              actantProp.id,
+                              "certainty",
+                              newValue
+                            );
+                          }}
+                          options={meta.dictionaries.certainties}
+                          value={actantProp.certainty}
+                        />
+                      </td>
+                      <td key="elvl">
+                        <Input
+                          type="select"
+                          onChangeFn={(newValue: string) => {
+                            updateActantProp(actantProp.id, "elvl", newValue);
+                          }}
+                          options={meta.dictionaries.elvls}
+                          value={actantProp.elvl}
+                        />
+                      </td>
+                      <td key="actions">
+                        <Button
+                          icon={<FaTrashAlt />}
+                          color="danger"
+                          onClick={() => {
+                            removeProp(actantProp.id);
+                          }}
+                        />
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          ) : null}
+
+          <div className=""></div>
+        </div>
+      );
+    } else {
+      return <div />;
+    }
+  };
   return (
     <div className="statement-editor">
       {statement ? (
         <div key={statement.id}>
           <div className="section section-introduction">
-            <div className="section-introduction-content">
-              <div className="table">
-                <div className="table-row leading-3">
-                  <div className="label">Action</div>
-                  <div className="value">
-                    <Input
-                      type="select"
-                      onChangeFn={(newValue: string) =>
-                        changeDataValue(newValue, "action")
-                      }
-                      options={actionTypes}
-                      value={statement.data.action}
-                    />
-                  </div>
-                </div>
-                <div className="table-row">
-                  <div className="label">Modality</div>
-                  <div className="value">
-                    <Input
-                      type="select"
-                      onChangeFn={(newValue: string) =>
-                        changeDataValue(newValue, "modality")
-                      }
-                      options={meta.dictionaries.modalities}
-                      value={statement.data.modality}
-                    />
-                  </div>
-                </div>
-                <div className="table-row">
-                  <div className="label">Elvl</div>
-                  <div className="value">
-                    <Input
-                      type="select"
-                      onChangeFn={(newValue: string) =>
-                        changeDataValue(newValue, "elvl")
-                      }
-                      options={meta.dictionaries.elvls}
-                      value={statement.data.elvl}
-                    />
-                  </div>
-                </div>
-                <div className="table-row">
-                  <div className="label">Certainty</div>
-                  <div className="value">
-                    <Input
-                      type="select"
-                      onChangeFn={(newValue: string) =>
-                        changeDataValue(newValue, "certainty")
-                      }
-                      options={meta.dictionaries.certainties}
-                      value={statement.data.certainty}
-                    />
-                  </div>
+            <div className="table">
+              <div className="table-row leading-3">
+                <div className="label">Action</div>
+                <div className="value">
+                  <Input
+                    type="select"
+                    onChangeFn={(newValue: string) =>
+                      changeDataValue(newValue, "action")
+                    }
+                    options={actionTypes}
+                    value={statement.data.action}
+                  />
                 </div>
               </div>
-              <div>
-                <div className="">Statement Text</div>
-                <Input
-                  type="textarea"
-                  cols={55}
-                  onChangeFn={(newValue: string) =>
-                    changeDataValue(newValue, "text")
-                  }
-                  value={statement.data.text}
-                />
+              <div className="table-row">
+                <div className="label">Modality</div>
+                <div className="value">
+                  <Input
+                    type="select"
+                    onChangeFn={(newValue: string) =>
+                      changeDataValue(newValue, "modality")
+                    }
+                    options={meta.dictionaries.modalities}
+                    value={statement.data.modality}
+                  />
+                </div>
+              </div>
+              <div className="table-row">
+                <div className="label">Elvl</div>
+                <div className="value">
+                  <Input
+                    type="select"
+                    onChangeFn={(newValue: string) =>
+                      changeDataValue(newValue, "elvl")
+                    }
+                    options={meta.dictionaries.elvls}
+                    value={statement.data.elvl}
+                  />
+                </div>
+              </div>
+              <div className="table-row">
+                <div className="label">Certainty</div>
+                <div className="value">
+                  <Input
+                    type="select"
+                    onChangeFn={(newValue: string) =>
+                      changeDataValue(newValue, "certainty")
+                    }
+                    options={meta.dictionaries.certainties}
+                    value={statement.data.certainty}
+                  />
+                </div>
+              </div>
+              <div className="table-row">
+                <div className="label">Statement Text</div>
+                <div className="value">
+                  <Input
+                    type="textarea"
+                    cols={55}
+                    onChangeFn={(newValue: string) =>
+                      changeDataValue(newValue, "text")
+                    }
+                    value={statement.data.text}
+                  />
+                </div>
               </div>
             </div>
           </div>
@@ -294,7 +530,34 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                 })}
               </tbody>
             </table>
-            <div className="mt-1">{suggester()}</div>
+            <div className="mt-1">
+              <Suggester
+                suggestions={[]}
+                typed={""}
+                category={Entities["P"].id}
+                categories={Object.keys(Entities).map((ek) => ({
+                  value: Entities[ek].id,
+                  label: Entities[ek].id,
+                }))}
+                onType={(newTyped: string) => console.log("newTyped", newTyped)}
+                onChangeCategory={(newEntityTypeId: keyof typeof Entities) => {
+                  console.log("newEntityType", newEntityTypeId);
+                }}
+                onCreate={(suggestion: SuggestionI) => {
+                  console.log("suggestion " + suggestion.id + " picked");
+                }}
+                onPick={(created: SuggestionI) => {
+                  console.log("on picked");
+                }}
+                onDrop={(item: {
+                  id: string;
+                  type: string;
+                  category: string;
+                }) => {
+                  addNewStatementActant(item.id);
+                }}
+              />
+            </div>
           </div>
 
           {
@@ -302,95 +565,15 @@ export const StatementEditor: React.FC<StatementEditor> = ({
           }
           <div key="properties" className="section section-properties">
             <h2 className="section-heading">Properties (has)</h2>
-            {statement.data.actants.map((statementActant, sai) => {
-              const actant = actants.find(
-                (a) => a.id === statementActant.actant
-              );
-
-              const actantProps = statement.data.props.filter(
-                (p) => p.subject === statementActant.actant
-              );
-
-              return actant ? (
-                <div key={sai} className="property-part">
-                  <Tag
-                    key={"1"}
-                    propId={actant.id}
-                    category={Entities[actant.class].id}
-                    color={Entities[actant.class].color}
-                    label={actant.data.label}
-                  />
-
-                  {actantProps.length ? (
-                    <table className="property-table">
-                      <thead>
-                        <tr>
-                          <th key="type">Type</th>
-                          <th key="value">Value</th>
-                          <th key="certainty">Certa inty</th>
-                          <th key="elvl">Elvl</th>
-                          <th key="actions">Actions</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {actantProps.map((actantProp, ap) => {
-                          const typeId = actantProp.actant1;
-                          const valueId = actantProp.actant2;
-
-                          const type = actants.find((a) => a.id === typeId);
-                          const value = actants.find((a) => a.id === valueId);
-
-                          return type && value ? (
-                            <tr key={ap} className="property-row">
-                              <td key="type">
-                                <Tag
-                                  propId={actant.id}
-                                  category={Entities[type.class].id}
-                                  color={Entities[type.class].color}
-                                  label={actant.data.label}
-                                />
-                              </td>
-                              <td key="value">
-                                <Tag
-                                  propId={actant.id}
-                                  category={Entities[value.class].id}
-                                  color={Entities[value.class].color}
-                                  label={actant.data.label}
-                                />
-                              </td>
-                              <td key="certainty">
-                                <Input
-                                  type="select"
-                                  onChangeFn={(newValue: string) => {}}
-                                  options={meta.dictionaries.certainties}
-                                  value={statementActant.certainty}
-                                />
-                              </td>
-                              <td key="elvl">
-                                <Input
-                                  type="select"
-                                  onChangeFn={() => {}}
-                                  options={meta.dictionaries.elvls}
-                                  value={statementActant.elvl}
-                                />
-                              </td>
-                              <td key="actions">
-                                <Button icon={<FaTrashAlt />} color="danger" />
-                              </td>
-                            </tr>
-                          ) : (
-                            <tr />
-                          );
-                        })}
-                      </tbody>
-                    </table>
-                  ) : null}
-                  <div className="">{suggester()}</div>
-                </div>
-              ) : (
-                <div />
-              );
-            })}
+            <>{renderActantProps(statement, 0)}</>
+            <>
+              {statement.data.actants.map((statementActant, ai) => {
+                const actant = actants.find(
+                  (a) => a.id === statementActant.actant
+                );
+                return renderActantProps(actant, ai);
+              })}
+            </>
           </div>
           {
             // references
@@ -466,33 +649,28 @@ export const StatementEditor: React.FC<StatementEditor> = ({
               </table>
             ) : null}
             <div className="">
-              {
-                <Suggester
-                  suggestions={[]}
-                  typed={""}
-                  category={Entities["P"].id}
-                  categories={[
-                    {
-                      value: Entities["R"].id,
-                      label: Entities["R"].id,
-                    },
-                  ]}
-                  onType={(newTyped: string) =>
-                    console.log("newTyped", newTyped)
-                  }
-                  onChangeCategory={(
-                    newEntityTypeId: keyof typeof Entities
-                  ) => {
-                    console.log("newEntityType", newEntityTypeId);
-                  }}
-                  onCreate={(suggestion: SuggestionI) => {
-                    console.log("suggestion " + suggestion.id + " picked");
-                  }}
-                  onPick={(created: SuggestionI) => {
-                    console.log("on picked");
-                  }}
-                />
-              }
+              <Suggester
+                suggestions={[]}
+                typed={""}
+                category={Entities["P"].id}
+                categories={[
+                  {
+                    value: Entities["R"].id,
+                    label: Entities["R"].id,
+                  },
+                ]}
+                onType={(newTyped: string) => console.log("newTyped", newTyped)}
+                onChangeCategory={(newEntityTypeId: keyof typeof Entities) => {
+                  console.log("newEntityType", newEntityTypeId);
+                }}
+                onCreate={(suggestion: SuggestionI) => {
+                  console.log("suggestion " + suggestion.id + " picked");
+                }}
+                onPick={(created: SuggestionI) => {
+                  console.log("on picked");
+                }}
+                onDrop={(item: {}) => {}}
+              />
             </div>
           </div>
           {
