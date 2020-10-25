@@ -154,6 +154,7 @@ storiesOf("Suggester", module).add(
               "new node " + created.category + ": " + created.label + " created"
             );
           }}
+          onDrop={(item: {}) => {}}
         />
       </DndProvider>
     );
@@ -193,6 +194,7 @@ storiesOf("Suggester", module).add(
               "new node " + created.category + ": " + created.label + " created"
             );
           }}
+          onDrop={(item: {}) => {}}
         />
       </DndProvider>
     );

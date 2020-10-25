@@ -77,7 +77,7 @@ async function findAll(
 async function saveOne(actant: any): Promise<any> {
   let conn = await r.connect(rethinkConfig);
 
-  await r.table(TABLE_NAME).insert(actant).run(conn);
+  //const result = await r.table(TABLE_NAME).insert(actant).run(conn);
 
   conn.close();
 }
@@ -88,7 +88,12 @@ async function saveOne(actant: any): Promise<any> {
 async function updateOne(actant: any): Promise<any> {
   let conn = await r.connect(rethinkConfig);
 
-  let result = await r.table(TABLE_NAME).get(actant.id).update(actant);
+  let result = await r
+    .table(TABLE_NAME)
+    .get(actant.id)
+    .update(actant)
+    .run(conn);
+
   conn.close();
 
   return result;
@@ -100,6 +105,7 @@ async function updateOne(actant: any): Promise<any> {
  */
 async function deleteOne(actantId: string): Promise<any> {
   let conn = await r.connect(rethinkConfig);
+  console.log("deleting actant", actantId);
 
   console.log(actantId);
 
@@ -126,6 +132,7 @@ export default Router()
     "/",
     async (request: Request, response: Response, next: NextFunction) => {
       const actant = request.body;
+      console.log("creating actant", actant.id);
 
       if (!actant) {
         return response.status(BAD_REQUEST).json({
@@ -146,6 +153,7 @@ export default Router()
     "/:uuid",
     async (request: Request, response: Response, next: NextFunction) => {
       const actant = request.body;
+      console.log("updating actant", actant.id);
 
       if (!actant) {
         return response.status(BAD_REQUEST).json({
@@ -153,7 +161,7 @@ export default Router()
         });
       }
 
-      const result_ = await saveOne(actant);
+      const result_ = await updateOne(actant);
 
       console.log(`UPDATE ${result_}`);
 
@@ -168,7 +176,6 @@ export default Router()
    */
   .delete("/:uuid", async (request: Request, response: Response) => {
     const uuid: string = request.params.uuid;
-
     const result_ = await deleteOne(uuid);
 
     return result_

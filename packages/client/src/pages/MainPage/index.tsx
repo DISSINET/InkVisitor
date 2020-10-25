@@ -27,7 +27,7 @@ interface MainPage {
   size: number[];
 }
 
-const initTerritory = "T40";
+const initTerritory = "T40-02-07";
 
 const MainPage: React.FC<MainPage> = ({
   meta,
@@ -58,6 +58,7 @@ const MainPage: React.FC<MainPage> = ({
   }, [isAuthenticated]);
 
   useEffect(() => {
+
     if (isAuthenticated && token) {
       fetchMeta(token);
     }
@@ -72,6 +73,12 @@ const MainPage: React.FC<MainPage> = ({
   const heightHeader = 70;
   const heightFooter = 40;
   const heightContent = size[1] - heightHeader - heightFooter;
+
+  const activeStatement = activeStatementId
+    ? territory.statements.find(
+        (statement) => statement.id === activeStatementId
+      )
+    : undefined;
 
   return (
     <>
@@ -118,21 +125,20 @@ const MainPage: React.FC<MainPage> = ({
                 meta={meta}
                 actants={territory.actants}
                 activeStatementId={activeStatementId}
+                fetchTerritory={fetchTerritory}
                 setActiveStatementId={setActiveStatementId}
               />
             </Box>
             <Box height={heightContent} width={720} label={"Editor"}>
-              <StatementEditor
-                statement={
-                  activeStatementId
-                    ? territory.statements.find(
-                        (statement) => statement.id === activeStatementId
-                      )
-                    : undefined
-                }
-                meta={meta}
-                actants={territory.actants}
-              />
+              {activeStatement ? (
+                <StatementEditor
+                  activeStatement={activeStatement}
+                  meta={meta}
+                  actants={territory.actants}
+                  setActiveStatementId={setActiveStatementId}
+                  fetchTerritory={fetchTerritory}
+                />
+              ) : null}
             </Box>
             <div className="flex flex-col">
               <Box height={400} width={350} label={"Search"}></Box>
