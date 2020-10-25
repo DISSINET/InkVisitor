@@ -483,18 +483,21 @@ const createEmptyPropStatement = (
         props: [],
         actants: [
           {
+            id: v4(),
             actant: idSubject,
             position: "s",
             elvl: "1",
             certainty: "1",
           },
           {
+            id: v4(),
             actant: idActant1,
             position: "a1",
             elvl: "1",
             certainty: "1",
           },
           {
+            id: v4(),
             actant: idActant2,
             position: "a2",
             elvl: "1",
@@ -538,6 +541,7 @@ const processActant = (
         addResourceToEntityId(actantIdClean, codingSheetEntities);
 
       statement.data.actants.push({
+        id: v4(),
         actant: actantId,
         position: position,
         elvl: elvl,
