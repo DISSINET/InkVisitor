@@ -22,6 +22,7 @@ export interface StatementI extends ActantI {
       certainty: string;
     }[];
     actants: {
+      id: string;
       actant: string;
       position: string;
       elvl: string;
