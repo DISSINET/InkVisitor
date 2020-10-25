@@ -1,4 +1,3 @@
-
 import { FaTrashAlt, FaPlus } from "react-icons/fa";
 import React, { useEffect, useState } from "react";
 
@@ -61,10 +60,16 @@ export const StatementEditor: React.FC<StatementEditor> = ({
   const [selectedAction, setSelectedAction] = useState<
     ValueType<OptionTypeBase>
   >();
+  const activeStatementCopy: StatementI = JSON.parse(
+    JSON.stringify(activeStatement)
+  );
+  const [statement, setStatement] = React.useState(activeStatementCopy);
+
   const actionTypes = meta.actions.map((a) => ({
     value: a.id,
     label: a.labels[0].label,
   }));
+
   useEffect(() => {
     if (statement?.data.action) {
       const actionObject = meta.actions.find(
@@ -76,12 +81,6 @@ export const StatementEditor: React.FC<StatementEditor> = ({
       });
     }
   }, [statement?.data.action]);
-
-  const activeStatementCopy: StatementI = JSON.parse(
-    JSON.stringify(activeStatement)
-  );
-
-  const [statement, setStatement] = React.useState(activeStatementCopy);
 
   React.useEffect(() => {
     if (statement !== activeStatement) {
@@ -421,21 +420,20 @@ export const StatementEditor: React.FC<StatementEditor> = ({
   return (
     <div className="statement-editor">
       {statement ? (
-        <div key={statement.id}>
-          <div className="section section-introduction">
-            <div className="table">
-              <div className="table-row leading-3">
-                <div className="label">Action</div>
-                <div className="value">
-<DropDown
+        <div>
+          <div key={statement.id}>
+            <div className="section section-introduction">
+              <div className="table">
+                <div className="table-row leading-3">
+                  <div className="label">Action</div>
+                  <div className="value">
+                    <DropDown
                       value={selectedAction}
                       onChange={(selectedAction: ValueType<OptionTypeBase>) =>
                         setSelectedAction(selectedAction)
                       }
                       options={actionTypes}
                     />
-
-                    
                   </div>
                 </div>
               </div>
