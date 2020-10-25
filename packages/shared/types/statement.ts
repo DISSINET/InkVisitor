@@ -15,13 +15,14 @@ export interface StatementI extends ActantI {
     note: string;
     props: {
       id: string;
-      subject: string;
-      actant1: string;
-      actant2: string;
+      origin: string;
+      type: string;
+      value: string;
       elvl: string;
       certainty: string;
     }[];
     actants: {
+      id: string;
       actant: string;
       position: string;
       elvl: string;
