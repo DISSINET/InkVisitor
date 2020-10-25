@@ -99,6 +99,16 @@ export const StatementEditor: React.FC<StatementEditor> = ({
     setStatement(newStatement);
   };
 
+  const addNewReference = (resourceId: string) => {
+    const newStatement = { ...statement };
+    newStatement.data.references.push({
+      resource: resourceId,
+      part: "",
+      type: "P",
+    });
+    setStatement(newStatement);
+  };
+
   const removeStatementReference = (resourceId: string) => {
     const newStatement = { ...statement };
     newStatement.data.references = newStatement.data.references.filter(
@@ -270,11 +280,13 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                               type: string;
                               category: string;
                             }) => {
-                              updateActantProp(
-                                actantProp.id,
-                                "actant1",
-                                item.id
-                              );
+                              if (item.category === "C") {
+                                updateActantProp(
+                                  actantProp.id,
+                                  "actant1",
+                                  item.id
+                                );
+                              }
                             }}
                           />
                         )}
@@ -669,7 +681,15 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                 onPick={(created: SuggestionI) => {
                   console.log("on picked");
                 }}
-                onDrop={(item: {}) => {}}
+                onDrop={(item: {
+                  id: string;
+                  type: string;
+                  category: string;
+                }) => {
+                  if (item.category === "R") {
+                    addNewReference(item.id);
+                  }
+                }}
               />
             </div>
           </div>
