@@ -27,7 +27,7 @@ interface SuggesterProps {
   onChangeCategory: Function;
   onCreate: Function;
   onPick: Function;
-  onDrop?: Function;
+  onDrop: Function;
 }
 
 export const Suggester: React.FC<SuggesterProps> = ({
@@ -49,6 +49,7 @@ export const Suggester: React.FC<SuggesterProps> = ({
   const [{ isOver }, dropRef] = useDrop({
     accept: ItemTypes.TAG,
     drop: (item) => {
+      onDrop(item);
       console.log(item);
     },
     collect: (monitor) => ({
