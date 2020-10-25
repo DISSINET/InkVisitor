@@ -6,6 +6,8 @@ import { Entities, EntityKeys } from "types";
 
 import { storiesOf } from "@storybook/react";
 import { withState } from "@dump247/storybook-state";
+import { DndProvider } from "react-dnd";
+import { HTML5Backend } from "react-dnd-html5-backend";
 
 interface State {
   typed: string;
@@ -124,7 +126,7 @@ storiesOf("Suggester", module).add(
   withState(state)(({ store }) => {
     const { typed, entityType, suggestions } = store.state;
     return (
-      <>
+      <DndProvider backend={HTML5Backend}>
         <Suggester
           typed={typed}
           placeholder="find a person, location or an event"
@@ -154,7 +156,7 @@ storiesOf("Suggester", module).add(
           }}
           onDrop={(item: {}) => {}}
         />
-      </>
+      </DndProvider>
     );
   })
 );
@@ -164,7 +166,7 @@ storiesOf("Suggester", module).add(
   withState(state)(({ store }) => {
     const { typed, entityType, suggestions } = store.state;
     return (
-      <>
+      <DndProvider backend={HTML5Backend}>
         <Suggester
           typed={typed}
           placeholder="find a person, location or an event"
@@ -194,7 +196,7 @@ storiesOf("Suggester", module).add(
           }}
           onDrop={(item: {}) => {}}
         />
-      </>
+      </DndProvider>
     );
   })
 );

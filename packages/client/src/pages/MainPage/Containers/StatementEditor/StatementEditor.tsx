@@ -1,10 +1,12 @@
-import React from "react";
+
 import { FaTrashAlt, FaPlus } from "react-icons/fa";
+import React, { useEffect, useState } from "react";
 
 import { Entities } from "types";
-import { Tag, Button, Input, Suggester } from "components";
+import { Tag, Button, Input, Suggester, DropDown } from "components";
 import { StatementI, ResponseMetaI, ActantI } from "@shared/types";
 import { SuggestionI } from "components/Suggester/Suggester";
+import { OptionTypeBase, ValueType } from "react-select";
 
 import { updateActant } from "api/updateActant";
 import { deleteActant } from "api/deleteActant";
@@ -56,10 +58,24 @@ export const StatementEditor: React.FC<StatementEditor> = ({
   setActiveStatementId,
   fetchTerritory,
 }) => {
+  const [selectedAction, setSelectedAction] = useState<
+    ValueType<OptionTypeBase>
+  >();
   const actionTypes = meta.actions.map((a) => ({
     value: a.id,
     label: a.labels[0].label,
   }));
+  useEffect(() => {
+    if (statement?.data.action) {
+      const actionObject = meta.actions.find(
+        (action) => action.id === statement.data.action
+      );
+      setSelectedAction({
+        value: actionObject?.id,
+        label: actionObject?.labels[0].label,
+      });
+    }
+  }, [statement?.data.action]);
 
   const activeStatementCopy: StatementI = JSON.parse(
     JSON.stringify(activeStatement)
@@ -411,14 +427,16 @@ export const StatementEditor: React.FC<StatementEditor> = ({
               <div className="table-row leading-3">
                 <div className="label">Action</div>
                 <div className="value">
-                  <Input
-                    type="select"
-                    onChangeFn={(newValue: string) =>
-                      changeDataValue(newValue, "action")
-                    }
-                    options={actionTypes}
-                    value={statement.data.action}
-                  />
+<DropDown
+                      value={selectedAction}
+                      onChange={(selectedAction: ValueType<OptionTypeBase>) =>
+                        setSelectedAction(selectedAction)
+                      }
+                      options={actionTypes}
+                    />
+
+                    
+                  </div>
                 </div>
               </div>
               <div className="table-row">

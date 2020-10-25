@@ -76,7 +76,6 @@ export const Tag: React.FC<TagProps> = ({
       opacity: monitor.isDragging() ? 0.5 : 1,
     }),
   });
-
   return (
     <div className={tagClasses} ref={dragRef}>
       <div className={entityClasses}>{category}</div>
