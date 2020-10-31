@@ -1,8 +1,7 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import { useTable, Cell, Row, useExpanded } from "react-table";
 import classNames from "classnames";
 import { FaInfo, FaPencilAlt, FaTrashAlt, FaClone } from "react-icons/fa";
-import { useAuth0 } from "@auth0/auth0-react";
 
 import { Tag, Button } from "components";
 import { Entities } from "types";
@@ -16,7 +15,7 @@ interface StatementsTableProps {
   actants: ActantI[];
   activeStatementId: string;
   setActiveStatementId: (id: string) => void;
-  fetchTerritory: (id: string, token?: string) => void;
+  fetchTerritory: (id: string) => void;
 }
 
 interface IActant {
@@ -53,15 +52,6 @@ export const StatementsTable: React.FC<StatementsTableProps> = ({
     "table-auto",
     "text-sm"
   );
-
-  const [token, setToken] = useState("");
-  const { getAccessTokenSilently } = useAuth0();
-
-  useEffect(() => {
-    getAccessTokenSilently().then((newToken) => {
-      setToken(newToken);
-    });
-  }, []);
 
   const columns = useMemo(
     () => [
@@ -190,9 +180,9 @@ export const StatementsTable: React.FC<StatementsTableProps> = ({
               color="danger"
               onClick={() => {
                 const territoryId = row.values.data.territory;
-                deleteActant(row.values.id, token);
+                deleteActant(row.values.id);
                 setActiveStatementId("");
-                fetchTerritory(territoryId, token);
+                fetchTerritory(territoryId);
               }}
             />
           </div>

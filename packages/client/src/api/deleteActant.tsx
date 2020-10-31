@@ -1,14 +1,17 @@
+import store from "redux/store";
+
 import { api } from "./api";
 
-export const deleteActant = async (actantId: string, token?: string) => {
+export const deleteActant = async (actantId: string) => {
+  const authToken = store.getState().token;
   const config = {
-    headers: { Authorization: `Bearer ${token}` },
+    headers: { Authorization: `Bearer ${authToken}` },
   };
 
   try {
     const response = await api.delete(
       `/actants/${actantId}`,
-      token ? config : undefined
+      authToken ? config : undefined
     );
     return await response.data;
   } catch (err) {

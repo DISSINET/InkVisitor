@@ -1,10 +1,13 @@
+import store from "redux/store";
+
 import { api } from "./api";
 import { ActantI } from "@shared/types";
 
-export const updateActant = async (actant: ActantI, token?: string) => {
+export const updateActant = async (actant: ActantI) => {
+  const authToken = store.getState().token;
   const config = {
     headers: {
-      authorization: `Bearer ${token}`,
+      authorization: `Bearer ${authToken}`,
     },
   };
 
@@ -12,7 +15,7 @@ export const updateActant = async (actant: ActantI, token?: string) => {
     const response = await api.put(
       `/actants/${actant.id}`,
       actant,
-      token ? config : undefined
+      authToken ? config : undefined
     );
     return await response.data;
   } catch (err) {

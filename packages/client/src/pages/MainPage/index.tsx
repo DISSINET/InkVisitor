@@ -16,15 +16,15 @@ import { StatementsTable } from "./Containers/StatementsTable/StatementsTable";
 import { StatementEditor } from "./Containers/StatementEditor/StatementEditor";
 
 interface MainPage {
-  fetchMeta: (token?: string) => void;
+  fetchMeta: () => void;
   meta: ResponseMetaI;
-  fetchTerritory: (id: string, token?: string) => void;
+  fetchTerritory: (id: string) => void;
   territory: ResponseTerritoryI;
   setActiveStatementId: (id: string) => void;
   activeStatementId: string;
   setAuthToken: (token: string) => void;
-  token: string;
   size: number[];
+  token: string;
 }
 
 const initTerritory = "T40-02-07";
@@ -37,8 +37,8 @@ const MainPage: React.FC<MainPage> = ({
   setActiveStatementId,
   activeStatementId,
   setAuthToken,
-  token,
   size,
+  token,
 }) => {
   const {
     user,
@@ -58,17 +58,16 @@ const MainPage: React.FC<MainPage> = ({
   }, [isAuthenticated]);
 
   useEffect(() => {
-
     if (isAuthenticated && token) {
-      fetchMeta(token);
+      fetchMeta();
     }
-  }, [fetchMeta, token]);
+  }, [fetchMeta, isAuthenticated, token]);
 
   useEffect(() => {
     if (isAuthenticated && token) {
-      fetchTerritory(initTerritory, token);
+      fetchTerritory(initTerritory);
     }
-  }, [fetchTerritory, token]);
+  }, [fetchTerritory, isAuthenticated, token]);
 
   const heightHeader = 70;
   const heightFooter = 40;
@@ -116,7 +115,6 @@ const MainPage: React.FC<MainPage> = ({
                 territory={territory}
                 fetchTerritory={fetchTerritory}
                 setActiveStatementId={setActiveStatementId}
-                token={token}
               />
             </Box>
             <Box height={heightContent} width={650} label={"Statements"}>
