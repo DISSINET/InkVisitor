@@ -7,8 +7,6 @@ import { StatementI, ResponseMetaI, ActantI } from "@shared/types";
 import { SuggestionI } from "components/Suggester/Suggester";
 import { OptionTypeBase, ValueType } from "react-select";
 
-import { useAuth0 } from "@auth0/auth0-react";
-
 import { updateActant } from "api/updateActant";
 import { deleteActant } from "api/deleteActant";
 import { createActant } from "api/createActant";
@@ -20,7 +18,7 @@ interface StatementEditor {
   meta: ResponseMetaI;
   actants: ActantI[];
   setActiveStatementId: (id: string) => void;
-  fetchTerritory: (id: string, token?: string) => void;
+  fetchTerritory: (id: string) => void;
 }
 
 /**
@@ -41,20 +39,11 @@ export const StatementEditor: React.FC<StatementEditor> = ({
     JSON.stringify(activeStatement)
   );
   const [statement, setStatement] = useState(activeStatementCopy);
-  const [token, setToken] = useState("");
 
   const actionTypes = meta.actions.map((a) => ({
     value: a.id,
     label: a.labels[0].label,
   }));
-
-  const { getAccessTokenSilently } = useAuth0();
-
-  useEffect(() => {
-    getAccessTokenSilently().then((newToken) => {
-      setToken(newToken);
-    });
-  }, []);
 
   useEffect(() => {
     if (statement?.data.action) {
@@ -793,8 +782,8 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                   label="save"
                   color="primary"
                   onClick={() => {
-                    updateActant(statement, token);
-                    fetchTerritory(activeStatementCopy.data.territory, token);
+                    updateActant(statement);
+                    fetchTerritory(activeStatementCopy.data.territory);
                   }}
                 />
               </div>
@@ -803,9 +792,9 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                   label="delete"
                   color="danger"
                   onClick={() => {
-                    deleteActant(activeStatementCopy.id, token);
+                    deleteActant(activeStatementCopy.id);
                     setActiveStatementId("");
-                    fetchTerritory(statement.data.territory, token);
+                    fetchTerritory(statement.data.territory);
                   }}
                 />
               </div>
