@@ -3,7 +3,7 @@ import { useTable, Cell, Row, useExpanded } from "react-table";
 import classNames from "classnames";
 import { FaInfo, FaPencilAlt, FaTrashAlt, FaClone } from "react-icons/fa";
 
-import { Tag, Button } from "components";
+import { Tag, Button, Submit } from "components";
 import { Entities } from "types";
 import { ResponseMetaI, ActantI } from "@shared/types";
 
@@ -44,6 +44,10 @@ export const StatementsTable: React.FC<StatementsTableProps> = ({
   activeStatementId,
   fetchTerritory,
 }) => {
+  const [showSubmit, setShowSubmit] = useState(false);
+  const [actantId, setActantId] = useState("");
+  const [territoryId, setTerritoryId] = useState("");
+
   const wrapperClasses = classNames("table-wrapper", "px-1");
   const tableClasses = classNames(
     "component",
@@ -179,10 +183,10 @@ export const StatementsTable: React.FC<StatementsTableProps> = ({
               icon={<FaTrashAlt size={14} />}
               color="danger"
               onClick={() => {
-                const territoryId = row.values.data.territory;
-                deleteActant(row.values.id);
-                setActiveStatementId("");
-                fetchTerritory(territoryId);
+                // const territoryId = row.values.data.territory;
+                setTerritoryId(row.values.data.territory);
+                setActantId(row.values.id);
+                setShowSubmit(true);
               }}
             />
           </div>
@@ -226,61 +230,76 @@ export const StatementsTable: React.FC<StatementsTableProps> = ({
   );
 
   return (
-    <div className={wrapperClasses}>
-      <table {...getTableProps()} className={tableClasses}>
-        <thead className="border-b-2 border-black">
-          {headerGroups.map((headerGroup, key) => (
-            <tr
-              {...headerGroup.getHeaderGroupProps()}
-              key={key}
-              style={{ fontSize: "1rem" }}
-            >
-              {headerGroup.headers.map((column, key) => (
-                <th
-                  className="table-header text-left"
-                  {...column.getHeaderProps()}
-                  key={key}
-                >
-                  {column.render("Header")}
-                </th>
-              ))}
-            </tr>
-          ))}
-        </thead>
-        <tbody {...getTableBodyProps()}>
-          {rows.map((row, i) => {
-            prepareRow(row);
-            return (
-              <React.Fragment key={i}>
-                <tr
-                  {...row.getRowProps()}
-                  className={classNames({
-                    "bg-white": i % 2 == 0,
-                    "bg-grey": i % 2 == 1,
-                    "border-solid border-2 border-black":
-                      row.values.id === activeStatementId,
-                  })}
-                >
-                  {row.cells.map((cell, i) => {
-                    return (
-                      <td className="p-1" {...cell.getCellProps()}>
-                        {cell.render("Cell")}
-                      </td>
-                    );
-                  })}
-                </tr>
-                {row.isExpanded ? (
-                  <tr>
-                    <td colSpan={visibleColumns.length}>
-                      {renderRowSubComponent({ row })}
-                    </td>
+    <>
+      <div className={wrapperClasses}>
+        <table {...getTableProps()} className={tableClasses}>
+          <thead className="border-b-2 border-black">
+            {headerGroups.map((headerGroup, key) => (
+              <tr
+                {...headerGroup.getHeaderGroupProps()}
+                key={key}
+                style={{ fontSize: "1rem" }}
+              >
+                {headerGroup.headers.map((column, key) => (
+                  <th
+                    className="table-header text-left"
+                    {...column.getHeaderProps()}
+                    key={key}
+                  >
+                    {column.render("Header")}
+                  </th>
+                ))}
+              </tr>
+            ))}
+          </thead>
+          <tbody {...getTableBodyProps()}>
+            {rows.map((row, i) => {
+              prepareRow(row);
+              return (
+                <React.Fragment key={i}>
+                  <tr
+                    {...row.getRowProps()}
+                    className={classNames({
+                      "bg-white": i % 2 == 0,
+                      "bg-grey": i % 2 == 1,
+                      "border-solid border-2 border-black":
+                        row.values.id === activeStatementId,
+                    })}
+                  >
+                    {row.cells.map((cell, i) => {
+                      return (
+                        <td className="p-1" {...cell.getCellProps()}>
+                          {cell.render("Cell")}
+                        </td>
+                      );
+                    })}
                   </tr>
-                ) : null}
-              </React.Fragment>
-            );
-          })}
-        </tbody>
-      </table>
-    </div>
+                  {row.isExpanded ? (
+                    <tr>
+                      <td colSpan={visibleColumns.length}>
+                        {renderRowSubComponent({ row })}
+                      </td>
+                    </tr>
+                  ) : null}
+                </React.Fragment>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+      <Submit
+        title={"Delete actant"}
+        text={`Do you really want to delete actant with id ${actantId}?`}
+        show={showSubmit}
+        onCancel={() => setShowSubmit(false)}
+        onSubmit={() => {
+          deleteActant(actantId);
+          setActantId("");
+          setActiveStatementId("");
+          fetchTerritory(territoryId);
+          setShowSubmit(false);
+        }}
+      />
+    </>
   );
 };
