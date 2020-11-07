@@ -7,8 +7,6 @@ interface Footer {
 export const Footer: React.FC<Footer> = ({ height }) => {
   const wrapperClasses = classNames("bg-primary");
   return (
-    <div className={wrapperClasses} style={{ height: `${height}px` }}>
-      Footer
-    </div>
+    <div className={wrapperClasses} style={{ height: `${height}px` }}></div>
   );
 };

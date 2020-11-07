@@ -67,7 +67,7 @@ body {
     .action-buttons {
       @apply inline-flex;
       .action-button {
-        @apply ml-2;
+        /* @apply ml-2; */
       }
     }
   }

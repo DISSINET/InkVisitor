@@ -136,7 +136,9 @@ const MainPage: React.FC<MainPage> = ({
                   setActiveStatementId={setActiveStatementId}
                   fetchTerritory={fetchTerritory}
                 />
-              ) : null}
+              ) : (
+                <div>No statement selected.</div>
+              )}
             </Box>
             <div className="flex flex-col">
               <Box height={400} width={350} label={"Search"}></Box>

@@ -6,7 +6,7 @@ import { Tag, Button, Input, Suggester, DropDown } from "components";
 import { StatementI, ResponseMetaI, ActantI } from "@shared/types";
 import { SuggestionI } from "components/Suggester/Suggester";
 import { OptionTypeBase, ValueType } from "react-select";
-import "./editor.css"
+import "./editor.css";
 
 import { updateActant } from "api/updateActant";
 import { deleteActant } from "api/deleteActant";
@@ -391,9 +391,9 @@ export const StatementEditor: React.FC<StatementEditor> = ({
   };
   return (
     <div className="statement-editor">
-      {statement ? (
+      {statement && (
         <>
-          <div>
+          <div className="mb-8">
             <div key={statement.id}>
               <div className="section section-introduction">
                 <h2 className="section-heading-first">Summary</h2>
@@ -791,7 +791,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
             </div>
           </div>
           {/* -------- Footer action buttons -------- */}
-          <div className="editor-footer section section-actions sticky bottom-0 mt-4 p-2 flex justify-end">
+          <div className="editor-footer section section-actions absolute mt-4 p-2 flex justify-end">
             <div className="action-buttons">
               <div className="action-button">
                 <Button
@@ -826,8 +826,6 @@ export const StatementEditor: React.FC<StatementEditor> = ({
             </div>
           </div>
         </>
-      ) : (
-        <div>no statement selected</div>
       )}
     </div>
   );

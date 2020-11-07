@@ -23,7 +23,8 @@ export const Box: React.FC<BoxProps> = ({
     "border-2",
     "flex",
     "flex-col",
-    "bg-white"
+    "bg-white",
+    "relative"
   );
 
   const headClasses = classNames(
