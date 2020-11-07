@@ -3,11 +3,12 @@ import { useTable, Cell, Row, useExpanded } from "react-table";
 import classNames from "classnames";
 import { FaInfo, FaPencilAlt, FaTrashAlt, FaClone } from "react-icons/fa";
 
-import { Tag, Button, Submit } from "components";
+import { Tag, Button, Submit, Toast } from "components";
 import { Entities } from "types";
 import { ResponseMetaI, ActantI } from "@shared/types";
 import { deleteActant } from "api/deleteActant";
 import "./table.css";
+import { toast } from "react-toastify";
 
 interface StatementsTableProps {
   statements: {}[];
@@ -293,13 +294,16 @@ export const StatementsTable: React.FC<StatementsTableProps> = ({
         show={showSubmit}
         onCancel={() => setShowSubmit(false)}
         onSubmit={() => {
-          deleteActant(actantId);
+          deleteActant(actantId).then(() =>
+            toast.success("Statement deleted!")
+          );
           setActantId("");
           setActiveStatementId("");
           fetchTerritory(territoryId);
           setShowSubmit(false);
         }}
       />
+      <Toast />
     </>
   );
 };

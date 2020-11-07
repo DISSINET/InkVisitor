@@ -801,6 +801,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                     updateActant(statement);
                     fetchTerritory(activeStatementCopy.data.territory);
                   }}
+                  marginRight
                 />
               </div>
               <div className="action-button">
@@ -812,6 +813,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                     setActiveStatementId("");
                     fetchTerritory(statement.data.territory);
                   }}
+                  marginRight
                 />
               </div>
               <div className="action-button">
