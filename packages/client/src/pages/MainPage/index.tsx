@@ -10,7 +10,7 @@ import { fetchMeta } from "redux/actions/metaActions";
 import { fetchTerritory } from "redux/actions/territoryTreeActions";
 import { setActiveStatementId } from "redux/actions/statementActions";
 import { setAuthToken } from "redux/actions/authActions";
-import { Tree } from "pages/MainPage/Containers/Tree/Tree";
+import { TerritoryTree } from "pages/MainPage/Containers/TerritoryTree/TerritoryTree";
 import { ResponseMetaI } from "@shared/types/response-meta";
 import { StatementsTable } from "./Containers/StatementsTable/StatementsTable";
 import { StatementEditor } from "./Containers/StatementEditor/StatementEditor";
@@ -111,7 +111,7 @@ const MainPage: React.FC<MainPage> = ({
         {isAuthenticated ? (
           <div className="flex">
             <Box height={heightContent} width={200} label={"Territories"}>
-              <Tree
+              <TerritoryTree
                 territory={territory}
                 fetchTerritory={fetchTerritory}
                 setActiveStatementId={setActiveStatementId}

@@ -22,7 +22,8 @@ export const Box: React.FC<BoxProps> = ({
     `border-${color}`,
     "border-2",
     "flex",
-    "flex-col"
+    "flex-col",
+    "bg-white"
   );
 
   const headClasses = classNames(

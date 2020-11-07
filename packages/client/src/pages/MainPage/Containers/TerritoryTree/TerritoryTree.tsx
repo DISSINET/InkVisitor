@@ -5,13 +5,13 @@ import { Entities } from "types";
 import { ResponseTerritoryI } from "@shared/types/response-territory";
 import { TerritoryI } from "@shared/types";
 
-interface Tree {
+interface TerritoryTree {
   territory?: ResponseTerritoryI;
   fetchTerritory: (id: string) => void;
   setActiveStatementId: (id: string) => void;
 }
 
-export const Tree: React.FC<Tree> = ({
+export const TerritoryTree: React.FC<TerritoryTree> = ({
   territory,
   fetchTerritory,
   setActiveStatementId,
@@ -28,12 +28,14 @@ export const Tree: React.FC<Tree> = ({
             category={Entities.T.id}
             color={Entities.T.color}
             label={territory?.data.label}
+            invertedLabel
           />
         </div>
         {territoryParent && (
           <div className="">
             <h3>{"Parent territory: "}</h3>
             <Tag
+              propId={territoryParent}
               category={Entities.T.id}
               color={Entities.T.color}
               label={territoryParent && territoryParent}
