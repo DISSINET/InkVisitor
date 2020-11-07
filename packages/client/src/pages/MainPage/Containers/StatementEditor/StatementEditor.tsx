@@ -6,6 +6,7 @@ import { Tag, Button, Input, Suggester, DropDown } from "components";
 import { StatementI, ResponseMetaI, ActantI } from "@shared/types";
 import { SuggestionI } from "components/Suggester/Suggester";
 import { OptionTypeBase, ValueType } from "react-select";
+import "./editor.css"
 
 import { updateActant } from "api/updateActant";
 import { deleteActant } from "api/deleteActant";
@@ -789,7 +790,8 @@ export const StatementEditor: React.FC<StatementEditor> = ({
               />
             </div>
           </div>
-          <div className="section section-actions sticky bottom-0 bg-grey mt-4 p-2 flex justify-end">
+          {/* -------- Footer action buttons -------- */}
+          <div className="editor-footer section section-actions sticky bottom-0 mt-4 p-2 flex justify-end">
             <div className="action-buttons">
               <div className="action-button">
                 <Button

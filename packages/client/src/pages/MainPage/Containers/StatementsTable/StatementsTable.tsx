@@ -289,7 +289,7 @@ export const StatementsTable: React.FC<StatementsTableProps> = ({
       </div>
       <Submit
         title={"Delete actant"}
-        text={`Do you really want to delete actant with id ${actantId}?`}
+        text={`Do you really want to delete actant with ID [${actantId}]?`}
         show={showSubmit}
         onCancel={() => setShowSubmit(false)}
         onSubmit={() => {

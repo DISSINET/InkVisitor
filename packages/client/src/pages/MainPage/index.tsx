@@ -4,7 +4,7 @@ import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { useAuth0 } from "@auth0/auth0-react";
 
-import { Box, Button, Header } from "components";
+import { Box, Button, Footer, Header } from "components";
 import { ResponseTerritoryI } from "@shared/types/response-territory";
 import { fetchMeta } from "redux/actions/metaActions";
 import { fetchTerritory } from "redux/actions/territoryTreeActions";
@@ -151,7 +151,7 @@ const MainPage: React.FC<MainPage> = ({
           <div className="p-5">{"Login to continue.."}</div>
         )}
       </DndProvider>
-      {/* footer */}
+      <Footer height={heightFooter} />
       {/* <Header height={heightFooter} paddingY={0} paddingX={10} color="grey" /> */}
     </>
   );
