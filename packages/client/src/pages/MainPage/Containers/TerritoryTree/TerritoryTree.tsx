@@ -4,6 +4,7 @@ import { Tag, Button } from "components";
 import { Entities } from "types";
 import { ResponseTerritoryI } from "@shared/types/response-territory";
 import { TerritoryI } from "@shared/types";
+import { useHistory } from "react-router-dom";
 
 interface TerritoryTree {
   territory?: ResponseTerritoryI;
@@ -16,6 +17,7 @@ export const TerritoryTree: React.FC<TerritoryTree> = ({
   fetchTerritory,
   setActiveStatementId,
 }) => {
+  const history = useHistory();
   const territoryParent = territory && (territory.data.parent as string);
 
   return (
@@ -45,6 +47,7 @@ export const TerritoryTree: React.FC<TerritoryTree> = ({
                   <Button
                     onClick={() => {
                       fetchTerritory(territoryParent);
+                      history.push(`/${territoryParent}`);
                       setActiveStatementId("");
                     }}
                     label="<"
@@ -73,6 +76,7 @@ export const TerritoryTree: React.FC<TerritoryTree> = ({
                       <Button
                         onClick={() => {
                           fetchTerritory(child.id);
+                          history.push(`/${child.id}`);
                           setActiveStatementId("");
                         }}
                         label=">"

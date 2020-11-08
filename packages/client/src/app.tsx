@@ -27,6 +27,17 @@ export const App: React.FC<AppProps> = () => {
         <Auth0ProviderWithHistory>
           <Switch>
             <Route
+              path="/:territoryId/:statementId"
+              children={<MainPage size={size} />}
+              // render={(props) => <MainPage {...props} size={size} />}
+            />
+            <Route
+              path="/:territoryId"
+              children={<MainPage size={size} />}
+              // render={(props) => <MainPage {...props} size={size} />}
+            />
+            <Route
+              path="/"
               exact={true}
               render={(props) => <MainPage {...props} size={size} />}
             />

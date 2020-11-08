@@ -9,6 +9,7 @@ import { ResponseMetaI, ActantI } from "@shared/types";
 import { deleteActant } from "api/deleteActant";
 import "./table.css";
 import { toast } from "react-toastify";
+import { useHistory, useParams } from "react-router-dom";
 
 interface StatementsTableProps {
   statements: {}[];
@@ -45,9 +46,14 @@ export const StatementsTable: React.FC<StatementsTableProps> = ({
   activeStatementId,
   fetchTerritory,
 }) => {
+  const history = useHistory();
   const [showSubmit, setShowSubmit] = useState(false);
   const [actantId, setActantId] = useState("");
-  const [territoryId, setTerritoryId] = useState("");
+  const [currentTerritoryId, setCurrentTerritoryId] = useState("");
+  const { territoryId } = useParams<{
+    territoryId: string;
+    statementId: string;
+  }>();
 
   const wrapperClasses = classNames("table-wrapper", "px-1");
   const tableClasses = classNames(
@@ -172,11 +178,14 @@ export const StatementsTable: React.FC<StatementsTableProps> = ({
               key="e"
               icon={<FaPencilAlt size={14} />}
               color="primary"
-              onClick={() =>
+              onClick={() => {
                 activeStatementId === row.values.id
                   ? setActiveStatementId("")
-                  : setActiveStatementId(row.values.id)
-              }
+                  : setActiveStatementId(row.values.id);
+                activeStatementId === row.values.id
+                  ? history.push(`/${territoryId}`)
+                  : history.push(`/${territoryId}/${row.values.id}`);
+              }}
             />
             <Button key="d" icon={<FaClone size={14} />} color="warning" />
             <Button
@@ -185,7 +194,7 @@ export const StatementsTable: React.FC<StatementsTableProps> = ({
               color="danger"
               onClick={() => {
                 // const territoryId = row.values.data.territory;
-                setTerritoryId(row.values.data.territory);
+                setCurrentTerritoryId(row.values.data.territory);
                 setActantId(row.values.id);
                 setShowSubmit(true);
               }}
@@ -299,7 +308,7 @@ export const StatementsTable: React.FC<StatementsTableProps> = ({
           );
           setActantId("");
           setActiveStatementId("");
-          fetchTerritory(territoryId);
+          fetchTerritory(currentTerritoryId);
           setShowSubmit(false);
         }}
       />
