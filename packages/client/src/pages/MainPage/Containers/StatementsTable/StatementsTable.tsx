@@ -3,11 +3,12 @@ import { useTable, Cell, Row, useExpanded } from "react-table";
 import classNames from "classnames";
 import { FaInfo, FaPencilAlt, FaTrashAlt, FaClone } from "react-icons/fa";
 
-import { Tag, Button, Submit } from "components";
+import { Tag, Button, Submit, Toast } from "components";
 import { Entities } from "types";
 import { ResponseMetaI, ActantI } from "@shared/types";
-
 import { deleteActant } from "api/deleteActant";
+import "./table.css";
+import { toast } from "react-toastify";
 
 interface StatementsTableProps {
   statements: {}[];
@@ -261,7 +262,7 @@ export const StatementsTable: React.FC<StatementsTableProps> = ({
                     {...row.getRowProps()}
                     className={classNames({
                       "bg-white": i % 2 == 0,
-                      "bg-grey": i % 2 == 1,
+                      "odd-strip": i % 2 == 1,
                       "border-solid border-2 border-black":
                         row.values.id === activeStatementId,
                     })}
@@ -289,17 +290,20 @@ export const StatementsTable: React.FC<StatementsTableProps> = ({
       </div>
       <Submit
         title={"Delete actant"}
-        text={`Do you really want to delete actant with id ${actantId}?`}
+        text={`Do you really want to delete actant with ID [${actantId}]?`}
         show={showSubmit}
         onCancel={() => setShowSubmit(false)}
         onSubmit={() => {
-          deleteActant(actantId);
+          deleteActant(actantId).then(() =>
+            toast.success("Statement deleted!")
+          );
           setActantId("");
           setActiveStatementId("");
           fetchTerritory(territoryId);
           setShowSubmit(false);
         }}
       />
+      <Toast />
     </>
   );
 };

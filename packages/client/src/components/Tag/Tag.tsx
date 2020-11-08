@@ -3,6 +3,7 @@ import classNames from "classnames";
 import { useDrag } from "react-dnd";
 
 import { ItemTypes } from "types";
+import "./tag.css";
 
 interface TagProps {
   label?: string;
@@ -12,6 +13,7 @@ interface TagProps {
   button?: ReactNode;
   marginRight?: boolean;
   propId?: string;
+  invertedLabel?: boolean;
 }
 
 export const Tag: React.FC<TagProps> = ({
@@ -22,6 +24,7 @@ export const Tag: React.FC<TagProps> = ({
   button,
   marginRight,
   propId,
+  invertedLabel,
 }) => {
   const tagClasses = classNames(
     "component",
@@ -59,7 +62,7 @@ export const Tag: React.FC<TagProps> = ({
     "py-1",
     "px-2",
     "truncate",
-    "bg-white",
+    invertedLabel ? "bg-primary text-white" : "bg-white",
     { "bg-primary text-white": mode === "selected" }
   );
   const buttonClasses = classNames(
