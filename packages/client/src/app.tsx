@@ -27,7 +27,8 @@ export const App: React.FC<AppProps> = () => {
         <Auth0ProviderWithHistory>
           <Switch>
             <Route
-              exact={true}
+              path="/:territoryId?/:statementId?"
+              exact
               render={(props) => <MainPage {...props} size={size} />}
             />
           </Switch>
