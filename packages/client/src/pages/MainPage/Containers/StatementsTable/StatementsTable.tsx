@@ -271,8 +271,9 @@ export const StatementsTable: React.FC<StatementsTableProps> = ({
                     {...row.getRowProps()}
                     className={classNames({
                       "bg-white": i % 2 == 0,
-                      "odd-strip": i % 2 == 1,
-                      "border-solid border-2 border-black":
+                      "odd-strip":
+                        i % 2 == 1 && row.values.id !== activeStatementId,
+                      "bg-primary text-white":
                         row.values.id === activeStatementId,
                     })}
                   >

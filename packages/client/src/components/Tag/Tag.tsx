@@ -36,7 +36,8 @@ export const Tag: React.FC<TagProps> = ({
     "overflow-hidden",
     "max-w-xs",
     marginRight && "mr-1",
-    "cursor-move"
+    "cursor-move",
+    "text-black"
   );
 
   const entityClasses = classNames(
