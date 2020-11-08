@@ -18,9 +18,8 @@ module.exports = {
       black: "#000",
       white: "#fff",
       primary: "#091034",
-      // success: "#288acc",
-      success: "#2682c9",
-      // warning: "#E4BB27",
+      success: "#1575bf",
+      // warning: "#E4BB27", // orig.
       warning: "#e8af35",
       danger: "#B62929",
       info: "#38385A",

@@ -55,7 +55,6 @@ const MainPage: React.FC<MainPage> = ({
     logout,
     getAccessTokenSilently,
   } = useAuth0();
-  // const [activeStatement, setActiveStatement] = useState<StatementI>();
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -83,17 +82,9 @@ const MainPage: React.FC<MainPage> = ({
   }, [fetchTerritory, isAuthenticated, token, territoryId]);
 
   const heightHeader = 70;
-  const heightFooter = 40;
+  const heightFooter = 30;
   const heightContent = size[1] - heightHeader - heightFooter;
 
-  // useEffect(() => {
-  //   if (statementId) {
-  //     const statement = territory.statements.find(
-  //       (statement) => statement.id === statementId
-  //     );
-  //     setActiveStatement(statement);
-  //   }
-  // }, [statementId]);
   const activeStatement = statementId
     ? territory.statements.find((statement) => statement.id === statementId)
     : undefined;
