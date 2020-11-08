@@ -7,7 +7,6 @@ import { Tag, Button, Submit, Toast } from "components";
 import { Entities } from "types";
 import { ResponseMetaI, ActantI } from "@shared/types";
 import { deleteActant } from "api/deleteActant";
-import "./table.css";
 import { toast } from "react-toastify";
 import { useHistory, useParams } from "react-router-dom";
 
@@ -177,7 +176,7 @@ export const StatementsTable: React.FC<StatementsTableProps> = ({
             <Button
               key="e"
               icon={<FaPencilAlt size={14} />}
-              color="primary"
+              color="warning"
               onClick={() => {
                 activeStatementId === row.values.id
                   ? setActiveStatementId("")
@@ -187,7 +186,7 @@ export const StatementsTable: React.FC<StatementsTableProps> = ({
                   : history.push(`/${territoryId}/${row.values.id}`);
               }}
             />
-            <Button key="d" icon={<FaClone size={14} />} color="warning" />
+            <Button key="d" icon={<FaClone size={14} />} color="success" />
             <Button
               key="r"
               icon={<FaTrashAlt size={14} />}

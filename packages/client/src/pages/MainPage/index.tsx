@@ -172,7 +172,7 @@ const MainPage: React.FC<MainPage> = ({
           <div className="p-5">{"Login to continue.."}</div>
         )}
       </DndProvider>
-      <Footer height={heightFooter} />
+      {isAuthenticated && <Footer height={heightFooter} />}
     </>
   );
 };

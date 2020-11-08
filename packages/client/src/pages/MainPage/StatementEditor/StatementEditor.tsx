@@ -877,7 +877,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
             </div>
           </div>
           {/* -------- Footer action buttons -------- */}
-          <div className="editor-footer section section-actions absolute p-2 flex justify-end bg-primary">
+          <div className="editor-footer section section-actions absolute pt-1 pl-1 flex justify-end bg-primary">
             <div className="action-buttons">
               <div className="action-button">
                 <Button
