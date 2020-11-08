@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
@@ -14,6 +14,8 @@ import { TerritoryTree } from "pages/MainPage/Containers/TerritoryTree/Territory
 import { ResponseMetaI } from "@shared/types/response-meta";
 import { StatementsTable } from "./Containers/StatementsTable/StatementsTable";
 import { StatementEditor } from "./Containers/StatementEditor/StatementEditor";
+import { useHistory, useParams } from "react-router-dom";
+import { StatementI } from "@shared/types";
 
 interface MainPage {
   fetchMeta: () => void;
@@ -40,6 +42,11 @@ const MainPage: React.FC<MainPage> = ({
   size,
   token,
 }) => {
+  const history = useHistory();
+  const { territoryId, statementId } = useParams<{
+    territoryId: string;
+    statementId: string;
+  }>();
   const {
     user,
     isAuthenticated,
@@ -48,6 +55,7 @@ const MainPage: React.FC<MainPage> = ({
     logout,
     getAccessTokenSilently,
   } = useAuth0();
+  // const [activeStatement, setActiveStatement] = useState<StatementI>();
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -65,18 +73,29 @@ const MainPage: React.FC<MainPage> = ({
 
   useEffect(() => {
     if (isAuthenticated && token) {
-      fetchTerritory(initTerritory);
+      if (territoryId) {
+        fetchTerritory(territoryId);
+      } else {
+        fetchTerritory(initTerritory);
+        history.push(`/${initTerritory}`);
+      }
     }
-  }, [fetchTerritory, isAuthenticated, token]);
+  }, [fetchTerritory, isAuthenticated, token, territoryId]);
 
   const heightHeader = 70;
   const heightFooter = 40;
   const heightContent = size[1] - heightHeader - heightFooter;
 
-  const activeStatement = activeStatementId
-    ? territory.statements.find(
-        (statement) => statement.id === activeStatementId
-      )
+  // useEffect(() => {
+  //   if (statementId) {
+  //     const statement = territory.statements.find(
+  //       (statement) => statement.id === statementId
+  //     );
+  //     setActiveStatement(statement);
+  //   }
+  // }, [statementId]);
+  const activeStatement = statementId
+    ? territory.statements.find((statement) => statement.id === statementId)
     : undefined;
 
   return (
@@ -122,7 +141,7 @@ const MainPage: React.FC<MainPage> = ({
                 statements={territory.statements}
                 meta={meta}
                 actants={territory.actants}
-                activeStatementId={activeStatementId}
+                activeStatementId={statementId}
                 fetchTerritory={fetchTerritory}
                 setActiveStatementId={setActiveStatementId}
               />
@@ -154,7 +173,6 @@ const MainPage: React.FC<MainPage> = ({
         )}
       </DndProvider>
       <Footer height={heightFooter} />
-      {/* <Header height={heightFooter} paddingY={0} paddingX={10} color="grey" /> */}
     </>
   );
 };

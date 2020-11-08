@@ -38,7 +38,11 @@ export const Submit: React.FC<Submit> = ({
               onClick={(): void => onSubmit()}
               marginRight
             />
-            <Button label="Cancel" onClick={(): void => onCancel()} />
+            <Button
+              label="Cancel"
+              color="warning"
+              onClick={(): void => onCancel()}
+            />
           </ModalFooter>
         </ModalCard>
       </Modal>
