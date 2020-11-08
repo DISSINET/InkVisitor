@@ -381,8 +381,6 @@ export const StatementEditor: React.FC<StatementEditor> = ({
               </tbody>
             </table>
           ) : null}
-
-          <div className=""></div>
         </div>
       );
     } else {
@@ -393,7 +391,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
     <div className="statement-editor">
       {statement && (
         <>
-          <div className="mb-8">
+          <div style={{ marginBottom: "4rem" }}>
             <div key={statement.id}>
               <div className="section section-introduction">
                 <h2 className="section-heading-first">Summary</h2>
@@ -791,12 +789,12 @@ export const StatementEditor: React.FC<StatementEditor> = ({
             </div>
           </div>
           {/* -------- Footer action buttons -------- */}
-          <div className="editor-footer section section-actions absolute mt-4 p-2 flex justify-end">
+          <div className="editor-footer section section-actions absolute p-2 flex justify-end bg-primary">
             <div className="action-buttons">
               <div className="action-button">
                 <Button
                   label="Save"
-                  color="primary"
+                  color="info"
                   onClick={() => {
                     updateActant(statement);
                     fetchTerritory(activeStatementCopy.data.territory);

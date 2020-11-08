@@ -137,7 +137,7 @@ const MainPage: React.FC<MainPage> = ({
                   fetchTerritory={fetchTerritory}
                 />
               ) : (
-                <div>No statement selected.</div>
+                <div>no statement selected</div>
               )}
             </Box>
             <div className="flex flex-col">
