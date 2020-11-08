@@ -27,9 +27,9 @@ export const DropDown: React.FC<DropDown> = ({ options, value, onChange }) => {
         colors: {
           ...theme.colors,
           text: "white",
-          primary25: "grey",
-          primary50: "grey",
-          primary: "black",
+          primary25: "rgba(212, 219, 244, 0.3)",
+          primary50: "rgba(212, 219, 244, 0.3)",
+          primary: "rgb(9, 16, 52)",
         },
       })}
     />

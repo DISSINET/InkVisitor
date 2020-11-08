@@ -4,13 +4,13 @@ import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { useAuth0 } from "@auth0/auth0-react";
 
-import { Box, Button, Header } from "components";
+import { Box, Button, Footer, Header } from "components";
 import { ResponseTerritoryI } from "@shared/types/response-territory";
 import { fetchMeta } from "redux/actions/metaActions";
 import { fetchTerritory } from "redux/actions/territoryTreeActions";
 import { setActiveStatementId } from "redux/actions/statementActions";
 import { setAuthToken } from "redux/actions/authActions";
-import { Tree } from "pages/MainPage/Containers/Tree/Tree";
+import { TerritoryTree } from "pages/MainPage/Containers/TerritoryTree/TerritoryTree";
 import { ResponseMetaI } from "@shared/types/response-meta";
 import { StatementsTable } from "./Containers/StatementsTable/StatementsTable";
 import { StatementEditor } from "./Containers/StatementEditor/StatementEditor";
@@ -111,7 +111,7 @@ const MainPage: React.FC<MainPage> = ({
         {isAuthenticated ? (
           <div className="flex">
             <Box height={heightContent} width={200} label={"Territories"}>
-              <Tree
+              <TerritoryTree
                 territory={territory}
                 fetchTerritory={fetchTerritory}
                 setActiveStatementId={setActiveStatementId}
@@ -136,7 +136,9 @@ const MainPage: React.FC<MainPage> = ({
                   setActiveStatementId={setActiveStatementId}
                   fetchTerritory={fetchTerritory}
                 />
-              ) : null}
+              ) : (
+                <div>no statement selected</div>
+              )}
             </Box>
             <div className="flex flex-col">
               <Box height={400} width={350} label={"Search"}></Box>
@@ -151,7 +153,7 @@ const MainPage: React.FC<MainPage> = ({
           <div className="p-5">{"Login to continue.."}</div>
         )}
       </DndProvider>
-      {/* footer */}
+      <Footer height={heightFooter} />
       {/* <Header height={heightFooter} paddingY={0} paddingX={10} color="grey" /> */}
     </>
   );
