@@ -262,6 +262,14 @@ const loadStatementsTables = async (next) => {
         codingSheet.entities
       );
 
+      // time
+      processTime(
+        mainStatement,
+        statement.id_location,
+        statement.id_location_from,
+        statement.id_location_to
+      );
+
       // ar property
       if (
         checkValidId(statement.action_or_relation_property_type_id) &&
@@ -519,6 +527,66 @@ const addResourceToEntityId = (id, codeSheetResources) => {
   } else {
     return id;
   }
+};
+
+const processTime = (
+  statement,
+  locationWhereIds,
+  locationFromIds,
+  locationToIds
+) => {
+  const locationTypes = [
+    {
+      ids: locationWhereIds,
+      concept: "R0010_C0223",
+    },
+    {
+      ids: locationFromIds,
+      concept: "R0010_C0304",
+    },
+    {
+      ids: locationToIds,
+      concept: "R0010_C0305",
+    },
+  ];
+
+  const sameLocationType = "C0230";
+
+  locationTypes.forEach((locationType) => {
+    const locationIdValues = locationType.ids;
+
+    if (
+      locationIdValues &&
+      locationIdValues !== "NS" &&
+      locationIdValues !== "NA"
+    ) {
+      locationIdValues.split(" #").forEach((locationIdValue) => {
+        if (locationIdValue.includes("<")) {
+          // location value refers to another statement
+          const statementLocationId = locationIdValue
+            .replace("<", "")
+            .replace(">", "");
+          statement.data.props.push({
+            id: v4(),
+            origin: statement.id,
+            type: sameLocationType,
+            value: statementLocationId,
+            elvl: "1",
+            certainty: "1",
+          });
+        } else {
+          statement.data.props.push({
+            id: v4(),
+            origin: statement.id,
+            type: locationType.concept,
+            value: locationIdValue,
+            elvl: "1",
+            certainty: "1",
+          });
+        }
+      });
+    }
+  });
 };
 
 const processActant = (
