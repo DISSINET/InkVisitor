@@ -5,8 +5,10 @@ var fs = require("fs");
 /**
  * waterfall processing
  */
-const actants = [];
-const actions = [];
+var actants = [];
+var actions = [];
+
+var propsConfig = {};
 
 const loadStatementsTables = async (next) => {
   const tableActions = await loadSheet({
@@ -108,10 +110,6 @@ const loadStatementsTables = async (next) => {
       };
     });
 
-  /**
-   * parse all ENTITY sheets
-   */
-
   addTerritoryActant("entity-tables", {
     label: "entity tables",
     parent: "T0",
@@ -120,6 +118,71 @@ const loadStatementsTables = async (next) => {
     language: "la",
   });
 
+  /**
+   * prepare props config from CONCEPT list
+   *  */
+  const conceptSheet = entitySheets.find((es) => es.id === "R0010");
+
+  const conceptsData = await loadSheet({
+    spread: conceptSheet.spread,
+    sheet: conceptSheet.sheet,
+  });
+
+  const propsList = {};
+  conceptsData.forEach((conceptRow) => {
+    const entityTableNames = conceptRow.instance_entity_type.split(" #");
+    entityTableNames.forEach((entityTableName) => {
+      const type = conceptRow.masterlists_column_name;
+      const value = conceptRow.masterlists_column_value;
+      const id = conceptRow.id;
+
+      if (type && type !== "NA") {
+        if (type in propsList) {
+          propsList[type].push({
+            id,
+            value,
+            type,
+          });
+        } else {
+          propsList[type] = [
+            {
+              id,
+              value,
+              type,
+            },
+          ];
+        }
+      }
+    });
+  });
+
+  Object.keys(propsList).forEach((propName) => {
+    const propValues = propsList[propName];
+    if (propValues.length === 1) {
+      propsConfig[propName] = {
+        type: "value",
+        conceptId: propValues[0].id,
+      };
+    } else {
+      const conceptRow = propValues.find((v) => v.value === "NA");
+      if (conceptRow) {
+        propsConfig[propName] = {
+          type: "concept",
+          conceptId: conceptRow.id,
+          mappingDict: {},
+        };
+        propValues.forEach((propValue) => {
+          propsConfig[propName]["mappingDict"][propValue.value] = propValue.id;
+        });
+      } else {
+        console.log("warning: wrong prop:", propName, propValues);
+      }
+    }
+  });
+
+  /**
+   * parse all ENTITY sheets
+   */
   for (var esi = 0; esi < entitySheets.length; esi++) {
     const entitySheet = entitySheets[esi];
 
@@ -155,11 +218,7 @@ const loadStatementsTables = async (next) => {
         entitySheet.entityType
       );
 
-      parseEntityPropsInRow(
-        entityRow,
-        entitySheet.entityType,
-        entityRowTerritory
-      );
+      parseEntityPropsInRow(entityRow, entityRowTerritory);
     });
 
     entitySheet.texts.forEach((text) => {
@@ -225,7 +284,7 @@ const loadStatementsTables = async (next) => {
           elvl: statement.epistemological_level || "1",
           modality: statement.modality || "1",
           text: statement.text,
-          note: statement.note,
+          note: `NOTE: ${statement.note}, LOCATION: ${statement.location_text}, TIME: ${statement.time_note}`,
           props: [],
           actants: [],
         },
@@ -262,13 +321,17 @@ const loadStatementsTables = async (next) => {
         codingSheet.entities
       );
 
-      // time
-      processTime(
+      // location
+      processLocation(
         mainStatement,
         statement.id_location,
         statement.id_location_from,
         statement.id_location_to
       );
+
+      // time
+      // TODO
+      //processTime(mainStatement, statement);
 
       // ar property
       if (
@@ -374,96 +437,45 @@ const addResourceActant = (id, data) => {
 };
 
 // Parsing props in entity tables
+const parseEntityPropsInRow = (row, territory) => {
+  Object.keys(row).forEach((tableProp) => {
+    if (Object.keys(propsConfig).includes(tableProp)) {
+      // check empty value
+      if (row[tableProp]) {
+        const propType = propsConfig[tableProp].type;
 
-const propsConfig = {
-  P: {
-    name: {
-      type: "value",
-      conceptId: "R0010_C0325",
-    },
-    surname: {
-      type: "value",
-      conceptId: "R0010_C0324",
-    },
-    occupation_type: {
-      type: "value",
-      conceptId: "R0010_C0318",
-    },
-    occupation_general: {
-      type: "value",
-      conceptId: "R0010_C0315",
-    },
-    occupation_or_office: {
-      type: "value",
-      conceptId: "R0010_C0314",
-    },
-    education: {
-      type: "value",
-      conceptId: "R0010_C0319",
-    },
-    sex: {
-      type: "concept",
-      conceptId: "R0010_C0320",
-      mappingFn: (tableValue) => {
-        if (tableValue === "m") {
-          return "R0010_C0172";
-        } else if (tableValue === "f") {
-          return "R0010_C0171";
-        } else {
-          false;
-        }
-      },
-    },
-  },
-  G: {},
-  C: {},
-  L: {},
-  O: {},
-  E: {},
-};
+        // CONCEPT type
+        if (propType === "concept") {
+          const conceptValueId =
+            propsConfig[tableProp].mappingDict[row[tableProp]];
 
-const parseEntityPropsInRow = (row, entityId, territory) => {
-  if (entityId in propsConfig) {
-    const entityPropConfig = propsConfig[entityId];
-
-    Object.keys(row).forEach((tableProp) => {
-      if (Object.keys(entityPropConfig).includes(tableProp)) {
-        // check empty value
-        if (row[tableProp]) {
-          const propType = entityPropConfig[tableProp].type;
-
-          // CONCEPT type
-          if (propType === "concept") {
-            const conceptValueId = entityPropConfig[tableProp].mappingFn(
-              row[tableProp]
-            );
-
+          if (conceptValueId) {
             createEmptyPropStatement(
               row.id,
-              entityPropConfig[tableProp].conceptId,
+              propsConfig[tableProp].conceptId,
               conceptValueId,
               territory
             );
-            // VALUE type
-          } else if (propType === "value") {
-            const value = row[tableProp];
-            const valueId = v4();
-
-            // add actant
-            addEntityActant(valueId, value, "V");
-
-            // add statement
-            createEmptyPropStatement(
-              row.id,
-              entityPropConfig[tableProp].conceptId,
-              valueId,
-              territory
-            );
           }
+          // VALUE type
+        } else if (propType === "value") {
+          const value = row[tableProp];
+          const valueId = v4();
+
+          // add actant
+          addEntityActant(valueId, value, "V");
+
+          // add statement
+          createEmptyPropStatement(
+            row.id,
+            propsConfig[tableProp].conceptId,
+            valueId,
+            territory
+          );
         }
       }
-    });
-  }
+    }
+  });
 };
 
 /**
@@ -529,7 +541,7 @@ const addResourceToEntityId = (id, codeSheetResources) => {
   }
 };
 
-const processTime = (
+const processLocation = (
   statement,
   locationWhereIds,
   locationFromIds,
@@ -600,8 +612,9 @@ const processActant = (
   if (checkValidId(actantIdValues)) {
     actantIdValues.split(" #").forEach((actantIdValue) => {
       // asign elvl and certainty
+
       let elvl = actantIdValue.includes("[") ? "2" : "1";
-      let certainty = actantIdValue.includes("[") ? "2" : "1";
+      let certainty = "1";
 
       // remove brackets
       const actantIdClean = actantIdValue.replace("[", "").replace("]", "");

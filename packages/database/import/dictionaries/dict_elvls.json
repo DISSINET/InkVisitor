@@ -2,16 +2,16 @@
   {
     "value": "1",
     "label": "textual",
-    "info": "translates what is explicitly in the text "
+    "info": "translates what is explicitly in the text"
   },
   {
     "value": "2",
-    "label": "interpretative",
-    "info": "interpretation of what is explicitly in the text "
+    "label": "interpretive",
+    "info": "interpretation of what is explicitly in the text"
   },
   {
     "value": "3",
-    "label": "ontic",
-    "info": "translates what is explicitly in the text "
+    "label": "inferential",0
+    "info": "inferred from the text"
   }
 ]
