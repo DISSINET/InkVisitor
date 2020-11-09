@@ -225,7 +225,7 @@ const loadStatementsTables = async (next) => {
           elvl: statement.epistemological_level || "1",
           modality: statement.modality || "1",
           text: statement.text,
-          note: statement.note,
+          note: `NOTE: ${statement.note}, LOCATION: ${statement.location_text}, TIME: ${statement.time_note}`,
           props: [],
           actants: [],
         },
@@ -262,13 +262,17 @@ const loadStatementsTables = async (next) => {
         codingSheet.entities
       );
 
-      // time
-      processTime(
+      // location
+      processLocation(
         mainStatement,
         statement.id_location,
         statement.id_location_from,
         statement.id_location_to
       );
+
+      // time
+      // TODO
+      //processTime(mainStatement, statement);
 
       // ar property
       if (
@@ -529,7 +533,7 @@ const addResourceToEntityId = (id, codeSheetResources) => {
   }
 };
 
-const processTime = (
+const processLocation = (
   statement,
   locationWhereIds,
   locationFromIds,
@@ -600,8 +604,9 @@ const processActant = (
   if (checkValidId(actantIdValues)) {
     actantIdValues.split(" #").forEach((actantIdValue) => {
       // asign elvl and certainty
+
       let elvl = actantIdValue.includes("[") ? "2" : "1";
-      let certainty = actantIdValue.includes("[") ? "2" : "1";
+      let certainty = "1";
 
       // remove brackets
       const actantIdClean = actantIdValue.replace("[", "").replace("]", "");
