@@ -10,10 +10,10 @@ import { fetchMeta } from "redux/actions/metaActions";
 import { fetchTerritory } from "redux/actions/territoryTreeActions";
 import { setActiveStatementId } from "redux/actions/statementActions";
 import { setAuthToken } from "redux/actions/authActions";
-import { TerritoryTree } from "pages/MainPage/Containers/TerritoryTree/TerritoryTree";
+import { TerritoryTree } from "pages/MainPage/TerritoryTree/TerritoryTree";
 import { ResponseMetaI } from "@shared/types/response-meta";
-import { StatementsTable } from "./Containers/StatementsTable/StatementsTable";
-import { StatementEditor } from "./Containers/StatementEditor/StatementEditor";
+import { StatementsTable } from "./StatementsTable/StatementsTable";
+import { StatementEditor } from "./StatementEditor/StatementEditor";
 import { useHistory, useParams } from "react-router-dom";
 import { StatementI } from "@shared/types";
 

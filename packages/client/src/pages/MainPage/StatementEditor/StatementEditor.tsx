@@ -2,6 +2,7 @@ import { FaTrashAlt, FaPlus } from "react-icons/fa";
 import React, { useEffect, useState } from "react";
 
 import { Entities } from "types";
+import { ActantSuggester } from "pages/MainPage/components/ActantSuggester/ActantSuggester";
 import { Tag, Button, Input, Suggester, DropDown } from "components";
 import { StatementI, ResponseMetaI, ActantI } from "@shared/types";
 import { SuggestionI } from "components/Suggester/Suggester";
