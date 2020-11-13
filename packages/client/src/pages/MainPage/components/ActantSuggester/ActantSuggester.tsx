@@ -58,12 +58,15 @@ export const ActantSuggester: React.FC<ActantSuggester> = ({
       }}
       onCreate={() => {
         onCreate(entity, typed);
+        setTyped("");
       }}
       onPick={(created: SuggestionI) => {
         onPick(created);
+        setTyped("");
       }}
       onDrop={(item: DropItemI) => {
         onDrop(item);
+        setTyped("");
       }}
     />
   );
