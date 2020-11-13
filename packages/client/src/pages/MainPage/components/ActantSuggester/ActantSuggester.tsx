@@ -8,7 +8,7 @@ import { ActantI } from "@shared/types";
 import { getActants } from "api/getActants";
 
 interface ActantSuggester {
-  entityIds: string[];
+  entityIds: readonly string[];
   onPick: Function;
   onDrop: Function;
   onCreate: Function;
@@ -41,7 +41,6 @@ export const ActantSuggester: React.FC<ActantSuggester> = ({
         setTyped(newTyped);
         if (newTyped.length > MINLENGTHOFTYPEDTOSUGGEST) {
           const suggestedActants = await getActants(entity, newTyped);
-          console.log(suggestedActants);
           setSuggestions(
             suggestedActants.map((a: ActantI) => ({
               id: a.id,
@@ -57,8 +56,8 @@ export const ActantSuggester: React.FC<ActantSuggester> = ({
       onChangeCategory={(newEntityTypeId: string) => {
         setEntity(newEntityTypeId);
       }}
-      onCreate={(suggestion: SuggestionI) => {
-        console.log("suggestion " + suggestion.id + " picked");
+      onCreate={() => {
+        onCreate(entity, typed);
       }}
       onPick={(created: SuggestionI) => {
         onPick(created);

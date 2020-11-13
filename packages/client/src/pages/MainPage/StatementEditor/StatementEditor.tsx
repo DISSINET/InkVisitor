@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import { Entities } from "types";
 import {
   ActantSuggester,
-  IDropItem,
+  DropItemI,
 } from "pages/MainPage/components/ActantSuggester/ActantSuggester";
 import { Tag, Button, Input, Suggester, DropDown } from "components";
 import { StatementI, ResponseMetaI, ActantI } from "@shared/types";
@@ -26,6 +26,49 @@ interface StatementEditor {
   setActiveStatementId: (id: string) => void;
   fetchTerritory: (id: string) => void;
 }
+
+const EntitiesActant = [
+  "P",
+  "R",
+  "G",
+  "O",
+  "C",
+  "L",
+  "V",
+  "E",
+  "S",
+  "T",
+] as const;
+
+const EntitiesPropType = ["C"] as const;
+
+const EntitiesPropValue = [
+  "T",
+  "S",
+  "R",
+  "P",
+  "G",
+  "O",
+  "C",
+  "L",
+  "V",
+  "E",
+] as const;
+
+const EntitiesResource = ["R"] as const;
+
+const EntitiesTags = [
+  "P",
+  "T",
+  "R",
+  "G",
+  "O",
+  "C",
+  "L",
+  "V",
+  "E",
+  "S",
+] as const;
 
 /**
  * Setting the statement
@@ -122,7 +165,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
 
   const addNewStatementActant = (actantId: string) => {
     const newStatement = { ...statement };
-    console.log("adding new statement", newStatement);
+
     newStatement.data.actants.push({
       id: uuidv4(),
       actant: actantId,
@@ -132,6 +175,22 @@ export const StatementEditor: React.FC<StatementEditor> = ({
     });
     checkActant(actantId);
     setStatement(newStatement);
+  };
+
+  const createNewActant = async (
+    entity: typeof EntitiesActant[number],
+    label: string
+  ): Promise<false | string> => {
+    const newActant: ActantI = {
+      id: uuidv4(),
+      class: entity,
+      data: {
+        label: label,
+      },
+      meta: {},
+    };
+    const createResponse = await createActant(newActant);
+    return createResponse && createResponse.id ? createResponse.id : false;
   };
 
   const removeStatementActant = (actantId: string) => {
@@ -176,29 +235,30 @@ export const StatementEditor: React.FC<StatementEditor> = ({
     }
   };
 
-  const updateStatementReference = (
-    resourceId: string,
-    propName: "part" | "type",
-    newValue: string
-  ) => {
-    const newStatement = { ...statement };
-    const referenceToChange = newStatement.data.references.find(
-      (a) => a.resource === resourceId
-    );
-    if (referenceToChange) {
-      referenceToChange[propName] = newValue;
-      setStatement(newStatement);
-    }
-  };
-
   const addNewReference = (resourceId: string) => {
     const newStatement = { ...statement };
     newStatement.data.references.push({
+      id: uuidv4(),
       resource: resourceId,
       part: "",
       type: "P",
     });
     setStatement(newStatement);
+  };
+
+  const updateStatementReference = (
+    referenceId: string,
+    propName: "part" | "type",
+    newValue: string
+  ) => {
+    const newStatement = { ...statement };
+    const referenceToChange = newStatement.data.references.find(
+      (a) => a.id === referenceId
+    );
+    if (referenceToChange) {
+      referenceToChange[propName] = newValue;
+      setStatement(newStatement);
+    }
   };
 
   const removeStatementReference = (resourceId: string) => {
@@ -283,32 +343,8 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                             label={type.data.label}
                           />
                         ) : (
-                          <Suggester
-                            suggestions={[]}
-                            typed={""}
-                            category={Entities["C"].id}
-                            categories={[
-                              {
-                                value: Entities["C"].id,
-                                label: Entities["C"].id,
-                              },
-                            ]}
-                            onType={(newTyped: string) =>
-                              console.log("newTyped", newTyped)
-                            }
-                            onChangeCategory={(
-                              newEntityTypeId: keyof typeof Entities
-                            ) => {
-                              console.log("newEntityType", newEntityTypeId);
-                            }}
-                            onCreate={(suggestion: SuggestionI) => {
-                              console.log(
-                                "suggestion " + suggestion.id + " picked"
-                              );
-                            }}
-                            onPick={(created: SuggestionI) => {
-                              console.log("on picked");
-                            }}
+                          <ActantSuggester
+                            entityIds={EntitiesPropType}
                             onDrop={(item: {
                               id: string;
                               type: string;
@@ -319,6 +355,32 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                                   actantProp.id,
                                   "type",
                                   item.id
+                                );
+                              }
+                            }}
+                            onPick={async (suggestion: SuggestionI) => {
+                              await checkActant(suggestion.id);
+                              updateActantProp(
+                                actantProp.id,
+                                "type",
+                                suggestion.id
+                              );
+                            }}
+                            onCreate={async (
+                              entity: typeof EntitiesActant[number],
+                              label: string
+                            ) => {
+                              const actantId = await createNewActant(
+                                entity,
+                                label
+                              );
+
+                              if (actantId !== false) {
+                                await checkActant(actantId);
+                                updateActantProp(
+                                  actantProp.id,
+                                  "type",
+                                  actantId
                                 );
                               }
                             }}
@@ -335,35 +397,32 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                           />
                         ) : (
                           <ActantSuggester
-                            entityIds={Object.keys(Entities)}
-                            onPick={() => {}}
-                            onDrop={() => {}}
-                            onCreate={() => {}}
-                          />
-                          /*
-                          <Suggester
-                            suggestions={[]}
-                            typed={""}
-                            category={Entities["P"].id}
-                            categories={Object.keys(Entities).map((ek) => ({
-                              value: Entities[ek].id,
-                              label: Entities[ek].id,
-                            }))}
-                            onType={(newTyped: string) =>
-                              console.log("newTyped", newTyped)
-                            }
-                            onChangeCategory={(
-                              newEntityTypeId: keyof typeof Entities
-                            ) => {
-                              console.log("newEntityType", newEntityTypeId);
-                            }}
-                            onCreate={(suggestion: SuggestionI) => {
-                              console.log(
-                                "suggestion " + suggestion.id + " picked"
+                            entityIds={EntitiesPropValue}
+                            onPick={async (suggestion: SuggestionI) => {
+                              await checkActant(suggestion.id);
+                              updateActantProp(
+                                actantProp.id,
+                                "value",
+                                suggestion.id
                               );
                             }}
-                            onPick={(created: SuggestionI) => {
-                              console.log("on picked");
+                            onCreate={async (
+                              entity: typeof EntitiesActant[number],
+                              label: string
+                            ) => {
+                              const actantId = await createNewActant(
+                                entity,
+                                label
+                              );
+
+                              if (actantId !== false) {
+                                await checkActant(actantId);
+                                updateActantProp(
+                                  actantProp.id,
+                                  "value",
+                                  actantId
+                                );
+                              }
                             }}
                             onDrop={(item: {
                               id: string;
@@ -373,7 +432,6 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                               updateActantProp(actantProp.id, "value", item.id);
                             }}
                           />
-                          */
                         )}
                       </td>
                       <td key="certainty">
@@ -422,7 +480,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
     }
   };
   return (
-    <div className="statement-editor" key={JSON.stringify(statement)}>
+    <div className="statement-editor">
       {statement && (
         <>
           <div style={{ marginBottom: "4rem" }}>
@@ -587,47 +645,24 @@ export const StatementEditor: React.FC<StatementEditor> = ({
               </table>
               <div className="mt-1">
                 <ActantSuggester
-                  entityIds={Object.keys(Entities)}
-                  onPick={() => {}}
-                  onDrop={(item: IDropItem) => {
+                  entityIds={EntitiesActant}
+                  onPick={(suggestion: SuggestionI) => {
+                    addNewStatementActant(suggestion.id);
+                  }}
+                  onDrop={(item: DropItemI) => {
                     addNewStatementActant(item.id);
                   }}
-                  onCreate={() => {}}
+                  onCreate={async (
+                    entity: typeof EntitiesActant[number],
+                    label: string
+                  ) => {
+                    const actantId = await createNewActant(entity, label);
+                    if (actantId !== false) {
+                      await checkActant(actantId);
+                      addNewStatementActant(actantId);
+                    }
+                  }}
                 />
-                {/*
-
-                            <Suggester
-                              suggestions={[]}
-                              typed={""}
-                              category={Entities["P"].id}
-                              categories={Object.keys(Entities).map((ek) => ({
-                                value: Entities[ek].id,
-                                label: Entities[ek].id,
-                              }))}
-                              onType={(newTyped: string) =>
-                                console.log("newTyped", newTyped)
-                              }
-                              onChangeCategory={(
-                                newEntityTypeId: keyof typeof Entities
-                              ) => {
-                                console.log("newEntityType", newEntityTypeId);
-                              }}
-                              onCreate={(suggestion: SuggestionI) => {
-                                console.log("suggestion " + suggestion.id + " picked");
-                              }}
-                              onPick={(created: SuggestionI) => {
-                                console.log("on picked");
-                              }}
-                              onDrop={(item: {
-                                id: string;
-                                type: string;
-                                category: string;
-                              }) => {
-                                addNewStatementActant(item.id);
-                              }}
-                            />
-
-                            */}
               </div>
             </div>
 
@@ -666,7 +701,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                         (a) => a.id === reference.resource
                       );
                       return resource ? (
-                        <tr key={resource.id}>
+                        <tr key={reference.id}>
                           <td>
                             <Tag
                               propId={reference.resource}
@@ -680,7 +715,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                               type="text"
                               onChangeFn={(newValue: string) => {
                                 updateStatementReference(
-                                  resource.id,
+                                  reference.id,
                                   "part",
                                   newValue
                                 );
@@ -693,7 +728,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                               type="select"
                               onChangeFn={(newValue: string) => {
                                 updateStatementReference(
-                                  resource.id,
+                                  reference.id,
                                   "type",
                                   newValue
                                 );
@@ -719,37 +754,25 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                 </table>
               ) : null}
               <div className="">
-                <Suggester
-                  suggestions={[]}
-                  typed={""}
-                  category={Entities["P"].id}
-                  categories={[
-                    {
-                      value: Entities["R"].id,
-                      label: Entities["R"].id,
-                    },
-                  ]}
-                  onType={(newTyped: string) =>
-                    console.log("newTyped", newTyped)
-                  }
-                  onChangeCategory={(
-                    newEntityTypeId: keyof typeof Entities
-                  ) => {
-                    console.log("newEntityType", newEntityTypeId);
+                <ActantSuggester
+                  entityIds={EntitiesResource}
+                  onPick={async (suggestion: SuggestionI) => {
+                    await checkActant(suggestion.id);
+                    addNewReference(suggestion.id);
                   }}
-                  onCreate={(suggestion: SuggestionI) => {
-                    console.log("suggestion " + suggestion.id + " picked");
-                  }}
-                  onPick={(created: SuggestionI) => {
-                    console.log("on picked");
-                  }}
-                  onDrop={(item: {
-                    id: string;
-                    type: string;
-                    category: string;
-                  }) => {
+                  onDrop={(item: DropItemI) => {
                     if (item.category === "R") {
                       addNewReference(item.id);
+                    }
+                  }}
+                  onCreate={async (
+                    entity: typeof EntitiesResource[number],
+                    label: string
+                  ) => {
+                    const actantId = await createNewActant(entity, label);
+                    if (actantId !== false) {
+                      await checkActant(actantId);
+                      addNewReference(actantId);
                     }
                   }}
                 />
@@ -786,34 +809,28 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                 })}
               </div>
               <div className="">
-                <Suggester
-                  suggestions={[]}
-                  typed={""}
-                  category={Entities["P"].id}
-                  categories={Object.keys(Entities).map((ek) => ({
-                    value: Entities[ek].id,
-                    label: Entities[ek].id,
-                  }))}
-                  onType={(newTyped: string) =>
-                    console.log("newTyped", newTyped)
-                  }
-                  onChangeCategory={(
-                    newEntityTypeId: keyof typeof Entities
-                  ) => {
-                    console.log("newEntityType", newEntityTypeId);
-                  }}
-                  onCreate={(suggestion: SuggestionI) => {
-                    console.log("suggestion " + suggestion.id + " picked");
-                  }}
-                  onPick={(created: SuggestionI) => {
-                    console.log("on picked");
-                  }}
+                <ActantSuggester
+                  entityIds={EntitiesTags}
                   onDrop={(item: {
                     id: string;
                     type: string;
                     category: string;
                   }) => {
                     addNewTag(item.id);
+                  }}
+                  onPick={async (suggestion: SuggestionI) => {
+                    await checkActant(suggestion.id);
+                    addNewTag(suggestion.id);
+                  }}
+                  onCreate={async (
+                    entity: typeof EntitiesTags[number],
+                    label: string
+                  ) => {
+                    const actantId = await createNewActant(entity, label);
+                    if (actantId !== false) {
+                      await checkActant(actantId);
+                      addNewTag(actantId);
+                    }
                   }}
                 />
               </div>
