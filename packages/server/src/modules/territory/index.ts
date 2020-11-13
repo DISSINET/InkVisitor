@@ -85,7 +85,7 @@ export default Router()
           ...referenceIds,
           ...propActantIds,
         ]),
-      ];
+      ].filter((a) => a);
 
       //console.log("allActantIds", allActantIds);
 
