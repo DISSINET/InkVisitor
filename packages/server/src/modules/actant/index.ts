@@ -17,7 +17,12 @@ const CLASS_NAME = "E";
  * RethinkDB actant load function.
  */
 async function findOne(actantId: string): Promise<any> {
-  return await getOneActant(actantId, CLASS_NAME);
+  let conn = await r.connect(rethinkConfig);
+  let result = await r.table(TABLE_NAME).get(actantId).run(conn);
+
+  conn.close();
+
+  return result;
 }
 
 /**
@@ -29,10 +34,7 @@ async function findAll(
   filters: any = {}
 ): Promise<any> {
   let conn = await r.connect(rethinkConfig);
-
-  console.log(filters);
-
-  const baseFilterKeys = ["label", "class"];
+  const baseFilterKeys = ["class"];
 
   const dataFilterKeys = [
     "certainty",
@@ -62,6 +64,12 @@ async function findAll(
   let result = await r
     .table(TABLE_NAME)
     .filter(filterObject)
+    .filter((doc: any) =>
+      filters.label
+        ? doc.hasFields("data")("label") &&
+          doc("data")("label").match(filters.label)
+        : true
+    )
     .limit(limit)
     .run(conn);
 
@@ -186,7 +194,7 @@ export default Router()
   /**
    * Retrieve the actants collection based on filters
    */
-  .get("/actants", async (request: Request, response: Response) => {
+  .get("/query", async (request: Request, response: Response) => {
     const filters = request.query; //.filter( (x) => !(x in ["offset", "limit"]) )
     const actants = await findAll(100, 0, filters);
 
@@ -200,7 +208,7 @@ export default Router()
   .get("/:uuid", async (request: Request, response: Response) => {
     const uuid: string = request.params.uuid;
 
-    console.log(uuid);
+    console.log("asking for single actant", uuid);
 
     const actant: any | null = await findOne(uuid);
 
