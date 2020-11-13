@@ -66,7 +66,7 @@ async function findAll(
     .filter((doc: any) =>
       filters.label
         ? doc.hasFields("data")("label") &&
-          doc("data")("label").match(filters.label)
+          doc("data")("label").downcase().match(filters.label.toLowerCase())
         : true
     )
     .limit(limit)
@@ -113,8 +113,6 @@ async function updateOne(actant: any): Promise<any> {
 async function deleteOne(actantId: string): Promise<any> {
   let conn = await r.connect(rethinkConfig);
   console.log("deleting actant", actantId);
-
-  console.log(actantId);
 
   const result = await r.table(TABLE_NAME).get(actantId).delete().run(conn);
 
