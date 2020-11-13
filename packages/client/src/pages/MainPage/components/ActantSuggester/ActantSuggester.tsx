@@ -1,11 +1,71 @@
 import React, { useState } from "react";
 import { Tag, Button, Input, Suggester, DropDown } from "components";
+import { Entities } from "types";
+import { SuggestionI } from "components/Suggester/Suggester";
 
-interface ActantSuggester {}
+import { ActantI } from "@shared/types";
 
-export const ActantSuggester: React.FC<ActantSuggester> = ({}) => {
+import { getActants } from "api/getActants";
+
+interface ActantSuggester {
+  entityIds: string[];
+  onPick: Function;
+  onDrop: Function;
+  onCreate: Function;
+}
+
+export interface DropItemI {
+  id: string;
+  type: string;
+  category: string;
+}
+
+const MINLENGTHOFTYPEDTOSUGGEST = 2;
+export const ActantSuggester: React.FC<ActantSuggester> = ({
+  entityIds,
+  onPick,
+  onDrop,
+  onCreate,
+}) => {
   const [typed, setTyped] = useState("");
   const [suggestions, setSuggestions] = useState([]);
+  const [entity, setEntity] = useState(entityIds[0]);
 
-  return <div />;
+  return (
+    <Suggester
+      suggestions={suggestions}
+      typed={typed}
+      category={entity}
+      categories={entityIds.map((i) => ({ value: i, label: i }))}
+      onType={async (newTyped: string) => {
+        setTyped(newTyped);
+        if (newTyped.length > MINLENGTHOFTYPEDTOSUGGEST) {
+          const suggestedActants = await getActants(entity, newTyped);
+          console.log(suggestedActants);
+          setSuggestions(
+            suggestedActants.map((a: ActantI) => ({
+              id: a.id,
+              label: a.data.label,
+              category: entity,
+              color: Entities[entity].color,
+            }))
+          );
+        } else {
+          setSuggestions([]);
+        }
+      }}
+      onChangeCategory={(newEntityTypeId: string) => {
+        setEntity(newEntityTypeId);
+      }}
+      onCreate={(suggestion: SuggestionI) => {
+        console.log("suggestion " + suggestion.id + " picked");
+      }}
+      onPick={(created: SuggestionI) => {
+        onPick(created);
+      }}
+      onDrop={(item: DropItemI) => {
+        onDrop(item);
+      }}
+    />
+  );
 };
