@@ -11,7 +11,6 @@ import { r } from "rethinkdb-ts";
 // Repository functions
 //-----------------------------------------------------------------------------
 const TABLE_NAME = "actants";
-const CLASS_NAME = "E";
 
 /**
  * RethinkDB actant load function.
@@ -84,10 +83,10 @@ async function findAll(
  */
 async function saveOne(actant: any): Promise<any> {
   let conn = await r.connect(rethinkConfig);
-
-  //const result = await r.table(TABLE_NAME).insert(actant).run(conn);
-
+  const result = await r.table(TABLE_NAME).insert(actant).run(conn);
   conn.close();
+
+  return result;
 }
 
 /**
@@ -140,6 +139,7 @@ export default Router()
     "/",
     async (request: Request, response: Response, next: NextFunction) => {
       const actant = request.body;
+
       console.log("creating actant", actant.id);
 
       if (!actant) {
@@ -148,7 +148,7 @@ export default Router()
         });
       }
 
-      await saveOne(actant);
+      const result = await saveOne(actant);
 
       return response.status(CREATED).json(actant).end();
     }

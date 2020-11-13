@@ -151,7 +151,7 @@ const MainPage: React.FC<MainPage> = ({
                 <StatementEditor
                   activeStatement={activeStatement}
                   meta={meta}
-                  actants={territory.actants}
+                  activeTerritoryActants={territory.actants}
                   setActiveStatementId={setActiveStatementId}
                   fetchTerritory={fetchTerritory}
                 />
