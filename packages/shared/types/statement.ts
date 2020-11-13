@@ -6,7 +6,7 @@ export interface StatementI extends ActantI {
     label: string;
     action: string;
     territory: string;
-    references: { resource: string; part: string; type: string }[];
+    references: { id: string; resource: string; part: string; type: string }[];
     tags: string[];
     certainty: string;
     elvl: string;
