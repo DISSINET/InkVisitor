@@ -43,10 +43,10 @@ button:focus {
 
   .section {
     .section-heading-first {
-      @apply text-lg font-bold text-center mb-4;
+      @apply text-lg font-bold border-solid text-center mb-4 text-gray-700;
     }
     .section-heading {
-      @apply text-lg font-bold mt-4 border-t-4 border-solid text-center mb-4;
+      @apply text-lg font-bold mt-4 border-t-4 border-solid text-center mb-4 text-gray-700;
     }
   }
 
