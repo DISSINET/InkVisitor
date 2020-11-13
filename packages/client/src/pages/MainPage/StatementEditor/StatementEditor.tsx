@@ -569,81 +569,106 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                   </tr>
                 </thead>
                 <tbody>
-                  {statement.data.actants.map((statementActant, sai) => {
-                    const actant = actants.find(
-                      (a) => a.id === statementActant.actant
-                    );
-                    return actant && actant.class && Entities[actant.class] ? (
-                      <tr key={statementActant.id}>
-                        <td key="actants">
-                          <Tag
-                            key={"1"}
-                            propId={actant.id}
-                            category={Entities[actant.class].id}
-                            color={Entities[actant.class].color}
-                            label={actant.data.label}
-                          />
-                        </td>
-                        <td key="position">
-                          <Input
-                            type="select"
-                            onChangeFn={(newValue: string) =>
-                              updateStatementActant(
-                                statementActant.id,
-                                "position",
-                                newValue
-                              )
-                            }
-                            options={meta.dictionaries.positions}
-                            value={statementActant.position}
-                          />
-                        </td>
-                        <td key="certainty">
-                          <Input
-                            type="select"
-                            onChangeFn={(newValue: string) =>
-                              updateStatementActant(
-                                statementActant.id,
-                                "certainty",
-                                newValue
-                              )
-                            }
-                            options={meta.dictionaries.certainties}
-                            value={statementActant.certainty}
-                          />
-                        </td>
-                        <td key="elvl">
-                          <Input
-                            type="select"
-                            onChangeFn={(newValue: string) =>
-                              updateStatementActant(
-                                statementActant.id,
-                                "elvl",
-                                newValue
-                              )
-                            }
-                            options={meta.dictionaries.elvls}
-                            value={statementActant.elvl}
-                          />
-                        </td>
-                        <td key="actions">
-                          <Button
-                            key="d"
-                            icon={<FaTrashAlt />}
-                            color="danger"
-                            onClick={() => {
-                              removeStatementActant(statementActant.id);
-                            }}
-                          />
-                        </td>
-                      </tr>
-                    ) : (
-                      <tr key={sai} />
-                    );
-                  })}
+                  {statement.data.actants
+                    .sort(function (a, b) {
+                      const positionRanks = (position: string) => {
+                        if (position === "s") {
+                          return 1;
+                        } else if (position === "a1") {
+                          return 2;
+                        } else if (position === "a2") {
+                          return 3;
+                        } else if (position === "a3") {
+                          return 4;
+                        } else if (position === "p") {
+                          return 5;
+                        } else {
+                          return 6;
+                        }
+                      };
+
+                      return positionRanks(a.position) >
+                        positionRanks(b.position)
+                        ? 1
+                        : -1;
+                    })
+                    .map((statementActant, sai) => {
+                      const actant = actants.find(
+                        (a) => a.id === statementActant.actant
+                      );
+                      return actant &&
+                        actant.class &&
+                        Entities[actant.class] ? (
+                        <tr key={statementActant.id}>
+                          <td key="actants">
+                            <Tag
+                              key={"1"}
+                              propId={actant.id}
+                              category={Entities[actant.class].id}
+                              color={Entities[actant.class].color}
+                              label={actant.data.label}
+                            />
+                          </td>
+                          <td key="position">
+                            <Input
+                              type="select"
+                              onChangeFn={(newValue: string) =>
+                                updateStatementActant(
+                                  statementActant.id,
+                                  "position",
+                                  newValue
+                                )
+                              }
+                              options={meta.dictionaries.positions}
+                              value={statementActant.position}
+                            />
+                          </td>
+                          <td key="certainty">
+                            <Input
+                              type="select"
+                              onChangeFn={(newValue: string) =>
+                                updateStatementActant(
+                                  statementActant.id,
+                                  "certainty",
+                                  newValue
+                                )
+                              }
+                              options={meta.dictionaries.certainties}
+                              value={statementActant.certainty}
+                            />
+                          </td>
+                          <td key="elvl">
+                            <Input
+                              type="select"
+                              onChangeFn={(newValue: string) =>
+                                updateStatementActant(
+                                  statementActant.id,
+                                  "elvl",
+                                  newValue
+                                )
+                              }
+                              options={meta.dictionaries.elvls}
+                              value={statementActant.elvl}
+                            />
+                          </td>
+                          <td key="actions">
+                            <Button
+                              key="d"
+                              icon={<FaTrashAlt />}
+                              color="danger"
+                              onClick={() => {
+                                removeStatementActant(statementActant.id);
+                              }}
+                            />
+                          </td>
+                        </tr>
+                      ) : (
+                        <tr key={sai} />
+                      );
+                    })}
                 </tbody>
               </table>
-              <div className="mt-1">
+              <div className="mt-1" key="actants-suggester">
                 <ActantSuggester
                   entityIds={EntitiesActant}
                   onPick={(suggestion: SuggestionI) => {
@@ -683,7 +708,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
             {
               // references
             }
-            <div className="section section-references">
+            <div className="section section-references" key="references">
               <h2 className="section-heading">References</h2>
               {statement.data.references.length ? (
                 <table className="references-table">
@@ -781,7 +806,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
             {
               // tags
             }
-            <div className="section section-tags">
+            <div className="section section-tags" key="tags">
               <h2 className="section-heading">Tags</h2>
               <div className="tags">
                 {statement.data.tags.map((tagId) => {
