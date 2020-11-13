@@ -269,11 +269,13 @@ const loadStatementsTables = async (next) => {
           territory: statement.text_part_id,
           references: [
             {
+              id: v4(),
               resource: statement.primary_reference_id,
               part: statement.primary_reference_part,
               type: "P",
             },
             {
+              id: v4(),
               resource: statement.secondary_reference_id,
               part: statement.secondary_reference_part,
               type: "S",

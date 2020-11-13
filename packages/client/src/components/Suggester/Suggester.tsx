@@ -32,6 +32,8 @@ interface SuggesterProps {
   onDrop: Function;
 }
 
+const MAXSUGGESTIONDISPLAYED = 10;
+
 export const Suggester: React.FC<SuggesterProps> = ({
   suggestions,
   placeholder,
@@ -61,15 +63,17 @@ export const Suggester: React.FC<SuggesterProps> = ({
 
   return (
     <div
-      ref={dropRef}
       className={classNames(
         "suggestor",
         "component",
-        "inline-flex",
+        "relative",
         isOver && "opacity-75"
       )}
     >
-      <div className={classNames("suggestor-input", "inline-flex")}>
+      <div
+        ref={dropRef}
+        className={classNames("suggestor-input", "inline-flex")}
+      >
         <Input
           type="select"
           value={category}
@@ -102,32 +106,37 @@ export const Suggester: React.FC<SuggesterProps> = ({
             "suggestor-list",
             "bg-grey",
             "absolute",
+            "bg-opacity-75",
             "p-1",
-            "w-auto"
+            "w-auto",
+            "z-10"
           )}
-          style={{ top: "36px", left: "47px" }}
+          style={{}}
         >
-          {suggestions.map((suggestion, si) => (
-            <div
-              className={classNames("suggestion-line", "block", "p-1")}
-              key={si}
-            >
-              <Tag
-                label={suggestion.label}
-                category={suggestion.category}
-                color={suggestion.color}
-                button={
-                  <Button
-                    label=">"
-                    color="primary"
-                    onClick={() => {
-                      onPick(suggestion);
-                    }}
-                  />
-                }
-              />
-            </div>
-          ))}
+          {suggestions
+            .filter((s, si) => si < MAXSUGGESTIONDISPLAYED)
+            .map((suggestion, si) => (
+              <div
+                className={classNames("suggestion-line", "block", "p-1")}
+                key={si}
+              >
+                <Tag
+                  propId={suggestion.id}
+                  label={suggestion.label}
+                  category={suggestion.category}
+                  color={suggestion.color}
+                  button={
+                    <Button
+                      label=">"
+                      color="primary"
+                      onClick={() => {
+                        onPick(suggestion);
+                      }}
+                    />
+                  }
+                />
+              </div>
+            ))}
         </div>
       ) : null}
     </div>

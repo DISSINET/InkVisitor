@@ -11,13 +11,17 @@ import { r } from "rethinkdb-ts";
 // Repository functions
 //-----------------------------------------------------------------------------
 const TABLE_NAME = "actants";
-const CLASS_NAME = "E";
 
 /**
  * RethinkDB actant load function.
  */
 async function findOne(actantId: string): Promise<any> {
-  return await getOneActant(actantId, CLASS_NAME);
+  let conn = await r.connect(rethinkConfig);
+  let result = await r.table(TABLE_NAME).get(actantId).run(conn);
+
+  conn.close();
+
+  return result;
 }
 
 /**
@@ -29,10 +33,7 @@ async function findAll(
   filters: any = {}
 ): Promise<any> {
   let conn = await r.connect(rethinkConfig);
-
-  console.log(filters);
-
-  const baseFilterKeys = ["label", "class"];
+  const baseFilterKeys = ["class"];
 
   const dataFilterKeys = [
     "certainty",
@@ -62,6 +63,12 @@ async function findAll(
   let result = await r
     .table(TABLE_NAME)
     .filter(filterObject)
+    .filter((doc: any) =>
+      filters.label
+        ? doc.hasFields("data")("label") &&
+          doc("data")("label").downcase().match(filters.label.toLowerCase())
+        : true
+    )
     .limit(limit)
     .run(conn);
 
@@ -76,10 +83,10 @@ async function findAll(
  */
 async function saveOne(actant: any): Promise<any> {
   let conn = await r.connect(rethinkConfig);
-
-  //const result = await r.table(TABLE_NAME).insert(actant).run(conn);
-
+  const result = await r.table(TABLE_NAME).insert(actant).run(conn);
   conn.close();
+
+  return result;
 }
 
 /**
@@ -107,8 +114,6 @@ async function deleteOne(actantId: string): Promise<any> {
   let conn = await r.connect(rethinkConfig);
   console.log("deleting actant", actantId);
 
-  console.log(actantId);
-
   const result = await r.table(TABLE_NAME).get(actantId).delete().run(conn);
 
   conn.close();
@@ -132,6 +137,7 @@ export default Router()
     "/",
     async (request: Request, response: Response, next: NextFunction) => {
       const actant = request.body;
+
       console.log("creating actant", actant.id);
 
       if (!actant) {
@@ -140,7 +146,7 @@ export default Router()
         });
       }
 
-      await saveOne(actant);
+      const result = await saveOne(actant);
 
       return response.status(CREATED).json(actant).end();
     }
@@ -186,7 +192,7 @@ export default Router()
   /**
    * Retrieve the actants collection based on filters
    */
-  .get("/actants", async (request: Request, response: Response) => {
+  .get("/query", async (request: Request, response: Response) => {
     const filters = request.query; //.filter( (x) => !(x in ["offset", "limit"]) )
     const actants = await findAll(100, 0, filters);
 
@@ -200,7 +206,7 @@ export default Router()
   .get("/:uuid", async (request: Request, response: Response) => {
     const uuid: string = request.params.uuid;
 
-    console.log(uuid);
+    console.log("asking for single actant", uuid);
 
     const actant: any | null = await findOne(uuid);
 

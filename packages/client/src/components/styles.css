@@ -1,6 +1,8 @@
 :root {
 }
-*, ::before, ::after {
+*,
+::before,
+::after {
   text-rendering: optimizeLegibility;
   /* -webkit-font-smoothing: antialiased; */
   /* -moz-osx-font-smoothing: grayscale; */
@@ -14,6 +16,7 @@ body {
   min-width: 100%;
   font-family: "Roboto", sans-serif;
   letter-spacing: 0.2px;
+  overflow: hidden;
 }
 
 .btn {
