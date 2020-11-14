@@ -15,7 +15,7 @@ body {
   min-width: 100%;
   font-family: "Roboto", sans-serif;
   letter-spacing: 0.2px;
-  overflow: hidden;
+  /* overflow: hidden; */
 }
 
 .btn {

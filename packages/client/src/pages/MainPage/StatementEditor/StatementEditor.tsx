@@ -882,7 +882,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
               <div className="action-button">
                 <Button
                   label="Save"
-                  color="info"
+                  color="success"
                   onClick={() => {
                     updateActant(statement);
                     fetchTerritory(activeStatementCopy.data.territory);
