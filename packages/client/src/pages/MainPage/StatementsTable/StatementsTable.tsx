@@ -306,9 +306,7 @@ export const StatementsTable: React.FC<StatementsTableProps> = ({
         show={showSubmit}
         onCancel={() => setShowSubmit(false)}
         onSubmit={() => {
-          deleteActant(actantId).then(() =>
-            toast.success("Statement deleted!")
-          );
+          deleteActant(actantId).then(() => toast.dark("Statement deleted!"));
           setActantId("");
           setActiveStatementId("");
           fetchTerritory(currentTerritoryId);

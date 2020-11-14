@@ -17,7 +17,9 @@ body {
   letter-spacing: 0.2px;
   /* overflow: hidden; */
 }
-
+.muni-font {
+  /* font-family: muni; */
+}
 .btn {
   @apply m-4 px-2 py-1 text-white border-none font-bold rounded bg-primary;
 }

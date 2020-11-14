@@ -33,7 +33,8 @@ export const Box: React.FC<BoxProps> = ({
     "text-white",
     "font-bold",
     "p-2",
-    "text-lg"
+    "text-lg",
+    "muni-font"
   );
   const contentClasses = classNames(
     "box-content",
