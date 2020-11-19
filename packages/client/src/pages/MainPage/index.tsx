@@ -4,9 +4,11 @@ import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { useAuth0 } from "@auth0/auth0-react";
 
+import { Entities } from "types";
+
 import { Box, Button, Footer, Header } from "components";
 import { TerritoryCreateModal } from "pages/MainPage/components/TerritoryCreateModal/TerritoryCreateModal";
-import { ResponseTerritoryI } from "@shared/types/response-territory";
+import { ResponseTerritoryI, ActantI, StatementI } from "@shared/types";
 import { fetchMeta } from "redux/actions/metaActions";
 import { fetchTerritory } from "redux/actions/territoryTreeActions";
 import { setActiveStatementId } from "redux/actions/statementActions";
@@ -16,7 +18,9 @@ import { ResponseMetaI } from "@shared/types/response-meta";
 import { StatementsTable } from "./StatementsTable/StatementsTable";
 import { StatementEditor } from "./StatementEditor/StatementEditor";
 import { useHistory, useParams } from "react-router-dom";
-import { StatementI } from "@shared/types";
+import { v4 as uuidv4 } from "uuid";
+
+import { createActant } from "api/createActant";
 
 interface MainPage {
   fetchMeta: () => void;
@@ -48,6 +52,39 @@ const MainPage: React.FC<MainPage> = ({
     territoryId: string;
     statementId: string;
   }>();
+
+  const createNewStatement = async () => {
+    // wtf?
+    const entityClass: "S" = "S";
+    const newStatementId = uuidv4();
+    const newStatement = {
+      id: newStatementId,
+      class: entityClass,
+      data: {
+        label: "",
+        action: "A0093",
+        territory: territoryId,
+        references: [],
+        tags: [],
+        certainty: "1",
+        elvl: "1",
+        modality: "1",
+        text: "",
+        note: "",
+        props: [],
+        actants: [],
+      },
+      meta: {},
+    };
+
+    const createResponse = await createActant(newStatement);
+
+    if (createResponse && createResponse.id) {
+      await fetchTerritory(territoryId);
+      await setActiveStatementId(newStatementId);
+      history.push(`/${territoryId}/${newStatementId}`);
+    }
+  };
 
   // opening and closing modal for creating new territory
   const [createTerritoryModalOpen, setCreateTerritoryModalOpen] = useState(
@@ -152,6 +189,7 @@ const MainPage: React.FC<MainPage> = ({
                 activeStatementId={statementId}
                 fetchTerritory={fetchTerritory}
                 setActiveStatementId={setActiveStatementId}
+                createNewStatement={createNewStatement}
               />
             </Box>
             <Box height={heightContent} width={720} label={"Editor"}>

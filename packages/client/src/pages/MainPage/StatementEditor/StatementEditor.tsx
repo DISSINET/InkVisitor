@@ -85,7 +85,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
     ValueType<OptionTypeBase>
   >();
 
-  // todo - check whether we need to create copies of props
+  // todo - check whether we really need to create copies of props
   const activeStatementCopy: StatementI = JSON.parse(
     JSON.stringify(activeStatement)
   );
