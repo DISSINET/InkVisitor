@@ -1,8 +1,8 @@
-import React from "react";
+import React, { SetStateAction, Dispatch } from "react";
 
 import { Tag, Button } from "components";
 import { Entities } from "types";
-import { ResponseTerritoryI } from "@shared/types/response-territory";
+import { ResponseTerritoryI } from "@shared/types";
 import { TerritoryI } from "@shared/types";
 import { useHistory } from "react-router-dom";
 
@@ -10,12 +10,14 @@ interface TerritoryTree {
   territory?: ResponseTerritoryI;
   fetchTerritory: (id: string) => void;
   setActiveStatementId: (id: string) => void;
+  setCreateTerritoryModalOpen: Dispatch<SetStateAction<boolean>>;
 }
 
 export const TerritoryTree: React.FC<TerritoryTree> = ({
   territory,
   fetchTerritory,
   setActiveStatementId,
+  setCreateTerritoryModalOpen,
 }) => {
   const history = useHistory();
   const territoryParent = territory && (territory.data.parent as string);
@@ -45,6 +47,7 @@ export const TerritoryTree: React.FC<TerritoryTree> = ({
                 territoryParent &&
                 territoryParent.length > 0 && (
                   <Button
+                    color="primary"
                     onClick={() => {
                       fetchTerritory(territoryParent);
                       history.push(`/${territoryParent}`);
@@ -57,6 +60,14 @@ export const TerritoryTree: React.FC<TerritoryTree> = ({
             />
           </div>
         )}
+      </div>
+      <div className="flex flex-col mt-1">
+        <Button
+          onClick={() => {
+            setCreateTerritoryModalOpen(true);
+          }}
+          label="+ new child territory"
+        />
       </div>
       <div className="flex flex-col mt-1">
         {territory && territory.children && territory.children.length > 0 && (
