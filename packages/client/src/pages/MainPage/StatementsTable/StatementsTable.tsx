@@ -7,7 +7,6 @@ import { Tag, Button, Submit, Toast } from "components";
 import { Entities } from "types";
 import { ResponseMetaI, ActantI } from "@shared/types";
 import { deleteActant } from "api/deleteActant";
-import "./table.css";
 import { toast } from "react-toastify";
 import { useHistory, useParams } from "react-router-dom";
 
@@ -133,11 +132,13 @@ export const StatementsTable: React.FC<StatementsTableProps> = ({
                   (a: IActant) => a.position !== "s"
                 )
               : [];
+          const isOversized = rowActants.length > 4;
+          const rowActantsSlice = rowActants.slice(0, 4);
 
           return (
             <div className="table-subjects inline-flex">
-              {rowActants.length > 0
-                ? rowActants.map((actant: IActant, si: number) => {
+              {rowActantsSlice.length > 0
+                ? rowActantsSlice.map((actant: IActant, si: number) => {
                     const actantObject =
                       actants &&
                       (actants.find(
@@ -157,6 +158,7 @@ export const StatementsTable: React.FC<StatementsTableProps> = ({
                     );
                   })
                 : null}
+              {isOversized && <div className="flex items-end">{"..."}</div>}
             </div>
           );
         },
@@ -174,10 +176,11 @@ export const StatementsTable: React.FC<StatementsTableProps> = ({
                 onClick={() => (row.isExpanded = !row.isExpanded)}
               />
             </span>
+            <Button key="d" icon={<FaClone size={14} />} color="success" />
             <Button
               key="e"
               icon={<FaPencilAlt size={14} />}
-              color="primary"
+              color="warning"
               onClick={() => {
                 activeStatementId === row.values.id
                   ? setActiveStatementId("")
@@ -187,7 +190,6 @@ export const StatementsTable: React.FC<StatementsTableProps> = ({
                   : history.push(`/${territoryId}/${row.values.id}`);
               }}
             />
-            <Button key="d" icon={<FaClone size={14} />} color="warning" />
             <Button
               key="r"
               icon={<FaTrashAlt size={14} />}
@@ -304,9 +306,7 @@ export const StatementsTable: React.FC<StatementsTableProps> = ({
         show={showSubmit}
         onCancel={() => setShowSubmit(false)}
         onSubmit={() => {
-          deleteActant(actantId).then(() =>
-            toast.success("Statement deleted!")
-          );
+          deleteActant(actantId).then(() => toast.dark("Statement deleted!"));
           setActantId("");
           setActiveStatementId("");
           fetchTerritory(currentTerritoryId);
