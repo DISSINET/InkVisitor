@@ -4,25 +4,33 @@
 ::before,
 ::after {
   text-rendering: optimizeLegibility;
-  /* -webkit-font-smoothing: antialiased; */
-  /* -moz-osx-font-smoothing: grayscale; */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 html {
 }
 
 body {
   position: absolute;
-  min-height: 100vh;
   min-width: 100%;
   font-family: "Roboto", sans-serif;
   letter-spacing: 0.2px;
-  overflow: hidden;
+  /* overflow: hidden; */
 }
-
+.muni-font {
+  /* font-family: muni; */
+}
 .btn {
   @apply m-4 px-2 py-1 text-white border-none font-bold rounded bg-primary;
 }
-
+button:focus {
+  outline: 0 !important;
+}
+.table {
+  .odd-strip {
+    background-color: rgba(212, 219, 244, 0.4);
+  }
+}
 .statement-editor {
   table {
     th {
@@ -37,10 +45,10 @@ body {
 
   .section {
     .section-heading-first {
-      @apply text-lg font-bold text-center mb-4;
+      @apply text-lg font-bold border-solid text-center mb-4 text-gray-700;
     }
     .section-heading {
-      @apply text-lg font-bold mt-4 border-t-4 border-solid text-center mb-4;
+      @apply text-lg font-bold mt-4 border-t-4 border-solid text-center mb-4 text-gray-700;
     }
   }
 

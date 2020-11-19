@@ -33,14 +33,14 @@ export const Submit: React.FC<Submit> = ({
           </ModalContent>
           <ModalFooter>
             <Button
-              color="danger"
               label="Submit"
+              color="danger"
               onClick={(): void => onSubmit()}
               marginRight
             />
             <Button
               label="Cancel"
-              color="warning"
+              color="info"
               onClick={(): void => onCancel()}
             />
           </ModalFooter>
