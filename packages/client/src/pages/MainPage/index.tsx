@@ -5,6 +5,7 @@ import { HTML5Backend } from "react-dnd-html5-backend";
 import { useAuth0 } from "@auth0/auth0-react";
 
 import { Box, Button, Footer, Header } from "components";
+import { TerritoryCreateModal } from "pages/MainPage/components/TerritoryCreateModal/TerritoryCreateModal";
 import { ResponseTerritoryI } from "@shared/types/response-territory";
 import { fetchMeta } from "redux/actions/metaActions";
 import { fetchTerritory } from "redux/actions/territoryTreeActions";
@@ -47,6 +48,12 @@ const MainPage: React.FC<MainPage> = ({
     territoryId: string;
     statementId: string;
   }>();
+
+  // opening and closing modal for creating new territory
+  const [createTerritoryModalOpen, setCreateTerritoryModalOpen] = useState(
+    false
+  );
+
   const {
     user,
     isAuthenticated,
@@ -118,13 +125,23 @@ const MainPage: React.FC<MainPage> = ({
         }
       />
       <DndProvider backend={HTML5Backend}>
-        {isAuthenticated ? (
+        {isAuthenticated && meta ? (
           <div className="flex">
+            <TerritoryCreateModal
+              meta={meta}
+              parentTerritory={territory}
+              fetchTerritory={fetchTerritory}
+              setCreateTerritoryModalOpen={setCreateTerritoryModalOpen}
+              createTerritoryModalOpen={createTerritoryModalOpen}
+            />
             <Box height={heightContent} width={200} label={"Territories"}>
               <TerritoryTree
                 territory={territory}
                 fetchTerritory={fetchTerritory}
                 setActiveStatementId={setActiveStatementId}
+                setCreateTerritoryModalOpen={() => {
+                  setCreateTerritoryModalOpen(true);
+                }}
               />
             </Box>
             <Box height={heightContent} width={650} label={"Statements"}>

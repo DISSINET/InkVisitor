@@ -59,13 +59,16 @@ export const ActantSuggester: React.FC<ActantSuggester> = ({
       onCreate={() => {
         onCreate(entity, typed);
         setTyped("");
+        setSuggestions([]);
       }}
       onPick={(created: SuggestionI) => {
         onPick(created);
         setTyped("");
+        setSuggestions([]);
       }}
       onDrop={(item: DropItemI) => {
         onDrop(item);
+        setSuggestions([]);
         setTyped("");
       }}
     />
