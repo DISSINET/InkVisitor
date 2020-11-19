@@ -23,6 +23,8 @@ export const Button: React.FC<ButtonProps> = ({
   const classes = [
     "component",
     "button",
+    "flex",
+    "items-center",
     icon ? "px-1" : "px-2",
     "py-1",
     "font-bold",

@@ -1,7 +1,13 @@
 import React, { useMemo, useState } from "react";
 import { useTable, Cell, Row, useExpanded } from "react-table";
 import classNames from "classnames";
-import { FaInfo, FaPencilAlt, FaTrashAlt, FaClone } from "react-icons/fa";
+import {
+  FaInfo,
+  FaPencilAlt,
+  FaTrashAlt,
+  FaClone,
+  FaPlus,
+} from "react-icons/fa";
 
 import { Tag, Button, Submit, Toast } from "components";
 import { Entities } from "types";
@@ -17,6 +23,7 @@ interface StatementsTableProps {
   activeStatementId: string;
   setActiveStatementId: (id: string) => void;
   fetchTerritory: (id: string) => void;
+  createNewStatement: () => void;
 }
 
 interface IActant {
@@ -44,6 +51,7 @@ export const StatementsTable: React.FC<StatementsTableProps> = ({
   setActiveStatementId,
   activeStatementId,
   fetchTerritory,
+  createNewStatement,
 }) => {
   const history = useHistory();
   const [showSubmit, setShowSubmit] = useState(false);
@@ -244,6 +252,16 @@ export const StatementsTable: React.FC<StatementsTableProps> = ({
   return (
     <>
       <div className={wrapperClasses}>
+        <div>
+          <Button
+            icon={<FaPlus size={12} style={{ marginRight: "2px" }} />}
+            color="primary"
+            label="statement"
+            onClick={() => {
+              createNewStatement();
+            }}
+          />
+        </div>
         <table {...getTableProps()} className={tableClasses}>
           <thead className="border-b-2 border-black">
             {headerGroups.map((headerGroup, key) => (
