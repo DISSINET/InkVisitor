@@ -28,7 +28,7 @@ const store: Store<
 > = createStore(
   rootReducer,
   initialState,
-  compose(applyMiddleware(...middleWare))
+  composeWithDevTools(applyMiddleware(...middleWare))
 );
 
 export default store;

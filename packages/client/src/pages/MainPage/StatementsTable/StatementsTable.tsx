@@ -109,10 +109,13 @@ export const StatementsTable: React.FC<StatementsTableProps> = ({
                 )
               : [];
 
+          const isOversized = subjects.length > 4;
+          const subjectsSlice = subjects.slice(0, 1);
+
           return (
-            <div className="table-subjects">
-              {subjects.length
-                ? subjects.map((actant: IActant, si: number) => {
+            <div className="table-subjects inline-flex">
+              {subjectsSlice.length
+                ? subjectsSlice.map((actant: IActant, si: number) => {
                     const subjectObject =
                       actants &&
                       (actants.find(
@@ -130,6 +133,7 @@ export const StatementsTable: React.FC<StatementsTableProps> = ({
                     ) : null;
                   })
                 : null}
+              {isOversized && <div className="flex items-end">{"..."}</div>}
             </div>
           );
         },
@@ -236,17 +240,36 @@ export const StatementsTable: React.FC<StatementsTableProps> = ({
 
   const renderRowSubComponent = React.useCallback(
     ({ row }) => (
-      <pre
-        style={{
-          fontSize: "10px",
-          maxWidth: "100px",
-        }}
-        className={"break-words"}
-      >
-        <code>{JSON.stringify({ values: row.values }, null, 2)}</code>
-      </pre>
+      <div className="bg-info w-full text-white p-2">
+        <div className="flex flex-row">
+          <div className="mr-4">Modality: {row.values.data.modality}</div>
+          <div className="mr-4">Elvl: {row.values.data.elvl}</div>
+          <div className="">Certainty: {row.values.data.certainty}</div>
+        </div>
+        <div className="mt-2">Text: {row.values.data.text}</div>
+        <div className="mt-2">Note: {row.values.data.note}</div>
+        <div className="mt-2">
+          Tags:{" "}
+          {row.values.data.tags.map((tagId: string, si: number) => {
+            const actantObject =
+              actants && (actants.find((a) => a.id === tagId) as ActantITable);
+            const entity = Entities[actantObject?.class];
+            return actantObject && entity ? (
+              <Tag
+                key={si}
+                propId={actantObject && actantObject.id}
+                category={entity.id}
+                color={entity.color}
+                marginRight
+              />
+            ) : (
+              <div key={si} />
+            );
+          })}
+        </div>
+      </div>
     ),
-    []
+    [actants]
   );
 
   const {
