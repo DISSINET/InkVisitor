@@ -12,8 +12,6 @@ import { SuggestionI } from "components/Suggester/Suggester";
 import { OptionTypeBase, ValueType } from "react-select";
 import "./editor.css";
 
-import { updateActant } from "api/updateActant";
-import { deleteActant } from "api/deleteActant";
 import { getActant } from "api/getActant";
 import { createActant } from "api/createActant";
 
@@ -23,8 +21,10 @@ interface StatementEditor {
   activeStatement: StatementI;
   activeTerritoryActants: ActantI[];
   meta: ResponseMetaI;
-  setActiveStatementId: (id: string) => void;
-  fetchTerritory: (id: string) => void;
+
+  actantDeleteFn: (id: string) => Promise<boolean>;
+  actantCreateFn: (actant: ActantI) => Promise<boolean>;
+  actantUpdateFn: (actant: ActantI) => Promise<boolean>;
 }
 
 const EntitiesActant = [
@@ -78,14 +78,16 @@ export const StatementEditor: React.FC<StatementEditor> = ({
   activeStatement,
   activeTerritoryActants,
   meta,
-  setActiveStatementId,
-  fetchTerritory,
+
+  actantDeleteFn,
+  actantCreateFn,
+  actantUpdateFn,
 }) => {
   const [selectedAction, setSelectedAction] = useState<
     ValueType<OptionTypeBase>
   >();
 
-  // todo - check whether we really need to create copies of props
+  // todo: check whether we really need to create copies of props
   const activeStatementCopy: StatementI = JSON.parse(
     JSON.stringify(activeStatement)
   );
@@ -93,10 +95,13 @@ export const StatementEditor: React.FC<StatementEditor> = ({
     JSON.stringify(activeTerritoryActants)
   );
 
+  // statement object that is edited
   const [statement, setStatement] = useState(activeStatementCopy);
 
+  // the list of all actants potentially needed to draw the editor component; may get updated when a new actant / prop is added
   const [actants, setActants] = useState(activeTerritoryActantsCopy);
 
+  // check whether the actant is in the list of actants or it should be added
   const checkActant = async (actantId: string) => {
     if (actants.find((a) => a.id === actantId)) {
       return true;
@@ -876,7 +881,9 @@ export const StatementEditor: React.FC<StatementEditor> = ({
               />
             </div>
           </div>
+
           {/* -------- Footer action buttons -------- */}
+
           <div className="editor-footer section section-actions absolute pt-1 pl-1 flex justify-end bg-primary">
             <div className="action-buttons">
               <div className="action-button">
@@ -884,8 +891,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                   label="Save"
                   color="success"
                   onClick={() => {
-                    updateActant(statement);
-                    fetchTerritory(activeStatementCopy.data.territory);
+                    actantUpdateFn(statement);
                   }}
                   marginRight
                 />
@@ -895,9 +901,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                   label="Delete"
                   color="danger"
                   onClick={() => {
-                    deleteActant(activeStatementCopy.id);
-                    setActiveStatementId("");
-                    fetchTerritory(statement.data.territory);
+                    actantDeleteFn(activeStatementCopy.id);
                   }}
                   marginRight
                 />
