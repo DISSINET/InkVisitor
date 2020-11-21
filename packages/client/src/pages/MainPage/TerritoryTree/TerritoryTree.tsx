@@ -1,29 +1,103 @@
-import React, { SetStateAction, Dispatch } from "react";
+import React, { useState } from "react";
 
-import { Tag, Button } from "components";
+import {
+  Tag,
+  Button,
+  Modal,
+  ModalHeader,
+  ModalCard,
+  ModalContent,
+  ModalFooter,
+  Input,
+} from "components";
+
+import { FaPlus } from "react-icons/fa";
 import { Entities } from "types";
 import { ResponseTerritoryI } from "@shared/types";
 import { TerritoryI } from "@shared/types";
-import { useHistory } from "react-router-dom";
 
 interface TerritoryTree {
   territory?: ResponseTerritoryI;
-  fetchTerritory: (id: string) => void;
-  setActiveStatementId: (id: string) => void;
-  setCreateTerritoryModalOpen: Dispatch<SetStateAction<boolean>>;
+  activeTerritoryChangeFn: (id: string) => void;
+  territoryCreateFn: (label: string) => Promise<boolean>;
 }
 
 export const TerritoryTree: React.FC<TerritoryTree> = ({
   territory,
-  fetchTerritory,
-  setActiveStatementId,
-  setCreateTerritoryModalOpen,
+  activeTerritoryChangeFn,
+  territoryCreateFn,
 }) => {
-  const history = useHistory();
   const territoryParent = territory && (territory.data.parent as string);
+
+  const [createModalOpen, setCreateModalOpen] = useState(false);
+  const [labelNew, setLabelNew] = useState("");
+
+  const createNew = async () => {
+    return territoryCreateFn(labelNew);
+  };
+
+  /**
+   * Modal window for assigning new territory
+   */
+  const renderModal = () => {
+    return (
+      <Modal
+        showModal={createModalOpen}
+        onClose={() => {
+          setCreateModalOpen(false);
+        }}
+      >
+        <ModalCard>
+          <ModalHeader
+            onClose={() => {
+              setCreateModalOpen(false);
+            }}
+            title="create new territory"
+          ></ModalHeader>
+          <ModalContent>
+            <div>
+              <Input
+                type="text"
+                label="label"
+                onChangeFn={(newValue: string) => {
+                  setLabelNew(newValue);
+                }}
+                value={labelNew}
+              />
+            </div>
+          </ModalContent>
+          <ModalFooter>
+            <div className="ml-2">
+              <Button
+                color="danger"
+                onClick={() => {
+                  setCreateModalOpen(false);
+                }}
+                label="cancel"
+              />
+            </div>
+            <div className="ml-2">
+              <Button
+                color="primary"
+                onClick={async () => {
+                  const created = await createNew();
+                  if (created) {
+                    setLabelNew("");
+                    setCreateModalOpen(false);
+                  }
+                }}
+                label="create"
+              />
+            </div>
+          </ModalFooter>
+        </ModalCard>
+      </Modal>
+    );
+  };
 
   return (
     <div>
+      {renderModal()}
       <div className="flex flex-col mt-1">
         <div className="mb-1">
           <h3>{"Selected territory: "}</h3>
@@ -49,9 +123,7 @@ export const TerritoryTree: React.FC<TerritoryTree> = ({
                   <Button
                     color="primary"
                     onClick={() => {
-                      fetchTerritory(territoryParent);
-                      history.push(`/${territoryParent}`);
-                      setActiveStatementId("");
+                      activeTerritoryChangeFn(territoryParent);
                     }}
                     label="<"
                   />
@@ -64,9 +136,10 @@ export const TerritoryTree: React.FC<TerritoryTree> = ({
       <div className="flex flex-col mt-1">
         <Button
           onClick={() => {
-            setCreateTerritoryModalOpen(true);
+            setCreateModalOpen(true);
           }}
-          label="+ new child territory"
+          icon={<FaPlus size={12} style={{ marginRight: "2px" }} />}
+          label="new child territory"
         />
       </div>
       <div className="flex flex-col mt-1">
@@ -86,9 +159,7 @@ export const TerritoryTree: React.FC<TerritoryTree> = ({
                     <>
                       <Button
                         onClick={() => {
-                          fetchTerritory(child.id);
-                          history.push(`/${child.id}`);
-                          setActiveStatementId("");
+                          activeTerritoryChangeFn(child.id);
                         }}
                         label=">"
                       />

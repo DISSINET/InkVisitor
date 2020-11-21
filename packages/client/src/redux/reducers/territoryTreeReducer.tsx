@@ -6,14 +6,9 @@ const initialState: ResponseTerritoryI = {
   id: "",
   data: {
     label: "",
-    content: "",
-    language: "",
     parent: "",
-    type: "",
   },
-  meta: {
-    created: { user: "", time: "" },
-  },
+  meta: {},
   children: [],
   parent: false,
   statements: [],

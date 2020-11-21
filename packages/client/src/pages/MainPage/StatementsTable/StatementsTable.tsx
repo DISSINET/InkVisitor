@@ -9,11 +9,10 @@ import {
   FaPlus,
 } from "react-icons/fa";
 
-import { Tag, Button, Submit, Toast } from "components";
+import { Tag, Button, Submit } from "components";
 import { Entities } from "types";
 import { ResponseMetaI, ActantI } from "@shared/types";
-import { deleteActant } from "api/deleteActant";
-import { toast } from "react-toastify";
+
 import { useHistory, useParams } from "react-router-dom";
 
 interface StatementsTableProps {
@@ -22,8 +21,8 @@ interface StatementsTableProps {
   actants: ActantI[];
   activeStatementId: string;
   setActiveStatementId: (id: string) => void;
-  fetchTerritory: (id: string) => void;
-  createNewStatement: () => void;
+  statementCreateFn: () => Promise<boolean>;
+  actantDeleteFn: (actantId: string) => Promise<boolean>;
 }
 
 interface IActant {
@@ -50,17 +49,24 @@ export const StatementsTable: React.FC<StatementsTableProps> = ({
   actants,
   setActiveStatementId,
   activeStatementId,
-  fetchTerritory,
-  createNewStatement,
+  statementCreateFn,
+  actantDeleteFn,
 }) => {
   const history = useHistory();
-  const [showSubmit, setShowSubmit] = useState(false);
-  const [actantId, setActantId] = useState("");
-  const [currentTerritoryId, setCurrentTerritoryId] = useState("");
+  const [deleteSubmitOpen, setDeleteSubmitOpen] = useState(false);
+  const [deleteActantId, setDeleteActantId] = useState("");
   const { territoryId } = useParams<{
     territoryId: string;
     statementId: string;
   }>();
+
+  const openDeleteSubmit = (actantId: string) => {
+    setDeleteActantId(actantId);
+    setDeleteSubmitOpen(true);
+  };
+  const closeDeleteSubmit = () => {
+    setDeleteSubmitOpen(false);
+  };
 
   const wrapperClasses = classNames("table-wrapper", "px-1");
   const tableClasses = classNames(
@@ -70,6 +76,21 @@ export const StatementsTable: React.FC<StatementsTableProps> = ({
     "table-auto",
     "text-sm"
   );
+
+  const createStatement = async () => {
+    const createResponse = await statementCreateFn();
+    if (createResponse) {
+      // do sth when the request was successful
+    }
+  };
+
+  const deleteStatement = async () => {
+    const deleteResponse = await actantDeleteFn(deleteActantId);
+
+    if (deleteResponse) {
+      closeDeleteSubmit();
+    }
+  };
 
   const columns = useMemo(
     () => [
@@ -203,10 +224,7 @@ export const StatementsTable: React.FC<StatementsTableProps> = ({
               icon={<FaTrashAlt size={14} />}
               color="danger"
               onClick={() => {
-                // const territoryId = row.values.data.territory;
-                setCurrentTerritoryId(row.values.data.territory);
-                setActantId(row.values.id);
-                setShowSubmit(true);
+                openDeleteSubmit(row.values.id);
               }}
             />
           </div>
@@ -257,9 +275,7 @@ export const StatementsTable: React.FC<StatementsTableProps> = ({
             icon={<FaPlus size={12} style={{ marginRight: "2px" }} />}
             color="primary"
             label="statement"
-            onClick={() => {
-              createNewStatement();
-            }}
+            onClick={createStatement}
           />
         </div>
         <table {...getTableProps()} className={tableClasses}>
@@ -320,18 +336,13 @@ export const StatementsTable: React.FC<StatementsTableProps> = ({
       </div>
       <Submit
         title={"Delete actant"}
-        text={`Do you really want to delete actant with ID [${actantId}]?`}
-        show={showSubmit}
-        onCancel={() => setShowSubmit(false)}
+        text={`Do you really want to delete actant with ID [${deleteActantId}]?`}
+        show={deleteSubmitOpen}
+        onCancel={() => closeDeleteSubmit()}
         onSubmit={() => {
-          deleteActant(actantId).then(() => toast.dark("Statement deleted!"));
-          setActantId("");
-          setActiveStatementId("");
-          fetchTerritory(currentTerritoryId);
-          setShowSubmit(false);
+          deleteStatement();
         }}
       />
-      <Toast />
     </>
   );
 };

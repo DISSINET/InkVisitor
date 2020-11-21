@@ -6,9 +6,15 @@ import { useAuth0 } from "@auth0/auth0-react";
 
 import { Entities } from "types";
 
-import { Box, Button, Footer, Header } from "components";
-import { TerritoryCreateModal } from "pages/MainPage/components/TerritoryCreateModal/TerritoryCreateModal";
-import { ResponseTerritoryI, ActantI, StatementI } from "@shared/types";
+import { toast } from "react-toastify";
+
+import { Box, Button, Footer, Header, Toast } from "components";
+import {
+  ResponseTerritoryI,
+  ActantI,
+  TerritoryI,
+  StatementI,
+} from "@shared/types";
 import { fetchMeta } from "redux/actions/metaActions";
 import { fetchTerritory } from "redux/actions/territoryTreeActions";
 import { setActiveStatementId } from "redux/actions/statementActions";
@@ -19,6 +25,8 @@ import { StatementsTable } from "./StatementsTable/StatementsTable";
 import { StatementEditor } from "./StatementEditor/StatementEditor";
 import { useHistory, useParams } from "react-router-dom";
 import { v4 as uuidv4 } from "uuid";
+
+import { deleteActant } from "api/deleteActant";
 
 import { createActant } from "api/createActant";
 
@@ -53,9 +61,20 @@ const MainPage: React.FC<MainPage> = ({
     statementId: string;
   }>();
 
-  const createNewStatement = async () => {
-    // wtf?
-    const entityClass: "S" = "S";
+  /**
+   * handling GLOBAL STATE
+   */
+  const activeTerritoryChange = async (territoryId: string) => {
+    fetchTerritory(territoryId);
+    history.push(`/${territoryId}`);
+    setActiveStatementId("");
+  };
+
+  /**
+   * handling STATEMENTS
+   */
+  const statementCreate = async () => {
+    const entityClass: "S" = "S"; // wtf?
     const newStatementId = uuidv4();
     const newStatement = {
       id: newStatementId,
@@ -84,12 +103,50 @@ const MainPage: React.FC<MainPage> = ({
       await setActiveStatementId(newStatementId);
       history.push(`/${territoryId}/${newStatementId}`);
     }
+    return !!createResponse;
   };
 
-  // opening and closing modal for creating new territory
-  const [createTerritoryModalOpen, setCreateTerritoryModalOpen] = useState(
-    false
-  );
+  /**
+   * handling TERRITORIES
+   */
+  const territoryCreate = async (territoryLabelToCreate: string) => {
+    console.log("creating territory with label", territoryLabelToCreate);
+
+    const newActant: TerritoryI = {
+      id: uuidv4(),
+      class: "T",
+      data: {
+        label: territoryLabelToCreate,
+        parent: territoryId,
+      },
+      meta: {},
+    };
+
+    const createResponse = await createActant(newActant);
+
+    if (createResponse && createResponse.id ? createResponse.id : false) {
+      fetchTerritory(territoryId);
+      return true;
+    } else {
+      return false;
+    }
+  };
+
+  /**
+   * handling all actants
+   */
+  const actantDelete = async (actantId: string) => {
+    const response = deleteActant(actantId);
+    if (response) {
+      toast.dark("Statement deleted!");
+
+      if (activeStatementId === actantId) {
+        setActiveStatementId("");
+      }
+      fetchTerritory(territoryId);
+    }
+    return !!response;
+  };
 
   const {
     user,
@@ -164,21 +221,11 @@ const MainPage: React.FC<MainPage> = ({
       <DndProvider backend={HTML5Backend}>
         {isAuthenticated && meta ? (
           <div className="flex">
-            <TerritoryCreateModal
-              meta={meta}
-              parentTerritory={territory}
-              fetchTerritory={fetchTerritory}
-              setCreateTerritoryModalOpen={setCreateTerritoryModalOpen}
-              createTerritoryModalOpen={createTerritoryModalOpen}
-            />
             <Box height={heightContent} width={200} label={"Territories"}>
               <TerritoryTree
                 territory={territory}
-                fetchTerritory={fetchTerritory}
-                setActiveStatementId={setActiveStatementId}
-                setCreateTerritoryModalOpen={() => {
-                  setCreateTerritoryModalOpen(true);
-                }}
+                activeTerritoryChangeFn={activeTerritoryChange}
+                territoryCreateFn={territoryCreate}
               />
             </Box>
             <Box height={heightContent} width={650} label={"Statements"}>
@@ -187,9 +234,9 @@ const MainPage: React.FC<MainPage> = ({
                 meta={meta}
                 actants={territory.actants}
                 activeStatementId={statementId}
-                fetchTerritory={fetchTerritory}
                 setActiveStatementId={setActiveStatementId}
-                createNewStatement={createNewStatement}
+                statementCreateFn={statementCreate}
+                actantDeleteFn={actantDelete}
               />
             </Box>
             <Box height={heightContent} width={720} label={"Editor"}>
@@ -218,6 +265,8 @@ const MainPage: React.FC<MainPage> = ({
           <div className="p-5">{"Login to continue.."}</div>
         )}
       </DndProvider>
+
+      <Toast />
       {isAuthenticated && <Footer height={heightFooter} />}
     </>
   );
