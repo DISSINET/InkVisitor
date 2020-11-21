@@ -2,7 +2,6 @@ import { ActionI } from "./action";
 import { ActantI } from "./actant";
 import { DictionaryEntryI } from "./dictionaryentry";
 import { EntityI } from "./entity";
-import { ResourceI } from "./resource";
 import { ResponseTerritoryI } from "./response-territory";
 import { ResponseMetaI } from "./response-meta";
 import { StatementI } from "./statement";
@@ -16,7 +15,6 @@ export type {
   DictionaryEntryI,
   EntityI,
   OptionI,
-  ResourceI,
   ResponseTerritoryI,
   ResponseMetaI,
   StatementI,
