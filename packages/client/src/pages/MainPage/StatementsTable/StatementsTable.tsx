@@ -21,7 +21,6 @@ interface StatementsTableProps {
   actants: ActantI[];
   activeStatementId: string;
   setActiveStatementId: (id: string) => void;
-  fetchTerritory: (id: string) => void;
   statementCreateFn: () => Promise<boolean>;
   actantDeleteFn: (actantId: string) => Promise<boolean>;
 }
@@ -50,7 +49,6 @@ export const StatementsTable: React.FC<StatementsTableProps> = ({
   actants,
   setActiveStatementId,
   activeStatementId,
-  fetchTerritory,
   statementCreateFn,
   actantDeleteFn,
 }) => {

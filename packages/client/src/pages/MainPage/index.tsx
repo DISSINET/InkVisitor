@@ -62,10 +62,18 @@ const MainPage: React.FC<MainPage> = ({
   }>();
 
   /**
+   * handling GLOBAL STATE
+   */
+  const activeTerritoryChange = async (territoryId: string) => {
+    fetchTerritory(territoryId);
+    history.push(`/${territoryId}`);
+    setActiveStatementId("");
+  };
+
+  /**
    * handling STATEMENTS
    */
-
-  const StatementCreate = async () => {
+  const statementCreate = async () => {
     const entityClass: "S" = "S"; // wtf?
     const newStatementId = uuidv4();
     const newStatement = {
@@ -127,7 +135,6 @@ const MainPage: React.FC<MainPage> = ({
   /**
    * handling all actants
    */
-
   const actantDelete = async (actantId: string) => {
     const response = deleteActant(actantId);
     if (response) {
@@ -217,8 +224,7 @@ const MainPage: React.FC<MainPage> = ({
             <Box height={heightContent} width={200} label={"Territories"}>
               <TerritoryTree
                 territory={territory}
-                fetchTerritory={fetchTerritory}
-                setActiveStatementId={setActiveStatementId}
+                activeTerritoryChangeFn={activeTerritoryChange}
                 territoryCreateFn={territoryCreate}
               />
             </Box>
@@ -228,9 +234,8 @@ const MainPage: React.FC<MainPage> = ({
                 meta={meta}
                 actants={territory.actants}
                 activeStatementId={statementId}
-                fetchTerritory={fetchTerritory}
                 setActiveStatementId={setActiveStatementId}
-                statementCreateFn={StatementCreate}
+                statementCreateFn={statementCreate}
                 actantDeleteFn={actantDelete}
               />
             </Box>

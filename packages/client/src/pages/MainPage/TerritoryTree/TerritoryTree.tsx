@@ -1,4 +1,4 @@
-import React, { SetStateAction, Dispatch, useState } from "react";
+import React, { useState } from "react";
 
 import {
   Tag,
@@ -15,22 +15,18 @@ import { FaPlus } from "react-icons/fa";
 import { Entities } from "types";
 import { ResponseTerritoryI } from "@shared/types";
 import { TerritoryI } from "@shared/types";
-import { useHistory } from "react-router-dom";
 
 interface TerritoryTree {
   territory?: ResponseTerritoryI;
-  fetchTerritory: (id: string) => void;
-  setActiveStatementId: (id: string) => void;
+  activeTerritoryChangeFn: (id: string) => void;
   territoryCreateFn: (label: string) => Promise<boolean>;
 }
 
 export const TerritoryTree: React.FC<TerritoryTree> = ({
   territory,
-  fetchTerritory,
-  setActiveStatementId,
+  activeTerritoryChangeFn,
   territoryCreateFn,
 }) => {
-  const history = useHistory();
   const territoryParent = territory && (territory.data.parent as string);
 
   const [createModalOpen, setCreateModalOpen] = useState(false);
@@ -127,9 +123,7 @@ export const TerritoryTree: React.FC<TerritoryTree> = ({
                   <Button
                     color="primary"
                     onClick={() => {
-                      fetchTerritory(territoryParent);
-                      history.push(`/${territoryParent}`);
-                      setActiveStatementId("");
+                      activeTerritoryChangeFn(territoryParent);
                     }}
                     label="<"
                   />
@@ -165,9 +159,7 @@ export const TerritoryTree: React.FC<TerritoryTree> = ({
                     <>
                       <Button
                         onClick={() => {
-                          fetchTerritory(child.id);
-                          history.push(`/${child.id}`);
-                          setActiveStatementId("");
+                          activeTerritoryChangeFn(child.id);
                         }}
                         label=">"
                       />
