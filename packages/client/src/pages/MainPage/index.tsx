@@ -7,8 +7,12 @@ import { useAuth0 } from "@auth0/auth0-react";
 import { Entities } from "types";
 
 import { Box, Button, Footer, Header } from "components";
-import { TerritoryCreateModal } from "pages/MainPage/components/TerritoryCreateModal/TerritoryCreateModal";
-import { ResponseTerritoryI, ActantI, StatementI } from "@shared/types";
+import {
+  ResponseTerritoryI,
+  ActantI,
+  TerritoryI,
+  StatementI,
+} from "@shared/types";
 import { fetchMeta } from "redux/actions/metaActions";
 import { fetchTerritory } from "redux/actions/territoryTreeActions";
 import { setActiveStatementId } from "redux/actions/statementActions";
@@ -86,10 +90,31 @@ const MainPage: React.FC<MainPage> = ({
     }
   };
 
-  // opening and closing modal for creating new territory
-  const [createTerritoryModalOpen, setCreateTerritoryModalOpen] = useState(
-    false
-  );
+  /**
+   * handling TERRITORIES
+   */
+  const territoryCreate = async (territoryLabelToCreate: string) => {
+    console.log("creating territory with label", territoryLabelToCreate);
+
+    const newActant: TerritoryI = {
+      id: uuidv4(),
+      class: "T",
+      data: {
+        label: territoryLabelToCreate,
+        parent: territoryId,
+      },
+      meta: {},
+    };
+
+    const createResponse = await createActant(newActant);
+
+    if (createResponse && createResponse.id ? createResponse.id : false) {
+      fetchTerritory(territoryId);
+      return true;
+    } else {
+      return false;
+    }
+  };
 
   const {
     user,
@@ -164,21 +189,12 @@ const MainPage: React.FC<MainPage> = ({
       <DndProvider backend={HTML5Backend}>
         {isAuthenticated && meta ? (
           <div className="flex">
-            <TerritoryCreateModal
-              meta={meta}
-              parentTerritory={territory}
-              fetchTerritory={fetchTerritory}
-              setCreateTerritoryModalOpen={setCreateTerritoryModalOpen}
-              createTerritoryModalOpen={createTerritoryModalOpen}
-            />
             <Box height={heightContent} width={200} label={"Territories"}>
               <TerritoryTree
                 territory={territory}
                 fetchTerritory={fetchTerritory}
                 setActiveStatementId={setActiveStatementId}
-                setCreateTerritoryModalOpen={() => {
-                  setCreateTerritoryModalOpen(true);
-                }}
+                territoryCreateFn={territoryCreate}
               />
             </Box>
             <Box height={heightContent} width={650} label={"Statements"}>
