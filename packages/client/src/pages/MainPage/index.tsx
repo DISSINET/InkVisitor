@@ -28,6 +28,7 @@ import { v4 as uuidv4 } from "uuid";
 
 import { deleteActant } from "api/deleteActant";
 
+import { updateActant } from "api/updateActant";
 import { createActant } from "api/createActant";
 
 interface MainPage {
@@ -73,9 +74,10 @@ const MainPage: React.FC<MainPage> = ({
   /**
    * handling STATEMENTS
    */
-  const statementCreate = async () => {
+  const statementCreateAndSet = async () => {
     const entityClass: "S" = "S"; // wtf?
     const newStatementId = uuidv4();
+
     const newStatement = {
       id: newStatementId,
       class: entityClass,
@@ -110,9 +112,7 @@ const MainPage: React.FC<MainPage> = ({
    * handling TERRITORIES
    */
   const territoryCreate = async (territoryLabelToCreate: string) => {
-    console.log("creating territory with label", territoryLabelToCreate);
-
-    const newActant: TerritoryI = {
+    const newTerritory: TerritoryI = {
       id: uuidv4(),
       class: "T",
       data: {
@@ -121,15 +121,7 @@ const MainPage: React.FC<MainPage> = ({
       },
       meta: {},
     };
-
-    const createResponse = await createActant(newActant);
-
-    if (createResponse && createResponse.id ? createResponse.id : false) {
-      fetchTerritory(territoryId);
-      return true;
-    } else {
-      return false;
-    }
+    return actantCreate(newTerritory);
   };
 
   /**
@@ -137,12 +129,33 @@ const MainPage: React.FC<MainPage> = ({
    */
   const actantDelete = async (actantId: string) => {
     const response = deleteActant(actantId);
+
     if (response) {
       toast.dark("Statement deleted!");
 
+      // in case we are deleting the statement that is actually active
       if (activeStatementId === actantId) {
         setActiveStatementId("");
       }
+
+      fetchTerritory(territoryId);
+    }
+    return !!response;
+  };
+
+  const actantUpdate = async (actant: ActantI) => {
+    const response = await updateActant(actant);
+    if (response) {
+      toast.dark("Actant updated!");
+      fetchTerritory(territoryId);
+    }
+    return !!response;
+  };
+
+  const actantCreate = async (actant: ActantI) => {
+    const response = await createActant(actant);
+    if (response) {
+      toast.dark("Actant created!");
       fetchTerritory(territoryId);
     }
     return !!response;
@@ -235,7 +248,7 @@ const MainPage: React.FC<MainPage> = ({
                 actants={territory.actants}
                 activeStatementId={statementId}
                 setActiveStatementId={setActiveStatementId}
-                statementCreateFn={statementCreate}
+                statementCreateFn={statementCreateAndSet}
                 actantDeleteFn={actantDelete}
               />
             </Box>
@@ -245,8 +258,9 @@ const MainPage: React.FC<MainPage> = ({
                   activeStatement={activeStatement}
                   meta={meta}
                   activeTerritoryActants={territory.actants}
-                  setActiveStatementId={setActiveStatementId}
-                  fetchTerritory={fetchTerritory}
+                  actantDeleteFn={actantDelete}
+                  actantCreateFn={actantCreate}
+                  actantUpdateFn={actantUpdate}
                 />
               ) : (
                 <div>no statement selected</div>
