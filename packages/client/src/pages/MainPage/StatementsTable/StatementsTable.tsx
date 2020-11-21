@@ -23,7 +23,7 @@ interface StatementsTableProps {
   activeStatementId: string;
   setActiveStatementId: (id: string) => void;
   fetchTerritory: (id: string) => void;
-  createNewStatement: () => void;
+  StatementCreateFn: () => Promise<boolean>;
 }
 
 interface IActant {
@@ -51,7 +51,7 @@ export const StatementsTable: React.FC<StatementsTableProps> = ({
   setActiveStatementId,
   activeStatementId,
   fetchTerritory,
-  createNewStatement,
+  StatementCreateFn,
 }) => {
   const history = useHistory();
   const [showSubmit, setShowSubmit] = useState(false);
@@ -70,6 +70,10 @@ export const StatementsTable: React.FC<StatementsTableProps> = ({
     "table-auto",
     "text-sm"
   );
+
+  const createNew = () => {
+    StatementCreateFn();
+  };
 
   const columns = useMemo(
     () => [
@@ -257,9 +261,7 @@ export const StatementsTable: React.FC<StatementsTableProps> = ({
             icon={<FaPlus size={12} style={{ marginRight: "2px" }} />}
             color="primary"
             label="statement"
-            onClick={() => {
-              createNewStatement();
-            }}
+            onClick={createNew}
           />
         </div>
         <table {...getTableProps()} className={tableClasses}>

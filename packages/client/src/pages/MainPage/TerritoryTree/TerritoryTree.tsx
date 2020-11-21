@@ -21,7 +21,7 @@ interface TerritoryTree {
   territory?: ResponseTerritoryI;
   fetchTerritory: (id: string) => void;
   setActiveStatementId: (id: string) => void;
-  territoryCreateFn: Function;
+  territoryCreateFn: (label: string) => Promise<boolean>;
 }
 
 export const TerritoryTree: React.FC<TerritoryTree> = ({

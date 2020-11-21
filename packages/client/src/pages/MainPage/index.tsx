@@ -57,9 +57,12 @@ const MainPage: React.FC<MainPage> = ({
     statementId: string;
   }>();
 
-  const createNewStatement = async () => {
-    // wtf?
-    const entityClass: "S" = "S";
+  /**
+   * handling STATEMENTS
+   */
+
+  const StatementCreate = async () => {
+    const entityClass: "S" = "S"; // wtf?
     const newStatementId = uuidv4();
     const newStatement = {
       id: newStatementId,
@@ -88,6 +91,7 @@ const MainPage: React.FC<MainPage> = ({
       await setActiveStatementId(newStatementId);
       history.push(`/${territoryId}/${newStatementId}`);
     }
+    return !!createResponse;
   };
 
   /**
@@ -115,6 +119,9 @@ const MainPage: React.FC<MainPage> = ({
       return false;
     }
   };
+
+ 
+ 
 
   const {
     user,
@@ -205,7 +212,7 @@ const MainPage: React.FC<MainPage> = ({
                 activeStatementId={statementId}
                 fetchTerritory={fetchTerritory}
                 setActiveStatementId={setActiveStatementId}
-                createNewStatement={createNewStatement}
+                StatementCreateFn={StatementCreate}
               />
             </Box>
             <Box height={heightContent} width={720} label={"Editor"}>
