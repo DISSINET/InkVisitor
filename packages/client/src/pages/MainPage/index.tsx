@@ -6,7 +6,9 @@ import { useAuth0 } from "@auth0/auth0-react";
 
 import { Entities } from "types";
 
-import { Box, Button, Footer, Header } from "components";
+import { toast } from "react-toastify";
+
+import { Box, Button, Footer, Header, Toast } from "components";
 import {
   ResponseTerritoryI,
   ActantI,
@@ -23,6 +25,8 @@ import { StatementsTable } from "./StatementsTable/StatementsTable";
 import { StatementEditor } from "./StatementEditor/StatementEditor";
 import { useHistory, useParams } from "react-router-dom";
 import { v4 as uuidv4 } from "uuid";
+
+import { deleteActant } from "api/deleteActant";
 
 import { createActant } from "api/createActant";
 
@@ -120,8 +124,22 @@ const MainPage: React.FC<MainPage> = ({
     }
   };
 
- 
- 
+  /**
+   * handling all actants
+   */
+
+  const actantDelete = async (actantId: string) => {
+    const response = deleteActant(actantId);
+    if (response) {
+      toast.dark("Statement deleted!");
+
+      if (activeStatementId === actantId) {
+        setActiveStatementId("");
+      }
+      fetchTerritory(territoryId);
+    }
+    return !!response;
+  };
 
   const {
     user,
@@ -212,7 +230,8 @@ const MainPage: React.FC<MainPage> = ({
                 activeStatementId={statementId}
                 fetchTerritory={fetchTerritory}
                 setActiveStatementId={setActiveStatementId}
-                StatementCreateFn={StatementCreate}
+                statementCreateFn={StatementCreate}
+                actantDeleteFn={actantDelete}
               />
             </Box>
             <Box height={heightContent} width={720} label={"Editor"}>
@@ -241,6 +260,8 @@ const MainPage: React.FC<MainPage> = ({
           <div className="p-5">{"Login to continue.."}</div>
         )}
       </DndProvider>
+
+      <Toast />
       {isAuthenticated && <Footer height={heightFooter} />}
     </>
   );
