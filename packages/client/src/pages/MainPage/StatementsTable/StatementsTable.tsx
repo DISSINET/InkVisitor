@@ -31,6 +31,11 @@ interface IActant {
   elvl: string;
   position: string;
 }
+interface IReference {
+  part: string;
+  resource: string;
+  type: string;
+}
 
 // FIXME: I had to retype ActantI, because there is not type attribute on ActantI type in @shared
 interface ActantITable extends ActantI {
@@ -239,36 +244,78 @@ export const StatementsTable: React.FC<StatementsTableProps> = ({
   );
 
   const renderRowSubComponent = React.useCallback(
-    ({ row }) => (
-      <div className="bg-info w-full text-white p-2">
-        <div className="flex flex-row">
-          <div className="mr-4">Modality: {row.values.data.modality}</div>
-          <div className="mr-4">Elvl: {row.values.data.elvl}</div>
-          <div className="">Certainty: {row.values.data.certainty}</div>
+    ({ row }) => {
+      const action = meta.actions.find((a) => a.id === row.values.data.action);
+      return (
+        <div className="bg-info w-full text-white p-2">
+          <div className="">Text: {row.values.data.text}</div>
+          <div className="mt-2">
+            <Tag
+              propId={action && action.id}
+              category={Entities.S.id}
+              color={Entities.S.color}
+              label={action?.labels[0].label}
+            />
+            action
+          </div>
+          <div className="flex flex-col">
+            {row.values.data.actants.map((actant: IActant, key: number) => {
+              const actantObject =
+                actants &&
+                (actants.find((a) => a.id === actant.actant) as ActantITable);
+              const entity = Entities[actantObject?.class];
+              return (
+                <div className="mt-2 mr-4">
+                  <Tag
+                    key={key}
+                    propId={actantObject && actantObject.id}
+                    label={actantObject.data.label}
+                    category={entity.id}
+                    color={entity.color}
+                    marginRight
+                  />
+                </div>
+              );
+            })}
+          </div>
+          <div className="flex flex-row mt-2">
+            Resources:{" "}
+            {row.values.data.references.map(
+              (reference: IReference, key: number) => {
+                <Tag
+                  key={key}
+                  propId={reference.resource}
+                  category={Entities.R.id}
+                  color={Entities.R.color}
+                  marginRight
+                />;
+              }
+            )}
+          </div>
+          <div className="mt-2">Note: {row.values.data.note}</div>
+          <div className="mt-2">
+            Tags:{" "}
+            {row.values.data.tags.map((tagId: string, si: number) => {
+              const actantObject =
+                actants &&
+                (actants.find((a) => a.id === tagId) as ActantITable);
+              const entity = Entities[actantObject?.class];
+              return actantObject && entity ? (
+                <Tag
+                  key={si}
+                  propId={actantObject && actantObject.id}
+                  category={entity.id}
+                  color={entity.color}
+                  marginRight
+                />
+              ) : (
+                <div key={si} />
+              );
+            })}
+          </div>
         </div>
-        <div className="mt-2">Text: {row.values.data.text}</div>
-        <div className="mt-2">Note: {row.values.data.note}</div>
-        <div className="mt-2">
-          Tags:{" "}
-          {row.values.data.tags.map((tagId: string, si: number) => {
-            const actantObject =
-              actants && (actants.find((a) => a.id === tagId) as ActantITable);
-            const entity = Entities[actantObject?.class];
-            return actantObject && entity ? (
-              <Tag
-                key={si}
-                propId={actantObject && actantObject.id}
-                category={entity.id}
-                color={entity.color}
-                marginRight
-              />
-            ) : (
-              <div key={si} />
-            );
-          })}
-        </div>
-      </div>
-    ),
+      );
+    },
     [actants]
   );
 
