@@ -1,7 +1,5 @@
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const { CleanWebpackPlugin } = require("clean-webpack-plugin");
-const FaviconsWebpackPlugin = require("favicons-webpack-plugin");
-const postcssPresetEnv = require("postcss-preset-env");
 const path = require("path");
 
 module.exports = {
@@ -9,7 +7,7 @@ module.exports = {
   output: {
     path: path.resolve(__dirname, "build"),
     filename: "[name].bundle.js",
-    publicPath: '/',
+    publicPath: "/",
   },
   module: {
     rules: [
@@ -58,7 +56,6 @@ module.exports = {
   mode: "development",
   plugins: [
     new CleanWebpackPlugin(),
-    new FaviconsWebpackPlugin("./public/favicon.ico"),
     new HtmlWebpackPlugin({
       template: "./public/index.html",
     }),
