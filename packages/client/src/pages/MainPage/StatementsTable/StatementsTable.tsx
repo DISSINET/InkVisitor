@@ -31,6 +31,11 @@ interface IActant {
   elvl: string;
   position: string;
 }
+interface IReference {
+  part: string;
+  resource: string;
+  type: string;
+}
 
 // FIXME: I had to retype ActantI, because there is not type attribute on ActantI type in @shared
 interface ActantITable extends ActantI {
@@ -109,10 +114,13 @@ export const StatementsTable: React.FC<StatementsTableProps> = ({
                 )
               : [];
 
+          const isOversized = subjects.length > 4;
+          const subjectsSlice = subjects.slice(0, 1);
+
           return (
-            <div className="table-subjects">
-              {subjects.length
-                ? subjects.map((actant: IActant, si: number) => {
+            <div className="table-subjects inline-flex">
+              {subjectsSlice.length
+                ? subjectsSlice.map((actant: IActant, si: number) => {
                     const subjectObject =
                       actants &&
                       (actants.find(
@@ -130,6 +138,7 @@ export const StatementsTable: React.FC<StatementsTableProps> = ({
                     ) : null;
                   })
                 : null}
+              {isOversized && <div className="flex items-end">{"..."}</div>}
             </div>
           );
         },
@@ -177,7 +186,7 @@ export const StatementsTable: React.FC<StatementsTableProps> = ({
                     return actantObject && entity ? (
                       <Tag
                         key={si}
-                        propId={actantObject && actantObject.id}
+                        propId={actantObject?.id}
                         category={entity.id}
                         color={entity.color}
                         marginRight
@@ -235,18 +244,113 @@ export const StatementsTable: React.FC<StatementsTableProps> = ({
   );
 
   const renderRowSubComponent = React.useCallback(
-    ({ row }) => (
-      <pre
-        style={{
-          fontSize: "10px",
-          maxWidth: "100px",
-        }}
-        className={"break-words"}
-      >
-        <code>{JSON.stringify({ values: row.values }, null, 2)}</code>
-      </pre>
-    ),
-    []
+    ({ row }) => {
+      const { action, text, note, references, tags } = row.values.data;
+      const actionObject = meta.actions.find((a) => a.id === action);
+
+      return (
+        <div className="bg-info w-full text-white p-2 text-xs">
+          {/* ---------- TEXT ---------- */}
+          <p>{text}</p>
+          {/* ---------- SUBJECT ---------- */}
+          <div className="mt-2 flex items-center">
+            <div className="mr-2">
+              <Tag
+                propId={actionObject && actionObject.id}
+                category={Entities.S.id}
+                color={Entities.S.color}
+                label={actionObject?.labels[0].label}
+              />
+            </div>
+            <div className="mr-2">action</div>
+
+            {actionObject?.labels.map(
+              (labelObject) =>
+                labelObject.label !== "NULL" && (
+                  <div className="mr-2">{labelObject.label}</div>
+                )
+            )}
+          </div>
+          {/* ---------- ACTANTS ---------- */}
+          <div className="flex flex-col">
+            {row.values &&
+              row.values.data.actants.map((actant: IActant, key: number) => {
+                const actantObject =
+                  actants &&
+                  (actants.find((a) => a.id === actant.actant) as ActantITable);
+                const entity = Entities[actantObject?.class];
+                const position = meta.dictionaries.positions.find(
+                  (p) => p.value === actant.position
+                );
+                const certainty = meta.dictionaries.certainties.find(
+                  (c) => c.value === actant.certainty
+                );
+                const elvl = meta.dictionaries.elvls.find(
+                  (e) => e.value === actant.elvl
+                );
+
+                return (
+                  <>
+                    {actantObject && (
+                      <div className="mt-2 flex items-center" key={key}>
+                        <div className="mr-2">
+                          <Tag
+                            propId={actantObject?.id}
+                            label={actantObject?.data.label}
+                            category={entity?.id}
+                            color={entity?.color}
+                            marginRight
+                          />
+                        </div>
+                        <div className="mr-2">{position?.label}</div>
+                        <div className="mr-2">{certainty?.label}</div>
+                        <div className="mr-2">{elvl?.label}</div>
+                      </div>
+                    )}
+                  </>
+                );
+              })}
+          </div>
+          {/* ---------- RESOURCES ---------- */}
+          <div className="mt-2">
+            Resources:{" "}
+            {references.map((reference: IReference, key: number) => (
+              <Tag
+                key={key}
+                propId={reference.resource}
+                category={Entities.R.id}
+                color={Entities.R.color}
+                marginRight
+              />
+            ))}
+          </div>
+          {/* ---------- NOTE ---------- */}
+          <div className="mt-2">Note: {note}</div>
+          {/* ---------- TAGS ---------- */}
+          <div className="mt-2">
+            Tags:{" "}
+            {tags.map((tagId: string, si: number) => {
+              const actantObject =
+                actants &&
+                (actants.find((a) => a.id === tagId) as ActantITable);
+              const entity = Entities[actantObject?.class];
+              return actantObject && entity ? (
+                <Tag
+                  key={si}
+                  propId={actantObject?.id}
+                  category={entity.id}
+                  color={entity.color}
+                  marginRight
+                />
+              ) : (
+                <div key={si} />
+              );
+            })}
+          </div>
+        </div>
+      );
+    },
+    [actants]
   );
 
   const {

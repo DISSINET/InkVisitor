@@ -211,7 +211,7 @@ const MainPage: React.FC<MainPage> = ({
         paddingX={10}
         left={<div className="text-4xl">InkVisitor</div>}
         right={
-          <div className="inline">
+          <div className="flex">
             {isAuthenticated ? (
               <>
                 <div className="text-sm inline m-2">logged as {user.name}</div>

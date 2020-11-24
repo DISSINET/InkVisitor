@@ -39,6 +39,7 @@ export const Box: React.FC<BoxProps> = ({
   const contentClasses = classNames(
     "box-content",
     "bg-white",
+    // "bg-blue-50",
     "p-2",
     "overflow-auto",
     "h-full",
