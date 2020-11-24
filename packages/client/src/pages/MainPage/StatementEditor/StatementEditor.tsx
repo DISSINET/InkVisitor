@@ -1,12 +1,14 @@
 import { FaTrashAlt, FaPlus } from "react-icons/fa";
 import React, { useEffect, useState } from "react";
 
+import { toast } from "react-toastify";
+
 import { Entities } from "types";
 import {
   ActantSuggester,
   DropItemI,
 } from "pages/MainPage/components/ActantSuggester/ActantSuggester";
-import { Tag, Button, Input, Suggester, DropDown } from "components";
+import { Tag, Button, Input, Suggester, DropDown, Toast } from "components";
 import { StatementI, ResponseMetaI, ActantI } from "@shared/types";
 import { SuggestionI } from "components/Suggester/Suggester";
 import { OptionTypeBase, ValueType } from "react-select";
@@ -195,6 +197,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
       meta: {},
     };
     const createResponse = await createActant(newActant);
+    toast.dark("Actant created!");
     return createResponse && createResponse.id ? createResponse.id : false;
   };
 
@@ -911,6 +914,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                   label="Cancel Changes"
                   color="warning"
                   onClick={() => {
+                    toast.dark("Changes cancelled!");
                     setStatement(activeStatementCopy);
                   }}
                 />
@@ -919,6 +923,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
           </div>
         </>
       )}
+      <Toast />
     </div>
   );
 };
