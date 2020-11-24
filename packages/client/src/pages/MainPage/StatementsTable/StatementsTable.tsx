@@ -278,18 +278,18 @@ export const StatementsTable: React.FC<StatementsTableProps> = ({
               );
             })}
           </div>
-          <div className="flex flex-row mt-2">
+          <div className=" mt-2">
             Resources:{" "}
             {row.values.data.references.map(
-              (reference: IReference, key: number) => {
+              (reference: IReference, key: number) => (
                 <Tag
                   key={key}
                   propId={reference.resource}
                   category={Entities.R.id}
                   color={Entities.R.color}
                   marginRight
-                />;
-              }
+                />
+              )
             )}
           </div>
           <div className="mt-2">Note: {row.values.data.note}</div>
