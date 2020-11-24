@@ -238,8 +238,10 @@ const loadStatementsTables = async (next) => {
 
     data.forEach((statement) => {
       // the main statement
+
+      // parse the statement id but keep the order somehow
       const mainStatement = {
-        id: statement.id,
+        id: v4(),
         class: "S",
         data: {
           label: "",
