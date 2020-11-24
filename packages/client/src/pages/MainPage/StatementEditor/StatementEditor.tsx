@@ -8,7 +8,15 @@ import {
   ActantSuggester,
   DropItemI,
 } from "pages/MainPage/components/ActantSuggester/ActantSuggester";
-import { Tag, Button, Input, Suggester, DropDown, Toast } from "components";
+import {
+  Tag,
+  Button,
+  Input,
+  Suggester,
+  DropDown,
+  Toast,
+  Submit,
+} from "components";
 import { StatementI, ResponseMetaI, ActantI } from "@shared/types";
 import { SuggestionI } from "components/Suggester/Suggester";
 import { OptionTypeBase, ValueType } from "react-select";
@@ -102,6 +110,18 @@ export const StatementEditor: React.FC<StatementEditor> = ({
 
   // the list of all actants potentially needed to draw the editor component; may get updated when a new actant / prop is added
   const [actants, setActants] = useState(activeTerritoryActantsCopy);
+
+  // modal
+  const [deleteSubmitOpen, setDeleteSubmitOpen] = useState(false);
+  const [deleteActantId, setDeleteActantId] = useState("");
+
+  const openDeleteSubmit = (actantId: string) => {
+    setDeleteActantId(actantId);
+    setDeleteSubmitOpen(true);
+  };
+  const closeDeleteSubmit = () => {
+    setDeleteSubmitOpen(false);
+  };
 
   // check whether the actant is in the list of actants or it should be added
   const checkActant = async (actantId: string) => {
@@ -904,7 +924,8 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                   label="Delete"
                   color="danger"
                   onClick={() => {
-                    actantDeleteFn(activeStatementCopy.id);
+                    openDeleteSubmit(activeStatementCopy.id);
+                    //actantDeleteFn(activeStatementCopy.id);
                   }}
                   marginRight
                 />
@@ -924,6 +945,15 @@ export const StatementEditor: React.FC<StatementEditor> = ({
         </>
       )}
       <Toast />
+      <Submit
+        title={"Delete actant"}
+        text={`Do you really want to delete actant with ID [${deleteActantId}]?`}
+        show={deleteSubmitOpen}
+        onCancel={() => closeDeleteSubmit()}
+        onSubmit={() => {
+          actantDeleteFn(deleteActantId);
+        }}
+      />
     </div>
   );
 };
