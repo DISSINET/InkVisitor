@@ -249,9 +249,9 @@ export const StatementsTable: React.FC<StatementsTableProps> = ({
       const actionObject = meta.actions.find((a) => a.id === action);
 
       return (
-        <div className="bg-info w-full text-white p-2">
+        <div className="bg-info w-full text-white p-2 text-xs">
           {/* ---------- TEXT ---------- */}
-          <div className="text-sm">{text}</div>
+          <p>{text}</p>
           {/* ---------- SUBJECT ---------- */}
           <div className="mt-2 flex items-center">
             <div className="mr-2">
