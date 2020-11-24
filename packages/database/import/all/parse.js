@@ -236,7 +236,6 @@ const loadStatementsTables = async (next) => {
           : false,
       });
     });
-    console.log(codingSheet);
 
     data.forEach((statement) => {
       // the main statement
@@ -246,7 +245,7 @@ const loadStatementsTables = async (next) => {
         id: v4(),
         class: "S",
         data: {
-          label: "",
+          label: statement.id,
           action: statement.id_action_or_relation,
           territory: statement.text_part_id,
           references: [
@@ -264,9 +263,11 @@ const loadStatementsTables = async (next) => {
             },
           ],
           tags: statement.tags_id.split(" #").filter((t) => t),
-          certainty: statement.certainty || "1",
-          elvl: statement.epistemological_level || "1",
-          modality: statement.modality || "1",
+          certainty: parseInt(statement.certainty) || "1",
+          elvl: parseInt(statement.epistemological_level) || "1",
+
+          // TODO handle modality
+          modality: parseInt(statement.modality) || "1",
           text: statement.text,
           note: `NOTE: ${statement.note}, LOCATION: ${statement.location_text}, TIME: ${statement.time_note}`,
           props: [],
@@ -628,6 +629,7 @@ const processActant = (
           createNewActantIfNeeded(propActant2Value) ||
           addResourceToEntityId(propActant2Value, codingSheetEntities);
 
+        console.log(propActant1Id);
         /**
          * TODO
          * elvl and certainty
