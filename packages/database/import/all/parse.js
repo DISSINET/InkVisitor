@@ -50,18 +50,12 @@ const loadStatementsTables = async (next) => {
     addTerritoryActant(text.id, {
       label: text.label,
       parent: "T0",
-      content: text.content,
-      type: "",
-      language: "la",
     });
   });
 
   addTerritoryActant(rootTerritory, {
     label: "everything",
     parent: false,
-    content: "everything",
-    type: "",
-    language: "la",
   });
 
   // parse resources
@@ -77,10 +71,6 @@ const loadStatementsTables = async (next) => {
   tableManuscripts.forEach((manuscript) => {
     addResourceActant(manuscript.id, {
       label: manuscript.label,
-      content: "",
-      link: "",
-      type: manuscript.form,
-      language: "la",
     });
   });
 
@@ -113,9 +103,6 @@ const loadStatementsTables = async (next) => {
   addTerritoryActant("entity-tables", {
     label: "entity tables",
     parent: "T0",
-    content: "",
-    type: "",
-    language: "la",
   });
 
   /**
@@ -196,9 +183,6 @@ const loadStatementsTables = async (next) => {
     addTerritoryActant(entitySheetTerritory, {
       label: entitySheet.label,
       parent: "entity-tables",
-      content: "",
-      type: "",
-      language: "la",
     });
 
     data.forEach((entityRow) => {
@@ -207,9 +191,6 @@ const loadStatementsTables = async (next) => {
       addTerritoryActant(entityRowTerritory, {
         label: entitySheet.label + "_" + entityRow.id,
         parent: entitySheetTerritory,
-        content: "",
-        type: "",
-        language: "la",
       });
 
       addEntityActant(
@@ -222,10 +203,11 @@ const loadStatementsTables = async (next) => {
     });
 
     entitySheet.texts.forEach((text) => {
-      const sheet = codingSheets.find((cs) => cs.textId === text);
-      if (sheet) {
+      const sheets = codingSheets.filter((cs) => cs.textId === text);
+
+      sheets.forEach((sheet) => {
         sheet.entities[entitySheet.entityType] = entitySheet.id;
-      }
+      });
     });
   }
 
@@ -252,19 +234,18 @@ const loadStatementsTables = async (next) => {
         parent: territoryId.includes("-")
           ? territoryId.split("-").slice(0, -1).join("-")
           : false,
-        content: "",
-        type: "A",
-        language: "la",
       });
     });
 
     data.forEach((statement) => {
       // the main statement
+
+      // parse the statement id but keep the order somehow
       const mainStatement = {
-        id: statement.id,
+        id: v4(),
         class: "S",
         data: {
-          label: "",
+          label: statement.id,
           action: statement.id_action_or_relation,
           territory: statement.text_part_id,
           references: [
@@ -282,9 +263,11 @@ const loadStatementsTables = async (next) => {
             },
           ],
           tags: statement.tags_id.split(" #").filter((t) => t),
-          certainty: statement.certainty || "1",
-          elvl: statement.epistemological_level || "1",
-          modality: statement.modality || "1",
+          certainty: parseInt(statement.certainty) || "1",
+          elvl: parseInt(statement.epistemological_level) || "1",
+
+          // TODO handle modality
+          modality: parseInt(statement.modality) || "1",
           text: statement.text,
           note: `NOTE: ${statement.note}, LOCATION: ${statement.location_text}, TIME: ${statement.time_note}`,
           props: [],
@@ -536,6 +519,7 @@ const createEmptyPropStatement = (
 
 const addResourceToEntityId = (id, codeSheetResources) => {
   const entityId = id[0];
+
   if (entityId in codeSheetResources) {
     return codeSheetResources[entityId] + "_" + id;
   } else {
@@ -645,6 +629,7 @@ const processActant = (
           createNewActantIfNeeded(propActant2Value) ||
           addResourceToEntityId(propActant2Value, codingSheetEntities);
 
+        console.log(propActant1Id);
         /**
          * TODO
          * elvl and certainty
