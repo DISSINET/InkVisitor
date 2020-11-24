@@ -818,7 +818,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                   const tagActant = actants.find((a) => a.id === tagId);
 
                   return tagActant ? (
-                    <div className="tag" key={tagId}>
+                    <div className="mb-2" key={tagId}>
                       <Tag
                         propId={tagId}
                         category={Entities[tagActant.class].id}

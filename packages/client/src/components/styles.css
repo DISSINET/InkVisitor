@@ -23,12 +23,18 @@ body {
 .btn {
   @apply m-4 px-2 py-1 text-white border-none font-bold rounded bg-primary;
 }
-button:focus {
+button:focus,
+input:focus,
+select:focus {
   outline: 0 !important;
+}
+.text-area {
+  line-height: 1.2;
 }
 .table {
   .odd-strip {
-    background-color: rgba(212, 219, 244, 0.4);
+    /* background-color: rgba(212, 219, 244, 0.4); */
+    background-color: #f0f2fc;
   }
 }
 .statement-editor {

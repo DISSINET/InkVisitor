@@ -46,6 +46,7 @@ export const Input: React.FC<InputProps> = ({
     {
       "bg-primary": inverted,
       "text-white": inverted,
+      "text-area": type === "textarea",
     }
   );
 
