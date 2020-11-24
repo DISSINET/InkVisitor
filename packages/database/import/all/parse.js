@@ -50,18 +50,12 @@ const loadStatementsTables = async (next) => {
     addTerritoryActant(text.id, {
       label: text.label,
       parent: "T0",
-      content: text.content,
-      type: "",
-      language: "la",
     });
   });
 
   addTerritoryActant(rootTerritory, {
     label: "everything",
     parent: false,
-    content: "everything",
-    type: "",
-    language: "la",
   });
 
   // parse resources
@@ -77,10 +71,6 @@ const loadStatementsTables = async (next) => {
   tableManuscripts.forEach((manuscript) => {
     addResourceActant(manuscript.id, {
       label: manuscript.label,
-      content: "",
-      link: "",
-      type: manuscript.form,
-      language: "la",
     });
   });
 
@@ -113,9 +103,6 @@ const loadStatementsTables = async (next) => {
   addTerritoryActant("entity-tables", {
     label: "entity tables",
     parent: "T0",
-    content: "",
-    type: "",
-    language: "la",
   });
 
   /**
@@ -196,9 +183,6 @@ const loadStatementsTables = async (next) => {
     addTerritoryActant(entitySheetTerritory, {
       label: entitySheet.label,
       parent: "entity-tables",
-      content: "",
-      type: "",
-      language: "la",
     });
 
     data.forEach((entityRow) => {
@@ -207,9 +191,6 @@ const loadStatementsTables = async (next) => {
       addTerritoryActant(entityRowTerritory, {
         label: entitySheet.label + "_" + entityRow.id,
         parent: entitySheetTerritory,
-        content: "",
-        type: "",
-        language: "la",
       });
 
       addEntityActant(
@@ -252,9 +233,6 @@ const loadStatementsTables = async (next) => {
         parent: territoryId.includes("-")
           ? territoryId.split("-").slice(0, -1).join("-")
           : false,
-        content: "",
-        type: "A",
-        language: "la",
       });
     });
 
