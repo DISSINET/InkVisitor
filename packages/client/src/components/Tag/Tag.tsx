@@ -4,6 +4,7 @@ import { useDrag } from "react-dnd";
 
 import { ItemTypes } from "types";
 import "./tag.css";
+import ReactTooltip from "react-tooltip";
 
 interface TagProps {
   label?: string;
@@ -81,11 +82,26 @@ export const Tag: React.FC<TagProps> = ({
     }),
   });
   return (
-    <div className={tagClasses} ref={dragRef}>
-      <div className={entityClasses}>{category}</div>
-      {label && <div className={labelClasses}>{label}</div>}
-      {button && <div className={buttonClasses}>{button}</div>}
-    </div>
+    <>
+      <div
+        className={tagClasses}
+        ref={dragRef}
+        data-for="main"
+        data-tip={label ? label : "tooltip label"}
+        data-iscapture="true"
+      >
+        <div className={entityClasses}>{category}</div>
+        {label && <div className={labelClasses}>{label}</div>}
+        {button && <div className={buttonClasses}>{button}</div>}
+      </div>
+      <ReactTooltip
+        id="main"
+        place="bottom"
+        type="dark"
+        effect="solid"
+        multiline={false}
+      />
+    </>
   );
 };
 
