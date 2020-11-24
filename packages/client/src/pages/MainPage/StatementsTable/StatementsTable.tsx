@@ -186,7 +186,7 @@ export const StatementsTable: React.FC<StatementsTableProps> = ({
                     return actantObject && entity ? (
                       <Tag
                         key={si}
-                        propId={actantObject && actantObject.id}
+                        propId={actantObject?.id}
                         category={entity.id}
                         color={entity.color}
                         marginRight
@@ -245,57 +245,91 @@ export const StatementsTable: React.FC<StatementsTableProps> = ({
 
   const renderRowSubComponent = React.useCallback(
     ({ row }) => {
-      const action = meta.actions.find((a) => a.id === row.values.data.action);
+      const { action, text, note, references, tags } = row.values.data;
+      const actionObject = meta.actions.find((a) => a.id === action);
+
       return (
         <div className="bg-info w-full text-white p-2">
-          <div className="">Text: {row.values.data.text}</div>
-          <div className="mt-2">
-            <Tag
-              propId={action && action.id}
-              category={Entities.S.id}
-              color={Entities.S.color}
-              label={action?.labels[0].label}
-            />
-            action
-          </div>
-          <div className="flex flex-col">
-            {row.values.data.actants.map((actant: IActant, key: number) => {
-              const actantObject =
-                actants &&
-                (actants.find((a) => a.id === actant.actant) as ActantITable);
-              const entity = Entities[actantObject?.class];
-              return (
-                <div className="mt-2 mr-4">
-                  <Tag
-                    key={key}
-                    propId={actantObject && actantObject.id}
-                    label={actantObject.data.label}
-                    category={entity.id}
-                    color={entity.color}
-                    marginRight
-                  />
-                </div>
-              );
-            })}
-          </div>
-          <div className=" mt-2">
-            Resources:{" "}
-            {row.values.data.references.map(
-              (reference: IReference, key: number) => (
-                <Tag
-                  key={key}
-                  propId={reference.resource}
-                  category={Entities.R.id}
-                  color={Entities.R.color}
-                  marginRight
-                />
-              )
+          {/* ---------- TEXT ---------- */}
+          <div className="text-sm">{text}</div>
+          {/* ---------- SUBJECT ---------- */}
+          <div className="mt-2 flex items-center">
+            <div className="mr-2">
+              <Tag
+                propId={actionObject && actionObject.id}
+                category={Entities.S.id}
+                color={Entities.S.color}
+                label={actionObject?.labels[0].label}
+              />
+            </div>
+            <div className="mr-2">action</div>
+
+            {actionObject?.labels.map(
+              (labelObject) =>
+                labelObject.label !== "NULL" && (
+                  <div className="mr-2">{labelObject.label}</div>
+                )
             )}
           </div>
-          <div className="mt-2">Note: {row.values.data.note}</div>
+          {/* ---------- ACTANTS ---------- */}
+          <div className="flex flex-col">
+            {row.values &&
+              row.values.data.actants.map((actant: IActant, key: number) => {
+                const actantObject =
+                  actants &&
+                  (actants.find((a) => a.id === actant.actant) as ActantITable);
+                const entity = Entities[actantObject?.class];
+                const position = meta.dictionaries.positions.find(
+                  (p) => p.value === actant.position
+                );
+                const certainty = meta.dictionaries.certainties.find(
+                  (c) => c.value === actant.certainty
+                );
+                const elvl = meta.dictionaries.elvls.find(
+                  (e) => e.value === actant.elvl
+                );
+
+                return (
+                  <>
+                    {actantObject && (
+                      <div className="mt-2 flex items-center" key={key}>
+                        <div className="mr-2">
+                          <Tag
+                            propId={actantObject?.id}
+                            label={actantObject?.data.label}
+                            category={entity?.id}
+                            color={entity?.color}
+                            marginRight
+                          />
+                        </div>
+                        <div className="mr-2">{position?.label}</div>
+                        <div className="mr-2">{certainty?.label}</div>
+                        <div className="mr-2">{elvl?.label}</div>
+                      </div>
+                    )}
+                  </>
+                );
+              })}
+          </div>
+          {/* ---------- RESOURCES ---------- */}
+          <div className="mt-2">
+            Resources:{" "}
+            {references.map((reference: IReference, key: number) => (
+              <Tag
+                key={key}
+                propId={reference.resource}
+                category={Entities.R.id}
+                color={Entities.R.color}
+                marginRight
+              />
+            ))}
+          </div>
+          {/* ---------- NOTE ---------- */}
+          <div className="mt-2">Note: {note}</div>
+          {/* ---------- TAGS ---------- */}
           <div className="mt-2">
             Tags:{" "}
-            {row.values.data.tags.map((tagId: string, si: number) => {
+            {tags.map((tagId: string, si: number) => {
               const actantObject =
                 actants &&
                 (actants.find((a) => a.id === tagId) as ActantITable);
@@ -303,7 +337,7 @@ export const StatementsTable: React.FC<StatementsTableProps> = ({
               return actantObject && entity ? (
                 <Tag
                   key={si}
-                  propId={actantObject && actantObject.id}
+                  propId={actantObject?.id}
                   category={entity.id}
                   color={entity.color}
                   marginRight
