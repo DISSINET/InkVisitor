@@ -203,10 +203,11 @@ const loadStatementsTables = async (next) => {
     });
 
     entitySheet.texts.forEach((text) => {
-      const sheet = codingSheets.find((cs) => cs.textId === text);
-      if (sheet) {
+      const sheets = codingSheets.filter((cs) => cs.textId === text);
+
+      sheets.forEach((sheet) => {
         sheet.entities[entitySheet.entityType] = entitySheet.id;
-      }
+      });
     });
   }
 
@@ -235,6 +236,7 @@ const loadStatementsTables = async (next) => {
           : false,
       });
     });
+    console.log(codingSheet);
 
     data.forEach((statement) => {
       // the main statement
@@ -516,6 +518,7 @@ const createEmptyPropStatement = (
 
 const addResourceToEntityId = (id, codeSheetResources) => {
   const entityId = id[0];
+
   if (entityId in codeSheetResources) {
     return codeSheetResources[entityId] + "_" + id;
   } else {
