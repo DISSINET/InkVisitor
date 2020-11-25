@@ -4,6 +4,7 @@ import { useDrag } from "react-dnd";
 
 import { ItemTypes } from "types";
 import "./tag.css";
+import ReactTooltip from "react-tooltip";
 
 interface TagProps {
   label?: string;
@@ -14,6 +15,7 @@ interface TagProps {
   marginRight?: boolean;
   propId?: string;
   invertedLabel?: boolean;
+  showLabel?: boolean;
 }
 
 export const Tag: React.FC<TagProps> = ({
@@ -25,6 +27,7 @@ export const Tag: React.FC<TagProps> = ({
   marginRight,
   propId,
   invertedLabel,
+  showLabel,
 }) => {
   const tagClasses = classNames(
     "component",
@@ -51,8 +54,8 @@ export const Tag: React.FC<TagProps> = ({
     "text-xs",
     "font-bold",
     {
-      "border-r-2": !!label,
-      "border-primary": !!label,
+      "border-r-2": !!label && !!showLabel,
+      "border-primary": !!label && !!showLabel,
     }
   );
   const labelClasses = classNames(
@@ -81,11 +84,27 @@ export const Tag: React.FC<TagProps> = ({
     }),
   });
   return (
-    <div className={tagClasses} ref={dragRef}>
-      <div className={entityClasses}>{category}</div>
-      {label && <div className={labelClasses}>{label}</div>}
-      {button && <div className={buttonClasses}>{button}</div>}
-    </div>
+    <>
+      <div
+        className={tagClasses}
+        ref={dragRef}
+        data-for={"main"}
+        data-tip={label ? label : "no label"}
+        data-iscapture="true"
+        data-tip-disable={showLabel}
+      >
+        <div className={entityClasses}>{category}</div>
+        {showLabel && label && <div className={labelClasses}>{label}</div>}
+        {button && <div className={buttonClasses}>{button}</div>}
+      </div>
+      <ReactTooltip
+        id="main"
+        place="bottom"
+        type="dark"
+        effect="solid"
+        multiline={false}
+      />
+    </>
   );
 };
 
@@ -94,4 +113,5 @@ Tag.defaultProps = {
   category: "T",
   color: "black",
   mode: false,
+  showLabel: true,
 };

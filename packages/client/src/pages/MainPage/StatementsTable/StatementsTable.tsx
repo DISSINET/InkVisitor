@@ -133,6 +133,8 @@ export const StatementsTable: React.FC<StatementsTableProps> = ({
                         propId={actant.actant}
                         category={entity.id}
                         color={entity.color}
+                        label={subjectObject.data.label}
+                        showLabel={false}
                         marginRight
                       />
                     ) : null;
@@ -189,6 +191,8 @@ export const StatementsTable: React.FC<StatementsTableProps> = ({
                         propId={actantObject?.id}
                         category={entity.id}
                         color={entity.color}
+                        label={actantObject.data.label}
+                        showLabel={false}
                         marginRight
                       />
                     ) : (
