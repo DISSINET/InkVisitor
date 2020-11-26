@@ -1,7 +1,5 @@
-FROM node:8
-WORKDIR /
-COPY package*.json ./
-RUN npm install
+FROM node:10.16
 COPY . .
-EXPOSE 3333
-CMD ["node", "app.js"]
+RUN npm install
+EXPOSE 3000
+CMD ["npm", "start"]

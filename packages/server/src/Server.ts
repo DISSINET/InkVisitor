@@ -15,12 +15,6 @@ import ActantRouter from "@modules/actant";
 import TerritoryRouter from "@modules/territory";
 import MetaRouter from "@modules/meta";
 
-import {
-  createConnection,
-  closeConnection,
-  rethinkConfig,
-} from "@service/RethinkDB";
-
 const server = express();
 server.use(cors());
 
@@ -32,12 +26,12 @@ server.use(express.urlencoded({ extended: true }));
 server.use(cookieParser(cookieProps.secret));
 
 // Show routes called in console during development
-if (process.env.NODE_ENV === "development") {
+if (process.env.NODE_ENV === "devel") {
   server.use(morgan("dev"));
 }
 
 // Securing
-if (process.env.NODE_ENV === "production") {
+if (process.env.NODE_ENV === "prod") {
   server.use(helmet());
 }
 

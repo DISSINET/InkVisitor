@@ -1,5 +1,12 @@
 # DISSINET SERVER
 
+## Deploy
+
+- npm run build
+- npm start to test
+- podman build -t inkvisitor.server
+- podman run -p 3000:3000 inkvisitor.server
+
 ## Development
 
 Assuming that you are in the project folder.
@@ -20,7 +27,7 @@ Start the application server on `localhost:3000`.
   - `cd ./packages/server`
   - `npm install`
   - `npm run start:dev`
-  
+
 ## Authentication Example
 
 ```shell
