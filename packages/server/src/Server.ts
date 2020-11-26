@@ -11,9 +11,9 @@ import "express-async-errors";
 import logger from "@common/Logger";
 import { cookieProps } from "@common/constants";
 
-import ActantRouter from "src/modules/actant";
-import TerritoryRouter from "src/modules/territory";
-import MetaRouter from "src/modules/meta";
+import ActantRouter from "@modules/actant";
+import TerritoryRouter from "@modules/territory";
+import MetaRouter from "@modules/meta";
 
 import {
   createConnection,

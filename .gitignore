@@ -17,6 +17,9 @@ config.json
 # parcel folders
 .cache
 
+# logs
+*.log
+
 # dist folders
 dist
 build

@@ -5,7 +5,7 @@ try {
   // Remove current build
   fs.removeSync("./dist/");
   // Copy front-end files
-  //fs.copySync('./src/public', './dist/public');
+  fs.copySync("./package.json", "./dist/package.json");
   // Transpile the typescript files
   childProcess.exec("tsc --build tsconfig.prod.json");
 } catch (err) {
