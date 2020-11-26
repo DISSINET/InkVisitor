@@ -1,14 +1,14 @@
 const merge = require("webpack-merge");
 const common = require("./webpack.common.js");
-const dotenv = require("dotenv-webpack");
+const Dotenv = require("dotenv-webpack");
 
 module.exports = merge(common, {
   mode: "production",
   devtool: "source-map",
 
   plugins: [
-    new dotenv({
-      path: ".env.production",
+    new Dotenv({
+      ath: "./env/.env.prod",
       safe: true,
       systemvars: true,
     }),

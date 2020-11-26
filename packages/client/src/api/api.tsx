@@ -1,5 +1,6 @@
 import axios from "axios";
-import store from "redux/store";
+
+console.log(process.env.URL);
 
 export const api = axios.create({
   baseURL: "http://localhost:3000/api/v1",
