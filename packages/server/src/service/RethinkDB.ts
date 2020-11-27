@@ -10,10 +10,10 @@ declare global {
 }
 
 export const rethinkConfig = {
-  db: "dissinet",
-  host: "localhost",
-  port: 28015,
-  authKey: "",
+  db: process.env.DB_NAME,
+  host: process.env.DB_HOST,
+  port: parseInt(process?.env?.DB_PORT || "28015"),
+  authKey: process.env.DB_AUTH,
 };
 
 /*

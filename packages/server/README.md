@@ -4,8 +4,9 @@
 
 - npm run build
 - npm start to test
-- podman build -t inkvisitor.server
-- podman run -p 3000:3000 inkvisitor.server
+- podman build -t inkvisitor-server .
+- (podman run -p 3000:3000 inkvisitor.server)
+- podman save -o inkvisitor-server.tar --format oci-archive inkvisitor-server
 
 ## Development
 

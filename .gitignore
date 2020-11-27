@@ -32,3 +32,6 @@ import/~$actants.xlsx
 
 .env.**
 
+
+# docker files
+*.tar
