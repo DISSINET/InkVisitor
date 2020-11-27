@@ -21,7 +21,7 @@ const Auth0ProviderWithHistory: React.FC<Auth0ProviderWithHistory> = ({
     <Auth0Provider
       domain={domain}
       clientId={clientId}
-      redirectUri={window.location.origin}
+      redirectUri={process.env.LOGIN_REDIRECT || window.location.origin}
       onRedirectCallback={onRedirectCallback}
       useRefreshTokens={true}
       cacheLocation="localstorage"
