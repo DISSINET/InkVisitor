@@ -9,7 +9,7 @@ module.exports = merge(common, {
 
   plugins: [
     new Dotenv({
-      ath: "./env/.env.prod",
+      path: "./env/.env.prod",
       systemvars: true,
     }),
   ],
