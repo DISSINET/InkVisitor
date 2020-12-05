@@ -9,7 +9,8 @@ module.exports = merge(common, {
   devServer: {
     hot: true,
     contentBase: "./build",
-    historyApiFallback: true, // react router doesnt work localy without this setting
+    historyApiFallback: true, //
+    port: 8000,
   },
   plugins: [
     new Dotenv({
