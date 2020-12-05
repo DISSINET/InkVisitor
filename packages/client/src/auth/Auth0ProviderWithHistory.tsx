@@ -14,7 +14,7 @@ const Auth0ProviderWithHistory: React.FC<Auth0ProviderWithHistory> = ({
   const history = useHistory();
 
   const onRedirectCallback = (appState: any) => {
-    history.push(appState?.returnTo || window.location.pathname);
+    //history.push(appState?.returnTo || window.location.pathname);
   };
 
   return (

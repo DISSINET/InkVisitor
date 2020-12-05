@@ -216,7 +216,7 @@ const MainPage: React.FC<MainPage> = ({
               <>
                 <div className="text-sm inline m-2">logged as {user.name}</div>
                 <Button
-                  label="log out"
+                  label="Log Out"
                   color="danger"
                   onClick={() =>
                     logout({ returnTo: process.env.LOGOUT_REDIRECT })
