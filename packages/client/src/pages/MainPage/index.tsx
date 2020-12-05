@@ -218,7 +218,9 @@ const MainPage: React.FC<MainPage> = ({
                 <Button
                   label="log out"
                   color="danger"
-                  onClick={() => logout()}
+                  onClick={() =>
+                    logout({ returnTo: process.env.LOGOUT_REDIRECT })
+                  }
                 />
               </>
             ) : (
