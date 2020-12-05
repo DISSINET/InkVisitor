@@ -3,9 +3,11 @@
   "version": "0.1.0",
   "scripts": {
     "build": "node build.js",
+    "deploy": "rsync -avz dist/ adamm@10.16.30.211:/var/www/html/apps/inkvisitor/server/dist",
     "lint": "tslint --project \"tsconfig.json\"",
     "start": "node -r module-alias/register ./dist --env=prod",
     "start:dev": "nodemon",
+    "start:prod": "forever node -r module-alias/register ./dist --env=prod",
     "test": "nodemon --config ./spec/nodemon.json"
   },
   "nodemonConfig": {
@@ -36,8 +38,13 @@
     "express": "^4.17.1",
     "express-async-errors": "^3.1.1",
     "express-jwt": "^6.0.0",
+    "find": "^0.3.0",
+    "fs-extra": "^9.0.1",
     "helmet": "^3.23.1",
+    "http": "0.0.1-security",
     "http-status-codes": "^1.4.0",
+    "https": "^1.0.0",
+    "jsonfile": "^6.0.1",
     "jsonwebtoken": "^8.5.1",
     "jwks-rsa": "^1.10.1",
     "module-alias": "^2.2.2",
@@ -45,9 +52,6 @@
     "randomstring": "^1.1.5",
     "rethinkdb": "^2.4.2",
     "rethinkdb-ts": "^2.4.5",
-    "find": "^0.3.0",
-    "fs-extra": "^9.0.1",
-    "jsonfile": "^6.0.1",
     "uuid": "^8.1.0",
     "winston": "^3.2.1"
   },
@@ -69,6 +73,7 @@
     "@types/uuid": "^8.0.0",
     "jasmine": "^3.5.0",
     "nodemon": "^2.0.4",
+    "rsync": "^0.6.1",
     "supertest": "^4.0.2",
     "ts-node": "^8.10.2",
     "tsconfig-paths": "^3.9.0",

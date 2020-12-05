@@ -30,8 +30,11 @@ import/source_data/~$DDB Mockup ACTANTS (entities Person, Concepts, Locations, O
 import/source_data/~$DDB Sellan Coding source.xlsx
 import/~$actants.xlsx
 
+# venv
 .env.**
-
 
 # docker files
 *.tar
+
+# certificates
+*.pem

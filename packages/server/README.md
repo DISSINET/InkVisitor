@@ -2,13 +2,17 @@
 
 ## Deploy
 
-- npm run build
-- npm start to test
-- podman build -t inkvisitor-server .
-- (podman run -p 3000:3000 --network="host" inkvisitor.server)
-- podman save -o inkvisitor-server.tar --format oci-archive inkvisitor-server
+- `npm run build` - builds and deploys the server
+- go to ssh and `cd var/www/html/inkvisitor/server`
+- `npm install`
+- `npm start`
+- #`npm start` to test
+- #`podman build --no-cache -t inkvisitor-server .`
+- #(`podman run -p 3000:3000 --network="host" inkvisitor-server`)
+- #`rm -rf inkvisitor-server.tar`
+- #`podman save -o inkvisitor-server.tar --format oci-archive inkvisitor-server`
 - copy to server
-- podman load -i inkvisitor-server"
+- #`podman load -i inkvisitor-server.tar`
 
 ## Development
 

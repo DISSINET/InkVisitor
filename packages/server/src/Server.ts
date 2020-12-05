@@ -18,10 +18,22 @@ import MetaRouter from "@modules/meta";
 const server = express();
 server.use(cors());
 
+/*
+server.use((req, res, next) => {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header(
+    "Access-Control-Allow-Headers",
+    "Origin, X-Requested-With, Content-Type, Accept"
+  );
+  next();
+});
+*/
+
 // Middleware that will open a connection to the database.
 // server.use(createConnection);
 
 server.use(express.json());
+
 server.use(express.urlencoded({ extended: true }));
 server.use(cookieParser(cookieProps.secret));
 
@@ -34,6 +46,11 @@ if (process.env.NODE_ENV === "devel") {
 if (process.env.NODE_ENV === "prod") {
   server.use(helmet());
 }
+
+server.get("/", function (req, res) {
+  console.log("testing");
+  res.send("test output");
+});
 
 //----------------------------------------------------------------------------
 import jwt from "express-jwt";
@@ -52,13 +69,9 @@ const jwtCheck: jwt.RequestHandler = jwt({
 });
 
 //@ts-ignore
-server.use(jwtCheck);
+//server.use(jwtCheck);
 
 //----------------------------------------------------------------------------
-
-server.get("/private", function (req, res) {
-  res.send("Private resource");
-});
 
 // Routing
 const routerV1 = Router();

@@ -37,6 +37,7 @@ export const createConnection = async (
 ) => {
   await rethink.connectPool(rethinkConfig);
   const connection = await rethink.connect(rethinkConfig);
+  console.log("connected to db");
   request.rethink = connection;
 };
 
