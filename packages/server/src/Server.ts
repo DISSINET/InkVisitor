@@ -69,7 +69,7 @@ const jwtCheck: jwt.RequestHandler = jwt({
 });
 
 //@ts-ignore
-//server.use(jwtCheck);
+server.use(jwtCheck);
 
 //----------------------------------------------------------------------------
 

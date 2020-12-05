@@ -2,12 +2,14 @@
   "name": "server",
   "version": "0.1.0",
   "scripts": {
-    "build": "node build.js",
-    "deploy": "rsync -avz dist/ adamm@10.16.30.211:/var/www/html/apps/inkvisitor/server/dist",
+    "build": "tsc --build tsconfig.prod.json",
+    "deploy": "node build.js",
     "lint": "tslint --project \"tsconfig.json\"",
     "start": "node -r module-alias/register ./dist --env=prod",
     "start:dev": "nodemon",
-    "start:prod": "forever node -r module-alias/register ./dist --env=prod",
+    "start:prod": "pm2 start npm --name \"inkvisitor-server\" -- start",
+    "stop:prod": "pm2 delete \"inkvisitor-server\"",
+    "list": "forever list",
     "test": "nodemon --config ./spec/nodemon.json"
   },
   "nodemonConfig": {
@@ -73,6 +75,7 @@
     "@types/uuid": "^8.0.0",
     "jasmine": "^3.5.0",
     "nodemon": "^2.0.4",
+    "pm2": "^4.5.0",
     "rsync": "^0.6.1",
     "supertest": "^4.0.2",
     "ts-node": "^8.10.2",

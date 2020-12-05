@@ -25,6 +25,13 @@ httpsServer.listen(port, () => {
   console.log("https server working at port", port);
 });
 
+if (process.env.HTTP != "0") {
+  const httpPort = Number(process.env.HTTP);
+  httpServer.listen(httpPort, () => {
+    console.log("http server working at port", httpPort);
+  });
+}
+
 /*
 server.listen(port, () => {
   logger.info("Express server started on port: " + port);

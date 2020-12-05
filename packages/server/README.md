@@ -5,7 +5,8 @@
 - `npm run build` - builds and deploys the server
 - go to ssh and `cd var/www/html/inkvisitor/server`
 - `npm install`
-- `npm start`
+- `npm run start:prod`
+- `npm run stop:prod` to stop the process
 - #`npm start` to test
 - #`podman build --no-cache -t inkvisitor-server .`
 - #(`podman run -p 3000:3000 --network="host" inkvisitor-server`)
