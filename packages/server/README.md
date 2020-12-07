@@ -1,5 +1,20 @@
 # DISSINET SERVER
 
+## Deploy
+
+- `npm run build` - builds and deploys the server
+- go to ssh and `cd var/www/html/inkvisitor/server`
+- `npm install`
+- `npm run start:prod`
+- `npm run stop:prod` to stop the process
+- #`npm start` to test
+- #`podman build --no-cache -t inkvisitor-server .`
+- #(`podman run -p 3000:3000 --network="host" inkvisitor-server`)
+- #`rm -rf inkvisitor-server.tar`
+- #`podman save -o inkvisitor-server.tar --format oci-archive inkvisitor-server`
+- copy to server
+- #`podman load -i inkvisitor-server.tar`
+
 ## Development
 
 Assuming that you are in the project folder.
@@ -20,7 +35,7 @@ Start the application server on `localhost:3000`.
   - `cd ./packages/server`
   - `npm install`
   - `npm run start:dev`
-  
+
 ## Authentication Example
 
 ```shell

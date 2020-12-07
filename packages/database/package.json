@@ -1,23 +1,26 @@
 {
   "name": "database",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "description": "",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "parse:all": "node import/all/parse.js",
     "parse:sellan": "node import/sellan/parse.js",
-    "import:all": "node scripts/import-rethinkdb.js all",
-    "import:mock": "node scripts/import-rethinkdb.js mock",
-    "import:sellan": "node scripts/import-rethinkdb.js sellan"
+    "import:remote": "node scripts/import-rethinkdb.js all remote",
+    "import:all": "node scripts/import-rethinkdb.js all local",
+    "import:mock": "node scripts/import-rethinkdb.js mock local",
+    "import:sellan": "node scripts/import-rethinkdb.js sellan local"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "dotenv": "^8.2.0",
     "googleapis": "^59.0.0",
     "readline": "^1.3.0",
     "readline-sync": "^1.4.10",
     "rethinkdb": "^2.4.2",
+    "tunnel-ssh": "^4.1.4",
     "uuid": "^8.3.0"
   }
 }

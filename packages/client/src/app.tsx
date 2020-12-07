@@ -23,7 +23,7 @@ export const App: React.FC<AppProps> = () => {
 
   return (
     <Provider store={store}>
-      <BrowserRouter>
+      <BrowserRouter basename="apps/inkvisitor">
         <Auth0ProviderWithHistory>
           <Switch>
             <Route
