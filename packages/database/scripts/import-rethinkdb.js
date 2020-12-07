@@ -1,6 +1,6 @@
-const { table } = require("console");
 const fs = require("fs");
 const r = require("rethinkdb");
+var tunnel = require("tunnel-ssh");
 
 const datasets = {
   mock: [
@@ -35,16 +35,16 @@ const datasets = {
   ],
 };
 const datasetId = process.argv[2];
-const tablesToImport = datasets[datasetId];
-console.log(`***importing database ${datasetId}***`);
-console.log("");
+const dbMode = process.argv[3];
 
-const config = {
-  db: "dissinet",
-  host: "localhost",
-  port: 28015,
-  tables: tablesToImport,
-};
+const envData = require("dotenv").config({ path: `env/.env.${dbMode}` }).parsed;
+
+const tablesToImport = datasets[datasetId];
+
+console.log(dbMode, envData);
+
+console.log(`***importing dataset ${datasetId}***`);
+console.log("");
 
 const dictionaries = {
   certainties: "import/dictionaries/dict_certainties.json",
@@ -60,18 +60,28 @@ const dictionaries = {
 //-----------------------------------------------------------------------------
 // Main
 //-----------------------------------------------------------------------------
-const load = async () => {
+
+const importData = async () => {
+  const config = {
+    db: envData.DB_NAME,
+    host: envData.DB_HOST,
+    port: envData.DB_PORT,
+    tables: tablesToImport,
+  };
+
   let conn = null;
 
   try {
     conn = await r.connect(config);
+
+    console.log(config);
 
     // Drop the database.
     try {
       await r.dbDrop(config.db).run(conn);
       console.log("database dropped");
     } catch (e) {
-      console.log("database not dropped", e);
+      console.log("database not dropped");
     }
 
     // Recreate the database
@@ -79,8 +89,11 @@ const load = async () => {
       await r.dbCreate(config.db).run(conn);
       console.log("database created");
     } catch (e) {
-      console.log("database not created", e);
+      console.log("database not created");
     }
+
+    // default database
+    conn.use(config.db);
 
     // Insert dictionaries
     const dictionaryKeys = Object.keys(dictionaries);
@@ -114,4 +127,21 @@ const load = async () => {
   }
 };
 
-load();
+if (dbMode == "remote") {
+  const tnl = tunnel(
+    {
+      host: envData.SSH_IP,
+      port: 28015,
+      dstPort: 28017,
+      username: envData.SSH_USERNAME,
+      password: envData.SSH_LOGIN,
+    },
+    function (error, tnl) {
+      console.log("in the tunnel");
+      importData();
+      tnl.close();
+    }
+  );
+} else {
+  importData();
+}

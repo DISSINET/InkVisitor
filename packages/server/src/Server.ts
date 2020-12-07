@@ -11,35 +11,46 @@ import "express-async-errors";
 import logger from "@common/Logger";
 import { cookieProps } from "@common/constants";
 
-import ActantRouter from "src/modules/actant";
-import TerritoryRouter from "src/modules/territory";
-import MetaRouter from "src/modules/meta";
-
-import {
-  createConnection,
-  closeConnection,
-  rethinkConfig,
-} from "@service/RethinkDB";
+import ActantRouter from "@modules/actant";
+import TerritoryRouter from "@modules/territory";
+import MetaRouter from "@modules/meta";
 
 const server = express();
 server.use(cors());
+
+/*
+server.use((req, res, next) => {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header(
+    "Access-Control-Allow-Headers",
+    "Origin, X-Requested-With, Content-Type, Accept"
+  );
+  next();
+});
+*/
 
 // Middleware that will open a connection to the database.
 // server.use(createConnection);
 
 server.use(express.json());
+
 server.use(express.urlencoded({ extended: true }));
 server.use(cookieParser(cookieProps.secret));
 
 // Show routes called in console during development
-if (process.env.NODE_ENV === "development") {
+if (process.env.NODE_ENV === "devel") {
   server.use(morgan("dev"));
 }
 
 // Securing
-if (process.env.NODE_ENV === "production") {
+if (process.env.NODE_ENV === "prod") {
   server.use(helmet());
 }
+
+server.get("/", function (req, res) {
+  console.log("testing");
+  res.send("test output");
+});
 
 //----------------------------------------------------------------------------
 import jwt from "express-jwt";
@@ -61,10 +72,6 @@ const jwtCheck: jwt.RequestHandler = jwt({
 server.use(jwtCheck);
 
 //----------------------------------------------------------------------------
-
-server.get("/private", function (req, res) {
-  res.send("Private resource");
-});
 
 // Routing
 const routerV1 = Router();

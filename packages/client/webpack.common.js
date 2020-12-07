@@ -1,14 +1,8 @@
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const { CleanWebpackPlugin } = require("clean-webpack-plugin");
-const path = require("path");
 
 module.exports = {
   entry: "./src/index.tsx",
-  output: {
-    path: path.resolve(__dirname, "build"),
-    filename: "[name].bundle.js",
-    publicPath: "/",
-  },
   module: {
     rules: [
       { test: /\.(js)$/, use: "babel-loader", exclude: /node_modules/ },

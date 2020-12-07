@@ -14,14 +14,14 @@ const Auth0ProviderWithHistory: React.FC<Auth0ProviderWithHistory> = ({
   const history = useHistory();
 
   const onRedirectCallback = (appState: any) => {
-    history.push(appState?.returnTo || window.location.pathname);
+    //history.push(appState?.returnTo || window.location.pathname);
   };
 
   return (
     <Auth0Provider
       domain={domain}
       clientId={clientId}
-      redirectUri={window.location.origin}
+      redirectUri={process.env.LOGIN_REDIRECT || window.location.origin}
       onRedirectCallback={onRedirectCallback}
       useRefreshTokens={true}
       cacheLocation="localstorage"

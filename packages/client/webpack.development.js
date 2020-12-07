@@ -1,6 +1,7 @@
+const path = require("path");
 const merge = require("webpack-merge");
 const common = require("./webpack.common.js");
-const dotenv = require("dotenv-webpack");
+const Dotenv = require("dotenv-webpack");
 
 module.exports = merge(common, {
   mode: "development",
@@ -8,13 +9,19 @@ module.exports = merge(common, {
   devServer: {
     hot: true,
     contentBase: "./build",
-    historyApiFallback: true, // react router doesnt work localy without this setting
+    historyApiFallback: true, //
+    port: 8000,
   },
   plugins: [
-    new dotenv({
-      path: ".env.development",
-      safe: true,
+    new Dotenv({
+      path: "./env/.env.devel",
       systemvars: true,
     }),
   ],
+
+  output: {
+    filename: "[name].bundle.js",
+    path: path.resolve(__dirname, "build"),
+    publicPath: "/",
+  },
 });
