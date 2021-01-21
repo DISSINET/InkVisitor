@@ -13,7 +13,7 @@ export const rethinkConfig = {
   db: process.env.DB_NAME,
   host: process.env.DB_HOST,
   port: parseInt(process?.env?.DB_PORT || "28015"),
-  authKey: process.env.DB_AUTH,
+  password: process.env.DB_AUTH,
 };
 
 /*
