@@ -3,13 +3,12 @@
   "version": "0.1.0",
   "scripts": {
     "build": "tsc --build tsconfig.prod.json",
-    "deploy": "node build.js",
     "lint": "tslint --project \"tsconfig.json\"",
     "start": "node -r module-alias/register ./dist --env=prod",
     "start:dev": "nodemon",
     "start:prod": "pm2 start npm --name \"inkvisitor-server\" -- start",
+    "restart:prod": "pm2 restart inkvisitor-server",
     "stop:prod": "pm2 delete \"inkvisitor-server\"",
-    "list": "forever list",
     "test": "nodemon --config ./spec/nodemon.json"
   },
   "nodemonConfig": {
@@ -41,7 +40,6 @@
     "express-async-errors": "^3.1.1",
     "express-jwt": "^6.0.0",
     "find": "^0.3.0",
-    "fs-extra": "^9.0.1",
     "helmet": "^3.23.1",
     "http": "0.0.1-security",
     "http-status-codes": "^1.4.0",
