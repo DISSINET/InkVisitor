@@ -1,8 +1,10 @@
-const fs = require("fs");
+import * as fs from "fs";
+import { User } from "../../shared/types/user";
+import { hashPassword } from "../../server/src/common/auth";
 const r = require("rethinkdb");
-var tunnel = require("tunnel-ssh");
+const tunnel = require("tunnel-ssh");
 
-const datasets = {
+const datasets: Record<string, any> = {
   mock: [
     {
       name: "actants",
@@ -11,6 +13,10 @@ const datasets = {
     {
       name: "actions",
       path: "import/mock/actions.json",
+    },
+    {
+      name: "users",
+      path: "import/mock/users.json",
     },
   ],
   sellan: [
@@ -46,7 +52,7 @@ console.log(dbMode, envData);
 console.log(`***importing dataset ${datasetId}***`);
 console.log("");
 
-const dictionaries = {
+const dictionaries: Record<string, string> = {
   certainties: "import/dictionaries/dict_certainties.json",
   elvls: "import/dictionaries/dict_elvls.json",
   languages: "import/dictionaries/dict_languages.json",
@@ -99,7 +105,9 @@ const importData = async () => {
     const dictionaryKeys = Object.keys(dictionaries);
     for (let i = 0; i < dictionaryKeys.length; i++) {
       const dictionaryPath = dictionaries[dictionaryKeys[i]];
-      const dictionaryData = JSON.parse(fs.readFileSync(dictionaryPath));
+      const dictionaryData = JSON.parse(
+        fs.readFileSync(dictionaryPath).toString()
+      );
       const tableName = `dict_${dictionaryKeys[i]}`;
       await r.tableCreate(tableName).run(conn);
       await r.table(tableName).insert(dictionaryData).run(conn);
@@ -113,7 +121,14 @@ const importData = async () => {
       await r.tableCreate(table.name).run(conn);
       await console.log(`table ${table.name} created`);
 
-      const data = JSON.parse(fs.readFileSync(table.path));
+      let data = JSON.parse(fs.readFileSync(table.path).toString());
+      if (table.name === "users") {
+        data = data.map((user: User) => {
+          user.password = hashPassword(user.password);
+          return user;
+        });
+      }
+
       await r.table(table.name).insert(data).run(conn);
       await console.log(`data into the table ${table.name} inserted`);
     }
@@ -136,7 +151,7 @@ if (dbMode == "remote") {
       username: envData.SSH_USERNAME,
       password: envData.SSH_LOGIN,
     },
-    function (error, tnl) {
+    function (error: any, tnl: any) {
       console.log("in the tunnel");
       importData();
       tnl.close();

@@ -7,10 +7,10 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "parse:all": "node import/all/parse.js",
     "parse:sellan": "node import/sellan/parse.js",
-    "import:remote": "node scripts/import-rethinkdb.js all remote",
-    "import:all": "node scripts/import-rethinkdb.js all local",
-    "import:mock": "node scripts/import-rethinkdb.js mock local",
-    "import:sellan": "node scripts/import-rethinkdb.js sellan local"
+    "import:remote": "npx ts-node  scripts/import-rethinkdb.ts all remote",
+    "import:all": "npx ts-node  scripts/import-rethinkdb.ts all local",
+    "import:mock": "npx ts-node  scripts/import-rethinkdb.ts mock local",
+    "import:sellan": "npx ts-node  scripts/import-rethinkdb.ts sellan local"
   },
   "author": "",
   "license": "ISC",
@@ -22,5 +22,8 @@
     "rethinkdb": "^2.4.2",
     "tunnel-ssh": "^4.1.4",
     "uuid": "^8.3.0"
+  },
+  "devDependencies": {
+    "@types/node": "^14.14.25"
   }
 }
