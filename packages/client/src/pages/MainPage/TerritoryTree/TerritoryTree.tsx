@@ -1,4 +1,6 @@
-import React, { useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
+import { FaPlus } from "react-icons/fa";
+import update from "immutability-helper";
 
 import {
   Tag,
@@ -10,8 +12,6 @@ import {
   ModalFooter,
   Input,
 } from "components";
-
-import { FaPlus } from "react-icons/fa";
 import { Entities } from "types";
 import { ResponseTerritoryI } from "@shared/types";
 import { TerritoryI } from "@shared/types";
@@ -31,6 +31,26 @@ export const TerritoryTree: React.FC<TerritoryTree> = ({
 
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [labelNew, setLabelNew] = useState("");
+  const [childTerritories, setChildTerritories] = useState<TerritoryI[]>([]);
+
+  useEffect(() => {
+    setChildTerritories(territory ? territory.children : []);
+  }, [territory?.children]);
+
+  const moveTagFn = useCallback(
+    (dragIndex: number, hoverIndex: number) => {
+      const dragCard = childTerritories[dragIndex];
+      setChildTerritories(
+        update(childTerritories, {
+          $splice: [
+            [dragIndex, 1],
+            [hoverIndex, 0, dragCard],
+          ],
+        })
+      );
+    },
+    [childTerritories]
+  );
 
   const createNew = async () => {
     return territoryCreateFn(labelNew);
@@ -147,14 +167,16 @@ export const TerritoryTree: React.FC<TerritoryTree> = ({
           <h3>{"Children territories: "}</h3>
         )}
         {territory &&
-          territory.children.map((child: TerritoryI, key) => {
+          childTerritories.map((child: TerritoryI, key) => {
             return (
-              <div className="flex mb-1" key={key}>
+              <div className="flex mb-1" key={child.id}>
                 <Tag
                   propId={child.id}
+                  index={key}
                   category={Entities.T.id}
                   color={Entities.T.color}
                   label={child && child.data.label}
+                  moveTagFn={moveTagFn}
                   button={
                     <>
                       <Button
