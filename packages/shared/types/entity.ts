@@ -1,15 +1,11 @@
-import { ActantI } from "./actant";
+import { ActantI, LabelI } from "./";
 
 export interface EntityI extends ActantI {
-  class: "P" | "G" | "O" | "C" | "L" | "V" | "E";
-  id: string;
-  data: {
-    label: string;
-  };
-  meta: {
-    created: {
-      user: string;
-      time: string;
+    class: "P" | "G" | "O" | "C" | "L" | "V" | "E";
+    meta: {
+        created: {
+            user: string;
+            time: string;
+        };
     };
-  };
 }
