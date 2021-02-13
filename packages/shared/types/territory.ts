@@ -5,5 +5,4 @@ export interface TerritoryI extends ActantI {
     data: {
         parent: string | false;
     };
-    meta: {};
 }
