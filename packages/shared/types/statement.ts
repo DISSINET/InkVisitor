@@ -4,7 +4,10 @@ export interface StatementI extends ActantI {
     class: "S";
     data: {
         action: string;
-        territory: string;
+        territory: {
+            id: string;
+            order: number;
+        };
         references: {
             id: string;
             resource: string;
@@ -19,6 +22,7 @@ export interface StatementI extends ActantI {
         note: string;
         props: {
             id: string;
+            order: number;
             origin: string;
             type: string;
             value: string;
@@ -27,6 +31,7 @@ export interface StatementI extends ActantI {
         }[];
         actants: {
             id: string;
+            order: number;
             actant: string;
             position: string;
             elvl: string;
