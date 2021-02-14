@@ -6,6 +6,7 @@ import { modalityDict } from "./modality";
 import { actantPositionDict } from "./actantposition";
 import { referenceTypeDict } from "./referencetype";
 import { resourceTypeDict } from "./resourcetype";
+import { userRoleDict } from "./userroles";
 import { territoryTypeDict } from "./territorytype";
 
 export {
@@ -18,4 +19,5 @@ export {
     referenceTypeDict,
     resourceTypeDict,
     territoryTypeDict,
+    userRoleDict,
 };

@@ -3,10 +3,13 @@
  */
 
 import { ActantI, TerritoryI, StatementI, ResponseActantI } from ".";
+import { userRoleDict } from "./../dictionaries";
 
+const userRoleValues = userRoleDict.map((i) => i.value);
 export interface ResponseUserI {
     id: string;
     name: string;
+    role: typeof userRoleValues[number];
     bookmarks: BookmarkFolderI[];
     storedTerritories: StoredTerritoryI[];
 }
