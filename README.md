@@ -19,7 +19,8 @@
 -   import data
     -   `cd ./packages/database`
     -   `npm install`
-    -   `npm run import:sellan`
+    -   `npm run import:local` to import datasets to the local database (`.env.devel`)
+    -   `npm run import:remote` to import datasets to the remote database (`.env.prod`)
 
 ### Client
 

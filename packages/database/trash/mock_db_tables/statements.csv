@@ -1,8 +1,0 @@
-id,action_id,territory_id,certainty,elvl,modality,text,note
-1,A1,T1-1-1,1,1,1,Fisherman David said that ...,
-2,A2,T1-1-1,1,1,1,"...priest Honza, baker Robert, and a group of local villagers performed a ritual in a house near Dover.",
-3,A3,T1-1-2,1,1,1,Robert brought 3 breads to the ritual.,
-4,A4,T1-1,1,1,1,This house burned down during the big forest fire. ,
-5,A5,T2-1,1,1,1,This house burned down 2 years before the big forest fire.,
-6,A6,T3,1,1,1,Dover has latitude of 51.13,
-7,A6,T3,1,1,1,Dover has longitude of 1.31,
