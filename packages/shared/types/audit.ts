@@ -4,5 +4,10 @@ export interface AuditI {
     id: string;
     user: string;
     date: Date;
-    changes: Object;
+    changes: ChangeI[];
+}
+
+interface ChangeI {
+    id: string;
+    newValue: object;
 }
