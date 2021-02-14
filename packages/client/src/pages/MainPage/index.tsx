@@ -25,7 +25,7 @@ import { StatementsTable } from "./StatementsTable/StatementsTable";
 import { StatementEditor } from "./StatementEditor/StatementEditor";
 import { useHistory, useParams } from "react-router-dom";
 import { v4 as uuidv4 } from "uuid";
-
+import api from "../../api/api";
 import { deleteActant } from "api/deleteActant";
 
 import { updateActant } from "api/updateActant";
@@ -56,6 +56,13 @@ const MainPage: React.FC<MainPage> = ({
   size,
   token,
 }) => {
+  const usernameRef = React.createRef<any>();
+  const passwordRef = React.createRef<any>();
+  const handleLogin = (event: any) => {
+    event.preventDefault();
+    api.signIn(usernameRef.current.value, passwordRef.current.value);
+    //api.signIn()
+  };
   const history = useHistory();
   const { territoryId, statementId } = useParams<{
     territoryId: string;
@@ -278,7 +285,13 @@ const MainPage: React.FC<MainPage> = ({
             </div>
           </div>
         ) : (
-          <div className="p-5">{"Login to continue.."}</div>
+          <div className="p-5">
+            <form onSubmit={handleLogin}>
+              <input type="text" placeholder="username" ref={usernameRef} />
+              <input type="text" placeholder="username" ref={passwordRef} />
+              <button type="submit">Submit</button>
+            </form>
+          </div>
         )}
       </DndProvider>
 
