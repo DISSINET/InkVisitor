@@ -3,26 +3,6 @@ const r = require("rethinkdb");
 var tunnel = require("tunnel-ssh");
 
 const datasets = {
-    mock: [
-        {
-            name: "actants",
-            path: "datasets/mock/actants.json",
-        },
-        {
-            name: "actions",
-            path: "datasets/mock/actions.json",
-        },
-    ],
-    sellan: [
-        {
-            name: "actants",
-            path: "datasets/sellan/actants.json",
-        },
-        {
-            name: "actions",
-            path: "datasets/sellan/actions.json",
-        },
-    ],
     all: [
         {
             name: "actants",
@@ -81,8 +61,24 @@ const importData = async () => {
             console.log("database not created");
         }
 
-        // default database
+        // set default database
         conn.use(config.db);
+
+        // create audits and users tables
+        await r.tableCreate("audits").run(conn);
+        await r.tableCreate("users").run(conn);
+
+        // add
+        await r
+            .table("users")
+            .insert({
+                id: "0",
+                name: "admin",
+                role: "1",
+                bookmarks: [],
+                storedTerritories: [],
+            })
+            .run(conn);
 
         // Insert data to tables.
         for (let i = 0; i < config.tables.length; ++i) {
@@ -105,7 +101,7 @@ const importData = async () => {
     }
 };
 
-if (dbMode == "remote") {
+if (dbMode == "prod") {
     const tnl = tunnel(
         {
             host: envData.SSH_IP,
