@@ -3,7 +3,7 @@ import { ActantI } from "./actant";
 export interface TerritoryI extends ActantI {
     class: "T";
     parent: ParentTerritoryI;
-    type: string;
+    type: string; // territoryTypeDict
 }
 
 interface ParentTerritoryI {
