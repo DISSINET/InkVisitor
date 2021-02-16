@@ -24,12 +24,14 @@ export default Router().post(
       throw new UserDoesNotExits(`user ${name} was not found`);
     }
 
-    if (!checkPassword(rawPassword, user.password)) {
+    if (!checkPassword(rawPassword, user.password || "")) {
       throw new BadCredentialsError("unknown credentials");
     }
 
+    user.password = undefined;
+
     response.json({
-      token: generateAccessToken(name, user.id),
+      token: generateAccessToken(user),
     });
   }
 );

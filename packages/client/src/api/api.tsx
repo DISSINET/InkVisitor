@@ -1,6 +1,5 @@
+import { User } from "@auth0/auth0-react/dist/auth-state";
 import axios, { AxiosInstance, AxiosResponse } from "axios";
-
-console.log(process.env.URL);
 
 const parseJwt = (token: string) => {
   var base64Url = token.split(".")[1];
@@ -34,6 +33,7 @@ class Api {
   private headers: object;
   private connection: AxiosInstance;
   private token: string;
+  private user: User;
 
   constructor() {
     if (!process.env.APIURL) {
@@ -57,37 +57,31 @@ class Api {
     });
 
     this.token = "";
-
     this.checkLogin();
   }
 
   checkLogin() {
-    console.log("checking whether user logged in previously");
     let storedToken = localStorage.getItem("token");
     let storedUsername = localStorage.getItem("username");
 
-    console.log("token", storedToken);
     if (!!storedToken && !!storedUsername) {
       const parsedToken = parseJwt(storedToken);
 
       if (parsedToken && Date.now() < parsedToken.exp * 1000) {
-        console.log("yes, user was saved previously", storedUsername);
-        this.saveLogin(storedToken, storedUsername);
+        this.saveLogin(storedToken, parsedToken.user);
       } else {
       }
     }
   }
 
-  saveLogin(newToken: string, newUsername: string) {
-    setTimeout(() => {
-      localStorage.setItem("token", newToken);
-      localStorage.setItem("username", newUsername);
-      this.token = newToken;
-    }, 100);
+  saveLogin(newToken: string, user: User) {
+    localStorage.setItem("token", newToken);
+    localStorage.setItem("user", JSON.stringify(user));
+    this.token = newToken;
+    this.user = user;
   }
 
   async signIn(username: string, password: string): Promise<any> {
-    console.log("going to try to sign in ");
     try {
       const response = (await this.connection.post(
         "/users/signin",
@@ -97,9 +91,10 @@ class Api {
         },
         {}
       )) as AxiosResponse;
-      console.log("login response", response.data);
+
       if (response.status === 200) {
-        this.saveLogin(response.data.token, username);
+        const parsed = parseJwt(response.data.token);
+        this.saveLogin(response.data.token, parsed.user);
       }
       return { ...response.data };
     } catch (err) {
@@ -108,10 +103,17 @@ class Api {
   }
 
   async signOut() {
-    console.log("going to sign out");
     localStorage.setItem("token", "");
     localStorage.setItem("username", "");
     this.token = "";
+  }
+
+  getUser(): User {
+    return this.user;
+  }
+
+  isAuthenticated(): boolean {
+    return !!this.user;
   }
 }
 
