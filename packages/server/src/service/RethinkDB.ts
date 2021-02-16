@@ -1,10 +1,16 @@
-import { Connection, r as rethink } from "rethinkdb-ts";
+import {
+  Connection,
+  r as rethink,
+  isRethinkDBError,
+  MasterPool,
+} from "rethinkdb-ts";
 import { Express, NextFunction, Request, Response } from "express";
+import { RethinkDBError } from "rethinkdb-ts/lib/error/error";
 
 declare global {
   namespace Express {
     export interface Request {
-      rethink: Connection;
+      db: Db;
     }
   }
 }
@@ -15,6 +21,26 @@ export const rethinkConfig = {
   port: parseInt(process?.env?.DB_PORT || "28015"),
   password: process.env.DB_AUTH,
 };
+
+export class Db {
+  connection?: Connection;
+
+  constructor() {
+    if (!rethinkConfig.db || !rethinkConfig.host || !rethinkConfig.port) {
+      throw new Error("Missing db params, check env vars");
+    }
+  }
+
+  async initDb(): Promise<void> {
+    this.connection = await rethink.connect(rethinkConfig);
+  }
+
+  close() {
+    if (this.connection) {
+      this.connection.close();
+    }
+  }
+}
 
 /*
  * Send back a 500 error.
@@ -35,10 +61,10 @@ export const createConnection = async (
   response: Response,
   next: NextFunction
 ) => {
-  await rethink.connectPool(rethinkConfig);
-  const connection = await rethink.connect(rethinkConfig);
+  request.db = new Db();
+  await request.db.initDb();
   console.log("connected to db");
-  request.rethink = connection;
+  next();
 };
 
 /*
@@ -49,5 +75,5 @@ export const closeConnection = async (
   response: Response,
   next: NextFunction
 ) => {
-  await request.rethink.close();
+  await request.db.close();
 };
