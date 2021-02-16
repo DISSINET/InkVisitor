@@ -56,6 +56,7 @@ server.get("/", function (req, res) {
 //----------------------------------------------------------------------------
 import jwt from "express-jwt";
 import jwks from "jwks-rsa";
+import { validateJwt } from "@common/auth";
 
 /*jwt({
   secret: jwks.expressJwtSecret({
@@ -70,15 +71,7 @@ import jwks from "jwks-rsa";
 });
 */
 //@ts-ignore
-server.use(function (req, res, next) {
-  if (req.path.indexOf("/api/v1/users/") === 0) {
-    next();
-  } else {
-    res.status(403).send({
-      message: "Access Forbidden",
-    });
-  }
-});
+server.use(validateJwt().unless({ path: [/api\/v1\/users/] }));
 
 //----------------------------------------------------------------------------
 
