@@ -1,5 +1,5 @@
 import { User } from "@auth0/auth0-react/dist/auth-state";
-import axios, { AxiosInstance, AxiosResponse } from "axios";
+import axios, { AxiosInstance, AxiosResponse, AxiosRequestConfig } from "axios";
 
 const parseJwt = (token: string) => {
   var base64Url = token.split(".")[1];
@@ -58,6 +58,10 @@ class Api {
 
     this.token = "";
     this.checkLogin();
+  }
+
+  async get(url: string): Promise<any> {
+    return this.connection.get(url);
   }
 
   checkLogin() {
