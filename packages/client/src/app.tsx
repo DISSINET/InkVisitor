@@ -1,7 +1,6 @@
 import React, { useState, useLayoutEffect, useEffect } from "react";
 import { Provider } from "react-redux";
 import { Switch, Route, BrowserRouter } from "react-router-dom";
-import Auth0ProviderWithHistory from "auth/Auth0ProviderWithHistory";
 
 import "app.css";
 import store from "redux/store";
@@ -24,15 +23,13 @@ export const App: React.FC<AppProps> = () => {
   return (
     <Provider store={store}>
       <BrowserRouter basename="apps/inkvisitor">
-        <Auth0ProviderWithHistory>
-          <Switch>
-            <Route
-              path="/:territoryId?/:statementId?"
-              exact
-              render={(props) => <MainPage {...props} size={size} />}
-            />
-          </Switch>
-        </Auth0ProviderWithHistory>
+        <Switch>
+          <Route
+            path="/:territoryId?/:statementId?"
+            exact
+            render={(props) => <MainPage {...props} size={size} />}
+          />
+        </Switch>
       </BrowserRouter>
     </Provider>
   );

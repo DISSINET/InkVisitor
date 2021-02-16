@@ -7,7 +7,7 @@ export const setAuthToken = (token: string) => (
 ): Promise<void> => {
   dispatch({
     type: SET_AUTH_TOKEN,
-    token: token,
+    token,
   });
   return Promise.resolve();
 };
