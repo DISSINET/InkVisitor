@@ -10,7 +10,7 @@ export const userRoleDict = [
         info: "",
     },
     {
-        value: "2",
+        value: "3",
         label: "observer",
         info: "",
     },
