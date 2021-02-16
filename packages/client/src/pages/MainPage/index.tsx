@@ -25,7 +25,7 @@ import { StatementsTable } from "./StatementsTable/StatementsTable";
 import { StatementEditor } from "./StatementEditor/StatementEditor";
 import { useHistory, useParams } from "react-router-dom";
 import { v4 as uuidv4 } from "uuid";
-
+import api from "../../api/api";
 import { deleteActant } from "api/deleteActant";
 
 import { updateActant } from "api/updateActant";
@@ -56,6 +56,16 @@ const MainPage: React.FC<MainPage> = ({
   size,
   token,
 }) => {
+  const usernameRef = React.createRef<any>();
+  const passwordRef = React.createRef<any>();
+  const handleLogin = async (event: any) => {
+    event.preventDefault();
+    await api.signIn(usernameRef.current.value, passwordRef.current.value);
+    setUser(api.getUser());
+  };
+
+  const [user, setUser] = useState(api.getUser());
+
   const history = useHistory();
   const { territoryId, statementId } = useParams<{
     territoryId: string;
@@ -161,31 +171,19 @@ const MainPage: React.FC<MainPage> = ({
     return !!response;
   };
 
-  const {
-    user,
-    isAuthenticated,
-    isLoading,
-    loginWithRedirect,
-    logout,
-    getAccessTokenSilently,
-  } = useAuth0();
-
   useEffect(() => {
-    if (isAuthenticated) {
-      getAccessTokenSilently().then((token) => {
-        setAuthToken(token);
-      });
+    if (user) {
     }
-  }, [isAuthenticated]);
+  }, [user]);
 
   useEffect(() => {
-    if (isAuthenticated && token) {
+    if (user) {
       fetchMeta();
     }
-  }, [fetchMeta, isAuthenticated, token]);
+  }, [fetchMeta, user, token]);
 
   useEffect(() => {
-    if (isAuthenticated && token) {
+    if (user && token) {
       if (territoryId) {
         fetchTerritory(territoryId);
       } else {
@@ -193,7 +191,7 @@ const MainPage: React.FC<MainPage> = ({
         history.push(`/${initTerritory}`);
       }
     }
-  }, [fetchTerritory, isAuthenticated, token, territoryId]);
+  }, [fetchTerritory, user, token, territoryId]);
 
   const heightHeader = 70;
   const heightFooter = 30;
@@ -212,29 +210,21 @@ const MainPage: React.FC<MainPage> = ({
         left={<div className="text-4xl">InkVisitor</div>}
         right={
           <div className="flex">
-            {isAuthenticated ? (
+            {user ? (
               <>
-                <div className="text-sm inline m-2">logged as {user.name}</div>
-                <Button
-                  label="Log Out"
-                  color="danger"
-                  onClick={() =>
-                    logout({ returnTo: process.env.LOGOUT_REDIRECT })
-                  }
-                />
+                <div className="text-sm inline m-2">
+                  logged as {api.getUser().name}
+                </div>
+                <Button label="Log Out" color="danger" onClick={() => null} />
               </>
             ) : (
-              <Button
-                label="Log In"
-                color="info"
-                onClick={() => loginWithRedirect()}
-              />
+              <Button label="Log In" color="info" onClick={() => null} />
             )}
           </div>
         }
       />
       <DndProvider backend={HTML5Backend}>
-        {isAuthenticated && meta ? (
+        {user && meta ? (
           <div className="flex">
             <Box height={heightContent} width={200} label={"Territories"}>
               <TerritoryTree
@@ -278,12 +268,18 @@ const MainPage: React.FC<MainPage> = ({
             </div>
           </div>
         ) : (
-          <div className="p-5">{"Login to continue.."}</div>
+          <div className="p-5">
+            <form onSubmit={handleLogin}>
+              <input type="text" placeholder="username" ref={usernameRef} />
+              <input type="text" placeholder="username" ref={passwordRef} />
+              <button type="submit">Submit</button>
+            </form>
+          </div>
         )}
       </DndProvider>
 
       <Toast />
-      {isAuthenticated && <Footer height={heightFooter} />}
+      {user && <Footer height={heightFooter} />}
     </>
   );
 };
