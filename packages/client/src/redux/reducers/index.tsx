@@ -2,13 +2,14 @@ import { combineReducers } from "redux";
 
 import meta from "./metaReducer";
 import { territory } from "./territoryTreeReducer";
-import activeStatementId from "./statementReducer";
 import token from "./authTokenReducer";
+import activeStatementIdSlice from "redux/features/statementIdSlice";
+import authTokenSlice from "redux/features/authTokenSlice";
 
 const rootReducer = combineReducers({
   meta,
   territory,
-  activeStatementId,
+  activeStatementId: activeStatementIdSlice,
   token,
 });
 
