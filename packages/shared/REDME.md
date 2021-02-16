@@ -1,3 +1,0 @@
-# DISSINET SHARED
-
-## Shared Models

@@ -1,12 +1,18 @@
 import { ActantI } from "./";
 
 export interface StatementI extends ActantI {
-  class: "S";
-  data: {
-    label: string;
+    class: "S";
     action: string;
-    territory: string;
-    references: { id: string; resource: string; part: string; type: string }[];
+    territory: {
+        id: string;
+        order: number;
+    };
+    references: {
+        id: string;
+        resource: string;
+        part: string;
+        type: string;
+    }[];
     tags: string[];
     certainty: string;
     elvl: string;
@@ -14,30 +20,20 @@ export interface StatementI extends ActantI {
     text: string;
     note: string;
     props: {
-      id: string;
-      origin: string;
-      type: string;
-      value: string;
-      elvl: string;
-      certainty: string;
+        id: string;
+        order: number;
+        origin: string;
+        type: string;
+        value: string;
+        elvl: string;
+        certainty: string;
     }[];
     actants: {
-      id: string;
-      actant: string;
-      position: string;
-      elvl: string;
-      certainty: string;
+        id: string;
+        order: number;
+        actant: string;
+        position: string;
+        elvl: string;
+        certainty: string;
     }[];
-  };
-  meta: {
-    created: {
-      user: string;
-      time: string;
-    };
-    updated: {
-      user: string;
-      time: string;
-      value: {};
-    }[];
-  };
 }
