@@ -1,4 +1,3 @@
-
 export enum Role {
     Admin,
     Standard,
@@ -15,7 +14,6 @@ export interface IUser {
     name: Name;
     email: Email;
     password: string;
-
 }
 
 export class User implements IUser {
@@ -30,7 +28,7 @@ export class User implements IUser {
         name: Name,
         email: Email,
         role: Role,
-        password: Password,
+        password: Password
     ) {
         this.name = name;
         this.email = email;
