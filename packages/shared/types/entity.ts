@@ -1,15 +1,8 @@
-import { ActantI } from "./actant";
+import { ActantI, LabelI } from "./";
+import { entityLogicalTypeDict } from "./../dictionaries";
 
+const entityLogicalTypeValues = entityLogicalTypeDict.map((i) => i.value);
 export interface EntityI extends ActantI {
-  class: "P" | "G" | "O" | "C" | "L" | "V" | "E";
-  id: string;
-  data: {
-    label: string;
-  };
-  meta: {
-    created: {
-      user: string;
-      time: string;
-    };
-  };
+    class: "P" | "G" | "O" | "C" | "L" | "V" | "E";
+    logicalType: typeof entityLogicalTypeValues[number];
 }

@@ -7,6 +7,7 @@ import "./tag.css";
 import ReactTooltip from "react-tooltip";
 
 interface TagProps {
+
   label?: string;
   category: string;
   color: string;
@@ -19,6 +20,7 @@ interface TagProps {
   index?: number;
   moveTagFn?: (dragIndex: number, hoverIndex: number) => void;
 }
+
 interface DragItem {
   index: number;
   id: string;
@@ -38,53 +40,50 @@ export const Tag: React.FC<TagProps> = ({
   index,
   moveTagFn,
 }) => {
-  const tagClasses = classNames(
-    "component",
-    "tag",
-    "border-black",
-    "border-2",
-    "inline-flex",
-    "rounded-md",
-    "overflow-hidden",
-    "max-w-xs",
-    marginRight && "mr-1",
-    "cursor-move",
-    "text-black"
-  );
+    const tagClasses = classNames(
+        "component",
+        "tag",
+        "border-black",
+        "border-2",
+        "inline-flex",
+        "rounded-md",
+        "overflow-hidden",
+        "max-w-xs",
+        marginRight && "mr-1",
+        "cursor-move",
+        "text-black"
+    );
 
-  const entityClasses = classNames(
-    `bg-${color}`,
-    "tag-entity",
-    "inline",
-    "w-6",
-    "py-1",
-    "px-2",
-    "text-center",
-    "text-xs",
-    "font-bold",
-    {
-      "border-r-2": !!label && !!showLabel,
-      "border-primary": !!label && !!showLabel,
-    }
-  );
-  const labelClasses = classNames(
-    "tag-label",
-    "text-xs",
-    "inline",
-    "align-middle",
-    "py-1",
-    "px-2",
-    "truncate",
-    invertedLabel ? "bg-primary text-white" : "bg-white",
-    { "bg-primary text-white": mode === "selected" }
-  );
-  const buttonClasses = classNames(
-    "tag-button",
-    "flex",
-    "-mt-2",
-    "-mb-2",
-    "align-middle"
-  );
+    const entityClasses = classNames(
+        `bg-${color}`,
+        "tag-entity",
+        "inline",
+        "w-6",
+        "py-1",
+        "text-center",
+        "font-extrabold",
+        {
+            "border-r-2": !!label && !!showLabel,
+            "border-primary": !!label && !!showLabel,
+        }
+    );
+    const labelClasses = classNames(
+        "tag-label",
+        "inline",
+        "align-middle",
+        "py-1",
+        "px-1",
+        "truncate",
+        invertedLabel ? "bg-primary text-white" : "bg-white",
+        { "bg-primary text-white": mode === "selected" }
+    );
+    const buttonClasses = classNames(
+        "tag-button",
+        "flex",
+        "-mt-2",
+        "-mb-2",
+        "align-middle"
+    );
 
   const ref = useRef<HTMLDivElement>(null);
   const [, drop] = useDrop({
@@ -169,9 +168,9 @@ export const Tag: React.FC<TagProps> = ({
 };
 
 Tag.defaultProps = {
-  label: "",
-  category: "T",
-  color: "black",
-  mode: false,
-  showLabel: true,
+    label: "",
+    category: "T",
+    color: "black",
+    mode: false,
+    showLabel: true,
 };

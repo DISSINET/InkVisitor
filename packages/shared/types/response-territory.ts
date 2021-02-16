@@ -4,9 +4,14 @@
 
 import { ActantI, TerritoryI, StatementI } from "./";
 
+// to discuss
 export interface ResponseTerritoryI extends TerritoryI {
-  children: TerritoryI[];
-  parent: false | TerritoryI;
-  statements: StatementI[];
-  actants: ActantI[];
+    parents: ParentTerritoryI[];
+    children: TerritoryI[];
+    statementIds: string[];
+}
+
+interface ParentTerritoryI {
+    level: number;
+    territory: TerritoryI;
 }
