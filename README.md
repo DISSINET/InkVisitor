@@ -65,24 +65,6 @@ curl --request GET \
 -   **deleteOne**
 -   **postOne**
 
-#### /territories
-
-_to be discussed!_
-
--   **getOne: ResponseTerritoryI** returns territory by id, all territories exactly one level below and the path to the root territory, all statements with this territory and all its actants
--   **putOne**
--   **deleteOne**
--   **postOne**
-
-#### /statements
-
-_to be discussed_
-
--   **getOne: ResponseStatementI**
--   **putOne**
--   **deleteOne**
--   **postOne**
-
 #### /actants
 
 -   **getMore: ResponseActantI[]**
@@ -98,3 +80,26 @@ _to be discussed_
 -   **putOne**
 -   **deleteOne**
 -   **postOne**
+
+#### /tree
+
+-   :ResponseTreeI
+-   a route returning the structure of all territories
+
+<!-- #### /territories
+
+_to be discussed!_
+
+-   **getOne: ResponseTerritoryI** returns territory by id, all territories exactly one level below and the path to the root territory, all statements with this territory and all its actants
+-   **putOne**
+-   **deleteOne**
+-   **postOne**
+
+#### /statements
+
+_to be discussed_
+
+-   **getOne: ResponseStatementI**
+-   **putOne**
+-   **deleteOne**
+-   **postOne** -->
