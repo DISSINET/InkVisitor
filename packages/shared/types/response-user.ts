@@ -1,23 +1,31 @@
 /**
- * type of the /user endpoint response
+ * type of the /users endpoint response
  */
 
-import { ActantI, TerritoryI, StatementI, ResponseActantI } from ".";
+import { ResponseActantI } from "./";
 import { userRoleDict } from "./../dictionaries";
 
 const userRoleValues = userRoleDict.map((i) => i.value);
+
 export interface ResponseUserI {
     id: string;
+    email: string;
     name: string;
     role: typeof userRoleValues[number];
     bookmarks: BookmarkFolderI[];
     storedTerritories: StoredTerritoryI[];
 }
 
+export interface UserOptions {
+    defaultTerritory: string;
+    defaultLanguage: string;
+    searchLanguages: string[];
+}
+
 interface StoredTerritoryI {
     id: string;
     order: number;
-    territory: TerritoryI;
+    territory: ResponseActantI;
 }
 
 interface BookmarkFolderI {
