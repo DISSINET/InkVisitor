@@ -59,32 +59,51 @@ curl --request GET \
 
 #### /users
 
--   **getMore: ResponseUserI[]**
--   **getOne: ResponseUserI**
--   **putOne**
--   **deleteOne**
--   **postOne**
+-   **POST** /getMore {FilterUsersI} => ResponseUserI[]
+-   **GET** /:id => ResponseUserI
+-   **PUT** /:id {changes}
+-   **DELETE** /:id
+-   **POST** /:id {UserI}
 
 #### /actants
 
--   **getMore: ResponseActantI[]**
--   **getOne: ResponseActantI**
--   **putOne**
--   **deleteOne**
--   **postOne**
+-   **POST** /getMore {FilterActantsI} => ResponseActantI[]
+-   **GET** /:id => ResponseActantI
+-   **PUT** /:id {changes} =>
+-   **DELETE** /:id =>
+-   **POST** /:id {ActantI} =>
 
 #### /actions
 
--   **getAll: ResponseActionI[]** get full list of actions for select box, can be loaded at initialization
--   **getOne: ResponseActionI** get one action to display edit modal
--   **putOne**
--   **deleteOne**
--   **postOne**
+-   **POST** /getMore {FilterActionsI} => ResponseActionI[]
+-   **GET** /:id => ResponseActionI
+-   **PUT** /:id {changes} =>
+-   **DELETE** /:id =>
+-   **POST** /:id {ActionI} =>
 
 #### /tree
 
--   :ResponseTreeI
--   a route returning the structure of all territories
+-   **GET** /
+    {}
+    => ResponseTreeI
+    _returns the structure of all territories_
+
+#### /territory
+
+-   **GET** /:id
+    {}
+    => ResponseTerritoryI
+    _returns all statements and actants for selected territory_
+
+-   **POST** /moveTerritory
+    {moveId: string; beforeId: string | false; afterId: string | false}
+    =>
+    _move territory within the parent territory - between beforeId and afterId_
+
+-   **POST** /moveStatement
+    {moveId: string; beforeId: string | false; afterId: string | false}
+    =>
+    _move statement within the territory - between beforeId and afterId_
 
 <!-- #### /territories
 
