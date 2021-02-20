@@ -15,6 +15,9 @@ export const DefaultButton = () => {
 export const PrimaryButton = () => {
   return <Button label="primary" color="primary" />;
 };
+export const SuccessButton = () => {
+  return <Button label="success" color="success" />;
+};
 
 export const WarningButton = () => {
   return <Button label="warning" color="warning" />;
@@ -29,17 +32,21 @@ export const InfoButton = () => {
 };
 
 export const PrimaryInvertedButton = () => {
-  return <Button label="primary" inverted color="primary" />;
+  return <Button label="primary inverted" inverted color="primary" />;
+};
+
+export const SuccessInvertedButton = () => {
+  return <Button label="success inverted" inverted color="success" />;
 };
 
 export const WarningInvertedButton = () => {
-  return <Button label="warning" inverted color="warning" />;
+  return <Button label="warning inverted" inverted color="warning" />;
 };
 
 export const DangerInvertedButton = () => {
-  return <Button label="danger" inverted color="danger" />;
+  return <Button label="danger inverted" inverted color="danger" />;
 };
 
 export const InfoInvertedButton = () => {
-  return <Button label="info" inverted color="info" />;
+  return <Button label="info inverted" inverted color="info" />;
 };

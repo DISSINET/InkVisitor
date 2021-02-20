@@ -2,6 +2,7 @@ import React, { MouseEventHandler } from "react";
 import classNames from "classnames";
 
 import { Colors } from "types";
+import { Button as RebassButton } from "rebass/styled-components";
 
 interface ButtonProps {
   label?: string;
@@ -41,11 +42,20 @@ export const Button: React.FC<ButtonProps> = ({
     classes.push("text-white");
     classes.push(`border-${color}`);
   }
+  // return (
+  //   <button onClick={onClick} className={classNames(classes)}>
+  //     {icon}
+  //     {label}
+  //   </button>
+  // );
   return (
-    <button onClick={onClick} className={classNames(classes)}>
+    <RebassButton
+      onClick={onClick}
+      variant={`${inverted ? color + "Inverted" : color}`}
+    >
       {icon}
       {label}
-    </button>
+    </RebassButton>
   );
 };
 
