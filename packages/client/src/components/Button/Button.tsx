@@ -1,8 +1,28 @@
 import React, { MouseEventHandler } from "react";
-import classNames from "classnames";
 
 import { Colors } from "types";
 import { Button as RebassButton } from "rebass/styled-components";
+import styled from "styled-components";
+import { space1, space2 } from "Theme/constants";
+
+interface StyledButton {
+  hasIcon?: boolean;
+  hasMarginRight?: boolean;
+}
+const StyledButton = styled(RebassButton).attrs({
+  sx: { fontSize: "xs" },
+})<StyledButton>`
+  display: flex;
+  align-items: center;
+  font-weight: 700;
+  padding: ${space1} ${({ hasIcon }) => (hasIcon ? space1 : space2)};
+  border: 2px solid;
+  margin-right: ${({ hasMarginRight }) => (hasMarginRight ? space1 : "0")};
+
+  :focus {
+    outline: 0;
+  }
+`;
 
 interface ButtonProps {
   label?: string;
@@ -21,41 +41,16 @@ export const Button: React.FC<ButtonProps> = ({
   onClick,
   marginRight,
 }) => {
-  const classes = [
-    "component",
-    "button",
-    "flex",
-    "items-center",
-    icon ? "px-1" : "px-2",
-    "py-1",
-    "font-bold",
-    "border-2",
-    "text-xs",
-    marginRight && "mr-1",
-  ];
-  if (inverted) {
-    classes.push("bg-white");
-    classes.push(`text-${color}`);
-    classes.push(`border-${color}`);
-  } else {
-    classes.push(`bg-${color}`);
-    classes.push("text-white");
-    classes.push(`border-${color}`);
-  }
-  // return (
-  //   <button onClick={onClick} className={classNames(classes)}>
-  //     {icon}
-  //     {label}
-  //   </button>
-  // );
   return (
-    <RebassButton
+    <StyledButton
       onClick={onClick}
       variant={`${inverted ? color + "Inverted" : color}`}
+      hasIcon={icon && true}
+      hasMarginRight={marginRight}
     >
       {icon}
       {label}
-    </RebassButton>
+    </StyledButton>
   );
 };
 

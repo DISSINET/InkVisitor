@@ -1,27 +1,26 @@
 :root {
 }
-*,
+/* *,
 ::before,
 ::after {
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-}
+} */
 html {
 }
 
-body {
+/* body {
   position: absolute;
   min-width: 100%;
   font-family: "Roboto", sans-serif;
   letter-spacing: 0.2px;
-  /* overflow: hidden; */
-}
+} */
 .muni-font {
   /* font-family: muni; */
 }
 .btn {
-  @apply m-4 px-2 py-1 text-white border-none font-bold rounded bg-primary;
+  /* @apply m-4 px-2 py-1 text-white border-none font-bold rounded bg-primary; */
 }
 button:focus,
 input:focus,

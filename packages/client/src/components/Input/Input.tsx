@@ -2,7 +2,11 @@ import React from "react";
 import classNames from "classnames";
 
 import { OptionI } from "@shared/types";
+import styled from "styled-components";
 
+const Wrapper = styled.div`
+  margin-top: 0.5rem;
+`;
 interface InputProps {
   label?: string;
   value?: string;
@@ -51,7 +55,7 @@ export const Input: React.FC<InputProps> = ({
   );
 
   return (
-    <div className="wrapper mt-2">
+    <Wrapper className="wrapper mt-2">
       {label && <span className={labelClasses}> {label}</span>}
       {type === "text" && (
         <input
@@ -91,7 +95,7 @@ export const Input: React.FC<InputProps> = ({
           ))}
         </select>
       )}
-    </div>
+    </Wrapper>
   );
 };
 

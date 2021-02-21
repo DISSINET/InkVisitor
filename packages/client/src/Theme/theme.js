@@ -71,56 +71,63 @@ export default {
     56: '14rem',
     64: '16rem',
   },
+  fontSizes: {
+    xs: "0.75rem",
+    sm: "0.875rem",
+    base: "1rem",
+    lg: "1.125rem",
+    xl: "1.25rem",
+    "2xl": "1.5rem",
+    "3xl": "1.875rem",
+    "4xl": "2.25rem",
+    "5xl": "3rem",
+    "6xl": "4rem",
+  },
   buttons: {
     primary: {
       color: 'white',
       bg: 'primary',
     },
-    primaryInverted: {
-      color: 'primary',
-      bg: 'white',
-      borderColor: 'primary',
-      border: '1px solid'
-    },
     success: {
       color: 'white',
       bg: 'success',
-    },
-    successInverted: {
-      color: 'success',
-      bg: 'white',
-      borderColor: 'success',
-      border: '1px solid'
     },
     warning: {
       color: 'white',
       bg: 'warning'
     },
-    warningInverted: {
-      color: 'warning',
-      bg: 'white',
-      borderColor: 'warning',
-      border: '1px solid'
-    },
     danger: {
       color: 'white',
       bg: 'danger'
-    },
-    dangerInverted: {
-      color: 'danger',
-      bg: 'white',
-      borderColor: 'danger',
-      border: '1px solid'
     },
     info: {
       color: 'white',
       bg: 'info'
     },
+    primaryInverted: {
+      color: 'primary',
+      bg: 'white',
+      borderColor: 'primary',
+    },
+    successInverted: {
+      color: 'success',
+      bg: 'white',
+      borderColor: 'success',
+    },
+    warningInverted: {
+      color: 'warning',
+      bg: 'white',
+      borderColor: 'warning',
+    },
+    dangerInverted: {
+      color: 'danger',
+      bg: 'white',
+      borderColor: 'danger',
+    },
     infoInverted: {
       color: 'info',
       bg: 'white',
       borderColor: 'info',
-      border: '1px solid'
     },
   }
 }

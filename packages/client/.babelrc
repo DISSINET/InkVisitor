@@ -7,7 +7,7 @@
         ["@babel/preset-env", { "targets": { "node": "current" } }],
         ["@babel/preset-typescript"]
       ],
-      "plugins": ["require-context-hook", "macros"]
+      "plugins": ["require-context-hook", "macros", "babel-plugin-styled-components"]
     }
   }
 }

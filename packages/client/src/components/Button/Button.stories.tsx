@@ -1,5 +1,6 @@
 import * as React from "react";
 import { Button } from "components";
+import { FaTrashAlt } from "react-icons/fa";
 
 export default {
   title: "Button",
@@ -12,23 +13,26 @@ export const DefaultButton = () => {
   return <Button label="default" />;
 };
 
+export const IconButton = () => {
+  return <Button icon={<FaTrashAlt />} color="danger" />;
+};
 export const PrimaryButton = () => {
-  return <Button label="primary" color="primary" />;
+  return <Button label="Primary" color="primary" />;
 };
 export const SuccessButton = () => {
-  return <Button label="success" color="success" />;
+  return <Button label="Success" color="success" />;
 };
 
 export const WarningButton = () => {
-  return <Button label="warning" color="warning" />;
+  return <Button label="Warning" color="warning" />;
 };
 
 export const DangerButton = () => {
-  return <Button label="danger" color="danger" />;
+  return <Button label="Danger" color="danger" />;
 };
 
 export const InfoButton = () => {
-  return <Button label="info" color="info" />;
+  return <Button label="Info" color="info" />;
 };
 
 export const PrimaryInvertedButton = () => {
