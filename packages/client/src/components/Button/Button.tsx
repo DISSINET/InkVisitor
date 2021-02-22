@@ -27,7 +27,7 @@ const StyledButton = styled(RebassButton).attrs({
 interface ButtonProps {
   label?: string;
   icon?: JSX.Element;
-  inverted?: Boolean;
+  inverted?: boolean;
   color?: typeof Colors[number];
   onClick?: MouseEventHandler<HTMLElement>;
   marginRight?: boolean;

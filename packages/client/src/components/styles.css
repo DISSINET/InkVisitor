@@ -28,7 +28,7 @@ select:focus {
   outline: 0 !important;
 }
 .text-area {
-  line-height: 1.2;
+  /* line-height: 1.2; */
 }
 .table {
   .odd-strip {

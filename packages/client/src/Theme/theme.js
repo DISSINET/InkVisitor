@@ -83,6 +83,24 @@ export default {
     "5xl": "3rem",
     "6xl": "4rem",
   },
+  fontWeight: {
+    hairline: "100",
+    // thin: "200",
+    light: "300",
+    normal: "400",
+    medium: "500",
+    // semibold: "600",
+    bold: "700",
+    // extrabold: "800",
+    black: "900",
+  },
+  borderWidth: {
+    default: "1px",
+    0: "0",
+    2: "2px",
+    4: "4px",
+    8: "8px",
+  },
   buttons: {
     primary: {
       color: 'white',

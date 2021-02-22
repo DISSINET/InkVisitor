@@ -1,16 +1,18 @@
 import React from "react";
-import classNames from "classnames";
 
 import { OptionI } from "@shared/types";
-import styled from "styled-components";
+import {
+  Wrapper,
+  Label,
+  StyledInput,
+  StyledSelect,
+  StyledTextArea,
+} from "./InputStyle";
 
-const Wrapper = styled.div`
-  margin-top: 0.5rem;
-`;
 interface InputProps {
   label?: string;
   value?: string;
-  inverted?: Boolean;
+  inverted?: boolean;
   type?: "text" | "textarea" | "select";
   options?: OptionI[];
   rows?: number;
@@ -30,47 +32,24 @@ export const Input: React.FC<InputProps> = ({
   onChangeFn,
   placeholder,
 }) => {
-  const labelClasses = classNames(
-    "label",
-    "text-right",
-    "text-s",
-    "mr-2",
-    "font-bold",
-    "align-top",
-    "leading-10"
-  );
-  const valueClasses = classNames(
-    "value",
-    "border-2",
-    "border-primary",
-    "text-left",
-    "text-xs",
-    "p-1",
-    "resize-none",
-    {
-      "bg-primary": inverted,
-      "text-white": inverted,
-      "text-area": type === "textarea",
-    }
-  );
-
   return (
-    <Wrapper className="wrapper mt-2">
-      {label && <span className={labelClasses}> {label}</span>}
+    <Wrapper>
+      {label && <Label className="label"> {label}</Label>}
       {type === "text" && (
-        <input
-          className={valueClasses}
+        <StyledInput
+          className="value"
           style={{ lineHeight: "16px" }}
           placeholder={placeholder}
           value={value}
           onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
             onChangeFn(e.currentTarget.value);
           }}
+          inverted={inverted}
         />
       )}
       {type === "textarea" && (
-        <textarea
-          className={valueClasses}
+        <StyledTextArea
+          className="value"
           placeholder={placeholder}
           value={value}
           rows={rows}
@@ -78,22 +57,24 @@ export const Input: React.FC<InputProps> = ({
           onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => {
             onChangeFn(e.target.value);
           }}
+          inverted={inverted}
         />
       )}
       {type === "select" && options && (
-        <select
-          className={valueClasses + " font-bold"}
+        <StyledSelect
+          className="value"
           value={value}
           onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
             onChangeFn(e.target.value);
           }}
+          inverted={inverted}
         >
           {options.map((option, oi) => (
             <option key={oi} value={option.value}>
               {option.label}
             </option>
           ))}
-        </select>
+        </StyledSelect>
       )}
     </Wrapper>
   );
