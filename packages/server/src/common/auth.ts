@@ -34,14 +34,12 @@ export function validateJwt() {
     secret: process.env.SECRET as secretType,
     algorithms: [defaultJwtAlgo],
     getToken: function fromHeaderOrQuerystring(req: any) {
-      console.log(req.headers);
       if (
         req.headers.authorization &&
         req.headers.authorization.split(" ")[0] === "Bearer"
       ) {
         return req.headers.authorization.split(" ")[1];
       } else if (req.query && req.query.token) {
-        console.log("is ok");
         return req.query.token;
       }
       return null;

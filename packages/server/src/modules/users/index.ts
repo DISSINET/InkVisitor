@@ -6,17 +6,24 @@ import { Router } from "express";
 import { BAD_REQUEST, CREATED, NOT_FOUND, OK } from "http-status-codes";
 import { r } from "rethinkdb-ts";
 import { findUserByName } from "@service/shorthands";
-import { BadCredentialsError, UserDoesNotExits } from "@common/errors";
+import {
+  BadCredentialsError,
+  BadParams,
+  UserDoesNotExits,
+} from "@common/errors";
 import { checkPassword, generateAccessToken } from "@common/auth";
-//-----------------------------------------------------------------------------
-// Router
-//-----------------------------------------------------------------------------
+import { asyncRouteHandler } from "..";
 
-export default Router().post(
+export default Router().get(
   "/signin",
-  async (request: Request, response: Response) => {
+  asyncRouteHandler(async (request: Request, response: Response) => {
     const name = request.body.username;
     const rawPassword = request.body.password;
+
+    if (!name || !rawPassword) {
+      throw new BadParams("name and password have to be set");
+    }
+
     console.log("user is signing in", name, rawPassword);
 
     const user = await findUserByName(request.db, name);
@@ -33,5 +40,5 @@ export default Router().post(
     response.json({
       token: generateAccessToken(user),
     });
-  }
+  })
 );

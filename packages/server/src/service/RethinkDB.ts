@@ -75,5 +75,6 @@ export const closeConnection = async (
   response: Response,
   next: NextFunction
 ) => {
+  console.log("disconnected db");
   await request.db.close();
 };
