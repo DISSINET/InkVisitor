@@ -83,15 +83,15 @@ export default {
     "5xl": "3rem",
     "6xl": "4rem",
   },
-  fontWeight: {
+  fontWeights: {
     hairline: "100",
-    // thin: "200",
+    thin: "200",
     light: "300",
     normal: "400",
     medium: "500",
-    // semibold: "600",
+    semibold: "600",
     bold: "700",
-    // extrabold: "800",
+    extrabold: "800",
     black: "900",
   },
   borderWidth: {
@@ -101,51 +101,4 @@ export default {
     4: "4px",
     8: "8px",
   },
-  buttons: {
-    primary: {
-      color: 'white',
-      bg: 'primary',
-    },
-    success: {
-      color: 'white',
-      bg: 'success',
-    },
-    warning: {
-      color: 'white',
-      bg: 'warning'
-    },
-    danger: {
-      color: 'white',
-      bg: 'danger'
-    },
-    info: {
-      color: 'white',
-      bg: 'info'
-    },
-    primaryInverted: {
-      color: 'primary',
-      bg: 'white',
-      borderColor: 'primary',
-    },
-    successInverted: {
-      color: 'success',
-      bg: 'white',
-      borderColor: 'success',
-    },
-    warningInverted: {
-      color: 'warning',
-      bg: 'white',
-      borderColor: 'warning',
-    },
-    dangerInverted: {
-      color: 'danger',
-      bg: 'white',
-      borderColor: 'danger',
-    },
-    infoInverted: {
-      color: 'info',
-      bg: 'white',
-      borderColor: 'info',
-    },
-  }
 }

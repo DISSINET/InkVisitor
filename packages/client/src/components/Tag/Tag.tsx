@@ -5,9 +5,22 @@ import { DropTargetMonitor, useDrag, useDrop, XYCoord } from "react-dnd";
 import { ItemTypes } from "types";
 import "./tag.css";
 import ReactTooltip from "react-tooltip";
+import styled from "styled-components";
+import { space1 } from "Theme/constants";
+
+interface IEntityStyle {
+  color: string;
+}
+const Entity = styled.div<IEntityStyle>`
+  background-color: ${({ color, theme }) => theme.colors[color]};
+  display: inline;
+  padding-top: ${space1};
+  padding-bottom: ${space1};
+  text-align: center;
+  font-weight: ${({ theme }) => theme.fontWeights["extrabold"]};
+`;
 
 interface TagProps {
-
   label?: string;
   category: string;
   color: string;
@@ -40,50 +53,50 @@ export const Tag: React.FC<TagProps> = ({
   index,
   moveTagFn,
 }) => {
-    const tagClasses = classNames(
-        "component",
-        "tag",
-        "border-black",
-        "border-2",
-        "inline-flex",
-        "rounded-md",
-        "overflow-hidden",
-        "max-w-xs",
-        marginRight && "mr-1",
-        "cursor-move",
-        "text-black"
-    );
+  const tagClasses = classNames(
+    "component",
+    "tag",
+    "border-black",
+    "border-2",
+    "inline-flex",
+    "rounded-md",
+    "overflow-hidden",
+    "max-w-xs",
+    marginRight && "mr-1",
+    "cursor-move",
+    "text-black"
+  );
 
-    const entityClasses = classNames(
-        `bg-${color}`,
-        "tag-entity",
-        "inline",
-        "w-6",
-        "py-1",
-        "text-center",
-        "font-extrabold",
-        {
-            "border-r-2": !!label && !!showLabel,
-            "border-primary": !!label && !!showLabel,
-        }
-    );
-    const labelClasses = classNames(
-        "tag-label",
-        "inline",
-        "align-middle",
-        "py-1",
-        "px-1",
-        "truncate",
-        invertedLabel ? "bg-primary text-white" : "bg-white",
-        { "bg-primary text-white": mode === "selected" }
-    );
-    const buttonClasses = classNames(
-        "tag-button",
-        "flex",
-        "-mt-2",
-        "-mb-2",
-        "align-middle"
-    );
+  const entityClasses = classNames(
+    // `bg-${color}`,
+    "tag-entity",
+    // "inline",
+    "w-6",
+    // "py-1",
+    // "text-center",
+    // "font-extrabold",
+    {
+      "border-r-2": !!label && !!showLabel,
+      "border-primary": !!label && !!showLabel,
+    }
+  );
+  const labelClasses = classNames(
+    "tag-label",
+    "inline",
+    "align-middle",
+    "py-1",
+    "px-1",
+    "truncate",
+    invertedLabel ? "bg-primary text-white" : "bg-white",
+    { "bg-primary text-white": mode === "selected" }
+  );
+  const buttonClasses = classNames(
+    "tag-button",
+    "flex",
+    "-mt-2",
+    "-mb-2",
+    "align-middle"
+  );
 
   const ref = useRef<HTMLDivElement>(null);
   const [, drop] = useDrop({
@@ -152,7 +165,9 @@ export const Tag: React.FC<TagProps> = ({
         data-iscapture="true"
         data-tip-disable={showLabel}
       >
-        <div className={entityClasses}>{category}</div>
+        <Entity className={entityClasses} color={color}>
+          {category}
+        </Entity>
         {showLabel && label && <div className={labelClasses}>{label}</div>}
         {button && <div className={buttonClasses}>{button}</div>}
       </div>
@@ -168,9 +183,9 @@ export const Tag: React.FC<TagProps> = ({
 };
 
 Tag.defaultProps = {
-    label: "",
-    category: "T",
-    color: "black",
-    mode: false,
-    showLabel: true,
+  label: "",
+  category: "T",
+  color: "black",
+  mode: false,
+  showLabel: true,
 };

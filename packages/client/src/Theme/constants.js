@@ -1,4 +1,4 @@
-import theme from "./theme"
+import theme from "./theme";
 
 export const space1 = theme.space[1];
 export const space2 = theme.space[2];

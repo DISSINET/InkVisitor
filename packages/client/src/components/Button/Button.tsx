@@ -1,23 +1,27 @@
 import React, { MouseEventHandler } from "react";
 
 import { Colors } from "types";
-import { Button as RebassButton } from "rebass/styled-components";
 import styled from "styled-components";
 import { space1, space2 } from "Theme/constants";
 
 interface StyledButton {
   hasIcon?: boolean;
   hasMarginRight?: boolean;
+  inverted?: boolean;
+  color: string;
 }
-const StyledButton = styled(RebassButton).attrs({
-  sx: { fontSize: "xs" },
-})<StyledButton>`
+const StyledButton = styled.button<StyledButton>`
   display: flex;
   align-items: center;
+  font-size: ${({ theme }) => theme.fontSizes["xs"]};
   font-weight: 700;
   padding: ${space1} ${({ hasIcon }) => (hasIcon ? space1 : space2)};
-  border: 2px solid;
+  border: 2px solid ${({ theme, color }) => theme.colors[color]};
   margin-right: ${({ hasMarginRight }) => (hasMarginRight ? space1 : "0")};
+  color: ${({ theme, color, inverted }) =>
+    inverted ? theme.colors[color] : "white"};
+  background-color: ${({ theme, color, inverted }) =>
+    inverted ? "white" : theme.colors[color]};
 
   :focus {
     outline: 0;
@@ -44,9 +48,10 @@ export const Button: React.FC<ButtonProps> = ({
   return (
     <StyledButton
       onClick={onClick}
-      variant={`${inverted ? color + "Inverted" : color}`}
       hasIcon={icon && true}
       hasMarginRight={marginRight}
+      color={color ? color : "primary"}
+      inverted={inverted}
     >
       {icon}
       {label}
