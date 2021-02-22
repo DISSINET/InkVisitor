@@ -1,6 +1,6 @@
 import * as bcrypt from "bcrypt";
 import { sign as signJwt } from "jsonwebtoken";
-import { User } from "../../../shared/types/user";
+import { UserI } from "../../../shared/types/user";
 import jwt, { secretType } from "express-jwt";
 
 export function hashPassword(rawPassword: string): string {
@@ -16,7 +16,7 @@ export function checkPassword(
 
 const defaultJwtAlgo = "HS256";
 
-export function generateAccessToken(user: User) {
+export function generateAccessToken(user: UserI) {
   return signJwt(
     {
       user,
