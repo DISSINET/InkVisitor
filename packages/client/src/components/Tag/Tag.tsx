@@ -10,7 +10,8 @@ interface TagProps {
   label?: string;
   category: string;
   color: string;
-  mode?: "selected" | false;
+  mode?: "selected" | "disabled" | "invalid" | false;
+  logicalType?: "definitive" | "indefinitive" | "hypothetical";
   button?: ReactNode;
   marginRight?: boolean;
   invertedLabel?: boolean;
@@ -31,6 +32,7 @@ export const Tag: React.FC<TagProps> = ({
   category,
   color,
   mode,
+  logicalType,
   button,
   marginRight,
   propId,
@@ -39,19 +41,6 @@ export const Tag: React.FC<TagProps> = ({
   index,
   moveTagFn,
 }) => {
-  const labelClasses = classNames(
-    "tag-label",
-    invertedLabel ? "bg-primary text-white" : "bg-white",
-    { "bg-primary text-white": mode === "selected" }
-  );
-  const buttonClasses = classNames(
-    "tag-button",
-    // "flex",
-    "-mt-2",
-    "-mb-2"
-    // "align-middle"
-  );
-
   const ref = useRef<HTMLDivElement>(null);
   const [, drop] = useDrop({
     accept: ItemTypes.TAG,
@@ -119,20 +108,18 @@ export const Tag: React.FC<TagProps> = ({
         data-iscapture="true"
         data-tip-disable={showLabel}
         hasMarginRight={marginRight}
+        logicalType={logicalType ? logicalType : "definitive"}
       >
-        <Entity
-          color={color}
-          label={label ? true : false}
-          showLabel={showLabel}
-        >
-          {category}
-        </Entity>
+        <Entity color={color}>{category}</Entity>
         {showLabel && label && (
-          <Label className={labelClasses} invertedLabel={invertedLabel}>
+          <Label
+            invertedLabel={invertedLabel}
+            logicalType={logicalType ? logicalType : "definitive"}
+          >
             {label}
           </Label>
         )}
-        {button && <Button className={buttonClasses}>{button}</Button>}
+        {button && <Button>{button}</Button>}
       </TagWrapper>
       <ReactTooltip
         id="main"

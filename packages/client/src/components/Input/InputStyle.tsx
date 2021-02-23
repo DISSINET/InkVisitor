@@ -25,6 +25,9 @@ export const StyledInput = styled.input<IValue>`
   font-size: ${({ theme }) => theme.fontSizes["xs"]};
   padding: ${space1};
   resize: none;
+  :focus {
+    outline: 0;
+  }
 `;
 export const StyledSelect = styled.select<IValue>`
   text-align: left;
@@ -38,6 +41,9 @@ export const StyledSelect = styled.select<IValue>`
   font-weight: bold;
   padding: ${space1};
   resize: none;
+  :focus {
+    outline: 0;
+  }
 `;
 export const StyledTextArea = styled.textarea<IValue>`
   text-align: left;
@@ -51,4 +57,7 @@ export const StyledTextArea = styled.textarea<IValue>`
   padding: ${space1};
   resize: none;
   line-height: 1.2;
+  :focus {
+    outline: 0;
+  }
 `;

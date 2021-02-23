@@ -22,7 +22,6 @@ const StyledButton = styled.button<StyledButton>`
     inverted ? theme.colors[color] : "white"};
   background-color: ${({ theme, color, inverted }) =>
     inverted ? "white" : theme.colors[color]};
-
   :focus {
     outline: 0;
   }

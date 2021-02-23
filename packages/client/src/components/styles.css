@@ -25,7 +25,7 @@ html {
 button:focus,
 input:focus,
 select:focus {
-  outline: 0 !important;
+  /* outline: 0 !important; */
 }
 .text-area {
   /* line-height: 1.2; */

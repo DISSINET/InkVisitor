@@ -1,6 +1,8 @@
 import * as React from "react";
-import { Entities } from "types";
+import { DndProvider } from "react-dnd";
+import { HTML5Backend } from "react-dnd-html5-backend";
 
+import { Entities } from "types";
 import { Box, Button, ButtonSet, Input, Suggester, Tag } from "components";
 
 export default {
@@ -12,7 +14,7 @@ export default {
 
 export const Layout1 = () => {
   return (
-    <div>
+    <DndProvider backend={HTML5Backend}>
       <Button label="danger" color="danger" />
       <Tag
         category={Entities["T"].id}
@@ -29,6 +31,6 @@ export const Layout1 = () => {
       <Box label="default box" width={400} height={400}>
         {<div>box content</div>}
       </Box>
-    </div>
+    </DndProvider>
   );
 };
