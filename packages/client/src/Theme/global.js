@@ -9,7 +9,7 @@ const GlobalStyle = createGlobalStyle`
     position: absolute;
     min-width: 100%;
     font-family: "Roboto", sans-serif;
-    letter-spacing: 0.2px;
+    letter-spacing: .2px;
     line-height: 1.5;
     /* font-size: 62.5%; */
   }

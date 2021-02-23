@@ -6,6 +6,7 @@ interface IValueStyle {
 }
 export const Wrapper = styled.div`
   margin-top: ${space2};
+  display: flex;
 `;
 export const Label = styled.span`
   text-align: right;
@@ -17,9 +18,9 @@ export const Label = styled.span`
 export const StyledInput = styled.input<IValueStyle>`
   text-align: left;
   color: ${({ inverted, theme }) =>
-    inverted ? "white" : theme.colors["primary"]};
+    inverted ? theme.colors["white"] : theme.colors["primary"]};
   background-color: ${({ inverted, theme }) =>
-    inverted ? theme.colors["primary"] : "white"};
+    inverted ? theme.colors["primary"] : theme.colors["white"]};
   border-width: ${({ theme }) => theme.borderWidths[2]};
   border-color: ${({ theme }) => theme.colors["primary"]};
   font-size: ${({ theme }) => theme.fontSizes["xs"]};
@@ -32,9 +33,9 @@ export const StyledInput = styled.input<IValueStyle>`
 export const StyledSelect = styled.select<IValueStyle>`
   text-align: left;
   color: ${({ inverted, theme }) =>
-    inverted ? "white" : theme.colors["primary"]};
+    inverted ? theme.colors["white"] : theme.colors["primary"]};
   background-color: ${({ inverted, theme }) =>
-    inverted ? theme.colors["primary"] : "white"};
+    inverted ? theme.colors["primary"] : theme.colors["white"]};
   border-width: ${({ theme }) => theme.borderWidths[2]};
   border-color: ${({ theme }) => theme.colors["primary"]};
   font-size: ${({ theme }) => theme.fontSizes["xs"]};
@@ -48,9 +49,9 @@ export const StyledSelect = styled.select<IValueStyle>`
 export const StyledTextArea = styled.textarea<IValueStyle>`
   text-align: left;
   color: ${({ inverted, theme }) =>
-    inverted ? "white" : theme.colors["primary"]};
+    inverted ? theme.colors["white"] : theme.colors["primary"]};
   background-color: ${({ inverted, theme }) =>
-    inverted ? theme.colors["primary"] : "white"};
+    inverted ? theme.colors["primary"] : theme.colors["white"]};
   border-width: ${({ theme }) => theme.borderWidths[2]};
   border-color: ${({ theme }) => theme.colors["primary"]};
   font-size: ${({ theme }) => theme.fontSizes["xs"]};

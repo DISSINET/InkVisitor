@@ -3,7 +3,7 @@ import { DropTargetMonitor, useDrag, useDrop, XYCoord } from "react-dnd";
 
 import { ItemTypes } from "types";
 import ReactTooltip from "react-tooltip";
-import { TagWrapper, Entity, Label, Button } from "./TagStyles";
+import { TagWrapper, EntityTag, Label, ButtonWrapper } from "./TagStyles";
 
 interface TagProps {
   label?: string;
@@ -109,7 +109,7 @@ export const Tag: React.FC<TagProps> = ({
         hasMarginRight={marginRight}
         logicalType={logicalType ? logicalType : "definitive"}
       >
-        <Entity color={color}>{category}</Entity>
+        <EntityTag color={color}>{category}</EntityTag>
         {showLabel && label && (
           <Label
             invertedLabel={invertedLabel}
@@ -118,7 +118,7 @@ export const Tag: React.FC<TagProps> = ({
             {label}
           </Label>
         )}
-        {button && <Button>{button}</Button>}
+        {button && <ButtonWrapper>{button}</ButtonWrapper>}
       </TagWrapper>
       <ReactTooltip
         id="main"

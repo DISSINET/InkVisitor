@@ -25,9 +25,11 @@ export const Layout1 = () => {
       <Tag
         category={Entities["T"].id}
         color={Entities["T"].color}
-        label="entity label"
+        label="selected entity label"
+        invertedLabel
         button={<Button label="x" color="danger" />}
       />
+      <Input value="default input" onChangeFn={() => {}} />
       <Box label="default box" width={400} height={400}>
         {<div>box content</div>}
       </Box>
