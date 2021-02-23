@@ -6,6 +6,7 @@ import {
   findUserById,
   findUsersByLabel,
   createUser,
+  updateUser,
 } from "@service/shorthands";
 import {
   BadCredentialsError,
@@ -93,6 +94,48 @@ export default Router()
       const result = await createUser(request.db, userData);
 
       if (result.inserted === 1) {
+        response.json({
+          success: true,
+        });
+      } else {
+        response.json({
+          success: false,
+          errors: result.errors,
+        });
+      }
+    })
+  )
+  .put(
+    "/update/:userId?",
+    asyncRouteHandler(async (request: Request, response: Response) => {
+      const userId = request.params.userId;
+      const userData = request.body as UserI;
+
+      if (!userId || !userData || Object.keys(userData).length === 0) {
+        throw new BadParams("user id and data have to be set");
+      }
+
+      const allowedKeys = [
+        "email",
+        "name",
+        "password",
+        "role",
+        "bookmarks",
+        "storedTerritories",
+      ];
+      for (const key of Object.keys(userData)) {
+        if (allowedKeys.indexOf(key) === -1) {
+          throw new BadParams("user data have unsupported keys");
+        }
+      }
+
+      if (userData.password) {
+        userData.password = hashPassword(userData.password);
+      }
+
+      const result = await updateUser(request.db, userId, userData);
+
+      if (result.replaced) {
         response.json({
           success: true,
         });
