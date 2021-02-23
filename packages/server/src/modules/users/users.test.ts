@@ -10,7 +10,7 @@ describe("Users signin", function () {
   describe("Empty body", () => {
     it("should return a 400 code with bad params error", (done) => {
       return request(app)
-        .get(`${apiPath}/users/signin`)
+        .post(`${apiPath}/users/signin`)
         .expect("Content-Type", /json/)
         .expect({ error: new BadParams("whatever").toString() })
         .expect(400, done);

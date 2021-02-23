@@ -14,7 +14,7 @@ import {
 import { checkPassword, generateAccessToken } from "@common/auth";
 import { asyncRouteHandler } from "..";
 
-export default Router().get(
+export default Router().post(
   "/signin",
   asyncRouteHandler(async (request: Request, response: Response) => {
     const name = request.body.username;
