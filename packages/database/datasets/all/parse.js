@@ -243,7 +243,7 @@ const loadStatementsTables = async (next) => {
             const mainStatement = {
                 id: v4(),
                 class: "S",
-                label: [
+                labels: [
                     {
                         value: statement.id,
                         id: v4(),
@@ -251,35 +251,37 @@ const loadStatementsTables = async (next) => {
                         primary: true,
                     },
                 ],
-                action: statement.id_action_or_relation,
-                territory: {
-                    id: statement.text_part_id,
-                    order: si,
-                },
-                references: [
-                    {
-                        id: v4(),
-                        resource: statement.primary_reference_id,
-                        part: statement.primary_reference_part,
-                        type: "P",
+                data: {
+                    action: statement.id_action_or_relation,
+                    territory: {
+                        id: statement.text_part_id,
+                        order: si,
                     },
-                    {
-                        id: v4(),
-                        resource: statement.secondary_reference_id,
-                        part: statement.secondary_reference_part,
-                        type: "S",
-                    },
-                ],
-                tags: statement.tags_id.split(" #").filter((t) => t),
-                certainty: parseInt(statement.certainty) || "1",
-                elvl: parseInt(statement.epistemological_level) || "1",
+                    references: [
+                        {
+                            id: v4(),
+                            resource: statement.primary_reference_id,
+                            part: statement.primary_reference_part,
+                            type: "P",
+                        },
+                        {
+                            id: v4(),
+                            resource: statement.secondary_reference_id,
+                            part: statement.secondary_reference_part,
+                            type: "S",
+                        },
+                    ],
+                    tags: statement.tags_id.split(" #").filter((t) => t),
+                    certainty: parseInt(statement.certainty) || "1",
+                    elvl: parseInt(statement.epistemological_level) || "1",
 
-                // TODO handle modality
-                modality: parseInt(statement.modality) || "1",
-                text: statement.text,
-                note: `NOTE: ${statement.note}, LOCATION: ${statement.location_text}, TIME: ${statement.time_note}`,
-                props: [],
-                actants: [],
+                    // TODO handle modality
+                    modality: parseInt(statement.modality) || "1",
+                    text: statement.text,
+                    note: `NOTE: ${statement.note}, LOCATION: ${statement.location_text}, TIME: ${statement.time_note}`,
+                    props: [],
+                    actants: [],
+                },
             };
 
             //subject
@@ -423,9 +425,14 @@ const addTerritoryActant = (id, label, parentId, order) => {
                         primary: true,
                     },
                 ],
-                parent: {
-                    id: parentId,
-                    order: order,
+                data: {
+                    parent: {
+                        id: parentId,
+                        order: order,
+                    },
+                    type: "",
+                    content: "",
+                    lang: "1",
                 },
             });
         }
@@ -444,6 +451,11 @@ const addResourceActant = (id, label) => {
                     primary: true,
                 },
             ],
+            data: {
+                link: "",
+                type: "1",
+                lang: "1",
+            },
         });
     }
 };
@@ -506,47 +518,46 @@ const createEmptyPropStatement = (
         actants.push({
             id: v4(),
             class: "S",
-            meta: { created, updated: [] },
-            label: "",
-            action: "A0093",
-            territory: {
-                id: territory,
-                order: order,
+
+            labels: [],
+            data: {
+                action: "A0093",
+                territory: {
+                    id: territory,
+                    order: order,
+                },
+                references: [],
+                tags: [],
+                certainty: "1",
+                elvl: "1",
+                modality: "1",
+                text: "",
+                note: "",
+                props: [],
+                actants: [
+                    {
+                        id: v4(),
+                        actant: idSubject,
+                        position: "s",
+                        elvl: "1",
+                        certainty: "1",
+                    },
+                    {
+                        id: v4(),
+                        actant: idActant1,
+                        position: "a1",
+                        elvl: "1",
+                        certainty: "1",
+                    },
+                    {
+                        id: v4(),
+                        actant: idActant2,
+                        position: "a2",
+                        elvl: "1",
+                        certainty: "1",
+                    },
+                ],
             },
-            references: [],
-            tags: [],
-            certainty: "1",
-            elvl: "1",
-            modality: "1",
-            text: "",
-            note: "",
-            props: [],
-            actants: [
-                {
-                    order: 1,
-                    id: v4(),
-                    actant: idSubject,
-                    position: "s",
-                    elvl: "1",
-                    certainty: "1",
-                },
-                {
-                    order: 2,
-                    id: v4(),
-                    actant: idActant1,
-                    position: "a1",
-                    elvl: "1",
-                    certainty: "1",
-                },
-                {
-                    order: 3,
-                    id: v4(),
-                    actant: idActant2,
-                    position: "a2",
-                    elvl: "1",
-                    certainty: "1",
-                },
-            ],
         });
     }
 };
@@ -648,7 +659,6 @@ const processActant = (
 
             const statementActantId = v4();
             statement.actants.push({
-                order: statement.actants.length,
                 id: statementActantId,
                 actant: actantId,
                 position: position,
@@ -682,7 +692,6 @@ const processActant = (
                  */
                 statement.data.props.push({
                     id: v4(),
-                    order: statement.props.length,
                     origin: statementActantId,
                     type: propActant1Id,
                     value: propActant2Id,
