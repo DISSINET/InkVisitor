@@ -53,3 +53,7 @@ export async function updateUser(
   delete safeData.id;
   return rethink.table("users").get(userId).update(safeData).run(db.connection);
 }
+
+export async function deleteUser(db: Db, userId: string): Promise<WriteResult> {
+  return rethink.table("users").get(userId).delete().run(db.connection);
+}
