@@ -22,7 +22,6 @@ export interface IStatement extends IActant {
         note: string;
         props: {
             id: string;
-            order: number;
             origin: string;
             type: string;
             value: string;
@@ -31,7 +30,6 @@ export interface IStatement extends IActant {
         }[];
         actants: {
             id: string;
-            order: number;
             actant: string;
             position: string;
             elvl: string;
