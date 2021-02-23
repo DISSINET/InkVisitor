@@ -7,6 +7,7 @@ import {
   findUsersByLabel,
   createUser,
   updateUser,
+  deleteUser,
 } from "@service/shorthands";
 import {
   BadCredentialsError,
@@ -26,8 +27,6 @@ export default Router()
       if (!name || !rawPassword) {
         throw new BadParams("name and password have to be set");
       }
-
-      console.log("user is signing in", name, rawPassword);
 
       const user = await findUserByName(request.db, name);
       if (!user) {
@@ -136,6 +135,29 @@ export default Router()
       const result = await updateUser(request.db, userId, userData);
 
       if (result.replaced) {
+        response.json({
+          success: true,
+        });
+      } else {
+        response.json({
+          success: false,
+          errors: result.errors,
+        });
+      }
+    })
+  )
+  .delete(
+    "/delete/:userId?",
+    asyncRouteHandler(async (request: Request, response: Response) => {
+      const userId = request.params.userId;
+
+      if (!userId) {
+        throw new BadParams("user id has to be set");
+      }
+
+      const result = await deleteUser(request.db, userId);
+
+      if (result.deleted === 1) {
         response.json({
           success: true,
         });
