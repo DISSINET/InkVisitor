@@ -59,40 +59,40 @@ curl --request GET \
 
 #### /users
 
--   **POST** /getMore {FilterUsersI} => ResponseUserI[]
--   **GET** /:id => ResponseUserI
+-   **POST** /getMore {IFilterUsers} => IResponseUser[]
+-   **GET** /:id => IResponseUser
 -   **PUT** /:id {changes}
 -   **DELETE** /:id
 -   **POST** /:id {UserI}
 
 #### /actants
 
--   **POST** /getMore {FilterActantsI} => ResponseActantI[]
--   **GET** /:id => ResponseActantI
+-   **POST** /getMore {IFilterActants} => IResponseActant[]
+-   **GET** /:id => IResponseActant
 -   **PUT** /:id {changes} =>
 -   **DELETE** /:id =>
 -   **POST** /:id {ActantI} =>
 
 #### /actions
 
--   **POST** /getMore {FilterActionsI} => ResponseActionI[]
--   **GET** /:id => ResponseActionI
+-   **POST** /getMore {IFilterActions} => IResponseAction[]
+-   **GET** /:id => IResponseAction
 -   **PUT** /:id {changes} =>
 -   **DELETE** /:id =>
--   **POST** /:id {ActionI} =>
+-   **POST** /:id {IAction} =>
 
 #### /tree
 
 -   **GET** /
     {}
-    => ResponseTreeI
+    => IResponseTree
     _returns the structure of all territories_
 
 #### /territory
 
 -   **GET** /:id
     {}
-    => ResponseTerritoryI
+    => IResponseTerritory
     _returns all statements and actants for selected territory_
 
 -   **POST** /moveTerritory
