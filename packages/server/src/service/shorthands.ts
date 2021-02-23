@@ -1,4 +1,4 @@
-import { Connection, r as rethink } from "rethinkdb-ts";
+import { Connection, r as rethink, WriteResult } from "rethinkdb-ts";
 import { UserI } from "../../../shared/types/user";
 import { Db } from "./RethinkDB";
 
@@ -38,4 +38,8 @@ export async function findUsersByLabel(
     })
     .run(db.connection);
   return data;
+}
+
+export async function createUser(db: Db, data: UserI): Promise<WriteResult> {
+  return rethink.table("users").insert(data).run(db.connection);
 }
