@@ -12,3 +12,14 @@ export async function findUserByName(db: Db, name: string): Promise<UserI> {
     .run(db.connection);
   return data.length == 0 ? null : data[0];
 }
+
+export async function findUserById(db: Db, id: string): Promise<UserI> {
+  const data = await rethink
+    .table("users")
+    .filter({
+      id,
+    })
+    .limit(1)
+    .run(db.connection);
+  return data.length == 0 ? null : data[0];
+}
