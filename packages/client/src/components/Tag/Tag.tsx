@@ -1,5 +1,4 @@
 import React, { ReactNode, useRef } from "react";
-import classNames from "classnames";
 import { DropTargetMonitor, useDrag, useDrop, XYCoord } from "react-dnd";
 
 import { ItemTypes } from "types";

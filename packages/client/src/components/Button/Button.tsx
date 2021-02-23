@@ -4,13 +4,13 @@ import { Colors } from "types";
 import styled from "styled-components";
 import { space1, space2 } from "Theme/constants";
 
-interface StyledButton {
+interface IButtonStyle {
   hasIcon?: boolean;
   hasMarginRight?: boolean;
   inverted?: boolean;
   color: string;
 }
-const StyledButton = styled.button<StyledButton>`
+const StyledButton = styled.button<IButtonStyle>`
   display: flex;
   align-items: center;
   font-size: ${({ theme }) => theme.fontSizes["xs"]};

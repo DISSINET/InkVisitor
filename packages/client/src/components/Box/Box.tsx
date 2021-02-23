@@ -1,7 +1,7 @@
 import React, { ReactNode } from "react";
-import classNames from "classnames";
 
 import { Colors } from "types";
+import { StyledBox, Head, Content } from "./BoxStyles";
 
 interface BoxProps {
   label?: string;
@@ -18,43 +18,14 @@ export const Box: React.FC<BoxProps> = ({
   height,
   children,
 }) => {
-  const boxClasses = classNames(
-    `border-${color}`,
-    "border-2",
-    "flex",
-    "flex-col",
-    "bg-white",
-    "relative"
-  );
-
-  const headClasses = classNames(
-    "box-head",
-    `bg-${color}`,
-    "text-white",
-    "font-bold",
-    "p-2",
-    "text-lg",
-    "muni-font"
-  );
-  const contentClasses = classNames(
-    "box-content",
-    "bg-white",
-    // "bg-blue-50",
-    "p-2",
-    "overflow-auto",
-    "h-full",
-    "flex",
-    "flex-col"
-  );
-
   return (
-    <div
-      className={boxClasses}
+    <StyledBox
       style={{ width: width, height: height ? height : "100%" }}
+      color={color ? color : "primary"}
     >
-      <div className={headClasses}>{label}</div>
-      <div className={contentClasses}>{children}</div>
-    </div>
+      <Head color={color ? color : "primary"}>{label}</Head>
+      <Content>{children}</Content>
+    </StyledBox>
   );
 };
 

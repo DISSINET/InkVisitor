@@ -7,7 +7,7 @@ import {
   StyledInput,
   StyledSelect,
   StyledTextArea,
-} from "./InputStyle";
+} from "./InputStyles";
 
 interface InputProps {
   label?: string;

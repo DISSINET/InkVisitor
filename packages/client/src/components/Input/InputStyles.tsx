@@ -1,7 +1,7 @@
 import styled from "styled-components";
 import { space1, space2 } from "Theme/constants";
 
-interface IValue {
+interface IValueStyle {
   inverted?: boolean;
 }
 export const Wrapper = styled.div`
@@ -14,7 +14,7 @@ export const Label = styled.span`
   font-weight: bold;
   line-height: 2.5rem;
 `;
-export const StyledInput = styled.input<IValue>`
+export const StyledInput = styled.input<IValueStyle>`
   text-align: left;
   color: ${({ inverted, theme }) =>
     inverted ? "white" : theme.colors["primary"]};
@@ -29,7 +29,7 @@ export const StyledInput = styled.input<IValue>`
     outline: 0;
   }
 `;
-export const StyledSelect = styled.select<IValue>`
+export const StyledSelect = styled.select<IValueStyle>`
   text-align: left;
   color: ${({ inverted, theme }) =>
     inverted ? "white" : theme.colors["primary"]};
@@ -45,7 +45,7 @@ export const StyledSelect = styled.select<IValue>`
     outline: 0;
   }
 `;
-export const StyledTextArea = styled.textarea<IValue>`
+export const StyledTextArea = styled.textarea<IValueStyle>`
   text-align: left;
   color: ${({ inverted, theme }) =>
     inverted ? "white" : theme.colors["primary"]};

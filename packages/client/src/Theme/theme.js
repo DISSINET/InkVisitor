@@ -4,6 +4,7 @@ export default {
     current: 'currentColor',
 
     black: '#000',
+    // white: 'palevioletred',
     white: '#fff',
     primary: '#091034',
     success: '#6174C2',
