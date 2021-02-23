@@ -32,12 +32,15 @@ export class Db {
   }
 
   async initDb(): Promise<void> {
-    this.connection = await rethink.connect(rethinkConfig);
+    this.connection = await rethink.connect({
+      ...rethinkConfig,
+      timeout: 2, // important -  close will wait for this seconds
+    });
   }
 
-  close() {
+  async close() {
     if (this.connection) {
-      this.connection.close();
+      await this.connection.close({ noreplyWait: true });
     }
   }
 }
@@ -63,7 +66,6 @@ export const createConnection = async (
 ) => {
   request.db = new Db();
   await request.db.initDb();
-  console.log("connected to db");
   next();
 };
 
@@ -75,6 +77,7 @@ export const closeConnection = async (
   response: Response,
   next: NextFunction
 ) => {
-  console.log("disconnected db");
-  await request.db.close();
+  if (request.db) {
+    await request.db.close();
+  }
 };
