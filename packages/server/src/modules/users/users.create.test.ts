@@ -8,7 +8,7 @@ const should = chai.should();
 
 describe("Users create", function () {
   describe("empty data", () => {
-    it("should return a 400 code with bad params error", (done) => {
+    it("should return a 400 code with BadParams error", (done) => {
       return request(app)
         .post(`${apiPath}/users/create`)
         .expect("Content-Type", /json/)
@@ -17,7 +17,7 @@ describe("Users create", function () {
     });
   });
   describe("faulty data ", () => {
-    it("should return a 200 code with successful response", (done) => {
+    it("should return a 400 code with BadParams error", (done) => {
       return request(app)
         .post(`${apiPath}/users/create`)
         .send({ test: "" })
