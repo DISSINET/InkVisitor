@@ -2,18 +2,18 @@
  * type of the /tree endpoint response
  */
 
-import { TerritoryI } from ".";
+import { ITerritory } from ".";
 
 // to discuss
-export interface ResponseTreeI {
+export interface IResponseTree {
     tree: {
-        TreeTerritoryComponentI;
+        ITreeTerritoryComponent;
     };
     maxLevels: number; // levels of nesting
 }
 
-interface TreeTerritoryComponentI {
-    territory: TerritoryI;
+interface ITreeTerritoryComponent {
+    territory: ITerritory;
     statementsCount: number; // number of statements under this territory
-    children: TreeTerritoryComponentI[];
+    children: ITreeTerritoryComponent[];
 }

@@ -1,9 +1,9 @@
-import { DictionaryI } from "./";
+import { IDictionary } from "./";
 import { languageDict } from "./../dictionaries";
 
 const languageValues = languageDict.map((i) => i.value);
 
-export interface LabelI {
+export interface ILabel {
     id: string;
     value: string;
     lang: typeof languageValues[number];

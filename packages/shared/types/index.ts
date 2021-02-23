@@ -1,37 +1,38 @@
-import { AuditI } from "./audit";
-import { ActionI } from "./action";
-import { ActantI } from "./actant";
-import { EntityI } from "./entity";
-import { LabelI } from "./label";
-import { UserI } from "./user";
-import { ResponseActantI } from "./response-actant";
-import { ResponseActionI } from "./response-action";
-import { ResponseStatementI } from "./response-statement";
-import { ResponseTreeI } from "./response-tree";
-import { ResponseTerritoryI } from "./response-territory";
-import { ResponseUserI } from "./response-user";
-import { StatementI } from "./statement";
-import { TerritoryI } from "./territory";
+import { IAudit } from "./audit";
+import { IAction } from "./action";
+import { IActant } from "./actant";
+import { IEntity } from "./entity";
+import { ILabel } from "./label";
+import { IUser } from "./user";
+import { IResource } from "./resource";
+import { IResponseActant } from "./response-actant";
+import { IResponseAction } from "./response-action";
+import { IResponseStatement } from "./response-statement";
+import { IResponseTree } from "./response-tree";
+import { IResponseTerritory } from "./response-territory";
+import { IResponseUser } from "./response-user";
+import { IStatement } from "./statement";
+import { ITerritory } from "./territory";
+import { IOption } from "./option";
 
-import { OptionI } from "./option";
-
-type DictionaryI = OptionI[];
+type IDictionary = IOption[];
 
 export type {
-  AuditI,
-  ActionI,
-  ActantI,
-  EntityI,
-  LabelI,
-  OptionI,
-  DictionaryI,
-  StatementI,
-  TerritoryI,
-  UserI,
-  ResponseActantI,
-  ResponseActionI,
-  ResponseStatementI,
-  ResponseTerritoryI,
-  ResponseTreeI,
-  ResponseUserI,
+    IAudit,
+    IAction,
+    IActant,
+    IEntity,
+    IDictionary,
+    ILabel,
+    IOption,
+    IStatement,
+    ITerritory,
+    IUser,
+    IResource,
+    IResponseActant,
+    IResponseAction,
+    IResponseStatement,
+    IResponseTerritory,
+    IResponseTree,
+    IResponseUser,
 };

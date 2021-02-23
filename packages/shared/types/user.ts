@@ -1,37 +1,37 @@
-import { ResponseActantI } from "./";
+import { IResponseActant } from "./";
 import { userRoleDict } from "./../dictionaries";
 
 const userRoleValues = userRoleDict.map((i) => i.value);
-export interface UserI {
+export interface IUser {
     id: string;
     email: string;
     name: string;
     password?: string;
     role: typeof userRoleValues[number];
-    bookmarks: BookmarkFolderI[];
-    storedTerritories: StoredTerritoryI[];
+    bookmarks: IBookmarkFolder[];
+    storedTerritories: IStoredTerritory[];
 }
 
-export interface UserOptions {
+export interface IUserOptions {
     defaultTerritory: string;
     defaultLanguage: string;
     searchLanguages: string[];
 }
 
-interface StoredTerritoryI {
+interface IStoredTerritory {
     id: string;
     order: number;
     territory: string;
 }
 
-interface BookmarkFolderI {
+interface IBookmarkFolder {
     id: string;
     name: string;
     order: number;
-    actants: BookmarkActantI[];
+    actants: IBookmarkActant[];
 }
 
-interface BookmarkActantI {
+interface IBookmarkActant {
     id: string;
     order: number;
     actant: string;

@@ -2,10 +2,10 @@
  * type of the /territory endpoint response
  */
 
-import { ActantI, TerritoryI, StatementI } from "./";
+import { IActant, ITerritory, IStatement } from "./";
 
 // to discuss
-export interface ResponseTerritoryI extends TerritoryI {
-    statements: StatementI[];
-    actants: ActantI[];
+export interface IResponseTerritory extends ITerritory {
+    statements: IStatement[];
+    actants: IActant[];
 }

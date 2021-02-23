@@ -2,11 +2,12 @@
  * type of the /user endpoint response
  */
 
-import { ActantI, AuditI, StatementI } from ".";
+import { IActant, IAudit, IStatement, ITerritory } from ".";
 
 // TODO
-export interface ResponseActantI extends ActantI {
-    usedIn: StatementI[]; // all statements where this actoin was used
+export interface IResponseActant extends IActant {
+    usedIn: IStatement[]; // all statements where this actant is used
     usedCount: number; // how many times was this action used
-    audits: AuditI[];
+    audits: IAudit[];
+    displayLabel: string;
 }
