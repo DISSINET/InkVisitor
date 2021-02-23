@@ -3,22 +3,8 @@ import classNames from "classnames";
 import { DropTargetMonitor, useDrag, useDrop, XYCoord } from "react-dnd";
 
 import { ItemTypes } from "types";
-import "./tag.css";
 import ReactTooltip from "react-tooltip";
-import styled from "styled-components";
-import { space1 } from "Theme/constants";
-
-interface IEntityStyle {
-  color: string;
-}
-const Entity = styled.div<IEntityStyle>`
-  background-color: ${({ color, theme }) => theme.colors[color]};
-  display: inline;
-  padding-top: ${space1};
-  padding-bottom: ${space1};
-  text-align: center;
-  font-weight: ${({ theme }) => theme.fontWeights["extrabold"]};
-`;
+import { TagWrapper, Entity, Label, Button } from "./TagStyles";
 
 interface TagProps {
   label?: string;
@@ -53,49 +39,17 @@ export const Tag: React.FC<TagProps> = ({
   index,
   moveTagFn,
 }) => {
-  const tagClasses = classNames(
-    "component",
-    "tag",
-    "border-black",
-    "border-2",
-    "inline-flex",
-    "rounded-md",
-    "overflow-hidden",
-    "max-w-xs",
-    marginRight && "mr-1",
-    "cursor-move",
-    "text-black"
-  );
-
-  const entityClasses = classNames(
-    // `bg-${color}`,
-    "tag-entity",
-    // "inline",
-    "w-6",
-    // "py-1",
-    // "text-center",
-    // "font-extrabold",
-    {
-      "border-r-2": !!label && !!showLabel,
-      "border-primary": !!label && !!showLabel,
-    }
-  );
   const labelClasses = classNames(
     "tag-label",
-    "inline",
-    "align-middle",
-    "py-1",
-    "px-1",
-    "truncate",
     invertedLabel ? "bg-primary text-white" : "bg-white",
     { "bg-primary text-white": mode === "selected" }
   );
   const buttonClasses = classNames(
     "tag-button",
-    "flex",
+    // "flex",
     "-mt-2",
-    "-mb-2",
-    "align-middle"
+    "-mb-2"
+    // "align-middle"
   );
 
   const ref = useRef<HTMLDivElement>(null);
@@ -157,20 +111,29 @@ export const Tag: React.FC<TagProps> = ({
 
   return (
     <>
-      <div
+      <TagWrapper
         ref={ref}
-        className={tagClasses}
+        className="tag"
         data-for={"main"}
         data-tip={label ? label : "no label"}
         data-iscapture="true"
         data-tip-disable={showLabel}
+        hasMarginRight={marginRight}
       >
-        <Entity className={entityClasses} color={color}>
+        <Entity
+          color={color}
+          label={label ? true : false}
+          showLabel={showLabel}
+        >
           {category}
         </Entity>
-        {showLabel && label && <div className={labelClasses}>{label}</div>}
-        {button && <div className={buttonClasses}>{button}</div>}
-      </div>
+        {showLabel && label && (
+          <Label className={labelClasses} invertedLabel={invertedLabel}>
+            {label}
+          </Label>
+        )}
+        {button && <Button className={buttonClasses}>{button}</Button>}
+      </TagWrapper>
       <ReactTooltip
         id="main"
         place="bottom"

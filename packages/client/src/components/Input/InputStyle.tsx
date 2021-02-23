@@ -20,7 +20,7 @@ export const StyledInput = styled.input<IValue>`
     inverted ? "white" : theme.colors["primary"]};
   background-color: ${({ inverted, theme }) =>
     inverted ? theme.colors["primary"] : "white"};
-  border-width: ${({ theme }) => theme.borderWidth[2]};
+  border-width: ${({ theme }) => theme.borderWidths[2]};
   border-color: ${({ theme }) => theme.colors["primary"]};
   font-size: ${({ theme }) => theme.fontSizes["xs"]};
   padding: ${space1};
@@ -32,7 +32,7 @@ export const StyledSelect = styled.select<IValue>`
     inverted ? "white" : theme.colors["primary"]};
   background-color: ${({ inverted, theme }) =>
     inverted ? theme.colors["primary"] : "white"};
-  border-width: ${({ theme }) => theme.borderWidth[2]};
+  border-width: ${({ theme }) => theme.borderWidths[2]};
   border-color: ${({ theme }) => theme.colors["primary"]};
   font-size: ${({ theme }) => theme.fontSizes["xs"]};
   font-weight: bold;
@@ -45,7 +45,7 @@ export const StyledTextArea = styled.textarea<IValue>`
     inverted ? "white" : theme.colors["primary"]};
   background-color: ${({ inverted, theme }) =>
     inverted ? theme.colors["primary"] : "white"};
-  border-width: ${({ theme }) => theme.borderWidth[2]};
+  border-width: ${({ theme }) => theme.borderWidths[2]};
   border-color: ${({ theme }) => theme.colors["primary"]};
   font-size: ${({ theme }) => theme.fontSizes["xs"]};
   padding: ${space1};
