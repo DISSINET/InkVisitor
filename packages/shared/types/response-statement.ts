@@ -2,10 +2,10 @@
  * type of the /user endpoint response
  */
 
-import { AuditI, ActantI, StatementI } from ".";
+import { IAudit, IActant, IStatement } from ".";
 
-export interface ResponseStatementI extends StatementI {
-    audits: AuditI[];
-    usedIn: StatementI[];
-    actants: ActantI;
+export interface IResponseStatement extends IStatement {
+    audits: IAudit[];
+    usedIn: IStatement[];
+    actants: IActant;
 }

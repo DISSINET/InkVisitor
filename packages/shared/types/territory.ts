@@ -1,6 +1,6 @@
-import { ActantI } from "./actant";
+import { IActant } from "./actant";
 
-export interface TerritoryI extends ActantI {
+export interface ITerritory extends IActant {
     class: "T";
     parent: ParentTerritoryI;
     type: string; // territoryTypeDict

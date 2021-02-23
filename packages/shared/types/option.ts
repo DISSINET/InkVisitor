@@ -1,5 +1,5 @@
-export interface OptionI {
-  value: string;
-  label: string;
-  info?: string;
+export interface IOption {
+    value: string;
+    label: string;
+    info?: string;
 }

@@ -2,9 +2,9 @@
  * type of the /actions endpoint response
  */
 
-import { ActionI, StatementI } from ".";
+import { IAction, IStatement } from ".";
 
-export interface ResponseActionI extends ActionI {
-    usedIn: StatementI[]; // last 10 statements where this actoin was used
+export interface IResponseAction extends IAction {
+    usedIn: IStatement[]; // last 10 statements where this actoin was used
     usedCount: number; // how many times was this action used
 }

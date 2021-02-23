@@ -2,12 +2,12 @@
  * type of the /users endpoint response
  */
 
-import { ResponseActantI } from "./";
+import { IResponseActant } from "./";
 import { userRoleDict } from "./../dictionaries";
 
 const userRoleValues = userRoleDict.map((i) => i.value);
 
-export interface ResponseUserI {
+export interface IResponseUser {
     id: string;
     email: string;
     name: string;
@@ -25,7 +25,7 @@ export interface UserOptions {
 interface StoredTerritoryI {
     id: string;
     order: number;
-    territory: ResponseActantI;
+    territory: IResponseActant;
 }
 
 interface BookmarkFolderI {
@@ -38,5 +38,5 @@ interface BookmarkFolderI {
 interface BookmarkActantI {
     id: string;
     order: number;
-    actant: ResponseActantI;
+    actant: IResponseActant;
 }

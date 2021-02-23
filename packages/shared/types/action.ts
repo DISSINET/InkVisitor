@@ -1,11 +1,11 @@
-import { LabelI } from "./";
+import { ILabel } from "./";
 
 // TODO
-export interface ActionI {
+export interface IAction {
     id: string;
     parent: false | string;
     note: string;
-    labels: LabelI[];
+    labels: ILabel[];
     types: [];
     valencies: [];
     rulesActants: [];

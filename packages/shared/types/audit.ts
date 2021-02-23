@@ -1,13 +1,13 @@
-import { LabelI } from ".";
+import { ILabel } from ".";
 
-export interface AuditI {
+export interface IAudit {
     id: string;
     user: string;
     date: Date;
-    changes: ChangeI[];
+    changes: IChange[];
 }
 
-interface ChangeI {
+interface IChange {
     id: string;
     newValue: object;
 }

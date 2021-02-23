@@ -1,6 +1,6 @@
-import { ActantI } from "./";
+import { IActant } from "./";
 
-export interface StatementI extends ActantI {
+export interface IStatement extends IActant {
     class: "S";
     action: string;
     territory: {
