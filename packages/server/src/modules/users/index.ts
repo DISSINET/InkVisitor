@@ -1,23 +1,19 @@
-import { getOneActant, Result } from "../index";
-import { rethinkConfig } from "@service/RethinkDB";
-import { paramMissingError } from "@common/constants";
-import { NextFunction, Request, Response } from "express";
+import { NextFunction, raw, Request, Response } from "express";
 import { Router } from "express";
-import { BAD_REQUEST, CREATED, NOT_FOUND, OK } from "http-status-codes";
-import { r } from "rethinkdb-ts";
+import { UserI } from "@shared/types/user";
 import {
   findUserByName,
   findUserById,
   findUsersByLabel,
+  createUser,
 } from "@service/shorthands";
 import {
   BadCredentialsError,
   BadParams,
   UserDoesNotExits,
 } from "@common/errors";
-import { checkPassword, generateAccessToken } from "@common/auth";
+import { checkPassword, generateAccessToken, hashPassword } from "@common/auth";
 import { asyncRouteHandler } from "..";
-import { use } from "chai";
 
 export default Router()
   .post(
@@ -77,5 +73,34 @@ export default Router()
       const users = await findUsersByLabel(request.db, label as string);
 
       response.json(users);
+    })
+  )
+  .post(
+    "/create",
+    asyncRouteHandler(async (request: Request, response: Response) => {
+      const userData = request.body as UserI;
+
+      if (
+        !userData ||
+        !userData.email ||
+        !userData.name ||
+        !userData.password
+      ) {
+        throw new BadParams("user data have to be set");
+      }
+
+      userData.password = hashPassword(userData.password);
+      const result = await createUser(request.db, userData);
+
+      if (result.inserted === 1) {
+        response.json({
+          success: true,
+        });
+      } else {
+        response.json({
+          success: false,
+          errors: result.errors,
+        });
+      }
     })
   );
