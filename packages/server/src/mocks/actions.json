@@ -5,6 +5,7 @@
         "note": "",
         "labels": [
             {
+                "id": "al1",
                 "label": "said",
                 "language": "Lang1"
             }
@@ -19,10 +20,7 @@
         "parent": false,
         "note": "",
         "labels": [
-            {
-                "label": "performed ritual",
-                "language": "Lang1"
-            }
+            { "id": "al2", "label": "performed ritual", "language": "Lang1" }
         ],
         "types": [],
         "valencies": [],
@@ -33,12 +31,7 @@
         "id": "A3",
         "parent": false,
         "note": "",
-        "labels": [
-            {
-                "label": "brought",
-                "language": "Lang1"
-            }
-        ],
+        "labels": [{ "id": "al3", "label": "brought", "language": "Lang1" }],
         "types": [],
         "valencies": [],
         "rulesActants": [],
@@ -49,10 +42,7 @@
         "parent": false,
         "note": "",
         "labels": [
-            {
-                "label": "burned down",
-                "language": "Lang1"
-            }
+            { "id": "al4", "label": "burned down", "language": "Lang1" }
         ],
         "types": [],
         "valencies": [],
@@ -63,12 +53,7 @@
         "id": "A5",
         "parent": false,
         "note": "",
-        "labels": [
-            {
-                "label": "has",
-                "language": "Lang1"
-            }
-        ],
+        "labels": [{ "id": "al5", "label": "has", "language": "Lang1" }],
         "types": [],
         "valencies": [],
         "rulesActants": [],
