@@ -5,7 +5,11 @@ import { NextFunction, Request, Response } from "express";
 import { Router } from "express";
 import { BAD_REQUEST, CREATED, NOT_FOUND, OK } from "http-status-codes";
 import { r } from "rethinkdb-ts";
-import { findUserByName, findUserById } from "@service/shorthands";
+import {
+  findUserByName,
+  findUserById,
+  findUsersByLabel,
+} from "@service/shorthands";
 import {
   BadCredentialsError,
   BadParams,
@@ -59,5 +63,19 @@ export default Router()
       }
 
       response.json(user);
+    })
+  )
+  .post(
+    "/getMore",
+    asyncRouteHandler(async (request: Request, response: Response) => {
+      const label = request.body.label;
+
+      if (!label) {
+        throw new BadParams("label has to be set");
+      }
+
+      const users = await findUsersByLabel(request.db, label as string);
+
+      response.json(users);
     })
   );
