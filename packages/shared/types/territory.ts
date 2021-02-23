@@ -2,8 +2,10 @@ import { IActant } from "./actant";
 
 export interface ITerritory extends IActant {
     class: "T";
-    parent: ParentTerritoryI;
-    type: string; // territoryTypeDict
+    data: {
+        parent: ParentTerritoryI;
+        type: string; // territoryTypeDict
+    };
 }
 
 interface ParentTerritoryI {
