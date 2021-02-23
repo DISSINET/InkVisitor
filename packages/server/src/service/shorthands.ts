@@ -43,3 +43,13 @@ export async function findUsersByLabel(
 export async function createUser(db: Db, data: UserI): Promise<WriteResult> {
   return rethink.table("users").insert(data).run(db.connection);
 }
+
+export async function updateUser(
+  db: Db,
+  userId: string,
+  data: UserI
+): Promise<WriteResult> {
+  const safeData: any = { ...data };
+  delete safeData.id;
+  return rethink.table("users").get(userId).update(safeData).run(db.connection);
+}
