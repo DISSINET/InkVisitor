@@ -1,5 +1,5 @@
 import * as fs from "fs";
-import { User } from "../../shared/types/user";
+import { IUser } from "../../shared/types/user";
 import { hashPassword } from "../../server/src/common/auth";
 const r = require("rethinkdb");
 const tunnel = require("tunnel-ssh");
@@ -53,14 +53,14 @@ console.log(`***importing dataset ${datasetId}***`);
 console.log("");
 
 const dictionaries: Record<string, string> = {
-  certainties: "import/dictionaries/dict_certainties.json",
-  elvls: "import/dictionaries/dict_elvls.json",
-  languages: "import/dictionaries/dict_languages.json",
-  modalities: "import/dictionaries/dict_modalities.json",
-  positions: "import/dictionaries/dict_positions.json",
-  referencetypes: "import/dictionaries/dict_referencetypes.json",
-  resourcetypes: "import/dictionaries/dict_resourcetypes.json",
-  territorytypes: "import/dictionaries/dict_territorytypes.json",
+  //certainties: "import/dictionaries/dict_certainties.json",
+  // elvls: "import/dictionaries/dict_elvls.json",
+  // languages: "import/dictionaries/dict_languages.json",
+  //modalities: "import/dictionaries/dict_modalities.json",
+  // positions: "import/dictionaries/dict_positions.json",
+  // referencetypes: "import/dictionaries/dict_referencetypes.json",
+  // resourcetypes: "import/dictionaries/dict_resourcetypes.json",
+  // territorytypes: "import/dictionaries/dict_territorytypes.json",
 };
 
 //-----------------------------------------------------------------------------
@@ -123,8 +123,8 @@ const importData = async () => {
 
       let data = JSON.parse(fs.readFileSync(table.path).toString());
       if (table.name === "users") {
-        data = data.map((user: User) => {
-          user.password = hashPassword(user.password);
+        data = data.map((user: IUser) => {
+          user.password = hashPassword(user.password ? user.password : "");
           return user;
         });
       }
