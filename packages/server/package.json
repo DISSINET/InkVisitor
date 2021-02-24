@@ -9,7 +9,7 @@
     "start:prod": "pm2 start npm --name \"inkvisitor-server\" -- start",
     "restart:prod": "pm2 restart inkvisitor-server",
     "stop:prod": "pm2 delete \"inkvisitor-server\"",
-    "test": "jest"
+    "test": "jest -t"
   },
   "nodemonConfig": {
     "watch": [
