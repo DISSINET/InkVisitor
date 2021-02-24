@@ -1,5 +1,7 @@
 import { Connection, r as rethink, WriteResult } from "rethinkdb-ts";
 import { IUser } from "../../../shared/types/user";
+import { IActant } from "../../../shared/types/actant";
+
 import { Db } from "./RethinkDB";
 
 // USER
@@ -58,4 +60,17 @@ export async function updateUser(
 
 export async function deleteUser(db: Db, userId: string): Promise<WriteResult> {
   return rethink.table("users").get(userId).delete().run(db.connection);
+}
+
+// ACTANT
+
+export async function findActantById(db: Db, id: string): Promise<IActant> {
+  const data = await rethink
+    .table("actants")
+    .filter({
+      id,
+    })
+    .limit(1)
+    .run(db.connection);
+  return data.length == 0 ? null : data[0];
 }

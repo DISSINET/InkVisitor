@@ -7,11 +7,10 @@ import { BAD_REQUEST } from "http-status-codes";
 import { createConnection, closeConnection } from "@service/RethinkDB";
 import logger from "@common/Logger";
 import { apiPath } from "./common/constants";
-import ActantRouter from "@modules/actant";
+import ActantsRouter from "@modules/actants";
 import TerritoryRouter from "@modules/territory";
 import MetaRouter from "@modules/meta";
 import UsersRouter from "@modules/users";
-
 const server = express();
 server.use(cors());
 
@@ -46,7 +45,7 @@ server.use(apiPath, routerV1);
 
 //routerV1.use('/statements', StatementRouter);.
 routerV1.use("/users", UsersRouter);
-routerV1.use("/actants", ActantRouter);
+routerV1.use("/actants", ActantsRouter);
 routerV1.use("/territory", TerritoryRouter);
 routerV1.use("/meta", MetaRouter);
 
