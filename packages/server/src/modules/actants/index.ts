@@ -1,10 +1,15 @@
-import { getOneActant, Result } from "../index";
+import { asyncRouteHandler, getOneActant, Result } from "../index";
 
 import { rethinkConfig } from "@service/RethinkDB";
 import { paramMissingError } from "@common/constants";
 import { Router, Response, Request, NextFunction } from "express";
 import { BAD_REQUEST, CREATED, OK, NOT_FOUND } from "http-status-codes";
-
+import { findActantById } from "@service/shorthands";
+import {
+  BadCredentialsError,
+  BadParams,
+  ActantDoesNotExits,
+} from "@common/errors";
 import { r } from "rethinkdb-ts";
 
 //-----------------------------------------------------------------------------
@@ -121,18 +126,25 @@ async function deleteOne(actantId: string): Promise<any> {
   return result;
 }
 
-//-----------------------------------------------------------------------------
-// Controller functions
-//-----------------------------------------------------------------------------
-
-//-----------------------------------------------------------------------------
-// Router
-//-----------------------------------------------------------------------------
-
 export default Router()
-  /**
-   * Create the actant.
-   */
+  .get(
+    "/get/:actantId?",
+    asyncRouteHandler(async (request: Request, response: Response) => {
+      const actantId = request.params.actantId;
+
+      if (!actantId) {
+        throw new BadParams("actantId has to be set");
+      }
+
+      const actant = await findActantById(request.db, actantId as string);
+      if (!actant) {
+        throw new ActantDoesNotExits(`actant ${actantId} was not found`);
+      }
+
+      response.json(actant);
+    })
+  )
+  // old
   .post(
     "/",
     async (request: Request, response: Response, next: NextFunction) => {
@@ -198,11 +210,12 @@ export default Router()
 
     console.log("getting actants");
     return Result(response, OK, actants);
-  })
+  });
 
-  /**
-   * Retrieve the actant individual.
-   */
+/**
+ * Retrieve the actant individual.
+ */
+/*
   .get("/:uuid", async (request: Request, response: Response) => {
     const uuid: string = request.params.uuid;
 
@@ -214,3 +227,4 @@ export default Router()
       ? Result(response, OK, actant)
       : Result(response, NOT_FOUND, `Actant ${uuid} was not found.`);
   });
+*/

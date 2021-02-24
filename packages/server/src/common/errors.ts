@@ -74,8 +74,33 @@ class UserDoesNotExits extends Error {
   }
 }
 
+class ActantDoesNotExits extends Error {
+  public static code = "actant does not exist";
+
+  constructor(m: string) {
+    super(m);
+
+    // Set the prototype explicitly.
+    Object.setPrototypeOf(this, ActantDoesNotExits.prototype);
+  }
+
+  statusCode(): number {
+    return 400;
+  }
+
+  toString(): string {
+    return ActantDoesNotExits.code;
+  }
+}
+
 export interface IError extends Error {
   statusCode(): number;
 }
 
-export { BadCredentialsError, NotFound, BadParams, UserDoesNotExits };
+export {
+  BadCredentialsError,
+  NotFound,
+  BadParams,
+  UserDoesNotExits,
+  ActantDoesNotExits,
+};
