@@ -13,7 +13,8 @@ export const Label = styled.span`
   margin-right: ${space2};
   vertical-align: top;
   font-weight: bold;
-  line-height: 2.5rem;
+  display: flex;
+  align-items: flex-end;
 `;
 export const StyledInput = styled.input<IValueStyle>`
   text-align: left;
