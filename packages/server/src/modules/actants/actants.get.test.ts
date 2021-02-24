@@ -23,7 +23,7 @@ describe("Actants get", function () {
     });
   });
   describe("Wrong param", () => {
-    it("should return a 400 code with UserDoesNotExits error", (done) => {
+    it("should return a 400 code with ActantDoesNotExits error", (done) => {
       return request(app)
         .get(`${apiPath}/actants/get/123`)
         .set("authorization", "Bearer " + supertestConfig.token)

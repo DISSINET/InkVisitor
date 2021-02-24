@@ -4,7 +4,7 @@ import { rethinkConfig } from "@service/RethinkDB";
 import { paramMissingError } from "@common/constants";
 import { Router, Response, Request, NextFunction } from "express";
 import { BAD_REQUEST, CREATED, OK, NOT_FOUND } from "http-status-codes";
-import { findActantById } from "@service/shorthands";
+import { findActantById, findActantsByLabelOrClass } from "@service/shorthands";
 import {
   BadCredentialsError,
   BadParams,
@@ -142,6 +142,25 @@ export default Router()
       }
 
       response.json(actant);
+    })
+  )
+  .post(
+    "/getMore",
+    asyncRouteHandler(async (request: Request, response: Response) => {
+      const label = request.body.label;
+      const classParam = request.body.class;
+
+      if (!label && !classParam) {
+        throw new BadParams("label or class has to be set");
+      }
+
+      const actants = await findActantsByLabelOrClass(
+        request.db,
+        label,
+        classParam
+      );
+
+      response.json(actants);
     })
   )
   // old

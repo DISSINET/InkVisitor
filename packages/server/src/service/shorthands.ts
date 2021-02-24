@@ -3,6 +3,7 @@ import { IUser } from "../../../shared/types/user";
 import { IActant } from "../../../shared/types/actant";
 
 import { Db } from "./RethinkDB";
+import { ILabel } from "@shared/types";
 
 // USER
 
@@ -73,4 +74,23 @@ export async function findActantById(db: Db, id: string): Promise<IActant> {
     .limit(1)
     .run(db.connection);
   return data.length == 0 ? null : data[0];
+}
+
+export async function findActantsByLabelOrClass(
+  db: Db,
+  label: string,
+  classParam: string
+): Promise<IActant[]> {
+  const data = await rethink
+    .table("actants")
+    .filter(function (user: any) {
+      return rethink.or(
+        rethink.row("class").eq(classParam),
+        rethink
+          .row("labels")
+          .contains<ILabel>((labelObj) => labelObj("value").eq(label))
+      );
+    })
+    .run(db.connection);
+  return data;
 }
