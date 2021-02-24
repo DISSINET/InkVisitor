@@ -7,22 +7,21 @@ interface ITagWrapperStyle {
   logicalType: string;
 }
 export const TagWrapper = styled.div<ITagWrapperStyle>`
-  display: flex;
+  display: inline-flex;
   border: ${({ theme }) => theme.borderWidths[2]};
   border-style: ${({ logicalType }) =>
     (logicalType === "definitive" && "solid") ||
     (logicalType === "indefinitive" && "dashed") ||
     (logicalType === "hypothetical" && "dotted")};
-  border-color: ${({ theme }) => theme.colors["black"]};
+  border-color: black;
   border-radius: ${({ theme }) => theme.borderRadius["md"]};
   overflow: hidden;
   margin-right: ${({ hasMarginRight }) => hasMarginRight && space1};
   max-width: 10rem;
   cursor: move;
-  color: ${({ theme }) => theme.colors["black"]};
+  color: black;
   font-size: 10px;
   box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.4);
-  /* height: 25px; */
 `;
 
 interface IEntityStyle {
@@ -34,6 +33,8 @@ export const EntityTag = styled.div<IEntityStyle>`
   justify-content: center;
   align-items: center;
   flex-shrink: 0;
+  padding-top: ${space1};
+  padding-bottom: ${space1};
   font-weight: ${({ theme }) => theme.fontWeights["extrabold"]};
   width: 1.5rem;
 `;
@@ -45,27 +46,24 @@ interface ILabelStyle {
 export const Label = styled.div<ILabelStyle>`
   display: inline;
   vertical-align: middle;
-  line-height: 2.6;
-  padding: 0 ${space1};
+  padding: ${space1};
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
   background-color: ${({ theme, invertedLabel }) =>
-    invertedLabel ? theme.colors["primary"] : theme.colors["white"]};
-  color: ${({ theme, invertedLabel }) =>
-    invertedLabel ? theme.colors["white"] : theme.colors["black"]};
+    invertedLabel ? theme.colors["primary"] : "white"};
+  color: ${({ invertedLabel }) => (invertedLabel ? "white" : "black")};
   border-left: ${({ theme }) => theme.borderWidths[2]};
   border-left-style: ${({ logicalType }) =>
     (logicalType === "definitive" && "solid") ||
     (logicalType === "indefinitive" && "dashed") ||
     (logicalType === "hypothetical" && "dotted")};
-  border-left-color: ${({ theme }) => theme.colors["black"]};
+  border-left-color: ${({ theme }) => theme.colors["primary"]};
 `;
 
 export const ButtonWrapper = styled.div`
   display: flex;
-  justify-content: center;
-  align-items: center;
-  /* height: 100%; */
-  cursor: pointer;
+  vertical-align: middle;
+  margin-top: -${space2};
+  margin-bottom: -0.4rem;
 `;

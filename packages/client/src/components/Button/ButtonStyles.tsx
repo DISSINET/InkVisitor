@@ -19,6 +19,7 @@ export const StyledButton = styled.button<IButtonStyle>`
     inverted ? theme.colors[color] : theme.colors["white"]};
   background-color: ${({ theme, color, inverted }) =>
     inverted ? theme.colors["white"] : theme.colors[color]};
+  cursor: pointer;
   :focus {
     outline: 0;
   }

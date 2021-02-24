@@ -5,13 +5,13 @@ export default {
 
     black: '#000',
     white: '#fff',
+    grey: '#C4C4C4',
+    text: '#383737',
     primary: '#091034',
     success: '#6174C2',
     warning: '#D8AA37',
     danger: '#99103B',
     info: '#324185',
-    text: '#383737',
-    grey: '#C4C4C4',
 
     entityC: '#83BCB6',
     entityE: '#D8B5A5',
@@ -64,6 +64,7 @@ export default {
     12: '3rem',
     16: '4rem',
     20: '5rem',
+    22: '5.5rem',
     24: '6rem',
     32: '8rem',
     40: '10rem',

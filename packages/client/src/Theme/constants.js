@@ -11,6 +11,7 @@ export const space10 = theme.space[10];
 export const space12 = theme.space[12];
 export const space16 = theme.space[16];
 export const space20 = theme.space[20];
+export const space22 = theme.space[22];
 export const space24 = theme.space[24];
 export const space32 = theme.space[32];
 export const space40 = theme.space[40];
