@@ -1,6 +1,6 @@
 import { NextFunction, raw, Request, Response } from "express";
 import { Router } from "express";
-import { UserI } from "@shared/types/user";
+import { IUser } from "@shared/types/user";
 import {
   findUserByName,
   findUserById,
@@ -78,7 +78,7 @@ export default Router()
   .post(
     "/create",
     asyncRouteHandler(async (request: Request, response: Response) => {
-      const userData = request.body as UserI;
+      const userData = request.body as IUser;
 
       if (
         !userData ||
@@ -108,7 +108,7 @@ export default Router()
     "/update/:userId?",
     asyncRouteHandler(async (request: Request, response: Response) => {
       const userId = request.params.userId;
-      const userData = request.body as UserI;
+      const userData = request.body as IUser;
 
       if (!userId || !userData || Object.keys(userData).length === 0) {
         throw new BadParams("user id and data have to be set");

@@ -1,8 +1,10 @@
 import { Connection, r as rethink, WriteResult } from "rethinkdb-ts";
-import { UserI } from "../../../shared/types/user";
+import { IUser } from "../../../shared/types/user";
 import { Db } from "./RethinkDB";
 
-export async function findUserByName(db: Db, name: string): Promise<UserI> {
+// USER
+
+export async function findUserByName(db: Db, name: string): Promise<IUser> {
   const data = await rethink
     .table("users")
     .filter({
@@ -13,7 +15,7 @@ export async function findUserByName(db: Db, name: string): Promise<UserI> {
   return data.length == 0 ? null : data[0];
 }
 
-export async function findUserById(db: Db, id: string): Promise<UserI> {
+export async function findUserById(db: Db, id: string): Promise<IUser> {
   const data = await rethink
     .table("users")
     .filter({
@@ -27,7 +29,7 @@ export async function findUserById(db: Db, id: string): Promise<UserI> {
 export async function findUsersByLabel(
   db: Db,
   label: string
-): Promise<UserI[]> {
+): Promise<IUser[]> {
   const data = await rethink
     .table("users")
     .filter(function (user: any) {
@@ -40,14 +42,14 @@ export async function findUsersByLabel(
   return data;
 }
 
-export async function createUser(db: Db, data: UserI): Promise<WriteResult> {
+export async function createUser(db: Db, data: IUser): Promise<WriteResult> {
   return rethink.table("users").insert(data).run(db.connection);
 }
 
 export async function updateUser(
   db: Db,
   userId: string,
-  data: UserI
+  data: IUser
 ): Promise<WriteResult> {
   const safeData: any = { ...data };
   delete safeData.id;
