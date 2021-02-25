@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import { space3, space8 } from "Theme/constants";
+import { space3, space6, space8 } from "Theme/constants";
 
 interface ModalWrap {
   showModal: boolean;
@@ -53,14 +53,16 @@ export const CardHeader = styled.header`
 export const CardTitle = styled.h2`
   flex-grow: 1;
   flex-shrink: 0;
+  font-weight: ${({ theme }) => theme.fontWeights["medium"]};
   font-size: ${({ theme }) => theme.fontSizes["2xl"]};
+  line-height: 1.4;
 `;
 export const CardBody = styled.section`
   -webkit-overflow-scrolling: touch;
   flex-grow: 1;
   flex-shrink: 1;
   overflow: auto;
-  padding: ${space8};
+  padding: ${space6};
   background-color: #ffffff;
 `;
 export const Footer = styled.div`

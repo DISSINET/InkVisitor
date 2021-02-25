@@ -1,7 +1,7 @@
 import { Arrow } from "components/Arrow/Arrow";
 import { Box } from "components/Box/Box";
 import { Button } from "components/Button/Button";
-import { ButtonSet } from "components/Buttonset/Buttonset";
+import { ButtonGroup } from "components/Buttonset/ButtonGroup";
 import { Header } from "components/Header/Header";
 import { Footer } from "components/Footer/Footer";
 import { Input } from "components/Input/Input";
@@ -22,7 +22,7 @@ export {
   Arrow,
   Box,
   Button,
-  ButtonSet,
+  ButtonGroup,
   Header,
   Footer,
   Input,
