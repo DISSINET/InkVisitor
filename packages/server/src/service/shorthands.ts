@@ -139,3 +139,18 @@ export async function findActionById(db: Db, id: string): Promise<IAction> {
     .run(db.connection);
   return data.length == 0 ? null : data[0];
 }
+
+export async function findActionsByLabel(
+  db: Db,
+  label: string
+): Promise<IAction[]> {
+  const data = await rethink
+    .table("actions")
+    .filter(function (user: any) {
+      return rethink
+        .row("labels")
+        .contains<IAction>((labelObj) => labelObj("value").eq(label));
+    })
+    .run(db.connection);
+  return data;
+}
