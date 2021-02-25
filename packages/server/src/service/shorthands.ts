@@ -3,7 +3,7 @@ import { IUser } from "../../../shared/types/user";
 import { IActant } from "../../../shared/types/actant";
 
 import { Db } from "./RethinkDB";
-import { ILabel } from "@shared/types";
+import { IAction, ILabel } from "@shared/types";
 
 // USER
 
@@ -126,4 +126,16 @@ export async function deleteActant(
   actantId: string
 ): Promise<WriteResult> {
   return rethink.table("actants").get(actantId).delete().run(db.connection);
+}
+
+// ACTIONS
+export async function findActionById(db: Db, id: string): Promise<IAction> {
+  const data = await rethink
+    .table("actions")
+    .filter({
+      id,
+    })
+    .limit(1)
+    .run(db.connection);
+  return data.length == 0 ? null : data[0];
 }
