@@ -9,6 +9,7 @@ import {
   findActantsByLabelOrClass,
   createActant,
   updateActant,
+  deleteActant,
 } from "@service/shorthands";
 import {
   BadCredentialsError,
@@ -217,6 +218,29 @@ export default Router()
       const result = await updateActant(request.db, actantId, actantData);
 
       if (result.replaced) {
+        response.json({
+          success: true,
+        });
+      } else {
+        response.json({
+          success: false,
+          errors: result.errors,
+        });
+      }
+    })
+  )
+  .delete(
+    "/delete/:actantId?",
+    asyncRouteHandler(async (request: Request, response: Response) => {
+      const actantId = request.params.actantId;
+
+      if (!actantId) {
+        throw new BadParams("actant id has to be set");
+      }
+
+      const result = await deleteActant(request.db, actantId);
+
+      if (result.deleted === 1) {
         response.json({
           success: true,
         });
