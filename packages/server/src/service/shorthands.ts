@@ -120,3 +120,10 @@ export async function updateActant(
     .update(safeData)
     .run(db.connection);
 }
+
+export async function deleteActant(
+  db: Db,
+  actantId: string
+): Promise<WriteResult> {
+  return rethink.table("actants").get(actantId).delete().run(db.connection);
+}
