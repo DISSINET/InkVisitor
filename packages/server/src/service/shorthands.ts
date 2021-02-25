@@ -180,3 +180,10 @@ export async function updateAction(
     .update(safeData)
     .run(db.connection);
 }
+
+export async function deleteAction(
+  db: Db,
+  actionId: string
+): Promise<WriteResult> {
+  return rethink.table("actions").get(actionId).delete().run(db.connection);
+}
