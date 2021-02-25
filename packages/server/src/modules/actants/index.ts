@@ -8,6 +8,7 @@ import {
   findActantById,
   findActantsByLabelOrClass,
   createActant,
+  updateActant,
 } from "@service/shorthands";
 import {
   BadCredentialsError,
@@ -185,6 +186,37 @@ export default Router()
       const result = await createActant(request.db, actantData);
 
       if (result.inserted === 1) {
+        response.json({
+          success: true,
+        });
+      } else {
+        response.json({
+          success: false,
+          errors: result.errors,
+        });
+      }
+    })
+  )
+  .put(
+    "/update/:actantId?",
+    asyncRouteHandler(async (request: Request, response: Response) => {
+      const actantId = request.params.actantId;
+      const actantData = request.body as IActant;
+
+      if (!actantId || !actantData || Object.keys(actantData).length === 0) {
+        throw new BadParams("actant id and data have to be set");
+      }
+
+      const allowedKeys = ["class", "labels", "data"];
+      for (const key of Object.keys(actantData)) {
+        if (allowedKeys.indexOf(key) === -1) {
+          throw new BadParams("actant data have unsupported keys");
+        }
+      }
+
+      const result = await updateActant(request.db, actantId, actantData);
+
+      if (result.replaced) {
         response.json({
           success: true,
         });
