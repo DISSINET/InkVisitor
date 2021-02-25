@@ -97,9 +97,26 @@ export async function findActantsByLabelOrClass(
 
 export async function createActant(
   db: Db,
+  data: IActant,
+  keepId?: boolean
+): Promise<WriteResult> {
+  const safeData: any = { ...data };
+  if (!keepId) {
+    delete safeData.id;
+  }
+  return rethink.table("actants").insert(safeData).run(db.connection);
+}
+
+export async function updateActant(
+  db: Db,
+  actantId: string,
   data: IActant
 ): Promise<WriteResult> {
   const safeData: any = { ...data };
   delete safeData.id;
-  return rethink.table("actants").insert(safeData).run(db.connection);
+  return rethink
+    .table("actants")
+    .get(actantId)
+    .update(safeData)
+    .run(db.connection);
 }
