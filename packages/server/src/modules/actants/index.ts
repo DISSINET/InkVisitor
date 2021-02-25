@@ -4,13 +4,18 @@ import { rethinkConfig } from "@service/RethinkDB";
 import { paramMissingError } from "@common/constants";
 import { Router, Response, Request, NextFunction } from "express";
 import { BAD_REQUEST, CREATED, OK, NOT_FOUND } from "http-status-codes";
-import { findActantById, findActantsByLabelOrClass } from "@service/shorthands";
+import {
+  findActantById,
+  findActantsByLabelOrClass,
+  createActant,
+} from "@service/shorthands";
 import {
   BadCredentialsError,
   BadParams,
   ActantDoesNotExits,
 } from "@common/errors";
 import { r } from "rethinkdb-ts";
+import { IActant } from "@shared/types";
 
 //-----------------------------------------------------------------------------
 // Repository functions
@@ -161,6 +166,34 @@ export default Router()
       );
 
       response.json(actants);
+    })
+  )
+  .post(
+    "/create",
+    asyncRouteHandler(async (request: Request, response: Response) => {
+      const actantData = request.body as IActant;
+
+      if (
+        !actantData ||
+        !actantData.class ||
+        !actantData.labels ||
+        !actantData.data
+      ) {
+        throw new BadParams("actant data have to be set");
+      }
+
+      const result = await createActant(request.db, actantData);
+
+      if (result.inserted === 1) {
+        response.json({
+          success: true,
+        });
+      } else {
+        response.json({
+          success: false,
+          errors: result.errors,
+        });
+      }
     })
   )
   // old

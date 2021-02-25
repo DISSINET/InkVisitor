@@ -94,3 +94,12 @@ export async function findActantsByLabelOrClass(
     .run(db.connection);
   return data;
 }
+
+export async function createActant(
+  db: Db,
+  data: IActant
+): Promise<WriteResult> {
+  const safeData: any = { ...data };
+  delete safeData.id;
+  return rethink.table("actants").insert(safeData).run(db.connection);
+}
