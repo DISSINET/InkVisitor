@@ -5,6 +5,7 @@ import {
   findActionById,
   findActionsByLabel,
   createAction,
+  updateAction,
 } from "@service/shorthands";
 import {
   BadCredentialsError,
@@ -73,6 +74,46 @@ export default Router()
       const result = await createAction(request.db, actionData);
 
       if (result.inserted === 1) {
+        response.json({
+          success: true,
+        });
+      } else {
+        response.json({
+          success: false,
+          errors: result.errors,
+        });
+      }
+    })
+  )
+  .put(
+    "/update/:actionId?",
+    asyncRouteHandler(async (request: Request, response: Response) => {
+      const actionId = request.params.actionId;
+      const actionData = request.body as IAction;
+
+      if (!actionId || !actionData || !Object.keys(actionData).length) {
+        throw new BadParams("action id and data have to be set");
+      }
+
+      const allowedKeys = [
+        "id",
+        "parent",
+        "note",
+        "labels",
+        "types",
+        "valencies",
+        "rulesActants",
+        "rulesProperties",
+      ];
+      for (const key of Object.keys(actionData)) {
+        if (allowedKeys.indexOf(key) === -1) {
+          throw new BadParams("actant data have unsupported keys");
+        }
+      }
+
+      const result = await updateAction(request.db, actionId, actionData);
+
+      if (result.replaced) {
         response.json({
           success: true,
         });
