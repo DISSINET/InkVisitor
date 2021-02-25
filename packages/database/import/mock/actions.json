@@ -1,62 +1,58 @@
 [
-    {
-        "id": "A1",
-        "parent": false,
-        "note": "",
-        "labels": [
-            {
-                "id": "al1",
-                "label": "said",
-                "language": "Lang1"
-            }
-        ],
-        "types": [],
-        "valencies": [],
-        "rulesActants": [],
-        "rulesProperties": []
-    },
-    {
-        "id": "A2",
-        "parent": false,
-        "note": "",
-        "labels": [
-            { "id": "al2", "label": "performed ritual", "language": "Lang1" }
-        ],
-        "types": [],
-        "valencies": [],
-        "rulesActants": [],
-        "rulesProperties": []
-    },
-    {
-        "id": "A3",
-        "parent": false,
-        "note": "",
-        "labels": [{ "id": "al3", "label": "brought", "language": "Lang1" }],
-        "types": [],
-        "valencies": [],
-        "rulesActants": [],
-        "rulesProperties": []
-    },
-    {
-        "id": "A4",
-        "parent": false,
-        "note": "",
-        "labels": [
-            { "id": "al4", "label": "burned down", "language": "Lang1" }
-        ],
-        "types": [],
-        "valencies": [],
-        "rulesActants": [],
-        "rulesProperties": []
-    },
-    {
-        "id": "A5",
-        "parent": false,
-        "note": "",
-        "labels": [{ "id": "al5", "label": "has", "language": "Lang1" }],
-        "types": [],
-        "valencies": [],
-        "rulesActants": [],
-        "rulesProperties": []
-    }
+  {
+    "id": "A1",
+    "parent": false,
+    "note": "",
+    "labels": [
+      {
+        "id": "al1",
+        "value": "said",
+        "lang": "Lang1"
+      }
+    ],
+    "types": [],
+    "valencies": [],
+    "rulesActants": [],
+    "rulesProperties": []
+  },
+  {
+    "id": "A2",
+    "parent": false,
+    "note": "",
+    "labels": [{ "id": "al2", "value": "performed ritual", "lang": "Lang1" }],
+    "types": [],
+    "valencies": [],
+    "rulesActants": [],
+    "rulesProperties": []
+  },
+  {
+    "id": "A3",
+    "parent": false,
+    "note": "",
+    "labels": [{ "id": "al3", "value": "brought", "lang": "Lang1" }],
+    "types": [],
+    "valencies": [],
+    "rulesActants": [],
+    "rulesProperties": []
+  },
+  {
+    "id": "A4",
+    "parent": false,
+    "note": "",
+    "labels": [{ "id": "al4", "value": "burned down", "lang": "Lang1" }],
+    "types": [],
+    "valencies": [],
+    "rulesActants": [],
+    "rulesProperties": []
+  },
+  {
+    "id": "A5",
+    "parent": false,
+    "note": "",
+    "labels": [{ "id": "al5", "value": "has", "lang": "Lang1" }],
+    "types": [],
+    "valencies": [],
+    "rulesActants": [],
+    "rulesProperties": []
+  }
 ]
