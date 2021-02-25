@@ -3,7 +3,7 @@ import helmet from "helmet";
 import { IError } from "@common/errors";
 import express, { Request, Response, NextFunction, Router } from "express";
 import cors from "cors";
-import { BAD_REQUEST } from "http-status-codes";
+import { BAD_REQUEST, NOT_FOUND } from "http-status-codes";
 import { createConnection, closeConnection } from "@service/RethinkDB";
 import logger from "@common/Logger";
 import { apiPath } from "./common/constants";
@@ -48,6 +48,13 @@ routerV1.use("/users", UsersRouter);
 routerV1.use("/actants", ActantsRouter);
 routerV1.use("/territory", TerritoryRouter);
 routerV1.use("/meta", MetaRouter);
+
+// unknown paths (after jwt check) should return 404
+server.all("*", function (req, res, next) {
+  res.status(NOT_FOUND).json({
+    error: "404",
+  });
+});
 
 // Errors
 server.use(
