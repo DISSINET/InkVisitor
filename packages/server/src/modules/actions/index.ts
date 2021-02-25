@@ -6,6 +6,7 @@ import {
   findActionsByLabel,
   createAction,
   updateAction,
+  deleteAction,
 } from "@service/shorthands";
 import {
   BadCredentialsError,
@@ -114,6 +115,29 @@ export default Router()
       const result = await updateAction(request.db, actionId, actionData);
 
       if (result.replaced) {
+        response.json({
+          success: true,
+        });
+      } else {
+        response.json({
+          success: false,
+          errors: result.errors,
+        });
+      }
+    })
+  )
+  .delete(
+    "/delete/:actionId?",
+    asyncRouteHandler(async (request: Request, response: Response) => {
+      const actionId = request.params.actionId;
+
+      if (!actionId) {
+        throw new BadParams("action id has to be set");
+      }
+
+      const result = await deleteAction(request.db, actionId);
+
+      if (result.deleted === 1) {
         response.json({
           success: true,
         });
