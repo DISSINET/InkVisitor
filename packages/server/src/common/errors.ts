@@ -93,6 +93,25 @@ class ActantDoesNotExits extends Error {
   }
 }
 
+class ActionDoesNotExits extends Error {
+  public static code = "action does not exist";
+
+  constructor(m: string) {
+    super(m);
+
+    // Set the prototype explicitly.
+    Object.setPrototypeOf(this, ActionDoesNotExits.prototype);
+  }
+
+  statusCode(): number {
+    return 400;
+  }
+
+  toString(): string {
+    return ActionDoesNotExits.code;
+  }
+}
+
 export interface IError extends Error {
   statusCode(): number;
 }
@@ -103,4 +122,5 @@ export {
   BadParams,
   UserDoesNotExits,
   ActantDoesNotExits,
+  ActionDoesNotExits,
 };

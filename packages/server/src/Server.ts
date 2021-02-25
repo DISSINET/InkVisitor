@@ -11,6 +11,7 @@ import ActantsRouter from "@modules/actants";
 import TerritoryRouter from "@modules/territory";
 import MetaRouter from "@modules/meta";
 import UsersRouter from "@modules/users";
+import ActionsRouter from "@modules/actions";
 const server = express();
 server.use(cors());
 
@@ -46,6 +47,7 @@ server.use(apiPath, routerV1);
 //routerV1.use('/statements', StatementRouter);.
 routerV1.use("/users", UsersRouter);
 routerV1.use("/actants", ActantsRouter);
+routerV1.use("/actions", ActionsRouter);
 routerV1.use("/territory", TerritoryRouter);
 routerV1.use("/meta", MetaRouter);
 
