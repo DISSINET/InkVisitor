@@ -154,3 +154,15 @@ export async function findActionsByLabel(
     .run(db.connection);
   return data;
 }
+
+export async function createAction(
+  db: Db,
+  data: IAction,
+  keepId?: boolean
+): Promise<WriteResult> {
+  const safeData: any = { ...data };
+  if (!keepId) {
+    delete safeData.id;
+  }
+  return rethink.table("actions").insert(safeData).run(db.connection);
+}
