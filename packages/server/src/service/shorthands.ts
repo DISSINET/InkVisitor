@@ -166,3 +166,17 @@ export async function createAction(
   }
   return rethink.table("actions").insert(safeData).run(db.connection);
 }
+
+export async function updateAction(
+  db: Db,
+  actionId: string,
+  data: IAction
+): Promise<WriteResult> {
+  const safeData: any = { ...data };
+  delete safeData.id;
+  return rethink
+    .table("actions")
+    .get(actionId)
+    .update(safeData)
+    .run(db.connection);
+}
