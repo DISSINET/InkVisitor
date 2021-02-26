@@ -6,6 +6,9 @@ import { ILabel } from "./label";
 import { IProp } from "./prop";
 import { IUser } from "./user";
 import { IResource } from "./resource";
+import { IResponseDetail } from "./response-detail";
+import { IResponseBookmarks } from "./response-bookmarks";
+import { IResponseAdministration } from "./response-administration";
 import { IResponseActant } from "./response-actant";
 import { IResponseAction } from "./response-action";
 import { IResponseStatement } from "./response-statement";
@@ -33,6 +36,9 @@ export type {
     IResource,
     IResponseActant,
     IResponseAction,
+    IResponseDetail,
+    IResponseBookmarks,
+    IResponseAdministration,
     IResponseStatement,
     IResponseTerritory,
     IResponseTree,

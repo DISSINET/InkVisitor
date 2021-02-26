@@ -81,44 +81,54 @@ curl --request GET \
 -   **DELETE** /:id =>
 -   **POST** /:id {IAction} =>
 
-#### /tree
+#### /tree (Tree container)
 
 -   **GET** /
     {}
     => IResponseTree
     _returns the structure of all territories_
 
-#### /territory
+-   **POST** /moveTerritory
+    {moveId: string; parentId: string; beforeId: string; afterId: string}
+    =>
+    _move territory to a new / same parent between beforeId and afterId_
+
+#### /territory (List container)
 
 -   **GET** /:id
     {}
     => IResponseTerritory
     _returns all statements and actants for selected territory_
 
--   **POST** /moveTerritory
-    {moveId: string; beforeId: string | false; afterId: string | false}
-    =>
-    _move territory within the parent territory - between beforeId and afterId_
-
 -   **POST** /moveStatement
-    {moveId: string; beforeId: string | false; afterId: string | false}
+    {moveId: string; beforeId: string; afterId: string}
     =>
     _move statement within the territory - between beforeId and afterId_
 
-<!-- #### /territories
+#### /statement (Editor container)
 
-_to be discussed!_
+-   **GET** /:id
+    {}
+    => IResponseStatement
+    _get everything of the statement_
 
--   **getOne: ResponseTerritoryI** returns territory by id, all territories exactly one level below and the path to the root territory, all statements with this territory and all its actants
--   **putOne**
--   **deleteOne**
--   **postOne**
+#### /administration (Administration container)
 
-#### /statements
+-   **GET** /:id
+    {}
+    => IResponseAdministration
+    _administration purposes_
 
-_to be discussed_
+#### /bookmarks (Bookmarks container)
 
--   **getOne: ResponseStatementI**
--   **putOne**
--   **deleteOne**
--   **postOne** -->
+-   **GET** /:id
+    {}
+    => IResponseBookmarks
+    _get all bookmarks of a user_
+
+#### /detail (Detail container)
+
+-   **GET** /:id
+    {}
+    => IResponseDetail
+    _get everything of the actant_

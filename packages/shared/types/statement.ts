@@ -1,4 +1,4 @@
-import { IActant } from "./";
+import { IActant, IProp } from "./";
 
 export interface IStatement extends IActant {
     class: "S";
@@ -20,14 +20,7 @@ export interface IStatement extends IActant {
         modality: string;
         text: string;
         note: string;
-        props: {
-            id: string;
-            origin: string;
-            type: string;
-            value: string;
-            elvl: string;
-            certainty: string;
-        }[];
+        props: IProp[];
         actants: {
             id: string;
             actant: string;
