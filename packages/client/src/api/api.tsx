@@ -368,8 +368,8 @@ class Api {
 
     async territoryMoveStatement(
         moveId: string,
-        beforeId: string | false,
-        afterId: string | false
+        beforeId: string,
+        afterId: string
     ): Promise<AxiosResponse> {
         try {
             const response = await this.connection.post(
