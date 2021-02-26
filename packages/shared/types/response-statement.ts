@@ -1,5 +1,5 @@
 /**
- * type of the /user endpoint response
+ * type of the GET /statement {id} and POST /statement {id[]} response
  */
 
 import { IAudit, IActant, IStatement } from ".";
@@ -7,5 +7,4 @@ import { IAudit, IActant, IStatement } from ".";
 export interface IResponseStatement extends IStatement {
     audits: IAudit[];
     usedIn: IStatement[];
-    actants: IActant;
 }

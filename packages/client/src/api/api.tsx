@@ -195,6 +195,7 @@ class Api {
 
     /**
      * Actants
+     * Suggester container
      */
     async actantsGet(actantId: string): Promise<AxiosResponse> {
         try {
@@ -319,6 +320,7 @@ class Api {
 
     /**
      * Tree
+     * Tree container
      */
     async treeGet(): Promise<AxiosResponse> {
         try {
@@ -329,33 +331,34 @@ class Api {
         }
     }
 
-    /**
-     * Territory
-     */
-    async territoryGet(territoryId: string): Promise<AxiosResponse> {
+    // this may include parent change
+    async treeMoveTerritory(
+        moveId: string,
+        parentId: string,
+        beforeId: string,
+        afterId: string
+    ): Promise<AxiosResponse> {
         try {
-            const response = await this.connection.post(
-                `/territory/${territoryId}`
-            );
+            const response = await this.connection.post(`/tree/moveTerritory`, {
+                moveId,
+                parentId,
+                beforeId,
+                afterId,
+            });
             return response;
         } catch (err) {
             throw { ...err.response.data };
         }
     }
 
-    async territoryMoveTerritory(
-        moveId: string,
-        beforeId: string | false,
-        afterId: string | false
-    ): Promise<AxiosResponse> {
+    /**
+     * Territory
+     * List container
+     */
+    async territoryGet(territoryId: string): Promise<AxiosResponse> {
         try {
-            const response = await this.connection.post(
-                `/territory/moveTerritory`,
-                {
-                    moveId,
-                    beforeId,
-                    afterId,
-                }
+            const response = await this.connection.get(
+                `/territory/${territoryId}`
             );
             return response;
         } catch (err) {
@@ -376,6 +379,62 @@ class Api {
                     beforeId,
                     afterId,
                 }
+            );
+            return response;
+        } catch (err) {
+            throw { ...err.response.data };
+        }
+    }
+
+    /**
+     * Statement
+     * Editor container
+     */
+    async statementGet(statementId: string): Promise<AxiosResponse> {
+        try {
+            const response = await this.connection.get(
+                `/statement/${statementId}`
+            );
+            return response;
+        } catch (err) {
+            throw { ...err.response.data };
+        }
+    }
+
+    /**
+     * Detail
+     * Detail container
+     */
+    async detailGet(actantId: string): Promise<AxiosResponse> {
+        try {
+            const response = await this.connection.get(`/detail/${actantId}`);
+            return response;
+        } catch (err) {
+            throw { ...err.response.data };
+        }
+    }
+
+    /**
+     * Administration
+     * Administration container
+     */
+    async administrationGet(): Promise<AxiosResponse> {
+        try {
+            const response = await this.connection.get(`/administration/`);
+            return response;
+        } catch (err) {
+            throw { ...err.response.data };
+        }
+    }
+
+    /**
+     * Administration
+     * Administration container
+     */
+    async bookmarksGet(userId: string): Promise<AxiosResponse> {
+        try {
+            const response = await this.connection.get(
+                `/bookmarksGet/${userId}`
             );
             return response;
         } catch (err) {

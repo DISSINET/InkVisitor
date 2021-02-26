@@ -10,6 +10,12 @@ export interface IUser {
     role: typeof userRoleValues[number];
     bookmarks: IBookmarkFolder[];
     storedTerritories: IStoredTerritory[];
+    rights: IUserRight[];
+}
+
+export interface IUserRight {
+    territory: string;
+    mode: string; // probably write | read | admin...
 }
 
 export interface IUserOptions {
