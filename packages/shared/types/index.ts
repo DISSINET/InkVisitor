@@ -3,6 +3,7 @@ import { IAction } from "./action";
 import { IActant } from "./actant";
 import { IEntity } from "./entity";
 import { ILabel } from "./label";
+import { IProp } from "./prop";
 import { IUser } from "./user";
 import { IResource } from "./resource";
 import { IResponseActant } from "./response-actant";
@@ -27,6 +28,7 @@ export type {
     IOption,
     IStatement,
     ITerritory,
+    IProp,
     IUser,
     IResource,
     IResponseActant,
