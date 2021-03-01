@@ -61,5 +61,6 @@ export const StyledTextArea = styled.textarea<IValueStyle>`
   line-height: 1.2;
   :focus {
     outline: 0;
+    border-color: ${({ theme }) => theme.colors["success"]};
   }
 `;
