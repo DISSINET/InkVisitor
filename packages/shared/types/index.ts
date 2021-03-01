@@ -18,29 +18,31 @@ import { IResponseUser } from "./response-user";
 import { IStatement } from "./statement";
 import { ITerritory } from "./territory";
 import { IOption } from "./option";
+import { IResponseGeneric } from "./response-generic";
 
 type IDictionary = IOption[];
 
 export type {
-    IAudit,
-    IAction,
-    IActant,
-    IEntity,
-    IDictionary,
-    ILabel,
-    IOption,
-    IStatement,
-    ITerritory,
-    IProp,
-    IUser,
-    IResource,
-    IResponseActant,
-    IResponseAction,
-    IResponseDetail,
-    IResponseBookmarks,
-    IResponseAdministration,
-    IResponseStatement,
-    IResponseTerritory,
-    IResponseTree,
-    IResponseUser,
+  IAudit,
+  IAction,
+  IActant,
+  IEntity,
+  IDictionary,
+  ILabel,
+  IOption,
+  IStatement,
+  ITerritory,
+  IProp,
+  IUser,
+  IResource,
+  IResponseActant,
+  IResponseAction,
+  IResponseDetail,
+  IResponseBookmarks,
+  IResponseAdministration,
+  IResponseStatement,
+  IResponseTerritory,
+  IResponseTree,
+  IResponseUser,
+  IResponseGeneric,
 };
