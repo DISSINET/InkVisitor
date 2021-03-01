@@ -9,7 +9,7 @@ export default {
 };
 
 export const DefaultHeader = () => {
-  return <Header />;
+  return <Header color={"primary"} />;
 };
 
 export const LeftButtonContentHeader = () => {
@@ -54,6 +54,7 @@ export const VariousSizesHeader = () => {
 
       <Header
         height={50}
+        color={"info"}
         left={<div className="text-xl">header with 50pxs</div>}
         right={<div className="text-sm">left content</div>}
       />
@@ -61,20 +62,23 @@ export const VariousSizesHeader = () => {
 
       <Header
         height={100}
+        color={"warning"}
         left={<div className="text-xl">header with 100pxs</div>}
         right={<div className="text-sm">left content</div>}
       />
       <br />
 
       <Header
-        height={150}
-        left={<div className="text-xl">header with 150pxs</div>}
+        height={250}
+        color={"danger"}
+        left={<div className="text-xl">header with 250pxs</div>}
         right={<div className="text-sm">left content</div>}
       />
       <br />
 
       <Header
         height={50}
+        color={"success"}
         left={
           <div className="text-xl">
             Very long text that would probably wrap and the user does not see
