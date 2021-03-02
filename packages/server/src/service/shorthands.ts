@@ -1,4 +1,4 @@
-import { Connection, r as rethink, WriteResult } from "rethinkdb-ts";
+import { r as rethink, WriteResult } from "rethinkdb-ts";
 import { IUser } from "../../../shared/types/user";
 import { IActant } from "../../../shared/types/actant";
 
@@ -74,6 +74,17 @@ export async function findActantById(db: Db, id: string): Promise<IActant> {
     .limit(1)
     .run(db.connection);
   return data.length == 0 ? null : data[0];
+}
+
+export async function findActantsById(
+  db: Db,
+  ids: string[]
+): Promise<IActant[]> {
+  const data = await rethink
+    .table("actants")
+    .getAll(...ids)
+    .run(db.connection);
+  return data;
 }
 
 export async function findActantsByLabelOrClass(
