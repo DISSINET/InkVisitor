@@ -2,41 +2,28 @@
  * type of the /users endpoint response
  */
 
-import { IResponseActant } from "./";
+import { IResponseActant, IBookmarkFolder, IResponseBookmarkFolder } from "./";
 import { userRoleDict } from "./../dictionaries";
 
 const userRoleValues = userRoleDict.map((i) => i.value);
 
 export interface IResponseUser {
-    id: string;
-    email: string;
-    name: string;
-    role: typeof userRoleValues[number];
-    bookmarks: BookmarkFolderI[];
-    storedTerritories: StoredTerritoryI[];
+  id: string;
+  email: string;
+  name: string;
+  role: typeof userRoleValues[number];
+  bookmarks: IResponseBookmarkFolder[];
+  storedTerritories: IResponseStoredTerritory[];
 }
 
 export interface UserOptions {
-    defaultTerritory: string;
-    defaultLanguage: string;
-    searchLanguages: string[];
+  defaultTerritory: string;
+  defaultLanguage: string;
+  searchLanguages: string[];
 }
 
-interface StoredTerritoryI {
-    id: string;
-    order: number;
-    territory: IResponseActant;
-}
-
-interface BookmarkFolderI {
-    id: string;
-    name: string;
-    order: number;
-    actants: BookmarkActantI[];
-}
-
-interface BookmarkActantI {
-    id: string;
-    order: number;
-    actant: IResponseActant;
+export interface IResponseStoredTerritory {
+  id: string;
+  order: number;
+  territory: IResponseActant;
 }
