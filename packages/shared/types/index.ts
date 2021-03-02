@@ -4,17 +4,20 @@ import { IActant } from "./actant";
 import { IEntity } from "./entity";
 import { ILabel } from "./label";
 import { IProp } from "./prop";
-import { IUser } from "./user";
+import { IUser, IBookmarkFolder, IStoredTerritory } from "./user";
 import { IResource } from "./resource";
 import { IResponseDetail } from "./response-detail";
-import { IResponseBookmarks } from "./response-bookmarks";
+import {
+  IResponseBookmarks,
+  IResponseBookmarkFolder,
+} from "./response-bookmarks";
 import { IResponseAdministration } from "./response-administration";
 import { IResponseActant } from "./response-actant";
 import { IResponseAction } from "./response-action";
 import { IResponseStatement } from "./response-statement";
 import { IResponseTree } from "./response-tree";
 import { IResponseTerritory } from "./response-territory";
-import { IResponseUser } from "./response-user";
+import { IResponseUser, IResponseStoredTerritory } from "./response-user";
 import { IStatement } from "./statement";
 import { ITerritory } from "./territory";
 import { IOption } from "./option";
@@ -34,15 +37,19 @@ export type {
   ITerritory,
   IProp,
   IUser,
+  IBookmarkFolder,
+  IStoredTerritory,
   IResource,
   IResponseActant,
   IResponseAction,
   IResponseDetail,
   IResponseBookmarks,
+  IResponseBookmarkFolder,
   IResponseAdministration,
   IResponseStatement,
   IResponseTerritory,
   IResponseTree,
   IResponseUser,
+  IResponseStoredTerritory,
   IResponseGeneric,
 };

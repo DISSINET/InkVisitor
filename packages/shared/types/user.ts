@@ -24,13 +24,13 @@ export interface IUserOptions {
   searchLanguages: string[];
 }
 
-interface IStoredTerritory {
+export interface IStoredTerritory {
   id: string;
   order: number;
   territory: string;
 }
 
-interface IBookmarkFolder {
+export interface IBookmarkFolder {
   id: string;
   name: string;
   actantIds: string[]; // list of ids are stored in the db, for response type see IResponseBookmarks
