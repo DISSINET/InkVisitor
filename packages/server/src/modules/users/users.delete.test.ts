@@ -41,6 +41,7 @@ describe("Users delete", function () {
         bookmarks: [],
         role: "1",
         storedTerritories: [],
+        rights: [],
       });
 
       request(app)

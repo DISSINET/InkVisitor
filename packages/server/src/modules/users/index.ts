@@ -8,6 +8,7 @@ import {
   createUser,
   updateUser,
   deleteUser,
+  findActantsById,
 } from "@service/shorthands";
 import {
   BadCredentialsError,
@@ -16,6 +17,8 @@ import {
 } from "@common/errors";
 import { checkPassword, generateAccessToken, hashPassword } from "@common/auth";
 import { asyncRouteHandler } from "..";
+import { IResponseActant, IResponseBookmarks } from "@shared/types";
+import actants from "@modules/actants";
 
 export default Router()
   .post(
@@ -167,5 +170,41 @@ export default Router()
           errors: result.errors,
         });
       }
+    })
+  )
+  .get(
+    "/bookmarksGet/:userId?",
+    asyncRouteHandler(async (request: Request, response: Response) => {
+      const userId = request.params.userId;
+
+      if (!userId) {
+        throw new BadParams("user id has to be set");
+      }
+
+      const user = await findUserById(request.db, userId);
+      if (!user) {
+        throw new UserDoesNotExits(`user with id ${userId} does not exist`);
+      }
+
+      const out: IResponseBookmarks = {
+        bookmarks: [],
+      };
+
+      if (user.bookmarks) {
+        for (const bookmark of user.bookmarks) {
+          out.bookmarks.push({
+            id: bookmark.id,
+            name: bookmark.name,
+            actants: [],
+          });
+          if (bookmark.actantIds && bookmark.actantIds.length) {
+            out.bookmarks[out.bookmarks.length - 1].actants = (
+              await findActantsById(request.db, bookmark.actantIds)
+            ).map((act) => ({ ...act, usedCount: bookmark.actantIds.length }));
+          }
+        }
+      }
+
+      response.json(out);
     })
   );

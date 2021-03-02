@@ -5,18 +5,11 @@
 import { IResponseActant } from ".";
 
 export interface IResponseBookmarks {
-    bookmarks: IBookmarkFolder[];
+  bookmarks: IResponseBookmarkFolder[];
 }
 
-interface IBookmarkFolder {
-    id: string;
-    name: string;
-    order: number;
-    actants: IBookmarkActant[];
-}
-
-interface IBookmarkActant {
-    id: string;
-    order: number;
-    actant: string;
+export interface IResponseBookmarkFolder {
+  id: string;
+  name: string;
+  actants: IResponseActant[];
 }
