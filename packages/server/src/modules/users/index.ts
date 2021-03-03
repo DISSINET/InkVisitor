@@ -10,6 +10,7 @@ import {
   deleteUser,
   findActantsById,
   findActantById,
+  findAllUsers,
   getActantUsage,
 } from "@service/shorthands";
 import {
@@ -24,6 +25,7 @@ import {
   IResponseBookmarks,
   IResponseUser,
   IResponseStoredTerritory,
+  IResponseAdministration,
 } from "@shared/types";
 
 export default Router()
@@ -220,8 +222,60 @@ export default Router()
       response.json(out);
     })
   )
+  .get(
+    "/administration",
+    asyncRouteHandler(async (request: Request, response: Response) => {
+      const out: IResponseAdministration = {
+        users: [],
+      };
+
+      for (const user of await findAllUsers(request.db)) {
+        const userResponse: IResponseUser = {
+          id: user.id,
+          email: user.email,
+          name: user.name,
+          role: user.role,
+          bookmarks: [],
+          storedTerritories: [],
+        };
+
+        if (user.bookmarks) {
+          for (const bookmark of user.bookmarks) {
+            const bookmarkResponse: IResponseBookmarkFolder = {
+              name: bookmark.name,
+              actants: [],
+            };
+            if (bookmark.actantIds && bookmark.actantIds.length) {
+              for (const actant of await findActantsById(
+                request.db,
+                bookmark.actantIds
+              )) {
+                bookmarkResponse.actants.push({
+                  ...actant,
+                  usedCount: await getActantUsage(request.db, actant.id),
+                });
+              }
+            }
+            userResponse.bookmarks.push(bookmarkResponse);
           }
         }
+
+        if (user.storedTerritories) {
+          for (const territory of user.storedTerritories) {
+            const territoryResponse: IResponseStoredTerritory = {
+              territory: {
+                ...(await findActantById(request.db, territory.territoryId)),
+                usedCount: await getActantUsage(
+                  request.db,
+                  territory.territoryId
+                ),
+              },
+            };
+            userResponse.storedTerritories.push(territoryResponse);
+          }
+        }
+
+        out.users.push(userResponse);
       }
 
       response.json(out);
