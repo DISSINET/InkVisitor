@@ -3,7 +3,7 @@ import { IUser } from "../../../shared/types/user";
 import { IActant } from "../../../shared/types/actant";
 
 import { Db } from "./RethinkDB";
-import { IAction, ILabel } from "@shared/types";
+import { IAction, ILabel, IStatement } from "@shared/types";
 
 // USER
 export async function findAllUsers(db: Db): Promise<IUser[]> {
@@ -68,10 +68,15 @@ export async function deleteUser(db: Db, userId: string): Promise<WriteResult> {
 
 // ACTANT
 
-export async function findActantById(db: Db, id: string): Promise<IActant> {
+export async function findActantById<T = IAction | IStatement>(
+  db: Db,
+  id: string,
+  additionalFilter: object = {}
+): Promise<T> {
   const data = await rethink
     .table("actants")
     .filter({
+      ...additionalFilter,
       id,
     })
     .limit(1)
@@ -124,9 +129,9 @@ export async function findActantsByLabelOrClass(
   return data;
 }
 
-export async function createActant(
+export async function createActant<T = IActant | IStatement>(
   db: Db,
-  data: IActant,
+  data: T,
   keepId?: boolean
 ): Promise<WriteResult> {
   const safeData: any = { ...data };

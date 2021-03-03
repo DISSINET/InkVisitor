@@ -26,6 +26,7 @@ import {
   IResponseUser,
   IResponseStoredTerritory,
   IResponseAdministration,
+  IActant,
 } from "@shared/types";
 
 export default Router()
@@ -264,7 +265,10 @@ export default Router()
           for (const territory of user.storedTerritories) {
             const territoryResponse: IResponseStoredTerritory = {
               territory: {
-                ...(await findActantById(request.db, territory.territoryId)),
+                ...(await findActantById<IActant>(
+                  request.db,
+                  territory.territoryId
+                )),
                 usedCount: await getActantUsage(
                   request.db,
                   territory.territoryId

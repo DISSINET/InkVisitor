@@ -11,6 +11,7 @@ import {
   findActantById,
 } from "../../service/shorthands";
 import { supertestConfig } from "..";
+import { IActant } from "@shared/types";
 
 const should = chai.should();
 
@@ -57,7 +58,7 @@ describe("Actants delete", function () {
         .expect("Content-Type", /json/)
         .expect({ success: true })
         .expect(200, async () => {
-          const deletedActant = await findActantById(db, testId);
+          const deletedActant = await findActantById<IActant>(db, testId);
           should.not.exist(deletedActant);
           done();
         });
