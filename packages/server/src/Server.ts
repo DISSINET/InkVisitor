@@ -12,6 +12,8 @@ import TerritoryRouter from "@modules/territory";
 import MetaRouter from "@modules/meta";
 import UsersRouter from "@modules/users";
 import ActionsRouter from "@modules/actions";
+import StatementsRouter from "@modules/statements";
+
 const server = express();
 server.use(cors());
 
@@ -50,6 +52,7 @@ routerV1.use("/actants", ActantsRouter);
 routerV1.use("/actions", ActionsRouter);
 routerV1.use("/territory", TerritoryRouter);
 routerV1.use("/meta", MetaRouter);
+routerV1.use("/statements", StatementsRouter);
 
 // unknown paths (after jwt check) should return 404
 server.all("*", function (req, res, next) {

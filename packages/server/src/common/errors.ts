@@ -112,6 +112,25 @@ class ActionDoesNotExits extends Error {
   }
 }
 
+class StatementDoesNotExits extends Error {
+  public static code = "statement does not exist";
+
+  constructor(m: string) {
+    super(m);
+
+    // Set the prototype explicitly.
+    Object.setPrototypeOf(this, StatementDoesNotExits.prototype);
+  }
+
+  statusCode(): number {
+    return 400;
+  }
+
+  toString(): string {
+    return StatementDoesNotExits.code;
+  }
+}
+
 export interface IError extends Error {
   statusCode(): number;
 }
@@ -123,4 +142,5 @@ export {
   UserDoesNotExits,
   ActantDoesNotExits,
   ActionDoesNotExits,
+  StatementDoesNotExits,
 };
