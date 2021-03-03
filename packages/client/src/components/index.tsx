@@ -9,6 +9,7 @@ import { Tag } from "components/Tag/Tag";
 import { Suggester } from "components/Suggester/Suggester";
 import { DropDown } from "components/DropDown/DropDown";
 import { Toast } from "components/Toast/Toast";
+import { Toggle } from "components/Toggle/Toggle";
 import { Submit } from "components/Submit/Submit";
 import {
   Modal,
@@ -30,6 +31,7 @@ export {
   Suggester,
   DropDown,
   Toast,
+  Toggle,
   Modal,
   ModalCard,
   ModalHeader,

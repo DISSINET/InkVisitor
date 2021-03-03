@@ -19,6 +19,16 @@ export const DefaultButtonGroup = () => {
     </ButtonGroup>
   );
 };
+export const ButtonGroupNoMargin = () => {
+  return (
+    <ButtonGroup noMargin>
+      <Button label="button 1" color="primary" />
+      <Button label="button 2" color="warning" />
+      <Button label="button 3" color="danger" />
+      <Button label="button 4" color="info" />
+    </ButtonGroup>
+  );
+};
 
 export const IconButtonGroup = () => {
   return (
