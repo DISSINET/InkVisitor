@@ -4,7 +4,7 @@ import { space1, space2 } from "Theme/constants";
 interface IButtonStyle {
   hasIcon?: boolean;
   hasMarginRight?: boolean;
-  inverted?: boolean;
+  inverted: boolean;
   color: string;
 }
 export const StyledButton = styled.button<IButtonStyle>`

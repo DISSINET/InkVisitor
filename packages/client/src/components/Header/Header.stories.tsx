@@ -32,6 +32,7 @@ export const RightSimpleContentHeader = () => {
 export const RightAndLeftSimpleContentHeader = () => {
   return (
     <Header
+      color={"info"}
       left={<div className="text-5xl">header</div>}
       right={<Button label="button on the right side" inverted />}
     />

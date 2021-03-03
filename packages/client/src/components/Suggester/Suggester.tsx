@@ -22,6 +22,7 @@ export interface SuggestionI {
 }
 
 interface SuggesterProps {
+  marginTop?: boolean;
   suggestions: SuggestionI[];
   placeholder?: string; // text to display when typed === ""
   typed: string; // input value
@@ -41,6 +42,7 @@ interface SuggesterProps {
 const MAXSUGGESTIONDISPLAYED = 10;
 
 export const Suggester: React.FC<SuggesterProps> = ({
+  marginTop,
   suggestions = [],
   placeholder,
   typed,
@@ -68,7 +70,7 @@ export const Suggester: React.FC<SuggesterProps> = ({
   });
 
   return (
-    <StyledSuggester>
+    <StyledSuggester marginTop={marginTop}>
       <InputWrapper ref={dropRef} isOver={isOver}>
         <Input
           type="select"

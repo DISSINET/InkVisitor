@@ -67,6 +67,7 @@ export default {
     16: '4rem',
     20: '5rem',
     22: '5.5rem',
+    23: '5.75rem',
     24: '6rem',
     32: '8rem',
     40: '10rem',

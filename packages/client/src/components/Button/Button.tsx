@@ -27,7 +27,7 @@ export const Button: React.FC<ButtonProps> = ({
       onClick={onClick}
       hasIcon={icon && true}
       hasMarginRight={marginRight}
-      color={color ? color : "primary"}
+      color={color}
       inverted={inverted}
     >
       {icon}

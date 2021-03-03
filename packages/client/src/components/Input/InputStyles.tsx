@@ -5,7 +5,6 @@ interface IValueStyle {
   inverted?: boolean;
 }
 export const Wrapper = styled.div`
-  margin-top: ${space2};
   display: flex;
 `;
 export const Label = styled.span`

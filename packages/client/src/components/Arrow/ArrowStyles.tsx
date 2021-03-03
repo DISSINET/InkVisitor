@@ -1,7 +1,8 @@
 import styled from "styled-components";
+import { Colors } from "types";
 
 interface StyledArrow {
-  color: string;
+  color: typeof Colors[number];
   rotation: string;
   sizeValidated: number;
   marginValidated: number;
