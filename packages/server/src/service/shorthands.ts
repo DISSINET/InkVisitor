@@ -76,6 +76,21 @@ export async function findActantById(db: Db, id: string): Promise<IActant> {
   return data.length == 0 ? null : data[0];
 }
 
+export async function getActantUsage(db: Db, id: string): Promise<number> {
+  return await rethink
+    .table("actants")
+    .filter({
+      class: "S",
+    })
+    .filter(function (user: any) {
+      return user("data")("actants").contains((labelObj: any) =>
+        labelObj("actant").eq(id)
+      );
+    })
+    .count()
+    .run(db.connection);
+}
+
 export async function findActantsById(
   db: Db,
   ids: string[]

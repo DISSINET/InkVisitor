@@ -9,6 +9,8 @@ import {
   updateUser,
   deleteUser,
   findActantsById,
+  findActantById,
+  getActantUsage,
 } from "@service/shorthands";
 import {
   BadCredentialsError,
@@ -17,8 +19,12 @@ import {
 } from "@common/errors";
 import { checkPassword, generateAccessToken, hashPassword } from "@common/auth";
 import { asyncRouteHandler } from "..";
-import { IResponseActant, IResponseBookmarks } from "@shared/types";
-import actants from "@modules/actants";
+import {
+  IResponseBookmarkFolder,
+  IResponseBookmarks,
+  IResponseUser,
+  IResponseStoredTerritory,
+} from "@shared/types";
 
 export default Router()
   .post(
@@ -192,15 +198,28 @@ export default Router()
 
       if (user.bookmarks) {
         for (const bookmark of user.bookmarks) {
-          out.bookmarks.push({
-            id: bookmark.id,
+          const bookmarkResponse: IResponseBookmarkFolder = {
             name: bookmark.name,
             actants: [],
-          });
+          };
           if (bookmark.actantIds && bookmark.actantIds.length) {
-            out.bookmarks[out.bookmarks.length - 1].actants = (
-              await findActantsById(request.db, bookmark.actantIds)
-            ).map((act) => ({ ...act, usedCount: bookmark.actantIds.length }));
+            for (const actant of await findActantsById(
+              request.db,
+              bookmark.actantIds
+            )) {
+              bookmarkResponse.actants.push({
+                ...actant,
+                usedCount: await getActantUsage(request.db, actant.id),
+              });
+            }
+          }
+          out.bookmarks.push(bookmarkResponse);
+        }
+      }
+
+      response.json(out);
+    })
+  )
           }
         }
       }

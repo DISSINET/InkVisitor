@@ -9,7 +9,6 @@ export interface IResponseBookmarks {
 }
 
 export interface IResponseBookmarkFolder {
-  id: string;
   name: string;
   actants: IResponseActant[];
 }
