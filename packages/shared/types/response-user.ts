@@ -23,7 +23,5 @@ export interface UserOptions {
 }
 
 export interface IResponseStoredTerritory {
-  id: string;
-  order: number;
   territory: IResponseActant;
 }

@@ -25,13 +25,11 @@ export interface IUserOptions {
 }
 
 export interface IStoredTerritory {
-  id: string;
-  order: number;
-  territory: string;
+  territoryId: string; // reference to actants table, for response type see IResponseStoredTerritory
+  // more field could be added here
 }
 
 export interface IBookmarkFolder {
-  id: string;
   name: string;
   actantIds: string[]; // list of ids are stored in the db, for response type see IResponseBookmarks
 }
