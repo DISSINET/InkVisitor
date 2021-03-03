@@ -10,6 +10,7 @@ import {
   createActant,
   updateActant,
   deleteActant,
+  getActantUsage,
 } from "@service/shorthands";
 import {
   BadCredentialsError,
@@ -17,7 +18,7 @@ import {
   ActantDoesNotExits,
 } from "@common/errors";
 import { r } from "rethinkdb-ts";
-import { IActant } from "@shared/types";
+import { IActant, IResponseDetail } from "@shared/types";
 
 //-----------------------------------------------------------------------------
 // Repository functions
@@ -250,6 +251,29 @@ export default Router()
           errors: result.errors,
         });
       }
+    })
+  )
+  .get(
+    "/detail/:actantId?",
+    asyncRouteHandler(async (request: Request, response: Response) => {
+      const actantId = request.params.actantId;
+
+      if (!actantId) {
+        throw new BadParams("actant id has to be set");
+      }
+
+      const actant = await findActantById(request.db, actantId);
+      if (!actant) {
+        throw new ActantDoesNotExits(`actant ${actantId} was not found`);
+      }
+
+      const usage = await getActantUsage(request.db, actantId);
+
+      const out: IResponseDetail = {
+        ...actant,
+        usedCount: usage,
+      };
+      response.json(out);
     })
   )
   // old

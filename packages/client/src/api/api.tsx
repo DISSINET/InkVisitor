@@ -300,6 +300,19 @@ class Api {
   }
 
   /**
+   * Detail
+   * Detail container
+   */
+  async detailGet(actantId: string): Promise<AxiosResponse<IResponseDetail>> {
+    try {
+      const response = await this.connection.get(`/actants/detail/${actantId}`);
+      return response;
+    } catch (err) {
+      throw { ...err.response.data };
+    }
+  }
+
+  /**
    * Actions
    */
   async actionsGet(actionId: string): Promise<AxiosResponse<IResponseAction>> {
@@ -438,19 +451,6 @@ class Api {
   ): Promise<AxiosResponse<IResponseStatement>> {
     try {
       const response = await this.connection.get(`/statement/${statementId}`);
-      return response;
-    } catch (err) {
-      throw { ...err.response.data };
-    }
-  }
-
-  /**
-   * Detail
-   * Detail container
-   */
-  async detailGet(actantId: string): Promise<AxiosResponse<IResponseDetail>> {
-    try {
-      const response = await this.connection.get(`/detail/${actantId}`);
       return response;
     } catch (err) {
       throw { ...err.response.data };
