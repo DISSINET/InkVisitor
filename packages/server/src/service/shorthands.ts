@@ -6,6 +6,9 @@ import { Db } from "./RethinkDB";
 import { IAction, ILabel } from "@shared/types";
 
 // USER
+export async function findAllUsers(db: Db): Promise<IUser[]> {
+  return await rethink.table("users").run(db.connection);
+}
 
 export async function findUserByName(db: Db, name: string): Promise<IUser> {
   const data = await rethink
