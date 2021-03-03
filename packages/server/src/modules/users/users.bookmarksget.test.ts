@@ -4,11 +4,12 @@ import "mocha";
 import request from "supertest";
 import { apiPath } from "../../common/constants";
 import app from "../../Server";
-import { createUser } from "../../service/shorthands";
+import { createUser, getActantUsage } from "../../service/shorthands";
 import { Db } from "@service/RethinkDB";
 import { IResponseBookmarks } from "@shared/types";
 
 const should = chai.should();
+const expect = chai.expect;
 
 describe("Users bookmarksGet", function () {
   describe("Empty param", () => {
@@ -60,6 +61,7 @@ describe("Users bookmarksGet", function () {
       const db = new Db();
       await db.initDb();
       const testUserId = Math.random().toString();
+      const linkedBookmarkActant = "P1";
       await createUser(db, {
         id: testUserId,
         name: "test",
@@ -67,9 +69,8 @@ describe("Users bookmarksGet", function () {
         password: "test",
         bookmarks: [
           {
-            id: "1",
             name: "test",
-            actantIds: ["T0"], // this id should exist in actants
+            actantIds: [linkedBookmarkActant], // this id should exist in actants
           },
         ],
         role: "1",
@@ -77,6 +78,7 @@ describe("Users bookmarksGet", function () {
         rights: [],
       });
 
+      const bookmarkCountUsage = await getActantUsage(db, linkedBookmarkActant);
       request(app)
         .get(`${apiPath}/users/bookmarksGet/${testUserId}`)
         .expect((res) => {
@@ -85,6 +87,10 @@ describe("Users bookmarksGet", function () {
           res.body.should.have.keys("bookmarks");
           res.body.bookmarks.should.be.a("array");
           res.body.bookmarks.should.have.lengthOf(1);
+          res.body.bookmarks[0].actants.should.have.lengthOf(1);
+          expect(res.body.bookmarks[0].actants[0].usedCount).eq(
+            bookmarkCountUsage
+          );
         })
         .expect(200, done);
     });
