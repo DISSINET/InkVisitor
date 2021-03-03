@@ -450,7 +450,9 @@ class Api {
     statementId: string
   ): Promise<AxiosResponse<IResponseStatement>> {
     try {
-      const response = await this.connection.get(`/statement/${statementId}`);
+      const response = await this.connection.get(
+        `/statements/get/${statementId}`
+      );
       return response;
     } catch (err) {
       throw { ...err.response.data };
