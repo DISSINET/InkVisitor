@@ -262,7 +262,7 @@ export default Router()
         throw new BadParams("actant id has to be set");
       }
 
-      const actant = await findActantById(request.db, actantId);
+      const actant = await findActantById<IActant>(request.db, actantId);
       if (!actant) {
         throw new ActantDoesNotExits(`actant ${actantId} was not found`);
       }

@@ -7,6 +7,7 @@ import app from "../../Server";
 import { supertestConfig } from "..";
 import { Db } from "@service/RethinkDB";
 import { createActant, findActantById } from "@service/shorthands";
+import { IActant } from "@shared/types";
 
 const should = chai.should();
 
@@ -51,7 +52,7 @@ describe("Actants update", function () {
         .expect("Content-Type", /json/)
         .expect({ success: true })
         .expect(200, async () => {
-          const changedEntry = await findActantById(db, testId);
+          const changedEntry = await findActantById<IActant>(db, testId);
           changedEntry.class.should.eq(changeClassInto);
           done();
         });
