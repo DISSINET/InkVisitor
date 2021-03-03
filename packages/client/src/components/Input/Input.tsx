@@ -22,13 +22,13 @@ interface InputProps {
 }
 
 export const Input: React.FC<InputProps> = ({
-  label,
-  inverted,
-  value,
-  type,
-  options,
-  rows,
-  cols,
+  label = "",
+  inverted = false,
+  value = "",
+  type = "text",
+  options = [],
+  rows = 5,
+  cols = 50,
   onChangeFn,
   placeholder,
 }) => {
@@ -78,14 +78,4 @@ export const Input: React.FC<InputProps> = ({
       )}
     </Wrapper>
   );
-};
-
-Input.defaultProps = {
-  inverted: false,
-  label: "",
-  value: "",
-  type: "text",
-  options: [],
-  rows: 5,
-  cols: 50,
 };

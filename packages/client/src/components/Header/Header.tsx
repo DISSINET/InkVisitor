@@ -18,7 +18,7 @@ export const Header: React.FC<HeaderProps> = ({
   left = <div />,
   right = <div />,
   height = "auto",
-  color = "success",
+  color = "primary",
 }) => {
   return (
     <StyledHeader

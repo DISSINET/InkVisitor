@@ -13,11 +13,13 @@ interface ButtonProps {
 }
 
 export const Button: React.FC<ButtonProps> = ({
-  label,
+  label = "",
   icon,
-  inverted,
-  color,
-  onClick,
+  inverted = false,
+  color = "primary",
+  onClick = () => {
+    // do nothing
+  },
   marginRight,
 }) => {
   return (
@@ -32,13 +34,4 @@ export const Button: React.FC<ButtonProps> = ({
       {label}
     </StyledButton>
   );
-};
-
-Button.defaultProps = {
-  onClick: () => {
-    // do nothing
-  },
-  color: "primary",
-  inverted: false,
-  label: "",
 };

@@ -41,7 +41,7 @@ interface SuggesterProps {
 const MAXSUGGESTIONDISPLAYED = 10;
 
 export const Suggester: React.FC<SuggesterProps> = ({
-  suggestions,
+  suggestions = [],
   placeholder,
   typed,
   category,
@@ -123,8 +123,4 @@ export const Suggester: React.FC<SuggesterProps> = ({
       ) : null}
     </StyledSuggester>
   );
-};
-
-Suggester.defaultProps = {
-  suggestions: [],
 };

@@ -13,16 +13,20 @@ export const DefaultHeader = () => {
 };
 
 export const LeftButtonContentHeader = () => {
-  return <Header left={<Button label="button on the left side" inverted />} />;
+  return (
+    <Header left={<Button label="button on the left side" color="success" />} />
+  );
 };
 
 export const LeftLabelContentHeader = () => {
-  return <Header left={<h1 className="text-2xl">header</h1>} />;
+  return <Header left={<h1>Header title</h1>} />;
 };
 
 export const RightSimpleContentHeader = () => {
   return (
-    <Header right={<Button label="button on the right side" inverted />} />
+    <Header
+      right={<Button color="danger" label="button on the right side" />}
+    />
   );
 };
 export const RightAndLeftSimpleContentHeader = () => {
@@ -47,8 +51,8 @@ export const VariousSizesHeader = () => {
   return (
     <div>
       <Header
-        left={<div className="text-xl">header with auto height</div>}
-        right={<div className="text-sm">left content</div>}
+        left={<div>header with auto height</div>}
+        right={<div>right content</div>}
       />
       <br />
 
@@ -56,7 +60,7 @@ export const VariousSizesHeader = () => {
         height={50}
         color={"info"}
         left={<div className="text-xl">header with 50pxs</div>}
-        right={<div className="text-sm">left content</div>}
+        right={<div className="text-sm">right content</div>}
       />
       <br />
 
@@ -64,7 +68,7 @@ export const VariousSizesHeader = () => {
         height={100}
         color={"warning"}
         left={<div className="text-xl">header with 100pxs</div>}
-        right={<div className="text-sm">left content</div>}
+        right={<div className="text-sm">right content</div>}
       />
       <br />
 
@@ -72,7 +76,7 @@ export const VariousSizesHeader = () => {
         height={250}
         color={"danger"}
         left={<div className="text-xl">header with 250pxs</div>}
-        right={<div className="text-sm">left content</div>}
+        right={<div className="text-sm">right content</div>}
       />
       <br />
 
@@ -85,7 +89,7 @@ export const VariousSizesHeader = () => {
             the full length while the header is too narrow
           </div>
         }
-        right={<div className="text-sm">left content</div>}
+        right={<div className="text-sm">right content</div>}
       />
     </div>
   );
@@ -95,18 +99,18 @@ export const CustomPaddingHeader = () => {
   return (
     <div>
       <Header
-        paddingX={20}
+        paddingX={80}
         paddingY={0}
         left={<div className="text-xl">no Y padding</div>}
-        right={<div className="text-sm">left content</div>}
+        right={<div className="text-sm">right content</div>}
       />
 
       <br />
       <Header
         paddingX={0}
-        paddingY={50}
+        paddingY={80}
         left={<div className="text-xl">no X padding</div>}
-        right={<div className="text-sm">left content</div>}
+        right={<div className="text-sm">right content</div>}
       />
     </div>
   );

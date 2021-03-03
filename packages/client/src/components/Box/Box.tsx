@@ -12,10 +12,10 @@ interface BoxProps {
 }
 
 export const Box: React.FC<BoxProps> = ({
-  label,
-  color,
-  width,
-  height,
+  label = "",
+  color = "primary",
+  width = 100,
+  height = 200,
   children,
 }) => {
   return (
@@ -27,11 +27,4 @@ export const Box: React.FC<BoxProps> = ({
       <Content>{children}</Content>
     </StyledBox>
   );
-};
-
-Box.defaultProps = {
-  label: "",
-  color: "primary",
-  width: 100,
-  height: 200,
 };

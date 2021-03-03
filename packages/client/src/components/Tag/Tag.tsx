@@ -27,16 +27,16 @@ interface DragItem {
 }
 
 export const Tag: React.FC<TagProps> = ({
-  label,
-  category,
+  label = "",
+  category = "T",
   color,
-  mode,
-  logicalType,
+  mode = false,
+  logicalType = "definitive",
   button,
   marginRight,
   propId,
   invertedLabel,
-  showLabel,
+  showLabel = true,
   index,
   moveTagFn,
 }) => {
@@ -107,14 +107,11 @@ export const Tag: React.FC<TagProps> = ({
         data-iscapture="true"
         data-tip-disable={showLabel}
         hasMarginRight={marginRight}
-        logicalType={logicalType ? logicalType : "definitive"}
+        logicalType={logicalType}
       >
         <EntityTag color={color}>{category}</EntityTag>
         {showLabel && label && (
-          <Label
-            invertedLabel={invertedLabel}
-            logicalType={logicalType ? logicalType : "definitive"}
-          >
+          <Label invertedLabel={invertedLabel} logicalType={logicalType}>
             {label}
           </Label>
         )}
@@ -129,12 +126,4 @@ export const Tag: React.FC<TagProps> = ({
       />
     </>
   );
-};
-
-Tag.defaultProps = {
-  label: "",
-  category: "T",
-  color: "black",
-  mode: false,
-  showLabel: true,
 };
