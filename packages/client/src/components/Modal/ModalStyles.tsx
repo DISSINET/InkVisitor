@@ -1,5 +1,12 @@
 import styled from "styled-components";
-import { space3, space6, space8 } from "Theme/constants";
+import {
+  space1,
+  space2,
+  space3,
+  space4,
+  space5,
+  space8,
+} from "Theme/constants";
 
 interface ModalWrap {
   showModal: boolean;
@@ -43,7 +50,7 @@ export const CardHeader = styled.header`
   justify-content: flex-start;
   align-items: center;
   flex-shrink: 0;
-  padding: ${space3};
+  padding: ${space4};
   position: relative;
   background-color: #ffffff;
   border-bottom: 1px solid #dbdbdb;
@@ -55,16 +62,18 @@ export const CardTitle = styled.h2`
   /* flex-grow: 1; */
   /* flex-shrink: 0; */
   font-weight: ${({ theme }) => theme.fontWeights["medium"]};
-  font-size: ${({ theme }) => theme.fontSizes["lg"]};
-  line-height: 0.8;
+  font-size: ${({ theme }) => theme.fontSizes["xl"]};
+  /* line-height: 1.4; */
+  padding: 0 ${space4};
 `;
 export const CardBody = styled.section`
   -webkit-overflow-scrolling: touch;
   flex-grow: 1;
   flex-shrink: 1;
   overflow: auto;
-  padding: ${space6};
+  padding: ${space5} ${space8};
   background-color: #ffffff;
+  font-size: ${({ theme }) => theme.fontSizes["sm"]};
 `;
 export const Footer = styled.div`
   border-bottom-left-radius: 6px;
@@ -75,6 +84,6 @@ export const Footer = styled.div`
   display: flex;
   flex-shrink: 0;
   justify-content: flex-end;
-  padding: ${space3};
+  padding: ${space4};
   position: relative;
 `;

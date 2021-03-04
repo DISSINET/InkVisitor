@@ -10,7 +10,7 @@ export default {
 
 export const DefaultBox = () => {
   return (
-    <Box label="default box" width={400} height={400}>
+    <Box label="Default Box" width={400} height={400}>
       {<div>box content</div>}
     </Box>
   );

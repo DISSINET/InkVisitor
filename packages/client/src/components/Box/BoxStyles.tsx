@@ -35,5 +35,5 @@ export const Content = styled.div`
   flex-direction: column;
   overflow: auto;
   height: 100%;
-  font-size: ${({ theme }) => theme.fontSizes["sm"]};
+  font-size: ${({ theme }) => theme.fontSizes["base"]};
 `;

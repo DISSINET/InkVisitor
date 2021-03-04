@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import { space1 } from "Theme/constants";
+import { space2 } from "Theme/constants";
 
 interface ButtonGroup {
   noMargin?: boolean;
@@ -7,6 +7,6 @@ interface ButtonGroup {
 export const ButtonGroup = styled.div<ButtonGroup>`
   display: flex;
   button:not(:last-child) {
-    margin-right: ${({ noMargin }) => (noMargin ? 0 : space1)};
+    margin-right: ${({ noMargin }) => (noMargin ? 0 : space2)};
   }
 `;
