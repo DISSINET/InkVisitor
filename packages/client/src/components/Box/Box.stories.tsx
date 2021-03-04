@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Box, Button } from "components";
+import { Box } from "components";
 
 export default {
   title: "Box",

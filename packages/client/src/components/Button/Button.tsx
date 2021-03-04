@@ -9,7 +9,6 @@ interface ButtonProps {
   inverted?: boolean;
   color?: typeof Colors[number];
   onClick?: MouseEventHandler<HTMLElement>;
-  marginRight?: boolean;
 }
 
 export const Button: React.FC<ButtonProps> = ({
@@ -20,13 +19,11 @@ export const Button: React.FC<ButtonProps> = ({
   onClick = () => {
     // do nothing
   },
-  marginRight,
 }) => {
   return (
     <StyledButton
       onClick={onClick}
       hasIcon={icon && true}
-      hasMarginRight={marginRight}
       color={color}
       inverted={inverted}
     >
