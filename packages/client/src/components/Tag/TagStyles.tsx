@@ -1,6 +1,6 @@
 import styled from "styled-components";
 
-import { space1, space2 } from "Theme/constants";
+import { space1, space2, space4, space48 } from "Theme/constants";
 
 interface ITagWrapperStyle {
   hasMarginRight?: boolean;
@@ -17,7 +17,7 @@ export const TagWrapper = styled.div<ITagWrapperStyle>`
   border-radius: ${({ theme }) => theme.borderRadius["md"]};
   overflow: hidden;
   margin-right: ${({ hasMarginRight }) => hasMarginRight && space1};
-  max-width: 10rem;
+  max-width: ${space48};
   cursor: move;
   color: black;
   font-size: 10px;
@@ -29,12 +29,11 @@ interface IEntityStyle {
 }
 export const EntityTag = styled.div<IEntityStyle>`
   background-color: ${({ color, theme }) => theme.colors[color]};
+  padding: 0 ${space4};
   display: flex;
   justify-content: center;
   align-items: center;
   flex-shrink: 0;
-  padding-top: ${space1};
-  padding-bottom: ${space1};
   font-weight: ${({ theme }) => theme.fontWeights["extrabold"]};
   width: 1.5rem;
 `;
@@ -46,7 +45,7 @@ interface ILabelStyle {
 export const Label = styled.div<ILabelStyle>`
   display: inline;
   vertical-align: middle;
-  padding: ${space1};
+  padding: ${space1} ${space2};
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;

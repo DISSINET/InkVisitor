@@ -38,16 +38,7 @@ export const Layout1 = () => {
         <Button label="Toast!" color="info" onClick={() => toast.dark("Hi!")} />
         <Toast />
       </ButtonGroup>
-      <Submit
-        title="Submit title"
-        text="Do you really want to submit?"
-        onSubmit={() => {
-          alert("You've submitted!");
-          setShowSubmit(false);
-        }}
-        onCancel={() => setShowSubmit(false)}
-        show={showSubmit}
-      />
+
       <Tag
         category={Entities["T"].id}
         color={Entities["T"].color}
@@ -62,7 +53,7 @@ export const Layout1 = () => {
         button={<Button label="x" color="danger" />}
       />
       <Input value="default input" onChangeFn={() => {}} />
-      <Box label="default box" width={400} height={400}>
+      <Box label="default box" width={500} height={700}>
         {
           <div>
             <FontXs>FontXs</FontXs>
@@ -78,6 +69,16 @@ export const Layout1 = () => {
           </div>
         }
       </Box>
+      <Submit
+        title="Submit title"
+        text="Do you really want to submit?"
+        onSubmit={() => {
+          alert("You've submitted!");
+          setShowSubmit(false);
+        }}
+        onCancel={() => setShowSubmit(false)}
+        show={showSubmit}
+      />
     </DndProvider>
   );
 };

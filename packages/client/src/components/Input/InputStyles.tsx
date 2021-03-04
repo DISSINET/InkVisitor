@@ -14,6 +14,7 @@ export const Label = styled.span`
   font-weight: bold;
   display: flex;
   align-items: flex-end;
+  font-size: ${({ theme }) => theme.fontSizes["base"]};
 `;
 export const StyledInput = styled.input<IValueStyle>`
   text-align: left;

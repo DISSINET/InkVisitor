@@ -5,7 +5,7 @@ interface StyledSelect {
   width?: number;
 }
 export const StyledSelect = styled(Select)`
-  font-size: 0.75rem;
+  font-size: ${({ theme }) => theme.fontSizes["xs"]};
   font-weight: bold;
   width: ${({ width }) => (width ? `${width / 10}rem` : "100%")};
   .react-select__control {

@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import { space2 } from "Theme/constants";
+import { space4 } from "Theme/constants";
 
 interface IBoxStyle {
   color: string;
@@ -23,16 +23,17 @@ export const Head = styled.div<Head>`
   background-color: ${({ theme, color }) => theme.colors[color]};
   color: ${({ theme }) => theme.colors["white"]};
   font-weight: ${({ theme }) => theme.fontWeights["bold"]};
-  padding: ${space2};
+  padding: ${space4};
   font-size: ${({ theme }) => theme.fontSizes["lg"]};
-  line-height: 1.75rem;
+  line-height: 2.8rem;
   /* font-family: muni; */
 `;
 export const Content = styled.div`
   background-color: ${({ theme }) => theme.colors["white"]};
-  padding: ${space2};
+  padding: ${space4};
   display: flex;
   flex-direction: column;
   overflow: auto;
   height: 100%;
+  font-size: ${({ theme }) => theme.fontSizes["sm"]};
 `;

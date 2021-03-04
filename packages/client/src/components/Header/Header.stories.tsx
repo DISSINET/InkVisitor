@@ -19,7 +19,20 @@ export const LeftButtonContentHeader = () => {
 };
 
 export const LeftLabelContentHeader = () => {
-  return <Header left={<h1>Header title</h1>} />;
+  return (
+    <Header
+      left={
+        <div>
+          <h1>h1 - Header title</h1>
+          <h2>h2 - Header title</h2>
+          <h3>h3 - Header title</h3>
+          <h4>h4 - Header title</h4>
+          <h5>h5 - Header title</h5>
+          <h6>h6 - Header title</h6>
+        </div>
+      }
+    />
+  );
 };
 
 export const RightSimpleContentHeader = () => {
