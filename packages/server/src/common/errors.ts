@@ -131,6 +131,25 @@ class StatementDoesNotExits extends Error {
   }
 }
 
+class TerritoriesBrokenError extends Error {
+  public static code = "territories tree is broken";
+
+  constructor(m: string) {
+    super(m);
+
+    // Set the prototype explicitly.
+    Object.setPrototypeOf(this, TerritoriesBrokenError.prototype);
+  }
+
+  statusCode(): number {
+    return 500;
+  }
+
+  toString(): string {
+    return TerritoriesBrokenError.code;
+  }
+}
+
 export interface IError extends Error {
   statusCode(): number;
 }
@@ -143,4 +162,5 @@ export {
   ActantDoesNotExits,
   ActionDoesNotExits,
   StatementDoesNotExits,
+  TerritoriesBrokenError,
 };

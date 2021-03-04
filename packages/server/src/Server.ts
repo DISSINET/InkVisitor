@@ -13,6 +13,7 @@ import MetaRouter from "@modules/meta";
 import UsersRouter from "@modules/users";
 import ActionsRouter from "@modules/actions";
 import StatementsRouter from "@modules/statements";
+import TreeRouter from "@modules/tree";
 
 const server = express();
 server.use(cors());
@@ -39,7 +40,7 @@ server.get("/health", function (req, res) {
 import { validateJwt } from "@common/auth";
 import { UnauthorizedError } from "express-jwt";
 
-server.use(validateJwt().unless({ path: [/api\/v1\/users/] }));
+//server.use(validateJwt().unless({ path: [/api\/v1\/users/] }));
 
 // Routing
 const routerV1 = Router();
@@ -53,6 +54,7 @@ routerV1.use("/actions", ActionsRouter);
 routerV1.use("/territory", TerritoryRouter);
 routerV1.use("/meta", MetaRouter);
 routerV1.use("/statements", StatementsRouter);
+routerV1.use("/tree", TreeRouter);
 
 // unknown paths (after jwt check) should return 404
 server.all("*", function (req, res, next) {
