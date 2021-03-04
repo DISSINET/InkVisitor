@@ -9,7 +9,7 @@ export default {
 };
 
 export const DefaultHeader = () => {
-  return <Header color={"primary"} />;
+  return <Header color="primary" />;
 };
 
 export const LeftButtonContentHeader = () => {
@@ -32,7 +32,7 @@ export const RightSimpleContentHeader = () => {
 export const RightAndLeftSimpleContentHeader = () => {
   return (
     <Header
-      color={"info"}
+      color="info"
       left={<div className="text-5xl">header</div>}
       right={<Button label="button on the right side" inverted />}
     />
@@ -59,7 +59,7 @@ export const VariousSizesHeader = () => {
 
       <Header
         height={50}
-        color={"info"}
+        color="info"
         left={<div className="text-xl">header with 50pxs</div>}
         right={<div className="text-sm">right content</div>}
       />
@@ -67,7 +67,7 @@ export const VariousSizesHeader = () => {
 
       <Header
         height={100}
-        color={"warning"}
+        color="warning"
         left={<div className="text-xl">header with 100pxs</div>}
         right={<div className="text-sm">right content</div>}
       />
@@ -75,7 +75,7 @@ export const VariousSizesHeader = () => {
 
       <Header
         height={250}
-        color={"danger"}
+        color="danger"
         left={<div className="text-xl">header with 250pxs</div>}
         right={<div className="text-sm">right content</div>}
       />
@@ -83,7 +83,7 @@ export const VariousSizesHeader = () => {
 
       <Header
         height={50}
-        color={"success"}
+        color="success"
         left={
           <div className="text-xl">
             Very long text that would probably wrap and the user does not see
@@ -108,6 +108,7 @@ export const CustomPaddingHeader = () => {
 
       <br />
       <Header
+        color="info"
         paddingX={0}
         paddingY={80}
         left={<div className="text-xl">no X padding</div>}
