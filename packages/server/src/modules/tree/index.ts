@@ -25,9 +25,15 @@ function populateTree(
 export default Router().get(
   "/get",
   asyncRouteHandler(async (request: Request, response: Response) => {
-    const territories = await getActants<ITerritory>(request.db, {
-      class: "T",
-    });
+    const territories = (
+      await getActants<ITerritory>(request.db, {
+        class: "T",
+      })
+    ).sort(
+      (terA, terB) =>
+        (terA.data.parent ? terA.data.parent.order : 0) -
+        (terB.data.parent ? terB.data.parent.order : 0)
+    );
 
     const parentMap: Record<string, ITerritory[]> = {};
     for (const territory of territories) {
