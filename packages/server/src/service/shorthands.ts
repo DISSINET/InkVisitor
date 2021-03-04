@@ -74,7 +74,22 @@ export async function getActants<T = IAction | IStatement | ITerritory>(
   return rethink.table("actants").filter(filter).run(db.connection);
 }
 
-export async function findActantById<T = IAction | IStatement>(
+export async function getTerritoryChilds(
+  db: Db,
+  parentId: string
+): Promise<ITerritory[]> {
+  return rethink
+    .table("actants")
+    .filter(function (territory: any) {
+      return rethink.and(
+        territory("data")("parent").typeOf().eq("OBJECT"),
+        territory("data")("parent")("id").eq(parentId)
+      );
+    })
+    .run(db.connection);
+}
+
+export async function findActantById<T = IAction | IStatement | ITerritory>(
   db: Db,
   id: string,
   additionalFilter: object = {}

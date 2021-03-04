@@ -131,6 +131,25 @@ class StatementDoesNotExits extends Error {
   }
 }
 
+class TerritoryDoesNotExits extends Error {
+  public static code = "territory does not exist";
+
+  constructor(m: string) {
+    super(m);
+
+    // Set the prototype explicitly.
+    Object.setPrototypeOf(this, TerritoryDoesNotExits.prototype);
+  }
+
+  statusCode(): number {
+    return 400;
+  }
+
+  toString(): string {
+    return TerritoryDoesNotExits.code;
+  }
+}
+
 class TerritoriesBrokenError extends Error {
   public static code = "territories tree is broken";
 
@@ -150,10 +169,28 @@ class TerritoriesBrokenError extends Error {
   }
 }
 
+class TerrytoryInvalidMove extends Error {
+  public static code = "cannot move territory to invalid index";
+
+  constructor(m: string) {
+    super(m);
+
+    // Set the prototype explicitly.
+    Object.setPrototypeOf(this, TerrytoryInvalidMove.prototype);
+  }
+
+  statusCode(): number {
+    return 500;
+  }
+
+  toString(): string {
+    return TerrytoryInvalidMove.code;
+  }
+}
+
 export interface IError extends Error {
   statusCode(): number;
 }
-
 export {
   BadCredentialsError,
   NotFound,
@@ -163,4 +200,6 @@ export {
   ActionDoesNotExits,
   StatementDoesNotExits,
   TerritoriesBrokenError,
+  TerritoryDoesNotExits,
+  TerrytoryInvalidMove,
 };

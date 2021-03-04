@@ -394,15 +394,13 @@ class Api {
   async treeMoveTerritory(
     moveId: string,
     parentId: string,
-    beforeId: string,
-    afterId: string
+    newIndex: number
   ): Promise<AxiosResponse<IResponseGeneric>> {
     try {
       const response = await this.connection.post(`/tree/moveTerritory`, {
         moveId,
         parentId,
-        beforeId,
-        afterId,
+        newIndex,
       });
       return response;
     } catch (err) {
