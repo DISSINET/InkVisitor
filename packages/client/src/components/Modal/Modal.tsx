@@ -1,4 +1,4 @@
-import React, { ReactNode } from "react";
+import React, { FC, ReactNode } from "react";
 
 import {
   ModalWrap,
@@ -16,7 +16,7 @@ interface Modal {
   showModal: boolean;
   disableBgClick?: boolean;
 }
-export const Modal: React.FC<Modal> = ({
+export const Modal: FC<Modal> = ({
   children,
   onClose,
   showModal,
@@ -36,7 +36,7 @@ interface ModalCard {
   children?: ReactNode;
   fullwidth?: boolean;
 }
-export const ModalCard: React.FC<ModalCard> = ({ children, fullwidth }) => {
+export const ModalCard: FC<ModalCard> = ({ children, fullwidth }) => {
   return <Card fullwidth={fullwidth}>{children}</Card>;
 };
 
@@ -44,7 +44,7 @@ interface ModalHeader {
   title?: string;
   onClose: Function;
 }
-export const ModalHeader: React.FC<ModalHeader> = ({ title, onClose }) => {
+export const ModalHeader: FC<ModalHeader> = ({ title, onClose }) => {
   return (
     <CardHeader>
       <CardTitle>{title}</CardTitle>
@@ -60,13 +60,13 @@ export const ModalHeader: React.FC<ModalHeader> = ({ title, onClose }) => {
 interface ModalContent {
   children?: ReactNode;
 }
-export const ModalContent: React.FC<ModalContent> = ({ children }) => {
+export const ModalContent: FC<ModalContent> = ({ children }) => {
   return <CardBody>{children}</CardBody>;
 };
 
 interface ModalFooter {
   children?: ReactNode;
 }
-export const ModalFooter: React.FC<ModalFooter> = ({ children }) => {
+export const ModalFooter: FC<ModalFooter> = ({ children }) => {
   return <Footer>{children}</Footer>;
 };
