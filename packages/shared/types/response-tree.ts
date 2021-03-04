@@ -5,15 +5,11 @@
 import { ITerritory } from ".";
 
 // to discuss
-export interface IResponseTree {
-    tree: {
-        ITreeTerritoryComponent;
-    };
-    maxLevels: number; // levels of nesting
-}
+export interface IResponseTree extends ITreeTerritoryComponent {}
 
 interface ITreeTerritoryComponent {
-    territory: ITerritory;
-    statementsCount: number; // number of statements under this territory
-    children: ITreeTerritoryComponent[];
+  territory: ITerritory;
+  statementsCount: number; // number of statements under this territory
+  maxLevels: number; // levels of nesting
+  children: ITreeTerritoryComponent[];
 }
