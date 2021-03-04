@@ -51,11 +51,12 @@ export const CardHeader = styled.header`
   border-top-right-radius: 6px;
 `;
 export const CardTitle = styled.h2`
-  flex-grow: 1;
-  flex-shrink: 0;
+  /* display: flex; */
+  /* flex-grow: 1; */
+  /* flex-shrink: 0; */
   font-weight: ${({ theme }) => theme.fontWeights["medium"]};
-  font-size: ${({ theme }) => theme.fontSizes["2xl"]};
-  line-height: 1.4;
+  font-size: ${({ theme }) => theme.fontSizes["lg"]};
+  line-height: 0.8;
 `;
 export const CardBody = styled.section`
   -webkit-overflow-scrolling: touch;
