@@ -1,8 +1,10 @@
 import styled from "styled-components";
-import { space1, space2 } from "Theme/constants";
+import { space2 } from "Theme/constants";
 
 interface IBoxStyle {
   color: string;
+  width: number;
+  height: number;
 }
 export const StyledBox = styled.div<IBoxStyle>`
   position: relative;
@@ -11,8 +13,13 @@ export const StyledBox = styled.div<IBoxStyle>`
   border-color: ${({ theme, color }) => theme.colors[color]};
   border-style: solid;
   border-width: ${({ theme }) => theme.borderWidths[2]};
+  width: ${({ width }) => `${width / 10}rem`};
+  height: ${({ height }) => (height ? `${height / 10}rem` : "100%")};
 `;
-export const Head = styled.div<IBoxStyle>`
+interface Head {
+  color: string;
+}
+export const Head = styled.div<Head>`
   background-color: ${({ theme, color }) => theme.colors[color]};
   color: ${({ theme }) => theme.colors["white"]};
   font-weight: ${({ theme }) => theme.fontWeights["bold"]};

@@ -19,11 +19,8 @@ export const Box: React.FC<BoxProps> = ({
   children,
 }) => {
   return (
-    <StyledBox
-      style={{ width: width, height: height ? height : "100%" }}
-      color={color ? color : "primary"}
-    >
-      <Head color={color ? color : "primary"}>{label}</Head>
+    <StyledBox color={color} width={width} height={height}>
+      <Head color={color}>{label}</Head>
       <Content>{children}</Content>
     </StyledBox>
   );

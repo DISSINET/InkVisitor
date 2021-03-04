@@ -14,6 +14,12 @@ const GlobalStyle = createGlobalStyle`
     font-family: "Roboto", sans-serif;
     letter-spacing: .2px;
     line-height: 1.5;
+    /* @font-face {
+      font-family: "muni";
+      src: url("assets/fonts/muni-font.ttf") format("truetype");
+      font-style: normal;
+      font-weight: normal;
+    } */
   }
   *, *::after, *::before {
     margin: 0;

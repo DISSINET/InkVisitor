@@ -1,5 +1,4 @@
 import React from "react";
-import classNames from "classnames";
 import { useDrop } from "react-dnd";
 import { FaPlus } from "react-icons/fa";
 
@@ -99,7 +98,7 @@ export const Suggester: React.FC<SuggesterProps> = ({
         </SuggesterButton>
       </InputWrapper>
       {suggestions.length ? (
-        <SuggesterList className={classNames("bg-opacity-75")}>
+        <SuggesterList>
           {suggestions
             .filter((s, si) => si < MAXSUGGESTIONDISPLAYED)
             .map((suggestion, si) => (

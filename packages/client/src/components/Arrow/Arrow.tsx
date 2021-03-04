@@ -1,5 +1,4 @@
 import React, { MouseEventHandler } from "react";
-import classNames from "classnames";
 
 import { Colors } from "types";
 import { StyledArrow } from "./ArrowStyles";

@@ -48,11 +48,6 @@ export const ModalHeader: FC<ModalHeader> = ({ title, onClose }) => {
   return (
     <CardHeader>
       <CardTitle>{title}</CardTitle>
-      {/* <button
-        type="button"
-        onClick={(): void => onClose()}
-        aria-label="close"
-      ></button> */}
     </CardHeader>
   );
 };
