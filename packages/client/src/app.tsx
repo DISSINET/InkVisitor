@@ -1,10 +1,13 @@
 import React, { useState, useLayoutEffect, useEffect } from "react";
 import { Provider } from "react-redux";
 import { Switch, Route, BrowserRouter } from "react-router-dom";
+import { ThemeProvider } from "styled-components";
 
+import theme from "./Theme/theme";
 import "app.css";
 import store from "redux/store";
 import MainPage from "pages/MainPage";
+import GlobalStyle from "Theme/global";
 
 interface AppProps {}
 
@@ -22,15 +25,18 @@ export const App: React.FC<AppProps> = () => {
 
   return (
     <Provider store={store}>
-      <BrowserRouter basename="apps/inkvisitor">
-        <Switch>
-          <Route
-            path="/:territoryId?/:statementId?"
-            exact
-            render={(props) => <MainPage {...props} size={size} />}
-          />
-        </Switch>
-      </BrowserRouter>
+      <ThemeProvider theme={theme}>
+        <GlobalStyle />
+        <BrowserRouter basename="apps/inkvisitor">
+          <Switch>
+            <Route
+              path="/:territoryId?/:statementId?"
+              exact
+              render={(props) => <MainPage {...props} size={size} />}
+            />
+          </Switch>
+        </BrowserRouter>
+      </ThemeProvider>
     </Provider>
   );
 };

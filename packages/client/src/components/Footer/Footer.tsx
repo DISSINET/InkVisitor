@@ -1,12 +1,15 @@
-import classNames from "classnames";
 import React from "react";
+import { Colors } from "types";
+
+import { StyledFooter } from "./FooterStyles";
 
 interface Footer {
   height?: number;
+  color?: typeof Colors[number];
 }
-export const Footer: React.FC<Footer> = ({ height }) => {
-  const wrapperClasses = classNames("bg-primary");
-  return (
-    <div className={wrapperClasses} style={{ height: `${height}px` }}></div>
-  );
+export const Footer: React.FC<Footer> = ({
+  height = 30,
+  color = "primary",
+}) => {
+  return <StyledFooter height={height} color={color}></StyledFooter>;
 };

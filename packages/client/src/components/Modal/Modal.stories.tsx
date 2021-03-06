@@ -7,6 +7,7 @@ import {
   ModalContent,
   ModalFooter,
   Button,
+  ButtonGroup,
 } from "components";
 
 export default {
@@ -31,16 +32,17 @@ export const DefaultModal = () => {
             <p>{"Main content of modal.."}</p>
           </ModalContent>
           <ModalFooter>
-            <Button
-              label="Cancel"
-              color="danger"
-              onClick={(): void => setShowModal(false)}
-              marginRight
-            />
-            <Button
-              label="Save"
-              onClick={(): void => alert("Something was saved!")}
-            />
+            <ButtonGroup>
+              <Button
+                label="Cancel"
+                color="danger"
+                onClick={(): void => setShowModal(false)}
+              />
+              <Button
+                label="Save"
+                onClick={(): void => alert("Something was saved!")}
+              />
+            </ButtonGroup>
           </ModalFooter>
         </ModalCard>
       </Modal>
@@ -66,16 +68,17 @@ export const FullWidthModal = () => {
             </p>
           </ModalContent>
           <ModalFooter>
-            <Button
-              label="Cancel"
-              color="danger"
-              onClick={(): void => setShowModal(false)}
-              marginRight
-            />
-            <Button
-              label="Save"
-              onClick={(): void => alert("Something was saved!")}
-            />
+            <ButtonGroup>
+              <Button
+                label="Cancel"
+                color="danger"
+                onClick={(): void => setShowModal(false)}
+              />
+              <Button
+                label="Save"
+                onClick={(): void => alert("Something was saved!")}
+              />
+            </ButtonGroup>
           </ModalFooter>
         </ModalCard>
       </Modal>

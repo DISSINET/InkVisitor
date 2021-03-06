@@ -32,6 +32,59 @@ export const TagWithLabel = () => {
   );
 };
 
+export const TagWithInvertedLabel = () => {
+  return (
+    <DndProvider backend={HTML5Backend}>
+      <Tag
+        category={Entities["S"].id}
+        color={Entities["S"].color}
+        label="entity label"
+        invertedLabel
+      />
+    </DndProvider>
+  );
+};
+
+export const TagWithLabelIndefinitive = () => {
+  return (
+    <DndProvider backend={HTML5Backend}>
+      <Tag
+        category={Entities["R"].id}
+        color={Entities["R"].color}
+        label="entity label"
+        logicalType={"indefinitive"}
+      />
+    </DndProvider>
+  );
+};
+
+export const TagWithInvertedLabelIndefinitive = () => {
+  return (
+    <DndProvider backend={HTML5Backend}>
+      <Tag
+        category={Entities["R"].id}
+        color={Entities["R"].color}
+        label="entity label"
+        logicalType={"indefinitive"}
+        invertedLabel
+      />
+    </DndProvider>
+  );
+};
+
+export const TagWithLabelHypothetical = () => {
+  return (
+    <DndProvider backend={HTML5Backend}>
+      <Tag
+        category={Entities["S"].id}
+        color={Entities["S"].color}
+        label="entity label"
+        logicalType={"hypothetical"}
+      />
+    </DndProvider>
+  );
+};
+
 export const TagWithLabelAndButton = () => {
   return (
     <DndProvider backend={HTML5Backend}>

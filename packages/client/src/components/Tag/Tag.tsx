@@ -1,17 +1,16 @@
 import React, { ReactNode, useRef } from "react";
-import classNames from "classnames";
 import { DropTargetMonitor, useDrag, useDrop, XYCoord } from "react-dnd";
 
 import { ItemTypes } from "types";
-import "./tag.css";
 import ReactTooltip from "react-tooltip";
+import { TagWrapper, EntityTag, Label, ButtonWrapper } from "./TagStyles";
 
 interface TagProps {
-
   label?: string;
   category: string;
   color: string;
-  mode?: "selected" | false;
+  mode?: "selected" | "disabled" | "invalid" | false;
+  logicalType?: "definitive" | "indefinitive" | "hypothetical";
   button?: ReactNode;
   marginRight?: boolean;
   invertedLabel?: boolean;
@@ -28,63 +27,19 @@ interface DragItem {
 }
 
 export const Tag: React.FC<TagProps> = ({
-  label,
-  category,
+  label = "",
+  category = "T",
   color,
-  mode,
+  mode = false,
+  logicalType = "definitive",
   button,
   marginRight,
   propId,
   invertedLabel,
-  showLabel,
+  showLabel = true,
   index,
   moveTagFn,
 }) => {
-    const tagClasses = classNames(
-        "component",
-        "tag",
-        "border-black",
-        "border-2",
-        "inline-flex",
-        "rounded-md",
-        "overflow-hidden",
-        "max-w-xs",
-        marginRight && "mr-1",
-        "cursor-move",
-        "text-black"
-    );
-
-    const entityClasses = classNames(
-        `bg-${color}`,
-        "tag-entity",
-        "inline",
-        "w-6",
-        "py-1",
-        "text-center",
-        "font-extrabold",
-        {
-            "border-r-2": !!label && !!showLabel,
-            "border-primary": !!label && !!showLabel,
-        }
-    );
-    const labelClasses = classNames(
-        "tag-label",
-        "inline",
-        "align-middle",
-        "py-1",
-        "px-1",
-        "truncate",
-        invertedLabel ? "bg-primary text-white" : "bg-white",
-        { "bg-primary text-white": mode === "selected" }
-    );
-    const buttonClasses = classNames(
-        "tag-button",
-        "flex",
-        "-mt-2",
-        "-mb-2",
-        "align-middle"
-    );
-
   const ref = useRef<HTMLDivElement>(null);
   const [, drop] = useDrop({
     accept: ItemTypes.TAG,
@@ -144,18 +99,24 @@ export const Tag: React.FC<TagProps> = ({
 
   return (
     <>
-      <div
+      <TagWrapper
         ref={ref}
-        className={tagClasses}
+        className="tag"
         data-for={"main"}
         data-tip={label ? label : "no label"}
         data-iscapture="true"
         data-tip-disable={showLabel}
+        hasMarginRight={marginRight}
+        logicalType={logicalType}
       >
-        <div className={entityClasses}>{category}</div>
-        {showLabel && label && <div className={labelClasses}>{label}</div>}
-        {button && <div className={buttonClasses}>{button}</div>}
-      </div>
+        <EntityTag color={color}>{category}</EntityTag>
+        {showLabel && label && (
+          <Label invertedLabel={invertedLabel} logicalType={logicalType}>
+            {label}
+          </Label>
+        )}
+        {button && <ButtonWrapper>{button}</ButtonWrapper>}
+      </TagWrapper>
       <ReactTooltip
         id="main"
         place="bottom"
@@ -165,12 +126,4 @@ export const Tag: React.FC<TagProps> = ({
       />
     </>
   );
-};
-
-Tag.defaultProps = {
-    label: "",
-    category: "T",
-    color: "black",
-    mode: false,
-    showLabel: true,
 };

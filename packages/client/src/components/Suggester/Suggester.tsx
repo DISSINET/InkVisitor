@@ -1,12 +1,17 @@
-import React, { ReactNode, MouseEventHandler } from "react";
-import classNames from "classnames";
+import React from "react";
 import { useDrop } from "react-dnd";
+import { FaPlus } from "react-icons/fa";
 
 import { Button, Input, Tag } from "components";
 import { OptionI } from "@shared/types";
 import { ItemTypes } from "types";
-
-import { FaPlus } from "react-icons/fa";
+import {
+  StyledSuggester,
+  InputWrapper,
+  SuggesterButton,
+  SuggesterList,
+  SuggestionLine,
+} from "./SuggesterStyles";
 
 export interface SuggestionI {
   id: string;
@@ -16,6 +21,7 @@ export interface SuggestionI {
 }
 
 interface SuggesterProps {
+  marginTop?: boolean;
   suggestions: SuggestionI[];
   placeholder?: string; // text to display when typed === ""
   typed: string; // input value
@@ -35,7 +41,8 @@ interface SuggesterProps {
 const MAXSUGGESTIONDISPLAYED = 10;
 
 export const Suggester: React.FC<SuggesterProps> = ({
-  suggestions,
+  marginTop,
+  suggestions = [],
   placeholder,
   typed,
   category,
@@ -62,18 +69,8 @@ export const Suggester: React.FC<SuggesterProps> = ({
   });
 
   return (
-    <div
-      className={classNames(
-        "suggestor",
-        "component",
-        "relative",
-        isOver && "opacity-75"
-      )}
-    >
-      <div
-        ref={dropRef}
-        className={classNames("suggestor-input", "inline-flex")}
-      >
+    <StyledSuggester marginTop={marginTop}>
+      <InputWrapper ref={dropRef} isOver={isOver}>
         <Input
           type="select"
           value={category}
@@ -87,7 +84,7 @@ export const Suggester: React.FC<SuggesterProps> = ({
           onChangeFn={onType}
           placeholder={placeholder}
         />
-        <div className="suggester-button mt-2">
+        <SuggesterButton>
           <Button
             icon={<FaPlus style={{ fontSize: "16px", padding: "2px" }} />}
             color="primary"
@@ -98,28 +95,14 @@ export const Suggester: React.FC<SuggesterProps> = ({
               });
             }}
           />
-        </div>
-      </div>
+        </SuggesterButton>
+      </InputWrapper>
       {suggestions.length ? (
-        <div
-          className={classNames(
-            "suggestor-list",
-            "bg-grey",
-            "absolute",
-            "bg-opacity-75",
-            "p-1",
-            "w-auto",
-            "z-10"
-          )}
-          style={{}}
-        >
+        <SuggesterList>
           {suggestions
             .filter((s, si) => si < MAXSUGGESTIONDISPLAYED)
             .map((suggestion, si) => (
-              <div
-                className={classNames("suggestion-line", "block", "p-1")}
-                key={si}
-              >
+              <SuggestionLine key={si}>
                 <Tag
                   propId={suggestion.id}
                   label={suggestion.label}
@@ -135,14 +118,10 @@ export const Suggester: React.FC<SuggesterProps> = ({
                     />
                   }
                 />
-              </div>
+              </SuggestionLine>
             ))}
-        </div>
+        </SuggesterList>
       ) : null}
-    </div>
+    </StyledSuggester>
   );
-};
-
-Suggester.defaultProps = {
-  suggestions: [],
 };

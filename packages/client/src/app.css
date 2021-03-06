@@ -1,11 +1,2 @@
 @import "components/styles.css";
-@import "components/DropDown/dropdown.css";
-@import "tailwind.css";
-@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@100;300;400;500;700;900&display=swap');
-
-@font-face {
-  font-family: "muni";
-  src: url("assets/fonts/muni-font.ttf") format("truetype");
-  font-style: normal;
-  font-weight: normal;
-}
+/* @import "tailwind.css"; */
