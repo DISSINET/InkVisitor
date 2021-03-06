@@ -5,6 +5,8 @@ import {
   space3,
   space4,
   space5,
+  space6,
+  space7,
   space8,
 } from "Theme/constants";
 
@@ -50,40 +52,39 @@ export const CardHeader = styled.header`
   justify-content: flex-start;
   align-items: center;
   flex-shrink: 0;
-  padding: ${space4};
+  padding: ${space3} ${space6} ${space1} ${space6};
   position: relative;
-  background-color: #ffffff;
-  border-bottom: 1px solid #dbdbdb;
-  border-top-left-radius: 6px;
-  border-top-right-radius: 6px;
+  background-color: ${({ theme }) => theme.colors["white"]};
+  border-bottom-style: solid;
+  border-bottom-width: ${({ theme }) => theme.borderWidths["default"]};
+  border-bottom-color: ${({ theme }) => theme.colors["gray"][400]};
+  border-top-left-radius: ${({ theme }) => theme.borderRadius["sm"]};
+  border-top-right-radius: ${({ theme }) => theme.borderRadius["sm"]};
 `;
 export const CardTitle = styled.h2`
-  /* display: flex; */
-  /* flex-grow: 1; */
-  /* flex-shrink: 0; */
   font-weight: ${({ theme }) => theme.fontWeights["medium"]};
   font-size: ${({ theme }) => theme.fontSizes["xl"]};
-  /* line-height: 1.4; */
-  padding: 0 ${space4};
 `;
 export const CardBody = styled.section`
   -webkit-overflow-scrolling: touch;
   flex-grow: 1;
   flex-shrink: 1;
   overflow: auto;
-  padding: ${space5} ${space8};
+  padding: ${space5} ${space7};
   background-color: #ffffff;
   font-size: ${({ theme }) => theme.fontSizes["sm"]};
 `;
 export const Footer = styled.div`
-  border-bottom-left-radius: 6px;
-  border-bottom-right-radius: 6px;
-  border-top: 1px solid #dbdbdb;
+  border-bottom-left-radius: ${({ theme }) => theme.borderRadius["sm"]};
+  border-bottom-right-radius: ${({ theme }) => theme.borderRadius["sm"]};
+  border-top-style: solid;
+  border-top-width: ${({ theme }) => theme.borderWidths["default"]};
+  border-top-color: ${({ theme }) => theme.colors["gray"][400]};
   align-items: center;
   background-color: #ffffff;
   display: flex;
   flex-shrink: 0;
   justify-content: flex-end;
-  padding: ${space4};
+  padding: ${space3};
   position: relative;
 `;

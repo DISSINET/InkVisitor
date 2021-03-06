@@ -15,6 +15,17 @@ export default {
       800: '#02051E',
       900: '#010318',
     },
+    gray: {
+    100: '#f7fafc',
+    200: '#edf2f7',
+    300: '#e2e8f0',
+    400: '#cbd5e0',
+    500: '#a0aec0',
+    600: '#718096',
+    700: '#4a5568',
+    800: '#2d3748',
+    900: '#1a202c',
+  },
 
     black: '#000',
     white: '#fff',
@@ -38,19 +49,6 @@ export default {
     entityT: 'hsl(212, 78%, 50%)',
     // seda
     entityV: '#BAB0AC',
-
-    // gray: {
-    //   100: '#f7fafc',
-    //   200: '#edf2f7',
-    //   300: '#e2e8f0',
-    //   400: '#cbd5e0',
-    //   500: '#a0aec0',
-    //   600: '#718096',
-    //   700: '#4a5568',
-    //   800: '#2d3748',
-    //   900: '#1a202c',
-    // },
-   
   },
   space: {
     px: '1px',
@@ -105,13 +103,14 @@ export default {
     0: "0",
     2: "0.2rem",
     4: "0.4rem",
+    6: "0.6rem",
     8: "0.8rem",
   },
   borderRadius: {
     none: "0",
-    sm: "0.125rem",
-    default: "0.25rem",
-    md: "0.375rem",
+    sm: "0.5rem",
+    default: "0.75rem",
+    md: "1rem",
     lg: "0.5rem",
     full: "9999px",
   },

@@ -1,6 +1,6 @@
 import styled from "styled-components";
 
-import { space1, space2, space4, space48 } from "Theme/constants";
+import { space1, space2, space4, space48, space56 } from "Theme/constants";
 
 interface ITagWrapperStyle {
   hasMarginRight?: boolean;
@@ -14,10 +14,10 @@ export const TagWrapper = styled.div<ITagWrapperStyle>`
     (logicalType === "indefinitive" && "dashed") ||
     (logicalType === "hypothetical" && "dotted")};
   border-color: black;
-  border-radius: ${({ theme }) => theme.borderRadius["md"]};
+  border-radius: ${({ theme }) => theme.borderRadius["sm"]};
   overflow: hidden;
   margin-right: ${({ hasMarginRight }) => hasMarginRight && space1};
-  max-width: ${space48};
+  max-width: ${space56};
   cursor: move;
   color: black;
   font-size: 10px;
@@ -29,7 +29,7 @@ interface IEntityStyle {
 }
 export const EntityTag = styled.div<IEntityStyle>`
   background-color: ${({ color, theme }) => theme.colors[color]};
-  padding: 0 ${space4};
+  padding: ${space1} ${space4};
   display: flex;
   justify-content: center;
   align-items: center;
