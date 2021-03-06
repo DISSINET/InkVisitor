@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Box, Button } from "components";
+import { Box } from "components";
 
 export default {
   title: "Box",
@@ -10,7 +10,7 @@ export default {
 
 export const DefaultBox = () => {
   return (
-    <Box label="default box" width={400} height={400}>
+    <Box label="Default Box" width={400} height={400}>
       {<div>box content</div>}
     </Box>
   );

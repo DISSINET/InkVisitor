@@ -7,6 +7,7 @@ import {
   ModalContent,
   ModalFooter,
   ModalCard,
+  ButtonGroup,
 } from "components";
 
 interface Submit {
@@ -32,17 +33,18 @@ export const Submit: React.FC<Submit> = ({
             <p>{text}</p>
           </ModalContent>
           <ModalFooter>
-            <Button
-              label="Submit"
-              color="danger"
-              onClick={(): void => onSubmit()}
-              marginRight
-            />
-            <Button
-              label="Cancel"
-              color="info"
-              onClick={(): void => onCancel()}
-            />
+            <ButtonGroup>
+              <Button
+                label="Submit"
+                color="danger"
+                onClick={(): void => onSubmit()}
+              />
+              <Button
+                label="Cancel"
+                color="info"
+                onClick={(): void => onCancel()}
+              />
+            </ButtonGroup>
           </ModalFooter>
         </ModalCard>
       </Modal>

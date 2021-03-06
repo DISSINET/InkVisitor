@@ -162,12 +162,13 @@ storiesOf("Suggester", module).add(
 );
 
 storiesOf("Suggester", module).add(
-  "Categories",
+  "Categories with margin top",
   withState(state)(({ store }) => {
     const { typed, entityType, suggestions } = store.state;
     return (
       <DndProvider backend={HTML5Backend}>
         <Suggester
+          marginTop
           typed={typed}
           placeholder="find a person, location or an event"
           category={entityType.id}

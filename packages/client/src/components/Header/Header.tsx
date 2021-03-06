@@ -1,7 +1,7 @@
 import React, { MouseEventHandler } from "react";
-import classNames from "classnames";
 
 import { Colors } from "types";
+import { StyledHeader, TextLeft, TextRight } from "./HeaderStyles";
 
 interface HeaderProps {
   paddingX?: number;
@@ -15,46 +15,20 @@ interface HeaderProps {
 export const Header: React.FC<HeaderProps> = ({
   paddingX,
   paddingY,
-  left,
-  right,
-  height,
-  color,
+  left = <div />,
+  right = <div />,
+  height = "auto",
+  color = "primary",
 }) => {
-  const classesWrapper = [
-    "component",
-    "header",
-    "px-10",
-    "py-3",
-    "w-full",
-    `bg-${color}`,
-    "text-white",
-    "flex",
-    "overflow-y-hidden",
-  ];
-
   return (
-    <div
-      className={classNames(classesWrapper)}
-      style={{
-        height: height === "auto" ? "auto" : `${height}px`,
-        padding: `${paddingY}px ${paddingX}px`,
-      }}
+    <StyledHeader
+      bgColor={color}
+      height={height}
+      paddingX={paddingX}
+      paddingY={paddingY}
     >
-      <div className={classNames(["flex-1", "self-center", "text-left"])}>
-        {left}
-      </div>
-      <div className={classNames(["flex-none", "self-center", "text-right"])}>
-        {right}
-      </div>
-    </div>
+      <TextLeft>{left}</TextLeft>
+      <TextRight>{right}</TextRight>
+    </StyledHeader>
   );
-};
-
-Header.defaultProps = {
-  color: "primary",
-  paddingY: 75,
-  paddingX: 15,
-  height: "auto",
-  left: <div />,
-  right: <div />,
 };

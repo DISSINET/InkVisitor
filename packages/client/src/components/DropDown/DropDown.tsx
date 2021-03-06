@@ -1,37 +1,34 @@
 import React, { ReactNode } from "react";
-import Select, {
+import {
   OptionsType,
   OptionTypeBase,
   GroupedOptionsType,
   ValueType,
-  Theme,
 } from "react-select";
 
-interface DropDown {
+import { StyledSelect } from "./DropdownStyles";
+
+interface Dropdown {
   options?: OptionsType<OptionTypeBase> | GroupedOptionsType<OptionTypeBase>;
   value?: ValueType<OptionTypeBase>;
   onChange: (selectedOption: ValueType<OptionTypeBase>) => void;
   ref?: React.RefObject<ReactNode>;
+  width?: number;
 }
-export const DropDown: React.FC<DropDown> = ({ options, value, onChange }) => {
+export const Dropdown: React.FC<Dropdown> = ({
+  options,
+  value,
+  onChange,
+  width,
+}) => {
   return (
-    <Select
+    <StyledSelect
       className="react-select-container"
       classNamePrefix="react-select"
       value={value}
       onChange={onChange}
       options={options}
-      theme={(theme: Theme) => ({
-        ...theme,
-        borderRadius: 0,
-        colors: {
-          ...theme.colors,
-          text: "white",
-          primary25: "rgba(212, 219, 244, 0.3)",
-          primary50: "rgba(212, 219, 244, 0.3)",
-          primary: "rgb(9, 16, 52)",
-        },
-      })}
+      width={width}
     />
   );
 };

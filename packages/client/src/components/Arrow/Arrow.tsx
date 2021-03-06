@@ -1,7 +1,7 @@
 import React, { MouseEventHandler } from "react";
-import classNames from "classnames";
 
 import { Colors } from "types";
+import { StyledArrow } from "./ArrowStyles";
 
 type Rotation = "top" | "bottom" | "right" | "left";
 
@@ -14,59 +14,23 @@ interface ArrowProps {
 }
 
 export const Arrow: React.FC<ArrowProps> = ({
-  color,
-  rotation,
-  size,
-  margin,
-  onClick,
-}) => {
-  const classes = ["component", "arrow", "w-0", "h-0", `border-${color}`];
-
-  const sizeValidated = size || 13;
-  const marginValidated = margin || 4;
-  const sizeMinusMargin = sizeValidated + marginValidated;
-  const triangleMultiplier = 1.5;
-
-  const borderStyles: React.CSSProperties = {
-    borderBottomColor: rotation === "top" ? "" : "transparent",
-    borderTopColor: rotation === "bottom" ? "" : "transparent",
-    borderLeftColor: rotation === "right" ? "" : "transparent",
-    borderRightColor: rotation === "left" ? "" : "transparent",
-
-    marginTop:
-      rotation === "top" ? `-${sizeValidated * triangleMultiplier}px` : 0,
-    marginBottom:
-      rotation === "bottom" ? `-${sizeValidated * triangleMultiplier}px` : 0,
-    marginLeft:
-      rotation === "left"
-        ? `-${sizeValidated * triangleMultiplier - marginValidated}px`
-        : margin,
-    marginRight:
-      rotation === "right"
-        ? `-${sizeValidated * triangleMultiplier - marginValidated}px`
-        : margin,
-
-    borderWidth:
-      rotation === "top" || rotation === "bottom"
-        ? `${sizeValidated * triangleMultiplier}px ${sizeValidated}px`
-        : `${sizeValidated}px ${sizeValidated * triangleMultiplier}px`,
-  };
-
-  return (
-    <div
-      style={borderStyles}
-      onClick={onClick}
-      className={classNames(classes)}
-    ></div>
-  );
-};
-
-Arrow.defaultProps = {
-  onClick: () => {
+  color = "primary",
+  rotation = "bottom",
+  size = 13,
+  margin = 5,
+  onClick = () => {
     // do nothing
   },
-  color: "primary",
-  rotation: "bottom",
-  size: 13,
-  margin: 5,
+}) => {
+  return (
+    <StyledArrow
+      onClick={onClick}
+      color={color}
+      rotation={rotation}
+      margin={margin}
+      sizeValidated={size || 13}
+      marginValidated={margin || 4}
+      triangleMultiplier={1.5}
+    ></StyledArrow>
+  );
 };
