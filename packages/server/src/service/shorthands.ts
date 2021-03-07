@@ -105,6 +105,16 @@ export async function findActantById<T = IAction | IStatement | ITerritory>(
   return data.length == 0 ? null : data[0];
 }
 
+export async function findActants<T = IAction | IStatement | ITerritory>(
+  db: Db,
+  additionalFilter: object = {}
+): Promise<T[]> {
+  return await rethink
+    .table("actants")
+    .filter(additionalFilter)
+    .run(db.connection);
+}
+
 export async function getActantUsage(db: Db, id: string): Promise<number> {
   return await rethink
     .table("actants")

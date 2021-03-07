@@ -23,7 +23,7 @@ import {
   findActantById,
 } from "@service/shorthands";
 import * as fs from "fs";
-import territory from "@modules/territory";
+import territory from "@modules/territories";
 import { expect } from "chai";
 
 const should = chai.should();
