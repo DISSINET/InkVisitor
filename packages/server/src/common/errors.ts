@@ -188,6 +188,25 @@ class TerrytoryInvalidMove extends Error {
   }
 }
 
+class StatementInvalidMove extends Error {
+  public static code = "cannot move statement";
+
+  constructor(m: string) {
+    super(m);
+
+    // Set the prototype explicitly.
+    Object.setPrototypeOf(this, StatementInvalidMove.prototype);
+  }
+
+  statusCode(): number {
+    return 500;
+  }
+
+  toString(): string {
+    return StatementInvalidMove.code;
+  }
+}
+
 export interface IError extends Error {
   statusCode(): number;
 }
@@ -202,4 +221,5 @@ export {
   TerritoriesBrokenError,
   TerritoryDoesNotExits,
   TerrytoryInvalidMove,
+  StatementInvalidMove,
 };
