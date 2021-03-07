@@ -70,6 +70,7 @@ export default Router()
       }
 
       let root: ITerritory;
+      console.log(parentMap[""]);
       if (parentMap[""].length != 1) {
         throw new TerritoriesBrokenError("Territories tree is broken");
       } else {
@@ -135,9 +136,7 @@ export default Router()
         childs.splice(currentIndex, 1);
       }
 
-      childs = insertTerritoryToChilds(childs, newIndex, territory).sort(
-        sortTerritories
-      );
+      childs = insertTerritoryToChilds(childs, newIndex, territory);
 
       for (let i = 0; i < childs.length; i++) {
         const child = childs[i];
