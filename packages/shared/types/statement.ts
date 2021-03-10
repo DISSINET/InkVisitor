@@ -8,7 +8,7 @@ export interface IStatement extends IActant {
             id: string;
             order: number;
         };
-        labels: ILabel[];
+        //labels: ILabel[];
         references: {
             id: string;
             resource: string;
