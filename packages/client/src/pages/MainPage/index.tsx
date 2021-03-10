@@ -1,9 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { connect } from "react-redux";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
-
-import { Entities } from "types";
 
 import { toast } from "react-toastify";
 
@@ -47,12 +44,12 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
                 height={heightHeader}
                 paddingY={0}
                 paddingX={10}
-                left={<div className="text-4xl">InkVisitor</div>}
+                left={<div>InkVisitor</div>}
                 right={
-                    <div className="flex">
+                    <div>
                         {/* {user ? (
                             <>
-                                <div className="text-sm inline m-2">
+                                <div ">
                                     logged as {api.getUser().name}
                                 </div>
                                 <Button
@@ -72,41 +69,33 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
                 }
             />
             <DndProvider backend={HTML5Backend}>
-                <div className="flex">
-                    <Box
-                        height={heightContent}
-                        width={200}
-                        label={"Territories"}
-                    >
+                <div style={{ display: "flex" }}>
+                    <Box height={heightContent} width={200} label="Territories">
                         <TerritoryTreeBox />
                     </Box>
-                    <Box
-                        height={heightContent}
-                        width={650}
-                        label={"Statements"}
-                    >
+                    <Box height={heightContent} width={650} label="Statements">
                         <StatementListBox />
                     </Box>
-                    <div className="flex flex-col">
+                    <div>
+                        <Box height={400} width={720} label="Editor">
+                            <StatementEditorBox />
+                        </Box>
                         <Box
                             height={heightContent - 400}
                             width={720}
-                            label={"Editor"}
+                            label="Detail"
                         >
-                            <StatementEditorBox />
-                        </Box>
-                        <Box height={400} width={720} label={"Detail"}>
                             <ActantDetailBox />
                         </Box>
                     </div>
-                    <div className="flex flex-col">
-                        <Box height={400} width={350} label={"Search"}>
+                    <div>
+                        <Box height={400} width={350} label="Search">
                             <ActantSearchBox />
                         </Box>
                         <Box
                             height={heightContent - 400}
                             width={350}
-                            label={"Bookmarks"}
+                            label="Bookmarks"
                         >
                             <ActantBookmarkBox />
                         </Box>
@@ -119,3 +108,5 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
         </>
     );
 };
+
+export default MainPage;
