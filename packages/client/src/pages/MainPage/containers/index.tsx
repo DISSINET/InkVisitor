@@ -1,4 +1,5 @@
 import { ActantSearchBox } from "./ActantSearchBox/ActantSearchBox";
+import { ActantDetailBox } from "./ActantDetailBox/ActantDetailBox";
 import { ActantSuggester } from "./ActantSuggester/ActantSuggester";
 import { ActionModal } from "./ActionModal/ActionModal";
 import { ActantBookmarkBox } from "./ActantBookmarkBox/ActantBookmarkBox";
@@ -10,6 +11,7 @@ import { UserOptionsModal } from "./UserOptionsModal/UserOptionsModal";
 
 export {
     ActantSearchBox,
+    ActantDetailBox,
     ActantSuggester,
     ActionModal,
     ActantBookmarkBox,
