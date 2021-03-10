@@ -8,8 +8,8 @@ import { IUser, IBookmarkFolder, IStoredTerritory } from "./user";
 import { IResource } from "./resource";
 import { IResponseDetail } from "./response-detail";
 import {
-  IResponseBookmarks,
-  IResponseBookmarkFolder,
+    IResponseBookmarks,
+    IResponseBookmarkFolder,
 } from "./response-bookmarks";
 import { IResponseAdministration } from "./response-administration";
 import { IResponseActant } from "./response-actant";
@@ -23,33 +23,30 @@ import { ITerritory } from "./territory";
 import { IOption } from "./option";
 import { IResponseGeneric } from "./response-generic";
 
-type IDictionary = IOption[];
-
 export type {
-  IAudit,
-  IAction,
-  IActant,
-  IEntity,
-  IDictionary,
-  ILabel,
-  IOption,
-  IStatement,
-  ITerritory,
-  IProp,
-  IUser,
-  IBookmarkFolder,
-  IStoredTerritory,
-  IResource,
-  IResponseActant,
-  IResponseAction,
-  IResponseDetail,
-  IResponseBookmarks,
-  IResponseBookmarkFolder,
-  IResponseAdministration,
-  IResponseStatement,
-  IResponseTerritory,
-  IResponseTree,
-  IResponseUser,
-  IResponseStoredTerritory,
-  IResponseGeneric,
+    IAudit,
+    IAction,
+    IActant,
+    IEntity,
+    ILabel,
+    IOption,
+    IStatement,
+    ITerritory,
+    IProp,
+    IUser,
+    IBookmarkFolder,
+    IStoredTerritory,
+    IResource,
+    IResponseActant,
+    IResponseAction,
+    IResponseDetail,
+    IResponseBookmarks,
+    IResponseBookmarkFolder,
+    IResponseAdministration,
+    IResponseStatement,
+    IResponseTerritory,
+    IResponseTree,
+    IResponseUser,
+    IResponseStoredTerritory,
+    IResponseGeneric,
 };
