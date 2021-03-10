@@ -1,4 +1,4 @@
-import { IDictionary } from "./";
+import { IOption } from "./";
 import { languageDict } from "./../dictionaries";
 
 const languageValues = languageDict.map((i) => i.value);
