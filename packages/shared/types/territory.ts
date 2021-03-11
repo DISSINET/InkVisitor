@@ -13,6 +13,6 @@ export interface ITerritory extends IActant {
 }
 
 interface ParentTerritoryI {
-    id: string;
+    id: string; // '' in case of root
     order: number;
 }
