@@ -23,7 +23,7 @@ export const TerritoryTreeBox: React.FC = () => {
             <div>
                 {renderTerritoryTag(territory.labels[0].value, territory.id)}
 
-                <div style={{ marginLeft: `${5 - lvl}em` }}>
+                <div style={{ marginLeft: `1em` }}>
                     {children.map((child: any) =>
                         renderTerritory(
                             child.territory,

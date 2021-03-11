@@ -15,7 +15,10 @@ import { IResponseAdministration } from "./response-administration";
 import { IResponseActant } from "./response-actant";
 import { IResponseAction } from "./response-action";
 import { IResponseStatement } from "./response-statement";
-import { IResponseTree } from "./response-tree";
+import {
+    IResponseTree,
+    IResponseTreeTerritoryComponent,
+} from "./response-tree";
 import { IResponseTerritory } from "./response-territory";
 import { IResponseUser, IResponseStoredTerritory } from "./response-user";
 import { IStatement } from "./statement";
@@ -46,6 +49,7 @@ export type {
     IResponseStatement,
     IResponseTerritory,
     IResponseTree,
+    IResponseTreeTerritoryComponent,
     IResponseUser,
     IResponseStoredTerritory,
     IResponseGeneric,
