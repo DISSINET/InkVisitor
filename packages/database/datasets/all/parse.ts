@@ -1,13 +1,26 @@
 var { loadSheet } = require("./../util/loadsheet");
 var { v4 } = require("uuid");
 var fs = require("fs");
-const { uuid } = require("rethinkdb/ast");
+
+import {
+    IAudit,
+    IAction,
+    IActant,
+    IEntity,
+    ILabel,
+    IOption,
+    IStatement,
+    ITerritory,
+    IResource,
+    IProp,
+    IUser,
+} from "./../../../shared/types";
 
 /**
  * waterfall processing
  */
 var actants = [];
-var actions = [];
+var actions: IAction[] = [];
 
 var propsConfig = {};
 
@@ -21,25 +34,28 @@ const loadStatementsTables = async (next) => {
      * actions
      */
     tableActions.forEach((action) => {
-        actions.push({
+        const newAction: IAction = {
             id: action.id_action_or_relation,
             parent: action.parent_id,
             note: action.note,
             labels: [
                 {
-                    label: action.action_or_relation_english,
-                    language: "en",
+                    id: v4(),
+                    value: action.action_or_relation_english,
+                    lang: "en",
                 },
                 {
-                    label: action.action_or_relation,
-                    language: "la",
+                    id: v4(),
+                    value: action.action_or_relation,
+                    lang: "la",
                 },
             ],
             types: [],
             valencies: [],
             rulesActants: [],
             rulesProperties: [],
-        });
+        };
+        actions.push(newAction);
     });
 
     // parse the table of territories
@@ -220,12 +236,17 @@ const loadStatementsTables = async (next) => {
         });
 
         // territories
-        const territoryIds = [
-            ...new Set(data.map((s) => s.text_part_id).filter((a) => a)),
-        ];
+        const territoryIds = new Set();
+
+        data.forEach((s) => {
+            const textPartId = s.text_part_id;
+            if (textPartId) {
+                territoryIds.add(textPartId);
+            }
+        });
 
         // add sub-territories
-        territoryIds.forEach((ti, territoryId) => {
+        territoryIds.forEach((ti: number, territoryId: string) => {
             addTerritoryActant(
                 territoryId,
                 territoryId,
@@ -240,7 +261,7 @@ const loadStatementsTables = async (next) => {
             // the main statement
 
             // parse the statement id but keep the order somehow
-            const mainStatement = {
+            const mainStatement: IStatement = {
                 id: v4(),
                 class: "S",
                 labels: [
@@ -272,11 +293,11 @@ const loadStatementsTables = async (next) => {
                         },
                     ],
                     tags: statement.tags_id.split(" #").filter((t) => t),
-                    certainty: parseInt(statement.certainty) || "1",
-                    elvl: parseInt(statement.epistemological_level) || "1",
+                    certainty: statement.certainty || "1",
+                    elvl: statement.epistemological_level || "1",
 
                     // TODO handle modality
-                    modality: parseInt(statement.modality) || "1",
+                    modality: statement.modality || "1",
                     text: statement.text,
                     note: `NOTE: ${statement.note}, LOCATION: ${statement.location_text}, TIME: ${statement.time_note}`,
                     props: [],
@@ -351,12 +372,20 @@ const loadStatementsTables = async (next) => {
 
                 mainStatement.data.props.push({
                     id: v4(),
-                    order: 1,
-                    origin: statement.id,
-                    type: propActant1Id,
-                    value: propActant2Id,
                     elvl: "1",
                     certainty: "1",
+                    modality: "1",
+                    origin: statement.id,
+                    type: {
+                        id: propActant1Id,
+                        certainty: "1",
+                        elvl: "1",
+                    },
+                    value: {
+                        id: propActant2Id,
+                        certainty: "1",
+                        elvl: "1",
+                    },
                 });
             }
 
@@ -380,11 +409,6 @@ const loadStatementsTables = async (next) => {
  */
 const rootTerritory = "T0";
 
-const created = {
-    user: "1",
-    time: new Date().valueOf(),
-};
-
 const checkValidId = (idValue) => {
     return (
         idValue &&
@@ -402,8 +426,8 @@ const addEntityActant = (id, label, type) => {
             class: type,
             labels: [
                 {
-                    id: string,
-                    value: label.trim(),
+                    id: id,
+                    value: label ? label.trim() : label,
                     lang: "en",
                     primary: true,
                 },
@@ -411,10 +435,15 @@ const addEntityActant = (id, label, type) => {
         });
     }
 };
-const addTerritoryActant = (id, label, parentId, order) => {
+const addTerritoryActant = (
+    id: string,
+    label: string,
+    parentId: string | false,
+    order: number
+) => {
     if (id) {
         if (!actants.some((a) => a.id == id)) {
-            actants.push({
+            const newTerritory: ITerritory = {
                 id,
                 class: "T",
                 labels: [
@@ -432,15 +461,17 @@ const addTerritoryActant = (id, label, parentId, order) => {
                     },
                     type: "",
                     content: "",
-                    lang: "1",
+                    lang: "en",
                 },
-            });
+            };
+
+            actants.push(newTerritory);
         }
     }
 };
 const addResourceActant = (id, label) => {
     if (id) {
-        actants.push({
+        const newResource: IResource = {
             id,
             class: "R",
             labels: [
@@ -452,18 +483,22 @@ const addResourceActant = (id, label) => {
                 },
             ],
             data: {
+                content: "",
                 link: "",
                 type: "1",
-                lang: "1",
+                lang: "en",
             },
-        });
+        };
+        actants.push(newResource);
     }
 };
 
 // Parsing props in entity tables
 const parseEntityPropsInRow = (row, territory) => {
-    Object.keys(row).forEach((tpi, tableProp) => {
-        if (Object.keys(propsConfig).includes(tableProp)) {
+    const entityProps = Object.keys(row) as Array<keyof string>;
+
+    entityProps.forEach((tpi: number, tableProp) => {
+        if (Object.keys(propsConfig).includes(tableProp.toString())) {
             // check empty value
             if (row[tableProp]) {
                 const propType = propsConfig[tableProp].type;
@@ -515,7 +550,7 @@ const createEmptyPropStatement = (
     order
 ) => {
     if (idSubject && idActant1 && idActant2) {
-        actants.push({
+        const newEmptyStatement: IStatement = {
             id: v4(),
             class: "S",
 
@@ -558,7 +593,8 @@ const createEmptyPropStatement = (
                     },
                 ],
             },
-        });
+        };
+        actants.push(newEmptyStatement);
     }
 };
 
@@ -641,19 +677,19 @@ const processActant = (
     codingSheetEntities
 ) => {
     if (checkValidId(actantIdValues)) {
-        actantIdValues.split(" #").forEach((ai, actantIdValue) => {
+        actantIdValues.split(" #").forEach((ai, actantIdValue: string) => {
             // asign elvl and certainty
 
-            let elvl = actantIdValue.includes("[") ? "2" : "1";
-            let certainty = "1";
+            let elvl: string = actantIdValue.includes("[") ? "2" : "1";
+            let certainty: string = "1";
 
             // remove brackets
-            const actantIdClean = actantIdValue
+            const actantIdClean: string = actantIdValue
                 .replace("[", "")
                 .replace("]", "");
 
             // chceck tilda in value and create new actant
-            const actantId =
+            const actantId: string =
                 createNewActantIfNeeded(actantIdClean) ||
                 addResourceToEntityId(actantIdClean, codingSheetEntities);
 
@@ -685,7 +721,6 @@ const processActant = (
                         codingSheetEntities
                     );
 
-                console.log(propActant1Id);
                 /**
                  * TODO
                  * elvl and certainty
@@ -693,10 +728,19 @@ const processActant = (
                 statement.data.props.push({
                     id: v4(),
                     origin: statementActantId,
-                    type: propActant1Id,
-                    value: propActant2Id,
                     elvl: "1",
                     certainty: "1",
+                    modality: "1",
+                    type: {
+                        id: propActant1Id,
+                        certainty: "1",
+                        elvl: "1",
+                    },
+                    value: {
+                        id: propActant2Id,
+                        certainty: "1",
+                        elvl: "1",
+                    },
                 });
             }
         });
