@@ -19,12 +19,19 @@ import {
 /**
  * waterfall processing
  */
-var actants = [];
+var actants: IActant[] = [];
 var actions: IAction[] = [];
 
-var propsConfig = {};
+type IConceptProp = {
+    type: "value" | "concept";
+    conceptId: string;
+    mappingDict?: { [id: string]: string };
+};
+var propsConfig: {
+    [id: string]: IConceptProp;
+} = {};
 
-const loadStatementsTables = async (next) => {
+const loadStatementsTables = async (next: Function) => {
     const tableActions = await loadSheet({
         spread: "1vzY6opQeR9hZVW6fmuZu2sgy_izF8vqGGhBQDxqT_eQ",
         sheet: "Statements",
@@ -33,7 +40,7 @@ const loadStatementsTables = async (next) => {
     /**
      * actions
      */
-    tableActions.forEach((action) => {
+    tableActions.forEach((action: any) => {
         const newAction: IAction = {
             id: action.id_action_or_relation,
             parent: action.parent_id,
@@ -66,7 +73,7 @@ const loadStatementsTables = async (next) => {
 
     addTerritoryActant("entity-tables", "entity tables", "T0", 0);
 
-    tableTexts.forEach((ti, text) => {
+    tableTexts.forEach((text: { id: string; label: string }, ti: number) => {
         addTerritoryActant(text.id, text.label, "T0", ti + 1);
     });
 
@@ -77,16 +84,37 @@ const loadStatementsTables = async (next) => {
         spread: "13eVorFf7J9R8YzO7TmJRVLzIIwRJS737r7eFbH1boyE",
         sheet: "Manuscripts",
     });
-    const tableResources = await loadSheet({
+
+    type IRowResources = {
+        type: string;
+        id: string;
+        label: string;
+        text_id: string;
+        spreadsheet_id: string;
+        sheet_name: string;
+        entity_type: string;
+        spread: string;
+        sheet: string;
+    };
+    type ICodingSheet = {
+        id: string;
+        textId: string;
+        label: string;
+        spread: string;
+        sheet: string;
+        entities: { [key: string]: string };
+    };
+
+    const tableResources: IRowResources[] = await loadSheet({
         spread: "13eVorFf7J9R8YzO7TmJRVLzIIwRJS737r7eFbH1boyE",
         sheet: "Resources",
     });
 
-    tableManuscripts.forEach((manuscript) => {
+    tableManuscripts.forEach((manuscript: { id: string; label: string }) => {
         addResourceActant(manuscript.id, manuscript.label);
     });
 
-    const codingSheets = tableResources
+    const codingSheets: ICodingSheet[] = tableResources
         .filter((row) => row["type"] === "coding sheet")
         .map((row) => {
             return {
@@ -117,13 +145,25 @@ const loadStatementsTables = async (next) => {
      *  */
     const conceptSheet = entitySheets.find((es) => es.id === "R0010");
 
-    const conceptsData = await loadSheet({
-        spread: conceptSheet.spread,
-        sheet: conceptSheet.sheet,
-    });
+    const conceptsData = conceptSheet
+        ? await loadSheet({
+              spread: conceptSheet.spread,
+              sheet: conceptSheet.sheet,
+          })
+        : [];
 
-    const propsList = {};
-    conceptsData.forEach((conceptRow) => {
+    type IConceptRow = {
+        masterlists_column_name: string;
+        masterlists_column_value: string;
+        instance_entity_type: string;
+        id: string;
+    };
+
+    const propsList: {
+        [id: string]: { id: string; value: string; type: string }[];
+    } = {};
+
+    conceptsData.forEach((conceptRow: IConceptRow) => {
         const entityTableNames = conceptRow.instance_entity_type.split(" #");
         entityTableNames.forEach((entityTableName) => {
             const type = conceptRow.masterlists_column_name;
@@ -150,25 +190,31 @@ const loadStatementsTables = async (next) => {
         });
     });
 
-    Object.keys(propsList).forEach((propName) => {
+    Object.keys(propsList).forEach((propName: string) => {
         const propValues = propsList[propName];
+
         if (propValues.length === 1) {
-            propsConfig[propName] = {
+            const prop: IConceptProp = {
                 type: "value",
                 conceptId: propValues[0].id,
             };
+            propsConfig[propName] = prop;
         } else {
             const conceptRow = propValues.find((v) => v.value === "NA");
             if (conceptRow) {
-                propsConfig[propName] = {
+                const prop: IConceptProp = {
                     type: "concept",
                     conceptId: conceptRow.id,
                     mappingDict: {},
                 };
+
                 propValues.forEach((propValue) => {
-                    propsConfig[propName]["mappingDict"][propValue.value] =
-                        propValue.id;
+                    if (prop["mappingDict"]) {
+                        prop["mappingDict"][propValue.value] = propValue.id;
+                    }
                 });
+
+                propsConfig[propName] = prop;
             } else {
                 console.log("warning: wrong prop:", propName, propValues);
             }
@@ -195,7 +241,7 @@ const loadStatementsTables = async (next) => {
             esi
         );
 
-        data.forEach((eri, entityRow) => {
+        data.forEach((entityRow: any, eri: number) => {
             const entityRowTerritory =
                 entitySheetTerritory + "_" + entityRow.id;
 
@@ -209,7 +255,14 @@ const loadStatementsTables = async (next) => {
             addEntityActant(
                 entitySheet.id + "_" + entityRow.id,
                 entityRow.label,
-                entitySheet.entityType
+                entitySheet.entityType as
+                    | "P"
+                    | "G"
+                    | "O"
+                    | "C"
+                    | "L"
+                    | "V"
+                    | "E"
             );
 
             parseEntityPropsInRow(entityRow, entityRowTerritory);
@@ -236,17 +289,17 @@ const loadStatementsTables = async (next) => {
         });
 
         // territories
-        const territoryIds = new Set();
+        const territoryIds: string[] = [];
 
-        data.forEach((s) => {
+        data.forEach((s: { text_part_id: string }) => {
             const textPartId = s.text_part_id;
-            if (textPartId) {
-                territoryIds.add(textPartId);
+            if (textPartId && !territoryIds.includes(textPartId)) {
+                territoryIds.push(textPartId);
             }
         });
 
         // add sub-territories
-        territoryIds.forEach((ti: number, territoryId: string) => {
+        territoryIds.forEach((territoryId: string, ti: number) => {
             addTerritoryActant(
                 territoryId,
                 territoryId,
@@ -257,7 +310,7 @@ const loadStatementsTables = async (next) => {
             );
         });
 
-        data.forEach((si, statement) => {
+        data.forEach((statement: any, si: number) => {
             // the main statement
 
             // parse the statement id but keep the order somehow
@@ -292,7 +345,9 @@ const loadStatementsTables = async (next) => {
                             type: "S",
                         },
                     ],
-                    tags: statement.tags_id.split(" #").filter((t) => t),
+                    tags: statement.tags_id
+                        .split(" #")
+                        .filter((t: string) => t),
                     certainty: statement.certainty || "1",
                     elvl: statement.epistemological_level || "1",
 
@@ -409,7 +464,7 @@ const loadStatementsTables = async (next) => {
  */
 const rootTerritory = "T0";
 
-const checkValidId = (idValue) => {
+const checkValidId = (idValue: string) => {
     return (
         idValue &&
         idValue !== "???" &&
@@ -419,20 +474,31 @@ const checkValidId = (idValue) => {
     );
 };
 
-const addEntityActant = (id, label, type) => {
+/***
+ * TODO: logical type
+ */
+const addEntityActant = (
+    id: string,
+    label: string,
+    type: "P" | "G" | "O" | "C" | "L" | "V" | "E"
+) => {
+    const newEntityActant: IEntity = {
+        id,
+        class: type,
+        labels: [
+            {
+                id: id,
+                value: label ? label.trim() : label,
+                lang: "en",
+                primary: true,
+            },
+        ],
+        data: {
+            logicalType: "1",
+        },
+    };
     if (id) {
-        actants.push({
-            id,
-            class: type,
-            labels: [
-                {
-                    id: id,
-                    value: label ? label.trim() : label,
-                    lang: "en",
-                    primary: true,
-                },
-            ],
-        });
+        actants.push(newEntityActant);
     }
 };
 const addTerritoryActant = (
@@ -469,7 +535,7 @@ const addTerritoryActant = (
         }
     }
 };
-const addResourceActant = (id, label) => {
+const addResourceActant = (id: string, label: string) => {
     if (id) {
         const newResource: IResource = {
             id,
@@ -494,10 +560,10 @@ const addResourceActant = (id, label) => {
 };
 
 // Parsing props in entity tables
-const parseEntityPropsInRow = (row, territory) => {
+const parseEntityPropsInRow = (row: any, territory: string) => {
     const entityProps = Object.keys(row) as Array<keyof string>;
 
-    entityProps.forEach((tpi: number, tableProp) => {
+    entityProps.forEach((tableProp: any, tpi: number) => {
         if (Object.keys(propsConfig).includes(tableProp.toString())) {
             // check empty value
             if (row[tableProp]) {
@@ -506,7 +572,7 @@ const parseEntityPropsInRow = (row, territory) => {
                 // CONCEPT type
                 if (propType === "concept") {
                     const conceptValueId =
-                        propsConfig[tableProp].mappingDict[row[tableProp]];
+                        propsConfig[tableProp].mappingDict?.[row[tableProp]];
 
                     if (conceptValueId) {
                         createEmptyPropStatement(
@@ -543,11 +609,11 @@ const parseEntityPropsInRow = (row, territory) => {
  * create simple statement HAS without any props
  */
 const createEmptyPropStatement = (
-    idSubject,
-    idActant1,
-    idActant2,
-    territory,
-    order
+    idSubject: string,
+    idActant1: string,
+    idActant2: string,
+    territory: string,
+    order: number
 ) => {
     if (idSubject && idActant1 && idActant2) {
         const newEmptyStatement: IStatement = {
@@ -598,7 +664,10 @@ const createEmptyPropStatement = (
     }
 };
 
-const addResourceToEntityId = (id, codeSheetResources) => {
+const addResourceToEntityId = (
+    id: string,
+    codeSheetResources: { [key: string]: string }
+) => {
     const entityId = id[0];
 
     if (entityId in codeSheetResources) {
@@ -609,10 +678,10 @@ const addResourceToEntityId = (id, codeSheetResources) => {
 };
 
 const processLocation = (
-    statement,
-    locationWhereIds,
-    locationFromIds,
-    locationToIds
+    statement: IStatement,
+    locationWhereIds: string,
+    locationFromIds: string,
+    locationToIds: string
 ) => {
     const locationTypes = [
         {
@@ -647,20 +716,38 @@ const processLocation = (
                         .replace(">", "");
                     statement.data.props.push({
                         id: v4(),
-                        origin: statement.id,
-                        type: sameLocationType,
-                        value: statementLocationId,
                         elvl: "1",
                         certainty: "1",
+                        modality: "1",
+                        origin: statement.id,
+                        type: {
+                            id: sameLocationType,
+                            certainty: "1",
+                            elvl: "1",
+                        },
+                        value: {
+                            id: statementLocationId,
+                            certainty: "1",
+                            elvl: "1",
+                        },
                     });
                 } else {
                     statement.data.props.push({
                         id: v4(),
-                        origin: statement.id,
-                        type: locationType.concept,
-                        value: locationIdValue,
                         elvl: "1",
                         certainty: "1",
+                        modality: "1",
+                        origin: statement.id,
+                        type: {
+                            id: locationType.concept,
+                            certainty: "1",
+                            elvl: "1",
+                        },
+                        value: {
+                            id: locationIdValue,
+                            certainty: "1",
+                            elvl: "1",
+                        },
                     });
                 }
             });
@@ -669,15 +756,15 @@ const processLocation = (
 };
 
 const processActant = (
-    statement,
-    position,
-    actantIdValues,
-    propActant1Value,
-    propActant2Value,
-    codingSheetEntities
+    statement: IStatement,
+    position: string,
+    actantIdValues: string,
+    propActant1Value: string,
+    propActant2Value: string,
+    codingSheetEntities: { [key: string]: string }
 ) => {
     if (checkValidId(actantIdValues)) {
-        actantIdValues.split(" #").forEach((ai, actantIdValue: string) => {
+        actantIdValues.split(" #").forEach((actantIdValue: string) => {
             // asign elvl and certainty
 
             let elvl: string = actantIdValue.includes("[") ? "2" : "1";
@@ -694,7 +781,7 @@ const processActant = (
                 addResourceToEntityId(actantIdClean, codingSheetEntities);
 
             const statementActantId = v4();
-            statement.actants.push({
+            statement.data.actants.push({
                 id: statementActantId,
                 actant: actantId,
                 position: position,
@@ -748,13 +835,18 @@ const processActant = (
 };
 
 // add a new actant when the tilda ~ is present in the value and returns id of that new actant - otherwise return false
-const createNewActantIfNeeded = (actantValue) => {
+const createNewActantIfNeeded = (actantValue: string) => {
     if (actantValue.includes("~")) {
         const newActantId = v4();
-        const newActantType = actantValue.split("~")[1];
-        const newActantLabel = actantValue.split("~")[2];
+        const newActantType: string = actantValue.split("~")[1];
+        const newActantLabel: string = actantValue.split("~")[2];
 
-        addEntityActant(newActantId, newActantLabel, newActantType);
+        if (["P", "G", "O", "C", "L", "V", "E"].indexOf(newActantType) > -1)
+            addEntityActant(
+                newActantId,
+                newActantLabel,
+                newActantType as "P" | "G" | "O" | "C" | "L" | "V" | "E"
+            );
 
         return newActantId;
     } else {
@@ -763,6 +855,6 @@ const createNewActantIfNeeded = (actantValue) => {
 };
 
 loadStatementsTables(() => {
-    fs.writeFileSync("import/all/actants.json", JSON.stringify(actants));
-    fs.writeFileSync("import/all/actions.json", JSON.stringify(actions));
+    fs.writeFileSync("datasets/all/actants.json", JSON.stringify(actants));
+    fs.writeFileSync("datasets/all/actions.json", JSON.stringify(actions));
 });
