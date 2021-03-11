@@ -1,0 +1,38 @@
+[
+  {
+    "id": "1",
+    "name": "admin",
+    "email": "admin@admin.com",
+    "password": "admin",
+    "options": {
+      "defaultTerritory": "",
+      "defaultLanguage": "",
+      "searchLanguages": []
+    },
+    "bookmarks": null
+  },
+  {
+    "id": "2",
+    "name": "adam",
+    "email": "adam@gmail.com",
+    "password": "adam",
+    "options": {
+      "defaultTerritory": "",
+      "defaultLanguage": "",
+      "searchLanguages": []
+    },
+    "bookmarks": null
+  },
+  {
+    "id": "3",
+    "name": "test",
+    "email": "test@gmail.com",
+    "password": "test",
+    "options": {
+      "defaultTerritory": "",
+      "defaultLanguage": "",
+      "searchLanguages": []
+    },
+    "bookmarks": null
+  }
+]

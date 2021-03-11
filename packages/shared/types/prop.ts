@@ -2,6 +2,7 @@ export interface IProp {
     id: string;
     elvl: string;
     certainty: string;
+    modality: string;
     origin: string;
 
     type: {
