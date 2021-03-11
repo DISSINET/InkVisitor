@@ -6,12 +6,11 @@
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1",
         "parse": "ts-node datasets/all/parse.ts",
-        "import_old:remote": "node scripts/import.js all prod",
-        "import_old:local": "node scripts/import.js all devel",
-        "import:remote": "npx ts-node  scripts/import-rethinkdb.ts all remote",
-        "import:all": "npx ts-node  scripts/import-rethinkdb.ts all local",
-        "import:mock": "npx ts-node  scripts/import-rethinkdb.ts mock local",
-        "import:sellan": "npx ts-node  scripts/import-rethinkdb.ts sellan local"
+        "import-remote:all": "npx ts-node scripts/import.ts all prod",
+        "import-local:all": "npx ts-node scripts/import.ts all local",
+        "import-remote:mock": "npx ts-node scripts/import.ts mock prod",
+        "import-local:mock": "npx ts-node scripts/import.ts mock local",
+        "import:remote": "npx ts-node  scripts/import.ts all remote"
     },
     "author": "",
     "license": "ISC",
