@@ -7,8 +7,12 @@ import "app.css";
 import MainPage from "./pages/MainPage";
 import GlobalStyle from "Theme/global";
 
-interface AppProps {}
+import { QueryClient, QueryClientProvider, useQuery } from "react-query";
+import { ReactQueryDevtools } from "react-query/devtools";
 
+const queryClient = new QueryClient();
+
+interface AppProps {}
 export const App: React.FC<AppProps> = () => {
     const [size, setSize] = useState([0, 0]);
 
@@ -24,15 +28,20 @@ export const App: React.FC<AppProps> = () => {
     return (
         <ThemeProvider theme={theme}>
             <GlobalStyle />
-            <BrowserRouter basename="apps/inkvisitor">
-                <Switch>
-                    <Route
-                        path="/:territoryId?/:statementId?"
-                        exact
-                        render={(props) => <MainPage {...props} size={size} />}
-                    />
-                </Switch>
-            </BrowserRouter>
+            <QueryClientProvider client={queryClient}>
+                <BrowserRouter basename="apps/inkvisitor">
+                    <Switch>
+                        <Route
+                            path="/:territoryId?/:statementId?"
+                            exact
+                            render={(props) => (
+                                <MainPage {...props} size={size} />
+                            )}
+                        />
+                    </Switch>
+                </BrowserRouter>
+                <ReactQueryDevtools initialIsOpen />
+            </QueryClientProvider>
         </ThemeProvider>
     );
 };

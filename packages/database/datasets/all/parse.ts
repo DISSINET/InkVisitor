@@ -49,12 +49,12 @@ const loadStatementsTables = async (next: Function) => {
                 {
                     id: v4(),
                     value: action.action_or_relation_english,
-                    lang: "en",
+                    lang: "EN",
                 },
                 {
                     id: v4(),
                     value: action.action_or_relation,
-                    lang: "la",
+                    lang: "LA",
                 },
             ],
             types: [],
@@ -321,7 +321,7 @@ const loadStatementsTables = async (next: Function) => {
                     {
                         value: statement.id,
                         id: v4(),
-                        lang: "en",
+                        lang: "EN",
                         primary: true,
                     },
                 ],
