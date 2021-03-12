@@ -6,7 +6,6 @@ import { apiPath } from "../../common/constants";
 import app from "../../Server";
 import { createUser, getActantUsage } from "../../service/shorthands";
 import { Db } from "@service/RethinkDB";
-import { IResponseBookmarks } from "@shared/types";
 
 const should = chai.should();
 const expect = chai.expect;
@@ -42,6 +41,11 @@ describe("Users bookmarksGet", function () {
         role: "1",
         storedTerritories: [],
         rights: [],
+        options: {
+          defaultLanguage: "",
+          defaultTerritory: "",
+          searchLanguages: [],
+        },
       });
 
       request(app)
@@ -76,6 +80,11 @@ describe("Users bookmarksGet", function () {
         role: "1",
         storedTerritories: [],
         rights: [],
+        options: {
+          defaultLanguage: "",
+          defaultTerritory: "",
+          searchLanguages: [],
+        },
       });
 
       const bookmarkCountUsage = await getActantUsage(db, linkedBookmarkActant);

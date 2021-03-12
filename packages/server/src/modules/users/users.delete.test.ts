@@ -42,6 +42,11 @@ describe("Users delete", function () {
         role: "1",
         storedTerritories: [],
         rights: [],
+        options: {
+          defaultLanguage: "",
+          defaultTerritory: "",
+          searchLanguages: [],
+        },
       });
 
       request(app)
