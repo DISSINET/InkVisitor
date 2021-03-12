@@ -15,6 +15,7 @@ import {
   IResponseTerritory,
   IStatement,
   IResponseGeneric,
+  IActant,
 } from "@shared/types";
 
 function insertIStatementToChilds(
@@ -40,7 +41,10 @@ export default Router()
 
       const territory = await findActantById<ITerritory>(
         request.db,
-        territoryId
+        territoryId,
+        {
+          class: "T",
+        }
       );
       if (!territory) {
         throw new TerritoryDoesNotExits(
@@ -48,14 +52,31 @@ export default Router()
         );
       }
 
+      const statements: IStatement[] = (
+        await findActants<IStatement>(request.db, { class: "S" })
+      ).filter((s) => s.data.territory && s.data.territory.id === territoryId);
+
+      const actantIds: Record<string, null> = {};
+      const actants: IActant[] = [];
+
+      for (const statement of statements) {
+        statement.data.actants.forEach((a) => (actantIds[a.actant] = null));
+        statement.data.tags.forEach((t) => (actantIds[t] = null));
+        statement.data.props.forEach((p) => {
+          actantIds[p.value.id] = null;
+          actantIds[p.type.id] = null;
+          actantIds[p.origin] = null;
+        });
+      }
+
+      for (const actantId in actantIds) {
+        actants.push(await findActantById(request.db, actantId));
+      }
+
       const out: IResponseTerritory = {
         ...territory,
-        statements: (
-          await findActants<IStatement>(request.db, { class: "S" })
-        ).filter(
-          (s) => s.data.territory && s.data.territory.id === territoryId
-        ),
-        actants: [], // TODO
+        statements,
+        actants,
       };
 
       response.json(out);
