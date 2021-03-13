@@ -14,34 +14,32 @@ const queryClient = new QueryClient();
 
 interface AppProps {}
 export const App: React.FC<AppProps> = () => {
-    const [size, setSize] = useState([0, 0]);
+  const [size, setSize] = useState([0, 0]);
 
-    useLayoutEffect(() => {
-        const handleResize = () => {
-            setSize([window.innerWidth, window.innerHeight]);
-        };
-        window.addEventListener("resize", handleResize);
-        handleResize();
-        return () => window.removeEventListener("resize", handleResize);
-    }, []);
+  useLayoutEffect(() => {
+    const handleResize = () => {
+      setSize([window.innerWidth, window.innerHeight]);
+    };
+    window.addEventListener("resize", handleResize);
+    handleResize();
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
-    return (
-        <ThemeProvider theme={theme}>
-            <GlobalStyle />
-            <QueryClientProvider client={queryClient}>
-                <BrowserRouter basename="apps/inkvisitor">
-                    <Switch>
-                        <Route
-                            path="/:territoryId?/:statementId?"
-                            exact
-                            render={(props) => (
-                                <MainPage {...props} size={size} />
-                            )}
-                        />
-                    </Switch>
-                </BrowserRouter>
-                <ReactQueryDevtools initialIsOpen />
-            </QueryClientProvider>
-        </ThemeProvider>
-    );
+  return (
+    <ThemeProvider theme={theme}>
+      <GlobalStyle />
+      <QueryClientProvider client={queryClient}>
+        <BrowserRouter basename="apps/inkvisitor">
+          <Switch>
+            <Route
+              path="/"
+              exact
+              render={(props) => <MainPage {...props} size={size} />}
+            />
+          </Switch>
+        </BrowserRouter>
+        <ReactQueryDevtools initialIsOpen />
+      </QueryClientProvider>
+    </ThemeProvider>
+  );
 };
