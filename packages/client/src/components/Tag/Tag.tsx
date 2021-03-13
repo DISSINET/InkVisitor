@@ -10,11 +10,11 @@ interface TagProps {
   category: string;
   color: string;
   mode?: "selected" | "disabled" | "invalid" | false;
-  logicalType?: "definitive" | "indefinitive" | "hypothetical";
+  borderStyle?: "solid" | "dashed" | "dotted";
   button?: ReactNode;
   marginRight?: boolean;
   invertedLabel?: boolean;
-  showLabel?: boolean;
+  short?: boolean;
   propId?: string;
   index?: number;
   moveTagFn?: (dragIndex: number, hoverIndex: number) => void;
@@ -31,12 +31,12 @@ export const Tag: React.FC<TagProps> = ({
   category = "T",
   color,
   mode = false,
-  logicalType = "definitive",
+  borderStyle = "solid",
   button,
   marginRight,
   propId,
   invertedLabel,
-  showLabel = true,
+  short = false,
   index,
   moveTagFn,
 }) => {
@@ -105,13 +105,13 @@ export const Tag: React.FC<TagProps> = ({
         data-for={"main"}
         data-tip={label ? label : "no label"}
         data-iscapture="true"
-        data-tip-disable={showLabel}
+        data-tip-disable={!short}
         hasMarginRight={marginRight}
-        logicalType={logicalType}
+        borderStyle={borderStyle}
       >
         <EntityTag color={color}>{category}</EntityTag>
-        {showLabel && label && (
-          <Label invertedLabel={invertedLabel} logicalType={logicalType}>
+        {!short && label && (
+          <Label invertedLabel={invertedLabel} logicalType={borderStyle}>
             {label}
           </Label>
         )}
