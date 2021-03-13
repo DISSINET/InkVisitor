@@ -8,16 +8,16 @@ import { IUser, IBookmarkFolder, IStoredTerritory } from "./user";
 import { IResource } from "./resource";
 import { IResponseDetail } from "./response-detail";
 import {
-    IResponseBookmarks,
-    IResponseBookmarkFolder,
+  IResponseBookmarks,
+  IResponseBookmarkFolder,
 } from "./response-bookmarks";
 import { IResponseAdministration } from "./response-administration";
 import { IResponseActant } from "./response-actant";
 import { IResponseAction } from "./response-action";
 import { IResponseStatement } from "./response-statement";
 import {
-    IResponseTree,
-    IResponseTreeTerritoryComponent,
+  IResponseTree,
+  IResponseTreeTerritoryComponent,
 } from "./response-tree";
 import { IResponseTerritory } from "./response-territory";
 import { IResponseUser, IResponseStoredTerritory } from "./response-user";
@@ -27,30 +27,30 @@ import { IOption } from "./option";
 import { IResponseGeneric } from "./response-generic";
 
 export type {
-    IAudit,
-    IAction,
-    IActant,
-    IEntity,
-    ILabel,
-    IOption,
-    IStatement,
-    ITerritory,
-    IProp,
-    IUser,
-    IBookmarkFolder,
-    IStoredTerritory,
-    IResource,
-    IResponseActant,
-    IResponseAction,
-    IResponseDetail,
-    IResponseBookmarks,
-    IResponseBookmarkFolder,
-    IResponseAdministration,
-    IResponseStatement,
-    IResponseTerritory,
-    IResponseTree,
-    IResponseTreeTerritoryComponent,
-    IResponseUser,
-    IResponseStoredTerritory,
-    IResponseGeneric,
+  IAudit,
+  IAction,
+  IActant,
+  IEntity,
+  ILabel,
+  IOption,
+  IStatement,
+  ITerritory,
+  IProp,
+  IUser,
+  IBookmarkFolder,
+  IStoredTerritory,
+  IResource,
+  IResponseActant,
+  IResponseAction,
+  IResponseDetail,
+  IResponseBookmarks,
+  IResponseBookmarkFolder,
+  IResponseAdministration,
+  IResponseStatement,
+  IResponseTerritory,
+  IResponseTree,
+  IResponseTreeTerritoryComponent,
+  IResponseUser,
+  IResponseStoredTerritory,
+  IResponseGeneric,
 };
