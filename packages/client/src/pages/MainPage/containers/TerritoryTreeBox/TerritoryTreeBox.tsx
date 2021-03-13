@@ -20,9 +20,10 @@ export const TerritoryTreeBox: React.FC = () => {
 
   var hashParams = queryString.parse(location.hash);
   const territoryId = hashParams.territory;
+  const statementId = hashParams.statement;
 
   const { status, data, error, isFetching } = useQuery(
-    "tree",
+    ["statement", "territory", "tree"],
     async () => {
       const res = await api.treeGet();
       return res.data;
@@ -42,7 +43,6 @@ export const TerritoryTreeBox: React.FC = () => {
               history.push({
                 hash: queryString.stringify(hashParams),
               });
-              console.log("clicked");
             }}
             icon={<FaCaretRight />}
             label=""
@@ -65,10 +65,6 @@ export const TerritoryTreeBox: React.FC = () => {
       </div>
     );
   };
-
-  if (data) {
-    console.log(data);
-  }
 
   return (
     <div>

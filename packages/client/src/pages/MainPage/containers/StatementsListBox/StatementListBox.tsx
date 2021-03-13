@@ -1,9 +1,9 @@
 import React, { useMemo, useState } from "react";
 import { useTable, Cell, Row, useExpanded } from "react-table";
 import { useQuery } from "react-query";
-import { ActantTag } from "./../";
 
 import { FaInfo, FaPencilAlt, FaClone, FaTrashAlt } from "react-icons/fa";
+import { ActantTag } from "./../";
 
 import { Button, ButtonGroup } from "components";
 const queryString = require("query-string");
@@ -19,22 +19,21 @@ const initialData: { statements: IStatement[]; actants: IActant[] } = {
 };
 
 export const StatementListBox: React.FC = () => {
+  let history = useHistory();
+  let location = useLocation();
   var hashParams = queryString.parse(location.hash);
   const territoryId = hashParams.territory;
 
   const { status, data, error, isFetching } = useQuery(
-    ["statements-list", territoryId],
+    ["statement", "territory", "statement-list", territoryId],
     async () => {
       const res = await api.territoryGet(territoryId);
       return res.data;
     },
-    { initialData: initialData }
+    { initialData: initialData, enabled: !!territoryId }
   );
 
   const { statements, actants } = data || initialData;
-
-  console.log("statements", statements);
-  console.log("actants", actants);
 
   const columns: any = useMemo(() => {
     return [
@@ -108,7 +107,6 @@ export const StatementListBox: React.FC = () => {
               {actantIdsSlice
                 .filter((a: any) => a)
                 .map((actantId: string, ai: number) => {
-                  console.log(actants);
                   const actantObject =
                     actants && actants.find((a) => a && a.id === actantId);
 
@@ -140,7 +138,10 @@ export const StatementListBox: React.FC = () => {
               icon={<FaPencilAlt size={14} />}
               color="warning"
               onClick={() => {
-                // edit
+                hashParams["statement"] = row.values.id;
+                history.push({
+                  hash: queryString.stringify(hashParams),
+                });
               }}
             />
             <Button
