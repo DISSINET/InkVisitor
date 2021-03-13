@@ -14,6 +14,7 @@ export const TerritoryTreeBox: React.FC = () => {
   let location = useLocation();
 
   var hashParams = queryString.parse(location.hash);
+  const territoryId = hashParams.territory;
 
   const { status, data, error, isFetching } = useQuery(
     "tree",
@@ -29,7 +30,7 @@ export const TerritoryTreeBox: React.FC = () => {
       <Tag
         category="T"
         label={label}
-        color="#bcd"
+        color={territoryId === id ? "entityC" : ""}
         key={id}
         button={
           <Button
@@ -51,7 +52,7 @@ export const TerritoryTreeBox: React.FC = () => {
 
   const renderTerritory = (territory: any, children: any, lvl: any) => {
     return (
-      <div>
+      <div style={{ padding: "2px" }}>
         {renderTerritoryTag(territory.labels[0].value, territory.id)}
 
         <div style={{ marginLeft: `1em` }}>
