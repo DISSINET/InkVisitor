@@ -4,9 +4,14 @@ import api from "api";
 const queryString = require("query-string");
 
 import { useLocation, useHistory } from "react-router";
-import { ITerritory, IResponseTreeTerritoryComponent } from "@shared/types";
+import {
+  ITerritory,
+  IResponseTreeTerritoryComponent,
+  IActant,
+} from "@shared/types";
 import { Button, ButtonGroup, Tag } from "components";
 
+import { ActantTag } from "./../";
 import { FaCaretRight } from "react-icons/fa";
 
 export const TerritoryTreeBox: React.FC = () => {
@@ -25,13 +30,10 @@ export const TerritoryTreeBox: React.FC = () => {
     {}
   );
 
-  const renderTerritoryTag = (label: string, id: string) => {
+  const renderTerritoryTag = (territoryActant: IActant, id: string) => {
     return (
-      <Tag
-        category="T"
-        label={label}
-        color={territoryId === id ? "entityC" : ""}
-        key={id}
+      <ActantTag
+        actant={territoryActant}
         button={
           <Button
             color="primary"
@@ -53,7 +55,7 @@ export const TerritoryTreeBox: React.FC = () => {
   const renderTerritory = (territory: any, children: any, lvl: any) => {
     return (
       <div style={{ padding: "2px" }}>
-        {renderTerritoryTag(territory.labels[0].value, territory.id)}
+        {renderTerritoryTag(territory, territory.id)}
 
         <div style={{ marginLeft: `1em` }}>
           {children.map((child: any) =>
