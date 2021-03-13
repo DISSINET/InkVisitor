@@ -4,15 +4,12 @@ import { space1, space2, space4, space48, space56 } from "Theme/constants";
 
 interface ITagWrapperStyle {
   hasMarginRight?: boolean;
-  logicalType: string;
+  borderStyle: "solid" | "dashed" | "dotted";
 }
 export const TagWrapper = styled.div<ITagWrapperStyle>`
   display: inline-flex;
   border: ${({ theme }) => theme.borderWidths[2]};
-  border-style: ${({ logicalType }) =>
-    (logicalType === "definitive" && "solid") ||
-    (logicalType === "indefinitive" && "dashed") ||
-    (logicalType === "hypothetical" && "dotted")};
+  border-style: ${({ borderStyle }) => borderStyle};
   border-color: black;
   border-radius: ${({ theme }) => theme.borderRadius["sm"]};
   overflow: hidden;
