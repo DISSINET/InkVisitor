@@ -17,7 +17,7 @@ interface TagProps {
   short?: boolean;
   propId?: string;
   index?: number;
-  moveTagFn?: (dragIndex: number, hoverIndex: number) => void;
+  moveFn?: (dragIndex: number, hoverIndex: number) => void;
 }
 
 interface DragItem {
@@ -38,7 +38,7 @@ export const Tag: React.FC<TagProps> = ({
   invertedLabel,
   short = false,
   index,
-  moveTagFn,
+  moveFn,
 }) => {
   const ref = useRef<HTMLDivElement>(null);
   const [, drop] = useDrop({
@@ -79,7 +79,7 @@ export const Tag: React.FC<TagProps> = ({
         return;
       }
       // Time to actually perform the action
-      moveTagFn && moveTagFn(dragIndex, hoverIndex);
+      moveFn && moveFn(dragIndex, hoverIndex);
 
       // Note: we're mutating the monitor item here!
       // Generally it's better to avoid mutations,

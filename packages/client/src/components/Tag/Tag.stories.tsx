@@ -52,7 +52,7 @@ export const TagWithLabelIndefinitive = () => {
         category={Entities["R"].id}
         color={Entities["R"].color}
         label="entity label"
-        logicalType={"indefinitive"}
+        borderStyle={"dashed"}
       />
     </DndProvider>
   );
@@ -65,7 +65,7 @@ export const TagWithInvertedLabelIndefinitive = () => {
         category={Entities["R"].id}
         color={Entities["R"].color}
         label="entity label"
-        logicalType={"indefinitive"}
+        borderStyle={"dotted"}
         invertedLabel
       />
     </DndProvider>
@@ -79,7 +79,7 @@ export const TagWithLabelHypothetical = () => {
         category={Entities["S"].id}
         color={Entities["S"].color}
         label="entity label"
-        logicalType={"hypothetical"}
+        borderStyle={"dotted"}
       />
     </DndProvider>
   );
