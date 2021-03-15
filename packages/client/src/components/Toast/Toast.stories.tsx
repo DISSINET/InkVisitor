@@ -13,7 +13,14 @@ export default {
 export const DefaultToast = () => {
   return (
     <>
-      <Button label="Trigger toast!" onClick={() => toast("Ahoj!")} />
+      <Button
+        label="Trigger toast!"
+        onClick={() =>
+          toast(
+            "Default toast! This message is a bit long. Though you can see that it still looks fine."
+          )
+        }
+      />
       <Toast />
     </>
   );
@@ -22,7 +29,7 @@ export const DefaultToast = () => {
 export const DarkToast = () => {
   return (
     <>
-      <Button label="Trigger toast!" onClick={() => toast.dark("Ahoj!")} />
+      <Button label="Trigger toast!" onClick={() => toast.dark("I'm dark!")} />
       <Toast />
     </>
   );
@@ -40,7 +47,7 @@ export const SuccessToast = () => {
     <>
       <Button
         label="Trigger toast!"
-        onClick={() => toast.success("Success!")}
+        onClick={() => toast.success("Entity saved!")}
       />
       <Toast />
     </>
@@ -60,7 +67,14 @@ export const WarningToast = () => {
 export const ErrorToast = () => {
   return (
     <>
-      <Button label="Trigger toast!" onClick={() => toast.error("Error!")} />
+      <Button
+        label="Trigger toast!"
+        onClick={() =>
+          toast.error(
+            "Error! When something is broken, you can see it instantly."
+          )
+        }
+      />
       <Toast />
     </>
   );

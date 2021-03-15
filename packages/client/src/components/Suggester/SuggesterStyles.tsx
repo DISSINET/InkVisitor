@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import { space1, space2, space23 } from "Theme/constants";
+import { space1, space2, space36 } from "Theme/constants";
 
 interface StyledSuggester {
   marginTop?: boolean;
@@ -20,7 +20,7 @@ export const InputWrapper = styled.div<InputWrapper>`
 export const SuggesterButton = styled.div``;
 export const SuggesterList = styled.div`
   position: absolute;
-  left: ${space23};
+  left: ${space36};
   background-color: ${({ theme }) => theme.colors["blue"][50]};
   padding: ${space1};
   width: auto;
