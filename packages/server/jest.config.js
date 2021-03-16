@@ -13,6 +13,7 @@ const paths = Object.keys(tsconfig.compilerOptions.paths).reduce(
   },
   {}
 );
+
 module.exports = {
   preset: "ts-jest",
   testEnvironment: "node",
