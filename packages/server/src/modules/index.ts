@@ -1,5 +1,5 @@
 import { rethinkConfig } from "@service/RethinkDB";
-import { Response } from "express";
+import { Response, Request } from "express";
 import { r } from "rethinkdb-ts";
 import { createConnection, closeConnection } from "../service/RethinkDB";
 //-----------------------------------------------------------------------------
@@ -14,7 +14,7 @@ export const getOneActant = async (
   return await r.table("actants").filter(predicate).run(conn);
 };
 
-//-----------------------------------------------------------------------------
+//---------------------------------------------------- -------------------------
 // Controller functions
 //-----------------------------------------------------------------------------
 
@@ -29,24 +29,20 @@ export const Result = (
   return response.status(code).json(message);
 };
 
-export const asyncRouteHandler = (fn: any) => (
-  req: any,
-  res: any,
-  next: any
-) => {
-  Promise.resolve(
-    (async () => {
-      await createConnection(req, res, () => {});
-      return fn(req, res);
-    })()
-  )
-    .catch((err) => {
+export function asyncRouteHandler<T>(
+  fn: (req: Request, response: Response) => Promise<T>
+): (req: any, res: any, next: any) => void {
+  return async (req: Request, res: Response, next: Function) => {
+    await createConnection(req, res, () => {});
+    try {
+      const returnedData = fn(req, res);
+    } catch (err) {
       next(err);
-    })
-    .finally(() => {
-      closeConnection(req, res, () => {});
-    });
-};
+    }
+
+    closeConnection(req, res, () => {});
+  };
+}
 
 export const supertestConfig = {
   token:
