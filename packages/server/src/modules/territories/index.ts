@@ -57,7 +57,10 @@ export default Router()
       const actants: IActant[] = [];
 
       for (const actantId of getActantIdsFromStatements(statements)) {
-        actants.push(await findActantById(request.db, actantId));
+        const actant = await findActantById<IActant>(request.db, actantId);
+        if (actant) {
+          actants.push(actant);
+        }
       }
 
       const out: IResponseTerritory = {
