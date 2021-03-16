@@ -21,6 +21,7 @@ export default Router().get(
 
     const out: IResponseStatement = {
       ...statement,
+      actants: [],
       audits: [],
       usedIn: [],
     };
