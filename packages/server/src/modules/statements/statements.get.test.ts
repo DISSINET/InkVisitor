@@ -38,6 +38,7 @@ const testValidStatement = (res: any) => {
       actants: [],
     },
     labels: [],
+    actants: [],
     audits: [],
     usedIn: [],
   };
