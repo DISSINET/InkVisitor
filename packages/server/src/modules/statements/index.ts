@@ -1,9 +1,10 @@
 import { Request, Response } from "express";
 import { Router } from "express";
-import { findActantById, findActionById } from "@service/shorthands";
+import { findActantById } from "@service/shorthands";
 import { BadParams, StatementDoesNotExits } from "@common/errors";
 import { asyncRouteHandler } from "..";
-import { IResponseStatement, IStatement } from "@shared/types";
+import { IResponseStatement, IStatement, IActant } from "@shared/types";
+import { getActantIdsFromStatements } from "@shared/types/statement";
 
 export default Router().get(
   "/get/:statementId?",
@@ -19,12 +20,22 @@ export default Router().get(
       throw new StatementDoesNotExits(`statement ${statementId} was not found`);
     }
 
+    const actants: IActant[] = [];
+
+    for (const actantId of getActantIdsFromStatements([statement])) {
+      const actant = await findActantById<IActant>(request.db, actantId);
+      if (actant) {
+        actants.push(actant);
+      }
+    }
+
     const out: IResponseStatement = {
       ...statement,
-      actants: [],
+      actants,
       audits: [],
       usedIn: [],
     };
+
     response.json(out);
   })
 );
