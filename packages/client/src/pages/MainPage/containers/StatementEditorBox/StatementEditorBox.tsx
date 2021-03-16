@@ -3,9 +3,17 @@ import { useQuery, useMutation, useQueryClient } from "react-query";
 import api from "api";
 const queryString = require("query-string");
 
+import { FaTrashAlt } from "react-icons/fa";
+
 import { useLocation, useHistory } from "react-router";
 
-import { ActantTag } from "./../";
+import {
+  ActantTag,
+  ActionDropdown,
+  CertaintyToggle,
+  ModalityToggle,
+  ElvlToggle,
+} from "./../";
 import { Button, ButtonGroup, Input } from "components";
 import { modalityDict } from "./../../../../../../shared/dictionaries";
 
@@ -19,7 +27,13 @@ export const StatementEditorBox: React.FC = () => {
 
   const queryClient = useQueryClient();
 
-  const { status, data: statement, error, isFetching } = useQuery(
+  // Statement query
+  const {
+    status: statusStatement,
+    data: statement,
+    error: errorStatement,
+    isFetching: isFetchingStatement,
+  } = useQuery(
     ["statement", statementId],
     async () => {
       const res = await api.statementGet(statementId);
@@ -27,7 +41,6 @@ export const StatementEditorBox: React.FC = () => {
     },
     { enabled: !!statementId }
   );
-
   const update = async (changes: object) => {
     const res = await api.actantsUpdate(statementId, {
       data: changes,
@@ -40,31 +53,116 @@ export const StatementEditorBox: React.FC = () => {
       {statement ? (
         <div style={{ marginBottom: "4rem" }}>
           <div key={statement.id}>
-            <div className="section section-introduction">
-              <h2 className="section-heading-first">Summary</h2>
-              <div className="table">
-                <div className="table-row leading-3">
-                  <div className="label">Action</div>
-                  <div className="value"></div>
-                </div>
+            <div className="editor-section">
+              <div className="editor-section-header">Summary</div>
+              <div className="editor-section-content">
                 <div className="table-row">
-                  <div className="label">Modality</div>
+                  <div className="label">Action</div>
                   <div className="value">
-                    <Input
-                      type="select"
-                      onChangeFn={(newValue: string) => {
+                    <ActionDropdown
+                      onSelectedChange={(newActionValue: {
+                        value: string;
+                        label: string;
+                      }) => {
                         const newData = {
                           ...statement.data,
-                          ...{ modality: newValue },
+                          ...{ action: newActionValue.value },
                         };
                         update(newData);
                       }}
-                      options={modalityDict}
-                      value={statement.data.modality}
+                      value={statement.data.action}
                     />
                   </div>
                 </div>
+                <div className="table-row">
+                  <div className="label">Text</div>
+                  <div className="value">
+                    <Input
+                      type="textarea"
+                      cols={55}
+                      onChangeFn={(newValue: string) => {
+                        const newData = {
+                          ...statement.data,
+                          ...{ text: newValue },
+                        };
+                        update(newData);
+                      }}
+                      value={statement.data.text}
+                    />
+                  </div>
+                </div>
+                <div className="table-row">
+                  <ModalityToggle />
+                  <ElvlToggle />
+                  <CertaintyToggle />
+                </div>
               </div>
+            </div>
+            <div className="editor-section">
+              <div className="editor-section-header">Actants</div>
+              <div className="editor-section-content">
+                <table className="">
+                  <thead>
+                    <tr>
+                      <th key="actants">Actants</th>
+                      <th key="position">Position</th>
+                      <th key="certainty"></th>
+                      <th key="elvl"></th>
+                      <th key="modality"></th>
+                      <th key="actions"></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {statement.data.actants.map((sActant, sai) => {
+                      const actant = statement.actants.find(
+                        (a) => a.id === sActant.actant
+                      );
+                      //console.log(statement.actants, sActant);
+                      if (actant) {
+                        return (
+                          <tr>
+                            <td>
+                              <ActantTag
+                                key={sai}
+                                actant={actant}
+                                short={false}
+                              />
+                            </td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td>
+                              <Button
+                                key="d"
+                                icon={<FaTrashAlt />}
+                                color="danger"
+                                onClick={() => {}}
+                              />
+                            </td>
+                          </tr>
+                        );
+                      }
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            <div className="editor-section">
+              <div className="editor-section-header">Properties (has)</div>
+              <div className="editor-section-content"></div>
+            </div>
+            <div className="editor-section">
+              <div className="editor-section-header">References</div>
+              <div className="editor-section-content"></div>
+            </div>
+            <div className="editor-section">
+              <div className="editor-section-header">Tags</div>
+              <div className="editor-section-content"></div>
+            </div>
+            <div className="editor-section">
+              <div className="editor-section-header">Notes</div>
+              <div className="editor-section-content"></div>
             </div>
           </div>
         </div>

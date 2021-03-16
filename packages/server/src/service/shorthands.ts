@@ -194,6 +194,10 @@ export async function deleteActant(
 }
 
 // ACTIONS
+export async function findAllActions(db: Db): Promise<IAction[]> {
+  return await rethink.table("actions").run(db.connection);
+}
+
 export async function findActionById(db: Db, id: string): Promise<IAction> {
   const data = await rethink
     .table("actions")
