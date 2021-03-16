@@ -35,7 +35,7 @@ export function asyncRouteHandler<T>(
   return async (req: Request, res: Response, next: Function) => {
     await createConnection(req, res, () => {});
     try {
-      const returnedData = fn(req, res);
+      const returnedData = await fn(req, res);
     } catch (err) {
       next(err);
     }
