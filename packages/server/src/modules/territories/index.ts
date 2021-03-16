@@ -1,13 +1,10 @@
-import { getOneActant, Result } from "../index";
-
-import { rethinkConfig } from "@service/RethinkDB";
 import {
   BadParams,
   StatementDoesNotExits,
   TerritoryDoesNotExits,
   StatementInvalidMove,
 } from "@common/errors";
-import { Router, Response, Request, NextFunction } from "express";
+import { Router, Response, Request } from "express";
 import { asyncRouteHandler } from "..";
 import { findActantById, updateActant, findActants } from "@service/shorthands";
 import {
@@ -17,6 +14,7 @@ import {
   IResponseGeneric,
   IActant,
 } from "@shared/types";
+import { getActantIdsFromStatements } from "@shared/types/statement";
 
 function insertIStatementToChilds(
   array: IStatement[],
@@ -56,21 +54,13 @@ export default Router()
         await findActants<IStatement>(request.db, { class: "S" })
       ).filter((s) => s.data.territory && s.data.territory.id === territoryId);
 
-      const actantIds: Record<string, null> = {};
       const actants: IActant[] = [];
 
-      for (const statement of statements) {
-        statement.data.actants.forEach((a) => (actantIds[a.actant] = null));
-        statement.data.tags.forEach((t) => (actantIds[t] = null));
-        statement.data.props.forEach((p) => {
-          actantIds[p.value.id] = null;
-          actantIds[p.type.id] = null;
-          actantIds[p.origin] = null;
-        });
-      }
-
-      for (const actantId in actantIds) {
-        actants.push(await findActantById(request.db, actantId));
+      for (const actantId of getActantIdsFromStatements(statements)) {
+        const actant = await findActantById<IActant>(request.db, actantId);
+        if (actant) {
+          actants.push(actant);
+        }
       }
 
       const out: IResponseTerritory = {
@@ -104,7 +94,7 @@ export default Router()
         request.db,
         statement.data.territory.id
       );
-      if (!statement) {
+      if (!territory) {
         throw new TerritoryDoesNotExits("territory does not exist");
       }
 
