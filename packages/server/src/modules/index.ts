@@ -1,5 +1,5 @@
 import { rethinkConfig } from "@service/RethinkDB";
-import { Response, Request } from "express";
+import { Response, Request, NextFunction } from "express";
 import { r } from "rethinkdb-ts";
 import { createConnection, closeConnection } from "../service/RethinkDB";
 //-----------------------------------------------------------------------------
@@ -37,20 +37,20 @@ export const Result = (
  * Thats why we are handling db connection here and not in the middlewares.
  * @param fn - the function handler for each route
  */
-export function asyncRouteHandler<T>(
-  fn: (req: Request, response: Response) => Promise<T>
-): (req: any, res: any, next: any) => void {
-  return async (req: Request, res: Response, next: Function) => {
-    await createConnection(req, res, () => {});
+export function asyncRouteHandler<T = unknown>(
+  fn: (req: Request) => Promise<T>
+): (req: Request, res: Response, next: NextFunction) => void {
+  return async (req: Request, res: Response, next: NextFunction) => {
+    await createConnection(req, res, () => null);
 
     try {
-      const returnedData = await fn(req, res);
+      const returnedData = await fn(req);
       res.json(returnedData);
-    } catch (err) {
+    } catch (err: unknown) {
       next(err);
     }
 
-    closeConnection(req, res, () => {});
+    closeConnection(req, res, () => null);
   };
 }
 
