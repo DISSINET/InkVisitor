@@ -23,7 +23,10 @@ export default Router().get(
     const actants: IActant[] = [];
 
     for (const actantId of getActantIdsFromStatements([statement])) {
-      actants.push(await findActantById(request.db, actantId));
+      const actant = await findActantById<IActant>(request.db, actantId);
+      if (actant) {
+        actants.push(actant);
+      }
     }
 
     const out: IResponseStatement = {
