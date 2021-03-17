@@ -1,5 +1,4 @@
-import * as chai from "chai";
-import "mocha";
+import { expect } from "@modules/common.test";
 import request from "supertest";
 import { supertestConfig } from "..";
 import { apiPath } from "../../common/constants";
@@ -11,11 +10,6 @@ import {
   deleteActant,
   findActantById,
 } from "@service/shorthands";
-import * as fs from "fs";
-import territory from "@modules/territories";
-import { expect } from "chai";
-
-const should = chai.should();
 
 const randSuffix = Math.random();
 async function createMockStatementsWithTerritory(

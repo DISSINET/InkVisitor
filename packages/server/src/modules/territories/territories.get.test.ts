@@ -1,16 +1,11 @@
+import { expect } from "@modules/common.test";
 import { BadParams, TerritoryDoesNotExits } from "@common/errors";
 import { Db } from "@service/RethinkDB";
-import { createActant, createAction, deleteActant } from "@service/shorthands";
+import { createActant, deleteActant } from "@service/shorthands";
 import { IActant, IStatement, ITerritory } from "@shared/types";
-import * as chai from "chai";
-import { link } from "fs";
-import "mocha";
 import request from "supertest";
 import { apiPath } from "../../common/constants";
 import app from "../../Server";
-
-const should = chai.should();
-const expect = chai.expect;
 
 describe("Territories get", function () {
   describe("Empty param", () => {
