@@ -1,10 +1,9 @@
-import { BadParams, UserDoesNotExits } from "@common/errors";
-import * as chai from "chai";
-import "mocha";
+import "@modules/common.test";
+import { BadParams } from "@common/errors";
 import request from "supertest";
 import { apiPath } from "../../common/constants";
 import app from "../../Server";
-const should = chai.should();
+import { successfulGenericResponse } from "@modules/common.test";
 
 describe("Users create", function () {
   describe("empty data", () => {
@@ -32,7 +31,7 @@ describe("Users create", function () {
         .post(`${apiPath}/users/create`)
         .send({ name: "tester", email: "tester@dissinet.cz", password: "pass" })
         .expect("Content-Type", /json/)
-        .expect({ success: true })
+        .expect(successfulGenericResponse)
         .expect(200, done);
     });
   });
