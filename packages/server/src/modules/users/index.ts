@@ -27,12 +27,13 @@ import {
   IResponseStoredTerritory,
   IResponseAdministration,
   IActant,
+  IResponseGeneric,
 } from "@shared/types";
 
 export default Router()
   .post(
     "/signin",
-    asyncRouteHandler(async (request: Request, response: Response) => {
+    asyncRouteHandler<unknown>(async (request: Request) => {
       const name = request.body.username;
       const rawPassword = request.body.password;
 
@@ -51,14 +52,14 @@ export default Router()
 
       user.password = undefined;
 
-      response.json({
+      return {
         token: generateAccessToken(user),
-      });
+      };
     })
   )
   .get(
     "/get/:userId?",
-    asyncRouteHandler(async (request: Request, response: Response) => {
+    asyncRouteHandler<IUser>(async (request: Request) => {
       const userId = request.params.userId;
 
       if (!userId) {
@@ -70,26 +71,24 @@ export default Router()
         throw new UserDoesNotExits(`user ${userId} was not found`);
       }
 
-      response.json(user);
+      return user;
     })
   )
   .post(
     "/getMore",
-    asyncRouteHandler(async (request: Request, response: Response) => {
+    asyncRouteHandler<IUser[]>(async (request: Request) => {
       const label = request.body.label;
 
       if (!label) {
         throw new BadParams("label has to be set");
       }
 
-      const users = await findUsersByLabel(request.db, label as string);
-
-      response.json(users);
+      return await findUsersByLabel(request.db, label as string);
     })
   )
   .post(
     "/create",
-    asyncRouteHandler(async (request: Request, response: Response) => {
+    asyncRouteHandler<IResponseGeneric>(async (request: Request) => {
       const userData = request.body as IUser;
 
       if (
@@ -105,20 +104,20 @@ export default Router()
       const result = await createUser(request.db, userData);
 
       if (result.inserted === 1) {
-        response.json({
+        return {
           result: true,
-        });
+        };
       } else {
-        response.json({
+        return {
           result: false,
           errors: result.errors,
-        });
+        };
       }
     })
   )
   .put(
     "/update/:userId?",
-    asyncRouteHandler(async (request: Request, response: Response) => {
+    asyncRouteHandler<IResponseGeneric>(async (request: Request) => {
       const userId = request.params.userId;
       const userData = request.body as IUser;
 
@@ -147,20 +146,20 @@ export default Router()
       const result = await updateUser(request.db, userId, userData);
 
       if (result.replaced) {
-        response.json({
+        return {
           result: true,
-        });
+        };
       } else {
-        response.json({
+        return {
           result: false,
           errors: result.errors,
-        });
+        };
       }
     })
   )
   .delete(
     "/delete/:userId?",
-    asyncRouteHandler(async (request: Request, response: Response) => {
+    asyncRouteHandler<IResponseGeneric>(async (request: Request) => {
       const userId = request.params.userId;
 
       if (!userId) {
@@ -170,20 +169,20 @@ export default Router()
       const result = await deleteUser(request.db, userId);
 
       if (result.deleted === 1) {
-        response.json({
+        return {
           result: true,
-        });
+        };
       } else {
-        response.json({
+        return {
           result: false,
           errors: result.errors,
-        });
+        };
       }
     })
   )
   .get(
     "/bookmarksGet/:userId?",
-    asyncRouteHandler(async (request: Request, response: Response) => {
+    asyncRouteHandler<IResponseBookmarks>(async (request: Request) => {
       const userId = request.params.userId;
 
       if (!userId) {
@@ -220,12 +219,12 @@ export default Router()
         }
       }
 
-      response.json(out);
+      return out;
     })
   )
   .get(
     "/administration",
-    asyncRouteHandler(async (request: Request, response: Response) => {
+    asyncRouteHandler<IResponseAdministration>(async (request: Request) => {
       const out: IResponseAdministration = {
         users: [],
       };
@@ -282,6 +281,6 @@ export default Router()
         out.users.push(userResponse);
       }
 
-      response.json(out);
+      return out;
     })
   );

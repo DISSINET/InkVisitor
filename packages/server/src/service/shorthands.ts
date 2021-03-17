@@ -89,10 +89,10 @@ export async function getTerritoryChilds(
     .run(db.connection);
 }
 
-export async function findActantById<T = IAction | IStatement | ITerritory>(
+export async function findActantById<T extends IActant>(
   db: Db,
   id: string,
-  additionalFilter: object = {}
+  additionalFilter: Record<string, unknown> = {}
 ): Promise<T> {
   const data = await rethink
     .table("actants")
@@ -105,9 +105,9 @@ export async function findActantById<T = IAction | IStatement | ITerritory>(
   return data.length == 0 ? null : data[0];
 }
 
-export async function findActants<T = IAction | IStatement | ITerritory>(
+export async function findActants<T extends IActant>(
   db: Db,
-  additionalFilter: object = {}
+  additionalFilter: Record<string, unknown> = {}
 ): Promise<T[]> {
   return await rethink
     .table("actants")
