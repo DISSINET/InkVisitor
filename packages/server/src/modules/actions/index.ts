@@ -1,6 +1,5 @@
-import { NextFunction, raw, Request, Response } from "express";
-import { Router } from "express";
-import { IAction } from "@shared/types";
+import { Router, Request } from "express";
+import { IAction, IResponseGeneric } from "@shared/types";
 import {
   findActionById,
   findActionsByLabel,
@@ -8,17 +7,13 @@ import {
   updateAction,
   deleteAction,
 } from "@service/shorthands";
-import {
-  BadCredentialsError,
-  BadParams,
-  ActionDoesNotExits,
-} from "@common/errors";
+import { BadParams, ActionDoesNotExits } from "@common/errors";
 import { asyncRouteHandler } from "..";
 
 export default Router()
   .get(
     "/get/:actionId?",
-    asyncRouteHandler(async (request: Request, response: Response) => {
+    asyncRouteHandler<IAction>(async (request: Request) => {
       const actionId = request.params.actionId;
 
       if (!actionId) {
@@ -30,12 +25,12 @@ export default Router()
         throw new ActionDoesNotExits(`action ${actionId} was not found`);
       }
 
-      response.json(action);
+      return action;
     })
   )
   .post(
     "/getMore",
-    asyncRouteHandler(async (request: Request, response: Response) => {
+    asyncRouteHandler<IAction[]>(async (request: Request) => {
       const label = request.body.label;
 
       if (!label) {
@@ -44,12 +39,12 @@ export default Router()
 
       const actions = await findActionsByLabel(request.db, label);
 
-      response.json(actions);
+      return actions;
     })
   )
   .post(
     "/create",
-    asyncRouteHandler(async (request: Request, response: Response) => {
+    asyncRouteHandler<IResponseGeneric>(async (request: Request) => {
       const actionData = request.body as IAction;
 
       if (!actionData || !Object.keys(actionData).length) {
@@ -75,20 +70,20 @@ export default Router()
       const result = await createAction(request.db, actionData);
 
       if (result.inserted === 1) {
-        response.json({
+        return {
           result: true,
-        });
+        };
       } else {
-        response.json({
+        return {
           result: false,
           errors: result.errors,
-        });
+        };
       }
     })
   )
   .put(
     "/update/:actionId?",
-    asyncRouteHandler(async (request: Request, response: Response) => {
+    asyncRouteHandler<IResponseGeneric>(async (request: Request) => {
       const actionId = request.params.actionId;
       const actionData = request.body as IAction;
 
@@ -115,20 +110,20 @@ export default Router()
       const result = await updateAction(request.db, actionId, actionData);
 
       if (result.replaced) {
-        response.json({
+        return {
           result: true,
-        });
+        };
       } else {
-        response.json({
+        return {
           result: false,
           errors: result.errors,
-        });
+        };
       }
     })
   )
   .delete(
     "/delete/:actionId?",
-    asyncRouteHandler(async (request: Request, response: Response) => {
+    asyncRouteHandler<IResponseGeneric>(async (request: Request) => {
       const actionId = request.params.actionId;
 
       if (!actionId) {
@@ -138,14 +133,14 @@ export default Router()
       const result = await deleteAction(request.db, actionId);
 
       if (result.deleted === 1) {
-        response.json({
+        return {
           result: true,
-        });
+        };
       } else {
-        response.json({
+        return {
           result: false,
           errors: result.errors,
-        });
+        };
       }
     })
   );

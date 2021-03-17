@@ -12,13 +12,14 @@ import {
   deleteActant,
   getActantUsage,
 } from "@service/shorthands";
-import {
-  BadCredentialsError,
-  BadParams,
-  ActantDoesNotExits,
-} from "@common/errors";
+import { BadParams, ActantDoesNotExits } from "@common/errors";
 import { r } from "rethinkdb-ts";
-import { IActant, IResponseDetail } from "@shared/types";
+import {
+  IActant,
+  IResource,
+  IResponseDetail,
+  IResponseGeneric,
+} from "@shared/types";
 
 //-----------------------------------------------------------------------------
 // Repository functions
@@ -137,24 +138,27 @@ async function deleteOne(actantId: string): Promise<any> {
 export default Router()
   .get(
     "/get/:actantId?",
-    asyncRouteHandler(async (request: Request, response: Response) => {
+    asyncRouteHandler<IActant>(async (request: Request) => {
       const actantId = request.params.actantId;
 
       if (!actantId) {
         throw new BadParams("actantId has to be set");
       }
 
-      const actant = await findActantById(request.db, actantId as string);
+      const actant = await findActantById<IActant>(
+        request.db,
+        actantId as string
+      );
       if (!actant) {
         throw new ActantDoesNotExits(`actant ${actantId} was not found`);
       }
 
-      response.json(actant);
+      return actant;
     })
   )
   .post(
     "/getMore",
-    asyncRouteHandler(async (request: Request, response: Response) => {
+    asyncRouteHandler<IActant[]>(async (request: Request) => {
       const label = request.body.label;
       const classParam = request.body.class;
 
@@ -162,18 +166,12 @@ export default Router()
         throw new BadParams("label or class has to be set");
       }
 
-      const actants = await findActantsByLabelOrClass(
-        request.db,
-        label,
-        classParam
-      );
-
-      response.json(actants);
+      return await findActantsByLabelOrClass(request.db, label, classParam);
     })
   )
   .post(
     "/create",
-    asyncRouteHandler(async (request: Request, response: Response) => {
+    asyncRouteHandler<IResponseGeneric>(async (request: Request) => {
       const actantData = request.body as IActant;
 
       if (
@@ -188,20 +186,20 @@ export default Router()
       const result = await createActant(request.db, actantData);
 
       if (result.inserted === 1) {
-        response.json({
+        return {
           result: true,
-        });
+        };
       } else {
-        response.json({
+        return {
           result: false,
           errors: result.errors,
-        });
+        };
       }
     })
   )
   .put(
     "/update/:actantId?",
-    asyncRouteHandler(async (request: Request, response: Response) => {
+    asyncRouteHandler<IResponseGeneric>(async (request: Request) => {
       const actantId = request.params.actantId;
       const actantData = request.body as IActant;
 
@@ -219,20 +217,20 @@ export default Router()
       const result = await updateActant(request.db, actantId, actantData);
 
       if (result.replaced) {
-        response.json({
+        return {
           result: true,
-        });
+        };
       } else {
-        response.json({
+        return {
           result: false,
           errors: result.errors,
-        });
+        };
       }
     })
   )
   .delete(
     "/delete/:actantId?",
-    asyncRouteHandler(async (request: Request, response: Response) => {
+    asyncRouteHandler<IResponseGeneric>(async (request: Request) => {
       const actantId = request.params.actantId;
 
       if (!actantId) {
@@ -242,20 +240,20 @@ export default Router()
       const result = await deleteActant(request.db, actantId);
 
       if (result.deleted === 1) {
-        response.json({
+        return {
           result: true,
-        });
+        };
       } else {
-        response.json({
+        return {
           result: false,
           errors: result.errors,
-        });
+        };
       }
     })
   )
   .get(
     "/detail/:actantId?",
-    asyncRouteHandler(async (request: Request, response: Response) => {
+    asyncRouteHandler<IResponseDetail>(async (request: Request) => {
       const actantId = request.params.actantId;
 
       if (!actantId) {
@@ -269,11 +267,10 @@ export default Router()
 
       const usage = await getActantUsage(request.db, actantId);
 
-      const out: IResponseDetail = {
+      return {
         ...actant,
         usedCount: usage,
       };
-      response.json(out);
     })
   )
   // old

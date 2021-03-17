@@ -46,7 +46,7 @@ export function asyncRouteHandler<T = unknown>(
     try {
       const returnedData = await fn(req);
       res.json(returnedData);
-    } catch (err: unknown) {
+    } catch (err) {
       next(err);
     }
 

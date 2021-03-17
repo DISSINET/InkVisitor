@@ -4,7 +4,7 @@ import {
   TerritoryDoesNotExits,
   StatementInvalidMove,
 } from "@common/errors";
-import { Router, Response, Request } from "express";
+import { Router, Request } from "express";
 import { asyncRouteHandler } from "..";
 import { findActantById, updateActant, findActants } from "@service/shorthands";
 import {
@@ -30,9 +30,8 @@ const sortStatements = (terA: IStatement, terB: IStatement): number =>
 export default Router()
   .get(
     "/get/:territoryId?",
-    asyncRouteHandler(async (request: Request, response: Response) => {
+    asyncRouteHandler<IResponseTerritory>(async (request: Request) => {
       const territoryId = request.params.territoryId;
-
       if (!territoryId) {
         throw new BadParams("territoryId has to be set");
       }
@@ -63,18 +62,16 @@ export default Router()
         }
       }
 
-      const out: IResponseTerritory = {
+      return {
         ...territory,
         statements,
         actants,
       };
-
-      response.json(out);
     })
   )
   .post(
     "/moveStatement",
-    asyncRouteHandler(async (request: Request, response: Response) => {
+    asyncRouteHandler<IResponseGeneric>(async (request: Request) => {
       const moveId = request.body.moveId;
       const newIndex = request.body.newIndex;
 
@@ -123,7 +120,7 @@ export default Router()
       if (currentIndex === newIndex) {
         out.result = false;
         out.message = "already on the new index";
-        return response.json(out);
+        return out;
       }
       statementsForTerritory.splice(currentIndex, 1);
 
@@ -139,6 +136,6 @@ export default Router()
         await updateActant(request.db, statement.id, statement);
       }
 
-      response.json(out);
+      return out;
     })
   );
