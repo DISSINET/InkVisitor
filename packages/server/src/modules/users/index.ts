@@ -106,11 +106,11 @@ export default Router()
 
       if (result.inserted === 1) {
         response.json({
-          success: true,
+          result: true,
         });
       } else {
         response.json({
-          success: false,
+          result: false,
           errors: result.errors,
         });
       }
@@ -148,11 +148,11 @@ export default Router()
 
       if (result.replaced) {
         response.json({
-          success: true,
+          result: true,
         });
       } else {
         response.json({
-          success: false,
+          result: false,
           errors: result.errors,
         });
       }
@@ -171,11 +171,11 @@ export default Router()
 
       if (result.deleted === 1) {
         response.json({
-          success: true,
+          result: true,
         });
       } else {
         response.json({
-          success: false,
+          result: false,
           errors: result.errors,
         });
       }
