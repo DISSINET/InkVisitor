@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { Request } from "express";
 import { Router } from "express";
 import { findActantById } from "@service/shorthands";
 import { BadParams, StatementDoesNotExits } from "@common/errors";
@@ -8,7 +8,7 @@ import { getActantIdsFromStatements } from "@shared/types/statement";
 
 export default Router().get(
   "/get/:statementId?",
-  asyncRouteHandler(async (request: Request, response: Response) => {
+  asyncRouteHandler<IResponseStatement>(async (request: Request) => {
     const statementId = request.params.statementId;
 
     if (!statementId) {
@@ -29,13 +29,11 @@ export default Router().get(
       }
     }
 
-    const out: IResponseStatement = {
+    return {
       ...statement,
       actants,
       audits: [],
       usedIn: [],
     };
-
-    response.json(out);
   })
 );

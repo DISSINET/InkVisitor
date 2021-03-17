@@ -1,16 +1,9 @@
-import {
-  ActantDoesNotExits,
-  BadParams,
-  UserDoesNotExits,
-} from "@common/errors";
-import * as chai from "chai";
-import "mocha";
+import "@modules/common.test";
+import { BadParams } from "@common/errors";
 import request from "supertest";
 import { supertestConfig } from "..";
 import { apiPath } from "../../common/constants";
 import app from "../../Server";
-
-const should = chai.should();
 
 const checkArrayOfActants = (res: any) => {
   res.body.should.not.empty;

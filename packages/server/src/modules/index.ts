@@ -1,5 +1,5 @@
 import { rethinkConfig } from "@service/RethinkDB";
-import { Response } from "express";
+import { Response, Request, NextFunction } from "express";
 import { r } from "rethinkdb-ts";
 import { createConnection, closeConnection } from "../service/RethinkDB";
 //-----------------------------------------------------------------------------
@@ -14,7 +14,7 @@ export const getOneActant = async (
   return await r.table("actants").filter(predicate).run(conn);
 };
 
-//-----------------------------------------------------------------------------
+//---------------------------------------------------- -------------------------
 // Controller functions
 //-----------------------------------------------------------------------------
 
@@ -29,24 +29,30 @@ export const Result = (
   return response.status(code).json(message);
 };
 
-export const asyncRouteHandler = (fn: any) => (
-  req: any,
-  res: any,
-  next: any
-) => {
-  Promise.resolve(
-    (async () => {
-      await createConnection(req, res, () => {});
-      return fn(req, res);
-    })()
-  )
-    .catch((err) => {
+/**
+ * Wrapper around each api route - handles explicitly thrown errors which could not be handled
+ * by out express err handler(see server.ts).
+ *
+ * Handles db connection init & closing. In case of an unexpected error, the latter procedure is not reliable.
+ * Thats why we are handling db connection here and not in the middlewares.
+ * @param fn - the function handler for each route
+ */
+export function asyncRouteHandler<T = unknown>(
+  fn: (req: Request) => Promise<T>
+): (req: Request, res: Response, next: NextFunction) => void {
+  return async (req: Request, res: Response, next: NextFunction) => {
+    await createConnection(req, res, () => null);
+
+    try {
+      const returnedData = await fn(req);
+      res.json(returnedData);
+    } catch (err) {
       next(err);
-    })
-    .finally(() => {
-      closeConnection(req, res, () => {});
-    });
-};
+    }
+
+    closeConnection(req, res, () => null);
+  };
+}
 
 export const supertestConfig = {
   token:
