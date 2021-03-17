@@ -1,12 +1,10 @@
-import { BadParams, UserDoesNotExits } from "@common/errors";
-import * as chai from "chai";
-import "mocha";
+import { successfulGenericResponse } from "@modules/common.test";
+import { BadParams } from "@common/errors";
 import request from "supertest";
 import { apiPath } from "../../common/constants";
 import app from "../../Server";
 import { supertestConfig } from "..";
 import { IActant } from "@shared/types";
-const should = chai.should();
 
 describe("Actants create", function () {
   describe("empty data", () => {
@@ -43,7 +41,7 @@ describe("Actants create", function () {
         .send(actantData)
         .set("authorization", "Bearer " + supertestConfig.token)
         .expect("Content-Type", /json/)
-        .expect({ success: true })
+        .expect(successfulGenericResponse)
         .expect(200, done);
     });
   });

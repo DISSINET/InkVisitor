@@ -1,14 +1,11 @@
-import { BadParams, UserDoesNotExits } from "@common/errors";
-import * as chai from "chai";
-import "mocha";
+import "@modules/common.test";
+import { BadParams } from "@common/errors";
 import request from "supertest";
 import { apiPath } from "../../common/constants";
 import app from "../../Server";
 import { supertestConfig } from "..";
 import { Db } from "@service/RethinkDB";
 import { createAction, findActionById } from "@service/shorthands";
-
-const should = chai.should();
 
 describe("Actions update", function () {
   describe("empty data", () => {
