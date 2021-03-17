@@ -1,13 +1,10 @@
+import "@modules/common.test";
 import { ActionDoesNotExits, BadParams } from "@common/errors";
-import * as chai from "chai";
-import "mocha";
 import request from "supertest";
 import { supertestConfig } from "..";
 import { apiPath } from "../../common/constants";
 import app from "../../Server";
 import { IAction } from "@shared/types";
-
-const should = chai.should();
 
 const testValidAction = (res: any) => {
   res.body.should.not.empty;

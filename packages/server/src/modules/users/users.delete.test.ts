@@ -1,13 +1,14 @@
-import { BadParams, UserDoesNotExits } from "@common/errors";
+import "@modules/common.test";
+import { BadParams } from "@common/errors";
 import { Db } from "@service/RethinkDB";
-import * as chai from "chai";
-import "mocha";
 import request from "supertest";
 import { apiPath } from "../../common/constants";
 import app from "../../Server";
 import { createUser } from "../../service/shorthands";
-
-const should = chai.should();
+import {
+  successfulGenericResponse,
+  faultyGenericResponse,
+} from "../common.test";
 
 describe("Users delete", function () {
   describe("empty data", () => {
@@ -24,7 +25,7 @@ describe("Users delete", function () {
       return request(app)
         .delete(`${apiPath}/users/delete/randomid12345`)
         .expect("Content-Type", /json/)
-        .expect({ success: false, errors: 0 })
+        .expect(faultyGenericResponse)
         .expect(200, done);
     });
   });
@@ -52,7 +53,7 @@ describe("Users delete", function () {
       request(app)
         .delete(`${apiPath}/users/delete/${testUserId}`)
         .expect("Content-Type", /json/)
-        .expect({ success: true })
+        .expect(successfulGenericResponse)
         .expect(200, done);
     });
   });

@@ -1,10 +1,8 @@
+import "@modules/common.test";
 import { BadParams, UserDoesNotExits } from "@common/errors";
-import * as chai from "chai";
-import "mocha";
 import request from "supertest";
 import { apiPath } from "../../common/constants";
 import app from "../../Server";
-const should = chai.should();
 
 describe("Users signin", function () {
   describe("Empty body", () => {

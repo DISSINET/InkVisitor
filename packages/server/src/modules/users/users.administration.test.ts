@@ -1,14 +1,7 @@
-import { BadParams, UserDoesNotExits } from "@common/errors";
-import * as chai from "chai";
-import "mocha";
+import "@modules/common.test";
 import request from "supertest";
 import { apiPath } from "../../common/constants";
 import app from "../../Server";
-import { createUser, getActantUsage } from "../../service/shorthands";
-import { Db } from "@service/RethinkDB";
-
-const should = chai.should();
-const expect = chai.expect;
 
 describe("Users administration", function () {
   describe("Default check", () => {
