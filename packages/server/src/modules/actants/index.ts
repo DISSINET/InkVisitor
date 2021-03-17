@@ -192,7 +192,7 @@ export default Router()
       } else {
         return {
           result: false,
-          errors: result.errors,
+          errors: result.first_error ? [result.first_error] : [],
         };
       }
     })
@@ -223,7 +223,7 @@ export default Router()
       } else {
         return {
           result: false,
-          errors: result.errors,
+          errors: result.first_error ? [result.first_error] : [],
         };
       }
     })
@@ -246,7 +246,7 @@ export default Router()
       } else {
         return {
           result: false,
-          errors: result.errors,
+          errors: result.first_error ? [result.first_error] : [],
         };
       }
     })
