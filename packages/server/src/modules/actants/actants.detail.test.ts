@@ -1,20 +1,12 @@
-import {
-  ActantDoesNotExits,
-  BadParams,
-  UserDoesNotExits,
-} from "@common/errors";
-import * as chai from "chai";
-import "mocha";
+import { expect } from "@modules/common.test";
+import { ActantDoesNotExits, BadParams } from "@common/errors";
 import request from "supertest";
 import { supertestConfig } from "..";
 import { apiPath } from "../../common/constants";
 import app from "../../Server";
 import { createActant } from "@service/shorthands";
 import { Db } from "@service/RethinkDB";
-import { expect } from "chai";
 import { IActant } from "@shared/types";
-
-const should = chai.should();
 
 describe("Actants detail", function () {
   describe("Empty param", () => {

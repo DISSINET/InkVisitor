@@ -1,10 +1,5 @@
-import {
-  ActionDoesNotExits,
-  BadParams,
-  StatementDoesNotExits,
-} from "@common/errors";
-import * as chai from "chai";
-import "mocha";
+import "@modules/common.test";
+import { BadParams, StatementDoesNotExits } from "@common/errors";
 import request from "supertest";
 import { supertestConfig } from "..";
 import { apiPath } from "../../common/constants";
@@ -12,8 +7,6 @@ import app from "../../Server";
 import { IResponseStatement, IStatement } from "@shared/types";
 import { Db } from "@service/RethinkDB";
 import { createActant } from "@service/shorthands";
-
-const should = chai.should();
 
 const testValidStatement = (res: any) => {
   res.body.should.not.empty;

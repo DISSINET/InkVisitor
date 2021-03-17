@@ -1,14 +1,15 @@
+import { should } from "@modules/common.test";
 import { BadParams } from "@common/errors";
 import { Db } from "@service/RethinkDB";
-import * as chai from "chai";
-import "mocha";
 import request from "supertest";
 import { apiPath } from "../../common/constants";
 import app from "../../Server";
 import { createAction, findActionById } from "../../service/shorthands";
 import { supertestConfig } from "..";
-
-const should = chai.should();
+import {
+  faultyGenericResponse,
+  successfulGenericResponse,
+} from "@modules/common.test";
 
 describe("Actions delete", function () {
   describe("empty data", () => {
@@ -27,7 +28,7 @@ describe("Actions delete", function () {
         .delete(`${apiPath}/actions/delete/randomid12345`)
         .set("authorization", "Bearer " + supertestConfig.token)
         .expect("Content-Type", /json/)
-        .expect({ success: false, errors: 0 })
+        .expect(faultyGenericResponse)
         .expect(200, done);
     });
   });
@@ -55,7 +56,7 @@ describe("Actions delete", function () {
         .delete(`${apiPath}/actions/delete/${testId}`)
         .set("authorization", "Bearer " + supertestConfig.token)
         .expect("Content-Type", /json/)
-        .expect({ success: true })
+        .expect(successfulGenericResponse)
         .expect(200, async () => {
           const deletedEntry = await findActionById(db, testId);
           should.not.exist(deletedEntry);

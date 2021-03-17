@@ -1,6 +1,5 @@
-import { BadParams, UserDoesNotExits } from "@common/errors";
-import * as chai from "chai";
-import "mocha";
+import "@modules/common.test";
+import { BadParams } from "@common/errors";
 import request from "supertest";
 import { apiPath } from "../../common/constants";
 import app from "../../Server";
@@ -8,8 +7,6 @@ import { supertestConfig } from "..";
 import { Db } from "@service/RethinkDB";
 import { createActant, findActantById } from "@service/shorthands";
 import { IActant } from "@shared/types";
-
-const should = chai.should();
 
 describe("Actants update", function () {
   describe("empty data", () => {
@@ -38,7 +35,7 @@ describe("Actants update", function () {
       const db = new Db();
       await db.initDb();
       const testId = Math.random().toString();
-      const changeClassInto: string = "T";
+      const changeClassInto = "T";
       await createActant(
         db,
         { id: testId, labels: [], data: {}, class: "C" },

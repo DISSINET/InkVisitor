@@ -1,5 +1,4 @@
-import { Request, Response } from "express";
-import { Router } from "express";
+import { Router, Request } from "express";
 import {
   findActantById,
   getActants,
@@ -46,7 +45,7 @@ const sortTerritories = (terA: ITerritory, terB: ITerritory): number =>
 export default Router()
   .get(
     "/get",
-    asyncRouteHandler(async (request: Request, response: Response) => {
+    asyncRouteHandler<IResponseTree>(async (request: Request) => {
       const territories = (
         await getActants<ITerritory>(request.db, {
           class: "T",
@@ -69,19 +68,18 @@ export default Router()
       }
 
       let root: ITerritory;
-      console.log(parentMap[""]);
       if (parentMap[""].length != 1) {
         throw new TerritoriesBrokenError("Territories tree is broken");
       } else {
         root = parentMap[""][0];
       }
 
-      response.json(populateTree(root, parentMap, 0));
+      return populateTree(root, parentMap, 0);
     })
   )
   .post(
     "/moveTerritory",
-    asyncRouteHandler(async (request: Request, response: Response) => {
+    asyncRouteHandler<IResponseGeneric>(async (request: Request) => {
       const moveId = request.body.moveId;
       const parentId = request.body.parentId;
       const newIndex = request.body.newIndex;
@@ -129,8 +127,8 @@ export default Router()
         }
         if (currentIndex === newIndex) {
           out.result = false;
-          out.message = "already on the new index";
-          return response.json(out);
+          out.errors = ["already on the new index"];
+          return out;
         }
         childs.splice(currentIndex, 1);
       }
@@ -145,6 +143,6 @@ export default Router()
         await updateActant(request.db, child.id, child);
       }
 
-      response.json(out);
+      return out;
     })
   );
