@@ -119,7 +119,7 @@ export default Router()
       }
       if (currentIndex === newIndex) {
         out.result = false;
-        out.message = "already on the new index";
+        out.errors = ["already on the new index"];
         return out;
       }
       statementsForTerritory.splice(currentIndex, 1);
