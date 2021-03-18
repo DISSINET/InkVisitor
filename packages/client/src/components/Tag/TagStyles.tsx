@@ -49,7 +49,7 @@ export const Label = styled.div<ILabelStyle>`
   background-color: ${({ theme, invertedLabel }) =>
     invertedLabel ? theme.colors["primary"] : "white"};
   color: ${({ invertedLabel }) => (invertedLabel ? "white" : "black")};
-  border-left: ${({ theme }) => theme.borderWidths[2]};
+  border-left-width: ${({ theme }) => theme.borderWidths[2]};
   border-left-style: ${({ logicalType }) =>
     (logicalType === "definitive" && "solid") ||
     (logicalType === "indefinitive" && "dashed") ||

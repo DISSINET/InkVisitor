@@ -25,7 +25,8 @@ export const TextLeft = styled.div`
   display: flex;
   flex: 1 1 0%;
   align-self: center;
-  font-size: ${({ theme }) => theme.fontSizes["base"]};
+  font-size: ${({ theme }) => theme.fontSizes["3xl"]};
+  font-weight: 500;
 `;
 export const TextRight = styled.div`
   display: flex;
