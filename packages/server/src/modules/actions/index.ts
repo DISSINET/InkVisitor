@@ -6,7 +6,6 @@ import {
   createAction,
   updateAction,
   deleteAction,
-  findAllActions,
 } from "@service/shorthands";
 import { BadParams, ActionDoesNotExits } from "@common/errors";
 import { asyncRouteHandler } from "..";
@@ -35,8 +34,7 @@ export default Router()
       const label = request.body.label;
 
       if (!label) {
-        await findAllActions(request.db);
-        // throw new BadParams("label has to be set");
+        throw new BadParams("label has to be set");
       }
 
       const actions = await findActionsByLabel(request.db, label);
