@@ -68,7 +68,7 @@ export default Router()
       }
 
       let root: ITerritory;
-      if (parentMap[""].length != 1) {
+      if (parentMap[""]?.length != 1) {
         throw new TerritoriesBrokenError("Territories tree is broken");
       } else {
         root = parentMap[""][0];

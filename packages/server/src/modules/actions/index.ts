@@ -35,8 +35,8 @@ export default Router()
       const label = request.body.label;
 
       if (!label) {
-        response.json(await findAllActions(request.db));
-        throw new BadParams("label has to be set");
+        await findAllActions(request.db);
+        // throw new BadParams("label has to be set");
       }
 
       const actions = await findActionsByLabel(request.db, label);
