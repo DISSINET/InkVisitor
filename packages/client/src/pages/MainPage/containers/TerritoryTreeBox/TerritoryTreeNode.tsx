@@ -39,13 +39,14 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
         <StyledIconWrap>
           {hasChildren ? (
             <Arrow
-              rotation="right"
+              rotation={isExpanded ? "bottom" : "right"}
               size={6}
               onClick={() => {
                 hashParams["territory"] = id;
                 history.push({
                   hash: queryString.stringify(hashParams),
                 });
+                setIsExpanded(!isExpanded);
               }}
             />
           ) : (
@@ -57,6 +58,7 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
                 history.push({
                   hash: queryString.stringify(hashParams),
                 });
+                setIsExpanded(!isExpanded);
               }}
             />
           )}
@@ -66,19 +68,20 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
     );
   };
 
-  const renderTerritory = (territory: any, children: any, lvl: any) => {
-    return (
-      <div key={territory.id}>
-        {renderTerritoryTag(territory, territory.id, children.length > 0)}
+  return (
+    <div key={territory.id}>
+      {renderTerritoryTag(territory, territory.id, children.length > 0)}
 
-        <StyledChildrenWrap>
-          {children.map((child: any) =>
-            renderTerritory(child.territory, child.children, child.lvl)
-          )}
-        </StyledChildrenWrap>
-      </div>
-    );
-  };
-
-  return <div>{renderTerritory(territory, children, lvl)}</div>;
+      <StyledChildrenWrap>
+        {isExpanded &&
+          children.map((child: any) => (
+            <TerritoryTreeNode
+              territory={child.territory}
+              children={child.children}
+              lvl={child.lvl}
+            />
+          ))}
+      </StyledChildrenWrap>
+    </div>
+  );
 };
