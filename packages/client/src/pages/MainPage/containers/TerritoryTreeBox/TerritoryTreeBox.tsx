@@ -14,17 +14,20 @@ import { Arrow, Button, ButtonGroup, Tag } from "components";
 import { ActantTag } from "./../";
 import { FaCaretRight, FaCircle, FaDotCircle } from "react-icons/fa";
 import {
+  StyledChildrenWrap,
   StyledIconWrap,
   StyledTerritoryTagWrap,
 } from "./TerritoryTreeBoxStyle";
+import theme from "Theme/theme";
+import { TerritoryTreeNode } from "./TerritoryTreeNode";
 
 export const TerritoryTreeBox: React.FC = () => {
-  let history = useHistory();
-  let location = useLocation();
+  // let history = useHistory();
+  // let location = useLocation();
 
-  var hashParams = queryString.parse(location.hash);
-  const territoryId = hashParams.territory;
-  const statementId = hashParams.statement;
+  // var hashParams = queryString.parse(location.hash);
+  // const territoryId = hashParams.territory;
+  // const statementId = hashParams.statement;
 
   const { status, data, error, isFetching } = useQuery(
     ["statement", "territory", "tree"],
@@ -35,76 +38,15 @@ export const TerritoryTreeBox: React.FC = () => {
     {}
   );
 
-  const renderTerritoryTag = (
-    territoryActant: IActant,
-    id: string,
-    hasChildren: boolean
-  ) => {
-    return (
-      <StyledTerritoryTagWrap>
-        <StyledIconWrap>
-          {hasChildren ? (
-            <Arrow
-              rotation="right"
-              size={6}
-              onClick={() => {
-                hashParams["territory"] = id;
-                history.push({
-                  hash: queryString.stringify(hashParams),
-                });
-              }}
-            />
-          ) : (
-            <FaDotCircle
-              size={13}
-              style={{ marginRight: "0.3rem" }}
-              onClick={() => {
-                hashParams["territory"] = id;
-                history.push({
-                  hash: queryString.stringify(hashParams),
-                });
-              }}
-            />
-          )}
-        </StyledIconWrap>
-        <ActantTag
-          actant={territoryActant}
-          isSelected={territoryId === id}
-          // button={
-          //   <Button
-          //     color="primary"
-          //     onClick={() => {
-          //       hashParams["territory"] = id;
-          //       history.push({
-          //         hash: queryString.stringify(hashParams),
-          //       });
-          //     }}
-          //     icon={<FaCaretRight />}
-          //     label=""
-          //   />
-          // }
-        />
-      </StyledTerritoryTagWrap>
-    );
-  };
-
-  const renderTerritory = (territory: any, children: any, lvl: any) => {
-    return (
-      <div style={{}} key={territory.id}>
-        {renderTerritoryTag(territory, territory.id, children.length > 0)}
-
-        <div style={{ marginLeft: `0.75rem` }}>
-          {children.map((child: any) =>
-            renderTerritory(child.territory, child.children, child.lvl)
-          )}
-        </div>
-      </div>
-    );
-  };
-
   return (
     <div>
-      {data && renderTerritory(data.territory, data.children, data.lvl)}
+      {data && (
+        <TerritoryTreeNode
+          territory={data.territory}
+          children={data.children}
+          lvl={data.lvl}
+        />
+      )}
     </div>
   );
 };

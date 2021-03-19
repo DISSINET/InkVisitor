@@ -8,3 +8,6 @@ export const StyledTerritoryTagWrap = styled.div`
 export const StyledIconWrap = styled.div`
   cursor: pointer;
 `;
+export const StyledChildrenWrap = styled.div`
+  margin-left: ${({ theme }) => theme.space[3]};
+`;
