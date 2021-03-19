@@ -1,3 +1,4 @@
+import { FaDotCircle } from "react-icons/fa";
 import styled from "styled-components";
 
 export const StyledTerritoryTagWrap = styled.div`
@@ -10,4 +11,8 @@ export const StyledIconWrap = styled.div`
 `;
 export const StyledChildrenWrap = styled.div`
   margin-left: ${({ theme }) => theme.space[3]};
+`;
+export const StyledFaDotCircle = styled(FaDotCircle)`
+  margin: 0 0.3rem;
+  color: ${({ theme }) => theme.colors["primary"]};
 `;

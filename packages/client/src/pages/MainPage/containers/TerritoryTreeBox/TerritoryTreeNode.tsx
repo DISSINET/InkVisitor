@@ -1,22 +1,21 @@
-import React, { ReactNode, useState } from "react";
+import React, { useState } from "react";
 
 import { IActant } from "@shared/types";
 import {
   StyledChildrenWrap,
+  StyledFaDotCircle,
   StyledIconWrap,
   StyledTerritoryTagWrap,
 } from "./TerritoryTreeBoxStyle";
 import { Arrow } from "components";
-import { FaDotCircle } from "react-icons/fa";
 import { ActantTag } from "./../";
-import theme from "Theme/theme";
 import { useHistory } from "react-router-dom";
 const queryString = require("query-string");
 
 interface TerritoryTreeNode {
   territory: any;
   children: any;
-  lvl: any;
+  lvl: number;
 }
 export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
   territory,
@@ -50,15 +49,13 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
               }}
             />
           ) : (
-            <FaDotCircle
+            <StyledFaDotCircle
               size={13}
-              style={{ marginRight: "0.3rem", color: theme.colors["primary"] }}
               onClick={() => {
                 hashParams["territory"] = id;
                 history.push({
                   hash: queryString.stringify(hashParams),
                 });
-                setIsExpanded(!isExpanded);
               }}
             />
           )}
