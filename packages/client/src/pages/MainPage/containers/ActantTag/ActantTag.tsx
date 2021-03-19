@@ -72,6 +72,7 @@ interface IActantTag {
   short?: boolean;
   button?: ReactNode;
   moveFn?: (dragIndex: number, hoverIndex: number) => void;
+  isSelected?: boolean;
 }
 
 export const ActantTag: React.FC<IActantTag> = ({
@@ -80,6 +81,7 @@ export const ActantTag: React.FC<IActantTag> = ({
   mode,
   button,
   moveFn,
+  isSelected,
 }) => {
   const classId = actant.class;
   const classObject = classes[classId];
@@ -109,6 +111,7 @@ export const ActantTag: React.FC<IActantTag> = ({
       color={classObject.color}
       mode={mode}
       borderStyle={borderStyle}
+      invertedLabel={isSelected}
     />
   );
 };
