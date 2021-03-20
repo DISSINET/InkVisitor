@@ -8,7 +8,6 @@ interface ToggleWrapper {
 }
 export const ToggleWrapper = styled.div<ToggleWrapper>`
   display: inline-flex;
-  align-items: flex-end;
   border: 2px solid ${({ theme, color }) => theme.colors[color]};
   color: ${({ theme, color, inverted }) =>
     inverted ? theme.colors[color] : theme.colors["white"]};
@@ -19,10 +18,10 @@ interface LabelWrapper {
   hasIcon?: boolean;
 }
 export const LabelWrapper = styled.div<LabelWrapper>`
+  height: 2.4rem;
   display: ${({ hasIcon }) => (hasIcon ? "flex" : "inline-block")};
   align-items: center;
   vertical-align: middle;
-  height: 2.4rem;
   overflow: hidden !important;
   text-overflow: ellipsis;
   white-space: nowrap;
