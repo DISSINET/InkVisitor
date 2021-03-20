@@ -1,19 +1,25 @@
-import React, { FC, useState } from "react";
+import React, { FC, useEffect, useState } from "react";
 
-import { Button } from "components";
-import { Colors } from "types";
+import { LabelWrapper, ToggleWrapper } from "./ToggleStyles";
+import { Colors, ToggleItem } from "types";
 
 interface Toggle {
-  optionList: string[];
+  optionList: ToggleItem[];
   inverted?: boolean;
   color?: typeof Colors[number];
+  onChangeFn?: (item: ToggleItem) => void;
 }
 export const Toggle: FC<Toggle> = ({
-  optionList,
-  inverted,
+  optionList = [{ value: "", label: "" }],
+  inverted = false,
   color = "primary",
+  onChangeFn = (item: ToggleItem) => {},
 }) => {
   const [selected, setSelected] = useState(0);
+  useEffect(() => {
+    onChangeFn(optionList[selected]);
+  }, [selected]);
+
   const chooseNext = () => {
     if (selected < optionList.length - 1) {
       setSelected(selected + 1);
@@ -23,11 +29,13 @@ export const Toggle: FC<Toggle> = ({
   };
 
   return (
-    <Button
-      label={optionList[selected]}
-      onClick={() => chooseNext()}
-      color={color}
-      inverted={inverted}
-    />
+    <ToggleWrapper color={color} inverted={inverted}>
+      <LabelWrapper
+        onClick={() => chooseNext()}
+        hasIcon={typeof optionList[selected].label !== "string"}
+      >
+        {optionList[selected].label}
+      </LabelWrapper>
+    </ToggleWrapper>
   );
 };

@@ -5,5 +5,12 @@ import { Toggle } from "components";
 interface ICertaintyToggle {}
 
 export const CertaintyToggle: React.FC<ICertaintyToggle> = ({}) => {
-  return <Toggle optionList={["certain", "uncertain"]} />;
+  return (
+    <Toggle
+      optionList={[
+        { value: "certain", label: "certain" },
+        { value: "uncertain", label: "uncertain" },
+      ]}
+    />
+  );
 };

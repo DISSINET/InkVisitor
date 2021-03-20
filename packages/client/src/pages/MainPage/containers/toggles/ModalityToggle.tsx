@@ -5,5 +5,12 @@ import { Toggle } from "components";
 interface IModalityToggle {}
 
 export const ModalityToggle: React.FC<IModalityToggle> = ({}) => {
-  return <Toggle optionList={["certain", "uncertain"]} />;
+  return (
+    <Toggle
+      optionList={[
+        { value: "certain", label: "certain" },
+        { value: "uncertain", label: "uncertain" },
+      ]}
+    />
+  );
 };
