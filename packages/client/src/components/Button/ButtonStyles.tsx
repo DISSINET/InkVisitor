@@ -11,7 +11,7 @@ export const StyledButton = styled.button<IButtonStyle>`
   align-items: center;
   font-size: ${({ theme }) => theme.fontSizes["xs"]};
   font-weight: 900;
-  padding: ${space2} ${({ hasIcon }) => (hasIcon ? space2 : space3)};
+  padding: ${space1} ${({ hasIcon }) => (hasIcon ? space1 : space2)};
   border: 2px solid ${({ theme, color }) => theme.colors[color]};
   color: ${({ theme, color, inverted }) =>
     inverted ? theme.colors[color] : theme.colors["white"]};

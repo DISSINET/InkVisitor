@@ -77,6 +77,7 @@ export default {
     64: "16rem",
   },
   fontSizes: {
+    xxs: "1rem",
     xs: "1.2rem",
     sm: "1.4rem",
     base: "1.6rem",

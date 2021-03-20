@@ -1,17 +1,21 @@
 import React, { useMemo, useState } from "react";
 import { useTable, Cell, Row, useExpanded } from "react-table";
 import { useQuery } from "react-query";
-
 import { FaInfo, FaPencilAlt, FaClone, FaTrashAlt } from "react-icons/fa";
-import { ActantTag } from "./../";
-
-import { Button, ButtonGroup } from "components";
-const queryString = require("query-string");
-
-import api from "api";
 import { useLocation, useHistory } from "react-router";
 
+import { Button, ButtonGroup } from "components";
+import { ActantTag } from "./../";
+import api from "api";
 import { IStatement, IActant } from "@shared/types";
+import {
+  StyledTable,
+  StyledTd,
+  StyledTh,
+  StyledTHead,
+  StyledTr,
+} from "./TableStyles";
+const queryString = require("query-string");
 
 const initialData: { statements: IStatement[]; actants: IActant[] } = {
   statements: [],
@@ -125,7 +129,7 @@ export const StatementListBox: React.FC = () => {
         Header: "",
         id: "expander",
         Cell: ({ row }: any) => (
-          <ButtonGroup>
+          <ButtonGroup noMargin>
             <Button
               key="i"
               icon={<FaInfo size={14} />}
@@ -178,45 +182,37 @@ export const StatementListBox: React.FC = () => {
 
   return (
     <div>
-      <table {...getTableProps()}>
-        <thead className="border-b-2 border-black">
+      <StyledTable {...getTableProps()}>
+        <StyledTHead>
           {headerGroups.map((headerGroup, key) => (
-            <tr
-              {...headerGroup.getHeaderGroupProps()}
-              key={key}
-              style={{ fontSize: "1rem" }}
-            >
+            <tr {...headerGroup.getHeaderGroupProps()} key={key}>
               {headerGroup.headers.map((column, key) => (
-                <th
-                  className="table-header text-left"
-                  {...column.getHeaderProps()}
-                  key={key}
-                >
+                <StyledTh {...column.getHeaderProps()} key={key}>
                   {column.render("Header")}
-                </th>
+                </StyledTh>
               ))}
             </tr>
           ))}
-        </thead>
+        </StyledTHead>
         <tbody {...getTableBodyProps()}>
           {rows.map((row, i) => {
             prepareRow(row);
             return (
               <React.Fragment key={i}>
-                <tr {...row.getRowProps()}>
+                <StyledTr {...row.getRowProps()} isOdd={Boolean(i % 2)}>
                   {row.cells.map((cell, i) => {
                     return (
-                      <td className="p-1" {...cell.getCellProps()}>
+                      <StyledTd {...cell.getCellProps()}>
                         {cell.render("Cell")}
-                      </td>
+                      </StyledTd>
                     );
                   })}
-                </tr>
+                </StyledTr>
               </React.Fragment>
             );
           })}
         </tbody>
-      </table>
+      </StyledTable>
     </div>
   );
 };
