@@ -58,10 +58,10 @@ export const Layout1 = () => {
         <div>
           <Toggle
             optionList={[
-              "This text is too long to handle",
-              "Another long which is too long to handle",
-              "Masarykova",
-              "Univerzita",
+              { value: "0", label: "This text is too long to handle" },
+              { value: "1", label: "Another long which is too long to handle" },
+              { value: "2", label: "Masarykova" },
+              { value: "3", label: "Univerzita" },
             ]}
             color="danger"
           />

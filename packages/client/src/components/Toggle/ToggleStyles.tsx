@@ -18,16 +18,16 @@ interface LabelWrapper {
   hasIcon?: boolean;
 }
 export const LabelWrapper = styled.div<LabelWrapper>`
-  height: 2.4rem;
+  height: 2.25rem;
   display: ${({ hasIcon }) => (hasIcon ? "flex" : "inline-block")};
   align-items: center;
-  vertical-align: middle;
+  /* vertical-align: middle; */
   overflow: hidden !important;
   text-overflow: ellipsis;
   white-space: nowrap;
   cursor: pointer;
   vertical-align: bottom;
-  padding: ${({ theme }) => `${theme.space[1]} ${theme.space[2]}`};
+  padding: ${({ theme }) => `0.15rem ${theme.space[2]}`};
   font-size: ${({ theme }) => theme.fontSizes["sm"]};
   max-width: ${({ theme }) => theme.space[56]};
 `;
