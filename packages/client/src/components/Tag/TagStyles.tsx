@@ -2,11 +2,11 @@ import styled from "styled-components";
 
 import { space1, space2, space4, space48, space56 } from "Theme/constants";
 
-interface ITagWrapperStyle {
+interface TagWrapper {
   hasMarginRight?: boolean;
   borderStyle: "solid" | "dashed" | "dotted";
 }
-export const TagWrapper = styled.div<ITagWrapperStyle>`
+export const TagWrapper = styled.div<TagWrapper>`
   display: inline-flex;
   border: ${({ theme }) => theme.borderWidths[2]};
   border-style: ${({ borderStyle }) => borderStyle};
@@ -21,10 +21,10 @@ export const TagWrapper = styled.div<ITagWrapperStyle>`
   height: 2.25rem;
 `;
 
-interface IEntityStyle {
+interface EntityTag {
   color: string;
 }
-export const EntityTag = styled.div<IEntityStyle>`
+export const EntityTag = styled.div<EntityTag>`
   background-color: ${({ color, theme }) => theme.colors[color]};
   display: flex;
   justify-content: center;
@@ -34,7 +34,7 @@ export const EntityTag = styled.div<IEntityStyle>`
   width: ${({ theme }) => theme.space[7]};
 `;
 
-interface ILabelStyle {
+interface Label {
   invertedLabel?: boolean;
   logicalType: string;
 }
@@ -50,20 +50,20 @@ const handleLogicalType = (logicalType: string) => {
       return "solid";
   }
 };
-export const Label = styled.div<ILabelStyle>`
-  display: inline;
+export const Label = styled.div<Label>`
+  display: inline-block;
   vertical-align: middle;
-  padding: ${({ theme }) => `${theme.space[1]} ${theme.space[2]}`};
-  overflow: hidden;
+  overflow: hidden !important;
   text-overflow: ellipsis;
   white-space: nowrap;
+  padding: ${({ theme }) => `${theme.space[1]} ${theme.space[2]}`};
   background-color: ${({ theme, invertedLabel }) =>
     invertedLabel ? theme.colors["primary"] : "white"};
   color: ${({ invertedLabel }) => (invertedLabel ? "white" : "black")};
   border-left-width: ${({ theme }) => theme.borderWidths[2]};
   border-left-style: ${({ logicalType }) => handleLogicalType(logicalType)};
   border-left-color: ${({ theme }) => theme.colors["black"]};
-  max-width: ${space56};
+  max-width: ${({ theme }) => theme.space[56]};
 `;
 
 export const ButtonWrapper = styled.div`

@@ -9,8 +9,6 @@ interface ButtonProps {
   inverted?: boolean;
   color?: typeof Colors[number];
   onClick?: MouseEventHandler<HTMLElement>;
-  // TODO: remove after removing from containers
-  marginRight?: boolean;
 }
 
 export const Button: React.FC<ButtonProps> = ({

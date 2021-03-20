@@ -1,16 +1,16 @@
 import React, { FC, useState } from "react";
 
-import { Button } from "components";
-import { Colors } from "types";
+import { LabelWrapper, ToggleWrapper } from "./ToggleStyles";
+import { Colors, Entities } from "types";
 
 interface Toggle {
-  optionList: string[];
+  optionList: String[] | JSX.Element[];
   inverted?: boolean;
   color?: typeof Colors[number];
 }
 export const Toggle: FC<Toggle> = ({
-  optionList,
-  inverted,
+  optionList = "",
+  inverted = false,
   color = "primary",
 }) => {
   const [selected, setSelected] = useState(0);
@@ -23,11 +23,13 @@ export const Toggle: FC<Toggle> = ({
   };
 
   return (
-    <Button
-      label={optionList[selected]}
-      onClick={() => chooseNext()}
-      color={color}
-      inverted={inverted}
-    />
+    <ToggleWrapper color={color} inverted={inverted}>
+      <LabelWrapper
+        onClick={() => chooseNext()}
+        hasIcon={typeof optionList[selected] !== "string"}
+      >
+        {optionList[selected]}
+      </LabelWrapper>
+    </ToggleWrapper>
   );
 };
