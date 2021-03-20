@@ -12,6 +12,7 @@ import {
   Submit,
   Tag,
   Toast,
+  Toggle,
 } from "components";
 import styled from "styled-components";
 import { useState } from "react";
@@ -54,20 +55,29 @@ export const Layout1 = () => {
       />
       <Input value="default input" onChangeFn={() => {}} />
       <Box label="default box" width={500} height={700}>
-        {
-          <div>
-            <FontXs>FontXs</FontXs>
-            <FontSm>FontSm</FontSm>
-            <FontBase>FontBase</FontBase>
-            <FontLg>FontLg</FontLg>
-            <FontXl>FontXl</FontXl>
-            <Font2Xl>Font2Xl</Font2Xl>
-            <Font3Xl>Font3Xl</Font3Xl>
-            <Font4Xl>Font4Xl</Font4Xl>
-            <Font5Xl>Font5Xl</Font5Xl>
-            <Font6Xl>Font6Xl</Font6Xl>
-          </div>
-        }
+        <div>
+          <Toggle
+            optionList={[
+              { value: "0", label: "This text is too long to handle" },
+              { value: "1", label: "Another long which is too long to handle" },
+              { value: "2", label: "Masarykova" },
+              { value: "3", label: "Univerzita" },
+            ]}
+            color="danger"
+          />
+        </div>
+        <>
+          <FontXs>FontXs</FontXs>
+          <FontSm>FontSm</FontSm>
+          <FontBase>FontBase</FontBase>
+          <FontLg>FontLg</FontLg>
+          <FontXl>FontXl</FontXl>
+          <Font2Xl>Font2Xl</Font2Xl>
+          <Font3Xl>Font3Xl</Font3Xl>
+          <Font4Xl>Font4Xl</Font4Xl>
+          <Font5Xl>Font5Xl</Font5Xl>
+          <Font6Xl>Font6Xl</Font6Xl>
+        </>
       </Box>
       <Submit
         title="Submit title"

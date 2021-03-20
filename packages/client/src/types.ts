@@ -93,3 +93,5 @@ export interface Node {
   children: Array<Node>;
 }
 export const ItemTypes = { TAG: "TAG" };
+
+export type ToggleItem = { value: string; label: String | JSX.Element };
