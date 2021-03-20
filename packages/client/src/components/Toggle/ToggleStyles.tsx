@@ -2,11 +2,11 @@ import styled from "styled-components";
 
 import { Colors } from "types";
 
-interface ToggleWrapper {
+interface StyledToggle {
   color: typeof Colors[number];
   inverted: boolean;
 }
-export const ToggleWrapper = styled.div<ToggleWrapper>`
+export const StyledToggle = styled.div<StyledToggle>`
   display: inline-flex;
   border: 2px solid ${({ theme, color }) => theme.colors[color]};
   color: ${({ theme, color, inverted }) =>
@@ -14,14 +14,13 @@ export const ToggleWrapper = styled.div<ToggleWrapper>`
   background-color: ${({ theme, color, inverted }) =>
     inverted ? theme.colors["white"] : theme.colors[color]};
 `;
-interface LabelWrapper {
+interface StyledLabel {
   hasIcon?: boolean;
 }
-export const LabelWrapper = styled.div<LabelWrapper>`
+export const StyledLabel = styled.div<StyledLabel>`
   height: 2.25rem;
   display: ${({ hasIcon }) => (hasIcon ? "flex" : "inline-block")};
   align-items: center;
-  /* vertical-align: middle; */
   overflow: hidden !important;
   text-overflow: ellipsis;
   white-space: nowrap;

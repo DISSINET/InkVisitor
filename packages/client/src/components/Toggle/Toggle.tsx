@@ -1,6 +1,6 @@
 import React, { FC, useEffect, useState } from "react";
 
-import { LabelWrapper, ToggleWrapper } from "./ToggleStyles";
+import { StyledLabel, StyledToggle } from "./ToggleStyles";
 import { Colors, ToggleItem } from "types";
 
 interface Toggle {
@@ -29,13 +29,13 @@ export const Toggle: FC<Toggle> = ({
   };
 
   return (
-    <ToggleWrapper color={color} inverted={inverted}>
-      <LabelWrapper
+    <StyledToggle color={color} inverted={inverted}>
+      <StyledLabel
         onClick={() => chooseNext()}
         hasIcon={typeof optionList[selected].label !== "string"}
       >
         {optionList[selected].label}
-      </LabelWrapper>
-    </ToggleWrapper>
+      </StyledLabel>
+    </StyledToggle>
   );
 };
