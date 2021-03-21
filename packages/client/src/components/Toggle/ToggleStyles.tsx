@@ -30,3 +30,9 @@ export const StyledLabel = styled.div<StyledLabel>`
   font-size: ${({ theme }) => theme.fontSizes["sm"]};
   max-width: ${({ theme }) => theme.space[56]};
 `;
+
+interface StyledIcon {}
+export const StyledIcon = styled.div<StyledIcon>`
+  padding-left: ${({ theme }) => `${theme.space[2]}`};
+  padding-top: ${({ theme }) => `${theme.space[1]}`};
+`;

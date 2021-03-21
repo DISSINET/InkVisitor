@@ -12,16 +12,18 @@ export default {
 };
 
 export const DefaultToggle = () => {
-  const [toggleItem, setToggleItem] = useState<ToggleItem>();
+  const options = [
+    { value: "0", label: "Neverending text about something" },
+    { value: "1", label: "InkVisitor" },
+    { value: "2", label: "Development" },
+  ];
+  const [toggleItem, setToggleItem] = useState<ToggleItem>(options[0]);
 
   return (
     <>
       <Toggle
-        optionList={[
-          { value: "0", label: "Neverending text about something" },
-          { value: "1", label: "InkVisitor" },
-          { value: "2", label: "Development" },
-        ]}
+        optionList={options}
+        selectedValue={toggleItem.value}
         onChangeFn={(item: ToggleItem) => setToggleItem(item)}
       />
       <h6>value: {toggleItem?.value}</h6>
@@ -30,16 +32,18 @@ export const DefaultToggle = () => {
   );
 };
 export const DefaultIconToggle = () => {
-  const [toggleItem, setToggleItem] = useState<ToggleItem>();
+  const options = [
+    { value: "0", label: <FaPencilAlt /> },
+    { value: "1", label: <FaTrashAlt /> },
+    { value: "2", label: <FaInfo /> },
+  ];
+  const [toggleItem, setToggleItem] = useState<ToggleItem>(options[0]);
 
   return (
     <>
       <Toggle
-        optionList={[
-          { value: "0", label: <FaPencilAlt /> },
-          { value: "1", label: <FaTrashAlt /> },
-          { value: "2", label: <FaInfo /> },
-        ]}
+        optionList={options}
+        selectedValue={toggleItem.value}
         onChangeFn={(item: ToggleItem) => setToggleItem(item)}
         color="danger"
         inverted
@@ -51,17 +55,19 @@ export const DefaultIconToggle = () => {
 };
 
 export const LongToggleWithValueOutside = () => {
-  const [toggleItem, setToggleItem] = useState<ToggleItem>();
+  const options = [
+    { value: "0", label: "This text is too long to handle" },
+    { value: "1", label: "Another long which is too long to handle" },
+    { value: "2", label: "Masarykova" },
+    { value: "3", label: "Univerzita" },
+  ];
+  const [toggleItem, setToggleItem] = useState<ToggleItem>(options[0]);
   return (
     <>
       <div>
         <Toggle
-          optionList={[
-            { value: "0", label: "This text is too long to handle" },
-            { value: "1", label: "Another long which is too long to handle" },
-            { value: "2", label: "Masarykova" },
-            { value: "3", label: "Univerzita" },
-          ]}
+          optionList={options}
+          selectedValue={toggleItem.value}
           color="danger"
           onChangeFn={(item: ToggleItem) => setToggleItem(item)}
         />

@@ -1,16 +1,32 @@
 import React from "react";
+import { FaBook } from "react-icons/fa";
 
 import { Toggle } from "components";
 
-interface IElvlToggle {}
+import { elvlDict } from "./../../../../../../shared/dictionaries";
 
-export const ElvlToggle: React.FC<IElvlToggle> = ({}) => {
+interface IElvlToggle {
+  onChangeFn: Function;
+  value: string;
+}
+
+export const ElvlToggle: React.FC<IElvlToggle> = ({ onChangeFn, value }) => {
+  const items = elvlDict.map((i) => {
+    return {
+      value: i.value,
+      label: i.value,
+      tooltip: i.label,
+    };
+  });
   return (
     <Toggle
-      optionList={[
-        { value: "certain", label: "certain" },
-        { value: "uncertain", label: "uncertain" },
-      ]}
+      icon={<FaBook />}
+      inverted
+      onChangeFn={(newValue) => {
+        onChangeFn(newValue.value);
+      }}
+      optionList={items}
+      selectedValue={value}
     />
   );
 };
