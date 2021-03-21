@@ -1,10 +1,12 @@
-import React, { FC, useEffect, useState } from "react";
+import React, { FC, useEffect, useState, useMemo } from "react";
 
 import { StyledLabel, StyledToggle, StyledIcon } from "./ToggleStyles";
 import { Colors, ToggleItem } from "types";
+import Popup from "reactjs-popup";
 
 interface Toggle {
   optionList: ToggleItem[];
+  selectedValue: string;
   inverted?: boolean;
   color?: typeof Colors[number];
   onChangeFn?: (item: ToggleItem) => void;
@@ -12,33 +14,54 @@ interface Toggle {
 }
 export const Toggle: FC<Toggle> = ({
   optionList = [{ value: "", label: "" }],
+  selectedValue = optionList[0].value,
   inverted = false,
   color = "primary",
   onChangeFn = (item: ToggleItem) => {},
   icon = false,
 }) => {
-  const [selected, setSelected] = useState(0);
-  useEffect(() => {
-    onChangeFn(optionList[selected]);
-  }, [selected]);
+  const selectedIndex = useMemo(() => {
+    const selectedOption = optionList.find((o) => o.value === selectedValue);
+
+    if (selectedOption) {
+      return optionList.indexOf(selectedOption);
+    } else {
+      return 0;
+    }
+  }, [selectedValue]);
+
+  const tooltip = useMemo(() => {
+    return optionList[selectedIndex].tooltip || "";
+  }, [selectedIndex]);
 
   const chooseNext = () => {
-    if (selected < optionList.length - 1) {
-      setSelected(selected + 1);
+    if (selectedIndex < optionList.length - 1) {
+      onChangeFn(optionList[selectedIndex + 1]);
     } else {
-      setSelected(0);
+      onChangeFn(optionList[0]);
     }
   };
 
   return (
-    <StyledToggle color={color} inverted={inverted}>
-      {icon && <StyledIcon>{icon}</StyledIcon>}
-      <StyledLabel
-        onClick={() => chooseNext()}
-        hasIcon={typeof optionList[selected].label !== "string"}
-      >
-        {optionList[selected].label}
-      </StyledLabel>
-    </StyledToggle>
+    <Popup
+      trigger={
+        <StyledToggle
+          color={color}
+          inverted={inverted}
+          onClick={() => chooseNext()}
+        >
+          {icon && <StyledIcon>{icon}</StyledIcon>}
+          <StyledLabel
+            hasIcon={typeof optionList[selectedIndex].label !== "string"}
+          >
+            {optionList[selectedIndex].label}
+          </StyledLabel>
+        </StyledToggle>
+      }
+      position={["top center", "bottom right", "bottom left"]}
+      on={["hover", "focus"]}
+    >
+      {tooltip}
+    </Popup>
   );
 };
