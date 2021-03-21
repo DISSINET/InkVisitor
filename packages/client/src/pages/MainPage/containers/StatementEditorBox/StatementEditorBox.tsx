@@ -52,7 +52,7 @@ export const StatementEditorBox: React.FC = () => {
       {statement ? (
         <div style={{ marginBottom: "4rem" }}>
           <div key={statement.id}>
-            <div className="editor-section">
+            <div key="editor-section-summary" className="editor-section">
               <div className="editor-section-header">Summary</div>
               <div className="editor-section-content">
                 <div className="table-row">
@@ -98,7 +98,6 @@ export const StatementEditorBox: React.FC = () => {
                         ...statement.data,
                         ...{ modality: newValue },
                       };
-                      console.log(newData);
                       update(newData);
                     }}
                   />
@@ -125,7 +124,7 @@ export const StatementEditorBox: React.FC = () => {
                 </div>
               </div>
             </div>
-            <div className="editor-section">
+            <div key="editor-section-actants" className="editor-section">
               <div className="editor-section-header">Actants</div>
               <div className="editor-section-content">
                 <table className="">
@@ -147,7 +146,7 @@ export const StatementEditorBox: React.FC = () => {
                       //console.log(statement.actants, sActant);
                       if (actant) {
                         return (
-                          <tr>
+                          <tr key={sai}>
                             <td>
                               <ActantTag
                                 key={sai}
@@ -175,19 +174,19 @@ export const StatementEditorBox: React.FC = () => {
                 </table>
               </div>
             </div>
-            <div className="editor-section">
+            <div key="editor-section-props" className="editor-section">
               <div className="editor-section-header">Properties (has)</div>
               <div className="editor-section-content"></div>
             </div>
-            <div className="editor-section">
+            <div key="editor-section-refs" className="editor-section">
               <div className="editor-section-header">References</div>
               <div className="editor-section-content"></div>
             </div>
-            <div className="editor-section">
+            <div key="editor-section-tags" className="editor-section">
               <div className="editor-section-header">Tags</div>
               <div className="editor-section-content"></div>
             </div>
-            <div className="editor-section">
+            <div key="editor-section-notes" className="editor-section">
               <div className="editor-section-header">Notes</div>
               <div className="editor-section-content"></div>
             </div>
