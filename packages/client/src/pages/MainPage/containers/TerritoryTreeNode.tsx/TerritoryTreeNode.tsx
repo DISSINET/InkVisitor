@@ -20,6 +20,9 @@ interface TerritoryTreeNode {
   lvl: number;
   statementsCount: number;
   // expandParent?: () => void;
+  propId?: string;
+  index?: number;
+  moveFn?: (dragIndex: number, hoverIndex: number) => void;
 }
 export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
   territory,
@@ -27,6 +30,9 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
   lvl,
   statementsCount,
   // expandParent = () => {},
+  propId,
+  index,
+  moveFn,
 }) => {
   let history = useHistory();
   var hashParams = queryString.parse(location.hash);
@@ -48,7 +54,7 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
     setChildTerritories(children);
   }, [children]);
 
-  const moveFn = useCallback(
+  const moveChildFn = useCallback(
     (dragIndex: number, hoverIndex: number) => {
       const dragCard = childTerritories[dragIndex];
       setChildTerritories(
@@ -109,7 +115,13 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
             </>
           )}
         </StyledIconWrap>
-        <ActantTag actant={territoryActant} isSelected={isSelected} />
+        <ActantTag
+          actant={territoryActant}
+          isSelected={isSelected}
+          propId={propId}
+          index={index}
+          moveFn={moveFn}
+        />
       </StyledTerritoryTagWrap>
     );
   };
@@ -127,6 +139,9 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
             lvl={child.lvl}
             statementsCount={child.statementsCount}
             // expandParent={() => setIsExpanded(true)}
+            propId={child.id}
+            index={key}
+            moveFn={moveChildFn}
           />
         ))}
       </StyledChildrenWrap>

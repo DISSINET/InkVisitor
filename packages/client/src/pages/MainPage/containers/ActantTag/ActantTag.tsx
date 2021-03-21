@@ -71,6 +71,8 @@ interface IActantTag {
   mode?: "selected" | "disabled" | "invalid" | false;
   short?: boolean;
   button?: ReactNode;
+  propId?: string;
+  index?: number;
   moveFn?: (dragIndex: number, hoverIndex: number) => void;
   isSelected?: boolean;
 }
@@ -80,6 +82,8 @@ export const ActantTag: React.FC<IActantTag> = ({
   short = false,
   mode,
   button,
+  propId,
+  index,
   moveFn,
   isSelected,
 }) => {
@@ -111,6 +115,8 @@ export const ActantTag: React.FC<IActantTag> = ({
       mode={mode}
       borderStyle={borderStyle}
       invertedLabel={isSelected}
+      propId={propId}
+      index={index}
     />
   );
 };
