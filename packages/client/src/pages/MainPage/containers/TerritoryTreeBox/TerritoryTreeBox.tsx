@@ -1,8 +1,7 @@
 import React from "react";
 import { useQuery } from "react-query";
 import api from "api";
-
-import { TerritoryTreeNode } from "./TerritoryTreeNode";
+import { TerritoryTreeNode } from "./..";
 
 export const TerritoryTreeBox: React.FC = () => {
   const { status, data, error, isFetching } = useQuery(
@@ -21,6 +20,7 @@ export const TerritoryTreeBox: React.FC = () => {
           territory={data.territory}
           children={data.children}
           lvl={data.lvl}
+          statementsCount={data.statementsCount}
         />
       )}
     </>
