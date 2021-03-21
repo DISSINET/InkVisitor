@@ -18,7 +18,6 @@ export const ElvlToggle: React.FC<IElvlToggle> = ({ onChangeFn, value }) => {
       tooltip: i.label,
     };
   });
-  const selectedItemNo = items.map((i) => i.value).indexOf(value) || 0;
   return (
     <Toggle
       icon={<FaBook />}
