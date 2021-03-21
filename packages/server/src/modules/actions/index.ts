@@ -1,6 +1,7 @@
 import { Router, Request } from "express";
 import { IAction, IResponseGeneric } from "@shared/types";
 import {
+  findAllActions,
   findActionById,
   findActionsByLabel,
   createAction,
@@ -34,6 +35,7 @@ export default Router()
       const label = request.body.label;
 
       if (!label) {
+        return await findAllActions(request.db);
         throw new BadParams("label has to be set");
       }
 
