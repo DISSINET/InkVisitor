@@ -1,6 +1,6 @@
 import React, { FC, useEffect, useState } from "react";
 
-import { StyledLabel, StyledToggle } from "./ToggleStyles";
+import { StyledLabel, StyledToggle, StyledIcon } from "./ToggleStyles";
 import { Colors, ToggleItem } from "types";
 
 interface Toggle {
@@ -8,12 +8,14 @@ interface Toggle {
   inverted?: boolean;
   color?: typeof Colors[number];
   onChangeFn?: (item: ToggleItem) => void;
+  icon?: React.ReactElement;
 }
 export const Toggle: FC<Toggle> = ({
   optionList = [{ value: "", label: "" }],
   inverted = false,
   color = "primary",
   onChangeFn = (item: ToggleItem) => {},
+  icon = false,
 }) => {
   const [selected, setSelected] = useState(0);
   useEffect(() => {
@@ -30,6 +32,7 @@ export const Toggle: FC<Toggle> = ({
 
   return (
     <StyledToggle color={color} inverted={inverted}>
+      {icon && <StyledIcon>{icon}</StyledIcon>}
       <StyledLabel
         onClick={() => chooseNext()}
         hasIcon={typeof optionList[selected].label !== "string"}
