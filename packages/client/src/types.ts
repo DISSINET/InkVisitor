@@ -94,4 +94,8 @@ export interface Node {
 }
 export const ItemTypes = { TAG: "TAG" };
 
-export type ToggleItem = { value: string; label: String | JSX.Element };
+export type ToggleItem = {
+  value: string;
+  label: String | JSX.Element;
+  tooltip?: string;
+};
