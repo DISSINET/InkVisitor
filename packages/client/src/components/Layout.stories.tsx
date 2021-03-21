@@ -63,6 +63,7 @@ export const Layout1 = () => {
               { value: "2", label: "Masarykova" },
               { value: "3", label: "Univerzita" },
             ]}
+            selectedValue={"0"}
             color="danger"
           />
         </div>
