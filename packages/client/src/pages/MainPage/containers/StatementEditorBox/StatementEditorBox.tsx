@@ -91,9 +91,37 @@ export const StatementEditorBox: React.FC = () => {
                   </div>
                 </div>
                 <div className="table-row">
-                  <ModalityToggle />
-                  <ElvlToggle />
-                  <CertaintyToggle />
+                  <ModalityToggle
+                    value={statement.data.modality}
+                    onChangeFn={(newValue: string) => {
+                      const newData = {
+                        ...statement.data,
+                        ...{ modality: newValue },
+                      };
+                      console.log(newData);
+                      update(newData);
+                    }}
+                  />
+                  <ElvlToggle
+                    value={statement.data.elvl}
+                    onChangeFn={(newValue: string) => {
+                      const newData = {
+                        ...statement.data,
+                        ...{ elvl: newValue },
+                      };
+                      update(newData);
+                    }}
+                  />
+                  <CertaintyToggle
+                    value={statement.data.certainty}
+                    onChangeFn={(newValue: string) => {
+                      const newData = {
+                        ...statement.data,
+                        ...{ certainty: newValue },
+                      };
+                      update(newData);
+                    }}
+                  />
                 </div>
               </div>
             </div>

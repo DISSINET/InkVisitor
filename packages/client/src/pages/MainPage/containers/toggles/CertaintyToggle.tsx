@@ -5,17 +5,31 @@ import { Toggle } from "components";
 
 import { certaintyDict } from "./../../../../../../shared/dictionaries";
 
-interface ICertaintyToggle {}
+interface ICertaintyToggle {
+  onChangeFn: Function;
+  value: string;
+}
 
-export const CertaintyToggle: React.FC<ICertaintyToggle> = ({}) => {
+export const CertaintyToggle: React.FC<ICertaintyToggle> = ({
+  onChangeFn,
+  value,
+}) => {
+  const items = certaintyDict.map((i) => {
+    return {
+      value: i.value,
+      label: i.value,
+      tooltip: i.label,
+    };
+  });
   return (
     <Toggle
       icon={<FaQuestionCircle />}
       inverted
       onChangeFn={(newValue) => {
-        console.log(newValue);
+        onChangeFn(newValue.value);
       }}
-      optionList={certaintyDict}
+      selectedValue={value}
+      optionList={items}
     />
   );
 };
