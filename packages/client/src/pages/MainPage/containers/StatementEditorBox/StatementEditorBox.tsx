@@ -15,7 +15,6 @@ import {
   ElvlToggle,
 } from "./../";
 import { Button, ButtonGroup, Input } from "components";
-import { modalityDict } from "./../../../../../../shared/dictionaries";
 
 export const StatementEditorBox: React.FC = () => {
   let history = useHistory();
