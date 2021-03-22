@@ -54,15 +54,15 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
 
   const moveChildFn = useCallback(
     (dragIndex: number, hoverIndex: number) => {
-      const dragCard = childTerritories[dragIndex];
-      setChildTerritories(
-        update(childTerritories, {
-          $splice: [
-            [dragIndex, 1],
-            [hoverIndex, 0, dragCard],
-          ],
-        })
-      );
+      // const dragCard = childTerritories[dragIndex];
+      // setChildTerritories(
+      //   update(childTerritories, {
+      //     $splice: [
+      //       [dragIndex, 1],
+      //       [hoverIndex, 0, dragCard],
+      //     ],
+      //   })
+      // );
     },
     [childTerritories]
   );
