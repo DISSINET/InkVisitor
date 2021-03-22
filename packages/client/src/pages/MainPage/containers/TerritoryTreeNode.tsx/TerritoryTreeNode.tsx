@@ -128,21 +128,20 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
     <div key={territory.id}>
       {renderTerritoryTag(territory, territory.id, children.length > 0)}
 
-      <StyledChildrenWrap>
-        {isExpanded &&
-          childTerritories.map((child: any, key: number) => (
-            <TerritoryTreeNode
-              key={key}
-              territory={child.territory}
-              children={child.children}
-              lvl={child.lvl}
-              statementsCount={child.statementsCount}
-              initExpandedNodes={initExpandedNodes}
-              propId={child.id}
-              index={key}
-              moveFn={moveChildFn}
-            />
-          ))}
+      <StyledChildrenWrap isExpanded={isExpanded}>
+        {childTerritories.map((child: any, key: number) => (
+          <TerritoryTreeNode
+            key={key}
+            territory={child.territory}
+            children={child.children}
+            lvl={child.lvl}
+            statementsCount={child.statementsCount}
+            initExpandedNodes={initExpandedNodes}
+            propId={child.id}
+            index={key}
+            moveFn={moveChildFn}
+          />
+        ))}
       </StyledChildrenWrap>
     </div>
   );

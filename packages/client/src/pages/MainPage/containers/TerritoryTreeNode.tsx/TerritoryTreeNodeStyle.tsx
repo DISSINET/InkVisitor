@@ -9,8 +9,11 @@ export const StyledTerritoryTagWrap = styled.div`
 export const StyledIconWrap = styled.div`
   cursor: pointer;
 `;
-interface StyledChildrenWrap {}
+interface StyledChildrenWrap {
+  isExpanded?: boolean;
+}
 export const StyledChildrenWrap = styled.div<StyledChildrenWrap>`
+  display: ${({ isExpanded }) => (isExpanded ? "block" : "none")};
   margin-left: ${({ theme }) => theme.space[3]};
 `;
 export const StyledFaDotCircle = styled(FaDotCircle)`
