@@ -14,7 +14,7 @@ import {
   StyledTh,
   StyledTHead,
   StyledTr,
-} from "./TableStyles";
+} from "./StatementListStyles";
 const queryString = require("query-string");
 
 const initialData: { statements: IStatement[]; actants: IActant[] } = {
@@ -27,6 +27,7 @@ export const StatementListBox: React.FC = () => {
   let location = useLocation();
   var hashParams = queryString.parse(location.hash);
   const territoryId = hashParams.territory;
+  const statementId = hashParams.statement;
 
   const { status, data, error, isFetching } = useQuery(
     ["statement", "territory", "statement-list", territoryId],
@@ -199,7 +200,11 @@ export const StatementListBox: React.FC = () => {
             prepareRow(row);
             return (
               <React.Fragment key={i}>
-                <StyledTr {...row.getRowProps()} isOdd={Boolean(i % 2)}>
+                <StyledTr
+                  {...row.getRowProps()}
+                  isOdd={Boolean(i % 2)}
+                  isSelected={row.values.id === statementId}
+                >
                   {row.cells.map((cell, i) => {
                     return (
                       <StyledTd {...cell.getCellProps()}>

@@ -19,7 +19,7 @@ interface TerritoryTreeNode {
   children: any;
   lvl: number;
   statementsCount: number;
-  // expandParent?: () => void;
+  initExpandedNodes?: string[];
   propId?: string;
   index?: number;
   moveFn?: (dragIndex: number, hoverIndex: number) => void;
@@ -29,7 +29,7 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
   children,
   lvl,
   statementsCount,
-  // expandParent = () => {},
+  initExpandedNodes = [],
   propId,
   index,
   moveFn,
@@ -39,20 +39,18 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
   const territoryId = hashParams.territory;
   const isSelected = territoryId === territory.id;
 
-  const [isExpanded, setIsExpanded] = useState(true);
-
-  // useEffect(() => {
-  //   if (isSelected) {
-  //     console.log("here", territory.id);
-  //     expandParent;
-  //   }
-  // }, []);
-
+  const [isExpanded, setIsExpanded] = useState(false);
   const [childTerritories, setChildTerritories] = useState<any[]>([]);
 
   useEffect(() => {
     setChildTerritories(children);
   }, [children]);
+
+  useEffect(() => {
+    if (initExpandedNodes.some((node) => node === territory.id)) {
+      setIsExpanded(true);
+    }
+  }, []);
 
   const moveChildFn = useCallback(
     (dragIndex: number, hoverIndex: number) => {
@@ -130,20 +128,21 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
     <div key={territory.id}>
       {renderTerritoryTag(territory, territory.id, children.length > 0)}
 
-      <StyledChildrenWrap isExpanded={isExpanded}>
-        {childTerritories.map((child: any, key: number) => (
-          <TerritoryTreeNode
-            key={key}
-            territory={child.territory}
-            children={child.children}
-            lvl={child.lvl}
-            statementsCount={child.statementsCount}
-            // expandParent={() => setIsExpanded(true)}
-            propId={child.id}
-            index={key}
-            moveFn={moveChildFn}
-          />
-        ))}
+      <StyledChildrenWrap>
+        {isExpanded &&
+          childTerritories.map((child: any, key: number) => (
+            <TerritoryTreeNode
+              key={key}
+              territory={child.territory}
+              children={child.children}
+              lvl={child.lvl}
+              statementsCount={child.statementsCount}
+              initExpandedNodes={initExpandedNodes}
+              propId={child.id}
+              index={key}
+              moveFn={moveChildFn}
+            />
+          ))}
       </StyledChildrenWrap>
     </div>
   );

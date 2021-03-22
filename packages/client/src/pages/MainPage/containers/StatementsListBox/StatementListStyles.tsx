@@ -20,7 +20,13 @@ interface StyledTr {
 }
 export const StyledTr = styled.tr<StyledTr>`
   background-color: ${({ theme, isOdd, isSelected }) =>
-    isOdd ? theme.colors["white"] : theme.colors["blue"][50]};
+    isSelected
+      ? theme.colors["primary"]
+      : isOdd
+      ? theme.colors["white"]
+      : theme.colors["blue"][50]};
+  color: ${({ theme, isSelected }) =>
+    isSelected ? theme.colors["white"] : theme.colors["black"]};
 `;
 export const StyledTd = styled.td`
   padding: ${({ theme }) => theme.space[2]} 0;
