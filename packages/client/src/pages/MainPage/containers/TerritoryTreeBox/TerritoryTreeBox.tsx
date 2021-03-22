@@ -1,9 +1,10 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useQuery } from "react-query";
 const queryString = require("query-string");
 
 import api from "api";
 import { TerritoryTreeNode } from "./..";
+import { IResponseTree } from "@shared/types";
 
 export const TerritoryTreeBox: React.FC = () => {
   const { status, data, error, isFetching } = useQuery(
@@ -16,13 +17,32 @@ export const TerritoryTreeBox: React.FC = () => {
   );
   var hashParams = queryString.parse(location.hash);
   const territoryId = hashParams.territory;
+  const [selectedTerritory, setSelectedTerritory] = useState<IResponseTree>();
 
-  // useEffect(() => {
-  //   const selectedNode = data?.children.find((child) =>
-  //     child.children.some((item) => item.territory.id === territoryId)
-  //   );
-  //   console.log(selectedNode);
-  // }, [data]);
+  const searchTree = (
+    element: IResponseTree,
+    matchingTitle: string
+  ): IResponseTree | null => {
+    if (element.territory.id === matchingTitle) {
+      return element;
+    } else if (element.children != null) {
+      var i;
+      var result = null;
+      for (i = 0; result === null && i < element.children.length; i++) {
+        result = searchTree(element.children[i], matchingTitle);
+      }
+      return result;
+    }
+    return null;
+  };
+  useEffect(() => {
+    if (data) {
+      const foundTerritory = searchTree(data, territoryId);
+      if (foundTerritory) {
+        setSelectedTerritory(foundTerritory);
+      }
+    }
+  }, [data]);
 
   return (
     <>
