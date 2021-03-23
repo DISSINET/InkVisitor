@@ -17,6 +17,7 @@ export interface IStatement extends IActant {
       id: string;
       actant: string; //  this
       position: string;
+      modality: string;
       elvl: string;
       certainty: string;
     }[];
@@ -31,7 +32,6 @@ export interface IStatement extends IActant {
     tags: string[]; // ids of IActant
   };
 }
-
 
 export function getActantIdsFromStatements(statements: IStatement[]): string[] {
   const actantIds: Record<string, null> = {}; // unique check

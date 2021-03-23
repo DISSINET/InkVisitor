@@ -143,11 +143,10 @@ export const StatementEditorBox: React.FC = () => {
                 <table className="">
                   <thead>
                     <tr>
-                      <th key="actants">Actants</th>
-                      <th key="position">Position</th>
+                      <th key="actants"></th>
+                      <th key="position"></th>
                       <th key="certainty"></th>
-                      <th key="elvl"></th>
-                      <th key="modality"></th>
+
                       <th key="actions"></th>
                     </tr>
                   </thead>
@@ -156,7 +155,6 @@ export const StatementEditorBox: React.FC = () => {
                       const actant = statement.actants.find(
                         (a) => a.id === sActant.actant
                       );
-                      //console.log(statement.actants, sActant);
                       if (actant) {
                         return (
                           <tr key={sai}>
@@ -179,9 +177,32 @@ export const StatementEditorBox: React.FC = () => {
                                 }}
                               ></Input>
                             </td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
+                            <td>
+                              <ModalityToggle
+                                value={sActant.modality}
+                                onChangeFn={(newValue: string) => {
+                                  updateStateActant(sActant.id, {
+                                    modality: newValue,
+                                  });
+                                }}
+                              />
+                              <ElvlToggle
+                                value={sActant.elvl}
+                                onChangeFn={(newValue: string) => {
+                                  updateStateActant(sActant.id, {
+                                    elvl: newValue,
+                                  });
+                                }}
+                              />
+                              <CertaintyToggle
+                                value={sActant.certainty}
+                                onChangeFn={(newValue: string) => {
+                                  updateStateActant(sActant.id, {
+                                    certainty: newValue,
+                                  });
+                                }}
+                              />
+                            </td>
                             <td>
                               <Button
                                 key="d"
