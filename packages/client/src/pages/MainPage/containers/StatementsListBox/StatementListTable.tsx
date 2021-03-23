@@ -62,6 +62,7 @@ export const StatementListTable: React.FC<StatementListTable> = ({
                 {column.render("Header")}
               </StyledTh>
             ))}
+            <th></th>
           </tr>
         ))}
       </StyledTHead>
@@ -69,7 +70,12 @@ export const StatementListTable: React.FC<StatementListTable> = ({
         {rows.map((row, i) => {
           prepareRow(row);
           return (
-            <StatementListRow key={i} index={i} row={row} moveRow={moveRow} />
+            <StatementListRow
+              index={i}
+              row={row}
+              moveRow={moveRow}
+              {...row.getRowProps()}
+            />
           );
         })}
       </tbody>

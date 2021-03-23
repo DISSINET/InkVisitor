@@ -17,6 +17,7 @@ export const StyledTh = styled.th`
 interface StyledTr {
   isOdd?: boolean;
   isSelected?: boolean;
+  opacity?: number;
 }
 export const StyledTr = styled.tr<StyledTr>`
   background-color: ${({ theme, isOdd, isSelected }) =>
@@ -27,6 +28,7 @@ export const StyledTr = styled.tr<StyledTr>`
       : theme.colors["blue"][50]};
   color: ${({ theme, isSelected }) =>
     isSelected ? theme.colors["white"] : theme.colors["black"]};
+  opacity: ${({ opacity }) => (opacity ? opacity : 1)};
 `;
 export const StyledTd = styled.td`
   padding: ${({ theme }) => theme.space[2]} 0;

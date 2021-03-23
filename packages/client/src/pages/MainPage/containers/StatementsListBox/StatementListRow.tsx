@@ -42,7 +42,7 @@ export const StatementListRow: React.FC<StatementListRow> = ({
         return;
       }
       // Determine rectangle on screen
-      const hoverBoundingRect = dropRef.current.getBoundingClientRect();
+      const hoverBoundingRect = dropRef.current?.getBoundingClientRect();
       // Get vertical middle
       const hoverMiddleY =
         (hoverBoundingRect.bottom - hoverBoundingRect.top) / 2;
@@ -78,16 +78,16 @@ export const StatementListRow: React.FC<StatementListRow> = ({
     }),
   });
 
-  // const opacity = isDragging ? 0 : 1;
+  const opacity = isDragging ? 0.5 : 1;
 
-  preview(drop(dropRef));
-  drag(dragRef);
+  // drop(dropRef);
+  // drag(dragRef);
+  drag(drop(dragRef));
 
   return (
     <StyledTr
       ref={dropRef}
-      // style={{ opacity }}
-      {...row.getRowProps()}
+      opacity={opacity}
       isOdd={Boolean(index % 2)}
       isSelected={row.values.id === statementId}
     >
@@ -96,7 +96,7 @@ export const StatementListRow: React.FC<StatementListRow> = ({
           <StyledTd {...cell.getCellProps()}>{cell.render("Cell")}</StyledTd>
         );
       })}
-      <td ref={dragRef}>
+      <td ref={dragRef} style={{ cursor: "move" }}>
         <FaGripVertical />
       </td>
     </StyledTr>

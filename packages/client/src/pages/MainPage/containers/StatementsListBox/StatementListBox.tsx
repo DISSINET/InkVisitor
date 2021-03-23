@@ -41,10 +41,6 @@ export const StatementListBox: React.FC = () => {
         accessor: "id",
       },
       {
-        Header: "",
-        id: "move",
-      },
-      {
         Header: "Subjects",
         accessor: "data",
         Cell: ({ row }: Cell) => {
