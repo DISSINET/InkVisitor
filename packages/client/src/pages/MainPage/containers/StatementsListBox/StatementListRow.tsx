@@ -1,3 +1,4 @@
+import api from "api";
 import React, { useRef } from "react";
 import {
   DragSourceMonitor,
@@ -69,6 +70,9 @@ export const StatementListRow: React.FC<StatementListRow> = ({
       }
       // Time to actually perform the action
       moveRow(dragIndex, hoverIndex);
+      // TODO: send to BE
+      // api.territoryMoveStatement(`${item.id}`, hoverIndex);
+
       // Note: we're mutating the monitor item here!
       // Generally it's better to avoid mutations,
       // but it's good here for the sake of performance
