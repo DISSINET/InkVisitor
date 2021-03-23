@@ -4,20 +4,20 @@ import { PopupPosition, EventType } from "reactjs-popup/dist/types";
 import { StyledPopup } from "./TooltipStyles";
 
 interface Tooltip {
-  trigger: ReactElement;
+  children: ReactElement;
   position?: PopupPosition | PopupPosition[];
   on?: EventType | EventType[];
-  tooltip: string;
+  label: string;
 }
 export const Tooltip: React.FC<Tooltip> = ({
-  trigger,
+  children,
   position = ["bottom center", "top center"],
   on = ["hover", "focus"],
-  tooltip,
+  label,
 }) => {
   return (
-    <StyledPopup trigger={trigger} position={position} on={on}>
-      {tooltip}
+    <StyledPopup trigger={children} position={position} on={on}>
+      {label}
     </StyledPopup>
   );
 };

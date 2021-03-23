@@ -44,23 +44,22 @@ export const Toggle: FC<Toggle> = ({
 
   return (
     <Tooltip
-      trigger={
-        <StyledToggle
-          color={color}
-          inverted={inverted}
-          onClick={() => chooseNext()}
-        >
-          {icon && <StyledIcon>{icon}</StyledIcon>}
-          <StyledLabel
-            hasIcon={typeof optionList[selectedIndex].label !== "string"}
-          >
-            {optionList[selectedIndex].label}
-          </StyledLabel>
-        </StyledToggle>
-      }
       position={["bottom left", "top left"]}
       on={["hover", "focus"]}
-      tooltip={tooltip}
-    />
+      label={tooltip}
+    >
+      <StyledToggle
+        color={color}
+        inverted={inverted}
+        onClick={() => chooseNext()}
+      >
+        {icon && <StyledIcon>{icon}</StyledIcon>}
+        <StyledLabel
+          hasIcon={typeof optionList[selectedIndex].label !== "string"}
+        >
+          {optionList[selectedIndex].label}
+        </StyledLabel>
+      </StyledToggle>
+    </Tooltip>
   );
 };

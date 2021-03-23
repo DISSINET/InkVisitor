@@ -70,8 +70,7 @@ export const StatementListRow: React.FC<StatementListRow> = ({
       }
       // Time to actually perform the action
       moveRow(dragIndex, hoverIndex);
-      // TODO: send to BE
-      // api.territoryMoveStatement(`${item.id}`, hoverIndex);
+      api.territoryMoveStatement(`${item.id}`, hoverIndex);
 
       // Note: we're mutating the monitor item here!
       // Generally it's better to avoid mutations,
@@ -82,7 +81,7 @@ export const StatementListRow: React.FC<StatementListRow> = ({
   });
 
   const [{ isDragging }, drag, preview] = useDrag({
-    item: { type: ItemTypes.ROW, index },
+    item: { type: ItemTypes.ROW, index, id: row.values.id },
     collect: (monitor: DragSourceMonitor) => ({
       isDragging: monitor.isDragging(),
     }),
