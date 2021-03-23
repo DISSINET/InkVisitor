@@ -1,8 +1,8 @@
-import React, { FC, useEffect, useState, useMemo } from "react";
+import React, { FC, useMemo } from "react";
 
 import { StyledLabel, StyledToggle, StyledIcon } from "./ToggleStyles";
 import { Colors, ToggleItem } from "types";
-import Popup from "reactjs-popup";
+import { Tooltip } from "components";
 
 interface Toggle {
   optionList: ToggleItem[];
@@ -43,7 +43,7 @@ export const Toggle: FC<Toggle> = ({
   };
 
   return (
-    <Popup
+    <Tooltip
       trigger={
         <StyledToggle
           color={color}
@@ -58,10 +58,9 @@ export const Toggle: FC<Toggle> = ({
           </StyledLabel>
         </StyledToggle>
       }
-      position={["top center", "bottom right", "bottom left"]}
+      position={["bottom left", "top left"]}
       on={["hover", "focus"]}
-    >
-      {tooltip}
-    </Popup>
+      tooltip={tooltip}
+    />
   );
 };

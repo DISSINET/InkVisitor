@@ -88,7 +88,7 @@ export const StatementListRow: React.FC<StatementListRow> = ({
     }),
   });
 
-  const opacity = isDragging ? 0.5 : 1;
+  const opacity = isDragging ? 0.7 : 1;
 
   // drop(dropRef);
   // drag(dragRef);

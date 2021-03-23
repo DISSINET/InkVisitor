@@ -11,6 +11,7 @@ import { Dropdown } from "components/Dropdown/Dropdown";
 import { Toast } from "components/Toast/Toast";
 import { Toggle } from "components/Toggle/Toggle";
 import { Submit } from "components/Submit/Submit";
+import { Tooltip } from "components/Tooltip/Tooltip";
 import {
   Modal,
   ModalCard,
@@ -38,4 +39,5 @@ export {
   ModalContent,
   ModalFooter,
   Submit,
+  Tooltip,
 };
