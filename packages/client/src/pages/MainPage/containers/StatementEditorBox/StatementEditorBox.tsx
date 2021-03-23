@@ -14,6 +14,8 @@ import {
   ModalityToggle,
   ElvlToggle,
 } from "./../";
+
+import { actantPositionDict } from "./../../../../../../shared/dictionaries";
 import { Button, ButtonGroup, Input } from "components";
 
 export const StatementEditorBox: React.FC = () => {
@@ -25,6 +27,16 @@ export const StatementEditorBox: React.FC = () => {
   const statementId = hashParams.statement;
 
   const queryClient = useQueryClient();
+
+  const updateStateActant = (statementActantId: string, changes: any) => {
+    if (statement && statementActantId) {
+      const updatedActants = statement.data.actants.map((a) =>
+        a.id === statementActantId ? { ...a, ...changes } : a
+      );
+      const newData = { ...statement.data, ...{ actants: updatedActants } };
+      update(newData);
+    }
+  };
 
   // Statement query
   const {
@@ -40,6 +52,7 @@ export const StatementEditorBox: React.FC = () => {
     },
     { enabled: !!statementId }
   );
+
   const update = async (changes: object) => {
     const res = await api.actantsUpdate(statementId, {
       data: changes,
@@ -154,7 +167,18 @@ export const StatementEditorBox: React.FC = () => {
                                 short={false}
                               />
                             </td>
-                            <td></td>
+                            <td>
+                              <Input
+                                type="select"
+                                value={sActant.position}
+                                options={actantPositionDict}
+                                onChangeFn={(newPosition: any) => {
+                                  updateStateActant(sActant.id, {
+                                    position: newPosition,
+                                  });
+                                }}
+                              ></Input>
+                            </td>
                             <td></td>
                             <td></td>
                             <td></td>
