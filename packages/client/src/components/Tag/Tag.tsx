@@ -1,5 +1,11 @@
 import React, { ReactNode, useRef } from "react";
-import { DropTargetMonitor, useDrag, useDrop, XYCoord } from "react-dnd";
+import {
+  DragSourceMonitor,
+  DropTargetMonitor,
+  useDrag,
+  useDrop,
+  XYCoord,
+} from "react-dnd";
 
 import { ItemTypes } from "types";
 import ReactTooltip from "react-tooltip";
@@ -91,7 +97,7 @@ export const Tag: React.FC<TagProps> = ({
 
   const [{ isDragging }, drag] = useDrag({
     item: { type: ItemTypes.TAG, id: propId, index, category },
-    collect: (monitor: any) => ({
+    collect: (monitor: DragSourceMonitor) => ({
       isDragging: monitor.isDragging(),
     }),
   });

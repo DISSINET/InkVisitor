@@ -1,5 +1,11 @@
 import React, { useRef } from "react";
-import { DropTargetMonitor, useDrag, useDrop, XYCoord } from "react-dnd";
+import {
+  DragSourceMonitor,
+  DropTargetMonitor,
+  useDrag,
+  useDrop,
+  XYCoord,
+} from "react-dnd";
 import { FaGripVertical } from "react-icons/fa";
 import { Cell } from "react-table";
 const queryString = require("query-string");
@@ -73,7 +79,7 @@ export const StatementListRow: React.FC<StatementListRow> = ({
 
   const [{ isDragging }, drag, preview] = useDrag({
     item: { type: ItemTypes.ROW, index },
-    collect: (monitor: any) => ({
+    collect: (monitor: DragSourceMonitor) => ({
       isDragging: monitor.isDragging(),
     }),
   });
