@@ -1,7 +1,5 @@
 import styled from "styled-components";
 
-import { space1, space2, space4, space48, space56 } from "Theme/constants";
-
 interface TagWrapper {
   hasMarginRight?: boolean;
   borderStyle: "solid" | "dashed" | "dotted";
@@ -13,7 +11,8 @@ export const TagWrapper = styled.div<TagWrapper>`
   border-color: ${({ theme }) => theme.colors["black"]};
   border-radius: ${({ theme }) => theme.borderRadius["sm"]};
   overflow: hidden;
-  margin-right: ${({ hasMarginRight }) => hasMarginRight && space1};
+  margin-right: ${({ theme, hasMarginRight }) =>
+    hasMarginRight && theme.space[1]};
   cursor: move;
   color: black;
   font-size: ${({ theme }) => theme.fontSizes["xxs"]};
@@ -36,20 +35,8 @@ export const EntityTag = styled.div<EntityTag>`
 
 interface Label {
   invertedLabel?: boolean;
-  logicalType: string;
+  borderStyle: "solid" | "dashed" | "dotted";
 }
-const handleLogicalType = (logicalType: string) => {
-  switch (logicalType) {
-    case "definitive":
-      return "solid";
-    case "indefinitive":
-      return "dashed";
-    case "hypothetical":
-      return "dotted";
-    default:
-      return "solid";
-  }
-};
 export const Label = styled.div<Label>`
   display: inline-block;
   vertical-align: middle;
@@ -61,7 +48,7 @@ export const Label = styled.div<Label>`
     invertedLabel ? theme.colors["primary"] : "white"};
   color: ${({ invertedLabel }) => (invertedLabel ? "white" : "black")};
   border-left-width: ${({ theme }) => theme.borderWidths[2]};
-  border-left-style: ${({ logicalType }) => handleLogicalType(logicalType)};
+  border-left-style: ${({ borderStyle }) => borderStyle};
   border-left-color: ${({ theme }) => theme.colors["black"]};
   max-width: ${({ theme }) => theme.space[56]};
 `;

@@ -1,21 +1,15 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useRef, useState } from "react";
 import { useTable, Cell, Row, useExpanded } from "react-table";
 import { useQuery } from "react-query";
 import { FaInfo, FaPencilAlt, FaClone, FaTrashAlt } from "react-icons/fa";
 import { useLocation, useHistory } from "react-router";
+const queryString = require("query-string");
 
 import { Button, ButtonGroup } from "components";
 import { ActantTag } from "./../";
 import api from "api";
 import { IStatement, IActant } from "@shared/types";
-import {
-  StyledTable,
-  StyledTd,
-  StyledTh,
-  StyledTHead,
-  StyledTr,
-} from "./TableStyles";
-const queryString = require("query-string");
+import { StatementListTable } from "./StatementListTable";
 
 const initialData: { statements: IStatement[]; actants: IActant[] } = {
   statements: [],
@@ -27,6 +21,7 @@ export const StatementListBox: React.FC = () => {
   let location = useLocation();
   var hashParams = queryString.parse(location.hash);
   const territoryId = hashParams.territory;
+  const statementId = hashParams.statement;
 
   const { status, data, error, isFetching } = useQuery(
     ["statement", "territory", "statement-list", territoryId],
@@ -162,57 +157,5 @@ export const StatementListBox: React.FC = () => {
     ];
   }, [data]);
 
-  const {
-    getTableProps,
-    getTableBodyProps,
-    headerGroups,
-    rows,
-    prepareRow,
-    visibleColumns,
-  } = useTable(
-    {
-      columns,
-      data: statements,
-      initialState: {
-        hiddenColumns: ["id"],
-      },
-    },
-    useExpanded
-  );
-
-  return (
-    <div>
-      <StyledTable {...getTableProps()}>
-        <StyledTHead>
-          {headerGroups.map((headerGroup, key) => (
-            <tr {...headerGroup.getHeaderGroupProps()} key={key}>
-              {headerGroup.headers.map((column, key) => (
-                <StyledTh {...column.getHeaderProps()} key={key}>
-                  {column.render("Header")}
-                </StyledTh>
-              ))}
-            </tr>
-          ))}
-        </StyledTHead>
-        <tbody {...getTableBodyProps()}>
-          {rows.map((row, i) => {
-            prepareRow(row);
-            return (
-              <React.Fragment key={i}>
-                <StyledTr {...row.getRowProps()} isOdd={Boolean(i % 2)}>
-                  {row.cells.map((cell, i) => {
-                    return (
-                      <StyledTd {...cell.getCellProps()}>
-                        {cell.render("Cell")}
-                      </StyledTd>
-                    );
-                  })}
-                </StyledTr>
-              </React.Fragment>
-            );
-          })}
-        </tbody>
-      </StyledTable>
-    </div>
-  );
+  return <StatementListTable data={statements} columns={columns} />;
 };
