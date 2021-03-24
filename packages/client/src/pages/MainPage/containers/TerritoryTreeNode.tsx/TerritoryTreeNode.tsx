@@ -90,7 +90,7 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
           ) : (
             <>
               {statementsCount > 0 ? (
-                <StyledFaDotCircle
+                <StyledFaCircle
                   size={12}
                   onClick={() => {
                     hashParams["territory"] = id;
@@ -100,7 +100,7 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
                   }}
                 />
               ) : (
-                <StyledFaCircle
+                <StyledFaDotCircle
                   size={12}
                   onClick={() => {
                     hashParams["territory"] = id;
