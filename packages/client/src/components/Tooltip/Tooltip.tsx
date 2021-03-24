@@ -14,7 +14,7 @@ export const Tooltip: React.FC<Tooltip> = ({
   children,
   position = ["bottom center", "top center"],
   on = ["hover", "focus"],
-  label,
+  label = "",
   disabled = false,
 }) => {
   return (
@@ -22,7 +22,7 @@ export const Tooltip: React.FC<Tooltip> = ({
       trigger={children}
       position={position}
       on={on}
-      disabled={disabled}
+      disabled={disabled || label.length === 0}
     >
       {label}
     </StyledPopup>

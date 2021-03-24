@@ -1,7 +1,5 @@
 import styled from "styled-components";
 
-import { space1 } from "Theme/constants";
-
 interface TagWrapper {
   hasMarginRight?: boolean;
   borderStyle: "solid" | "dashed" | "dotted";
@@ -13,7 +11,8 @@ export const TagWrapper = styled.div<TagWrapper>`
   border-color: ${({ theme }) => theme.colors["black"]};
   border-radius: ${({ theme }) => theme.borderRadius["sm"]};
   overflow: hidden;
-  margin-right: ${({ hasMarginRight }) => hasMarginRight && space1};
+  margin-right: ${({ theme, hasMarginRight }) =>
+    hasMarginRight && theme.space[1]};
   cursor: move;
   color: black;
   font-size: ${({ theme }) => theme.fontSizes["xxs"]};
@@ -38,18 +37,6 @@ interface Label {
   invertedLabel?: boolean;
   borderStyle: "solid" | "dashed" | "dotted";
 }
-const handleLogicalType = (logicalType: string) => {
-  switch (logicalType) {
-    case "definitive":
-      return "solid";
-    case "indefinitive":
-      return "dashed";
-    case "hypothetical":
-      return "dotted";
-    default:
-      return "solid";
-  }
-};
 export const Label = styled.div<Label>`
   display: inline-block;
   vertical-align: middle;

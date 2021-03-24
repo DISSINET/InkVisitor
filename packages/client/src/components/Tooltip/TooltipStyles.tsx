@@ -14,13 +14,10 @@ export const StyledPopup = styled(Popup)`
     color: ${({ theme }) => theme.colors["black"]};
   }
   [role="tooltip"]&-content {
-    box-shadow: rgba(0, 0, 0, 0.16) 0px 0px 3px;
+    /* box-shadow: rgba(0, 0, 0, 0.16) 0px 0px 3px; */
   }
-
   &-overlay {
-    /* background: rgba(0, 0, 0, 0.5); */
   }
   [data-popup="tooltip"]&-overlay {
-    /* background: transparent; */
   }
 `;

@@ -105,20 +105,22 @@ export const Tag: React.FC<TagProps> = ({
 
   return (
     <>
-      <Tooltip label={label.length > 0 ? label : "no label"} disabled={!short}>
-        <TagWrapper
-          ref={ref}
-          hasMarginRight={marginRight}
-          borderStyle={borderStyle}
-        >
-          <EntityTag color={color}>{category}</EntityTag>
-          {!short && label && (
-            <Label invertedLabel={invertedLabel} borderStyle={borderStyle}>
-              {label}
-            </Label>
-          )}
-          {button && <ButtonWrapper>{button}</ButtonWrapper>}
-        </TagWrapper>
+      <Tooltip label={label} disabled={!short}>
+        <>
+          <TagWrapper
+            ref={ref}
+            hasMarginRight={marginRight}
+            borderStyle={borderStyle}
+          >
+            <EntityTag color={color}>{category}</EntityTag>
+            {!short && label && (
+              <Label invertedLabel={invertedLabel} borderStyle={borderStyle}>
+                {label}
+              </Label>
+            )}
+            {button && <ButtonWrapper>{button}</ButtonWrapper>}
+          </TagWrapper>
+        </>
       </Tooltip>
     </>
   );
