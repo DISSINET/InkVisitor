@@ -87,11 +87,10 @@ export const StatementListRow: React.FC<StatementListRow> = ({
     }),
   });
 
-  const opacity = isDragging ? 0.7 : 1;
+  const opacity = isDragging ? 0.2 : 1;
 
-  // drop(dropRef);
-  // drag(dragRef);
-  drag(drop(dragRef));
+  preview(drop(dropRef));
+  drag(dragRef);
 
   return (
     <StyledTr
