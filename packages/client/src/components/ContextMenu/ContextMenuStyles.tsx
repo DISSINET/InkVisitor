@@ -8,11 +8,14 @@ export const StyledWrapper = styled.div`
   flex-direction: column;
   position: relative;
 `;
-export const StyledContextButtonGroup = styled.div`
-  display: flex;
+interface StyledContextButtonGroup {
+  showMenu?: boolean;
+}
+export const StyledContextButtonGroup = styled.div<StyledContextButtonGroup>`
+  display: ${({ showMenu }) => (showMenu ? "flex" : "none")};
   flex-direction: column;
   position: absolute;
-  top: ${({ theme }) => theme.space[8]};
+  top: ${({ theme }) => theme.space[7]};
   z-index: 10;
 `;
 export const StyledFaChevronCircleDown = styled(FaChevronCircleDown)`

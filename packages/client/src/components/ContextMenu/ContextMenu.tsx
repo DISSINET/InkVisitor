@@ -18,34 +18,33 @@ export const ContextMenu: React.FC<ContextMenu> = () => {
       onMouseOut={() => setShowMenu(false)}
     >
       <StyledFaChevronCircleDown />
-      {showMenu && (
-        <StyledContextButtonGroup>
-          <Button
-            key="add"
-            icon={<FaPlus size={14} />}
-            color="info"
-            onClick={() => {
-              // add child
-            }}
-          />
-          <Button
-            key="favorites"
-            icon={<FaStar size={14} />}
-            color="warning"
-            onClick={() => {
-              // add to favorites
-            }}
-          />
-          <Button
-            key="delete"
-            icon={<FaTrashAlt size={14} />}
-            color="danger"
-            onClick={() => {
-              // delete
-            }}
-          />
-        </StyledContextButtonGroup>
-      )}
+
+      <StyledContextButtonGroup showMenu={showMenu}>
+        <Button
+          key="add"
+          icon={<FaPlus size={14} />}
+          color="info"
+          onClick={() => {
+            // add child
+          }}
+        />
+        <Button
+          key="favorites"
+          icon={<FaStar size={14} />}
+          color="warning"
+          onClick={() => {
+            // add to favorites
+          }}
+        />
+        <Button
+          key="delete"
+          icon={<FaTrashAlt size={14} />}
+          color="danger"
+          onClick={() => {
+            // delete
+          }}
+        />
+      </StyledContextButtonGroup>
     </StyledWrapper>
   );
 };
