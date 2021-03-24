@@ -177,7 +177,7 @@ export default Router()
       if (
         !actantData ||
         !actantData.class ||
-        !actantData.labels ||
+        !actantData.label ||
         !actantData.data
       ) {
         throw new BadParams("actant data have to be set");
