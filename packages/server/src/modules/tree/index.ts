@@ -17,17 +17,20 @@ import { IResponseGeneric, IResponseTree, ITerritory } from "@shared/types";
 function populateTree(
   root: ITerritory,
   parentMap: Record<string, ITerritory[]>,
-  lvl: number
+  lvl: number,
+  parents: string[]
 ): IResponseTree {
   const childs = parentMap[root.id]
-    ? parentMap[root.id].map((ter) => populateTree(ter, parentMap, lvl + 1))
+    ? parentMap[root.id].map((ter) =>
+        populateTree(ter, parentMap, lvl + 1, [...parents, root.id])
+      )
     : [];
   return {
     territory: root,
     statementsCount: 0, // for now
     lvl,
     children: childs,
-    path: [],
+    path: parents,
   };
 }
 
@@ -75,7 +78,7 @@ export default Router()
         root = parentMap[""][0];
       }
 
-      return populateTree(root, parentMap, 0);
+      return populateTree(root, parentMap, 0, []);
     })
   )
   .post(
