@@ -44,7 +44,7 @@ describe("Actants delete", function () {
           id: testId,
           class: "T",
           data: {},
-          labels: [],
+          label: "",
         },
         true
       );

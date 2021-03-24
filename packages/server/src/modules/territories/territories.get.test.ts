@@ -41,14 +41,14 @@ describe("Territories get", function () {
           parent: false,
           type: "",
         },
-        labels: [],
+        label: "",
       };
       await createActant(db, territory, true);
 
       const statement: IStatement = {
         class: "S",
         id: linkedStatementId,
-        labels: [],
+        label: "",
         data: {
           actants: [],
           action: "",
@@ -69,7 +69,7 @@ describe("Territories get", function () {
 
       const tagActant: IActant = {
         class: "S",
-        labels: [],
+        label: "",
         data: {},
         id: linkedActantId,
       };

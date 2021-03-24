@@ -38,7 +38,7 @@ describe("Actants update", function () {
       const changeClassInto = "T";
       await createActant(
         db,
-        { id: testId, labels: [], data: {}, class: "C" },
+        { id: testId, label: "", data: {}, class: "C" },
         true
       );
 

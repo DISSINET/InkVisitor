@@ -18,7 +18,7 @@ async function createMockStatementsWithTerritory(
   const ter: ITerritory = {
     id: `root-${randSuffix}`,
     class: "T",
-    labels: [],
+    label: "",
     data: {
       content: "",
       lang: "",
@@ -34,7 +34,7 @@ async function createMockStatementsWithTerritory(
     {
       id: `s1-${randSuffix}`,
       class: "S",
-      labels: [],
+      label: "",
       data: {
         actants: [],
         action: "",
@@ -55,7 +55,7 @@ async function createMockStatementsWithTerritory(
     {
       id: `s2-${randSuffix}`,
       class: "S",
-      labels: [],
+      label: "",
       data: {
         actants: [],
         action: "",
