@@ -68,6 +68,17 @@ describe("Tree moveTerritory", function () {
       await db.initDb();
       const territories = await createMockTree(db);
 
+      let lvl11 = await findActantById<ITerritory>(db, `lvl1-1-${randSuffix}`);
+      let lvl12 = await findActantById<ITerritory>(db, `lvl1-2-${randSuffix}`);
+      expect(lvl11.data.parent ? lvl11.data.parent.id : "").to.be.eq(
+        `root-${randSuffix}`
+      );
+      expect(lvl11.data.parent ? lvl11.data.parent.order : 0).to.be.eq(1);
+      expect(lvl12.data.parent ? lvl12.data.parent.id : "").to.be.eq(
+        `root-${randSuffix}`
+      );
+      expect(lvl12.data.parent ? lvl12.data.parent.order : 0).to.be.eq(2);
+
       await request(app)
         .post(`${apiPath}/tree/moveTerritory`)
         .send({
@@ -79,14 +90,8 @@ describe("Tree moveTerritory", function () {
         .expect(200)
         .expect({ result: true });
 
-      const lvl11 = await findActantById<ITerritory>(
-        db,
-        `lvl1-1-${randSuffix}`
-      );
-      const lvl12 = await findActantById<ITerritory>(
-        db,
-        `lvl1-2-${randSuffix}`
-      );
+      lvl11 = await findActantById<ITerritory>(db, `lvl1-1-${randSuffix}`);
+      lvl12 = await findActantById<ITerritory>(db, `lvl1-2-${randSuffix}`);
       expect(lvl11.data.parent ? lvl11.data.parent.id : "").to.be.eq(
         `root-${randSuffix}`
       );
@@ -95,6 +100,7 @@ describe("Tree moveTerritory", function () {
         `root-${randSuffix}`
       );
       expect(lvl12.data.parent ? lvl12.data.parent.order : 0).to.be.eq(1);
+
       for (const ter of territories) {
         await deleteActant(db, ter.id);
       }
