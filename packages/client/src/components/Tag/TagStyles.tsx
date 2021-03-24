@@ -1,6 +1,6 @@
 import styled from "styled-components";
 
-import { space1, space2, space4, space48, space56 } from "Theme/constants";
+import { space1 } from "Theme/constants";
 
 interface TagWrapper {
   hasMarginRight?: boolean;
@@ -36,7 +36,7 @@ export const EntityTag = styled.div<EntityTag>`
 
 interface Label {
   invertedLabel?: boolean;
-  logicalType: string;
+  borderStyle: "solid" | "dashed" | "dotted";
 }
 const handleLogicalType = (logicalType: string) => {
   switch (logicalType) {
@@ -61,7 +61,7 @@ export const Label = styled.div<Label>`
     invertedLabel ? theme.colors["primary"] : "white"};
   color: ${({ invertedLabel }) => (invertedLabel ? "white" : "black")};
   border-left-width: ${({ theme }) => theme.borderWidths[2]};
-  border-left-style: ${({ logicalType }) => handleLogicalType(logicalType)};
+  border-left-style: ${({ borderStyle }) => borderStyle};
   border-left-color: ${({ theme }) => theme.colors["black"]};
   max-width: ${({ theme }) => theme.space[56]};
 `;

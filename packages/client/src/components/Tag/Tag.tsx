@@ -8,8 +8,8 @@ import {
 } from "react-dnd";
 
 import { ItemTypes } from "types";
-import ReactTooltip from "react-tooltip";
 import { TagWrapper, EntityTag, Label, ButtonWrapper } from "./TagStyles";
+import { Tooltip } from "components";
 
 interface TagProps {
   label?: string;
@@ -105,31 +105,21 @@ export const Tag: React.FC<TagProps> = ({
 
   return (
     <>
-      <TagWrapper
-        ref={ref}
-        className="tag"
-        data-for={"main"}
-        data-tip={label ? label : "no label"}
-        data-iscapture="true"
-        data-tip-disable={!short}
-        hasMarginRight={marginRight}
-        borderStyle={borderStyle}
-      >
-        <EntityTag color={color}>{category}</EntityTag>
-        {!short && label && (
-          <Label invertedLabel={invertedLabel} logicalType={borderStyle}>
-            {label}
-          </Label>
-        )}
-        {button && <ButtonWrapper>{button}</ButtonWrapper>}
-      </TagWrapper>
-      <ReactTooltip
-        id="main"
-        place="bottom"
-        type="dark"
-        effect="solid"
-        multiline={false}
-      />
+      <Tooltip label={label.length > 0 ? label : "no label"} disabled={!short}>
+        <TagWrapper
+          ref={ref}
+          hasMarginRight={marginRight}
+          borderStyle={borderStyle}
+        >
+          <EntityTag color={color}>{category}</EntityTag>
+          {!short && label && (
+            <Label invertedLabel={invertedLabel} borderStyle={borderStyle}>
+              {label}
+            </Label>
+          )}
+          {button && <ButtonWrapper>{button}</ButtonWrapper>}
+        </TagWrapper>
+      </Tooltip>
     </>
   );
 };

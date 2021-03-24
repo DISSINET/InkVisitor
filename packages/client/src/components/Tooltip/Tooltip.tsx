@@ -8,15 +8,22 @@ interface Tooltip {
   position?: PopupPosition | PopupPosition[];
   on?: EventType | EventType[];
   label: string;
+  disabled?: boolean;
 }
 export const Tooltip: React.FC<Tooltip> = ({
   children,
   position = ["bottom center", "top center"],
   on = ["hover", "focus"],
   label,
+  disabled = false,
 }) => {
   return (
-    <StyledPopup trigger={children} position={position} on={on}>
+    <StyledPopup
+      trigger={children}
+      position={position}
+      on={on}
+      disabled={disabled}
+    >
       {label}
     </StyledPopup>
   );
