@@ -309,14 +309,7 @@ const loadStatementsTables = async (next: Function) => {
       const mainStatement: IStatement = {
         id: v4(),
         class: "S",
-        labels: [
-          {
-            value: statement.id,
-            id: v4(),
-            lang: "EN",
-            primary: true,
-          },
-        ],
+        label: statement.id,
         data: {
           action: statement.id_action_or_relation,
           territory: {
@@ -475,14 +468,7 @@ const addEntityActant = (
   const newEntityActant: IEntity = {
     id,
     class: type,
-    labels: [
-      {
-        id: id,
-        value: label ? label.trim() : label,
-        lang: "en",
-        primary: true,
-      },
-    ],
+    label: label,
     data: {
       logicalType: "1",
     },
@@ -502,14 +488,7 @@ const addTerritoryActant = (
       const newTerritory: ITerritory = {
         id,
         class: "T",
-        labels: [
-          {
-            id: v4(),
-            value: label.trim(),
-            lang: "en",
-            primary: true,
-          },
-        ],
+        label: label.trim(),
         data: {
           parent: {
             id: parentId,
@@ -530,14 +509,7 @@ const addResourceActant = (id: string, label: string) => {
     const newResource: IResource = {
       id,
       class: "R",
-      labels: [
-        {
-          id: v4(),
-          value: label.trim(),
-          lang: "en",
-          primary: true,
-        },
-      ],
+      label: label.trim(),
       data: {
         content: "",
         link: "",
@@ -610,7 +582,7 @@ const createEmptyPropStatement = (
       id: v4(),
       class: "S",
 
-      labels: [],
+      label: "",
       data: {
         action: "A0093",
         territory: {
