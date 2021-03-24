@@ -19,30 +19,30 @@ export const TerritoryTreeBox: React.FC = () => {
   const territoryId = hashParams.territory;
   const [selectedTerritory, setSelectedTerritory] = useState<IResponseTree>();
 
-  const searchTree = (
-    element: IResponseTree,
-    matchingTitle: string
-  ): IResponseTree | null => {
-    if (element.territory.id === matchingTitle) {
-      return element;
-    } else if (element.children != null) {
-      var i;
-      var result = null;
-      for (i = 0; result === null && i < element.children.length; i++) {
-        result = searchTree(element.children[i], matchingTitle);
-      }
-      return result;
-    }
-    return null;
-  };
-  useEffect(() => {
-    if (data) {
-      const foundTerritory = searchTree(data, territoryId);
-      if (foundTerritory) {
-        setSelectedTerritory(foundTerritory);
-      }
-    }
-  }, [data]);
+  // const searchTree = (
+  //   element: IResponseTree,
+  //   matchingTitle: string
+  // ): IResponseTree | null => {
+  //   if (element.territory.id === matchingTitle) {
+  //     return element;
+  //   } else if (element.children != null) {
+  //     var i;
+  //     var result = null;
+  //     for (i = 0; result === null && i < element.children.length; i++) {
+  //       result = searchTree(element.children[i], matchingTitle);
+  //     }
+  //     return result;
+  //   }
+  //   return null;
+  // };
+  // useEffect(() => {
+  //   if (data) {
+  //     const foundTerritory = searchTree(data, territoryId);
+  //     if (foundTerritory) {
+  //       setSelectedTerritory(foundTerritory);
+  //     }
+  //   }
+  // }, [data]);
 
   return (
     <>

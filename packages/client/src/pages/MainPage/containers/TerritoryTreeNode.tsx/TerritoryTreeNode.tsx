@@ -52,20 +52,20 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
     }
   }, []);
 
-  const moveChildFn = useCallback(
-    (dragIndex: number, hoverIndex: number) => {
-      // const dragCard = childTerritories[dragIndex];
-      // setChildTerritories(
-      //   update(childTerritories, {
-      //     $splice: [
-      //       [dragIndex, 1],
-      //       [hoverIndex, 0, dragCard],
-      //     ],
-      //   })
-      // );
-    },
-    [childTerritories]
-  );
+  // const moveChildFn = useCallback(
+  // (dragIndex: number, hoverIndex: number) => {
+  // const dragCard = childTerritories[dragIndex];
+  // setChildTerritories(
+  //   update(childTerritories, {
+  //     $splice: [
+  //       [dragIndex, 1],
+  //       [hoverIndex, 0, dragCard],
+  //     ],
+  //   })
+  // );
+  // },
+  // [childTerritories]
+  // );
 
   const renderTerritoryTag = (
     territoryActant: IActant,
@@ -91,7 +91,7 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
             <>
               {statementsCount > 0 ? (
                 <StyledFaDotCircle
-                  size={13}
+                  size={12}
                   onClick={() => {
                     hashParams["territory"] = id;
                     history.push({
@@ -101,7 +101,7 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
                 />
               ) : (
                 <StyledFaCircle
-                  size={13}
+                  size={12}
                   onClick={() => {
                     hashParams["territory"] = id;
                     history.push({
@@ -118,7 +118,7 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
           isSelected={isSelected}
           propId={propId}
           index={index}
-          moveFn={moveFn}
+          // moveFn={moveFn}
         />
       </StyledTerritoryTagWrap>
     );
@@ -128,20 +128,21 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
     <div key={territory.id}>
       {renderTerritoryTag(territory, territory.id, children.length > 0)}
 
-      <StyledChildrenWrap isExpanded={isExpanded}>
-        {childTerritories.map((child: any, key: number) => (
-          <TerritoryTreeNode
-            key={key}
-            territory={child.territory}
-            children={child.children}
-            lvl={child.lvl}
-            statementsCount={child.statementsCount}
-            initExpandedNodes={initExpandedNodes}
-            propId={child.id}
-            index={key}
-            moveFn={moveChildFn}
-          />
-        ))}
+      <StyledChildrenWrap>
+        {isExpanded &&
+          childTerritories.map((child: any, key: number) => (
+            <TerritoryTreeNode
+              key={key}
+              territory={child.territory}
+              children={child.children}
+              lvl={child.lvl}
+              statementsCount={child.statementsCount}
+              initExpandedNodes={initExpandedNodes}
+              propId={child.id}
+              index={key}
+              // moveFn={moveChildFn}
+            />
+          ))}
       </StyledChildrenWrap>
     </div>
   );
