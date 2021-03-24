@@ -34,7 +34,7 @@ describe("Actants detail", function () {
       const testId = Math.random().toString();
       const testData: IActant = {
         id: testId,
-        labels: [],
+        label: "",
         data: {},
         class: "C",
       };

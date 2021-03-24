@@ -170,7 +170,7 @@ export async function findActantsByLabelOrClass(
       return rethink.or(
         rethink.row("class").eq(classParam),
         rethink
-          .row("labels")
+          .row("label")
           .contains<ILabel>((labelObj) => labelObj("value").eq(label))
       );
     })
@@ -235,7 +235,7 @@ export async function findActionsByLabel(
     .table("actions")
     .filter(function (user: any) {
       return rethink
-        .row("labels")
+        .row("label")
         .contains<IAction>((labelObj) => labelObj("value").eq(label));
     })
     .run(db.connection);

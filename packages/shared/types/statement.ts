@@ -20,7 +20,6 @@ export interface IStatement extends IActant {
       elvl: string;
       certainty: string;
     }[];
-    //labels: ILabel[];
     props: IProp[]; // this
     references: {
       id: string;
@@ -31,7 +30,6 @@ export interface IStatement extends IActant {
     tags: string[]; // ids of IActant
   };
 }
-
 
 export function getActantIdsFromStatements(statements: IStatement[]): string[] {
   const actantIds: Record<string, null> = {}; // unique check

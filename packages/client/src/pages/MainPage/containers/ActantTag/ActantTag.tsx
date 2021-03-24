@@ -87,8 +87,7 @@ export const ActantTag: React.FC<IActantTag> = ({
   const classObject = classes[classId];
 
   // todo
-  const label =
-    !short && actant.labels && actant.labels[0] ? actant.labels[0].value : "";
+  const label = !short ? actant.label : "";
 
   // todo - clean
   const borderStyle =

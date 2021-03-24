@@ -30,7 +30,7 @@ const testValidStatement = (res: any) => {
       props: [],
       actants: [],
     },
-    labels: [],
+    label: "",
     actants: [],
     audits: [],
     usedIn: [],
@@ -83,7 +83,7 @@ describe("Statements get", function () {
           props: [],
           actants: [],
         },
-        labels: [],
+        label: "",
       });
       return request(app)
         .get(
