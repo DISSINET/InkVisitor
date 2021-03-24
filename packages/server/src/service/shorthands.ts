@@ -274,3 +274,7 @@ export async function deleteAction(
 ): Promise<WriteResult> {
   return rethink.table("actions").get(actionId).delete().run(db.connection);
 }
+
+export async function deleteActants(db: Db): Promise<WriteResult> {
+  return rethink.table("actants").delete().run(db.connection);
+}
