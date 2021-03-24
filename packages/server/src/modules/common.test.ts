@@ -39,7 +39,7 @@ export async function createMockTree(db: Db): Promise<ITerritory[]> {
     {
       id: `root-${randSuffix}`,
       class: "T",
-      labels: [],
+      label: "",
       data: {
         content: "",
         lang: "",
@@ -50,7 +50,7 @@ export async function createMockTree(db: Db): Promise<ITerritory[]> {
     {
       id: `lvl1-1-${randSuffix}`,
       class: "T",
-      labels: [],
+      label: "",
       data: {
         content: "",
         lang: "",
@@ -64,7 +64,7 @@ export async function createMockTree(db: Db): Promise<ITerritory[]> {
     {
       id: `lvl1-2-${randSuffix}`,
       class: "T",
-      labels: [],
+      label: "",
       data: {
         content: "",
         lang: "",
@@ -97,7 +97,7 @@ export async function createMockStatements(
     out.push({
       id: `statement-${i}-${randSuffix}`,
       class: "S",
-      labels: [],
+      label: "",
       data: {
         territory: {
           id: forStatement,

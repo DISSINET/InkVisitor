@@ -3,16 +3,16 @@ import { languageDict } from "./../dictionaries";
 
 const languageValues = languageDict.map((i) => i.value);
 export interface ITerritory extends IActant {
-    class: "T";
-    data: {
-        parent: ParentTerritoryI | false;
-        type: string; // territoryTypeDict
-        content: string;
-        lang: typeof languageValues[number];
-    };
+  class: "T";
+  data: {
+    parent: ParentTerritoryI | false;
+    type: string; // territoryTypeDict
+    content: string;
+    lang: typeof languageValues[number];
+  };
 }
 
 interface ParentTerritoryI {
-    id: string; // '' in case of root
-    order: number;
+  id: string; // '' in case of root
+  order: number;
 }
