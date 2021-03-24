@@ -4,6 +4,7 @@ import {
   getActants,
   updateActant,
   getTerritoryChilds,
+  getStatementsForTerritory,
 } from "@service/shorthands";
 import {
   BadParams,
@@ -12,21 +13,34 @@ import {
   TerrytoryInvalidMove,
 } from "@common/errors";
 import { asyncRouteHandler } from "..";
-import { IResponseGeneric, IResponseTree, ITerritory } from "@shared/types";
+import {
+  IResponseGeneric,
+  IResponseTree,
+  IStatement,
+  ITerritory,
+} from "@shared/types";
 
 function populateTree(
   root: ITerritory,
   parentMap: Record<string, ITerritory[]>,
-  lvl: number
+  statementsMap: Record<string, IStatement[]>,
+  lvl: number,
+  parents: string[]
 ): IResponseTree {
   const childs = parentMap[root.id]
-    ? parentMap[root.id].map((ter) => populateTree(ter, parentMap, lvl + 1))
+    ? parentMap[root.id].map((ter) =>
+        populateTree(ter, parentMap, statementsMap, lvl + 1, [
+          ...parents,
+          root.id,
+        ])
+      )
     : [];
   return {
     territory: root,
-    statementsCount: 0, // for now
+    statementsCount: statementsMap[root.id] ? statementsMap[root.id].length : 0,
     lvl,
     children: childs,
+    path: parents,
   };
 }
 
@@ -53,10 +67,16 @@ export default Router()
       ).sort(sortTerritories);
 
       const parentMap: Record<string, ITerritory[]> = {};
+      const statementsCountMap: Record<string, IStatement[]> = {};
       for (const territory of territories) {
         if (typeof territory.data.parent === "undefined") {
           continue;
         }
+
+        statementsCountMap[territory.id] = await getStatementsForTerritory(
+          request.db,
+          territory.id
+        );
 
         const parentId: string = territory.data.parent
           ? territory.data.parent.id
@@ -74,7 +94,7 @@ export default Router()
         root = parentMap[""][0];
       }
 
-      return populateTree(root, parentMap, 0);
+      return populateTree(root, parentMap, statementsCountMap, 0, []);
     })
   )
   .post(
