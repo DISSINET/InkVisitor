@@ -67,6 +67,24 @@ export async function deleteUser(db: Db, userId: string): Promise<WriteResult> {
 }
 
 // ACTANT
+export async function getStatementsForTerritory(
+  db: Db,
+  terId: string
+): Promise<IStatement[]> {
+  return rethink
+    .table("actants")
+    .filter({
+      class: "S",
+    })
+    .filter(function (territory: any) {
+      return rethink.and(
+        territory("data")("territory").typeOf().eq("OBJECT"),
+        territory("data")("territory")("id").eq(terId)
+      );
+    })
+    .run(db.connection);
+}
+
 export async function getActants<T = IAction | IStatement | ITerritory>(
   db: Db,
   filter: object = {}
