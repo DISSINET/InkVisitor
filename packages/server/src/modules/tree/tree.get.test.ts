@@ -21,7 +21,7 @@ const testValidTree = (res: any) => {
         parent: false,
         type: "",
       },
-      labels: [],
+      label: "",
     },
   };
   res.body.should.have.keys(Object.keys(treeExample));

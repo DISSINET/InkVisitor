@@ -33,7 +33,7 @@ describe("Actants create", function () {
       const actantData: IActant = {
         class: "T",
         data: {},
-        labels: [],
+        label: "",
         id: "whatever",
       };
       return request(app)
