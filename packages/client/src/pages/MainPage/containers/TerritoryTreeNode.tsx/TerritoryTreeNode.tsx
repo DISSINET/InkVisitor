@@ -11,7 +11,7 @@ import {
   StyledIconWrap,
   StyledTerritoryTagWrap,
 } from "./TerritoryTreeNodeStyle";
-import { Arrow } from "components";
+import { Arrow, ContextMenu } from "components";
 import { ActantTag } from "..";
 
 interface TerritoryTreeNode {
@@ -120,6 +120,7 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
           index={index}
           // moveFn={moveFn}
         />
+        <ContextMenu />
       </StyledTerritoryTagWrap>
     );
   };

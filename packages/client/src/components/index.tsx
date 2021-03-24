@@ -2,6 +2,7 @@ import { Arrow } from "components/Arrow/Arrow";
 import { Box } from "components/Box/Box";
 import { Button } from "components/Button/Button";
 import { ButtonGroup } from "components/ButtonGroup/ButtonGroup";
+import { ContextMenu } from "./ContextMenu/ContextMenu";
 import { Header } from "components/Header/Header";
 import { Footer } from "components/Footer/Footer";
 import { Input } from "components/Input/Input";
@@ -25,6 +26,7 @@ export {
   Box,
   Button,
   ButtonGroup,
+  ContextMenu,
   Header,
   Footer,
   Input,
