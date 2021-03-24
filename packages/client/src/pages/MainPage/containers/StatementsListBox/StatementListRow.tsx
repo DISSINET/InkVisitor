@@ -1,4 +1,5 @@
-import React, { ReactNode, useRef } from "react";
+import api from "api";
+import React, { useRef } from "react";
 import {
   DragSourceMonitor,
   DropTargetMonitor,
@@ -6,62 +7,49 @@ import {
   useDrop,
   XYCoord,
 } from "react-dnd";
+import { FaGripVertical } from "react-icons/fa";
+import { Cell } from "react-table";
+const queryString = require("query-string");
 
 import { ItemTypes } from "types";
-import { TagWrapper, EntityTag, Label, ButtonWrapper } from "./TagStyles";
-import { Tooltip } from "components";
+import { StyledTr, StyledTd } from "./StatementListStyles";
 
-interface TagProps {
-  label?: string;
-  category: string;
-  color: string;
-  mode?: "selected" | "disabled" | "invalid" | false;
-  borderStyle?: "solid" | "dashed" | "dotted";
-  button?: ReactNode;
-  marginRight?: boolean;
-  invertedLabel?: boolean;
-  short?: boolean;
-  propId?: string;
-  index?: number;
-  moveFn?: (dragIndex: number, hoverIndex: number) => void;
-}
-
-interface DragItem {
+type DragItem = {
   index: number;
   id: string;
   type: string;
+};
+interface StatementListRow {
+  row: any;
+  index: number;
+  moveRow: any;
 }
 
-export const Tag: React.FC<TagProps> = ({
-  label = "",
-  category = "T",
-  color,
-  mode = false,
-  borderStyle = "solid",
-  button,
-  marginRight,
-  propId,
-  invertedLabel,
-  short = false,
+export const StatementListRow: React.FC<StatementListRow> = ({
+  row,
   index,
-  moveFn,
+  moveRow,
 }) => {
-  const ref = useRef<HTMLDivElement>(null);
+  var hashParams = queryString.parse(location.hash);
+  const statementId = hashParams.statement;
+
+  const dropRef = useRef<HTMLTableRowElement>(null);
+  const dragRef = useRef<HTMLTableDataCellElement>(null);
+
   const [, drop] = useDrop({
-    accept: ItemTypes.TAG,
+    accept: ItemTypes.ROW,
     hover(item: DragItem, monitor: DropTargetMonitor) {
-      if (!ref.current) {
+      if (!dropRef.current) {
         return;
       }
       const dragIndex = item.index;
       const hoverIndex = index;
-
       // Don't replace items with themselves
       if (dragIndex === hoverIndex) {
         return;
       }
       // Determine rectangle on screen
-      const hoverBoundingRect = ref.current?.getBoundingClientRect();
+      const hoverBoundingRect = dropRef.current?.getBoundingClientRect();
       // Get vertical middle
       const hoverMiddleY =
         (hoverBoundingRect.bottom - hoverBoundingRect.top) / 2;
@@ -69,13 +57,9 @@ export const Tag: React.FC<TagProps> = ({
       const clientOffset = monitor.getClientOffset();
       // Get pixels to the top
       const hoverClientY = (clientOffset as XYCoord).y - hoverBoundingRect.top;
-
       // Only perform the move when the mouse has crossed half of the items height
       // When dragging downwards, only move when the cursor is below 50%
       // When dragging upwards, only move when the cursor is above 50%
-      if (!hoverIndex) {
-        return;
-      }
       // Dragging downwards
       if (dragIndex < hoverIndex && hoverClientY < hoverMiddleY) {
         return;
@@ -85,7 +69,8 @@ export const Tag: React.FC<TagProps> = ({
         return;
       }
       // Time to actually perform the action
-      moveFn && moveFn(dragIndex, hoverIndex);
+      moveRow(dragIndex, hoverIndex);
+      api.territoryMoveStatement(`${item.id}`, hoverIndex);
 
       // Note: we're mutating the monitor item here!
       // Generally it's better to avoid mutations,
@@ -95,33 +80,33 @@ export const Tag: React.FC<TagProps> = ({
     },
   });
 
-  const [{ isDragging }, drag] = useDrag({
-    item: { type: ItemTypes.TAG, id: propId, index, category },
+  const [{ isDragging }, drag, preview] = useDrag({
+    item: { type: ItemTypes.ROW, index, id: row.values.id },
     collect: (monitor: DragSourceMonitor) => ({
       isDragging: monitor.isDragging(),
     }),
   });
-  drag(drop(ref));
+
+  const opacity = isDragging ? 0.2 : 1;
+
+  preview(drop(dropRef));
+  drag(dragRef);
 
   return (
-    <>
-      <Tooltip label={label} disabled={!short}>
-        <>
-          <TagWrapper
-            ref={ref}
-            hasMarginRight={marginRight}
-            borderStyle={borderStyle}
-          >
-            <EntityTag color={color}>{category}</EntityTag>
-            {!short && label && (
-              <Label invertedLabel={invertedLabel} borderStyle={borderStyle}>
-                {label}
-              </Label>
-            )}
-            {button && <ButtonWrapper>{button}</ButtonWrapper>}
-          </TagWrapper>
-        </>
-      </Tooltip>
-    </>
+    <StyledTr
+      ref={dropRef}
+      opacity={opacity}
+      isOdd={Boolean(index % 2)}
+      isSelected={row.values.id === statementId}
+    >
+      {row.cells.map((cell: Cell) => {
+        return (
+          <StyledTd {...cell.getCellProps()}>{cell.render("Cell")}</StyledTd>
+        );
+      })}
+      <td ref={dragRef} style={{ cursor: "move" }}>
+        <FaGripVertical />
+      </td>
+    </StyledTr>
   );
 };

@@ -1,8 +1,8 @@
-import React, { FC, useEffect, useState, useMemo } from "react";
+import React, { FC, useMemo } from "react";
 
 import { StyledLabel, StyledToggle, StyledIcon } from "./ToggleStyles";
 import { Colors, ToggleItem } from "types";
-import Popup from "reactjs-popup";
+import { Tooltip } from "components";
 
 interface Toggle {
   optionList: ToggleItem[];
@@ -43,25 +43,23 @@ export const Toggle: FC<Toggle> = ({
   };
 
   return (
-    <Popup
-      trigger={
-        <StyledToggle
-          color={color}
-          inverted={inverted}
-          onClick={() => chooseNext()}
-        >
-          {icon && <StyledIcon>{icon}</StyledIcon>}
-          <StyledLabel
-            hasIcon={typeof optionList[selectedIndex].label !== "string"}
-          >
-            {optionList[selectedIndex].label}
-          </StyledLabel>
-        </StyledToggle>
-      }
-      position={["top center", "bottom right", "bottom left"]}
+    <Tooltip
+      position={["bottom left", "top left"]}
       on={["hover", "focus"]}
+      label={tooltip}
     >
-      {tooltip}
-    </Popup>
+      <StyledToggle
+        color={color}
+        inverted={inverted}
+        onClick={() => chooseNext()}
+      >
+        {icon && <StyledIcon>{icon}</StyledIcon>}
+        <StyledLabel
+          hasIcon={typeof optionList[selectedIndex].label !== "string"}
+        >
+          {optionList[selectedIndex].label}
+        </StyledLabel>
+      </StyledToggle>
+    </Tooltip>
   );
 };

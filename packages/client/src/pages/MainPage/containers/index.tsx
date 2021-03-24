@@ -13,6 +13,7 @@ import { UserOptionsModal } from "./UserOptionsModal/UserOptionsModal";
 import { CertaintyToggle } from "./toggles/CertaintyToggle";
 import { ModalityToggle } from "./toggles/ModalityToggle";
 import { ElvlToggle } from "./toggles/ElvlToggle";
+import { TerritoryTreeNode } from "./TerritoryTreeNode.tsx/TerritoryTreeNode";
 
 export {
   ActantSearchBox,
@@ -25,6 +26,7 @@ export {
   StatementEditorBox,
   StatementListBox,
   TerritoryTreeBox,
+  TerritoryTreeNode,
   UserAdministrationModal,
   UserOptionsModal,
   CertaintyToggle,

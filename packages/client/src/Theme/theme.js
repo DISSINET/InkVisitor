@@ -110,6 +110,7 @@ export default {
   },
   borderRadius: {
     none: "0",
+    xs: "0.25rem",
     sm: "0.5rem",
     default: "0.75rem",
     md: "1rem",
