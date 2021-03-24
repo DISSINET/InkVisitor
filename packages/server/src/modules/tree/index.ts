@@ -27,6 +27,7 @@ function populateTree(
     statementsCount: 0, // for now
     lvl,
     children: childs,
+    path: [],
   };
 }
 

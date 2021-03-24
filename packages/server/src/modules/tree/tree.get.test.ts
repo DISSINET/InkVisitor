@@ -23,6 +23,7 @@ const testValidTree = (res: any) => {
       },
       labels: [],
     },
+    path: [],
   };
   res.body.should.have.keys(Object.keys(treeExample));
   res.body.territory.should.have.keys(Object.keys(treeExample.territory));
