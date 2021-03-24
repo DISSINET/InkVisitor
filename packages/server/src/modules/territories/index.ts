@@ -51,7 +51,11 @@ export default Router()
 
       const statements: IStatement[] = (
         await findActants<IStatement>(request.db, { class: "S" })
-      ).filter((s) => s.data.territory && s.data.territory.id === territoryId);
+      )
+        .filter((s) => s.data.territory && s.data.territory.id === territoryId)
+        .sort((a, b) => {
+          return a.data.territory.order - b.data.territory.order;
+        });
 
       const actants: IActant[] = [];
 

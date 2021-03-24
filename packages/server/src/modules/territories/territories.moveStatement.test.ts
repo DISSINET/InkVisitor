@@ -87,6 +87,11 @@ describe("Territories moveStatement", function () {
       const db = new Db();
       await db.initDb();
       const statements = await createMockStatementsWithTerritory(db);
+      let s1 = await findActantById<IStatement>(db, statements[0].id);
+      let s2 = await findActantById<IStatement>(db, statements[1].id);
+
+      expect(s1.data.territory.order).to.be.eq(1);
+      expect(s2.data.territory.order).to.be.eq(2);
 
       await request(app)
         .post(`${apiPath}/territories/moveStatement`)
@@ -98,8 +103,8 @@ describe("Territories moveStatement", function () {
         .expect(200)
         .expect({ result: true });
 
-      const s1 = await findActantById<IStatement>(db, statements[0].id);
-      const s2 = await findActantById<IStatement>(db, statements[1].id);
+      s1 = await findActantById<IStatement>(db, statements[0].id);
+      s2 = await findActantById<IStatement>(db, statements[1].id);
 
       console.log(s1.id, s1.data.territory.order);
       console.log(s2.id, s2.data.territory.order);
