@@ -1,14 +1,5 @@
 import styled from "styled-components";
-import {
-  space1,
-  space2,
-  space3,
-  space4,
-  space5,
-  space6,
-  space7,
-  space8,
-} from "Theme/constants";
+import { space1, space3, space5, space6, space7 } from "Theme/constants";
 
 interface ModalWrap {
   showModal: boolean;
@@ -60,6 +51,7 @@ export const CardHeader = styled.header`
   border-bottom-color: ${({ theme }) => theme.colors["gray"][400]};
   border-top-left-radius: ${({ theme }) => theme.borderRadius["sm"]};
   border-top-right-radius: ${({ theme }) => theme.borderRadius["sm"]};
+  min-height: ${({ theme }) => theme.space[12]};
 `;
 export const CardTitle = styled.h2`
   font-weight: ${({ theme }) => theme.fontWeights["medium"]};

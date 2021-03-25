@@ -12,7 +12,7 @@ import {
 
 interface Modal {
   children?: ReactNode;
-  onClose: Function;
+  onClose: () => void;
   showModal: boolean;
   disableBgClick?: boolean;
 }
@@ -20,13 +20,11 @@ export const Modal: FC<Modal> = ({
   children,
   onClose,
   showModal,
-  disableBgClick,
+  disableBgClick = false,
 }) => {
   return (
     <ModalWrap showModal={showModal}>
-      <Background
-        onClick={(): void => (disableBgClick ? {} : onClose())}
-      ></Background>
+      <Background onClick={disableBgClick ? () => {} : onClose}></Background>
       {children}
     </ModalWrap>
   );
@@ -42,13 +40,14 @@ export const ModalCard: FC<ModalCard> = ({ children, fullwidth }) => {
 
 interface ModalHeader {
   title?: string;
-  onClose: Function;
 }
-export const ModalHeader: FC<ModalHeader> = ({ title, onClose }) => {
+export const ModalHeader: FC<ModalHeader> = ({ title }) => {
   return (
-    <CardHeader>
-      <CardTitle>{title}</CardTitle>
-    </CardHeader>
+    <>
+      <CardHeader>
+        <CardTitle>{title}</CardTitle>
+      </CardHeader>
+    </>
   );
 };
 

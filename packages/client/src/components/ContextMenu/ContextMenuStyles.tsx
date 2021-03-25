@@ -15,11 +15,11 @@ export const StyledContextButtonGroup = styled.div<StyledContextButtonGroup>`
   display: ${({ showMenu }) => (showMenu ? "flex" : "none")};
   flex-direction: column;
   position: absolute;
-  top: ${({ theme }) => theme.space[7]};
+  top: ${({ theme }) => theme.space[8]};
   z-index: 10;
 `;
 export const StyledFaChevronCircleDown = styled(FaChevronCircleDown)`
   color: ${({ theme }) => theme.colors["primary"]};
-  margin: 0 ${({ theme }) => theme.space[2]};
+  margin: ${({ theme }) => `${theme.space[1]} ${theme.space[2]}`};
   cursor: pointer;
 `;

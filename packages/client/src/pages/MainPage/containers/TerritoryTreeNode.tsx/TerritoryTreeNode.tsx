@@ -120,7 +120,7 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
           index={index}
           // moveFn={moveFn}
         />
-        <ContextMenu />
+        <ContextMenu actantId={territoryActant.id} />
       </StyledTerritoryTagWrap>
     );
   };

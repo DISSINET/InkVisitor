@@ -24,10 +24,7 @@ export const DefaultModal = () => {
       <Button label="Show Modal!" onClick={() => setShowModal(true)} />
       <Modal onClose={(): void => setShowModal(false)} showModal={showModal}>
         <ModalCard>
-          <ModalHeader
-            onClose={(): void => setShowModal(false)}
-            title={"Modal title"}
-          />
+          <ModalHeader title={"Modal title"} />
           <ModalContent>
             <p>{"Main content of modal.."}</p>
           </ModalContent>
@@ -56,10 +53,7 @@ export const FullWidthModal = () => {
       <Button label="Show Modal!" onClick={() => setShowModal(true)} />
       <Modal onClose={(): void => setShowModal(false)} showModal={showModal}>
         <ModalCard fullwidth>
-          <ModalHeader
-            onClose={(): void => setShowModal(false)}
-            title={"Modal title"}
-          />
+          <ModalHeader title={"Modal title"} />
           <ModalContent>
             <p>
               {
