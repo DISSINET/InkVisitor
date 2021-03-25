@@ -30,7 +30,7 @@ interface Card {
   fullwidth?: boolean;
 }
 export const Card = styled.div<Card>`
-  width: ${({ fullwidth }) => (fullwidth ? "calc(100vw - 40px)" : "50%")};
+  width: ${({ fullwidth }) => (fullwidth ? "calc(100vw - 40px)" : "50rem")};
   display: flex;
   flex-direction: column;
   max-height: calc(100vh - 40px);
@@ -58,13 +58,14 @@ export const CardTitle = styled.h2`
   font-size: ${({ theme }) => theme.fontSizes["xl"]};
 `;
 export const CardBody = styled.section`
-  -webkit-overflow-scrolling: touch;
+  display: flex;
   flex-grow: 1;
   flex-shrink: 1;
   overflow: auto;
   padding: ${space5} ${space7};
   background-color: #ffffff;
   font-size: ${({ theme }) => theme.fontSizes["sm"]};
+  -webkit-overflow-scrolling: touch;
 `;
 export const Footer = styled.div`
   border-bottom-left-radius: ${({ theme }) => theme.borderRadius["sm"]};
@@ -77,6 +78,6 @@ export const Footer = styled.div`
   display: flex;
   flex-shrink: 0;
   justify-content: flex-end;
-  padding: ${space3};
+  padding: ${({ theme }) => theme.space[4]};
   position: relative;
 `;
