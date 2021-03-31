@@ -77,7 +77,7 @@ const loadStatementsTables = async (next: Function) => {
     addTerritoryActant(text.id, text.label, "T0", ti + 1);
   });
 
-  addTerritoryActant(rootTerritory, "everything", "", 0);
+  addTerritoryActant(rootTerritory, "everything", false, 0);
 
   // parse resources
   const tableManuscripts = await loadSheet({
@@ -480,7 +480,7 @@ const addEntityActant = (
 const addTerritoryActant = (
   id: string,
   label: string,
-  parentId: string,
+  parentId: string | false,
   order: number
 ) => {
   if (id) {
@@ -490,10 +490,12 @@ const addTerritoryActant = (
         class: "T",
         label: label.trim(),
         data: {
-          parent: {
-            id: parentId,
-            order: order,
-          },
+          parent: parentId
+            ? {
+                id: parentId,
+                order: order,
+              }
+            : false,
           type: "",
           content: "",
           lang: "en",
@@ -604,6 +606,7 @@ const createEmptyPropStatement = (
             position: "s",
             elvl: "1",
             certainty: "1",
+            modality: "1",
           },
           {
             id: v4(),
@@ -611,6 +614,7 @@ const createEmptyPropStatement = (
             position: "a1",
             elvl: "1",
             certainty: "1",
+            modality: "1",
           },
           {
             id: v4(),
@@ -618,6 +622,7 @@ const createEmptyPropStatement = (
             position: "a2",
             elvl: "1",
             certainty: "1",
+            modality: "1",
           },
         ],
       },
@@ -749,6 +754,7 @@ const processActant = (
         position: position,
         elvl: elvl,
         certainty: certainty,
+        modality: "1",
       });
 
       // create a prop if there is one
