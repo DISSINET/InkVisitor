@@ -19,11 +19,12 @@ import {
   IStatement,
   ITerritory,
 } from "@shared/types";
+import { Db } from "@service/RethinkDB";
 
 function populateTree(
   root: ITerritory,
   parentMap: Record<string, ITerritory[]>,
-  statementsMap: Record<string, IStatement[]>,
+  statementsMap: Record<string, number>,
   lvl: number,
   parents: string[]
 ): IResponseTree {
@@ -37,7 +38,7 @@ function populateTree(
     : [];
   return {
     territory: root,
-    statementsCount: statementsMap[root.id] ? statementsMap[root.id].length : 0,
+    statementsCount: statementsMap[root.id] ? statementsMap[root.id] : 0,
     lvl,
     children: childs,
     path: parents,
@@ -56,6 +57,45 @@ const sortTerritories = (terA: ITerritory, terB: ITerritory): number =>
   (terA.data.parent ? terA.data.parent.order : 0) -
   (terB.data.parent ? terB.data.parent.order : 0);
 
+async function countStatements(db: Db): Promise<Record<string, number>> {
+  const statements = (await getActants<IStatement>(db, { class: "S" })).filter(
+    (s) => s.data.territory && s.data.territory.id
+  );
+  const statementsCountMap: Record<string, number> = {}; // key is territoryid
+  for (const statement of statements) {
+    const terId = statement.data.territory.id;
+    if (!statementsCountMap[terId]) {
+      statementsCountMap[terId] = 0;
+    }
+
+    statementsCountMap[terId]++;
+  }
+
+  return statementsCountMap;
+}
+
+async function createParentMap(
+  territories: ITerritory[]
+): Promise<Record<string, ITerritory[]>> {
+  const parentMap: Record<string, ITerritory[]> = {};
+
+  for (const territory of territories) {
+    if (typeof territory.data.parent === "undefined") {
+      continue;
+    }
+
+    const parentId: string = territory.data.parent
+      ? territory.data.parent.id
+      : "";
+    if (!parentMap[parentId]) {
+      parentMap[parentId] = [];
+    }
+    parentMap[parentId].push(territory);
+  }
+
+  return parentMap;
+}
+
 export default Router()
   .get(
     "/get",
@@ -66,26 +106,8 @@ export default Router()
         })
       ).sort(sortTerritories);
 
-      const parentMap: Record<string, ITerritory[]> = {};
-      const statementsCountMap: Record<string, IStatement[]> = {};
-      for (const territory of territories) {
-        if (typeof territory.data.parent === "undefined") {
-          continue;
-        }
-
-        statementsCountMap[territory.id] = await getStatementsForTerritory(
-          request.db,
-          territory.id
-        );
-
-        const parentId: string = territory.data.parent
-          ? territory.data.parent.id
-          : "";
-        if (!parentMap[parentId]) {
-          parentMap[parentId] = [];
-        }
-        parentMap[parentId].push(territory);
-      }
+      const statementsCountMap = await countStatements(request.db);
+      const parentMap = await createParentMap(territories);
 
       let root: ITerritory;
       if (parentMap[""]?.length != 1) {
