@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "react-query";
 import api from "api";
 const queryString = require("query-string");
@@ -14,6 +14,8 @@ import {
   ModalityToggle,
   ElvlToggle,
 } from "./../";
+
+import { CProp } from "constructors";
 
 import { actantPositionDict } from "./../../../../../../shared/dictionaries";
 import { IActant, IProp } from "@shared/types";
@@ -47,6 +49,7 @@ export const StatementEditorBox: React.FC = () => {
   // getting origin actants of properties
   const propsByOrigins = useMemo(() => {
     if (statement) {
+      console.log("getting ne props", statement?.data.props);
       const allProps = statement?.data.props;
       const statementItself = { ...statement };
 
@@ -85,7 +88,11 @@ export const StatementEditorBox: React.FC = () => {
     } else {
       return [];
     }
-  }, [statement]);
+  }, [statement && JSON.stringify(statement.data.props)]);
+
+  if (statement) {
+    console.log("new render", statement.data.props);
+  }
 
   const updateStateActant = (statementActantId: string, changes: any) => {
     if (statement && statementActantId) {
@@ -97,12 +104,22 @@ export const StatementEditorBox: React.FC = () => {
     }
   };
 
-  const updateStateProp = (propId: string, changes: any) => {
+  const updateProp = (propId: string, changes: any) => {
     if (statement && propId) {
       const updatedProps = statement.data.props.map((p) =>
         p.id === propId ? { ...p, ...changes } : p
       );
       const newData = { ...statement.data, ...{ props: updatedProps } };
+      update(newData);
+    }
+  };
+
+  const addProp = (originId: string) => {
+    if (statement && originId) {
+      const newProp = CProp();
+      newProp.origin = originId;
+      const newData = { ...statement.data };
+      newData.props.push(newProp);
       update(newData);
     }
   };
@@ -191,6 +208,8 @@ export const StatementEditorBox: React.FC = () => {
                 </div>
               </div>
             </div>
+
+            {/* Actants */}
             <div key="editor-section-actants" className="editor-section">
               <div className="editor-section-header">Actants</div>
               <div className="editor-section-content">
@@ -272,14 +291,16 @@ export const StatementEditorBox: React.FC = () => {
                 </table>
               </div>
             </div>
+
+            {/* Props */}
             <div key="editor-section-props" className="editor-section">
               <div className="editor-section-header">Properties (has)</div>
               <div className="editor-section-content">
                 {propsByOrigins.map((propOrigin, sai) => {
-                  const actant = statement.actants.find(
+                  const originActant = statement.actants.find(
                     (a) => a.id === propOrigin.origin
                   );
-                  if (actant) {
+                  if (originActant) {
                     const renderPropRow = (prop: IProp, level: "1" | "2") => {
                       const propTypeActant = statement.actants.find(
                         (a) => a.id === prop.type.id
@@ -309,7 +330,7 @@ export const StatementEditorBox: React.FC = () => {
                             <ElvlToggle
                               value={prop.type.elvl}
                               onChangeFn={(newValue: string) => {
-                                updateStateProp(prop.id, {
+                                updateProp(prop.id, {
                                   type: { ...prop.type, ...{ elvl: newValue } },
                                 });
                               }}
@@ -317,7 +338,7 @@ export const StatementEditorBox: React.FC = () => {
                             <CertaintyToggle
                               value={prop.type.certainty}
                               onChangeFn={(newValue: string) => {
-                                updateStateProp(prop.id, {
+                                updateProp(prop.id, {
                                   type: {
                                     ...prop.type,
                                     ...{ certainty: newValue },
@@ -339,7 +360,7 @@ export const StatementEditorBox: React.FC = () => {
                             <ElvlToggle
                               value={prop.value.elvl}
                               onChangeFn={(newValue: string) => {
-                                updateStateProp(prop.id, {
+                                updateProp(prop.id, {
                                   value: {
                                     ...prop.value,
                                     ...{ elvl: newValue },
@@ -350,7 +371,7 @@ export const StatementEditorBox: React.FC = () => {
                             <CertaintyToggle
                               value={prop.value.certainty}
                               onChangeFn={(newValue: string) => {
-                                updateStateProp(prop.id, {
+                                updateProp(prop.id, {
                                   value: {
                                     ...prop.value,
                                     ...{ certainty: newValue },
@@ -363,7 +384,7 @@ export const StatementEditorBox: React.FC = () => {
                             <ModalityToggle
                               value={prop.modality}
                               onChangeFn={(newValue: string) => {
-                                updateStateProp(prop.id, {
+                                updateProp(prop.id, {
                                   modality: newValue,
                                 });
                               }}
@@ -371,7 +392,7 @@ export const StatementEditorBox: React.FC = () => {
                             <ElvlToggle
                               value={prop.elvl}
                               onChangeFn={(newValue: string) => {
-                                updateStateProp(prop.id, {
+                                updateProp(prop.id, {
                                   elvl: newValue,
                                 });
                               }}
@@ -379,17 +400,21 @@ export const StatementEditorBox: React.FC = () => {
                             <CertaintyToggle
                               value={prop.certainty}
                               onChangeFn={(newValue: string) => {
-                                updateStateProp(prop.id, {
+                                updateProp(prop.id, {
                                   certainty: newValue,
                                 });
                               }}
                             />
+                          </div>
+                          <div style={{ display: "table-cell" }}>
                             {level === "1" && (
                               <Button
                                 key="d"
                                 icon={<FaPlusCircle />}
                                 color="primary"
-                                onClick={() => {}}
+                                onClick={() => {
+                                  addProp(prop.id);
+                                }}
                               />
                             )}
                           </div>
@@ -398,19 +423,25 @@ export const StatementEditorBox: React.FC = () => {
                     };
 
                     return (
-                      <div key={actant.id}>
+                      <div key={originActant.id}>
                         <div
                           style={{
                             display: "inline-flex",
                             paddingTop: "0.2em",
                           }}
                         >
-                          <ActantTag key={sai} actant={actant} short={false} />
+                          <ActantTag
+                            key={sai}
+                            actant={originActant}
+                            short={false}
+                          />
                           <Button
                             key="d"
                             icon={<FaPlusCircle />}
                             color="primary"
-                            onClick={() => {}}
+                            onClick={() => {
+                              addProp(originActant.id);
+                            }}
                           />
                         </div>
 
@@ -430,14 +461,20 @@ export const StatementEditorBox: React.FC = () => {
                 })}
               </div>
             </div>
+
+            {/* Refs */}
             <div key="editor-section-refs" className="editor-section">
               <div className="editor-section-header">References</div>
               <div className="editor-section-content"></div>
             </div>
+
+            {/* Tags */}
             <div key="editor-section-tags" className="editor-section">
               <div className="editor-section-header">Tags</div>
               <div className="editor-section-content"></div>
             </div>
+
+            {/* Notes */}
             <div key="editor-section-notes" className="editor-section">
               <div className="editor-section-header">Notes</div>
               <div className="editor-section-content"></div>
