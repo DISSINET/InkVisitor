@@ -15,11 +15,14 @@ import {
   ElvlToggle,
 } from "./../";
 
-import { CProp } from "constructors";
+import { CProp, CStatementActant } from "constructors";
 
 import { actantPositionDict } from "./../../../../../../shared/dictionaries";
-import { IActant, IProp } from "@shared/types";
+import { IActant, IProp, IStatementActant } from "@shared/types";
 import { Button, ButtonGroup, Input } from "components";
+import { ActantSuggester } from "./../";
+
+const classEntities = ["P", "G", "O", "C", "L", "V", "E"];
 
 export const StatementEditorBox: React.FC = () => {
   let history = useHistory();
@@ -49,7 +52,7 @@ export const StatementEditorBox: React.FC = () => {
   // getting origin actants of properties
   const propsByOrigins = useMemo(() => {
     if (statement) {
-      console.log("getting ne props", statement?.data.props);
+      //console.log("getting ne props", statement?.data.props);
       const allProps = statement?.data.props;
       const statementItself = { ...statement };
 
@@ -90,11 +93,16 @@ export const StatementEditorBox: React.FC = () => {
     }
   }, [statement && JSON.stringify(statement.data.props)]);
 
-  if (statement) {
-    console.log("new render", statement.data.props);
-  }
-
-  const updateStateActant = (statementActantId: string, changes: any) => {
+  const addActant = (newStatementActantId: string) => {
+    if (statement) {
+      const newStatementActant = CStatementActant();
+      newStatementActant.actant = newStatementActantId;
+      const newData = { ...statement.data };
+      newData.actants.push(newStatementActant);
+      update(newData);
+    }
+  };
+  const updateActant = (statementActantId: string, changes: any) => {
     if (statement && statementActantId) {
       const updatedActants = statement.data.actants.map((a) =>
         a.id === statementActantId ? { ...a, ...changes } : a
@@ -243,7 +251,7 @@ export const StatementEditorBox: React.FC = () => {
                                 value={sActant.position}
                                 options={actantPositionDict}
                                 onChangeFn={(newPosition: any) => {
-                                  updateStateActant(sActant.id, {
+                                  updateActant(sActant.id, {
                                     position: newPosition,
                                   });
                                 }}
@@ -253,7 +261,7 @@ export const StatementEditorBox: React.FC = () => {
                               <ModalityToggle
                                 value={sActant.modality}
                                 onChangeFn={(newValue: string) => {
-                                  updateStateActant(sActant.id, {
+                                  updateActant(sActant.id, {
                                     modality: newValue,
                                   });
                                 }}
@@ -261,7 +269,7 @@ export const StatementEditorBox: React.FC = () => {
                               <ElvlToggle
                                 value={sActant.elvl}
                                 onChangeFn={(newValue: string) => {
-                                  updateStateActant(sActant.id, {
+                                  updateActant(sActant.id, {
                                     elvl: newValue,
                                   });
                                 }}
@@ -269,7 +277,7 @@ export const StatementEditorBox: React.FC = () => {
                               <CertaintyToggle
                                 value={sActant.certainty}
                                 onChangeFn={(newValue: string) => {
-                                  updateStateActant(sActant.id, {
+                                  updateActant(sActant.id, {
                                     certainty: newValue,
                                   });
                                 }}
@@ -289,6 +297,12 @@ export const StatementEditorBox: React.FC = () => {
                     })}
                   </tbody>
                 </table>
+                <ActantSuggester
+                  onSelected={(newSelectedId: string) => {
+                    addActant(newSelectedId);
+                  }}
+                  categoryIds={classEntities}
+                ></ActantSuggester>
               </div>
             </div>
 
@@ -325,7 +339,17 @@ export const StatementEditorBox: React.FC = () => {
                                 short={false}
                               />
                             ) : (
-                              "suggester"
+                              <ActantSuggester
+                                onSelected={(newSelectedId: string) => {
+                                  updateProp(prop.id, {
+                                    type: {
+                                      ...prop.type,
+                                      ...{ id: newSelectedId },
+                                    },
+                                  });
+                                }}
+                                categoryIds={classEntities}
+                              ></ActantSuggester>
                             )}
                             <ElvlToggle
                               value={prop.type.elvl}
@@ -355,7 +379,17 @@ export const StatementEditorBox: React.FC = () => {
                                 short={false}
                               />
                             ) : (
-                              "suggester"
+                              <ActantSuggester
+                                onSelected={(newSelectedId: string) => {
+                                  updateProp(prop.id, {
+                                    value: {
+                                      ...prop.type,
+                                      ...{ id: newSelectedId },
+                                    },
+                                  });
+                                }}
+                                categoryIds={classEntities}
+                              ></ActantSuggester>
                             )}
                             <ElvlToggle
                               value={prop.value.elvl}
