@@ -13,23 +13,27 @@ export interface IStatement extends IActant {
       id: string;
       order: number;
     };
-    actants: {
-      id: string;
-      actant: string; //  this
-      position: string;
-      modality: string;
-      elvl: string;
-      certainty: string;
-    }[];
+    actants: IStatementActant[];
     props: IProp[]; // this
-    references: {
-      id: string;
-      resource: string;
-      part: string;
-      type: string;
-    }[];
+    references: IStatementReference[];
     tags: string[]; // ids of IActant
   };
+}
+
+export interface IStatementActant {
+  id: string;
+  actant: string; //  this
+  position: string;
+  modality: string;
+  elvl: string;
+  certainty: string;
+}
+
+export interface IStatementReference {
+  id: string;
+  resource: string;
+  part: string;
+  type: string;
 }
 
 export function getActantIdsFromStatements(statements: IStatement[]): string[] {
