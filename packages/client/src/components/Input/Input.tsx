@@ -19,6 +19,7 @@ interface InputProps {
   cols?: number;
   onChangeFn: Function;
   placeholder?: string;
+  changeOnType?: boolean;
 }
 
 export const Input: React.FC<InputProps> = ({
@@ -29,6 +30,7 @@ export const Input: React.FC<InputProps> = ({
   options = [],
   rows = 5,
   cols = 50,
+  changeOnType = false,
   onChangeFn,
   placeholder,
 }) => {
@@ -49,6 +51,9 @@ export const Input: React.FC<InputProps> = ({
           value={displayValue}
           onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
             setDisplayValue(e.currentTarget.value);
+            if (changeOnType) {
+              onChangeFn(e.currentTarget.value);
+            }
           }}
           onBlur={() => {
             onChangeFn(displayValue);
