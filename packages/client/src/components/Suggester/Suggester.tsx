@@ -36,6 +36,7 @@ interface SuggesterProps {
   onCreate: Function;
   onPick: Function;
   onDrop: Function;
+  cleanOnSelect?: boolean;
 }
 
 const MAXSUGGESTIONDISPLAYED = 10;
@@ -61,7 +62,6 @@ export const Suggester: React.FC<SuggesterProps> = ({
     accept: ItemTypes.TAG,
     drop: (item: DragObjectWithType) => {
       onDrop(item);
-      console.log(item);
     },
     collect: (monitor: DropTargetMonitor) => ({
       isOver: !!monitor.isOver(),
@@ -83,6 +83,7 @@ export const Suggester: React.FC<SuggesterProps> = ({
           value={typed}
           onChangeFn={onType}
           placeholder={placeholder}
+          changeOnType={true}
         />
         <SuggesterButton>
           <Button
