@@ -6,6 +6,7 @@ import { Header } from "components/Header/Header";
 import { Footer } from "components/Footer/Footer";
 import { Input } from "components/Input/Input";
 import { Tag } from "components/Tag/Tag";
+import { TagGroup } from "components/TagGroup/TagGroup";
 import { Suggester } from "components/Suggester/Suggester";
 import { Dropdown } from "components/Dropdown/Dropdown";
 import { Toast } from "components/Toast/Toast";
@@ -29,6 +30,7 @@ export {
   Footer,
   Input,
   Tag,
+  TagGroup,
   Suggester,
   Dropdown,
   Toast,

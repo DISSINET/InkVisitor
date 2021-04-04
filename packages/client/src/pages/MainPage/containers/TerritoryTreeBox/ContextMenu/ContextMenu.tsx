@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { FaTrashAlt, FaStar, FaPlus } from "react-icons/fa";
 import { toast } from "react-toastify";
+import { useQuery, useMutation, useQueryClient } from "react-query";
 
 import api from "api";
 import {
@@ -26,6 +27,8 @@ interface ContextMenu {
   territoryActant: IActant;
 }
 export const ContextMenu: React.FC<ContextMenu> = ({ territoryActant }) => {
+  const queryClient = useQueryClient();
+
   const [showMenu, setShowMenu] = useState(false);
   const [showSubmit, setShowSubmit] = useState(false);
   const [showCreate, setShowCreate] = useState(false);
@@ -35,6 +38,23 @@ export const ContextMenu: React.FC<ContextMenu> = ({ territoryActant }) => {
     toast.info(`Territory [${territory.label}] created!`);
     setShowCreate(false);
     setTerritoryName("");
+    queryClient.invalidateQueries(["territory"]);
+  };
+
+  const create = async (label: string) => {
+    const newTerritory: IActant = {
+      id: "",
+      label: label,
+      class: "T",
+      data: { parent: { id: territoryActant.id } },
+    };
+    const res = await api.actantsCreate(newTerritory);
+    if (res.status === 200) {
+      territoryCreated(newTerritory);
+      queryClient.invalidateQueries(["territory"]);
+    } else {
+      toast.error(`Error: Territory [${label}] not created!`);
+    }
   };
 
   const createTerritory = (label: string) => {
@@ -149,7 +169,6 @@ export const ContextMenu: React.FC<ContextMenu> = ({ territoryActant }) => {
           </ModalFooter>
         </ModalCard>
       </Modal>
-      <Toast />
     </>
   );
 };
