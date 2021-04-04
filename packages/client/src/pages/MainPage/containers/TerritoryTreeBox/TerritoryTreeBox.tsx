@@ -52,7 +52,7 @@ export const TerritoryTreeBox: React.FC = () => {
           children={data.children}
           lvl={data.lvl}
           statementsCount={data.statementsCount}
-          initExpandedNodes={[]}
+          initExpandedNodes={["T0"]}
         />
       )}
     </>

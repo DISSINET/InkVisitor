@@ -9,6 +9,9 @@ interface StyledArrow {
   triangleMultiplier: number;
   margin: number;
 }
+const roundHalf = (num: number) => {
+  return Math.round(num * 2) / 2;
+};
 export const StyledArrow = styled.div<StyledArrow>`
   width: 0;
   height: 0;
@@ -29,9 +32,22 @@ export const StyledArrow = styled.div<StyledArrow>`
     rotation === "left" ? "" : "transparent"};
 
   margin-top: ${({ rotation, sizeValidated, triangleMultiplier }) =>
-    rotation === "top" ? `-${sizeValidated * triangleMultiplier}px` : 0};
+    rotation === "top"
+      ? `-${
+          sizeValidated * triangleMultiplier - roundHalf(sizeValidated / 6)
+        }px`
+      : rotation === "bottom"
+      ? `${roundHalf(sizeValidated / 3)}px`
+      : 0};
+
   margin-bottom: ${({ rotation, sizeValidated, triangleMultiplier }) =>
-    rotation === "bottom" ? `-${sizeValidated * triangleMultiplier}px` : 0};
+    rotation === "bottom"
+      ? `-${
+          sizeValidated * triangleMultiplier - roundHalf(sizeValidated / 6)
+        }px`
+      : rotation === "top"
+      ? `${roundHalf(sizeValidated / 3)}px`
+      : 0};
   margin-left: ${({
     rotation,
     sizeValidated,
@@ -40,8 +56,15 @@ export const StyledArrow = styled.div<StyledArrow>`
     margin,
   }) =>
     rotation === "left"
-      ? `-${sizeValidated * triangleMultiplier - marginValidated}px`
+      ? `-${
+          sizeValidated * triangleMultiplier -
+          marginValidated -
+          roundHalf(sizeValidated / 6)
+        }px`
+      : rotation === "right"
+      ? `${margin + roundHalf(sizeValidated / 3)}px`
       : margin};
+
   margin-right: ${({
     rotation,
     sizeValidated,
@@ -50,6 +73,12 @@ export const StyledArrow = styled.div<StyledArrow>`
     margin,
   }) =>
     rotation === "right"
-      ? `-${sizeValidated * triangleMultiplier - marginValidated}px`
+      ? `-${
+          sizeValidated * triangleMultiplier -
+          marginValidated -
+          roundHalf(sizeValidated / 6)
+        }px`
+      : rotation === "left"
+      ? `${margin + roundHalf(sizeValidated / 3)}px`
       : margin};
 `;

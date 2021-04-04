@@ -17,7 +17,7 @@ export const Arrow: React.FC<ArrowProps> = ({
   color = "primary",
   rotation = "bottom",
   size = 13,
-  margin = 5,
+  margin = 0,
   onClick = () => {
     // do nothing
   },
@@ -28,8 +28,8 @@ export const Arrow: React.FC<ArrowProps> = ({
       color={color}
       rotation={rotation}
       margin={margin}
-      sizeValidated={size || 13}
-      marginValidated={margin || 4}
+      sizeValidated={size}
+      marginValidated={margin}
       triangleMultiplier={1.5}
     ></StyledArrow>
   );

@@ -16,12 +16,12 @@ export const StyledChildrenWrap = styled.div<StyledChildrenWrap>`
   margin-left: ${({ theme }) => theme.space[3]};
 `;
 export const StyledFaDotCircle = styled(FaDotCircle)`
-  margin-left: 0.3rem;
-  margin-right: 0.5rem;
+  /* margin-left: 0.3rem; */
+  /* margin-right: 0.5rem; */
   color: ${({ theme }) => theme.colors["primary"]};
 `;
 export const StyledFaCircle = styled(FaCircle)`
-  margin-left: 0.3rem;
-  margin-right: 0.5rem;
+  /* margin-left: 0.3rem; */
+  /* margin-right: 0.5rem; */
   color: ${({ theme }) => theme.colors["primary"]};
 `;
