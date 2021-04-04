@@ -8,6 +8,7 @@ import {
   StyledChildrenWrap,
   StyledFaCircle,
   StyledFaDotCircle,
+  StyledIconBox,
   StyledIconWrap,
   StyledTerritoryTagWrap,
 } from "./TerritoryTreeNodeStyle";
@@ -77,17 +78,19 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
       <StyledTerritoryTagWrap>
         <StyledIconWrap>
           {hasChildren ? (
-            <Arrow
-              rotation={isExpanded ? "bottom" : "right"}
-              size={6}
-              onClick={() => {
-                hashParams["territory"] = id;
-                history.push({
-                  hash: queryString.stringify(hashParams),
-                });
-                setIsExpanded(!isExpanded);
-              }}
-            />
+            <StyledIconBox>
+              <Arrow
+                rotation={isExpanded ? "bottom" : "right"}
+                size={6}
+                onClick={() => {
+                  hashParams["territory"] = id;
+                  history.push({
+                    hash: queryString.stringify(hashParams),
+                  });
+                  setIsExpanded(!isExpanded);
+                }}
+              />
+            </StyledIconBox>
           ) : (
             <>
               {statementsCount > 0 ? (

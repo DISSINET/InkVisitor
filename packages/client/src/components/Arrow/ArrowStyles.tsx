@@ -63,7 +63,7 @@ export const StyledArrow = styled.div<StyledArrow>`
         }px`
       : rotation === "right"
       ? `${margin + roundHalf(sizeValidated / 3)}px`
-      : margin};
+      : `${margin}`};
 
   margin-right: ${({
     rotation,
@@ -80,5 +80,5 @@ export const StyledArrow = styled.div<StyledArrow>`
         }px`
       : rotation === "left"
       ? `${margin + roundHalf(sizeValidated / 3)}px`
-      : margin};
+      : `${margin}`};
 `;

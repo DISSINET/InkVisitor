@@ -1,3 +1,4 @@
+import { Arrow } from "components";
 import { FaCircle, FaDotCircle } from "react-icons/fa";
 import styled from "styled-components";
 
@@ -16,12 +17,13 @@ export const StyledChildrenWrap = styled.div<StyledChildrenWrap>`
   margin-left: ${({ theme }) => theme.space[3]};
 `;
 export const StyledFaDotCircle = styled(FaDotCircle)`
-  /* margin-left: 0.3rem; */
-  /* margin-right: 0.5rem; */
+  margin: 0 ${({ theme }) => theme.space[1]};
   color: ${({ theme }) => theme.colors["primary"]};
 `;
 export const StyledFaCircle = styled(FaCircle)`
-  /* margin-left: 0.3rem; */
-  /* margin-right: 0.5rem; */
+  margin: 0 ${({ theme }) => theme.space[1]};
   color: ${({ theme }) => theme.colors["primary"]};
+`;
+export const StyledIconBox = styled.div`
+  margin: 0 ${({ theme }) => theme.space[1]};
 `;
