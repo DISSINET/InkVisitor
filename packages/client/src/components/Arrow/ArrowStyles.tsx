@@ -5,9 +5,7 @@ interface StyledArrow {
   color: typeof Colors[number];
   rotation: string;
   sizeValidated: number;
-  marginValidated: number;
   triangleMultiplier: number;
-  margin: number;
 }
 const roundHalf = (num: number) => {
   return Math.round(num * 2) / 2;
@@ -48,37 +46,21 @@ export const StyledArrow = styled.div<StyledArrow>`
       : rotation === "top"
       ? `${roundHalf(sizeValidated / 3)}px`
       : 0};
-  margin-left: ${({
-    rotation,
-    sizeValidated,
-    marginValidated,
-    triangleMultiplier,
-    margin,
-  }) =>
+  margin-left: ${({ rotation, sizeValidated, triangleMultiplier }) =>
     rotation === "left"
       ? `-${
-          sizeValidated * triangleMultiplier -
-          marginValidated -
-          roundHalf(sizeValidated / 6)
+          sizeValidated * triangleMultiplier - roundHalf(sizeValidated / 6)
         }px`
       : rotation === "right"
-      ? `${margin + roundHalf(sizeValidated / 3)}px`
-      : `${margin}`};
+      ? `${roundHalf(sizeValidated / 3)}px`
+      : 0};
 
-  margin-right: ${({
-    rotation,
-    sizeValidated,
-    marginValidated,
-    triangleMultiplier,
-    margin,
-  }) =>
+  margin-right: ${({ rotation, sizeValidated, triangleMultiplier }) =>
     rotation === "right"
       ? `-${
-          sizeValidated * triangleMultiplier -
-          marginValidated -
-          roundHalf(sizeValidated / 6)
+          sizeValidated * triangleMultiplier - roundHalf(sizeValidated / 6)
         }px`
       : rotation === "left"
-      ? `${margin + roundHalf(sizeValidated / 3)}px`
-      : `${margin}`};
+      ? `${roundHalf(sizeValidated / 3)}px`
+      : 0};
 `;

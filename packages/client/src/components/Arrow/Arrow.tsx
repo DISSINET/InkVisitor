@@ -10,14 +10,12 @@ interface ArrowProps {
   rotation?: Rotation;
   onClick?: MouseEventHandler<HTMLElement>;
   size?: number;
-  margin?: number;
 }
 
 export const Arrow: React.FC<ArrowProps> = ({
   color = "primary",
   rotation = "bottom",
   size = 13,
-  margin = 0,
   onClick = () => {
     // do nothing
   },
@@ -27,9 +25,7 @@ export const Arrow: React.FC<ArrowProps> = ({
       onClick={onClick}
       color={color}
       rotation={rotation}
-      margin={margin}
       sizeValidated={size}
-      marginValidated={margin}
       triangleMultiplier={1.5}
     ></StyledArrow>
   );
