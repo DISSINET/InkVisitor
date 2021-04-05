@@ -3,6 +3,8 @@ import { useQuery, useMutation, useQueryClient } from "react-query";
 import api from "api";
 const queryString = require("query-string");
 
+import styled from "styled-components";
+
 import { FaTrashAlt, FaPlusCircle } from "react-icons/fa";
 
 import { useLocation, useHistory } from "react-router";
@@ -332,7 +334,11 @@ export const StatementEditorBox: React.FC = () => {
                   //console.log(propOrigin, originActant);
 
                   if (originActant) {
-                    const renderPropRow = (prop: IProp, level: "1" | "2") => {
+                    const renderPropRow = (
+                      prop: IProp,
+                      level: "1" | "2",
+                      lastSecondLevel: boolean
+                    ) => {
                       const propTypeActant = statement.actants.find(
                         (a) => a.id === prop.type.id
                       );
@@ -341,35 +347,58 @@ export const StatementEditorBox: React.FC = () => {
                       );
 
                       return (
-                        <div
-                          key={prop.id}
-                          style={{
-                            paddingBottom: "0.2em",
-                            paddingLeft: level === "1" ? "1em" : "2em",
-                          }}
-                        >
-                          <div style={{ display: "table-cell" }}>
+                        <>
+                          <StyledPropLineColumn
+                            padded={level === "2"}
+                            lastSecondLevel={lastSecondLevel}
+                          >
                             {propTypeActant ? (
-                              <ActantTag
-                                key={sai}
-                                actant={propTypeActant}
-                                short={false}
-                                button={
-                                  <Button
-                                    key="d"
-                                    icon={<FaTrashAlt />}
-                                    color="danger"
-                                    onClick={() => {
+                              <>
+                                <ActantTag
+                                  key={sai}
+                                  actant={propTypeActant}
+                                  short={false}
+                                  button={
+                                    <Button
+                                      key="d"
+                                      icon={<FaTrashAlt />}
+                                      color="danger"
+                                      onClick={() => {
+                                        updateProp(prop.id, {
+                                          type: {
+                                            ...prop.type,
+                                            ...{ id: "" },
+                                          },
+                                        });
+                                      }}
+                                    />
+                                  }
+                                />
+                                <StyledPropButtonGroup>
+                                  <ElvlToggle
+                                    value={prop.type.elvl}
+                                    onChangeFn={(newValue: string) => {
                                       updateProp(prop.id, {
                                         type: {
                                           ...prop.type,
-                                          ...{ id: "" },
+                                          ...{ elvl: newValue },
                                         },
                                       });
                                     }}
                                   />
-                                }
-                              />
+                                  <CertaintyToggle
+                                    value={prop.type.certainty}
+                                    onChangeFn={(newValue: string) => {
+                                      updateProp(prop.id, {
+                                        type: {
+                                          ...prop.type,
+                                          ...{ certainty: newValue },
+                                        },
+                                      });
+                                    }}
+                                  />
+                                </StyledPropButtonGroup>
+                              </>
                             ) : (
                               <ActantSuggester
                                 onSelected={(newSelectedId: string) => {
@@ -383,48 +412,58 @@ export const StatementEditorBox: React.FC = () => {
                                 categoryIds={classEntities}
                               ></ActantSuggester>
                             )}
-                            <ElvlToggle
-                              value={prop.type.elvl}
-                              onChangeFn={(newValue: string) => {
-                                updateProp(prop.id, {
-                                  type: { ...prop.type, ...{ elvl: newValue } },
-                                });
-                              }}
-                            />
-                            <CertaintyToggle
-                              value={prop.type.certainty}
-                              onChangeFn={(newValue: string) => {
-                                updateProp(prop.id, {
-                                  type: {
-                                    ...prop.type,
-                                    ...{ certainty: newValue },
-                                  },
-                                });
-                              }}
-                            />
-                          </div>
-                          <div style={{ display: "table-cell" }}>
+                          </StyledPropLineColumn>
+                          <StyledPropLineColumn
+                            padded={level === "2"}
+                            lastSecondLevel={lastSecondLevel}
+                          >
                             {propValueActant ? (
-                              <ActantTag
-                                key={sai}
-                                actant={propValueActant}
-                                short={false}
-                                button={
-                                  <Button
-                                    key="d"
-                                    icon={<FaTrashAlt />}
-                                    color="danger"
-                                    onClick={() => {
+                              <>
+                                <ActantTag
+                                  key={sai}
+                                  actant={propValueActant}
+                                  short={false}
+                                  button={
+                                    <Button
+                                      key="d"
+                                      icon={<FaTrashAlt />}
+                                      color="danger"
+                                      onClick={() => {
+                                        updateProp(prop.id, {
+                                          value: {
+                                            ...prop.value,
+                                            ...{ id: "" },
+                                          },
+                                        });
+                                      }}
+                                    />
+                                  }
+                                />
+                                <StyledPropButtonGroup>
+                                  <ElvlToggle
+                                    value={prop.value.elvl}
+                                    onChangeFn={(newValue: string) => {
                                       updateProp(prop.id, {
                                         value: {
                                           ...prop.value,
-                                          ...{ id: "" },
+                                          ...{ elvl: newValue },
                                         },
                                       });
                                     }}
                                   />
-                                }
-                              />
+                                  <CertaintyToggle
+                                    value={prop.value.certainty}
+                                    onChangeFn={(newValue: string) => {
+                                      updateProp(prop.id, {
+                                        value: {
+                                          ...prop.value,
+                                          ...{ certainty: newValue },
+                                        },
+                                      });
+                                    }}
+                                  />
+                                </StyledPropButtonGroup>
+                              </>
                             ) : (
                               <ActantSuggester
                                 onSelected={(newSelectedId: string) => {
@@ -438,113 +477,102 @@ export const StatementEditorBox: React.FC = () => {
                                 categoryIds={classEntities}
                               ></ActantSuggester>
                             )}
-                            <ElvlToggle
-                              value={prop.value.elvl}
-                              onChangeFn={(newValue: string) => {
-                                updateProp(prop.id, {
-                                  value: {
-                                    ...prop.value,
-                                    ...{ elvl: newValue },
-                                  },
-                                });
-                              }}
-                            />
-                            <CertaintyToggle
-                              value={prop.value.certainty}
-                              onChangeFn={(newValue: string) => {
-                                updateProp(prop.id, {
-                                  value: {
-                                    ...prop.value,
-                                    ...{ certainty: newValue },
-                                  },
-                                });
-                              }}
-                            />
-                          </div>
-                          <div style={{ display: "table-cell" }}>
-                            <ModalityToggle
-                              value={prop.modality}
-                              onChangeFn={(newValue: string) => {
-                                updateProp(prop.id, {
-                                  modality: newValue,
-                                });
-                              }}
-                            />
-                            <ElvlToggle
-                              value={prop.elvl}
-                              onChangeFn={(newValue: string) => {
-                                updateProp(prop.id, {
-                                  elvl: newValue,
-                                });
-                              }}
-                            />
-                            <CertaintyToggle
-                              value={prop.certainty}
-                              onChangeFn={(newValue: string) => {
-                                updateProp(prop.id, {
-                                  certainty: newValue,
-                                });
-                              }}
-                            />
-                          </div>
-                          <div style={{ display: "table-cell" }}>
-                            {level === "1" && (
-                              <Button
-                                key="add"
-                                icon={<FaPlusCircle />}
-                                color="primary"
-                                onClick={() => {
-                                  addProp(prop.id);
+                          </StyledPropLineColumn>
+                          <StyledPropLineColumn
+                            lastSecondLevel={lastSecondLevel}
+                          >
+                            <StyledPropButtonGroup>
+                              <ModalityToggle
+                                value={prop.modality}
+                                onChangeFn={(newValue: string) => {
+                                  updateProp(prop.id, {
+                                    modality: newValue,
+                                  });
                                 }}
                               />
-                            )}
-                            <Button
-                              key="delete"
-                              icon={<FaTrashAlt />}
-                              color="danger"
-                              onClick={() => {
-                                removeProp(prop.id);
-                              }}
-                            />
-                          </div>
-                        </div>
+                              <ElvlToggle
+                                value={prop.elvl}
+                                onChangeFn={(newValue: string) => {
+                                  updateProp(prop.id, {
+                                    elvl: newValue,
+                                  });
+                                }}
+                              />
+                              <CertaintyToggle
+                                value={prop.certainty}
+                                onChangeFn={(newValue: string) => {
+                                  updateProp(prop.id, {
+                                    certainty: newValue,
+                                  });
+                                }}
+                              />
+                            </StyledPropButtonGroup>
+                          </StyledPropLineColumn>
+                          <StyledPropLineColumn
+                            lastSecondLevel={lastSecondLevel}
+                          >
+                            <StyledPropButtonGroup>
+                              {level === "1" && (
+                                <Button
+                                  key="add"
+                                  icon={<FaPlusCircle />}
+                                  color="primary"
+                                  onClick={() => {
+                                    addProp(prop.id);
+                                  }}
+                                />
+                              )}
+                              <Button
+                                key="delete"
+                                icon={<FaTrashAlt />}
+                                color="danger"
+                                onClick={() => {
+                                  removeProp(prop.id);
+                                }}
+                              />
+                            </StyledPropButtonGroup>
+                          </StyledPropLineColumn>
+                        </>
                       );
                     };
 
                     return (
-                      <div key={originActant.id}>
-                        <div
-                          style={{
-                            display: "inline-flex",
-                            paddingTop: "0.2em",
-                          }}
-                        >
+                      <StyledPropsActantWrapper key={originActant.id}>
+                        <StyledPropsActantHeader>
                           <ActantTag
                             key={sai}
                             actant={originActant}
                             short={false}
                           />
-                          <Button
-                            key="d"
-                            icon={<FaPlusCircle />}
-                            color="primary"
-                            onClick={() => {
-                              addProp(originActant.id);
-                            }}
-                          />
-                        </div>
+                          <StyledPropButtonGroup>
+                            <Button
+                              key="d"
+                              icon={<FaPlusCircle />}
+                              color="primary"
+                              onClick={() => {
+                                addProp(originActant.id);
+                              }}
+                            />
+                          </StyledPropButtonGroup>
+                        </StyledPropsActantHeader>
 
-                        {propOrigin.props.map((prop1, pi1) => {
-                          return (
-                            <div>
-                              {renderPropRow(prop1, "1")}
-                              {prop1.props.map((prop2: any, pi2: number) => {
-                                return renderPropRow(prop2, "2");
-                              })}
-                            </div>
-                          );
-                        })}
-                      </div>
+                        <StyledPropsActantList>
+                          {propOrigin.props.map((prop1, pi1) => {
+                            return (
+                              <>
+                                {renderPropRow(prop1, "1", false)}
+                                {prop1.props.map((prop2: any, pi2: number) => {
+                                  return renderPropRow(
+                                    prop2,
+                                    "2",
+                                    pi2 === prop1.props.length - 1
+                                  );
+                                })}
+                              </>
+                            );
+                          })}
+                        </StyledPropsActantList>
+                      </StyledPropsActantWrapper>
                     );
                   }
                 })}
@@ -576,3 +604,42 @@ export const StatementEditorBox: React.FC = () => {
     </div>
   );
 };
+
+interface StyledPropsActantWrapper {}
+export const StyledPropsActantWrapper = styled.div<StyledPropsActantWrapper>``;
+
+interface StyledPropsActantHeader {}
+export const StyledPropsActantHeader = styled.div<StyledPropsActantHeader>`
+  display: inline-flex;
+  padding-top: ${({ theme }) => theme.space[1]};
+  padding-bottom: ${({ theme }) => theme.space[6]};
+`;
+
+interface StyledPropsActantList {}
+export const StyledPropsActantList = styled.div<StyledPropsActantList>`
+  display: grid;
+  padding-left: ${({ theme }) => theme.space[8]};
+  grid-template-columns: 15em 15em 9em 6em;
+  grid-template-rows: auto;
+  grid-auto-flow: row;
+  padding-bottom: ${({ theme }) => theme.space[6]};
+`;
+
+interface StyledPropButtonGroup {}
+export const StyledPropButtonGroup = styled.div<StyledPropButtonGroup>`
+  margin-left: ${({ theme }) => theme.space[3]};
+  display: inline-flex;
+`;
+
+interface StyledPropLineColumn {
+  padded?: boolean;
+  lastSecondLevel?: boolean;
+}
+export const StyledPropLineColumn = styled.div<StyledPropLineColumn>`
+  display: inline-flex;
+  padding-bottom: ${({ theme, lastSecondLevel }) =>
+    lastSecondLevel ? theme.space[4] : theme.space[1]};
+  align-items: center;
+  padding-left: ${({ theme, padded }) =>
+    padded ? theme.space[6] : theme.space[0]};
+`;

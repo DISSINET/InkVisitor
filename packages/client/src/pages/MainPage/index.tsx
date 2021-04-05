@@ -74,15 +74,15 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
             <TerritoryTreeBox />
           </Box>
           <div>
-            <Box height={400} width={650} label="Statements">
+            <Box height={400} width={570} label="Statements">
               <StatementListBox />
             </Box>
-            <Box height={heightContent - 400} width={650} label="Detail">
+            <Box height={heightContent - 400} width={570} label="Detail">
               <ActantDetailBox />
             </Box>
           </div>
           <div>
-            <Box height={heightContent} width={720} label="Editor">
+            <Box height={heightContent} width={800} label="Editor">
               <StatementEditorBox />
             </Box>
           </div>
