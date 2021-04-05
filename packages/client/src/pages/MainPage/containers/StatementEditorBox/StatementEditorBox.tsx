@@ -160,7 +160,7 @@ export const StatementEditorBox: React.FC = () => {
       {statement ? (
         <div style={{ marginBottom: "4rem" }}>
           <div key={statement.id}>
-            <StyledEditorSection key="editor-section-summary">
+            <StyledEditorSection firstSection key="editor-section-summary">
               <StyledEditorSectionHeader>Summary</StyledEditorSectionHeader>
               <div className="editor-section-content">
                 <div className="table-row">
@@ -646,8 +646,12 @@ export const StyledPropLineColumn = styled.div<StyledPropLineColumn>`
     padded ? theme.space[6] : theme.space[0]};
 `;
 
-interface StyledEditorSection {}
+interface StyledEditorSection {
+  firstSection?: boolean;
+}
 export const StyledEditorSection = styled.div<StyledEditorSection>`
+  padding-top: ${({ theme, firstSection = false }) =>
+    firstSection ? 0 : theme.space[4]};
   padding-bottom: ${({ theme }) => theme.space[6]};
   border-bottom-width: ${({ theme }) => theme.borderWidths[2]};
   border-bottom-color: ${({ theme }) => theme.colors.black};
