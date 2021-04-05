@@ -160,8 +160,8 @@ export const StatementEditorBox: React.FC = () => {
       {statement ? (
         <div style={{ marginBottom: "4rem" }}>
           <div key={statement.id}>
-            <div key="editor-section-summary" className="editor-section">
-              <div className="editor-section-header">Summary</div>
+            <StyledEditorSection key="editor-section-summary">
+              <StyledEditorSectionHeader>Summary</StyledEditorSectionHeader>
               <div className="editor-section-content">
                 <div className="table-row">
                   <div className="label">Action</div>
@@ -231,11 +231,11 @@ export const StatementEditorBox: React.FC = () => {
                   />
                 </div>
               </div>
-            </div>
+            </StyledEditorSection>
 
             {/* Actants */}
-            <div key="editor-section-actants" className="editor-section">
-              <div className="editor-section-header">Actants</div>
+            <StyledEditorSection key="editor-section-actants">
+              <StyledEditorSectionHeader>Actants</StyledEditorSectionHeader>
               <div className="editor-section-content">
                 <table className="">
                   <thead>
@@ -320,11 +320,13 @@ export const StatementEditorBox: React.FC = () => {
                   categoryIds={classEntities}
                 ></ActantSuggester>
               </div>
-            </div>
+            </StyledEditorSection>
 
             {/* Props */}
-            <div key="editor-section-props" className="editor-section">
-              <div className="editor-section-header">Properties (has)</div>
+            <StyledEditorSection key="editor-section-props">
+              <StyledEditorSectionHeader>
+                Properties (has)
+              </StyledEditorSectionHeader>
               <div
                 className="editor-section-content"
                 key={JSON.stringify(statement.data)}
@@ -577,25 +579,25 @@ export const StatementEditorBox: React.FC = () => {
                   }
                 })}
               </div>
-            </div>
+            </StyledEditorSection>
 
             {/* Refs */}
-            <div key="editor-section-refs" className="editor-section">
-              <div className="editor-section-header">References</div>
+            <StyledEditorSection key="editor-section-refs">
+              <StyledEditorSectionHeader>References</StyledEditorSectionHeader>
               <div className="editor-section-content"></div>
-            </div>
+            </StyledEditorSection>
 
             {/* Tags */}
-            <div key="editor-section-tags" className="editor-section">
-              <div className="editor-section-header">Tags</div>
+            <StyledEditorSection key="editor-section-tags">
+              <StyledEditorSectionHeader>Tags</StyledEditorSectionHeader>
               <div className="editor-section-content"></div>
-            </div>
+            </StyledEditorSection>
 
             {/* Notes */}
-            <div key="editor-section-notes" className="editor-section">
-              <div className="editor-section-header">Notes</div>
+            <StyledEditorSection key="editor-section-notes">
+              <StyledEditorSectionHeader>Notes</StyledEditorSectionHeader>
               <div className="editor-section-content"></div>
-            </div>
+            </StyledEditorSection>
           </div>
         </div>
       ) : (
@@ -642,4 +644,18 @@ export const StyledPropLineColumn = styled.div<StyledPropLineColumn>`
   align-items: center;
   padding-left: ${({ theme, padded }) =>
     padded ? theme.space[6] : theme.space[0]};
+`;
+
+interface StyledEditorSection {}
+export const StyledEditorSection = styled.div<StyledEditorSection>`
+  padding-bottom: ${({ theme }) => theme.space[6]};
+  border-bottom-width: ${({ theme }) => theme.borderWidths[2]};
+  border-bottom-color: ${({ theme }) => theme.colors.black};
+  border-bottom-style: solid;
+`;
+
+interface StyledEditorSectionHeader {}
+export const StyledEditorSectionHeader = styled.div<StyledEditorSectionHeader>`
+  font-weight: ${({ theme }) => theme.fontWeights.bold};
+  font-size: ${({ theme }) => theme.fontSizes.xl};
 `;
