@@ -1,4 +1,5 @@
 import { Arrow } from "components/Arrow/Arrow";
+import { ActantDetail } from "components/ActantDetail/ActantDetail";
 import { Box } from "components/Box/Box";
 import { Button } from "components/Button/Button";
 import { ButtonGroup } from "components/ButtonGroup/ButtonGroup";
@@ -6,6 +7,7 @@ import { Header } from "components/Header/Header";
 import { Footer } from "components/Footer/Footer";
 import { Input } from "components/Input/Input";
 import { Tag } from "components/Tag/Tag";
+import { TagGroup } from "components/TagGroup/TagGroup";
 import { Suggester } from "components/Suggester/Suggester";
 import { Dropdown } from "components/Dropdown/Dropdown";
 import { Toast } from "components/Toast/Toast";
@@ -22,6 +24,7 @@ import {
 
 export {
   Arrow,
+  ActantDetail,
   Box,
   Button,
   ButtonGroup,
@@ -29,6 +32,7 @@ export {
   Footer,
   Input,
   Tag,
+  TagGroup,
   Suggester,
   Dropdown,
   Toast,

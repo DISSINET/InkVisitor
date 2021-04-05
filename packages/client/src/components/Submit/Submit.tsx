@@ -14,8 +14,8 @@ interface Submit {
   title?: string;
   text?: string;
   show: boolean;
-  onSubmit: Function;
-  onCancel: Function;
+  onSubmit: () => void;
+  onCancel: () => void;
 }
 export const Submit: React.FC<Submit> = ({
   title,
@@ -26,24 +26,16 @@ export const Submit: React.FC<Submit> = ({
 }) => {
   return (
     <>
-      <Modal onClose={(): void => onCancel()} showModal={show} disableBgClick>
+      <Modal onClose={onCancel} showModal={show} disableBgClick>
         <ModalCard>
-          <ModalHeader onClose={(): void => onCancel()} title={title} />
+          <ModalHeader title={title} />
           <ModalContent>
             <p>{text}</p>
           </ModalContent>
           <ModalFooter>
             <ButtonGroup>
-              <Button
-                label="Submit"
-                color="danger"
-                onClick={(): void => onSubmit()}
-              />
-              <Button
-                label="Cancel"
-                color="info"
-                onClick={(): void => onCancel()}
-              />
+              <Button label="Submit" color="danger" onClick={onSubmit} />
+              <Button label="Cancel" color="info" onClick={onCancel} />
             </ButtonGroup>
           </ModalFooter>
         </ModalCard>

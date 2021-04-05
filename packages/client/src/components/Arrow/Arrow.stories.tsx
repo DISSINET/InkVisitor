@@ -1,5 +1,6 @@
 import * as React from "react";
-import { Arrow, Button } from "components";
+import { Arrow, Button, Tag } from "components";
+import styled from "styled-components";
 
 export default {
   title: "Arrow",
@@ -53,3 +54,53 @@ export const ArrowWithButton = () => {
     </div>
   );
 };
+export const AllArrows = () => {
+  const size = 20;
+  return (
+    <>
+      <RowBox>
+        <BorderBox>
+          <Arrow rotation="top" size={size} color="success" />
+        </BorderBox>
+        <BorderBox>
+          <Arrow rotation="right" size={size} color="success" />
+        </BorderBox>
+        <BorderBox>
+          <Arrow rotation="bottom" size={size} color="success" />
+        </BorderBox>
+        <BorderBox>
+          <Arrow rotation="left" size={size} color="success" />
+        </BorderBox>
+      </RowBox>
+      <ColumnBox>
+        <BorderBox>
+          <Arrow rotation="top" size={size} color="danger" />
+          <Button label="Test" />
+        </BorderBox>
+        <BorderBox>
+          <Arrow rotation="right" size={size} color="danger" />
+          <Button label="Test" />
+        </BorderBox>
+        <BorderBox>
+          <Arrow rotation="bottom" size={size} color="danger" />
+          <Button label="Test" />
+        </BorderBox>
+        <BorderBox>
+          <Arrow rotation="left" size={size} color="danger" />
+          <Button label="Test" />
+        </BorderBox>
+      </ColumnBox>
+    </>
+  );
+};
+const BorderBox = styled.div`
+  display: inline-flex;
+  border: 1px solid black;
+`;
+const RowBox = styled.div`
+  display: flex;
+`;
+const ColumnBox = styled.div`
+  display: flex;
+  flex-direction: column;
+`;

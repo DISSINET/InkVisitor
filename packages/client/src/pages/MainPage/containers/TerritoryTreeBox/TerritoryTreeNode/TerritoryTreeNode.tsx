@@ -8,11 +8,13 @@ import {
   StyledChildrenWrap,
   StyledFaCircle,
   StyledFaDotCircle,
+  StyledIconBox,
   StyledIconWrap,
   StyledTerritoryTagWrap,
-} from "./TerritoryTreeNodeStyle";
+} from "./TerritoryTreeNodeStyles";
 import { Arrow } from "components";
-import { ActantTag } from "..";
+import { ContextMenu } from "../ContextMenu/ContextMenu";
+import { ActantTag } from "../..";
 
 interface TerritoryTreeNode {
   territory: any;
@@ -76,17 +78,19 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
       <StyledTerritoryTagWrap>
         <StyledIconWrap>
           {hasChildren ? (
-            <Arrow
-              rotation={isExpanded ? "bottom" : "right"}
-              size={6}
-              onClick={() => {
-                hashParams["territory"] = id;
-                history.push({
-                  hash: queryString.stringify(hashParams),
-                });
-                setIsExpanded(!isExpanded);
-              }}
-            />
+            <StyledIconBox>
+              <Arrow
+                rotation={isExpanded ? "bottom" : "right"}
+                size={6}
+                onClick={() => {
+                  hashParams["territory"] = id;
+                  history.push({
+                    hash: queryString.stringify(hashParams),
+                  });
+                  setIsExpanded(!isExpanded);
+                }}
+              />
+            </StyledIconBox>
           ) : (
             <>
               {statementsCount > 0 ? (
@@ -120,6 +124,7 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
           index={index}
           // moveFn={moveFn}
         />
+        <ContextMenu territoryActant={territoryActant} />
       </StyledTerritoryTagWrap>
     );
   };

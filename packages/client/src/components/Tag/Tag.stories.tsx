@@ -3,7 +3,7 @@ import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 
 import { Entities } from "types";
-import { Tag, Button } from "components";
+import { Tag, Button, TagGroup } from "components";
 
 export default {
   title: "Tag",
@@ -28,6 +28,52 @@ export const TagWithLabel = () => {
         color={Entities["R"].color}
         label="entity label"
       />
+    </DndProvider>
+  );
+};
+
+export const ShortTagWithLabel = () => {
+  return (
+    <DndProvider backend={HTML5Backend}>
+      <Tag
+        category={Entities["T"].id}
+        color={Entities["T"].color}
+        label="entity label"
+        short
+      />
+    </DndProvider>
+  );
+};
+
+export const ShortTagGroup = () => {
+  return (
+    <DndProvider backend={HTML5Backend}>
+      <TagGroup>
+        <Tag
+          category={Entities["R"].id}
+          color={Entities["R"].color}
+          label="entity label"
+          short
+        />
+        <Tag
+          category={Entities["O"].id}
+          color={Entities["O"].color}
+          label="entity label"
+          short
+        />
+        <Tag
+          category={Entities["S"].id}
+          color={Entities["S"].color}
+          label="entity label"
+          short
+        />
+        <Tag
+          category={Entities["E"].id}
+          color={Entities["E"].color}
+          label="entity label"
+          short
+        />
+      </TagGroup>
     </DndProvider>
   );
 };

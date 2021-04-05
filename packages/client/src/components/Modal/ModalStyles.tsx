@@ -1,14 +1,5 @@
 import styled from "styled-components";
-import {
-  space1,
-  space2,
-  space3,
-  space4,
-  space5,
-  space6,
-  space7,
-  space8,
-} from "Theme/constants";
+import { space1, space3, space5, space6, space7 } from "Theme/constants";
 
 interface ModalWrap {
   showModal: boolean;
@@ -39,7 +30,7 @@ interface Card {
   fullwidth?: boolean;
 }
 export const Card = styled.div<Card>`
-  width: ${({ fullwidth }) => (fullwidth ? "calc(100vw - 40px)" : "50%")};
+  width: ${({ fullwidth }) => (fullwidth ? "calc(100vw - 40px)" : "50rem")};
   display: flex;
   flex-direction: column;
   max-height: calc(100vh - 40px);
@@ -60,19 +51,21 @@ export const CardHeader = styled.header`
   border-bottom-color: ${({ theme }) => theme.colors["gray"][400]};
   border-top-left-radius: ${({ theme }) => theme.borderRadius["sm"]};
   border-top-right-radius: ${({ theme }) => theme.borderRadius["sm"]};
+  min-height: ${({ theme }) => theme.space[12]};
 `;
 export const CardTitle = styled.h2`
   font-weight: ${({ theme }) => theme.fontWeights["medium"]};
   font-size: ${({ theme }) => theme.fontSizes["xl"]};
 `;
 export const CardBody = styled.section`
-  -webkit-overflow-scrolling: touch;
+  display: flex;
   flex-grow: 1;
   flex-shrink: 1;
   overflow: auto;
   padding: ${space5} ${space7};
   background-color: #ffffff;
   font-size: ${({ theme }) => theme.fontSizes["sm"]};
+  -webkit-overflow-scrolling: touch;
 `;
 export const Footer = styled.div`
   border-bottom-left-radius: ${({ theme }) => theme.borderRadius["sm"]};
@@ -85,6 +78,6 @@ export const Footer = styled.div`
   display: flex;
   flex-shrink: 0;
   justify-content: flex-end;
-  padding: ${space3};
+  padding: ${({ theme }) => theme.space[4]};
   position: relative;
 `;

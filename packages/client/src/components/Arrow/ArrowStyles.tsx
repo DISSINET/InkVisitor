@@ -5,10 +5,11 @@ interface StyledArrow {
   color: typeof Colors[number];
   rotation: string;
   sizeValidated: number;
-  marginValidated: number;
   triangleMultiplier: number;
-  margin: number;
 }
+const roundHalf = (num: number) => {
+  return Math.round(num * 2) / 2;
+};
 export const StyledArrow = styled.div<StyledArrow>`
   width: 0;
   height: 0;
@@ -29,27 +30,37 @@ export const StyledArrow = styled.div<StyledArrow>`
     rotation === "left" ? "" : "transparent"};
 
   margin-top: ${({ rotation, sizeValidated, triangleMultiplier }) =>
-    rotation === "top" ? `-${sizeValidated * triangleMultiplier}px` : 0};
+    rotation === "top"
+      ? `-${
+          sizeValidated * triangleMultiplier - roundHalf(sizeValidated / 6)
+        }px`
+      : rotation === "bottom"
+      ? `${roundHalf(sizeValidated / 3)}px`
+      : 0};
+
   margin-bottom: ${({ rotation, sizeValidated, triangleMultiplier }) =>
-    rotation === "bottom" ? `-${sizeValidated * triangleMultiplier}px` : 0};
-  margin-left: ${({
-    rotation,
-    sizeValidated,
-    marginValidated,
-    triangleMultiplier,
-    margin,
-  }) =>
+    rotation === "bottom"
+      ? `-${
+          sizeValidated * triangleMultiplier - roundHalf(sizeValidated / 6)
+        }px`
+      : rotation === "top"
+      ? `${roundHalf(sizeValidated / 3)}px`
+      : 0};
+  margin-left: ${({ rotation, sizeValidated, triangleMultiplier }) =>
     rotation === "left"
-      ? `-${sizeValidated * triangleMultiplier - marginValidated}px`
-      : margin};
-  margin-right: ${({
-    rotation,
-    sizeValidated,
-    marginValidated,
-    triangleMultiplier,
-    margin,
-  }) =>
+      ? `-${
+          sizeValidated * triangleMultiplier - roundHalf(sizeValidated / 6)
+        }px`
+      : rotation === "right"
+      ? `${roundHalf(sizeValidated / 3)}px`
+      : 0};
+
+  margin-right: ${({ rotation, sizeValidated, triangleMultiplier }) =>
     rotation === "right"
-      ? `-${sizeValidated * triangleMultiplier - marginValidated}px`
-      : margin};
+      ? `-${
+          sizeValidated * triangleMultiplier - roundHalf(sizeValidated / 6)
+        }px`
+      : rotation === "left"
+      ? `${roundHalf(sizeValidated / 3)}px`
+      : 0};
 `;
