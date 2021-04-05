@@ -483,7 +483,7 @@ export const StatementEditorBox: React.FC = () => {
                           <StyledPropLineColumn
                             lastSecondLevel={lastSecondLevel}
                           >
-                            <StyledPropButtonGroup>
+                            <StyledPropButtonGroup leftMargin={false}>
                               <ModalityToggle
                                 value={prop.modality}
                                 onChangeFn={(newValue: string) => {
@@ -513,7 +513,7 @@ export const StatementEditorBox: React.FC = () => {
                           <StyledPropLineColumn
                             lastSecondLevel={lastSecondLevel}
                           >
-                            <StyledPropButtonGroup>
+                            <StyledPropButtonGroup leftMargin={false}>
                               {level === "1" && (
                                 <Button
                                   key="add"
@@ -557,23 +557,38 @@ export const StatementEditorBox: React.FC = () => {
                             />
                           </StyledPropButtonGroup>
                         </StyledPropsActantHeader>
-
-                        <StyledPropsActantList>
-                          {propOrigin.props.map((prop1, pi1) => {
-                            return (
-                              <>
-                                {renderPropRow(prop1, "1", false)}
-                                {prop1.props.map((prop2: any, pi2: number) => {
-                                  return renderPropRow(
-                                    prop2,
-                                    "2",
-                                    pi2 === prop1.props.length - 1
-                                  );
-                                })}
-                              </>
-                            );
-                          })}
-                        </StyledPropsActantList>
+                        {propOrigin.props.length > 0 ? (
+                          <StyledPropsActantList>
+                            <StyledPropsActantListHeaderColumn>
+                              Type
+                            </StyledPropsActantListHeaderColumn>
+                            <StyledPropsActantListHeaderColumn>
+                              Value
+                            </StyledPropsActantListHeaderColumn>
+                            <StyledPropsActantListHeaderColumn>
+                              Attributes
+                            </StyledPropsActantListHeaderColumn>
+                            <StyledPropsActantListHeaderColumn>
+                              Actions
+                            </StyledPropsActantListHeaderColumn>
+                            {propOrigin.props.map((prop1, pi1) => {
+                              return (
+                                <>
+                                  {renderPropRow(prop1, "1", false)}
+                                  {prop1.props.map(
+                                    (prop2: any, pi2: number) => {
+                                      return renderPropRow(
+                                        prop2,
+                                        "2",
+                                        pi2 === prop1.props.length - 1
+                                      );
+                                    }
+                                  )}
+                                </>
+                              );
+                            })}
+                          </StyledPropsActantList>
+                        ) : null}
                       </StyledPropsActantWrapper>
                     );
                   }
@@ -627,9 +642,12 @@ export const StyledPropsActantList = styled.div<StyledPropsActantList>`
   padding-bottom: ${({ theme }) => theme.space[6]};
 `;
 
-interface StyledPropButtonGroup {}
+interface StyledPropButtonGroup {
+  leftMargin?: boolean;
+}
 export const StyledPropButtonGroup = styled.div<StyledPropButtonGroup>`
-  margin-left: ${({ theme }) => theme.space[3]};
+  margin-left: ${({ theme, leftMargin = true }) =>
+    leftMargin ? theme.space[3] : theme.space[0]};
   display: inline-flex;
 `;
 
@@ -662,4 +680,12 @@ interface StyledEditorSectionHeader {}
 export const StyledEditorSectionHeader = styled.div<StyledEditorSectionHeader>`
   font-weight: ${({ theme }) => theme.fontWeights.bold};
   font-size: ${({ theme }) => theme.fontSizes.xl};
+`;
+
+interface StyledPropsActantListHeaderColumn {}
+export const StyledPropsActantListHeaderColumn = styled.div<StyledPropsActantListHeaderColumn>`
+  font-weight: ${({ theme }) => theme.fontWeights.light};
+  margin-left: ${({ theme }) => theme.space[1]};
+  font-size: ${({ theme }) => theme.fontSizes["sm"]};
+  font-style: italic;
 `;
