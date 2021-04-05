@@ -66,10 +66,10 @@ export const StatementEditorBox: React.FC = () => {
 
       const allPossibleOrigins = [statementItself, ...statementActants];
 
-      const originProps: { origin: any; props: any[] }[] = [];
+      const originProps: { origin: any; props: any[]; actant: IActant }[] = [];
 
       allPossibleOrigins.forEach((origin) => {
-        originProps.push({ origin: origin.id, props: [] });
+        originProps.push({ origin: origin.id, props: [], actant: origin });
       });
 
       // 1st level
@@ -320,9 +320,7 @@ export const StatementEditorBox: React.FC = () => {
                 key={JSON.stringify(statement.data)}
               >
                 {propsByOrigins.map((propOrigin, sai) => {
-                  const originActant = statement.actants.find(
-                    (a) => a.id === propOrigin.origin
-                  );
+                  const originActant = propOrigin.actant;
                   //console.log(propOrigin, originActant);
 
                   if (originActant) {
