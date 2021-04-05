@@ -32,6 +32,19 @@ export const TagWithLabel = () => {
   );
 };
 
+export const ShortTagWithLabel = () => {
+  return (
+    <DndProvider backend={HTML5Backend}>
+      <Tag
+        category={Entities["T"].id}
+        color={Entities["T"].color}
+        label="entity label"
+        short
+      />
+    </DndProvider>
+  );
+};
+
 export const TagWithInvertedLabel = () => {
   return (
     <DndProvider backend={HTML5Backend}>

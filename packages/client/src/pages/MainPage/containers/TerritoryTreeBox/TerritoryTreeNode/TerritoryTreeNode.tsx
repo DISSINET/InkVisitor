@@ -11,7 +11,7 @@ import {
   StyledIconBox,
   StyledIconWrap,
   StyledTerritoryTagWrap,
-} from "./TerritoryTreeNodeStyle";
+} from "./TerritoryTreeNodeStyles";
 import { Arrow } from "components";
 import { ContextMenu } from "../ContextMenu/ContextMenu";
 import { ActantTag } from "../..";

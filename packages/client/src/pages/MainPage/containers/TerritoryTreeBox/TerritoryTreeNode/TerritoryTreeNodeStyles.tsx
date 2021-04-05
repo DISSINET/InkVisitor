@@ -1,11 +1,10 @@
-import { Arrow } from "components";
 import { FaCircle, FaDotCircle } from "react-icons/fa";
 import styled from "styled-components";
 
 export const StyledTerritoryTagWrap = styled.div`
   display: flex;
   align-items: center;
-  margin-bottom: 3px;
+  margin-bottom: ${({ theme }) => theme.space[1]};
 `;
 export const StyledIconWrap = styled.div`
   cursor: pointer;

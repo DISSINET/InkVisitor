@@ -18,7 +18,6 @@ interface TagProps {
   mode?: "selected" | "disabled" | "invalid" | false;
   borderStyle?: "solid" | "dashed" | "dotted";
   button?: ReactNode;
-  marginRight?: boolean;
   invertedLabel?: boolean;
   short?: boolean;
   propId?: string;
@@ -39,7 +38,6 @@ export const Tag: React.FC<TagProps> = ({
   mode = false,
   borderStyle = "solid",
   button,
-  marginRight,
   propId,
   invertedLabel,
   short = false,
@@ -107,11 +105,7 @@ export const Tag: React.FC<TagProps> = ({
     <>
       <Tooltip label={label} disabled={!short}>
         <>
-          <TagWrapper
-            ref={ref}
-            hasMarginRight={marginRight}
-            borderStyle={borderStyle}
-          >
+          <TagWrapper ref={ref} borderStyle={borderStyle}>
             <EntityTag color={color}>{category}</EntityTag>
             {!short && label && (
               <Label invertedLabel={invertedLabel} borderStyle={borderStyle}>
