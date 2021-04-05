@@ -52,7 +52,11 @@ export const StatementEditorBox: React.FC = () => {
   // getting origin actants of properties
   const propsByOrigins = useMemo(() => {
     if (statement) {
-      //console.log("getting ne props", statement?.data.props);
+      console.log(
+        "getting new props",
+        statement.data.actants,
+        statement.actants
+      );
       const allProps = statement?.data.props;
       const statementItself = { ...statement };
 
@@ -87,11 +91,13 @@ export const StatementEditorBox: React.FC = () => {
         });
       });
 
+      //console.log(originProps);
+
       return originProps;
     } else {
       return [];
     }
-  }, [statement && JSON.stringify(statement.data.props)]);
+  }, [JSON.stringify(statement)]);
 
   const addActant = (newStatementActantId: string) => {
     if (statement) {
@@ -309,11 +315,16 @@ export const StatementEditorBox: React.FC = () => {
             {/* Props */}
             <div key="editor-section-props" className="editor-section">
               <div className="editor-section-header">Properties (has)</div>
-              <div className="editor-section-content">
+              <div
+                className="editor-section-content"
+                key={JSON.stringify(statement.data)}
+              >
                 {propsByOrigins.map((propOrigin, sai) => {
                   const originActant = statement.actants.find(
                     (a) => a.id === propOrigin.origin
                   );
+                  //console.log(propOrigin, originActant);
+
                   if (originActant) {
                     const renderPropRow = (prop: IProp, level: "1" | "2") => {
                       const propTypeActant = statement.actants.find(
@@ -337,6 +348,21 @@ export const StatementEditorBox: React.FC = () => {
                                 key={sai}
                                 actant={propTypeActant}
                                 short={false}
+                                button={
+                                  <Button
+                                    key="d"
+                                    icon={<FaTrashAlt />}
+                                    color="danger"
+                                    onClick={() => {
+                                      updateProp(prop.id, {
+                                        type: {
+                                          ...prop.type,
+                                          ...{ id: "" },
+                                        },
+                                      });
+                                    }}
+                                  />
+                                }
                               />
                             ) : (
                               <ActantSuggester
@@ -377,6 +403,21 @@ export const StatementEditorBox: React.FC = () => {
                                 key={sai}
                                 actant={propValueActant}
                                 short={false}
+                                button={
+                                  <Button
+                                    key="d"
+                                    icon={<FaTrashAlt />}
+                                    color="danger"
+                                    onClick={() => {
+                                      updateProp(prop.id, {
+                                        value: {
+                                          ...prop.value,
+                                          ...{ id: "" },
+                                        },
+                                      });
+                                    }}
+                                  />
+                                }
                               />
                             ) : (
                               <ActantSuggester
