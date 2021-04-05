@@ -60,10 +60,7 @@ export const ContextMenu: React.FC<ContextMenu> = ({ territoryActant }) => {
     },
     {
       onSuccess: () => {
-        queryClient.invalidateQueries(["territory"], {
-          refetchActive: true,
-          refetchInactive: false,
-        });
+        queryClient.invalidateQueries(["territory"]);
         toast.info(`Territory created!`);
         setShowCreate(false);
         setTerritoryName("");

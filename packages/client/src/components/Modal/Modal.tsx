@@ -12,13 +12,13 @@ import {
 
 interface Modal {
   children?: ReactNode;
-  onClose: () => void;
+  onClose?: () => void;
   showModal: boolean;
   disableBgClick?: boolean;
 }
 export const Modal: FC<Modal> = ({
   children,
-  onClose,
+  onClose = () => {},
   showModal,
   disableBgClick = false,
 }) => {
