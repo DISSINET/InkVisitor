@@ -3,7 +3,7 @@ import { useQuery } from "react-query";
 const queryString = require("query-string");
 
 import api from "api";
-import { TerritoryTreeNode } from "./..";
+import { TerritoryTreeNode } from "./TerritoryTreeNode/TerritoryTreeNode";
 import { IResponseTree } from "@shared/types";
 
 export const TerritoryTreeBox: React.FC = () => {
@@ -52,7 +52,7 @@ export const TerritoryTreeBox: React.FC = () => {
           children={data.children}
           lvl={data.lvl}
           statementsCount={data.statementsCount}
-          initExpandedNodes={["T0", "T1", "T1-1"]}
+          initExpandedNodes={["T0"]}
         />
       )}
     </>

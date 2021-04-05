@@ -16,10 +16,10 @@ export const StyledBox = styled.div<IBoxStyle>`
   width: ${({ width }) => `${width / 10}rem`};
   height: ${({ height }) => (height ? `${height / 10}rem` : "100%")};
 `;
-interface Head {
+interface StyledHead {
   color: string;
 }
-export const Head = styled.div<Head>`
+export const StyledHead = styled.div<StyledHead>`
   background-color: ${({ theme, color }) => theme.colors[color]};
   color: ${({ theme }) => theme.colors["white"]};
   font-weight: ${({ theme }) => theme.fontWeights["medium"]};
@@ -29,9 +29,12 @@ export const Head = styled.div<Head>`
   letter-spacing: 0.04rem;
   /* font-family: muni; */
 `;
-export const Content = styled.div`
+interface StyledContent {
+  noPadding: boolean;
+}
+export const StyledContent = styled.div<StyledContent>`
   background-color: ${({ theme }) => theme.colors["white"]};
-  padding: ${space2};
+  padding: ${({ theme, noPadding }) => (noPadding ? 0 : theme.space[2])};
   display: flex;
   flex-direction: column;
   overflow: auto;

@@ -5,7 +5,7 @@ import { FaInfo, FaPencilAlt, FaClone, FaTrashAlt } from "react-icons/fa";
 import { useLocation, useHistory } from "react-router";
 const queryString = require("query-string");
 
-import { Button, ButtonGroup } from "components";
+import { Button, ButtonGroup, TagGroup } from "components";
 import { ActantTag } from "./../";
 import api from "api";
 import { IStatement, IActant } from "@shared/types";
@@ -54,7 +54,7 @@ export const StatementListBox: React.FC = () => {
           const subjectIdsSlice = subjectIds.slice(0, 1);
 
           return (
-            <div className="table-subjects inline-flex">
+            <TagGroup>
               {subjectIdsSlice
                 .filter((a: any) => a)
                 .map((actantId: string, ai: number) => {
@@ -63,16 +63,12 @@ export const StatementListBox: React.FC = () => {
 
                   return (
                     subjectObject && (
-                      <ActantTag
-                        key={ai}
-                        actant={subjectObject}
-                        short={false}
-                      />
+                      <ActantTag key={ai} actant={subjectObject} short />
                     )
                   );
                 })}
               {isOversized && <div className="flex items-end">{"..."}</div>}
-            </div>
+            </TagGroup>
           );
         },
       },
@@ -102,7 +98,7 @@ export const StatementListBox: React.FC = () => {
           const actantIdsSlice = actantIds.slice(0, 4);
 
           return (
-            <div className="table-subjects inline-flex">
+            <TagGroup>
               {actantIdsSlice
                 .filter((a: any) => a)
                 .map((actantId: string, ai: number) => {
@@ -111,12 +107,12 @@ export const StatementListBox: React.FC = () => {
 
                   return (
                     actantObject && (
-                      <ActantTag key={ai} actant={actantObject} short={false} />
+                      <ActantTag key={ai} actant={actantObject} short />
                     )
                   );
                 })}
               {isOversized && <div className="flex items-end">{"..."}</div>}
-            </div>
+            </TagGroup>
           );
         },
       },
