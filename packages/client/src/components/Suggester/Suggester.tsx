@@ -29,6 +29,7 @@ interface SuggesterProps {
   categories: IOption[]; // all possible categories
   suggestionListPosition?: string; // todo not implemented yet
   disabled?: boolean; // todo not implemented yet
+  inputWidth?: number;
 
   // events
   onType: Function;
@@ -50,6 +51,7 @@ export const Suggester: React.FC<SuggesterProps> = ({
   categories,
   suggestionListPosition,
   disabled,
+  inputWidth = 100,
 
   // events
   onType,
@@ -84,6 +86,7 @@ export const Suggester: React.FC<SuggesterProps> = ({
           onChangeFn={onType}
           placeholder={placeholder}
           changeOnType={true}
+          width={inputWidth}
         />
         <SuggesterButton>
           <Button
