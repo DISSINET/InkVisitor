@@ -34,13 +34,7 @@ export const ContextMenu: React.FC<ContextMenu> = ({ territoryActant }) => {
   const [showCreate, setShowCreate] = useState(false);
   const [territoryName, setTerritoryName] = useState("");
 
-  const territoryCreated = (territory: IActant) => {
-    toast.info(`Territory [${territory.label}] created!`);
-    setShowCreate(false);
-    setTerritoryName("");
-    queryClient.invalidateQueries(["territory"]);
-  };
-
+  // Invalidate queries only
   const create = async (label: string) => {
     const newTerritory: IActant = {
       id: "",
@@ -57,6 +51,36 @@ export const ContextMenu: React.FC<ContextMenu> = ({ territoryActant }) => {
     }
   };
 
+  // Invalidate query after mutation
+  const addTerritoryMutation = useMutation(
+    async (territory: IActant) => {
+      const response = await api.actantsCreate(territory);
+      // TODO: handle errors from response
+      return response.data;
+    },
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries(["territory"], {
+          refetchActive: true,
+          refetchInactive: false,
+        });
+        toast.info(`Territory created!`);
+        setShowCreate(false);
+        setTerritoryName("");
+      },
+      onError: (error) => {
+        toast.error("Error");
+      },
+    }
+  );
+
+  const territoryCreated = (territory: IActant) => {
+    toast.info(`Territory [${territory.label}] created!`);
+    setShowCreate(false);
+    setTerritoryName("");
+    // queryClient.invalidateQueries(["territory"]);
+  };
+
   const createTerritory = (label: string) => {
     const newTerritory: IActant = {
       id: "",
@@ -64,13 +88,14 @@ export const ContextMenu: React.FC<ContextMenu> = ({ territoryActant }) => {
       class: "T",
       data: { parent: { id: territoryActant.id } },
     };
-    api
-      .actantsCreate(newTerritory)
-      .then((response) =>
-        response.status === 200
-          ? territoryCreated(newTerritory)
-          : toast.error(`Error: Territory [${label}] not created!`)
-      );
+    addTerritoryMutation.mutate(newTerritory);
+    // api
+    //   .actantsCreate(newTerritory)
+    //   .then((response) =>
+    //     response.status === 200
+    //       ? territoryCreated(newTerritory)
+    //       : toast.error(`Error: Territory [${label}] not created!`)
+    //   );
   };
 
   return (
