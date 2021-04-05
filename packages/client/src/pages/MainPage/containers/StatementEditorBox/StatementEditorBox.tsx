@@ -138,6 +138,14 @@ export const StatementEditorBox: React.FC = () => {
     }
   };
 
+  const removeProp = (originId: string) => {
+    if (statement && originId) {
+      const newData = { ...statement.data };
+      newData.props = newData.props.filter((p) => p.id !== originId);
+      update(newData);
+    }
+  };
+
   const update = async (changes: object) => {
     const res = await api.actantsUpdate(statementId, {
       data: changes,
@@ -482,7 +490,7 @@ export const StatementEditorBox: React.FC = () => {
                           <div style={{ display: "table-cell" }}>
                             {level === "1" && (
                               <Button
-                                key="d"
+                                key="add"
                                 icon={<FaPlusCircle />}
                                 color="primary"
                                 onClick={() => {
@@ -490,6 +498,14 @@ export const StatementEditorBox: React.FC = () => {
                                 }}
                               />
                             )}
+                            <Button
+                              key="delete"
+                              icon={<FaTrashAlt />}
+                              color="danger"
+                              onClick={() => {
+                                removeProp(prop.id);
+                              }}
+                            />
                           </div>
                         </div>
                       );

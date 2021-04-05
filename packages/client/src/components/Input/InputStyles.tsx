@@ -3,6 +3,7 @@ import { space1, space2 } from "Theme/constants";
 
 interface IValueStyle {
   inverted?: boolean;
+  width?: number;
 }
 export const Wrapper = styled.div`
   display: flex;
@@ -26,6 +27,7 @@ export const StyledInput = styled.input<IValueStyle>`
   border-color: ${({ theme }) => theme.colors["primary"]};
   font-size: ${({ theme }) => theme.fontSizes["xs"]};
   padding: ${space1};
+  width: ${({ width }) => (width ? width + "px" : "auto")};
   resize: none;
   :focus {
     outline: 0;
@@ -41,6 +43,7 @@ export const StyledSelect = styled.select<IValueStyle>`
   border-color: ${({ theme }) => theme.colors["primary"]};
   font-size: ${({ theme }) => theme.fontSizes["xs"]};
   font-weight: bold;
+  width: ${({ width }) => (width ? width + "px" : "auto")};
   padding: ${space1};
   resize: none;
   :focus {
@@ -56,6 +59,7 @@ export const StyledTextArea = styled.textarea<IValueStyle>`
   border-width: ${({ theme }) => theme.borderWidths[2]};
   border-color: ${({ theme }) => theme.colors["primary"]};
   font-size: ${({ theme }) => theme.fontSizes["xs"]};
+  width: ${({ width }) => (width ? width + "px" : "auto")};
   padding: ${space1};
   resize: none;
   line-height: 1.2;

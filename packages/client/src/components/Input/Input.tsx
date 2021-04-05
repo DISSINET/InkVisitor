@@ -17,6 +17,7 @@ interface InputProps {
   options?: IOption[];
   rows?: number;
   cols?: number;
+  width?: number;
   onChangeFn: Function;
   placeholder?: string;
   changeOnType?: boolean;
@@ -30,12 +31,12 @@ export const Input: React.FC<InputProps> = ({
   options = [],
   rows = 5,
   cols = 50,
+  width = 150,
   changeOnType = false,
   onChangeFn,
   placeholder,
 }) => {
   const [displayValue, setDisplayValue] = useState(value);
-
   useEffect(() => {
     setDisplayValue(value);
   }, [value]);
@@ -45,6 +46,7 @@ export const Input: React.FC<InputProps> = ({
       {label && <Label className="label"> {label}</Label>}
       {type === "text" && (
         <StyledInput
+          width={width}
           className="value"
           style={{ lineHeight: "16px" }}
           placeholder={placeholder}
