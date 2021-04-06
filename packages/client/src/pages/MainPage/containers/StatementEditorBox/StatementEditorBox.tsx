@@ -210,10 +210,10 @@ export const StatementEditorBox: React.FC = () => {
           <div key={statement.id}>
             <StyledEditorSection firstSection key="editor-section-summary">
               <StyledEditorSectionHeader>Summary</StyledEditorSectionHeader>
-              <div className="editor-section-content">
-                <div className="table-row">
-                  <div className="label">Action</div>
-                  <div className="value">
+              <StyledEditorSectionContent>
+                <div>
+                  <StyledListHeaderColumn>Action</StyledListHeaderColumn>
+                  <div>
                     <ActionDropdown
                       onSelectedChange={(newActionValue: {
                         value: string;
@@ -229,9 +229,9 @@ export const StatementEditorBox: React.FC = () => {
                     />
                   </div>
                 </div>
-                <div className="table-row">
-                  <div className="label">Text</div>
-                  <div className="value">
+                <div>
+                  <StyledListHeaderColumn>Text</StyledListHeaderColumn>
+                  <div>
                     <Input
                       type="textarea"
                       width={1000}
@@ -246,7 +246,8 @@ export const StatementEditorBox: React.FC = () => {
                     />
                   </div>
                 </div>
-                <div className="table-row">
+                <div>
+                  <StyledListHeaderColumn>Attributes</StyledListHeaderColumn>
                   <ModalityToggle
                     value={statement.data.modality}
                     onChangeFn={(newValue: string) => {
@@ -278,7 +279,7 @@ export const StatementEditorBox: React.FC = () => {
                     }}
                   />
                 </div>
-              </div>
+              </StyledEditorSectionContent>
             </StyledEditorSection>
 
             {/* Actants */}
@@ -369,7 +370,9 @@ export const StatementEditorBox: React.FC = () => {
                             key="d"
                             icon={<FaTrashAlt />}
                             color="danger"
-                            onClick={() => {}}
+                            onClick={() => {
+                              //todo
+                            }}
                           />
                         </StyledActantListItem>
                       </>
@@ -381,6 +384,7 @@ export const StatementEditorBox: React.FC = () => {
                     addActant(newSelectedId);
                   }}
                   categoryIds={classEntities}
+                  placeholder={"add new actant"}
                 ></ActantSuggester>
               </StyledEditorSectionContent>
             </StyledEditorSection>
@@ -749,6 +753,7 @@ export const StatementEditorBox: React.FC = () => {
                 <ActantSuggester
                   onSelected={(newSelectedId: string) => {}}
                   categoryIds={["R"]}
+                  placeholder={"add new actant"}
                 ></ActantSuggester>
               </StyledEditorSectionContent>
             </StyledEditorSection>
@@ -789,12 +794,13 @@ export const StatementEditorBox: React.FC = () => {
                     addTag(newSelectedId);
                   }}
                   categoryIds={classEntities}
+                  placeholder={"add new tag"}
                 ></ActantSuggester>
               </StyledEditorSectionContent>
             </StyledEditorSection>
 
             {/* Notes */}
-            <StyledEditorSection key="editor-section-notes">
+            <StyledEditorSection key="editor-section-notes" lastSection>
               <StyledEditorSectionHeader>Notes</StyledEditorSectionHeader>
               <StyledEditorSectionContent>
                 <Input
@@ -823,12 +829,14 @@ export const StatementEditorBox: React.FC = () => {
 // Editor Section
 interface StyledEditorSection {
   firstSection?: boolean;
+  lastSection?: boolean;
 }
 export const StyledEditorSection = styled.div<StyledEditorSection>`
   padding-top: ${({ theme, firstSection = false }) =>
     firstSection ? 0 : theme.space[4]};
   padding-bottom: ${({ theme }) => theme.space[6]};
-  border-bottom-width: ${({ theme }) => theme.borderWidths[2]};
+  border-bottom-width: ${({ theme, lastSection = false }) =>
+    lastSection ? theme.borderWidths[0] : theme.borderWidths[2]};
   border-bottom-color: ${({ theme }) => theme.colors["gray"][600]};
   border-bottom-style: solid;
 `;
