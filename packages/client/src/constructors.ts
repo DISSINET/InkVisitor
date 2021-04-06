@@ -1,6 +1,12 @@
-import { IProp, IStatementActant, IActant } from "../../shared/types";
+import {
+  IProp,
+  IStatementActant,
+  IActant,
+  ITerritory,
+} from "../../shared/types";
 
 import { v4 as uuidv4 } from "uuid";
+import { Label } from "components/Input/InputStyles";
 
 export const CProp = (): IProp => ({
   id: uuidv4(),
@@ -27,6 +33,22 @@ export const CStatementActant = (): IStatementActant => ({
   modality: "1",
   elvl: "1",
   certainty: "1",
+});
+
+export const CTerritoryActant = (
+  label: string,
+  parentId: string,
+  parentOrder: number
+): ITerritory => ({
+  id: uuidv4(),
+  class: "T",
+  label: label,
+  data: {
+    parent: { id: parentId, order: parentOrder },
+    type: "1",
+    content: "",
+    lang: "1",
+  },
 });
 
 export const CActant = (

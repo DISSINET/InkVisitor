@@ -8,8 +8,9 @@ import { IResponseTree } from "@shared/types";
 
 export const TerritoryTreeBox: React.FC = () => {
   const { status, data, error, isFetching } = useQuery(
-    ["statement", "territory", "tree"],
+    ["tree"],
     async () => {
+      console.log("!!getting tree");
       const res = await api.treeGet();
       return res.data;
     },
