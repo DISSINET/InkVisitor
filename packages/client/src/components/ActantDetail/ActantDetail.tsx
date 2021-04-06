@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { useQueryClient } from "react-query";
 import { toast } from "react-toastify";
 
-import { IActant } from "@shared/types";
 import {
   Button,
   ButtonGroup,
@@ -15,15 +14,23 @@ import {
 } from "components";
 
 interface ActantDetail {
-  actant: IActant;
+  label: string;
+  category: string;
+  showDetail?: boolean;
+  onClose: () => void;
 }
-export const ActantDetail: React.FC<ActantDetail> = ({ actant }) => {
+export const ActantDetail: React.FC<ActantDetail> = ({
+  label,
+  category,
+  showDetail = false,
+  onClose,
+}) => {
   const queryClient = useQueryClient();
-  const [showDetail, setShowDetail] = useState(false);
-  const [tagLabel, setTagLabel] = useState(actant.label);
+  // const [showDetail, setShowDetail] = useState(false);
+  const [tagLabel, setTagLabel] = useState(label);
   return (
     <>
-      <Modal onClose={() => setShowDetail(false)} showModal={showDetail}>
+      <Modal onClose={onClose} showModal={showDetail}>
         <ModalCard>
           <ModalHeader title={"Add child Territory"} />
           <ModalContent>
@@ -46,19 +53,11 @@ export const ActantDetail: React.FC<ActantDetail> = ({ actant }) => {
                   }
                 }}
               />
-              <Button
-                label="Cancel"
-                color="success"
-                onClick={() => {
-                  setShowDetail(false);
-                  setTagLabel("");
-                }}
-              />
+              <Button label="Cancel" color="success" onClick={onClose} />
             </ButtonGroup>
           </ModalFooter>
         </ModalCard>
       </Modal>
-      )
     </>
   );
 };

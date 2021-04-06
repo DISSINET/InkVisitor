@@ -9,7 +9,7 @@ import {
 
 import { ItemTypes } from "types";
 import { TagWrapper, EntityTag, Label, ButtonWrapper } from "./TagStyles";
-import { Tooltip } from "components";
+import { ActantDetail, Tooltip } from "components";
 
 interface TagProps {
   label?: string;
@@ -44,6 +44,8 @@ export const Tag: React.FC<TagProps> = ({
   index,
   moveFn,
 }) => {
+  const [showDetail, setShowDetail] = useState(false);
+
   const ref = useRef<HTMLDivElement>(null);
   const [, drop] = useDrop({
     accept: ItemTypes.TAG,
@@ -105,7 +107,11 @@ export const Tag: React.FC<TagProps> = ({
     <>
       <Tooltip label={label} disabled={!short}>
         <div>
-          <TagWrapper ref={ref} borderStyle={borderStyle}>
+          <TagWrapper
+            ref={ref}
+            borderStyle={borderStyle}
+            onDoubleClick={() => setShowDetail(true)}
+          >
             <EntityTag color={color}>{category}</EntityTag>
             {!short && label && (
               <Label invertedLabel={invertedLabel} borderStyle={borderStyle}>
@@ -116,6 +122,13 @@ export const Tag: React.FC<TagProps> = ({
           </TagWrapper>
         </div>
       </Tooltip>
+
+      <ActantDetail
+        label={label}
+        category={category}
+        showDetail={showDetail}
+        onClose={() => setShowDetail(false)}
+      />
     </>
   );
 };
