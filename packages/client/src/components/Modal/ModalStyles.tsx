@@ -1,11 +1,9 @@
 import styled from "styled-components";
 import { space1, space3, space5, space6, space7 } from "Theme/constants";
 
-interface ModalWrap {
-  showModal: boolean;
-}
+interface ModalWrap {}
 export const ModalWrap = styled.div<ModalWrap>`
-  display: ${({ showModal }) => (showModal ? "flex" : "none")};
+  display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;

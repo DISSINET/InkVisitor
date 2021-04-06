@@ -23,43 +23,42 @@ export const ActantDetail: React.FC<ActantDetail> = ({ actant }) => {
   const [tagLabel, setTagLabel] = useState(actant.label);
   return (
     <>
-      {showDetail && (
-        <Modal onClose={() => setShowDetail(false)} showModal={showDetail}>
-          <ModalCard>
-            <ModalHeader title={"Add child Territory"} />
-            <ModalContent>
-              <Input
-                label={"Territory name: "}
-                value={tagLabel}
-                onChangeFn={(value: string) => setTagLabel(value)}
+      <Modal onClose={() => setShowDetail(false)} showModal={showDetail}>
+        <ModalCard>
+          <ModalHeader title={"Add child Territory"} />
+          <ModalContent>
+            <Input
+              label={"Territory name: "}
+              value={tagLabel}
+              onChangeFn={(value: string) => setTagLabel(value)}
+            />
+          </ModalContent>
+          <ModalFooter>
+            <ButtonGroup>
+              <Button
+                label="Save"
+                color="primary"
+                onClick={() => {
+                  if (tagLabel.length > 0) {
+                    // update({data: });
+                  } else {
+                    toast.warning("Fill actant label!");
+                  }
+                }}
               />
-            </ModalContent>
-            <ModalFooter>
-              <ButtonGroup>
-                <Button
-                  label="Save"
-                  color="primary"
-                  onClick={() => {
-                    if (tagLabel.length > 0) {
-                      // update({data: });
-                    } else {
-                      toast.warning("Fill actant label!");
-                    }
-                  }}
-                />
-                <Button
-                  label="Cancel"
-                  color="success"
-                  onClick={() => {
-                    setShowDetail(false);
-                    setTagLabel("");
-                  }}
-                />
-              </ButtonGroup>
-            </ModalFooter>
-          </ModalCard>
-        </Modal>
-      )}
+              <Button
+                label="Cancel"
+                color="success"
+                onClick={() => {
+                  setShowDetail(false);
+                  setTagLabel("");
+                }}
+              />
+            </ButtonGroup>
+          </ModalFooter>
+        </ModalCard>
+      </Modal>
+      )
     </>
   );
 };

@@ -23,10 +23,16 @@ export const Modal: FC<Modal> = ({
   disableBgClick = false,
 }) => {
   return (
-    <ModalWrap showModal={showModal}>
-      <Background onClick={disableBgClick ? () => {} : onClose}></Background>
-      {children}
-    </ModalWrap>
+    <>
+      {showModal && (
+        <ModalWrap>
+          <Background
+            onClick={disableBgClick ? () => {} : onClose}
+          ></Background>
+          {children}
+        </ModalWrap>
+      )}
+    </>
   );
 };
 
