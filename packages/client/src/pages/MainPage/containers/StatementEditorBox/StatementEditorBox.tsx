@@ -284,90 +284,105 @@ export const StatementEditorBox: React.FC = () => {
             {/* Actants */}
             <StyledEditorSection key="editor-section-actants">
               <StyledEditorSectionHeader>Actants</StyledEditorSectionHeader>
-              <div className="editor-section-content">
-                <table className="">
-                  <thead>
-                    <tr>
-                      <th key="actants"></th>
-                      <th key="position"></th>
-                      <th key="certainty"></th>
-                      <th key="actions"></th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {statement.data.actants.map((sActant, sai) => {
-                      const actant = statement.actants.find(
-                        (a) => a.id === sActant.actant
-                      );
-                      if (actant) {
-                        return (
-                          <tr key={sai}>
-                            <td>
-                              <ActantTag
-                                key={sai}
-                                actant={actant}
-                                short={false}
-                              />
-                            </td>
-                            <td>
-                              <Input
-                                type="select"
-                                value={sActant.position}
-                                options={actantPositionDict}
-                                onChangeFn={(newPosition: any) => {
-                                  updateActant(sActant.id, {
-                                    position: newPosition,
-                                  });
-                                }}
-                              ></Input>
-                            </td>
-                            <td>
-                              <ModalityToggle
-                                value={sActant.modality}
-                                onChangeFn={(newValue: string) => {
-                                  updateActant(sActant.id, {
-                                    modality: newValue,
-                                  });
-                                }}
-                              />
-                              <ElvlToggle
-                                value={sActant.elvl}
-                                onChangeFn={(newValue: string) => {
-                                  updateActant(sActant.id, {
-                                    elvl: newValue,
-                                  });
-                                }}
-                              />
-                              <CertaintyToggle
-                                value={sActant.certainty}
-                                onChangeFn={(newValue: string) => {
-                                  updateActant(sActant.id, {
-                                    certainty: newValue,
-                                  });
-                                }}
-                              />
-                            </td>
-                            <td>
-                              <Button
-                                key="d"
-                                icon={<FaTrashAlt />}
-                                color="danger"
-                                onClick={() => {}}
-                              />
-                            </td>
-                          </tr>
-                        );
-                      }
-                    })}
-                  </tbody>
-                </table>
+              <StyledEditorSectionContent>
+                <StyledActantList>
+                  <StyledListHeaderColumn>Actant</StyledListHeaderColumn>
+                  <StyledListHeaderColumn>Position</StyledListHeaderColumn>
+                  <StyledListHeaderColumn>Attributes</StyledListHeaderColumn>
+                  <StyledListHeaderColumn>Actions</StyledListHeaderColumn>
+                  {statement.data.actants.map((sActant, sai) => {
+                    const actant = statement.actants.find(
+                      (a) => a.id === sActant.actant
+                    );
+                    return (
+                      <>
+                        <StyledActantListItem>
+                          {actant ? (
+                            <ActantTag
+                              key={sai}
+                              actant={actant}
+                              short={false}
+                              button={
+                                <Button
+                                  key="d"
+                                  icon={<FaTrashAlt />}
+                                  color="danger"
+                                  onClick={() => {
+                                    updateActant(sActant.id, {
+                                      actant: "",
+                                    });
+                                  }}
+                                />
+                              }
+                            />
+                          ) : (
+                            <ActantSuggester
+                              onSelected={(newSelectedId: string) => {
+                                updateActant(sActant.id, {
+                                  actant: newSelectedId,
+                                });
+                              }}
+                              categoryIds={classEntities}
+                            />
+                          )}
+                        </StyledActantListItem>
+                        <StyledActantListItem>
+                          <Input
+                            type="select"
+                            value={sActant.position}
+                            options={actantPositionDict}
+                            onChangeFn={(newPosition: any) => {
+                              updateActant(sActant.id, {
+                                position: newPosition,
+                              });
+                            }}
+                          ></Input>
+                        </StyledActantListItem>
+                        <StyledActantListItem>
+                          <ModalityToggle
+                            value={sActant.modality}
+                            onChangeFn={(newValue: string) => {
+                              updateActant(sActant.id, {
+                                modality: newValue,
+                              });
+                            }}
+                          />
+                          <ElvlToggle
+                            value={sActant.elvl}
+                            onChangeFn={(newValue: string) => {
+                              updateActant(sActant.id, {
+                                elvl: newValue,
+                              });
+                            }}
+                          />
+                          <CertaintyToggle
+                            value={sActant.certainty}
+                            onChangeFn={(newValue: string) => {
+                              updateActant(sActant.id, {
+                                certainty: newValue,
+                              });
+                            }}
+                          />
+                        </StyledActantListItem>
+                        <StyledActantListItem>
+                          <Button
+                            key="d"
+                            icon={<FaTrashAlt />}
+                            color="danger"
+                            onClick={() => {}}
+                          />
+                        </StyledActantListItem>
+                      </>
+                    );
+                  })}
+                </StyledActantList>
                 <ActantSuggester
                   onSelected={(newSelectedId: string) => {
                     addActant(newSelectedId);
                   }}
                   categoryIds={classEntities}
                 ></ActantSuggester>
-              </div>
+              </StyledEditorSectionContent>
             </StyledEditorSection>
 
             {/* Props */}
@@ -843,6 +858,20 @@ export const StyledListHeaderColumn = styled.div<StyledListHeaderColumn>`
   font-size: ${({ theme }) => theme.fontSizes["sm"]};
   font-style: italic;
 `;
+
+// Actants
+
+interface StyledActantList {}
+export const StyledActantList = styled.div<StyledActantList>`
+  display: grid;
+  padding-left: ${({ theme }) => theme.space[0]};
+  grid-template-columns: 14em 10em 10em 6em;
+  grid-template-rows: auto;
+  grid-auto-flow: row;
+  padding-bottom: ${({ theme }) => theme.space[6]};
+`;
+interface StyledActantListItem {}
+export const StyledActantListItem = styled.div<StyledActantListItem>``;
 
 // Props section
 interface StyledPropsActantHeader {}
