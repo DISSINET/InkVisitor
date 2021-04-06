@@ -32,7 +32,7 @@ export const ActantDetail: React.FC<ActantDetail> = ({
     <>
       <Modal onClose={onClose} showModal={showDetail}>
         <ModalCard>
-          <ModalHeader title={"Add child Territory"} />
+          <ModalHeader title={"Edit actant"} />
           <ModalContent>
             <Input
               label={"Territory name: "}
