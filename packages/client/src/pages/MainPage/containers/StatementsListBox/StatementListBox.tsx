@@ -24,7 +24,7 @@ export const StatementListBox: React.FC = () => {
   const statementId = hashParams.statement;
 
   const { status, data, error, isFetching } = useQuery(
-    ["statement", "territory", "statement-list", territoryId],
+    ["territory", "statement-list", territoryId],
     async () => {
       const res = await api.territoryGet(territoryId);
       return res.data;

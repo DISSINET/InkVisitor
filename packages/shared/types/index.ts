@@ -21,7 +21,7 @@ import {
 } from "./response-tree";
 import { IResponseTerritory } from "./response-territory";
 import { IResponseUser, IResponseStoredTerritory } from "./response-user";
-import { IStatement } from "./statement";
+import { IStatement, IStatementActant, IStatementReference } from "./statement";
 import { ITerritory } from "./territory";
 import { IOption } from "./option";
 import { IResponseGeneric } from "./response-generic";
@@ -34,6 +34,8 @@ export type {
   ILabel,
   IOption,
   IStatement,
+  IStatementActant,
+  IStatementReference,
   ITerritory,
   IProp,
   IUser,
