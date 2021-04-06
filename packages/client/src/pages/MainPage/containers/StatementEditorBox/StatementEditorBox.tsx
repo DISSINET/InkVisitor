@@ -156,6 +156,7 @@ export const StatementEditorBox: React.FC = () => {
     }
   };
 
+  // references
   const addReference = () => {};
   const updateReference = (referenceId: string, changes: any) => {
     if (statement && referenceId) {
@@ -175,6 +176,22 @@ export const StatementEditorBox: React.FC = () => {
       newData.references = newData.references.filter(
         (p) => p.id !== referenceId
       );
+      update(newData);
+    }
+  };
+
+  //tags
+  const addTag = (tagId: string) => {
+    if (statement && tagId) {
+      const newData = { ...statement.data };
+      newData.tags.push(tagId);
+      update(newData);
+    }
+  };
+  const removeTag = (tagId: string) => {
+    if (statement && tagId) {
+      const newData = { ...statement.data };
+      newData.tags = newData.tags.filter((p) => p !== tagId);
       update(newData);
     }
   };
@@ -442,7 +459,7 @@ export const StatementEditorBox: React.FC = () => {
                                     },
                                   });
                                 }}
-                                categoryIds={classEntities}
+                                categoryIds={["C"]}
                               ></ActantSuggester>
                             )}
                           </StyledPropLineColumn>
@@ -724,7 +741,41 @@ export const StatementEditorBox: React.FC = () => {
             {/* Tags */}
             <StyledEditorSection key="editor-section-tags">
               <StyledEditorSectionHeader>Tags</StyledEditorSectionHeader>
-              <StyledEditorSectionContent></StyledEditorSectionContent>
+              <StyledEditorSectionContent>
+                <StyledTagsList>
+                  {statement.data.tags.map((tag: string) => {
+                    const tagActant = statement.actants.find(
+                      (a) => a.id === tag
+                    );
+                    return (
+                      tagActant && (
+                        <StyledTagsListItem key={tag}>
+                          <ActantTag
+                            actant={tagActant}
+                            short={false}
+                            button={
+                              <Button
+                                key="d"
+                                icon={<FaTrashAlt />}
+                                color="danger"
+                                onClick={() => {
+                                  removeTag(tag);
+                                }}
+                              />
+                            }
+                          />
+                        </StyledTagsListItem>
+                      )
+                    );
+                  })}
+                </StyledTagsList>
+                <ActantSuggester
+                  onSelected={(newSelectedId: string) => {
+                    addTag(newSelectedId);
+                  }}
+                  categoryIds={classEntities}
+                ></ActantSuggester>
+              </StyledEditorSectionContent>
             </StyledEditorSection>
 
             {/* Notes */}
@@ -840,4 +891,18 @@ export const StyledReferencesList = styled.div<StyledReferencesList>`
   grid-template-rows: auto;
   grid-auto-flow: row;
   padding-bottom: ${({ theme }) => theme.space[6]};
+`;
+
+// tags
+interface StyledTagsList {}
+export const StyledTagsList = styled.div<StyledTagsList>`
+  display: block;
+  padding-bottom: ${({ theme }) => theme.space[6]};
+`;
+
+interface StyledTagsListItem {}
+export const StyledTagsListItem = styled.div<StyledTagsListItem>`
+  padding-right: ${({ theme }) => theme.space[2]};
+  padding-bottom: ${({ theme }) => theme.space[1]};
+  display: inline-block;
 `;
