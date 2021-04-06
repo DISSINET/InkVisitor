@@ -83,12 +83,9 @@ export const ActantTag: React.FC<IActantTag> = ({
   const classId = actant.class;
   const classObject = classes[classId];
 
-  // todo
-  const label = !short ? actant.label : "";
-
   return (
     <Tag
-      label={label}
+      label={actant.label}
       short={short}
       button={button}
       moveFn={moveFn}

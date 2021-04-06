@@ -16,7 +16,7 @@ export const StyledContextButtonGroup = styled.div<StyledContextButtonGroup>`
   flex-direction: column;
   position: absolute;
   top: ${({ theme }) => theme.space[8]};
-  z-index: 10;
+  z-index: 100;
 `;
 export const StyledFaChevronCircleDown = styled(FaChevronCircleDown)`
   color: ${({ theme }) => theme.colors["primary"]};

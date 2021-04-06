@@ -12,4 +12,4 @@ addDecorator((story) => (
   </ThemeProvider>
 ));
 
-export const parameters = { layout: "fullscreen" };
+// export const parameters = { layout: "fullscreen" };

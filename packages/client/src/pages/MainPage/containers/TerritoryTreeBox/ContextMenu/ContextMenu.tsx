@@ -101,7 +101,7 @@ export const ContextMenu: React.FC<ContextMenu> = ({ territoryActant }) => {
         onMouseOver={() => setShowMenu(true)}
         onMouseOut={() => setShowMenu(false)}
       >
-        <StyledFaChevronCircleDown />
+        <StyledFaChevronCircleDown size={14} />
 
         <StyledContextButtonGroup showMenu={showMenu}>
           <Button

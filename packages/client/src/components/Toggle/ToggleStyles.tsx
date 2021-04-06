@@ -13,6 +13,7 @@ export const StyledToggle = styled.div<StyledToggle>`
     inverted ? theme.colors[color] : theme.colors["white"]};
   background-color: ${({ theme, color, inverted }) =>
     inverted ? theme.colors["white"] : theme.colors[color]};
+  cursor: pointer;
 `;
 interface StyledLabel {
   hasIcon?: boolean;
@@ -24,7 +25,6 @@ export const StyledLabel = styled.div<StyledLabel>`
   overflow: hidden !important;
   text-overflow: ellipsis;
   white-space: nowrap;
-  cursor: pointer;
   vertical-align: bottom;
   padding: ${({ theme }) => `0.15rem ${theme.space[2]}`};
   font-size: ${({ theme }) => theme.fontSizes["sm"]};
