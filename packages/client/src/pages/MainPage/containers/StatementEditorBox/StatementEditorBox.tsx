@@ -5,7 +5,7 @@ const queryString = require("query-string");
 
 import styled from "styled-components";
 
-import { FaTrashAlt, FaPlusCircle } from "react-icons/fa";
+import { FaTrashAlt, FaPlus } from "react-icons/fa";
 
 import { useLocation, useHistory } from "react-router";
 
@@ -19,8 +19,16 @@ import {
 
 import { CProp, CStatementActant } from "constructors";
 
-import { actantPositionDict } from "./../../../../../../shared/dictionaries";
-import { IActant, IProp, IStatementActant } from "@shared/types";
+import {
+  actantPositionDict,
+  referenceTypeDict,
+} from "./../../../../../../shared/dictionaries";
+import {
+  IActant,
+  IProp,
+  IStatementActant,
+  IStatementReference,
+} from "@shared/types";
 import { Button, ButtonGroup, Input } from "components";
 import { ActantSuggester } from "./../";
 
@@ -144,6 +152,29 @@ export const StatementEditorBox: React.FC = () => {
     if (statement && originId) {
       const newData = { ...statement.data };
       newData.props = newData.props.filter((p) => p.id !== originId);
+      update(newData);
+    }
+  };
+
+  const addReference = () => {};
+  const updateReference = (referenceId: string, changes: any) => {
+    if (statement && referenceId) {
+      const updatedReferences = statement.data.references.map((r) =>
+        r.id === referenceId ? { ...r, ...changes } : r
+      );
+      const newData = {
+        ...statement.data,
+        ...{ references: updatedReferences },
+      };
+      update(newData);
+    }
+  };
+  const removeReference = (referenceId: string) => {
+    if (statement && referenceId) {
+      const newData = { ...statement.data };
+      newData.references = newData.references.filter(
+        (p) => p.id !== referenceId
+      );
       update(newData);
     }
   };
@@ -517,7 +548,7 @@ export const StatementEditorBox: React.FC = () => {
                               {level === "1" && (
                                 <Button
                                   key="add"
-                                  icon={<FaPlusCircle />}
+                                  icon={<FaPlus />}
                                   color="primary"
                                   onClick={() => {
                                     addProp(prop.id);
@@ -539,7 +570,7 @@ export const StatementEditorBox: React.FC = () => {
                     };
 
                     return (
-                      <StyledPropsActantWrapper key={originActant.id}>
+                      <StyledEditorSectionContent key={originActant.id}>
                         <StyledPropsActantHeader>
                           <ActantTag
                             key={sai}
@@ -549,7 +580,7 @@ export const StatementEditorBox: React.FC = () => {
                           <StyledPropButtonGroup>
                             <Button
                               key="d"
-                              icon={<FaPlusCircle />}
+                              icon={<FaPlus />}
                               color="primary"
                               onClick={() => {
                                 addProp(originActant.id);
@@ -559,18 +590,18 @@ export const StatementEditorBox: React.FC = () => {
                         </StyledPropsActantHeader>
                         {propOrigin.props.length > 0 ? (
                           <StyledPropsActantList>
-                            <StyledPropsActantListHeaderColumn>
+                            <StyledListHeaderColumn>
                               Type
-                            </StyledPropsActantListHeaderColumn>
-                            <StyledPropsActantListHeaderColumn>
+                            </StyledListHeaderColumn>
+                            <StyledListHeaderColumn>
                               Value
-                            </StyledPropsActantListHeaderColumn>
-                            <StyledPropsActantListHeaderColumn>
+                            </StyledListHeaderColumn>
+                            <StyledListHeaderColumn>
                               Attributes
-                            </StyledPropsActantListHeaderColumn>
-                            <StyledPropsActantListHeaderColumn>
+                            </StyledListHeaderColumn>
+                            <StyledListHeaderColumn>
                               Actions
-                            </StyledPropsActantListHeaderColumn>
+                            </StyledListHeaderColumn>
                             {propOrigin.props.map((prop1, pi1) => {
                               return (
                                 <>
@@ -589,7 +620,7 @@ export const StatementEditorBox: React.FC = () => {
                             })}
                           </StyledPropsActantList>
                         ) : null}
-                      </StyledPropsActantWrapper>
+                      </StyledEditorSectionContent>
                     );
                   }
                 })}
@@ -599,19 +630,120 @@ export const StatementEditorBox: React.FC = () => {
             {/* Refs */}
             <StyledEditorSection key="editor-section-refs">
               <StyledEditorSectionHeader>References</StyledEditorSectionHeader>
-              <div className="editor-section-content"></div>
+              <StyledEditorSectionContent>
+                <StyledReferencesList>
+                  {statement.data.references.length > 0 && (
+                    <>
+                      <StyledListHeaderColumn>Resource</StyledListHeaderColumn>
+                      <StyledListHeaderColumn>Part</StyledListHeaderColumn>
+                      <StyledListHeaderColumn>Type</StyledListHeaderColumn>
+                      <StyledListHeaderColumn>Actions</StyledListHeaderColumn>
+                    </>
+                  )}
+                  {statement.data.references.map(
+                    (reference: IStatementReference) => {
+                      const referenceActant = statement.actants.find(
+                        (a) => a.id === reference.resource
+                      );
+                      return (
+                        <>
+                          <StyledReferencesListColumn>
+                            {referenceActant ? (
+                              <ActantTag
+                                actant={referenceActant}
+                                short={false}
+                                button={
+                                  <Button
+                                    key="d"
+                                    icon={<FaTrashAlt />}
+                                    color="danger"
+                                    onClick={() => {
+                                      updateReference(reference.id, {
+                                        resource: "",
+                                      });
+                                    }}
+                                  />
+                                }
+                              />
+                            ) : (
+                              <ActantSuggester
+                                onSelected={(newSelectedId: string) => {
+                                  updateReference(reference.id, {
+                                    resource: newSelectedId,
+                                  });
+                                }}
+                                categoryIds={["R"]}
+                              ></ActantSuggester>
+                            )}
+                          </StyledReferencesListColumn>
+                          <StyledReferencesListColumn>
+                            <Input
+                              type="text"
+                              value={reference.part}
+                              onChangeFn={(newPart: string) => {
+                                updateReference(reference.id, {
+                                  part: newPart,
+                                });
+                              }}
+                            ></Input>
+                          </StyledReferencesListColumn>
+                          <StyledReferencesListColumn>
+                            <Input
+                              type="select"
+                              value={reference.type}
+                              options={referenceTypeDict}
+                              onChangeFn={(newType: any) => {
+                                updateReference(reference.id, {
+                                  type: newType,
+                                });
+                              }}
+                            ></Input>
+                          </StyledReferencesListColumn>
+                          <StyledReferencesListColumn>
+                            <Button
+                              key="delete"
+                              icon={<FaTrashAlt />}
+                              color="danger"
+                              onClick={() => {
+                                removeReference(reference.id);
+                              }}
+                            />
+                          </StyledReferencesListColumn>
+                        </>
+                      );
+                    }
+                  )}
+                </StyledReferencesList>
+                <ActantSuggester
+                  onSelected={(newSelectedId: string) => {}}
+                  categoryIds={["R"]}
+                ></ActantSuggester>
+              </StyledEditorSectionContent>
             </StyledEditorSection>
 
             {/* Tags */}
             <StyledEditorSection key="editor-section-tags">
               <StyledEditorSectionHeader>Tags</StyledEditorSectionHeader>
-              <div className="editor-section-content"></div>
+              <StyledEditorSectionContent></StyledEditorSectionContent>
             </StyledEditorSection>
 
             {/* Notes */}
             <StyledEditorSection key="editor-section-notes">
               <StyledEditorSectionHeader>Notes</StyledEditorSectionHeader>
-              <div className="editor-section-content"></div>
+              <StyledEditorSectionContent>
+                <Input
+                  type="textarea"
+                  cols={55}
+                  onChangeFn={(newValue: string) => {
+                    const newData = {
+                      ...statement.data,
+                      ...{ note: newValue },
+                    };
+                    update(newData);
+                  }}
+                  value={statement.data.note}
+                />
+              </StyledEditorSectionContent>
             </StyledEditorSection>
           </div>
         </div>
@@ -622,9 +754,44 @@ export const StatementEditorBox: React.FC = () => {
   );
 };
 
-interface StyledPropsActantWrapper {}
-export const StyledPropsActantWrapper = styled.div<StyledPropsActantWrapper>``;
+// Editor Section
+interface StyledEditorSection {
+  firstSection?: boolean;
+}
+export const StyledEditorSection = styled.div<StyledEditorSection>`
+  padding-top: ${({ theme, firstSection = false }) =>
+    firstSection ? 0 : theme.space[4]};
+  padding-bottom: ${({ theme }) => theme.space[6]};
+  border-bottom-width: ${({ theme }) => theme.borderWidths[2]};
+  border-bottom-color: ${({ theme }) => theme.colors.black};
+  border-bottom-style: solid;
+`;
 
+interface StyledEditorSectionHeader {}
+export const StyledEditorSectionHeader = styled.div<StyledEditorSectionHeader>`
+  font-weight: ${({ theme }) => theme.fontWeights.bold};
+  font-size: ${({ theme }) => theme.fontSizes.xl};
+  margin-bottom: ${({ theme }) => theme.space["4"]};
+`;
+
+interface StyledEditorSectionContent {}
+export const StyledEditorSectionContent = styled.div<StyledEditorSectionContent>`
+  padding-left: ${({ theme }) => theme.space[8]};
+`;
+
+// Grids
+interface StyledReferencesListColumn {}
+export const StyledReferencesListColumn = styled.div<StyledReferencesListColumn>``;
+
+interface StyledListHeaderColumn {}
+export const StyledListHeaderColumn = styled.div<StyledListHeaderColumn>`
+  font-weight: ${({ theme }) => theme.fontWeights.light};
+  margin-left: ${({ theme }) => theme.space[1]};
+  font-size: ${({ theme }) => theme.fontSizes["sm"]};
+  font-style: italic;
+`;
+
+// Props section
 interface StyledPropsActantHeader {}
 export const StyledPropsActantHeader = styled.div<StyledPropsActantHeader>`
   display: inline-flex;
@@ -636,7 +803,7 @@ interface StyledPropsActantList {}
 export const StyledPropsActantList = styled.div<StyledPropsActantList>`
   display: grid;
   padding-left: ${({ theme }) => theme.space[8]};
-  grid-template-columns: 15em 15em 9em 6em;
+  grid-template-columns: 18em 18em 9em 6em;
   grid-template-rows: auto;
   grid-auto-flow: row;
   padding-bottom: ${({ theme }) => theme.space[6]};
@@ -664,28 +831,11 @@ export const StyledPropLineColumn = styled.div<StyledPropLineColumn>`
     padded ? theme.space[6] : theme.space[0]};
 `;
 
-interface StyledEditorSection {
-  firstSection?: boolean;
-}
-export const StyledEditorSection = styled.div<StyledEditorSection>`
-  padding-top: ${({ theme, firstSection = false }) =>
-    firstSection ? 0 : theme.space[4]};
+interface StyledReferencesList {}
+export const StyledReferencesList = styled.div<StyledReferencesList>`
+  display: grid;
+  grid-template-columns: 15em 15em 9em 6em;
+  grid-template-rows: auto;
+  grid-auto-flow: row;
   padding-bottom: ${({ theme }) => theme.space[6]};
-  border-bottom-width: ${({ theme }) => theme.borderWidths[2]};
-  border-bottom-color: ${({ theme }) => theme.colors.black};
-  border-bottom-style: solid;
-`;
-
-interface StyledEditorSectionHeader {}
-export const StyledEditorSectionHeader = styled.div<StyledEditorSectionHeader>`
-  font-weight: ${({ theme }) => theme.fontWeights.bold};
-  font-size: ${({ theme }) => theme.fontSizes.xl};
-`;
-
-interface StyledPropsActantListHeaderColumn {}
-export const StyledPropsActantListHeaderColumn = styled.div<StyledPropsActantListHeaderColumn>`
-  font-weight: ${({ theme }) => theme.fontWeights.light};
-  margin-left: ${({ theme }) => theme.space[1]};
-  font-size: ${({ theme }) => theme.fontSizes["sm"]};
-  font-style: italic;
 `;
