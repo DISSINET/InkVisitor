@@ -11,11 +11,13 @@ import api from "api";
 interface ActantSuggesterI {
   categoryIds: string[];
   onSelected: Function;
+  placeholder?: string;
 }
 
 export const ActantSuggester: React.FC<ActantSuggesterI> = ({
   categoryIds,
   onSelected,
+  placeholder = "",
 }) => {
   const [typed, setTyped] = useState<string>("");
   const [selectedCategory, setSelectedCategory] = useState<string>();
@@ -100,7 +102,7 @@ export const ActantSuggester: React.FC<ActantSuggesterI> = ({
     <Suggester
       marginTop={false}
       suggestions={suggestions || []}
-      placeholder={""} // text to display when typed === ""
+      placeholder={placeholder}
       typed={typed} // input value
       category={selectedCategory} // selected category
       categories={allCategories} // all possible categories

@@ -45,7 +45,7 @@ const MAXSUGGESTIONDISPLAYED = 10;
 export const Suggester: React.FC<SuggesterProps> = ({
   marginTop,
   suggestions = [],
-  placeholder,
+  placeholder = "",
   typed,
   category,
   categories,
