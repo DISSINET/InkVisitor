@@ -3,7 +3,6 @@ import { Switch, Route, BrowserRouter } from "react-router-dom";
 import { ThemeProvider } from "styled-components";
 
 import theme from "./Theme/theme";
-import "app.css";
 import MainPage from "./pages/MainPage";
 import GlobalStyle from "Theme/global";
 

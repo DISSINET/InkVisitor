@@ -45,39 +45,6 @@ export const ShortTagWithLabel = () => {
   );
 };
 
-export const ShortTagGroup = () => {
-  return (
-    <DndProvider backend={HTML5Backend}>
-      <TagGroup>
-        <Tag
-          category={Entities["R"].id}
-          color={Entities["R"].color}
-          label="entity label"
-          short
-        />
-        <Tag
-          category={Entities["O"].id}
-          color={Entities["O"].color}
-          label="entity label"
-          short
-        />
-        <Tag
-          category={Entities["S"].id}
-          color={Entities["S"].color}
-          label="entity label"
-          short
-        />
-        <Tag
-          category={Entities["E"].id}
-          color={Entities["E"].color}
-          label="entity label"
-          short
-        />
-      </TagGroup>
-    </DndProvider>
-  );
-};
-
 export const TagWithInvertedLabel = () => {
   return (
     <DndProvider backend={HTML5Backend}>
