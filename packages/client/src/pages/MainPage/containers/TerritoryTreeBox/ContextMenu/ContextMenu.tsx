@@ -21,7 +21,9 @@ import {
   StyledFaChevronCircleDown,
   StyledWrapper,
 } from "./ContextMenuStyles";
-import { IActant } from "@shared/types";
+import { IActant, ITerritory } from "@shared/types";
+
+import { CTerritoryActant } from "constructors";
 
 interface ContextMenu {
   territoryActant: IActant;
@@ -34,65 +36,21 @@ export const ContextMenu: React.FC<ContextMenu> = ({ territoryActant }) => {
   const [showCreate, setShowCreate] = useState(false);
   const [territoryName, setTerritoryName] = useState("");
 
-  // Invalidate queries only
-  const create = async (label: string) => {
-    const newTerritory: IActant = {
-      id: "",
-      label: label,
-      class: "T",
-      data: { parent: { id: territoryActant.id } },
-    };
+  const createTerritory = async (label: string) => {
+    const newTerritory: ITerritory = CTerritoryActant(
+      label,
+      territoryActant.id,
+      1000
+    );
     const res = await api.actantsCreate(newTerritory);
     if (res.status === 200) {
-      territoryCreated(newTerritory);
-      queryClient.invalidateQueries(["territory"]);
+      toast.info(`Territory [${newTerritory.label}] created!`);
+      setShowCreate(false);
+      setTerritoryName("");
+      queryClient.invalidateQueries("tree");
     } else {
       toast.error(`Error: Territory [${label}] not created!`);
     }
-  };
-
-  // Invalidate query after mutation
-  const addTerritoryMutation = useMutation(
-    async (territory: IActant) => {
-      const response = await api.actantsCreate(territory);
-      // TODO: handle errors from response
-      return response.data;
-    },
-    {
-      onSuccess: () => {
-        queryClient.invalidateQueries(["territory"]);
-        toast.info(`Territory created!`);
-        setShowCreate(false);
-        setTerritoryName("");
-      },
-      onError: (error) => {
-        toast.error("Error");
-      },
-    }
-  );
-
-  const territoryCreated = (territory: IActant) => {
-    toast.info(`Territory [${territory.label}] created!`);
-    setShowCreate(false);
-    setTerritoryName("");
-    // queryClient.invalidateQueries(["territory"]);
-  };
-
-  const createTerritory = (label: string) => {
-    const newTerritory: IActant = {
-      id: "",
-      label: label,
-      class: "T",
-      data: { parent: { id: territoryActant.id } },
-    };
-    addTerritoryMutation.mutate(newTerritory);
-    // api
-    //   .actantsCreate(newTerritory)
-    //   .then((response) =>
-    //     response.status === 200
-    //       ? territoryCreated(newTerritory)
-    //       : toast.error(`Error: Territory [${label}] not created!`)
-    //   );
   };
 
   return (
