@@ -34,8 +34,8 @@ export const Submit: React.FC<Submit> = ({
           </ModalContent>
           <ModalFooter>
             <ButtonGroup>
-              <Button label="Submit" color="danger" onClick={onSubmit} />
               <Button label="Cancel" color="info" onClick={onCancel} />
+              <Button label="Submit" color="danger" onClick={onSubmit} />
             </ButtonGroup>
           </ModalFooter>
         </ModalCard>

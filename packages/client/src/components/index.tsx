@@ -1,5 +1,4 @@
 import { Arrow } from "components/Arrow/Arrow";
-import { ActantDetail } from "components/ActantDetail/ActantDetail";
 import { Box } from "components/Box/Box";
 import { Button } from "components/Button/Button";
 import { ButtonGroup } from "components/ButtonGroup/ButtonGroup";
@@ -24,7 +23,6 @@ import {
 
 export {
   Arrow,
-  ActantDetail,
   Box,
   Button,
   ButtonGroup,

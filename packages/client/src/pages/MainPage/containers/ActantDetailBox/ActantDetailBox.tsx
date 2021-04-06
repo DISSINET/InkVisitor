@@ -3,16 +3,10 @@ import React, { useState } from "react";
 import { Input } from "components";
 import { StyledContent } from "./ActandDetailBoxStyles";
 
-interface ActantDetailBox {
-  category: string;
-  label: string;
-}
-export const ActantDetailBox: React.FC<ActantDetailBox> = ({
-  category,
-  label,
-}) => {
-  const [selectedCategory, setSelectedCategory] = useState<string>(category);
-  const [tagLabel, setTagLabel] = useState(label);
+interface ActantDetailBox {}
+export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
+  const [selectedCategory, setSelectedCategory] = useState<string>("T");
+  const [tagLabel, setTagLabel] = useState("label");
 
   return (
     <StyledContent>
