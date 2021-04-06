@@ -6,12 +6,15 @@ import {
   useDrop,
   XYCoord,
 } from "react-dnd";
+const queryString = require("query-string");
 
 import { ItemTypes } from "types";
 import { TagWrapper, EntityTag, Label, ButtonWrapper } from "./TagStyles";
-import { ActantDetail, Tooltip } from "components";
+import { Tooltip } from "components";
+import { useHistory, useLocation } from "react-router-dom";
 
 interface TagProps {
+  propId: string;
   label?: string;
   category: string;
   color: string;
@@ -20,7 +23,6 @@ interface TagProps {
   button?: ReactNode;
   invertedLabel?: boolean;
   short?: boolean;
-  propId?: string;
   index?: number;
   moveFn?: (dragIndex: number, hoverIndex: number) => void;
 }
@@ -32,19 +34,21 @@ interface DragItem {
 }
 
 export const Tag: React.FC<TagProps> = ({
+  propId,
   label = "",
   category = "T",
   color,
   mode = false,
   borderStyle = "solid",
   button,
-  propId,
   invertedLabel,
   short = false,
   index,
   moveFn,
 }) => {
-  const [showDetail, setShowDetail] = useState(false);
+  let history = useHistory();
+  let location = useLocation();
+  var hashParams = queryString.parse(location.hash);
 
   const ref = useRef<HTMLDivElement>(null);
   const [, drop] = useDrop({
@@ -110,7 +114,7 @@ export const Tag: React.FC<TagProps> = ({
           <TagWrapper
             ref={ref}
             borderStyle={borderStyle}
-            onDoubleClick={() => setShowDetail(true)}
+            onDoubleClick={() => {}}
           >
             <EntityTag color={color}>{category}</EntityTag>
             {!short && label && (
@@ -122,13 +126,6 @@ export const Tag: React.FC<TagProps> = ({
           </TagWrapper>
         </div>
       </Tooltip>
-
-      <ActantDetail
-        label={label}
-        category={category}
-        showDetail={showDetail}
-        onClose={() => setShowDetail(false)}
-      />
     </>
   );
 };

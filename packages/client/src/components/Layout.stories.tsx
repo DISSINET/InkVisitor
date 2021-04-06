@@ -41,12 +41,14 @@ export const Layout1 = () => {
       </ButtonGroup>
 
       <Tag
+        propId="0"
         category={Entities["T"].id}
         color={Entities["T"].color}
         label="entity label"
         button={<Button label="x" color="danger" />}
       />
       <Tag
+        propId="1"
         category={Entities["T"].id}
         color={Entities["T"].color}
         label="selected entity label"
