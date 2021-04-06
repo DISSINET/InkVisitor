@@ -47,6 +47,9 @@ export function getActantIdsFromStatements(statements: IStatement[]): string[] {
       actantIds[p.type.id] = null;
       actantIds[p.origin] = null;
     });
+    statement.data.references.forEach((p) => {
+      actantIds[p.resource] = null;
+    });
   }
 
   return Object.keys(actantIds);
