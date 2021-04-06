@@ -48,7 +48,6 @@ export const Input: React.FC<InputProps> = ({
         <StyledInput
           width={width}
           className="value"
-          style={{ lineHeight: "16px" }}
           placeholder={placeholder}
           value={displayValue}
           onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
