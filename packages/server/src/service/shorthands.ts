@@ -164,14 +164,13 @@ export async function findActantsByLabelOrClass(
   label: string,
   classParam: string
 ): Promise<IActant[]> {
+  console.log(label, classParam);
   const data = await rethink
     .table("actants")
-    .filter(function (user: any) {
-      return rethink.or(
-        rethink.row("class").eq(classParam),
-        rethink
-          .row("label")
-          .contains<ILabel>((labelObj) => labelObj("value").eq(label))
+    .filter(function (actant: any) {
+      return rethink.and(
+        actant("class").match(classParam),
+        actant("label").downcase().match(`^${label.toLowerCase()}`)
       );
     })
     .run(db.connection);

@@ -17,8 +17,10 @@ interface InputProps {
   options?: IOption[];
   rows?: number;
   cols?: number;
+  width?: number;
   onChangeFn: Function;
   placeholder?: string;
+  changeOnType?: boolean;
 }
 
 export const Input: React.FC<InputProps> = ({
@@ -29,11 +31,12 @@ export const Input: React.FC<InputProps> = ({
   options = [],
   rows = 5,
   cols = 50,
+  width = 150,
+  changeOnType = false,
   onChangeFn,
   placeholder,
 }) => {
   const [displayValue, setDisplayValue] = useState(value);
-
   useEffect(() => {
     setDisplayValue(value);
   }, [value]);
@@ -43,12 +46,15 @@ export const Input: React.FC<InputProps> = ({
       {label && <Label className="label"> {label}</Label>}
       {type === "text" && (
         <StyledInput
+          width={width}
           className="value"
-          style={{ lineHeight: "16px" }}
           placeholder={placeholder}
           value={displayValue}
           onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
             setDisplayValue(e.currentTarget.value);
+            if (changeOnType) {
+              onChangeFn(e.currentTarget.value);
+            }
           }}
           onBlur={() => {
             onChangeFn(displayValue);
@@ -63,6 +69,7 @@ export const Input: React.FC<InputProps> = ({
           value={displayValue}
           rows={rows}
           cols={cols}
+          width={width}
           onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => {
             setDisplayValue(e.target.value);
           }}

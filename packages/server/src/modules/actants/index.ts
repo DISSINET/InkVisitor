@@ -183,7 +183,7 @@ export default Router()
         throw new BadParams("actant data have to be set");
       }
 
-      const result = await createActant(request.db, actantData);
+      const result = await createActant(request.db, actantData, true);
 
       if (result.inserted === 1) {
         return {
@@ -279,8 +279,6 @@ export default Router()
     async (request: Request, response: Response, next: NextFunction) => {
       const actant = request.body;
 
-      console.log("creating actant", actant.id);
-
       if (!actant) {
         return response.status(BAD_REQUEST).json({
           error: paramMissingError,
@@ -300,7 +298,6 @@ export default Router()
     "/:uuid",
     async (request: Request, response: Response, next: NextFunction) => {
       const actant = request.body;
-      console.log("updating actant", actant.id);
 
       if (!actant) {
         return response.status(BAD_REQUEST).json({

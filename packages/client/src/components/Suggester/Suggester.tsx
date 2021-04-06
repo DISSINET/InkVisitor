@@ -29,6 +29,7 @@ interface SuggesterProps {
   categories: IOption[]; // all possible categories
   suggestionListPosition?: string; // todo not implemented yet
   disabled?: boolean; // todo not implemented yet
+  inputWidth?: number;
 
   // events
   onType: Function;
@@ -36,6 +37,7 @@ interface SuggesterProps {
   onCreate: Function;
   onPick: Function;
   onDrop: Function;
+  cleanOnSelect?: boolean;
 }
 
 const MAXSUGGESTIONDISPLAYED = 10;
@@ -43,12 +45,13 @@ const MAXSUGGESTIONDISPLAYED = 10;
 export const Suggester: React.FC<SuggesterProps> = ({
   marginTop,
   suggestions = [],
-  placeholder,
+  placeholder = "",
   typed,
   category,
   categories,
   suggestionListPosition,
   disabled,
+  inputWidth = 100,
 
   // events
   onType,
@@ -61,7 +64,6 @@ export const Suggester: React.FC<SuggesterProps> = ({
     accept: ItemTypes.TAG,
     drop: (item: DragObjectWithType) => {
       onDrop(item);
-      console.log(item);
     },
     collect: (monitor: DropTargetMonitor) => ({
       isOver: !!monitor.isOver(),
@@ -83,6 +85,8 @@ export const Suggester: React.FC<SuggesterProps> = ({
           value={typed}
           onChangeFn={onType}
           placeholder={placeholder}
+          changeOnType={true}
+          width={inputWidth}
         />
         <SuggesterButton>
           <Button

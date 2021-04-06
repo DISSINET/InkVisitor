@@ -60,12 +60,6 @@ const classes = {
   },
 };
 
-const logicalTypes = {
-  definitive: "solid",
-  indefinitive: "dashed",
-  hypothetical: "dotted",
-};
-
 interface IActantTag {
   actant: IActant | IEntity;
   mode?: "selected" | "disabled" | "invalid" | false;
@@ -82,7 +76,6 @@ export const ActantTag: React.FC<IActantTag> = ({
   short = false,
   mode,
   button,
-  propId,
   index,
   moveFn,
   isSelected,
@@ -93,17 +86,6 @@ export const ActantTag: React.FC<IActantTag> = ({
   // todo
   const label = !short ? actant.label : "";
 
-  // todo - clean
-  const borderStyle =
-    "logicalType" in actant.data
-      ? (logicalTypes[
-          actant.data?.logicalType as
-            | "definitive"
-            | "indefinitive"
-            | "hypothetical"
-        ] as "solid" | "dotted" | "dashed")
-      : "solid";
-
   return (
     <Tag
       label={label}
@@ -113,9 +95,9 @@ export const ActantTag: React.FC<IActantTag> = ({
       category={classId}
       color={classObject.color}
       mode={mode}
-      borderStyle={borderStyle}
+      borderStyle="solid"
       invertedLabel={isSelected}
-      propId={propId}
+      propId={actant.id}
       index={index}
     />
   );
