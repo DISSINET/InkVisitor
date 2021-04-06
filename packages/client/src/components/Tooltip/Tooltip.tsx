@@ -12,7 +12,7 @@ interface Tooltip {
 }
 export const Tooltip: React.FC<Tooltip> = ({
   children,
-  position = ["bottom center", "top center"],
+  position = ["bottom center", "right center", "top center"],
   on = ["hover", "focus"],
   label = "",
   disabled = false,
