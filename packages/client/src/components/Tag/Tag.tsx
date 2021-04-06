@@ -104,7 +104,7 @@ export const Tag: React.FC<TagProps> = ({
   return (
     <>
       <Tooltip label={label} disabled={!short}>
-        <>
+        <div>
           <TagWrapper ref={ref} borderStyle={borderStyle}>
             <EntityTag color={color}>{category}</EntityTag>
             {!short && label && (
@@ -114,7 +114,7 @@ export const Tag: React.FC<TagProps> = ({
             )}
             {button && <ButtonWrapper>{button}</ButtonWrapper>}
           </TagWrapper>
-        </>
+        </div>
       </Tooltip>
     </>
   );
