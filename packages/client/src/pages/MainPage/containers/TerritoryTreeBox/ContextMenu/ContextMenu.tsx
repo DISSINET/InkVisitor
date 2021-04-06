@@ -40,7 +40,7 @@ export const ContextMenu: React.FC<ContextMenu> = ({ territoryActant }) => {
     const newTerritory: ITerritory = CTerritoryActant(
       label,
       territoryActant.id,
-      1000
+      -1
     );
     const res = await api.actantsCreate(newTerritory);
     if (res.status === 200) {
