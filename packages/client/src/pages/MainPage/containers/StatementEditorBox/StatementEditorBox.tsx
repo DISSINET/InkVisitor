@@ -217,7 +217,7 @@ export const StatementEditorBox: React.FC = () => {
                   <div className="value">
                     <Input
                       type="textarea"
-                      cols={55}
+                      width={1000}
                       onChangeFn={(newValue: string) => {
                         const newData = {
                           ...statement.data,
@@ -733,7 +733,7 @@ export const StatementEditorBox: React.FC = () => {
               <StyledEditorSectionContent>
                 <Input
                   type="textarea"
-                  cols={55}
+                  width={1000}
                   onChangeFn={(newValue: string) => {
                     const newData = {
                       ...statement.data,
@@ -763,7 +763,7 @@ export const StyledEditorSection = styled.div<StyledEditorSection>`
     firstSection ? 0 : theme.space[4]};
   padding-bottom: ${({ theme }) => theme.space[6]};
   border-bottom-width: ${({ theme }) => theme.borderWidths[2]};
-  border-bottom-color: ${({ theme }) => theme.colors.black};
+  border-bottom-color: ${({ theme }) => theme.colors["gray"][600]};
   border-bottom-style: solid;
 `;
 
@@ -772,11 +772,13 @@ export const StyledEditorSectionHeader = styled.div<StyledEditorSectionHeader>`
   font-weight: ${({ theme }) => theme.fontWeights.bold};
   font-size: ${({ theme }) => theme.fontSizes.xl};
   margin-bottom: ${({ theme }) => theme.space["4"]};
+  color: ${({ theme }) => theme.colors["gray"][600]};
+  text-align: center;
 `;
 
 interface StyledEditorSectionContent {}
 export const StyledEditorSectionContent = styled.div<StyledEditorSectionContent>`
-  padding-left: ${({ theme }) => theme.space[8]};
+  padding-left: ${({ theme }) => theme.space[0]};
 `;
 
 // Grids
@@ -796,7 +798,7 @@ interface StyledPropsActantHeader {}
 export const StyledPropsActantHeader = styled.div<StyledPropsActantHeader>`
   display: inline-flex;
   padding-top: ${({ theme }) => theme.space[1]};
-  padding-bottom: ${({ theme }) => theme.space[6]};
+  padding-bottom: ${({ theme }) => theme.space[2]};
 `;
 
 interface StyledPropsActantList {}

@@ -70,6 +70,7 @@ export const Input: React.FC<InputProps> = ({
           value={displayValue}
           rows={rows}
           cols={cols}
+          width={width}
           onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => {
             setDisplayValue(e.target.value);
           }}
