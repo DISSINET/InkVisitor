@@ -8,6 +8,7 @@ interface StyledToggle {
 }
 export const StyledToggle = styled.div<StyledToggle>`
   display: inline-flex;
+  height: ${({ theme }) => theme.space[10]};
   border: 2px solid ${({ theme, color }) => theme.colors[color]};
   color: ${({ theme, color, inverted }) =>
     inverted ? theme.colors[color] : theme.colors["white"]};
@@ -19,7 +20,6 @@ interface StyledLabel {
   hasIcon?: boolean;
 }
 export const StyledLabel = styled.div<StyledLabel>`
-  height: 2.25rem;
   display: ${({ hasIcon }) => (hasIcon ? "flex" : "inline-block")};
   align-items: center;
   overflow: hidden !important;

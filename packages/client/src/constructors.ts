@@ -6,7 +6,6 @@ import {
 } from "../../shared/types";
 
 import { v4 as uuidv4 } from "uuid";
-import { Label } from "components/Input/InputStyles";
 
 export const CProp = (): IProp => ({
   id: uuidv4(),

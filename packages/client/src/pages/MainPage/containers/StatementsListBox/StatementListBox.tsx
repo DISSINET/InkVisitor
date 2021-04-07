@@ -8,10 +8,14 @@ const queryString = require("query-string");
 import { Button, ButtonGroup, TagGroup } from "components";
 import { ActantTag } from "./../";
 import api from "api";
-import { IStatement, IActant } from "@shared/types";
+import { IStatement, IActant, IAction } from "@shared/types";
 import { StatementListTable } from "./StatementListTable";
+import { StyledDots } from "./StatementLitBoxStyles";
 
-const initialData: { statements: IStatement[]; actants: IActant[] } = {
+const initialData: {
+  statements: IStatement[];
+  actants: IActant[];
+} = {
   statements: [],
   actants: [],
 };
@@ -50,7 +54,7 @@ export const StatementListBox: React.FC = () => {
                 .map((a: any) => a.actant)
             : [];
 
-          const isOversized = subjectIds.length > 4;
+          const isOversized = subjectIds.length > 1;
           const subjectIdsSlice = subjectIds.slice(0, 1);
 
           return (
@@ -67,7 +71,7 @@ export const StatementListBox: React.FC = () => {
                     )
                   );
                 })}
-              {isOversized && <div className="flex items-end">{"..."}</div>}
+              {isOversized && <StyledDots>{"..."}</StyledDots>}
             </TagGroup>
           );
         },
@@ -77,6 +81,10 @@ export const StatementListBox: React.FC = () => {
         accessor: "data.action",
         Cell: ({ row }: Cell) => {
           const actionTypeLabel = row.values.data?.action;
+          // const actionLabel = actions?.find(
+          //   (a: IAction) => a.id === actionTypeLabel
+          // )?.labels[0].value;
+
           return (
             <p>
               {actionTypeLabel && actionTypeLabel.length > 40
@@ -111,7 +119,7 @@ export const StatementListBox: React.FC = () => {
                     )
                   );
                 })}
-              {isOversized && <div className="flex items-end">{"..."}</div>}
+              {isOversized && <StyledDots>{"..."}</StyledDots>}
             </TagGroup>
           );
         },

@@ -75,7 +75,9 @@ export default {
     36: "9rem",
     40: "10rem",
     48: "12rem",
+    52: "13rem",
     56: "14rem",
+    60: "15rem",
     64: "16rem",
   },
   fontSizes: {

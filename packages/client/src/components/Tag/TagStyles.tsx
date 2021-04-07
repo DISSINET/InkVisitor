@@ -14,7 +14,7 @@ export const TagWrapper = styled.div<TagWrapper>`
   margin-right: ${({ theme, hasMarginRight }) =>
     hasMarginRight && theme.space[1]};
   cursor: move;
-  color: black;
+  color: ${({ theme }) => theme.colors["black"]};
   font-size: ${({ theme }) => theme.fontSizes["xxs"]};
   box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.4);
   height: 2.25rem;
@@ -45,12 +45,13 @@ export const Label = styled.div<Label>`
   white-space: nowrap;
   padding: ${({ theme }) => `${theme.space[1]} ${theme.space[2]}`};
   background-color: ${({ theme, invertedLabel }) =>
-    invertedLabel ? theme.colors["primary"] : "white"};
-  color: ${({ invertedLabel }) => (invertedLabel ? "white" : "black")};
+    invertedLabel ? theme.colors["primary"] : theme.colors["white"]};
+  color: ${({ theme, invertedLabel }) =>
+    invertedLabel ? theme.colors["white"] : theme.colors["black"]};
   border-left-width: ${({ theme }) => theme.borderWidths[2]};
   border-left-style: ${({ borderStyle }) => borderStyle};
   border-left-color: ${({ theme }) => theme.colors["black"]};
-  max-width: ${({ theme }) => theme.space[56]};
+  max-width: ${({ theme }) => theme.space[52]};
 `;
 
 export const ButtonWrapper = styled.div`

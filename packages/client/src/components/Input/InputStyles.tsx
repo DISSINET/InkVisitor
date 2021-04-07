@@ -18,6 +18,7 @@ export const Label = styled.span`
   font-size: ${({ theme }) => theme.fontSizes["base"]};
 `;
 export const StyledInput = styled.input<IValueStyle>`
+  height: ${({ theme }) => theme.space[10]};
   text-align: left;
   color: ${({ inverted, theme }) =>
     inverted ? theme.colors["white"] : theme.colors["primary"]};
@@ -26,14 +27,15 @@ export const StyledInput = styled.input<IValueStyle>`
   border-width: ${({ theme }) => theme.borderWidths[2]};
   border-color: ${({ theme }) => theme.colors["primary"]};
   font-size: ${({ theme }) => theme.fontSizes["xs"]};
-  padding: ${space1};
-  width: ${({ width }) => (width ? width + "px" : "auto")};
+  padding: ${space1} ${space1} 0 ${space1};
+  width: ${({ width }) => (width ? `${width}px` : "auto")};
   resize: none;
   :focus {
     outline: 0;
   }
 `;
 export const StyledSelect = styled.select<IValueStyle>`
+  height: ${({ theme }) => theme.space[10]};
   text-align: left;
   color: ${({ inverted, theme }) =>
     inverted ? theme.colors["white"] : theme.colors["primary"]};
@@ -44,7 +46,7 @@ export const StyledSelect = styled.select<IValueStyle>`
   font-size: ${({ theme }) => theme.fontSizes["xs"]};
   font-weight: bold;
   width: ${({ width }) => (width ? width + "px" : "auto")};
-  padding: ${space1};
+  padding: ${space1} ${space1} 0 ${space1};
   resize: none;
   :focus {
     outline: 0;
@@ -59,7 +61,7 @@ export const StyledTextArea = styled.textarea<IValueStyle>`
   border-width: ${({ theme }) => theme.borderWidths[2]};
   border-color: ${({ theme }) => theme.colors["primary"]};
   font-size: ${({ theme }) => theme.fontSizes["xs"]};
-  width: ${({ width }) => (width ? width + "px" : "auto")};
+  width: ${({ width }) => (width ? `${width}px` : "auto")};
   padding: ${space1};
   resize: none;
   line-height: 1.2;

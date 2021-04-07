@@ -29,6 +29,9 @@ export const StyledTr = styled.tr<StyledTr>`
   color: ${({ theme, isSelected }) =>
     isSelected ? theme.colors["white"] : theme.colors["black"]};
   opacity: ${({ opacity }) => (opacity ? opacity : 1)};
+  td:first-child {
+    padding-left: ${({ theme }) => theme.space[1]};
+  }
 `;
 export const StyledTd = styled.td`
   padding: ${({ theme }) => theme.space[2]} 0;
