@@ -54,8 +54,8 @@ export const StatementListBox: React.FC = () => {
                 .map((a: any) => a.actant)
             : [];
 
-          const isOversized = subjectIds.length > 1;
-          const subjectIdsSlice = subjectIds.slice(0, 1);
+          const isOversized = subjectIds.length > 2;
+          const subjectIdsSlice = subjectIds.slice(0, 2);
 
           return (
             <TagGroup>
