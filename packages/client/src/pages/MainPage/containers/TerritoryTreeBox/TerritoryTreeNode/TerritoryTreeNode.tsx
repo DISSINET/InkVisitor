@@ -2,6 +2,12 @@ import React, { useCallback, useEffect, useState } from "react";
 import update from "immutability-helper";
 import { useHistory } from "react-router-dom";
 const queryString = require("query-string");
+import {
+  BsCaretRightFill,
+  BsCaretDownFill,
+  BsCaretRight,
+  BsCaretDown,
+} from "react-icons/bs";
 
 import { IActant } from "@shared/types";
 import {
@@ -69,6 +75,40 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
   // [childTerritories]
   // );
 
+  const onCaretClick = (id: string) => {
+    hashParams["territory"] = id;
+    history.push({
+      hash: queryString.stringify(hashParams),
+    });
+    setIsExpanded(!isExpanded);
+  };
+
+  const getArrowIcon = (id: string) => {
+    if (statementsCount > 0) {
+      // filled
+      return (
+        <>
+          {isExpanded ? (
+            <BsCaretDownFill onClick={() => onCaretClick(id)} />
+          ) : (
+            <BsCaretRightFill onClick={() => onCaretClick(id)} />
+          )}
+        </>
+      );
+    } else {
+      // bordered
+      return (
+        <>
+          {isExpanded ? (
+            <BsCaretDown onClick={() => onCaretClick(id)} />
+          ) : (
+            <BsCaretRight onClick={() => onCaretClick(id)} />
+          )}
+        </>
+      );
+    }
+  };
+
   const renderTerritoryTag = (
     territoryActant: IActant,
     id: string,
@@ -78,24 +118,12 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
       <StyledTerritoryTagWrap>
         <StyledIconWrap>
           {hasChildren ? (
-            <StyledIconBox>
-              <Arrow
-                rotation={isExpanded ? "bottom" : "right"}
-                size={6}
-                onClick={() => {
-                  hashParams["territory"] = id;
-                  history.push({
-                    hash: queryString.stringify(hashParams),
-                  });
-                  setIsExpanded(!isExpanded);
-                }}
-              />
-            </StyledIconBox>
+            <>{getArrowIcon(id)}</>
           ) : (
             <>
               {statementsCount > 0 ? (
                 <StyledFaCircle
-                  size={12}
+                  size={11}
                   onClick={() => {
                     hashParams["territory"] = id;
                     history.push({
@@ -105,7 +133,7 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
                 />
               ) : (
                 <StyledFaDotCircle
-                  size={12}
+                  size={11}
                   onClick={() => {
                     hashParams["territory"] = id;
                     history.push({
