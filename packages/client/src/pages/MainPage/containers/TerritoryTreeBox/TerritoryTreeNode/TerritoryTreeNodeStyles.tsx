@@ -17,12 +17,14 @@ export const StyledChildrenWrap = styled.div<StyledChildrenWrap>`
 `;
 export const StyledFaDotCircle = styled(FaDotCircle)`
   margin: 0 ${({ theme }) => theme.space[1]};
-  color: ${({ theme }) => theme.colors["primary"]};
+  color: ${({ theme }) => theme.color["primary"]};
 `;
 export const StyledFaCircle = styled(FaCircle)`
   margin: 0 ${({ theme }) => theme.space[1]};
-  color: ${({ theme }) => theme.colors["primary"]};
+  color: ${({ theme }) => theme.color["primary"]};
 `;
 export const StyledIconBox = styled.div`
-  margin: 0 ${({ theme }) => theme.space[1]};
+  /* margin: 0 ${({ theme }) => theme.space[1]}; */
+  width: ${({ theme }) => theme.space[10]};
+  background-color: hotpink;
 `;

@@ -19,7 +19,7 @@ export const StyledContextButtonGroup = styled.div<StyledContextButtonGroup>`
   z-index: 100;
 `;
 export const StyledFaChevronCircleDown = styled(FaChevronCircleDown)`
-  color: ${({ theme }) => theme.colors["primary"]};
+  color: ${({ theme }) => theme.color["primary"]};
   margin: ${({ theme }) => `${theme.space[1]} ${theme.space[2]}`};
   cursor: pointer;
 `;

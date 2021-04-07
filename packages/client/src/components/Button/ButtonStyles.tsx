@@ -9,14 +9,14 @@ interface IButtonStyle {
 export const StyledButton = styled.button<IButtonStyle>`
   display: flex;
   align-items: center;
-  font-size: ${({ theme }) => theme.fontSizes["xs"]};
+  font-size: ${({ theme }) => theme.fontSize["xs"]};
   font-weight: 900;
   padding: ${space1} ${({ hasIcon }) => (hasIcon ? space1 : space2)};
-  border: 2px solid ${({ theme, color }) => theme.colors[color]};
+  border: 2px solid ${({ theme, color }) => theme.color[color]};
   color: ${({ theme, color, inverted }) =>
-    inverted ? theme.colors[color] : theme.colors["white"]};
+    inverted ? theme.color[color] : theme.color["white"]};
   background-color: ${({ theme, color, inverted }) =>
-    inverted ? theme.colors["white"] : theme.colors[color]};
+    inverted ? theme.color["white"] : theme.color[color]};
   cursor: pointer;
   :focus {
     outline: 0;

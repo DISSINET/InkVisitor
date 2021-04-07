@@ -5,7 +5,7 @@ interface StyledSelect {
   width?: number;
 }
 export const StyledSelect = styled(Select)`
-  font-size: ${({ theme }) => theme.fontSizes["xs"]};
+  font-size: ${({ theme }) => theme.fontSize["xs"]};
   font-weight: bold;
   width: ${({ width }) => (width ? `${width / 10}rem` : "100%")};
   .react-select__control {
@@ -42,10 +42,10 @@ export const StyledSelect = styled(Select)`
     }
   }
   .react-select__option--is-selected {
-    background-color: ${({ theme }) => theme.colors["primary"]};
+    background-color: ${({ theme }) => theme.color["primary"]};
     color: white;
     :hover {
-      background-color: ${({ theme }) => theme.colors["primary"]};
+      background-color: ${({ theme }) => theme.color["primary"]};
     }
   }
 `;
