@@ -6,12 +6,15 @@ import {
   useDrop,
   XYCoord,
 } from "react-dnd";
+const queryString = require("query-string");
 
 import { ItemTypes } from "types";
 import { TagWrapper, EntityTag, Label, ButtonWrapper } from "./TagStyles";
 import { Tooltip } from "components";
+import { useHistory, useLocation } from "react-router-dom";
 
 interface TagProps {
+  propId: string;
   label?: string;
   category: string;
   color: string;
@@ -20,7 +23,6 @@ interface TagProps {
   button?: ReactNode;
   invertedLabel?: boolean;
   short?: boolean;
-  propId?: string;
   index?: number;
   moveFn?: (dragIndex: number, hoverIndex: number) => void;
 }
@@ -32,18 +34,22 @@ interface DragItem {
 }
 
 export const Tag: React.FC<TagProps> = ({
+  propId,
   label = "",
   category = "T",
   color,
   mode = false,
   borderStyle = "solid",
   button,
-  propId,
   invertedLabel,
   short = false,
   index,
   moveFn,
 }) => {
+  let history = useHistory();
+  let location = useLocation();
+  var hashParams = queryString.parse(location.hash);
+
   const ref = useRef<HTMLDivElement>(null);
   const [, drop] = useDrop({
     accept: ItemTypes.TAG,
@@ -67,7 +73,6 @@ export const Tag: React.FC<TagProps> = ({
       const clientOffset = monitor.getClientOffset();
       // Get pixels to the top
       const hoverClientY = (clientOffset as XYCoord).y - hoverBoundingRect.top;
-
       // Only perform the move when the mouse has crossed half of the items height
       // When dragging downwards, only move when the cursor is below 50%
       // When dragging upwards, only move when the cursor is above 50%
@@ -84,7 +89,6 @@ export const Tag: React.FC<TagProps> = ({
       }
       // Time to actually perform the action
       moveFn && moveFn(dragIndex, hoverIndex);
-
       // Note: we're mutating the monitor item here!
       // Generally it's better to avoid mutations,
       // but it's good here for the sake of performance
@@ -101,21 +105,48 @@ export const Tag: React.FC<TagProps> = ({
   });
   drag(drop(ref));
 
+  const renderEntityTag = () => <EntityTag color={color}>{category}</EntityTag>;
+  const renderButton = () => <ButtonWrapper>{button}</ButtonWrapper>;
+
+  const onDoubleClick = () => {
+    hashParams["actant"] = propId;
+    history.push({
+      hash: queryString.stringify(hashParams),
+    });
+  };
+
   return (
     <>
-      <Tooltip label={label} disabled={!short}>
-        <div>
-          <TagWrapper ref={ref} borderStyle={borderStyle}>
-            <EntityTag color={color}>{category}</EntityTag>
-            {!short && label && (
+      {short ? (
+        <Tooltip label={label}>
+          <div>
+            <TagWrapper
+              ref={ref}
+              borderStyle={borderStyle}
+              onDoubleClick={() => onDoubleClick()}
+            >
+              {renderEntityTag()}
+              {button && renderButton()}
+            </TagWrapper>
+          </div>
+        </Tooltip>
+      ) : (
+        <>
+          <TagWrapper
+            ref={ref}
+            borderStyle={borderStyle}
+            onDoubleClick={() => onDoubleClick()}
+          >
+            {renderEntityTag()}
+            {label && (
               <Label invertedLabel={invertedLabel} borderStyle={borderStyle}>
                 {label}
               </Label>
             )}
-            {button && <ButtonWrapper>{button}</ButtonWrapper>}
+            {button && renderButton()}
           </TagWrapper>
-        </div>
-      </Tooltip>
+        </>
+      )}
     </>
   );
 };

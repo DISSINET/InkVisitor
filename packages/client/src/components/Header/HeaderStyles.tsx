@@ -15,8 +15,8 @@ export const StyledHeader = styled.div<StyledHeader>`
       paddingX || paddingX === 0 ? `${paddingX / 10}rem` : space3
     }`};
   width: 100%;
-  background-color: ${({ theme, bgColor }) => theme.colors[bgColor]};
-  color: ${({ theme }) => theme.colors["white"]};
+  background-color: ${({ theme, bgColor }) => theme.color[bgColor]};
+  color: ${({ theme }) => theme.color["white"]};
   display: flex;
   overflow-y: hidden;
 `;
@@ -25,7 +25,7 @@ export const TextLeft = styled.div`
   display: flex;
   flex: 1 1 0%;
   align-self: center;
-  font-size: ${({ theme }) => theme.fontSizes["3xl"]};
+  font-size: ${({ theme }) => theme.fontSize["3xl"]};
   font-weight: 500;
 `;
 export const TextRight = styled.div`
@@ -33,5 +33,5 @@ export const TextRight = styled.div`
   flex: 1 1 0%;
   align-self: center;
   justify-content: flex-end;
-  font-size: ${({ theme }) => theme.fontSizes["base"]};
+  font-size: ${({ theme }) => theme.fontSize["base"]};
 `;

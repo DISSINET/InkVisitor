@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { FaTrashAlt, FaStar, FaPlus } from "react-icons/fa";
 import { toast } from "react-toastify";
-import { useQuery, useMutation, useQueryClient } from "react-query";
+import { useQueryClient } from "react-query";
 
 import api from "api";
 import {
@@ -14,7 +14,6 @@ import {
   ModalFooter,
   ModalHeader,
   Submit,
-  Toast,
 } from "components";
 import {
   StyledContextButtonGroup,
@@ -22,7 +21,6 @@ import {
   StyledWrapper,
 } from "./ContextMenuStyles";
 import { IActant, ITerritory } from "@shared/types";
-
 import { CTerritoryActant } from "constructors";
 
 interface ContextMenu {
@@ -51,6 +49,17 @@ export const ContextMenu: React.FC<ContextMenu> = ({ territoryActant }) => {
     } else {
       toast.error(`Error: Territory [${label}] not created!`);
     }
+  };
+
+  const onSubmitDelete = async () => {
+    const res = await api.actantsDelete(territoryActant.id);
+    if (res.status === 200) {
+      toast.info(`Territory [${territoryActant.label}] deleted!`);
+      queryClient.invalidateQueries("tree");
+    } else {
+      toast.error(`Error: Territory [${territoryActant.label}] not deleted!`);
+    }
+    setShowSubmit(false);
   };
 
   return (
@@ -96,18 +105,7 @@ export const ContextMenu: React.FC<ContextMenu> = ({ territoryActant }) => {
         title={"Delete Territory"}
         text={`Do you really want do delete Territory with ID [${territoryActant.id}]?`}
         show={showSubmit}
-        onSubmit={() => {
-          api
-            .actantsDelete(territoryActant.id)
-            .then((response) =>
-              response.status === 200
-                ? toast.info(`Territory [${territoryActant.label}] deleted!`)
-                : toast.error(
-                    `Error: Territory [${territoryActant.label}] not deleted!`
-                  )
-            );
-          setShowSubmit(false);
-        }}
+        onSubmit={() => onSubmitDelete()}
         onCancel={() => setShowSubmit(false)}
       />
       <Modal
@@ -127,6 +125,14 @@ export const ContextMenu: React.FC<ContextMenu> = ({ territoryActant }) => {
           <ModalFooter>
             <ButtonGroup>
               <Button
+                label="Cancel"
+                color="success"
+                onClick={() => {
+                  setShowCreate(false);
+                  setTerritoryName("");
+                }}
+              />
+              <Button
                 label="Save"
                 color="primary"
                 onClick={() => {
@@ -135,14 +141,6 @@ export const ContextMenu: React.FC<ContextMenu> = ({ territoryActant }) => {
                   } else {
                     toast.warning("Fill territory name!");
                   }
-                }}
-              />
-              <Button
-                label="Cancel"
-                color="success"
-                onClick={() => {
-                  setShowCreate(false);
-                  setTerritoryName("");
                 }}
               />
             </ButtonGroup>

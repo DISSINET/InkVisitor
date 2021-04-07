@@ -1,11 +1,9 @@
 import styled from "styled-components";
 import { space1, space3, space5, space6, space7 } from "Theme/constants";
 
-interface ModalWrap {
-  showModal: boolean;
-}
+interface ModalWrap {}
 export const ModalWrap = styled.div<ModalWrap>`
-  display: ${({ showModal }) => (showModal ? "flex" : "none")};
+  display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
@@ -45,17 +43,17 @@ export const CardHeader = styled.header`
   flex-shrink: 0;
   padding: ${space3} ${space6} ${space1} ${space6};
   position: relative;
-  background-color: ${({ theme }) => theme.colors["white"]};
+  background-color: ${({ theme }) => theme.color["white"]};
   border-bottom-style: solid;
-  border-bottom-width: ${({ theme }) => theme.borderWidths["default"]};
-  border-bottom-color: ${({ theme }) => theme.colors["gray"][400]};
+  border-bottom-width: ${({ theme }) => theme.borderWidth["default"]};
+  border-bottom-color: ${({ theme }) => theme.color["gray"][400]};
   border-top-left-radius: ${({ theme }) => theme.borderRadius["sm"]};
   border-top-right-radius: ${({ theme }) => theme.borderRadius["sm"]};
   min-height: ${({ theme }) => theme.space[12]};
 `;
 export const CardTitle = styled.h2`
-  font-weight: ${({ theme }) => theme.fontWeights["medium"]};
-  font-size: ${({ theme }) => theme.fontSizes["xl"]};
+  font-weight: ${({ theme }) => theme.fontWeight["medium"]};
+  font-size: ${({ theme }) => theme.fontSize["xl"]};
 `;
 export const CardBody = styled.section`
   display: flex;
@@ -64,15 +62,15 @@ export const CardBody = styled.section`
   overflow: auto;
   padding: ${space5} ${space7};
   background-color: #ffffff;
-  font-size: ${({ theme }) => theme.fontSizes["sm"]};
+  font-size: ${({ theme }) => theme.fontSize["sm"]};
   -webkit-overflow-scrolling: touch;
 `;
 export const Footer = styled.div`
   border-bottom-left-radius: ${({ theme }) => theme.borderRadius["sm"]};
   border-bottom-right-radius: ${({ theme }) => theme.borderRadius["sm"]};
   border-top-style: solid;
-  border-top-width: ${({ theme }) => theme.borderWidths["default"]};
-  border-top-color: ${({ theme }) => theme.colors["gray"][400]};
+  border-top-width: ${({ theme }) => theme.borderWidth["default"]};
+  border-top-color: ${({ theme }) => theme.color["gray"][400]};
   align-items: center;
   background-color: #ffffff;
   display: flex;

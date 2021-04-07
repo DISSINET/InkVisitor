@@ -1,5 +1,5 @@
 export default {
-  colors: {
+  color: {
     transparent: "transparent",
 
     blue: {
@@ -75,10 +75,12 @@ export default {
     36: "9rem",
     40: "10rem",
     48: "12rem",
+    52: "13rem",
     56: "14rem",
+    60: "15rem",
     64: "16rem",
   },
-  fontSizes: {
+  fontSize: {
     xxs: "1rem",
     xs: "1.2rem",
     sm: "1.4rem",
@@ -91,7 +93,7 @@ export default {
     "5xl": "4.8rem",
     "6xl": "6.4rem",
   },
-  fontWeights: {
+  fontWeight: {
     hairline: "100",
     // thin: "200",
     light: "300",
@@ -102,7 +104,7 @@ export default {
     // extrabold: "800",
     black: "900",
   },
-  borderWidths: {
+  borderWidth: {
     default: "0.1rem",
     0: "0",
     2: "0.2rem",

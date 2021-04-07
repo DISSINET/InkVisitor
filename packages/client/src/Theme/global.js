@@ -28,22 +28,22 @@ const GlobalStyle = createGlobalStyle`
     -moz-osx-font-smoothing: grayscale;
   }
   h1 {
-    font-size: ${({ theme }) => theme.fontSizes["4xl"]};
+    font-size: ${({ theme }) => theme.fontSize["4xl"]};
   }
   h2 {
-    font-size: ${({ theme }) => theme.fontSizes["3xl"]};
+    font-size: ${({ theme }) => theme.fontSize["3xl"]};
   }
   h3 {
-    font-size: ${({ theme }) => theme.fontSizes["2xl"]};
+    font-size: ${({ theme }) => theme.fontSize["2xl"]};
   }
   h4 {
-    font-size: ${({ theme }) => theme.fontSizes["xl"]};
+    font-size: ${({ theme }) => theme.fontSize["xl"]};
   }
   h5 {
-    font-size: ${({ theme }) => theme.fontSizes["lg"]};
+    font-size: ${({ theme }) => theme.fontSize["lg"]};
   }
   h6 {
-    font-size: ${({ theme }) => theme.fontSizes["base"]};
+    font-size: ${({ theme }) => theme.fontSize["base"]};
   }
 `;
 

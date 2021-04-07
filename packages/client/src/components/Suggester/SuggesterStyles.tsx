@@ -21,7 +21,7 @@ export const SuggesterButton = styled.div``;
 export const SuggesterList = styled.div`
   position: absolute;
   left: ${space36};
-  background-color: ${({ theme }) => theme.colors["blue"][50]};
+  background-color: ${({ theme }) => theme.color["blue"][50]};
   padding: ${space1};
   width: auto;
   z-index: 10;

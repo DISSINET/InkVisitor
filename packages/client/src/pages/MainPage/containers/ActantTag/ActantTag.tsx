@@ -85,6 +85,7 @@ export const ActantTag: React.FC<IActantTag> = ({
 
   return (
     <Tag
+      propId={actant.id}
       label={actant.label}
       short={short}
       button={button}
@@ -94,7 +95,6 @@ export const ActantTag: React.FC<IActantTag> = ({
       mode={mode}
       borderStyle="solid"
       invertedLabel={isSelected}
-      propId={actant.id}
       index={index}
     />
   );
