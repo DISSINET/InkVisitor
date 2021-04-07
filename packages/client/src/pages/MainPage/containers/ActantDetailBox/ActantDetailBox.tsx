@@ -6,9 +6,10 @@ import { StyledContent, StyledRow } from "./ActandDetailBoxStyles";
 import { useHistory, useLocation } from "react-router-dom";
 import api from "api";
 import { useQuery } from "react-query";
-import { IActant } from "@shared/types";
+import { IActant, IOption } from "@shared/types";
 import { FaTimes } from "react-icons/fa";
 import { ActantTag } from "..";
+import { Entities } from "types";
 
 const classEntities = ["P", "G", "O", "C", "L", "V", "E"];
 // const initActant = {  id: "",
@@ -35,6 +36,25 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
   const [selectedCategory, setSelectedCategory] = useState<string>("T");
   const [tagLabel, setTagLabel] = useState("");
   const [actant, setActant] = useState<IActant>();
+  const [allCategories, setAllCategories] = useState<false | IOption[]>();
+
+  // initial load of categories
+  useEffect(() => {
+    const categories: IOption[] = [];
+    classEntities.forEach((categoryId) => {
+      const foundEntityCategory = Entities[categoryId];
+      if (foundEntityCategory) {
+        categories.push({
+          label: foundEntityCategory.id,
+          value: foundEntityCategory.id,
+        });
+      }
+    });
+    if (categories.length) {
+      setAllCategories(categories);
+      setSelectedCategory(categories[0].value);
+    }
+  }, []);
 
   useEffect(() => {
     if (data) {
@@ -56,17 +76,19 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
 
   return (
     <>
-      {actant && (
+      {actant && allCategories && (
         <StyledContent>
           <StyledRow>
             <Input
               type="select"
               value={selectedCategory}
-              options={[]}
+              options={allCategories}
               onChangeFn={(newSelectedId: string) => {
-                updateActant(actant.id, {
-                  actant: newSelectedId,
-                });
+                setSelectedCategory(newSelectedId);
+                // TODO update on BE
+                // updateActant(actant.id, {
+                //   actant: newSelectedId,
+                // });
               }}
             />
             <ActantTag actant={actant} propId={actant.id} />
@@ -77,7 +99,14 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
             <Button
               color="danger"
               icon={<FaTimes />}
-              onClick={() => setActant(undefined)}
+              onClick={() => {
+                setActant(undefined);
+                hashParams["actant"] = "";
+                history.push({
+                  hash: queryString.stringify(hashParams),
+                });
+                // TODO: remove actant from URL
+              }}
             />
           </StyledRow>
         </StyledContent>
