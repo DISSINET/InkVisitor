@@ -19,7 +19,7 @@ export const StyledArrow = styled.div<StyledArrow>`
     rotation === "top" || rotation === "bottom"
       ? `${sizeValidated * triangleMultiplier}px ${sizeValidated}px`
       : `${sizeValidated}px ${sizeValidated * triangleMultiplier}px`};
-  border-color: ${({ theme, color }) => theme.colors[color]};
+  border-color: ${({ theme, color }) => theme.color[color]};
   border-bottom-color: ${({ rotation }) =>
     rotation === "top" ? "" : "transparent"};
   border-top-color: ${({ rotation }) =>

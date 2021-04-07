@@ -6,16 +6,16 @@ interface TagWrapper {
 }
 export const TagWrapper = styled.div<TagWrapper>`
   display: inline-flex;
-  border: ${({ theme }) => theme.borderWidths[2]};
+  border: ${({ theme }) => theme.borderWidth[2]};
   border-style: ${({ borderStyle }) => borderStyle};
-  border-color: ${({ theme }) => theme.colors["black"]};
+  border-color: ${({ theme }) => theme.color["black"]};
   border-radius: ${({ theme }) => theme.borderRadius["sm"]};
   overflow: hidden;
   margin-right: ${({ theme, hasMarginRight }) =>
     hasMarginRight && theme.space[1]};
   cursor: move;
-  color: ${({ theme }) => theme.colors["black"]};
-  font-size: ${({ theme }) => theme.fontSizes["xxs"]};
+  color: ${({ theme }) => theme.color["black"]};
+  font-size: ${({ theme }) => theme.fontSize["xxs"]};
   box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.4);
   height: 2.25rem;
 `;
@@ -24,12 +24,12 @@ interface EntityTag {
   color: string;
 }
 export const EntityTag = styled.div<EntityTag>`
-  background-color: ${({ color, theme }) => theme.colors[color]};
+  background-color: ${({ color, theme }) => theme.color[color]};
   display: flex;
   justify-content: center;
   align-items: center;
   flex-shrink: 0;
-  font-weight: ${({ theme }) => theme.fontWeights["extrabold"]};
+  font-weight: ${({ theme }) => theme.fontWeight["extrabold"]};
   width: ${({ theme }) => theme.space[7]};
 `;
 
@@ -45,12 +45,12 @@ export const Label = styled.div<Label>`
   white-space: nowrap;
   padding: ${({ theme }) => `${theme.space[1]} ${theme.space[2]}`};
   background-color: ${({ theme, invertedLabel }) =>
-    invertedLabel ? theme.colors["primary"] : theme.colors["white"]};
+    invertedLabel ? theme.color["primary"] : theme.color["white"]};
   color: ${({ theme, invertedLabel }) =>
-    invertedLabel ? theme.colors["white"] : theme.colors["black"]};
-  border-left-width: ${({ theme }) => theme.borderWidths[2]};
+    invertedLabel ? theme.color["white"] : theme.color["black"]};
+  border-left-width: ${({ theme }) => theme.borderWidth[2]};
   border-left-style: ${({ borderStyle }) => borderStyle};
-  border-left-color: ${({ theme }) => theme.colors["black"]};
+  border-left-color: ${({ theme }) => theme.color["black"]};
   max-width: ${({ theme }) => theme.space[52]};
 `;
 

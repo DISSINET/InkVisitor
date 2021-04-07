@@ -7,13 +7,13 @@ interface StyledToggle {
   inverted: boolean;
 }
 export const StyledToggle = styled.div<StyledToggle>`
-  display: inline-flex;
   height: ${({ theme }) => theme.space[10]};
-  border: 2px solid ${({ theme, color }) => theme.colors[color]};
+  display: inline-flex;
+  border: 2px solid ${({ theme, color }) => theme.color[color]};
   color: ${({ theme, color, inverted }) =>
-    inverted ? theme.colors[color] : theme.colors["white"]};
+    inverted ? theme.color[color] : theme.color["white"]};
   background-color: ${({ theme, color, inverted }) =>
-    inverted ? theme.colors["white"] : theme.colors[color]};
+    inverted ? theme.color["white"] : theme.color[color]};
   cursor: pointer;
 `;
 interface StyledLabel {
@@ -26,13 +26,15 @@ export const StyledLabel = styled.div<StyledLabel>`
   text-overflow: ellipsis;
   white-space: nowrap;
   vertical-align: bottom;
-  padding: ${({ theme }) => `0.15rem ${theme.space[2]}`};
-  font-size: ${({ theme }) => theme.fontSizes["sm"]};
+  padding-left: ${({ theme }) => theme.space[2]};
+  padding-right: ${({ theme }) => theme.space[2]};
+  padding-bottom: 0.15rem;
+  font-size: ${({ theme }) => theme.fontSize["sm"]};
   max-width: ${({ theme }) => theme.space[56]};
 `;
 
 interface StyledIcon {}
 export const StyledIcon = styled.div<StyledIcon>`
   padding-left: ${({ theme }) => `${theme.space[2]}`};
-  padding-top: ${({ theme }) => `${theme.space[1]}`};
+  padding-top: 0.15rem;
 `;

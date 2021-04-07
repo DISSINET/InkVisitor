@@ -6,10 +6,10 @@ export const StyledTable = styled.table`
   border-collapse: collapse;
 `;
 export const StyledTHead = styled.thead`
-  border-bottom-width: ${({ theme }) => theme.borderWidths[2]};
+  border-bottom-width: ${({ theme }) => theme.borderWidth[2]};
   border-bottom-style: solid;
-  border-bottom-color: ${({ theme }) => theme.colors["black"]};
-  font-size: ${({ theme }) => theme.fontSizes["sm"]};
+  border-bottom-color: ${({ theme }) => theme.color["black"]};
+  font-size: ${({ theme }) => theme.fontSize["sm"]};
 `;
 export const StyledTh = styled.th`
   text-align: left;
@@ -22,12 +22,12 @@ interface StyledTr {
 export const StyledTr = styled.tr<StyledTr>`
   background-color: ${({ theme, isOdd, isSelected }) =>
     isSelected
-      ? theme.colors["primary"]
+      ? theme.color["primary"]
       : isOdd
-      ? theme.colors["white"]
-      : theme.colors["blue"][50]};
+      ? theme.color["white"]
+      : theme.color["blue"][50]};
   color: ${({ theme, isSelected }) =>
-    isSelected ? theme.colors["white"] : theme.colors["black"]};
+    isSelected ? theme.color["white"] : theme.color["black"]};
   opacity: ${({ opacity }) => (opacity ? opacity : 1)};
   td:first-child {
     padding-left: ${({ theme }) => theme.space[1]};
@@ -35,5 +35,5 @@ export const StyledTr = styled.tr<StyledTr>`
 `;
 export const StyledTd = styled.td`
   padding: ${({ theme }) => theme.space[2]} 0;
-  font-size: ${({ theme }) => theme.fontSizes["sm"]};
+  font-size: ${({ theme }) => theme.fontSize["sm"]};
 `;

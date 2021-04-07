@@ -97,32 +97,32 @@ export const Layout1 = () => {
 };
 
 const FontXs = styled.p`
-  font-size: ${({ theme }) => theme.fontSizes["xs"]};
+  font-size: ${({ theme }) => theme.fontSize["xs"]};
 `;
 const FontSm = styled.p`
-  font-size: ${({ theme }) => theme.fontSizes["sm"]};
+  font-size: ${({ theme }) => theme.fontSize["sm"]};
 `;
 const FontBase = styled.p`
-  font-size: ${({ theme }) => theme.fontSizes["base"]};
+  font-size: ${({ theme }) => theme.fontSize["base"]};
 `;
 const FontLg = styled.p`
-  font-size: ${({ theme }) => theme.fontSizes["lg"]};
+  font-size: ${({ theme }) => theme.fontSize["lg"]};
 `;
 const FontXl = styled.p`
-  font-size: ${({ theme }) => theme.fontSizes["xl"]};
+  font-size: ${({ theme }) => theme.fontSize["xl"]};
 `;
 const Font2Xl = styled.p`
-  font-size: ${({ theme }) => theme.fontSizes["2xl"]};
+  font-size: ${({ theme }) => theme.fontSize["2xl"]};
 `;
 const Font3Xl = styled.p`
-  font-size: ${({ theme }) => theme.fontSizes["3xl"]};
+  font-size: ${({ theme }) => theme.fontSize["3xl"]};
 `;
 const Font4Xl = styled.p`
-  font-size: ${({ theme }) => theme.fontSizes["4xl"]};
+  font-size: ${({ theme }) => theme.fontSize["4xl"]};
 `;
 const Font5Xl = styled.p`
-  font-size: ${({ theme }) => theme.fontSizes["5xl"]};
+  font-size: ${({ theme }) => theme.fontSize["5xl"]};
 `;
 const Font6Xl = styled.p`
-  font-size: ${({ theme }) => theme.fontSizes["6xl"]};
+  font-size: ${({ theme }) => theme.fontSize["6xl"]};
 `;
