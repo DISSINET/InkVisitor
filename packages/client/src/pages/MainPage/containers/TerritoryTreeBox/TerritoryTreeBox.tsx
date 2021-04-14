@@ -45,6 +45,9 @@ export const TerritoryTreeBox: React.FC = () => {
   //   }
   // }, [data]);
 
+  if (isFetching) {
+    return <div>loading...</div>;
+  }
   return (
     <>
       {data && (

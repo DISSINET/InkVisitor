@@ -5,7 +5,7 @@ import { FaInfo, FaPencilAlt, FaClone, FaTrashAlt } from "react-icons/fa";
 import { useLocation, useHistory } from "react-router";
 const queryString = require("query-string");
 
-import { Button, ButtonGroup, TagGroup } from "components";
+import { Button, ButtonGroup, TagGroup, Tooltip } from "components";
 import { ActantTag } from "./../";
 import api from "api";
 import { IStatement, IActant, IAction } from "@shared/types";
@@ -37,6 +37,20 @@ export const StatementListBox: React.FC = () => {
   );
 
   const { statements, actants } = data || initialData;
+
+  const {
+    status: statusActions,
+    data: actions,
+    error: errorActions,
+    isFetching: isFetchingActions,
+  } = useQuery(
+    ["actions"],
+    async () => {
+      const res = await api.actionsGetMore({});
+      return res.data;
+    },
+    {}
+  );
 
   const columns: any = useMemo(() => {
     return [
@@ -81,15 +95,20 @@ export const StatementListBox: React.FC = () => {
         accessor: "data.action",
         Cell: ({ row }: Cell) => {
           const actionTypeLabel = row.values.data?.action;
-          // const actionLabel = actions?.find(
-          //   (a: IAction) => a.id === actionTypeLabel
-          // )?.labels[0].value;
+          const actionLabel = actions?.find(
+            (a: IAction) => a.id === actionTypeLabel
+          )?.labels[0].value;
 
           return (
             <p>
-              {actionTypeLabel && actionTypeLabel.length > 40
-                ? `${actionTypeLabel.substring(0, 40)}...`
-                : actionTypeLabel}
+              {actionLabel &&
+                (actionLabel.length > 9 ? (
+                  <Tooltip label={actionLabel}>
+                    <div>{`${actionLabel.substring(0, 9)}...`}</div>
+                  </Tooltip>
+                ) : (
+                  actionLabel
+                ))}
             </p>
           );
         },
@@ -159,7 +178,7 @@ export const StatementListBox: React.FC = () => {
         ),
       },
     ];
-  }, [data]);
+  }, [data, actions]);
 
   if (isFetching) {
     return <div>loading...</div>;
