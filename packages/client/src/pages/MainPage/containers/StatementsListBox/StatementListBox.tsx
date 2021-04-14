@@ -161,5 +161,8 @@ export const StatementListBox: React.FC = () => {
     ];
   }, [data]);
 
+  if (isFetching) {
+    return <div>loading...</div>;
+  }
   return <StatementListTable data={statements} columns={columns} />;
 };
