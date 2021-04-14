@@ -1,7 +1,13 @@
 import React, { useMemo, useRef, useState } from "react";
-import { useTable, Cell, Row, useExpanded } from "react-table";
+import { Cell } from "react-table";
 import { useQuery } from "react-query";
-import { FaInfo, FaPencilAlt, FaClone, FaTrashAlt } from "react-icons/fa";
+import {
+  FaInfo,
+  FaPencilAlt,
+  FaClone,
+  FaTrashAlt,
+  FaPlus,
+} from "react-icons/fa";
 import { useLocation, useHistory } from "react-router";
 const queryString = require("query-string");
 
@@ -68,11 +74,12 @@ export const StatementListBox: React.FC = () => {
                 .map((a: any) => a.actant)
             : [];
 
-          const isOversized = subjectIds.length > 2;
-          const subjectIdsSlice = subjectIds.slice(0, 2);
+          const isOversized = subjectIds.length > 1;
+          const subjectIdsSlice = subjectIds.slice(0, 1);
 
           return (
             <TagGroup>
+              <ActantTag actant={{ id: "", class: "S", label: "", data: {} }} />
               {subjectIdsSlice
                 .filter((a: any) => a)
                 .map((actantId: string, ai: number) => {
@@ -177,8 +184,28 @@ export const StatementListBox: React.FC = () => {
           </ButtonGroup>
         ),
       },
+      {
+        Header: "",
+        id: "addStatement",
+        Cell: ({ row }: any) => (
+          <div>
+            <Button
+              key="add"
+              icon={<FaPlus size={14} />}
+              color="primary"
+              inverted
+              onClick={() => addStatement(row.values.id)}
+            />
+          </div>
+        ),
+      },
     ];
   }, [data, actions]);
+
+  const addStatement = (rowId: string) => {
+    // TODO: add new statement
+    console.log("Adding statement not implemented. Clicked on ID: ", rowId);
+  };
 
   if (isFetching) {
     return <div>loading...</div>;
