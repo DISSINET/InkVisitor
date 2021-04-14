@@ -5,6 +5,7 @@ const queryString = require("query-string");
 import api from "api";
 import { TerritoryTreeNode } from "./TerritoryTreeNode/TerritoryTreeNode";
 import { IResponseTree } from "@shared/types";
+import { DotLoader } from "react-spinners";
 
 export const TerritoryTreeBox: React.FC = () => {
   const { status, data, error, isFetching } = useQuery(
@@ -46,7 +47,19 @@ export const TerritoryTreeBox: React.FC = () => {
   // }, [data]);
 
   if (isFetching) {
-    return <div>loading...</div>;
+    return (
+      <div
+        style={{
+          height: "100%",
+          width: "100%",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <DotLoader />
+      </div>
+    );
   }
   return (
     <>

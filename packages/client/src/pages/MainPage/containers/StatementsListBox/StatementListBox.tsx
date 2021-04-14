@@ -17,6 +17,7 @@ import api from "api";
 import { IStatement, IActant, IAction } from "@shared/types";
 import { StatementListTable } from "./StatementListTable";
 import { StyledDots } from "./StatementLitBoxStyles";
+import { DotLoader } from "react-spinners";
 
 const initialData: {
   statements: IStatement[];
@@ -208,7 +209,20 @@ export const StatementListBox: React.FC = () => {
   };
 
   if (isFetching) {
-    return <div>loading...</div>;
+    // return <div>loading...</div>;
+    return (
+      <div
+        style={{
+          height: "100%",
+          width: "100%",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <DotLoader />
+      </div>
+    );
   }
   return <StatementListTable data={statements} columns={columns} />;
 };
