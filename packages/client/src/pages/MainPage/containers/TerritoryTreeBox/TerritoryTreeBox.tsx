@@ -62,7 +62,7 @@ export const TerritoryTreeBox: React.FC = () => {
 
   return (
     <>
-      <DotLoader loading={isFetching} color={theme.color["primary"]} />
+      {/* <DotLoader loading={isFetching} color={theme.color["primary"]} /> */}
 
       {data && (
         <TerritoryTreeNode
