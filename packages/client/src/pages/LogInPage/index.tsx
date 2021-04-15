@@ -18,6 +18,7 @@ const LogInPage: React.FC<LogInPage> = ({}) => {
   const [password, setPassword] = useState("");
 
   const handleLogIn = () => {
+    // const res = api.checkLogin();
     dispatch(setAuthToken(Math.floor(Math.random() * 100).toString()));
   };
 

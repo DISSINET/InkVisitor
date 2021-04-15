@@ -21,7 +21,6 @@ import { StatementListTable } from "./StatementListTable/StatementListTable";
 import { StyledDots, StyledLoaderWrap } from "./StatementLitBoxStyles";
 import { CStatement } from "constructors";
 import theme from "Theme/theme";
-import { setAuthToken } from "redux/features/authTokenSlice";
 
 const initialData: {
   statements: IStatement[];

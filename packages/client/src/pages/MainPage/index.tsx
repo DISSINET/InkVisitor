@@ -19,7 +19,6 @@ import {
   UserOptionsModal,
 } from "./containers";
 import { useHistory, useParams } from "react-router-dom";
-import api from "../../api";
 
 interface MainPage {
   size: number[];
