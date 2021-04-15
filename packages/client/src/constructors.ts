@@ -3,7 +3,8 @@ import {
   IStatementActant,
   IActant,
   ITerritory,
-} from "../../shared/types";
+  IStatement,
+} from "@shared/types";
 
 import { v4 as uuidv4 } from "uuid";
 
@@ -22,6 +23,28 @@ export const CProp = (): IProp => ({
     id: "",
     certainty: "1",
     elvl: "1",
+  },
+});
+
+export const CStatement = (territoryId: string): IStatement => ({
+  id: uuidv4(),
+  class: "S",
+  label: "",
+  data: {
+    action: "",
+    certainty: "1",
+    elvl: "1",
+    modality: "1",
+    text: "",
+    note: "",
+    territory: {
+      id: territoryId,
+      order: -1,
+    },
+    actants: [],
+    props: [],
+    references: [],
+    tags: [],
   },
 });
 

@@ -1,16 +1,26 @@
 import React, { useMemo, useRef, useState } from "react";
-import { useTable, Cell, Row, useExpanded } from "react-table";
-import { useQuery } from "react-query";
-import { FaInfo, FaPencilAlt, FaClone, FaTrashAlt } from "react-icons/fa";
+import { Cell } from "react-table";
+import { useQuery, useQueryClient } from "react-query";
+import {
+  FaInfo,
+  FaPencilAlt,
+  FaClone,
+  FaTrashAlt,
+  FaPlus,
+} from "react-icons/fa";
 import { useLocation, useHistory } from "react-router";
 const queryString = require("query-string");
 
-import { Button, ButtonGroup, TagGroup } from "components";
+import { Button, ButtonGroup, TagGroup, Tooltip } from "components";
 import { ActantTag } from "./../";
 import api from "api";
 import { IStatement, IActant, IAction } from "@shared/types";
-import { StatementListTable } from "./StatementListTable";
-import { StyledDots } from "./StatementLitBoxStyles";
+import { StatementListTable } from "./StatementListTable/StatementListTable";
+import { StyledDots, StyledLoaderWrap } from "./StatementLitBoxStyles";
+import { DotLoader } from "react-spinners";
+import { CStatement } from "constructors";
+import theme from "Theme/theme";
+import { toast } from "react-toastify";
 
 const initialData: {
   statements: IStatement[];
@@ -21,6 +31,7 @@ const initialData: {
 };
 
 export const StatementListBox: React.FC = () => {
+  const queryClient = useQueryClient();
   let history = useHistory();
   let location = useLocation();
   var hashParams = queryString.parse(location.hash);
@@ -38,6 +49,20 @@ export const StatementListBox: React.FC = () => {
 
   const { statements, actants } = data || initialData;
 
+  const {
+    status: statusActions,
+    data: actions,
+    error: errorActions,
+    isFetching: isFetchingActions,
+  } = useQuery(
+    ["actions"],
+    async () => {
+      const res = await api.actionsGetMore({});
+      return res.data;
+    },
+    {}
+  );
+
   const columns: any = useMemo(() => {
     return [
       {
@@ -54,11 +79,12 @@ export const StatementListBox: React.FC = () => {
                 .map((a: any) => a.actant)
             : [];
 
-          const isOversized = subjectIds.length > 2;
-          const subjectIdsSlice = subjectIds.slice(0, 2);
+          const isOversized = subjectIds.length > 1;
+          const subjectIdsSlice = subjectIds.slice(0, 1);
 
           return (
             <TagGroup>
+              <ActantTag actant={{ id: "", class: "S", label: "", data: {} }} />
               {subjectIdsSlice
                 .filter((a: any) => a)
                 .map((actantId: string, ai: number) => {
@@ -81,15 +107,20 @@ export const StatementListBox: React.FC = () => {
         accessor: "data.action",
         Cell: ({ row }: Cell) => {
           const actionTypeLabel = row.values.data?.action;
-          // const actionLabel = actions?.find(
-          //   (a: IAction) => a.id === actionTypeLabel
-          // )?.labels[0].value;
+          const actionLabel = actions?.find(
+            (a: IAction) => a.id === actionTypeLabel
+          )?.labels[0].value;
 
           return (
             <p>
-              {actionTypeLabel && actionTypeLabel.length > 40
-                ? `${actionTypeLabel.substring(0, 40)}...`
-                : actionTypeLabel}
+              {actionLabel &&
+                (actionLabel.length > 9 ? (
+                  <Tooltip label={actionLabel}>
+                    <div>{`${actionLabel.substring(0, 9)}...`}</div>
+                  </Tooltip>
+                ) : (
+                  actionLabel
+                ))}
             </p>
           );
         },
@@ -158,8 +189,45 @@ export const StatementListBox: React.FC = () => {
           </ButtonGroup>
         ),
       },
+      {
+        Header: "",
+        id: "addStatement",
+        Cell: ({ row }: any) => (
+          <div>
+            <Button
+              key="add"
+              icon={<FaPlus size={14} />}
+              color="primary"
+              inverted
+              onClick={() => addStatement()}
+            />
+          </div>
+        ),
+      },
     ];
-  }, [data]);
+  }, [data, actions]);
 
+  const addStatement = async () => {
+    const newStatement: IStatement = CStatement(territoryId);
+    const res = await api.actantsCreate(newStatement);
+    if (res.status === 200) {
+      toast.info(`Statement created!`);
+      queryClient.invalidateQueries([
+        "territory",
+        "statement-list",
+        territoryId,
+      ]);
+    } else {
+      toast.error(`Error: Statement not created!`);
+    }
+  };
+
+  if (isFetching) {
+    return (
+      <StyledLoaderWrap>
+        <DotLoader color={theme.color["primary"]} />
+      </StyledLoaderWrap>
+    );
+  }
   return <StatementListTable data={statements} columns={columns} />;
 };
