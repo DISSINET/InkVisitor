@@ -1,6 +1,6 @@
 import React, { useMemo, useRef, useState } from "react";
 import { Cell } from "react-table";
-import { useQuery } from "react-query";
+import { useQuery, useQueryClient } from "react-query";
 import {
   FaInfo,
   FaPencilAlt,
@@ -14,12 +14,13 @@ const queryString = require("query-string");
 import { Button, ButtonGroup, TagGroup, Tooltip } from "components";
 import { ActantTag } from "./../";
 import api from "api";
-import { IStatement, IActant, IAction, IStatementActant } from "@shared/types";
+import { IStatement, IActant, IAction } from "@shared/types";
 import { StatementListTable } from "./StatementListTable/StatementListTable";
 import { StyledDots, StyledLoaderWrap } from "./StatementLitBoxStyles";
 import { DotLoader } from "react-spinners";
-import { CStatementActant } from "constructors";
+import { CStatement } from "constructors";
 import theme from "Theme/theme";
+import { toast } from "react-toastify";
 
 const initialData: {
   statements: IStatement[];
@@ -30,6 +31,7 @@ const initialData: {
 };
 
 export const StatementListBox: React.FC = () => {
+  const queryClient = useQueryClient();
   let history = useHistory();
   let location = useLocation();
   var hashParams = queryString.parse(location.hash);
@@ -197,7 +199,7 @@ export const StatementListBox: React.FC = () => {
               icon={<FaPlus size={14} />}
               color="primary"
               inverted
-              onClick={() => addStatement(row.values.id)}
+              onClick={() => addStatement()}
             />
           </div>
         ),
@@ -205,11 +207,19 @@ export const StatementListBox: React.FC = () => {
     ];
   }, [data, actions]);
 
-  const addStatement = async (rowId: string) => {
-    // TODO: add new statement
-    console.log("Adding statement not implemented. Clicked on ID: ", rowId);
-    const newStatement: IStatementActant = CStatementActant();
-    // const res = await api.actantsCreate(newStatement);
+  const addStatement = async () => {
+    const newStatement: IStatement = CStatement(territoryId);
+    const res = await api.actantsCreate(newStatement);
+    if (res.status === 200) {
+      toast.info(`Statement created!`);
+      queryClient.invalidateQueries([
+        "statement-list",
+        "territory",
+        territoryId,
+      ]);
+    } else {
+      toast.error(`Error: Statement not created!`);
+    }
   };
 
   if (isFetching) {
