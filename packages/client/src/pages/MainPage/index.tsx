@@ -48,23 +48,23 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
         right={
           <div>
             {/* {user ? (
-                            <>
-                                <div ">
-                                    logged as {api.getUser().name}
-                                </div>
-                                <Button
-                                    label="Log Out"
-                                    color="danger"
-                                    onClick={() => null}
-                                />
-                            </>
-                        ) : (
-                            <Button
-                                label="Log In"
-                                color="info"
-                                onClick={() => null}
-                            />
-                        )} */}
+              <>
+                  <div ">
+                      logged as {api.getUser().name}
+                  </div>
+                  <Button
+                      label="Log Out"
+                      color="danger"
+                      onClick={() => null}
+                  />
+              </>
+          ) : (
+              <Button
+                  label="Log In"
+                  color="info"
+                  onClick={() => null}
+              />
+          )} */}
           </div>
         }
       />
