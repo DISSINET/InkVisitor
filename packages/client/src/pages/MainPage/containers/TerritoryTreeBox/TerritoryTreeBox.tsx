@@ -5,6 +5,8 @@ const queryString = require("query-string");
 import api from "api";
 import { TerritoryTreeNode } from "./TerritoryTreeNode/TerritoryTreeNode";
 import { IResponseTree } from "@shared/types";
+import { DotLoader } from "react-spinners";
+import theme from "Theme/theme";
 
 export const TerritoryTreeBox: React.FC = () => {
   const { status, data, error, isFetching } = useQuery(
@@ -18,6 +20,19 @@ export const TerritoryTreeBox: React.FC = () => {
   );
   var hashParams = queryString.parse(location.hash);
   const territoryId = hashParams.territory;
+  const {
+    status: territoryStatus,
+    data: territory,
+    error: territoryError,
+    isFetching: territoryIsFetching,
+  } = useQuery(
+    ["territory"],
+    async () => {
+      const res = await api.territoryGet(territoryId);
+      return res.data;
+    },
+    {}
+  );
   const [selectedTerritory, setSelectedTerritory] = useState<IResponseTree>();
 
   // const searchTree = (
@@ -47,6 +62,8 @@ export const TerritoryTreeBox: React.FC = () => {
 
   return (
     <>
+      {/* <DotLoader loading={isFetching} color={theme.color["primary"]} /> */}
+
       {data && (
         <TerritoryTreeNode
           territory={data.territory}

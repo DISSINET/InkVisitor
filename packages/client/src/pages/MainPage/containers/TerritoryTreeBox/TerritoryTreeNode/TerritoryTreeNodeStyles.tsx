@@ -23,8 +23,3 @@ export const StyledFaCircle = styled(FaCircle)`
   margin: 0 ${({ theme }) => theme.space[1]};
   color: ${({ theme }) => theme.color["primary"]};
 `;
-export const StyledIconBox = styled.div`
-  /* margin: 0 ${({ theme }) => theme.space[1]}; */
-  width: ${({ theme }) => theme.space[10]};
-  background-color: hotpink;
-`;

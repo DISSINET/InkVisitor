@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { Column, useTable, useExpanded } from "react-table";
 import update from "immutability-helper";
-import { StyledTable, StyledTHead, StyledTh } from "./StatementListStyles";
+import { StyledTable, StyledTHead, StyledTh } from "./StatementListTableStyles";
 import { StatementListRow } from "./StatementListRow";
 import { IStatement, IActant } from "@shared/types";
 

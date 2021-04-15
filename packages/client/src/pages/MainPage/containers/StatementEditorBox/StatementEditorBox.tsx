@@ -79,11 +79,11 @@ export const StatementEditorBox: React.FC = () => {
   // getting origin actants of properties
   const propsByOrigins = useMemo(() => {
     if (statement) {
-      console.log(
-        "getting new props",
-        statement.data.actants,
-        statement.actants
-      );
+      // console.log(
+      //   "getting new props",
+      //   statement.data.actants,
+      //   statement.actants
+      // );
       const allProps = statement?.data.props;
       const statementItself = { ...statement };
 

@@ -14,11 +14,9 @@ import {
   StyledChildrenWrap,
   StyledFaCircle,
   StyledFaDotCircle,
-  StyledIconBox,
   StyledIconWrap,
   StyledTerritoryTagWrap,
 } from "./TerritoryTreeNodeStyles";
-import { Arrow } from "components";
 import { ContextMenu } from "../ContextMenu/ContextMenu";
 import { ActantTag } from "../..";
 
