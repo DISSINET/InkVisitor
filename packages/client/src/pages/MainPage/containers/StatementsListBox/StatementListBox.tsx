@@ -213,8 +213,8 @@ export const StatementListBox: React.FC = () => {
     if (res.status === 200) {
       toast.info(`Statement created!`);
       queryClient.invalidateQueries([
-        "statement-list",
         "territory",
+        "statement-list",
         territoryId,
       ]);
     } else {
