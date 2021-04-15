@@ -14,10 +14,12 @@ const queryString = require("query-string");
 import { Button, ButtonGroup, TagGroup, Tooltip } from "components";
 import { ActantTag } from "./../";
 import api from "api";
-import { IStatement, IActant, IAction } from "@shared/types";
-import { StatementListTable } from "./StatementListTable";
-import { StyledDots } from "./StatementLitBoxStyles";
+import { IStatement, IActant, IAction, IStatementActant } from "@shared/types";
+import { StatementListTable } from "./StatementListTable/StatementListTable";
+import { StyledDots, StyledLoaderWrap } from "./StatementLitBoxStyles";
 import { DotLoader } from "react-spinners";
+import { CStatementActant } from "constructors";
+import theme from "Theme/theme";
 
 const initialData: {
   statements: IStatement[];
@@ -203,25 +205,18 @@ export const StatementListBox: React.FC = () => {
     ];
   }, [data, actions]);
 
-  const addStatement = (rowId: string) => {
+  const addStatement = async (rowId: string) => {
     // TODO: add new statement
     console.log("Adding statement not implemented. Clicked on ID: ", rowId);
+    const newStatement: IStatementActant = CStatementActant();
+    // const res = await api.actantsCreate(newStatement);
   };
 
   if (isFetching) {
-    // return <div>loading...</div>;
     return (
-      <div
-        style={{
-          height: "100%",
-          width: "100%",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-        }}
-      >
-        <DotLoader />
-      </div>
+      <StyledLoaderWrap>
+        <DotLoader color={theme.color["primary"]} />
+      </StyledLoaderWrap>
     );
   }
   return <StatementListTable data={statements} columns={columns} />;

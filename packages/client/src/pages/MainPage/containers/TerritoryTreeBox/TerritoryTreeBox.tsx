@@ -6,6 +6,7 @@ import api from "api";
 import { TerritoryTreeNode } from "./TerritoryTreeNode/TerritoryTreeNode";
 import { IResponseTree } from "@shared/types";
 import { DotLoader } from "react-spinners";
+import theme from "Theme/theme";
 
 export const TerritoryTreeBox: React.FC = () => {
   const { status, data, error, isFetching } = useQuery(
@@ -34,23 +35,35 @@ export const TerritoryTreeBox: React.FC = () => {
   );
   const [selectedTerritory, setSelectedTerritory] = useState<IResponseTree>();
 
-  if (isFetching) {
-    return (
-      <div
-        style={{
-          height: "100%",
-          width: "100%",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-        }}
-      >
-        <DotLoader />
-      </div>
-    );
-  }
+  // const searchTree = (
+  //   element: IResponseTree,
+  //   matchingTitle: string
+  // ): IResponseTree | null => {
+  //   if (element.territory.id === matchingTitle) {
+  //     return element;
+  //   } else if (element.children != null) {
+  //     var i;
+  //     var result = null;
+  //     for (i = 0; result === null && i < element.children.length; i++) {
+  //       result = searchTree(element.children[i], matchingTitle);
+  //     }
+  //     return result;
+  //   }
+  //   return null;
+  // };
+  // useEffect(() => {
+  //   if (data) {
+  //     const foundTerritory = searchTree(data, territoryId);
+  //     if (foundTerritory) {
+  //       setSelectedTerritory(foundTerritory);
+  //     }
+  //   }
+  // }, [data]);
+
   return (
     <>
+      <DotLoader loading={isFetching} color={theme.color["primary"]} />
+
       {data && (
         <TerritoryTreeNode
           territory={data.territory}

@@ -12,7 +12,7 @@ import { Cell } from "react-table";
 const queryString = require("query-string");
 
 import { ItemTypes } from "types";
-import { StyledTr, StyledTd } from "./StatementListStyles";
+import { StyledTr, StyledTd } from "./StatementListTableStyles";
 
 type DragItem = {
   index: number;
