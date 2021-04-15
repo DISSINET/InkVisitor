@@ -29,7 +29,7 @@ export const CProp = (): IProp => ({
 export const CStatement = (territoryId: string): IStatement => ({
   id: uuidv4(),
   class: "S",
-  label: "x",
+  label: "",
   data: {
     action: "",
     certainty: "1",
@@ -39,7 +39,7 @@ export const CStatement = (territoryId: string): IStatement => ({
     note: "",
     territory: {
       id: territoryId,
-      order: 2,
+      order: -1,
     },
     actants: [],
     props: [],
