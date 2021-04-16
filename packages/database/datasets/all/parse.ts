@@ -335,7 +335,7 @@ const loadStatementsTables = async (next: Function) => {
           elvl: statement.epistemological_level || "1",
 
           // TODO handle modality
-          modality: statement.modality || "1",
+          modality: statement.modality || "Y",
           text: statement.text,
           note: `NOTE: ${statement.note}, LOCATION: ${statement.location_text}, TIME: ${statement.time_note}`,
           props: [],
@@ -412,7 +412,7 @@ const loadStatementsTables = async (next: Function) => {
           id: v4(),
           elvl: "1",
           certainty: "1",
-          modality: "1",
+          modality: "Y",
           origin: statement.id,
           type: {
             id: propActant1Id,
@@ -595,7 +595,7 @@ const createEmptyPropStatement = (
         tags: [],
         certainty: "1",
         elvl: "1",
-        modality: "1",
+        modality: "Y",
         text: "",
         note: "",
         props: [],
@@ -682,7 +682,7 @@ const processLocation = (
             id: v4(),
             elvl: "1",
             certainty: "1",
-            modality: "1",
+            modality: "Y",
             origin: statement.id,
             type: {
               id: sameLocationType,
@@ -700,7 +700,7 @@ const processLocation = (
             id: v4(),
             elvl: "1",
             certainty: "1",
-            modality: "1",
+            modality: "Y",
             origin: statement.id,
             type: {
               id: locationType.concept,
@@ -772,7 +772,7 @@ const processActant = (
           origin: statementActantId,
           elvl: "1",
           certainty: "1",
-          modality: "1",
+          modality: "Y",
           type: {
             id: propActant1Id,
             certainty: "1",
