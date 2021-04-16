@@ -238,8 +238,8 @@ export const StatementEditorBox: React.FC = () => {
                         width={1000}
                         onChangeFn={(newValue: string) => {
                           const newData = {
-                            ...statement.data,
                             ...{ text: newValue },
+                            ...statement.data,
                           };
                           update(newData);
                         }}
@@ -357,14 +357,6 @@ export const StatementEditorBox: React.FC = () => {
                           ></Input>
                         </StyledActantListItem>
                         <StyledActantListItem>
-                          <ModalityToggle
-                            value={sActant.modality}
-                            onChangeFn={(newValue: string) => {
-                              updateActant(sActant.id, {
-                                modality: newValue,
-                              });
-                            }}
-                          />
                           <ElvlToggle
                             value={sActant.elvl}
                             onChangeFn={(newValue: string) => {
