@@ -19,7 +19,6 @@ import {
   UserOptionsModal,
 } from "./containers";
 import { useHistory, useParams } from "react-router-dom";
-import api from "../../api";
 
 interface MainPage {
   size: number[];
@@ -48,23 +47,23 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
         right={
           <div>
             {/* {user ? (
-                            <>
-                                <div ">
-                                    logged as {api.getUser().name}
-                                </div>
-                                <Button
-                                    label="Log Out"
-                                    color="danger"
-                                    onClick={() => null}
-                                />
-                            </>
-                        ) : (
-                            <Button
-                                label="Log In"
-                                color="info"
-                                onClick={() => null}
-                            />
-                        )} */}
+              <>
+                  <div ">
+                      logged as {api.getUser().name}
+                  </div>
+                  <Button
+                      label="Log Out"
+                      color="danger"
+                      onClick={() => null}
+                  />
+              </>
+          ) : (
+              <Button
+                  label="Log In"
+                  color="info"
+                  onClick={() => null}
+              />
+          )} */}
           </div>
         }
       />

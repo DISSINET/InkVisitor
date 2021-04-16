@@ -9,6 +9,8 @@ import {
   FaPlus,
 } from "react-icons/fa";
 import { useLocation, useHistory } from "react-router";
+import { toast } from "react-toastify";
+import { DotLoader } from "react-spinners";
 const queryString = require("query-string");
 
 import { Button, ButtonGroup, TagGroup, Tooltip } from "components";
@@ -17,10 +19,8 @@ import api from "api";
 import { IStatement, IActant, IAction } from "@shared/types";
 import { StatementListTable } from "./StatementListTable/StatementListTable";
 import { StyledDots, StyledLoaderWrap } from "./StatementLitBoxStyles";
-import { DotLoader } from "react-spinners";
 import { CStatement } from "constructors";
 import theme from "Theme/theme";
-import { toast } from "react-toastify";
 
 const initialData: {
   statements: IStatement[];
