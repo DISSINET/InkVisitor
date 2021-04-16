@@ -5,8 +5,8 @@ import { Button, Input } from "components";
 import { setAuthToken } from "redux/features/authTokenSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { StyledLogInBox, StyledPage } from "./LogInPageStyles";
-import api from "api";
 import { setUsername } from "redux/features/usernameSlice";
+import api from "api";
 
 interface LogInPage {
   size: number[];
@@ -21,6 +21,7 @@ const LogInPage: React.FC<LogInPage> = ({}) => {
 
   const handleLogIn = async () => {
     const res = await api.signIn(username, password);
+
     dispatch(setAuthToken(Math.floor(Math.random() * 100).toString()));
     dispatch(setUsername(Math.floor(Math.random() * 100).toString()));
   };
