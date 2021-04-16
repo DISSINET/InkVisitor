@@ -6,6 +6,7 @@ import { setAuthToken } from "redux/features/authTokenSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { StyledLogInBox, StyledPage } from "./LogInPageStyles";
 import { api } from "api";
+import { setUsername } from "redux/features/usernameSlice";
 
 interface LogInPage {
   size: number[];
@@ -13,13 +14,15 @@ interface LogInPage {
 const LogInPage: React.FC<LogInPage> = ({}) => {
   const dispatch = useAppDispatch();
   const token = useAppSelector((state) => state.token);
+  const username = useAppSelector((state) => state.username);
 
-  const [username, setUsername] = useState("");
+  const [usernameLocal, setUsernameLocal] = useState("");
   const [password, setPassword] = useState("");
 
-  const handleLogIn = () => {
-    // const res = api.checkLogin();
+  const handleLogIn = async () => {
+    // const res = await api.signIn(username, password);
     dispatch(setAuthToken(Math.floor(Math.random() * 100).toString()));
+    dispatch(setUsername(Math.floor(Math.random() * 100).toString()));
   };
 
   return (
@@ -28,8 +31,8 @@ const LogInPage: React.FC<LogInPage> = ({}) => {
         <h2>InkVisitor</h2>
         <Input
           placeholder="username"
-          onChangeFn={(text: string) => setUsername(text)}
-          value={username}
+          onChangeFn={(text: string) => setUsernameLocal(text)}
+          value={usernameLocal}
         />
         <Input
           placeholder="password"
@@ -37,6 +40,7 @@ const LogInPage: React.FC<LogInPage> = ({}) => {
           value={password}
         />
         <h5>{token}</h5>
+        <h5>{username}</h5>
         <Button onClick={() => handleLogIn()} label={"Log In"} color="danger" />
       </StyledLogInBox>
     </StyledPage>
