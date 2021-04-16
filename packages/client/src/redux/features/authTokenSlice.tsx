@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
-const initialState: string = "init";
+const initialState: string = "";
 
 const authTokenSlice = createSlice({
   name: "token",
