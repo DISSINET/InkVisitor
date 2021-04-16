@@ -33,16 +33,16 @@ export const App: React.FC<AppProps> = () => {
       <QueryClientProvider client={queryClient}>
         <BrowserRouter basename="apps/inkvisitor">
           <Switch>
-            <Route
-              path="/"
-              exact
-              render={(props) => <LogInPage {...props} size={size} />}
-            />
             {/* <Route
               path="/"
               exact
-              render={(props) => <MainPage {...props} size={size} />}
+              render={(props) => <LogInPage {...props} size={size} />}
             /> */}
+            <Route
+              path="/"
+              exact
+              render={(props) => <MainPage {...props} size={size} />}
+            />
           </Switch>
         </BrowserRouter>
         <ReactQueryDevtools initialIsOpen />
