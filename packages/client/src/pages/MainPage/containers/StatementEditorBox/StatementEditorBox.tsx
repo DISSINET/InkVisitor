@@ -231,36 +231,36 @@ export const StatementEditorBox: React.FC = () => {
                 <div>
                   <StyledListHeaderColumn>Action</StyledListHeaderColumn>
                   <div>
-                    <ActionDropdown
-                      onSelectedChange={(newActionValue: {
-                        value: string;
-                        label: string;
-                      }) => {
-                        const newData = {
-                          ...statement.data,
-                          ...{ action: newActionValue.value },
-                        };
-                        update(newData);
-                      }}
-                      value={statement.data.action}
-                    />
-                  </div>
-                </div>
-                <div>
-                  <StyledListHeaderColumn>Text</StyledListHeaderColumn>
-                  <div>
-                    <Input
-                      type="textarea"
-                      width={1000}
-                      onChangeFn={(newValue: string) => {
-                        const newData = {
-                          ...statement.data,
-                          ...{ text: newValue },
-                        };
-                        update(newData);
-                      }}
-                      value={statement.data.text}
-                    />
+                    <StyledListHeaderColumn>Text</StyledListHeaderColumn>
+                    <div>
+                      <Input
+                        type="textarea"
+                        width={1000}
+                        onChangeFn={(newValue: string) => {
+                          const newData = {
+                            ...statement.data,
+                            ...{ text: newValue },
+                          };
+                          update(newData);
+                        }}
+                        value={statement.data.text}
+                      />
+                    </div>
+                    <div>
+                      <ActionDropdown
+                        onSelectedChange={(newActionValue: {
+                          value: string;
+                          label: string;
+                        }) => {
+                          const newData = {
+                            ...statement.data,
+                            ...{ action: newActionValue.value },
+                          };
+                          update(newData);
+                        }}
+                        value={statement.data.action}
+                      />
+                    </div>
                   </div>
                 </div>
                 <div>
@@ -409,7 +409,7 @@ export const StatementEditorBox: React.FC = () => {
             {/* Props */}
             <StyledEditorSection key="editor-section-props">
               <StyledEditorSectionHeader>
-                Properties (has)
+                Actant Properties
               </StyledEditorSectionHeader>
               <div
                 className="editor-section-content"
