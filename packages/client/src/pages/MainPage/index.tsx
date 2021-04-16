@@ -24,8 +24,6 @@ interface MainPage {
   size: number[];
 }
 
-const initTerritory = "T40-02-07";
-
 const MainPage: React.FC<MainPage> = ({ size }) => {
   const history = useHistory();
   const { territoryId, statementId } = useParams<{
