@@ -8,10 +8,12 @@ import { IStatement, IActant } from "@shared/types";
 interface StatementListTable {
   data: {}[];
   columns: Column<{}>[];
+  handleRowClick?: Function;
 }
 export const StatementListTable: React.FC<StatementListTable> = ({
   data,
   columns,
+  handleRowClick = () => {},
 }) => {
   const [records, setRecords] = useState<{}[]>([]);
   useEffect(() => {
@@ -71,6 +73,7 @@ export const StatementListTable: React.FC<StatementListTable> = ({
           prepareRow(row);
           return (
             <StatementListRow
+              handleClick={handleRowClick}
               index={i}
               row={row}
               moveRow={moveRow}

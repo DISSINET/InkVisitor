@@ -108,7 +108,10 @@ export const Tag: React.FC<TagProps> = ({
   const renderEntityTag = () => <EntityTag color={color}>{category}</EntityTag>;
   const renderButton = () => <ButtonWrapper>{button}</ButtonWrapper>;
 
-  const onDoubleClick = () => {
+  const onDoubleClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    e.nativeEvent.stopImmediatePropagation();
+
     hashParams["actant"] = propId;
     history.push({
       hash: queryString.stringify(hashParams),
@@ -123,7 +126,7 @@ export const Tag: React.FC<TagProps> = ({
             <TagWrapper
               ref={ref}
               borderStyle={borderStyle}
-              onDoubleClick={() => onDoubleClick()}
+              onDoubleClick={(e: React.MouseEvent) => onDoubleClick(e)}
             >
               {renderEntityTag()}
               {button && renderButton()}
@@ -135,7 +138,7 @@ export const Tag: React.FC<TagProps> = ({
           <TagWrapper
             ref={ref}
             borderStyle={borderStyle}
-            onDoubleClick={() => onDoubleClick()}
+            onDoubleClick={(e: React.MouseEvent) => onDoubleClick(e)}
           >
             {renderEntityTag()}
             {label && (
