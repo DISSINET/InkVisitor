@@ -4,6 +4,9 @@ import { useQuery, useQueryClient } from "react-query";
 import {
   FaInfo,
   FaPencilAlt,
+  FaRegCheckSquare,
+  FaRegSquare,
+  FaSquare,
   FaClone,
   FaTrashAlt,
   FaPlus,
@@ -70,6 +73,33 @@ export const StatementListBox: React.FC = () => {
         accessor: "id",
       },
       {
+        Header: "",
+        id: "Selector",
+        Cell: ({ row }: Cell) => {
+          return hashParams["statement"] === row.values.id ? (
+            <FaRegCheckSquare
+              size={14}
+              onClick={() => {
+                hashParams["statement"] = row.values.id;
+                history.push({
+                  hash: queryString.stringify(hashParams),
+                });
+              }}
+            />
+          ) : (
+            <FaRegSquare
+              size={14}
+              onClick={() => {
+                hashParams["statement"] = row.values.id;
+                history.push({
+                  hash: queryString.stringify(hashParams),
+                });
+              }}
+            />
+          );
+        },
+      },
+      {
         Header: "Subjects",
         accessor: "data",
         Cell: ({ row }: Cell) => {
@@ -112,7 +142,7 @@ export const StatementListBox: React.FC = () => {
           )?.labels[0].value;
 
           return (
-            <p>
+            <div>
               {actionLabel &&
                 (actionLabel.length > 9 ? (
                   <Tooltip label={actionLabel}>
@@ -121,7 +151,7 @@ export const StatementListBox: React.FC = () => {
                 ) : (
                   actionLabel
                 ))}
-            </p>
+            </div>
           );
         },
       },
@@ -167,17 +197,7 @@ export const StatementListBox: React.FC = () => {
               onClick={() => (row.isExpanded = !row.isExpanded)}
             />
             <Button key="d" icon={<FaClone size={14} />} color="success" />
-            <Button
-              key="e"
-              icon={<FaPencilAlt size={14} />}
-              color="warning"
-              onClick={() => {
-                hashParams["statement"] = row.values.id;
-                history.push({
-                  hash: queryString.stringify(hashParams),
-                });
-              }}
-            />
+
             <Button
               key="r"
               icon={<FaTrashAlt size={14} />}
@@ -186,22 +206,13 @@ export const StatementListBox: React.FC = () => {
                 // delete
               }}
             />
-          </ButtonGroup>
-        ),
-      },
-      {
-        Header: "",
-        id: "addStatement",
-        Cell: ({ row }: any) => (
-          <div>
             <Button
               key="add"
               icon={<FaPlus size={14} />}
-              color="primary"
-              inverted
+              color="warning"
               onClick={() => addStatement()}
             />
-          </div>
+          </ButtonGroup>
         ),
       },
     ];
@@ -234,5 +245,13 @@ export const StatementListBox: React.FC = () => {
       </StyledLoaderWrap>
     );
   }
-  return <StatementListTable data={statements} columns={columns} />;
+  return (
+    <StatementListTable
+      data={statements}
+      columns={columns}
+      handleRowClick={(rowId: string) => {
+        console.log(rowId);
+      }}
+    />
+  );
 };
