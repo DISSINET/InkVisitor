@@ -20,13 +20,26 @@ export const InputWrapper = styled.div<InputWrapper>`
 export const SuggesterButton = styled.div``;
 export const SuggesterList = styled.div`
   position: absolute;
-  left: ${space36};
+  left: 0;
   background-color: ${({ theme }) => theme.color["blue"][50]};
   padding: ${space1};
   width: auto;
   z-index: 10;
+  display: grid;
+  grid-template-columns: 1.5em 10em 2em;
+  grid-template-rows: auto;
+  grid-auto-flow: row;
+  align-items: center;
+
+  > div {
+    margin-bottom: ${space1};
+  }
 `;
-export const SuggestionLine = styled.div`
-  display: block;
-  padding: ${space1};
+
+export const SuggestionLineIcons = styled.div``;
+
+export const SuggestionLineTag = styled.div``;
+
+export const SuggestionLineActions = styled.div`
+  cursor: pointer;
 `;
