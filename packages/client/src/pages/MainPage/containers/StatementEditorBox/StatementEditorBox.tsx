@@ -313,7 +313,7 @@ export const StatementEditorBox: React.FC = () => {
                       (a) => a.id === sActant.actant
                     );
                     return (
-                      <>
+                      <React.Fragment key={sai}>
                         <StyledActantListItem>
                           {actant ? (
                             <ActantTag
@@ -384,7 +384,7 @@ export const StatementEditorBox: React.FC = () => {
                             }}
                           />
                         </StyledActantListItem>
-                      </>
+                      </React.Fragment>
                     );
                   })}
                 </StyledActantList>
@@ -425,13 +425,13 @@ export const StatementEditorBox: React.FC = () => {
                       );
 
                       return (
-                        <>
+                        <React.Fragment key={sai}>
                           <StyledPropLineColumn
                             padded={level === "2"}
                             lastSecondLevel={lastSecondLevel}
                           >
                             {propTypeActant ? (
-                              <>
+                              <React.Fragment>
                                 <ActantTag
                                   key={sai}
                                   actant={propTypeActant}
@@ -476,7 +476,7 @@ export const StatementEditorBox: React.FC = () => {
                                     }}
                                   />
                                 </StyledPropButtonGroup>
-                              </>
+                              </React.Fragment>
                             ) : (
                               <ActantSuggester
                                 onSelected={(newSelectedId: string) => {
@@ -496,7 +496,7 @@ export const StatementEditorBox: React.FC = () => {
                             lastSecondLevel={lastSecondLevel}
                           >
                             {propValueActant ? (
-                              <>
+                              <React.Fragment>
                                 <ActantTag
                                   key={sai}
                                   actant={propValueActant}
@@ -541,7 +541,7 @@ export const StatementEditorBox: React.FC = () => {
                                     }}
                                   />
                                 </StyledPropButtonGroup>
-                              </>
+                              </React.Fragment>
                             ) : (
                               <ActantSuggester
                                 onSelected={(newSelectedId: string) => {
@@ -610,7 +610,7 @@ export const StatementEditorBox: React.FC = () => {
                               />
                             </StyledPropButtonGroup>
                           </StyledPropLineColumn>
-                        </>
+                        </React.Fragment>
                       );
                     };
 
@@ -649,7 +649,7 @@ export const StatementEditorBox: React.FC = () => {
                             </StyledListHeaderColumn>
                             {propOrigin.props.map((prop1, pi1) => {
                               return (
-                                <>
+                                <React.Fragment key={pi1}>
                                   {renderPropRow(prop1, "1", false)}
                                   {prop1.props.map(
                                     (prop2: any, pi2: number) => {
@@ -660,7 +660,7 @@ export const StatementEditorBox: React.FC = () => {
                                       );
                                     }
                                   )}
-                                </>
+                                </React.Fragment>
                               );
                             })}
                           </StyledPropsActantList>
@@ -678,20 +678,20 @@ export const StatementEditorBox: React.FC = () => {
               <StyledEditorSectionContent>
                 <StyledReferencesList>
                   {statement.data.references.length > 0 && (
-                    <>
+                    <React.Fragment>
                       <StyledListHeaderColumn>Resource</StyledListHeaderColumn>
                       <StyledListHeaderColumn>Part</StyledListHeaderColumn>
                       <StyledListHeaderColumn>Type</StyledListHeaderColumn>
                       <StyledListHeaderColumn>Actions</StyledListHeaderColumn>
-                    </>
+                    </React.Fragment>
                   )}
                   {statement.data.references.map(
-                    (reference: IStatementReference) => {
+                    (reference: IStatementReference, ri) => {
                       const referenceActant = statement.actants.find(
                         (a) => a.id === reference.resource
                       );
                       return (
-                        <>
+                        <React.Fragment key={ri}>
                           <StyledReferencesListColumn>
                             {referenceActant ? (
                               <ActantTag
@@ -754,7 +754,7 @@ export const StatementEditorBox: React.FC = () => {
                               }}
                             />
                           </StyledReferencesListColumn>
-                        </>
+                        </React.Fragment>
                       );
                     }
                   )}
