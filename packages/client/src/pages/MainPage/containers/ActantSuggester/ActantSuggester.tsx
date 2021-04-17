@@ -94,7 +94,10 @@ export const ActantSuggester: React.FC<ActantSuggesterI> = ({
     handleClean();
   };
   const handleDropped = (newDropped: any) => {
-    onSelected(newDropped.id);
+    const droppedCategory = newDropped.category;
+    if (categoryIds.includes(droppedCategory)) {
+      onSelected(newDropped.id);
+    }
     handleClean();
   };
 
