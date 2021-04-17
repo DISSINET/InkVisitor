@@ -1,6 +1,6 @@
-import React from "react";
+import React, { ReactElement } from "react";
 import { DragObjectWithType, DropTargetMonitor, useDrop } from "react-dnd";
-import { FaPlus } from "react-icons/fa";
+import { FaPlus, FaPlayCircle } from "react-icons/fa";
 
 import { Button, Input, Tag } from "components";
 import { IOption } from "@shared/types";
@@ -10,7 +10,9 @@ import {
   InputWrapper,
   SuggesterButton,
   SuggesterList,
-  SuggestionLine,
+  SuggestionLineIcons,
+  SuggestionLineTag,
+  SuggestionLineActions,
 } from "./SuggesterStyles";
 
 export interface SuggestionI {
@@ -18,6 +20,7 @@ export interface SuggestionI {
   label: string;
   category: string;
   color: string;
+  icons?: React.ReactNode[];
 }
 
 interface SuggesterProps {
@@ -106,23 +109,24 @@ export const Suggester: React.FC<SuggesterProps> = ({
           {suggestions
             .filter((s, si) => si < MAXSUGGESTIONDISPLAYED)
             .map((suggestion, si) => (
-              <SuggestionLine key={si}>
-                <Tag
-                  propId={suggestion.id}
-                  label={suggestion.label}
-                  category={suggestion.category}
-                  color={suggestion.color}
-                  button={
-                    <Button
-                      label=">"
-                      color="primary"
-                      onClick={() => {
-                        onPick(suggestion);
-                      }}
-                    />
-                  }
-                />
-              </SuggestionLine>
+              <React.Fragment key={si}>
+                <SuggestionLineActions>
+                  <FaPlayCircle
+                    onClick={() => {
+                      onPick(suggestion);
+                    }}
+                  />
+                </SuggestionLineActions>
+                <SuggestionLineTag>
+                  <Tag
+                    propId={suggestion.id}
+                    label={suggestion.label}
+                    category={suggestion.category}
+                    color={suggestion.color}
+                  />
+                </SuggestionLineTag>
+                <SuggestionLineIcons>{suggestion.icons}</SuggestionLineIcons>
+              </React.Fragment>
             ))}
         </SuggesterList>
       ) : null}
