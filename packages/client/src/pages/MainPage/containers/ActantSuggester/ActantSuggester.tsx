@@ -62,7 +62,7 @@ export const ActantSuggester: React.FC<ActantSuggesterI> = ({
 
         //console.log(territoryActants, territoryActantIds, s.id);
         if ((territoryActants as string[])?.includes(s.id)) {
-          icons.push(<FaHome color="" />);
+          icons.push(<FaHome key={s.id} color="" />);
         }
         return {
           color: entity.color,

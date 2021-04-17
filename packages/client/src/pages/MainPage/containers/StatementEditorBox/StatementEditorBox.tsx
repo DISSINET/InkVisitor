@@ -425,7 +425,14 @@ export const StatementEditorBox: React.FC = () => {
                       );
 
                       return (
-                        <React.Fragment key={sai}>
+                        <React.Fragment
+                          key={
+                            propOrigin.origin +
+                            prop.type.id +
+                            prop.value.id +
+                            sai
+                          }
+                        >
                           <StyledPropLineColumn
                             padded={level === "2"}
                             lastSecondLevel={lastSecondLevel}
@@ -649,7 +656,7 @@ export const StatementEditorBox: React.FC = () => {
                             </StyledListHeaderColumn>
                             {propOrigin.props.map((prop1, pi1) => {
                               return (
-                                <React.Fragment key={pi1}>
+                                <React.Fragment key={prop1 + pi1}>
                                   {renderPropRow(prop1, "1", false)}
                                   {prop1.props.map(
                                     (prop2: any, pi2: number) => {
