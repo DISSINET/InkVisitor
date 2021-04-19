@@ -16,6 +16,10 @@ class StatementActant implements IStatementActant {
   certainty = "";
 
   constructor(data: UnknownObject) {
+    if (!data) {
+      return;
+    }
+
     fillFlatObject(this, data);
   }
 }
@@ -27,15 +31,22 @@ class StatementReference implements IStatementReference {
   type = "";
 
   constructor(data: UnknownObject) {
+    if (!data) {
+      return;
+    }
+
     fillFlatObject(this, data);
   }
 }
 
-class StatementTerritoryData {
+class StatementTerritory {
   id = "";
   order = -1;
 
   constructor(data: UnknownObject) {
+    if (!data) {
+      return;
+    }
     fillFlatObject(this, data);
   }
 }
@@ -47,7 +58,7 @@ class StatementData {
   modality = "";
   text = "";
   note = "";
-  territory = new StatementTerritoryData({});
+  territory = new StatementTerritory({});
   actants = [] as IStatementActant[];
   props = [] as IProp[];
   references = [] as IStatementReference[];
@@ -59,25 +70,16 @@ class StatementData {
     }
 
     fillFlatObject(this, data);
-    this.territory = new StatementTerritoryData(
-      data.territory as UnknownObject
-    );
+    this.territory = new StatementTerritory(data.territory as UnknownObject);
 
-    fillArray<StatementActant>(
-      this.actants,
-      StatementActant,
-      data ? (data.actants as unknown[]) : null
-    );
+    fillArray<StatementActant>(this.actants, StatementActant, data.actants);
 
-    fillArray<Prop>(this.props, Prop, data ? (data.props as unknown[]) : null);
+    fillArray<Prop>(this.props, Prop, data.props);
 
-    fillArray<StatementReference>(
-      this.references,
-      StatementReference,
-      data ? (data.references as unknown[]) : null
-    );
+    const refs = data.references; // to enable oneline below (formatter issue ^^)
+    fillArray<StatementReference>(this.references, StatementReference, refs);
 
-    fillArray(this.tags, String, data ? (data.tags as unknown[]) : null);
+    fillArray(this.tags, String, data.tags);
   }
 }
 
@@ -88,6 +90,10 @@ class Statement implements IStatement {
   data = new StatementData({});
 
   constructor(data: UnknownObject) {
+    if (!data) {
+      return;
+    }
+
     fillFlatObject(this, data);
     this.data = new StatementData(data.data as UnknownObject);
   }

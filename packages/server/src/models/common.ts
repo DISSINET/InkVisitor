@@ -1,4 +1,4 @@
-export type UnknownObject = Record<string, unknown>;
+export type UnknownObject = Record<string, unknown> | undefined;
 
 export function fillFlatObject<T>(
   ctx: T,
@@ -30,12 +30,12 @@ type AConstructorTypeOf<T> = new (...data: any[]) => T;
 export function fillArray<T>(
   ctx: T[],
   constructor: AConstructorTypeOf<T>,
-  source: unknown[] | null
+  source: unknown[] | unknown
 ): void {
   if (!source) {
     return;
   }
-  for (const sourceElement of source) {
+  for (const sourceElement of source as unknown[]) {
     ctx.push(new constructor(sourceElement));
   }
 }
