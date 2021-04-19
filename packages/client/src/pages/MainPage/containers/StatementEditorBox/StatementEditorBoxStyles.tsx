@@ -1,5 +1,20 @@
 import styled from "styled-components";
 
+const StyledGrid = styled.div`
+  display: grid;
+  align-items: center;
+  padding-left: ${({ theme }) => theme.space[0]};
+  grid-template-columns: auto auto auto auto;
+  width: fit-content;
+  grid-template-rows: auto;
+  grid-auto-flow: row;
+  padding-bottom: ${({ theme }) => theme.space[6]};
+`;
+
+const StyledGridCell = styled.div`
+  margin: ${({ theme }) => theme.space[1]};
+`;
+
 // Editor Section
 interface StyledEditorSection {
   firstSection?: boolean;
@@ -30,30 +45,23 @@ export const StyledEditorSectionContent = styled.div<StyledEditorSectionContent>
 `;
 
 // Grids
-interface StyledReferencesListColumn {}
-export const StyledReferencesListColumn = styled.div<StyledReferencesListColumn>``;
-
 interface StyledListHeaderColumn {}
 export const StyledListHeaderColumn = styled.div<StyledListHeaderColumn>`
   font-weight: ${({ theme }) => theme.fontWeight.light};
   margin-left: ${({ theme }) => theme.space[1]};
   font-size: ${({ theme }) => theme.fontSize["sm"]};
+  text-align: center;
   font-style: italic;
 `;
 
 // Actants
-
 interface StyledActantList {}
-export const StyledActantList = styled.div<StyledActantList>`
-  display: grid;
-  padding-left: ${({ theme }) => theme.space[0]};
-  grid-template-columns: 14em 10em 10em 6em;
-  grid-template-rows: auto;
-  grid-auto-flow: row;
-  padding-bottom: ${({ theme }) => theme.space[6]};
-`;
+export const StyledActantList = styled(StyledGrid)<StyledActantList>``;
+
 interface StyledActantListItem {}
-export const StyledActantListItem = styled.div<StyledActantListItem>``;
+export const StyledActantListItem = styled(
+  StyledGridCell
+)<StyledActantListItem>``;
 
 // Props section
 interface StyledPropsActantHeader {}
@@ -64,14 +72,9 @@ export const StyledPropsActantHeader = styled.div<StyledPropsActantHeader>`
 `;
 
 interface StyledPropsActantList {}
-export const StyledPropsActantList = styled.div<StyledPropsActantList>`
-  display: grid;
-  padding-left: ${({ theme }) => theme.space[8]};
-  grid-template-columns: 18em 18em 9em 6em;
-  grid-template-rows: auto;
-  grid-auto-flow: row;
-  padding-bottom: ${({ theme }) => theme.space[6]};
-`;
+export const StyledPropsActantList = styled(
+  StyledGrid
+)<StyledPropsActantList>``;
 
 interface StyledPropButtonGroup {
   leftMargin?: boolean;
@@ -86,23 +89,25 @@ interface StyledPropLineColumn {
   padded?: boolean;
   lastSecondLevel?: boolean;
 }
-export const StyledPropLineColumn = styled.div<StyledPropLineColumn>`
+export const StyledPropLineColumn = styled(
+  StyledGridCell
+)<StyledPropLineColumn>`
   display: inline-flex;
   padding-bottom: ${({ theme, lastSecondLevel }) =>
-    lastSecondLevel ? theme.space[4] : theme.space[1]};
+    lastSecondLevel ? theme.space[4] : theme.space[0]};
   align-items: center;
   padding-left: ${({ theme, padded }) =>
     padded ? theme.space[6] : theme.space[0]};
 `;
 
+// references
 interface StyledReferencesList {}
-export const StyledReferencesList = styled.div<StyledReferencesList>`
-  display: grid;
-  grid-template-columns: 15em 15em 9em 6em;
-  grid-template-rows: auto;
-  grid-auto-flow: row;
-  padding-bottom: ${({ theme }) => theme.space[6]};
-`;
+export const StyledReferencesList = styled(StyledGrid)<StyledReferencesList>``;
+
+interface StyledReferencesListColumn {}
+export const StyledReferencesListColumn = styled(
+  StyledGridCell
+)<StyledReferencesListColumn>``;
 
 // tags
 interface StyledTagsList {}

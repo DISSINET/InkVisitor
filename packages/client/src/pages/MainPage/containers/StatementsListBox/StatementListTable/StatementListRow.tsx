@@ -23,12 +23,14 @@ interface StatementListRow {
   row: any;
   index: number;
   moveRow: any;
+  handleClick: Function;
 }
 
 export const StatementListRow: React.FC<StatementListRow> = ({
   row,
   index,
   moveRow,
+  handleClick = () => {},
 }) => {
   var hashParams = queryString.parse(location.hash);
   const statementId = hashParams.statement;
@@ -97,6 +99,9 @@ export const StatementListRow: React.FC<StatementListRow> = ({
       opacity={opacity}
       isOdd={Boolean(index % 2)}
       isSelected={row.values.id === statementId}
+      onClick={() => {
+        handleClick(row.values.id);
+      }}
     >
       {row.cells.map((cell: Cell) => {
         return (

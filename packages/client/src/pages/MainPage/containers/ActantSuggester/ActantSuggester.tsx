@@ -3,10 +3,13 @@ import React, { useEffect, useState } from "react";
 import { Suggester, SuggestionI } from "components/Suggester/Suggester";
 import { IOption, IActant } from "@shared/types";
 
+import { FaHome } from "react-icons/fa";
 import { CActant } from "constructors";
 import { Entities } from "types";
 import { useQuery, useQueryClient } from "react-query";
 import api from "api";
+
+const queryString = require("query-string");
 
 interface ActantSuggesterI {
   categoryIds: string[];
@@ -22,10 +25,24 @@ export const ActantSuggester: React.FC<ActantSuggesterI> = ({
   const [typed, setTyped] = useState<string>("");
   const [selectedCategory, setSelectedCategory] = useState<string>();
   const [allCategories, setAllCategories] = useState<false | IOption[]>();
+  //const [territoryActantIds, setTerritoryActantIds] = useState<string[]>([]);
 
+  var hashParams = queryString.parse(location.hash);
   const queryClient = useQueryClient();
+  const territoryId = hashParams.territory;
 
-  // Statement query
+  // territory query
+  const { status, data: territoryActants, error, isFetching } = useQuery(
+    ["territory", "suggesters", territoryId],
+    async () => {
+      const res = await api.territoryGet(territoryId);
+      //setTerritoryActantIds(res.data.actants.map((a) => a.id));
+      return res.data.actants.map((a) => a.id);
+    },
+    { initialData: [], enabled: !!territoryId }
+  );
+
+  // Suggesions query
   const {
     status: statusStatement,
     data: suggestions,
@@ -40,11 +57,19 @@ export const ActantSuggester: React.FC<ActantSuggesterI> = ({
       });
       return resSuggestions.data.map((s: IActant) => {
         const entity = Entities[s.class];
+
+        const icons: React.ReactNode[] = [];
+
+        //console.log(territoryActants, territoryActantIds, s.id);
+        if ((territoryActants as string[])?.includes(s.id)) {
+          icons.push(<FaHome key={s.id} color="" />);
+        }
         return {
           color: entity.color,
           category: s.class,
           label: s.label,
           id: s.id,
+          icons: icons,
         };
       });
     },
@@ -54,6 +79,19 @@ export const ActantSuggester: React.FC<ActantSuggesterI> = ({
   const handleClean = () => {
     setTyped("");
   };
+
+  // clean on escape press
+  useEffect(() => {
+    document.addEventListener(
+      "keydown",
+      (event: KeyboardEvent) => {
+        if (event.key === "Escape") {
+          handleClean();
+        }
+      },
+      false
+    );
+  }, []);
 
   // initial load of categories
   useEffect(() => {
@@ -94,7 +132,10 @@ export const ActantSuggester: React.FC<ActantSuggesterI> = ({
     handleClean();
   };
   const handleDropped = (newDropped: any) => {
-    onSelected(newDropped.id);
+    const droppedCategory = newDropped.category;
+    if (categoryIds.includes(droppedCategory)) {
+      onSelected(newDropped.id);
+    }
     handleClean();
   };
 
@@ -107,6 +148,10 @@ export const ActantSuggester: React.FC<ActantSuggesterI> = ({
       category={selectedCategory} // selected category
       categories={allCategories} // all possible categories
       suggestionListPosition={""} // todo not implemented yet
+      displayCancelButton={typed.length > 2}
+      onCancel={() => {
+        handleClean();
+      }}
       //disabled?: boolean; // todo not implemented yet
       onType={(newType: string) => {
         handleTyped(newType);

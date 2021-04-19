@@ -3,9 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "react-query";
 import api from "api";
 const queryString = require("query-string");
 
-import styled from "styled-components";
-
-import { FaTrashAlt, FaPlus } from "react-icons/fa";
+import { FaTrashAlt, FaPlus, FaUnlink } from "react-icons/fa";
 
 import { useLocation, useHistory } from "react-router";
 
@@ -49,7 +47,8 @@ import {
   StyledTagsListItem,
 } from "./StatementEditorBoxStyles";
 
-const classEntities = ["P", "G", "O", "C", "L", "V", "E"];
+const classEntitiesActant = ["P", "G", "O", "C", "L", "V", "E"];
+const classEntitiesProp = ["C", "P", "G", "O", "L", "V", "E"];
 
 export const StatementEditorBox: React.FC = () => {
   let history = useHistory();
@@ -126,6 +125,15 @@ export const StatementEditorBox: React.FC = () => {
     }
   }, [JSON.stringify(statement)]);
 
+  const removeActant = (statementActantId: string) => {
+    if (statement) {
+      const updatedActants = statement.data.actants.filter(
+        (a) => a.id !== statementActantId
+      );
+      const newData = { ...statement.data, ...{ actants: updatedActants } };
+      update(newData);
+    }
+  };
   const addActant = (newStatementActantId: string) => {
     if (statement) {
       const newStatementActant = CStatementActant();
@@ -231,36 +239,36 @@ export const StatementEditorBox: React.FC = () => {
                 <div>
                   <StyledListHeaderColumn>Action</StyledListHeaderColumn>
                   <div>
-                    <ActionDropdown
-                      onSelectedChange={(newActionValue: {
-                        value: string;
-                        label: string;
-                      }) => {
-                        const newData = {
-                          ...statement.data,
-                          ...{ action: newActionValue.value },
-                        };
-                        update(newData);
-                      }}
-                      value={statement.data.action}
-                    />
-                  </div>
-                </div>
-                <div>
-                  <StyledListHeaderColumn>Text</StyledListHeaderColumn>
-                  <div>
-                    <Input
-                      type="textarea"
-                      width={1000}
-                      onChangeFn={(newValue: string) => {
-                        const newData = {
-                          ...statement.data,
-                          ...{ text: newValue },
-                        };
-                        update(newData);
-                      }}
-                      value={statement.data.text}
-                    />
+                    <StyledListHeaderColumn>Text</StyledListHeaderColumn>
+                    <div>
+                      <Input
+                        type="textarea"
+                        width={1000}
+                        onChangeFn={(newValue: string) => {
+                          const newData = {
+                            ...{ text: newValue },
+                            ...statement.data,
+                          };
+                          update(newData);
+                        }}
+                        value={statement.data.text}
+                      />
+                    </div>
+                    <div>
+                      <ActionDropdown
+                        onSelectedChange={(newActionValue: {
+                          value: string;
+                          label: string;
+                        }) => {
+                          const newData = {
+                            ...statement.data,
+                            ...{ action: newActionValue.value },
+                          };
+                          update(newData);
+                        }}
+                        value={statement.data.action}
+                      />
+                    </div>
                   </div>
                 </div>
                 <div>
@@ -313,17 +321,17 @@ export const StatementEditorBox: React.FC = () => {
                       (a) => a.id === sActant.actant
                     );
                     return (
-                      <>
+                      <React.Fragment key={sai}>
                         <StyledActantListItem>
                           {actant ? (
                             <ActantTag
-                              key={sai}
                               actant={actant}
                               short={false}
                               button={
                                 <Button
                                   key="d"
-                                  icon={<FaTrashAlt />}
+                                  tooltip="unlink actant"
+                                  icon={<FaUnlink />}
                                   color="danger"
                                   onClick={() => {
                                     updateActant(sActant.id, {
@@ -340,7 +348,7 @@ export const StatementEditorBox: React.FC = () => {
                                   actant: newSelectedId,
                                 });
                               }}
-                              categoryIds={classEntities}
+                              categoryIds={classEntitiesActant}
                             />
                           )}
                         </StyledActantListItem>
@@ -357,14 +365,6 @@ export const StatementEditorBox: React.FC = () => {
                           ></Input>
                         </StyledActantListItem>
                         <StyledActantListItem>
-                          <ModalityToggle
-                            value={sActant.modality}
-                            onChangeFn={(newValue: string) => {
-                              updateActant(sActant.id, {
-                                modality: newValue,
-                              });
-                            }}
-                          />
                           <ElvlToggle
                             value={sActant.elvl}
                             onChangeFn={(newValue: string) => {
@@ -387,12 +387,13 @@ export const StatementEditorBox: React.FC = () => {
                             key="d"
                             icon={<FaTrashAlt />}
                             color="danger"
+                            tooltip="remove actant row"
                             onClick={() => {
-                              //todo
+                              removeActant(sActant.id);
                             }}
                           />
                         </StyledActantListItem>
-                      </>
+                      </React.Fragment>
                     );
                   })}
                 </StyledActantList>
@@ -400,7 +401,7 @@ export const StatementEditorBox: React.FC = () => {
                   onSelected={(newSelectedId: string) => {
                     addActant(newSelectedId);
                   }}
-                  categoryIds={classEntities}
+                  categoryIds={classEntitiesActant}
                   placeholder={"add new actant"}
                 ></ActantSuggester>
               </StyledEditorSectionContent>
@@ -409,7 +410,7 @@ export const StatementEditorBox: React.FC = () => {
             {/* Props */}
             <StyledEditorSection key="editor-section-props">
               <StyledEditorSectionHeader>
-                Properties (has)
+                Actant Properties
               </StyledEditorSectionHeader>
               <div
                 className="editor-section-content"
@@ -423,6 +424,7 @@ export const StatementEditorBox: React.FC = () => {
                     const renderPropRow = (
                       prop: IProp,
                       level: "1" | "2",
+                      order: number,
                       lastSecondLevel: boolean
                     ) => {
                       const propTypeActant = statement.actants.find(
@@ -433,13 +435,15 @@ export const StatementEditorBox: React.FC = () => {
                       );
 
                       return (
-                        <>
+                        <React.Fragment
+                          key={propOrigin.origin + level + "|" + order}
+                        >
                           <StyledPropLineColumn
                             padded={level === "2"}
                             lastSecondLevel={lastSecondLevel}
                           >
                             {propTypeActant ? (
-                              <>
+                              <React.Fragment>
                                 <ActantTag
                                   key={sai}
                                   actant={propTypeActant}
@@ -447,8 +451,9 @@ export const StatementEditorBox: React.FC = () => {
                                   button={
                                     <Button
                                       key="d"
-                                      icon={<FaTrashAlt />}
+                                      icon={<FaUnlink />}
                                       color="danger"
+                                      tooltip="unlink actant"
                                       onClick={() => {
                                         updateProp(prop.id, {
                                           type: {
@@ -484,7 +489,7 @@ export const StatementEditorBox: React.FC = () => {
                                     }}
                                   />
                                 </StyledPropButtonGroup>
-                              </>
+                              </React.Fragment>
                             ) : (
                               <ActantSuggester
                                 onSelected={(newSelectedId: string) => {
@@ -504,7 +509,7 @@ export const StatementEditorBox: React.FC = () => {
                             lastSecondLevel={lastSecondLevel}
                           >
                             {propValueActant ? (
-                              <>
+                              <React.Fragment>
                                 <ActantTag
                                   key={sai}
                                   actant={propValueActant}
@@ -512,7 +517,8 @@ export const StatementEditorBox: React.FC = () => {
                                   button={
                                     <Button
                                       key="d"
-                                      icon={<FaTrashAlt />}
+                                      icon={<FaUnlink />}
+                                      tooltip="unlink actant"
                                       color="danger"
                                       onClick={() => {
                                         updateProp(prop.id, {
@@ -549,7 +555,7 @@ export const StatementEditorBox: React.FC = () => {
                                     }}
                                   />
                                 </StyledPropButtonGroup>
-                              </>
+                              </React.Fragment>
                             ) : (
                               <ActantSuggester
                                 onSelected={(newSelectedId: string) => {
@@ -560,7 +566,7 @@ export const StatementEditorBox: React.FC = () => {
                                     },
                                   });
                                 }}
-                                categoryIds={classEntities}
+                                categoryIds={classEntitiesProp}
                               ></ActantSuggester>
                             )}
                           </StyledPropLineColumn>
@@ -602,6 +608,7 @@ export const StatementEditorBox: React.FC = () => {
                                 <Button
                                   key="add"
                                   icon={<FaPlus />}
+                                  tooltip="add second level prop"
                                   color="primary"
                                   onClick={() => {
                                     addProp(prop.id);
@@ -611,6 +618,7 @@ export const StatementEditorBox: React.FC = () => {
                               <Button
                                 key="delete"
                                 icon={<FaTrashAlt />}
+                                tooltip="remove prop row"
                                 color="danger"
                                 onClick={() => {
                                   removeProp(prop.id);
@@ -618,7 +626,7 @@ export const StatementEditorBox: React.FC = () => {
                               />
                             </StyledPropButtonGroup>
                           </StyledPropLineColumn>
-                        </>
+                        </React.Fragment>
                       );
                     };
 
@@ -635,6 +643,7 @@ export const StatementEditorBox: React.FC = () => {
                               key="d"
                               icon={<FaPlus />}
                               color="primary"
+                              tooltip="add new prop"
                               onClick={() => {
                                 addProp(originActant.id);
                               }}
@@ -657,18 +666,19 @@ export const StatementEditorBox: React.FC = () => {
                             </StyledListHeaderColumn>
                             {propOrigin.props.map((prop1, pi1) => {
                               return (
-                                <>
-                                  {renderPropRow(prop1, "1", false)}
+                                <React.Fragment key={prop1 + pi1}>
+                                  {renderPropRow(prop1, "1", pi1, false)}
                                   {prop1.props.map(
                                     (prop2: any, pi2: number) => {
                                       return renderPropRow(
                                         prop2,
                                         "2",
+                                        pi2,
                                         pi2 === prop1.props.length - 1
                                       );
                                     }
                                   )}
-                                </>
+                                </React.Fragment>
                               );
                             })}
                           </StyledPropsActantList>
@@ -686,20 +696,20 @@ export const StatementEditorBox: React.FC = () => {
               <StyledEditorSectionContent>
                 <StyledReferencesList>
                   {statement.data.references.length > 0 && (
-                    <>
+                    <React.Fragment>
                       <StyledListHeaderColumn>Resource</StyledListHeaderColumn>
                       <StyledListHeaderColumn>Part</StyledListHeaderColumn>
                       <StyledListHeaderColumn>Type</StyledListHeaderColumn>
                       <StyledListHeaderColumn>Actions</StyledListHeaderColumn>
-                    </>
+                    </React.Fragment>
                   )}
                   {statement.data.references.map(
-                    (reference: IStatementReference) => {
+                    (reference: IStatementReference, ri) => {
                       const referenceActant = statement.actants.find(
                         (a) => a.id === reference.resource
                       );
                       return (
-                        <>
+                        <React.Fragment key={ri}>
                           <StyledReferencesListColumn>
                             {referenceActant ? (
                               <ActantTag
@@ -708,7 +718,8 @@ export const StatementEditorBox: React.FC = () => {
                                 button={
                                   <Button
                                     key="d"
-                                    icon={<FaTrashAlt />}
+                                    tooltip="unlink actant"
+                                    icon={<FaUnlink />}
                                     color="danger"
                                     onClick={() => {
                                       updateReference(reference.id, {
@@ -755,6 +766,7 @@ export const StatementEditorBox: React.FC = () => {
                           <StyledReferencesListColumn>
                             <Button
                               key="delete"
+                              tooltip="remove reference row"
                               icon={<FaTrashAlt />}
                               color="danger"
                               onClick={() => {
@@ -762,7 +774,7 @@ export const StatementEditorBox: React.FC = () => {
                               }}
                             />
                           </StyledReferencesListColumn>
-                        </>
+                        </React.Fragment>
                       );
                     }
                   )}
@@ -770,7 +782,7 @@ export const StatementEditorBox: React.FC = () => {
                 <ActantSuggester
                   onSelected={(newSelectedId: string) => {}}
                   categoryIds={["R"]}
-                  placeholder={"add new actant"}
+                  placeholder={"add new reference"}
                 ></ActantSuggester>
               </StyledEditorSectionContent>
             </StyledEditorSection>
@@ -793,7 +805,8 @@ export const StatementEditorBox: React.FC = () => {
                             button={
                               <Button
                                 key="d"
-                                icon={<FaTrashAlt />}
+                                tooltip="unlink actant from tags"
+                                icon={<FaUnlink />}
                                 color="danger"
                                 onClick={() => {
                                   removeTag(tag);
@@ -810,7 +823,7 @@ export const StatementEditorBox: React.FC = () => {
                   onSelected={(newSelectedId: string) => {
                     addTag(newSelectedId);
                   }}
-                  categoryIds={classEntities}
+                  categoryIds={classEntitiesActant}
                   placeholder={"add new tag"}
                 ></ActantSuggester>
               </StyledEditorSectionContent>
