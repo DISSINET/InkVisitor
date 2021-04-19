@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "react-query";
 import api from "api";
 const queryString = require("query-string");
 
-import { FaTrashAlt, FaPlus } from "react-icons/fa";
+import { FaTrashAlt, FaPlus, FaUnlink } from "react-icons/fa";
 
 import { useLocation, useHistory } from "react-router";
 
@@ -316,13 +316,13 @@ export const StatementEditorBox: React.FC = () => {
                         <StyledActantListItem>
                           {actant ? (
                             <ActantTag
-                              key={sai}
                               actant={actant}
                               short={false}
                               button={
                                 <Button
                                   key="d"
-                                  icon={<FaTrashAlt />}
+                                  tooltip="unlink actant"
+                                  icon={<FaUnlink />}
                                   color="danger"
                                   onClick={() => {
                                     updateActant(sActant.id, {
@@ -378,7 +378,9 @@ export const StatementEditorBox: React.FC = () => {
                             key="d"
                             icon={<FaTrashAlt />}
                             color="danger"
+                            tooltip="remove actant row"
                             onClick={() => {
+                              
                               //todo
                             }}
                           />
@@ -441,8 +443,9 @@ export const StatementEditorBox: React.FC = () => {
                                   button={
                                     <Button
                                       key="d"
-                                      icon={<FaTrashAlt />}
+                                      icon={<FaUnlink />}
                                       color="danger"
+                                      tooltip="unlink actant"
                                       onClick={() => {
                                         updateProp(prop.id, {
                                           type: {
@@ -506,7 +509,8 @@ export const StatementEditorBox: React.FC = () => {
                                   button={
                                     <Button
                                       key="d"
-                                      icon={<FaTrashAlt />}
+                                      icon={<FaUnlink />}
+                                      tooltip="unlink actant"
                                       color="danger"
                                       onClick={() => {
                                         updateProp(prop.id, {
@@ -596,6 +600,7 @@ export const StatementEditorBox: React.FC = () => {
                                 <Button
                                   key="add"
                                   icon={<FaPlus />}
+                                  tooltip="add second level prop"
                                   color="primary"
                                   onClick={() => {
                                     addProp(prop.id);
@@ -605,6 +610,7 @@ export const StatementEditorBox: React.FC = () => {
                               <Button
                                 key="delete"
                                 icon={<FaTrashAlt />}
+                                tooltip="remove prop row"
                                 color="danger"
                                 onClick={() => {
                                   removeProp(prop.id);
@@ -629,6 +635,7 @@ export const StatementEditorBox: React.FC = () => {
                               key="d"
                               icon={<FaPlus />}
                               color="primary"
+                              tooltip="add new prop"
                               onClick={() => {
                                 addProp(originActant.id);
                               }}
@@ -703,7 +710,8 @@ export const StatementEditorBox: React.FC = () => {
                                 button={
                                   <Button
                                     key="d"
-                                    icon={<FaTrashAlt />}
+                                    tooltip="unlink actant"
+                                    icon={<FaUnlink />}
                                     color="danger"
                                     onClick={() => {
                                       updateReference(reference.id, {
@@ -750,6 +758,7 @@ export const StatementEditorBox: React.FC = () => {
                           <StyledReferencesListColumn>
                             <Button
                               key="delete"
+                              tooltip="remove reference row"
                               icon={<FaTrashAlt />}
                               color="danger"
                               onClick={() => {
@@ -788,7 +797,8 @@ export const StatementEditorBox: React.FC = () => {
                             button={
                               <Button
                                 key="d"
-                                icon={<FaTrashAlt />}
+                                tooltip="unlink actant from tags"
+                                icon={<FaUnlink />}
                                 color="danger"
                                 onClick={() => {
                                   removeTag(tag);
