@@ -4,7 +4,7 @@ import {
   IStatementReference,
 } from "@shared/types/statement";
 import { IProp } from "@shared/types";
-import { fillFlatObject } from "./common";
+import { fillFlatObject, fillArray, UnknownObject } from "./common";
 import { Prop } from "./prop";
 
 class StatementActant implements IStatementActant {
@@ -15,7 +15,7 @@ class StatementActant implements IStatementActant {
   elvl = "";
   certainty = "";
 
-  constructor(data: Record<string, unknown>) {
+  constructor(data: UnknownObject) {
     fillFlatObject(this, data);
   }
 }
@@ -26,8 +26,58 @@ class StatementReference implements IStatementReference {
   part = "";
   type = "";
 
-  constructor(data: Record<string, unknown>) {
+  constructor(data: UnknownObject) {
     fillFlatObject(this, data);
+  }
+}
+
+class StatementTerritoryData {
+  id = "";
+  order = -1;
+
+  constructor(data: UnknownObject) {
+    fillFlatObject(this, data);
+  }
+}
+
+class StatementData {
+  action = "";
+  certainty = "";
+  elvl = "";
+  modality = "";
+  text = "";
+  note = "";
+  territory = new StatementTerritoryData({});
+  actants = [] as IStatementActant[];
+  props = [] as IProp[];
+  references = [] as IStatementReference[];
+  tags = [] as string[];
+
+  constructor(data: UnknownObject) {
+    if (!data) {
+      return;
+    }
+
+    fillFlatObject(this, data);
+    this.territory = new StatementTerritoryData(
+      data.territory as UnknownObject
+    );
+
+    fillArray<StatementActant>(
+      this.actants,
+      StatementActant,
+      data ? (data.actants as unknown[]) : null
+    );
+
+    fillArray<Prop>(this.props, Prop, data ? (data.props as unknown[]) : null);
+
+    fillArray<StatementReference>(
+      this.references,
+      StatementReference,
+      data ? (data.references as unknown[]) : null
+    );
+
+    fillArray(this.tags, String, data ? (data.tags as unknown[]) : null);
   }
 }
 
@@ -35,74 +85,11 @@ class Statement implements IStatement {
   id = "";
   class: "S" = "S";
   label = "";
-  data = {
-    action: "",
-    certainty: "",
-    elvl: "",
-    modality: "",
-    text: "",
-    note: "",
-    territory: {
-      id: "",
-      order: -1,
-    },
-    actants: [] as IStatementActant[],
-    props: [] as IProp[],
-    references: [] as IStatementReference[],
-    tags: [] as string[],
-  };
+  data = new StatementData({});
 
-  constructor(data: Record<string, unknown>) {
+  constructor(data: UnknownObject) {
     fillFlatObject(this, data);
-
-    if (typeof data.data === "object" && data.data !== null) {
-      const passedData = data.data as Record<string, unknown>;
-      fillFlatObject(this.data, passedData);
-
-      if (
-        typeof passedData.territory === "object" &&
-        passedData.territory !== null
-      ) {
-        const territoryData = passedData.territory as Record<string, unknown>;
-        fillFlatObject(this.data.territory, territoryData);
-      }
-
-      if (
-        typeof passedData.actants === "object" &&
-        (passedData.actants as []).length
-      ) {
-        for (const actant of passedData.actants as []) {
-          this.data.actants.push(new StatementActant(actant));
-        }
-      }
-
-      if (
-        typeof passedData.props === "object" &&
-        (passedData.props as []).length
-      ) {
-        for (const prop of passedData.props as []) {
-          this.data.props.push(new Prop(prop));
-        }
-      }
-
-      if (
-        typeof passedData.references === "object" &&
-        (passedData.references as []).length
-      ) {
-        for (const reference of passedData.references as []) {
-          this.data.references.push(new StatementReference(reference));
-        }
-      }
-
-      if (
-        typeof passedData.tags === "object" &&
-        (passedData.tags as []).length
-      ) {
-        for (const tag of passedData.tags as []) {
-          this.data.tags.push(tag);
-        }
-      }
-    }
+    this.data = new StatementData(data.data as UnknownObject);
   }
 }
 

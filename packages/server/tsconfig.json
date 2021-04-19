@@ -20,7 +20,7 @@
       "@shared/*": ["./../shared/*"],
       "@server/*": ["src/server"],
       "@modules/*": ["src/modules/*"],
-      "@service/*": ["src/service/*"]
+      "@service/*": ["src/service/*"],
       "@models/*": ["src/models/*"]
     },
     "types": ["node"],
