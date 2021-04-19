@@ -415,6 +415,7 @@ export const StatementEditorBox: React.FC = () => {
                     const renderPropRow = (
                       prop: IProp,
                       level: "1" | "2",
+                      order: number,
                       lastSecondLevel: boolean
                     ) => {
                       const propTypeActant = statement.actants.find(
@@ -426,12 +427,7 @@ export const StatementEditorBox: React.FC = () => {
 
                       return (
                         <React.Fragment
-                          key={
-                            propOrigin.origin +
-                            prop.type.id +
-                            prop.value.id +
-                            sai
-                          }
+                          key={propOrigin.origin + level + "|" + order}
                         >
                           <StyledPropLineColumn
                             padded={level === "2"}
@@ -657,12 +653,13 @@ export const StatementEditorBox: React.FC = () => {
                             {propOrigin.props.map((prop1, pi1) => {
                               return (
                                 <React.Fragment key={prop1 + pi1}>
-                                  {renderPropRow(prop1, "1", false)}
+                                  {renderPropRow(prop1, "1", pi1, false)}
                                   {prop1.props.map(
                                     (prop2: any, pi2: number) => {
                                       return renderPropRow(
                                         prop2,
                                         "2",
+                                        pi2,
                                         pi2 === prop1.props.length - 1
                                       );
                                     }
