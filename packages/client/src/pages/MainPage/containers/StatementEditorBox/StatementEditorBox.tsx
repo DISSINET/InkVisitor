@@ -3,8 +3,6 @@ import { useQuery, useMutation, useQueryClient } from "react-query";
 import api from "api";
 const queryString = require("query-string");
 
-import styled from "styled-components";
-
 import { FaTrashAlt, FaPlus } from "react-icons/fa";
 
 import { useLocation, useHistory } from "react-router";
@@ -767,7 +765,7 @@ export const StatementEditorBox: React.FC = () => {
                 <ActantSuggester
                   onSelected={(newSelectedId: string) => {}}
                   categoryIds={["R"]}
-                  placeholder={"add new actant"}
+                  placeholder={"add new reference"}
                 ></ActantSuggester>
               </StyledEditorSectionContent>
             </StyledEditorSection>

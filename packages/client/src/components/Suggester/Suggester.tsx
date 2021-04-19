@@ -1,6 +1,7 @@
-import React, { ReactElement } from "react";
+import React, { ReactElement, useEffect } from "react";
 import { DragObjectWithType, DropTargetMonitor, useDrop } from "react-dnd";
 import { FaPlus, FaPlayCircle } from "react-icons/fa";
+import { MdCancel } from "react-icons/md";
 
 import { Button, Input, Tag } from "components";
 import { IOption } from "@shared/types";
@@ -13,6 +14,7 @@ import {
   SuggestionLineIcons,
   SuggestionLineTag,
   SuggestionLineActions,
+  SuggestionCancelButton,
 } from "./SuggesterStyles";
 
 export interface SuggestionI {
@@ -33,6 +35,7 @@ interface SuggesterProps {
   suggestionListPosition?: string; // todo not implemented yet
   disabled?: boolean; // todo not implemented yet
   inputWidth?: number;
+  displayCancelButton?: boolean;
 
   // events
   onType: Function;
@@ -40,6 +43,7 @@ interface SuggesterProps {
   onCreate: Function;
   onPick: Function;
   onDrop: Function;
+  onCancel?: Function;
   cleanOnSelect?: boolean;
 }
 
@@ -55,6 +59,7 @@ export const Suggester: React.FC<SuggesterProps> = ({
   suggestionListPosition,
   disabled,
   inputWidth = 100,
+  displayCancelButton = false,
 
   // events
   onType,
@@ -62,6 +67,7 @@ export const Suggester: React.FC<SuggesterProps> = ({
   onCreate,
   onPick,
   onDrop,
+  onCancel = () => {},
 }) => {
   const [{ isOver }, dropRef] = useDrop({
     accept: ItemTypes.TAG,
@@ -91,6 +97,12 @@ export const Suggester: React.FC<SuggesterProps> = ({
           changeOnType={true}
           width={inputWidth}
         />
+        {displayCancelButton && (
+          <SuggestionCancelButton>
+            <MdCancel onClick={() => onCancel()} />
+          </SuggestionCancelButton>
+        )}
+
         <SuggesterButton>
           <Button
             icon={<FaPlus style={{ fontSize: "16px", padding: "2px" }} />}

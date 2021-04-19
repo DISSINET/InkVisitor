@@ -80,6 +80,19 @@ export const ActantSuggester: React.FC<ActantSuggesterI> = ({
     setTyped("");
   };
 
+  // clean on escape press
+  useEffect(() => {
+    document.addEventListener(
+      "keydown",
+      (event: KeyboardEvent) => {
+        if (event.key === "Escape") {
+          handleClean();
+        }
+      },
+      false
+    );
+  }, []);
+
   // initial load of categories
   useEffect(() => {
     const categories: IOption[] = [];
@@ -135,6 +148,10 @@ export const ActantSuggester: React.FC<ActantSuggesterI> = ({
       category={selectedCategory} // selected category
       categories={allCategories} // all possible categories
       suggestionListPosition={""} // todo not implemented yet
+      displayCancelButton={typed.length > 2}
+      onCancel={() => {
+        handleClean();
+      }}
       //disabled?: boolean; // todo not implemented yet
       onType={(newType: string) => {
         handleTyped(newType);

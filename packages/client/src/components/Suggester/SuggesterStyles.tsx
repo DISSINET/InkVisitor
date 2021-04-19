@@ -36,6 +36,15 @@ export const SuggesterList = styled.div`
   }
 `;
 
+export const SuggestionCancelButton = styled.div`
+  position: absolute;
+  left: 7.5em;
+  top: 4px;
+  svg {
+    color: ${({ theme }) => theme.color["danger"]};
+  }
+`;
+
 export const SuggestionLineIcons = styled.div``;
 
 export const SuggestionLineTag = styled.div``;
