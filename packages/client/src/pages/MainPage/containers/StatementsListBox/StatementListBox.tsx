@@ -193,15 +193,18 @@ export const StatementListBox: React.FC = () => {
             <Button
               key="i"
               icon={<FaInfo size={14} />}
+              tooltip="info"
               color="info"
               onClick={() => (row.isExpanded = !row.isExpanded)}
             />
-            <Button key="d" icon={<FaClone size={14} />} color="success" />
-
+            {
+              //<Button key="d" icon={<FaClone size={14} />} color="success" tooltip="duplicate"/>
+            }
             <Button
               key="r"
               icon={<FaTrashAlt size={14} />}
               color="danger"
+              tooltip="delete"
               onClick={() => {
                 // delete
               }}
@@ -209,6 +212,7 @@ export const StatementListBox: React.FC = () => {
             <Button
               key="add"
               icon={<FaPlus size={14} />}
+              tooltip="add new statement"
               color="warning"
               onClick={() => addStatement()}
             />
@@ -250,7 +254,7 @@ export const StatementListBox: React.FC = () => {
       data={statements}
       columns={columns}
       handleRowClick={(rowId: string) => {
-        console.log(rowId);
+        //console.log(rowId);
       }}
     />
   );
