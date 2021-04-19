@@ -10,6 +10,6 @@
   "rules": {
     "quotes": "off",
     "@typescript-eslint/quotes": ["error", "double"],
-    "@typescript-eslint/lines-between-class-members": 2
+    "@typescript-eslint/lines-between-class-members": "off"
   }
 }
