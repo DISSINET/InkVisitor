@@ -49,7 +49,8 @@ import {
   StyledTagsListItem,
 } from "./StatementEditorBoxStyles";
 
-const classEntities = ["P", "G", "O", "C", "L", "V", "E"];
+const classEntitiesActant = ["P", "G", "O", "C", "L", "V", "E"];
+const classEntitiesProp = ["C", "P", "G", "O", "L", "V", "E"];
 
 export const StatementEditorBox: React.FC = () => {
   let history = useHistory();
@@ -340,7 +341,7 @@ export const StatementEditorBox: React.FC = () => {
                                   actant: newSelectedId,
                                 });
                               }}
-                              categoryIds={classEntities}
+                              categoryIds={classEntitiesActant}
                             />
                           )}
                         </StyledActantListItem>
@@ -392,7 +393,7 @@ export const StatementEditorBox: React.FC = () => {
                   onSelected={(newSelectedId: string) => {
                     addActant(newSelectedId);
                   }}
-                  categoryIds={classEntities}
+                  categoryIds={classEntitiesActant}
                   placeholder={"add new actant"}
                 ></ActantSuggester>
               </StyledEditorSectionContent>
@@ -555,7 +556,7 @@ export const StatementEditorBox: React.FC = () => {
                                     },
                                   });
                                 }}
-                                categoryIds={classEntities}
+                                categoryIds={classEntitiesProp}
                               ></ActantSuggester>
                             )}
                           </StyledPropLineColumn>
@@ -806,7 +807,7 @@ export const StatementEditorBox: React.FC = () => {
                   onSelected={(newSelectedId: string) => {
                     addTag(newSelectedId);
                   }}
-                  categoryIds={classEntities}
+                  categoryIds={classEntitiesActant}
                   placeholder={"add new tag"}
                 ></ActantSuggester>
               </StyledEditorSectionContent>
