@@ -1,7 +1,7 @@
 import { IProp } from "@shared/types";
-import { fillFlatObject, UnknownObject } from "./common";
+import { fillFlatObject, UnknownObject, IModel } from "./common";
 
-export class Prop implements IProp {
+export class Prop implements IProp, IModel {
   id = "";
   elvl = "";
   certainty = "";
@@ -20,14 +20,18 @@ export class Prop implements IProp {
   };
 
   constructor(data: UnknownObject) {
+    if (!data) {
+      return;
+    }
+
     fillFlatObject(this, data);
 
-    if (typeof data.type === "object" && data.type !== null) {
-      fillFlatObject(this.type, data.type as UnknownObject);
-    }
+    fillFlatObject(this.type, data.type as Record<string, unknown>);
 
-    if (typeof data.value === "object" && data.value !== null) {
-      fillFlatObject(this.value, data.value as UnknownObject);
-    }
+    fillFlatObject(this.value, data.value as Record<string, unknown>);
+  }
+
+  isValid(): boolean {
+    return true; // always true - no rules yet
   }
 }

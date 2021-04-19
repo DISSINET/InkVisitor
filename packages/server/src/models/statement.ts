@@ -3,11 +3,10 @@ import {
   IStatementActant,
   IStatementReference,
 } from "@shared/types/statement";
-import { IProp } from "@shared/types";
-import { fillFlatObject, fillArray, UnknownObject } from "./common";
+import { fillFlatObject, fillArray, UnknownObject, IModel } from "./common";
 import { Prop } from "./prop";
 
-class StatementActant implements IStatementActant {
+class StatementActant implements IStatementActant, IModel {
   id = "";
   actant = "";
   position = "";
@@ -22,9 +21,13 @@ class StatementActant implements IStatementActant {
 
     fillFlatObject(this, data);
   }
+
+  isValid(): boolean {
+    return false;
+  }
 }
 
-class StatementReference implements IStatementReference {
+class StatementReference implements IStatementReference, IModel {
   id = "";
   resource = "";
   part = "";
@@ -37,9 +40,13 @@ class StatementReference implements IStatementReference {
 
     fillFlatObject(this, data);
   }
+
+  isValid(): boolean {
+    return false;
+  }
 }
 
-class StatementTerritory {
+export class StatementTerritory {
   id = "";
   order = -1;
 
@@ -49,9 +56,17 @@ class StatementTerritory {
     }
     fillFlatObject(this, data);
   }
+
+  isValid(): boolean {
+    if (this.id === "" || this.order === -1) {
+      return false;
+    }
+
+    return true;
+  }
 }
 
-class StatementData {
+export class StatementData implements IModel {
   action = "";
   certainty = "";
   elvl = "";
@@ -59,9 +74,9 @@ class StatementData {
   text = "";
   note = "";
   territory = new StatementTerritory({});
-  actants = [] as IStatementActant[];
-  props = [] as IProp[];
-  references = [] as IStatementReference[];
+  actants = [] as StatementActant[];
+  props = [] as Prop[];
+  references = [] as StatementReference[];
   tags = [] as string[];
 
   constructor(data: UnknownObject) {
@@ -81,9 +96,32 @@ class StatementData {
 
     fillArray(this.tags, String, data.tags);
   }
+
+  isValid(): boolean {
+    if (!this.territory.isValid()) {
+      return false;
+    }
+    for (const actant of this.actants) {
+      if (!actant.isValid()) {
+        return false;
+      }
+    }
+    for (const prop of this.props) {
+      if (!prop.isValid()) {
+        return false;
+      }
+    }
+    for (const reference of this.references) {
+      if (!reference.isValid()) {
+        return false;
+      }
+    }
+
+    return true;
+  }
 }
 
-class Statement implements IStatement {
+class Statement implements IStatement, IModel {
   id = "";
   class: "S" = "S";
   label = "";
@@ -96,6 +134,14 @@ class Statement implements IStatement {
 
     fillFlatObject(this, data);
     this.data = new StatementData(data.data as UnknownObject);
+  }
+
+  isValid(): boolean {
+    if (this.class != "S") {
+      return false;
+    }
+
+    return this.data.isValid();
   }
 }
 

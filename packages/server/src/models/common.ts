@@ -1,5 +1,9 @@
 export type UnknownObject = Record<string, unknown> | undefined;
 
+export interface IModel {
+  isValid(): boolean; // validate model before inserting to the db
+}
+
 export function fillFlatObject<T>(
   ctx: T,
   source: Record<string, unknown> | null

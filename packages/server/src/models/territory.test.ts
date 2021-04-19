@@ -1,5 +1,5 @@
 import "ts-jest";
-import Territory from "./territory";
+import Territory, { TerritoryData, TerritoryParent } from "./territory";
 
 describe("Territory constructor test", function () {
   describe("empty data", () => {
@@ -8,12 +8,12 @@ describe("Territory constructor test", function () {
     emptyTerritory.id = "";
     emptyTerritory.class = "T";
     emptyTerritory.label = "";
-    emptyTerritory.data = {
-      parent: false,
-      type: "",
-      content: "",
-      lang: "",
-    };
+    emptyTerritory.data = Object.create(TerritoryData.prototype);
+    emptyTerritory.data.parent = false;
+    emptyTerritory.data.type = "";
+    emptyTerritory.data.content = "";
+    emptyTerritory.data.lang = "";
+
     it("should return empty territory", () => {
       const out = new Territory(emptyData);
       expect(JSON.stringify(out)).toEqual(JSON.stringify(emptyTerritory));
@@ -39,19 +39,45 @@ describe("Territory constructor test", function () {
     fullTerritory.id = "id";
     fullTerritory.class = "T";
     fullTerritory.label = "label";
-    fullTerritory.data = {
-      parent: {
-        id: "2",
-        order: -1,
-      },
-      type: "type",
-      content: "content",
-      lang: "lang",
-    };
+    fullTerritory.data = Object.create(TerritoryData.prototype);
+    fullTerritory.data.parent = Object.create(TerritoryParent.prototype);
+    (fullTerritory.data.parent as TerritoryParent).id = "2";
+    (fullTerritory.data.parent as TerritoryParent).order = -1;
+    fullTerritory.data.type = "type";
+    fullTerritory.data.content = "content";
+    fullTerritory.data.lang = "lang";
 
     it("should return full territory", () => {
       const out = new Territory(fullData);
       expect(JSON.stringify(out)).toEqual(JSON.stringify(fullTerritory));
+    });
+  });
+});
+
+describe("Territory validate test", function () {
+  describe("empty data", () => {
+    it("should return true", () => {
+      const emptyTerritory = new Territory(undefined);
+      expect(emptyTerritory.isValid()).toEqual(true);
+    });
+  });
+  describe("ok data", () => {
+    it("should return true", () => {
+      const okData = new Territory({
+        id: "id",
+        class: "T",
+        label: "label",
+        data: {
+          parent: {
+            id: "2",
+            order: 1,
+          },
+          type: "type",
+          content: "content",
+          lang: "lang",
+        },
+      });
+      expect(okData.isValid()).toEqual(true);
     });
   });
 });
