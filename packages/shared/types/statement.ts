@@ -24,7 +24,6 @@ export interface IStatementActant {
   id: string;
   actant: string; //  this
   position: string;
-  modality: string;
   elvl: string;
   certainty: string;
 }

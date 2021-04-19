@@ -1,87 +1,163 @@
 export const modalityDict = [
-    {
-        value: "1",
-        label: "yes",
-        info: "",
-    },
-    {
-        value: "2",
-        label: "no",
-        info: "",
-    },
-    {
-        value: "3",
-        label: "condition-realis",
-        info: "",
-    },
-    {
-        value: "4",
-        label: "condition-irrealis",
-        info: "",
-    },
-    {
-        value: "5",
-        label: "desirability-realis",
-        info: "",
-    },
-    {
-        value: "6",
-        label: "desirability-irrealis",
-        info: "",
-    },
-    {
-        value: "7",
-        label: "undesirability-realis",
-        info: "",
-    },
-    {
-        value: "8",
-        label: "undesirability-irrealis",
-        info: "",
-    },
-    {
-        value: "9",
-        label: "question-realis",
-        info: "",
-    },
-    {
-        value: "10",
-        label: "question-irrealis",
-        info: "",
-    },
-    {
-        value: "11",
-        label: "possibility-high",
-        info: "",
-    },
-    {
-        value: "12",
-        label: "possibility-neutral",
-        info: "",
-    },
-    {
-        value: "13",
-        label: "possibility-low",
-        info: "",
-    },
-    {
-        value: "14",
-        label: "certitude",
-        info: "",
-    },
-    {
-        value: "15",
-        label: "allegation",
-        info: "",
-    },
-    {
-        value: "16",
-        label: "semblance",
-        info: "",
-    },
-    {
-        value: "17",
-        label: "ability",
-        info: "",
-    },
+  {
+    value: "Y",
+    label: "yes",
+    info: "",
+  },
+  {
+    value: "N",
+    label: "no",
+    info: "",
+  },
+  // conditions
+
+  {
+    value: "CR",
+    label: "condition-realis",
+    info: "",
+  },
+  {
+    value: "CI",
+    label: "condition-irrealis",
+    info: "",
+  },
+  {
+    value: "NCR",
+    label: "negative condition-realis",
+    info: "",
+  },
+  {
+    value: "NCI",
+    label: "negative condition-irrealis",
+    info: "",
+  },
+
+  // questions
+  {
+    value: "QR",
+    label: "question-realis",
+    info: "",
+  },
+  {
+    label: "question-irrealis",
+    value: "QI",
+    info: "",
+  },
+  {
+    value: "NQR",
+    label: "negative question-realis",
+    info: "",
+  },
+  {
+    label: "negative question-irrealis",
+    value: "NQI",
+    info: "",
+  },
+
+  // posibilities
+  {
+    value: "P3",
+    label: "possibility-high",
+    info: "",
+  },
+  {
+    value: "P1",
+    label: "possibility-neutral",
+    info: "",
+  },
+  {
+    value: "P2",
+    label: "possibility-low",
+    info: "",
+  },
+  {
+    value: "NP",
+    label: "impossibility",
+    info: "",
+  },
+
+  // certitude
+  {
+    value: "Cer",
+    label: "certitude",
+    info: "",
+  },
+  {
+    value: "NCer",
+    label: "certitude that not",
+    info: "",
+  },
+
+  // desirability
+  {
+    value: "DR",
+    label: "desirability-realis",
+    info: "",
+  },
+  {
+    value: "DI",
+    label: "desirability-irrealis",
+    info: "",
+  },
+  {
+    value: "NDR",
+    label: "undesirability-realis",
+    info: "",
+  },
+  {
+    value: "NDI",
+    label: "undesirability-irrealis",
+    info: "",
+  },
+  {
+    value: "QD",
+    label: "question about desirability",
+    info: "",
+  },
+
+  // ability
+  {
+    value: "Ab",
+    label: "ability",
+    info: "",
+  },
+  {
+    value: "NAb",
+    label: "disability",
+    info: "",
+  },
+  {
+    value: "QAb",
+    label: "question about ability",
+    info: "",
+  },
+
+  // belief
+  {
+    value: "B",
+    label: "belief",
+    info: "",
+  },
+  {
+    value: "NB",
+    label: "belief that not",
+    info: "",
+  },
+
+  // allegation
+  {
+    value: "All",
+    label: "allegation",
+    info: "",
+  },
+  {
+    value: "NAll",
+    label: "allegation that not",
+    info: "",
+  },
+  {
+    value: "S",
+    label: "semblance",
+    info: "",
+  },
 ];

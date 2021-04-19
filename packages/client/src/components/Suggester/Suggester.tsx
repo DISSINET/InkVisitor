@@ -1,6 +1,7 @@
-import React from "react";
+import React, { ReactElement, useEffect } from "react";
 import { DragObjectWithType, DropTargetMonitor, useDrop } from "react-dnd";
-import { FaPlus } from "react-icons/fa";
+import { FaPlus, FaPlayCircle } from "react-icons/fa";
+import { MdCancel } from "react-icons/md";
 
 import { Button, Input, Tag } from "components";
 import { IOption } from "@shared/types";
@@ -10,7 +11,10 @@ import {
   InputWrapper,
   SuggesterButton,
   SuggesterList,
-  SuggestionLine,
+  SuggestionLineIcons,
+  SuggestionLineTag,
+  SuggestionLineActions,
+  SuggestionCancelButton,
 } from "./SuggesterStyles";
 
 export interface SuggestionI {
@@ -18,6 +22,7 @@ export interface SuggestionI {
   label: string;
   category: string;
   color: string;
+  icons?: React.ReactNode[];
 }
 
 interface SuggesterProps {
@@ -30,6 +35,7 @@ interface SuggesterProps {
   suggestionListPosition?: string; // todo not implemented yet
   disabled?: boolean; // todo not implemented yet
   inputWidth?: number;
+  displayCancelButton?: boolean;
 
   // events
   onType: Function;
@@ -37,6 +43,7 @@ interface SuggesterProps {
   onCreate: Function;
   onPick: Function;
   onDrop: Function;
+  onCancel?: Function;
   cleanOnSelect?: boolean;
 }
 
@@ -52,6 +59,7 @@ export const Suggester: React.FC<SuggesterProps> = ({
   suggestionListPosition,
   disabled,
   inputWidth = 100,
+  displayCancelButton = false,
 
   // events
   onType,
@@ -59,6 +67,7 @@ export const Suggester: React.FC<SuggesterProps> = ({
   onCreate,
   onPick,
   onDrop,
+  onCancel = () => {},
 }) => {
   const [{ isOver }, dropRef] = useDrop({
     accept: ItemTypes.TAG,
@@ -88,9 +97,16 @@ export const Suggester: React.FC<SuggesterProps> = ({
           changeOnType={true}
           width={inputWidth}
         />
+        {displayCancelButton && (
+          <SuggestionCancelButton>
+            <MdCancel onClick={() => onCancel()} />
+          </SuggestionCancelButton>
+        )}
+
         <SuggesterButton>
           <Button
             icon={<FaPlus style={{ fontSize: "16px", padding: "2px" }} />}
+            tooltip="create new actant"
             color="primary"
             onClick={() => {
               onCreate({
@@ -106,23 +122,24 @@ export const Suggester: React.FC<SuggesterProps> = ({
           {suggestions
             .filter((s, si) => si < MAXSUGGESTIONDISPLAYED)
             .map((suggestion, si) => (
-              <SuggestionLine key={si}>
-                <Tag
-                  propId={suggestion.id}
-                  label={suggestion.label}
-                  category={suggestion.category}
-                  color={suggestion.color}
-                  button={
-                    <Button
-                      label=">"
-                      color="primary"
-                      onClick={() => {
-                        onPick(suggestion);
-                      }}
-                    />
-                  }
-                />
-              </SuggestionLine>
+              <React.Fragment key={si}>
+                <SuggestionLineActions>
+                  <FaPlayCircle
+                    onClick={() => {
+                      onPick(suggestion);
+                    }}
+                  />
+                </SuggestionLineActions>
+                <SuggestionLineTag>
+                  <Tag
+                    propId={suggestion.id}
+                    label={suggestion.label}
+                    category={suggestion.category}
+                    color={suggestion.color}
+                  />
+                </SuggestionLineTag>
+                <SuggestionLineIcons>{suggestion.icons}</SuggestionLineIcons>
+              </React.Fragment>
             ))}
         </SuggesterList>
       ) : null}

@@ -12,7 +12,7 @@ export const CProp = (): IProp => ({
   id: uuidv4(),
   elvl: "1",
   certainty: "1",
-  modality: "1",
+  modality: "Y",
   origin: "",
   type: {
     id: "",
@@ -34,7 +34,7 @@ export const CStatement = (territoryId: string): IStatement => ({
     action: "",
     certainty: "1",
     elvl: "1",
-    modality: "1",
+    modality: "Y",
     text: "",
     note: "",
     territory: {
@@ -52,7 +52,6 @@ export const CStatementActant = (): IStatementActant => ({
   id: uuidv4(),
   actant: "",
   position: "s",
-  modality: "1",
   elvl: "1",
   certainty: "1",
 });
