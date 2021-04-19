@@ -24,13 +24,11 @@
     "exec": "ts-node -r tsconfig-paths/register ./src"
   },
   "_moduleAliases": {
-    "@daos": "dist/mocks",
-    "@entities": "dist/domain",
     "@shared": "dist/shared",
-    "@common": "dist/common",
-    "@server": "dist/server",
-    "@modules": "dist/modules",
-    "@service": "dist/service"
+    "@common": "dist/server/src/common",
+    "@modules": "dist/server/src/modules",
+    "@service": "dist/server/src/service",
+    "@models": "dist/server/src/models"
   },
   "dependencies": {
     "bcrypt": "^5.0.0",
@@ -65,7 +63,7 @@
     "@types/find": "^0.2.1",
     "@types/helmet": "0.0.47",
     "@types/jasmine": "^3.5.10",
-    "@types/jest": "^26.0.20",
+    "@types/jest": "^26.0.22",
     "@types/jsonfile": "^6.0.0",
     "@types/jsonwebtoken": "^8.5.0",
     "@types/mocha": "^8.2.1",
