@@ -5,14 +5,14 @@ const languageValues = languageDict.map((i) => i.value);
 export interface ITerritory extends IActant {
   class: "T";
   data: {
-    parent: ParentTerritoryI | false;
+    parent: IParentTerritory | false;
     type: string; // territoryTypeDict
     content: string;
     lang: typeof languageValues[number];
   };
 }
 
-interface ParentTerritoryI {
+export interface IParentTerritory {
   id: string; // '' in case of root
   order: number;
 }
