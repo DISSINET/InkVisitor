@@ -125,6 +125,15 @@ export const StatementEditorBox: React.FC = () => {
     }
   }, [JSON.stringify(statement)]);
 
+  const removeActant = (statementActantId: string) => {
+    if (statement) {
+      const updatedActants = statement.data.actants.filter(
+        (a) => a.id !== statementActantId
+      );
+      const newData = { ...statement.data, ...{ actants: updatedActants } };
+      update(newData);
+    }
+  };
   const addActant = (newStatementActantId: string) => {
     if (statement) {
       const newStatementActant = CStatementActant();
@@ -380,8 +389,7 @@ export const StatementEditorBox: React.FC = () => {
                             color="danger"
                             tooltip="remove actant row"
                             onClick={() => {
-                              
-                              //todo
+                              removeActant(sActant.id);
                             }}
                           />
                         </StyledActantListItem>
