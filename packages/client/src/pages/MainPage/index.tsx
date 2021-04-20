@@ -96,6 +96,7 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
 
       <Toast />
       <Footer height={heightFooter} />
+      <UserAdministrationModal />
     </>
   );
 };

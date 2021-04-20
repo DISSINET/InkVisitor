@@ -113,39 +113,37 @@ export const ContextMenu: React.FC<ContextMenu> = ({ territoryActant }) => {
         showModal={showCreate}
         disableBgClick
       >
-        <ModalCard>
-          <ModalHeader title={"Add child Territory"} />
-          <ModalContent>
-            <Input
-              label={"Territory name: "}
-              value={territoryName}
-              onChangeFn={(value: string) => setTerritoryName(value)}
+        <ModalHeader title={"Add child Territory"} />
+        <ModalContent>
+          <Input
+            label={"Territory name: "}
+            value={territoryName}
+            onChangeFn={(value: string) => setTerritoryName(value)}
+          />
+        </ModalContent>
+        <ModalFooter>
+          <ButtonGroup>
+            <Button
+              label="Cancel"
+              color="success"
+              onClick={() => {
+                setShowCreate(false);
+                setTerritoryName("");
+              }}
             />
-          </ModalContent>
-          <ModalFooter>
-            <ButtonGroup>
-              <Button
-                label="Cancel"
-                color="success"
-                onClick={() => {
-                  setShowCreate(false);
-                  setTerritoryName("");
-                }}
-              />
-              <Button
-                label="Save"
-                color="primary"
-                onClick={() => {
-                  if (territoryName.length > 0) {
-                    createTerritory(territoryName);
-                  } else {
-                    toast.warning("Fill territory name!");
-                  }
-                }}
-              />
-            </ButtonGroup>
-          </ModalFooter>
-        </ModalCard>
+            <Button
+              label="Save"
+              color="primary"
+              onClick={() => {
+                if (territoryName.length > 0) {
+                  createTerritory(territoryName);
+                } else {
+                  toast.warning("Fill territory name!");
+                }
+              }}
+            />
+          </ButtonGroup>
+        </ModalFooter>
       </Modal>
     </>
   );
