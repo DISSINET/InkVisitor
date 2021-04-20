@@ -20,6 +20,7 @@ import { Button, ButtonGroup, TagGroup, Tooltip } from "components";
 import { ActantTag } from "./../";
 import api from "api";
 import { IStatement, IActant, IAction } from "@shared/types";
+import { ActantType } from "@shared/enums";
 import { StatementListTable } from "./StatementListTable/StatementListTable";
 import { StyledDots, StyledLoaderWrap } from "./StatementLitBoxStyles";
 import { CStatement } from "constructors";
@@ -114,7 +115,14 @@ export const StatementListBox: React.FC = () => {
 
           return (
             <TagGroup>
-              <ActantTag actant={{ id: "", class: "S", label: "", data: {} }} />
+              <ActantTag
+                actant={{
+                  id: "",
+                  class: ActantType.Statement,
+                  label: "",
+                  data: {},
+                }}
+              />
               {subjectIdsSlice
                 .filter((a: any) => a)
                 .map((actantId: string, ai: number) => {

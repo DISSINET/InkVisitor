@@ -1,6 +1,8 @@
+import { ActantType } from "../enums";
+
 export interface IActant {
   id: string;
-  class: "T" | "S" | "R" | "P" | "G" | "O" | "C" | "L" | "V" | "E";
+  class: ActantType;
   label: string;
   data: object;
 }

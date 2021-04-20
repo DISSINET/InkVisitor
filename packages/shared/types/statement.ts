@@ -1,7 +1,8 @@
-import { IActant, IProp, ILabel } from "./";
+import { IActant, IProp } from "./";
+import { ActantType } from "../enums";
 
 export interface IStatement extends IActant {
-  class: "S";
+  class: ActantType.Statement;
   data: {
     action: string;
     certainty: string;
