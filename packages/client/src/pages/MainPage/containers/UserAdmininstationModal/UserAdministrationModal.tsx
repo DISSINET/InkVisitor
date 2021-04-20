@@ -12,27 +12,38 @@ import {
 } from "components";
 import { StyledLogInBox } from "./UserAdministrationModalStyles";
 import { useAppDispatch } from "redux/hooks";
+import { toast } from "react-toastify";
 
 export const UserAdministrationModal: React.FC = () => {
   const dispatch = useAppDispatch();
   const token = localStorage.getItem("token");
+  const username = localStorage.getItem("username");
 
   const [usernameLocal, setUsernameLocal] = useState("");
   const [password, setPassword] = useState("");
   const [showLogIn, setShowLogIn] = useState(true);
 
   useEffect(() => {
-    const username = localStorage.getItem("username");
-    if (username) {
-      setUsernameLocal(username);
+    if (token && username) {
+      setShowLogIn(false);
+    } else {
+      setShowLogIn(true);
     }
-  }, []);
+  }, [username, token]);
 
   const handleLogIn = async () => {
+    if (usernameLocal.length === 0) {
+      toast.error("Fill username");
+      return;
+    }
+    if (password.length === 0) {
+      toast.error("Fill password");
+      return;
+    }
     const res = await api.signIn(usernameLocal, password);
-
-    //   dispatch(setAuthToken(Math.floor(Math.random() * 100).toString()));
-    //   dispatch(setUsername(Math.floor(Math.random() * 100).toString()));
+    if (res.token) {
+      setShowLogIn(false);
+    }
   };
 
   return (
@@ -49,6 +60,7 @@ export const UserAdministrationModal: React.FC = () => {
           />
           <Input
             placeholder="password"
+            password
             inverted
             onChangeFn={(text: string) => setPassword(text)}
             value={password}

@@ -90,6 +90,11 @@ class Api {
     this.checkLogin();
   }
 
+  isLoggedIn = () => {
+    let storedToken = localStorage.getItem("token");
+    let storedUsername = localStorage.getItem("username");
+    return storedToken && storedUsername ? true : false;
+  };
   /**
    * Authentication
    */

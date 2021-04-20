@@ -30,7 +30,7 @@ export const ActionDropdown: React.FC<IActionDropdown> = ({
       const res = await api.actionsGetMore({});
       return res.data;
     },
-    {}
+    { enabled: api.isLoggedIn() }
   );
   const options = useMemo(() => {
     return actions?.map((action: IAction) => {

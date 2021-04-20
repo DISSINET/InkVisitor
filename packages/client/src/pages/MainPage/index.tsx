@@ -19,6 +19,7 @@ import {
   UserOptionsModal,
 } from "./containers";
 import { useHistory, useParams } from "react-router-dom";
+import api from "api";
 
 interface MainPage {
   size: number[];
@@ -44,24 +45,16 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
         left={<div>InkVisitor</div>}
         right={
           <div>
-            {/* {user ? (
+            {api.isLoggedIn() && (
               <>
-                  <div ">
-                      logged as {api.getUser().name}
-                  </div>
-                  <Button
-                      label="Log Out"
-                      color="danger"
-                      onClick={() => null}
-                  />
+                <div>logged as {localStorage.getItem("username")}</div>
+                <Button
+                  label="Log Out"
+                  color="danger"
+                  onClick={() => api.signOut()}
+                />
               </>
-          ) : (
-              <Button
-                  label="Log In"
-                  color="info"
-                  onClick={() => null}
-              />
-          )} */}
+            )}
           </div>
         }
       />

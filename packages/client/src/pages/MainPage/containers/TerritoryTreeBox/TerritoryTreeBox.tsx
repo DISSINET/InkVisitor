@@ -16,7 +16,7 @@ export const TerritoryTreeBox: React.FC = () => {
       const res = await api.treeGet();
       return res.data;
     },
-    {}
+    { enabled: api.isLoggedIn() }
   );
   var hashParams = queryString.parse(location.hash);
   const territoryId = hashParams.territory;
