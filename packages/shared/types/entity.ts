@@ -1,18 +1,10 @@
-import { ActantType, IActant } from "./";
+import { IActant } from "./";
+import {EntityActantType} from '../enums'
 import { entityLogicalTypeDict } from "./../dictionaries";
-
-type EntityClasses =
-  | ActantType.Person
-  | ActantType.Group
-  | ActantType.Object
-  | ActantType.Concept
-  | ActantType.Location
-  | ActantType.Value
-  | ActantType.Event;
 
 const entityLogicalTypeValues = entityLogicalTypeDict.map((i) => i.value);
 export interface IEntity extends IActant {
-  class: EntityClasses;
+  class: EntityActantType;
   data: {
     logicalType: typeof entityLogicalTypeValues[number];
   };

@@ -1,4 +1,5 @@
-import { IActant, ActantType } from ".";
+import { IActant } from ".";
+import { ActantType } from "../enums";
 import { languageDict } from "./../dictionaries";
 
 const languageValues = languageDict.map((i) => i.value);

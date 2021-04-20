@@ -5,7 +5,7 @@ import {
   ITerritory,
   IStatement,
 } from "@shared/types";
-
+import { CategoryActantType, ActantType } from "@shared/enums";
 import { v4 as uuidv4 } from "uuid";
 
 export const CProp = (): IProp => ({
@@ -28,7 +28,7 @@ export const CProp = (): IProp => ({
 
 export const CStatement = (territoryId: string): IStatement => ({
   id: uuidv4(),
-  class: "S",
+  class: ActantType.Statement,
   label: "",
   data: {
     action: "",
@@ -63,7 +63,7 @@ export const CTerritoryActant = (
   parentOrder: number
 ): ITerritory => ({
   id: uuidv4(),
-  class: "T",
+  class: ActantType.Territory,
   label: label,
   data: {
     parent: { id: parentId, order: parentOrder },
@@ -74,7 +74,7 @@ export const CTerritoryActant = (
 });
 
 export const CActant = (
-  category: "P" | "G" | "O" | "C" | "L" | "V" | "E",
+  category: CategoryActantType,
   label: string
 ): IActant => ({
   id: uuidv4(),
