@@ -33,16 +33,18 @@ export const UserAdministrationModal: React.FC = () => {
 
   const handleLogIn = async () => {
     if (usernameLocal.length === 0) {
-      toast.error("Fill username");
+      toast.warn("Fill username");
       return;
     }
     if (password.length === 0) {
-      toast.error("Fill password");
+      toast.warn("Fill password");
       return;
     }
     const res = await api.signIn(usernameLocal, password);
     if (res.token) {
       setShowLogIn(false);
+    } else {
+      toast.error("Wrong attempt!");
     }
   };
 

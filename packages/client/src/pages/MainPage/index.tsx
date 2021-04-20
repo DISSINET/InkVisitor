@@ -26,6 +26,7 @@ interface MainPage {
 }
 
 const MainPage: React.FC<MainPage> = ({ size }) => {
+  const isLoggedIn = api.isLoggedIn();
   const history = useHistory();
   const { territoryId, statementId } = useParams<{
     territoryId: string;
@@ -45,7 +46,7 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
         left={<div>InkVisitor</div>}
         right={
           <div>
-            {api.isLoggedIn() && (
+            {isLoggedIn && (
               <>
                 <div>logged as {localStorage.getItem("username")}</div>
                 <Button
