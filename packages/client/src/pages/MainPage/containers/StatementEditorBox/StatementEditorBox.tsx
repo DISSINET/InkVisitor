@@ -23,13 +23,8 @@ import {
   actantPositionDict,
   referenceTypeDict,
 } from "./../../../../../../shared/dictionaries";
-import {
-  IActant,
-  IProp,
-  IStatementActant,
-  IStatementReference,
-} from "@shared/types";
-import { Button, ButtonGroup, Input } from "components";
+import { IActant, IProp, IStatementReference } from "@shared/types";
+import { Button, Input } from "components";
 import { ActantSuggester } from "./../";
 
 import {
