@@ -8,6 +8,7 @@ import { CActant } from "constructors";
 import { Entities } from "types";
 import { useQuery, useQueryClient } from "react-query";
 import api from "api";
+import { CategoryActantType } from "@shared/enums";
 
 const queryString = require("query-string");
 
@@ -120,7 +121,7 @@ export const ActantSuggester: React.FC<ActantSuggesterI> = ({
 
   const handleCreate = async (newCreated: {
     label: string;
-    category: "P" | "G" | "O" | "C" | "L" | "V" | "E";
+    category: CategoryActantType;
   }) => {
     const newActant = CActant(newCreated.category, newCreated.label);
     const resCreate = await api.actantsCreate(newActant);
@@ -161,7 +162,7 @@ export const ActantSuggester: React.FC<ActantSuggesterI> = ({
       }
       onCreate={(newCreated: {
         label: string;
-        category: "P" | "G" | "O" | "C" | "L" | "V" | "E";
+        category: CategoryActantType;
       }) => {
         handleCreate(newCreated);
       }}
