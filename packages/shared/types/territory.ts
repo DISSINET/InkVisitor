@@ -1,9 +1,10 @@
 import { IActant } from "./actant";
 import { languageDict } from "./../dictionaries";
+import { ActantType } from ".";
 
 const languageValues = languageDict.map((i) => i.value);
 export interface ITerritory extends IActant {
-  class: "T";
+  class: ActantType.Territory;
   data: {
     parent: IParentTerritory | false;
     type: string; // territoryTypeDict

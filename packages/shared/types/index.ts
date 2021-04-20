@@ -1,6 +1,6 @@
 import { IAudit } from "./audit";
 import { IAction } from "./action";
-import { IActant } from "./actant";
+import { IActant, ActantType } from "./actant";
 import { IEntity } from "./entity";
 import { ILabel } from "./label";
 import { IProp } from "./prop";
@@ -27,6 +27,7 @@ import { IOption } from "./option";
 import { IResponseGeneric } from "./response-generic";
 
 export type {
+  ActantType,
   IAudit,
   IAction,
   IActant,
