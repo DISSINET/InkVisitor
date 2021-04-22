@@ -60,6 +60,7 @@ export const StatementEditorActantList: React.FC<StatementEditorActantList> = ({
                 statement={statement}
                 statementId={statementId}
                 classEntitiesActant={classEntitiesActant}
+                moveFn={moveChildFn}
               />
             )}
           </>
