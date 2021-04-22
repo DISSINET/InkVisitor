@@ -40,6 +40,7 @@ server.get("/health", function (req, res) {
 import { validateJwt } from "@common/auth";
 import { UnauthorizedError } from "express-jwt";
 
+// uncomment this to enable auth
 server.use(validateJwt().unless({ path: [/api\/v1\/users/] }));
 
 // Routing

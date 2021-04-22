@@ -26,14 +26,32 @@ export const Background = styled.div`
 
 interface Card {
   fullwidth?: boolean;
+  inverted: boolean;
+  width: "full" | "normal" | "thin";
 }
+const handleWidth = (width: string) => {
+  switch (width) {
+    case "full":
+      return "calc(100vw - 40px)";
+    case "normal":
+      return "50rem";
+    case "thin":
+      return "auto";
+  }
+};
 export const Card = styled.div<Card>`
-  width: ${({ fullwidth }) => (fullwidth ? "calc(100vw - 40px)" : "50rem")};
+  width: ${({ width }) => handleWidth(width)};
+  min-width: 27rem;
   display: flex;
   flex-direction: column;
   max-height: calc(100vh - 40px);
   overflow: hidden;
   z-index: 50;
+  background-color: ${({ theme, inverted }) =>
+    inverted ? theme.color["primary"] : theme.color["white"]};
+  color: ${({ theme, inverted }) =>
+    inverted ? theme.color["white"] : theme.color["black"]};
+  border-radius: ${({ theme }) => theme.borderRadius["sm"]};
 `;
 
 export const CardHeader = styled.header`
@@ -43,12 +61,10 @@ export const CardHeader = styled.header`
   flex-shrink: 0;
   padding: ${space3} ${space6} ${space1} ${space6};
   position: relative;
-  background-color: ${({ theme }) => theme.color["white"]};
+
   border-bottom-style: solid;
   border-bottom-width: ${({ theme }) => theme.borderWidth["default"]};
   border-bottom-color: ${({ theme }) => theme.color["gray"][400]};
-  border-top-left-radius: ${({ theme }) => theme.borderRadius["sm"]};
-  border-top-right-radius: ${({ theme }) => theme.borderRadius["sm"]};
   min-height: ${({ theme }) => theme.space[12]};
 `;
 export const CardTitle = styled.h2`
@@ -61,18 +77,16 @@ export const CardBody = styled.section`
   flex-shrink: 1;
   overflow: auto;
   padding: ${space5} ${space7};
-  background-color: #ffffff;
+
   font-size: ${({ theme }) => theme.fontSize["sm"]};
   -webkit-overflow-scrolling: touch;
 `;
 export const Footer = styled.div`
-  border-bottom-left-radius: ${({ theme }) => theme.borderRadius["sm"]};
-  border-bottom-right-radius: ${({ theme }) => theme.borderRadius["sm"]};
   border-top-style: solid;
   border-top-width: ${({ theme }) => theme.borderWidth["default"]};
   border-top-color: ${({ theme }) => theme.color["gray"][400]};
   align-items: center;
-  background-color: #ffffff;
+
   display: flex;
   flex-shrink: 0;
   justify-content: flex-end;

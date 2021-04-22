@@ -27,18 +27,16 @@ export const Submit: React.FC<Submit> = ({
   return (
     <>
       <Modal onClose={onCancel} showModal={show} disableBgClick>
-        <ModalCard>
-          <ModalHeader title={title} />
-          <ModalContent>
-            <p>{text}</p>
-          </ModalContent>
-          <ModalFooter>
-            <ButtonGroup>
-              <Button label="Cancel" color="info" onClick={onCancel} />
-              <Button label="Submit" color="danger" onClick={onSubmit} />
-            </ButtonGroup>
-          </ModalFooter>
-        </ModalCard>
+        <ModalHeader title={title} />
+        <ModalContent>
+          <p>{text}</p>
+        </ModalContent>
+        <ModalFooter>
+          <ButtonGroup>
+            <Button label="Cancel" color="info" onClick={onCancel} />
+            <Button label="Submit" color="danger" onClick={onSubmit} />
+          </ButtonGroup>
+        </ModalFooter>
       </Modal>
     </>
   );

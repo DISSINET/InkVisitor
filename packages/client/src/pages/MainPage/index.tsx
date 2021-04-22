@@ -19,12 +19,23 @@ import {
   UserOptionsModal,
 } from "./containers";
 import { useHistory, useParams } from "react-router-dom";
+import api from "api";
+import { useQueryClient } from "react-query";
+import { useAppDispatch, useAppSelector } from "redux/hooks";
+import { setAuthToken } from "redux/features/authTokenSlice";
+import { setUsername } from "redux/features/usernameSlice";
+import { StyledUserBox, StyledBoxWrap, StyledUser } from "./MainPageStyles";
 
 interface MainPage {
   size: number[];
 }
 
 const MainPage: React.FC<MainPage> = ({ size }) => {
+  const isLoggedIn = api.isLoggedIn();
+  const dispatch = useAppDispatch();
+  const username = useAppSelector((state) => state.username);
+  const queryClient = useQueryClient();
+
   const history = useHistory();
   const { territoryId, statementId } = useParams<{
     territoryId: string;
@@ -35,6 +46,13 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
   const heightFooter = 30;
   const heightContent = size[1] - heightHeader - heightFooter;
 
+  const handleLogOut = () => {
+    api.signOut();
+    dispatch(setUsername(""));
+    dispatch(setAuthToken(""));
+    toast.success("You've been successfully logged out!");
+    queryClient.removeQueries();
+  };
   return (
     <>
       <Header
@@ -44,29 +62,21 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
         left={<div>InkVisitor</div>}
         right={
           <div>
-            {/* {user ? (
-              <>
-                  <div ">
-                      logged as {api.getUser().name}
-                  </div>
-                  <Button
-                      label="Log Out"
-                      color="danger"
-                      onClick={() => null}
-                  />
-              </>
-          ) : (
-              <Button
-                  label="Log In"
-                  color="info"
-                  onClick={() => null}
-              />
-          )} */}
+            {isLoggedIn && (
+              <StyledUserBox>
+                <StyledUser>logged as {username}</StyledUser>
+                <Button
+                  label="Log Out"
+                  color="danger"
+                  onClick={() => handleLogOut()}
+                />
+              </StyledUserBox>
+            )}
           </div>
         }
       />
       <DndProvider backend={HTML5Backend}>
-        <div style={{ display: "flex" }}>
+        <StyledBoxWrap>
           <Box height={heightContent} width={200} label="Territories">
             <TerritoryTreeBox />
           </Box>
@@ -91,11 +101,12 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
               <ActantBookmarkBox />
             </Box>
           </div>
-        </div>
+        </StyledBoxWrap>
       </DndProvider>
 
       <Toast />
       <Footer height={heightFooter} />
+      {!isLoggedIn && <UserAdministrationModal />}
     </>
   );
 };

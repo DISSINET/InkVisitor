@@ -67,7 +67,7 @@ export const StatementEditorBox: React.FC = () => {
       const res = await api.statementGet(statementId);
       return res.data;
     },
-    { enabled: !!statementId }
+    { enabled: !!statementId && api.isLoggedIn() }
   );
 
   // getting origin actants of properties

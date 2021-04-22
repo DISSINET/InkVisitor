@@ -5,18 +5,16 @@ const queryString = require("query-string");
 import api from "api";
 import { TerritoryTreeNode } from "./TerritoryTreeNode/TerritoryTreeNode";
 import { IResponseTree } from "@shared/types";
-import { DotLoader } from "react-spinners";
-import theme from "Theme/theme";
 
 export const TerritoryTreeBox: React.FC = () => {
   const { status, data, error, isFetching } = useQuery(
     ["tree"],
     async () => {
-      console.log("!!getting tree");
+      // console.log("!!getting tree");
       const res = await api.treeGet();
       return res.data;
     },
-    {}
+    { enabled: api.isLoggedIn() }
   );
   var hashParams = queryString.parse(location.hash);
   const territoryId = hashParams.territory;

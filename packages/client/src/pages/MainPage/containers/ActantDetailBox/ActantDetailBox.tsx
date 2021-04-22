@@ -30,7 +30,7 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
       const res = await api.actantsGet(actantId);
       return res.data;
     },
-    { enabled: !!actantId }
+    { enabled: !!actantId && api.isLoggedIn() }
   );
 
   const [selectedCategory, setSelectedCategory] = useState<string>("T");

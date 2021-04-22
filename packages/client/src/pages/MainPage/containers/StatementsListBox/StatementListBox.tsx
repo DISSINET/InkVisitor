@@ -48,7 +48,7 @@ export const StatementListBox: React.FC = () => {
       const res = await api.territoryGet(territoryId);
       return res.data;
     },
-    { initialData: initialData, enabled: !!territoryId }
+    { initialData: initialData, enabled: !!territoryId && api.isLoggedIn() }
   );
 
   const { statements, actants } = data || initialData;
@@ -64,7 +64,7 @@ export const StatementListBox: React.FC = () => {
       const res = await api.actionsGetMore({});
       return res.data;
     },
-    {}
+    { enabled: api.isLoggedIn() }
   );
 
   const columns: any = useMemo(() => {

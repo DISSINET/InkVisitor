@@ -5,7 +5,6 @@ import { ThemeProvider } from "styled-components";
 import theme from "./Theme/theme";
 import MainPage from "./pages/MainPage";
 import GlobalStyle from "Theme/global";
-import LogInPage from "pages/LogInPage";
 
 import { QueryClient, QueryClientProvider, useQuery } from "react-query";
 import { ReactQueryDevtools } from "react-query/devtools";
@@ -25,19 +24,12 @@ export const App: React.FC<AppProps> = () => {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // const isLoggedIn = api.checkLogin();
-
   return (
     <ThemeProvider theme={theme}>
       <GlobalStyle />
       <QueryClientProvider client={queryClient}>
         <BrowserRouter basename="apps/inkvisitor">
           <Switch>
-            {/* <Route
-              path="/"
-              exact
-              render={(props) => <LogInPage {...props} size={size} />}
-            /> */}
             <Route
               path="/"
               exact
