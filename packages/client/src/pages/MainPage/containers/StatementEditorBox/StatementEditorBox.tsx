@@ -24,6 +24,7 @@ import {
 import { IActant, IProp, IStatementReference } from "@shared/types";
 import { Button, Input } from "components";
 import { ActantSuggester } from "./../";
+import { StatementEditorActantList } from "./StatementEditorActantList/StatementEditorActantList";
 
 import {
   StyledEditorSection,
@@ -50,8 +51,8 @@ export const StatementEditorBox: React.FC = () => {
   let location = useLocation();
   var hashParams = queryString.parse(location.hash);
 
-  const territoryId = hashParams.territory;
   const statementId = hashParams.statement;
+  const territoryId = hashParams.territory;
 
   const queryClient = useQueryClient();
 
@@ -120,30 +121,12 @@ export const StatementEditorBox: React.FC = () => {
     }
   }, [JSON.stringify(statement)]);
 
-  const removeActant = (statementActantId: string) => {
-    if (statement) {
-      const updatedActants = statement.data.actants.filter(
-        (a) => a.id !== statementActantId
-      );
-      const newData = { ...statement.data, ...{ actants: updatedActants } };
-      update(newData);
-    }
-  };
   const addActant = (newStatementActantId: string) => {
     if (statement) {
       const newStatementActant = CStatementActant();
       newStatementActant.actant = newStatementActantId;
       const newData = { ...statement.data };
       newData.actants.push(newStatementActant);
-      update(newData);
-    }
-  };
-  const updateActant = (statementActantId: string, changes: any) => {
-    if (statement && statementActantId) {
-      const updatedActants = statement.data.actants.map((a) =>
-        a.id === statementActantId ? { ...a, ...changes } : a
-      );
-      const newData = { ...statement.data, ...{ actants: updatedActants } };
       update(newData);
     }
   };
@@ -306,92 +289,11 @@ export const StatementEditorBox: React.FC = () => {
             <StyledEditorSection key="editor-section-actants">
               <StyledEditorSectionHeader>Actants</StyledEditorSectionHeader>
               <StyledEditorSectionContent>
-                <StyledActantList>
-                  <StyledListHeaderColumn>Actant</StyledListHeaderColumn>
-                  <StyledListHeaderColumn>Position</StyledListHeaderColumn>
-                  <StyledListHeaderColumn>Attributes</StyledListHeaderColumn>
-                  <StyledListHeaderColumn>Actions</StyledListHeaderColumn>
-                  {statement.data.actants.map((sActant, sai) => {
-                    const actant = statement.actants.find(
-                      (a) => a.id === sActant.actant
-                    );
-                    return (
-                      <React.Fragment key={sai}>
-                        <StyledActantListItem>
-                          {actant ? (
-                            <ActantTag
-                              actant={actant}
-                              short={false}
-                              button={
-                                <Button
-                                  key="d"
-                                  tooltip="unlink actant"
-                                  icon={<FaUnlink />}
-                                  color="danger"
-                                  onClick={() => {
-                                    updateActant(sActant.id, {
-                                      actant: "",
-                                    });
-                                  }}
-                                />
-                              }
-                            />
-                          ) : (
-                            <ActantSuggester
-                              onSelected={(newSelectedId: string) => {
-                                updateActant(sActant.id, {
-                                  actant: newSelectedId,
-                                });
-                              }}
-                              categoryIds={classEntitiesActant}
-                            />
-                          )}
-                        </StyledActantListItem>
-                        <StyledActantListItem>
-                          <Input
-                            type="select"
-                            value={sActant.position}
-                            options={actantPositionDict}
-                            onChangeFn={(newPosition: any) => {
-                              updateActant(sActant.id, {
-                                position: newPosition,
-                              });
-                            }}
-                          ></Input>
-                        </StyledActantListItem>
-                        <StyledActantListItem>
-                          <ElvlToggle
-                            value={sActant.elvl}
-                            onChangeFn={(newValue: string) => {
-                              updateActant(sActant.id, {
-                                elvl: newValue,
-                              });
-                            }}
-                          />
-                          <CertaintyToggle
-                            value={sActant.certainty}
-                            onChangeFn={(newValue: string) => {
-                              updateActant(sActant.id, {
-                                certainty: newValue,
-                              });
-                            }}
-                          />
-                        </StyledActantListItem>
-                        <StyledActantListItem>
-                          <Button
-                            key="d"
-                            icon={<FaTrashAlt />}
-                            color="danger"
-                            tooltip="remove actant row"
-                            onClick={() => {
-                              removeActant(sActant.id);
-                            }}
-                          />
-                        </StyledActantListItem>
-                      </React.Fragment>
-                    );
-                  })}
-                </StyledActantList>
+                <StatementEditorActantList
+                  statement={statement}
+                  statementId={statementId}
+                  classEntitiesActant={classEntitiesActant}
+                />
                 <ActantSuggester
                   onSelected={(newSelectedId: string) => {
                     addActant(newSelectedId);
