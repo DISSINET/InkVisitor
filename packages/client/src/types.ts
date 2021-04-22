@@ -99,3 +99,8 @@ export type ToggleItem = {
   label: String | JSX.Element;
   tooltip?: string;
 };
+export type DragItem = {
+  index: number;
+  id: string;
+  type: string;
+};

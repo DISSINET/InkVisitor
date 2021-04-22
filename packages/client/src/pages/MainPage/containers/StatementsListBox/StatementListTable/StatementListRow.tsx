@@ -11,14 +11,9 @@ import { FaGripVertical } from "react-icons/fa";
 import { Cell } from "react-table";
 const queryString = require("query-string");
 
-import { ItemTypes } from "types";
+import { DragItem, ItemTypes } from "types";
 import { StyledTr, StyledTd } from "./StatementListTableStyles";
 
-type DragItem = {
-  index: number;
-  id: string;
-  type: string;
-};
 interface StatementListRow {
   row: any;
   index: number;
