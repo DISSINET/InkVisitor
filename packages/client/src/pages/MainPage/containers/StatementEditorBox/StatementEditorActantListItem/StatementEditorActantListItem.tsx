@@ -15,14 +15,9 @@ import { DragItem, ItemTypes } from "types";
 import { actantPositionDict } from "../../../../../../../shared/dictionaries";
 import { ActantTag, ActantSuggester, CertaintyToggle, ElvlToggle } from "../..";
 import { Input, Button } from "components";
+import { StyledActantListItem } from "../StatementEditorBoxStyles";
 import api from "api";
 
-import { StyledActantListItem } from "../StatementEditorBoxStyles";
-import styled from "styled-components";
-
-const StyledGridRow = styled.div`
-  display: flex;
-`;
 interface StatementEditorActantListItem {
   index: number;
   actant: IActant;
@@ -109,6 +104,9 @@ export const StatementEditorActantListItem: React.FC<StatementEditorActantListIt
   });
 
   drag(drop(dropRef));
+
+  // preview(drop(dropRef));
+  // drag(dragRef);
 
   return (
     <React.Fragment>
