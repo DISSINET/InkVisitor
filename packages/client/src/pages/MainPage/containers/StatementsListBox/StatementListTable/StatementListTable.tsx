@@ -42,17 +42,20 @@ export const StatementListTable: React.FC<StatementListTable> = ({
     useExpanded
   );
 
-  const moveRow = (dragIndex: number, hoverIndex: number) => {
-    const dragRecord = records[dragIndex];
-    setRecords(
-      update(records, {
-        $splice: [
-          [dragIndex, 1],
-          [hoverIndex, 0, dragRecord],
-        ],
-      })
-    );
-  };
+  const moveRow = useCallback(
+    (dragIndex: number, hoverIndex: number) => {
+      const dragRecord = records[dragIndex];
+      setRecords(
+        update(records, {
+          $splice: [
+            [dragIndex, 1],
+            [hoverIndex, 0, dragRecord],
+          ],
+        })
+      );
+    },
+    [records]
+  );
 
   return (
     <StyledTable {...getTableProps()}>

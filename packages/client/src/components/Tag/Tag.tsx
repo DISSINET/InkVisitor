@@ -8,7 +8,7 @@ import {
 } from "react-dnd";
 const queryString = require("query-string");
 
-import { ItemTypes } from "types";
+import { DragItem, ItemTypes } from "types";
 import { TagWrapper, EntityTag, Label, ButtonWrapper } from "./TagStyles";
 import { Tooltip } from "components";
 import { useHistory, useLocation } from "react-router-dom";
@@ -25,12 +25,6 @@ interface TagProps {
   short?: boolean;
   index?: number;
   moveFn?: (dragIndex: number, hoverIndex: number) => void;
-}
-
-interface DragItem {
-  index: number;
-  id: string;
-  type: string;
 }
 
 export const Tag: React.FC<TagProps> = ({
