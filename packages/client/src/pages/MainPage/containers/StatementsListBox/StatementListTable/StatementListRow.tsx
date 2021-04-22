@@ -72,7 +72,7 @@ export const StatementListRow: React.FC<StatementListRow> = ({
       }
       // Time to actually perform the action
       moveRow(dragIndex, hoverIndex);
-      api.territoryMoveStatement(`${item.id}`, hoverIndex);
+      // api.territoryMoveStatement(`${item.id}`, hoverIndex);
       // Note: we're mutating the monitor item here!
       // Generally it's better to avoid mutations,
       // but it's good here for the sake of performance
@@ -86,6 +86,8 @@ export const StatementListRow: React.FC<StatementListRow> = ({
     collect: (monitor: DragSourceMonitor) => ({
       isDragging: monitor.isDragging(),
     }),
+    end: (item: DragItem | undefined, monitor: DragSourceMonitor) =>
+      api.territoryMoveStatement(`${row.values.id}`, index),
   });
 
   const opacity = isDragging ? 0.2 : 1;
