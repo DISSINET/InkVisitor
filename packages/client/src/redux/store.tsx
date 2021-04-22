@@ -5,7 +5,7 @@ import authTokenSlice from "./features/authTokenSlice";
 import usernameSlice from "./features/usernameSlice";
 
 const store: Store = configureStore({
-  reducer: { token: authTokenSlice, username: usernameSlice },
+  reducer: { username: usernameSlice, token: authTokenSlice },
 });
 
 export default store;

@@ -16,6 +16,7 @@ import {
   IResponseBookmarks,
   IResponseAdministration,
 } from "@shared/types";
+import { connect } from "react-redux";
 
 type FilterActantsI = {
   label?: string;
@@ -94,6 +95,7 @@ class Api {
     let storedToken = localStorage.getItem("token");
     let storedUsername = localStorage.getItem("username");
     return storedToken && storedUsername ? true : false;
+    // return {username: storedUsername ,token: storedToken};
   };
   /**
    * Authentication
@@ -107,7 +109,8 @@ class Api {
       const parsedToken = parseJwt(storedToken);
 
       if (parsedToken && Date.now() < parsedToken.exp * 1000) {
-        this.saveLogin(storedToken, parsedToken.user);
+        const username = parsedToken.user.name;
+        this.saveLogin(storedToken, username);
       } else {
       }
     }
@@ -117,7 +120,6 @@ class Api {
     localStorage.setItem("token", newToken);
     localStorage.setItem("username", newUserName);
     this.token = newToken;
-    // set global
   }
 
   async signIn(username: string, password: string): Promise<any> {
@@ -133,7 +135,7 @@ class Api {
 
       if (response.status === 200) {
         const parsed = parseJwt(response.data.token);
-        this.saveLogin(response.data.token, parsed.user);
+        this.saveLogin(response.data.token, parsed.user.name);
       }
       return { ...response.data };
     } catch (err) {
@@ -144,6 +146,7 @@ class Api {
   async signOut() {
     localStorage.setItem("token", "");
     localStorage.setItem("username", "");
+
     this.token = "";
     // set global
   }

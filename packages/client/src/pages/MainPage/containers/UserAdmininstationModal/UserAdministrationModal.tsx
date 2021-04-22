@@ -5,7 +5,6 @@ import {
   ButtonGroup,
   Input,
   Modal,
-  ModalCard,
   ModalContent,
   ModalFooter,
   ModalHeader,
@@ -13,23 +12,13 @@ import {
 import { StyledLogInBox } from "./UserAdministrationModalStyles";
 import { useAppDispatch } from "redux/hooks";
 import { toast } from "react-toastify";
+import { setAuthToken } from "redux/features/authTokenSlice";
+import { setUsername } from "redux/features/usernameSlice";
 
 export const UserAdministrationModal: React.FC = () => {
   const dispatch = useAppDispatch();
-  const token = localStorage.getItem("token");
-  const username = localStorage.getItem("username");
-
   const [usernameLocal, setUsernameLocal] = useState("");
   const [password, setPassword] = useState("");
-  const [showLogIn, setShowLogIn] = useState(true);
-
-  useEffect(() => {
-    if (token && username) {
-      setShowLogIn(false);
-    } else {
-      setShowLogIn(true);
-    }
-  }, [username, token]);
 
   const handleLogIn = async () => {
     if (usernameLocal.length === 0) {
@@ -42,18 +31,18 @@ export const UserAdministrationModal: React.FC = () => {
     }
     const res = await api.signIn(usernameLocal, password);
     if (res.token) {
-      setShowLogIn(false);
+      dispatch(setUsername(usernameLocal));
+      dispatch(setAuthToken(res.token));
     } else {
       toast.error("Wrong attempt!");
     }
   };
 
   return (
-    <Modal showModal={showLogIn} disableBgClick inverted width="thin">
-      <ModalHeader title={"User log in"} />
+    <Modal showModal disableBgClick inverted width="thin">
+      <ModalHeader title={"User Log In"} />
       <ModalContent>
         <StyledLogInBox>
-          {/* <h2>InkVisitor</h2> */}
           <Input
             placeholder="username"
             inverted
@@ -67,8 +56,6 @@ export const UserAdministrationModal: React.FC = () => {
             onChangeFn={(text: string) => setPassword(text)}
             value={password}
           />
-          {/* <h5>{token}</h5>
-          <h5>{usernameLocal}</h5> */}
         </StyledLogInBox>
       </ModalContent>
       <ModalFooter>
