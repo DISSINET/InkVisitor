@@ -74,7 +74,7 @@ export const ActantSuggester: React.FC<ActantSuggesterI> = ({
         };
       });
     },
-    { enabled: typed.length > 2 && !!selectedCategory }
+    { enabled: typed.length > 2 && !!selectedCategory && api.isLoggedIn() }
   );
 
   const handleClean = () => {

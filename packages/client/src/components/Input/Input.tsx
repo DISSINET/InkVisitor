@@ -21,6 +21,7 @@ interface InputProps {
   onChangeFn: Function;
   placeholder?: string;
   changeOnType?: boolean;
+  password?: boolean;
 }
 
 export const Input: React.FC<InputProps> = ({
@@ -35,6 +36,7 @@ export const Input: React.FC<InputProps> = ({
   changeOnType = false,
   onChangeFn,
   placeholder,
+  password = false,
 }) => {
   const [displayValue, setDisplayValue] = useState(value);
   useEffect(() => {
@@ -46,6 +48,7 @@ export const Input: React.FC<InputProps> = ({
       {label && <Label className="label"> {label}</Label>}
       {type === "text" && (
         <StyledInput
+          type={password ? "password" : "text"}
           width={width}
           className="value"
           placeholder={placeholder}

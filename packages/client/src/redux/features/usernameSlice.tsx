@@ -1,10 +1,10 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
-const initialState: string = "";
+const initialState: string | null = localStorage.getItem("username");
 
 const usernameSlice = createSlice({
   name: "username",
-  initialState,
+  initialState: initialState || "",
   reducers: {
     setUsername: (state: string, action: PayloadAction<string>) =>
       (state = action.payload),
