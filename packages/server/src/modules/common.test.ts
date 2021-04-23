@@ -25,6 +25,7 @@ export const faultyGenericResponse: IResponseGeneric = {
 };
 
 export const testFaultyMessage = (res: supertest.Response): void => {
+  console.log(res.body, "QQQQQ");
   res.body.should.have.keys(Object.keys(faultyGenericResponse));
   res.body.result.should.be.false;
   res.body.errors.should.be.an("array");

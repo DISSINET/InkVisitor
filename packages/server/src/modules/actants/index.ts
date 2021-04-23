@@ -4,8 +4,6 @@ import {
   findActantById,
   findActantsByLabelOrClass,
   createActant,
-  updateActant,
-  deleteActant,
   getActantUsage,
 } from "@service/shorthands";
 import { getActantType } from "@models/factory";
