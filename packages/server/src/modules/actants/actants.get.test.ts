@@ -4,8 +4,10 @@ import request from "supertest";
 import { supertestConfig } from "..";
 import { apiPath } from "../../common/constants";
 import app from "../../Server";
+import Statement from "@models/statement";
+import { Db } from "@service/RethinkDB";
 
-describe("Actants get", function () {
+describe("Actants get method", function () {
   describe("Empty param", () => {
     it("should return a 400 code with BadParams error", (done) => {
       return request(app)
@@ -25,17 +27,32 @@ describe("Actants get", function () {
     });
   });
   describe("Correct param", () => {
-    it("should return a 200 code with user response", (done) => {
-      return request(app)
-        .get(`${apiPath}/actants/get/C01`)
+    it("should return a 200 code with user response", async (done) => {
+      const db = new Db();
+      await db.initDb();
+
+      const statementRandomId = Math.random().toString();
+      const actantData = new Statement({
+        id: statementRandomId,
+        data: {
+          territory: {
+            id: "not relevant",
+          },
+        },
+      });
+
+      await actantData.save(db.connection);
+
+      request(app)
+        .get(`${apiPath}/actants/get/${statementRandomId}`)
         .set("authorization", "Bearer " + supertestConfig.token)
+        .expect(200)
         .expect((res) => {
           res.body.should.not.empty;
           res.body.should.be.a("object");
-          res.body.should.have.property("id");
           res.body.id.should.not.empty;
         })
-        .expect(200, done);
+        .then(() => done());
     });
   });
 });
