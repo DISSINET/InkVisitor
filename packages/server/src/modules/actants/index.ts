@@ -9,7 +9,11 @@ import {
   getActantUsage,
 } from "@service/shorthands";
 import { getActantType } from "@models/factory";
-import { BadParams, ActantDoesNotExits } from "@common/errors";
+import {
+  BadParams,
+  ActantDoesNotExits,
+  ModelNotValidError,
+} from "@common/errors";
 import { IActant, IResponseDetail, IResponseGeneric } from "@shared/types";
 
 export default Router()
@@ -26,6 +30,7 @@ export default Router()
         request.db,
         actantId as string
       );
+
       if (!actant) {
         throw new ActantDoesNotExits(`actant ${actantId} was not found`);
       }
@@ -72,20 +77,40 @@ export default Router()
     "/update/:actantId?",
     asyncRouteHandler<IResponseGeneric>(async (request: Request) => {
       const actantId = request.params.actantId;
-      const actantData = request.body as IActant;
+      const actantData = request.body as Record<string, unknown>;
 
+      // not validation, just required data for this operation
       if (!actantId || !actantData || Object.keys(actantData).length === 0) {
         throw new BadParams("actant id and data have to be set");
       }
 
-      const allowedKeys = ["class", "labels", "data"];
-      for (const key of Object.keys(actantData)) {
-        if (allowedKeys.indexOf(key) === -1) {
-          throw new BadParams("actant data have unsupported keys");
-        }
+      // actantId must be already in the db
+      const existingActant = await findActantById(request.db, actantId);
+      if (!existingActant) {
+        throw new ActantDoesNotExits(
+          `actant with id ${actantId} does not exist`
+        );
       }
 
-      const result = await updateActant(request.db, actantId, actantData);
+      // get correct IDbModel implementation
+      const model = getActantType({
+        ...actantData,
+        class: existingActant.class,
+        id: actantId,
+      });
+
+      // class is from the db, so it must work, unless bad data
+      if (!model) {
+        throw new Error("internal error");
+      }
+
+      // checking the validity of the final model (already has updated data)
+      if (!model.isValid) {
+        throw new ModelNotValidError("");
+      }
+
+      // update only the required fields
+      const result = await model.update(request.db.connection, actantData);
 
       if (result.replaced) {
         return {
@@ -108,7 +133,26 @@ export default Router()
         throw new BadParams("actant id has to be set");
       }
 
-      const result = await deleteActant(request.db, actantId);
+      // actantId must be already in the db
+      const existingActant = await findActantById(request.db, actantId);
+      if (!existingActant) {
+        throw new ActantDoesNotExits(
+          `actant with id ${actantId} does not exist`
+        );
+      }
+
+      // get correct IDbModel implementation
+      const model = getActantType({
+        class: existingActant.class,
+        id: actantId,
+      });
+
+      // class is from the db, so it must work, unless bad data
+      if (!model) {
+        throw new Error("internal error");
+      }
+
+      const result = await model.delete(request.db.connection);
 
       if (result.deleted === 1) {
         return {

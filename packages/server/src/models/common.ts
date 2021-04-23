@@ -9,6 +9,11 @@ export interface IModel {
 
 export interface IDbModel extends IModel {
   save(dbInstance: Connection | undefined): Promise<WriteResult>;
+  update(
+    dbInstance: Connection | undefined,
+    updateData: Record<string, unknown>
+  ): Promise<WriteResult>;
+  delete(dbInstance: Connection | undefined): Promise<WriteResult>;
 }
 
 export function fillFlatObject<T>(

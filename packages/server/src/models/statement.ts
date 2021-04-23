@@ -158,6 +158,21 @@ class Statement implements IStatement, IDbModel {
   save(db: Connection | undefined): Promise<WriteResult> {
     return rethink.table(Statement.table).insert(this).run(db);
   }
+
+  update(
+    db: Connection | undefined,
+    updateData: Record<string, undefined>
+  ): Promise<WriteResult> {
+    return rethink
+      .table(Statement.table)
+      .get(this.id)
+      .update(updateData)
+      .run(db);
+  }
+
+  delete(db: Connection | undefined): Promise<WriteResult> {
+    return rethink.table(Statement.table).get(this.id).delete().run(db);
+  }
 }
 
 export default Statement;
