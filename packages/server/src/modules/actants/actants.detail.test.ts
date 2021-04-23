@@ -6,7 +6,7 @@ import { apiPath } from "../../common/constants";
 import app from "../../Server";
 import { createActant } from "@service/shorthands";
 import { Db } from "@service/RethinkDB";
-import { IActant } from "@shared/types";
+import Statement from "@models/statement";
 
 describe("Actants detail", function () {
   describe("Empty param", () => {
@@ -32,13 +32,10 @@ describe("Actants detail", function () {
       const db = new Db();
       await db.initDb();
       const testId = Math.random().toString();
-      const testData: IActant = {
+      const testData = new Statement({
         id: testId,
-        label: "",
-        data: {},
-        class: "C",
-      };
-      await createActant(db, testData, true);
+      });
+      await createActant(db, testData);
 
       request(app)
         .get(`${apiPath}/actants/detail/${testId}`)

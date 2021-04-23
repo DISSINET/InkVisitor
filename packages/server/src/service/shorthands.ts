@@ -4,6 +4,7 @@ import { IActant } from "../../../shared/types/actant";
 
 import { Db } from "./RethinkDB";
 import { IAction, ILabel, IStatement, ITerritory } from "@shared/types";
+import { IModel } from "@models/common";
 
 // USER
 export async function findAllUsers(db: Db): Promise<IUser[]> {
@@ -177,16 +178,8 @@ export async function findActantsByLabelOrClass(
   return data;
 }
 
-export async function createActant<T = IActant | IStatement>(
-  db: Db,
-  data: T,
-  keepId?: boolean
-): Promise<WriteResult> {
-  const safeData: any = { ...data };
-  if (!keepId) {
-    delete safeData.id;
-  }
-  return rethink.table("actants").insert(safeData).run(db.connection);
+export async function createActant(db: Db, data: IModel): Promise<WriteResult> {
+  return rethink.table("actants").insert(data).run(db.connection);
 }
 
 export async function updateActant(

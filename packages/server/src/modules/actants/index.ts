@@ -8,6 +8,7 @@ import {
   deleteActant,
   getActantUsage,
 } from "@service/shorthands";
+import { getActantType } from "@models/factory";
 import { BadParams, ActantDoesNotExits } from "@common/errors";
 import { IActant, IResponseDetail, IResponseGeneric } from "@shared/types";
 
@@ -48,18 +49,12 @@ export default Router()
   .post(
     "/create",
     asyncRouteHandler<IResponseGeneric>(async (request: Request) => {
-      const actantData = request.body as IActant;
-
-      if (
-        !actantData ||
-        !actantData.class ||
-        //  !actantData.label ||
-        !actantData.data
-      ) {
+      const model = getActantType(request.body as Record<string, unknown>);
+      if (!model) {
         throw new BadParams("actant data have to be set");
       }
 
-      const result = await createActant(request.db, actantData, true);
+      const result = await createActant(request.db, model);
 
       if (result.inserted === 1) {
         return {

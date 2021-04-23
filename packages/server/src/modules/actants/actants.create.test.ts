@@ -4,7 +4,7 @@ import request from "supertest";
 import { apiPath } from "../../common/constants";
 import app from "../../Server";
 import { supertestConfig } from "..";
-import { IActant } from "@shared/types";
+import Statement from "@models/statement";
 
 describe("Actants create", function () {
   describe("empty data", () => {
@@ -29,13 +29,11 @@ describe("Actants create", function () {
     });
   });
   describe("ok data", () => {
-    it("should return a 200 code with successful response", (done) => {
-      const actantData: IActant = {
-        class: "T",
-        data: {},
-        label: "",
-        id: "whatever",
-      };
+    it("should return a 200 code with successful responsedsd", (done) => {
+      const randId = Math.random().toString();
+      const actantData = new Statement({
+        id: randId,
+      });
       return request(app)
         .post(`${apiPath}/actants/create`)
         .send(actantData)

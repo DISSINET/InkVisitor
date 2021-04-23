@@ -1,3 +1,4 @@
+import { ActantType } from "@shared/enums";
 import { ITerritory, IParentTerritory } from "@shared/types/territory";
 import { fillFlatObject, UnknownObject, IModel } from "./common";
 
@@ -52,7 +53,7 @@ export class TerritoryData implements IModel {
 
 class Territory implements ITerritory, IModel {
   id = "";
-  class: "T" = "T";
+  class: ActantType.Territory = ActantType.Territory;
   label = "";
   data = new TerritoryData({});
 
