@@ -1,7 +1,14 @@
+import { Db } from "@service/RethinkDB";
+import { Connection, WriteResult } from "rethinkdb-ts";
+
 export type UnknownObject = Record<string, unknown> | undefined;
 
 export interface IModel {
   isValid(): boolean; // validate model before inserting to the db
+}
+
+export interface IDbModel extends IModel {
+  save(dbInstance: Connection | undefined): Promise<WriteResult>;
 }
 
 export function fillFlatObject<T>(

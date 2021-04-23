@@ -3,8 +3,16 @@ import {
   IStatementActant,
   IStatementReference,
 } from "@shared/types/statement";
-import { fillFlatObject, fillArray, UnknownObject, IModel } from "./common";
+import {
+  fillFlatObject,
+  fillArray,
+  UnknownObject,
+  IModel,
+  IDbModel,
+} from "./common";
 import { Prop } from "./prop";
+import { r as rethink, Connection, WriteResult } from "rethinkdb-ts";
+import { ActantType } from "@shared/enums";
 
 class StatementActant implements IStatementActant, IModel {
   id = "";
@@ -58,7 +66,8 @@ export class StatementTerritory {
   }
 
   isValid(): boolean {
-    if (this.id === "" || this.order === -1) {
+    // order is optional, it will be moved to last position if empty
+    if (this.id === "") {
       return false;
     }
 
@@ -121,9 +130,11 @@ export class StatementData implements IModel {
   }
 }
 
-class Statement implements IStatement, IModel {
+class Statement implements IStatement, IDbModel {
+  static table = "actants";
+
   id = "";
-  class: "S" = "S";
+  class: ActantType.Statement = ActantType.Statement;
   label = "";
   data = new StatementData({});
 
@@ -137,11 +148,15 @@ class Statement implements IStatement, IModel {
   }
 
   isValid(): boolean {
-    if (this.class != "S") {
+    if (this.class != ActantType.Statement) {
       return false;
     }
 
     return this.data.isValid();
+  }
+
+  save(db: Connection | undefined): Promise<WriteResult> {
+    return rethink.table(Statement.table).insert(this).run(db);
   }
 }
 

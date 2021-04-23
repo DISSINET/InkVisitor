@@ -4,7 +4,8 @@ import { IActant } from "../../../shared/types/actant";
 
 import { Db } from "./RethinkDB";
 import { IAction, ILabel, IStatement, ITerritory } from "@shared/types";
-import { IModel } from "@models/common";
+import { IDbModel, IModel } from "@models/common";
+import { ModelNotValidError } from "@common/errors";
 
 // USER
 export async function findAllUsers(db: Db): Promise<IUser[]> {
@@ -178,8 +179,14 @@ export async function findActantsByLabelOrClass(
   return data;
 }
 
-export async function createActant(db: Db, data: IModel): Promise<WriteResult> {
-  return rethink.table("actants").insert(data).run(db.connection);
+export async function createActant(
+  db: Db,
+  data: IDbModel
+): Promise<WriteResult> {
+  if (!data.isValid()) {
+    throw new ModelNotValidError("");
+  }
+  return data.save(db.connection);
 }
 
 export async function updateActant(

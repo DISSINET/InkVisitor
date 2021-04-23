@@ -17,6 +17,25 @@ class BadCredentialsError extends Error {
   }
 }
 
+class ModelNotValidError extends Error {
+  public static code = "model not valid";
+
+  constructor(m: string) {
+    super(m);
+
+    // Set the prototype explicitly.
+    Object.setPrototypeOf(this, ModelNotValidError.prototype);
+  }
+
+  statusCode(): number {
+    return 400;
+  }
+
+  toString(): string {
+    return ModelNotValidError.code;
+  }
+}
+
 class NotFound extends Error {
   public static code = "resource not found";
 
@@ -211,6 +230,7 @@ export interface IError extends Error {
   statusCode(): number;
 }
 export {
+  ModelNotValidError,
   BadCredentialsError,
   NotFound,
   BadParams,
