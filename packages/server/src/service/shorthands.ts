@@ -189,20 +189,6 @@ export async function createActant(
   return data.save(db.connection);
 }
 
-export async function updateActant(
-  db: Db,
-  actantId: string,
-  data: IActant
-): Promise<WriteResult> {
-  const safeData: any = { ...data };
-  delete safeData.id;
-  return rethink
-    .table("actants")
-    .get(actantId)
-    .update(safeData)
-    .run(db.connection);
-}
-
 export async function deleteActant(
   db: Db,
   actantId: string

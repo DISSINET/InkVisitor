@@ -99,6 +99,21 @@ class Territory implements ITerritory, IDbModel {
     }
     return rethink.table(Territory.table).insert(this).run(db);
   }
+
+  update(
+    db: Connection | undefined,
+    updateData: Record<string, undefined>
+  ): Promise<WriteResult> {
+    return rethink
+      .table(Territory.table)
+      .get(this.id)
+      .update(updateData)
+      .run(db);
+  }
+
+  delete(db: Connection | undefined): Promise<WriteResult> {
+    return rethink.table(Territory.table).get(this.id).delete().run(db);
+  }
 }
 
 export default Territory;
