@@ -3,8 +3,11 @@ import { BadParams } from "@common/errors";
 import request from "supertest";
 import { apiPath } from "../../common/constants";
 import app from "../../Server";
-import { supertestConfig } from "..";
+import { getOneActant, supertestConfig } from "..";
 import Statement from "@models/statement";
+import Territory from "@models/territory";
+import { deleteActant } from "@service/shorthands";
+import { Db } from "@service/RethinkDB";
 
 describe("Actants create", function () {
   describe("empty data", () => {
@@ -29,18 +32,29 @@ describe("Actants create", function () {
     });
   });
   describe("ok data", () => {
-    it("should return a 200 code with successful responsedsd", (done) => {
-      const randId = Math.random().toString();
+    it("should return a 200 code with successful responsedsd", async (done) => {
+      const db = new Db();
+      await db.initDb();
+
+      const statementRandomId = Math.random().toString();
       const actantData = new Statement({
-        id: randId,
+        id: statementRandomId,
+        data: {
+          territory: {
+            id: "not relevant",
+          },
+        },
       });
-      return request(app)
+
+      request(app)
         .post(`${apiPath}/actants/create`)
         .send(actantData)
         .set("authorization", "Bearer " + supertestConfig.token)
+        .expect(200)
         .expect("Content-Type", /json/)
         .expect(successfulGenericResponse)
-        .expect(200, done);
+        .then(() => deleteActant(db, statementRandomId))
+        .then(() => done());
     });
   });
 });

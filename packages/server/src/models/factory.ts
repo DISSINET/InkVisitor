@@ -1,9 +1,9 @@
-import { IModel, UnknownObject } from "./common";
+import { IDbModel, UnknownObject } from "./common";
 import { ActantType } from "@shared/enums";
 import Territory from "./territory";
 import Statement from "./statement";
 
-export function getActantType(data: UnknownObject): IModel | null {
+export function getActantType(data: UnknownObject): IDbModel | null {
   if (!data || typeof data !== "object" || Object.keys(data).length === 0) {
     return null;
   }
