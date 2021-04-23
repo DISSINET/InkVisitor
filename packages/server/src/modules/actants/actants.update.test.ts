@@ -7,6 +7,7 @@ import { supertestConfig } from "..";
 import { Db } from "@service/RethinkDB";
 import { createActant, findActantById } from "@service/shorthands";
 import { IActant } from "@shared/types";
+import Statement from "@models/statement";
 
 describe("Actants update", function () {
   describe("empty data", () => {
@@ -35,22 +36,18 @@ describe("Actants update", function () {
       const db = new Db();
       await db.initDb();
       const testId = Math.random().toString();
-      const changeClassInto = "T";
-      await createActant(
-        db,
-        { id: testId, label: "", data: {}, class: "C" },
-        true
-      );
+      const changeLabelTo = "new label";
+      await createActant(db, new Statement({ id: testId, label: "" }));
 
       request(app)
         .put(`${apiPath}/actants/update/${testId}`)
-        .send({ class: changeClassInto })
+        .send({ label: changeLabelTo })
         .set("authorization", "Bearer " + supertestConfig.token)
         .expect("Content-Type", /json/)
         .expect({ success: true })
         .expect(200, async () => {
           const changedEntry = await findActantById<IActant>(db, testId);
-          changedEntry.class.should.eq(changeClassInto);
+          changedEntry.label.should.eq(changeLabelTo);
           done();
         });
     });

@@ -7,13 +7,15 @@ import app from "../../Server";
 import { IResponseStatement, IStatement } from "@shared/types";
 import { Db } from "@service/RethinkDB";
 import { createActant } from "@service/shorthands";
+import { ActantType } from "@shared/enums";
+import Statement from "@models/statement";
 
 const testValidStatement = (res: any) => {
   res.body.should.not.empty;
   res.body.should.be.a("object");
   const actionExample: IResponseStatement = {
     id: "",
-    class: "S",
+    class: ActantType.Statement,
     data: {
       action: "",
       territory: {
@@ -64,27 +66,7 @@ describe("Statements get", function () {
     it("should return a 200 code with IResponseStatement response", async (done) => {
       const db = new Db();
       await db.initDb();
-      const response = await createActant<IStatement>(db, {
-        id: "",
-        class: "S",
-        data: {
-          action: "",
-          territory: {
-            id: "",
-            order: 0,
-          },
-          references: [],
-          tags: [],
-          certainty: "",
-          elvl: "",
-          modality: "",
-          text: "",
-          note: "",
-          props: [],
-          actants: [],
-        },
-        label: "",
-      });
+      const response = await createActant(db, new Statement({}));
       return request(app)
         .get(
           `${apiPath}/statements/get/${

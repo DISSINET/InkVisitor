@@ -11,6 +11,7 @@ import app from "../../Server";
 import { createActant, findActantById } from "../../service/shorthands";
 import { supertestConfig } from "..";
 import { IActant } from "@shared/types";
+import Territory from "@models/territory";
 
 describe("Actants delete", function () {
   describe("empty data", () => {
@@ -40,13 +41,9 @@ describe("Actants delete", function () {
       const testId = Math.random().toString();
       await createActant(
         db,
-        {
+        new Territory({
           id: testId,
-          class: "T",
-          data: {},
-          label: "",
-        },
-        true
+        })
       );
 
       request(app)

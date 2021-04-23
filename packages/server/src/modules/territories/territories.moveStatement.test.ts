@@ -10,73 +10,41 @@ import {
   deleteActant,
   findActantById,
 } from "@service/shorthands";
+import Territory from "@models/territory";
+import Statement from "@models/statement";
 
 const randSuffix = Math.random();
-async function createMockStatementsWithTerritory(
-  db: Db
-): Promise<IStatement[]> {
-  const ter: ITerritory = {
+async function createMockStatementsWithTerritory(db: Db): Promise<Statement[]> {
+  const ter: Territory = new Territory({
     id: `root-${randSuffix}`,
-    class: "T",
-    label: "",
-    data: {
-      content: "",
-      lang: "",
-      parent: false,
-      type: "",
-    },
-  };
+  });
 
   // create the territory first
-  await createActant(db, ter, true);
+  await createActant(db, ter);
 
-  const out: IStatement[] = [
-    {
+  const out: Statement[] = [
+    new Statement({
       id: `s1-${randSuffix}`,
-      class: "S",
-      label: "",
       data: {
-        actants: [],
-        action: "",
-        certainty: "",
-        elvl: "",
-        modality: "",
-        note: "",
-        props: [],
-        references: [],
-        tags: [],
         territory: {
           id: ter.id,
           order: 1,
         },
-        text: "",
       },
-    },
-    {
+    }),
+    new Statement({
       id: `s2-${randSuffix}`,
-      class: "S",
-      label: "",
       data: {
-        actants: [],
-        action: "",
-        certainty: "",
-        elvl: "",
-        modality: "",
-        note: "",
-        props: [],
-        references: [],
-        tags: [],
         territory: {
           id: ter.id,
           order: 2,
         },
-        text: "",
       },
-    },
+    }),
   ];
 
   for (const stat of out) {
-    await createActant(db, stat, true);
+    await createActant(db, stat);
   }
   return out;
 }

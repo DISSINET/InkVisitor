@@ -2,10 +2,13 @@ import { expect } from "@modules/common.test";
 import { BadParams, TerritoryDoesNotExits } from "@common/errors";
 import { Db } from "@service/RethinkDB";
 import { createActant, deleteActant } from "@service/shorthands";
-import { IActant, IStatement, ITerritory } from "@shared/types";
+import { IActant, IStatement } from "@shared/types";
+import Territory from "@models/territory";
 import request from "supertest";
 import { apiPath } from "../../common/constants";
 import app from "../../Server";
+import { ActantType } from "@shared/enums";
+import Statement from "@models/statement";
 
 describe("Territories get", function () {
   describe("Empty param", () => {
@@ -32,49 +35,27 @@ describe("Territories get", function () {
       const linkedStatementId = Math.random().toString();
       const linkedActantId = Math.random().toString();
 
-      const territory: ITerritory = {
+      const territory: Territory = new Territory({
         id: testTerritoryId,
-        class: "T",
-        data: {
-          content: "",
-          lang: "",
-          parent: false,
-          type: "",
-        },
-        label: "",
-      };
-      await createActant(db, territory, true);
+      });
+      await createActant(db, territory);
 
-      const statement: IStatement = {
-        class: "S",
+      const statement = new Statement({
         id: linkedStatementId,
-        label: "",
         data: {
-          actants: [],
-          action: "",
-          certainty: "",
-          elvl: "",
-          modality: "",
-          note: "",
-          props: [],
-          references: [],
           tags: [linkedActantId],
           territory: {
             id: testTerritoryId,
             order: 1,
           },
-          text: "",
         },
-      };
+      });
 
-      const tagActant: IActant = {
-        class: "S",
-        label: "",
-        data: {},
+      const tagActant = new Statement({
         id: linkedActantId,
-      };
-      await createActant(db, tagActant, true);
-      await createActant(db, statement, true);
+      });
+      await createActant(db, tagActant);
+      await createActant(db, statement);
 
       await request(app)
         .get(`${apiPath}/territories/get/${testTerritoryId}`)

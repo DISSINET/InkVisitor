@@ -4,6 +4,7 @@ import { supertestConfig } from "..";
 import { apiPath } from "../../common/constants";
 import app from "../../Server";
 import { ITerritory } from "@shared/types";
+import Territory from "@models/territory";
 import { Db } from "@service/RethinkDB";
 import {
   createActant,
@@ -13,50 +14,32 @@ import {
 
 const randSuffix = Math.random();
 async function createMockTree(db: Db): Promise<ITerritory[]> {
-  const out: ITerritory[] = [
-    {
+  const out: Territory[] = [
+    new Territory({
       id: `root-${randSuffix}`,
-      class: "T",
-      label: "",
-      data: {
-        content: "",
-        lang: "",
-        parent: false,
-        type: "",
-      },
-    },
-    {
+    }),
+    new Territory({
       id: `lvl1-1-${randSuffix}`,
-      class: "T",
-      label: "",
       data: {
-        content: "",
-        lang: "",
         parent: {
           id: `root-${randSuffix}`,
           order: 1,
         },
-        type: "",
       },
-    },
-    {
+    }),
+    new Territory({
       id: `lvl1-2-${randSuffix}`,
-      class: "T",
-      label: "",
       data: {
-        content: "",
-        lang: "",
         parent: {
           id: `root-${randSuffix}`,
           order: 2,
         },
-        type: "",
       },
-    },
+    }),
   ];
 
   for (const ter of out) {
-    await createActant(db, ter, true);
+    await createActant(db, ter);
   }
   return out;
 }
