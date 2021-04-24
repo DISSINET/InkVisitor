@@ -224,7 +224,7 @@ export async function findActionsByLabel(
     .table("actions")
     .filter(function (user: any) {
       return rethink
-        .row("label")
+        .row("labels")
         .contains<IAction>((labelObj) => labelObj("value").eq(label));
     })
     .run(db.connection);
