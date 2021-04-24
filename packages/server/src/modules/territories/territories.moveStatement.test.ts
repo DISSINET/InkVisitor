@@ -3,7 +3,7 @@ import request from "supertest";
 import { supertestConfig } from "..";
 import { apiPath } from "../../common/constants";
 import app from "../../Server";
-import { IStatement, ITerritory } from "@shared/types";
+import { IStatement } from "@shared/types";
 import { Db } from "@service/RethinkDB";
 import {
   createActant,
@@ -63,6 +63,7 @@ describe("Territories moveStatement", function () {
 
       await request(app)
         .post(`${apiPath}/territories/moveStatement`)
+        .set("authorization", "Bearer " + supertestConfig.token)
         .send({
           moveId: statements[1].id,
           newIndex: 0,
@@ -73,9 +74,6 @@ describe("Territories moveStatement", function () {
 
       s1 = await findActantById<IStatement>(db, statements[0].id);
       s2 = await findActantById<IStatement>(db, statements[1].id);
-
-      console.log(s1.id, s1.data.territory.order);
-      console.log(s2.id, s2.data.territory.order);
 
       expect(s1.data.territory.order).to.be.eq(2);
       expect(s2.data.territory.order).to.be.eq(1);
