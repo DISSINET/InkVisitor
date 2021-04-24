@@ -35,7 +35,6 @@ export default Router()
       const label = request.body.label;
 
       if (!label) {
-        return await findAllActions(request.db);
         throw new BadParams("label has to be set");
       }
 
@@ -57,7 +56,7 @@ export default Router()
         "id",
         "parent",
         "note",
-        "label",
+        "labels",
         "types",
         "valencies",
         "rulesActants",
@@ -97,7 +96,7 @@ export default Router()
         "id",
         "parent",
         "note",
-        "label",
+        "labels",
         "types",
         "valencies",
         "rulesActants",
