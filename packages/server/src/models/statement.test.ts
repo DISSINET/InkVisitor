@@ -1,3 +1,4 @@
+import { ActantType } from "@shared/enums";
 import "ts-jest";
 import Statement, { StatementTerritory } from "./statement";
 
@@ -6,7 +7,7 @@ describe("Statement constructor test", function () {
     const emptyData = {};
     const emptyStatement: Statement = Object.create(Statement.prototype);
     emptyStatement.id = "";
-    emptyStatement.class = "S";
+    emptyStatement.class = ActantType.Statement;
     emptyStatement.label = "";
 
     emptyStatement.data = Object.create(StatementTerritory.prototype);
@@ -56,7 +57,7 @@ describe("Statement constructor test", function () {
     };
     const fullStatement: Statement = Object.create(Statement.prototype);
     fullStatement.id = "id";
-    fullStatement.class = "S";
+    fullStatement.class = ActantType.Statement;
     fullStatement.label = "label";
     fullStatement.data = Object.create(StatementTerritory.prototype);
     fullStatement.data.action = "action";

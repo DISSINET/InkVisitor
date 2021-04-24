@@ -34,7 +34,7 @@ describe("Actions update", function () {
       const db = new Db();
       await db.initDb();
       const testId = Math.random().toString();
-      const changeNoteInto: string = "newnote";
+      const changeNoteInto = "newnote";
       await createAction(
         db,
         {

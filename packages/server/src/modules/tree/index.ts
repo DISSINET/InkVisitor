@@ -2,9 +2,7 @@ import { Router, Request } from "express";
 import {
   findActantById,
   getActants,
-  updateActant,
   getTerritoryChilds,
-  getStatementsForTerritory,
 } from "@service/shorthands";
 import {
   BadParams,
@@ -20,6 +18,7 @@ import {
   ITerritory,
 } from "@shared/types";
 import { Db } from "@service/RethinkDB";
+import Territory from "@models/territory";
 
 function populateTree(
   root: ITerritory,
@@ -157,10 +156,15 @@ export default Router()
         result: true,
       };
 
-      if (territory.data.parent && territory.data.parent.id !== parentId) {
+      if (!territory.data.parent) {
+        // root territory cannot be moved - or not yet implemented
+        throw new TerrytoryInvalidMove("cannot move root territory");
+      } else if (territory.data.parent.id !== parentId) {
+        // change parent of the terri
         territory.data.parent.id = parentId;
       } else {
-        //  if the parent does not change -> remove the wanted child, so it can be added on specific position
+        // if the parent does not change -> remove the wanted child, so it can be added on specific position
+        // this is not required if moving under new parent
         const currentIndex = childs.findIndex((ter) => ter.id === moveId);
         if (currentIndex === -1) {
           throw new TerrytoryInvalidMove(
@@ -178,11 +182,13 @@ export default Router()
       childs = insertTerritoryToChilds(childs, newIndex, territory);
 
       for (let i = 0; i < childs.length; i++) {
-        const child = childs[i];
-        if (child.data.parent) {
-          child.data.parent.order = i + 1;
+        const childTerritory = new Territory({ ...childs[i] });
+        if (childTerritory.data.parent) {
+          childTerritory.data.parent.order = i + 1;
+          await childTerritory.update(request.db.connection, {
+            data: childTerritory.data,
+          });
         }
-        await updateActant(request.db, child.id, child);
       }
 
       return out;
