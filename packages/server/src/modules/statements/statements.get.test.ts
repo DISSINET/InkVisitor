@@ -66,13 +66,13 @@ describe("Statements get", function () {
     it("should return a 200 code with IResponseStatement response", async (done) => {
       const db = new Db();
       await db.initDb();
-      const response = await createActant(db, new Statement({}));
+      const randomId = Math.random().toString();
+      await createActant(
+        db,
+        new Statement({ id: randomId, data: { territory: { id: "2" } } })
+      );
       return request(app)
-        .get(
-          `${apiPath}/statements/get/${
-            response.generated_keys ? response.generated_keys[0] : ""
-          }`
-        )
+        .get(`${apiPath}/statements/get/${randomId}`)
         .set("authorization", "Bearer " + supertestConfig.token)
         .expect(200)
         .expect(testValidStatement)
