@@ -161,7 +161,7 @@ class Statement implements IStatement, IDbModel {
 
   update(
     db: Connection | undefined,
-    updateData: Record<string, undefined>
+    updateData: Record<string, unknown>
   ): Promise<WriteResult> {
     return rethink
       .table(Statement.table)
