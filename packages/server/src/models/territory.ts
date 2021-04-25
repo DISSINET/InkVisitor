@@ -97,7 +97,16 @@ class Territory implements ITerritory, IDbModel {
       const childs = await this.findChilds(db, this.data.parent.id);
       this.data.parent.order = childs.length + 1;
     }
-    return rethink.table(Territory.table).insert(this).run(db);
+    const result = await rethink
+      .table(Territory.table)
+      .insert({ ...this, id: undefined })
+      .run(db);
+
+    if (result.generated_keys) {
+      this.id = result.generated_keys[0];
+    }
+
+    return result;
   }
 
   update(
