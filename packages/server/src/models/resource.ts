@@ -47,8 +47,17 @@ class Resource implements IResource, IDbModel {
     return this.data.isValid();
   }
 
-  save(db: Connection | undefined): Promise<WriteResult> {
-    return rethink.table(Resource.table).insert(this).run(db);
+  async save(db: Connection | undefined): Promise<WriteResult> {
+    const result = await rethink
+      .table(Resource.table)
+      .insert({ ...this, id: undefined })
+      .run(db);
+
+    if (result.generated_keys) {
+      this.id = result.generated_keys[0];
+    }
+
+    return result;
   }
 
   update(
