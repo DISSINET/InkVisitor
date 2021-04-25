@@ -4,9 +4,8 @@ import request from "supertest";
 import { supertestConfig } from "..";
 import { apiPath } from "../../common/constants";
 import app from "../../Server";
-import { createActant } from "@service/shorthands";
 import { Db } from "@service/RethinkDB";
-import { IActant } from "@shared/types";
+import Statement from "@models/statement";
 
 describe("Actants detail", function () {
   describe("Empty param", () => {
@@ -31,24 +30,27 @@ describe("Actants detail", function () {
     it("should return a 200 code with user response", async (done) => {
       const db = new Db();
       await db.initDb();
-      const testId = Math.random().toString();
-      const testData: IActant = {
-        id: testId,
-        label: "",
-        data: {},
-        class: "C",
-      };
-      await createActant(db, testData, true);
+
+      const statementRandomId = Math.random().toString();
+      const actantData = new Statement({
+        id: statementRandomId,
+        data: {
+          territory: {
+            id: "not relevant",
+          },
+        },
+      });
+
+      await actantData.save(db.connection);
 
       request(app)
-        .get(`${apiPath}/actants/detail/${testId}`)
+        .get(`${apiPath}/actants/detail/${statementRandomId}`)
         .set("authorization", "Bearer " + supertestConfig.token)
         .expect(200)
         .expect((res) => {
           res.body.should.not.empty;
           res.body.should.be.a("object");
-          res.body.should.have.keys([...Object.keys(testData), "usedCount"]);
-          expect(res.body.id).eq(testId);
+          expect(res.body.id).eq(statementRandomId);
         })
         .then(() => done());
     });

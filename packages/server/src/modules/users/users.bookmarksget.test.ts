@@ -3,8 +3,15 @@ import { BadParams, UserDoesNotExits } from "@common/errors";
 import request from "supertest";
 import { apiPath } from "../../common/constants";
 import app from "../../Server";
-import { createUser, getActantUsage } from "../../service/shorthands";
+import {
+  createActant,
+  createUser,
+  findActantById,
+  getActantUsage,
+} from "../../service/shorthands";
 import { Db } from "@service/RethinkDB";
+import { getOneActant } from "..";
+import Statement from "@models/statement";
 
 describe("Users bookmarksGet", function () {
   describe("Empty param", () => {
@@ -60,17 +67,21 @@ describe("Users bookmarksGet", function () {
     it("should return a 200 code with non-empty array of bookmarks", async (done) => {
       const db = new Db();
       await db.initDb();
-      const testUserId = Math.random().toString();
-      const linkedBookmarkActant = "P1";
+      const testId = Math.random().toString();
+
+      await createActant(
+        db,
+        new Statement({ id: testId, data: { territory: { id: "any" } } })
+      );
       await createUser(db, {
-        id: testUserId,
+        id: testId,
         name: "test",
         email: "test@test.test",
         password: "test",
         bookmarks: [
           {
             name: "test",
-            actantIds: [linkedBookmarkActant], // this id should exist in actants
+            actantIds: [testId], // this id should exist in actants
           },
         ],
         role: "1",
@@ -83,9 +94,9 @@ describe("Users bookmarksGet", function () {
         },
       });
 
-      const bookmarkCountUsage = await getActantUsage(db, linkedBookmarkActant);
+      const bookmarkCountUsage = await getActantUsage(db, testId);
       request(app)
-        .get(`${apiPath}/users/bookmarksGet/${testUserId}`)
+        .get(`${apiPath}/users/bookmarksGet/${testId}`)
         .expect((res) => {
           res.body.should.not.empty;
           res.body.should.be.a("object");

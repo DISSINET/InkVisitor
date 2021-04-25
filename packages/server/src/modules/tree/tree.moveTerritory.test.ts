@@ -1,72 +1,19 @@
-import { expect } from "@modules/common.test";
+import { expect, createMockTree, clean } from "@modules/common.test";
 import request from "supertest";
 import { supertestConfig } from "..";
 import { apiPath } from "../../common/constants";
 import app from "../../Server";
 import { ITerritory } from "@shared/types";
 import { Db } from "@service/RethinkDB";
-import {
-  createActant,
-  deleteActant,
-  findActantById,
-} from "@service/shorthands";
-
-const randSuffix = Math.random();
-async function createMockTree(db: Db): Promise<ITerritory[]> {
-  const out: ITerritory[] = [
-    {
-      id: `root-${randSuffix}`,
-      class: "T",
-      label: "",
-      data: {
-        content: "",
-        lang: "",
-        parent: false,
-        type: "",
-      },
-    },
-    {
-      id: `lvl1-1-${randSuffix}`,
-      class: "T",
-      label: "",
-      data: {
-        content: "",
-        lang: "",
-        parent: {
-          id: `root-${randSuffix}`,
-          order: 1,
-        },
-        type: "",
-      },
-    },
-    {
-      id: `lvl1-2-${randSuffix}`,
-      class: "T",
-      label: "",
-      data: {
-        content: "",
-        lang: "",
-        parent: {
-          id: `root-${randSuffix}`,
-          order: 2,
-        },
-        type: "",
-      },
-    },
-  ];
-
-  for (const ter of out) {
-    await createActant(db, ter, true);
-  }
-  return out;
-}
+import { findActantById } from "@service/shorthands";
 
 describe("Tree moveTerritory", function () {
   describe("Move lvl1-2 before lvl1-1", () => {
     it("should return a 200 code with IResponseGeneric success response", async (done) => {
       const db = new Db();
       await db.initDb();
-      const territories = await createMockTree(db);
+      const randSuffix = "tree-moveTerritory-" + Math.random().toString();
+      await createMockTree(db, randSuffix);
 
       let lvl11 = await findActantById<ITerritory>(db, `lvl1-1-${randSuffix}`);
       let lvl12 = await findActantById<ITerritory>(db, `lvl1-2-${randSuffix}`);
@@ -101,9 +48,7 @@ describe("Tree moveTerritory", function () {
       );
       expect(lvl12.data.parent ? lvl12.data.parent.order : 0).to.be.eq(1);
 
-      for (const ter of territories) {
-        await deleteActant(db, ter.id);
-      }
+      await clean(db);
       return done();
     });
   });

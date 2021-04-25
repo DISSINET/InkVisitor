@@ -6,7 +6,7 @@ import {
 } from "@common/errors";
 import { Router, Request } from "express";
 import { asyncRouteHandler } from "..";
-import { findActantById, updateActant, findActants } from "@service/shorthands";
+import { findActantById, findActants } from "@service/shorthands";
 import {
   ITerritory,
   IResponseTerritory,
@@ -14,6 +14,7 @@ import {
   IResponseGeneric,
   IActant,
 } from "@shared/types";
+import Statement from "@models/statement";
 import { getActantIdsFromStatements } from "@shared/types/statement";
 
 function insertIStatementToChilds(
@@ -135,9 +136,9 @@ export default Router()
       );
 
       for (let i = 0; i < statementsForTerritory.length; i++) {
-        const statement = statementsForTerritory[i];
+        const statement = new Statement({ ...statementsForTerritory[i] });
         statement.data.territory.order = i + 1;
-        await updateActant(request.db, statement.id, statement);
+        await statement.update(request.db.connection, { data: statement.data });
       }
 
       return out;

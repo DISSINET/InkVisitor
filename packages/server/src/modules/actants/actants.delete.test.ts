@@ -3,14 +3,15 @@ import {
   successfulGenericResponse,
   should,
 } from "@modules/common.test";
-import { BadParams } from "@common/errors";
+import { ActantDoesNotExits, BadParams } from "@common/errors";
 import { Db } from "@service/RethinkDB";
 import request from "supertest";
 import { apiPath } from "../../common/constants";
 import app from "../../Server";
-import { createActant, findActantById } from "../../service/shorthands";
+import { findActantById } from "../../service/shorthands";
 import { supertestConfig } from "..";
 import { IActant } from "@shared/types";
+import Territory from "@models/territory";
 
 describe("Actants delete", function () {
   describe("empty data", () => {
@@ -29,8 +30,8 @@ describe("Actants delete", function () {
         .delete(`${apiPath}/actants/delete/randomid12345`)
         .set("authorization", "Bearer " + supertestConfig.token)
         .expect("Content-Type", /json/)
-        .expect(testFaultyMessage)
-        .expect(200, done);
+        .expect({ error: new ActantDoesNotExits("").toString() })
+        .expect(400, done);
     });
   });
   describe("ok data", () => {
@@ -38,27 +39,21 @@ describe("Actants delete", function () {
       const db = new Db();
       await db.initDb();
       const testId = Math.random().toString();
-      await createActant(
-        db,
-        {
-          id: testId,
-          class: "T",
-          data: {},
-          label: "",
-        },
-        true
-      );
+      const territory = new Territory({
+        id: testId,
+      });
+      await territory.save(db.connection);
 
       request(app)
         .delete(`${apiPath}/actants/delete/${testId}`)
         .set("authorization", "Bearer " + supertestConfig.token)
         .expect("Content-Type", /json/)
-        .expect(successfulGenericResponse)
-        .expect(200, async () => {
+        .expect(200)
+        .expect(async () => {
           const deletedActant = await findActantById<IActant>(db, testId);
           should.not.exist(deletedActant);
-          done();
-        });
+        })
+        .then(() => done());
     });
   });
 });
