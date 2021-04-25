@@ -8,6 +8,7 @@ export interface IModel {
 }
 
 export interface IDbModel extends IModel {
+  id?: string;
   save(dbInstance: Connection | undefined): Promise<WriteResult>;
   update(
     dbInstance: Connection | undefined,
