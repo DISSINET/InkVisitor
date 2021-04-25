@@ -1,10 +1,12 @@
 import "@modules/common.test";
-import { BadParams } from "@common/errors";
 import request from "supertest";
 import { supertestConfig } from "..";
 import { apiPath } from "../../common/constants";
 import app from "../../Server";
 import { IAction } from "@shared/types";
+import { Db } from "@service/RethinkDB";
+import { createAction, deleteAction } from "@service/shorthands";
+import "ts-jest";
 
 const checkArrayOfActions = (res: any) => {
   const actionExample: IAction = {
@@ -26,32 +28,99 @@ const checkArrayOfActions = (res: any) => {
 
 describe("Actions getMore", function () {
   describe("Empty param", () => {
-    it("should return a 400 code with BadParams error", (done) => {
-      return request(app)
+    it("should return a 200 code with array of all actions", async (done) => {
+      const db = new Db();
+      await db.initDb();
+      const randomLabel = "actions-getMore-" + Math.random().toString();
+      const insertResult = await createAction(
+        db,
+        {
+          id: "",
+          labels: [
+            {
+              id: randomLabel,
+              lang: "en",
+              value: randomLabel,
+            },
+          ],
+          note: "",
+          parent: false,
+          rulesActants: [],
+          rulesProperties: [],
+          types: [],
+          valencies: [],
+        },
+        false
+      );
+      request(app)
         .post(`${apiPath}/actions/getMore`)
         .set("authorization", "Bearer " + supertestConfig.token)
-        .expect({ error: new BadParams("whatever").toString() })
-        .expect(400, done);
-    });
-  });
-  describe("Wrong param", () => {
-    it("should return a 400 code with BadParams error", (done) => {
-      return request(app)
-        .post(`${apiPath}/actions/getMore`)
-        .send({ label: "" })
-        .set("authorization", "Bearer " + supertestConfig.token)
-        .expect({ error: new BadParams("whatever").toString() })
-        .expect(400, done);
+        .expect(200)
+        .expect((res) => {
+          checkArrayOfActions(res);
+          const foundLabel = (res.body as IAction[]).find(
+            (action) =>
+              !!action.labels.find((label) => label.value === randomLabel)
+          );
+          expect(foundLabel).not.toBeNull();
+        })
+        .then(() =>
+          deleteAction(
+            db,
+            insertResult.generated_keys ? insertResult.generated_keys[0] : ""
+          )
+        )
+        .then(() => db.close())
+        .then(() => done());
     });
   });
   describe("Correct label param", () => {
-    it("should return a 200 code with user response", (done) => {
-      return request(app)
+    it("should return a 200 code with array of 1 element", async (done) => {
+      const db = new Db();
+      await db.initDb();
+      const randomLabel = "actions-getMore-" + Math.random().toString();
+      const insertResult = await createAction(
+        db,
+        {
+          id: "",
+          labels: [
+            {
+              id: randomLabel,
+              lang: "en",
+              value: randomLabel,
+            },
+          ],
+          note: "",
+          parent: false,
+          rulesActants: [],
+          rulesProperties: [],
+          types: [],
+          valencies: [],
+        },
+        false
+      );
+      request(app)
         .post(`${apiPath}/actions/getMore`)
-        .send({ label: "said" })
+        .send({ label: randomLabel })
         .set("authorization", "Bearer " + supertestConfig.token)
-        .expect(checkArrayOfActions)
-        .expect(200, done);
+        .expect(200)
+        .expect((res) => {
+          checkArrayOfActions(res);
+          expect((res.body as []).length).toEqual(1);
+          const foundLabel = (res.body as IAction[]).find(
+            (action) =>
+              !!action.labels.find((label) => label.value === randomLabel)
+          );
+          expect(foundLabel).not.toBeNull();
+        })
+        .then(() =>
+          deleteAction(
+            db,
+            insertResult.generated_keys ? insertResult.generated_keys[0] : ""
+          )
+        )
+        .then(() => db.close())
+        .then(() => done());
     });
   });
 });
