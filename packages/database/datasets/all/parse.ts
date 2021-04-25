@@ -2,6 +2,7 @@ var { loadSheet } = require("./../util/loadsheet");
 var { v4 } = require("uuid");
 var fs = require("fs");
 
+import { ActantType, EntityActantType } from "../../../shared/enums";
 import {
   IAudit,
   IAction,
@@ -254,7 +255,7 @@ const loadStatementsTables = async (next: Function) => {
       addEntityActant(
         entitySheet.id + "_" + entityRow.id,
         entityRow.label,
-        entitySheet.entityType as "P" | "G" | "O" | "C" | "L" | "V" | "E"
+        entitySheet.entityType as EntityActantType
       );
 
       parseEntityPropsInRow(entityRow, entityRowTerritory);
@@ -308,7 +309,7 @@ const loadStatementsTables = async (next: Function) => {
       // parse the statement id but keep the order somehow
       const mainStatement: IStatement = {
         id: v4(),
-        class: "S",
+        class: ActantType.Statement,
         label: statement.id,
         data: {
           action: statement.id_action_or_relation,
@@ -460,11 +461,7 @@ const checkValidId = (idValue: string) => {
 /***
  * TODO: logical type
  */
-const addEntityActant = (
-  id: string,
-  label: string,
-  type: "P" | "G" | "O" | "C" | "L" | "V" | "E"
-) => {
+const addEntityActant = (id: string, label: string, type: EntityActantType) => {
   const newEntityActant: IEntity = {
     id,
     class: type,
@@ -487,7 +484,7 @@ const addTerritoryActant = (
     if (!actants.some((a) => a.id == id)) {
       const newTerritory: ITerritory = {
         id,
-        class: "T",
+        class: ActantType.Territory,
         label: label.trim(),
         data: {
           parent: parentId
@@ -510,7 +507,7 @@ const addResourceActant = (id: string, label: string) => {
   if (id) {
     const newResource: IResource = {
       id,
-      class: "R",
+      class: ActantType.Resource,
       label: label.trim(),
       data: {
         content: "",
@@ -553,7 +550,7 @@ const parseEntityPropsInRow = (row: any, territory: string) => {
           const valueId = v4();
 
           // add actant
-          addEntityActant(valueId, value, "V");
+          addEntityActant(valueId, value, ActantType.Value);
 
           // add statement
           createEmptyPropStatement(
@@ -582,7 +579,7 @@ const createEmptyPropStatement = (
   if (idSubject && idActant1 && idActant2) {
     const newEmptyStatement: IStatement = {
       id: v4(),
-      class: "S",
+      class: ActantType.Statement,
 
       label: "",
       data: {
@@ -800,7 +797,7 @@ const createNewActantIfNeeded = (actantValue: string) => {
       addEntityActant(
         newActantId,
         newActantLabel,
-        newActantType as "P" | "G" | "O" | "C" | "L" | "V" | "E"
+        newActantType as EntityActantType
       );
 
     return newActantId;
