@@ -4,6 +4,8 @@ import { IActant } from "../../../shared/types/actant";
 
 import { Db } from "./RethinkDB";
 import { IAction, ILabel, IStatement, ITerritory } from "@shared/types";
+import { IDbModel, IModel } from "@models/common";
+import { ModelNotValidError } from "@common/errors";
 
 // USER
 export async function findAllUsers(db: Db): Promise<IUser[]> {
@@ -164,43 +166,31 @@ export async function findActantsByLabelOrClass(
   label: string,
   classParam: string
 ): Promise<IActant[]> {
-  console.log(label, classParam);
   const data = await rethink
     .table("actants")
     .filter(function (actant: any) {
-      return rethink.and(
-        actant("class").match(classParam),
-        actant("label").downcase().match(`^${label.toLowerCase()}`)
-      );
+      const tests = [];
+      if (typeof label !== "undefined") {
+        tests.push(actant("label").downcase().match(`^${label.toLowerCase()}`));
+      }
+      if (typeof classParam !== "undefined") {
+        tests.push(actant("class").match(classParam));
+      }
+
+      return rethink.and(tests as any);
     })
     .run(db.connection);
   return data;
 }
 
-export async function createActant<T = IActant | IStatement>(
+export async function createActant(
   db: Db,
-  data: T,
-  keepId?: boolean
+  data: IDbModel
 ): Promise<WriteResult> {
-  const safeData: any = { ...data };
-  if (!keepId) {
-    delete safeData.id;
+  if (!data.isValid()) {
+    throw new ModelNotValidError("");
   }
-  return rethink.table("actants").insert(safeData).run(db.connection);
-}
-
-export async function updateActant(
-  db: Db,
-  actantId: string,
-  data: IActant
-): Promise<WriteResult> {
-  const safeData: any = { ...data };
-  delete safeData.id;
-  return rethink
-    .table("actants")
-    .get(actantId)
-    .update(safeData)
-    .run(db.connection);
+  return data.save(db.connection);
 }
 
 export async function deleteActant(

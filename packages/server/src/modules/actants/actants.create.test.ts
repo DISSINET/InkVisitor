@@ -4,7 +4,9 @@ import request from "supertest";
 import { apiPath } from "../../common/constants";
 import app from "../../Server";
 import { supertestConfig } from "..";
-import { IActant } from "@shared/types";
+import Statement from "@models/statement";
+import { deleteActant } from "@service/shorthands";
+import { Db } from "@service/RethinkDB";
 
 describe("Actants create", function () {
   describe("empty data", () => {
@@ -29,20 +31,29 @@ describe("Actants create", function () {
     });
   });
   describe("ok data", () => {
-    it("should return a 200 code with successful response", (done) => {
-      const actantData: IActant = {
-        class: "T",
-        data: {},
-        label: "",
-        id: "whatever",
-      };
-      return request(app)
+    it("should return a 200 code with successful responsedsd", async (done) => {
+      const db = new Db();
+      await db.initDb();
+
+      const statementRandomId = Math.random().toString();
+      const actantData = new Statement({
+        id: statementRandomId,
+        data: {
+          territory: {
+            id: "not relevant",
+          },
+        },
+      });
+
+      request(app)
         .post(`${apiPath}/actants/create`)
         .send(actantData)
         .set("authorization", "Bearer " + supertestConfig.token)
+        .expect(200)
         .expect("Content-Type", /json/)
         .expect(successfulGenericResponse)
-        .expect(200, done);
+        .then(() => deleteActant(db, statementRandomId))
+        .then(() => done());
     });
   });
 });

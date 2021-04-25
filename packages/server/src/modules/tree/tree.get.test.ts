@@ -78,8 +78,8 @@ describe("Tree get", function () {
   it("should return a 200 code with IResponseTree response", async (done) => {
     const db = new Db();
     await db.initDb();
-
-    const territories = await createMockTree(db);
+    const randSuffix = "tree-get" + Math.random().toString();
+    const territories = await createMockTree(db, randSuffix);
     const statements = await createMockStatements(db, territories);
     const statementsTerritoryId = statements[0].data.territory.id;
 

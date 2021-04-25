@@ -30,7 +30,7 @@ describe("Actions create", function () {
     });
   });
   describe("ok data", () => {
-    it("should return a 200 code with successful response", (done) => {
+    it("should return a 200 code with successful response", async (done) => {
       const actionData: IAction = {
         id: "",
         labels: [],
@@ -41,13 +41,14 @@ describe("Actions create", function () {
         types: [],
         valencies: [],
       };
-      return request(app)
+      request(app)
         .post(`${apiPath}/actions/create`)
         .send(actionData)
         .set("authorization", "Bearer " + supertestConfig.token)
+        .expect(200)
         .expect("Content-Type", /json/)
         .expect(successfulGenericResponse)
-        .expect(200, done);
+        .then(() => done());
     });
   });
 });

@@ -1,3 +1,4 @@
+import { ActantType } from "@shared/enums";
 import "ts-jest";
 import Territory, { TerritoryData, TerritoryParent } from "./territory";
 
@@ -6,7 +7,7 @@ describe("Territory constructor test", function () {
     const emptyData = {};
     const emptyTerritory: Territory = Object.create(Territory.prototype);
     emptyTerritory.id = "";
-    emptyTerritory.class = "T";
+    emptyTerritory.class = ActantType.Territory;
     emptyTerritory.label = "";
     emptyTerritory.data = Object.create(TerritoryData.prototype);
     emptyTerritory.data.parent = false;
@@ -37,7 +38,7 @@ describe("Territory constructor test", function () {
     };
     const fullTerritory: Territory = Object.create(Territory.prototype);
     fullTerritory.id = "id";
-    fullTerritory.class = "T";
+    fullTerritory.class = ActantType.Territory;
     fullTerritory.label = "label";
     fullTerritory.data = Object.create(TerritoryData.prototype);
     fullTerritory.data.parent = Object.create(TerritoryParent.prototype);

@@ -5,6 +5,8 @@ import supertest from "supertest";
 import { ITerritory } from "@shared/types/index";
 import { Db } from "@service/RethinkDB";
 import { createActant, deleteActants } from "@service/shorthands";
+import Statement from "@models/statement";
+import Territory from "@models/territory";
 
 export const expect = chai.expect;
 export const should = chai.should();
@@ -23,6 +25,7 @@ export const faultyGenericResponse: IResponseGeneric = {
 };
 
 export const testFaultyMessage = (res: supertest.Response): void => {
+  console.log(res.body, "QQQQQ");
   res.body.should.have.keys(Object.keys(faultyGenericResponse));
   res.body.result.should.be.false;
   res.body.errors.should.be.an("array");
@@ -32,53 +35,37 @@ function getRandomFromArray<T>(input: T[]): T {
   return input[Math.floor(Math.random() * input.length)];
 }
 
-export async function createMockTree(db: Db): Promise<ITerritory[]> {
+export async function createMockTree(
+  db: Db,
+  randSuffix: string
+): Promise<ITerritory[]> {
   await deleteActants(db);
-  const randSuffix = Math.random();
-  const out: ITerritory[] = [
-    {
+  const out: Territory[] = [
+    new Territory({
       id: `root-${randSuffix}`,
-      class: "T",
-      label: "",
-      data: {
-        content: "",
-        lang: "",
-        parent: false,
-        type: "",
-      },
-    },
-    {
+    }),
+    new Territory({
       id: `lvl1-1-${randSuffix}`,
-      class: "T",
-      label: "",
       data: {
-        content: "",
-        lang: "",
         parent: {
           id: `root-${randSuffix}`,
           order: 1,
         },
-        type: "",
       },
-    },
-    {
+    }),
+    new Territory({
       id: `lvl1-2-${randSuffix}`,
-      class: "T",
-      label: "",
       data: {
-        content: "",
-        lang: "",
         parent: {
           id: `root-${randSuffix}`,
           order: 2,
         },
-        type: "",
       },
-    },
+    }),
   ];
 
   for (const ter of out) {
-    await createActant(db, ter, true);
+    await createActant(db, ter);
   }
   return out;
 }
@@ -90,39 +77,31 @@ export async function createMockStatements(
   const randSuffix = Math.random();
   const forStatement = getRandomFromArray<ITerritory>(territories).id;
 
-  const out: IStatement[] = [];
+  const out: Statement[] = [];
 
   // create statements with territory id set
   for (let i = 0; i < 3; i++) {
-    out.push({
-      id: `statement-${i}-${randSuffix}`,
-      class: "S",
-      label: "",
-      data: {
-        territory: {
-          id: forStatement,
-          order: i + 1,
+    out.push(
+      new Statement({
+        id: `statement-${i}-${randSuffix}`,
+        data: {
+          territory: {
+            id: forStatement,
+            order: i + 1,
+          },
         },
-        actants: [],
-        action: "",
-        certainty: "",
-        elvl: "",
-        modality: "",
-        note: "",
-        props: [],
-        references: [],
-        tags: [],
-        text: "",
-      },
-    });
+      })
+    );
   }
 
   for (const ter of out) {
-    await createActant(db, ter, true);
+    await createActant(db, ter);
   }
   return out;
 }
 
 export async function clean(db: Db): Promise<void> {
   await deleteActants(db);
+
+  await db.close();
 }

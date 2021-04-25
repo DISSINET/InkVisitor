@@ -1,5 +1,5 @@
 import "@modules/common.test";
-import { BadParams } from "@common/errors";
+import { ActantDoesNotExits, BadParams } from "@common/errors";
 import request from "supertest";
 import { apiPath } from "../../common/constants";
 import app from "../../Server";
@@ -7,6 +7,8 @@ import { supertestConfig } from "..";
 import { Db } from "@service/RethinkDB";
 import { createActant, findActantById } from "@service/shorthands";
 import { IActant } from "@shared/types";
+import Statement from "@models/statement";
+import { successfulGenericResponse } from "@modules/common.test";
 
 describe("Actants update", function () {
   describe("empty data", () => {
@@ -26,7 +28,7 @@ describe("Actants update", function () {
         .send({ test: "" })
         .set("authorization", "Bearer " + supertestConfig.token)
         .expect("Content-Type", /json/)
-        .expect({ error: new BadParams("whatever").toString() })
+        .expect({ error: new ActantDoesNotExits("whatever").toString() })
         .expect(400, done);
     });
   });
@@ -35,24 +37,22 @@ describe("Actants update", function () {
       const db = new Db();
       await db.initDb();
       const testId = Math.random().toString();
-      const changeClassInto = "T";
-      await createActant(
-        db,
-        { id: testId, label: "", data: {}, class: "C" },
-        true
-      );
+      const changeLabelTo = "new label";
+      const statementData = new Statement({ id: testId, label: "" });
+      await statementData.save(db.connection);
 
       request(app)
         .put(`${apiPath}/actants/update/${testId}`)
-        .send({ class: changeClassInto })
+        .send({ label: changeLabelTo })
         .set("authorization", "Bearer " + supertestConfig.token)
         .expect("Content-Type", /json/)
-        .expect({ success: true })
-        .expect(200, async () => {
+        .expect(200)
+        .expect(successfulGenericResponse)
+        .expect(async () => {
           const changedEntry = await findActantById<IActant>(db, testId);
-          changedEntry.class.should.eq(changeClassInto);
-          done();
-        });
+          changedEntry.label.should.eq(changeLabelTo);
+        })
+        .then(() => done());
     });
   });
 });
