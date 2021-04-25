@@ -35,9 +35,11 @@ function getRandomFromArray<T>(input: T[]): T {
   return input[Math.floor(Math.random() * input.length)];
 }
 
-export async function createMockTree(db: Db): Promise<ITerritory[]> {
+export async function createMockTree(
+  db: Db,
+  randSuffix: string
+): Promise<ITerritory[]> {
   await deleteActants(db);
-  const randSuffix = Math.random();
   const out: Territory[] = [
     new Territory({
       id: `root-${randSuffix}`,
@@ -100,4 +102,6 @@ export async function createMockStatements(
 
 export async function clean(db: Db): Promise<void> {
   await deleteActants(db);
+
+  await db.close();
 }
