@@ -41,22 +41,14 @@ export const TerritoryTreeBox: React.FC = () => {
   useEffect(() => {
     if (data) {
       const foundTerritory = searchTree(data, territoryId);
-      console.log(foundTerritory?.path);
       if (foundTerritory) {
         setSelectedTerritoryPath(foundTerritory.path);
       }
     }
   }, [data]);
-  // useEffect(() => {
-  //   if (selectedTerritoryPath.length > 0) {
-  //     setSelectedTerritoryPath([]);
-  //   }
-  // }, [selectedTerritoryPath]);
 
   return (
     <>
-      {/* <DotLoader loading={isFetching} color={theme.color["primary"]} /> */}
-
       {data && (
         <TerritoryTreeNode
           territory={data.territory}
