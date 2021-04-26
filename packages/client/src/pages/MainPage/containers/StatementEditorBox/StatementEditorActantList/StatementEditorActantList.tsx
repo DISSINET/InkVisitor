@@ -51,7 +51,7 @@ export const StatementEditorActantList: React.FC<StatementEditorActantList> = ({
       {actants.map((sActant, sai) => {
         const actant = statement.actants.find((a) => a.id === sActant.actant);
         return (
-          <>
+          <React.Fragment key={sai}>
             {actant && (
               <StatementEditorActantListItem
                 index={sai}
@@ -63,7 +63,7 @@ export const StatementEditorActantList: React.FC<StatementEditorActantList> = ({
                 moveFn={moveChildFn}
               />
             )}
-          </>
+          </React.Fragment>
         );
       })}
     </StyledActantList>
