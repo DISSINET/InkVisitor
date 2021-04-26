@@ -19,6 +19,8 @@ import {
 } from "./TerritoryTreeNodeStyles";
 import { ContextMenu } from "../ContextMenu/ContextMenu";
 import { ActantTag } from "../..";
+import { useAppDispatch, useAppSelector } from "redux/hooks";
+import { setTreeInitialized } from "redux/features/treeInitializeSlice";
 
 interface TerritoryTreeNode {
   territory: any;
@@ -40,6 +42,9 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
   index,
   moveFn,
 }) => {
+  const dispatch = useAppDispatch();
+  const treeInitialized = useAppSelector((state) => state.treeInitialized);
+
   let history = useHistory();
   var hashParams = queryString.parse(location.hash);
   const territoryId = hashParams.territory;
@@ -53,8 +58,13 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
   }, [children]);
 
   useEffect(() => {
-    if (initExpandedNodes.some((node) => node === territory.id)) {
-      setIsExpanded(true);
+    if (!treeInitialized) {
+      if (initExpandedNodes.some((node) => node === territory.id)) {
+        setIsExpanded(true);
+      } else if (territoryId === territory.id) {
+        setIsExpanded(true);
+        dispatch(setTreeInitialized(true));
+      }
     }
   }, []);
 

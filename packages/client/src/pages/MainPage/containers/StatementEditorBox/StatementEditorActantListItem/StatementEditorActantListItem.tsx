@@ -105,9 +105,6 @@ export const StatementEditorActantListItem: React.FC<StatementEditorActantListIt
 
   drag(drop(dropRef));
 
-  // preview(drop(dropRef));
-  // drag(dragRef);
-
   return (
     <React.Fragment>
       <StyledActantListItem ref={dropRef}>
