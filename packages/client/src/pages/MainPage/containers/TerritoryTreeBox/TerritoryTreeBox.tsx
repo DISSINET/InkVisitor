@@ -18,44 +18,44 @@ export const TerritoryTreeBox: React.FC = () => {
   );
   var hashParams = queryString.parse(location.hash);
   const territoryId = hashParams.territory;
-  const [selectedTerritory, setSelectedTerritory] = useState<IResponseTree>();
+  const [selectedTerritoryPath, setSelectedTerritoryPath] = useState<string[]>([
+    "T0",
+  ]);
 
-  // const searchTree = (
-  //   element: IResponseTree,
-  //   matchingTitle: string
-  // ): IResponseTree | null => {
-  //   if (element.territory.id === matchingTitle) {
-  //     return element;
-  //   } else if (element.children != null) {
-  //     var i;
-  //     var result = null;
-  //     for (i = 0; result === null && i < element.children.length; i++) {
-  //       result = searchTree(element.children[i], matchingTitle);
-  //     }
-  //     return result;
-  //   }
-  //   return null;
-  // };
-  // useEffect(() => {
-  //   if (data) {
-  //     const foundTerritory = searchTree(data, territoryId);
-  //     if (foundTerritory) {
-  //       setSelectedTerritory(foundTerritory);
-  //     }
-  //   }
-  // }, [data]);
+  const searchTree = (
+    element: IResponseTree,
+    matchingTitle: string
+  ): IResponseTree | null => {
+    if (element.territory.id === matchingTitle) {
+      return element;
+    } else if (element.children != null) {
+      var i;
+      var result = null;
+      for (i = 0; result === null && i < element.children.length; i++) {
+        result = searchTree(element.children[i], matchingTitle);
+      }
+      return result;
+    }
+    return null;
+  };
+  useEffect(() => {
+    if (data) {
+      const foundTerritory = searchTree(data, territoryId);
+      if (foundTerritory) {
+        setSelectedTerritoryPath(foundTerritory.path);
+      }
+    }
+  }, [data]);
 
   return (
     <>
-      {/* <DotLoader loading={isFetching} color={theme.color["primary"]} /> */}
-
       {data && (
         <TerritoryTreeNode
           territory={data.territory}
           children={data.children}
           lvl={data.lvl}
           statementsCount={data.statementsCount}
-          initExpandedNodes={["T0"]}
+          initExpandedNodes={selectedTerritoryPath}
         />
       )}
     </>
