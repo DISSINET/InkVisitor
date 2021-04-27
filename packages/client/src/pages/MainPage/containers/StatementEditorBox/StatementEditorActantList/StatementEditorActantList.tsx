@@ -9,6 +9,7 @@ import {
 } from "../StatementEditorBoxStyles";
 import { IResponseStatement, IStatementActant } from "@shared/types";
 import { StatementEditorActantListItem } from "../StatementEditorActantListItem/StatementEditorActantListItem";
+import api from "api";
 
 interface StatementEditorActantList {
   statement: IResponseStatement;
@@ -20,11 +21,12 @@ export const StatementEditorActantList: React.FC<StatementEditorActantList> = ({
   statementId,
   classEntitiesActant,
 }) => {
+  const queryClient = useQueryClient();
   const [actants, setActants] = useState<IStatementActant[]>([]);
 
   useEffect(() => {
     setActants(statement?.data?.actants);
-  }, [statement?.data?.actants]);
+  }, [statement]);
 
   const moveChildFn = useCallback(
     (dragIndex: number, hoverIndex: number) => {
@@ -40,6 +42,17 @@ export const StatementEditorActantList: React.FC<StatementEditorActantList> = ({
     },
     [actants]
   );
+
+  const updateActantsOrder = () => {
+    updateApiCall({ actants: actants });
+  };
+
+  const updateApiCall = async (changes: object) => {
+    const res = await api.actantsUpdate(statementId, {
+      data: changes,
+    });
+    queryClient.invalidateQueries(["statement"]);
+  };
 
   return (
     <StyledActantList>
@@ -61,6 +74,7 @@ export const StatementEditorActantList: React.FC<StatementEditorActantList> = ({
                 statementId={statementId}
                 classEntitiesActant={classEntitiesActant}
                 moveFn={moveChildFn}
+                updateOrderFn={updateActantsOrder}
               />
             )}
           </React.Fragment>

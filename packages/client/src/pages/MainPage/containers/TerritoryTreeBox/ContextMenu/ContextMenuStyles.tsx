@@ -5,17 +5,20 @@ export const StyledWrapper = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
-  flex-direction: column;
-  position: relative;
+  flex-direction: row;
+  /* position: relative; */
 `;
 interface StyledContextButtonGroup {
   showMenu?: boolean;
+  clientX: number;
+  clientY: number;
 }
 export const StyledContextButtonGroup = styled.div<StyledContextButtonGroup>`
   display: ${({ showMenu }) => (showMenu ? "flex" : "none")};
-  flex-direction: column;
+  flex-direction: row;
   position: absolute;
-  top: ${({ theme }) => theme.space[8]};
+  top: ${({ clientY }) => `${(clientY - 85) / 10}rem`};
+  left: ${({ clientX }) => `${clientX / 10}rem`};
   z-index: 100;
 `;
 export const StyledFaChevronCircleDown = styled(FaChevronCircleDown)`

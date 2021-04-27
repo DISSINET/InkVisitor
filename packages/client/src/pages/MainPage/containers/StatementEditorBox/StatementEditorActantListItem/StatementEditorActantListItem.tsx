@@ -26,6 +26,7 @@ interface StatementEditorActantListItem {
   statementId: string;
   classEntitiesActant: string[];
   moveFn: (dragIndex: number, hoverIndex: number) => void;
+  updateOrderFn: () => void;
 }
 export const StatementEditorActantListItem: React.FC<StatementEditorActantListItem> = ({
   index,
@@ -35,6 +36,7 @@ export const StatementEditorActantListItem: React.FC<StatementEditorActantListIt
   statementId,
   classEntitiesActant,
   moveFn,
+  updateOrderFn,
 }) => {
   const queryClient = useQueryClient();
   const dropRef = useRef<HTMLDivElement>(null);
@@ -97,10 +99,7 @@ export const StatementEditorActantListItem: React.FC<StatementEditorActantListIt
     collect: (monitor: DragSourceMonitor) => ({
       isDragging: monitor.isDragging(),
     }),
-    end: (item: DragItem | undefined, monitor: DragSourceMonitor) => {
-      // TODO: api call to change order
-      // updateApiCall({ order: index }),
-    },
+    end: updateOrderFn,
   });
 
   drag(drop(dropRef));

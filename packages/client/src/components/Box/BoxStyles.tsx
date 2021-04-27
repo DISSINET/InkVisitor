@@ -7,7 +7,7 @@ interface IBoxStyle {
   height: number;
 }
 export const StyledBox = styled.div<IBoxStyle>`
-  /* position: relative; */
+  position: relative;
   display: flex;
   flex-direction: column;
   border-color: ${({ theme, color }) => theme.color[color]};
