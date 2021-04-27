@@ -1,7 +1,9 @@
 import { ActantType } from "@shared/enums";
 import { ITerritory, IParentTerritory } from "@shared/types/territory";
 import { r as rethink, Connection, WriteResult } from "rethinkdb-ts";
-import { fillFlatObject, UnknownObject, IModel, IDbModel } from "./common";
+import { fillFlatObject, UnknownObject, IModel } from "./common";
+import Actant from "./actant";
+import { collapseTextChangeRangesAcrossMultipleVersions } from "typescript";
 
 export class TerritoryParent implements IParentTerritory, IModel {
   id = "";
@@ -52,7 +54,7 @@ export class TerritoryData implements IModel {
   }
 }
 
-class Territory implements ITerritory, IDbModel {
+class Territory extends Actant implements ITerritory {
   static table = "actants";
 
   id = "";
@@ -61,6 +63,8 @@ class Territory implements ITerritory, IDbModel {
   data = new TerritoryData({});
 
   constructor(data: UnknownObject) {
+    super();
+
     if (!data) {
       return;
     }
@@ -77,16 +81,13 @@ class Territory implements ITerritory, IDbModel {
     return this.data.isValid();
   }
 
-  async findChilds(
-    db: Connection | undefined,
-    parentId: string
-  ): Promise<ITerritory[]> {
+  async findChilds(db: Connection | undefined): Promise<ITerritory[]> {
     return await rethink
       .table(Territory.table)
-      .filter(function (territory: any) {
+      .filter((territory: any) => {
         return rethink.and(
           territory("data")("parent").typeOf().eq("OBJECT"),
-          territory("data")("parent")("id").eq(parentId)
+          territory("data")("parent")("id").eq(this.id)
         );
       })
       .run(db);
@@ -94,25 +95,37 @@ class Territory implements ITerritory, IDbModel {
 
   async save(db: Connection | undefined): Promise<WriteResult> {
     if (this.data.parent) {
-      const childs = await this.findChilds(db, this.data.parent.id);
+      // get count of future siblings and move current territory to last position
+      const childs = await this.findChilds.call(
+        new Territory({ id: this.data.parent.id }),
+        db
+      );
       this.data.parent.order = childs.length + 1;
     }
-    return rethink.table(Territory.table).insert(this).run(db);
-  }
 
-  update(
-    db: Connection | undefined,
-    updateData: Record<string, unknown>
-  ): Promise<WriteResult> {
-    return rethink
+    const result = await rethink
       .table(Territory.table)
-      .get(this.id)
-      .update(updateData)
+      .insert({ ...this, id: undefined })
       .run(db);
+
+    if (result.generated_keys) {
+      this.id = result.generated_keys[0];
+    }
+
+    return result;
   }
 
-  delete(db: Connection | undefined): Promise<WriteResult> {
-    return rethink.table(Territory.table).get(this.id).delete().run(db);
+  async delete(db: Connection | undefined): Promise<WriteResult> {
+    if (!this.id) {
+      throw new Error("delete called on territory with undefined id");
+    }
+
+    const childs = await this.findChilds(db);
+    if (childs.length) {
+      throw new Error("cannot delete territory with childs");
+    }
+
+    return await super.delete(db);
   }
 }
 
