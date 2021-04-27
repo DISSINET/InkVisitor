@@ -38,19 +38,16 @@ describe("Actants delete", function () {
     it("should return a 200 code with successful response", async (done) => {
       const db = new Db();
       await db.initDb();
-      const testId = Math.random().toString();
-      const territory = new Territory({
-        id: testId,
-      });
+      const territory = new Territory({});
       await territory.save(db.connection);
 
       request(app)
-        .delete(`${apiPath}/actants/delete/${testId}`)
+        .delete(`${apiPath}/actants/delete/${territory.id}`)
         .set("authorization", "Bearer " + supertestConfig.token)
         .expect("Content-Type", /json/)
         .expect(200)
         .expect(async () => {
-          const deletedActant = await findActantById<IActant>(db, testId);
+          const deletedActant = await findActantById<IActant>(db, territory.id);
           should.not.exist(deletedActant);
         })
         .then(() => done());

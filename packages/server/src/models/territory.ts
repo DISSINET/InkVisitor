@@ -1,7 +1,8 @@
 import { ActantType } from "@shared/enums";
 import { ITerritory, IParentTerritory } from "@shared/types/territory";
 import { r as rethink, Connection, WriteResult } from "rethinkdb-ts";
-import { fillFlatObject, UnknownObject, IModel, IDbModel } from "./common";
+import { fillFlatObject, UnknownObject, IModel } from "./common";
+import Actant from "./actant";
 
 export class TerritoryParent implements IParentTerritory, IModel {
   id = "";
@@ -52,7 +53,7 @@ export class TerritoryData implements IModel {
   }
 }
 
-class Territory implements ITerritory, IDbModel {
+class Territory extends Actant implements ITerritory {
   static table = "actants";
 
   id = "";
@@ -61,6 +62,8 @@ class Territory implements ITerritory, IDbModel {
   data = new TerritoryData({});
 
   constructor(data: UnknownObject) {
+    super();
+
     if (!data) {
       return;
     }
@@ -107,21 +110,6 @@ class Territory implements ITerritory, IDbModel {
     }
 
     return result;
-  }
-
-  update(
-    db: Connection | undefined,
-    updateData: Record<string, unknown>
-  ): Promise<WriteResult> {
-    return rethink
-      .table(Territory.table)
-      .get(this.id)
-      .update(updateData)
-      .run(db);
-  }
-
-  delete(db: Connection | undefined): Promise<WriteResult> {
-    return rethink.table(Territory.table).get(this.id).delete().run(db);
   }
 }
 

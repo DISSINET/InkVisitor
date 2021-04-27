@@ -3,16 +3,10 @@ import {
   IStatementActant,
   IStatementReference,
 } from "@shared/types/statement";
-import {
-  fillFlatObject,
-  fillArray,
-  UnknownObject,
-  IModel,
-  IDbModel,
-} from "./common";
+import { fillFlatObject, fillArray, UnknownObject, IModel } from "./common";
 import { Prop } from "./prop";
-import { r as rethink, Connection, WriteResult } from "rethinkdb-ts";
 import { ActantType } from "@shared/enums";
+import Actant from "./actant";
 
 class StatementActant implements IStatementActant, IModel {
   id = "";
@@ -130,7 +124,7 @@ export class StatementData implements IModel {
   }
 }
 
-class Statement implements IStatement, IDbModel {
+class Statement extends Actant implements IStatement {
   static table = "actants";
 
   id = "";
@@ -139,6 +133,8 @@ class Statement implements IStatement, IDbModel {
   data = new StatementData({});
 
   constructor(data: UnknownObject) {
+    super();
+
     if (!data) {
       return;
     }
@@ -153,34 +149,6 @@ class Statement implements IStatement, IDbModel {
     }
 
     return this.data.isValid();
-  }
-
-  async save(db: Connection | undefined): Promise<WriteResult> {
-    const result = await rethink
-      .table(Statement.table)
-      .insert({ ...this, id: undefined })
-      .run(db);
-
-    if (result.generated_keys) {
-      this.id = result.generated_keys[0];
-    }
-
-    return result;
-  }
-
-  update(
-    db: Connection | undefined,
-    updateData: Record<string, unknown>
-  ): Promise<WriteResult> {
-    return rethink
-      .table(Statement.table)
-      .get(this.id)
-      .update(updateData)
-      .run(db);
-  }
-
-  delete(db: Connection | undefined): Promise<WriteResult> {
-    return rethink.table(Statement.table).get(this.id).delete().run(db);
   }
 }
 

@@ -1,6 +1,5 @@
 import { ActantType } from "@shared/enums";
 import "ts-jest";
-import Statement, { StatementTerritory } from "./statement";
 import { getActantType } from "./factory";
 import "ts-jest";
 
