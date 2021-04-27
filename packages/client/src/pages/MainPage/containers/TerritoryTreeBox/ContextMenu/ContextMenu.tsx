@@ -35,6 +35,10 @@ export const ContextMenu: React.FC<ContextMenu> = ({ territoryActant }) => {
   const [showSubmit, setShowSubmit] = useState(false);
   const [showCreate, setShowCreate] = useState(false);
   const [territoryName, setTerritoryName] = useState("");
+  const [currentMousePosition, setCurrentMousePosition] = useState({
+    x: 0,
+    y: 0,
+  });
 
   const createTerritory = async (label: string) => {
     const newTerritory: ITerritory = CTerritoryActant(
@@ -67,15 +71,21 @@ export const ContextMenu: React.FC<ContextMenu> = ({ territoryActant }) => {
   return (
     <>
       <StyledWrapper
-        onMouseOver={() => {
-          console.log(`mouse position: X:${position.x} Y:${position.y}`);
+        onMouseEnter={() => {
+          if (!showMenu) {
+            setCurrentMousePosition({ x: position.x, y: position.y });
+          }
           setShowMenu(true);
         }}
-        onMouseOut={() => setShowMenu(false)}
+        onMouseLeave={() => setShowMenu(false)}
       >
         <StyledFaChevronCircleDown size={14} />
 
-        <StyledContextButtonGroup showMenu={showMenu}>
+        <StyledContextButtonGroup
+          showMenu={showMenu}
+          clientX={currentMousePosition.x}
+          clientY={currentMousePosition.y}
+        >
           <Button
             key="add"
             icon={<FaPlus size={14} />}
