@@ -22,12 +22,14 @@ import {
 } from "./ContextMenuStyles";
 import { IActant, ITerritory } from "@shared/types";
 import { CTerritoryActant } from "constructors";
+import { useMousePosition } from "utils";
 
 interface ContextMenu {
   territoryActant: IActant;
 }
 export const ContextMenu: React.FC<ContextMenu> = ({ territoryActant }) => {
   const queryClient = useQueryClient();
+  const position = useMousePosition();
 
   const [showMenu, setShowMenu] = useState(false);
   const [showSubmit, setShowSubmit] = useState(false);
@@ -65,7 +67,10 @@ export const ContextMenu: React.FC<ContextMenu> = ({ territoryActant }) => {
   return (
     <>
       <StyledWrapper
-        onMouseOver={() => setShowMenu(true)}
+        onMouseOver={() => {
+          console.log(`mouse position: X:${position.x} Y:${position.y}`);
+          setShowMenu(true);
+        }}
         onMouseOut={() => setShowMenu(false)}
       >
         <StyledFaChevronCircleDown size={14} />
@@ -101,6 +106,7 @@ export const ContextMenu: React.FC<ContextMenu> = ({ territoryActant }) => {
           />
         </StyledContextButtonGroup>
       </StyledWrapper>
+
       <Submit
         title={"Delete Territory"}
         text={`Do you really want do delete Territory with ID [${territoryActant.id}]?`}
