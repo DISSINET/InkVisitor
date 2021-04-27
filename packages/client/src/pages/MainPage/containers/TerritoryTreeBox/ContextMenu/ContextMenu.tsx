@@ -22,17 +22,23 @@ import {
 } from "./ContextMenuStyles";
 import { IActant, ITerritory } from "@shared/types";
 import { CTerritoryActant } from "constructors";
+import { useMousePosition } from "utils";
 
 interface ContextMenu {
   territoryActant: IActant;
 }
 export const ContextMenu: React.FC<ContextMenu> = ({ territoryActant }) => {
   const queryClient = useQueryClient();
+  const position = useMousePosition();
 
   const [showMenu, setShowMenu] = useState(false);
   const [showSubmit, setShowSubmit] = useState(false);
   const [showCreate, setShowCreate] = useState(false);
   const [territoryName, setTerritoryName] = useState("");
+  const [currentMousePosition, setCurrentMousePosition] = useState({
+    x: 0,
+    y: 0,
+  });
 
   const createTerritory = async (label: string) => {
     const newTerritory: ITerritory = CTerritoryActant(
@@ -65,12 +71,21 @@ export const ContextMenu: React.FC<ContextMenu> = ({ territoryActant }) => {
   return (
     <>
       <StyledWrapper
-        onMouseOver={() => setShowMenu(true)}
-        onMouseOut={() => setShowMenu(false)}
+        onMouseEnter={() => {
+          if (!showMenu) {
+            setCurrentMousePosition({ x: position.x, y: position.y });
+          }
+          setShowMenu(true);
+        }}
+        onMouseLeave={() => setShowMenu(false)}
       >
         <StyledFaChevronCircleDown size={14} />
 
-        <StyledContextButtonGroup showMenu={showMenu}>
+        <StyledContextButtonGroup
+          showMenu={showMenu}
+          clientX={currentMousePosition.x}
+          clientY={currentMousePosition.y}
+        >
           <Button
             key="add"
             icon={<FaPlus size={14} />}
@@ -101,6 +116,7 @@ export const ContextMenu: React.FC<ContextMenu> = ({ territoryActant }) => {
           />
         </StyledContextButtonGroup>
       </StyledWrapper>
+
       <Submit
         title={"Delete Territory"}
         text={`Do you really want do delete Territory with ID [${territoryActant.id}]?`}
