@@ -2,6 +2,7 @@ import {
   testFaultyMessage,
   successfulGenericResponse,
   should,
+  clean,
 } from "@modules/common.test";
 import { ActantDoesNotExits, BadParams } from "@common/errors";
 import { Db } from "@service/RethinkDB";
@@ -51,6 +52,26 @@ describe("Actants delete", function () {
           should.not.exist(deletedActant);
         })
         .then(() => done());
+    });
+  });
+
+  describe("territory with childs", () => {
+    it("should return a 400 code", async (done) => {
+      const db = new Db();
+      await db.initDb();
+      const root = new Territory({});
+      await root.save(db.connection);
+      const leaf = new Territory({ data: { parent: { id: root.id } } });
+      await leaf.save(db.connection);
+
+      await request(app)
+        .delete(`${apiPath}/actants/delete/${root.id}`)
+        .set("authorization", "Bearer " + supertestConfig.token)
+        .expect("Content-Type", /json/)
+        .expect(400);
+
+      await clean(db);
+      done();
     });
   });
 });

@@ -1,6 +1,9 @@
 import { ActantType } from "@shared/enums";
 import "ts-jest";
 import Territory, { TerritoryData, TerritoryParent } from "./territory";
+import { Db } from "@service/RethinkDB";
+import { clean } from "@modules/common.test";
+import { findActantById } from "@service/shorthands";
 
 describe("Territory constructor test", function () {
   describe("empty data", () => {
@@ -79,6 +82,57 @@ describe("Territory validate test", function () {
         },
       });
       expect(okData.isValid()).toEqual(true);
+    });
+  });
+});
+
+describe("Territory.delete", function () {
+  describe("empty data", () => {
+    it("should return error", async () => {
+      const db = new Db();
+      await db.initDb();
+
+      const territory = new Territory({});
+
+      await expect(territory.delete(db.connection)).rejects.toThrow(Error);
+
+      await clean(db);
+    });
+  });
+
+  describe("territory with child", () => {
+    it("should return error", async () => {
+      const db = new Db();
+      await db.initDb();
+
+      const root = new Territory({});
+      await root.save(db.connection);
+      const child = new Territory({ data: { parent: { id: root.id } } });
+      await child.save(db.connection);
+
+      await expect(root.delete(db.connection)).rejects.toThrow(Error);
+
+      await clean(db);
+    });
+  });
+
+  describe("leaf territory", () => {
+    it("should delete the child", async () => {
+      const db = new Db();
+      await db.initDb();
+
+      const root = new Territory({});
+      await root.save(db.connection);
+      const child = new Territory({ data: { parent: { id: root.id } } });
+      await child.save(db.connection);
+
+      await expect(child.delete(db.connection)).resolves.not.toBeNull();
+
+      const existingChild = await findActantById(db, child.id);
+
+      expect(existingChild).toBeNull();
+
+      await clean(db);
     });
   });
 });
