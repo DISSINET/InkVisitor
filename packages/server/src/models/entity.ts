@@ -1,7 +1,7 @@
-import { fillFlatObject, UnknownObject, IModel, IDbModel } from "./common";
-import { r as rethink, Connection, WriteResult } from "rethinkdb-ts";
+import { fillFlatObject, UnknownObject, IModel } from "./common";
 import { ActantType, EntityActantType } from "@shared/enums";
 import { IEntity, entityLogicalTypeValues } from "@shared/types/entity";
+import Actant from "./actant";
 
 class EntityData implements IModel {
   logicalType: typeof entityLogicalTypeValues[number] = "s";
@@ -17,7 +17,7 @@ class EntityData implements IModel {
   }
 }
 
-class Entity implements IEntity, IDbModel {
+class Entity extends Actant implements IEntity {
   static table = "actants";
 
   id = "";
@@ -26,6 +26,8 @@ class Entity implements IEntity, IDbModel {
   data = new EntityData({});
 
   constructor(data: UnknownObject) {
+    super();
+
     if (!data) {
       return;
     }
@@ -49,30 +51,6 @@ class Entity implements IEntity, IDbModel {
     }
 
     return this.data.isValid();
-  }
-
-  async save(db: Connection | undefined): Promise<WriteResult> {
-    const result = await rethink
-      .table(Entity.table)
-      .insert({ ...this, id: undefined })
-      .run(db);
-
-    if (result.generated_keys) {
-      this.id = result.generated_keys[0];
-    }
-
-    return result;
-  }
-
-  update(
-    db: Connection | undefined,
-    updateData: Record<string, unknown>
-  ): Promise<WriteResult> {
-    return rethink.table(Entity.table).get(this.id).update(updateData).run(db);
-  }
-
-  delete(db: Connection | undefined): Promise<WriteResult> {
-    return rethink.table(Entity.table).get(this.id).delete().run(db);
   }
 }
 

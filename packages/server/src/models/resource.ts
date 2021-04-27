@@ -1,7 +1,7 @@
-import { fillFlatObject, UnknownObject, IModel, IDbModel } from "./common";
-import { r as rethink, Connection, WriteResult } from "rethinkdb-ts";
+import { fillFlatObject, UnknownObject, IModel } from "./common";
 import { ActantType } from "@shared/enums";
 import { IResource, languageValues } from "@shared/types/resource";
+import Actant from "./actant";
 
 class ResourceData implements IModel {
   content = "";
@@ -22,7 +22,7 @@ class ResourceData implements IModel {
   }
 }
 
-class Resource implements IResource, IDbModel {
+class Resource extends Actant implements IResource {
   static table = "actants";
 
   id = "";
@@ -31,6 +31,8 @@ class Resource implements IResource, IDbModel {
   data = new ResourceData({});
 
   constructor(data: UnknownObject) {
+    super();
+
     if (!data) {
       return;
     }
@@ -45,34 +47,6 @@ class Resource implements IResource, IDbModel {
     }
 
     return this.data.isValid();
-  }
-
-  async save(db: Connection | undefined): Promise<WriteResult> {
-    const result = await rethink
-      .table(Resource.table)
-      .insert({ ...this, id: undefined })
-      .run(db);
-
-    if (result.generated_keys) {
-      this.id = result.generated_keys[0];
-    }
-
-    return result;
-  }
-
-  update(
-    db: Connection | undefined,
-    updateData: Record<string, unknown>
-  ): Promise<WriteResult> {
-    return rethink
-      .table(Resource.table)
-      .get(this.id)
-      .update(updateData)
-      .run(db);
-  }
-
-  delete(db: Connection | undefined): Promise<WriteResult> {
-    return rethink.table(Resource.table).get(this.id).delete().run(db);
   }
 }
 
