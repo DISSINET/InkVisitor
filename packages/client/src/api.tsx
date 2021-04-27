@@ -112,6 +112,7 @@ class Api {
         const username = parsedToken.user.name;
         this.saveLogin(storedToken, username);
       } else {
+        this.signOut();
       }
     }
   }
