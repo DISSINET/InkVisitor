@@ -43,11 +43,7 @@ export const Toggle: FC<Toggle> = ({
   };
 
   return (
-    <Tooltip
-      position={["bottom left", "top left"]}
-      on={["hover", "focus"]}
-      label={tooltip}
-    >
+    <Tooltip position={["top center"]} on={["hover", "focus"]} label={tooltip}>
       <StyledToggle
         color={color}
         inverted={inverted}

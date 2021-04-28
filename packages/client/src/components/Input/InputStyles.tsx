@@ -43,8 +43,7 @@ export const StyledSelect = styled.select<IValueStyle>`
   background-color: ${({ inverted, theme }) =>
     inverted ? theme.color["primary"] : theme.color["white"]};
   border-width: ${({ theme }) => theme.borderWidth[2]};
-  border-color: ${({ inverted, theme }) =>
-    inverted ? theme.color["white"] : theme.color["primary"]};
+  border-color: ${({ inverted, theme }) => theme.color["primary"]};
   font-size: ${({ theme }) => theme.fontSize["xs"]};
   font-weight: bold;
   width: ${({ width }) => (width ? width + "px" : "auto")};
