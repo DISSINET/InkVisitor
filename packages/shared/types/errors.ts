@@ -1,3 +1,5 @@
+import { Func } from "mocha";
+
 class BadCredentialsError extends Error {
   public static code = "bad credentials";
 
@@ -229,6 +231,28 @@ class StatementInvalidMove extends Error {
 export interface IError extends Error {
   statusCode(): number;
 }
+
+/*
+type filterMap = Record<string, new (description: string) => IError>;
+
+const errors: filterMap = {
+  ModelNotValidError,
+  BadCredentialsError,
+  NotFound,
+  BadParams,
+  UserDoesNotExits,
+  ActantDoesNotExits,
+  ActionDoesNotExits,
+  StatementDoesNotExits,
+  TerritoriesBrokenError,
+  TerritoryDoesNotExits,
+  TerrytoryInvalidMove,
+  StatementInvalidMove,
+};
+
+export default errors;
+*/
+
 export {
   ModelNotValidError,
   BadCredentialsError,

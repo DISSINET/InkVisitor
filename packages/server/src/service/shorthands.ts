@@ -1,11 +1,10 @@
 import { r as rethink, WriteResult } from "rethinkdb-ts";
 import { IUser } from "../../../shared/types/user";
 import { IActant } from "../../../shared/types/actant";
-
 import { Db } from "./RethinkDB";
-import { IAction, ILabel, IStatement, ITerritory } from "@shared/types";
-import { IDbModel, IModel } from "@models/common";
-import { ModelNotValidError } from "@common/errors";
+import { IAction, IStatement, ITerritory } from "@shared/types";
+import { IDbModel } from "@models/common";
+import { ModelNotValidError } from "@shared/types/errors";
 
 // USER
 export async function findAllUsers(db: Db): Promise<IUser[]> {

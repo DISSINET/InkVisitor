@@ -1,16 +1,14 @@
 import { expect } from "@modules/common.test";
-import { BadParams, UserDoesNotExits } from "@common/errors";
+import { BadParams, UserDoesNotExits } from "@shared/types/errors";
 import request from "supertest";
 import { apiPath } from "../../common/constants";
 import app from "../../Server";
 import {
   createActant,
   createUser,
-  findActantById,
   getActantUsage,
 } from "../../service/shorthands";
 import { Db } from "@service/RethinkDB";
-import { getOneActant } from "..";
 import Statement from "@models/statement";
 
 describe("Users bookmarksGet", function () {

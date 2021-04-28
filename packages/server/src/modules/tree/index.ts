@@ -9,7 +9,7 @@ import {
   TerritoriesBrokenError,
   TerritoryDoesNotExits,
   TerrytoryInvalidMove,
-} from "@common/errors";
+} from "@shared/types/errors";
 import { asyncRouteHandler } from "..";
 import {
   IResponseGeneric,

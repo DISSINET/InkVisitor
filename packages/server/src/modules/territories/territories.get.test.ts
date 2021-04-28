@@ -1,5 +1,5 @@
 import { expect } from "@modules/common.test";
-import { BadParams, TerritoryDoesNotExits } from "@common/errors";
+import { BadParams, TerritoryDoesNotExits } from "@shared/types/errors";
 import { Db } from "@service/RethinkDB";
 import { createActant, deleteActant } from "@service/shorthands";
 import Territory from "@models/territory";
