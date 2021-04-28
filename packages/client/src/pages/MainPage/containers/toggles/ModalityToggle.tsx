@@ -1,7 +1,7 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { IoMdChatbubbles } from "react-icons/io";
 
-import { Toggle, Dropdown } from "components";
+import { Dropdown } from "components";
 
 import styled from "styled-components";
 
@@ -25,10 +25,15 @@ export const ModalityToggle: React.FC<IModalityToggle> = ({
     };
   });
 
+  const selectedItem = useMemo(() => {
+    return items.find((i) => i.value === value);
+  }, [value]);
+
   return (
     <Dropdown
+      label={selectedItem?.label}
       options={items}
-      value={items.find((i) => i.value === value)}
+      value={selectedItem}
       onChange={(newValue: any) => {
         onChangeFn(newValue.value);
       }}
@@ -46,15 +51,6 @@ export const ModalityToggle: React.FC<IModalityToggle> = ({
       menuWidth={200}
       noDropDownIndicator
     />
-    // <Toggle
-    //   icon={<IoMdChatbubbles />}
-    //   inverted
-    //   onChangeFn={(newValue) => {
-    //     onChangeFn(newValue.value);
-    //   }}
-    //   optionList={items}
-    //   selectedValue={value}
-    // />
   );
 };
 
