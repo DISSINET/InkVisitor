@@ -55,6 +55,7 @@ export const ActionDropdown: React.FC<IActionDropdown> = ({
         onSelectedChange(selectedItem);
       }}
       options={options}
+      width={500}
     />
   );
 };

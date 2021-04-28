@@ -5,14 +5,18 @@ interface StyledSelect {
   width?: number;
 }
 export const StyledSelect = styled(Select)`
-  font-size: ${({ theme }) => theme.fontSize["xs"]};
   font-weight: bold;
-  width: ${({ width }) => (width ? `${width / 10}rem` : "100%")};
+  display: inline-flex;
+  min-height: ${({ theme }) => theme.space[10]};
+  vertical-align: bottom;
+  font-size: ${({ theme }) => theme.fontSize["sm"]};
+  height: ${({ theme }) => theme.space[10]};
   .react-select__control {
+    width: ${({ width }) => (width ? `${width / 10}rem` : "auto")};
+    height: ${({ theme }) => theme.space[10]};
+    min-height: ${({ theme }) => theme.space[10]};
     border: 2px solid black;
     border-radius: 0;
-    min-height: 30px;
-    max-height: 30px;
     :hover {
       border-color: black;
     }
@@ -22,9 +26,13 @@ export const StyledSelect = styled(Select)`
   }
   .react-select__value-container {
     padding: 0 0.25rem;
+    width: ${({ width }) => (width ? `${width / 10}rem` : "auto")};
   }
   .react-select__single-value {
+    top: 40%;
+    font-weight: normal;
     color: black;
+    vertical-align: middle;
   }
   .react-select__indicator {
     color: black;
@@ -35,6 +43,7 @@ export const StyledSelect = styled(Select)`
   }
   .react-select__menu {
     border-radius: 0;
+    box-shadow: ${({ theme }) => theme.boxShadow["normal"]};
   }
   .react-select__option {
     :hover {
