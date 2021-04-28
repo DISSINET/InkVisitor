@@ -75,33 +75,7 @@ export const StatementListBox: React.FC = () => {
         Header: "ID",
         accessor: "id",
       },
-      {
-        Header: "",
-        id: "Selector",
-        Cell: ({ row }: Cell) => {
-          return hashParams["statement"] === row.values.id ? (
-            <FaDotCircle
-              size={14}
-              onClick={() => {
-                hashParams["statement"] = row.values.id;
-                history.push({
-                  hash: queryString.stringify(hashParams),
-                });
-              }}
-            />
-          ) : (
-            <FaRegCircle
-              size={14}
-              onClick={() => {
-                hashParams["statement"] = row.values.id;
-                history.push({
-                  hash: queryString.stringify(hashParams),
-                });
-              }}
-            />
-          );
-        },
-      },
+
       {
         Header: "Subjects",
         accessor: "data",
@@ -228,6 +202,33 @@ export const StatementListBox: React.FC = () => {
             />
           </ButtonGroup>
         ),
+      },
+      {
+        Header: "",
+        id: "Selector",
+        Cell: ({ row }: Cell) => {
+          return hashParams["statement"] === row.values.id ? (
+            <FaDotCircle
+              size={14}
+              onClick={() => {
+                hashParams["statement"] = row.values.id;
+                history.push({
+                  hash: queryString.stringify(hashParams),
+                });
+              }}
+            />
+          ) : (
+            <FaRegCircle
+              size={14}
+              onClick={() => {
+                hashParams["statement"] = row.values.id;
+                history.push({
+                  hash: queryString.stringify(hashParams),
+                });
+              }}
+            />
+          );
+        },
       },
     ];
   }, [data, actions]);
