@@ -335,6 +335,7 @@ export const StatementEditorBox: React.FC = () => {
                         <React.Fragment
                           key={propOrigin.origin + level + "|" + order}
                         >
+                          <StyledPropLineColumn></StyledPropLineColumn>
                           <StyledPropLineColumn
                             padded={level === "2"}
                             lastSecondLevel={lastSecondLevel}
@@ -594,6 +595,7 @@ export const StatementEditorBox: React.FC = () => {
                 <StyledReferencesList>
                   {statement.data.references.length > 0 && (
                     <React.Fragment>
+                      <StyledListHeaderColumn></StyledListHeaderColumn>
                       <StyledListHeaderColumn>Resource</StyledListHeaderColumn>
                       <StyledListHeaderColumn>Part</StyledListHeaderColumn>
                       <StyledListHeaderColumn>Type</StyledListHeaderColumn>
@@ -607,6 +609,7 @@ export const StatementEditorBox: React.FC = () => {
                       );
                       return (
                         <React.Fragment key={ri}>
+                          <StyledReferencesListColumn />
                           <StyledReferencesListColumn>
                             {referenceActant ? (
                               <ActantTag

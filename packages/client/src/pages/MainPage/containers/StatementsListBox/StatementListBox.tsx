@@ -10,6 +10,8 @@ import {
   FaClone,
   FaTrashAlt,
   FaPlus,
+  FaRegCircle,
+  FaDotCircle,
 } from "react-icons/fa";
 import { useLocation, useHistory } from "react-router";
 import { toast } from "react-toastify";
@@ -78,7 +80,7 @@ export const StatementListBox: React.FC = () => {
         id: "Selector",
         Cell: ({ row }: Cell) => {
           return hashParams["statement"] === row.values.id ? (
-            <FaRegCheckSquare
+            <FaDotCircle
               size={14}
               onClick={() => {
                 hashParams["statement"] = row.values.id;
@@ -88,7 +90,7 @@ export const StatementListBox: React.FC = () => {
               }}
             />
           ) : (
-            <FaRegSquare
+            <FaRegCircle
               size={14}
               onClick={() => {
                 hashParams["statement"] = row.values.id;
