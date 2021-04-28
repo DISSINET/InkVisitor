@@ -1,6 +1,10 @@
 import Select from "react-select";
 import styled from "styled-components";
 
+export const StyledSelectWrapper = styled.div`
+  display: inline-block;
+  vertical-align: bottom;
+`;
 interface StyledSelect {
   width?: number;
 }
