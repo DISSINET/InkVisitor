@@ -11,7 +11,7 @@ export default class Actant implements IDbModel {
   async save(db: Connection | undefined): Promise<WriteResult> {
     const result = await rethink
       .table(Actant.table)
-      .insert({ ...this, id: undefined })
+      .insert({ ...this, id: this.id || undefined })
       .run(db);
 
     if (result.generated_keys) {

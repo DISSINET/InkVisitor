@@ -103,16 +103,7 @@ class Territory extends Actant implements ITerritory {
       this.data.parent.order = childs.length + 1;
     }
 
-    const result = await rethink
-      .table(Territory.table)
-      .insert({ ...this, id: undefined })
-      .run(db);
-
-    if (result.generated_keys) {
-      this.id = result.generated_keys[0];
-    }
-
-    return result;
+    return super.save(db);
   }
 
   async delete(db: Connection | undefined): Promise<WriteResult> {
@@ -125,7 +116,7 @@ class Territory extends Actant implements ITerritory {
       throw new Error("cannot delete territory with childs");
     }
 
-    return await super.delete(db);
+    return super.delete(db);
   }
 }
 
