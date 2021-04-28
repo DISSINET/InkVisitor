@@ -11,7 +11,7 @@ import {
   BadParams,
   ActantDoesNotExits,
   ModelNotValidError,
-} from "@common/errors";
+} from "@shared/types/errors";
 import { IActant, IResponseDetail, IResponseGeneric } from "@shared/types";
 
 export default Router()

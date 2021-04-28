@@ -1,10 +1,13 @@
 import morgan from "morgan";
 import helmet from "helmet";
-import { IError } from "@common/errors";
+import { IError, InternalServerError } from "@shared/types/errors";
 import express, { Request, Response, NextFunction, Router } from "express";
 import cors from "cors";
-import { BAD_REQUEST, NOT_FOUND } from "http-status-codes";
-import { createConnection, closeConnection } from "@service/RethinkDB";
+import {
+  BAD_REQUEST,
+  NOT_FOUND,
+  INTERNAL_SERVER_ERROR,
+} from "http-status-codes";
 import logger from "@common/Logger";
 import { apiPath } from "./common/constants";
 import ActantsRouter from "@modules/actants";
@@ -39,6 +42,7 @@ server.get("/health", function (req, res) {
 
 import { validateJwt } from "@common/auth";
 import { UnauthorizedError } from "express-jwt";
+import { IResponseGeneric, errorTypes } from "@shared/types/response-generic";
 
 // uncomment this to enable auth
 server.use(validateJwt().unless({ path: [/api\/v1\/users/] }));
@@ -59,9 +63,12 @@ routerV1.use("/tree", TreeRouter);
 
 // unknown paths (after jwt check) should return 404
 server.all("*", function (req, res, next) {
-  res.status(NOT_FOUND).json({
-    error: "404",
-  });
+  const genericResponse: IResponseGeneric = {
+    result: false,
+    error: "UnknownRoute",
+  };
+
+  res.status(NOT_FOUND).json(genericResponse);
 });
 
 // Errors
@@ -72,11 +79,16 @@ server.use(
       logger.error(err.message, err);
     }
 
-    return res
-      .status(isCustomError ? (err as IError).statusCode() : BAD_REQUEST)
-      .json({
-        error: err.toString(),
-      });
+    if (!isCustomError) {
+      err = new InternalServerError("unknown error occured");
+    }
+
+    const genericResponse: IResponseGeneric = {
+      result: false,
+      error: err.constructor.name as errorTypes,
+    };
+
+    return res.status((err as IError).statusCode()).json(genericResponse);
   }
 );
 

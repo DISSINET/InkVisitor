@@ -1,5 +1,5 @@
 import "@modules/common.test";
-import { ActantDoesNotExits, BadParams } from "@common/errors";
+import { ActantDoesNotExits, BadParams } from "@shared/types/errors";
 import request from "supertest";
 import { supertestConfig } from "..";
 import { apiPath } from "../../common/constants";

@@ -1,10 +1,5 @@
-import {
-  testFaultyMessage,
-  successfulGenericResponse,
-  should,
-  clean,
-} from "@modules/common.test";
-import { ActantDoesNotExits, BadParams } from "@common/errors";
+import { should, clean } from "@modules/common.test";
+import { ActantDoesNotExits, BadParams } from "@shared/types/errors";
 import { Db } from "@service/RethinkDB";
 import request from "supertest";
 import { apiPath } from "../../common/constants";

@@ -8,7 +8,7 @@ import {
   updateAction,
   deleteAction,
 } from "@service/shorthands";
-import { BadParams, ActionDoesNotExits } from "@common/errors";
+import { BadParams, ActionDoesNotExits } from "@shared/types/errors";
 import { asyncRouteHandler } from "..";
 
 export default Router()

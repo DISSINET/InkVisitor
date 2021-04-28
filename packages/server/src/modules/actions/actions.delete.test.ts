@@ -1,5 +1,5 @@
 import { should } from "@modules/common.test";
-import { BadParams } from "@common/errors";
+import { BadParams } from "@shared/types/errors";
 import { Db } from "@service/RethinkDB";
 import request from "supertest";
 import { apiPath } from "../../common/constants";

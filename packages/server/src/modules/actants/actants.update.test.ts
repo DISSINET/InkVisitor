@@ -1,11 +1,11 @@
 import "@modules/common.test";
-import { ActantDoesNotExits, BadParams } from "@common/errors";
+import { ActantDoesNotExits, BadParams } from "@shared/types/errors";
 import request from "supertest";
 import { apiPath } from "../../common/constants";
 import app from "../../Server";
 import { supertestConfig } from "..";
 import { Db } from "@service/RethinkDB";
-import { createActant, findActantById } from "@service/shorthands";
+import { findActantById } from "@service/shorthands";
 import { IActant } from "@shared/types";
 import Statement from "@models/statement";
 import { successfulGenericResponse } from "@modules/common.test";

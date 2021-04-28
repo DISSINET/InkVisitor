@@ -1,12 +1,11 @@
 import { clean, successfulGenericResponse } from "@modules/common.test";
-import { BadParams } from "@common/errors";
+import { BadParams } from "@shared/types/errors";
 import request from "supertest";
 import { apiPath } from "../../common/constants";
 import app from "../../Server";
 import { supertestConfig } from "..";
 import Statement from "@models/statement";
 import {
-  createActant,
   deleteActant,
   deleteActants,
   findActantById,

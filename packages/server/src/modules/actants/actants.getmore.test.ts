@@ -1,5 +1,5 @@
 import "@modules/common.test";
-import { BadParams } from "@common/errors";
+import { BadParams } from "@shared/types/errors";
 import request from "supertest";
 import { supertestConfig } from "..";
 import { apiPath } from "../../common/constants";
