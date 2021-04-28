@@ -1,4 +1,4 @@
-import { NextFunction, raw, Request, Response } from "express";
+import { Request } from "express";
 import { Router } from "express";
 import { IUser } from "@shared/types/user";
 import {
@@ -17,7 +17,7 @@ import {
   BadCredentialsError,
   BadParams,
   UserDoesNotExits,
-} from "@common/errors";
+} from "@shared/types/errors";
 import { checkPassword, generateAccessToken, hashPassword } from "@common/auth";
 import { asyncRouteHandler } from "..";
 import {

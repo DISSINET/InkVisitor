@@ -3,7 +3,7 @@ import {
   StatementDoesNotExits,
   TerritoryDoesNotExits,
   StatementInvalidMove,
-} from "@common/errors";
+} from "@shared/types/errors";
 import { Router, Request } from "express";
 import { asyncRouteHandler } from "..";
 import { findActantById, findActants } from "@service/shorthands";
