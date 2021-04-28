@@ -100,14 +100,14 @@ export const StatementListRow: React.FC<StatementListRow> = ({
         handleClick(row.values.id);
       }}
     >
+      <td ref={dragRef} style={{ cursor: "move" }}>
+        <FaGripVertical />
+      </td>
       {row.cells.map((cell: Cell) => {
         return (
           <StyledTd {...cell.getCellProps()}>{cell.render("Cell")}</StyledTd>
         );
       })}
-      <td ref={dragRef} style={{ cursor: "move" }}>
-        <FaGripVertical />
-      </td>
     </StyledTr>
   );
 };
