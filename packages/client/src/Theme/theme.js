@@ -121,4 +121,7 @@ export default {
     lg: "0.5rem",
     full: "9999px",
   },
+  boxShadow: {
+    normal: "1px 1px 3px rgba(0, 0, 0, 0.4)",
+  },
 };
