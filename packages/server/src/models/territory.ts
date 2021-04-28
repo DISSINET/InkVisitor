@@ -3,7 +3,6 @@ import { ITerritory, IParentTerritory } from "@shared/types/territory";
 import { r as rethink, Connection, WriteResult } from "rethinkdb-ts";
 import { fillFlatObject, UnknownObject, IModel } from "./common";
 import Actant from "./actant";
-import { collapseTextChangeRangesAcrossMultipleVersions } from "typescript";
 
 export class TerritoryParent implements IParentTerritory, IModel {
   id = "";

@@ -123,9 +123,7 @@ export default Router()
         throw new StatementInvalidMove("statement not present in the array");
       }
       if (currentIndex === newIndex) {
-        out.result = false;
-        out.errors = ["already on the new index"];
-        return out;
+        throw new StatementInvalidMove("already on the position");
       }
       statementsForTerritory.splice(currentIndex, 1);
 

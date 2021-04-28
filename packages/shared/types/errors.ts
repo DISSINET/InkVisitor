@@ -1,12 +1,8 @@
-import { Func } from "mocha";
-
 class BadCredentialsError extends Error {
   public static code = "bad credentials";
 
   constructor(m: string) {
     super(m);
-
-    // Set the prototype explicitly.
     Object.setPrototypeOf(this, BadCredentialsError.prototype);
   }
 
@@ -24,8 +20,6 @@ class ModelNotValidError extends Error {
 
   constructor(m: string) {
     super(m);
-
-    // Set the prototype explicitly.
     Object.setPrototypeOf(this, ModelNotValidError.prototype);
   }
 
@@ -43,8 +37,6 @@ class NotFound extends Error {
 
   constructor(m: string) {
     super(m);
-
-    // Set the prototype explicitly.
     Object.setPrototypeOf(this, NotFound.prototype);
   }
 
@@ -62,8 +54,6 @@ class BadParams extends Error {
 
   constructor(m: string) {
     super(m);
-
-    // Set the prototype explicitly.
     Object.setPrototypeOf(this, BadParams.prototype);
   }
 
@@ -81,8 +71,6 @@ class UserDoesNotExits extends Error {
 
   constructor(m: string) {
     super(m);
-
-    // Set the prototype explicitly.
     Object.setPrototypeOf(this, UserDoesNotExits.prototype);
   }
 
@@ -100,8 +88,6 @@ class ActantDoesNotExits extends Error {
 
   constructor(m: string) {
     super(m);
-
-    // Set the prototype explicitly.
     Object.setPrototypeOf(this, ActantDoesNotExits.prototype);
   }
 
@@ -119,8 +105,6 @@ class ActionDoesNotExits extends Error {
 
   constructor(m: string) {
     super(m);
-
-    // Set the prototype explicitly.
     Object.setPrototypeOf(this, ActionDoesNotExits.prototype);
   }
 
@@ -138,8 +122,6 @@ class StatementDoesNotExits extends Error {
 
   constructor(m: string) {
     super(m);
-
-    // Set the prototype explicitly.
     Object.setPrototypeOf(this, StatementDoesNotExits.prototype);
   }
 
@@ -157,8 +139,6 @@ class TerritoryDoesNotExits extends Error {
 
   constructor(m: string) {
     super(m);
-
-    // Set the prototype explicitly.
     Object.setPrototypeOf(this, TerritoryDoesNotExits.prototype);
   }
 
@@ -176,8 +156,6 @@ class TerritoriesBrokenError extends Error {
 
   constructor(m: string) {
     super(m);
-
-    // Set the prototype explicitly.
     Object.setPrototypeOf(this, TerritoriesBrokenError.prototype);
   }
 
@@ -195,8 +173,6 @@ class TerrytoryInvalidMove extends Error {
 
   constructor(m: string) {
     super(m);
-
-    // Set the prototype explicitly.
     Object.setPrototypeOf(this, TerrytoryInvalidMove.prototype);
   }
 
@@ -214,8 +190,6 @@ class StatementInvalidMove extends Error {
 
   constructor(m: string) {
     super(m);
-
-    // Set the prototype explicitly.
     Object.setPrototypeOf(this, StatementInvalidMove.prototype);
   }
 
@@ -225,6 +199,40 @@ class StatementInvalidMove extends Error {
 
   toString(): string {
     return StatementInvalidMove.code;
+  }
+}
+
+class UnknownRoute extends Error {
+  public static code = "unknown route";
+
+  constructor(m: string) {
+    super(m);
+    Object.setPrototypeOf(this, UnknownRoute.prototype);
+  }
+
+  statusCode(): number {
+    return 404;
+  }
+
+  toString(): string {
+    return UnknownRoute.code;
+  }
+}
+
+class InternalServerError extends Error {
+  public static code = "internal server error";
+
+  constructor(m: string) {
+    super(m);
+    Object.setPrototypeOf(this, InternalServerError.prototype);
+  }
+
+  statusCode(): number {
+    return 500;
+  }
+
+  toString(): string {
+    return InternalServerError.code;
   }
 }
 
@@ -254,6 +262,8 @@ export default errors;
 */
 
 export {
+  InternalServerError,
+  UnknownRoute,
   ModelNotValidError,
   BadCredentialsError,
   NotFound,

@@ -167,14 +167,10 @@ export default Router()
         // this is not required if moving under new parent
         const currentIndex = childs.findIndex((ter) => ter.id === moveId);
         if (currentIndex === -1) {
-          throw new TerrytoryInvalidMove(
-            "cannot move territory- moveId not found in array of childs"
-          );
+          throw new TerrytoryInvalidMove("territory not found in the array");
         }
         if (currentIndex === newIndex) {
-          out.result = false;
-          out.errors = ["already on the new index"];
-          return out;
+          throw new TerrytoryInvalidMove("already on the position");
         }
         childs.splice(currentIndex, 1);
       }

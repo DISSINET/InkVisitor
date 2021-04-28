@@ -1,10 +1,10 @@
 import "@modules/common.test";
-import { BadParams, StatementDoesNotExits } from "@common/errors";
+import { BadParams, StatementDoesNotExits } from "@shared/types/errors";
 import request from "supertest";
 import { supertestConfig } from "..";
 import { apiPath } from "../../common/constants";
 import app from "../../Server";
-import { IResponseStatement, IStatement } from "@shared/types";
+import { IResponseStatement } from "@shared/types";
 import { Db } from "@service/RethinkDB";
 import { createActant } from "@service/shorthands";
 import { ActantType } from "@shared/enums";
