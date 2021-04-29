@@ -1,27 +1,27 @@
-import "@modules/common.test";
-import { BadParams, UserDoesNotExits } from "@common/errors";
+import { testErroneousResponse } from "@modules/common.test";
+import { BadParams, UserDoesNotExits } from "@shared/types/errors";
 import request from "supertest";
 import { apiPath } from "../../common/constants";
 import app from "../../Server";
 
 describe("Users signin", function () {
   describe("Empty body", () => {
-    it("should return a 400 code with BadParams error", (done) => {
+    it("should return a UserDoesNotExits error wrapped in IResponseGeneric", (done) => {
       return request(app)
         .post(`${apiPath}/users/signin`)
         .expect("Content-Type", /json/)
-        .expect({ error: new BadParams("whatever").toString() })
-        .expect(400, done);
+        .expect(testErroneousResponse.bind(undefined, new BadParams("")))
+        .then(() => done());
     });
   });
   describe("Ok body with faulty params ", () => {
-    it("should return a 400 code with UserDoesNotExits error", (done) => {
+    it("should return a UserDoesNotExits error wrapped in IResponseGeneric", (done) => {
       return request(app)
         .post(`${apiPath}/users/signin`)
         .send({ username: "fake", password: "fake" })
         .expect("Content-Type", /json/)
-        .expect({ error: new UserDoesNotExits("whatever").toString() })
-        .expect(400, done);
+        .expect(testErroneousResponse.bind(undefined, new UserDoesNotExits("")))
+        .then(() => done());
     });
   });
   describe("Ok body with ok user", () => {

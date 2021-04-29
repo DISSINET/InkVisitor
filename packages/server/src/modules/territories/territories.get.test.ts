@@ -1,5 +1,5 @@
-import { expect } from "@modules/common.test";
-import { BadParams, TerritoryDoesNotExits } from "@common/errors";
+import { expect, testErroneousResponse } from "@modules/common.test";
+import { BadParams, TerritoryDoesNotExits } from "@shared/types/errors";
 import { Db } from "@service/RethinkDB";
 import { createActant, deleteActant } from "@service/shorthands";
 import Territory from "@models/territory";
@@ -11,21 +11,23 @@ import { supertestConfig } from "..";
 
 describe("Territories get", function () {
   describe("Empty param", () => {
-    it("should return a 400 code with BadParams error", (done) => {
+    it("should return a BadParams error wrapped in IResponseGeneric", (done) => {
       return request(app)
         .get(`${apiPath}/territories/get`)
         .set("authorization", "Bearer " + supertestConfig.token)
-        .expect({ error: new BadParams("whatever").toString() })
-        .expect(400, done);
+        .expect(testErroneousResponse.bind(undefined, new BadParams("")))
+        .then(() => done());
     });
   });
   describe("Wrong param", () => {
-    it("should return a 400 code with TerritoryDoesNotExits error", (done) => {
+    it("should return a TerritoryDoesNotExits error wrapped in IResponseGeneric", (done) => {
       return request(app)
         .get(`${apiPath}/territories/get/123`)
         .set("authorization", "Bearer " + supertestConfig.token)
-        .expect({ error: new TerritoryDoesNotExits("whatever").toString() })
-        .expect(400, done);
+        .expect(
+          testErroneousResponse.bind(undefined, new TerritoryDoesNotExits(""))
+        )
+        .then(() => done());
     });
   });
   describe("Correct param", () => {

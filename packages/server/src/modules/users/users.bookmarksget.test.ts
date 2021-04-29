@@ -1,33 +1,34 @@
-import { expect } from "@modules/common.test";
-import { BadParams, UserDoesNotExits } from "@common/errors";
+import { expect, testErroneousResponse } from "@modules/common.test";
+import { BadParams, UserDoesNotExits } from "@shared/types/errors";
 import request from "supertest";
 import { apiPath } from "../../common/constants";
 import app from "../../Server";
 import {
   createActant,
   createUser,
-  findActantById,
   getActantUsage,
 } from "../../service/shorthands";
 import { Db } from "@service/RethinkDB";
-import { getOneActant } from "..";
 import Statement from "@models/statement";
+import { supertestConfig } from "..";
 
 describe("Users bookmarksGet", function () {
   describe("Empty param", () => {
-    it("should return a 400 code with BadParams error", (done) => {
+    it("should return a BadParams error wrapped in IResponseGeneric", (done) => {
       return request(app)
         .get(`${apiPath}/users/bookmarksGet`)
-        .expect({ error: new BadParams("whatever").toString() })
-        .expect(400, done);
+        .set("authorization", "Bearer " + supertestConfig.token)
+        .expect(testErroneousResponse.bind(undefined, new BadParams("")))
+        .then(() => done());
     });
   });
   describe("Wrong param", () => {
-    it("should return a 400 code with UserDoesNotExits error", (done) => {
+    it("should return a UserDoesNotExits error wrapped in IResponseGeneric", (done) => {
       return request(app)
         .get(`${apiPath}/users/bookmarksGet/123`)
-        .expect({ error: new UserDoesNotExits("whatever").toString() })
-        .expect(400, done);
+        .set("authorization", "Bearer " + supertestConfig.token)
+        .expect(testErroneousResponse.bind(undefined, new UserDoesNotExits("")))
+        .then(() => done());
     });
   });
   describe("Correct param with nonexistent actant", () => {
@@ -53,6 +54,7 @@ describe("Users bookmarksGet", function () {
 
       request(app)
         .get(`${apiPath}/users/bookmarksGet/${testUserId}`)
+        .set("authorization", "Bearer " + supertestConfig.token)
         .expect((res) => {
           res.body.should.not.empty;
           res.body.should.be.a("object");
@@ -97,6 +99,7 @@ describe("Users bookmarksGet", function () {
       const bookmarkCountUsage = await getActantUsage(db, testId);
       request(app)
         .get(`${apiPath}/users/bookmarksGet/${testId}`)
+        .set("authorization", "Bearer " + supertestConfig.token)
         .expect((res) => {
           res.body.should.not.empty;
           res.body.should.be.a("object");
