@@ -240,6 +240,27 @@ export interface IError extends Error {
   statusCode(): number;
 }
 
+class UnauthorizedError extends Error {
+  public static code = "unauthorized";
+
+  constructor(m: string) {
+    super(m);
+    Object.setPrototypeOf(this, UnauthorizedError.prototype);
+  }
+
+  statusCode(): number {
+    return 401;
+  }
+
+  toString(): string {
+    return UnauthorizedError.code;
+  }
+}
+
+export interface IError extends Error {
+  statusCode(): number;
+}
+
 /*
 type filterMap = Record<string, new (description: string) => IError>;
 
@@ -262,6 +283,7 @@ export default errors;
 */
 
 export {
+  UnauthorizedError,
   InternalServerError,
   UnknownRoute,
   ModelNotValidError,

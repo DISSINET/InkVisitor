@@ -1,13 +1,13 @@
 import morgan from "morgan";
 import helmet from "helmet";
-import { IError, InternalServerError } from "@shared/types/errors";
+import {
+  IError,
+  InternalServerError,
+  UnknownRoute,
+  UnauthorizedError,
+} from "@shared/types/errors";
 import express, { Request, Response, NextFunction, Router } from "express";
 import cors from "cors";
-import {
-  BAD_REQUEST,
-  NOT_FOUND,
-  INTERNAL_SERVER_ERROR,
-} from "http-status-codes";
 import logger from "@common/Logger";
 import { apiPath } from "./common/constants";
 import ActantsRouter from "@modules/actants";
@@ -41,11 +41,11 @@ server.get("/health", function (req, res) {
 });
 
 import { validateJwt } from "@common/auth";
-import { UnauthorizedError } from "express-jwt";
+import { UnauthorizedError as JwtUnauthorizedError } from "express-jwt";
 import { IResponseGeneric, errorTypes } from "@shared/types/response-generic";
 
 // uncomment this to enable auth
-server.use(validateJwt().unless({ path: [/api\/v1\/users/] }));
+server.use(validateJwt().unless({ path: [/api\/v1\/users\/signin/] }));
 
 // Routing
 const routerV1 = Router();
@@ -61,31 +61,45 @@ routerV1.use("/meta", MetaRouter);
 routerV1.use("/statements", StatementsRouter);
 routerV1.use("/tree", TreeRouter);
 
+export const unknownRouteError = new UnknownRoute("route does not exist");
+export const unauthorizedError = new UnauthorizedError("unauthorized");
+export const internalServerError = new InternalServerError(
+  "unknown error occured"
+);
+
 // unknown paths (after jwt check) should return 404
 server.all("*", function (req, res, next) {
   const genericResponse: IResponseGeneric = {
     result: false,
-    error: "UnknownRoute",
+    error: unknownRouteError.constructor.name as errorTypes,
+    message: unknownRouteError.message,
   };
 
-  res.status(NOT_FOUND).json(genericResponse);
+  res.status(unknownRouteError.statusCode()).json(genericResponse);
 });
 
 // Errors
 server.use(
   (err: IError | Error, req: Request, res: Response, next: NextFunction) => {
+    // should expect customized errors, unknown unhandled errors, or errors thrown from some lib
     const isCustomError = typeof (err as IError).statusCode === "function";
-    if (!isCustomError && !(err instanceof UnauthorizedError)) {
-      logger.error(err.message, err);
-    }
 
     if (!isCustomError) {
-      err = new InternalServerError("unknown error occured");
+      if (err instanceof JwtUnauthorizedError) {
+        // customized unauthorized error
+        err = unauthorizedError;
+      } else {
+        // unknown unhandled error - should log the message
+        logger.error(err.message, err);
+        err = internalServerError;
+      }
     }
 
+    // in any case, the error should be wrapper in IResponseGeneric
     const genericResponse: IResponseGeneric = {
       result: false,
       error: err.constructor.name as errorTypes,
+      message: err.message,
     };
 
     return res.status((err as IError).statusCode()).json(genericResponse);
