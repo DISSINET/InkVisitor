@@ -11,6 +11,7 @@ import {
   BadParams,
   ActantDoesNotExits,
   ModelNotValidError,
+  InternalServerError,
 } from "@shared/types/errors";
 import { IActant, IResponseDetail, IResponseGeneric } from "@shared/types";
 
@@ -64,10 +65,7 @@ export default Router()
           result: true,
         };
       } else {
-        return {
-          result: false,
-          errors: result.first_error ? [result.first_error] : [],
-        };
+        throw new InternalServerError("cannot create actant");
       }
     })
   )
@@ -115,10 +113,7 @@ export default Router()
           result: true,
         };
       } else {
-        return {
-          result: false,
-          errors: result.first_error ? [result.first_error] : [],
-        };
+        throw new InternalServerError(`cannot update actant ${actantId}`);
       }
     })
   )
@@ -157,10 +152,7 @@ export default Router()
           result: true,
         };
       } else {
-        return {
-          result: false,
-          errors: result.first_error ? [result.first_error] : [],
-        };
+        throw new InternalServerError(`cannot delete actant ${actantId}`);
       }
     })
   )

@@ -16,6 +16,7 @@ import {
 import {
   BadCredentialsError,
   BadParams,
+  InternalServerError,
   UserDoesNotExits,
 } from "@shared/types/errors";
 import { checkPassword, generateAccessToken, hashPassword } from "@common/auth";
@@ -108,10 +109,7 @@ export default Router()
           result: true,
         };
       } else {
-        return {
-          result: false,
-          errors: result.first_error ? [result.first_error] : [],
-        };
+        throw new InternalServerError("cannot create user");
       }
     })
   )
@@ -143,6 +141,11 @@ export default Router()
         userData.password = hashPassword(userData.password);
       }
 
+      const existingUser = await findUserById(request.db, userId);
+      if (!existingUser) {
+        throw new UserDoesNotExits(`user with id ${userId} does not exist`);
+      }
+
       const result = await updateUser(request.db, userId, userData);
 
       if (result.replaced) {
@@ -150,10 +153,7 @@ export default Router()
           result: true,
         };
       } else {
-        return {
-          result: false,
-          errors: result.first_error ? [result.first_error] : [],
-        };
+        throw new InternalServerError(`cannot update user ${userId}`);
       }
     })
   )
@@ -166,6 +166,11 @@ export default Router()
         throw new BadParams("user id has to be set");
       }
 
+      const existingUser = await findUserById(request.db, userId);
+      if (!existingUser) {
+        throw new UserDoesNotExits(`user with id ${userId} does not exist`);
+      }
+
       const result = await deleteUser(request.db, userId);
 
       if (result.deleted === 1) {
@@ -175,7 +180,8 @@ export default Router()
       } else {
         return {
           result: false,
-          errors: result.first_error ? [result.first_error] : [],
+          error: "InternalServerError",
+          message: `user ${userId} could not be removed`,
         };
       }
     })

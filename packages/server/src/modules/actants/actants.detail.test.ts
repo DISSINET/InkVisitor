@@ -1,4 +1,4 @@
-import { expect } from "@modules/common.test";
+import { clean, expect, testErroneousResponse } from "@modules/common.test";
 import { ActantDoesNotExits, BadParams } from "@shared/types/errors";
 import request from "supertest";
 import { supertestConfig } from "..";
@@ -9,21 +9,23 @@ import Statement from "@models/statement";
 
 describe("Actants detail", function () {
   describe("Empty param", () => {
-    it("should return a 400 code with BadParams error", (done) => {
+    it("should return a BadParams error wrapped in IResponseGeneric", (done) => {
       return request(app)
         .get(`${apiPath}/actants/detail`)
         .set("authorization", "Bearer " + supertestConfig.token)
-        .expect({ error: new BadParams("whatever").toString() })
-        .expect(400, done);
+        .expect(testErroneousResponse.bind(undefined, new BadParams("")))
+        .then(() => done());
     });
   });
   describe("Wrong param", () => {
-    it("should return a 400 code with ActantDoesNotExits error", (done) => {
+    it("should return a ActantDoesNotExits error wrapped in IResponseGeneric", (done) => {
       return request(app)
         .get(`${apiPath}/actants/detail/123`)
         .set("authorization", "Bearer " + supertestConfig.token)
-        .expect({ error: new ActantDoesNotExits("whatever").toString() })
-        .expect(400, done);
+        .expect(
+          testErroneousResponse.bind(undefined, new ActantDoesNotExits(""))
+        )
+        .then(() => done());
     });
   });
   describe("Correct param", () => {
@@ -43,7 +45,7 @@ describe("Actants detail", function () {
 
       await actantData.save(db.connection);
 
-      request(app)
+      await request(app)
         .get(`${apiPath}/actants/detail/${statementRandomId}`)
         .set("authorization", "Bearer " + supertestConfig.token)
         .expect(200)
@@ -51,8 +53,10 @@ describe("Actants detail", function () {
           res.body.should.not.empty;
           res.body.should.be.a("object");
           expect(res.body.id).eq(statementRandomId);
-        })
-        .then(() => done());
+        });
+
+      await clean(db);
+      done();
     });
   });
 });

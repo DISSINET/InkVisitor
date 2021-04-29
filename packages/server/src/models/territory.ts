@@ -3,6 +3,7 @@ import { ITerritory, IParentTerritory } from "@shared/types/territory";
 import { r as rethink, Connection, WriteResult } from "rethinkdb-ts";
 import { fillFlatObject, UnknownObject, IModel } from "./common";
 import Actant from "./actant";
+import { InvalidDeleteError } from "@shared/types/errors";
 
 export class TerritoryParent implements IParentTerritory, IModel {
   id = "";
@@ -107,12 +108,14 @@ class Territory extends Actant implements ITerritory {
 
   async delete(db: Connection | undefined): Promise<WriteResult> {
     if (!this.id) {
-      throw new Error("delete called on territory with undefined id");
+      throw new InvalidDeleteError(
+        "delete called on territory with undefined id"
+      );
     }
 
     const childs = await this.findChilds(db);
     if (childs.length) {
-      throw new Error("cannot delete territory with childs");
+      throw new InvalidDeleteError("cannot delete territory with childs");
     }
 
     return super.delete(db);

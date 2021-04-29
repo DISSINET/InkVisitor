@@ -176,7 +176,13 @@ export async function findActantsByLabelOrClass(
         tests.push(actant("class").match(classParam));
       }
 
-      return rethink.and(tests as any);
+      if (!tests.length) {
+        return null;
+      } else if (tests.length === 1) {
+        return rethink.and(tests[0]);
+      } else {
+        return rethink.and(tests[0], tests[1]);
+      }
     })
     .run(db.connection);
   return data;

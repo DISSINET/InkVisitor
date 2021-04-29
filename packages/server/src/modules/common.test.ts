@@ -7,6 +7,8 @@ import { Db } from "@service/RethinkDB";
 import { createActant, deleteActants } from "@service/shorthands";
 import Statement from "@models/statement";
 import Territory from "@models/territory";
+import { IError } from "@shared/types/errors";
+import { errorTypes } from "@shared/types/response-generic";
 
 export const expect = chai.expect;
 export const should = chai.should();
@@ -19,16 +21,21 @@ export const successfulGenericResponse: IResponseGeneric = {
   result: true,
 };
 
-export const faultyGenericResponse: IResponseGeneric = {
-  result: false,
-  error: "InternalServerError",
-};
-
-export const testFaultyMessage = (res: supertest.Response): void => {
-  res.body.should.have.keys(Object.keys(faultyGenericResponse));
-  res.body.result.should.be.false;
-  res.body.errors.should.be.an("array");
-};
+export function testErroneousResponse(
+  expectedErrorClass: IError,
+  res: Response
+): void {
+  const expectedType: IResponseGeneric = {
+    result: false,
+    error: expectedErrorClass.constructor.name as errorTypes,
+    message: "",
+    // message not important
+  };
+  expect(res.status).to.be.eq(expectedErrorClass.statusCode());
+  expect(res.body).keys(expectedType);
+  expect((res.body as any).result).to.be.eq(expectedType.result);
+  expect((res.body as any).error).to.be.eq(expectedType.error);
+}
 
 function getRandomFromArray<T>(input: T[]): T {
   return input[Math.floor(Math.random() * input.length)];

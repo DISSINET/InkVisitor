@@ -1,4 +1,8 @@
-import { clean, successfulGenericResponse } from "@modules/common.test";
+import {
+  clean,
+  successfulGenericResponse,
+  testErroneousResponse,
+} from "@modules/common.test";
 import { BadParams } from "@shared/types/errors";
 import request from "supertest";
 import { apiPath } from "../../common/constants";
@@ -6,7 +10,6 @@ import app from "../../Server";
 import { supertestConfig } from "..";
 import Statement from "@models/statement";
 import {
-  deleteActant,
   deleteActants,
   findActantById,
   findActants,
@@ -17,24 +20,24 @@ import "ts-jest";
 
 describe("Actants create", function () {
   describe("empty data", () => {
-    it("should return a 400 code with BadParams error", (done) => {
+    it("should return a BadParams error wrapped in IResponseGeneric", (done) => {
       return request(app)
         .post(`${apiPath}/actants/create`)
         .set("authorization", "Bearer " + supertestConfig.token)
         .expect("Content-Type", /json/)
-        .expect({ error: new BadParams("whatever").toString() })
-        .expect(400, done);
+        .expect(testErroneousResponse.bind(undefined, new BadParams("")))
+        .then(() => done());
     });
   });
   describe("faulty data ", () => {
-    it("should return a 400 code with BadParams error", (done) => {
+    it("should return a BadParams error wrapped in IResponseGeneric", (done) => {
       return request(app)
         .post(`${apiPath}/actants/create`)
         .send({ test: "" })
         .set("authorization", "Bearer " + supertestConfig.token)
         .expect("Content-Type", /json/)
-        .expect({ error: new BadParams("whatever").toString() })
-        .expect(400, done);
+        .expect(testErroneousResponse.bind(undefined, new BadParams("")))
+        .then(() => done());
     });
   });
   describe("ok statement data", () => {
@@ -58,9 +61,10 @@ describe("Actants create", function () {
         .set("authorization", "Bearer " + supertestConfig.token)
         .expect(200)
         .expect("Content-Type", /json/)
-        .expect(successfulGenericResponse)
-        .then(() => deleteActant(db, statementRandomId))
-        .then(() => done());
+        .expect(successfulGenericResponse);
+
+      await clean(db);
+      done();
     });
   });
   describe("create territory data with predefined id", () => {

@@ -261,6 +261,27 @@ export interface IError extends Error {
   statusCode(): number;
 }
 
+class InvalidDeleteError extends Error {
+  public static code = "invalid delete";
+
+  constructor(m: string) {
+    super(m);
+    Object.setPrototypeOf(this, InvalidDeleteError.prototype);
+  }
+
+  statusCode(): number {
+    return 400;
+  }
+
+  toString(): string {
+    return InvalidDeleteError.code;
+  }
+}
+
+export interface IError extends Error {
+  statusCode(): number;
+}
+
 /*
 type filterMap = Record<string, new (description: string) => IError>;
 
@@ -283,6 +304,7 @@ export default errors;
 */
 
 export {
+  InvalidDeleteError,
   UnauthorizedError,
   InternalServerError,
   UnknownRoute,
