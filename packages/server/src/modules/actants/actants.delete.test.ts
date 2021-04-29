@@ -1,5 +1,9 @@
-import { should, clean } from "@modules/common.test";
-import { ActantDoesNotExits, BadParams } from "@shared/types/errors";
+import { should, clean, testErroneousResponse } from "@modules/common.test";
+import {
+  ActantDoesNotExits,
+  BadParams,
+  InvalidDeleteError,
+} from "@shared/types/errors";
 import { Db } from "@service/RethinkDB";
 import request from "supertest";
 import { apiPath } from "../../common/constants";
@@ -11,23 +15,25 @@ import Territory from "@models/territory";
 
 describe("Actants delete", function () {
   describe("empty data", () => {
-    it("should return a 400 code with BadParams error", (done) => {
+    it("should return a BadParams error wrapped in IResponseGeneric", (done) => {
       return request(app)
         .delete(`${apiPath}/actants/delete`)
         .set("authorization", "Bearer " + supertestConfig.token)
         .expect("Content-Type", /json/)
-        .expect({ error: new BadParams("whatever").toString() })
-        .expect(400, done);
+        .expect(testErroneousResponse.bind(undefined, new BadParams("")))
+        .then(() => done());
     });
   });
   describe("faulty data", () => {
-    it("should return a 200 code with unsuccessful message", (done) => {
+    it("should return a ActantDoesNotExits error wrapped in IResponseGeneric", (done) => {
       return request(app)
         .delete(`${apiPath}/actants/delete/randomid12345`)
         .set("authorization", "Bearer " + supertestConfig.token)
         .expect("Content-Type", /json/)
-        .expect({ error: new ActantDoesNotExits("").toString() })
-        .expect(400, done);
+        .expect(
+          testErroneousResponse.bind(undefined, new ActantDoesNotExits(""))
+        )
+        .then(() => done());
     });
   });
   describe("ok data", () => {
@@ -37,7 +43,7 @@ describe("Actants delete", function () {
       const territory = new Territory({});
       await territory.save(db.connection);
 
-      request(app)
+      await request(app)
         .delete(`${apiPath}/actants/delete/${territory.id}`)
         .set("authorization", "Bearer " + supertestConfig.token)
         .expect("Content-Type", /json/)
@@ -45,13 +51,15 @@ describe("Actants delete", function () {
         .expect(async () => {
           const deletedActant = await findActantById<IActant>(db, territory.id);
           should.not.exist(deletedActant);
-        })
-        .then(() => done());
+        });
+
+      await clean(db);
+      done();
     });
   });
 
   describe("territory with childs", () => {
-    it("should return a 400 code", async (done) => {
+    it("should return an InvalidDeleteError error wrapped in IResponseGeneric", async (done) => {
       const db = new Db();
       await db.initDb();
       const root = new Territory({});
@@ -63,7 +71,9 @@ describe("Actants delete", function () {
         .delete(`${apiPath}/actants/delete/${root.id}`)
         .set("authorization", "Bearer " + supertestConfig.token)
         .expect("Content-Type", /json/)
-        .expect(400);
+        .expect(
+          testErroneousResponse.bind(undefined, new InvalidDeleteError(""))
+        );
 
       await clean(db);
       done();

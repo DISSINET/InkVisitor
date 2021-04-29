@@ -1,4 +1,4 @@
-import "@modules/common.test";
+import { clean, testErroneousResponse } from "@modules/common.test";
 import { ActantDoesNotExits, BadParams } from "@shared/types/errors";
 import request from "supertest";
 import { supertestConfig } from "..";
@@ -9,21 +9,23 @@ import { Db } from "@service/RethinkDB";
 
 describe("Actants get method", function () {
   describe("Empty param", () => {
-    it("should return a 400 code with BadParams error", (done) => {
+    it("should return a BadParams error wrapped in IResponseGeneric", (done) => {
       return request(app)
         .get(`${apiPath}/actants/get`)
         .set("authorization", "Bearer " + supertestConfig.token)
-        .expect({ error: new BadParams("whatever").toString() })
-        .expect(400, done);
+        .expect(testErroneousResponse.bind(undefined, new BadParams("")))
+        .then(() => done());
     });
   });
   describe("Wrong param", () => {
-    it("should return a 400 code with ActantDoesNotExits error", (done) => {
+    it("should return an ActantDoesNotExits error wrapped in IResponseGeneric", (done) => {
       return request(app)
         .get(`${apiPath}/actants/get/123`)
         .set("authorization", "Bearer " + supertestConfig.token)
-        .expect({ error: new ActantDoesNotExits("whatever").toString() })
-        .expect(400, done);
+        .expect(
+          testErroneousResponse.bind(undefined, new ActantDoesNotExits(""))
+        )
+        .then(() => done());
     });
   });
   describe("Correct param", () => {
@@ -43,7 +45,7 @@ describe("Actants get method", function () {
 
       await actantData.save(db.connection);
 
-      request(app)
+      await request(app)
         .get(`${apiPath}/actants/get/${statementRandomId}`)
         .set("authorization", "Bearer " + supertestConfig.token)
         .expect(200)
@@ -51,8 +53,10 @@ describe("Actants get method", function () {
           res.body.should.not.empty;
           res.body.should.be.a("object");
           res.body.id.should.not.empty;
-        })
-        .then(() => done());
+        });
+
+      await clean(db);
+      done();
     });
   });
 });

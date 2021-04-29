@@ -8,7 +8,11 @@ import {
   updateAction,
   deleteAction,
 } from "@service/shorthands";
-import { BadParams, ActionDoesNotExits } from "@shared/types/errors";
+import {
+  BadParams,
+  ActionDoesNotExits,
+  InternalServerError,
+} from "@shared/types/errors";
 import { asyncRouteHandler } from "..";
 
 export default Router()
@@ -73,10 +77,7 @@ export default Router()
           result: true,
         };
       } else {
-        return {
-          result: false,
-          errors: result.first_error ? [result.first_error] : [],
-        };
+        throw new InternalServerError("cannot create action");
       }
     })
   )
@@ -106,6 +107,11 @@ export default Router()
         }
       }
 
+      const existingAction = await findActionById(request.db, actionId);
+      if (!existingAction) {
+        throw new ActionDoesNotExits(`action ${actionId} does not exist`);
+      }
+
       const result = await updateAction(request.db, actionId, actionData);
 
       if (result.replaced) {
@@ -113,10 +119,7 @@ export default Router()
           result: true,
         };
       } else {
-        return {
-          result: false,
-          errors: result.first_error ? [result.first_error] : [],
-        };
+        throw new InternalServerError(`cannot update action ${actionId}`);
       }
     })
   )
@@ -129,6 +132,11 @@ export default Router()
         throw new BadParams("action id has to be set");
       }
 
+      const existingAction = await findActionById(request.db, actionId);
+      if (!existingAction) {
+        throw new ActionDoesNotExits(`action ${actionId} does not exist`);
+      }
+
       const result = await deleteAction(request.db, actionId);
 
       if (result.deleted === 1) {
@@ -136,10 +144,7 @@ export default Router()
           result: true,
         };
       } else {
-        return {
-          result: false,
-          errors: result.first_error ? [result.first_error] : [],
-        };
+        throw new InternalServerError(`cannot remove action ${actionId}`);
       }
     })
   );
