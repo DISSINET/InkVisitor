@@ -1,5 +1,5 @@
-import "@modules/common.test";
-import { BadParams } from "@common/errors";
+import { testErroneousResponse } from "@modules/common.test";
+import { ActionDoesNotExits, BadParams } from "@shared/types/errors";
 import request from "supertest";
 import { apiPath } from "../../common/constants";
 import app from "../../Server";
@@ -9,24 +9,37 @@ import { createAction, findActionById } from "@service/shorthands";
 
 describe("Actions update", function () {
   describe("empty data", () => {
-    it("should return a 400 code with BadParams error", (done) => {
+    it("should return a BadParams error wrapper in IResponseGeneric", (done) => {
       return request(app)
         .put(`${apiPath}/actions/update/1`)
         .set("authorization", "Bearer " + supertestConfig.token)
         .expect("Content-Type", /json/)
-        .expect({ error: new BadParams("whatever").toString() })
-        .expect(400, done);
+        .expect(testErroneousResponse.bind(undefined, new BadParams("")))
+        .then(() => done());
     });
   });
-  describe("faulty data ", () => {
-    it("should return a 400 code with BadParams error", (done) => {
+  describe("faulty data", () => {
+    it("should return a BadParams error wrapper in IResponseGeneric", (done) => {
       return request(app)
         .put(`${apiPath}/actions/update/1`)
         .send({ test: "" })
         .set("authorization", "Bearer " + supertestConfig.token)
         .expect("Content-Type", /json/)
-        .expect({ error: new BadParams("whatever").toString() })
-        .expect(400, done);
+        .expect(testErroneousResponse.bind(undefined, new BadParams("")))
+        .then(() => done());
+    });
+  });
+  describe("not existing action", () => {
+    it("should return a BadParams error wrapper in IResponseGeneric", (done) => {
+      return request(app)
+        .put(`${apiPath}/actions/update/21e4232e23231`)
+        .send({ note: "" })
+        .set("authorization", "Bearer " + supertestConfig.token)
+        .expect("Content-Type", /json/)
+        .expect(
+          testErroneousResponse.bind(undefined, new ActionDoesNotExits(""))
+        )
+        .then(() => done());
     });
   });
   describe("ok data", () => {

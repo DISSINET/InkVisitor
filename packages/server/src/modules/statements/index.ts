@@ -1,7 +1,7 @@
 import { Request } from "express";
 import { Router } from "express";
 import { findActantById } from "@service/shorthands";
-import { BadParams, StatementDoesNotExits } from "@common/errors";
+import { BadParams, StatementDoesNotExits } from "@shared/types/errors";
 import { asyncRouteHandler } from "..";
 import { IResponseStatement, IStatement, IActant } from "@shared/types";
 import { getActantIdsFromStatements } from "@shared/types/statement";

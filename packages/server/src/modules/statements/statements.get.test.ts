@@ -1,10 +1,10 @@
-import "@modules/common.test";
-import { BadParams, StatementDoesNotExits } from "@common/errors";
+import { testErroneousResponse } from "@modules/common.test";
+import { BadParams, StatementDoesNotExits } from "@shared/types/errors";
 import request from "supertest";
 import { supertestConfig } from "..";
 import { apiPath } from "../../common/constants";
 import app from "../../Server";
-import { IResponseStatement, IStatement } from "@shared/types";
+import { IResponseStatement } from "@shared/types";
 import { Db } from "@service/RethinkDB";
 import { createActant } from "@service/shorthands";
 import { ActantType } from "@shared/enums";
@@ -43,22 +43,22 @@ const testValidStatement = (res: any) => {
 
 describe("Statements get", function () {
   describe("Empty param", () => {
-    it("should return a 400 code with BadParams error", (done) => {
+    it("should return a BadParams error wrapped in IResponseGeneric", (done) => {
       return request(app)
         .get(`${apiPath}/statements/get`)
         .set("authorization", "Bearer " + supertestConfig.token)
-        .expect(400)
-        .expect({ error: new BadParams("whatever").toString() })
+        .expect(testErroneousResponse.bind(undefined, new BadParams("")))
         .then(() => done());
     });
   });
   describe("Wrong param", () => {
-    it("should return a 400 code with ActantDoesNotExits error", (done) => {
+    it("should return a StatementDoesNotExits error wrapped in IResponseGeneric", (done) => {
       return request(app)
         .get(`${apiPath}/statements/get/invalidId12345`)
         .set("authorization", "Bearer " + supertestConfig.token)
-        .expect(400)
-        .expect({ error: new StatementDoesNotExits("whatever").toString() })
+        .expect(
+          testErroneousResponse.bind(undefined, new StatementDoesNotExits(""))
+        )
         .then(() => done());
     });
   });

@@ -3,8 +3,6 @@ class BadCredentialsError extends Error {
 
   constructor(m: string) {
     super(m);
-
-    // Set the prototype explicitly.
     Object.setPrototypeOf(this, BadCredentialsError.prototype);
   }
 
@@ -22,8 +20,6 @@ class ModelNotValidError extends Error {
 
   constructor(m: string) {
     super(m);
-
-    // Set the prototype explicitly.
     Object.setPrototypeOf(this, ModelNotValidError.prototype);
   }
 
@@ -41,8 +37,6 @@ class NotFound extends Error {
 
   constructor(m: string) {
     super(m);
-
-    // Set the prototype explicitly.
     Object.setPrototypeOf(this, NotFound.prototype);
   }
 
@@ -60,8 +54,6 @@ class BadParams extends Error {
 
   constructor(m: string) {
     super(m);
-
-    // Set the prototype explicitly.
     Object.setPrototypeOf(this, BadParams.prototype);
   }
 
@@ -79,8 +71,6 @@ class UserDoesNotExits extends Error {
 
   constructor(m: string) {
     super(m);
-
-    // Set the prototype explicitly.
     Object.setPrototypeOf(this, UserDoesNotExits.prototype);
   }
 
@@ -98,8 +88,6 @@ class ActantDoesNotExits extends Error {
 
   constructor(m: string) {
     super(m);
-
-    // Set the prototype explicitly.
     Object.setPrototypeOf(this, ActantDoesNotExits.prototype);
   }
 
@@ -117,8 +105,6 @@ class ActionDoesNotExits extends Error {
 
   constructor(m: string) {
     super(m);
-
-    // Set the prototype explicitly.
     Object.setPrototypeOf(this, ActionDoesNotExits.prototype);
   }
 
@@ -136,8 +122,6 @@ class StatementDoesNotExits extends Error {
 
   constructor(m: string) {
     super(m);
-
-    // Set the prototype explicitly.
     Object.setPrototypeOf(this, StatementDoesNotExits.prototype);
   }
 
@@ -155,8 +139,6 @@ class TerritoryDoesNotExits extends Error {
 
   constructor(m: string) {
     super(m);
-
-    // Set the prototype explicitly.
     Object.setPrototypeOf(this, TerritoryDoesNotExits.prototype);
   }
 
@@ -174,8 +156,6 @@ class TerritoriesBrokenError extends Error {
 
   constructor(m: string) {
     super(m);
-
-    // Set the prototype explicitly.
     Object.setPrototypeOf(this, TerritoriesBrokenError.prototype);
   }
 
@@ -193,8 +173,6 @@ class TerrytoryInvalidMove extends Error {
 
   constructor(m: string) {
     super(m);
-
-    // Set the prototype explicitly.
     Object.setPrototypeOf(this, TerrytoryInvalidMove.prototype);
   }
 
@@ -212,8 +190,6 @@ class StatementInvalidMove extends Error {
 
   constructor(m: string) {
     super(m);
-
-    // Set the prototype explicitly.
     Object.setPrototypeOf(this, StatementInvalidMove.prototype);
   }
 
@@ -226,10 +202,112 @@ class StatementInvalidMove extends Error {
   }
 }
 
+class UnknownRoute extends Error {
+  public static code = "unknown route";
+
+  constructor(m: string) {
+    super(m);
+    Object.setPrototypeOf(this, UnknownRoute.prototype);
+  }
+
+  statusCode(): number {
+    return 404;
+  }
+
+  toString(): string {
+    return UnknownRoute.code;
+  }
+}
+
+class InternalServerError extends Error {
+  public static code = "internal server error";
+
+  constructor(m: string) {
+    super(m);
+    Object.setPrototypeOf(this, InternalServerError.prototype);
+  }
+
+  statusCode(): number {
+    return 500;
+  }
+
+  toString(): string {
+    return InternalServerError.code;
+  }
+}
+
 export interface IError extends Error {
   statusCode(): number;
 }
+
+class UnauthorizedError extends Error {
+  public static code = "unauthorized";
+
+  constructor(m: string) {
+    super(m);
+    Object.setPrototypeOf(this, UnauthorizedError.prototype);
+  }
+
+  statusCode(): number {
+    return 401;
+  }
+
+  toString(): string {
+    return UnauthorizedError.code;
+  }
+}
+
+export interface IError extends Error {
+  statusCode(): number;
+}
+
+class InvalidDeleteError extends Error {
+  public static code = "invalid delete";
+
+  constructor(m: string) {
+    super(m);
+    Object.setPrototypeOf(this, InvalidDeleteError.prototype);
+  }
+
+  statusCode(): number {
+    return 400;
+  }
+
+  toString(): string {
+    return InvalidDeleteError.code;
+  }
+}
+
+export interface IError extends Error {
+  statusCode(): number;
+}
+
+/*
+type filterMap = Record<string, new (description: string) => IError>;
+
+const errors: filterMap = {
+  ModelNotValidError,
+  BadCredentialsError,
+  NotFound,
+  BadParams,
+  UserDoesNotExits,
+  ActantDoesNotExits,
+  ActionDoesNotExits,
+  StatementDoesNotExits,
+  TerritoriesBrokenError,
+  TerritoryDoesNotExits,
+  TerrytoryInvalidMove,
+  StatementInvalidMove,
+};
+
+export default errors;
+*/
+
 export {
+  InvalidDeleteError,
+  UnauthorizedError,
+  InternalServerError,
+  UnknownRoute,
   ModelNotValidError,
   BadCredentialsError,
   NotFound,

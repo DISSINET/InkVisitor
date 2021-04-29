@@ -1,12 +1,12 @@
-import "@modules/common.test";
-import { ActionDoesNotExits, BadParams } from "@common/errors";
-import request from "supertest";
+import { testErroneousResponse } from "@modules/common.test";
+import { ActionDoesNotExits, BadParams } from "@shared/types/errors";
+import request, { Response } from "supertest";
 import { supertestConfig } from "..";
 import { apiPath } from "../../common/constants";
 import app from "../../Server";
 import { IAction } from "@shared/types";
 
-const testValidAction = (res: any) => {
+const testValidAction = (res: Response) => {
   res.body.should.not.empty;
   res.body.should.be.a("object");
   const actionExample: IAction = {
@@ -29,8 +29,8 @@ describe("Actions get", function () {
       return request(app)
         .get(`${apiPath}/actions/get`)
         .set("authorization", "Bearer " + supertestConfig.token)
-        .expect({ error: new BadParams("whatever").toString() })
-        .expect(400, done);
+        .expect(testErroneousResponse.bind(undefined, new BadParams("")))
+        .then(() => done());
     });
   });
   describe("Wrong param", () => {
@@ -38,8 +38,10 @@ describe("Actions get", function () {
       return request(app)
         .get(`${apiPath}/actions/get/invalidId12345`)
         .set("authorization", "Bearer " + supertestConfig.token)
-        .expect({ error: new ActionDoesNotExits("whatever").toString() })
-        .expect(400, done);
+        .expect(
+          testErroneousResponse.bind(undefined, new ActionDoesNotExits(""))
+        )
+        .then(() => done());
     });
   });
   describe("Correct param", () => {
@@ -47,8 +49,9 @@ describe("Actions get", function () {
       return request(app)
         .get(`${apiPath}/actions/get/A1`)
         .set("authorization", "Bearer " + supertestConfig.token)
+        .expect(200)
         .expect(testValidAction)
-        .expect(200, done);
+        .then(() => done());
     });
   });
 });
