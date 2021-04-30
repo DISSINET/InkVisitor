@@ -63,10 +63,6 @@ class StatementInvalidMove extends CustomError {
   public static code = 500;
 }
 
-class UnknownRoute extends CustomError {
-  public static code = 404;
-}
-
 class InternalServerError extends CustomError {
   public static code = 500;
 }
@@ -104,7 +100,6 @@ export {
   InvalidDeleteError,
   UnauthorizedError,
   InternalServerError,
-  UnknownRoute,
   ModelNotValidError,
   BadCredentialsError,
   NotFound,
