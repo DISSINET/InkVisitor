@@ -28,7 +28,7 @@ export const StyledLabel = styled.div<StyledLabel>`
   vertical-align: bottom;
   padding-left: ${({ theme }) => theme.space[2]};
   padding-right: ${({ theme }) => theme.space[2]};
-  padding-bottom: 0.15rem;
+  padding-bottom: 0.15rem 0;
   font-size: ${({ theme }) => theme.fontSize["sm"]};
   max-width: ${({ theme }) => theme.space[56]};
 `;

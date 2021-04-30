@@ -12,7 +12,8 @@ import { Cell } from "react-table";
 const queryString = require("query-string");
 
 import { DragItem, ItemTypes } from "types";
-import { StyledTr, StyledTd } from "./StatementListTableStyles";
+import { StatementListRowExpanded } from "./StatementListRowExpanded";
+import { StyledTr, StyledTd } from "./StatementListRowStyles";
 
 interface StatementListRow {
   row: any;
@@ -91,23 +92,26 @@ export const StatementListRow: React.FC<StatementListRow> = ({
   drag(dragRef);
 
   return (
-    <StyledTr
-      ref={dropRef}
-      opacity={opacity}
-      isOdd={Boolean(index % 2)}
-      isSelected={row.values.id === statementId}
-      onClick={() => {
-        handleClick(row.values.id);
-      }}
-    >
-      <td ref={dragRef} style={{ cursor: "move" }}>
-        <FaGripVertical />
-      </td>
-      {row.cells.map((cell: Cell) => {
-        return (
-          <StyledTd {...cell.getCellProps()}>{cell.render("Cell")}</StyledTd>
-        );
-      })}
-    </StyledTr>
+    <>
+      <StyledTr
+        ref={dropRef}
+        opacity={opacity}
+        isOdd={Boolean(index % 2)}
+        isSelected={row.values.id === statementId}
+        onClick={() => {
+          handleClick(row.values.id);
+        }}
+      >
+        <td ref={dragRef} style={{ cursor: "move" }}>
+          <FaGripVertical />
+        </td>
+        {row.cells.map((cell: Cell) => {
+          return (
+            <StyledTd {...cell.getCellProps()}>{cell.render("Cell")}</StyledTd>
+          );
+        })}
+      </StyledTr>
+      {row.isExpanded ? <StatementListRowExpanded row={row} /> : null}
+    </>
   );
 };

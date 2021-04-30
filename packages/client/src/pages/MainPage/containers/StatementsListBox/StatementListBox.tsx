@@ -75,7 +75,6 @@ export const StatementListBox: React.FC = () => {
         Header: "ID",
         accessor: "id",
       },
-
       {
         Header: "Subjects",
         accessor: "data",
@@ -174,13 +173,15 @@ export const StatementListBox: React.FC = () => {
         id: "expander",
         Cell: ({ row }: any) => (
           <ButtonGroup noMargin>
-            <Button
-              key="i"
-              icon={<FaInfo size={14} />}
-              tooltip="info"
-              color="info"
-              onClick={() => (row.isExpanded = !row.isExpanded)}
-            />
+            <span {...row.getToggleRowExpandedProps()}>
+              <Button
+                key="i"
+                icon={<FaInfo size={14} />}
+                tooltip="info"
+                color="info"
+                onClick={() => (row.isExpanded = !row.isExpanded)}
+              />
+            </span>
             {
               //<Button key="d" icon={<FaClone size={14} />} color="success" tooltip="duplicate"/>
             }
