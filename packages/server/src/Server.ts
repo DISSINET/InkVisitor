@@ -2,7 +2,7 @@ import morgan from "morgan";
 import helmet from "helmet";
 import {
   InternalServerError,
-  UnknownRoute,
+  NotFound,
   UnauthorizedError,
   CustomError,
 } from "@shared/types/errors";
@@ -61,7 +61,7 @@ routerV1.use("/meta", MetaRouter);
 routerV1.use("/statements", StatementsRouter);
 routerV1.use("/tree", TreeRouter);
 
-export const unknownRouteError = new UnknownRoute("route does not exist");
+export const unknownRouteError = new NotFound("route does not exist");
 export const unauthorizedError = new UnauthorizedError("unauthorized");
 export const internalServerError = new InternalServerError(
   "unknown error occured"
