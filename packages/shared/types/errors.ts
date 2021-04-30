@@ -1,313 +1,133 @@
-class BadCredentialsError extends Error {
-  public static code = "bad credentials";
+/**
+ * CustomError is wrapper around generic Error object, so we can implement our own logic and still use classic Error interface
+ * The changes are:
+ *   - name attribute is set explicitly in the constructor, so its value refers to the customized error class (ie. "BadCredentialsError")
+ *   - statusCode method returns static 'code' attribute from constructed class
+ */
+export class CustomError extends Error {
+  public static code: number = 400;
 
   constructor(m: string) {
     super(m);
-    Object.setPrototypeOf(this, BadCredentialsError.prototype);
+    this.name = this.constructor.name; // so the value would be taken from the constructor - not the default Error
   }
 
   statusCode(): number {
-    return 401;
-  }
-
-  toString(): string {
-    return BadCredentialsError.code;
+    return (this.constructor as any).code;
   }
 }
 
-class ModelNotValidError extends Error {
-  public static code = "model not valid";
-
-  constructor(m: string) {
-    super(m);
-    Object.setPrototypeOf(this, ModelNotValidError.prototype);
-  }
-
-  statusCode(): number {
-    return 400;
-  }
-
-  toString(): string {
-    return ModelNotValidError.code;
-  }
+/**
+ * BadCredentialsError is an error associated with invalid combination of login & password credentials
+ */
+class BadCredentialsError extends CustomError {
+  public static code = 401;
 }
 
-class NotFound extends Error {
-  public static code = "resource not found";
-
-  constructor(m: string) {
-    super(m);
-    Object.setPrototypeOf(this, NotFound.prototype);
-  }
-
-  statusCode(): number {
-    return 404;
-  }
-
-  toString(): string {
-    return NotFound.code;
-  }
+/**
+ * ModelNotValidError is thrown, when incoming raw data in the api handler cannot be assigned to known model.
+ * Governed by 'class' attribute
+ * @see ../../packages/server/models/factory.ts
+ */
+class ModelNotValidError extends CustomError {
+  public static code = 400;
 }
 
-class BadParams extends Error {
-  public static code = "bad parameters";
-
-  constructor(m: string) {
-    super(m);
-    Object.setPrototypeOf(this, BadParams.prototype);
-  }
-
-  statusCode(): number {
-    return 400;
-  }
-
-  toString(): string {
-    return BadParams.code;
-  }
+/**
+ * NotFound will be thrown when the api cannot handle the request - unknown route
+ */
+class NotFound extends CustomError {
+  public static code = 404;
 }
 
-class UserDoesNotExits extends Error {
-  public static code = "user does not exist";
-
-  constructor(m: string) {
-    super(m);
-    Object.setPrototypeOf(this, UserDoesNotExits.prototype);
-  }
-
-  statusCode(): number {
-    return 400;
-  }
-
-  toString(): string {
-    return UserDoesNotExits.code;
-  }
+/**
+ * BadParams is more generic error for bad input data
+ */
+class BadParams extends CustomError {
+  public static code = 400;
 }
 
-class ActantDoesNotExits extends Error {
-  public static code = "actant does not exist";
-
-  constructor(m: string) {
-    super(m);
-    Object.setPrototypeOf(this, ActantDoesNotExits.prototype);
-  }
-
-  statusCode(): number {
-    return 400;
-  }
-
-  toString(): string {
-    return ActantDoesNotExits.code;
-  }
+/**
+ * UserDoesNotExits will be thrown when attempting to remove/update the user entry, which does not exist
+ */
+class UserDoesNotExits extends CustomError {
+  public static code = 400;
 }
 
-class ActionDoesNotExits extends Error {
-  public static code = "action does not exist";
-
-  constructor(m: string) {
-    super(m);
-    Object.setPrototypeOf(this, ActionDoesNotExits.prototype);
-  }
-
-  statusCode(): number {
-    return 400;
-  }
-
-  toString(): string {
-    return ActionDoesNotExits.code;
-  }
+/**
+ * ActantDoesNotExits will be thrown when attempting to remove/update the actant entry, which does not exist
+ */
+class ActantDoesNotExits extends CustomError {
+  public static code = 400;
 }
 
-class StatementDoesNotExits extends Error {
-  public static code = "statement does not exist";
-
-  constructor(m: string) {
-    super(m);
-    Object.setPrototypeOf(this, StatementDoesNotExits.prototype);
-  }
-
-  statusCode(): number {
-    return 400;
-  }
-
-  toString(): string {
-    return StatementDoesNotExits.code;
-  }
+/**
+ * ActionDoesNotExits will be thrown when attempting to remove/update the action entry, which does not exist
+ */
+class ActionDoesNotExits extends CustomError {
+  public static code = 400;
 }
 
-class TerritoryDoesNotExits extends Error {
-  public static code = "territory does not exist";
-
-  constructor(m: string) {
-    super(m);
-    Object.setPrototypeOf(this, TerritoryDoesNotExits.prototype);
-  }
-
-  statusCode(): number {
-    return 400;
-  }
-
-  toString(): string {
-    return TerritoryDoesNotExits.code;
-  }
+/**
+ * StatementDoesNotExits will be thrown when attempting to remove/update the statement entry, which does not exist
+ */
+class StatementDoesNotExits extends CustomError {
+  public static code = 400;
 }
 
-class TerritoriesBrokenError extends Error {
-  public static code = "territories tree is broken";
-
-  constructor(m: string) {
-    super(m);
-    Object.setPrototypeOf(this, TerritoriesBrokenError.prototype);
-  }
-
-  statusCode(): number {
-    return 500;
-  }
-
-  toString(): string {
-    return TerritoriesBrokenError.code;
-  }
+/**
+ * TerritoryDoesNotExits will be thrown when attempting to remove/update the territory entry, which does not exist
+ */
+class TerritoryDoesNotExits extends CustomError {
+  public static code = 400;
 }
 
-class TerrytoryInvalidMove extends Error {
-  public static code = "cannot move territory to invalid index";
-
-  constructor(m: string) {
-    super(m);
-    Object.setPrototypeOf(this, TerrytoryInvalidMove.prototype);
-  }
-
-  statusCode(): number {
-    return 500;
-  }
-
-  toString(): string {
-    return TerrytoryInvalidMove.code;
-  }
+/**
+ * TerritoriesBrokenError is an error associated with broken tree structure (more than one root element)
+ */
+class TerritoriesBrokenError extends CustomError {
+  public static code = 500;
 }
 
-class StatementInvalidMove extends Error {
-  public static code = "cannot move statement";
-
-  constructor(m: string) {
-    super(m);
-    Object.setPrototypeOf(this, StatementInvalidMove.prototype);
-  }
-
-  statusCode(): number {
-    return 500;
-  }
-
-  toString(): string {
-    return StatementInvalidMove.code;
-  }
+/**
+ * TerrytoryInvalidMove will be thrown during tree/moveTerritory request, while violating some constraint
+ */
+class TerrytoryInvalidMove extends CustomError {
+  public static code = 500;
 }
 
-class UnknownRoute extends Error {
-  public static code = "unknown route";
-
-  constructor(m: string) {
-    super(m);
-    Object.setPrototypeOf(this, UnknownRoute.prototype);
-  }
-
-  statusCode(): number {
-    return 404;
-  }
-
-  toString(): string {
-    return UnknownRoute.code;
-  }
+/**
+ * StatementInvalidMove will be thrown during territories/moveStatement request, while violating some constraint
+ */
+class StatementInvalidMove extends CustomError {
+  public static code = 500;
 }
 
-class InternalServerError extends Error {
-  public static code = "internal server error";
-
-  constructor(m: string) {
-    super(m);
-    Object.setPrototypeOf(this, InternalServerError.prototype);
-  }
-
-  statusCode(): number {
-    return 500;
-  }
-
-  toString(): string {
-    return InternalServerError.code;
-  }
+/**
+ * InternalServerError will be thrown when some unexpected error occurs
+ */
+class InternalServerError extends CustomError {
+  public static code = 500;
 }
 
-export interface IError extends Error {
-  statusCode(): number;
+/**
+ * UnauthorizedError will be thrown during request, which does not contain authorization data (without jwt token)
+ */
+class UnauthorizedError extends CustomError {
+  public static code = 401;
 }
 
-class UnauthorizedError extends Error {
-  public static code = "unauthorized";
-
-  constructor(m: string) {
-    super(m);
-    Object.setPrototypeOf(this, UnauthorizedError.prototype);
-  }
-
-  statusCode(): number {
-    return 401;
-  }
-
-  toString(): string {
-    return UnauthorizedError.code;
-  }
+/**
+ * InvalidDeleteError will be thrown from model's delete method, while violating some constraint
+ */
+class InvalidDeleteError extends CustomError {
+  public static code = 400;
 }
-
-export interface IError extends Error {
-  statusCode(): number;
-}
-
-class InvalidDeleteError extends Error {
-  public static code = "invalid delete";
-
-  constructor(m: string) {
-    super(m);
-    Object.setPrototypeOf(this, InvalidDeleteError.prototype);
-  }
-
-  statusCode(): number {
-    return 400;
-  }
-
-  toString(): string {
-    return InvalidDeleteError.code;
-  }
-}
-
-export interface IError extends Error {
-  statusCode(): number;
-}
-
-/*
-type filterMap = Record<string, new (description: string) => IError>;
-
-const errors: filterMap = {
-  ModelNotValidError,
-  BadCredentialsError,
-  NotFound,
-  BadParams,
-  UserDoesNotExits,
-  ActantDoesNotExits,
-  ActionDoesNotExits,
-  StatementDoesNotExits,
-  TerritoriesBrokenError,
-  TerritoryDoesNotExits,
-  TerrytoryInvalidMove,
-  StatementInvalidMove,
-};
-
-export default errors;
-*/
 
 export {
   InvalidDeleteError,
   UnauthorizedError,
   InternalServerError,
-  UnknownRoute,
   ModelNotValidError,
   BadCredentialsError,
   NotFound,
