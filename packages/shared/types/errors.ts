@@ -1,285 +1,82 @@
-class BadCredentialsError extends Error {
-  public static code = "bad credentials";
+export class CustomError extends Error {
+  name = ""; //  identifier - class name, ie. "BadParams"
+  message = ""; // customized message - details about the error detail create in constructor, ie. "Lable not provided"
+
+  public static code: number = 400;
 
   constructor(m: string) {
     super(m);
-    Object.setPrototypeOf(this, BadCredentialsError.prototype);
+    this.message = m;
+    this.name = this.constructor.name;
   }
 
   statusCode(): number {
-    return 401;
-  }
-
-  toString(): string {
-    return BadCredentialsError.code;
+    return (this.constructor as any).code;
   }
 }
 
-class ModelNotValidError extends Error {
-  public static code = "model not valid";
-
-  constructor(m: string) {
-    super(m);
-    Object.setPrototypeOf(this, ModelNotValidError.prototype);
-  }
-
-  statusCode(): number {
-    return 400;
-  }
-
-  toString(): string {
-    return ModelNotValidError.code;
-  }
+class BadCredentialsError extends CustomError {
+  public static code = 401;
 }
 
-class NotFound extends Error {
-  public static code = "resource not found";
-
-  constructor(m: string) {
-    super(m);
-    Object.setPrototypeOf(this, NotFound.prototype);
-  }
-
-  statusCode(): number {
-    return 404;
-  }
-
-  toString(): string {
-    return NotFound.code;
-  }
+class ModelNotValidError extends CustomError {
+  public static code = 400;
 }
 
-class BadParams extends Error {
-  public static code = "bad parameters";
-
-  constructor(m: string) {
-    super(m);
-    Object.setPrototypeOf(this, BadParams.prototype);
-  }
-
-  statusCode(): number {
-    return 400;
-  }
-
-  toString(): string {
-    return BadParams.code;
-  }
+class NotFound extends CustomError {
+  public static code = 404;
 }
 
-class UserDoesNotExits extends Error {
-  public static code = "user does not exist";
-
-  constructor(m: string) {
-    super(m);
-    Object.setPrototypeOf(this, UserDoesNotExits.prototype);
-  }
-
-  statusCode(): number {
-    return 400;
-  }
-
-  toString(): string {
-    return UserDoesNotExits.code;
-  }
+class BadParams extends CustomError {
+  public static code = 400;
 }
 
-class ActantDoesNotExits extends Error {
-  public static code = "actant does not exist";
-
-  constructor(m: string) {
-    super(m);
-    Object.setPrototypeOf(this, ActantDoesNotExits.prototype);
-  }
-
-  statusCode(): number {
-    return 400;
-  }
-
-  toString(): string {
-    return ActantDoesNotExits.code;
-  }
+class UserDoesNotExits extends CustomError {
+  public static code = 400;
 }
 
-class ActionDoesNotExits extends Error {
-  public static code = "action does not exist";
-
-  constructor(m: string) {
-    super(m);
-    Object.setPrototypeOf(this, ActionDoesNotExits.prototype);
-  }
-
-  statusCode(): number {
-    return 400;
-  }
-
-  toString(): string {
-    return ActionDoesNotExits.code;
-  }
+class ActantDoesNotExits extends CustomError {
+  public static code = 400;
 }
 
-class StatementDoesNotExits extends Error {
-  public static code = "statement does not exist";
-
-  constructor(m: string) {
-    super(m);
-    Object.setPrototypeOf(this, StatementDoesNotExits.prototype);
-  }
-
-  statusCode(): number {
-    return 400;
-  }
-
-  toString(): string {
-    return StatementDoesNotExits.code;
-  }
+class ActionDoesNotExits extends CustomError {
+  public static code = 400;
 }
 
-class TerritoryDoesNotExits extends Error {
-  public static code = "territory does not exist";
-
-  constructor(m: string) {
-    super(m);
-    Object.setPrototypeOf(this, TerritoryDoesNotExits.prototype);
-  }
-
-  statusCode(): number {
-    return 400;
-  }
-
-  toString(): string {
-    return TerritoryDoesNotExits.code;
-  }
+class StatementDoesNotExits extends CustomError {
+  public static code = 400;
 }
 
-class TerritoriesBrokenError extends Error {
-  public static code = "territories tree is broken";
-
-  constructor(m: string) {
-    super(m);
-    Object.setPrototypeOf(this, TerritoriesBrokenError.prototype);
-  }
-
-  statusCode(): number {
-    return 500;
-  }
-
-  toString(): string {
-    return TerritoriesBrokenError.code;
-  }
+class TerritoryDoesNotExits extends CustomError {
+  public static code = 400;
 }
 
-class TerrytoryInvalidMove extends Error {
-  public static code = "cannot move territory to invalid index";
-
-  constructor(m: string) {
-    super(m);
-    Object.setPrototypeOf(this, TerrytoryInvalidMove.prototype);
-  }
-
-  statusCode(): number {
-    return 500;
-  }
-
-  toString(): string {
-    return TerrytoryInvalidMove.code;
-  }
+class TerritoriesBrokenError extends CustomError {
+  public static code = 500;
 }
 
-class StatementInvalidMove extends Error {
-  public static code = "cannot move statement";
-
-  constructor(m: string) {
-    super(m);
-    Object.setPrototypeOf(this, StatementInvalidMove.prototype);
-  }
-
-  statusCode(): number {
-    return 500;
-  }
-
-  toString(): string {
-    return StatementInvalidMove.code;
-  }
+class TerrytoryInvalidMove extends CustomError {
+  public static code = 500;
 }
 
-class UnknownRoute extends Error {
-  public static code = "unknown route";
-
-  constructor(m: string) {
-    super(m);
-    Object.setPrototypeOf(this, UnknownRoute.prototype);
-  }
-
-  statusCode(): number {
-    return 404;
-  }
-
-  toString(): string {
-    return UnknownRoute.code;
-  }
+class StatementInvalidMove extends CustomError {
+  public static code = 500;
 }
 
-class InternalServerError extends Error {
-  public static code = "internal server error";
-
-  constructor(m: string) {
-    super(m);
-    Object.setPrototypeOf(this, InternalServerError.prototype);
-  }
-
-  statusCode(): number {
-    return 500;
-  }
-
-  toString(): string {
-    return InternalServerError.code;
-  }
+class UnknownRoute extends CustomError {
+  public static code = 404;
 }
 
-export interface IError extends Error {
-  statusCode(): number;
+class InternalServerError extends CustomError {
+  public static code = 500;
 }
 
-class UnauthorizedError extends Error {
-  public static code = "unauthorized";
-
-  constructor(m: string) {
-    super(m);
-    Object.setPrototypeOf(this, UnauthorizedError.prototype);
-  }
-
-  statusCode(): number {
-    return 401;
-  }
-
-  toString(): string {
-    return UnauthorizedError.code;
-  }
+class UnauthorizedError extends CustomError {
+  public static code = 401;
 }
 
-export interface IError extends Error {
-  statusCode(): number;
-}
-
-class InvalidDeleteError extends Error {
-  public static code = "invalid delete";
-
-  constructor(m: string) {
-    super(m);
-    Object.setPrototypeOf(this, InvalidDeleteError.prototype);
-  }
-
-  statusCode(): number {
-    return 400;
-  }
-
-  toString(): string {
-    return InvalidDeleteError.code;
-  }
-}
-
-export interface IError extends Error {
-  statusCode(): number;
+class InvalidDeleteError extends CustomError {
+  public static code = 400;
 }
 
 /*
