@@ -1,10 +1,10 @@
 import morgan from "morgan";
 import helmet from "helmet";
 import {
-  IError,
   InternalServerError,
   UnknownRoute,
   UnauthorizedError,
+  CustomError,
 } from "@shared/types/errors";
 import express, { Request, Response, NextFunction, Router } from "express";
 import cors from "cors";
@@ -80,9 +80,14 @@ server.all("*", function (req, res, next) {
 
 // Errors
 server.use(
-  (err: IError | Error, req: Request, res: Response, next: NextFunction) => {
+  (
+    err: CustomError | Error,
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
     // should expect customized errors, unknown unhandled errors, or errors thrown from some lib
-    const isCustomError = typeof (err as IError).statusCode === "function";
+    const isCustomError = typeof (err as CustomError).statusCode === "function";
 
     if (!isCustomError) {
       if (err instanceof JwtUnauthorizedError) {
@@ -102,7 +107,7 @@ server.use(
       message: err.message,
     };
 
-    return res.status((err as IError).statusCode()).json(genericResponse);
+    return res.status((err as CustomError).statusCode()).json(genericResponse);
   }
 );
 
