@@ -171,7 +171,7 @@ export const StatementListBox: React.FC = () => {
       {
         Header: "",
         id: "expander",
-        Cell: ({ row }: any) => (
+        Cell: ({ row }: Cell) => (
           <ButtonGroup noMargin>
             <span {...row.getToggleRowExpandedProps()}>
               <Button

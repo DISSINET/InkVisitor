@@ -156,7 +156,9 @@ export const StatementListRowExpanded: React.FC<StatementListRowExpanded> = ({
 
   return (
     <tr>
-      <td colSpan={visibleColumns.length}>{renderRowSubComponent({ row })}</td>
+      <td colSpan={visibleColumns.length + 1}>
+        {renderRowSubComponent({ row })}
+      </td>
     </tr>
   );
 };
