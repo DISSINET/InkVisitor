@@ -20,6 +20,7 @@ interface StatementListRow {
   index: number;
   moveRow: any;
   handleClick: Function;
+  visibleColumns: any;
 }
 
 export const StatementListRow: React.FC<StatementListRow> = ({
@@ -27,6 +28,7 @@ export const StatementListRow: React.FC<StatementListRow> = ({
   index,
   moveRow,
   handleClick = () => {},
+  visibleColumns,
 }) => {
   var hashParams = queryString.parse(location.hash);
   const statementId = hashParams.statement;
@@ -111,7 +113,9 @@ export const StatementListRow: React.FC<StatementListRow> = ({
           );
         })}
       </StyledTr>
-      {row.isExpanded ? <StatementListRowExpanded row={row} /> : null}
+      {row.isExpanded ? (
+        <StatementListRowExpanded row={row} visibleColumns={visibleColumns} />
+      ) : null}
     </>
   );
 };

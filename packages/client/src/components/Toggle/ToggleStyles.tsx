@@ -28,7 +28,8 @@ export const StyledLabel = styled.div<StyledLabel>`
   vertical-align: bottom;
   padding-left: ${({ theme }) => theme.space[2]};
   padding-right: ${({ theme }) => theme.space[2]};
-  padding-bottom: 0.15rem 0;
+  padding-bottom: 0.15rem;
+  /* padding-top: 0.15rem; */
   font-size: ${({ theme }) => theme.fontSize["sm"]};
   max-width: ${({ theme }) => theme.space[56]};
 `;
@@ -36,5 +37,6 @@ export const StyledLabel = styled.div<StyledLabel>`
 interface StyledIcon {}
 export const StyledIcon = styled.div<StyledIcon>`
   padding-left: ${({ theme }) => `${theme.space[2]}`};
-  padding-top: 0.15rem;
+  padding-top: 0.25rem;
+  padding-bottom: 0.25rem;
 `;
