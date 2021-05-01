@@ -15,7 +15,6 @@ import {
   IActant,
 } from "@shared/types";
 import Statement from "@models/statement";
-import { getActantIdsFromStatements } from "@shared/types/statement";
 
 function insertIStatementToChilds(
   array: IStatement[],
@@ -60,7 +59,7 @@ export default Router()
 
       const actants: IActant[] = [];
 
-      for (const actantId of getActantIdsFromStatements(statements)) {
+      for (const actantId of Statement.getDependencyListForMany(statements)) {
         const actant = await findActantById<IActant>(request.db, actantId);
         if (actant) {
           actants.push(actant);

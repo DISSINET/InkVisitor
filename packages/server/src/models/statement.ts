@@ -150,6 +150,36 @@ class Statement extends Actant implements IStatement {
 
     return this.data.isValid();
   }
+
+  getDependencyList(): string[] {
+    const actantIds: Record<string, null> = {};
+
+    this.data.actants.forEach((a) => (actantIds[a.actant] = null));
+    this.data.tags.forEach((t) => (actantIds[t] = null));
+    this.data.props.forEach((p) => {
+      actantIds[p.value.id] = null;
+      actantIds[p.type.id] = null;
+      actantIds[p.origin] = null;
+    });
+    this.data.references.forEach((p) => {
+      actantIds[p.resource] = null;
+    });
+
+    return Object.keys(actantIds);
+  }
+
+  static getDependencyListForMany(statements: IStatement[]): string[] {
+    const actantIds: Record<string, null> = {}; // unique check
+
+    const stModel = new Statement(undefined);
+    for (const statement of statements) {
+      stModel.getDependencyList
+        .call(statement)
+        .forEach((id) => (actantIds[id] = null));
+    }
+
+    return Object.keys(actantIds);
+  }
 }
 
 export default Statement;

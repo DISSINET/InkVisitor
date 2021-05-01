@@ -4,7 +4,7 @@ import { findActantById } from "@service/shorthands";
 import { BadParams, StatementDoesNotExits } from "@shared/types/errors";
 import { asyncRouteHandler } from "..";
 import { IResponseStatement, IStatement, IActant } from "@shared/types";
-import { getActantIdsFromStatements } from "@shared/types/statement";
+import Statement from "@models/statement";
 
 export default Router().get(
   "/get/:statementId?",
@@ -15,14 +15,18 @@ export default Router().get(
       throw new BadParams("statement id has to be set");
     }
 
-    const statement = await findActantById<IStatement>(request.db, statementId);
-    if (!statement) {
+    const statementData = await findActantById<IStatement>(
+      request.db,
+      statementId
+    );
+    if (!statementData) {
       throw new StatementDoesNotExits(`statement ${statementId} was not found`);
     }
 
     const actants: IActant[] = [];
 
-    for (const actantId of getActantIdsFromStatements([statement])) {
+    const statementModel = new Statement({ ...statementData });
+    for (const actantId of statementModel.getDependencyList()) {
       const actant = await findActantById<IActant>(request.db, actantId);
       if (actant) {
         actants.push(actant);
@@ -30,7 +34,7 @@ export default Router().get(
     }
 
     return {
-      ...statement,
+      ...statementData,
       actants,
       audits: [],
       usedIn: [],
