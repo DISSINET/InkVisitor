@@ -11,11 +11,7 @@ import { FaTimes } from "react-icons/fa";
 import { ActantTag } from "..";
 import { Entities } from "types";
 
-const classEntities = ["P", "G", "O", "C", "L", "V", "E"];
-// const initActant = {  id: "",
-//   class: "T" | "S" | "R" | "P" | "G" | "O" | "C" | "L" | "V" | "E";
-//   label: string;
-//   data: object;}
+import { ActantType } from "@shared/enums";
 
 interface ActantDetailBox {}
 export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
@@ -41,15 +37,19 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
   // initial load of categories
   useEffect(() => {
     const categories: IOption[] = [];
-    classEntities.forEach((categoryId) => {
-      const foundEntityCategory = Entities[categoryId];
+
+    for (const actantType in ActantType) {
+      const foundEntityCategory = Object.values(Entities).find(
+        (e) => e.label === actantType
+      );
       if (foundEntityCategory) {
         categories.push({
           label: foundEntityCategory.id,
           value: foundEntityCategory.id,
         });
       }
-    });
+    }
+
     if (categories.length) {
       setAllCategories(categories);
       setSelectedCategory(categories[0].value);

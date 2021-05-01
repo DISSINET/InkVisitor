@@ -81,7 +81,6 @@ export const StatementListBox: React.FC = () => {
   };
 
   const { statements, actants } = data || initialData;
-  console.log(statements.map((s) => s.data.territory.order));
 
   const {
     status: statusActions,
