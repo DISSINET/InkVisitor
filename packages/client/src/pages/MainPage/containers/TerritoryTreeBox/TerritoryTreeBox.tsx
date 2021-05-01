@@ -5,6 +5,7 @@ const queryString = require("query-string");
 import api from "api";
 import { TerritoryTreeNode } from "./TerritoryTreeNode/TerritoryTreeNode";
 import { IResponseTree } from "@shared/types";
+import { Loader } from "components";
 
 export const TerritoryTreeBox: React.FC = () => {
   const { status, data, error, isFetching } = useQuery(
@@ -58,6 +59,7 @@ export const TerritoryTreeBox: React.FC = () => {
           initExpandedNodes={selectedTerritoryPath}
         />
       )}
+      <Loader show={isFetching} />
     </>
   );
 };

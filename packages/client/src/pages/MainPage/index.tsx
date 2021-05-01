@@ -25,6 +25,7 @@ import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { setAuthToken } from "redux/features/authTokenSlice";
 import { setUsername } from "redux/features/usernameSlice";
 import { StyledUserBox, StyledBoxWrap, StyledUser } from "./MainPageStyles";
+import { heightFooter, heightHeader } from "Theme/constants";
 
 interface MainPage {
   size: number[];
@@ -42,8 +43,6 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
     statementId: string;
   }>();
 
-  const heightHeader = 70;
-  const heightFooter = 30;
   const heightContent = size[1] - heightHeader - heightFooter;
 
   const handleLogOut = () => {

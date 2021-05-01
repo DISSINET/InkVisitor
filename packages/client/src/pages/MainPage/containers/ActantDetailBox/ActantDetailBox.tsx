@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 const queryString = require("query-string");
 
-import { Button, Input } from "components";
+import { Button, Input, Loader } from "components";
 import { StyledContent, StyledRow } from "./ActandDetailBoxStyles";
 import { useHistory, useLocation } from "react-router-dom";
 import api from "api";
@@ -78,6 +78,7 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
           </StyledRow>
         </StyledContent>
       )}
+      <Loader show={isFetching} />
     </>
   );
 };

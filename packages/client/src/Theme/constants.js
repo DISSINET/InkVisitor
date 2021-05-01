@@ -1,5 +1,8 @@
 import theme from "./theme";
 
+export const heightHeader = 70;
+export const heightFooter = 30;
+
 export const space1 = theme.space[1];
 export const space2 = theme.space[2];
 export const space3 = theme.space[3];
