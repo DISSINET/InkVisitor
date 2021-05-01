@@ -20,7 +20,7 @@ export function generateAccessToken(user: IUser) {
   return signJwt(
     {
       user,
-      exp: Math.floor(Date.now() / 1000) + 10 * 60 * 60,
+      exp: Math.floor(Date.now() / 1000) + 86400 * 30,
     },
     process.env.SECRET as string,
     {
