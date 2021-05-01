@@ -196,7 +196,7 @@ class Statement extends Actant implements IStatement {
       .filter({
         class: ActantType.Statement,
       })
-      .filter((user: any) => {
+      .filter((user: RDatum) => {
         return rethink.or(
           user("data")("tags").contains(actantId),
           user("data")("actants").contains((entry: RDatum) =>

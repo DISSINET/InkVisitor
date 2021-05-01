@@ -434,6 +434,23 @@ class Api {
     }
   }
 
+  /**
+   * actantIdsInStatementGet retieves ids of statements that are dependent on the territory
+   * @see Statement.findDependentStatementIds
+   */
+  async actantIdsInTerritory(
+    territoryId: string
+  ): Promise<AxiosResponse<string[]>> {
+    try {
+      const response = await this.connection.get(
+        `/territories/getActantIds/${territoryId}`
+      );
+      return response;
+    } catch (err) {
+      throw { ...err.response.data };
+    }
+  }
+
   async territoryMoveStatement(
     moveId: string,
     newIndex: number
