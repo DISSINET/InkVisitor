@@ -55,7 +55,7 @@ export const StatementListRowExpanded: React.FC<StatementListRowExpanded> = ({
           {/* ---------- TEXT ---------- */}
           <p>{text}</p>
           {/* ---------- SUBJECT ---------- */}
-          <div className="mt-2 flex items-center">
+          {/* <div className="mt-2 flex items-center">
             <div className="mr-2">
               <Tag
                 propId={actionObject?.id || ""}
@@ -64,7 +64,7 @@ export const StatementListRowExpanded: React.FC<StatementListRowExpanded> = ({
                 label={actionObject?.labels[0].value}
               />
             </div>
-            <div className="mr-2">action</div>
+            <div className="mr-2">Action: </div>
 
             {actionObject?.labels.map(
               (labelObject: ILabel, key: number) =>
@@ -74,7 +74,7 @@ export const StatementListRowExpanded: React.FC<StatementListRowExpanded> = ({
                   </div>
                 )
             )}
-          </div>
+          </div> */}
           {/* ---------- ACTANTS ---------- */}
           {/* <div className="flex flex-col">
               {row.values &&
@@ -127,7 +127,7 @@ export const StatementListRowExpanded: React.FC<StatementListRowExpanded> = ({
               ))}
             </div> */}
           {/* ---------- NOTE ---------- */}
-          <div className="mt-2">Note: {note}</div>
+          {/* <div className="mt-2">Note: {note}</div> */}
           {/* ---------- TAGS ---------- */}
           {/* <div className="mt-2">
               Tags:{" "}
