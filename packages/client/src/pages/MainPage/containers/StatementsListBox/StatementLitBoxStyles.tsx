@@ -11,3 +11,8 @@ export const StyledLoaderWrap = styled.div`
   justify-content: center;
   align-items: center;
 `;
+
+export const StyledSelectorCell = styled.div`
+  cursor: pointer;
+  margin: -0.5em 0em;
+`;

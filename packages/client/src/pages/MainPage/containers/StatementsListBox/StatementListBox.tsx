@@ -24,7 +24,11 @@ import api from "api";
 import { IStatement, IActant, IAction } from "@shared/types";
 import { ActantType } from "@shared/enums";
 import { StatementListTable } from "./StatementListTable/StatementListTable";
-import { StyledDots, StyledLoaderWrap } from "./StatementLitBoxStyles";
+import {
+  StyledDots,
+  StyledLoaderWrap,
+  StyledSelectorCell,
+} from "./StatementLitBoxStyles";
 import { CStatement } from "constructors";
 import theme from "Theme/theme";
 
@@ -207,26 +211,30 @@ export const StatementListBox: React.FC = () => {
         Header: "",
         id: "Selector",
         Cell: ({ row }: Cell) => {
-          return hashParams["statement"] === row.values.id ? (
-            <FaDotCircle
-              size={14}
-              onClick={() => {
-                hashParams["statement"] = row.values.id;
-                history.push({
-                  hash: queryString.stringify(hashParams),
-                });
-              }}
-            />
-          ) : (
-            <FaRegCircle
-              size={14}
-              onClick={() => {
-                hashParams["statement"] = row.values.id;
-                history.push({
-                  hash: queryString.stringify(hashParams),
-                });
-              }}
-            />
+          return (
+            <StyledSelectorCell>
+              {hashParams["statement"] === row.values.id ? (
+                <FaDotCircle
+                  size={18}
+                  onClick={() => {
+                    hashParams["statement"] = row.values.id;
+                    history.push({
+                      hash: queryString.stringify(hashParams),
+                    });
+                  }}
+                />
+              ) : (
+                <FaRegCircle
+                  size={18}
+                  onClick={() => {
+                    hashParams["statement"] = row.values.id;
+                    history.push({
+                      hash: queryString.stringify(hashParams),
+                    });
+                  }}
+                />
+              )}
+            </StyledSelectorCell>
           );
         },
       },
