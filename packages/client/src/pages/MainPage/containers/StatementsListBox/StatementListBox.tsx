@@ -57,7 +57,31 @@ export const StatementListBox: React.FC = () => {
     { initialData: initialData, enabled: !!territoryId && api.isLoggedIn() }
   );
 
+  const addStatement = async (row: any) => {
+    const newStatement: IStatement = CStatement(territoryId);
+    newStatement.data.territory.order = row.original.data.territory.order;
+
+    const res = await api.actantsCreate(newStatement);
+
+    if (res.status === 200) {
+      toast.info(`Statement created!`);
+      queryClient.invalidateQueries([
+        "territory",
+        "statement-list",
+        territoryId,
+      ]);
+
+      hashParams["statement"] = newStatement.id;
+      history.push({
+        hash: queryString.stringify(hashParams),
+      });
+    } else {
+      toast.error(`Error: Statement not created!`);
+    }
+  };
+
   const { statements, actants } = data || initialData;
+  console.log(statements.map((s) => s.data.territory.order));
 
   const {
     status: statusActions,
@@ -202,7 +226,7 @@ export const StatementListBox: React.FC = () => {
               icon={<FaPlus size={14} />}
               tooltip="add new statement"
               color="warning"
-              onClick={() => addStatement()}
+              onClick={() => addStatement(row)}
             />
           </ButtonGroup>
         ),
@@ -240,26 +264,6 @@ export const StatementListBox: React.FC = () => {
       },
     ];
   }, [data, actions]);
-
-  const addStatement = async () => {
-    const newStatement: IStatement = CStatement(territoryId);
-    const res = await api.actantsCreate(newStatement);
-    if (res.status === 200) {
-      toast.info(`Statement created!`);
-      queryClient.invalidateQueries([
-        "territory",
-        "statement-list",
-        territoryId,
-      ]);
-
-      hashParams["statement"] = newStatement.id;
-      history.push({
-        hash: queryString.stringify(hashParams),
-      });
-    } else {
-      toast.error(`Error: Statement not created!`);
-    }
-  };
 
   if (isFetching) {
     return (
