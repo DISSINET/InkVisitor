@@ -7,6 +7,7 @@ import { fillFlatObject, fillArray, UnknownObject, IModel } from "./common";
 import { Prop } from "./prop";
 import { ActantType } from "@shared/enums";
 import Actant from "./actant";
+import { r as rethink, Connection, RDatum } from "rethinkdb-ts";
 
 class StatementActant implements IStatementActant, IModel {
   id = "";
@@ -97,7 +98,12 @@ export class StatementData implements IModel {
     const refs = data.references; // to enable oneline below (formatter issue ^^)
     fillArray<StatementReference>(this.references, StatementReference, refs);
 
-    fillArray(this.tags, String, data.tags);
+    // fill array uses constructors - which string[] cannot use (will create an object instead of string type)
+    if (data.tags) {
+      for (const tag of data.tags as string[]) {
+        this.tags.push(tag);
+      }
+    }
   }
 
   isValid(): boolean {
@@ -149,6 +155,72 @@ class Statement extends Actant implements IStatement {
     }
 
     return this.data.isValid();
+  }
+
+  getDependencyList(): string[] {
+    const actantIds: Record<string, null> = {};
+
+    this.data.actants.forEach((a) => (actantIds[a.actant] = null));
+    this.data.tags.forEach((t) => (actantIds[t] = null));
+    this.data.props.forEach((p) => {
+      actantIds[p.value.id] = null;
+      actantIds[p.type.id] = null;
+      actantIds[p.origin] = null;
+    });
+    this.data.references.forEach((p) => {
+      actantIds[p.resource] = null;
+    });
+
+    return Object.keys(actantIds);
+  }
+
+  static getDependencyListForMany(statements: IStatement[]): string[] {
+    const actantIds: Record<string, null> = {}; // unique check
+
+    const stModel = new Statement(undefined);
+    for (const statement of statements) {
+      stModel.getDependencyList
+        .call(statement)
+        .forEach((id) => (actantIds[id] = null));
+    }
+
+    return Object.keys(actantIds);
+  }
+
+  static async findDependentStatementIds(
+    db: Connection | undefined,
+    actantId: string
+  ): Promise<string[]> {
+    const statements = await rethink
+      .table("actants")
+      .filter({
+        class: ActantType.Statement,
+      })
+      .filter((user: RDatum) => {
+        return rethink.or(
+          user("data")("tags").contains(actantId),
+          user("data")("actants").contains((entry: RDatum) =>
+            entry("actant").eq(actantId)
+          ),
+          user("data")("tags").contains(actantId),
+          user("data")("props").contains((entry: RDatum) =>
+            entry("value")("id").eq(actantId)
+          ),
+          user("data")("props").contains((entry: RDatum) =>
+            entry("type")("id").eq(actantId)
+          ),
+          user("data")("props").contains((entry: RDatum) =>
+            entry("origin").eq(actantId)
+          ),
+          user("data")("references").contains((entry: RDatum) =>
+            entry("resource").eq(actantId)
+          )
+        );
+      })
+      .pluck("id")
+      .run(db);
+
+    return statements.map((s) => s.id);
   }
 }
 

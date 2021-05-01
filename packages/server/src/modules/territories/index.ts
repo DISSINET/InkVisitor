@@ -15,7 +15,6 @@ import {
   IActant,
 } from "@shared/types";
 import Statement from "@models/statement";
-import { getActantIdsFromStatements } from "@shared/types/statement";
 
 function insertIStatementToChilds(
   array: IStatement[],
@@ -60,7 +59,7 @@ export default Router()
 
       const actants: IActant[] = [];
 
-      for (const actantId of getActantIdsFromStatements(statements)) {
+      for (const actantId of Statement.getDependencyListForMany(statements)) {
         const actant = await findActantById<IActant>(request.db, actantId);
         if (actant) {
           actants.push(actant);
@@ -72,6 +71,35 @@ export default Router()
         statements,
         actants,
       };
+    })
+  )
+  .get(
+    "/getActantIds/:territoryId?",
+    asyncRouteHandler<string[]>(async (request: Request) => {
+      const territoryId = request.params.territoryId;
+      if (!territoryId) {
+        throw new BadParams("territoryId has to be set");
+      }
+
+      const territory = await findActantById<ITerritory>(
+        request.db,
+        territoryId,
+        {
+          class: "T",
+        }
+      );
+      if (!territory) {
+        throw new TerritoryDoesNotExits(
+          `territory ${territoryId} was not found`
+        );
+      }
+
+      const dependentStatementIds: string[] = await Statement.findDependentStatementIds(
+        request.db.connection,
+        territoryId
+      );
+
+      return dependentStatementIds;
     })
   )
   .post(
