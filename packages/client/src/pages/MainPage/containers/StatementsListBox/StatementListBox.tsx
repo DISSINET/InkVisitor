@@ -254,20 +254,25 @@ export const StatementListBox: React.FC = () => {
     }
   };
 
-  if (isFetching) {
-    return (
-      <StyledLoaderWrap>
+  // if (isFetching) {
+  //   return (
+  //     <StyledLoaderWrap show={isFetching}>
+  //       <DotLoader color={theme.color["primary"]} />
+  //     </StyledLoaderWrap>
+  //   );
+  // }
+  return (
+    <>
+      <StatementListTable
+        data={statements}
+        columns={columns}
+        handleRowClick={(rowId: string) => {
+          //console.log(rowId);
+        }}
+      />
+      <StyledLoaderWrap show={isFetching}>
         <DotLoader color={theme.color["primary"]} />
       </StyledLoaderWrap>
-    );
-  }
-  return (
-    <StatementListTable
-      data={statements}
-      columns={columns}
-      handleRowClick={(rowId: string) => {
-        //console.log(rowId);
-      }}
-    />
+    </>
   );
 };
