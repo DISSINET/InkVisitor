@@ -1,8 +1,8 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { Column, useTable, useExpanded } from "react-table";
+import { Column, useTable, useExpanded, Row } from "react-table";
 import update from "immutability-helper";
 import { StyledTable, StyledTHead, StyledTh } from "./StatementListTableStyles";
-import { StatementListRow } from "./StatementListRow";
+import { StatementListRow } from "./StatementListRow/StatementListRow";
 import { IStatement, IActant } from "@shared/types";
 
 interface StatementListTable {
@@ -62,17 +62,17 @@ export const StatementListTable: React.FC<StatementListTable> = ({
       <StyledTHead>
         {headerGroups.map((headerGroup, key) => (
           <tr {...headerGroup.getHeaderGroupProps()} key={key}>
+            <th></th>
             {headerGroup.headers.map((column, key) => (
               <StyledTh {...column.getHeaderProps()} key={key}>
                 {column.render("Header")}
               </StyledTh>
             ))}
-            <th></th>
           </tr>
         ))}
       </StyledTHead>
       <tbody {...getTableBodyProps()}>
-        {rows.map((row, i) => {
+        {rows.map((row: Row, i: number) => {
           prepareRow(row);
           return (
             <StatementListRow
@@ -81,6 +81,7 @@ export const StatementListTable: React.FC<StatementListTable> = ({
               row={row}
               moveRow={moveRow}
               {...row.getRowProps()}
+              visibleColumns={visibleColumns}
             />
           );
         })}
