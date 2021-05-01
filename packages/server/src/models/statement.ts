@@ -7,6 +7,7 @@ import { fillFlatObject, fillArray, UnknownObject, IModel } from "./common";
 import { Prop } from "./prop";
 import { ActantType } from "@shared/enums";
 import Actant from "./actant";
+import { r as rethink, Connection, RDatum } from "rethinkdb-ts";
 
 class StatementActant implements IStatementActant, IModel {
   id = "";
@@ -97,7 +98,12 @@ export class StatementData implements IModel {
     const refs = data.references; // to enable oneline below (formatter issue ^^)
     fillArray<StatementReference>(this.references, StatementReference, refs);
 
-    fillArray(this.tags, String, data.tags);
+    // fill array uses constructors - which string[] cannot use (will create an object instead of string type)
+    if (data.tags) {
+      for (const tag of data.tags as string[]) {
+        this.tags.push(tag);
+      }
+    }
   }
 
   isValid(): boolean {
@@ -179,6 +185,42 @@ class Statement extends Actant implements IStatement {
     }
 
     return Object.keys(actantIds);
+  }
+
+  static async findDependentStatementIds(
+    db: Connection | undefined,
+    actantId: string
+  ): Promise<string[]> {
+    const statements = await rethink
+      .table("actants")
+      .filter({
+        class: ActantType.Statement,
+      })
+      .filter((user: any) => {
+        return rethink.or(
+          user("data")("tags").contains(actantId),
+          user("data")("actants").contains((entry: RDatum) =>
+            entry("actant").eq(actantId)
+          ),
+          user("data")("tags").contains(actantId),
+          user("data")("props").contains((entry: RDatum) =>
+            entry("value")("id").eq(actantId)
+          ),
+          user("data")("props").contains((entry: RDatum) =>
+            entry("type")("id").eq(actantId)
+          ),
+          user("data")("props").contains((entry: RDatum) =>
+            entry("origin").eq(actantId)
+          ),
+          user("data")("references").contains((entry: RDatum) =>
+            entry("resource").eq(actantId)
+          )
+        );
+      })
+      .pluck("id")
+      .run(db);
+
+    return statements.map((s) => s.id);
   }
 }
 
