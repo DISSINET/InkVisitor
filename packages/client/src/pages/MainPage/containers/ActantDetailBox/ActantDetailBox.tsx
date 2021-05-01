@@ -9,7 +9,6 @@ import { QueryClient, useQuery, useQueryClient } from "react-query";
 import { IActant, IOption } from "@shared/types";
 import { FaTimes } from "react-icons/fa";
 import { ActantTag } from "..";
-import { Entities } from "types";
 
 import { ActantType } from "@shared/enums";
 
@@ -22,7 +21,7 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
 
   const queryClient = useQueryClient();
 
-  const { status, data, error, isFetching } = useQuery(
+  const { status, data: actant, error, isFetching } = useQuery(
     ["actant", actantId],
     async () => {
       const res = await api.actantsGet(actantId);
@@ -31,80 +30,44 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
     { enabled: !!actantId && api.isLoggedIn() }
   );
 
-  const [selectedCategory, setSelectedCategory] = useState<string>("T");
-  const [tagLabel, setTagLabel] = useState("");
-  const [actant, setActant] = useState<IActant>();
-  const [allCategories, setAllCategories] = useState<false | IOption[]>();
-
-  // initial load of categories
-  useEffect(() => {
-    const categories: IOption[] = [];
-
-    for (const actantType in ActantType) {
-      const foundEntityCategory = Object.values(Entities).find(
-        (e) => e.label === actantType
-      );
-      if (foundEntityCategory) {
-        categories.push({
-          label: foundEntityCategory.id,
-          value: foundEntityCategory.id,
-        });
-      }
-    }
-
-    if (categories.length) {
-      setAllCategories(categories);
-      setSelectedCategory(categories[0].value);
-    }
-  }, []);
-
-  useEffect(() => {
-    if (data) {
-      setTagLabel(data.label);
-      setSelectedCategory(data.class);
-      setActant(data);
-    }
-  }, [data]);
-
-  const updateActant = (statementActantId: string, changes: any) => {
-    // if (statementActantId) {
-    //   const updatedActants = statement.data.actants.map((a) =>
-    //     a.id === statementActantId ? { ...a, ...changes } : a
-    //   );
-    //   const newData = { ...statement.data, ...{ actants: updatedActants } };
-    //   update(newData);
-    // }
-  };
-
   return (
     <>
-      {actant && allCategories && (
+      {actant && (
         <StyledContent>
           <StyledRow>
-            <Input
+            {/* <Input
               type="select"
-              value={selectedCategory}
-              options={allCategories}
-              onChangeFn={(newSelectedId: string) => {
-                console.log(newSelectedId);
-                //setSelectedCategory(newSelectedId);
-                api.actantsUpdate(actant.id, {
+              value={actant.class}
+              options={ActantType.map(actantType => ({
+                label: actantType,
+
+              }))}
+              onChangeFn={async (newSelectedId: string) => {
+                const res = await api.actantsUpdate(actant.id, {
                   ...actant,
                   ...{ class: newSelectedId },
                 });
-                queryClient.invalidateQueries(["actant", actantId]);
+                queryClient.invalidateQueries(["actant"]);
+                queryClient.invalidateQueries(["territory"]);
               }}
-            />
+            /> */}
             <ActantTag actant={actant} propId={actant.id} />
             <Input
-              value={tagLabel}
-              onChangeFn={(value: string) => setTagLabel(value)}
+              value={actant.label}
+              onChangeFn={async (newLabel: string) => {
+                const res = await api.actantsUpdate(actant.id, {
+                  ...actant,
+                  ...{ label: newLabel },
+                });
+                queryClient.invalidateQueries(["actant"]);
+                queryClient.invalidateQueries(["statement"]);
+                //queryClient.invalidateQueries(["territory"]);
+              }}
             />
             <Button
               color="danger"
               icon={<FaTimes />}
               onClick={() => {
-                setActant(undefined);
                 hashParams["actant"] = "";
                 history.push({
                   hash: queryString.stringify(hashParams),
