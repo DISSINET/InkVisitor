@@ -36,6 +36,7 @@ export const ContextMenu: React.FC<ContextMenu> = ({ territoryActant }) => {
   const [currentPosition, setCurrentPosition] = useState({
     x: 0,
     y: 0,
+    height: 0,
   });
 
   const createTerritory = async (label: string) => {
@@ -69,7 +70,11 @@ export const ContextMenu: React.FC<ContextMenu> = ({ territoryActant }) => {
   const setDivPosition = () => {
     if (ref.current) {
       const rect = ref.current.getBoundingClientRect();
-      setCurrentPosition({ x: rect["x"], y: rect["y"] });
+      setCurrentPosition({
+        x: rect["x"],
+        y: rect["y"],
+        height: rect["height"],
+      });
     }
   };
 
@@ -92,6 +97,7 @@ export const ContextMenu: React.FC<ContextMenu> = ({ territoryActant }) => {
             showMenu={showMenu}
             clientX={currentPosition.x}
             clientY={currentPosition.y}
+            height={currentPosition.height}
           >
             <Button
               key="add"
