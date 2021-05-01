@@ -233,22 +233,12 @@ export const StatementListBox: React.FC = () => {
               {hashParams["statement"] === row.values.id ? (
                 <FaDotCircle
                   size={18}
-                  onClick={() => {
-                    hashParams["statement"] = row.values.id;
-                    history.push({
-                      hash: queryString.stringify(hashParams),
-                    });
-                  }}
+                  onClick={() => selectStatementRow(row.values.id)}
                 />
               ) : (
                 <FaRegCircle
                   size={18}
-                  onClick={() => {
-                    hashParams["statement"] = row.values.id;
-                    history.push({
-                      hash: queryString.stringify(hashParams),
-                    });
-                  }}
+                  onClick={() => selectStatementRow(row.values.id)}
                 />
               )}
             </StyledSelectorCell>
@@ -258,16 +248,20 @@ export const StatementListBox: React.FC = () => {
     ];
   }, [data, actions, hashParams["statement"]]);
 
+  const selectStatementRow = (rowId: string) => {
+    hashParams["statement"] = rowId;
+    history.push({
+      hash: queryString.stringify(hashParams),
+    });
+  };
+
   return (
     <>
       <StatementListTable
         data={statements}
         columns={columns}
         handleRowClick={(rowId: string) => {
-          hashParams["statement"] = rowId;
-          history.push({
-            hash: queryString.stringify(hashParams),
-          });
+          // selectStatementRow(rowId)
         }}
       />
       <Loader show={isFetching} />
