@@ -5,17 +5,12 @@ import { Button, Input, Loader } from "components";
 import { StyledContent, StyledRow } from "./ActandDetailBoxStyles";
 import { useHistory, useLocation } from "react-router-dom";
 import api from "api";
-import { useQuery } from "react-query";
+import { QueryClient, useQuery, useQueryClient } from "react-query";
 import { IActant, IOption } from "@shared/types";
 import { FaTimes } from "react-icons/fa";
 import { ActantTag } from "..";
-import { Entities } from "types";
 
-const classEntities = ["P", "G", "O", "C", "L", "V", "E"];
-// const initActant = {  id: "",
-//   class: "T" | "S" | "R" | "P" | "G" | "O" | "C" | "L" | "V" | "E";
-//   label: string;
-//   data: object;}
+import { ActantType } from "@shared/enums";
 
 interface ActantDetailBox {}
 export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
@@ -24,7 +19,9 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
   var hashParams = queryString.parse(location.hash);
   const actantId = hashParams.actant;
 
-  const { status, data, error, isFetching } = useQuery(
+  const queryClient = useQueryClient();
+
+  const { status, data: actant, error, isFetching } = useQuery(
     ["actant", actantId],
     async () => {
       const res = await api.actantsGet(actantId);
@@ -33,74 +30,44 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
     { enabled: !!actantId && api.isLoggedIn() }
   );
 
-  const [selectedCategory, setSelectedCategory] = useState<string>("T");
-  const [tagLabel, setTagLabel] = useState("");
-  const [actant, setActant] = useState<IActant>();
-  const [allCategories, setAllCategories] = useState<false | IOption[]>();
-
-  // initial load of categories
-  useEffect(() => {
-    const categories: IOption[] = [];
-    classEntities.forEach((categoryId) => {
-      const foundEntityCategory = Entities[categoryId];
-      if (foundEntityCategory) {
-        categories.push({
-          label: foundEntityCategory.id,
-          value: foundEntityCategory.id,
-        });
-      }
-    });
-    if (categories.length) {
-      setAllCategories(categories);
-      setSelectedCategory(categories[0].value);
-    }
-  }, []);
-
-  useEffect(() => {
-    if (data) {
-      setTagLabel(data.label);
-      setSelectedCategory(data.class);
-      setActant(data);
-    }
-  }, [data]);
-
-  const updateActant = (statementActantId: string, changes: any) => {
-    // if (statementActantId) {
-    //   const updatedActants = statement.data.actants.map((a) =>
-    //     a.id === statementActantId ? { ...a, ...changes } : a
-    //   );
-    //   const newData = { ...statement.data, ...{ actants: updatedActants } };
-    //   update(newData);
-    // }
-  };
-
   return (
     <>
-      {actant && allCategories && (
+      {actant && (
         <StyledContent>
           <StyledRow>
-            <Input
+            {/* <Input
               type="select"
-              value={selectedCategory}
-              options={allCategories}
-              onChangeFn={(newSelectedId: string) => {
-                setSelectedCategory(newSelectedId);
-                // TODO update on BE
-                // updateActant(actant.id, {
-                //   actant: newSelectedId,
-                // });
+              value={actant.class}
+              options={ActantType.map(actantType => ({
+                label: actantType,
+
+              }))}
+              onChangeFn={async (newSelectedId: string) => {
+                const res = await api.actantsUpdate(actant.id, {
+                  ...actant,
+                  ...{ class: newSelectedId },
+                });
+                queryClient.invalidateQueries(["actant"]);
+                queryClient.invalidateQueries(["territory"]);
               }}
-            />
+            /> */}
             <ActantTag actant={actant} propId={actant.id} />
             <Input
-              value={tagLabel}
-              onChangeFn={(value: string) => setTagLabel(value)}
+              value={actant.label}
+              onChangeFn={async (newLabel: string) => {
+                const res = await api.actantsUpdate(actant.id, {
+                  ...actant,
+                  ...{ label: newLabel },
+                });
+                queryClient.invalidateQueries(["actant"]);
+                queryClient.invalidateQueries(["statement"]);
+                //queryClient.invalidateQueries(["territory"]);
+              }}
             />
             <Button
               color="danger"
               icon={<FaTimes />}
               onClick={() => {
-                setActant(undefined);
                 hashParams["actant"] = "";
                 history.push({
                   hash: queryString.stringify(hashParams),
