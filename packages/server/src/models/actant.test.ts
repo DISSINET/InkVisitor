@@ -286,6 +286,14 @@ describe("test Actant.update", function () {
             id: "territoryId",
             order: 2,
           },
+          actants: [
+            {
+              id: "1",
+            },
+            {
+              id: "2",
+            },
+          ],
           text: "jea",
         },
       });
@@ -293,8 +301,9 @@ describe("test Actant.update", function () {
 
       const actantRef = new Statement({ id: actant.id });
       const changedTextValue = "changed";
+      const newActantId = "3";
       await actantRef.update(db.connection, {
-        data: { text: changedTextValue },
+        data: { text: changedTextValue, actants: [{ id: newActantId }] },
       });
 
       const existingActantData = await findActantById<IStatement>(
@@ -307,6 +316,9 @@ describe("test Actant.update", function () {
       expect(existingActantData.data.territory.id).toEqual(
         actant.data.territory.id
       );
+      // actants field should be replaced
+      expect(existingActantData.data.actants).toHaveLength(1);
+      expect(existingActantData.data.actants[0].id).toEqual(newActantId);
 
       await clean(db);
       done();
