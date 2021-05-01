@@ -35,22 +35,3 @@ export interface IStatementReference {
   part: string;
   type: string;
 }
-
-export function getActantIdsFromStatements(statements: IStatement[]): string[] {
-  const actantIds: Record<string, null> = {}; // unique check
-
-  for (const statement of statements) {
-    statement.data.actants.forEach((a) => (actantIds[a.actant] = null));
-    statement.data.tags.forEach((t) => (actantIds[t] = null));
-    statement.data.props.forEach((p) => {
-      actantIds[p.value.id] = null;
-      actantIds[p.type.id] = null;
-      actantIds[p.origin] = null;
-    });
-    statement.data.references.forEach((p) => {
-      actantIds[p.resource] = null;
-    });
-  }
-
-  return Object.keys(actantIds);
-}
