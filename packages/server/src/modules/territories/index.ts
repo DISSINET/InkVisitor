@@ -73,6 +73,35 @@ export default Router()
       };
     })
   )
+  .get(
+    "/getActantIds/:territoryId?",
+    asyncRouteHandler<string[]>(async (request: Request) => {
+      const territoryId = request.params.territoryId;
+      if (!territoryId) {
+        throw new BadParams("territoryId has to be set");
+      }
+
+      const territory = await findActantById<ITerritory>(
+        request.db,
+        territoryId,
+        {
+          class: "T",
+        }
+      );
+      if (!territory) {
+        throw new TerritoryDoesNotExits(
+          `territory ${territoryId} was not found`
+        );
+      }
+
+      const dependentStatementIds: string[] = await Statement.findDependentStatementIds(
+        request.db.connection,
+        territoryId
+      );
+
+      return dependentStatementIds;
+    })
+  )
   .post(
     "/moveStatement",
     asyncRouteHandler<IResponseGeneric>(async (request: Request) => {
