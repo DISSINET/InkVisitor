@@ -25,7 +25,6 @@ export const StyledHead = styled.div<StyledHead>`
   padding: ${space2};
   font-size: ${({ theme }) => theme.fontSize["base"]};
   line-height: 2rem;
-  letter-spacing: 0.04rem;
   font-family: Muni;
   font-weight: ${({ theme }) => theme.fontWeight["bold"]};
   font-style: normal;
