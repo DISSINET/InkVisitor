@@ -22,12 +22,14 @@ interface StyledHead {
 export const StyledHead = styled.div<StyledHead>`
   background-color: ${({ theme, color }) => theme.color[color]};
   color: ${({ theme }) => theme.color["white"]};
-  font-weight: ${({ theme }) => theme.fontWeight["medium"]};
   padding: ${space2};
   font-size: ${({ theme }) => theme.fontSize["base"]};
   line-height: 2rem;
   letter-spacing: 0.04rem;
-  /* font-family: muni; */
+  font-family: Muni;
+  font-weight: ${({ theme }) => theme.fontWeight["bold"]};
+  font-style: normal;
+  text-transform: uppercase;
 `;
 interface StyledContent {
   noPadding: boolean;
