@@ -466,9 +466,7 @@ const addEntityActant = (id: string, label: string, type: EntityActantType) => {
     id,
     class: type,
     label: label,
-    data: {
-      logicalType: "1",
-    },
+    data: {},
   };
   if (id) {
     actants.push(newEntityActant);

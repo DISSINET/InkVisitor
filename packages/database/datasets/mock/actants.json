@@ -143,166 +143,137 @@
   {
     "id": "P1",
     "class": "P",
-    "label": "David",
-    "data": { "logicalType": "1" }
+    "label": "David"
   },
   {
     "id": "P2",
     "class": "P",
-    "label": "Honza",
-    "data": { "logicalType": "1" }
+    "label": "Honza"
   },
   {
     "id": "P3",
     "class": "P",
-    "label": "Robert",
-    "data": { "logicalType": "1" }
+    "label": "Robert"
   },
   {
     "id": "G1",
     "class": "G",
-    "label": "a group of villagers",
-    "data": { "logicalType": "1" }
+    "label": "a group of villagers"
   },
   {
     "id": "O1",
     "class": "O",
-    "label": "3 breads",
-    "data": { "logicalType": "1" }
+    "label": "3 breads"
   },
   {
     "id": "L1",
     "class": "L",
-    "label": "A house near Dover",
-    "data": { "logicalType": "1" }
+    "label": "A house near Dover"
   },
   {
     "id": "L2",
     "class": "L",
-    "label": "Dover",
-    "data": { "logicalType": "1" }
+    "label": "Dover"
   },
   {
     "id": "E1",
     "class": "E",
-    "label": "big forest fire",
-
-    "data": { "logicalType": "1" }
+    "label": "big forest fire"
   },
   {
     "id": "C01",
     "class": "C",
-    "label": "location:where",
-    "data": { "logicalType": "1" }
+    "label": "location:where"
   },
   {
     "id": "C02",
     "class": "C",
-    "label": "location:near",
-    "data": { "logicalType": "1" }
+    "label": "location:near"
   },
   {
     "id": "C03",
     "class": "C",
-    "label": "time:when",
-    "data": { "logicalType": "1" }
+    "label": "time:when"
   },
   {
     "id": "C04",
     "class": "C",
-    "label": "time:during",
-    "data": { "logicalType": "1" }
+    "label": "time:during"
   },
   {
     "id": "C05",
     "class": "C",
-    "label": "class",
-    "data": { "logicalType": "1" }
+    "label": "class"
   },
   {
     "id": "C06",
     "class": "C",
-    "label": "occupation",
-    "data": { "logicalType": "1" }
+    "label": "occupation"
   },
   {
     "id": "C07",
     "class": "C",
-    "label": "longitude",
-    "data": { "logicalType": "1" }
+    "label": "longitude"
   },
   {
     "id": "C08",
     "class": "C",
-    "label": "latitude",
-    "data": { "logicalType": "1" }
+    "label": "latitude"
   },
   {
     "id": "C09",
     "class": "C",
-    "label": "units",
-    "data": { "logicalType": "1" }
+    "label": "units"
   },
   {
     "id": "C010",
     "class": "C",
-    "label": "amount",
-    "data": { "logicalType": "1" }
+    "label": "amount"
   },
   {
     "id": "C011",
     "class": "C",
-    "label": "years",
-    "data": { "logicalType": "1" }
+    "label": "years"
   },
   {
     "id": "C1",
     "class": "C",
-    "label": "food",
-    "data": { "logicalType": "3" }
+    "label": "food"
   },
   {
     "id": "C2",
     "class": "C",
-    "label": "fisherman",
-
-    "data": { "logicalType": "1" }
+    "label": "fisherman"
   },
   {
     "id": "C3",
     "class": "C",
-    "label": "priest",
-    "data": { "logicalType": "1" }
+    "label": "priest"
   },
   {
     "id": "C4",
     "class": "C",
-    "label": "baker",
-    "data": { "logicalType": "1" }
+    "label": "baker"
   },
   {
     "id": "V1",
     "class": "V",
-    "label": "1217",
-    "data": { "logicalType": "1" }
+    "label": "1217"
   },
   {
     "id": "V2",
     "class": "V",
-    "label": "1.31",
-    "data": { "logicalType": "1" }
+    "label": "1.31"
   },
   {
     "id": "V3",
     "class": "V",
-    "label": "51.13",
-    "data": { "logicalType": "1" }
+    "label": "51.13"
   },
   {
     "id": "V4",
     "class": "V",
-    "label": "2",
-    "data": { "logicalType": "1" }
+    "label": "2"
   },
   {
     "id": "S1",

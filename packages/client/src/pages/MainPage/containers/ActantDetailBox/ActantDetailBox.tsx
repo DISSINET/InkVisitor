@@ -5,7 +5,7 @@ import { Button, Input } from "components";
 import { StyledContent, StyledRow } from "./ActandDetailBoxStyles";
 import { useHistory, useLocation } from "react-router-dom";
 import api from "api";
-import { useQuery } from "react-query";
+import { QueryClient, useQuery, useQueryClient } from "react-query";
 import { IActant, IOption } from "@shared/types";
 import { FaTimes } from "react-icons/fa";
 import { ActantTag } from "..";
@@ -19,6 +19,8 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
   let location = useLocation();
   var hashParams = queryString.parse(location.hash);
   const actantId = hashParams.actant;
+
+  const queryClient = useQueryClient();
 
   const { status, data, error, isFetching } = useQuery(
     ["actant", actantId],
@@ -84,11 +86,13 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
               value={selectedCategory}
               options={allCategories}
               onChangeFn={(newSelectedId: string) => {
-                setSelectedCategory(newSelectedId);
-                // TODO update on BE
-                // updateActant(actant.id, {
-                //   actant: newSelectedId,
-                // });
+                console.log(newSelectedId);
+                //setSelectedCategory(newSelectedId);
+                api.actantsUpdate(actant.id, {
+                  ...actant,
+                  ...{ class: newSelectedId },
+                });
+                queryClient.invalidateQueries(["actant", actantId]);
               }}
             />
             <ActantTag actant={actant} propId={actant.id} />
