@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { FaTrashAlt, FaStar, FaPlus } from "react-icons/fa";
 import { toast } from "react-toastify";
 import { useQueryClient } from "react-query";
@@ -9,7 +9,6 @@ import {
   ButtonGroup,
   Input,
   Modal,
-  ModalCard,
   ModalContent,
   ModalFooter,
   ModalHeader,
@@ -22,20 +21,19 @@ import {
 } from "./ContextMenuStyles";
 import { IActant, ITerritory } from "@shared/types";
 import { CTerritoryActant } from "constructors";
-import { useMousePosition } from "utils";
 
 interface ContextMenu {
   territoryActant: IActant;
 }
 export const ContextMenu: React.FC<ContextMenu> = ({ territoryActant }) => {
   const queryClient = useQueryClient();
-  const position = useMousePosition();
+  const ref = useRef<HTMLDivElement>(null);
 
   const [showMenu, setShowMenu] = useState(false);
   const [showSubmit, setShowSubmit] = useState(false);
   const [showCreate, setShowCreate] = useState(false);
   const [territoryName, setTerritoryName] = useState("");
-  const [currentMousePosition, setCurrentMousePosition] = useState({
+  const [currentPosition, setCurrentPosition] = useState({
     x: 0,
     y: 0,
   });
@@ -68,12 +66,20 @@ export const ContextMenu: React.FC<ContextMenu> = ({ territoryActant }) => {
     setShowSubmit(false);
   };
 
+  const setDivPosition = () => {
+    if (ref.current) {
+      const rect = ref.current.getBoundingClientRect();
+      setCurrentPosition({ x: rect["x"], y: rect["y"] });
+    }
+  };
+
   return (
     <>
       <StyledWrapper
+        ref={ref}
         onMouseEnter={() => {
           if (!showMenu) {
-            setCurrentMousePosition({ x: position.x, y: position.y });
+            setDivPosition();
           }
           setShowMenu(true);
         }}
@@ -81,40 +87,42 @@ export const ContextMenu: React.FC<ContextMenu> = ({ territoryActant }) => {
       >
         <StyledFaChevronCircleDown size={14} />
 
-        <StyledContextButtonGroup
-          showMenu={showMenu}
-          clientX={currentMousePosition.x}
-          clientY={currentMousePosition.y}
-        >
-          <Button
-            key="add"
-            icon={<FaPlus size={14} />}
-            color="info"
-            onClick={() => {
-              // add child
-              setShowCreate(true);
-            }}
-          />
-          <Button
-            key="favorites"
-            icon={<FaStar size={14} />}
-            color="warning"
-            onClick={() => {
-              // add to favorites
-              toast.success(
-                `You're adding territory [${territoryActant.label}] to favorites. (not implemented yet)`
-              );
-            }}
-          />
-          <Button
-            key="delete"
-            icon={<FaTrashAlt size={14} />}
-            color="danger"
-            onClick={() => {
-              setShowSubmit(true);
-            }}
-          />
-        </StyledContextButtonGroup>
+        {showMenu && (
+          <StyledContextButtonGroup
+            showMenu={showMenu}
+            clientX={currentPosition.x}
+            clientY={currentPosition.y}
+          >
+            <Button
+              key="add"
+              icon={<FaPlus size={14} />}
+              color="info"
+              onClick={() => {
+                // add child
+                setShowCreate(true);
+              }}
+            />
+            <Button
+              key="favorites"
+              icon={<FaStar size={14} />}
+              color="warning"
+              onClick={() => {
+                // add to favorites
+                toast.success(
+                  `You're adding territory [${territoryActant.label}] to favorites. (not implemented yet)`
+                );
+              }}
+            />
+            <Button
+              key="delete"
+              icon={<FaTrashAlt size={14} />}
+              color="danger"
+              onClick={() => {
+                setShowSubmit(true);
+              }}
+            />
+          </StyledContextButtonGroup>
+        )}
       </StyledWrapper>
 
       <Submit
