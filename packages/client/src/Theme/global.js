@@ -1,5 +1,7 @@
 import { createGlobalStyle } from "styled-components";
 
+import MuniFont from "assets/fonts/muni-bold-webfont.woff2";
+
 const GlobalStyle = createGlobalStyle`
   @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@100;300;400;500;700;900&display=swap');
 
@@ -12,12 +14,10 @@ const GlobalStyle = createGlobalStyle`
     font-family: "Roboto", sans-serif;
     letter-spacing: .2px;
     line-height: 1.5;
-    /* @font-face {
-      font-family: "muni";
-      src: url("assets/fonts/muni-font.ttf") format("truetype");
-      font-style: normal;
-      font-weight: normal;
-    } */
+    @font-face {
+      font-family: "Muni";
+      src: url("${MuniFont}") format("woff2");
+    }
   }
   *, *::after, *::before {
     margin: 0;
