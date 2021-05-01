@@ -22,7 +22,7 @@ import {
   referenceTypeDict,
 } from "./../../../../../../shared/dictionaries";
 import { IActant, IProp, IStatementReference } from "@shared/types";
-import { Button, Input } from "components";
+import { Button, Input, Loader } from "components";
 import { ActantSuggester } from "./../";
 import { StatementEditorActantList } from "./StatementEditorActantList/StatementEditorActantList";
 
@@ -752,6 +752,7 @@ export const StatementEditorBox: React.FC = () => {
       ) : (
         "no statement selected"
       )}
+      <Loader show={isFetchingStatement} />
     </div>
   );
 };
