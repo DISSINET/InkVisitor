@@ -256,7 +256,7 @@ export const StatementListBox: React.FC = () => {
         },
       },
     ];
-  }, [data, actions]);
+  }, [data, actions, hashParams["statement"]]);
 
   return (
     <>
@@ -264,7 +264,10 @@ export const StatementListBox: React.FC = () => {
         data={statements}
         columns={columns}
         handleRowClick={(rowId: string) => {
-          //console.log(rowId);
+          hashParams["statement"] = rowId;
+          history.push({
+            hash: queryString.stringify(hashParams),
+          });
         }}
       />
       <Loader show={isFetching} />
