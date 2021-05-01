@@ -18,7 +18,8 @@ export class TerritoryParent implements IParentTerritory, IModel {
   }
 
   isValid(): boolean {
-    if (this.id === "" || this.order === -1) {
+    if (this.id === "") {
+      //|| this.order === -1) {
       return false;
     }
 
