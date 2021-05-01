@@ -1,13 +1,12 @@
 import { IResponseGeneric, IStatement } from "@shared/types";
 import "mocha";
 import * as chai from "chai";
-import supertest from "supertest";
 import { ITerritory } from "@shared/types/index";
 import { Db } from "@service/RethinkDB";
 import { createActant, deleteActants } from "@service/shorthands";
 import Statement from "@models/statement";
 import Territory from "@models/territory";
-import { IError } from "@shared/types/errors";
+import { CustomError } from "@shared/types/errors";
 import { errorTypes } from "@shared/types/response-generic";
 
 export const expect = chai.expect;
@@ -22,7 +21,7 @@ export const successfulGenericResponse: IResponseGeneric = {
 };
 
 export function testErroneousResponse(
-  expectedErrorClass: IError,
+  expectedErrorClass: CustomError,
   res: Response
 ): void {
   const expectedType: IResponseGeneric = {

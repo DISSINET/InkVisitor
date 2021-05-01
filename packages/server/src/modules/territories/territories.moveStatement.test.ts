@@ -68,7 +68,6 @@ describe("Territories moveStatement", function () {
           moveId: statements[1].id,
           newIndex: 0,
         })
-        .set("authorization", "Bearer " + supertestConfig.token)
         .expect(200)
         .expect({ result: true });
 
