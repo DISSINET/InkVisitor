@@ -3,11 +3,6 @@ import { Cell } from "react-table";
 import { useQuery, useQueryClient } from "react-query";
 import {
   FaInfo,
-  FaPencilAlt,
-  FaRegCheckSquare,
-  FaRegSquare,
-  FaSquare,
-  FaClone,
   FaTrashAlt,
   FaPlus,
   FaRegCircle,
@@ -15,18 +10,16 @@ import {
 } from "react-icons/fa";
 import { useLocation, useHistory } from "react-router";
 import { toast } from "react-toastify";
-import { DotLoader } from "react-spinners";
 const queryString = require("query-string");
 
-import { Button, ButtonGroup, TagGroup, Tooltip } from "components";
+import { Button, ButtonGroup, Loader, TagGroup, Tooltip } from "components";
 import { ActantTag } from "./../";
 import api from "api";
 import { IStatement, IActant, IAction } from "@shared/types";
 import { ActantType } from "@shared/enums";
 import { StatementListTable } from "./StatementListTable/StatementListTable";
-import { StyledDots, StyledLoaderWrap } from "./StatementLitBoxStyles";
+import { StyledDots } from "./StatementLitBoxStyles";
 import { CStatement } from "constructors";
-import theme from "Theme/theme";
 
 const initialData: {
   statements: IStatement[];
@@ -254,13 +247,6 @@ export const StatementListBox: React.FC = () => {
     }
   };
 
-  // if (isFetching) {
-  //   return (
-  //     <StyledLoaderWrap show={isFetching}>
-  //       <DotLoader color={theme.color["primary"]} />
-  //     </StyledLoaderWrap>
-  //   );
-  // }
   return (
     <>
       <StatementListTable
@@ -270,9 +256,7 @@ export const StatementListBox: React.FC = () => {
           //console.log(rowId);
         }}
       />
-      <StyledLoaderWrap show={isFetching}>
-        <DotLoader color={theme.color["primary"]} />
-      </StyledLoaderWrap>
+      <Loader show={isFetching} />
     </>
   );
 };
