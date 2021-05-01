@@ -294,6 +294,7 @@ describe("test Actant.update", function () {
               id: "2",
             },
           ],
+          certainty: "certain",
           text: "jea",
         },
       });
@@ -302,8 +303,13 @@ describe("test Actant.update", function () {
       const actantRef = new Statement({ id: actant.id });
       const changedTextValue = "changed";
       const newActantId = "3";
+      const newCertaintyValue = "";
       await actantRef.update(db.connection, {
-        data: { text: changedTextValue, actants: [{ id: newActantId }] },
+        data: {
+          text: changedTextValue,
+          actants: [{ id: newActantId }],
+          certainty: newCertaintyValue,
+        },
       });
 
       const existingActantData = await findActantById<IStatement>(
@@ -319,6 +325,8 @@ describe("test Actant.update", function () {
       // actants field should be replaced
       expect(existingActantData.data.actants).toHaveLength(1);
       expect(existingActantData.data.actants[0].id).toEqual(newActantId);
+      // certainty should be erased - but the key should exist
+      expect(existingActantData.data.certainty).toEqual(newCertaintyValue);
 
       await clean(db);
       done();
