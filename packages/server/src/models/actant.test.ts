@@ -273,3 +273,43 @@ describe("test Actant.delete", function () {
     });
   });
 });
+
+describe("test Actant.update", function () {
+  describe("if providing only part of nested data", () => {
+    it("should update it as merge operation", async (done) => {
+      const db = new Db();
+      await db.initDb();
+
+      const actant = new Statement({
+        data: {
+          territory: {
+            id: "territoryId",
+            order: 2,
+          },
+          text: "jea",
+        },
+      });
+      await actant.save(db.connection);
+
+      const actantRef = new Statement({ id: actant.id });
+      const changedTextValue = "changed";
+      await actantRef.update(db.connection, {
+        data: { text: changedTextValue },
+      });
+
+      const existingActantData = await findActantById<IStatement>(
+        db,
+        actant.id
+      );
+      // new value
+      expect(existingActantData.data.text).toEqual(changedTextValue);
+      //  territory data from the save call
+      expect(existingActantData.data.territory.id).toEqual(
+        actant.data.territory.id
+      );
+
+      await clean(db);
+      done();
+    });
+  });
+});
