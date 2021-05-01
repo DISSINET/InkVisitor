@@ -5,6 +5,7 @@ import { ButtonGroup } from "components/ButtonGroup/ButtonGroup";
 import { Header } from "components/Header/Header";
 import { Footer } from "components/Footer/Footer";
 import { Input } from "components/Input/Input";
+import { Loader } from "components/Loader/Loader";
 import { Tag } from "components/Tag/Tag";
 import { TagGroup } from "components/TagGroup/TagGroup";
 import { Suggester } from "components/Suggester/Suggester";
@@ -29,6 +30,7 @@ export {
   Header,
   Footer,
   Input,
+  Loader,
   Tag,
   TagGroup,
   Suggester,

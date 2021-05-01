@@ -31,6 +31,7 @@ export default {
     grey: "#C4C4C4",
     text: "#383737",
     primary: "#091034",
+    primaryTransparent: "rgba(9,16,52,0.2)",
     success: "#6174C2",
     warning: "#D8AA37",
     danger: "#99103B",

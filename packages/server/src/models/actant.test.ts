@@ -273,3 +273,63 @@ describe("test Actant.delete", function () {
     });
   });
 });
+
+describe("test Actant.update", function () {
+  describe("if providing only part of nested data", () => {
+    it("should update it as merge operation", async (done) => {
+      const db = new Db();
+      await db.initDb();
+
+      const actant = new Statement({
+        data: {
+          territory: {
+            id: "territoryId",
+            order: 2,
+          },
+          actants: [
+            {
+              id: "1",
+            },
+            {
+              id: "2",
+            },
+          ],
+          certainty: "certain",
+          text: "jea",
+        },
+      });
+      await actant.save(db.connection);
+
+      const actantRef = new Statement({ id: actant.id });
+      const changedTextValue = "changed";
+      const newActantId = "3";
+      const newCertaintyValue = "";
+      await actantRef.update(db.connection, {
+        data: {
+          text: changedTextValue,
+          actants: [{ id: newActantId }],
+          certainty: newCertaintyValue,
+        },
+      });
+
+      const existingActantData = await findActantById<IStatement>(
+        db,
+        actant.id
+      );
+      // new value
+      expect(existingActantData.data.text).toEqual(changedTextValue);
+      //  territory data from the save call
+      expect(existingActantData.data.territory.id).toEqual(
+        actant.data.territory.id
+      );
+      // actants field should be replaced
+      expect(existingActantData.data.actants).toHaveLength(1);
+      expect(existingActantData.data.actants[0].id).toEqual(newActantId);
+      // certainty should be erased - but the key should exist
+      expect(existingActantData.data.certainty).toEqual(newCertaintyValue);
+
+      await clean(db);
+      done();
+    });
+  });
+});
