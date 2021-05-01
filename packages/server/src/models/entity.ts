@@ -1,11 +1,9 @@
 import { fillFlatObject, UnknownObject, IModel } from "./common";
 import { ActantType, EntityActantType } from "@shared/enums";
-import { IEntity, entityLogicalTypeValues } from "@shared/types/entity";
+import { IEntity } from "@shared/types/entity";
 import Actant from "./actant";
 
 class EntityData implements IModel {
-  logicalType: typeof entityLogicalTypeValues[number] = "s";
-
   constructor(data: UnknownObject) {
     if (!data) {
       return;

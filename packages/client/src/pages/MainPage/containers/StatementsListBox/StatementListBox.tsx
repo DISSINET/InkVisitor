@@ -18,7 +18,9 @@ import api from "api";
 import { IStatement, IActant, IAction } from "@shared/types";
 import { ActantType } from "@shared/enums";
 import { StatementListTable } from "./StatementListTable/StatementListTable";
-import { StyledDots } from "./StatementLitBoxStyles";
+import {
+  StyledDots
+} from "./StatementLitBoxStyles";
 import { CStatement } from "constructors";
 
 const initialData: {
@@ -45,6 +47,29 @@ export const StatementListBox: React.FC = () => {
     },
     { initialData: initialData, enabled: !!territoryId && api.isLoggedIn() }
   );
+
+  const addStatement = async (row: any) => {
+    const newStatement: IStatement = CStatement(territoryId);
+    newStatement.data.territory.order = row.original.data.territory.order;
+
+    const res = await api.actantsCreate(newStatement);
+
+    if (res.status === 200) {
+      toast.info(`Statement created!`);
+      queryClient.invalidateQueries([
+        "territory",
+        "statement-list",
+        territoryId,
+      ]);
+
+      hashParams["statement"] = newStatement.id;
+      history.push({
+        hash: queryString.stringify(hashParams),
+      });
+    } else {
+      toast.error(`Error: Statement not created!`);
+    }
+  };
 
   const { statements, actants } = data || initialData;
 
@@ -192,7 +217,7 @@ export const StatementListBox: React.FC = () => {
               icon={<FaPlus size={14} />}
               tooltip="add new statement"
               color="warning"
-              onClick={() => addStatement()}
+              onClick={() => addStatement(row)}
             />
           </ButtonGroup>
         ),
@@ -201,51 +226,35 @@ export const StatementListBox: React.FC = () => {
         Header: "",
         id: "Selector",
         Cell: ({ row }: Cell) => {
-          return hashParams["statement"] === row.values.id ? (
-            <FaDotCircle
-              size={14}
-              onClick={() => {
-                hashParams["statement"] = row.values.id;
-                history.push({
-                  hash: queryString.stringify(hashParams),
-                });
-              }}
-            />
-          ) : (
-            <FaRegCircle
-              size={14}
-              onClick={() => {
-                hashParams["statement"] = row.values.id;
-                history.push({
-                  hash: queryString.stringify(hashParams),
-                });
-              }}
-            />
+          return (
+            <StyledSelectorCell>
+              {hashParams["statement"] === row.values.id ? (
+                <FaDotCircle
+                  size={18}
+                  onClick={() => {
+                    hashParams["statement"] = row.values.id;
+                    history.push({
+                      hash: queryString.stringify(hashParams),
+                    });
+                  }}
+                />
+              ) : (
+                <FaRegCircle
+                  size={18}
+                  onClick={() => {
+                    hashParams["statement"] = row.values.id;
+                    history.push({
+                      hash: queryString.stringify(hashParams),
+                    });
+                  }}
+                />
+              )}
+            </StyledSelectorCell>
           );
         },
       },
     ];
   }, [data, actions]);
-
-  const addStatement = async () => {
-    const newStatement: IStatement = CStatement(territoryId);
-    const res = await api.actantsCreate(newStatement);
-    if (res.status === 200) {
-      toast.info(`Statement created!`);
-      queryClient.invalidateQueries([
-        "territory",
-        "statement-list",
-        territoryId,
-      ]);
-
-      hashParams["statement"] = newStatement.id;
-      history.push({
-        hash: queryString.stringify(hashParams),
-      });
-    } else {
-      toast.error(`Error: Statement not created!`);
-    }
-  };
 
   return (
     <>
