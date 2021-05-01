@@ -19,7 +19,9 @@ import { IStatement, IActant, IAction } from "@shared/types";
 import { ActantType } from "@shared/enums";
 import { StatementListTable } from "./StatementListTable/StatementListTable";
 import {
-  StyledDots
+  StyledDots,
+  StyledLoaderWrap,
+  StyledSelectorCell,
 } from "./StatementLitBoxStyles";
 import { CStatement } from "constructors";
 
