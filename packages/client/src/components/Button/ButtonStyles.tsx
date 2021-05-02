@@ -22,3 +22,7 @@ export const StyledButton = styled.button<IButtonStyle>`
     outline: 0;
   }
 `;
+
+export const StyledButtonLabel = styled.span<{ hasIcon?: boolean }>`
+  margin-left: ${({ theme, hasIcon }) => (hasIcon ? theme.space[2] : 0)};
+`;

@@ -1,7 +1,7 @@
 import React, { MouseEventHandler } from "react";
 
 import { Colors } from "types";
-import { StyledButton } from "./ButtonStyles";
+import { StyledButton, StyledButtonLabel } from "./ButtonStyles";
 
 import { Tooltip } from "components";
 
@@ -33,7 +33,9 @@ export const Button: React.FC<ButtonProps> = ({
         inverted={inverted}
       >
         {icon}
-        {label}
+        {label && (
+          <StyledButtonLabel hasIcon={!!icon}>{label}</StyledButtonLabel>
+        )}
       </StyledButton>
     );
   };
