@@ -13,9 +13,9 @@
   },
   {
     "id": "2",
-    "name": "adam",
-    "email": "adam@gmail.com",
-    "password": "adam",
+    "name": "user1",
+    "email": "user1@inkvisitor.com",
+    "password": "abc",
     "options": {
       "defaultTerritory": "",
       "defaultLanguage": "",
@@ -25,9 +25,21 @@
   },
   {
     "id": "3",
-    "name": "test",
-    "email": "test@gmail.com",
-    "password": "test",
+    "name": "user2",
+    "email": "user2@inkvisitor.com",
+    "password": "def",
+    "options": {
+      "defaultTerritory": "",
+      "defaultLanguage": "",
+      "searchLanguages": []
+    },
+    "bookmarks": null
+  },
+  {
+    "id": "4",
+    "name": "user3",
+    "email": "user3@inkvisitor.com",
+    "password": "ghi",
     "options": {
       "defaultTerritory": "",
       "defaultLanguage": "",
