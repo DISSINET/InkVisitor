@@ -2,6 +2,8 @@ import React, { useEffect, useRef, useState } from "react";
 import { FaTrashAlt, FaStar, FaPlus } from "react-icons/fa";
 import { toast } from "react-toastify";
 import { useQueryClient } from "react-query";
+import { useLocation, useHistory } from "react-router";
+const queryString = require("query-string");
 
 import api from "api";
 import {
@@ -29,6 +31,10 @@ export const ContextMenu: React.FC<ContextMenu> = ({ territoryActant }) => {
   const queryClient = useQueryClient();
   const ref = useRef<HTMLDivElement>(null);
 
+  let history = useHistory();
+  let location = useLocation();
+  var hashParams = queryString.parse(location.hash);
+
   const [showMenu, setShowMenu] = useState(false);
   const [showSubmit, setShowSubmit] = useState(false);
   const [showCreate, setShowCreate] = useState(false);
@@ -51,6 +57,11 @@ export const ContextMenu: React.FC<ContextMenu> = ({ territoryActant }) => {
       toast.info(`Territory [${newTerritory.label}] created!`);
       setTerritoryName("");
       queryClient.invalidateQueries("tree");
+
+      hashParams["territory"] = newTerritory.id;
+      history.push({
+        hash: queryString.stringify(hashParams),
+      });
     } else {
       toast.error(`Error: Territory [${label}] not created!`);
     }
