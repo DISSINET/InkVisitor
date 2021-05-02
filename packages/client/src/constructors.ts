@@ -48,6 +48,18 @@ export const CStatement = (territoryId: string): IStatement => ({
   },
 });
 
+// duplicate statement
+export const DStatement = (statement: IStatement): IStatement => {
+  const duplicatedStatement = { ...statement };
+  duplicatedStatement.id = uuidv4();
+  duplicatedStatement.data.actants.map((a) => (a.id = uuidv4()));
+  duplicatedStatement.data.props.map((p) => (p.id = uuidv4()));
+  duplicatedStatement.data.references.map((r) => (r.id = uuidv4()));
+  duplicatedStatement.data.territory.order += 0.00001;
+
+  return duplicatedStatement;
+};
+
 export const CStatementActant = (): IStatementActant => ({
   id: uuidv4(),
   actant: "",
