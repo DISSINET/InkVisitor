@@ -42,32 +42,30 @@ const loadStatementsTables = async (next: Function) => {
    * actions
    */
   tableActions.forEach((action: any) => {
-    tableActions.forEach((action: any) => {
-      if (action.action_or_relation_english || action.action_or_relation) {
-        const newAction: IAction = {
-          id: action.id_action_or_relation,
-          parent: action.parent_id,
-          note: action.note,
-          labels: [
-            {
-              id: v4(),
-              value: action.action_or_relation_english,
-              lang: "EN",
-            },
-            {
-              id: v4(),
-              value: action.action_or_relation,
-              lang: "LA",
-            },
-          ],
-          types: [],
-          valencies: [],
-          rulesActants: [],
-          rulesProperties: [],
-        };
-        actions.push(newAction);
-      }
-    });
+    if (action.action_or_relation_english || action.action_or_relation) {
+      const newAction: IAction = {
+        id: action.id_action_or_relation,
+        parent: action.parent_id,
+        note: action.note,
+        labels: [
+          {
+            id: v4(),
+            value: action.action_or_relation_english,
+            lang: "EN",
+          },
+          {
+            id: v4(),
+            value: action.action_or_relation,
+            lang: "LA",
+          },
+        ],
+        types: [],
+        valencies: [],
+        rulesActants: [],
+        rulesProperties: [],
+      };
+      actions.push(newAction);
+    }
   });
 
   // parse the table of territories

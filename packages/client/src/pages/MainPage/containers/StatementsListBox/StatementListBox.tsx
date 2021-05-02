@@ -75,6 +75,34 @@ export const StatementListBox: React.FC = () => {
 
   const { statements, actants } = data || initialData;
 
+  const moveEndRow = (statementToMove: IStatement, index: number) => {
+    const beforeOrder =
+      index === 0 ? false : statements[index - 1].data.territory.order;
+    const afterOrder =
+      index === statements.length - 1
+        ? false
+        : statements[index].data.territory.order;
+
+    let newOrder = 0;
+    if (afterOrder === false) {
+      newOrder = (beforeOrder as number) + 1;
+    } else if (beforeOrder === false) {
+      newOrder = (afterOrder as number) / 2;
+    } else {
+      newOrder = ((beforeOrder as number) + (afterOrder as number)) / 2;
+    }
+
+    //console.log("moveend", beforeOrder, afterOrder, newOrder);
+    api.actantsUpdate(statementToMove.id, {
+      data: {
+        territory: {
+          id: statementToMove.data.territory.id,
+          order: newOrder,
+        },
+      },
+    });
+  };
+
   const {
     status: statusActions,
     data: actions,
@@ -258,6 +286,7 @@ export const StatementListBox: React.FC = () => {
   return (
     <>
       <StatementListTable
+        moveEndRow={moveEndRow}
         data={statements}
         columns={columns}
         handleRowClick={(rowId: string) => {
