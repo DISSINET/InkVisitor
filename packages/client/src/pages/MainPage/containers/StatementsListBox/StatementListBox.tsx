@@ -7,6 +7,7 @@ import {
   FaPlus,
   FaRegCircle,
   FaDotCircle,
+  FaRecycle,
 } from "react-icons/fa";
 import { useLocation, useHistory } from "react-router";
 import { toast } from "react-toastify";
@@ -22,15 +23,20 @@ import {
   StyledDots,
   StyledLoaderWrap,
   StyledSelectorCell,
+  StyledStatementListHeader,
+  StyledStatementListHeaderTitle,
+  StyledStatementListHeaderActions,
 } from "./StatementLitBoxStyles";
 import { CStatement } from "constructors";
 
 const initialData: {
   statements: IStatement[];
   actants: IActant[];
+  label: string;
 } = {
   statements: [],
   actants: [],
+  label: "",
 };
 
 export const StatementListBox: React.FC = () => {
@@ -50,9 +56,35 @@ export const StatementListBox: React.FC = () => {
     { initialData: initialData, enabled: !!territoryId && api.isLoggedIn() }
   );
 
-  const addStatement = async (row: any) => {
+  const removeStatement = async (sId: string) => {
+    const res = await api.actantsDelete(sId);
+    toast.info(`Statement removed!`);
+    queryClient.invalidateQueries(["territory", "statement-list", territoryId]);
+  };
+
+  const addStatementAtTheEnd = async () => {
     const newStatement: IStatement = CStatement(territoryId);
-    newStatement.data.territory.order = row.original.data.territory.order;
+    newStatement.data.territory.order = statements.length
+      ? statements[statements.length - 1].data.territory.order
+      : 1;
+    const res = await api.actantsCreate(newStatement);
+    hashParams["statement"] = newStatement.id;
+    history.push({
+      hash: queryString.stringify(hashParams),
+    });
+    queryClient.invalidateQueries(["territory", "statement-list", territoryId]);
+  };
+
+  const addStatementAtCertainIndex = async (index: number) => {
+    let newOrder =
+      index === 0
+        ? statements[0].data.territory.order - 1
+        : (statements[index - 1].data.territory.order +
+            statements[index].data.territory.order) /
+          2;
+
+    const newStatement: IStatement = CStatement(territoryId);
+    newStatement.data.territory.order = newOrder;
 
     const res = await api.actantsCreate(newStatement);
 
@@ -75,32 +107,37 @@ export const StatementListBox: React.FC = () => {
 
   const { statements, actants } = data || initialData;
 
-  const moveEndRow = (statementToMove: IStatement, index: number) => {
-    const beforeOrder =
-      index === 0 ? false : statements[index - 1].data.territory.order;
-    const afterOrder =
-      index === statements.length - 1
-        ? false
-        : statements[index].data.territory.order;
+  const moveEndRow = async (statementToMove: IStatement, index: number) => {
+    // whether row is moving top-bottom direction
+    const topDown =
+      statementToMove.data.territory.order <
+      statements[index].data.territory.order;
 
-    let newOrder = 0;
-    if (afterOrder === false) {
-      newOrder = (beforeOrder as number) + 1;
-    } else if (beforeOrder === false) {
-      newOrder = (afterOrder as number) / 2;
+    const thisOrder = statementToMove.data.territory.order;
+    let allOrders = statements.map((s) => s.data.territory.order);
+    allOrders.sort((a, b) => (a > b ? 1 : -1));
+    const thisIndex = allOrders.indexOf(thisOrder);
+
+    allOrders = allOrders.filter((o) => o !== thisOrder);
+    allOrders.splice(index, 0, thisOrder);
+
+    if (index === 0) {
+      allOrders[index] = allOrders[1] - 1;
+    } else if (index === allOrders.length - 1) {
+      allOrders[index] = allOrders[index - 1] + 1;
     } else {
-      newOrder = ((beforeOrder as number) + (afterOrder as number)) / 2;
+      allOrders[index] = (allOrders[index - 1] + allOrders[index + 1]) / 2;
     }
 
-    //console.log("moveend", beforeOrder, afterOrder, newOrder);
-    api.actantsUpdate(statementToMove.id, {
+    const res = await api.actantsUpdate(statementToMove.id, {
       data: {
         territory: {
           id: statementToMove.data.territory.id,
-          order: newOrder,
+          order: allOrders[index],
         },
       },
     });
+    queryClient.invalidateQueries(["territory", "statement-list", territoryId]);
   };
 
   const {
@@ -174,6 +211,9 @@ export const StatementListBox: React.FC = () => {
 
           return (
             <div>
+              <div>
+                {/* {actionLabel + " | " + row.values.data?.territory.order} */}
+              </div>
               {actionLabel &&
                 (actionLabel.length > 9 ? (
                   <Tooltip label={actionLabel}>
@@ -239,15 +279,15 @@ export const StatementListBox: React.FC = () => {
               color="danger"
               tooltip="delete"
               onClick={() => {
-                // delete
+                removeStatement((row.original as IStatement).id);
               }}
             />
             <Button
               key="add"
               icon={<FaPlus size={14} />}
-              tooltip="add new statement"
+              tooltip="add new statement before"
               color="warning"
-              onClick={() => addStatement(row)}
+              onClick={() => addStatementAtCertainIndex(row.index)}
             />
           </ButtonGroup>
         ),
@@ -283,8 +323,39 @@ export const StatementListBox: React.FC = () => {
     });
   };
 
+  statements.sort((a, b) =>
+    a.data.territory.order > b.data.territory.order ? 1 : -1
+  );
+
   return (
     <>
+      <StyledStatementListHeader>
+        <StyledStatementListHeaderTitle>
+          {data ? `Territory ${data.label}` : "no territory selected"}
+        </StyledStatementListHeaderTitle>
+        <StyledStatementListHeaderActions>
+          <Button
+            key="add"
+            icon={<FaPlus size={14} />}
+            tooltip="add new statement at the end of the list"
+            color="primary"
+            label="add new statement"
+            onClick={() => {
+              addStatementAtTheEnd();
+            }}
+          />
+          <Button
+            key="refresh"
+            icon={<FaRecycle size={14} />}
+            tooltip="refresh data"
+            color="info"
+            label="refresh"
+            onClick={() => {
+              queryClient.invalidateQueries(["territory"]);
+            }}
+          />
+        </StyledStatementListHeaderActions>
+      </StyledStatementListHeader>
       <StatementListTable
         moveEndRow={moveEndRow}
         data={statements}

@@ -46,7 +46,6 @@ export const StatementListTable: React.FC<StatementListTable> = ({
 
   const moveRow = useCallback(
     (dragIndex: number, hoverIndex: number) => {
-      console.log("moweRow");
       const dragRecord = records[dragIndex];
       setRecords(
         update(records, {
