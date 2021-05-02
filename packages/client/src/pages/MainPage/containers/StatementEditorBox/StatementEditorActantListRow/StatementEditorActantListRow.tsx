@@ -18,7 +18,7 @@ import { Input, Button } from "components";
 import { StyledActantListItem } from "../StatementEditorBoxStyles";
 import api from "api";
 
-interface StatementEditorActantListItem {
+interface StatementEditorActantListRow {
   index: number;
   actant: IActant;
   sActant: IStatementActant;
@@ -28,7 +28,7 @@ interface StatementEditorActantListItem {
   moveFn: (dragIndex: number, hoverIndex: number) => void;
   updateOrderFn: () => void;
 }
-export const StatementEditorActantListItem: React.FC<StatementEditorActantListItem> = ({
+export const StatementEditorActantListRow: React.FC<StatementEditorActantListRow> = ({
   index,
   actant,
   sActant,
@@ -95,7 +95,7 @@ export const StatementEditorActantListItem: React.FC<StatementEditorActantListIt
   });
 
   const [{ isDragging }, drag, preview] = useDrag({
-    item: { type: ItemTypes.ROW, index, id: actant.id },
+    item: { type: ItemTypes.ROW, index, id: sActant.id },
     collect: (monitor: DragSourceMonitor) => ({
       isDragging: monitor.isDragging(),
     }),
@@ -104,13 +104,16 @@ export const StatementEditorActantListItem: React.FC<StatementEditorActantListIt
 
   drag(drop(dropRef));
 
+  // const opacity = isDragging ? 0.2 : 1;
+  const opacity = 1;
+
   return (
     <React.Fragment>
       <StyledActantListItem ref={dropRef}>
         <FaGripVertical style={{ cursor: "move" }} />
       </StyledActantListItem>
 
-      <StyledActantListItem>
+      <StyledActantListItem opacity={opacity}>
         {actant ? (
           <ActantTag
             actant={actant}
@@ -140,7 +143,7 @@ export const StatementEditorActantListItem: React.FC<StatementEditorActantListIt
           />
         )}
       </StyledActantListItem>
-      <StyledActantListItem>
+      <StyledActantListItem opacity={opacity}>
         <Input
           type="select"
           value={sActant.position}
@@ -152,7 +155,7 @@ export const StatementEditorActantListItem: React.FC<StatementEditorActantListIt
           }}
         ></Input>
       </StyledActantListItem>
-      <StyledActantListItem>
+      <StyledActantListItem opacity={opacity}>
         <ElvlToggle
           value={sActant.elvl}
           onChangeFn={(newValue: string) => {
@@ -170,7 +173,7 @@ export const StatementEditorActantListItem: React.FC<StatementEditorActantListIt
           }}
         />
       </StyledActantListItem>
-      <StyledActantListItem>
+      <StyledActantListItem opacity={opacity}>
         <Button
           key="d"
           icon={<FaTrashAlt />}

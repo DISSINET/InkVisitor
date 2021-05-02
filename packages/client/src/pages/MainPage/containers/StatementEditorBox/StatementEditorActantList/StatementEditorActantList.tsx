@@ -8,7 +8,7 @@ import {
   StyledListHeaderColumn,
 } from "../StatementEditorBoxStyles";
 import { IResponseStatement, IStatementActant } from "@shared/types";
-import { StatementEditorActantListItem } from "../StatementEditorActantListItem/StatementEditorActantListItem";
+import { StatementEditorActantListRow } from "../StatementEditorActantListRow/StatementEditorActantListRow";
 import api from "api";
 
 interface StatementEditorActantList {
@@ -66,7 +66,7 @@ export const StatementEditorActantList: React.FC<StatementEditorActantList> = ({
         return (
           <React.Fragment key={sai}>
             {actant && (
-              <StatementEditorActantListItem
+              <StatementEditorActantListRow
                 index={sai}
                 actant={actant}
                 sActant={sActant}
