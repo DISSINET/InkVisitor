@@ -24,7 +24,14 @@ import { useQueryClient } from "react-query";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { setAuthToken } from "redux/features/authTokenSlice";
 import { setUsername } from "redux/features/usernameSlice";
-import { StyledUserBox, StyledBoxWrap, StyledUser } from "./MainPageStyles";
+import {
+  StyledUserBox,
+  StyledBoxWrap,
+  StyledUser,
+  StyledFaUserAlt,
+  StyledText,
+  StyledUsername,
+} from "./MainPageStyles";
 import { heightFooter, heightHeader } from "Theme/constants";
 
 interface MainPage {
@@ -63,7 +70,11 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
           <div>
             {isLoggedIn && (
               <StyledUserBox>
-                <StyledUser>logged as {username}</StyledUser>
+                <StyledUser>
+                  <StyledText>logged as</StyledText>
+                  <StyledFaUserAlt size={14} />
+                  <StyledUsername>{username}</StyledUsername>
+                </StyledUser>
                 <Button
                   label="Log Out"
                   color="danger"

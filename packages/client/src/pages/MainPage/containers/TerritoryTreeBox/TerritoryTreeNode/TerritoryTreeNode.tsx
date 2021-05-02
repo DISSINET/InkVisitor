@@ -21,6 +21,7 @@ import { ContextMenu } from "../ContextMenu/ContextMenu";
 import { ActantTag } from "../..";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { setTreeInitialized } from "redux/features/treeInitializeSlice";
+import theme from "Theme/theme";
 
 interface TerritoryTreeNode {
   territory: any;
@@ -97,9 +98,27 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
       return (
         <>
           {isExpanded ? (
-            <BsCaretDownFill onClick={() => onCaretClick(id)} />
+            <BsCaretDownFill
+              size={14}
+              onClick={() => onCaretClick(id)}
+              style={{
+                strokeWidth: "2",
+                strokeLinejoin: "bevel",
+                color: theme.color["primary"],
+                marginRight: "2px",
+              }}
+            />
           ) : (
-            <BsCaretRightFill onClick={() => onCaretClick(id)} />
+            <BsCaretRightFill
+              size={14}
+              onClick={() => onCaretClick(id)}
+              style={{
+                strokeWidth: "2",
+                strokeLinejoin: "bevel",
+                color: theme.color["primary"],
+                marginRight: "2px",
+              }}
+            />
           )}
         </>
       );
@@ -108,9 +127,27 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
       return (
         <>
           {isExpanded ? (
-            <BsCaretDown onClick={() => onCaretClick(id)} />
+            <BsCaretDown
+              size={14}
+              onClick={() => onCaretClick(id)}
+              style={{
+                strokeWidth: "2",
+                strokeLinejoin: "bevel",
+                color: theme.color["primary"],
+                marginRight: "2px",
+              }}
+            />
           ) : (
-            <BsCaretRight onClick={() => onCaretClick(id)} />
+            <BsCaretRight
+              size={14}
+              onClick={() => onCaretClick(id)}
+              style={{
+                strokeWidth: "2",
+                strokeLinejoin: "bevel",
+                color: theme.color["primary"],
+                marginRight: "2px",
+              }}
+            />
           )}
         </>
       );

@@ -100,7 +100,7 @@ export const StatementListRow: React.FC<StatementListRow> = ({
         opacity={opacity}
         isOdd={Boolean(index % 2)}
         isSelected={row.values.id === statementId}
-        onDoubleClick={() => {
+        onClick={() => {
           handleClick(row.values.id);
         }}
       >
