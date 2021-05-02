@@ -435,7 +435,7 @@ class Api {
   }
 
   /**
-   * actantIdsInStatementGet retieves ids of statements that are dependent on the territory
+   * actantIdsInStatementGet retieves ids of statements that are used on the territory
    * @see Statement.findDependentStatementIds
    */
   async actantIdsInTerritory(
