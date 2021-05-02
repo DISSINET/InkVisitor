@@ -19,6 +19,7 @@ interface StatementListRow {
   row: any;
   index: number;
   moveRow: any;
+  moveEndRow: Function;
   handleClick: Function;
   visibleColumns: any;
 }
@@ -27,6 +28,7 @@ export const StatementListRow: React.FC<StatementListRow> = ({
   row,
   index,
   moveRow,
+  moveEndRow,
   handleClick = () => {},
   visibleColumns,
 }) => {
@@ -84,8 +86,9 @@ export const StatementListRow: React.FC<StatementListRow> = ({
     collect: (monitor: DragSourceMonitor) => ({
       isDragging: monitor.isDragging(),
     }),
-    end: (item: DragItem | undefined, monitor: DragSourceMonitor) =>
-      api.territoryMoveStatement(`${row.values.id}`, index),
+    end: (item: DragItem | undefined, monitor: DragSourceMonitor) => {
+      moveEndRow(row.values, index);
+    },
   });
 
   const opacity = isDragging ? 0.2 : 1;
