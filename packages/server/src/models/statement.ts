@@ -27,7 +27,7 @@ class StatementActant implements IStatementActant, IModel {
   }
 
   isValid(): boolean {
-    return false;
+    return true;
   }
 }
 
@@ -46,7 +46,7 @@ class StatementReference implements IStatementReference, IModel {
   }
 
   isValid(): boolean {
-    return false;
+    return true;
   }
 }
 
