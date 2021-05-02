@@ -1,6 +1,7 @@
 import { createGlobalStyle } from "styled-components";
 
 import MuniFont from "assets/fonts/muni-bold-webfont.woff2";
+import MuniArial from "assets/fonts/academicons.woff2";
 
 const GlobalStyle = createGlobalStyle`
   @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@100;300;400;500;700;900&display=swap');
@@ -12,11 +13,16 @@ const GlobalStyle = createGlobalStyle`
     position: absolute;
     min-width: 100%;
     font-family: "Roboto", sans-serif;
+    /* font-family: "MuniArial", Arial, Helvetica Neue, sans-serif; */
     letter-spacing: .2px;
     line-height: 1.5;
     @font-face {
       font-family: "Muni";
       src: url("${MuniFont}") format("woff2");
+    }
+    @font-face {
+      font-family: "MuniArial";
+      src: url("${MuniArial}") format("woff2");
     }
   }
   *, *::after, *::before {
