@@ -44,7 +44,10 @@ export const UserAdministrationModal: React.FC = () => {
       disableBgClick
       inverted
       width="thin"
-      onSubmit={() => handleLogIn()}
+      onSubmit={(e) => {
+        e.preventDefault();
+        handleLogIn();
+      }}
     >
       <ModalHeader title={"User Log In"} />
       <ModalContent>
