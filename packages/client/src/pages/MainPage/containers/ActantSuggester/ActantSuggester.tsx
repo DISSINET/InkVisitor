@@ -149,7 +149,7 @@ export const ActantSuggester: React.FC<ActantSuggesterI> = ({
       category={selectedCategory} // selected category
       categories={allCategories} // all possible categories
       suggestionListPosition={""} // todo not implemented yet
-      displayCancelButton={typed.length > 2}
+      displayCancelButton={typed.length > 0}
       onCancel={() => {
         handleClean();
       }}
