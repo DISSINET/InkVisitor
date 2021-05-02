@@ -56,6 +56,12 @@ export const StatementListBox: React.FC = () => {
     { initialData: initialData, enabled: !!territoryId && api.isLoggedIn() }
   );
 
+  const removeStatement = async (sId: string) => {
+    const res = await api.actantsDelete(sId);
+    toast.info(`Statement removed!`);
+    queryClient.invalidateQueries(["territory", "statement-list", territoryId]);
+  };
+
   const addStatementAtTheEnd = async () => {
     const newStatement: IStatement = CStatement(territoryId);
     newStatement.data.territory.order = statements.length
@@ -273,7 +279,7 @@ export const StatementListBox: React.FC = () => {
               color="danger"
               tooltip="delete"
               onClick={() => {
-                // delete
+                removeStatement((row.original as IStatement).id);
               }}
             />
             <Button
