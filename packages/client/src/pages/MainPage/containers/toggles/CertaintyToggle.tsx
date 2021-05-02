@@ -2,7 +2,6 @@ import React, { useMemo } from "react";
 import styled from "styled-components";
 
 import { FaQuestionCircle } from "react-icons/fa";
-import { IoMdChatbubbles } from "react-icons/io";
 
 import { Toggle, Dropdown } from "components";
 import { certaintyDict } from "./../../../../../../shared/dictionaries";
@@ -41,7 +40,7 @@ export const CertaintyToggle: React.FC<ICertaintyToggle> = ({
           <StyledModalityContentSpan>{option.label}</StyledModalityContentSpan>
         ) : (
           <StyledModalityContentSpan>
-            <IoMdChatbubbles />
+            <FaQuestionCircle />
             {option.value}
           </StyledModalityContentSpan>
         );
