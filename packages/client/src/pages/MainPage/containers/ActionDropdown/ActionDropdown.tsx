@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useMemo } from "react";
 
-import { Dropdown } from "components";
+import { Dropdown, Button } from "components";
 import api from "api";
 import { IAction } from "@shared/types";
 import { useQuery, useMutation, useQueryClient } from "react-query";
@@ -34,7 +34,7 @@ export const ActionDropdown: React.FC<IActionDropdown> = ({
   );
   const options = useMemo(() => {
     return actions?.map((action: IAction) => {
-      const label = action.labels[0].value;
+      const label = action.labels.map((l) => l.value).join(" - ");
       return { value: action.id, label: label };
     });
   }, [actions]);
@@ -55,7 +55,7 @@ export const ActionDropdown: React.FC<IActionDropdown> = ({
         onSelectedChange(selectedItem);
       }}
       options={options}
-      width={500}
+      width={600}
     />
   );
 };
