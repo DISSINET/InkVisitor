@@ -36,9 +36,9 @@ export const ActantSuggester: React.FC<ActantSuggesterI> = ({
   const { status, data: territoryActants, error, isFetching } = useQuery(
     ["territory", "suggesters", territoryId],
     async () => {
-      const res = await api.territoryGet(territoryId);
+      const res = await api.actantIdsInTerritory(territoryId);
       //setTerritoryActantIds(res.data.actants.map((a) => a.id));
-      return res.data.actants.map((a) => a.id);
+      return res.data;
     },
     { initialData: [], enabled: !!territoryId }
   );
