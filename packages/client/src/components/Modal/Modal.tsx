@@ -13,7 +13,7 @@ import {
 interface Modal {
   children?: ReactNode;
   onClose?: () => void;
-  onSubmit?: () => void;
+  onSubmit?: (e: any) => void;
   showModal: boolean;
   disableBgClick?: boolean;
   fullwidth?: boolean;
