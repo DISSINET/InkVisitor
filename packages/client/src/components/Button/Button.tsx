@@ -12,6 +12,7 @@ interface ButtonProps {
   inverted?: boolean;
   color?: typeof Colors[number];
   onClick?: MouseEventHandler<HTMLElement>;
+  type?: "button" | "submit" | "reset";
 }
 
 export const Button: React.FC<ButtonProps> = ({
@@ -23,6 +24,7 @@ export const Button: React.FC<ButtonProps> = ({
   onClick = () => {
     // do nothing
   },
+  type = "button",
 }) => {
   const renderButton = () => {
     return (
@@ -31,6 +33,7 @@ export const Button: React.FC<ButtonProps> = ({
         hasIcon={icon && true}
         color={color}
         inverted={inverted}
+        type={type}
       >
         {icon}
         {label && (

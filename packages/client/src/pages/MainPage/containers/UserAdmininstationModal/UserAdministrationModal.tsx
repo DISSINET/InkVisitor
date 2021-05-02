@@ -39,7 +39,13 @@ export const UserAdministrationModal: React.FC = () => {
   };
 
   return (
-    <Modal showModal disableBgClick inverted width="thin">
+    <Modal
+      showModal
+      disableBgClick
+      inverted
+      width="thin"
+      onSubmit={() => handleLogIn()}
+    >
       <ModalHeader title={"User Log In"} />
       <ModalContent>
         <StyledLogInBox>
@@ -48,6 +54,7 @@ export const UserAdministrationModal: React.FC = () => {
             inverted
             onChangeFn={(text: string) => setUsernameLocal(text)}
             value={usernameLocal}
+            changeOnType
           />
           <Input
             placeholder="password"
@@ -55,12 +62,18 @@ export const UserAdministrationModal: React.FC = () => {
             inverted
             onChangeFn={(text: string) => setPassword(text)}
             value={password}
+            changeOnType
           />
         </StyledLogInBox>
       </ModalContent>
       <ModalFooter>
         <ButtonGroup>
-          <Button label="Log In" color="danger" onClick={() => handleLogIn()} />
+          <Button
+            type="submit"
+            label="Log In"
+            color="danger"
+            // onClick={() => handleLogIn()}
+          />
         </ButtonGroup>
       </ModalFooter>
     </Modal>

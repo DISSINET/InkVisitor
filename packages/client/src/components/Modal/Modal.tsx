@@ -13,6 +13,7 @@ import {
 interface Modal {
   children?: ReactNode;
   onClose?: () => void;
+  onSubmit?: () => void;
   showModal: boolean;
   disableBgClick?: boolean;
   fullwidth?: boolean;
@@ -22,6 +23,7 @@ interface Modal {
 export const Modal: FC<Modal> = ({
   children,
   onClose = () => {},
+  onSubmit = () => {},
   showModal,
   disableBgClick = false,
   inverted = false,
@@ -36,7 +38,7 @@ export const Modal: FC<Modal> = ({
             onClick={disableBgClick ? () => {} : onClose}
           ></Background>
           <ModalCard inverted={inverted} fullwidth={fullwidth} width={width}>
-            {children}
+            <form onSubmit={onSubmit}>{children}</form>
           </ModalCard>
         </ModalWrap>
       )}

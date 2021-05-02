@@ -5,6 +5,7 @@ interface IButtonStyle {
   hasIcon?: boolean;
   inverted: boolean;
   color: string;
+  type: "button" | "submit" | "reset";
 }
 export const StyledButton = styled.button<IButtonStyle>`
   display: flex;
