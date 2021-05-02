@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, Ref } from "react";
 
 import { IOption } from "@shared/types";
 import {
@@ -22,6 +22,7 @@ interface InputProps {
   placeholder?: string;
   changeOnType?: boolean;
   password?: boolean;
+  ref?: Ref<HTMLInputElement>;
 }
 
 export const Input: React.FC<InputProps> = ({
@@ -37,6 +38,7 @@ export const Input: React.FC<InputProps> = ({
   onChangeFn,
   placeholder,
   password = false,
+  ref,
 }) => {
   const [displayValue, setDisplayValue] = useState(value);
   useEffect(() => {
@@ -63,6 +65,7 @@ export const Input: React.FC<InputProps> = ({
             onChangeFn(displayValue);
           }}
           inverted={inverted}
+          ref={ref}
         />
       )}
       {type === "textarea" && (

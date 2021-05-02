@@ -58,10 +58,14 @@ export const StyledListHeaderColumn = styled.div<StyledListHeaderColumn>`
 interface StyledActantList {}
 export const StyledActantList = styled(StyledGrid)<StyledActantList>``;
 
-interface StyledActantListItem {}
+interface StyledActantListItem {
+  opacity?: number;
+}
 export const StyledActantListItem = styled(
   StyledGridCell
-)<StyledActantListItem>``;
+)<StyledActantListItem>`
+  opacity: ${({ opacity }) => opacity};
+`;
 
 // Props section
 interface StyledPropsActantHeader {}
