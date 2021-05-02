@@ -56,30 +56,6 @@ export const StatementListBox: React.FC = () => {
     { initialData: initialData, enabled: !!territoryId && api.isLoggedIn() }
   );
 
-  // auxiliary function to create new order based on a given index in list
-  const getNewOrderValue = (index: number, statements: IStatement[]) => {
-    const beforeOrder =
-      index === 0 ? false : statements[index - 1].data.territory.order;
-    const afterOrder =
-      index === statements.length - 1
-        ? false
-        : statements[index].data.territory.order;
-
-    let newOrder = 0;
-    if (afterOrder === false) {
-      newOrder = (beforeOrder as number) + 1;
-    } else if (beforeOrder === false) {
-      newOrder = (afterOrder as number) / 2;
-    } else {
-      newOrder = ((beforeOrder as number) + (afterOrder as number)) / 2;
-    }
-    console.log(
-      `index ${index}, beforeOrder ${beforeOrder}, afterOrder ${afterOrder}, newOrder ${newOrder}`
-    );
-    console.log(statements.map((s) => s.data.territory.order));
-    return newOrder;
-  };
-
   const addStatementAtTheEnd = async () => {
     const newStatement: IStatement = CStatement(territoryId);
     newStatement.data.territory.order = statements.length
@@ -94,9 +70,13 @@ export const StatementListBox: React.FC = () => {
   };
 
   const addStatementAtCertainIndex = async (index: number) => {
-    console.log("index", index);
-    const newOrder = getNewOrderValue(index, statements);
-    console.log("new order", newOrder);
+    let newOrder =
+      index === 0
+        ? statements[0].data.territory.order - 1
+        : (statements[index - 1].data.territory.order +
+            statements[index].data.territory.order) /
+          2;
+
     const newStatement: IStatement = CStatement(territoryId);
     newStatement.data.territory.order = newOrder;
 
@@ -299,7 +279,7 @@ export const StatementListBox: React.FC = () => {
             <Button
               key="add"
               icon={<FaPlus size={14} />}
-              tooltip="add new statement"
+              tooltip="add new statement before"
               color="warning"
               onClick={() => addStatementAtCertainIndex(row.index)}
             />
