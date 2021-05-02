@@ -125,8 +125,9 @@ export const StatementEditorBox: React.FC = () => {
     if (statement) {
       const newStatementActant = CStatementActant();
       newStatementActant.actant = newStatementActantId;
-      const newData = { ...statement.data };
-      newData.actants.push(newStatementActant);
+      const newData = {
+        actants: [...statement.data.actants, newStatementActant],
+      };
       update(newData);
     }
   };
@@ -136,7 +137,7 @@ export const StatementEditorBox: React.FC = () => {
       const updatedProps = statement.data.props.map((p) =>
         p.id === propId ? { ...p, ...changes } : p
       );
-      const newData = { ...statement.data, ...{ props: updatedProps } };
+      const newData = { ...{ props: updatedProps } };
       update(newData);
     }
   };
@@ -145,16 +146,17 @@ export const StatementEditorBox: React.FC = () => {
     if (statement && originId) {
       const newProp = CProp();
       newProp.origin = originId;
-      const newData = { ...statement.data };
-      newData.props.push(newProp);
+
+      const newData = { props: [...statement.data.props, newProp] };
       update(newData);
     }
   };
 
   const removeProp = (originId: string) => {
     if (statement && originId) {
-      const newData = { ...statement.data };
-      newData.props = newData.props.filter((p) => p.id !== originId);
+      const newData = {
+        props: statement.data.props.filter((p) => p.id !== originId),
+      };
       update(newData);
     }
   };
@@ -167,18 +169,18 @@ export const StatementEditorBox: React.FC = () => {
         r.id === referenceId ? { ...r, ...changes } : r
       );
       const newData = {
-        ...statement.data,
-        ...{ references: updatedReferences },
+        references: updatedReferences,
       };
       update(newData);
     }
   };
   const removeReference = (referenceId: string) => {
     if (statement && referenceId) {
-      const newData = { ...statement.data };
-      newData.references = newData.references.filter(
-        (p) => p.id !== referenceId
-      );
+      const newData = {
+        references: statement.data.references.filter(
+          (p) => p.id !== referenceId
+        ),
+      };
       update(newData);
     }
   };
@@ -186,15 +188,13 @@ export const StatementEditorBox: React.FC = () => {
   //tags
   const addTag = (tagId: string) => {
     if (statement && tagId) {
-      const newData = { ...statement.data };
-      newData.tags.push(tagId);
+      const newData = { tags: [...statement.data.tags, tagId] };
       update(newData);
     }
   };
   const removeTag = (tagId: string) => {
     if (statement && tagId) {
-      const newData = { ...statement.data };
-      newData.tags = newData.tags.filter((p) => p !== tagId);
+      const newData = { tags: statement.data.tags.filter((p) => p !== tagId) };
       update(newData);
     }
   };

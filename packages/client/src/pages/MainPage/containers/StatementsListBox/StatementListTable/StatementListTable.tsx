@@ -9,11 +9,13 @@ interface StatementListTable {
   data: {}[];
   columns: Column<{}>[];
   handleRowClick?: Function;
+  moveEndRow: Function;
 }
 export const StatementListTable: React.FC<StatementListTable> = ({
   data,
   columns,
   handleRowClick = () => {},
+  moveEndRow,
 }) => {
   const [records, setRecords] = useState<{}[]>([]);
   useEffect(() => {
@@ -44,6 +46,7 @@ export const StatementListTable: React.FC<StatementListTable> = ({
 
   const moveRow = useCallback(
     (dragIndex: number, hoverIndex: number) => {
+      console.log("moweRow");
       const dragRecord = records[dragIndex];
       setRecords(
         update(records, {
@@ -80,6 +83,7 @@ export const StatementListTable: React.FC<StatementListTable> = ({
               index={i}
               row={row}
               moveRow={moveRow}
+              moveEndRow={moveEndRow}
               {...row.getRowProps()}
               visibleColumns={visibleColumns}
             />

@@ -47,7 +47,7 @@ export const StatementEditorActantListItem: React.FC<StatementEditorActantListIt
       const updatedActants = statement.data.actants.map((a) =>
         a.id === statementActantId ? { ...a, ...changes } : a
       );
-      const newData = { ...statement.data, ...{ actants: updatedActants } };
+      const newData = { actants: updatedActants };
       updateApiCall(newData);
     }
   };
@@ -56,7 +56,7 @@ export const StatementEditorActantListItem: React.FC<StatementEditorActantListIt
       const updatedActants = statement.data.actants.filter(
         (a) => a.id !== statementActantId
       );
-      const newData = { ...statement.data, ...{ actants: updatedActants } };
+      const newData = { actants: updatedActants };
       updateApiCall(newData);
     }
   };
