@@ -1,9 +1,9 @@
 import { ActantType } from "@shared/enums";
 import { ITerritory, IParentTerritory } from "@shared/types/territory";
-import { r as rethink, Connection, WriteResult } from "rethinkdb-ts";
+import { r as rethink, Connection, WriteResult, RDatum } from "rethinkdb-ts";
 import { fillFlatObject, UnknownObject, IModel } from "./common";
 import Actant from "./actant";
-import { InvalidDeleteError } from "@shared/types/errors";
+import { InternalServerError, InvalidDeleteError } from "@shared/types/errors";
 
 export class TerritoryParent implements IParentTerritory, IModel {
   id = "";
@@ -19,7 +19,6 @@ export class TerritoryParent implements IParentTerritory, IModel {
 
   isValid(): boolean {
     if (this.id === "") {
-      //|| this.order === -1) {
       return false;
     }
 
@@ -82,18 +81,6 @@ class Territory extends Actant implements ITerritory {
     return this.data.isValid();
   }
 
-  async findChilds(db: Connection | undefined): Promise<ITerritory[]> {
-    return await rethink
-      .table(Territory.table)
-      .filter((territory: any) => {
-        return rethink.and(
-          territory("data")("parent").typeOf().eq("OBJECT"),
-          territory("data")("parent")("id").eq(this.id)
-        );
-      })
-      .run(db);
-  }
-
   async save(db: Connection | undefined): Promise<WriteResult> {
     if (this.data.parent) {
       // get count of future siblings and move current territory to last position
@@ -101,10 +88,41 @@ class Territory extends Actant implements ITerritory {
         new Territory({ id: this.data.parent.id }),
         db
       );
-      this.data.parent.order = childs.length + 1;
+
+      const wantedOrder = this.data.parent.order;
+      this.data.parent.order = Actant.determineOrder(wantedOrder, childs);
     }
 
     return super.save(db);
+  }
+
+  async update(
+    db: Connection | undefined,
+    updateData: Record<string, unknown>
+  ): Promise<WriteResult> {
+    if (updateData["data"] && (updateData["data"] as any)["parent"]) {
+      const parentData = (updateData["data"] as any)["parent"];
+      let parentId: string;
+      if (parentData.id) {
+        parentId = parentData.id;
+      } else if (this.data.parent) {
+        parentId = this.data.parent.id;
+      } else {
+        throw new InternalServerError("parent for category must be set");
+      }
+
+      const siblings = await this.findChilds.call(
+        new Territory({ id: parentId }),
+        db
+      );
+      this.data.parent = new TerritoryParent({
+        id: parentId,
+        order: Actant.determineOrder(parentData.order, siblings),
+      });
+      parentData.order = this.data.parent.order;
+    }
+
+    return rethink.table(Actant.table).get(this.id).update(updateData).run(db);
   }
 
   async delete(db: Connection | undefined): Promise<WriteResult> {
@@ -115,11 +133,34 @@ class Territory extends Actant implements ITerritory {
     }
 
     const childs = await this.findChilds(db);
-    if (childs.length) {
+    if (Object.keys(childs).length) {
       throw new InvalidDeleteError("cannot delete territory with childs");
     }
 
     return super.delete(db);
+  }
+
+  async findChilds(
+    db: Connection | undefined
+  ): Promise<Record<number, ITerritory>> {
+    const list: ITerritory[] = await rethink
+      .table(Territory.table)
+      .filter((territory: RDatum) => {
+        return rethink.and(
+          territory("data")("parent").typeOf().eq("OBJECT"),
+          territory("data")("parent")("id").eq(this.id)
+        );
+      })
+      .run(db);
+
+    const out: Record<number, ITerritory> = {};
+    for (const ter of list) {
+      if (ter.data.parent) {
+        out[ter.data.parent.order] = ter;
+      }
+    }
+
+    return out;
   }
 }
 

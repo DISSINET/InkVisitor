@@ -5,6 +5,9 @@ import { supertestConfig } from "..";
 import { apiPath } from "../../common/constants";
 import app from "../../Server";
 import { IAction } from "@shared/types";
+import { Db } from "@service/RethinkDB";
+import { deleteActions, createAction } from "@service/shorthands";
+import "ts-jest";
 
 const testValidAction = (res: Response) => {
   res.body.should.not.empty;
@@ -45,13 +48,46 @@ describe("Actions get", function () {
     });
   });
   describe("Correct param", () => {
-    it("should return a 200 code with user response", (done) => {
-      return request(app)
-        .get(`${apiPath}/actions/get/A1`)
+    it("should return a 200 code with user response", async (done) => {
+      const db = new Db();
+      await db.initDb();
+      const result = await createAction(
+        db,
+        {
+          id: "",
+          labels: [
+            {
+              id: "randomLabel",
+              lang: "en",
+              value: "randomLabel",
+            },
+          ],
+          note: "",
+          parent: false,
+          rulesActants: [],
+          rulesProperties: [],
+          types: [],
+          valencies: [],
+        },
+        false
+      );
+
+      let id = "";
+      if (!result.generated_keys) {
+        expect(result.generated_keys).not.toBeNull();
+      } else {
+        id = result.generated_keys[0];
+      }
+
+      await request(app)
+        .get(`${apiPath}/actions/get/${id}`)
         .set("authorization", "Bearer " + supertestConfig.token)
         .expect(200)
-        .expect(testValidAction)
-        .then(() => done());
+        .expect(testValidAction);
+
+      await deleteActions(db);
+      await db.close();
+      done();
     });
   });
 });
