@@ -239,8 +239,7 @@ export const StatementEditorBox: React.FC = () => {
                           label: string;
                         }) => {
                           const newData = {
-                            ...statement.data,
-                            ...{ action: newActionValue.value },
+                            action: newActionValue.value,
                           };
                           update(newData);
                         }}
