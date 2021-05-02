@@ -2,6 +2,7 @@ import { IDbModel } from "./common";
 import { r as rethink, Connection, WriteResult } from "rethinkdb-ts";
 import { IStatement } from "@shared/types";
 import { ActantType } from "@shared/enums";
+import { InternalServerError } from "@shared/types/errors";
 
 export default class Actant implements IDbModel {
   static table = "actants";
@@ -82,5 +83,39 @@ export default class Actant implements IDbModel {
         );
       })
       .run(db);
+  }
+
+  static determineOrder(want: number, sibl: Record<number, unknown>): number {
+    const sortedOrders: number[] = Object.keys(sibl)
+      .map((k) => parseFloat(k))
+      .sort();
+    let out = -1;
+
+    if (want === -1 || want === undefined) {
+      out = sortedOrders.length ? sortedOrders[sortedOrders.length - 1] + 1 : 0;
+    } else if (sibl[want]) {
+      // if there is a conflict - order number already exist
+      for (let i = 0; i < sortedOrders.length; i++) {
+        if (sortedOrders[i] === want) {
+          if (sortedOrders.length === i + 1) {
+            // conflict occured on the biggest number - use + 1 value
+            out = sortedOrders[i] + 1;
+            break;
+          }
+          // new number would be slightly bigger than conflicted and slightly lower than the bigger one
+          out = sortedOrders[i] + (sortedOrders[i + 1] - sortedOrders[i]) / 2;
+          break;
+        }
+      }
+    } else {
+      // all good
+      out = want;
+    }
+
+    if (out === -1) {
+      throw new InternalServerError("cannot determine correct order");
+    }
+
+    return out;
   }
 }
