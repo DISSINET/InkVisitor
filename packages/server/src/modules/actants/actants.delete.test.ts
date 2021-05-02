@@ -64,7 +64,9 @@ describe("Actants delete", function () {
       await db.initDb();
       const root = new Territory({});
       await root.save(db.connection);
-      const leaf = new Territory({ data: { parent: { id: root.id } } });
+      const leaf = new Territory({
+        data: { parent: { id: root.id, order: -1 } },
+      });
       await leaf.save(db.connection);
 
       await request(app)

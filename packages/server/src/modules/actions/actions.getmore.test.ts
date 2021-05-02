@@ -5,7 +5,7 @@ import { apiPath } from "../../common/constants";
 import app from "../../Server";
 import { IAction } from "@shared/types";
 import { Db } from "@service/RethinkDB";
-import { createAction, deleteAction } from "@service/shorthands";
+import { createAction, deleteActions } from "@service/shorthands";
 import "ts-jest";
 
 const checkArrayOfActions = (res: any) => {
@@ -31,8 +31,9 @@ describe("Actions getMore", function () {
     it("should return a 200 code with array of all actions", async (done) => {
       const db = new Db();
       await db.initDb();
+
       const randomLabel = "actions-getMore-" + Math.random().toString();
-      const insertResult = await createAction(
+      await createAction(
         db,
         {
           id: "",
@@ -52,7 +53,7 @@ describe("Actions getMore", function () {
         },
         false
       );
-      request(app)
+      await request(app)
         .post(`${apiPath}/actions/getMore`)
         .set("authorization", "Bearer " + supertestConfig.token)
         .expect(200)
@@ -63,15 +64,11 @@ describe("Actions getMore", function () {
               !!action.labels.find((label) => label.value === randomLabel)
           );
           expect(foundLabel).not.toBeNull();
-        })
-        .then(() =>
-          deleteAction(
-            db,
-            insertResult.generated_keys ? insertResult.generated_keys[0] : ""
-          )
-        )
-        .then(() => db.close())
-        .then(() => done());
+        });
+
+      await deleteActions(db);
+      await db.close();
+      done();
     });
   });
   describe("Correct label param", () => {
@@ -79,7 +76,7 @@ describe("Actions getMore", function () {
       const db = new Db();
       await db.initDb();
       const randomLabel = "actions-getMore-" + Math.random().toString();
-      const insertResult = await createAction(
+      await createAction(
         db,
         {
           id: "",
@@ -99,7 +96,7 @@ describe("Actions getMore", function () {
         },
         false
       );
-      request(app)
+      await request(app)
         .post(`${apiPath}/actions/getMore`)
         .send({ label: randomLabel })
         .set("authorization", "Bearer " + supertestConfig.token)
@@ -112,15 +109,11 @@ describe("Actions getMore", function () {
               !!action.labels.find((label) => label.value === randomLabel)
           );
           expect(foundLabel).not.toBeNull();
-        })
-        .then(() =>
-          deleteAction(
-            db,
-            insertResult.generated_keys ? insertResult.generated_keys[0] : ""
-          )
-        )
-        .then(() => db.close())
-        .then(() => done());
+        });
+
+      await deleteActions(db);
+      await db.close();
+      done();
     });
   });
 });

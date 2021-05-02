@@ -2,7 +2,7 @@ import { ActantType } from "@shared/enums";
 import "ts-jest";
 import Statement, { StatementTerritory } from "./statement";
 import { Db } from "@service/RethinkDB";
-import { deleteActants } from "@service/shorthands";
+import { deleteActants, findActantById } from "@service/shorthands";
 import Territory from "./territory";
 import { IStatement } from "@shared/types/statement";
 
@@ -386,6 +386,26 @@ describe("findDependentStatementIds", function () {
     });
   });
 
+  describe("one territory, one linked statement via territory.id field", () => {
+    it("should return empty array", async () => {
+      const territory = new Territory(undefined);
+      await territory.save(db.connection);
+
+      const statementData: IStatement = JSON.parse(
+        JSON.stringify(baseStatementData)
+      );
+      statementData.data.territory.id = territory.id;
+      const statement = new Statement({ ...statementData });
+      await statement.save(db.connection);
+
+      const ids = await Statement.findDependentStatementIds(
+        db.connection,
+        territory.id
+      );
+      expect(ids).toHaveLength(1);
+    });
+  });
+
   describe("one territory, two linked statement via references.resource and tags respectively", () => {
     it("should return empty array", async () => {
       const territory = new Territory(undefined);
@@ -455,6 +475,201 @@ describe("findDependentStatementIds", function () {
         territory.id
       );
       expect(ids).toHaveLength(2);
+    });
+  });
+});
+
+describe("Statement - save territory order", function () {
+  let db: Db;
+  beforeAll(async () => {
+    db = new Db();
+    await db.initDb();
+  });
+
+  beforeEach(async () => {
+    await deleteActants(db);
+  });
+
+  afterAll(async () => {
+    await db.close();
+  });
+
+  describe("insert one child without explicit order", () => {
+    it("should have order = 0", async (done) => {
+      const statement = new Statement({ data: { territory: { id: "any" } } });
+      await statement.save(db.connection);
+
+      const createdData = await findActantById<IStatement>(db, statement.id);
+      expect(createdData.data.territory.id).toEqual(
+        statement.data.territory.id
+      );
+      expect(createdData.data.territory.order).toEqual(0);
+
+      done();
+    });
+  });
+
+  describe("insert one child with explicit order", () => {
+    it("should have order = 999 as wanted", async (done) => {
+      const statement = new Statement({
+        data: { territory: { id: "any", order: 999 } },
+      });
+      await statement.save(db.connection);
+
+      const createdData = await findActantById<IStatement>(db, statement.id);
+      expect(createdData.data.territory.id).toEqual(
+        statement.data.territory.id
+      );
+      expect(createdData.data.territory.order).toEqual(
+        statement.data.territory.order
+      );
+
+      done();
+    });
+  });
+
+  describe("insert two child without explicit order", () => {
+    it("should have order = 0 and 1 respectively", async (done) => {
+      const statement1 = new Statement({
+        data: { territory: { id: "any" } },
+      });
+      await statement1.save(db.connection);
+      const statement2 = new Statement({
+        data: { territory: { id: "any" } },
+      });
+      await statement2.save(db.connection);
+
+      // first statement provides order = -1, which should result in save '0' value
+      const createdData1 = await findActantById<IStatement>(db, statement1.id);
+      expect(createdData1.data.territory.id).toEqual(
+        createdData1.data.territory.id
+      );
+      expect(createdData1.data.territory.order).toEqual(
+        createdData1.data.territory.order
+      );
+      expect(createdData1.data.territory.order).toEqual(0);
+
+      // second statement provides order = -1, which should result in save '1' value
+      const createdData2 = await findActantById<IStatement>(db, statement2.id);
+      expect(createdData2.data.territory.id).toEqual(
+        createdData2.data.territory.id
+      );
+      expect(createdData2.data.territory.order).toEqual(
+        createdData2.data.territory.order
+      );
+      expect(createdData2.data.territory.order).toEqual(1);
+      done();
+    });
+  });
+});
+
+describe("Statement - update territory order", function () {
+  let db: Db;
+  beforeAll(async () => {
+    db = new Db();
+    await db.initDb();
+  });
+
+  beforeEach(async () => {
+    await deleteActants(db);
+  });
+
+  afterAll(async () => {
+    await db.close();
+  });
+
+  describe("update the only child", () => {
+    it("should have order as chosen", async (done) => {
+      const statement = new Statement({ data: { territory: { id: "any" } } });
+      await statement.save(db.connection);
+      const wantedNewOrder = 999;
+      await statement.update(db.connection, {
+        data: { territory: { order: wantedNewOrder } },
+      });
+      const createdData = await findActantById<IStatement>(db, statement.id);
+      expect(createdData.data.territory.order).toEqual(wantedNewOrder);
+
+      done();
+    });
+  });
+
+  describe("update the second's order value without conflict ", () => {
+    it("should have order as chosen", async (done) => {
+      const statement1 = new Statement({ data: { territory: { id: "any" } } });
+      await statement1.save(db.connection);
+
+      const statement2 = new Statement({ data: { territory: { id: "any" } } });
+      await statement2.save(db.connection);
+
+      const wantedNewOrder = 999;
+      await statement2.update(db.connection, {
+        data: { territory: { order: wantedNewOrder } },
+      });
+
+      const createdData = await findActantById<IStatement>(db, statement2.id);
+      expect(createdData.data.territory.order).toEqual(wantedNewOrder);
+
+      done();
+    });
+  });
+
+  describe("update the second's order value (conflict)", () => {
+    it("should have order as before", async (done) => {
+      const statement1 = new Statement({ data: { territory: { id: "any" } } });
+      await statement1.save(db.connection);
+
+      const statement2 = new Statement({ data: { territory: { id: "any" } } });
+      await statement2.save(db.connection);
+
+      await statement2.update(db.connection, {
+        data: { territory: { order: statement1.data.territory.order } },
+      });
+
+      // second statement's order is still 1... 0 is taken
+      const createdData2 = await findActantById<IStatement>(db, statement2.id);
+      expect(createdData2.data.territory.order).toEqual(1);
+
+      // first statement's order remains 0
+      const createdData1 = await findActantById<IStatement>(db, statement1.id);
+      expect(createdData1.data.territory.order).toEqual(0);
+
+      done();
+    });
+  });
+
+  describe("update the third's order value (conflict)", () => {
+    it("should have non conflicting order", async (done) => {
+      const statement1 = new Statement({ data: { territory: { id: "any" } } });
+      await statement1.save(db.connection);
+
+      const statement2 = new Statement({ data: { territory: { id: "any" } } });
+      await statement2.save(db.connection);
+
+      const statement3 = new Statement({ data: { territory: { id: "any" } } });
+      await statement3.save(db.connection);
+
+      // third statement wants to have the same order as first statement
+      await statement3.update(db.connection, {
+        data: { territory: { order: statement1.data.territory.order } },
+      });
+
+      // first statement should retain its order
+      const createdData1 = await findActantById<IStatement>(db, statement1.id);
+      expect(createdData1.data.territory.order).toEqual(
+        statement1.data.territory.order
+      );
+
+      // second statement should retain its order
+      const createdData2 = await findActantById<IStatement>(db, statement2.id);
+      expect(createdData2.data.territory.order).toEqual(
+        statement2.data.territory.order
+      );
+
+      // thirs statement should be before the 1 and 2
+      const createdData3 = await findActantById<IStatement>(db, statement3.id);
+      expect(createdData3.data.territory.order).toEqual(0.5);
+
+      done();
     });
   });
 });
