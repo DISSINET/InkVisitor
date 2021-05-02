@@ -81,17 +81,18 @@ export const ActantSuggester: React.FC<ActantSuggesterI> = ({
     setTyped("");
   };
 
+  const handleKeyPress = (event: KeyboardEvent) => {
+    if (event.key === "Escape") {
+      handleClean();
+    }
+  };
+
   // clean on escape press
   useEffect(() => {
-    document.addEventListener(
-      "keydown",
-      (event: KeyboardEvent) => {
-        if (event.key === "Escape") {
-          handleClean();
-        }
-      },
-      false
-    );
+    document.addEventListener("keydown", handleKeyPress);
+    return () => {
+      window.removeEventListener("keydown", handleKeyPress);
+    };
   }, []);
 
   // initial load of categories
