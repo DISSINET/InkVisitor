@@ -97,7 +97,7 @@ export const StatementListRow: React.FC<StatementListRow> = ({
   drag(dragRef);
 
   return (
-    <>
+    <React.Fragment key={row.values.data.territory.order}>
       <StyledTr
         ref={dropRef}
         opacity={opacity}
@@ -119,6 +119,6 @@ export const StatementListRow: React.FC<StatementListRow> = ({
       {row.isExpanded ? (
         <StatementListRowExpanded row={row} visibleColumns={visibleColumns} />
       ) : null}
-    </>
+    </React.Fragment>
   );
 };
