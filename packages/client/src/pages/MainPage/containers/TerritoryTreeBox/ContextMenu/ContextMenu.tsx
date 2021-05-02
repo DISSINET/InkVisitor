@@ -142,6 +142,13 @@ export const ContextMenu: React.FC<ContextMenu> = ({ territoryActant }) => {
         onClose={() => setShowCreate(false)}
         showModal={showCreate}
         disableBgClick
+        onSubmit={() => {
+          if (territoryName.length > 0) {
+            createTerritory(territoryName);
+          } else {
+            toast.warning("Fill territory name!");
+          }
+        }}
       >
         <ModalHeader title={"Add child Territory"} />
         <ModalContent>
@@ -149,6 +156,7 @@ export const ContextMenu: React.FC<ContextMenu> = ({ territoryActant }) => {
             label={"Territory name: "}
             value={territoryName}
             onChangeFn={(value: string) => setTerritoryName(value)}
+            changeOnType
           />
         </ModalContent>
         <ModalFooter>
@@ -164,13 +172,14 @@ export const ContextMenu: React.FC<ContextMenu> = ({ territoryActant }) => {
             <Button
               label="Save"
               color="primary"
-              onClick={() => {
-                if (territoryName.length > 0) {
-                  createTerritory(territoryName);
-                } else {
-                  toast.warning("Fill territory name!");
-                }
-              }}
+              type="submit"
+              // onClick={() => {
+              //   if (territoryName.length > 0) {
+              //     createTerritory(territoryName);
+              //   } else {
+              //     toast.warning("Fill territory name!");
+              //   }
+              // }}
             />
           </ButtonGroup>
         </ModalFooter>
