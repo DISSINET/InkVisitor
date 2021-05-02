@@ -47,8 +47,8 @@ export const ContextMenu: React.FC<ContextMenu> = ({ territoryActant }) => {
     );
     const res = await api.actantsCreate(newTerritory);
     if (res.status === 200) {
-      toast.info(`Territory [${newTerritory.label}] created!`);
       setShowCreate(false);
+      toast.info(`Territory [${newTerritory.label}] created!`);
       setTerritoryName("");
       queryClient.invalidateQueries("tree");
     } else {
