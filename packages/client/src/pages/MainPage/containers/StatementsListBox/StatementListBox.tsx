@@ -57,7 +57,7 @@ export const StatementListBox: React.FC = () => {
   );
 
   // auxiliary function to create new order based on a given index in list
-  const getNewOrderValue = (index: number) => {
+  const getNewOrderValue = (index: number, statements: IStatement[]) => {
     const beforeOrder =
       index === 0 ? false : statements[index - 1].data.territory.order;
     const afterOrder =
@@ -73,6 +73,10 @@ export const StatementListBox: React.FC = () => {
     } else {
       newOrder = ((beforeOrder as number) + (afterOrder as number)) / 2;
     }
+    console.log(
+      `index ${index}, beforeOrder ${beforeOrder}, afterOrder ${afterOrder}, newOrder ${newOrder}`
+    );
+    console.log(statements.map((s) => s.data.territory.order));
     return newOrder;
   };
 
@@ -91,7 +95,7 @@ export const StatementListBox: React.FC = () => {
 
   const addStatementAtCertainIndex = async (index: number) => {
     console.log("index", index);
-    const newOrder = getNewOrderValue(index);
+    const newOrder = getNewOrderValue(index, statements);
     console.log("new order", newOrder);
     const newStatement: IStatement = CStatement(territoryId);
     newStatement.data.territory.order = newOrder;
@@ -117,17 +121,37 @@ export const StatementListBox: React.FC = () => {
 
   const { statements, actants } = data || initialData;
 
-  const moveEndRow = (statementToMove: IStatement, index: number) => {
-    const newOrder = getNewOrderValue(index);
+  const moveEndRow = async (statementToMove: IStatement, index: number) => {
+    // whether row is moving top-bottom direction
+    const topDown =
+      statementToMove.data.territory.order <
+      statements[index].data.territory.order;
 
-    api.actantsUpdate(statementToMove.id, {
+    const thisOrder = statementToMove.data.territory.order;
+    let allOrders = statements.map((s) => s.data.territory.order);
+    allOrders.sort((a, b) => (a > b ? 1 : -1));
+    const thisIndex = allOrders.indexOf(thisOrder);
+
+    allOrders = allOrders.filter((o) => o !== thisOrder);
+    allOrders.splice(index, 0, thisOrder);
+
+    if (index === 0) {
+      allOrders[index] = allOrders[1] - 1;
+    } else if (index === allOrders.length - 1) {
+      allOrders[index] = allOrders[index - 1] + 1;
+    } else {
+      allOrders[index] = (allOrders[index - 1] + allOrders[index + 1]) / 2;
+    }
+
+    const res = await api.actantsUpdate(statementToMove.id, {
       data: {
         territory: {
           id: statementToMove.data.territory.id,
-          order: newOrder,
+          order: allOrders[index],
         },
       },
     });
+    queryClient.invalidateQueries(["territory", "statement-list", territoryId]);
   };
 
   const {
@@ -201,6 +225,9 @@ export const StatementListBox: React.FC = () => {
 
           return (
             <div>
+              <div>
+                {/* {actionLabel + " | " + row.values.data?.territory.order} */}
+              </div>
               {actionLabel &&
                 (actionLabel.length > 9 ? (
                   <Tooltip label={actionLabel}>
@@ -309,6 +336,10 @@ export const StatementListBox: React.FC = () => {
       hash: queryString.stringify(hashParams),
     });
   };
+
+  statements.sort((a, b) =>
+    a.data.territory.order > b.data.territory.order ? 1 : -1
+  );
 
   return (
     <>
