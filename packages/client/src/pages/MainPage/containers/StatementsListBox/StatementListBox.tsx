@@ -8,6 +8,7 @@ import {
   FaRegCircle,
   FaDotCircle,
   FaRecycle,
+  FaClone,
 } from "react-icons/fa";
 import { useLocation, useHistory } from "react-router";
 import { toast } from "react-toastify";
@@ -27,7 +28,7 @@ import {
   StyledStatementListHeaderTitle,
   StyledStatementListHeaderActions,
 } from "./StatementLitBoxStyles";
-import { CStatement } from "constructors";
+import { CStatement, DStatement } from "constructors";
 
 const initialData: {
   statements: IStatement[];
@@ -60,6 +61,24 @@ export const StatementListBox: React.FC = () => {
     const res = await api.actantsDelete(sId);
     toast.info(`Statement removed!`);
     queryClient.invalidateQueries(["territory", "statement-list", territoryId]);
+  };
+
+  const duplicateStatement = async (statementToDuplicate: IStatement) => {
+    const duplicatedStatement = DStatement(statementToDuplicate);
+
+    const res = await api.actantsCreate(duplicatedStatement);
+    if (res.status === 200) {
+      hashParams["statement"] = duplicatedStatement.id;
+      history.push({
+        hash: queryString.stringify(hashParams),
+      });
+      toast.info(`Statement duplicated!`);
+      queryClient.invalidateQueries([
+        "territory",
+        "statement-list",
+        territoryId,
+      ]);
+    }
   };
 
   const addStatementAtTheEnd = async () => {
@@ -270,9 +289,17 @@ export const StatementListBox: React.FC = () => {
                 onClick={() => (row.isExpanded = !row.isExpanded)}
               />
             </span>
-            {
-              //<Button key="d" icon={<FaClone size={14} />} color="success" tooltip="duplicate"/>
-            }
+
+            <Button
+              key="d"
+              icon={<FaClone size={14} />}
+              color="success"
+              tooltip="duplicate"
+              onClick={() => {
+                duplicateStatement(row.original as IStatement);
+              }}
+            />
+
             <Button
               key="r"
               icon={<FaTrashAlt size={14} />}
