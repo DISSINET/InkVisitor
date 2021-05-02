@@ -22,15 +22,20 @@ import {
   StyledDots,
   StyledLoaderWrap,
   StyledSelectorCell,
+  StyledStatementListHeader,
+  StyledStatementListHeaderTitle,
+  StyledStatementListHeaderActions,
 } from "./StatementLitBoxStyles";
 import { CStatement } from "constructors";
 
 const initialData: {
   statements: IStatement[];
   actants: IActant[];
+  label: string;
 } = {
   statements: [],
   actants: [],
+  label: "",
 };
 
 export const StatementListBox: React.FC = () => {
@@ -49,6 +54,19 @@ export const StatementListBox: React.FC = () => {
     },
     { initialData: initialData, enabled: !!territoryId && api.isLoggedIn() }
   );
+
+  const addStatementAtTheEnd = async () => {
+    const newStatement: IStatement = CStatement(territoryId);
+    newStatement.data.territory.order = statements.length
+      ? statements[statements.length - 1].data.territory.order
+      : 1;
+    const res = await api.actantsCreate(newStatement);
+    hashParams["statement"] = newStatement.id;
+    history.push({
+      hash: queryString.stringify(hashParams),
+    });
+    queryClient.invalidateQueries(["territory", "statement-list", territoryId]);
+  };
 
   const addStatement = async (row: any) => {
     const newStatement: IStatement = CStatement(territoryId);
@@ -285,6 +303,23 @@ export const StatementListBox: React.FC = () => {
 
   return (
     <>
+      <StyledStatementListHeader>
+        <StyledStatementListHeaderTitle>
+          {data ? `Territory ${data.label}` : "no territory selected"}
+        </StyledStatementListHeaderTitle>
+        <StyledStatementListHeaderActions>
+          <Button
+            key="add"
+            icon={<FaPlus size={14} />}
+            tooltip="add new statement at the end of the list"
+            color="warning"
+            label="add new statement"
+            onClick={() => {
+              addStatementAtTheEnd();
+            }}
+          />
+        </StyledStatementListHeaderActions>
+      </StyledStatementListHeader>
       <StatementListTable
         moveEndRow={moveEndRow}
         data={statements}
