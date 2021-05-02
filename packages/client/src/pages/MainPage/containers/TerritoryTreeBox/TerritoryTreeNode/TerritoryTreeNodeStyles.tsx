@@ -18,8 +18,10 @@ export const StyledChildrenWrap = styled.div<StyledChildrenWrap>`
 export const StyledFaDotCircle = styled(FaDotCircle)`
   margin: 0 ${({ theme }) => theme.space[1]};
   color: ${({ theme }) => theme.color["primary"]};
+  stroke-width: 0.5;
 `;
 export const StyledFaCircle = styled(FaCircle)`
   margin: 0 ${({ theme }) => theme.space[1]};
   color: ${({ theme }) => theme.color["primary"]};
+  stroke-width: 0.5;
 `;

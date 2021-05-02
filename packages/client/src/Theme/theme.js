@@ -28,10 +28,11 @@ export default {
 
     black: "#000",
     white: "#fff",
+    whiteTransparent: "rgba(255,255,255,0.3)",
     grey: "#C4C4C4",
     text: "#383737",
     primary: "#091034",
-    primaryTransparent: "rgba(9,16,52,0.2)",
+    primaryTransparent: "rgba(9,16,52,0.3)",
     success: "#6174C2",
     warning: "#D8AA37",
     danger: "#99103B",
