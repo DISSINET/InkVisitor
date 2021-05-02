@@ -7,6 +7,7 @@ import {
   FaPlus,
   FaRegCircle,
   FaDotCircle,
+  FaRecycle,
 } from "react-icons/fa";
 import { useLocation, useHistory } from "react-router";
 import { toast } from "react-toastify";
@@ -55,6 +56,26 @@ export const StatementListBox: React.FC = () => {
     { initialData: initialData, enabled: !!territoryId && api.isLoggedIn() }
   );
 
+  // auxiliary function to create new order based on a given index in list
+  const getNewOrderValue = (index: number) => {
+    const beforeOrder =
+      index === 0 ? false : statements[index - 1].data.territory.order;
+    const afterOrder =
+      index === statements.length - 1
+        ? false
+        : statements[index].data.territory.order;
+
+    let newOrder = 0;
+    if (afterOrder === false) {
+      newOrder = (beforeOrder as number) + 1;
+    } else if (beforeOrder === false) {
+      newOrder = (afterOrder as number) / 2;
+    } else {
+      newOrder = ((beforeOrder as number) + (afterOrder as number)) / 2;
+    }
+    return newOrder;
+  };
+
   const addStatementAtTheEnd = async () => {
     const newStatement: IStatement = CStatement(territoryId);
     newStatement.data.territory.order = statements.length
@@ -68,9 +89,12 @@ export const StatementListBox: React.FC = () => {
     queryClient.invalidateQueries(["territory", "statement-list", territoryId]);
   };
 
-  const addStatement = async (row: any) => {
+  const addStatementAtCertainIndex = async (index: number) => {
+    console.log("index", index);
+    const newOrder = getNewOrderValue(index);
+    console.log("new order", newOrder);
     const newStatement: IStatement = CStatement(territoryId);
-    newStatement.data.territory.order = row.original.data.territory.order;
+    newStatement.data.territory.order = newOrder;
 
     const res = await api.actantsCreate(newStatement);
 
@@ -94,23 +118,8 @@ export const StatementListBox: React.FC = () => {
   const { statements, actants } = data || initialData;
 
   const moveEndRow = (statementToMove: IStatement, index: number) => {
-    const beforeOrder =
-      index === 0 ? false : statements[index - 1].data.territory.order;
-    const afterOrder =
-      index === statements.length - 1
-        ? false
-        : statements[index].data.territory.order;
+    const newOrder = getNewOrderValue(index);
 
-    let newOrder = 0;
-    if (afterOrder === false) {
-      newOrder = (beforeOrder as number) + 1;
-    } else if (beforeOrder === false) {
-      newOrder = (afterOrder as number) / 2;
-    } else {
-      newOrder = ((beforeOrder as number) + (afterOrder as number)) / 2;
-    }
-
-    //console.log("moveend", beforeOrder, afterOrder, newOrder);
     api.actantsUpdate(statementToMove.id, {
       data: {
         territory: {
@@ -265,7 +274,7 @@ export const StatementListBox: React.FC = () => {
               icon={<FaPlus size={14} />}
               tooltip="add new statement"
               color="warning"
-              onClick={() => addStatement(row)}
+              onClick={() => addStatementAtCertainIndex(row.index)}
             />
           </ButtonGroup>
         ),
@@ -312,10 +321,20 @@ export const StatementListBox: React.FC = () => {
             key="add"
             icon={<FaPlus size={14} />}
             tooltip="add new statement at the end of the list"
-            color="warning"
+            color="primary"
             label="add new statement"
             onClick={() => {
               addStatementAtTheEnd();
+            }}
+          />
+          <Button
+            key="refresh"
+            icon={<FaRecycle size={14} />}
+            tooltip="refresh data"
+            color="info"
+            label="refresh"
+            onClick={() => {
+              queryClient.invalidateQueries(["territory"]);
             }}
           />
         </StyledStatementListHeaderActions>
