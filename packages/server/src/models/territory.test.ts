@@ -3,7 +3,8 @@ import "ts-jest";
 import Territory, { TerritoryData, TerritoryParent } from "./territory";
 import { Db } from "@service/RethinkDB";
 import { clean } from "@modules/common.test";
-import { findActantById } from "@service/shorthands";
+import { findActantById, deleteActants } from "@service/shorthands";
+import { ITerritory } from "@shared/types";
 
 describe("Territory constructor test", function () {
   describe("empty data", () => {
@@ -133,6 +134,174 @@ describe("Territory.delete", function () {
       expect(existingChild).toBeNull();
 
       await clean(db);
+    });
+  });
+});
+
+describe("Territory - save territory", function () {
+  let db: Db;
+  beforeAll(async () => {
+    db = new Db();
+    await db.initDb();
+  });
+
+  beforeEach(async () => {
+    await deleteActants(db);
+  });
+
+  afterAll(async () => {
+    await db.close();
+  });
+
+  describe("save territory without parent", () => {
+    it("should have empty parent prop", async (done) => {
+      const territory = new Territory(undefined);
+      await territory.save(db.connection);
+
+      const createdData = await findActantById<ITerritory>(db, territory.id);
+      expect(createdData.data.parent).toEqual(false);
+
+      done();
+    });
+  });
+
+  describe("save territory with parent", () => {
+    it("should have order as expected", async (done) => {
+      const territory = new Territory({
+        data: { parent: { id: "any", order: 999 } },
+      });
+      await territory.save(db.connection);
+
+      const createdData = await findActantById<ITerritory>(db, territory.id);
+      expect((createdData.data.parent as any).id).toEqual(
+        (territory.data.parent as any).id
+      );
+      expect((createdData.data.parent as any).order).toEqual(
+        (territory.data.parent as any).order
+      );
+      done();
+    });
+  });
+
+  describe("save two territories without explicit orders", () => {
+    it("should have orders 0 and 1 respectively", async (done) => {
+      const territory1 = new Territory({
+        data: { parent: { id: "any" } },
+      });
+      await territory1.save(db.connection);
+      const territory2 = new Territory({
+        data: { parent: { id: "any" } },
+      });
+      await territory2.save(db.connection);
+
+      const createdData1 = await findActantById<ITerritory>(db, territory1.id);
+      expect(createdData1.data.parent).toEqual(territory1.data.parent);
+      expect((createdData1.data.parent as any).order).toEqual(0);
+
+      const createdData2 = await findActantById<ITerritory>(db, territory2.id);
+      expect(createdData2.data.parent).toEqual(territory2.data.parent);
+      expect((createdData2.data.parent as any).order).toEqual(1);
+
+      done();
+    });
+  });
+
+  describe("save three territories with explicit orders", () => {
+    it("should have orders as provided", async (done) => {
+      const territory1 = new Territory({
+        data: { parent: { id: "any", order: 14 } },
+      });
+      await territory1.save(db.connection);
+      const territory2 = new Territory({
+        data: { parent: { id: "any", order: 0 } },
+      });
+      await territory2.save(db.connection);
+      const territory3 = new Territory({
+        data: { parent: { id: "any" } },
+      });
+      await territory3.save(db.connection);
+
+      // first territory's order is set without conflict
+      const createdData1 = await findActantById<ITerritory>(db, territory1.id);
+      expect(createdData1.data.parent).toEqual(territory1.data.parent);
+      expect((createdData1.data.parent as any).order).toEqual(14);
+
+      // second territory's order is set without conflict
+      const createdData2 = await findActantById<ITerritory>(db, territory2.id);
+      expect(createdData2.data.parent).toEqual(territory2.data.parent);
+      expect((createdData2.data.parent as any).order).toEqual(0);
+
+      // third territory's order is not set, is pushed to the end
+      const createdData3 = await findActantById<ITerritory>(db, territory3.id);
+      expect(createdData3.data.parent).toEqual(territory3.data.parent);
+      expect((createdData3.data.parent as any).order).toEqual(14 + 1);
+
+      done();
+    });
+  });
+});
+
+describe("Territory - update territory", function () {
+  let db: Db;
+  beforeAll(async () => {
+    db = new Db();
+    await db.initDb();
+  });
+
+  beforeEach(async () => {
+    await deleteActants(db);
+  });
+
+  afterAll(async () => {
+    await db.close();
+  });
+
+  describe("update territory without parent", () => {
+    it("should have empty parent prop, but set lavel prop", async (done) => {
+      const territory = new Territory(undefined);
+      await territory.save(db.connection);
+
+      await territory.update(db.connection, { label: "new label" });
+
+      const createdData = await findActantById<ITerritory>(db, territory.id);
+      expect(createdData.data.parent).toEqual(false);
+      expect(createdData.label).toEqual("new label");
+
+      done();
+    });
+  });
+
+  describe("update territory with new parent without explicit order", () => {
+    it("should have order as expected", async (done) => {
+      const territory = new Territory(undefined);
+      await territory.save(db.connection);
+      await territory.update(db.connection, {
+        data: { parent: { id: "new" } },
+      });
+
+      const createdData = await findActantById<ITerritory>(db, territory.id);
+      expect(createdData.data.parent).toEqual(territory.data.parent as any);
+      expect((createdData.data.parent as any).order).toEqual(0);
+      expect((createdData.data.parent as any).id).toEqual("new");
+
+      done();
+    });
+  });
+
+  describe("update territory with new parent with explicit order", () => {
+    it("should have order as expected", async (done) => {
+      const territory = new Territory(undefined);
+      await territory.save(db.connection);
+      await territory.update(db.connection, {
+        data: { parent: { id: "new", order: 90 } },
+      });
+
+      const createdData = await findActantById<ITerritory>(db, territory.id);
+      expect(createdData.data.parent).toEqual(territory.data.parent as any);
+      expect((createdData.data.parent as any).order).toEqual(90);
+      expect((createdData.data.parent as any).id).toEqual("new");
+
+      done();
     });
   });
 });

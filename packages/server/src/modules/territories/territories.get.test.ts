@@ -1,7 +1,7 @@
 import { expect, testErroneousResponse } from "@modules/common.test";
 import { BadParams, TerritoryDoesNotExits } from "@shared/types/errors";
 import { Db } from "@service/RethinkDB";
-import { createActant, deleteActant } from "@service/shorthands";
+import { createActant, deleteActant, deleteActants } from "@service/shorthands";
 import Territory from "@models/territory";
 import request from "supertest";
 import { apiPath } from "../../common/constants";
@@ -9,7 +9,7 @@ import app from "../../Server";
 import Statement from "@models/statement";
 import { supertestConfig } from "..";
 
-describe("Territories get", function () {
+describe("Territories get query", function () {
   describe("Empty param", () => {
     it("should return a BadParams error wrapped in IResponseGeneric", (done) => {
       return request(app)
@@ -34,37 +34,36 @@ describe("Territories get", function () {
     it("should return a 200 code with IResponseTerritory response", async (done) => {
       const db = new Db();
       await db.initDb();
+      await deleteActants(db);
       const testTerritoryId = Math.random().toString();
       const linkedStatementId = Math.random().toString();
-      const linkedActantId = Math.random().toString();
 
       const territory: Territory = new Territory({
         id: testTerritoryId,
       });
       await createActant(db, territory);
 
-      const statement = new Statement({
+      const statement1 = new Statement({
         id: linkedStatementId,
         data: {
-          tags: [linkedActantId],
           territory: {
-            id: testTerritoryId,
+            id: "some random",
             order: 1,
           },
         },
       });
+      await createActant(db, statement1);
 
-      const tagActant = new Statement({
-        id: linkedActantId,
+      const statement2 = new Statement({
         data: {
+          tags: [statement1.id],
           territory: {
             id: testTerritoryId,
             order: 2,
           },
         },
       });
-      await createActant(db, tagActant);
-      await createActant(db, statement);
+      await createActant(db, statement2);
 
       await request(app)
         .get(`${apiPath}/territories/get/${testTerritoryId}`)
@@ -80,19 +79,15 @@ describe("Territories get", function () {
           ]);
 
           res.body.statements.should.be.a("array");
-          res.body.statements.should.have.length(2);
-          res.body.statements[0].should.have.keys([...Object.keys(statement)]);
+          res.body.statements.should.have.length(1); // only one territory-link
 
           res.body.actants.should.be.a("array");
-          res.body.actants.should.have.length(0);
-          //res.body.actants[0].should.have.keys([...Object.keys(tagActant)]);
+          res.body.actants.should.have.length(2); // todo
 
           expect(res.body.id).to.be.eq(testTerritoryId);
         });
 
-      await deleteActant(db, testTerritoryId);
-      await deleteActant(db, linkedStatementId);
-      await deleteActant(db, linkedActantId);
+      await deleteActants(db);
       return done();
     });
   });
