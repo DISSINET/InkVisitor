@@ -2,17 +2,19 @@ import React from "react";
 import { useQuery, useQueryClient } from "react-query";
 import { useHistory, useLocation } from "react-router-dom";
 const queryString = require("query-string");
+import { FaPlus, FaRecycle } from "react-icons/fa";
 
 import {
+  StyledButtonGroup,
   StyledHeader,
   StyledHeaderBreadcrumbRow,
   StyledTitle,
 } from "./StatementListHeaderStyles";
 import { StyledHeaderRow } from "./StatementListHeaderStyles";
+import { StatementListBreadcrumbItem } from "./StatementListBreadcrumbItem/StatementListBreadcrumbItem";
 import { IActant, IStatement } from "@shared/types";
 import { CStatement } from "constructors";
 import { Button, ButtonGroup } from "components";
-import { FaPlus, FaRecycle } from "react-icons/fa";
 import api from "api";
 import { useAppSelector } from "redux/hooks";
 
@@ -54,21 +56,18 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
   return (
     <StyledHeader>
       <StyledHeaderBreadcrumbRow>
-        <ButtonGroup>
-          {selectedTerritoryPath.map((territory: string, key: number) => (
-            <React.Fragment key={key}>
-              <Button
-                label={territory}
-                onClick={() => {
-                  hashParams["territory"] = territory;
-                  history.push({
-                    hash: queryString.stringify(hashParams),
-                  });
-                }}
-              />
-            </React.Fragment>
-          ))}
-        </ButtonGroup>
+        <StyledButtonGroup noMargin>
+          {selectedTerritoryPath.map((territory: string, key: number) => {
+            return (
+              <React.Fragment key={key}>
+                <StatementListBreadcrumbItem
+                  territoryId={territory}
+                  isLast={selectedTerritoryPath.length === key + 1}
+                />
+              </React.Fragment>
+            );
+          })}
+        </StyledButtonGroup>
       </StyledHeaderBreadcrumbRow>
       <StyledHeaderRow>
         <StyledTitle>
