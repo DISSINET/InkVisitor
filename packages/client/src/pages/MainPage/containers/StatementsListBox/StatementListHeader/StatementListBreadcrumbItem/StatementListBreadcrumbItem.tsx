@@ -6,6 +6,8 @@ const queryString = require("query-string");
 import { Button, Loader } from "components";
 import api from "api";
 import { StyledItemBox } from "./StatementListBreadcrumbItemStyles";
+import { useAppDispatch } from "redux/hooks";
+import { setTreeInitialized } from "redux/features/treeInitializeSlice";
 
 interface StatementListBreadcrumbItem {
   territoryId: string;
@@ -17,6 +19,7 @@ export const StatementListBreadcrumbItem: React.FC<StatementListBreadcrumbItem> 
   let history = useHistory();
   let location = useLocation();
   var hashParams = queryString.parse(location.hash);
+  const dispatch = useAppDispatch();
 
   const { status, data, error, isFetching } = useQuery(
     ["territory", territoryId],
@@ -35,6 +38,7 @@ export const StatementListBreadcrumbItem: React.FC<StatementListBreadcrumbItem> 
           color="info"
           inverted
           onClick={() => {
+            dispatch(setTreeInitialized(false));
             hashParams["territory"] = territoryId;
             history.push({
               hash: queryString.stringify(hashParams),
