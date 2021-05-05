@@ -19,6 +19,7 @@ interface InputProps {
   cols?: number;
   width?: number;
   onChangeFn: Function;
+  onEnterPressFn?: Function;
   placeholder?: string;
   changeOnType?: boolean;
   password?: boolean;
@@ -34,6 +35,7 @@ export const Input: React.FC<InputProps> = ({
   cols = 50,
   width = 150,
   changeOnType = false,
+  onEnterPressFn = () => {},
   onChangeFn,
   placeholder,
   password = false,
@@ -59,6 +61,11 @@ export const Input: React.FC<InputProps> = ({
               onChangeFn(e.currentTarget.value);
             }
           }}
+          onKeyPress={(event: React.KeyboardEvent) => {
+            if (event.key === "Enter") {
+              onEnterPressFn();
+            }
+          }}
           onBlur={() => {
             onChangeFn(displayValue);
           }}
@@ -79,6 +86,11 @@ export const Input: React.FC<InputProps> = ({
           onBlur={() => {
             onChangeFn(displayValue);
           }}
+          onKeyPress={(event: React.KeyboardEvent) => {
+            if (event.key === "Enter") {
+              onEnterPressFn();
+            }
+          }}
           inverted={inverted}
         />
       )}
@@ -88,6 +100,11 @@ export const Input: React.FC<InputProps> = ({
           value={value}
           onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
             onChangeFn(e.target.value);
+          }}
+          onKeyPress={(event: React.KeyboardEvent) => {
+            if (event.key === "Enter") {
+              onEnterPressFn();
+            }
           }}
           inverted={inverted}
         >
