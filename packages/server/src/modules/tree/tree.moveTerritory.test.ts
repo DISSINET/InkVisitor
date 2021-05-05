@@ -46,7 +46,7 @@ describe("Tree moveTerritory", function () {
       expect(lvl12.data.parent ? lvl12.data.parent.id : "").to.be.eq(
         `root-${randSuffix}`
       );
-      expect(lvl12.data.parent ? lvl12.data.parent.order : 0).to.be.eq(1);
+      expect(lvl12.data.parent ? lvl12.data.parent.order : 0).to.be.eq(1.5);
 
       await clean(db);
       return done();

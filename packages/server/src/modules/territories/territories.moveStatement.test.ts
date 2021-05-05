@@ -74,8 +74,8 @@ describe("Territories moveStatement", function () {
       s1 = await findActantById<IStatement>(db, statements[0].id);
       s2 = await findActantById<IStatement>(db, statements[1].id);
 
-      expect(s1.data.territory.order).to.be.eq(2);
-      expect(s2.data.territory.order).to.be.eq(1);
+      expect(s1.data.territory.order).to.be.eq(3);
+      expect(s2.data.territory.order).to.be.eq(2);
 
       for (const stat of statements) {
         await deleteActant(db, stat.id);
