@@ -1,10 +1,8 @@
 import React, { useRef, useState } from "react";
 import { FaTrashAlt, FaStar, FaPlus } from "react-icons/fa";
 import { toast } from "react-toastify";
-import { useQueryClient } from "react-query";
 
-import api from "api";
-import { Button, Submit } from "components";
+import { Button } from "components";
 import {
   StyledContextButtonGroup,
   StyledFaChevronCircleDown,
@@ -18,7 +16,6 @@ interface ContextMenu {
   territoryActant: IActant;
 }
 export const ContextMenu: React.FC<ContextMenu> = ({ territoryActant }) => {
-  const queryClient = useQueryClient();
   const ref = useRef<HTMLDivElement>(null);
 
   const [showMenu, setShowMenu] = useState(false);
