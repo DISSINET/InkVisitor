@@ -1,28 +1,17 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useRef, useState } from "react";
 import { FaTrashAlt, FaStar, FaPlus } from "react-icons/fa";
 import { toast } from "react-toastify";
 import { useQueryClient } from "react-query";
-import { useLocation, useHistory } from "react-router";
-const queryString = require("query-string");
 
 import api from "api";
-import {
-  Button,
-  ButtonGroup,
-  Input,
-  Modal,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
-  Submit,
-} from "components";
+import { Button, Submit } from "components";
 import {
   StyledContextButtonGroup,
   StyledFaChevronCircleDown,
   StyledWrapper,
 } from "./ContextMenuStyles";
-import { IActant, ITerritory } from "@shared/types";
-import { CTerritoryActant } from "constructors";
+import { IActant } from "@shared/types";
+import { ContextMenuNewTerritoryModal } from "../ContextMenuNewTerritoryModal/ContextMenuNewTerritoryModal";
 
 interface ContextMenu {
   territoryActant: IActant;
@@ -31,41 +20,14 @@ export const ContextMenu: React.FC<ContextMenu> = ({ territoryActant }) => {
   const queryClient = useQueryClient();
   const ref = useRef<HTMLDivElement>(null);
 
-  let history = useHistory();
-  let location = useLocation();
-  var hashParams = queryString.parse(location.hash);
-
   const [showMenu, setShowMenu] = useState(false);
-  const [showSubmit, setShowSubmit] = useState(false);
   const [showCreate, setShowCreate] = useState(false);
-  const [territoryName, setTerritoryName] = useState("");
+  const [showSubmit, setShowSubmit] = useState(false);
   const [currentPosition, setCurrentPosition] = useState({
     x: 0,
     y: 0,
     height: 0,
   });
-
-  const createTerritory = async (label: string) => {
-    const newTerritory: ITerritory = CTerritoryActant(
-      label,
-      territoryActant.id,
-      -1
-    );
-    const res = await api.actantsCreate(newTerritory);
-    if (res.status === 200) {
-      setShowCreate(false);
-      toast.info(`Territory [${newTerritory.label}] created!`);
-      setTerritoryName("");
-      queryClient.invalidateQueries("tree");
-
-      hashParams["territory"] = newTerritory.id;
-      history.push({
-        hash: queryString.stringify(hashParams),
-      });
-    } else {
-      toast.error(`Error: Territory [${label}] not created!`);
-    }
-  };
 
   const onSubmitDelete = async () => {
     const res = await api.actantsDelete(territoryActant.id);
@@ -149,51 +111,12 @@ export const ContextMenu: React.FC<ContextMenu> = ({ territoryActant }) => {
         onSubmit={() => onSubmitDelete()}
         onCancel={() => setShowSubmit(false)}
       />
-      <Modal
-        onClose={() => setShowCreate(false)}
-        showModal={showCreate}
-        disableBgClick
-        onSubmit={() => {
-          if (territoryName.length > 0) {
-            createTerritory(territoryName);
-          } else {
-            toast.warning("Fill territory name!");
-          }
-        }}
-      >
-        <ModalHeader title={"Add child Territory"} />
-        <ModalContent>
-          <Input
-            label={"Territory name: "}
-            value={territoryName}
-            onChangeFn={(value: string) => setTerritoryName(value)}
-            changeOnType
-          />
-        </ModalContent>
-        <ModalFooter>
-          <ButtonGroup>
-            <Button
-              label="Cancel"
-              color="success"
-              onClick={() => {
-                setShowCreate(false);
-                setTerritoryName("");
-              }}
-            />
-            <Button
-              label="Save"
-              color="primary"
-              onClick={() => {
-                if (territoryName.length > 0) {
-                  createTerritory(territoryName);
-                } else {
-                  toast.warning("Fill territory name!");
-                }
-              }}
-            />
-          </ButtonGroup>
-        </ModalFooter>
-      </Modal>
+      {showCreate && (
+        <ContextMenuNewTerritoryModal
+          onClose={() => setShowCreate(false)}
+          territoryActantId={territoryActant.id}
+        />
+      )}
     </>
   );
 };

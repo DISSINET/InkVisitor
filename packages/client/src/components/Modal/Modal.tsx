@@ -14,7 +14,6 @@ import {
 interface Modal {
   children?: ReactNode;
   onClose?: () => void;
-  onSubmit?: () => void;
   showModal: boolean;
   disableBgClick?: boolean;
   fullwidth?: boolean;
@@ -24,26 +23,12 @@ interface Modal {
 export const Modal: FC<Modal> = ({
   children,
   onClose = () => {},
-  onSubmit = () => {},
   showModal,
   disableBgClick = false,
   inverted = false,
   fullwidth = false,
   width = "normal",
 }) => {
-  // useKeypress("Escape", onClose);
-  // useKeypress("Enter", onSubmit);
-
-  // useEffect(() => {
-  //   const close = (e: any) => {
-  //     if (e.keyCode === 27) {
-  //       onClose();
-  //     }
-  //   };
-  //   window.addEventListener("keydown", close);
-  //   return () => window.removeEventListener("keydown", close);
-  // }, []);
-
   return (
     <>
       {showModal && (

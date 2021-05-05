@@ -33,6 +33,7 @@ export const UserAdministrationModal: React.FC = () => {
     const res = await api.signIn(usernameLocal, password);
     if (res.token) {
       dispatch(setUsername(usernameLocal));
+
       dispatch(setAuthToken(res.token));
     } else {
       toast.error("Wrong attempt!");
@@ -42,13 +43,7 @@ export const UserAdministrationModal: React.FC = () => {
   useKeypress("Enter", handleLogIn, [usernameLocal, password]);
 
   return (
-    <Modal
-      showModal
-      disableBgClick
-      inverted
-      width="thin"
-      // onSubmit={handleLogIn}
-    >
+    <Modal showModal disableBgClick inverted width="thin">
       <ModalHeader title={"User Log In"} />
       <ModalContent>
         <StyledLogInBox>
