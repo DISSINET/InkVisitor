@@ -96,6 +96,12 @@ export const Suggester: React.FC<SuggesterProps> = ({
           placeholder={placeholder}
           changeOnType={true}
           width={inputWidth}
+          onEnterPressFn={() => {
+            onCreate({
+              label: typed,
+              category: category,
+            });
+          }}
         />
         {displayCancelButton && (
           <SuggestionCancelButton>
