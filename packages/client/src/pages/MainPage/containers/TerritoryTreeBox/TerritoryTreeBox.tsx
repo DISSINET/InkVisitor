@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { useQuery } from "react-query";
 const queryString = require("query-string");
 
@@ -6,6 +6,8 @@ import api from "api";
 import { TerritoryTreeNode } from "./TerritoryTreeNode/TerritoryTreeNode";
 import { IResponseTree } from "@shared/types";
 import { Loader } from "components";
+import { useAppDispatch, useAppSelector } from "redux/hooks";
+import { setSelectedTerritoryPath } from "redux/features/selectedTerritoryPathSlice";
 
 export const TerritoryTreeBox: React.FC = () => {
   const { status, data, error, isFetching } = useQuery(
@@ -19,9 +21,10 @@ export const TerritoryTreeBox: React.FC = () => {
   );
   var hashParams = queryString.parse(location.hash);
   const territoryId = hashParams.territory;
-  const [selectedTerritoryPath, setSelectedTerritoryPath] = useState<string[]>([
-    "T0",
-  ]);
+  const dispatch = useAppDispatch();
+  const selectedTerritoryPath = useAppSelector(
+    (state) => state.selectedTerritoryPath
+  );
 
   const searchTree = (
     element: IResponseTree,
@@ -43,10 +46,10 @@ export const TerritoryTreeBox: React.FC = () => {
     if (data) {
       const foundTerritory = searchTree(data, territoryId);
       if (foundTerritory) {
-        setSelectedTerritoryPath(foundTerritory.path);
+        dispatch(setSelectedTerritoryPath(foundTerritory.path));
       }
     }
-  }, [data]);
+  }, [data, territoryId]);
 
   return (
     <>
