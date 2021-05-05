@@ -43,7 +43,7 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
     const newStatement: IStatement = CStatement(territoryId);
     const { statements } = data;
     newStatement.data.territory.order = statements.length
-      ? statements[statements.length - 1].data.territory.order
+      ? statements[statements.length - 1].data.territory.order + 1
       : 1;
     const res = await api.actantsCreate(newStatement);
     hashParams["statement"] = newStatement.id;

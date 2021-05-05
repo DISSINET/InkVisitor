@@ -21,7 +21,13 @@ import {
   actantPositionDict,
   referenceTypeDict,
 } from "./../../../../../../shared/dictionaries";
-import { IActant, IProp, IStatementReference } from "@shared/types";
+import {
+  IActant,
+  IProp,
+  IStatement,
+  IStatementReference,
+  IResponseStatement,
+} from "@shared/types";
 import { Button, Input, Loader } from "components";
 import { ActantSuggester } from "./../";
 import { StatementEditorActantList } from "./StatementEditorActantList/StatementEditorActantList";
@@ -43,8 +49,11 @@ import {
   StyledTagsListItem,
 } from "./StatementEditorBoxStyles";
 
-const classEntitiesActant = ["P", "G", "O", "C", "L", "V", "E"];
-const classEntitiesProp = ["C", "P", "G", "O", "L", "V", "E"];
+const classesActants = ["P", "G", "O", "C", "L", "V", "E", "S", "T", "R"];
+const classesPropType = ["C"];
+const classesPropValue = ["P", "G", "O", "C", "L", "V", "E", "S", "T", "R"];
+const classesResources = ["R"];
+const classesTags = ["P", "G", "O", "C", "L", "V", "E", "S", "T", "R"];
 
 export const StatementEditorBox: React.FC = () => {
   let history = useHistory();
@@ -206,6 +215,256 @@ export const StatementEditorBox: React.FC = () => {
     queryClient.invalidateQueries(["statement"]);
   };
 
+  const renderPropGroup = (propOrigin: any, statement: IResponseStatement) => {
+    const originActant = propOrigin.actant;
+
+    if (originActant) {
+      return (
+        <React.Fragment key={originActant.id}>
+          <StyledPropsActantHeader>
+            <ActantTag actant={originActant} short={false} />
+            <StyledPropButtonGroup>
+              <Button
+                key="d"
+                icon={<FaPlus />}
+                color="primary"
+                tooltip="add new prop"
+                onClick={() => {
+                  addProp(originActant.id);
+                }}
+              />
+            </StyledPropButtonGroup>
+          </StyledPropsActantHeader>
+          {propOrigin.props.length > 0 ? (
+            <StyledPropsActantList>
+              <StyledListHeaderColumn>Type</StyledListHeaderColumn>
+              <StyledListHeaderColumn>Value</StyledListHeaderColumn>
+              <StyledListHeaderColumn>Attributes</StyledListHeaderColumn>
+              <StyledListHeaderColumn>Actions</StyledListHeaderColumn>
+              {propOrigin.props.map((prop1: any, pi1: number) => {
+                return (
+                  <React.Fragment key={prop1 + pi1}>
+                    {renderPropRow(statement, prop1, "1", pi1, false)}
+                    {prop1.props.map((prop2: any, pi2: number) => {
+                      return renderPropRow(
+                        statement,
+                        prop2,
+                        "2",
+                        pi2,
+                        pi2 === prop1.props.length - 1
+                      );
+                    })}
+                  </React.Fragment>
+                );
+              })}
+            </StyledPropsActantList>
+          ) : null}
+        </React.Fragment>
+      );
+    }
+  };
+
+  const renderPropRow = (
+    statement: IResponseStatement,
+    prop: IProp,
+    level: "1" | "2",
+    order: number,
+    lastSecondLevel: boolean
+  ) => {
+    const propTypeActant = statement.actants.find((a) => a.id === prop.type.id);
+    const propValueActant = statement.actants.find(
+      (a) => a.id === prop.value.id
+    );
+
+    return (
+      <React.Fragment key={prop.origin + level + "|" + order}>
+        <StyledPropLineColumn></StyledPropLineColumn>
+        <StyledPropLineColumn
+          padded={level === "2"}
+          lastSecondLevel={lastSecondLevel}
+        >
+          {propTypeActant ? (
+            <React.Fragment>
+              <ActantTag
+                actant={propTypeActant}
+                short={false}
+                button={
+                  <Button
+                    key="d"
+                    icon={<FaUnlink />}
+                    color="danger"
+                    tooltip="unlink actant"
+                    onClick={() => {
+                      updateProp(prop.id, {
+                        type: {
+                          ...prop.type,
+                          ...{ id: "" },
+                        },
+                      });
+                    }}
+                  />
+                }
+              />
+              <StyledPropButtonGroup>
+                <ElvlToggle
+                  value={prop.type.elvl}
+                  onChangeFn={(newValue: string) => {
+                    updateProp(prop.id, {
+                      type: {
+                        ...prop.type,
+                        ...{ elvl: newValue },
+                      },
+                    });
+                  }}
+                />
+                <CertaintyToggle
+                  value={prop.type.certainty}
+                  onChangeFn={(newValue: string) => {
+                    updateProp(prop.id, {
+                      type: {
+                        ...prop.type,
+                        ...{ certainty: newValue },
+                      },
+                    });
+                  }}
+                />
+              </StyledPropButtonGroup>
+            </React.Fragment>
+          ) : (
+            <ActantSuggester
+              onSelected={(newSelectedId: string) => {
+                updateProp(prop.id, {
+                  type: {
+                    ...prop.type,
+                    ...{ id: newSelectedId },
+                  },
+                });
+              }}
+              categoryIds={classesPropType}
+            ></ActantSuggester>
+          )}
+        </StyledPropLineColumn>
+        <StyledPropLineColumn
+          padded={level === "2"}
+          lastSecondLevel={lastSecondLevel}
+        >
+          {propValueActant ? (
+            <React.Fragment>
+              <ActantTag
+                actant={propValueActant}
+                short={false}
+                button={
+                  <Button
+                    key="d"
+                    icon={<FaUnlink />}
+                    tooltip="unlink actant"
+                    color="danger"
+                    onClick={() => {
+                      updateProp(prop.id, {
+                        value: {
+                          ...prop.value,
+                          ...{ id: "" },
+                        },
+                      });
+                    }}
+                  />
+                }
+              />
+              <StyledPropButtonGroup>
+                <ElvlToggle
+                  value={prop.value.elvl}
+                  onChangeFn={(newValue: string) => {
+                    updateProp(prop.id, {
+                      value: {
+                        ...prop.value,
+                        ...{ elvl: newValue },
+                      },
+                    });
+                  }}
+                />
+                <CertaintyToggle
+                  value={prop.value.certainty}
+                  onChangeFn={(newValue: string) => {
+                    updateProp(prop.id, {
+                      value: {
+                        ...prop.value,
+                        ...{ certainty: newValue },
+                      },
+                    });
+                  }}
+                />
+              </StyledPropButtonGroup>
+            </React.Fragment>
+          ) : (
+            <ActantSuggester
+              onSelected={(newSelectedId: string) => {
+                updateProp(prop.id, {
+                  value: {
+                    ...prop.type,
+                    ...{ id: newSelectedId },
+                  },
+                });
+              }}
+              categoryIds={classesPropValue}
+            ></ActantSuggester>
+          )}
+        </StyledPropLineColumn>
+        <StyledPropLineColumn lastSecondLevel={lastSecondLevel}>
+          <StyledPropButtonGroup leftMargin={false}>
+            <ModalityToggle
+              value={prop.modality}
+              onChangeFn={(newValue: string) => {
+                updateProp(prop.id, {
+                  modality: newValue,
+                });
+              }}
+            />
+            <ElvlToggle
+              value={prop.elvl}
+              onChangeFn={(newValue: string) => {
+                updateProp(prop.id, {
+                  elvl: newValue,
+                });
+              }}
+            />
+            <CertaintyToggle
+              value={prop.certainty}
+              onChangeFn={(newValue: string) => {
+                updateProp(prop.id, {
+                  certainty: newValue,
+                });
+              }}
+            />
+          </StyledPropButtonGroup>
+        </StyledPropLineColumn>
+        <StyledPropLineColumn lastSecondLevel={lastSecondLevel}>
+          <StyledPropButtonGroup leftMargin={false}>
+            {level === "1" && (
+              <Button
+                key="add"
+                icon={<FaPlus />}
+                tooltip="add second level prop"
+                color="primary"
+                onClick={() => {
+                  addProp(prop.id);
+                }}
+              />
+            )}
+            <Button
+              key="delete"
+              icon={<FaTrashAlt />}
+              tooltip="remove prop row"
+              color="danger"
+              onClick={() => {
+                removeProp(prop.id);
+              }}
+            />
+          </StyledPropButtonGroup>
+        </StyledPropLineColumn>
+      </React.Fragment>
+    );
+  };
+
   return (
     <div>
       {statement ? (
@@ -292,300 +551,39 @@ export const StatementEditorBox: React.FC = () => {
                 <StatementEditorActantList
                   statement={statement}
                   statementId={statementId}
-                  classEntitiesActant={classEntitiesActant}
+                  classEntitiesActant={classesActants}
                 />
                 <ActantSuggester
                   onSelected={(newSelectedId: string) => {
                     addActant(newSelectedId);
                   }}
-                  categoryIds={classEntitiesActant}
+                  categoryIds={classesActants}
                   placeholder={"add new actant"}
                 ></ActantSuggester>
               </StyledEditorSectionContent>
             </StyledEditorSection>
 
-            {/* Props */}
-            <StyledEditorSection key="editor-section-props">
+            {/* Statement Props */}
+            <StyledEditorSection key="editor-section-props-statement">
+              <StyledEditorSectionHeader>
+                Statement Props
+              </StyledEditorSectionHeader>
+
+              <StyledEditorSectionContent key={JSON.stringify(statement.data)}>
+                {renderPropGroup(propsByOrigins[0], statement)}
+              </StyledEditorSectionContent>
+            </StyledEditorSection>
+
+            {/* Actant Props */}
+            <StyledEditorSection key="editor-section-props-actants">
               <StyledEditorSectionHeader>
                 Actant Properties
               </StyledEditorSectionHeader>
-              <div
-                className="editor-section-content"
-                key={JSON.stringify(statement.data)}
-              >
-                {propsByOrigins.map((propOrigin, sai) => {
-                  const originActant = propOrigin.actant;
-                  //console.log(propOrigin, originActant);
-
-                  if (originActant) {
-                    const renderPropRow = (
-                      prop: IProp,
-                      level: "1" | "2",
-                      order: number,
-                      lastSecondLevel: boolean
-                    ) => {
-                      const propTypeActant = statement.actants.find(
-                        (a) => a.id === prop.type.id
-                      );
-                      const propValueActant = statement.actants.find(
-                        (a) => a.id === prop.value.id
-                      );
-
-                      return (
-                        <React.Fragment
-                          key={propOrigin.origin + level + "|" + order}
-                        >
-                          <StyledPropLineColumn></StyledPropLineColumn>
-                          <StyledPropLineColumn
-                            padded={level === "2"}
-                            lastSecondLevel={lastSecondLevel}
-                          >
-                            {propTypeActant ? (
-                              <React.Fragment>
-                                <ActantTag
-                                  key={sai}
-                                  actant={propTypeActant}
-                                  short={false}
-                                  button={
-                                    <Button
-                                      key="d"
-                                      icon={<FaUnlink />}
-                                      color="danger"
-                                      tooltip="unlink actant"
-                                      onClick={() => {
-                                        updateProp(prop.id, {
-                                          type: {
-                                            ...prop.type,
-                                            ...{ id: "" },
-                                          },
-                                        });
-                                      }}
-                                    />
-                                  }
-                                />
-                                <StyledPropButtonGroup>
-                                  <ElvlToggle
-                                    value={prop.type.elvl}
-                                    onChangeFn={(newValue: string) => {
-                                      updateProp(prop.id, {
-                                        type: {
-                                          ...prop.type,
-                                          ...{ elvl: newValue },
-                                        },
-                                      });
-                                    }}
-                                  />
-                                  <CertaintyToggle
-                                    value={prop.type.certainty}
-                                    onChangeFn={(newValue: string) => {
-                                      updateProp(prop.id, {
-                                        type: {
-                                          ...prop.type,
-                                          ...{ certainty: newValue },
-                                        },
-                                      });
-                                    }}
-                                  />
-                                </StyledPropButtonGroup>
-                              </React.Fragment>
-                            ) : (
-                              <ActantSuggester
-                                onSelected={(newSelectedId: string) => {
-                                  updateProp(prop.id, {
-                                    type: {
-                                      ...prop.type,
-                                      ...{ id: newSelectedId },
-                                    },
-                                  });
-                                }}
-                                categoryIds={["C"]}
-                              ></ActantSuggester>
-                            )}
-                          </StyledPropLineColumn>
-                          <StyledPropLineColumn
-                            padded={level === "2"}
-                            lastSecondLevel={lastSecondLevel}
-                          >
-                            {propValueActant ? (
-                              <React.Fragment>
-                                <ActantTag
-                                  key={sai}
-                                  actant={propValueActant}
-                                  short={false}
-                                  button={
-                                    <Button
-                                      key="d"
-                                      icon={<FaUnlink />}
-                                      tooltip="unlink actant"
-                                      color="danger"
-                                      onClick={() => {
-                                        updateProp(prop.id, {
-                                          value: {
-                                            ...prop.value,
-                                            ...{ id: "" },
-                                          },
-                                        });
-                                      }}
-                                    />
-                                  }
-                                />
-                                <StyledPropButtonGroup>
-                                  <ElvlToggle
-                                    value={prop.value.elvl}
-                                    onChangeFn={(newValue: string) => {
-                                      updateProp(prop.id, {
-                                        value: {
-                                          ...prop.value,
-                                          ...{ elvl: newValue },
-                                        },
-                                      });
-                                    }}
-                                  />
-                                  <CertaintyToggle
-                                    value={prop.value.certainty}
-                                    onChangeFn={(newValue: string) => {
-                                      updateProp(prop.id, {
-                                        value: {
-                                          ...prop.value,
-                                          ...{ certainty: newValue },
-                                        },
-                                      });
-                                    }}
-                                  />
-                                </StyledPropButtonGroup>
-                              </React.Fragment>
-                            ) : (
-                              <ActantSuggester
-                                onSelected={(newSelectedId: string) => {
-                                  updateProp(prop.id, {
-                                    value: {
-                                      ...prop.type,
-                                      ...{ id: newSelectedId },
-                                    },
-                                  });
-                                }}
-                                categoryIds={classEntitiesProp}
-                              ></ActantSuggester>
-                            )}
-                          </StyledPropLineColumn>
-                          <StyledPropLineColumn
-                            lastSecondLevel={lastSecondLevel}
-                          >
-                            <StyledPropButtonGroup leftMargin={false}>
-                              <ModalityToggle
-                                value={prop.modality}
-                                onChangeFn={(newValue: string) => {
-                                  updateProp(prop.id, {
-                                    modality: newValue,
-                                  });
-                                }}
-                              />
-                              <ElvlToggle
-                                value={prop.elvl}
-                                onChangeFn={(newValue: string) => {
-                                  updateProp(prop.id, {
-                                    elvl: newValue,
-                                  });
-                                }}
-                              />
-                              <CertaintyToggle
-                                value={prop.certainty}
-                                onChangeFn={(newValue: string) => {
-                                  updateProp(prop.id, {
-                                    certainty: newValue,
-                                  });
-                                }}
-                              />
-                            </StyledPropButtonGroup>
-                          </StyledPropLineColumn>
-                          <StyledPropLineColumn
-                            lastSecondLevel={lastSecondLevel}
-                          >
-                            <StyledPropButtonGroup leftMargin={false}>
-                              {level === "1" && (
-                                <Button
-                                  key="add"
-                                  icon={<FaPlus />}
-                                  tooltip="add second level prop"
-                                  color="primary"
-                                  onClick={() => {
-                                    addProp(prop.id);
-                                  }}
-                                />
-                              )}
-                              <Button
-                                key="delete"
-                                icon={<FaTrashAlt />}
-                                tooltip="remove prop row"
-                                color="danger"
-                                onClick={() => {
-                                  removeProp(prop.id);
-                                }}
-                              />
-                            </StyledPropButtonGroup>
-                          </StyledPropLineColumn>
-                        </React.Fragment>
-                      );
-                    };
-
-                    return (
-                      <StyledEditorSectionContent key={originActant.id}>
-                        <StyledPropsActantHeader>
-                          <ActantTag
-                            key={sai}
-                            actant={originActant}
-                            short={false}
-                          />
-                          <StyledPropButtonGroup>
-                            <Button
-                              key="d"
-                              icon={<FaPlus />}
-                              color="primary"
-                              tooltip="add new prop"
-                              onClick={() => {
-                                addProp(originActant.id);
-                              }}
-                            />
-                          </StyledPropButtonGroup>
-                        </StyledPropsActantHeader>
-                        {propOrigin.props.length > 0 ? (
-                          <StyledPropsActantList>
-                            <StyledListHeaderColumn>
-                              Type
-                            </StyledListHeaderColumn>
-                            <StyledListHeaderColumn>
-                              Value
-                            </StyledListHeaderColumn>
-                            <StyledListHeaderColumn>
-                              Attributes
-                            </StyledListHeaderColumn>
-                            <StyledListHeaderColumn>
-                              Actions
-                            </StyledListHeaderColumn>
-                            {propOrigin.props.map((prop1, pi1) => {
-                              return (
-                                <React.Fragment key={prop1 + pi1}>
-                                  {renderPropRow(prop1, "1", pi1, false)}
-                                  {prop1.props.map(
-                                    (prop2: any, pi2: number) => {
-                                      return renderPropRow(
-                                        prop2,
-                                        "2",
-                                        pi2,
-                                        pi2 === prop1.props.length - 1
-                                      );
-                                    }
-                                  )}
-                                </React.Fragment>
-                              );
-                            })}
-                          </StyledPropsActantList>
-                        ) : null}
-                      </StyledEditorSectionContent>
-                    );
-                  }
+              <StyledEditorSectionContent key={JSON.stringify(statement.data)}>
+                {propsByOrigins.slice(1).map((propOrigin, sai) => {
+                  return renderPropGroup(propOrigin, statement);
                 })}
-              </div>
+              </StyledEditorSectionContent>
             </StyledEditorSection>
 
             {/* Refs */}
@@ -636,7 +634,7 @@ export const StatementEditorBox: React.FC = () => {
                                     resource: newSelectedId,
                                   });
                                 }}
-                                categoryIds={["R"]}
+                                categoryIds={classesResources}
                               ></ActantSuggester>
                             )}
                           </StyledReferencesListColumn>
@@ -681,7 +679,7 @@ export const StatementEditorBox: React.FC = () => {
                 </StyledReferencesList>
                 <ActantSuggester
                   onSelected={(newSelectedId: string) => {}}
-                  categoryIds={["R"]}
+                  categoryIds={classesResources}
                   placeholder={"add new reference"}
                 ></ActantSuggester>
               </StyledEditorSectionContent>
@@ -723,7 +721,7 @@ export const StatementEditorBox: React.FC = () => {
                   onSelected={(newSelectedId: string) => {
                     addTag(newSelectedId);
                   }}
-                  categoryIds={classEntitiesActant}
+                  categoryIds={classesTags}
                   placeholder={"add new tag"}
                 ></ActantSuggester>
               </StyledEditorSectionContent>
