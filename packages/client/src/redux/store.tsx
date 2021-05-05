@@ -1,15 +1,15 @@
 import { Store } from "redux";
 import { configureStore } from "@reduxjs/toolkit";
 
-import authTokenSlice from "./features/authTokenSlice";
 import usernameSlice from "./features/usernameSlice";
 import treeInitializeSlice from "./features/treeInitializeSlice";
+import selectedTerritoryPathSlice from "./features/selectedTerritoryPathSlice";
 
 const store: Store = configureStore({
   reducer: {
     username: usernameSlice,
-    token: authTokenSlice,
     treeInitialized: treeInitializeSlice,
+    selectedTerritoryPath: selectedTerritoryPathSlice,
   },
 });
 

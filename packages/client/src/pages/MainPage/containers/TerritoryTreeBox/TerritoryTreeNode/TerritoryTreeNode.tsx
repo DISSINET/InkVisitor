@@ -60,14 +60,19 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
 
   useEffect(() => {
     if (!treeInitialized) {
-      if (initExpandedNodes.some((node) => node === territory.id)) {
+      const shouldExpand = initExpandedNodes.some(
+        (node) => node === territory.id
+      );
+      if (shouldExpand) {
         setIsExpanded(true);
       } else if (territoryId === territory.id) {
         setIsExpanded(true);
         dispatch(setTreeInitialized(true));
+      } else {
+        setIsExpanded(false);
       }
     }
-  }, []);
+  }, [treeInitialized, initExpandedNodes]);
 
   // const moveChildFn = useCallback(
   // (dragIndex: number, hoverIndex: number) => {
