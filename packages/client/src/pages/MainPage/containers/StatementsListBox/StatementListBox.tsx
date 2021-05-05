@@ -83,9 +83,10 @@ export const StatementListBox: React.FC = () => {
 
   const addStatementAtTheEnd = async () => {
     const newStatement: IStatement = CStatement(territoryId);
-    newStatement.data.territory.order = statements.length
-      ? statements[statements.length - 1].data.territory.order
-      : 1;
+    newStatement.data.territory.order =
+      statements.length > 0
+        ? statements[statements.length - 1].data.territory.order + 1
+        : 1;
     const res = await api.actantsCreate(newStatement);
     hashParams["statement"] = newStatement.id;
     history.push({
