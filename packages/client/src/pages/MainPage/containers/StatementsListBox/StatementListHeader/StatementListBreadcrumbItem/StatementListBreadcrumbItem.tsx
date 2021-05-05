@@ -5,16 +5,13 @@ const queryString = require("query-string");
 
 import { Button, Loader } from "components";
 import api from "api";
-import { StyledButton } from "components/Button/ButtonStyles";
 import { StyledItemBox } from "./StatementListBreadcrumbItemStyles";
 
 interface StatementListBreadcrumbItem {
   territoryId: string;
-  isLast?: boolean;
 }
 export const StatementListBreadcrumbItem: React.FC<StatementListBreadcrumbItem> = ({
   territoryId,
-  isLast = false,
 }) => {
   const queryClient = useQueryClient();
   let history = useHistory();
@@ -44,7 +41,7 @@ export const StatementListBreadcrumbItem: React.FC<StatementListBreadcrumbItem> 
             });
           }}
         />
-        <Loader show={isFetching} size={20} />
+        <Loader show={isFetching && !data} size={18} />
       </StyledItemBox>
     </>
   );

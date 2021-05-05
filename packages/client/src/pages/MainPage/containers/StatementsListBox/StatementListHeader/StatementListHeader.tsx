@@ -60,10 +60,7 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
           {selectedTerritoryPath.map((territory: string, key: number) => {
             return (
               <React.Fragment key={key}>
-                <StatementListBreadcrumbItem
-                  territoryId={territory}
-                  isLast={selectedTerritoryPath.length === key + 1}
-                />
+                <StatementListBreadcrumbItem territoryId={territory} />
               </React.Fragment>
             );
           })}
@@ -79,7 +76,7 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
             icon={<FaPlus size={14} />}
             tooltip="add new statement at the end of the list"
             color="primary"
-            label="add new statement"
+            label="new statement"
             onClick={() => {
               addStatementAtTheEnd();
             }}
