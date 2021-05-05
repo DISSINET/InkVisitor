@@ -242,10 +242,10 @@ class Statement extends Actant implements IStatement {
     return Object.keys(actantIds);
   }
 
-  static async findDependentStatementIds(
+  static async findDependentStatements(
     db: Connection | undefined,
     actantId: string
-  ): Promise<string[]> {
+  ): Promise<IStatement[]> {
     const statements = await rethink
       .table("actants")
       .filter({
@@ -272,10 +272,11 @@ class Statement extends Actant implements IStatement {
           )
         );
       })
-      .pluck("id")
       .run(db);
 
-    return statements.map((s) => s.id);
+    return statements.sort((a, b) => {
+      return a.data.territory.order - b.data.territory.order;
+    });
   }
 }
 

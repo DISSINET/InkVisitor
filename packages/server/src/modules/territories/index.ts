@@ -6,7 +6,11 @@ import {
 } from "@shared/types/errors";
 import { Router, Request } from "express";
 import { asyncRouteHandler } from "..";
-import { findActantById, findActants } from "@service/shorthands";
+import {
+  findActantById,
+  findActants,
+  findActantsById,
+} from "@service/shorthands";
 import {
   ITerritory,
   IResponseTerritory,
@@ -49,22 +53,13 @@ export default Router()
         );
       }
 
-      const statements: IStatement[] = (
-        await findActants<IStatement>(request.db, { class: "S" })
-      )
-        .filter((s) => s.data.territory && s.data.territory.id === territoryId)
-        .sort((a, b) => {
-          return a.data.territory.order - b.data.territory.order;
-        });
+      const statements = await Statement.findDependentStatements(
+        request.db.connection,
+        territoryId
+      );
 
-      const actants: IActant[] = [];
-
-      for (const actantId of Statement.getDependencyListForMany(statements)) {
-        const actant = await findActantById<IActant>(request.db, actantId);
-        if (actant) {
-          actants.push(actant);
-        }
-      }
+      const actantIds = Statement.getDependencyListForMany(statements);
+      const actants = await findActantsById(request.db, actantIds);
 
       return {
         ...territory,
@@ -94,12 +89,12 @@ export default Router()
         );
       }
 
-      const dependentStatementIds: string[] = await Statement.findDependentStatementIds(
+      const dependentStatements: IStatement[] = await Statement.findDependentStatements(
         request.db.connection,
         territoryId
       );
 
-      return dependentStatementIds;
+      return Statement.getDependencyListForMany(dependentStatements);
     })
   )
   .post(

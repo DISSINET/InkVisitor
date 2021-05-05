@@ -160,8 +160,11 @@ describe("findDependentStatementIds", function () {
 
   describe("empty db", () => {
     it("should return empty array", async (done) => {
-      const ids = await Statement.findDependentStatementIds(db.connection, "");
-      expect(ids).toHaveLength(0);
+      const statements = await Statement.findDependentStatements(
+        db.connection,
+        ""
+      );
+      expect(statements).toHaveLength(0);
       done();
     });
   });
@@ -171,11 +174,11 @@ describe("findDependentStatementIds", function () {
       const territory = new Territory(undefined);
       await territory.save(db.connection);
 
-      const ids = await Statement.findDependentStatementIds(
+      const statements = await Statement.findDependentStatements(
         db.connection,
         territory.id
       );
-      expect(ids).toHaveLength(0);
+      expect(statements).toHaveLength(0);
     });
   });
 
@@ -189,11 +192,11 @@ describe("findDependentStatementIds", function () {
       });
       await statement.save(db.connection);
 
-      const ids = await Statement.findDependentStatementIds(
+      const statements = await Statement.findDependentStatements(
         db.connection,
         territory.id
       );
-      expect(ids).toHaveLength(0);
+      expect(statements).toHaveLength(0);
     });
   });
 
@@ -217,11 +220,11 @@ describe("findDependentStatementIds", function () {
       const statement = new Statement({ ...statementData });
       await statement.save(db.connection);
 
-      const ids = await Statement.findDependentStatementIds(
+      const statements = await Statement.findDependentStatements(
         db.connection,
         territory.id
       );
-      expect(ids).toHaveLength(1);
+      expect(statements).toHaveLength(1);
     });
   });
 
@@ -237,11 +240,11 @@ describe("findDependentStatementIds", function () {
       const statement = new Statement({ ...statementData });
       await statement.save(db.connection);
 
-      const ids = await Statement.findDependentStatementIds(
+      const statements = await Statement.findDependentStatements(
         db.connection,
         territory.id
       );
-      expect(ids).toHaveLength(1);
+      expect(statements).toHaveLength(1);
     });
   });
 
@@ -275,11 +278,11 @@ describe("findDependentStatementIds", function () {
       const statement = new Statement({ ...statementData });
       await statement.save(db.connection);
 
-      const ids = await Statement.findDependentStatementIds(
+      const statements = await Statement.findDependentStatements(
         db.connection,
         territory.id
       );
-      expect(ids).toHaveLength(1);
+      expect(statements).toHaveLength(1);
     });
   });
 
@@ -313,11 +316,11 @@ describe("findDependentStatementIds", function () {
       const statement = new Statement({ ...statementData });
       await statement.save(db.connection);
 
-      const ids = await Statement.findDependentStatementIds(
+      const statements = await Statement.findDependentStatements(
         db.connection,
         territory.id
       );
-      expect(ids).toHaveLength(1);
+      expect(statements).toHaveLength(1);
     });
   });
 
@@ -351,11 +354,11 @@ describe("findDependentStatementIds", function () {
       const statement = new Statement({ ...statementData });
       await statement.save(db.connection);
 
-      const ids = await Statement.findDependentStatementIds(
+      const statements = await Statement.findDependentStatements(
         db.connection,
         territory.id
       );
-      expect(ids).toHaveLength(1);
+      expect(statements).toHaveLength(1);
     });
   });
 
@@ -378,11 +381,11 @@ describe("findDependentStatementIds", function () {
       const statement = new Statement({ ...statementData });
       await statement.save(db.connection);
 
-      const ids = await Statement.findDependentStatementIds(
+      const statements = await Statement.findDependentStatements(
         db.connection,
         territory.id
       );
-      expect(ids).toHaveLength(1);
+      expect(statements).toHaveLength(1);
     });
   });
 
@@ -398,11 +401,11 @@ describe("findDependentStatementIds", function () {
       const statement = new Statement({ ...statementData });
       await statement.save(db.connection);
 
-      const ids = await Statement.findDependentStatementIds(
+      const statements = await Statement.findDependentStatements(
         db.connection,
         territory.id
       );
-      expect(ids).toHaveLength(1);
+      expect(statements).toHaveLength(1);
     });
   });
 
@@ -434,11 +437,11 @@ describe("findDependentStatementIds", function () {
       const statement2 = new Statement({ ...statementData2 });
       await statement2.save(db.connection);
 
-      const ids = await Statement.findDependentStatementIds(
+      const statements = await Statement.findDependentStatements(
         db.connection,
         territory.id
       );
-      expect(ids).toHaveLength(2);
+      expect(statements).toHaveLength(2);
     });
   });
 
@@ -470,11 +473,11 @@ describe("findDependentStatementIds", function () {
       const statement2 = new Statement({ ...statementData2 });
       await statement2.save(db.connection);
 
-      const ids = await Statement.findDependentStatementIds(
+      const statements = await Statement.findDependentStatements(
         db.connection,
         territory.id
       );
-      expect(ids).toHaveLength(2);
+      expect(statements).toHaveLength(2);
     });
   });
 });
