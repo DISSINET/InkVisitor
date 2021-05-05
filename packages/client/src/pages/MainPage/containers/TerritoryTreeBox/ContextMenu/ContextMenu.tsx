@@ -12,6 +12,7 @@ import {
 } from "./ContextMenuStyles";
 import { IActant } from "@shared/types";
 import { ContextMenuNewTerritoryModal } from "../ContextMenuNewTerritoryModal/ContextMenuNewTerritoryModal";
+import { ContextMenuSubmitDelete } from "../ContextMenuSubmitDelete/ContextMenuSubmitDelete";
 
 interface ContextMenu {
   territoryActant: IActant;
@@ -28,17 +29,6 @@ export const ContextMenu: React.FC<ContextMenu> = ({ territoryActant }) => {
     y: 0,
     height: 0,
   });
-
-  const onSubmitDelete = async () => {
-    const res = await api.actantsDelete(territoryActant.id);
-    if (res.status === 200) {
-      toast.info(`Territory [${territoryActant.label}] deleted!`);
-      queryClient.invalidateQueries("tree");
-    } else {
-      toast.error(`Error: Territory [${territoryActant.label}] not deleted!`);
-    }
-    setShowSubmit(false);
-  };
 
   const setDivPosition = () => {
     if (ref.current) {
@@ -104,13 +94,12 @@ export const ContextMenu: React.FC<ContextMenu> = ({ territoryActant }) => {
         )}
       </StyledWrapper>
 
-      <Submit
-        title={"Delete Territory"}
-        text={`Do you really want do delete Territory with ID [${territoryActant.id}]?`}
-        show={showSubmit}
-        onSubmit={() => onSubmitDelete()}
-        onCancel={() => setShowSubmit(false)}
-      />
+      {showSubmit && (
+        <ContextMenuSubmitDelete
+          onClose={() => setShowSubmit(false)}
+          territoryActant={territoryActant}
+        />
+      )}
       {showCreate && (
         <ContextMenuNewTerritoryModal
           onClose={() => setShowCreate(false)}
