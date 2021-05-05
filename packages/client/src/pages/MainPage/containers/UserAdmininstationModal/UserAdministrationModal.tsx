@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import api from "api";
 import {
   Button,
@@ -14,6 +14,7 @@ import { useAppDispatch } from "redux/hooks";
 import { toast } from "react-toastify";
 import { setAuthToken } from "redux/features/authTokenSlice";
 import { setUsername } from "redux/features/usernameSlice";
+import useKeypress from "hooks/useKeyPress";
 
 export const UserAdministrationModal: React.FC = () => {
   const dispatch = useAppDispatch();
@@ -32,23 +33,17 @@ export const UserAdministrationModal: React.FC = () => {
     const res = await api.signIn(usernameLocal, password);
     if (res.token) {
       dispatch(setUsername(usernameLocal));
+
       dispatch(setAuthToken(res.token));
     } else {
       toast.error("Wrong attempt!");
     }
   };
 
+  useKeypress("Enter", handleLogIn, [usernameLocal, password]);
+
   return (
-    <Modal
-      showModal
-      disableBgClick
-      inverted
-      width="thin"
-      onSubmit={(e) => {
-        e.preventDefault();
-        handleLogIn();
-      }}
-    >
+    <Modal showModal disableBgClick inverted width="thin">
       <ModalHeader title={"User Log In"} />
       <ModalContent>
         <StyledLogInBox>
@@ -71,12 +66,7 @@ export const UserAdministrationModal: React.FC = () => {
       </ModalContent>
       <ModalFooter>
         <ButtonGroup>
-          <Button
-            type="submit"
-            label="Log In"
-            color="danger"
-            // onClick={() => handleLogIn()}
-          />
+          <Button label="Log In" color="danger" onClick={() => handleLogIn()} />
         </ButtonGroup>
       </ModalFooter>
     </Modal>

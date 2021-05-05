@@ -1,11 +1,22 @@
-import { useEffect } from "react";
+import { useCallback, useEffect } from "react";
 
-export default function useKeypress(key: string, action: Function) {
-  useEffect(() => {
-    function onKeyup(e: any) {
-      if (e.key === key) action();
+export default function useKeypress(
+  targetKey: string,
+  handleKeyPress: () => void,
+  dependencyArr?: any[]
+) {
+  const checkKeyPress = useCallback(() => {}, [dependencyArr]);
+
+  function downHandler({ key }: any) {
+    if (key === targetKey) {
+      handleKeyPress();
     }
-    window.addEventListener("keyup", onKeyup);
-    return () => window.removeEventListener("keyup", onKeyup);
-  }, []);
+  }
+
+  useEffect(() => {
+    window.addEventListener("keydown", downHandler);
+    return () => {
+      window.removeEventListener("keydown", downHandler);
+    };
+  }, [checkKeyPress]);
 }

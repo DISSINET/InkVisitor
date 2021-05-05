@@ -1,4 +1,5 @@
-import React, { FC, ReactNode } from "react";
+import useKeypress from "hooks/useKeyPress";
+import React, { FC, ReactNode, useEffect } from "react";
 
 import {
   ModalWrap,
@@ -13,7 +14,6 @@ import {
 interface Modal {
   children?: ReactNode;
   onClose?: () => void;
-  onSubmit?: (e: any) => void;
   showModal: boolean;
   disableBgClick?: boolean;
   fullwidth?: boolean;
@@ -23,7 +23,6 @@ interface Modal {
 export const Modal: FC<Modal> = ({
   children,
   onClose = () => {},
-  onSubmit = () => {},
   showModal,
   disableBgClick = false,
   inverted = false,
@@ -38,7 +37,7 @@ export const Modal: FC<Modal> = ({
             onClick={disableBgClick ? () => {} : onClose}
           ></Background>
           <ModalCard inverted={inverted} fullwidth={fullwidth} width={width}>
-            <form onSubmit={onSubmit}>{children}</form>
+            {children}
           </ModalCard>
         </ModalWrap>
       )}
