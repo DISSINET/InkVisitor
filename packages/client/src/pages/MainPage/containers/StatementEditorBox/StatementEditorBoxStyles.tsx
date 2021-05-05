@@ -76,9 +76,10 @@ export const StyledPropsActantHeader = styled.div<StyledPropsActantHeader>`
 `;
 
 interface StyledPropsActantList {}
-export const StyledPropsActantList = styled(
-  StyledGrid
-)<StyledPropsActantList>``;
+export const StyledPropsActantList = styled(StyledGrid)<StyledPropsActantList>`
+  margin-left: ${({ theme }) => theme.space[6]};
+  padding-bottom: ${({ theme }) => theme.space[10]};
+`;
 
 interface StyledPropButtonGroup {
   leftMargin?: boolean;
@@ -97,11 +98,13 @@ export const StyledPropLineColumn = styled(
   StyledGridCell
 )<StyledPropLineColumn>`
   display: inline-flex;
-  padding-bottom: ${({ theme, lastSecondLevel }) =>
+  margin-bottom: ${({ theme, lastSecondLevel }) =>
     lastSecondLevel ? theme.space[4] : theme.space[0]};
   align-items: center;
   padding-left: ${({ theme, padded }) =>
     padded ? theme.space[6] : theme.space[0]};
+  padding-right: 5px;
+  border-right: 1px dashed black;
 `;
 
 // references
