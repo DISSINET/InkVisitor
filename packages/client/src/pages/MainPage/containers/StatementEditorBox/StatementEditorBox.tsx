@@ -49,8 +49,11 @@ import {
   StyledTagsListItem,
 } from "./StatementEditorBoxStyles";
 
-const classEntitiesActant = ["P", "G", "O", "C", "L", "V", "E"];
-const classEntitiesProp = ["C", "P", "G", "O", "L", "V", "E"];
+const classesActants = ["P", "G", "O", "C", "L", "V", "E", "S", "T", "R"];
+const classesPropType = ["C"];
+const classesPropValue = ["P", "G", "O", "C", "L", "V", "E", "S", "T", "R"];
+const classesResources = ["R"];
+const classesTags = ["P", "G", "O", "C", "L", "V", "E", "S", "T", "R"];
 
 export const StatementEditorBox: React.FC = () => {
   let history = useHistory();
@@ -337,7 +340,7 @@ export const StatementEditorBox: React.FC = () => {
                   },
                 });
               }}
-              categoryIds={["C"]}
+              categoryIds={classesPropType}
             ></ActantSuggester>
           )}
         </StyledPropLineColumn>
@@ -402,7 +405,7 @@ export const StatementEditorBox: React.FC = () => {
                   },
                 });
               }}
-              categoryIds={classEntitiesProp}
+              categoryIds={classesPropValue}
             ></ActantSuggester>
           )}
         </StyledPropLineColumn>
@@ -548,13 +551,13 @@ export const StatementEditorBox: React.FC = () => {
                 <StatementEditorActantList
                   statement={statement}
                   statementId={statementId}
-                  classEntitiesActant={classEntitiesActant}
+                  classEntitiesActant={classesActants}
                 />
                 <ActantSuggester
                   onSelected={(newSelectedId: string) => {
                     addActant(newSelectedId);
                   }}
-                  categoryIds={classEntitiesActant}
+                  categoryIds={classesActants}
                   placeholder={"add new actant"}
                 ></ActantSuggester>
               </StyledEditorSectionContent>
@@ -631,7 +634,7 @@ export const StatementEditorBox: React.FC = () => {
                                     resource: newSelectedId,
                                   });
                                 }}
-                                categoryIds={["R"]}
+                                categoryIds={classesResources}
                               ></ActantSuggester>
                             )}
                           </StyledReferencesListColumn>
@@ -676,7 +679,7 @@ export const StatementEditorBox: React.FC = () => {
                 </StyledReferencesList>
                 <ActantSuggester
                   onSelected={(newSelectedId: string) => {}}
-                  categoryIds={["R"]}
+                  categoryIds={classesResources}
                   placeholder={"add new reference"}
                 ></ActantSuggester>
               </StyledEditorSectionContent>
@@ -718,7 +721,7 @@ export const StatementEditorBox: React.FC = () => {
                   onSelected={(newSelectedId: string) => {
                     addTag(newSelectedId);
                   }}
-                  categoryIds={classEntitiesActant}
+                  categoryIds={classesTags}
                   placeholder={"add new tag"}
                 ></ActantSuggester>
               </StyledEditorSectionContent>
