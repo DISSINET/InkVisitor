@@ -20,14 +20,8 @@ import api from "api";
 import { IStatement, IActant, IAction } from "@shared/types";
 import { ActantType } from "@shared/enums";
 import { StatementListTable } from "./StatementListTable/StatementListTable";
-import {
-  StyledDots,
-  StyledLoaderWrap,
-  StyledSelectorCell,
-  StyledStatementListHeader,
-  StyledStatementListHeaderTitle,
-  StyledStatementListHeaderActions,
-} from "./StatementLitBoxStyles";
+import { StatementListHeader } from "./StatementListHeader/StatementListHeader";
+import { StyledDots, StyledSelectorCell } from "./StatementLitBoxStyles";
 import { CStatement, DStatement } from "constructors";
 
 const initialData: {
@@ -79,20 +73,6 @@ export const StatementListBox: React.FC = () => {
         territoryId,
       ]);
     }
-  };
-
-  const addStatementAtTheEnd = async () => {
-    const newStatement: IStatement = CStatement(territoryId);
-    newStatement.data.territory.order =
-      statements.length > 0
-        ? statements[statements.length - 1].data.territory.order + 1
-        : 1;
-    const res = await api.actantsCreate(newStatement);
-    hashParams["statement"] = newStatement.id;
-    history.push({
-      hash: queryString.stringify(hashParams),
-    });
-    queryClient.invalidateQueries(["territory", "statement-list", territoryId]);
   };
 
   const addStatementAtCertainIndex = async (index: number) => {
@@ -195,14 +175,6 @@ export const StatementListBox: React.FC = () => {
 
           return (
             <TagGroup>
-              <ActantTag
-                actant={{
-                  id: "",
-                  class: ActantType.Statement,
-                  label: "",
-                  data: {},
-                }}
-              />
               {subjectIdsSlice
                 .filter((a: any) => a)
                 .map((actantId: string, ai: number) => {
@@ -357,33 +329,7 @@ export const StatementListBox: React.FC = () => {
 
   return (
     <>
-      <StyledStatementListHeader>
-        <StyledStatementListHeaderTitle>
-          {data ? `Territory ${data.label}` : "no territory selected"}
-        </StyledStatementListHeaderTitle>
-        <StyledStatementListHeaderActions>
-          <Button
-            key="add"
-            icon={<FaPlus size={14} />}
-            tooltip="add new statement at the end of the list"
-            color="primary"
-            label="add new statement"
-            onClick={() => {
-              addStatementAtTheEnd();
-            }}
-          />
-          <Button
-            key="refresh"
-            icon={<FaRecycle size={14} />}
-            tooltip="refresh data"
-            color="info"
-            label="refresh"
-            onClick={() => {
-              queryClient.invalidateQueries(["territory"]);
-            }}
-          />
-        </StyledStatementListHeaderActions>
-      </StyledStatementListHeader>
+      <StatementListHeader data={data ? data : initialData} />
       <StatementListTable
         moveEndRow={moveEndRow}
         data={statements}

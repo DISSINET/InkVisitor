@@ -6,11 +6,12 @@ import { StyledLoaderWrap } from "./LoaderStyles";
 
 interface Loader {
   show: boolean;
+  size?: number;
 }
-export const Loader: React.FC<Loader> = ({ show }) => {
+export const Loader: React.FC<Loader> = ({ show, size = 60 }) => {
   return (
     <StyledLoaderWrap show={show}>
-      <DotLoader color={theme.color["primary"]} />
+      <DotLoader color={theme.color["primary"]} size={size} />
     </StyledLoaderWrap>
   );
 };
