@@ -1,4 +1,5 @@
-import React, { FC, ReactNode } from "react";
+import useKeypress from "hooks/useKeyPress";
+import React, { FC, ReactNode, useEffect } from "react";
 
 import {
   ModalWrap,
@@ -13,7 +14,7 @@ import {
 interface Modal {
   children?: ReactNode;
   onClose?: () => void;
-  onSubmit?: (e: any) => void;
+  onSubmit?: () => void;
   showModal: boolean;
   disableBgClick?: boolean;
   fullwidth?: boolean;
@@ -30,6 +31,19 @@ export const Modal: FC<Modal> = ({
   fullwidth = false,
   width = "normal",
 }) => {
+  // useKeypress("Escape", onClose);
+  // useKeypress("Enter", onSubmit);
+
+  // useEffect(() => {
+  //   const close = (e: any) => {
+  //     if (e.keyCode === 27) {
+  //       onClose();
+  //     }
+  //   };
+  //   window.addEventListener("keydown", close);
+  //   return () => window.removeEventListener("keydown", close);
+  // }, []);
+
   return (
     <>
       {showModal && (
@@ -38,7 +52,7 @@ export const Modal: FC<Modal> = ({
             onClick={disableBgClick ? () => {} : onClose}
           ></Background>
           <ModalCard inverted={inverted} fullwidth={fullwidth} width={width}>
-            <form onSubmit={onSubmit}>{children}</form>
+            {children}
           </ModalCard>
         </ModalWrap>
       )}

@@ -183,14 +183,13 @@ export const ContextMenu: React.FC<ContextMenu> = ({ territoryActant }) => {
             <Button
               label="Save"
               color="primary"
-              type="submit"
-              // onClick={() => {
-              //   if (territoryName.length > 0) {
-              //     createTerritory(territoryName);
-              //   } else {
-              //     toast.warning("Fill territory name!");
-              //   }
-              // }}
+              onClick={() => {
+                if (territoryName.length > 0) {
+                  createTerritory(territoryName);
+                } else {
+                  toast.warning("Fill territory name!");
+                }
+              }}
             />
           </ButtonGroup>
         </ModalFooter>
