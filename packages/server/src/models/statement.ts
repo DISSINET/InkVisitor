@@ -242,6 +242,25 @@ class Statement extends Actant implements IStatement {
     return Object.keys(actantIds);
   }
 
+  static async findStatementsInTerritory(
+    db: Connection | undefined,
+    actantId: string
+  ): Promise<IStatement[]> {
+    const statements = await rethink
+      .table("actants")
+      .filter({
+        class: ActantType.Statement,
+      })
+      .filter((row: RDatum) => {
+        return row("data")("territory")("id").eq(actantId);
+      })
+      .run(db);
+
+    return statements.sort((a, b) => {
+      return a.data.territory.order - b.data.territory.order;
+    });
+  }
+
   static async findDependentStatements(
     db: Connection | undefined,
     actantId: string
