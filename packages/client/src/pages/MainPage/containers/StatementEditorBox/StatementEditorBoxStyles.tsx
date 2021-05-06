@@ -70,7 +70,7 @@ export const StyledActantListItem = styled(
 // Props section
 interface StyledPropsActantHeader {}
 export const StyledPropsActantHeader = styled.div<StyledPropsActantHeader>`
-  display: inline-flex;
+  display: block;
   padding-top: ${({ theme }) => theme.space[1]};
   padding-bottom: ${({ theme }) => theme.space[2]};
 `;
@@ -87,6 +87,7 @@ interface StyledPropButtonGroup {
 export const StyledPropButtonGroup = styled.div<StyledPropButtonGroup>`
   margin-left: ${({ theme, leftMargin = true }) =>
     leftMargin ? theme.space[3] : theme.space[0]};
+  vertical-align: middle;
   display: inline-flex;
 `;
 
