@@ -3,7 +3,13 @@ import { useQuery, useMutation, useQueryClient } from "react-query";
 import api from "api";
 const queryString = require("query-string");
 
-import { FaTrashAlt, FaPlus, FaUnlink } from "react-icons/fa";
+import {
+  FaTrashAlt,
+  FaPlus,
+  FaUnlink,
+  FaCaretUp,
+  FaCaretDown,
+} from "react-icons/fa";
 
 import { useLocation, useHistory } from "react-router";
 
@@ -161,12 +167,84 @@ export const StatementEditorBox: React.FC = () => {
     }
   };
 
-  const removeProp = (originId: string) => {
-    if (statement && originId) {
+  const removeProp = (propId: string) => {
+    if (statement && propId) {
       const newData = {
-        props: statement.data.props.filter((p) => p.id !== originId),
+        props: statement.data.props.filter((p) => p.id !== propId),
       };
       update(newData);
+    }
+  };
+
+  const movePropUp = (propId: string) => {
+    if (statement) {
+      const propToMove = statement.data.props.find((p) => p.id === propId);
+      if (propToMove) {
+        const propsForOriginIds = statement.data.props
+          .filter((p) => p.origin === propToMove.origin)
+          .map((p) => p.id);
+        if (propsForOriginIds.length > 1) {
+          const statementsPropIds = statement.data.props.map((p) => p.id);
+          const oldIndex = statementsPropIds.indexOf(propId);
+          const oldIndexInPropsForOriginId = propsForOriginIds.indexOf(propId);
+
+          if (oldIndex !== 0 && oldIndexInPropsForOriginId !== 0) {
+            const previousIndexInPropsForOriginId =
+              oldIndexInPropsForOriginId - 1;
+            const previousIndexInProps = statementsPropIds.indexOf(
+              propsForOriginIds[previousIndexInPropsForOriginId]
+            );
+            const oldIndex = statementsPropIds.indexOf(propId);
+
+            const newStatementProps = [...statement.data.props];
+
+            newStatementProps.splice(
+              oldIndex,
+              0,
+              newStatementProps.splice(previousIndexInProps, 1)[0]
+            );
+
+            update({ props: newStatementProps });
+          }
+        }
+      }
+    }
+  };
+
+  const movePropDown = (propId: string) => {
+    if (statement) {
+      const propToMove = statement.data.props.find((p) => p.id === propId);
+      if (propToMove) {
+        const propsForOriginIds = statement.data.props
+          .filter((p) => p.origin === propToMove.origin)
+          .map((p) => p.id);
+        if (propsForOriginIds.length > 1) {
+          const statementsPropIds = statement.data.props.map((p) => p.id);
+          const oldIndex = statementsPropIds.indexOf(propId);
+          const oldIndexInPropsForOriginId = propsForOriginIds.indexOf(propId);
+
+          if (
+            oldIndex !== statementsPropIds.length &&
+            oldIndexInPropsForOriginId !== propsForOriginIds.length
+          ) {
+            const nextIndexInPropsForOriginId = oldIndexInPropsForOriginId + 1;
+            const nextIndexInProps = statementsPropIds.indexOf(
+              propsForOriginIds[nextIndexInPropsForOriginId]
+            );
+            const oldIndex = statementsPropIds.indexOf(propId);
+
+            const newStatementProps = [...statement.data.props];
+
+            newStatementProps.splice(
+              oldIndex,
+              0,
+              newStatementProps.splice(nextIndexInProps, 1)[0]
+            );
+
+            update({ props: newStatementProps });
+          }
+        }
+      }
     }
   };
 
@@ -457,6 +535,26 @@ export const StatementEditorBox: React.FC = () => {
               color="danger"
               onClick={() => {
                 removeProp(prop.id);
+              }}
+            />{" "}
+            <Button
+              key="up"
+              inverted
+              icon={<FaCaretUp />}
+              tooltip="move prop up"
+              color="info"
+              onClick={() => {
+                movePropUp(prop.id);
+              }}
+            />
+            <Button
+              key="down"
+              inverted
+              icon={<FaCaretDown />}
+              tooltip="move prop down"
+              color="info"
+              onClick={() => {
+                movePropDown(prop.id);
               }}
             />
           </StyledPropButtonGroup>

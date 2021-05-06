@@ -69,6 +69,7 @@ export const ContextMenuNewTerritoryModal: React.FC<ContextMenuNewTerritoryModal
       <ModalHeader title={"Add child Territory"} />
       <ModalContent>
         <Input
+          autoFocus
           label={"Territory name: "}
           value={territoryName}
           onChangeFn={(value: string) => setTerritoryName(value)}

@@ -23,6 +23,7 @@ interface InputProps {
   placeholder?: string;
   changeOnType?: boolean;
   password?: boolean;
+  autoFocus?: boolean;
 }
 
 export const Input: React.FC<InputProps> = ({
@@ -39,6 +40,7 @@ export const Input: React.FC<InputProps> = ({
   onChangeFn,
   placeholder,
   password = false,
+  autoFocus = false,
 }) => {
   const [displayValue, setDisplayValue] = useState(value);
   useEffect(() => {
@@ -52,6 +54,7 @@ export const Input: React.FC<InputProps> = ({
         <StyledInput
           type={password ? "password" : "text"}
           width={width}
+          autoFocus={autoFocus}
           className="value"
           placeholder={placeholder}
           value={displayValue}
@@ -77,6 +80,7 @@ export const Input: React.FC<InputProps> = ({
           className="value"
           placeholder={placeholder}
           value={displayValue}
+          autoFocus={autoFocus}
           rows={rows}
           cols={cols}
           width={width}
@@ -98,6 +102,7 @@ export const Input: React.FC<InputProps> = ({
         <StyledSelect
           className="value"
           value={value}
+          autoFocus={autoFocus}
           onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
             onChangeFn(e.target.value);
           }}
