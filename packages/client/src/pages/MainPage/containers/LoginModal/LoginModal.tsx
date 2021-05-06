@@ -53,6 +53,7 @@ export const LoginModal: React.FC = () => {
             onChangeFn={(text: string) => setUsernameLocal(text)}
             value={usernameLocal}
             changeOnType
+            autoFocus
           />
           <Input
             placeholder="password"
