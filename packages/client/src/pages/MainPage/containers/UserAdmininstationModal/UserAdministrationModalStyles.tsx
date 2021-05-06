@@ -1,11 +1,6 @@
 import { Input } from "components";
 import styled from "styled-components";
 
-export const StyledLogInBox = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: space-around;
-  flex-direction: column;
-  width: 100%;
+export const StyledAdministrationModalWrapper = styled.div`
   height: ${({ theme }) => theme.space[28]};
 `;
