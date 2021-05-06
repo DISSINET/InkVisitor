@@ -17,6 +17,7 @@ import {
   TerritoryTreeBox,
   UserAdministrationModal,
   UserOptionsModal,
+  LoginModal,
 } from "./containers";
 import { useHistory, useParams } from "react-router-dom";
 import api from "api";
@@ -116,7 +117,7 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
 
       <Toast />
       <Footer height={heightFooter} />
-      {!isLoggedIn && <UserAdministrationModal />}
+      {!isLoggedIn && <LoginModal />}
     </>
   );
 };
