@@ -53,7 +53,7 @@ export default Router()
         );
       }
 
-      const statements = await Statement.findDependentStatements(
+      const statements = await Statement.findStatementsInTerritory(
         request.db.connection,
         territoryId
       );
@@ -89,7 +89,7 @@ export default Router()
         );
       }
 
-      const dependentStatements: IStatement[] = await Statement.findDependentStatements(
+      const dependentStatements: IStatement[] = await Statement.findStatementsInTerritory(
         request.db.connection,
         territoryId
       );
