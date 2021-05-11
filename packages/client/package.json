@@ -21,6 +21,7 @@
     "@types/react-router-dom": "^5.1.5",
     "@types/react-select": "^3.0.22",
     "@types/react-table": "^7.0.19",
+    "@types/react-transition-group": "^4.4.1",
     "@types/uuid": "^8.3.0",
     "axios": "^0.21.1",
     "classnames": "^2.2.6",

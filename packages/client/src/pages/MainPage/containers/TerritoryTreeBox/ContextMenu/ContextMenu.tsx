@@ -1,6 +1,7 @@
 import React, { useRef, useState } from "react";
 import { FaTrashAlt, FaStar, FaPlus } from "react-icons/fa";
 import { toast } from "react-toastify";
+import { CSSTransition } from "react-transition-group";
 
 import { Button } from "components";
 import {
@@ -52,43 +53,52 @@ export const ContextMenu: React.FC<ContextMenu> = ({ territoryActant }) => {
       >
         <StyledFaChevronCircleDown size={14} />
 
-        {showMenu && (
-          <StyledContextButtonGroup
-            showMenu={showMenu}
-            clientX={currentPosition.x}
-            clientY={currentPosition.y}
-            height={currentPosition.height}
-          >
-            <Button
-              key="add"
-              icon={<FaPlus size={14} />}
-              color="info"
-              onClick={() => {
-                // add child
-                setShowCreate(true);
-              }}
-            />
-            <Button
-              key="favorites"
-              icon={<FaStar size={14} />}
-              color="warning"
-              onClick={() => {
-                // add to favorites
-                toast.success(
-                  `You're adding territory [${territoryActant.label}] to favorites. (not implemented yet)`
-                );
-              }}
-            />
-            <Button
-              key="delete"
-              icon={<FaTrashAlt size={14} />}
-              color="danger"
-              onClick={() => {
-                setShowSubmit(true);
-              }}
-            />
-          </StyledContextButtonGroup>
-        )}
+        {/* {showMenu && ( */}
+        <CSSTransition
+          in={showMenu}
+          timeout={300}
+          classNames="fade"
+          unmountOnExit
+        >
+          {() => (
+            <StyledContextButtonGroup
+              showMenu={showMenu}
+              clientX={currentPosition.x}
+              clientY={currentPosition.y}
+              height={currentPosition.height}
+            >
+              <Button
+                key="add"
+                icon={<FaPlus size={14} />}
+                color="info"
+                onClick={() => {
+                  // add child
+                  setShowCreate(true);
+                }}
+              />
+              <Button
+                key="favorites"
+                icon={<FaStar size={14} />}
+                color="warning"
+                onClick={() => {
+                  // add to favorites
+                  toast.success(
+                    `You're adding territory [${territoryActant.label}] to favorites. (not implemented yet)`
+                  );
+                }}
+              />
+              <Button
+                key="delete"
+                icon={<FaTrashAlt size={14} />}
+                color="danger"
+                onClick={() => {
+                  setShowSubmit(true);
+                }}
+              />
+            </StyledContextButtonGroup>
+          )}
+        </CSSTransition>
+        {/* )} */}
       </StyledWrapper>
 
       {showSubmit && (
