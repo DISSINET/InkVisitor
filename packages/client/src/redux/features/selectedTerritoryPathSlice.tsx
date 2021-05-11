@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
-const initialState: string[] = [""];
+const initialState: string[] = [];
 
 const selectedTerritoryPathSlice = createSlice({
   name: "selectedTerritoryPath",

@@ -42,6 +42,7 @@
     "react-spinners": "^0.10.6",
     "react-table": "^7.5.0",
     "react-toastify": "^6.0.9",
+    "react-transition-group": "^4.4.1",
     "reactjs-popup": "^2.0.4",
     "redux": "^4.0.5",
     "redux-devtools-extension": "^2.13.8",

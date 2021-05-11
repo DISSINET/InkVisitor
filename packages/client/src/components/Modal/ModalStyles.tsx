@@ -21,7 +21,7 @@ export const Background = styled.div`
   left: 0;
   right: 0;
   top: 0;
-  background-color: rgba(0, 0, 0, 0.86);
+  background-color: ${({ theme }) => theme.color["modalBg"]};
 `;
 
 interface Card {
@@ -29,7 +29,7 @@ interface Card {
   inverted: boolean;
   width: "full" | "normal" | "thin";
 }
-const handleWidth = (width: string) => {
+const handleWidth = (width: "full" | "normal" | "thin") => {
   switch (width) {
     case "full":
       return "calc(100vw - 40px)";
