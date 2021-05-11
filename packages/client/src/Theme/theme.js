@@ -32,11 +32,12 @@ export default {
     grey: "#C4C4C4",
     text: "#383737",
     primary: "#091034",
-    primaryTransparent: "rgba(9,16,52,0.25)",
     success: "#6174C2",
     warning: "#D8AA37",
     danger: "#99103B",
     info: "#324185",
+    primaryTransparent: "rgba(9,16,52,0.2)",
+    modalBg: "rgba(9,16,52,0.3)",
 
     entityC: "#83BCB6",
     entityE: "#D8B5A5",

@@ -57,41 +57,44 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
     <StyledHeader>
       <StyledHeaderBreadcrumbRow>
         <StyledButtonGroup noMargin>
-          {selectedTerritoryPath.map((territory: string, key: number) => {
-            return (
-              <React.Fragment key={key}>
-                <StatementListBreadcrumbItem territoryId={territory} />
-              </React.Fragment>
-            );
-          })}
+          {selectedTerritoryPath &&
+            selectedTerritoryPath.map((territory: string, key: number) => {
+              return (
+                <React.Fragment key={key}>
+                  <StatementListBreadcrumbItem territoryId={territory} />
+                </React.Fragment>
+              );
+            })}
         </StyledButtonGroup>
       </StyledHeaderBreadcrumbRow>
       <StyledHeaderRow>
         <StyledTitle>
-          {data ? `T: ${data.label}` : "no territory selected"}
+          {territoryId ? `T: ${data.label}` : "no territory selected"}
         </StyledTitle>
-        <ButtonGroup>
-          <Button
-            key="add"
-            icon={<FaPlus size={14} />}
-            tooltip="add new statement at the end of the list"
-            color="primary"
-            label="new statement"
-            onClick={() => {
-              addStatementAtTheEnd();
-            }}
-          />
-          <Button
-            key="refresh"
-            icon={<FaRecycle size={14} />}
-            tooltip="refresh data"
-            color="info"
-            label="refresh"
-            onClick={() => {
-              queryClient.invalidateQueries(["territory"]);
-            }}
-          />
-        </ButtonGroup>
+        {territoryId && (
+          <ButtonGroup>
+            <Button
+              key="add"
+              icon={<FaPlus size={14} />}
+              tooltip="add new statement at the end of the list"
+              color="primary"
+              label="new statement"
+              onClick={() => {
+                addStatementAtTheEnd();
+              }}
+            />
+            <Button
+              key="refresh"
+              icon={<FaRecycle size={14} />}
+              tooltip="refresh data"
+              color="info"
+              label="refresh"
+              onClick={() => {
+                queryClient.invalidateQueries(["territory"]);
+              }}
+            />
+          </ButtonGroup>
+        )}
       </StyledHeaderRow>
     </StyledHeader>
   );
