@@ -17,6 +17,8 @@ import { CTerritoryActant } from "constructors";
 import useKeypress from "hooks/useKeyPress";
 import { useHistory, useLocation } from "react-router-dom";
 import api from "api";
+import { setTreeInitialized } from "redux/features/treeInitializeSlice";
+import { useAppDispatch } from "redux/hooks";
 
 interface ContextMenuNewTerritoryModal {
   territoryActantId: string;
@@ -31,6 +33,7 @@ export const ContextMenuNewTerritoryModal: React.FC<ContextMenuNewTerritoryModal
   let history = useHistory();
   let location = useLocation();
   var hashParams = queryString.parse(location.hash);
+  const dispatch = useAppDispatch();
 
   const handleCreateTerritory = () => {
     if (territoryName.length > 0) {
@@ -52,6 +55,7 @@ export const ContextMenuNewTerritoryModal: React.FC<ContextMenuNewTerritoryModal
       toast.info(`Territory [${newTerritory.label}] created!`);
       queryClient.invalidateQueries("tree");
 
+      dispatch(setTreeInitialized(false));
       hashParams["territory"] = newTerritory.id;
       history.push({
         hash: queryString.stringify(hashParams),
