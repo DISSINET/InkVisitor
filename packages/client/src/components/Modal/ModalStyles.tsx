@@ -25,7 +25,6 @@ export const StyledBackground = styled.div`
 `;
 
 interface Card {
-  fullwidth?: boolean;
   inverted: boolean;
   width: "full" | "normal" | "thin";
 }
@@ -41,7 +40,6 @@ const handleWidth = (width: "full" | "normal" | "thin") => {
 };
 export const StyledCard = styled.div<Card>`
   width: ${({ width }) => handleWidth(width)};
-  /* min-width: 27rem; */
   display: flex;
   flex-direction: column;
   max-height: calc(100vh - 40px);

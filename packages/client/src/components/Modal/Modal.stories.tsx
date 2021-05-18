@@ -52,7 +52,7 @@ export const FullWidthModal = () => {
       <Modal
         onClose={(): void => setShowModal(false)}
         showModal={showModal}
-        fullwidth
+        width="full"
       >
         <ModalHeader title={"Modal title"} />
         <ModalContent>

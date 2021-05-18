@@ -2,9 +2,11 @@ import React, { useState } from "react";
 import api from "api";
 import { Button, Input, Modal } from "components";
 import {
+  StyledButtonWrap,
   StyledContentWrap,
   StyledFaLock,
   StyledFaUserAlt,
+  StyledHeading,
   StyledInputRow,
 } from "./LoginModalStyles";
 import { useAppDispatch } from "redux/hooks";
@@ -42,7 +44,7 @@ export const LoginModal: React.FC = () => {
   return (
     <Modal showModal disableBgClick width="thin">
       <StyledContentWrap>
-        <h4>{"Log In"}</h4>
+        <StyledHeading>{"Log In"}</StyledHeading>
         <StyledInputRow>
           <StyledFaUserAlt size={14} />
           <Input
@@ -65,7 +67,14 @@ export const LoginModal: React.FC = () => {
             noBorder
           />
         </StyledInputRow>
-        <Button label="Log In" color="success" onClick={() => handleLogIn()} />
+        <StyledButtonWrap>
+          <Button
+            fullWidth
+            label="Log In"
+            color="success"
+            onClick={() => handleLogIn()}
+          />
+        </StyledButtonWrap>
       </StyledContentWrap>
     </Modal>
   );

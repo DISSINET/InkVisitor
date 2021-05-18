@@ -15,7 +15,6 @@ interface Modal {
   onClose?: () => void;
   showModal: boolean;
   disableBgClick?: boolean;
-  fullwidth?: boolean;
   width?: "full" | "normal" | "thin";
   inverted?: boolean;
 }
@@ -25,17 +24,14 @@ export const Modal: FC<Modal> = ({
   showModal,
   disableBgClick = false,
   inverted = false,
-  fullwidth = false,
   width = "normal",
 }) => {
   return (
     <>
       {showModal && (
         <StyledModalWrap>
-          <StyledBackground
-            onClick={disableBgClick ? () => {} : onClose}
-          ></StyledBackground>
-          <ModalCard inverted={inverted} fullwidth={fullwidth} width={width}>
+          <StyledBackground onClick={disableBgClick ? () => {} : onClose} />
+          <ModalCard inverted={inverted} width={width}>
             {children}
           </ModalCard>
         </StyledModalWrap>
@@ -46,18 +42,12 @@ export const Modal: FC<Modal> = ({
 
 interface ModalCard {
   children?: ReactNode;
-  fullwidth: boolean;
   width: "full" | "normal" | "thin";
   inverted: boolean;
 }
-export const ModalCard: FC<ModalCard> = ({
-  children,
-  fullwidth,
-  inverted,
-  width,
-}) => {
+export const ModalCard: FC<ModalCard> = ({ children, inverted, width }) => {
   return (
-    <StyledCard fullwidth={fullwidth} inverted={inverted} width={width}>
+    <StyledCard inverted={inverted} width={width}>
       {children}
     </StyledCard>
   );
