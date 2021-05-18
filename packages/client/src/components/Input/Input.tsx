@@ -13,6 +13,7 @@ interface InputProps {
   label?: string;
   value?: string;
   inverted?: boolean;
+  noBorder?: boolean;
   type?: "text" | "textarea" | "select";
   options?: IOption[];
   rows?: number;
@@ -29,6 +30,7 @@ interface InputProps {
 export const Input: React.FC<InputProps> = ({
   label = "",
   inverted = false,
+  noBorder = false,
   value = "",
   type = "text",
   options = [],
@@ -73,6 +75,7 @@ export const Input: React.FC<InputProps> = ({
             onChangeFn(displayValue);
           }}
           inverted={inverted}
+          noBorder={noBorder}
         />
       )}
       {type === "textarea" && (
@@ -96,6 +99,7 @@ export const Input: React.FC<InputProps> = ({
             }
           }}
           inverted={inverted}
+          noBorder={noBorder}
         />
       )}
       {type === "select" && options && (
@@ -112,6 +116,7 @@ export const Input: React.FC<InputProps> = ({
             }
           }}
           inverted={inverted}
+          noBorder={noBorder}
         >
           {options.map((option, oi) => (
             <option key={oi} value={option.value}>
