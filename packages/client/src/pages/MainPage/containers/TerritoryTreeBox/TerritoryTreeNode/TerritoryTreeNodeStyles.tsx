@@ -10,10 +10,10 @@ export const StyledIconWrap = styled.div`
   cursor: pointer;
 `;
 interface StyledChildrenWrap {
-  isExpanded?: boolean;
+  noIndent?: boolean;
 }
 export const StyledChildrenWrap = styled.div<StyledChildrenWrap>`
-  margin-left: ${({ theme }) => theme.space[3]};
+  margin-left: ${({ theme, noIndent }) => (noIndent ? 0 : theme.space[3])};
 `;
 export const StyledFaDotCircle = styled(FaDotCircle)`
   margin: 0 ${({ theme }) => theme.space[1]};
