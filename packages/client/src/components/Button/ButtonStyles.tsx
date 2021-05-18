@@ -1,15 +1,17 @@
 import styled from "styled-components";
-import { space1, space2, space3 } from "Theme/constants";
+import { space1, space2 } from "Theme/constants";
 
 interface IButtonStyle {
   hasIcon?: boolean;
+  fullWidth?: boolean;
   inverted: boolean;
   color: string;
-  type: "button" | "submit" | "reset";
 }
 export const StyledButton = styled.button<IButtonStyle>`
   display: flex;
   align-items: center;
+  justify-content: center;
+  width: ${({ fullWidth }) => (fullWidth ? "100%" : "auto")};
   font-size: ${({ theme }) => theme.fontSize["xs"]};
   font-weight: 900;
   padding: ${space1} ${({ hasIcon }) => (hasIcon ? space1 : space2)};

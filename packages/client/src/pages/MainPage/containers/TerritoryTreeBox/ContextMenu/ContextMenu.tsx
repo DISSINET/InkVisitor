@@ -53,7 +53,6 @@ export const ContextMenu: React.FC<ContextMenu> = ({ territoryActant }) => {
       >
         <StyledFaChevronCircleDown size={14} />
 
-        {/* {showMenu && ( */}
         <CSSTransition
           in={showMenu}
           timeout={300}
@@ -98,7 +97,6 @@ export const ContextMenu: React.FC<ContextMenu> = ({ territoryActant }) => {
             </StyledContextButtonGroup>
           )}
         </CSSTransition>
-        {/* )} */}
       </StyledWrapper>
 
       {showSubmit && (

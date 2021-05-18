@@ -9,7 +9,7 @@ import {
   BsCaretDown,
 } from "react-icons/bs";
 
-import { IActant } from "@shared/types";
+import { IActant, ITerritory } from "@shared/types";
 import {
   StyledChildrenWrap,
   StyledFaCircle,
@@ -24,7 +24,7 @@ import { setTreeInitialized } from "redux/features/treeInitializeSlice";
 import theme from "Theme/theme";
 
 interface TerritoryTreeNode {
-  territory: any;
+  territory: ITerritory;
   children: any;
   lvl: number;
   statementsCount: number;
@@ -164,6 +164,9 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
     id: string,
     hasChildren: boolean
   ) => {
+    if (lvl === 0) {
+      return;
+    }
     return (
       <StyledTerritoryTagWrap>
         <StyledIconWrap>
@@ -211,7 +214,7 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
     <div key={territory.id}>
       {renderTerritoryTag(territory, territory.id, children.length > 0)}
 
-      <StyledChildrenWrap>
+      <StyledChildrenWrap noIndent={lvl === 0}>
         {isExpanded &&
           childTerritories.map((child: any, key: number) => (
             <TerritoryTreeNode

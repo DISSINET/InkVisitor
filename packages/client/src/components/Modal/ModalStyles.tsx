@@ -2,7 +2,7 @@ import styled from "styled-components";
 import { space1, space3, space5, space6, space7 } from "Theme/constants";
 
 interface ModalWrap {}
-export const ModalWrap = styled.div<ModalWrap>`
+export const StyledModalWrap = styled.div<ModalWrap>`
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -15,7 +15,7 @@ export const ModalWrap = styled.div<ModalWrap>`
   top: 0;
   z-index: 40;
 `;
-export const Background = styled.div`
+export const StyledBackground = styled.div`
   position: absolute;
   bottom: 0;
   left: 0;
@@ -25,7 +25,6 @@ export const Background = styled.div`
 `;
 
 interface Card {
-  fullwidth?: boolean;
   inverted: boolean;
   width: "full" | "normal" | "thin";
 }
@@ -39,9 +38,8 @@ const handleWidth = (width: "full" | "normal" | "thin") => {
       return "auto";
   }
 };
-export const Card = styled.div<Card>`
+export const StyledCard = styled.div<Card>`
   width: ${({ width }) => handleWidth(width)};
-  min-width: 27rem;
   display: flex;
   flex-direction: column;
   max-height: calc(100vh - 40px);
@@ -54,7 +52,7 @@ export const Card = styled.div<Card>`
   border-radius: ${({ theme }) => theme.borderRadius["sm"]};
 `;
 
-export const CardHeader = styled.header`
+export const StyledCardHeader = styled.header`
   display: flex;
   justify-content: flex-start;
   align-items: center;
@@ -67,11 +65,11 @@ export const CardHeader = styled.header`
   border-bottom-color: ${({ theme }) => theme.color["gray"][400]};
   min-height: ${({ theme }) => theme.space[12]};
 `;
-export const CardTitle = styled.h2`
+export const StyledCardTitle = styled.h2`
   font-weight: ${({ theme }) => theme.fontWeight["medium"]};
   font-size: ${({ theme }) => theme.fontSize["xl"]};
 `;
-export const CardBody = styled.section`
+export const StyledCardBody = styled.section`
   display: flex;
   flex-grow: 1;
   flex-shrink: 1;
@@ -81,7 +79,7 @@ export const CardBody = styled.section`
   font-size: ${({ theme }) => theme.fontSize["sm"]};
   -webkit-overflow-scrolling: touch;
 `;
-export const Footer = styled.div`
+export const StyledFooter = styled.div`
   border-top-style: solid;
   border-top-width: ${({ theme }) => theme.borderWidth["default"]};
   border-top-color: ${({ theme }) => theme.color["gray"][400]};

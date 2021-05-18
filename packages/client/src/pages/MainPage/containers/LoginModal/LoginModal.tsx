@@ -1,15 +1,14 @@
 import React, { useState } from "react";
 import api from "api";
+import { Button, Input, Modal } from "components";
 import {
-  Button,
-  ButtonGroup,
-  Input,
-  Modal,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
-} from "components";
-import { StyledLogInBox } from "./LoginModalStyles";
+  StyledButtonWrap,
+  StyledContentWrap,
+  StyledFaLock,
+  StyledFaUserAlt,
+  StyledHeading,
+  StyledInputRow,
+} from "./LoginModalStyles";
 import { useAppDispatch } from "redux/hooks";
 import { toast } from "react-toastify";
 import { setAuthToken } from "redux/features/authTokenSlice";
@@ -43,33 +42,40 @@ export const LoginModal: React.FC = () => {
   useKeypress("Enter", handleLogIn, [usernameLocal, password]);
 
   return (
-    <Modal showModal disableBgClick inverted width="thin">
-      <ModalHeader title={"User Log In"} />
-      <ModalContent>
-        <StyledLogInBox>
+    <Modal showModal disableBgClick width="thin">
+      <StyledContentWrap>
+        <StyledHeading>{"Log In"}</StyledHeading>
+        <StyledInputRow>
+          <StyledFaUserAlt size={14} />
           <Input
             placeholder="username"
-            inverted
             onChangeFn={(text: string) => setUsernameLocal(text)}
             value={usernameLocal}
             changeOnType
             autoFocus
+            noBorder
           />
+        </StyledInputRow>
+        <StyledInputRow>
+          <StyledFaLock size={14} />
           <Input
             placeholder="password"
             password
-            inverted
             onChangeFn={(text: string) => setPassword(text)}
             value={password}
             changeOnType
+            noBorder
           />
-        </StyledLogInBox>
-      </ModalContent>
-      <ModalFooter>
-        <ButtonGroup>
-          <Button label="Log In" color="danger" onClick={() => handleLogIn()} />
-        </ButtonGroup>
-      </ModalFooter>
+        </StyledInputRow>
+        <StyledButtonWrap>
+          <Button
+            fullWidth
+            label="Log In"
+            color="success"
+            onClick={() => handleLogIn()}
+          />
+        </StyledButtonWrap>
+      </StyledContentWrap>
     </Modal>
   );
 };
