@@ -4,6 +4,7 @@ import { space1, space2 } from "Theme/constants";
 interface IValueStyle {
   inverted?: boolean;
   width?: number;
+  noBorder?: boolean;
 }
 export const Wrapper = styled.div`
   display: flex;
@@ -24,7 +25,8 @@ export const StyledInput = styled.input<IValueStyle>`
     inverted ? theme.color["white"] : theme.color["primary"]};
   background-color: ${({ inverted, theme }) =>
     inverted ? theme.color["primary"] : theme.color["white"]};
-  border-width: ${({ theme }) => theme.borderWidth[2]};
+  border-width: ${({ theme, noBorder }) =>
+    noBorder ? 0 : theme.borderWidth[2]};
   border-color: ${({ inverted, theme }) =>
     inverted ? theme.color["white"] : theme.color["primary"]};
   font-size: ${({ theme }) => theme.fontSize["xs"]};
@@ -42,8 +44,10 @@ export const StyledSelect = styled.select<IValueStyle>`
     inverted ? theme.color["white"] : theme.color["primary"]};
   background-color: ${({ inverted, theme }) =>
     inverted ? theme.color["primary"] : theme.color["white"]};
-  border-width: ${({ theme }) => theme.borderWidth[2]};
-  border-color: ${({ inverted, theme }) => theme.color["primary"]};
+  border-width: ${({ theme, noBorder }) =>
+    noBorder ? 0 : theme.borderWidth[2]};
+  border-color: ${({ inverted, theme }) =>
+    inverted ? theme.color["white"] : theme.color["primary"]};
   font-size: ${({ theme }) => theme.fontSize["xs"]};
   font-weight: bold;
   width: ${({ width }) => (width ? width + "px" : "auto")};
@@ -59,7 +63,8 @@ export const StyledTextArea = styled.textarea<IValueStyle>`
     inverted ? theme.color["white"] : theme.color["primary"]};
   background-color: ${({ inverted, theme }) =>
     inverted ? theme.color["primary"] : theme.color["white"]};
-  border-width: ${({ theme }) => theme.borderWidth[2]};
+  border-width: ${({ theme, noBorder }) =>
+    noBorder ? 0 : theme.borderWidth[2]};
   border-color: ${({ theme }) => theme.color["primary"]};
   font-size: ${({ theme }) => theme.fontSize["xs"]};
   width: ${({ width }) => (width ? `${width}px` : "auto")};
