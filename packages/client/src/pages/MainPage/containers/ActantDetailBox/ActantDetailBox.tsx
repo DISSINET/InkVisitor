@@ -21,7 +21,12 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
 
   const queryClient = useQueryClient();
 
-  const { status, data: actant, error, isFetching } = useQuery(
+  const {
+    status,
+    data: actant,
+    error,
+    isFetching,
+  } = useQuery(
     ["actant", actantId],
     async () => {
       const res = await api.actantsGet(actantId);
@@ -61,7 +66,8 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
                 });
                 queryClient.invalidateQueries(["actant"]);
                 queryClient.invalidateQueries(["statement"]);
-                //queryClient.invalidateQueries(["territory"]);
+                queryClient.invalidateQueries(["tree"]);
+                queryClient.invalidateQueries(["territory"]);
               }}
             />
             <Button
