@@ -22,6 +22,7 @@ import { ActantTag } from "../..";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { setTreeInitialized } from "redux/features/treeInitializeSlice";
 import theme from "Theme/theme";
+import { rootTerritoryId } from "Theme/constants";
 
 interface TerritoryTreeNode {
   territory: ITerritory;
@@ -48,8 +49,8 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
 
   let history = useHistory();
   var hashParams = queryString.parse(location.hash);
-  const territoryId = hashParams.territory;
-  const isSelected = territoryId === territory.id;
+  const selectedTerritoryId = hashParams.territory;
+  const isSelected = selectedTerritoryId === territory.id;
 
   const [isExpanded, setIsExpanded] = useState(false);
   const [childTerritories, setChildTerritories] = useState<any[]>([]);
@@ -65,9 +66,11 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
       );
       if (shouldExpand) {
         setIsExpanded(true);
-      } else if (territoryId === territory.id) {
+      } else if (selectedTerritoryId === territory.id) {
         setIsExpanded(true);
         dispatch(setTreeInitialized(true));
+      } else if (territory.id === rootTerritoryId) {
+        setIsExpanded(true);
       } else {
         setIsExpanded(false);
       }
@@ -164,49 +167,51 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
     id: string,
     hasChildren: boolean
   ) => {
-    if (lvl === 0) {
-      return;
-    }
+    console.log(id);
     return (
-      <StyledTerritoryTagWrap>
-        <StyledIconWrap>
-          {hasChildren ? (
-            <>{getArrowIcon(id)}</>
-          ) : (
-            <>
-              {statementsCount > 0 ? (
-                <StyledFaCircle
-                  size={11}
-                  onClick={() => {
-                    hashParams["territory"] = id;
-                    history.push({
-                      hash: queryString.stringify(hashParams),
-                    });
-                  }}
-                />
+      <>
+        {id !== rootTerritoryId && (
+          <StyledTerritoryTagWrap>
+            <StyledIconWrap>
+              {hasChildren ? (
+                <>{getArrowIcon(id)}</>
               ) : (
-                <StyledFaDotCircle
-                  size={11}
-                  onClick={() => {
-                    hashParams["territory"] = id;
-                    history.push({
-                      hash: queryString.stringify(hashParams),
-                    });
-                  }}
-                />
+                <>
+                  {statementsCount > 0 ? (
+                    <StyledFaCircle
+                      size={11}
+                      onClick={() => {
+                        hashParams["territory"] = id;
+                        history.push({
+                          hash: queryString.stringify(hashParams),
+                        });
+                      }}
+                    />
+                  ) : (
+                    <StyledFaDotCircle
+                      size={11}
+                      onClick={() => {
+                        hashParams["territory"] = id;
+                        history.push({
+                          hash: queryString.stringify(hashParams),
+                        });
+                      }}
+                    />
+                  )}
+                </>
               )}
-            </>
-          )}
-        </StyledIconWrap>
-        <ActantTag
-          actant={territoryActant}
-          isSelected={isSelected}
-          propId={propId}
-          index={index}
-          // moveFn={moveFn}
-        />
-        <ContextMenu territoryActant={territoryActant} />
-      </StyledTerritoryTagWrap>
+            </StyledIconWrap>
+            <ActantTag
+              actant={territoryActant}
+              isSelected={isSelected}
+              propId={propId}
+              index={index}
+              // moveFn={moveFn}
+            />
+            <ContextMenu territoryActant={territoryActant} />
+          </StyledTerritoryTagWrap>
+        )}
+      </>
     );
   };
 
