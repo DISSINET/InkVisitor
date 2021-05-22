@@ -59,8 +59,8 @@ export const ContextMenu: React.FC<ContextMenu> = ({ territoryActant }) => {
         <StyledFaChevronCircleDown size={14} />
         {showMenu && (
           <StyledContextButtonGroup
-            clientX={currentPosition.x}
-            clientY={currentPosition.y}
+            clientx={currentPosition.x}
+            clienty={currentPosition.y}
             height={currentPosition.height}
             style={animatedMenuMount}
           >

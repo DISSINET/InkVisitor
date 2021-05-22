@@ -10,8 +10,8 @@ export const StyledWrapper = styled.div`
   flex-direction: row;
 `;
 interface StyledContextButtonGroup {
-  clientX: number;
-  clientY: number;
+  clientx: number;
+  clienty: number;
   height: number;
 }
 export const StyledContextButtonGroup = styled(
@@ -20,9 +20,9 @@ export const StyledContextButtonGroup = styled(
   display: flex;
   flex-direction: row;
   position: absolute;
-  top: ${({ clientY, height }) =>
-    `${(clientY - heightHeader - height / 4) / 10}rem`};
-  left: ${({ clientX }) => `${(clientX + 20) / 10}rem`};
+  top: ${({ clienty, height }) =>
+    `${(clienty - heightHeader - height / 4) / 10}rem`};
+  left: ${({ clientx }) => `${(clientx + 20) / 10}rem`};
   z-index: 100;
 `;
 export const StyledFaChevronCircleDown = styled(FaChevronCircleDown)`
