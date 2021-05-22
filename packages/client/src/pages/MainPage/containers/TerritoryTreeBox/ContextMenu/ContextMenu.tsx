@@ -71,6 +71,7 @@ export const ContextMenu: React.FC<ContextMenu> = ({ territoryActant }) => {
               onClick={() => {
                 // add child
                 setShowCreate(true);
+                setShowMenu(false);
               }}
             />
             <Button
@@ -90,6 +91,7 @@ export const ContextMenu: React.FC<ContextMenu> = ({ territoryActant }) => {
               color="danger"
               onClick={() => {
                 setShowSubmit(true);
+                setShowMenu(false);
               }}
             />
           </StyledContextButtonGroup>

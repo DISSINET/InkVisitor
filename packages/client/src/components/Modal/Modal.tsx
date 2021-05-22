@@ -29,7 +29,7 @@ export const Modal: FC<Modal> = ({
 }) => {
   const animatedMount = useSpring({
     opacity: showModal ? 1 : 0,
-    config: { friction: 20, mass: 1, tension: 200 },
+    config: { friction: 15, mass: 1, tension: 170, clamp: true },
   });
   return (
     <>
