@@ -12,6 +12,7 @@ import {
 import { IActant } from "@shared/types";
 import { ContextMenuNewTerritoryModal } from "../ContextMenuNewTerritoryModal/ContextMenuNewTerritoryModal";
 import { ContextMenuSubmitDelete } from "../ContextMenuSubmitDelete/ContextMenuSubmitDelete";
+import { useSpring } from "react-spring";
 
 interface ContextMenu {
   territoryActant: IActant;
@@ -27,6 +28,12 @@ export const ContextMenu: React.FC<ContextMenu> = ({ territoryActant }) => {
     y: 0,
     height: 0,
   });
+  const animatedMenuMount = useSpring({
+    opacity: showMenu ? 1 : 0,
+    config: { friction: 20, mass: 1, tension: 170 },
+  });
+  // const animatedCreateMount = useSpring({ opacity: showCreate ? 1 : 0 });
+  // const animatedSubmitMount = useSpring({ opacity: showSubmit ? 1 : 0 });
 
   const setDivPosition = () => {
     if (ref.current) {
@@ -52,51 +59,43 @@ export const ContextMenu: React.FC<ContextMenu> = ({ territoryActant }) => {
         onMouseLeave={() => setShowMenu(false)}
       >
         <StyledFaChevronCircleDown size={14} />
-
-        <CSSTransition
-          in={showMenu}
-          timeout={300}
-          classNames="fade"
-          unmountOnExit
-        >
-          {() => (
-            <StyledContextButtonGroup
-              showMenu={showMenu}
-              clientX={currentPosition.x}
-              clientY={currentPosition.y}
-              height={currentPosition.height}
-            >
-              <Button
-                key="add"
-                icon={<FaPlus size={14} />}
-                color="info"
-                onClick={() => {
-                  // add child
-                  setShowCreate(true);
-                }}
-              />
-              <Button
-                key="favorites"
-                icon={<FaStar size={14} />}
-                color="warning"
-                onClick={() => {
-                  // add to favorites
-                  toast.success(
-                    `You're adding territory [${territoryActant.label}] to favorites. (not implemented yet)`
-                  );
-                }}
-              />
-              <Button
-                key="delete"
-                icon={<FaTrashAlt size={14} />}
-                color="danger"
-                onClick={() => {
-                  setShowSubmit(true);
-                }}
-              />
-            </StyledContextButtonGroup>
-          )}
-        </CSSTransition>
+        {showMenu && (
+          <StyledContextButtonGroup
+            clientX={currentPosition.x}
+            clientY={currentPosition.y}
+            height={currentPosition.height}
+            style={animatedMenuMount}
+          >
+            <Button
+              key="add"
+              icon={<FaPlus size={14} />}
+              color="info"
+              onClick={() => {
+                // add child
+                setShowCreate(true);
+              }}
+            />
+            <Button
+              key="favorites"
+              icon={<FaStar size={14} />}
+              color="warning"
+              onClick={() => {
+                // add to favorites
+                toast.success(
+                  `You're adding territory [${territoryActant.label}] to favorites. (not implemented yet)`
+                );
+              }}
+            />
+            <Button
+              key="delete"
+              icon={<FaTrashAlt size={14} />}
+              color="danger"
+              onClick={() => {
+                setShowSubmit(true);
+              }}
+            />
+          </StyledContextButtonGroup>
+        )}
       </StyledWrapper>
 
       {showSubmit && (
