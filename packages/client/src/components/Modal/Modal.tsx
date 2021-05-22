@@ -1,4 +1,5 @@
 import React, { FC, ReactNode, useEffect } from "react";
+import { useSpring } from "react-spring";
 
 import {
   StyledModalWrap,
@@ -26,12 +27,23 @@ export const Modal: FC<Modal> = ({
   inverted = false,
   width = "normal",
 }) => {
+  const animatedMount = useSpring({
+    opacity: showModal ? 1 : 0,
+    config: { friction: 20, mass: 1, tension: 200 },
+  });
   return (
     <>
       {showModal && (
         <StyledModalWrap>
-          <StyledBackground onClick={disableBgClick ? () => {} : onClose} />
-          <ModalCard inverted={inverted} width={width}>
+          <StyledBackground
+            style={animatedMount}
+            onClick={disableBgClick ? () => {} : onClose}
+          />
+          <ModalCard
+            animatedMount={animatedMount}
+            inverted={inverted}
+            width={width}
+          >
             {children}
           </ModalCard>
         </StyledModalWrap>
@@ -44,10 +56,16 @@ interface ModalCard {
   children?: ReactNode;
   width: "full" | "normal" | "thin";
   inverted: boolean;
+  animatedMount: any;
 }
-export const ModalCard: FC<ModalCard> = ({ children, inverted, width }) => {
+export const ModalCard: FC<ModalCard> = ({
+  children,
+  inverted,
+  width,
+  animatedMount,
+}) => {
   return (
-    <StyledCard inverted={inverted} width={width}>
+    <StyledCard style={animatedMount} inverted={inverted} width={width}>
       {children}
     </StyledCard>
   );

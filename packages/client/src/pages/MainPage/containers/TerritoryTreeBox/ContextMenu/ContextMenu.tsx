@@ -32,8 +32,6 @@ export const ContextMenu: React.FC<ContextMenu> = ({ territoryActant }) => {
     opacity: showMenu ? 1 : 0,
     config: { friction: 20, mass: 1, tension: 170 },
   });
-  // const animatedCreateMount = useSpring({ opacity: showCreate ? 1 : 0 });
-  // const animatedSubmitMount = useSpring({ opacity: showSubmit ? 1 : 0 });
 
   const setDivPosition = () => {
     if (ref.current) {

@@ -1,3 +1,4 @@
+import { animated } from "react-spring";
 import styled from "styled-components";
 import { space1, space3, space5, space6, space7 } from "Theme/constants";
 
@@ -15,7 +16,7 @@ export const StyledModalWrap = styled.div<ModalWrap>`
   top: 0;
   z-index: 40;
 `;
-export const StyledBackground = styled.div`
+export const StyledBackground = styled(animated.div)`
   position: absolute;
   bottom: 0;
   left: 0;
@@ -38,7 +39,7 @@ const handleWidth = (width: "full" | "normal" | "thin") => {
       return "auto";
   }
 };
-export const StyledCard = styled.div<Card>`
+export const StyledCard = styled(animated.div)<Card>`
   width: ${({ width }) => handleWidth(width)};
   display: flex;
   flex-direction: column;
