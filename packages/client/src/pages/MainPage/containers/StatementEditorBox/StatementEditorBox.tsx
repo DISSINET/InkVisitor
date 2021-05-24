@@ -59,7 +59,7 @@ const classesActants = ["P", "G", "O", "C", "L", "V", "E", "S", "T", "R"];
 const classesPropType = ["C"];
 const classesPropValue = ["P", "G", "O", "C", "L", "V", "E", "S", "T", "R"];
 const classesResources = ["R"];
-const classesTags = ["P", "G", "O", "C", "L", "V", "E", "S", "T", "R"];
+const classesTags = ["C", "P", "G", "O", "L", "V", "E", "S", "T", "R"];
 
 export const StatementEditorBox: React.FC = () => {
   let history = useHistory();
