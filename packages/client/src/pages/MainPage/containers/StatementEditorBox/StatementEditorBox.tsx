@@ -318,7 +318,7 @@ export const StatementEditorBox: React.FC = () => {
               <StyledListHeaderColumn>Type</StyledListHeaderColumn>
               <StyledListHeaderColumn>Value</StyledListHeaderColumn>
               <StyledListHeaderColumn>Attributes</StyledListHeaderColumn>
-              <StyledListHeaderColumn>Actions</StyledListHeaderColumn>
+              <StyledListHeaderColumn></StyledListHeaderColumn>
               {propOrigin.props.map((prop1: any, pi1: number) => {
                 return (
                   <React.Fragment key={prop1 + pi1}>
@@ -664,7 +664,7 @@ export const StatementEditorBox: React.FC = () => {
             {/* Statement Props */}
             <StyledEditorSection key="editor-section-props-statement">
               <StyledEditorSectionHeader>
-                Statement Props
+                Statement Properties
               </StyledEditorSectionHeader>
 
               <StyledEditorSectionContent key={JSON.stringify(statement.data)}>
@@ -695,7 +695,7 @@ export const StatementEditorBox: React.FC = () => {
                       <StyledListHeaderColumn>Resource</StyledListHeaderColumn>
                       <StyledListHeaderColumn>Part</StyledListHeaderColumn>
                       <StyledListHeaderColumn>Type</StyledListHeaderColumn>
-                      <StyledListHeaderColumn>Actions</StyledListHeaderColumn>
+                      <StyledListHeaderColumn></StyledListHeaderColumn>
                     </React.Fragment>
                   )}
                   {statement.data.references.map(
