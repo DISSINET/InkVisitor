@@ -167,7 +167,6 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
     id: string,
     hasChildren: boolean
   ) => {
-    console.log(id);
     return (
       <>
         {id !== rootTerritoryId && (

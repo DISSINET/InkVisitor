@@ -21,7 +21,11 @@ import { IStatement, IActant, IAction } from "@shared/types";
 import { ActantType } from "@shared/enums";
 import { StatementListTable } from "./StatementListTable/StatementListTable";
 import { StatementListHeader } from "./StatementListHeader/StatementListHeader";
-import { StyledDots, StyledSelectorCell } from "./StatementLitBoxStyles";
+import {
+  StyledDots,
+  StyledSelectorCell,
+  StyledActionLabel,
+} from "./StatementLitBoxStyles";
 import { CStatement, DStatement } from "constructors";
 
 const initialData: {
@@ -210,7 +214,7 @@ export const StatementListBox: React.FC = () => {
               {actionLabel &&
                 (actionLabel.length > 9 ? (
                   <Tooltip label={actionLabel}>
-                    <div>{`${actionLabel.substring(0, 9)}...`}</div>
+                    <StyledActionLabel>{actionLabel}</StyledActionLabel>
                   </Tooltip>
                 ) : (
                   actionLabel
@@ -252,6 +256,7 @@ export const StatementListBox: React.FC = () => {
       {
         Header: "",
         id: "expander",
+        width: 300,
         Cell: ({ row }: Cell) => (
           <ButtonGroup noMargin>
             <span {...row.getToggleRowExpandedProps()}>
