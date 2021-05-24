@@ -60,7 +60,7 @@ export const StatementEditorActantList: React.FC<StatementEditorActantList> = ({
       <StyledListHeaderColumn>Actant</StyledListHeaderColumn>
       <StyledListHeaderColumn>Position</StyledListHeaderColumn>
       <StyledListHeaderColumn>Attributes</StyledListHeaderColumn>
-      <StyledListHeaderColumn>Actions</StyledListHeaderColumn>
+      <StyledListHeaderColumn></StyledListHeaderColumn>
       {actants.map((sActant, sai) => {
         const actant = statement.actants.find((a) => a.id === sActant.actant);
         return (
