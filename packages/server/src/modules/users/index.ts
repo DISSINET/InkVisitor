@@ -218,6 +218,7 @@ export default Router()
               bookmarkResponse.actants.push({
                 ...actant,
                 usedCount: await getActantUsage(request.db, actant.id),
+                usedIn: [],
               });
             }
           }
@@ -259,6 +260,7 @@ export default Router()
                 bookmarkResponse.actants.push({
                   ...actant,
                   usedCount: await getActantUsage(request.db, actant.id),
+                  usedIn: [],
                 });
               }
             }
@@ -278,6 +280,7 @@ export default Router()
                   request.db,
                   territory.territoryId
                 ),
+                usedIn: [],
               },
             };
             userResponse.storedTerritories.push(territoryResponse);
