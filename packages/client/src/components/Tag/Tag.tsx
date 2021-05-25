@@ -131,7 +131,11 @@ export const Tag: React.FC<TagProps> = ({
         </Tooltip>
       ) : (
         <>
-          <Tooltip label={label} disabled={!enableTooltip}>
+          <Tooltip
+            label={label}
+            disabled={!enableTooltip}
+            position={"right center"}
+          >
             <div style={{ display: "inline-flex" }}>
               <TagWrapper
                 ref={ref}
