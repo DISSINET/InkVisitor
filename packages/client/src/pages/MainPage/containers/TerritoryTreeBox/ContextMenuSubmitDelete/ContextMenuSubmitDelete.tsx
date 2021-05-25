@@ -52,7 +52,7 @@ export const ContextMenuSubmitDelete: React.FC<ContextMenuSubmitDelete> = ({
   return (
     <Submit
       title={"Delete Territory"}
-      text={`Do you really want do delete Territory [${territoryActant.label}] with ID [${territoryActant.id}]?`}
+      text={`Do you really want do delete Territory [${territoryActant.label}]?`}
       show={showModal}
       onSubmit={() => onSubmitDelete()}
       onCancel={() => onClose()}

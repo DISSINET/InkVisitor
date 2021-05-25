@@ -26,9 +26,9 @@ export const ContextMenu: React.FC<ContextMenu> = ({
   const ref = useRef<HTMLDivElement>(null);
 
   const [showMenu, setShowMenu] = useState(false);
-  useEffect(() => {
-    showMenu ? onMenuOpen() : onMenuClose();
-  }, [showMenu]);
+  // useEffect(() => {
+  //   showMenu ? onMenuOpen() : onMenuClose();
+  // }, [showMenu]);
   const [showCreate, setShowCreate] = useState(false);
   const [showSubmit, setShowSubmit] = useState(false);
   const [currentPosition, setCurrentPosition] = useState({
@@ -57,9 +57,11 @@ export const ContextMenu: React.FC<ContextMenu> = ({
             setDivPosition();
           }
           setShowMenu(true);
+          onMenuOpen();
         }}
         onMouseLeave={() => {
           setShowMenu(false);
+          onMenuClose();
         }}
       >
         <StyledFaChevronCircleDown size={14} />
