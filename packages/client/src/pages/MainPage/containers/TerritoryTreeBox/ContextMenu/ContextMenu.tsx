@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { FaTrashAlt, FaStar, FaPlus } from "react-icons/fa";
 import { toast } from "react-toastify";
 
@@ -11,16 +11,24 @@ import {
 import { IActant } from "@shared/types";
 import { ContextMenuNewTerritoryModal } from "../ContextMenuNewTerritoryModal/ContextMenuNewTerritoryModal";
 import { ContextMenuSubmitDelete } from "../ContextMenuSubmitDelete/ContextMenuSubmitDelete";
-import { useSpring } from "react-spring";
 import { config, Transition } from "react-spring/renderprops";
 
 interface ContextMenu {
   territoryActant: IActant;
+  onMenuOpen: () => void;
+  onMenuClose: () => void;
 }
-export const ContextMenu: React.FC<ContextMenu> = ({ territoryActant }) => {
+export const ContextMenu: React.FC<ContextMenu> = ({
+  territoryActant,
+  onMenuOpen,
+  onMenuClose,
+}) => {
   const ref = useRef<HTMLDivElement>(null);
 
   const [showMenu, setShowMenu] = useState(false);
+  useEffect(() => {
+    showMenu ? onMenuOpen() : onMenuClose();
+  }, [showMenu]);
   const [showCreate, setShowCreate] = useState(false);
   const [showSubmit, setShowSubmit] = useState(false);
   const [currentPosition, setCurrentPosition] = useState({
@@ -50,7 +58,9 @@ export const ContextMenu: React.FC<ContextMenu> = ({ territoryActant }) => {
           }
           setShowMenu(true);
         }}
-        onMouseLeave={() => setShowMenu(false)}
+        onMouseLeave={() => {
+          setShowMenu(false);
+        }}
       >
         <StyledFaChevronCircleDown size={14} />
         <Transition

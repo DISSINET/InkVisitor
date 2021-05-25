@@ -1,5 +1,5 @@
 import React, { FC, ReactNode, useEffect } from "react";
-import { useSpring } from "react-spring";
+import { config, useSpring } from "react-spring";
 
 import {
   StyledModalWrap,
@@ -17,19 +17,17 @@ interface Modal {
   showModal: boolean;
   disableBgClick?: boolean;
   width?: "full" | "normal" | "thin";
-  inverted?: boolean;
 }
 export const Modal: FC<Modal> = ({
   children,
   onClose = () => {},
   showModal,
   disableBgClick = false,
-  inverted = false,
   width = "normal",
 }) => {
   const animatedMount = useSpring({
     opacity: showModal ? 1 : 0,
-    config: { friction: 15, mass: 1, tension: 170, clamp: true },
+    config: config.stiff,
   });
   return (
     <>
@@ -39,11 +37,7 @@ export const Modal: FC<Modal> = ({
             style={animatedMount}
             onClick={disableBgClick ? () => {} : onClose}
           />
-          <ModalCard
-            animatedMount={animatedMount}
-            inverted={inverted}
-            width={width}
-          >
+          <ModalCard animatedMount={animatedMount} width={width}>
             {children}
           </ModalCard>
         </StyledModalWrap>
@@ -55,17 +49,15 @@ export const Modal: FC<Modal> = ({
 interface ModalCard {
   children?: ReactNode;
   width: "full" | "normal" | "thin";
-  inverted: boolean;
   animatedMount: any;
 }
 export const ModalCard: FC<ModalCard> = ({
   children,
-  inverted,
   width,
   animatedMount,
 }) => {
   return (
-    <StyledCard style={animatedMount} inverted={inverted} width={width}>
+    <StyledCard style={animatedMount} width={width}>
       {children}
     </StyledCard>
   );

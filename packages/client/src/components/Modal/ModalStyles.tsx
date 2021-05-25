@@ -26,7 +26,6 @@ export const StyledBackground = styled(animated.div)`
 `;
 
 interface Card {
-  inverted: boolean;
   width: "full" | "normal" | "thin";
 }
 const handleWidth = (width: "full" | "normal" | "thin") => {
@@ -46,10 +45,8 @@ export const StyledCard = styled(animated.div)<Card>`
   max-height: calc(100vh - 40px);
   overflow: hidden;
   z-index: 50;
-  background-color: ${({ theme, inverted }) =>
-    inverted ? theme.color["primary"] : theme.color["white"]};
-  color: ${({ theme, inverted }) =>
-    inverted ? theme.color["white"] : theme.color["black"]};
+  background-color: ${({ theme }) => theme.color["white"]};
+  color: ${({ theme }) => theme.color["black"]};
   border-radius: ${({ theme }) => theme.borderRadius["sm"]};
 `;
 
