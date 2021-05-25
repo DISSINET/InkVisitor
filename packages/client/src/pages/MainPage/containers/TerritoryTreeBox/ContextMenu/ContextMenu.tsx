@@ -56,12 +56,12 @@ export const ContextMenu: React.FC<ContextMenu> = ({
           if (!showMenu) {
             setDivPosition();
           }
-          setShowMenu(true);
           onMenuOpen();
+          setShowMenu(true);
         }}
         onMouseLeave={() => {
-          setShowMenu(false);
           onMenuClose();
+          setShowMenu(false);
         }}
       >
         <StyledFaChevronCircleDown size={14} />
@@ -89,6 +89,7 @@ export const ContextMenu: React.FC<ContextMenu> = ({
                     // add child
                     setShowCreate(true);
                     setShowMenu(false);
+                    onMenuClose();
                   }}
                 />
                 <Button
@@ -109,6 +110,7 @@ export const ContextMenu: React.FC<ContextMenu> = ({
                   onClick={() => {
                     setShowSubmit(true);
                     setShowMenu(false);
+                    onMenuClose();
                   }}
                 />
               </StyledContextButtonGroup>
