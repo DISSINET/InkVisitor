@@ -297,6 +297,32 @@ class Statement extends Actant implements IStatement {
       return a.data.territory.order - b.data.territory.order;
     });
   }
+
+  static async findMetaStatements(
+    db: Connection | undefined,
+    actantId: string
+  ): Promise<Statement[]> {
+    const statements = await rethink
+      .table("actants")
+      .filter({
+        class: ActantType.Statement,
+      })
+      .filter((row: RDatum) => {
+        return rethink.and(
+          row("data")("actants").contains((entry: RDatum) =>
+            entry("actant").eq(actantId)
+          ),
+          row("data")("territory")("id").eq("T0")
+        );
+      })
+      .run(db);
+
+    return statements
+      .sort((a, b) => {
+        return a.data.territory.order - b.data.territory.order;
+      })
+      .map((s) => new Statement({ ...s }));
+  }
 }
 
 export default Statement;

@@ -36,8 +36,6 @@ export default Router().get(
     return {
       ...statementData,
       actants,
-      audits: [],
-      usedIn: [],
     };
   })
 );
