@@ -13,7 +13,14 @@ import {
   ModelNotValidError,
   InternalServerError,
 } from "@shared/types/errors";
-import { IActant, IResponseDetail, IResponseGeneric } from "@shared/types";
+import {
+  IActant,
+  IResponseDetail,
+  IResponseGeneric,
+  IResponseStatement,
+} from "@shared/types";
+import Statement from "@models/statement";
+import { stat } from "node:fs";
 
 export default Router()
   .get(
@@ -171,10 +178,30 @@ export default Router()
       }
 
       const usage = await getActantUsage(request.db, actantId);
+      const meta: IResponseStatement[] = [];
+
+      const statements = await Statement.findMetaStatements(
+        request.db.connection,
+        actant.id
+      );
+      for (const statement of statements) {
+        const actants: IActant[] = [];
+        for (const actantId of statement.getDependencyList()) {
+          const actant = await findActantById<IActant>(request.db, actantId);
+          if (actant) {
+            actants.push(actant);
+          }
+        }
+        meta.push({
+          ...statement,
+          actants,
+        });
+      }
 
       return {
         ...actant,
         usedCount: usage,
+        metaStatements: meta,
       };
     })
   );
