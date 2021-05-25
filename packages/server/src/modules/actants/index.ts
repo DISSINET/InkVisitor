@@ -18,14 +18,14 @@ import {
   IResponseDetail,
   IResponseGeneric,
   IResponseStatement,
+  IResponseActant,
 } from "@shared/types";
 import Statement from "@models/statement";
-import { stat } from "node:fs";
 
 export default Router()
   .get(
     "/get/:actantId?",
-    asyncRouteHandler<IActant>(async (request: Request) => {
+    asyncRouteHandler<IResponseActant>(async (request: Request) => {
       const actantId = request.params.actantId;
 
       if (!actantId) {
@@ -41,12 +41,21 @@ export default Router()
         throw new ActantDoesNotExits(`actant ${actantId} was not found`);
       }
 
-      return actant;
+      const usedInStatements = await Statement.findDependentStatements(
+        request.db.connection,
+        actant.id
+      );
+
+      return {
+        ...actant,
+        usedCount: usedInStatements.length,
+        usedIn: usedInStatements,
+      };
     })
   )
   .post(
     "/getMore",
-    asyncRouteHandler<IActant[]>(async (request: Request) => {
+    asyncRouteHandler<IResponseActant[]>(async (request: Request) => {
       const label = request.body.label;
       const classParam = request.body.class;
 
@@ -54,7 +63,27 @@ export default Router()
         throw new BadParams("label or class has to be set");
       }
 
-      return await findActantsByLabelOrClass(request.db, label, classParam);
+      const out: IResponseActant[] = [];
+
+      const actants = await findActantsByLabelOrClass(
+        request.db,
+        label,
+        classParam
+      );
+
+      for (const actant of actants) {
+        const usedInStatements = await Statement.findDependentStatements(
+          request.db.connection,
+          actant.id
+        );
+        out.push({
+          ...actant,
+          usedCount: usedInStatements.length,
+          usedIn: usedInStatements,
+        });
+      }
+
+      return out;
     })
   )
   .post(
@@ -195,12 +224,14 @@ export default Router()
         meta.push({
           ...statement,
           actants,
+          usedIn: [],
         });
       }
 
       return {
         ...actant,
         usedCount: usage,
+        usedIn: [],
         metaStatements: meta,
       };
     })
