@@ -676,3 +676,74 @@ describe("Statement - update territory order", function () {
     });
   });
 });
+
+describe("Statement - findMetaStatements", function () {
+  let db: Db;
+  beforeAll(async () => {
+    db = new Db();
+    await db.initDb();
+  });
+
+  beforeEach(async () => {
+    await deleteActants(db);
+  });
+
+  afterAll(async () => {
+    await db.close();
+  });
+
+  describe("bad territory or actant", () => {
+    it("should return empty list", async (done) => {
+      const wantedActantId = "A0";
+      const statement1 = new Statement({
+        data: {
+          territory: { id: "something" },
+          actants: [{ actant: "something" }],
+        },
+      });
+      await statement1.save(db.connection);
+      const statement2 = new Statement({
+        data: {
+          territory: { id: "T0" },
+          actants: [{ actant: "something" }],
+        },
+      });
+      await statement2.save(db.connection);
+      const statement3 = new Statement({
+        data: {
+          territory: { id: "something" },
+          actants: [{ actant: "A0" }],
+        },
+      });
+      await statement3.save(db.connection);
+
+      const statements = await Statement.findMetaStatements(
+        db.connection,
+        wantedActantId
+      );
+
+      expect(statements.length).toEqual(0);
+
+      done();
+    });
+  });
+
+  describe("basic search by T0 and A1", () => {
+    it("should return list of 1 item", async (done) => {
+      const actantId = "A1";
+      const statement = new Statement({
+        data: { territory: { id: "T0" }, actants: [{ actant: actantId }] },
+      });
+      await statement.save(db.connection);
+
+      const statements = await Statement.findMetaStatements(
+        db.connection,
+        actantId
+      );
+
+      expect(statements.length).toEqual(1);
+
+      done();
+    });
+  });
+});
