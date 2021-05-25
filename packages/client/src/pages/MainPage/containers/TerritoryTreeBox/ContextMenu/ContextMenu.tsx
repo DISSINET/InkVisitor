@@ -1,7 +1,6 @@
 import React, { useRef, useState } from "react";
 import { FaTrashAlt, FaStar, FaPlus } from "react-icons/fa";
 import { toast } from "react-toastify";
-import { CSSTransition } from "react-transition-group";
 
 import { Button } from "components";
 import {
@@ -13,6 +12,7 @@ import { IActant } from "@shared/types";
 import { ContextMenuNewTerritoryModal } from "../ContextMenuNewTerritoryModal/ContextMenuNewTerritoryModal";
 import { ContextMenuSubmitDelete } from "../ContextMenuSubmitDelete/ContextMenuSubmitDelete";
 import { useSpring } from "react-spring";
+import { config, Transition } from "react-spring/renderprops";
 
 interface ContextMenu {
   territoryActant: IActant;
@@ -27,10 +27,6 @@ export const ContextMenu: React.FC<ContextMenu> = ({ territoryActant }) => {
     x: 0,
     y: 0,
     height: 0,
-  });
-  const animatedMenuMount = useSpring({
-    opacity: showMenu ? 1 : 0,
-    config: { friction: 20, mass: 1, tension: 170 },
   });
 
   const setDivPosition = () => {
@@ -57,45 +53,56 @@ export const ContextMenu: React.FC<ContextMenu> = ({ territoryActant }) => {
         onMouseLeave={() => setShowMenu(false)}
       >
         <StyledFaChevronCircleDown size={14} />
-        {showMenu && (
-          <StyledContextButtonGroup
-            clientx={currentPosition.x}
-            clienty={currentPosition.y}
-            height={currentPosition.height}
-            style={animatedMenuMount}
-          >
-            <Button
-              key="add"
-              icon={<FaPlus size={14} />}
-              color="info"
-              onClick={() => {
-                // add child
-                setShowCreate(true);
-                setShowMenu(false);
-              }}
-            />
-            <Button
-              key="favorites"
-              icon={<FaStar size={14} />}
-              color="warning"
-              onClick={() => {
-                // add to favorites
-                toast.success(
-                  `You're adding territory [${territoryActant.label}] to favorites. (not implemented yet)`
-                );
-              }}
-            />
-            <Button
-              key="delete"
-              icon={<FaTrashAlt size={14} />}
-              color="danger"
-              onClick={() => {
-                setShowSubmit(true);
-                setShowMenu(false);
-              }}
-            />
-          </StyledContextButtonGroup>
-        )}
+        <Transition
+          items={showMenu}
+          from={{ opacity: 0 }}
+          enter={{ opacity: 1 }}
+          leave={{ opacity: 0 }}
+          config={config.stiff}
+        >
+          {(showMenu) =>
+            showMenu &&
+            ((styles) => (
+              <StyledContextButtonGroup
+                clientx={currentPosition.x}
+                clienty={currentPosition.y}
+                height={currentPosition.height}
+                style={styles}
+              >
+                <Button
+                  key="add"
+                  icon={<FaPlus size={14} />}
+                  color="info"
+                  onClick={() => {
+                    // add child
+                    setShowCreate(true);
+                    setShowMenu(false);
+                  }}
+                />
+                <Button
+                  key="favorites"
+                  icon={<FaStar size={14} />}
+                  color="warning"
+                  onClick={() => {
+                    // add to favorites
+                    toast.success(
+                      `You're adding territory [${territoryActant.label}] to favorites. (not implemented yet)`
+                    );
+                  }}
+                />
+                <Button
+                  key="delete"
+                  icon={<FaTrashAlt size={14} />}
+                  color="danger"
+                  onClick={() => {
+                    setShowSubmit(true);
+                    setShowMenu(false);
+                  }}
+                />
+              </StyledContextButtonGroup>
+            ))
+          }
+        </Transition>
       </StyledWrapper>
 
       {showSubmit && (
