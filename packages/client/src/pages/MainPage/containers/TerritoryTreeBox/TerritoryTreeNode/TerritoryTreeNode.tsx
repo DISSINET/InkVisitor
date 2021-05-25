@@ -212,6 +212,7 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
                 isSelected={isSelected}
                 propId={propId}
                 index={index}
+                enableTooltip
                 // moveFn={moveFn}
               />
             </animated.div>

@@ -25,6 +25,7 @@ interface TagProps {
   short?: boolean;
   index?: number;
   moveFn?: (dragIndex: number, hoverIndex: number) => void;
+  enableTooltip?: boolean;
 }
 
 export const Tag: React.FC<TagProps> = ({
@@ -39,6 +40,7 @@ export const Tag: React.FC<TagProps> = ({
   short = false,
   index,
   moveFn,
+  enableTooltip = false,
 }) => {
   let history = useHistory();
   let location = useLocation();
@@ -129,19 +131,26 @@ export const Tag: React.FC<TagProps> = ({
         </Tooltip>
       ) : (
         <>
-          <TagWrapper
-            ref={ref}
-            borderStyle={borderStyle}
-            onDoubleClick={(e: React.MouseEvent) => onDoubleClick(e)}
-          >
-            {renderEntityTag()}
-            {label && (
-              <Label invertedLabel={invertedLabel} borderStyle={borderStyle}>
-                {label}
-              </Label>
-            )}
-            {button && renderButton()}
-          </TagWrapper>
+          <Tooltip label={label} disabled={!enableTooltip}>
+            <div style={{ display: "inline-flex" }}>
+              <TagWrapper
+                ref={ref}
+                borderStyle={borderStyle}
+                onDoubleClick={(e: React.MouseEvent) => onDoubleClick(e)}
+              >
+                {renderEntityTag()}
+                {label && (
+                  <Label
+                    invertedLabel={invertedLabel}
+                    borderStyle={borderStyle}
+                  >
+                    {label}
+                  </Label>
+                )}
+                {button && renderButton()}
+              </TagWrapper>
+            </div>
+          </Tooltip>
         </>
       )}
     </>
