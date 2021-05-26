@@ -29,11 +29,13 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
   } = useQuery(
     ["actant", actantId],
     async () => {
-      const res = await api.actantsGet(actantId);
+      const res = await api.detailGet(actantId);
       return res.data;
     },
     { enabled: !!actantId && api.isLoggedIn() }
   );
+
+  console.log(actant);
 
   return (
     <>

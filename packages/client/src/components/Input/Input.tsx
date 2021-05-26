@@ -72,7 +72,9 @@ export const Input: React.FC<InputProps> = ({
             }
           }}
           onBlur={() => {
-            onChangeFn(displayValue);
+            if (displayValue !== value) {
+              onChangeFn(displayValue);
+            }
           }}
           inverted={inverted}
           noBorder={noBorder}
