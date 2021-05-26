@@ -1,7 +1,8 @@
 import { FaCircle, FaDotCircle } from "react-icons/fa";
+import { animated } from "react-spring";
 import styled from "styled-components";
 
-export const StyledTerritoryTagWrap = styled.div`
+export const StyledTerritoryTagWrap = styled(animated.div)`
   display: flex;
   align-items: center;
   margin-bottom: ${({ theme }) => theme.space[1]};

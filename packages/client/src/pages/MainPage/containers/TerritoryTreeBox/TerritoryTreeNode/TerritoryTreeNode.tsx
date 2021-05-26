@@ -23,6 +23,7 @@ import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { setTreeInitialized } from "redux/features/treeInitializeSlice";
 import theme from "Theme/theme";
 import { rootTerritoryId } from "Theme/constants";
+import { animated, config, useSpring } from "react-spring";
 
 interface TerritoryTreeNode {
   territory: ITerritory;
@@ -54,6 +55,11 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
 
   const [isExpanded, setIsExpanded] = useState(false);
   const [childTerritories, setChildTerritories] = useState<any[]>([]);
+  const [contextMenuOpen, setContextMenuOpen] = useState(false);
+  const animatedStyle = useSpring({
+    opacity: contextMenuOpen ? 0.6 : 1,
+    config: config.stiff,
+  });
 
   useEffect(() => {
     setChildTerritories(children);
@@ -200,14 +206,21 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
                 </>
               )}
             </StyledIconWrap>
-            <ActantTag
-              actant={territoryActant}
-              isSelected={isSelected}
-              propId={propId}
-              index={index}
-              // moveFn={moveFn}
+            <animated.div style={animatedStyle}>
+              <ActantTag
+                actant={territoryActant}
+                isSelected={isSelected}
+                propId={propId}
+                index={index}
+                enableTooltip
+                // moveFn={moveFn}
+              />
+            </animated.div>
+            <ContextMenu
+              territoryActant={territoryActant}
+              onMenuOpen={() => setContextMenuOpen(true)}
+              onMenuClose={() => setContextMenuOpen(false)}
             />
-            <ContextMenu territoryActant={territoryActant} />
           </StyledTerritoryTagWrap>
         )}
       </>

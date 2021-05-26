@@ -13,12 +13,19 @@ import {
   ModelNotValidError,
   InternalServerError,
 } from "@shared/types/errors";
-import { IActant, IResponseDetail, IResponseGeneric } from "@shared/types";
+import {
+  IActant,
+  IResponseDetail,
+  IResponseGeneric,
+  IResponseStatement,
+  IResponseActant,
+} from "@shared/types";
+import Statement from "@models/statement";
 
 export default Router()
   .get(
     "/get/:actantId?",
-    asyncRouteHandler<IActant>(async (request: Request) => {
+    asyncRouteHandler<IResponseActant>(async (request: Request) => {
       const actantId = request.params.actantId;
 
       if (!actantId) {
@@ -34,12 +41,21 @@ export default Router()
         throw new ActantDoesNotExits(`actant ${actantId} was not found`);
       }
 
-      return actant;
+      const usedInStatements = await Statement.findDependentStatements(
+        request.db.connection,
+        actant.id
+      );
+
+      return {
+        ...actant,
+        usedCount: usedInStatements.length,
+        usedIn: usedInStatements,
+      };
     })
   )
   .post(
     "/getMore",
-    asyncRouteHandler<IActant[]>(async (request: Request) => {
+    asyncRouteHandler<IResponseActant[]>(async (request: Request) => {
       const label = request.body.label;
       const classParam = request.body.class;
 
@@ -47,7 +63,27 @@ export default Router()
         throw new BadParams("label or class has to be set");
       }
 
-      return await findActantsByLabelOrClass(request.db, label, classParam);
+      const out: IResponseActant[] = [];
+
+      const actants = await findActantsByLabelOrClass(
+        request.db,
+        label,
+        classParam
+      );
+
+      for (const actant of actants) {
+        const usedInStatements = await Statement.findDependentStatements(
+          request.db.connection,
+          actant.id
+        );
+        out.push({
+          ...actant,
+          usedCount: usedInStatements.length,
+          usedIn: usedInStatements,
+        });
+      }
+
+      return out;
     })
   )
   .post(
@@ -171,10 +207,32 @@ export default Router()
       }
 
       const usage = await getActantUsage(request.db, actantId);
+      const meta: IResponseStatement[] = [];
+
+      const statements = await Statement.findMetaStatements(
+        request.db.connection,
+        actant.id
+      );
+      for (const statement of statements) {
+        const actants: IActant[] = [];
+        for (const actantId of statement.getDependencyList()) {
+          const actant = await findActantById<IActant>(request.db, actantId);
+          if (actant) {
+            actants.push(actant);
+          }
+        }
+        meta.push({
+          ...statement,
+          actants,
+          usedIn: [],
+        });
+      }
 
       return {
         ...actant,
         usedCount: usage,
+        usedIn: [],
+        metaStatements: meta,
       };
     })
   );
