@@ -225,6 +225,7 @@ export default Router()
           ...statement,
           actants,
           usedIn: [],
+          audits: [],
         });
       }
 

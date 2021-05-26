@@ -11,8 +11,8 @@ export const StyledPopup = styled(Popup)`
     padding: ${({ theme }) => `${theme.space[2]} ${theme.space[3]}`};
     min-width: ${({ theme }) => theme.space[16]};
     display: flex;
-    justify-content: center;
-    align-items: center;
+    justify-content: right;
+    align-items: right;
   }
   &-arrow {
     color: ${({ theme }) => theme.color["black"]};
