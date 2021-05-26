@@ -80,7 +80,7 @@ export const ActantTag: React.FC<IActantTag> = ({
   index,
   moveFn,
   isSelected,
-  enableTooltip,
+  enableTooltip = false,
 }) => {
   const classId = actant.class;
   const classObject = classes[classId];
