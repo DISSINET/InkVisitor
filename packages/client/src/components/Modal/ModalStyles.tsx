@@ -1,3 +1,4 @@
+import { animated } from "react-spring";
 import styled from "styled-components";
 import { space1, space3, space5, space6, space7 } from "Theme/constants";
 
@@ -15,7 +16,7 @@ export const StyledModalWrap = styled.div<ModalWrap>`
   top: 0;
   z-index: 40;
 `;
-export const StyledBackground = styled.div`
+export const StyledBackground = styled(animated.div)`
   position: absolute;
   bottom: 0;
   left: 0;
@@ -25,7 +26,6 @@ export const StyledBackground = styled.div`
 `;
 
 interface Card {
-  inverted: boolean;
   width: "full" | "normal" | "thin";
 }
 const handleWidth = (width: "full" | "normal" | "thin") => {
@@ -38,17 +38,15 @@ const handleWidth = (width: "full" | "normal" | "thin") => {
       return "auto";
   }
 };
-export const StyledCard = styled.div<Card>`
+export const StyledCard = styled(animated.div)<Card>`
   width: ${({ width }) => handleWidth(width)};
   display: flex;
   flex-direction: column;
   max-height: calc(100vh - 40px);
   overflow: hidden;
   z-index: 50;
-  background-color: ${({ theme, inverted }) =>
-    inverted ? theme.color["primary"] : theme.color["white"]};
-  color: ${({ theme, inverted }) =>
-    inverted ? theme.color["white"] : theme.color["black"]};
+  background-color: ${({ theme }) => theme.color["white"]};
+  color: ${({ theme }) => theme.color["black"]};
   border-radius: ${({ theme }) => theme.borderRadius["sm"]};
 `;
 
