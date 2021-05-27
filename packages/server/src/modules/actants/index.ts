@@ -15,6 +15,7 @@ import {
 } from "@shared/types/errors";
 import {
   IActant,
+  IStatement,
   IResponseDetail,
   IResponseGeneric,
   IResponseStatement,
@@ -72,10 +73,11 @@ export default Router()
       );
 
       for (const actant of actants) {
-        const usedInStatements = await Statement.findDependentStatements(
-          request.db.connection,
-          actant.id
-        );
+        const usedInStatements: IStatement[] = [];
+        // await Statement.findDependentStatements(
+        //   request.db.connection,
+        //   actant.id
+        // );
         out.push({
           ...actant,
           usedCount: usedInStatements.length,

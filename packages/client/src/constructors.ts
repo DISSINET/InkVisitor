@@ -48,6 +48,36 @@ export const CStatement = (territoryId: string): IStatement => ({
   },
 });
 
+export const CMetaStatement = (subjectId: string): IStatement => ({
+  id: uuidv4(),
+  class: ActantType.Statement,
+  label: "",
+  data: {
+    action: "A0093",
+    certainty: "1",
+    elvl: "1",
+    modality: "Y",
+    text: "",
+    note: "",
+    territory: {
+      id: "T0",
+      order: -1,
+    },
+    actants: [
+      {
+        id: uuidv4(),
+        actant: subjectId,
+        position: "s",
+        elvl: "1",
+        certainty: "1",
+      },
+    ],
+    props: [],
+    references: [],
+    tags: [],
+  },
+});
+
 // duplicate statement
 export const DStatement = (statement: IStatement): IStatement => {
   const duplicatedStatement = { ...statement };
