@@ -44,17 +44,16 @@ import { validateJwt } from "@common/auth";
 import { UnauthorizedError as JwtUnauthorizedError } from "express-jwt";
 import { IResponseGeneric, errorTypes } from "@shared/types/response-generic";
 
-// Make sure you register this **before** other middleware
 server.use(function profilerMiddleware(req: Request, res, next) {
   const start = Date.now();
   res.once("finish", () => {
-    // check threshold - 500ms
-    const elapsed = Date.now() - start > 100;
-    if (elapsed) {
+    // check threshold - 200ms
+    const elapsed = Date.now() - start;
+    if (elapsed > 200) {
       console.log(
-        `[${new Date().toUTCString()}] Slow query: ${
+        `[${new Date().toUTCString()}] Slow query(${elapsed}ms): ${
           req.baseUrl + req.route.path
-        } - ${elapsed}ms`
+        }`
       );
     }
   });
@@ -63,7 +62,7 @@ server.use(function profilerMiddleware(req: Request, res, next) {
 });
 
 // uncomment this to enable auth
-server.use(validateJwt().unless({ path: [/api\/v1\/users\/signin/] }));
+//server.use(validateJwt().unless({ path: [/api\/v1\/users\/signin/] }));
 
 // Routing
 const routerV1 = Router();
