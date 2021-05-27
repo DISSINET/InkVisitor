@@ -206,7 +206,6 @@ export default Router()
         throw new ActantDoesNotExits(`actant ${actantId} was not found`);
       }
 
-      const usage = await getActantUsage(request.db, actantId);
       const meta: IResponseStatement[] = [];
 
       const statements = await Statement.findMetaStatements(
@@ -215,24 +214,32 @@ export default Router()
       );
       for (const statement of statements) {
         const actants: IActant[] = [];
-        for (const actantId of statement.getDependencyList()) {
-          const actant = await findActantById<IActant>(request.db, actantId);
-          if (actant) {
-            actants.push(actant);
+        for (const dependentActantId of statement.getDependencyList()) {
+          const dependentActant = await findActantById<IActant>(
+            request.db,
+            dependentActantId
+          );
+          if (dependentActant) {
+            actants.push(dependentActant);
           }
         }
+
         meta.push({
           ...statement,
           actants,
-          usedIn: [],
         });
       }
 
+      const usedInStatements = await Statement.findDependentStatements(
+        request.db.connection,
+        actant.id
+      );
+
       return {
         ...actant,
-        usedCount: usage,
-        usedIn: [],
-        metaStatements: meta,
+        usedCount: usedInStatements.length,
+        usedIn: usedInStatements,
+        metaProps: meta,
       };
     })
   );
