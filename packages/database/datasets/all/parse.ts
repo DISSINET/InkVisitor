@@ -74,7 +74,7 @@ const loadStatementsTables = async (next: Function) => {
     sheet: "Texts",
   });
 
-  addTerritoryActant("entity-tables", "entity tables", "T0", 0);
+  //  addTerritoryActant("entity-tables", "entity tables", "T0", 0);
 
   tableTexts.forEach((text: { id: string; label: string }, ti: number) => {
     addTerritoryActant(text.id, text.label, "T0", ti + 1);
@@ -237,22 +237,22 @@ const loadStatementsTables = async (next: Function) => {
 
     const entitySheetTerritory = "T_" + entitySheet.id;
 
-    addTerritoryActant(
-      entitySheetTerritory,
-      entitySheet.label,
-      "entity-tables",
-      esi
-    );
+    // addTerritoryActant(
+    //   entitySheetTerritory,
+    //   entitySheet.label,
+    //   "entity-tables",
+    //   esi
+    // );
 
     data.forEach((entityRow: any, eri: number) => {
-      const entityRowTerritory = entitySheetTerritory + "_" + entityRow.id;
+      //const entityRowTerritory = entitySheetTerritory + "_" + entityRow.id;
 
-      addTerritoryActant(
-        entityRowTerritory,
-        entitySheet.label + "_" + entityRow.id,
-        entitySheetTerritory,
-        eri
-      );
+      // addTerritoryActant(
+      //   entityRowTerritory,
+      //   entitySheet.label + "_" + entityRow.id,
+      //   entitySheetTerritory,
+      //   eri
+      // );
 
       addEntityActant(
         entitySheet.id + "_" + entityRow.id,
@@ -260,7 +260,7 @@ const loadStatementsTables = async (next: Function) => {
         entitySheet.entityType as EntityActantType
       );
 
-      parseEntityPropsInRow(entityRow, entityRowTerritory);
+      parseEntityPropsInRow(entityRow, "T0");
     });
 
     entitySheet.texts.forEach((text) => {
