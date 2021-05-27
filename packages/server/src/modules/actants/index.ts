@@ -4,7 +4,7 @@ import {
   findActantById,
   findActantsByLabelOrClass,
   createActant,
-  getActantUsage,
+  findActantsByIds,
 } from "@service/shorthands";
 import { getActantType } from "@models/factory";
 import {
@@ -192,21 +192,16 @@ export default Router()
         request.db.connection,
         actant.id
       );
+
       for (const statement of statements) {
-        const actants: IActant[] = [];
-        for (const dependentActantId of statement.getDependencyList()) {
-          const dependentActant = await findActantById<IActant>(
-            request.db,
-            dependentActantId
-          );
-          if (dependentActant) {
-            actants.push(dependentActant);
-          }
-        }
+        const metaActants = await findActantsByIds(
+          request.db,
+          statement.getDependencyList()
+        );
 
         meta.push({
           ...statement,
-          actants,
+          actants: metaActants,
         });
       }
 
