@@ -62,7 +62,7 @@ server.use(function profilerMiddleware(req: Request, res, next) {
 });
 
 // uncomment this to enable auth
-//server.use(validateJwt().unless({ path: [/api\/v1\/users\/signin/] }));
+server.use(validateJwt().unless({ path: [/api\/v1\/users\/signin/] }));
 
 // Routing
 const routerV1 = Router();
