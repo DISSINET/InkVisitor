@@ -63,27 +63,7 @@ export default Router()
         throw new BadParams("label or class has to be set");
       }
 
-      const out: IResponseActant[] = [];
-
-      const actants = await findActantsByLabelOrClass(
-        request.db,
-        label,
-        classParam
-      );
-
-      for (const actant of actants) {
-        const usedInStatements = await Statement.findDependentStatements(
-          request.db.connection,
-          actant.id
-        );
-        out.push({
-          ...actant,
-          usedCount: usedInStatements.length,
-          usedIn: usedInStatements,
-        });
-      }
-
-      return out;
+      return await findActantsByLabelOrClass(request.db, label, classParam);
     })
   )
   .post(
