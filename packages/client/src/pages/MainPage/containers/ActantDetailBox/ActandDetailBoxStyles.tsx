@@ -21,6 +21,32 @@ export const StyledContentRow = styled.div`
 export const StyledSectionMeta = styled.div`
   display: block;
 `;
+export const StyledSectionUsed = styled.div`
+  display: block;
+`;
+
+export const StyledSectionUsedTable = styled.div`
+  display: grid;
+  align-items: center;
+  padding-left: ${({ theme }) => theme.space[0]};
+  grid-template-columns: auto auto auto auto auto;
+  width: fit-content;
+  grid-template-rows: auto;
+  grid-auto-flow: row;
+  padding-top: ${({ theme }) => theme.space[6]};
+  padding-bottom: ${({ theme }) => theme.space[6]};
+`;
+export const StyledSectionUsedTableCell = styled.div<StyledSectionMetaTableCell>`
+  display: inline-flex;
+  margin-bottom: ${({ theme, lastSecondLevel }) =>
+    lastSecondLevel ? theme.space[2] : theme.space[2]};
+  align-items: center;
+  padding: 0 5px;
+  border-right: ${({ theme, borderless }) =>
+    borderless ? "none" : "1px dashed black"};
+`;
+
+
 export const StyledSectionMetaTable = styled.div`
   display: grid;
   align-items: center;

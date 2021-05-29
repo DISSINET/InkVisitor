@@ -5,6 +5,9 @@ import { Button, Input, Loader } from "components";
 import {
   StyledContent,
   StyledSectionHeader,
+  StyledSectionUsed,
+  StyledSectionUsedTable,
+  StyledSectionUsedTableCell,
   StyledSectionMeta,
   StyledSectionMetaTable,
   StyledSectionMetaTableButtonGroup,
@@ -385,6 +388,19 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
               })}
             </StyledSectionMetaTable>
           </StyledSectionMeta>
+          <StyledSectionUsed>
+            <h4>Used in statements:</h4>
+            <StyledSectionUsedTable>
+              {actant.usedIn.map((usedInStatement) => {
+                //console.log(actant.usedIn);
+                return (
+                  <StyledSectionUsedTableCell>
+                    {usedInStatement.id}
+                  </StyledSectionUsedTableCell>
+                );
+              })}
+            </StyledSectionUsedTable>
+          </StyledSectionUsed>
         </StyledContent>
       )}
       <Loader show={isFetching} />
