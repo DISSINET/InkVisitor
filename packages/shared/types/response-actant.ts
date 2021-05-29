@@ -4,8 +4,7 @@
 
 import { IActant, IStatement } from ".";
 
-// TODO
 export interface IResponseActant extends IActant {
-  usedCount: number;
-  usedIn: IStatement[];
+  usedCount?: number;
+  usedIn?: IStatement[];
 }

@@ -124,6 +124,17 @@ export async function findActantById<T extends IActant>(
   return data.length == 0 ? null : data[0];
 }
 
+export async function findActantsByIds<T extends IActant>(
+  db: Db,
+  ids: string[]
+): Promise<T[]> {
+  const data = await rethink
+    .table("actants")
+    .getAll(rethink.args(ids))
+    .run(db.connection);
+  return data;
+}
+
 export async function findActants<T extends IActant>(
   db: Db,
   additionalFilter: Record<string, unknown> = {}
