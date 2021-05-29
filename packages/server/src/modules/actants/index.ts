@@ -4,7 +4,7 @@ import {
   findActantById,
   findActantsByLabelOrClass,
   createActant,
-  getActantUsage,
+  findActantsByIds,
 } from "@service/shorthands";
 import { getActantType } from "@models/factory";
 import {
@@ -64,28 +64,7 @@ export default Router()
         throw new BadParams("label or class has to be set");
       }
 
-      const out: IResponseActant[] = [];
-
-      const actants = await findActantsByLabelOrClass(
-        request.db,
-        label,
-        classParam
-      );
-
-      for (const actant of actants) {
-        const usedInStatements: IStatement[] = [];
-        // await Statement.findDependentStatements(
-        //   request.db.connection,
-        //   actant.id
-        // );
-        out.push({
-          ...actant,
-          usedCount: usedInStatements.length,
-          usedIn: usedInStatements,
-        });
-      }
-
-      return out;
+      return await findActantsByLabelOrClass(request.db, label, classParam);
     })
   )
   .post(
@@ -208,34 +187,35 @@ export default Router()
         throw new ActantDoesNotExits(`actant ${actantId} was not found`);
       }
 
-      const usage = await getActantUsage(request.db, actantId);
       const meta: IResponseStatement[] = [];
 
       const statements = await Statement.findMetaStatements(
         request.db.connection,
         actant.id
       );
+
       for (const statement of statements) {
-        const actants: IActant[] = [];
-        for (const actantId of statement.getDependencyList()) {
-          const actant = await findActantById<IActant>(request.db, actantId);
-          if (actant) {
-            actants.push(actant);
-          }
-        }
+        const metaActants = await findActantsByIds(
+          request.db,
+          statement.getDependencyList()
+        );
+
         meta.push({
           ...statement,
-          actants,
-          usedIn: [],
-          audits: [],
+          actants: metaActants,
         });
       }
 
+      const usedInStatements = await Statement.findDependentStatements(
+        request.db.connection,
+        actant.id
+      );
+
       return {
         ...actant,
-        usedCount: usage,
-        usedIn: [],
-        metaStatements: meta,
+        usedCount: usedInStatements.length,
+        usedIn: usedInStatements,
+        metaProps: meta,
       };
     })
   );

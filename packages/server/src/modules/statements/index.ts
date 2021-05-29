@@ -1,6 +1,6 @@
 import { Request } from "express";
 import { Router } from "express";
-import { findActantById } from "@service/shorthands";
+import { findActantById, findActantsByIds } from "@service/shorthands";
 import { BadParams, StatementDoesNotExits } from "@shared/types/errors";
 import { asyncRouteHandler } from "..";
 import { IResponseStatement, IStatement, IActant } from "@shared/types";
@@ -23,15 +23,11 @@ export default Router().get(
       throw new StatementDoesNotExits(`statement ${statementId} was not found`);
     }
 
-    const actants: IActant[] = [];
-
     const statementModel = new Statement({ ...statementData });
-    for (const actantId of statementModel.getDependencyList()) {
-      const actant = await findActantById<IActant>(request.db, actantId);
-      if (actant) {
-        actants.push(actant);
-      }
-    }
+    const actants = await findActantsByIds<IActant>(
+      request.db,
+      statementModel.getDependencyList()
+    );
 
     return {
       ...statementData,
