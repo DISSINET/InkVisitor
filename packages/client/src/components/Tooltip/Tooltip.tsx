@@ -20,6 +20,7 @@ export const Tooltip: React.FC<Tooltip> = ({
   return (
     <StyledPopup
       trigger={children}
+      mouseLeaveDelay={0}
       position={position}
       on={on}
       disabled={disabled || label.length === 0}
