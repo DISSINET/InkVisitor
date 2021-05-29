@@ -46,14 +46,14 @@ export const StyledSectionMetaTableButtonGroup = styled.div<StyledSectionMetaTab
 interface StyledSectionMetaTableCell {
   padded?: boolean;
   lastSecondLevel?: boolean;
+  borderless?: boolean;
 }
 export const StyledSectionMetaTableCell = styled.div<StyledSectionMetaTableCell>`
   display: inline-flex;
   margin-bottom: ${({ theme, lastSecondLevel }) =>
-    lastSecondLevel ? theme.space[4] : theme.space[4]};
+    lastSecondLevel ? theme.space[2] : theme.space[2]};
   align-items: center;
-  padding-left: ${({ theme, padded }) =>
-    padded ? theme.space[6] : theme.space[0]};
-  padding-right: 5px;
-  border-right: 1px dashed black;
+  padding: 0 5px;
+  border-right: ${({ theme, borderless }) =>
+    borderless ? "none" : "1px dashed black"};
 `;
