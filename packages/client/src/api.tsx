@@ -259,7 +259,6 @@ class Api {
     filter: FilterActantsI
   ): Promise<AxiosResponse<IResponseActant[]>> {
     try {
-      console.log("getting more", filter);
       const response = await this.connection.post(`/actants/getMore`, filter);
       return response;
     } catch (err) {

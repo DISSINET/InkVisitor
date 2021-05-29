@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 const queryString = require("query-string");
 
 import { Button, Input, Loader } from "components";
@@ -51,6 +51,80 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
     { enabled: !!actantId && api.isLoggedIn() }
   );
 
+  const metaStatements = useMemo(() => {
+    if (actant && actant.metaStatements) {
+      const sorteMetaStatements = [...actant.metaStatements];
+      sorteMetaStatements.sort(
+        (s1: IResponseStatement, s2: IResponseStatement) => {
+          const typeSActant1 = s1.data.actants.find((a) => a.position == "a1");
+          const typeSActant2 = s2.data.actants.find((a) => a.position == "a1");
+          const typeActant1 = typeSActant1
+            ? s1.actants.find((a) => a.id === typeSActant1.actant)
+            : false;
+
+          const typeActant2 = typeSActant2
+            ? s2.actants.find((a) => a.id === typeSActant2.actant)
+            : false;
+          if (
+            typeActant1 === false ||
+            typeSActant1?.actant === "" ||
+            !typeActant1
+          ) {
+            return 1;
+          } else if (
+            typeActant2 === false ||
+            typeSActant2?.actant === "" ||
+            !typeActant2
+          ) {
+            return -1;
+          } else {
+            return typeActant1.label > typeActant2.label ? 1 : -1;
+          }
+        }
+      );
+      return sorteMetaStatements;
+    } else {
+      return [];
+    }
+  }, [actant]);
+
+  const updateStatementActant = async (
+    statementId: string,
+    actantId: string,
+    changes: any
+  ) => {
+    const metaStatement =
+      actant && actant.metaStatements.find((ms) => ms.id === statementId);
+
+    if (metaStatement) {
+      const metaStatementData = { ...metaStatement.data };
+
+      const updatedStatementActants = metaStatementData.actants.map((actant) =>
+        actant.id === actantId ? { ...actant, ...changes } : actant
+      );
+
+      const res = await api.actantsUpdate(statementId, {
+        data: { ...metaStatementData, ...{ actants: updatedStatementActants } },
+      });
+      queryClient.invalidateQueries(["actant"]);
+    }
+  };
+
+  const updateStatementAttribute = async (
+    statementId: string,
+    changes: any
+  ) => {
+    const metaStatement =
+      actant && actant.metaStatements.find((ms) => ms.id === statementId);
+
+    if (metaStatement) {
+      const res = await api.actantsUpdate(statementId, {
+        data: { ...metaStatement.data, ...changes },
+      });
+      queryClient.invalidateQueries(["actant"]);
+    }
+  };
+
   return (
     <>
       {actant && (
@@ -100,46 +174,31 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
             />
 
             <StyledSectionMetaTable>
-              {actant.metaStatements.map(
-                (metaStatement: IResponseStatement) => {
-                  const typeSActant = metaStatement.data.actants.find(
-                    (a) => a.position == "a1"
-                  );
-                  const valueSActant = metaStatement.data.actants.find(
-                    (a) => a.position == "a2"
-                  );
+              {metaStatements.map((metaStatement: IResponseStatement) => {
+                const typeSActant = metaStatement.data.actants.find(
+                  (a) => a.position == "a1"
+                );
+                const valueSActant = metaStatement.data.actants.find(
+                  (a) => a.position == "a2"
+                );
 
-                  const typeActant = typeSActant
-                    ? metaStatement.actants.find(
-                        (a) => a.id === typeSActant.actant
-                      )
-                    : false;
+                const typeActant = typeSActant
+                  ? metaStatement.actants.find(
+                      (a) => a.id === typeSActant.actant
+                    )
+                  : false;
 
-                  const valueActant = valueSActant
-                    ? metaStatement.actants.find(
-                        (a) => a.id === valueSActant.actant
-                      )
-                    : false;
+                const valueActant = valueSActant
+                  ? metaStatement.actants.find(
+                      (a) => a.id === valueSActant.actant
+                    )
+                  : false;
 
-                  // console.log(
-                  //   "meta statement",
-                  //   metaStatement.id,
-                  //   metaStatement,
-                  //   valueActant
-                  // );
-
-                  return (
+                return (
+                  typeSActant &&
+                  valueSActant && (
                     <React.Fragment key={metaStatement.id}>
-                      <StyledSectionMetaTableCell>
-                        {/* <ActionDropdown
-                          onSelectedChange={(newActionValue: {
-                            value: string;
-                            label: string;
-                          }) => {}}
-                          width={200}
-                          value={metaStatement.data.action}
-                        /> */}
-                      </StyledSectionMetaTableCell>
+                      <StyledSectionMetaTableCell></StyledSectionMetaTableCell>
 
                       {/* type */}
                       <StyledSectionMetaTableCell>
@@ -154,7 +213,13 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
                                   icon={<FaUnlink />}
                                   tooltip="unlink actant"
                                   color="danger"
-                                  onClick={() => {}}
+                                  onClick={() => {
+                                    updateStatementActant(
+                                      metaStatement.id,
+                                      typeSActant.id,
+                                      { actant: "" }
+                                    );
+                                  }}
                                 />
                               }
                             />
@@ -162,23 +227,21 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
                               <ElvlToggle
                                 value={typeSActant.elvl}
                                 onChangeFn={(newValue: string) => {
-                                  // updateProp(prop.id, {
-                                  //   type: {
-                                  //     ...prop.type,
-                                  //     ...{ elvl: newValue },
-                                  //   },
-                                  // });
+                                  updateStatementActant(
+                                    metaStatement.id,
+                                    typeSActant.id,
+                                    { elvl: newValue }
+                                  );
                                 }}
                               />
                               <CertaintyToggle
                                 value={typeSActant.certainty}
                                 onChangeFn={(newValue: string) => {
-                                  // updateProp(prop.id, {
-                                  //   type: {
-                                  //     ...prop.type,
-                                  //     ...{ certainty: newValue },
-                                  //   },
-                                  // });
+                                  updateStatementActant(
+                                    metaStatement.id,
+                                    typeSActant.id,
+                                    { certainty: newValue }
+                                  );
                                 }}
                               />
                             </StyledSectionMetaTableButtonGroup>
@@ -186,22 +249,11 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
                         ) : (
                           <ActantSuggester
                             onSelected={async (newActantId: string) => {
-                              const newStatementActant = CStatementActant();
-                              newStatementActant.actant = newActantId;
-                              newStatementActant.position = "a1";
-                              const newData = {
-                                actants: [
-                                  ...metaStatement.data.actants,
-                                  newStatementActant,
-                                ],
-                              };
-                              const res = await api.actantsUpdate(
+                              updateStatementActant(
                                 metaStatement.id,
-                                {
-                                  data: newData,
-                                }
+                                typeSActant.id,
+                                { actant: newActantId }
                               );
-                              queryClient.invalidateQueries(["actant"]);
                             }}
                             categoryIds={["C"]}
                             placeholder={"add new reference"}
@@ -222,7 +274,13 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
                                   icon={<FaUnlink />}
                                   tooltip="unlink actant"
                                   color="danger"
-                                  onClick={() => {}}
+                                  onClick={() => {
+                                    updateStatementActant(
+                                      metaStatement.id,
+                                      valueSActant.id,
+                                      { actant: "" }
+                                    );
+                                  }}
                                 />
                               }
                             />
@@ -230,23 +288,21 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
                               <ElvlToggle
                                 value={valueSActant.elvl}
                                 onChangeFn={(newValue: string) => {
-                                  // updateProp(prop.id, {
-                                  //   type: {
-                                  //     ...prop.type,
-                                  //     ...{ elvl: newValue },
-                                  //   },
-                                  // });
+                                  updateStatementActant(
+                                    metaStatement.id,
+                                    valueSActant.id,
+                                    { elvl: newValue }
+                                  );
                                 }}
                               />
                               <CertaintyToggle
                                 value={valueSActant.certainty}
                                 onChangeFn={(newValue: string) => {
-                                  // updateProp(prop.id, {
-                                  //   type: {
-                                  //     ...prop.type,
-                                  //     ...{ certainty: newValue },
-                                  //   },
-                                  // });
+                                  updateStatementActant(
+                                    metaStatement.id,
+                                    valueSActant.id,
+                                    { certainty: newValue }
+                                  );
                                 }}
                               />
                             </StyledSectionMetaTableButtonGroup>
@@ -254,22 +310,11 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
                         ) : (
                           <ActantSuggester
                             onSelected={async (newActantId: string) => {
-                              const newStatementActant = CStatementActant();
-                              newStatementActant.actant = newActantId;
-                              newStatementActant.position = "a2";
-                              const newData = {
-                                actants: [
-                                  ...metaStatement.data.actants,
-                                  newStatementActant,
-                                ],
-                              };
-                              const res = await api.actantsUpdate(
+                              updateStatementActant(
                                 metaStatement.id,
-                                {
-                                  data: newData,
-                                }
+                                valueSActant.id,
+                                { actant: newActantId }
                               );
-                              queryClient.invalidateQueries(["actant"]);
                             }}
                             categoryIds={[
                               "P",
@@ -287,37 +332,38 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
                           ></ActantSuggester>
                         )}
                       </StyledSectionMetaTableCell>
+
                       {/* attributes of statement */}
                       <StyledSectionMetaTableCell>
                         <StyledSectionMetaTableButtonGroup>
                           <ModalityToggle
                             value={metaStatement.data.modality}
                             onChangeFn={(newValue: string) => {
-                              // updateProp(prop.id, {
-                              //   modality: newValue,
-                              // });
+                              updateStatementAttribute(metaStatement.id, {
+                                modality: newValue,
+                              });
                             }}
                           />
                           <ElvlToggle
                             value={metaStatement.data.elvl}
                             onChangeFn={(newValue: string) => {
-                              // updateProp(prop.id, {
-                              //   elvl: newValue,
-                              // });
+                              updateStatementAttribute(metaStatement.id, {
+                                elvl: newValue,
+                              });
                             }}
                           />
                           <CertaintyToggle
                             value={metaStatement.data.certainty}
                             onChangeFn={(newValue: string) => {
-                              // updateProp(prop.id, {
-                              //   certainty: newValue,
-                              // });
+                              updateStatementAttribute(metaStatement.id, {
+                                certainty: newValue,
+                              });
                             }}
                           />
                         </StyledSectionMetaTableButtonGroup>
                       </StyledSectionMetaTableCell>
                       {/* actions */}
-                      <StyledSectionMetaTableCell>
+                      <StyledSectionMetaTableCell borderless>
                         <StyledSectionMetaTableButtonGroup>
                           <Button
                             key="r"
@@ -334,9 +380,9 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
                         </StyledSectionMetaTableButtonGroup>
                       </StyledSectionMetaTableCell>
                     </React.Fragment>
-                  );
-                }
-              )}
+                  )
+                );
+              })}
             </StyledSectionMetaTable>
           </StyledSectionMeta>
         </StyledContent>
