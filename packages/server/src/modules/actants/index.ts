@@ -15,6 +15,7 @@ import {
 } from "@shared/types/errors";
 import {
   IActant,
+  IStatement,
   IResponseDetail,
   IResponseGeneric,
   IResponseStatement,

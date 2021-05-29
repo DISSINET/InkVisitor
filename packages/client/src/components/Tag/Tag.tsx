@@ -26,6 +26,20 @@ interface TagProps {
   index?: number;
   moveFn?: (dragIndex: number, hoverIndex: number) => void;
   enableTooltip?: boolean;
+  position?:
+    | "top left"
+    | "top center"
+    | "top right"
+    | "right top"
+    | "right center"
+    | "right bottom"
+    | "bottom left"
+    | "bottom center"
+    | "bottom right"
+    | "left top"
+    | "left center"
+    | "left bottom"
+    | "center center";
 }
 
 export const Tag: React.FC<TagProps> = ({
@@ -40,6 +54,7 @@ export const Tag: React.FC<TagProps> = ({
   short = false,
   index,
   moveFn,
+  position = "right top",
   enableTooltip = false,
 }) => {
   let history = useHistory();
@@ -117,7 +132,7 @@ export const Tag: React.FC<TagProps> = ({
   return (
     <>
       {short ? (
-        <Tooltip label={label}>
+        <Tooltip position={position} label={label}>
           <div>
             <TagWrapper
               ref={ref}
@@ -131,11 +146,7 @@ export const Tag: React.FC<TagProps> = ({
         </Tooltip>
       ) : (
         <>
-          <Tooltip
-            label={label}
-            disabled={!enableTooltip}
-            position={"right center"}
-          >
+          <Tooltip label={label} disabled={!enableTooltip} position={position}>
             <div style={{ display: "inline-flex" }}>
               <TagWrapper
                 ref={ref}

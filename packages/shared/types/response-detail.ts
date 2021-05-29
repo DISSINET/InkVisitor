@@ -5,6 +5,6 @@
 import { IResponseActant, IResponseStatement } from ".";
 
 export interface IResponseDetail extends IResponseActant {
-    usedCount: number;
-    metaProps: IResponseStatement[] // statements with territory T0
+  usedCount: number;
+  metaStatements: IResponseStatement[]; // statements with territory T0
 }
