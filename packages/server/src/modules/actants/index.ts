@@ -215,7 +215,7 @@ export default Router()
         ...actant,
         usedCount: usedInStatements.length,
         usedIn: usedInStatements,
-        metaProps: meta,
+        metaStatements: meta,
       };
     })
   );

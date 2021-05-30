@@ -6,6 +6,7 @@ interface IButtonStyle {
   fullWidth?: boolean;
   inverted: boolean;
   color: string;
+  disabled?: boolean;
 }
 export const StyledButton = styled.button<IButtonStyle>`
   display: flex;
@@ -15,12 +16,28 @@ export const StyledButton = styled.button<IButtonStyle>`
   font-size: ${({ theme }) => theme.fontSize["xs"]};
   font-weight: 900;
   padding: ${space1} ${({ hasIcon }) => (hasIcon ? space1 : space2)};
-  border: 2px solid ${({ theme, color }) => theme.color[color]};
-  color: ${({ theme, color, inverted }) =>
-    inverted ? theme.color[color] : theme.color["white"]};
-  background-color: ${({ theme, color, inverted }) =>
-    inverted ? theme.color["white"] : theme.color[color]};
-  cursor: pointer;
+  border-color: ${({ theme, disabled, color }) =>
+    disabled ? theme.color["gray"][400] : theme.color[color]};
+  border-width: "2px";
+  border-style: solid;
+
+  color: ${({ theme, disabled, color, inverted }) => {
+    return disabled
+      ? theme.color["gray"][200]
+      : inverted
+      ? theme.color[color]
+      : theme.color["white"];
+  }};
+  background-color: ${({ theme, disabled, color, inverted }) => {
+    return disabled
+      ? theme.color["gray"][400]
+      : inverted
+      ? theme.color["white"]
+      : theme.color[color];
+  }};
+  cursor: ${({ disabled }) => {
+    return disabled ? "not-allowed" : "pointer";
+  }};
   white-space: nowrap;
   :focus {
     outline: 0;

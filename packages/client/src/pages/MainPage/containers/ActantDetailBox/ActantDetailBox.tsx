@@ -1,24 +1,39 @@
 import React, { useEffect, useState, useMemo } from "react";
 const queryString = require("query-string");
 
-import { Button, Input, Loader } from "components";
+import { Button, ButtonGroup, Input, Loader } from "components";
 import {
   StyledContent,
+  StyledSection,
   StyledSectionHeader,
-  StyledSectionUsed,
   StyledSectionUsedTable,
+  StyledHeaderColumn,
   StyledSectionUsedTableCell,
-  StyledSectionMeta,
   StyledSectionMetaTable,
   StyledSectionMetaTableButtonGroup,
   StyledSectionMetaTableCell,
   StyledContentRow,
+  StyledSectionUsedText,
+  StyledSectionUsedPageManager,
 } from "./ActandDetailBoxStyles";
 import { useHistory, useLocation } from "react-router-dom";
 import api from "api";
 import { QueryClient, useQuery, useQueryClient } from "react-query";
-import { IActant, IOption, IResponseStatement } from "@shared/types";
-import { FaTimes, FaPlus, FaUnlink, FaTrashAlt } from "react-icons/fa";
+import {
+  IActant,
+  IOption,
+  IResponseStatement,
+  IStatement,
+} from "@shared/types";
+import {
+  FaEdit,
+  FaPlus,
+  FaUnlink,
+  FaTrashAlt,
+  FaStepBackward,
+  FaStepForward,
+  FaRecycle
+} from "react-icons/fa";
 import {
   ActantTag,
   ActionDropdown,
@@ -29,7 +44,7 @@ import {
 } from "..";
 
 import { CMetaStatement, CStatementActant } from "constructors";
-import { ActantType } from "@shared/enums";
+import { findPositionInStatement } from "utils";
 
 interface ActantDetailBox {}
 export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
@@ -37,6 +52,9 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
   let location = useLocation();
   var hashParams = queryString.parse(location.hash);
   const actantId = hashParams.actant;
+
+  const [usedInPage, setUsedInPage] = useState<number>(0);
+  const statementsPerPage = 20;
 
   const queryClient = useQueryClient();
 
@@ -53,6 +71,36 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
     },
     { enabled: !!actantId && api.isLoggedIn() }
   );
+
+  const usedInPages = useMemo(() => {
+    if (actant && actant.usedIn) {
+      return Math.ceil(actant.usedIn.length / statementsPerPage);
+    } else {
+      return 0;
+    }
+  }, [actantId, actant]);
+
+  useEffect(() => {
+    setUsedInPage(0);
+  }, [actantId]);
+
+  const usedInStatements = useMemo(() => {
+    if (actant && actant.usedIn) {
+      const displayStatements = actant.usedIn.slice(
+        statementsPerPage * usedInPage,
+        statementsPerPage * (usedInPage + 1)
+      );
+
+      return displayStatements.map((statement: IStatement) => {
+        return {
+          position: findPositionInStatement(statement, actant),
+          statement: statement,
+        };
+      });
+    } else {
+      return [];
+    }
+  }, [usedInPage, actantId, actant]);
 
   const metaStatements = useMemo(() => {
     if (actant && actant.metaStatements) {
@@ -132,8 +180,8 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
     <>
       {actant && (
         <StyledContent>
-          <StyledSectionHeader>
-            <h4>Actant detail</h4>
+          <StyledSection firstSection>
+            <StyledSectionHeader>Actant detail</StyledSectionHeader>
             <StyledContentRow>
               <ActantTag actant={actant} propId={actant.id} />
               <Input
@@ -149,6 +197,7 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
                   queryClient.invalidateQueries(["territory"]);
                 }}
               />
+              <ButtonGroup>
               <Button
                 color="danger"
                 icon={<FaTrashAlt />}
@@ -157,13 +206,24 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
                   history.push({
                     hash: queryString.stringify(hashParams),
                   });
-                  // TODO: remove actant from URL
                 }}
               />
+              <Button
+              key="refresh"
+              icon={<FaRecycle size={14} />}
+              tooltip="refresh data"
+              color="info"
+              label="refresh"
+              onClick={() => {
+                queryClient.invalidateQueries(["actant"]);
+              }}
+            />
+
+              </ButtonGroup>
             </StyledContentRow>
-          </StyledSectionHeader>
-          <StyledSectionMeta>
-            <h4>Meta statements</h4>
+          </StyledSection>
+          <StyledSection>
+            <StyledSectionHeader>Meta statements</StyledSectionHeader>
             <Button
               color="primary"
               label="create new meta statement"
@@ -175,6 +235,7 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
                 queryClient.invalidateQueries(["actant"]);
               }}
             />
+            
 
             <StyledSectionMetaTable>
               {metaStatements.map((metaStatement: IResponseStatement) => {
@@ -387,20 +448,78 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
                 );
               })}
             </StyledSectionMetaTable>
-          </StyledSectionMeta>
-          <StyledSectionUsed>
-            <h4>Used in statements:</h4>
+          </StyledSection>
+          <StyledSection lastSection>
+            <StyledSectionHeader>Used in statements:</StyledSectionHeader>
+            <StyledSectionUsedPageManager>
+              {`Page ${usedInPage + 1} / ${usedInPages}`}
+              <Button
+                key="previous"
+                disabled={usedInPage === 0}
+                icon={<FaStepBackward size={14} />}
+                color="primary"
+                tooltip="previous page"
+                onClick={() => {
+                  if (usedInPage !== 0) {
+                    setUsedInPage(usedInPage - 1);
+                  }
+                }}
+              />
+              <Button
+                key="next"
+                disabled={usedInPage === usedInPages - 1}
+                icon={<FaStepForward size={14} />}
+                color="primary"
+                tooltip="next page"
+                onClick={() => {
+                  if (usedInPage !== usedInPages - 1) {
+                    setUsedInPage(usedInPage + 1);
+                  }
+                }}
+              />
+            </StyledSectionUsedPageManager>
             <StyledSectionUsedTable>
-              {actant.usedIn.map((usedInStatement) => {
+              <StyledHeaderColumn></StyledHeaderColumn>
+              <StyledHeaderColumn>Text</StyledHeaderColumn>
+              <StyledHeaderColumn>Position</StyledHeaderColumn>
+              <StyledHeaderColumn></StyledHeaderColumn>
+              {usedInStatements.map((usedInStatement) => {
+                const { statement, position } = usedInStatement;
                 //console.log(actant.usedIn);
                 return (
-                  <StyledSectionUsedTableCell>
-                    {usedInStatement.id}
-                  </StyledSectionUsedTableCell>
+                  <React.Fragment key={statement.id}>
+                    <StyledSectionUsedTableCell>
+                      <ActantTag key={statement.id} actant={statement} short />
+                    </StyledSectionUsedTableCell>
+                    <StyledSectionUsedTableCell>
+                      <StyledSectionUsedText>
+                        {statement.data.text}
+                      </StyledSectionUsedText>
+                    </StyledSectionUsedTableCell>
+                    <StyledSectionUsedTableCell>
+                      <StyledSectionUsedText>{position}</StyledSectionUsedText>
+                    </StyledSectionUsedTableCell>
+                    <StyledSectionMetaTableCell borderless>
+                      <StyledSectionMetaTableButtonGroup>
+                        <Button
+                          key="r"
+                          icon={<FaEdit size={14} />}
+                          color="warning"
+                          tooltip="edit statement"
+                          onClick={async () => {
+                            hashParams["statement"] = statement.id;
+                            history.push({
+                              hash: queryString.stringify(hashParams),
+                            });
+                          }}
+                        />
+                      </StyledSectionMetaTableButtonGroup>
+                    </StyledSectionMetaTableCell>
+                  </React.Fragment>
                 );
               })}
             </StyledSectionUsedTable>
-          </StyledSectionUsed>
+          </StyledSection>
         </StyledContent>
       )}
       <Loader show={isFetching} />
