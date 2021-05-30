@@ -9,7 +9,13 @@ import GlobalStyle from "Theme/global";
 import { QueryClient, QueryClientProvider, useQuery } from "react-query";
 import { ReactQueryDevtools } from "react-query/devtools";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+    },
+  },
+});
 
 interface AppProps {}
 export const App: React.FC<AppProps> = () => {
