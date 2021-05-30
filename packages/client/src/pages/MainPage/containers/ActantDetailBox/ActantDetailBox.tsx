@@ -439,28 +439,30 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
             <h4>Used in statements:</h4>
             <StyledSectionUsedPageManager>
               {`Page ${usedInPage + 1} / ${usedInPages}`}
-              {usedInPage !== 0 && (
-                <Button
-                  key="next"
-                  icon={<FaStepBackward size={14} />}
-                  color="primary"
-                  tooltip="previous page"
-                  onClick={() => {
+              <Button
+                key="previous"
+                disabled={usedInPage === 0}
+                icon={<FaStepBackward size={14} />}
+                color="primary"
+                tooltip="previous page"
+                onClick={() => {
+                  if (usedInPage !== 0) {
                     setUsedInPage(usedInPage - 1);
-                  }}
-                />
-              )}
-              {usedInPage !== usedInPages - 1 && (
-                <Button
-                  key="previous"
-                  icon={<FaStepForward size={14} />}
-                  color="primary"
-                  tooltip="previous page"
-                  onClick={() => {
+                  }
+                }}
+              />
+              <Button
+                key="next"
+                disabled={usedInPage === usedInPages - 1}
+                icon={<FaStepForward size={14} />}
+                color="primary"
+                tooltip="next page"
+                onClick={() => {
+                  if (usedInPage !== usedInPages - 1) {
                     setUsedInPage(usedInPage + 1);
-                  }}
-                />
-              )}
+                  }
+                }}
+              />
             </StyledSectionUsedPageManager>
             <StyledSectionUsedTable>
               {usedInStatements.map((usedInStatement) => {
