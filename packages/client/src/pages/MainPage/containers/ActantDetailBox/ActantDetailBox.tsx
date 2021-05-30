@@ -13,12 +13,26 @@ import {
   StyledSectionMetaTableButtonGroup,
   StyledSectionMetaTableCell,
   StyledContentRow,
+  StyledSectionUsedText,
+  StyledSectionUsedPageManager,
 } from "./ActandDetailBoxStyles";
 import { useHistory, useLocation } from "react-router-dom";
 import api from "api";
 import { QueryClient, useQuery, useQueryClient } from "react-query";
-import { IActant, IOption, IResponseStatement } from "@shared/types";
-import { FaTimes, FaPlus, FaUnlink, FaTrashAlt } from "react-icons/fa";
+import {
+  IActant,
+  IOption,
+  IResponseStatement,
+  IStatement,
+} from "@shared/types";
+import {
+  FaEdit,
+  FaPlus,
+  FaUnlink,
+  FaTrashAlt,
+  FaStepBackward,
+  FaStepForward,
+} from "react-icons/fa";
 import {
   ActantTag,
   ActionDropdown,
@@ -29,7 +43,7 @@ import {
 } from "..";
 
 import { CMetaStatement, CStatementActant } from "constructors";
-import { ActantType } from "@shared/enums";
+import { findPositionInStatement } from "utils";
 
 interface ActantDetailBox {}
 export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
@@ -37,6 +51,9 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
   let location = useLocation();
   var hashParams = queryString.parse(location.hash);
   const actantId = hashParams.actant;
+
+  const [usedInPage, setUsedInPage] = useState<number>(0);
+  const statementsPerPage = 20;
 
   const queryClient = useQueryClient();
 
@@ -53,6 +70,36 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
     },
     { enabled: !!actantId && api.isLoggedIn() }
   );
+
+  const usedInPages = useMemo(() => {
+    if (actant && actant.usedIn) {
+      return Math.ceil(actant.usedIn.length / statementsPerPage);
+    } else {
+      return 0;
+    }
+  }, [actantId, actant]);
+
+  useEffect(() => {
+    setUsedInPage(0);
+  }, [actantId]);
+
+  const usedInStatements = useMemo(() => {
+    if (actant && actant.usedIn) {
+      const displayStatements = actant.usedIn.slice(
+        statementsPerPage * usedInPage,
+        statementsPerPage * (usedInPage + 1)
+      );
+
+      return displayStatements.map((statement: IStatement) => {
+        return {
+          position: findPositionInStatement(statement, actant),
+          statement: statement,
+        };
+      });
+    } else {
+      return [];
+    }
+  }, [usedInPage, actantId, actant]);
 
   const metaStatements = useMemo(() => {
     if (actant && actant.metaStatements) {
@@ -390,13 +437,65 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
           </StyledSectionMeta>
           <StyledSectionUsed>
             <h4>Used in statements:</h4>
+            <StyledSectionUsedPageManager>
+              {`Page ${usedInPage + 1} / ${usedInPages}`}
+              {usedInPage !== 0 && (
+                <Button
+                  key="next"
+                  icon={<FaStepBackward size={14} />}
+                  color="primary"
+                  tooltip="previous page"
+                  onClick={() => {
+                    setUsedInPage(usedInPage - 1);
+                  }}
+                />
+              )}
+              {usedInPage !== usedInPages - 1 && (
+                <Button
+                  key="previous"
+                  icon={<FaStepForward size={14} />}
+                  color="primary"
+                  tooltip="previous page"
+                  onClick={() => {
+                    setUsedInPage(usedInPage + 1);
+                  }}
+                />
+              )}
+            </StyledSectionUsedPageManager>
             <StyledSectionUsedTable>
-              {actant.usedIn.map((usedInStatement) => {
+              {usedInStatements.map((usedInStatement) => {
+                const { statement, position } = usedInStatement;
                 //console.log(actant.usedIn);
                 return (
-                  <StyledSectionUsedTableCell>
-                    {usedInStatement.id}
-                  </StyledSectionUsedTableCell>
+                  <React.Fragment key={statement.id}>
+                    <StyledSectionUsedTableCell>
+                      <ActantTag key={statement.id} actant={statement} short />
+                    </StyledSectionUsedTableCell>
+                    <StyledSectionUsedTableCell>
+                      <StyledSectionUsedText>
+                        {statement.data.text}
+                      </StyledSectionUsedText>
+                    </StyledSectionUsedTableCell>
+                    <StyledSectionUsedTableCell>
+                      <StyledSectionUsedText>{position}</StyledSectionUsedText>
+                    </StyledSectionUsedTableCell>
+                    <StyledSectionMetaTableCell borderless>
+                      <StyledSectionMetaTableButtonGroup>
+                        <Button
+                          key="r"
+                          icon={<FaEdit size={14} />}
+                          color="warning"
+                          tooltip="edit statement"
+                          onClick={async () => {
+                            hashParams["statement"] = statement.id;
+                            history.push({
+                              hash: queryString.stringify(hashParams),
+                            });
+                          }}
+                        />
+                      </StyledSectionMetaTableButtonGroup>
+                    </StyledSectionMetaTableCell>
+                  </React.Fragment>
                 );
               })}
             </StyledSectionUsedTable>

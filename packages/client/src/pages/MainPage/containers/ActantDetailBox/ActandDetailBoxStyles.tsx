@@ -29,13 +29,27 @@ export const StyledSectionUsedTable = styled.div`
   display: grid;
   align-items: center;
   padding-left: ${({ theme }) => theme.space[0]};
-  grid-template-columns: auto auto auto auto auto;
+  grid-template-columns: auto auto auto auto;
   width: fit-content;
   grid-template-rows: auto;
   grid-auto-flow: row;
   padding-top: ${({ theme }) => theme.space[6]};
   padding-bottom: ${({ theme }) => theme.space[6]};
 `;
+
+export const StyledSectionUsedText = styled.div`
+  font-size: ${({ theme }) => theme.fontSize["xs"]};
+`;
+
+export const StyledSectionUsedPageManager = styled.div`
+  font-size: ${({ theme }) => theme.fontSize["xs"]};
+  display: inline-flex;
+  align-items: center;
+  button {
+    margin: 0 ${({ theme }) => theme.space[2]};
+  }
+`;
+
 export const StyledSectionUsedTableCell = styled.div<StyledSectionMetaTableCell>`
   display: inline-flex;
   margin-bottom: ${({ theme, lastSecondLevel }) =>
@@ -45,7 +59,6 @@ export const StyledSectionUsedTableCell = styled.div<StyledSectionMetaTableCell>
   border-right: ${({ theme, borderless }) =>
     borderless ? "none" : "1px dashed black"};
 `;
-
 
 export const StyledSectionMetaTable = styled.div`
   display: grid;
