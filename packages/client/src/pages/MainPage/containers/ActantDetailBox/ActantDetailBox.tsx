@@ -4,11 +4,11 @@ const queryString = require("query-string");
 import { Button, Input, Loader } from "components";
 import {
   StyledContent,
+  StyledSection,
   StyledSectionHeader,
-  StyledSectionUsed,
   StyledSectionUsedTable,
+  StyledHeaderColumn,
   StyledSectionUsedTableCell,
-  StyledSectionMeta,
   StyledSectionMetaTable,
   StyledSectionMetaTableButtonGroup,
   StyledSectionMetaTableCell,
@@ -179,8 +179,8 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
     <>
       {actant && (
         <StyledContent>
-          <StyledSectionHeader>
-            <h4>Actant detail</h4>
+          <StyledSection firstSection>
+            <StyledSectionHeader>Actant detail</StyledSectionHeader>
             <StyledContentRow>
               <ActantTag actant={actant} propId={actant.id} />
               <Input
@@ -208,9 +208,9 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
                 }}
               />
             </StyledContentRow>
-          </StyledSectionHeader>
-          <StyledSectionMeta>
-            <h4>Meta statements</h4>
+          </StyledSection>
+          <StyledSection>
+            <StyledSectionHeader>Meta statements</StyledSectionHeader>
             <Button
               color="primary"
               label="create new meta statement"
@@ -434,9 +434,9 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
                 );
               })}
             </StyledSectionMetaTable>
-          </StyledSectionMeta>
-          <StyledSectionUsed>
-            <h4>Used in statements:</h4>
+          </StyledSection>
+          <StyledSection lastSection>
+            <StyledSectionHeader>Used in statements:</StyledSectionHeader>
             <StyledSectionUsedPageManager>
               {`Page ${usedInPage + 1} / ${usedInPages}`}
               <Button
@@ -465,6 +465,10 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
               />
             </StyledSectionUsedPageManager>
             <StyledSectionUsedTable>
+              <StyledHeaderColumn></StyledHeaderColumn>
+              <StyledHeaderColumn>Text</StyledHeaderColumn>
+              <StyledHeaderColumn>Position</StyledHeaderColumn>
+              <StyledHeaderColumn></StyledHeaderColumn>
               {usedInStatements.map((usedInStatement) => {
                 const { statement, position } = usedInStatement;
                 //console.log(actant.usedIn);
@@ -501,7 +505,7 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
                 );
               })}
             </StyledSectionUsedTable>
-          </StyledSectionUsed>
+          </StyledSection>
         </StyledContent>
       )}
       <Loader show={isFetching} />
