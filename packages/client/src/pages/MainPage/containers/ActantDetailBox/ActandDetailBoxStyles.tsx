@@ -7,35 +7,70 @@ export const StyledContent = styled.div`
   align-items: start;
 `;
 
+interface StyledSection {
+  firstSection?: boolean;
+  lastSection?: boolean;
+}
+
+export const StyledSection = styled.div<StyledSection>`
+  padding-top: ${({ theme, firstSection = false }) =>
+    firstSection ? 0 : theme.space[4]};
+  padding-bottom: ${({ theme }) => theme.space[6]};
+  border-bottom-width: ${({ theme, lastSection = false }) =>
+    lastSection ? theme.borderWidth[0] : theme.borderWidth[2]};
+  border-bottom-color: ${({ theme }) => theme.color["gray"][600]};
+  border-bottom-style: solid;
+  width: 100%;
+`;
+
 export const StyledSectionHeader = styled.div`
-  display: block;
-  input,
-  select {
-    margin: ${({ theme }) => `0 ${theme.space[5]}`};
-  }
+  font-weight: ${({ theme }) => theme.fontWeight.bold};
+  font-size: ${({ theme }) => theme.fontSize.xl};
+  margin-bottom: ${({ theme }) => theme.space["4"]};
+  color: ${({ theme }) => theme.color["gray"][600]};
 `;
 export const StyledContentRow = styled.div`
   display: flex;
-`;
-
-export const StyledSectionMeta = styled.div`
-  display: block;
-`;
-export const StyledSectionUsed = styled.div`
-  display: block;
 `;
 
 export const StyledSectionUsedTable = styled.div`
   display: grid;
   align-items: center;
   padding-left: ${({ theme }) => theme.space[0]};
-  grid-template-columns: auto auto auto auto auto;
+  grid-template-columns: auto auto auto auto;
   width: fit-content;
   grid-template-rows: auto;
   grid-auto-flow: row;
   padding-top: ${({ theme }) => theme.space[6]};
   padding-bottom: ${({ theme }) => theme.space[6]};
 `;
+
+interface StyledHeaderColumn {}
+export const StyledHeaderColumn = styled.div<StyledHeaderColumn>`
+  font-weight: ${({ theme }) => theme.fontWeight.light};
+  margin-left: ${({ theme }) => theme.space[1]};
+  font-size: ${({ theme }) => theme.fontSize["sm"]};
+  text-align: left;
+  font-style: italic;
+`;
+
+export const StyledSectionUsedText = styled.div`
+  font-size: ${({ theme }) => theme.fontSize["xs"]};
+  max-width: 20em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+`;
+
+export const StyledSectionUsedPageManager = styled.div`
+  font-size: ${({ theme }) => theme.fontSize["xs"]};
+  display: inline-flex;
+  align-items: center;
+  button {
+    margin: 0 ${({ theme }) => theme.space[2]};
+  }
+`;
+
 export const StyledSectionUsedTableCell = styled.div<StyledSectionMetaTableCell>`
   display: inline-flex;
   margin-bottom: ${({ theme, lastSecondLevel }) =>
@@ -45,7 +80,6 @@ export const StyledSectionUsedTableCell = styled.div<StyledSectionMetaTableCell>
   border-right: ${({ theme, borderless }) =>
     borderless ? "none" : "1px dashed black"};
 `;
-
 
 export const StyledSectionMetaTable = styled.div`
   display: grid;

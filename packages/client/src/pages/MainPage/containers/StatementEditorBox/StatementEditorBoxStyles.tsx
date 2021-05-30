@@ -36,7 +36,6 @@ export const StyledEditorSectionHeader = styled.div<StyledEditorSectionHeader>`
   font-size: ${({ theme }) => theme.fontSize.xl};
   margin-bottom: ${({ theme }) => theme.space["4"]};
   color: ${({ theme }) => theme.color["gray"][600]};
-  text-align: center;
 `;
 
 interface StyledEditorSectionContent {}
@@ -50,7 +49,7 @@ export const StyledListHeaderColumn = styled.div<StyledListHeaderColumn>`
   font-weight: ${({ theme }) => theme.fontWeight.light};
   margin-left: ${({ theme }) => theme.space[1]};
   font-size: ${({ theme }) => theme.fontSize["sm"]};
-  text-align: center;
+  text-align: left;
   font-style: italic;
 `;
 
