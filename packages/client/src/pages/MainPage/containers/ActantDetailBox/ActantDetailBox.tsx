@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useMemo } from "react";
 const queryString = require("query-string");
 
-import { Button, Input, Loader } from "components";
+import { Button, ButtonGroup, Input, Loader } from "components";
 import {
   StyledContent,
   StyledSection,
@@ -32,6 +32,7 @@ import {
   FaTrashAlt,
   FaStepBackward,
   FaStepForward,
+  FaRecycle
 } from "react-icons/fa";
 import {
   ActantTag,
@@ -196,6 +197,7 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
                   queryClient.invalidateQueries(["territory"]);
                 }}
               />
+              <ButtonGroup>
               <Button
                 color="danger"
                 icon={<FaTrashAlt />}
@@ -204,9 +206,20 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
                   history.push({
                     hash: queryString.stringify(hashParams),
                   });
-                  // TODO: remove actant from URL
                 }}
               />
+              <Button
+              key="refresh"
+              icon={<FaRecycle size={14} />}
+              tooltip="refresh data"
+              color="info"
+              label="refresh"
+              onClick={() => {
+                queryClient.invalidateQueries(["actant"]);
+              }}
+            />
+
+              </ButtonGroup>
             </StyledContentRow>
           </StyledSection>
           <StyledSection>
@@ -222,6 +235,7 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
                 queryClient.invalidateQueries(["actant"]);
               }}
             />
+            
 
             <StyledSectionMetaTable>
               {metaStatements.map((metaStatement: IResponseStatement) => {
