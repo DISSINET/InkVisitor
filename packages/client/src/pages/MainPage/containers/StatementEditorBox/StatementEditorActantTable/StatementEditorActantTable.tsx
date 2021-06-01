@@ -1,0 +1,103 @@
+import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { Column, useTable, useExpanded, Row } from "react-table";
+import update from "immutability-helper";
+import {
+  StyledTable,
+  StyledTHead,
+  StyledTh,
+} from "./StatementEditorActantTableStyles";
+import { StatementEditorActantTableRow } from "./StatementEditorActantTableRow/StatementEditorActantTableRow";
+import { IResponseStatement, IStatementActant } from "@shared/types";
+
+interface StatementEditorActantTable {
+  statement: IResponseStatement;
+  // columns: Column<{}>[];
+  handleRowClick?: Function;
+  moveEndRow: Function;
+}
+export const StatementEditorActantTable: React.FC<StatementEditorActantTable> =
+  ({ statement, handleRowClick = () => {}, moveEndRow }) => {
+    const [actants, setActants] = useState<IStatementActant[]>([]);
+
+    useEffect(() => {
+      setActants(statement?.data?.actants);
+    }, [statement]);
+
+    const columns: Column<{}>[] = useMemo(() => {
+      return [
+        {
+          Header: "ID",
+          accessor: "id",
+        },
+      ];
+    }, [actants]);
+
+    const getRowId = useCallback((row) => {
+      return row.id;
+    }, []);
+    const {
+      getTableProps,
+      getTableBodyProps,
+      headerGroups,
+      rows,
+      prepareRow,
+      visibleColumns,
+    } = useTable(
+      {
+        columns,
+        data: actants,
+        getRowId,
+        initialState: {
+          hiddenColumns: ["id"],
+        },
+      },
+      useExpanded
+    );
+
+    const moveRow = useCallback(
+      (dragIndex: number, hoverIndex: number) => {
+        const dragRecord = actants[dragIndex];
+        setActants(
+          update(actants, {
+            $splice: [
+              [dragIndex, 1],
+              [hoverIndex, 0, dragRecord],
+            ],
+          })
+        );
+      },
+      [actants]
+    );
+
+    return (
+      <StyledTable {...getTableProps()}>
+        <StyledTHead>
+          {headerGroups.map((headerGroup, key) => (
+            <tr {...headerGroup.getHeaderGroupProps()} key={key}>
+              <th></th>
+              {headerGroup.headers.map((column, key) => (
+                <StyledTh {...column.getHeaderProps()} key={key}>
+                  {column.render("Header")}
+                </StyledTh>
+              ))}
+            </tr>
+          ))}
+        </StyledTHead>
+        <tbody {...getTableBodyProps()}>
+          {rows.map((row: Row, i: number) => {
+            prepareRow(row);
+            return (
+              <StatementEditorActantTableRow
+                handleClick={handleRowClick}
+                index={i}
+                row={row}
+                moveRow={moveRow}
+                moveEndRow={moveEndRow}
+                {...row.getRowProps()}
+              />
+            );
+          })}
+        </tbody>
+      </StyledTable>
+    );
+  };

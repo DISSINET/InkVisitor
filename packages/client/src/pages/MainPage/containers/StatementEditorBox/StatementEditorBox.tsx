@@ -54,6 +54,7 @@ import {
   StyledTagsList,
   StyledTagsListItem,
 } from "./StatementEditorBoxStyles";
+import { StatementEditorActantTable } from "./StatementEditorActantTable/StatementEditorActantTable";
 
 const classesActants = ["P", "G", "O", "C", "L", "V", "E", "S", "T", "R"];
 const classesPropType = ["C"];
@@ -650,6 +651,10 @@ export const StatementEditorBox: React.FC = () => {
                   statement={statement}
                   statementId={statementId}
                   classEntitiesActant={classesActants}
+                />
+                <StatementEditorActantTable
+                  statement={statement}
+                  moveEndRow={() => {}}
                 />
                 <ActantSuggester
                   onSelected={(newSelectedId: string) => {
