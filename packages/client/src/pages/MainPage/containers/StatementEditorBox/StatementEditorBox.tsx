@@ -36,7 +36,6 @@ import {
 } from "@shared/types";
 import { Button, Input, Loader } from "components";
 import { ActantSuggester } from "./../";
-import { StatementEditorActantList } from "./StatementEditorActantList/StatementEditorActantList";
 
 import {
   StyledEditorSection,
@@ -44,8 +43,6 @@ import {
   StyledEditorSectionContent,
   StyledReferencesListColumn,
   StyledListHeaderColumn,
-  StyledActantList,
-  StyledActantListItem,
   StyledPropsActantHeader,
   StyledPropsActantList,
   StyledPropButtonGroup,
@@ -647,15 +644,12 @@ export const StatementEditorBox: React.FC = () => {
             <StyledEditorSection key="editor-section-actants">
               <StyledEditorSectionHeader>Actants</StyledEditorSectionHeader>
               <StyledEditorSectionContent>
-                <StatementEditorActantList
+                <StatementEditorActantTable
                   statement={statement}
                   statementId={statementId}
                   classEntitiesActant={classesActants}
                 />
-                <StatementEditorActantTable
-                  statement={statement}
-                  moveEndRow={() => {}}
-                />
+
                 <ActantSuggester
                   onSelected={(newSelectedId: string) => {
                     addActant(newSelectedId);

@@ -17,12 +17,12 @@ interface StatementEditorActantTableRow {
   row: any;
   index: number;
   moveRow: any;
-  moveEndRow: Function;
+  updateOrderFn: () => void;
   handleClick: Function;
 }
 
 export const StatementEditorActantTableRow: React.FC<StatementEditorActantTableRow> =
-  ({ row, index, moveRow, moveEndRow, handleClick = () => {} }) => {
+  ({ row, index, moveRow, updateOrderFn, handleClick = () => {} }) => {
     var hashParams = queryString.parse(location.hash);
     const statementId = hashParams.statement;
 
@@ -62,9 +62,7 @@ export const StatementEditorActantTableRow: React.FC<StatementEditorActantTableR
       collect: (monitor: DragSourceMonitor) => ({
         isDragging: monitor.isDragging(),
       }),
-      end: (item: DragItem | undefined, monitor: DragSourceMonitor) => {
-        moveEndRow(row.values, index);
-      },
+      end: updateOrderFn,
     });
 
     const opacity = isDragging ? 0.2 : 1;
