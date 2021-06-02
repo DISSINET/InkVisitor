@@ -36,7 +36,6 @@ import {
 } from "@shared/types";
 import { Button, Input, Loader } from "components";
 import { ActantSuggester } from "./../";
-import { StatementEditorActantList } from "./StatementEditorActantList/StatementEditorActantList";
 
 import {
   StyledEditorSection,
@@ -44,8 +43,6 @@ import {
   StyledEditorSectionContent,
   StyledReferencesListColumn,
   StyledListHeaderColumn,
-  StyledActantList,
-  StyledActantListItem,
   StyledPropsActantHeader,
   StyledPropsActantList,
   StyledPropButtonGroup,
@@ -53,7 +50,9 @@ import {
   StyledReferencesList,
   StyledTagsList,
   StyledTagsListItem,
+  StyledEditorActantTableWrapper,
 } from "./StatementEditorBoxStyles";
+import { StatementEditorActantTable } from "./StatementEditorActantTable/StatementEditorActantTable";
 
 const classesActants = ["P", "G", "O", "C", "L", "V", "E", "S", "T", "R"];
 const classesPropType = ["C"];
@@ -646,11 +645,14 @@ export const StatementEditorBox: React.FC = () => {
             <StyledEditorSection key="editor-section-actants">
               <StyledEditorSectionHeader>Actants</StyledEditorSectionHeader>
               <StyledEditorSectionContent>
-                <StatementEditorActantList
-                  statement={statement}
-                  statementId={statementId}
-                  classEntitiesActant={classesActants}
-                />
+                <StyledEditorActantTableWrapper>
+                  <StatementEditorActantTable
+                    statement={statement}
+                    statementId={statementId}
+                    classEntitiesActant={classesActants}
+                  />
+                </StyledEditorActantTableWrapper>
+
                 <ActantSuggester
                   onSelected={(newSelectedId: string) => {
                     addActant(newSelectedId);
