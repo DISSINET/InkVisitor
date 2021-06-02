@@ -50,6 +50,7 @@ import {
   StyledReferencesList,
   StyledTagsList,
   StyledTagsListItem,
+  StyledEditorActantTableWrapper,
 } from "./StatementEditorBoxStyles";
 import { StatementEditorActantTable } from "./StatementEditorActantTable/StatementEditorActantTable";
 
@@ -644,11 +645,13 @@ export const StatementEditorBox: React.FC = () => {
             <StyledEditorSection key="editor-section-actants">
               <StyledEditorSectionHeader>Actants</StyledEditorSectionHeader>
               <StyledEditorSectionContent>
-                <StatementEditorActantTable
-                  statement={statement}
-                  statementId={statementId}
-                  classEntitiesActant={classesActants}
-                />
+                <StyledEditorActantTableWrapper>
+                  <StatementEditorActantTable
+                    statement={statement}
+                    statementId={statementId}
+                    classEntitiesActant={classesActants}
+                  />
+                </StyledEditorActantTableWrapper>
 
                 <ActantSuggester
                   onSelected={(newSelectedId: string) => {

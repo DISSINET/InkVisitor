@@ -116,3 +116,7 @@ export const StyledTagsListItem = styled.div<StyledTagsListItem>`
   padding-bottom: ${({ theme }) => theme.space[1]};
   display: inline-block;
 `;
+
+export const StyledEditorActantTableWrapper = styled.div`
+  margin-bottom: ${({ theme }) => theme.space[4]};
+`;
