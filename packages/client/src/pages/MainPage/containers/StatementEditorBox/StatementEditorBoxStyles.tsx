@@ -53,19 +53,6 @@ export const StyledListHeaderColumn = styled.div<StyledListHeaderColumn>`
   font-style: italic;
 `;
 
-// Actants
-interface StyledActantList {}
-export const StyledActantList = styled(StyledGrid)<StyledActantList>``;
-
-interface StyledActantListItem {
-  opacity?: number;
-}
-export const StyledActantListItem = styled(
-  StyledGridCell
-)<StyledActantListItem>`
-  opacity: ${({ opacity }) => opacity};
-`;
-
 // Props section
 interface StyledPropsActantHeader {}
 export const StyledPropsActantHeader = styled.div<StyledPropsActantHeader>`
@@ -128,4 +115,8 @@ export const StyledTagsListItem = styled.div<StyledTagsListItem>`
   padding-right: ${({ theme }) => theme.space[2]};
   padding-bottom: ${({ theme }) => theme.space[1]};
   display: inline-block;
+`;
+
+export const StyledEditorActantTableWrapper = styled.div`
+  margin-bottom: ${({ theme }) => theme.space[4]};
 `;

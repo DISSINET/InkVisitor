@@ -1,5 +1,5 @@
 import React, { useMemo, useRef, useState } from "react";
-import { Cell } from "react-table";
+import { Cell, Column } from "react-table";
 import { useQuery, useQueryClient } from "react-query";
 import {
   FaInfo,
@@ -159,7 +159,7 @@ export const StatementListBox: React.FC = () => {
     { enabled: api.isLoggedIn() }
   );
 
-  const columns: any = useMemo(() => {
+  const columns: Column<{}>[] = useMemo(() => {
     return [
       {
         Header: "ID",
