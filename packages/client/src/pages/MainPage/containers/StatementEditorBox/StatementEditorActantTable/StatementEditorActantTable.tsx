@@ -7,20 +7,30 @@ import {
   StyledTh,
 } from "./StatementEditorActantTableStyles";
 import { StatementEditorActantTableRow } from "./StatementEditorActantTableRow/StatementEditorActantTableRow";
-import { IResponseStatement, IStatementActant } from "@shared/types";
+import { IActant, IResponseStatement, IStatementActant } from "@shared/types";
 
+interface FilteredActantObject {
+  actant: IActant | undefined;
+  sActant: IStatementActant;
+}
 interface StatementEditorActantTable {
   statement: IResponseStatement;
-  // columns: Column<{}>[];
   handleRowClick?: Function;
   moveEndRow: Function;
 }
 export const StatementEditorActantTable: React.FC<StatementEditorActantTable> =
   ({ statement, handleRowClick = () => {}, moveEndRow }) => {
-    const [actants, setActants] = useState<IStatementActant[]>([]);
+    const [filteredActants, setFilteredActants] = useState<
+      FilteredActantObject[]
+    >([]);
 
     useEffect(() => {
-      setActants(statement?.data?.actants);
+      const filteredActants = statement.data.actants.map((sActant, key) => {
+        const actant = statement.actants.find((a) => a.id === sActant.actant);
+        return { id: key, actant, sActant };
+      });
+      console.log(filteredActants);
+      setFilteredActants(filteredActants);
     }, [statement]);
 
     const columns: Column<{}>[] = useMemo(() => {
@@ -29,8 +39,17 @@ export const StatementEditorActantTable: React.FC<StatementEditorActantTable> =
           Header: "ID",
           accessor: "id",
         },
+        {
+          Header: "Actant",
+        },
+        {
+          Header: "Position",
+        },
+        {
+          Header: "Attributes",
+        },
       ];
-    }, [actants]);
+    }, [filteredActants]);
 
     const getRowId = useCallback((row) => {
       return row.id;
@@ -45,10 +64,10 @@ export const StatementEditorActantTable: React.FC<StatementEditorActantTable> =
     } = useTable(
       {
         columns,
-        data: actants,
+        data: filteredActants,
         getRowId,
         initialState: {
-          hiddenColumns: ["id"],
+          // hiddenColumns: ["id"],
         },
       },
       useExpanded
@@ -56,9 +75,9 @@ export const StatementEditorActantTable: React.FC<StatementEditorActantTable> =
 
     const moveRow = useCallback(
       (dragIndex: number, hoverIndex: number) => {
-        const dragRecord = actants[dragIndex];
-        setActants(
-          update(actants, {
+        const dragRecord = filteredActants[dragIndex];
+        setFilteredActants(
+          update(filteredActants, {
             $splice: [
               [dragIndex, 1],
               [hoverIndex, 0, dragRecord],
@@ -66,7 +85,7 @@ export const StatementEditorActantTable: React.FC<StatementEditorActantTable> =
           })
         );
       },
-      [actants]
+      [filteredActants]
     );
 
     return (
