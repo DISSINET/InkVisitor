@@ -13,4 +13,5 @@ export interface IResponseTreeTerritoryComponent {
   statementsCount: number; // number of statements with this data.territory.id
   lvl: number; // levels of nesting
   children: IResponseTreeTerritoryComponent[];
+  empty?: boolean;
 }
