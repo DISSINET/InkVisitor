@@ -1,8 +1,20 @@
 import theme from "./theme";
 
+export const rootTerritoryId = "T0";
+
+// layout
 export const heightHeader = 70;
 export const heightFooter = 30;
-export const rootTerritoryId = "T0";
+export const collapsedPanelWidth = 32;
+
+export const firstPanelWidth = 200;
+export const secondPanelWidth = 570;
+export const thirdPanelWidth = 800;
+export const fourthPanelWidth = 350;
+// animations
+export const springConfig = {
+  panelExpand: { tension: 195, friction: 31 },
+};
 
 export const space1 = theme.space[1];
 export const space2 = theme.space[2];

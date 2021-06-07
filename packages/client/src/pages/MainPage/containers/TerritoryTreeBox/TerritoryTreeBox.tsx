@@ -9,6 +9,7 @@ import { Loader } from "components";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { setSelectedTerritoryPath } from "redux/features/selectedTerritoryPathSlice";
 import { config, useSpring, animated } from "react-spring";
+import { springConfig } from "Theme/constants";
 
 export const TerritoryTreeBox: React.FC = () => {
   const { status, data, error, isFetching } = useQuery(
@@ -58,22 +59,22 @@ export const TerritoryTreeBox: React.FC = () => {
 
   const animatedDisappearance = useSpring({
     opacity: territoryTreeBoxExpanded ? 1 : 0,
-    config: config.stiff,
+    config: springConfig.panelExpand,
   });
 
   return (
     <>
-      <animated.div style={animatedDisappearance}>
-        {data && (
-          <TerritoryTreeNode
-            territory={data.territory}
-            children={data.children}
-            lvl={data.lvl}
-            statementsCount={data.statementsCount}
-            initExpandedNodes={selectedTerritoryPath}
-          />
-        )}
-      </animated.div>
+      {/* <animated.div style={animatedDisappearance}> */}
+      {data && (
+        <TerritoryTreeNode
+          territory={data.territory}
+          children={data.children}
+          lvl={data.lvl}
+          statementsCount={data.statementsCount}
+          initExpandedNodes={selectedTerritoryPath}
+        />
+      )}
+      {/* </animated.div> */}
       <Loader show={isFetching} />
     </>
   );

@@ -33,7 +33,16 @@ import {
   StyledUsername,
   StyledButtonWrap,
 } from "./MainPageStyles";
-import { heightFooter, heightHeader } from "Theme/constants";
+import {
+  collapsedPanelWidth,
+  firstPanelWidth,
+  fourthPanelWidth,
+  heightFooter,
+  heightHeader,
+  secondPanelWidth,
+  springConfig,
+  thirdPanelWidth,
+} from "Theme/constants";
 import { RiMenuFoldFill, RiMenuUnfoldFill } from "react-icons/ri";
 import { setTerritoryTreeBoxExpanded } from "redux/features/territoryTreeBoxExpandedSlice";
 import { config, useSpring } from "react-spring";
@@ -60,17 +69,6 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
       statementId: string;
     }>();
 
-  const heightContent = size[1] - heightHeader - heightFooter;
-
-  const animatedTerritoryTreeWidth = useSpring({
-    width: territoryTreeBoxExpanded ? 200 : 50,
-    config: config.stiff,
-  });
-  const animatedLastBoxWidth = useSpring({
-    width: lastBoxExpanded ? 350 : 50,
-    config: config.stiff,
-  });
-
   const handleLogOut = () => {
     api.signOut();
     dispatch(setUsername(""));
@@ -78,6 +76,52 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
     toast.success("You've been successfully logged out!");
     queryClient.removeQueries();
   };
+
+  const heightContent = size[1] - heightHeader - heightFooter;
+
+  const animatedFirstPanel = useSpring({
+    width: territoryTreeBoxExpanded ? firstPanelWidth : collapsedPanelWidth,
+    secondPanelWidth: territoryTreeBoxExpanded
+      ? secondPanelWidth
+      : secondPanelWidth + firstPanelWidth - collapsedPanelWidth,
+    config: springConfig.panelExpand,
+  });
+  const animatedFourthPanel = useSpring({
+    width: lastBoxExpanded ? fourthPanelWidth : collapsedPanelWidth,
+    editorWidth: lastBoxExpanded
+      ? thirdPanelWidth
+      : thirdPanelWidth + fourthPanelWidth - collapsedPanelWidth,
+    config: springConfig.panelExpand,
+  });
+
+  const firstPanelButton = () => (
+    <StyledButtonWrap>
+      <Button
+        onClick={() =>
+          territoryTreeBoxExpanded
+            ? dispatch(setTerritoryTreeBoxExpanded(false))
+            : dispatch(setTerritoryTreeBoxExpanded(true))
+        }
+        inverted
+        icon={
+          territoryTreeBoxExpanded ? <RiMenuFoldFill /> : <RiMenuUnfoldFill />
+        }
+      />
+    </StyledButtonWrap>
+  );
+  const fourthPanelButton = () => (
+    <StyledButtonWrap>
+      <Button
+        onClick={() =>
+          lastBoxExpanded
+            ? dispatch(setLastBoxExpanded(false))
+            : dispatch(setLastBoxExpanded(true))
+        }
+        inverted
+        icon={lastBoxExpanded ? <RiMenuUnfoldFill /> : <RiMenuFoldFill />}
+      />
+    </StyledButtonWrap>
+  );
   return (
     <>
       <Header
@@ -108,68 +152,58 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
         <StyledBoxWrap>
           <Box
             height={heightContent}
-            animatedWidth={animatedTerritoryTreeWidth}
-            label={territoryTreeBoxExpanded ? "Territories" : "T"}
+            animatedWidth={animatedFirstPanel.width}
+            label="Territories"
+            isExpanded={territoryTreeBoxExpanded}
           >
-            <StyledButtonWrap>
-              <Button
-                onClick={() =>
-                  territoryTreeBoxExpanded
-                    ? dispatch(setTerritoryTreeBoxExpanded(false))
-                    : dispatch(setTerritoryTreeBoxExpanded(true))
-                }
-                inverted
-                icon={
-                  territoryTreeBoxExpanded ? (
-                    <RiMenuFoldFill />
-                  ) : (
-                    <RiMenuUnfoldFill />
-                  )
-                }
-              />
-            </StyledButtonWrap>
+            {firstPanelButton()}
             <TerritoryTreeBox />
           </Box>
           <div>
-            <Box height={400} width={570} label="Statements">
+            <Box
+              height={400}
+              width={secondPanelWidth}
+              animatedWidth={animatedFirstPanel.secondPanelWidth}
+              label="Statements"
+            >
               <StatementListBox />
             </Box>
-            <Box height={heightContent - 400} width={570} label="Detail">
+            <Box
+              height={heightContent - 400}
+              width={secondPanelWidth}
+              animatedWidth={animatedFirstPanel.secondPanelWidth}
+              label="Detail"
+            >
               <ActantDetailBox />
             </Box>
           </div>
           <div>
-            <Box height={heightContent} width={800} label="Editor">
+            <Box
+              height={heightContent}
+              animatedWidth={animatedFourthPanel.editorWidth}
+              label="Editor"
+            >
               <StatementEditorBox />
             </Box>
           </div>
           <div>
             <Box
               height={400}
-              animatedWidth={animatedLastBoxWidth}
-              label={lastBoxExpanded ? "Search" : "S"}
+              animatedWidth={animatedFourthPanel.width}
+              label="Search"
+              isExpanded={lastBoxExpanded}
             >
               <ActantSearchBox />
-              <StyledButtonWrap>
-                <Button
-                  onClick={() =>
-                    lastBoxExpanded
-                      ? dispatch(setLastBoxExpanded(false))
-                      : dispatch(setLastBoxExpanded(true))
-                  }
-                  inverted
-                  icon={
-                    lastBoxExpanded ? <RiMenuFoldFill /> : <RiMenuUnfoldFill />
-                  }
-                />
-              </StyledButtonWrap>
+              {fourthPanelButton()}
             </Box>
             <Box
               height={heightContent - 400}
-              animatedWidth={animatedLastBoxWidth}
-              label={lastBoxExpanded ? "Bookmarks" : "B"}
+              animatedWidth={animatedFourthPanel.width}
+              label="Bookmarks"
+              isExpanded={lastBoxExpanded}
             >
               <ActantBookmarkBox />
+              {fourthPanelButton()}
             </Box>
           </div>
         </StyledBoxWrap>

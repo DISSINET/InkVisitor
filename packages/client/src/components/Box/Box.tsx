@@ -1,5 +1,6 @@
 import React, { ReactNode } from "react";
-import { AnimatedValue } from "react-spring";
+import { animated, AnimatedValue, config, useSpring } from "react-spring";
+import theme from "Theme/theme";
 
 import { Colors } from "types";
 import { StyledBox, StyledContent, StyledHead } from "./BoxStyles";
@@ -12,6 +13,7 @@ interface BoxProps {
   height?: number;
   noPadding?: boolean;
   children?: ReactNode;
+  isExpanded?: boolean;
 }
 
 export const Box: React.FC<BoxProps> = ({
@@ -21,16 +23,24 @@ export const Box: React.FC<BoxProps> = ({
   animatedWidth,
   height = 200,
   noPadding = false,
+  isExpanded = true,
   children,
 }) => {
+  const animatedHeading = useSpring({
+    opacity: isExpanded ? 1 : 0,
+    config: config.stiff,
+  });
+
   return (
     <StyledBox
       color={color}
       width={width}
-      style={animatedWidth}
+      style={{ width: animatedWidth }}
       height={height}
     >
-      <StyledHead color={color}>{label}</StyledHead>
+      <StyledHead color={color}>
+        <animated.div style={animatedHeading}>{label}</animated.div>
+      </StyledHead>
       <StyledContent color={color} noPadding={noPadding}>
         {children}
       </StyledContent>

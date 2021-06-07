@@ -11,16 +11,13 @@ export const StyledBox = styled(animated.div)<IBoxStyle>`
   position: relative;
   display: flex;
   flex-direction: column;
-  /* border-color: ${({ theme, color }) => theme.color[color]};
-  border-style: solid;
-  border-width: ${({ theme }) => theme.borderWidth[2]}; */
   width: ${({ width }) => `${width / 10}rem`};
   height: ${({ height }) => (height ? `${height / 10}rem` : "100%")};
 `;
 interface StyledHead {
   color: string;
 }
-export const StyledHead = styled.div<StyledHead>`
+export const StyledHead = styled(animated.div)<StyledHead>`
   background-color: ${({ theme, color }) => theme.color[color]};
   color: ${({ theme }) => theme.color["white"]};
   padding: ${space2};
