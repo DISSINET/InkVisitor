@@ -31,8 +31,13 @@ import {
   StyledFaUserAlt,
   StyledText,
   StyledUsername,
+  StyledButtonWrap,
 } from "./MainPageStyles";
 import { heightFooter, heightHeader } from "Theme/constants";
+import { RiMenuFoldFill, RiMenuUnfoldFill } from "react-icons/ri";
+import { setTerritoryTreeBoxExpanded } from "redux/features/territoryTreeBoxExpandedSlice";
+import { config, useSpring } from "react-spring";
+import { setLastBoxExpanded } from "redux/features/lastBoxExpandedSlice";
 
 interface MainPage {
   size: number[];
@@ -42,15 +47,29 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
   const isLoggedIn = api.isLoggedIn();
   const dispatch = useAppDispatch();
   const username = useAppSelector((state) => state.username);
+  const territoryTreeBoxExpanded = useAppSelector(
+    (state) => state.territoryTreeBoxExpanded
+  );
+  const lastBoxExpanded = useAppSelector((state) => state.lastBoxExpanded);
   const queryClient = useQueryClient();
 
   const history = useHistory();
-  const { territoryId, statementId } = useParams<{
-    territoryId: string;
-    statementId: string;
-  }>();
+  const { territoryId, statementId } =
+    useParams<{
+      territoryId: string;
+      statementId: string;
+    }>();
 
   const heightContent = size[1] - heightHeader - heightFooter;
+
+  const animatedTerritoryTreeWidth = useSpring({
+    width: territoryTreeBoxExpanded ? 200 : 50,
+    config: config.stiff,
+  });
+  const animatedLastBoxWidth = useSpring({
+    width: lastBoxExpanded ? 350 : 50,
+    config: config.stiff,
+  });
 
   const handleLogOut = () => {
     api.signOut();
@@ -87,7 +106,28 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
       />
       <DndProvider backend={HTML5Backend}>
         <StyledBoxWrap>
-          <Box height={heightContent} width={200} label="Territories">
+          <Box
+            height={heightContent}
+            animatedWidth={animatedTerritoryTreeWidth}
+            label={territoryTreeBoxExpanded ? "Territories" : "T"}
+          >
+            <StyledButtonWrap>
+              <Button
+                onClick={() =>
+                  territoryTreeBoxExpanded
+                    ? dispatch(setTerritoryTreeBoxExpanded(false))
+                    : dispatch(setTerritoryTreeBoxExpanded(true))
+                }
+                inverted
+                icon={
+                  territoryTreeBoxExpanded ? (
+                    <RiMenuFoldFill />
+                  ) : (
+                    <RiMenuUnfoldFill />
+                  )
+                }
+              />
+            </StyledButtonWrap>
             <TerritoryTreeBox />
           </Box>
           <div>
@@ -104,10 +144,31 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
             </Box>
           </div>
           <div>
-            <Box height={400} width={350} label="Search">
+            <Box
+              height={400}
+              animatedWidth={animatedLastBoxWidth}
+              label={lastBoxExpanded ? "Search" : "S"}
+            >
               <ActantSearchBox />
+              <StyledButtonWrap>
+                <Button
+                  onClick={() =>
+                    lastBoxExpanded
+                      ? dispatch(setLastBoxExpanded(false))
+                      : dispatch(setLastBoxExpanded(true))
+                  }
+                  inverted
+                  icon={
+                    lastBoxExpanded ? <RiMenuFoldFill /> : <RiMenuUnfoldFill />
+                  }
+                />
+              </StyledButtonWrap>
             </Box>
-            <Box height={heightContent - 400} width={350} label="Bookmarks">
+            <Box
+              height={heightContent - 400}
+              animatedWidth={animatedLastBoxWidth}
+              label={lastBoxExpanded ? "Bookmarks" : "B"}
+            >
               <ActantBookmarkBox />
             </Box>
           </div>

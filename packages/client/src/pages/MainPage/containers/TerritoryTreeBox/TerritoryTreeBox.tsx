@@ -8,6 +8,7 @@ import { IResponseTree } from "@shared/types";
 import { Loader } from "components";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { setSelectedTerritoryPath } from "redux/features/selectedTerritoryPathSlice";
+import { config, useSpring, animated } from "react-spring";
 
 export const TerritoryTreeBox: React.FC = () => {
   const { status, data, error, isFetching } = useQuery(
@@ -24,6 +25,9 @@ export const TerritoryTreeBox: React.FC = () => {
   const dispatch = useAppDispatch();
   const selectedTerritoryPath = useAppSelector(
     (state) => state.selectedTerritoryPath
+  );
+  const territoryTreeBoxExpanded = useAppSelector(
+    (state) => state.territoryTreeBoxExpanded
   );
 
   const searchTree = (
@@ -42,6 +46,7 @@ export const TerritoryTreeBox: React.FC = () => {
     }
     return null;
   };
+
   useEffect(() => {
     if (data) {
       const foundTerritory = searchTree(data, territoryId);
@@ -51,17 +56,24 @@ export const TerritoryTreeBox: React.FC = () => {
     }
   }, [data, territoryId]);
 
+  const animatedDisappearance = useSpring({
+    opacity: territoryTreeBoxExpanded ? 1 : 0,
+    config: config.stiff,
+  });
+
   return (
     <>
-      {data && (
-        <TerritoryTreeNode
-          territory={data.territory}
-          children={data.children}
-          lvl={data.lvl}
-          statementsCount={data.statementsCount}
-          initExpandedNodes={selectedTerritoryPath}
-        />
-      )}
+      <animated.div style={animatedDisappearance}>
+        {data && (
+          <TerritoryTreeNode
+            territory={data.territory}
+            children={data.children}
+            lvl={data.lvl}
+            statementsCount={data.statementsCount}
+            initExpandedNodes={selectedTerritoryPath}
+          />
+        )}
+      </animated.div>
       <Loader show={isFetching} />
     </>
   );

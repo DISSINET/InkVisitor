@@ -1,3 +1,4 @@
+import { animated } from "react-spring";
 import styled from "styled-components";
 import { space2 } from "Theme/constants";
 
@@ -6,13 +7,13 @@ interface IBoxStyle {
   width: number;
   height: number;
 }
-export const StyledBox = styled.div<IBoxStyle>`
+export const StyledBox = styled(animated.div)<IBoxStyle>`
   position: relative;
   display: flex;
   flex-direction: column;
-  border-color: ${({ theme, color }) => theme.color[color]};
+  /* border-color: ${({ theme, color }) => theme.color[color]};
   border-style: solid;
-  border-width: ${({ theme }) => theme.borderWidth[2]};
+  border-width: ${({ theme }) => theme.borderWidth[2]}; */
   width: ${({ width }) => `${width / 10}rem`};
   height: ${({ height }) => (height ? `${height / 10}rem` : "100%")};
 `;
@@ -29,9 +30,14 @@ export const StyledHead = styled.div<StyledHead>`
   font-weight: ${({ theme }) => theme.fontWeight["bold"]};
   font-style: normal;
   text-transform: uppercase;
+  border-color: ${({ theme }) => theme.color["grey"]};
+  border-style: dashed;
+  border-width: ${({ theme }) => theme.borderWidth[1]};
+  border-bottom: none;
 `;
 interface StyledContent {
   noPadding: boolean;
+  color: string;
 }
 export const StyledContent = styled.div<StyledContent>`
   background-color: ${({ theme }) => theme.color["white"]};
@@ -41,4 +47,9 @@ export const StyledContent = styled.div<StyledContent>`
   overflow: auto;
   height: 100%;
   font-size: ${({ theme }) => theme.fontSize["base"]};
+
+  border-color: ${({ theme, color }) => theme.color[color]};
+  border-style: solid;
+  border-width: ${({ theme }) => theme.borderWidth[2]};
+  border-top: none;
 `;

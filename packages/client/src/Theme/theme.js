@@ -110,6 +110,7 @@ export default {
   borderWidth: {
     default: "0.1rem",
     0: "0",
+    1: "0.1rem",
     2: "0.2rem",
     4: "0.4rem",
     6: "0.6rem",
