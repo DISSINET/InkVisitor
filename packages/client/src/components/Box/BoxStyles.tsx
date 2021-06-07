@@ -2,12 +2,12 @@ import { animated } from "react-spring";
 import styled from "styled-components";
 import { space2 } from "Theme/constants";
 
-interface IBoxStyle {
+interface StyledBox {
   color: string;
   width: number;
   height: number;
 }
-export const StyledBox = styled(animated.div)<IBoxStyle>`
+export const StyledBox = styled(animated.div)<StyledBox>`
   position: relative;
   display: flex;
   flex-direction: column;

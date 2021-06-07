@@ -9,7 +9,13 @@ import {
 const queryString = require("query-string");
 
 import { DragItem, ItemTypes } from "types";
-import { TagWrapper, EntityTag, Label, ButtonWrapper } from "./TagStyles";
+import {
+  StyledTagWrapper,
+  StyledEntityTag,
+  StyledLabel,
+  ButtonWrapper,
+  StyledTooltipSeparator,
+} from "./TagStyles";
 import { Tooltip } from "components";
 import { useHistory, useLocation } from "react-router-dom";
 
@@ -116,7 +122,9 @@ export const Tag: React.FC<TagProps> = ({
   });
   drag(drop(ref));
 
-  const renderEntityTag = () => <EntityTag color={color}>{category}</EntityTag>;
+  const renderEntityTag = () => (
+    <StyledEntityTag color={color}>{category}</StyledEntityTag>
+  );
   const renderButton = () => <ButtonWrapper>{button}</ButtonWrapper>;
 
   const onDoubleClick = (e: React.MouseEvent) => {
@@ -134,37 +142,37 @@ export const Tag: React.FC<TagProps> = ({
       {short ? (
         <Tooltip position={position} label={label}>
           <div>
-            <TagWrapper
+            <StyledTagWrapper
               ref={ref}
               borderStyle={borderStyle}
               onDoubleClick={(e: React.MouseEvent) => onDoubleClick(e)}
             >
               {renderEntityTag()}
               {button && renderButton()}
-            </TagWrapper>
+            </StyledTagWrapper>
           </div>
         </Tooltip>
       ) : (
         <>
           <Tooltip label={label} disabled={!enableTooltip} position={position}>
-            <div style={{ display: "inline-flex" }}>
-              <TagWrapper
+            <StyledTooltipSeparator>
+              <StyledTagWrapper
                 ref={ref}
                 borderStyle={borderStyle}
                 onDoubleClick={(e: React.MouseEvent) => onDoubleClick(e)}
               >
                 {renderEntityTag()}
                 {label && (
-                  <Label
+                  <StyledLabel
                     invertedLabel={invertedLabel}
                     borderStyle={borderStyle}
                   >
                     {label}
-                  </Label>
+                  </StyledLabel>
                 )}
                 {button && renderButton()}
-              </TagWrapper>
-            </div>
+              </StyledTagWrapper>
+            </StyledTooltipSeparator>
           </Tooltip>
         </>
       )}

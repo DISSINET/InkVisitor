@@ -1,16 +1,16 @@
 import styled from "styled-components";
 
-interface TagWrapper {
+interface StyledTagWrapper {
   hasMarginRight?: boolean;
   borderStyle: "solid" | "dashed" | "dotted";
 }
-export const TagWrapper = styled.div<TagWrapper>`
+export const StyledTagWrapper = styled.div<StyledTagWrapper>`
   display: inline-flex;
+  overflow: hidden;
   border: ${({ theme }) => theme.borderWidth[2]};
   border-style: ${({ borderStyle }) => borderStyle};
   border-color: ${({ theme }) => theme.color["black"]};
   border-radius: ${({ theme }) => theme.borderRadius["sm"]};
-  overflow: hidden;
   margin-right: ${({ theme, hasMarginRight }) =>
     hasMarginRight && theme.space[1]};
   cursor: move;
@@ -20,10 +20,10 @@ export const TagWrapper = styled.div<TagWrapper>`
   height: 2.25rem;
 `;
 
-interface EntityTag {
+interface StyledEntityTag {
   color: string;
 }
-export const EntityTag = styled.div<EntityTag>`
+export const StyledEntityTag = styled.div<StyledEntityTag>`
   background-color: ${({ color, theme }) => theme.color[color]};
   display: flex;
   justify-content: center;
@@ -33,11 +33,11 @@ export const EntityTag = styled.div<EntityTag>`
   width: ${({ theme }) => theme.space[7]};
 `;
 
-interface Label {
+interface StyledLabel {
   invertedLabel?: boolean;
   borderStyle: "solid" | "dashed" | "dotted";
 }
-export const Label = styled.div<Label>`
+export const StyledLabel = styled.div<StyledLabel>`
   display: inline-block;
   vertical-align: middle;
   overflow: hidden !important;
@@ -56,4 +56,9 @@ export const Label = styled.div<Label>`
 
 export const ButtonWrapper = styled.div`
   display: flex;
+`;
+
+export const StyledTooltipSeparator = styled.div`
+  display: inline-flex;
+  overflow: hidden;
 `;

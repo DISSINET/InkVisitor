@@ -64,17 +64,17 @@ export const TerritoryTreeBox: React.FC = () => {
 
   return (
     <>
-      {/* <animated.div style={animatedDisappearance}> */}
-      {data && (
-        <TerritoryTreeNode
-          territory={data.territory}
-          children={data.children}
-          lvl={data.lvl}
-          statementsCount={data.statementsCount}
-          initExpandedNodes={selectedTerritoryPath}
-        />
-      )}
-      {/* </animated.div> */}
+      <animated.div style={animatedDisappearance}>
+        {data && (
+          <TerritoryTreeNode
+            territory={data.territory}
+            children={data.children}
+            lvl={data.lvl}
+            statementsCount={data.statementsCount}
+            initExpandedNodes={selectedTerritoryPath}
+          />
+        )}
+      </animated.div>
       <Loader show={isFetching} />
     </>
   );
