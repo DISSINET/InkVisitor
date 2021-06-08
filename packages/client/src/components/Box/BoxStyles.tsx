@@ -35,6 +35,7 @@ export const StyledHead = styled(animated.div)<StyledHead>`
 interface StyledContent {
   $noPadding: boolean;
   color: string;
+  $isExpanded: boolean;
 }
 export const StyledContent = styled(animated.div)<StyledContent>`
   background-color: ${({ theme }) => theme.color["white"]};
@@ -45,9 +46,11 @@ export const StyledContent = styled(animated.div)<StyledContent>`
   height: 100%;
   font-size: ${({ theme }) => theme.fontSize["base"]};
 
-  border-color: ${({ theme, color }) => theme.color[color]};
-  border-style: solid;
-  border-width: ${({ theme }) => theme.borderWidth[2]};
+  border-color: ${({ theme, color, $isExpanded }) =>
+    $isExpanded ? theme.color[color] : theme.color["grey"]};
+  border-style: ${({ $isExpanded }) => ($isExpanded ? "solid" : "dotted")};
+  border-width: ${({ theme, $isExpanded }) =>
+    $isExpanded ? theme.borderWidth[2] : theme.borderWidth[1]};
   border-top: none;
 `;
 interface StyledContentAnimationWrap {

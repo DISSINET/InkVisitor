@@ -1,5 +1,11 @@
 import React, { ReactNode, useState } from "react";
-import { animated, AnimatedValue, config, useSpring } from "react-spring";
+import {
+  animated,
+  AnimatedValue,
+  config,
+  OpaqueInterpolation,
+  useSpring,
+} from "react-spring";
 import { springConfig } from "Theme/constants";
 import theme from "Theme/theme";
 
@@ -41,7 +47,7 @@ export const Box: React.FC<BoxProps> = ({
   const animatedExpand = useSpring({
     opacity: isExpanded ? 1 : 0,
     contentLabelOpacity: isExpanded ? 0 : 1,
-    contentBackgroundColor: isExpanded ? "white" : theme.color["success"],
+    contentBackgroundColor: isExpanded ? "white" : theme.color["primary"],
     onRest: () =>
       isExpanded ? setShowContentLabel(false) : setHideContent(true),
     onStart: () =>
@@ -63,6 +69,7 @@ export const Box: React.FC<BoxProps> = ({
       <StyledContent
         color={color}
         $noPadding={noPadding}
+        $isExpanded={isExpanded}
         style={{
           backgroundColor: animatedExpand.contentBackgroundColor as any,
         }}
@@ -75,7 +82,9 @@ export const Box: React.FC<BoxProps> = ({
         </StyledContentAnimationWrap>
         <StyledVerticalText
           $showContentLabel={showContentLabel}
-          style={{ opacity: animatedExpand.contentLabelOpacity as any }}
+          style={{
+            opacity: animatedExpand.contentLabelOpacity as any,
+          }}
         >
           {label}
         </StyledVerticalText>
