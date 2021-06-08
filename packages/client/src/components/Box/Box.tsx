@@ -1,5 +1,6 @@
 import React, { ReactNode } from "react";
 import { animated, AnimatedValue, config, useSpring } from "react-spring";
+import { springConfig } from "Theme/constants";
 import theme from "Theme/theme";
 
 import { Colors } from "types";
@@ -26,9 +27,9 @@ export const Box: React.FC<BoxProps> = ({
   isExpanded = true,
   children,
 }) => {
-  const animatedHeading = useSpring({
+  const animatedExpand = useSpring({
     opacity: isExpanded ? 1 : 0,
-    config: config.stiff,
+    config: springConfig.panelExpand,
   });
 
   return (
@@ -39,7 +40,7 @@ export const Box: React.FC<BoxProps> = ({
       height={height}
     >
       <StyledHead color={color}>
-        <animated.div style={animatedHeading}>{label}</animated.div>
+        <animated.div style={animatedExpand}>{label}</animated.div>
       </StyledHead>
       <StyledContent color={color} noPadding={noPadding}>
         {children}
