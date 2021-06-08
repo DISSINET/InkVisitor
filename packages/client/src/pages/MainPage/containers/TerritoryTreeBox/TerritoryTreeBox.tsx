@@ -25,9 +25,6 @@ export const TerritoryTreeBox: React.FC = () => {
   const selectedTerritoryPath = useAppSelector(
     (state) => state.selectedTerritoryPath
   );
-  const territoryTreeBoxExpanded = useAppSelector(
-    (state) => state.territoryTreeBoxExpanded
-  );
 
   const searchTree = (
     element: IResponseTree,

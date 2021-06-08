@@ -4,7 +4,12 @@ import { springConfig } from "Theme/constants";
 import theme from "Theme/theme";
 
 import { Colors } from "types";
-import { StyledBox, StyledContent, StyledHead } from "./BoxStyles";
+import {
+  StyledBox,
+  StyledContent,
+  StyledHead,
+  StyledVerticalText,
+} from "./BoxStyles";
 
 interface BoxProps {
   label?: string;
@@ -13,8 +18,9 @@ interface BoxProps {
   animatedWidth?: any;
   height?: number;
   noPadding?: boolean;
-  children?: ReactNode;
   isExpanded?: boolean;
+  button?: ReactNode;
+  children?: ReactNode;
 }
 
 export const Box: React.FC<BoxProps> = ({
@@ -25,10 +31,16 @@ export const Box: React.FC<BoxProps> = ({
   height = 200,
   noPadding = false,
   isExpanded = true,
+  button,
   children,
 }) => {
   const animatedExpand = useSpring({
     opacity: isExpanded ? 1 : 0,
+    contentBgColor: isExpanded ? "white" : theme.color["success"],
+    config: springConfig.panelExpand,
+  });
+  const animatedCollapse = useSpring({
+    backgroundColor: isExpanded ? "white" : theme.color["success"],
     config: springConfig.panelExpand,
   });
 
@@ -41,9 +53,15 @@ export const Box: React.FC<BoxProps> = ({
     >
       <StyledHead color={color}>
         <animated.div style={animatedExpand}>{label}</animated.div>
+        {button && button}
       </StyledHead>
-      <StyledContent color={color} noPadding={noPadding}>
-        {children}
+      <StyledContent
+        color={color}
+        noPadding={noPadding}
+        style={animatedCollapse}
+      >
+        <animated.div style={animatedExpand}>{children}</animated.div>
+        <StyledVerticalText>{label}</StyledVerticalText>
       </StyledContent>
     </StyledBox>
   );

@@ -36,7 +36,7 @@ interface StyledContent {
   noPadding: boolean;
   color: string;
 }
-export const StyledContent = styled.div<StyledContent>`
+export const StyledContent = styled(animated.div)<StyledContent>`
   background-color: ${({ theme }) => theme.color["white"]};
   padding: ${({ theme, noPadding }) => (noPadding ? 0 : theme.space[2])};
   display: flex;
@@ -49,4 +49,11 @@ export const StyledContent = styled.div<StyledContent>`
   border-style: solid;
   border-width: ${({ theme }) => theme.borderWidth[2]};
   border-top: none;
+`;
+
+export const StyledVerticalText = styled(animated.div)`
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  font-size: ${({ theme }) => theme.fontSize["base"]};
+  color: ${({ theme }) => theme.color["white"]};
 `;

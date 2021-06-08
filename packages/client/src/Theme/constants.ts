@@ -12,7 +12,7 @@ export const secondPanelWidth = 570;
 export const thirdPanelWidth = 800;
 export const fourthPanelWidth = 350;
 // animations
-export const springConfig = {
+export const springConfig: { [key: string]: {} } = {
   panelExpand: { tension: 195, friction: 31 },
 };
 

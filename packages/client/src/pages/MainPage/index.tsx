@@ -44,9 +44,9 @@ import {
   thirdPanelWidth,
 } from "Theme/constants";
 import { RiMenuFoldFill, RiMenuUnfoldFill } from "react-icons/ri";
-import { setTerritoryTreeBoxExpanded } from "redux/features/territoryTreeBoxExpandedSlice";
+import { setFirstPanelExpanded } from "redux/features/firstPanelExpandedSlice";
 import { config, useSpring } from "react-spring";
-import { setLastBoxExpanded } from "redux/features/lastBoxExpandedSlice";
+import { setFourthPanelExpanded } from "redux/features/fourthPanelExpandedSlice";
 
 interface MainPage {
   size: number[];
@@ -56,10 +56,12 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
   const isLoggedIn = api.isLoggedIn();
   const dispatch = useAppDispatch();
   const username = useAppSelector((state) => state.username);
-  const territoryTreeBoxExpanded = useAppSelector(
-    (state) => state.territoryTreeBoxExpanded
+  const firstPanelExpanded = useAppSelector(
+    (state) => state.firstPanelExpanded
   );
-  const lastBoxExpanded = useAppSelector((state) => state.lastBoxExpanded);
+  const fourthPanelExpanded = useAppSelector(
+    (state) => state.fourthPanelExpanded
+  );
   const queryClient = useQueryClient();
 
   const history = useHistory();
@@ -80,15 +82,15 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
   const heightContent = size[1] - heightHeader - heightFooter;
 
   const animatedFirstPanel = useSpring({
-    width: territoryTreeBoxExpanded ? firstPanelWidth : collapsedPanelWidth,
-    secondPanelWidth: territoryTreeBoxExpanded
+    width: firstPanelExpanded ? firstPanelWidth : collapsedPanelWidth,
+    secondPanelWidth: firstPanelExpanded
       ? secondPanelWidth
       : secondPanelWidth + firstPanelWidth - collapsedPanelWidth,
     config: springConfig.panelExpand,
   });
   const animatedFourthPanel = useSpring({
-    width: lastBoxExpanded ? fourthPanelWidth : collapsedPanelWidth,
-    editorWidth: lastBoxExpanded
+    width: fourthPanelExpanded ? fourthPanelWidth : collapsedPanelWidth,
+    editorWidth: fourthPanelExpanded
       ? thirdPanelWidth
       : thirdPanelWidth + fourthPanelWidth - collapsedPanelWidth,
     config: springConfig.panelExpand,
@@ -98,14 +100,12 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
     <StyledButtonWrap>
       <Button
         onClick={() =>
-          territoryTreeBoxExpanded
-            ? dispatch(setTerritoryTreeBoxExpanded(false))
-            : dispatch(setTerritoryTreeBoxExpanded(true))
+          firstPanelExpanded
+            ? dispatch(setFirstPanelExpanded(false))
+            : dispatch(setFirstPanelExpanded(true))
         }
         inverted
-        icon={
-          territoryTreeBoxExpanded ? <RiMenuFoldFill /> : <RiMenuUnfoldFill />
-        }
+        icon={firstPanelExpanded ? <RiMenuFoldFill /> : <RiMenuUnfoldFill />}
       />
     </StyledButtonWrap>
   );
@@ -113,12 +113,12 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
     <StyledButtonWrap>
       <Button
         onClick={() =>
-          lastBoxExpanded
-            ? dispatch(setLastBoxExpanded(false))
-            : dispatch(setLastBoxExpanded(true))
+          fourthPanelExpanded
+            ? dispatch(setFourthPanelExpanded(false))
+            : dispatch(setFourthPanelExpanded(true))
         }
         inverted
-        icon={lastBoxExpanded ? <RiMenuUnfoldFill /> : <RiMenuFoldFill />}
+        icon={fourthPanelExpanded ? <RiMenuUnfoldFill /> : <RiMenuFoldFill />}
       />
     </StyledButtonWrap>
   );
@@ -154,9 +154,9 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
             height={heightContent}
             animatedWidth={animatedFirstPanel.width}
             label="Territories"
-            isExpanded={territoryTreeBoxExpanded}
+            isExpanded={firstPanelExpanded}
+            button={firstPanelButton()}
           >
-            {firstPanelButton()}
             <TerritoryTreeBox />
           </Box>
           <div>
@@ -191,19 +191,19 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
               height={400}
               animatedWidth={animatedFourthPanel.width}
               label="Search"
-              isExpanded={lastBoxExpanded}
+              isExpanded={fourthPanelExpanded}
+              button={fourthPanelButton()}
             >
               <ActantSearchBox />
-              {fourthPanelButton()}
             </Box>
             <Box
               height={heightContent - 400}
               animatedWidth={animatedFourthPanel.width}
               label="Bookmarks"
-              isExpanded={lastBoxExpanded}
+              isExpanded={fourthPanelExpanded}
+              button={fourthPanelButton()}
             >
               <ActantBookmarkBox />
-              {fourthPanelButton()}
             </Box>
           </div>
         </StyledBoxWrap>
