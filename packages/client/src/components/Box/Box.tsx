@@ -1,4 +1,4 @@
-import React, { ReactNode } from "react";
+import React, { ReactNode, useState } from "react";
 import { animated, AnimatedValue, config, useSpring } from "react-spring";
 import { springConfig } from "Theme/constants";
 import theme from "Theme/theme";
@@ -7,6 +7,7 @@ import { Colors } from "types";
 import {
   StyledBox,
   StyledContent,
+  StyledContentAnimationWrap,
   StyledHead,
   StyledVerticalText,
 } from "./BoxStyles";
@@ -34,13 +35,17 @@ export const Box: React.FC<BoxProps> = ({
   button,
   children,
 }) => {
+  const [hideContent, setHideContent] = useState<boolean>(false);
+  const [showContentLabel, setShowContentLabel] = useState<boolean>(false);
+
   const animatedExpand = useSpring({
     opacity: isExpanded ? 1 : 0,
-    contentBgColor: isExpanded ? "white" : theme.color["success"],
-    config: springConfig.panelExpand,
-  });
-  const animatedCollapse = useSpring({
-    backgroundColor: isExpanded ? "white" : theme.color["success"],
+    contentLabelOpacity: isExpanded ? 0 : 1,
+    contentBackgroundColor: isExpanded ? "white" : theme.color["success"],
+    onRest: () =>
+      isExpanded ? setShowContentLabel(false) : setHideContent(true),
+    onStart: () =>
+      isExpanded ? setHideContent(false) : setShowContentLabel(true),
     config: springConfig.panelExpand,
   });
 
@@ -57,11 +62,23 @@ export const Box: React.FC<BoxProps> = ({
       </StyledHead>
       <StyledContent
         color={color}
-        noPadding={noPadding}
-        style={animatedCollapse}
+        $noPadding={noPadding}
+        style={{
+          backgroundColor: animatedExpand.contentBackgroundColor as any,
+        }}
       >
-        <animated.div style={animatedExpand}>{children}</animated.div>
-        <StyledVerticalText>{label}</StyledVerticalText>
+        <StyledContentAnimationWrap
+          $hideContent={hideContent}
+          style={animatedExpand}
+        >
+          {children}
+        </StyledContentAnimationWrap>
+        <StyledVerticalText
+          $showContentLabel={showContentLabel}
+          style={{ opacity: animatedExpand.contentLabelOpacity as any }}
+        >
+          {label}
+        </StyledVerticalText>
       </StyledContent>
     </StyledBox>
   );

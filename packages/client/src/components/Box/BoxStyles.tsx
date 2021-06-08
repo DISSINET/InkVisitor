@@ -33,12 +33,12 @@ export const StyledHead = styled(animated.div)<StyledHead>`
   border-bottom: none;
 `;
 interface StyledContent {
-  noPadding: boolean;
+  $noPadding: boolean;
   color: string;
 }
 export const StyledContent = styled(animated.div)<StyledContent>`
   background-color: ${({ theme }) => theme.color["white"]};
-  padding: ${({ theme, noPadding }) => (noPadding ? 0 : theme.space[2])};
+  padding: ${({ theme, $noPadding }) => ($noPadding ? 0 : theme.space[2])};
   display: flex;
   flex-direction: column;
   overflow: auto;
@@ -50,10 +50,27 @@ export const StyledContent = styled(animated.div)<StyledContent>`
   border-width: ${({ theme }) => theme.borderWidth[2]};
   border-top: none;
 `;
-
-export const StyledVerticalText = styled(animated.div)`
+interface StyledContentAnimationWrap {
+  $hideContent: boolean;
+}
+export const StyledContentAnimationWrap = styled(
+  animated.div
+)<StyledContentAnimationWrap>`
+  display: ${({ $hideContent }) => ($hideContent ? "none" : "inherit")};
+  flex-direction: column;
+`;
+interface StyledVerticalText {
+  $showContentLabel: boolean;
+}
+export const StyledVerticalText = styled(animated.p)<StyledVerticalText>`
+  position: absolute;
+  display: ${({ $showContentLabel }) =>
+    $showContentLabel ? "initial" : "none"};
+  left: ${({ theme }) => theme.space[1]};
   writing-mode: vertical-rl;
   text-orientation: mixed;
+  font-family: Muni;
+  font-weight: ${({ theme }) => theme.fontWeight["bold"]};
   font-size: ${({ theme }) => theme.fontSize["base"]};
   color: ${({ theme }) => theme.color["white"]};
 `;
