@@ -5,12 +5,16 @@ export const rootTerritoryId = "T0";
 // layout
 export const heightHeader = 70;
 export const heightFooter = 30;
+
+export const layoutWidthBreakpoint = 1920;
+export const widthBoundaries = [0, 200, 770, 1570, 1920];
 export const collapsedPanelWidth = 32;
 
-export const firstPanelWidth = 200;
-export const secondPanelWidth = 570;
-export const thirdPanelWidth = 800;
-export const fourthPanelWidth = 350;
+export const firstPanelWidth = widthBoundaries[1];
+export const secondPanelWidth = widthBoundaries[2] - widthBoundaries[1];
+export const thirdPanelWidth = widthBoundaries[3] - widthBoundaries[2];
+export const fourthPanelWidth = widthBoundaries[4] - widthBoundaries[3];
+
 // animations
 export const springConfig: { [key: string]: {} } = {
   panelExpand: { tension: 195, friction: 31 },

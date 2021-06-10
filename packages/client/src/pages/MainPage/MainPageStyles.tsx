@@ -11,6 +11,9 @@ export const StyledUser = styled.div`
 `;
 export const StyledBoxWrap = styled.div`
   display: flex;
+  width: 192rem;
+  min-width: 100%;
+  overflow: hidden;
 `;
 export const StyledFaUserAlt = styled(FaUserAlt)`
   margin-left: ${({ theme }) => theme.space[2]};
