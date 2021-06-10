@@ -14,7 +14,7 @@ services:
 
   inkvisitor-database:
     <<: *service
-    platform: linux/x86_64
+    platform: linux/amd64
     image: rethinkdb
     container_name: "inkvisitor-database"
     volumes:
