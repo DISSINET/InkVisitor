@@ -11,9 +11,7 @@ const GlobalStyle = createGlobalStyle`
   }
   body {
     position: absolute;
-    min-width: 100%;
     font-family: "Roboto", sans-serif;
-    /* font-family: "MuniArial", Arial, Helvetica Neue, sans-serif; */
     letter-spacing: .2px;
     line-height: 1.5;
     @font-face {

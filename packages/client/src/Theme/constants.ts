@@ -1,8 +1,24 @@
 import theme from "./theme";
 
+export const rootTerritoryId = "T0";
+
+// layout
 export const heightHeader = 70;
 export const heightFooter = 30;
-export const rootTerritoryId = "T0";
+
+export const layoutWidthBreakpoint = 1920;
+export const widthBoundaries = [0, 200, 770, 1570, 1920];
+export const collapsedPanelWidth = 32;
+
+export const firstPanelWidth = widthBoundaries[1];
+export const secondPanelWidth = widthBoundaries[2] - widthBoundaries[1];
+export const thirdPanelWidth = widthBoundaries[3] - widthBoundaries[2];
+export const fourthPanelWidth = widthBoundaries[4] - widthBoundaries[3];
+
+// animations
+export const springConfig: { [key: string]: {} } = {
+  panelExpand: { tension: 195, friction: 31 },
+};
 
 export const space1 = theme.space[1];
 export const space2 = theme.space[2];
