@@ -10,9 +10,8 @@ export const StyledUser = styled.div`
   align-items: center;
   margin-right: ${({ theme }) => theme.space[4]};
 `;
-export const StyledBoxWrap = styled.div`
+export const StyledPanelWrap = styled.div`
   display: flex;
-  /* width: 192rem; */
   width: 100%;
   overflow: hidden;
 `;

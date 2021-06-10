@@ -6,20 +6,11 @@ import { StyledPanel } from "./PanelStyles";
 
 interface Panel {
   width: number;
-  elasticWidth: number;
   children: ReactNode;
 }
-export const Panel: React.FC<Panel> = ({
-  width = 100,
-  elasticWidth,
-  children,
-}) => {
+export const Panel: React.FC<Panel> = ({ width = 100, children }) => {
   const animatedWidth = useSpring({
     width: `${width / 10}rem`,
-    config: springConfig.panelExpand,
-  });
-  const animatedElasticWidth = useSpring({
-    width: `${elasticWidth}%`,
     config: springConfig.panelExpand,
   });
   return <StyledPanel style={animatedWidth}>{children}</StyledPanel>;

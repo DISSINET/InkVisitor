@@ -26,7 +26,7 @@ import { setAuthToken } from "redux/features/authTokenSlice";
 import { setUsername } from "redux/features/usernameSlice";
 import {
   StyledUserBox,
-  StyledBoxWrap,
+  StyledPanelWrap,
   StyledUser,
   StyledFaUserAlt,
   StyledText,
@@ -36,16 +36,12 @@ import {
 } from "./MainPageStyles";
 import {
   collapsedPanelWidth,
-  firstPanelElasticWidth,
   firstPanelWidth,
-  fourthPanelElasticWidth,
   fourthPanelWidth,
   heightFooter,
   heightHeader,
-  secondPanelElasticWidth,
   secondPanelWidth,
   springConfig,
-  thirdPanelElasticWidth,
   thirdPanelWidth,
 } from "Theme/constants";
 import { RiMenuFoldFill, RiMenuUnfoldFill } from "react-icons/ri";
@@ -141,11 +137,10 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
           }
         />
         <DndProvider backend={HTML5Backend}>
-          <StyledBoxWrap>
+          <StyledPanelWrap>
             {/* FIRST PANEL */}
             <Panel
               width={firstPanelExpanded ? firstPanelWidth : collapsedPanelWidth}
-              elasticWidth={firstPanelElasticWidth}
             >
               <Box
                 height={heightContent}
@@ -163,7 +158,6 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
                   ? secondPanelWidth
                   : secondPanelWidth + firstPanelWidth - collapsedPanelWidth
               }
-              elasticWidth={secondPanelElasticWidth}
             >
               <Box height={400} label="Statements">
                 <StatementListBox />
@@ -179,7 +173,6 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
                   ? thirdPanelWidth
                   : thirdPanelWidth + fourthPanelWidth - collapsedPanelWidth
               }
-              elasticWidth={thirdPanelElasticWidth}
             >
               <Box height={heightContent} label="Editor">
                 <StatementEditorBox />
@@ -190,7 +183,6 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
               width={
                 fourthPanelExpanded ? fourthPanelWidth : collapsedPanelWidth
               }
-              elasticWidth={fourthPanelElasticWidth}
             >
               <Box
                 height={400}
@@ -209,7 +201,7 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
                 <ActantBookmarkBox />
               </Box>
             </Panel>
-          </StyledBoxWrap>
+          </StyledPanelWrap>
         </DndProvider>
 
         <Toast />
