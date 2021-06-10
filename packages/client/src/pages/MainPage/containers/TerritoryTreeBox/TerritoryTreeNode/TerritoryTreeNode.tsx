@@ -58,6 +58,8 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
   const [contextMenuOpen, setContextMenuOpen] = useState(false);
   const animatedStyle = useSpring({
     opacity: contextMenuOpen ? 0.6 : 1,
+    display: "inline-flex",
+    overflow: "hidden",
     config: config.stiff,
   });
 

@@ -31,8 +31,22 @@ import {
   StyledFaUserAlt,
   StyledText,
   StyledUsername,
+  StyledButtonWrap,
 } from "./MainPageStyles";
-import { heightFooter, heightHeader } from "Theme/constants";
+import {
+  collapsedPanelWidth,
+  firstPanelWidth,
+  fourthPanelWidth,
+  heightFooter,
+  heightHeader,
+  secondPanelWidth,
+  springConfig,
+  thirdPanelWidth,
+} from "Theme/constants";
+import { RiMenuFoldFill, RiMenuUnfoldFill } from "react-icons/ri";
+import { setFirstPanelExpanded } from "redux/features/firstPanelExpandedSlice";
+import { config, useSpring } from "react-spring";
+import { setFourthPanelExpanded } from "redux/features/fourthPanelExpandedSlice";
 
 interface MainPage {
   size: number[];
@@ -42,15 +56,20 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
   const isLoggedIn = api.isLoggedIn();
   const dispatch = useAppDispatch();
   const username = useAppSelector((state) => state.username);
+  const firstPanelExpanded = useAppSelector(
+    (state) => state.firstPanelExpanded
+  );
+  const fourthPanelExpanded = useAppSelector(
+    (state) => state.fourthPanelExpanded
+  );
   const queryClient = useQueryClient();
 
   const history = useHistory();
-  const { territoryId, statementId } = useParams<{
-    territoryId: string;
-    statementId: string;
-  }>();
-
-  const heightContent = size[1] - heightHeader - heightFooter;
+  const { territoryId, statementId } =
+    useParams<{
+      territoryId: string;
+      statementId: string;
+    }>();
 
   const handleLogOut = () => {
     api.signOut();
@@ -59,6 +78,50 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
     toast.success("You've been successfully logged out!");
     queryClient.removeQueries();
   };
+
+  const heightContent = size[1] - heightHeader - heightFooter;
+
+  const animatedFirstPanel = useSpring({
+    width: firstPanelExpanded ? firstPanelWidth : collapsedPanelWidth,
+    secondPanelWidth: firstPanelExpanded
+      ? secondPanelWidth
+      : secondPanelWidth + firstPanelWidth - collapsedPanelWidth,
+    config: springConfig.panelExpand,
+  });
+  const animatedFourthPanel = useSpring({
+    width: fourthPanelExpanded ? fourthPanelWidth : collapsedPanelWidth,
+    editorWidth: fourthPanelExpanded
+      ? thirdPanelWidth
+      : thirdPanelWidth + fourthPanelWidth - collapsedPanelWidth,
+    config: springConfig.panelExpand,
+  });
+
+  const firstPanelButton = () => (
+    <StyledButtonWrap>
+      <Button
+        onClick={() =>
+          firstPanelExpanded
+            ? dispatch(setFirstPanelExpanded(false))
+            : dispatch(setFirstPanelExpanded(true))
+        }
+        inverted
+        icon={firstPanelExpanded ? <RiMenuFoldFill /> : <RiMenuUnfoldFill />}
+      />
+    </StyledButtonWrap>
+  );
+  const fourthPanelButton = () => (
+    <StyledButtonWrap>
+      <Button
+        onClick={() =>
+          fourthPanelExpanded
+            ? dispatch(setFourthPanelExpanded(false))
+            : dispatch(setFourthPanelExpanded(true))
+        }
+        inverted
+        icon={fourthPanelExpanded ? <RiMenuUnfoldFill /> : <RiMenuFoldFill />}
+      />
+    </StyledButtonWrap>
+  );
   return (
     <>
       <Header
@@ -87,27 +150,59 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
       />
       <DndProvider backend={HTML5Backend}>
         <StyledBoxWrap>
-          <Box height={heightContent} width={200} label="Territories">
+          <Box
+            height={heightContent}
+            animatedWidth={animatedFirstPanel.width}
+            label="Territories"
+            isExpanded={firstPanelExpanded}
+            button={firstPanelButton()}
+          >
             <TerritoryTreeBox />
           </Box>
           <div>
-            <Box height={400} width={570} label="Statements">
+            <Box
+              height={400}
+              width={secondPanelWidth}
+              animatedWidth={animatedFirstPanel.secondPanelWidth}
+              label="Statements"
+            >
               <StatementListBox />
             </Box>
-            <Box height={heightContent - 400} width={570} label="Detail">
+            <Box
+              height={heightContent - 400}
+              width={secondPanelWidth}
+              animatedWidth={animatedFirstPanel.secondPanelWidth}
+              label="Detail"
+            >
               <ActantDetailBox />
             </Box>
           </div>
           <div>
-            <Box height={heightContent} width={800} label="Editor">
+            <Box
+              height={heightContent}
+              animatedWidth={animatedFourthPanel.editorWidth}
+              label="Editor"
+            >
               <StatementEditorBox />
             </Box>
           </div>
           <div>
-            <Box height={400} width={350} label="Search">
+            <Box
+              height={400}
+              animatedWidth={animatedFourthPanel.width}
+              label="Search"
+              isExpanded={fourthPanelExpanded}
+              button={fourthPanelButton()}
+            >
               <ActantSearchBox />
             </Box>
-            <Box height={heightContent - 400} width={350} label="Bookmarks">
+            <Box
+              height={heightContent - 400}
+              animatedWidth={animatedFourthPanel.width}
+              label="Bookmarks"
+              isExpanded={fourthPanelExpanded}
+              button={fourthPanelButton()}
+            >
               <ActantBookmarkBox />
             </Box>
           </div>

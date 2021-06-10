@@ -42,6 +42,7 @@ export const TerritoryTreeBox: React.FC = () => {
     }
     return null;
   };
+
   useEffect(() => {
     if (data) {
       const foundTerritory = searchTree(data, territoryId);

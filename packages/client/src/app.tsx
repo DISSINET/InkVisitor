@@ -26,6 +26,7 @@ export const App: React.FC<AppProps> = () => {
     const handleResize = () => {
       setSize([window.innerWidth, window.innerHeight]);
     };
+    console.log("X, Y", [window.innerWidth, window.innerHeight]);
     window.addEventListener("resize", handleResize);
     handleResize();
     return () => window.removeEventListener("resize", handleResize);
