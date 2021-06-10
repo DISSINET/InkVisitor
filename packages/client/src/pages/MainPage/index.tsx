@@ -32,15 +32,20 @@ import {
   StyledText,
   StyledUsername,
   StyledButtonWrap,
+  StyledPage,
 } from "./MainPageStyles";
 import {
   collapsedPanelWidth,
+  firstPanelElasticWidth,
   firstPanelWidth,
+  fourthPanelElasticWidth,
   fourthPanelWidth,
   heightFooter,
   heightHeader,
+  secondPanelElasticWidth,
   secondPanelWidth,
   springConfig,
+  thirdPanelElasticWidth,
   thirdPanelWidth,
 } from "Theme/constants";
 import { RiMenuFoldFill, RiMenuUnfoldFill } from "react-icons/ri";
@@ -81,21 +86,6 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
 
   const heightContent = size[1] - heightHeader - heightFooter;
 
-  const animatedFirstPanel = useSpring({
-    width: firstPanelExpanded ? firstPanelWidth : collapsedPanelWidth,
-    secondPanelWidth: firstPanelExpanded
-      ? secondPanelWidth
-      : secondPanelWidth + firstPanelWidth - collapsedPanelWidth,
-    config: springConfig.panelExpand,
-  });
-  const animatedFourthPanel = useSpring({
-    width: fourthPanelExpanded ? fourthPanelWidth : collapsedPanelWidth,
-    editorWidth: fourthPanelExpanded
-      ? thirdPanelWidth
-      : thirdPanelWidth + fourthPanelWidth - collapsedPanelWidth,
-    config: springConfig.panelExpand,
-  });
-
   const firstPanelButton = () => (
     <StyledButtonWrap>
       <Button
@@ -122,96 +112,117 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
       />
     </StyledButtonWrap>
   );
+
   return (
     <>
-      <Header
-        height={heightHeader}
-        paddingY={0}
-        paddingX={10}
-        left={<div>InkVisitor</div>}
-        right={
-          <div>
-            {isLoggedIn && (
-              <StyledUserBox>
-                <StyledUser>
-                  <StyledText>logged as</StyledText>
-                  <StyledFaUserAlt size={14} />
-                  <StyledUsername>{username}</StyledUsername>
-                </StyledUser>
-                <Button
-                  label="Log Out"
-                  color="danger"
-                  onClick={() => handleLogOut()}
-                />
-              </StyledUserBox>
-            )}
-          </div>
-        }
-      />
-      <DndProvider backend={HTML5Backend}>
-        <StyledBoxWrap>
-          <Box
-            height={heightContent}
-            animatedWidth={animatedFirstPanel.width}
-            label="Territories"
-            isExpanded={firstPanelExpanded}
-            button={firstPanelButton()}
-          >
-            <TerritoryTreeBox />
-          </Box>
-          <div>
-            <Box
-              height={400}
-              width={secondPanelWidth}
-              animatedWidth={animatedFirstPanel.secondPanelWidth}
-              label="Statements"
-            >
-              <StatementListBox />
-            </Box>
-            <Box
-              height={heightContent - 400}
-              width={secondPanelWidth}
-              animatedWidth={animatedFirstPanel.secondPanelWidth}
-              label="Detail"
-            >
-              <ActantDetailBox />
-            </Box>
-          </div>
-          <div>
+      <StyledPage>
+        <Header
+          height={heightHeader}
+          paddingY={0}
+          paddingX={10}
+          left={<div>InkVisitor</div>}
+          right={
+            <div>
+              {isLoggedIn && (
+                <StyledUserBox>
+                  <StyledUser>
+                    <StyledText>logged as</StyledText>
+                    <StyledFaUserAlt size={14} />
+                    <StyledUsername>{username}</StyledUsername>
+                  </StyledUser>
+                  <Button
+                    label="Log Out"
+                    color="danger"
+                    onClick={() => handleLogOut()}
+                  />
+                </StyledUserBox>
+              )}
+            </div>
+          }
+        />
+        <DndProvider backend={HTML5Backend}>
+          <StyledBoxWrap>
+            {/* FIRST PANEL */}
             <Box
               height={heightContent}
-              animatedWidth={animatedFourthPanel.editorWidth}
-              label="Editor"
+              width={firstPanelExpanded ? firstPanelWidth : collapsedPanelWidth}
+              label="Territories"
+              isExpanded={firstPanelExpanded}
+              button={firstPanelButton()}
             >
-              <StatementEditorBox />
+              <TerritoryTreeBox />
             </Box>
-          </div>
-          <div>
-            <Box
-              height={400}
-              animatedWidth={animatedFourthPanel.width}
-              label="Search"
-              isExpanded={fourthPanelExpanded}
-              button={fourthPanelButton()}
-            >
-              <ActantSearchBox />
-            </Box>
-            <Box
-              height={heightContent - 400}
-              animatedWidth={animatedFourthPanel.width}
-              label="Bookmarks"
-              isExpanded={fourthPanelExpanded}
-              button={fourthPanelButton()}
-            >
-              <ActantBookmarkBox />
-            </Box>
-          </div>
-        </StyledBoxWrap>
-      </DndProvider>
+            {/* SECOND PANEL */}
+            <div>
+              <Box
+                height={400}
+                width={
+                  firstPanelExpanded
+                    ? secondPanelWidth
+                    : secondPanelWidth + firstPanelWidth - collapsedPanelWidth
+                }
+                label="Statements"
+              >
+                <StatementListBox />
+              </Box>
+              <Box
+                height={heightContent - 400}
+                width={
+                  firstPanelExpanded
+                    ? secondPanelWidth
+                    : secondPanelWidth + firstPanelWidth - collapsedPanelWidth
+                }
+                label="Detail"
+              >
+                <ActantDetailBox />
+              </Box>
+            </div>
+            {/* THIRD PANEL */}
+            <div>
+              <Box
+                height={heightContent}
+                width={
+                  fourthPanelExpanded
+                    ? thirdPanelWidth
+                    : thirdPanelWidth + fourthPanelWidth - collapsedPanelWidth
+                }
+                label="Editor"
+              >
+                <StatementEditorBox />
+              </Box>
+            </div>
+            {/* FOURTH PANEL */}
+            <div>
+              <Box
+                height={400}
+                width={
+                  fourthPanelExpanded ? fourthPanelWidth : collapsedPanelWidth
+                }
+                label="Search"
+                isExpanded={fourthPanelExpanded}
+                button={fourthPanelButton()}
+              >
+                <ActantSearchBox />
+              </Box>
+              <Box
+                height={heightContent - 400}
+                width={
+                  fourthPanelExpanded ? fourthPanelWidth : collapsedPanelWidth
+                }
+                label="Bookmarks"
+                isExpanded={fourthPanelExpanded}
+                button={fourthPanelButton()}
+              >
+                <ActantBookmarkBox />
+              </Box>
+            </div>
+          </StyledBoxWrap>
+        </DndProvider>
 
-      <Toast />
-      <Footer height={heightFooter} />
-      {!isLoggedIn && <LoginModal />}
+        <Toast />
+        <Footer height={heightFooter} />
+        {!isLoggedIn && <LoginModal />}
+      </StyledPage>
     </>
   );
 };

@@ -6,6 +6,7 @@ interface StyledFooter {
   height: number;
 }
 export const StyledFooter = styled.div<StyledFooter>`
-  background-color: ${({ theme, color }) => theme.color[color]};
+  width: 100%;
   height: ${({ height }) => `${height}px`};
+  background-color: ${({ theme, color }) => theme.color[color]};
 `;

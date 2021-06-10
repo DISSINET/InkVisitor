@@ -7,13 +7,24 @@ export const heightHeader = 70;
 export const heightFooter = 30;
 
 export const layoutWidthBreakpoint = 1920;
-export const widthBoundaries = [0, 200, 770, 1570, 1920];
 export const collapsedPanelWidth = 32;
+// INIT WIDTHS
+// px pixels
+export const widthBoundaries = [200, 770, 1570, 1920];
+export const firstPanelWidth = widthBoundaries[0];
+export const secondPanelWidth = widthBoundaries[1] - widthBoundaries[0];
+export const thirdPanelWidth = widthBoundaries[2] - widthBoundaries[1];
+export const fourthPanelWidth = widthBoundaries[3] - widthBoundaries[2];
 
-export const firstPanelWidth = widthBoundaries[1];
-export const secondPanelWidth = widthBoundaries[2] - widthBoundaries[1];
-export const thirdPanelWidth = widthBoundaries[3] - widthBoundaries[2];
-export const fourthPanelWidth = widthBoundaries[4] - widthBoundaries[3];
+// % percent
+export const widthElasticBoundaries = [10, 30, 42, 18];
+export const firstPanelElasticWidth = widthElasticBoundaries[0];
+export const secondPanelElasticWidth =
+  widthElasticBoundaries[1] - widthElasticBoundaries[0];
+export const thirdPanelElasticWidth =
+  widthElasticBoundaries[2] - widthElasticBoundaries[1];
+export const fourthPanelElasticWidth =
+  widthElasticBoundaries[3] - widthElasticBoundaries[2];
 
 // animations
 export const springConfig: { [key: string]: {} } = {

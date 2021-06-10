@@ -1,5 +1,6 @@
 import { FaUserAlt } from "react-icons/fa";
 import styled from "styled-components";
+import { layoutWidthBreakpoint } from "Theme/constants";
 
 export const StyledUserBox = styled.div`
   display: flex;
@@ -11,8 +12,8 @@ export const StyledUser = styled.div`
 `;
 export const StyledBoxWrap = styled.div`
   display: flex;
-  width: 192rem;
-  min-width: 100%;
+  /* width: 192rem; */
+  width: 100%;
   overflow: hidden;
 `;
 export const StyledFaUserAlt = styled(FaUserAlt)`
@@ -29,4 +30,9 @@ export const StyledButtonWrap = styled.div`
   position: absolute;
   top: ${({ theme }) => theme.space[2]};
   right: ${({ theme }) => theme.space[2]};
+`;
+export const StyledPage = styled.div`
+  width: 100%;
+  min-width: ${layoutWidthBreakpoint};
+  /* height: 100vh; */
 `;
