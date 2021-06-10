@@ -21,7 +21,6 @@ import {
 interface BoxProps {
   label?: string;
   color?: typeof Colors[number];
-  width?: number;
   height?: number;
   noPadding?: boolean;
   isExpanded?: boolean;
@@ -32,8 +31,7 @@ interface BoxProps {
 export const Box: React.FC<BoxProps> = ({
   label = "",
   color = "primary",
-  width = 100,
-  height = 200,
+  height,
   noPadding = false,
   isExpanded = true,
   button,
@@ -52,19 +50,9 @@ export const Box: React.FC<BoxProps> = ({
       isExpanded ? setHideContent(false) : setShowContentLabel(true),
     config: springConfig.panelExpand,
   });
-  const animatedWidth = useSpring({
-    width: `${width / 10}rem`,
-    config: springConfig.panelExpand,
-  });
 
   return (
-    <StyledBox
-      color={color}
-      // width={width}
-      style={animatedWidth}
-      // style={animatedElasticWidth}
-      height={height}
-    >
+    <StyledBox color={color} height={height}>
       <StyledHead color={color}>
         <animated.div style={animatedExpand}>{label}</animated.div>
         {button && button}

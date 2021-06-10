@@ -4,7 +4,7 @@ import { HTML5Backend } from "react-dnd-html5-backend";
 
 import { toast } from "react-toastify";
 
-import { Box, Button, Footer, Header, Toast } from "components";
+import { Box, Button, Footer, Header, Panel, Toast } from "components";
 
 import {
   ActantSearchBox,
@@ -143,61 +143,57 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
         <DndProvider backend={HTML5Backend}>
           <StyledBoxWrap>
             {/* FIRST PANEL */}
-            <Box
-              height={heightContent}
+            <Panel
               width={firstPanelExpanded ? firstPanelWidth : collapsedPanelWidth}
-              label="Territories"
-              isExpanded={firstPanelExpanded}
-              button={firstPanelButton()}
+              elasticWidth={firstPanelElasticWidth}
             >
-              <TerritoryTreeBox />
-            </Box>
-            {/* SECOND PANEL */}
-            <div>
-              <Box
-                height={400}
-                width={
-                  firstPanelExpanded
-                    ? secondPanelWidth
-                    : secondPanelWidth + firstPanelWidth - collapsedPanelWidth
-                }
-                label="Statements"
-              >
-                <StatementListBox />
-              </Box>
-              <Box
-                height={heightContent - 400}
-                width={
-                  firstPanelExpanded
-                    ? secondPanelWidth
-                    : secondPanelWidth + firstPanelWidth - collapsedPanelWidth
-                }
-                label="Detail"
-              >
-                <ActantDetailBox />
-              </Box>
-            </div>
-            {/* THIRD PANEL */}
-            <div>
               <Box
                 height={heightContent}
-                width={
-                  fourthPanelExpanded
-                    ? thirdPanelWidth
-                    : thirdPanelWidth + fourthPanelWidth - collapsedPanelWidth
-                }
-                label="Editor"
+                label="Territories"
+                isExpanded={firstPanelExpanded}
+                button={firstPanelButton()}
               >
+                <TerritoryTreeBox />
+              </Box>
+            </Panel>
+            {/* SECOND PANEL */}
+            <Panel
+              width={
+                firstPanelExpanded
+                  ? secondPanelWidth
+                  : secondPanelWidth + firstPanelWidth - collapsedPanelWidth
+              }
+              elasticWidth={secondPanelElasticWidth}
+            >
+              <Box height={400} label="Statements">
+                <StatementListBox />
+              </Box>
+              <Box height={heightContent - 400} label="Detail">
+                <ActantDetailBox />
+              </Box>
+            </Panel>
+            {/* THIRD PANEL */}
+            <Panel
+              width={
+                fourthPanelExpanded
+                  ? thirdPanelWidth
+                  : thirdPanelWidth + fourthPanelWidth - collapsedPanelWidth
+              }
+              elasticWidth={thirdPanelElasticWidth}
+            >
+              <Box height={heightContent} label="Editor">
                 <StatementEditorBox />
               </Box>
-            </div>
+            </Panel>
             {/* FOURTH PANEL */}
-            <div>
+            <Panel
+              width={
+                fourthPanelExpanded ? fourthPanelWidth : collapsedPanelWidth
+              }
+              elasticWidth={fourthPanelElasticWidth}
+            >
               <Box
                 height={400}
-                width={
-                  fourthPanelExpanded ? fourthPanelWidth : collapsedPanelWidth
-                }
                 label="Search"
                 isExpanded={fourthPanelExpanded}
                 button={fourthPanelButton()}
@@ -206,16 +202,13 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
               </Box>
               <Box
                 height={heightContent - 400}
-                width={
-                  fourthPanelExpanded ? fourthPanelWidth : collapsedPanelWidth
-                }
                 label="Bookmarks"
                 isExpanded={fourthPanelExpanded}
                 button={fourthPanelButton()}
               >
                 <ActantBookmarkBox />
               </Box>
-            </div>
+            </Panel>
           </StyledBoxWrap>
         </DndProvider>
 

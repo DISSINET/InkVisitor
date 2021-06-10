@@ -34,5 +34,5 @@ export const StyledButtonWrap = styled.div`
 export const StyledPage = styled.div`
   width: 100%;
   min-width: ${layoutWidthBreakpoint};
-  /* height: 100vh; */
+  height: 100vh;
 `;

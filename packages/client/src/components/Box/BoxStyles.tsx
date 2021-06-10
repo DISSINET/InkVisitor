@@ -4,8 +4,7 @@ import { space2 } from "Theme/constants";
 
 interface StyledBox {
   color: string;
-  // width: number;
-  height: number;
+  height?: number;
 }
 export const StyledBox = styled(animated.div)<StyledBox>`
   position: relative;
