@@ -124,14 +124,16 @@ export default Router()
   .get(
     "/get",
     asyncRouteHandler<IResponseTree>(async (request: Request) => {
-      const territories = (
-        await getActants<ITerritory>(request.db, {
+      const [territories, statementsCountMap] = await Promise.all([
+        getActants<ITerritory>(request.db, {
           class: "T",
-        })
-      ).sort(sortTerritories);
-
-      const statementsCountMap = await countStatements(request.db);
-      const helper = new TreeCreator(territories, statementsCountMap);
+        }),
+        countStatements(request.db),
+      ]);
+      const helper = new TreeCreator(
+        territories.sort(sortTerritories),
+        statementsCountMap
+      );
 
       return helper.populateTree(helper.getRootTerritory(), 0, []);
     })
