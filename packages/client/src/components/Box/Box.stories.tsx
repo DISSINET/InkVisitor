@@ -10,7 +10,7 @@ export default {
 
 export const DefaultBox = () => {
   return (
-    <Box label="Default Box" width={400} height={400}>
+    <Box label="Default Box" height={400}>
       {<div>box content</div>}
     </Box>
   );
@@ -18,7 +18,7 @@ export const DefaultBox = () => {
 
 export const WarningBox = () => {
   return (
-    <Box label="warning box" width={400} height={400} color="warning">
+    <Box label="warning box" height={400} color="warning">
       {<div>warning box content</div>}
     </Box>
   );

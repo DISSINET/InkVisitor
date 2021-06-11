@@ -9,6 +9,7 @@ import GlobalStyle from "Theme/global";
 
 import { QueryClient, QueryClientProvider, useQuery } from "react-query";
 import { ReactQueryDevtools } from "react-query/devtools";
+import { layoutWidthBreakpoint } from "Theme/constants";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -27,6 +28,11 @@ export const App: React.FC<AppProps> = () => {
       setSize([window.innerWidth, window.innerHeight]);
     };
     // count widths here and set to REDUX
+    if (window.innerWidth < layoutWidthBreakpoint) {
+      const onePercent = layoutWidthBreakpoint / 100;
+    } else {
+      const onePercent = window.innerWidth / 100;
+    }
     window.addEventListener("resize", handleResize);
     handleResize();
     return () => window.removeEventListener("resize", handleResize);
