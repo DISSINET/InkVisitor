@@ -20,28 +20,75 @@ import {
 import { Db } from "@service/RethinkDB";
 import Territory from "@models/territory";
 
-function populateTree(
-  root: ITerritory,
-  parentMap: Record<string, ITerritory[]>,
-  statementsMap: Record<string, number>,
-  lvl: number,
-  parents: string[]
-): IResponseTree {
-  const childs = parentMap[root.id]
-    ? parentMap[root.id].map((ter) =>
-        populateTree(ter, parentMap, statementsMap, lvl + 1, [
-          ...parents,
-          root.id,
-        ])
-      )
-    : [];
-  return {
-    territory: root,
-    statementsCount: statementsMap[root.id] ? statementsMap[root.id] : 0,
-    lvl,
-    children: childs,
-    path: parents,
-  };
+class TreeCreator {
+  parentMap: Record<string, ITerritory[]>; // map of rootId -> childs
+  statementsMap: Record<string, number>; // map of territoryId -> number of statements
+
+  constructor(
+    territories: ITerritory[],
+    statementsMap: Record<string, number>
+  ) {
+    this.parentMap = {};
+    this.createParentMap(territories);
+
+    // only one root possible
+    if (this.parentMap[""]?.length != 1) {
+      throw new TerritoriesBrokenError("Territories tree is broken");
+    }
+
+    this.statementsMap = statementsMap;
+  }
+
+  getRootTerritory(): ITerritory {
+    return this.parentMap[""][0];
+  }
+
+  createParentMap(territories: ITerritory[]) {
+    for (const territory of territories) {
+      if (typeof territory.data.parent === "undefined") {
+        continue;
+      }
+
+      const parentId: string = territory.data.parent
+        ? territory.data.parent.id
+        : "";
+      if (!this.parentMap[parentId]) {
+        this.parentMap[parentId] = [];
+      }
+      this.parentMap[parentId].push(territory);
+    }
+  }
+
+  populateTree(
+    subtreeRoot: ITerritory,
+    lvl: number,
+    parents: string[]
+  ): IResponseTree {
+    const subtreeRootId = subtreeRoot.id;
+    let childs: IResponseTree[] = [];
+    let noOfStatements = 0;
+
+    if (this.parentMap[subtreeRootId]) {
+      childs = this.parentMap[subtreeRootId].map((ter) =>
+        this.populateTree(ter, lvl + 1, [...parents, subtreeRootId])
+      );
+    }
+
+    if (this.statementsMap[subtreeRootId]) {
+      noOfStatements = this.statementsMap[subtreeRootId];
+    }
+
+    const childsAreEmpty = !childs.find((ch) => !ch.empty);
+
+    return {
+      territory: subtreeRoot,
+      statementsCount: noOfStatements,
+      lvl,
+      children: childs,
+      path: parents,
+      empty: childsAreEmpty && !noOfStatements,
+    };
+  }
 }
 
 function insertTerritoryToChilds(
@@ -73,28 +120,6 @@ async function countStatements(db: Db): Promise<Record<string, number>> {
   return statementsCountMap;
 }
 
-async function createParentMap(
-  territories: ITerritory[]
-): Promise<Record<string, ITerritory[]>> {
-  const parentMap: Record<string, ITerritory[]> = {};
-
-  for (const territory of territories) {
-    if (typeof territory.data.parent === "undefined") {
-      continue;
-    }
-
-    const parentId: string = territory.data.parent
-      ? territory.data.parent.id
-      : "";
-    if (!parentMap[parentId]) {
-      parentMap[parentId] = [];
-    }
-    parentMap[parentId].push(territory);
-  }
-
-  return parentMap;
-}
-
 export default Router()
   .get(
     "/get",
@@ -106,16 +131,9 @@ export default Router()
       ).sort(sortTerritories);
 
       const statementsCountMap = await countStatements(request.db);
-      const parentMap = await createParentMap(territories);
+      const helper = new TreeCreator(territories, statementsCountMap);
 
-      let root: ITerritory;
-      if (parentMap[""]?.length != 1) {
-        throw new TerritoriesBrokenError("Territories tree is broken");
-      } else {
-        root = parentMap[""][0];
-      }
-
-      return populateTree(root, parentMap, statementsCountMap, 0, []);
+      return helper.populateTree(helper.getRootTerritory(), 0, []);
     })
   )
   .post(
