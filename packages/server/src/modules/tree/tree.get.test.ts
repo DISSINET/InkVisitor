@@ -4,10 +4,12 @@ import {
   createMockStatements,
   clean,
 } from "@modules/common.test";
+import { createActant } from "@service/shorthands";
 import request from "supertest";
 import { supertestConfig } from "..";
 import { apiPath } from "../../common/constants";
 import app from "../../Server";
+import Territory from "@models/territory";
 import { IResponseTree, IStatement, ITerritory } from "@shared/types";
 import { Db } from "@service/RethinkDB";
 
@@ -31,6 +33,33 @@ const findSubtreeInTree = (
 
 const testCorrectRootTerritory = (mockTerritories: ITerritory[], res: any) => {
   expect(res.body.territory).to.be.deep.eq(mockTerritories[0]);
+  expect(res.body.empty).to.be.eq(false);
+};
+
+const testNotEmptyFlagForPopulatedTerritory = (
+  statementsTerritoryId: string,
+  res: any
+) => {
+  const territoryWithStatements = findSubtreeInTree(
+    res.body,
+    statementsTerritoryId
+  );
+
+  if (territoryWithStatements) {
+    expect(territoryWithStatements.empty).to.be.eq(false);
+  } else {
+    throw new Error("findSubtreeInTree returned null");
+  }
+};
+
+const testEmptyFlagForPopulatedTerritory = (terId: string, res: any) => {
+  const territory = findSubtreeInTree(res.body, terId);
+
+  if (territory) {
+    expect(territory.empty).to.be.eq(true);
+  } else {
+    throw new Error("findSubtreeInTree returned null");
+  }
 };
 
 const testCorrectStatementsCount = (
@@ -82,6 +111,16 @@ describe("Tree get", function () {
     const territories = await createMockTree(db, randSuffix);
     const statements = await createMockStatements(db, territories);
     const statementsTerritoryId = statements[0].data.territory.id;
+    const additionalEmptyTerritory = new Territory({
+      id: `empty-ter--${randSuffix}`,
+      data: {
+        parent: {
+          id: territories[0].id,
+          order: 1,
+        },
+      },
+    });
+    await createActant(db, additionalEmptyTerritory);
 
     await request(app)
       .get(`${apiPath}/tree/get`)
@@ -95,7 +134,24 @@ describe("Tree get", function () {
           statements
         )
       )
-      .expect(testCorrectPaths.bind(undefined, territories));
+      .expect(
+        testNotEmptyFlagForPopulatedTerritory.bind(
+          undefined,
+          statementsTerritoryId
+        )
+      )
+      .expect(
+        testEmptyFlagForPopulatedTerritory.bind(
+          undefined,
+          additionalEmptyTerritory.id
+        )
+      )
+      .expect(
+        testCorrectPaths.bind(undefined, [
+          ...territories,
+          additionalEmptyTerritory,
+        ])
+      );
 
     await clean(db);
     return done();

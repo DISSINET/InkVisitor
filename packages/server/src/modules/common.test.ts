@@ -80,7 +80,7 @@ export async function createMockStatements(
   territories: ITerritory[]
 ): Promise<IStatement[]> {
   const randSuffix = Math.random();
-  const forStatement = getRandomFromArray<ITerritory>(territories).id;
+  const chosenTerritory = getRandomFromArray<ITerritory>(territories).id;
 
   const out: Statement[] = [];
 
@@ -91,7 +91,7 @@ export async function createMockStatements(
         id: `statement-${i}-${randSuffix}`,
         data: {
           territory: {
-            id: forStatement,
+            id: chosenTerritory,
             order: i + 1,
           },
         },
