@@ -13,7 +13,7 @@ export const StyledSelect = styled(Select)`
   display: inline-flex;
   min-height: ${({ theme }) => theme.space[10]};
   vertical-align: bottom;
-  font-size: ${({ theme }) => theme.fontSize["sm"]};
+  font-size: ${({ theme }) => theme.fontSize["xs"]};
   height: ${({ theme }) => theme.space[10]};
   .react-select__control {
     width: ${({ width }) => (width ? `${width / 10}rem` : "auto")};
@@ -33,7 +33,8 @@ export const StyledSelect = styled(Select)`
     width: ${({ width }) => (width ? `${width / 10}rem` : "auto")};
   }
   .react-select__single-value {
-    top: 40%;
+    font-size: ${({ theme }) => theme.fontSize["sm"]};
+    top: 50%;
     font-weight: normal;
     color: black;
     vertical-align: middle;
