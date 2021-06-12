@@ -7,7 +7,7 @@ import { TerritoryTreeNode } from "./TerritoryTreeNode/TerritoryTreeNode";
 import { IResponseTree } from "@shared/types";
 import { Loader } from "components";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
-import { setSelectedTerritoryPath } from "redux/features/selectedTerritoryPathSlice";
+import { setSelectedTerritoryPath } from "redux/features/territoryTree/selectedTerritoryPathSlice";
 
 export const TerritoryTreeBox: React.FC = () => {
   const { status, data, error, isFetching } = useQuery(

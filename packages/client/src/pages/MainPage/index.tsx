@@ -45,9 +45,9 @@ import {
   thirdPanelWidth,
 } from "Theme/constants";
 import { RiMenuFoldFill, RiMenuUnfoldFill } from "react-icons/ri";
-import { setFirstPanelExpanded } from "redux/features/firstPanelExpandedSlice";
+import { setFirstPanelExpanded } from "redux/features/layout/firstPanelExpandedSlice";
 import { config, useSpring } from "react-spring";
-import { setFourthPanelExpanded } from "redux/features/fourthPanelExpandedSlice";
+import { setFourthPanelExpanded } from "redux/features/layout/fourthPanelExpandedSlice";
 
 interface MainPage {
   size: number[];

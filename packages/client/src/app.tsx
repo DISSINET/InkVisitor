@@ -11,7 +11,7 @@ import { QueryClient, QueryClientProvider, useQuery } from "react-query";
 import { ReactQueryDevtools } from "react-query/devtools";
 import { layoutWidthBreakpoint } from "Theme/constants";
 import { useAppDispatch } from "redux/hooks";
-import { setLayoutWidth } from "redux/features/layoutWidthSlice";
+import { setLayoutWidth } from "redux/features/layout/layoutWidthSlice";
 
 const queryClient = new QueryClient({
   defaultOptions: {

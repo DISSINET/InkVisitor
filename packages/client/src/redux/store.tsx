@@ -2,11 +2,11 @@ import { combineReducers, Store } from "redux";
 import { configureStore } from "@reduxjs/toolkit";
 
 import usernameSlice from "./features/usernameSlice";
-import treeInitializeSlice from "./features/treeInitializeSlice";
-import selectedTerritoryPathSlice from "./features/selectedTerritoryPathSlice";
-import firstPanelExpandedSlice from "./features/firstPanelExpandedSlice";
-import fourthPanelExpandedSlice from "./features/fourthPanelExpandedSlice";
-import layoutWidthSlice from "./features/layoutWidthSlice";
+import treeInitializeSlice from "./features/territoryTree/treeInitializeSlice";
+import selectedTerritoryPathSlice from "./features/territoryTree/selectedTerritoryPathSlice";
+import firstPanelExpandedSlice from "./features/layout/firstPanelExpandedSlice";
+import fourthPanelExpandedSlice from "./features/layout/fourthPanelExpandedSlice";
+import layoutWidthSlice from "./features/layout/layoutWidthSlice";
 
 const store: Store = configureStore({
   reducer: {
