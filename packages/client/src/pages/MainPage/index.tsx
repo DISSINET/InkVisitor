@@ -58,10 +58,10 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
   const dispatch = useAppDispatch();
   const username = useAppSelector((state) => state.username);
   const firstPanelExpanded = useAppSelector(
-    (state) => state.firstPanelExpanded
+    (state) => state.layout.firstPanelExpanded
   );
   const fourthPanelExpanded = useAppSelector(
-    (state) => state.fourthPanelExpanded
+    (state) => state.layout.fourthPanelExpanded
   );
   const queryClient = useQueryClient();
 

@@ -36,7 +36,7 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
   const statementId = hashParams.statement;
 
   const selectedTerritoryPath = useAppSelector(
-    (state) => state.selectedTerritoryPath
+    (state) => state.territoryTree.selectedTerritoryPath
   );
 
   const addStatementAtTheEnd = async () => {

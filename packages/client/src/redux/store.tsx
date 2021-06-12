@@ -1,4 +1,4 @@
-import { Store } from "redux";
+import { combineReducers, Store } from "redux";
 import { configureStore } from "@reduxjs/toolkit";
 
 import usernameSlice from "./features/usernameSlice";
@@ -11,11 +11,15 @@ import layoutWidthSlice from "./features/layoutWidthSlice";
 const store: Store = configureStore({
   reducer: {
     username: usernameSlice,
-    treeInitialized: treeInitializeSlice,
-    selectedTerritoryPath: selectedTerritoryPathSlice,
-    firstPanelExpanded: firstPanelExpandedSlice,
-    fourthPanelExpanded: fourthPanelExpandedSlice,
-    layoutWidth: layoutWidthSlice,
+    territoryTree: combineReducers({
+      selectedTerritoryPath: selectedTerritoryPathSlice,
+      treeInitialized: treeInitializeSlice,
+    }),
+    layout: combineReducers({
+      layoutWidth: layoutWidthSlice,
+      firstPanelExpanded: firstPanelExpandedSlice,
+      fourthPanelExpanded: fourthPanelExpandedSlice,
+    }),
   },
 });
 

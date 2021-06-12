@@ -23,7 +23,7 @@ export const TerritoryTreeBox: React.FC = () => {
   const territoryId = hashParams.territory;
   const dispatch = useAppDispatch();
   const selectedTerritoryPath = useAppSelector(
-    (state) => state.selectedTerritoryPath
+    (state) => state.territoryTree.selectedTerritoryPath
   );
 
   const searchTree = (
