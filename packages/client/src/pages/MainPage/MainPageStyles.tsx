@@ -1,6 +1,10 @@
 import { FaUserAlt } from "react-icons/fa";
 import styled from "styled-components";
-import { layoutWidthBreakpoint, widthElasticBoundaries } from "Theme/constants";
+import {
+  collapsedPanelWidth,
+  layoutWidthBreakpoint,
+  widthElasticBoundaries,
+} from "Theme/constants";
 
 export const StyledPage = styled.div`
   width: 100%;
