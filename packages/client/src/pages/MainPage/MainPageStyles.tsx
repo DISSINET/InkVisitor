@@ -15,8 +15,10 @@ export const StyledUser = styled.div`
   align-items: center;
   margin-right: ${({ theme }) => theme.space[4]};
 `;
+interface StyledPanelWrap {
+  // panelWidths: string[];
+}
 export const StyledPanelWrap = styled.div`
-  /* display: flex; */
   width: 100%;
   overflow: hidden;
   display: grid;

@@ -10,6 +10,8 @@ import GlobalStyle from "Theme/global";
 import { QueryClient, QueryClientProvider, useQuery } from "react-query";
 import { ReactQueryDevtools } from "react-query/devtools";
 import { layoutWidthBreakpoint } from "Theme/constants";
+import { useAppDispatch } from "redux/hooks";
+import { setLayoutWidth } from "redux/features/layoutWidthSlice";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -22,6 +24,7 @@ const queryClient = new QueryClient({
 interface AppProps {}
 export const App: React.FC<AppProps> = () => {
   const [size, setSize] = useState([0, 0]);
+  const dispatch = useAppDispatch();
 
   useLayoutEffect(() => {
     const handleResize = () => {
@@ -29,9 +32,9 @@ export const App: React.FC<AppProps> = () => {
     };
     // count widths here and set to REDUX
     if (window.innerWidth < layoutWidthBreakpoint) {
-      const onePercent = layoutWidthBreakpoint / 100;
+      dispatch(setLayoutWidth(layoutWidthBreakpoint));
     } else {
-      const onePercent = window.innerWidth / 100;
+      dispatch(setLayoutWidth(window.innerWidth));
     }
     window.addEventListener("resize", handleResize);
     handleResize();

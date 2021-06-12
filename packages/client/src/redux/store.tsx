@@ -6,6 +6,7 @@ import treeInitializeSlice from "./features/treeInitializeSlice";
 import selectedTerritoryPathSlice from "./features/selectedTerritoryPathSlice";
 import firstPanelExpandedSlice from "./features/firstPanelExpandedSlice";
 import fourthPanelExpandedSlice from "./features/fourthPanelExpandedSlice";
+import layoutWidthSlice from "./features/layoutWidthSlice";
 
 const store: Store = configureStore({
   reducer: {
@@ -14,6 +15,7 @@ const store: Store = configureStore({
     selectedTerritoryPath: selectedTerritoryPathSlice,
     firstPanelExpanded: firstPanelExpandedSlice,
     fourthPanelExpanded: fourthPanelExpandedSlice,
+    layoutWidth: layoutWidthSlice,
   },
 });
 
