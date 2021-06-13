@@ -1,6 +1,5 @@
+import "ts-jest";
 import { IResponseGeneric, IStatement } from "@shared/types";
-import "mocha";
-import * as chai from "chai";
 import { ITerritory } from "@shared/types/index";
 import { Db } from "@service/RethinkDB";
 import { createActant, deleteActants } from "@service/shorthands";
@@ -9,12 +8,13 @@ import Territory from "@models/territory";
 import { CustomError } from "@shared/types/errors";
 import { errorTypes } from "@shared/types/response-generic";
 
-export const expect = chai.expect;
-export const should = chai.should();
-
 describe("common", function () {
   it("should work", () => undefined);
 });
+
+function getRandomFromArray<T>(input: T[]): T {
+  return input[Math.floor(Math.random() * input.length)];
+}
 
 export const successfulGenericResponse: IResponseGeneric = {
   result: true,
@@ -27,17 +27,15 @@ export function testErroneousResponse(
   const expectedType: IResponseGeneric = {
     result: false,
     error: expectedErrorClass.constructor.name as errorTypes,
-    message: "",
-    // message not important
   };
-  expect(res.status).to.be.eq(expectedErrorClass.statusCode());
-  expect(res.body).keys(expectedType);
-  expect((res.body as any).result).to.be.eq(expectedType.result);
-  expect((res.body as any).error).to.be.eq(expectedType.error);
-}
-
-function getRandomFromArray<T>(input: T[]): T {
-  return input[Math.floor(Math.random() * input.length)];
+  expect(res.status).toEqual(expectedErrorClass.statusCode());
+  expect(res.body).toMatchObject(expectedType);
+  expect((res.body as unknown as IResponseGeneric).result).toEqual(
+    expectedType.result
+  );
+  expect((res.body as unknown as IResponseGeneric).error).toEqual(
+    expectedType.error
+  );
 }
 
 export async function createMockTree(
