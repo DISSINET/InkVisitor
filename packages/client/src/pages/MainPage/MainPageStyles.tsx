@@ -1,6 +1,12 @@
 import { FaUserAlt } from "react-icons/fa";
 import styled from "styled-components";
+import { layoutWidthBreakpoint } from "Theme/constants";
 
+export const StyledPage = styled.div`
+  width: 100%;
+  min-width: ${layoutWidthBreakpoint};
+  height: 100vh;
+`;
 export const StyledUserBox = styled.div`
   display: flex;
 `;
@@ -9,11 +15,11 @@ export const StyledUser = styled.div`
   align-items: center;
   margin-right: ${({ theme }) => theme.space[4]};
 `;
-export const StyledBoxWrap = styled.div`
-  display: flex;
-  width: 192rem;
-  min-width: 100%;
+interface StyledPanelWrap {}
+export const StyledPanelWrap = styled.div`
+  width: 100%;
   overflow: hidden;
+  display: flex;
 `;
 export const StyledFaUserAlt = styled(FaUserAlt)`
   margin-left: ${({ theme }) => theme.space[2]};

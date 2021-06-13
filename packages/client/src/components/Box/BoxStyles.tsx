@@ -4,16 +4,16 @@ import { space2 } from "Theme/constants";
 
 interface StyledBox {
   color: string;
-  width: number;
-  height: number;
+  height?: number;
 }
 export const StyledBox = styled(animated.div)<StyledBox>`
   position: relative;
   display: flex;
+  width: 100%;
   flex-direction: column;
-  width: ${({ width }) => `${width / 10}rem`};
   height: ${({ height }) => (height ? `${height / 10}rem` : "100%")};
 `;
+
 interface StyledHead {
   color: string;
 }

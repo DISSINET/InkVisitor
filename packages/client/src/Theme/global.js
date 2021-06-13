@@ -10,7 +10,6 @@ const GlobalStyle = createGlobalStyle`
     font-size: 62.5%;
   }
   body {
-    position: absolute;
     font-family: "Roboto", sans-serif;
     letter-spacing: .2px;
     line-height: 1.5;

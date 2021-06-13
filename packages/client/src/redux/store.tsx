@@ -1,19 +1,27 @@
-import { Store } from "redux";
+import { combineReducers, Store } from "redux";
 import { configureStore } from "@reduxjs/toolkit";
 
 import usernameSlice from "./features/usernameSlice";
-import treeInitializeSlice from "./features/treeInitializeSlice";
-import selectedTerritoryPathSlice from "./features/selectedTerritoryPathSlice";
-import firstPanelExpandedSlice from "./features/firstPanelExpandedSlice";
-import fourthPanelExpandedSlice from "./features/fourthPanelExpandedSlice";
+import treeInitializeSlice from "./features/territoryTree/treeInitializeSlice";
+import selectedTerritoryPathSlice from "./features/territoryTree/selectedTerritoryPathSlice";
+import firstPanelExpandedSlice from "./features/layout/firstPanelExpandedSlice";
+import fourthPanelExpandedSlice from "./features/layout/fourthPanelExpandedSlice";
+import layoutWidthSlice from "./features/layout/layoutWidthSlice";
+import panelWidthsSlice from "./features/layout/panelWidthsSlice";
 
 const store: Store = configureStore({
   reducer: {
     username: usernameSlice,
-    treeInitialized: treeInitializeSlice,
-    selectedTerritoryPath: selectedTerritoryPathSlice,
-    firstPanelExpanded: firstPanelExpandedSlice,
-    fourthPanelExpanded: fourthPanelExpandedSlice,
+    territoryTree: combineReducers({
+      selectedTerritoryPath: selectedTerritoryPathSlice,
+      treeInitialized: treeInitializeSlice,
+    }),
+    layout: combineReducers({
+      layoutWidth: layoutWidthSlice,
+      panelWidths: panelWidthsSlice,
+      firstPanelExpanded: firstPanelExpandedSlice,
+      fourthPanelExpanded: fourthPanelExpandedSlice,
+    }),
   },
 });
 
