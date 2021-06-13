@@ -100,11 +100,11 @@ export const StatementListBox: React.FC = () => {
         "statement-list",
         territoryId,
       ]);
-
       hashParams["statement"] = newStatement.id;
       history.push({
         hash: queryString.stringify(hashParams),
       });
+      queryClient.invalidateQueries("tree");
     } else {
       toast.error(`Error: Statement not created!`);
     }
