@@ -21,8 +21,6 @@ import {
 interface BoxProps {
   label?: string;
   color?: typeof Colors[number];
-  width?: number;
-  animatedWidth?: any;
   height?: number;
   noPadding?: boolean;
   isExpanded?: boolean;
@@ -33,9 +31,7 @@ interface BoxProps {
 export const Box: React.FC<BoxProps> = ({
   label = "",
   color = "primary",
-  width = 100,
-  animatedWidth,
-  height = 200,
+  height,
   noPadding = false,
   isExpanded = true,
   button,
@@ -56,12 +52,7 @@ export const Box: React.FC<BoxProps> = ({
   });
 
   return (
-    <StyledBox
-      color={color}
-      width={width}
-      style={{ width: animatedWidth }}
-      height={height}
-    >
+    <StyledBox color={color} height={height}>
       <StyledHead color={color}>
         <animated.div style={animatedExpand}>{label}</animated.div>
         {button && button}

@@ -56,7 +56,7 @@ export const Layout1 = () => {
         button={<Button label="x" color="danger" />}
       />
       <Input value="default input" onChangeFn={() => {}} />
-      <Box label="default box" width={500} height={700}>
+      <Box label="default box" height={700}>
         <div>
           <Toggle
             optionList={[

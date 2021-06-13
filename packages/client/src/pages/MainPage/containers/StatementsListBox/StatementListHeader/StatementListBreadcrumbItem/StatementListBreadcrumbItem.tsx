@@ -7,7 +7,7 @@ import { Button, Loader } from "components";
 import api from "api";
 import { StyledItemBox } from "./StatementListBreadcrumbItemStyles";
 import { useAppDispatch } from "redux/hooks";
-import { setTreeInitialized } from "redux/features/treeInitializeSlice";
+import { setTreeInitialized } from "redux/features/territoryTree/treeInitializeSlice";
 import { rootTerritoryId } from "Theme/constants";
 
 interface StatementListBreadcrumbItem {

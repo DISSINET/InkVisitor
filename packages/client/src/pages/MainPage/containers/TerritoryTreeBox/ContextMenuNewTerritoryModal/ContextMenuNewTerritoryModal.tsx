@@ -17,7 +17,7 @@ import { CTerritoryActant } from "constructors";
 import useKeypress from "hooks/useKeyPress";
 import { useHistory, useLocation } from "react-router-dom";
 import api from "api";
-import { setTreeInitialized } from "redux/features/treeInitializeSlice";
+import { setTreeInitialized } from "redux/features/territoryTree/treeInitializeSlice";
 import { useAppDispatch } from "redux/hooks";
 
 interface ContextMenuNewTerritoryModal {

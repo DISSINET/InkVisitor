@@ -20,7 +20,7 @@ import {
 import { ContextMenu } from "../ContextMenu/ContextMenu";
 import { ActantTag } from "../..";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
-import { setTreeInitialized } from "redux/features/treeInitializeSlice";
+import { setTreeInitialized } from "redux/features/territoryTree/treeInitializeSlice";
 import theme from "Theme/theme";
 import { rootTerritoryId } from "Theme/constants";
 import { animated, config, useSpring } from "react-spring";
