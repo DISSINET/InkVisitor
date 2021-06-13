@@ -60,6 +60,7 @@ export const StatementListBox: React.FC = () => {
     const res = await api.actantsDelete(sId);
     toast.info(`Statement removed!`);
     queryClient.invalidateQueries(["territory", "statement-list", territoryId]);
+    queryClient.invalidateQueries("tree");
   };
 
   const duplicateStatement = async (statementToDuplicate: IStatement) => {
