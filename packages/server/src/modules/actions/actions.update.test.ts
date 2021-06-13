@@ -71,7 +71,7 @@ describe("Actions update", function () {
         .expect({ success: true })
         .expect(200, async () => {
           const changedEntry = await findActionById(db, testId);
-          changedEntry.note.should.eq(changeNoteInto);
+          expect(changedEntry.note).toEqual(changeNoteInto);
           done();
         });
     });

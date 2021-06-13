@@ -1,4 +1,4 @@
-import { expect, createMockTree, clean } from "@modules/common.test";
+import { createMockTree, clean } from "@modules/common.test";
 import request from "supertest";
 import { supertestConfig } from "..";
 import { apiPath } from "../../common/constants";
@@ -17,14 +17,14 @@ describe("Tree moveTerritory", function () {
 
       let lvl11 = await findActantById<ITerritory>(db, `lvl1-1-${randSuffix}`);
       let lvl12 = await findActantById<ITerritory>(db, `lvl1-2-${randSuffix}`);
-      expect(lvl11.data.parent ? lvl11.data.parent.id : "").to.be.eq(
+      expect(lvl11.data.parent ? lvl11.data.parent.id : "").toEqual(
         `root-${randSuffix}`
       );
-      expect(lvl11.data.parent ? lvl11.data.parent.order : 0).to.be.eq(1);
-      expect(lvl12.data.parent ? lvl12.data.parent.id : "").to.be.eq(
+      expect(lvl11.data.parent ? lvl11.data.parent.order : 0).toEqual(1);
+      expect(lvl12.data.parent ? lvl12.data.parent.id : "").toEqual(
         `root-${randSuffix}`
       );
-      expect(lvl12.data.parent ? lvl12.data.parent.order : 0).to.be.eq(2);
+      expect(lvl12.data.parent ? lvl12.data.parent.order : 0).toEqual(2);
 
       await request(app)
         .post(`${apiPath}/tree/moveTerritory`)
@@ -39,14 +39,14 @@ describe("Tree moveTerritory", function () {
 
       lvl11 = await findActantById<ITerritory>(db, `lvl1-1-${randSuffix}`);
       lvl12 = await findActantById<ITerritory>(db, `lvl1-2-${randSuffix}`);
-      expect(lvl11.data.parent ? lvl11.data.parent.id : "").to.be.eq(
+      expect(lvl11.data.parent ? lvl11.data.parent.id : "").toEqual(
         `root-${randSuffix}`
       );
-      expect(lvl11.data.parent ? lvl11.data.parent.order : 0).to.be.eq(2);
-      expect(lvl12.data.parent ? lvl12.data.parent.id : "").to.be.eq(
+      expect(lvl11.data.parent ? lvl11.data.parent.order : 0).toEqual(2);
+      expect(lvl12.data.parent ? lvl12.data.parent.id : "").toEqual(
         `root-${randSuffix}`
       );
-      expect(lvl12.data.parent ? lvl12.data.parent.order : 0).to.be.eq(1.5);
+      expect(lvl12.data.parent ? lvl12.data.parent.order : 0).toEqual(1.5);
 
       await clean(db);
       return done();

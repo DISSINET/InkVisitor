@@ -1,4 +1,4 @@
-import { should, clean, testErroneousResponse } from "@modules/common.test";
+import { clean, testErroneousResponse } from "@modules/common.test";
 import {
   ActantDoesNotExits,
   BadParams,
@@ -50,7 +50,7 @@ describe("Actants delete", function () {
         .expect(200)
         .expect(async () => {
           const deletedActant = await findActantById<IActant>(db, territory.id);
-          should.not.exist(deletedActant);
+          expect(deletedActant).toBeNull();
         });
 
       await clean(db);
