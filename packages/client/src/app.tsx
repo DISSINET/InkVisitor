@@ -9,9 +9,10 @@ import GlobalStyle from "Theme/global";
 
 import { QueryClient, QueryClientProvider, useQuery } from "react-query";
 import { ReactQueryDevtools } from "react-query/devtools";
-import { layoutWidthBreakpoint } from "Theme/constants";
+import { layoutWidthBreakpoint, widthElasticBoundaries } from "Theme/constants";
 import { useAppDispatch } from "redux/hooks";
 import { setLayoutWidth } from "redux/features/layout/layoutWidthSlice";
+import { setPanelWidths } from "redux/features/layout/panelWidthsSlice";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -31,11 +32,20 @@ export const App: React.FC<AppProps> = () => {
       setSize([window.innerWidth, window.innerHeight]);
     };
     // count widths here and set to REDUX
-    if (window.innerWidth < layoutWidthBreakpoint) {
-      dispatch(setLayoutWidth(layoutWidthBreakpoint));
-    } else {
-      dispatch(setLayoutWidth(window.innerWidth));
-    }
+    const layoutWidth =
+      window.innerWidth < layoutWidthBreakpoint
+        ? layoutWidthBreakpoint
+        : window.innerWidth;
+    dispatch(setLayoutWidth(layoutWidth));
+    const onePercent = layoutWidth / 100;
+    const panels = [
+      Math.floor(onePercent * widthElasticBoundaries[0] * 10) / 10,
+      Math.floor(onePercent * widthElasticBoundaries[1] * 10) / 10,
+      Math.floor(onePercent * widthElasticBoundaries[2] * 10) / 10,
+      Math.floor(onePercent * widthElasticBoundaries[3] * 10) / 10,
+    ];
+    dispatch(setPanelWidths(panels));
+
     window.addEventListener("resize", handleResize);
     handleResize();
     return () => window.removeEventListener("resize", handleResize);

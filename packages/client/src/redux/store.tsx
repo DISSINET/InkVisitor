@@ -7,6 +7,7 @@ import selectedTerritoryPathSlice from "./features/territoryTree/selectedTerrito
 import firstPanelExpandedSlice from "./features/layout/firstPanelExpandedSlice";
 import fourthPanelExpandedSlice from "./features/layout/fourthPanelExpandedSlice";
 import layoutWidthSlice from "./features/layout/layoutWidthSlice";
+import panelWidthsSlice from "./features/layout/panelWidthsSlice";
 
 const store: Store = configureStore({
   reducer: {
@@ -17,6 +18,7 @@ const store: Store = configureStore({
     }),
     layout: combineReducers({
       layoutWidth: layoutWidthSlice,
+      panelWidths: panelWidthsSlice,
       firstPanelExpanded: firstPanelExpandedSlice,
       fourthPanelExpanded: fourthPanelExpandedSlice,
     }),

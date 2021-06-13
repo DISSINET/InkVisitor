@@ -25,9 +25,9 @@ interface StyledPanelWrap {
 export const StyledPanelWrap = styled.div`
   width: 100%;
   overflow: hidden;
-  display: grid;
-  grid-template-columns: ${widthElasticBoundaries[0]}% ${widthElasticBoundaries[1]}% ${widthElasticBoundaries[2]}% ${widthElasticBoundaries[3]}%;
-  grid-template-rows: 100%;
+  display: flex;
+  /* grid-template-columns: ${widthElasticBoundaries[0]}% ${widthElasticBoundaries[1]}% ${widthElasticBoundaries[2]}% ${widthElasticBoundaries[3]}%;
+  grid-template-rows: 100%; */
 `;
 export const StyledFaUserAlt = styled(FaUserAlt)`
   margin-left: ${({ theme }) => theme.space[2]};
