@@ -51,13 +51,15 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
   const isLoggedIn = api.isLoggedIn();
   const dispatch = useAppDispatch();
   const username = useAppSelector((state) => state.username);
-  const firstPanelExpanded = useAppSelector(
+  const firstPanelExpanded: boolean = useAppSelector(
     (state) => state.layout.firstPanelExpanded
   );
-  const fourthPanelExpanded = useAppSelector(
+  const fourthPanelExpanded: boolean = useAppSelector(
     (state) => state.layout.fourthPanelExpanded
   );
-  const panelWidths = useAppSelector((state) => state.layout.panelWidths);
+  const panelWidths: number[] = useAppSelector(
+    (state) => state.layout.panelWidths
+  );
   const queryClient = useQueryClient();
 
   const history = useHistory();
