@@ -50,8 +50,8 @@ describe("Actants detail", function () {
         .set("authorization", "Bearer " + supertestConfig.token)
         .expect(200)
         .expect((res) => {
-          res.body.should.not.empty;
-          res.body.should.be.a("object");
+          expect(res.body).toBeTruthy();
+          expect(typeof res.body).toBe("object");
           expect(res.body.id).toEqual(statementRandomId);
         });
 
