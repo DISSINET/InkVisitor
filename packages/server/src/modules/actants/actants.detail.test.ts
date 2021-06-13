@@ -1,4 +1,4 @@
-import { clean, expect, testErroneousResponse } from "@modules/common.test";
+import { clean, testErroneousResponse } from "@modules/common.test";
 import { ActantDoesNotExits, BadParams } from "@shared/types/errors";
 import request from "supertest";
 import { supertestConfig } from "..";
@@ -52,7 +52,7 @@ describe("Actants detail", function () {
         .expect((res) => {
           res.body.should.not.empty;
           res.body.should.be.a("object");
-          expect(res.body.id).eq(statementRandomId);
+          expect(res.body.id).toEqual(statementRandomId);
         });
 
       await clean(db);

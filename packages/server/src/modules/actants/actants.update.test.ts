@@ -52,7 +52,7 @@ describe("Actants update", function () {
         .expect(successfulGenericResponse)
         .expect(async () => {
           const changedEntry = await findActantById<IActant>(db, testId);
-          changedEntry.label.should.eq(changeLabelTo);
+          expect(changedEntry.label).toEqual(changeLabelTo);
         });
 
       await clean(db);
