@@ -61,6 +61,7 @@ export const TerritoryTreeBox: React.FC = () => {
           lvl={data.lvl}
           statementsCount={data.statementsCount}
           initExpandedNodes={selectedTerritoryPath}
+          empty={data.empty}
         />
       )}
       <Loader show={isFetching} />
