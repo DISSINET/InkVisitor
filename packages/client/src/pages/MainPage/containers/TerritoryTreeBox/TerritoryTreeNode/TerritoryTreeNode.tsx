@@ -34,6 +34,7 @@ interface TerritoryTreeNode {
   propId?: string;
   index?: number;
   moveFn?: (dragIndex: number, hoverIndex: number) => void;
+  empty?: boolean;
 }
 export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
   territory,
@@ -44,6 +45,7 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
   propId,
   index,
   moveFn,
+  empty,
 }) => {
   const dispatch = useAppDispatch();
   const treeInitialized = useAppSelector((state) => state.treeInitialized);
@@ -109,7 +111,7 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
   };
 
   const getArrowIcon = (id: string) => {
-    if (statementsCount > 0) {
+    if (!empty) {
       // filled
       return (
         <>
@@ -245,6 +247,7 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
               initExpandedNodes={initExpandedNodes}
               propId={child.id}
               index={key}
+              empty={child.empty}
               // moveFn={moveChildFn}
             />
           ))}

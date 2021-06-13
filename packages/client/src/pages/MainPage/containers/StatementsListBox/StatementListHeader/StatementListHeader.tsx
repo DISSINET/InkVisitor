@@ -51,6 +51,7 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
       hash: queryString.stringify(hashParams),
     });
     queryClient.invalidateQueries(["territory", "statement-list", territoryId]);
+    queryClient.invalidateQueries("tree");
   };
 
   return (
