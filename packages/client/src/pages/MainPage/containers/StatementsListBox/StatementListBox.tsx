@@ -60,6 +60,7 @@ export const StatementListBox: React.FC = () => {
     const res = await api.actantsDelete(sId);
     toast.info(`Statement removed!`);
     queryClient.invalidateQueries(["territory", "statement-list", territoryId]);
+    queryClient.invalidateQueries("tree");
   };
 
   const duplicateStatement = async (statementToDuplicate: IStatement) => {
@@ -100,11 +101,11 @@ export const StatementListBox: React.FC = () => {
         "statement-list",
         territoryId,
       ]);
-
       hashParams["statement"] = newStatement.id;
       history.push({
         hash: queryString.stringify(hashParams),
       });
+      queryClient.invalidateQueries("tree");
     } else {
       toast.error(`Error: Statement not created!`);
     }
