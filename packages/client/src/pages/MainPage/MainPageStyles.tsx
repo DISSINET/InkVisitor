@@ -1,10 +1,6 @@
 import { FaUserAlt } from "react-icons/fa";
 import styled from "styled-components";
-import {
-  collapsedPanelWidth,
-  layoutWidthBreakpoint,
-  widthElasticBoundaries,
-} from "Theme/constants";
+import { layoutWidthBreakpoint } from "Theme/constants";
 
 export const StyledPage = styled.div`
   width: 100%;
@@ -19,15 +15,11 @@ export const StyledUser = styled.div`
   align-items: center;
   margin-right: ${({ theme }) => theme.space[4]};
 `;
-interface StyledPanelWrap {
-  // panelWidths: string[];
-}
+interface StyledPanelWrap {}
 export const StyledPanelWrap = styled.div`
   width: 100%;
   overflow: hidden;
   display: flex;
-  /* grid-template-columns: ${widthElasticBoundaries[0]}% ${widthElasticBoundaries[1]}% ${widthElasticBoundaries[2]}% ${widthElasticBoundaries[3]}%;
-  grid-template-rows: 100%; */
 `;
 export const StyledFaUserAlt = styled(FaUserAlt)`
   margin-left: ${({ theme }) => theme.space[2]};

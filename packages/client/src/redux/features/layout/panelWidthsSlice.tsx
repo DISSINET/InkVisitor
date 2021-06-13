@@ -1,6 +1,7 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { panelWidths } from "Theme/constants";
 
-const initialState: number[] = [];
+const initialState: number[] = panelWidths;
 
 const panelWidthsSlice = createSlice({
   name: "panelWidths",

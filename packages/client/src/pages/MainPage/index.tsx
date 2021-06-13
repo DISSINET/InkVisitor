@@ -36,17 +36,11 @@ import {
 } from "./MainPageStyles";
 import {
   collapsedPanelWidth,
-  firstPanelWidth,
-  fourthPanelWidth,
   heightFooter,
   heightHeader,
-  secondPanelWidth,
-  springConfig,
-  thirdPanelWidth,
 } from "Theme/constants";
 import { RiMenuFoldFill, RiMenuUnfoldFill } from "react-icons/ri";
 import { setFirstPanelExpanded } from "redux/features/layout/firstPanelExpandedSlice";
-import { config, useSpring } from "react-spring";
 import { setFourthPanelExpanded } from "redux/features/layout/fourthPanelExpandedSlice";
 
 interface MainPage {
@@ -63,6 +57,7 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
   const fourthPanelExpanded = useAppSelector(
     (state) => state.layout.fourthPanelExpanded
   );
+  const panelWidths = useAppSelector((state) => state.layout.panelWidths);
   const queryClient = useQueryClient();
 
   const history = useHistory();
@@ -140,7 +135,7 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
           <StyledPanelWrap>
             {/* FIRST PANEL */}
             <Panel
-              width={firstPanelExpanded ? firstPanelWidth : collapsedPanelWidth}
+              width={firstPanelExpanded ? panelWidths[0] : collapsedPanelWidth}
             >
               <Box
                 height={heightContent}
@@ -155,8 +150,8 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
             <Panel
               width={
                 firstPanelExpanded
-                  ? secondPanelWidth
-                  : secondPanelWidth + firstPanelWidth - collapsedPanelWidth
+                  ? panelWidths[1]
+                  : panelWidths[1] + panelWidths[0] - collapsedPanelWidth
               }
             >
               <Box height={400} label="Statements">
@@ -170,8 +165,8 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
             <Panel
               width={
                 fourthPanelExpanded
-                  ? thirdPanelWidth
-                  : thirdPanelWidth + fourthPanelWidth - collapsedPanelWidth
+                  ? panelWidths[2]
+                  : panelWidths[2] + panelWidths[3] - collapsedPanelWidth
               }
             >
               <Box height={heightContent} label="Editor">
@@ -180,9 +175,7 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
             </Panel>
             {/* FOURTH PANEL */}
             <Panel
-              width={
-                fourthPanelExpanded ? fourthPanelWidth : collapsedPanelWidth
-              }
+              width={fourthPanelExpanded ? panelWidths[3] : collapsedPanelWidth}
             >
               <Box
                 height={400}

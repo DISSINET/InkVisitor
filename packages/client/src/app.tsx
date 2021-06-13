@@ -1,4 +1,4 @@
-import React, { useState, useLayoutEffect } from "react";
+import React, { useState, useLayoutEffect, useEffect } from "react";
 import { Switch, Route, BrowserRouter } from "react-router-dom";
 import { ThemeProvider } from "styled-components";
 import { Helmet } from "react-helmet";
@@ -9,7 +9,7 @@ import GlobalStyle from "Theme/global";
 
 import { QueryClient, QueryClientProvider, useQuery } from "react-query";
 import { ReactQueryDevtools } from "react-query/devtools";
-import { layoutWidthBreakpoint, widthElasticBoundaries } from "Theme/constants";
+import { layoutWidthBreakpoint, percentPanelWidths } from "Theme/constants";
 import { useAppDispatch } from "redux/hooks";
 import { setLayoutWidth } from "redux/features/layout/layoutWidthSlice";
 import { setPanelWidths } from "redux/features/layout/panelWidthsSlice";
@@ -27,7 +27,7 @@ export const App: React.FC<AppProps> = () => {
   const [size, setSize] = useState([0, 0]);
   const dispatch = useAppDispatch();
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     const handleResize = () => {
       setSize([window.innerWidth, window.innerHeight]);
     };
@@ -39,10 +39,10 @@ export const App: React.FC<AppProps> = () => {
     dispatch(setLayoutWidth(layoutWidth));
     const onePercent = layoutWidth / 100;
     const panels = [
-      Math.floor(onePercent * widthElasticBoundaries[0] * 10) / 10,
-      Math.floor(onePercent * widthElasticBoundaries[1] * 10) / 10,
-      Math.floor(onePercent * widthElasticBoundaries[2] * 10) / 10,
-      Math.floor(onePercent * widthElasticBoundaries[3] * 10) / 10,
+      Math.floor(onePercent * percentPanelWidths[0] * 10) / 10,
+      Math.floor(onePercent * percentPanelWidths[1] * 10) / 10,
+      Math.floor(onePercent * percentPanelWidths[2] * 10) / 10,
+      Math.floor(onePercent * percentPanelWidths[3] * 10) / 10,
     ];
     dispatch(setPanelWidths(panels));
 
