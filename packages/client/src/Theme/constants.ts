@@ -6,7 +6,7 @@ export const rootTerritoryId = "T0";
 export const heightHeader = 70;
 export const heightFooter = 30;
 
-export const layoutWidthBreakpoint = 1920;
+export const layoutWidthBreakpoint = 1000;
 export const collapsedPanelWidth = 32;
 // INIT PANEL WIDTHS
 export const panelWidths = [200, 570, 800, 350];

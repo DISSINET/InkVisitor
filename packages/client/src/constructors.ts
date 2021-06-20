@@ -4,9 +4,16 @@ import {
   IActant,
   ITerritory,
   IStatement,
+  IBookmarkFolder,
 } from "@shared/types";
 import { CategoryActantType, ActantType } from "@shared/enums";
 import { v4 as uuidv4 } from "uuid";
+
+export const CBookmarkFolder = (bookmarkName: string): IBookmarkFolder => ({
+  id: uuidv4(),
+  name: bookmarkName,
+  actantIds: [],
+});
 
 export const CProp = (): IProp => ({
   id: uuidv4(),
