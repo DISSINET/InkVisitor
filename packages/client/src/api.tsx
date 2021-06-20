@@ -189,12 +189,12 @@ class Api {
   }
 
   async usersUpdate(
-    userId: string,
+    userId: string | false,
     changes: object
   ): Promise<AxiosResponse<IResponseGeneric>> {
     try {
       const response = await this.connection.put(
-        `/users/update/${userId}`,
+        !!userId ? `/users/update/${userId}` : "/users/update/",
         changes
       );
       return response;
@@ -230,11 +230,11 @@ class Api {
    * Administration container
    */
   async bookmarksGet(
-    userId: string
+    userId: string | false
   ): Promise<AxiosResponse<IResponseBookmarks>> {
     try {
       const response = await this.connection.get(
-        `/users/bookmarksGet/${userId}`
+        !!userId ? `/users/bookmarksGet/${userId}` : "/users/bookmarksGet/"
       );
       return response;
     } catch (err) {
