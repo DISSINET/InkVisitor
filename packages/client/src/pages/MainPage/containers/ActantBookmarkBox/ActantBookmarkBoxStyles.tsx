@@ -20,7 +20,6 @@ export const StyledFolderWrapper = styled.div`
   width: 100%;
 `;
 export const StyledFolderHeader = styled.div`
-  cursor: pointer;
   width: 100%;
   height: ${({ theme }) => theme.space[14]};
   display: inline-block;
@@ -36,9 +35,26 @@ export const StyledFolderHeaderText = styled.span`
   white-space: nowrap;
   text-overflow: ellipsis;
 `;
+export const StyledFolderWrapperOpenArea = styled.span`
+  cursor: pointer;
+  display: inline-block;
+`;
 export const StyledFolderHeaderButtons = styled.div`
   display: inline-block;
   float: right;
   align-items: start;
 `;
-export const StyledFolderContent = styled.div``;
+export const StyledFolderContent = styled.div`
+  padding: ${({ theme }) => theme.space[3]};
+`;
+
+export const StyledFolderContentTags = styled.div`
+  display: block;
+  padding-bottom: ${({ theme }) => theme.space[6]};
+`;
+export const StyledFolderContentTag = styled.div`
+  padding-right: ${({ theme }) => theme.space[2]};
+  padding-bottom: ${({ theme }) => theme.space[1]};
+  display: inline-block;
+`;
+export const StyledFolderSuggester = styled.div``;
