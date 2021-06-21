@@ -4,6 +4,8 @@ import api from "api";
 const queryString = require("query-string");
 import { useLocation, useHistory } from "react-router";
 
+import { ActantTag, ActantSuggester } from "..";
+
 import { CBookmarkFolder } from "constructors";
 
 import {
@@ -42,6 +44,10 @@ import {
   StyledFolderList,
   StyledFolderHeaderText,
   StyledFolderHeaderButtons,
+  StyledFolderWrapperOpenArea,
+  StyledFolderContentTag,
+  StyledFolderContentTags,
+  StyledFolderSuggester,
 } from "./ActantBookmarkBoxStyles";
 
 import {
@@ -60,6 +66,8 @@ import {
   IResponseBookmarkFolder,
   IResponseActant,
 } from "@shared/types";
+
+const bookmarkEntities = ["P", "G", "O", "C", "L", "V", "E", "S", "T", "R"];
 
 export const ActantBookmarkBox: React.FC = () => {
   const queryClient = useQueryClient();
@@ -82,7 +90,8 @@ export const ActantBookmarkBox: React.FC = () => {
     ["bookmarks"],
     async () => {
       const res = await api.bookmarksGet(false);
-      return res.data.bookmarks.sort((a, b) => (a > b ? 1 : -1));
+      res.data.bookmarks.sort((a, b) => (a > b ? 1 : -1));
+      return res.data.bookmarks;
     },
     { enabled: api.isLoggedIn() }
   );
@@ -121,7 +130,7 @@ export const ActantBookmarkBox: React.FC = () => {
     setCreatingBookmark(false);
   };
 
-  const acceptBookmark = async () => {
+  const createFolder = async () => {
     if (bookmarkFolders) {
       const newBookmarkFolder: IBookmarkFolder =
         CBookmarkFolder(editingBookmarkName);
@@ -133,6 +142,7 @@ export const ActantBookmarkBox: React.FC = () => {
         if (res.status === 200) {
           setEditingBookmarkName("");
           setCreatingBookmark(false);
+          queryClient.invalidateQueries(["bookmarks"]);
         }
       }
     }
@@ -150,6 +160,21 @@ export const ActantBookmarkBox: React.FC = () => {
     }
   };
 
+  const addBookmark = async (folderId: string, bookmarkId: string) => {
+    const newBookmarks: IBookmarkFolder[] | false = getBookmarksCopy();
+    if (newBookmarks) {
+      const folder = newBookmarks.find((b) => b.id === folderId);
+
+      if (folder) {
+        folder.actantIds.push(bookmarkId);
+        const res = await api.usersUpdate(false, { bookmarks: newBookmarks });
+        if (res.status === 200) {
+          queryClient.invalidateQueries(["bookmarks"]);
+        }
+      }
+    }
+  };
+
   return (
     <StyledContent>
       <StyledHeader>
@@ -157,42 +182,43 @@ export const ActantBookmarkBox: React.FC = () => {
           key="add"
           icon={<FaPlus size={14} />}
           color="primary"
-          label="create new bookmark folder"
+          label="bookmark folder"
           onClick={() => clickNewBookmarFolderkHandle()}
         />
       </StyledHeader>
       {bookmarkFolders && (
-        <StyledFolderList key="list">
+        <StyledFolderList key={JSON.stringify(bookmarkFolders)}>
           {bookmarkFolders.map((bookmarkFolder: IResponseBookmarkFolder) => {
             const open = openedFolders.includes(bookmarkFolder.id);
             const empty = bookmarkFolder.actants.length === 0;
 
             return (
-              <StyledFolderWrapper
-                key={bookmarkFolder.id}
-                onClick={() => {
-                  handleClickFolder(bookmarkFolder.id);
-                }}
-              >
+              <StyledFolderWrapper key={bookmarkFolder.name + Math.random()}>
                 <StyledFolderHeader>
-                  {(() => {
-                    if (open) {
-                      if (empty) {
-                        return <FaRegFolderOpen />;
+                  <StyledFolderWrapperOpenArea
+                    onClick={() => {
+                      handleClickFolder(bookmarkFolder.id);
+                    }}
+                  >
+                    {(() => {
+                      if (open) {
+                        if (empty) {
+                          return <FaRegFolderOpen />;
+                        } else {
+                          return <FaFolderOpen />;
+                        }
                       } else {
-                        return <FaFolderOpen />;
+                        if (empty) {
+                          return <FaRegFolder />;
+                        } else {
+                          return <FaFolder />;
+                        }
                       }
-                    } else {
-                      if (empty) {
-                        return <FaRegFolder />;
-                      } else {
-                        return <FaFolder />;
-                      }
-                    }
-                  })()}
-                  <StyledFolderHeaderText>
-                    {bookmarkFolder.name}
-                  </StyledFolderHeaderText>
+                    })()}
+                    <StyledFolderHeaderText>
+                      {bookmarkFolder.name}
+                    </StyledFolderHeaderText>
+                  </StyledFolderWrapperOpenArea>
                   <StyledFolderHeaderButtons>
                     <ButtonGroup noMargin={true}>
                       <Button
@@ -210,9 +236,28 @@ export const ActantBookmarkBox: React.FC = () => {
                     </ButtonGroup>
                   </StyledFolderHeaderButtons>
                 </StyledFolderHeader>
-                <StyledFolderContent>
-                  {open && <span>open</span>}
-                </StyledFolderContent>
+                {open && (
+                  <StyledFolderContent>
+                    <StyledFolderContentTags>
+                      {bookmarkFolder.actants.map((actant) => {
+                        return (
+                          <StyledFolderContentTag>
+                            <ActantTag actant={actant} short={false} />
+                          </StyledFolderContentTag>
+                        );
+                      })}
+                    </StyledFolderContentTags>
+                    <StyledFolderSuggester>
+                      <ActantSuggester
+                        onSelected={(bookmarkId: string) => {
+                          addBookmark(bookmarkFolder.id, bookmarkId);
+                        }}
+                        categoryIds={bookmarkEntities}
+                        placeholder={"add new bookmark"}
+                      ></ActantSuggester>
+                    </StyledFolderSuggester>
+                  </StyledFolderContent>
+                )}
               </StyledFolderWrapper>
             );
           })}
@@ -228,7 +273,7 @@ export const ActantBookmarkBox: React.FC = () => {
 
       {/* create modal */}
       <Modal key="create-modal" showModal={creatingBookmark} width="thin">
-        <ModalHeader title="Create new Bookmark Folder" />
+        <ModalHeader title="Bookmark Folder" />
         <ModalContent>
           <Input
             label="Bookmark folder name: "
@@ -255,7 +300,7 @@ export const ActantBookmarkBox: React.FC = () => {
               label="Create"
               color="primary"
               onClick={() => {
-                acceptBookmark();
+                createFolder();
               }}
             />
           </ButtonGroup>
