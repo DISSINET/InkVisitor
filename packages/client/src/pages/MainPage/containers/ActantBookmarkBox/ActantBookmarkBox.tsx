@@ -74,11 +74,10 @@ const bookmarkEntities = ["P", "G", "O", "C", "L", "V", "E", "S", "T", "R"];
 export const ActantBookmarkBox: React.FC = () => {
   const queryClient = useQueryClient();
 
-  const [editingBookmarkId, setEditingBookmarkId] =
-    useState<string | false>(false);
+  const [editingFolder, setEditingFolder] = useState<string | false>(false);
   const [removingFolder, setRemovingFolder] = useState<string | false>(false);
-  const [creatingBookmark, setCreatingBookmark] = useState<boolean>(false);
-  const [editingBookmarkName, setEditingBookmarkName] = useState<string>("");
+  const [creatingFolder, setCreatingFolder] = useState<boolean>(false);
+  const [editingFolderName, setEditingFolderName] = useState<string>("");
   const [openedFolders, setOpenedFolders] = useState<string[]>([]);
 
   // User query
@@ -100,7 +99,6 @@ export const ActantBookmarkBox: React.FC = () => {
   const removingFolderName = useMemo(() => {
     if (bookmarkFolders) {
       const folder = bookmarkFolders.find((b) => b.id === removingFolder);
-      console.log(folder);
       if (folder) {
         return folder.name;
       }
@@ -108,8 +106,6 @@ export const ActantBookmarkBox: React.FC = () => {
 
     return "";
   }, [removingFolder]);
-
-  console.log(bookmarkFolders);
 
   const getBookmarksCopy = (): IBookmarkFolder[] | false => {
     if (bookmarkFolders) {
@@ -127,14 +123,40 @@ export const ActantBookmarkBox: React.FC = () => {
 
   // methods
   const clickNewBookmarFolderkHandle = () => {
-    setCreatingBookmark(true);
+    setCreatingFolder(true);
 
     //startCreatingNewBookmark(newBookmarkFolder.id);
   };
 
-  const startEditingFolder = (folderId: string) => {};
+  const startEditingFolder = (folder: IResponseBookmarkFolder) => {
+    setEditingFolder(folder.id);
+    setEditingFolderName(folder.name);
+  };
 
-  const acceptEditedFolder = (folderId: string) => {};
+  const cancelEditingFolder = () => {
+    setEditingFolderName("");
+    setEditingFolder(false);
+  };
+  const acceptEditingFolder = async () => {
+    const newBookmarks: IBookmarkFolder[] | false = getBookmarksCopy();
+    if (newBookmarks) {
+      const newBookmarksAfterEdit = newBookmarks.map((b) => {
+        if (b.id === editingFolder) {
+          return { ...b, ...{ name: editingFolderName } };
+        } else {
+          return b;
+        }
+      });
+      const res = await api.usersUpdate(false, {
+        bookmarks: newBookmarksAfterEdit,
+      });
+      if (res.status === 200) {
+        queryClient.invalidateQueries(["bookmarks"]);
+        setEditingFolderName("");
+        setEditingFolder(false);
+      }
+    }
+  };
 
   const askRemoveFolder = (folderId: string) => {
     setRemovingFolder(folderId);
@@ -159,23 +181,23 @@ export const ActantBookmarkBox: React.FC = () => {
     setRemovingFolder(false);
   };
 
-  const cancelCreatingBookmark = () => {
-    setEditingBookmarkName("");
-    setCreatingBookmark(false);
+  const cancelCreatingFolder = () => {
+    setEditingFolderName("");
+    setCreatingFolder(false);
   };
 
   const createFolder = async () => {
     if (bookmarkFolders) {
       const newBookmarkFolder: IBookmarkFolder =
-        CBookmarkFolder(editingBookmarkName);
+        CBookmarkFolder(editingFolderName);
 
       const newBookmarks: IBookmarkFolder[] | false = getBookmarksCopy();
       if (newBookmarks) {
         newBookmarks.push(newBookmarkFolder);
         const res = await api.usersUpdate(false, { bookmarks: newBookmarks });
         if (res.status === 200) {
-          setEditingBookmarkName("");
-          setCreatingBookmark(false);
+          setEditingFolderName("");
+          setCreatingFolder(false);
           queryClient.invalidateQueries(["bookmarks"]);
         }
       }
@@ -183,8 +205,6 @@ export const ActantBookmarkBox: React.FC = () => {
   };
 
   const handleClickFolder = (folderId: string) => {
-    console.log("opening", folderId);
-
     if (openedFolders.includes(folderId)) {
       // close
       setOpenedFolders(openedFolders.filter((f) => f !== folderId));
@@ -277,7 +297,9 @@ export const ActantBookmarkBox: React.FC = () => {
                         key="edit"
                         icon={<FaEdit size={12} />}
                         color="warning"
-                        onClick={() => {}}
+                        onClick={() => {
+                          startEditingFolder(bookmarkFolder);
+                        }}
                       />
                       <Button
                         key="remove"
@@ -336,21 +358,53 @@ export const ActantBookmarkBox: React.FC = () => {
       )}
       <Loader show={isFetching} />
       {/* edit modal */}
-      <Modal
-        key="edit-modal"
-        showModal={!!editingBookmarkId}
-        width="thin"
-      ></Modal>
-
-      {/* create modal */}
-      <Modal key="create-modal" showModal={creatingBookmark} width="thin">
+      <Modal key="edit-modal" showModal={!!editingFolder} width="thin">
         <ModalHeader title="Bookmark Folder" />
         <ModalContent>
           <Input
             label="Bookmark folder name: "
             placeholder=""
-            onChangeFn={(newName: string) => setEditingBookmarkName(newName)}
-            value={editingBookmarkName}
+            onChangeFn={(newName: string) => setEditingFolderName(newName)}
+            value={editingFolderName}
+            changeOnType
+            autoFocus
+            onEnterPressFn={() => {
+              acceptEditingFolder();
+            }}
+          />
+        </ModalContent>
+
+        <ModalFooter>
+          <ButtonGroup>
+            <Button
+              key="cancel"
+              label="Cancel"
+              color="warning"
+              onClick={() => {
+                cancelEditingFolder();
+              }}
+            />
+            <Button
+              key="create"
+              label="Create"
+              color="primary"
+              onClick={() => {
+                acceptEditingFolder();
+              }}
+            />
+          </ButtonGroup>
+        </ModalFooter>
+      </Modal>
+
+      {/* create modal */}
+      <Modal key="create-modal" showModal={creatingFolder} width="thin">
+        <ModalHeader title="Bookmark Folder" />
+        <ModalContent>
+          <Input
+            label="Bookmark folder name: "
+            placeholder=""
+            onChangeFn={(newName: string) => setEditingFolderName(newName)}
+            value={editingFolderName}
             changeOnType
             autoFocus
             onEnterPressFn={() => {
@@ -366,7 +420,7 @@ export const ActantBookmarkBox: React.FC = () => {
               label="Cancel"
               color="warning"
               onClick={() => {
-                cancelCreatingBookmark();
+                cancelCreatingFolder();
               }}
             />
             <Button
