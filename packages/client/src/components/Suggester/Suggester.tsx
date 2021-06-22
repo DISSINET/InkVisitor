@@ -36,6 +36,7 @@ interface SuggesterProps {
   disabled?: boolean; // todo not implemented yet
   inputWidth?: number;
   displayCancelButton?: boolean;
+  allowCreate?: boolean;
 
   // events
   onType: Function;
@@ -60,6 +61,7 @@ export const Suggester: React.FC<SuggesterProps> = ({
   disabled,
   inputWidth = 100,
   displayCancelButton = false,
+  allowCreate = true,
 
   // events
   onType,
@@ -109,19 +111,21 @@ export const Suggester: React.FC<SuggesterProps> = ({
           </SuggestionCancelButton>
         )}
 
-        <SuggesterButton>
-          <Button
-            icon={<FaPlus style={{ fontSize: "16px", padding: "2px" }} />}
-            tooltip="create new actant"
-            color="primary"
-            onClick={() => {
-              onCreate({
-                label: typed,
-                category: category,
-              });
-            }}
-          />
-        </SuggesterButton>
+        {allowCreate && (
+          <SuggesterButton>
+            <Button
+              icon={<FaPlus style={{ fontSize: "16px", padding: "2px" }} />}
+              tooltip="create new actant"
+              color="primary"
+              onClick={() => {
+                onCreate({
+                  label: typed,
+                  category: category,
+                });
+              }}
+            />
+          </SuggesterButton>
+        )}
       </InputWrapper>
       {suggestions.length ? (
         <SuggesterList>
