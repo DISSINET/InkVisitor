@@ -69,7 +69,6 @@ export const App: React.FC<AppProps> = () => {
               />
             </Switch>
           </BrowserRouter>
-          <ReactQueryDevtools initialIsOpen />
         </QueryClientProvider>
       </ThemeProvider>
     </>

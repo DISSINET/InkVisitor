@@ -13,7 +13,10 @@ module.exports = {
       },
       {
         test: /\.tsx?$/,
-        use: "ts-loader?configFile=tsconfig.json",
+        loader: "ts-loader?configFile=tsconfig.json",
+        options: {
+          transpileOnly: true,
+        },
       },
       {
         test: /\.svg$/,
