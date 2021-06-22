@@ -30,6 +30,7 @@ import {
   FaFolderOpen,
   FaRegFolder,
   FaRegFolderOpen,
+  FaUnlink,
   FaDotCircle,
   FaRecycle,
   FaClone,
@@ -166,10 +167,28 @@ export const ActantBookmarkBox: React.FC = () => {
       const folder = newBookmarks.find((b) => b.id === folderId);
 
       if (folder) {
-        folder.actantIds.push(bookmarkId);
-        const res = await api.usersUpdate(false, { bookmarks: newBookmarks });
-        if (res.status === 200) {
-          queryClient.invalidateQueries(["bookmarks"]);
+        if (!folder.actantIds.includes(bookmarkId)) {
+          folder.actantIds.push(bookmarkId);
+          const res = await api.usersUpdate(false, { bookmarks: newBookmarks });
+          if (res.status === 200) {
+            queryClient.invalidateQueries(["bookmarks"]);
+          }
+        }
+      }
+    }
+  };
+
+  const removeBookmark = async (folderId: string, bookmarkId: string) => {
+    const newBookmarks: IBookmarkFolder[] | false = getBookmarksCopy();
+    if (newBookmarks) {
+      const folder = newBookmarks.find((b) => b.id === folderId);
+      if (folder) {
+        if (folder.actantIds.includes(bookmarkId)) {
+          folder.actantIds = folder.actantIds.filter((a) => a !== bookmarkId);
+          const res = await api.usersUpdate(false, { bookmarks: newBookmarks });
+          if (res.status === 200) {
+            queryClient.invalidateQueries(["bookmarks"]);
+          }
         }
       }
     }
@@ -241,8 +260,25 @@ export const ActantBookmarkBox: React.FC = () => {
                     <StyledFolderContentTags>
                       {bookmarkFolder.actants.map((actant) => {
                         return (
-                          <StyledFolderContentTag>
-                            <ActantTag actant={actant} short={false} />
+                          <StyledFolderContentTag key={actant.id}>
+                            <ActantTag
+                              actant={actant}
+                              short={false}
+                              button={
+                                <Button
+                                  key="d"
+                                  icon={<FaUnlink />}
+                                  color="danger"
+                                  tooltip="unlink actant"
+                                  onClick={() => {
+                                    removeBookmark(
+                                      bookmarkFolder.id,
+                                      actant.id
+                                    );
+                                  }}
+                                />
+                              }
+                            />
                           </StyledFolderContentTag>
                         );
                       })}
@@ -282,6 +318,9 @@ export const ActantBookmarkBox: React.FC = () => {
             value={editingBookmarkName}
             changeOnType
             autoFocus
+            onEnterPressFn={() => {
+              createFolder();
+            }}
           />
         </ModalContent>
 
