@@ -18,6 +18,7 @@ import {
   ModalContent,
   ModalFooter,
   Input,
+  Submit,
 } from "components";
 
 import {
@@ -75,11 +76,10 @@ export const ActantBookmarkBox: React.FC = () => {
 
   const [editingBookmarkId, setEditingBookmarkId] =
     useState<string | false>(false);
+  const [removingFolder, setRemovingFolder] = useState<string | false>(false);
   const [creatingBookmark, setCreatingBookmark] = useState<boolean>(false);
   const [editingBookmarkName, setEditingBookmarkName] = useState<string>("");
   const [openedFolders, setOpenedFolders] = useState<string[]>([]);
-
-  console.log(localStorage.getItem("username"));
 
   // User query
   const {
@@ -91,11 +91,23 @@ export const ActantBookmarkBox: React.FC = () => {
     ["bookmarks"],
     async () => {
       const res = await api.bookmarksGet(false);
-      res.data.bookmarks.sort((a, b) => (a > b ? 1 : -1));
+      res.data.bookmarks.sort((a, b) => (a.name > b.name ? 1 : -1));
       return res.data.bookmarks;
     },
     { enabled: api.isLoggedIn() }
   );
+
+  const removingFolderName = useMemo(() => {
+    if (bookmarkFolders) {
+      const folder = bookmarkFolders.find((b) => b.id === removingFolder);
+      console.log(folder);
+      if (folder) {
+        return folder.name;
+      }
+    }
+
+    return "";
+  }, [removingFolder]);
 
   console.log(bookmarkFolders);
 
@@ -114,16 +126,37 @@ export const ActantBookmarkBox: React.FC = () => {
   };
 
   // methods
-  const startCreatingNewBookmark = (bookmarkId: string) => {
-    setEditingBookmarkId(bookmarkId);
-  };
-  const stopCreatingNewBookmark = () => {
-    setEditingBookmarkId(false);
-  };
   const clickNewBookmarFolderkHandle = () => {
     setCreatingBookmark(true);
 
     //startCreatingNewBookmark(newBookmarkFolder.id);
+  };
+
+  const startEditingFolder = (folderId: string) => {};
+
+  const acceptEditedFolder = (folderId: string) => {};
+
+  const askRemoveFolder = (folderId: string) => {
+    setRemovingFolder(folderId);
+  };
+  const acceptRemoveFolder = async () => {
+    const newBookmarks: IBookmarkFolder[] | false = getBookmarksCopy();
+    if (newBookmarks) {
+      const newBookmarksAfterRemove = newBookmarks.filter(
+        (b) => b.id !== removingFolder
+      );
+      const res = await api.usersUpdate(false, {
+        bookmarks: newBookmarksAfterRemove,
+      });
+      if (res.status === 200) {
+        queryClient.invalidateQueries(["bookmarks"]);
+      }
+    }
+
+    setRemovingFolder(false);
+  };
+  const cancelRemoveFolder = () => {
+    setRemovingFolder(false);
   };
 
   const cancelCreatingBookmark = () => {
@@ -206,7 +239,7 @@ export const ActantBookmarkBox: React.FC = () => {
         />
       </StyledHeader>
       {bookmarkFolders && (
-        <StyledFolderList key={JSON.stringify(bookmarkFolders)}>
+        <StyledFolderList>
           {bookmarkFolders.map((bookmarkFolder: IResponseBookmarkFolder) => {
             const open = openedFolders.includes(bookmarkFolder.id);
             const empty = bookmarkFolder.actants.length === 0;
@@ -250,7 +283,9 @@ export const ActantBookmarkBox: React.FC = () => {
                         key="remove"
                         icon={<FaTrash size={12} />}
                         color="danger"
-                        onClick={() => {}}
+                        onClick={() => {
+                          askRemoveFolder(bookmarkFolder.id);
+                        }}
                       />
                     </ButtonGroup>
                   </StyledFolderHeaderButtons>
@@ -345,6 +380,14 @@ export const ActantBookmarkBox: React.FC = () => {
           </ButtonGroup>
         </ModalFooter>
       </Modal>
+
+      <Submit
+        title={`Delete Bookmark folder ${removingFolderName}`}
+        text={`Do you really want do delete Bookmark folder ${removingFolderName}?`}
+        show={removingFolder != false}
+        onSubmit={() => acceptRemoveFolder()}
+        onCancel={() => cancelRemoveFolder()}
+      />
     </StyledContent>
   );
 };
