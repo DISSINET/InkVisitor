@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState, ReactElement } from "react";
 import { useQuery, useMutation, useQueryClient } from "react-query";
 import api from "api";
 const queryString = require("query-string");
-import { useLocation, useHistory } from "react-router";
+import { toast } from "react-toastify";
 
 import { ActantTag, ActantSuggester } from "..";
 
@@ -124,8 +124,6 @@ export const ActantBookmarkBox: React.FC = () => {
   // methods
   const clickNewBookmarFolderkHandle = () => {
     setCreatingFolder(true);
-
-    //startCreatingNewBookmark(newBookmarkFolder.id);
   };
 
   const startEditingFolder = (folder: IResponseBookmarkFolder) => {
@@ -137,6 +135,7 @@ export const ActantBookmarkBox: React.FC = () => {
     setEditingFolderName("");
     setEditingFolder(false);
   };
+
   const acceptEditingFolder = async () => {
     const newBookmarks: IBookmarkFolder[] | false = getBookmarksCopy();
     if (newBookmarks) {
@@ -151,6 +150,7 @@ export const ActantBookmarkBox: React.FC = () => {
         bookmarks: newBookmarksAfterEdit,
       });
       if (res.status === 200) {
+        toast.info("Bookmark edited");
         queryClient.invalidateQueries(["bookmarks"]);
         setEditingFolderName("");
         setEditingFolder(false);
@@ -171,6 +171,7 @@ export const ActantBookmarkBox: React.FC = () => {
         bookmarks: newBookmarksAfterRemove,
       });
       if (res.status === 200) {
+        toast.warning("Bookmark folder removed");
         queryClient.invalidateQueries(["bookmarks"]);
       }
     }
@@ -196,6 +197,7 @@ export const ActantBookmarkBox: React.FC = () => {
         newBookmarks.push(newBookmarkFolder);
         const res = await api.usersUpdate(false, { bookmarks: newBookmarks });
         if (res.status === 200) {
+          toast.success("Bookmark folder created");
           setEditingFolderName("");
           setCreatingFolder(false);
           queryClient.invalidateQueries(["bookmarks"]);
