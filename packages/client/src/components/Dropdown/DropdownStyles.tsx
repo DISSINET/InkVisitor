@@ -45,7 +45,7 @@ export const StyledSelect = styled(Select)`
   }
   .react-select__value-container {
     padding: 0 0.25rem;
-    width: ${({ width }) => (width ? `${width / 10}rem` : "auto")};
+    width: ${({ width }) => getWidth(width)};
   }
   .react-select__single-value {
     font-size: ${({ theme }) => theme.fontSize["sm"]};
@@ -64,6 +64,7 @@ export const StyledSelect = styled(Select)`
   .react-select__menu {
     border-radius: 0;
     box-shadow: ${({ theme }) => theme.boxShadow["normal"]};
+    width: ${({ width }) => (width === "full" ? "100%" : "auto")};
   }
   .react-select__option {
     :hover {

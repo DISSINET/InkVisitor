@@ -9,13 +9,13 @@ import { OptionTypeBase, ValueType } from "react-select";
 
 interface IActionDropdown {
   value: string;
-  width?: number;
+  width?: number | "full";
   onSelectedChange: Function;
 }
 
 export const ActionDropdown: React.FC<IActionDropdown> = ({
   value,
-  width = 500,
+  width = "full",
   onSelectedChange,
 }) => {
   const [selectedItem, setSelectedItem] = useState<ValueType<OptionTypeBase>>();
@@ -57,7 +57,7 @@ export const ActionDropdown: React.FC<IActionDropdown> = ({
         onSelectedChange(selectedItem);
       }}
       options={options}
-      width="full"
+      width={width}
     />
   );
 };
