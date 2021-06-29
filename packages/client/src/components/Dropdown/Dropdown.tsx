@@ -15,7 +15,7 @@ interface Dropdown {
   label?: string;
   onChange: (selectedOption: ValueType<OptionTypeBase>) => void;
   ref?: React.RefObject<ReactNode>;
-  width?: number;
+  width?: number | "full";
   menuWidth?: number;
   hideSelectedOptions?: boolean;
   noDropDownIndicator?: boolean;
@@ -38,7 +38,7 @@ export const Dropdown: React.FC<Dropdown> = ({
 }) => {
   return (
     <Tooltip label={label} position={["top center"]} on={["hover"]}>
-      <StyledSelectWrapper>
+      <StyledSelectWrapper width={width}>
         <StyledSelect
           className="react-select-container"
           classNamePrefix="react-select"
