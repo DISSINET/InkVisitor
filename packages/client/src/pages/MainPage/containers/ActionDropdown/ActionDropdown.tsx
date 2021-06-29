@@ -15,7 +15,7 @@ interface IActionDropdown {
 
 export const ActionDropdown: React.FC<IActionDropdown> = ({
   value,
-  width = 792,
+  width = 500,
   onSelectedChange,
 }) => {
   const [selectedItem, setSelectedItem] = useState<ValueType<OptionTypeBase>>();
@@ -57,7 +57,7 @@ export const ActionDropdown: React.FC<IActionDropdown> = ({
         onSelectedChange(selectedItem);
       }}
       options={options}
-      width={width}
+      width="full"
     />
   );
 };
