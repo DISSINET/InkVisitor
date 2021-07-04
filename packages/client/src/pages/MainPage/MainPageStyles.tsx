@@ -20,7 +20,9 @@ export const StyledPanelWrap = styled.div`
   width: 100%;
   overflow: hidden;
   display: flex;
+  position: relative;
 `;
+
 export const StyledFaUserAlt = styled(FaUserAlt)`
   margin-left: ${({ theme }) => theme.space[2]};
   margin-right: ${({ theme }) => theme.space[1]};
