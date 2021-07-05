@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useSpring } from "react-spring";
 import { setPanelWidths } from "redux/features/layout/panelWidthsSlice";
+import { setSeparatorXPosition } from "redux/features/layout/separatorXPositionSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 
 import { StyledPanelSeparator } from "./PanelSeparatorStyles";
@@ -11,67 +12,61 @@ export const PanelSeparator: React.FC<PanelSeparator> = ({}) => {
   const panelWidths: number[] = useAppSelector(
     (state) => state.layout.panelWidths
   );
-  const layoutWidth: number = useAppSelector(
-    (state) => state.layout.layoutWidth
+  const separatorXPosition: number = useAppSelector(
+    (state) => state.layout.separatorXPosition
   );
 
-  const [separatorXPosition, setSeparatorXPosition] = useState<
+  const [separatorXTempPosition, setSeparatorXTempPosition] = useState<
     undefined | number
   >(undefined);
-  const [leftWidth, setLeftWidth] = useState<number>(144 + 432);
+  const [leftWidth, setLeftWidth] = useState<number>(separatorXPosition);
   const [dragging, setDragging] = useState(false);
   const [hovered, setHovered] = useState(false);
-  const MIN_WIDTH = 50;
+  const MIN_WIDTH = 400;
 
   const animatedXPosition = useSpring({
     left: `${(leftWidth - 2) / 10}rem`,
   });
 
-  // useEffect(() => {
-  //   setLeftWidth(panelWidths[0] + panelWidths[1]);
-  // }, [panelWidths]);
+  useEffect(() => {
+    // TODO: this is needed only for INIT after width count
+    setLeftWidth(separatorXPosition);
+    dispatch(
+      setPanelWidths([
+        panelWidths[0],
+        separatorXPosition - panelWidths[0],
+        panelWidths[0] + panelWidths[1] + panelWidths[2] - separatorXPosition,
+        panelWidths[3],
+      ])
+    );
+  }, [separatorXPosition]);
 
   const onMouseDown = (e: React.MouseEvent) => {
-    setSeparatorXPosition(e.clientX);
+    setSeparatorXTempPosition(e.clientX);
     setDragging(true);
   };
 
   const onMove = (clientX: number) => {
-    // if (dragging && leftWidth && separatorXPosition) {
-    //   const newLeftWidth = leftWidth + clientX - separatorXPosition;
-    //   setSeparatorXPosition(clientX);
+    if (dragging && leftWidth && separatorXTempPosition) {
+      const newLeftWidth = leftWidth + clientX - separatorXTempPosition;
+      setSeparatorXTempPosition(clientX);
+      if (newLeftWidth < MIN_WIDTH + panelWidths[0]) {
+        setLeftWidth(MIN_WIDTH + panelWidths[0]);
+        return;
+      }
+      const threePanelWidth = panelWidths[0] + panelWidths[1] + panelWidths[2];
 
-    //   if (newLeftWidth < MIN_WIDTH) {
-    //     setLeftWidth(MIN_WIDTH);
-    //     return;
-    //   }
-
-    //   const splitPaneWidth = panelWidths[1] + panelWidths[2];
-
-    //   if (newLeftWidth > splitPaneWidth - MIN_WIDTH) {
-    //     setLeftWidth(splitPaneWidth - MIN_WIDTH);
-    //     return;
-    //   }
-
-    //   setLeftWidth(newLeftWidth);
-    // }
-    if (dragging && leftWidth && separatorXPosition) {
-      const newLeftWidth = leftWidth + clientX - separatorXPosition;
-      setSeparatorXPosition(clientX);
+      if (newLeftWidth > threePanelWidth - MIN_WIDTH) {
+        setLeftWidth(threePanelWidth - MIN_WIDTH);
+        return;
+      }
       setLeftWidth(newLeftWidth);
     }
   };
 
   useEffect(() => {
     if (!dragging) {
-      dispatch(
-        setPanelWidths([
-          panelWidths[0],
-          leftWidth - panelWidths[0],
-          panelWidths[0] + panelWidths[1] + panelWidths[2] - leftWidth,
-          panelWidths[3],
-        ])
-      );
+      dispatch(setSeparatorXPosition(leftWidth));
     }
   }, [leftWidth, dragging]);
 

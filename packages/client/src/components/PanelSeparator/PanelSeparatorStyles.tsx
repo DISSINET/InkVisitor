@@ -8,7 +8,7 @@ export const StyledPanelSeparator = styled(animated.div)<StyledPanelSeparator>`
   position: absolute;
   width: 4px;
   cursor: col-resize;
-  height: 100%;
+  height: calc(100% - 2px);
   background-color: hotpink;
   z-index: 30;
 `;
