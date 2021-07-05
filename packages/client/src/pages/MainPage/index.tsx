@@ -142,7 +142,7 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
         />
         <DndProvider backend={HTML5Backend}>
           <StyledPanelWrap>
-            {/* <PanelSeparator xPosition={panelWidths[0] + panelWidths[1]} /> */}
+            <PanelSeparator />
             {/* FIRST PANEL */}
             <Panel
               width={firstPanelExpanded ? panelWidths[0] : collapsedPanelWidth}
