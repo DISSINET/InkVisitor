@@ -1,7 +1,6 @@
 export default {
   color: {
     transparent: "transparent",
-
     blue: {
       50: "#e6eafa",
       100: "#CCD5F4",

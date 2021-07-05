@@ -16,6 +16,7 @@ export const percentPanelWidths = [10, 30, 42, 18];
 // animations
 export const springConfig: { [key: string]: {} } = {
   panelExpand: { tension: 195, friction: 31 },
+  separatorXPosition: { tension: 305, friction: 21, clamp: true },
 };
 
 export const space1 = theme.space[1];
