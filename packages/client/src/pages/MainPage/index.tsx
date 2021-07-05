@@ -4,7 +4,15 @@ import { HTML5Backend } from "react-dnd-html5-backend";
 
 import { toast } from "react-toastify";
 
-import { Box, Button, Footer, Header, Panel, Toast } from "components";
+import {
+  Box,
+  Button,
+  Footer,
+  Header,
+  Panel,
+  PanelSeparator,
+  Toast,
+} from "components";
 
 import {
   ActantSearchBox,
@@ -60,14 +68,16 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
   const panelWidths: number[] = useAppSelector(
     (state) => state.layout.panelWidths
   );
+  const separatorXPosition: number = useAppSelector(
+    (state) => state.layout.separatorXPosition
+  );
   const queryClient = useQueryClient();
 
   const history = useHistory();
-  const { territoryId, statementId } =
-    useParams<{
-      territoryId: string;
-      statementId: string;
-    }>();
+  const { territoryId, statementId } = useParams<{
+    territoryId: string;
+    statementId: string;
+  }>();
 
   const handleLogOut = () => {
     api.signOut();
@@ -135,6 +145,7 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
         />
         <DndProvider backend={HTML5Backend}>
           <StyledPanelWrap>
+            {separatorXPosition > 0 && <PanelSeparator />}
             {/* FIRST PANEL */}
             <Panel
               width={firstPanelExpanded ? panelWidths[0] : collapsedPanelWidth}

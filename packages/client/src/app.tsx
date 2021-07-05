@@ -10,9 +10,10 @@ import GlobalStyle from "Theme/global";
 import { QueryClient, QueryClientProvider, useQuery } from "react-query";
 import { ReactQueryDevtools } from "react-query/devtools";
 import { layoutWidthBreakpoint, percentPanelWidths } from "Theme/constants";
-import { useAppDispatch } from "redux/hooks";
+import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { setLayoutWidth } from "redux/features/layout/layoutWidthSlice";
 import { setPanelWidths } from "redux/features/layout/panelWidthsSlice";
+import { setSeparatorXPosition } from "redux/features/layout/separatorXPositionSlice";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -31,7 +32,7 @@ export const App: React.FC<AppProps> = () => {
     const handleResize = () => {
       setSize([window.innerWidth, window.innerHeight]);
     };
-    // count widths here and set to REDUX
+    // count widths and set to REDUX
     const layoutWidth =
       window.innerWidth < layoutWidthBreakpoint
         ? layoutWidthBreakpoint
@@ -45,6 +46,7 @@ export const App: React.FC<AppProps> = () => {
       Math.floor(onePercent * percentPanelWidths[3] * 10) / 10,
     ];
     dispatch(setPanelWidths(panels));
+    dispatch(setSeparatorXPosition(panels[0] + panels[1]));
 
     window.addEventListener("resize", handleResize);
     handleResize();

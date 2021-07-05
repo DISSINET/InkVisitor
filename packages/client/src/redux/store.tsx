@@ -8,6 +8,7 @@ import firstPanelExpandedSlice from "./features/layout/firstPanelExpandedSlice";
 import fourthPanelExpandedSlice from "./features/layout/fourthPanelExpandedSlice";
 import layoutWidthSlice from "./features/layout/layoutWidthSlice";
 import panelWidthsSlice from "./features/layout/panelWidthsSlice";
+import separatorXPositionSlice from "./features/layout/separatorXPositionSlice";
 
 const store: Store = configureStore({
   reducer: {
@@ -19,6 +20,7 @@ const store: Store = configureStore({
     layout: combineReducers({
       layoutWidth: layoutWidthSlice,
       panelWidths: panelWidthsSlice,
+      separatorXPosition: separatorXPositionSlice,
       firstPanelExpanded: firstPanelExpandedSlice,
       fourthPanelExpanded: fourthPanelExpandedSlice,
     }),
