@@ -6,7 +6,7 @@ interface StyledPanelSeparator {
 }
 export const StyledPanelSeparator = styled(animated.div)<StyledPanelSeparator>`
   position: absolute;
-  width: 4px;
+  width: ${({ theme }) => theme.borderWidth[4]};
   cursor: col-resize;
   height: ${({ theme }) => `calc(100% - ${theme.borderWidth[2]})`};
   background-color: ${({ theme }) => theme.color["success"]};
