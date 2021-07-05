@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
-const initialState: number = 700;
+const initialState: number = 0;
 
 const separatorXPositionSlice = createSlice({
   name: "separatorXPosition",

@@ -68,6 +68,9 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
   const panelWidths: number[] = useAppSelector(
     (state) => state.layout.panelWidths
   );
+  const separatorXPosition: number = useAppSelector(
+    (state) => state.layout.separatorXPosition
+  );
   const queryClient = useQueryClient();
 
   const history = useHistory();
@@ -142,7 +145,7 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
         />
         <DndProvider backend={HTML5Backend}>
           <StyledPanelWrap>
-            <PanelSeparator />
+            {separatorXPosition > 0 && <PanelSeparator />}
             {/* FIRST PANEL */}
             <Panel
               width={firstPanelExpanded ? panelWidths[0] : collapsedPanelWidth}

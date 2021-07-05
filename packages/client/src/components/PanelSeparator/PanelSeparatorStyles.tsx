@@ -2,14 +2,16 @@ import { animated } from "react-spring";
 import styled from "styled-components";
 
 interface StyledPanelSeparator {
-  $xPosition?: number;
+  $show: boolean;
 }
 export const StyledPanelSeparator = styled(animated.div)<StyledPanelSeparator>`
   position: absolute;
   width: 4px;
   cursor: col-resize;
-  height: calc(100% - 2px);
-  background-color: hotpink;
+  height: ${({ theme }) => `calc(100% - ${theme.borderWidth[2]})`};
+  background-color: ${({ theme }) => theme.color["success"]};
   z-index: 30;
+
+  opacity: ${({ $show }) => ($show ? 1 : 0)};
+  transition: opacity 0.3s ease;
 `;
-// left: ${({ $xPosition }) => `${($xPosition - 2) / 10}rem`};

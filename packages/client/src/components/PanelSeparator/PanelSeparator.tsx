@@ -3,9 +3,12 @@ import { useSpring } from "react-spring";
 import { setPanelWidths } from "redux/features/layout/panelWidthsSlice";
 import { setSeparatorXPosition } from "redux/features/layout/separatorXPositionSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
+import { springConfig } from "Theme/constants";
+import theme from "Theme/theme";
 
 import { StyledPanelSeparator } from "./PanelSeparatorStyles";
 
+const MIN_WIDTH = 300;
 interface PanelSeparator {}
 export const PanelSeparator: React.FC<PanelSeparator> = ({}) => {
   const dispatch = useAppDispatch();
@@ -22,10 +25,10 @@ export const PanelSeparator: React.FC<PanelSeparator> = ({}) => {
   const [leftWidth, setLeftWidth] = useState<number>(separatorXPosition);
   const [dragging, setDragging] = useState(false);
   const [hovered, setHovered] = useState(false);
-  const MIN_WIDTH = 400;
 
-  const animatedXPosition = useSpring({
+  const animatedSeparator = useSpring({
     left: `${(leftWidth - 2) / 10}rem`,
+    config: springConfig.separatorXPosition,
   });
 
   useEffect(() => {
@@ -96,8 +99,8 @@ export const PanelSeparator: React.FC<PanelSeparator> = ({}) => {
       onMouseDown={onMouseDown}
       onMouseOver={() => setHovered(true)}
       onMouseOut={() => setHovered(false)}
-      // $xPosition={leftWidth}
-      style={animatedXPosition}
+      style={animatedSeparator}
+      $show={hovered || dragging}
     />
   );
 };
