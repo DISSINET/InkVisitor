@@ -46,6 +46,7 @@ import {
   collapsedPanelWidth,
   heightFooter,
   heightHeader,
+  layoutWidthBreakpoint,
 } from "Theme/constants";
 import { RiMenuFoldFill, RiMenuUnfoldFill } from "react-icons/ri";
 import { setFirstPanelExpanded } from "redux/features/layout/firstPanelExpandedSlice";
@@ -145,7 +146,8 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
         />
         <DndProvider backend={HTML5Backend}>
           <StyledPanelWrap>
-            {separatorXPosition > 0 && <PanelSeparator />}
+            {separatorXPosition > 0 &&
+              window.innerWidth > layoutWidthBreakpoint && <PanelSeparator />}
             {/* FIRST PANEL */}
             <Panel
               width={firstPanelExpanded ? panelWidths[0] : collapsedPanelWidth}

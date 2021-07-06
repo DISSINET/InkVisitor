@@ -3,22 +3,38 @@ import { useSpring } from "react-spring";
 import { setPanelWidths } from "redux/features/layout/panelWidthsSlice";
 import { setSeparatorXPosition } from "redux/features/layout/separatorXPositionSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
-import { springConfig } from "Theme/constants";
-import theme from "Theme/theme";
+import {
+  collapsedPanelWidth,
+  secondPanelMinWidth,
+  springConfig,
+  thirdPanelMinWidth,
+} from "Theme/constants";
 
 import { StyledPanelSeparator } from "./PanelSeparatorStyles";
 
-const MIN_WIDTH = 300;
 interface PanelSeparator {}
 export const PanelSeparator: React.FC<PanelSeparator> = ({}) => {
   const dispatch = useAppDispatch();
   const panelWidths: number[] = useAppSelector(
     (state) => state.layout.panelWidths
   );
+  const layoutWidth: number = useAppSelector(
+    (state) => state.layout.layoutWidth
+  );
   const separatorXPosition: number = useAppSelector(
     (state) => state.layout.separatorXPosition
   );
+  const firstPanelExpanded: number = useAppSelector(
+    (state) => state.layout.firstPanelExpanded
+  );
+  const fourthPanelExpanded: number = useAppSelector(
+    (state) => state.layout.fourthPanelExpanded
+  );
 
+  const LEFT_SIDE_MIN_WIDTH = secondPanelMinWidth + panelWidths[0];
+  const LEFT_SIDE_MAX_WIDTH = layoutWidth - panelWidths[3] - thirdPanelMinWidth;
+
+  const [separatorInitialized, setseparatorInitialized] = useState(false);
   const [separatorXTempPosition, setSeparatorXTempPosition] = useState<
     undefined | number
   >(undefined);
@@ -32,8 +48,10 @@ export const PanelSeparator: React.FC<PanelSeparator> = ({}) => {
   });
 
   useEffect(() => {
-    // TODO: this is needed only for INIT after width count
-    setLeftWidth(separatorXPosition);
+    if (!separatorInitialized) {
+      setLeftWidth(separatorXPosition);
+      setseparatorInitialized(true);
+    }
     dispatch(
       setPanelWidths([
         panelWidths[0],
@@ -53,14 +71,14 @@ export const PanelSeparator: React.FC<PanelSeparator> = ({}) => {
     if (dragging && leftWidth && separatorXTempPosition) {
       const newLeftWidth = leftWidth + clientX - separatorXTempPosition;
       setSeparatorXTempPosition(clientX);
-      if (newLeftWidth < MIN_WIDTH + panelWidths[0]) {
-        setLeftWidth(MIN_WIDTH + panelWidths[0]);
+      if (newLeftWidth < LEFT_SIDE_MIN_WIDTH) {
+        setLeftWidth(LEFT_SIDE_MIN_WIDTH);
         return;
       }
-      const threePanelWidth = panelWidths[0] + panelWidths[1] + panelWidths[2];
+      // const threePanelWidth = panelWidths[0] + panelWidths[1] + panelWidths[2];
 
-      if (newLeftWidth > threePanelWidth - MIN_WIDTH) {
-        setLeftWidth(threePanelWidth - MIN_WIDTH);
+      if (newLeftWidth > LEFT_SIDE_MAX_WIDTH) {
+        setLeftWidth(LEFT_SIDE_MAX_WIDTH);
         return;
       }
       setLeftWidth(newLeftWidth);
