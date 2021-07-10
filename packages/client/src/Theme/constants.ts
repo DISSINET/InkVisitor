@@ -7,11 +7,14 @@ export const heightHeader = 70;
 export const heightFooter = 30;
 
 export const layoutWidthBreakpoint = 1000;
-export const collapsedPanelWidth = 32;
 // INIT PANEL WIDTHS
 export const panelWidths = [200, 570, 800, 350];
+// MORE PANEL WIDTHS
+export const collapsedPanelWidth = 32;
+export const secondPanelMinWidth = 450;
+export const thirdPanelMinWidth = 470;
 // % PERCENT PANEL WIDTHS
-export const percentPanelWidths = [10, 30, 42, 18];
+export const percentPanelWidths = [10, 31, 41, 18];
 
 // animations
 export const springConfig: { [key: string]: {} } = {
