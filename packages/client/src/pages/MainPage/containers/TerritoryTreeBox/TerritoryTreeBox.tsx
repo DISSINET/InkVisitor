@@ -8,6 +8,8 @@ import { IResponseTree } from "@shared/types";
 import { Loader } from "components";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { setSelectedTerritoryPath } from "redux/features/territoryTree/selectedTerritoryPathSlice";
+import { DragObjectWithType, DropTargetMonitor, useDrop } from "react-dnd";
+import { ItemTypes } from "types";
 
 export const TerritoryTreeBox: React.FC = () => {
   const { status, data, error, isFetching } = useQuery(
@@ -62,6 +64,9 @@ export const TerritoryTreeBox: React.FC = () => {
           statementsCount={data.statementsCount}
           initExpandedNodes={selectedTerritoryPath}
           empty={data.empty}
+          updateOrderFn={() => {
+            console.log("hi there");
+          }}
         />
       )}
       <Loader show={isFetching} />

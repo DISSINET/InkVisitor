@@ -60,7 +60,7 @@ export const PanelSeparator: React.FC<PanelSeparator> = ({}) => {
         panelWidths[3],
       ])
     );
-  }, [separatorXPosition]);
+  }, [separatorXPosition, separatorInitialized]);
 
   const onMouseDown = (e: React.MouseEvent) => {
     setSeparatorXTempPosition(e.clientX);

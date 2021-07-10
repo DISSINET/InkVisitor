@@ -70,6 +70,7 @@ interface IActantTag {
   moveFn?: (dragIndex: number, hoverIndex: number) => void;
   isSelected?: boolean;
   enableTooltip?: boolean;
+  updateOrderFn?: () => void;
 }
 
 export const ActantTag: React.FC<IActantTag> = ({
@@ -81,6 +82,7 @@ export const ActantTag: React.FC<IActantTag> = ({
   moveFn,
   isSelected,
   enableTooltip = false,
+  updateOrderFn,
 }) => {
   const classId = actant.class;
   const classObject = classes[classId];
@@ -99,6 +101,7 @@ export const ActantTag: React.FC<IActantTag> = ({
       invertedLabel={isSelected}
       index={index}
       enableTooltip={enableTooltip}
+      updateOrderFn={updateOrderFn}
     />
   );
 };
