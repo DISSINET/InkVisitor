@@ -35,6 +35,7 @@ interface TerritoryTreeNode {
   index?: number;
   moveFn?: (dragIndex: number, hoverIndex: number) => void;
   empty?: boolean;
+  updateOrderFn?: () => void;
 }
 export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
   territory,
@@ -46,6 +47,7 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
   index,
   moveFn,
   empty,
+  updateOrderFn,
 }) => {
   const dispatch = useAppDispatch();
   const treeInitialized = useAppSelector((state) => state.treeInitialized);
@@ -87,20 +89,20 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
     }
   }, [treeInitialized, initExpandedNodes]);
 
-  // const moveChildFn = useCallback(
-  // (dragIndex: number, hoverIndex: number) => {
-  // const dragCard = childTerritories[dragIndex];
-  // setChildTerritories(
-  //   update(childTerritories, {
-  //     $splice: [
-  //       [dragIndex, 1],
-  //       [hoverIndex, 0, dragCard],
-  //     ],
-  //   })
-  // );
-  // },
-  // [childTerritories]
-  // );
+  const moveChildFn = useCallback(
+    (dragIndex: number, hoverIndex: number) => {
+      const dragCard = childTerritories[dragIndex];
+      setChildTerritories(
+        update(childTerritories, {
+          $splice: [
+            [dragIndex, 1],
+            [hoverIndex, 0, dragCard],
+          ],
+        })
+      );
+    },
+    [childTerritories]
+  );
 
   const onCaretClick = (id: string) => {
     hashParams["territory"] = id;
@@ -217,7 +219,8 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
                 propId={propId}
                 index={index}
                 enableTooltip
-                // moveFn={moveFn}
+                moveFn={moveFn}
+                updateOrderFn={updateOrderFn}
               />
             </animated.div>
             <ContextMenu
@@ -248,7 +251,7 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
               propId={child.id}
               index={key}
               empty={child.empty}
-              // moveFn={moveChildFn}
+              moveFn={moveChildFn}
             />
           ))}
       </StyledChildrenWrap>

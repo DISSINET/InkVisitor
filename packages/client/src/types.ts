@@ -92,7 +92,11 @@ export interface Node {
   label: string;
   children: Array<Node>;
 }
-export const ItemTypes = { TAG: "TAG", ROW: "ROW" };
+export const ItemTypes = {
+  TAG: "TAG",
+  STATEMENT_ROW: "STATEMENT_ROW",
+  ACTANT_ROW: "ACTANT_ROW",
+};
 
 export type ToggleItem = {
   value: string;

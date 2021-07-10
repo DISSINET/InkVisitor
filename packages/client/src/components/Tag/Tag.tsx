@@ -46,6 +46,7 @@ interface TagProps {
     | "left center"
     | "left bottom"
     | "center center";
+  updateOrderFn?: () => void;
 }
 
 export const Tag: React.FC<TagProps> = ({
@@ -62,6 +63,7 @@ export const Tag: React.FC<TagProps> = ({
   moveFn,
   position = "right top",
   enableTooltip = false,
+  updateOrderFn = () => {},
 }) => {
   let history = useHistory();
   let location = useLocation();
@@ -112,6 +114,7 @@ export const Tag: React.FC<TagProps> = ({
       // to avoid expensive index searches.
       item.index = hoverIndex;
     },
+    // drop: updateOrderFn,
   });
 
   const [{ isDragging }, drag] = useDrag({
@@ -119,6 +122,7 @@ export const Tag: React.FC<TagProps> = ({
     collect: (monitor: DragSourceMonitor) => ({
       isDragging: monitor.isDragging(),
     }),
+    // end: updateOrderFn,
   });
   drag(drop(ref));
 
