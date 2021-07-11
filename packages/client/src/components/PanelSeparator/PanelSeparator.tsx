@@ -4,11 +4,11 @@ import { setPanelWidths } from "redux/features/layout/panelWidthsSlice";
 import { setSeparatorXPosition } from "redux/features/layout/separatorXPositionSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import {
-  collapsedPanelWidth,
   secondPanelMinWidth,
   springConfig,
   thirdPanelMinWidth,
 } from "Theme/constants";
+import { debounce } from "utils";
 
 import { StyledPanelSeparator } from "./PanelSeparatorStyles";
 
@@ -23,12 +23,6 @@ export const PanelSeparator: React.FC<PanelSeparator> = ({}) => {
   );
   const separatorXPosition: number = useAppSelector(
     (state) => state.layout.separatorXPosition
-  );
-  const firstPanelExpanded: number = useAppSelector(
-    (state) => state.layout.firstPanelExpanded
-  );
-  const fourthPanelExpanded: number = useAppSelector(
-    (state) => state.layout.fourthPanelExpanded
   );
 
   const LEFT_SIDE_MIN_WIDTH = secondPanelMinWidth + panelWidths[0];
@@ -75,7 +69,6 @@ export const PanelSeparator: React.FC<PanelSeparator> = ({}) => {
         setLeftWidth(LEFT_SIDE_MIN_WIDTH);
         return;
       }
-      // const threePanelWidth = panelWidths[0] + panelWidths[1] + panelWidths[2];
 
       if (newLeftWidth > LEFT_SIDE_MAX_WIDTH) {
         setLeftWidth(LEFT_SIDE_MAX_WIDTH);
