@@ -1,6 +1,4 @@
 import { IActant, IStatement } from "@shared/types";
-import { DropTargetMonitor } from "react-dnd";
-import { DragItem } from "types";
 
 export const findPositionInStatement = (
   statement: IStatement,
