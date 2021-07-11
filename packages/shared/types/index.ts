@@ -25,6 +25,8 @@ import { IStatement, IStatementActant, IStatementReference } from "./statement";
 import { ITerritory } from "./territory";
 import { IOption } from "./option";
 import { IResponseGeneric } from "./response-generic";
+import { IResponseSearch } from "./response-search";
+import { RequestSearch } from "./request-search";
 
 export type {
   IAudit,
@@ -55,4 +57,7 @@ export type {
   IResponseUser,
   IResponseStoredTerritory,
   IResponseGeneric,
+  IResponseSearch,
 };
+
+export { RequestSearch };
