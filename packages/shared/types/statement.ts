@@ -23,7 +23,7 @@ export interface IStatement extends IActant {
 
 export interface IStatementActant {
   id: string;
-  actant: string; //  this
+  actant: string;
   position: string;
   elvl: string;
   certainty: string;

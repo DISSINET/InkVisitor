@@ -1,10 +1,11 @@
-import { r as rethink, WriteResult } from "rethinkdb-ts";
+import { r as rethink, RDatum, WriteResult } from "rethinkdb-ts";
 import { IUser } from "../../../shared/types/user";
 import { IActant } from "../../../shared/types/actant";
 import { Db } from "./RethinkDB";
 import { IAction, IStatement, ITerritory } from "@shared/types";
 import { IDbModel } from "@models/common";
 import { ModelNotValidError } from "@shared/types/errors";
+import { ActantType } from "@shared/enums";
 
 // USER
 export async function findAllUsers(db: Db): Promise<IUser[]> {
@@ -214,6 +215,80 @@ export async function deleteActant(
   actantId: string
 ): Promise<WriteResult> {
   return rethink.table("actants").get(actantId).delete().run(db.connection);
+}
+
+export async function findAssociatedActantIds(
+  db: Db,
+  actantId: string | false,
+  actionId: string | false
+): Promise<string[]> {
+  const statements = await rethink
+    .table("actants")
+    .filter({
+      class: "S",
+    })
+    .filter(function (row: RDatum) {
+      const tests = [];
+      if (actantId) {
+        tests.push(
+          row("data")("actants").contains((actantObj: RDatum) =>
+            actantObj("actant").eq(actantId)
+          )
+        );
+      }
+      if (actionId) {
+        tests.push(row("data")("action").eq(actionId));
+      }
+
+      if (!tests.length) {
+        return null;
+      } else if (tests.length === 1) {
+        console.log("only first test");
+        return rethink.and(tests[0]);
+      } else {
+        return rethink.and(tests[0], tests[1]);
+      }
+    })
+    .run(db.connection);
+
+  const actantIds: string[] = [];
+
+  (statements as IStatement[]).forEach((s) => {
+    const ids = s.data.actants.map((a) => a.actant);
+    actantIds.push(...ids);
+  });
+
+  return actantIds;
+}
+
+export async function filterActantsByWildcard(
+  db: Db,
+  actantClass: ActantType | false,
+  actantLabel: string | false,
+  actantIds?: string[]
+): Promise<IActant[]> {
+  let query = rethink.table("actants");
+
+  if (actantIds && actantIds.length) {
+    console.log("get all?", actantIds);
+    query = query.getAll(rethink.args(actantIds)) as any;
+  }
+
+  if (actantClass) {
+    console.log("filter by class", actantClass);
+    query = query.filter({
+      class: actantClass,
+    });
+  }
+
+  if (actantLabel) {
+    console.log("filter by label", actantLabel);
+    query = query.filter(function (row: RDatum) {
+      return row("label").downcase().match(`^${actantLabel.toLowerCase()}`);
+    });
+  }
+
+  return query.run(db.connection);
 }
 
 // ACTIONS
