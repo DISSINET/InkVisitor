@@ -1,4 +1,6 @@
 import { IActant, IStatement } from "@shared/types";
+import { DropTargetMonitor } from "react-dnd";
+import { DragItem } from "types";
 
 export const findPositionInStatement = (
   statement: IStatement,
@@ -41,16 +43,21 @@ export const findPositionInStatement = (
   }
 };
 
-export function debounce<T extends unknown[], U>(
-  callback: (...args: T) => PromiseLike<U> | U,
-  wait: number
-) {
-  let timer: NodeJS.Timeout;
+export function debounce<T extends (...args: any[]) => any>(
+  callback: T,
+  ms: number
+): (...args: Parameters<T>) => Promise<ReturnType<T>> {
+  let timer: NodeJS.Timeout | undefined;
 
-  return (...args: T): Promise<U> => {
-    clearTimeout(timer);
-    return new Promise((resolve) => {
-      timer = setTimeout(() => resolve(callback(...args)), wait);
+  return (...args: Parameters<T>) => {
+    if (timer) {
+      clearTimeout(timer);
+    }
+    return new Promise<ReturnType<T>>((resolve) => {
+      timer = setTimeout(() => {
+        const returnValue = callback(...args) as ReturnType<T>;
+        resolve(returnValue);
+      }, ms);
     });
   };
 }
