@@ -30,6 +30,10 @@ export class RequestSearch implements IResponseSearch {
       return new BadParams("invalid 'class' value");
     }
 
+    if (!this.label && !this.actionId && !this.actantId) {
+      return new BadParams("at least some search field has to be set");
+    }
+
     return;
   }
 }

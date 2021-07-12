@@ -243,7 +243,6 @@ export async function findAssociatedActantIds(
       if (!tests.length) {
         return null;
       } else if (tests.length === 1) {
-        console.log("only first test");
         return rethink.and(tests[0]);
       } else {
         return rethink.and(tests[0], tests[1]);
@@ -270,19 +269,16 @@ export async function filterActantsByWildcard(
   let query = rethink.table("actants");
 
   if (actantIds && actantIds.length) {
-    console.log("get all?", actantIds);
     query = query.getAll(rethink.args(actantIds)) as any;
   }
 
   if (actantClass) {
-    console.log("filter by class", actantClass);
     query = query.filter({
       class: actantClass,
     });
   }
 
   if (actantLabel) {
-    console.log("filter by label", actantLabel);
     query = query.filter(function (row: RDatum) {
       return row("label").downcase().match(`^${actantLabel.toLowerCase()}`);
     });
