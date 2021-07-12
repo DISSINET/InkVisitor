@@ -234,14 +234,19 @@ export default Router()
         throw err;
       }
 
-      const associatedActantIds = await findAssociatedActantIds(
-        httpRequest.db,
-        req.actantId,
-        req.actionId
-      );
+      let associatedActantIds: string[] | undefined = undefined;
+      if (req.actantId || req.actionId) {
+        associatedActantIds = await findAssociatedActantIds(
+          httpRequest.db,
+          req.actantId,
+          req.actionId
+        );
+      }
 
-      console.log(associatedActantIds);
-      //associatedActantIds = ["002df9d8-fc8e-49ba-88be-e51d0b8db85e"];
+      if (associatedActantIds && !associatedActantIds.length) {
+        return [];
+      }
+
       const actants = await filterActantsByWildcard(
         httpRequest.db,
         req.class,
