@@ -1,4 +1,4 @@
-import React, { ReactNode, useRef } from "react";
+import React, { ReactNode, useEffect, useRef } from "react";
 import {
   DragSourceMonitor,
   DropTargetMonitor,
@@ -18,6 +18,9 @@ import {
 } from "./TagStyles";
 import { Tooltip } from "components";
 import { useHistory, useLocation } from "react-router-dom";
+import { debounce } from "utils";
+import { useAppDispatch } from "redux/hooks";
+import { setDraggedTerritoryPath } from "redux/features/territoryTree/draggedTerritorySlice";
 
 interface TagProps {
   propId: string;
@@ -68,6 +71,7 @@ export const Tag: React.FC<TagProps> = ({
   let history = useHistory();
   let location = useLocation();
   var hashParams = queryString.parse(location.hash);
+  const dispatch = useAppDispatch();
 
   const ref = useRef<HTMLDivElement>(null);
   const hoverFn = (item: DragItem, monitor: DropTargetMonitor) => {
@@ -93,7 +97,8 @@ export const Tag: React.FC<TagProps> = ({
     if (dragIndex > hoverIndex && hoverClientY > hoverMiddleY) {
       return;
     }
-    moveFn && moveFn(dragIndex, hoverIndex);
+
+    moveFn && debounce(() => moveFn(dragIndex, hoverIndex), 0);
     item.index = hoverIndex;
   };
 
@@ -112,6 +117,15 @@ export const Tag: React.FC<TagProps> = ({
     }),
     // end: updateOrderFn,
   });
+
+  useEffect(() => {
+    if (isDragging) {
+      dispatch(setDraggedTerritoryPath({ id: propId, index }));
+    } else {
+      dispatch(setDraggedTerritoryPath({}));
+    }
+  }, [isDragging]);
+
   drag(drop(ref));
 
   const renderEntityTag = () => (
