@@ -18,7 +18,6 @@ import {
 } from "./TagStyles";
 import { Tooltip } from "components";
 import { useHistory, useLocation } from "react-router-dom";
-import { debounce } from "utils";
 import { useAppDispatch } from "redux/hooks";
 import { setDraggedTerritoryPath } from "redux/features/territoryTree/draggedTerritorySlice";
 
@@ -98,7 +97,7 @@ export const Tag: React.FC<TagProps> = ({
       return;
     }
 
-    moveFn && debounce(() => moveFn(dragIndex, hoverIndex), 0);
+    moveFn && moveFn(dragIndex, hoverIndex);
     item.index = hoverIndex;
   };
 
