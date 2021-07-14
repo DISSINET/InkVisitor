@@ -19,7 +19,6 @@ import {
 import { Tooltip } from "components";
 import { useHistory, useLocation } from "react-router-dom";
 import { useAppDispatch } from "redux/hooks";
-import { setDraggedTerritoryPath } from "redux/features/territoryTree/draggedTerritorySlice";
 
 interface TagProps {
   propId: string;
@@ -115,14 +114,6 @@ export const Tag: React.FC<TagProps> = ({
       isDragging: monitor.isDragging(),
     }),
   });
-
-  useEffect(() => {
-    if (isDragging) {
-      dispatch(setDraggedTerritoryPath({ id: propId, index }));
-    } else {
-      dispatch(setDraggedTerritoryPath({}));
-    }
-  }, [isDragging]);
 
   drag(drop(ref));
 
