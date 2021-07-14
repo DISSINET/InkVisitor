@@ -24,6 +24,9 @@ import { setTreeInitialized } from "redux/features/territoryTree/treeInitializeS
 import theme from "Theme/theme";
 import { rootTerritoryId } from "Theme/constants";
 import { animated, config, useSpring } from "react-spring";
+import api from "api";
+import { IParentTerritory } from "@shared/types/territory";
+import { useQueryClient } from "react-query";
 
 interface TerritoryTreeNode {
   territory: ITerritory;
@@ -35,7 +38,6 @@ interface TerritoryTreeNode {
   index?: number;
   moveFn?: (dragIndex: number, hoverIndex: number) => void;
   empty?: boolean;
-  updateOrderFn?: () => void;
 }
 export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
   territory,
@@ -47,10 +49,10 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
   index,
   moveFn,
   empty,
-  updateOrderFn,
 }) => {
   const dispatch = useAppDispatch();
   const treeInitialized = useAppSelector((state) => state.treeInitialized);
+  const queryClient = useQueryClient();
 
   let history = useHistory();
   var hashParams = queryString.parse(location.hash);
@@ -103,6 +105,20 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
     },
     [childTerritories]
   );
+
+  const moveTerritory = async (newIndex: number) => {
+    if (territory.data.parent) {
+      const parent = territory.data.parent as IParentTerritory;
+      console.log(territory.id, parent.id, newIndex);
+      const res = await api.treeMoveTerritory(
+        territory.id,
+        parent.id,
+        newIndex
+      );
+      console.log(res);
+      queryClient.invalidateQueries("tree");
+    }
+  };
 
   const onCaretClick = (id: string) => {
     hashParams["territory"] = id;
@@ -220,7 +236,7 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
                 index={index}
                 enableTooltip
                 moveFn={moveFn}
-                updateOrderFn={updateOrderFn}
+                updateOrderFn={moveTerritory}
               />
             </animated.div>
             <ContextMenu
@@ -235,14 +251,14 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
   };
 
   return (
-    <div key={territory.id}>
+    <>
       {renderTerritoryTag(territory, territory.id, children.length > 0)}
 
       <StyledChildrenWrap noIndent={lvl === 0}>
         {isExpanded &&
           childTerritories.map((child: any, key: number) => (
             <TerritoryTreeNode
-              key={key}
+              key={`${key}_${child.id}`}
               territory={child.territory}
               children={child.children}
               lvl={child.lvl}
@@ -255,6 +271,6 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
             />
           ))}
       </StyledChildrenWrap>
-    </div>
+    </>
   );
 };
