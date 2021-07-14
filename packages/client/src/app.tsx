@@ -62,6 +62,7 @@ export const App: React.FC<AppProps> = () => {
       <ThemeProvider theme={theme}>
         <GlobalStyle />
         <QueryClientProvider client={queryClient}>
+          <ReactQueryDevtools initialIsOpen={false} />
           <BrowserRouter basename="apps/inkvisitor">
             <Switch>
               <Route
