@@ -62,9 +62,6 @@ export const TerritoryTreeBox: React.FC = () => {
           statementsCount={data.statementsCount}
           initExpandedNodes={selectedTerritoryPath}
           empty={data.empty}
-          updateOrderFn={() => {
-            console.log("hi there");
-          }}
         />
       )}
       <Loader show={isFetching} />
