@@ -62,6 +62,7 @@ const classes = {
 
 interface IActantTag {
   actant: IActant | IEntity;
+  parentId?: string;
   mode?: "selected" | "disabled" | "invalid" | false;
   short?: boolean;
   button?: ReactNode;
@@ -75,6 +76,7 @@ interface IActantTag {
 
 export const ActantTag: React.FC<IActantTag> = ({
   actant,
+  parentId,
   short = false,
   mode,
   button,
@@ -102,6 +104,7 @@ export const ActantTag: React.FC<IActantTag> = ({
       index={index}
       enableTooltip={enableTooltip}
       updateOrderFn={updateOrderFn}
+      parentId={parentId}
     />
   );
 };

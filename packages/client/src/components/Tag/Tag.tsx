@@ -22,6 +22,7 @@ import { useAppDispatch } from "redux/hooks";
 
 interface TagProps {
   propId: string;
+  parentId?: string;
   label?: string;
   category: string;
   color: string;
@@ -52,6 +53,7 @@ interface TagProps {
 
 export const Tag: React.FC<TagProps> = ({
   propId,
+  parentId,
   label = "",
   category = "T",
   color,
@@ -115,6 +117,14 @@ export const Tag: React.FC<TagProps> = ({
     }),
   });
 
+  useEffect(() => {
+    if (isDragging) {
+      dispatch(setDraggedTerritory({ id: propId, parentId, index }));
+    } else {
+      dispatch(setDraggedTerritory({}));
+    }
+  }, [isDragging]);
+
   drag(drop(ref));
 
   const renderEntityTag = () => (
@@ -174,3 +184,10 @@ export const Tag: React.FC<TagProps> = ({
     </>
   );
 };
+function setDraggedTerritory(arg0: {
+  id: string;
+  parentId: string | undefined;
+  index: number | undefined;
+}): any {
+  throw new Error("Function not implemented.");
+}
