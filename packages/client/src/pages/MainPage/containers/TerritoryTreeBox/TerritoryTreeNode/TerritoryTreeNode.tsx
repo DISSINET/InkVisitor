@@ -233,6 +233,7 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
               <ActantTag
                 actant={territoryActant}
                 parentId={parent.id}
+                lvl={lvl}
                 isSelected={isSelected}
                 propId={propId}
                 index={index}

@@ -49,15 +49,6 @@ const parseJwt = (token: string) => {
   }
 };
 
-const api = axios.create({
-  baseURL: process.env.APIURL + "/api/v1",
-  timeout: 5000,
-  responseType: "json",
-  headers: {
-    "Content-Type": "application/json",
-  },
-});
-
 class Api {
   private baseUrl: string;
   private headers: object;

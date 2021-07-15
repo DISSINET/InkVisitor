@@ -19,6 +19,7 @@ import {
 import { Tooltip } from "components";
 import { useHistory, useLocation } from "react-router-dom";
 import { useAppDispatch } from "redux/hooks";
+import { setDraggedTerritory } from "redux/features/territoryTree/draggedTerritorySlice";
 
 interface TagProps {
   propId: string;
@@ -49,6 +50,7 @@ interface TagProps {
     | "left bottom"
     | "center center";
   updateOrderFn?: (newIndex: number) => void;
+  lvl?: number;
 }
 
 export const Tag: React.FC<TagProps> = ({
@@ -67,6 +69,7 @@ export const Tag: React.FC<TagProps> = ({
   position = "right top",
   enableTooltip = false,
   updateOrderFn = () => {},
+  lvl,
 }) => {
   let history = useHistory();
   let location = useLocation();
@@ -74,6 +77,7 @@ export const Tag: React.FC<TagProps> = ({
   const dispatch = useAppDispatch();
 
   const ref = useRef<HTMLDivElement>(null);
+
   const hoverFn = (item: DragItem, monitor: DropTargetMonitor) => {
     if (!ref.current) {
       return;
@@ -119,7 +123,7 @@ export const Tag: React.FC<TagProps> = ({
 
   useEffect(() => {
     if (isDragging) {
-      dispatch(setDraggedTerritory({ id: propId, parentId, index }));
+      dispatch(setDraggedTerritory({ id: propId, parentId, index, lvl }));
     } else {
       dispatch(setDraggedTerritory({}));
     }
@@ -184,10 +188,3 @@ export const Tag: React.FC<TagProps> = ({
     </>
   );
 };
-function setDraggedTerritory(arg0: {
-  id: string;
-  parentId: string | undefined;
-  index: number | undefined;
-}): any {
-  throw new Error("Function not implemented.");
-}
