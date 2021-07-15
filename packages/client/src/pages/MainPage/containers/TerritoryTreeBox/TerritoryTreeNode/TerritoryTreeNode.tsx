@@ -195,6 +195,7 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
     id: string,
     hasChildren: boolean
   ) => {
+    const parent = territory.data.parent as IParentTerritory;
     return (
       <>
         {id !== rootTerritoryId && (
@@ -231,6 +232,7 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
             <animated.div style={animatedStyle}>
               <ActantTag
                 actant={territoryActant}
+                parentId={parent.id}
                 isSelected={isSelected}
                 propId={propId}
                 index={index}
