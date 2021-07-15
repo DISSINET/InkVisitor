@@ -72,6 +72,7 @@ interface IActantTag {
   isSelected?: boolean;
   enableTooltip?: boolean;
   updateOrderFn?: (newIndex: number) => void;
+  lvl?: number;
 }
 
 export const ActantTag: React.FC<IActantTag> = ({
@@ -85,6 +86,7 @@ export const ActantTag: React.FC<IActantTag> = ({
   isSelected,
   enableTooltip = false,
   updateOrderFn,
+  lvl,
 }) => {
   const classId = actant.class;
   const classObject = classes[classId];
@@ -105,6 +107,7 @@ export const ActantTag: React.FC<IActantTag> = ({
       enableTooltip={enableTooltip}
       updateOrderFn={updateOrderFn}
       parentId={parentId}
+      lvl={lvl}
     />
   );
 };
