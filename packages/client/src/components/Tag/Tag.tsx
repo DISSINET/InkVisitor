@@ -49,7 +49,7 @@ interface TagProps {
     | "left center"
     | "left bottom"
     | "center center";
-  updateOrderFn?: (newIndex: number) => void;
+  updateOrderFn?: (item: DragItem) => void;
   lvl?: number;
 }
 
@@ -111,7 +111,7 @@ export const Tag: React.FC<TagProps> = ({
     hover(item: DragItem, monitor: DropTargetMonitor) {
       hoverFn(item, monitor);
     },
-    drop: (item: DragItem) => updateOrderFn(item.index),
+    drop: (item: DragItem) => updateOrderFn(item),
   });
 
   const [{ isDragging }, drag] = useDrag({
