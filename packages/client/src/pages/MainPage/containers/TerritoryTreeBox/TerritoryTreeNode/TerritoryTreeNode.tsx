@@ -27,6 +27,7 @@ import { animated, config, useSpring } from "react-spring";
 import api from "api";
 import { IParentTerritory } from "@shared/types/territory";
 import { useQueryClient } from "react-query";
+import { DragItem } from "types";
 
 interface TerritoryTreeNode {
   territory: ITerritory;
@@ -106,15 +107,11 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
     [childTerritories]
   );
 
-  const moveTerritory = async (newIndex: number) => {
+  const moveTerritory = async (item: DragItem) => {
     if (territory.data.parent) {
       const parent = territory.data.parent as IParentTerritory;
-      console.log(territory.id, parent.id, newIndex);
-      const res = await api.treeMoveTerritory(
-        territory.id,
-        parent.id,
-        newIndex
-      );
+
+      const res = await api.treeMoveTerritory(item.id, parent.id, item.index);
       console.log(res);
       queryClient.invalidateQueries("tree");
     }

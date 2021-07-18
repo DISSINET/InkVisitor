@@ -1,6 +1,7 @@
 import React, { ReactNode } from "react";
 import { Tag } from "components";
 import { IActant, IEntity } from "@shared/types";
+import { DragItem } from "types";
 
 const classes = {
   T: {
@@ -71,7 +72,7 @@ interface IActantTag {
   moveFn?: (dragIndex: number, hoverIndex: number) => void;
   isSelected?: boolean;
   enableTooltip?: boolean;
-  updateOrderFn?: (newIndex: number) => void;
+  updateOrderFn?: (item: DragItem) => void;
   lvl?: number;
 }
 
