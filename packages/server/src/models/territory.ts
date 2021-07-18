@@ -147,6 +147,9 @@ class Territory extends Actant implements ITerritory {
   ): Promise<Record<number, ITerritory>> {
     const list: ITerritory[] = await rethink
       .table(Territory.table)
+      .filter({
+        class: ActantType.Territory,
+      })
       .filter((territory: RDatum) => {
         return rethink.and(
           territory("data")("parent").typeOf().eq("OBJECT"),
