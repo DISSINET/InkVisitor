@@ -165,10 +165,12 @@ export default Router()
         throw new TerritoryDoesNotExits("parent territory does not exist");
       }
 
-      const childs = (await getTerritoryChilds(request.db, parentId)).sort(
-        sortTerritories
+      const childsMap = await new Territory({ ...parent }).findChilds(
+        request.db.connection
       );
-      if (newIndex < 0 || newIndex > childs.length) {
+      const childsArray = Object.values(childsMap).sort(sortTerritories);
+
+      if (newIndex < 0 || newIndex > childsArray.length) {
         throw new TerrytoryInvalidMove(
           "cannot move territory to invalid index"
         );
@@ -186,7 +188,7 @@ export default Router()
         territory.data.parent.id = parentId;
         territory.data.parent.order = -1;
       } else {
-        const currentIndex = childs.findIndex((ter) => ter.id === moveId);
+        const currentIndex = childsArray.findIndex((ter) => ter.id === moveId);
         if (currentIndex === -1) {
           throw new TerrytoryInvalidMove("territory not found in the array");
         }
@@ -194,13 +196,15 @@ export default Router()
         const goingUp = currentIndex > newIndex;
         const position = goingUp ? Math.max(newIndex - 1, 0) : newIndex;
         // newIndex is just the n-th element, does not reflect the order value
-        const newOrderValue = (childs[position].data.parent as IParentTerritory)
-          .order;
+        const newOrderValue = (
+          childsArray[position].data.parent as IParentTerritory
+        ).order;
 
         territory.data.parent.order = newOrderValue;
       }
 
       const childTerritory = new Territory({ ...territory });
+      childTerritory.setSiblings(childsMap);
       await childTerritory.update(request.db.connection, {
         data: childTerritory.data,
       });

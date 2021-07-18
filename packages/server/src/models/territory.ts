@@ -62,6 +62,8 @@ class Territory extends Actant implements ITerritory {
   label = "";
   data = new TerritoryData({});
 
+  _siblings: Record<number, ITerritory> = {};
+
   constructor(data: UnknownObject) {
     super();
 
@@ -79,6 +81,10 @@ class Territory extends Actant implements ITerritory {
     }
 
     return this.data.isValid();
+  }
+
+  setSiblings(childsMap: Record<number, ITerritory>) {
+    this._siblings = childsMap;
   }
 
   async save(db: Connection | undefined): Promise<WriteResult> {
@@ -111,13 +117,9 @@ class Territory extends Actant implements ITerritory {
         throw new InternalServerError("parent for category must be set");
       }
 
-      const siblings = await this.findChilds.call(
-        new Territory({ id: parentId }),
-        db
-      );
       this.data.parent = new TerritoryParent({
         id: parentId,
-        order: Actant.determineOrder(parentData.order, siblings),
+        order: Actant.determineOrder(parentData.order, this._siblings),
       });
       parentData.order = this.data.parent.order;
     }
