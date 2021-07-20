@@ -41,16 +41,12 @@ export function asyncRouteHandler<T = unknown>(
   fn: (req: Request) => Promise<T>
 ): (req: Request, res: Response, next: NextFunction) => void {
   return async (req: Request, res: Response, next: NextFunction) => {
-    await createConnection(req, res, () => null);
-
     try {
       const returnedData = await fn(req);
       res.json(returnedData);
     } catch (err) {
       next(err);
     }
-
-    closeConnection(req, res, () => null);
   };
 }
 

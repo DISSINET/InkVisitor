@@ -28,7 +28,8 @@
     "@common": "dist/server/src/common",
     "@modules": "dist/server/src/modules",
     "@service": "dist/server/src/service",
-    "@models": "dist/server/src/models"
+    "@models": "dist/server/src/models",
+    "@middlewares": "dist/server/src/middlewares"
   },
   "dependencies": {
     "bcrypt": "^5.0.0",
