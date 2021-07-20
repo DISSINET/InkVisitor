@@ -5,7 +5,6 @@ import cors from "cors";
 import { apiPath } from "./common/constants";
 import ActantsRouter from "@modules/actants";
 import TerritoriesRouter from "@modules/territories";
-import MetaRouter from "@modules/meta";
 import UsersRouter from "@modules/users";
 import ActionsRouter from "@modules/actions";
 import StatementsRouter from "@modules/statements";
@@ -58,7 +57,6 @@ routerV1.use("/users", UsersRouter);
 routerV1.use("/actants", ActantsRouter);
 routerV1.use("/actions", ActionsRouter);
 routerV1.use("/territories", TerritoriesRouter);
-routerV1.use("/meta", MetaRouter);
 routerV1.use("/statements", StatementsRouter);
 routerV1.use("/tree", TreeRouter);
 
