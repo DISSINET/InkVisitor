@@ -6,11 +6,13 @@ import {
 } from "rethinkdb-ts";
 import { Express, NextFunction, Request, Response } from "express";
 import { RethinkDBError } from "rethinkdb-ts/lib/error/error";
+import Acl from "@middlewares/acl";
 
 declare global {
   namespace Express {
     export interface Request {
       db: Db;
+      acl: Acl;
       userId?: string;
     }
   }
