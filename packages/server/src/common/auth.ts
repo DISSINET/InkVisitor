@@ -17,7 +17,7 @@ export function checkPassword(
 
 const defaultJwtAlgo = "HS256";
 
-export function generateAccessToken(user: IUser) {
+export function generateAccessToken(user: IUser): string {
   return signJwt(
     {
       user,
@@ -30,7 +30,7 @@ export function generateAccessToken(user: IUser) {
   );
 }
 
-export function validateJwt() {
+export function validateJwt(): jwt.RequestHandler {
   return jwt({
     secret: process.env.SECRET as secretType,
     algorithms: [defaultJwtAlgo],
