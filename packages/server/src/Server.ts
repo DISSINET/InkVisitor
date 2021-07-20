@@ -14,6 +14,7 @@ import Acl from "@middlewares/acl";
 import dbMiddleware from "@middlewares/db";
 import profilerMiddleware from "@middlewares/profiler";
 import errorsMiddleware, { catchAll } from "@middlewares/errors";
+import { validateJwt } from "@common/auth";
 
 const server = express();
 
