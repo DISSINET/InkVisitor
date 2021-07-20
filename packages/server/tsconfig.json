@@ -21,7 +21,8 @@
       "@server/*": ["src/server"],
       "@modules/*": ["src/modules/*"],
       "@service/*": ["src/service/*"],
-      "@models/*": ["src/models/*"]
+      "@models/*": ["src/models/*"],
+      "@middlewares/*": ["src/middlewares/*"]
     },
     "types": ["node"],
     "typeRoots": ["node_modules/@types"]

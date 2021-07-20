@@ -17,6 +17,8 @@ import UsersRouter from "@modules/users";
 import ActionsRouter from "@modules/actions";
 import StatementsRouter from "@modules/statements";
 import TreeRouter from "@modules/tree";
+import Acl from "@middlewares/acl";
+import dbMiddleware from "@middlewares/db";
 
 const server = express();
 server.use(cors());
@@ -61,6 +63,8 @@ server.use(function profilerMiddleware(req: Request, res, next) {
   next();
 });
 
+server.use(dbMiddleware);
+
 // uncomment this to enable auth
 server.use(validateJwt().unless({ path: [/api\/v1\/users\/signin/] }));
 
@@ -68,6 +72,10 @@ server.use(validateJwt().unless({ path: [/api\/v1\/users\/signin/] }));
 const routerV1 = Router();
 
 server.use(apiPath, routerV1);
+
+// uncomment this to enable acl
+const acl = new Acl();
+routerV1.use(acl.authorize);
 
 //routerV1.use('/statements', StatementRouter);.
 routerV1.use("/users", UsersRouter);
