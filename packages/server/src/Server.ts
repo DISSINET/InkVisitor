@@ -66,4 +66,6 @@ server.all("*", catchAll);
 // Errors
 server.use(errorsMiddleware);
 
+acl.assignRoutes(routerV1);
+
 export default server;

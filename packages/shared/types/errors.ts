@@ -26,6 +26,14 @@ class BadCredentialsError extends CustomError {
 }
 
 /**
+ * PermissionDeniedError will be thrown if request is not authorized to request such resource
+ */
+class PermissionDeniedError extends CustomError {
+  public static code = 400;
+  message = "Permission denied";
+}
+
+/**
  * ModelNotValidError is thrown, when incoming raw data in the api handler cannot be assigned to known model.
  * Governed by 'class' attribute
  * @see ../../packages/server/models/factory.ts
@@ -150,6 +158,7 @@ class UnknownError extends CustomError {
 const allErrors: Record<string, any> = {
   InvalidDeleteError,
   UnauthorizedError,
+  PermissionDeniedError,
   InternalServerError,
   ModelNotValidError,
   BadCredentialsError,
@@ -172,6 +181,7 @@ export function getErrorByCode(name: string): CustomError {
 export {
   InvalidDeleteError,
   UnauthorizedError,
+  PermissionDeniedError,
   InternalServerError,
   ModelNotValidError,
   BadCredentialsError,
