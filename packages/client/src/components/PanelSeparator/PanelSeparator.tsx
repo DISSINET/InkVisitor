@@ -110,7 +110,7 @@ export const PanelSeparator: React.FC<PanelSeparator> = ({}) => {
         document.removeEventListener("mouseup", onMouseUp);
       };
     }
-  }, [hovered]);
+  }, [hovered, dragging]);
 
   return (
     <StyledPanelSeparator
