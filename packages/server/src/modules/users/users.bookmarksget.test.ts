@@ -82,6 +82,7 @@ describe("Users bookmarksGet", function () {
         password: "test",
         bookmarks: [
           {
+            id: "test",
             name: "test",
             actantIds: [testId], // this id should exist in actants
           },
