@@ -254,7 +254,7 @@ export default Router()
         associatedActantIds
       );
 
-      return actants.map((a) => {
+      return actants.map((a: IActant) => {
         const out: IResponseSearch = {
           actantId: a.id,
           actantLabel: a.label,
