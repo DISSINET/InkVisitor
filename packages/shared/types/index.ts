@@ -4,6 +4,7 @@ import { IActant } from "./actant";
 import { IEntity } from "./entity";
 import { ILabel } from "./label";
 import { IProp } from "./prop";
+import { IOperator } from "./operator";
 import { IUser, IBookmarkFolder, IStoredTerritory } from "./user";
 import { IResource } from "./resource";
 import { IResponseDetail } from "./response-detail";
@@ -37,6 +38,7 @@ export type {
   IStatementActant,
   IStatementReference,
   ITerritory,
+  IOperator,
   IProp,
   IUser,
   IBookmarkFolder,
