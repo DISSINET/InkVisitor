@@ -5,6 +5,8 @@ import {
   findActantsByLabelOrClass,
   createActant,
   findActantsByIds,
+  findAssociatedActantIds,
+  filterActantsByWildcard,
 } from "@service/shorthands";
 import { getActantType } from "@models/factory";
 import {
@@ -15,12 +17,15 @@ import {
 } from "@shared/types/errors";
 import {
   IActant,
-  IStatement,
   IResponseDetail,
   IResponseGeneric,
   IResponseStatement,
   IResponseActant,
+  IResponseSearch,
+  RequestSearch,
+  IStatement,
 } from "@shared/types";
+
 import Statement from "@models/statement";
 
 export default Router()
@@ -217,5 +222,45 @@ export default Router()
         usedIn: usedInStatements,
         metaStatements: meta,
       };
+    })
+  )
+  .post(
+    "/search",
+    asyncRouteHandler<IResponseSearch[]>(async (httpRequest: Request) => {
+      const req = new RequestSearch(httpRequest.body);
+
+      const err = req.validate();
+      if (err) {
+        throw err;
+      }
+
+      let associatedActantIds: string[] | undefined = undefined;
+      if (req.actantId || req.actionId) {
+        associatedActantIds = await findAssociatedActantIds(
+          httpRequest.db,
+          req.actantId,
+          req.actionId
+        );
+      }
+
+      if (associatedActantIds && !associatedActantIds.length) {
+        return [];
+      }
+
+      const actants = await filterActantsByWildcard(
+        httpRequest.db,
+        req.class,
+        req.label,
+        associatedActantIds
+      );
+
+      return actants.map((a) => {
+        const out: IResponseSearch = {
+          actantId: a.id,
+          actantLabel: a.label,
+          class: a.class,
+        };
+        return out;
+      });
     })
   );
