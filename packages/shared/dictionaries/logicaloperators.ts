@@ -1,4 +1,4 @@
-export const languageDict = [
+export const logicalOperatorsDict = [
   { label: "xor", value: "x" },
   { label: "and", value: "a" },
   { label: "or", value: "o" },
