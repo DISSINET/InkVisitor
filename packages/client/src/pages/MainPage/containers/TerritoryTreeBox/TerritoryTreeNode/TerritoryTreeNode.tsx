@@ -27,7 +27,7 @@ import { animated, config, useSpring } from "react-spring";
 import api from "api";
 import { IParentTerritory } from "@shared/types/territory";
 import { useQueryClient } from "react-query";
-import { DragItem } from "types";
+import { DraggedTerritoryItem, DragItem } from "types";
 
 interface TerritoryTreeNode {
   territory: ITerritory;
@@ -112,7 +112,6 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
       const parent = territory.data.parent as IParentTerritory;
 
       const res = await api.treeMoveTerritory(item.id, parent.id, item.index);
-      console.log(res);
       queryClient.invalidateQueries("tree");
     }
   };
@@ -187,6 +186,28 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
     }
   };
 
+  const draggedTerritory: DraggedTerritoryItem = useAppSelector(
+    (state) => state.territoryTree.draggedTerritory
+  );
+
+  const [tempDisabled, setTempDisabled] = useState(false);
+  const [tempHidden, setTempHidden] = useState(false);
+
+  useEffect(() => {
+    if (
+      draggedTerritory.parentId &&
+      draggedTerritory.parentId !==
+        (territory.data.parent as IParentTerritory).id &&
+      draggedTerritory.parentId !== propId
+    ) {
+      draggedTerritory.lvl && draggedTerritory.lvl < lvl
+        ? setTempHidden(true)
+        : setTempDisabled(true);
+    } else {
+      setTempDisabled(false);
+    }
+  }, [draggedTerritory]);
+
   const renderTerritoryTag = (
     territoryActant: IActant,
     id: string,
@@ -195,57 +216,63 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
     const parent = territory.data.parent as IParentTerritory;
     return (
       <>
-        {id !== rootTerritoryId && (
-          <StyledTerritoryTagWrap>
-            <StyledIconWrap>
-              {hasChildren ? (
-                <>{getArrowIcon(id)}</>
-              ) : (
-                <>
-                  {statementsCount > 0 ? (
-                    <StyledFaCircle
-                      size={11}
-                      onClick={() => {
-                        hashParams["territory"] = id;
-                        history.push({
-                          hash: queryString.stringify(hashParams),
-                        });
-                      }}
-                    />
-                  ) : (
-                    <StyledFaDotCircle
-                      size={11}
-                      onClick={() => {
-                        hashParams["territory"] = id;
-                        history.push({
-                          hash: queryString.stringify(hashParams),
-                        });
-                      }}
-                    />
-                  )}
-                </>
-              )}
-            </StyledIconWrap>
-            <animated.div style={animatedStyle}>
-              <ActantTag
-                actant={territoryActant}
-                parentId={parent.id}
-                lvl={lvl}
-                isSelected={isSelected}
-                propId={propId}
-                index={index}
-                enableTooltip
-                moveFn={moveFn}
-                updateOrderFn={moveTerritory}
+        <>
+          {!tempHidden && !tempDisabled && id !== rootTerritoryId && (
+            <StyledTerritoryTagWrap>
+              <StyledIconWrap>
+                {hasChildren ? (
+                  <>{getArrowIcon(id)}</>
+                ) : (
+                  <>
+                    {statementsCount > 0 ? (
+                      <StyledFaCircle
+                        size={11}
+                        onClick={() => {
+                          hashParams["territory"] = id;
+                          history.push({
+                            hash: queryString.stringify(hashParams),
+                          });
+                        }}
+                      />
+                    ) : (
+                      <StyledFaDotCircle
+                        size={11}
+                        onClick={() => {
+                          hashParams["territory"] = id;
+                          history.push({
+                            hash: queryString.stringify(hashParams),
+                          });
+                        }}
+                      />
+                    )}
+                  </>
+                )}
+              </StyledIconWrap>
+              <animated.div style={animatedStyle}>
+                <ActantTag
+                  actant={territoryActant}
+                  parentId={parent.id}
+                  lvl={lvl}
+                  isSelected={isSelected}
+                  propId={propId}
+                  index={index}
+                  enableTooltip
+                  moveFn={moveFn}
+                  updateOrderFn={moveTerritory}
+                  disabled={tempDisabled || tempHidden}
+                />
+              </animated.div>
+              <ContextMenu
+                territoryActant={territoryActant}
+                onMenuOpen={() => setContextMenuOpen(true)}
+                onMenuClose={() => setContextMenuOpen(false)}
               />
-            </animated.div>
-            <ContextMenu
-              territoryActant={territoryActant}
-              onMenuOpen={() => setContextMenuOpen(true)}
-              onMenuClose={() => setContextMenuOpen(false)}
-            />
-          </StyledTerritoryTagWrap>
-        )}
+            </StyledTerritoryTagWrap>
+          )}
+          {id !== rootTerritoryId && tempDisabled && (
+            <h6 style={{ height: "2.5rem" }}>disabled tag</h6>
+          )}
+        </>
       </>
     );
   };

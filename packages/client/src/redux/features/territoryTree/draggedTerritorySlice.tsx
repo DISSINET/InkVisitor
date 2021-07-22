@@ -1,20 +1,15 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { DraggedTerritoryItem } from "types";
 
-interface DraggedItem {
-  id?: string;
-  parentId?: string;
-  index?: number;
-  lvl?: number;
-}
-const initialState: DraggedItem = {};
+const initialState: DraggedTerritoryItem = {};
 
 const draggedTerritorySlice = createSlice({
   name: "draggedTerritory",
   initialState: initialState,
   reducers: {
     setDraggedTerritory: (
-      state: DraggedItem,
-      action: PayloadAction<DraggedItem>
+      state: DraggedTerritoryItem,
+      action: PayloadAction<DraggedTerritoryItem>
     ) => (state = action.payload),
   },
 });

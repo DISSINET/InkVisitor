@@ -108,3 +108,9 @@ export type DragItem = {
   id: string;
   type: string;
 };
+export interface DraggedTerritoryItem {
+  id?: string;
+  parentId?: string;
+  lvl?: number;
+  index?: number;
+}

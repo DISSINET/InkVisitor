@@ -74,6 +74,7 @@ interface IActantTag {
   enableTooltip?: boolean;
   updateOrderFn?: (item: DragItem) => void;
   lvl?: number;
+  disabled?: boolean;
 }
 
 export const ActantTag: React.FC<IActantTag> = ({
@@ -88,6 +89,7 @@ export const ActantTag: React.FC<IActantTag> = ({
   enableTooltip = false,
   updateOrderFn,
   lvl,
+  disabled,
 }) => {
   const classId = actant.class;
   const classObject = classes[classId];
@@ -109,6 +111,7 @@ export const ActantTag: React.FC<IActantTag> = ({
       updateOrderFn={updateOrderFn}
       parentId={parentId}
       lvl={lvl}
+      disabled={disabled}
     />
   );
 };
