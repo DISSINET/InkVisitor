@@ -27,6 +27,7 @@ import {
 } from "@shared/types";
 
 import Statement from "@models/statement";
+import { IDbModel } from "@models/common";
 
 export default Router()
   .get(
@@ -110,12 +111,18 @@ export default Router()
         );
       }
 
-      // get correct IDbModel implementation
-      const model = getActantType({
-        ...actantData,
-        class: existingActant.class,
-        id: actantId,
-      });
+      let model: IDbModel | null = null;
+
+      try {
+        // get correct IDbModel implementation
+        model = getActantType({
+          ...actantData,
+          class: existingActant.class,
+          id: actantId,
+        });
+      } catch (e) {
+        throw new ModelNotValidError(e.toString);
+      }
 
       // class is from the db, so it must work, unless bad data
       if (!model) {
@@ -123,7 +130,7 @@ export default Router()
       }
 
       // checking the validity of the final model (already has updated data)
-      if (!model.isValid) {
+      if (!model.isValid()) {
         throw new ModelNotValidError("");
       }
 
