@@ -4,6 +4,7 @@ import { IActant } from "./actant";
 import { IEntity } from "./entity";
 import { ILabel } from "./label";
 import { IProp } from "./prop";
+import { IOperator } from "./operator";
 import { IUser, IBookmarkFolder, IStoredTerritory } from "./user";
 import { IResource } from "./resource";
 import { IResponseDetail } from "./response-detail";
@@ -25,6 +26,8 @@ import { IStatement, IStatementActant, IStatementReference } from "./statement";
 import { ITerritory } from "./territory";
 import { IOption } from "./option";
 import { IResponseGeneric } from "./response-generic";
+import { IResponseSearch } from "./response-search";
+import { RequestSearch } from "./request-search";
 
 export type {
   IAudit,
@@ -37,6 +40,7 @@ export type {
   IStatementActant,
   IStatementReference,
   ITerritory,
+  IOperator,
   IProp,
   IUser,
   IBookmarkFolder,
@@ -55,4 +59,7 @@ export type {
   IResponseUser,
   IResponseStoredTerritory,
   IResponseGeneric,
+  IResponseSearch,
 };
+
+export { RequestSearch };

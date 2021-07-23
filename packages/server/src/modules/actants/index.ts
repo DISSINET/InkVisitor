@@ -5,6 +5,8 @@ import {
   findActantsByLabelOrClass,
   createActant,
   findActantsByIds,
+  findAssociatedActantIds,
+  filterActantsByWildcard,
 } from "@service/shorthands";
 import { getActantType } from "@models/factory";
 import {
@@ -15,13 +17,17 @@ import {
 } from "@shared/types/errors";
 import {
   IActant,
-  IStatement,
   IResponseDetail,
   IResponseGeneric,
   IResponseStatement,
   IResponseActant,
+  IResponseSearch,
+  RequestSearch,
+  IStatement,
 } from "@shared/types";
+
 import Statement from "@models/statement";
+import { IDbModel } from "@models/common";
 
 export default Router()
   .get(
@@ -105,12 +111,18 @@ export default Router()
         );
       }
 
-      // get correct IDbModel implementation
-      const model = getActantType({
-        ...actantData,
-        class: existingActant.class,
-        id: actantId,
-      });
+      let model: IDbModel | null = null;
+
+      try {
+        // get correct IDbModel implementation
+        model = getActantType({
+          ...actantData,
+          class: existingActant.class,
+          id: actantId,
+        });
+      } catch (e) {
+        throw new ModelNotValidError(e.toString);
+      }
 
       // class is from the db, so it must work, unless bad data
       if (!model) {
@@ -118,7 +130,7 @@ export default Router()
       }
 
       // checking the validity of the final model (already has updated data)
-      if (!model.isValid) {
+      if (!model.isValid()) {
         throw new ModelNotValidError("");
       }
 
@@ -217,5 +229,45 @@ export default Router()
         usedIn: usedInStatements,
         metaStatements: meta,
       };
+    })
+  )
+  .post(
+    "/search",
+    asyncRouteHandler<IResponseSearch[]>(async (httpRequest: Request) => {
+      const req = new RequestSearch(httpRequest.body);
+
+      const err = req.validate();
+      if (err) {
+        throw err;
+      }
+
+      let associatedActantIds: string[] | undefined = undefined;
+      if (req.actantId || req.actionId) {
+        associatedActantIds = await findAssociatedActantIds(
+          httpRequest.db,
+          req.actantId,
+          req.actionId
+        );
+      }
+
+      if (associatedActantIds && !associatedActantIds.length) {
+        return [];
+      }
+
+      const actants = await filterActantsByWildcard(
+        httpRequest.db,
+        req.class,
+        req.label,
+        associatedActantIds
+      );
+
+      return actants.map((a: IActant) => {
+        const out: IResponseSearch = {
+          actantId: a.id,
+          actantLabel: a.label,
+          class: a.class,
+        };
+        return out;
+      });
     })
   );

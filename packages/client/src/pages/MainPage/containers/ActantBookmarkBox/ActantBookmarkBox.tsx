@@ -66,7 +66,6 @@ import {
   IBookmarkFolder,
   IResponseBookmarks,
   IResponseBookmarkFolder,
-  IResponseActant,
 } from "@shared/types";
 
 const bookmarkEntities = ["P", "G", "O", "C", "L", "V", "E", "S", "T", "R"];
@@ -113,7 +112,7 @@ export const ActantBookmarkBox: React.FC = () => {
         return {
           id: bookmark.id,
           name: bookmark.name,
-          actantIds: bookmark.actants.map((a: IResponseActant) => a.id),
+          actantIds: bookmark.actants.map((a: IActant) => a.id),
         };
       });
     } else {
