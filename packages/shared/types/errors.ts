@@ -6,14 +6,22 @@
  */
 export class CustomError extends Error {
   public static code: number = 400;
+  public loggable: boolean = false;
+  public log: string = "";
 
   constructor(m: string) {
     super(m);
+    this.log = m;
+    console.log(this.log);
     this.name = this.constructor.name; // so the value would be taken from the constructor - not the default Error
   }
 
   statusCode(): number {
     return (this.constructor as any).code;
+  }
+
+  shouldLog(): boolean {
+    return this.loggable;
   }
 }
 
@@ -41,6 +49,7 @@ class PermissionDeniedError extends CustomError {
 class ModelNotValidError extends CustomError {
   public static code = 400;
   message = "Model not valid";
+  loggable = true;
 }
 
 /**

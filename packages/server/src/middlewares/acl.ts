@@ -22,8 +22,8 @@ class Acl {
     next();
   }
 
-  public async getError(req: Request): Promise<CustomError> {
-    return permissionDeniedErr;
+  public async getError(req: Request): Promise<CustomError | null> {
+    return null;
   }
 }
 
