@@ -121,7 +121,7 @@ export default Router()
           id: actantId,
         });
       } catch (e) {
-        throw new ModelNotValidError(e.toString);
+        throw new ModelNotValidError(e.toString());
       }
 
       // class is from the db, so it must work, unless bad data
