@@ -845,11 +845,13 @@ export const StatementEditorBox: React.FC = () => {
                   type="textarea"
                   width={1000}
                   onChangeFn={(newValue: string) => {
-                    const newData = {
-                      ...statement.data,
-                      ...{ note: newValue },
-                    };
-                    update(newData);
+                    if (statement.data.note !== newValue) {
+                      const newData = {
+                        ...statement.data,
+                        ...{ note: newValue },
+                      };
+                      update(newData);
+                    }
                   }}
                   value={statement.data.note}
                 />
