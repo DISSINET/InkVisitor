@@ -143,6 +143,11 @@ export const StatementEditorBox: React.FC = () => {
         actants: [...statement.data.actants, newStatementActant],
       };
       update(newData);
+      queryClient.invalidateQueries([
+        "territory",
+        "statement-list",
+        territoryId,
+      ]);
     }
   };
 
