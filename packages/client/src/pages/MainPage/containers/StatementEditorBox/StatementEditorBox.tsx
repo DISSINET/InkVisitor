@@ -580,8 +580,7 @@ export const StatementEditorBox: React.FC = () => {
                         width={1000}
                         onChangeFn={(newValue: string) => {
                           const newData = {
-                            ...{ text: newValue },
-                            ...statement.data,
+                            text: newValue,
                           };
                           update(newData);
                         }}
@@ -595,10 +594,15 @@ export const StatementEditorBox: React.FC = () => {
                           label: string;
                         }) => {
                           const newData = {
-                            ...statement.data,
+                            // ...statement.data,
                             ...{ action: newActionValue.value },
                           };
                           update(newData);
+                          queryClient.invalidateQueries([
+                            "territory",
+                            "statement-list",
+                            territoryId,
+                          ]);
                         }}
                         value={statement.data.action}
                       />
