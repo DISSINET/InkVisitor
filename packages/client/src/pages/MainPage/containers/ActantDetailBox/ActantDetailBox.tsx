@@ -32,7 +32,7 @@ import {
   FaTrashAlt,
   FaStepBackward,
   FaStepForward,
-  FaRecycle
+  FaRecycle,
 } from "react-icons/fa";
 import {
   ActantTag,
@@ -188,8 +188,7 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
                 value={actant.label}
                 onChangeFn={async (newLabel: string) => {
                   const res = await api.actantsUpdate(actant.id, {
-                    ...actant,
-                    ...{ label: newLabel },
+                    label: newLabel,
                   });
                   queryClient.invalidateQueries(["actant"]);
                   queryClient.invalidateQueries(["statement"]);
@@ -198,27 +197,26 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
                 }}
               />
               <ButtonGroup>
-              <Button
-                color="danger"
-                icon={<FaTrashAlt />}
-                onClick={() => {
-                  hashParams["actant"] = "";
-                  history.push({
-                    hash: queryString.stringify(hashParams),
-                  });
-                }}
-              />
-              <Button
-              key="refresh"
-              icon={<FaRecycle size={14} />}
-              tooltip="refresh data"
-              color="info"
-              label="refresh"
-              onClick={() => {
-                queryClient.invalidateQueries(["actant"]);
-              }}
-            />
-
+                <Button
+                  color="danger"
+                  icon={<FaTrashAlt />}
+                  onClick={() => {
+                    hashParams["actant"] = "";
+                    history.push({
+                      hash: queryString.stringify(hashParams),
+                    });
+                  }}
+                />
+                <Button
+                  key="refresh"
+                  icon={<FaRecycle size={14} />}
+                  tooltip="refresh data"
+                  color="info"
+                  label="refresh"
+                  onClick={() => {
+                    queryClient.invalidateQueries(["actant"]);
+                  }}
+                />
               </ButtonGroup>
             </StyledContentRow>
           </StyledSection>
@@ -235,7 +233,6 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
                 queryClient.invalidateQueries(["actant"]);
               }}
             />
-            
 
             <StyledSectionMetaTable>
               {metaStatements.map((metaStatement: IResponseStatement) => {
