@@ -8,7 +8,7 @@ import {
 } from "react-dnd";
 const queryString = require("query-string");
 
-import { DraggedTerritoryItem, DragItem, ItemTypes } from "types";
+import { DragItem, ItemTypes } from "types";
 import {
   StyledTagWrapper,
   StyledEntityTag,
@@ -18,7 +18,7 @@ import {
 } from "./TagStyles";
 import { Tooltip } from "components";
 import { useHistory, useLocation } from "react-router-dom";
-import { useAppDispatch, useAppSelector } from "redux/hooks";
+import { useAppDispatch } from "redux/hooks";
 import { setDraggedTerritory } from "redux/features/territoryTree/draggedTerritorySlice";
 
 interface TagProps {
@@ -131,24 +131,6 @@ export const Tag: React.FC<TagProps> = ({
     }
   }, [isDragging]);
 
-  // const draggedTerritory: DraggedTerritoryItem = useAppSelector(
-  //   (state) => state.territoryTree.draggedTerritory
-  // );
-
-  // const [tempDisabled, setTempDisabled] = useState(false);
-
-  // useEffect(() => {
-  //   if (
-  //     draggedTerritory.parentId &&
-  //     draggedTerritory.parentId !== parentId &&
-  //     draggedTerritory.parentId !== propId
-  //   ) {
-  //     setTempDisabled(true);
-  //   } else {
-  //     setTempDisabled(false);
-  //   }
-  // }, [draggedTerritory]);
-
   drag(drop(ref));
 
   const renderEntityTag = () => (
@@ -186,7 +168,7 @@ export const Tag: React.FC<TagProps> = ({
           <Tooltip label={label} disabled={!enableTooltip} position={position}>
             <StyledTooltipSeparator>
               <StyledTagWrapper
-                ref={!disabled ? ref : null}
+                ref={ref}
                 borderStyle={borderStyle}
                 onDoubleClick={(e: React.MouseEvent) => onDoubleClick(e)}
               >

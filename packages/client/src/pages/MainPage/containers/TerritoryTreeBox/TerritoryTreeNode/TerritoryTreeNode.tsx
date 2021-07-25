@@ -191,7 +191,7 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
   );
 
   const [tempDisabled, setTempDisabled] = useState(false);
-  const [tempHidden, setTempHidden] = useState(false);
+  const [hideChildTerritories, setHideChildTerritories] = useState(false);
 
   useEffect(() => {
     if (
@@ -200,11 +200,19 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
         (territory.data.parent as IParentTerritory).id &&
       draggedTerritory.parentId !== propId
     ) {
-      draggedTerritory.lvl && draggedTerritory.lvl < lvl
-        ? setTempHidden(true)
-        : setTempDisabled(true);
+      if (draggedTerritory.lvl && draggedTerritory.lvl > lvl) {
+        setTempDisabled(true);
+      }
     } else {
       setTempDisabled(false);
+    }
+
+    if (draggedTerritory.parentId) {
+      if (draggedTerritory.lvl && draggedTerritory.lvl === lvl) {
+        setHideChildTerritories(true);
+      }
+    } else {
+      setHideChildTerritories(false);
     }
   }, [draggedTerritory]);
 
@@ -217,7 +225,7 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
     return (
       <>
         <>
-          {!tempHidden && !tempDisabled && id !== rootTerritoryId && (
+          {!tempDisabled && id !== rootTerritoryId && (
             <StyledTerritoryTagWrap>
               <StyledIconWrap>
                 {hasChildren ? (
@@ -259,7 +267,7 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
                   enableTooltip
                   moveFn={moveFn}
                   updateOrderFn={moveTerritory}
-                  disabled={tempDisabled || tempHidden}
+                  disabled={tempDisabled}
                 />
               </animated.div>
               <ContextMenu
@@ -282,7 +290,8 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
       {renderTerritoryTag(territory, territory.id, children.length > 0)}
 
       <StyledChildrenWrap noIndent={lvl === 0}>
-        {isExpanded &&
+        {!hideChildTerritories &&
+          isExpanded &&
           childTerritories.map((child: any, key: number) => (
             <TerritoryTreeNode
               key={`${key}_${child.id}`}

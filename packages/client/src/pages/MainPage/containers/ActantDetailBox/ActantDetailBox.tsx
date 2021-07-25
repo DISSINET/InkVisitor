@@ -187,9 +187,11 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
               <Input
                 value={actant.label}
                 onChangeFn={async (newLabel: string) => {
-                  const res = await api.actantsUpdate(actant.id, {
-                    label: newLabel,
-                  });
+                  if (newLabel !== actant.label) {
+                    const res = await api.actantsUpdate(actant.id, {
+                      label: newLabel,
+                    });
+                  }
                   queryClient.invalidateQueries(["actant"]);
                   queryClient.invalidateQueries(["statement"]);
                   queryClient.invalidateQueries(["tree"]);
