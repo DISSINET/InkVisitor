@@ -194,11 +194,21 @@ export default Router()
         }
 
         const goingUp = currentIndex > newIndex;
-        const position = goingUp ? Math.max(newIndex - 1, 0) : newIndex;
+
         // newIndex is just the n-th element, does not reflect the order value
-        const newOrderValue = (
-          childsArray[position].data.parent as IParentTerritory
-        ).order;
+        let newOrderValue: number;
+
+        if (goingUp && newIndex == 0) {
+          // move to be the first element - special case - we don't want to assign the same order value
+          newOrderValue =
+            (childsArray[0].data.parent as IParentTerritory).order - 1;
+        } else {
+          newOrderValue = (
+            childsArray[goingUp ? newIndex - 1 : newIndex].data
+              .parent as IParentTerritory
+          ).order;
+        }
+
 
         territory.data.parent.order = newOrderValue;
       }
