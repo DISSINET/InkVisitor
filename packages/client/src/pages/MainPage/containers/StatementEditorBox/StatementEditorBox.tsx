@@ -586,7 +586,8 @@ export const StatementEditorBox: React.FC = () => {
                         onChangeFn={(newValue: string) => {
                           if (newValue !== statement.data.text) {
                             const newData = {
-                              text: newValue,
+                              ...statement.data,
+                              ...{ text: newValue },
                             };
                             update(newData);
                           }
