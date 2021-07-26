@@ -586,8 +586,7 @@ export const StatementEditorBox: React.FC = () => {
                         onChangeFn={(newValue: string) => {
                           if (newValue !== statement.data.text) {
                             const newData = {
-                              ...statement.data,
-                              ...{ text: newValue },
+                              text: newValue,
                             };
                             update(newData);
                           }
@@ -602,7 +601,7 @@ export const StatementEditorBox: React.FC = () => {
                           label: string;
                         }) => {
                           const newData = {
-                            ...{ action: newActionValue.value },
+                            action: newActionValue.value,
                           };
                           update(newData);
                           queryClient.invalidateQueries([
@@ -622,8 +621,7 @@ export const StatementEditorBox: React.FC = () => {
                     value={statement.data.modality}
                     onChangeFn={(newValue: string) => {
                       const newData = {
-                        ...statement.data,
-                        ...{ modality: newValue },
+                        modality: newValue,
                       };
                       update(newData);
                     }}
@@ -632,8 +630,7 @@ export const StatementEditorBox: React.FC = () => {
                     value={statement.data.elvl}
                     onChangeFn={(newValue: string) => {
                       const newData = {
-                        ...statement.data,
-                        ...{ elvl: newValue },
+                        elvl: newValue,
                       };
                       update(newData);
                     }}
@@ -642,8 +639,7 @@ export const StatementEditorBox: React.FC = () => {
                     value={statement.data.certainty}
                     onChangeFn={(newValue: string) => {
                       const newData = {
-                        ...statement.data,
-                        ...{ certainty: newValue },
+                        certainty: newValue,
                       };
                       update(newData);
                     }}
@@ -848,8 +844,7 @@ export const StatementEditorBox: React.FC = () => {
                   onChangeFn={(newValue: string) => {
                     if (statement.data.note !== newValue) {
                       const newData = {
-                        ...statement.data,
-                        ...{ note: newValue },
+                        note: newValue,
                       };
                       update(newData);
                     }
