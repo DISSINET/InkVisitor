@@ -117,13 +117,13 @@ export const Tag: React.FC<TagProps> = ({
       isDragging: monitor.isDragging(),
     }),
     end: (item: DragItem | undefined, monitor: DragSourceMonitor) => {
-      item && updateOrderFn(item);
+      if (item && item.index !== index) updateOrderFn(item);
     },
   });
 
   useEffect(() => {
     if (isDragging) {
-      dispatch(setDraggedTerritory({ id: propId, parentId, lvl, index }));
+      dispatch(setDraggedTerritory({ id: propId, parentId, index, lvl }));
     } else {
       dispatch(setDraggedTerritory({}));
     }
