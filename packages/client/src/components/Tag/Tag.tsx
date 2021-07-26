@@ -71,7 +71,6 @@ export const Tag: React.FC<TagProps> = ({
   enableTooltip = false,
   updateOrderFn = () => {},
   lvl,
-  disabled = false,
 }) => {
   let history = useHistory();
   let location = useLocation();
