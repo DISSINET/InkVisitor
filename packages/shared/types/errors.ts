@@ -108,6 +108,14 @@ class TerritoryDoesNotExits extends CustomError {
 }
 
 /**
+ * PermissionDoesNotExits will be thrown when attempting to remove/update the permission entry which does not exist
+ */
+class PermissionDoesNotExits extends CustomError {
+  public static code = 400;
+  message = "Permission does not exist";
+}
+
+/**
  * TerritoriesBrokenError is an error associated with broken tree structure (more than one root element)
  */
 class TerritoriesBrokenError extends CustomError {
@@ -176,6 +184,7 @@ const allErrors: Record<string, any> = {
   ActantDoesNotExits,
   ActionDoesNotExits,
   StatementDoesNotExits,
+  PermissionDoesNotExits,
   TerritoriesBrokenError,
   TerritoryDoesNotExits,
   TerrytoryInvalidMove,
@@ -199,6 +208,7 @@ export {
   ActantDoesNotExits,
   ActionDoesNotExits,
   StatementDoesNotExits,
+  PermissionDoesNotExits,
   TerritoriesBrokenError,
   TerritoryDoesNotExits,
   TerrytoryInvalidMove,

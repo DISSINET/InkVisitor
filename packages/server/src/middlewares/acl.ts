@@ -46,7 +46,6 @@ class Acl {
   public async validate(req: Request): Promise<CustomError | null> {
     req.userId = "1";
     const user = await User.getUser(req.db.connection, req.userId);
-    console.log(user);
     if (!req.userId) {
       console.log("no user");
       return permissionDeniedErr;

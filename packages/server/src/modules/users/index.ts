@@ -31,7 +31,6 @@ import {
   IActant,
   IResponseGeneric,
 } from "@shared/types";
-import { UNAUTHORIZED } from "http-status-codes";
 
 export default Router()
   .post(

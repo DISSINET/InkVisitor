@@ -1,5 +1,21 @@
 [
   {
+    "controller": "acl",
+    "method": "index",
+    "roles": ["admin"]
+  },
+  {
+    "controller": "acl",
+    "method": "update",
+    "roles": ["admin"]
+  },
+  {
+    "controller": "acl",
+    "method": "delete",
+    "roles": ["admin"]
+  },
+
+  {
     "controller": "statements",
     "method": "get",
     "roles": ["*"]
