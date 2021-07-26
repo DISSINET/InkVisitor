@@ -65,7 +65,7 @@ export const Tag: React.FC<TagProps> = ({
   button,
   invertedLabel,
   short = false,
-  index,
+  index = -1,
   moveFn,
   position = "right top",
   enableTooltip = false,
@@ -79,40 +79,36 @@ export const Tag: React.FC<TagProps> = ({
 
   const ref = useRef<HTMLDivElement>(null);
 
-  const hoverFn = (item: DragItem, monitor: DropTargetMonitor) => {
-    if (!ref.current) {
-      return;
-    }
-    const dragIndex: number = item.index;
-    const hoverIndex: number | undefined = index;
-
-    if (dragIndex === hoverIndex) {
-      return;
-    }
-    const hoverBoundingRect = ref.current?.getBoundingClientRect();
-    const hoverMiddleY = (hoverBoundingRect.bottom - hoverBoundingRect.top) / 2;
-    const clientOffset = monitor.getClientOffset();
-    const hoverClientY = (clientOffset as XYCoord).y - hoverBoundingRect.top;
-    if (hoverIndex === undefined) {
-      return;
-    }
-    if (dragIndex < hoverIndex && hoverClientY < hoverMiddleY) {
-      return;
-    }
-    if (dragIndex > hoverIndex && hoverClientY > hoverMiddleY) {
-      return;
-    }
-
-    moveFn && moveFn(dragIndex, hoverIndex);
-    item.index = hoverIndex;
-  };
-
   const [, drop] = useDrop({
     accept: ItemTypes.TAG,
     hover(item: DragItem, monitor: DropTargetMonitor) {
-      hoverFn(item, monitor);
+      if (!ref.current) {
+        return;
+      }
+      const dragIndex: number = item.index;
+      const hoverIndex: number | undefined = index;
+
+      if (dragIndex === hoverIndex) {
+        return;
+      }
+      const hoverBoundingRect = ref.current?.getBoundingClientRect();
+      const hoverMiddleY =
+        (hoverBoundingRect.bottom - hoverBoundingRect.top) / 2;
+      const clientOffset = monitor.getClientOffset();
+      const hoverClientY = (clientOffset as XYCoord).y - hoverBoundingRect.top;
+      if (hoverIndex === undefined) {
+        return;
+      }
+      if (dragIndex < hoverIndex && hoverClientY < hoverMiddleY) {
+        return;
+      }
+      if (dragIndex > hoverIndex && hoverClientY > hoverMiddleY) {
+        return;
+      }
+
+      moveFn && moveFn(dragIndex, hoverIndex);
+      item.index = hoverIndex;
     },
-    drop: (item: DragItem) => updateOrderFn(item),
   });
 
   const [{ isDragging }, drag] = useDrag({
@@ -120,6 +116,9 @@ export const Tag: React.FC<TagProps> = ({
     collect: (monitor: DragSourceMonitor) => ({
       isDragging: monitor.isDragging(),
     }),
+    end: (item: DragItem | undefined, monitor: DragSourceMonitor) => {
+      item && updateOrderFn(item);
+    },
   });
 
   useEffect(() => {
