@@ -196,6 +196,7 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
                   queryClient.invalidateQueries(["statement"]);
                   queryClient.invalidateQueries(["tree"]);
                   queryClient.invalidateQueries(["territory"]);
+                  queryClient.invalidateQueries(["bookmarks"]);
                 }}
               />
               <ButtonGroup>

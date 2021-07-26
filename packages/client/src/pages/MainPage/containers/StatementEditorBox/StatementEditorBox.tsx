@@ -29,7 +29,6 @@ import {
 } from "./../../../../../../shared/dictionaries";
 import {
   IActant,
-  IStatementAction,
   IProp,
   IStatement,
   IStatementReference,
@@ -39,9 +38,6 @@ import { Button, Input, Loader } from "components";
 import { ActantSuggester } from "./../";
 
 import {
-  StyledEditorSection,
-  StyledEditorSectionHeader,
-  StyledEditorSectionContent,
   StyledReferencesListColumn,
   StyledListHeaderColumn,
   StyledPropsActantHeader,
@@ -51,6 +47,9 @@ import {
   StyledReferencesList,
   StyledTagsList,
   StyledTagsListItem,
+  StyledEditorSection,
+  StyledEditorSectionContent,
+  StyledEditorSectionHeader,
   StyledEditorActantTableWrapper,
 } from "./StatementEditorBoxStyles";
 import { StatementEditorActantTable } from "./StatementEditorActantTable/StatementEditorActantTable";

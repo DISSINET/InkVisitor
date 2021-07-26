@@ -8,6 +8,7 @@ import {
 
 import { StyledSelect, StyledSelectWrapper } from "./DropdownStyles";
 import { Tooltip } from "components";
+import theme from "Theme/theme";
 
 interface Dropdown {
   options?: OptionsType<OptionTypeBase> | GroupedOptionsType<OptionTypeBase>;
