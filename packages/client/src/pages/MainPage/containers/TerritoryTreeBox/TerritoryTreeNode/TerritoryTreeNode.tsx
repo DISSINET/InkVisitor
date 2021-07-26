@@ -269,7 +269,6 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
                     enableTooltip
                     moveFn={moveFn}
                     updateOrderFn={moveTerritory}
-                    disabled={tempDisabled}
                   />
                 </animated.div>
                 <ContextMenu
