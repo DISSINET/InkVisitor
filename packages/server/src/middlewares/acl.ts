@@ -1,3 +1,5 @@
+import Aco from "@models/acl_aco";
+import AclPermission from "@models/acl_permission";
 import { CustomError, PermissionDeniedError } from "@shared/types/errors";
 import { Response, Request, NextFunction, Router } from "express";
 
@@ -8,7 +10,7 @@ interface RouterLayer {
 }
 
 class Acl {
-  cachedRoutes: Record<string, any> = {};
+  cachedRoutes: Record<string, Record<string, any>> = {};
 
   layers: RouterLayer[] = [];
 
@@ -26,7 +28,29 @@ class Acl {
     next();
   }
 
+  private async getPermission(req: Request): Promise<AclPermission | null> {
+    const ctrl = req.baseUrl;
+    const method = req.route.path;
+
+    const permission = await AclPermission.findByPath(
+      req.db.connection,
+      ctrl,
+      method
+    );
+
+    return permission;
+  }
+
   public async validate(req: Request): Promise<CustomError | null> {
+    if (!req.userId) {
+      return permissionDeniedErr;
+    }
+
+    const permission = await this.getPermission(req);
+    if (!permission?.isUserAllowed(req.userId)) {
+      return permissionDeniedErr;
+    }
+
     return null;
   }
 }

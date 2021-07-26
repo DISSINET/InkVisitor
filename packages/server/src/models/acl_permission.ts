@@ -1,21 +1,23 @@
 import { r as rethink, Connection, WriteResult } from "rethinkdb-ts";
 import { IDbModel } from "./common";
 
-export default class Aco implements IDbModel {
+export default class AclPermission implements IDbModel {
   id?: string;
   controller: string;
   method: string;
+  userIds: string[];
 
-  static table = "acl_acos";
+  static table = "acl_permissions";
 
   constructor(data: Record<string, any>) {
     this.controller = data.controller;
     this.method = data.method;
+    this.userIds = data.userIds;
   }
 
   async save(dbInstance: Connection | undefined): Promise<WriteResult> {
     const result = await rethink
-      .table(Aco.table)
+      .table(AclPermission.table)
       .insert({ ...this, id: this.id || undefined })
       .run(dbInstance);
 
@@ -31,25 +33,37 @@ export default class Aco implements IDbModel {
     updateData: Record<string, unknown>
   ): Promise<WriteResult> {
     return rethink
-      .table(Aco.table)
+      .table(AclPermission.table)
       .get(this.id)
       .update(updateData)
       .run(dbInstance);
   }
 
   delete(dbInstance: Connection | undefined): Promise<WriteResult> {
-    return rethink.table(Aco.table).get(this.id).delete().run(dbInstance);
+    return rethink
+      .table(AclPermission.table)
+      .get(this.id)
+      .delete()
+      .run(dbInstance);
   }
 
   isValid(): boolean {
     return true;
   }
 
-  static async FindByPath(
+  isUserAllowed(userId: string): boolean {
+    return (
+      this.userIds &&
+      !!this.userIds.length &&
+      this.userIds.indexOf(userId) !== -1
+    );
+  }
+
+  static async findByPath(
     dbInstance: Connection | undefined,
     ctrlName: string,
     method: string
-  ): Promise<Aco> {
+  ): Promise<AclPermission> {
     const data = await rethink
       .table("actants")
       .filter({
@@ -58,6 +72,6 @@ export default class Aco implements IDbModel {
       })
       .run(dbInstance);
 
-    return new Aco(data);
+    return new AclPermission(data);
   }
 }
