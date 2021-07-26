@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from "react";
+import React, { useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "react-query";
 import api from "api";
 const queryString = require("query-string");
@@ -143,6 +143,11 @@ export const StatementEditorBox: React.FC = () => {
         actants: [...statement.data.actants, newStatementActant],
       };
       update(newData);
+      queryClient.invalidateQueries([
+        "territory",
+        "statement-list",
+        territoryId,
+      ]);
     }
   };
 
@@ -579,11 +584,12 @@ export const StatementEditorBox: React.FC = () => {
                         type="textarea"
                         width={1000}
                         onChangeFn={(newValue: string) => {
-                          const newData = {
-                            ...{ text: newValue },
-                            ...statement.data,
-                          };
-                          update(newData);
+                          if (newValue !== statement.data.text) {
+                            const newData = {
+                              text: newValue,
+                            };
+                            update(newData);
+                          }
                         }}
                         value={statement.data.text}
                       />
@@ -595,10 +601,14 @@ export const StatementEditorBox: React.FC = () => {
                           label: string;
                         }) => {
                           const newData = {
-                            ...statement.data,
                             ...{ action: newActionValue.value },
                           };
                           update(newData);
+                          queryClient.invalidateQueries([
+                            "territory",
+                            "statement-list",
+                            territoryId,
+                          ]);
                         }}
                         value={statement.data.action}
                       />
@@ -835,11 +845,13 @@ export const StatementEditorBox: React.FC = () => {
                   type="textarea"
                   width={1000}
                   onChangeFn={(newValue: string) => {
-                    const newData = {
-                      ...statement.data,
-                      ...{ note: newValue },
-                    };
-                    update(newData);
+                    if (statement.data.note !== newValue) {
+                      const newData = {
+                        ...statement.data,
+                        ...{ note: newValue },
+                      };
+                      update(newData);
+                    }
                   }}
                   value={statement.data.note}
                 />

@@ -66,6 +66,9 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
   const fourthPanelExpanded: boolean = useAppSelector(
     (state) => state.layout.fourthPanelExpanded
   );
+  const layoutWidth: number = useAppSelector(
+    (state) => state.layout.layoutWidth
+  );
   const panelWidths: number[] = useAppSelector(
     (state) => state.layout.panelWidths
   );
@@ -119,7 +122,7 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
 
   return (
     <>
-      <StyledPage>
+      <StyledPage layoutWidth={layoutWidth}>
         <Header
           height={heightHeader}
           paddingY={0}

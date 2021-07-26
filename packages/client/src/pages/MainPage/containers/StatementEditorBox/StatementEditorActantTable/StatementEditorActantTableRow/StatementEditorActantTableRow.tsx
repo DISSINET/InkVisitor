@@ -30,7 +30,7 @@ export const StatementEditorActantTableRow: React.FC<StatementEditorActantTableR
     const dragRef = useRef<HTMLTableDataCellElement>(null);
 
     const [, drop] = useDrop({
-      accept: ItemTypes.ROW,
+      accept: ItemTypes.ACTANT_ROW,
       hover(item: DragItem, monitor: DropTargetMonitor) {
         if (!dropRef.current) {
           return;
@@ -58,7 +58,7 @@ export const StatementEditorActantTableRow: React.FC<StatementEditorActantTableR
     });
 
     const [{ isDragging }, drag, preview] = useDrag({
-      item: { type: ItemTypes.ROW, index, id: row.values.id },
+      item: { type: ItemTypes.ACTANT_ROW, index, id: row.values.id },
       collect: (monitor: DragSourceMonitor) => ({
         isDragging: monitor.isDragging(),
       }),
