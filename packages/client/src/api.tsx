@@ -1,3 +1,4 @@
+import React from "react";
 import axios, { AxiosInstance, AxiosResponse, AxiosRequestConfig } from "axios";
 import {
   IResponseUser,
@@ -8,15 +9,14 @@ import {
   IUser,
   IAction,
   IActant,
-  IStatement,
-  ITerritory,
   IResponseDetail,
   IResponseStatement,
   IResponseGeneric,
   IResponseBookmarks,
   IResponseAdministration,
 } from "@shared/types";
-import { connect } from "react-redux";
+import * as errors from "@shared/types/errors";
+import { toast } from "react-toastify";
 
 type FilterActantsI = {
   label?: string;
@@ -49,15 +49,6 @@ const parseJwt = (token: string) => {
   }
 };
 
-const api = axios.create({
-  baseURL: process.env.APIURL + "/api/v1",
-  timeout: 5000,
-  responseType: "json",
-  headers: {
-    "Content-Type": "application/json",
-  },
-});
-
 class Api {
   private baseUrl: string;
   private headers: object;
@@ -87,8 +78,37 @@ class Api {
       return config;
     });
 
+    this.connection.interceptors.response.use(
+      function (response) {
+        // Any status code that lie within the range of 2xx cause this function to trigger
+        // Do something with response data
+        return response;
+      },
+      (error) => {
+        // Any status codes that falls outside the range of 2xx cause this function to trigger
+        // Do something with response error
+        this.showErrorToast(error);
+        return Promise.reject(error);
+      }
+    );
+
     this.token = "";
     this.checkLogin();
+  }
+
+  showErrorToast(err: any) {
+    const hydratedError = errors.getErrorByCode(
+      err.response.data ? err.response.data.error : ""
+    );
+
+    toast.error(
+      <div>
+        {hydratedError.message}
+        {err.response.data.message ? (
+          <p style={{ fontSize: "1rem" }}>{err.response.data.message}</p>
+        ) : null}
+      </div>
+    );
   }
 
   isLoggedIn = () => {
@@ -137,6 +157,7 @@ class Api {
       if (response.status === 200) {
         const parsed = parseJwt(response.data.token);
         this.saveLogin(response.data.token, parsed.user.name);
+        toast.success("Logged in");
       }
       return { ...response.data };
     } catch (err) {

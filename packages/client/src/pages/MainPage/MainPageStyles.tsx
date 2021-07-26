@@ -2,8 +2,11 @@ import { FaUserAlt } from "react-icons/fa";
 import styled from "styled-components";
 import { layoutWidthBreakpoint } from "Theme/constants";
 
-export const StyledPage = styled.div`
-  width: 100%;
+interface StyledPage {
+  layoutWidth: number;
+}
+export const StyledPage = styled.div<StyledPage>`
+  width: ${({ layoutWidth }) => layoutWidth};
   min-width: ${layoutWidthBreakpoint};
   height: 100vh;
 `;
