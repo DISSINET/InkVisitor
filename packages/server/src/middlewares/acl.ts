@@ -1,4 +1,3 @@
-import Aco from "@models/acl_aco";
 import AclPermission from "@models/acl_permission";
 import User from "@models/user";
 import { CustomError, PermissionDeniedError } from "@shared/types/errors";
@@ -39,12 +38,17 @@ class Acl {
       ctrl,
       method
     );
+    console.log(ctrl, method, permission);
 
     return permission;
   }
 
   public async validate(req: Request): Promise<CustomError | null> {
+    req.userId = "1";
+    const user = await User.getUser(req.db.connection, req.userId);
+    console.log(user);
     if (!req.userId) {
+      console.log("no user");
       return permissionDeniedErr;
     }
 
