@@ -193,9 +193,11 @@ export default Router()
   .get(
     "/bookmarksGet/:userId?",
     asyncRouteHandler<IResponseBookmarks>(async (request: Request) => {
-      const userId = request.params.userId || (request as any).user.user.id;
+      if (!(request as any).user) {
+        throw new BadParams("not logged");
+      }
 
-      console.log("userId", userId);
+      const userId = request.params.userId || (request as any).user.user.id;
 
       if (!userId) {
         throw new BadParams("user id has to be set");
