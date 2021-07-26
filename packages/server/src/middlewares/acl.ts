@@ -1,5 +1,6 @@
 import Aco from "@models/acl_aco";
 import AclPermission from "@models/acl_permission";
+import User from "@models/user";
 import { CustomError, PermissionDeniedError } from "@shared/types/errors";
 import { Response, Request, NextFunction, Router } from "express";
 
@@ -29,8 +30,9 @@ class Acl {
   }
 
   private async getPermission(req: Request): Promise<AclPermission | null> {
-    const ctrl = req.baseUrl;
-    const method = req.route.path;
+    const ctrl = req.baseUrl.split("/").pop() || "";
+    const methodParts = req.route.path.split("/");
+    const method = methodParts[0] == "" ? methodParts[1] : methodParts[0];
 
     const permission = await AclPermission.findByPath(
       req.db.connection,
@@ -47,7 +49,7 @@ class Acl {
     }
 
     const permission = await this.getPermission(req);
-    if (!permission?.isUserAllowed(req.userId)) {
+    if (!permission?.isRoleAllowed(user.role)) {
       return permissionDeniedErr;
     }
 

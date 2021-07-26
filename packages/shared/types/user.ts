@@ -1,7 +1,6 @@
-import { IResponseActant } from "./";
 import { userRoleDict } from "./../dictionaries";
 
-const userRoleValues = userRoleDict.map((i) => i.value);
+const userRoleValues = userRoleDict.map((i) => i.label);
 export interface IUser {
   id: string;
   email: string;
@@ -12,6 +11,11 @@ export interface IUser {
   bookmarks: IBookmarkFolder[];
   storedTerritories: IStoredTerritory[];
   rights: IUserRight[];
+}
+
+export interface IUserRole {
+  label: string;
+  info: string;
 }
 
 export interface IUserRight {
