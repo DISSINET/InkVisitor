@@ -86,6 +86,8 @@ export const Tag: React.FC<TagProps> = ({
     }
     const dragIndex = item.index;
     const hoverIndex = index;
+    console.log("dragIndex", dragIndex);
+    console.log("hoverIndex", hoverIndex);
 
     if (dragIndex === hoverIndex) {
       return;
@@ -98,12 +100,15 @@ export const Tag: React.FC<TagProps> = ({
       return;
     }
     if (dragIndex < hoverIndex && hoverClientY < hoverMiddleY) {
+      console.log("here <");
       return;
     }
     if (dragIndex > hoverIndex && hoverClientY > hoverMiddleY) {
+      console.log("here >");
       return;
     }
 
+    console.log("------ moveFn -------");
     moveFn && moveFn(dragIndex, hoverIndex);
     item.index = hoverIndex;
   };

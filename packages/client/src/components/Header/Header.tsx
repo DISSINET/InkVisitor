@@ -1,4 +1,5 @@
-import React, { MouseEventHandler } from "react";
+import React from "react";
+import { useAppSelector } from "redux/hooks";
 
 import { Colors } from "types";
 import { StyledHeader, TextLeft, TextRight } from "./HeaderStyles";
@@ -20,12 +21,17 @@ export const Header: React.FC<HeaderProps> = ({
   height = "auto",
   color = "primary",
 }) => {
+  const layoutWidth: number = useAppSelector(
+    (state) => state.layout.layoutWidth
+  );
+
   return (
     <StyledHeader
       bgColor={color}
       height={height}
       paddingX={paddingX}
       paddingY={paddingY}
+      layoutWidth={layoutWidth}
     >
       <TextLeft>{left}</TextLeft>
       <TextRight>{right}</TextRight>

@@ -9,7 +9,11 @@ import GlobalStyle from "Theme/global";
 
 import { QueryClient, QueryClientProvider, useQuery } from "react-query";
 import { ReactQueryDevtools } from "react-query/devtools";
-import { layoutWidthBreakpoint, percentPanelWidths } from "Theme/constants";
+import {
+  layoutWidthBreakpoint,
+  minLayoutWidth,
+  percentPanelWidths,
+} from "Theme/constants";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { setLayoutWidth } from "redux/features/layout/layoutWidthSlice";
 import { setPanelWidths } from "redux/features/layout/panelWidthsSlice";
@@ -35,7 +39,7 @@ export const App: React.FC<AppProps> = () => {
     // count widths and set to REDUX
     const layoutWidth =
       window.innerWidth < layoutWidthBreakpoint
-        ? layoutWidthBreakpoint
+        ? minLayoutWidth
         : window.innerWidth;
     dispatch(setLayoutWidth(layoutWidth));
     const onePercent = layoutWidth / 100;

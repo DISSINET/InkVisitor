@@ -12,6 +12,7 @@ import {
 import { IActant, ITerritory } from "@shared/types";
 import {
   StyledChildrenWrap,
+  StyledDisabledTag,
   StyledFaCircle,
   StyledFaDotCircle,
   StyledIconWrap,
@@ -224,63 +225,64 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
     const parent = territory.data.parent as IParentTerritory;
     return (
       <>
-        <>
-          {!tempDisabled && id !== rootTerritoryId && (
-            <StyledTerritoryTagWrap>
-              <StyledIconWrap>
-                {hasChildren ? (
-                  <>{getArrowIcon(id)}</>
-                ) : (
-                  <>
-                    {statementsCount > 0 ? (
-                      <StyledFaCircle
-                        size={11}
-                        onClick={() => {
-                          hashParams["territory"] = id;
-                          history.push({
-                            hash: queryString.stringify(hashParams),
-                          });
-                        }}
-                      />
-                    ) : (
-                      <StyledFaDotCircle
-                        size={11}
-                        onClick={() => {
-                          hashParams["territory"] = id;
-                          history.push({
-                            hash: queryString.stringify(hashParams),
-                          });
-                        }}
-                      />
-                    )}
-                  </>
-                )}
-              </StyledIconWrap>
-              <animated.div style={animatedStyle}>
-                <ActantTag
-                  actant={territoryActant}
-                  parentId={parent.id}
-                  lvl={lvl}
-                  isSelected={isSelected}
-                  propId={propId}
-                  index={index}
-                  enableTooltip
-                  moveFn={moveFn}
-                  updateOrderFn={moveTerritory}
-                  disabled={tempDisabled}
+        {id !== rootTerritoryId && (
+          <>
+            {!tempDisabled ? (
+              <StyledTerritoryTagWrap>
+                <StyledIconWrap>
+                  {hasChildren ? (
+                    <>{getArrowIcon(id)}</>
+                  ) : (
+                    <>
+                      {statementsCount > 0 ? (
+                        <StyledFaCircle
+                          size={11}
+                          onClick={() => {
+                            hashParams["territory"] = id;
+                            history.push({
+                              hash: queryString.stringify(hashParams),
+                            });
+                          }}
+                        />
+                      ) : (
+                        <StyledFaDotCircle
+                          size={11}
+                          onClick={() => {
+                            hashParams["territory"] = id;
+                            history.push({
+                              hash: queryString.stringify(hashParams),
+                            });
+                          }}
+                        />
+                      )}
+                    </>
+                  )}
+                </StyledIconWrap>
+                <animated.div style={animatedStyle}>
+                  <ActantTag
+                    actant={territoryActant}
+                    parentId={parent.id}
+                    lvl={lvl}
+                    isSelected={isSelected}
+                    propId={propId}
+                    index={index}
+                    enableTooltip
+                    moveFn={moveFn}
+                    updateOrderFn={moveTerritory}
+                    disabled={tempDisabled}
+                  />
+                </animated.div>
+                <ContextMenu
+                  territoryActant={territoryActant}
+                  onMenuOpen={() => setContextMenuOpen(true)}
+                  onMenuClose={() => setContextMenuOpen(false)}
                 />
-              </animated.div>
-              <ContextMenu
-                territoryActant={territoryActant}
-                onMenuOpen={() => setContextMenuOpen(true)}
-                onMenuClose={() => setContextMenuOpen(false)}
-              />
-            </StyledTerritoryTagWrap>
-          )}
-          {id !== rootTerritoryId && tempDisabled && (
-            <h6 style={{ height: "2.5rem" }}>disabled tag</h6>
-          )}
-        </>
+              </StyledTerritoryTagWrap>
+            ) : (
+              <StyledDisabledTag />
+            )}
+          </>
+        )}
       </>
     );
   };
