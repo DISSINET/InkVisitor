@@ -3,18 +3,22 @@ import { Response, Request, NextFunction, Router } from "express";
 
 export const permissionDeniedErr = new PermissionDeniedError("");
 
+interface RouterLayer {
+  stack: RouterLayer[];
+}
+
 class Acl {
   cachedRoutes: Record<string, any> = {};
 
-  layers: any[] = [];
+  layers: RouterLayer[] = [];
 
   constructor() {
     this.authorize = this.authorize.bind(this);
     return;
   }
 
-  public assignRoutes(router: Router) {
-    this.layers = router.stack;
+  public assignRoutes(router: Router): void {
+    this.layers = router.stack as RouterLayer[];
   }
 
   public authorize(req: Request, res: Response, next: NextFunction): void {
@@ -22,7 +26,7 @@ class Acl {
     next();
   }
 
-  public async getError(req: Request): Promise<CustomError | null> {
+  public async validate(req: Request): Promise<CustomError | null> {
     return null;
   }
 }
