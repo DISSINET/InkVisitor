@@ -6,6 +6,7 @@ import { apiPath } from "./common/constants";
 import ActantsRouter from "@modules/actants";
 import TerritoriesRouter from "@modules/territories";
 import UsersRouter from "@modules/users";
+import AclRouter from "@modules/acl";
 import ActionsRouter from "@modules/actions";
 import StatementsRouter from "@modules/statements";
 import TreeRouter from "@modules/tree";
@@ -52,7 +53,8 @@ server.use(apiPath, routerV1);
 const acl = new Acl();
 routerV1.use(acl.authorize);
 
-//routerV1.use('/statements', StatementRouter);.
+//routerV1.use('/statements', StatementRouter);
+routerV1.use("/acl", AclRouter);
 routerV1.use("/users", UsersRouter);
 routerV1.use("/actants", ActantsRouter);
 routerV1.use("/actions", ActionsRouter);
