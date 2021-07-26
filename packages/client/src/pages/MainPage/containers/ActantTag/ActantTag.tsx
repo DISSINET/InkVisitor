@@ -111,7 +111,6 @@ export const ActantTag: React.FC<IActantTag> = ({
       updateOrderFn={updateOrderFn}
       parentId={parentId}
       lvl={lvl}
-      disabled={disabled}
     />
   );
 };
