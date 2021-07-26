@@ -27,6 +27,7 @@ import {
   IResponseTree,
   IResponseTreeTerritoryComponent,
 } from "./response-tree";
+import { IResponsePermission } from "./response-permission";
 import { IResponseTerritory } from "./response-territory";
 import { IResponseUser, IResponseStoredTerritory } from "./response-user";
 import { IStatement, IStatementActant, IStatementReference } from "./statement";
@@ -70,6 +71,7 @@ export type {
   IResponseStoredTerritory,
   IResponseGeneric,
   IResponseSearch,
+  IResponsePermission,
 };
 
 export { RequestSearch };
