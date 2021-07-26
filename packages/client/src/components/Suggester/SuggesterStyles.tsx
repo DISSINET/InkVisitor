@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import { space1, space2, space36 } from "Theme/constants";
+import { space1, space2, space4, space36 } from "Theme/constants";
 
 interface StyledSuggester {
   marginTop?: boolean;
@@ -15,6 +15,9 @@ interface InputWrapper {
 export const InputWrapper = styled.div<InputWrapper>`
   display: flex;
   opacity: ${({ isOver }) => isOver && "75%"};
+  input {
+    padding-right: ${space4};
+  }
 `;
 
 export const SuggesterButton = styled.div``;
