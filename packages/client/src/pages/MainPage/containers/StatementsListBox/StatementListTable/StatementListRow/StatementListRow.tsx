@@ -38,7 +38,7 @@ export const StatementListRow: React.FC<StatementListRow> = ({
   const dragRef = useRef<HTMLTableDataCellElement>(null);
 
   const [, drop] = useDrop({
-    accept: ItemTypes.ROW,
+    accept: ItemTypes.STATEMENT_ROW,
     hover(item: DragItem, monitor: DropTargetMonitor) {
       if (!dropRef.current) {
         return;
@@ -65,7 +65,7 @@ export const StatementListRow: React.FC<StatementListRow> = ({
   });
 
   const [{ isDragging }, drag, preview] = useDrag({
-    item: { type: ItemTypes.ROW, index, id: row.values.id },
+    item: { type: ItemTypes.STATEMENT_ROW, index, id: row.values.id },
     collect: (monitor: DragSourceMonitor) => ({
       isDragging: monitor.isDragging(),
     }),

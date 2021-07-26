@@ -1,4 +1,5 @@
 import React from "react";
+import { useAppSelector } from "redux/hooks";
 import { Colors } from "types";
 
 import { StyledFooter } from "./FooterStyles";
@@ -11,5 +12,15 @@ export const Footer: React.FC<Footer> = ({
   height = 30,
   color = "primary",
 }) => {
-  return <StyledFooter height={height} color={color}></StyledFooter>;
+  const layoutWidth: number = useAppSelector(
+    (state) => state.layout.layoutWidth
+  );
+
+  return (
+    <StyledFooter
+      height={height}
+      color={color}
+      layoutWidth={layoutWidth}
+    ></StyledFooter>
+  );
 };

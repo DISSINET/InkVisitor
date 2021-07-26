@@ -19,6 +19,8 @@ import {
 } from "@shared/types";
 import { Db } from "@service/RethinkDB";
 import Territory from "@models/territory";
+import { IParentTerritory } from "@shared/types/territory";
+import { ActantType } from "@shared/enums";
 
 class TreeCreator {
   parentMap: Record<string, ITerritory[]>; // map of rootId -> childs
@@ -150,23 +152,25 @@ export default Router()
       }
 
       const territory = await findActantById<ITerritory>(request.db, moveId, {
-        class: "T",
+        class: ActantType.Territory,
       });
       if (!territory) {
         throw new TerritoryDoesNotExits("territory does not exist");
       }
 
       const parent = await findActantById<ITerritory>(request.db, parentId, {
-        class: "T",
+        class: ActantType.Territory,
       });
       if (!parent) {
-        throw new TerritoryDoesNotExits("territory does not exist");
+        throw new TerritoryDoesNotExits("parent territory does not exist");
       }
 
-      let childs = (await getTerritoryChilds(request.db, parentId)).sort(
-        sortTerritories
+      const childsMap = await new Territory({ ...parent }).findChilds(
+        request.db.connection
       );
-      if (newIndex < 0 || newIndex > childs.length) {
+      const childsArray = Object.values(childsMap).sort(sortTerritories);
+
+      if (newIndex < 0 || newIndex > childsArray.length) {
         throw new TerrytoryInvalidMove(
           "cannot move territory to invalid index"
         );
@@ -180,32 +184,30 @@ export default Router()
         // root territory cannot be moved - or not yet implemented
         throw new TerrytoryInvalidMove("cannot move root territory");
       } else if (territory.data.parent.id !== parentId) {
-        // change parent of the terri
+        // change parent of the territory
         territory.data.parent.id = parentId;
+        territory.data.parent.order = -1;
       } else {
-        // if the parent does not change -> remove the wanted child, so it can be added on specific position
-        // this is not required if moving under new parent
-        const currentIndex = childs.findIndex((ter) => ter.id === moveId);
+        const currentIndex = childsArray.findIndex((ter) => ter.id === moveId);
         if (currentIndex === -1) {
           throw new TerrytoryInvalidMove("territory not found in the array");
         }
-        if (currentIndex === newIndex) {
-          throw new TerrytoryInvalidMove("already on the position");
-        }
-        childs.splice(currentIndex, 1);
+
+        const goingUp = currentIndex > newIndex;
+        const position = goingUp ? Math.max(newIndex - 1, 0) : newIndex;
+        // newIndex is just the n-th element, does not reflect the order value
+        const newOrderValue = (
+          childsArray[position].data.parent as IParentTerritory
+        ).order;
+
+        territory.data.parent.order = newOrderValue;
       }
 
-      childs = insertTerritoryToChilds(childs, newIndex, territory);
-
-      for (let i = 0; i < childs.length; i++) {
-        const childTerritory = new Territory({ ...childs[i] });
-        if (childTerritory.data.parent) {
-          childTerritory.data.parent.order = i + 1;
-          await childTerritory.update(request.db.connection, {
-            data: childTerritory.data,
-          });
-        }
-      }
+      const childTerritory = new Territory({ ...territory });
+      childTerritory.setSiblings(childsMap);
+      await childTerritory.update(request.db.connection, {
+        data: childTerritory.data,
+      });
 
       return out;
     })

@@ -7,7 +7,6 @@ import {
   FaPlus,
   FaRegCircle,
   FaDotCircle,
-  FaRecycle,
   FaClone,
 } from "react-icons/fa";
 import { useLocation, useHistory } from "react-router";
@@ -114,6 +113,14 @@ export const StatementListBox: React.FC = () => {
   const { statements, actants } = data || initialData;
 
   const moveEndRow = async (statementToMove: IStatement, index: number) => {
+    // return if order don't change
+    if (
+      statementToMove.data.territory.order ===
+      statements[index].data.territory.order
+    ) {
+      return;
+    }
+
     // whether row is moving top-bottom direction
     const topDown =
       statementToMove.data.territory.order <

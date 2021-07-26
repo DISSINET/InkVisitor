@@ -22,6 +22,7 @@ export class CustomError extends Error {
  */
 class BadCredentialsError extends CustomError {
   public static code = 401;
+  message = "Bad credentials";
 }
 
 /**
@@ -31,6 +32,7 @@ class BadCredentialsError extends CustomError {
  */
 class ModelNotValidError extends CustomError {
   public static code = 400;
+  message = "Model not valid";
 }
 
 /**
@@ -38,6 +40,7 @@ class ModelNotValidError extends CustomError {
  */
 class NotFound extends CustomError {
   public static code = 404;
+  message = "Not found";
 }
 
 /**
@@ -45,6 +48,7 @@ class NotFound extends CustomError {
  */
 class BadParams extends CustomError {
   public static code = 400;
+  message = "Bad parameters";
 }
 
 /**
@@ -52,6 +56,7 @@ class BadParams extends CustomError {
  */
 class UserDoesNotExits extends CustomError {
   public static code = 400;
+  message = "User does not exist";
 }
 
 /**
@@ -59,6 +64,7 @@ class UserDoesNotExits extends CustomError {
  */
 class ActantDoesNotExits extends CustomError {
   public static code = 400;
+  message = "Actant does not exist";
 }
 
 /**
@@ -66,6 +72,7 @@ class ActantDoesNotExits extends CustomError {
  */
 class ActionDoesNotExits extends CustomError {
   public static code = 400;
+  message = "Action does not exist";
 }
 
 /**
@@ -73,6 +80,7 @@ class ActionDoesNotExits extends CustomError {
  */
 class StatementDoesNotExits extends CustomError {
   public static code = 400;
+  message = "Statement does not exist";
 }
 
 /**
@@ -80,6 +88,7 @@ class StatementDoesNotExits extends CustomError {
  */
 class TerritoryDoesNotExits extends CustomError {
   public static code = 400;
+  message = "Territory does not exist";
 }
 
 /**
@@ -87,6 +96,7 @@ class TerritoryDoesNotExits extends CustomError {
  */
 class TerritoriesBrokenError extends CustomError {
   public static code = 500;
+  message = "Territories are broken";
 }
 
 /**
@@ -94,6 +104,7 @@ class TerritoriesBrokenError extends CustomError {
  */
 class TerrytoryInvalidMove extends CustomError {
   public static code = 500;
+  message = "Invalid move";
 }
 
 /**
@@ -101,6 +112,7 @@ class TerrytoryInvalidMove extends CustomError {
  */
 class StatementInvalidMove extends CustomError {
   public static code = 500;
+  message = "Invalid move";
 }
 
 /**
@@ -108,6 +120,7 @@ class StatementInvalidMove extends CustomError {
  */
 class InternalServerError extends CustomError {
   public static code = 500;
+  message = "Internal server error";
 }
 
 /**
@@ -115,6 +128,7 @@ class InternalServerError extends CustomError {
  */
 class UnauthorizedError extends CustomError {
   public static code = 401;
+  message = "Unauthorized request";
 }
 
 /**
@@ -122,6 +136,37 @@ class UnauthorizedError extends CustomError {
  */
 class InvalidDeleteError extends CustomError {
   public static code = 400;
+  message = "Invalid delete request";
+}
+
+/**
+ * UnknownError works as a backup
+ */
+class UnknownError extends CustomError {
+  public static code = 500;
+  message = "Unknown error";
+}
+
+const allErrors: Record<string, any> = {
+  InvalidDeleteError,
+  UnauthorizedError,
+  InternalServerError,
+  ModelNotValidError,
+  BadCredentialsError,
+  NotFound,
+  BadParams,
+  UserDoesNotExits,
+  ActantDoesNotExits,
+  ActionDoesNotExits,
+  StatementDoesNotExits,
+  TerritoriesBrokenError,
+  TerritoryDoesNotExits,
+  TerrytoryInvalidMove,
+  StatementInvalidMove,
+};
+
+export function getErrorByCode(name: string): CustomError {
+  return allErrors[name] ? new allErrors[name]() : new UnknownError("");
 }
 
 export {
