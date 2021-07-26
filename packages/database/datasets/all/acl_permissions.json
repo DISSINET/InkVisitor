@@ -1,0 +1,22 @@
+[
+  {
+    "controller": "statements",
+    "method": "get",
+    "roles": ["*"]
+  },
+  {
+    "controller": "tree",
+    "method": "get",
+    "roles": ["*"]
+  },
+  {
+    "controller": "users",
+    "method": "signin",
+    "roles": ["*"]
+  },
+  {
+    "controller": "users",
+    "method": "bookmarksGet",
+    "roles": ["admin"]
+  }
+]

@@ -5,14 +5,14 @@ export default class AclPermission implements IDbModel {
   id?: string;
   controller: string;
   method: string;
-  userIds: string[];
+  roles: string[];
 
   static table = "acl_permissions";
 
   constructor(data: Record<string, any>) {
     this.controller = data.controller;
     this.method = data.method;
-    this.userIds = data.userIds;
+    this.roles = data.roles;
   }
 
   async save(dbInstance: Connection | undefined): Promise<WriteResult> {
@@ -51,11 +51,9 @@ export default class AclPermission implements IDbModel {
     return true;
   }
 
-  isUserAllowed(userId: string): boolean {
+  isRoleAllowed(group: string): boolean {
     return (
-      this.userIds &&
-      !!this.userIds.length &&
-      this.userIds.indexOf(userId) !== -1
+      this.roles && !!this.roles.length && this.roles.indexOf(group) !== -1
     );
   }
 
@@ -63,15 +61,18 @@ export default class AclPermission implements IDbModel {
     dbInstance: Connection | undefined,
     ctrlName: string,
     method: string
-  ): Promise<AclPermission> {
+  ): Promise<AclPermission | null> {
     const data = await rethink
-      .table("actants")
+      .table(AclPermission.table)
       .filter({
         controller: ctrlName,
         method: method,
       })
       .run(dbInstance);
 
-    return new AclPermission(data);
+    if (!data.length) {
+      return null;
+    }
+    return new AclPermission(data[0]);
   }
 }

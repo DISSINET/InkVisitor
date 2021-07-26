@@ -5,7 +5,14 @@ import { IEntity } from "./entity";
 import { ILabel } from "./label";
 import { IProp } from "./prop";
 import { IOperator } from "./operator";
-import { IUser, IBookmarkFolder, IStoredTerritory } from "./user";
+import {
+  IUser,
+  IBookmarkFolder,
+  IStoredTerritory,
+  IUserOptions,
+  IUserRight,
+  IUserRole,
+} from "./user";
 import { IResource } from "./resource";
 import { IResponseDetail } from "./response-detail";
 import {
@@ -43,6 +50,9 @@ export type {
   IOperator,
   IProp,
   IUser,
+  IUserRole,
+  IUserOptions,
+  IUserRight,
   IBookmarkFolder,
   IStoredTerritory,
   IResource,
