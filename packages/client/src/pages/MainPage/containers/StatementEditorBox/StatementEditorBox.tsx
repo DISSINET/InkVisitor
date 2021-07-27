@@ -146,11 +146,7 @@ export const StatementEditorBox: React.FC = () => {
         actants: [...statement.data.actants, newStatementActant],
       };
       update(newData);
-      queryClient.invalidateQueries([
-        "territory",
-        "statement-list",
-        territoryId,
-      ]);
+      queryClient.invalidateQueries(["territory"]);
     }
   };
 
@@ -299,6 +295,20 @@ export const StatementEditorBox: React.FC = () => {
     });
     queryClient.invalidateQueries(["statement"]);
   };
+
+  const updateActantsMutation = useMutation(
+    async (changes: object) =>
+      await api.actantsUpdate(statementId, {
+        data: changes,
+      }),
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries(["statement"]);
+        // only action dropdown needs to refresh territory
+        queryClient.invalidateQueries(["territory"]);
+      },
+    }
+  );
 
   const renderPropGroup = (propOrigin: any, statement: IResponseStatement) => {
     const originActant = propOrigin.actant;
@@ -603,11 +613,7 @@ export const StatementEditorBox: React.FC = () => {
                             action: newActionValue.value,
                           };
                           update(newData);
-                          queryClient.invalidateQueries([
-                            "territory",
-                            "statement-list",
-                            territoryId,
-                          ]);
+                          queryClient.invalidateQueries(["territory"]);
                         }}
                         value={statement.data.action}
                       /> */}
