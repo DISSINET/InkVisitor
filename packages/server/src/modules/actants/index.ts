@@ -119,7 +119,7 @@ export default Router()
           ...existingActant,
         });
       } catch (e) {
-        throw new ModelNotValidError(e.toString);
+        throw new ModelNotValidError(e.toString());
       }
 
       // class is from the db, so it must work, unless bad data

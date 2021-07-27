@@ -5,7 +5,7 @@
 import { IResponseActant, IBookmarkFolder, IResponseBookmarkFolder } from "./";
 import { userRoleDict } from "./../dictionaries";
 
-const userRoleValues = userRoleDict.map((i) => i.value);
+const userRoleValues = userRoleDict.map((i) => i.label);
 
 export interface IResponseUser {
   id: string;
