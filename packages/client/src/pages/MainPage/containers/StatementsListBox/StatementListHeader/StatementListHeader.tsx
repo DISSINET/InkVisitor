@@ -1,5 +1,5 @@
 import React from "react";
-import { useQuery, useQueryClient } from "react-query";
+import { useMutation, useQuery, useQueryClient } from "react-query";
 import { useHistory, useLocation } from "react-router-dom";
 const queryString = require("query-string");
 import { FaPlus, FaRecycle } from "react-icons/fa";
@@ -39,19 +39,29 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
     (state) => state.territoryTree.selectedTerritoryPath
   );
 
-  const addStatementAtTheEnd = async () => {
+  const addStatementAtTheEndMutation = useMutation(
+    async (newStatement: IStatement) => {
+      await api.actantsCreate(newStatement);
+    },
+    {
+      onSuccess: (data, variables) => {
+        hashParams["statement"] = variables.id;
+        history.push({
+          hash: queryString.stringify(hashParams),
+        });
+        queryClient.invalidateQueries(["territory"]);
+        queryClient.invalidateQueries("tree");
+      },
+    }
+  );
+
+  const handleCreateStatement = () => {
     const newStatement: IStatement = CStatement(territoryId);
     const { statements } = data;
     newStatement.data.territory.order = statements.length
       ? statements[statements.length - 1].data.territory.order + 1
       : 1;
-    const res = await api.actantsCreate(newStatement);
-    hashParams["statement"] = newStatement.id;
-    history.push({
-      hash: queryString.stringify(hashParams),
-    });
-    queryClient.invalidateQueries(["territory"]);
-    queryClient.invalidateQueries("tree");
+    addStatementAtTheEndMutation.mutate(newStatement);
   };
 
   return (
@@ -81,7 +91,7 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
               color="primary"
               label="new statement"
               onClick={() => {
-                addStatementAtTheEnd();
+                handleCreateStatement();
               }}
             />
             <Button
