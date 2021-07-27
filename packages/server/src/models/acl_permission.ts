@@ -11,6 +11,7 @@ export default class AclPermission implements IDbModel {
   static table = "acl_permissions";
 
   constructor(data: Record<string, any>) {
+    this.id = data.id;
     this.controller = data.controller;
     this.method = data.method;
     this.roles = data.roles;
