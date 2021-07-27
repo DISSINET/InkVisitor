@@ -12,6 +12,7 @@ import {
 import { IActant, ITerritory } from "@shared/types";
 import {
   StyledChildrenWrap,
+  StyledDisabledTag,
   StyledFaCircle,
   StyledFaDotCircle,
   StyledIconWrap,
@@ -27,7 +28,7 @@ import { animated, config, useSpring } from "react-spring";
 import api from "api";
 import { IParentTerritory } from "@shared/types/territory";
 import { useQueryClient } from "react-query";
-import { DragItem } from "types";
+import { DraggedTerritoryItem, DragItem } from "types";
 
 interface TerritoryTreeNode {
   territory: ITerritory;
@@ -112,7 +113,6 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
       const parent = territory.data.parent as IParentTerritory;
 
       const res = await api.treeMoveTerritory(item.id, parent.id, item.index);
-      console.log(res);
       queryClient.invalidateQueries("tree");
     }
   };
@@ -187,6 +187,36 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
     }
   };
 
+  const draggedTerritory: DraggedTerritoryItem = useAppSelector(
+    (state) => state.territoryTree.draggedTerritory
+  );
+
+  const [tempDisabled, setTempDisabled] = useState(false);
+  const [hideChildTerritories, setHideChildTerritories] = useState(false);
+
+  useEffect(() => {
+    if (
+      draggedTerritory.parentId &&
+      draggedTerritory.parentId !==
+        (territory.data.parent as IParentTerritory).id &&
+      draggedTerritory.parentId !== propId
+    ) {
+      if (draggedTerritory.lvl && draggedTerritory.lvl > lvl) {
+        setTempDisabled(true);
+      }
+    } else {
+      setTempDisabled(false);
+    }
+
+    if (draggedTerritory.parentId) {
+      if (draggedTerritory.lvl && draggedTerritory.lvl === lvl) {
+        setHideChildTerritories(true);
+      }
+    } else {
+      setHideChildTerritories(false);
+    }
+  }, [draggedTerritory]);
+
   const renderTerritoryTag = (
     territoryActant: IActant,
     id: string,
@@ -196,55 +226,61 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
     return (
       <>
         {id !== rootTerritoryId && (
-          <StyledTerritoryTagWrap>
-            <StyledIconWrap>
-              {hasChildren ? (
-                <>{getArrowIcon(id)}</>
-              ) : (
-                <>
-                  {statementsCount > 0 ? (
-                    <StyledFaCircle
-                      size={11}
-                      onClick={() => {
-                        hashParams["territory"] = id;
-                        history.push({
-                          hash: queryString.stringify(hashParams),
-                        });
-                      }}
-                    />
+          <>
+            {!tempDisabled ? (
+              <StyledTerritoryTagWrap>
+                <StyledIconWrap>
+                  {hasChildren ? (
+                    <>{getArrowIcon(id)}</>
                   ) : (
-                    <StyledFaDotCircle
-                      size={11}
-                      onClick={() => {
-                        hashParams["territory"] = id;
-                        history.push({
-                          hash: queryString.stringify(hashParams),
-                        });
-                      }}
-                    />
+                    <>
+                      {statementsCount > 0 ? (
+                        <StyledFaCircle
+                          size={11}
+                          onClick={() => {
+                            hashParams["territory"] = id;
+                            history.push({
+                              hash: queryString.stringify(hashParams),
+                            });
+                          }}
+                        />
+                      ) : (
+                        <StyledFaDotCircle
+                          size={11}
+                          onClick={() => {
+                            hashParams["territory"] = id;
+                            history.push({
+                              hash: queryString.stringify(hashParams),
+                            });
+                          }}
+                        />
+                      )}
+                    </>
                   )}
-                </>
-              )}
-            </StyledIconWrap>
-            <animated.div style={animatedStyle}>
-              <ActantTag
-                actant={territoryActant}
-                parentId={parent.id}
-                lvl={lvl}
-                isSelected={isSelected}
-                propId={propId}
-                index={index}
-                enableTooltip
-                moveFn={moveFn}
-                updateOrderFn={moveTerritory}
-              />
-            </animated.div>
-            <ContextMenu
-              territoryActant={territoryActant}
-              onMenuOpen={() => setContextMenuOpen(true)}
-              onMenuClose={() => setContextMenuOpen(false)}
-            />
-          </StyledTerritoryTagWrap>
+                </StyledIconWrap>
+                <animated.div style={animatedStyle}>
+                  <ActantTag
+                    actant={territoryActant}
+                    parentId={parent.id}
+                    lvl={lvl}
+                    isSelected={isSelected}
+                    propId={propId}
+                    index={index}
+                    enableTooltip
+                    moveFn={moveFn}
+                    updateOrderFn={moveTerritory}
+                  />
+                </animated.div>
+                <ContextMenu
+                  territoryActant={territoryActant}
+                  onMenuOpen={() => setContextMenuOpen(true)}
+                  onMenuClose={() => setContextMenuOpen(false)}
+                />
+              </StyledTerritoryTagWrap>
+            ) : (
+              <StyledDisabledTag />
+            )}
+          </>
         )}
       </>
     );
@@ -255,7 +291,8 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
       {renderTerritoryTag(territory, territory.id, children.length > 0)}
 
       <StyledChildrenWrap noIndent={lvl === 0}>
-        {isExpanded &&
+        {!hideChildTerritories &&
+          isExpanded &&
           childTerritories.map((child: any, key: number) => (
             <TerritoryTreeNode
               key={`${key}_${child.id}`}

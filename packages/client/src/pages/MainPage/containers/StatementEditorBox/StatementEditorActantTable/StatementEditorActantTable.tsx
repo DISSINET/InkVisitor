@@ -14,6 +14,7 @@ import { FaTrashAlt, FaUnlink } from "react-icons/fa";
 import { useQueryClient } from "react-query";
 import api from "api";
 import { actantPositionDict } from "@shared/dictionaries";
+const queryString = require("query-string");
 
 interface FilteredActantObject {
   data: { actant: IActant | undefined; sActant: IStatementActant };
@@ -32,6 +33,8 @@ export const StatementEditorActantTable: React.FC<StatementEditorActantTable> =
     classEntitiesActant,
   }) => {
     const queryClient = useQueryClient();
+    var hashParams = queryString.parse(location.hash);
+    const territoryId = hashParams.territory;
 
     const [filteredActants, setFilteredActants] = useState<
       FilteredActantObject[]
@@ -78,6 +81,11 @@ export const StatementEditorActantTable: React.FC<StatementEditorActantTable> =
         data: changes,
       });
       queryClient.invalidateQueries(["statement"]);
+      queryClient.invalidateQueries([
+        "territory",
+        "statement-list",
+        territoryId,
+      ]);
     };
 
     const columns: Column<{}>[] = useMemo(() => {

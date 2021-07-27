@@ -91,7 +91,7 @@ export default class Actant implements IDbModel {
       .sort((a, b) => a - b);
     let out = -1;
 
-    if (want === -1 || want === undefined) {
+    if (want === undefined) {
       out = sortedOrders.length ? sortedOrders[sortedOrders.length - 1] + 1 : 0;
     } else if (sibl[want]) {
       // if there is a conflict - order number already exist
@@ -111,10 +111,10 @@ export default class Actant implements IDbModel {
     } else {
       // all good
       out = want;
-    }
-
-    if (out === -1) {
-      throw new InternalServerError("cannot determine correct order");
+      // less than zero -> zero optional fix
+      if (out < 0 && (sortedOrders.length === 0 || sortedOrders[0] > 0)) {
+        out = 0;
+      }
     }
 
     return out;
