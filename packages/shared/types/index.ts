@@ -36,6 +36,7 @@ import { IOption } from "./option";
 import { IResponseGeneric } from "./response-generic";
 import { IResponseSearch } from "./response-search";
 import { RequestSearch } from "./request-search";
+import { RequestPermissionUpdate } from "./request-permission";
 
 export type {
   IAudit,
@@ -74,4 +75,4 @@ export type {
   IResponsePermission,
 };
 
-export { RequestSearch };
+export { RequestSearch, RequestPermissionUpdate };
