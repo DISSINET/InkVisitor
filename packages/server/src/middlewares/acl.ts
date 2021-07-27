@@ -38,18 +38,27 @@ class Acl {
       ctrl,
       method
     );
-    console.log(ctrl, method, permission);
+
+    if (!permission) {
+      const newPermission = new AclPermission({
+        controller: ctrl,
+        method,
+        roles: [],
+      });
+      await newPermission.save(req.db.connection);
+      console.log(`[Acl]: creating entry for ${ctrl}-${method}`);
+    }
 
     return permission;
   }
 
   public async validate(req: Request): Promise<CustomError | null> {
     req.userId = "1";
-    const user = await User.getUser(req.db.connection, req.userId);
     if (!req.userId) {
-      console.log("no user");
       return permissionDeniedErr;
     }
+
+    const user = await User.getUser(req.db.connection, req.userId);
 
     const permission = await this.getPermission(req);
     if (!permission?.isRoleAllowed(user.role)) {
