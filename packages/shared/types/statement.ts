@@ -1,5 +1,6 @@
 import { IActant, IProp } from "./";
 import { ActantType } from "../enums";
+import { IOperator } from "./";
 
 export interface IStatement extends IActant {
   class: ActantType.Statement;
@@ -15,16 +16,19 @@ export interface IStatement extends IActant {
       order: number;
     };
     actants: IStatementActant[];
-    props: IProp[]; // this
+    props: IProp[];
     references: IStatementReference[];
-    tags: string[]; // ids of IActant
+    tags: string[]; // ids of IActant;
   };
 }
 
 export interface IStatementActant {
   id: string;
-  actant: string; //  this
+  actant: string;
   position: string;
+
+  // todo: make mandatory
+  operator?: IOperator;
   elvl: string;
   certainty: string;
 }

@@ -7,12 +7,20 @@ import theme from "./Theme/theme";
 import MainPage from "./pages/MainPage";
 import GlobalStyle from "Theme/global";
 
+import AclPage from "./pages/Acl";
+
 import { QueryClient, QueryClientProvider, useQuery } from "react-query";
 import { ReactQueryDevtools } from "react-query/devtools";
-import { layoutWidthBreakpoint, percentPanelWidths } from "Theme/constants";
-import { useAppDispatch } from "redux/hooks";
+import {
+  layoutWidthBreakpoint,
+  minLayoutWidth,
+  percentPanelWidths,
+} from "Theme/constants";
+import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { setLayoutWidth } from "redux/features/layout/layoutWidthSlice";
 import { setPanelWidths } from "redux/features/layout/panelWidthsSlice";
+import { setSeparatorXPosition } from "redux/features/layout/separatorXPositionSlice";
+import api from "api";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -31,10 +39,10 @@ export const App: React.FC<AppProps> = () => {
     const handleResize = () => {
       setSize([window.innerWidth, window.innerHeight]);
     };
-    // count widths here and set to REDUX
+    // count widths and set to REDUX
     const layoutWidth =
       window.innerWidth < layoutWidthBreakpoint
-        ? layoutWidthBreakpoint
+        ? minLayoutWidth
         : window.innerWidth;
     dispatch(setLayoutWidth(layoutWidth));
     const onePercent = layoutWidth / 100;
@@ -45,6 +53,7 @@ export const App: React.FC<AppProps> = () => {
       Math.floor(onePercent * percentPanelWidths[3] * 10) / 10,
     ];
     dispatch(setPanelWidths(panels));
+    dispatch(setSeparatorXPosition(panels[0] + panels[1]));
 
     window.addEventListener("resize", handleResize);
     handleResize();
@@ -60,6 +69,7 @@ export const App: React.FC<AppProps> = () => {
       <ThemeProvider theme={theme}>
         <GlobalStyle />
         <QueryClientProvider client={queryClient}>
+          <ReactQueryDevtools initialIsOpen={false} />
           <BrowserRouter basename="apps/inkvisitor">
             <Switch>
               <Route
@@ -67,9 +77,15 @@ export const App: React.FC<AppProps> = () => {
                 exact
                 render={(props) => <MainPage {...props} size={size} />}
               />
+              {api.isLoggedIn() ? (
+                <Route
+                  path="/acl"
+                  exact
+                  render={(props) => <AclPage {...props} size={size} />}
+                />
+              ) : null}
             </Switch>
           </BrowserRouter>
-          <ReactQueryDevtools initialIsOpen />
         </QueryClientProvider>
       </ThemeProvider>
     </>

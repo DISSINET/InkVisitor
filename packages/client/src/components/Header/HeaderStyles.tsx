@@ -7,6 +7,7 @@ interface StyledHeader {
   paddingX?: number;
   paddingY?: number;
   height: number | "auto";
+  layoutWidth: number;
 }
 export const StyledHeader = styled.div<StyledHeader>`
   height: ${({ height }) => (height === "auto" ? "auto" : `${height / 10}rem`)};
@@ -14,7 +15,7 @@ export const StyledHeader = styled.div<StyledHeader>`
     `${paddingY || paddingY === 0 ? `${paddingY / 10}rem` : space10} ${
       paddingX || paddingX === 0 ? `${paddingX / 10}rem` : space3
     }`};
-  width: 100%;
+  width: ${({ layoutWidth }) => layoutWidth};
   background-color: ${({ theme, bgColor }) => theme.color[bgColor]};
   color: ${({ theme }) => theme.color["white"]};
   display: flex;

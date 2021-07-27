@@ -6,16 +6,21 @@ export const rootTerritoryId = "T0";
 export const heightHeader = 70;
 export const heightFooter = 30;
 
-export const layoutWidthBreakpoint = 1920;
-export const collapsedPanelWidth = 32;
+export const minLayoutWidth = 1440;
+export const layoutWidthBreakpoint = 1000;
 // INIT PANEL WIDTHS
 export const panelWidths = [200, 570, 800, 350];
+// MORE PANEL WIDTHS
+export const collapsedPanelWidth = 32;
+export const secondPanelMinWidth = 450;
+export const thirdPanelMinWidth = 470;
 // % PERCENT PANEL WIDTHS
-export const percentPanelWidths = [10, 30, 42, 18];
+export const percentPanelWidths = [10, 31, 41, 18];
 
 // animations
 export const springConfig: { [key: string]: {} } = {
   panelExpand: { tension: 195, friction: 31 },
+  separatorXPosition: { tension: 305, friction: 21, clamp: true },
 };
 
 export const space1 = theme.space[1];

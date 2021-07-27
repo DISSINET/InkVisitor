@@ -26,3 +26,10 @@ export const StyledFaCircle = styled(FaCircle)`
   color: ${({ theme }) => theme.color["primary"]};
   stroke-width: 0.5;
 `;
+export const StyledDisabledTag = styled.div`
+  height: 2.25rem;
+  padding: 0.25;
+  border: 2px dotted black;
+  border-radius: ${({ theme }) => theme.borderRadius["xs"]};
+  margin-bottom: 0.25rem;
+`;

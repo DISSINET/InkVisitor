@@ -1,3 +1,5 @@
+import { IOperator } from "./";
+
 export interface IProp {
   id: string;
   elvl: string;
@@ -5,6 +7,8 @@ export interface IProp {
   modality: string;
   origin: string;
 
+  // todo: make mandatory
+  operator?: IOperator;
   type: {
     id: string;
     certainty: string;

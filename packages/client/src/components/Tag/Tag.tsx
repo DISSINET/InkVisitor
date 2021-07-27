@@ -1,4 +1,4 @@
-import React, { ReactNode, useRef, useState } from "react";
+import React, { ReactNode, useEffect, useRef, useState } from "react";
 import {
   DragSourceMonitor,
   DropTargetMonitor,
@@ -18,9 +18,12 @@ import {
 } from "./TagStyles";
 import { Tooltip } from "components";
 import { useHistory, useLocation } from "react-router-dom";
+import { useAppDispatch } from "redux/hooks";
+import { setDraggedTerritory } from "redux/features/territoryTree/draggedTerritorySlice";
 
 interface TagProps {
   propId: string;
+  parentId?: string;
   label?: string;
   category: string;
   color: string;
@@ -46,10 +49,14 @@ interface TagProps {
     | "left center"
     | "left bottom"
     | "center center";
+  updateOrderFn?: (item: DragItem) => void;
+  lvl?: number;
+  disabled?: boolean;
 }
 
 export const Tag: React.FC<TagProps> = ({
   propId,
+  parentId,
   label = "",
   category = "T",
   color,
@@ -58,58 +65,48 @@ export const Tag: React.FC<TagProps> = ({
   button,
   invertedLabel,
   short = false,
-  index,
+  index = -1,
   moveFn,
   position = "right top",
   enableTooltip = false,
+  updateOrderFn = () => {},
+  lvl,
 }) => {
   let history = useHistory();
   let location = useLocation();
   var hashParams = queryString.parse(location.hash);
+  const dispatch = useAppDispatch();
 
   const ref = useRef<HTMLDivElement>(null);
+
   const [, drop] = useDrop({
     accept: ItemTypes.TAG,
     hover(item: DragItem, monitor: DropTargetMonitor) {
       if (!ref.current) {
         return;
       }
-      const dragIndex = item.index;
-      const hoverIndex = index;
+      const dragIndex: number = item.index;
+      const hoverIndex: number | undefined = index;
 
-      // Don't replace items with themselves
       if (dragIndex === hoverIndex) {
         return;
       }
-      // Determine rectangle on screen
       const hoverBoundingRect = ref.current?.getBoundingClientRect();
-      // Get vertical middle
       const hoverMiddleY =
         (hoverBoundingRect.bottom - hoverBoundingRect.top) / 2;
-      // Determine mouse position
       const clientOffset = monitor.getClientOffset();
-      // Get pixels to the top
       const hoverClientY = (clientOffset as XYCoord).y - hoverBoundingRect.top;
-      // Only perform the move when the mouse has crossed half of the items height
-      // When dragging downwards, only move when the cursor is below 50%
-      // When dragging upwards, only move when the cursor is above 50%
-      if (!hoverIndex) {
+      if (hoverIndex === undefined) {
         return;
       }
-      // Dragging downwards
       if (dragIndex < hoverIndex && hoverClientY < hoverMiddleY) {
         return;
       }
-      // Dragging upwards
       if (dragIndex > hoverIndex && hoverClientY > hoverMiddleY) {
         return;
       }
-      // Time to actually perform the action
+
       moveFn && moveFn(dragIndex, hoverIndex);
-      // Note: we're mutating the monitor item here!
-      // Generally it's better to avoid mutations,
-      // but it's good here for the sake of performance
-      // to avoid expensive index searches.
       item.index = hoverIndex;
     },
   });
@@ -119,7 +116,19 @@ export const Tag: React.FC<TagProps> = ({
     collect: (monitor: DragSourceMonitor) => ({
       isDragging: monitor.isDragging(),
     }),
+    end: (item: DragItem | undefined, monitor: DragSourceMonitor) => {
+      if (item && item.index !== index) updateOrderFn(item);
+    },
   });
+
+  useEffect(() => {
+    if (isDragging) {
+      dispatch(setDraggedTerritory({ id: propId, parentId, index, lvl }));
+    } else {
+      dispatch(setDraggedTerritory({}));
+    }
+  }, [isDragging]);
+
   drag(drop(ref));
 
   const renderEntityTag = () => (

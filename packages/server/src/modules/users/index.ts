@@ -1,6 +1,7 @@
 import { Request } from "express";
 import { Router } from "express";
 import { IUser } from "@shared/types/user";
+import { v4 } from "uuid";
 import {
   findUserByName,
   findUserById,
@@ -116,7 +117,9 @@ export default Router()
   .put(
     "/update/:userId?",
     asyncRouteHandler<IResponseGeneric>(async (request: Request) => {
-      const userId = request.params.userId;
+      const userId = request.params.userId || (request as any).user.user.id;
+
+      console.log("userId", userId);
       const userData = request.body as IUser;
 
       if (!userId || !userData || Object.keys(userData).length === 0) {
@@ -189,7 +192,11 @@ export default Router()
   .get(
     "/bookmarksGet/:userId?",
     asyncRouteHandler<IResponseBookmarks>(async (request: Request) => {
-      const userId = request.params.userId;
+      if (!(request as any).user) {
+        throw new BadParams("not logged");
+      }
+
+      const userId = request.params.userId || (request as any).user.user.id;
 
       if (!userId) {
         throw new BadParams("user id has to be set");
@@ -208,6 +215,7 @@ export default Router()
         for (const bookmark of user.bookmarks) {
           const bookmarkResponse: IResponseBookmarkFolder = {
             name: bookmark.name,
+            id: bookmark.id,
             actants: [],
           };
           if (bookmark.actantIds && bookmark.actantIds.length) {
@@ -249,6 +257,7 @@ export default Router()
         if (user.bookmarks) {
           for (const bookmark of user.bookmarks) {
             const bookmarkResponse: IResponseBookmarkFolder = {
+              id: bookmark.id,
               name: bookmark.name,
               actants: [],
             };

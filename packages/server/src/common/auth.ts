@@ -2,6 +2,7 @@ import * as bcrypt from "bcrypt";
 import { sign as signJwt } from "jsonwebtoken";
 import { IUser } from "../../../shared/types/user";
 import jwt, { secretType } from "express-jwt";
+import { Request } from "express";
 
 export function hashPassword(rawPassword: string): string {
   return bcrypt.hashSync(rawPassword, 10);
@@ -16,7 +17,7 @@ export function checkPassword(
 
 const defaultJwtAlgo = "HS256";
 
-export function generateAccessToken(user: IUser) {
+export function generateAccessToken(user: IUser): string {
   return signJwt(
     {
       user,
@@ -29,11 +30,11 @@ export function generateAccessToken(user: IUser) {
   );
 }
 
-export function validateJwt() {
+export function validateJwt(): jwt.RequestHandler {
   return jwt({
     secret: process.env.SECRET as secretType,
     algorithms: [defaultJwtAlgo],
-    getToken: function fromHeaderOrQuerystring(req: any) {
+    getToken: function fromHeaderOrQuerystring(req: Request) {
       if (
         req.headers.authorization &&
         req.headers.authorization.split(" ")[0] === "Bearer"

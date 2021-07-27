@@ -4,7 +4,15 @@ import { HTML5Backend } from "react-dnd-html5-backend";
 
 import { toast } from "react-toastify";
 
-import { Box, Button, Footer, Header, Panel, Toast } from "components";
+import {
+  Box,
+  Button,
+  Footer,
+  Header,
+  Panel,
+  PanelSeparator,
+  Toast,
+} from "components";
 
 import {
   ActantSearchBox,
@@ -38,6 +46,7 @@ import {
   collapsedPanelWidth,
   heightFooter,
   heightHeader,
+  layoutWidthBreakpoint,
 } from "Theme/constants";
 import { RiMenuFoldFill, RiMenuUnfoldFill } from "react-icons/ri";
 import { setFirstPanelExpanded } from "redux/features/layout/firstPanelExpandedSlice";
@@ -57,17 +66,22 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
   const fourthPanelExpanded: boolean = useAppSelector(
     (state) => state.layout.fourthPanelExpanded
   );
+  const layoutWidth: number = useAppSelector(
+    (state) => state.layout.layoutWidth
+  );
   const panelWidths: number[] = useAppSelector(
     (state) => state.layout.panelWidths
+  );
+  const separatorXPosition: number = useAppSelector(
+    (state) => state.layout.separatorXPosition
   );
   const queryClient = useQueryClient();
 
   const history = useHistory();
-  const { territoryId, statementId } =
-    useParams<{
-      territoryId: string;
-      statementId: string;
-    }>();
+  const { territoryId, statementId } = useParams<{
+    territoryId: string;
+    statementId: string;
+  }>();
 
   const handleLogOut = () => {
     api.signOut();
@@ -108,7 +122,7 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
 
   return (
     <>
-      <StyledPage>
+      <StyledPage layoutWidth={layoutWidth}>
         <Header
           height={heightHeader}
           paddingY={0}
@@ -135,6 +149,8 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
         />
         <DndProvider backend={HTML5Backend}>
           <StyledPanelWrap>
+            {separatorXPosition > 0 &&
+              window.innerWidth > layoutWidthBreakpoint && <PanelSeparator />}
             {/* FIRST PANEL */}
             <Panel
               width={firstPanelExpanded ? panelWidths[0] : collapsedPanelWidth}

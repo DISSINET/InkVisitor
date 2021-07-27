@@ -7,7 +7,6 @@ import {
   FaPlus,
   FaRegCircle,
   FaDotCircle,
-  FaRecycle,
   FaClone,
 } from "react-icons/fa";
 import { useLocation, useHistory } from "react-router";
@@ -60,6 +59,7 @@ export const StatementListBox: React.FC = () => {
     const res = await api.actantsDelete(sId);
     toast.info(`Statement removed!`);
     queryClient.invalidateQueries(["territory", "statement-list", territoryId]);
+    queryClient.invalidateQueries("tree");
   };
 
   const duplicateStatement = async (statementToDuplicate: IStatement) => {
@@ -100,11 +100,11 @@ export const StatementListBox: React.FC = () => {
         "statement-list",
         territoryId,
       ]);
-
       hashParams["statement"] = newStatement.id;
       history.push({
         hash: queryString.stringify(hashParams),
       });
+      queryClient.invalidateQueries("tree");
     } else {
       toast.error(`Error: Statement not created!`);
     }
@@ -113,6 +113,14 @@ export const StatementListBox: React.FC = () => {
   const { statements, actants } = data || initialData;
 
   const moveEndRow = async (statementToMove: IStatement, index: number) => {
+    // return if order don't change
+    if (
+      statementToMove.data.territory.order ===
+      statements[index].data.territory.order
+    ) {
+      return;
+    }
+
     // whether row is moving top-bottom direction
     const topDown =
       statementToMove.data.territory.order <

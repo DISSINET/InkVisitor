@@ -1,6 +1,7 @@
 import React, { ReactNode } from "react";
 import { Tag } from "components";
 import { IActant, IEntity } from "@shared/types";
+import { DragItem } from "types";
 
 const classes = {
   T: {
@@ -62,6 +63,7 @@ const classes = {
 
 interface IActantTag {
   actant: IActant | IEntity;
+  parentId?: string;
   mode?: "selected" | "disabled" | "invalid" | false;
   short?: boolean;
   button?: ReactNode;
@@ -70,10 +72,14 @@ interface IActantTag {
   moveFn?: (dragIndex: number, hoverIndex: number) => void;
   isSelected?: boolean;
   enableTooltip?: boolean;
+  updateOrderFn?: (item: DragItem) => void;
+  lvl?: number;
+  disabled?: boolean;
 }
 
 export const ActantTag: React.FC<IActantTag> = ({
   actant,
+  parentId,
   short = false,
   mode,
   button,
@@ -81,6 +87,9 @@ export const ActantTag: React.FC<IActantTag> = ({
   moveFn,
   isSelected,
   enableTooltip = false,
+  updateOrderFn,
+  lvl,
+  disabled,
 }) => {
   const classId = actant.class;
   const classObject = classes[classId];
@@ -99,6 +108,9 @@ export const ActantTag: React.FC<IActantTag> = ({
       invertedLabel={isSelected}
       index={index}
       enableTooltip={enableTooltip}
+      updateOrderFn={updateOrderFn}
+      parentId={parentId}
+      lvl={lvl}
     />
   );
 };

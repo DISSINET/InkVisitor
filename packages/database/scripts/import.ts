@@ -7,6 +7,10 @@ var tunnel = require("tunnel-ssh");
 const datasets: Record<string, any> = {
   all: [
     {
+      name: "acl_permissions",
+      path: "datasets/all/acl_permissions.json",
+    },
+    {
       name: "actants",
       path: "datasets/all/actants.json",
     },
@@ -24,6 +28,10 @@ const datasets: Record<string, any> = {
     },
   ],
   mock: [
+    {
+      name: "acl_permissions",
+      path: "datasets/mock/acl_permissions.json",
+    },
     {
       name: "actants",
       path: "datasets/mock/actants.json",

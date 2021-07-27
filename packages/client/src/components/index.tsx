@@ -22,6 +22,7 @@ import {
   ModalContent,
   ModalFooter,
 } from "components/Modal/Modal";
+import { PanelSeparator } from "./PanelSeparator/PanelSeparator";
 
 export {
   Arrow,
@@ -45,5 +46,6 @@ export {
   ModalContent,
   ModalFooter,
   Submit,
+  PanelSeparator,
   Tooltip,
 };
