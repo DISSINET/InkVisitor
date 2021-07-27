@@ -6,14 +6,21 @@
  */
 export class CustomError extends Error {
   public static code: number = 400;
+  public loggable: boolean = false;
+  public log: string = "";
 
   constructor(m: string) {
     super(m);
+    this.log = m;
     this.name = this.constructor.name; // so the value would be taken from the constructor - not the default Error
   }
 
   statusCode(): number {
     return (this.constructor as any).code;
+  }
+
+  shouldLog(): boolean {
+    return this.loggable;
   }
 }
 
@@ -22,6 +29,15 @@ export class CustomError extends Error {
  */
 class BadCredentialsError extends CustomError {
   public static code = 401;
+  message = "Bad credentials";
+}
+
+/**
+ * PermissionDeniedError will be thrown if request is not authorized to request such resource
+ */
+class PermissionDeniedError extends CustomError {
+  public static code = 400;
+  message = "Permission denied";
 }
 
 /**
@@ -31,6 +47,8 @@ class BadCredentialsError extends CustomError {
  */
 class ModelNotValidError extends CustomError {
   public static code = 400;
+  message = "Model not valid";
+  loggable = true;
 }
 
 /**
@@ -38,6 +56,7 @@ class ModelNotValidError extends CustomError {
  */
 class NotFound extends CustomError {
   public static code = 404;
+  message = "Not found";
 }
 
 /**
@@ -45,6 +64,7 @@ class NotFound extends CustomError {
  */
 class BadParams extends CustomError {
   public static code = 400;
+  message = "Bad parameters";
 }
 
 /**
@@ -52,6 +72,7 @@ class BadParams extends CustomError {
  */
 class UserDoesNotExits extends CustomError {
   public static code = 400;
+  message = "User does not exist";
 }
 
 /**
@@ -59,6 +80,7 @@ class UserDoesNotExits extends CustomError {
  */
 class ActantDoesNotExits extends CustomError {
   public static code = 400;
+  message = "Actant does not exist";
 }
 
 /**
@@ -66,6 +88,7 @@ class ActantDoesNotExits extends CustomError {
  */
 class ActionDoesNotExits extends CustomError {
   public static code = 400;
+  message = "Action does not exist";
 }
 
 /**
@@ -73,6 +96,7 @@ class ActionDoesNotExits extends CustomError {
  */
 class StatementDoesNotExits extends CustomError {
   public static code = 400;
+  message = "Statement does not exist";
 }
 
 /**
@@ -80,6 +104,15 @@ class StatementDoesNotExits extends CustomError {
  */
 class TerritoryDoesNotExits extends CustomError {
   public static code = 400;
+  message = "Territory does not exist";
+}
+
+/**
+ * PermissionDoesNotExits will be thrown when attempting to remove/update the permission entry which does not exist
+ */
+class PermissionDoesNotExits extends CustomError {
+  public static code = 400;
+  message = "Permission does not exist";
 }
 
 /**
@@ -87,6 +120,7 @@ class TerritoryDoesNotExits extends CustomError {
  */
 class TerritoriesBrokenError extends CustomError {
   public static code = 500;
+  message = "Territories are broken";
 }
 
 /**
@@ -94,6 +128,7 @@ class TerritoriesBrokenError extends CustomError {
  */
 class TerrytoryInvalidMove extends CustomError {
   public static code = 500;
+  message = "Invalid move";
 }
 
 /**
@@ -101,6 +136,7 @@ class TerrytoryInvalidMove extends CustomError {
  */
 class StatementInvalidMove extends CustomError {
   public static code = 500;
+  message = "Invalid move";
 }
 
 /**
@@ -108,6 +144,7 @@ class StatementInvalidMove extends CustomError {
  */
 class InternalServerError extends CustomError {
   public static code = 500;
+  message = "Internal server error";
 }
 
 /**
@@ -115,6 +152,7 @@ class InternalServerError extends CustomError {
  */
 class UnauthorizedError extends CustomError {
   public static code = 401;
+  message = "Unauthorized request";
 }
 
 /**
@@ -122,11 +160,21 @@ class UnauthorizedError extends CustomError {
  */
 class InvalidDeleteError extends CustomError {
   public static code = 400;
+  message = "Invalid delete request";
 }
 
-export {
+/**
+ * UnknownError works as a backup
+ */
+class UnknownError extends CustomError {
+  public static code = 500;
+  message = "Unknown error";
+}
+
+const allErrors: Record<string, any> = {
   InvalidDeleteError,
   UnauthorizedError,
+  PermissionDeniedError,
   InternalServerError,
   ModelNotValidError,
   BadCredentialsError,
@@ -136,6 +184,31 @@ export {
   ActantDoesNotExits,
   ActionDoesNotExits,
   StatementDoesNotExits,
+  PermissionDoesNotExits,
+  TerritoriesBrokenError,
+  TerritoryDoesNotExits,
+  TerrytoryInvalidMove,
+  StatementInvalidMove,
+};
+
+export function getErrorByCode(name: string): CustomError {
+  return allErrors[name] ? new allErrors[name]() : new UnknownError("");
+}
+
+export {
+  InvalidDeleteError,
+  UnauthorizedError,
+  PermissionDeniedError,
+  InternalServerError,
+  ModelNotValidError,
+  BadCredentialsError,
+  NotFound,
+  BadParams,
+  UserDoesNotExits,
+  ActantDoesNotExits,
+  ActionDoesNotExits,
+  StatementDoesNotExits,
+  PermissionDoesNotExits,
   TerritoriesBrokenError,
   TerritoryDoesNotExits,
   TerrytoryInvalidMove,

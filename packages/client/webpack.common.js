@@ -13,7 +13,10 @@ module.exports = {
       },
       {
         test: /\.tsx?$/,
-        use: "ts-loader?configFile=tsconfig.json",
+        loader: "ts-loader?configFile=tsconfig.json",
+        options: {
+          transpileOnly: true,
+        },
       },
       {
         test: /\.svg$/,
@@ -46,6 +49,7 @@ module.exports = {
     new CleanWebpackPlugin(),
     new HtmlWebpackPlugin({
       template: "./public/index.html",
+      favicon: "./public/favicon.ico",
     }),
   ],
 };

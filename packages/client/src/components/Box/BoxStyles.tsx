@@ -67,6 +67,7 @@ interface StyledVerticalText {
 }
 export const StyledVerticalText = styled(animated.p)<StyledVerticalText>`
   position: absolute;
+  top: ${({ theme }) => theme.space[12]};
   display: ${({ $showContentLabel }) =>
     $showContentLabel ? "initial" : "none"};
   left: ${({ theme }) => theme.space[1]};

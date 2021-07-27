@@ -9,7 +9,8 @@
       "defaultLanguage": "",
       "searchLanguages": []
     },
-    "bookmarks": null
+    "bookmarks": null,
+    "role": "admin"
   },
   {
     "id": "2",
@@ -21,7 +22,8 @@
       "defaultLanguage": "",
       "searchLanguages": []
     },
-    "bookmarks": null
+    "bookmarks": null,
+    "role": "viewer"
   },
   {
     "id": "3",
@@ -33,7 +35,8 @@
       "defaultLanguage": "",
       "searchLanguages": []
     },
-    "bookmarks": null
+    "bookmarks": null,
+    "role": "viewer"
   },
   {
     "id": "4",
@@ -45,6 +48,7 @@
       "defaultLanguage": "",
       "searchLanguages": []
     },
-    "bookmarks": null
+    "bookmarks": null,
+    "role": "viewer"
   }
 ]
