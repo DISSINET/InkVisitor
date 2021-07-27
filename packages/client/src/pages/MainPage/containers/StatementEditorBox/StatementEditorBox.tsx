@@ -290,10 +290,7 @@ export const StatementEditorBox: React.FC = () => {
   };
 
   const update = async (changes: object) => {
-    const res = await api.actantsUpdate(statementId, {
-      data: changes,
-    });
-    queryClient.invalidateQueries(["statement"]);
+    updateActantsMutation.mutate(changes);
   };
 
   const updateActantsMutation = useMutation(
@@ -304,8 +301,20 @@ export const StatementEditorBox: React.FC = () => {
     {
       onSuccess: () => {
         queryClient.invalidateQueries(["statement"]);
+      },
+    }
+  );
+
+  const updateActantsRefreshListMutation = useMutation(
+    async (changes: object) =>
+      await api.actantsUpdate(statementId, {
+        data: changes,
+      }),
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries("statement");
         // only action dropdown needs to refresh territory
-        queryClient.invalidateQueries(["territory"]);
+        queryClient.invalidateQueries("territory");
       },
     }
   );
@@ -612,8 +621,8 @@ export const StatementEditorBox: React.FC = () => {
                           const newData = {
                             action: newActionValue.value,
                           };
-                          update(newData);
-                          queryClient.invalidateQueries(["territory"]);
+                          // update(newData);
+                          updateActantsRefreshListMutation.mutate(newData);
                         }}
                         value={statement.data.action}
                       /> */}

@@ -144,7 +144,7 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
     async (newStatement: IStatement) => await api.actantsCreate(newStatement),
     {
       onSuccess: () => {
-        queryClient.invalidateQueries(["actant"]);
+        queryClient.invalidateQueries("actant");
       },
     }
   );
@@ -153,7 +153,7 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
     async (metaStatementId: string) => await api.actantsDelete(metaStatementId),
     {
       onSuccess: () => {
-        queryClient.invalidateQueries(["actant"]);
+        queryClient.invalidateQueries("actant");
       },
     }
   );
@@ -174,11 +174,11 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
                       label: newLabel,
                     });
                     if (res.status === 200) {
-                      queryClient.invalidateQueries(["actant"]);
-                      queryClient.invalidateQueries(["statement"]);
-                      queryClient.invalidateQueries(["tree"]);
-                      queryClient.invalidateQueries(["territory"]);
-                      queryClient.invalidateQueries(["bookmarks"]);
+                      queryClient.invalidateQueries("actant");
+                      queryClient.invalidateQueries("statement");
+                      queryClient.invalidateQueries("tree");
+                      queryClient.invalidateQueries("territory");
+                      queryClient.invalidateQueries("bookmarks");
                     }
                   }
                 }}
