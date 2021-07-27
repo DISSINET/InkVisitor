@@ -11,7 +11,7 @@ import { IActant, IResponseStatement, IStatementActant } from "@shared/types";
 import { ActantSuggester, ActantTag, CertaintyToggle, ElvlToggle } from "../..";
 import { Button, Input } from "components";
 import { FaTrashAlt, FaUnlink } from "react-icons/fa";
-import { useQueryClient } from "react-query";
+import { useMutation, useQueryClient } from "react-query";
 import api from "api";
 import { actantPositionDict } from "@shared/dictionaries";
 const queryString = require("query-string");
@@ -54,7 +54,7 @@ export const StatementEditorActantTable: React.FC<StatementEditorActantTable> =
           a.id === statementActantId ? { ...a, ...changes } : a
         );
         const newData = { actants: updatedActants };
-        updateApiCall(newData);
+        updateActantsMutation.mutate(newData);
       }
     };
     const removeActant = (statementActantId: string) => {
@@ -63,7 +63,7 @@ export const StatementEditorActantTable: React.FC<StatementEditorActantTable> =
           (a) => a.id !== statementActantId
         );
         const newData = { actants: updatedActants };
-        updateApiCall(newData);
+        updateActantsMutation.mutate(newData);
       }
     };
 
@@ -71,22 +71,21 @@ export const StatementEditorActantTable: React.FC<StatementEditorActantTable> =
       const actants: IStatementActant[] = filteredActants.map(
         (filteredActant) => filteredActant.data.sActant
       );
-      updateApiCall({
-        actants: actants,
-      });
+      updateActantsMutation.mutate({ actants });
     };
 
-    const updateApiCall = async (changes: object) => {
-      const res = await api.actantsUpdate(statementId, {
-        data: changes,
-      });
-      queryClient.invalidateQueries(["statement"]);
-      queryClient.invalidateQueries([
-        "territory",
-        "statement-list",
-        territoryId,
-      ]);
-    };
+    const updateActantsMutation = useMutation(
+      async (changes: object) =>
+        await api.actantsUpdate(statementId, {
+          data: changes,
+        }),
+      {
+        onSuccess: () => {
+          queryClient.invalidateQueries(["statement"]);
+          queryClient.invalidateQueries(["territory"]);
+        },
+      }
+    );
 
     const columns: Column<{}>[] = useMemo(() => {
       return [

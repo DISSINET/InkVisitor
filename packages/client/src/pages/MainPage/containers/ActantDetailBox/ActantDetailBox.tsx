@@ -18,7 +18,7 @@ import {
 } from "./ActandDetailBoxStyles";
 import { useHistory, useLocation } from "react-router-dom";
 import api from "api";
-import { QueryClient, useQuery, useQueryClient } from "react-query";
+import { useMutation, useQuery, useQueryClient } from "react-query";
 import {
   IActant,
   IOption,
@@ -175,6 +175,19 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
       queryClient.invalidateQueries(["actant"]);
     }
   };
+
+  // const updateActantsMutation = useMutation(
+  //   async (changes: object) =>
+  //     await api.actantsUpdate(statementId, {
+  //       data: changes,
+  //     }),
+  //   {
+  //     onSuccess: () => {
+  //       queryClient.invalidateQueries(["statement"]);
+  //       queryClient.invalidateQueries(["territory"]);
+  //     },
+  //   }
+  // );
 
   return (
     <>

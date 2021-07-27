@@ -72,7 +72,7 @@ export const StatementListBox: React.FC = () => {
   const removeStatement = async (sId: string) => {
     const res = await api.actantsDelete(sId);
     toast.info(`Statement removed!`);
-    queryClient.invalidateQueries(["territory", "statement-list", territoryId]);
+    queryClient.invalidateQueries(["territory"]);
     queryClient.invalidateQueries("tree");
   };
 
