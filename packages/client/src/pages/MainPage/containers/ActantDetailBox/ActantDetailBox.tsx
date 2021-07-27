@@ -189,6 +189,24 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
   //   }
   // );
 
+  const actantsDeleteMutation = useMutation(
+    async (metaStatementId: string) => await api.actantsDelete(metaStatementId),
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries(["actant"]);
+      },
+    }
+  );
+
+  const actantsCreateMutation = useMutation(
+    async (newStatement: IStatement) => await api.actantsCreate(newStatement),
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries(["actant"]);
+      },
+    }
+  );
+
   return (
     <>
       {actant && (
@@ -204,12 +222,14 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
                     const res = await api.actantsUpdate(actant.id, {
                       label: newLabel,
                     });
+                    if (res.status === 200) {
+                      queryClient.invalidateQueries(["actant"]);
+                      queryClient.invalidateQueries(["statement"]);
+                      queryClient.invalidateQueries(["tree"]);
+                      queryClient.invalidateQueries(["territory"]);
+                      queryClient.invalidateQueries(["bookmarks"]);
+                    }
                   }
-                  queryClient.invalidateQueries(["actant"]);
-                  queryClient.invalidateQueries(["statement"]);
-                  queryClient.invalidateQueries(["tree"]);
-                  queryClient.invalidateQueries(["territory"]);
-                  queryClient.invalidateQueries(["bookmarks"]);
                 }}
               />
               <ButtonGroup>
@@ -244,9 +264,8 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
               icon={<FaPlus />}
               onClick={async () => {
                 const newStatement = CMetaStatement(actant.id);
-                const res = await api.actantsCreate(newStatement);
 
-                queryClient.invalidateQueries(["actant"]);
+                actantsCreateMutation.mutate(newStatement);
               }}
             />
 
@@ -447,12 +466,9 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
                             icon={<FaTrashAlt size={14} />}
                             color="danger"
                             tooltip="delete"
-                            onClick={async () => {
-                              const res = await api.actantsDelete(
-                                metaStatement.id
-                              );
-                              queryClient.invalidateQueries(["actant"]);
-                            }}
+                            onClick={() =>
+                              actantsDeleteMutation.mutate(metaStatement.id)
+                            }
                           />
                         </StyledSectionMetaTableButtonGroup>
                       </StyledSectionMetaTableCell>
@@ -535,7 +551,13 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
           </StyledSection>
         </StyledContent>
       )}
-      <Loader show={isFetching} />
+      <Loader
+        show={
+          isFetching ||
+          actantsDeleteMutation.isLoading ||
+          actantsCreateMutation.isLoading
+        }
+      />
     </>
   );
 };
