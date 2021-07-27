@@ -55,7 +55,9 @@ export default class AclPermission implements IDbModel {
 
   isRoleAllowed(group: string): boolean {
     return (
-      this.roles && !!this.roles.length && this.roles.indexOf(group) !== -1
+      this.roles &&
+      !!this.roles.length &&
+      (this.roles.indexOf("*") !== -1 || this.roles.indexOf(group) !== -1)
     );
   }
 
