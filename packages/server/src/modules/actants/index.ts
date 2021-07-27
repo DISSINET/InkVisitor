@@ -116,9 +116,7 @@ export default Router()
       try {
         // get correct IDbModel implementation
         model = getActantType({
-          ...actantData,
-          class: existingActant.class,
-          id: actantId,
+          ...existingActant,
         });
       } catch (e) {
         throw new ModelNotValidError(e.toString());
