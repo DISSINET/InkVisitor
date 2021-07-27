@@ -45,6 +45,7 @@ import {
 
 import { CMetaStatement, CStatementActant } from "constructors";
 import { findPositionInStatement } from "utils";
+import { ActantDetailMetaTableRow } from "./ActantDetailMetaTableRow/ActantDetailMetaTableRow";
 
 interface ActantDetailBox {}
 export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
@@ -139,58 +140,8 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
     }
   }, [actant]);
 
-  const updateStatementActant = async (
-    statementId: string,
-    actantId: string,
-    changes: any
-  ) => {
-    const metaStatement =
-      actant && actant.metaStatements.find((ms) => ms.id === statementId);
-
-    if (metaStatement) {
-      const metaStatementData = { ...metaStatement.data };
-
-      const updatedStatementActants = metaStatementData.actants.map((actant) =>
-        actant.id === actantId ? { ...actant, ...changes } : actant
-      );
-
-      const res = await api.actantsUpdate(statementId, {
-        data: { ...metaStatementData, ...{ actants: updatedStatementActants } },
-      });
-      queryClient.invalidateQueries(["actant"]);
-    }
-  };
-
-  const updateStatementAttribute = async (
-    statementId: string,
-    changes: any
-  ) => {
-    const metaStatement =
-      actant && actant.metaStatements.find((ms) => ms.id === statementId);
-
-    if (metaStatement) {
-      const res = await api.actantsUpdate(statementId, {
-        data: { ...metaStatement.data, ...changes },
-      });
-      queryClient.invalidateQueries(["actant"]);
-    }
-  };
-
-  // const updateActantsMutation = useMutation(
-  //   async (changes: object) =>
-  //     await api.actantsUpdate(statementId, {
-  //       data: changes,
-  //     }),
-  //   {
-  //     onSuccess: () => {
-  //       queryClient.invalidateQueries(["statement"]);
-  //       queryClient.invalidateQueries(["territory"]);
-  //     },
-  //   }
-  // );
-
-  const actantsDeleteMutation = useMutation(
-    async (metaStatementId: string) => await api.actantsDelete(metaStatementId),
+  const actantsCreateMutation = useMutation(
+    async (newStatement: IStatement) => await api.actantsCreate(newStatement),
     {
       onSuccess: () => {
         queryClient.invalidateQueries(["actant"]);
@@ -198,8 +149,8 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
     }
   );
 
-  const actantsCreateMutation = useMutation(
-    async (newStatement: IStatement) => await api.actantsCreate(newStatement),
+  const actantsDeleteMutation = useMutation(
+    async (metaStatementId: string) => await api.actantsDelete(metaStatementId),
     {
       onSuccess: () => {
         queryClient.invalidateQueries(["actant"]);
@@ -294,184 +245,15 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
                   typeSActant &&
                   valueSActant && (
                     <React.Fragment key={metaStatement.id}>
-                      <StyledSectionMetaTableCell></StyledSectionMetaTableCell>
-
-                      {/* type */}
-                      <StyledSectionMetaTableCell>
-                        {typeSActant && typeActant ? (
-                          <React.Fragment>
-                            <ActantTag
-                              actant={typeActant}
-                              short={false}
-                              button={
-                                <Button
-                                  key="d"
-                                  icon={<FaUnlink />}
-                                  tooltip="unlink actant"
-                                  color="danger"
-                                  onClick={() => {
-                                    updateStatementActant(
-                                      metaStatement.id,
-                                      typeSActant.id,
-                                      { actant: "" }
-                                    );
-                                  }}
-                                />
-                              }
-                            />
-                            <StyledSectionMetaTableButtonGroup>
-                              <ElvlToggle
-                                value={typeSActant.elvl}
-                                onChangeFn={(newValue: string) => {
-                                  updateStatementActant(
-                                    metaStatement.id,
-                                    typeSActant.id,
-                                    { elvl: newValue }
-                                  );
-                                }}
-                              />
-                              <CertaintyToggle
-                                value={typeSActant.certainty}
-                                onChangeFn={(newValue: string) => {
-                                  updateStatementActant(
-                                    metaStatement.id,
-                                    typeSActant.id,
-                                    { certainty: newValue }
-                                  );
-                                }}
-                              />
-                            </StyledSectionMetaTableButtonGroup>
-                          </React.Fragment>
-                        ) : (
-                          <ActantSuggester
-                            onSelected={async (newActantId: string) => {
-                              updateStatementActant(
-                                metaStatement.id,
-                                typeSActant.id,
-                                { actant: newActantId }
-                              );
-                            }}
-                            categoryIds={["C"]}
-                            placeholder={"add new reference"}
-                          ></ActantSuggester>
-                        )}
-                      </StyledSectionMetaTableCell>
-
-                      {/* value */}
-                      <StyledSectionMetaTableCell>
-                        {valueSActant && valueActant ? (
-                          <React.Fragment>
-                            <ActantTag
-                              actant={valueActant}
-                              short={false}
-                              button={
-                                <Button
-                                  key="d"
-                                  icon={<FaUnlink />}
-                                  tooltip="unlink actant"
-                                  color="danger"
-                                  onClick={() => {
-                                    updateStatementActant(
-                                      metaStatement.id,
-                                      valueSActant.id,
-                                      { actant: "" }
-                                    );
-                                  }}
-                                />
-                              }
-                            />
-                            <StyledSectionMetaTableButtonGroup>
-                              <ElvlToggle
-                                value={valueSActant.elvl}
-                                onChangeFn={(newValue: string) => {
-                                  updateStatementActant(
-                                    metaStatement.id,
-                                    valueSActant.id,
-                                    { elvl: newValue }
-                                  );
-                                }}
-                              />
-                              <CertaintyToggle
-                                value={valueSActant.certainty}
-                                onChangeFn={(newValue: string) => {
-                                  updateStatementActant(
-                                    metaStatement.id,
-                                    valueSActant.id,
-                                    { certainty: newValue }
-                                  );
-                                }}
-                              />
-                            </StyledSectionMetaTableButtonGroup>
-                          </React.Fragment>
-                        ) : (
-                          <ActantSuggester
-                            onSelected={async (newActantId: string) => {
-                              updateStatementActant(
-                                metaStatement.id,
-                                valueSActant.id,
-                                { actant: newActantId }
-                              );
-                            }}
-                            categoryIds={[
-                              "P",
-                              "G",
-                              "O",
-                              "C",
-                              "L",
-                              "V",
-                              "E",
-                              "S",
-                              "T",
-                              "R",
-                            ]}
-                            placeholder={"add new reference"}
-                          ></ActantSuggester>
-                        )}
-                      </StyledSectionMetaTableCell>
-
-                      {/* attributes of statement */}
-                      <StyledSectionMetaTableCell>
-                        <StyledSectionMetaTableButtonGroup>
-                          <ModalityToggle
-                            value={metaStatement.data.modality}
-                            onChangeFn={(newValue: string) => {
-                              updateStatementAttribute(metaStatement.id, {
-                                modality: newValue,
-                              });
-                            }}
-                          />
-                          <ElvlToggle
-                            value={metaStatement.data.elvl}
-                            onChangeFn={(newValue: string) => {
-                              updateStatementAttribute(metaStatement.id, {
-                                elvl: newValue,
-                              });
-                            }}
-                          />
-                          <CertaintyToggle
-                            value={metaStatement.data.certainty}
-                            onChangeFn={(newValue: string) => {
-                              updateStatementAttribute(metaStatement.id, {
-                                certainty: newValue,
-                              });
-                            }}
-                          />
-                        </StyledSectionMetaTableButtonGroup>
-                      </StyledSectionMetaTableCell>
-                      {/* actions */}
-                      <StyledSectionMetaTableCell borderless>
-                        <StyledSectionMetaTableButtonGroup>
-                          <Button
-                            key="r"
-                            icon={<FaTrashAlt size={14} />}
-                            color="danger"
-                            tooltip="delete"
-                            onClick={() =>
-                              actantsDeleteMutation.mutate(metaStatement.id)
-                            }
-                          />
-                        </StyledSectionMetaTableButtonGroup>
-                      </StyledSectionMetaTableCell>
+                      <ActantDetailMetaTableRow
+                        actant={actant}
+                        typeSActant={typeSActant}
+                        typeActant={typeActant}
+                        metaStatement={metaStatement}
+                        valueSActant={valueSActant}
+                        valueActant={valueActant}
+                        actantsDeleteMutation={actantsDeleteMutation}
+                      />
                     </React.Fragment>
                   )
                 );
@@ -554,8 +336,8 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
       <Loader
         show={
           isFetching ||
-          actantsDeleteMutation.isLoading ||
-          actantsCreateMutation.isLoading
+          actantsCreateMutation.isLoading ||
+          actantsDeleteMutation.isLoading
         }
       />
     </>
