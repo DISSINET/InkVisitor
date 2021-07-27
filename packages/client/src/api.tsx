@@ -14,6 +14,8 @@ import {
   IResponseGeneric,
   IResponseBookmarks,
   IResponseAdministration,
+  IResponsePermission,
+  RequestPermissionUpdate,
 } from "@shared/types";
 import * as errors from "@shared/types/errors";
 import { toast } from "react-toastify";
@@ -500,6 +502,30 @@ class Api {
     try {
       const response = await this.connection.get(
         `/statements/get/${statementId}`
+      );
+      return response;
+    } catch (err) {
+      throw { ...err.response.data };
+    }
+  }
+
+  async getAclPermissions(): Promise<AxiosResponse<IResponsePermission>> {
+    try {
+      const response = await this.connection.get(`/acl/index`);
+      return response;
+    } catch (err) {
+      throw { ...err.response.data };
+    }
+  }
+
+  async updatePermission(
+    permissionId: string,
+    data: RequestPermissionUpdate
+  ): Promise<AxiosResponse<IResponseGeneric>> {
+    try {
+      const response = await this.connection.put(
+        `/acl/update/${permissionId}`,
+        data
       );
       return response;
     } catch (err) {
