@@ -1,10 +1,5 @@
 import React from "react";
-import {
-  useMutation,
-  UseMutationResult,
-  useQuery,
-  useQueryClient,
-} from "react-query";
+import { UseMutationResult, useQueryClient } from "react-query";
 import { useHistory, useLocation } from "react-router-dom";
 const queryString = require("query-string");
 import { FaPlus, FaRecycle } from "react-icons/fa";
@@ -20,7 +15,6 @@ import { StatementListBreadcrumbItem } from "./StatementListBreadcrumbItem/State
 import { IActant, IStatement } from "@shared/types";
 import { CStatement } from "constructors";
 import { Button, ButtonGroup } from "components";
-import api from "api";
 import { useAppSelector } from "redux/hooks";
 
 interface StatementListHeader {

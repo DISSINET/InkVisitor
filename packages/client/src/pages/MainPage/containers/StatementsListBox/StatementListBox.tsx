@@ -177,7 +177,7 @@ export const StatementListBox: React.FC = () => {
         },
       },
     });
-    queryClient.invalidateQueries(["territory", "statement-list", territoryId]);
+    queryClient.invalidateQueries("territory");
   };
 
   const columns: Column<{}>[] = useMemo(() => {
@@ -374,7 +374,8 @@ export const StatementListBox: React.FC = () => {
           isFetching ||
           removeStatementMutation.isLoading ||
           duplicateStatementMutation.isLoading ||
-          addStatementAtTheEndMutation.isLoading
+          addStatementAtTheEndMutation.isLoading ||
+          actantsCreateMutation.isLoading
         }
       />
     </>

@@ -690,8 +690,8 @@ export const StatementEditorBox: React.FC = () => {
               <StyledEditorActantTableWrapper>
                 <StatementEditorActantTable
                   statement={statement}
-                  statementId={statementId}
                   classEntitiesActant={classesActants}
+                  updateActantsMutation={updateActantsMutation}
                 />
               </StyledEditorActantTableWrapper>
 
@@ -890,7 +890,9 @@ export const StatementEditorBox: React.FC = () => {
       ) : (
         "no statement selected"
       )}
-      <Loader show={isFetchingStatement} />
+      <Loader
+        show={isFetchingStatement || updateActantsRefreshListMutation.isLoading}
+      />
     </div>
   );
 };
