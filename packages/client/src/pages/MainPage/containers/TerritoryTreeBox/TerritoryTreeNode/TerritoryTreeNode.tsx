@@ -110,7 +110,7 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
 
   const moveTerritoryMutation = useMutation(
     async (item: DragItem) => {
-      if (territory.data.parent) {
+      if (territory.data.parent && item.index !== -1) {
         const parent = territory.data.parent as IParentTerritory;
         await api.treeMoveTerritory(item.id, parent.id, item.index);
       }
