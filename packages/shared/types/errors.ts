@@ -6,14 +6,21 @@
  */
 export class CustomError extends Error {
   public static code: number = 400;
+  public loggable: boolean = false;
+  public log: string = "";
 
   constructor(m: string) {
     super(m);
+    this.log = m;
     this.name = this.constructor.name; // so the value would be taken from the constructor - not the default Error
   }
 
   statusCode(): number {
     return (this.constructor as any).code;
+  }
+
+  shouldLog(): boolean {
+    return this.loggable;
   }
 }
 
@@ -26,6 +33,14 @@ class BadCredentialsError extends CustomError {
 }
 
 /**
+ * PermissionDeniedError will be thrown if request is not authorized to request such resource
+ */
+class PermissionDeniedError extends CustomError {
+  public static code = 400;
+  message = "Permission denied";
+}
+
+/**
  * ModelNotValidError is thrown, when incoming raw data in the api handler cannot be assigned to known model.
  * Governed by 'class' attribute
  * @see ../../packages/server/models/factory.ts
@@ -33,6 +48,7 @@ class BadCredentialsError extends CustomError {
 class ModelNotValidError extends CustomError {
   public static code = 400;
   message = "Model not valid";
+  loggable = true;
 }
 
 /**
@@ -89,6 +105,14 @@ class StatementDoesNotExits extends CustomError {
 class TerritoryDoesNotExits extends CustomError {
   public static code = 400;
   message = "Territory does not exist";
+}
+
+/**
+ * PermissionDoesNotExits will be thrown when attempting to remove/update the permission entry which does not exist
+ */
+class PermissionDoesNotExits extends CustomError {
+  public static code = 400;
+  message = "Permission does not exist";
 }
 
 /**
@@ -150,6 +174,7 @@ class UnknownError extends CustomError {
 const allErrors: Record<string, any> = {
   InvalidDeleteError,
   UnauthorizedError,
+  PermissionDeniedError,
   InternalServerError,
   ModelNotValidError,
   BadCredentialsError,
@@ -159,6 +184,7 @@ const allErrors: Record<string, any> = {
   ActantDoesNotExits,
   ActionDoesNotExits,
   StatementDoesNotExits,
+  PermissionDoesNotExits,
   TerritoriesBrokenError,
   TerritoryDoesNotExits,
   TerrytoryInvalidMove,
@@ -172,6 +198,7 @@ export function getErrorByCode(name: string): CustomError {
 export {
   InvalidDeleteError,
   UnauthorizedError,
+  PermissionDeniedError,
   InternalServerError,
   ModelNotValidError,
   BadCredentialsError,
@@ -181,6 +208,7 @@ export {
   ActantDoesNotExits,
   ActionDoesNotExits,
   StatementDoesNotExits,
+  PermissionDoesNotExits,
   TerritoriesBrokenError,
   TerritoryDoesNotExits,
   TerrytoryInvalidMove,
