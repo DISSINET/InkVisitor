@@ -85,6 +85,22 @@ export const StatementListBox: React.FC = () => {
     }
   );
 
+  const addStatementAtTheEndMutation = useMutation(
+    async (newStatement: IStatement) => {
+      await api.actantsCreate(newStatement);
+    },
+    {
+      onSuccess: (data, variables) => {
+        hashParams["statement"] = variables.id;
+        history.push({
+          hash: queryString.stringify(hashParams),
+        });
+        queryClient.invalidateQueries("territory");
+        queryClient.invalidateQueries("tree");
+      },
+    }
+  );
+
   const actantsCreateMutation = useMutation(
     async (newStatement: IStatement) => await api.actantsCreate(newStatement),
     {
@@ -341,7 +357,10 @@ export const StatementListBox: React.FC = () => {
 
   return (
     <>
-      <StatementListHeader data={data ? data : initialData} />
+      <StatementListHeader
+        data={data ? data : initialData}
+        addStatementAtTheEndMutation={addStatementAtTheEndMutation}
+      />
       <StatementListTable
         moveEndRow={moveEndRow}
         data={statements}
@@ -350,7 +369,14 @@ export const StatementListBox: React.FC = () => {
           // selectStatementRow(rowId)
         }}
       />
-      <Loader show={isFetching} />
+      <Loader
+        show={
+          isFetching ||
+          removeStatementMutation.isLoading ||
+          duplicateStatementMutation.isLoading ||
+          addStatementAtTheEndMutation.isLoading
+        }
+      />
     </>
   );
 };

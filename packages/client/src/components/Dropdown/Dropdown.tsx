@@ -23,6 +23,8 @@ interface Dropdown {
   formatOptionLabel?: Function;
   isOptionSelected?: Function;
   getOptionLabel?: Function;
+  placeholder?: string;
+  isClearable?: boolean;
 }
 export const Dropdown: React.FC<Dropdown> = ({
   options,
@@ -36,6 +38,8 @@ export const Dropdown: React.FC<Dropdown> = ({
   formatOptionLabel,
   hideSelectedOptions = false,
   noDropDownIndicator = false,
+  placeholder = "select..",
+  isClearable = false,
 }) => {
   return (
     <Tooltip label={label} position={["top center"]} on={["hover"]}>
@@ -43,6 +47,8 @@ export const Dropdown: React.FC<Dropdown> = ({
         <StyledSelect
           className="react-select-container"
           classNamePrefix="react-select"
+          placeholder={placeholder}
+          isClearable={isClearable}
           {...(getOptionLabel ? { getOptionLabel: getOptionLabel } : {})}
           {...(formatOptionLabel
             ? { formatOptionLabel: formatOptionLabel }

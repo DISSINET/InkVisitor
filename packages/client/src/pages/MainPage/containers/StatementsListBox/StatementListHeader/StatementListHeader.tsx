@@ -1,5 +1,10 @@
 import React from "react";
-import { useMutation, useQuery, useQueryClient } from "react-query";
+import {
+  useMutation,
+  UseMutationResult,
+  useQuery,
+  useQueryClient,
+} from "react-query";
 import { useHistory, useLocation } from "react-router-dom";
 const queryString = require("query-string");
 import { FaPlus, FaRecycle } from "react-icons/fa";
@@ -24,9 +29,16 @@ interface StatementListHeader {
     actants: IActant[];
     label: string;
   };
+  addStatementAtTheEndMutation: UseMutationResult<
+    void,
+    unknown,
+    IStatement,
+    unknown
+  >;
 }
 export const StatementListHeader: React.FC<StatementListHeader> = ({
   data,
+  addStatementAtTheEndMutation,
 }) => {
   const queryClient = useQueryClient();
   let history = useHistory();
@@ -37,22 +49,6 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
 
   const selectedTerritoryPath = useAppSelector(
     (state) => state.territoryTree.selectedTerritoryPath
-  );
-
-  const addStatementAtTheEndMutation = useMutation(
-    async (newStatement: IStatement) => {
-      await api.actantsCreate(newStatement);
-    },
-    {
-      onSuccess: (data, variables) => {
-        hashParams["statement"] = variables.id;
-        history.push({
-          hash: queryString.stringify(hashParams),
-        });
-        queryClient.invalidateQueries("territory");
-        queryClient.invalidateQueries("tree");
-      },
-    }
   );
 
   const handleCreateStatement = () => {

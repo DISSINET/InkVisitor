@@ -7,15 +7,25 @@ import {
   StyledRow,
   StyledRowHeader,
 } from "./ActantSearchBoxStyles";
+import { ActantSuggester } from "..";
+
+const classes = ["C", "P", "G", "O", "L", "V", "E", "T", "R"];
+const classesActants = ["P", "G", "O", "C", "L", "V", "E", "S", "T", "R"];
 
 export const ActantSearchBox: React.FC = () => {
+  const options = classes.map((c: string) => {
+    return { label: c, value: c };
+  });
   return (
     <StyledBoxContent>
       <StyledRow>
         <StyledRowHeader>class</StyledRowHeader>
         <Dropdown
           onChange={(option: ValueType<OptionTypeBase>) => console.log(option)}
-          // options={}
+          options={options}
+          width={80}
+          placeholder={""}
+          isClearable
         />
       </StyledRow>
       <StyledRow>
@@ -28,11 +38,25 @@ export const ActantSearchBox: React.FC = () => {
       </StyledRow>
       <StyledRow>
         <StyledRowHeader>used with action</StyledRowHeader>
-        {/* <Suggester  /> */}
+        <ActantSuggester
+          categoryIds={classesActants}
+          onSelected={(newSelectedId: string) => {
+            console.log(newSelectedId);
+          }}
+          placeholder={"actant"}
+          allowCreate={false}
+        />
       </StyledRow>
       <StyledRow>
         <StyledRowHeader>used with actant</StyledRowHeader>
-        {/* <Suggester  /> */}
+        <ActantSuggester
+          categoryIds={classesActants}
+          onSelected={(newSelectedId: string) => {
+            console.log(newSelectedId);
+          }}
+          placeholder={"actant"}
+          allowCreate={false}
+        />
       </StyledRow>
       <StyledRow>
         <StyledRowHeader>
