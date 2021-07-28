@@ -8,8 +8,8 @@ const { google } = require("googleapis");
 var readlineSync = require("readline-sync");
 
 const SCOPES = ["https://www.googleapis.com/auth/spreadsheets.readonly"];
-const TOKEN_PATH = "import/util/token.json";
-const CREDENTIALS_PATH = "import/util/credentials.json";
+const TOKEN_PATH = "datasets/util/token.json";
+const CREDENTIALS_PATH = "datasets/util/credentials.json";
 
 // Load client secrets from a local file.
 module.exports.loadSheet = async ({ spread, sheet, raw = false }) => {
@@ -18,6 +18,8 @@ module.exports.loadSheet = async ({ spread, sheet, raw = false }) => {
         return JSON.parse(fs.readFileSync("sheetcache/" + tempFileName));
     }
     const credentials = JSON.parse(fs.readFileSync(CREDENTIALS_PATH));
+
+    console.log(credentials)
 
     const auth = await authorize(credentials);
 
@@ -85,7 +87,7 @@ const authorize = async (credentials) => {
         oAuth2Client.setCredentials(JSON.parse(tokenFile));
         return oAuth2Client;
     } catch (e) {
-        const newToken = await getNewToken(oAuth2Client);
+        const newToken = getNewToken(oAuth2Client);
         return newToken;
     }
 };
@@ -107,7 +109,7 @@ var getNewToken = async (oAuth2Client) => {
         hideEchoBack: true,
     });
 
-    const { err, token } = await this.oAuth2Client.getToken(code);
+    const { err, tokens: token } = await oAuth2Client.getToken(code);
 
     if (err)
         return console.error(
