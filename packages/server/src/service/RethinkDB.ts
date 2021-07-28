@@ -6,11 +6,14 @@ import {
 } from "rethinkdb-ts";
 import { Express, NextFunction, Request, Response } from "express";
 import { RethinkDBError } from "rethinkdb-ts/lib/error/error";
+import Acl from "@middlewares/acl";
 
 declare global {
   namespace Express {
     export interface Request {
       db: Db;
+      acl: Acl;
+      userId?: string;
     }
   }
 }
@@ -59,24 +62,15 @@ export function handleErrorMiddleware(response: Response) {
 /*
  * Open RethinkDB connection and store in `request.rethink`.
  */
-export const createConnection = async (
-  request: Request,
-  response: Response,
-  next: NextFunction
-) => {
+export const createConnection = async (request: Request): Promise<void> => {
   request.db = new Db();
   await request.db.initDb();
-  next();
 };
 
 /*
  * Close the RethinkDB connection stored in `request.rethink`.
  */
-export const closeConnection = async (
-  request: Request,
-  response: Response,
-  next: NextFunction
-) => {
+export const closeConnection = async (request: Request): Promise<void> => {
   if (request.db) {
     await request.db.close();
   }
