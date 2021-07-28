@@ -145,8 +145,7 @@ export const StatementEditorBox: React.FC = () => {
       const newData = {
         actants: [...statement.data.actants, newStatementActant],
       };
-      update(newData);
-      queryClient.invalidateQueries(["territory"]);
+      updateActantsRefreshListMutation.mutate(newData);
     }
   };
 
@@ -313,7 +312,6 @@ export const StatementEditorBox: React.FC = () => {
     {
       onSuccess: () => {
         queryClient.invalidateQueries("statement");
-        // only action dropdown needs to refresh territory
         queryClient.invalidateQueries("territory");
       },
     }
