@@ -18,3 +18,11 @@ export const StyledRowHeader = styled.div`
 export const StyledRowContent = styled.div`
   display: flex;
 `;
+export const StyledResults = styled.div`
+  display: flex;
+  flex-direction: column;
+`;
+export const StyledResultHeading = styled.h6``;
+export const StyledResultItem = styled.div`
+  margin-bottom: ${({ theme }) => theme.space[1]};
+`;

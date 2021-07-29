@@ -5,5 +5,11 @@ import { StyledToastContainer } from "./ToastStyles";
 
 interface Toast {}
 export const Toast: React.FC<Toast> = () => {
-  return <StyledToastContainer hideProgressBar closeButton={false} />;
+  return (
+    <StyledToastContainer
+      hideProgressBar
+      closeButton={false}
+      position={"top-left"}
+    />
+  );
 };

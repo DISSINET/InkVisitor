@@ -1,18 +1,21 @@
 import React, { useEffect, useState } from "react";
-import { OptionTypeBase, ValueType } from "react-select";
+import { OptionsType, OptionTypeBase, ValueType } from "react-select";
 
-import { Dropdown, Input, Suggester } from "components";
+import { Dropdown, Input, Tag } from "components";
 import {
   StyledBoxContent,
+  StyledResultHeading,
+  StyledResultItem,
+  StyledResults,
   StyledRow,
   StyledRowHeader,
 } from "./ActantSearchBoxStyles";
 import { ActantSuggester } from "..";
 import { useMutation } from "react-query";
 import api from "api";
-import { IRequestSearch } from "types";
+import { Entities, IRequestSearch } from "types";
+import { IOption, IResponseSearch } from "@shared/types";
 
-const classes = ["C", "P", "G", "O", "L", "V", "E", "T", "R"];
 const classesActants = ["P", "G", "O", "C", "L", "V", "E", "S", "T", "R"];
 
 const initValues: IRequestSearch = {
@@ -22,49 +25,69 @@ const initValues: IRequestSearch = {
 };
 
 export const ActantSearchBox: React.FC = () => {
-  const [data, setData] = useState<IRequestSearch>(initValues);
+  const [options, setOptions] = useState<OptionsType<OptionTypeBase>>();
+  const [classOption, setClassOption] = useState<ValueType<OptionTypeBase>>();
+  const [searchData, setSearchData] = useState<IRequestSearch>(initValues);
+  const [results, setResults] = useState<IResponseSearch[]>([]);
+
+  useEffect(() => {
+    const optionsToSet: OptionsType<OptionTypeBase> = Object.entries(Entities)
+      .filter((c: any) => {
+        if (c[1].id !== "A" && c[1].id !== "R") {
+          return c;
+        }
+      })
+      .map((entity) => {
+        return { value: entity[1].id, label: entity[1].label };
+      });
+    setOptions(optionsToSet);
+  }, []);
 
   const handleChange = (
     key: string,
-    value: string | ValueType<OptionTypeBase>
+    value: string | false | ValueType<OptionTypeBase>
   ) => {
-    setData({
-      ...data,
+    setSearchData({
+      ...searchData,
       [key]: value,
     });
   };
 
   useEffect(() => {
-    if (data.actantId || data.label || data.class) {
-      searchActantsMutation.mutate(data);
+    if (searchData.actantId || searchData.label) {
+      searchActantsMutation.mutate(searchData);
     } else {
-      // Clear search results
+      setResults([]);
     }
-  }, [data]);
+  }, [searchData]);
 
   const searchActantsMutation = useMutation(
     async (searchData: IRequestSearch) => api.actantsSearch(searchData),
     {
       onSuccess: (data) => {
-        console.log(data.data);
+        setResults(data.data);
       },
     }
   );
 
-  const options = classes.map((c: string) => {
-    return { label: c, value: c };
-  });
   return (
     <StyledBoxContent>
       <StyledRow>
         <StyledRowHeader>class</StyledRowHeader>
         <Dropdown
           placeholder={""}
-          width={80}
+          width={150}
           isClearable
           options={options}
+          value={classOption}
           onChange={(option: ValueType<OptionTypeBase>) => {
-            handleChange("class", option);
+            if (option) {
+              setClassOption(option);
+              handleChange("class", (option as IOption).value);
+            } else {
+              setClassOption(null);
+              handleChange("class", false);
+            }
           }}
         />
       </StyledRow>
@@ -77,7 +100,10 @@ export const ActantSearchBox: React.FC = () => {
         />
       </StyledRow>
       <StyledRow>
-        <StyledRowHeader>used with actant</StyledRowHeader>
+        <StyledRowHeader>
+          {/* used with */}
+          actant
+        </StyledRowHeader>
         <ActantSuggester
           categoryIds={classesActants}
           onSelected={(newSelectedId: string) => {
@@ -88,9 +114,22 @@ export const ActantSearchBox: React.FC = () => {
         />
       </StyledRow>
       <StyledRow>
-        <StyledRowHeader>
-          <b>Results:</b>
-        </StyledRowHeader>
+        <StyledResultHeading>Results:</StyledResultHeading>
+      </StyledRow>
+      <StyledRow>
+        <StyledResults>
+          {results &&
+            results.map((result: IResponseSearch, key: number) => (
+              <StyledResultItem key={key}>
+                <Tag
+                  propId={result.actantId}
+                  label={result.actantLabel}
+                  category={result.class}
+                  color={Entities[result.class].color}
+                />
+              </StyledResultItem>
+            ))}
+        </StyledResults>
       </StyledRow>
     </StyledBoxContent>
   );
