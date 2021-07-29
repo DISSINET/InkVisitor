@@ -53,7 +53,6 @@ class Acl {
   }
 
   public async validate(req: Request): Promise<CustomError | null> {
-    req.userId = "1";
     if (!req.userId) {
       return permissionDeniedErr;
     }
@@ -61,7 +60,7 @@ class Acl {
     const user = await User.getUser(req.db.connection, req.userId);
 
     const permission = await this.getPermission(req);
-    if (!permission?.isRoleAllowed(user.role)) {
+    if (user.role !== "admin" && !permission?.isRoleAllowed(user.role)) {
       return permissionDeniedErr;
     }
 
