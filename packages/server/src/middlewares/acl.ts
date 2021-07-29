@@ -58,14 +58,14 @@ class Acl {
       return null;
     }
 
-    req.userId = "1";
-    if (!req.userId) {
+    if (!req.user) {
       return permissionDeniedErr;
     }
 
-    const user = await User.getUser(req.db.connection, req.userId);
-
-    if (user.role !== "admin" && !permission?.isRoleAllowed(user.role)) {
+    if (
+      req.user.user.role !== "admin" &&
+      !permission?.isRoleAllowed(req.user.user.role)
+    ) {
       return permissionDeniedErr;
     }
 
