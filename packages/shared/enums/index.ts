@@ -1,4 +1,5 @@
 export enum ActantType {
+  Action = "A",
   Territory = "T",
   Statement = "S",
   Resource = "R",
@@ -14,6 +15,7 @@ export enum ActantType {
 export function isValidActantType(input: ActantType): boolean {
   return (
     [
+      ActantType.Action,
       ActantType.Territory,
       ActantType.Statement,
       ActantType.Resource,
