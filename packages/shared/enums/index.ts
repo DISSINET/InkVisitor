@@ -52,3 +52,12 @@ export type ActantStatus = typeof statuses[number];
 
 const logicalTypes = ["1", "2", "3"] as const;
 export type ActantLogicalType = typeof logicalTypes[number];
+
+const certanties = ["1", "2", "3", "4", "5", "6"] as const;
+export type StatementCertainty = typeof certanties[number];
+
+const elvls = ["1", "2", "3"] as const;
+export type StatementElvls = typeof elvls[number];
+
+const positions = ["s", "a1", "a2", "p"] as const;
+export type StatementPositions = typeof positions[number];
