@@ -6,7 +6,6 @@ import app from "../../Server";
 import { IAction } from "@shared/types";
 import { Db } from "@service/RethinkDB";
 import { createAction, deleteActions } from "@service/shorthands";
-import "ts-jest";
 
 const checkArrayOfActions = (res: any) => {
   const actionExample: IAction = {

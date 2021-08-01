@@ -1,6 +1,5 @@
 import { IResponseGeneric, IStatement } from "@shared/types";
-import "mocha";
-import * as chai from "chai";
+import "ts-jest";
 import { ITerritory } from "@shared/types/index";
 import { Db } from "@service/RethinkDB";
 import { createActant, deleteActants } from "@service/shorthands";
@@ -8,9 +7,6 @@ import Statement from "@models/statement";
 import Territory from "@models/territory";
 import { CustomError } from "@shared/types/errors";
 import { errorTypes } from "@shared/types/response-generic";
-
-export const expect = chai.expect;
-export const should = chai.should();
 
 describe("common", function () {
   it("should work", () => undefined);
@@ -30,10 +26,10 @@ export function testErroneousResponse(
     message: "",
     // message not important
   };
-  expect(res.status).to.be.eq(expectedErrorClass.statusCode());
-  expect(res.body).keys(expectedType);
-  expect((res.body as any).result).to.be.eq(expectedType.result);
-  expect((res.body as any).error).to.be.eq(expectedType.error);
+  expect(res.status).toEqual(expectedErrorClass.statusCode());
+  expect(Object.keys(res.body as any)).toEqual(Object.keys(expectedType));
+  expect((res.body as any).result).toEqual(expectedType.result);
+  expect((res.body as any).error).toEqual(expectedType.error);
 }
 
 function getRandomFromArray<T>(input: T[]): T {

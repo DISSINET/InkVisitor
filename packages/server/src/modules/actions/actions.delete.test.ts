@@ -1,4 +1,4 @@
-import { should, testErroneousResponse } from "@modules/common.test";
+import { testErroneousResponse } from "@modules/common.test";
 import { ActionDoesNotExits, BadParams } from "@shared/types/errors";
 import { Db } from "@service/RethinkDB";
 import request from "supertest";
@@ -58,7 +58,7 @@ describe("Actions delete", function () {
         .expect(successfulGenericResponse)
         .expect(200, async () => {
           const deletedEntry = await findActionById(db, testId);
-          should.not.exist(deletedEntry);
+          expect(deletedEntry).toBeNull();
           done();
         });
     });

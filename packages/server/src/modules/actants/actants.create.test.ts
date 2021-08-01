@@ -55,7 +55,7 @@ describe("Actants create", function () {
         },
       });
 
-      request(app)
+      await request(app)
         .post(`${apiPath}/actants/create`)
         .send(actantData)
         .set("authorization", "Bearer " + supertestConfig.token)
