@@ -1,9 +1,15 @@
 import { fillFlatObject, UnknownObject, IModel } from "./common";
-import { ActantType, EntityActantType } from "@shared/enums";
+import {
+  ActantType,
+  EntityActantType,
+  ActantStatus,
+  ActantLogicalType,
+} from "@shared/enums";
 import { IEntity } from "@shared/types/entity";
 import Actant from "./actant";
 
 class EntityData implements IModel {
+  logicalType: ActantLogicalType = "1";
   constructor(data: UnknownObject) {
     if (!data) {
       return;
@@ -20,8 +26,14 @@ class Entity extends Actant implements IEntity {
 
   id = "";
   class: EntityActantType = ActantType.Concept; // just default
-  label = "";
   data = new EntityData({});
+
+  label: string = "";
+  label_extended: string = "";
+  status: ActantStatus = "0";
+  language: string = "eng";
+  notes: string[] = [];
+  recommendations: string[] = [];
 
   constructor(data: UnknownObject) {
     super();
