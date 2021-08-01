@@ -12,6 +12,7 @@ import {
 } from "@service/shorthands";
 import Territory from "@models/territory";
 import Statement from "@models/statement";
+import { clean } from "@modules/common.test";
 
 const randSuffix = Math.random();
 async function createMockStatementsWithTerritory(db: Db): Promise<Statement[]> {
@@ -77,9 +78,7 @@ describe("Territories moveStatement", function () {
       expect(s1.data.territory.order).toEqual(3);
       expect(s2.data.territory.order).toEqual(2);
 
-      for (const stat of statements) {
-        await deleteActant(db, stat.id);
-      }
+      await clean(db);
       return done();
     });
   });
