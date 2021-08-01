@@ -45,3 +45,10 @@ export type EntityActantType =
   | ActantType.Location
   | ActantType.Value
   | ActantType.Event;
+
+// TODO: find a way how to turn imported list into enum
+const statuses = ["0", "1", "2", "3"] as const;
+export type ActantStatus = typeof statuses[number];
+
+const logicalTypes = ["1", "2", "3"] as const;
+export type ActantLogicalType = typeof logicalTypes[number];
