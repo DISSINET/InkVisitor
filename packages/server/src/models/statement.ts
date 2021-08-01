@@ -2,7 +2,8 @@ import {
   IStatement,
   IStatementActant,
   IStatementReference,
-} from "@shared/types/statement";
+  IStatementAction,
+} from "@shared/types";
 import { fillFlatObject, fillArray, UnknownObject, IModel } from "./common";
 import { Prop } from "./prop";
 import {
@@ -78,10 +79,31 @@ export class StatementTerritory {
   }
 }
 
-export class StatementData implements IModel {
-  action = "";
-  certainty: StatementCertainty = "1";
+export class StatementAction {
+  id = "";
+  action: string = "";
   elvl: StatementElvl = "1";
+  certainty: StatementCertainty = "1";
+
+  constructor(data: UnknownObject) {
+    if (!data) {
+      return;
+    }
+    fillFlatObject(this, data);
+  }
+
+  isValid(): boolean {
+    // order is optional, it will be moved to last position if empty
+    if (this.id === "") {
+      return false;
+    }
+
+    return true;
+  }
+}
+
+export class StatementData implements IModel {
+  actions = [] as StatementAction[];
   modality = "";
   text = "";
   territory = new StatementTerritory({});
@@ -228,6 +250,7 @@ class Statement extends Actant implements IStatement {
 
     this.data.actants.forEach((a) => (actantIds[a.actant] = null));
     this.data.tags.forEach((t) => (actantIds[t] = null));
+    this.data.actions.forEach((t) => (actantIds[t.action] = null));
     this.data.props.forEach((p) => {
       actantIds[p.value.id] = null;
       actantIds[p.type.id] = null;
@@ -284,6 +307,9 @@ class Statement extends Actant implements IStatement {
       .filter((row: RDatum) => {
         return rethink.or(
           row("data")("territory")("id").eq(actantId),
+          row("data")("actions").contains((entry: RDatum) =>
+            entry("action").eq(actantId)
+          ),
           row("data")("actants").contains((entry: RDatum) =>
             entry("actant").eq(actantId)
           ),
