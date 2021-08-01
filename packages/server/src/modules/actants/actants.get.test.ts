@@ -50,9 +50,8 @@ describe("Actants get method", function () {
         .set("authorization", "Bearer " + supertestConfig.token)
         .expect(200)
         .expect((res) => {
-          res.body.should.not.empty;
-          res.body.should.be.a("object");
-          res.body.id.should.not.empty;
+          expect(typeof res.body).toEqual("object");
+          expect(res.body.id).toBeTruthy();
         });
 
       await clean(db);

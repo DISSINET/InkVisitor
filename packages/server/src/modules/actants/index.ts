@@ -23,9 +23,8 @@ import {
   IResponseActant,
   IResponseSearch,
   RequestSearch,
-  IStatement,
 } from "@shared/types";
-
+import { mergeDeep } from "@common/functions";
 import Statement from "@models/statement";
 import { IDbModel } from "@models/common";
 
@@ -77,8 +76,9 @@ export default Router()
     "/create",
     asyncRouteHandler<IResponseGeneric>(async (request: Request) => {
       const model = getActantType(request.body as Record<string, unknown>);
-      if (!model) {
-        throw new BadParams("actant data have to be set");
+
+      if (!model.isValid()) {
+        throw new ModelNotValidError("");
       }
 
       const result = await createActant(request.db, model);
@@ -111,21 +111,12 @@ export default Router()
         );
       }
 
-      let model: IDbModel | null = null;
-
-      try {
-        // get correct IDbModel implementation
-        model = getActantType({
-          ...existingActant,
-        });
-      } catch (e) {
-        throw new ModelNotValidError(e.toString());
-      }
-
-      // class is from the db, so it must work, unless bad data
-      if (!model) {
-        throw new Error("internal error");
-      }
+      // get correct IDbModel implementation
+      const model = getActantType({
+        ...mergeDeep(existingActant, actantData),
+        class: existingActant.class,
+        id: actantId,
+      });
 
       // checking the validity of the final model (already has updated data)
       if (!model.isValid()) {
@@ -268,4 +259,4 @@ export default Router()
         return out;
       });
     })
-  );  
+  );
