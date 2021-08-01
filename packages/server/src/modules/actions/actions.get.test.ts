@@ -1,4 +1,4 @@
-import { testErroneousResponse } from "@modules/common.test";
+import { clean, testErroneousResponse } from "@modules/common.test";
 import { ActionDoesNotExits, BadParams } from "@shared/types/errors";
 import request, { Response } from "supertest";
 import { supertestConfig } from "..";
@@ -7,11 +7,10 @@ import app from "../../Server";
 import { IAction } from "@shared/types";
 import { Db } from "@service/RethinkDB";
 import { deleteActions, createAction } from "@service/shorthands";
-import "ts-jest";
 
 const testValidAction = (res: Response) => {
-  res.body.should.not.empty;
-  res.body.should.be.a("object");
+  expect(res.body).toBeTruthy();
+  expect(typeof res.body).toEqual("object");
   const actionExample: IAction = {
     id: "",
     labels: [],
@@ -22,8 +21,8 @@ const testValidAction = (res: Response) => {
     types: [],
     valencies: [],
   };
-  res.body.should.have.keys(Object.keys(actionExample));
-  res.body.id.should.not.empty;
+  expect(Object.keys(res.body)).toEqual(Object.keys(actionExample));
+  expect(res.body.id).toBeTruthy();
 };
 
 describe("Actions get", function () {
@@ -85,8 +84,7 @@ describe("Actions get", function () {
         .expect(200)
         .expect(testValidAction);
 
-      await deleteActions(db);
-      await db.close();
+      await clean(db);
       done();
     });
   });
