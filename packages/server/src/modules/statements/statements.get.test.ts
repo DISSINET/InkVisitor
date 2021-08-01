@@ -1,4 +1,4 @@
-import { testErroneousResponse } from "@modules/common.test";
+import { clean, testErroneousResponse } from "@modules/common.test";
 import { BadParams, StatementDoesNotExits } from "@shared/types/errors";
 import request from "supertest";
 import { supertestConfig } from "..";
@@ -11,8 +11,8 @@ import { ActantType } from "@shared/enums";
 import Statement from "@models/statement";
 
 const testValidStatement = (res: any) => {
-  res.body.should.not.empty;
-  res.body.should.be.a("object");
+  expect(res.body).toBeTruthy();
+  expect(typeof res.body).toEqual("object");
   const actionExample: IResponseStatement = {
     id: "",
     class: ActantType.Statement,
@@ -34,11 +34,11 @@ const testValidStatement = (res: any) => {
     },
     label: "",
     actants: [],
-    audits: [],
-    usedIn: [],
   };
-  res.body.should.have.keys(Object.keys(actionExample));
-  res.body.id.should.not.empty;
+  expect(Object.keys(res.body).sort()).toEqual(
+    Object.keys(actionExample).sort()
+  );
+  expect(res.body.id).toBeTruthy();
 };
 
 describe("Statements get", function () {
@@ -71,12 +71,14 @@ describe("Statements get", function () {
         db,
         new Statement({ id: randomId, data: { territory: { id: "2" } } })
       );
-      return request(app)
+      await request(app)
         .get(`${apiPath}/statements/get/${randomId}`)
         .set("authorization", "Bearer " + supertestConfig.token)
         .expect(200)
-        .expect(testValidStatement)
-        .then(() => done());
+        .expect(testValidStatement);
+
+      await clean(db);
+      done();
     });
   });
 });
