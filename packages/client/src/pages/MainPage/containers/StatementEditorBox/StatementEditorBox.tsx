@@ -673,7 +673,7 @@ export const StatementEditorBox: React.FC = () => {
             {/* Statement Props */}
             <StyledEditorSection key="editor-section-props-statement">
               <StyledEditorSectionHeader>
-                Statement Properties
+                Actions Properties
               </StyledEditorSectionHeader>
 
               <StyledEditorSectionContent key={JSON.stringify(statement.data)}>
