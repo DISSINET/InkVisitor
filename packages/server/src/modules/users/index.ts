@@ -24,7 +24,6 @@ import { checkPassword, generateAccessToken, hashPassword } from "@common/auth";
 import { asyncRouteHandler } from "..";
 import {
   IResponseBookmarkFolder,
-  IResponseBookmarks,
   IResponseUser,
   IResponseStoredTerritory,
   IResponseAdministration,
@@ -190,8 +189,8 @@ export default Router()
     })
   )
   .get(
-    "/bookmarksGet/:userId?",
-    asyncRouteHandler<IResponseBookmarks>(async (request: Request) => {
+    "/bookmarks/:userId?",
+    asyncRouteHandler<IResponseBookmarkFolder[]>(async (request: Request) => {
       if (!(request as any).user) {
         throw new BadParams("not logged");
       }
@@ -207,9 +206,7 @@ export default Router()
         throw new UserDoesNotExits(`user with id ${userId} does not exist`);
       }
 
-      const out: IResponseBookmarks = {
-        bookmarks: [],
-      };
+      const out: IResponseBookmarkFolder[] = [];
 
       if (user.bookmarks) {
         for (const bookmark of user.bookmarks) {
@@ -225,12 +222,10 @@ export default Router()
             )) {
               bookmarkResponse.actants.push({
                 ...actant,
-                usedCount: await getActantUsage(request.db, actant.id),
-                usedIn: [],
               });
             }
           }
-          out.bookmarks.push(bookmarkResponse);
+          out.push(bookmarkResponse);
         }
       }
 
@@ -268,8 +263,6 @@ export default Router()
               )) {
                 bookmarkResponse.actants.push({
                   ...actant,
-                  usedCount: await getActantUsage(request.db, actant.id),
-                  usedIn: [],
                 });
               }
             }

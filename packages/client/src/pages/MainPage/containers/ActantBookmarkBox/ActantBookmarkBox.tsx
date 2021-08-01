@@ -89,8 +89,8 @@ export const ActantBookmarkBox: React.FC = () => {
     ["bookmarks"],
     async () => {
       const res = await api.bookmarksGet(false);
-      res.data.bookmarks.sort((a, b) => (a.name > b.name ? 1 : -1));
-      return res.data.bookmarks;
+      res.data.sort((a, b) => (a.name > b.name ? 1 : -1));
+      return res.data;
     },
     { enabled: api.isLoggedIn() }
   );
@@ -188,8 +188,9 @@ export const ActantBookmarkBox: React.FC = () => {
 
   const createFolder = async () => {
     if (bookmarkFolders) {
-      const newBookmarkFolder: IBookmarkFolder =
-        CBookmarkFolder(editingFolderName);
+      const newBookmarkFolder: IBookmarkFolder = CBookmarkFolder(
+        editingFolderName
+      );
 
       const newBookmarks: IBookmarkFolder[] | false = getBookmarksCopy();
       if (newBookmarks) {
