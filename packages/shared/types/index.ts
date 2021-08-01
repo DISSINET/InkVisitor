@@ -15,9 +15,7 @@ import {
 } from "./user";
 import { IResource } from "./resource";
 import { IResponseDetail } from "./response-detail";
-import {
-  IResponseBookmarkFolder,
-} from "./response-bookmarks";
+import { IResponseBookmarkFolder } from "./response-bookmarks";
 import { IResponseAdministration } from "./response-administration";
 import { IResponseActant } from "./response-actant";
 import { IResponseAction } from "./response-action";
@@ -29,7 +27,12 @@ import {
 import { IResponsePermission } from "./response-permission";
 import { IResponseTerritory } from "./response-territory";
 import { IResponseUser, IResponseStoredTerritory } from "./response-user";
-import { IStatement, IStatementActant, IStatementReference } from "./statement";
+import {
+  IStatement,
+  IStatementActant,
+  IStatementAction,
+  IStatementReference,
+} from "./statement";
 import { ITerritory } from "./territory";
 import { IOption } from "./option";
 import { IResponseGeneric } from "./response-generic";
@@ -45,6 +48,7 @@ export type {
   ILabel,
   IOption,
   IStatement,
+  IStatementAction,
   IStatementActant,
   IStatementReference,
   ITerritory,

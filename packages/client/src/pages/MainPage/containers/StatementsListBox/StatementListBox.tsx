@@ -55,6 +55,20 @@ export const StatementListBox: React.FC = () => {
     { initialData: initialData, enabled: !!territoryId && api.isLoggedIn() }
   );
 
+  // const {
+  //   status: statusActions,
+  //   data: actions,
+  //   error: errorActions,
+  //   isFetching: isFetchingActions,
+  // } = useQuery(
+  //   ["actions"],
+  //   async () => {
+  //     const res = await api.actionsGetMore({});
+  //     return res.data;
+  //   },
+  //   { enabled: api.isLoggedIn() }
+  // );
+
   const removeStatement = async (sId: string) => {
     const res = await api.actantsDelete(sId);
     toast.info(`Statement removed!`);
@@ -153,20 +167,6 @@ export const StatementListBox: React.FC = () => {
     queryClient.invalidateQueries(["territory", "statement-list", territoryId]);
   };
 
-  const {
-    status: statusActions,
-    data: actions,
-    error: errorActions,
-    isFetching: isFetchingActions,
-  } = useQuery(
-    ["actions"],
-    async () => {
-      const res = await api.actionsGetMore({});
-      return res.data;
-    },
-    { enabled: api.isLoggedIn() }
-  );
-
   const columns: Column<{}>[] = useMemo(() => {
     return [
       {
@@ -210,9 +210,10 @@ export const StatementListBox: React.FC = () => {
         accessor: "data.action",
         Cell: ({ row }: Cell) => {
           const actionTypeLabel = row.values.data?.action;
-          const actionLabel = actions?.find(
-            (a: IAction) => a.id === actionTypeLabel
-          )?.label;
+          const actionLabel: string = "";
+          // actions?.find(
+          //   (a: IAction) => a.id === actionTypeLabel
+          // )?.label;
 
           return (
             <div>
@@ -328,7 +329,7 @@ export const StatementListBox: React.FC = () => {
         },
       },
     ];
-  }, [data, actions, hashParams["statement"]]);
+  }, [data, hashParams["statement"]]);
 
   const selectStatementRow = (rowId: string) => {
     hashParams["statement"] = rowId;

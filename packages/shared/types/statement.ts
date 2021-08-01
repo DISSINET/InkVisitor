@@ -10,9 +10,7 @@ import {
 export interface IStatement extends IActant {
   class: ActantType.Statement;
   data: {
-    action: string;
-    certainty: StatementCertainty;
-    elvl: StatementElvl;
+    actions: IStatementAction[];
     modality: string;
     text: string;
     territory: {
@@ -24,6 +22,14 @@ export interface IStatement extends IActant {
     references: IStatementReference[];
     tags: string[]; // ids of IActant;
   };
+}
+
+export interface IStatementAction {
+  id: string;
+  action: string;
+  operator?: IOperator;
+  elvl: StatementElvl;
+  certainty: StatementCertainty;
 }
 
 export interface IStatementActant {

@@ -43,9 +43,7 @@ export const CStatement = (territoryId: string): IStatement => ({
   notes: [],
   recommendations: [],
   data: {
-    action: "",
-    certainty: "1",
-    elvl: "1",
+    actions: [],
     modality: "Y",
     text: "",
     territory: {
@@ -69,9 +67,14 @@ export const CMetaStatement = (subjectId: string): IStatement => ({
   notes: [],
   recommendations: [],
   data: {
-    action: "A0093",
-    certainty: "1",
-    elvl: "1",
+    actions: [
+      {
+        id: uuidv4(),
+        action: "A0093",
+        certainty: "1",
+        elvl: "1",
+      },
+    ],
     modality: "Y",
     text: "",
     territory: {
@@ -144,7 +147,6 @@ export const CTerritoryActant = (
     parent: { id: parentId, order: parentOrder },
     type: "1",
     content: "",
-    lang: "1",
   },
 });
 
