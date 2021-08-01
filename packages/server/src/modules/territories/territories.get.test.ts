@@ -1,7 +1,7 @@
-import { expect, testErroneousResponse } from "@modules/common.test";
+import { testErroneousResponse } from "@modules/common.test";
 import { BadParams, TerritoryDoesNotExits } from "@shared/types/errors";
 import { Db } from "@service/RethinkDB";
-import { createActant, deleteActant, deleteActants } from "@service/shorthands";
+import { createActant, deleteActants } from "@service/shorthands";
 import Territory from "@models/territory";
 import request from "supertest";
 import { apiPath } from "../../common/constants";
@@ -84,7 +84,7 @@ describe("Territories get query", function () {
           res.body.actants.should.be.a("array");
           res.body.actants.should.have.length(2); // todo
 
-          expect(res.body.id).to.be.eq(testTerritoryId);
+          expect(res.body.id).toEqual(testTerritoryId);
         });
 
       await deleteActants(db);
