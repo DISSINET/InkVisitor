@@ -1,4 +1,4 @@
-import { ActantType } from "@shared/enums";
+import { ActantType, ActantStatus } from "@shared/enums";
 import { ITerritory, IParentTerritory } from "@shared/types/territory";
 import { r as rethink, Connection, WriteResult, RDatum } from "rethinkdb-ts";
 import { fillFlatObject, UnknownObject, IModel } from "./common";
@@ -59,8 +59,13 @@ class Territory extends Actant implements ITerritory {
 
   id = "";
   class: ActantType.Territory = ActantType.Territory;
-  label = "";
   data = new TerritoryData({});
+  label: string = "";
+  label_extended: string = "";
+  status: ActantStatus = "0";
+  language: string = "eng";
+  notes: string[] = [];
+  recommendations: string[] = [];
 
   _siblings: Record<number, ITerritory> = {};
 

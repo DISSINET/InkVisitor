@@ -3,8 +3,8 @@ import { IOperator } from "./";
 import {
   ActantType,
   StatementCertainty,
-  StatementElvls,
-  StatementPositions,
+  StatementElvl,
+  StatementPosition,
 } from "../enums";
 
 export interface IStatement extends IActant {
@@ -12,7 +12,7 @@ export interface IStatement extends IActant {
   data: {
     action: string;
     certainty: StatementCertainty;
-    elvl: StatementElvls;
+    elvl: StatementElvl;
     modality: string;
     text: string;
     territory: {
@@ -29,11 +29,11 @@ export interface IStatement extends IActant {
 export interface IStatementActant {
   id: string;
   actant: string;
-  position: StatementPositions;
+  position: StatementPosition;
 
   // todo: make mandatory
   operator?: IOperator;
-  elvl: StatementElvls;
+  elvl: StatementElvl;
   certainty: StatementCertainty;
 }
 

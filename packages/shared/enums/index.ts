@@ -57,7 +57,7 @@ const certanties = ["1", "2", "3", "4", "5", "6"] as const;
 export type StatementCertainty = typeof certanties[number];
 
 const elvls = ["1", "2", "3"] as const;
-export type StatementElvls = typeof elvls[number];
+export type StatementElvl = typeof elvls[number];
 
 const positions = ["s", "a1", "a2", "p"] as const;
-export type StatementPositions = typeof positions[number];
+export type StatementPosition = typeof positions[number];
