@@ -212,7 +212,7 @@ export const StatementListBox: React.FC = () => {
           const actionTypeLabel = row.values.data?.action;
           const actionLabel = actions?.find(
             (a: IAction) => a.id === actionTypeLabel
-          )?.labels[0].value;
+          )?.label;
 
           return (
             <div>
