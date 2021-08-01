@@ -1,4 +1,4 @@
-import { testErroneousResponse } from "@modules/common.test";
+import { clean, testErroneousResponse } from "@modules/common.test";
 import { BadParams, TerritoryDoesNotExits } from "@shared/types/errors";
 import { Db } from "@service/RethinkDB";
 import { createActant, deleteActants } from "@service/shorthands";
@@ -70,24 +70,18 @@ describe("Territories get query", function () {
         .set("authorization", "Bearer " + supertestConfig.token)
         .expect(200)
         .expect((res) => {
-          res.body.should.not.empty;
-          res.body.should.be.a("object");
-          res.body.should.have.keys([
-            ...Object.keys(territory),
-            "statements",
-            "actants",
-          ]);
+          expect(res.body).toBeTruthy();
+          expect(typeof res.body).toEqual("object");
+          expect(Object.keys(res.body).sort()).toEqual(
+            [...Object.keys(territory), "statements", "actants"].sort()
+          );
 
-          res.body.statements.should.be.a("array");
-          res.body.statements.should.have.length(1); // only one territory-link
-
-          res.body.actants.should.be.a("array");
-          res.body.actants.should.have.length(2); // todo
-
+          expect(res.body.statements).toHaveLength(1);
+          expect(res.body.actants).toHaveLength(2);
           expect(res.body.id).toEqual(testTerritoryId);
         });
 
-      await deleteActants(db);
+      await clean(db);
       return done();
     });
   });
