@@ -2,7 +2,15 @@ var { loadSheet } = require("./../util/loadsheet");
 var { v4 } = require("uuid");
 var fs = require("fs");
 
-import { ActantType, EntityActantType } from "../../../shared/enums";
+import {
+  ActantType,
+  EntityActantType,
+  ActantLogicalType,
+  ActantStatus,
+  StatementPosition,
+  StatementElvl,
+  StatementCertainty,
+} from "../../../shared/enums";
 import {
   IAudit,
   IAction,
@@ -132,6 +140,7 @@ const loadStatementsTables = async (next: Function) => {
 
   const entitySheets = tableResources
     .filter((row) => row["type"] === "entity table")
+    .filter((row) => row["spreadsheet_id"])
     .map((row) => {
       return {
         id: row["id"],
@@ -312,7 +321,6 @@ const loadStatementsTables = async (next: Function) => {
       const mainStatement: IStatement = {
         id: v4(),
         class: ActantType.Statement,
-        label: statement.id,
         data: {
           action: statement.id_action_or_relation,
           territory: {
@@ -340,10 +348,15 @@ const loadStatementsTables = async (next: Function) => {
           // TODO handle modality
           modality: statement.modality || "Y",
           text: statement.text,
-          note: `NOTE: ${statement.note}, LOCATION: ${statement.location_text}, TIME: ${statement.time_note}`,
           props: [],
           actants: [],
         },
+        notes: [statement.note, statement.location_text, statement.time_note],
+        label: statement.id,
+        label_extended: "",
+        status: "1",
+        language: "eng",
+        recommendations: [],
       };
 
       //subject
@@ -467,8 +480,15 @@ const addEntityActant = (id: string, label: string, type: EntityActantType) => {
   const newEntityActant: IEntity = {
     id,
     class: type,
+    data: {
+      logicalType: "1",
+    },
     label: label,
-    data: {},
+    label_extended: "",
+    status: "1",
+    language: "eng",
+    recommendations: [],
+    notes: [],
   };
   if (id) {
     actants.push(newEntityActant);
@@ -485,7 +505,6 @@ const addTerritoryActant = (
       const newTerritory: ITerritory = {
         id,
         class: ActantType.Territory,
-        label: label.trim(),
         data: {
           parent: parentId
             ? {
@@ -497,6 +516,12 @@ const addTerritoryActant = (
           content: "",
           lang: "en",
         },
+        label: label.trim(),
+        label_extended: "",
+        status: "1",
+        language: "eng",
+        recommendations: [],
+        notes: [],
       };
 
       actants.push(newTerritory);
@@ -508,13 +533,18 @@ const addResourceActant = (id: string, label: string) => {
     const newResource: IResource = {
       id,
       class: ActantType.Resource,
-      label: label.trim(),
       data: {
         content: "",
         link: "",
         type: "1",
         lang: "en",
       },
+      label: label.trim(),
+      label_extended: "",
+      status: "1",
+      language: "eng",
+      recommendations: [],
+      notes: [],
     };
     actants.push(newResource);
   }
@@ -594,7 +624,6 @@ const createEmptyPropStatement = (
         elvl: "1",
         modality: "Y",
         text: "",
-        note: "",
         props: [],
         actants: [
           {
@@ -620,6 +649,11 @@ const createEmptyPropStatement = (
           },
         ],
       },
+      label_extended: "",
+      status: "1",
+      language: "eng",
+      recommendations: [],
+      notes: [],
     };
     actants.push(newEmptyStatement);
   }
@@ -718,7 +752,7 @@ const processLocation = (
 
 const processActant = (
   statement: IStatement,
-  position: string,
+  position: StatementPosition,
   actantIdValues: string,
   propActant1Value: string,
   propActant2Value: string,
@@ -728,8 +762,8 @@ const processActant = (
     actantIdValues.split(" #").forEach((actantIdValue: string) => {
       // asign elvl and certainty
 
-      let elvl: string = actantIdValue.includes("[") ? "2" : "1";
-      let certainty: string = "1";
+      let elvl: StatementElvl = actantIdValue.includes("[") ? "2" : "1";
+      let certainty: StatementCertainty = "1";
 
       // remove brackets
       const actantIdClean: string = actantIdValue

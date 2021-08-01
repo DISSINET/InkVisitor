@@ -19,8 +19,6 @@ module.exports.loadSheet = async ({ spread, sheet, raw = false }) => {
     }
     const credentials = JSON.parse(fs.readFileSync(CREDENTIALS_PATH));
 
-    console.log(credentials)
-
     const auth = await authorize(credentials);
 
     const sheets = google.sheets({ version: "v4", auth });
