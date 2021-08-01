@@ -15,7 +15,6 @@ export interface IStatement extends IActant {
     elvl: StatementElvls;
     modality: string;
     text: string;
-    note: string;
     territory: {
       id: string;
       order: number;
