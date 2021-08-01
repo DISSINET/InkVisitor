@@ -25,6 +25,8 @@ import {
   IUser,
 } from "./../../../shared/types";
 
+import { actantStatusDict } from "./../../../shared/dictionaries";
+
 /**
  * waterfall processing
  */
@@ -44,35 +46,65 @@ const loadStatementsTables = async (next: Function) => {
   const tableActions = await loadSheet({
     spread: "1vzY6opQeR9hZVW6fmuZu2sgy_izF8vqGGhBQDxqT_eQ",
     sheet: "Statements",
+    headerRow: 3,
   });
 
   /**
    * actions
    */
   tableActions.forEach((action: any) => {
-    if (action.action_or_relation_english || action.action_or_relation) {
+    if (action.label) {
+      const statusOption = actantStatusDict.find(
+        (o) => o.label === action.status
+      );
+
+      const parseEntities = (text: string) => {
+        const out: string[] = [];
+
+        const parts = text.split("|");
+        if (parts.length == 0) {
+          return [];
+        } else {
+          parts.forEach((part) => {
+            if (part === "NULL") {
+              out.push("NULL");
+            } else {
+              Object.values(ActantType).forEach((type) => {
+                if (part.includes(type)) {
+                  out.push(type);
+                }
+              });
+            }
+          });
+
+          return out;
+        }
+      };
+
       const newAction: IAction = {
-        id: action.id_action_or_relation,
+        id: action.id,
         class: ActantType.Action,
-        label: action.action_or_relation,
-        label_extended: action.action_or_relation_english,
         data: {
           valencies: {
-            s: "",
-            a1: "",
-            a2: "",
+            s: action.subject_valency,
+            a1: action.actant1_valency,
+            a2: action.actant2_valency,
           },
           entities: {
-            s: [],
-            a1: [],
-            a2: [],
+            s: parseEntities(action.subject_entity_type),
+            a1: parseEntities(action.actant1_entity_type),
+            a2: parseEntities(action.actant2_entity_type),
           },
           properties: [],
         },
-        language: "eng",
-        status: "1",
-        notes: [action.note],
+        language: action.language === "English" ? "eng" : "lat",
+        status: statusOption
+          ? (statusOption.value as ActantStatus)
+          : ("0" as ActantStatus),
+        notes: action.note ? [action.note] : [],
         recommendations: [],
+        label: action.label,
+        label_extended: action.detail_incl_valency,
       };
       actions.push(newAction);
     }
