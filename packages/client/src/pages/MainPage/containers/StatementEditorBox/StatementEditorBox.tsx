@@ -595,7 +595,7 @@ export const StatementEditorBox: React.FC = () => {
                       />
                     </div>
                     <div>
-                      <ActionDropdown
+                      {/* <ActionDropdown
                         onSelectedChange={(newActionValue: {
                           value: string;
                           label: string;
@@ -611,7 +611,7 @@ export const StatementEditorBox: React.FC = () => {
                           ]);
                         }}
                         value={statement.data.action}
-                      />
+                      /> */}
                     </div>
                   </div>
                 </div>
@@ -626,7 +626,7 @@ export const StatementEditorBox: React.FC = () => {
                       update(newData);
                     }}
                   />
-                  <ElvlToggle
+                  {/* <ElvlToggle
                     value={statement.data.elvl}
                     onChangeFn={(newValue: string) => {
                       const newData = {
@@ -643,7 +643,7 @@ export const StatementEditorBox: React.FC = () => {
                       };
                       update(newData);
                     }}
-                  />
+                  /> */}
                 </div>
               </StyledEditorSectionContent>
             </StyledEditorSection>
@@ -838,7 +838,7 @@ export const StatementEditorBox: React.FC = () => {
             <StyledEditorSection key="editor-section-notes" lastSection>
               <StyledEditorSectionHeader>Notes</StyledEditorSectionHeader>
               <StyledEditorSectionContent>
-                <Input
+                {/* <Input
                   type="textarea"
                   width={1000}
                   onChangeFn={(newValue: string) => {
@@ -850,7 +850,7 @@ export const StatementEditorBox: React.FC = () => {
                     }
                   }}
                   value={statement.data.note}
-                />
+                /> */}
               </StyledEditorSectionContent>
             </StyledEditorSection>
           </div>
