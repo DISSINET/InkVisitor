@@ -30,7 +30,7 @@ export class TerritoryData implements IModel {
   parent: TerritoryParent | false = false;
   type = "";
   content = "";
-  lang = "";
+  language = "";
 
   constructor(data: UnknownObject) {
     if (!data) {

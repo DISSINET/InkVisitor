@@ -1,13 +1,21 @@
-import { ILabel } from "./";
+import { ILabel, IActant } from "./";
 
 // TODO
-export interface IAction {
+export interface IAction extends IActant {
   id: string;
-  parent: false | string;
-  note: string;
-  labels: ILabel[];
-  types: [];
-  valencies: [];
-  rulesActants: [];
-  rulesProperties: [];
+  data: {
+    valencies: {
+      s: string;
+      a1: string;
+      a2: string;
+    };
+
+    entities: {
+      s: string[];
+      a1: string[];
+      a2: string[];
+    };
+
+    properties: [];
+  };
 }

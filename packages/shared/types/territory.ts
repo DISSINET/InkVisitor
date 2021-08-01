@@ -9,7 +9,6 @@ export interface ITerritory extends IActant {
     parent: IParentTerritory | false;
     type: string; // territoryTypeDict
     content: string;
-    lang: typeof languageValues[number];
   };
 }
 

@@ -10,6 +10,7 @@ import Actant from "./actant";
 
 class EntityData implements IModel {
   logicalType: ActantLogicalType = "1";
+  language: string = "eng";
   constructor(data: UnknownObject) {
     if (!data) {
       return;

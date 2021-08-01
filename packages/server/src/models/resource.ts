@@ -7,7 +7,7 @@ class ResourceData implements IModel {
   content = "";
   link = "";
   type = "";
-  lang: typeof languageValues[number] = "en"; // default
+  language: typeof languageValues[number] = "en"; // default
 
   constructor(data: UnknownObject) {
     if (!data) {
