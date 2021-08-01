@@ -1,22 +1,38 @@
 import { IProp } from "@shared/types";
 import { fillFlatObject, UnknownObject, IModel } from "./common";
+import {
+  ActantType,
+  ActantStatus,
+  ActantLogicalType,
+  StatementCertainty,
+  StatementElvl,
+  StatementPosition,
+} from "@shared/enums";
 
 export class Prop implements IProp, IModel {
   id = "";
-  elvl = "";
-  certainty = "";
+  elvl: StatementElvl = "1";
+  certainty: StatementCertainty = "1";
   modality = "";
   origin = "";
 
-  type = {
+  type: {
+    id: string;
+    certainty: StatementCertainty;
+    elvl: StatementElvl;
+  } = {
     id: "",
-    certainty: "",
-    elvl: "",
+    certainty: "1",
+    elvl: "1",
   };
-  value = {
+  value: {
+    id: string;
+    certainty: StatementCertainty;
+    elvl: StatementElvl;
+  } = {
     id: "",
-    certainty: "",
-    elvl: "",
+    certainty: "1",
+    elvl: "1",
   };
 
   constructor(data: UnknownObject) {
