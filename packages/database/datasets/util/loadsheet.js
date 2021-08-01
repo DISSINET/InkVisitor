@@ -12,7 +12,7 @@ const TOKEN_PATH = "datasets/util/token.json";
 const CREDENTIALS_PATH = "datasets/util/credentials.json";
 
 // Load client secrets from a local file.
-module.exports.loadSheet = async ({ spread, sheet, raw = false }) => {
+module.exports.loadSheet = async ({ spread, sheet, raw = false, headerRow = 0 }) => {
     const tempFileName = spread + "_" + sheet + ".json";
     if (fs.existsSync("sheetcache/" + tempFileName)) {
         return JSON.parse(fs.readFileSync("sheetcache/" + tempFileName));
@@ -38,13 +38,15 @@ module.exports.loadSheet = async ({ spread, sheet, raw = false }) => {
         return res.data.values;
     }
 
+
     const data = res.data.values.filter(
         (row) => row.filter((value) => value && value !== "#N/A").length > 1
     );
+    console.log(data)
 
     // divide data to rows and header
-    const header = data[0];
-    const rows = data.filter((r, ri) => ri !== 0);
+    const header = data[headerRow];
+    const rows = data.filter((r, ri) => ri > headerRow);
 
     // change rows to objects
     const records = rows
