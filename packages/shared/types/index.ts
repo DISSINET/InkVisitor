@@ -16,7 +16,6 @@ import {
 import { IResource } from "./resource";
 import { IResponseDetail } from "./response-detail";
 import {
-  IResponseBookmarks,
   IResponseBookmarkFolder,
 } from "./response-bookmarks";
 import { IResponseAdministration } from "./response-administration";
@@ -61,7 +60,6 @@ export type {
   IResponseActant,
   IResponseAction,
   IResponseDetail,
-  IResponseBookmarks,
   IResponseBookmarkFolder,
   IResponseAdministration,
   IResponseStatement,

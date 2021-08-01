@@ -1,5 +1,5 @@
 import React from "react";
-import axios, { AxiosInstance, AxiosResponse, AxiosRequestConfig } from "axios";
+import axios, { AxiosInstance, AxiosResponse } from "axios";
 import {
   IResponseUser,
   IResponseActant,
@@ -12,10 +12,9 @@ import {
   IResponseDetail,
   IResponseStatement,
   IResponseGeneric,
-  IResponseBookmarks,
   IResponseAdministration,
   IResponsePermission,
-  RequestPermissionUpdate,
+  RequestPermissionUpdate,, IResponseBookmarkFolder
 } from "@shared/types";
 import * as errors from "@shared/types/errors";
 import { toast } from "react-toastify";
@@ -254,10 +253,10 @@ class Api {
    */
   async bookmarksGet(
     userId: string | false
-  ): Promise<AxiosResponse<IResponseBookmarks>> {
+  ): Promise<AxiosResponse<IResponseBookmarkFolder[]>> {
     try {
       const response = await this.connection.get(
-        !!userId ? `/users/bookmarksGet/${userId}` : "/users/bookmarksGet/"
+        !!userId ? `/users/bookmarks/${userId}` : "/users/bookmarks/"
       );
       return response;
     } catch (err) {
