@@ -53,23 +53,26 @@ const loadStatementsTables = async (next: Function) => {
     if (action.action_or_relation_english || action.action_or_relation) {
       const newAction: IAction = {
         id: action.id_action_or_relation,
-        labels: [
-          {
-            id: v4(),
-            value: action.action_or_relation_english,
-            lang: "EN",
+        class: ActantType.Action,
+        label: action.action_or_relation,
+        label_extended: action.action_or_relation_english,
+        data: {
+          valencies: {
+            s: "",
+            a1: "",
+            a2: "",
           },
-          {
-            id: v4(),
-            value: action.action_or_relation,
-            lang: "LA",
+          entities: {
+            s: [],
+            a1: [],
+            a2: [],
           },
-        ],
-        types: [],
-        valencies: [],
-        rulesActants: [],
-        rulesProperties: [],
-        notes: action.note,
+          properties: [],
+        },
+        language: "eng",
+        status: "1",
+        notes: [action.note],
+        recommendations: [],
       };
       actions.push(newAction);
     }

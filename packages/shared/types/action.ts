@@ -2,7 +2,6 @@ import { ILabel, IActant } from "./";
 
 // TODO
 export interface IAction extends IActant {
-  id: string;
   data: {
     valencies: {
       s: string;
