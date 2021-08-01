@@ -1,4 +1,4 @@
-import { expect, testErroneousResponse } from "@modules/common.test";
+import { testErroneousResponse } from "@modules/common.test";
 import { BadParams, UserDoesNotExits } from "@shared/types/errors";
 import request from "supertest";
 import { apiPath } from "../../common/constants";
@@ -108,7 +108,7 @@ describe("Users bookmarksGet", function () {
           res.body.bookmarks.should.be.a("array");
           res.body.bookmarks.should.have.lengthOf(1);
           res.body.bookmarks[0].actants.should.have.lengthOf(1);
-          expect(res.body.bookmarks[0].actants[0].usedCount).eq(
+          expect(res.body.bookmarks[0].actants[0].usedCount).toEqual(
             bookmarkCountUsage
           );
         })

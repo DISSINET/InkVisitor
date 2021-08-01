@@ -3,7 +3,7 @@ import {
   successfulGenericResponse,
   testErroneousResponse,
 } from "@modules/common.test";
-import { BadParams } from "@shared/types/errors";
+import { BadParams, ModelNotValidError } from "@shared/types/errors";
 import request from "supertest";
 import { apiPath } from "../../common/constants";
 import app from "../../Server";
@@ -20,23 +20,27 @@ import "ts-jest";
 
 describe("Actants create", function () {
   describe("empty data", () => {
-    it("should return a BadParams error wrapped in IResponseGeneric", (done) => {
+    it("should return a ModelNotValid error wrapped in IResponseGeneric", (done) => {
       return request(app)
         .post(`${apiPath}/actants/create`)
         .set("authorization", "Bearer " + supertestConfig.token)
         .expect("Content-Type", /json/)
-        .expect(testErroneousResponse.bind(undefined, new BadParams("")))
+        .expect(
+          testErroneousResponse.bind(undefined, new ModelNotValidError(""))
+        )
         .then(() => done());
     });
   });
   describe("faulty data ", () => {
-    it("should return a BadParams error wrapped in IResponseGeneric", (done) => {
+    it("should return a ModelNotValid error wrapped in IResponseGeneric", (done) => {
       return request(app)
         .post(`${apiPath}/actants/create`)
         .send({ test: "" })
         .set("authorization", "Bearer " + supertestConfig.token)
         .expect("Content-Type", /json/)
-        .expect(testErroneousResponse.bind(undefined, new BadParams("")))
+        .expect(
+          testErroneousResponse.bind(undefined, new ModelNotValidError(""))
+        )
         .then(() => done());
     });
   });

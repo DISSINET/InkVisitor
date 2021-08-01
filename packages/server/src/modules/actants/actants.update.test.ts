@@ -40,7 +40,13 @@ describe("Actants update", function () {
       await db.initDb();
       const testId = Math.random().toString();
       const changeLabelTo = "new label";
-      const statementData = new Statement({ id: testId, label: "" });
+      const statementData = new Statement({
+        id: testId,
+        label: "",
+        data: {
+          territory: { id: testId + "ter" },
+        },
+      });
       await statementData.save(db.connection);
 
       await request(app)
@@ -52,7 +58,7 @@ describe("Actants update", function () {
         .expect(successfulGenericResponse)
         .expect(async () => {
           const changedEntry = await findActantById<IActant>(db, testId);
-          changedEntry.label.should.eq(changeLabelTo);
+          expect(changedEntry.label).toEqual(changeLabelTo);
         });
 
       await clean(db);
