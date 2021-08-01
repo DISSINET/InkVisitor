@@ -36,7 +36,7 @@ export const ActionDropdown: React.FC<IActionDropdown> = ({
   );
   const options = useMemo(() => {
     return actions?.map((action: IAction) => {
-      const label = action.label;
+      const label = action.labels.map((l) => l.value).join(" - ");
       return { value: action.id, label: label };
     });
   }, [actions]);
