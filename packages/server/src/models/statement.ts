@@ -79,9 +79,7 @@ export class StatementTerritory {
 }
 
 export class StatementData implements IModel {
-  action = "";
-  certainty: StatementCertainty = "1";
-  elvl: StatementElvl = "1";
+  actions = [];
   modality = "";
   text = "";
   territory = new StatementTerritory({});

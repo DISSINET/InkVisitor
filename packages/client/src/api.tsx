@@ -14,7 +14,8 @@ import {
   IResponseGeneric,
   IResponseAdministration,
   IResponsePermission,
-  RequestPermissionUpdate,, IResponseBookmarkFolder
+  RequestPermissionUpdate,
+  IResponseBookmarkFolder,
 } from "@shared/types";
 import * as errors from "@shared/types/errors";
 import { toast } from "react-toastify";

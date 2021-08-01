@@ -356,7 +356,14 @@ const loadStatementsTables = async (next: Function) => {
         id: v4(),
         class: ActantType.Statement,
         data: {
-          action: statement.id_action_or_relation,
+          actions: [
+            {
+              id: v4(),
+              action: statement.id_action_or_relation,
+              certainty: statement.certainty || "1",
+              elvl: statement.epistemological_level || "1",
+            },
+          ],
           territory: {
             id: statement.text_part_id,
             order: si,
@@ -376,8 +383,6 @@ const loadStatementsTables = async (next: Function) => {
             },
           ],
           tags: statement.tags_id.split(" #").filter((t: string) => t),
-          certainty: statement.certainty || "1",
-          elvl: statement.epistemological_level || "1",
 
           // TODO handle modality
           modality: statement.modality || "Y",
@@ -645,15 +650,20 @@ const createEmptyPropStatement = (
 
       label: "",
       data: {
-        action: "A0093",
+        actions: [
+          {
+            id: v4(),
+            action: "A0093",
+            certainty: "1",
+            elvl: "1",
+          },
+        ],
         territory: {
           id: territory,
           order: order,
         },
         references: [],
         tags: [],
-        certainty: "1",
-        elvl: "1",
         modality: "Y",
         text: "",
         props: [],
