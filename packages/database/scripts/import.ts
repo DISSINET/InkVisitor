@@ -100,7 +100,7 @@ const importData = async () => {
 
     // set default database
     conn.use(config.db);
-
+    
     // Insert data to tables.
     for (let i = 0; i < config.tables.length; ++i) {
       const table = config.tables[i];

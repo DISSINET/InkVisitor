@@ -1,16 +1,20 @@
 import { IActant, IProp } from "./";
-import { ActantType } from "../enums";
 import { IOperator } from "./";
+import {
+  ActantType,
+  StatementCertainty,
+  StatementElvl,
+  StatementPosition,
+} from "../enums";
 
 export interface IStatement extends IActant {
   class: ActantType.Statement;
   data: {
     action: string;
-    certainty: string;
-    elvl: string;
+    certainty: StatementCertainty;
+    elvl: StatementElvl;
     modality: string;
     text: string;
-    note: string;
     territory: {
       id: string;
       order: number;
@@ -25,12 +29,12 @@ export interface IStatement extends IActant {
 export interface IStatementActant {
   id: string;
   actant: string;
-  position: string;
+  position: StatementPosition;
 
   // todo: make mandatory
   operator?: IOperator;
-  elvl: string;
-  certainty: string;
+  elvl: StatementElvl;
+  certainty: StatementCertainty;
 }
 
 export interface IStatementReference {

@@ -2,7 +2,15 @@ var { loadSheet } = require("./../util/loadsheet");
 var { v4 } = require("uuid");
 var fs = require("fs");
 
-import { ActantType, EntityActantType } from "../../../shared/enums";
+import {
+  ActantType,
+  EntityActantType,
+  ActantLogicalType,
+  ActantStatus,
+  StatementPosition,
+  StatementElvl,
+  StatementCertainty,
+} from "../../../shared/enums";
 import {
   IAudit,
   IAction,
@@ -16,6 +24,8 @@ import {
   IProp,
   IUser,
 } from "./../../../shared/types";
+
+import { actantStatusDict } from "./../../../shared/dictionaries";
 
 /**
  * waterfall processing
@@ -36,33 +46,65 @@ const loadStatementsTables = async (next: Function) => {
   const tableActions = await loadSheet({
     spread: "1vzY6opQeR9hZVW6fmuZu2sgy_izF8vqGGhBQDxqT_eQ",
     sheet: "Statements",
+    headerRow: 3,
   });
 
   /**
    * actions
    */
   tableActions.forEach((action: any) => {
-    if (action.action_or_relation_english || action.action_or_relation) {
+    if (action.label) {
+      const statusOption = actantStatusDict.find(
+        (o) => o.label === action.status
+      );
+
+      const parseEntities = (text: string) => {
+        const out: string[] = [];
+
+        const parts = text.split("|");
+        if (parts.length == 0) {
+          return [];
+        } else {
+          parts.forEach((part) => {
+            if (part === "NULL") {
+              out.push("NULL");
+            } else {
+              Object.values(ActantType).forEach((type) => {
+                if (part.includes(type)) {
+                  out.push(type);
+                }
+              });
+            }
+          });
+
+          return out;
+        }
+      };
+
       const newAction: IAction = {
-        id: action.id_action_or_relation,
-        parent: action.parent_id,
-        note: action.note,
-        labels: [
-          {
-            id: v4(),
-            value: action.action_or_relation_english,
-            lang: "EN",
+        id: action.id,
+        class: ActantType.Action,
+        data: {
+          valencies: {
+            s: action.subject_valency,
+            a1: action.actant1_valency,
+            a2: action.actant2_valency,
           },
-          {
-            id: v4(),
-            value: action.action_or_relation,
-            lang: "LA",
+          entities: {
+            s: parseEntities(action.subject_entity_type),
+            a1: parseEntities(action.actant1_entity_type),
+            a2: parseEntities(action.actant2_entity_type),
           },
-        ],
-        types: [],
-        valencies: [],
-        rulesActants: [],
-        rulesProperties: [],
+          properties: [],
+        },
+        language: action.language === "English" ? "eng" : "lat",
+        status: statusOption
+          ? (statusOption.value as ActantStatus)
+          : ("0" as ActantStatus),
+        notes: action.note ? [action.note] : [],
+        recommendations: [],
+        label: action.label,
+        label_extended: action.detail_incl_valency,
       };
       actions.push(newAction);
     }
@@ -132,6 +174,7 @@ const loadStatementsTables = async (next: Function) => {
 
   const entitySheets = tableResources
     .filter((row) => row["type"] === "entity table")
+    .filter((row) => row["spreadsheet_id"])
     .map((row) => {
       return {
         id: row["id"],
@@ -312,7 +355,6 @@ const loadStatementsTables = async (next: Function) => {
       const mainStatement: IStatement = {
         id: v4(),
         class: ActantType.Statement,
-        label: statement.id,
         data: {
           action: statement.id_action_or_relation,
           territory: {
@@ -340,10 +382,15 @@ const loadStatementsTables = async (next: Function) => {
           // TODO handle modality
           modality: statement.modality || "Y",
           text: statement.text,
-          note: `NOTE: ${statement.note}, LOCATION: ${statement.location_text}, TIME: ${statement.time_note}`,
           props: [],
           actants: [],
         },
+        notes: [statement.note, statement.location_text, statement.time_note],
+        label: statement.id,
+        label_extended: "",
+        language: "eng",
+        status: "1",
+        recommendations: [],
       };
 
       //subject
@@ -467,8 +514,15 @@ const addEntityActant = (id: string, label: string, type: EntityActantType) => {
   const newEntityActant: IEntity = {
     id,
     class: type,
+    data: {
+      logicalType: "1",
+    },
     label: label,
-    data: {},
+    label_extended: "",
+    status: "1",
+    language: "eng",
+    recommendations: [],
+    notes: [],
   };
   if (id) {
     actants.push(newEntityActant);
@@ -485,7 +539,6 @@ const addTerritoryActant = (
       const newTerritory: ITerritory = {
         id,
         class: ActantType.Territory,
-        label: label.trim(),
         data: {
           parent: parentId
             ? {
@@ -495,8 +548,13 @@ const addTerritoryActant = (
             : false,
           type: "",
           content: "",
-          lang: "en",
         },
+        label: label.trim(),
+        label_extended: "",
+        status: "1",
+        language: "eng",
+        recommendations: [],
+        notes: [],
       };
 
       actants.push(newTerritory);
@@ -508,13 +566,17 @@ const addResourceActant = (id: string, label: string) => {
     const newResource: IResource = {
       id,
       class: ActantType.Resource,
-      label: label.trim(),
       data: {
         content: "",
         link: "",
         type: "1",
-        lang: "en",
       },
+      label: label.trim(),
+      label_extended: "",
+      status: "1",
+      language: "eng",
+      recommendations: [],
+      notes: [],
     };
     actants.push(newResource);
   }
@@ -594,7 +656,6 @@ const createEmptyPropStatement = (
         elvl: "1",
         modality: "Y",
         text: "",
-        note: "",
         props: [],
         actants: [
           {
@@ -620,6 +681,11 @@ const createEmptyPropStatement = (
           },
         ],
       },
+      label_extended: "",
+      status: "1",
+      language: "eng",
+      recommendations: [],
+      notes: [],
     };
     actants.push(newEmptyStatement);
   }
@@ -718,7 +784,7 @@ const processLocation = (
 
 const processActant = (
   statement: IStatement,
-  position: string,
+  position: StatementPosition,
   actantIdValues: string,
   propActant1Value: string,
   propActant2Value: string,
@@ -728,8 +794,8 @@ const processActant = (
     actantIdValues.split(" #").forEach((actantIdValue: string) => {
       // asign elvl and certainty
 
-      let elvl: string = actantIdValue.includes("[") ? "2" : "1";
-      let certainty: string = "1";
+      let elvl: StatementElvl = actantIdValue.includes("[") ? "2" : "1";
+      let certainty: StatementCertainty = "1";
 
       // remove brackets
       const actantIdClean: string = actantIdValue

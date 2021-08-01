@@ -5,7 +5,14 @@ import {
 } from "@shared/types/statement";
 import { fillFlatObject, fillArray, UnknownObject, IModel } from "./common";
 import { Prop } from "./prop";
-import { ActantType } from "@shared/enums";
+import {
+  ActantType,
+  ActantStatus,
+  ActantLogicalType,
+  StatementCertainty,
+  StatementElvl,
+  StatementPosition,
+} from "@shared/enums";
 import Actant from "./actant";
 import { r as rethink, Connection, RDatum, WriteResult } from "rethinkdb-ts";
 import { InternalServerError } from "@shared/types/errors";
@@ -13,10 +20,10 @@ import { InternalServerError } from "@shared/types/errors";
 class StatementActant implements IStatementActant, IModel {
   id = "";
   actant = "";
-  position = "";
+  position: StatementPosition = "s";
   modality = "";
-  elvl = "";
-  certainty = "";
+  elvl: StatementElvl = "1";
+  certainty: StatementCertainty = "1";
 
   constructor(data: UnknownObject) {
     if (!data) {
@@ -73,11 +80,10 @@ export class StatementTerritory {
 
 export class StatementData implements IModel {
   action = "";
-  certainty = "";
-  elvl = "";
+  certainty: StatementCertainty = "1";
+  elvl: StatementElvl = "1";
   modality = "";
   text = "";
-  note = "";
   territory = new StatementTerritory({});
   actants = [] as StatementActant[];
   props = [] as Prop[];
@@ -136,8 +142,13 @@ class Statement extends Actant implements IStatement {
 
   id = "";
   class: ActantType.Statement = ActantType.Statement;
-  label = "";
   data = new StatementData({});
+  label = "";
+  label_extended: string = "";
+  status: ActantStatus = "0";
+  language: string = "eng";
+  notes: string[] = [];
+  recommendations: string[] = [];
 
   constructor(data: UnknownObject) {
     super();
