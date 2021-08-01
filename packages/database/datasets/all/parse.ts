@@ -31,7 +31,6 @@ import { actantStatusDict } from "./../../../shared/dictionaries";
  * waterfall processing
  */
 var actants: IActant[] = [];
-var actions: IAction[] = [];
 
 type IConceptProp = {
   type: "value" | "concept";
@@ -106,7 +105,7 @@ const loadStatementsTables = async (next: Function) => {
         label: action.label,
         label_extended: action.detail_incl_valency,
       };
-      actions.push(newAction);
+      actants.push(newAction);
     }
   });
 
@@ -884,5 +883,4 @@ const createNewActantIfNeeded = (actantValue: string) => {
 
 loadStatementsTables(() => {
   fs.writeFileSync("datasets/all/actants.json", JSON.stringify(actants));
-  fs.writeFileSync("datasets/all/actions.json", JSON.stringify(actions));
 });
