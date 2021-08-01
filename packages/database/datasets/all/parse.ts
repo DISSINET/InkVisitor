@@ -53,8 +53,6 @@ const loadStatementsTables = async (next: Function) => {
     if (action.action_or_relation_english || action.action_or_relation) {
       const newAction: IAction = {
         id: action.id_action_or_relation,
-        parent: action.parent_id,
-        note: action.note,
         labels: [
           {
             id: v4(),
@@ -71,6 +69,7 @@ const loadStatementsTables = async (next: Function) => {
         valencies: [],
         rulesActants: [],
         rulesProperties: [],
+        notes: action.note,
       };
       actions.push(newAction);
     }
@@ -354,8 +353,8 @@ const loadStatementsTables = async (next: Function) => {
         notes: [statement.note, statement.location_text, statement.time_note],
         label: statement.id,
         label_extended: "",
-        status: "1",
         language: "eng",
+        status: "1",
         recommendations: [],
       };
 
@@ -514,7 +513,6 @@ const addTerritoryActant = (
             : false,
           type: "",
           content: "",
-          lang: "en",
         },
         label: label.trim(),
         label_extended: "",
@@ -537,7 +535,6 @@ const addResourceActant = (id: string, label: string) => {
         content: "",
         link: "",
         type: "1",
-        lang: "en",
       },
       label: label.trim(),
       label_extended: "",
