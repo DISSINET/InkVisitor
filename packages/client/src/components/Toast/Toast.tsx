@@ -9,7 +9,7 @@ export const Toast: React.FC<Toast> = () => {
     <StyledToastContainer
       hideProgressBar
       closeButton={false}
-      position={"top-left"}
+      position={"top-right"}
     />
   );
 };
