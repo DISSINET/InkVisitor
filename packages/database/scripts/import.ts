@@ -15,10 +15,6 @@ const datasets: Record<string, any> = {
       path: "datasets/all/actants.json",
     },
     {
-      name: "actions",
-      path: "datasets/all/actions.json",
-    },
-    {
       name: "users",
       path: "datasets/all/users.json",
     },
@@ -35,10 +31,6 @@ const datasets: Record<string, any> = {
     {
       name: "actants",
       path: "datasets/mock/actants.json",
-    },
-    {
-      name: "actions",
-      path: "datasets/mock/actions.json",
     },
     {
       name: "users",
