@@ -101,13 +101,6 @@ export const StatementEditorActionTable: React.FC<StatementEditorActionTable> =
           data: changes,
         },
       });
-      // const res = await api.actantsUpdate(statementId, {
-      //   data: changes,
-      // });
-      // queryClient.invalidateQueries(["statement"]);
-      // queryClient.invalidateQueries([
-      //   "territory"
-      // ]);
     };
 
     const columns: Column<{}>[] = useMemo(() => {
