@@ -29,7 +29,6 @@ import {
 } from "./../../../../../../shared/dictionaries";
 import {
   IActant,
-  IStatementAction,
   IProp,
   IStatement,
   IStatementReference,
@@ -39,9 +38,6 @@ import { Button, Input, Loader } from "components";
 import { ActantSuggester } from "./../";
 
 import {
-  StyledEditorSection,
-  StyledEditorSectionHeader,
-  StyledEditorSectionContent,
   StyledReferencesListColumn,
   StyledListHeaderColumn,
   StyledPropsActantHeader,
@@ -51,6 +47,9 @@ import {
   StyledReferencesList,
   StyledTagsList,
   StyledTagsListItem,
+  StyledEditorSection,
+  StyledEditorSectionContent,
+  StyledEditorSectionHeader,
   StyledEditorActantTableWrapper,
 } from "./StatementEditorBoxStyles";
 import { StatementEditorActantTable } from "./StatementEditorActantTable/StatementEditorActantTable";
@@ -146,12 +145,7 @@ export const StatementEditorBox: React.FC = () => {
       const newData = {
         actants: [...statement.data.actants, newStatementActant],
       };
-      update(newData);
-      queryClient.invalidateQueries([
-        "territory",
-        "statement-list",
-        territoryId,
-      ]);
+      updateActantsRefreshListMutation.mutate(newData);
     }
   };
 
@@ -295,11 +289,33 @@ export const StatementEditorBox: React.FC = () => {
   };
 
   const update = async (changes: object) => {
-    const res = await api.actantsUpdate(statementId, {
-      data: changes,
-    });
-    queryClient.invalidateQueries(["statement"]);
+    updateActantsMutation.mutate(changes);
   };
+
+  const updateActantsMutation = useMutation(
+    async (changes: object) =>
+      await api.actantsUpdate(statementId, {
+        data: changes,
+      }),
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries(["statement"]);
+      },
+    }
+  );
+
+  const updateActantsRefreshListMutation = useMutation(
+    async (changes: object) =>
+      await api.actantsUpdate(statementId, {
+        data: changes,
+      }),
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries("statement");
+        queryClient.invalidateQueries("territory");
+      },
+    }
+  );
 
   const renderPropGroup = (propOrigin: any, statement: IResponseStatement) => {
     const originActant = propOrigin.actant;
@@ -603,12 +619,8 @@ export const StatementEditorBox: React.FC = () => {
                           const newData = {
                             action: newActionValue.value,
                           };
-                          update(newData);
-                          queryClient.invalidateQueries([
-                            "territory",
-                            "statement-list",
-                            territoryId,
-                          ]);
+                          // update(newData);
+                          updateActantsRefreshListMutation.mutate(newData);
                         }}
                         value={statement.data.action}
                       /> */}
@@ -676,8 +688,8 @@ export const StatementEditorBox: React.FC = () => {
               <StyledEditorActantTableWrapper>
                 <StatementEditorActantTable
                   statement={statement}
-                  statementId={statementId}
                   classEntitiesActant={classesActants}
+                  updateActantsMutation={updateActantsRefreshListMutation}
                 />
               </StyledEditorActantTableWrapper>
 
@@ -876,7 +888,9 @@ export const StatementEditorBox: React.FC = () => {
       ) : (
         "no statement selected"
       )}
-      <Loader show={isFetchingStatement} />
+      <Loader
+        show={isFetchingStatement || updateActantsRefreshListMutation.isLoading}
+      />
     </div>
   );
 };

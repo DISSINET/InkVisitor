@@ -26,9 +26,6 @@ export const ContextMenu: React.FC<ContextMenu> = ({
   const ref = useRef<HTMLDivElement>(null);
 
   const [showMenu, setShowMenu] = useState(false);
-  // useEffect(() => {
-  //   showMenu ? onMenuOpen() : onMenuClose();
-  // }, [showMenu]);
   const [showCreate, setShowCreate] = useState(false);
   const [showSubmit, setShowSubmit] = useState(false);
   const [currentPosition, setCurrentPosition] = useState({

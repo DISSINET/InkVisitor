@@ -27,7 +27,7 @@ import { rootTerritoryId } from "Theme/constants";
 import { animated, config, useSpring } from "react-spring";
 import api from "api";
 import { IParentTerritory } from "@shared/types/territory";
-import { useQueryClient } from "react-query";
+import { useMutation, useQueryClient } from "react-query";
 import { DraggedTerritoryItem, DragItem } from "types";
 
 interface TerritoryTreeNode {
@@ -108,14 +108,19 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
     [childTerritories]
   );
 
-  const moveTerritory = async (item: DragItem) => {
-    if (territory.data.parent) {
-      const parent = territory.data.parent as IParentTerritory;
-
-      const res = await api.treeMoveTerritory(item.id, parent.id, item.index);
-      queryClient.invalidateQueries("tree");
+  const moveTerritoryMutation = useMutation(
+    async (item: DragItem) => {
+      if (territory.data.parent && item.index !== -1) {
+        const parent = territory.data.parent as IParentTerritory;
+        await api.treeMoveTerritory(item.id, parent.id, item.index);
+      }
+    },
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries("tree");
+      },
     }
-  };
+  );
 
   const onCaretClick = (id: string) => {
     hashParams["territory"] = id;
@@ -268,7 +273,7 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
                     index={index}
                     enableTooltip
                     moveFn={moveFn}
-                    updateOrderFn={moveTerritory}
+                    updateOrderFn={moveTerritoryMutation.mutate}
                   />
                 </animated.div>
                 <ContextMenu
