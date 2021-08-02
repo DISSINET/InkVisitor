@@ -86,6 +86,7 @@ export const CMetaStatement = (subjectId: string): IStatement => ({
         position: "s",
         elvl: "1",
         certainty: "1",
+        mode: "1",
       },
       {
         id: uuidv4(),
@@ -93,6 +94,7 @@ export const CMetaStatement = (subjectId: string): IStatement => ({
         position: "a1",
         elvl: "1",
         certainty: "1",
+        mode: "1",
       },
       {
         id: uuidv4(),
@@ -100,6 +102,7 @@ export const CMetaStatement = (subjectId: string): IStatement => ({
         position: "a2",
         elvl: "1",
         certainty: "1",
+        mode: "1",
       },
     ],
     props: [],
@@ -126,6 +129,7 @@ export const CStatementActant = (): IStatementActant => ({
   position: "s",
   elvl: "1",
   certainty: "1",
+  mode: "1",
 });
 
 export const CTerritoryActant = (

@@ -668,6 +668,7 @@ const createEmptyPropStatement = (
             position: "s",
             elvl: "1",
             certainty: "1",
+            mode: "1",
           },
           {
             id: v4(),
@@ -675,6 +676,7 @@ const createEmptyPropStatement = (
             position: "a1",
             elvl: "1",
             certainty: "1",
+            mode: "1",
           },
           {
             id: v4(),
@@ -682,6 +684,7 @@ const createEmptyPropStatement = (
             position: "a2",
             elvl: "1",
             certainty: "1",
+            mode: "1",
           },
         ],
       },
@@ -817,6 +820,7 @@ const processActant = (
         position: position,
         elvl: elvl,
         certainty: certainty,
+        mode: "1",
       });
 
       // create a prop if there is one

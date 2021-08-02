@@ -5,6 +5,7 @@ import {
   StatementCertainty,
   StatementElvl,
   StatementPosition,
+  StatementMode,
 } from "../enums";
 
 export interface IStatement extends IActant {
@@ -36,6 +37,7 @@ export interface IStatementActant {
   id: string;
   actant: string;
   position: StatementPosition;
+  mode: StatementMode;
 
   // todo: make mandatory
   operator?: IOperator;

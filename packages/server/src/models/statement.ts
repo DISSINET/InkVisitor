@@ -11,6 +11,7 @@ import {
   ActantStatus,
   ActantLogicalType,
   StatementCertainty,
+  StatementMode,
   StatementElvl,
   StatementPosition,
 } from "@shared/enums";
@@ -25,6 +26,7 @@ class StatementActant implements IStatementActant, IModel {
   modality = "";
   elvl: StatementElvl = "1";
   certainty: StatementCertainty = "1";
+  mode: StatementMode = "1";
 
   constructor(data: UnknownObject) {
     if (!data) {
