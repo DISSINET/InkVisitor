@@ -157,6 +157,21 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
       },
     }
   );
+  const actantsLabelUpdateMutation = useMutation(
+    async (actantObject: { actantId: string; newLabel: string }) =>
+      await api.actantsUpdate(actantObject.actantId, {
+        label: actantObject.newLabel,
+      }),
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries("actant");
+        queryClient.invalidateQueries("statement");
+        queryClient.invalidateQueries("tree");
+        queryClient.invalidateQueries("territory");
+        queryClient.invalidateQueries("bookmarks");
+      },
+    }
+  );
 
   return (
     <>
@@ -170,16 +185,10 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
                 value={actant.label}
                 onChangeFn={async (newLabel: string) => {
                   if (newLabel !== actant.label) {
-                    const res = await api.actantsUpdate(actant.id, {
-                      label: newLabel,
+                    actantsLabelUpdateMutation.mutate({
+                      actantId: actant.id,
+                      newLabel: newLabel,
                     });
-                    if (res.status === 200) {
-                      queryClient.invalidateQueries("actant");
-                      queryClient.invalidateQueries("statement");
-                      queryClient.invalidateQueries("tree");
-                      queryClient.invalidateQueries("territory");
-                      queryClient.invalidateQueries("bookmarks");
-                    }
                   }
                 }}
               />
@@ -337,7 +346,8 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
         show={
           isFetching ||
           actantsCreateMutation.isLoading ||
-          actantsDeleteMutation.isLoading
+          actantsDeleteMutation.isLoading ||
+          actantsLabelUpdateMutation.isLoading
         }
       />
     </>
