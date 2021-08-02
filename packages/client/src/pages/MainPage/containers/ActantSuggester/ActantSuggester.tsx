@@ -6,7 +6,7 @@ import { IOption, IActant } from "@shared/types";
 import { FaHome } from "react-icons/fa";
 import { CActant } from "constructors";
 import { Entities } from "types";
-import { useQuery, useQueryClient } from "react-query";
+import { useMutation, useQuery, useQueryClient } from "react-query";
 import api from "api";
 import { CategoryActantType } from "@shared/enums";
 
@@ -127,14 +127,22 @@ export const ActantSuggester: React.FC<ActantSuggesterI> = ({
     setSelectedCategory(newCategory);
   };
 
+  const actantsCreateMutation = useMutation(
+    async (newActant: IActant) => await api.actantsCreate(newActant),
+    {
+      onSuccess: (data, variables) => {
+        onSelected(variables.id);
+        handleClean();
+      },
+    }
+  );
+
   const handleCreate = async (newCreated: {
     label: string;
     category: CategoryActantType;
   }) => {
     const newActant = CActant(newCreated.category, newCreated.label);
-    const resCreate = await api.actantsCreate(newActant);
-    onSelected(newActant.id);
-    handleClean();
+    actantsCreateMutation.mutate(newActant);
   };
   const handlePick = (newPicked: SuggestionI) => {
     onSelected(newPicked.id);
