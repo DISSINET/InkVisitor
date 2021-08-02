@@ -34,7 +34,6 @@ export const ActantSearchBox: React.FC = () => {
   });
   const [searchData, setSearchData] = useState<IRequestSearch>(initValues);
   const [results, setResults] = useState<IResponseSearch[]>([]);
-  // const [actant, setActant] = useState("");
 
   const {
     status,
