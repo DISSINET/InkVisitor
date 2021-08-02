@@ -5,9 +5,8 @@ export interface IActant {
   class: ActantType;
   data: object;
   label: string;
-  label_extended: string;
+  detail: string;
   status: ActantStatus;
   language: string;
   notes: string[];
-  recommendations: string[];
 }

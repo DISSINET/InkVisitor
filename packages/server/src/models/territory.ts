@@ -61,11 +61,10 @@ class Territory extends Actant implements ITerritory {
   class: ActantType.Territory = ActantType.Territory;
   data = new TerritoryData({});
   label: string = "";
-  label_extended: string = "";
+  detail: string = "";
   status: ActantStatus = "0";
   language: string = "eng";
   notes: string[] = [];
-  recommendations: string[] = [];
 
   _siblings: Record<number, ITerritory> = {};
 

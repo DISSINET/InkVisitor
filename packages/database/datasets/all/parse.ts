@@ -101,9 +101,8 @@ const loadStatementsTables = async (next: Function) => {
           ? (statusOption.value as ActantStatus)
           : ("0" as ActantStatus),
         notes: action.note ? [action.note] : [],
-        recommendations: [],
         label: action.label,
-        label_extended: action.detail_incl_valency,
+        detail: action.detail_incl_valency,
       };
       actants.push(newAction);
     }
@@ -391,10 +390,9 @@ const loadStatementsTables = async (next: Function) => {
         },
         notes: [statement.note, statement.location_text, statement.time_note],
         label: statement.id,
-        label_extended: "",
+        detail: "",
         language: "eng",
         status: "1",
-        recommendations: [],
       };
 
       //subject
@@ -522,10 +520,9 @@ const addEntityActant = (id: string, label: string, type: EntityActantType) => {
       logicalType: "1",
     },
     label: label,
-    label_extended: "",
+    detail: "",
     status: "1",
     language: "eng",
-    recommendations: [],
     notes: [],
   };
   if (id) {
@@ -554,10 +551,9 @@ const addTerritoryActant = (
           content: "",
         },
         label: label.trim(),
-        label_extended: "",
+        detail: "",
         status: "1",
         language: "eng",
-        recommendations: [],
         notes: [],
       };
 
@@ -576,10 +572,9 @@ const addResourceActant = (id: string, label: string) => {
         type: "1",
       },
       label: label.trim(),
-      label_extended: "",
+      detail: "",
       status: "1",
       language: "eng",
-      recommendations: [],
       notes: [],
     };
     actants.push(newResource);
@@ -690,10 +685,9 @@ const createEmptyPropStatement = (
           },
         ],
       },
-      label_extended: "",
+      detail: "",
       status: "1",
       language: "eng",
-      recommendations: [],
       notes: [],
     };
     actants.push(newEmptyStatement);
