@@ -173,6 +173,18 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
     }
   );
 
+  const actantsUpdateMutation = useMutation(
+    async (metaStatementObject: { metaStatementId: string; changes: object }) =>
+      await api.actantsUpdate(metaStatementObject.metaStatementId, {
+        data: metaStatementObject.changes,
+      }),
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries(["actant"]);
+      },
+    }
+  );
+
   return (
     <>
       {actant && (
@@ -262,6 +274,7 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
                         valueSActant={valueSActant}
                         valueActant={valueActant}
                         actantsDeleteMutation={actantsDeleteMutation}
+                        actantsUpdateMutation={actantsUpdateMutation}
                       />
                     </React.Fragment>
                   )
@@ -347,7 +360,8 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
           isFetching ||
           actantsCreateMutation.isLoading ||
           actantsDeleteMutation.isLoading ||
-          actantsLabelUpdateMutation.isLoading
+          actantsLabelUpdateMutation.isLoading ||
+          actantsUpdateMutation.isLoading
         }
       />
     </>
