@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { OptionsType, OptionTypeBase, ValueType } from "react-select";
 
-import { Dropdown, Input, Tag } from "components";
+import { Button, Dropdown, Input, Tag } from "components";
 import {
   StyledBoxContent,
   StyledResultHeading,
@@ -11,11 +11,12 @@ import {
   StyledRowHeader,
 } from "./ActantSearchBoxStyles";
 import { ActantSuggester } from "..";
-import { useMutation } from "react-query";
+import { useMutation, useQuery } from "react-query";
 import api from "api";
 import { Entities, IRequestSearch } from "types";
 import { IOption, IResponseSearch } from "@shared/types";
 import { ActantType } from "@shared/enums";
+import { FaUnlink } from "react-icons/fa";
 
 const classesActants = ["P", "G", "O", "C", "L", "V", "E", "S", "T", "R"];
 
@@ -33,6 +34,23 @@ export const ActantSearchBox: React.FC = () => {
   });
   const [searchData, setSearchData] = useState<IRequestSearch>(initValues);
   const [results, setResults] = useState<IResponseSearch[]>([]);
+  // const [actant, setActant] = useState("");
+
+  const {
+    status,
+    data: actant,
+    error,
+    isFetching,
+  } = useQuery(
+    ["actant", searchData.actantId],
+    async () => {
+      if (searchData.actantId) {
+        const res = await api.detailGet(searchData.actantId);
+        return res.data;
+      }
+    },
+    { enabled: !!searchData.actantId && api.isLoggedIn() }
+  );
 
   useEffect(() => {
     const optionsToSet: OptionsType<OptionTypeBase> = Object.entries(Entities)
@@ -113,6 +131,29 @@ export const ActantSearchBox: React.FC = () => {
           allowCreate={false}
         />
       </StyledRow>
+      <StyledRow>
+        {actant && (
+          <Tag
+            propId={actant.id}
+            label={actant.label}
+            category={actant.class}
+            color={Entities[actant.class].color}
+            button={
+              <Button
+                key="d"
+                icon={<FaUnlink />}
+                color="danger"
+                tooltip="unlink actant"
+                onClick={() => {
+                  handleChange("actantId", "");
+                }}
+              />
+            }
+          />
+        )}
+      </StyledRow>
+
+      {/* RESULTS */}
       {results.length > 0 && (
         <>
           <StyledRow>
