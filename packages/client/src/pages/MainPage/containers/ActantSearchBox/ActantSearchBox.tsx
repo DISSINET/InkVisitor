@@ -15,18 +15,22 @@ import { useMutation } from "react-query";
 import api from "api";
 import { Entities, IRequestSearch } from "types";
 import { IOption, IResponseSearch } from "@shared/types";
+import { ActantType } from "@shared/enums";
 
 const classesActants = ["P", "G", "O", "C", "L", "V", "E", "S", "T", "R"];
 
 const initValues: IRequestSearch = {
-  class: null,
+  class: ActantType.Territory,
   actantId: "",
   label: "",
 };
 
 export const ActantSearchBox: React.FC = () => {
   const [options, setOptions] = useState<OptionsType<OptionTypeBase>>();
-  const [classOption, setClassOption] = useState<ValueType<OptionTypeBase>>();
+  const [classOption, setClassOption] = useState<ValueType<OptionTypeBase>>({
+    label: initValues.class,
+    value: initValues.class,
+  });
   const [searchData, setSearchData] = useState<IRequestSearch>(initValues);
   const [results, setResults] = useState<IResponseSearch[]>([]);
 
@@ -77,16 +81,12 @@ export const ActantSearchBox: React.FC = () => {
         <Dropdown
           placeholder={""}
           width={150}
-          isClearable
           options={options}
           value={classOption}
           onChange={(option: ValueType<OptionTypeBase>) => {
             if (option) {
               setClassOption(option);
               handleChange("class", (option as IOption).value);
-            } else {
-              setClassOption(null);
-              handleChange("class", false);
             }
           }}
         />
@@ -113,24 +113,27 @@ export const ActantSearchBox: React.FC = () => {
           allowCreate={false}
         />
       </StyledRow>
-      <StyledRow>
-        <StyledResultHeading>Results:</StyledResultHeading>
-      </StyledRow>
-      <StyledRow>
-        <StyledResults>
-          {results &&
-            results.map((result: IResponseSearch, key: number) => (
-              <StyledResultItem key={key}>
-                <Tag
-                  propId={result.actantId}
-                  label={result.actantLabel}
-                  category={result.class}
-                  color={Entities[result.class].color}
-                />
-              </StyledResultItem>
-            ))}
-        </StyledResults>
-      </StyledRow>
+      {results.length > 0 && (
+        <>
+          <StyledRow>
+            <StyledResultHeading>Results:</StyledResultHeading>
+          </StyledRow>
+          <StyledRow>
+            <StyledResults>
+              {results.map((result: IResponseSearch, key: number) => (
+                <StyledResultItem key={key}>
+                  <Tag
+                    propId={result.actantId}
+                    label={result.actantLabel}
+                    category={result.class}
+                    color={Entities[result.class].color}
+                  />
+                </StyledResultItem>
+              ))}
+            </StyledResults>
+          </StyledRow>
+        </>
+      )}
     </StyledBoxContent>
   );
 };
