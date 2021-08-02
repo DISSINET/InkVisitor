@@ -13,12 +13,14 @@ import {
   IResponseStatement,
   IResponseGeneric,
   IResponseAdministration,
+  IResponseBookmarkFolder,
+  IResponseSearch,
   IResponsePermission,
   RequestPermissionUpdate,
-  IResponseBookmarkFolder,
 } from "@shared/types";
 import * as errors from "@shared/types/errors";
 import { toast } from "react-toastify";
+import { IRequestSearch } from "types";
 
 type FilterActantsI = {
   label?: string;
@@ -324,6 +326,20 @@ class Api {
     try {
       const response = await this.connection.delete(
         `/actants/delete/${actantId}`
+      );
+      return response;
+    } catch (err) {
+      throw { ...err.response.data };
+    }
+  }
+
+  async actantsSearch(
+    searchData: IRequestSearch
+  ): Promise<AxiosResponse<IResponseSearch[]>> {
+    try {
+      const response = await this.connection.post(
+        `/actants/search`,
+        searchData
       );
       return response;
     } catch (err) {

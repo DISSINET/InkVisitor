@@ -8,6 +8,7 @@ import {
   ModalFooter,
   ModalCard,
   ButtonGroup,
+  Loader,
 } from "components";
 
 interface Submit {
@@ -16,6 +17,7 @@ interface Submit {
   show: boolean;
   onSubmit: () => void;
   onCancel: () => void;
+  loading?: boolean;
 }
 export const Submit: React.FC<Submit> = ({
   title,
@@ -23,6 +25,7 @@ export const Submit: React.FC<Submit> = ({
   show,
   onSubmit,
   onCancel,
+  loading = false,
 }) => {
   return (
     <>
@@ -37,6 +40,7 @@ export const Submit: React.FC<Submit> = ({
             <Button label="Submit" color="danger" onClick={onSubmit} />
           </ButtonGroup>
         </ModalFooter>
+        <Loader show={loading} />
       </Modal>
     </>
   );

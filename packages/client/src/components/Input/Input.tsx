@@ -93,7 +93,9 @@ export const Input: React.FC<InputProps> = ({
             setDisplayValue(e.target.value);
           }}
           onBlur={() => {
-            onChangeFn(displayValue);
+            if (!changeOnType) {
+              onChangeFn(displayValue);
+            }
           }}
           onKeyPress={(event: React.KeyboardEvent) => {
             if (event.key === "Enter") {

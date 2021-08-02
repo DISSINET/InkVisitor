@@ -1,6 +1,6 @@
 import React, { useMemo, useRef, useState } from "react";
 import { Cell, Column } from "react-table";
-import { useQuery, useQueryClient } from "react-query";
+import { useMutation, useQuery, useQueryClient } from "react-query";
 import {
   FaInfo,
   FaTrashAlt,
@@ -55,44 +55,73 @@ export const StatementListBox: React.FC = () => {
     { initialData: initialData, enabled: !!territoryId && api.isLoggedIn() }
   );
 
-  // const {
-  //   status: statusActions,
-  //   data: actions,
-  //   error: errorActions,
-  //   isFetching: isFetchingActions,
-  // } = useQuery(
-  //   ["actions"],
-  //   async () => {
-  //     const res = await api.actionsGetMore({});
-  //     return res.data;
-  //   },
-  //   { enabled: api.isLoggedIn() }
-  // );
-
-  const removeStatement = async (sId: string) => {
-    const res = await api.actantsDelete(sId);
-    toast.info(`Statement removed!`);
-    queryClient.invalidateQueries(["territory", "statement-list", territoryId]);
-    queryClient.invalidateQueries("tree");
-  };
-
-  const duplicateStatement = async (statementToDuplicate: IStatement) => {
-    const duplicatedStatement = DStatement(statementToDuplicate);
-
-    const res = await api.actantsCreate(duplicatedStatement);
-    if (res.status === 200) {
-      hashParams["statement"] = duplicatedStatement.id;
-      history.push({
-        hash: queryString.stringify(hashParams),
-      });
-      toast.info(`Statement duplicated!`);
-      queryClient.invalidateQueries([
-        "territory",
-        "statement-list",
-        territoryId,
-      ]);
+  const removeStatementMutation = useMutation(
+    async (sId: string) => {
+      await api.actantsDelete(sId);
+    },
+    {
+      onSuccess: () => {
+        toast.info(`Statement removed!`);
+        queryClient.invalidateQueries("territory");
+        queryClient.invalidateQueries("tree");
+      },
     }
-  };
+  );
+
+  const duplicateStatementMutation = useMutation(
+    async (statementToDuplicate: IStatement) => {
+      const duplicatedStatement = DStatement(statementToDuplicate);
+      await api.actantsCreate(duplicatedStatement);
+    },
+    {
+      onSuccess: (data, variables) => {
+        hashParams["statement"] = variables.id;
+        history.push({
+          hash: queryString.stringify(hashParams),
+        });
+        toast.info(`Statement duplicated!`);
+        queryClient.invalidateQueries("territory");
+      },
+    }
+  );
+
+  const addStatementAtTheEndMutation = useMutation(
+    async (newStatement: IStatement) => {
+      await api.actantsCreate(newStatement);
+    },
+    {
+      onSuccess: (data, variables) => {
+        hashParams["statement"] = variables.id;
+        history.push({
+          hash: queryString.stringify(hashParams),
+        });
+        queryClient.invalidateQueries("territory");
+        queryClient.invalidateQueries("tree");
+      },
+    }
+  );
+
+  const actantsCreateMutation = useMutation(
+    async (newStatement: IStatement) => await api.actantsCreate(newStatement),
+    {
+      onSuccess: (data, variables) => {
+        toast.info(`Statement created!`);
+        queryClient.invalidateQueries([
+          "territory",
+          "statement-list",
+          territoryId,
+        ]);
+        hashParams["statement"] = variables.id;
+        history.push({
+          hash: queryString.stringify(hashParams),
+        });
+        queryClient.invalidateQueries("tree");
+      },
+      onError: () => {
+        toast.error(`Error: Statement not created!`);
+      },
+    }
+  );
 
   const addStatementAtCertainIndex = async (index: number) => {
     let newOrder =
@@ -105,23 +134,7 @@ export const StatementListBox: React.FC = () => {
     const newStatement: IStatement = CStatement(territoryId);
     newStatement.data.territory.order = newOrder;
 
-    const res = await api.actantsCreate(newStatement);
-
-    if (res.status === 200) {
-      toast.info(`Statement created!`);
-      queryClient.invalidateQueries([
-        "territory",
-        "statement-list",
-        territoryId,
-      ]);
-      hashParams["statement"] = newStatement.id;
-      history.push({
-        hash: queryString.stringify(hashParams),
-      });
-      queryClient.invalidateQueries("tree");
-    } else {
-      toast.error(`Error: Statement not created!`);
-    }
+    actantsCreateMutation.mutate(newStatement);
   };
 
   const { statements, actants } = data || initialData;
@@ -164,7 +177,7 @@ export const StatementListBox: React.FC = () => {
         },
       },
     });
-    queryClient.invalidateQueries(["territory", "statement-list", territoryId]);
+    queryClient.invalidateQueries("territory");
   };
 
   const columns: Column<{}>[] = useMemo(() => {
@@ -284,7 +297,7 @@ export const StatementListBox: React.FC = () => {
               color="success"
               tooltip="duplicate"
               onClick={() => {
-                duplicateStatement(row.original as IStatement);
+                duplicateStatementMutation.mutate(row.original as IStatement);
               }}
             />
 
@@ -294,7 +307,7 @@ export const StatementListBox: React.FC = () => {
               color="danger"
               tooltip="delete"
               onClick={() => {
-                removeStatement((row.original as IStatement).id);
+                removeStatementMutation.mutate((row.original as IStatement).id);
               }}
             />
             <Button
@@ -344,7 +357,10 @@ export const StatementListBox: React.FC = () => {
 
   return (
     <>
-      <StatementListHeader data={data ? data : initialData} />
+      <StatementListHeader
+        data={data ? data : initialData}
+        addStatementAtTheEndMutation={addStatementAtTheEndMutation}
+      />
       <StatementListTable
         moveEndRow={moveEndRow}
         data={statements}
@@ -353,7 +369,15 @@ export const StatementListBox: React.FC = () => {
           // selectStatementRow(rowId)
         }}
       />
-      <Loader show={isFetching} />
+      <Loader
+        show={
+          isFetching ||
+          removeStatementMutation.isLoading ||
+          duplicateStatementMutation.isLoading ||
+          addStatementAtTheEndMutation.isLoading ||
+          actantsCreateMutation.isLoading
+        }
+      />
     </>
   );
 };
