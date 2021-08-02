@@ -37,6 +37,15 @@ interface ActantDetailMetaTableRow {
     string,
     unknown
   >;
+  actantsUpdateMutation: UseMutationResult<
+    AxiosResponse<IResponseGeneric>,
+    unknown,
+    {
+      metaStatementId: string;
+      changes: object;
+    },
+    unknown
+  >;
 }
 export const ActantDetailMetaTableRow: React.FC<ActantDetailMetaTableRow> = ({
   actant,
@@ -46,20 +55,9 @@ export const ActantDetailMetaTableRow: React.FC<ActantDetailMetaTableRow> = ({
   valueSActant,
   valueActant,
   actantsDeleteMutation,
+  actantsUpdateMutation,
 }) => {
   const queryClient = useQueryClient();
-
-  const actantsUpdateMutation = useMutation(
-    async (changes: object) =>
-      await api.actantsUpdate(metaStatement.id, {
-        data: changes,
-      }),
-    {
-      onSuccess: () => {
-        queryClient.invalidateQueries(["actant"]);
-      },
-    }
-  );
 
   const updateStatementActant = async (
     statementId: string,
@@ -77,8 +75,11 @@ export const ActantDetailMetaTableRow: React.FC<ActantDetailMetaTableRow> = ({
       );
 
       actantsUpdateMutation.mutate({
-        ...metaStatementData,
-        ...{ actants: updatedStatementActants },
+        metaStatementId: metaStatement.id,
+        changes: {
+          ...metaStatementData,
+          ...{ actants: updatedStatementActants },
+        },
       });
     }
   };
@@ -91,7 +92,10 @@ export const ActantDetailMetaTableRow: React.FC<ActantDetailMetaTableRow> = ({
       actant && actant.metaStatements.find((ms) => ms.id === statementId);
 
     if (metaStatement) {
-      actantsUpdateMutation.mutate({ ...metaStatement.data, ...changes });
+      actantsUpdateMutation.mutate({
+        metaStatementId: metaStatement.id,
+        changes: { ...metaStatement.data, ...changes },
+      });
     }
   };
 
