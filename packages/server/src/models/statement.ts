@@ -166,11 +166,10 @@ class Statement extends Actant implements IStatement {
   class: ActantType.Statement = ActantType.Statement;
   data = new StatementData({});
   label = "";
-  label_extended: string = "";
+  detail: string = "";
   status: ActantStatus = "0";
   language: string = "eng";
   notes: string[] = [];
-  recommendations: string[] = [];
 
   constructor(data: UnknownObject) {
     super();

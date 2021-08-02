@@ -29,11 +29,10 @@ class Resource extends Actant implements IResource {
   class: ActantType.Resource = ActantType.Resource;
   data = new ResourceData({});
   label: string = "";
-  label_extended: string = "";
+  detail: string = "";
   status: ActantStatus = "0";
   language: string = "eng";
   notes: string[] = [];
-  recommendations: string[] = [];
 
   constructor(data: UnknownObject) {
     super();

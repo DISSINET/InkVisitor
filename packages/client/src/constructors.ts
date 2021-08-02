@@ -37,11 +37,10 @@ export const CStatement = (territoryId: string): IStatement => ({
   id: uuidv4(),
   class: ActantType.Statement,
   label: "",
-  label_extended: "",
+  detail: "",
   status: "0",
   language: "eng",
   notes: [],
-  recommendations: [],
   data: {
     actions: [],
     modality: "Y",
@@ -61,11 +60,10 @@ export const CMetaStatement = (subjectId: string): IStatement => ({
   id: uuidv4(),
   class: ActantType.Statement,
   label: "",
-  label_extended: "",
+  detail: "",
   status: "0",
   language: "eng",
   notes: [],
-  recommendations: [],
   data: {
     actions: [
       {
@@ -138,11 +136,10 @@ export const CTerritoryActant = (
   id: uuidv4(),
   class: ActantType.Territory,
   label: label,
-  label_extended: "",
+  detail: "",
   status: "0",
   language: "eng",
   notes: [],
-  recommendations: [],
   data: {
     parent: { id: parentId, order: parentOrder },
     type: "1",
@@ -157,10 +154,9 @@ export const CActant = (
   id: uuidv4(),
   class: category,
   label: label,
-  label_extended: "",
+  detail: "",
   data: {},
   status: "0",
   language: "eng",
   notes: [],
-  recommendations: [],
 });
