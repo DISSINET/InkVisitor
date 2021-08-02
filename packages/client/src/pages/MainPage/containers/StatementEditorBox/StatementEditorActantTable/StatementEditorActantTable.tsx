@@ -7,13 +7,18 @@ import {
   StyledTh,
 } from "./StatementEditorActantTableStyles";
 import { StatementEditorActantTableRow } from "./StatementEditorActantTableRow/StatementEditorActantTableRow";
-import { IActant, IResponseStatement, IStatementActant } from "@shared/types";
+import {
+  IActant,
+  IResponseGeneric,
+  IResponseStatement,
+  IStatementActant,
+} from "@shared/types";
 import { ActantSuggester, ActantTag, CertaintyToggle, ElvlToggle } from "../..";
-import { Button, Input } from "components";
+import { Button, Input, Loader } from "components";
 import { FaTrashAlt, FaUnlink } from "react-icons/fa";
-import { useQueryClient } from "react-query";
-import api from "api";
+import { useMutation, UseMutationResult, useQueryClient } from "react-query";
 import { actantPositionDict } from "@shared/dictionaries";
+import { AxiosResponse } from "axios";
 const queryString = require("query-string");
 
 interface FilteredActantObject {
@@ -21,16 +26,21 @@ interface FilteredActantObject {
 }
 interface StatementEditorActantTable {
   statement: IResponseStatement;
-  statementId: string;
   handleRowClick?: Function;
   classEntitiesActant: string[];
+  updateActantsMutation: UseMutationResult<
+    AxiosResponse<IResponseGeneric>,
+    unknown,
+    object,
+    unknown
+  >;
 }
 export const StatementEditorActantTable: React.FC<StatementEditorActantTable> =
   ({
     statement,
-    statementId,
     handleRowClick = () => {},
     classEntitiesActant,
+    updateActantsMutation,
   }) => {
     const queryClient = useQueryClient();
     var hashParams = queryString.parse(location.hash);
@@ -54,7 +64,7 @@ export const StatementEditorActantTable: React.FC<StatementEditorActantTable> =
           a.id === statementActantId ? { ...a, ...changes } : a
         );
         const newData = { actants: updatedActants };
-        updateApiCall(newData);
+        updateActantsMutation.mutate(newData);
       }
     };
     const removeActant = (statementActantId: string) => {
@@ -63,7 +73,7 @@ export const StatementEditorActantTable: React.FC<StatementEditorActantTable> =
           (a) => a.id !== statementActantId
         );
         const newData = { actants: updatedActants };
-        updateApiCall(newData);
+        updateActantsMutation.mutate(newData);
       }
     };
 
@@ -71,21 +81,7 @@ export const StatementEditorActantTable: React.FC<StatementEditorActantTable> =
       const actants: IStatementActant[] = filteredActants.map(
         (filteredActant) => filteredActant.data.sActant
       );
-      updateApiCall({
-        actants: actants,
-      });
-    };
-
-    const updateApiCall = async (changes: object) => {
-      const res = await api.actantsUpdate(statementId, {
-        data: changes,
-      });
-      queryClient.invalidateQueries(["statement"]);
-      queryClient.invalidateQueries([
-        "territory",
-        "statement-list",
-        territoryId,
-      ]);
+      updateActantsMutation.mutate({ actants });
     };
 
     const columns: Column<{}>[] = useMemo(() => {
@@ -229,34 +225,36 @@ export const StatementEditorActantTable: React.FC<StatementEditorActantTable> =
     );
 
     return (
-      <StyledTable {...getTableProps()}>
-        <StyledTHead>
-          {headerGroups.map((headerGroup, key) => (
-            <tr {...headerGroup.getHeaderGroupProps()} key={key}>
-              <th></th>
-              {headerGroup.headers.map((column, key) => (
-                <StyledTh {...column.getHeaderProps()} key={key}>
-                  {column.render("Header")}
-                </StyledTh>
-              ))}
-            </tr>
-          ))}
-        </StyledTHead>
-        <tbody {...getTableBodyProps()}>
-          {rows.map((row: Row, i: number) => {
-            prepareRow(row);
-            return (
-              <StatementEditorActantTableRow
-                handleClick={handleRowClick}
-                index={i}
-                row={row}
-                moveRow={moveRow}
-                updateOrderFn={updateActantsOrder}
-                {...row.getRowProps()}
-              />
-            );
-          })}
-        </tbody>
-      </StyledTable>
+      <>
+        <StyledTable {...getTableProps()}>
+          <StyledTHead>
+            {headerGroups.map((headerGroup, key) => (
+              <tr {...headerGroup.getHeaderGroupProps()} key={key}>
+                <th></th>
+                {headerGroup.headers.map((column, key) => (
+                  <StyledTh {...column.getHeaderProps()} key={key}>
+                    {column.render("Header")}
+                  </StyledTh>
+                ))}
+              </tr>
+            ))}
+          </StyledTHead>
+          <tbody {...getTableBodyProps()}>
+            {rows.map((row: Row, i: number) => {
+              prepareRow(row);
+              return (
+                <StatementEditorActantTableRow
+                  handleClick={handleRowClick}
+                  index={i}
+                  row={row}
+                  moveRow={moveRow}
+                  updateOrderFn={updateActantsOrder}
+                  {...row.getRowProps()}
+                />
+              );
+            })}
+          </tbody>
+        </StyledTable>
+      </>
     );
   };

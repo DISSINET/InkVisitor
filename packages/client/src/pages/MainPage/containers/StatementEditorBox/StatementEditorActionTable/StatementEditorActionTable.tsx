@@ -16,7 +16,7 @@ import {
 import { ActantSuggester, ActantTag, CertaintyToggle, ElvlToggle } from "../..";
 import { Button, Input } from "components";
 import { FaTrashAlt, FaUnlink } from "react-icons/fa";
-import { useQueryClient } from "react-query";
+import { useMutation, useQueryClient } from "react-query";
 import api from "api";
 const queryString = require("query-string");
 
@@ -80,16 +80,27 @@ export const StatementEditorActionTable: React.FC<StatementEditorActionTable> =
       });
     };
 
+    const updateApiCallMutation = useMutation(
+      async (statementObject: { statementId: string; changes: object }) =>
+        await api.actantsUpdate(
+          statementObject.statementId,
+          statementObject.changes
+        ),
+      {
+        onSuccess: (data, variables) => {
+          queryClient.invalidateQueries(["statement"]);
+          queryClient.invalidateQueries(["territory"]);
+        },
+      }
+    );
+
     const updateApiCall = async (changes: object) => {
-      const res = await api.actantsUpdate(statementId, {
-        data: changes,
+      updateApiCallMutation.mutate({
+        statementId: statementId,
+        changes: {
+          data: changes,
+        },
       });
-      queryClient.invalidateQueries(["statement"]);
-      queryClient.invalidateQueries([
-        "territory",
-        "statement-list",
-        territoryId,
-      ]);
     };
 
     const columns: Column<{}>[] = useMemo(() => {

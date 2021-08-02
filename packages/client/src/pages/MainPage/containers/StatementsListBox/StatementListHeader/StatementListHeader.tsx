@@ -1,5 +1,5 @@
 import React from "react";
-import { useQuery, useQueryClient } from "react-query";
+import { UseMutationResult, useQueryClient } from "react-query";
 import { useHistory, useLocation } from "react-router-dom";
 const queryString = require("query-string");
 import { FaPlus, FaRecycle } from "react-icons/fa";
@@ -15,7 +15,6 @@ import { StatementListBreadcrumbItem } from "./StatementListBreadcrumbItem/State
 import { IActant, IStatement } from "@shared/types";
 import { CStatement } from "constructors";
 import { Button, ButtonGroup } from "components";
-import api from "api";
 import { useAppSelector } from "redux/hooks";
 
 interface StatementListHeader {
@@ -24,9 +23,16 @@ interface StatementListHeader {
     actants: IActant[];
     label: string;
   };
+  addStatementAtTheEndMutation: UseMutationResult<
+    void,
+    unknown,
+    IStatement,
+    unknown
+  >;
 }
 export const StatementListHeader: React.FC<StatementListHeader> = ({
   data,
+  addStatementAtTheEndMutation,
 }) => {
   const queryClient = useQueryClient();
   let history = useHistory();
@@ -39,19 +45,13 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
     (state) => state.territoryTree.selectedTerritoryPath
   );
 
-  const addStatementAtTheEnd = async () => {
+  const handleCreateStatement = () => {
     const newStatement: IStatement = CStatement(territoryId);
     const { statements } = data;
     newStatement.data.territory.order = statements.length
       ? statements[statements.length - 1].data.territory.order + 1
       : 1;
-    const res = await api.actantsCreate(newStatement);
-    hashParams["statement"] = newStatement.id;
-    history.push({
-      hash: queryString.stringify(hashParams),
-    });
-    queryClient.invalidateQueries(["territory", "statement-list", territoryId]);
-    queryClient.invalidateQueries("tree");
+    addStatementAtTheEndMutation.mutate(newStatement);
   };
 
   return (
@@ -81,7 +81,7 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
               color="primary"
               label="new statement"
               onClick={() => {
-                addStatementAtTheEnd();
+                handleCreateStatement();
               }}
             />
             <Button
