@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useQueryClient } from "react-query";
+import { useMutation, useQueryClient } from "react-query";
 import { useHistory, useLocation } from "react-router-dom";
 import { toast } from "react-toastify";
 const queryString = require("query-string");
@@ -29,21 +29,28 @@ export const ContextMenuSubmitDelete: React.FC<ContextMenuSubmitDelete> = ({
   var hashParams = queryString.parse(location.hash);
   const territoryId = hashParams.territory;
 
-  const onSubmitDelete = async () => {
-    const res = await api.actantsDelete(territoryActant.id);
-    if (res.status === 200) {
-      toast.info(`Territory [${territoryActant.label}] deleted!`);
-      queryClient.invalidateQueries("tree");
-    } else {
-      toast.error(`Error: Territory [${territoryActant.label}] not deleted!`);
+  const deleteTerritoryMutation = useMutation(
+    async () => await api.actantsDelete(territoryActant.id),
+    {
+      onSuccess: () => {
+        toast.info(`Territory [${territoryActant.label}] deleted!`);
+        queryClient.invalidateQueries("tree");
+        if (territoryId === territoryActant.id) {
+          hashParams["territory"] = "";
+          history.push({
+            hash: queryString.stringify(hashParams),
+          });
+        }
+        onClose();
+      },
+      onError: () => {
+        toast.error(`Error: Territory [${territoryActant.label}] not deleted!`);
+      },
     }
-    if (territoryId === territoryActant.id) {
-      hashParams["territory"] = "";
-      history.push({
-        hash: queryString.stringify(hashParams),
-      });
-    }
-    onClose();
+  );
+
+  const onSubmitDelete = () => {
+    deleteTerritoryMutation.mutate();
   };
 
   useKeypress("Enter", onSubmitDelete);
@@ -56,6 +63,7 @@ export const ContextMenuSubmitDelete: React.FC<ContextMenuSubmitDelete> = ({
       show={showModal}
       onSubmit={() => onSubmitDelete()}
       onCancel={() => onClose()}
+      loading={deleteTerritoryMutation.isLoading}
     />
   );
 };

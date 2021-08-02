@@ -16,12 +16,14 @@ interface ActantSuggesterI {
   categoryIds: string[];
   onSelected: Function;
   placeholder?: string;
+  allowCreate?: boolean;
 }
 
 export const ActantSuggester: React.FC<ActantSuggesterI> = ({
   categoryIds,
   onSelected,
   placeholder = "",
+  allowCreate,
 }) => {
   const [typed, setTyped] = useState<string>("");
   const [selectedCategory, setSelectedCategory] = useState<string>();
@@ -33,7 +35,12 @@ export const ActantSuggester: React.FC<ActantSuggesterI> = ({
   const territoryId = hashParams.territory;
 
   // territory query
-  const { status, data: territoryActants, error, isFetching } = useQuery(
+  const {
+    status,
+    data: territoryActants,
+    error,
+    isFetching,
+  } = useQuery(
     ["territory", "suggesters", territoryId],
     async () => {
       const res = await api.actantIdsInTerritory(territoryId);
@@ -173,6 +180,7 @@ export const ActantSuggester: React.FC<ActantSuggesterI> = ({
       onDrop={(newDropped: any) => {
         handleDropped(newDropped);
       }}
+      allowCreate={allowCreate}
     />
   ) : (
     <div></div>

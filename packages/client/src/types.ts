@@ -1,3 +1,5 @@
+import { ActantType } from "@shared/enums";
+
 export const Colors = [
   "black",
   "white",
@@ -113,4 +115,9 @@ export interface DraggedTerritoryItem {
   parentId?: string;
   lvl?: number;
   index?: number;
+}
+export interface IRequestSearch {
+  class?: ActantType | null;
+  label?: string;
+  actantId?: string;
 }
