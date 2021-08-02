@@ -689,7 +689,7 @@ export const StatementEditorBox: React.FC = () => {
                 <StatementEditorActantTable
                   statement={statement}
                   classEntitiesActant={classesActants}
-                  updateActantsMutation={updateActantsMutation}
+                  updateActantsMutation={updateActantsRefreshListMutation}
                 />
               </StyledEditorActantTableWrapper>
 
