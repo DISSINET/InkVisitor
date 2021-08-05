@@ -25,9 +25,10 @@ export function testErroneousResponse(
   const expectedType: IResponseGeneric = {
     result: false,
     error: expectedErrorClass.constructor.name as errorTypes,
+    message: "",
   };
   expect(res.status).toEqual(expectedErrorClass.statusCode());
-  expect(Object.keys(res.body as any)).toEqual(Object.keys(expectedType));
+  expect(typeof res.body).toEqual("object");
   expect((res.body as any).result).toEqual(expectedType.result);
   expect((res.body as any).error).toEqual(expectedType.error);
 }
