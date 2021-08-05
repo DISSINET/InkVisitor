@@ -207,7 +207,7 @@ export default Router()
       for (const statement of statements) {
         const metaActants = await findActantsByIds(
           request.db,
-          statement.getDependencyList()
+          statement.getLinkedActantIds()
         );
 
         meta.push({
@@ -268,4 +268,4 @@ export default Router()
         return out;
       });
     })
-  );  
+  );

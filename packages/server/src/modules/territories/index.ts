@@ -16,7 +16,6 @@ import {
   IResponseTerritory,
   IStatement,
   IResponseGeneric,
-  IActant,
 } from "@shared/types";
 import Statement from "@models/statement";
 
@@ -58,7 +57,7 @@ export default Router()
         territoryId
       );
 
-      const actantIds = Statement.getDependencyListForMany(statements);
+      const actantIds = Statement.getLinkedActantIdsForMany(statements);
       const actants = await findActantsById(request.db, actantIds);
 
       return {
@@ -89,12 +88,13 @@ export default Router()
         );
       }
 
-      const dependentStatements: IStatement[] = await Statement.findStatementsInTerritory(
-        request.db.connection,
-        territoryId
-      );
+      const dependentStatements: IStatement[] =
+        await Statement.findStatementsInTerritory(
+          request.db.connection,
+          territoryId
+        );
 
-      return Statement.getDependencyListForMany(dependentStatements);
+      return Statement.getLinkedActantIdsForMany(dependentStatements);
     })
   )
   .post(
