@@ -1,5 +1,179 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { OptionsType, OptionTypeBase, ValueType } from "react-select";
+
+import { Button, Dropdown, Input, Tag } from "components";
+import {
+  StyledBoxContent,
+  StyledResultHeading,
+  StyledResultItem,
+  StyledResults,
+  StyledRow,
+  StyledRowHeader,
+} from "./ActantSearchBoxStyles";
+import { ActantSuggester } from "..";
+import { useMutation, useQuery } from "react-query";
+import api from "api";
+import { Entities, IRequestSearch } from "types";
+import { IOption, IResponseSearch } from "@shared/types";
+import { ActantType } from "@shared/enums";
+import { FaUnlink } from "react-icons/fa";
+
+const classesActants = ["P", "G", "O", "C", "L", "V", "E", "S", "T", "R"];
+
+const initValues: IRequestSearch = {
+  class: ActantType.Territory,
+  actantId: "",
+  label: "",
+};
 
 export const ActantSearchBox: React.FC = () => {
-    return <div />;
+  const [options, setOptions] = useState<OptionsType<OptionTypeBase>>();
+  const [classOption, setClassOption] = useState<ValueType<OptionTypeBase>>({
+    label: initValues.class,
+    value: initValues.class,
+  });
+  const [searchData, setSearchData] = useState<IRequestSearch>(initValues);
+  const [results, setResults] = useState<IResponseSearch[]>([]);
+
+  const {
+    status,
+    data: actant,
+    error,
+    isFetching,
+  } = useQuery(
+    ["actant", searchData.actantId],
+    async () => {
+      if (searchData.actantId) {
+        const res = await api.detailGet(searchData.actantId);
+        return res.data;
+      }
+    },
+    { enabled: !!searchData.actantId && api.isLoggedIn() }
+  );
+
+  useEffect(() => {
+    const optionsToSet: OptionsType<OptionTypeBase> = Object.entries(Entities)
+      .filter((c: any) => {
+        if (c[1].id !== "A" && c[1].id !== "R") {
+          return c;
+        }
+      })
+      .map((entity) => {
+        return { value: entity[1].id, label: entity[1].label };
+      });
+    setOptions(optionsToSet);
+  }, []);
+
+  const handleChange = (
+    key: string,
+    value: string | false | ValueType<OptionTypeBase>
+  ) => {
+    setSearchData({
+      ...searchData,
+      [key]: value,
+    });
+  };
+
+  useEffect(() => {
+    if (searchData.actantId || searchData.label) {
+      searchActantsMutation.mutate(searchData);
+    } else {
+      setResults([]);
+    }
+  }, [searchData]);
+
+  const searchActantsMutation = useMutation(
+    async (searchData: IRequestSearch) => api.actantsSearch(searchData),
+    {
+      onSuccess: (data) => {
+        setResults(data.data);
+      },
+    }
+  );
+
+  return (
+    <StyledBoxContent>
+      <StyledRow>
+        <StyledRowHeader>class</StyledRowHeader>
+        <Dropdown
+          placeholder={""}
+          width={150}
+          options={options}
+          value={classOption}
+          onChange={(option: ValueType<OptionTypeBase>) => {
+            if (option) {
+              setClassOption(option);
+              handleChange("class", (option as IOption).value);
+            }
+          }}
+        />
+      </StyledRow>
+      <StyledRow>
+        <StyledRowHeader>label</StyledRowHeader>
+        <Input
+          placeholder="search"
+          changeOnType
+          onChangeFn={(value: string) => handleChange("label", value)}
+        />
+      </StyledRow>
+      <StyledRow>
+        <StyledRowHeader>
+          {/* used with */}
+          actant
+        </StyledRowHeader>
+        <ActantSuggester
+          categoryIds={classesActants}
+          onSelected={(newSelectedId: string) => {
+            handleChange("actantId", newSelectedId);
+          }}
+          placeholder={"actant"}
+          allowCreate={false}
+        />
+      </StyledRow>
+      <StyledRow>
+        {actant && (
+          <Tag
+            propId={actant.id}
+            label={actant.label}
+            category={actant.class}
+            color={Entities[actant.class].color}
+            button={
+              <Button
+                key="d"
+                icon={<FaUnlink />}
+                color="danger"
+                tooltip="unlink actant"
+                onClick={() => {
+                  handleChange("actantId", "");
+                }}
+              />
+            }
+          />
+        )}
+      </StyledRow>
+
+      {/* RESULTS */}
+      {results.length > 0 && (
+        <>
+          <StyledRow>
+            <StyledResultHeading>Results:</StyledResultHeading>
+          </StyledRow>
+          <StyledRow>
+            <StyledResults>
+              {results.map((result: IResponseSearch, key: number) => (
+                <StyledResultItem key={key}>
+                  <Tag
+                    propId={result.actantId}
+                    label={result.actantLabel}
+                    category={result.class}
+                    color={Entities[result.class].color}
+                  />
+                </StyledResultItem>
+              ))}
+            </StyledResults>
+          </StyledRow>
+        </>
+      )}
+    </StyledBoxContent>
+  );
 };
