@@ -62,7 +62,10 @@ export const StatementEditorActantTableRow: React.FC<StatementEditorActantTableR
       collect: (monitor: DragSourceMonitor) => ({
         isDragging: monitor.isDragging(),
       }),
-      end: updateOrderFn,
+      end: (item: DragItem | undefined, monitor: DragSourceMonitor) => {
+        // TODO: check if order changed
+        if (item) updateOrderFn();
+      },
     });
 
     const opacity = isDragging ? 0.2 : 1;

@@ -13,11 +13,14 @@ import {
   IResponseStatement,
   IResponseGeneric,
   IResponseAdministration,
+  IResponseBookmarkFolder,
+  IResponseSearch,
   IResponsePermission,
-  RequestPermissionUpdate,, IResponseBookmarkFolder
+  RequestPermissionUpdate,
 } from "@shared/types";
 import * as errors from "@shared/types/errors";
 import { toast } from "react-toastify";
+import { IRequestSearch } from "types";
 
 type FilterActantsI = {
   label?: string;
@@ -330,6 +333,20 @@ class Api {
     }
   }
 
+  async actantsSearch(
+    searchData: IRequestSearch
+  ): Promise<AxiosResponse<IResponseSearch[]>> {
+    try {
+      const response = await this.connection.post(
+        `/actants/search`,
+        searchData
+      );
+      return response;
+    } catch (err) {
+      throw { ...err.response.data };
+    }
+  }
+
   /**
    * Detail
    * Detail container
@@ -346,67 +363,67 @@ class Api {
   /**
    * Actions
    */
-  async actionsGet(actionId: string): Promise<AxiosResponse<IResponseAction>> {
-    try {
-      const response = await this.connection.get(`/actions/get/${actionId}`);
-      return response;
-    } catch (err) {
-      throw { ...err.response.data };
-    }
-  }
+  // async actionsGet(actionId: string): Promise<AxiosResponse<IResponseAction>> {
+  //   try {
+  //     const response = await this.connection.get(`/actions/get/${actionId}`);
+  //     return response;
+  //   } catch (err) {
+  //     throw { ...err.response.data };
+  //   }
+  // }
 
-  async actionsGetMore(
-    filter: FilterActionsI
-  ): Promise<AxiosResponse<IResponseAction[]>> {
-    try {
-      const response = await this.connection.post(`/actions/getMore`, filter);
-      return response;
-    } catch (err) {
-      throw { ...err.response.data };
-    }
-  }
+  // async actionsGetMore(
+  //   filter: FilterActionsI
+  // ): Promise<AxiosResponse<IResponseAction[]>> {
+  //   try {
+  //     const response = await this.connection.post(`/actions/getMore`, filter);
+  //     return response;
+  //   } catch (err) {
+  //     throw { ...err.response.data };
+  //   }
+  // }
 
-  async actionsCreate(
-    newActionData: IAction
-  ): Promise<AxiosResponse<IResponseGeneric>> {
-    try {
-      const response = await this.connection.post(
-        `/actions/create`,
-        newActionData
-      );
-      return response;
-    } catch (err) {
-      throw { ...err.response.data };
-    }
-  }
+  // async actionsCreate(
+  //   newActionData: IAction
+  // ): Promise<AxiosResponse<IResponseGeneric>> {
+  //   try {
+  //     const response = await this.connection.post(
+  //       `/actions/create`,
+  //       newActionData
+  //     );
+  //     return response;
+  //   } catch (err) {
+  //     throw { ...err.response.data };
+  //   }
+  // }
 
-  async actionsUpdate(
-    actantId: string,
-    changes: object
-  ): Promise<AxiosResponse<IResponseGeneric>> {
-    try {
-      const response = await this.connection.put(
-        `/actions/update/${actantId}`,
-        changes
-      );
-      return response;
-    } catch (err) {
-      throw { ...err.response.data };
-    }
-  }
+  // async actionsUpdate(
+  //   actantId: string,
+  //   changes: object
+  // ): Promise<AxiosResponse<IResponseGeneric>> {
+  //   try {
+  //     const response = await this.connection.put(
+  //       `/actions/update/${actantId}`,
+  //       changes
+  //     );
+  //     return response;
+  //   } catch (err) {
+  //     throw { ...err.response.data };
+  //   }
+  // }
 
-  async actionsDelete(
-    actantId: string
-  ): Promise<AxiosResponse<IResponseGeneric>> {
-    try {
-      const response = await this.connection.delete(
-        `/actions/delete/${actantId}`
-      );
-      return response;
-    } catch (err) {
-      throw { ...err.response.data };
-    }
-  }
+  // async actionsDelete(
+  //   actantId: string
+  // ): Promise<AxiosResponse<IResponseGeneric>> {
+  //   try {
+  //     const response = await this.connection.delete(
+  //       `/actions/delete/${actantId}`
+  //     );
+  //     return response;
+  //   } catch (err) {
+  //     throw { ...err.response.data };
+  //   }
+  // }
 
   /**
    * Tree

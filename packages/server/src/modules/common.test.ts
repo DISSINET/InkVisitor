@@ -1,3 +1,4 @@
+import "ts-jest";
 import { IResponseGeneric, IStatement } from "@shared/types";
 import "ts-jest";
 import { ITerritory } from "@shared/types/index";
@@ -12,6 +13,10 @@ describe("common", function () {
   it("should work", () => undefined);
 });
 
+function getRandomFromArray<T>(input: T[]): T {
+  return input[Math.floor(Math.random() * input.length)];
+}
+
 export const successfulGenericResponse: IResponseGeneric = {
   result: true,
 };
@@ -23,8 +28,6 @@ export function testErroneousResponse(
   const expectedType: IResponseGeneric = {
     result: false,
     error: expectedErrorClass.constructor.name as errorTypes,
-    message: "",
-    // message not important
   };
   expect(res.status).toEqual(expectedErrorClass.statusCode());
   expect(Object.keys(res.body as any)).toEqual(Object.keys(expectedType));

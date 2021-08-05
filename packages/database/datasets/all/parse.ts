@@ -2,7 +2,15 @@ var { loadSheet } = require("./../util/loadsheet");
 var { v4 } = require("uuid");
 var fs = require("fs");
 
-import { ActantType, EntityActantType } from "../../../shared/enums";
+import {
+  ActantType,
+  EntityActantType,
+  ActantLogicalType,
+  ActantStatus,
+  StatementPosition,
+  StatementElvl,
+  StatementCertainty,
+} from "../../../shared/enums";
 import {
   IAudit,
   IAction,
@@ -17,11 +25,12 @@ import {
   IUser,
 } from "./../../../shared/types";
 
+import { actantStatusDict } from "./../../../shared/dictionaries";
+
 /**
  * waterfall processing
  */
 var actants: IActant[] = [];
-var actions: IAction[] = [];
 
 type IConceptProp = {
   type: "value" | "concept";
@@ -36,35 +45,66 @@ const loadStatementsTables = async (next: Function) => {
   const tableActions = await loadSheet({
     spread: "1vzY6opQeR9hZVW6fmuZu2sgy_izF8vqGGhBQDxqT_eQ",
     sheet: "Statements",
+    headerRow: 3,
   });
 
   /**
    * actions
    */
   tableActions.forEach((action: any) => {
-    if (action.action_or_relation_english || action.action_or_relation) {
-      const newAction: IAction = {
-        id: action.id_action_or_relation,
-        parent: action.parent_id,
-        note: action.note,
-        labels: [
-          {
-            id: v4(),
-            value: action.action_or_relation_english,
-            lang: "EN",
-          },
-          {
-            id: v4(),
-            value: action.action_or_relation,
-            lang: "LA",
-          },
-        ],
-        types: [],
-        valencies: [],
-        rulesActants: [],
-        rulesProperties: [],
+    if (action.label) {
+      const statusOption = actantStatusDict.find(
+        (o) => o.label === action.status
+      );
+
+      const parseEntities = (text: string) => {
+        const out: string[] = [];
+
+        const parts = text.split("|");
+        if (parts.length == 0) {
+          return [];
+        } else {
+          parts.forEach((part) => {
+            if (part === "NULL") {
+              out.push("NULL");
+            } else {
+              Object.values(ActantType).forEach((type) => {
+                if (part.includes(type)) {
+                  out.push(type);
+                }
+              });
+            }
+          });
+
+          return out;
+        }
       };
-      actions.push(newAction);
+
+      const newAction: IAction = {
+        id: action.id,
+        class: ActantType.Action,
+        data: {
+          valencies: {
+            s: action.subject_valency,
+            a1: action.actant1_valency,
+            a2: action.actant2_valency,
+          },
+          entities: {
+            s: parseEntities(action.subject_entity_type),
+            a1: parseEntities(action.actant1_entity_type),
+            a2: parseEntities(action.actant2_entity_type),
+          },
+          properties: [],
+        },
+        language: action.language === "English" ? "eng" : "lat",
+        status: statusOption
+          ? (statusOption.value as ActantStatus)
+          : ("0" as ActantStatus),
+        notes: action.note ? [action.note] : [],
+        label: action.label,
+        detail: action.detail_incl_valency,
+      };
+      actants.push(newAction);
     }
   });
 
@@ -132,6 +172,7 @@ const loadStatementsTables = async (next: Function) => {
 
   const entitySheets = tableResources
     .filter((row) => row["type"] === "entity table")
+    .filter((row) => row["spreadsheet_id"])
     .map((row) => {
       return {
         id: row["id"],
@@ -312,9 +353,15 @@ const loadStatementsTables = async (next: Function) => {
       const mainStatement: IStatement = {
         id: v4(),
         class: ActantType.Statement,
-        label: statement.id,
         data: {
-          action: statement.id_action_or_relation,
+          actions: [
+            {
+              id: v4(),
+              action: statement.id_action_or_relation,
+              certainty: statement.certainty || "1",
+              elvl: statement.epistemological_level || "1",
+            },
+          ],
           territory: {
             id: statement.text_part_id,
             order: si,
@@ -334,16 +381,18 @@ const loadStatementsTables = async (next: Function) => {
             },
           ],
           tags: statement.tags_id.split(" #").filter((t: string) => t),
-          certainty: statement.certainty || "1",
-          elvl: statement.epistemological_level || "1",
 
           // TODO handle modality
           modality: statement.modality || "Y",
           text: statement.text,
-          note: `NOTE: ${statement.note}, LOCATION: ${statement.location_text}, TIME: ${statement.time_note}`,
           props: [],
           actants: [],
         },
+        notes: [statement.note, statement.location_text, statement.time_note],
+        label: statement.id,
+        detail: "",
+        language: "eng",
+        status: "1",
       };
 
       //subject
@@ -467,8 +516,14 @@ const addEntityActant = (id: string, label: string, type: EntityActantType) => {
   const newEntityActant: IEntity = {
     id,
     class: type,
+    data: {
+      logicalType: "1",
+    },
     label: label,
-    data: {},
+    detail: "",
+    status: "1",
+    language: "eng",
+    notes: [],
   };
   if (id) {
     actants.push(newEntityActant);
@@ -485,7 +540,6 @@ const addTerritoryActant = (
       const newTerritory: ITerritory = {
         id,
         class: ActantType.Territory,
-        label: label.trim(),
         data: {
           parent: parentId
             ? {
@@ -495,8 +549,12 @@ const addTerritoryActant = (
             : false,
           type: "",
           content: "",
-          lang: "en",
         },
+        label: label.trim(),
+        detail: "",
+        status: "1",
+        language: "eng",
+        notes: [],
       };
 
       actants.push(newTerritory);
@@ -508,13 +566,16 @@ const addResourceActant = (id: string, label: string) => {
     const newResource: IResource = {
       id,
       class: ActantType.Resource,
-      label: label.trim(),
       data: {
         content: "",
         link: "",
         type: "1",
-        lang: "en",
       },
+      label: label.trim(),
+      detail: "",
+      status: "1",
+      language: "eng",
+      notes: [],
     };
     actants.push(newResource);
   }
@@ -583,18 +644,22 @@ const createEmptyPropStatement = (
 
       label: "",
       data: {
-        action: "A0093",
+        actions: [
+          {
+            id: v4(),
+            action: "A0093",
+            certainty: "1",
+            elvl: "1",
+          },
+        ],
         territory: {
           id: territory,
           order: order,
         },
         references: [],
         tags: [],
-        certainty: "1",
-        elvl: "1",
         modality: "Y",
         text: "",
-        note: "",
         props: [],
         actants: [
           {
@@ -603,6 +668,7 @@ const createEmptyPropStatement = (
             position: "s",
             elvl: "1",
             certainty: "1",
+            mode: "1",
           },
           {
             id: v4(),
@@ -610,6 +676,7 @@ const createEmptyPropStatement = (
             position: "a1",
             elvl: "1",
             certainty: "1",
+            mode: "1",
           },
           {
             id: v4(),
@@ -617,9 +684,14 @@ const createEmptyPropStatement = (
             position: "a2",
             elvl: "1",
             certainty: "1",
+            mode: "1",
           },
         ],
       },
+      detail: "",
+      status: "1",
+      language: "eng",
+      notes: [],
     };
     actants.push(newEmptyStatement);
   }
@@ -718,7 +790,7 @@ const processLocation = (
 
 const processActant = (
   statement: IStatement,
-  position: string,
+  position: StatementPosition,
   actantIdValues: string,
   propActant1Value: string,
   propActant2Value: string,
@@ -728,8 +800,8 @@ const processActant = (
     actantIdValues.split(" #").forEach((actantIdValue: string) => {
       // asign elvl and certainty
 
-      let elvl: string = actantIdValue.includes("[") ? "2" : "1";
-      let certainty: string = "1";
+      let elvl: StatementElvl = actantIdValue.includes("[") ? "2" : "1";
+      let certainty: StatementCertainty = "1";
 
       // remove brackets
       const actantIdClean: string = actantIdValue
@@ -748,6 +820,7 @@ const processActant = (
         position: position,
         elvl: elvl,
         certainty: certainty,
+        mode: "1",
       });
 
       // create a prop if there is one
@@ -808,5 +881,4 @@ const createNewActantIfNeeded = (actantValue: string) => {
 
 loadStatementsTables(() => {
   fs.writeFileSync("datasets/all/actants.json", JSON.stringify(actants));
-  fs.writeFileSync("datasets/all/actions.json", JSON.stringify(actions));
 });

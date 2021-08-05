@@ -1,8 +1,3 @@
-import {
-  clean,
-  successfulGenericResponse,
-  testErroneousResponse,
-} from "@modules/common.test";
 import { ActionDoesNotExits, BadParams } from "@shared/types/errors";
 import request from "supertest";
 import { apiPath } from "../../common/constants";

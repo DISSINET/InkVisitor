@@ -6,21 +6,26 @@ export const certaintyDict = [
     },
     {
         value: "2",
-        label: "probable",
+        label: "almost certain",
         info: "",
     },
     {
         value: "3",
-        label: "possible",
+        label: "probable",
         info: "",
     },
     {
         value: "4",
-        label: "dubious",
+        label: "possible",
         info: "",
     },
     {
         value: "5",
+        label: "dubious",
+        info: "",
+    },
+    {
+        value: "6",
         label: "false",
         info: "",
     },
