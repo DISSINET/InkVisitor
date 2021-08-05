@@ -4,6 +4,7 @@ import Territory from "./territory";
 import Statement from "./statement";
 import Entity from "./entity";
 import Resource from "./resource";
+import Action from "./action";
 
 export function getActantType(data: UnknownObject): IDbModel | null {
   if (!data || typeof data !== "object" || Object.keys(data).length === 0) {
@@ -31,6 +32,8 @@ export function getActantType(data: UnknownObject): IDbModel | null {
       return new Entity(data);
     case ActantType.Resource:
       return new Resource(data);
+    case ActantType.Action:
+      return new Action(data);
     default:
       return null;
   }
