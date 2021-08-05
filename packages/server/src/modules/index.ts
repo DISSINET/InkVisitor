@@ -12,10 +12,12 @@ export function asyncRouteHandler<T = unknown>(
   fn: (req: Request) => Promise<T>
 ): (req: Request, res: Response, next: NextFunction) => void {
   return async (req: Request, res: Response, next: NextFunction) => {
-    const err = await req.acl.validate(req);
-    if (err) {
-      next(err);
-      return;
+    if (req.acl) {
+      const err = await req.acl.validate(req);
+      if (err) {
+        next(err);
+        return;
+      }
     }
 
     try {
