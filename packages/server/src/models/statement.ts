@@ -120,6 +120,9 @@ export class StatementData implements IModel {
     }
 
     fillFlatObject(this, data);
+
+    fillArray<StatementAction>(this.actions, StatementAction, data.actions);
+
     this.territory = new StatementTerritory(data.territory as UnknownObject);
 
     fillArray<StatementActant>(this.actants, StatementActant, data.actants);
