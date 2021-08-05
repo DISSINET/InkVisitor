@@ -5,6 +5,7 @@ import Statement from "./statement";
 import Entity from "./entity";
 import Resource from "./resource";
 import { ModelNotValidError } from "@shared/types/errors";
+import Action from "./action";
 
 export function getActantType(data: UnknownObject): IDbModel {
   if (!data || typeof data !== "object" || Object.keys(data).length === 0) {
@@ -32,6 +33,8 @@ export function getActantType(data: UnknownObject): IDbModel {
       return new Entity(data);
     case ActantType.Resource:
       return new Resource(data);
+    case ActantType.Action:
+      return new Action(data);
     default:
       throw new ModelNotValidError("unknown class");
   }
