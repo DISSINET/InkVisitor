@@ -1,5 +1,5 @@
 import "ts-jest";
-import { IResponseGeneric, IStatement } from "@shared/types";
+import { IActant, IAction, IResponseGeneric, IStatement } from "@shared/types";
 import "ts-jest";
 import { ITerritory } from "@shared/types/index";
 import { Db } from "@service/RethinkDB";
@@ -8,14 +8,11 @@ import Statement from "@models/statement";
 import Territory from "@models/territory";
 import { CustomError } from "@shared/types/errors";
 import { errorTypes } from "@shared/types/response-generic";
+import { ActantType } from "@shared/enums";
 
 describe("common", function () {
   it("should work", () => undefined);
 });
-
-function getRandomFromArray<T>(input: T[]): T {
-  return input[Math.floor(Math.random() * input.length)];
-}
 
 export const successfulGenericResponse: IResponseGeneric = {
   result: true,
@@ -108,4 +105,37 @@ export async function clean(db: Db): Promise<void> {
   await deleteActants(db);
 
   await db.close();
+}
+
+export function mockActantData(id: string, actantType: ActantType): IActant {
+  return {
+    id: id,
+    class: actantType,
+    data: {},
+    label: `label${id}`,
+    detail: "",
+    status: "0",
+    language: "",
+    notes: [],
+  };
+}
+
+export function mockStatementData(id: string): IStatement {
+  return {
+    ...mockActantData(id, ActantType.Statement),
+    class: ActantType.Statement,
+    data: {
+      actants: [],
+      actions: [],
+      modality: "",
+      props: [],
+      references: [],
+      tags: [],
+      territory: {
+        id: "",
+        order: 0,
+      },
+      text: "",
+    },
+  };
 }
