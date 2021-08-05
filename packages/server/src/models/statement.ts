@@ -2,14 +2,12 @@ import {
   IStatement,
   IStatementActant,
   IStatementReference,
-  IStatementAction,
 } from "@shared/types";
 import { fillFlatObject, fillArray, UnknownObject, IModel } from "./common";
 import { Prop } from "./prop";
 import {
   ActantType,
   ActantStatus,
-  ActantLogicalType,
   StatementCertainty,
   StatementMode,
   StatementElvl,
@@ -36,6 +34,10 @@ class StatementActant implements IStatementActant, IModel {
     fillFlatObject(this, data);
   }
 
+  /**
+   * predicate for valid data content
+   * @returns boolean result
+   */
   isValid(): boolean {
     return true;
   }
@@ -55,6 +57,10 @@ class StatementReference implements IStatementReference, IModel {
     fillFlatObject(this, data);
   }
 
+  /**
+   * predicate for valid data content
+   * @returns boolean result
+   */
   isValid(): boolean {
     return true;
   }
@@ -71,8 +77,12 @@ export class StatementTerritory {
     fillFlatObject(this, data);
   }
 
+  /**
+   * predicate for valid data content
+   * @returns boolean result
+   */
   isValid(): boolean {
-    // order is optional, it will be moved to last position if empty
+    // order is optional, it will be fixed in underlaying call to Actant.determineOrder
     if (this.id === "") {
       return false;
     }
@@ -94,6 +104,10 @@ export class StatementAction {
     fillFlatObject(this, data);
   }
 
+  /**
+   * predicate for valid data content
+   * @returns boolean result
+   */
   isValid(): boolean {
     // order is optional, it will be moved to last position if empty
     if (this.id === "") {
@@ -140,6 +154,10 @@ export class StatementData implements IModel {
     }
   }
 
+  /**
+   * predicate for valid data content
+   * @returns boolean result
+   */
   isValid(): boolean {
     if (!this.territory.isValid()) {
       return false;
@@ -187,6 +205,10 @@ class Statement extends Actant implements IStatement {
     this.data = new StatementData(data.data as UnknownObject);
   }
 
+  /**
+   * predicate for valid data content
+   * @returns boolean result
+   */
   isValid(): boolean {
     if (this.class != ActantType.Statement) {
       return false;
@@ -195,6 +217,11 @@ class Statement extends Actant implements IStatement {
     return this.data.isValid();
   }
 
+  /**
+   * Stores the statement data in the db
+   * @param db db connection
+   * @returns write result of the db operation
+   */
   async save(db: Connection | undefined): Promise<WriteResult> {
     const siblings = await this.findTerritorySiblings(db);
     this.data.territory.order = Actant.determineOrder(
@@ -205,6 +232,12 @@ class Statement extends Actant implements IStatement {
     return super.save(db);
   }
 
+  /**
+   * Updates the statement db entry. This method attempts to alter the territory.order value to better fit the real number value.
+   * @param db db connection
+   * @param updateData raw data object to be merged with db entry
+   * @returns write result of the db operation
+   */
   async update(
     db: Connection | undefined,
     updateData: Record<string, unknown>
@@ -228,15 +261,23 @@ class Statement extends Actant implements IStatement {
     return super.update(db, updateData);
   }
 
+  /**
+   * Finds statements that are stored under the same territory (while not being the same statement as the received)
+   * @param db db connection
+   * @returns map of order value as the key and statement data as the value
+   */
   async findTerritorySiblings(
     db: Connection | undefined
   ): Promise<Record<number, IStatement>> {
     const list: IStatement[] = await rethink
       .table(Actant.table)
-      .filter((territory: RDatum) => {
+      .filter({
+        class: ActantType.Statement,
+      })
+      .filter((entry: RDatum) => {
         return rethink.and(
-          territory("data")("territory")("id").eq(this.data.territory.id),
-          territory("id").ne(this.id)
+          entry("data")("territory")("id").eq(this.data.territory.id),
+          entry("id").ne(this.id)
         );
       })
       .run(db);
@@ -249,7 +290,11 @@ class Statement extends Actant implements IStatement {
     return out;
   }
 
-  getDependencyList(): string[] {
+  /**
+   * Returns actant ids that are present in data fields
+   * @returns list of ids
+   */
+  getLinkedActantIds(): string[] {
     const actantIds: Record<string, null> = {};
 
     this.data.actants.forEach((a) => (actantIds[a.actant] = null));
@@ -267,12 +312,17 @@ class Statement extends Actant implements IStatement {
     return Object.keys(actantIds);
   }
 
-  static getDependencyListForMany(statements: IStatement[]): string[] {
+  /**
+   * getLinkedActantIds wrapped in foreach cycle
+   * @param statements list of scanned statements
+   * @returns list of ids unique for multiple statements
+   */
+  static getLinkedActantIdsForMany(statements: IStatement[]): string[] {
     const actantIds: Record<string, null> = {}; // unique check
 
     const stModel = new Statement(undefined);
     for (const statement of statements) {
-      stModel.getDependencyList
+      stModel.getLinkedActantIds
         .call(statement)
         .forEach((id) => (actantIds[id] = null));
     }
@@ -280,9 +330,15 @@ class Statement extends Actant implements IStatement {
     return Object.keys(actantIds);
   }
 
+  /**
+   * finds statements which are under specific territory
+   * @param db db connection
+   * @param territoryId id of the actant
+   * @returns list of statements data
+   */
   static async findStatementsInTerritory(
     db: Connection | undefined,
-    actantId: string
+    territoryId: string
   ): Promise<IStatement[]> {
     const statements = await rethink
       .table("actants")
@@ -290,7 +346,7 @@ class Statement extends Actant implements IStatement {
         class: ActantType.Statement,
       })
       .filter((row: RDatum) => {
-        return row("data")("territory")("id").eq(actantId);
+        return row("data")("territory")("id").eq(territoryId);
       })
       .run(db);
 
@@ -299,6 +355,12 @@ class Statement extends Actant implements IStatement {
     });
   }
 
+  /**
+   * finds statements which are under specific territory
+   * @param db db connection
+   * @param territoryId id of the actant
+   * @returns list of statements data
+   */
   static async findDependentStatements(
     db: Connection | undefined,
     actantId: string
@@ -339,6 +401,12 @@ class Statement extends Actant implements IStatement {
     });
   }
 
+  /**
+   * finds statements that are linked via data.actants array to wanted actant id and are linked to the root territory
+   * @param db db connection
+   * @param actantId id of the actant
+   * @returns list of statement objects sorted by territory order
+   */
   static async findMetaStatements(
     db: Connection | undefined,
     actantId: string
