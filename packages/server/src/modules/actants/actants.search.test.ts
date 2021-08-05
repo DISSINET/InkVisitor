@@ -3,16 +3,14 @@ import {
   mockActantData,
   mockStatementData,
 } from "@modules/common.test";
-import { BadParams } from "@shared/types/errors";
+import { BadParams, PermissionDeniedError } from "@shared/types/errors";
 import request, { Response } from "supertest";
 import { apiPath } from "../../common/constants";
 import app from "../../Server";
 import { supertestConfig } from "..";
 import { Db } from "@service/RethinkDB";
 import "ts-jest";
-import { createActant, createAction } from "@service/shorthands";
 import { deleteActants } from "@service/shorthands";
-import { IActant, IAction, IStatement } from "@shared/types";
 import { ActantType } from "@shared/enums";
 import { getActantType } from "@models/factory";
 
