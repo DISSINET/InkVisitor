@@ -18,37 +18,9 @@ export const StatementListRowExpanded: React.FC<StatementListRowExpanded> = ({
 }) => {
   const [actants, setActants] = useState<IStatementActant[]>([]);
 
-  const {
-    status: statusActions,
-    data: actions,
-    error: errorActions,
-    isFetching: isFetchingActions,
-  } = useQuery(
-    ["actions"],
-    async () => {
-      const res = await api.actionsGetMore({});
-      return res.data;
-    },
-    { enabled: api.isLoggedIn() }
-  );
-  const {
-    status: statusDictionaries,
-    data: dictionaries,
-    error: errorDictionaries,
-    isFetching: isFetchingDictionaries,
-  } = useQuery(
-    ["dictionaries"],
-    async () => {
-      const res = await api.actionsGetMore({});
-      return res.data;
-    },
-    { enabled: api.isLoggedIn() }
-  );
-
   const renderRowSubComponent = React.useCallback(
     ({ row }) => {
       const { action, text, note, references, tags } = row.values.data;
-      const actionObject = actions?.find((a: IAction) => a.id === action);
 
       return (
         <StyledSubRow>

@@ -1,9 +1,10 @@
 import { IOperator } from "./";
+import { StatementCertainty, StatementElvl } from "../enums";
 
 export interface IProp {
   id: string;
-  elvl: string;
-  certainty: string;
+  elvl: StatementElvl;
+  certainty: StatementCertainty;
   modality: string;
   origin: string;
 
@@ -11,12 +12,12 @@ export interface IProp {
   operator?: IOperator;
   type: {
     id: string;
-    certainty: string;
-    elvl: string;
+    certainty: StatementCertainty;
+    elvl: StatementElvl;
   };
   value: {
     id: string;
-    certainty: string;
-    elvl: string;
+    certainty: StatementCertainty;
+    elvl: StatementElvl;
   };
 }

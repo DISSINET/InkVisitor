@@ -6,7 +6,7 @@ import { IOption, IActant } from "@shared/types";
 import { FaHome } from "react-icons/fa";
 import { CActant } from "constructors";
 import { Entities } from "types";
-import { useQuery, useQueryClient } from "react-query";
+import { useMutation, useQuery, useQueryClient } from "react-query";
 import api from "api";
 import { CategoryActantType } from "@shared/enums";
 
@@ -16,12 +16,14 @@ interface ActantSuggesterI {
   categoryIds: string[];
   onSelected: Function;
   placeholder?: string;
+  allowCreate?: boolean;
 }
 
 export const ActantSuggester: React.FC<ActantSuggesterI> = ({
   categoryIds,
   onSelected,
   placeholder = "",
+  allowCreate,
 }) => {
   const [typed, setTyped] = useState<string>("");
   const [selectedCategory, setSelectedCategory] = useState<string>();
@@ -33,7 +35,12 @@ export const ActantSuggester: React.FC<ActantSuggesterI> = ({
   const territoryId = hashParams.territory;
 
   // territory query
-  const { status, data: territoryActants, error, isFetching } = useQuery(
+  const {
+    status,
+    data: territoryActants,
+    error,
+    isFetching,
+  } = useQuery(
     ["territory", "suggesters", territoryId],
     async () => {
       const res = await api.actantIdsInTerritory(territoryId);
@@ -120,14 +127,22 @@ export const ActantSuggester: React.FC<ActantSuggesterI> = ({
     setSelectedCategory(newCategory);
   };
 
+  const actantsCreateMutation = useMutation(
+    async (newActant: IActant) => await api.actantsCreate(newActant),
+    {
+      onSuccess: (data, variables) => {
+        onSelected(variables.id);
+        handleClean();
+      },
+    }
+  );
+
   const handleCreate = async (newCreated: {
     label: string;
     category: CategoryActantType;
   }) => {
     const newActant = CActant(newCreated.category, newCreated.label);
-    const resCreate = await api.actantsCreate(newActant);
-    onSelected(newActant.id);
-    handleClean();
+    actantsCreateMutation.mutate(newActant);
   };
   const handlePick = (newPicked: SuggestionI) => {
     onSelected(newPicked.id);
@@ -173,6 +188,7 @@ export const ActantSuggester: React.FC<ActantSuggesterI> = ({
       onDrop={(newDropped: any) => {
         handleDropped(newDropped);
       }}
+      allowCreate={allowCreate}
     />
   ) : (
     <div></div>

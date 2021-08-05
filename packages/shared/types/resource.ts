@@ -10,6 +10,5 @@ export interface IResource extends IActant {
     content: string;
     link: string;
     type: string;
-    lang: typeof languageValues[number];
   };
 }

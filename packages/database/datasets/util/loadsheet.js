@@ -8,11 +8,11 @@ const { google } = require("googleapis");
 var readlineSync = require("readline-sync");
 
 const SCOPES = ["https://www.googleapis.com/auth/spreadsheets.readonly"];
-const TOKEN_PATH = "import/util/token.json";
-const CREDENTIALS_PATH = "import/util/credentials.json";
+const TOKEN_PATH = "datasets/util/token.json";
+const CREDENTIALS_PATH = "datasets/util/credentials.json";
 
 // Load client secrets from a local file.
-module.exports.loadSheet = async ({ spread, sheet, raw = false }) => {
+module.exports.loadSheet = async ({ spread, sheet, raw = false, headerRow = 0 }) => {
     const tempFileName = spread + "_" + sheet + ".json";
     if (fs.existsSync("sheetcache/" + tempFileName)) {
         return JSON.parse(fs.readFileSync("sheetcache/" + tempFileName));
@@ -38,13 +38,15 @@ module.exports.loadSheet = async ({ spread, sheet, raw = false }) => {
         return res.data.values;
     }
 
+
     const data = res.data.values.filter(
         (row) => row.filter((value) => value && value !== "#N/A").length > 1
     );
+    console.log(data)
 
     // divide data to rows and header
-    const header = data[0];
-    const rows = data.filter((r, ri) => ri !== 0);
+    const header = data[headerRow];
+    const rows = data.filter((r, ri) => ri > headerRow);
 
     // change rows to objects
     const records = rows
@@ -85,7 +87,7 @@ const authorize = async (credentials) => {
         oAuth2Client.setCredentials(JSON.parse(tokenFile));
         return oAuth2Client;
     } catch (e) {
-        const newToken = await getNewToken(oAuth2Client);
+        const newToken = getNewToken(oAuth2Client);
         return newToken;
     }
 };
@@ -107,7 +109,7 @@ var getNewToken = async (oAuth2Client) => {
         hideEchoBack: true,
     });
 
-    const { err, token } = await this.oAuth2Client.getToken(code);
+    const { err, tokens: token } = await oAuth2Client.getToken(code);
 
     if (err)
         return console.error(

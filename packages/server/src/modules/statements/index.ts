@@ -26,7 +26,7 @@ export default Router().get(
     const statementModel = new Statement({ ...statementData });
     const actants = await findActantsByIds<IActant>(
       request.db,
-      statementModel.getDependencyList()
+      statementModel.getLinkedActantIds()
     );
 
     return {
