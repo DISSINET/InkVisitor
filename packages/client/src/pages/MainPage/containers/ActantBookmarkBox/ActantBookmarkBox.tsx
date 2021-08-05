@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState, ReactElement } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "react-query";
 import api from "api";
 const queryString = require("query-string");
@@ -13,7 +13,6 @@ import {
   ButtonGroup,
   Loader,
   Modal,
-  ModalCard,
   ModalHeader,
   ModalContent,
   ModalFooter,
@@ -22,8 +21,6 @@ import {
 } from "components";
 
 import {
-  FaInfo,
-  FaTrashAlt,
   FaPlus,
   FaTrash,
   FaEdit,
@@ -32,9 +29,6 @@ import {
   FaRegFolder,
   FaRegFolderOpen,
   FaUnlink,
-  FaDotCircle,
-  FaRecycle,
-  FaClone,
 } from "react-icons/fa";
 
 import {
@@ -59,12 +53,7 @@ import {
 
 import {
   IActant,
-  IProp,
-  IStatement,
-  IStatementReference,
-  IResponseStatement,
   IBookmarkFolder,
-  IResponseBookmarks,
   IResponseBookmarkFolder,
 } from "@shared/types";
 
@@ -89,8 +78,8 @@ export const ActantBookmarkBox: React.FC = () => {
     ["bookmarks"],
     async () => {
       const res = await api.bookmarksGet(false);
-      res.data.bookmarks.sort((a, b) => (a.name > b.name ? 1 : -1));
-      return res.data.bookmarks;
+      res.data.sort((a, b) => (a.name > b.name ? 1 : -1));
+      return res.data;
     },
     { enabled: api.isLoggedIn() }
   );
@@ -135,48 +124,57 @@ export const ActantBookmarkBox: React.FC = () => {
     setEditingFolder(false);
   };
 
-  const acceptEditingFolder = async () => {
-    const newBookmarks: IBookmarkFolder[] | false = getBookmarksCopy();
-    if (newBookmarks) {
-      const newBookmarksAfterEdit = newBookmarks.map((b) => {
-        if (b.id === editingFolder) {
-          return { ...b, ...{ name: editingFolderName } };
-        } else {
-          return b;
-        }
-      });
-      const res = await api.usersUpdate(false, {
-        bookmarks: newBookmarksAfterEdit,
-      });
-      if (res.status === 200) {
+  const acceptEditingFolderMutation = useMutation(
+    async () => {
+      const newBookmarks: IBookmarkFolder[] | false = getBookmarksCopy();
+      if (newBookmarks) {
+        const newBookmarksAfterEdit = newBookmarks.map((b) => {
+          if (b.id === editingFolder) {
+            return { ...b, ...{ name: editingFolderName } };
+          } else {
+            return b;
+          }
+        });
+        await api.usersUpdate(false, {
+          bookmarks: newBookmarksAfterEdit,
+        });
+      }
+    },
+    {
+      onSuccess: () => {
         toast.info("Bookmark edited");
         queryClient.invalidateQueries(["bookmarks"]);
         setEditingFolderName("");
         setEditingFolder(false);
-      }
+      },
     }
-  };
+  );
 
   const askRemoveFolder = (folderId: string) => {
     setRemovingFolder(folderId);
   };
-  const acceptRemoveFolder = async () => {
-    const newBookmarks: IBookmarkFolder[] | false = getBookmarksCopy();
-    if (newBookmarks) {
-      const newBookmarksAfterRemove = newBookmarks.filter(
-        (b) => b.id !== removingFolder
-      );
-      const res = await api.usersUpdate(false, {
-        bookmarks: newBookmarksAfterRemove,
-      });
-      if (res.status === 200) {
+
+  const acceptRemoveFolderMutation = useMutation(
+    async () => {
+      const newBookmarks: IBookmarkFolder[] | false = getBookmarksCopy();
+      if (newBookmarks) {
+        const newBookmarksAfterRemove = newBookmarks.filter(
+          (b) => b.id !== removingFolder
+        );
+        await api.usersUpdate(false, {
+          bookmarks: newBookmarksAfterRemove,
+        });
+      }
+
+      setRemovingFolder(false);
+    },
+    {
+      onSuccess: () => {
         toast.warning("Bookmark folder removed");
         queryClient.invalidateQueries(["bookmarks"]);
-      }
+      },
     }
-
-    setRemovingFolder(false);
-  };
+  );
   const cancelRemoveFolder = () => {
     setRemovingFolder(false);
   };
@@ -186,24 +184,28 @@ export const ActantBookmarkBox: React.FC = () => {
     setCreatingFolder(false);
   };
 
-  const createFolder = async () => {
-    if (bookmarkFolders) {
-      const newBookmarkFolder: IBookmarkFolder =
-        CBookmarkFolder(editingFolderName);
+  const createFolderMutation = useMutation(
+    async () => {
+      if (bookmarkFolders) {
+        const newBookmarkFolder: IBookmarkFolder =
+          CBookmarkFolder(editingFolderName);
 
-      const newBookmarks: IBookmarkFolder[] | false = getBookmarksCopy();
-      if (newBookmarks) {
-        newBookmarks.push(newBookmarkFolder);
-        const res = await api.usersUpdate(false, { bookmarks: newBookmarks });
-        if (res.status === 200) {
-          toast.success("Bookmark folder created");
-          setEditingFolderName("");
-          setCreatingFolder(false);
-          queryClient.invalidateQueries(["bookmarks"]);
+        const newBookmarks: IBookmarkFolder[] | false = getBookmarksCopy();
+        if (newBookmarks) {
+          newBookmarks.push(newBookmarkFolder);
+          await api.usersUpdate(false, { bookmarks: newBookmarks });
         }
       }
+    },
+    {
+      onSuccess: () => {
+        toast.success("Bookmark folder created");
+        setEditingFolderName("");
+        setCreatingFolder(false);
+        queryClient.invalidateQueries(["bookmarks"]);
+      },
     }
-  };
+  );
 
   const handleClickFolder = (folderId: string) => {
     if (openedFolders.includes(folderId)) {
@@ -223,10 +225,7 @@ export const ActantBookmarkBox: React.FC = () => {
       if (folder) {
         if (!folder.actantIds.includes(bookmarkId)) {
           folder.actantIds.push(bookmarkId);
-          const res = await api.usersUpdate(false, { bookmarks: newBookmarks });
-          if (res.status === 200) {
-            queryClient.invalidateQueries(["bookmarks"]);
-          }
+          changeBookmarksMutation.mutate(newBookmarks);
         }
       }
     }
@@ -239,14 +238,21 @@ export const ActantBookmarkBox: React.FC = () => {
       if (folder) {
         if (folder.actantIds.includes(bookmarkId)) {
           folder.actantIds = folder.actantIds.filter((a) => a !== bookmarkId);
-          const res = await api.usersUpdate(false, { bookmarks: newBookmarks });
-          if (res.status === 200) {
-            queryClient.invalidateQueries(["bookmarks"]);
-          }
+          changeBookmarksMutation.mutate(newBookmarks);
         }
       }
     }
   };
+
+  const changeBookmarksMutation = useMutation(
+    async (newBookmarks: IBookmarkFolder[]) =>
+      await api.usersUpdate(false, { bookmarks: newBookmarks }),
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries(["bookmarks"]);
+      },
+    }
+  );
 
   return (
     <StyledContent>
@@ -370,7 +376,7 @@ export const ActantBookmarkBox: React.FC = () => {
             changeOnType
             autoFocus
             onEnterPressFn={() => {
-              acceptEditingFolder();
+              acceptEditingFolderMutation.mutate();
             }}
           />
         </ModalContent>
@@ -386,11 +392,11 @@ export const ActantBookmarkBox: React.FC = () => {
               }}
             />
             <Button
-              key="create"
-              label="Create"
+              key="submit"
+              label="Submit"
               color="primary"
               onClick={() => {
-                acceptEditingFolder();
+                acceptEditingFolderMutation.mutate();
               }}
             />
           </ButtonGroup>
@@ -409,7 +415,7 @@ export const ActantBookmarkBox: React.FC = () => {
             changeOnType
             autoFocus
             onEnterPressFn={() => {
-              createFolder();
+              createFolderMutation.mutate();
             }}
           />
         </ModalContent>
@@ -429,19 +435,26 @@ export const ActantBookmarkBox: React.FC = () => {
               label="Create"
               color="primary"
               onClick={() => {
-                createFolder();
+                createFolderMutation.mutate();
               }}
             />
           </ButtonGroup>
         </ModalFooter>
+        <Loader
+          show={
+            createFolderMutation.isLoading ||
+            acceptEditingFolderMutation.isLoading
+          }
+        />
       </Modal>
 
       <Submit
         title={`Delete Bookmark folder ${removingFolderName}`}
         text={`Do you really want do delete Bookmark folder ${removingFolderName}?`}
         show={removingFolder != false}
-        onSubmit={() => acceptRemoveFolder()}
+        onSubmit={() => acceptRemoveFolderMutation.mutate()}
         onCancel={() => cancelRemoveFolder()}
+        loading={acceptRemoveFolderMutation.isLoading}
       />
     </StyledContent>
   );

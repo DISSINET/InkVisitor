@@ -37,13 +37,14 @@ export const CStatement = (territoryId: string): IStatement => ({
   id: uuidv4(),
   class: ActantType.Statement,
   label: "",
+  detail: "",
+  status: "0",
+  language: "eng",
+  notes: [],
   data: {
-    action: "",
-    certainty: "1",
-    elvl: "1",
+    actions: [],
     modality: "Y",
     text: "",
-    note: "",
     territory: {
       id: territoryId,
       order: -1,
@@ -59,13 +60,21 @@ export const CMetaStatement = (subjectId: string): IStatement => ({
   id: uuidv4(),
   class: ActantType.Statement,
   label: "",
+  detail: "",
+  status: "0",
+  language: "eng",
+  notes: [],
   data: {
-    action: "A0093",
-    certainty: "1",
-    elvl: "1",
+    actions: [
+      {
+        id: uuidv4(),
+        action: "A0093",
+        certainty: "1",
+        elvl: "1",
+      },
+    ],
     modality: "Y",
     text: "",
-    note: "",
     territory: {
       id: "T0",
       order: -1,
@@ -77,6 +86,7 @@ export const CMetaStatement = (subjectId: string): IStatement => ({
         position: "s",
         elvl: "1",
         certainty: "1",
+        mode: "1",
       },
       {
         id: uuidv4(),
@@ -84,6 +94,7 @@ export const CMetaStatement = (subjectId: string): IStatement => ({
         position: "a1",
         elvl: "1",
         certainty: "1",
+        mode: "1",
       },
       {
         id: uuidv4(),
@@ -91,6 +102,7 @@ export const CMetaStatement = (subjectId: string): IStatement => ({
         position: "a2",
         elvl: "1",
         certainty: "1",
+        mode: "1",
       },
     ],
     props: [],
@@ -117,6 +129,7 @@ export const CStatementActant = (): IStatementActant => ({
   position: "s",
   elvl: "1",
   certainty: "1",
+  mode: "1",
 });
 
 export const CTerritoryActant = (
@@ -127,11 +140,14 @@ export const CTerritoryActant = (
   id: uuidv4(),
   class: ActantType.Territory,
   label: label,
+  detail: "",
+  status: "0",
+  language: "eng",
+  notes: [],
   data: {
     parent: { id: parentId, order: parentOrder },
     type: "1",
     content: "",
-    lang: "1",
   },
 });
 
@@ -142,5 +158,9 @@ export const CActant = (
   id: uuidv4(),
   class: category,
   label: label,
+  detail: "",
   data: {},
+  status: "0",
+  language: "eng",
+  notes: [],
 });

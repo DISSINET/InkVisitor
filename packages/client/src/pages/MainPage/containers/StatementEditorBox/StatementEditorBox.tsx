@@ -38,9 +38,6 @@ import { Button, Input, Loader } from "components";
 import { ActantSuggester } from "./../";
 
 import {
-  StyledEditorSection,
-  StyledEditorSectionHeader,
-  StyledEditorSectionContent,
   StyledReferencesListColumn,
   StyledListHeaderColumn,
   StyledPropsActantHeader,
@@ -50,9 +47,13 @@ import {
   StyledReferencesList,
   StyledTagsList,
   StyledTagsListItem,
+  StyledEditorSection,
+  StyledEditorSectionContent,
+  StyledEditorSectionHeader,
   StyledEditorActantTableWrapper,
 } from "./StatementEditorBoxStyles";
 import { StatementEditorActantTable } from "./StatementEditorActantTable/StatementEditorActantTable";
+import { StatementEditorActionTable } from "./StatementEditorActionTable/StatementEditorActionTable";
 
 const classesActants = ["P", "G", "O", "C", "L", "V", "E", "S", "T", "R"];
 const classesPropType = ["C"];
@@ -84,6 +85,8 @@ export const StatementEditorBox: React.FC = () => {
     },
     { enabled: !!statementId && api.isLoggedIn() }
   );
+
+  console.log(statement);
 
   // getting origin actants of properties
   const propsByOrigins = useMemo(() => {
@@ -142,12 +145,7 @@ export const StatementEditorBox: React.FC = () => {
       const newData = {
         actants: [...statement.data.actants, newStatementActant],
       };
-      update(newData);
-      queryClient.invalidateQueries([
-        "territory",
-        "statement-list",
-        territoryId,
-      ]);
+      updateActantsRefreshListMutation.mutate(newData);
     }
   };
 
@@ -291,11 +289,33 @@ export const StatementEditorBox: React.FC = () => {
   };
 
   const update = async (changes: object) => {
-    const res = await api.actantsUpdate(statementId, {
-      data: changes,
-    });
-    queryClient.invalidateQueries(["statement"]);
+    updateActantsMutation.mutate(changes);
   };
+
+  const updateActantsMutation = useMutation(
+    async (changes: object) =>
+      await api.actantsUpdate(statementId, {
+        data: changes,
+      }),
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries(["statement"]);
+      },
+    }
+  );
+
+  const updateActantsRefreshListMutation = useMutation(
+    async (changes: object) =>
+      await api.actantsUpdate(statementId, {
+        data: changes,
+      }),
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries("statement");
+        queryClient.invalidateQueries("territory");
+      },
+    }
+  );
 
   const renderPropGroup = (propOrigin: any, statement: IResponseStatement) => {
     const originActant = propOrigin.actant;
@@ -570,32 +590,28 @@ export const StatementEditorBox: React.FC = () => {
   return (
     <div>
       {statement ? (
-        <div style={{ marginBottom: "4rem" }}>
-          <div key={statement.id}>
-            <StyledEditorSection firstSection key="editor-section-summary">
-              <StyledEditorSectionHeader>Summary</StyledEditorSectionHeader>
-              <StyledEditorSectionContent>
+        <div style={{ marginBottom: "4rem" }} key={statement.id}>
+          <StyledEditorSection firstSection key="editor-section-summary">
+            <StyledEditorSectionHeader>Summary</StyledEditorSectionHeader>
+            <StyledEditorSectionContent>
+              <div>
+                <StyledListHeaderColumn>Action</StyledListHeaderColumn>
                 <div>
-                  <StyledListHeaderColumn>Action</StyledListHeaderColumn>
-                  <div>
-                    <StyledListHeaderColumn>Text</StyledListHeaderColumn>
-                    <div>
-                      <Input
-                        type="textarea"
-                        width={1000}
-                        onChangeFn={(newValue: string) => {
-                          if (newValue !== statement.data.text) {
-                            const newData = {
-                              text: newValue,
-                            };
-                            update(newData);
-                          }
-                        }}
-                        value={statement.data.text}
-                      />
-                    </div>
-                    <div>
-                      <ActionDropdown
+                  <StyledListHeaderColumn>Text</StyledListHeaderColumn>
+                  <Input
+                    type="textarea"
+                    width={1000}
+                    onChangeFn={(newValue: string) => {
+                      if (newValue !== statement.data.text) {
+                        const newData = {
+                          text: newValue,
+                        };
+                        update(newData);
+                      }
+                    }}
+                    value={statement.data.text}
+                  />
+                  {/* <ActionDropdown
                         onSelectedChange={(newActionValue: {
                           value: string;
                           label: string;
@@ -603,30 +619,25 @@ export const StatementEditorBox: React.FC = () => {
                           const newData = {
                             action: newActionValue.value,
                           };
-                          update(newData);
-                          queryClient.invalidateQueries([
-                            "territory",
-                            "statement-list",
-                            territoryId,
-                          ]);
+                          // update(newData);
+                          updateActantsRefreshListMutation.mutate(newData);
                         }}
                         value={statement.data.action}
-                      />
-                    </div>
-                  </div>
+                      /> */}
                 </div>
-                <div>
-                  <StyledListHeaderColumn>Attributes</StyledListHeaderColumn>
-                  <ModalityToggle
-                    value={statement.data.modality}
-                    onChangeFn={(newValue: string) => {
-                      const newData = {
-                        modality: newValue,
-                      };
-                      update(newData);
-                    }}
-                  />
-                  <ElvlToggle
+              </div>
+              <div>
+                <StyledListHeaderColumn>Attributes</StyledListHeaderColumn>
+                <ModalityToggle
+                  value={statement.data.modality}
+                  onChangeFn={(newValue: string) => {
+                    const newData = {
+                      modality: newValue,
+                    };
+                    update(newData);
+                  }}
+                />
+                {/* <ElvlToggle
                     value={statement.data.elvl}
                     onChangeFn={(newValue: string) => {
                       const newData = {
@@ -643,199 +654,219 @@ export const StatementEditorBox: React.FC = () => {
                       };
                       update(newData);
                     }}
-                  />
-                </div>
-              </StyledEditorSectionContent>
-            </StyledEditorSection>
+                  /> */}
+              </div>
+            </StyledEditorSectionContent>
+          </StyledEditorSection>
 
-            {/* Actants */}
-            <StyledEditorSection key="editor-section-actants">
-              <StyledEditorSectionHeader>Actants</StyledEditorSectionHeader>
-              <StyledEditorSectionContent>
-                <StyledEditorActantTableWrapper>
-                  <StatementEditorActantTable
-                    statement={statement}
-                    statementId={statementId}
-                    classEntitiesActant={classesActants}
-                  />
-                </StyledEditorActantTableWrapper>
+          {/* Actions */}
+          <StyledEditorSection key="editor-section-actions">
+            <StyledEditorSectionHeader>Actions</StyledEditorSectionHeader>
+            <StyledEditorSectionContent>
+              <StyledEditorActantTableWrapper>
+                <StatementEditorActionTable
+                  statement={statement}
+                  statementId={statementId}
+                  classEntitiesActant={classesActants}
+                />
+              </StyledEditorActantTableWrapper>
 
-                <ActantSuggester
-                  onSelected={(newSelectedId: string) => {
-                    addActant(newSelectedId);
-                  }}
-                  categoryIds={classesActants}
-                  placeholder={"add new actant"}
-                ></ActantSuggester>
-              </StyledEditorSectionContent>
-            </StyledEditorSection>
+              <ActantSuggester
+                onSelected={(newSelectedId: string) => {
+                  //
+                }}
+                categoryIds={["A"]}
+                placeholder={"add new action"}
+              ></ActantSuggester>
+            </StyledEditorSectionContent>
+          </StyledEditorSection>
 
-            {/* Statement Props */}
-            <StyledEditorSection key="editor-section-props-statement">
-              <StyledEditorSectionHeader>
-                Statement Properties
-              </StyledEditorSectionHeader>
+          {/* Actants */}
+          <StyledEditorSection key="editor-section-actants">
+            <StyledEditorSectionHeader>Actants</StyledEditorSectionHeader>
+            <StyledEditorSectionContent>
+              <StyledEditorActantTableWrapper>
+                <StatementEditorActantTable
+                  statement={statement}
+                  classEntitiesActant={classesActants}
+                  updateActantsMutation={updateActantsRefreshListMutation}
+                />
+              </StyledEditorActantTableWrapper>
 
-              <StyledEditorSectionContent key={JSON.stringify(statement.data)}>
-                {renderPropGroup(propsByOrigins[0], statement)}
-              </StyledEditorSectionContent>
-            </StyledEditorSection>
+              <ActantSuggester
+                onSelected={(newSelectedId: string) => {
+                  addActant(newSelectedId);
+                }}
+                categoryIds={classesActants}
+                placeholder={"add new actant"}
+              ></ActantSuggester>
+            </StyledEditorSectionContent>
+          </StyledEditorSection>
 
-            {/* Actant Props */}
-            <StyledEditorSection key="editor-section-props-actants">
-              <StyledEditorSectionHeader>
-                Actant Properties
-              </StyledEditorSectionHeader>
-              <StyledEditorSectionContent key={JSON.stringify(statement.data)}>
-                {propsByOrigins.slice(1).map((propOrigin, sai) => {
-                  return renderPropGroup(propOrigin, statement);
-                })}
-              </StyledEditorSectionContent>
-            </StyledEditorSection>
+          {/* Statement Props */}
+          <StyledEditorSection key="editor-section-props-statement">
+            <StyledEditorSectionHeader>
+              Actions Properties
+            </StyledEditorSectionHeader>
 
-            {/* Refs */}
-            <StyledEditorSection key="editor-section-refs">
-              <StyledEditorSectionHeader>References</StyledEditorSectionHeader>
-              <StyledEditorSectionContent>
-                <StyledReferencesList>
-                  {statement.data.references.length > 0 && (
-                    <React.Fragment>
-                      <StyledListHeaderColumn></StyledListHeaderColumn>
-                      <StyledListHeaderColumn>Resource</StyledListHeaderColumn>
-                      <StyledListHeaderColumn>Part</StyledListHeaderColumn>
-                      <StyledListHeaderColumn>Type</StyledListHeaderColumn>
-                      <StyledListHeaderColumn></StyledListHeaderColumn>
-                    </React.Fragment>
-                  )}
-                  {statement.data.references.map(
-                    (reference: IStatementReference, ri) => {
-                      const referenceActant = statement.actants.find(
-                        (a) => a.id === reference.resource
-                      );
-                      return (
-                        <React.Fragment key={ri}>
-                          <StyledReferencesListColumn />
-                          <StyledReferencesListColumn>
-                            {referenceActant ? (
-                              <ActantTag
-                                actant={referenceActant}
-                                short={false}
-                                button={
-                                  <Button
-                                    key="d"
-                                    tooltip="unlink actant"
-                                    icon={<FaUnlink />}
-                                    color="danger"
-                                    onClick={() => {
-                                      updateReference(reference.id, {
-                                        resource: "",
-                                      });
-                                    }}
-                                  />
-                                }
-                              />
-                            ) : (
-                              <ActantSuggester
-                                onSelected={(newSelectedId: string) => {
-                                  updateReference(reference.id, {
-                                    resource: newSelectedId,
-                                  });
-                                }}
-                                categoryIds={classesResources}
-                              ></ActantSuggester>
-                            )}
-                          </StyledReferencesListColumn>
-                          <StyledReferencesListColumn>
-                            <Input
-                              type="text"
-                              value={reference.part}
-                              onChangeFn={(newPart: string) => {
-                                updateReference(reference.id, {
-                                  part: newPart,
-                                });
-                              }}
-                            ></Input>
-                          </StyledReferencesListColumn>
-                          <StyledReferencesListColumn>
-                            <Input
-                              type="select"
-                              value={reference.type}
-                              options={referenceTypeDict}
-                              onChangeFn={(newType: any) => {
-                                updateReference(reference.id, {
-                                  type: newType,
-                                });
-                              }}
-                            ></Input>
-                          </StyledReferencesListColumn>
-                          <StyledReferencesListColumn>
-                            <Button
-                              key="delete"
-                              tooltip="remove reference row"
-                              icon={<FaTrashAlt />}
-                              color="danger"
-                              onClick={() => {
-                                removeReference(reference.id);
-                              }}
-                            />
-                          </StyledReferencesListColumn>
-                        </React.Fragment>
-                      );
-                    }
-                  )}
-                </StyledReferencesList>
-                <ActantSuggester
-                  onSelected={(newSelectedId: string) => {}}
-                  categoryIds={classesResources}
-                  placeholder={"add new reference"}
-                ></ActantSuggester>
-              </StyledEditorSectionContent>
-            </StyledEditorSection>
+            <StyledEditorSectionContent key={JSON.stringify(statement.data)}>
+              {renderPropGroup(propsByOrigins[0], statement)}
+            </StyledEditorSectionContent>
+          </StyledEditorSection>
 
-            {/* Tags */}
-            <StyledEditorSection key="editor-section-tags">
-              <StyledEditorSectionHeader>Tags</StyledEditorSectionHeader>
-              <StyledEditorSectionContent>
-                <StyledTagsList>
-                  {statement.data.tags.map((tag: string) => {
-                    const tagActant = statement.actants.find(
-                      (a) => a.id === tag
+          {/* Actant Props */}
+          <StyledEditorSection key="editor-section-props-actants">
+            <StyledEditorSectionHeader>
+              Actant Properties
+            </StyledEditorSectionHeader>
+            <StyledEditorSectionContent key={JSON.stringify(statement.data)}>
+              {propsByOrigins.slice(1).map((propOrigin, sai) => {
+                return renderPropGroup(propOrigin, statement);
+              })}
+            </StyledEditorSectionContent>
+          </StyledEditorSection>
+
+          {/* Refs */}
+          <StyledEditorSection key="editor-section-refs">
+            <StyledEditorSectionHeader>References</StyledEditorSectionHeader>
+            <StyledEditorSectionContent>
+              <StyledReferencesList>
+                {statement.data.references.length > 0 && (
+                  <React.Fragment>
+                    <StyledListHeaderColumn></StyledListHeaderColumn>
+                    <StyledListHeaderColumn>Resource</StyledListHeaderColumn>
+                    <StyledListHeaderColumn>Part</StyledListHeaderColumn>
+                    <StyledListHeaderColumn>Type</StyledListHeaderColumn>
+                    <StyledListHeaderColumn></StyledListHeaderColumn>
+                  </React.Fragment>
+                )}
+                {statement.data.references.map(
+                  (reference: IStatementReference, ri) => {
+                    const referenceActant = statement.actants.find(
+                      (a) => a.id === reference.resource
                     );
                     return (
-                      tagActant && (
-                        <StyledTagsListItem key={tag}>
-                          <ActantTag
-                            actant={tagActant}
-                            short={false}
-                            button={
-                              <Button
-                                key="d"
-                                tooltip="unlink actant from tags"
-                                icon={<FaUnlink />}
-                                color="danger"
-                                onClick={() => {
-                                  removeTag(tag);
-                                }}
-                              />
-                            }
+                      <React.Fragment key={ri}>
+                        <StyledReferencesListColumn />
+                        <StyledReferencesListColumn>
+                          {referenceActant ? (
+                            <ActantTag
+                              actant={referenceActant}
+                              short={false}
+                              button={
+                                <Button
+                                  key="d"
+                                  tooltip="unlink actant"
+                                  icon={<FaUnlink />}
+                                  color="danger"
+                                  onClick={() => {
+                                    updateReference(reference.id, {
+                                      resource: "",
+                                    });
+                                  }}
+                                />
+                              }
+                            />
+                          ) : (
+                            <ActantSuggester
+                              onSelected={(newSelectedId: string) => {
+                                updateReference(reference.id, {
+                                  resource: newSelectedId,
+                                });
+                              }}
+                              categoryIds={classesResources}
+                            ></ActantSuggester>
+                          )}
+                        </StyledReferencesListColumn>
+                        <StyledReferencesListColumn>
+                          <Input
+                            type="text"
+                            value={reference.part}
+                            onChangeFn={(newPart: string) => {
+                              updateReference(reference.id, {
+                                part: newPart,
+                              });
+                            }}
+                          ></Input>
+                        </StyledReferencesListColumn>
+                        <StyledReferencesListColumn>
+                          <Input
+                            type="select"
+                            value={reference.type}
+                            options={referenceTypeDict}
+                            onChangeFn={(newType: any) => {
+                              updateReference(reference.id, {
+                                type: newType,
+                              });
+                            }}
+                          ></Input>
+                        </StyledReferencesListColumn>
+                        <StyledReferencesListColumn>
+                          <Button
+                            key="delete"
+                            tooltip="remove reference row"
+                            icon={<FaTrashAlt />}
+                            color="danger"
+                            onClick={() => {
+                              removeReference(reference.id);
+                            }}
                           />
-                        </StyledTagsListItem>
-                      )
+                        </StyledReferencesListColumn>
+                      </React.Fragment>
                     );
-                  })}
-                </StyledTagsList>
-                <ActantSuggester
-                  onSelected={(newSelectedId: string) => {
-                    addTag(newSelectedId);
-                  }}
-                  categoryIds={classesTags}
-                  placeholder={"add new tag"}
-                ></ActantSuggester>
-              </StyledEditorSectionContent>
-            </StyledEditorSection>
+                  }
+                )}
+              </StyledReferencesList>
+              <ActantSuggester
+                onSelected={(newSelectedId: string) => {}}
+                categoryIds={classesResources}
+                placeholder={"add new reference"}
+              ></ActantSuggester>
+            </StyledEditorSectionContent>
+          </StyledEditorSection>
 
-            {/* Notes */}
-            <StyledEditorSection key="editor-section-notes" lastSection>
+          {/* Tags */}
+          <StyledEditorSection key="editor-section-tags">
+            <StyledEditorSectionHeader>Tags</StyledEditorSectionHeader>
+            <StyledEditorSectionContent>
+              <StyledTagsList>
+                {statement.data.tags.map((tag: string) => {
+                  const tagActant = statement.actants.find((a) => a.id === tag);
+                  return (
+                    tagActant && (
+                      <StyledTagsListItem key={tag}>
+                        <ActantTag
+                          actant={tagActant}
+                          short={false}
+                          button={
+                            <Button
+                              key="d"
+                              tooltip="unlink actant from tags"
+                              icon={<FaUnlink />}
+                              color="danger"
+                              onClick={() => {
+                                removeTag(tag);
+                              }}
+                            />
+                          }
+                        />
+                      </StyledTagsListItem>
+                    )
+                  );
+                })}
+              </StyledTagsList>
+              <ActantSuggester
+                onSelected={(newSelectedId: string) => {
+                  addTag(newSelectedId);
+                }}
+                categoryIds={classesTags}
+                placeholder={"add new tag"}
+              ></ActantSuggester>
+            </StyledEditorSectionContent>
+          </StyledEditorSection>
+
+          {/* Notes */}
+          {/* <StyledEditorSection key="editor-section-notes" lastSection>
               <StyledEditorSectionHeader>Notes</StyledEditorSectionHeader>
               <StyledEditorSectionContent>
                 <Input
@@ -852,13 +883,14 @@ export const StatementEditorBox: React.FC = () => {
                   value={statement.data.note}
                 />
               </StyledEditorSectionContent>
-            </StyledEditorSection>
-          </div>
+            </StyledEditorSection> */}
         </div>
       ) : (
         "no statement selected"
       )}
-      <Loader show={isFetchingStatement} />
+      <Loader
+        show={isFetchingStatement || updateActantsRefreshListMutation.isLoading}
+      />
     </div>
   );
 };

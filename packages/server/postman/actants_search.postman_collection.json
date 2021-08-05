@@ -1,0 +1,148 @@
+{
+	"variables": [],
+	"info": {
+		"name": "search",
+		"_postman_id": "ab017592-2c40-3d02-1499-aa262031f092",
+		"description": "",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "http://localhost:4000/api/v1/actants/search",
+			"request": {
+				"url": {
+					"raw": "http://localhost:4000/api/v1/actants/search?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImJvb2ttYXJrcyI6bnVsbCwiZW1haWwiOiJhZG1pbkBhZG1pbi5jb20iLCJpZCI6IjEiLCJuYW1lIjoiYWRtaW4iLCJvcHRpb25zIjp7ImRlZmF1bHRMYW5ndWFnZSI6IiIsImRlZmF1bHRUZXJyaXRvcnkiOiIiLCJzZWFyY2hMYW5ndWFnZXMiOltdfSwicm9sZSI6ImFkbWluIn0sImV4cCI6MTYzMDEzODAxNCwiaWF0IjoxNjI3NTQ2MDE0fQ.guH7HQpYDaKpnSiQfKLKppj4_5zIEw_Dkt3rlUjcwiM",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4000",
+					"path": [
+						"api",
+						"v1",
+						"actants",
+						"search"
+					],
+					"query": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImJvb2ttYXJrcyI6bnVsbCwiZW1haWwiOiJhZG1pbkBhZG1pbi5jb20iLCJpZCI6IjEiLCJuYW1lIjoiYWRtaW4iLCJvcHRpb25zIjp7ImRlZmF1bHRMYW5ndWFnZSI6IiIsImRlZmF1bHRUZXJyaXRvcnkiOiIiLCJzZWFyY2hMYW5ndWFnZXMiOltdfSwicm9sZSI6ImFkbWluIn0sImV4cCI6MTYzMDEzODAxNCwiaWF0IjoxNjI3NTQ2MDE0fQ.guH7HQpYDaKpnSiQfKLKppj4_5zIEw_Dkt3rlUjcwiM",
+							"equals": true,
+							"description": ""
+						}
+					],
+					"variable": []
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"class\": \"T\",\n\t\"label\": \"t\"\n}"
+				},
+				"description": "search by class + label"
+			},
+			"response": []
+		},
+		{
+			"name": "http://localhost:4000/api/v1/actants/search 2",
+			"request": {
+				"url": {
+					"raw": "http://localhost:4000/api/v1/actants/search?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImJvb2ttYXJrcyI6bnVsbCwiZW1haWwiOiJhZG1pbkBhZG1pbi5jb20iLCJpZCI6IjEiLCJuYW1lIjoiYWRtaW4iLCJvcHRpb25zIjp7ImRlZmF1bHRMYW5ndWFnZSI6IiIsImRlZmF1bHRUZXJyaXRvcnkiOiIiLCJzZWFyY2hMYW5ndWFnZXMiOltdfSwicm9sZSI6ImFkbWluIn0sImV4cCI6MTYzMDEzODAxNCwiaWF0IjoxNjI3NTQ2MDE0fQ.guH7HQpYDaKpnSiQfKLKppj4_5zIEw_Dkt3rlUjcwiM",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4000",
+					"path": [
+						"api",
+						"v1",
+						"actants",
+						"search"
+					],
+					"query": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImJvb2ttYXJrcyI6bnVsbCwiZW1haWwiOiJhZG1pbkBhZG1pbi5jb20iLCJpZCI6IjEiLCJuYW1lIjoiYWRtaW4iLCJvcHRpb25zIjp7ImRlZmF1bHRMYW5ndWFnZSI6IiIsImRlZmF1bHRUZXJyaXRvcnkiOiIiLCJzZWFyY2hMYW5ndWFnZXMiOltdfSwicm9sZSI6ImFkbWluIn0sImV4cCI6MTYzMDEzODAxNCwiaWF0IjoxNjI3NTQ2MDE0fQ.guH7HQpYDaKpnSiQfKLKppj4_5zIEw_Dkt3rlUjcwiM",
+							"equals": true,
+							"description": ""
+						}
+					],
+					"variable": []
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"class\": \"V\",\n\t\"actionId\": \"A0093\"\n}"
+				},
+				"description": "search by class + actionId"
+			},
+			"response": []
+		},
+		{
+			"name": "http://localhost:4000/api/v1/actants/search 3",
+			"request": {
+				"url": {
+					"raw": "http://localhost:4000/api/v1/actants/search?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImJvb2ttYXJrcyI6bnVsbCwiZW1haWwiOiJhZG1pbkBhZG1pbi5jb20iLCJpZCI6IjEiLCJuYW1lIjoiYWRtaW4iLCJvcHRpb25zIjp7ImRlZmF1bHRMYW5ndWFnZSI6IiIsImRlZmF1bHRUZXJyaXRvcnkiOiIiLCJzZWFyY2hMYW5ndWFnZXMiOltdfSwicm9sZSI6ImFkbWluIn0sImV4cCI6MTYzMDEzODAxNCwiaWF0IjoxNjI3NTQ2MDE0fQ.guH7HQpYDaKpnSiQfKLKppj4_5zIEw_Dkt3rlUjcwiM",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4000",
+					"path": [
+						"api",
+						"v1",
+						"actants",
+						"search"
+					],
+					"query": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImJvb2ttYXJrcyI6bnVsbCwiZW1haWwiOiJhZG1pbkBhZG1pbi5jb20iLCJpZCI6IjEiLCJuYW1lIjoiYWRtaW4iLCJvcHRpb25zIjp7ImRlZmF1bHRMYW5ndWFnZSI6IiIsImRlZmF1bHRUZXJyaXRvcnkiOiIiLCJzZWFyY2hMYW5ndWFnZXMiOltdfSwicm9sZSI6ImFkbWluIn0sImV4cCI6MTYzMDEzODAxNCwiaWF0IjoxNjI3NTQ2MDE0fQ.guH7HQpYDaKpnSiQfKLKppj4_5zIEw_Dkt3rlUjcwiM",
+							"equals": true,
+							"description": ""
+						}
+					],
+					"variable": []
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					},
+					{
+						"key": "",
+						"value": "",
+						"description": "",
+						"disabled": true
+					},
+					{
+						"key": "Authorization",
+						"value": "Basic Og==",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"class\": \"V\",\n\t\"actantId\": \"P0221\"\n}"
+				},
+				"description": "search by class + actantId"
+			},
+			"response": []
+		}
+	]
+}
