@@ -22,7 +22,7 @@ import { FaUnlink } from "react-icons/fa";
 const classesActants = ["P", "G", "O", "C", "L", "V", "E", "S", "T", "R"];
 
 const initValues: IRequestSearch = {
-  class: ActantType.Location,
+  class: ActantType.Territory,
   actantId: "",
   label: "a",
 };
@@ -30,8 +30,8 @@ const initValues: IRequestSearch = {
 export const ActantSearchBox: React.FC = () => {
   const [options, setOptions] = useState<OptionsType<OptionTypeBase>>();
   const [classOption, setClassOption] = useState<ValueType<OptionTypeBase>>({
-    label: initValues.class,
-    value: initValues.class,
+    label: Entities[initValues.class].label,
+    value: Entities[initValues.class].id,
   });
   const [searchData, setSearchData] = useState<IRequestSearch>(initValues);
   const [results, setResults] = useState<IResponseSearch[]>([]);
