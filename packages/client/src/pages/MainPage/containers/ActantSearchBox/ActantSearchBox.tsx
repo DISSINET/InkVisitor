@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { OptionsType, OptionTypeBase, ValueType } from "react-select";
 
-import { Button, Dropdown, Input, Tag } from "components";
+import { Button, Dropdown, Input, Loader, Tag } from "components";
 import {
   StyledBoxContent,
   StyledResultHeading,
   StyledResultItem,
   StyledResults,
+  StyledResultsWrapper,
   StyledRow,
   StyledRowHeader,
 } from "./ActantSearchBoxStyles";
@@ -21,9 +22,9 @@ import { FaUnlink } from "react-icons/fa";
 const classesActants = ["P", "G", "O", "C", "L", "V", "E", "S", "T", "R"];
 
 const initValues: IRequestSearch = {
-  class: ActantType.Territory,
+  class: ActantType.Location,
   actantId: "",
-  label: "",
+  label: "a",
 };
 
 export const ActantSearchBox: React.FC = () => {
@@ -102,6 +103,7 @@ export const ActantSearchBox: React.FC = () => {
           value={classOption}
           onChange={(option: ValueType<OptionTypeBase>) => {
             if (option) {
+              console.log(option);
               setClassOption(option);
               handleChange("class", (option as IOption).value);
             }
@@ -152,28 +154,32 @@ export const ActantSearchBox: React.FC = () => {
         )}
       </StyledRow>
 
-      {/* RESULTS */}
-      {results.length > 0 && (
-        <>
-          <StyledRow>
-            <StyledResultHeading>Results:</StyledResultHeading>
-          </StyledRow>
-          <StyledRow>
-            <StyledResults>
-              {results.map((result: IResponseSearch, key: number) => (
-                <StyledResultItem key={key}>
-                  <Tag
-                    propId={result.actantId}
-                    label={result.actantLabel}
-                    category={result.class}
-                    color={Entities[result.class].color}
-                  />
-                </StyledResultItem>
-              ))}
-            </StyledResults>
-          </StyledRow>
-        </>
-      )}
+      <StyledRow>
+        <StyledResultHeading>Results:</StyledResultHeading>
+      </StyledRow>
+      <StyledResultsWrapper>
+        {/* RESULTS */}
+        {results.length > 0 && (
+          <>
+            <StyledRow>
+              <StyledResults>
+                {results.map((result: IResponseSearch, key: number) => (
+                  <StyledResultItem key={key}>
+                    <Tag
+                      propId={result.actantId}
+                      label={result.actantLabel}
+                      category={result.class}
+                      color={Entities[result.class].color}
+                      fullWidth
+                    />
+                  </StyledResultItem>
+                ))}
+              </StyledResults>
+            </StyledRow>
+          </>
+        )}
+        <Loader show={searchActantsMutation.isLoading} />
+      </StyledResultsWrapper>
     </StyledBoxContent>
   );
 };
