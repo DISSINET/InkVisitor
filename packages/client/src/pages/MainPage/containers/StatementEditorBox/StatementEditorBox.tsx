@@ -86,7 +86,7 @@ export const StatementEditorBox: React.FC = () => {
     { enabled: !!statementId && api.isLoggedIn() }
   );
 
-  console.log(statement);
+  // console.log(statement);
 
   // getting origin actants of properties
   const propsByOrigins = useMemo(() => {

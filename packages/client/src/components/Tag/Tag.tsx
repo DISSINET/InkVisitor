@@ -32,6 +32,7 @@ interface TagProps {
   button?: ReactNode;
   invertedLabel?: boolean;
   short?: boolean;
+  fullWidth?: boolean;
   index?: number;
   moveFn?: (dragIndex: number, hoverIndex: number) => void;
   enableTooltip?: boolean;
@@ -65,6 +66,7 @@ export const Tag: React.FC<TagProps> = ({
   button,
   invertedLabel,
   short = false,
+  fullWidth = false,
   index = -1,
   moveFn,
   position = "right top",
@@ -175,6 +177,7 @@ export const Tag: React.FC<TagProps> = ({
                   <StyledLabel
                     invertedLabel={invertedLabel}
                     borderStyle={borderStyle}
+                    fullWidth={fullWidth}
                   >
                     {label}
                   </StyledLabel>

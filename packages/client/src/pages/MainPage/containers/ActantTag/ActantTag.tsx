@@ -66,6 +66,7 @@ interface IActantTag {
   parentId?: string;
   mode?: "selected" | "disabled" | "invalid" | false;
   short?: boolean;
+  fullWidth?: boolean;
   button?: ReactNode;
   propId?: string;
   index?: number;
@@ -81,6 +82,7 @@ export const ActantTag: React.FC<IActantTag> = ({
   actant,
   parentId,
   short = false,
+  fullWidth,
   mode,
   button,
   index,
@@ -111,6 +113,7 @@ export const ActantTag: React.FC<IActantTag> = ({
       updateOrderFn={updateOrderFn}
       parentId={parentId}
       lvl={lvl}
+      fullWidth={fullWidth}
     />
   );
 };

@@ -35,6 +35,7 @@ export const Box: React.FC<BoxProps> = ({
   const [showContentLabel, setShowContentLabel] = useState<boolean>(false);
 
   const animatedExpand = useSpring({
+    height: "100%",
     opacity: isExpanded ? 1 : 0,
     contentLabelOpacity: isExpanded ? 0 : 1,
     contentBackgroundColor: isExpanded
