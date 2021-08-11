@@ -36,6 +36,7 @@ export const StyledEntityTag = styled.div<StyledEntityTag>`
 interface StyledLabel {
   invertedLabel?: boolean;
   borderStyle: "solid" | "dashed" | "dotted";
+  fullWidth: boolean;
 }
 export const StyledLabel = styled.div<StyledLabel>`
   display: inline-block;
@@ -51,7 +52,8 @@ export const StyledLabel = styled.div<StyledLabel>`
   border-left-width: ${({ theme }) => theme.borderWidth[2]};
   border-left-style: ${({ borderStyle }) => borderStyle};
   border-left-color: ${({ theme }) => theme.color["black"]};
-  max-width: ${({ theme }) => theme.space[52]};
+  max-width: ${({ theme, fullWidth }) =>
+    fullWidth ? "100%" : theme.space[52]};
 `;
 
 export const ButtonWrapper = styled.div`
