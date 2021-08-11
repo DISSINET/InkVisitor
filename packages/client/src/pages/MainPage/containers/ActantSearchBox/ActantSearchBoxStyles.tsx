@@ -32,8 +32,7 @@ export const StyledResults = styled.div`
   display: inline-flex;
   flex-direction: column;
   overflow: hidden;
-  /* align-items: flex-end; */
-  /* max-width: 100%; */
+  width: 100%;
 `;
 
 export const StyledResultHeading = styled.h6`

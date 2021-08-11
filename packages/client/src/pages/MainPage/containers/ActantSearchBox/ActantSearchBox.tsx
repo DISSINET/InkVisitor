@@ -24,7 +24,7 @@ const classesActants = ["P", "G", "O", "C", "L", "V", "E", "S", "T", "R"];
 const initValues: IRequestSearch = {
   class: ActantType.Territory,
   actantId: "",
-  label: "a",
+  label: "",
 };
 
 export const ActantSearchBox: React.FC = () => {
@@ -102,11 +102,8 @@ export const ActantSearchBox: React.FC = () => {
           options={options}
           value={classOption}
           onChange={(option: ValueType<OptionTypeBase>) => {
-            if (option) {
-              console.log(option);
-              setClassOption(option);
-              handleChange("class", (option as IOption).value);
-            }
+            setClassOption(option);
+            handleChange("class", (option as IOption).value);
           }}
         />
       </StyledRow>
