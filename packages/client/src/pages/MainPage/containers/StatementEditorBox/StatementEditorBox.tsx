@@ -13,13 +13,7 @@ import {
 
 import { useLocation, useHistory } from "react-router";
 
-import {
-  ActantTag,
-  ActionDropdown,
-  CertaintyToggle,
-  ModalityToggle,
-  ElvlToggle,
-} from "./../";
+import { ActantTag, ActionDropdown, CertaintyToggle, ElvlToggle } from "./../";
 
 import { CProp, CStatementActant } from "constructors";
 
@@ -419,17 +413,6 @@ export const StatementEditorBox: React.FC = () => {
                     });
                   }}
                 />
-                <CertaintyToggle
-                  value={prop.type.certainty}
-                  onChangeFn={(newValue: string) => {
-                    updateProp(prop.id, {
-                      type: {
-                        ...prop.type,
-                        ...{ certainty: newValue },
-                      },
-                    });
-                  }}
-                />
               </StyledPropButtonGroup>
             </React.Fragment>
           ) : (
@@ -484,17 +467,6 @@ export const StatementEditorBox: React.FC = () => {
                     });
                   }}
                 />
-                <CertaintyToggle
-                  value={prop.value.certainty}
-                  onChangeFn={(newValue: string) => {
-                    updateProp(prop.id, {
-                      value: {
-                        ...prop.value,
-                        ...{ certainty: newValue },
-                      },
-                    });
-                  }}
-                />
               </StyledPropButtonGroup>
             </React.Fragment>
           ) : (
@@ -513,14 +485,6 @@ export const StatementEditorBox: React.FC = () => {
         </StyledPropLineColumn>
         <StyledPropLineColumn lastSecondLevel={lastSecondLevel}>
           <StyledPropButtonGroup leftMargin={false}>
-            <ModalityToggle
-              value={prop.modality}
-              onChangeFn={(newValue: string) => {
-                updateProp(prop.id, {
-                  modality: newValue,
-                });
-              }}
-            />
             <ElvlToggle
               value={prop.elvl}
               onChangeFn={(newValue: string) => {
@@ -628,15 +592,7 @@ export const StatementEditorBox: React.FC = () => {
               </div>
               <div>
                 <StyledListHeaderColumn>Attributes</StyledListHeaderColumn>
-                <ModalityToggle
-                  value={statement.data.modality}
-                  onChangeFn={(newValue: string) => {
-                    const newData = {
-                      modality: newValue,
-                    };
-                    update(newData);
-                  }}
-                />
+
                 {/* <ElvlToggle
                     value={statement.data.elvl}
                     onChangeFn={(newValue: string) => {
