@@ -56,15 +56,39 @@ const logicalTypes = ["1", "2", "3"] as const;
 export type ActantLogicalType = typeof logicalTypes[number];
 
 const certanties = ["1", "2", "3", "4", "5", "6"] as const;
-export type StatementCertainty = typeof certanties[number];
+export type Certainty = typeof certanties[number];
 
 const elvls = ["1", "2", "3"] as const;
-export type StatementElvl = typeof elvls[number];
+export type Elvl = typeof elvls[number];
 
 const positions = ["s", "a1", "a2", "p"] as const;
-export type StatementPosition = typeof positions[number];
+export type Position = typeof positions[number];
 
-const modes = ["1", "2", "3", "4", "5"] as const;
-export type StatementMode = typeof modes[number];
+const logics = ["1", "2"] as const;
+export type Logic = typeof logics[number];
 
+const moods = [
+  "1",
+  "2",
+  "3",
+  "4",
+  "5",
+  "6",
+  "7",
+  "8",
+  "9",
+  "10",
+  "11",
+  "12",
+  "13",
+] as const;
+export type Mood = typeof moods[number];
 
+const moodsvariants = ["1", "2", "3"] as const;
+export type MoodVariant = typeof moodsvariants[number];
+
+const virtualities = ["1", "2", "3"] as const;
+export type Virtuality = typeof virtualities[number];
+
+const partitivities = ["1", "2", "3", "4", "5"] as const;
+export type Partitivity = typeof partitivities[number];

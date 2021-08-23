@@ -2,17 +2,25 @@ import {
   IStatement,
   IStatementActant,
   IStatementReference,
+  IStatementProp,
+  IOperator,
 } from "@shared/types";
 import { fillFlatObject, fillArray, UnknownObject, IModel } from "./common";
-import { Prop } from "./prop";
 import {
   ActantType,
   ActantStatus,
-  StatementCertainty,
-  StatementMode,
-  StatementElvl,
-  StatementPosition,
+  EntityActantType,
+  Certainty,
+  Elvl,
+  Position,
+  Logic,
+  Mood,
+  MoodVariant,
+  Virtuality,
+  Partitivity,
 } from "@shared/enums";
+import { COperator } from "./../../../client/src/constructors";
+
 import Actant from "./actant";
 import { r as rethink, Connection, RDatum, WriteResult } from "rethinkdb-ts";
 import { InternalServerError } from "@shared/types/errors";
@@ -20,11 +28,12 @@ import { InternalServerError } from "@shared/types/errors";
 class StatementActant implements IStatementActant, IModel {
   id = "";
   actant = "";
-  position: StatementPosition = "s";
-  modality = "";
-  elvl: StatementElvl = "1";
-  certainty: StatementCertainty = "1";
-  mode: StatementMode = "1";
+  position: Position = "s";
+  elvl: Elvl = "1";
+  logic: Logic = "1";
+  virtuality: Virtuality = "1";
+  partitivity: Partitivity = "1";
+  operator: IOperator = COperator();
 
   constructor(data: UnknownObject) {
     if (!data) {
@@ -94,8 +103,12 @@ export class StatementTerritory {
 export class StatementAction {
   id = "";
   action: string = "";
-  elvl: StatementElvl = "1";
-  certainty: StatementCertainty = "1";
+  elvl: Elvl = "1";
+  certainty: Certainty = "1";
+  logic: Logic = "1";
+  mood: Mood[] = [];
+  moodvariant: MoodVariant = "1";
+  operator: IOperator = COperator();
 
   constructor(data: UnknownObject) {
     if (!data) {
@@ -118,13 +131,67 @@ export class StatementAction {
   }
 }
 
+export class StatementProp implements IStatementProp, IModel {
+  id = "";
+
+  origin = "";
+  elvl: Elvl = "1";
+  certainty: Certainty = "1";
+  logic: Logic = "1";
+  mood: Mood[] = [];
+  moodvariant: MoodVariant = "1";
+  operator: IOperator = COperator();
+
+  type: {
+    id: string;
+    elvl: Elvl;
+    logic: Logic;
+    virtuality: Virtuality;
+    partitivity: Partitivity;
+  } = {
+    id: "",
+    elvl: "1",
+    logic: "1",
+    virtuality: "1",
+    partitivity: "1",
+  };
+  value: {
+    id: string;
+    elvl: Elvl;
+    logic: Logic;
+    virtuality: Virtuality;
+    partitivity: Partitivity;
+  } = {
+    id: "",
+    elvl: "1",
+    logic: "1",
+    virtuality: "1",
+    partitivity: "1",
+  };
+
+  constructor(data: UnknownObject) {
+    if (!data) {
+      return;
+    }
+
+    fillFlatObject(this, data);
+
+    fillFlatObject(this.type, data.type as Record<string, unknown>);
+
+    fillFlatObject(this.value, data.value as Record<string, unknown>);
+  }
+
+  isValid(): boolean {
+    return true; // always true - no rules yet
+  }
+}
+
 export class StatementData implements IModel {
   actions = [] as StatementAction[];
-  modality = "";
   text = "";
   territory = new StatementTerritory({});
   actants = [] as StatementActant[];
-  props = [] as Prop[];
+  props = [] as StatementProp[];
   references = [] as StatementReference[];
   tags = [] as string[];
 
@@ -141,7 +208,7 @@ export class StatementData implements IModel {
 
     fillArray<StatementActant>(this.actants, StatementActant, data.actants);
 
-    fillArray<Prop>(this.props, Prop, data.props);
+    fillArray<StatementProp>(this.props, StatementProp, data.props);
 
     const refs = data.references; // to enable one-liner below (line lenth, formatter issue ^^)
     fillArray<StatementReference>(this.references, StatementReference, refs);

@@ -29,7 +29,7 @@ import {
 } from "./../../../../../../shared/dictionaries";
 import {
   IActant,
-  IProp,
+  IStatementProp,
   IStatement,
   IStatementReference,
   IResponseStatement,
@@ -368,7 +368,7 @@ export const StatementEditorBox: React.FC = () => {
 
   const renderPropRow = (
     statement: IResponseStatement,
-    prop: IProp,
+    prop: IStatementProp,
     level: "1" | "2",
     order: number,
     lastSecondLevel: boolean

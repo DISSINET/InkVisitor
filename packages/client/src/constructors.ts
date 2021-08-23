@@ -18,13 +18,13 @@ export const CBookmarkFolder = (bookmarkName: string): IBookmarkFolder => ({
 
 export const CProp = (): IStatementProp => ({
   id: uuidv4(),
+  origin: "",
   elvl: "1",
   certainty: "1",
   logic: "1",
   mood: ["1"],
   moodvariant: "1",
   operator: COperator(),
-  origin: "",
 
   type: {
     id: "",
