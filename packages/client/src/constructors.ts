@@ -1,10 +1,11 @@
 import {
-  IProp,
+  IStatementProp,
   IStatementActant,
   IActant,
   ITerritory,
   IStatement,
   IBookmarkFolder,
+  IOperator,
 } from "@shared/types";
 import { CategoryActantType, ActantType } from "@shared/enums";
 import { v4 as uuidv4 } from "uuid";
@@ -15,21 +16,29 @@ export const CBookmarkFolder = (bookmarkName: string): IBookmarkFolder => ({
   actantIds: [],
 });
 
-export const CProp = (): IProp => ({
+export const CProp = (): IStatementProp => ({
   id: uuidv4(),
   elvl: "1",
   certainty: "1",
-  modality: "Y",
+  logic: "1",
+  mood: ["1"],
+  moodvariant: "1",
+  operator: COperator(),
   origin: "",
+
   type: {
     id: "",
-    certainty: "1",
     elvl: "1",
+    logic: "1",
+    virtuality: "1",
+    partitivity: "1",
   },
   value: {
     id: "",
-    certainty: "1",
     elvl: "1",
+    logic: "1",
+    virtuality: "1",
+    partitivity: "1",
   },
 });
 
@@ -43,7 +52,6 @@ export const CStatement = (territoryId: string): IStatement => ({
   notes: [],
   data: {
     actions: [],
-    modality: "Y",
     text: "",
     territory: {
       id: territoryId,
@@ -71,9 +79,12 @@ export const CMetaStatement = (subjectId: string): IStatement => ({
         action: "A0093",
         certainty: "1",
         elvl: "1",
+        logic: "1",
+        mood: ["1"],
+        moodvariant: "1",
+        operator: COperator(),
       },
     ],
-    modality: "Y",
     text: "",
     territory: {
       id: "T0",
@@ -85,24 +96,30 @@ export const CMetaStatement = (subjectId: string): IStatement => ({
         actant: subjectId,
         position: "s",
         elvl: "1",
-        certainty: "1",
-        mode: "1",
+        logic: "1",
+        virtuality: "1",
+        partitivity: "1",
+        operator: COperator(),
       },
       {
         id: uuidv4(),
         actant: "",
         position: "a1",
         elvl: "1",
-        certainty: "1",
-        mode: "1",
+        logic: "1",
+        virtuality: "1",
+        partitivity: "1",
+        operator: COperator(),
       },
       {
         id: uuidv4(),
         actant: "",
         position: "a2",
         elvl: "1",
-        certainty: "1",
-        mode: "1",
+        logic: "1",
+        virtuality: "1",
+        partitivity: "1",
+        operator: COperator(),
       },
     ],
     props: [],
@@ -128,8 +145,10 @@ export const CStatementActant = (): IStatementActant => ({
   actant: "",
   position: "s",
   elvl: "1",
-  certainty: "1",
-  mode: "1",
+  logic: "1",
+  virtuality: "1",
+  partitivity: "1",
+  operator: COperator(),
 });
 
 export const CTerritoryActant = (
@@ -163,4 +182,10 @@ export const CActant = (
   status: "0",
   language: "eng",
   notes: [],
+});
+
+export const COperator = (): IOperator => ({
+  bundleStart: false,
+  bundleEnd: false,
+  value: "1",
 });

@@ -4,12 +4,16 @@ var fs = require("fs");
 
 import {
   ActantType,
-  EntityActantType,
-  ActantLogicalType,
   ActantStatus,
-  StatementPosition,
-  StatementElvl,
-  StatementCertainty,
+  EntityActantType,
+  Certainty,
+  Elvl,
+  Position,
+  Logic,
+  Mood,
+  MoodVariant,
+  Virtuality,
+  Partitivity,
 } from "../../../shared/enums";
 import {
   IAudit,
@@ -21,9 +25,11 @@ import {
   IStatement,
   ITerritory,
   IResource,
-  IProp,
+  IStatementProp,
   IUser,
 } from "./../../../shared/types";
+
+import { COperator } from "./../../../client/src/constructors";
 
 import { actantStatusDict } from "./../../../shared/dictionaries";
 
@@ -360,6 +366,10 @@ const loadStatementsTables = async (next: Function) => {
               action: statement.id_action_or_relation,
               certainty: statement.certainty || "1",
               elvl: statement.epistemological_level || "1",
+              logic: "1",
+              mood: ["1"],
+              moodvariant: "1",
+              operator: COperator(),
             },
           ],
           territory: {
@@ -381,9 +391,6 @@ const loadStatementsTables = async (next: Function) => {
             },
           ],
           tags: statement.tags_id.split(" #").filter((t: string) => t),
-
-          // TODO handle modality
-          modality: statement.modality || "Y",
           text: statement.text,
           props: [],
           actants: [],
@@ -462,19 +469,26 @@ const loadStatementsTables = async (next: Function) => {
 
         mainStatement.data.props.push({
           id: v4(),
+          origin: statement.id,
           elvl: "1",
           certainty: "1",
-          modality: "Y",
-          origin: statement.id,
+          logic: "1",
+          mood: ["1"],
+          moodvariant: "1",
+          operator: COperator(),
           type: {
             id: propActant1Id,
-            certainty: "1",
             elvl: "1",
+            logic: "1",
+            virtuality: "1",
+            partitivity: "1",
           },
           value: {
             id: propActant2Id,
-            certainty: "1",
             elvl: "1",
+            logic: "1",
+            virtuality: "1",
+            partitivity: "1",
           },
         });
       }
@@ -650,6 +664,10 @@ const createEmptyPropStatement = (
             action: "A0093",
             certainty: "1",
             elvl: "1",
+            logic: "1",
+            mood: ["1"],
+            moodvariant: "1",
+            operator: COperator(),
           },
         ],
         territory: {
@@ -658,7 +676,6 @@ const createEmptyPropStatement = (
         },
         references: [],
         tags: [],
-        modality: "Y",
         text: "",
         props: [],
         actants: [
@@ -667,24 +684,30 @@ const createEmptyPropStatement = (
             actant: idSubject,
             position: "s",
             elvl: "1",
-            certainty: "1",
-            mode: "1",
+            logic: "1",
+            virtuality: "1",
+            partitivity: "1",
+            operator: COperator(),
           },
           {
             id: v4(),
             actant: idActant1,
             position: "a1",
             elvl: "1",
-            certainty: "1",
-            mode: "1",
+            logic: "1",
+            virtuality: "1",
+            partitivity: "1",
+            operator: COperator(),
           },
           {
             id: v4(),
             actant: idActant2,
             position: "a2",
             elvl: "1",
-            certainty: "1",
-            mode: "1",
+            logic: "1",
+            virtuality: "1",
+            partitivity: "1",
+            operator: COperator(),
           },
         ],
       },
@@ -749,37 +772,52 @@ const processLocation = (
             .replace(">", "");
           statement.data.props.push({
             id: v4(),
+            origin: statement.id,
             elvl: "1",
             certainty: "1",
-            modality: "Y",
-            origin: statement.id,
+            logic: "1",
+            mood: ["1"],
+            moodvariant: "1",
+            operator: COperator(),
+
             type: {
               id: sameLocationType,
-              certainty: "1",
               elvl: "1",
+              logic: "1",
+              virtuality: "1",
+              partitivity: "1",
             },
             value: {
               id: statementLocationId,
-              certainty: "1",
               elvl: "1",
+              logic: "1",
+              virtuality: "1",
+              partitivity: "1",
             },
           });
         } else {
           statement.data.props.push({
             id: v4(),
+            origin: statement.id,
             elvl: "1",
             certainty: "1",
-            modality: "Y",
-            origin: statement.id,
+            logic: "1",
+            mood: ["1"],
+            moodvariant: "1",
+            operator: COperator(),
             type: {
               id: locationType.concept,
-              certainty: "1",
               elvl: "1",
+              logic: "1",
+              virtuality: "1",
+              partitivity: "1",
             },
             value: {
               id: locationIdValue,
-              certainty: "1",
               elvl: "1",
+              logic: "1",
+              virtuality: "1",
+              partitivity: "1",
             },
           });
         }
@@ -790,7 +828,7 @@ const processLocation = (
 
 const processActant = (
   statement: IStatement,
-  position: StatementPosition,
+  position: Position,
   actantIdValues: string,
   propActant1Value: string,
   propActant2Value: string,
@@ -800,8 +838,8 @@ const processActant = (
     actantIdValues.split(" #").forEach((actantIdValue: string) => {
       // asign elvl and certainty
 
-      let elvl: StatementElvl = actantIdValue.includes("[") ? "2" : "1";
-      let certainty: StatementCertainty = "1";
+      let elvl: Elvl = actantIdValue.includes("[") ? "2" : "1";
+      let certainty: Certainty = "1";
 
       // remove brackets
       const actantIdClean: string = actantIdValue
@@ -818,9 +856,11 @@ const processActant = (
         id: statementActantId,
         actant: actantId,
         position: position,
-        elvl: elvl,
-        certainty: certainty,
-        mode: "1",
+        elvl: "1",
+        logic: "1",
+        virtuality: "1",
+        partitivity: "1",
+        operator: COperator(),
       });
 
       // create a prop if there is one
@@ -842,16 +882,24 @@ const processActant = (
           origin: statementActantId,
           elvl: "1",
           certainty: "1",
-          modality: "Y",
+          logic: "1",
+          mood: ["1"],
+          moodvariant: "1",
+          operator: COperator(),
+
           type: {
             id: propActant1Id,
-            certainty: "1",
             elvl: "1",
+            logic: "1",
+            virtuality: "1",
+            partitivity: "1",
           },
           value: {
             id: propActant2Id,
-            certainty: "1",
             elvl: "1",
+            logic: "1",
+            virtuality: "1",
+            partitivity: "1",
           },
         });
       }
