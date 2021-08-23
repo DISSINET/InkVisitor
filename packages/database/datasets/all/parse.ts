@@ -22,6 +22,7 @@ import {
   IEntity,
   ILabel,
   IOption,
+  IOperator,
   IStatement,
   ITerritory,
   IResource,
@@ -29,9 +30,13 @@ import {
   IUser,
 } from "./../../../shared/types";
 
-import { COperator } from "./../../../client/src/constructors";
-
 import { actantStatusDict } from "./../../../shared/dictionaries";
+
+export const COperator = (): IOperator => ({
+  bundleStart: false,
+  bundleEnd: false,
+  value: "1",
+});
 
 /**
  * waterfall processing

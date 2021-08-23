@@ -11,13 +11,7 @@ import {
   IResponseStatement,
   IStatementActant,
 } from "@shared/types";
-import {
-  ActantSuggester,
-  ActantTag,
-  CertaintyToggle,
-  ElvlToggle,
-  ModalityToggle,
-} from "../..";
+import { ActantSuggester, ActantTag, CertaintyToggle, ElvlToggle } from "../..";
 import {
   StyledSectionMetaTableButtonGroup,
   StyledSectionMetaTableCell,
@@ -133,14 +127,6 @@ export const ActantDetailMetaTableRow: React.FC<ActantDetailMetaTableRow> = ({
                   });
                 }}
               />
-              <CertaintyToggle
-                value={typeSActant.certainty}
-                onChangeFn={(newValue: string) => {
-                  updateStatementActant(metaStatement.id, typeSActant.id, {
-                    certainty: newValue,
-                  });
-                }}
-              />
             </StyledSectionMetaTableButtonGroup>
           </React.Fragment>
         ) : (
@@ -186,14 +172,6 @@ export const ActantDetailMetaTableRow: React.FC<ActantDetailMetaTableRow> = ({
                   });
                 }}
               />
-              <CertaintyToggle
-                value={valueSActant.certainty}
-                onChangeFn={(newValue: string) => {
-                  updateStatementActant(metaStatement.id, valueSActant.id, {
-                    certainty: newValue,
-                  });
-                }}
-              />
             </StyledSectionMetaTableButtonGroup>
           </React.Fragment>
         ) : (
@@ -211,32 +189,7 @@ export const ActantDetailMetaTableRow: React.FC<ActantDetailMetaTableRow> = ({
 
       {/* attributes of statement */}
       <StyledSectionMetaTableCell>
-        <StyledSectionMetaTableButtonGroup>
-          <ModalityToggle
-            value={metaStatement.data.modality}
-            onChangeFn={(newValue: string) => {
-              updateStatementAttribute(metaStatement.id, {
-                modality: newValue,
-              });
-            }}
-          />
-          <ElvlToggle
-            value={metaStatement.data.elvl}
-            onChangeFn={(newValue: string) => {
-              updateStatementAttribute(metaStatement.id, {
-                elvl: newValue,
-              });
-            }}
-          />
-          <CertaintyToggle
-            value={metaStatement.data.certainty}
-            onChangeFn={(newValue: string) => {
-              updateStatementAttribute(metaStatement.id, {
-                certainty: newValue,
-              });
-            }}
-          />
-        </StyledSectionMetaTableButtonGroup>
+        <StyledSectionMetaTableButtonGroup></StyledSectionMetaTableButtonGroup>
       </StyledSectionMetaTableCell>
       {/* actions */}
       <StyledSectionMetaTableCell borderless>

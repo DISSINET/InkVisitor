@@ -40,7 +40,6 @@ import {
   ActantSuggester,
   ElvlToggle,
   CertaintyToggle,
-  ModalityToggle,
 } from "..";
 
 import { CMetaStatement, CStatementActant } from "constructors";
