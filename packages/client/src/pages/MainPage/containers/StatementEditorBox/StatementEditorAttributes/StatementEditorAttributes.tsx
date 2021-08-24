@@ -1,4 +1,7 @@
-import { StyledAttributeWrapper } from "./StatementEditorAttributeModalStyles";
+import {
+  StyledAttributeWrapper,
+  StyledAttributeModalContent,
+} from "./StatementEditorAttributesStyles";
 
 import {
   Button,
@@ -36,33 +39,34 @@ interface AttributeData {
   operator?: IOperator;
 }
 
-interface StatementEditorAttributeModal {
+interface StatementEditorAttributes {
   mode: "action" | "actant" | "prop" | "prop-value" | "prop-type";
   title: string;
-  inputData: AttributeData;
-  handleCancel: Function;
-  handleAccept: (data: AttributeData) => void;
+  data: AttributeData;
+  handleUpdate: (data: AttributeData) => void;
 }
 
-export const StatementEditorAttributeModal: React.FC<StatementEditorAttributeModal> =
-  ({ mode, title, inputData, handleCancel, handleAccept }) => {
-    const [data, setData] = useState<AttributeData>(inputData);
+export const StatementEditorAttributes: React.FC<StatementEditorAttributes> = ({
+  mode,
+  title,
+  data,
+  handleUpdate,
+}) => {
+  const [modalData, setModalData] = useState<AttributeData>(data);
+  const [modalOpen, setModalOpen] = useState<boolean>(false);
 
-    const handleAcceptClick = () => {
-      handleAccept(data);
-    };
+  const handleAcceptClick = () => {};
 
-    const handleCancelClick = () => {
-      handleCancel();
-    };
+  const handleCancelClick = () => {};
 
+  const renderModal = () => {
     return (
-      <Modal key="edit-modal" showModal={true} width="thin">
+      <Modal key="edit-modal" showModal={modalOpen} width="thin">
         <ModalHeader title={title} />
         <ModalContent>
-          <StyledAttributeWrapper>
+          <StyledAttributeModalContent>
             Here comes the attributes
-          </StyledAttributeWrapper>
+          </StyledAttributeModalContent>
         </ModalContent>
 
         <ModalFooter>
@@ -88,3 +92,6 @@ export const StatementEditorAttributeModal: React.FC<StatementEditorAttributeMod
       </Modal>
     );
   };
+
+  return <StyledAttributeWrapper>{renderModal()}</StyledAttributeWrapper>;
+};
