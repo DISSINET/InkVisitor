@@ -14,6 +14,8 @@ import {
   Input,
   Submit,
 } from "components";
+
+import { MdSettings } from "react-icons/md";
 import {
   ActantType,
   Certainty,
@@ -27,6 +29,7 @@ import {
 } from "@shared/enums";
 import { IOperator } from "@shared/types";
 import React, { useState } from "react";
+import { ElvlToggle } from "../..";
 
 interface AttributeData {
   certainty?: Certainty;
@@ -41,31 +44,48 @@ interface AttributeData {
 
 interface StatementEditorAttributes {
   mode: "action" | "actant" | "prop" | "prop-value" | "prop-type";
-  title: string;
+  modalTitle: string;
   data: AttributeData;
   handleUpdate: (data: AttributeData) => void;
 }
 
 export const StatementEditorAttributes: React.FC<StatementEditorAttributes> = ({
   mode,
-  title,
+  modalTitle,
   data,
   handleUpdate,
 }) => {
   const [modalData, setModalData] = useState<AttributeData>(data);
   const [modalOpen, setModalOpen] = useState<boolean>(false);
 
-  const handleAcceptClick = () => {};
+  const handleAcceptClick = () => {
+    handleUpdate(modalData);
+  };
 
-  const handleCancelClick = () => {};
+  const handleOpenModalClick = () => {
+    console.log("open modal");
+    setModalOpen(true);
+  };
+
+  const handleCancelClick = () => {
+    console.log("cancel modal");
+    setModalOpen(false);
+  };
 
   const renderModal = () => {
     return (
-      <Modal key="edit-modal" showModal={modalOpen} width="thin">
-        <ModalHeader title={title} />
+      <Modal key="edit-modal" showModal={true} width="thin">
+        <ModalHeader title={modalTitle} />
         <ModalContent>
           <StyledAttributeModalContent>
-            Here comes the attributes
+            {modalData.elvl && (
+              <AttributeElvl
+                value={modalData.elvl}
+                onChangeFn={(newElvl: Elvl) => {
+                  console.log(newElvl);
+                }}
+              ></AttributeElvl>
+            )}
           </StyledAttributeModalContent>
         </ModalContent>
 
@@ -93,5 +113,33 @@ export const StatementEditorAttributes: React.FC<StatementEditorAttributes> = ({
     );
   };
 
-  return <StyledAttributeWrapper>{renderModal()}</StyledAttributeWrapper>;
+  return (
+    <StyledAttributeWrapper>
+      <>{modalOpen && renderModal()}</>
+      <Button
+        key="add"
+        icon={<MdSettings />}
+        tooltip=""
+        color="primary"
+        onClick={() => {
+          handleOpenModalClick();
+        }}
+      />
+    </StyledAttributeWrapper>
+  );
+};
+
+interface AttributeElvl {
+  value: Elvl;
+  onChangeFn: (value: Elvl) => void;
+}
+const AttributeElvl: React.FC<AttributeElvl> = ({ value, onChangeFn }) => {
+  return (
+    <ElvlToggle
+      value={value}
+      onChangeFn={(newValue: Elvl) => {
+        onChangeFn(newValue);
+      }}
+    />
+  );
 };
