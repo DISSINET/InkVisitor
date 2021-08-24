@@ -7,6 +7,8 @@ import {
   StyledTh,
 } from "./StatementEditorActantTableStyles";
 import { StatementEditorActantTableRow } from "./StatementEditorActantTableRow/StatementEditorActantTableRow";
+import { StatementEditorAttributes } from "./../StatementEditorAttributes/StatementEditorAttributes";
+
 import {
   IActant,
   IResponseGeneric,
@@ -148,24 +150,39 @@ export const StatementEditorActantTable: React.FC<StatementEditorActantTable> =
           Cell: ({ row }: Cell) => {
             const { sActant } = row.values.data;
             return (
-              <>
-                <ElvlToggle
-                  value={sActant.elvl}
-                  onChangeFn={(newValue: string) => {
-                    updateActant(sActant.id, {
-                      elvl: newValue,
-                    });
-                  }}
-                />
-                <CertaintyToggle
-                  value={sActant.certainty}
-                  onChangeFn={(newValue: string) => {
-                    updateActant(sActant.id, {
-                      certainty: newValue,
-                    });
-                  }}
-                />
-              </>
+              <StatementEditorAttributes
+                mode="actant"
+                modalTitle="actant"
+                data={{
+                  elvl: sActant.elvl,
+                  certainty: sActant.certainty,
+                  logic: sActant.logic,
+                  virtuality: sActant.virtuality,
+                  partitivity: sActant.partitivity,
+                  operator: sActant.operator,
+                }}
+                handleUpdate={(newData) => {
+                  console.log("handleupdate", newData);
+                }}
+              />
+              // <>
+              //   <ElvlToggle
+              //     value={sActant.elvl}
+              //     onChangeFn={(newValue: string) => {
+              //       updateActant(sActant.id, {
+              //         elvl: newValue,
+              //       });
+              //     }}
+              //   />
+              //   <CertaintyToggle
+              //     value={sActant.certainty}
+              //     onChangeFn={(newValue: string) => {
+              //       updateActant(sActant.id, {
+              //         certainty: newValue,
+              //       });
+              //     }}
+              //   />
+              // </>
             );
           },
         },

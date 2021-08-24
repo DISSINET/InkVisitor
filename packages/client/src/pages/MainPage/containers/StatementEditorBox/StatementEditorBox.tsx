@@ -591,28 +591,6 @@ export const StatementEditorBox: React.FC = () => {
                       /> */}
                 </div>
               </div>
-              <div>
-                <StyledListHeaderColumn>Attributes</StyledListHeaderColumn>
-
-                {/* <ElvlToggle
-                    value={statement.data.elvl}
-                    onChangeFn={(newValue: string) => {
-                      const newData = {
-                        elvl: newValue,
-                      };
-                      update(newData);
-                    }}
-                  />
-                  <CertaintyToggle
-                    value={statement.data.certainty}
-                    onChangeFn={(newValue: string) => {
-                      const newData = {
-                        certainty: newValue,
-                      };
-                      update(newData);
-                    }}
-                  /> */}
-              </div>
             </StyledEditorSectionContent>
           </StyledEditorSection>
 
