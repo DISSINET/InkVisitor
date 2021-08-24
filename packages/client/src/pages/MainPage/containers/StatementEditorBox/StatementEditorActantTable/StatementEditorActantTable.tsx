@@ -148,21 +148,20 @@ export const StatementEditorActantTable: React.FC<StatementEditorActantTable> =
         {
           Header: "Attributes",
           Cell: ({ row }: Cell) => {
-            const { sActant } = row.values.data;
+            const { actant, sActant } = row.values.data;
             return (
               <StatementEditorAttributes
-                mode="actant"
-                modalTitle="actant"
+                modalTitle={actant.label}
                 data={{
                   elvl: sActant.elvl,
-                  certainty: sActant.certainty,
+                  //certainty: sActant.certainty,
                   logic: sActant.logic,
                   virtuality: sActant.virtuality,
                   partitivity: sActant.partitivity,
                   operator: sActant.operator,
                 }}
                 handleUpdate={(newData) => {
-                  console.log("handleupdate", newData);
+                  updateActant(sActant.id, newData);
                 }}
               />
               // <>
