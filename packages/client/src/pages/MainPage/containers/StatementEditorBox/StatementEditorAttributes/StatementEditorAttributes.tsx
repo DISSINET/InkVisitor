@@ -1,7 +1,29 @@
 import {
   StyledAttributeWrapper,
   StyledAttributeModalContent,
+  StyledAttributeModalRow,
+  StyledAttributeModalRowLabel,
+  StyledAttributeModalRowLabelText,
+  StyledAttributeModalRowLabelIcon,
 } from "./StatementEditorAttributesStyles";
+
+import {
+  certaintyDict,
+  elvlDict,
+  languageDict,
+  actantLogicalTypeDict,
+  actantPositionDict,
+  referenceTypeDict,
+  resourceTypeDict,
+  territoryTypeDict,
+  userRoleDict,
+  actantStatusDict,
+  logicDict,
+  moodDict,
+  moodVariantsDict,
+  partitivityDict,
+  virtualityDict,
+} from "@shared/dictionaries";
 
 import {
   Button,
@@ -13,6 +35,7 @@ import {
   ModalFooter,
   Input,
   Submit,
+  Dropdown,
 } from "components";
 
 import { MdSettings } from "react-icons/md";
@@ -28,8 +51,18 @@ import {
   Partitivity,
 } from "@shared/enums";
 import { IOperator } from "@shared/types";
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { ElvlToggle } from "../..";
+
+type AttributeName =
+  | "certainty"
+  | "elvl"
+  | "logic"
+  | "mood"
+  | "moodvariant"
+  | "virtuality"
+  | "partitivity"
+  | "operator";
 
 interface AttributeData {
   certainty?: Certainty;
@@ -43,48 +76,180 @@ interface AttributeData {
 }
 
 interface StatementEditorAttributes {
-  mode: "action" | "actant" | "prop" | "prop-value" | "prop-type";
   modalTitle: string;
   data: AttributeData;
   handleUpdate: (data: AttributeData) => void;
 }
 
 export const StatementEditorAttributes: React.FC<StatementEditorAttributes> = ({
-  mode,
   modalTitle,
   data,
   handleUpdate,
 }) => {
   const [modalData, setModalData] = useState<AttributeData>(data);
-  const [modalOpen, setModalOpen] = useState<boolean>(false);
+  const [modalOpen, setModalOpen] = useState<boolean>();
+
+  const handleModalDataChange = (
+    attributeName: AttributeName,
+    newValue:
+      | Certainty
+      | Elvl
+      | Logic
+      | Mood[]
+      | MoodVariant
+      | Virtuality
+      | Partitivity
+      | IOperator
+  ) => {
+    const newModalData = Object.assign({}, modalData);
+
+    switch (attributeName) {
+      case "logic":
+        newModalData["logic"] = newValue as Logic;
+        break;
+      case "certainty":
+        newModalData["certainty"] = newValue as Certainty;
+        break;
+      case "elvl":
+        newModalData["elvl"] = newValue as Elvl;
+        break;
+      case "mood":
+        newModalData["mood"] = newValue as Mood[];
+        break;
+      case "moodvariant":
+        newModalData["moodvariant"] = newValue as MoodVariant;
+        break;
+      case "virtuality":
+        newModalData["virtuality"] = newValue as Virtuality;
+        break;
+      case "partitivity":
+        newModalData["partitivity"] = newValue as Partitivity;
+        break;
+      case "operator":
+        newModalData["operator"] = newValue as IOperator;
+        break;
+    }
+
+    setModalData(newModalData);
+  };
 
   const handleAcceptClick = () => {
-    handleUpdate(modalData);
+    const updateModalData: AttributeData = {};
+    Object.keys(modalData).forEach((modelDataKey) => {
+      const modelDataValue = modalData[modelDataKey as AttributeName];
+
+      if (modelDataValue) {
+        //@ts-ignore
+        updateModalData[modelDataKey as AttributeName] = modelDataValue;
+      }
+    });
+    handleUpdate(updateModalData);
   };
 
   const handleOpenModalClick = () => {
-    console.log("open modal");
     setModalOpen(true);
   };
 
   const handleCancelClick = () => {
-    console.log("cancel modal");
     setModalOpen(false);
   };
 
   const renderModal = () => {
     return (
-      <Modal key="edit-modal" showModal={true} width="thin">
+      <Modal
+        key="edit-modal"
+        showModal={true}
+        disableBgClick={false}
+        onClose={() => {
+          handleCancelClick();
+        }}
+      >
         <ModalHeader title={modalTitle} />
         <ModalContent>
           <StyledAttributeModalContent>
             {modalData.elvl && (
-              <AttributeElvl
+              <AttributeRow
                 value={modalData.elvl}
-                onChangeFn={(newElvl: Elvl) => {
-                  console.log(newElvl);
+                multi={false}
+                items={elvlDict}
+                label="Epistemic level"
+                onChangeFn={(newValue: string | string[]) => {
+                  handleModalDataChange("elvl", newValue as Elvl);
                 }}
-              ></AttributeElvl>
+                icon={<MdSettings />}
+              ></AttributeRow>
+            )}
+            {modalData.logic && (
+              <AttributeRow
+                value={modalData.logic}
+                multi={false}
+                items={logicDict}
+                label="Logical level"
+                icon={<MdSettings />}
+                onChangeFn={(newValue: string | string[]) => {
+                  handleModalDataChange("logic", newValue as Logic);
+                }}
+              ></AttributeRow>
+            )}
+            {modalData.certainty && (
+              <AttributeRow
+                value={modalData.certainty}
+                multi={false}
+                items={certaintyDict}
+                label="Certainty"
+                icon={<MdSettings />}
+                onChangeFn={(newValue: string | string[]) => {
+                  handleModalDataChange("certainty", newValue as Certainty);
+                }}
+              ></AttributeRow>
+            )}
+            {modalData.mood && (
+              <AttributeRow
+                value={modalData.mood}
+                multi={true}
+                items={moodDict}
+                label="Mood"
+                icon={<MdSettings />}
+                onChangeFn={(newValue: string | string[]) => {
+                  handleModalDataChange("mood", newValue as Mood[]);
+                }}
+              ></AttributeRow>
+            )}
+            {modalData.moodvariant && (
+              <AttributeRow
+                value={modalData.moodvariant}
+                multi={false}
+                items={moodVariantsDict}
+                label="Mood Variant"
+                icon={<MdSettings />}
+                onChangeFn={(newValue: string | string[]) => {
+                  handleModalDataChange("moodvariant", newValue as MoodVariant);
+                }}
+              ></AttributeRow>
+            )}
+            {modalData.virtuality && (
+              <AttributeRow
+                value={modalData.virtuality}
+                multi={false}
+                items={virtualityDict}
+                label="Virtuality"
+                icon={<MdSettings />}
+                onChangeFn={(newValue: string | string[]) => {
+                  handleModalDataChange("virtuality", newValue as Virtuality);
+                }}
+              ></AttributeRow>
+            )}
+            {modalData.partitivity && (
+              <AttributeRow
+                value={modalData.partitivity}
+                multi={false}
+                items={partitivityDict}
+                label="Partitivity"
+                icon={<MdSettings />}
+                onChangeFn={(newValue: string | string[]) => {
+                  handleModalDataChange("partitivity", newValue as Partitivity);
+                }}
+              ></AttributeRow>
             )}
           </StyledAttributeModalContent>
         </ModalContent>
@@ -129,17 +294,46 @@ export const StatementEditorAttributes: React.FC<StatementEditorAttributes> = ({
   );
 };
 
-interface AttributeElvl {
-  value: Elvl;
-  onChangeFn: (value: Elvl) => void;
+interface AttributeRow {
+  value: string | string[];
+  items: { value: string; label: string }[];
+  label: string;
+  icon: React.ReactElement;
+  multi: boolean;
+  onChangeFn: (value: string | string[]) => void;
 }
-const AttributeElvl: React.FC<AttributeElvl> = ({ value, onChangeFn }) => {
+const AttributeRow: React.FC<AttributeRow> = ({
+  value,
+  items,
+  label,
+  icon,
+  multi,
+  onChangeFn,
+}) => {
+  const selectedItem = useMemo(() => {
+    return items.find((i: any) => i.value === value);
+  }, [value]);
+
   return (
-    <ElvlToggle
-      value={value}
-      onChangeFn={(newValue: Elvl) => {
-        onChangeFn(newValue);
-      }}
-    />
+    <StyledAttributeModalRow>
+      <StyledAttributeModalRowLabel>
+        <StyledAttributeModalRowLabelIcon>
+          {icon}
+        </StyledAttributeModalRowLabelIcon>
+        <StyledAttributeModalRowLabelText>
+          {label}
+        </StyledAttributeModalRowLabelText>
+      </StyledAttributeModalRowLabel>
+      <Dropdown
+        label={selectedItem?.label}
+        options={items}
+        value={selectedItem}
+        onChange={(newValue: any) => {
+          onChangeFn(newValue.value as string | string[]);
+        }}
+        width={200}
+        menuWidth={200}
+      />
+    </StyledAttributeModalRow>
   );
 };
