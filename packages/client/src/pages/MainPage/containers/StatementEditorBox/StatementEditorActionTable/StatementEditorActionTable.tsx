@@ -10,13 +10,15 @@ import { StatementEditorActionTableRow } from "./StatementEditorActionTableRow/S
 import {
   IAction,
   IActant,
+  IResponseGeneric,
   IResponseStatement,
   IStatementAction,
 } from "@shared/types";
 import { ActantSuggester, ActantTag, CertaintyToggle, ElvlToggle } from "../..";
 import { Button, Input } from "components";
 import { FaTrashAlt, FaUnlink } from "react-icons/fa";
-import { useMutation, useQueryClient } from "react-query";
+import { useMutation, UseMutationResult, useQueryClient } from "react-query";
+import { AxiosResponse } from "axios";
 import api from "api";
 const queryString = require("query-string");
 
@@ -27,14 +29,19 @@ interface StatementEditorActionTable {
   statement: IResponseStatement;
   statementId: string;
   handleRowClick?: Function;
-  classEntitiesActant: string[];
+  updateActionsMutation: UseMutationResult<
+    AxiosResponse<IResponseGeneric>,
+    unknown,
+    object,
+    unknown
+  >;
 }
 export const StatementEditorActionTable: React.FC<StatementEditorActionTable> =
   ({
     statement,
     statementId,
     handleRowClick = () => {},
-    classEntitiesActant,
+    updateActionsMutation,
   }) => {
     const queryClient = useQueryClient();
     var hashParams = queryString.parse(location.hash);
@@ -125,9 +132,9 @@ export const StatementEditorActionTable: React.FC<StatementEditorActionTable> =
                     icon={<FaUnlink />}
                     color="danger"
                     onClick={() => {
-                      // updateActant(sAction.id, {
-                      //   actant: "",
-                      // });
+                      updateAction(sAction.id, {
+                        action: "",
+                      });
                     }}
                   />
                 }
@@ -135,7 +142,9 @@ export const StatementEditorActionTable: React.FC<StatementEditorActionTable> =
             ) : (
               <ActantSuggester
                 onSelected={(newSelectedId: string) => {
-                  //
+                  updateAction(sAction.id, {
+                    action: newSelectedId,
+                  });
                 }}
                 categoryIds={["A"]}
                 placeholder={"add new action"}
@@ -179,7 +188,7 @@ export const StatementEditorActionTable: React.FC<StatementEditorActionTable> =
               color="danger"
               tooltip="remove action row"
               onClick={() => {
-                //removeActant(row.values.data.sActant.id);
+                removeAction(row.values.data.sAction.id);
               }}
             />
           ),
