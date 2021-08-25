@@ -15,7 +15,7 @@ import { useLocation, useHistory } from "react-router";
 
 import { ActantTag, ActionDropdown, CertaintyToggle, ElvlToggle } from "./../";
 
-import { CProp, CStatementActant } from "constructors";
+import { CProp, CStatementActant, CStatementAction } from "constructors";
 
 import {
   actantPositionDict,
@@ -132,6 +132,18 @@ export const StatementEditorBox: React.FC = () => {
       return [];
     }
   }, [JSON.stringify(statement)]);
+
+  // actions
+  const addAction = (newActionId: string) => {
+    if (statement) {
+      const newStatementAction = CStatementAction(newActionId);
+
+      const newData = {
+        actions: [...statement.data.actions, newStatementAction],
+      };
+      updateActionsRefreshListMutation.mutate(newData);
+    }
+  };
 
   const addActant = (newStatementActantId: string) => {
     if (statement) {
@@ -299,6 +311,19 @@ export const StatementEditorBox: React.FC = () => {
     }
   );
 
+  const updateActionsRefreshListMutation = useMutation(
+    async (changes: object) =>
+      await api.actantsUpdate(statementId, {
+        data: changes,
+      }),
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries("statement");
+        //queryClient.invalidateQueries("territory");
+      },
+    }
+  );
+
   const updateActantsRefreshListMutation = useMutation(
     async (changes: object) =>
       await api.actantsUpdate(statementId, {
@@ -307,7 +332,7 @@ export const StatementEditorBox: React.FC = () => {
     {
       onSuccess: () => {
         queryClient.invalidateQueries("statement");
-        queryClient.invalidateQueries("territory");
+        //queryClient.invalidateQueries("territory");
       },
     }
   );
@@ -605,13 +630,13 @@ export const StatementEditorBox: React.FC = () => {
                 <StatementEditorActionTable
                   statement={statement}
                   statementId={statementId}
-                  classEntitiesActant={classesActants}
+                  updateActionsMutation={updateActionsRefreshListMutation}
                 />
               </StyledEditorActantTableWrapper>
 
               <ActantSuggester
                 onSelected={(newSelectedId: string) => {
-                  //
+                  addAction(newSelectedId);
                 }}
                 categoryIds={["A"]}
                 placeholder={"add new action"}
