@@ -334,9 +334,9 @@ export const StatementEditorBox: React.FC = () => {
           </StyledPropsActantHeader>
           {propOrigin.props.length > 0 ? (
             <StyledPropsActantList>
+              <StyledListHeaderColumn></StyledListHeaderColumn>
               <StyledListHeaderColumn>Type</StyledListHeaderColumn>
               <StyledListHeaderColumn>Value</StyledListHeaderColumn>
-              <StyledListHeaderColumn>Attributes</StyledListHeaderColumn>
               <StyledListHeaderColumn></StyledListHeaderColumn>
               {propOrigin.props.map((prop1: any, pi1: number) => {
                 return (
@@ -376,6 +376,24 @@ export const StatementEditorBox: React.FC = () => {
     return (
       <React.Fragment key={prop.origin + level + "|" + order}>
         <StyledPropLineColumn></StyledPropLineColumn>
+        <StyledPropLineColumn lastSecondLevel={lastSecondLevel}>
+          <StyledPropButtonGroup leftMargin={false}>
+            <StatementEditorAttributes
+              modalTitle={`${propValueActant?.label} - ${propTypeActant?.label}`}
+              data={{
+                elvl: prop.elvl,
+                certainty: prop.certainty,
+                logic: prop.logic,
+                mood: prop.mood,
+                moodvariant: prop.moodvariant,
+                operator: prop.operator,
+              }}
+              handleUpdate={(newData) => {
+                updateProp(prop.id, newData);
+              }}
+            />
+          </StyledPropButtonGroup>
+        </StyledPropLineColumn>
         <StyledPropLineColumn
           padded={level === "2"}
           lastSecondLevel={lastSecondLevel}
@@ -403,15 +421,16 @@ export const StatementEditorBox: React.FC = () => {
                 }
               />
               <StyledPropButtonGroup>
-                <ElvlToggle
-                  value={prop.type.elvl}
-                  onChangeFn={(newValue: string) => {
-                    updateProp(prop.id, {
-                      type: {
-                        ...prop.type,
-                        ...{ elvl: newValue },
-                      },
-                    });
+                <StatementEditorAttributes
+                  modalTitle={propTypeActant.label}
+                  data={{
+                    elvl: prop.type.elvl,
+                    logic: prop.type.logic,
+                    virtuality: prop.type.virtuality,
+                    partitivity: prop.type.partitivity,
+                  }}
+                  handleUpdate={(newData) => {
+                    updateProp(prop.id, { type: { ...prop.type, ...newData } });
                   }}
                 />
               </StyledPropButtonGroup>
@@ -457,14 +476,17 @@ export const StatementEditorBox: React.FC = () => {
                 }
               />
               <StyledPropButtonGroup>
-                <ElvlToggle
-                  value={prop.value.elvl}
-                  onChangeFn={(newValue: string) => {
+                <StatementEditorAttributes
+                  modalTitle={propValueActant.label}
+                  data={{
+                    elvl: prop.value.elvl,
+                    logic: prop.value.logic,
+                    virtuality: prop.value.virtuality,
+                    partitivity: prop.value.partitivity,
+                  }}
+                  handleUpdate={(newData) => {
                     updateProp(prop.id, {
-                      value: {
-                        ...prop.value,
-                        ...{ elvl: newValue },
-                      },
+                      value: { ...prop.value, ...newData },
                     });
                   }}
                 />
@@ -484,26 +506,7 @@ export const StatementEditorBox: React.FC = () => {
             ></ActantSuggester>
           )}
         </StyledPropLineColumn>
-        <StyledPropLineColumn lastSecondLevel={lastSecondLevel}>
-          <StyledPropButtonGroup leftMargin={false}>
-            <ElvlToggle
-              value={prop.elvl}
-              onChangeFn={(newValue: string) => {
-                updateProp(prop.id, {
-                  elvl: newValue,
-                });
-              }}
-            />
-            <CertaintyToggle
-              value={prop.certainty}
-              onChangeFn={(newValue: string) => {
-                updateProp(prop.id, {
-                  certainty: newValue,
-                });
-              }}
-            />
-          </StyledPropButtonGroup>
-        </StyledPropLineColumn>
+
         <StyledPropLineColumn lastSecondLevel={lastSecondLevel}>
           <StyledPropButtonGroup leftMargin={false}>
             {level === "1" && (

@@ -149,12 +149,12 @@ export const StatementEditorActantTable: React.FC<StatementEditorActantTable> =
           Header: "Attributes",
           Cell: ({ row }: Cell) => {
             const { actant, sActant } = row.values.data;
-            return (
+            return actant && sActant ? (
               <StatementEditorAttributes
                 modalTitle={actant.label}
                 data={{
                   elvl: sActant.elvl,
-                  //certainty: sActant.certainty,
+                  certainty: sActant.certainty,
                   logic: sActant.logic,
                   virtuality: sActant.virtuality,
                   partitivity: sActant.partitivity,
@@ -164,24 +164,8 @@ export const StatementEditorActantTable: React.FC<StatementEditorActantTable> =
                   updateActant(sActant.id, newData);
                 }}
               />
-              // <>
-              //   <ElvlToggle
-              //     value={sActant.elvl}
-              //     onChangeFn={(newValue: string) => {
-              //       updateActant(sActant.id, {
-              //         elvl: newValue,
-              //       });
-              //     }}
-              //   />
-              //   <CertaintyToggle
-              //     value={sActant.certainty}
-              //     onChangeFn={(newValue: string) => {
-              //       updateActant(sActant.id, {
-              //         certainty: newValue,
-              //       });
-              //     }}
-              //   />
-              // </>
+            ) : (
+              <div />
             );
           },
         },
