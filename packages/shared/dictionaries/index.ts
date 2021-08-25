@@ -13,6 +13,7 @@ import { moodDict } from "./mood";
 import { moodVariantsDict } from "./moodvariants";
 import { partitivityDict } from "./partitivity";
 import { virtualityDict } from "./virtuality";
+import { operatorDict } from "./operator";
 
 export {
   certaintyDict,
@@ -30,4 +31,5 @@ export {
   moodVariantsDict,
   partitivityDict,
   virtualityDict,
+  operatorDict,
 };

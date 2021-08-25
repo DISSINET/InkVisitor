@@ -10,19 +10,12 @@ import {
 import {
   certaintyDict,
   elvlDict,
-  languageDict,
-  actantLogicalTypeDict,
-  actantPositionDict,
-  referenceTypeDict,
-  resourceTypeDict,
-  territoryTypeDict,
-  userRoleDict,
-  actantStatusDict,
   logicDict,
   moodDict,
   moodVariantsDict,
   partitivityDict,
   virtualityDict,
+  operatorDict,
 } from "@shared/dictionaries";
 
 import {
@@ -49,8 +42,8 @@ import {
   MoodVariant,
   Virtuality,
   Partitivity,
+  Operator,
 } from "@shared/enums";
-import { IOperator } from "@shared/types";
 import React, { useState, useMemo } from "react";
 import { ElvlToggle } from "../..";
 
@@ -72,7 +65,7 @@ interface AttributeData {
   moodvariant?: MoodVariant;
   virtuality?: Virtuality;
   partitivity?: Partitivity;
-  operator?: IOperator;
+  operator?: Operator;
 }
 
 interface StatementEditorAttributes {
@@ -99,7 +92,7 @@ export const StatementEditorAttributes: React.FC<StatementEditorAttributes> = ({
       | MoodVariant
       | Virtuality
       | Partitivity
-      | IOperator
+      | Operator
   ) => {
     const newModalData = Object.assign({}, modalData);
 
@@ -126,7 +119,7 @@ export const StatementEditorAttributes: React.FC<StatementEditorAttributes> = ({
         newModalData["partitivity"] = newValue as Partitivity;
         break;
       case "operator":
-        newModalData["operator"] = newValue as IOperator;
+        newModalData["operator"] = newValue as Operator;
         break;
     }
 
@@ -251,6 +244,18 @@ export const StatementEditorAttributes: React.FC<StatementEditorAttributes> = ({
                 }}
               ></AttributeRow>
             )}
+            {modalData.operator && (
+              <AttributeRow
+                value={modalData.operator}
+                multi={false}
+                items={partitivityDict}
+                label="Partitivity"
+                icon={<MdSettings />}
+                onChangeFn={(newValue: string | string[]) => {
+                  handleModalDataChange("partitivity", newValue as Partitivity);
+                }}
+              ></AttributeRow>
+            )}
           </StyledAttributeModalContent>
         </ModalContent>
 
@@ -266,7 +271,7 @@ export const StatementEditorAttributes: React.FC<StatementEditorAttributes> = ({
             />
             <Button
               key="submit"
-              label="Submit"
+              label="Apply changes"
               color="primary"
               onClick={() => {
                 handleAcceptClick();

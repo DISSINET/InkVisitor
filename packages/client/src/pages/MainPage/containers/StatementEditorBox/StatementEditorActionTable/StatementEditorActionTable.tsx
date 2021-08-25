@@ -126,7 +126,7 @@ export const StatementEditorActionTable: React.FC<StatementEditorActionTable> =
           },
         },
         {
-          Header: "Attributes",
+          id: "Attributes",
           Cell: ({ row }: Cell) => {
             const { action, sAction } = row.values.data;
             return action && sAction ? (
