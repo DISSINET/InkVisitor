@@ -16,7 +16,7 @@ export const StyledAttributeModalRowLabel = styled.div`
   /* width: 100%; */
 `;
 export const StyledAttributeModalRowLabelIcon = styled.div`
-  margin-left: ${({ theme }) => theme.space[2]};
+  margin-right: ${({ theme }) => theme.space[2]};
   display: inline-flex;
   /* width: 100%; */
 `;

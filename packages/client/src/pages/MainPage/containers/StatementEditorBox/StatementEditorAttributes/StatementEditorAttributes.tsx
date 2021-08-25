@@ -325,11 +325,14 @@ const AttributeRow: React.FC<AttributeRow> = ({
         </StyledAttributeModalRowLabelText>
       </StyledAttributeModalRowLabel>
       <Dropdown
-        label={selectedItem?.label}
+        isMulti={multi}
         options={items}
         value={selectedItem}
         onChange={(newValue: any) => {
-          onChangeFn(newValue.value as string | string[]);
+          onChangeFn(
+            newValue.value ||
+              (newValue.map((v: any) => v.value) as string | string[])
+          );
         }}
         width={200}
         menuWidth={200}
