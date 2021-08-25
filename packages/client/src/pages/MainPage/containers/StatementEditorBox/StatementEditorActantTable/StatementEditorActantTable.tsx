@@ -159,6 +159,8 @@ export const StatementEditorActantTable: React.FC<StatementEditorActantTable> =
                   virtuality: sActant.virtuality,
                   partitivity: sActant.partitivity,
                   operator: sActant.operator,
+                  bundleStart: sActant.bundleStart,
+                  bundleEnd: sActant.bundleEnd,
                 }}
                 handleUpdate={(newData) => {
                   updateActant(sActant.id, newData);

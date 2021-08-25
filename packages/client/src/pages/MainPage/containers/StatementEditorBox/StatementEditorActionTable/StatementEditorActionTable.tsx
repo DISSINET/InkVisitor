@@ -139,6 +139,8 @@ export const StatementEditorActionTable: React.FC<StatementEditorActionTable> =
                   mood: sAction.mood,
                   moodvariant: sAction.moodvariant,
                   operator: sAction.operator,
+                  bundleStart: sAction.bundleStart,
+                  bundleEnd: sAction.bundleEnd,
                 }}
                 handleUpdate={(newData) => {
                   updateAction(sAction.id, newData);

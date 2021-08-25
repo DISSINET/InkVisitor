@@ -66,6 +66,8 @@ interface AttributeData {
   virtuality?: Virtuality;
   partitivity?: Partitivity;
   operator?: Operator;
+  bundleStart?: boolean;
+  bundleEnd?: boolean;
 }
 
 interface StatementEditorAttributes {
@@ -93,6 +95,7 @@ export const StatementEditorAttributes: React.FC<StatementEditorAttributes> = ({
       | Virtuality
       | Partitivity
       | Operator
+      | boolean
   ) => {
     const newModalData = Object.assign({}, modalData);
 
@@ -248,11 +251,11 @@ export const StatementEditorAttributes: React.FC<StatementEditorAttributes> = ({
               <AttributeRow
                 value={modalData.operator}
                 multi={false}
-                items={partitivityDict}
-                label="Partitivity"
+                items={operatorDict}
+                label="Logical Operator"
                 icon={<MdSettings />}
                 onChangeFn={(newValue: string | string[]) => {
-                  handleModalDataChange("partitivity", newValue as Partitivity);
+                  handleModalDataChange("operator", newValue as Operator);
                 }}
               ></AttributeRow>
             )}
