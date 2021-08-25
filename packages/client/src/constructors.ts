@@ -1,6 +1,7 @@
 import {
   IStatementProp,
   IStatementActant,
+  IStatementAction,
   IActant,
   ITerritory,
   IStatement,
@@ -148,6 +149,17 @@ export const CStatementActant = (): IStatementActant => ({
   logic: "1",
   virtuality: "1",
   partitivity: "1",
+  operator: COperator(),
+});
+
+export const CStatementAction = (actionId: string): IStatementAction => ({
+  id: uuidv4(),
+  action: actionId,
+  elvl: "1",
+  certainty: "1",
+  logic: "1",
+  mood: [],
+  moodvariant: "1",
   operator: COperator(),
 });
 
