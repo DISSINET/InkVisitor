@@ -311,7 +311,9 @@ const AttributeRow: React.FC<AttributeRow> = ({
   onChangeFn,
 }) => {
   const selectedItem = useMemo(() => {
-    return items.find((i: any) => i.value === value);
+    return multi
+      ? items.filter((i: any) => value.includes(i.value))
+      : items.find((i: any) => i.value === value);
   }, [value]);
 
   return (
@@ -330,8 +332,9 @@ const AttributeRow: React.FC<AttributeRow> = ({
         value={selectedItem}
         onChange={(newValue: any) => {
           onChangeFn(
-            newValue.value ||
-              (newValue.map((v: any) => v.value) as string | string[])
+            multi
+              ? newValue.map((v: any) => v.value)
+              : (newValue.value as string | string[])
           );
         }}
         width={200}
