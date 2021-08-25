@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useState, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "react-query";
 import api from "api";
 const queryString = require("query-string");
@@ -15,7 +15,7 @@ import { useLocation, useHistory } from "react-router";
 
 import { ActantTag, ActionDropdown, CertaintyToggle, ElvlToggle } from "./../";
 
-import { CProp, CStatementActant } from "constructors";
+import { CProp, CStatementActant, CStatementAction } from "constructors";
 
 import {
   actantPositionDict,
@@ -48,6 +48,7 @@ import {
 } from "./StatementEditorBoxStyles";
 import { StatementEditorActantTable } from "./StatementEditorActantTable/StatementEditorActantTable";
 import { StatementEditorActionTable } from "./StatementEditorActionTable/StatementEditorActionTable";
+import { StatementEditorAttributes } from "./StatementEditorAttributes/StatementEditorAttributes";
 
 const classesActants = ["P", "G", "O", "C", "L", "V", "E", "S", "T", "R"];
 const classesPropType = ["C"];
@@ -131,6 +132,18 @@ export const StatementEditorBox: React.FC = () => {
       return [];
     }
   }, [JSON.stringify(statement)]);
+
+  // actions
+  const addAction = (newActionId: string) => {
+    if (statement) {
+      const newStatementAction = CStatementAction(newActionId);
+
+      const newData = {
+        actions: [...statement.data.actions, newStatementAction],
+      };
+      updateActionsRefreshListMutation.mutate(newData);
+    }
+  };
 
   const addActant = (newStatementActantId: string) => {
     if (statement) {
@@ -298,6 +311,20 @@ export const StatementEditorBox: React.FC = () => {
     }
   );
 
+  const updateActionsRefreshListMutation = useMutation(
+    async (changes: object) => {
+      await api.actantsUpdate(statementId, {
+        data: changes,
+      });
+    },
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries("statement");
+        //queryClient.invalidateQueries("territory");
+      },
+    }
+  );
+
   const updateActantsRefreshListMutation = useMutation(
     async (changes: object) =>
       await api.actantsUpdate(statementId, {
@@ -306,7 +333,7 @@ export const StatementEditorBox: React.FC = () => {
     {
       onSuccess: () => {
         queryClient.invalidateQueries("statement");
-        queryClient.invalidateQueries("territory");
+        //queryClient.invalidateQueries("territory");
       },
     }
   );
@@ -333,9 +360,9 @@ export const StatementEditorBox: React.FC = () => {
           </StyledPropsActantHeader>
           {propOrigin.props.length > 0 ? (
             <StyledPropsActantList>
+              <StyledListHeaderColumn></StyledListHeaderColumn>
               <StyledListHeaderColumn>Type</StyledListHeaderColumn>
               <StyledListHeaderColumn>Value</StyledListHeaderColumn>
-              <StyledListHeaderColumn>Attributes</StyledListHeaderColumn>
               <StyledListHeaderColumn></StyledListHeaderColumn>
               {propOrigin.props.map((prop1: any, pi1: number) => {
                 return (
@@ -375,6 +402,26 @@ export const StatementEditorBox: React.FC = () => {
     return (
       <React.Fragment key={prop.origin + level + "|" + order}>
         <StyledPropLineColumn></StyledPropLineColumn>
+        <StyledPropLineColumn lastSecondLevel={lastSecondLevel}>
+          <StyledPropButtonGroup leftMargin={false}>
+            <StatementEditorAttributes
+              modalTitle={`${propValueActant?.label} - ${propTypeActant?.label}`}
+              data={{
+                elvl: prop.elvl,
+                certainty: prop.certainty,
+                logic: prop.logic,
+                mood: prop.mood,
+                moodvariant: prop.moodvariant,
+                operator: prop.operator,
+                bundleStart: prop.bundleStart,
+                bundleEnd: prop.bundleEnd,
+              }}
+              handleUpdate={(newData) => {
+                updateProp(prop.id, newData);
+              }}
+            />
+          </StyledPropButtonGroup>
+        </StyledPropLineColumn>
         <StyledPropLineColumn
           padded={level === "2"}
           lastSecondLevel={lastSecondLevel}
@@ -402,15 +449,16 @@ export const StatementEditorBox: React.FC = () => {
                 }
               />
               <StyledPropButtonGroup>
-                <ElvlToggle
-                  value={prop.type.elvl}
-                  onChangeFn={(newValue: string) => {
-                    updateProp(prop.id, {
-                      type: {
-                        ...prop.type,
-                        ...{ elvl: newValue },
-                      },
-                    });
+                <StatementEditorAttributes
+                  modalTitle={propTypeActant.label}
+                  data={{
+                    elvl: prop.type.elvl,
+                    logic: prop.type.logic,
+                    virtuality: prop.type.virtuality,
+                    partitivity: prop.type.partitivity,
+                  }}
+                  handleUpdate={(newData) => {
+                    updateProp(prop.id, { type: { ...prop.type, ...newData } });
                   }}
                 />
               </StyledPropButtonGroup>
@@ -456,14 +504,17 @@ export const StatementEditorBox: React.FC = () => {
                 }
               />
               <StyledPropButtonGroup>
-                <ElvlToggle
-                  value={prop.value.elvl}
-                  onChangeFn={(newValue: string) => {
+                <StatementEditorAttributes
+                  modalTitle={propValueActant.label}
+                  data={{
+                    elvl: prop.value.elvl,
+                    logic: prop.value.logic,
+                    virtuality: prop.value.virtuality,
+                    partitivity: prop.value.partitivity,
+                  }}
+                  handleUpdate={(newData) => {
                     updateProp(prop.id, {
-                      value: {
-                        ...prop.value,
-                        ...{ elvl: newValue },
-                      },
+                      value: { ...prop.value, ...newData },
                     });
                   }}
                 />
@@ -483,26 +534,7 @@ export const StatementEditorBox: React.FC = () => {
             ></ActantSuggester>
           )}
         </StyledPropLineColumn>
-        <StyledPropLineColumn lastSecondLevel={lastSecondLevel}>
-          <StyledPropButtonGroup leftMargin={false}>
-            <ElvlToggle
-              value={prop.elvl}
-              onChangeFn={(newValue: string) => {
-                updateProp(prop.id, {
-                  elvl: newValue,
-                });
-              }}
-            />
-            <CertaintyToggle
-              value={prop.certainty}
-              onChangeFn={(newValue: string) => {
-                updateProp(prop.id, {
-                  certainty: newValue,
-                });
-              }}
-            />
-          </StyledPropButtonGroup>
-        </StyledPropLineColumn>
+
         <StyledPropLineColumn lastSecondLevel={lastSecondLevel}>
           <StyledPropButtonGroup leftMargin={false}>
             {level === "1" && (
@@ -575,42 +607,7 @@ export const StatementEditorBox: React.FC = () => {
                     }}
                     value={statement.data.text}
                   />
-                  {/* <ActionDropdown
-                        onSelectedChange={(newActionValue: {
-                          value: string;
-                          label: string;
-                        }) => {
-                          const newData = {
-                            action: newActionValue.value,
-                          };
-                          // update(newData);
-                          updateActantsRefreshListMutation.mutate(newData);
-                        }}
-                        value={statement.data.action}
-                      /> */}
                 </div>
-              </div>
-              <div>
-                <StyledListHeaderColumn>Attributes</StyledListHeaderColumn>
-
-                {/* <ElvlToggle
-                    value={statement.data.elvl}
-                    onChangeFn={(newValue: string) => {
-                      const newData = {
-                        elvl: newValue,
-                      };
-                      update(newData);
-                    }}
-                  />
-                  <CertaintyToggle
-                    value={statement.data.certainty}
-                    onChangeFn={(newValue: string) => {
-                      const newData = {
-                        certainty: newValue,
-                      };
-                      update(newData);
-                    }}
-                  /> */}
               </div>
             </StyledEditorSectionContent>
           </StyledEditorSection>
@@ -623,13 +620,13 @@ export const StatementEditorBox: React.FC = () => {
                 <StatementEditorActionTable
                   statement={statement}
                   statementId={statementId}
-                  classEntitiesActant={classesActants}
+                  updateActionsMutation={updateActionsRefreshListMutation}
                 />
               </StyledEditorActantTableWrapper>
 
               <ActantSuggester
                 onSelected={(newSelectedId: string) => {
-                  //
+                  addAction(newSelectedId);
                 }}
                 categoryIds={["A"]}
                 placeholder={"add new action"}

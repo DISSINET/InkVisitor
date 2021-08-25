@@ -7,6 +7,8 @@ import {
   StyledTh,
 } from "./StatementEditorActantTableStyles";
 import { StatementEditorActantTableRow } from "./StatementEditorActantTableRow/StatementEditorActantTableRow";
+import { StatementEditorAttributes } from "./../StatementEditorAttributes/StatementEditorAttributes";
+
 import {
   IActant,
   IResponseGeneric,
@@ -144,28 +146,28 @@ export const StatementEditorActantTable: React.FC<StatementEditorActantTable> =
           },
         },
         {
-          Header: "Attributes",
+          id: "Attributes",
           Cell: ({ row }: Cell) => {
-            const { sActant } = row.values.data;
-            return (
-              <>
-                <ElvlToggle
-                  value={sActant.elvl}
-                  onChangeFn={(newValue: string) => {
-                    updateActant(sActant.id, {
-                      elvl: newValue,
-                    });
-                  }}
-                />
-                <CertaintyToggle
-                  value={sActant.certainty}
-                  onChangeFn={(newValue: string) => {
-                    updateActant(sActant.id, {
-                      certainty: newValue,
-                    });
-                  }}
-                />
-              </>
+            const { actant, sActant } = row.values.data;
+            return actant && sActant ? (
+              <StatementEditorAttributes
+                modalTitle={actant.label}
+                data={{
+                  elvl: sActant.elvl,
+                  certainty: sActant.certainty,
+                  logic: sActant.logic,
+                  virtuality: sActant.virtuality,
+                  partitivity: sActant.partitivity,
+                  operator: sActant.operator,
+                  bundleStart: sActant.bundleStart,
+                  bundleEnd: sActant.bundleEnd,
+                }}
+                handleUpdate={(newData) => {
+                  updateActant(sActant.id, newData);
+                }}
+              />
+            ) : (
+              <div />
             );
           },
         },

@@ -3,7 +3,6 @@ import { IAction } from "./action";
 import { IActant } from "./actant";
 import { IEntity } from "./entity";
 import { ILabel } from "./label";
-import { IOperator } from "./operator";
 import {
   IUser,
   IBookmarkFolder,
@@ -53,7 +52,6 @@ export type {
   IStatementProp,
   IStatementReference,
   ITerritory,
-  IOperator,
   IUser,
   IUserRole,
   IUserOptions,

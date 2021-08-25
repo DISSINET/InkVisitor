@@ -1,11 +1,11 @@
 import {
   IStatementProp,
   IStatementActant,
+  IStatementAction,
   IActant,
   ITerritory,
   IStatement,
   IBookmarkFolder,
-  IOperator,
 } from "@shared/types";
 import { CategoryActantType, ActantType } from "@shared/enums";
 import { v4 as uuidv4 } from "uuid";
@@ -24,7 +24,9 @@ export const CProp = (): IStatementProp => ({
   logic: "1",
   mood: ["1"],
   moodvariant: "1",
-  operator: COperator(),
+  operator: "a",
+  bundleStart: false,
+  bundleEnd: false,
 
   type: {
     id: "",
@@ -82,7 +84,9 @@ export const CMetaStatement = (subjectId: string): IStatement => ({
         logic: "1",
         mood: ["1"],
         moodvariant: "1",
-        operator: COperator(),
+        operator: "a",
+        bundleStart: false,
+        bundleEnd: false,
       },
     ],
     text: "",
@@ -99,7 +103,9 @@ export const CMetaStatement = (subjectId: string): IStatement => ({
         logic: "1",
         virtuality: "1",
         partitivity: "1",
-        operator: COperator(),
+        operator: "a",
+        bundleStart: false,
+        bundleEnd: false,
       },
       {
         id: uuidv4(),
@@ -109,7 +115,9 @@ export const CMetaStatement = (subjectId: string): IStatement => ({
         logic: "1",
         virtuality: "1",
         partitivity: "1",
-        operator: COperator(),
+        operator: "a",
+        bundleStart: false,
+        bundleEnd: false,
       },
       {
         id: uuidv4(),
@@ -119,7 +127,9 @@ export const CMetaStatement = (subjectId: string): IStatement => ({
         logic: "1",
         virtuality: "1",
         partitivity: "1",
-        operator: COperator(),
+        operator: "a",
+        bundleStart: false,
+        bundleEnd: false,
       },
     ],
     props: [],
@@ -148,7 +158,22 @@ export const CStatementActant = (): IStatementActant => ({
   logic: "1",
   virtuality: "1",
   partitivity: "1",
-  operator: COperator(),
+  operator: "a",
+  bundleStart: false,
+  bundleEnd: false,
+});
+
+export const CStatementAction = (actionId: string): IStatementAction => ({
+  id: uuidv4(),
+  action: actionId,
+  elvl: "1",
+  certainty: "1",
+  logic: "1",
+  mood: [],
+  moodvariant: "1",
+  operator: "a",
+  bundleStart: false,
+  bundleEnd: false,
 });
 
 export const CTerritoryActant = (
@@ -182,10 +207,4 @@ export const CActant = (
   status: "0",
   language: "eng",
   notes: [],
-});
-
-export const COperator = (): IOperator => ({
-  bundleStart: false,
-  bundleEnd: false,
-  value: "1",
 });
