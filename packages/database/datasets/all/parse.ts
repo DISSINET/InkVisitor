@@ -22,7 +22,6 @@ import {
   IEntity,
   ILabel,
   IOption,
-  IOperator,
   IStatement,
   ITerritory,
   IResource,
@@ -31,12 +30,6 @@ import {
 } from "./../../../shared/types";
 
 import { actantStatusDict } from "./../../../shared/dictionaries";
-
-export const COperator = (): IOperator => ({
-  bundleStart: false,
-  bundleEnd: false,
-  value: "1",
-});
 
 /**
  * waterfall processing
@@ -374,7 +367,9 @@ const loadStatementsTables = async (next: Function) => {
               logic: "1",
               mood: ["1"],
               moodvariant: "1",
-              operator: COperator(),
+              operator: "a",
+              bundleStart: false,
+              bundleEnd: false,
             },
           ],
           territory: {
@@ -480,7 +475,9 @@ const loadStatementsTables = async (next: Function) => {
           logic: "1",
           mood: ["1"],
           moodvariant: "1",
-          operator: COperator(),
+          operator: "a",
+          bundleStart: false,
+          bundleEnd: false,
           type: {
             id: propActant1Id,
             elvl: "1",
@@ -672,7 +669,9 @@ const createEmptyPropStatement = (
             logic: "1",
             mood: ["1"],
             moodvariant: "1",
-            operator: COperator(),
+            operator: "a",
+            bundleStart: false,
+            bundleEnd: false,
           },
         ],
         territory: {
@@ -692,7 +691,9 @@ const createEmptyPropStatement = (
             logic: "1",
             virtuality: "1",
             partitivity: "1",
-            operator: COperator(),
+            operator: "a",
+            bundleStart: false,
+            bundleEnd: false,
           },
           {
             id: v4(),
@@ -702,7 +703,9 @@ const createEmptyPropStatement = (
             logic: "1",
             virtuality: "1",
             partitivity: "1",
-            operator: COperator(),
+            operator: "a",
+            bundleStart: false,
+            bundleEnd: false,
           },
           {
             id: v4(),
@@ -712,7 +715,9 @@ const createEmptyPropStatement = (
             logic: "1",
             virtuality: "1",
             partitivity: "1",
-            operator: COperator(),
+            operator: "a",
+            bundleStart: false,
+            bundleEnd: false,
           },
         ],
       },
@@ -783,7 +788,9 @@ const processLocation = (
             logic: "1",
             mood: ["1"],
             moodvariant: "1",
-            operator: COperator(),
+            operator: "a",
+            bundleStart: false,
+            bundleEnd: false,
 
             type: {
               id: sameLocationType,
@@ -809,7 +816,9 @@ const processLocation = (
             logic: "1",
             mood: ["1"],
             moodvariant: "1",
-            operator: COperator(),
+            operator: "a",
+            bundleStart: false,
+            bundleEnd: false,
             type: {
               id: locationType.concept,
               elvl: "1",
@@ -844,7 +853,6 @@ const processActant = (
       // asign elvl and certainty
 
       let elvl: Elvl = actantIdValue.includes("[") ? "2" : "1";
-      let certainty: Certainty = "1";
 
       // remove brackets
       const actantIdClean: string = actantIdValue
@@ -861,11 +869,13 @@ const processActant = (
         id: statementActantId,
         actant: actantId,
         position: position,
-        elvl: "1",
+        elvl: elvl,
         logic: "1",
         virtuality: "1",
         partitivity: "1",
-        operator: COperator(),
+        operator: "a",
+        bundleStart: false,
+        bundleEnd: false,
       });
 
       // create a prop if there is one
@@ -890,7 +900,9 @@ const processActant = (
           logic: "1",
           mood: ["1"],
           moodvariant: "1",
-          operator: COperator(),
+          operator: "a",
+          bundleStart: false,
+          bundleEnd: false,
 
           type: {
             id: propActant1Id,

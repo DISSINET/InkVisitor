@@ -92,3 +92,6 @@ export type Virtuality = typeof virtualities[number];
 
 const partitivities = ["1", "2", "3", "4", "5"] as const;
 export type Partitivity = typeof partitivities[number];
+
+const Operators = ["x", "a", "o", ">", ">=", "=", "<=", "<"] as const;
+export type Operator = typeof Operators[number];

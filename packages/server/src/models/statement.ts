@@ -3,7 +3,6 @@ import {
   IStatementActant,
   IStatementReference,
   IStatementProp,
-  IOperator,
 } from "@shared/types";
 import { fillFlatObject, fillArray, UnknownObject, IModel } from "./common";
 import {
@@ -18,8 +17,8 @@ import {
   MoodVariant,
   Virtuality,
   Partitivity,
+  Operator,
 } from "@shared/enums";
-import { COperator } from "./../../../client/src/constructors";
 
 import Actant from "./actant";
 import { r as rethink, Connection, RDatum, WriteResult } from "rethinkdb-ts";
@@ -33,7 +32,9 @@ class StatementActant implements IStatementActant, IModel {
   logic: Logic = "1";
   virtuality: Virtuality = "1";
   partitivity: Partitivity = "1";
-  operator: IOperator = COperator();
+  operator: Operator = "a";
+  bundleStart: boolean = false;
+  bundleEnd: boolean = false;
 
   constructor(data: UnknownObject) {
     if (!data) {
@@ -108,7 +109,9 @@ export class StatementAction {
   logic: Logic = "1";
   mood: Mood[] = [];
   moodvariant: MoodVariant = "1";
-  operator: IOperator = COperator();
+  operator: Operator = "a";
+  bundleStart: boolean = false;
+  bundleEnd: boolean = false;
 
   constructor(data: UnknownObject) {
     if (!data) {
@@ -140,7 +143,9 @@ export class StatementProp implements IStatementProp, IModel {
   logic: Logic = "1";
   mood: Mood[] = [];
   moodvariant: MoodVariant = "1";
-  operator: IOperator = COperator();
+  operator: Operator = "a";
+  bundleStart: boolean = false;
+  bundleEnd: boolean = false;
 
   type: {
     id: string;

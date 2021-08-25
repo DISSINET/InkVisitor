@@ -146,7 +146,7 @@ export const StatementEditorActantTable: React.FC<StatementEditorActantTable> =
           },
         },
         {
-          Header: "Attributes",
+          id: "Attributes",
           Cell: ({ row }: Cell) => {
             const { actant, sActant } = row.values.data;
             return actant && sActant ? (
