@@ -30,12 +30,7 @@ interface StatementEditorActionTable {
   statement: IResponseStatement;
   statementId: string;
   handleRowClick?: Function;
-  updateActionsMutation: UseMutationResult<
-    AxiosResponse<IResponseGeneric>,
-    unknown,
-    object,
-    unknown
-  >;
+  updateActionsMutation: UseMutationResult<any, unknown, object, unknown>;
 }
 export const StatementEditorActionTable: React.FC<StatementEditorActionTable> =
   ({

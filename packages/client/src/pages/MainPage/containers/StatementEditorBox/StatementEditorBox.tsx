@@ -312,10 +312,11 @@ export const StatementEditorBox: React.FC = () => {
   );
 
   const updateActionsRefreshListMutation = useMutation(
-    async (changes: object) =>
+    async (changes: object) => {
       await api.actantsUpdate(statementId, {
         data: changes,
-      }),
+      });
+    },
     {
       onSuccess: () => {
         queryClient.invalidateQueries("statement");
@@ -604,19 +605,6 @@ export const StatementEditorBox: React.FC = () => {
                     }}
                     value={statement.data.text}
                   />
-                  {/* <ActionDropdown
-                        onSelectedChange={(newActionValue: {
-                          value: string;
-                          label: string;
-                        }) => {
-                          const newData = {
-                            action: newActionValue.value,
-                          };
-                          // update(newData);
-                          updateActantsRefreshListMutation.mutate(newData);
-                        }}
-                        value={statement.data.action}
-                      /> */}
                 </div>
               </div>
             </StyledEditorSectionContent>
