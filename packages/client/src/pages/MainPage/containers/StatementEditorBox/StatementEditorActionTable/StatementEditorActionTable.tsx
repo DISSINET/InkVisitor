@@ -10,13 +10,16 @@ import { StatementEditorActionTableRow } from "./StatementEditorActionTableRow/S
 import {
   IAction,
   IActant,
+  IResponseGeneric,
   IResponseStatement,
   IStatementAction,
 } from "@shared/types";
 import { ActantSuggester, ActantTag, CertaintyToggle, ElvlToggle } from "../..";
+import { StatementEditorAttributes } from "./../StatementEditorAttributes/StatementEditorAttributes";
 import { Button, Input } from "components";
 import { FaTrashAlt, FaUnlink } from "react-icons/fa";
-import { useMutation, useQueryClient } from "react-query";
+import { useMutation, UseMutationResult, useQueryClient } from "react-query";
+import { AxiosResponse } from "axios";
 import api from "api";
 const queryString = require("query-string");
 
@@ -27,14 +30,14 @@ interface StatementEditorActionTable {
   statement: IResponseStatement;
   statementId: string;
   handleRowClick?: Function;
-  classEntitiesActant: string[];
+  updateActionsMutation: UseMutationResult<any, unknown, object, unknown>;
 }
 export const StatementEditorActionTable: React.FC<StatementEditorActionTable> =
   ({
     statement,
     statementId,
     handleRowClick = () => {},
-    classEntitiesActant,
+    updateActionsMutation,
   }) => {
     const queryClient = useQueryClient();
     var hashParams = queryString.parse(location.hash);
@@ -58,7 +61,7 @@ export const StatementEditorActionTable: React.FC<StatementEditorActionTable> =
           a.id === statementActionId ? { ...a, ...changes } : a
         );
         const newData = { actions: updatedActions };
-        updateApiCall(newData);
+        updateActionsMutation.mutate(newData);
       }
     };
     const removeAction = (statementActionId: string) => {
@@ -67,7 +70,7 @@ export const StatementEditorActionTable: React.FC<StatementEditorActionTable> =
           (a) => a.id !== statementActionId
         );
         const newData = { actions: updatedActions };
-        updateApiCall(newData);
+        updateActionsMutation.mutate(newData);
       }
     };
 
@@ -75,31 +78,8 @@ export const StatementEditorActionTable: React.FC<StatementEditorActionTable> =
       const actions: IStatementAction[] = filteredActions.map(
         (filteredAction) => filteredAction.data.sAction
       );
-      updateApiCall({
+      updateActionsMutation.mutate({
         actions: actions,
-      });
-    };
-
-    const updateApiCallMutation = useMutation(
-      async (statementObject: { statementId: string; changes: object }) =>
-        await api.actantsUpdate(
-          statementObject.statementId,
-          statementObject.changes
-        ),
-      {
-        onSuccess: (data, variables) => {
-          queryClient.invalidateQueries(["statement"]);
-          queryClient.invalidateQueries(["territory"]);
-        },
-      }
-    );
-
-    const updateApiCall = async (changes: object) => {
-      updateApiCallMutation.mutate({
-        statementId: statementId,
-        changes: {
-          data: changes,
-        },
       });
     };
 
@@ -125,9 +105,9 @@ export const StatementEditorActionTable: React.FC<StatementEditorActionTable> =
                     icon={<FaUnlink />}
                     color="danger"
                     onClick={() => {
-                      // updateActant(sAction.id, {
-                      //   actant: "",
-                      // });
+                      updateAction(sAction.id, {
+                        action: "",
+                      });
                     }}
                   />
                 }
@@ -135,7 +115,9 @@ export const StatementEditorActionTable: React.FC<StatementEditorActionTable> =
             ) : (
               <ActantSuggester
                 onSelected={(newSelectedId: string) => {
-                  //
+                  updateAction(sAction.id, {
+                    action: newSelectedId,
+                  });
                 }}
                 categoryIds={["A"]}
                 placeholder={"add new action"}
@@ -144,28 +126,28 @@ export const StatementEditorActionTable: React.FC<StatementEditorActionTable> =
           },
         },
         {
-          Header: "Attributes",
+          id: "Attributes",
           Cell: ({ row }: Cell) => {
-            const { sAction } = row.values.data;
-            return (
-              <>
-                <ElvlToggle
-                  value={sAction.elvl}
-                  onChangeFn={(newValue: string) => {
-                    // updateActant(sAction.id, {
-                    //   elvl: newValue,
-                    // });
-                  }}
-                />
-                <CertaintyToggle
-                  value={sAction.certainty}
-                  onChangeFn={(newValue: string) => {
-                    // updateActant(sAction.id, {
-                    //   certainty: newValue,
-                    // });
-                  }}
-                />
-              </>
+            const { action, sAction } = row.values.data;
+            return action && sAction ? (
+              <StatementEditorAttributes
+                modalTitle={action.label}
+                data={{
+                  elvl: sAction.elvl,
+                  certainty: sAction.certainty,
+                  logic: sAction.logic,
+                  mood: sAction.mood,
+                  moodvariant: sAction.moodvariant,
+                  operator: sAction.operator,
+                  bundleStart: sAction.bundleStart,
+                  bundleEnd: sAction.bundleEnd,
+                }}
+                handleUpdate={(newData) => {
+                  updateAction(sAction.id, newData);
+                }}
+              />
+            ) : (
+              <div />
             );
           },
         },
@@ -179,7 +161,7 @@ export const StatementEditorActionTable: React.FC<StatementEditorActionTable> =
               color="danger"
               tooltip="remove action row"
               onClick={() => {
-                //removeActant(row.values.data.sActant.id);
+                removeAction(row.values.data.sAction.id);
               }}
             />
           ),

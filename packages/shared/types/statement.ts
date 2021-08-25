@@ -1,5 +1,4 @@
 import { IActant } from "./";
-import { IOperator } from "./";
 import {
   ActantType,
   Certainty,
@@ -10,6 +9,7 @@ import {
   MoodVariant,
   Virtuality,
   Partitivity,
+  Operator,
 } from "../enums";
 
 export interface IStatement extends IActant {
@@ -36,7 +36,9 @@ export interface IStatementAction {
   logic: Logic;
   mood: Mood[];
   moodvariant: MoodVariant;
-  operator: IOperator;
+  operator: Operator;
+  bundleStart: boolean;
+  bundleEnd: boolean;
 }
 
 export interface IStatementActant {
@@ -47,9 +49,9 @@ export interface IStatementActant {
   logic: Logic;
   virtuality: Virtuality;
   partitivity: Partitivity;
-  operator: IOperator;
-
-  // todo: make mandatory
+  operator: Operator;
+  bundleStart: boolean;
+  bundleEnd: boolean;
 }
 
 export interface IStatementProp {
@@ -59,9 +61,10 @@ export interface IStatementProp {
   logic: Logic;
   mood: Mood[];
   moodvariant: MoodVariant;
-  operator: IOperator;
-  
-  
+  operator: Operator;
+  bundleStart: boolean;
+  bundleEnd: boolean;
+
   origin: string;
   // todo: make mandatory
   type: {
