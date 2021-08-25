@@ -8,7 +8,6 @@ import {
 
 import { StyledSelect, StyledSelectWrapper } from "./DropdownStyles";
 import { Tooltip } from "components";
-import theme from "Theme/theme";
 
 interface Dropdown {
   options?: OptionsType<OptionTypeBase> | GroupedOptionsType<OptionTypeBase>;
@@ -25,6 +24,7 @@ interface Dropdown {
   getOptionLabel?: Function;
   placeholder?: string;
   isClearable?: boolean;
+  isMulti?: boolean;
 }
 export const Dropdown: React.FC<Dropdown> = ({
   options,
@@ -40,11 +40,13 @@ export const Dropdown: React.FC<Dropdown> = ({
   noDropDownIndicator = false,
   placeholder = "select..",
   isClearable = false,
+  isMulti = false,
 }) => {
   return (
     <Tooltip label={label} position={["top center"]} on={["hover"]}>
       <StyledSelectWrapper width={width}>
         <StyledSelect
+          isMulti={isMulti}
           className="react-select-container"
           classNamePrefix="react-select"
           placeholder={placeholder}
