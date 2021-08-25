@@ -46,6 +46,7 @@ import {
 } from "@shared/enums";
 import React, { useState, useMemo } from "react";
 import { ElvlToggle } from "../..";
+import { AttributeIcon } from "../../AttributeIcons/AttributeIcons";
 
 type AttributeName =
   | "certainty"
@@ -172,7 +173,7 @@ export const StatementEditorAttributes: React.FC<StatementEditorAttributes> = ({
                 onChangeFn={(newValue: string | string[]) => {
                   handleModalDataChange("elvl", newValue as Elvl);
                 }}
-                icon={<MdSettings />}
+                icon={<AttributeIcon attributeName="elvl" />}
               ></AttributeRow>
             )}
             {modalData.logic && (
@@ -181,7 +182,7 @@ export const StatementEditorAttributes: React.FC<StatementEditorAttributes> = ({
                 multi={false}
                 items={logicDict}
                 label="Logical level"
-                icon={<MdSettings />}
+                icon={<AttributeIcon attributeName="logic" />}
                 onChangeFn={(newValue: string | string[]) => {
                   handleModalDataChange("logic", newValue as Logic);
                 }}
@@ -193,7 +194,7 @@ export const StatementEditorAttributes: React.FC<StatementEditorAttributes> = ({
                 multi={false}
                 items={certaintyDict}
                 label="Certainty"
-                icon={<MdSettings />}
+                icon={<AttributeIcon attributeName="certainty" />}
                 onChangeFn={(newValue: string | string[]) => {
                   handleModalDataChange("certainty", newValue as Certainty);
                 }}
@@ -205,7 +206,7 @@ export const StatementEditorAttributes: React.FC<StatementEditorAttributes> = ({
                 multi={true}
                 items={moodDict}
                 label="Mood"
-                icon={<MdSettings />}
+                icon={<AttributeIcon attributeName="mood" />}
                 onChangeFn={(newValue: string | string[]) => {
                   handleModalDataChange("mood", newValue as Mood[]);
                 }}
@@ -217,7 +218,7 @@ export const StatementEditorAttributes: React.FC<StatementEditorAttributes> = ({
                 multi={false}
                 items={moodVariantsDict}
                 label="Mood Variant"
-                icon={<MdSettings />}
+                icon={<AttributeIcon attributeName="moodvariant" />}
                 onChangeFn={(newValue: string | string[]) => {
                   handleModalDataChange("moodvariant", newValue as MoodVariant);
                 }}
@@ -229,7 +230,7 @@ export const StatementEditorAttributes: React.FC<StatementEditorAttributes> = ({
                 multi={false}
                 items={virtualityDict}
                 label="Virtuality"
-                icon={<MdSettings />}
+                icon={<AttributeIcon attributeName="virtuality" />}
                 onChangeFn={(newValue: string | string[]) => {
                   handleModalDataChange("virtuality", newValue as Virtuality);
                 }}
@@ -241,7 +242,7 @@ export const StatementEditorAttributes: React.FC<StatementEditorAttributes> = ({
                 multi={false}
                 items={partitivityDict}
                 label="Partitivity"
-                icon={<MdSettings />}
+                icon={<AttributeIcon attributeName="partitivity" />}
                 onChangeFn={(newValue: string | string[]) => {
                   handleModalDataChange("partitivity", newValue as Partitivity);
                 }}
@@ -253,7 +254,7 @@ export const StatementEditorAttributes: React.FC<StatementEditorAttributes> = ({
                 multi={false}
                 items={operatorDict}
                 label="Logical Operator"
-                icon={<MdSettings />}
+                icon={<AttributeIcon attributeName="operator" />}
                 onChangeFn={(newValue: string | string[]) => {
                   handleModalDataChange("operator", newValue as Operator);
                 }}

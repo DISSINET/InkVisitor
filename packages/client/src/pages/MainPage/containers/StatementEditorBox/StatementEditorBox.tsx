@@ -413,7 +413,6 @@ export const StatementEditorBox: React.FC = () => {
                 mood: prop.mood,
                 moodvariant: prop.moodvariant,
                 operator: prop.operator,
-                operator: prop.operator,
                 bundleStart: prop.bundleStart,
                 bundleEnd: prop.bundleEnd,
               }}
