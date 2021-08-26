@@ -94,16 +94,28 @@ export const StatementEditorBox: React.FC = () => {
       const allProps = statement?.data.props;
       const statementItself = { ...statement };
 
-      const statementActants = statement.actants.filter((sa) =>
-        statement.data.actants.map((a) => a.actant).includes(sa.id)
+      const statementActants = statement.actants.filter(
+        (sa) =>
+          statement.data.actants.map((a) => a.actant).includes(sa.id) ||
+          statement.data.actions.map((a) => a.action).includes(sa.id)
       );
 
-      const allPossibleOrigins = [statementItself, ...statementActants];
+      const allPossibleOrigins = [...statementActants];
 
-      const originProps: { origin: any; props: any[]; actant: IActant }[] = [];
+      const originProps: {
+        type: "action" | "actant";
+        origin: any;
+        props: any[];
+        actant: IActant;
+      }[] = [];
 
       allPossibleOrigins.forEach((origin) => {
-        originProps.push({ origin: origin.id, props: [], actant: origin });
+        originProps.push({
+          type: origin.class === "A" ? "action" : "actant",
+          origin: origin.id,
+          props: [],
+          actant: origin,
+        });
       });
 
       // 1st level
@@ -663,7 +675,12 @@ export const StatementEditorBox: React.FC = () => {
             </StyledEditorSectionHeader>
 
             <StyledEditorSectionContent key={JSON.stringify(statement.data)}>
-              {renderPropGroup(propsByOrigins[0], statement)}
+              {propsByOrigins
+                .filter((p) => p.type === "action")
+                .map((propOrigin, sai) => {
+                  console.log(propOrigin);
+                  return renderPropGroup(propOrigin, statement);
+                })}
             </StyledEditorSectionContent>
           </StyledEditorSection>
 
@@ -673,9 +690,12 @@ export const StatementEditorBox: React.FC = () => {
               Actant Properties
             </StyledEditorSectionHeader>
             <StyledEditorSectionContent key={JSON.stringify(statement.data)}>
-              {propsByOrigins.slice(1).map((propOrigin, sai) => {
-                return renderPropGroup(propOrigin, statement);
-              })}
+              {propsByOrigins
+                .filter((p) => p.type === "actant")
+                .map((propOrigin, sai) => {
+                  console.log(propOrigin);
+                  return renderPropGroup(propOrigin, statement);
+                })}
             </StyledEditorSectionContent>
           </StyledEditorSection>
 
