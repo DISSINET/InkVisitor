@@ -1,8 +1,30 @@
 # InkVisitor
 
 ## Description
+InkVisitor is an open-source browser-based application for the manual entry of complex structured data from textual resources in the humanities and the social sciences. The data are entered as statements which interconnect entities of various different classes (Persons, Groups, Physical Objects, Concepts, Locations, Events, Statements, Texts and Values) into semantic quadruples (subject, verb, object 1, object 2), following the syntactic structure of the natural-language textual resources. InkVisitor serves as a data-entry front-end for a database ([RethinkDB](https://rethinkdb.com/)). 
 
 ## Changelog
+
+## Data model
+
+### Basics
+The data model upon which InkVisitor is built is destined to capture very complex natural-language data with all the uncertainties, narrative perspectives, and semantic nuances of the natural language in order to then make them available to various kinds of quantitative and computational analyses.
+
+
+### Statement
+A Statement is an Entity type, with a unique identifier. Statements have the purpose of relating other Entities.
+
+
+The other main Entity types are:
+Action type
+Concept
+Person
+Group
+(Physical) object
+Location
+Event
+Value
+
 
 ## Development
 
