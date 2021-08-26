@@ -4,7 +4,8 @@ import { Button, Input } from "components";
 import { IResponseStatement } from "@shared/types";
 import { useMutation, useQueryClient } from "react-query";
 import api from "api";
-import { FaPlus } from "react-icons/fa";
+import { FaPlus, FaTrashAlt } from "react-icons/fa";
+import { StyledRow } from "./MultiInputStyles";
 
 const testTextArr = [
   "dasdasdads",
@@ -21,7 +22,7 @@ export const MultiInput: React.FC<MultiInput> = ({ statement }) => {
   const handleChange = (key: number, value: string) => {
     const newData: string[] = [...data];
     newData[key] = value;
-    // updateStatementMutation.mutate({ notes: newData });
+    updateStatementMutation.mutate({ notes: newData });
     setData(newData);
   };
 
@@ -37,24 +38,37 @@ export const MultiInput: React.FC<MultiInput> = ({ statement }) => {
     }
   );
 
+  const handleDelete = (key: number) => {
+    const newData = data;
+    newData.splice(key, 1);
+    updateStatementMutation.mutate({ notes: newData });
+  };
+
   return (
     <>
       {data?.map((text, key) => {
         return (
-          <Input
-            key={key}
-            type="textarea"
-            width={1000}
-            // changeOnType
-            onChangeFn={(newValue: string) => {
-              if (text !== newValue) {
-                console.log(key, newValue);
-                handleChange(key, newValue);
-                // update(newData);
-              }
-            }}
-            value={text}
-          />
+          <StyledRow key={key}>
+            <Input
+              key={key}
+              type="textarea"
+              width={1000}
+              onChangeFn={(newValue: string) => {
+                if (text !== newValue) {
+                  console.log(key, newValue);
+                  handleChange(key, newValue);
+                }
+              }}
+              value={text}
+            />
+            <div style={{ display: "flex" }}>
+              <Button
+                color="danger"
+                icon={<FaTrashAlt />}
+                onClick={() => handleDelete(key)}
+              />
+            </div>
+          </StyledRow>
         );
       })}
       <Button
