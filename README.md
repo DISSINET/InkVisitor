@@ -1,15 +1,19 @@
 # InkVisitor
 
 ## Description
-InkVisitor is an open-source browser-based application for the manual entry of complex structured data from textual resources in the humanities and the social sciences. The data are entered as statements which interconnect entities of various different classes (Persons, Groups, Physical Objects, Concepts, Locations, Events, Statements, Texts and Values) into semantic quadruples (subject, verb, object 1, object 2), following the syntactic structure of the natural-language textual resources. InkVisitor serves as a data-entry front-end for a database ([RethinkDB](https://rethinkdb.com/)). 
+InkVisitor is an open-source browser-based application for the manual entry of complex structured data from textual resources in the humanities and the social sciences. The data are entered in the form of statements, which interconnect entities of various different classes (Persons, Groups, Physical Objects, Concepts, Locations, Events, Statements, Texts and Values) into semantic quadruples (subject, verb, object 1, object 2) following the syntactic structure of natural-language textual resources. InkVisitor serves as a data-entry front-end for a [RethinkDB](https://rethinkdb.com/) research database which then allows various kinds of quantitative and computational analyses of the data.
+
+## Acknowledgements
+InkVisitor has been developed in the [Dissident Networks Project (DISSINET)](https://dissinet.cz), a historical and social scientific research project focusing on medieval religious dissidence, inquisition, and inquisitorial records. The development has received substantial funding from the Czech Science Foundation (EXPRO project No. GX19-26975X “Dissident Religious Cultures in Medieval Europe from the Perspective of Social Network Analysis and Geographic Information Systems”) and the European Research Council (ERC Consolidator Grant, project No. 101000442 “Networks of Dissent: Computational Modelling of Dissident and Inquisitorial Cultures in Medieval Europe”).
+
+The lead developer is [Adam Mertel](https://github.com/adammertel/). Other contributors of code include Petr Hanák, Ján Mertel and others. Contributors to the data model and testers include David Zbíral, Robert L. J. Shaw, Tomáš Hampejs, Jan Král, Katia Riccardo and others.
 
 ## Changelog
 
 ## Data model
 
-### Basics
-The data model upon which InkVisitor is built is destined to capture very complex natural-language data with all the uncertainties, narrative perspectives, and semantic nuances of the natural language in order to then make them available to various kinds of quantitative and computational analyses.
-
+### Foundations
+The data model upon which InkVisitor is built is destined to capture very complex natural-language data with all their uncertainties, narrative perspectives, and semantic nuances. It does so in the semantically enriched syntactic form of quadruples, which are an extended form of semantic triples destined to capture more naturally the structure of languages with two grammatical objects (e.g., Mary gave a present to Peter: subject, verb, object 1, object two) and with multiple sentence constituents. It pays attention not only to certainty tags, but also to the overall perspective: is a given statement a positive utterance of state of affairs, or is it a question, a condition, a wish? Does the text's formulation presume that the action denoted by the predicate actually happened, or does it not? While the DISSINET data model has been initially developed to capture medieval inquisitorial records, it is a generalized data model of rare complexity from which historians, humanists, and social scientists will develop in order to bridge between quantitative and qualitative research in consequential ways and transcend the limitations of Computer-Assisted Qualitative Data nalysis Software (CAQDAS (Compu
 
 ### Statement
 A Statement is an Entity type, with a unique identifier. Statements have the purpose of relating other Entities.
