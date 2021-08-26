@@ -91,6 +91,9 @@ export const Input: React.FC<InputProps> = ({
           width={width}
           onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => {
             setDisplayValue(e.target.value);
+            if (changeOnType) {
+              onChangeFn(e.currentTarget.value);
+            }
           }}
           onBlur={() => {
             if (!changeOnType) {

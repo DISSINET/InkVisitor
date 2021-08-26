@@ -28,7 +28,7 @@ import {
   IStatementReference,
   IResponseStatement,
 } from "@shared/types";
-import { Button, Input, Loader } from "components";
+import { Button, Input, Loader, MultiInput } from "components";
 import { ActantSuggester } from "./../";
 
 import {
@@ -819,10 +819,11 @@ export const StatementEditorBox: React.FC = () => {
           </StyledEditorSection>
 
           {/* Notes */}
-          {/* <StyledEditorSection key="editor-section-notes" lastSection>
-              <StyledEditorSectionHeader>Notes</StyledEditorSectionHeader>
-              <StyledEditorSectionContent>
-                <Input
+          <StyledEditorSection key="editor-section-notes" lastSection>
+            <StyledEditorSectionHeader>Notes</StyledEditorSectionHeader>
+            <StyledEditorSectionContent>
+              <MultiInput statement={statement} />
+              {/* <Input
                   type="textarea"
                   width={1000}
                   onChangeFn={(newValue: string) => {
@@ -834,9 +835,9 @@ export const StatementEditorBox: React.FC = () => {
                     }
                   }}
                   value={statement.data.note}
-                />
-              </StyledEditorSectionContent>
-            </StyledEditorSection> */}
+                /> */}
+            </StyledEditorSectionContent>
+          </StyledEditorSection>
         </div>
       ) : (
         "no statement selected"
