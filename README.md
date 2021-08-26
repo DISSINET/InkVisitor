@@ -1,33 +1,47 @@
 # InkVisitor
 
 ## Description
-InkVisitor is an open-source browser-based application for the manual entry of complex structured data from textual resources in the humanities and the social sciences. The data are entered in the form of statements, which interconnect entities of various different classes (Persons, Groups, Physical Objects, Concepts, Locations, Events, Statements, Texts and Values) into semantic quadruples (subject, verb, object 1, object 2) following the syntactic structure of natural-language textual resources. InkVisitor serves as a data-entry front-end for a [RethinkDB](https://rethinkdb.com/) research database which then allows various kinds of quantitative and computational analyses of the data.
+InkVisitor is an open-source browser-based application for the manual entry of complex structured data from textual resources in the humanities and the social sciences. The data are entered in the form of statements, which interconnect entities of various different classes into semantic quadruples (subject, verb, object 1, object 2) following the syntactic structure of texts. InkVisitor serves as a data-entry front-end for [RethinkDB](https://rethinkdb.com/) research databases which then allow for various kinds of quantitative and computational analyses of the data to be performed.
 
 ## Acknowledgements
 InkVisitor has been developed in the [Dissident Networks Project (DISSINET)](https://dissinet.cz), a historical and social scientific research project focusing on medieval religious dissidence, inquisition, and inquisitorial records. The development has received substantial funding from the Czech Science Foundation (EXPRO project No. GX19-26975X “Dissident Religious Cultures in Medieval Europe from the Perspective of Social Network Analysis and Geographic Information Systems”) and the European Research Council (ERC Consolidator Grant, project No. 101000442 “Networks of Dissent: Computational Modelling of Dissident and Inquisitorial Cultures in Medieval Europe”).
 
-The lead developer is [Adam Mertel](https://github.com/adammertel/). Other contributors of code include Petr Hanák, Ján Mertel and others. Contributors to the data model and testers include David Zbíral, Robert L. J. Shaw, Tomáš Hampejs, Jan Král, Katia Riccardo and others.
+The lead developer of the application is [Adam Mertel](https://github.com/adammertel/). Other contributors of code include Petr Hanák, Ján Mertel and others. The lead authors of the data model are David Zbíral and Robert L. J. Shaw. Other contributors to the data model and testers include Tomáš Hampejs, Jan Král, Katia Riccardo and others.
 
 ## Changelog
 
 ## Data model
 
-### Foundations
-The data model upon which InkVisitor is built is destined to capture very complex natural-language data with all their uncertainties, narrative perspectives, and semantic nuances. It does so in the semantically enriched syntactic form of quadruples, which are an extended form of semantic triples destined to capture more naturally the structure of languages with two grammatical objects (e.g., Mary gave a present to Peter: subject, verb, object 1, object two) and with multiple sentence constituents. It pays attention not only to certainty tags, but also to the overall perspective: is a given statement a positive utterance of state of affairs, or is it a question, a condition, a wish? Does the text's formulation presume that the action denoted by the predicate actually happened, or does it not? While the DISSINET data model has been initially developed to capture medieval inquisitorial records, it is a generalized data model of rare complexity from which historians, humanists, and social scientists will develop in order to bridge between quantitative and qualitative research in consequential ways and transcend the limitations of Computer-Assisted Qualitative Data nalysis Software (CAQDAS (Compu
+### Purpose
+The data model upon which InkVisitor is built is destined to capture complex natural-language data with all their **uncertainties, narrative perspective, and semantic nuance**. It does so in the semantically rich form of **quadruples**, which are an extended form of semantic triples destined to capture, more naturally than triples, the structure of languages with two grammatical objects (e.g., “Mary gave a present to Peter”: subject, verb, object 1, object 2) as well as with chains of statements (e.g., “Mary told Peter – that she would give him a present”) and multiple sentence constituents.
 
-### Statement
-A Statement is an Entity type, with a unique identifier. Statements have the purpose of relating other Entities.
+The data model captures not only editorial assessment of **certainty level**, but also the overall perspective in its two key aspects: epistemic level and modality. **Epistemic level** expresses whether a claim is directly in the text, or is an interpretation thereof, or is an inference by and large independent from the text. **Modality** captures whether a given statement of the text is a positive utterance of the state of affairs, a question, a condition, a wish etc.
 
+While the DISSINET data model has been developed primarily to capture medieval inquisitorial records, it represents a quite **generalized data model** of rare complexity from which historians, humanists, and social scientists will benefit for bridging between quantitative and qualitative research in consequential ways and transcend the limitations of, on the one hand, Computer-Assisted Qualitative Data Analysis Software (CAQDAS) with its strongly hypothesis-driven and classificatory approach, and on the other, the limitations of fact-oriented tabular data collection which tends to lose much of the discursive information and grammatical moods of the original data sources.
 
-The other main Entity types are:
-Action type
-Concept
-Person
-Group
-(Physical) object
-Location
-Event
-Value
+The DISSINET data model represents a unique way to precisely represent textual sources in a deeply structured and interconnected manner.
+
+### Entity types
+A **Statement** is an Entity type which has the purpose of relating other Entities. All statements (as well as all other entities) have unique IDs, and their original order in the text is preserved, thereby allowing to follow the development of an action in the narrative, the interplay of questions and answers, etc.
+
+The other Entity types covered in the data model are:
+- **Action type**
+- **Concept**
+- **Person**
+- **Group**
+- **(Physical) Object**
+- **Location**
+- **Event**
+- **Value**
+- **Text / Text part**
+- **Resource**
+
+### Properties and their uses
+The uses of properties include:
+- Modelling adjectives concerning actants.
+- Instantiating Entities to parent types. 
+- Defining time and place of action (including in fuzzy terms).
+- Recording other adverbials, for example those concerning manner of action, circumstances, causes or consequences of action.
 
 
 ## Development
