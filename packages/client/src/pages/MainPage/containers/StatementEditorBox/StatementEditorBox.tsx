@@ -823,19 +823,6 @@ export const StatementEditorBox: React.FC = () => {
             <StyledEditorSectionHeader>Notes</StyledEditorSectionHeader>
             <StyledEditorSectionContent>
               <MultiInput statement={statement} />
-              {/* <Input
-                  type="textarea"
-                  width={1000}
-                  onChangeFn={(newValue: string) => {
-                    if (statement.data.note !== newValue) {
-                      const newData = {
-                        note: newValue,
-                      };
-                      update(newData);
-                    }
-                  }}
-                  value={statement.data.note}
-                /> */}
             </StyledEditorSectionContent>
           </StyledEditorSection>
         </div>
