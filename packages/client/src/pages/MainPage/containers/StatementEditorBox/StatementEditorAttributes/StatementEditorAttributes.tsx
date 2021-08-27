@@ -47,6 +47,7 @@ import {
 import React, { useState, useMemo } from "react";
 import { ElvlToggle } from "../..";
 import { AttributeIcon } from "../../AttributeIcons/AttributeIcons";
+import { Colors, Entities } from "types";
 
 type AttributeName =
   | "certainty"
@@ -73,12 +74,14 @@ interface AttributeData {
 
 interface StatementEditorAttributes {
   modalTitle: string;
+  entityType?: ActantType;
   data: AttributeData;
   handleUpdate: (data: AttributeData) => void;
 }
 
 export const StatementEditorAttributes: React.FC<StatementEditorAttributes> = ({
   modalTitle,
+  entityType,
   data,
   handleUpdate,
 }) => {
@@ -161,7 +164,10 @@ export const StatementEditorAttributes: React.FC<StatementEditorAttributes> = ({
           handleCancelClick();
         }}
       >
-        <ModalHeader title={modalTitle} />
+        <ModalHeader
+          title={modalTitle}
+          color={entityType ? Entities[entityType].color : undefined}
+        />
         <ModalContent>
           <StyledAttributeModalContent>
             {modalData.elvl && (
@@ -288,18 +294,20 @@ export const StatementEditorAttributes: React.FC<StatementEditorAttributes> = ({
   };
 
   return (
-    <StyledAttributeWrapper>
-      <>{modalOpen && renderModal()}</>
-      <Button
-        key="add"
-        icon={<MdSettings />}
-        tooltip=""
-        color="primary"
-        onClick={() => {
-          handleOpenModalClick();
-        }}
-      />
-    </StyledAttributeWrapper>
+    <>
+      {modalOpen && renderModal()}
+      <StyledAttributeWrapper>
+        <Button
+          key="add"
+          icon={<MdSettings />}
+          tooltip=""
+          color="primary"
+          onClick={() => {
+            handleOpenModalClick();
+          }}
+        />
+      </StyledAttributeWrapper>
+    </>
   );
 };
 

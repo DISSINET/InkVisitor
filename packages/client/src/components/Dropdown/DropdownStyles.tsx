@@ -64,7 +64,7 @@ export const StyledSelect = styled(Select)`
   .react-select__menu {
     border-radius: 0;
     box-shadow: ${({ theme }) => theme.boxShadow["normal"]};
-    width: ${({ width }) => (width === "full" ? "100%" : "auto")};
+    width: 100%;
   }
   .react-select__option {
     :hover {
