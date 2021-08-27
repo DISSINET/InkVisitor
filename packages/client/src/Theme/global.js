@@ -32,21 +32,27 @@ const GlobalStyle = createGlobalStyle`
   }
   h1 {
     font-size: ${({ theme }) => theme.fontSize["4xl"]};
+    line-height: 1.5;
   }
   h2 {
     font-size: ${({ theme }) => theme.fontSize["3xl"]};
+    line-height: 1.5;
   }
   h3 {
     font-size: ${({ theme }) => theme.fontSize["2xl"]};
+    line-height: 1.5;
   }
   h4 {
     font-size: ${({ theme }) => theme.fontSize["xl"]};
+    line-height: 1.5;
   }
   h5 {
     font-size: ${({ theme }) => theme.fontSize["lg"]};
+    line-height: 1.5;
   }
   h6 {
     font-size: ${({ theme }) => theme.fontSize["base"]};
+    line-height: 1.5;
   }
 `;
 

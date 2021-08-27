@@ -14,6 +14,7 @@ import {
   IResponseGeneric,
   IResponseStatement,
   IStatementActant,
+  IStatementProp,
 } from "@shared/types";
 import { ActantSuggester, ActantTag, CertaintyToggle, ElvlToggle } from "../..";
 import { Button, Input, Loader } from "components";
@@ -148,10 +149,15 @@ export const StatementEditorActantTable: React.FC<StatementEditorActantTable> =
         {
           id: "Attributes",
           Cell: ({ row }: Cell) => {
-            const { actant, sActant } = row.values.data;
+            const {
+              actant,
+              sActant,
+            }: { actant: IActant; sActant: IStatementActant | any } =
+              row.values.data;
             return actant && sActant ? (
               <StatementEditorAttributes
                 modalTitle={actant.label}
+                entityType={actant.class}
                 data={{
                   elvl: sActant.elvl,
                   certainty: sActant.certainty,

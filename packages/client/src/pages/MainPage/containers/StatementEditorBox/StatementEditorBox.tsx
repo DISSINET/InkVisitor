@@ -320,7 +320,7 @@ export const StatementEditorBox: React.FC = () => {
     {
       onSuccess: () => {
         queryClient.invalidateQueries("statement");
-        //queryClient.invalidateQueries("territory");
+        queryClient.invalidateQueries("territory");
       },
     }
   );
@@ -333,7 +333,7 @@ export const StatementEditorBox: React.FC = () => {
     {
       onSuccess: () => {
         queryClient.invalidateQueries("statement");
-        //queryClient.invalidateQueries("territory");
+        queryClient.invalidateQueries("territory");
       },
     }
   );

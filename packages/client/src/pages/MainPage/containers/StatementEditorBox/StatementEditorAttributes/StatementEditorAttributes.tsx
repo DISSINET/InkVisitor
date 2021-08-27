@@ -29,6 +29,7 @@ import {
   Input,
   Submit,
   Dropdown,
+  Checkbox,
 } from "components";
 
 import { MdSettings } from "react-icons/md";
@@ -47,6 +48,7 @@ import {
 import React, { useState, useMemo } from "react";
 import { ElvlToggle } from "../..";
 import { AttributeIcon } from "../../AttributeIcons/AttributeIcons";
+import { Colors, Entities } from "types";
 
 type AttributeName =
   | "certainty"
@@ -56,7 +58,9 @@ type AttributeName =
   | "moodvariant"
   | "virtuality"
   | "partitivity"
-  | "operator";
+  | "operator"
+  | "bundleStart"
+  | "bundleEnd";
 
 interface AttributeData {
   certainty?: Certainty;
@@ -73,17 +77,19 @@ interface AttributeData {
 
 interface StatementEditorAttributes {
   modalTitle: string;
+  entityType?: ActantType;
   data: AttributeData;
   handleUpdate: (data: AttributeData) => void;
 }
 
 export const StatementEditorAttributes: React.FC<StatementEditorAttributes> = ({
   modalTitle,
+  entityType,
   data,
   handleUpdate,
 }) => {
   const [modalData, setModalData] = useState<AttributeData>(data);
-  const [modalOpen, setModalOpen] = useState<boolean>();
+  const [modalOpen, setModalOpen] = useState<boolean>(false);
 
   const handleModalDataChange = (
     attributeName: AttributeName,
@@ -125,6 +131,12 @@ export const StatementEditorAttributes: React.FC<StatementEditorAttributes> = ({
       case "operator":
         newModalData["operator"] = newValue as Operator;
         break;
+      case "bundleStart":
+        newModalData["bundleStart"] = newValue as boolean;
+        break;
+      case "bundleEnd":
+        newModalData["bundleEnd"] = newValue as boolean;
+        break;
     }
 
     setModalData(newModalData);
@@ -161,7 +173,10 @@ export const StatementEditorAttributes: React.FC<StatementEditorAttributes> = ({
           handleCancelClick();
         }}
       >
-        <ModalHeader title={modalTitle} />
+        <ModalHeader
+          title={modalTitle}
+          color={entityType ? Entities[entityType].color : undefined}
+        />
         <ModalContent>
           <StyledAttributeModalContent>
             {modalData.elvl && (
@@ -260,6 +275,26 @@ export const StatementEditorAttributes: React.FC<StatementEditorAttributes> = ({
                 }}
               ></AttributeRow>
             )}
+            {modalData.operator && (
+              <CheckboxRow
+                value={modalData.bundleStart ? modalData.bundleStart : false}
+                label="Bundle start"
+                icon={<AttributeIcon attributeName="bundleStart" />}
+                onChangeFn={(newValue: boolean) => {
+                  handleModalDataChange("bundleStart", newValue as boolean);
+                }}
+              />
+            )}
+            {modalData.operator && (
+              <CheckboxRow
+                value={modalData.bundleEnd ? modalData.bundleEnd : false}
+                label="Bundle end"
+                icon={<AttributeIcon attributeName="bundleEnd" />}
+                onChangeFn={(newValue: boolean) => {
+                  handleModalDataChange("bundleEnd", newValue as boolean);
+                }}
+              />
+            )}
           </StyledAttributeModalContent>
         </ModalContent>
 
@@ -288,18 +323,20 @@ export const StatementEditorAttributes: React.FC<StatementEditorAttributes> = ({
   };
 
   return (
-    <StyledAttributeWrapper>
-      <>{modalOpen && renderModal()}</>
-      <Button
-        key="add"
-        icon={<MdSettings />}
-        tooltip=""
-        color="primary"
-        onClick={() => {
-          handleOpenModalClick();
-        }}
-      />
-    </StyledAttributeWrapper>
+    <>
+      {modalOpen && renderModal()}
+      <StyledAttributeWrapper>
+        <Button
+          key="add"
+          icon={<MdSettings />}
+          tooltip=""
+          color="primary"
+          onClick={() => {
+            handleOpenModalClick();
+          }}
+        />
+      </StyledAttributeWrapper>
+    </>
   );
 };
 
@@ -336,6 +373,7 @@ const AttributeRow: React.FC<AttributeRow> = ({
         </StyledAttributeModalRowLabelText>
       </StyledAttributeModalRowLabel>
       <Dropdown
+        width="full"
         isMulti={multi}
         options={items}
         value={selectedItem}
@@ -346,8 +384,37 @@ const AttributeRow: React.FC<AttributeRow> = ({
               : (newValue.value as string | string[])
           );
         }}
-        width={200}
-        menuWidth={200}
+      />
+    </StyledAttributeModalRow>
+  );
+};
+
+interface CheckboxRow {
+  value: boolean;
+  onChangeFn: (value: boolean) => void;
+  label: string;
+  icon: React.ReactElement;
+}
+export const CheckboxRow: React.FC<CheckboxRow> = ({
+  value,
+  onChangeFn,
+  icon,
+  label,
+}) => {
+  return (
+    <StyledAttributeModalRow>
+      <StyledAttributeModalRowLabel>
+        <StyledAttributeModalRowLabelIcon>
+          {icon}
+        </StyledAttributeModalRowLabelIcon>
+        <StyledAttributeModalRowLabelText>
+          {label}
+        </StyledAttributeModalRowLabelText>
+      </StyledAttributeModalRowLabel>
+      <Checkbox
+        onChangeFn={(newValue: boolean) => onChangeFn(newValue)}
+        id={label}
+        value={value}
       />
     </StyledAttributeModalRow>
   );

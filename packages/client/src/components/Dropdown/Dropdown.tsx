@@ -63,15 +63,6 @@ export const Dropdown: React.FC<Dropdown> = ({
                 display: noDropDownIndicator ? "none" : "",
               };
             },
-            menu: () => {
-              return {
-                width: menuWidth ? menuWidth : width,
-                position: "absolute",
-                top: "2em",
-                zIndex: 100,
-                backgroundColor: "white",
-              };
-            },
           }}
           onChange={onChange}
           options={options}
