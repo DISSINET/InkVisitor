@@ -151,9 +151,11 @@ export const ActantSearchBox: React.FC = () => {
         )}
       </StyledRow>
 
-      <StyledRow>
-        <StyledResultHeading>Results:</StyledResultHeading>
-      </StyledRow>
+      {results.length > 0 && (
+        <StyledRow>
+          <StyledResultHeading>Results:</StyledResultHeading>
+        </StyledRow>
+      )}
       <StyledResultsWrapper>
         {/* RESULTS */}
         {results.length > 0 && (
