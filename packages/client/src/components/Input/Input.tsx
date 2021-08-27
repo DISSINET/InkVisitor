@@ -72,7 +72,7 @@ export const Input: React.FC<InputProps> = ({
             }
           }}
           onBlur={() => {
-            if (displayValue !== value) {
+            if (displayValue !== value && !changeOnType) {
               onChangeFn(displayValue);
             }
           }}

@@ -24,12 +24,14 @@ import {
   ModalFooter,
 } from "components/Modal/Modal";
 import { PanelSeparator } from "./PanelSeparator/PanelSeparator";
+import { Checkbox } from "./Checkbox/Checkbox";
 
 export {
   Arrow,
   Box,
   Button,
   ButtonGroup,
+  Checkbox,
   Header,
   Footer,
   Input,

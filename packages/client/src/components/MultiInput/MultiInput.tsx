@@ -55,7 +55,6 @@ export const MultiInput: React.FC<MultiInput> = ({ statement }) => {
               width={1000}
               onChangeFn={(newValue: string) => {
                 if (text !== newValue) {
-                  console.log(key, newValue);
                   handleChange(key, newValue);
                 }
               }}

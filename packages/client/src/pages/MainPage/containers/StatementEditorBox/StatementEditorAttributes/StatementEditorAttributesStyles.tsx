@@ -9,16 +9,15 @@ export const StyledAttributeModalContent = styled.div`
 export const StyledAttributeModalRow = styled.div`
   display: inline-flex;
   padding-bottom: ${({ theme }) => theme.space[1]};
-  /* width: 100%; */
+  width: 100%;
 `;
 export const StyledAttributeModalRowLabel = styled.div`
   display: inline-flex;
-  /* width: 100%; */
+  margin-top: ${({ theme }) => theme.space[1]};
 `;
 export const StyledAttributeModalRowLabelIcon = styled.div`
   margin-right: ${({ theme }) => theme.space[2]};
   display: inline-flex;
-  /* width: 100%; */
 `;
 
 export const StyledAttributeModalRowLabelText = styled.div`

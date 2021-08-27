@@ -28,7 +28,7 @@ export const AttributeCertaintyIcon: React.FC = () => {
 export const AttributeIcon: React.FC<{ attributeName: string }> = ({
   attributeName,
 }) => {
-  console.log(attributeName);
+  // console.log(attributeName);
   //@ts-ignore
   return attributeIcons[attributeName];
 };
