@@ -6,6 +6,7 @@ import { Dropdown } from "components/Dropdown/Dropdown";
 import { Header } from "components/Header/Header";
 import { Footer } from "components/Footer/Footer";
 import { Input } from "components/Input/Input";
+import { MultiInput } from "components/MultiInput/MultiInput";
 import { Loader } from "components/Loader/Loader";
 import { Panel } from "components/Panel/Panel";
 import { Suggester } from "components/Suggester/Suggester";
@@ -32,6 +33,7 @@ export {
   Header,
   Footer,
   Input,
+  MultiInput,
   Loader,
   Panel,
   Tag,
