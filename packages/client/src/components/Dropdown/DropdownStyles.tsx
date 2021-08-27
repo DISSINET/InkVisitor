@@ -24,15 +24,15 @@ export const StyledSelect = styled(Select)`
   font-weight: bold;
   display: inline-flex;
   min-height: ${({ theme }) => theme.space[10]};
+  /* height: ${({ theme }) => theme.space[10]}; */
   vertical-align: bottom;
   font-size: ${({ theme }) => theme.fontSize["xs"]};
-  height: ${({ theme }) => theme.space[10]};
   max-width: 100%;
   width: 100%;
   .react-select__control {
     width: ${({ width }) => getWidth(width)};
     max-width: 100%;
-    height: ${({ theme }) => theme.space[10]};
+    /* height: ${({ theme }) => theme.space[10]}; */
     min-height: ${({ theme }) => theme.space[10]};
     border: 2px solid black;
     border-radius: 0;

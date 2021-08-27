@@ -344,6 +344,8 @@ const AttributeRow: React.FC<AttributeRow> = ({
         </StyledAttributeModalRowLabelText>
       </StyledAttributeModalRowLabel>
       <Dropdown
+        width="full"
+        // width={200}
         isMulti={multi}
         options={items}
         value={selectedItem}
@@ -354,7 +356,6 @@ const AttributeRow: React.FC<AttributeRow> = ({
               : (newValue.value as string | string[])
           );
         }}
-        width={200}
         menuWidth={200}
       />
     </StyledAttributeModalRow>
