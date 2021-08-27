@@ -275,23 +275,23 @@ export const StatementEditorAttributes: React.FC<StatementEditorAttributes> = ({
                 }}
               ></AttributeRow>
             )}
-            {modalData.bundleStart && (
+            {modalData.operator && (
               <CheckboxRow
-                value={modalData.bundleStart}
+                value={modalData.bundleStart ? modalData.bundleStart : false}
                 label="Bundle start"
                 icon={<AttributeIcon attributeName="bundleStart" />}
                 onChangeFn={(newValue: boolean) => {
-                  console.log(newValue);
+                  handleModalDataChange("bundleStart", newValue as boolean);
                 }}
               />
             )}
-            {modalData.bundleEnd && (
+            {modalData.operator && (
               <CheckboxRow
-                value={modalData.bundleEnd}
+                value={modalData.bundleEnd ? modalData.bundleEnd : false}
                 label="Bundle end"
                 icon={<AttributeIcon attributeName="bundleEnd" />}
                 onChangeFn={(newValue: boolean) => {
-                  console.log(newValue);
+                  handleModalDataChange("bundleEnd", newValue as boolean);
                 }}
               />
             )}
