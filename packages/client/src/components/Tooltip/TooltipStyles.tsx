@@ -7,7 +7,6 @@ export const StyledPopup = styled(Popup)`
     color: ${({ theme }) => theme.color["white"]};
     border-radius: ${({ theme }) => theme.borderRadius["sm"]};
     font-size: ${({ theme }) => theme.fontSize["xxs"]};
-    font-weight: ${({ theme }) => theme.fontWeight["bold"]};
     padding: ${({ theme }) => `${theme.space[2]} ${theme.space[3]}`};
     min-width: ${({ theme }) => theme.space[16]};
     display: flex;
@@ -24,3 +23,8 @@ export const StyledPopup = styled(Popup)`
   [data-popup="tooltip"]&-overlay {
   }
 `;
+
+export const StyledLabel = styled.p`
+  font-weight: ${({ theme }) => theme.fontWeight["bold"]};
+`;
+export const StyledDetail = styled.p``;
