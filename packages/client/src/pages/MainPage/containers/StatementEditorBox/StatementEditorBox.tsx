@@ -103,45 +103,47 @@ export const StatementEditorBox: React.FC = () => {
       const allPossibleOrigins = [...statementActants];
 
       const originProps: {
-        type: "action" | "actant";
-        origin: any;
-        props: any[];
-        actant: IActant;
-      }[] = [];
+        [key: string]: {
+          type: "action" | "actant";
+          origin: any;
+          props: any[];
+          actant: IActant;
+        };
+      } = {};
 
       allPossibleOrigins.forEach((origin) => {
-        originProps.push({
+        originProps[origin.id as string] = {
           type: origin.class === "A" ? "action" : "actant",
           origin: origin.id,
           props: [],
           actant: origin,
-        });
+        };
       });
 
       // 1st level
       allProps.forEach((prop) => {
-        const originProp = originProps.find((op) => op.origin === prop.origin);
+        const originProp = originProps[prop.origin];
         if (originProp) {
           originProp.props.push({ ...prop, ...{ props: [] } });
         }
       });
 
       // 2nd level
-      allProps.forEach((prop) => {
-        originProps.forEach((op) => {
-          op.props.forEach((op2) => {
-            if (op2.id === prop.origin) {
-              op2.props.push(prop);
-            }
-          });
-        });
-      });
+      // allProps.forEach((prop) => {
+      //   originProps.forEach((op) => {
+      //     op.props.forEach((op2) => {
+      //       if (op2.id === prop.origin) {
+      //         op2.props.push(prop);
+      //       }
+      //     });
+      //   });
+      // });
 
       //console.log(originProps);
 
       return originProps;
     } else {
-      return [];
+      return {};
     }
   }, [JSON.stringify(statement)]);
 
@@ -350,8 +352,12 @@ export const StatementEditorBox: React.FC = () => {
     }
   );
 
-  const renderPropGroup = (propOrigin: any, statement: IResponseStatement) => {
-    const originActant = propOrigin.actant;
+  const renderPropGroup = (
+    propOriginId: string,
+    statement: IResponseStatement
+  ) => {
+    const propOrigin = propsByOrigins[propOriginId];
+    const originActant = propOrigin?.actant;
 
     if (originActant) {
       return (
@@ -633,6 +639,7 @@ export const StatementEditorBox: React.FC = () => {
                   statement={statement}
                   statementId={statementId}
                   updateActionsMutation={updateActionsRefreshListMutation}
+                  renderPropGroup={renderPropGroup}
                 />
               </StyledEditorActantTableWrapper>
 
@@ -655,6 +662,7 @@ export const StatementEditorBox: React.FC = () => {
                   statement={statement}
                   classEntitiesActant={classesActants}
                   updateActantsMutation={updateActantsRefreshListMutation}
+                  renderPropGroup={renderPropGroup}
                 />
               </StyledEditorActantTableWrapper>
 
@@ -669,7 +677,7 @@ export const StatementEditorBox: React.FC = () => {
           </StyledEditorSection>
 
           {/* Statement Props */}
-          <StyledEditorSection key="editor-section-props-statement">
+          {/* <StyledEditorSection key="editor-section-props-statement">
             <StyledEditorSectionHeader>
               Actions Properties
             </StyledEditorSectionHeader>
@@ -684,7 +692,6 @@ export const StatementEditorBox: React.FC = () => {
             </StyledEditorSectionContent>
           </StyledEditorSection>
 
-          {/* Actant Props */}
           <StyledEditorSection key="editor-section-props-actants">
             <StyledEditorSectionHeader>
               Actant Properties
@@ -697,7 +704,7 @@ export const StatementEditorBox: React.FC = () => {
                   return renderPropGroup(propOrigin, statement);
                 })}
             </StyledEditorSectionContent>
-          </StyledEditorSection>
+          </StyledEditorSection> */}
 
           {/* Refs */}
           <StyledEditorSection key="editor-section-refs">

@@ -30,6 +30,7 @@ interface StatementEditorActionTable {
   statement: IResponseStatement;
   statementId: string;
   handleRowClick?: Function;
+  renderPropGroup: Function;
   updateActionsMutation: UseMutationResult<any, unknown, object, unknown>;
 }
 export const StatementEditorActionTable: React.FC<StatementEditorActionTable> =
@@ -37,6 +38,7 @@ export const StatementEditorActionTable: React.FC<StatementEditorActionTable> =
     statement,
     statementId,
     handleRowClick = () => {},
+    renderPropGroup,
     updateActionsMutation,
   }) => {
     const queryClient = useQueryClient();
@@ -225,9 +227,11 @@ export const StatementEditorActionTable: React.FC<StatementEditorActionTable> =
             prepareRow(row);
             return (
               <StatementEditorActionTableRow
+                renderPropGroup={renderPropGroup}
                 handleClick={handleRowClick}
                 index={i}
                 row={row}
+                statement={statement}
                 moveRow={moveRow}
                 updateOrderFn={updateActionOrder}
                 {...row.getRowProps()}

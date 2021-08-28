@@ -1,3 +1,4 @@
+import { IResponseStatement } from "@shared/types";
 import React, { useRef } from "react";
 import {
   DragSourceMonitor,
@@ -17,12 +18,22 @@ interface StatementEditorActionTableRow {
   row: any;
   index: number;
   moveRow: any;
+  statement: IResponseStatement;
   updateOrderFn: () => void;
   handleClick: Function;
+  renderPropGroup: Function;
 }
 
 export const StatementEditorActionTableRow: React.FC<StatementEditorActionTableRow> =
-  ({ row, index, moveRow, updateOrderFn, handleClick = () => {} }) => {
+  ({
+    row,
+    index,
+    moveRow,
+    statement,
+    updateOrderFn,
+    handleClick = () => {},
+    renderPropGroup,
+  }) => {
     var hashParams = queryString.parse(location.hash);
     const statementId = hashParams.statement;
 
@@ -92,6 +103,8 @@ export const StatementEditorActionTableRow: React.FC<StatementEditorActionTableR
             );
           })}
         </StyledTr>
+
+        {renderPropGroup(row.values.data.action.id, statement)}
       </React.Fragment>
     );
   };

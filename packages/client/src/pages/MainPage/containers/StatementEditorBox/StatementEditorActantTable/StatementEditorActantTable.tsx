@@ -31,6 +31,7 @@ interface StatementEditorActantTable {
   statement: IResponseStatement;
   handleRowClick?: Function;
   classEntitiesActant: string[];
+  renderPropGroup: Function;
   updateActantsMutation: UseMutationResult<
     AxiosResponse<IResponseGeneric>,
     unknown,
@@ -42,6 +43,7 @@ export const StatementEditorActantTable: React.FC<StatementEditorActantTable> =
   ({
     statement,
     handleRowClick = () => {},
+    renderPropGroup,
     classEntitiesActant,
     updateActantsMutation,
   }) => {
