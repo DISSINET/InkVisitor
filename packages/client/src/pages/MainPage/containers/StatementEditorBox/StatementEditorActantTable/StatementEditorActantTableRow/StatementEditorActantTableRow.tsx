@@ -109,13 +109,7 @@ export const StatementEditorActantTableRow: React.FC<StatementEditorActantTableR
           })}
         </StyledTr>
 
-        {/* <tr>
-          <td colSpan={visibleColumns.length + 1}>
-            <StyledSubRow> */}
         {renderPropGroup(row.values.data.sActant.id, statement, visibleColumns)}
-        {/* </StyledSubRow>
-          </td>
-        </tr> */}
       </React.Fragment>
     );
   };
