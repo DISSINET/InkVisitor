@@ -30,6 +30,7 @@ import {
   Submit,
   Dropdown,
   Checkbox,
+  Tooltip,
 } from "components";
 
 import { MdSettings } from "react-icons/md";
@@ -326,15 +327,17 @@ export const StatementEditorAttributes: React.FC<StatementEditorAttributes> = ({
     <>
       {modalOpen && renderModal()}
       <StyledAttributeWrapper>
+        {/* <Tooltip label="settings"> */}
         <Button
-          key="add"
+          key="settings"
           icon={<MdSettings />}
-          tooltip=""
+          tooltip="settings"
           color="primary"
           onClick={() => {
             handleOpenModalClick();
           }}
         />
+        {/* </Tooltip> */}
       </StyledAttributeWrapper>
     </>
   );
