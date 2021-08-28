@@ -17,7 +17,7 @@ import {
 import { ActantSuggester, ActantTag, CertaintyToggle, ElvlToggle } from "../..";
 import { StatementEditorAttributes } from "./../StatementEditorAttributes/StatementEditorAttributes";
 import { Button, Input } from "components";
-import { FaTrashAlt, FaUnlink } from "react-icons/fa";
+import { FaPlus, FaTrashAlt, FaUnlink } from "react-icons/fa";
 import { useMutation, UseMutationResult, useQueryClient } from "react-query";
 import { AxiosResponse } from "axios";
 import api from "api";
@@ -33,6 +33,15 @@ interface StatementEditorActionTable {
   handleRowClick?: Function;
   renderPropGroup: Function;
   updateActionsMutation: UseMutationResult<any, unknown, object, unknown>;
+  addProp: (originId: string) => void;
+  propsByOrigins: {
+    [key: string]: {
+      type: "action" | "actant";
+      origin: any;
+      props: any[];
+      actant: IActant;
+    };
+  };
 }
 export const StatementEditorActionTable: React.FC<StatementEditorActionTable> =
   ({
@@ -41,6 +50,8 @@ export const StatementEditorActionTable: React.FC<StatementEditorActionTable> =
     handleRowClick = () => {},
     renderPropGroup,
     updateActionsMutation,
+    addProp,
+    propsByOrigins,
   }) => {
     const queryClient = useQueryClient();
     var hashParams = queryString.parse(location.hash);
@@ -117,35 +128,6 @@ export const StatementEditorActionTable: React.FC<StatementEditorActionTable> =
                 }
               />
             ) : (
-              // {sAction && (
-              //   <StatementEditorAttributes
-              //     modalTitle={action.label}
-              //     entityType={ActantType.Action}
-              //     data={{
-              //       elvl: sAction.elvl,
-              //       certainty: sAction.certainty,
-              //       logic: sAction.logic,
-              //       mood: sAction.mood,
-              //       moodvariant: sAction.moodvariant,
-              //       operator: sAction.operator,
-              //       bundleStart: sAction.bundleStart,
-              //       bundleEnd: sAction.bundleEnd,
-              //     }}
-              //     handleUpdate={(newData) => {
-              //       updateAction(sAction.id, newData);
-              //     }}
-              //   />
-              // )}
-              // <Button
-              //   key="d"
-              //   icon={<FaTrashAlt />}
-              //   color="danger"
-              //   tooltip="remove action row"
-              //   onClick={() => {
-              //     removeAction(row.values.data.sAction.id);
-              //   }}
-              // />
-              // </StyledCell>
               <ActantSuggester
                 onSelected={(newSelectedId: string) => {
                   updateAction(sAction.id, {
@@ -187,7 +169,7 @@ export const StatementEditorActionTable: React.FC<StatementEditorActionTable> =
         },
         {
           Header: "",
-          id: "expander",
+          id: "remove",
           Cell: ({ row }: Cell) => (
             <Button
               key="d"
@@ -199,6 +181,26 @@ export const StatementEditorActionTable: React.FC<StatementEditorActionTable> =
               }}
             />
           ),
+        },
+        {
+          Header: "",
+          id: "add",
+          Cell: ({ row }: Cell) => {
+            const propOriginId = row.values.data.action.id;
+            const propOrigin = propsByOrigins[propOriginId];
+            const originActant = propOrigin?.actant;
+            return (
+              <Button
+                key="a"
+                icon={<FaPlus />}
+                color="primary"
+                tooltip="add new prop"
+                onClick={() => {
+                  addProp(originActant.id);
+                }}
+              />
+            );
+          },
         },
       ];
     }, [filteredActions]);

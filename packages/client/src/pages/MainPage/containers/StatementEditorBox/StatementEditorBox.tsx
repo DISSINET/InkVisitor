@@ -49,6 +49,8 @@ import {
 import { StatementEditorActantTable } from "./StatementEditorActantTable/StatementEditorActantTable";
 import { StatementEditorActionTable } from "./StatementEditorActionTable/StatementEditorActionTable";
 import { StatementEditorAttributes } from "./StatementEditorAttributes/StatementEditorAttributes";
+import { StyledSubRow } from "./StatementEditorActionTable/StatementEditorActionTableRow/StatementEditorActionTableRowStyles";
+import { ColumnInstance } from "react-table";
 
 const classesActants = ["P", "G", "O", "C", "L", "V", "E", "S", "T", "R"];
 const classesPropType = ["C"];
@@ -355,53 +357,47 @@ export const StatementEditorBox: React.FC = () => {
 
   const renderPropGroup = (
     propOriginId: string,
-    statement: IResponseStatement
+    statement: IResponseStatement,
+    visibleColumns: ColumnInstance<{}>[]
   ) => {
     const propOrigin = propsByOrigins[propOriginId];
     const originActant = propOrigin?.actant;
 
-    if (originActant) {
+    if (originActant && propOrigin.props.length > 0) {
       return (
-        <React.Fragment key={originActant.id}>
-          <StyledPropsActantHeader>
-            <ActantTag actant={originActant} short={false} />
-            <StyledPropButtonGroup>
-              <Button
-                key="d"
-                icon={<FaPlus />}
-                color="primary"
-                tooltip="add new prop"
-                onClick={() => {
-                  addProp(originActant.id);
-                }}
-              />
-            </StyledPropButtonGroup>
-          </StyledPropsActantHeader>
-          {propOrigin.props.length > 0 ? (
-            <StyledPropsActantList>
-              <StyledListHeaderColumn></StyledListHeaderColumn>
-              <StyledListHeaderColumn>Type</StyledListHeaderColumn>
-              <StyledListHeaderColumn>Value</StyledListHeaderColumn>
-              <StyledListHeaderColumn></StyledListHeaderColumn>
-              {propOrigin.props.map((prop1: any, pi1: number) => {
-                return (
-                  <React.Fragment key={prop1 + pi1}>
-                    {renderPropRow(statement, prop1, "1", pi1, false)}
-                    {prop1.props.map((prop2: any, pi2: number) => {
-                      return renderPropRow(
-                        statement,
-                        prop2,
-                        "2",
-                        pi2,
-                        pi2 === prop1.props.length - 1
+        <tr>
+          <td colSpan={visibleColumns.length + 1}>
+            <StyledSubRow>
+              <React.Fragment key={originActant.id}>
+                <StyledPropsActantHeader></StyledPropsActantHeader>
+                {propOrigin.props.length > 0 ? (
+                  <StyledPropsActantList>
+                    <StyledListHeaderColumn></StyledListHeaderColumn>
+                    <StyledListHeaderColumn>Type</StyledListHeaderColumn>
+                    <StyledListHeaderColumn>Value</StyledListHeaderColumn>
+                    <StyledListHeaderColumn></StyledListHeaderColumn>
+                    {propOrigin.props.map((prop1: any, pi1: number) => {
+                      return (
+                        <React.Fragment key={prop1 + pi1}>
+                          {renderPropRow(statement, prop1, "1", pi1, false)}
+                          {prop1.props.map((prop2: any, pi2: number) => {
+                            return renderPropRow(
+                              statement,
+                              prop2,
+                              "2",
+                              pi2,
+                              pi2 === prop1.props.length - 1
+                            );
+                          })}
+                        </React.Fragment>
                       );
                     })}
-                  </React.Fragment>
-                );
-              })}
-            </StyledPropsActantList>
-          ) : null}
-        </React.Fragment>
+                  </StyledPropsActantList>
+                ) : null}
+              </React.Fragment>
+            </StyledSubRow>
+          </td>
+        </tr>
       );
     }
   };
@@ -470,6 +466,7 @@ export const StatementEditorBox: React.FC = () => {
               <StyledPropButtonGroup>
                 <StatementEditorAttributes
                   modalTitle={propTypeActant.label}
+                  entityType={propTypeActant.class}
                   data={{
                     elvl: prop.type.elvl,
                     logic: prop.type.logic,
@@ -525,6 +522,7 @@ export const StatementEditorBox: React.FC = () => {
               <StyledPropButtonGroup>
                 <StatementEditorAttributes
                   modalTitle={propValueActant.label}
+                  entityType={propValueActant.class}
                   data={{
                     elvl: prop.value.elvl,
                     logic: prop.value.logic,
@@ -641,6 +639,8 @@ export const StatementEditorBox: React.FC = () => {
                   statementId={statementId}
                   updateActionsMutation={updateActionsRefreshListMutation}
                   renderPropGroup={renderPropGroup}
+                  addProp={addProp}
+                  propsByOrigins={propsByOrigins}
                 />
               </StyledEditorActantTableWrapper>
 
