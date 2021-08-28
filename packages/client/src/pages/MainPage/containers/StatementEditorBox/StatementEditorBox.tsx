@@ -49,6 +49,8 @@ import {
 import { StatementEditorActantTable } from "./StatementEditorActantTable/StatementEditorActantTable";
 import { StatementEditorActionTable } from "./StatementEditorActionTable/StatementEditorActionTable";
 import { StatementEditorAttributes } from "./StatementEditorAttributes/StatementEditorAttributes";
+import { StyledSubRow } from "./StatementEditorActionTable/StatementEditorActionTableRow/StatementEditorActionTableRowStyles";
+import { ColumnInstance } from "react-table";
 
 const classesActants = ["P", "G", "O", "C", "L", "V", "E", "S", "T", "R"];
 const classesPropType = ["C"];
@@ -94,42 +96,56 @@ export const StatementEditorBox: React.FC = () => {
       const allProps = statement?.data.props;
       const statementItself = { ...statement };
 
-      const statementActants = statement.actants.filter((sa) =>
-        statement.data.actants.map((a) => a.actant).includes(sa.id)
+      const statementActants = statement.actants.filter(
+        (sa) =>
+          statement.data.actants.map((a) => a.actant).includes(sa.id) ||
+          statement.data.actions.map((a) => a.action).includes(sa.id)
       );
 
-      const allPossibleOrigins = [statementItself, ...statementActants];
+      const allPossibleOrigins = [...statementActants];
 
-      const originProps: { origin: any; props: any[]; actant: IActant }[] = [];
+      const originProps: {
+        [key: string]: {
+          type: "action" | "actant";
+          origin: any;
+          props: any[];
+          actant: IActant;
+        };
+      } = {};
 
       allPossibleOrigins.forEach((origin) => {
-        originProps.push({ origin: origin.id, props: [], actant: origin });
+        originProps[origin.id as string] = {
+          type: origin.class === "A" ? "action" : "actant",
+          origin: origin.id,
+          props: [],
+          actant: origin,
+        };
       });
 
       // 1st level
       allProps.forEach((prop) => {
-        const originProp = originProps.find((op) => op.origin === prop.origin);
+        const originProp = originProps[prop.origin];
         if (originProp) {
           originProp.props.push({ ...prop, ...{ props: [] } });
         }
       });
 
       // 2nd level
-      allProps.forEach((prop) => {
-        originProps.forEach((op) => {
-          op.props.forEach((op2) => {
-            if (op2.id === prop.origin) {
-              op2.props.push(prop);
-            }
-          });
-        });
-      });
+      // allProps.forEach((prop) => {
+      //   originProps.forEach((op) => {
+      //     op.props.forEach((op2) => {
+      //       if (op2.id === prop.origin) {
+      //         op2.props.push(prop);
+      //       }
+      //     });
+      //   });
+      // });
 
       //console.log(originProps);
 
       return originProps;
     } else {
-      return [];
+      return {};
     }
   }, [JSON.stringify(statement)]);
 
@@ -307,6 +323,7 @@ export const StatementEditorBox: React.FC = () => {
     {
       onSuccess: () => {
         queryClient.invalidateQueries(["statement"]);
+        // queryClient.invalidateQueries(["territory"]);
       },
     }
   );
@@ -338,51 +355,49 @@ export const StatementEditorBox: React.FC = () => {
     }
   );
 
-  const renderPropGroup = (propOrigin: any, statement: IResponseStatement) => {
-    const originActant = propOrigin.actant;
+  const renderPropGroup = (
+    propOriginId: string,
+    statement: IResponseStatement,
+    visibleColumns: ColumnInstance<{}>[]
+  ) => {
+    const propOrigin = propsByOrigins[propOriginId];
+    const originActant = propOrigin?.actant;
 
-    if (originActant) {
+    if (originActant && propOrigin.props.length > 0) {
       return (
-        <React.Fragment key={originActant.id}>
-          <StyledPropsActantHeader>
-            <ActantTag actant={originActant} short={false} />
-            <StyledPropButtonGroup>
-              <Button
-                key="d"
-                icon={<FaPlus />}
-                color="primary"
-                tooltip="add new prop"
-                onClick={() => {
-                  addProp(originActant.id);
-                }}
-              />
-            </StyledPropButtonGroup>
-          </StyledPropsActantHeader>
-          {propOrigin.props.length > 0 ? (
-            <StyledPropsActantList>
-              <StyledListHeaderColumn></StyledListHeaderColumn>
-              <StyledListHeaderColumn>Type</StyledListHeaderColumn>
-              <StyledListHeaderColumn>Value</StyledListHeaderColumn>
-              <StyledListHeaderColumn></StyledListHeaderColumn>
-              {propOrigin.props.map((prop1: any, pi1: number) => {
-                return (
-                  <React.Fragment key={prop1 + pi1}>
-                    {renderPropRow(statement, prop1, "1", pi1, false)}
-                    {prop1.props.map((prop2: any, pi2: number) => {
-                      return renderPropRow(
-                        statement,
-                        prop2,
-                        "2",
-                        pi2,
-                        pi2 === prop1.props.length - 1
+        <tr>
+          <td colSpan={visibleColumns.length + 1}>
+            <StyledSubRow>
+              <React.Fragment key={originActant.id}>
+                <StyledPropsActantHeader></StyledPropsActantHeader>
+                {propOrigin.props.length > 0 ? (
+                  <StyledPropsActantList>
+                    <StyledListHeaderColumn></StyledListHeaderColumn>
+                    <StyledListHeaderColumn>Type</StyledListHeaderColumn>
+                    <StyledListHeaderColumn>Value</StyledListHeaderColumn>
+                    <StyledListHeaderColumn></StyledListHeaderColumn>
+                    {propOrigin.props.map((prop1: any, pi1: number) => {
+                      return (
+                        <React.Fragment key={prop1 + pi1}>
+                          {renderPropRow(statement, prop1, "1", pi1, false)}
+                          {prop1.props.map((prop2: any, pi2: number) => {
+                            return renderPropRow(
+                              statement,
+                              prop2,
+                              "2",
+                              pi2,
+                              pi2 === prop1.props.length - 1
+                            );
+                          })}
+                        </React.Fragment>
                       );
                     })}
-                  </React.Fragment>
-                );
-              })}
-            </StyledPropsActantList>
-          ) : null}
-        </React.Fragment>
+                  </StyledPropsActantList>
+                ) : null}
+              </React.Fragment>
+            </StyledSubRow>
+          </td>
+        </tr>
       );
     }
   };
@@ -451,6 +466,7 @@ export const StatementEditorBox: React.FC = () => {
               <StyledPropButtonGroup>
                 <StatementEditorAttributes
                   modalTitle={propTypeActant.label}
+                  entityType={propTypeActant.class}
                   data={{
                     elvl: prop.type.elvl,
                     logic: prop.type.logic,
@@ -506,6 +522,7 @@ export const StatementEditorBox: React.FC = () => {
               <StyledPropButtonGroup>
                 <StatementEditorAttributes
                   modalTitle={propValueActant.label}
+                  entityType={propValueActant.class}
                   data={{
                     elvl: prop.value.elvl,
                     logic: prop.value.logic,
@@ -621,6 +638,9 @@ export const StatementEditorBox: React.FC = () => {
                   statement={statement}
                   statementId={statementId}
                   updateActionsMutation={updateActionsRefreshListMutation}
+                  renderPropGroup={renderPropGroup}
+                  addProp={addProp}
+                  propsByOrigins={propsByOrigins}
                 />
               </StyledEditorActantTableWrapper>
 
@@ -643,6 +663,7 @@ export const StatementEditorBox: React.FC = () => {
                   statement={statement}
                   classEntitiesActant={classesActants}
                   updateActantsMutation={updateActantsRefreshListMutation}
+                  renderPropGroup={renderPropGroup}
                 />
               </StyledEditorActantTableWrapper>
 
@@ -657,27 +678,34 @@ export const StatementEditorBox: React.FC = () => {
           </StyledEditorSection>
 
           {/* Statement Props */}
-          <StyledEditorSection key="editor-section-props-statement">
+          {/* <StyledEditorSection key="editor-section-props-statement">
             <StyledEditorSectionHeader>
               Actions Properties
             </StyledEditorSectionHeader>
 
             <StyledEditorSectionContent key={JSON.stringify(statement.data)}>
-              {renderPropGroup(propsByOrigins[0], statement)}
+              {propsByOrigins
+                .filter((p) => p.type === "action")
+                .map((propOrigin, sai) => {
+                  console.log(propOrigin);
+                  return renderPropGroup(propOrigin, statement);
+                })}
             </StyledEditorSectionContent>
           </StyledEditorSection>
 
-          {/* Actant Props */}
           <StyledEditorSection key="editor-section-props-actants">
             <StyledEditorSectionHeader>
               Actant Properties
             </StyledEditorSectionHeader>
             <StyledEditorSectionContent key={JSON.stringify(statement.data)}>
-              {propsByOrigins.slice(1).map((propOrigin, sai) => {
-                return renderPropGroup(propOrigin, statement);
-              })}
+              {propsByOrigins
+                .filter((p) => p.type === "actant")
+                .map((propOrigin, sai) => {
+                  console.log(propOrigin);
+                  return renderPropGroup(propOrigin, statement);
+                })}
             </StyledEditorSectionContent>
-          </StyledEditorSection>
+          </StyledEditorSection> */}
 
           {/* Refs */}
           <StyledEditorSection key="editor-section-refs">
