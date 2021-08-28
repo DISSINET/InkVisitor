@@ -321,6 +321,7 @@ export const StatementEditorBox: React.FC = () => {
     {
       onSuccess: () => {
         queryClient.invalidateQueries(["statement"]);
+        // queryClient.invalidateQueries(["territory"]);
       },
     }
   );

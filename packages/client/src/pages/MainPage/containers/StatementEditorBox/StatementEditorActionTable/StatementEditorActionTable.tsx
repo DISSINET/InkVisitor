@@ -21,6 +21,7 @@ import { FaTrashAlt, FaUnlink } from "react-icons/fa";
 import { useMutation, UseMutationResult, useQueryClient } from "react-query";
 import { AxiosResponse } from "axios";
 import api from "api";
+import { ActantType } from "@shared/enums";
 const queryString = require("query-string");
 
 interface FilteredActionObject {
@@ -134,6 +135,7 @@ export const StatementEditorActionTable: React.FC<StatementEditorActionTable> =
             return action && sAction ? (
               <StatementEditorAttributes
                 modalTitle={action.label}
+                entityType={ActantType.Action}
                 data={{
                   elvl: sAction.elvl,
                   certainty: sAction.certainty,
