@@ -98,6 +98,7 @@ export const StatementEditorActionTable: React.FC<StatementEditorActionTable> =
           Cell: ({ row }: Cell) => {
             const { action, sAction } = row.values.data;
             return action ? (
+              // <StyledCell>
               <ActantTag
                 actant={action}
                 short={false}
@@ -116,6 +117,35 @@ export const StatementEditorActionTable: React.FC<StatementEditorActionTable> =
                 }
               />
             ) : (
+              // {sAction && (
+              //   <StatementEditorAttributes
+              //     modalTitle={action.label}
+              //     entityType={ActantType.Action}
+              //     data={{
+              //       elvl: sAction.elvl,
+              //       certainty: sAction.certainty,
+              //       logic: sAction.logic,
+              //       mood: sAction.mood,
+              //       moodvariant: sAction.moodvariant,
+              //       operator: sAction.operator,
+              //       bundleStart: sAction.bundleStart,
+              //       bundleEnd: sAction.bundleEnd,
+              //     }}
+              //     handleUpdate={(newData) => {
+              //       updateAction(sAction.id, newData);
+              //     }}
+              //   />
+              // )}
+              // <Button
+              //   key="d"
+              //   icon={<FaTrashAlt />}
+              //   color="danger"
+              //   tooltip="remove action row"
+              //   onClick={() => {
+              //     removeAction(row.values.data.sAction.id);
+              //   }}
+              // />
+              // </StyledCell>
               <ActantSuggester
                 onSelected={(newSelectedId: string) => {
                   updateAction(sAction.id, {
@@ -236,6 +266,7 @@ export const StatementEditorActionTable: React.FC<StatementEditorActionTable> =
                 statement={statement}
                 moveRow={moveRow}
                 updateOrderFn={updateActionOrder}
+                visibleColumns={visibleColumns}
                 {...row.getRowProps()}
               />
             );

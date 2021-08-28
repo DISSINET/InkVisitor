@@ -8,11 +8,15 @@ import {
   XYCoord,
 } from "react-dnd";
 import { FaGripVertical } from "react-icons/fa";
-import { Cell } from "react-table";
+import { Cell, ColumnInstance } from "react-table";
 const queryString = require("query-string");
 
 import { DragItem, ItemTypes } from "types";
-import { StyledTr, StyledTd } from "./StatementEditorActionTableRowStyles";
+import {
+  StyledTr,
+  StyledTd,
+  StyledSubRow,
+} from "./StatementEditorActionTableRowStyles";
 
 interface StatementEditorActionTableRow {
   row: any;
@@ -22,6 +26,7 @@ interface StatementEditorActionTableRow {
   updateOrderFn: () => void;
   handleClick: Function;
   renderPropGroup: Function;
+  visibleColumns: ColumnInstance<{}>[];
 }
 
 export const StatementEditorActionTableRow: React.FC<StatementEditorActionTableRow> =
@@ -33,6 +38,7 @@ export const StatementEditorActionTableRow: React.FC<StatementEditorActionTableR
     updateOrderFn,
     handleClick = () => {},
     renderPropGroup,
+    visibleColumns,
   }) => {
     var hashParams = queryString.parse(location.hash);
     const statementId = hashParams.statement;
@@ -92,7 +98,7 @@ export const StatementEditorActionTableRow: React.FC<StatementEditorActionTableR
             handleClick(row.values.id);
           }}
         >
-          <td ref={dragRef} style={{ cursor: "move" }}>
+          <td ref={dragRef} style={{ cursor: "move", width: "1%" }}>
             <FaGripVertical />
           </td>
           {row.cells.map((cell: Cell) => {
@@ -104,7 +110,13 @@ export const StatementEditorActionTableRow: React.FC<StatementEditorActionTableR
           })}
         </StyledTr>
 
-        {renderPropGroup(row.values.data.action.id, statement)}
+        <tr>
+          <td colSpan={visibleColumns.length + 1}>
+            <StyledSubRow>
+              {renderPropGroup(row.values.data.action.id, statement)}
+            </StyledSubRow>
+          </td>
+        </tr>
       </React.Fragment>
     );
   };
