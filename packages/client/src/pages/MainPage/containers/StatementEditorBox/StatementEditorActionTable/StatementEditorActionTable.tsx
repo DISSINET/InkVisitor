@@ -17,10 +17,11 @@ import {
 import { ActantSuggester, ActantTag, CertaintyToggle, ElvlToggle } from "../..";
 import { StatementEditorAttributes } from "./../StatementEditorAttributes/StatementEditorAttributes";
 import { Button, Input } from "components";
-import { FaTrashAlt, FaUnlink } from "react-icons/fa";
+import { FaPlus, FaTrashAlt, FaUnlink } from "react-icons/fa";
 import { useMutation, UseMutationResult, useQueryClient } from "react-query";
 import { AxiosResponse } from "axios";
 import api from "api";
+import { ActantType } from "@shared/enums";
 const queryString = require("query-string");
 
 interface FilteredActionObject {
@@ -30,14 +31,27 @@ interface StatementEditorActionTable {
   statement: IResponseStatement;
   statementId: string;
   handleRowClick?: Function;
+  renderPropGroup: Function;
   updateActionsMutation: UseMutationResult<any, unknown, object, unknown>;
+  addProp: (originId: string) => void;
+  propsByOrigins: {
+    [key: string]: {
+      type: "action" | "actant";
+      origin: any;
+      props: any[];
+      actant: IActant;
+    };
+  };
 }
 export const StatementEditorActionTable: React.FC<StatementEditorActionTable> =
   ({
     statement,
     statementId,
     handleRowClick = () => {},
+    renderPropGroup,
     updateActionsMutation,
+    addProp,
+    propsByOrigins,
   }) => {
     const queryClient = useQueryClient();
     var hashParams = queryString.parse(location.hash);
@@ -95,6 +109,7 @@ export const StatementEditorActionTable: React.FC<StatementEditorActionTable> =
           Cell: ({ row }: Cell) => {
             const { action, sAction } = row.values.data;
             return action ? (
+              // <StyledCell>
               <ActantTag
                 actant={action}
                 short={false}
@@ -132,6 +147,7 @@ export const StatementEditorActionTable: React.FC<StatementEditorActionTable> =
             return action && sAction ? (
               <StatementEditorAttributes
                 modalTitle={action.label}
+                entityType={ActantType.Action}
                 data={{
                   elvl: sAction.elvl,
                   certainty: sAction.certainty,
@@ -153,7 +169,7 @@ export const StatementEditorActionTable: React.FC<StatementEditorActionTable> =
         },
         {
           Header: "",
-          id: "expander",
+          id: "remove",
           Cell: ({ row }: Cell) => (
             <Button
               key="d"
@@ -165,6 +181,26 @@ export const StatementEditorActionTable: React.FC<StatementEditorActionTable> =
               }}
             />
           ),
+        },
+        {
+          Header: "",
+          id: "add",
+          Cell: ({ row }: Cell) => {
+            const propOriginId = row.values.data.action.id;
+            const propOrigin = propsByOrigins[propOriginId];
+            const originActant = propOrigin?.actant;
+            return (
+              <Button
+                key="a"
+                icon={<FaPlus />}
+                color="primary"
+                tooltip="add new prop"
+                onClick={() => {
+                  addProp(originActant.id);
+                }}
+              />
+            );
+          },
         },
       ];
     }, [filteredActions]);
@@ -225,11 +261,14 @@ export const StatementEditorActionTable: React.FC<StatementEditorActionTable> =
             prepareRow(row);
             return (
               <StatementEditorActionTableRow
+                renderPropGroup={renderPropGroup}
                 handleClick={handleRowClick}
                 index={i}
                 row={row}
+                statement={statement}
                 moveRow={moveRow}
                 updateOrderFn={updateActionOrder}
+                visibleColumns={visibleColumns}
                 {...row.getRowProps()}
               />
             );

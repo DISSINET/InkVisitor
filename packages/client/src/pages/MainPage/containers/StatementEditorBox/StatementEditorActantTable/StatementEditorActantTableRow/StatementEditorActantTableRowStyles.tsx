@@ -11,6 +11,9 @@ export const StyledTr = styled.tr<StyledTr>`
     padding-left: ${({ theme }) => theme.space[1]};
     padding-right: ${({ theme }) => theme.space[2]};
   }
+  td:not(:last-child) {
+    width: 1%;
+  }
 `;
 export const StyledTd = styled.td`
   padding-top: ${({ theme }) => `${theme.space[1]}`};

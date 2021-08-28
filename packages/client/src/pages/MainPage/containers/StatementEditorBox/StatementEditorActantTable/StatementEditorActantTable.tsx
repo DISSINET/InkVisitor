@@ -31,6 +31,7 @@ interface StatementEditorActantTable {
   statement: IResponseStatement;
   handleRowClick?: Function;
   classEntitiesActant: string[];
+  renderPropGroup: Function;
   updateActantsMutation: UseMutationResult<
     AxiosResponse<IResponseGeneric>,
     unknown,
@@ -42,6 +43,7 @@ export const StatementEditorActantTable: React.FC<StatementEditorActantTable> =
   ({
     statement,
     handleRowClick = () => {},
+    renderPropGroup,
     classEntitiesActant,
     updateActantsMutation,
   }) => {
@@ -97,7 +99,11 @@ export const StatementEditorActantTable: React.FC<StatementEditorActantTable> =
           Header: "Actant",
           accessor: "data",
           Cell: ({ row }: Cell) => {
-            const { actant, sActant } = row.values.data;
+            const {
+              actant,
+              sActant,
+            }: { actant: IActant; sActant: IStatementActant | any } =
+              row.values.data;
             return actant ? (
               <ActantTag
                 actant={actant}
@@ -252,11 +258,14 @@ export const StatementEditorActantTable: React.FC<StatementEditorActantTable> =
               prepareRow(row);
               return (
                 <StatementEditorActantTableRow
+                  statement={statement}
+                  renderPropGroup={renderPropGroup}
                   handleClick={handleRowClick}
                   index={i}
                   row={row}
                   moveRow={moveRow}
                   updateOrderFn={updateActantsOrder}
+                  visibleColumns={visibleColumns}
                   {...row.getRowProps()}
                 />
               );

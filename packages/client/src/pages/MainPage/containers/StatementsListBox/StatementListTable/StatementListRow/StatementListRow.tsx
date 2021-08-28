@@ -7,7 +7,7 @@ import {
   XYCoord,
 } from "react-dnd";
 import { FaGripVertical } from "react-icons/fa";
-import { Cell } from "react-table";
+import { Cell, ColumnInstance } from "react-table";
 const queryString = require("query-string");
 
 import { DragItem, ItemTypes } from "types";
@@ -20,7 +20,7 @@ interface StatementListRow {
   moveRow: any;
   moveEndRow: Function;
   handleClick: Function;
-  visibleColumns: any;
+  visibleColumns: ColumnInstance<{}>[];
 }
 
 export const StatementListRow: React.FC<StatementListRow> = ({
