@@ -395,12 +395,17 @@ const loadStatementsTables = async (next: Function) => {
           props: [],
           actants: [],
         },
-        notes: [statement.note, statement.location_text, statement.time_note],
+        notes: [],
         label: statement.id,
         detail: "",
         language: "eng",
         status: "1",
       };
+
+      statement.note && mainStatement.notes.push(statement.note);
+      statement.location_text &&
+        mainStatement.notes.push(statement.location_text);
+      statement.time_note && mainStatement.notes.push(statement.time_note);
 
       //subject
       processActant(
