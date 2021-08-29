@@ -13,7 +13,14 @@ import { useLocation, useHistory } from "react-router";
 import { toast } from "react-toastify";
 const queryString = require("query-string");
 
-import { Button, ButtonGroup, Loader, TagGroup, Tooltip } from "components";
+import {
+  Button,
+  ButtonGroup,
+  Loader,
+  Submit,
+  TagGroup,
+  Tooltip,
+} from "components";
 import { ActantTag } from "./../";
 import api from "api";
 import { IStatement, IActant, IAction } from "@shared/types";
@@ -44,6 +51,8 @@ export const StatementListBox: React.FC = () => {
   var hashParams = queryString.parse(location.hash);
   const territoryId = hashParams.territory;
   const statementId = hashParams.statement;
+  const [showSubmit, setShowSubmit] = useState(false);
+  const [statementToDelete, setStatementToDelete] = useState<IStatement>();
 
   const { status, data, error, isFetching } = useQuery(
     ["territory", "statement-list", territoryId],
@@ -307,7 +316,9 @@ export const StatementListBox: React.FC = () => {
               color="danger"
               tooltip="delete"
               onClick={() => {
-                removeStatementMutation.mutate((row.original as IStatement).id);
+                setStatementToDelete(row.original as IStatement);
+                setShowSubmit(true);
+                // removeStatementMutation.mutate((row.original as IStatement).id);
               }}
             />
             <Button
@@ -368,6 +379,27 @@ export const StatementListBox: React.FC = () => {
         handleRowClick={(rowId: string) => {
           // selectStatementRow(rowId)
         }}
+      />
+      <Submit
+        title="Delete statement"
+        text={`Do you really want to delete statement [${
+          statementToDelete?.label
+            ? statementToDelete.label
+            : statementToDelete?.id
+        }]?`}
+        show={showSubmit}
+        onCancel={() => {
+          setShowSubmit(false);
+          setStatementToDelete(undefined);
+        }}
+        onSubmit={() => {
+          if (statementToDelete) {
+            removeStatementMutation.mutate(statementToDelete.id);
+            setShowSubmit(false);
+            setStatementToDelete(undefined);
+          }
+        }}
+        loading={removeStatementMutation.isLoading}
       />
       <Loader
         show={
