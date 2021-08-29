@@ -12,15 +12,10 @@ import {
 } from "react-icons/fa";
 
 import { useLocation, useHistory } from "react-router";
-
-import { ActantTag, ActionDropdown, CertaintyToggle, ElvlToggle } from "./../";
-
+import { ActantTag } from "./../";
 import { CProp, CStatementActant, CStatementAction } from "constructors";
 
-import {
-  actantPositionDict,
-  referenceTypeDict,
-} from "./../../../../../../shared/dictionaries";
+import { referenceTypeDict } from "./../../../../../../shared/dictionaries";
 import {
   IActant,
   IStatementProp,
@@ -88,13 +83,7 @@ export const StatementEditorBox: React.FC = () => {
   // getting origin actants of properties
   const propsByOrigins = useMemo(() => {
     if (statement) {
-      // console.log(
-      //   "getting new props",
-      //   statement.data.actants,
-      //   statement.actants
-      // );
       const allProps = statement?.data.props;
-      const statementItself = { ...statement };
 
       const statementActants = statement.actants.filter(
         (sa) =>
@@ -107,7 +96,7 @@ export const StatementEditorBox: React.FC = () => {
       const originProps: {
         [key: string]: {
           type: "action" | "actant";
-          origin: any;
+          origin: string;
           props: any[];
           actant: IActant;
         };
@@ -371,6 +360,7 @@ export const StatementEditorBox: React.FC = () => {
     visibleColumns: ColumnInstance<{}>[]
   ) => {
     const propOrigin = propsByOrigins[propOriginId];
+
     const originActant = propOrigin?.actant;
 
     if (originActant && propOrigin.props.length > 0) {
@@ -671,9 +661,12 @@ export const StatementEditorBox: React.FC = () => {
               <StyledEditorActantTableWrapper>
                 <StatementEditorActantTable
                   statement={statement}
+                  statementId={statementId}
                   classEntitiesActant={classesActants}
                   updateActantsMutation={updateActantsRefreshListMutation}
                   renderPropGroup={renderPropGroup}
+                  addProp={addProp}
+                  propsByOrigins={propsByOrigins}
                 />
               </StyledEditorActantTableWrapper>
 
