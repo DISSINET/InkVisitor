@@ -131,15 +131,16 @@ export const StatementEditorBox: React.FC = () => {
       });
 
       // 2nd level
-      // allProps.forEach((prop) => {
-      //   originProps.forEach((op) => {
-      //     op.props.forEach((op2) => {
-      //       if (op2.id === prop.origin) {
-      //         op2.props.push(prop);
-      //       }
-      //     });
-      //   });
-      // });
+      allProps.forEach((prop) => {
+        Object.keys(originProps).forEach((opKey: string) => {
+          const op = originProps[opKey];
+          op.props.forEach((op2) => {
+            if (op2.id === prop.origin) {
+              op2.props.push(prop);
+            }
+          });
+        });
+      });
 
       //console.log(originProps);
 
@@ -685,36 +686,6 @@ export const StatementEditorBox: React.FC = () => {
               ></ActantSuggester>
             </StyledEditorSectionContent>
           </StyledEditorSection>
-
-          {/* Statement Props */}
-          {/* <StyledEditorSection key="editor-section-props-statement">
-            <StyledEditorSectionHeader>
-              Actions Properties
-            </StyledEditorSectionHeader>
-
-            <StyledEditorSectionContent key={JSON.stringify(statement.data)}>
-              {propsByOrigins
-                .filter((p) => p.type === "action")
-                .map((propOrigin, sai) => {
-                  console.log(propOrigin);
-                  return renderPropGroup(propOrigin, statement);
-                })}
-            </StyledEditorSectionContent>
-          </StyledEditorSection>
-
-          <StyledEditorSection key="editor-section-props-actants">
-            <StyledEditorSectionHeader>
-              Actant Properties
-            </StyledEditorSectionHeader>
-            <StyledEditorSectionContent key={JSON.stringify(statement.data)}>
-              {propsByOrigins
-                .filter((p) => p.type === "actant")
-                .map((propOrigin, sai) => {
-                  console.log(propOrigin);
-                  return renderPropGroup(propOrigin, statement);
-                })}
-            </StyledEditorSectionContent>
-          </StyledEditorSection> */}
 
           {/* Refs */}
           <StyledEditorSection key="editor-section-refs">
