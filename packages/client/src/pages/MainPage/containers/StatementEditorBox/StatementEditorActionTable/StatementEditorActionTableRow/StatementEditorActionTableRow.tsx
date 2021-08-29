@@ -12,11 +12,7 @@ import { Cell, ColumnInstance } from "react-table";
 const queryString = require("query-string");
 
 import { DragItem, ItemTypes } from "types";
-import {
-  StyledTr,
-  StyledTd,
-  StyledSubRow,
-} from "./StatementEditorActionTableRowStyles";
+import { StyledTr, StyledTd } from "./StatementEditorActionTableRowStyles";
 
 interface StatementEditorActionTableRow {
   row: any;
@@ -79,7 +75,9 @@ export const StatementEditorActionTableRow: React.FC<StatementEditorActionTableR
       collect: (monitor: DragSourceMonitor) => ({
         isDragging: monitor.isDragging(),
       }),
-      end: updateOrderFn,
+      end: (item: DragItem | undefined, monitor: DragSourceMonitor) => {
+        if (item) updateOrderFn();
+      },
     });
 
     const opacity = isDragging ? 0.2 : 1;
@@ -98,7 +96,7 @@ export const StatementEditorActionTableRow: React.FC<StatementEditorActionTableR
             handleClick(row.values.id);
           }}
         >
-          <td ref={dragRef} style={{ cursor: "move", width: "1%" }}>
+          <td ref={dragRef} style={{ cursor: "move" }}>
             <FaGripVertical />
           </td>
           {row.cells.map((cell: Cell) => {
@@ -110,7 +108,11 @@ export const StatementEditorActionTableRow: React.FC<StatementEditorActionTableR
           })}
         </StyledTr>
 
-        {renderPropGroup(row.values.data.action.id, statement, visibleColumns)}
+        {renderPropGroup(
+          row.values.data.sAction.action,
+          statement,
+          visibleColumns
+        )}
       </React.Fragment>
     );
   };
