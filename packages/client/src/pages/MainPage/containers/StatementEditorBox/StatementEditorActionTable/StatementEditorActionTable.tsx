@@ -19,10 +19,7 @@ import { StatementEditorAttributes } from "./../StatementEditorAttributes/Statem
 import { Button, Input } from "components";
 import { FaPlus, FaTrashAlt, FaUnlink } from "react-icons/fa";
 import { useMutation, UseMutationResult, useQueryClient } from "react-query";
-import { AxiosResponse } from "axios";
-import api from "api";
 import { ActantType } from "@shared/enums";
-const queryString = require("query-string");
 
 interface FilteredActionObject {
   data: { action: IActant | undefined; sAction: IStatementAction };
@@ -37,7 +34,7 @@ interface StatementEditorActionTable {
   propsByOrigins: {
     [key: string]: {
       type: "action" | "actant";
-      origin: any;
+      origin: string;
       props: any[];
       actant: IActant;
     };
@@ -53,10 +50,6 @@ export const StatementEditorActionTable: React.FC<StatementEditorActionTable> =
     addProp,
     propsByOrigins,
   }) => {
-    const queryClient = useQueryClient();
-    var hashParams = queryString.parse(location.hash);
-    const territoryId = hashParams.territory;
-
     const [filteredActions, setFilteredActions] = useState<
       FilteredActionObject[]
     >([]);
@@ -186,9 +179,10 @@ export const StatementEditorActionTable: React.FC<StatementEditorActionTable> =
           Header: "",
           id: "add",
           Cell: ({ row }: Cell) => {
-            const propOriginId = row.values.data.action.id;
-            const propOrigin = propsByOrigins[propOriginId];
-            const originActant = propOrigin?.actant;
+            const propOriginId = row.values.data.sAction.action;
+            // const propOriginId = row.values.data.action.id;
+            // const propOrigin = propsByOrigins[propOriginId];
+            // const originActant = propOrigin?.actant;
             return (
               <Button
                 key="a"
@@ -196,7 +190,7 @@ export const StatementEditorActionTable: React.FC<StatementEditorActionTable> =
                 color="primary"
                 tooltip="add new prop"
                 onClick={() => {
-                  addProp(originActant.id);
+                  addProp(propOriginId);
                 }}
               />
             );

@@ -76,7 +76,6 @@ export const StatementEditorActantTableRow: React.FC<StatementEditorActantTableR
         isDragging: monitor.isDragging(),
       }),
       end: (item: DragItem | undefined, monitor: DragSourceMonitor) => {
-        // TODO: check if order changed
         if (item) updateOrderFn();
       },
     });
@@ -109,7 +108,11 @@ export const StatementEditorActantTableRow: React.FC<StatementEditorActantTableR
           })}
         </StyledTr>
 
-        {renderPropGroup(row.values.data.sActant.id, statement, visibleColumns)}
+        {renderPropGroup(
+          row.values.data.sActant.actant,
+          statement,
+          visibleColumns
+        )}
       </React.Fragment>
     );
   };
