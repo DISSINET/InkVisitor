@@ -1,6 +1,14 @@
 import { animated } from "react-spring";
 import styled from "styled-components";
-import { space1, space3, space5, space6, space7 } from "Theme/constants";
+import {
+  space1,
+  space2,
+  space3,
+  space4,
+  space5,
+  space6,
+  space7,
+} from "Theme/constants";
 import { Colors } from "types";
 
 interface ModalWrap {}
@@ -59,7 +67,7 @@ export const StyledCardHeader = styled.header<StyledCardHeader>`
   justify-content: flex-start;
   align-items: center;
   flex-shrink: 0;
-  padding: ${space3} ${space6} ${space1} ${space6};
+  padding: ${space4} ${space6} ${space2} ${space6};
   background-color: ${({ theme, color }) => theme.color[color]};
   border-top-left-radius: ${({ theme }) => theme.borderRadius["sm"]};
   border-top-right-radius: ${({ theme }) => theme.borderRadius["sm"]};
