@@ -1,50 +1,14 @@
 import React, { useEffect, useState } from "react";
 
 import { Button, Input } from "components";
-import { IResponseStatement } from "@shared/types";
-import { useMutation, useQueryClient } from "react-query";
-import api from "api";
 import { FaPlus, FaTrashAlt } from "react-icons/fa";
 import { StyledRow } from "./MultiInputStyles";
 
-const testTextArr = [
-  "dasdasdads",
-  "Asda DKLlkd Podowi Qewieo qiuda",
-  "X V F skdjl aksjl fsa kljf opwi qp",
-];
 interface MultiInput {
   values: string[];
   onChange: Function;
 }
 export const MultiInput: React.FC<MultiInput> = ({ values, onChange }) => {
-  // const queryClient = useQueryClient();
-  // const [data, setData] = useState<string[]>(statement.notes || []);
-
-  // const handleChange = (key: number, value: string) => {
-  //   const newData: string[] = [...data];
-  //   newData[key] = value;
-  //   updateStatementMutation.mutate({ notes: newData });
-  //   setData(newData);
-  // };
-
-  // const updateStatementMutation = useMutation(
-  //   async (changes: object) =>
-  //     await api.actantsUpdate(statement.id, {
-  //       data: changes,
-  //     }),
-  //   {
-  //     onSuccess: () => {
-  //       queryClient.invalidateQueries(["statement"]);
-  //     },
-  //   }
-  // );
-
-  // const handleDelete = (key: number) => {
-  //   const newData = data;
-  //   newData.splice(key, 1);
-  //   updateStatementMutation.mutate({ notes: newData });
-  // };
-
   const [displayValues, setDisplayValues] = useState(values);
   useEffect(() => {
     const newDisplayValues = values.map((v) => v || "");
