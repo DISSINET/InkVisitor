@@ -1,10 +1,6 @@
 import {
   StyledAttributeWrapper,
   StyledAttributeModalContent,
-  StyledAttributeModalRow,
-  StyledAttributeModalRowLabel,
-  StyledAttributeModalRowLabelText,
-  StyledAttributeModalRowLabelIcon,
 } from "./StatementEditorAttributesStyles";
 
 import {
@@ -21,16 +17,10 @@ import {
 import {
   Button,
   ButtonGroup,
-  Loader,
   Modal,
   ModalHeader,
   ModalContent,
   ModalFooter,
-  Input,
-  Submit,
-  Dropdown,
-  Checkbox,
-  Tooltip,
 } from "components";
 
 import { MdSettings } from "react-icons/md";
@@ -38,7 +28,6 @@ import {
   ActantType,
   Certainty,
   Elvl,
-  Position,
   Logic,
   Mood,
   MoodVariant,
@@ -46,10 +35,12 @@ import {
   Partitivity,
   Operator,
 } from "@shared/enums";
-import React, { useState, useMemo } from "react";
+import React, { useState } from "react";
 import { ElvlToggle } from "../..";
 import { AttributeIcon } from "../../AttributeIcons/AttributeIcons";
 import { Colors, Entities } from "types";
+import { CheckboxRow } from "./CheckboxRow/CheckboxRow";
+import { AttributeRow } from "./AttributeRow/AttributeRow";
 
 type AttributeName =
   | "certainty"
@@ -327,7 +318,6 @@ export const StatementEditorAttributes: React.FC<StatementEditorAttributes> = ({
     <>
       {modalOpen && renderModal()}
       <StyledAttributeWrapper>
-        {/* <Tooltip label="settings"> */}
         <Button
           key="settings"
           icon={<MdSettings />}
@@ -337,88 +327,7 @@ export const StatementEditorAttributes: React.FC<StatementEditorAttributes> = ({
             handleOpenModalClick();
           }}
         />
-        {/* </Tooltip> */}
       </StyledAttributeWrapper>
     </>
-  );
-};
-
-interface AttributeRow {
-  value: string | string[];
-  items: { value: string; label: string }[];
-  label: string;
-  icon: React.ReactElement;
-  multi: boolean;
-  onChangeFn: (value: string | string[]) => void;
-}
-const AttributeRow: React.FC<AttributeRow> = ({
-  value,
-  items,
-  label,
-  icon,
-  multi,
-  onChangeFn,
-}) => {
-  const selectedItem = useMemo(() => {
-    return multi
-      ? items.filter((i: any) => value.includes(i.value))
-      : items.find((i: any) => i.value === value);
-  }, [value]);
-
-  return (
-    <StyledAttributeModalRow>
-      <StyledAttributeModalRowLabel>
-        <StyledAttributeModalRowLabelIcon>
-          {icon}
-        </StyledAttributeModalRowLabelIcon>
-        <StyledAttributeModalRowLabelText>
-          {label}
-        </StyledAttributeModalRowLabelText>
-      </StyledAttributeModalRowLabel>
-      <Dropdown
-        width="full"
-        isMulti={multi}
-        options={items}
-        value={selectedItem}
-        onChange={(newValue: any) => {
-          onChangeFn(
-            multi
-              ? newValue.map((v: any) => v.value)
-              : (newValue.value as string | string[])
-          );
-        }}
-      />
-    </StyledAttributeModalRow>
-  );
-};
-
-interface CheckboxRow {
-  value: boolean;
-  onChangeFn: (value: boolean) => void;
-  label: string;
-  icon: React.ReactElement;
-}
-export const CheckboxRow: React.FC<CheckboxRow> = ({
-  value,
-  onChangeFn,
-  icon,
-  label,
-}) => {
-  return (
-    <StyledAttributeModalRow>
-      <StyledAttributeModalRowLabel>
-        <StyledAttributeModalRowLabelIcon>
-          {icon}
-        </StyledAttributeModalRowLabelIcon>
-        <StyledAttributeModalRowLabelText>
-          {label}
-        </StyledAttributeModalRowLabelText>
-      </StyledAttributeModalRowLabel>
-      <Checkbox
-        onChangeFn={(newValue: boolean) => onChangeFn(newValue)}
-        id={label}
-        value={value}
-      />
-    </StyledAttributeModalRow>
   );
 };

@@ -12,7 +12,7 @@ const GlobalStyle = createGlobalStyle`
   body {
     font-family: "Roboto", sans-serif;
     letter-spacing: .2px;
-    line-height: 1.5;
+    line-height: 1.3;
     @font-face {
       font-family: "Muni";
       src: url("${MuniFont}") format("woff2");
