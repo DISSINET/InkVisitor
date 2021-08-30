@@ -198,7 +198,7 @@ export const StatementEditorActionTable: React.FC<StatementEditorActionTable> =
           },
         },
       ];
-    }, [filteredActions]);
+    }, [filteredActions, updateActionsMutation]);
 
     const getRowId = useCallback((row) => {
       return row.id;

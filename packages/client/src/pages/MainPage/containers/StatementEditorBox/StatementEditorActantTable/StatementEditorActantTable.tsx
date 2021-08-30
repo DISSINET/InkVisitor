@@ -221,7 +221,7 @@ export const StatementEditorActantTable: React.FC<StatementEditorActantTable> =
           },
         },
       ];
-    }, [filteredActants]);
+    }, [filteredActants, updateActantsMutation]);
 
     const getRowId = useCallback((row) => {
       return row.id;
