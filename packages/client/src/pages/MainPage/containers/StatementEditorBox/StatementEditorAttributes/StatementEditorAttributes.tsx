@@ -319,31 +319,49 @@ export const StatementEditorAttributes: React.FC<StatementEditorAttributes> = ({
   return (
     <>
       {modalOpen && renderModal()}
+
       <StyledAttributeWrapper>
         <Tooltip
           attributes={[
-            <TooltipAttributeRow attributeName="elvl" value={data.elvl} />,
-            <TooltipAttributeRow attributeName="logic" value={data.logic} />,
+            <TooltipAttributeRow
+              attributeName="elvl"
+              value={data.elvl}
+              items={elvlDict}
+            />,
+            <TooltipAttributeRow
+              attributeName="logic"
+              value={data.logic}
+              items={logicDict}
+            />,
             <TooltipAttributeRow
               attributeName="certainty"
               value={data.certainty}
+              items={certaintyDict}
             />,
-            <TooltipAttributeRow attributeName="mood" value={data.mood} />,
+            <TooltipAttributeRow
+              attributeName="mood"
+              value={data.mood}
+              items={moodDict}
+            />,
             <TooltipAttributeRow
               attributeName="moodvariant"
               value={data.moodvariant}
+              items={moodVariantsDict}
             />,
             <TooltipAttributeRow
               attributeName="virtuality"
               value={data.virtuality}
+              items={virtualityDict}
             />,
             <TooltipAttributeRow
               attributeName="partitivity"
               value={data.partitivity}
+              items={partitivityDict}
             />,
             <TooltipAttributeRow
               attributeName="operator"
               value={data.operator}
+              items={operatorDict}
             />,
           ]}
         >
