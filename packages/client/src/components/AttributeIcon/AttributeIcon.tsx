@@ -21,10 +21,6 @@ export const attributeIcons = {
   bundleEnd: <BiChevronRight />,
 };
 
-export const AttributeCertaintyIcon: React.FC = () => {
-  return <FaQuestionCircle />;
-};
-
 export const AttributeIcon: React.FC<{ attributeName: string }> = ({
   attributeName,
 }) => {

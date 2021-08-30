@@ -154,6 +154,7 @@ export const StatementEditorActionTable: React.FC<StatementEditorActionTable> =
                 handleUpdate={(newData) => {
                   updateAction(sAction.id, newData);
                 }}
+                loading={updateActionsMutation.isLoading}
               />
             ) : (
               <div />

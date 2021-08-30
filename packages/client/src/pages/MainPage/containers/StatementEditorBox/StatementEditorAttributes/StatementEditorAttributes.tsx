@@ -22,6 +22,7 @@ import {
   ModalContent,
   ModalFooter,
   Tooltip,
+  Loader,
 } from "components";
 
 import { MdSettings } from "react-icons/md";
@@ -74,6 +75,7 @@ interface StatementEditorAttributes {
   entityType?: ActantType;
   data: AttributeData;
   handleUpdate: (data: AttributeData) => void;
+  loading?: boolean;
 }
 
 export const StatementEditorAttributes: React.FC<StatementEditorAttributes> = ({
@@ -81,6 +83,7 @@ export const StatementEditorAttributes: React.FC<StatementEditorAttributes> = ({
   entityType,
   data,
   handleUpdate,
+  loading,
 }) => {
   const [modalData, setModalData] = useState<AttributeData>(data);
   const [modalOpen, setModalOpen] = useState<boolean>(false);
@@ -312,6 +315,7 @@ export const StatementEditorAttributes: React.FC<StatementEditorAttributes> = ({
             />
           </ButtonGroup>
         </ModalFooter>
+        <Loader show={loading} />
       </Modal>
     );
   };

@@ -180,6 +180,7 @@ export const StatementEditorActantTable: React.FC<StatementEditorActantTable> =
                 handleUpdate={(newData) => {
                   updateActant(sActant.id, newData);
                 }}
+                loading={updateActantsMutation.isLoading}
               />
             ) : (
               <div />
