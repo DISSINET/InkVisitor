@@ -6,25 +6,25 @@ import {
   StyledAttributeModalRowLabelIcon,
   StyledAttributeModalRowLabelText,
 } from "../StatementEditorAttributesStyles";
-import { Checkbox } from "components";
+import { AttributeIcon, Checkbox } from "components";
 
 interface CheckboxRow {
   value: boolean;
   onChangeFn: (value: boolean) => void;
   label: string;
-  icon: React.ReactElement;
+  attributeName: string;
 }
 export const CheckboxRow: React.FC<CheckboxRow> = ({
   value,
   onChangeFn,
-  icon,
   label,
+  attributeName,
 }) => {
   return (
     <StyledAttributeModalRow>
       <StyledAttributeModalRowLabel>
         <StyledAttributeModalRowLabelIcon>
-          {icon}
+          <AttributeIcon attributeName={attributeName} />
         </StyledAttributeModalRowLabelIcon>
         <StyledAttributeModalRowLabelText>
           {label}

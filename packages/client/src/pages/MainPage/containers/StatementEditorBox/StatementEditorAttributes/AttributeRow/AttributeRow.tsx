@@ -5,13 +5,13 @@ import {
   StyledAttributeModalRowLabelIcon,
   StyledAttributeModalRowLabelText,
 } from "../StatementEditorAttributesStyles";
-import { Dropdown } from "components";
+import { AttributeIcon, Dropdown } from "components";
 
 interface AttributeRow {
   value: string | string[];
   items: { value: string; label: string }[];
   label: string;
-  icon: React.ReactElement;
+  attributeName: string;
   multi: boolean;
   onChangeFn: (value: string | string[]) => void;
 }
@@ -19,7 +19,7 @@ export const AttributeRow: React.FC<AttributeRow> = ({
   value,
   items,
   label,
-  icon,
+  attributeName,
   multi,
   onChangeFn,
 }) => {
@@ -33,7 +33,7 @@ export const AttributeRow: React.FC<AttributeRow> = ({
     <StyledAttributeModalRow>
       <StyledAttributeModalRowLabel>
         <StyledAttributeModalRowLabelIcon>
-          {icon}
+          <AttributeIcon attributeName={attributeName} />
         </StyledAttributeModalRowLabelIcon>
         <StyledAttributeModalRowLabelText>
           {label}

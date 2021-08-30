@@ -25,9 +25,11 @@ import {
 } from "components/Modal/Modal";
 import { PanelSeparator } from "./PanelSeparator/PanelSeparator";
 import { Checkbox } from "./Checkbox/Checkbox";
+import { AttributeIcon } from "./AttributeIcon/AttributeIcon";
 
 export {
   Arrow,
+  AttributeIcon,
   Box,
   Button,
   ButtonGroup,
