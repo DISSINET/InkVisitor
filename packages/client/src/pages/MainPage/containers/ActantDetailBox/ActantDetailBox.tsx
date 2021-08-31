@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useMemo } from "react";
 const queryString = require("query-string");
 
-import { Button, ButtonGroup, Input, Loader } from "components";
+import { Button, ButtonGroup, Input, Loader, MultiInput } from "components";
 import {
   StyledContent,
   StyledSection,
@@ -15,6 +15,8 @@ import {
   StyledContentRow,
   StyledSectionUsedText,
   StyledSectionUsedPageManager,
+  StyledContentRowLabel,
+  StyledContentRowValue,
 } from "./ActandDetailBoxStyles";
 import { useHistory, useLocation } from "react-router-dom";
 import api from "api";
@@ -45,6 +47,8 @@ import {
 import { CMetaStatement, CStatementActant } from "constructors";
 import { findPositionInStatement } from "utils";
 import { ActantDetailMetaTableRow } from "./ActantDetailMetaTableRow/ActantDetailMetaTableRow";
+import { actantStatusDict, languageDict } from "@shared/dictionaries";
+import { composeWithDevTools } from "redux-devtools-extension";
 
 interface ActantDetailBox {}
 export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
@@ -83,6 +87,20 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
   useEffect(() => {
     setUsedInPage(0);
   }, [actantId]);
+
+  const actantMode = useMemo(() => {
+    const actantClass = actant?.class;
+    if (actantClass) {
+      if (actantClass === "A") {
+        return "action";
+      } else if (actantClass === "T") {
+        return "territory";
+      } else if (actantClass === "R") {
+        return "resource";
+      }
+    }
+    return "entity";
+  }, [actant]);
 
   const usedInStatements = useMemo(() => {
     if (actant && actant.usedIn) {
@@ -184,25 +202,26 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
     }
   );
 
+  const updateActantMutation = useMutation(
+    async (changes: any) => await api.actantsUpdate(actantId, changes),
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries(["actant"]);
+        // queryClient.invalidateQueries("statement");
+        // queryClient.invalidateQueries("tree");
+      },
+    }
+  );
+
   return (
     <>
       {actant && (
         <StyledContent>
           <StyledSection firstSection>
             <StyledSectionHeader>Actant detail</StyledSectionHeader>
+
             <StyledContentRow>
               <ActantTag actant={actant} propId={actant.id} />
-              <Input
-                value={actant.label}
-                onChangeFn={async (newLabel: string) => {
-                  if (newLabel !== actant.label) {
-                    actantsLabelUpdateMutation.mutate({
-                      actantId: actant.id,
-                      newLabel: newLabel,
-                    });
-                  }
-                }}
-              />
               <ButtonGroup>
                 <Button
                   color="danger"
@@ -225,6 +244,71 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
                   }}
                 />
               </ButtonGroup>
+            </StyledContentRow>
+
+            <StyledContentRow>
+              <StyledContentRowLabel>Label</StyledContentRowLabel>
+              <StyledContentRowValue>
+                <Input
+                  value={actant.label}
+                  onChangeFn={async (newLabel: string) => {
+                    if (newLabel !== actant.label) {
+                      actantsLabelUpdateMutation.mutate({
+                        actantId: actant.id,
+                        newLabel: newLabel,
+                      });
+                    }
+                  }}
+                />
+              </StyledContentRowValue>
+            </StyledContentRow>
+            <StyledContentRow>
+              <StyledContentRowLabel>Detail</StyledContentRowLabel>
+              <StyledContentRowValue>
+                <Input
+                  value={actant.detail}
+                  onChangeFn={async (newValue: string) => {
+                    updateActantMutation.mutate({ detail: newValue });
+                  }}
+                />
+              </StyledContentRowValue>
+            </StyledContentRow>
+            <StyledContentRow>
+              <StyledContentRowLabel>Status</StyledContentRowLabel>
+              <StyledContentRowValue>
+                <Input
+                  value={actant.status}
+                  type="select"
+                  options={actantStatusDict}
+                  onChangeFn={async (newValue: string) => {
+                    updateActantMutation.mutate({ status: newValue });
+                  }}
+                />
+              </StyledContentRowValue>
+            </StyledContentRow>
+            <StyledContentRow>
+              <StyledContentRowLabel>Language</StyledContentRowLabel>
+              <StyledContentRowValue>
+                <Input
+                  value={actant.language}
+                  type="select"
+                  options={languageDict}
+                  onChangeFn={async (newValue: string) => {
+                    updateActantMutation.mutate({ language: newValue });
+                  }}
+                />
+              </StyledContentRowValue>
+            </StyledContentRow>
+            <StyledContentRow>
+              <StyledContentRowLabel>Notes</StyledContentRowLabel>
+              <StyledContentRowValue>
+                <MultiInput
+                  values={actant.notes}
+                  onChange={(newValues: string[]) => {
+                    updateActantMutation.mutate({ notes: newValues });
+                  }}
+                />
+              </StyledContentRowValue>
             </StyledContentRow>
           </StyledSection>
           <StyledSection>
@@ -317,7 +401,6 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
               <StyledHeaderColumn></StyledHeaderColumn>
               {usedInStatements.map((usedInStatement) => {
                 const { statement, position } = usedInStatement;
-                //console.log(actant.usedIn);
                 return (
                   <React.Fragment key={statement.id}>
                     <StyledSectionUsedTableCell>
@@ -360,7 +443,7 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
           actantsCreateMutation.isLoading ||
           actantsDeleteMutation.isLoading ||
           actantsLabelUpdateMutation.isLoading ||
-          actantsUpdateMutation.isLoading
+          updateActantMutation.isLoading
         }
       />
     </>
