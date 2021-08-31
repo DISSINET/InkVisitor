@@ -47,7 +47,11 @@ import {
 import { CMetaStatement, CStatementActant } from "constructors";
 import { findPositionInStatement } from "utils";
 import { ActantDetailMetaTableRow } from "./ActantDetailMetaTableRow/ActantDetailMetaTableRow";
-import { actantStatusDict, languageDict } from "@shared/dictionaries";
+import {
+  actantLogicalTypeDict,
+  actantStatusDict,
+  languageDict,
+} from "@shared/dictionaries";
 import { composeWithDevTools } from "redux-devtools-extension";
 
 interface ActantDetailBox {}
@@ -310,6 +314,23 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
                 />
               </StyledContentRowValue>
             </StyledContentRow>
+            {actantMode === "entity" && actant.data?.logicalType && (
+              <StyledContentRow>
+                <StyledContentRowLabel>Logical Type</StyledContentRowLabel>
+                <StyledContentRowValue>
+                  <Input
+                    value={actant.data.logicalType}
+                    type="select"
+                    options={actantLogicalTypeDict}
+                    onChangeFn={(newValue: string) => {
+                      updateActantMutation.mutate({
+                        data: { logicalType: newValue },
+                      });
+                    }}
+                  />
+                </StyledContentRowValue>
+              </StyledContentRow>
+            )}
           </StyledSection>
           <StyledSection>
             <StyledSectionHeader>Meta statements</StyledSectionHeader>
