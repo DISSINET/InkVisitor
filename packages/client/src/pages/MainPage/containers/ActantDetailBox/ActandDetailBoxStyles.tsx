@@ -32,6 +32,12 @@ export const StyledSectionHeader = styled.div`
 export const StyledContentRow = styled.div`
   display: flex;
 `;
+export const StyledContentRowLabel = styled.div`
+  float: left;
+`;
+export const StyledContentRowValue = styled.div`
+  float: right;
+`;
 
 export const StyledSectionUsedTable = styled.div`
   display: grid;
