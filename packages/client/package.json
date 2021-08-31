@@ -7,7 +7,6 @@
     "test": "jest",
     "start": "webpack-dev-server --open --config webpack.development.js",
     "build": "webpack --config webpack.production.js",
-    "deploy": "npm run build && rsync -avz dist/ adamm@10.16.30.211:/var/www/html/apps/inkvisitor/",
     "storybook": "start-storybook -p 6006",
     "build-storybook": "build-storybook"
   },
