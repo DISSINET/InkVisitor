@@ -10,7 +10,7 @@ import Actant from "./actant";
 
 class EntityData implements IModel {
   logicalType: ActantLogicalType = "1";
-  language: string = "eng";
+  language: string[] = ["eng"];
   constructor(data: UnknownObject) {
     if (!data) {
       return;
@@ -32,7 +32,7 @@ class Entity extends Actant implements IEntity {
   label: string = "";
   detail: string = "";
   status: ActantStatus = "0";
-  language: string = "eng";
+  language: string[] = ["eng"];
   notes: string[] = [];
 
   constructor(data: UnknownObject) {

@@ -50,7 +50,7 @@ export const CStatement = (territoryId: string): IStatement => ({
   label: "",
   detail: "",
   status: "0",
-  language: "eng",
+  language: ["eng"],
   notes: [],
   data: {
     actions: [],
@@ -72,7 +72,7 @@ export const CMetaStatement = (subjectId: string): IStatement => ({
   label: "",
   detail: "",
   status: "0",
-  language: "eng",
+  language: ["eng"],
   notes: [],
   data: {
     actions: [
@@ -186,7 +186,7 @@ export const CTerritoryActant = (
   label: label,
   detail: "",
   status: "0",
-  language: "eng",
+  language: ["eng"],
   notes: [],
   data: {
     parent: { id: parentId, order: parentOrder },
@@ -205,6 +205,6 @@ export const CActant = (
   detail: "",
   data: {},
   status: "0",
-  language: "eng",
+  language: ["eng"],
   notes: [],
 });

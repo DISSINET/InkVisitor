@@ -8,6 +8,7 @@ export default class Actant implements IDbModel {
   static table = "actants";
 
   id?: string;
+  language: string[] = ["eng"];
 
   async save(db: Connection | undefined): Promise<WriteResult> {
     const result = await rethink

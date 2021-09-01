@@ -18,7 +18,7 @@ interface InputProps {
   options?: IOption[];
   rows?: number;
   cols?: number;
-  width?: number;
+  width?: number | undefined;
   onChangeFn: Function;
   onEnterPressFn?: Function;
   placeholder?: string;
@@ -36,7 +36,7 @@ export const Input: React.FC<InputProps> = ({
   options = [],
   rows = 5,
   cols = 50,
-  width = 150,
+  width = undefined,
   changeOnType = false,
   onEnterPressFn = () => {},
   onChangeFn,
@@ -113,6 +113,7 @@ export const Input: React.FC<InputProps> = ({
         <StyledSelect
           className="value"
           value={value}
+          width={width}
           autoFocus={autoFocus}
           onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
             onChangeFn(e.target.value);
