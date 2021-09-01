@@ -7,8 +7,13 @@ import { StyledRow } from "./MultiInputStyles";
 interface MultiInput {
   values: string[];
   onChange: Function;
+  width?: undefined | number;
 }
-export const MultiInput: React.FC<MultiInput> = ({ values, onChange }) => {
+export const MultiInput: React.FC<MultiInput> = ({
+  values,
+  onChange,
+  width = undefined,
+}) => {
   const [displayValues, setDisplayValues] = useState(values);
   useEffect(() => {
     const newDisplayValues = values.map((v) => v || "");
@@ -22,8 +27,11 @@ export const MultiInput: React.FC<MultiInput> = ({ values, onChange }) => {
   const handleChange = (key: number, value: string) => {
     const newValues = [...displayValues];
     newValues[key] = value;
-    setDisplayValues(newValues);
-    sendChanges(newValues);
+
+    if (JSON.stringify(newValues) !== JSON.stringify(displayValues)) {
+      setDisplayValues(newValues);
+      sendChanges(newValues);
+    }
   };
   const handleDelete = (key: number) => {
     const newValues = [...displayValues];
@@ -46,10 +54,10 @@ export const MultiInput: React.FC<MultiInput> = ({ values, onChange }) => {
             <Input
               key={key}
               type="textarea"
-              width={1000}
               onChangeFn={(newValue: string) => {
                 handleChange(key, newValue);
               }}
+              width={width}
               value={value}
             />
             <div style={{ display: "flex" }}>
