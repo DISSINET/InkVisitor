@@ -1,7 +1,14 @@
 import React, { useEffect, useState, useMemo } from "react";
 const queryString = require("query-string");
 
-import { Button, ButtonGroup, Input, Loader, MultiInput } from "components";
+import {
+  Button,
+  ButtonGroup,
+  Dropdown,
+  Input,
+  Loader,
+  MultiInput,
+} from "components";
 import {
   StyledContent,
   StyledSection,
@@ -230,6 +237,7 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
                 <Button
                   color="danger"
                   icon={<FaTrashAlt />}
+                  label="remove actant"
                   onClick={() => {
                     hashParams["actant"] = "";
                     history.push({
@@ -293,23 +301,16 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
             <StyledContentRow>
               <StyledContentRowLabel>Language</StyledContentRowLabel>
               <StyledContentRowValue>
-                <Input
-                  value={actant.language}
-                  type="select"
+                <Dropdown
+                  isMulti={true}
                   options={languageDict}
-                  onChangeFn={async (newValue: string) => {
-                    updateActantMutation.mutate({ language: newValue });
-                  }}
-                />
-              </StyledContentRowValue>
-            </StyledContentRow>
-            <StyledContentRow>
-              <StyledContentRowLabel>Notes</StyledContentRowLabel>
-              <StyledContentRowValue>
-                <MultiInput
-                  values={actant.notes}
-                  onChange={(newValues: string[]) => {
-                    updateActantMutation.mutate({ notes: newValues });
+                  value={languageDict.filter((i: any) =>
+                    actant.language.includes(i.value)
+                  )}
+                  onChange={(newValue: any) => {
+                    updateActantMutation.mutate({
+                      language: (newValue as string[]).map((v: any) => v.value),
+                    });
                   }}
                 />
               </StyledContentRowValue>
@@ -331,6 +332,17 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
                 </StyledContentRowValue>
               </StyledContentRow>
             )}
+            <StyledContentRow>
+              <StyledContentRowLabel>Notes</StyledContentRowLabel>
+              <StyledContentRowValue>
+                <MultiInput
+                  values={actant.notes}
+                  onChange={(newValues: string[]) => {
+                    updateActantMutation.mutate({ notes: newValues });
+                  }}
+                />
+              </StyledContentRowValue>
+            </StyledContentRow>
           </StyledSection>
           <StyledSection>
             <StyledSectionHeader>Meta statements</StyledSectionHeader>

@@ -100,7 +100,7 @@ const loadStatementsTables = async (next: Function) => {
           },
           properties: [],
         },
-        language: action.language === "English" ? "eng" : "lat",
+        language: action.language === "English" ? ["eng"] : ["lat"],
         status: statusOption
           ? (statusOption.value as ActantStatus)
           : ("0" as ActantStatus),
@@ -398,7 +398,7 @@ const loadStatementsTables = async (next: Function) => {
         notes: [],
         label: statement.id,
         detail: "",
-        language: "eng",
+        language: ["eng"],
         status: "1",
       };
 
@@ -543,7 +543,7 @@ const addEntityActant = (id: string, label: string, type: EntityActantType) => {
     label: label,
     detail: "",
     status: "1",
-    language: "eng",
+    language: ["eng"],
     notes: [],
   };
   if (id) {
@@ -574,7 +574,7 @@ const addTerritoryActant = (
         label: label.trim(),
         detail: "",
         status: "1",
-        language: "eng",
+        language: ["eng"],
         notes: [],
       };
 
@@ -595,7 +595,7 @@ const addResourceActant = (id: string, label: string) => {
       label: label.trim(),
       detail: "",
       status: "1",
-      language: "eng",
+      language: ["eng"],
       notes: [],
     };
     actants.push(newResource);
@@ -728,7 +728,7 @@ const createEmptyPropStatement = (
       },
       detail: "",
       status: "1",
-      language: "eng",
+      language: ["eng"],
       notes: [],
     };
     actants.push(newEmptyStatement);

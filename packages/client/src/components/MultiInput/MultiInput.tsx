@@ -21,17 +21,16 @@ export const MultiInput: React.FC<MultiInput> = ({
   }, [values]);
 
   const sendChanges = (newValues: string[]) => {
-    onChange(newValues);
+    if (JSON.stringify(newValues) !== JSON.stringify(displayValues)) {
+      onChange(newValues);
+    }
   };
 
   const handleChange = (key: number, value: string) => {
     const newValues = [...displayValues];
     newValues[key] = value;
-
-    if (JSON.stringify(newValues) !== JSON.stringify(displayValues)) {
-      setDisplayValues(newValues);
-      sendChanges(newValues);
-    }
+    setDisplayValues(newValues);
+    sendChanges(newValues);
   };
   const handleDelete = (key: number) => {
     const newValues = [...displayValues];

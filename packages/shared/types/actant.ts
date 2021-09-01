@@ -7,6 +7,6 @@ export interface IActant {
   label: string;
   detail: string;
   status: ActantStatus;
-  language: string;
+  language: string[];
   notes: string[];
 }
