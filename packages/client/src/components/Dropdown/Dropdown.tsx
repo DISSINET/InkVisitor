@@ -12,11 +12,9 @@ import { Tooltip } from "components";
 interface Dropdown {
   options?: OptionsType<OptionTypeBase> | GroupedOptionsType<OptionTypeBase>;
   value?: ValueType<OptionTypeBase>;
-  label?: string;
   onChange: (selectedOption: ValueType<OptionTypeBase>) => void;
   ref?: React.RefObject<ReactNode>;
   width?: number | "full";
-  menuWidth?: number;
   hideSelectedOptions?: boolean;
   noDropDownIndicator?: boolean;
   formatOptionLabel?: Function;
@@ -29,10 +27,8 @@ interface Dropdown {
 export const Dropdown: React.FC<Dropdown> = ({
   options,
   value,
-  label = "",
   onChange,
   width,
-  menuWidth,
   isOptionSelected,
   getOptionLabel,
   formatOptionLabel,
@@ -43,33 +39,29 @@ export const Dropdown: React.FC<Dropdown> = ({
   isMulti = false,
 }) => {
   return (
-    <Tooltip label={label} position={["top center"]} on={["hover"]}>
-      <StyledSelectWrapper width={width}>
-        <StyledSelect
-          isMulti={isMulti}
-          className="react-select-container"
-          classNamePrefix="react-select"
-          placeholder={placeholder}
-          isClearable={isClearable}
-          {...(getOptionLabel ? { getOptionLabel: getOptionLabel } : {})}
-          {...(formatOptionLabel
-            ? { formatOptionLabel: formatOptionLabel }
-            : {})}
-          {...(isOptionSelected ? { isOptionSelected: isOptionSelected } : {})}
-          value={value}
-          styles={{
-            dropdownIndicator: () => {
-              return {
-                display: noDropDownIndicator ? "none" : "",
-              };
-            },
-          }}
-          onChange={onChange}
-          options={options}
-          width={width}
-          hideSelectedOptions={hideSelectedOptions}
-        />
-      </StyledSelectWrapper>
-    </Tooltip>
+    <StyledSelectWrapper width={width}>
+      <StyledSelect
+        isMulti={isMulti}
+        className="react-select-container"
+        classNamePrefix="react-select"
+        placeholder={placeholder}
+        isClearable={isClearable}
+        {...(getOptionLabel ? { getOptionLabel: getOptionLabel } : {})}
+        {...(formatOptionLabel ? { formatOptionLabel: formatOptionLabel } : {})}
+        {...(isOptionSelected ? { isOptionSelected: isOptionSelected } : {})}
+        value={value}
+        styles={{
+          dropdownIndicator: () => {
+            return {
+              display: noDropDownIndicator ? "none" : "",
+            };
+          },
+        }}
+        onChange={onChange}
+        options={options}
+        width={width}
+        hideSelectedOptions={hideSelectedOptions}
+      />
+    </StyledSelectWrapper>
   );
 };

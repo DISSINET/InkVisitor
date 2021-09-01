@@ -180,6 +180,7 @@ export const StatementEditorActantTable: React.FC<StatementEditorActantTable> =
                 handleUpdate={(newData) => {
                   updateActant(sActant.id, newData);
                 }}
+                loading={updateActantsMutation.isLoading}
               />
             ) : (
               <div />
@@ -220,7 +221,7 @@ export const StatementEditorActantTable: React.FC<StatementEditorActantTable> =
           },
         },
       ];
-    }, [filteredActants]);
+    }, [filteredActants, updateActantsMutation]);
 
     const getRowId = useCallback((row) => {
       return row.id;

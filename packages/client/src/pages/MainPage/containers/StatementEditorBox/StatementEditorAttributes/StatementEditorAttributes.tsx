@@ -1,10 +1,6 @@
 import {
   StyledAttributeWrapper,
   StyledAttributeModalContent,
-  StyledAttributeModalRow,
-  StyledAttributeModalRowLabel,
-  StyledAttributeModalRowLabelText,
-  StyledAttributeModalRowLabelIcon,
 } from "./StatementEditorAttributesStyles";
 
 import {
@@ -21,15 +17,12 @@ import {
 import {
   Button,
   ButtonGroup,
-  Loader,
   Modal,
   ModalHeader,
   ModalContent,
   ModalFooter,
-  Input,
-  Submit,
-  Dropdown,
-  Checkbox,
+  Tooltip,
+  Loader,
 } from "components";
 
 import { MdSettings } from "react-icons/md";
@@ -37,7 +30,6 @@ import {
   ActantType,
   Certainty,
   Elvl,
-  Position,
   Logic,
   Mood,
   MoodVariant,
@@ -45,10 +37,13 @@ import {
   Partitivity,
   Operator,
 } from "@shared/enums";
-import React, { useState, useMemo } from "react";
+import React, { useState } from "react";
 import { ElvlToggle } from "../..";
-import { AttributeIcon } from "../../AttributeIcons/AttributeIcons";
+import { AttributeIcon } from "../../../../../components/AttributeIcon/AttributeIcon";
 import { Colors, Entities } from "types";
+import { CheckboxRow } from "./CheckboxRow/CheckboxRow";
+import { AttributeRow } from "./AttributeRow/AttributeRow";
+import { TooltipAttributeRow } from "./TooltipAttributeRow/TooltipAttributeRow";
 
 type AttributeName =
   | "certainty"
@@ -80,6 +75,7 @@ interface StatementEditorAttributes {
   entityType?: ActantType;
   data: AttributeData;
   handleUpdate: (data: AttributeData) => void;
+  loading?: boolean;
 }
 
 export const StatementEditorAttributes: React.FC<StatementEditorAttributes> = ({
@@ -87,6 +83,7 @@ export const StatementEditorAttributes: React.FC<StatementEditorAttributes> = ({
   entityType,
   data,
   handleUpdate,
+  loading,
 }) => {
   const [modalData, setModalData] = useState<AttributeData>(data);
   const [modalOpen, setModalOpen] = useState<boolean>(false);
@@ -163,11 +160,11 @@ export const StatementEditorAttributes: React.FC<StatementEditorAttributes> = ({
     setModalOpen(false);
   };
 
-  const renderModal = () => {
+  const renderModal = (showModal: boolean) => {
     return (
       <Modal
         key="edit-modal"
-        showModal={true}
+        showModal={showModal}
         disableBgClick={false}
         onClose={() => {
           handleCancelClick();
@@ -188,7 +185,7 @@ export const StatementEditorAttributes: React.FC<StatementEditorAttributes> = ({
                 onChangeFn={(newValue: string | string[]) => {
                   handleModalDataChange("elvl", newValue as Elvl);
                 }}
-                icon={<AttributeIcon attributeName="elvl" />}
+                attributeName="elvl"
               ></AttributeRow>
             )}
             {modalData.logic && (
@@ -197,7 +194,7 @@ export const StatementEditorAttributes: React.FC<StatementEditorAttributes> = ({
                 multi={false}
                 items={logicDict}
                 label="Logical level"
-                icon={<AttributeIcon attributeName="logic" />}
+                attributeName="logic"
                 onChangeFn={(newValue: string | string[]) => {
                   handleModalDataChange("logic", newValue as Logic);
                 }}
@@ -209,7 +206,7 @@ export const StatementEditorAttributes: React.FC<StatementEditorAttributes> = ({
                 multi={false}
                 items={certaintyDict}
                 label="Certainty"
-                icon={<AttributeIcon attributeName="certainty" />}
+                attributeName="certainty"
                 onChangeFn={(newValue: string | string[]) => {
                   handleModalDataChange("certainty", newValue as Certainty);
                 }}
@@ -221,7 +218,7 @@ export const StatementEditorAttributes: React.FC<StatementEditorAttributes> = ({
                 multi={true}
                 items={moodDict}
                 label="Mood"
-                icon={<AttributeIcon attributeName="mood" />}
+                attributeName="mood"
                 onChangeFn={(newValue: string | string[]) => {
                   handleModalDataChange("mood", newValue as Mood[]);
                 }}
@@ -233,7 +230,7 @@ export const StatementEditorAttributes: React.FC<StatementEditorAttributes> = ({
                 multi={false}
                 items={moodVariantsDict}
                 label="Mood Variant"
-                icon={<AttributeIcon attributeName="moodvariant" />}
+                attributeName="moodvariant"
                 onChangeFn={(newValue: string | string[]) => {
                   handleModalDataChange("moodvariant", newValue as MoodVariant);
                 }}
@@ -245,7 +242,7 @@ export const StatementEditorAttributes: React.FC<StatementEditorAttributes> = ({
                 multi={false}
                 items={virtualityDict}
                 label="Virtuality"
-                icon={<AttributeIcon attributeName="virtuality" />}
+                attributeName="virtuality"
                 onChangeFn={(newValue: string | string[]) => {
                   handleModalDataChange("virtuality", newValue as Virtuality);
                 }}
@@ -257,7 +254,7 @@ export const StatementEditorAttributes: React.FC<StatementEditorAttributes> = ({
                 multi={false}
                 items={partitivityDict}
                 label="Partitivity"
-                icon={<AttributeIcon attributeName="partitivity" />}
+                attributeName="partitivity"
                 onChangeFn={(newValue: string | string[]) => {
                   handleModalDataChange("partitivity", newValue as Partitivity);
                 }}
@@ -269,7 +266,7 @@ export const StatementEditorAttributes: React.FC<StatementEditorAttributes> = ({
                 multi={false}
                 items={operatorDict}
                 label="Logical Operator"
-                icon={<AttributeIcon attributeName="operator" />}
+                attributeName="operator"
                 onChangeFn={(newValue: string | string[]) => {
                   handleModalDataChange("operator", newValue as Operator);
                 }}
@@ -279,7 +276,7 @@ export const StatementEditorAttributes: React.FC<StatementEditorAttributes> = ({
               <CheckboxRow
                 value={modalData.bundleStart ? modalData.bundleStart : false}
                 label="Bundle start"
-                icon={<AttributeIcon attributeName="bundleStart" />}
+                attributeName="bundleStart"
                 onChangeFn={(newValue: boolean) => {
                   handleModalDataChange("bundleStart", newValue as boolean);
                 }}
@@ -289,7 +286,7 @@ export const StatementEditorAttributes: React.FC<StatementEditorAttributes> = ({
               <CheckboxRow
                 value={modalData.bundleEnd ? modalData.bundleEnd : false}
                 label="Bundle end"
-                icon={<AttributeIcon attributeName="bundleEnd" />}
+                attributeName="bundleEnd"
                 onChangeFn={(newValue: boolean) => {
                   handleModalDataChange("bundleEnd", newValue as boolean);
                 }}
@@ -318,104 +315,72 @@ export const StatementEditorAttributes: React.FC<StatementEditorAttributes> = ({
             />
           </ButtonGroup>
         </ModalFooter>
+        <Loader show={loading} />
       </Modal>
     );
   };
 
   return (
     <>
-      {modalOpen && renderModal()}
+      {renderModal(modalOpen)}
+
       <StyledAttributeWrapper>
-        <Button
-          key="add"
-          icon={<MdSettings />}
-          tooltip=""
-          color="primary"
-          onClick={() => {
-            handleOpenModalClick();
-          }}
-        />
+        <Tooltip
+          attributes={[
+            <TooltipAttributeRow
+              attributeName="elvl"
+              value={data.elvl}
+              items={elvlDict}
+            />,
+            <TooltipAttributeRow
+              attributeName="logic"
+              value={data.logic}
+              items={logicDict}
+            />,
+            <TooltipAttributeRow
+              attributeName="certainty"
+              value={data.certainty}
+              items={certaintyDict}
+            />,
+            <TooltipAttributeRow
+              attributeName="mood"
+              value={data.mood}
+              items={moodDict}
+            />,
+            <TooltipAttributeRow
+              attributeName="moodvariant"
+              value={data.moodvariant}
+              items={moodVariantsDict}
+            />,
+            <TooltipAttributeRow
+              attributeName="virtuality"
+              value={data.virtuality}
+              items={virtualityDict}
+            />,
+            <TooltipAttributeRow
+              attributeName="partitivity"
+              value={data.partitivity}
+              items={partitivityDict}
+            />,
+            <TooltipAttributeRow
+              attributeName="operator"
+              value={data.operator}
+              items={operatorDict}
+            />,
+          ]}
+        >
+          <div>
+            <Button
+              key="settings"
+              icon={<MdSettings />}
+              color="primary"
+              onClick={() => {
+                handleOpenModalClick();
+              }}
+            />
+          </div>
+        </Tooltip>
       </StyledAttributeWrapper>
     </>
-  );
-};
-
-interface AttributeRow {
-  value: string | string[];
-  items: { value: string; label: string }[];
-  label: string;
-  icon: React.ReactElement;
-  multi: boolean;
-  onChangeFn: (value: string | string[]) => void;
-}
-const AttributeRow: React.FC<AttributeRow> = ({
-  value,
-  items,
-  label,
-  icon,
-  multi,
-  onChangeFn,
-}) => {
-  const selectedItem = useMemo(() => {
-    return multi
-      ? items.filter((i: any) => value.includes(i.value))
-      : items.find((i: any) => i.value === value);
-  }, [value]);
-
-  return (
-    <StyledAttributeModalRow>
-      <StyledAttributeModalRowLabel>
-        <StyledAttributeModalRowLabelIcon>
-          {icon}
-        </StyledAttributeModalRowLabelIcon>
-        <StyledAttributeModalRowLabelText>
-          {label}
-        </StyledAttributeModalRowLabelText>
-      </StyledAttributeModalRowLabel>
-      <Dropdown
-        width="full"
-        isMulti={multi}
-        options={items}
-        value={selectedItem}
-        onChange={(newValue: any) => {
-          onChangeFn(
-            multi
-              ? newValue.map((v: any) => v.value)
-              : (newValue.value as string | string[])
-          );
-        }}
-      />
-    </StyledAttributeModalRow>
-  );
-};
-
-interface CheckboxRow {
-  value: boolean;
-  onChangeFn: (value: boolean) => void;
-  label: string;
-  icon: React.ReactElement;
-}
-export const CheckboxRow: React.FC<CheckboxRow> = ({
-  value,
-  onChangeFn,
-  icon,
-  label,
-}) => {
-  return (
-    <StyledAttributeModalRow>
-      <StyledAttributeModalRowLabel>
-        <StyledAttributeModalRowLabelIcon>
-          {icon}
-        </StyledAttributeModalRowLabelIcon>
-        <StyledAttributeModalRowLabelText>
-          {label}
-        </StyledAttributeModalRowLabelText>
-      </StyledAttributeModalRowLabel>
-      <Checkbox
-        onChangeFn={(newValue: boolean) => onChangeFn(newValue)}
-        id={label}
-        value={value}
-      />
-    </StyledAttributeModalRow>
   );
 };
