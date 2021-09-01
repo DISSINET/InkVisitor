@@ -1,6 +1,7 @@
 import { certaintyDict } from "./certainty";
 import { elvlDict } from "./elvl";
 import { languageDict } from "./language";
+import { entitiesDict } from "./entity";
 import { actantLogicalTypeDict } from "./logicaltype";
 import { actantPositionDict } from "./actantposition";
 import { referenceTypeDict } from "./referencetype";
@@ -19,6 +20,7 @@ export {
   certaintyDict,
   elvlDict,
   languageDict,
+  entitiesDict,
   actantLogicalTypeDict,
   actantPositionDict,
   referenceTypeDict,
