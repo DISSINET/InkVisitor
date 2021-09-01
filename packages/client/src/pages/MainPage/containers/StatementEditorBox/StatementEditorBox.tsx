@@ -606,7 +606,6 @@ export const StatementEditorBox: React.FC = () => {
                   <StyledListHeaderColumn>Text</StyledListHeaderColumn>
                   <Input
                     type="textarea"
-                    width={1000}
                     onChangeFn={(newValue: string) => {
                       if (newValue !== statement.data.text) {
                         const newData = {

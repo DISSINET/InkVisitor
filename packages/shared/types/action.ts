@@ -1,4 +1,4 @@
-import { ILabel, IActant } from "./";
+import { IActant } from "./";
 
 // TODO
 export interface IAction extends IActant {

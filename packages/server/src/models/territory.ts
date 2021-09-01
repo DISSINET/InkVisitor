@@ -30,7 +30,6 @@ export class TerritoryData implements IModel {
   parent: TerritoryParent | false = false;
   type = "";
   content = "";
-  language = "";
 
   constructor(data: UnknownObject) {
     if (!data) {
@@ -63,7 +62,7 @@ class Territory extends Actant implements ITerritory {
   label: string = "";
   detail: string = "";
   status: ActantStatus = "0";
-  language: string = "eng";
+  language: string[] = ["eng"];
   notes: string[] = [];
 
   _siblings: Record<number, ITerritory> = {};

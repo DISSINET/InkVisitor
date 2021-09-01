@@ -44,7 +44,7 @@ class Action extends Actant implements IAction {
   label: string = "";
   detail: string = "";
   status: ActantStatus = "0";
-  language: string = "eng";
+  language: string[] = ["eng"];
   notes: string[] = [];
 
   constructor(data: UnknownObject) {

@@ -263,7 +263,7 @@ class Statement extends Actant implements IStatement {
   label = "";
   detail: string = "";
   status: ActantStatus = "0";
-  language: string = "eng";
+  language: string[] = ["eng"];
   notes: string[] = [];
 
   constructor(data: UnknownObject) {
