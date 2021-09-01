@@ -58,6 +58,7 @@ import {
   actantLogicalTypeDict,
   actantStatusDict,
   languageDict,
+  entitiesDict,
 } from "@shared/dictionaries";
 import { composeWithDevTools } from "redux-devtools-extension";
 
@@ -303,13 +304,16 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
               <StyledContentRowValue>
                 <Dropdown
                   isMulti={true}
+                  width={200}
                   options={languageDict}
                   value={languageDict.filter((i: any) =>
                     actant.language.includes(i.value)
                   )}
                   onChange={(newValue: any) => {
                     updateActantMutation.mutate({
-                      language: (newValue as string[]).map((v: any) => v.value),
+                      language: newValue
+                        ? (newValue as string[]).map((v: any) => v.value)
+                        : [],
                     });
                   }}
                 />
@@ -332,6 +336,190 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
                 </StyledContentRowValue>
               </StyledContentRow>
             )}
+
+            {/* Actions */}
+            {actantMode === "action" && (
+              <StyledContentRow>
+                <StyledContentRowLabel>Valency subject</StyledContentRowLabel>
+                <StyledContentRowValue>
+                  <Input
+                    value={actant.data.valencies.s}
+                    onChangeFn={async (newValue: string) => {
+                      const oldData = { ...actant.data };
+                      updateActantMutation.mutate({
+                        data: {
+                          ...oldData,
+                          ...{
+                            valencies: {
+                              s: newValue,
+                              a1: actant.data.valencies.a1,
+                              a2: actant.data.valencies.a2,
+                            },
+                          },
+                        },
+                      });
+                    }}
+                  />
+                </StyledContentRowValue>
+              </StyledContentRow>
+            )}
+            {actantMode === "action" && (
+              <StyledContentRow>
+                <StyledContentRowLabel>Valency actant1</StyledContentRowLabel>
+                <StyledContentRowValue>
+                  <Input
+                    value={actant.data.valencies.a1}
+                    onChangeFn={async (newValue: string) => {
+                      const oldData = { ...actant.data };
+                      updateActantMutation.mutate({
+                        data: {
+                          ...oldData,
+                          ...{
+                            valencies: {
+                              s: actant.data.valencies.s,
+                              a1: newValue,
+                              a2: actant.data.valencies.a2,
+                            },
+                          },
+                        },
+                      });
+                    }}
+                  />
+                </StyledContentRowValue>
+              </StyledContentRow>
+            )}
+            {actantMode === "action" && (
+              <StyledContentRow>
+                <StyledContentRowLabel>Valency actant2</StyledContentRowLabel>
+                <StyledContentRowValue>
+                  <Input
+                    value={actant.data.valencies.a2}
+                    onChangeFn={async (newValue: string) => {
+                      const oldData = { ...actant.data };
+                      updateActantMutation.mutate({
+                        data: {
+                          ...oldData,
+                          ...{
+                            valencies: {
+                              s: actant.data.valencies.s,
+                              a1: actant.data.valencies.a1,
+                              a2: newValue,
+                            },
+                          },
+                        },
+                      });
+                    }}
+                  />
+                </StyledContentRowValue>
+              </StyledContentRow>
+            )}
+
+            {actantMode === "action" && (
+              <StyledContentRow>
+                <StyledContentRowLabel>Entity Subject</StyledContentRowLabel>
+                <StyledContentRowValue>
+                  <Dropdown
+                    isMulti={true}
+                    options={entitiesDict}
+                    value={entitiesDict.filter((i: any) =>
+                      actant.data.entities.s.includes(i.value)
+                    )}
+                    width={200}
+                    placeholder={"*"}
+                    onChange={(newValue: any) => {
+                      const oldData = { ...actant.data };
+                      updateActantMutation.mutate({
+                        data: {
+                          ...oldData,
+                          ...{
+                            entities: {
+                              s: newValue
+                                ? (newValue as string[]).map(
+                                    (v: any) => v.value
+                                  )
+                                : [],
+                              a1: actant.data.entities.a1,
+                              a2: actant.data.entities.a2,
+                            },
+                          },
+                        },
+                      });
+                    }}
+                  />
+                </StyledContentRowValue>
+              </StyledContentRow>
+            )}
+            {actantMode === "action" && (
+              <StyledContentRow>
+                <StyledContentRowLabel>Entity Subject</StyledContentRowLabel>
+                <StyledContentRowValue>
+                  <Dropdown
+                    isMulti={true}
+                    options={entitiesDict}
+                    value={entitiesDict.filter((i: any) =>
+                      actant.data.entities.a1.includes(i.value)
+                    )}
+                    width={200}
+                    placeholder={"*"}
+                    onChange={(newValue: any) => {
+                      const oldData = { ...actant.data };
+                      updateActantMutation.mutate({
+                        data: {
+                          ...oldData,
+                          ...{
+                            entities: {
+                              a1: newValue
+                                ? (newValue as string[]).map(
+                                    (v: any) => v.value
+                                  )
+                                : [],
+                              s: actant.data.entities.s,
+                              a2: actant.data.entities.a2,
+                            },
+                          },
+                        },
+                      });
+                    }}
+                  />
+                </StyledContentRowValue>
+              </StyledContentRow>
+            )}
+            {actantMode === "action" && (
+              <StyledContentRow>
+                <StyledContentRowLabel>Entity Subject</StyledContentRowLabel>
+                <StyledContentRowValue>
+                  <Dropdown
+                    isMulti={true}
+                    options={entitiesDict}
+                    value={entitiesDict.filter((i: any) =>
+                      actant.data.entities.a2.includes(i.value)
+                    )}
+                    width={200}
+                    placeholder={"*"}
+                    onChange={(newValue: any) => {
+                      const oldData = { ...actant.data };
+                      updateActantMutation.mutate({
+                        data: {
+                          ...oldData,
+                          ...{
+                            entities: {
+                              a2: newValue
+                                ? (newValue as string[]).map(
+                                    (v: any) => v.value
+                                  )
+                                : [],
+                              s: actant.data.entities.s,
+                              a1: actant.data.entities.a1,
+                            },
+                          },
+                        },
+                      });
+                    }}
+                  />
+                </StyledContentRowValue>
+              </StyledContentRow>
+            )}
+
             <StyledContentRow>
               <StyledContentRowLabel>Notes</StyledContentRowLabel>
               <StyledContentRowValue>
