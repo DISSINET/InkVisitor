@@ -20,6 +20,7 @@ import {
   StyledSectionMetaTableButtonGroup,
   StyledSectionMetaTableCell,
   StyledContentRow,
+  StyledForm,
   StyledSectionUsedText,
   StyledSectionUsedPageManager,
   StyledContentRowLabel,
@@ -259,278 +260,288 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
               </ButtonGroup>
             </StyledContentRow>
 
-            <StyledContentRow>
-              <StyledContentRowLabel>Label</StyledContentRowLabel>
-              <StyledContentRowValue>
-                <Input
-                  value={actant.label}
-                  onChangeFn={async (newLabel: string) => {
-                    if (newLabel !== actant.label) {
-                      actantsLabelUpdateMutation.mutate({
-                        actantId: actant.id,
-                        newLabel: newLabel,
-                      });
-                    }
-                  }}
-                />
-              </StyledContentRowValue>
-            </StyledContentRow>
-            <StyledContentRow>
-              <StyledContentRowLabel>Detail</StyledContentRowLabel>
-              <StyledContentRowValue>
-                <Input
-                  value={actant.detail}
-                  onChangeFn={async (newValue: string) => {
-                    updateActantMutation.mutate({ detail: newValue });
-                  }}
-                />
-              </StyledContentRowValue>
-            </StyledContentRow>
-            <StyledContentRow>
-              <StyledContentRowLabel>Status</StyledContentRowLabel>
-              <StyledContentRowValue>
-                <Input
-                  value={actant.status}
-                  type="select"
-                  options={actantStatusDict}
-                  onChangeFn={async (newValue: string) => {
-                    updateActantMutation.mutate({ status: newValue });
-                  }}
-                />
-              </StyledContentRowValue>
-            </StyledContentRow>
-            <StyledContentRow>
-              <StyledContentRowLabel>Language</StyledContentRowLabel>
-              <StyledContentRowValue>
-                <Dropdown
-                  isMulti={true}
-                  width={200}
-                  options={languageDict}
-                  value={languageDict.filter((i: any) =>
-                    actant.language.includes(i.value)
-                  )}
-                  onChange={(newValue: any) => {
-                    updateActantMutation.mutate({
-                      language: newValue
-                        ? (newValue as string[]).map((v: any) => v.value)
-                        : [],
-                    });
-                  }}
-                />
-              </StyledContentRowValue>
-            </StyledContentRow>
-            {actantMode === "entity" && actant.data?.logicalType && (
+            <StyledForm>
               <StyledContentRow>
-                <StyledContentRowLabel>Logical Type</StyledContentRowLabel>
+                <StyledContentRowLabel>Label</StyledContentRowLabel>
                 <StyledContentRowValue>
                   <Input
-                    value={actant.data.logicalType}
+                    width={200}
+                    value={actant.label}
+                    onChangeFn={async (newLabel: string) => {
+                      if (newLabel !== actant.label) {
+                        actantsLabelUpdateMutation.mutate({
+                          actantId: actant.id,
+                          newLabel: newLabel,
+                        });
+                      }
+                    }}
+                  />
+                </StyledContentRowValue>
+              </StyledContentRow>
+              <StyledContentRow>
+                <StyledContentRowLabel>Detail</StyledContentRowLabel>
+                <StyledContentRowValue>
+                  <Input
+                    width={200}
+                    value={actant.detail}
+                    onChangeFn={async (newValue: string) => {
+                      updateActantMutation.mutate({ detail: newValue });
+                    }}
+                  />
+                </StyledContentRowValue>
+              </StyledContentRow>
+              <StyledContentRow>
+                <StyledContentRowLabel>Status</StyledContentRowLabel>
+                <StyledContentRowValue>
+                  <Input
+                    value={actant.status}
                     type="select"
-                    options={actantLogicalTypeDict}
-                    onChangeFn={(newValue: string) => {
-                      updateActantMutation.mutate({
-                        data: { logicalType: newValue },
-                      });
-                    }}
-                  />
-                </StyledContentRowValue>
-              </StyledContentRow>
-            )}
-
-            {/* Actions */}
-            {actantMode === "action" && (
-              <StyledContentRow>
-                <StyledContentRowLabel>Valency subject</StyledContentRowLabel>
-                <StyledContentRowValue>
-                  <Input
-                    value={actant.data.valencies.s}
+                    width={200}
+                    options={actantStatusDict}
                     onChangeFn={async (newValue: string) => {
-                      const oldData = { ...actant.data };
-                      updateActantMutation.mutate({
-                        data: {
-                          ...oldData,
-                          ...{
-                            valencies: {
-                              s: newValue,
-                              a1: actant.data.valencies.a1,
-                              a2: actant.data.valencies.a2,
-                            },
-                          },
-                        },
-                      });
+                      updateActantMutation.mutate({ status: newValue });
                     }}
                   />
                 </StyledContentRowValue>
               </StyledContentRow>
-            )}
-            {actantMode === "action" && (
               <StyledContentRow>
-                <StyledContentRowLabel>Valency actant1</StyledContentRowLabel>
-                <StyledContentRowValue>
-                  <Input
-                    value={actant.data.valencies.a1}
-                    onChangeFn={async (newValue: string) => {
-                      const oldData = { ...actant.data };
-                      updateActantMutation.mutate({
-                        data: {
-                          ...oldData,
-                          ...{
-                            valencies: {
-                              s: actant.data.valencies.s,
-                              a1: newValue,
-                              a2: actant.data.valencies.a2,
-                            },
-                          },
-                        },
-                      });
-                    }}
-                  />
-                </StyledContentRowValue>
-              </StyledContentRow>
-            )}
-            {actantMode === "action" && (
-              <StyledContentRow>
-                <StyledContentRowLabel>Valency actant2</StyledContentRowLabel>
-                <StyledContentRowValue>
-                  <Input
-                    value={actant.data.valencies.a2}
-                    onChangeFn={async (newValue: string) => {
-                      const oldData = { ...actant.data };
-                      updateActantMutation.mutate({
-                        data: {
-                          ...oldData,
-                          ...{
-                            valencies: {
-                              s: actant.data.valencies.s,
-                              a1: actant.data.valencies.a1,
-                              a2: newValue,
-                            },
-                          },
-                        },
-                      });
-                    }}
-                  />
-                </StyledContentRowValue>
-              </StyledContentRow>
-            )}
-
-            {actantMode === "action" && (
-              <StyledContentRow>
-                <StyledContentRowLabel>Entity Subject</StyledContentRowLabel>
+                <StyledContentRowLabel>Language</StyledContentRowLabel>
                 <StyledContentRowValue>
                   <Dropdown
                     isMulti={true}
-                    options={entitiesDict}
-                    value={entitiesDict.filter((i: any) =>
-                      actant.data.entities.s.includes(i.value)
-                    )}
                     width={200}
-                    placeholder={"*"}
+                    options={languageDict}
+                    value={languageDict.filter((i: any) =>
+                      actant.language.includes(i.value)
+                    )}
                     onChange={(newValue: any) => {
-                      const oldData = { ...actant.data };
                       updateActantMutation.mutate({
-                        data: {
-                          ...oldData,
-                          ...{
-                            entities: {
-                              s: newValue
-                                ? (newValue as string[]).map(
-                                    (v: any) => v.value
-                                  )
-                                : [],
-                              a1: actant.data.entities.a1,
-                              a2: actant.data.entities.a2,
-                            },
-                          },
-                        },
+                        language: newValue
+                          ? (newValue as string[]).map((v: any) => v.value)
+                          : [],
                       });
                     }}
                   />
                 </StyledContentRowValue>
               </StyledContentRow>
-            )}
-            {actantMode === "action" && (
-              <StyledContentRow>
-                <StyledContentRowLabel>Entity Subject</StyledContentRowLabel>
-                <StyledContentRowValue>
-                  <Dropdown
-                    isMulti={true}
-                    options={entitiesDict}
-                    value={entitiesDict.filter((i: any) =>
-                      actant.data.entities.a1.includes(i.value)
-                    )}
-                    width={200}
-                    placeholder={"*"}
-                    onChange={(newValue: any) => {
-                      const oldData = { ...actant.data };
-                      updateActantMutation.mutate({
-                        data: {
-                          ...oldData,
-                          ...{
-                            entities: {
-                              a1: newValue
-                                ? (newValue as string[]).map(
-                                    (v: any) => v.value
-                                  )
-                                : [],
-                              s: actant.data.entities.s,
-                              a2: actant.data.entities.a2,
-                            },
-                          },
-                        },
-                      });
-                    }}
-                  />
-                </StyledContentRowValue>
-              </StyledContentRow>
-            )}
-            {actantMode === "action" && (
-              <StyledContentRow>
-                <StyledContentRowLabel>Entity Subject</StyledContentRowLabel>
-                <StyledContentRowValue>
-                  <Dropdown
-                    isMulti={true}
-                    options={entitiesDict}
-                    value={entitiesDict.filter((i: any) =>
-                      actant.data.entities.a2.includes(i.value)
-                    )}
-                    width={200}
-                    placeholder={"*"}
-                    onChange={(newValue: any) => {
-                      const oldData = { ...actant.data };
-                      updateActantMutation.mutate({
-                        data: {
-                          ...oldData,
-                          ...{
-                            entities: {
-                              a2: newValue
-                                ? (newValue as string[]).map(
-                                    (v: any) => v.value
-                                  )
-                                : [],
-                              s: actant.data.entities.s,
-                              a1: actant.data.entities.a1,
-                            },
-                          },
-                        },
-                      });
-                    }}
-                  />
-                </StyledContentRowValue>
-              </StyledContentRow>
-            )}
+              {actantMode === "entity" && actant.data?.logicalType && (
+                <StyledContentRow>
+                  <StyledContentRowLabel>Logical Type</StyledContentRowLabel>
+                  <StyledContentRowValue>
+                    <Input
+                      value={actant.data.logicalType}
+                      type="select"
+                      width={200}
+                      options={actantLogicalTypeDict}
+                      onChangeFn={(newValue: string) => {
+                        updateActantMutation.mutate({
+                          data: { logicalType: newValue },
+                        });
+                      }}
+                    />
+                  </StyledContentRowValue>
+                </StyledContentRow>
+              )}
 
-            <StyledContentRow>
-              <StyledContentRowLabel>Notes</StyledContentRowLabel>
-              <StyledContentRowValue>
-                <MultiInput
-                  values={actant.notes}
-                  onChange={(newValues: string[]) => {
-                    updateActantMutation.mutate({ notes: newValues });
-                  }}
-                />
-              </StyledContentRowValue>
-            </StyledContentRow>
+              {/* Actions */}
+              {actantMode === "action" && (
+                <StyledContentRow>
+                  <StyledContentRowLabel>Valency subject</StyledContentRowLabel>
+                  <StyledContentRowValue>
+                    <Input
+                      value={actant.data.valencies.s}
+                      width={200}
+                      onChangeFn={async (newValue: string) => {
+                        const oldData = { ...actant.data };
+                        updateActantMutation.mutate({
+                          data: {
+                            ...oldData,
+                            ...{
+                              valencies: {
+                                s: newValue,
+                                a1: actant.data.valencies.a1,
+                                a2: actant.data.valencies.a2,
+                              },
+                            },
+                          },
+                        });
+                      }}
+                    />
+                  </StyledContentRowValue>
+                </StyledContentRow>
+              )}
+              {actantMode === "action" && (
+                <StyledContentRow>
+                  <StyledContentRowLabel>Valency actant1</StyledContentRowLabel>
+                  <StyledContentRowValue>
+                    <Input
+                      value={actant.data.valencies.a1}
+                      width={200}
+                      onChangeFn={async (newValue: string) => {
+                        const oldData = { ...actant.data };
+                        updateActantMutation.mutate({
+                          data: {
+                            ...oldData,
+                            ...{
+                              valencies: {
+                                s: actant.data.valencies.s,
+                                a1: newValue,
+                                a2: actant.data.valencies.a2,
+                              },
+                            },
+                          },
+                        });
+                      }}
+                    />
+                  </StyledContentRowValue>
+                </StyledContentRow>
+              )}
+              {actantMode === "action" && (
+                <StyledContentRow>
+                  <StyledContentRowLabel>Valency actant2</StyledContentRowLabel>
+                  <StyledContentRowValue>
+                    <Input
+                      value={actant.data.valencies.a2}
+                      width={200}
+                      onChangeFn={async (newValue: string) => {
+                        const oldData = { ...actant.data };
+                        updateActantMutation.mutate({
+                          data: {
+                            ...oldData,
+                            ...{
+                              valencies: {
+                                s: actant.data.valencies.s,
+                                a1: actant.data.valencies.a1,
+                                a2: newValue,
+                              },
+                            },
+                          },
+                        });
+                      }}
+                    />
+                  </StyledContentRowValue>
+                </StyledContentRow>
+              )}
+
+              {actantMode === "action" && (
+                <StyledContentRow>
+                  <StyledContentRowLabel>Entity Subject</StyledContentRowLabel>
+                  <StyledContentRowValue>
+                    <Dropdown
+                      isMulti={true}
+                      options={entitiesDict}
+                      value={entitiesDict.filter((i: any) =>
+                        actant.data.entities.s.includes(i.value)
+                      )}
+                      width={200}
+                      placeholder={"*"}
+                      onChange={(newValue: any) => {
+                        const oldData = { ...actant.data };
+                        updateActantMutation.mutate({
+                          data: {
+                            ...oldData,
+                            ...{
+                              entities: {
+                                s: newValue
+                                  ? (newValue as string[]).map(
+                                      (v: any) => v.value
+                                    )
+                                  : [],
+                                a1: actant.data.entities.a1,
+                                a2: actant.data.entities.a2,
+                              },
+                            },
+                          },
+                        });
+                      }}
+                    />
+                  </StyledContentRowValue>
+                </StyledContentRow>
+              )}
+              {actantMode === "action" && (
+                <StyledContentRow>
+                  <StyledContentRowLabel>Entity Subject</StyledContentRowLabel>
+                  <StyledContentRowValue>
+                    <Dropdown
+                      isMulti={true}
+                      options={entitiesDict}
+                      value={entitiesDict.filter((i: any) =>
+                        actant.data.entities.a1.includes(i.value)
+                      )}
+                      width={200}
+                      placeholder={"*"}
+                      onChange={(newValue: any) => {
+                        const oldData = { ...actant.data };
+                        updateActantMutation.mutate({
+                          data: {
+                            ...oldData,
+                            ...{
+                              entities: {
+                                a1: newValue
+                                  ? (newValue as string[]).map(
+                                      (v: any) => v.value
+                                    )
+                                  : [],
+                                s: actant.data.entities.s,
+                                a2: actant.data.entities.a2,
+                              },
+                            },
+                          },
+                        });
+                      }}
+                    />
+                  </StyledContentRowValue>
+                </StyledContentRow>
+              )}
+              {actantMode === "action" && (
+                <StyledContentRow>
+                  <StyledContentRowLabel>Entity Subject</StyledContentRowLabel>
+                  <StyledContentRowValue>
+                    <Dropdown
+                      isMulti={true}
+                      options={entitiesDict}
+                      value={entitiesDict.filter((i: any) =>
+                        actant.data.entities.a2.includes(i.value)
+                      )}
+                      width={200}
+                      placeholder={"*"}
+                      onChange={(newValue: any) => {
+                        const oldData = { ...actant.data };
+                        updateActantMutation.mutate({
+                          data: {
+                            ...oldData,
+                            ...{
+                              entities: {
+                                a2: newValue
+                                  ? (newValue as string[]).map(
+                                      (v: any) => v.value
+                                    )
+                                  : [],
+                                s: actant.data.entities.s,
+                                a1: actant.data.entities.a1,
+                              },
+                            },
+                          },
+                        });
+                      }}
+                    />
+                  </StyledContentRowValue>
+                </StyledContentRow>
+              )}
+
+              <StyledContentRow>
+                <StyledContentRowLabel>Notes</StyledContentRowLabel>
+                <StyledContentRowValue>
+                  <MultiInput
+                    values={actant.notes}
+                    width={200}
+                    onChange={(newValues: string[]) => {
+                      updateActantMutation.mutate({ notes: newValues });
+                    }}
+                  />
+                </StyledContentRowValue>
+              </StyledContentRow>
+            </StyledForm>
           </StyledSection>
           <StyledSection>
             <StyledSectionHeader>Meta statements</StyledSectionHeader>
