@@ -100,6 +100,7 @@ export const ActantTag: React.FC<IActantTag> = ({
     <Tag
       propId={actant.id}
       label={actant.label}
+      detail={actant.detail}
       short={short}
       button={button}
       moveFn={moveFn}

@@ -313,16 +313,6 @@ export const StatementEditorBox: React.FC = () => {
     {
       onSuccess: () => {
         queryClient.invalidateQueries(["statement"]);
-        // queryClient.invalidateQueries(["territory"]);
-      },
-    }
-  );
-
-  const updateActantsMutation = useMutation(
-    async (changes: object) => await api.actantsUpdate(statementId, changes),
-    {
-      onSuccess: () => {
-        queryClient.invalidateQueries(["statement"]);
       },
     }
   );
@@ -434,6 +424,7 @@ export const StatementEditorBox: React.FC = () => {
               handleUpdate={(newData) => {
                 updateProp(prop.id, newData);
               }}
+              loading={updateActantsDataMutation.isLoading}
             />
           </StyledPropButtonGroup>
         </StyledPropLineColumn>
@@ -476,6 +467,7 @@ export const StatementEditorBox: React.FC = () => {
                   handleUpdate={(newData) => {
                     updateProp(prop.id, { type: { ...prop.type, ...newData } });
                   }}
+                  loading={updateActantsDataMutation.isLoading}
                 />
               </StyledPropButtonGroup>
             </React.Fragment>
@@ -534,6 +526,7 @@ export const StatementEditorBox: React.FC = () => {
                       value: { ...prop.value, ...newData },
                     });
                   }}
+                  loading={updateActantsDataMutation.isLoading}
                 />
               </StyledPropButtonGroup>
             </React.Fragment>
@@ -826,7 +819,7 @@ export const StatementEditorBox: React.FC = () => {
               <MultiInput
                 values={statement.notes}
                 onChange={(newValues: string[]) => {
-                  updateActantsMutation.mutate({ notes: newValues });
+                  updateActantsDataMutation.mutate({ notes: newValues });
                 }}
               />
             </StyledEditorSectionContent>

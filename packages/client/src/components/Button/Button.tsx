@@ -17,7 +17,7 @@ interface ButtonProps {
 }
 
 export const Button: React.FC<ButtonProps> = ({
-  tooltip = "",
+  tooltip,
   label = "",
   icon,
   inverted = false,

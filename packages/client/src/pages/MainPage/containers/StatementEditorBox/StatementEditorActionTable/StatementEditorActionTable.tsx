@@ -154,6 +154,7 @@ export const StatementEditorActionTable: React.FC<StatementEditorActionTable> =
                 handleUpdate={(newData) => {
                   updateAction(sAction.id, newData);
                 }}
+                loading={updateActionsMutation.isLoading}
               />
             ) : (
               <div />
@@ -197,7 +198,7 @@ export const StatementEditorActionTable: React.FC<StatementEditorActionTable> =
           },
         },
       ];
-    }, [filteredActions]);
+    }, [filteredActions, updateActionsMutation]);
 
     const getRowId = useCallback((row) => {
       return row.id;
