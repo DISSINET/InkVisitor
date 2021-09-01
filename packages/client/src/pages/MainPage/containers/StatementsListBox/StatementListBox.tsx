@@ -58,7 +58,6 @@ export const StatementListBox: React.FC = () => {
     ["territory", "statement-list", territoryId],
     async () => {
       const res = await api.territoryGet(territoryId);
-      // console.log("data", res.data);
       return res.data;
     },
     { initialData: initialData, enabled: !!territoryId && api.isLoggedIn() }

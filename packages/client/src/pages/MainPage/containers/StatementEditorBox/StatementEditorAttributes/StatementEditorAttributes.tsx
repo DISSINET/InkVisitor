@@ -160,11 +160,11 @@ export const StatementEditorAttributes: React.FC<StatementEditorAttributes> = ({
     setModalOpen(false);
   };
 
-  const renderModal = () => {
+  const renderModal = (showModal: boolean) => {
     return (
       <Modal
         key="edit-modal"
-        showModal={true}
+        showModal={showModal}
         disableBgClick={false}
         onClose={() => {
           handleCancelClick();
@@ -322,7 +322,7 @@ export const StatementEditorAttributes: React.FC<StatementEditorAttributes> = ({
 
   return (
     <>
-      {modalOpen && renderModal()}
+      {renderModal(modalOpen)}
 
       <StyledAttributeWrapper>
         <Tooltip
