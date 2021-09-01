@@ -29,7 +29,9 @@ export const StyledSectionHeader = styled.div`
   margin-bottom: ${({ theme }) => theme.space["4"]};
   color: ${({ theme }) => theme.color["gray"][600]};
 `;
+
 export const StyledContentRow = styled.div`
+  class: row;
   display: flex;
 `;
 export const StyledContentRowLabel = styled.div`
@@ -37,6 +39,26 @@ export const StyledContentRowLabel = styled.div`
 `;
 export const StyledContentRowValue = styled.div`
   float: right;
+`;
+
+export const StyledForm = styled.div`
+  display: table;
+  ${StyledContentRow} {
+    display: table-row;
+    width: 100%;
+    ${StyledContentRowLabel} {
+      display: table-cell;
+      padding: ${({ theme }) => theme.space["1"]};
+      padding-right: 0.5rem;
+      vertical-align: middle;
+      text-align: right;
+      float: initial;
+    }
+    ${StyledContentRowValue} {
+      display: table-cell;
+      padding: ${({ theme }) => theme.space["1"]};
+    }
+  }
 `;
 
 export const StyledSectionUsedTable = styled.div`

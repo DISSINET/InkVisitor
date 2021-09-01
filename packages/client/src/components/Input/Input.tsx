@@ -113,6 +113,7 @@ export const Input: React.FC<InputProps> = ({
         <StyledSelect
           className="value"
           value={value}
+          width={width}
           autoFocus={autoFocus}
           onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
             onChangeFn(e.target.value);
