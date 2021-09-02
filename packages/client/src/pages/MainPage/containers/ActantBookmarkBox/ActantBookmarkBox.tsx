@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "react-query";
 import api from "api";
 const queryString = require("query-string");
@@ -29,6 +29,7 @@ import {
   FaRegFolder,
   FaRegFolderOpen,
   FaUnlink,
+  FaTrashAlt,
 } from "react-icons/fa";
 
 import {
@@ -56,6 +57,8 @@ import {
   IBookmarkFolder,
   IResponseBookmarkFolder,
 } from "@shared/types";
+import { Cell, Column, useTable } from "react-table";
+import { ActantBookmarkFolderTable } from "./ActantBookmarkFolderTable/ActantBookmarkFolderTable";
 
 const bookmarkEntities = ["P", "G", "O", "C", "L", "V", "E", "S", "T", "R"];
 
@@ -187,8 +190,9 @@ export const ActantBookmarkBox: React.FC = () => {
   const createFolderMutation = useMutation(
     async () => {
       if (bookmarkFolders) {
-        const newBookmarkFolder: IBookmarkFolder =
-          CBookmarkFolder(editingFolderName);
+        const newBookmarkFolder: IBookmarkFolder = CBookmarkFolder(
+          editingFolderName
+        );
 
         const newBookmarks: IBookmarkFolder[] | false = getBookmarksCopy();
         if (newBookmarks) {
@@ -322,7 +326,11 @@ export const ActantBookmarkBox: React.FC = () => {
                 {open && (
                   <StyledFolderContent>
                     <StyledFolderContentTags>
-                      {bookmarkFolder.actants.map((actant) => {
+                      <ActantBookmarkFolderTable
+                        folder={bookmarkFolder}
+                        updateMutation={changeBookmarksMutation}
+                      ></ActantBookmarkFolderTable>
+                      {/* {bookmarkFolder.actants.map((actant) => {
                         return (
                           <StyledFolderContentTag key={actant.id}>
                             <ActantTag
@@ -345,7 +353,7 @@ export const ActantBookmarkBox: React.FC = () => {
                             />
                           </StyledFolderContentTag>
                         );
-                      })}
+                      })} */}
                     </StyledFolderContentTags>
                     <StyledFolderSuggester>
                       <ActantSuggester
