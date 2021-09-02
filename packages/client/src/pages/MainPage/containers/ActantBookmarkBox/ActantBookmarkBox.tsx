@@ -60,7 +60,19 @@ import {
 import { Cell, Column, useTable } from "react-table";
 import { ActantBookmarkFolderTable } from "./ActantBookmarkFolderTable/ActantBookmarkFolderTable";
 
-const bookmarkEntities = ["P", "G", "O", "C", "L", "V", "E", "S", "T", "R"];
+const bookmarkEntities = [
+  "A",
+  "P",
+  "G",
+  "O",
+  "C",
+  "L",
+  "V",
+  "E",
+  "S",
+  "T",
+  "R",
+];
 
 export const ActantBookmarkBox: React.FC = () => {
   const queryClient = useQueryClient();
