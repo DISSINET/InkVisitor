@@ -24,10 +24,12 @@ import { ActantBookmarkFolderTableRow } from "./ActantBookmarkFolderTableRow";
 interface ActantBookmarkFolderTable {
   folder: IResponseBookmarkFolder;
   updateMutation: any;
+  removeBookmark: Function;
 }
 export const ActantBookmarkFolderTable: React.FC<ActantBookmarkFolderTable> = ({
   folder,
   updateMutation,
+  removeBookmark,
 }) => {
   const columns: Column<{}>[] = useMemo(() => {
     return [
@@ -39,7 +41,7 @@ export const ActantBookmarkFolderTable: React.FC<ActantBookmarkFolderTable> = ({
         id: "Action",
         accessor: "data",
         Cell: ({ row }: Cell) => {
-          const actant = row.original;
+          const actant = row.original as IActant;
 
           return (
             <ActantTag
@@ -52,7 +54,7 @@ export const ActantBookmarkFolderTable: React.FC<ActantBookmarkFolderTable> = ({
                   color="danger"
                   tooltip="unlink actant"
                   onClick={() => {
-                    //removeBookmark(bookmarkFolder.id, actant.id);
+                    removeBookmark(folder.id, actant.id);
                   }}
                 />
               }

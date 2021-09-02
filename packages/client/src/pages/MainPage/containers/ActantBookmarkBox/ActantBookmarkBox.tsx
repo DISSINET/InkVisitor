@@ -329,6 +329,7 @@ export const ActantBookmarkBox: React.FC = () => {
                       <ActantBookmarkFolderTable
                         folder={bookmarkFolder}
                         updateMutation={changeBookmarksMutation}
+                        removeBookmark={removeBookmark}
                       ></ActantBookmarkFolderTable>
                       {/* {bookmarkFolder.actants.map((actant) => {
                         return (
