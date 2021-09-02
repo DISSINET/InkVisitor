@@ -258,6 +258,16 @@ export const ActantBookmarkBox: React.FC = () => {
     }
   );
 
+  const updateFolderActants = (newActantIds: string[], folderId: string) => {
+    const newBookmarks: IBookmarkFolder[] | false = getBookmarksCopy();
+    if (newBookmarks) {
+      const folder = newBookmarks.find((b) => b.id === folderId);
+      if (folder) {
+        folder.actantIds = newActantIds;
+        changeBookmarksMutation.mutate(newBookmarks);
+      }
+    }
+  };
   return (
     <StyledContent>
       <StyledHeader>
@@ -328,7 +338,7 @@ export const ActantBookmarkBox: React.FC = () => {
                     <StyledFolderContentTags>
                       <ActantBookmarkFolderTable
                         folder={bookmarkFolder}
-                        updateMutation={changeBookmarksMutation}
+                        updateFolderActants={updateFolderActants}
                         removeBookmark={removeBookmark}
                       ></ActantBookmarkFolderTable>
                       {/* {bookmarkFolder.actants.map((actant) => {

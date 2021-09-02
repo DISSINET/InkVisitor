@@ -23,14 +23,20 @@ import { ActantBookmarkFolderTableRow } from "./ActantBookmarkFolderTableRow";
 
 interface ActantBookmarkFolderTable {
   folder: IResponseBookmarkFolder;
-  updateMutation: any;
+  updateFolderActants: any;
   removeBookmark: Function;
 }
 export const ActantBookmarkFolderTable: React.FC<ActantBookmarkFolderTable> = ({
   folder,
-  updateMutation,
+  updateFolderActants,
   removeBookmark,
 }) => {
+  const [folderActants, setFolderActants] = useState(folder.actants);
+
+  useEffect(() => {
+    setFolderActants(folder.actants);
+  }, [folder]);
+
   const columns: Column<{}>[] = useMemo(() => {
     return [
       {
@@ -78,7 +84,7 @@ export const ActantBookmarkFolderTable: React.FC<ActantBookmarkFolderTable> = ({
     visibleColumns,
   } = useTable({
     columns,
-    data: folder.actants || [],
+    data: folderActants || [],
     getRowId,
     initialState: {
       hiddenColumns: ["id"],
@@ -86,25 +92,25 @@ export const ActantBookmarkFolderTable: React.FC<ActantBookmarkFolderTable> = ({
   });
 
   const updateFolderItemOrder = () => {
-    // updateActionsMutation.mutate({
-    //   actions: actions,
-    // });
+    updateFolderActants(
+      folderActants.map((a) => a.id),
+      folder.id
+    );
   };
 
   const moveRow = useCallback(
     (dragIndex: number, hoverIndex: number) => {
-      const dragRecord = folder.actants[dragIndex];
-      console.log(dragRecord);
-      //   setFilteredActions(
-      //     update(filteredActions, {
-      //       $splice: [
-      //         [dragIndex, 1],
-      //         [hoverIndex, 0, dragRecord],
-      //       ],
-      //     })
-      //   );
+      const dragRecord = folderActants[dragIndex];
+      const newlySortedActants = update(folderActants, {
+        $splice: [
+          [dragIndex, 1],
+          [hoverIndex, 0, dragRecord],
+        ],
+      });
+
+      setFolderActants(newlySortedActants);
     },
-    [folder]
+    [folderActants]
   );
 
   return (
