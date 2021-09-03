@@ -27,7 +27,7 @@ export const Box: React.FC<BoxProps> = ({
   label = "",
   color = "primary",
   height,
-  noPadding = false,
+  noPadding = true,
   isExpanded = true,
   button,
   children,
