@@ -52,9 +52,9 @@ export const StyledSelect = styled.select<IValueStyle>`
   background-color: ${({ inverted, theme }) =>
     inverted ? theme.color["primary"] : theme.color["white"]};
   border-width: ${({ theme, noBorder }) =>
-    noBorder ? theme.borderWidth[2] : theme.borderWidth[2]};
+    noBorder ? theme.borderWidth[1] : theme.borderWidth[1]};
   border-color: ${({ inverted, theme }) =>
-    inverted ? theme.color["primary"] : theme.color["primary"]};
+    inverted ? theme.color["gray"]["400"]: theme.color["gray"][400]};
   font-size: ${({ theme }) => theme.fontSize["xs"]};
   font-weight: bold;
   width: ${({ width }) => getWidth(width)};
