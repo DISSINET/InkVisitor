@@ -34,7 +34,7 @@ export const StyledEditorSectionHeader = styled.div<StyledEditorSectionHeader>`
   font-weight: ${({ theme }) => theme.fontWeight.bold};
   font-size: ${({ theme }) => theme.fontSize.xl};
   margin-bottom: ${({ theme }) => theme.space["4"]};
-  color: ${({ theme }) => theme.color["gray"][600]};
+  color: ${({ theme }) => theme.color["primary"]};
 `;
 
 interface StyledEditorSectionContent {}
