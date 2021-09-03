@@ -33,9 +33,9 @@ export const StyledInput = styled.input<IValueStyle>`
   background-color: ${({ inverted, theme }) =>
     inverted ? theme.color["primary"] : theme.color["white"]};
   border-width: ${({ theme, noBorder }) =>
-    noBorder ? 0 : theme.borderWidth[2]};
+    noBorder ? 0 : theme.borderWidth[1]};
   border-color: ${({ inverted, theme }) =>
-    inverted ? theme.color["white"] : theme.color["primary"]};
+    inverted ? theme.color["white"] : theme.color["gray"]["400"]};
   font-size: ${({ theme }) => theme.fontSize["xs"]};
   padding: ${space1};
   width: ${({ width }) => getWidth(width)};
