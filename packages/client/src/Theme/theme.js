@@ -27,7 +27,7 @@ export default {
     invertedBg: {
       plain: "#edf2f7",
       danger: "#FFEEEE",
-      info: "#fff",
+      info: "#F2EBFE",
       success: "#fff",
       primary: "#fff",
       grey: "#fff",

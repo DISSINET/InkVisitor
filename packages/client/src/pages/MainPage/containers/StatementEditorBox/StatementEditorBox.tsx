@@ -442,6 +442,7 @@ export const StatementEditorBox: React.FC = () => {
                     key="d"
                     icon={<FaUnlink />}
                     color="danger"
+                    inverted={true}
                     tooltip="unlink actant"
                     onClick={() => {
                       updateProp(prop.id, {
@@ -500,6 +501,7 @@ export const StatementEditorBox: React.FC = () => {
                     icon={<FaUnlink />}
                     tooltip="unlink actant"
                     color="danger"
+                    inverted={true}
                     onClick={() => {
                       updateProp(prop.id, {
                         value: {
@@ -552,7 +554,8 @@ export const StatementEditorBox: React.FC = () => {
                 key="add"
                 icon={<FaPlus />}
                 tooltip="add second level prop"
-                color="primary"
+                color="plain"
+                inverted={true}
                 onClick={() => {
                   addProp(prop.id);
                 }}
@@ -563,6 +566,7 @@ export const StatementEditorBox: React.FC = () => {
               icon={<FaTrashAlt />}
               tooltip="remove prop row"
               color="danger"
+              inverted={true}
               onClick={() => {
                 removeProp(prop.id);
               }}
@@ -572,7 +576,8 @@ export const StatementEditorBox: React.FC = () => {
               inverted
               icon={<FaCaretUp />}
               tooltip="move prop up"
-              color="info"
+              inverted={true}
+              color="plain"
               onClick={() => {
                 movePropUp(prop.id);
               }}
@@ -582,7 +587,7 @@ export const StatementEditorBox: React.FC = () => {
               inverted
               icon={<FaCaretDown />}
               tooltip="move prop down"
-              color="info"
+              color="plain"
               onClick={() => {
                 movePropDown(prop.id);
               }}
@@ -791,6 +796,7 @@ export const StatementEditorBox: React.FC = () => {
                               tooltip="unlink actant from tags"
                               icon={<FaUnlink />}
                               color="danger"
+                              inverted={true}
                               onClick={() => {
                                 removeTag(tag);
                               }}
