@@ -71,8 +71,8 @@ export const StyledTextArea = styled.textarea<IValueStyle>`
   background-color: ${({ inverted, theme }) =>
     inverted ? theme.color["primary"] : theme.color["white"]};
   border-width: ${({ theme, noBorder }) =>
-    noBorder ? 0 : theme.borderWidth[2]};
-  border-color: ${({ theme }) => theme.color["primary"]};
+    noBorder ? 0 : theme.borderWidth[1]};
+  border-color: ${({ theme }) => theme.color["gray"]["400"]};
   font-size: ${({ theme }) => theme.fontSize["xs"]};
   width: ${({ width }) => getWidth(width)};
   padding: ${space1};
@@ -81,5 +81,7 @@ export const StyledTextArea = styled.textarea<IValueStyle>`
   :focus {
     outline: 0;
     border-color: ${({ theme }) => theme.color["success"]};
+    border-width: ${({ theme, noBorder }) =>
+      noBorder ? 0 : theme.borderWidth[2]};
   }
 `;
