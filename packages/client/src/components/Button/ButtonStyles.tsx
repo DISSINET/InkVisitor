@@ -18,7 +18,7 @@ export const StyledButton = styled.button<IButtonStyle>`
   padding: ${space1} ${({ hasIcon }) => (hasIcon ? space1 : space2)};
   border-color: ${({ theme, disabled, color }) =>
     disabled ? theme.color["gray"][400] : theme.color[color]};
-  border-width: "2px";
+  border-width: thin;
   border-style: solid;
 
   color: ${({ theme, disabled, color, inverted }) => {
@@ -32,7 +32,7 @@ export const StyledButton = styled.button<IButtonStyle>`
     return disabled
       ? theme.color["gray"][400]
       : inverted
-      ? theme.color["white"]
+      ? theme.color["invertedBg"][color]
       : theme.color[color];
   }};
   cursor: ${({ disabled }) => {
