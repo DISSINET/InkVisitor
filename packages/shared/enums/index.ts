@@ -153,3 +153,8 @@ export enum ResourceType {
   Type1 = "1",
   Type2 = "2",
 }
+
+export enum TerritoryType {
+  Type1 = "1",
+  Type2 = "2",
+}
