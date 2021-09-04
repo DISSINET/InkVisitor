@@ -7,45 +7,52 @@ import {
   StyledTh,
 } from "./StatementEditorActantTableStyles";
 import { StatementEditorActantTableRow } from "./StatementEditorActantTableRow/StatementEditorActantTableRow";
+import { StatementEditorAttributes } from "./../StatementEditorAttributes/StatementEditorAttributes";
+
 import {
   IActant,
   IResponseGeneric,
   IResponseStatement,
   IStatementActant,
+  IStatementProp,
 } from "@shared/types";
 import { ActantSuggester, ActantTag, CertaintyToggle, ElvlToggle } from "../..";
 import { Button, Input, Loader } from "components";
-import { FaTrashAlt, FaUnlink } from "react-icons/fa";
+import { FaTrashAlt, FaUnlink, FaPlus } from "react-icons/fa";
 import { useMutation, UseMutationResult, useQueryClient } from "react-query";
 import { actantPositionDict } from "@shared/dictionaries";
-import { AxiosResponse } from "axios";
-const queryString = require("query-string");
 
 interface FilteredActantObject {
   data: { actant: IActant | undefined; sActant: IStatementActant };
 }
 interface StatementEditorActantTable {
   statement: IResponseStatement;
+  statementId: string;
   handleRowClick?: Function;
+  renderPropGroup: Function;
   classEntitiesActant: string[];
-  updateActantsMutation: UseMutationResult<
-    AxiosResponse<IResponseGeneric>,
-    unknown,
-    object,
-    unknown
-  >;
+  updateActantsMutation: UseMutationResult<any, unknown, object, unknown>;
+  addProp: (originId: string) => void;
+  propsByOrigins: {
+    [key: string]: {
+      type: "action" | "actant";
+      origin: string;
+      props: IStatementProp[];
+      actant: IActant;
+    };
+  };
 }
 export const StatementEditorActantTable: React.FC<StatementEditorActantTable> =
   ({
     statement,
+    statementId,
     handleRowClick = () => {},
     classEntitiesActant,
+    renderPropGroup,
     updateActantsMutation,
+    addProp,
+    propsByOrigins,
   }) => {
-    const queryClient = useQueryClient();
-    var hashParams = queryString.parse(location.hash);
-    const territoryId = hashParams.territory;
-
     const [filteredActants, setFilteredActants] = useState<
       FilteredActantObject[]
     >([]);
@@ -94,7 +101,11 @@ export const StatementEditorActantTable: React.FC<StatementEditorActantTable> =
           Header: "Actant",
           accessor: "data",
           Cell: ({ row }: Cell) => {
-            const { actant, sActant } = row.values.data;
+            const {
+              actant,
+              sActant,
+            }: { actant: IActant; sActant: IStatementActant | any } =
+              row.values.data;
             return actant ? (
               <ActantTag
                 actant={actant}
@@ -126,6 +137,7 @@ export const StatementEditorActantTable: React.FC<StatementEditorActantTable> =
           },
         },
         {
+          id: "position",
           Header: "Position",
           Cell: ({ row }: Cell) => {
             const { sActant } = row.values.data;
@@ -144,34 +156,40 @@ export const StatementEditorActantTable: React.FC<StatementEditorActantTable> =
           },
         },
         {
-          Header: "Attributes",
+          id: "Attributes",
           Cell: ({ row }: Cell) => {
-            const { sActant } = row.values.data;
-            return (
-              <>
-                <ElvlToggle
-                  value={sActant.elvl}
-                  onChangeFn={(newValue: string) => {
-                    updateActant(sActant.id, {
-                      elvl: newValue,
-                    });
-                  }}
-                />
-                <CertaintyToggle
-                  value={sActant.certainty}
-                  onChangeFn={(newValue: string) => {
-                    updateActant(sActant.id, {
-                      certainty: newValue,
-                    });
-                  }}
-                />
-              </>
+            const {
+              actant,
+              sActant,
+            }: { actant: IActant; sActant: IStatementActant | any } =
+              row.values.data;
+            return actant && sActant ? (
+              <StatementEditorAttributes
+                modalTitle={actant.label}
+                entityType={actant.class}
+                data={{
+                  elvl: sActant.elvl,
+                  certainty: sActant.certainty,
+                  logic: sActant.logic,
+                  virtuality: sActant.virtuality,
+                  partitivity: sActant.partitivity,
+                  operator: sActant.operator,
+                  bundleStart: sActant.bundleStart,
+                  bundleEnd: sActant.bundleEnd,
+                }}
+                handleUpdate={(newData) => {
+                  updateActant(sActant.id, newData);
+                }}
+                loading={updateActantsMutation.isLoading}
+              />
+            ) : (
+              <div />
             );
           },
         },
         {
           Header: "",
-          id: "expander",
+          id: "remove",
           Cell: ({ row }: Cell) => (
             <Button
               key="d"
@@ -184,8 +202,26 @@ export const StatementEditorActantTable: React.FC<StatementEditorActantTable> =
             />
           ),
         },
+        {
+          Header: "",
+          id: "add",
+          Cell: ({ row }: Cell) => {
+            const propOriginId = row.values.data.sActant.actant;
+            return (
+              <Button
+                key="a"
+                icon={<FaPlus />}
+                color="primary"
+                tooltip="add new prop"
+                onClick={() => {
+                  addProp(propOriginId);
+                }}
+              />
+            );
+          },
+        },
       ];
-    }, [filteredActants]);
+    }, [filteredActants, updateActantsMutation]);
 
     const getRowId = useCallback((row) => {
       return row.id;
@@ -225,36 +261,37 @@ export const StatementEditorActantTable: React.FC<StatementEditorActantTable> =
     );
 
     return (
-      <>
-        <StyledTable {...getTableProps()}>
-          <StyledTHead>
-            {headerGroups.map((headerGroup, key) => (
-              <tr {...headerGroup.getHeaderGroupProps()} key={key}>
-                <th></th>
-                {headerGroup.headers.map((column, key) => (
-                  <StyledTh {...column.getHeaderProps()} key={key}>
-                    {column.render("Header")}
-                  </StyledTh>
-                ))}
-              </tr>
-            ))}
-          </StyledTHead>
-          <tbody {...getTableBodyProps()}>
-            {rows.map((row: Row, i: number) => {
-              prepareRow(row);
-              return (
-                <StatementEditorActantTableRow
-                  handleClick={handleRowClick}
-                  index={i}
-                  row={row}
-                  moveRow={moveRow}
-                  updateOrderFn={updateActantsOrder}
-                  {...row.getRowProps()}
-                />
-              );
-            })}
-          </tbody>
-        </StyledTable>
-      </>
+      <StyledTable {...getTableProps()}>
+        <StyledTHead>
+          {headerGroups.map((headerGroup, key) => (
+            <tr {...headerGroup.getHeaderGroupProps()} key={key}>
+              <th></th>
+              {headerGroup.headers.map((column, key) => (
+                <StyledTh {...column.getHeaderProps()} key={key}>
+                  {column.render("Header")}
+                </StyledTh>
+              ))}
+            </tr>
+          ))}
+        </StyledTHead>
+        <tbody {...getTableBodyProps()}>
+          {rows.map((row: Row, i: number) => {
+            prepareRow(row);
+            return (
+              <StatementEditorActantTableRow
+                renderPropGroup={renderPropGroup}
+                handleClick={handleRowClick}
+                index={i}
+                row={row}
+                statement={statement}
+                moveRow={moveRow}
+                updateOrderFn={updateActantsOrder}
+                visibleColumns={visibleColumns}
+                {...row.getRowProps()}
+              />
+            );
+          })}
+        </tbody>
+      </StyledTable>
     );
   };

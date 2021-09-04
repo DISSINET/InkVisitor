@@ -7,7 +7,6 @@
     "test": "jest",
     "start": "webpack-dev-server --open --config webpack.development.js",
     "build": "webpack --config webpack.production.js",
-    "deploy": "npm run build && rsync -avz dist/ adamm@10.16.30.211:/var/www/html/apps/inkvisitor/",
     "storybook": "start-storybook -p 6006",
     "build-storybook": "build-storybook"
   },
@@ -33,6 +32,7 @@
     "react-icons": "^3.11.0",
     "react-query": "^3.12.1",
     "react-redux": "^7.2.0",
+    "react-router": "^5.2.1",
     "react-router-dom": "^5.2.0",
     "react-select": "^3.1.0",
     "react-spinners": "^0.10.6",
@@ -54,7 +54,6 @@
     "@storybook/addon-actions": "^6.1.21",
     "@storybook/addon-links": "^6.1.21",
     "@storybook/addon-storyshots": "^6.1.21",
-    "@storybook/addons": "^6.1.21",
     "@storybook/preset-typescript": "^3.0.0",
     "@storybook/react": "^6.1.21",
     "@types/jest": "^26.0.0",

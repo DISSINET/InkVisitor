@@ -1,14 +1,16 @@
 import React, { ReactElement } from "react";
 import { PopupPosition, EventType } from "reactjs-popup/dist/types";
 
-import { StyledPopup } from "./TooltipStyles";
+import { StyledDetail, StyledLabel, StyledPopup } from "./TooltipStyles";
 
 interface Tooltip {
   children: ReactElement;
   position?: PopupPosition | PopupPosition[];
   on?: EventType | EventType[];
-  label: string;
+  label?: string;
+  detail?: string;
   disabled?: boolean;
+  attributes?: React.ReactElement[];
 }
 export const Tooltip: React.FC<Tooltip> = ({
   children,
@@ -16,6 +18,8 @@ export const Tooltip: React.FC<Tooltip> = ({
   on = ["hover", "focus"],
   label = "",
   disabled = false,
+  detail = "",
+  attributes,
 }) => {
   return (
     <StyledPopup
@@ -23,9 +27,16 @@ export const Tooltip: React.FC<Tooltip> = ({
       mouseLeaveDelay={0}
       position={position}
       on={on}
-      disabled={disabled || label.length === 0}
+      disabled={
+        disabled ||
+        (label.length === 0 && detail.length === 0 && attributes?.length === 0)
+      }
     >
-      {label}
+      <div>
+        <StyledLabel>{label}</StyledLabel>
+        <StyledDetail>{detail}</StyledDetail>
+        {attributes}
+      </div>
     </StyledPopup>
   );
 };

@@ -26,13 +26,11 @@ export const StyledSelect = styled(Select)`
   min-height: ${({ theme }) => theme.space[10]};
   vertical-align: bottom;
   font-size: ${({ theme }) => theme.fontSize["xs"]};
-  height: ${({ theme }) => theme.space[10]};
   max-width: 100%;
   width: 100%;
   .react-select__control {
     width: ${({ width }) => getWidth(width)};
     max-width: 100%;
-    height: ${({ theme }) => theme.space[10]};
     min-height: ${({ theme }) => theme.space[10]};
     border: 2px solid black;
     border-radius: 0;
@@ -64,18 +62,21 @@ export const StyledSelect = styled(Select)`
   .react-select__menu {
     border-radius: 0;
     box-shadow: ${({ theme }) => theme.boxShadow["normal"]};
-    width: ${({ width }) => (width === "full" ? "100%" : "auto")};
+    width: 100%;
+    transform: translate(0, -6px);
   }
   .react-select__option {
     :hover {
-      background-color: rgba(212, 219, 244, 0.3);
     }
   }
   .react-select__option--is-selected {
     background-color: ${({ theme }) => theme.color["primary"]};
     color: white;
     :hover {
-      background-color: ${({ theme }) => theme.color["primary"]};
+      background-color: ${({ theme }) => theme.color["blue"][200]};
     }
+  }
+  .react-select__option--is-focused {
+    background-color: ${({ theme }) => theme.color["blue"][200]};
   }
 `;

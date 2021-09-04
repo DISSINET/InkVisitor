@@ -2,5 +2,8 @@
 echo -n "Enter your name and press [ENTER]: "
 read username
 
+echo -n "Enter host [ENTER]: "
+read host
+
 # use rsync
-scp -r packages/client/dist/* ${username}@10.16.30.211:/var/www/html/apps/inkvisitor
+scp -r packages/client/dist/* ${username}@${host}:/var/www/html/apps/inkvisitor

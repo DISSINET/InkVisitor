@@ -7,7 +7,7 @@ class ResourceData implements IModel {
   content = "";
   link = "";
   type = "";
-  language: typeof languageValues[number] = "en"; // default
+  language: typeof languageValues[number][] = ["eng"]; // default
 
   constructor(data: UnknownObject) {
     if (!data) {
@@ -31,7 +31,7 @@ class Resource extends Actant implements IResource {
   label: string = "";
   detail: string = "";
   status: ActantStatus = "0";
-  language: string = "eng";
+  language: string[] = ["eng"];
   notes: string[] = [];
 
   constructor(data: UnknownObject) {

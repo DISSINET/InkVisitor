@@ -1,16 +1,13 @@
 import React, { useState } from "react";
-import { Row, useTable } from "react-table";
-import { useQuery } from "react-query";
+import { ColumnInstance, Row, useTable } from "react-table";
 
-import { Entities } from "types";
-import { Tag } from "components";
 import { IActant, IAction, ILabel, IStatementActant } from "@shared/types";
 import api from "api";
 import { StyledSubRow } from "./StatementListRowStyles";
 
 interface StatementListRowExpanded {
   row: Row;
-  visibleColumns: any;
+  visibleColumns: ColumnInstance<{}>[];
 }
 export const StatementListRowExpanded: React.FC<StatementListRowExpanded> = ({
   row,

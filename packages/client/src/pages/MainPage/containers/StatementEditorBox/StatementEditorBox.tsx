@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useState, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "react-query";
 import api from "api";
 const queryString = require("query-string");
@@ -12,29 +12,18 @@ import {
 } from "react-icons/fa";
 
 import { useLocation, useHistory } from "react-router";
+import { ActantTag } from "./../";
+import { CProp, CStatementActant, CStatementAction } from "constructors";
 
-import {
-  ActantTag,
-  ActionDropdown,
-  CertaintyToggle,
-  ModalityToggle,
-  ElvlToggle,
-} from "./../";
-
-import { CProp, CStatementActant } from "constructors";
-
-import {
-  actantPositionDict,
-  referenceTypeDict,
-} from "./../../../../../../shared/dictionaries";
+import { referenceTypeDict } from "./../../../../../../shared/dictionaries";
 import {
   IActant,
-  IProp,
+  IStatementProp,
   IStatement,
   IStatementReference,
   IResponseStatement,
 } from "@shared/types";
-import { Button, Input, Loader } from "components";
+import { Button, Input, Loader, MultiInput } from "components";
 import { ActantSuggester } from "./../";
 
 import {
@@ -54,6 +43,9 @@ import {
 } from "./StatementEditorBoxStyles";
 import { StatementEditorActantTable } from "./StatementEditorActantTable/StatementEditorActantTable";
 import { StatementEditorActionTable } from "./StatementEditorActionTable/StatementEditorActionTable";
+import { StatementEditorAttributes } from "./StatementEditorAttributes/StatementEditorAttributes";
+import { StyledSubRow } from "./StatementEditorActionTable/StatementEditorActionTableRow/StatementEditorActionTableRowStyles";
+import { ColumnInstance } from "react-table";
 
 const classesActants = ["P", "G", "O", "C", "L", "V", "E", "S", "T", "R"];
 const classesPropType = ["C"];
@@ -86,34 +78,42 @@ export const StatementEditorBox: React.FC = () => {
     { enabled: !!statementId && api.isLoggedIn() }
   );
 
-  console.log(statement);
+  // console.log(statement);
 
   // getting origin actants of properties
   const propsByOrigins = useMemo(() => {
     if (statement) {
-      // console.log(
-      //   "getting new props",
-      //   statement.data.actants,
-      //   statement.actants
-      // );
       const allProps = statement?.data.props;
-      const statementItself = { ...statement };
 
-      const statementActants = statement.actants.filter((sa) =>
-        statement.data.actants.map((a) => a.actant).includes(sa.id)
+      const statementActants = statement.actants.filter(
+        (sa) =>
+          statement.data.actants.map((a) => a.actant).includes(sa.id) ||
+          statement.data.actions.map((a) => a.action).includes(sa.id)
       );
 
-      const allPossibleOrigins = [statementItself, ...statementActants];
+      const allPossibleOrigins = [...statementActants];
 
-      const originProps: { origin: any; props: any[]; actant: IActant }[] = [];
+      const originProps: {
+        [key: string]: {
+          type: "action" | "actant";
+          origin: string;
+          props: any[];
+          actant: IActant;
+        };
+      } = {};
 
       allPossibleOrigins.forEach((origin) => {
-        originProps.push({ origin: origin.id, props: [], actant: origin });
+        originProps[origin.id as string] = {
+          type: origin.class === "A" ? "action" : "actant",
+          origin: origin.id,
+          props: [],
+          actant: origin,
+        };
       });
 
       // 1st level
       allProps.forEach((prop) => {
-        const originProp = originProps.find((op) => op.origin === prop.origin);
+        const originProp = originProps[prop.origin];
         if (originProp) {
           originProp.props.push({ ...prop, ...{ props: [] } });
         }
@@ -121,7 +121,8 @@ export const StatementEditorBox: React.FC = () => {
 
       // 2nd level
       allProps.forEach((prop) => {
-        originProps.forEach((op) => {
+        Object.keys(originProps).forEach((opKey: string) => {
+          const op = originProps[opKey];
           op.props.forEach((op2) => {
             if (op2.id === prop.origin) {
               op2.props.push(prop);
@@ -134,9 +135,21 @@ export const StatementEditorBox: React.FC = () => {
 
       return originProps;
     } else {
-      return [];
+      return {};
     }
   }, [JSON.stringify(statement)]);
+
+  // actions
+  const addAction = (newActionId: string) => {
+    if (statement) {
+      const newStatementAction = CStatementAction(newActionId);
+
+      const newData = {
+        actions: [...statement.data.actions, newStatementAction],
+      };
+      updateActionsRefreshListMutation.mutate(newData);
+    }
+  };
 
   const addActant = (newStatementActantId: string) => {
     if (statement) {
@@ -289,10 +302,10 @@ export const StatementEditorBox: React.FC = () => {
   };
 
   const update = async (changes: object) => {
-    updateActantsMutation.mutate(changes);
+    updateActantsDataMutation.mutate(changes);
   };
 
-  const updateActantsMutation = useMutation(
+  const updateActantsDataMutation = useMutation(
     async (changes: object) =>
       await api.actantsUpdate(statementId, {
         data: changes,
@@ -300,6 +313,20 @@ export const StatementEditorBox: React.FC = () => {
     {
       onSuccess: () => {
         queryClient.invalidateQueries(["statement"]);
+      },
+    }
+  );
+
+  const updateActionsRefreshListMutation = useMutation(
+    async (changes: object) => {
+      await api.actantsUpdate(statementId, {
+        data: changes,
+      });
+    },
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries("statement");
+        queryClient.invalidateQueries("territory");
       },
     }
   );
@@ -317,58 +344,57 @@ export const StatementEditorBox: React.FC = () => {
     }
   );
 
-  const renderPropGroup = (propOrigin: any, statement: IResponseStatement) => {
-    const originActant = propOrigin.actant;
+  const renderPropGroup = (
+    propOriginId: string,
+    statement: IResponseStatement,
+    visibleColumns: ColumnInstance<{}>[]
+  ) => {
+    const propOrigin = propsByOrigins[propOriginId];
 
-    if (originActant) {
+    const originActant = propOrigin?.actant;
+
+    if (originActant && propOrigin.props.length > 0) {
       return (
-        <React.Fragment key={originActant.id}>
-          <StyledPropsActantHeader>
-            <ActantTag actant={originActant} short={false} />
-            <StyledPropButtonGroup>
-              <Button
-                key="d"
-                icon={<FaPlus />}
-                color="primary"
-                tooltip="add new prop"
-                onClick={() => {
-                  addProp(originActant.id);
-                }}
-              />
-            </StyledPropButtonGroup>
-          </StyledPropsActantHeader>
-          {propOrigin.props.length > 0 ? (
-            <StyledPropsActantList>
-              <StyledListHeaderColumn>Type</StyledListHeaderColumn>
-              <StyledListHeaderColumn>Value</StyledListHeaderColumn>
-              <StyledListHeaderColumn>Attributes</StyledListHeaderColumn>
-              <StyledListHeaderColumn></StyledListHeaderColumn>
-              {propOrigin.props.map((prop1: any, pi1: number) => {
-                return (
-                  <React.Fragment key={prop1 + pi1}>
-                    {renderPropRow(statement, prop1, "1", pi1, false)}
-                    {prop1.props.map((prop2: any, pi2: number) => {
-                      return renderPropRow(
-                        statement,
-                        prop2,
-                        "2",
-                        pi2,
-                        pi2 === prop1.props.length - 1
+        <tr>
+          <td colSpan={visibleColumns.length + 1}>
+            <StyledSubRow>
+              <React.Fragment key={originActant.id}>
+                <StyledPropsActantHeader></StyledPropsActantHeader>
+                {propOrigin.props.length > 0 ? (
+                  <StyledPropsActantList>
+                    <StyledListHeaderColumn></StyledListHeaderColumn>
+                    <StyledListHeaderColumn>Type</StyledListHeaderColumn>
+                    <StyledListHeaderColumn>Value</StyledListHeaderColumn>
+                    <StyledListHeaderColumn></StyledListHeaderColumn>
+                    {propOrigin.props.map((prop1: any, pi1: number) => {
+                      return (
+                        <React.Fragment key={prop1 + pi1}>
+                          {renderPropRow(statement, prop1, "1", pi1, false)}
+                          {prop1.props.map((prop2: any, pi2: number) => {
+                            return renderPropRow(
+                              statement,
+                              prop2,
+                              "2",
+                              pi2,
+                              pi2 === prop1.props.length - 1
+                            );
+                          })}
+                        </React.Fragment>
                       );
                     })}
-                  </React.Fragment>
-                );
-              })}
-            </StyledPropsActantList>
-          ) : null}
-        </React.Fragment>
+                  </StyledPropsActantList>
+                ) : null}
+              </React.Fragment>
+            </StyledSubRow>
+          </td>
+        </tr>
       );
     }
   };
 
   const renderPropRow = (
     statement: IResponseStatement,
-    prop: IProp,
+    prop: IStatementProp,
     level: "1" | "2",
     order: number,
     lastSecondLevel: boolean
@@ -381,6 +407,27 @@ export const StatementEditorBox: React.FC = () => {
     return (
       <React.Fragment key={prop.origin + level + "|" + order}>
         <StyledPropLineColumn></StyledPropLineColumn>
+        <StyledPropLineColumn lastSecondLevel={lastSecondLevel}>
+          <StyledPropButtonGroup leftMargin={false}>
+            <StatementEditorAttributes
+              modalTitle={`${propValueActant?.label} - ${propTypeActant?.label}`}
+              data={{
+                elvl: prop.elvl,
+                certainty: prop.certainty,
+                logic: prop.logic,
+                mood: prop.mood,
+                moodvariant: prop.moodvariant,
+                operator: prop.operator,
+                bundleStart: prop.bundleStart,
+                bundleEnd: prop.bundleEnd,
+              }}
+              handleUpdate={(newData) => {
+                updateProp(prop.id, newData);
+              }}
+              loading={updateActantsDataMutation.isLoading}
+            />
+          </StyledPropButtonGroup>
+        </StyledPropLineColumn>
         <StyledPropLineColumn
           padded={level === "2"}
           lastSecondLevel={lastSecondLevel}
@@ -408,27 +455,19 @@ export const StatementEditorBox: React.FC = () => {
                 }
               />
               <StyledPropButtonGroup>
-                <ElvlToggle
-                  value={prop.type.elvl}
-                  onChangeFn={(newValue: string) => {
-                    updateProp(prop.id, {
-                      type: {
-                        ...prop.type,
-                        ...{ elvl: newValue },
-                      },
-                    });
+                <StatementEditorAttributes
+                  modalTitle={propTypeActant.label}
+                  entityType={propTypeActant.class}
+                  data={{
+                    elvl: prop.type.elvl,
+                    logic: prop.type.logic,
+                    virtuality: prop.type.virtuality,
+                    partitivity: prop.type.partitivity,
                   }}
-                />
-                <CertaintyToggle
-                  value={prop.type.certainty}
-                  onChangeFn={(newValue: string) => {
-                    updateProp(prop.id, {
-                      type: {
-                        ...prop.type,
-                        ...{ certainty: newValue },
-                      },
-                    });
+                  handleUpdate={(newData) => {
+                    updateProp(prop.id, { type: { ...prop.type, ...newData } });
                   }}
+                  loading={updateActantsDataMutation.isLoading}
                 />
               </StyledPropButtonGroup>
             </React.Fragment>
@@ -473,27 +512,21 @@ export const StatementEditorBox: React.FC = () => {
                 }
               />
               <StyledPropButtonGroup>
-                <ElvlToggle
-                  value={prop.value.elvl}
-                  onChangeFn={(newValue: string) => {
+                <StatementEditorAttributes
+                  modalTitle={propValueActant.label}
+                  entityType={propValueActant.class}
+                  data={{
+                    elvl: prop.value.elvl,
+                    logic: prop.value.logic,
+                    virtuality: prop.value.virtuality,
+                    partitivity: prop.value.partitivity,
+                  }}
+                  handleUpdate={(newData) => {
                     updateProp(prop.id, {
-                      value: {
-                        ...prop.value,
-                        ...{ elvl: newValue },
-                      },
+                      value: { ...prop.value, ...newData },
                     });
                   }}
-                />
-                <CertaintyToggle
-                  value={prop.value.certainty}
-                  onChangeFn={(newValue: string) => {
-                    updateProp(prop.id, {
-                      value: {
-                        ...prop.value,
-                        ...{ certainty: newValue },
-                      },
-                    });
-                  }}
+                  loading={updateActantsDataMutation.isLoading}
                 />
               </StyledPropButtonGroup>
             </React.Fragment>
@@ -511,34 +544,7 @@ export const StatementEditorBox: React.FC = () => {
             ></ActantSuggester>
           )}
         </StyledPropLineColumn>
-        <StyledPropLineColumn lastSecondLevel={lastSecondLevel}>
-          <StyledPropButtonGroup leftMargin={false}>
-            <ModalityToggle
-              value={prop.modality}
-              onChangeFn={(newValue: string) => {
-                updateProp(prop.id, {
-                  modality: newValue,
-                });
-              }}
-            />
-            <ElvlToggle
-              value={prop.elvl}
-              onChangeFn={(newValue: string) => {
-                updateProp(prop.id, {
-                  elvl: newValue,
-                });
-              }}
-            />
-            <CertaintyToggle
-              value={prop.certainty}
-              onChangeFn={(newValue: string) => {
-                updateProp(prop.id, {
-                  certainty: newValue,
-                });
-              }}
-            />
-          </StyledPropButtonGroup>
-        </StyledPropLineColumn>
+
         <StyledPropLineColumn lastSecondLevel={lastSecondLevel}>
           <StyledPropButtonGroup leftMargin={false}>
             {level === "1" && (
@@ -600,7 +606,6 @@ export const StatementEditorBox: React.FC = () => {
                   <StyledListHeaderColumn>Text</StyledListHeaderColumn>
                   <Input
                     type="textarea"
-                    width={1000}
                     onChangeFn={(newValue: string) => {
                       if (newValue !== statement.data.text) {
                         const newData = {
@@ -611,50 +616,7 @@ export const StatementEditorBox: React.FC = () => {
                     }}
                     value={statement.data.text}
                   />
-                  {/* <ActionDropdown
-                        onSelectedChange={(newActionValue: {
-                          value: string;
-                          label: string;
-                        }) => {
-                          const newData = {
-                            action: newActionValue.value,
-                          };
-                          // update(newData);
-                          updateActantsRefreshListMutation.mutate(newData);
-                        }}
-                        value={statement.data.action}
-                      /> */}
                 </div>
-              </div>
-              <div>
-                <StyledListHeaderColumn>Attributes</StyledListHeaderColumn>
-                <ModalityToggle
-                  value={statement.data.modality}
-                  onChangeFn={(newValue: string) => {
-                    const newData = {
-                      modality: newValue,
-                    };
-                    update(newData);
-                  }}
-                />
-                {/* <ElvlToggle
-                    value={statement.data.elvl}
-                    onChangeFn={(newValue: string) => {
-                      const newData = {
-                        elvl: newValue,
-                      };
-                      update(newData);
-                    }}
-                  />
-                  <CertaintyToggle
-                    value={statement.data.certainty}
-                    onChangeFn={(newValue: string) => {
-                      const newData = {
-                        certainty: newValue,
-                      };
-                      update(newData);
-                    }}
-                  /> */}
               </div>
             </StyledEditorSectionContent>
           </StyledEditorSection>
@@ -667,13 +629,16 @@ export const StatementEditorBox: React.FC = () => {
                 <StatementEditorActionTable
                   statement={statement}
                   statementId={statementId}
-                  classEntitiesActant={classesActants}
+                  updateActionsMutation={updateActionsRefreshListMutation}
+                  renderPropGroup={renderPropGroup}
+                  addProp={addProp}
+                  propsByOrigins={propsByOrigins}
                 />
               </StyledEditorActantTableWrapper>
 
               <ActantSuggester
                 onSelected={(newSelectedId: string) => {
-                  //
+                  addAction(newSelectedId);
                 }}
                 categoryIds={["A"]}
                 placeholder={"add new action"}
@@ -688,8 +653,12 @@ export const StatementEditorBox: React.FC = () => {
               <StyledEditorActantTableWrapper>
                 <StatementEditorActantTable
                   statement={statement}
+                  statementId={statementId}
                   classEntitiesActant={classesActants}
                   updateActantsMutation={updateActantsRefreshListMutation}
+                  renderPropGroup={renderPropGroup}
+                  addProp={addProp}
+                  propsByOrigins={propsByOrigins}
                 />
               </StyledEditorActantTableWrapper>
 
@@ -700,29 +669,6 @@ export const StatementEditorBox: React.FC = () => {
                 categoryIds={classesActants}
                 placeholder={"add new actant"}
               ></ActantSuggester>
-            </StyledEditorSectionContent>
-          </StyledEditorSection>
-
-          {/* Statement Props */}
-          <StyledEditorSection key="editor-section-props-statement">
-            <StyledEditorSectionHeader>
-              Actions Properties
-            </StyledEditorSectionHeader>
-
-            <StyledEditorSectionContent key={JSON.stringify(statement.data)}>
-              {renderPropGroup(propsByOrigins[0], statement)}
-            </StyledEditorSectionContent>
-          </StyledEditorSection>
-
-          {/* Actant Props */}
-          <StyledEditorSection key="editor-section-props-actants">
-            <StyledEditorSectionHeader>
-              Actant Properties
-            </StyledEditorSectionHeader>
-            <StyledEditorSectionContent key={JSON.stringify(statement.data)}>
-              {propsByOrigins.slice(1).map((propOrigin, sai) => {
-                return renderPropGroup(propOrigin, statement);
-              })}
             </StyledEditorSectionContent>
           </StyledEditorSection>
 
@@ -866,24 +812,17 @@ export const StatementEditorBox: React.FC = () => {
           </StyledEditorSection>
 
           {/* Notes */}
-          {/* <StyledEditorSection key="editor-section-notes" lastSection>
-              <StyledEditorSectionHeader>Notes</StyledEditorSectionHeader>
-              <StyledEditorSectionContent>
-                <Input
-                  type="textarea"
-                  width={1000}
-                  onChangeFn={(newValue: string) => {
-                    if (statement.data.note !== newValue) {
-                      const newData = {
-                        note: newValue,
-                      };
-                      update(newData);
-                    }
-                  }}
-                  value={statement.data.note}
-                />
-              </StyledEditorSectionContent>
-            </StyledEditorSection> */}
+          <StyledEditorSection key="editor-section-notes" lastSection>
+            <StyledEditorSectionHeader>Notes</StyledEditorSectionHeader>
+            <StyledEditorSectionContent>
+              <MultiInput
+                values={statement.notes}
+                onChange={(newValues: string[]) => {
+                  updateActantsDataMutation.mutate({ notes: newValues });
+                }}
+              />
+            </StyledEditorSectionContent>
+          </StyledEditorSection>
         </div>
       ) : (
         "no statement selected"
