@@ -3,13 +3,13 @@ import {
   ActantType,
   EntityActantType,
   ActantStatus,
-  ActantLogicalType,
+  EntityLogicalType,
 } from "@shared/enums";
 import { IEntity } from "@shared/types/entity";
 import Actant from "./actant";
 
 class EntityData implements IModel {
-  logicalType: ActantLogicalType = "1";
+  logicalType: EntityLogicalType = EntityLogicalType.Type1;
   language: string[] = ["eng"];
   constructor(data: UnknownObject) {
     if (!data) {

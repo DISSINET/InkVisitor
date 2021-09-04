@@ -48,50 +48,90 @@ export type EntityActantType =
   | ActantType.Value
   | ActantType.Event;
 
-// TODO: find a way how to turn imported list into enum
-const statuses = ["0", "1", "2", "3"] as const;
-export type ActantStatus = typeof statuses[number];
+export enum EntityLogicalType {
+  Type1 = "1",
+  Type2 = "2",
+  Type3 = "3",
+}
 
-const logicalTypes = ["1", "2", "3"] as const;
-export type ActantLogicalType = typeof logicalTypes[number];
+export enum ActantStatus {
+  Status0 = "0",
+  Status1 = "1",
+  Status2 = "2",
+  Status3 = "3",
+}
 
-const certanties = ["1", "2", "3", "4", "5", "6"] as const;
-export type Certainty = typeof certanties[number];
+export enum Certainty {
+  Certainty0 = "0",
+  Certainty1 = "1",
+  Certainty2 = "2",
+  Certainty3 = "3",
+  Certainty4 = "4",
+  Certainty5 = "5",
+  Certainty6 = "6",
+}
 
-const elvls = ["1", "2", "3"] as const;
-export type Elvl = typeof elvls[number];
+export enum Elvl {
+  Elvl1 = "1",
+  Elvl2 = "2",
+  Elvl3 = "3",
+}
 
-const positions = ["s", "a1", "a2", "p"] as const;
-export type Position = typeof positions[number];
+export enum Position {
+  S = "s",
+  A1 = "a1",
+  A2 = "a2",
+  P = "p",
+}
 
-const logics = ["1", "2"] as const;
-export type Logic = typeof logics[number];
+export enum Logic {
+  Logic1 = "1",
+  Logic2 = "2",
+}
 
-const moods = [
-  "1",
-  "2",
-  "3",
-  "4",
-  "5",
-  "6",
-  "7",
-  "8",
-  "9",
-  "10",
-  "11",
-  "12",
-  "13",
-] as const;
-export type Mood = typeof moods[number];
+export enum Mood {
+  Mood1 = "1",
+  Mood2 = "2",
+  Mood3 = "3",
+  Mood4 = "4",
+  Mood5 = "5",
+  Mood6 = "6",
+  Mood7 = "7",
+  Mood8 = "8",
+  Mood9 = "9",
+  Mood10 = "10",
+  Mood11 = "11",
+  Mood12 = "12",
+  Mood13 = "13",
+}
 
-const moodsvariants = ["1", "2", "3"] as const;
-export type MoodVariant = typeof moodsvariants[number];
+export enum MoodVariant {
+  MoodVariant1 = "1",
+  MoodVariant2 = "2",
+  MoodVariant3 = "3",
+}
 
-const virtualities = ["1", "2", "3"] as const;
-export type Virtuality = typeof virtualities[number];
+export enum Virtuality {
+  Virtuality1 = "1",
+  Virtuality2 = "2",
+  Virtuality3 = "3",
+}
 
-const partitivities = ["1", "2", "3", "4", "5"] as const;
-export type Partitivity = typeof partitivities[number];
+export enum Partitivity {
+  Partitivity1 = "1",
+  Partitivity2 = "2",
+  Partitivity3 = "3",
+  Partitivity4 = "4",
+  Partitivity5 = "5",
+}
 
-const Operators = ["x", "a", "o", ">", ">=", "=", "<=", "<"] as const;
-export type Operator = typeof Operators[number];
+export enum Operator {
+  OperatorX = "x",
+  OperatorA = "a",
+  OperatorO = "o",
+  OperatorGt = ">",
+  OperatorGeq = ">=",
+  OperatorEq = "=",
+  OperatorLeq = "<=",
+  OperatorLt = "<",
+}
