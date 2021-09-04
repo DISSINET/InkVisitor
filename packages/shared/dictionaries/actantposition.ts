@@ -1,21 +1,23 @@
+import { Position } from "../enums";
+
 export const actantPositionDict = [
   {
-    value: "s",
+    value: Position.S,
     label: "subject",
     info: "",
   },
   {
-    value: "a1",
+    value: Position.A1,
     label: "actant1",
     info: "",
   },
   {
-    value: "a2",
+    value: Position.A2,
     label: "actant2",
     info: "",
   },
   {
-    value: "p",
+    value: Position.P,
     label: "pseudo-actant",
     info: "",
   },
