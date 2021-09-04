@@ -2,7 +2,7 @@ import React, { useMemo } from "react";
 import styled from "styled-components";
 import { FaBook } from "react-icons/fa";
 
-import { Toggle, Dropdown } from "components";
+import { Dropdown } from "components";
 
 import { elvlDict } from "./../../../../../../shared/dictionaries";
 

@@ -6,6 +6,7 @@ import { Dropdown } from "components/Dropdown/Dropdown";
 import { Header } from "components/Header/Header";
 import { Footer } from "components/Footer/Footer";
 import { Input } from "components/Input/Input";
+import { MultiInput } from "components/MultiInput/MultiInput";
 import { Loader } from "components/Loader/Loader";
 import { Panel } from "components/Panel/Panel";
 import { Suggester } from "components/Suggester/Suggester";
@@ -23,15 +24,20 @@ import {
   ModalFooter,
 } from "components/Modal/Modal";
 import { PanelSeparator } from "./PanelSeparator/PanelSeparator";
+import { Checkbox } from "./Checkbox/Checkbox";
+import { AttributeIcon } from "./AttributeIcon/AttributeIcon";
 
 export {
   Arrow,
+  AttributeIcon,
   Box,
   Button,
   ButtonGroup,
+  Checkbox,
   Header,
   Footer,
   Input,
+  MultiInput,
   Loader,
   Panel,
   Tag,

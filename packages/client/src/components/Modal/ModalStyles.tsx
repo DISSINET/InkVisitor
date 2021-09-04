@@ -1,6 +1,15 @@
 import { animated } from "react-spring";
 import styled from "styled-components";
-import { space1, space3, space5, space6, space7 } from "Theme/constants";
+import {
+  space1,
+  space2,
+  space3,
+  space4,
+  space5,
+  space6,
+  space7,
+} from "Theme/constants";
+import { Colors } from "types";
 
 interface ModalWrap {}
 export const StyledModalWrap = styled.div<ModalWrap>`
@@ -43,20 +52,26 @@ export const StyledCard = styled(animated.div)<Card>`
   display: flex;
   flex-direction: column;
   max-height: calc(100vh - 40px);
-  overflow: hidden;
+  /* overflow: hidden; */
   z-index: 50;
   background-color: ${({ theme }) => theme.color["white"]};
   color: ${({ theme }) => theme.color["black"]};
   border-radius: ${({ theme }) => theme.borderRadius["sm"]};
+  position: relative;
 `;
 
-export const StyledCardHeader = styled.header`
+interface StyledCardHeader {
+  color: typeof Colors[number];
+}
+export const StyledCardHeader = styled.header<StyledCardHeader>`
   display: flex;
   justify-content: flex-start;
   align-items: center;
   flex-shrink: 0;
-  padding: ${space3} ${space6} ${space1} ${space6};
-  position: relative;
+  padding: ${space4} ${space6} ${space2} ${space6};
+  background-color: ${({ theme, color }) => theme.color[color]};
+  border-top-left-radius: ${({ theme }) => theme.borderRadius["sm"]};
+  border-top-right-radius: ${({ theme }) => theme.borderRadius["sm"]};
 
   border-bottom-style: solid;
   border-bottom-width: ${({ theme }) => theme.borderWidth["default"]};
@@ -69,9 +84,9 @@ export const StyledCardTitle = styled.h2`
 `;
 export const StyledCardBody = styled.section`
   display: flex;
-  flex-grow: 1;
+  /* flex-grow: 1; */
   flex-shrink: 1;
-  overflow: auto;
+  /* overflow: auto; */
   padding: ${space5} ${space7};
 
   font-size: ${({ theme }) => theme.fontSize["sm"]};
@@ -87,5 +102,4 @@ export const StyledFooter = styled.div`
   flex-shrink: 0;
   justify-content: flex-end;
   padding: ${({ theme }) => theme.space[4]};
-  position: relative;
 `;

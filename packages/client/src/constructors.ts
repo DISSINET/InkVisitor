@@ -1,6 +1,7 @@
 import {
-  IProp,
+  IStatementProp,
   IStatementActant,
+  IStatementAction,
   IActant,
   ITerritory,
   IStatement,
@@ -15,21 +16,31 @@ export const CBookmarkFolder = (bookmarkName: string): IBookmarkFolder => ({
   actantIds: [],
 });
 
-export const CProp = (): IProp => ({
+export const CProp = (): IStatementProp => ({
   id: uuidv4(),
+  origin: "",
   elvl: "1",
   certainty: "1",
-  modality: "Y",
-  origin: "",
+  logic: "1",
+  mood: ["1"],
+  moodvariant: "1",
+  operator: "a",
+  bundleStart: false,
+  bundleEnd: false,
+
   type: {
     id: "",
-    certainty: "1",
     elvl: "1",
+    logic: "1",
+    virtuality: "1",
+    partitivity: "1",
   },
   value: {
     id: "",
-    certainty: "1",
     elvl: "1",
+    logic: "1",
+    virtuality: "1",
+    partitivity: "1",
   },
 });
 
@@ -39,11 +50,10 @@ export const CStatement = (territoryId: string): IStatement => ({
   label: "",
   detail: "",
   status: "0",
-  language: "eng",
+  language: ["eng"],
   notes: [],
   data: {
     actions: [],
-    modality: "Y",
     text: "",
     territory: {
       id: territoryId,
@@ -62,7 +72,7 @@ export const CMetaStatement = (subjectId: string): IStatement => ({
   label: "",
   detail: "",
   status: "0",
-  language: "eng",
+  language: ["eng"],
   notes: [],
   data: {
     actions: [
@@ -71,9 +81,14 @@ export const CMetaStatement = (subjectId: string): IStatement => ({
         action: "A0093",
         certainty: "1",
         elvl: "1",
+        logic: "1",
+        mood: ["1"],
+        moodvariant: "1",
+        operator: "a",
+        bundleStart: false,
+        bundleEnd: false,
       },
     ],
-    modality: "Y",
     text: "",
     territory: {
       id: "T0",
@@ -85,24 +100,36 @@ export const CMetaStatement = (subjectId: string): IStatement => ({
         actant: subjectId,
         position: "s",
         elvl: "1",
-        certainty: "1",
-        mode: "1",
+        logic: "1",
+        virtuality: "1",
+        partitivity: "1",
+        operator: "a",
+        bundleStart: false,
+        bundleEnd: false,
       },
       {
         id: uuidv4(),
         actant: "",
         position: "a1",
         elvl: "1",
-        certainty: "1",
-        mode: "1",
+        logic: "1",
+        virtuality: "1",
+        partitivity: "1",
+        operator: "a",
+        bundleStart: false,
+        bundleEnd: false,
       },
       {
         id: uuidv4(),
         actant: "",
         position: "a2",
         elvl: "1",
-        certainty: "1",
-        mode: "1",
+        logic: "1",
+        virtuality: "1",
+        partitivity: "1",
+        operator: "a",
+        bundleStart: false,
+        bundleEnd: false,
       },
     ],
     props: [],
@@ -128,8 +155,25 @@ export const CStatementActant = (): IStatementActant => ({
   actant: "",
   position: "s",
   elvl: "1",
+  logic: "1",
+  virtuality: "1",
+  partitivity: "1",
+  operator: "a",
+  bundleStart: false,
+  bundleEnd: false,
+});
+
+export const CStatementAction = (actionId: string): IStatementAction => ({
+  id: uuidv4(),
+  action: actionId,
+  elvl: "1",
   certainty: "1",
-  mode: "1",
+  logic: "1",
+  mood: [],
+  moodvariant: "1",
+  operator: "a",
+  bundleStart: false,
+  bundleEnd: false,
 });
 
 export const CTerritoryActant = (
@@ -142,7 +186,7 @@ export const CTerritoryActant = (
   label: label,
   detail: "",
   status: "0",
-  language: "eng",
+  language: ["eng"],
   notes: [],
   data: {
     parent: { id: parentId, order: parentOrder },
@@ -161,6 +205,6 @@ export const CActant = (
   detail: "",
   data: {},
   status: "0",
-  language: "eng",
+  language: ["eng"],
   notes: [],
 });

@@ -1,3 +1,4 @@
+import { IResponseStatement } from "@shared/types";
 import React, { useRef } from "react";
 import {
   DragSourceMonitor,
@@ -7,7 +8,7 @@ import {
   XYCoord,
 } from "react-dnd";
 import { FaGripVertical } from "react-icons/fa";
-import { Cell } from "react-table";
+import { Cell, ColumnInstance } from "react-table";
 const queryString = require("query-string");
 
 import { DragItem, ItemTypes } from "types";
@@ -19,10 +20,22 @@ interface StatementEditorActantTableRow {
   moveRow: any;
   updateOrderFn: () => void;
   handleClick: Function;
+  renderPropGroup: Function;
+  visibleColumns: ColumnInstance<{}>[];
+  statement: IResponseStatement;
 }
 
 export const StatementEditorActantTableRow: React.FC<StatementEditorActantTableRow> =
-  ({ row, index, moveRow, updateOrderFn, handleClick = () => {} }) => {
+  ({
+    row,
+    index,
+    moveRow,
+    statement,
+    updateOrderFn,
+    handleClick = () => {},
+    renderPropGroup,
+    visibleColumns,
+  }) => {
     var hashParams = queryString.parse(location.hash);
     const statementId = hashParams.statement;
 
@@ -63,7 +76,6 @@ export const StatementEditorActantTableRow: React.FC<StatementEditorActantTableR
         isDragging: monitor.isDragging(),
       }),
       end: (item: DragItem | undefined, monitor: DragSourceMonitor) => {
-        // TODO: check if order changed
         if (item) updateOrderFn();
       },
     });
@@ -95,6 +107,12 @@ export const StatementEditorActantTableRow: React.FC<StatementEditorActantTableR
             );
           })}
         </StyledTr>
+
+        {renderPropGroup(
+          row.values.data.sActant.actant,
+          statement,
+          visibleColumns
+        )}
       </React.Fragment>
     );
   };

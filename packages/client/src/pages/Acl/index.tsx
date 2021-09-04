@@ -94,7 +94,7 @@ const AclPage: React.FC<MainPage> = ({ size }) => {
 
   return (
     <>
-      <StyledPage layoutWidth>
+      <StyledPage layoutWidth={layoutWidth}>
         <Header
           height={heightHeader}
           paddingY={0}

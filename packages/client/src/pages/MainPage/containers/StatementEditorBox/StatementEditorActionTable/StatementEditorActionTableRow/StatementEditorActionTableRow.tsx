@@ -1,3 +1,4 @@
+import { IResponseStatement } from "@shared/types";
 import React, { useRef } from "react";
 import {
   DragSourceMonitor,
@@ -7,7 +8,7 @@ import {
   XYCoord,
 } from "react-dnd";
 import { FaGripVertical } from "react-icons/fa";
-import { Cell } from "react-table";
+import { Cell, ColumnInstance } from "react-table";
 const queryString = require("query-string");
 
 import { DragItem, ItemTypes } from "types";
@@ -17,12 +18,24 @@ interface StatementEditorActionTableRow {
   row: any;
   index: number;
   moveRow: any;
+  statement: IResponseStatement;
   updateOrderFn: () => void;
   handleClick: Function;
+  renderPropGroup: Function;
+  visibleColumns: ColumnInstance<{}>[];
 }
 
 export const StatementEditorActionTableRow: React.FC<StatementEditorActionTableRow> =
-  ({ row, index, moveRow, updateOrderFn, handleClick = () => {} }) => {
+  ({
+    row,
+    index,
+    moveRow,
+    statement,
+    updateOrderFn,
+    handleClick = () => {},
+    renderPropGroup,
+    visibleColumns,
+  }) => {
     var hashParams = queryString.parse(location.hash);
     const statementId = hashParams.statement;
 
@@ -62,7 +75,9 @@ export const StatementEditorActionTableRow: React.FC<StatementEditorActionTableR
       collect: (monitor: DragSourceMonitor) => ({
         isDragging: monitor.isDragging(),
       }),
-      end: updateOrderFn,
+      end: (item: DragItem | undefined, monitor: DragSourceMonitor) => {
+        if (item) updateOrderFn();
+      },
     });
 
     const opacity = isDragging ? 0.2 : 1;
@@ -92,6 +107,12 @@ export const StatementEditorActionTableRow: React.FC<StatementEditorActionTableR
             );
           })}
         </StyledTr>
+
+        {renderPropGroup(
+          row.values.data.sAction.action,
+          statement,
+          visibleColumns
+        )}
       </React.Fragment>
     );
   };

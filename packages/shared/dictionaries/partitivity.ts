@@ -1,4 +1,4 @@
-export const actantModeDict = [
+export const partitivityDict = [
   {
     value: "1",
     label: "unison",

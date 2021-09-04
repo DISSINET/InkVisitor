@@ -1,5 +1,6 @@
 import React, { FC, ReactNode, useEffect } from "react";
 import { config, useSpring } from "react-spring";
+import { Colors } from "types";
 
 import {
   StyledModalWrap,
@@ -65,11 +66,12 @@ export const ModalCard: FC<ModalCard> = ({
 
 interface ModalHeader {
   title?: string;
+  color?: typeof Colors[number];
 }
-export const ModalHeader: FC<ModalHeader> = ({ title }) => {
+export const ModalHeader: FC<ModalHeader> = ({ title, color = "white" }) => {
   return (
     <>
-      <StyledCardHeader>
+      <StyledCardHeader color={color}>
         <StyledCardTitle>{title}</StyledCardTitle>
       </StyledCardHeader>
     </>
