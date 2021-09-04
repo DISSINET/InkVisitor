@@ -143,3 +143,8 @@ export enum Language {
   Occitan = "oci",
   Czech = "ces",
 }
+
+export enum ReferenceType {
+  Primary = "1",
+  Secondary = "2",
+}
