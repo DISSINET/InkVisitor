@@ -62,7 +62,7 @@ export enum ActantStatus {
 }
 
 export enum Certainty {
-  Certainty0 = "0",
+  Certainty0 = "0", // this is not used in dicts (@see ../disctionaries/certainty.ts)
   Certainty1 = "1",
   Certainty2 = "2",
   Certainty3 = "3",
@@ -134,4 +134,12 @@ export enum Operator {
   OperatorEq = "=",
   OperatorLeq = "<=",
   OperatorLt = "<",
+}
+
+export enum Language {
+  Latin = "lat",
+  English = "eng",
+  MiddleEnglish = "enm",
+  Occitan = "oci",
+  Czech = "ces",
 }
