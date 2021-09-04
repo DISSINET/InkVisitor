@@ -158,3 +158,9 @@ export enum TerritoryType {
   Type1 = "1",
   Type2 = "2",
 }
+
+export enum UserRoles {
+  Admin = "admin",
+  Editor = "editor",
+  Viewer = "viewer",
+}
