@@ -1,4 +1,4 @@
-import { should, testErroneousResponse } from "@modules/common.test";
+import { clean, testErroneousResponse } from "@modules/common.test";
 import { ActionDoesNotExits, BadParams } from "@shared/types/errors";
 import { Db } from "@service/RethinkDB";
 import request from "supertest";
@@ -51,16 +51,19 @@ describe("Actions delete", function () {
         true
       );
 
-      request(app)
+      await request(app)
         .delete(`${apiPath}/actions/delete/${testId}`)
         .set("authorization", "Bearer " + supertestConfig.token)
         .expect("Content-Type", /json/)
         .expect(successfulGenericResponse)
-        .expect(200, async () => {
+        .expect(200)
+        .expect(async () => {
           const deletedEntry = await findActionById(db, testId);
-          should.not.exist(deletedEntry);
-          done();
+          expect(deletedEntry).toBeNull();
         });
+
+      await clean(db);
+      done();
     });
   });
 });

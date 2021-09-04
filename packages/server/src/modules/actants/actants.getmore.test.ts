@@ -9,15 +9,14 @@ import { Db } from "@service/RethinkDB";
 import Territory from "@models/territory";
 
 const expectNonEmptyArrayOfActants = (res: Response) => {
-  res.body.should.not.empty;
-  res.body.should.be.a("array");
-  res.body.should.have.lengthOf.above(0);
-  res.body[0].id.should.not.empty;
+  expect(res.body.constructor.name).toBe("Array");
+  expect(res.body.length).toBeGreaterThan(0);
+  expect(res.body[0].id).toBeTruthy();
 };
 
 const expectEmptyArrayOfActants = (res: Response) => {
-  res.body.should.be.a("array");
-  res.body.should.have.lengthOf(0);
+  expect(res.body.constructor.name).toEqual("Array");
+  expect(res.body).toHaveLength(0);
 };
 
 describe("Actants getMore", function () {

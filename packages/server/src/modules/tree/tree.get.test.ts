@@ -1,5 +1,4 @@
 import {
-  expect,
   createMockTree,
   createMockStatements,
   clean,
@@ -32,8 +31,8 @@ const findSubtreeInTree = (
 };
 
 const testCorrectRootTerritory = (mockTerritories: ITerritory[], res: any) => {
-  expect(res.body.territory).to.be.deep.eq(mockTerritories[0]);
-  expect(res.body.empty).to.be.eq(false);
+  expect(res.body.territory).toEqual(mockTerritories[0]);
+  expect(res.body.empty).toEqual(false);
 };
 
 const testNotEmptyFlagForPopulatedTerritory = (
@@ -46,7 +45,7 @@ const testNotEmptyFlagForPopulatedTerritory = (
   );
 
   if (territoryWithStatements) {
-    expect(territoryWithStatements.empty).to.be.eq(false);
+    expect(territoryWithStatements.empty).toEqual(false);
   } else {
     throw new Error("findSubtreeInTree returned null");
   }
@@ -56,7 +55,7 @@ const testEmptyFlagForPopulatedTerritory = (terId: string, res: any) => {
   const territory = findSubtreeInTree(res.body, terId);
 
   if (territory) {
-    expect(territory.empty).to.be.eq(true);
+    expect(territory.empty).toEqual(true);
   } else {
     throw new Error("findSubtreeInTree returned null");
   }
@@ -72,9 +71,9 @@ const testCorrectStatementsCount = (
     statementsTerritoryId
   );
   if (!territoryWithStatements) {
-    expect(territoryWithStatements).to.be.not.eq(null);
+    expect(territoryWithStatements).not.toEqual(null);
   } else {
-    expect(territoryWithStatements.statementsCount).to.be.eq(statements.length);
+    expect(territoryWithStatements.statementsCount).toEqual(statements.length);
   }
 };
 
@@ -94,7 +93,7 @@ const testCorrectPaths = (mockTerritories: ITerritory[], res: any) => {
   (function testPath(rootTree: IResponseTree) {
     let currentId = rootTree.territory.id;
     for (const parentId of rootTree.path) {
-      expect(hasParent(mockTerritories, currentId, parentId)).to.be.eq(true);
+      expect(hasParent(mockTerritories, currentId, parentId)).toEqual(true);
       currentId = parentId;
     }
     for (const child of rootTree.children) {

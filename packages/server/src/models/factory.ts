@@ -4,11 +4,12 @@ import Territory from "./territory";
 import Statement from "./statement";
 import Entity from "./entity";
 import Resource from "./resource";
+import { ModelNotValidError } from "@shared/types/errors";
 import Action from "./action";
 
-export function getActantType(data: UnknownObject): IDbModel | null {
+export function getActantType(data: UnknownObject): IDbModel {
   if (!data || typeof data !== "object" || Object.keys(data).length === 0) {
-    return null;
+    throw new ModelNotValidError("bad input data for factory");
   }
 
   switch (data.class as ActantType) {
@@ -35,6 +36,6 @@ export function getActantType(data: UnknownObject): IDbModel | null {
     case ActantType.Action:
       return new Action(data);
     default:
-      return null;
+      throw new ModelNotValidError("unknown class");
   }
 }

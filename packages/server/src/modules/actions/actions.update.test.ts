@@ -1,4 +1,3 @@
-import { testErroneousResponse } from "@modules/common.test";
 import { ActionDoesNotExits, BadParams } from "@shared/types/errors";
 import request from "supertest";
 import { apiPath } from "../../common/constants";
@@ -63,17 +62,20 @@ describe("Actions update", function () {
         true
       );
 
-      request(app)
+      await request(app)
         .put(`${apiPath}/actions/update/${testId}`)
         .send({ note: changeNoteInto })
         .set("authorization", "Bearer " + supertestConfig.token)
         .expect("Content-Type", /json/)
-        .expect({ success: true })
-        .expect(200, async () => {
+        .expect(successfulGenericResponse)
+        .expect(200)
+        .expect(async () => {
           const changedEntry = await findActionById(db, testId);
-          changedEntry.note.should.eq(changeNoteInto);
-          done();
+          expect(changedEntry.note).toEqual(changeNoteInto);
         });
+
+      await clean(db);
+      done();
     });
   });
 });

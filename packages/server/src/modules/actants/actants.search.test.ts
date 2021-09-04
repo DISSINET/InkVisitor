@@ -1,14 +1,16 @@
-import { testErroneousResponse } from "@modules/common.test";
-import { BadParams } from "@shared/types/errors";
+import {
+  testErroneousResponse,
+  mockActantData,
+  mockStatementData,
+} from "@modules/common.test";
+import { BadParams, PermissionDeniedError } from "@shared/types/errors";
 import request, { Response } from "supertest";
 import { apiPath } from "../../common/constants";
 import app from "../../Server";
 import { supertestConfig } from "..";
 import { Db } from "@service/RethinkDB";
 import "ts-jest";
-import { createAction } from "@service/shorthands";
 import { deleteActants } from "@service/shorthands";
-import { IActant, IAction, IStatement } from "@shared/types";
 import { ActantType } from "@shared/enums";
 import { getActantType } from "@models/factory";
 
@@ -50,86 +52,55 @@ describe("Actants search", function () {
     let db: Db;
     const rand = Math.random().toString();
 
-    const actantData: IActant = {
-      id: `testactant${rand}`,
-      class: ActantType.Person,
-      data: {},
-      label: `testactant${rand}`,
-    };
+    const actantData = mockActantData(`testactant${rand}`, ActantType.Person);
 
-    const wantedLinkedActant: IActant = {
-      id: `testactant2${rand}`,
-      class: ActantType.Event,
-      data: {},
-      label: `testactant2${rand}`,
-    };
+    const linkedActantData = mockActantData(`link${rand}`, ActantType.Event);
 
-    const actionData: IAction = {
-      id: `testaction${rand}`,
-      labels: [
-        {
-          id: `testlabel${rand}`,
-          lang: "",
-          value: `testlabel${rand}`,
-        },
-      ],
-      note: "",
-      parent: "",
-      rulesActants: [],
-      rulesProperties: [],
-      types: [],
-      valencies: [],
-    };
+    const actionData = mockActantData(`testaction${rand}`, ActantType.Action);
 
-    const statementData: IStatement = {
-      class: ActantType.Statement,
-      data: {
-        actants: [
-          {
-            actant: actantData.id,
-            certainty: "",
-            elvl: "",
-            id: actantData.id,
-            position: "",
-          },
-          {
-            actant: wantedLinkedActant.id,
-            certainty: "",
-            elvl: "",
-            id: wantedLinkedActant.id,
-            position: "",
-          },
-        ],
-        action: actionData.id,
-        certainty: "",
-        elvl: "",
-        modality: "",
-        note: "",
-        props: [],
-        references: [],
-        tags: [],
-        territory: {
-          id: "",
-          order: 0,
-        },
-        text: "",
+    const statementData = mockStatementData(`stat${rand}`);
+    statementData.data.actants = [
+      {
+        id: actantData.id,
+        actant: actantData.id,
+        position: "s",
+        mode: "1",
+        elvl: "1",
+        certainty: "1",
       },
-      id: `teststatement${rand}`,
-      label: "",
-    };
+      {
+        id: linkedActantData.id,
+        actant: linkedActantData.id,
+        position: "s",
+        mode: "1",
+        elvl: "1",
+        certainty: "1",
+      },
+    ];
+    statementData.data.actions = [
+      {
+        action: actionData.id,
+        certainty: "1",
+        elvl: "1",
+        id: "",
+      },
+    ];
 
     beforeAll(async () => {
       db = new Db();
       await db.initDb();
 
-      await createAction(db, actionData);
+      const actantA = getActantType(actionData as any);
+      if (actantA) {
+        await actantA.save(db.connection);
+      }
 
       const actantP = getActantType(actantData as any);
       if (actantP) {
         await actantP.save(db.connection);
       }
 
-      const linkedActant = getActantType(wantedLinkedActant as any);
+      const linkedActant = getActantType(linkedActantData as any);
       if (linkedActant) {
         await linkedActant.save(db.connection);
       }
@@ -182,7 +153,7 @@ describe("Actants search", function () {
         await request(app)
           .post(`${apiPath}/actants/search`)
           .send({
-            class: wantedLinkedActant.class,
+            class: linkedActantData.class,
             actantId: actantData.id,
           })
           .set("authorization", "Bearer " + supertestConfig.token)
@@ -190,7 +161,7 @@ describe("Actants search", function () {
           .expect(200)
           .expect((res: Response) => {
             expect(res.body).toHaveLength(1);
-            expect(res.body[0].actantId).toEqual(wantedLinkedActant.id);
+            expect(res.body[0].actantId).toEqual(linkedActantData.id);
           });
 
         done();
@@ -220,7 +191,7 @@ describe("Actants search", function () {
         await request(app)
           .post(`${apiPath}/actants/search`)
           .send({
-            class: wantedLinkedActant.class,
+            class: linkedActantData.class,
             actionId: actionData.id,
           })
           .set("authorization", "Bearer " + supertestConfig.token)
@@ -228,7 +199,7 @@ describe("Actants search", function () {
           .expect(200)
           .expect((res: Response) => {
             expect(res.body).toHaveLength(1);
-            expect(res.body[0].actantId).toEqual(wantedLinkedActant.id);
+            expect(res.body[0].actantId).toEqual(linkedActantData.id);
           });
 
         done();
@@ -258,16 +229,16 @@ describe("Actants search", function () {
         await request(app)
           .post(`${apiPath}/actants/search`)
           .send({
-            class: wantedLinkedActant.class,
+            class: linkedActantData.class,
             actantId: actantData.id,
             actionId: actionData.id,
-            label: wantedLinkedActant.label,
+            label: linkedActantData.label,
           })
           .set("authorization", "Bearer " + supertestConfig.token)
           .expect("Content-Type", /json/)
           .expect(200)
           .expect((res: Response) => {
-            expect(res.body[0].actantId).toEqual(wantedLinkedActant.id);
+            expect(res.body[0].actantId).toEqual(linkedActantData.id);
           });
 
         done();
@@ -279,10 +250,10 @@ describe("Actants search", function () {
         await request(app)
           .post(`${apiPath}/actants/search`)
           .send({
-            class: wantedLinkedActant.class,
+            class: linkedActantData.class,
             actantId: actantData.id,
             actionId: actionData.id,
-            label: wantedLinkedActant.label + "xxx", // does not exist
+            label: linkedActantData.label + "xxx", // does not exist
           })
           .set("authorization", "Bearer " + supertestConfig.token)
           .expect("Content-Type", /json/)
