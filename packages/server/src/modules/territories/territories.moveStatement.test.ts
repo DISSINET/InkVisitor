@@ -1,4 +1,4 @@
-import { expect } from "@modules/common.test";
+import "@modules/common.test";
 import request from "supertest";
 import { supertestConfig } from "..";
 import { apiPath } from "../../common/constants";
@@ -12,6 +12,7 @@ import {
 } from "@service/shorthands";
 import Territory from "@models/territory";
 import Statement from "@models/statement";
+import { clean } from "@modules/common.test";
 
 const randSuffix = Math.random();
 async function createMockStatementsWithTerritory(db: Db): Promise<Statement[]> {
@@ -58,8 +59,8 @@ describe("Territories moveStatement", function () {
       let s1 = await findActantById<IStatement>(db, statements[0].id);
       let s2 = await findActantById<IStatement>(db, statements[1].id);
 
-      expect(s1.data.territory.order).to.be.eq(1);
-      expect(s2.data.territory.order).to.be.eq(2);
+      expect(s1.data.territory.order).toEqual(1);
+      expect(s2.data.territory.order).toEqual(2);
 
       await request(app)
         .post(`${apiPath}/territories/moveStatement`)
@@ -74,12 +75,10 @@ describe("Territories moveStatement", function () {
       s1 = await findActantById<IStatement>(db, statements[0].id);
       s2 = await findActantById<IStatement>(db, statements[1].id);
 
-      expect(s1.data.territory.order).to.be.eq(3);
-      expect(s2.data.territory.order).to.be.eq(2);
+      expect(s1.data.territory.order).toEqual(3);
+      expect(s2.data.territory.order).toEqual(2);
 
-      for (const stat of statements) {
-        await deleteActant(db, stat.id);
-      }
+      await clean(db);
       return done();
     });
   });

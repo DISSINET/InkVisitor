@@ -36,7 +36,7 @@ class BadCredentialsError extends CustomError {
  * PermissionDeniedError will be thrown if request is not authorized to request such resource
  */
 class PermissionDeniedError extends CustomError {
-  public static code = 400;
+  public static code = 403;
   message = "Permission denied";
 }
 

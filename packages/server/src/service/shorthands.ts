@@ -237,7 +237,11 @@ export async function findAssociatedActantIds(
         );
       }
       if (actionId) {
-        tests.push(row("data")("action").eq(actionId));
+        tests.push(
+          row("data")("actions").contains((actionObj: RDatum) =>
+            actionObj("action").eq(actionId)
+          )
+        );
       }
 
       if (!tests.length) {
