@@ -115,6 +115,9 @@ export enum Virtuality {
   Virtuality1 = "1",
   Virtuality2 = "2",
   Virtuality3 = "3",
+  Virtuality4 = "4",
+  Virtuality5 = "5",
+  Virtuality6 = "6",
 }
 
 export enum Partitivity {
