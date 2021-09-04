@@ -148,3 +148,8 @@ export enum ReferenceType {
   Primary = "1",
   Secondary = "2",
 }
+
+export enum ResourceType {
+  Type1 = "1",
+  Type2 = "2",
+}
