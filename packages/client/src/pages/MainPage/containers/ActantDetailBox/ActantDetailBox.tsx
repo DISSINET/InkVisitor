@@ -8,6 +8,7 @@ import {
   Input,
   Loader,
   MultiInput,
+  Submit,
 } from "components";
 import {
   StyledContent,
@@ -73,6 +74,7 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
   var hashParams = queryString.parse(location.hash);
   const actantId = hashParams.actant;
 
+  const [showSubmit, setShowSubmit] = useState(false);
   const [usedInPage, setUsedInPage] = useState<number>(0);
   const statementsPerPage = 20;
 
@@ -236,6 +238,7 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
         toast.info(`Actant deleted!`);
         queryClient.invalidateQueries("statement");
         queryClient.invalidateQueries("territory");
+        queryClient.invalidateQueries("tree");
         hashParams["actant"] = "";
         history.push({
           hash: queryString.stringify(hashParams),
@@ -261,7 +264,7 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
                   icon={<FaTrashAlt />}
                   label="remove actant"
                   onClick={() => {
-                    deleteActantMutation.mutate(actantId);
+                    setShowSubmit(true);
                   }}
                 />
                 <Button
@@ -686,6 +689,15 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
           </StyledSection>
         </StyledContent>
       )}
+
+      <Submit
+        title="Remove actant"
+        text="Do you really want to delete actant?"
+        onSubmit={() => deleteActantMutation.mutate(actantId)}
+        onCancel={() => setShowSubmit(false)}
+        show={showSubmit}
+        loading={deleteActantMutation.isLoading}
+      />
       <Loader
         show={
           isFetching ||
