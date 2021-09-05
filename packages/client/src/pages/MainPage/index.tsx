@@ -172,29 +172,31 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
                   : panelWidths[1] + panelWidths[0] - collapsedPanelWidth
               }
             >
-              <Box height={400} label="Statements">
+              <Box height={actantId ? 400 : heightContent} label="Statements">
                 <StatementListBox />
               </Box>
-              <Box
-                height={heightContent - 400}
-                label="Detail"
-                button={
-                  actantId && (
-                    <Button
-                      color="danger"
-                      icon={<IoMdClose />}
-                      onClick={() => {
-                        hashParams["actant"] = "";
-                        history.push({
-                          hash: queryString.stringify(hashParams),
-                        });
-                      }}
-                    />
-                  )
-                }
-              >
-                <ActantDetailBox />
-              </Box>
+              {actantId && (
+                <Box
+                  height={heightContent - 400}
+                  label="Detail"
+                  button={
+                    actantId && (
+                      <Button
+                        inverted
+                        icon={<IoMdClose />}
+                        onClick={() => {
+                          hashParams["actant"] = "";
+                          history.push({
+                            hash: queryString.stringify(hashParams),
+                          });
+                        }}
+                      />
+                    )
+                  }
+                >
+                  <ActantDetailBox />
+                </Box>
+              )}
             </Panel>
             {/* THIRD PANEL */}
             <Panel
