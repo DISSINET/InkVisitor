@@ -2,12 +2,12 @@ import { Logic } from "../enums";
 
 export const logicDict = [
   {
-    value: Logic.Logic1,
+    value: Logic.Positive,
     label: "positive",
     info: "",
   },
   {
-    value: Logic.Logic2,
+    value: Logic.Negative,
     label: "negative",
     info: "",
   },

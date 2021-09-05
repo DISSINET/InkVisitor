@@ -2,27 +2,27 @@ import { Partitivity } from "../enums";
 
 export const partitivityDict = [
   {
-    value: Partitivity.Partitivity1,
+    value: Partitivity.Unison,
     label: "unison",
     info: "",
   },
   {
-    value: Partitivity.Partitivity2,
+    value: Partitivity.UnisonOrParts,
     label: "unison or parts",
     info: "",
   },
   {
-    value: Partitivity.Partitivity3,
+    value: Partitivity.UnisonOrDiscreteParts,
     label: "unison or discrete parts",
     info: "",
   },
   {
-    value: Partitivity.Partitivity4,
+    value: Partitivity.Parts,
     label: "parts",
     info: "",
   },
   {
-    value: Partitivity.Partitivity5,
+    value: Partitivity.DiscreteParts,
     label: "discrete parts",
     info: "",
   },

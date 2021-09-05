@@ -6,17 +6,17 @@ export const actantLogicalTypeDict: {
   info?: string;
 }[] = [
   {
-    value: EntityLogicalType.Type1,
+    value: EntityLogicalType.Definite,
     label: "definite",
     info: "",
   },
   {
-    value: EntityLogicalType.Type2,
+    value: EntityLogicalType.Indefinite,
     label: "indefinite",
     info: "",
   },
   {
-    value: EntityLogicalType.Type3,
+    value: EntityLogicalType.Hypothetical,
     label: "hypothetical",
     info: "",
   },

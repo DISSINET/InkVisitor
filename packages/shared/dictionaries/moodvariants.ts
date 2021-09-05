@@ -2,17 +2,17 @@ import { MoodVariant } from "../enums";
 
 export const moodVariantsDict = [
   {
-    value: MoodVariant.MoodVariant1,
+    value: MoodVariant.Realis,
     label: "realis",
     info: "",
   },
   {
-    value: MoodVariant.MoodVariant2,
+    value: MoodVariant.Irrealis,
     label: "irrealis",
     info: "",
   },
   {
-    value: MoodVariant.MoodVariant3,
+    value: MoodVariant.ToBeDecided,
     label: "to be decided",
     info: "",
   },

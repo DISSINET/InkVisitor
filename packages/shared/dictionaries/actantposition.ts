@@ -2,22 +2,22 @@ import { Position } from "../enums";
 
 export const actantPositionDict = [
   {
-    value: Position.S,
+    value: Position.Subject,
     label: "subject",
     info: "",
   },
   {
-    value: Position.A1,
+    value: Position.Actant1,
     label: "actant1",
     info: "",
   },
   {
-    value: Position.A2,
+    value: Position.Actant2,
     label: "actant2",
     info: "",
   },
   {
-    value: Position.P,
+    value: Position.PseudoActant,
     label: "pseudo-actant",
     info: "",
   },
