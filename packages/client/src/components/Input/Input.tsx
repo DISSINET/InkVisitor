@@ -18,7 +18,7 @@ interface InputProps {
   options?: IOption[];
   rows?: number;
   cols?: number;
-  width?: number;
+  width?: number | "full";
   onChangeFn: Function;
   onEnterPressFn?: Function;
   placeholder?: string;

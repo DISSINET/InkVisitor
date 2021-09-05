@@ -78,3 +78,8 @@ export const StyledVerticalText = styled(animated.p)<StyledVerticalText>`
   font-size: ${({ theme }) => theme.fontSize["base"]};
   color: ${({ theme }) => theme.color["white"]};
 `;
+export const StyledButtonWrap = styled.div`
+  position: absolute;
+  top: ${({ theme }) => theme.space[2]};
+  right: ${({ theme }) => theme.space[2]};
+`;

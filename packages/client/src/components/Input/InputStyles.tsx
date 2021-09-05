@@ -3,9 +3,16 @@ import { space1, space2 } from "Theme/constants";
 
 interface IValueStyle {
   inverted?: boolean;
-  width?: number;
+  width?: number | "full";
   noBorder?: boolean;
 }
+const getWidth = (width?: number | "full") => {
+  if (width) {
+    return width === "full" ? "100%" : `${width / 10}rem`;
+  } else {
+    return "auto";
+  }
+};
 export const Wrapper = styled.div`
   display: flex;
 `;
@@ -31,7 +38,7 @@ export const StyledInput = styled.input<IValueStyle>`
     inverted ? theme.color["white"] : theme.color["primary"]};
   font-size: ${({ theme }) => theme.fontSize["xs"]};
   padding: ${space1};
-  width: ${({ width }) => (width ? `${width}px` : "100%")};
+  width: ${({ width }) => getWidth(width)};
   resize: none;
   :focus {
     outline: 0;
@@ -50,7 +57,7 @@ export const StyledSelect = styled.select<IValueStyle>`
     inverted ? theme.color["primary"] : theme.color["primary"]};
   font-size: ${({ theme }) => theme.fontSize["xs"]};
   font-weight: bold;
-  width: ${({ width }) => (width ? width + "px" : "100%")};
+  width: ${({ width }) => getWidth(width)};
   padding: ${space1};
   resize: none;
   :focus {
@@ -67,7 +74,7 @@ export const StyledTextArea = styled.textarea<IValueStyle>`
     noBorder ? 0 : theme.borderWidth[2]};
   border-color: ${({ theme }) => theme.color["primary"]};
   font-size: ${({ theme }) => theme.fontSize["xs"]};
-  width: ${({ width }) => (width ? `${width}px` : "100%")};
+  width: ${({ width }) => getWidth(width)};
   padding: ${space1};
   resize: none;
   line-height: 1.2;

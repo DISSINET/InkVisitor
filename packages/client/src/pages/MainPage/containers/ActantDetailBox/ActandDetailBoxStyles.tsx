@@ -33,6 +33,8 @@ export const StyledActantPreviewRow = styled.div`
 
 export const StyledTagWrap = styled.div`
   margin-right: ${({ theme }) => theme.space[2]};
+  display: inline-flex;
+  overflow: hidden;
 `;
 
 export const StyledSectionHeader = styled.div`
@@ -57,11 +59,10 @@ export const StyledContentRowValue = styled.div`
 export const StyledForm = styled.div`
   display: table;
   width: 100%;
-  padding-right: 2rem;
+  padding-right: ${({ theme }) => theme.space[8]};
   ${StyledContentRow} {
     display: table-row;
     width: 100%;
-    /* background-color: hotpink; */
     ${StyledContentRowLabel} {
       width: 1%;
       white-space: nowrap;

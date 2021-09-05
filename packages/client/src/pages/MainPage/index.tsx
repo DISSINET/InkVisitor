@@ -1,8 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
-
 import { toast } from "react-toastify";
+import { useHistory, useParams } from "react-router-dom";
+import { useQueryClient } from "react-query";
+import { RiMenuFoldFill, RiMenuUnfoldFill } from "react-icons/ri";
+import { IoMdClose } from "react-icons/io";
+const queryString = require("query-string");
 
 import {
   Box,
@@ -26,9 +30,8 @@ import {
   UserOptionsModal,
   LoginModal,
 } from "./containers";
-import { useHistory, useParams } from "react-router-dom";
+
 import api from "api";
-import { useQueryClient } from "react-query";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { setAuthToken } from "redux/features/authTokenSlice";
 import { setUsername } from "redux/features/usernameSlice";
@@ -39,7 +42,6 @@ import {
   StyledFaUserAlt,
   StyledText,
   StyledUsername,
-  StyledButtonWrap,
   StyledPage,
 } from "./MainPageStyles";
 import {
@@ -48,7 +50,6 @@ import {
   heightHeader,
   layoutWidthBreakpoint,
 } from "Theme/constants";
-import { RiMenuFoldFill, RiMenuUnfoldFill } from "react-icons/ri";
 import { setFirstPanelExpanded } from "redux/features/layout/firstPanelExpandedSlice";
 import { setFourthPanelExpanded } from "redux/features/layout/fourthPanelExpandedSlice";
 
@@ -57,6 +58,9 @@ interface MainPage {
 }
 
 const MainPage: React.FC<MainPage> = ({ size }) => {
+  var hashParams = queryString.parse(location.hash);
+  const actantId = hashParams.actant;
+
   const isLoggedIn = api.isLoggedIn();
   const dispatch = useAppDispatch();
   const username = useAppSelector((state) => state.username);
@@ -94,30 +98,26 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
   const heightContent = size[1] - heightHeader - heightFooter;
 
   const firstPanelButton = () => (
-    <StyledButtonWrap>
-      <Button
-        onClick={() =>
-          firstPanelExpanded
-            ? dispatch(setFirstPanelExpanded(false))
-            : dispatch(setFirstPanelExpanded(true))
-        }
-        inverted
-        icon={firstPanelExpanded ? <RiMenuFoldFill /> : <RiMenuUnfoldFill />}
-      />
-    </StyledButtonWrap>
+    <Button
+      onClick={() =>
+        firstPanelExpanded
+          ? dispatch(setFirstPanelExpanded(false))
+          : dispatch(setFirstPanelExpanded(true))
+      }
+      inverted
+      icon={firstPanelExpanded ? <RiMenuFoldFill /> : <RiMenuUnfoldFill />}
+    />
   );
   const fourthPanelButton = () => (
-    <StyledButtonWrap>
-      <Button
-        onClick={() =>
-          fourthPanelExpanded
-            ? dispatch(setFourthPanelExpanded(false))
-            : dispatch(setFourthPanelExpanded(true))
-        }
-        inverted
-        icon={fourthPanelExpanded ? <RiMenuUnfoldFill /> : <RiMenuFoldFill />}
-      />
-    </StyledButtonWrap>
+    <Button
+      onClick={() =>
+        fourthPanelExpanded
+          ? dispatch(setFourthPanelExpanded(false))
+          : dispatch(setFourthPanelExpanded(true))
+      }
+      inverted
+      icon={fourthPanelExpanded ? <RiMenuUnfoldFill /> : <RiMenuFoldFill />}
+    />
   );
 
   return (
@@ -175,7 +175,24 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
               <Box height={400} label="Statements">
                 <StatementListBox />
               </Box>
-              <Box height={heightContent - 400} label="Detail">
+              <Box
+                height={heightContent - 400}
+                label="Detail"
+                button={
+                  actantId && (
+                    <Button
+                      color="danger"
+                      icon={<IoMdClose />}
+                      onClick={() => {
+                        hashParams["actant"] = "";
+                        history.push({
+                          hash: queryString.stringify(hashParams),
+                        });
+                      }}
+                    />
+                  )
+                }
+              >
                 <ActantDetailBox />
               </Box>
             </Panel>

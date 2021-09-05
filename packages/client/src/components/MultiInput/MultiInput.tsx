@@ -7,7 +7,7 @@ import { StyledRow } from "./MultiInputStyles";
 interface MultiInput {
   values: string[];
   onChange: Function;
-  width?: number;
+  width?: number | "full";
 }
 export const MultiInput: React.FC<MultiInput> = ({
   values,
