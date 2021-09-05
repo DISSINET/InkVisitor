@@ -64,6 +64,7 @@ import {
   entitiesDict,
 } from "@shared/dictionaries";
 import { composeWithDevTools } from "redux-devtools-extension";
+import { toast } from "react-toastify";
 
 interface ActantDetailBox {}
 export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
@@ -228,6 +229,21 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
     }
   );
 
+  const deleteActantMutation = useMutation(
+    async (actantId: string) => await api.actantsDelete(actantId),
+    {
+      onSuccess: (data, actantId) => {
+        toast.info(`Actant deleted!`);
+        queryClient.invalidateQueries("statement");
+        queryClient.invalidateQueries("territory");
+        hashParams["actant"] = "";
+        history.push({
+          hash: queryString.stringify(hashParams),
+        });
+      },
+    }
+  );
+
   return (
     <>
       {actant && (
@@ -245,10 +261,7 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
                   icon={<FaTrashAlt />}
                   label="remove actant"
                   onClick={() => {
-                    hashParams["actant"] = "";
-                    history.push({
-                      hash: queryString.stringify(hashParams),
-                    });
+                    deleteActantMutation.mutate(actantId);
                   }}
                 />
                 <Button
@@ -679,7 +692,8 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
           actantsCreateMutation.isLoading ||
           actantsDeleteMutation.isLoading ||
           actantsLabelUpdateMutation.isLoading ||
-          updateActantMutation.isLoading
+          updateActantMutation.isLoading ||
+          deleteActantMutation.isLoading
         }
       />
     </>
