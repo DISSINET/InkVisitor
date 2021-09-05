@@ -1,6 +1,5 @@
 import * as errors from "./errors";
 
-const errorKeys = Object.keys(errors);
 export type errorTypes = keyof typeof errors;
 
 /**
