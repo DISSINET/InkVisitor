@@ -1,12 +1,11 @@
-import { userRoleDict } from "./../dictionaries";
+import { UserRoles } from "./../enums";
 
-const userRoleValues = userRoleDict.map((i) => i.label);
 export interface IUser {
   id: string;
   email: string;
   name: string;
   password?: string;
-  role: typeof userRoleValues[number];
+  role: UserRoles;
   options: IUserOptions;
   bookmarks: IBookmarkFolder[];
   storedTerritories: IStoredTerritory[];
