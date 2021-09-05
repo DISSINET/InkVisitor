@@ -2,32 +2,32 @@ import { Certainty } from "../enums";
 
 export const certaintyDict = [
   {
-    value: Certainty.Certainty1,
+    value: Certainty.Certain,
     label: "certain",
     info: "",
   },
   {
-    value: Certainty.Certainty2,
+    value: Certainty.AlmostCertain,
     label: "almost certain",
     info: "",
   },
   {
-    value: Certainty.Certainty3,
+    value: Certainty.Probable,
     label: "probable",
     info: "",
   },
   {
-    value: Certainty.Certainty4,
+    value: Certainty.Possible,
     label: "possible",
     info: "",
   },
   {
-    value: Certainty.Certainty5,
+    value: Certainty.Dubious,
     label: "dubious",
     info: "",
   },
   {
-    value: Certainty.Certainty6,
+    value: Certainty.False,
     label: "false",
     info: "",
   },

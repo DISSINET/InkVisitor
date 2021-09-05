@@ -1,12 +1,12 @@
 import { Operator } from "../enums";
 
 export const operatorDict = [
-  { label: "and", value: Operator.OperatorA },
-  { label: "xor", value: Operator.OperatorX },
-  { label: "or", value: Operator.OperatorO },
-  { label: ">", value: Operator.OperatorGt },
-  { label: ">=", value: Operator.OperatorGeq },
-  { label: "=", value: Operator.OperatorEq },
-  { label: "<=", value: Operator.OperatorLeq },
-  { label: "<", value: Operator.OperatorLt },
+  { label: "and", value: Operator.And },
+  { label: "xor", value: Operator.Xor },
+  { label: "or", value: Operator.Or },
+  { label: ">", value: Operator.Greater },
+  { label: ">=", value: Operator.GreaterOrEqual },
+  { label: "=", value: Operator.Equal },
+  { label: "<=", value: Operator.LessOrEqual },
+  { label: "<", value: Operator.Less },
 ];

@@ -49,94 +49,94 @@ export type EntityActantType =
   | ActantType.Event;
 
 export enum EntityLogicalType {
-  Type1 = "1",
-  Type2 = "2",
-  Type3 = "3",
+  Definite = "1",
+  Indefinite = "2",
+  Hypothetical = "3",
 }
 
 export enum ActantStatus {
-  Status0 = "0",
-  Status1 = "1",
-  Status2 = "2",
-  Status3 = "3",
+  Pending = "0",
+  Approved = "1",
+  Discouraged = "2",
+  Warning = "3",
 }
 
 export enum Certainty {
   Certainty0 = "0", // this is not used in dicts (@see ../disctionaries/certainty.ts)
-  Certainty1 = "1",
-  Certainty2 = "2",
-  Certainty3 = "3",
-  Certainty4 = "4",
-  Certainty5 = "5",
-  Certainty6 = "6",
+  Certain = "1",
+  AlmostCertain = "2",
+  Probable = "3",
+  Possible = "4",
+  Dubious = "5",
+  False = "6",
 }
 
 export enum Elvl {
-  Elvl1 = "1",
-  Elvl2 = "2",
-  Elvl3 = "3",
+  Textual = "1",
+  Interpretive = "2",
+  Inferential = "3",
 }
 
 export enum Position {
-  S = "s",
-  A1 = "a1",
-  A2 = "a2",
-  P = "p",
+  Subject = "s",
+  Actant1 = "a1",
+  Actant2 = "a2",
+  PseudoActant = "p",
 }
 
 export enum Logic {
-  Logic1 = "1",
-  Logic2 = "2",
+  Positive = "1",
+  Negative = "2",
 }
 
 export enum Mood {
-  Mood1 = "1",
-  Mood2 = "2",
-  Mood3 = "3",
-  Mood4 = "4",
-  Mood5 = "5",
-  Mood6 = "6",
-  Mood7 = "7",
-  Mood8 = "8",
-  Mood9 = "9",
-  Mood10 = "10",
-  Mood11 = "11",
-  Mood12 = "12",
-  Mood13 = "13",
+  Indication = "1",
+  Question = "2",
+  Condition = "3",
+  Possibility = "4",
+  Probability = "5",
+  Certitude = "6",
+  Wish = "7",
+  Order = "8",
+  Licence = "9",
+  Ability = "10",
+  Belief = "11",
+  Allegation = "12",
+  Semblance = "13",
 }
 
 export enum MoodVariant {
-  MoodVariant1 = "1",
-  MoodVariant2 = "2",
-  MoodVariant3 = "3",
+  Realis = "1",
+  Irrealis = "2",
+  ToBeDecided = "3",
 }
 
 export enum Virtuality {
-  Virtuality1 = "1",
-  Virtuality2 = "2",
-  Virtuality3 = "3",
-  Virtuality4 = "4",
-  Virtuality5 = "5",
-  Virtuality6 = "6",
+  Reality = "1",
+  Possibility = "2",
+  Probability = "3",
+  Certitude = "4",
+  Allegation = "5",
+  Semblance = "6",
 }
 
 export enum Partitivity {
-  Partitivity1 = "1",
-  Partitivity2 = "2",
-  Partitivity3 = "3",
-  Partitivity4 = "4",
-  Partitivity5 = "5",
+  Unison = "1",
+  UnisonOrParts = "2",
+  UnisonOrDiscreteParts = "3",
+  Parts = "4",
+  DiscreteParts = "5",
 }
 
 export enum Operator {
-  OperatorX = "x",
-  OperatorA = "a",
-  OperatorO = "o",
-  OperatorGt = ">",
-  OperatorGeq = ">=",
-  OperatorEq = "=",
-  OperatorLeq = "<=",
-  OperatorLt = "<",
+  Xor = "x",
+  And = "a",
+  Or = "o",
+  Greater = ">",
+  GreaterOrEqual = ">=",
+  Equal = "=",
+  LessOrEqual = "<=",
+  Less = "<",
 }
 
 export enum Language {

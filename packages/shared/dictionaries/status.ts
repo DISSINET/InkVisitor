@@ -6,22 +6,22 @@ export const actantStatusDict: {
   info?: string;
 }[] = [
   {
-    value: ActantStatus.Status0,
+    value: ActantStatus.Pending,
     label: "pending",
     info: "",
   },
   {
-    value: ActantStatus.Status1,
+    value: ActantStatus.Approved,
     label: "approved",
     info: "",
   },
   {
-    value: ActantStatus.Status2,
+    value: ActantStatus.Discouraged,
     label: "discouraged",
     info: "",
   },
   {
-    value: ActantStatus.Status3,
+    value: ActantStatus.Warning,
     label: "warning",
     info: "",
   },
