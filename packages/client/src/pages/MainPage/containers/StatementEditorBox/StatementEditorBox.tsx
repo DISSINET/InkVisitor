@@ -710,6 +710,7 @@ export const StatementEditorBox: React.FC = () => {
                                   key="d"
                                   tooltip="unlink actant"
                                   icon={<FaUnlink />}
+                                  inverted={true}
                                   color="danger"
                                   onClick={() => {
                                     updateReference(reference.id, {
@@ -757,6 +758,7 @@ export const StatementEditorBox: React.FC = () => {
                           <Button
                             key="delete"
                             tooltip="remove reference row"
+                            inverted={true}
                             icon={<FaTrashAlt />}
                             color="danger"
                             onClick={() => {
