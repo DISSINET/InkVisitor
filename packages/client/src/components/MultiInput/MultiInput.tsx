@@ -7,12 +7,12 @@ import { StyledRow } from "./MultiInputStyles";
 interface MultiInput {
   values: string[];
   onChange: Function;
-  width?: undefined | number;
+  width?: number;
 }
 export const MultiInput: React.FC<MultiInput> = ({
   values,
   onChange,
-  width = undefined,
+  width,
 }) => {
   const [displayValues, setDisplayValues] = useState(values);
   useEffect(() => {

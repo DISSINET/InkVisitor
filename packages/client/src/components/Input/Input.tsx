@@ -18,7 +18,7 @@ interface InputProps {
   options?: IOption[];
   rows?: number;
   cols?: number;
-  width?: number | undefined;
+  width?: number;
   onChangeFn: Function;
   onEnterPressFn?: Function;
   placeholder?: string;
@@ -36,7 +36,7 @@ export const Input: React.FC<InputProps> = ({
   options = [],
   rows = 5,
   cols = 50,
-  width = undefined,
+  width,
   changeOnType = false,
   onEnterPressFn = () => {},
   onChangeFn,

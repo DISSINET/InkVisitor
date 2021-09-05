@@ -25,6 +25,8 @@ import {
   StyledSectionUsedPageManager,
   StyledContentRowLabel,
   StyledContentRowValue,
+  StyledActantPreviewRow,
+  StyledTagWrap,
 } from "./ActandDetailBoxStyles";
 import { useHistory, useLocation } from "react-router-dom";
 import api from "api";
@@ -233,8 +235,10 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
           <StyledSection firstSection>
             <StyledSectionHeader>Actant detail</StyledSectionHeader>
 
-            <StyledContentRow>
-              <ActantTag actant={actant} propId={actant.id} />
+            <StyledActantPreviewRow>
+              <StyledTagWrap>
+                <ActantTag actant={actant} propId={actant.id} />
+              </StyledTagWrap>
               <ButtonGroup>
                 <Button
                   color="danger"
@@ -258,14 +262,14 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
                   }}
                 />
               </ButtonGroup>
-            </StyledContentRow>
+            </StyledActantPreviewRow>
 
             <StyledForm>
               <StyledContentRow>
                 <StyledContentRowLabel>Label</StyledContentRowLabel>
                 <StyledContentRowValue>
                   <Input
-                    width={200}
+                    // width={200}
                     value={actant.label}
                     onChangeFn={async (newLabel: string) => {
                       if (newLabel !== actant.label) {
@@ -282,7 +286,7 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
                 <StyledContentRowLabel>Detail</StyledContentRowLabel>
                 <StyledContentRowValue>
                   <Input
-                    width={200}
+                    // width={200}
                     value={actant.detail}
                     onChangeFn={async (newValue: string) => {
                       updateActantMutation.mutate({ detail: newValue });
@@ -296,7 +300,7 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
                   <Input
                     value={actant.status}
                     type="select"
-                    width={200}
+                    // width={200}
                     options={actantStatusDict}
                     onChangeFn={async (newValue: string) => {
                       updateActantMutation.mutate({ status: newValue });
@@ -309,7 +313,8 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
                 <StyledContentRowValue>
                   <Dropdown
                     isMulti={true}
-                    width={200}
+                    width="full"
+                    // width={200}
                     options={languageDict}
                     value={languageDict.filter((i: any) =>
                       actant.language.includes(i.value)
@@ -331,7 +336,7 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
                     <Input
                       value={actant.data.logicalType}
                       type="select"
-                      width={200}
+                      // width={200}
                       options={actantLogicalTypeDict}
                       onChangeFn={(newValue: string) => {
                         updateActantMutation.mutate({
@@ -534,7 +539,7 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
                 <StyledContentRowValue>
                   <MultiInput
                     values={actant.notes}
-                    width={200}
+                    // width={200}
                     onChange={(newValues: string[]) => {
                       updateActantMutation.mutate({ notes: newValues });
                     }}

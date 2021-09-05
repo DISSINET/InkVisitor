@@ -13,7 +13,7 @@ export const Label = styled.span`
   text-align: right;
   margin-right: ${space2};
   vertical-align: top;
-  font-weight: ${({ theme }) => theme.fontWeight["bold"]};
+  font-weight: ${({ theme }) => theme.fontWeight["medium"]};
   display: flex;
   align-items: flex-end;
   font-size: ${({ theme }) => theme.fontSize["sm"]};
@@ -31,7 +31,7 @@ export const StyledInput = styled.input<IValueStyle>`
     inverted ? theme.color["white"] : theme.color["primary"]};
   font-size: ${({ theme }) => theme.fontSize["xs"]};
   padding: ${space1};
-  width: ${({ width }) => (width ? `${width}px` : "auto")};
+  width: ${({ width }) => (width ? `${width}px` : "100%")};
   resize: none;
   :focus {
     outline: 0;
@@ -50,7 +50,7 @@ export const StyledSelect = styled.select<IValueStyle>`
     inverted ? theme.color["primary"] : theme.color["primary"]};
   font-size: ${({ theme }) => theme.fontSize["xs"]};
   font-weight: bold;
-  width: ${({ width }) => (width ? width + "px" : "auto")};
+  width: ${({ width }) => (width ? width + "px" : "100%")};
   padding: ${space1};
   resize: none;
   :focus {
