@@ -54,7 +54,9 @@ export const StyledSelect = styled(Select)`
   }
   .react-select__indicator {
     color: black;
-    padding: 0 0.25rem;
+    svg {
+      height: 18;
+    }
   }
   .react-select__indicator-separator {
     display: none;
@@ -66,6 +68,7 @@ export const StyledSelect = styled(Select)`
     transform: translate(0, -6px);
   }
   .react-select__option {
+    margin: 0;
     :hover {
     }
   }

@@ -36,8 +36,3 @@ export const StyledText = styled.div`
 export const StyledUsername = styled.div`
   font-weight: ${({ theme }) => theme.fontWeight["bold"]};
 `;
-export const StyledButtonWrap = styled.div`
-  position: absolute;
-  top: ${({ theme }) => theme.space[2]};
-  right: ${({ theme }) => theme.space[2]};
-`;

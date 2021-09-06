@@ -8,6 +8,7 @@ import {
   Input,
   Loader,
   MultiInput,
+  Submit,
 } from "components";
 import {
   StyledContent,
@@ -25,6 +26,8 @@ import {
   StyledSectionUsedPageManager,
   StyledContentRowLabel,
   StyledContentRowValue,
+  StyledActantPreviewRow,
+  StyledTagWrap,
 } from "./ActandDetailBoxStyles";
 import { useHistory, useLocation } from "react-router-dom";
 import api from "api";
@@ -62,6 +65,7 @@ import {
   entitiesDict,
 } from "@shared/dictionaries";
 import { composeWithDevTools } from "redux-devtools-extension";
+import { toast } from "react-toastify";
 
 interface ActantDetailBox {}
 export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
@@ -70,6 +74,7 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
   var hashParams = queryString.parse(location.hash);
   const actantId = hashParams.actant;
 
+  const [showSubmit, setShowSubmit] = useState(false);
   const [usedInPage, setUsedInPage] = useState<number>(0);
   const statementsPerPage = 20;
 
@@ -226,6 +231,22 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
     }
   );
 
+  const deleteActantMutation = useMutation(
+    async (actantId: string) => await api.actantsDelete(actantId),
+    {
+      onSuccess: (data, actantId) => {
+        toast.info(`Actant deleted!`);
+        queryClient.invalidateQueries("statement");
+        queryClient.invalidateQueries("territory");
+        queryClient.invalidateQueries("tree");
+        hashParams["actant"] = "";
+        history.push({
+          hash: queryString.stringify(hashParams),
+        });
+      },
+    }
+  );
+
   return (
     <>
       {actant && (
@@ -233,18 +254,17 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
           <StyledSection firstSection>
             <StyledSectionHeader>Actant detail</StyledSectionHeader>
 
-            <StyledContentRow>
-              <ActantTag actant={actant} propId={actant.id} />
+            <StyledActantPreviewRow>
+              <StyledTagWrap>
+                <ActantTag actant={actant} propId={actant.id} fullWidth />
+              </StyledTagWrap>
               <ButtonGroup>
                 <Button
                   color="danger"
                   icon={<FaTrashAlt />}
                   label="remove actant"
                   onClick={() => {
-                    hashParams["actant"] = "";
-                    history.push({
-                      hash: queryString.stringify(hashParams),
-                    });
+                    setShowSubmit(true);
                   }}
                 />
                 <Button
@@ -258,14 +278,14 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
                   }}
                 />
               </ButtonGroup>
-            </StyledContentRow>
+            </StyledActantPreviewRow>
 
             <StyledForm>
               <StyledContentRow>
                 <StyledContentRowLabel>Label</StyledContentRowLabel>
                 <StyledContentRowValue>
                   <Input
-                    width={200}
+                    width="full"
                     value={actant.label}
                     onChangeFn={async (newLabel: string) => {
                       if (newLabel !== actant.label) {
@@ -282,7 +302,7 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
                 <StyledContentRowLabel>Detail</StyledContentRowLabel>
                 <StyledContentRowValue>
                   <Input
-                    width={200}
+                    width="full"
                     value={actant.detail}
                     onChangeFn={async (newValue: string) => {
                       updateActantMutation.mutate({ detail: newValue });
@@ -296,7 +316,7 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
                   <Input
                     value={actant.status}
                     type="select"
-                    width={200}
+                    width="full"
                     options={actantStatusDict}
                     onChangeFn={async (newValue: string) => {
                       updateActantMutation.mutate({ status: newValue });
@@ -309,7 +329,7 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
                 <StyledContentRowValue>
                   <Dropdown
                     isMulti={true}
-                    width={200}
+                    width="full"
                     options={languageDict}
                     value={languageDict.filter((i: any) =>
                       actant.language.includes(i.value)
@@ -331,7 +351,7 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
                     <Input
                       value={actant.data.logicalType}
                       type="select"
-                      width={200}
+                      width="full"
                       options={actantLogicalTypeDict}
                       onChangeFn={(newValue: string) => {
                         updateActantMutation.mutate({
@@ -350,7 +370,7 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
                   <StyledContentRowValue>
                     <Input
                       value={actant.data.valencies.s}
-                      width={200}
+                      width="full"
                       onChangeFn={async (newValue: string) => {
                         const oldData = { ...actant.data };
                         updateActantMutation.mutate({
@@ -376,7 +396,7 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
                   <StyledContentRowValue>
                     <Input
                       value={actant.data.valencies.a1}
-                      width={200}
+                      width="full"
                       onChangeFn={async (newValue: string) => {
                         const oldData = { ...actant.data };
                         updateActantMutation.mutate({
@@ -402,7 +422,7 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
                   <StyledContentRowValue>
                     <Input
                       value={actant.data.valencies.a2}
-                      width={200}
+                      width="full"
                       onChangeFn={async (newValue: string) => {
                         const oldData = { ...actant.data };
                         updateActantMutation.mutate({
@@ -433,7 +453,7 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
                       value={entitiesDict.filter((i: any) =>
                         actant.data.entities.s.includes(i.value)
                       )}
-                      width={200}
+                      width="full"
                       placeholder={"*"}
                       onChange={(newValue: any) => {
                         const oldData = { ...actant.data };
@@ -468,7 +488,7 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
                       value={entitiesDict.filter((i: any) =>
                         actant.data.entities.a1.includes(i.value)
                       )}
-                      width={200}
+                      width="full"
                       placeholder={"*"}
                       onChange={(newValue: any) => {
                         const oldData = { ...actant.data };
@@ -503,7 +523,7 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
                       value={entitiesDict.filter((i: any) =>
                         actant.data.entities.a2.includes(i.value)
                       )}
-                      width={200}
+                      width="full"
                       placeholder={"*"}
                       onChange={(newValue: any) => {
                         const oldData = { ...actant.data };
@@ -534,7 +554,7 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
                 <StyledContentRowValue>
                   <MultiInput
                     values={actant.notes}
-                    width={200}
+                    width="full"
                     onChange={(newValues: string[]) => {
                       updateActantMutation.mutate({ notes: newValues });
                     }}
@@ -669,13 +689,23 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
           </StyledSection>
         </StyledContent>
       )}
+
+      <Submit
+        title="Remove actant"
+        text="Do you really want to delete actant?"
+        onSubmit={() => deleteActantMutation.mutate(actantId)}
+        onCancel={() => setShowSubmit(false)}
+        show={showSubmit}
+        loading={deleteActantMutation.isLoading}
+      />
       <Loader
         show={
           isFetching ||
           actantsCreateMutation.isLoading ||
           actantsDeleteMutation.isLoading ||
           actantsLabelUpdateMutation.isLoading ||
-          updateActantMutation.isLoading
+          updateActantMutation.isLoading ||
+          deleteActantMutation.isLoading
         }
       />
     </>
