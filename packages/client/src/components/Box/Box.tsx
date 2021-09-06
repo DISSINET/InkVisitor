@@ -6,6 +6,7 @@ import theme from "Theme/theme";
 import { Colors } from "types";
 import {
   StyledBox,
+  StyledButtonWrap,
   StyledContent,
   StyledContentAnimationWrap,
   StyledHead,
@@ -52,7 +53,7 @@ export const Box: React.FC<BoxProps> = ({
     <StyledBox color={color} height={height}>
       <StyledHead color={color}>
         <animated.div style={animatedExpand}>{label}</animated.div>
-        {button && button}
+        <StyledButtonWrap>{button && button}</StyledButtonWrap>
       </StyledHead>
       <StyledContent
         color={color}

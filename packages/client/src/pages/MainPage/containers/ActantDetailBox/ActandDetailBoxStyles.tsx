@@ -1,4 +1,5 @@
 import styled from "styled-components";
+import { ActantTag } from "..";
 
 export const StyledContent = styled.div`
   height: 100%;
@@ -23,19 +24,33 @@ export const StyledSection = styled.div<StyledSection>`
   width: 100%;
 `;
 
+export const StyledActantPreviewRow = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: ${({ theme }) => theme.space[4]};
+`;
+
+export const StyledTagWrap = styled.div`
+  margin-right: ${({ theme }) => theme.space[2]};
+  display: inline-flex;
+  overflow: hidden;
+`;
+
 export const StyledSectionHeader = styled.div`
   font-weight: ${({ theme }) => theme.fontWeight.bold};
   font-size: ${({ theme }) => theme.fontSize.xl};
-  margin-bottom: ${({ theme }) => theme.space["4"]};
+  margin-bottom: ${({ theme }) => theme.space[4]};
   color: ${({ theme }) => theme.color["gray"][600]};
 `;
 
 export const StyledContentRow = styled.div`
-  class: row;
-  display: flex;
+  /* class: row; */
+  /* display: flex; */
 `;
 export const StyledContentRowLabel = styled.div`
   float: left;
+  font-size: ${({ theme }) => theme.fontSize["sm"]};
 `;
 export const StyledContentRowValue = styled.div`
   float: right;
@@ -43,20 +58,24 @@ export const StyledContentRowValue = styled.div`
 
 export const StyledForm = styled.div`
   display: table;
+  width: 100%;
+  padding-right: ${({ theme }) => theme.space[6]};
   ${StyledContentRow} {
     display: table-row;
     width: 100%;
     ${StyledContentRowLabel} {
+      width: 1%;
+      white-space: nowrap;
       display: table-cell;
-      padding: ${({ theme }) => theme.space["1"]};
-      padding-right: 0.5rem;
-      vertical-align: middle;
+      padding: ${({ theme }) => theme.space[2]};
+      vertical-align: top;
       text-align: right;
       float: initial;
     }
     ${StyledContentRowValue} {
       display: table-cell;
-      padding: ${({ theme }) => theme.space["1"]};
+      width: 100%;
+      padding: ${({ theme }) => theme.space[1]};
     }
   }
 `;

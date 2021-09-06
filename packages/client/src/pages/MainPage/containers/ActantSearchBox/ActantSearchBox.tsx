@@ -110,6 +110,7 @@ export const ActantSearchBox: React.FC = () => {
       <StyledRow>
         <StyledRowHeader>label</StyledRowHeader>
         <Input
+          width={150}
           placeholder="search"
           changeOnType
           onChangeFn={(value: string) => handleChange("label", value)}
