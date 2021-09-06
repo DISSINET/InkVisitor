@@ -59,7 +59,7 @@ export const StyledContentRowValue = styled.div`
 export const StyledForm = styled.div`
   display: table;
   width: 100%;
-  padding-right: ${({ theme }) => theme.space[8]};
+  padding-right: ${({ theme }) => theme.space[6]};
   ${StyledContentRow} {
     display: table-row;
     width: 100%;
@@ -67,9 +67,8 @@ export const StyledForm = styled.div`
       width: 1%;
       white-space: nowrap;
       display: table-cell;
-      padding: ${({ theme }) => theme.space[1]};
-      padding-right: 0.5rem;
-      vertical-align: middle;
+      padding: ${({ theme }) => theme.space[2]};
+      vertical-align: top;
       text-align: right;
       float: initial;
     }

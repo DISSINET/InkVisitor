@@ -182,7 +182,6 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
                   button={
                     actantId && (
                       <Button
-                        inverted
                         icon={<IoMdClose />}
                         onClick={() => {
                           hashParams["actant"] = "";
