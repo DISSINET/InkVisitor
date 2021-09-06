@@ -9,6 +9,7 @@ import { StatementListBox } from "./StatementsListBox/StatementListBox";
 import { TerritoryTreeBox } from "./TerritoryTreeBox/TerritoryTreeBox";
 import { LoginModal } from "./LoginModal/LoginModal";
 import { UserOptionsModal } from "./UserOptionsModal/UserOptionsModal";
+import { UserListModal } from "./UserListModal/UserListModal";
 import { CertaintyToggle } from "./toggles/CertaintyToggle";
 import { ElvlToggle } from "./toggles/ElvlToggle";
 
@@ -24,6 +25,7 @@ export {
   TerritoryTreeBox,
   LoginModal,
   UserOptionsModal,
+  UserListModal,
   CertaintyToggle,
   ElvlToggle,
 };
