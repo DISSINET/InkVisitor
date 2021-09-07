@@ -13,6 +13,7 @@ const datasets: Record<string, any> = {
     {
       name: "actants",
       path: "datasets/all/actants.json",
+      indexes: [r.table("actants").indexCreate("class")],
     },
     {
       name: "users",
@@ -54,6 +55,12 @@ console.log(dbMode, envData);
 console.log(`***importing dataset ${datasetId}***`);
 console.log("");
 
+function doIndex(statement: any, connection: any): Promise<any> {
+  return new Promise((resolve) => {
+    statement.run(connection, resolve);
+  });
+}
+
 //-----------------------------------------------------------------------------
 // Main
 //-----------------------------------------------------------------------------
@@ -92,13 +99,19 @@ const importData = async () => {
 
     // set default database
     conn.use(config.db);
-    
+
     // Insert data to tables.
     for (let i = 0; i < config.tables.length; ++i) {
       const table = config.tables[i];
 
       await r.tableCreate(table.name).run(conn);
-      await console.log(`table ${table.name} created`);
+      if (table.indexes) {
+        for (const index of table.indexes) {
+          await doIndex(index, conn);
+        }
+      }
+
+      console.log(`table ${table.name} created`);
 
       let data = JSON.parse(fs.readFileSync(table.path));
       if (table.name === "users") {
@@ -109,7 +122,7 @@ const importData = async () => {
       }
 
       await r.table(table.name).insert(data).run(conn);
-      await console.log(`data into the table ${table.name} inserted`);
+      console.log(`data into the table ${table.name} inserted`);
     }
   } catch (error) {
     console.log(error);
