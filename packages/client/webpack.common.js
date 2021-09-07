@@ -1,5 +1,9 @@
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const { CleanWebpackPlugin } = require("clean-webpack-plugin");
+const createStyledComponentsTransformer = require("typescript-plugin-styled-components")
+  .default;
+const styledComponentsTransformer = createStyledComponentsTransformer();
+
 const path = require("path");
 
 module.exports = {
@@ -24,6 +28,9 @@ module.exports = {
         test: /\.tsx?$/,
         loader: "ts-loader?configFile=tsconfig.json",
         options: {
+          getCustomTransformers: () => ({
+            before: [styledComponentsTransformer],
+          }),
           transpileOnly: true,
         },
       },
