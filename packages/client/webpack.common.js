@@ -26,7 +26,7 @@ module.exports = {
       },
       {
         test: /\.tsx?$/,
-        loader: "ts-loader?configFile=tsconfig.json",
+        loader: "ts-loader",
         options: {
           getCustomTransformers: () => ({
             before: [styledComponentsTransformer],
@@ -36,20 +36,11 @@ module.exports = {
       },
       {
         test: /\.svg$/,
-        use: [
-          {
-            loader: "svg-url-loader",
-            options: {
-              limit: 10000,
-            },
-          },
-        ],
+        type: "asset/inline",
       },
       {
         test: /\.(woff|woff2|ttf)$/,
-        use: {
-          loader: "url-loader",
-        },
+        type: "asset/inline",
       },
     ],
   },
@@ -60,7 +51,6 @@ module.exports = {
       "@shared": path.resolve(__dirname, "../shared/"),
     },
   },
-  mode: "development",
   plugins: [
     new CleanWebpackPlugin(),
     new HtmlWebpackPlugin({
