@@ -1,4 +1,3 @@
-import { Arrow } from "components/Arrow/Arrow";
 import { Box } from "components/Box/Box";
 import { Button } from "components/Button/Button";
 import { ButtonGroup } from "components/ButtonGroup/ButtonGroup";
@@ -28,7 +27,6 @@ import { Checkbox } from "./Checkbox/Checkbox";
 import { AttributeIcon } from "./AttributeIcon/AttributeIcon";
 
 export {
-  Arrow,
   AttributeIcon,
   Box,
   Button,
