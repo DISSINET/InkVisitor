@@ -112,7 +112,7 @@ export const StatementEditorActionTable: React.FC<StatementEditorActionTable> =
                     tooltip="unlink action"
                     icon={<FaUnlink />}
                     inverted={true}
-                    color="danger"
+                    color="plain"
                     onClick={() => {
                       updateAction(sAction.id, {
                         action: "",
@@ -169,7 +169,7 @@ export const StatementEditorActionTable: React.FC<StatementEditorActionTable> =
             <Button
               key="d"
               icon={<FaTrashAlt />}
-              color="danger"
+              color="plain"
               inverted={true}
               tooltip="remove action row"
               onClick={() => {

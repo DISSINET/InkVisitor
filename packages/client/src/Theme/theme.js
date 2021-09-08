@@ -43,7 +43,7 @@ export default {
     warning: "#D8AA37",
     danger: "#99103B",
     info: "#324185",
-    plain: "#718096", // gray 600
+    plain: "#4a5568", // gray 700
     primaryTransparent: "rgba(9,16,52,0.2)",
     modalBg: "rgba(9,16,52,0.3)",
 
