@@ -1,4 +1,3 @@
-import { Arrow } from "components/Arrow/Arrow";
 import { Box } from "components/Box/Box";
 import { Button } from "components/Button/Button";
 import { ButtonGroup } from "components/ButtonGroup/ButtonGroup";
@@ -14,7 +13,6 @@ import { Submit } from "components/Submit/Submit";
 import { Tag } from "components/Tag/Tag";
 import { TagGroup } from "components/TagGroup/TagGroup";
 import { Toast } from "components/Toast/Toast";
-import { Toggle } from "components/Toggle/Toggle";
 import { Tooltip } from "components/Tooltip/Tooltip";
 import {
   Modal,
@@ -28,7 +26,6 @@ import { Checkbox } from "./Checkbox/Checkbox";
 import { AttributeIcon } from "./AttributeIcon/AttributeIcon";
 
 export {
-  Arrow,
   AttributeIcon,
   Box,
   Button,
@@ -45,7 +42,6 @@ export {
   Suggester,
   Dropdown,
   Toast,
-  Toggle,
   Modal,
   ModalCard,
   ModalHeader,

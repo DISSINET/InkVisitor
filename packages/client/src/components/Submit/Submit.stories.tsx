@@ -7,16 +7,19 @@ export default {
   parameters: {
     info: { inline: true },
   },
+  args: {
+    title: "Submit title",
+    text: "Do you really want to submit?",
+  },
 };
 
-export const DefaultSubmit = () => {
+export const DefaultSubmit = ({ ...args }) => {
   const [showSubmit, setShowSubmit] = useState(false);
   return (
     <>
       <Button label="Show submit!" onClick={() => setShowSubmit(true)} />
       <Submit
-        title="Submit title"
-        text="Do you really want to submit?"
+        {...args}
         onSubmit={() => {
           alert("You've submitted!");
           setShowSubmit(false);
