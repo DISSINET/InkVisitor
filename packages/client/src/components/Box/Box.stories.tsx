@@ -6,20 +6,19 @@ export default {
   parameters: {
     info: { inline: true },
   },
+  args: {
+    color: "primary",
+    label: "Default box",
+    height: 400,
+  },
+  argTypes: {
+    color: {
+      options: ["primary", "info", "success", "danger", "warning"],
+      control: { type: "select" },
+    },
+  },
 };
 
-export const DefaultBox = () => {
-  return (
-    <Box label="Default Box" height={400}>
-      {<div>box content</div>}
-    </Box>
-  );
-};
-
-export const WarningBox = () => {
-  return (
-    <Box label="warning box" height={400} color="warning">
-      {<div>warning box content</div>}
-    </Box>
-  );
+export const DefaultBox = ({ ...args }) => {
+  return <Box {...args}>{<div>box content</div>}</Box>;
 };
