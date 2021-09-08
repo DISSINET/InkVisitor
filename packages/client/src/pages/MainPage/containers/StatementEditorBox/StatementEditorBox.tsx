@@ -441,7 +441,7 @@ export const StatementEditorBox: React.FC = () => {
                   <Button
                     key="d"
                     icon={<FaUnlink />}
-                    color="danger"
+                    color="plain"
                     inverted={true}
                     tooltip="unlink actant"
                     onClick={() => {
@@ -500,7 +500,7 @@ export const StatementEditorBox: React.FC = () => {
                     key="d"
                     icon={<FaUnlink />}
                     tooltip="unlink actant"
-                    color="danger"
+                    color="plain"
                     inverted={true}
                     onClick={() => {
                       updateProp(prop.id, {
@@ -565,7 +565,7 @@ export const StatementEditorBox: React.FC = () => {
               key="delete"
               icon={<FaTrashAlt />}
               tooltip="remove prop row"
-              color="danger"
+              color="plain"
               inverted={true}
               onClick={() => {
                 removeProp(prop.id);
@@ -606,9 +606,7 @@ export const StatementEditorBox: React.FC = () => {
             <StyledEditorSectionHeader>Summary</StyledEditorSectionHeader>
             <StyledEditorSectionContent>
               <div>
-                <StyledListHeaderColumn>Action</StyledListHeaderColumn>
                 <div>
-                  <StyledListHeaderColumn>Text</StyledListHeaderColumn>
                   <Input
                     type="textarea"
                     width="full"
@@ -711,7 +709,7 @@ export const StatementEditorBox: React.FC = () => {
                                   tooltip="unlink actant"
                                   icon={<FaUnlink />}
                                   inverted={true}
-                                  color="danger"
+                                  color="plain"
                                   onClick={() => {
                                     updateReference(reference.id, {
                                       resource: "",
@@ -760,7 +758,7 @@ export const StatementEditorBox: React.FC = () => {
                             tooltip="remove reference row"
                             inverted={true}
                             icon={<FaTrashAlt />}
-                            color="danger"
+                            color="plain"
                             onClick={() => {
                               removeReference(reference.id);
                             }}
@@ -797,7 +795,7 @@ export const StatementEditorBox: React.FC = () => {
                               key="d"
                               tooltip="unlink actant from tags"
                               icon={<FaUnlink />}
-                              color="danger"
+                              color="plain"
                               inverted={true}
                               onClick={() => {
                                 removeTag(tag);
