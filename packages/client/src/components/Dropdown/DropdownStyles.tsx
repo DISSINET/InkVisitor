@@ -32,7 +32,7 @@ export const StyledSelect = styled(Select)`
     width: ${({ width }) => getWidth(width)};
     max-width: 100%;
     min-height: ${({ theme }) => theme.space[10]};
-    border: 2px solid black;
+    border: 2px solid red ${({ theme }) => theme.color["gray"]["400"]};
     border-radius: 0;
     :hover {
       border-color: black;

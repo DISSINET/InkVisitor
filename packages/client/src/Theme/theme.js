@@ -24,7 +24,15 @@ export default {
       800: "#2d3748",
       900: "#1a202c",
     },
-
+    invertedBg: {
+      plain: "#edf2f7",
+      danger: "#FFEEEE",
+      info: "#F2EBFE",
+      success: "#fff",
+      primary: "#fff",
+      grey: "#fff",
+      warning: "#fff",
+    },
     black: "#000",
     white: "#fff",
     whiteTransparent: "rgba(255,255,255,0.3)",
@@ -35,6 +43,7 @@ export default {
     warning: "#D8AA37",
     danger: "#99103B",
     info: "#324185",
+    plain: "#718096", // gray 600
     primaryTransparent: "rgba(9,16,52,0.2)",
     modalBg: "rgba(9,16,52,0.3)",
 

@@ -263,6 +263,7 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
                   color="danger"
                   icon={<FaTrashAlt />}
                   label="remove actant"
+                  inverted={true}
                   onClick={() => {
                     setShowSubmit(true);
                   }}
@@ -271,6 +272,7 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
                   key="refresh"
                   icon={<FaRecycle size={14} />}
                   tooltip="refresh data"
+                  inverted={true}
                   color="info"
                   label="refresh"
                   onClick={() => {

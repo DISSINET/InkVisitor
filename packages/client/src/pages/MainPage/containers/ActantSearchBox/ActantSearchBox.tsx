@@ -142,6 +142,7 @@ export const ActantSearchBox: React.FC = () => {
                 key="d"
                 icon={<FaUnlink />}
                 color="danger"
+                inverted={true}
                 tooltip="unlink actant"
                 onClick={() => {
                   handleChange("actantId", "");

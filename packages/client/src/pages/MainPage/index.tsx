@@ -161,7 +161,7 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
                 isExpanded={firstPanelExpanded}
                 button={firstPanelButton()}
               >
-                <TerritoryTreeBox />
+               <TerritoryTreeBox />
               </Box>
             </Panel>
             {/* SECOND PANEL */}
@@ -205,7 +205,7 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
                   : panelWidths[2] + panelWidths[3] - collapsedPanelWidth
               }
             >
-              <Box height={heightContent} label="Editor">
+              <Box height={heightContent} label="Editor" noPadding={false}>
                 <StatementEditorBox />
               </Box>
             </Panel>
