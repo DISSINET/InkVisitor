@@ -40,8 +40,8 @@ export const Box: React.FC<BoxProps> = ({
     opacity: isExpanded ? 1 : 0,
     contentLabelOpacity: isExpanded ? 0 : 1,
     contentBackgroundColor: isExpanded
-      ? theme.color["white"]
-      : theme.color["primary"],
+      ? theme.color["gray"]["100"]
+      : theme.color["gray"]["300"],
     onRest: () =>
       isExpanded ? setShowContentLabel(false) : setHideContent(true),
     onStart: () =>

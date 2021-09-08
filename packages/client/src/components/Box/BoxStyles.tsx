@@ -27,8 +27,8 @@ export const StyledHead = styled(animated.div)<StyledHead>`
   font-weight: ${({ theme }) => theme.fontWeight["bold"]};
   font-style: normal;
   text-transform: uppercase;
-  //border-color: ${({ theme }) => theme.color["grey"]};
-  //border-style: dashed;
+  border-color: ${({ theme }) => theme.color["grey"]};
+  border-style: dashed;
   border-width: ${({ theme }) => theme.borderWidth[1]};
   border-bottom: none;
 `;
@@ -76,7 +76,7 @@ export const StyledVerticalText = styled(animated.p)<StyledVerticalText>`
   font-family: Muni;
   font-weight: ${({ theme }) => theme.fontWeight["bold"]};
   font-size: ${({ theme }) => theme.fontSize["base"]};
-  color: ${({ theme }) => theme.color["white"]};
+  color: ${({ theme }) => theme.color["gray"]["600"]};
 `;
 export const StyledButtonWrap = styled.div`
   position: absolute;
