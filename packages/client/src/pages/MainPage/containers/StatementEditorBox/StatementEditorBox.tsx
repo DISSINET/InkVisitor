@@ -606,9 +606,7 @@ export const StatementEditorBox: React.FC = () => {
             <StyledEditorSectionHeader>Summary</StyledEditorSectionHeader>
             <StyledEditorSectionContent>
               <div>
-                <StyledListHeaderColumn>Action</StyledListHeaderColumn>
                 <div>
-                  <StyledListHeaderColumn>Text</StyledListHeaderColumn>
                   <Input
                     type="textarea"
                     width="full"

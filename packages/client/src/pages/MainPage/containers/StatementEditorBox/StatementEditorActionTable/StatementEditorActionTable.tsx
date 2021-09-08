@@ -242,18 +242,6 @@ export const StatementEditorActionTable: React.FC<StatementEditorActionTable> =
 
     return (
       <StyledTable {...getTableProps()}>
-        <StyledTHead>
-          {headerGroups.map((headerGroup, key) => (
-            <tr {...headerGroup.getHeaderGroupProps()} key={key}>
-              <th></th>
-              {headerGroup.headers.map((column, key) => (
-                <StyledTh {...column.getHeaderProps()} key={key}>
-                  {column.render("Header")}
-                </StyledTh>
-              ))}
-            </tr>
-          ))}
-        </StyledTHead>
         <tbody {...getTableBodyProps()}>
           {rows.map((row: Row, i: number) => {
             prepareRow(row);
