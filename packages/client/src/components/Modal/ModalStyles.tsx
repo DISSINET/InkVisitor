@@ -84,8 +84,8 @@ export const StyledCardTitle = styled.h2`
 `;
 export const StyledCardBody = styled.section`
   display: flex;
+  /* flex-shrink: 1; */
   /* flex-grow: 1; */
-  flex-shrink: 1;
   /* overflow: auto; */
   padding: ${space5} ${space7};
 
