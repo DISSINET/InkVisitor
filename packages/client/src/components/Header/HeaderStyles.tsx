@@ -15,7 +15,7 @@ export const StyledHeader = styled.div<StyledHeader>`
     `${paddingY || paddingY === 0 ? `${paddingY / 10}rem` : space10} ${
       paddingX || paddingX === 0 ? `${paddingX / 10}rem` : space3
     }`};
-  width: ${({ layoutWidth }) => layoutWidth};
+  width: ${({ layoutWidth }) => (layoutWidth > 0 ? layoutWidth : "100%")};
   background-color: ${({ theme, bgColor }) => theme.color[bgColor]};
   color: ${({ theme }) => theme.color["white"]};
   display: flex;
