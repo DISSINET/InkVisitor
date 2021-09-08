@@ -3,17 +3,22 @@ import { Footer } from "components";
 
 export default {
   title: "Footer",
+  component: Footer,
   parameters: {
     info: { inline: true },
   },
+  argTypes: {
+    color: {
+      options: ["primary", "info", "success", "danger", "warning", "black"],
+      control: { type: "select" },
+    },
+  },
 };
 
-export const DefaultFooter = () => {
-  return <Footer />;
+export const DefaultFooter = ({ ...args }) => {
+  return <Footer {...args} />;
 };
-export const SuccessFooter = () => {
-  return <Footer color={"success"} />;
-};
-export const BigDangerFooter = () => {
-  return <Footer height={80} color={"danger"} />;
+DefaultFooter.args = {
+  color: "primary",
+  height: 30,
 };
