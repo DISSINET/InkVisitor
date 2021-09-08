@@ -4,53 +4,39 @@ import { FaTrashAlt } from "react-icons/fa";
 
 export default {
   title: "Button",
+  component: Button,
   parameters: {
     info: { inline: true },
   },
+  argTypes: {
+    color: {
+      options: ["primary", "info", "success", "danger", "warning", "black"],
+      control: { type: "select" },
+    },
+  },
 };
 
-export const DefaultButton = () => {
-  return <Button label="default" />;
+export const DefaultButton = ({ ...args }) => {
+  return <Button {...args} />;
+};
+DefaultButton.args = {
+  color: "primary",
+  label: "Default",
+  inverted: false,
 };
 
-export const IconButton = () => {
-  return <Button icon={<FaTrashAlt />} color="danger" />;
+export const IconOnlyButton = ({ ...args }) => {
+  return <Button {...args} icon={<FaTrashAlt />} />;
 };
-export const PrimaryButton = () => {
-  return <Button label="Primary" color="primary" />;
-};
-export const SuccessButton = () => {
-  return <Button label="Success" color="success" />;
+IconOnlyButton.args = {
+  color: "danger",
+  inverted: false,
 };
 
-export const WarningButton = () => {
-  return <Button label="Warning" color="warning" />;
+export const IconTextButton = ({ ...args }) => {
+  return <Button {...args} icon={<FaTrashAlt />} />;
 };
-
-export const DangerButton = () => {
-  return <Button label="Danger" color="danger" />;
-};
-
-export const InfoButton = () => {
-  return <Button label="Info" color="info" />;
-};
-
-export const PrimaryInvertedButton = () => {
-  return <Button label="primary inverted" inverted color="primary" />;
-};
-
-export const SuccessInvertedButton = () => {
-  return <Button label="success inverted" inverted color="success" />;
-};
-
-export const WarningInvertedButton = () => {
-  return <Button label="warning inverted" inverted color="warning" />;
-};
-
-export const DangerInvertedButton = () => {
-  return <Button label="danger inverted" inverted color="danger" />;
-};
-
-export const InfoInvertedButton = () => {
-  return <Button label="info inverted" inverted color="info" />;
+IconTextButton.args = {
+  label: "Icon text",
+  inverted: true,
 };
