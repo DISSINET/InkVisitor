@@ -3,7 +3,7 @@ import styled from "styled-components";
 
 import { FaQuestionCircle } from "react-icons/fa";
 
-import { Toggle, Dropdown } from "components";
+import { Dropdown } from "components";
 import { certaintyDict } from "./../../../../../../shared/dictionaries";
 
 interface ICertaintyToggle {
@@ -49,15 +49,6 @@ export const CertaintyToggle: React.FC<ICertaintyToggle> = ({
       menuWidth={100}
       noDropDownIndicator
     />
-    // <Toggle
-    //   icon={<FaQuestionCircle />}
-    //   inverted
-    //   onChangeFn={(newValue) => {
-    //     onChangeFn(newValue.value);
-    //   }}
-    //   selectedValue={value}
-    //   optionList={items}
-    // />
   );
 };
 
