@@ -28,6 +28,10 @@ export default {
   },
   argTypes: {
     category: { options: entityIds, control: { type: "select" } },
+    borderStyle: {
+      options: ["solid", "dashed", "dotted"],
+      control: { type: "radio" },
+    },
   },
   decorators: [
     (Story: Story) => (
