@@ -14,12 +14,11 @@ interface StyledSection {
 }
 
 export const StyledSection = styled.div<StyledSection>`
-  padding-top: ${({ theme, firstSection = false }) =>
-    firstSection ? 0 : theme.space[4]};
-  padding-bottom: ${({ theme }) => theme.space[6]};
+  padding: ${({ theme }) => theme.space[6]};
   border-bottom-width: ${({ theme, lastSection = false }) =>
-    lastSection ? theme.borderWidth[0] : theme.borderWidth[2]};
-  border-bottom-color: ${({ theme }) => theme.color["gray"][600]};
+    lastSection ? theme.borderWidth[0] : theme.borderWidth[1]};
+  border-bottom-color: ${({ theme }) => theme.color["gray"][500]};
+  background-color: ${({ theme }) => theme.color["gray"][200]};
   border-bottom-style: solid;
   width: 100%;
 `;

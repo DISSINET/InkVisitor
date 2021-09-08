@@ -32,9 +32,9 @@ export const StyledInput = styled.input<IValueStyle>`
   background-color: ${({ inverted, theme }) =>
     inverted ? theme.color["primary"] : theme.color["white"]};
   border-width: ${({ theme, inverted }) =>
-    inverted ? 0 : theme.borderWidth[2]};
+    inverted ? 0 : theme.borderWidth[1]};
   border-color: ${({ inverted, theme }) =>
-    inverted ? theme.color["white"] : theme.color["primary"]};
+    inverted ? theme.color["white"] : theme.color["gray"]["400"]};
   font-size: ${({ theme }) => theme.fontSize["xs"]};
   padding: ${space1};
   width: ${({ width }) => getWidth(width)};
@@ -50,9 +50,9 @@ export const StyledSelect = styled.select<IValueStyle>`
     inverted ? theme.color["white"] : theme.color["primary"]};
   background-color: ${({ inverted, theme }) =>
     inverted ? theme.color["primary"] : theme.color["white"]};
-  border-width: ${({ theme }) => theme.borderWidth[2]};
+  border-width: ${({ theme }) => theme.borderWidth[1]};
   border-color: ${({ inverted, theme }) =>
-    inverted ? theme.color["primary"] : theme.color["primary"]};
+    inverted ? theme.color["gray"]["400"]: theme.color["gray"][400]};
   font-size: ${({ theme }) => theme.fontSize["xs"]};
   font-weight: bold;
   width: ${({ width }) => getWidth(width)};
@@ -68,8 +68,8 @@ export const StyledTextArea = styled.textarea<IValueStyle>`
     inverted ? theme.color["white"] : theme.color["primary"]};
   background-color: ${({ inverted, theme }) =>
     inverted ? theme.color["primary"] : theme.color["white"]};
-  border-width: ${({ theme }) => theme.borderWidth[2]};
-  border-color: ${({ theme }) => theme.color["primary"]};
+  border-width: ${({ theme }) => theme.borderWidth[1]};
+  border-color: ${({ theme }) => theme.color["gray"]["400"]};
   font-size: ${({ theme }) => theme.fontSize["xs"]};
   width: ${({ width }) => getWidth(width)};
   padding: ${space1};
@@ -78,5 +78,7 @@ export const StyledTextArea = styled.textarea<IValueStyle>`
   :focus {
     outline: 0;
     border-color: ${({ theme }) => theme.color["success"]};
+    border-width: ${({ theme, noBorder }) =>
+      noBorder ? 0 : theme.borderWidth[2]};
   }
 `;
