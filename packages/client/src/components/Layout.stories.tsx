@@ -39,7 +39,7 @@ export const Layout1 = () => {
         <Toast />
       </ButtonGroup>
 
-      <Tag
+      {/* <Tag
         propId="0"
         category={Entities["T"].id}
         color={Entities["T"].color}
@@ -53,7 +53,7 @@ export const Layout1 = () => {
         label="selected entity label"
         invertedLabel
         button={<Button label="x" color="danger" />}
-      />
+      /> */}
       <Input value="default input" onChangeFn={() => {}} />
       <Box label="default box" height={700}>
         <>
