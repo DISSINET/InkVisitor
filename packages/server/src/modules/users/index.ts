@@ -83,7 +83,7 @@ export default Router()
       const label = request.body.label;
 
       if (!label) {
-        throw new BadParams("label has to be set");
+        return await findAllUsers(request.db)
       }
 
       return await findUsersByLabel(request.db, label as string);
