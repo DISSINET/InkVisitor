@@ -8,7 +8,6 @@ InkVisitor has been developed in the [Dissident Networks Project (DISSINET)](htt
 
 The lead developer of the application is [Adam Mertel](https://github.com/adammertel/). Other contributors of code include Petr Hanák, Ján Mertel and others. The lead authors of the data model are David Zbíral and Robert L. J. Shaw. Other contributors to the data model and testers include Tomáš Hampejs, Jan Král, Katia Riccardo and others.
 
-## Changelog
 
 ## Data model
 
@@ -42,6 +41,19 @@ The uses of properties include:
 - Instantiating Entities to parent types. 
 - Defining time and place of action (including in fuzzy terms).
 - Recording other adverbials, for example those concerning manner of action, circumstances, causes or consequences of action.
+
+
+## User Administration
+The environment supports a system of three roles:
+ - admin
+ - editor
+ - viewer
+
+Further, the admin may grant particular users (editors and viewers) access rights for specified territories. In the case of the editor, the access rights may be on the level of "view" and "edit", in the case of viewer role, it may only be "view" rights.
+
+**Entity Detail** is accessible to all roles. The viewer is not allowed to change any value, while the editor may change label, detail, notes, language and add, remove and edit property statements with the status of "pending." Moreover, all meta props in detail that he creates are getting status "pending." Admin has full access to internal attributes of the entity (status, class) and meta props. All meta props he creates have the status "approved."
+
+Only admin and editor with edit rights in the parent **Territory** (T) may edit, add or remove a child T. Editors and viewers do not see T they have no rights to in the T Tree. Only "edit" rights for the T grant the rights to add a new Statement under that particular T, or any other child of that T. That means that the admin has first to create a T and grant edit rights to editors.
 
 
 ## Development
