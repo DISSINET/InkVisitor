@@ -49,7 +49,7 @@ The environment supports a system of three roles:
  - editor
  - viewer
 
-Further, the admin may grant particular users (editors and viewers) access rights for specified territories. In the case of the editor, the access rights may be on the level of "view" and "edit", in the case of viewer role, it may only be "view" rights.
+Further, the admin may grant particular users (editors and viewers) access rights for specified territories. Editor role may be granted by "edit" rights, viewer role has "view" rights.
 
 **Entity Detail** is accessible to all roles. The viewer is not allowed to change any value, while the editor may change label, detail, notes, language and add, remove and edit property statements with the status of "pending." Moreover, all meta props in detail that he creates are getting status "pending." Admin has full access to internal attributes of the entity (status, class) and meta props. All meta props he creates have the status "approved."
 
