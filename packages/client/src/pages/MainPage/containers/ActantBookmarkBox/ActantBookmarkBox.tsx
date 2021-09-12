@@ -18,6 +18,7 @@ import {
   ModalFooter,
   Input,
   Submit,
+  Tooltip,
 } from "components";
 
 import {
@@ -123,6 +124,14 @@ export const ActantBookmarkBox: React.FC = () => {
       return false;
     }
   };
+
+  const editedFolderIsValid = useMemo(() => {
+    return (
+      editingFolderName !== "" &&
+      bookmarkFolders &&
+      !bookmarkFolders.map((b) => b.name).includes(editingFolderName)
+    );
+  }, [editingFolderName]);
 
   // methods
   const clickNewBookmarFolderkHandle = () => {
@@ -298,7 +307,7 @@ export const ActantBookmarkBox: React.FC = () => {
             const empty = bookmarkFolder.actants.length === 0;
 
             return (
-              <StyledFolderWrapper key={bookmarkFolder.name}>
+              <StyledFolderWrapper key={bookmarkFolder.id}>
                 <StyledFolderHeader>
                   <StyledFolderWrapperOpenArea
                     onClick={() => {
@@ -353,30 +362,6 @@ export const ActantBookmarkBox: React.FC = () => {
                         updateFolderActants={updateFolderActants}
                         removeBookmark={removeBookmark}
                       ></ActantBookmarkFolderTable>
-                      {/* {bookmarkFolder.actants.map((actant) => {
-                        return (
-                          <StyledFolderContentTag key={actant.id}>
-                            <ActantTag
-                              actant={actant}
-                              short={false}
-                              button={
-                                <Button
-                                  key="d"
-                                  icon={<FaUnlink />}
-                                  color="danger"
-                                  tooltip="unlink actant"
-                                  onClick={() => {
-                                    removeBookmark(
-                                      bookmarkFolder.id,
-                                      actant.id
-                                    );
-                                  }}
-                                />
-                              }
-                            />
-                          </StyledFolderContentTag>
-                        );
-                      })} */}
                     </StyledFolderContentTags>
                     <StyledFolderSuggester>
                       <ActantSuggester
@@ -395,6 +380,7 @@ export const ActantBookmarkBox: React.FC = () => {
         </StyledFolderList>
       )}
       <Loader show={isFetching} />
+
       {/* edit modal */}
       <Modal key="new-bookmar-modal" showModal={!!editingFolder} width="thin">
         <ModalHeader title="Bookmark Folder" />
@@ -429,6 +415,7 @@ export const ActantBookmarkBox: React.FC = () => {
               onClick={() => {
                 acceptEditingFolderMutation.mutate();
               }}
+              disabled={!editedFolderIsValid}
             />
           </ButtonGroup>
         </ModalFooter>
@@ -461,6 +448,7 @@ export const ActantBookmarkBox: React.FC = () => {
                 cancelCreatingFolder();
               }}
             />
+
             <Button
               key="create"
               label="Create"
@@ -468,6 +456,7 @@ export const ActantBookmarkBox: React.FC = () => {
               onClick={() => {
                 createFolderMutation.mutate();
               }}
+              disabled={!editedFolderIsValid}
             />
           </ButtonGroup>
         </ModalFooter>
