@@ -4,6 +4,7 @@ import { space1, space2 } from "Theme/constants";
 interface IValueStyle {
   inverted?: boolean;
   width?: number | "full";
+  noBorder?: boolean;
 }
 const getWidth = (width?: number | "full") => {
   if (width) {

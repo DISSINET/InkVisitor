@@ -576,7 +576,6 @@ export const StatementEditorBox: React.FC = () => {
               inverted
               icon={<FaCaretUp />}
               tooltip="move prop up"
-              inverted={true}
               color="plain"
               onClick={() => {
                 movePropUp(prop.id);
