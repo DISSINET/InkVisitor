@@ -27,6 +27,7 @@ export const Label = styled.span`
 export const StyledInput = styled.input<IValueStyle>`
   height: ${({ theme }) => theme.space[10]};
   text-align: left;
+  border-style: solid;
   color: ${({ inverted, theme }) =>
     inverted ? theme.color["white"] : theme.color["primary"]};
   background-color: ${({ inverted, theme }) =>
@@ -52,7 +53,7 @@ export const StyledSelect = styled.select<IValueStyle>`
     inverted ? theme.color["primary"] : theme.color["white"]};
   border-width: ${({ theme }) => theme.borderWidth[1]};
   border-color: ${({ inverted, theme }) =>
-    inverted ? theme.color["gray"]["400"]: theme.color["gray"][400]};
+    inverted ? theme.color["gray"]["400"] : theme.color["gray"][400]};
   font-size: ${({ theme }) => theme.fontSize["xs"]};
   font-weight: bold;
   width: ${({ width }) => getWidth(width)};
