@@ -6,6 +6,7 @@ import {
   ITerritory,
   IStatement,
   IBookmarkFolder,
+  IStatementReference,
 } from "@shared/types";
 import {
   CategoryActantType,
@@ -218,4 +219,11 @@ export const CActant = (
   status: ActantStatus["Approved"],
   language: ["eng"],
   notes: [],
+});
+
+export const CReference = (resourceId: string): IStatementReference => ({
+  id: uuidv4(),
+  resource: resourceId,
+  part: "",
+  type: "",
 });

@@ -13,7 +13,12 @@ import {
 
 import { useLocation, useHistory } from "react-router";
 import { ActantTag } from "./../";
-import { CProp, CStatementActant, CStatementAction } from "constructors";
+import {
+  CProp,
+  CReference,
+  CStatementActant,
+  CStatementAction,
+} from "constructors";
 
 import { referenceTypeDict } from "./../../../../../../shared/dictionaries";
 import {
@@ -264,7 +269,15 @@ export const StatementEditorBox: React.FC = () => {
   };
 
   // references
-  const addReference = () => {};
+  const addReference = (resourceId: string) => {
+    if (statement && resourceId) {
+      const newReference: IStatementReference = CReference(resourceId);
+      const newData = {
+        references: [...statement.data.references, newReference],
+      };
+      update(newData);
+    }
+  };
   const updateReference = (referenceId: string, changes: any) => {
     if (statement && referenceId) {
       const updatedReferences = statement.data.references.map((r) =>
@@ -694,6 +707,7 @@ export const StatementEditorBox: React.FC = () => {
                     const referenceActant = statement.actants.find(
                       (a) => a.id === reference.resource
                     );
+
                     return (
                       <React.Fragment key={ri}>
                         <StyledReferencesListColumn />
@@ -769,7 +783,9 @@ export const StatementEditorBox: React.FC = () => {
                 )}
               </StyledReferencesList>
               <ActantSuggester
-                onSelected={(newSelectedId: string) => {}}
+                onSelected={(newSelectedId: string) => {
+                  addReference(newSelectedId);
+                }}
                 categoryIds={classesResources}
                 placeholder={"add new reference"}
               ></ActantSuggester>
