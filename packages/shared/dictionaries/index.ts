@@ -5,7 +5,6 @@ import { entitiesDict } from "./entity";
 import { actantLogicalTypeDict } from "./logicaltype";
 import { actantPositionDict } from "./actantposition";
 import { referenceTypeDict } from "./referencetype";
-import { resourceTypeDict } from "./resourcetype";
 import { userRoleDict } from "./userroles";
 import { territoryTypeDict } from "./territorytype";
 import { actantStatusDict } from "./status";
@@ -24,7 +23,6 @@ export {
   actantLogicalTypeDict,
   actantPositionDict,
   referenceTypeDict,
-  resourceTypeDict,
   territoryTypeDict,
   userRoleDict,
   actantStatusDict,

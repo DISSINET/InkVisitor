@@ -570,8 +570,6 @@ const addTerritoryActant = (
                 order: order,
               }
             : false,
-          type: "",
-          content: "",
         },
         label: label.trim(),
         detail: "",
@@ -590,9 +588,7 @@ const addResourceActant = (id: string, label: string) => {
       id,
       class: ActantType.Resource,
       data: {
-        content: "",
         link: "",
-        type: "1",
       },
       label: label.trim(),
       detail: "",

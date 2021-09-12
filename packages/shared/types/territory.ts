@@ -5,8 +5,6 @@ export interface ITerritory extends IActant {
   class: ActantType.Territory;
   data: {
     parent: IParentTerritory | false;
-    type: string; // territoryTypeDict
-    content: string;
   };
 }
 
