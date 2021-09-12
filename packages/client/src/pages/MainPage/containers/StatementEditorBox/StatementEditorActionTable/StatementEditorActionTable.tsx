@@ -206,6 +206,7 @@ export const StatementEditorActionTable: React.FC<StatementEditorActionTable> =
     const getRowId = useCallback((row) => {
       return row.id;
     }, []);
+    
     const {
       getTableProps,
       getTableBodyProps,
