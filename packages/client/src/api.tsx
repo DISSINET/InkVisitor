@@ -1,5 +1,5 @@
 import React from "react";
-import axios, { AxiosInstance, AxiosResponse } from "axios";
+import axios, { AxiosError, AxiosInstance, AxiosResponse } from "axios";
 import {
   IResponseUser,
   IResponseActant,
@@ -164,7 +164,7 @@ class Api {
         toast.success("Logged in");
       }
       return { ...response.data };
-    } catch (err) {
+    } catch (err: any | AxiosError) {
       throw { ...err.response.data };
     }
   }
@@ -185,7 +185,7 @@ class Api {
     try {
       const response = await this.connection.get(`/users/get/${userId}`);
       return response;
-    } catch (err) {
+    } catch (err: any | AxiosError) {
       throw { ...err.response.data };
     }
   }
@@ -196,7 +196,7 @@ class Api {
     try {
       const response = await this.connection.post(`/users/getMore`, filters);
       return response;
-    } catch (err) {
+    } catch (err: any | AxiosError) {
       throw { ...err.response.data };
     }
   }
@@ -208,7 +208,7 @@ class Api {
     try {
       const response = await this.connection.post(`/users/create`);
       return response;
-    } catch (err) {
+    } catch (err: any | AxiosError) {
       throw { ...err.response.data };
     }
   }
@@ -223,7 +223,7 @@ class Api {
         changes
       );
       return response;
-    } catch (err) {
+    } catch (err: any | AxiosError) {
       throw { ...err.response.data };
     }
   }
@@ -232,7 +232,7 @@ class Api {
     try {
       const response = await this.connection.delete(`/users/delete/${userId}`);
       return response;
-    } catch (err) {
+    } catch (err: any | AxiosError) {
       throw { ...err.response.data };
     }
   }
@@ -245,7 +245,7 @@ class Api {
     try {
       const response = await this.connection.get(`/users/administration`);
       return response;
-    } catch (err) {
+    } catch (err: any | AxiosError) {
       throw { ...err.response.data };
     }
   }
@@ -262,7 +262,7 @@ class Api {
         !!userId ? `/users/bookmarks/${userId}` : "/users/bookmarks/"
       );
       return response;
-    } catch (err) {
+    } catch (err: any | AxiosError) {
       throw { ...err.response.data };
     }
   }
@@ -275,7 +275,7 @@ class Api {
     try {
       const response = await this.connection.get(`/actants/get/${actantId}`);
       return response;
-    } catch (err) {
+    } catch (err: any | AxiosError) {
       throw { ...err.response.data };
     }
   }
@@ -286,7 +286,7 @@ class Api {
     try {
       const response = await this.connection.post(`/actants/getMore`, filter);
       return response;
-    } catch (err) {
+    } catch (err: any | AxiosError) {
       throw { ...err.response.data };
     }
   }
@@ -300,7 +300,7 @@ class Api {
         newActantData
       );
       return response;
-    } catch (err) {
+    } catch (err: any | AxiosError) {
       throw { ...err.response.data };
     }
   }
@@ -315,7 +315,7 @@ class Api {
         changes
       );
       return response;
-    } catch (err) {
+    } catch (err: any | AxiosError) {
       throw { ...err.response.data };
     }
   }
@@ -328,7 +328,7 @@ class Api {
         `/actants/delete/${actantId}`
       );
       return response;
-    } catch (err) {
+    } catch (err: any | AxiosError) {
       throw { ...err.response.data };
     }
   }
@@ -342,7 +342,7 @@ class Api {
         searchData
       );
       return response;
-    } catch (err) {
+    } catch (err: any | AxiosError) {
       throw { ...err.response.data };
     }
   }
@@ -355,7 +355,7 @@ class Api {
     try {
       const response = await this.connection.get(`/actants/detail/${actantId}`);
       return response;
-    } catch (err) {
+    } catch (err: any | AxiosError) {
       throw { ...err.response.data };
     }
   }
@@ -367,7 +367,7 @@ class Api {
   //   try {
   //     const response = await this.connection.get(`/actions/get/${actionId}`);
   //     return response;
-  //   } catch (err) {
+  //   } catch (err: any | AxiosError) {
   //     throw { ...err.response.data };
   //   }
   // }
@@ -378,7 +378,7 @@ class Api {
   //   try {
   //     const response = await this.connection.post(`/actions/getMore`, filter);
   //     return response;
-  //   } catch (err) {
+  //   } catch (err: any | AxiosError) {
   //     throw { ...err.response.data };
   //   }
   // }
@@ -392,7 +392,7 @@ class Api {
   //       newActionData
   //     );
   //     return response;
-  //   } catch (err) {
+  //   } catch (err: any | AxiosError) {
   //     throw { ...err.response.data };
   //   }
   // }
@@ -407,7 +407,7 @@ class Api {
   //       changes
   //     );
   //     return response;
-  //   } catch (err) {
+  //   } catch (err: any | AxiosError) {
   //     throw { ...err.response.data };
   //   }
   // }
@@ -420,7 +420,7 @@ class Api {
   //       `/actions/delete/${actantId}`
   //     );
   //     return response;
-  //   } catch (err) {
+  //   } catch (err: any | AxiosError) {
   //     throw { ...err.response.data };
   //   }
   // }
@@ -433,7 +433,7 @@ class Api {
     try {
       const response = await this.connection.get(`/tree/get`);
       return response;
-    } catch (err) {
+    } catch (err: any | AxiosError) {
       throw { ...err.response.data };
     }
   }
@@ -451,7 +451,7 @@ class Api {
         newIndex,
       });
       return response;
-    } catch (err) {
+    } catch (err: any | AxiosError) {
       throw { ...err.response.data };
     }
   }
@@ -468,7 +468,7 @@ class Api {
         `/territories/get/${territoryId}`
       );
       return response;
-    } catch (err) {
+    } catch (err: any | AxiosError) {
       throw { ...err.response.data };
     }
   }
@@ -485,7 +485,7 @@ class Api {
         `/territories/getActantIds/${territoryId}`
       );
       return response;
-    } catch (err) {
+    } catch (err: any | AxiosError) {
       throw { ...err.response.data };
     }
   }
@@ -503,7 +503,7 @@ class Api {
         }
       );
       return response;
-    } catch (err) {
+    } catch (err: any | AxiosError) {
       throw { ...err.response.data };
     }
   }
@@ -520,7 +520,7 @@ class Api {
         `/statements/get/${statementId}`
       );
       return response;
-    } catch (err) {
+    } catch (err: any | AxiosError) {
       throw { ...err.response.data };
     }
   }
@@ -529,7 +529,7 @@ class Api {
     try {
       const response = await this.connection.get(`/acl/index`);
       return response;
-    } catch (err) {
+    } catch (err: any | AxiosError) {
       throw { ...err.response.data };
     }
   }
@@ -544,7 +544,7 @@ class Api {
         data
       );
       return response;
-    } catch (err) {
+    } catch (err: any | AxiosError) {
       throw { ...err.response.data };
     }
   }

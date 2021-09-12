@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "react-query";
 import api from "api";
 const queryString = require("query-string");
@@ -18,6 +18,7 @@ import {
   ModalFooter,
   Input,
   Submit,
+  Tooltip,
 } from "components";
 
 import {
@@ -29,6 +30,7 @@ import {
   FaRegFolder,
   FaRegFolderOpen,
   FaUnlink,
+  FaTrashAlt,
 } from "react-icons/fa";
 
 import {
@@ -56,8 +58,22 @@ import {
   IBookmarkFolder,
   IResponseBookmarkFolder,
 } from "@shared/types";
+import { Cell, Column, useTable } from "react-table";
+import { ActantBookmarkFolderTable } from "./ActantBookmarkFolderTable/ActantBookmarkFolderTable";
 
-const bookmarkEntities = ["P", "G", "O", "C", "L", "V", "E", "S", "T", "R"];
+const bookmarkEntities = [
+  "A",
+  "P",
+  "G",
+  "O",
+  "C",
+  "L",
+  "V",
+  "E",
+  "S",
+  "T",
+  "R",
+];
 
 export const ActantBookmarkBox: React.FC = () => {
   const queryClient = useQueryClient();
@@ -108,6 +124,14 @@ export const ActantBookmarkBox: React.FC = () => {
       return false;
     }
   };
+
+  const editedFolderIsValid = useMemo(() => {
+    return (
+      editingFolderName !== "" &&
+      bookmarkFolders &&
+      !bookmarkFolders.map((b) => b.name).includes(editingFolderName)
+    );
+  }, [editingFolderName]);
 
   // methods
   const clickNewBookmarFolderkHandle = () => {
@@ -187,8 +211,9 @@ export const ActantBookmarkBox: React.FC = () => {
   const createFolderMutation = useMutation(
     async () => {
       if (bookmarkFolders) {
-        const newBookmarkFolder: IBookmarkFolder =
-          CBookmarkFolder(editingFolderName);
+        const newBookmarkFolder: IBookmarkFolder = CBookmarkFolder(
+          editingFolderName
+        );
 
         const newBookmarks: IBookmarkFolder[] | false = getBookmarksCopy();
         if (newBookmarks) {
@@ -254,6 +279,16 @@ export const ActantBookmarkBox: React.FC = () => {
     }
   );
 
+  const updateFolderActants = (newActantIds: string[], folderId: string) => {
+    const newBookmarks: IBookmarkFolder[] | false = getBookmarksCopy();
+    if (newBookmarks) {
+      const folder = newBookmarks.find((b) => b.id === folderId);
+      if (folder) {
+        folder.actantIds = newActantIds;
+        changeBookmarksMutation.mutate(newBookmarks);
+      }
+    }
+  };
   return (
     <StyledContent>
       <StyledHeader>
@@ -272,7 +307,7 @@ export const ActantBookmarkBox: React.FC = () => {
             const empty = bookmarkFolder.actants.length === 0;
 
             return (
-              <StyledFolderWrapper key={bookmarkFolder.name + Math.random()}>
+              <StyledFolderWrapper key={bookmarkFolder.id}>
                 <StyledFolderHeader>
                   <StyledFolderWrapperOpenArea
                     onClick={() => {
@@ -322,30 +357,11 @@ export const ActantBookmarkBox: React.FC = () => {
                 {open && (
                   <StyledFolderContent>
                     <StyledFolderContentTags>
-                      {bookmarkFolder.actants.map((actant) => {
-                        return (
-                          <StyledFolderContentTag key={actant.id}>
-                            <ActantTag
-                              actant={actant}
-                              short={false}
-                              button={
-                                <Button
-                                  key="d"
-                                  icon={<FaUnlink />}
-                                  color="danger"
-                                  tooltip="unlink actant"
-                                  onClick={() => {
-                                    removeBookmark(
-                                      bookmarkFolder.id,
-                                      actant.id
-                                    );
-                                  }}
-                                />
-                              }
-                            />
-                          </StyledFolderContentTag>
-                        );
-                      })}
+                      <ActantBookmarkFolderTable
+                        folder={bookmarkFolder}
+                        updateFolderActants={updateFolderActants}
+                        removeBookmark={removeBookmark}
+                      ></ActantBookmarkFolderTable>
                     </StyledFolderContentTags>
                     <StyledFolderSuggester>
                       <ActantSuggester
@@ -364,8 +380,9 @@ export const ActantBookmarkBox: React.FC = () => {
         </StyledFolderList>
       )}
       <Loader show={isFetching} />
+
       {/* edit modal */}
-      <Modal key="edit-modal" showModal={!!editingFolder} width="thin">
+      <Modal key="new-bookmar-modal" showModal={!!editingFolder} width="thin">
         <ModalHeader title="Bookmark Folder" />
         <ModalContent>
           <Input
@@ -398,13 +415,14 @@ export const ActantBookmarkBox: React.FC = () => {
               onClick={() => {
                 acceptEditingFolderMutation.mutate();
               }}
+              disabled={!editedFolderIsValid}
             />
           </ButtonGroup>
         </ModalFooter>
       </Modal>
 
       {/* create modal */}
-      <Modal key="create-modal" showModal={creatingFolder} width="thin">
+      <Modal key="create-modal" showModal={creatingFolder == true}>
         <ModalHeader title="Bookmark Folder" />
         <ModalContent>
           <Input
@@ -430,6 +448,7 @@ export const ActantBookmarkBox: React.FC = () => {
                 cancelCreatingFolder();
               }}
             />
+
             <Button
               key="create"
               label="Create"
@@ -437,6 +456,7 @@ export const ActantBookmarkBox: React.FC = () => {
               onClick={() => {
                 createFolderMutation.mutate();
               }}
+              disabled={!editedFolderIsValid}
             />
           </ButtonGroup>
         </ModalFooter>

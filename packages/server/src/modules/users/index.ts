@@ -29,7 +29,9 @@ import {
   IResponseAdministration,
   IActant,
   IResponseGeneric,
+  IResponseActant,
 } from "@shared/types";
+import actants from "@modules/actants";
 
 export default Router()
   .post(
@@ -220,9 +222,8 @@ export default Router()
               request.db,
               bookmark.actantIds
             )) {
-              bookmarkResponse.actants.push({
-                ...actant,
-              });
+              bookmarkResponse.actants[bookmark.actantIds.indexOf(actant.id)] =
+                actant;
             }
           }
           out.push(bookmarkResponse);

@@ -7,7 +7,7 @@ interface StyledFooter {
   layoutWidth: number;
 }
 export const StyledFooter = styled.div<StyledFooter>`
-  width: ${({ layoutWidth }) => layoutWidth};
+  width: ${({ layoutWidth }) => (layoutWidth > 0 ? layoutWidth : "100%")};
   height: ${({ height }) => `${height}px`};
   background-color: ${({ theme, color }) => theme.color[color]};
 `;

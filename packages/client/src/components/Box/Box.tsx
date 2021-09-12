@@ -6,6 +6,7 @@ import theme from "Theme/theme";
 import { Colors } from "types";
 import {
   StyledBox,
+  StyledButtonWrap,
   StyledContent,
   StyledContentAnimationWrap,
   StyledHead,
@@ -26,7 +27,7 @@ export const Box: React.FC<BoxProps> = ({
   label = "",
   color = "primary",
   height,
-  noPadding = false,
+  noPadding = true,
   isExpanded = true,
   button,
   children,
@@ -39,8 +40,8 @@ export const Box: React.FC<BoxProps> = ({
     opacity: isExpanded ? 1 : 0,
     contentLabelOpacity: isExpanded ? 0 : 1,
     contentBackgroundColor: isExpanded
-      ? theme.color["white"]
-      : theme.color["primary"],
+      ? theme.color["gray"]["100"]
+      : theme.color["gray"]["300"],
     onRest: () =>
       isExpanded ? setShowContentLabel(false) : setHideContent(true),
     onStart: () =>
@@ -52,7 +53,7 @@ export const Box: React.FC<BoxProps> = ({
     <StyledBox color={color} height={height}>
       <StyledHead color={color}>
         <animated.div style={animatedExpand}>{label}</animated.div>
-        {button && button}
+        <StyledButtonWrap>{button && button}</StyledButtonWrap>
       </StyledHead>
       <StyledContent
         color={color}

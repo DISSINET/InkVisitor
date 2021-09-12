@@ -58,6 +58,11 @@ export const StyledLabel = styled.div<StyledLabel>`
 
 export const ButtonWrapper = styled.div`
   display: flex;
+  button {
+    border-width: 0;
+    border-left-width: ${({ theme }) => theme.borderWidth[2]};
+    border-left-style: solid;
+  }
 `;
 
 export const StyledTooltipSeparator = styled.div`
