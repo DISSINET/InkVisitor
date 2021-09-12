@@ -203,8 +203,6 @@ export const CTerritoryActant = (
   notes: [],
   data: {
     parent: { id: parentId, order: parentOrder },
-    type: "1",
-    content: "",
   },
 });
 

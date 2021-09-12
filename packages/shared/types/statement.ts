@@ -33,7 +33,7 @@ export interface IStatementAction {
   action: string;
   elvl: Elvl;
   certainty: Certainty;
-  logic: Logic["Positive"];
+  logic: Logic;
   mood: Mood[];
   moodvariant: MoodVariant;
   operator: Operator;
@@ -46,7 +46,7 @@ export interface IStatementActant {
   actant: string;
   position: Position;
   elvl: Elvl;
-  logic: Logic["Positive"];
+  logic: Logic;
   virtuality: Virtuality;
   partitivity: Partitivity;
   operator: Operator;
@@ -58,7 +58,7 @@ export interface IStatementProp {
   id: string;
   elvl: Elvl;
   certainty: Certainty;
-  logic: Logic["Positive"];
+  logic: Logic;
   mood: Mood[];
   moodvariant: MoodVariant;
   operator: Operator;
@@ -70,14 +70,14 @@ export interface IStatementProp {
   type: {
     id: string;
     elvl: Elvl;
-    logic: Logic["Positive"];
+    logic: Logic;
     virtuality: Virtuality;
     partitivity: Partitivity;
   };
   value: {
     id: string;
     elvl: Elvl;
-    logic: Logic["Positive"];
+    logic: Logic;
     virtuality: Virtuality;
     partitivity: Partitivity;
   };
