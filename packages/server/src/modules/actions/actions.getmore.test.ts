@@ -6,7 +6,6 @@ import app from "../../Server";
 import { IAction } from "@shared/types";
 import { Db } from "@service/RethinkDB";
 import { createAction, deleteActions } from "@service/shorthands";
-import "ts-jest";
 
 const checkArrayOfActions = (res: any) => {
   const actionExample: IAction = {
@@ -19,11 +18,11 @@ const checkArrayOfActions = (res: any) => {
     types: [],
     valencies: [],
   };
-  res.body.should.not.empty;
-  res.body.should.be.a("array");
-  res.body.should.have.lengthOf.above(0);
-  res.body[0].should.have.keys(Object.keys(actionExample));
-  res.body[0].id.should.not.empty;
+  expect(res.body).toBeTruthy();
+  expect(res.body.constructor.name).toEqual("Array");
+  expect(res.body.length).toBeGreaterThan(0);
+  expect(Object.keys(res.body[0])).toEqual(Object.keys(actionExample));
+  expect(res.body[0].id).toBeTruthy();
 };
 
 describe("Actions getMore", function () {

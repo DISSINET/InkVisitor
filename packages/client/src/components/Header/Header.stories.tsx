@@ -3,24 +3,44 @@ import { Header, Button } from "components";
 
 export default {
   title: "Header",
+  component: Header,
   parameters: {
     info: { inline: true },
   },
+  argTypes: {
+    color: {
+      options: ["primary", "info", "success", "danger", "warning", "black"],
+      control: { type: "select" },
+    },
+    left: {
+      control: false,
+    },
+    right: {
+      control: false,
+    },
+  },
 };
 
-export const DefaultHeader = () => {
-  return <Header color="primary" />;
+export const DefaultHeader = ({ ...args }) => {
+  return <Header {...args} />;
 };
 
-export const LeftButtonContentHeader = () => {
-  return (
-    <Header left={<Button label="button on the left side" color="success" />} />
-  );
-};
-
-export const LeftLabelContentHeader = () => {
+export const LeftButtonContentHeader = ({ ...args }) => {
   return (
     <Header
+      {...args}
+      left={<Button label="button on the left side" color="success" />}
+    />
+  );
+};
+LeftButtonContentHeader.args = {
+  color: "info",
+};
+
+export const LeftLabelContentHeader = ({ ...args }) => {
+  return (
+    <Header
+      {...args}
       left={
         <div>
           <h1>h1 - Header title</h1>
@@ -35,28 +55,32 @@ export const LeftLabelContentHeader = () => {
   );
 };
 
-export const RightSimpleContentHeader = () => {
+export const RightSimpleContentHeader = ({ ...args }) => {
   return (
     <Header
+      {...args}
       right={<Button color="danger" label="button on the right side" />}
     />
   );
 };
-export const RightAndLeftSimpleContentHeader = () => {
+export const RightAndLeftSimpleContentHeader = ({ ...args }) => {
   return (
     <Header
-      color="info"
-      // height={100}
+      {...args}
       paddingY={40}
       left={<div className="text-5xl">header</div>}
       right={<Button label="button on the right side" inverted />}
     />
   );
 };
+RightAndLeftSimpleContentHeader.args = {
+  color: "info",
+};
 
-export const RightAndLeftTextContentHeader = () => {
+export const RightAndLeftTextContentHeader = ({ ...args }) => {
   return (
     <Header
+      {...args}
       left={<div className="text-5xl">very very long and big header</div>}
       right={<div className="text-sm">logged as admin</div>}
     />
