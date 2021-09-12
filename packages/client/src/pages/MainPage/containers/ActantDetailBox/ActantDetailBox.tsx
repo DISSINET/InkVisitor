@@ -32,30 +32,18 @@ import {
 import { useHistory, useLocation } from "react-router-dom";
 import api from "api";
 import { useMutation, useQuery, useQueryClient } from "react-query";
-import {
-  IActant,
-  IOption,
-  IResponseStatement,
-  IStatement,
-} from "@shared/types";
+import { IResponseStatement, IStatement } from "@shared/types";
 import {
   FaEdit,
   FaPlus,
-  FaUnlink,
   FaTrashAlt,
   FaStepBackward,
   FaStepForward,
   FaRecycle,
 } from "react-icons/fa";
-import {
-  ActantTag,
-  ActionDropdown,
-  ActantSuggester,
-  ElvlToggle,
-  CertaintyToggle,
-} from "..";
+import { ActantTag } from "..";
 
-import { CMetaStatement, CStatementActant } from "constructors";
+import { CMetaStatement } from "constructors";
 import { findPositionInStatement } from "utils";
 import { ActantDetailMetaTableRow } from "./ActantDetailMetaTableRow/ActantDetailMetaTableRow";
 import {
@@ -64,6 +52,7 @@ import {
   languageDict,
   entitiesDict,
 } from "@shared/dictionaries";
+import { ActantType, Position } from "@shared/enums";
 import { composeWithDevTools } from "redux-devtools-extension";
 import { toast } from "react-toastify";
 
@@ -80,12 +69,7 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
 
   const queryClient = useQueryClient();
 
-  const {
-    status,
-    data: actant,
-    error,
-    isFetching,
-  } = useQuery(
+  const { status, data: actant, error, isFetching } = useQuery(
     ["actant", actantId],
     async () => {
       const res = await api.detailGet(actantId);
@@ -109,11 +93,11 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
   const actantMode = useMemo(() => {
     const actantClass = actant?.class;
     if (actantClass) {
-      if (actantClass === "A") {
+      if (actantClass === ActantType.Action) {
         return "action";
-      } else if (actantClass === "T") {
+      } else if (actantClass === ActantType.Territory) {
         return "territory";
-      } else if (actantClass === "R") {
+      } else if (actantClass === ActantType.Resource) {
         return "resource";
       }
     }
@@ -143,8 +127,12 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
       const sorteMetaStatements = [...actant.metaStatements];
       sorteMetaStatements.sort(
         (s1: IResponseStatement, s2: IResponseStatement) => {
-          const typeSActant1 = s1.data.actants.find((a) => a.position == "a1");
-          const typeSActant2 = s2.data.actants.find((a) => a.position == "a1");
+          const typeSActant1 = s1.data.actants.find(
+            (a) => a.position == Position.A1
+          );
+          const typeSActant2 = s2.data.actants.find(
+            (a) => a.position == Position.A1
+          );
           const typeActant1 = typeSActant1
             ? s1.actants.find((a) => a.id === typeSActant1.actant)
             : false;
