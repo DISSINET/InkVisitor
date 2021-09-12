@@ -35,12 +35,7 @@ export const ActantSuggester: React.FC<ActantSuggesterI> = ({
   const territoryId = hashParams.territory;
 
   // territory query
-  const {
-    status,
-    data: territoryActants,
-    error,
-    isFetching,
-  } = useQuery(
+  const { status, data: territoryActants, error, isFetching } = useQuery(
     ["territory", "suggesters", territoryId],
     async () => {
       const res = await api.actantIdsInTerritory(territoryId);
@@ -144,6 +139,7 @@ export const ActantSuggester: React.FC<ActantSuggesterI> = ({
     const newActant = CActant(newCreated.category, newCreated.label);
     actantsCreateMutation.mutate(newActant);
   };
+
   const handlePick = (newPicked: SuggestionI) => {
     onSelected(newPicked.id);
     handleClean();
