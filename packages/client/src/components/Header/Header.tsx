@@ -7,7 +7,7 @@ import { StyledHeader, TextLeft, TextRight } from "./HeaderStyles";
 interface HeaderProps {
   paddingX?: number;
   paddingY?: number;
-  height?: number | "auto";
+  height?: number;
   left?: JSX.Element;
   right?: JSX.Element;
   color?: typeof Colors[number];

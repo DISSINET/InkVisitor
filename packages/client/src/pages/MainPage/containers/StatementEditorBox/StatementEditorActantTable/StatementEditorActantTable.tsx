@@ -115,7 +115,8 @@ export const StatementEditorActantTable: React.FC<StatementEditorActantTable> =
                     key="d"
                     tooltip="unlink actant"
                     icon={<FaUnlink />}
-                    color="danger"
+                    color="plain"
+                    inverted={true}
                     onClick={() => {
                       updateActant(sActant.id, {
                         actant: "",
@@ -194,7 +195,8 @@ export const StatementEditorActantTable: React.FC<StatementEditorActantTable> =
             <Button
               key="d"
               icon={<FaTrashAlt />}
-              color="danger"
+              color="plain"
+              inverted={true}
               tooltip="remove actant row"
               onClick={() => {
                 removeActant(row.values.data.sActant.id);
@@ -211,7 +213,8 @@ export const StatementEditorActantTable: React.FC<StatementEditorActantTable> =
               <Button
                 key="a"
                 icon={<FaPlus />}
-                color="primary"
+                color="plain"
+                inverted={true}
                 tooltip="add new prop"
                 onClick={() => {
                   addProp(propOriginId);

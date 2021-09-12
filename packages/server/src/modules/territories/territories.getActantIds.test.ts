@@ -13,24 +13,25 @@ import { ActantType } from "@shared/enums";
 describe("Territories getActantIds", () => {
   let db: Db;
   const baseStatementData: IStatement = {
-    class: ActantType.Statement,
     id: "",
+    class: ActantType.Statement,
     label: "",
+    detail: "",
+    status: "0",
+    language: "",
+    notes: [],
     data: {
-      action: "",
-      certainty: "",
-      elvl: "",
+      actions: [],
       modality: "",
-      note: "",
-      props: [],
-      references: [],
-      tags: [],
+      text: "",
       territory: {
         id: "",
         order: 0,
       },
-      text: "",
       actants: [],
+      props: [],
+      references: [],
+      tags: [],
     },
   };
   beforeAll(async () => {
@@ -46,25 +47,27 @@ describe("Territories getActantIds", () => {
     await db.close();
   });
 
+  // TODO THERE WAS MORE TESTS LIKE THIS>>>WHERE ARE THEY
   describe("one territory, two linked statement via references.resource and tags at once", () => {
     it("should return empty array", async (done) => {
       const territory = new Territory(undefined);
       await territory.save(db.connection);
 
-      // first statement linked via references array and tags
+      // statements linked by tag/reference and territory - 3 linked actants
       const statementData1: IStatement = JSON.parse(
         JSON.stringify(baseStatementData)
       );
-      statementData1.data.tags = [territory.id];
+      statementData1.data.territory.id = territory.id;
+      statementData1.data.tags = ["tagid"];
       statementData1.data.references = [
         {
           id: "",
           part: "",
-          resource: territory.id,
+          resource: "refid",
           type: "",
         },
       ];
-      // second statement is the same
+      // second statement is the same - should not duplicate ids
       const statementData2: IStatement = JSON.parse(
         JSON.stringify(statementData1)
       );
@@ -80,10 +83,8 @@ describe("Territories getActantIds", () => {
         .expect(200)
         .expect((res: Request) => {
           expect(res.body).not.toBeNull();
-          if (res.body) {
-            expect(res.body.constructor.name).toEqual("Array");
-            expect(res.body).toHaveLength(2);
-          }
+          expect(res.body?.constructor.name).toEqual("Array");
+          expect(res.body).toHaveLength(3);
         });
 
       done();

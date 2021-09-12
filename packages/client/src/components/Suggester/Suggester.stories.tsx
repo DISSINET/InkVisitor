@@ -1,13 +1,24 @@
 import React, { useState } from "react";
 import { Suggester, Tag, Button } from "components";
-import { SuggestionI } from "./Suggester";
-
 import { Entities, EntityKeys } from "types";
-
-import { storiesOf } from "@storybook/react";
-import { withState } from "@dump247/storybook-state";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
+import { withReactContext } from "storybook-react-context";
+
+import { SuggestionI } from "./Suggester";
+
+export default {
+  title: "Suggester",
+  decorators: [withReactContext],
+  parameters: {
+    info: { inline: true },
+    initialState: {
+      typed: "",
+      entityType: Entities["P"],
+      suggestions: [],
+    },
+  },
+};
 
 interface State {
   typed: string;
@@ -121,83 +132,83 @@ const categoriesOptions = Object.keys(Entities).map((ek) => ({
   label: Entities[ek].label,
 }));
 
-storiesOf("Suggester", module).add(
-  "SimpleSuggester",
-  withState(state)(({ store }) => {
-    const { typed, entityType, suggestions } = store.state;
-    return (
-      <DndProvider backend={HTML5Backend}>
-        <Suggester
-          typed={typed}
-          placeholder="find a person, location or an event"
-          category={entityType.id}
-          categories={categoriesOptions}
-          suggestions={suggestions}
-          onType={(newTyped: string) => {
-            store.set({
-              typed: newTyped,
-              suggestions: filterSuggestions(entityType, newTyped),
-            });
-          }}
-          onChangeCategory={(newEntityTypeId: keyof typeof Entities) => {
-            const newEntityType = Entities[newEntityTypeId];
-            store.set({
-              entityType: newEntityType,
-              suggestions: filterSuggestions(newEntityType, typed),
-            });
-          }}
-          onPick={(suggestion: SuggestionI) => {
-            alert("suggestion " + suggestion.id + " picked");
-          }}
-          onCreate={(created: SuggestionI) => {
-            alert(
-              "new node " + created.category + ": " + created.label + " created"
-            );
-          }}
-          onDrop={(item: {}) => {}}
-        />
-      </DndProvider>
-    );
-  })
-);
+export const SimpleSuggester = (
+  _: any,
+  { context: [state, dispatch] }: any
+) => {
+  const { typed, entityType, suggestions } = state;
+  return (
+    <DndProvider backend={HTML5Backend}>
+      <Suggester
+        typed={typed}
+        placeholder="find a person, location or an event"
+        category={entityType.id}
+        categories={categoriesOptions}
+        suggestions={suggestions}
+        onType={(newTyped: string) => {
+          dispatch({
+            typed: newTyped,
+            suggestions: filterSuggestions(entityType, newTyped),
+          });
+        }}
+        onChangeCategory={(newEntityTypeId: keyof typeof Entities) => {
+          const newEntityType = Entities[newEntityTypeId];
+          dispatch({
+            entityType: newEntityType,
+            suggestions: filterSuggestions(newEntityType, typed),
+          });
+        }}
+        onPick={(suggestion: SuggestionI) => {
+          alert("suggestion " + suggestion.id + " picked");
+        }}
+        onCreate={(created: SuggestionI) => {
+          alert(
+            "new node " + created.category + ": " + created.label + " created"
+          );
+        }}
+        onDrop={(item: {}) => {}}
+      />
+    </DndProvider>
+  );
+};
 
-storiesOf("Suggester", module).add(
-  "Categories with margin top",
-  withState(state)(({ store }) => {
-    const { typed, entityType, suggestions } = store.state;
-    return (
-      <DndProvider backend={HTML5Backend}>
-        <Suggester
-          marginTop
-          typed={typed}
-          placeholder="find a person, location or an event"
-          category={entityType.id}
-          categories={categoriesOptions}
-          suggestions={suggestions}
-          onType={(newTyped: string) => {
-            store.set({
-              typed: newTyped,
-              suggestions: filterSuggestions(entityType, newTyped),
-            });
-          }}
-          onChangeCategory={(newEntityTypeId: keyof typeof Entities) => {
-            const newEntityType = Entities[newEntityTypeId];
-            store.set({
-              entityType: newEntityType,
-              suggestions: filterSuggestions(newEntityType, typed),
-            });
-          }}
-          onPick={(suggestion: SuggestionI) => {
-            alert("suggestion " + suggestion.id + " picked");
-          }}
-          onCreate={(created: SuggestionI) => {
-            alert(
-              "new node " + created.category + ": " + created.label + " created"
-            );
-          }}
-          onDrop={(item: {}) => {}}
-        />
-      </DndProvider>
-    );
-  })
-);
+export const SuggesterCategoriesMarginTop = (
+  _: any,
+  { context: [state, dispatch] }: any
+) => {
+  const { typed, entityType, suggestions } = state;
+  return (
+    <DndProvider backend={HTML5Backend}>
+      <Suggester
+        marginTop
+        typed={typed}
+        placeholder="find a person, location or an event"
+        category={entityType.id}
+        categories={categoriesOptions}
+        suggestions={suggestions}
+        onType={(newTyped: string) => {
+          dispatch({
+            typed: newTyped,
+            suggestions: filterSuggestions(entityType, newTyped),
+          });
+        }}
+        onChangeCategory={(newEntityTypeId: keyof typeof Entities) => {
+          const newEntityType = Entities[newEntityTypeId];
+          dispatch({
+            entityType: newEntityType,
+            suggestions: filterSuggestions(newEntityType, typed),
+          });
+        }}
+        onPick={(suggestion: SuggestionI) => {
+          alert("suggestion " + suggestion.id + " picked");
+        }}
+        onCreate={(created: SuggestionI) => {
+          alert(
+            "new node " + created.category + ": " + created.label + " created"
+          );
+        }}
+        onDrop={(item: {}) => {}}
+      />
+    </DndProvider>
+  );
+};

@@ -441,7 +441,8 @@ export const StatementEditorBox: React.FC = () => {
                   <Button
                     key="d"
                     icon={<FaUnlink />}
-                    color="danger"
+                    color="plain"
+                    inverted={true}
                     tooltip="unlink actant"
                     onClick={() => {
                       updateProp(prop.id, {
@@ -499,7 +500,8 @@ export const StatementEditorBox: React.FC = () => {
                     key="d"
                     icon={<FaUnlink />}
                     tooltip="unlink actant"
-                    color="danger"
+                    color="plain"
+                    inverted={true}
                     onClick={() => {
                       updateProp(prop.id, {
                         value: {
@@ -552,7 +554,8 @@ export const StatementEditorBox: React.FC = () => {
                 key="add"
                 icon={<FaPlus />}
                 tooltip="add second level prop"
-                color="primary"
+                color="plain"
+                inverted={true}
                 onClick={() => {
                   addProp(prop.id);
                 }}
@@ -562,7 +565,8 @@ export const StatementEditorBox: React.FC = () => {
               key="delete"
               icon={<FaTrashAlt />}
               tooltip="remove prop row"
-              color="danger"
+              color="plain"
+              inverted={true}
               onClick={() => {
                 removeProp(prop.id);
               }}
@@ -572,7 +576,8 @@ export const StatementEditorBox: React.FC = () => {
               inverted
               icon={<FaCaretUp />}
               tooltip="move prop up"
-              color="info"
+              inverted={true}
+              color="plain"
               onClick={() => {
                 movePropUp(prop.id);
               }}
@@ -582,7 +587,7 @@ export const StatementEditorBox: React.FC = () => {
               inverted
               icon={<FaCaretDown />}
               tooltip="move prop down"
-              color="info"
+              color="plain"
               onClick={() => {
                 movePropDown(prop.id);
               }}
@@ -601,11 +606,10 @@ export const StatementEditorBox: React.FC = () => {
             <StyledEditorSectionHeader>Summary</StyledEditorSectionHeader>
             <StyledEditorSectionContent>
               <div>
-                <StyledListHeaderColumn>Action</StyledListHeaderColumn>
                 <div>
-                  <StyledListHeaderColumn>Text</StyledListHeaderColumn>
                   <Input
                     type="textarea"
+                    width="full"
                     onChangeFn={(newValue: string) => {
                       if (newValue !== statement.data.text) {
                         const newData = {
@@ -704,7 +708,8 @@ export const StatementEditorBox: React.FC = () => {
                                   key="d"
                                   tooltip="unlink actant"
                                   icon={<FaUnlink />}
-                                  color="danger"
+                                  inverted={true}
+                                  color="plain"
                                   onClick={() => {
                                     updateReference(reference.id, {
                                       resource: "",
@@ -751,8 +756,9 @@ export const StatementEditorBox: React.FC = () => {
                           <Button
                             key="delete"
                             tooltip="remove reference row"
+                            inverted={true}
                             icon={<FaTrashAlt />}
-                            color="danger"
+                            color="plain"
                             onClick={() => {
                               removeReference(reference.id);
                             }}
@@ -789,7 +795,8 @@ export const StatementEditorBox: React.FC = () => {
                               key="d"
                               tooltip="unlink actant from tags"
                               icon={<FaUnlink />}
-                              color="danger"
+                              color="plain"
+                              inverted={true}
                               onClick={() => {
                                 removeTag(tag);
                               }}

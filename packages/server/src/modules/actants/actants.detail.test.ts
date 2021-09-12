@@ -1,4 +1,4 @@
-import { clean, expect, testErroneousResponse } from "@modules/common.test";
+import { clean, testErroneousResponse } from "@modules/common.test";
 import { ActantDoesNotExits, BadParams } from "@shared/types/errors";
 import request from "supertest";
 import { supertestConfig } from "..";
@@ -50,9 +50,8 @@ describe("Actants detail", function () {
         .set("authorization", "Bearer " + supertestConfig.token)
         .expect(200)
         .expect((res) => {
-          res.body.should.not.empty;
-          res.body.should.be.a("object");
-          expect(res.body.id).eq(statementRandomId);
+          expect(typeof res.body).toEqual("object");
+          expect(res.body.id).toEqual(statementRandomId);
         });
 
       await clean(db);

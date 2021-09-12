@@ -8,7 +8,7 @@ import {
 } from "react-dnd";
 const queryString = require("query-string");
 
-import { DragItem, ItemTypes } from "types";
+import { DragItem, ItemTypes, Entities } from "types";
 import {
   StyledTagWrapper,
   StyledEntityTag,
@@ -136,7 +136,9 @@ export const Tag: React.FC<TagProps> = ({
   drag(drop(ref));
 
   const renderEntityTag = () => (
-    <StyledEntityTag color={color}>{category}</StyledEntityTag>
+    <StyledEntityTag color={Entities[category].color}>
+      {category}
+    </StyledEntityTag>
   );
   const renderButton = () => <ButtonWrapper>{button}</ButtonWrapper>;
 

@@ -9,10 +9,29 @@ import { Tag, Button } from "components";
 
 const queryClient = new QueryClient();
 
+const entityIds: string[] = Object.entries(Entities).map((e) => e[1].id);
+
 export default {
   title: "Tag",
   parameters: {
     info: { inline: true },
+  },
+  args: {
+    category: Entities["T"].id,
+    borderStyle: "solid",
+    label: "",
+    detail: "",
+    invertedLabel: false,
+    short: false,
+    fullWidth: false,
+    enableTooltip: false,
+  },
+  argTypes: {
+    category: { options: entityIds, control: { type: "select" } },
+    borderStyle: {
+      options: ["solid", "dashed", "dotted"],
+      control: { type: "radio" },
+    },
   },
   decorators: [
     (Story: Story) => (
@@ -25,104 +44,27 @@ export default {
   ],
 };
 
-export const DefaultTag = () => {
-  return (
-    <Tag propId="0" category={Entities["T"].id} color={Entities["T"].color} />
-  );
+export const DefaultTag = ({ ...args }) => {
+  return <Tag {...args} propId="0" />;
 };
 
-export const TagWithLabel = () => {
+export const TagWithLabelAndButton = ({ ...args }) => {
   return (
-    <Tag
-      propId="0"
-      category={Entities["R"].id}
-      color={Entities["R"].color}
-      label="entity label"
-    />
+    <Tag {...args} propId="0" button={<Button label="x" color="danger" />} />
   );
 };
-
-export const ShortTagWithLabel = () => {
-  return (
-    <Tag
-      propId="0"
-      category={Entities["T"].id}
-      color={Entities["T"].color}
-      label="entity label"
-      short
-    />
-  );
+TagWithLabelAndButton.args = {
+  category: Entities["E"].id,
+  label: "entity label",
 };
 
-export const TagWithInvertedLabel = () => {
+export const TagWithVeryLongLabel = ({ ...args }) => {
   return (
-    <Tag
-      propId="0"
-      category={Entities["S"].id}
-      color={Entities["S"].color}
-      label="entity label"
-      invertedLabel
-    />
+    <Tag {...args} propId="0" button={<Button label="x" color="danger" />} />
   );
 };
-
-export const TagWithLabelIndefinitive = () => {
-  return (
-    <Tag
-      propId="0"
-      category={Entities["R"].id}
-      color={Entities["R"].color}
-      label="entity label"
-      borderStyle={"dashed"}
-    />
-  );
-};
-
-export const TagWithInvertedLabelIndefinitive = () => {
-  return (
-    <Tag
-      propId="0"
-      category={Entities["R"].id}
-      color={Entities["R"].color}
-      label="entity label"
-      borderStyle={"dotted"}
-      invertedLabel
-    />
-  );
-};
-
-export const TagWithLabelHypothetical = () => {
-  return (
-    <Tag
-      propId="0"
-      category={Entities["S"].id}
-      color={Entities["S"].color}
-      label="entity label"
-      borderStyle={"dotted"}
-    />
-  );
-};
-
-export const TagWithLabelAndButton = () => {
-  return (
-    <Tag
-      propId="0"
-      category={Entities["E"].id}
-      color={Entities["E"].color}
-      label="entity label"
-      button={<Button label="x" color="danger" />}
-    />
-  );
-};
-
-export const TagWithVeryLongLabel = () => {
-  return (
-    <Tag
-      propId="0"
-      category={Entities["P"].id}
-      color={Entities["P"].color}
-      label="entity label entity label entity label"
-      button={<Button label="x" color="danger" />}
-    />
-  );
+TagWithVeryLongLabel.args = {
+  category: Entities["P"].id,
+  label: "entity label entity label entity label",
+  enableTooltip: true,
 };
