@@ -65,7 +65,7 @@ describe("Actants search", function () {
         actant: actantData.id,
         position: "s",
         mode: "1",
-        elvl: "1",
+        elvl: (Elvl = Elvl["Textual"]),
         certainty: "1",
       },
       {
@@ -73,7 +73,7 @@ describe("Actants search", function () {
         actant: linkedActantData.id,
         position: "s",
         mode: "1",
-        elvl: "1",
+        elvl: (Elvl = Elvl["Textual"]),
         certainty: "1",
       },
     ];
@@ -81,7 +81,7 @@ describe("Actants search", function () {
       {
         action: actionData.id,
         certainty: "1",
-        elvl: "1",
+        elvl: (Elvl = Elvl["Textual"]),
         id: "",
       },
     ];

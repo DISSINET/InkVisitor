@@ -9,14 +9,13 @@ import {
 import { r as rethink, Connection, WriteResult } from "rethinkdb-ts";
 import { IDbModel } from "./common";
 import { userRoleDict } from "@shared/dictionaries";
-
-const userRoleValues = userRoleDict.map((i) => i.label);
+import { UserRoles } from "@shared/enums";
 
 export default class User implements IDbModel, IUser {
   id: string;
   email: string;
   name: string;
-  role: typeof userRoleValues[number];
+  role: UserRoles;
   options: IUserOptions;
   bookmarks: IBookmarkFolder[];
   storedTerritories: IStoredTerritory[];
