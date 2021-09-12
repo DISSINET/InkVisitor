@@ -18,6 +18,11 @@ export const InputWrapper = styled.div<InputWrapper>`
   input {
     padding-right: ${space4};
   }
+  input[type="text"],
+  select {
+    border-left-width: 0;
+    border-right-width: 0;
+  }
 `;
 
 export const SuggesterButton = styled.div``;
