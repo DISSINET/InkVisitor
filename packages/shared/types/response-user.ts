@@ -2,16 +2,14 @@
  * type of the /users endpoint response
  */
 
-import { IResponseActant, IBookmarkFolder, IResponseBookmarkFolder } from "./";
-import { userRoleDict } from "./../dictionaries";
-
-const userRoleValues = userRoleDict.map((i) => i.label);
+import { IResponseActant, IResponseBookmarkFolder } from "./";
+import { UserRoles } from "./../enums";
 
 export interface IResponseUser {
   id: string;
   email: string;
   name: string;
-  role: typeof userRoleValues[number];
+  role: UserRoles;
   bookmarks: IResponseBookmarkFolder[];
   storedTerritories: IResponseStoredTerritory[];
 }

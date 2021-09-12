@@ -1,66 +1,68 @@
+import { Mood } from "../enums";
+
 export const moodDict = [
   {
-    value: "1",
+    value: Mood.Indication,
     label: "indication",
     info: "",
   },
   {
-    value: "2",
+    value: Mood.Question,
     label: "question",
     info: "",
   },
   {
-    value: "3",
+    value: Mood.Condition,
     label: "condition",
     info: "",
   },
   {
-    value: "4",
+    value: Mood.Possibility,
     label: "possibility",
     info: "",
   },
   {
-    value: "5",
+    value: Mood.Probability,
     label: "probability",
     info: "",
   },
   {
-    value: "6",
+    value: Mood.Certitude,
     label: "certitude",
     info: "",
   },
   {
-    value: "7",
+    value: Mood.Wish,
     label: "wish",
     info: "",
   },
   {
-    value: "8",
+    value: Mood.Order,
     label: "order",
     info: "",
   },
   {
-    value: "9",
+    value: Mood.Licence,
     label: "licence",
     info: "",
   },
   {
-    value: "10",
+    value: Mood.Ability,
     label: "ability",
     info: "",
   },
   {
-    value: "11",
+    value: Mood.Belief,
     label: "belief",
     info: "",
   },
   {
-    value: "12",
+    value: Mood.Allegation,
     label: "allegation",
     info: "",
   },
   {
-    value: "13",
+    value: Mood.Semblance,
     label: "semblance",
     info: "",
   },

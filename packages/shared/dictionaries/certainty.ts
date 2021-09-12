@@ -1,32 +1,34 @@
+import { Certainty } from "../enums";
+
 export const certaintyDict = [
-    {
-        value: "1",
-        label: "certain",
-        info: "",
-    },
-    {
-        value: "2",
-        label: "almost certain",
-        info: "",
-    },
-    {
-        value: "3",
-        label: "probable",
-        info: "",
-    },
-    {
-        value: "4",
-        label: "possible",
-        info: "",
-    },
-    {
-        value: "5",
-        label: "dubious",
-        info: "",
-    },
-    {
-        value: "6",
-        label: "false",
-        info: "",
-    },
+  {
+    value: Certainty.Certain,
+    label: "certain",
+    info: "",
+  },
+  {
+    value: Certainty.AlmostCertain,
+    label: "almost certain",
+    info: "",
+  },
+  {
+    value: Certainty.Probable,
+    label: "probable",
+    info: "",
+  },
+  {
+    value: Certainty.Possible,
+    label: "possible",
+    info: "",
+  },
+  {
+    value: Certainty.Dubious,
+    label: "dubious",
+    info: "",
+  },
+  {
+    value: Certainty.False,
+    label: "false",
+    info: "",
+  },
 ];

@@ -1,56 +1,58 @@
+import { ActantType } from "../enums";
+
 export const entitiesDict = [
   {
-    value: "A",
+    value: ActantType.Action,
     label: "action",
     info: "",
   },
   {
-    value: "T",
+    value: ActantType.Territory,
     label: "territory",
     info: "",
   },
   {
-    value: "S",
+    value: ActantType.Statement,
     label: "statement",
     info: "",
   },
   {
-    value: "R",
+    value: ActantType.Resource,
     label: "resource",
     info: "",
   },
   {
-    value: "P",
+    value: ActantType.Person,
     label: "person",
     info: "",
   },
   {
-    value: "G",
+    value: ActantType.Group,
     label: "group",
     info: "",
   },
   {
-    value: "O",
+    value: ActantType.Object,
     label: "object",
     info: "",
   },
   {
-    value: "C",
+    value: ActantType.Concept,
     label: "concept",
     info: "",
   },
   {
-    value: "L",
+    value: ActantType.Location,
     label: "location",
     info: "",
   },
   {
-    value: "V",
+    value: ActantType.Value,
     label: "value",
     info: "",
   },
   {
-    value: "E",
+    value: ActantType.Event,
     label: "event",
     info: "",
   },

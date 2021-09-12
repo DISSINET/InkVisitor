@@ -1,4 +1,4 @@
-import { ActantType, ActantStatus, ActantLogicalType } from "../enums";
+import { ActantType, ActantStatus } from "../enums";
 
 export interface IActant {
   id: string;
