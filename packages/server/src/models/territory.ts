@@ -61,7 +61,7 @@ class Territory extends Actant implements ITerritory {
   data = new TerritoryData({});
   label: string = "";
   detail: string = "";
-  status: ActantStatus = ActantStatus["Pending"];
+  status: ActantStatus = ActantStatus.Pending;
   language: string[] = ["eng"];
   notes: string[] = [];
 

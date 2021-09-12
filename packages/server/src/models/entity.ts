@@ -9,7 +9,7 @@ import { IEntity } from "@shared/types/entity";
 import Actant from "./actant";
 
 class EntityData implements IModel {
-  logicalType: EntityLogicalType = EntityLogicalType["Definite"];
+  logicalType: EntityLogicalType = EntityLogicalType.Definite;
   language: string[] = ["eng"];
   constructor(data: UnknownObject) {
     if (!data) {
@@ -31,7 +31,7 @@ class Entity extends Actant implements IEntity {
 
   label: string = "";
   detail: string = "";
-  status: ActantStatus = ActantStatus["Approved"];
+  status: ActantStatus = ActantStatus.Pending;
   language: string[] = ["eng"];
   notes: string[] = [];
 
