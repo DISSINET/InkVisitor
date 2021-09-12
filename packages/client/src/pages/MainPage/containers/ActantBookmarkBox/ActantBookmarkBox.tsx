@@ -298,7 +298,7 @@ export const ActantBookmarkBox: React.FC = () => {
             const empty = bookmarkFolder.actants.length === 0;
 
             return (
-              <StyledFolderWrapper key={bookmarkFolder.name + Math.random()}>
+              <StyledFolderWrapper key={bookmarkFolder.name}>
                 <StyledFolderHeader>
                   <StyledFolderWrapperOpenArea
                     onClick={() => {
@@ -396,7 +396,7 @@ export const ActantBookmarkBox: React.FC = () => {
       )}
       <Loader show={isFetching} />
       {/* edit modal */}
-      <Modal key="edit-modal" showModal={!!editingFolder} width="thin">
+      <Modal key="new-bookmar-modal" showModal={!!editingFolder} width="thin">
         <ModalHeader title="Bookmark Folder" />
         <ModalContent>
           <Input
@@ -435,7 +435,7 @@ export const ActantBookmarkBox: React.FC = () => {
       </Modal>
 
       {/* create modal */}
-      <Modal key="create-modal" showModal={creatingFolder} width="thin">
+      <Modal key="create-modal" showModal={creatingFolder == true}>
         <ModalHeader title="Bookmark Folder" />
         <ModalContent>
           <Input
