@@ -27,12 +27,12 @@ import { InternalServerError } from "@shared/types/errors";
 class StatementActant implements IStatementActant, IModel {
   id = "";
   actant = "";
-  position: Position = "s";
-  elvl: Elvl = "1";
-  logic: Logic = "1";
-  virtuality: Virtuality = "1";
-  partitivity: Partitivity = "1";
-  operator: Operator = "a";
+  position: Position = Position["Subject"];
+  elvl: Elvl = Elvl["Textual"];
+  logic: Logic = Logic["Positive"];
+  virtuality: Virtuality = Virtuality["Reality"];
+  partitivity: Partitivity = Partitivity["Unison"];
+  operator: Operator = Operator["And"];
   bundleStart: boolean = false;
   bundleEnd: boolean = false;
 
@@ -104,12 +104,12 @@ export class StatementTerritory {
 export class StatementAction {
   id = "";
   action: string = "";
-  elvl: Elvl = "1";
-  certainty: Certainty = "1";
-  logic: Logic = "1";
+  elvl: Elvl = Elvl["Textual"];
+  certainty: Certainty = Certainty["Certain"];
+  logic: Logic = Logic["Positive"];
   mood: Mood[] = [];
-  moodvariant: MoodVariant = "1";
-  operator: Operator = "a";
+  moodvariant: MoodVariant = MoodVariant["Realis"];
+  operator: Operator = Operator["And"];
   bundleStart: boolean = false;
   bundleEnd: boolean = false;
 
@@ -138,12 +138,12 @@ export class StatementProp implements IStatementProp, IModel {
   id = "";
 
   origin = "";
-  elvl: Elvl = "1";
-  certainty: Certainty = "1";
-  logic: Logic = "1";
+  elvl: Elvl = Elvl["Textual"];
+  certainty: Certainty = Certainty["Certain"];
+  logic: Logic = Logic["Positive"];
   mood: Mood[] = [];
-  moodvariant: MoodVariant = "1";
-  operator: Operator = "a";
+  moodvariant: MoodVariant = MoodVariant["Realis"];
+  operator: Operator = Operator["And"];
   bundleStart: boolean = false;
   bundleEnd: boolean = false;
 
@@ -155,10 +155,10 @@ export class StatementProp implements IStatementProp, IModel {
     partitivity: Partitivity;
   } = {
     id: "",
-    elvl: "1",
-    logic: "1",
-    virtuality: "1",
-    partitivity: "1",
+    elvl: Elvl["Textual"],
+    logic: Logic["Positive"],
+    virtuality: Virtuality["Reality"],
+    partitivity: Partitivity["Unison"],
   };
   value: {
     id: string;
@@ -168,10 +168,10 @@ export class StatementProp implements IStatementProp, IModel {
     partitivity: Partitivity;
   } = {
     id: "",
-    elvl: "1",
-    logic: "1",
-    virtuality: "1",
-    partitivity: "1",
+    elvl: Elvl["Textual"],
+    logic: Logic["Positive"],
+    virtuality: Virtuality["Reality"],
+    partitivity: Partitivity["Unison"],
   };
 
   constructor(data: UnknownObject) {
@@ -262,7 +262,7 @@ class Statement extends Actant implements IStatement {
   data = new StatementData({});
   label = "";
   detail: string = "";
-  status: ActantStatus = "0";
+  status: ActantStatus = ActantStatus["Approved"];
   language: string[] = ["eng"];
   notes: string[] = [];
 
