@@ -1,9 +1,11 @@
 # InkVisitor
 
 ## Description
+
 InkVisitor is an open-source browser-based application for the manual entry of complex structured data from textual resources in the humanities and the social sciences. The data are entered in the form of statements, which interconnect entities of various different classes into semantic quadruples (subject, verb, object 1, object 2) following the syntactic structure of texts. InkVisitor serves as a data-entry front-end for [RethinkDB](https://rethinkdb.com/) research databases which then allow for various kinds of quantitative and computational analyses of the data to be performed.
 
 ## Acknowledgements
+
 InkVisitor has been developed in the [Dissident Networks Project (DISSINET)](https://dissinet.cz), a historical and social scientific research project focusing on medieval religious dissidence, inquisition, and inquisitorial records. The development has received substantial funding from the Czech Science Foundation (EXPRO project No. GX19-26975X “Dissident Religious Cultures in Medieval Europe from the Perspective of Social Network Analysis and Geographic Information Systems”) and the European Research Council (ERC Consolidator Grant, project No. 101000442 “Networks of Dissent: Computational Modelling of Dissident and Inquisitorial Cultures in Medieval Europe”).
 
 The lead developer of the application is [Adam Mertel](https://github.com/adammertel/). Other contributors of code include Petr Hanák, Ján Mertel and others. The lead authors of the data model are David Zbíral and Robert L. J. Shaw. Other contributors to the data model and testers include Tomáš Hampejs, Jan Král, Katia Riccardo and others.
@@ -12,6 +14,7 @@ The lead developer of the application is [Adam Mertel](https://github.com/adamme
 ## Data model
 
 ### Purpose
+
 The data model upon which InkVisitor is built is destined to capture complex natural-language data with all their **uncertainties, narrative perspective, and semantic nuance**. It does so in the semantically rich form of **quadruples**, which are an extended form of semantic triples destined to capture, more naturally than triples, the structure of languages with two grammatical objects (e.g., “Mary gave a present to Peter”: subject, verb, object 1, object 2) as well as with chains of statements (e.g., “Mary told Peter – that she would give him a present”) and multiple sentence constituents.
 
 The data model captures not only editorial assessment of **certainty level**, but also the overall perspective in its two key aspects: epistemic level and modality. **Epistemic level** expresses whether a claim is directly in the text, or is an interpretation thereof, or is an inference by and large independent from the text. **Modality** captures whether a given statement of the text is a positive utterance of the state of affairs, a question, a condition, a wish etc.
@@ -21,9 +24,11 @@ While the DISSINET data model has been developed primarily to capture medieval i
 The DISSINET data model represents a unique way to precisely represent textual sources in a deeply structured and interconnected manner.
 
 ### Entity types
+
 A **Statement** is an Entity type which has the purpose of relating other Entities. All statements (as well as all other entities) have unique IDs, and their original order in the text is preserved, thereby allowing to follow the development of an action in the narrative, the interplay of questions and answers, etc.
 
 The other Entity types covered in the data model are:
+
 - **Action type**
 - **Concept**
 - **Person**
@@ -36,9 +41,11 @@ The other Entity types covered in the data model are:
 - **Resource**
 
 ### Properties and their uses
+
 The uses of properties include:
+
 - Modelling adjectives concerning actants.
-- Instantiating Entities to parent types. 
+- Instantiating Entities to parent types.
 - Defining time and place of action (including in fuzzy terms).
 - Recording other adverbials, for example those concerning manner of action, circumstances, causes or consequences of action.
 
@@ -57,7 +64,6 @@ Only admin and editor with edit rights in the parent **Territory** (T) may edit,
 
 To administrate the users rights, admin roles may acces the **administration window**, where they can append new territories to editors and viewers. They can also create new users, change roles, see passwords or delete users. Admin role is not possible to be assigned or deleted through this environment.
 
-
 ## Development
 
 ### Server
@@ -73,8 +79,8 @@ To administrate the users rights, admin roles may acces the **administration win
 - import data
   - `cd ./packages/database`
   - `npm install`
-  - `npm run import:local` to import datasets to the local database (`.env.devel`)
-  - `npm run import:remote` to import datasets to the remote database (`.env.prod`)
+  - `npm run import-local:all` to import datasets to the local database (`.env.devel`)
+  - `npm run import:remote:all` to import datasets to the remote database (`.env.prod`)
 
 ### Client
 
