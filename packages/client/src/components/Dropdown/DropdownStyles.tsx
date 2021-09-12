@@ -32,7 +32,7 @@ export const StyledSelect = styled(Select)`
     width: ${({ width }) => getWidth(width)};
     max-width: 100%;
     min-height: ${({ theme }) => theme.space[10]};
-    border: 2px solid black;
+    border: 2px solid red ${({ theme }) => theme.color["gray"]["400"]};
     border-radius: 0;
     :hover {
       border-color: black;
@@ -54,7 +54,9 @@ export const StyledSelect = styled(Select)`
   }
   .react-select__indicator {
     color: black;
-    padding: 0 0.25rem;
+    svg {
+      height: 18;
+    }
   }
   .react-select__indicator-separator {
     display: none;
@@ -66,6 +68,7 @@ export const StyledSelect = styled(Select)`
     transform: translate(0, -6px);
   }
   .react-select__option {
+    margin: 0;
     :hover {
     }
   }

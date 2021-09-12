@@ -164,7 +164,7 @@ export const StatementEditorAttributes: React.FC<StatementEditorAttributes> = ({
     return (
       <Modal
         key="edit-modal"
-        showModal={showModal}
+        showModal={true}
         disableBgClick={false}
         onClose={() => {
           handleCancelClick();
@@ -300,7 +300,8 @@ export const StatementEditorAttributes: React.FC<StatementEditorAttributes> = ({
             <Button
               key="cancel"
               label="Cancel"
-              color="warning"
+              inverted={true}
+              color="primary"
               onClick={() => {
                 handleCancelClick();
               }}
@@ -322,48 +323,56 @@ export const StatementEditorAttributes: React.FC<StatementEditorAttributes> = ({
 
   return (
     <>
-      {renderModal(modalOpen)}
+      {modalOpen && renderModal(modalOpen)}
 
       <StyledAttributeWrapper>
         <Tooltip
           attributes={[
             <TooltipAttributeRow
               attributeName="elvl"
+              key="elvl"
               value={data.elvl}
               items={elvlDict}
             />,
             <TooltipAttributeRow
               attributeName="logic"
+              key="logic"
               value={data.logic}
               items={logicDict}
             />,
             <TooltipAttributeRow
               attributeName="certainty"
+              key="certainty"
               value={data.certainty}
               items={certaintyDict}
             />,
             <TooltipAttributeRow
               attributeName="mood"
+              key="mood"
               value={data.mood}
               items={moodDict}
             />,
             <TooltipAttributeRow
               attributeName="moodvariant"
+              key="moodvariant"
               value={data.moodvariant}
               items={moodVariantsDict}
             />,
             <TooltipAttributeRow
               attributeName="virtuality"
+              key="virtuality"
               value={data.virtuality}
               items={virtualityDict}
             />,
             <TooltipAttributeRow
               attributeName="partitivity"
+              key="partitivity"
               value={data.partitivity}
               items={partitivityDict}
             />,
             <TooltipAttributeRow
               attributeName="operator"
+              key="operator"
               value={data.operator}
               items={operatorDict}
             />,
@@ -373,7 +382,8 @@ export const StatementEditorAttributes: React.FC<StatementEditorAttributes> = ({
             <Button
               key="settings"
               icon={<MdSettings />}
-              color="primary"
+              inverted={true}
+              color="plain"
               onClick={() => {
                 handleOpenModalClick();
               }}

@@ -100,11 +100,6 @@ export const ItemTypes = {
   ACTANT_ROW: "ACTANT_ROW",
 };
 
-export type ToggleItem = {
-  value: string;
-  label: String | JSX.Element;
-  tooltip?: string;
-};
 export type DragItem = {
   index: number;
   id: string;

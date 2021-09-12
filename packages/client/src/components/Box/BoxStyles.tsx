@@ -18,8 +18,8 @@ interface StyledHead {
   color: string;
 }
 export const StyledHead = styled(animated.div)<StyledHead>`
-  background-color: ${({ theme, color }) => theme.color[color]};
-  color: ${({ theme }) => theme.color["white"]};
+  background-color: ${({ theme, color }) => theme.color["gray"]["300"]};
+  color: ${({ theme }) => theme.color["gray"]["600"]};
   padding: ${space2};
   font-size: ${({ theme }) => theme.fontSize["base"]};
   line-height: 2rem;
@@ -38,7 +38,7 @@ interface StyledContent {
   $isExpanded: boolean;
 }
 export const StyledContent = styled(animated.div)<StyledContent>`
-  background-color: ${({ theme }) => theme.color["white"]};
+  background-color: ${({ theme }) => theme.color["grey"]};
   padding: ${({ theme, $noPadding }) => ($noPadding ? 0 : theme.space[2])};
   display: flex;
   flex-direction: column;
@@ -47,10 +47,10 @@ export const StyledContent = styled(animated.div)<StyledContent>`
   font-size: ${({ theme }) => theme.fontSize["base"]};
 
   border-color: ${({ theme, color, $isExpanded }) =>
-    $isExpanded ? theme.color[color] : theme.color["grey"]};
+    $isExpanded ? theme.color["gray"]["200"] : theme.color["grey"]};
   border-style: ${({ $isExpanded }) => ($isExpanded ? "solid" : "dotted")};
   border-width: ${({ theme, $isExpanded }) =>
-    $isExpanded ? theme.borderWidth[2] : theme.borderWidth[1]};
+    $isExpanded ? theme.borderWidth[4] : theme.borderWidth[1]};
   border-top: none;
 `;
 interface StyledContentAnimationWrap {
@@ -76,5 +76,10 @@ export const StyledVerticalText = styled(animated.p)<StyledVerticalText>`
   font-family: Muni;
   font-weight: ${({ theme }) => theme.fontWeight["bold"]};
   font-size: ${({ theme }) => theme.fontSize["base"]};
-  color: ${({ theme }) => theme.color["white"]};
+  color: ${({ theme }) => theme.color["gray"]["600"]};
+`;
+export const StyledButtonWrap = styled.div`
+  position: absolute;
+  top: ${({ theme }) => theme.space[2]};
+  right: ${({ theme }) => theme.space[2]};
 `;

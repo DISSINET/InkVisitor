@@ -11,6 +11,7 @@ export const StyledTHead = styled.thead`
 export const StyledTh = styled.th`
   text-align: left;
   font-style: italic;
+  color: ${({ theme }) => theme.color["info"]};
   font-weight: ${({ theme }) => theme.fontWeight["light"]};
   padding-bottom: ${({ theme }) => theme.space[1]};
 `;

@@ -110,6 +110,7 @@ export const ActantSearchBox: React.FC = () => {
       <StyledRow>
         <StyledRowHeader>label</StyledRowHeader>
         <Input
+          width={150}
           placeholder="search"
           changeOnType
           onChangeFn={(value: string) => handleChange("label", value)}
@@ -141,6 +142,7 @@ export const ActantSearchBox: React.FC = () => {
                 key="d"
                 icon={<FaUnlink />}
                 color="danger"
+                inverted={true}
                 tooltip="unlink actant"
                 onClick={() => {
                   handleChange("actantId", "");

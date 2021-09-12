@@ -1,5 +1,9 @@
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const { CleanWebpackPlugin } = require("clean-webpack-plugin");
+const createStyledComponentsTransformer = require("typescript-plugin-styled-components")
+  .default;
+const styledComponentsTransformer = createStyledComponentsTransformer();
+
 const path = require("path");
 
 module.exports = {
@@ -22,27 +26,21 @@ module.exports = {
       },
       {
         test: /\.tsx?$/,
-        loader: "ts-loader?configFile=tsconfig.json",
+        loader: "ts-loader",
         options: {
+          getCustomTransformers: () => ({
+            before: [styledComponentsTransformer],
+          }),
           transpileOnly: true,
         },
       },
       {
         test: /\.svg$/,
-        use: [
-          {
-            loader: "svg-url-loader",
-            options: {
-              limit: 10000,
-            },
-          },
-        ],
+        type: "asset/inline",
       },
       {
         test: /\.(woff|woff2|ttf)$/,
-        use: {
-          loader: "url-loader",
-        },
+        type: "asset/inline",
       },
     ],
   },
@@ -53,7 +51,6 @@ module.exports = {
       "@shared": path.resolve(__dirname, "../shared/"),
     },
   },
-  mode: "development",
   plugins: [
     new CleanWebpackPlugin(),
     new HtmlWebpackPlugin({
