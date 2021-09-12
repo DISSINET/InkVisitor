@@ -37,7 +37,7 @@ class Action extends Actant implements IAction {
 
   label: string = "";
   detail: string = "";
-  status: ActantStatus = ActantStatus["Approved"];
+  status: ActantStatus = ActantStatus.Pending;
   language: string[] = ["eng"];
   notes: string[] = [];
 

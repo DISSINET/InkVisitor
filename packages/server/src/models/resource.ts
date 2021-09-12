@@ -1,5 +1,5 @@
 import { fillFlatObject, UnknownObject, IModel } from "./common";
-import { ActantType, ActantStatus } from "@shared/enums";
+import { ActantType, ActantStatus, Language } from "@shared/enums";
 import { IResource } from "@shared/types/resource";
 import Actant from "./actant";
 
@@ -7,6 +7,7 @@ class ResourceData implements IModel {
   content = "";
   link = "";
   type = "";
+  language: Language = Language.English;
 
   constructor(data: UnknownObject) {
     if (!data) {
@@ -29,7 +30,7 @@ class Resource extends Actant implements IResource {
   data = new ResourceData({});
   label: string = "";
   detail: string = "";
-  status: ActantStatus = ActantStatus["Approved"];
+  status: ActantStatus = ActantStatus.Pending;
   language: string[] = ["eng"];
   notes: string[] = [];
 
