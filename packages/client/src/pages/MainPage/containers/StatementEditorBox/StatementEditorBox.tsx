@@ -330,6 +330,15 @@ export const StatementEditorBox: React.FC = () => {
     }
   );
 
+  const updateActantMutation = useMutation(
+    async (changes: object) => await api.actantsUpdate(statementId, changes),
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries(["statement"]);
+      },
+    }
+  );
+
   const updateActionsRefreshListMutation = useMutation(
     async (changes: object) => {
       await api.actantsUpdate(statementId, {
@@ -840,7 +849,7 @@ export const StatementEditorBox: React.FC = () => {
               <MultiInput
                 values={statement.notes}
                 onChange={(newValues: string[]) => {
-                  updateActantsDataMutation.mutate({ notes: newValues });
+                  updateActantMutation.mutate({ notes: newValues });
                 }}
               />
             </StyledEditorSectionContent>
