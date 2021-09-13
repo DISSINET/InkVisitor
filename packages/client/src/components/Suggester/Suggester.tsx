@@ -83,7 +83,7 @@ export const Suggester: React.FC<SuggesterProps> = ({
 
   return (
     <StyledSuggester marginTop={marginTop}>
-      <StyledInputWrapper ref={dropRef} isOver={isOver}>
+      <StyledInputWrapper ref={dropRef} hasButton={allowCreate} isOver={isOver}>
         <Input
           type="select"
           value={category}

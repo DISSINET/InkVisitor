@@ -11,6 +11,7 @@ export const StyledSuggester = styled.div<StyledSuggester>`
 
 interface InputWrapper {
   isOver: boolean;
+  hasButton: boolean;
 }
 export const StyledInputWrapper = styled.div<InputWrapper>`
   display: flex;
@@ -18,15 +19,16 @@ export const StyledInputWrapper = styled.div<InputWrapper>`
   input {
     padding-right: ${space4};
   }
-  input[type="text"],
-  select {
+  input[type="text"] {
     border-left-width: 0;
+    border-right-width: ${({ hasButton }) => (hasButton ? 0 : "")};
+  }
+  select {
     border-right-width: 0;
   }
 `;
-
 export const StyledSuggesterButton = styled.div`
-  /* border: 1px solid black; */
+  border: 1px solid ${({ theme }) => theme.color["primary"]};
 `;
 export const StyledSuggesterList = styled.div`
   position: absolute;

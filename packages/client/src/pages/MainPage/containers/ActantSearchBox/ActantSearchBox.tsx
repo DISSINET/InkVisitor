@@ -125,7 +125,7 @@ export const ActantSearchBox: React.FC = () => {
           }}
           placeholder={"actant"}
           allowCreate={false}
-          inputWidth={140}
+          inputWidth={114}
         />
       </StyledRow>
       <StyledRow>
