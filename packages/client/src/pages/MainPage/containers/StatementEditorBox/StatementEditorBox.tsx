@@ -172,6 +172,7 @@ export const StatementEditorBox: React.FC = () => {
       const updatedProps = statement.data.props.map((p) =>
         p.id === propId ? { ...p, ...changes } : p
       );
+
       const newData = { ...{ props: updatedProps } };
       update(newData);
     }
