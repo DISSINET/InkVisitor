@@ -17,6 +17,7 @@ interface ActantSuggesterI {
   onSelected: Function;
   placeholder?: string;
   allowCreate?: boolean;
+  inputWidth?: number;
 }
 
 export const ActantSuggester: React.FC<ActantSuggesterI> = ({
@@ -24,6 +25,7 @@ export const ActantSuggester: React.FC<ActantSuggesterI> = ({
   onSelected,
   placeholder = "",
   allowCreate,
+  inputWidth,
 }) => {
   const [typed, setTyped] = useState<string>("");
   const [selectedCategory, setSelectedCategory] = useState<string>();
@@ -185,6 +187,7 @@ export const ActantSuggester: React.FC<ActantSuggesterI> = ({
         handleDropped(newDropped);
       }}
       allowCreate={allowCreate}
+      inputWidth={inputWidth}
     />
   ) : (
     <div></div>

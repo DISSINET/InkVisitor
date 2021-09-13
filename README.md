@@ -10,7 +10,6 @@ InkVisitor has been developed in the [Dissident Networks Project (DISSINET)](htt
 
 The lead developer of the application is [Adam Mertel](https://github.com/adammertel/). Other contributors of code include Petr Hanák, Ján Mertel and others. The lead authors of the data model are David Zbíral and Robert L. J. Shaw. Other contributors to the data model and testers include Tomáš Hampejs, Jan Král, Katia Riccardo and others.
 
-
 ## Data model
 
 ### Purpose
@@ -49,12 +48,13 @@ The uses of properties include:
 - Defining time and place of action (including in fuzzy terms).
 - Recording other adverbials, for example those concerning manner of action, circumstances, causes or consequences of action.
 
-
 ## User Administration
+
 The environment supports a system of three roles:
- - admin
- - editor
- - viewer
+
+- admin
+- editor
+- viewer
 
 Further, the admin may grant particular users (editors and viewers) access rights for specified territories. Editor role may be granted by "edit" rights, viewer role has "view" rights.
 
@@ -87,6 +87,12 @@ To administrate the users rights, admin roles may acces the **administration win
 - `cd packages/client`
 - (`npm install`)
 - `npm start`
+
+#### Storybook
+
+- `cd packages/client`
+- (`npm install`)
+- `npm run storybook`
 
 ## Deploy
 

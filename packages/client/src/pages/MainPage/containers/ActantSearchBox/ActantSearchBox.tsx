@@ -29,19 +29,16 @@ const initValues: IRequestSearch = {
 
 export const ActantSearchBox: React.FC = () => {
   const [options, setOptions] = useState<OptionsType<OptionTypeBase>>();
-  const [classOption, setClassOption] = useState<ValueType<OptionTypeBase>>({
+  const [classOption, setClassOption] = useState<
+    ValueType<OptionTypeBase, any>
+  >({
     label: Entities[initValues.class].label,
     value: Entities[initValues.class].id,
   });
   const [searchData, setSearchData] = useState<IRequestSearch>(initValues);
   const [results, setResults] = useState<IResponseSearch[]>([]);
 
-  const {
-    status,
-    data: actant,
-    error,
-    isFetching,
-  } = useQuery(
+  const { status, data: actant, error, isFetching } = useQuery(
     ["actant", searchData.actantId],
     async () => {
       if (searchData.actantId) {
@@ -67,7 +64,7 @@ export const ActantSearchBox: React.FC = () => {
 
   const handleChange = (
     key: string,
-    value: string | false | ValueType<OptionTypeBase>
+    value: string | false | ValueType<OptionTypeBase, any>
   ) => {
     setSearchData({
       ...searchData,
@@ -101,7 +98,7 @@ export const ActantSearchBox: React.FC = () => {
           width={150}
           options={options}
           value={classOption}
-          onChange={(option: ValueType<OptionTypeBase>) => {
+          onChange={(option: ValueType<OptionTypeBase, any>) => {
             setClassOption(option);
             handleChange("class", (option as IOption).value);
           }}
@@ -128,6 +125,7 @@ export const ActantSearchBox: React.FC = () => {
           }}
           placeholder={"actant"}
           allowCreate={false}
+          inputWidth={140}
         />
       </StyledRow>
       <StyledRow>
