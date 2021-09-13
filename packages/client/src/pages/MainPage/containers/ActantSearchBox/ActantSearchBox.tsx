@@ -134,7 +134,6 @@ export const ActantSearchBox: React.FC = () => {
             propId={actant.id}
             label={actant.label}
             category={actant.class}
-            color={Entities[actant.class].color}
             button={
               <Button
                 key="d"
@@ -168,7 +167,6 @@ export const ActantSearchBox: React.FC = () => {
                       propId={result.actantId}
                       label={result.actantLabel}
                       category={result.class}
-                      color={Entities[result.class].color}
                       fullWidth
                     />
                   </StyledResultItem>

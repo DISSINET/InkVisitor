@@ -145,7 +145,6 @@ export const Suggester: React.FC<SuggesterProps> = ({
                     propId={suggestion.id}
                     label={suggestion.label}
                     category={suggestion.category}
-                    color={suggestion.color}
                   />
                 </StyledSuggestionLineTag>
                 <StyledSuggestionLineIcons>
