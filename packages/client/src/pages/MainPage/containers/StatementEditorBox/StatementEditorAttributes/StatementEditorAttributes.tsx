@@ -37,7 +37,7 @@ import {
   Partitivity,
   Operator,
 } from "@shared/enums";
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { ElvlToggle } from "../..";
 import { AttributeIcon } from "../../../../../components/AttributeIcon/AttributeIcon";
 import { Colors, Entities } from "types";
@@ -139,6 +139,10 @@ export const StatementEditorAttributes: React.FC<StatementEditorAttributes> = ({
     setModalData(newModalData);
   };
 
+  const somethingWasUpdated = useMemo(() => {
+    return JSON.stringify(data) !== JSON.stringify(modalData);
+  }, [modalData, data]);
+
   const handleAcceptClick = () => {
     const updateModalData: AttributeData = {};
     Object.keys(modalData).forEach((modelDataKey) => {
@@ -149,7 +153,9 @@ export const StatementEditorAttributes: React.FC<StatementEditorAttributes> = ({
         updateModalData[modelDataKey as AttributeName] = modelDataValue;
       }
     });
-    handleUpdate(updateModalData);
+    if (somethingWasUpdated) {
+      handleUpdate(updateModalData);
+    }
   };
 
   const handleOpenModalClick = () => {
@@ -310,6 +316,7 @@ export const StatementEditorAttributes: React.FC<StatementEditorAttributes> = ({
               key="submit"
               label="Apply changes"
               color="primary"
+              disabled={!somethingWasUpdated}
               onClick={() => {
                 handleAcceptClick();
               }}
