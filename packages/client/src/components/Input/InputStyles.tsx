@@ -81,6 +81,6 @@ export const StyledTextArea = styled.textarea<IValueStyle>`
     outline: 0;
     border-color: ${({ theme }) => theme.color["success"]};
     border-width: ${({ theme, noBorder }) =>
-      noBorder ? 0 : theme.borderWidth[2]};
+      noBorder ? 0 : theme.borderWidth[1]};
   }
 `;
