@@ -47,5 +47,5 @@ export const StyledSubRow = styled.div`
 
 export const StyledPipe = styled.div`
   height: ${({ theme }) => theme.space[8]};
-  border-left: 1px solid black;
+  border-left: 1px dashed black;
 `;
