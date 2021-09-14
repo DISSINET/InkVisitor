@@ -45,7 +45,7 @@ import { ActantTag } from "..";
 
 import { CMetaStatement } from "constructors";
 import { findPositionInStatement } from "utils";
-import { ActantDetailMetaTableRow } from "./ActantDetailMetaTableRow/ActantDetailMetaTableRow";
+import { ActantDetailMetaTableRow } from "./ActantDetailMetaTable/ActantDetailMetaTableRow";
 import {
   actantLogicalTypeDict,
   actantStatusDict,
@@ -55,6 +55,7 @@ import {
 import { ActantType, Position } from "@shared/enums";
 import { composeWithDevTools } from "redux-devtools-extension";
 import { toast } from "react-toastify";
+import { ActantDetailMetaTable } from "./ActantDetailMetaTable/ActantDetailMetaTable";
 
 interface ActantDetailBox {}
 export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
@@ -122,17 +123,19 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
     }
   }, [usedInPage, actantId, actant]);
 
+  // sort meta statements by type label
   const metaStatements = useMemo(() => {
     if (actant && actant.metaStatements) {
       const sorteMetaStatements = [...actant.metaStatements];
       sorteMetaStatements.sort(
         (s1: IResponseStatement, s2: IResponseStatement) => {
           const typeSActant1 = s1.data.actants.find(
-            (a) => a.position == Position.A1
+            (a) => a.position == Position.Actant1
           );
           const typeSActant2 = s2.data.actants.find(
-            (a) => a.position == Position.A1
+            (a) => a.position == Position.Actant1
           );
+
           const typeActant1 = typeSActant1
             ? s1.actants.find((a) => a.id === typeSActant1.actant)
             : false;
@@ -140,6 +143,7 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
           const typeActant2 = typeSActant2
             ? s2.actants.find((a) => a.id === typeSActant2.actant)
             : false;
+
           if (
             typeActant1 === false ||
             typeSActant1?.actant === "" ||
@@ -555,6 +559,12 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
           </StyledSection>
           <StyledSection>
             <StyledSectionHeader>Meta statements</StyledSectionHeader>
+
+            <ActantDetailMetaTable
+              metaStatements={metaStatements}
+              updateMetaStatement={actantsUpdateMutation}
+              removeMetaStatement={actantsDeleteMutation}
+            />
             <Button
               color="primary"
               label="create new meta statement"
@@ -565,47 +575,6 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
                 actantsCreateMutation.mutate(newStatement);
               }}
             />
-
-            <StyledSectionMetaTable>
-              {metaStatements.map((metaStatement: IResponseStatement) => {
-                const typeSActant = metaStatement.data.actants.find(
-                  (a) => a.position == "a1"
-                );
-                const valueSActant = metaStatement.data.actants.find(
-                  (a) => a.position == "a2"
-                );
-
-                const typeActant = typeSActant
-                  ? metaStatement.actants.find(
-                      (a) => a.id === typeSActant.actant
-                    )
-                  : false;
-
-                const valueActant = valueSActant
-                  ? metaStatement.actants.find(
-                      (a) => a.id === valueSActant.actant
-                    )
-                  : false;
-
-                return (
-                  typeSActant &&
-                  valueSActant && (
-                    <React.Fragment key={metaStatement.id}>
-                      <ActantDetailMetaTableRow
-                        actant={actant}
-                        typeSActant={typeSActant}
-                        typeActant={typeActant}
-                        metaStatement={metaStatement}
-                        valueSActant={valueSActant}
-                        valueActant={valueActant}
-                        actantsDeleteMutation={actantsDeleteMutation}
-                        actantsUpdateMutation={actantsUpdateMutation}
-                      />
-                    </React.Fragment>
-                  )
-                );
-              })}
-            </StyledSectionMetaTable>
           </StyledSection>
           <StyledSection lastSection>
             <StyledSectionHeader>Used in statements:</StyledSectionHeader>

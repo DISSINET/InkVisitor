@@ -85,7 +85,6 @@ export const ActantBookmarkFolderTableRow: React.FC<ActantBookmarkFolderTableRow
         ref={dropRef}
         opacity={opacity}
         isOdd={Boolean(index % 2)}
-        isSelected={row.values.id === statementId}
       >
         <td ref={dragRef} style={{ cursor: "move" }}>
           <FaGripVertical />
