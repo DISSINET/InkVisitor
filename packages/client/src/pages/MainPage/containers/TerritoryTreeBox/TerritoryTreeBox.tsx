@@ -13,7 +13,6 @@ export const TerritoryTreeBox: React.FC = () => {
   const { status, data, error, isFetching } = useQuery(
     ["tree"],
     async () => {
-      // console.log("!!getting tree");
       const res = await api.treeGet();
       return res.data;
     },

@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "react-query";
 import api from "api";
 const queryString = require("query-string");
@@ -51,6 +51,7 @@ import { StatementEditorActionTable } from "./StatementEditorActionTable/Stateme
 import { StatementEditorAttributes } from "./StatementEditorAttributes/StatementEditorAttributes";
 import { StyledSubRow } from "./StatementEditorActionTable/StatementEditorActionTableRow/StatementEditorActionTableRowStyles";
 import { ColumnInstance } from "react-table";
+import { StatementDoesNotExits } from "@shared/types/errors";
 
 const classesActants = ["P", "G", "O", "C", "L", "V", "E", "S", "T", "R"];
 const classesPropType = ["C"];
@@ -80,8 +81,20 @@ export const StatementEditorBox: React.FC = () => {
       const res = await api.statementGet(statementId);
       return res.data;
     },
-    { enabled: !!statementId && api.isLoggedIn() }
+    { enabled: !!statementId && api.isLoggedIn(), retry: 0 }
   );
+
+  useEffect(() => {
+    if (
+      errorStatement &&
+      (errorStatement as any).error === "StatementDoesNotExits"
+    ) {
+      hashParams["statement"] = "";
+      history.push({
+        hash: queryString.stringify(hashParams),
+      });
+    }
+  }, [errorStatement]);
 
   // console.log(statement);
 
