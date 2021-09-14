@@ -67,6 +67,29 @@ export const StatementListBox: React.FC = () => {
     }
   );
 
+  const {
+    status: statusStatement,
+    data: statement,
+    error: errorStatement,
+    isFetching: isFetchingStatement,
+  } = useQuery(
+    ["statement", statementId],
+    async () => {
+      const res = await api.statementGet(statementId);
+      return res.data;
+    },
+    { enabled: !!statementId && api.isLoggedIn() }
+  );
+
+  useEffect(() => {
+    if (statement && !territoryId) {
+      hashParams["territory"] = statement.data.territory.id;
+      history.push({
+        hash: queryString.stringify(hashParams),
+      });
+    }
+  }, [statement, territoryId]);
+
   useEffect(() => {
     if (error && (error as any).error === "TerritoryDoesNotExits") {
       console.log(error);
