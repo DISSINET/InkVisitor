@@ -147,7 +147,9 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
                     <StyledFaUserAlt size={14} />
                     <StyledUsername>{username}</StyledUsername>
                   </StyledUser>
-                  { (username == "admin") ?
+                  { 
+                  //TODO make condition based on user role
+                  (username == "admin") ?
                   <Button
                     label="Manage Users"
                     color="info"
