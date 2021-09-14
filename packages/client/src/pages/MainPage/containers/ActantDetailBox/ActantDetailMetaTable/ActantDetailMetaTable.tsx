@@ -83,7 +83,11 @@ export const ActantDetailMetaTable: React.FC<ActantBookmarkFolderTable> = ({
         id: "type",
         accessor: "",
         Cell: ({ row }: Cell) => {
-          const { data, actants } = row.original as IResponseStatement;
+          const {
+            id: statementId,
+            data,
+            actants,
+          } = row.original as IResponseStatement;
 
           const typeSActant = data.actants.find((a) => a.position == "a1");
           const typeActant = typeSActant
@@ -102,9 +106,20 @@ export const ActantDetailMetaTable: React.FC<ActantBookmarkFolderTable> = ({
                   color="plain"
                   inverted={true}
                   onClick={() => {
-                    //   updateActant(sActant.id, {
-                    //       actant: "",
-                    //     });
+                    const metaStatementData = { ...data };
+                    const updatedStatementActants = metaStatementData.actants.map(
+                      (actant) =>
+                        actant.position === "a1"
+                          ? { ...actant, ...{ actant: "" } }
+                          : actant
+                    );
+                    updateMetaStatement.mutate({
+                      metaStatementId: statementId,
+                      changes: {
+                        ...metaStatementData,
+                        ...{ actants: updatedStatementActants },
+                      },
+                    });
                   }}
                 />
               }
@@ -112,9 +127,20 @@ export const ActantDetailMetaTable: React.FC<ActantBookmarkFolderTable> = ({
           ) : (
             <ActantSuggester
               onSelected={(newSelectedId: string) => {
-                // updateActant(sActant.id, {
-                //   actant: newSelectedId,
-                // });
+                const metaStatementData = { ...data };
+                const updatedStatementActants = metaStatementData.actants.map(
+                  (actant) =>
+                    actant.position === "a1"
+                      ? { ...actant, ...{ actant: newSelectedId } }
+                      : actant
+                );
+                updateMetaStatement.mutate({
+                  metaStatementId: statementId,
+                  changes: {
+                    ...metaStatementData,
+                    ...{ actants: updatedStatementActants },
+                  },
+                });
               }}
               categoryIds={["C"]}
             />
@@ -167,7 +193,11 @@ export const ActantDetailMetaTable: React.FC<ActantBookmarkFolderTable> = ({
         id: "value",
         accessor: "",
         Cell: ({ row }: Cell) => {
-          const { data, actants } = row.original as IResponseStatement;
+          const {
+            id: statementId,
+            data,
+            actants,
+          } = row.original as IResponseStatement;
 
           const valueSActant = data.actants.find((a) => a.position == "a2");
           const valueActant = valueSActant
@@ -186,9 +216,20 @@ export const ActantDetailMetaTable: React.FC<ActantBookmarkFolderTable> = ({
                   color="plain"
                   inverted={true}
                   onClick={() => {
-                    //   updateActant(sActant.id, {
-                    //       actant: "",
-                    //     });
+                    const metaStatementData = { ...data };
+                    const updatedStatementActants = metaStatementData.actants.map(
+                      (actant) =>
+                        actant.position === "a2"
+                          ? { ...actant, ...{ actant: "" } }
+                          : actant
+                    );
+                    updateMetaStatement.mutate({
+                      metaStatementId: statementId,
+                      changes: {
+                        ...metaStatementData,
+                        ...{ actants: updatedStatementActants },
+                      },
+                    });
                   }}
                 />
               }
@@ -196,9 +237,20 @@ export const ActantDetailMetaTable: React.FC<ActantBookmarkFolderTable> = ({
           ) : (
             <ActantSuggester
               onSelected={(newSelectedId: string) => {
-                // updateActant(sActant.id, {
-                //   actant: newSelectedId,
-                // });
+                const metaStatementData = { ...data };
+                const updatedStatementActants = metaStatementData.actants.map(
+                  (actant) =>
+                    actant.position === "a2"
+                      ? { ...actant, ...{ actant: newSelectedId } }
+                      : actant
+                );
+                updateMetaStatement.mutate({
+                  metaStatementId: statementId,
+                  changes: {
+                    ...metaStatementData,
+                    ...{ actants: updatedStatementActants },
+                  },
+                });
               }}
               categoryIds={["P", "G", "O", "C", "L", "V", "E", "S", "T", "R"]}
             />
@@ -249,7 +301,7 @@ export const ActantDetailMetaTable: React.FC<ActantBookmarkFolderTable> = ({
                 inverted={true}
                 tooltip="remove actant row"
                 onClick={() => {
-                  //removeActant(row.values.data.sActant.id);
+                  removeMetaStatement.mutate(statement.id);
                 }}
               />
             </ButtonGroup>
