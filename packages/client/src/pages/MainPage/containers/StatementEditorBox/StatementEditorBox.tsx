@@ -385,7 +385,6 @@ export const StatementEditorBox: React.FC = () => {
                 <StyledPropsActantHeader></StyledPropsActantHeader>
                 {propOrigin.props.length > 0 ? (
                   <StyledPropsActantList>
-                    <StyledListHeaderColumn></StyledListHeaderColumn>
                     <StyledListHeaderColumn>Type</StyledListHeaderColumn>
                     <StyledListHeaderColumn>Value</StyledListHeaderColumn>
                     <StyledListHeaderColumn></StyledListHeaderColumn>
@@ -429,28 +428,6 @@ export const StatementEditorBox: React.FC = () => {
 
     return (
       <React.Fragment key={prop.origin + level + "|" + order}>
-        <StyledPropLineColumn></StyledPropLineColumn>
-        <StyledPropLineColumn lastSecondLevel={lastSecondLevel}>
-          <StyledPropButtonGroup leftMargin={false}>
-            <StatementEditorAttributes
-              modalTitle={`${propValueActant?.label} - ${propTypeActant?.label}`}
-              data={{
-                elvl: prop.elvl,
-                certainty: prop.certainty,
-                logic: prop.logic,
-                mood: prop.mood,
-                moodvariant: prop.moodvariant,
-                operator: prop.operator,
-                bundleStart: prop.bundleStart,
-                bundleEnd: prop.bundleEnd,
-              }}
-              handleUpdate={(newData) => {
-                updateProp(prop.id, newData);
-              }}
-              loading={updateActantsDataMutation.isLoading}
-            />
-          </StyledPropButtonGroup>
-        </StyledPropLineColumn>
         <StyledPropLineColumn
           padded={level === "2"}
           lastSecondLevel={lastSecondLevel}
@@ -572,6 +549,23 @@ export const StatementEditorBox: React.FC = () => {
 
         <StyledPropLineColumn lastSecondLevel={lastSecondLevel}>
           <StyledPropButtonGroup leftMargin={false}>
+            <StatementEditorAttributes
+              modalTitle={`${propValueActant?.label} - ${propTypeActant?.label}`}
+              data={{
+                elvl: prop.elvl,
+                certainty: prop.certainty,
+                logic: prop.logic,
+                mood: prop.mood,
+                moodvariant: prop.moodvariant,
+                operator: prop.operator,
+                bundleStart: prop.bundleStart,
+                bundleEnd: prop.bundleEnd,
+              }}
+              handleUpdate={(newData) => {
+                updateProp(prop.id, newData);
+              }}
+              loading={updateActantsDataMutation.isLoading}
+            />
             {level === "1" && (
               <Button
                 key="add"
