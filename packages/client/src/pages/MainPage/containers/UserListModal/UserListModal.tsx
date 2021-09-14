@@ -1,13 +1,12 @@
 import React from "react";
 import { Column, useTable, useExpanded, Row } from "react-table";
-import { Button, Modal, 
-  ModalHeader,
-  ModalContent,
-  ModalFooter, Button, ButtonGroup } from "components";
+import { Button, Modal, ModalHeader, ModalContent, ModalFooter, Button, ButtonGroup } from "components";
 import { useQuery } from "react-query";
 import api from "api";
 
-export const UserListModal: React.FC = (props) => {
+
+
+export const UserListModal: React.FC = (modVals) => {
    const { status, data, error, isFetching } = useQuery(
     ["users"],
     async () => {
@@ -20,7 +19,7 @@ export const UserListModal: React.FC = (props) => {
    console.log(data)
 
     return (
-    <Modal showModal={props.showModal} onClose={() => props.handler()} >
+    <Modal showModal={modVals.isOpen} onClose={() => modVals.handler()} >
      <ModalHeader title={"Manage Users"} />
       <ModalContent>
        <table>
@@ -43,7 +42,7 @@ export const UserListModal: React.FC = (props) => {
           label="Close"
           color="primary"
           inverted
-          onClick={() => props.handler()}
+          onClick={() => modVals.handler()}
         />
       </ButtonGroup>
       </ModalFooter>
