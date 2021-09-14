@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Cell, Column } from "react-table";
 import { useMutation, useQuery, useQueryClient } from "react-query";
 import {
@@ -60,8 +60,22 @@ export const StatementListBox: React.FC = () => {
       const res = await api.territoryGet(territoryId);
       return res.data;
     },
-    { initialData: initialData, enabled: !!territoryId && api.isLoggedIn() }
+    {
+      initialData: initialData,
+      enabled: !!territoryId && api.isLoggedIn(),
+      retry: 0,
+    }
   );
+
+  useEffect(() => {
+    if (error && (error as any).error === "TerritoryDoesNotExits") {
+      console.log(error);
+      hashParams["territory"] = "";
+      history.push({
+        hash: queryString.stringify(hashParams),
+      });
+    }
+  }, [error]);
 
   const removeStatementMutation = useMutation(
     async (sId: string) => {

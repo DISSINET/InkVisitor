@@ -53,7 +53,6 @@ import {
   entitiesDict,
 } from "@shared/dictionaries";
 import { ActantType, Position } from "@shared/enums";
-import { composeWithDevTools } from "redux-devtools-extension";
 import { toast } from "react-toastify";
 import { ActantDetailMetaTable } from "./ActantDetailMetaTable/ActantDetailMetaTable";
 
@@ -76,8 +75,17 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
       const res = await api.detailGet(actantId);
       return res.data;
     },
-    { enabled: !!actantId && api.isLoggedIn() }
+    { enabled: !!actantId && api.isLoggedIn(), retry: 0 }
   );
+
+  useEffect(() => {
+    if (error && (error as any).error === "ActantDoesNotExits") {
+      hashParams["actant"] = "";
+      history.push({
+        hash: queryString.stringify(hashParams),
+      });
+    }
+  }, [error]);
 
   const usedInPages = useMemo(() => {
     if (actant && actant.usedIn) {
