@@ -27,7 +27,6 @@ interface TagProps {
   label?: string;
   detail?: string;
   category: string;
-  color: string;
   mode?: "selected" | "disabled" | "invalid" | false;
   borderStyle?: "solid" | "dashed" | "dotted";
   button?: ReactNode;
@@ -62,7 +61,6 @@ export const Tag: React.FC<TagProps> = ({
   label = "",
   detail = "Test Delete me!",
   category = "T",
-  color,
   mode = false,
   borderStyle = "solid",
   button,

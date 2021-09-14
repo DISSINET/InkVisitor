@@ -615,7 +615,7 @@ export const StatementEditorBox: React.FC = () => {
   };
 
   return (
-    <div>
+    <>
       {statement ? (
         <div style={{ marginBottom: "4rem" }} key={statement.id}>
           <StyledEditorSection firstSection key="editor-section-summary">
@@ -854,6 +854,6 @@ export const StatementEditorBox: React.FC = () => {
       <Loader
         show={isFetchingStatement || updateActantsRefreshListMutation.isLoading}
       />
-    </div>
+    </>
   );
 };

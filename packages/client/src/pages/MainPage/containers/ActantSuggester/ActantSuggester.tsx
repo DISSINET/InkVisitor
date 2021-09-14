@@ -9,6 +9,7 @@ import { Entities } from "types";
 import { useMutation, useQuery, useQueryClient } from "react-query";
 import api from "api";
 import { CategoryActantType } from "@shared/enums";
+import useDebounce from "hooks/useDebounce";
 
 const queryString = require("query-string");
 
@@ -17,6 +18,7 @@ interface ActantSuggesterI {
   onSelected: Function;
   placeholder?: string;
   allowCreate?: boolean;
+  inputWidth?: number;
 }
 
 export const ActantSuggester: React.FC<ActantSuggesterI> = ({
@@ -24,8 +26,10 @@ export const ActantSuggester: React.FC<ActantSuggesterI> = ({
   onSelected,
   placeholder = "",
   allowCreate,
+  inputWidth,
 }) => {
   const [typed, setTyped] = useState<string>("");
+  const debouncedTyped = useDebounce(typed, 100);
   const [selectedCategory, setSelectedCategory] = useState<string>();
   const [allCategories, setAllCategories] = useState<false | IOption[]>();
   //const [territoryActantIds, setTerritoryActantIds] = useState<string[]>([]);
@@ -52,10 +56,10 @@ export const ActantSuggester: React.FC<ActantSuggesterI> = ({
     error: errorStatement,
     isFetching: isFetchingStatement,
   } = useQuery(
-    ["suggestion", typed, selectedCategory],
+    ["suggestion", debouncedTyped, selectedCategory],
     async () => {
       const resSuggestions = await api.actantsGetMore({
-        label: typed,
+        label: debouncedTyped,
         class: selectedCategory,
       });
       return resSuggestions.data.map((s: IActant) => {
@@ -76,7 +80,10 @@ export const ActantSuggester: React.FC<ActantSuggesterI> = ({
         };
       });
     },
-    { enabled: typed.length > 2 && !!selectedCategory && api.isLoggedIn() }
+    {
+      enabled:
+        debouncedTyped.length > 2 && !!selectedCategory && api.isLoggedIn(),
+    }
   );
 
   const handleClean = () => {
@@ -185,6 +192,7 @@ export const ActantSuggester: React.FC<ActantSuggesterI> = ({
         handleDropped(newDropped);
       }}
       allowCreate={allowCreate}
+      inputWidth={inputWidth}
     />
   ) : (
     <div></div>

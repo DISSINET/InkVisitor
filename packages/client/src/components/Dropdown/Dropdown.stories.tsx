@@ -22,12 +22,14 @@ const items = [
   { value: 2, label: "third option" },
 ];
 export const DefaultDropdownFullWidth = ({ ...args }) => {
-  const [selectedItem, setSelectedItem] = useState<ValueType<OptionTypeBase>>();
+  const [selectedItem, setSelectedItem] = useState<
+    ValueType<OptionTypeBase, any>
+  >();
   return (
     <Dropdown
       {...args}
       value={selectedItem}
-      onChange={(selectedItem: ValueType<OptionTypeBase>) =>
+      onChange={(selectedItem: ValueType<OptionTypeBase, any>) =>
         setSelectedItem(selectedItem)
       }
       options={items}
@@ -37,12 +39,14 @@ export const DefaultDropdownFullWidth = ({ ...args }) => {
 };
 
 export const DropdownNarrower = ({ ...args }) => {
-  const [selectedItem, setSelectedItem] = useState<ValueType<OptionTypeBase>>();
+  const [selectedItem, setSelectedItem] = useState<
+    ValueType<OptionTypeBase, any>
+  >();
   return (
     <Dropdown
       {...args}
       value={selectedItem}
-      onChange={(selectedItem: ValueType<OptionTypeBase>) =>
+      onChange={(selectedItem: ValueType<OptionTypeBase, any>) =>
         setSelectedItem(selectedItem)
       }
       options={items}

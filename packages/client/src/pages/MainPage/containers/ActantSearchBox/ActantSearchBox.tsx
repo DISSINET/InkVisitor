@@ -18,6 +18,7 @@ import { Entities, IRequestSearch } from "types";
 import { IOption, IResponseSearch } from "@shared/types";
 import { ActantType } from "@shared/enums";
 import { FaUnlink } from "react-icons/fa";
+import useDebounce from "hooks/useDebounce";
 
 const classesActants = ["P", "G", "O", "C", "L", "V", "E", "S", "T", "R"];
 
@@ -29,19 +30,18 @@ const initValues: IRequestSearch = {
 
 export const ActantSearchBox: React.FC = () => {
   const [options, setOptions] = useState<OptionsType<OptionTypeBase>>();
-  const [classOption, setClassOption] = useState<ValueType<OptionTypeBase>>({
+  const [classOption, setClassOption] = useState<
+    ValueType<OptionTypeBase, any>
+  >({
     label: Entities[initValues.class].label,
     value: Entities[initValues.class].id,
   });
   const [searchData, setSearchData] = useState<IRequestSearch>(initValues);
+  const debouncedValues = useDebounce<IRequestSearch>(searchData, 100);
+
   const [results, setResults] = useState<IResponseSearch[]>([]);
 
-  const {
-    status,
-    data: actant,
-    error,
-    isFetching,
-  } = useQuery(
+  const { status, data: actant, error, isFetching } = useQuery(
     ["actant", searchData.actantId],
     async () => {
       if (searchData.actantId) {
@@ -67,7 +67,7 @@ export const ActantSearchBox: React.FC = () => {
 
   const handleChange = (
     key: string,
-    value: string | false | ValueType<OptionTypeBase>
+    value: string | false | ValueType<OptionTypeBase, any>
   ) => {
     setSearchData({
       ...searchData,
@@ -81,7 +81,7 @@ export const ActantSearchBox: React.FC = () => {
     } else {
       setResults([]);
     }
-  }, [searchData]);
+  }, [debouncedValues]);
 
   const searchActantsMutation = useMutation(
     async (searchData: IRequestSearch) => api.actantsSearch(searchData),
@@ -101,7 +101,7 @@ export const ActantSearchBox: React.FC = () => {
           width={150}
           options={options}
           value={classOption}
-          onChange={(option: ValueType<OptionTypeBase>) => {
+          onChange={(option: ValueType<OptionTypeBase, any>) => {
             setClassOption(option);
             handleChange("class", (option as IOption).value);
           }}
@@ -128,6 +128,7 @@ export const ActantSearchBox: React.FC = () => {
           }}
           placeholder={"actant"}
           allowCreate={false}
+          inputWidth={114}
         />
       </StyledRow>
       <StyledRow>
@@ -136,7 +137,6 @@ export const ActantSearchBox: React.FC = () => {
             propId={actant.id}
             label={actant.label}
             category={actant.class}
-            color={Entities[actant.class].color}
             button={
               <Button
                 key="d"
@@ -170,7 +170,6 @@ export const ActantSearchBox: React.FC = () => {
                       propId={result.actantId}
                       label={result.actantLabel}
                       category={result.class}
-                      color={Entities[result.class].color}
                       fullWidth
                     />
                   </StyledResultItem>
