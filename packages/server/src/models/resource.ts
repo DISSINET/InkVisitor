@@ -4,10 +4,7 @@ import { IResource } from "@shared/types/resource";
 import Actant from "./actant";
 
 class ResourceData implements IModel {
-  content = "";
-  link = "";
-  type = "";
-  language: Language = Language.English;
+  link: string = "";
 
   constructor(data: UnknownObject) {
     if (!data) {

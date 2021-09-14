@@ -28,8 +28,6 @@ export class TerritoryParent implements IParentTerritory, IModel {
 
 export class TerritoryData implements IModel {
   parent: TerritoryParent | false = false;
-  type = "";
-  content = "";
 
   constructor(data: UnknownObject) {
     if (!data) {

@@ -4,7 +4,7 @@ const StyledGrid = styled.div`
   display: grid;
   align-items: center;
   padding-left: ${({ theme }) => theme.space[0]};
-  grid-template-columns: auto auto auto auto auto;
+  grid-template-columns: auto auto auto;
   width: fit-content;
   grid-template-rows: auto;
   grid-auto-flow: row;
@@ -96,7 +96,9 @@ export const StyledPropLineColumn = styled(
 
 // references
 interface StyledReferencesList {}
-export const StyledReferencesList = styled(StyledGrid)<StyledReferencesList>``;
+export const StyledReferencesList = styled(StyledGrid)<StyledReferencesList>`
+  grid-template-columns: auto auto auto auto;
+`;
 
 interface StyledReferencesListColumn {}
 export const StyledReferencesListColumn = styled(
