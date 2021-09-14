@@ -18,6 +18,7 @@ import { Entities, IRequestSearch } from "types";
 import { IOption, IResponseSearch } from "@shared/types";
 import { ActantType } from "@shared/enums";
 import { FaUnlink } from "react-icons/fa";
+import useDebounce from "hooks/useDebounce";
 
 const classesActants = ["P", "G", "O", "C", "L", "V", "E", "S", "T", "R"];
 
@@ -36,6 +37,8 @@ export const ActantSearchBox: React.FC = () => {
     value: Entities[initValues.class].id,
   });
   const [searchData, setSearchData] = useState<IRequestSearch>(initValues);
+  const debouncedValues = useDebounce<IRequestSearch>(searchData, 100);
+
   const [results, setResults] = useState<IResponseSearch[]>([]);
 
   const { status, data: actant, error, isFetching } = useQuery(
@@ -78,7 +81,7 @@ export const ActantSearchBox: React.FC = () => {
     } else {
       setResults([]);
     }
-  }, [searchData]);
+  }, [debouncedValues]);
 
   const searchActantsMutation = useMutation(
     async (searchData: IRequestSearch) => api.actantsSearch(searchData),
