@@ -51,7 +51,11 @@ export const ActantDetailMetaTable: React.FC<ActantBookmarkFolderTable> = ({
         id: "type-attributes",
         accessor: "",
         Cell: ({ row }: Cell) => {
-          const { data, actants } = row.original as IResponseStatement;
+          const {
+            id: statementId,
+            data,
+            actants,
+          } = row.original as IResponseStatement;
 
           const typeSActant = data.actants.find((a) => a.position == "a1");
           const typeActant = typeSActant
@@ -69,9 +73,23 @@ export const ActantDetailMetaTable: React.FC<ActantBookmarkFolderTable> = ({
                 partitivity: typeSActant.partitivity,
               }}
               handleUpdate={(newData) => {
-                //updateActant(sActant.id, newData);
+                const metaStatementData = { ...data };
+                const updatedStatementActants = metaStatementData.actants.map(
+                  (actant) =>
+                    actant.position === "a1"
+                      ? { ...actant, ...newData }
+                      : actant
+                );
+
+                updateMetaStatement.mutate({
+                  metaStatementId: statementId,
+                  changes: {
+                    ...metaStatementData,
+                    ...{ actants: updatedStatementActants },
+                  },
+                });
               }}
-              //loading={updateActantsMutation.isLoading}
+              loading={updateMetaStatement.isLoading}
             />
           ) : (
             <div />
@@ -161,7 +179,11 @@ export const ActantDetailMetaTable: React.FC<ActantBookmarkFolderTable> = ({
         id: "value-attributes",
         accessor: "",
         Cell: ({ row }: Cell) => {
-          const { data, actants } = row.original as IResponseStatement;
+          const {
+            id: statementId,
+            data,
+            actants,
+          } = row.original as IResponseStatement;
 
           const valueSActant = data.actants.find((a) => a.position == "a2");
           const valueActant = valueSActant
@@ -179,9 +201,23 @@ export const ActantDetailMetaTable: React.FC<ActantBookmarkFolderTable> = ({
                 partitivity: valueSActant.partitivity,
               }}
               handleUpdate={(newData) => {
-                //updateActant(sActant.id, newData);
+                const metaStatementData = { ...data };
+                const updatedStatementActants = metaStatementData.actants.map(
+                  (actant) =>
+                    actant.position === "a2"
+                      ? { ...actant, ...newData }
+                      : actant
+                );
+
+                updateMetaStatement.mutate({
+                  metaStatementId: statementId,
+                  changes: {
+                    ...metaStatementData,
+                    ...{ actants: updatedStatementActants },
+                  },
+                });
               }}
-              //loading={updateActantsMutation.isLoading}
+              loading={updateMetaStatement.isLoading}
             />
           ) : (
             <div />
@@ -289,9 +325,19 @@ export const ActantDetailMetaTable: React.FC<ActantBookmarkFolderTable> = ({
                     bundleEnd: action.bundleEnd,
                   }}
                   handleUpdate={(newData) => {
-                    //updateActant(sActant.id, newData);
+                    const metaStatementData = { ...statement.data };
+                    const updatedStatementActions = metaStatementData.actions.map(
+                      (action) => ({ ...action, ...newData })
+                    );
+                    updateMetaStatement.mutate({
+                      metaStatementId: statement.id,
+                      changes: {
+                        ...metaStatementData,
+                        ...{ actions: updatedStatementActions },
+                      },
+                    });
                   }}
-                  //loading={updateActantsMutation.isLoading}
+                  loading={updateMetaStatement.isLoading}
                 />
               )}
               <Button
