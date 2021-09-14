@@ -181,7 +181,7 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
                 isExpanded={firstPanelExpanded}
                 button={firstPanelButton()}
               >
-               {/*<TerritoryTreeBox />*/}
+               <TerritoryTreeBox />
               </Box>
             </Panel>
             {/* SECOND PANEL */}

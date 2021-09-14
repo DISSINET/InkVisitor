@@ -1,24 +1,29 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { Column, useTable, useExpanded, Row } from "react-table";
-import { Modal, ModalHeader, ModalContent, ModalFooter, Button, ButtonGroup } from "components";
+import {
+  Modal,
+  ModalHeader,
+  ModalContent,
+  ModalFooter,
+  Button,
+  ButtonGroup,
+} from "components";
 import { useQuery } from "react-query";
 import api from "api";
 
-import {
-  StyledTable,
-  StyledTHead,
-  StyledTh,
-} from "./UserListTableStyles";
+import { FaTrashAlt, FaPlus } from "react-icons/fa";
 
-import {UserListTableRow}from "./UserListTableRow/UserListTableRow"
+import { StyledTable, StyledTHead, StyledTh } from "./UserListTableStyles";
+
+import { UserListTableRow } from "./UserListTableRow/UserListTableRow";
 
 interface UserListModal {
   isOpen: boolean;
-  handler: Function; 
+  handler: Function;
 }
 
 export const UserListModal: React.FC = (modVals: UserListModal) => {
-   const { status, data, error, isFetching } = useQuery(
+  const { status, data, error, isFetching } = useQuery(
     ["users"],
     async () => {
       const res = await api.usersGetMore({});
@@ -26,8 +31,6 @@ export const UserListModal: React.FC = (modVals: UserListModal) => {
     },
     { enabled: api.isLoggedIn() }
   );
-   
-   console.log(data)
 
   const getRowId = useCallback((row) => {
     return row.id;
@@ -36,24 +39,32 @@ export const UserListModal: React.FC = (modVals: UserListModal) => {
   const columns: Column<{}>[] = useMemo(() => {
     return [
       {
-        Header: "Name",
+        Header: "Name (Email)",
         id: "Name",
         accessor: "name",
-      },
-      {
-        Header: "Email",
-        id: "email",
-        accessor: "email",
+        Cell: ({ row }: Cell) => {
+          const username = row.values.Name;
+          const mail = "me@mail.com"; //row.values.email;
+          return (
+            <>
+              <h6>{username}</h6>
+              <span>{mail}</span>
+            </>
+          );
+        },
       },
       {
         Header: "Role",
         id: "role",
         accessor: "role",
+        Cell: ({ row }: Cell) => {
+          const role = row.values.role;
+          return <span>{role}</span>;
+        },
       },
       {
         Header: "Territories",
         id: "territories",
-        accessor: "territories",
       },
       {
         Header: "Password",
@@ -64,9 +75,29 @@ export const UserListModal: React.FC = (modVals: UserListModal) => {
         Header: "Actions",
         id: "actions",
         accessor: "actions",
+        Cell: ({ row }: Cell) => {
+          return (
+            <ButtonGroup noMargin>
+              <Button
+                key="add"
+                icon={<FaPlus size={14} />}
+                tooltip="add new user"
+                color="plain"
+                inverted
+              />
+              <Button
+                key="r"
+                icon={<FaTrashAlt size={14} />}
+                color="danger"
+                tooltip="delete"
+                inverted
+              />
+            </ButtonGroup>
+          );
+        },
       },
-     ]
-     }, [data]);
+    ];
+  }, [data]);
 
   const {
     getTableProps,
@@ -84,51 +115,54 @@ export const UserListModal: React.FC = (modVals: UserListModal) => {
     },
   });
 
-
-    return (
-    <Modal showModal={modVals.isOpen} onClose={() => modVals.handler()} width="middle">
-     <ModalHeader title={"Manage Users"} />
+  return (
+    <Modal
+      showModal={modVals.isOpen}
+      onClose={() => modVals.handler()}
+      width="middle"
+    >
+      <ModalHeader title={"Manage Users"} />
       <ModalContent>
-       <StyledTable {...getTableProps()}>
-       <StyledTHead>
-          {headerGroups.map((headerGroup, key) => (
-            <tr {...headerGroup.getHeaderGroupProps()} key={key}>
-              <th></th>
-              {headerGroup.headers.map((column, key) => (
-                <StyledTh {...column.getHeaderProps()} key={key}>
-                  {column.render("Header")}
-                </StyledTh>
-              ))}
-            </tr>
-          ))}
-       </StyledTHead>
-       <tbody {...getTableBodyProps()}>
-          {rows.map((row: Row, i: number) => {
-          prepareRow(row);
-            return ( 
-            <UserListTableRow
-                index={i}
-                row={row}
-                {...row.getRowProps()}
-              />
-            );
-          })}
-        </tbody>
-
-       </StyledTable>
-
+        <StyledTable {...getTableProps()}>
+          <StyledTHead>
+            {headerGroups.map((headerGroup, key) => (
+              <tr {...headerGroup.getHeaderGroupProps()} key={key}>
+                {headerGroup.headers.map((column, key) => (
+                  <StyledTh {...column.getHeaderProps()} key={key}>
+                    {column.render("Header")}
+                  </StyledTh>
+                ))}
+              </tr>
+            ))}
+          </StyledTHead>
+          <tbody {...getTableBodyProps()}>
+            {rows.map((row: Row, i: number) => {
+              prepareRow(row);
+              return (
+                <UserListTableRow index={i} row={row} {...row.getRowProps()} />
+              );
+            })}
+          </tbody>
+        </StyledTable>
       </ModalContent>
       <ModalFooter>
-      <ButtonGroup>
-        <Button
-          key="close"
-          label="Close"
-          color="primary"
-          inverted
-          onClick={() => modVals.handler()}
-        />
-      </ButtonGroup>
+        <ButtonGroup>
+          <Button
+            key="add"
+            icon={<FaPlus size={14} />}
+            tooltip="add new user"
+            color="primary"
+            label="new user"
+          />
+          <Button
+            key="close"
+            label="Close"
+            color="primary"
+            inverted
+            onClick={() => modVals.handler()}
+          />
+        </ButtonGroup>
       </ModalFooter>
     </Modal>
-    );
+  );
 };
