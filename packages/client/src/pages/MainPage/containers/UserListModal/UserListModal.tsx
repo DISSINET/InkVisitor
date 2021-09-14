@@ -1,12 +1,15 @@
 import React from "react";
 import { Column, useTable, useExpanded, Row } from "react-table";
-import { Button, Modal, ModalHeader, ModalContent, ModalFooter, Button, ButtonGroup } from "components";
+import { Modal, ModalHeader, ModalContent, ModalFooter, Button, ButtonGroup } from "components";
 import { useQuery } from "react-query";
 import api from "api";
 
+interface UserListModal {
+  isOpen: boolean;
+  handler: Function; 
+}
 
-
-export const UserListModal: React.FC = (modVals) => {
+export const UserListModal: React.FC = (modVals: UserListModal) => {
    const { status, data, error, isFetching } = useQuery(
     ["users"],
     async () => {
