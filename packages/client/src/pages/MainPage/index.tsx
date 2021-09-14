@@ -254,7 +254,7 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
         <Toast />
         <Footer height={heightFooter} />
         {!isLoggedIn && <LoginModal />}
-        <UserListModal showModal={modalOpen}  handler={handleUsersModalCancelClick} />
+        <UserListModal isOpen={modalOpen}  handler={handleUsersModalCancelClick} />
       </StyledPage>
     </>
   );
