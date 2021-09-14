@@ -11,8 +11,8 @@ import { Tooltip } from "components";
 
 interface Dropdown {
   options?: OptionsType<OptionTypeBase> | GroupedOptionsType<OptionTypeBase>;
-  value?: ValueType<OptionTypeBase>;
-  onChange: (selectedOption: ValueType<OptionTypeBase>) => void;
+  value?: ValueType<OptionTypeBase, any>;
+  onChange: (selectedOption: ValueType<OptionTypeBase, any>) => void;
   ref?: React.RefObject<ReactNode>;
   width?: number | "full";
   hideSelectedOptions?: boolean;

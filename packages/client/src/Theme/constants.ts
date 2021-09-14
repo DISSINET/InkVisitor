@@ -7,7 +7,7 @@ export const heightHeader = 70;
 export const heightFooter = 30;
 
 export const minLayoutWidth = 1440;
-export const layoutWidthBreakpoint = 1000;
+export const layoutWidthBreakpoint = 1200;
 // INIT PANEL WIDTHS
 export const panelWidths = [200, 570, 800, 350];
 // MORE PANEL WIDTHS
