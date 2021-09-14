@@ -96,7 +96,9 @@ export const StyledPropLineColumn = styled(
 
 // references
 interface StyledReferencesList {}
-export const StyledReferencesList = styled(StyledGrid)<StyledReferencesList>``;
+export const StyledReferencesList = styled(StyledGrid)<StyledReferencesList>`
+  grid-template-columns: auto auto auto auto;
+`;
 
 interface StyledReferencesListColumn {}
 export const StyledReferencesListColumn = styled(
