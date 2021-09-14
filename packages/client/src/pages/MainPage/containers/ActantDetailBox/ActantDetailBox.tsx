@@ -436,7 +436,6 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
                   </StyledContentRowValue>
                 </StyledContentRow>
               )}
-
               {actantMode === "action" && (
                 <StyledContentRow>
                   <StyledContentRowLabel>Entity Subject</StyledContentRowLabel>
@@ -534,6 +533,30 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
                                 s: actant.data.entities.s,
                                 a1: actant.data.entities.a1,
                               },
+                            },
+                          },
+                        });
+                      }}
+                    />
+                  </StyledContentRowValue>
+                </StyledContentRow>
+              )}
+
+              {actantMode === "resource" && (
+                <StyledContentRow>
+                  <StyledContentRowLabel>URL</StyledContentRowLabel>
+                  <StyledContentRowValue>
+                    <Input
+                      value={actant.data.url}
+                      width="full"
+                      onChangeFn={async (newValue: string) => {
+                        const oldData = { ...actant.data };
+                        console.log(oldData);
+                        updateActantMutation.mutate({
+                          data: {
+                            ...oldData,
+                            ...{
+                              link: newValue,
                             },
                           },
                         });
