@@ -29,6 +29,7 @@ import api from "api";
 import { IParentTerritory } from "@shared/types/territory";
 import { useMutation, useQueryClient } from "react-query";
 import { DraggedTerritoryItem, DragItem, SearchParams } from "types";
+import { useSearchParams } from "hooks";
 
 interface TerritoryTreeNode {
   territory: ITerritory;
@@ -58,19 +59,18 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
 
   let history = useHistory();
   const queryParams = new URLSearchParams(location.search);
+
   const {
     territory: territoryId,
+    setTerritory: setTerritoryId,
     statement: statementId,
-  }: SearchParams = useParams();
+    setStatement: setStatementId,
+  } = useSearchParams();
 
-  useEffect(() => {
-    console.log(territoryId);
-  }, [territoryId, statementId]);
+  // var hashParams = queryString.parse(location.hash);
+  // const selectedTerritoryId = hashParams.territory;
 
-  var hashParams = queryString.parse(location.hash);
-  const selectedTerritoryId = hashParams.territory;
-
-  const isSelected = selectedTerritoryId === territory.id;
+  const isSelected = territoryId === territory.id;
 
   const [isExpanded, setIsExpanded] = useState(false);
   const [childTerritories, setChildTerritories] = useState<any[]>([]);
@@ -93,7 +93,7 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
       );
       if (shouldExpand) {
         setIsExpanded(true);
-      } else if (selectedTerritoryId === territory.id) {
+      } else if (territoryId === territory.id) {
         setIsExpanded(true);
         dispatch(setTreeInitialized(true));
       } else if (territory.id === rootTerritoryId) {
@@ -133,24 +133,8 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
     }
   );
 
-  useEffect(() => {
-    console.log(territoryId);
-    history.push({
-      search: `?${queryString.stringify({
-        territoryId,
-      })}`,
-    });
-  }, [territoryId]);
-
   const onCaretClick = (id: string) => {
-    queryParams.set("territory", id);
-    // hashParams["territory"] = id;
-    history.push({
-      search: `?${queryString.stringify({
-        territory: id,
-      })}`,
-      // hash: queryString.stringify(hashParams),
-    });
+    setTerritoryId(id);
     setIsExpanded(!isExpanded);
   };
 
@@ -267,24 +251,14 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
                         <StyledFaCircle
                           size={11}
                           onClick={() => {
-                            queryParams.set("territory", id);
-                            history.push({
-                              search: `?${queryString.stringify({
-                                territory: id,
-                              })}`,
-                            });
+                            setTerritoryId(id);
                           }}
                         />
                       ) : (
                         <StyledFaDotCircle
                           size={11}
                           onClick={() => {
-                            queryParams.set("territory", id);
-                            history.push({
-                              search: `?${queryString.stringify({
-                                territory: id,
-                              })}`,
-                            });
+                            setTerritoryId(id);
                           }}
                         />
                       )}
