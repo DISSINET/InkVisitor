@@ -49,7 +49,6 @@ import { StatementEditorActionTable } from "./StatementEditorActionTable/Stateme
 import { StatementEditorAttributes } from "./StatementEditorAttributes/StatementEditorAttributes";
 import { StyledSubRow } from "./StatementEditorActionTable/StatementEditorActionTableRow/StatementEditorActionTableRowStyles";
 import { ColumnInstance } from "react-table";
-import { StatementDoesNotExits } from "@shared/types/errors";
 import { useSearchParams } from "hooks";
 
 const classesActants = ["P", "G", "O", "C", "L", "V", "E", "S", "T", "R"];

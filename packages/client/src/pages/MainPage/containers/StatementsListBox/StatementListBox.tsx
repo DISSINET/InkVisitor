@@ -79,7 +79,7 @@ export const StatementListBox: React.FC = () => {
       const res = await api.statementGet(statementId);
       return res.data;
     },
-    { enabled: !!statementId && api.isLoggedIn() }
+    { enabled: !!statementId && api.isLoggedIn(), retry: 0 }
   );
 
   useEffect(() => {
