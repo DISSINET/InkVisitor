@@ -1,7 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
 import update from "immutability-helper";
-import { useHistory, useParams } from "react-router-dom";
-const queryString = require("query-string");
 import {
   BsCaretRightFill,
   BsCaretDownFill,
@@ -57,18 +55,10 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
   const treeInitialized = useAppSelector((state) => state.treeInitialized);
   const queryClient = useQueryClient();
 
-  let history = useHistory();
-  const queryParams = new URLSearchParams(location.search);
-
   const {
     territory: territoryId,
     setTerritory: setTerritoryId,
-    statement: statementId,
-    setStatement: setStatementId,
   } = useSearchParams();
-
-  // var hashParams = queryString.parse(location.hash);
-  // const selectedTerritoryId = hashParams.territory;
 
   const isSelected = territoryId === territory.id;
 

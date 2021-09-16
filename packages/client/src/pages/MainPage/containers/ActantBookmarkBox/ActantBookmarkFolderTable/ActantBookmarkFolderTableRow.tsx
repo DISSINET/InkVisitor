@@ -9,7 +9,6 @@ import {
 } from "react-dnd";
 import { FaGripVertical } from "react-icons/fa";
 import { Cell, ColumnInstance } from "react-table";
-const queryString = require("query-string");
 
 import { DragItem, ItemTypes } from "types";
 import { StyledTr, StyledTd } from "./ActantBookmarkFolderTableStyles";
@@ -31,9 +30,6 @@ export const ActantBookmarkFolderTableRow: React.FC<ActantBookmarkFolderTableRow
   updateOrderFn,
   visibleColumns,
 }) => {
-  var hashParams = queryString.parse(location.hash);
-  const statementId = hashParams.statement;
-
   const dropRef = useRef<HTMLTableRowElement>(null);
   const dragRef = useRef<HTMLTableDataCellElement>(null);
 
@@ -81,11 +77,7 @@ export const ActantBookmarkFolderTableRow: React.FC<ActantBookmarkFolderTableRow
 
   return (
     <React.Fragment key={index}>
-      <StyledTr
-        ref={dropRef}
-        opacity={opacity}
-        isOdd={Boolean(index % 2)}
-      >
+      <StyledTr ref={dropRef} opacity={opacity} isOdd={Boolean(index % 2)}>
         <td ref={dragRef} style={{ cursor: "move" }}>
           <FaGripVertical />
         </td>

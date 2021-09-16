@@ -9,9 +9,7 @@ import {
   FaDotCircle,
   FaClone,
 } from "react-icons/fa";
-import { useLocation, useHistory, useParams } from "react-router";
 import { toast } from "react-toastify";
-const queryString = require("query-string");
 
 import {
   Button,
@@ -24,7 +22,6 @@ import {
 import { ActantTag } from "./../";
 import api from "api";
 import { IStatement, IActant, IAction } from "@shared/types";
-import { ActantType } from "@shared/enums";
 import { StatementListTable } from "./StatementListTable/StatementListTable";
 import { StatementListHeader } from "./StatementListHeader/StatementListHeader";
 import {
@@ -45,40 +42,15 @@ const initialData: {
   label: "",
 };
 
-interface StatementListParamas {
-  statement: string;
-  territory: string;
-}
-
 export const StatementListBox: React.FC = () => {
   const queryClient = useQueryClient();
-  let history = useHistory();
-  let { hash, search } = useLocation();
-  var hashParams = queryString.parse(hash);
 
   const {
     territory: territoryId,
     setTerritory: setTerritoryId,
     statement: statementId,
-    setStatement: setstatementId,
+    setStatement: setStatementId,
   } = useSearchParams();
-  // const [territoryId, setTerritoryId] = useState<string>("");
-  // const [statementId, setstatementId] = useState<string>("");
-
-  // useEffect(() => {
-  //   const params = new URLSearchParams(search);
-  //   const territoryId: string | null = params.get("territory");
-  //   const statementId = params.get("statement");
-  //   if (territoryId) {
-  //     setTerritoryId(territoryId);
-  //   }
-  //   if (statementId) {
-  //     setstatementId(statementId);
-  //   }
-  // }, []);
-
-  // const territoryId = hashParams.territory;
-  // const statementId = hashParams.statement;
 
   const [showSubmit, setShowSubmit] = useState(false);
   const [statementToDelete, setStatementToDelete] = useState<IStatement>();
@@ -112,20 +84,13 @@ export const StatementListBox: React.FC = () => {
 
   useEffect(() => {
     if (statement && !territoryId) {
-      hashParams["territory"] = statement.data.territory.id;
-      history.push({
-        hash: queryString.stringify(hashParams),
-      });
+      setTerritoryId(statement.data.territory.id);
     }
   }, [statement, territoryId]);
 
   useEffect(() => {
     if (error && (error as any).error === "TerritoryDoesNotExits") {
-      console.log(error);
-      hashParams["territory"] = "";
-      history.push({
-        hash: queryString.stringify(hashParams),
-      });
+      setTerritoryId("");
     }
   }, [error]);
 
@@ -149,10 +114,7 @@ export const StatementListBox: React.FC = () => {
     },
     {
       onSuccess: (data, variables) => {
-        hashParams["statement"] = variables.id;
-        history.push({
-          hash: queryString.stringify(hashParams),
-        });
+        setStatementId(variables.id);
         toast.info(`Statement duplicated!`);
         queryClient.invalidateQueries("territory");
       },
@@ -165,10 +127,7 @@ export const StatementListBox: React.FC = () => {
     },
     {
       onSuccess: (data, variables) => {
-        hashParams["statement"] = variables.id;
-        history.push({
-          hash: queryString.stringify(hashParams),
-        });
+        setStatementId(variables.id);
         queryClient.invalidateQueries("territory");
         queryClient.invalidateQueries("tree");
       },
@@ -185,10 +144,7 @@ export const StatementListBox: React.FC = () => {
           "statement-list",
           territoryId,
         ]);
-        hashParams["statement"] = variables.id;
-        history.push({
-          hash: queryString.stringify(hashParams),
-        });
+        setStatementId(variables.id);
         queryClient.invalidateQueries("tree");
       },
       onError: () => {
@@ -402,7 +358,7 @@ export const StatementListBox: React.FC = () => {
         Cell: ({ row }: Cell) => {
           return (
             <StyledSelectorCell>
-              {hashParams["statement"] === row.values.id ? (
+              {statementId === row.values.id ? (
                 <FaDotCircle
                   size={18}
                   onClick={() => selectStatementRow(row.values.id)}
@@ -418,13 +374,10 @@ export const StatementListBox: React.FC = () => {
         },
       },
     ];
-  }, [data, hashParams["statement"]]);
+  }, [data, statementId]);
 
   const selectStatementRow = (rowId: string) => {
-    hashParams["statement"] = rowId;
-    history.push({
-      hash: queryString.stringify(hashParams),
-    });
+    setStatementId(rowId);
   };
 
   statements.sort((a, b) =>

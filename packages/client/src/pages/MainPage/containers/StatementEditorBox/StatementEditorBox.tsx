@@ -1,7 +1,6 @@
 import React, { useState, useMemo, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "react-query";
 import api from "api";
-const queryString = require("query-string");
 
 import {
   FaTrashAlt,
@@ -11,7 +10,6 @@ import {
   FaCaretDown,
 } from "react-icons/fa";
 
-import { useLocation, useHistory } from "react-router";
 import { ActantTag } from "./../";
 import {
   CProp,
@@ -52,6 +50,7 @@ import { StatementEditorAttributes } from "./StatementEditorAttributes/Statement
 import { StyledSubRow } from "./StatementEditorActionTable/StatementEditorActionTableRow/StatementEditorActionTableRowStyles";
 import { ColumnInstance } from "react-table";
 import { StatementDoesNotExits } from "@shared/types/errors";
+import { useSearchParams } from "hooks";
 
 const classesActants = ["P", "G", "O", "C", "L", "V", "E", "S", "T", "R"];
 const classesPropType = ["C"];
@@ -60,12 +59,10 @@ const classesResources = ["R"];
 const classesTags = ["C", "P", "G", "O", "L", "V", "E", "S", "T", "R"];
 
 export const StatementEditorBox: React.FC = () => {
-  let history = useHistory();
-  let location = useLocation();
-  var hashParams = queryString.parse(location.hash);
-
-  const statementId = hashParams.statement;
-  const territoryId = hashParams.territory;
+  const {
+    statement: statementId,
+    setStatement: setStatementId,
+  } = useSearchParams();
 
   const queryClient = useQueryClient();
 
@@ -89,10 +86,7 @@ export const StatementEditorBox: React.FC = () => {
       errorStatement &&
       (errorStatement as any).error === "StatementDoesNotExits"
     ) {
-      hashParams["statement"] = "";
-      history.push({
-        hash: queryString.stringify(hashParams),
-      });
+      setStatementId("");
     }
   }, [errorStatement]);
 

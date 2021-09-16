@@ -1,13 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { useMutation, useQueryClient } from "react-query";
-import { useHistory, useLocation } from "react-router-dom";
 import { toast } from "react-toastify";
-const queryString = require("query-string");
 
 import api from "api";
 import { IActant } from "@shared/types";
 import { Submit } from "components";
 import useKeypress from "hooks/useKeyPress";
+import { useSearchParams } from "hooks";
 
 interface ContextMenuSubmitDelete {
   territoryActant: IActant;
@@ -24,10 +23,10 @@ export const ContextMenuSubmitDelete: React.FC<ContextMenuSubmitDelete> = ({
   }, []);
 
   const queryClient = useQueryClient();
-  let history = useHistory();
-  let location = useLocation();
-  var hashParams = queryString.parse(location.hash);
-  const territoryId = hashParams.territory;
+  const {
+    territory: territoryId,
+    setTerritory: setTerritoryId,
+  } = useSearchParams();
 
   const deleteTerritoryMutation = useMutation(
     async () => await api.actantsDelete(territoryActant.id),
@@ -36,10 +35,7 @@ export const ContextMenuSubmitDelete: React.FC<ContextMenuSubmitDelete> = ({
         toast.info(`Territory [${territoryActant.label}] deleted!`);
         queryClient.invalidateQueries("tree");
         if (territoryId === territoryActant.id) {
-          hashParams["territory"] = "";
-          history.push({
-            hash: queryString.stringify(hashParams),
-          });
+          setTerritoryId("");
         }
         onClose();
       },

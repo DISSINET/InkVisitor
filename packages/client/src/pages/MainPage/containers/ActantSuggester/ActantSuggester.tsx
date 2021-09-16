@@ -9,7 +9,7 @@ import { Entities } from "types";
 import { useMutation, useQuery, useQueryClient } from "react-query";
 import api from "api";
 import { CategoryActantType } from "@shared/enums";
-import { useDebounce } from "hooks";
+import { useDebounce, useSearchParams } from "hooks";
 
 const queryString = require("query-string");
 
@@ -34,9 +34,7 @@ export const ActantSuggester: React.FC<ActantSuggesterI> = ({
   const [allCategories, setAllCategories] = useState<false | IOption[]>();
   //const [territoryActantIds, setTerritoryActantIds] = useState<string[]>([]);
 
-  var hashParams = queryString.parse(location.hash);
-  const queryClient = useQueryClient();
-  const territoryId = hashParams.territory;
+  const { territory: territoryId } = useSearchParams();
 
   // territory query
   const { status, data: territoryActants, error, isFetching } = useQuery(
