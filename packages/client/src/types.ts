@@ -117,3 +117,9 @@ export interface IRequestSearch {
   actantId?: string;
 }
 export type DropdownItem = { value: string; label: string };
+
+export type SearchParams = {
+  territory?: string;
+  statement?: string;
+  actant?: string;
+};

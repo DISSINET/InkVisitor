@@ -21,6 +21,7 @@ import { setLayoutWidth } from "redux/features/layout/layoutWidthSlice";
 import { setPanelWidths } from "redux/features/layout/panelWidthsSlice";
 import { setSeparatorXPosition } from "redux/features/layout/separatorXPositionSlice";
 import api from "api";
+import { SearchParamsProvider } from "hooks/useParamsContext";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -71,20 +72,22 @@ export const App: React.FC<AppProps> = () => {
         <QueryClientProvider client={queryClient}>
           <ReactQueryDevtools initialIsOpen={false} />
           <BrowserRouter basename="apps/inkvisitor">
-            <Switch>
-              <Route
-                path="/"
-                exact
-                render={(props) => <MainPage {...props} size={size} />}
-              />
-              {api.isLoggedIn() ? (
+            <SearchParamsProvider>
+              <Switch>
                 <Route
-                  path="/acl"
+                  path="/"
                   exact
-                  render={(props) => <AclPage {...props} size={size} />}
+                  render={(props) => <MainPage {...props} size={size} />}
                 />
-              ) : null}
-            </Switch>
+                {api.isLoggedIn() ? (
+                  <Route
+                    path="/acl"
+                    exact
+                    render={(props) => <AclPage {...props} size={size} />}
+                  />
+                ) : null}
+              </Switch>
+            </SearchParamsProvider>
           </BrowserRouter>
         </QueryClientProvider>
       </ThemeProvider>

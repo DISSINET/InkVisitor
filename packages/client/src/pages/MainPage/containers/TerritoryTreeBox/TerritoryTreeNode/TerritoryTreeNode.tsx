@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from "react";
 import update from "immutability-helper";
-import { useHistory } from "react-router-dom";
+import { useHistory, useParams } from "react-router-dom";
 const queryString = require("query-string");
 import {
   BsCaretRightFill,
@@ -28,7 +28,7 @@ import { animated, config, useSpring } from "react-spring";
 import api from "api";
 import { IParentTerritory } from "@shared/types/territory";
 import { useMutation, useQueryClient } from "react-query";
-import { DraggedTerritoryItem, DragItem } from "types";
+import { DraggedTerritoryItem, DragItem, SearchParams } from "types";
 
 interface TerritoryTreeNode {
   territory: ITerritory;
@@ -57,8 +57,19 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
   const queryClient = useQueryClient();
 
   let history = useHistory();
+  const queryParams = new URLSearchParams(location.search);
+  const {
+    territory: territoryId,
+    statement: statementId,
+  }: SearchParams = useParams();
+
+  useEffect(() => {
+    console.log(territoryId);
+  }, [territoryId, statementId]);
+
   var hashParams = queryString.parse(location.hash);
   const selectedTerritoryId = hashParams.territory;
+
   const isSelected = selectedTerritoryId === territory.id;
 
   const [isExpanded, setIsExpanded] = useState(false);
@@ -122,10 +133,23 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
     }
   );
 
-  const onCaretClick = (id: string) => {
-    hashParams["territory"] = id;
+  useEffect(() => {
+    console.log(territoryId);
     history.push({
-      hash: queryString.stringify(hashParams),
+      search: `?${queryString.stringify({
+        territoryId,
+      })}`,
+    });
+  }, [territoryId]);
+
+  const onCaretClick = (id: string) => {
+    queryParams.set("territory", id);
+    // hashParams["territory"] = id;
+    history.push({
+      search: `?${queryString.stringify({
+        territory: id,
+      })}`,
+      // hash: queryString.stringify(hashParams),
     });
     setIsExpanded(!isExpanded);
   };
@@ -243,9 +267,11 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
                         <StyledFaCircle
                           size={11}
                           onClick={() => {
-                            hashParams["territory"] = id;
+                            queryParams.set("territory", id);
                             history.push({
-                              hash: queryString.stringify(hashParams),
+                              search: `?${queryString.stringify({
+                                territory: id,
+                              })}`,
                             });
                           }}
                         />
@@ -253,9 +279,11 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
                         <StyledFaDotCircle
                           size={11}
                           onClick={() => {
-                            hashParams["territory"] = id;
+                            queryParams.set("territory", id);
                             history.push({
-                              hash: queryString.stringify(hashParams),
+                              search: `?${queryString.stringify({
+                                territory: id,
+                              })}`,
                             });
                           }}
                         />

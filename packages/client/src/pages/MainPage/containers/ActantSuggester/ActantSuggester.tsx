@@ -9,7 +9,7 @@ import { Entities } from "types";
 import { useMutation, useQuery, useQueryClient } from "react-query";
 import api from "api";
 import { CategoryActantType } from "@shared/enums";
-import useDebounce from "hooks/useDebounce";
+import { useDebounce } from "hooks";
 
 const queryString = require("query-string");
 

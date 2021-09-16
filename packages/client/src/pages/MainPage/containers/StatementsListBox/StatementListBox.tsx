@@ -9,7 +9,7 @@ import {
   FaDotCircle,
   FaClone,
 } from "react-icons/fa";
-import { useLocation, useHistory } from "react-router";
+import { useLocation, useHistory, useParams } from "react-router";
 import { toast } from "react-toastify";
 const queryString = require("query-string");
 
@@ -33,6 +33,7 @@ import {
   StyledActionLabel,
 } from "./StatementLitBoxStyles";
 import { CStatement, DStatement } from "constructors";
+import { useSearchParams } from "hooks";
 
 const initialData: {
   statements: IStatement[];
@@ -44,13 +45,41 @@ const initialData: {
   label: "",
 };
 
+interface StatementListParamas {
+  statement: string;
+  territory: string;
+}
+
 export const StatementListBox: React.FC = () => {
   const queryClient = useQueryClient();
   let history = useHistory();
-  let location = useLocation();
-  var hashParams = queryString.parse(location.hash);
-  const territoryId = hashParams.territory;
-  const statementId = hashParams.statement;
+  let { hash, search } = useLocation();
+  var hashParams = queryString.parse(hash);
+
+  const {
+    territory: territoryId,
+    setTerritory: setTerritoryId,
+    statement: statementId,
+    setStatement: setstatementId,
+  } = useSearchParams();
+  // const [territoryId, setTerritoryId] = useState<string>("");
+  // const [statementId, setstatementId] = useState<string>("");
+
+  // useEffect(() => {
+  //   const params = new URLSearchParams(search);
+  //   const territoryId: string | null = params.get("territory");
+  //   const statementId = params.get("statement");
+  //   if (territoryId) {
+  //     setTerritoryId(territoryId);
+  //   }
+  //   if (statementId) {
+  //     setstatementId(statementId);
+  //   }
+  // }, []);
+
+  // const territoryId = hashParams.territory;
+  // const statementId = hashParams.statement;
+
   const [showSubmit, setShowSubmit] = useState(false);
   const [statementToDelete, setStatementToDelete] = useState<IStatement>();
 

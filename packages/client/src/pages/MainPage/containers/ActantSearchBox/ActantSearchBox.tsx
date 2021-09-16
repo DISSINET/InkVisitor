@@ -18,7 +18,7 @@ import { Entities, IRequestSearch } from "types";
 import { IOption, IResponseSearch } from "@shared/types";
 import { ActantType } from "@shared/enums";
 import { FaUnlink } from "react-icons/fa";
-import useDebounce from "hooks/useDebounce";
+import { useDebounce } from "hooks";
 
 const classesActants = ["P", "G", "O", "C", "L", "V", "E", "S", "T", "R"];
 
