@@ -27,6 +27,7 @@ import {
   StatementListBox,
   TerritoryTreeBox,
   UserOptionsModal,
+  UserListModal,
   LoginModal,
 } from "./containers";
 
@@ -79,6 +80,7 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
     (state) => state.layout.separatorXPosition
   );
   const queryClient = useQueryClient();
+  const [modalOpen, setModalOpen] = useState<boolean>(false);
 
   const handleLogOut = () => {
     api.signOut();
@@ -86,6 +88,14 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
     dispatch(setAuthToken(""));
     toast.success("You've been successfully logged out!");
     queryClient.removeQueries();
+  };
+
+  const handleUsersModalClic = () => {
+    setModalOpen(true);
+  };
+
+  const handleUsersModalCancelClick = () => {
+    setModalOpen(false);
   };
 
   const heightContent = size[1] - heightHeader - heightFooter;
@@ -130,6 +140,16 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
                     <StyledFaUserAlt size={14} />
                     <StyledUsername>{username}</StyledUsername>
                   </StyledUser>
+                  { 
+                  //TODO make condition based on user role
+                  (username == "admin") ?
+                  <Button
+                    label="Manage Users"
+                    color="info"
+                    onClick={() => handleUsersModalClic()}
+                  />
+                  : ''
+                  }
                   <Button
                     label="Log Out"
                     color="danger"
@@ -226,6 +246,7 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
         <Toast />
         <Footer height={heightFooter} />
         {!isLoggedIn && <LoginModal />}
+        <UserListModal isOpen={modalOpen}  handler={handleUsersModalCancelClick} />
       </StyledPage>
     </>
   );
