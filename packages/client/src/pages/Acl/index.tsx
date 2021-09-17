@@ -1,53 +1,37 @@
 import React, { useEffect, useState } from "react";
-import { DndProvider } from "react-dnd";
-import { HTML5Backend } from "react-dnd-html5-backend";
-
 import { toast } from "react-toastify";
 
-import {
-  Box,
-  Button,
-  Footer,
-  Header,
-  Panel,
-  PanelSeparator,
-  Toast,
-} from "components";
+import { Box, Button, Footer, Header, Toast } from "components";
 
-import { useHistory, useParams } from "react-router-dom";
 import api from "api";
-import { useQueryClient } from "react-query";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { setAuthToken } from "redux/features/authTokenSlice";
 import { setUsername } from "redux/features/usernameSlice";
 import {
   StyledUserBox,
-  StyledPanelWrap,
   StyledUser,
   StyledFaUserAlt,
   StyledText,
   StyledUsername,
-  StyledButtonWrap,
   StyledPage,
-} from "./MainPageStyles";
-import {
-  collapsedPanelWidth,
-  heightFooter,
-  heightHeader,
-  layoutWidthBreakpoint,
-} from "Theme/constants";
-import { RiMenuFoldFill, RiMenuUnfoldFill } from "react-icons/ri";
-import { setFirstPanelExpanded } from "redux/features/layout/firstPanelExpandedSlice";
-import { setFourthPanelExpanded } from "redux/features/layout/fourthPanelExpandedSlice";
+} from "./AclStyles";
+import { heightFooter, heightHeader } from "Theme/constants";
 import { useQuery } from "react-query";
 import { IResponsePermission, RequestPermissionUpdate } from "@shared/types";
 import { userRoleDict } from "@shared/dictionaries";
 
-interface MainPage {
+interface AclPage {
   size: number[];
 }
 
-const AclPage: React.FC<MainPage> = ({ size }) => {
+const initialData: IResponsePermission = {
+  id: "",
+  controller: "",
+  method: "",
+  roles: [],
+};
+
+const AclPage: React.FC<AclPage> = ({ size }) => {
   const isLoggedIn = api.isLoggedIn();
   const dispatch = useAppDispatch();
   const username = useAppSelector((state) => state.username);
@@ -64,8 +48,12 @@ const AclPage: React.FC<MainPage> = ({ size }) => {
       const res = await api.getAclPermissions();
       return res.data;
     },
-    { initialData: [] }
+    { initialData: initialData }
   );
+
+  useEffect(() => {
+    console.log(data);
+  }, [data]);
 
   const handleLogOut = () => {
     api.signOut();

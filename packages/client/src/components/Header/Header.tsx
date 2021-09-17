@@ -18,7 +18,7 @@ export const Header: React.FC<HeaderProps> = ({
   paddingY,
   left = <div />,
   right = <div />,
-  height = "auto",
+  height,
   color = "primary",
 }) => {
   const layoutWidth: number = useAppSelector(

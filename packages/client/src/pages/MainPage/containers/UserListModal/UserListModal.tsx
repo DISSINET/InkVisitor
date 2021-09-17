@@ -116,7 +116,7 @@ export const UserListModal: React.FC<UserListModal> = ({ isOpen, handler }) => {
   });
 
   return (
-    <Modal showModal={isOpen} onClose={() => handler()} width="normal">
+    <Modal showModal={isOpen} onClose={() => handler()} width="thin">
       <ModalHeader title={"Manage Users"} />
       <ModalContent>
         <StyledTable {...getTableProps()}>

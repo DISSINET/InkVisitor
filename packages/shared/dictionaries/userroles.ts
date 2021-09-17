@@ -1,18 +1,18 @@
-import { UserRoles } from "../enums";
+import { UserRole } from "../enums";
 
 export const userRoleDict = [
   {
-    value: UserRoles.Admin,
+    value: UserRole.Admin,
     label: "admin",
     info: "",
   },
   {
-    value: UserRoles.Editor,
+    value: UserRole.Editor,
     label: "editor",
     info: "",
   },
   {
-    value: UserRoles.Viewer,
+    value: UserRole.Viewer,
     label: "viewer",
     info: "",
   },

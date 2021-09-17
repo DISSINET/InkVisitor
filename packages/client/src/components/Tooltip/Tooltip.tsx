@@ -16,7 +16,7 @@ export const Tooltip: React.FC<Tooltip> = ({
   children,
   position = ["bottom center", "right center", "top center"],
   on = ["hover", "focus"],
-  label = "",
+  label = "(no label)",
   disabled = false,
   detail = "",
   attributes,
