@@ -1,3 +1,4 @@
+import { useSearchParams } from "hooks";
 import React, { useRef } from "react";
 import {
   DragSourceMonitor,
@@ -8,7 +9,6 @@ import {
 } from "react-dnd";
 import { FaGripVertical } from "react-icons/fa";
 import { Cell, ColumnInstance } from "react-table";
-const queryString = require("query-string");
 
 import { DragItem, ItemTypes } from "types";
 import { StatementListRowExpanded } from "./StatementListRowExpanded";
@@ -31,8 +31,7 @@ export const StatementListRow: React.FC<StatementListRow> = ({
   handleClick = () => {},
   visibleColumns,
 }) => {
-  var hashParams = queryString.parse(location.hash);
-  const statementId = hashParams.statement;
+  const { statement: statementId } = useSearchParams();
 
   const dropRef = useRef<HTMLTableRowElement>(null);
   const dragRef = useRef<HTMLTableDataCellElement>(null);

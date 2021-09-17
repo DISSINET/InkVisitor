@@ -6,7 +6,6 @@ import {
   useDrop,
   XYCoord,
 } from "react-dnd";
-const queryString = require("query-string");
 
 import { DragItem, ItemTypes, Entities } from "types";
 import {
@@ -17,9 +16,9 @@ import {
   StyledTooltipSeparator,
 } from "./TagStyles";
 import { Tooltip } from "components";
-import { useHistory, useLocation } from "react-router-dom";
 import { useAppDispatch } from "redux/hooks";
 import { setDraggedTerritory } from "redux/features/territoryTree/draggedTerritorySlice";
+import { useSearchParams } from "hooks";
 
 interface TagProps {
   propId: string;
@@ -74,9 +73,7 @@ export const Tag: React.FC<TagProps> = ({
   updateOrderFn = () => {},
   lvl,
 }) => {
-  let history = useHistory();
-  let location = useLocation();
-  var hashParams = queryString.parse(location.hash);
+  const { setActant: setActantId } = useSearchParams();
   const dispatch = useAppDispatch();
 
   const ref = useRef<HTMLDivElement>(null);
@@ -144,10 +141,7 @@ export const Tag: React.FC<TagProps> = ({
     e.stopPropagation();
     e.nativeEvent.stopImmediatePropagation();
 
-    hashParams["actant"] = propId;
-    history.push({
-      hash: queryString.stringify(hashParams),
-    });
+    setActantId(propId);
   };
 
   return (
