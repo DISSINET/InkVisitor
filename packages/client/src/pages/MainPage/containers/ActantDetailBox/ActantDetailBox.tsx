@@ -1,5 +1,4 @@
 import React, { useEffect, useState, useMemo } from "react";
-const queryString = require("query-string");
 
 import {
   Button,
@@ -29,7 +28,6 @@ import {
   StyledActantPreviewRow,
   StyledTagWrap,
 } from "./ActandDetailBoxStyles";
-import { useHistory, useLocation } from "react-router-dom";
 import api from "api";
 import { useMutation, useQuery, useQueryClient } from "react-query";
 import { IResponseStatement, IStatement } from "@shared/types";
@@ -55,13 +53,15 @@ import {
 import { ActantType, Position } from "@shared/enums";
 import { toast } from "react-toastify";
 import { ActantDetailMetaTable } from "./ActantDetailMetaTable/ActantDetailMetaTable";
+import { useSearchParams } from "hooks";
 
 interface ActantDetailBox {}
 export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
-  let history = useHistory();
-  let location = useLocation();
-  var hashParams = queryString.parse(location.hash);
-  const actantId = hashParams.actant;
+  const {
+    actant: actantId,
+    setActant: setActantId,
+    setStatement: setStatementId,
+  } = useSearchParams();
 
   const [showSubmit, setShowSubmit] = useState(false);
   const [usedInPage, setUsedInPage] = useState<number>(0);
@@ -80,10 +80,7 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
 
   useEffect(() => {
     if (error && (error as any).error === "ActantDoesNotExits") {
-      hashParams["actant"] = "";
-      history.push({
-        hash: queryString.stringify(hashParams),
-      });
+      setActantId("");
     }
   }, [error]);
 
@@ -239,10 +236,7 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
         queryClient.invalidateQueries("statement");
         queryClient.invalidateQueries("territory");
         queryClient.invalidateQueries("tree");
-        hashParams["actant"] = "";
-        history.push({
-          hash: queryString.stringify(hashParams),
-        });
+        setActantId("");
       },
     }
   );
@@ -664,10 +658,7 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
                           color="warning"
                           tooltip="edit statement"
                           onClick={async () => {
-                            hashParams["statement"] = statement.id;
-                            history.push({
-                              hash: queryString.stringify(hashParams),
-                            });
+                            setStatementId(statement.id);
                           }}
                         />
                       </StyledSectionMetaTableButtonGroup>
