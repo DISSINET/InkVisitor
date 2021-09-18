@@ -20,7 +20,7 @@ export default Router().get(
       statementId
     );
     if (!statementData) {
-      throw new StatementDoesNotExits(`statement ${statementId} was not found`);
+      throw new StatementDoesNotExits(`statement ${statementId} was not found`, statementId);
     }
 
     const statementModel = new Statement({ ...statementData });

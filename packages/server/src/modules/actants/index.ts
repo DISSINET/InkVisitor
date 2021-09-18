@@ -26,7 +26,6 @@ import {
 } from "@shared/types";
 import { mergeDeep } from "@common/functions";
 import Statement from "@models/statement";
-import { IDbModel } from "@models/common";
 
 export default Router()
   .get(
@@ -44,7 +43,7 @@ export default Router()
       );
 
       if (!actant) {
-        throw new ActantDoesNotExits(`actant ${actantId} was not found`);
+        throw new ActantDoesNotExits(`actant ${actantId} was not found`, actantId);
       }
 
       const usedInStatements = await Statement.findDependentStatements(
@@ -107,7 +106,7 @@ export default Router()
       const existingActant = await findActantById(request.db, actantId);
       if (!existingActant) {
         throw new ActantDoesNotExits(
-          `actant with id ${actantId} does not exist`
+          `actant with id ${actantId} does not exist`, actantId
         );
       }
 
@@ -148,7 +147,7 @@ export default Router()
       const existingActant = await findActantById(request.db, actantId);
       if (!existingActant) {
         throw new ActantDoesNotExits(
-          `actant with id ${actantId} does not exist`
+          `actant with id ${actantId} does not exist`, actantId
         );
       }
 
@@ -185,7 +184,7 @@ export default Router()
 
       const actant = await findActantById<IActant>(request.db, actantId);
       if (!actant) {
-        throw new ActantDoesNotExits(`actant ${actantId} was not found`);
+        throw new ActantDoesNotExits(`actant ${actantId} was not found`, actantId);
       }
 
       const meta: IResponseStatement[] = [];
