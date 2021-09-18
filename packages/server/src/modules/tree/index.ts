@@ -1,9 +1,5 @@
 import { Router, Request } from "express";
-import {
-  findActantById,
-  getActants,
-  getTerritoryChilds,
-} from "@service/shorthands";
+import { findActantById, getActants } from "@service/shorthands";
 import {
   BadParams,
   TerritoriesBrokenError,
@@ -155,14 +151,16 @@ export default Router()
         class: ActantType.Territory,
       });
       if (!territory) {
-        throw new TerritoryDoesNotExits("territory does not exist");
+        throw new TerritoryDoesNotExits(`territory ${moveId} does not exist`, moveId);
       }
 
       const parent = await findActantById<ITerritory>(request.db, parentId, {
         class: ActantType.Territory,
       });
       if (!parent) {
-        throw new TerritoryDoesNotExits("parent territory does not exist");
+        throw new TerritoryDoesNotExits(
+          `parent territory ${parentId} does not exist`, parentId
+        );
       }
 
       const childsMap = await new Territory({ ...parent }).findChilds(
@@ -208,7 +206,6 @@ export default Router()
               .parent as IParentTerritory
           ).order;
         }
-
 
         territory.data.parent.order = newOrderValue;
       }

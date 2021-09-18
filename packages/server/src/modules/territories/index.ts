@@ -48,7 +48,8 @@ export default Router()
       );
       if (!territory) {
         throw new TerritoryDoesNotExits(
-          `territory ${territoryId} was not found`
+          `territory ${territoryId} was not found`,
+          territoryId
         );
       }
 
@@ -84,7 +85,8 @@ export default Router()
       );
       if (!territory) {
         throw new TerritoryDoesNotExits(
-          `territory ${territoryId} was not found`
+          `territory ${territoryId} was not found`,
+          territoryId
         );
       }
 
@@ -112,7 +114,10 @@ export default Router()
         moveId
       );
       if (!statement) {
-        throw new StatementDoesNotExits("statement does not exist");
+        throw new StatementDoesNotExits(
+          `statement ${moveId} does not exist`,
+          moveId
+        );
       }
 
       const territory: ITerritory = await findActantById<ITerritory>(
@@ -120,7 +125,10 @@ export default Router()
         statement.data.territory.id
       );
       if (!territory) {
-        throw new TerritoryDoesNotExits("territory does not exist");
+        throw new TerritoryDoesNotExits(
+          `territory ${statement.data.territory.id} does not exist`,
+          statement.data.territory.id
+        );
       }
 
       const out: IResponseGeneric = {

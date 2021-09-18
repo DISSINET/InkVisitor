@@ -57,7 +57,7 @@ describe("Statements get", function () {
         .get(`${apiPath}/statements/get/invalidId12345`)
         .set("authorization", "Bearer " + supertestConfig.token)
         .expect(
-          testErroneousResponse.bind(undefined, new StatementDoesNotExits(""))
+          testErroneousResponse.bind(undefined, new StatementDoesNotExits("", ""))
         )
         .then(() => done());
     });
