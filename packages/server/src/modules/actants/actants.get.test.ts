@@ -23,7 +23,7 @@ describe("Actants get method", function () {
         .get(`${apiPath}/actants/get/123`)
         .set("authorization", "Bearer " + supertestConfig.token)
         .expect(
-          testErroneousResponse.bind(undefined, new ActantDoesNotExits(""))
+          testErroneousResponse.bind(undefined, new ActantDoesNotExits("", ""))
         )
         .then(() => done());
     });

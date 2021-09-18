@@ -41,7 +41,7 @@ export default Router()
       );
       if (!existingPermission) {
         throw new PermissionDoesNotExits(
-          `permission with id ${permissionId} does not exist`
+          `permission with id ${permissionId} does not exist`, permissionId
         );
       }
 
@@ -82,7 +82,7 @@ export default Router()
       );
       if (!existingPermission) {
         throw new PermissionDoesNotExits(
-          `permission with id ${permissionId} does not exist`
+          `permission with id ${permissionId} does not exist`, permissionId
         );
       }
 

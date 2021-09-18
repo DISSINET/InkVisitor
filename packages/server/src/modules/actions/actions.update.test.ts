@@ -36,7 +36,7 @@ describe("Actions update", function () {
         .set("authorization", "Bearer " + supertestConfig.token)
         .expect("Content-Type", /json/)
         .expect(
-          testErroneousResponse.bind(undefined, new ActionDoesNotExits(""))
+          testErroneousResponse.bind(undefined, new ActionDoesNotExits("", ""))
         )
         .then(() => done());
     });
