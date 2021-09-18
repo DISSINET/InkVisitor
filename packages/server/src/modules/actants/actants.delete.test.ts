@@ -31,7 +31,7 @@ describe("Actants delete", function () {
         .set("authorization", "Bearer " + supertestConfig.token)
         .expect("Content-Type", /json/)
         .expect(
-          testErroneousResponse.bind(undefined, new ActantDoesNotExits(""))
+          testErroneousResponse.bind(undefined, new ActantDoesNotExits("", ""))
         )
         .then(() => done());
     });

@@ -1,7 +1,6 @@
 import { Request } from "express";
 import { Router } from "express";
 import { IUser } from "@shared/types/user";
-import { v4 } from "uuid";
 import {
   findUserByName,
   findUserById,
@@ -29,9 +28,7 @@ import {
   IResponseAdministration,
   IActant,
   IResponseGeneric,
-  IResponseActant,
 } from "@shared/types";
-import actants from "@modules/actants";
 
 export default Router()
   .post(
@@ -46,7 +43,7 @@ export default Router()
 
       const user = await findUserByName(request.db, name);
       if (!user) {
-        throw new UserDoesNotExits(`user ${name} was not found`);
+        throw new UserDoesNotExits(`user ${name} was not found`, name);
       }
 
       if (!checkPassword(rawPassword, user.password || "")) {
@@ -71,7 +68,7 @@ export default Router()
 
       const user = await findUserById(request.db, userId as string);
       if (!user) {
-        throw new UserDoesNotExits(`user ${userId} was not found`);
+        throw new UserDoesNotExits(`user ${userId} was not found`, userId);
       }
 
       return user;
@@ -147,7 +144,7 @@ export default Router()
 
       const existingUser = await findUserById(request.db, userId);
       if (!existingUser) {
-        throw new UserDoesNotExits(`user with id ${userId} does not exist`);
+        throw new UserDoesNotExits(`user with id ${userId} does not exist`, userId);
       }
 
       const result = await updateUser(request.db, userId, userData);
@@ -172,7 +169,7 @@ export default Router()
 
       const existingUser = await findUserById(request.db, userId);
       if (!existingUser) {
-        throw new UserDoesNotExits(`user with id ${userId} does not exist`);
+        throw new UserDoesNotExits(`user with id ${userId} does not exist`, userId);
       }
 
       const result = await deleteUser(request.db, userId);
@@ -205,7 +202,7 @@ export default Router()
 
       const user = await findUserById(request.db, userId);
       if (!user) {
-        throw new UserDoesNotExits(`user with id ${userId} does not exist`);
+        throw new UserDoesNotExits(`user with id ${userId} does not exist`, userId);
       }
 
       const out: IResponseBookmarkFolder[] = [];

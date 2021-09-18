@@ -25,7 +25,7 @@ describe("Territories get query", function () {
         .get(`${apiPath}/territories/get/123`)
         .set("authorization", "Bearer " + supertestConfig.token)
         .expect(
-          testErroneousResponse.bind(undefined, new TerritoryDoesNotExits(""))
+          testErroneousResponse.bind(undefined, new TerritoryDoesNotExits("", ""))
         )
         .then(() => done());
     });

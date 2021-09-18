@@ -27,7 +27,7 @@ export default Router()
 
       const action = await findActionById(request.db, actionId);
       if (!action) {
-        throw new ActionDoesNotExits(`action ${actionId} was not found`);
+        throw new ActionDoesNotExits(`action ${actionId} was not found`, actionId);
       }
 
       return action;
@@ -109,7 +109,7 @@ export default Router()
 
       const existingAction = await findActionById(request.db, actionId);
       if (!existingAction) {
-        throw new ActionDoesNotExits(`action ${actionId} does not exist`);
+        throw new ActionDoesNotExits(`action ${actionId} does not exist`, actionId);
       }
 
       const result = await updateAction(request.db, actionId, actionData);
@@ -134,7 +134,7 @@ export default Router()
 
       const existingAction = await findActionById(request.db, actionId);
       if (!existingAction) {
-        throw new ActionDoesNotExits(`action ${actionId} does not exist`);
+        throw new ActionDoesNotExits(`action ${actionId} does not exist`, actionId);
       }
 
       const result = await deleteAction(request.db, actionId);

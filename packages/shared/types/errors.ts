@@ -5,9 +5,10 @@
  *   - statusCode method returns static 'code' attribute from constructed class
  */
 export class CustomError extends Error {
-  public static code: number = 400;
-  public loggable: boolean = false;
-  public log: string = "";
+  public static code: number = 400; // html code
+  public loggable: boolean = false; // errors could be logged into console as warn messages
+  public log: string = ""; // same as first constructor argument - wont be thrown in realtime, but it will be printed as warning
+  public message: string = ""; // this is what will be printed in output - public text, some error classes have overriden message attr
 
   constructor(m: string) {
     super(m);
@@ -72,7 +73,12 @@ class BadParams extends CustomError {
  */
 class UserDoesNotExits extends CustomError {
   public static code = 400;
-  message = "User does not exist";
+  message = "User $1 does not exist";
+
+  constructor(m: string, userId: string) {
+    super(m);
+    this.message = this.message.replace("$1", userId);
+  }
 }
 
 /**
@@ -80,7 +86,12 @@ class UserDoesNotExits extends CustomError {
  */
 class ActantDoesNotExits extends CustomError {
   public static code = 400;
-  message = "Actant does not exist";
+  message = "Actant $1 does not exist";
+
+  constructor(m: string, actantId: string) {
+    super(m);
+    this.message = this.message.replace("$1", actantId);
+  }
 }
 
 /**
@@ -88,7 +99,12 @@ class ActantDoesNotExits extends CustomError {
  */
 class ActionDoesNotExits extends CustomError {
   public static code = 400;
-  message = "Action does not exist";
+  message = "Action $1 does not exist";
+
+  constructor(m: string, actionId: string) {
+    super(m);
+    this.message = this.message.replace("$1", actionId);
+  }
 }
 
 /**
@@ -96,7 +112,12 @@ class ActionDoesNotExits extends CustomError {
  */
 class StatementDoesNotExits extends CustomError {
   public static code = 400;
-  message = "Statement does not exist";
+  message = "Statement $1 does not exist";
+
+  constructor(m: string, statementId: string) {
+    super(m);
+    this.message = this.message.replace("$1", statementId);
+  }
 }
 
 /**
@@ -104,7 +125,12 @@ class StatementDoesNotExits extends CustomError {
  */
 class TerritoryDoesNotExits extends CustomError {
   public static code = 400;
-  message = "Territory does not exist";
+  message = "Territory $1 does not exist";
+
+  constructor(m: string, territoryId: string) {
+    super(m);
+    this.message = this.message.replace("$1", territoryId);
+  }
 }
 
 /**
@@ -112,7 +138,12 @@ class TerritoryDoesNotExits extends CustomError {
  */
 class PermissionDoesNotExits extends CustomError {
   public static code = 400;
-  message = "Permission does not exist";
+  message = "Permission $1 does not exist";
+
+  constructor(m: string, permissionId: string) {
+    super(m);
+    this.message = this.message.replace("$1", permissionId);
+  }
 }
 
 /**
