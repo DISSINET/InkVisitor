@@ -1,11 +1,13 @@
+import { Logic } from "../enums";
+
 export const logicDict = [
   {
-    value: "1",
+    value: Logic.Positive,
     label: "positive",
     info: "",
   },
   {
-    value: "2",
+    value: Logic.Negative,
     label: "negative",
     info: "",
   },

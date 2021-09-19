@@ -3,13 +3,13 @@ import {
   ActantType,
   EntityActantType,
   ActantStatus,
-  ActantLogicalType,
+  EntityLogicalType,
 } from "@shared/enums";
 import { IEntity } from "@shared/types/entity";
 import Actant from "./actant";
 
 class EntityData implements IModel {
-  logicalType: ActantLogicalType = "1";
+  logicalType: EntityLogicalType = EntityLogicalType.Definite;
   language: string[] = ["eng"];
   constructor(data: UnknownObject) {
     if (!data) {
@@ -31,7 +31,7 @@ class Entity extends Actant implements IEntity {
 
   label: string = "";
   detail: string = "";
-  status: ActantStatus = "0";
+  status: ActantStatus = ActantStatus.Pending;
   language: string[] = ["eng"];
   notes: string[] = [];
 

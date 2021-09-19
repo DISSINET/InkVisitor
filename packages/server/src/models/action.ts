@@ -1,11 +1,5 @@
 import { fillFlatObject, UnknownObject, IModel } from "./common";
-import {
-  ActantType,
-  EntityActantType,
-  ActantStatus,
-  ActantLogicalType,
-} from "@shared/enums";
-import { IEntity } from "@shared/types/entity";
+import { ActantType, ActantStatus } from "@shared/enums";
 import Actant from "./actant";
 import { IAction } from "@shared/types";
 import { ActionEntity, ActionValency } from "@shared/types/action";
@@ -43,7 +37,7 @@ class Action extends Actant implements IAction {
 
   label: string = "";
   detail: string = "";
-  status: ActantStatus = "0";
+  status: ActantStatus = ActantStatus.Pending;
   language: string[] = ["eng"];
   notes: string[] = [];
 

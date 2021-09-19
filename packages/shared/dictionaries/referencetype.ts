@@ -1,12 +1,14 @@
+import { ReferenceType } from "../enums";
+
 export const referenceTypeDict = [
-    {
-        value: "1",
-        label: "Primary",
-        info: "",
-    },
-    {
-        value: "2",
-        label: "Secondary",
-        info: "",
-    },
+  {
+    value: ReferenceType.Primary,
+    label: "Primary",
+    info: "",
+  },
+  {
+    value: ReferenceType.Secondary,
+    label: "Secondary",
+    info: "",
+  },
 ];

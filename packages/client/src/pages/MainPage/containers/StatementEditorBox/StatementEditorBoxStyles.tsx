@@ -4,7 +4,7 @@ const StyledGrid = styled.div`
   display: grid;
   align-items: center;
   padding-left: ${({ theme }) => theme.space[0]};
-  grid-template-columns: auto auto auto auto auto;
+  grid-template-columns: auto auto auto;
   width: fit-content;
   grid-template-rows: auto;
   grid-auto-flow: row;
@@ -21,12 +21,11 @@ interface StyledEditorSection {
   lastSection?: boolean;
 }
 export const StyledEditorSection = styled.div<StyledEditorSection>`
-  padding-top: ${({ theme, firstSection = false }) =>
-    firstSection ? 0 : theme.space[4]};
-  padding-bottom: ${({ theme }) => theme.space[6]};
+  padding: ${({ theme }) => theme.space[6]};
   border-bottom-width: ${({ theme, lastSection = false }) =>
-    lastSection ? theme.borderWidth[0] : theme.borderWidth[2]};
-  border-bottom-color: ${({ theme }) => theme.color["gray"][600]};
+    lastSection ? theme.borderWidth[0] : theme.borderWidth[1]};
+  border-bottom-color: ${({ theme }) => theme.color["gray"][500]};
+  background-color: ${({ theme }) => theme.color["gray"][200]};
   border-bottom-style: solid;
 `;
 
@@ -35,7 +34,7 @@ export const StyledEditorSectionHeader = styled.div<StyledEditorSectionHeader>`
   font-weight: ${({ theme }) => theme.fontWeight.bold};
   font-size: ${({ theme }) => theme.fontSize.xl};
   margin-bottom: ${({ theme }) => theme.space["4"]};
-  color: ${({ theme }) => theme.color["gray"][600]};
+  color: ${({ theme }) => theme.color["primary"]};
 `;
 
 interface StyledEditorSectionContent {}
@@ -49,6 +48,7 @@ export const StyledListHeaderColumn = styled.div<StyledListHeaderColumn>`
   font-weight: ${({ theme }) => theme.fontWeight.light};
   margin-left: ${({ theme }) => theme.space[1]};
   font-size: ${({ theme }) => theme.fontSize["sm"]};
+  color: ${({ theme }) => theme.color["info"]};
   text-align: left;
   font-style: italic;
 `;
@@ -96,7 +96,9 @@ export const StyledPropLineColumn = styled(
 
 // references
 interface StyledReferencesList {}
-export const StyledReferencesList = styled(StyledGrid)<StyledReferencesList>``;
+export const StyledReferencesList = styled(StyledGrid)<StyledReferencesList>`
+  grid-template-columns: auto auto auto auto;
+`;
 
 interface StyledReferencesListColumn {}
 export const StyledReferencesListColumn = styled(

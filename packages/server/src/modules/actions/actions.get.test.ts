@@ -41,7 +41,7 @@ describe("Actions get", function () {
         .get(`${apiPath}/actions/get/invalidId12345`)
         .set("authorization", "Bearer " + supertestConfig.token)
         .expect(
-          testErroneousResponse.bind(undefined, new ActionDoesNotExits(""))
+          testErroneousResponse.bind(undefined, new ActionDoesNotExits("", ""))
         )
         .then(() => done());
     });

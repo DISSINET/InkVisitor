@@ -1,7 +1,5 @@
 import React from "react";
 import { UseMutationResult, useQueryClient } from "react-query";
-import { useHistory, useLocation } from "react-router-dom";
-const queryString = require("query-string");
 import { FaPlus, FaRecycle } from "react-icons/fa";
 
 import {
@@ -16,6 +14,7 @@ import { IActant, IStatement } from "@shared/types";
 import { CStatement } from "constructors";
 import { Button, ButtonGroup } from "components";
 import { useAppSelector } from "redux/hooks";
+import { useSearchParams } from "hooks";
 
 interface StatementListHeader {
   data: {
@@ -35,11 +34,7 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
   addStatementAtTheEndMutation,
 }) => {
   const queryClient = useQueryClient();
-  let history = useHistory();
-  let location = useLocation();
-  var hashParams = queryString.parse(location.hash);
-  const territoryId = hashParams.territory;
-  const statementId = hashParams.statement;
+  const { territory: territoryId } = useSearchParams();
 
   const selectedTerritoryPath = useAppSelector(
     (state) => state.territoryTree.selectedTerritoryPath

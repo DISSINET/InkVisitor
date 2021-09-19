@@ -6,16 +6,16 @@ interface StyledHeader {
   bgColor: string;
   paddingX?: number;
   paddingY?: number;
-  height: number | "auto";
+  height?: number;
   layoutWidth: number;
 }
 export const StyledHeader = styled.div<StyledHeader>`
-  height: ${({ height }) => (height === "auto" ? "auto" : `${height / 10}rem`)};
+  height: ${({ height }) => (height ? `${height / 10}rem` : "auto")};
   padding: ${({ paddingX, paddingY }) =>
     `${paddingY || paddingY === 0 ? `${paddingY / 10}rem` : space10} ${
       paddingX || paddingX === 0 ? `${paddingX / 10}rem` : space3
     }`};
-  width: ${({ layoutWidth }) => layoutWidth};
+  width: ${({ layoutWidth }) => (layoutWidth > 0 ? layoutWidth : "100%")};
   background-color: ${({ theme, bgColor }) => theme.color[bgColor]};
   color: ${({ theme }) => theme.color["white"]};
   display: flex;

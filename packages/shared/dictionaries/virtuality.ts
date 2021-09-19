@@ -1,31 +1,33 @@
+import { Virtuality } from "../enums";
+
 export const virtualityDict = [
   {
-    value: "1",
+    value: Virtuality.Reality,
     label: "reality",
     info: "",
   },
   {
-    value: "2",
+    value: Virtuality.Possibility,
     label: "possibility",
     info: "",
   },
   {
-    value: "3",
+    value: Virtuality.Probability,
     label: "probability",
     info: "",
   },
   {
-    value: "4",
+    value: Virtuality.Certitude,
     label: "certitude",
     info: "",
   },
   {
-    value: "5",
+    value: Virtuality.Allegation,
     label: "allegation",
     info: "",
   },
   {
-    value: "6",
+    value: Virtuality.Semblance,
     label: "semblance",
     info: "",
   },

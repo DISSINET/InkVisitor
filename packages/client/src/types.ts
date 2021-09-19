@@ -100,11 +100,6 @@ export const ItemTypes = {
   ACTANT_ROW: "ACTANT_ROW",
 };
 
-export type ToggleItem = {
-  value: string;
-  label: String | JSX.Element;
-  tooltip?: string;
-};
 export type DragItem = {
   index: number;
   id: string;
@@ -122,3 +117,9 @@ export interface IRequestSearch {
   actantId?: string;
 }
 export type DropdownItem = { value: string; label: string };
+
+export type SearchParams = {
+  territory?: string;
+  statement?: string;
+  actant?: string;
+};

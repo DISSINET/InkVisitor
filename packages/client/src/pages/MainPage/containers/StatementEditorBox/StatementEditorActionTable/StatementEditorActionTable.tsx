@@ -111,7 +111,8 @@ export const StatementEditorActionTable: React.FC<StatementEditorActionTable> =
                     key="d"
                     tooltip="unlink action"
                     icon={<FaUnlink />}
-                    color="danger"
+                    inverted={true}
+                    color="plain"
                     onClick={() => {
                       updateAction(sAction.id, {
                         action: "",
@@ -168,7 +169,8 @@ export const StatementEditorActionTable: React.FC<StatementEditorActionTable> =
             <Button
               key="d"
               icon={<FaTrashAlt />}
-              color="danger"
+              color="plain"
+              inverted={true}
               tooltip="remove action row"
               onClick={() => {
                 removeAction(row.values.data.sAction.id);
@@ -188,7 +190,8 @@ export const StatementEditorActionTable: React.FC<StatementEditorActionTable> =
               <Button
                 key="a"
                 icon={<FaPlus />}
-                color="primary"
+                color="plain"
+                inverted={true}
                 tooltip="add new prop"
                 onClick={() => {
                   addProp(propOriginId);
@@ -203,6 +206,7 @@ export const StatementEditorActionTable: React.FC<StatementEditorActionTable> =
     const getRowId = useCallback((row) => {
       return row.id;
     }, []);
+    
     const {
       getTableProps,
       getTableBodyProps,
@@ -239,18 +243,6 @@ export const StatementEditorActionTable: React.FC<StatementEditorActionTable> =
 
     return (
       <StyledTable {...getTableProps()}>
-        <StyledTHead>
-          {headerGroups.map((headerGroup, key) => (
-            <tr {...headerGroup.getHeaderGroupProps()} key={key}>
-              <th></th>
-              {headerGroup.headers.map((column, key) => (
-                <StyledTh {...column.getHeaderProps()} key={key}>
-                  {column.render("Header")}
-                </StyledTh>
-              ))}
-            </tr>
-          ))}
-        </StyledTHead>
         <tbody {...getTableBodyProps()}>
           {rows.map((row: Row, i: number) => {
             prepareRow(row);

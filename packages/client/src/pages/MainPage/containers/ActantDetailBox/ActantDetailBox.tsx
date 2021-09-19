@@ -1,5 +1,4 @@
 import React, { useEffect, useState, useMemo } from "react";
-const queryString = require("query-string");
 
 import {
   Button,
@@ -29,50 +28,40 @@ import {
   StyledActantPreviewRow,
   StyledTagWrap,
 } from "./ActandDetailBoxStyles";
-import { useHistory, useLocation } from "react-router-dom";
 import api from "api";
 import { useMutation, useQuery, useQueryClient } from "react-query";
-import {
-  IActant,
-  IOption,
-  IResponseStatement,
-  IStatement,
-} from "@shared/types";
+import { IResponseStatement, IStatement } from "@shared/types";
 import {
   FaEdit,
   FaPlus,
-  FaUnlink,
   FaTrashAlt,
   FaStepBackward,
   FaStepForward,
   FaRecycle,
 } from "react-icons/fa";
-import {
-  ActantTag,
-  ActionDropdown,
-  ActantSuggester,
-  ElvlToggle,
-  CertaintyToggle,
-} from "..";
+import { ActantTag } from "..";
 
-import { CMetaStatement, CStatementActant } from "constructors";
+import { CMetaStatement } from "constructors";
 import { findPositionInStatement } from "utils";
-import { ActantDetailMetaTableRow } from "./ActantDetailMetaTableRow/ActantDetailMetaTableRow";
+import { ActantDetailMetaTableRow } from "./ActantDetailMetaTable/ActantDetailMetaTableRow";
 import {
   actantLogicalTypeDict,
   actantStatusDict,
   languageDict,
   entitiesDict,
 } from "@shared/dictionaries";
-import { composeWithDevTools } from "redux-devtools-extension";
+import { ActantType, Position } from "@shared/enums";
 import { toast } from "react-toastify";
+import { ActantDetailMetaTable } from "./ActantDetailMetaTable/ActantDetailMetaTable";
+import { useSearchParams } from "hooks";
 
 interface ActantDetailBox {}
 export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
-  let history = useHistory();
-  let location = useLocation();
-  var hashParams = queryString.parse(location.hash);
-  const actantId = hashParams.actant;
+  const {
+    actant: actantId,
+    setActant: setActantId,
+    setStatement: setStatementId,
+  } = useSearchParams();
 
   const [showSubmit, setShowSubmit] = useState(false);
   const [usedInPage, setUsedInPage] = useState<number>(0);
@@ -80,19 +69,20 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
 
   const queryClient = useQueryClient();
 
-  const {
-    status,
-    data: actant,
-    error,
-    isFetching,
-  } = useQuery(
+  const { status, data: actant, error, isFetching } = useQuery(
     ["actant", actantId],
     async () => {
       const res = await api.detailGet(actantId);
       return res.data;
     },
-    { enabled: !!actantId && api.isLoggedIn() }
+    { enabled: !!actantId && api.isLoggedIn(), retry: 0 }
   );
+
+  useEffect(() => {
+    if (error && (error as any).error === "ActantDoesNotExits") {
+      setActantId("");
+    }
+  }, [error]);
 
   const usedInPages = useMemo(() => {
     if (actant && actant.usedIn) {
@@ -109,11 +99,11 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
   const actantMode = useMemo(() => {
     const actantClass = actant?.class;
     if (actantClass) {
-      if (actantClass === "A") {
+      if (actantClass === ActantType.Action) {
         return "action";
-      } else if (actantClass === "T") {
+      } else if (actantClass === ActantType.Territory) {
         return "territory";
-      } else if (actantClass === "R") {
+      } else if (actantClass === ActantType.Resource) {
         return "resource";
       }
     }
@@ -138,13 +128,19 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
     }
   }, [usedInPage, actantId, actant]);
 
+  // sort meta statements by type label
   const metaStatements = useMemo(() => {
     if (actant && actant.metaStatements) {
       const sorteMetaStatements = [...actant.metaStatements];
       sorteMetaStatements.sort(
         (s1: IResponseStatement, s2: IResponseStatement) => {
-          const typeSActant1 = s1.data.actants.find((a) => a.position == "a1");
-          const typeSActant2 = s2.data.actants.find((a) => a.position == "a1");
+          const typeSActant1 = s1.data.actants.find(
+            (a) => a.position == Position.Actant1
+          );
+          const typeSActant2 = s2.data.actants.find(
+            (a) => a.position == Position.Actant1
+          );
+
           const typeActant1 = typeSActant1
             ? s1.actants.find((a) => a.id === typeSActant1.actant)
             : false;
@@ -152,6 +148,7 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
           const typeActant2 = typeSActant2
             ? s2.actants.find((a) => a.id === typeSActant2.actant)
             : false;
+
           if (
             typeActant1 === false ||
             typeSActant1?.actant === "" ||
@@ -239,10 +236,7 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
         queryClient.invalidateQueries("statement");
         queryClient.invalidateQueries("territory");
         queryClient.invalidateQueries("tree");
-        hashParams["actant"] = "";
-        history.push({
-          hash: queryString.stringify(hashParams),
-        });
+        setActantId("");
       },
     }
   );
@@ -263,6 +257,7 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
                   color="danger"
                   icon={<FaTrashAlt />}
                   label="remove actant"
+                  inverted={true}
                   onClick={() => {
                     setShowSubmit(true);
                   }}
@@ -271,6 +266,7 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
                   key="refresh"
                   icon={<FaRecycle size={14} />}
                   tooltip="refresh data"
+                  inverted={true}
                   color="info"
                   label="refresh"
                   onClick={() => {
@@ -442,7 +438,6 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
                   </StyledContentRowValue>
                 </StyledContentRow>
               )}
-
               {actantMode === "action" && (
                 <StyledContentRow>
                   <StyledContentRowLabel>Entity Subject</StyledContentRowLabel>
@@ -549,6 +544,30 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
                 </StyledContentRow>
               )}
 
+              {actantMode === "resource" && (
+                <StyledContentRow>
+                  <StyledContentRowLabel>URL</StyledContentRowLabel>
+                  <StyledContentRowValue>
+                    <Input
+                      value={actant.data.url}
+                      width="full"
+                      onChangeFn={async (newValue: string) => {
+                        const oldData = { ...actant.data };
+                        console.log(oldData);
+                        updateActantMutation.mutate({
+                          data: {
+                            ...oldData,
+                            ...{
+                              link: newValue,
+                            },
+                          },
+                        });
+                      }}
+                    />
+                  </StyledContentRowValue>
+                </StyledContentRow>
+              )}
+
               <StyledContentRow>
                 <StyledContentRowLabel>Notes</StyledContentRowLabel>
                 <StyledContentRowValue>
@@ -565,6 +584,12 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
           </StyledSection>
           <StyledSection>
             <StyledSectionHeader>Meta statements</StyledSectionHeader>
+
+            <ActantDetailMetaTable
+              metaStatements={metaStatements}
+              updateMetaStatement={actantsUpdateMutation}
+              removeMetaStatement={actantsDeleteMutation}
+            />
             <Button
               color="primary"
               label="create new meta statement"
@@ -575,47 +600,6 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
                 actantsCreateMutation.mutate(newStatement);
               }}
             />
-
-            <StyledSectionMetaTable>
-              {metaStatements.map((metaStatement: IResponseStatement) => {
-                const typeSActant = metaStatement.data.actants.find(
-                  (a) => a.position == "a1"
-                );
-                const valueSActant = metaStatement.data.actants.find(
-                  (a) => a.position == "a2"
-                );
-
-                const typeActant = typeSActant
-                  ? metaStatement.actants.find(
-                      (a) => a.id === typeSActant.actant
-                    )
-                  : false;
-
-                const valueActant = valueSActant
-                  ? metaStatement.actants.find(
-                      (a) => a.id === valueSActant.actant
-                    )
-                  : false;
-
-                return (
-                  typeSActant &&
-                  valueSActant && (
-                    <React.Fragment key={metaStatement.id}>
-                      <ActantDetailMetaTableRow
-                        actant={actant}
-                        typeSActant={typeSActant}
-                        typeActant={typeActant}
-                        metaStatement={metaStatement}
-                        valueSActant={valueSActant}
-                        valueActant={valueActant}
-                        actantsDeleteMutation={actantsDeleteMutation}
-                        actantsUpdateMutation={actantsUpdateMutation}
-                      />
-                    </React.Fragment>
-                  )
-                );
-              })}
-            </StyledSectionMetaTable>
           </StyledSection>
           <StyledSection lastSection>
             <StyledSectionHeader>Used in statements:</StyledSectionHeader>
@@ -674,10 +658,7 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
                           color="warning"
                           tooltip="edit statement"
                           onClick={async () => {
-                            hashParams["statement"] = statement.id;
-                            history.push({
-                              hash: queryString.stringify(hashParams),
-                            });
+                            setStatementId(statement.id);
                           }}
                         />
                       </StyledSectionMetaTableButtonGroup>

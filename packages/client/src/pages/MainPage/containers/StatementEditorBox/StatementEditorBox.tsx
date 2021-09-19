@@ -1,7 +1,6 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "react-query";
 import api from "api";
-const queryString = require("query-string");
 
 import {
   FaTrashAlt,
@@ -11,9 +10,13 @@ import {
   FaCaretDown,
 } from "react-icons/fa";
 
-import { useLocation, useHistory } from "react-router";
 import { ActantTag } from "./../";
-import { CProp, CStatementActant, CStatementAction } from "constructors";
+import {
+  CProp,
+  CReference,
+  CStatementActant,
+  CStatementAction,
+} from "constructors";
 
 import { referenceTypeDict } from "./../../../../../../shared/dictionaries";
 import {
@@ -46,6 +49,7 @@ import { StatementEditorActionTable } from "./StatementEditorActionTable/Stateme
 import { StatementEditorAttributes } from "./StatementEditorAttributes/StatementEditorAttributes";
 import { StyledSubRow } from "./StatementEditorActionTable/StatementEditorActionTableRow/StatementEditorActionTableRowStyles";
 import { ColumnInstance } from "react-table";
+import { useSearchParams } from "hooks";
 
 const classesActants = ["P", "G", "O", "C", "L", "V", "E", "S", "T", "R"];
 const classesPropType = ["C"];
@@ -54,12 +58,10 @@ const classesResources = ["R"];
 const classesTags = ["C", "P", "G", "O", "L", "V", "E", "S", "T", "R"];
 
 export const StatementEditorBox: React.FC = () => {
-  let history = useHistory();
-  let location = useLocation();
-  var hashParams = queryString.parse(location.hash);
-
-  const statementId = hashParams.statement;
-  const territoryId = hashParams.territory;
+  const {
+    statement: statementId,
+    setStatement: setStatementId,
+  } = useSearchParams();
 
   const queryClient = useQueryClient();
 
@@ -75,8 +77,17 @@ export const StatementEditorBox: React.FC = () => {
       const res = await api.statementGet(statementId);
       return res.data;
     },
-    { enabled: !!statementId && api.isLoggedIn() }
+    { enabled: !!statementId && api.isLoggedIn(), retry: 0 }
   );
+
+  useEffect(() => {
+    if (
+      errorStatement &&
+      (errorStatement as any).error === "StatementDoesNotExits"
+    ) {
+      setStatementId("");
+    }
+  }, [errorStatement]);
 
   // console.log(statement);
 
@@ -167,6 +178,7 @@ export const StatementEditorBox: React.FC = () => {
       const updatedProps = statement.data.props.map((p) =>
         p.id === propId ? { ...p, ...changes } : p
       );
+
       const newData = { ...{ props: updatedProps } };
       update(newData);
     }
@@ -264,7 +276,15 @@ export const StatementEditorBox: React.FC = () => {
   };
 
   // references
-  const addReference = () => {};
+  const addReference = (resourceId: string) => {
+    if (statement && resourceId) {
+      const newReference: IStatementReference = CReference(resourceId);
+      const newData = {
+        references: [...statement.data.references, newReference],
+      };
+      update(newData);
+    }
+  };
   const updateReference = (referenceId: string, changes: any) => {
     if (statement && referenceId) {
       const updatedReferences = statement.data.references.map((r) =>
@@ -317,6 +337,15 @@ export const StatementEditorBox: React.FC = () => {
     }
   );
 
+  const updateActantMutation = useMutation(
+    async (changes: object) => await api.actantsUpdate(statementId, changes),
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries(["statement"]);
+      },
+    }
+  );
+
   const updateActionsRefreshListMutation = useMutation(
     async (changes: object) => {
       await api.actantsUpdate(statementId, {
@@ -362,7 +391,6 @@ export const StatementEditorBox: React.FC = () => {
                 <StyledPropsActantHeader></StyledPropsActantHeader>
                 {propOrigin.props.length > 0 ? (
                   <StyledPropsActantList>
-                    <StyledListHeaderColumn></StyledListHeaderColumn>
                     <StyledListHeaderColumn>Type</StyledListHeaderColumn>
                     <StyledListHeaderColumn>Value</StyledListHeaderColumn>
                     <StyledListHeaderColumn></StyledListHeaderColumn>
@@ -406,28 +434,6 @@ export const StatementEditorBox: React.FC = () => {
 
     return (
       <React.Fragment key={prop.origin + level + "|" + order}>
-        <StyledPropLineColumn></StyledPropLineColumn>
-        <StyledPropLineColumn lastSecondLevel={lastSecondLevel}>
-          <StyledPropButtonGroup leftMargin={false}>
-            <StatementEditorAttributes
-              modalTitle={`${propValueActant?.label} - ${propTypeActant?.label}`}
-              data={{
-                elvl: prop.elvl,
-                certainty: prop.certainty,
-                logic: prop.logic,
-                mood: prop.mood,
-                moodvariant: prop.moodvariant,
-                operator: prop.operator,
-                bundleStart: prop.bundleStart,
-                bundleEnd: prop.bundleEnd,
-              }}
-              handleUpdate={(newData) => {
-                updateProp(prop.id, newData);
-              }}
-              loading={updateActantsDataMutation.isLoading}
-            />
-          </StyledPropButtonGroup>
-        </StyledPropLineColumn>
         <StyledPropLineColumn
           padded={level === "2"}
           lastSecondLevel={lastSecondLevel}
@@ -441,7 +447,8 @@ export const StatementEditorBox: React.FC = () => {
                   <Button
                     key="d"
                     icon={<FaUnlink />}
-                    color="danger"
+                    color="plain"
+                    inverted={true}
                     tooltip="unlink actant"
                     onClick={() => {
                       updateProp(prop.id, {
@@ -499,7 +506,8 @@ export const StatementEditorBox: React.FC = () => {
                     key="d"
                     icon={<FaUnlink />}
                     tooltip="unlink actant"
-                    color="danger"
+                    color="plain"
+                    inverted={true}
                     onClick={() => {
                       updateProp(prop.id, {
                         value: {
@@ -547,12 +555,30 @@ export const StatementEditorBox: React.FC = () => {
 
         <StyledPropLineColumn lastSecondLevel={lastSecondLevel}>
           <StyledPropButtonGroup leftMargin={false}>
+            <StatementEditorAttributes
+              modalTitle={`${propValueActant?.label} - ${propTypeActant?.label}`}
+              data={{
+                elvl: prop.elvl,
+                certainty: prop.certainty,
+                logic: prop.logic,
+                mood: prop.mood,
+                moodvariant: prop.moodvariant,
+                operator: prop.operator,
+                bundleStart: prop.bundleStart,
+                bundleEnd: prop.bundleEnd,
+              }}
+              handleUpdate={(newData) => {
+                updateProp(prop.id, newData);
+              }}
+              loading={updateActantsDataMutation.isLoading}
+            />
             {level === "1" && (
               <Button
                 key="add"
                 icon={<FaPlus />}
                 tooltip="add second level prop"
-                color="primary"
+                color="plain"
+                inverted={true}
                 onClick={() => {
                   addProp(prop.id);
                 }}
@@ -562,7 +588,8 @@ export const StatementEditorBox: React.FC = () => {
               key="delete"
               icon={<FaTrashAlt />}
               tooltip="remove prop row"
-              color="danger"
+              color="plain"
+              inverted={true}
               onClick={() => {
                 removeProp(prop.id);
               }}
@@ -572,7 +599,7 @@ export const StatementEditorBox: React.FC = () => {
               inverted
               icon={<FaCaretUp />}
               tooltip="move prop up"
-              color="info"
+              color="plain"
               onClick={() => {
                 movePropUp(prop.id);
               }}
@@ -582,7 +609,7 @@ export const StatementEditorBox: React.FC = () => {
               inverted
               icon={<FaCaretDown />}
               tooltip="move prop down"
-              color="info"
+              color="plain"
               onClick={() => {
                 movePropDown(prop.id);
               }}
@@ -594,16 +621,14 @@ export const StatementEditorBox: React.FC = () => {
   };
 
   return (
-    <div>
+    <>
       {statement ? (
         <div style={{ marginBottom: "4rem" }} key={statement.id}>
           <StyledEditorSection firstSection key="editor-section-summary">
             <StyledEditorSectionHeader>Summary</StyledEditorSectionHeader>
             <StyledEditorSectionContent>
               <div>
-                <StyledListHeaderColumn>Action</StyledListHeaderColumn>
                 <div>
-                  <StyledListHeaderColumn>Text</StyledListHeaderColumn>
                   <Input
                     type="textarea"
                     width="full"
@@ -680,7 +705,6 @@ export const StatementEditorBox: React.FC = () => {
               <StyledReferencesList>
                 {statement.data.references.length > 0 && (
                   <React.Fragment>
-                    <StyledListHeaderColumn></StyledListHeaderColumn>
                     <StyledListHeaderColumn>Resource</StyledListHeaderColumn>
                     <StyledListHeaderColumn>Part</StyledListHeaderColumn>
                     <StyledListHeaderColumn>Type</StyledListHeaderColumn>
@@ -692,9 +716,9 @@ export const StatementEditorBox: React.FC = () => {
                     const referenceActant = statement.actants.find(
                       (a) => a.id === reference.resource
                     );
+
                     return (
                       <React.Fragment key={ri}>
-                        <StyledReferencesListColumn />
                         <StyledReferencesListColumn>
                           {referenceActant ? (
                             <ActantTag
@@ -705,7 +729,8 @@ export const StatementEditorBox: React.FC = () => {
                                   key="d"
                                   tooltip="unlink actant"
                                   icon={<FaUnlink />}
-                                  color="danger"
+                                  inverted={true}
+                                  color="plain"
                                   onClick={() => {
                                     updateReference(reference.id, {
                                       resource: "",
@@ -752,8 +777,9 @@ export const StatementEditorBox: React.FC = () => {
                           <Button
                             key="delete"
                             tooltip="remove reference row"
+                            inverted={true}
                             icon={<FaTrashAlt />}
-                            color="danger"
+                            color="plain"
                             onClick={() => {
                               removeReference(reference.id);
                             }}
@@ -765,7 +791,9 @@ export const StatementEditorBox: React.FC = () => {
                 )}
               </StyledReferencesList>
               <ActantSuggester
-                onSelected={(newSelectedId: string) => {}}
+                onSelected={(newSelectedId: string) => {
+                  addReference(newSelectedId);
+                }}
                 categoryIds={classesResources}
                 placeholder={"add new reference"}
               ></ActantSuggester>
@@ -790,7 +818,8 @@ export const StatementEditorBox: React.FC = () => {
                               key="d"
                               tooltip="unlink actant from tags"
                               icon={<FaUnlink />}
-                              color="danger"
+                              color="plain"
+                              inverted={true}
                               onClick={() => {
                                 removeTag(tag);
                               }}
@@ -819,7 +848,7 @@ export const StatementEditorBox: React.FC = () => {
               <MultiInput
                 values={statement.notes}
                 onChange={(newValues: string[]) => {
-                  updateActantsDataMutation.mutate({ notes: newValues });
+                  updateActantMutation.mutate({ notes: newValues });
                 }}
               />
             </StyledEditorSectionContent>
@@ -831,6 +860,6 @@ export const StatementEditorBox: React.FC = () => {
       <Loader
         show={isFetchingStatement || updateActantsRefreshListMutation.isLoading}
       />
-    </div>
+    </>
   );
 };

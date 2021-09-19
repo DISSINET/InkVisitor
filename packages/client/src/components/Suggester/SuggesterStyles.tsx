@@ -11,17 +11,26 @@ export const StyledSuggester = styled.div<StyledSuggester>`
 
 interface InputWrapper {
   isOver: boolean;
+  hasButton: boolean;
 }
-export const InputWrapper = styled.div<InputWrapper>`
+export const StyledInputWrapper = styled.div<InputWrapper>`
   display: flex;
   opacity: ${({ isOver }) => isOver && "75%"};
   input {
     padding-right: ${space4};
   }
+  input[type="text"] {
+    border-left-width: 0;
+    border-right-width: ${({ hasButton }) => (hasButton ? 0 : "")};
+  }
+  select {
+    border-right-width: 0;
+  }
 `;
-
-export const SuggesterButton = styled.div``;
-export const SuggesterList = styled.div`
+export const StyledSuggesterButton = styled.div`
+  border: 1px solid ${({ theme }) => theme.color["primary"]};
+`;
+export const StyledSuggesterList = styled.div`
   position: absolute;
   left: 0;
   background-color: ${({ theme }) => theme.color["blue"][50]};
@@ -39,7 +48,7 @@ export const SuggesterList = styled.div`
   }
 `;
 
-export const SuggestionCancelButton = styled.div`
+export const StyledSuggestionCancelButton = styled.div`
   position: absolute;
   left: 7.5em;
   top: 4px;
@@ -48,10 +57,10 @@ export const SuggestionCancelButton = styled.div`
   }
 `;
 
-export const SuggestionLineIcons = styled.div``;
+export const StyledSuggestionLineIcons = styled.div``;
 
-export const SuggestionLineTag = styled.div``;
+export const StyledSuggestionLineTag = styled.div``;
 
-export const SuggestionLineActions = styled.div`
+export const StyledSuggestionLineActions = styled.div`
   cursor: pointer;
 `;
