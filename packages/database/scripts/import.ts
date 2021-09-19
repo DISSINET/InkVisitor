@@ -50,8 +50,6 @@ const envData = require("dotenv").config({ path: `env/.env.${dbMode}` }).parsed;
 
 const tablesToImport = datasets[datasetId];
 
-console.log(dbMode, envData);
-
 console.log(`***importing dataset ${datasetId}***`);
 console.log("");
 
@@ -141,7 +139,7 @@ if (dbMode == "prod") {
       port: 28015,
       dstPort: 28017,
       username: envData.SSH_USERNAME,
-      password: envData.SSH_LOGIN,
+      password: envData.SSH_PASSWORD,
     },
     function (error: any, tnl: any) {
       console.log("in the tunnel");
