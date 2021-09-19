@@ -8,8 +8,6 @@
     "parse": "ts-node datasets/all/parse.ts",
     "import-remote:all": "npx ts-node scripts/import.ts all prod",
     "import-local:all": "npx ts-node scripts/import.ts all local",
-    "import-remote:mock": "npx ts-node scripts/import.ts mock prod",
-    "import-local:mock": "npx ts-node scripts/import.ts mock local",
     "import:remote": "npx ts-node  scripts/import.ts all remote"
   },
   "author": "",
