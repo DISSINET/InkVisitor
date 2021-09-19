@@ -47,3 +47,10 @@ Pure mockup with 5 statements (manually created), variations on sentence "David,
 
 - statements.json
 - actants.json (including territories)
+
+## Scripts
+`npm run install` first, then:
+
+    - `npm run parse` - loads data from google spreadsheet, you need additional files in `datasets/util` directory (token.json and credentials.json)
+    - `npm run import-remote` - will reset structure + mock data on remove host, you need `env.prod` file in `env` directory, refer to `env/.env.example`
+    - `npm run import-local` - same as previous one, but without SSH configuration
