@@ -6,7 +6,6 @@ import React, {
   ReactElement,
 } from "react";
 import { useLocation, useHistory } from "react-router-dom";
-import queryString from "query-string";
 
 const UNINITIALISED = (): void => {
   throw `function uninitialised`;
@@ -36,29 +35,27 @@ export const SearchParamsProvider = ({
 }: {
   children: ReactElement;
 }) => {
-  const { search } = useLocation();
-  const params = queryString.parse(search, {
-    parseNumbers: true,
-    parseBooleans: true,
-  });
   const history = useHistory();
+  const { hash } = useLocation();
+  const params = new URLSearchParams(hash.substring(1));
+  const parsedParams = Object.fromEntries(params);
+
   const [territory, setTerritory] = useState<string>(
-    typeof params.territory === "string" ? params.territory : ""
+    typeof parsedParams.territory === "string" ? parsedParams.territory : ""
   );
   const [statement, setStatement] = useState<string>(
-    typeof params.statement === "string" ? params.statement : ""
+    typeof parsedParams.statement === "string" ? parsedParams.statement : ""
   );
   const [actant, setActant] = useState<string>(
-    typeof params.actant === "string" ? params.actant : ""
+    typeof parsedParams.actant === "string" ? parsedParams.actant : ""
   );
+
   useEffect(() => {
+    territory ? params.set("territory", territory) : params.delete("territory");
+    statement ? params.set("statement", statement) : params.delete("statement");
+    actant ? params.set("actant", actant) : params.delete("actant");
     history.push({
-      search: `?${queryString.stringify({
-        ...queryString.parse(history.location.search),
-        territory: territory ? territory : undefined,
-        statement: statement ? statement : undefined,
-        actant: actant ? actant : undefined,
-      })}`,
+      hash: `${params}`,
     });
   }, [territory, statement, actant]);
 

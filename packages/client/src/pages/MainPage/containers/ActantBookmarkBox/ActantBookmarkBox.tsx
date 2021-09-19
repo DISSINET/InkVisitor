@@ -1,7 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "react-query";
 import api from "api";
-const queryString = require("query-string");
 import { toast } from "react-toastify";
 
 import { ActantTag, ActantSuggester } from "..";
