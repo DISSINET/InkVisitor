@@ -8,13 +8,13 @@ import { IOption } from "@shared/types";
 import { ItemTypes } from "types";
 import {
   StyledSuggester,
-  InputWrapper,
-  SuggesterButton,
-  SuggesterList,
-  SuggestionLineIcons,
-  SuggestionLineTag,
-  SuggestionLineActions,
-  SuggestionCancelButton,
+  StyledInputWrapper,
+  StyledSuggesterButton,
+  StyledSuggesterList,
+  StyledSuggestionLineIcons,
+  StyledSuggestionLineTag,
+  StyledSuggestionLineActions,
+  StyledSuggestionCancelButton,
 } from "./SuggesterStyles";
 
 export interface SuggestionI {
@@ -83,7 +83,7 @@ export const Suggester: React.FC<SuggesterProps> = ({
 
   return (
     <StyledSuggester marginTop={marginTop}>
-      <InputWrapper ref={dropRef} isOver={isOver}>
+      <StyledInputWrapper ref={dropRef} hasButton={allowCreate} isOver={isOver}>
         <Input
           type="select"
           value={category}
@@ -106,13 +106,13 @@ export const Suggester: React.FC<SuggesterProps> = ({
           }}
         />
         {displayCancelButton && (
-          <SuggestionCancelButton>
+          <StyledSuggestionCancelButton>
             <MdCancel onClick={() => onCancel()} />
-          </SuggestionCancelButton>
+          </StyledSuggestionCancelButton>
         )}
 
         {allowCreate && (
-          <SuggesterButton>
+          <StyledSuggesterButton>
             <Button
               icon={<FaPlus style={{ fontSize: "16px", padding: "2px" }} />}
               tooltip="create new actant"
@@ -124,34 +124,35 @@ export const Suggester: React.FC<SuggesterProps> = ({
                 });
               }}
             />
-          </SuggesterButton>
+          </StyledSuggesterButton>
         )}
-      </InputWrapper>
+      </StyledInputWrapper>
       {suggestions.length ? (
-        <SuggesterList>
+        <StyledSuggesterList>
           {suggestions
             .filter((s, si) => si < MAXSUGGESTIONDISPLAYED)
             .map((suggestion, si) => (
               <React.Fragment key={si}>
-                <SuggestionLineActions>
+                <StyledSuggestionLineActions>
                   <FaPlayCircle
                     onClick={() => {
                       onPick(suggestion);
                     }}
                   />
-                </SuggestionLineActions>
-                <SuggestionLineTag>
+                </StyledSuggestionLineActions>
+                <StyledSuggestionLineTag>
                   <Tag
                     propId={suggestion.id}
                     label={suggestion.label}
                     category={suggestion.category}
-                    color={suggestion.color}
                   />
-                </SuggestionLineTag>
-                <SuggestionLineIcons>{suggestion.icons}</SuggestionLineIcons>
+                </StyledSuggestionLineTag>
+                <StyledSuggestionLineIcons>
+                  {suggestion.icons}
+                </StyledSuggestionLineIcons>
               </React.Fragment>
             ))}
-        </SuggesterList>
+        </StyledSuggesterList>
       ) : null}
     </StyledSuggester>
   );

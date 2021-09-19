@@ -28,8 +28,6 @@ export class TerritoryParent implements IParentTerritory, IModel {
 
 export class TerritoryData implements IModel {
   parent: TerritoryParent | false = false;
-  type = "";
-  content = "";
 
   constructor(data: UnknownObject) {
     if (!data) {
@@ -61,7 +59,7 @@ class Territory extends Actant implements ITerritory {
   data = new TerritoryData({});
   label: string = "";
   detail: string = "";
-  status: ActantStatus = "0";
+  status: ActantStatus = ActantStatus.Pending;
   language: string[] = ["eng"];
   notes: string[] = [];
 

@@ -29,7 +29,7 @@ describe("Actants update", function () {
         .set("authorization", "Bearer " + supertestConfig.token)
         .expect("Content-Type", /json/)
         .expect(
-          testErroneousResponse.bind(undefined, new ActantDoesNotExits(""))
+          testErroneousResponse.bind(undefined, new ActantDoesNotExits("", ""))
         )
         .then(() => done());
     });

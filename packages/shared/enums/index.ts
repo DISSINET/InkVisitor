@@ -48,50 +48,122 @@ export type EntityActantType =
   | ActantType.Value
   | ActantType.Event;
 
-// TODO: find a way how to turn imported list into enum
-const statuses = ["0", "1", "2", "3"] as const;
-export type ActantStatus = typeof statuses[number];
+export enum EntityLogicalType {
+  Definite = "1",
+  Indefinite = "2",
+  Hypothetical = "3",
+}
 
-const logicalTypes = ["1", "2", "3"] as const;
-export type ActantLogicalType = typeof logicalTypes[number];
+export enum ActantStatus {
+  Pending = "0",
+  Approved = "1",
+  Discouraged = "2",
+  Warning = "3",
+}
 
-const certanties = ["1", "2", "3", "4", "5", "6"] as const;
-export type Certainty = typeof certanties[number];
+export enum Certainty {
+  Certainty0 = "0", // this is not used in dicts (@see ../disctionaries/certainty.ts)
+  Certain = "1",
+  AlmostCertain = "2",
+  Probable = "3",
+  Possible = "4",
+  Dubious = "5",
+  False = "6",
+}
 
-const elvls = ["1", "2", "3"] as const;
-export type Elvl = typeof elvls[number];
+export enum Elvl {
+  Textual = "1",
+  Interpretive = "2",
+  Inferential = "3",
+}
 
-const positions = ["s", "a1", "a2", "p"] as const;
-export type Position = typeof positions[number];
+export enum Position {
+  Subject = "s",
+  Actant1 = "a1",
+  Actant2 = "a2",
+  PseudoActant = "p",
+}
 
-const logics = ["1", "2"] as const;
-export type Logic = typeof logics[number];
+export enum Logic {
+  Positive = "1",
+  Negative = "2",
+}
 
-const moods = [
-  "1",
-  "2",
-  "3",
-  "4",
-  "5",
-  "6",
-  "7",
-  "8",
-  "9",
-  "10",
-  "11",
-  "12",
-  "13",
-] as const;
-export type Mood = typeof moods[number];
+export enum Mood {
+  Indication = "1",
+  Question = "2",
+  Condition = "3",
+  Possibility = "4",
+  Probability = "5",
+  Certitude = "6",
+  Wish = "7",
+  Order = "8",
+  Licence = "9",
+  Ability = "10",
+  Belief = "11",
+  Allegation = "12",
+  Semblance = "13",
+}
 
-const moodsvariants = ["1", "2", "3"] as const;
-export type MoodVariant = typeof moodsvariants[number];
+export enum MoodVariant {
+  Realis = "1",
+  Irrealis = "2",
+  ToBeDecided = "3",
+}
 
-const virtualities = ["1", "2", "3"] as const;
-export type Virtuality = typeof virtualities[number];
+export enum Virtuality {
+  Reality = "1",
+  Possibility = "2",
+  Probability = "3",
+  Certitude = "4",
+  Allegation = "5",
+  Semblance = "6",
+}
 
-const partitivities = ["1", "2", "3", "4", "5"] as const;
-export type Partitivity = typeof partitivities[number];
+export enum Partitivity {
+  Unison = "1",
+  UnisonOrParts = "2",
+  UnisonOrDiscreteParts = "3",
+  Parts = "4",
+  DiscreteParts = "5",
+}
 
-const Operators = ["x", "a", "o", ">", ">=", "=", "<=", "<"] as const;
-export type Operator = typeof Operators[number];
+export enum Operator {
+  Xor = "x",
+  And = "a",
+  Or = "o",
+  Greater = ">",
+  GreaterOrEqual = ">=",
+  Equal = "=",
+  LessOrEqual = "<=",
+  Less = "<",
+}
+
+export enum Language {
+  Latin = "lat",
+  English = "eng",
+  MiddleEnglish = "enm",
+  Occitan = "oci",
+  Czech = "ces",
+}
+
+export enum ReferenceType {
+  Primary = "1",
+  Secondary = "2",
+}
+
+export enum ResourceType {
+  Type1 = "1",
+  Type2 = "2",
+}
+
+export enum TerritoryType {
+  Type1 = "1",
+  Type2 = "2",
+}
+
+export enum UserRoles {
+  Admin = "admin",
+  Editor = "editor",
+  Viewer = "viewer",
+}

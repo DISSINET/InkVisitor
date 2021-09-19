@@ -6,9 +6,8 @@ import {
   useDrop,
   XYCoord,
 } from "react-dnd";
-const queryString = require("query-string");
 
-import { DragItem, ItemTypes } from "types";
+import { DragItem, ItemTypes, Entities } from "types";
 import {
   StyledTagWrapper,
   StyledEntityTag,
@@ -17,9 +16,9 @@ import {
   StyledTooltipSeparator,
 } from "./TagStyles";
 import { Tooltip } from "components";
-import { useHistory, useLocation } from "react-router-dom";
 import { useAppDispatch } from "redux/hooks";
 import { setDraggedTerritory } from "redux/features/territoryTree/draggedTerritorySlice";
+import { useSearchParams } from "hooks";
 
 interface TagProps {
   propId: string;
@@ -27,7 +26,6 @@ interface TagProps {
   label?: string;
   detail?: string;
   category: string;
-  color: string;
   mode?: "selected" | "disabled" | "invalid" | false;
   borderStyle?: "solid" | "dashed" | "dotted";
   button?: ReactNode;
@@ -62,7 +60,6 @@ export const Tag: React.FC<TagProps> = ({
   label = "",
   detail = "Test Delete me!",
   category = "T",
-  color,
   mode = false,
   borderStyle = "solid",
   button,
@@ -76,9 +73,7 @@ export const Tag: React.FC<TagProps> = ({
   updateOrderFn = () => {},
   lvl,
 }) => {
-  let history = useHistory();
-  let location = useLocation();
-  var hashParams = queryString.parse(location.hash);
+  const { setActant: setActantId } = useSearchParams();
   const dispatch = useAppDispatch();
 
   const ref = useRef<HTMLDivElement>(null);
@@ -136,7 +131,9 @@ export const Tag: React.FC<TagProps> = ({
   drag(drop(ref));
 
   const renderEntityTag = () => (
-    <StyledEntityTag color={color}>{category}</StyledEntityTag>
+    <StyledEntityTag color={Entities[category].color}>
+      {category}
+    </StyledEntityTag>
   );
   const renderButton = () => <ButtonWrapper>{button}</ButtonWrapper>;
 
@@ -144,10 +141,7 @@ export const Tag: React.FC<TagProps> = ({
     e.stopPropagation();
     e.nativeEvent.stopImmediatePropagation();
 
-    hashParams["actant"] = propId;
-    history.push({
-      hash: queryString.stringify(hashParams),
-    });
+    setActantId(propId);
   };
 
   return (

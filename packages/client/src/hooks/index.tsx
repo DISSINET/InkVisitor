@@ -1,3 +1,5 @@
+import useDebounce from "./useDebounce";
 import useKeyPress from "./useKeyPress";
+import { useSearchParams } from "./useParamsContext";
 
-export { useKeyPress };
+export { useKeyPress, useDebounce, useSearchParams };

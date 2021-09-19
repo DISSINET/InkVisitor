@@ -1,9 +1,7 @@
-import { userRoleDict } from "./../dictionaries";
-
-const userRoleValues = userRoleDict.map((i) => i.label);
+import { UserRoles } from "./../enums";
 
 export class RequestPermissionUpdate {
   controller?: string;
   method?: string;
-  roles?: typeof userRoleValues;
+  roles?: UserRoles;
 }

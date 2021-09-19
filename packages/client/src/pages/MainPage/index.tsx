@@ -6,7 +6,6 @@ import { useHistory, useParams } from "react-router-dom";
 import { useQueryClient } from "react-query";
 import { RiMenuFoldFill, RiMenuUnfoldFill } from "react-icons/ri";
 import { IoMdClose } from "react-icons/io";
-const queryString = require("query-string");
 
 import {
   Box,
@@ -28,6 +27,7 @@ import {
   StatementListBox,
   TerritoryTreeBox,
   UserOptionsModal,
+  UserListModal,
   LoginModal,
 } from "./containers";
 
@@ -52,14 +52,14 @@ import {
 } from "Theme/constants";
 import { setFirstPanelExpanded } from "redux/features/layout/firstPanelExpandedSlice";
 import { setFourthPanelExpanded } from "redux/features/layout/fourthPanelExpandedSlice";
+import { useSearchParams } from "hooks";
 
 interface MainPage {
   size: number[];
 }
 
 const MainPage: React.FC<MainPage> = ({ size }) => {
-  var hashParams = queryString.parse(location.hash);
-  const actantId = hashParams.actant;
+  const { actant: actantId, setActant: setActantId } = useSearchParams();
 
   const isLoggedIn = api.isLoggedIn();
   const dispatch = useAppDispatch();
@@ -80,12 +80,7 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
     (state) => state.layout.separatorXPosition
   );
   const queryClient = useQueryClient();
-
-  const history = useHistory();
-  const { territoryId, statementId } = useParams<{
-    territoryId: string;
-    statementId: string;
-  }>();
+  const [modalOpen, setModalOpen] = useState<boolean>(false);
 
   const handleLogOut = () => {
     api.signOut();
@@ -93,6 +88,14 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
     dispatch(setAuthToken(""));
     toast.success("You've been successfully logged out!");
     queryClient.removeQueries();
+  };
+
+  const handleUsersModalClic = () => {
+    setModalOpen(true);
+  };
+
+  const handleUsersModalCancelClick = () => {
+    setModalOpen(false);
   };
 
   const heightContent = size[1] - heightHeader - heightFooter;
@@ -137,6 +140,16 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
                     <StyledFaUserAlt size={14} />
                     <StyledUsername>{username}</StyledUsername>
                   </StyledUser>
+                  { 
+                  //TODO make condition based on user role
+                  (username == "admin") ?
+                  <Button
+                    label="Manage Users"
+                    color="info"
+                    onClick={() => handleUsersModalClic()}
+                  />
+                  : ''
+                  }
                   <Button
                     label="Log Out"
                     color="danger"
@@ -184,10 +197,7 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
                       <Button
                         icon={<IoMdClose />}
                         onClick={() => {
-                          hashParams["actant"] = "";
-                          history.push({
-                            hash: queryString.stringify(hashParams),
-                          });
+                          setActantId("");
                         }}
                       />
                     )
@@ -205,7 +215,7 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
                   : panelWidths[2] + panelWidths[3] - collapsedPanelWidth
               }
             >
-              <Box height={heightContent} label="Editor">
+              <Box height={heightContent} label="Editor" noPadding={false}>
                 <StatementEditorBox />
               </Box>
             </Panel>
@@ -236,6 +246,7 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
         <Toast />
         <Footer height={heightFooter} />
         {!isLoggedIn && <LoginModal />}
+        <UserListModal isOpen={modalOpen}  handler={handleUsersModalCancelClick} />
       </StyledPage>
     </>
   );

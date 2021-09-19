@@ -1,7 +1,7 @@
 import styled from "styled-components";
 
 export const StyledAttributeWrapper = styled.div`
-  width: 100%;
+  //width: 100%;
 `;
 export const StyledAttributeModalContent = styled.div`
   height: 100%;
@@ -24,3 +24,5 @@ export const StyledAttributeModalRowLabelText = styled.div`
   display: inline-flex;
   width: 10em;
 `;
+
+

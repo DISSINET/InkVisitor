@@ -7,11 +7,14 @@ export default {
   parameters: {
     info: { inline: true },
   },
+  args: {
+    noMargin: false,
+  },
 };
 
-export const DefaultButtonGroup = () => {
+export const DefaultButtonGroup = ({ ...args }) => {
   return (
-    <ButtonGroup>
+    <ButtonGroup {...args}>
       <Button label="button 1" color="primary" />
       <Button label="button 2" color="warning" />
       <Button label="button 3" color="danger" />
@@ -19,31 +22,10 @@ export const DefaultButtonGroup = () => {
     </ButtonGroup>
   );
 };
-export const ButtonGroupNoMargin = () => {
-  return (
-    <ButtonGroup noMargin>
-      <Button label="button 1" color="primary" />
-      <Button label="button 2" color="warning" />
-      <Button label="button 3" color="danger" />
-      <Button label="button 4" color="info" />
-    </ButtonGroup>
-  );
-};
 
-export const IconButtonGroup = () => {
+export const IconButtonGroup = ({ ...args }) => {
   return (
-    <ButtonGroup>
-      <Button key="i" icon={<FaInfo size={14} />} color="info" />
-      <Button key="d" icon={<FaClone size={14} />} color="success" />
-      <Button key="e" icon={<FaPencilAlt size={14} />} color="warning" />
-      <Button key="r" icon={<FaTrashAlt size={14} />} color="danger" />
-    </ButtonGroup>
-  );
-};
-
-export const IconButtonGroupNoMargin = () => {
-  return (
-    <ButtonGroup noMargin>
+    <ButtonGroup {...args}>
       <Button key="i" icon={<FaInfo size={14} />} color="info" />
       <Button key="d" icon={<FaClone size={14} />} color="success" />
       <Button key="e" icon={<FaPencilAlt size={14} />} color="warning" />

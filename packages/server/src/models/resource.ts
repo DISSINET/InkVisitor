@@ -1,13 +1,10 @@
 import { fillFlatObject, UnknownObject, IModel } from "./common";
-import { ActantType, ActantStatus } from "@shared/enums";
-import { IResource, languageValues } from "@shared/types/resource";
+import { ActantType, ActantStatus, Language } from "@shared/enums";
+import { IResource } from "@shared/types/resource";
 import Actant from "./actant";
 
 class ResourceData implements IModel {
-  content = "";
-  link = "";
-  type = "";
-  language: typeof languageValues[number][] = ["eng"]; // default
+  link: string = "";
 
   constructor(data: UnknownObject) {
     if (!data) {
@@ -30,7 +27,7 @@ class Resource extends Actant implements IResource {
   data = new ResourceData({});
   label: string = "";
   detail: string = "";
-  status: ActantStatus = "0";
+  status: ActantStatus = ActantStatus.Pending;
   language: string[] = ["eng"];
   notes: string[] = [];
 

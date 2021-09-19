@@ -1,6 +1,5 @@
 import React, { useEffect } from "react";
 import { useQuery } from "react-query";
-const queryString = require("query-string");
 
 import api from "api";
 import { TerritoryTreeNode } from "./TerritoryTreeNode/TerritoryTreeNode";
@@ -8,19 +7,20 @@ import { IResponseTree } from "@shared/types";
 import { Loader } from "components";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { setSelectedTerritoryPath } from "redux/features/territoryTree/selectedTerritoryPathSlice";
+import { useSearchParams } from "hooks";
 
 export const TerritoryTreeBox: React.FC = () => {
   const { status, data, error, isFetching } = useQuery(
     ["tree"],
     async () => {
-      // console.log("!!getting tree");
       const res = await api.treeGet();
       return res.data;
     },
     { enabled: api.isLoggedIn() }
   );
-  var hashParams = queryString.parse(location.hash);
-  const territoryId = hashParams.territory;
+
+  const { territory: territoryId } = useSearchParams();
+
   const dispatch = useAppDispatch();
   const selectedTerritoryPath = useAppSelector(
     (state) => state.territoryTree.selectedTerritoryPath

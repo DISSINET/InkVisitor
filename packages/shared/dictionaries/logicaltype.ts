@@ -1,20 +1,22 @@
+import { EntityLogicalType } from "../enums";
+
 export const actantLogicalTypeDict: {
   value: string;
   label: string;
   info?: string;
 }[] = [
   {
-    value: "1",
+    value: EntityLogicalType.Definite,
     label: "definite",
     info: "",
   },
   {
-    value: "2",
+    value: EntityLogicalType.Indefinite,
     label: "indefinite",
     info: "",
   },
   {
-    value: "3",
+    value: EntityLogicalType.Hypothetical,
     label: "hypothetical",
     info: "",
   },
