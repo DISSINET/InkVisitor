@@ -8,41 +8,67 @@ const datasets: Record<string, any> = {
   all: [
     {
       name: "acl_permissions",
-      path: "datasets/all/acl_permissions.json",
+      data: "datasets/all/acl_permissions.json",
     },
     {
       name: "actants",
-      path: "datasets/all/actants.json",
-      indexes: [r.table("actants").indexCreate("class")],
+      data: "datasets/all/actants.json",
+      indexes: [
+        r.table("actants").indexCreate("class"),
+        r.table("actants").indexCreate("label"),
+        r
+          .table("actants")
+          .indexCreate(
+            "data.actants.actant",
+            r.row("data")("actants")("actant")
+          ),
+        r
+          .table("actants")
+          .indexCreate(
+            "data.actions.action",
+            r.row("data")("actions")("action")
+          ),
+        r.table("actants").indexCreate("data.tags", r.row("data")("tags")),
+        r
+          .table("actants")
+          .indexCreate(
+            "data.props.type.id",
+            r.row("data")("props")("type")("id")
+          ),
+        r
+          .table("actants")
+          .indexCreate(
+            "data.props.value.id",
+            r.row("data")("props")("value")("id")
+          ),
+        r
+          .table("actants")
+          .indexCreate(
+            "data.references.resource",
+            r.row("data")("references")("resource")
+          ),
+        r
+          .table("actants")
+          .indexCreate("data.props.origin", r.row("data")("props")("origin")),
+        r
+          .table("actants")
+          .indexCreate("data.territory.id", r.row("data")("territory")("id")),
+        r
+          .table("actants")
+          .indexCreate("data.parent.id", r.row("data")("parent")("id")),
+      ],
     },
     {
       name: "users",
-      path: "datasets/all/users.json",
+      data: "datasets/all/users.json",
     },
     {
       name: "audits",
-      path: "datasets/all/audits.json",
-    },
-  ],
-  mock: [
-    {
-      name: "acl_permissions",
-      path: "datasets/mock/acl_permissions.json",
-    },
-    {
-      name: "actants",
-      path: "datasets/mock/actants.json",
-    },
-    {
-      name: "users",
-      path: "datasets/mock/users.json",
-    },
-    {
-      name: "audits",
-      path: "datasets/mock/audits.json",
+      data: "datasets/all/audits.json",
     },
   ],
 };
+
 const datasetId: string = process.argv[2];
 const dbMode = process.argv[3];
 
@@ -111,7 +137,7 @@ const importData = async () => {
 
       console.log(`table ${table.name} created`);
 
-      let data = JSON.parse(fs.readFileSync(table.path));
+      let data = JSON.parse(fs.readFileSync(table.data));
       if (table.name === "users") {
         data = data.map((user: IUser) => {
           user.password = hashPassword(user.password ? user.password : "");
