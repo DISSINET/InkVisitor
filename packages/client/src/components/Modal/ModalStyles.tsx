@@ -37,7 +37,7 @@ export const StyledBackground = styled(animated.div)`
 interface Card {
   width: "full" | "normal" | "thin";
 }
-const handleWidth = (width: "full" | "normal" | "thin") => {
+const getWidth = (width: "full" | "normal" | "thin") => {
   switch (width) {
     case "full":
       return "calc(100vw - 40px)";
@@ -48,7 +48,7 @@ const handleWidth = (width: "full" | "normal" | "thin") => {
   }
 };
 export const StyledCard = styled(animated.div)<Card>`
-  width: ${({ width }) => handleWidth(width)};
+  width: ${({ width }) => getWidth(width)};
   display: flex;
   flex-direction: column;
   max-height: calc(100vh - 40px);

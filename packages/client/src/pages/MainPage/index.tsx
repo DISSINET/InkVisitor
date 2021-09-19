@@ -10,6 +10,7 @@ import { IoMdClose } from "react-icons/io";
 import {
   Box,
   Button,
+  ButtonGroup,
   Footer,
   Header,
   Panel,
@@ -140,21 +141,23 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
                     <StyledFaUserAlt size={14} />
                     <StyledUsername>{username}</StyledUsername>
                   </StyledUser>
-                  { 
-                  //TODO make condition based on user role
-                  (username == "admin") ?
-                  <Button
-                    label="Manage Users"
-                    color="info"
-                    onClick={() => handleUsersModalClic()}
-                  />
-                  : ''
-                  }
-                  <Button
-                    label="Log Out"
-                    color="danger"
-                    onClick={() => handleLogOut()}
-                  />
+                  <ButtonGroup>
+                    {
+                      //TODO make condition based on user role
+                      username == "admin" && (
+                        <Button
+                          label="Manage Users"
+                          color="info"
+                          onClick={() => handleUsersModalClic()}
+                        />
+                      )
+                    }
+                    <Button
+                      label="Log Out"
+                      color="danger"
+                      onClick={() => handleLogOut()}
+                    />
+                  </ButtonGroup>
                 </StyledUserBox>
               )}
             </div>
@@ -246,7 +249,10 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
         <Toast />
         <Footer height={heightFooter} />
         {!isLoggedIn && <LoginModal />}
-        <UserListModal isOpen={modalOpen}  handler={handleUsersModalCancelClick} />
+        <UserListModal
+          isOpen={modalOpen}
+          handler={handleUsersModalCancelClick}
+        />
       </StyledPage>
     </>
   );

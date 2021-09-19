@@ -30,20 +30,3 @@ export const StyledTr = styled.tr<StyledTr>`
     width: 1%;
   }
 `;
-
-/*not used (yet?)
-export const StyledTd = styled.td`
-  padding-top: ${({ theme }) => `${theme.space[1]}`};
-  padding-right: ${({ theme }) => `${theme.space[2]}`};
-  padding-bottom: ${({ theme }) => `${theme.space[1]}`};
-  padding-left: 0;
-  font-size: ${({ theme }) => theme.fontSize["sm"]};
-  
-`;
-
-export const StyledSubRow = styled.div`
-  width: 100%;
-  padding: ${({ theme }) => theme.space[2]};
-  background-color: ${({ theme }) => theme.color["blue"][50]};
-`;
-*/
