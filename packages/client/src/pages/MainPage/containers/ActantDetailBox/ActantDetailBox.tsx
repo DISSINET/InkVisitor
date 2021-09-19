@@ -75,7 +75,7 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
       const res = await api.detailGet(actantId);
       return res.data;
     },
-    { enabled: !!actantId && api.isLoggedIn(), retry: 0 }
+    { enabled: !!actantId && api.isLoggedIn(), retry: 2 }
   );
 
   useEffect(() => {

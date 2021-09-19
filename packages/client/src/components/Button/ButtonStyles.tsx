@@ -21,23 +21,19 @@ export const StyledButton = styled.button<IButtonStyle>`
   border-width: thin;
   border-style: solid;
 
-  color: ${({ theme, disabled, color, inverted }) => {
-    return disabled
+  color: ${({ theme, disabled, color, inverted }) =>
+    disabled
       ? theme.color["gray"][200]
       : inverted
       ? theme.color[color]
-      : theme.color["white"];
-  }};
-  background-color: ${({ theme, disabled, color, inverted }) => {
-    return disabled
+      : theme.color["white"]};
+  background-color: ${({ theme, disabled, color, inverted }) =>
+    disabled
       ? theme.color["gray"][400]
       : inverted
       ? theme.color["invertedBg"][color]
-      : theme.color[color];
-  }};
-  cursor: ${({ disabled }) => {
-    return disabled ? "not-allowed" : "pointer";
-  }};
+      : theme.color[color]};
+  cursor: ${({ disabled }) => (disabled ? "not-allowed" : "pointer")};
   white-space: nowrap;
   :focus {
     outline: 0;

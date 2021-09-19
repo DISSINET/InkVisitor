@@ -52,7 +52,7 @@ export const SearchParamsProvider = ({
     typeof params.actant === "string" ? params.actant : ""
   );
   useEffect(() => {
-    history.replace({
+    history.push({
       search: `?${queryString.stringify({
         ...queryString.parse(history.location.search),
         territory: territory ? territory : undefined,

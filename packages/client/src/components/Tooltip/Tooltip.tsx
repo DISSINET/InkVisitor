@@ -16,7 +16,7 @@ export const Tooltip: React.FC<Tooltip> = ({
   children,
   position = ["bottom center", "right center", "top center"],
   on = ["hover", "focus"],
-  label = "(no label)",
+  label = "",
   disabled = false,
   detail = "",
   attributes,
@@ -33,7 +33,9 @@ export const Tooltip: React.FC<Tooltip> = ({
       }
     >
       <div>
-        <StyledLabel>{label}</StyledLabel>
+        <StyledLabel>
+          {!detail && !attributes && !label ? "(no label)" : label}
+        </StyledLabel>
         <StyledDetail>{detail}</StyledDetail>
         {attributes}
       </div>

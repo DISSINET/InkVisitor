@@ -51,10 +51,6 @@ const AclPage: React.FC<AclPage> = ({ size }) => {
     { initialData: initialData }
   );
 
-  useEffect(() => {
-    console.log(data);
-  }, [data]);
-
   const handleLogOut = () => {
     api.signOut();
     dispatch(setUsername(""));
