@@ -28,6 +28,7 @@ import {
   StyledDots,
   StyledSelectorCell,
   StyledActionLabel,
+  StyledText,
 } from "./StatementLitBoxStyles";
 import { CStatement, DStatement } from "constructors";
 import { useSearchParams } from "hooks";
@@ -218,38 +219,6 @@ export const StatementListBox: React.FC = () => {
         accessor: "id",
       },
       {
-        Header: "Subjects",
-        accessor: "data",
-        Cell: ({ row }: Cell) => {
-          const subjectIds = row.values.data?.actants
-            ? row.values.data.actants
-                .filter((a: any) => a.position === "s")
-                .map((a: any) => a.actant)
-            : [];
-
-          const isOversized = subjectIds.length > 1;
-          const subjectIdsSlice = subjectIds.slice(0, 1);
-
-          return (
-            <TagGroup>
-              {subjectIdsSlice
-                .filter((a: any) => a)
-                .map((actantId: string, ai: number) => {
-                  const subjectObject =
-                    actants && actants.find((a) => a.id === actantId);
-
-                  return (
-                    subjectObject && (
-                      <ActantTag key={ai} actant={subjectObject} short />
-                    )
-                  );
-                })}
-              {isOversized && <StyledDots>{"..."}</StyledDots>}
-            </TagGroup>
-          );
-        },
-      },
-      {
         Header: "Actions",
         Cell: ({ row }: Cell) => {
           const {
@@ -280,19 +249,16 @@ export const StatementListBox: React.FC = () => {
         },
       },
       {
-        Header: "Actants",
+        Header: "Objects",
+        accessor: "data",
         Cell: ({ row }: Cell) => {
           const actantIds = row.values.data?.actants
-            ? row.values.data.actants
-                .filter((a: any) => a.position !== "s")
-                .map((a: any) => a.actant)
+            ? row.values.data.actants.map((a: any) => a.actant)
             : [];
-          const isOversized = actantIds.length > 4;
-          const actantIdsSlice = actantIds.slice(0, 4);
 
           return (
             <TagGroup>
-              {actantIdsSlice
+              {actantIds
                 .filter((a: any) => a)
                 .map((actantId: string, ai: number) => {
                   const actantObject =
@@ -304,10 +270,15 @@ export const StatementListBox: React.FC = () => {
                     )
                   );
                 })}
-              {isOversized && <StyledDots>{"..."}</StyledDots>}
             </TagGroup>
           );
         },
+      },
+      {
+        Header: "Text",
+        Cell: ({ row }: Cell) => (
+          <StyledText>{row.values.data.text}</StyledText>
+        ),
       },
       {
         Header: "",

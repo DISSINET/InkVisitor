@@ -180,7 +180,7 @@ export const StatementEditorBox: React.FC = () => {
       );
 
       const newData = { ...{ props: updatedProps } };
-      update(newData);
+      updateActantsDataMutation.mutate(newData);
     }
   };
 
@@ -190,7 +190,7 @@ export const StatementEditorBox: React.FC = () => {
       newProp.origin = originId;
 
       const newData = { props: [...statement.data.props, newProp] };
-      update(newData);
+      updateActantsDataMutation.mutate(newData);
     }
   };
 
@@ -199,7 +199,7 @@ export const StatementEditorBox: React.FC = () => {
       const newData = {
         props: statement.data.props.filter((p) => p.id !== propId),
       };
-      update(newData);
+      updateActantsDataMutation.mutate(newData);
     }
   };
 
@@ -231,7 +231,7 @@ export const StatementEditorBox: React.FC = () => {
               newStatementProps.splice(previousIndexInProps, 1)[0]
             );
 
-            update({ props: newStatementProps });
+            updateActantsDataMutation.mutate({ props: newStatementProps });
           }
         }
       }
@@ -268,7 +268,7 @@ export const StatementEditorBox: React.FC = () => {
               newStatementProps.splice(nextIndexInProps, 1)[0]
             );
 
-            update({ props: newStatementProps });
+            updateActantsDataMutation.mutate({ props: newStatementProps });
           }
         }
       }
@@ -282,7 +282,7 @@ export const StatementEditorBox: React.FC = () => {
       const newData = {
         references: [...statement.data.references, newReference],
       };
-      update(newData);
+      updateActantsDataMutation.mutate(newData);
     }
   };
   const updateReference = (referenceId: string, changes: any) => {
@@ -293,7 +293,7 @@ export const StatementEditorBox: React.FC = () => {
       const newData = {
         references: updatedReferences,
       };
-      update(newData);
+      updateActantsDataMutation.mutate(newData);
     }
   };
   const removeReference = (referenceId: string) => {
@@ -303,7 +303,7 @@ export const StatementEditorBox: React.FC = () => {
           (p) => p.id !== referenceId
         ),
       };
-      update(newData);
+      updateActantsDataMutation.mutate(newData);
     }
   };
 
@@ -311,18 +311,14 @@ export const StatementEditorBox: React.FC = () => {
   const addTag = (tagId: string) => {
     if (statement && tagId) {
       const newData = { tags: [...statement.data.tags, tagId] };
-      update(newData);
+      updateActantsDataMutation.mutate(newData);
     }
   };
   const removeTag = (tagId: string) => {
     if (statement && tagId) {
       const newData = { tags: statement.data.tags.filter((p) => p !== tagId) };
-      update(newData);
+      updateActantsDataMutation.mutate(newData);
     }
-  };
-
-  const update = async (changes: object) => {
-    updateActantsDataMutation.mutate(changes);
   };
 
   const updateActantsDataMutation = useMutation(
@@ -331,7 +327,7 @@ export const StatementEditorBox: React.FC = () => {
         data: changes,
       }),
     {
-      onSuccess: () => {
+      onSuccess: (data, variables) => {
         queryClient.invalidateQueries(["statement"]);
       },
     }
@@ -637,7 +633,7 @@ export const StatementEditorBox: React.FC = () => {
                         const newData = {
                           text: newValue,
                         };
-                        update(newData);
+                        updateActantsRefreshListMutation.mutate(newData);
                       }
                     }}
                     value={statement.data.text}
