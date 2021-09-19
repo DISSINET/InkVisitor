@@ -1,11 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { Column, useTable, useExpanded, Row, Cell } from "react-table";
 import update from "immutability-helper";
-import {
-  StyledTable,
-  StyledTHead,
-  StyledTh,
-} from "../StatementEditorActionTable/StatementEditorActionTableStyles";
+import { StyledTable } from "../StatementEditorActionTable/StatementEditorActionTableStyles";
 import { StatementEditorActionTableRow } from "./StatementEditorActionTableRow/StatementEditorActionTableRow";
 import {
   IAction,
@@ -14,11 +10,11 @@ import {
   IResponseStatement,
   IStatementAction,
 } from "@shared/types";
-import { ActantSuggester, ActantTag, CertaintyToggle, ElvlToggle } from "../..";
+import { ActantSuggester, ActantTag } from "../..";
 import { StatementEditorAttributes } from "./../StatementEditorAttributes/StatementEditorAttributes";
-import { Button, Input } from "components";
+import { Button } from "components";
 import { FaPlus, FaTrashAlt, FaUnlink } from "react-icons/fa";
-import { useMutation, UseMutationResult, useQueryClient } from "react-query";
+import { UseMutationResult } from "react-query";
 import { ActantType } from "@shared/enums";
 
 interface FilteredActionObject {

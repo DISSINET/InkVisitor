@@ -16,7 +16,6 @@ import {
   StyledSectionUsedTable,
   StyledHeaderColumn,
   StyledSectionUsedTableCell,
-  StyledSectionMetaTable,
   StyledSectionMetaTableButtonGroup,
   StyledSectionMetaTableCell,
   StyledContentRow,
@@ -43,7 +42,6 @@ import { ActantTag } from "..";
 
 import { CMetaStatement } from "constructors";
 import { findPositionInStatement } from "utils";
-import { ActantDetailMetaTableRow } from "./ActantDetailMetaTable/ActantDetailMetaTableRow";
 import {
   actantLogicalTypeDict,
   actantStatusDict,
@@ -189,23 +187,9 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
       },
     }
   );
-  const actantsLabelUpdateMutation = useMutation(
-    async (actantObject: { actantId: string; newLabel: string }) =>
-      await api.actantsUpdate(actantObject.actantId, {
-        label: actantObject.newLabel,
-      }),
-    {
-      onSuccess: () => {
-        queryClient.invalidateQueries("actant");
-        queryClient.invalidateQueries("statement");
-        queryClient.invalidateQueries("tree");
-        queryClient.invalidateQueries("territory");
-        queryClient.invalidateQueries("bookmarks");
-      },
-    }
-  );
 
-  const actantsUpdateMutation = useMutation(
+  // TODO: what is metastatement?!
+  const updateMetaStatementMutation = useMutation(
     async (metaStatementObject: { metaStatementId: string; changes: object }) =>
       await api.actantsUpdate(metaStatementObject.metaStatementId, {
         data: metaStatementObject.changes,
@@ -220,10 +204,16 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
   const updateActantMutation = useMutation(
     async (changes: any) => await api.actantsUpdate(actantId, changes),
     {
-      onSuccess: () => {
+      onSuccess: (data, variables) => {
+        console.log(data);
+        console.log(variables);
         queryClient.invalidateQueries(["actant"]);
-        // queryClient.invalidateQueries("statement");
-        // queryClient.invalidateQueries("tree");
+        if (variables.detail || variables.label) {
+          queryClient.invalidateQueries("tree");
+          queryClient.invalidateQueries("territory");
+          queryClient.invalidateQueries("statement");
+          queryClient.invalidateQueries("bookmarks");
+        }
       },
     }
   );
@@ -285,9 +275,8 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
                     value={actant.label}
                     onChangeFn={async (newLabel: string) => {
                       if (newLabel !== actant.label) {
-                        actantsLabelUpdateMutation.mutate({
-                          actantId: actant.id,
-                          newLabel: newLabel,
+                        updateActantMutation.mutate({
+                          label: newLabel,
                         });
                       }
                     }}
@@ -587,7 +576,7 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
 
             <ActantDetailMetaTable
               metaStatements={metaStatements}
-              updateMetaStatement={actantsUpdateMutation}
+              updateMetaStatement={updateMetaStatementMutation}
               removeMetaStatement={actantsDeleteMutation}
             />
             <Button
@@ -684,7 +673,6 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
           isFetching ||
           actantsCreateMutation.isLoading ||
           actantsDeleteMutation.isLoading ||
-          actantsLabelUpdateMutation.isLoading ||
           updateActantMutation.isLoading ||
           deleteActantMutation.isLoading
         }
