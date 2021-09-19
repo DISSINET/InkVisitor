@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { Column, useTable, useExpanded, Row } from "react-table";
+import { Column, useTable, useExpanded, Row, Cell } from "react-table";
 import {
   Modal,
   ModalHeader,
@@ -22,7 +22,7 @@ interface UserListModal {
   handler: Function;
 }
 
-export const UserListModal: React.FC = (modVals: UserListModal) => {
+export const UserListModal: React.FC<UserListModal> = ({ isOpen, handler }) => {
   const { status, data, error, isFetching } = useQuery(
     ["users"],
     async () => {
@@ -116,11 +116,7 @@ export const UserListModal: React.FC = (modVals: UserListModal) => {
   });
 
   return (
-    <Modal
-      showModal={modVals.isOpen}
-      onClose={() => modVals.handler()}
-      width="middle"
-    >
+    <Modal showModal={isOpen} onClose={() => handler()} width="thin">
       <ModalHeader title={"Manage Users"} />
       <ModalContent>
         <StyledTable {...getTableProps()}>
@@ -159,7 +155,7 @@ export const UserListModal: React.FC = (modVals: UserListModal) => {
             label="Close"
             color="primary"
             inverted
-            onClick={() => modVals.handler()}
+            onClick={() => handler()}
           />
         </ButtonGroup>
       </ModalFooter>

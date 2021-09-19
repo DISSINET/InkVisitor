@@ -11,8 +11,6 @@ import api from "api";
 import { CategoryActantType } from "@shared/enums";
 import { useDebounce, useSearchParams } from "hooks";
 
-const queryString = require("query-string");
-
 interface ActantSuggesterI {
   categoryIds: string[];
   onSelected: Function;

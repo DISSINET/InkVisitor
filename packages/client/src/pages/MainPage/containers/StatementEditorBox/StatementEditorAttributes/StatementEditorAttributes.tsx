@@ -336,50 +336,50 @@ export const StatementEditorAttributes: React.FC<StatementEditorAttributes> = ({
         <Tooltip
           attributes={[
             <TooltipAttributeRow
-              attributeName="elvl"
               key="elvl"
+              attributeName="elvl"
               value={data.elvl}
               items={elvlDict}
             />,
             <TooltipAttributeRow
-              attributeName="logic"
               key="logic"
+              attributeName="logic"
               value={data.logic}
               items={logicDict}
             />,
             <TooltipAttributeRow
-              attributeName="certainty"
               key="certainty"
+              attributeName="certainty"
               value={data.certainty}
               items={certaintyDict}
             />,
             <TooltipAttributeRow
-              attributeName="mood"
               key="mood"
+              attributeName="mood"
               value={data.mood}
               items={moodDict}
             />,
             <TooltipAttributeRow
-              attributeName="moodvariant"
               key="moodvariant"
+              attributeName="moodvariant"
               value={data.moodvariant}
               items={moodVariantsDict}
             />,
             <TooltipAttributeRow
-              attributeName="virtuality"
               key="virtuality"
+              attributeName="virtuality"
               value={data.virtuality}
               items={virtualityDict}
             />,
             <TooltipAttributeRow
-              attributeName="partitivity"
               key="partitivity"
+              attributeName="partitivity"
               value={data.partitivity}
               items={partitivityDict}
             />,
             <TooltipAttributeRow
-              attributeName="operator"
               key="operator"
+              attributeName="operator"
               value={data.operator}
               items={operatorDict}
             />,

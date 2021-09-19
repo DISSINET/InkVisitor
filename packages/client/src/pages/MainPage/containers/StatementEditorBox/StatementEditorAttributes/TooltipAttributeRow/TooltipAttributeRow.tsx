@@ -24,7 +24,7 @@ export const TooltipAttributeRow: React.FC<TooltipAttributeRow> = ({
   return (
     <>
       {selectedItem && (
-        <StyledRow>
+        <StyledRow key={attributeName}>
           <AttributeIcon attributeName={attributeName} />
           {isArray ? (
             (selectedItem as DropdownItem[]).map((item) => (

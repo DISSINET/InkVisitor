@@ -1,7 +1,5 @@
-import { IResponseStatement } from "@shared/types";
-import React, { useRef } from "react";
-import { Cell, ColumnInstance } from "react-table";
-const queryString = require("query-string");
+import React from "react";
+import { Cell } from "react-table";
 
 import { StyledTr, StyledTd } from "./UserListTableRowStyles";
 
