@@ -205,8 +205,6 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
     async (changes: any) => await api.actantsUpdate(actantId, changes),
     {
       onSuccess: (data, variables) => {
-        console.log(data);
-        console.log(variables);
         queryClient.invalidateQueries(["actant"]);
         if (variables.detail || variables.label) {
           queryClient.invalidateQueries("tree");

@@ -21,7 +21,7 @@ import {
 } from "components";
 import { ActantTag } from "./../";
 import api from "api";
-import { IStatement, IActant, IAction } from "@shared/types";
+import { IStatement, IActant, IAction, IStatementAction } from "@shared/types";
 import { StatementListTable } from "./StatementListTable/StatementListTable";
 import { StatementListHeader } from "./StatementListHeader/StatementListHeader";
 import {
@@ -64,7 +64,7 @@ export const StatementListBox: React.FC = () => {
     {
       initialData: initialData,
       enabled: !!territoryId && api.isLoggedIn(),
-      retry: 0,
+      retry: 2,
     }
   );
 
@@ -79,7 +79,7 @@ export const StatementListBox: React.FC = () => {
       const res = await api.statementGet(statementId);
       return res.data;
     },
-    { enabled: !!statementId && api.isLoggedIn(), retry: 0 }
+    { enabled: !!statementId && api.isLoggedIn(), retry: 2 }
   );
 
   useEffect(() => {
@@ -250,29 +250,32 @@ export const StatementListBox: React.FC = () => {
         },
       },
       {
-        Header: "Type",
-        accessor: "data.action",
+        Header: "Actions",
         Cell: ({ row }: Cell) => {
-          const actionTypeLabel = row.values.data?.action;
-          const actionLabel: string = "";
-          // actions?.find(
-          //   (a: IAction) => a.id === actionTypeLabel
-          // )?.label;
+          const {
+            actions,
+            actants,
+          }: {
+            actions: IStatementAction[];
+            actants: IActant[];
+          } = row.values.data;
+          // TODO: get right actants to filter
+          // const actants = row.values.actants;
+          const filteredActions: (IActant | undefined)[] = actions.map(
+            (sAction: IStatementAction) => {
+              console.log(sAction.action);
+              return actants.find((a: IActant) => a.id === sAction.action);
+            }
+          );
 
           return (
-            <div>
-              <div>
-                {/* {actionLabel + " | " + row.values.data?.territory.order} */}
-              </div>
-              {actionLabel &&
-                (actionLabel.length > 9 ? (
-                  <Tooltip label={actionLabel}>
-                    <StyledActionLabel>{actionLabel}</StyledActionLabel>
-                  </Tooltip>
-                ) : (
-                  actionLabel
-                ))}
-            </div>
+            <>
+              {filteredActions?.map(
+                (action: IActant | undefined, key: number) => (
+                  <>{action && <ActantTag key={key} short actant={action} />}</>
+                )
+              )}
+            </>
           );
         },
       },
@@ -340,7 +343,6 @@ export const StatementListBox: React.FC = () => {
               onClick={() => {
                 setStatementToDelete(row.original as IStatement);
                 setShowSubmit(true);
-                // removeStatementMutation.mutate((row.original as IStatement).id);
               }}
             />
             <Button
@@ -348,7 +350,7 @@ export const StatementListBox: React.FC = () => {
               icon={<FaPlus size={14} />}
               tooltip="add new statement before"
               color="warning"
-              onClick={() => addStatementAtCertainIndex(row.index)}
+              onClick={() => addStatementAtCertainIndex(row.index + 1)}
             />
           </ButtonGroup>
         ),

@@ -77,7 +77,7 @@ export const StatementEditorBox: React.FC = () => {
       const res = await api.statementGet(statementId);
       return res.data;
     },
-    { enabled: !!statementId && api.isLoggedIn(), retry: 0 }
+    { enabled: !!statementId && api.isLoggedIn(), retry: 2 }
   );
 
   useEffect(() => {

@@ -1,8 +1,7 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { toast } from "react-toastify";
-import { useHistory, useParams } from "react-router-dom";
 import { useQueryClient } from "react-query";
 import { RiMenuFoldFill, RiMenuUnfoldFill } from "react-icons/ri";
 import { IoMdClose } from "react-icons/io";
@@ -21,8 +20,6 @@ import {
 import {
   ActantSearchBox,
   ActantDetailBox,
-  ActantSuggester,
-  ActionModal,
   ActantBookmarkBox,
   StatementEditorBox,
   StatementListBox,
