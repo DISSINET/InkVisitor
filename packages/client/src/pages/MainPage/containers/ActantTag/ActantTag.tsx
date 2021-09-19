@@ -30,7 +30,7 @@ export const ActantTag: React.FC<IActantTag> = ({
   index,
   moveFn,
   isSelected,
-  enableTooltip = false,
+  enableTooltip = true,
   updateOrderFn,
   lvl,
   disabled,

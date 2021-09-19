@@ -69,7 +69,7 @@ export const Tag: React.FC<TagProps> = ({
   index = -1,
   moveFn,
   position = "right top",
-  enableTooltip = false,
+  enableTooltip = true,
   updateOrderFn = () => {},
   lvl,
 }) => {
