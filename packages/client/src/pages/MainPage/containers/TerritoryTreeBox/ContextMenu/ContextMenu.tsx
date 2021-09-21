@@ -73,8 +73,8 @@ export const ContextMenu: React.FC<ContextMenu> = ({
             showMenu &&
             ((styles) => (
               <StyledContextButtonGroup
-                clientx={currentPosition.x}
-                clienty={currentPosition.y}
+                $clientX={currentPosition.x}
+                $clientY={currentPosition.y}
                 height={currentPosition.height}
                 style={styles}
               >

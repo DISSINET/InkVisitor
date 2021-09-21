@@ -32,6 +32,7 @@ import {
 } from "./StatementLitBoxStyles";
 import { CStatement, DStatement } from "constructors";
 import { useSearchParams } from "hooks";
+import { StatementListContextMenu } from "./StatementListContextMenu/StatementListContextMenu";
 
 const initialData: {
   statements: IStatement[];
@@ -232,7 +233,7 @@ export const StatementListBox: React.FC = () => {
           // const actants = row.values.actants;
           const filteredActions: (IActant | undefined)[] = actions.map(
             (sAction: IStatementAction) => {
-              console.log(sAction.action);
+              // console.log(sAction.action);
               return actants.find((a: IActant) => a.id === sAction.action);
             }
           );
@@ -241,7 +242,9 @@ export const StatementListBox: React.FC = () => {
             <>
               {filteredActions?.map(
                 (action: IActant | undefined, key: number) => (
-                  <>{action && <ActantTag key={key} short actant={action} />}</>
+                  <React.Fragment key={key}>
+                    {action && <ActantTag key={key} short actant={action} />}
+                  </React.Fragment>
                 )
               )}
             </>
@@ -276,9 +279,15 @@ export const StatementListBox: React.FC = () => {
       },
       {
         Header: "Text",
-        Cell: ({ row }: Cell) => (
-          <StyledText>{row.values.data.text}</StyledText>
-        ),
+        Cell: ({ row }: Cell) => {
+          const { text } = row.values.data;
+          const maxWordsCount = 20;
+          const trimmedText = text.split(" ").slice(0, maxWordsCount).join(" ");
+          if (text?.match(/(\w+)/g)?.length > maxWordsCount) {
+            return <StyledText>{trimmedText}...</StyledText>;
+          }
+          return <StyledText>{trimmedText}</StyledText>;
+        },
       },
       {
         Header: "",
@@ -286,7 +295,7 @@ export const StatementListBox: React.FC = () => {
         width: 300,
         Cell: ({ row }: Cell) => (
           <ButtonGroup noMargin>
-            <span {...row.getToggleRowExpandedProps()}>
+            {/* <span {...row.getToggleRowExpandedProps()}>
               <Button
                 key="i"
                 icon={<FaInfo size={14} />}
@@ -294,34 +303,39 @@ export const StatementListBox: React.FC = () => {
                 color="info"
                 onClick={() => (row.isExpanded = !row.isExpanded)}
               />
-            </span>
+            </span> */}
 
-            <Button
-              key="d"
-              icon={<FaClone size={14} />}
-              color="success"
-              tooltip="duplicate"
-              onClick={() => {
-                duplicateStatementMutation.mutate(row.original as IStatement);
-              }}
-            />
-
-            <Button
-              key="r"
-              icon={<FaTrashAlt size={14} />}
-              color="danger"
-              tooltip="delete"
-              onClick={() => {
-                setStatementToDelete(row.original as IStatement);
-                setShowSubmit(true);
-              }}
-            />
-            <Button
-              key="add"
-              icon={<FaPlus size={14} />}
-              tooltip="add new statement before"
-              color="warning"
-              onClick={() => addStatementAtCertainIndex(row.index + 1)}
+            <StatementListContextMenu
+              buttons={[
+                <Button
+                  key="d"
+                  icon={<FaClone size={14} />}
+                  color="info"
+                  tooltip="duplicate"
+                  onClick={() => {
+                    duplicateStatementMutation.mutate(
+                      row.original as IStatement
+                    );
+                  }}
+                />,
+                <Button
+                  key="r"
+                  icon={<FaTrashAlt size={14} />}
+                  color="danger"
+                  tooltip="delete"
+                  onClick={() => {
+                    setStatementToDelete(row.original as IStatement);
+                    setShowSubmit(true);
+                  }}
+                />,
+                <Button
+                  key="add"
+                  icon={<FaPlus size={14} />}
+                  tooltip="add new statement before"
+                  color="warning"
+                  onClick={() => addStatementAtCertainIndex(row.index + 1)}
+                />,
+              ]}
             />
           </ButtonGroup>
         ),

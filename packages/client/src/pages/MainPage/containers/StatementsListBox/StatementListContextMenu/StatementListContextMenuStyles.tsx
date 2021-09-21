@@ -1,8 +1,13 @@
+import styled from "styled-components";
 import { FaChevronCircleDown } from "react-icons/fa";
 import { animated } from "react-spring";
-import styled from "styled-components";
 import { heightHeader } from "Theme/constants";
 
+export const StyledFaChevronCircleDown = styled(FaChevronCircleDown)`
+  color: ${({ theme }) => theme.color["primary"]};
+  margin: ${({ theme }) => `${theme.space[1]} ${theme.space[2]}`};
+  cursor: pointer;
+`;
 export const StyledWrapper = styled.div`
   display: flex;
   justify-content: center;
@@ -22,11 +27,6 @@ export const StyledContextButtonGroup = styled(
   position: absolute;
   top: ${({ $clientY, height }) =>
     `${($clientY - heightHeader - height / 8) / 10}rem`};
-  left: ${({ $clientX }) => `${($clientX + 20) / 10}rem`};
+  left: ${({ $clientX }) => `${($clientX - 120) / 10}rem`};
   z-index: 100;
-`;
-export const StyledFaChevronCircleDown = styled(FaChevronCircleDown)`
-  color: ${({ theme }) => theme.color["primary"]};
-  margin: ${({ theme }) => `${theme.space[1]} ${theme.space[2]}`};
-  cursor: pointer;
 `;
