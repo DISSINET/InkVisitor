@@ -1,6 +1,10 @@
 import styled from "styled-components";
 import { animated } from "react-spring";
-import { heightHeader } from "Theme/constants";
+import {
+  collapsedPanelWidth,
+  heightHeader,
+  panelWidths,
+} from "Theme/constants";
 import { TiDocumentText } from "react-icons/ti";
 
 interface StyledTiDocumentText {
@@ -24,7 +28,7 @@ export const StyledWrapper = styled.div`
 interface StyledContextButtonGroup {
   $clientX: number;
   $clientY: number;
-  height: number;
+  $firstPanelExpanded: boolean;
 }
 export const StyledContextButtonGroup = styled(
   animated.div
@@ -32,7 +36,13 @@ export const StyledContextButtonGroup = styled(
   display: flex;
   flex-direction: row;
   position: absolute;
-  top: ${({ $clientY, height }) => `${($clientY - heightHeader - 2) / 10}rem`};
-  left: ${({ $clientX }) => `${($clientX - 210) / 10}rem`};
+  top: ${({ $clientY }) => `${($clientY - heightHeader - 2) / 10}rem`};
+  left: ${({ $clientX, $firstPanelExpanded }) =>
+    `${
+      ($clientX -
+        ($firstPanelExpanded ? panelWidths[0] + 6 : collapsedPanelWidth + 64)) /
+      10
+    }rem`};
   z-index: 100;
 `;
+// collapsedPanelWidth

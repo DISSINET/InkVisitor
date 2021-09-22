@@ -8,8 +8,8 @@ interface ButtonGroup {
 export const ButtonGroup = styled.div<ButtonGroup>`
   display: flex;
   flex-direction: ${({ column }) => (column ? "column" : "row")};
-  button:not(:last-child),
-  span:not(:last-child) {
+  > button:not(:last-child),
+  > span:not(:last-child) {
     margin-right: ${({ noMargin }) => (noMargin ? 0 : space2)};
   }
 `;

@@ -1,19 +1,16 @@
-import React, { useEffect, useRef, useState } from "react";
-import { FaTrashAlt, FaStar, FaPlus } from "react-icons/fa";
-import { toast } from "react-toastify";
-
+import { IActant } from "@shared/types";
 import { Button } from "components";
+import React, { useRef, useState } from "react";
+import { FaPlus, FaStar, FaTrashAlt } from "react-icons/fa";
+import { config, Transition } from "react-spring/renderprops";
+import { toast } from "react-toastify";
+import { ContextMenuNewTerritoryModal } from "../ContextMenuNewTerritoryModal/ContextMenuNewTerritoryModal";
+import { ContextMenuSubmitDelete } from "../ContextMenuSubmitDelete/ContextMenuSubmitDelete";
 import {
   StyledContextButtonGroup,
   StyledTiDocumentText,
   StyledWrapper,
 } from "./ContextMenuStyles";
-import { IActant } from "@shared/types";
-import { ContextMenuNewTerritoryModal } from "../ContextMenuNewTerritoryModal/ContextMenuNewTerritoryModal";
-import { ContextMenuSubmitDelete } from "../ContextMenuSubmitDelete/ContextMenuSubmitDelete";
-import { config, Transition } from "react-spring/renderprops";
-import { CgMenuRound } from "react-icons/cg";
-import { TiDocumentText } from "react-icons/ti";
 
 interface ContextMenu {
   territoryActant: IActant;

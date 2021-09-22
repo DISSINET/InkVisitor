@@ -257,7 +257,6 @@ export const StatementListBox: React.FC = () => {
         Header: "S",
         Cell: ({ row }: Cell) => {
           const statement = row.original;
-          console.log(statement);
           return <ActantTag actant={statement as IActant} short />;
         },
       },

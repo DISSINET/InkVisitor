@@ -1,5 +1,6 @@
 import React, { ReactNode, useRef, useState } from "react";
 import { config, Transition } from "react-spring/renderprops";
+import { useAppSelector } from "redux/hooks";
 
 import {
   StyledContextButtonGroup,
@@ -15,6 +16,9 @@ export const StatementListContextMenu: React.FC<StatementListContextMenu> = ({
   buttons,
   inverted,
 }) => {
+  const firstPanelExpanded: boolean = useAppSelector(
+    (state) => state.layout.firstPanelExpanded
+  );
   const ref = useRef<HTMLDivElement>(null);
 
   const [showMenu, setShowMenu] = useState(false);
@@ -27,7 +31,6 @@ export const StatementListContextMenu: React.FC<StatementListContextMenu> = ({
   const setDivPosition = () => {
     if (ref.current) {
       const rect = ref.current.getBoundingClientRect();
-      console.log(rect);
       setCurrentPosition({
         x: rect["x"],
         y: rect["y"],
@@ -67,8 +70,8 @@ export const StatementListContextMenu: React.FC<StatementListContextMenu> = ({
               <StyledContextButtonGroup
                 $clientX={currentPosition.x}
                 $clientY={currentPosition.y}
-                height={currentPosition.height}
                 style={styles}
+                $firstPanelExpanded={firstPanelExpanded}
               >
                 {buttons}
               </StyledContextButtonGroup>
