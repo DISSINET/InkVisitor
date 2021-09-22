@@ -12,6 +12,7 @@ export const StyledPopup = styled(Popup)`
     display: flex;
     justify-content: right;
     align-items: right;
+    max-width: 30rem;
   }
   &-arrow {
     color: ${({ theme }) => theme.color["black"]};

@@ -26,7 +26,7 @@ import { animated, config, useSpring } from "react-spring";
 import api from "api";
 import { IParentTerritory } from "@shared/types/territory";
 import { useMutation, useQueryClient } from "react-query";
-import { DraggedTerritoryItem, DragItem, SearchParams } from "types";
+import { DraggedTerritoryItem, DragItem } from "types";
 import { useSearchParams } from "hooks";
 
 interface TerritoryTreeNode {

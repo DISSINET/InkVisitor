@@ -97,7 +97,6 @@ export const StatementEditorActionTable: React.FC<StatementEditorActionTable> = 
         Cell: ({ row }: Cell) => {
           const { action, sAction } = row.values.data;
           return action ? (
-            // <StyledCell>
             <ActantTag
               actant={action}
               button={

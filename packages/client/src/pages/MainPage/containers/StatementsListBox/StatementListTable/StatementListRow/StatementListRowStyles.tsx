@@ -20,7 +20,8 @@ export const StyledTr = styled.tr<StyledTr>`
   }
 `;
 export const StyledTd = styled.td`
-  padding: ${({ theme }) => theme.space[2]} 0;
+  padding: ${({ theme }) => theme.space[2]};
+  padding-left: 0;
   font-size: ${({ theme }) => theme.fontSize["sm"]};
 `;
 export const StyledSubRow = styled.div`
