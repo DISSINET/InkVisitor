@@ -627,7 +627,12 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
                 return (
                   <React.Fragment key={statement.id}>
                     <StyledSectionUsedTableCell>
-                      <ActantTag key={statement.id} actant={statement} short />
+                      <ActantTag
+                        key={statement.id}
+                        actant={statement}
+                        short
+                        tooltipText={statement.data.text}
+                      />
                     </StyledSectionUsedTableCell>
                     <StyledSectionUsedTableCell>
                       <StyledSectionUsedText>

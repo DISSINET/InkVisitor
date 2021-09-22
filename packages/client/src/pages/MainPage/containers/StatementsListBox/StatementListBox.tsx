@@ -222,6 +222,19 @@ export const StatementListBox: React.FC = () => {
         accessor: "id",
       },
       {
+        Header: "S.",
+        Cell: ({ row }: Cell) => {
+          const statement = row.original as IStatement;
+          return (
+            <ActantTag
+              actant={statement as IActant}
+              short
+              tooltipText={statement.data.text}
+            />
+          );
+        },
+      },
+      {
         Header: "Subj.",
         accessor: "data",
         Cell: ({ row }: Cell) => {
@@ -253,13 +266,7 @@ export const StatementListBox: React.FC = () => {
           );
         },
       },
-      {
-        Header: "S",
-        Cell: ({ row }: Cell) => {
-          const statement = row.original;
-          return <ActantTag actant={statement as IActant} short />;
-        },
-      },
+
       {
         Header: "Actions",
         Cell: ({ row }: Cell) => {
@@ -296,9 +303,8 @@ export const StatementListBox: React.FC = () => {
           );
         },
       },
-
       {
-        Header: "Obj.",
+        Header: "Objects",
         Cell: ({ row }: Cell) => {
           const actantIds = row.values.data?.actants
             ? row.values.data.actants

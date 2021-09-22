@@ -45,4 +45,3 @@ export const StyledContextButtonGroup = styled(
     }rem`};
   z-index: 100;
 `;
-// collapsedPanelWidth
