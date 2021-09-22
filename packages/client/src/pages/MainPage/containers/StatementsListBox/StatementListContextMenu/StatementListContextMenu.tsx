@@ -3,15 +3,17 @@ import { config, Transition } from "react-spring/renderprops";
 
 import {
   StyledContextButtonGroup,
-  StyledFaChevronCircleDown,
+  StyledTiDocumentText,
   StyledWrapper,
 } from "./StatementListContextMenuStyles";
 
 interface StatementListContextMenu {
   buttons: ReactNode[];
+  inverted?: boolean;
 }
 export const StatementListContextMenu: React.FC<StatementListContextMenu> = ({
   buttons,
+  inverted,
 }) => {
   const ref = useRef<HTMLDivElement>(null);
 
@@ -25,6 +27,7 @@ export const StatementListContextMenu: React.FC<StatementListContextMenu> = ({
   const setDivPosition = () => {
     if (ref.current) {
       const rect = ref.current.getBoundingClientRect();
+      console.log(rect);
       setCurrentPosition({
         x: rect["x"],
         y: rect["y"],
@@ -49,7 +52,8 @@ export const StatementListContextMenu: React.FC<StatementListContextMenu> = ({
           setShowMenu(false);
         }}
       >
-        <StyledFaChevronCircleDown size={14} />
+        <StyledTiDocumentText $inverted={inverted} size={16} />
+
         <Transition
           items={showMenu}
           from={{ opacity: 0 }}

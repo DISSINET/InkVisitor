@@ -1,11 +1,18 @@
 import styled from "styled-components";
-import { FaChevronCircleDown } from "react-icons/fa";
 import { animated } from "react-spring";
 import { heightHeader } from "Theme/constants";
+import { TiDocumentText } from "react-icons/ti";
 
-export const StyledFaChevronCircleDown = styled(FaChevronCircleDown)`
+interface StyledTiDocumentText {
+  $inverted?: boolean;
+}
+export const StyledTiDocumentText = styled(
+  TiDocumentText
+)<StyledTiDocumentText>`
   color: ${({ theme }) => theme.color["primary"]};
-  margin: ${({ theme }) => `${theme.space[1]} ${theme.space[2]}`};
+  color: ${({ theme, $inverted }) =>
+    $inverted ? theme.color["white"] : theme.color["primary"]};
+  margin: ${({ theme }) => `${theme.space[1]} ${theme.space[1]}`};
   cursor: pointer;
 `;
 export const StyledWrapper = styled.div`
@@ -25,8 +32,7 @@ export const StyledContextButtonGroup = styled(
   display: flex;
   flex-direction: row;
   position: absolute;
-  top: ${({ $clientY, height }) =>
-    `${($clientY - heightHeader - height / 8) / 10}rem`};
-  left: ${({ $clientX }) => `${($clientX - 120) / 10}rem`};
+  top: ${({ $clientY, height }) => `${($clientY - heightHeader - 2) / 10}rem`};
+  left: ${({ $clientX }) => `${($clientX - 205) / 10}rem`};
   z-index: 100;
 `;

@@ -5,13 +5,15 @@ import { toast } from "react-toastify";
 import { Button } from "components";
 import {
   StyledContextButtonGroup,
-  StyledFaChevronCircleDown,
+  StyledTiDocumentText,
   StyledWrapper,
 } from "./ContextMenuStyles";
 import { IActant } from "@shared/types";
 import { ContextMenuNewTerritoryModal } from "../ContextMenuNewTerritoryModal/ContextMenuNewTerritoryModal";
 import { ContextMenuSubmitDelete } from "../ContextMenuSubmitDelete/ContextMenuSubmitDelete";
 import { config, Transition } from "react-spring/renderprops";
+import { CgMenuRound } from "react-icons/cg";
+import { TiDocumentText } from "react-icons/ti";
 
 interface ContextMenu {
   territoryActant: IActant;
@@ -61,7 +63,7 @@ export const ContextMenu: React.FC<ContextMenu> = ({
           setShowMenu(false);
         }}
       >
-        <StyledFaChevronCircleDown size={14} />
+        <StyledTiDocumentText />
         <Transition
           items={showMenu}
           from={{ opacity: 0 }}

@@ -8,6 +8,7 @@ import {
   FaRegCircle,
   FaDotCircle,
   FaClone,
+  FaEdit,
 } from "react-icons/fa";
 import { toast } from "react-toastify";
 
@@ -33,6 +34,7 @@ import {
 import { CStatement, DStatement } from "constructors";
 import { useSearchParams } from "hooks";
 import { StatementListContextMenu } from "./StatementListContextMenu/StatementListContextMenu";
+import { BsCaretDown, BsCaretUp } from "react-icons/bs";
 
 const initialData: {
   statements: IStatement[];
@@ -220,6 +222,38 @@ export const StatementListBox: React.FC = () => {
         accessor: "id",
       },
       {
+        Header: "Subjects",
+        accessor: "data",
+        Cell: ({ row }: Cell) => {
+          const subjectIds = row.values.data?.actants
+            ? row.values.data.actants
+                .filter((a: any) => a.position === "s")
+                .map((a: any) => a.actant)
+            : [];
+
+          const isOversized = subjectIds.length > 2;
+          const subjectIdsSlice = subjectIds.slice(0, 2);
+
+          return (
+            <TagGroup>
+              {subjectIdsSlice
+                .filter((a: any) => a)
+                .map((actantId: string, ai: number) => {
+                  const subjectObject =
+                    actants && actants.find((a) => a.id === actantId);
+
+                  return (
+                    subjectObject && (
+                      <ActantTag key={ai} actant={subjectObject} short />
+                    )
+                  );
+                })}
+              {isOversized && <StyledDots>{"..."}</StyledDots>}
+            </TagGroup>
+          );
+        },
+      },
+      {
         Header: "Actions",
         Cell: ({ row }: Cell) => {
           const {
@@ -234,9 +268,13 @@ export const StatementListBox: React.FC = () => {
           const filteredActions: (IActant | undefined)[] = actions.map(
             (sAction: IStatementAction) => {
               // console.log(sAction.action);
+              // return actants.find((a: IActant) => a.id === sAction.action);
               return actants.find((a: IActant) => a.id === sAction.action);
             }
           );
+
+          // const isOversized = filteredActions.length > 2;
+          // const subjectIdsSlice = filteredActions.slice(0, 2);
 
           return (
             <>
@@ -251,17 +289,21 @@ export const StatementListBox: React.FC = () => {
           );
         },
       },
+
       {
         Header: "Objects",
-        accessor: "data",
         Cell: ({ row }: Cell) => {
           const actantIds = row.values.data?.actants
-            ? row.values.data.actants.map((a: any) => a.actant)
+            ? row.values.data.actants
+                .filter((a: any) => a.position !== "s")
+                .map((a: any) => a.actant)
             : [];
+          const isOversized = actantIds.length > 4;
+          const actantIdsSlice = actantIds.slice(0, 4);
 
           return (
             <TagGroup>
-              {actantIds
+              {actantIdsSlice
                 .filter((a: any) => a)
                 .map((actantId: string, ai: number) => {
                   const actantObject =
@@ -273,6 +315,7 @@ export const StatementListBox: React.FC = () => {
                     )
                   );
                 })}
+              {isOversized && <StyledDots>{"..."}</StyledDots>}
             </TagGroup>
           );
         },
@@ -294,18 +337,9 @@ export const StatementListBox: React.FC = () => {
         id: "expander",
         width: 300,
         Cell: ({ row }: Cell) => (
-          <ButtonGroup noMargin>
-            {/* <span {...row.getToggleRowExpandedProps()}>
-              <Button
-                key="i"
-                icon={<FaInfo size={14} />}
-                tooltip="info"
-                color="info"
-                onClick={() => (row.isExpanded = !row.isExpanded)}
-              />
-            </span> */}
-
+          <ButtonGroup>
             <StatementListContextMenu
+              inverted={statementId === row.values.id}
               buttons={[
                 <Button
                   key="d"
@@ -337,29 +371,31 @@ export const StatementListBox: React.FC = () => {
                 />,
               ]}
             />
+            <span {...row.getToggleRowExpandedProps()}>
+              <Button
+                key="i"
+                icon={
+                  row.isExpanded ? (
+                    <BsCaretUp size={14} />
+                  ) : (
+                    <BsCaretDown size={14} />
+                  )
+                }
+                tooltip="info"
+                color="info"
+                onClick={() => (row.isExpanded = !row.isExpanded)}
+              />
+            </span>
+            <Button
+              icon={<FaEdit size={14} />}
+              color="warning"
+              tooltip="edit statement"
+              onClick={() => {
+                selectStatementRow(row.values.id);
+              }}
+            />
           </ButtonGroup>
         ),
-      },
-      {
-        Header: "",
-        id: "Selector",
-        Cell: ({ row }: Cell) => {
-          return (
-            <StyledSelectorCell>
-              {statementId === row.values.id ? (
-                <FaDotCircle
-                  size={18}
-                  onClick={() => selectStatementRow(row.values.id)}
-                />
-              ) : (
-                <FaRegCircle
-                  size={18}
-                  onClick={() => selectStatementRow(row.values.id)}
-                />
-              )}
-            </StyledSelectorCell>
-          );
-        },
       },
     ];
   }, [data, statementId]);
