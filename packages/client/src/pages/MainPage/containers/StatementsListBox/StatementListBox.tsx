@@ -222,7 +222,7 @@ export const StatementListBox: React.FC = () => {
         accessor: "id",
       },
       {
-        Header: "Subjects",
+        Header: "Subj.",
         accessor: "data",
         Cell: ({ row }: Cell) => {
           const subjectIds = row.values.data?.actants
@@ -251,6 +251,14 @@ export const StatementListBox: React.FC = () => {
               {isOversized && <StyledDots>{"..."}</StyledDots>}
             </TagGroup>
           );
+        },
+      },
+      {
+        Header: "S",
+        Cell: ({ row }: Cell) => {
+          const statement = row.original;
+          console.log(statement);
+          return <ActantTag actant={statement as IActant} short />;
         },
       },
       {
@@ -291,7 +299,7 @@ export const StatementListBox: React.FC = () => {
       },
 
       {
-        Header: "Objects",
+        Header: "Obj.",
         Cell: ({ row }: Cell) => {
           const actantIds = row.values.data?.actants
             ? row.values.data.actants

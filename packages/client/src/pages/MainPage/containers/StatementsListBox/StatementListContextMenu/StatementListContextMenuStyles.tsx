@@ -33,6 +33,6 @@ export const StyledContextButtonGroup = styled(
   flex-direction: row;
   position: absolute;
   top: ${({ $clientY, height }) => `${($clientY - heightHeader - 2) / 10}rem`};
-  left: ${({ $clientX }) => `${($clientX - 205) / 10}rem`};
+  left: ${({ $clientX }) => `${($clientX - 210) / 10}rem`};
   z-index: 100;
 `;
