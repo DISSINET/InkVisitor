@@ -63,8 +63,8 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
   const isSelected = territoryId === territory.id;
 
   const [isExpanded, setIsExpanded] = useState(false);
-  const [childTerritories, setChildTerritories] = useState<any[]>([]);
   const [contextMenuOpen, setContextMenuOpen] = useState(false);
+  const [childTerritories, setChildTerritories] = useState<any[]>([]);
   const animatedStyle = useSpring({
     opacity: contextMenuOpen ? 0.6 : 1,
     display: "inline-flex",

@@ -2,6 +2,7 @@ import { IActant } from "@shared/types";
 import { Button } from "components";
 import React, { useRef, useState } from "react";
 import { FaPlus, FaStar, FaTrashAlt } from "react-icons/fa";
+import { useSpring } from "react-spring";
 import { config, Transition } from "react-spring/renderprops";
 import { toast } from "react-toastify";
 import { ContextMenuNewTerritoryModal } from "../ContextMenuNewTerritoryModal/ContextMenuNewTerritoryModal";
@@ -44,6 +45,11 @@ export const ContextMenu: React.FC<ContextMenu> = ({
     }
   };
 
+  const animatedMount = useSpring({
+    opacity: showMenu ? 1 : 0,
+    config: config.stiff,
+  });
+
   return (
     <>
       <StyledWrapper
@@ -61,7 +67,49 @@ export const ContextMenu: React.FC<ContextMenu> = ({
         }}
       >
         <StyledTiDocumentText />
-        <Transition
+        {showMenu && (
+          <StyledContextButtonGroup
+            $clientX={currentPosition.x}
+            $clientY={currentPosition.y}
+            height={currentPosition.height}
+            style={animatedMount}
+            // style={styles}
+          >
+            <Button
+              key="add"
+              icon={<FaPlus size={14} />}
+              color="info"
+              onClick={() => {
+                // add child
+                setShowCreate(true);
+                setShowMenu(false);
+                onMenuClose();
+              }}
+            />
+            <Button
+              key="favorites"
+              icon={<FaStar size={14} />}
+              color="warning"
+              onClick={() => {
+                // add to favorites
+                toast.success(
+                  `You're adding territory [${territoryActant.label}] to favorites. (not implemented yet)`
+                );
+              }}
+            />
+            <Button
+              key="delete"
+              icon={<FaTrashAlt size={14} />}
+              color="danger"
+              onClick={() => {
+                setShowSubmit(true);
+                setShowMenu(false);
+                onMenuClose();
+              }}
+            />
+          </StyledContextButtonGroup>
+        )}
+        {/* <Transition
           items={showMenu}
           from={{ opacity: 0 }}
           enter={{ opacity: 1 }}
@@ -112,7 +160,7 @@ export const ContextMenu: React.FC<ContextMenu> = ({
               </StyledContextButtonGroup>
             ))
           }
-        </Transition>
+        </Transition> */}
       </StyledWrapper>
 
       {showSubmit && (
