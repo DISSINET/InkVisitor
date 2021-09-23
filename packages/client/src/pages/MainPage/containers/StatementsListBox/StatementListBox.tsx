@@ -222,7 +222,8 @@ export const StatementListBox: React.FC = () => {
         accessor: "id",
       },
       {
-        Header: "S.",
+        Header: "",
+        id: "Statement",
         Cell: ({ row }: Cell) => {
           const statement = row.original as IStatement;
           return (

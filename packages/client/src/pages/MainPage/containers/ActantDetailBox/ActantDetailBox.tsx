@@ -59,6 +59,7 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
     actant: actantId,
     setActant: setActantId,
     setStatement: setStatementId,
+    setTerritory: setTerritoryId,
   } = useSearchParams();
 
   const [showSubmit, setShowSubmit] = useState(false);
@@ -651,6 +652,7 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
                           tooltip="edit statement"
                           onClick={async () => {
                             setStatementId(statement.id);
+                            setTerritoryId(statement.data.territory.id);
                           }}
                         />
                       </StyledSectionMetaTableButtonGroup>
