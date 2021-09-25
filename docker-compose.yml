@@ -1,4 +1,4 @@
-version: "3.4"
+version: "3.6"
 
 x-service: &service
   restart: always
@@ -14,7 +14,6 @@ services:
 
   inkvisitor-database:
     <<: *service
-    platform: linux/amd64
     image: rethinkdb
     container_name: "inkvisitor-database"
     volumes:
