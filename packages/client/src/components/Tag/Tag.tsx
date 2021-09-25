@@ -58,7 +58,7 @@ export const Tag: React.FC<TagProps> = ({
   propId,
   parentId,
   label = "",
-  detail = "Test Delete me!",
+  detail = "",
   category = "T",
   mode = false,
   borderStyle = "solid",
