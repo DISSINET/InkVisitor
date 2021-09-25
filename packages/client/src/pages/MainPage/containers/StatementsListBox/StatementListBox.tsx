@@ -8,6 +8,7 @@ import {
   FaRegCircle,
   FaDotCircle,
   FaClone,
+  FaEdit,
 } from "react-icons/fa";
 import { toast } from "react-toastify";
 
@@ -21,16 +22,19 @@ import {
 } from "components";
 import { ActantTag } from "./../";
 import api from "api";
-import { IStatement, IActant, IAction } from "@shared/types";
+import { IStatement, IActant, IAction, IStatementAction } from "@shared/types";
 import { StatementListTable } from "./StatementListTable/StatementListTable";
 import { StatementListHeader } from "./StatementListHeader/StatementListHeader";
 import {
   StyledDots,
   StyledSelectorCell,
   StyledActionLabel,
+  StyledText,
 } from "./StatementLitBoxStyles";
 import { CStatement, DStatement } from "constructors";
 import { useSearchParams } from "hooks";
+import { StatementListContextMenu } from "./StatementListContextMenu/StatementListContextMenu";
+import { BsCaretDown, BsCaretUp } from "react-icons/bs";
 
 const initialData: {
   statements: IStatement[];
@@ -64,7 +68,7 @@ export const StatementListBox: React.FC = () => {
     {
       initialData: initialData,
       enabled: !!territoryId && api.isLoggedIn(),
-      retry: 0,
+      retry: 2,
     }
   );
 
@@ -79,7 +83,7 @@ export const StatementListBox: React.FC = () => {
       const res = await api.statementGet(statementId);
       return res.data;
     },
-    { enabled: !!statementId && api.isLoggedIn(), retry: 0 }
+    { enabled: !!statementId && api.isLoggedIn(), retry: 2 }
   );
 
   useEffect(() => {
@@ -218,7 +222,20 @@ export const StatementListBox: React.FC = () => {
         accessor: "id",
       },
       {
-        Header: "Subjects",
+        Header: "S.",
+        Cell: ({ row }: Cell) => {
+          const statement = row.original as IStatement;
+          return (
+            <ActantTag
+              actant={statement as IActant}
+              short
+              tooltipText={statement.data.text}
+            />
+          );
+        },
+      },
+      {
+        Header: "Subj.",
         accessor: "data",
         Cell: ({ row }: Cell) => {
           const subjectIds = row.values.data?.actants
@@ -227,8 +244,8 @@ export const StatementListBox: React.FC = () => {
                 .map((a: any) => a.actant)
             : [];
 
-          const isOversized = subjectIds.length > 1;
-          const subjectIdsSlice = subjectIds.slice(0, 1);
+          const isOversized = subjectIds.length > 2;
+          const subjectIdsSlice = subjectIds.slice(0, 2);
 
           return (
             <TagGroup>
@@ -249,35 +266,45 @@ export const StatementListBox: React.FC = () => {
           );
         },
       },
+
       {
-        Header: "Type",
-        accessor: "data.action",
+        Header: "Actions",
         Cell: ({ row }: Cell) => {
-          const actionTypeLabel = row.values.data?.action;
-          const actionLabel: string = "";
-          // actions?.find(
-          //   (a: IAction) => a.id === actionTypeLabel
-          // )?.label;
+          const {
+            actions,
+            actants,
+          }: {
+            actions: IStatementAction[];
+            actants: IActant[];
+          } = row.values.data;
+          // TODO: get right actants to filter
+          // const actants = row.values.actants;
+          const filteredActions: (IActant | undefined)[] = actions.map(
+            (sAction: IStatementAction) => {
+              // console.log(sAction.action);
+              // return actants.find((a: IActant) => a.id === sAction.action);
+              return actants.find((a: IActant) => a.id === sAction.action);
+            }
+          );
+
+          // const isOversized = filteredActions.length > 2;
+          // const subjectIdsSlice = filteredActions.slice(0, 2);
 
           return (
-            <div>
-              <div>
-                {/* {actionLabel + " | " + row.values.data?.territory.order} */}
-              </div>
-              {actionLabel &&
-                (actionLabel.length > 9 ? (
-                  <Tooltip label={actionLabel}>
-                    <StyledActionLabel>{actionLabel}</StyledActionLabel>
-                  </Tooltip>
-                ) : (
-                  actionLabel
-                ))}
-            </div>
+            <>
+              {filteredActions?.map(
+                (action: IActant | undefined, key: number) => (
+                  <React.Fragment key={key}>
+                    {action && <ActantTag key={key} short actant={action} />}
+                  </React.Fragment>
+                )
+              )}
+            </>
           );
         },
       },
       {
-        Header: "Actants",
+        Header: "Objects",
         Cell: ({ row }: Cell) => {
           const actantIds = row.values.data?.actants
             ? row.values.data.actants
@@ -307,72 +334,81 @@ export const StatementListBox: React.FC = () => {
         },
       },
       {
+        Header: "Text",
+        Cell: ({ row }: Cell) => {
+          const { text } = row.values.data;
+          const maxWordsCount = 20;
+          const trimmedText = text.split(" ").slice(0, maxWordsCount).join(" ");
+          if (text?.match(/(\w+)/g)?.length > maxWordsCount) {
+            return <StyledText>{trimmedText}...</StyledText>;
+          }
+          return <StyledText>{trimmedText}</StyledText>;
+        },
+      },
+      {
         Header: "",
         id: "expander",
         width: 300,
         Cell: ({ row }: Cell) => (
-          <ButtonGroup noMargin>
+          <ButtonGroup>
+            <StatementListContextMenu
+              inverted={statementId === row.values.id}
+              buttons={[
+                <Button
+                  key="d"
+                  icon={<FaClone size={14} />}
+                  color="info"
+                  tooltip="duplicate"
+                  onClick={() => {
+                    duplicateStatementMutation.mutate(
+                      row.original as IStatement
+                    );
+                  }}
+                />,
+                <Button
+                  key="r"
+                  icon={<FaTrashAlt size={14} />}
+                  color="danger"
+                  tooltip="delete"
+                  onClick={() => {
+                    setStatementToDelete(row.original as IStatement);
+                    setShowSubmit(true);
+                  }}
+                />,
+                <Button
+                  key="add"
+                  icon={<FaPlus size={14} />}
+                  tooltip="add new statement before"
+                  color="warning"
+                  onClick={() => addStatementAtCertainIndex(row.index + 1)}
+                />,
+              ]}
+            />
             <span {...row.getToggleRowExpandedProps()}>
               <Button
                 key="i"
-                icon={<FaInfo size={14} />}
+                icon={
+                  row.isExpanded ? (
+                    <BsCaretUp size={14} />
+                  ) : (
+                    <BsCaretDown size={14} />
+                  )
+                }
                 tooltip="info"
                 color="info"
                 onClick={() => (row.isExpanded = !row.isExpanded)}
               />
             </span>
-
             <Button
-              key="d"
-              icon={<FaClone size={14} />}
-              color="success"
-              tooltip="duplicate"
-              onClick={() => {
-                duplicateStatementMutation.mutate(row.original as IStatement);
-              }}
-            />
-
-            <Button
-              key="r"
-              icon={<FaTrashAlt size={14} />}
-              color="danger"
-              tooltip="delete"
-              onClick={() => {
-                setStatementToDelete(row.original as IStatement);
-                setShowSubmit(true);
-                // removeStatementMutation.mutate((row.original as IStatement).id);
-              }}
-            />
-            <Button
-              key="add"
-              icon={<FaPlus size={14} />}
-              tooltip="add new statement before"
+              icon={<FaEdit size={14} />}
               color="warning"
-              onClick={() => addStatementAtCertainIndex(row.index)}
+              tooltip="edit statement"
+              onClick={() => {
+                selectStatementRow(row.values.id);
+              }}
             />
           </ButtonGroup>
         ),
-      },
-      {
-        Header: "",
-        id: "Selector",
-        Cell: ({ row }: Cell) => {
-          return (
-            <StyledSelectorCell>
-              {statementId === row.values.id ? (
-                <FaDotCircle
-                  size={18}
-                  onClick={() => selectStatementRow(row.values.id)}
-                />
-              ) : (
-                <FaRegCircle
-                  size={18}
-                  onClick={() => selectStatementRow(row.values.id)}
-                />
-              )}
-            </StyledSelectorCell>
-          );
-        },
       },
     ];
   }, [data, statementId]);

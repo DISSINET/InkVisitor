@@ -1,17 +1,16 @@
-import React, { useEffect, useRef, useState } from "react";
-import { FaTrashAlt, FaStar, FaPlus } from "react-icons/fa";
-import { toast } from "react-toastify";
-
-import { Button } from "components";
-import {
-  StyledContextButtonGroup,
-  StyledFaChevronCircleDown,
-  StyledWrapper,
-} from "./ContextMenuStyles";
 import { IActant } from "@shared/types";
+import { Button } from "components";
+import React, { useRef, useState } from "react";
+import { FaPlus, FaStar, FaTrashAlt } from "react-icons/fa";
+import { config, Transition } from "react-spring/renderprops";
+import { toast } from "react-toastify";
 import { ContextMenuNewTerritoryModal } from "../ContextMenuNewTerritoryModal/ContextMenuNewTerritoryModal";
 import { ContextMenuSubmitDelete } from "../ContextMenuSubmitDelete/ContextMenuSubmitDelete";
-import { config, Transition } from "react-spring/renderprops";
+import {
+  StyledContextButtonGroup,
+  StyledTiDocumentText,
+  StyledWrapper,
+} from "./ContextMenuStyles";
 
 interface ContextMenu {
   territoryActant: IActant;
@@ -61,7 +60,7 @@ export const ContextMenu: React.FC<ContextMenu> = ({
           setShowMenu(false);
         }}
       >
-        <StyledFaChevronCircleDown size={14} />
+        <StyledTiDocumentText />
         <Transition
           items={showMenu}
           from={{ opacity: 0 }}
@@ -73,8 +72,8 @@ export const ContextMenu: React.FC<ContextMenu> = ({
             showMenu &&
             ((styles) => (
               <StyledContextButtonGroup
-                clientx={currentPosition.x}
-                clienty={currentPosition.y}
+                $clientX={currentPosition.x}
+                $clientY={currentPosition.y}
                 height={currentPosition.height}
                 style={styles}
               >

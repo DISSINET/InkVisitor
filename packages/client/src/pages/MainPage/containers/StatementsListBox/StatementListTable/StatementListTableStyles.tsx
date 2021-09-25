@@ -13,4 +13,5 @@ export const StyledTHead = styled.thead`
 `;
 export const StyledTh = styled.th`
   text-align: left;
+  padding-right: ${({ theme }) => theme.space[2]};
 `;
