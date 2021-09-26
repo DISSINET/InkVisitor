@@ -51,13 +51,14 @@ import {
 import { setFirstPanelExpanded } from "redux/features/layout/firstPanelExpandedSlice";
 import { setFourthPanelExpanded } from "redux/features/layout/fourthPanelExpandedSlice";
 import { useSearchParams } from "hooks";
+import ScrollHandler from "hooks/ScrollHandler";
 
 interface MainPage {
   size: number[];
 }
 
 const MainPage: React.FC<MainPage> = ({ size }) => {
-  const { actant: actantId, setActant: setActantId } = useSearchParams();
+  const { actantId, setActantId } = useSearchParams();
 
   const isLoggedIn = api.isLoggedIn();
   const dispatch = useAppDispatch();
@@ -186,6 +187,7 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
               }
             >
               <Box height={actantId ? 400 : heightContent} label="Statements">
+                <ScrollHandler />
                 <StatementListBox />
               </Box>
               {actantId && (

@@ -3,7 +3,6 @@ import { Column, useTable, useExpanded, Row } from "react-table";
 import update from "immutability-helper";
 import { StyledTable, StyledTHead, StyledTh } from "./StatementListTableStyles";
 import { StatementListRow } from "./StatementListRow/StatementListRow";
-import { IStatement, IActant } from "@shared/types";
 
 interface StatementListTable {
   data: {}[];

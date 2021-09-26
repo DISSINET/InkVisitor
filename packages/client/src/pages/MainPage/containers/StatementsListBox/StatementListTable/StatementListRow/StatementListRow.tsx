@@ -31,7 +31,7 @@ export const StatementListRow: React.FC<StatementListRow> = ({
   handleClick = () => {},
   visibleColumns,
 }) => {
-  const { statement: statementId } = useSearchParams();
+  const { statementId } = useSearchParams();
 
   const dropRef = useRef<HTMLTableRowElement>(null);
   const dragRef = useRef<HTMLTableDataCellElement>(null);
@@ -88,6 +88,7 @@ export const StatementListRow: React.FC<StatementListRow> = ({
         onClick={() => {
           handleClick(row.values.id);
         }}
+        id={`statement${row.values.id}`}
       >
         <td ref={dragRef} style={{ cursor: "move" }}>
           <FaGripVertical />

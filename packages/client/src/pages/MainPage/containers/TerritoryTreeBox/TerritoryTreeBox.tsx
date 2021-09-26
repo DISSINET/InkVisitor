@@ -19,7 +19,7 @@ export const TerritoryTreeBox: React.FC = () => {
     { enabled: api.isLoggedIn() }
   );
 
-  const { territory: territoryId } = useSearchParams();
+  const { territoryId } = useSearchParams();
 
   const dispatch = useAppDispatch();
   const selectedTerritoryPath = useAppSelector(

@@ -11,20 +11,20 @@ const UNINITIALISED = (): void => {
   throw `function uninitialised`;
 };
 const INITIAL_CONTEXT = {
-  territory: "",
-  setTerritory: UNINITIALISED,
-  statement: "",
-  setStatement: UNINITIALISED,
-  actant: "",
-  setActant: UNINITIALISED,
+  territoryId: "",
+  setTerritoryId: UNINITIALISED,
+  statementId: "",
+  setStatementId: UNINITIALISED,
+  actantId: "",
+  setActantId: UNINITIALISED,
 };
 interface SearchParamsContext {
-  territory: string;
-  setTerritory: (territory: string) => void;
-  statement: string;
-  setStatement: (statement: string) => void;
-  actant: string;
-  setActant: (actant: string) => void;
+  territoryId: string;
+  setTerritoryId: (territory: string) => void;
+  statementId: string;
+  setStatementId: (statement: string) => void;
+  actantId: string;
+  setActantId: (actant: string) => void;
 }
 const SearchParamsContext = createContext<SearchParamsContext>(INITIAL_CONTEXT);
 
@@ -40,34 +40,38 @@ export const SearchParamsProvider = ({
   const params = new URLSearchParams(hash.substring(1));
   const parsedParams = Object.fromEntries(params);
 
-  const [territory, setTerritory] = useState<string>(
+  const [territoryId, setTerritoryId] = useState<string>(
     typeof parsedParams.territory === "string" ? parsedParams.territory : ""
   );
-  const [statement, setStatement] = useState<string>(
+  const [statementId, setStatementId] = useState<string>(
     typeof parsedParams.statement === "string" ? parsedParams.statement : ""
   );
-  const [actant, setActant] = useState<string>(
+  const [actantId, setActantId] = useState<string>(
     typeof parsedParams.actant === "string" ? parsedParams.actant : ""
   );
 
   useEffect(() => {
-    territory ? params.set("territory", territory) : params.delete("territory");
-    statement ? params.set("statement", statement) : params.delete("statement");
-    actant ? params.set("actant", actant) : params.delete("actant");
+    territoryId
+      ? params.set("territory", territoryId)
+      : params.delete("territory");
+    statementId
+      ? params.set("statement", statementId)
+      : params.delete("statement");
+    actantId ? params.set("actant", actantId) : params.delete("actant");
     history.push({
       hash: `${params}`,
     });
-  }, [territory, statement, actant]);
+  }, [territoryId, statementId, actantId]);
 
   return (
     <SearchParamsContext.Provider
       value={{
-        territory,
-        setTerritory,
-        statement,
-        setStatement,
-        actant,
-        setActant,
+        territoryId,
+        setTerritoryId,
+        statementId,
+        setStatementId,
+        actantId,
+        setActantId,
       }}
     >
       {children}

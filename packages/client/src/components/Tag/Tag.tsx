@@ -73,7 +73,7 @@ export const Tag: React.FC<TagProps> = ({
   updateOrderFn = () => {},
   lvl,
 }) => {
-  const { setActant: setActantId } = useSearchParams();
+  const { setActantId } = useSearchParams();
   const dispatch = useAppDispatch();
 
   const ref = useRef<HTMLDivElement>(null);

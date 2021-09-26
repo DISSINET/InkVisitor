@@ -34,7 +34,7 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
   addStatementAtTheEndMutation,
 }) => {
   const queryClient = useQueryClient();
-  const { territory: territoryId } = useSearchParams();
+  const { territoryId } = useSearchParams();
 
   const selectedTerritoryPath = useAppSelector(
     (state) => state.territoryTree.selectedTerritoryPath

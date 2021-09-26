@@ -15,7 +15,7 @@ interface StatementListBreadcrumbItem {
 export const StatementListBreadcrumbItem: React.FC<StatementListBreadcrumbItem> = ({
   territoryId,
 }) => {
-  const { setTerritory: setTerritoryId } = useSearchParams();
+  const { setTerritoryId } = useSearchParams();
 
   const dispatch = useAppDispatch();
 
