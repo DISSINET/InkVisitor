@@ -56,9 +56,10 @@ import { useSearchParams } from "hooks";
 interface ActantDetailBox {}
 export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
   const {
-    actant: actantId,
-    setActant: setActantId,
-    setStatement: setStatementId,
+    actantId,
+    setActantId,
+    setStatementId,
+    setTerritoryId,
   } = useSearchParams();
 
   const [showSubmit, setShowSubmit] = useState(false);
@@ -651,6 +652,7 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
                           tooltip="edit statement"
                           onClick={async () => {
                             setStatementId(statement.id);
+                            setTerritoryId(statement.data.territory.id);
                           }}
                         />
                       </StyledSectionMetaTableButtonGroup>

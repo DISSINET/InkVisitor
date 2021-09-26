@@ -1,40 +1,33 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { Cell, Column } from "react-table";
 import { useMutation, useQuery, useQueryClient } from "react-query";
 import {
-  FaInfo,
   FaTrashAlt,
   FaPlus,
-  FaRegCircle,
-  FaDotCircle,
   FaClone,
   FaEdit,
+  FaChevronCircleDown,
+  FaChevronCircleUp,
 } from "react-icons/fa";
 import { toast } from "react-toastify";
 
-import {
-  Button,
-  ButtonGroup,
-  Loader,
-  Submit,
-  TagGroup,
-  Tooltip,
-} from "components";
+import { Button, ButtonGroup, Loader, Submit, TagGroup } from "components";
 import { ActantTag } from "./../";
 import api from "api";
-import { IStatement, IActant, IAction, IStatementAction } from "@shared/types";
+import { IStatement, IActant, IStatementAction } from "@shared/types";
 import { StatementListTable } from "./StatementListTable/StatementListTable";
 import { StatementListHeader } from "./StatementListHeader/StatementListHeader";
-import {
-  StyledDots,
-  StyledSelectorCell,
-  StyledActionLabel,
-  StyledText,
-} from "./StatementLitBoxStyles";
+import { StyledDots, StyledText } from "./StatementLitBoxStyles";
 import { CStatement, DStatement } from "constructors";
 import { useSearchParams } from "hooks";
 import { StatementListContextMenu } from "./StatementListContextMenu/StatementListContextMenu";
-import { BsCaretDown, BsCaretUp } from "react-icons/bs";
+import { useHistory } from "react-router";
 
 const initialData: {
   statements: IStatement[];
@@ -50,14 +43,15 @@ export const StatementListBox: React.FC = () => {
   const queryClient = useQueryClient();
 
   const {
-    territory: territoryId,
-    setTerritory: setTerritoryId,
-    statement: statementId,
-    setStatement: setStatementId,
+    territoryId,
+    setTerritoryId,
+    statementId,
+    setStatementId,
   } = useSearchParams();
 
   const [showSubmit, setShowSubmit] = useState(false);
   const [statementToDelete, setStatementToDelete] = useState<IStatement>();
+  const history = useHistory();
 
   const { status, data, error, isFetching } = useQuery(
     ["territory", "statement-list", territoryId],
@@ -222,7 +216,8 @@ export const StatementListBox: React.FC = () => {
         accessor: "id",
       },
       {
-        Header: "S.",
+        Header: "",
+        id: "Statement",
         Cell: ({ row }: Cell) => {
           const statement = row.original as IStatement;
           return (
@@ -355,6 +350,16 @@ export const StatementListBox: React.FC = () => {
               inverted={statementId === row.values.id}
               buttons={[
                 <Button
+                  key="r"
+                  icon={<FaTrashAlt size={14} />}
+                  color="danger"
+                  tooltip="delete"
+                  onClick={() => {
+                    setStatementToDelete(row.original as IStatement);
+                    setShowSubmit(true);
+                  }}
+                />,
+                <Button
                   key="d"
                   icon={<FaClone size={14} />}
                   color="info"
@@ -366,39 +371,14 @@ export const StatementListBox: React.FC = () => {
                   }}
                 />,
                 <Button
-                  key="r"
-                  icon={<FaTrashAlt size={14} />}
-                  color="danger"
-                  tooltip="delete"
-                  onClick={() => {
-                    setStatementToDelete(row.original as IStatement);
-                    setShowSubmit(true);
-                  }}
-                />,
-                <Button
                   key="add"
                   icon={<FaPlus size={14} />}
-                  tooltip="add new statement before"
+                  tooltip="add new statement after"
                   color="warning"
                   onClick={() => addStatementAtCertainIndex(row.index + 1)}
                 />,
               ]}
             />
-            <span {...row.getToggleRowExpandedProps()}>
-              <Button
-                key="i"
-                icon={
-                  row.isExpanded ? (
-                    <BsCaretUp size={14} />
-                  ) : (
-                    <BsCaretDown size={14} />
-                  )
-                }
-                tooltip="info"
-                color="info"
-                onClick={() => (row.isExpanded = !row.isExpanded)}
-              />
-            </span>
             <Button
               icon={<FaEdit size={14} />}
               color="warning"
@@ -407,6 +387,24 @@ export const StatementListBox: React.FC = () => {
                 selectStatementRow(row.values.id);
               }}
             />
+            <span
+              {...row.getToggleRowExpandedProps()}
+              style={{
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+              }}
+            >
+              {row.isExpanded ? (
+                <FaChevronCircleUp
+                  onClick={() => (row.isExpanded = !row.isExpanded)}
+                />
+              ) : (
+                <FaChevronCircleDown
+                  onClick={() => (row.isExpanded = !row.isExpanded)}
+                />
+              )}
+            </span>
           </ButtonGroup>
         ),
       },

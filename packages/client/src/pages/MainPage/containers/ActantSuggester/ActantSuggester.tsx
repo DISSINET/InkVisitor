@@ -32,7 +32,7 @@ export const ActantSuggester: React.FC<ActantSuggesterI> = ({
   const [allCategories, setAllCategories] = useState<false | IOption[]>();
   //const [territoryActantIds, setTerritoryActantIds] = useState<string[]>([]);
 
-  const { territory: territoryId } = useSearchParams();
+  const { territoryId } = useSearchParams();
 
   // territory query
   const { status, data: territoryActants, error, isFetching } = useQuery(

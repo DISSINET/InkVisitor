@@ -36,7 +36,7 @@ export const ContextMenuNewTerritoryModal: React.FC<ContextMenuNewTerritoryModal
 
   const queryClient = useQueryClient();
 
-  const { setTerritory: setTerritoryId } = useSearchParams();
+  const { setTerritoryId } = useSearchParams();
   const dispatch = useAppDispatch();
 
   const createTerritoryMutation = useMutation(
