@@ -1,20 +1,39 @@
+import api from "api";
+import { useSearchParams } from "hooks";
 import { useEffect } from "react";
-import { RouteComponentProps, withRouter } from "react-router-dom";
+import { useQuery } from "react-query";
 
-const ScrollHandler = ({ location }: RouteComponentProps) => {
-  // const {}
+const ScrollHandler = () => {
+  const { statementId, territoryId } = useSearchParams();
+
+  const { status } = useQuery(
+    ["territory", "statement-list", territoryId],
+    async () => {
+      const res = await api.territoryGet(territoryId);
+      return res.data;
+    },
+    {
+      enabled: !!territoryId && api.isLoggedIn(),
+      retry: 2,
+    }
+  );
+
   useEffect(() => {
-    const element = document.getElementById(location.hash);
-
-    setTimeout(() => {
-      window.scrollTo({
-        behavior: element ? "smooth" : "auto",
-        top: element ? element.offsetTop : 0,
-      });
-    }, 100);
-  }, [location]);
+    if (status === "success") {
+      setTimeout(() => {
+        const statementInTable = document.getElementById(
+          `statement${statementId}`
+        );
+        const box = document.getElementById(`Statements-box-content`);
+        box?.scrollTo({
+          behavior: statementInTable ? "smooth" : "auto",
+          top: statementInTable ? statementInTable.offsetTop : 0,
+        });
+      }, 200);
+    }
+  }, [statementId, status]);
 
   return null;
 };
 
-export default withRouter(ScrollHandler);
+export default ScrollHandler;

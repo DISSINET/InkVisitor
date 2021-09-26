@@ -56,6 +56,7 @@ export const Box: React.FC<BoxProps> = ({
         <StyledButtonWrap>{button && button}</StyledButtonWrap>
       </StyledHead>
       <StyledContent
+        id={`${label}-box-content`}
         color={color}
         $noPadding={noPadding}
         $isExpanded={isExpanded}

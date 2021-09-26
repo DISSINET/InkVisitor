@@ -88,7 +88,7 @@ export const StatementListRow: React.FC<StatementListRow> = ({
         onClick={() => {
           handleClick(row.values.id);
         }}
-        id={`#statement${row.values.id}`}
+        id={`statement${row.values.id}`}
       >
         <td ref={dragRef} style={{ cursor: "move" }}>
           <FaGripVertical />
