@@ -10,9 +10,12 @@ import {
 import {
   ActantStatus,
   ActantType,
+  Certainty,
   Elvl,
   Language,
   Logic,
+  Mood,
+  MoodVariant,
   Operator,
   Partitivity,
   Position,
@@ -77,12 +80,29 @@ const importData = async () => {
             });
           })
           .run(conn);
+        await r
+          .table(indexedTable)
+          .indexCreate("data.parent.id", function (actant: any) {
+            return actant("data")("parent")("id");
+          })
+          .run(conn);
+        await r
+          .table(indexedTable)
+          .indexCreate(
+            "actantOrActionStatement",
+            function (row: any) {
+              return row("data")("actants").map(function (actant: any) {
+                return row("data")("actions").map(function (action: any) {
+                  return [actant("actant"), action("action")];
+                });
+              });
+            },
+            { multi: true }
+          )
+          .run(conn);
       }
 
-      for (let i = 0; i < 15000; i++) {
-        if (i === 5000) {
-          continue;
-        }
+      for (let i = 0; i < 100; i++) {
         const entry: IStatement = {
           class: ActantType.Statement,
           detail: "",
@@ -94,7 +114,7 @@ const importData = async () => {
           data: {
             actants: [
               {
-                actant: i.toString(),
+                actant: "actant" + i.toString(),
                 bundleEnd: false,
                 bundleStart: false,
                 elvl: Elvl.Inferential,
@@ -106,7 +126,20 @@ const importData = async () => {
                 virtuality: Virtuality.Allegation,
               },
             ],
-            actions: [],
+            actions: [
+              {
+                action: "action" + i.toString(),
+                bundleEnd: false,
+                bundleStart: false,
+                certainty: Certainty.AlmostCertain,
+                elvl: Elvl.Inferential,
+                id: i.toString(),
+                logic: Logic.Negative,
+                mood: [],
+                moodvariant: MoodVariant.Irrealis,
+                operator: Operator.And,
+              },
+            ],
             props: [],
             references: [],
             tags: [`tag${i}`],
@@ -120,7 +153,41 @@ const importData = async () => {
         await r.table(tableName).insert(entry).run(conn);
       }
 
-      for (let i = 20000; i < 20500; i++) {
+      for (let i = 5000; i < 5100; i++) {
+        const entry: ITerritory = {
+          class: ActantType.Territory,
+          detail: "",
+          id: i.toString(),
+          label: "",
+          language: [Language.English],
+          notes: [],
+          status: ActantStatus.Pending,
+          data: {
+            parent: {
+              id: "parent" + i.toString(),
+              order: 0,
+            },
+          },
+        };
+        await r.table(tableName).insert(entry).run(conn);
+
+        // parentless
+        const entry2: ITerritory = {
+          class: ActantType.Territory,
+          detail: "",
+          id: i.toString(),
+          label: "",
+          language: [Language.English],
+          notes: [],
+          status: ActantStatus.Pending,
+          data: {
+            parent: false,
+          },
+        };
+        await r.table(tableName).insert(entry2).run(conn);
+      }
+
+      for (let i = 20000; i < 20010; i++) {
         const entry: IResource = {
           class: ActantType.Resource,
           data: {
@@ -150,8 +217,7 @@ const testClass = async () => {
     .getAll(ActantType.Resource, { index: "class" })
     .run(conn);
   let end = performance.now();
-  console.log(items);
-  console.log(`testClass(${indexedTable} took ${end - start} milliseconds.`);
+  console.log(`testClass(${indexedTable}) took ${end - start} milliseconds.`);
 
   start = performance.now();
   await r
@@ -161,17 +227,17 @@ const testClass = async () => {
     })
     .run(conn);
   end = performance.now();
-  console.log(`testClass(${unindexedTable} took ${end - start} milliseconds.`);
+  console.log(`testClass(${unindexedTable}) took ${end - start} milliseconds.`);
 };
 
 const testActantsActant = async () => {
   let start = performance.now();
 
-  await r.table(indexedTable).getAll(4999, "data.actants.actant").run(conn);
+  await r.table(indexedTable).getAll("100", "data.actants.actant").run(conn);
 
   let end = performance.now();
   console.log(
-    `testActantsActant(${indexedTable} took ${end - start} milliseconds.`
+    `testActantsActant(${indexedTable}) took ${end - start} milliseconds.`
   );
 
   start = performance.now();
@@ -180,14 +246,91 @@ const testActantsActant = async () => {
     .table(unindexedTable)
     .filter(function (user: any) {
       return user("data")("actants").contains((labelObj: any) =>
-        labelObj("actant").eq(4999)
+        labelObj("actant").eq("100")
       );
     })
     .run(conn);
 
   end = performance.now();
   console.log(
-    `testActantsActant(${unindexedTable} took ${end - start} milliseconds.`
+    `testActantsActant(${unindexedTable}) took ${end - start} milliseconds.`
+  );
+};
+
+const testParentId = async () => {
+  let start = performance.now();
+
+  await r
+    .table(indexedTable)
+    .getAll("parent5005", { index: "data.parent.id" })
+    .run(conn);
+
+  let end = performance.now();
+  console.log(
+    `testParentId(${indexedTable}) took ${end - start} milliseconds.`
+  );
+
+  start = performance.now();
+
+  await r
+    .table(unindexedTable)
+    .filter(function (territory: any) {
+      return r.and(
+        territory("data")("parent").typeOf().eq("OBJECT"),
+        territory("data")("parent")("id").eq("parent5005")
+      );
+    })
+    .run(conn);
+
+  end = performance.now();
+  console.log(
+    `testParentId(${unindexedTable}) took ${end - start} milliseconds.`
+  );
+};
+
+const testActantOrActionStatement = async () => {
+  let start = performance.now();
+
+  await r
+    .table(indexedTable)
+    .getAll([["actant1", "action1"]], {
+      index: "actantOrActionStatement",
+    })
+    .run(conn);
+
+  let end = performance.now();
+  console.log(
+    `testActantOrActionStatement(${indexedTable}) took ${
+      end - start
+    } milliseconds.`
+  );
+
+  start = performance.now();
+
+  await r
+    .table(unindexedTable)
+    .filter(function (row: RDatum) {
+      const tests = [];
+      tests.push(
+        row("data")("actants").contains((actantObj: RDatum) =>
+          actantObj("actant").eq("actant4")
+        )
+      );
+      tests.push(
+        row("data")("actions").contains((actionObj: RDatum) =>
+          actionObj("action").eq("action4")
+        )
+      );
+
+      return r.and(tests[0], tests[1]);
+    })
+    .run(conn);
+
+  end = performance.now();
+  console.log(
+    `testActantOrActionStatement(${unindexedTable}) took ${
+      end - start
+    } milliseconds.`
   );
 };
 
@@ -197,7 +340,9 @@ const testActantsActant = async () => {
   conn.use(config.db);
 
   await importData();
-  // await testClass();
+  await testClass();
   await testActantsActant();
+  await testActantOrActionStatement();
+  await testParentId();
   await conn.close();
 })();
