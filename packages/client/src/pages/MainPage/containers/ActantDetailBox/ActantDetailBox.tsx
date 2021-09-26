@@ -56,10 +56,10 @@ import { useSearchParams } from "hooks";
 interface ActantDetailBox {}
 export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
   const {
-    actant: actantId,
-    setActant: setActantId,
-    setStatement: setStatementId,
-    setTerritory: setTerritoryId,
+    actantId,
+    setActantId,
+    setStatementId,
+    setTerritoryId,
   } = useSearchParams();
 
   const [showSubmit, setShowSubmit] = useState(false);

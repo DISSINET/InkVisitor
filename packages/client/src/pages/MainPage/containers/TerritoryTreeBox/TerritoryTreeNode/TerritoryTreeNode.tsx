@@ -55,10 +55,7 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
   const treeInitialized = useAppSelector((state) => state.treeInitialized);
   const queryClient = useQueryClient();
 
-  const {
-    territory: territoryId,
-    setTerritory: setTerritoryId,
-  } = useSearchParams();
+  const { territoryId, setTerritoryId } = useSearchParams();
 
   const isSelected = territoryId === territory.id;
 

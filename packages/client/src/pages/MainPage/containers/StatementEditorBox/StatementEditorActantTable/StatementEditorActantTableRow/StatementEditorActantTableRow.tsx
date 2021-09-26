@@ -35,7 +35,7 @@ export const StatementEditorActantTableRow: React.FC<StatementEditorActantTableR
   renderPropGroup,
   visibleColumns,
 }) => {
-  const { statement: statementId } = useSearchParams();
+  const { statementId } = useSearchParams();
 
   const dropRef = useRef<HTMLTableRowElement>(null);
   const dragRef = useRef<HTMLTableDataCellElement>(null);
