@@ -28,6 +28,7 @@ import { CStatement, DStatement } from "constructors";
 import { useSearchParams } from "hooks";
 import { StatementListContextMenu } from "./StatementListContextMenu/StatementListContextMenu";
 import { useHistory } from "react-router";
+import { BsArrowUp, BsArrowDown } from "react-icons/bs";
 
 const initialData: {
   statements: IStatement[];
@@ -362,7 +363,7 @@ export const StatementListBox: React.FC = () => {
                 <Button
                   key="d"
                   icon={<FaClone size={14} />}
-                  color="info"
+                  color="warning"
                   tooltip="duplicate"
                   onClick={() => {
                     duplicateStatementMutation.mutate(
@@ -371,10 +372,27 @@ export const StatementListBox: React.FC = () => {
                   }}
                 />,
                 <Button
-                  key="add"
-                  icon={<FaPlus size={14} />}
+                  key="add-up"
+                  icon={
+                    <>
+                      <FaPlus size={14} />
+                      <BsArrowUp size={14} />
+                    </>
+                  }
+                  tooltip="add new statement before"
+                  color="info"
+                  onClick={() => addStatementAtCertainIndex(row.index - 1)}
+                />,
+                <Button
+                  key="add-down"
+                  icon={
+                    <>
+                      <FaPlus size={14} />
+                      <BsArrowDown size={14} />
+                    </>
+                  }
                   tooltip="add new statement after"
-                  color="warning"
+                  color="success"
                   onClick={() => addStatementAtCertainIndex(row.index + 1)}
                 />,
               ]}
