@@ -16,7 +16,6 @@ export const StyledTagWrapper = styled.div<StyledTagWrapper>`
   cursor: move;
   color: ${({ theme }) => theme.color["black"]};
   font-size: ${({ theme }) => theme.fontSize["xxs"]};
-  box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.4);
   height: 2.25rem;
 `;
 

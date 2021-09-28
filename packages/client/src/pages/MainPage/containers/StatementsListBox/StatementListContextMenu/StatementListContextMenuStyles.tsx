@@ -40,7 +40,9 @@ export const StyledContextButtonGroup = styled(
   left: ${({ $clientX, $firstPanelExpanded }) =>
     `${
       ($clientX -
-        ($firstPanelExpanded ? panelWidths[0] + 6 : collapsedPanelWidth + 64)) /
+        ($firstPanelExpanded
+          ? panelWidths[0] + 55
+          : collapsedPanelWidth + 111)) /
       10
     }rem`};
   z-index: 100;
