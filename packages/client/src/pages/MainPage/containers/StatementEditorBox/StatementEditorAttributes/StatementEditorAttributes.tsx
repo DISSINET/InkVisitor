@@ -37,13 +37,14 @@ import {
   Partitivity,
   Operator,
 } from "@shared/enums";
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { ElvlToggle } from "../..";
 import { AttributeIcon } from "../../../../../components/AttributeIcon/AttributeIcon";
 import { Colors, Entities } from "types";
 import { CheckboxRow } from "./CheckboxRow/CheckboxRow";
 import { AttributeRow } from "./AttributeRow/AttributeRow";
 import { TooltipAttributeRow } from "./TooltipAttributeRow/TooltipAttributeRow";
+import { TooltipBooleanRow } from "./TooltipBooleanRow/TooltipBooleanRow";
 
 type AttributeName =
   | "certainty"
@@ -382,6 +383,18 @@ export const StatementEditorAttributes: React.FC<StatementEditorAttributes> = ({
               attributeName="operator"
               value={data.operator}
               items={operatorDict}
+            />,
+            <TooltipBooleanRow
+              key="bundleStart"
+              attributeName="bundleStart"
+              label="bundle start"
+              show={data.bundleStart ? data.bundleStart : false}
+            />,
+            <TooltipBooleanRow
+              key="bundleEnd"
+              attributeName="bundleEnd"
+              label="bundle end"
+              show={data.bundleEnd ? data.bundleEnd : false}
             />,
           ]}
         >

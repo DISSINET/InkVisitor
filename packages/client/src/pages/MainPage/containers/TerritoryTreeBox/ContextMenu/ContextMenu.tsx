@@ -77,6 +77,7 @@ export const ContextMenu: React.FC<ContextMenu> = ({
           >
             <Button
               key="add"
+              tooltip="add child territory"
               icon={<FaPlus size={14} />}
               color="info"
               onClick={() => {
@@ -88,6 +89,7 @@ export const ContextMenu: React.FC<ContextMenu> = ({
             />
             <Button
               key="favorites"
+              tooltip="add to favorites"
               icon={<FaStar size={14} />}
               color="warning"
               onClick={() => {
@@ -99,6 +101,7 @@ export const ContextMenu: React.FC<ContextMenu> = ({
             />
             <Button
               key="delete"
+              tooltip="delete territory"
               icon={<FaTrashAlt size={14} />}
               color="danger"
               onClick={() => {
@@ -109,58 +112,6 @@ export const ContextMenu: React.FC<ContextMenu> = ({
             />
           </StyledContextButtonGroup>
         )}
-        {/* <Transition
-          items={showMenu}
-          from={{ opacity: 0 }}
-          enter={{ opacity: 1 }}
-          leave={{ opacity: 0 }}
-          config={config.stiff}
-        >
-          {(showMenu) =>
-            showMenu &&
-            ((styles) => (
-              <StyledContextButtonGroup
-                $clientX={currentPosition.x}
-                $clientY={currentPosition.y}
-                height={currentPosition.height}
-                style={styles}
-              >
-                <Button
-                  key="add"
-                  icon={<FaPlus size={14} />}
-                  color="info"
-                  onClick={() => {
-                    // add child
-                    setShowCreate(true);
-                    setShowMenu(false);
-                    onMenuClose();
-                  }}
-                />
-                <Button
-                  key="favorites"
-                  icon={<FaStar size={14} />}
-                  color="warning"
-                  onClick={() => {
-                    // add to favorites
-                    toast.success(
-                      `You're adding territory [${territoryActant.label}] to favorites. (not implemented yet)`
-                    );
-                  }}
-                />
-                <Button
-                  key="delete"
-                  icon={<FaTrashAlt size={14} />}
-                  color="danger"
-                  onClick={() => {
-                    setShowSubmit(true);
-                    setShowMenu(false);
-                    onMenuClose();
-                  }}
-                />
-              </StyledContextButtonGroup>
-            ))
-          }
-        </Transition> */}
       </StyledWrapper>
 
       {showSubmit && (
