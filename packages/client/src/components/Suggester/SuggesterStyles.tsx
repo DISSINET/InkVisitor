@@ -33,15 +33,19 @@ export const StyledSuggesterButton = styled.div`
 export const StyledSuggesterList = styled.div`
   position: absolute;
   left: 0;
+  z-index: 10;
+`;
+export const StyledRelativePosition = styled.div`
+  position: relative;
   background-color: ${({ theme }) => theme.color["blue"][50]};
   padding: ${space1};
   width: auto;
-  z-index: 10;
   display: grid;
   grid-template-columns: 1.5em 10em 2em;
   grid-template-rows: auto;
   grid-auto-flow: row;
   align-items: center;
+  min-height: 3rem;
 
   > div {
     margin-bottom: ${space1};

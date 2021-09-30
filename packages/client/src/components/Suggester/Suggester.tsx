@@ -3,7 +3,7 @@ import { DragObjectWithType, DropTargetMonitor, useDrop } from "react-dnd";
 import { FaPlus, FaPlayCircle } from "react-icons/fa";
 import { MdCancel } from "react-icons/md";
 
-import { Button, Input, Tag } from "components";
+import { Button, Input, Loader, Tag } from "components";
 import { IOption } from "@shared/types";
 import { ItemTypes } from "types";
 import {
@@ -15,11 +15,13 @@ import {
   StyledSuggestionLineTag,
   StyledSuggestionLineActions,
   StyledSuggestionCancelButton,
+  StyledRelativePosition,
 } from "./SuggesterStyles";
 
 export interface SuggestionI {
   id: string;
   label: string;
+  detail: string;
   category: string;
   color: string;
   icons?: React.ReactNode[];
@@ -37,6 +39,7 @@ interface SuggesterProps {
   inputWidth?: number;
   displayCancelButton?: boolean;
   allowCreate?: boolean;
+  isFetching?: boolean;
 
   // events
   onType: Function;
@@ -70,6 +73,7 @@ export const Suggester: React.FC<SuggesterProps> = ({
   onPick,
   onDrop,
   onCancel = () => {},
+  isFetching,
 }) => {
   const [{ isOver }, dropRef] = useDrop({
     accept: ItemTypes.TAG,
@@ -127,31 +131,35 @@ export const Suggester: React.FC<SuggesterProps> = ({
           </StyledSuggesterButton>
         )}
       </StyledInputWrapper>
-      {suggestions.length ? (
+      {suggestions.length || isFetching ? (
         <StyledSuggesterList>
-          {suggestions
-            .filter((s, si) => si < MAXSUGGESTIONDISPLAYED)
-            .map((suggestion, si) => (
-              <React.Fragment key={si}>
-                <StyledSuggestionLineActions>
-                  <FaPlayCircle
-                    onClick={() => {
-                      onPick(suggestion);
-                    }}
-                  />
-                </StyledSuggestionLineActions>
-                <StyledSuggestionLineTag>
-                  <Tag
-                    propId={suggestion.id}
-                    label={suggestion.label}
-                    category={suggestion.category}
-                  />
-                </StyledSuggestionLineTag>
-                <StyledSuggestionLineIcons>
-                  {suggestion.icons}
-                </StyledSuggestionLineIcons>
-              </React.Fragment>
-            ))}
+          <StyledRelativePosition>
+            {suggestions
+              .filter((s, si) => si < MAXSUGGESTIONDISPLAYED)
+              .map((suggestion, si) => (
+                <React.Fragment key={si}>
+                  <StyledSuggestionLineActions>
+                    <FaPlayCircle
+                      onClick={() => {
+                        onPick(suggestion);
+                      }}
+                    />
+                  </StyledSuggestionLineActions>
+                  <StyledSuggestionLineTag>
+                    <Tag
+                      propId={suggestion.id}
+                      label={suggestion.label}
+                      detail={suggestion.detail}
+                      category={suggestion.category}
+                    />
+                  </StyledSuggestionLineTag>
+                  <StyledSuggestionLineIcons>
+                    {suggestion.icons}
+                  </StyledSuggestionLineIcons>
+                </React.Fragment>
+              ))}
+            <Loader size={30} show={isFetching} />
+          </StyledRelativePosition>
         </StyledSuggesterList>
       ) : null}
     </StyledSuggester>
