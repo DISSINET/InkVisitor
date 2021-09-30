@@ -16,14 +16,12 @@ import { useMutation, useQuery } from "react-query";
 import api from "api";
 import { Entities, IRequestSearch } from "types";
 import { IOption, IResponseSearch } from "@shared/types";
-import { ActantType } from "@shared/enums";
 import { FaUnlink } from "react-icons/fa";
 import { useDebounce } from "hooks";
 
 const classesActants = ["P", "G", "O", "C", "L", "V", "E", "S", "T", "R"];
 
 const initValues: IRequestSearch = {
-  class: ActantType.Territory,
   actantId: "",
   label: "",
 };
@@ -33,8 +31,8 @@ export const ActantSearchBox: React.FC = () => {
   const [classOption, setClassOption] = useState<
     ValueType<OptionTypeBase, any>
   >({
-    label: Entities[initValues.class].label,
-    value: Entities[initValues.class].id,
+    label: "*",
+    value: undefined,
   });
   const [searchData, setSearchData] = useState<IRequestSearch>(initValues);
   const debouncedValues = useDebounce<IRequestSearch>(searchData, 100);
@@ -53,7 +51,10 @@ export const ActantSearchBox: React.FC = () => {
   );
 
   useEffect(() => {
-    const optionsToSet: OptionsType<OptionTypeBase> = Object.entries(Entities)
+    const optionsToSet: {
+      value: string | undefined;
+      label: string;
+    }[] = Object.entries(Entities)
       .filter((c: any) => {
         if (c[1].id !== "A" && c[1].id !== "R") {
           return c;
@@ -62,6 +63,7 @@ export const ActantSearchBox: React.FC = () => {
       .map((entity) => {
         return { value: entity[1].id, label: entity[1].label };
       });
+    optionsToSet.unshift({ value: undefined, label: "*" });
     setOptions(optionsToSet);
   }, []);
 
@@ -95,7 +97,7 @@ export const ActantSearchBox: React.FC = () => {
   return (
     <StyledBoxContent>
       <StyledRow>
-        <StyledRowHeader>class</StyledRowHeader>
+        <StyledRowHeader>Class</StyledRowHeader>
         <Dropdown
           placeholder={""}
           width={150}
@@ -108,7 +110,7 @@ export const ActantSearchBox: React.FC = () => {
         />
       </StyledRow>
       <StyledRow>
-        <StyledRowHeader>label</StyledRowHeader>
+        <StyledRowHeader>Label</StyledRowHeader>
         <Input
           width={150}
           placeholder="search"
@@ -119,7 +121,7 @@ export const ActantSearchBox: React.FC = () => {
       <StyledRow>
         <StyledRowHeader>
           {/* used with */}
-          actant
+          Actant
         </StyledRowHeader>
         <ActantSuggester
           categoryIds={classesActants}
@@ -167,6 +169,7 @@ export const ActantSearchBox: React.FC = () => {
                 {results.map((result: IResponseSearch, key: number) => (
                   <StyledResultItem key={key}>
                     <Tag
+                      position="left top"
                       propId={result.actantId}
                       label={result.actantLabel}
                       category={result.class}
