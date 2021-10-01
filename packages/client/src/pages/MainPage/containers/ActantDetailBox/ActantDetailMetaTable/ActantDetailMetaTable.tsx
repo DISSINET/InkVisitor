@@ -389,7 +389,7 @@ export const ActantDetailMetaTable: React.FC<ActantBookmarkFolderTable> = ({
     },
   });
 
-  return (
+  return statements && statements.length ? (
     <StyledTable {...getTableProps()}>
       <StyledTHead>
         <tr>
@@ -415,5 +415,7 @@ export const ActantDetailMetaTable: React.FC<ActantBookmarkFolderTable> = ({
         })}
       </tbody>
     </StyledTable>
+  ) : (
+    <div />
   );
 };
