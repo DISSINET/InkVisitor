@@ -350,85 +350,9 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
               {/* Actions */}
               {actantMode === "action" && (
                 <StyledContentRow>
-                  <StyledContentRowLabel>Valency subject</StyledContentRowLabel>
-                  <StyledContentRowValue>
-                    <Input
-                      value={actant.data.valencies.s}
-                      width="full"
-                      onChangeFn={async (newValue: string) => {
-                        const oldData = { ...actant.data };
-                        updateActantMutation.mutate({
-                          data: {
-                            ...oldData,
-                            ...{
-                              valencies: {
-                                s: newValue,
-                                a1: actant.data.valencies.a1,
-                                a2: actant.data.valencies.a2,
-                              },
-                            },
-                          },
-                        });
-                      }}
-                    />
-                  </StyledContentRowValue>
-                </StyledContentRow>
-              )}
-              {actantMode === "action" && (
-                <StyledContentRow>
-                  <StyledContentRowLabel>Valency actant1</StyledContentRowLabel>
-                  <StyledContentRowValue>
-                    <Input
-                      value={actant.data.valencies.a1}
-                      width="full"
-                      onChangeFn={async (newValue: string) => {
-                        const oldData = { ...actant.data };
-                        updateActantMutation.mutate({
-                          data: {
-                            ...oldData,
-                            ...{
-                              valencies: {
-                                s: actant.data.valencies.s,
-                                a1: newValue,
-                                a2: actant.data.valencies.a2,
-                              },
-                            },
-                          },
-                        });
-                      }}
-                    />
-                  </StyledContentRowValue>
-                </StyledContentRow>
-              )}
-              {actantMode === "action" && (
-                <StyledContentRow>
-                  <StyledContentRowLabel>Valency actant2</StyledContentRowLabel>
-                  <StyledContentRowValue>
-                    <Input
-                      value={actant.data.valencies.a2}
-                      width="full"
-                      onChangeFn={async (newValue: string) => {
-                        const oldData = { ...actant.data };
-                        updateActantMutation.mutate({
-                          data: {
-                            ...oldData,
-                            ...{
-                              valencies: {
-                                s: actant.data.valencies.s,
-                                a1: actant.data.valencies.a1,
-                                a2: newValue,
-                              },
-                            },
-                          },
-                        });
-                      }}
-                    />
-                  </StyledContentRowValue>
-                </StyledContentRow>
-              )}
-              {actantMode === "action" && (
-                <StyledContentRow>
-                  <StyledContentRowLabel>Entity Subject</StyledContentRowLabel>
+                  <StyledContentRowLabel>
+                    Subject entity type
+                  </StyledContentRowLabel>
                   <StyledContentRowValue>
                     <Dropdown
                       isMulti={true}
@@ -463,7 +387,36 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
               )}
               {actantMode === "action" && (
                 <StyledContentRow>
-                  <StyledContentRowLabel>Entity Subject</StyledContentRowLabel>
+                  <StyledContentRowLabel>Subject valency</StyledContentRowLabel>
+                  <StyledContentRowValue>
+                    <Input
+                      value={actant.data.valencies.s}
+                      width="full"
+                      onChangeFn={async (newValue: string) => {
+                        const oldData = { ...actant.data };
+                        updateActantMutation.mutate({
+                          data: {
+                            ...oldData,
+                            ...{
+                              valencies: {
+                                s: newValue,
+                                a1: actant.data.valencies.a1,
+                                a2: actant.data.valencies.a2,
+                              },
+                            },
+                          },
+                        });
+                      }}
+                    />
+                  </StyledContentRowValue>
+                </StyledContentRow>
+              )}
+
+              {actantMode === "action" && (
+                <StyledContentRow>
+                  <StyledContentRowLabel>
+                    Actant1 entity type
+                  </StyledContentRowLabel>
                   <StyledContentRowValue>
                     <Dropdown
                       isMulti={true}
@@ -496,9 +449,39 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
                   </StyledContentRowValue>
                 </StyledContentRow>
               )}
+
               {actantMode === "action" && (
                 <StyledContentRow>
-                  <StyledContentRowLabel>Entity Subject</StyledContentRowLabel>
+                  <StyledContentRowLabel>Actant1 valency</StyledContentRowLabel>
+                  <StyledContentRowValue>
+                    <Input
+                      value={actant.data.valencies.a1}
+                      width="full"
+                      onChangeFn={async (newValue: string) => {
+                        const oldData = { ...actant.data };
+                        updateActantMutation.mutate({
+                          data: {
+                            ...oldData,
+                            ...{
+                              valencies: {
+                                s: actant.data.valencies.s,
+                                a1: newValue,
+                                a2: actant.data.valencies.a2,
+                              },
+                            },
+                          },
+                        });
+                      }}
+                    />
+                  </StyledContentRowValue>
+                </StyledContentRow>
+              )}
+
+              {actantMode === "action" && (
+                <StyledContentRow>
+                  <StyledContentRowLabel>
+                    Actant2 entity type
+                  </StyledContentRowLabel>
                   <StyledContentRowValue>
                     <Dropdown
                       isMulti={true}
@@ -522,6 +505,33 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
                                   : [],
                                 s: actant.data.entities.s,
                                 a1: actant.data.entities.a1,
+                              },
+                            },
+                          },
+                        });
+                      }}
+                    />
+                  </StyledContentRowValue>
+                </StyledContentRow>
+              )}
+
+              {actantMode === "action" && (
+                <StyledContentRow>
+                  <StyledContentRowLabel>Actant2 valency</StyledContentRowLabel>
+                  <StyledContentRowValue>
+                    <Input
+                      value={actant.data.valencies.a2}
+                      width="full"
+                      onChangeFn={async (newValue: string) => {
+                        const oldData = { ...actant.data };
+                        updateActantMutation.mutate({
+                          data: {
+                            ...oldData,
+                            ...{
+                              valencies: {
+                                s: actant.data.valencies.s,
+                                a1: actant.data.valencies.a1,
+                                a2: newValue,
                               },
                             },
                           },
