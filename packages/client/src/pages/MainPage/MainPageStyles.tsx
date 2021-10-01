@@ -36,3 +36,11 @@ export const StyledText = styled.div`
 export const StyledUsername = styled.div`
   font-weight: ${({ theme }) => theme.fontWeight["bold"]};
 `;
+
+interface StyledHeaderLogo {
+  height: number;
+}
+export const StyledHeaderLogo = styled.img<StyledHeaderLogo>`
+  height: ${({ height }) => (height ? `${height / 10}rem` : "auto")};
+  padding: ${({ theme }) => theme.space[3]};
+`;

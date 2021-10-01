@@ -34,6 +34,7 @@ import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { setAuthToken } from "redux/features/authTokenSlice";
 import { setUsername } from "redux/features/usernameSlice";
 import {
+  StyledHeaderLogo,
   StyledUserBox,
   StyledPanelWrap,
   StyledUser,
@@ -52,6 +53,8 @@ import { setFirstPanelExpanded } from "redux/features/layout/firstPanelExpandedS
 import { setFourthPanelExpanded } from "redux/features/layout/fourthPanelExpandedSlice";
 import { useSearchParams } from "hooks";
 import ScrollHandler from "hooks/ScrollHandler";
+
+import LogoInkvisitor from "assets/logos/inkvisitor-full.svg";
 
 interface MainPage {
   size: number[];
@@ -129,7 +132,15 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
           height={heightHeader}
           paddingY={0}
           paddingX={10}
-          left={<div>InkVisitor</div>}
+          left={
+            <div>
+              <StyledHeaderLogo
+                height={heightHeader - 10}
+                src={LogoInkvisitor}
+                alt="React Logo"
+              />
+            </div>
+          }
           right={
             <div>
               {isLoggedIn && (

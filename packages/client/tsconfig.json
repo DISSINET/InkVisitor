@@ -21,6 +21,6 @@
       "@dictionaries": ["./../../shared/dictionaries/index.ts"]
     }
   },
-  "include": ["src"],
+  "include": ["images.d.ts", "src"],
   "exclude": ["node_modules"]
 }
