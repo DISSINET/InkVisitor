@@ -35,8 +35,15 @@ module.exports = {
         },
       },
       {
-        test: /\.svg$/,
-        type: "asset/inline",
+        test: /\.(png|jp(e*)g|svg|gif)$/,
+        use: [
+          {
+            loader: 'file-loader',
+            options: {
+              name: 'images/[hash]-[name].[ext]',
+            },
+          },
+        ],
       },
       {
         test: /\.(woff|woff2|ttf)$/,
