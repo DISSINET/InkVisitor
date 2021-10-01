@@ -42,5 +42,5 @@ interface StyledHeaderLogo {
 }
 export const StyledHeaderLogo = styled.img<StyledHeaderLogo>`
   height: ${({ height }) => (height ? `${height / 10}rem` : "auto")};
-  padding: ${({ theme }) => theme.space[3]};
+  padding: ${({ theme }) => theme.space[4]};
 `;
