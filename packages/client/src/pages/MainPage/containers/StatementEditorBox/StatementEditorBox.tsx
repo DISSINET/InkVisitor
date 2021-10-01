@@ -51,11 +51,23 @@ import { StyledSubRow } from "./StatementEditorActionTable/StatementEditorAction
 import { ColumnInstance } from "react-table";
 import { useSearchParams } from "hooks";
 
-const classesActants = ["P", "G", "O", "C", "L", "V", "E", "S", "T", "R"];
+const classesActants = ["A", "P", "G", "O", "C", "L", "V", "E", "S", "T", "R"];
 const classesPropType = ["C"];
-const classesPropValue = ["P", "G", "O", "C", "L", "V", "E", "S", "T", "R"];
+const classesPropValue = [
+  "A",
+  "P",
+  "G",
+  "O",
+  "C",
+  "L",
+  "V",
+  "E",
+  "S",
+  "T",
+  "R",
+];
 const classesResources = ["R"];
-const classesTags = ["C", "P", "G", "O", "L", "V", "E", "S", "T", "R"];
+const classesTags = ["A", "C", "P", "G", "O", "L", "V", "E", "S", "T", "R"];
 
 export const StatementEditorBox: React.FC = () => {
   const { statementId, setStatementId } = useSearchParams();
