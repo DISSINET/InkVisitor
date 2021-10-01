@@ -112,7 +112,7 @@ export interface DraggedTerritoryItem {
   index?: number;
 }
 export interface IRequestSearch {
-  class: ActantType;
+  class?: ActantType;
   label?: string;
   actantId?: string;
 }

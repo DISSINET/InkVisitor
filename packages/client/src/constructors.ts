@@ -167,7 +167,7 @@ export const DStatement = (statement: IStatement): IStatement => {
 export const CStatementActant = (): IStatementActant => ({
   id: uuidv4(),
   actant: "",
-  position: Position["Actant2"],
+  position: Position["Subject"],
   elvl: Elvl["Textual"],
   logic: Logic["Positive"],
   virtuality: Virtuality["Certitude"],
