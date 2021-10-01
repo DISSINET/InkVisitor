@@ -19,7 +19,7 @@ import { IOption, IResponseSearch } from "@shared/types";
 import { FaUnlink } from "react-icons/fa";
 import { useDebounce } from "hooks";
 
-const classesActants = ["P", "G", "O", "C", "L", "V", "E", "S", "T", "R"];
+const classesActants = ["A", "P", "G", "O", "C", "L", "V", "E", "S", "T", "R"];
 
 const initValues: IRequestSearch = {
   actantId: "",
