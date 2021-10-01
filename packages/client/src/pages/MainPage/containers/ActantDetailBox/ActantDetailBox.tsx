@@ -661,7 +661,7 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
                         <Button
                           key="r"
                           icon={<FaEdit size={14} />}
-                          color="warning"
+                          color="plain"
                           tooltip="edit statement"
                           onClick={async () => {
                             setStatementId(statement.id);

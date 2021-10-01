@@ -34,9 +34,11 @@ export const Tooltip: React.FC<Tooltip> = ({
     >
       <div>
         <StyledLabel>
-          {!detail && !attributes && !label ? "(no label)" : label}
+          {!label && !attributes ? "(no label)" : label}
         </StyledLabel>
-        <StyledDetail>{detail}</StyledDetail>
+        <StyledDetail>
+          {!detail && !attributes ? "(no detail)" : detail}
+        </StyledDetail>
         {attributes}
       </div>
     </StyledPopup>

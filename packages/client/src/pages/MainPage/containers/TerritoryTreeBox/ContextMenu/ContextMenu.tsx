@@ -3,13 +3,13 @@ import { Button } from "components";
 import React, { useRef, useState } from "react";
 import { FaPlus, FaStar, FaTrashAlt } from "react-icons/fa";
 import { useSpring } from "react-spring";
-import { config, Transition } from "react-spring/renderprops";
+import { config } from "react-spring/renderprops";
 import { toast } from "react-toastify";
 import { ContextMenuNewTerritoryModal } from "../ContextMenuNewTerritoryModal/ContextMenuNewTerritoryModal";
 import { ContextMenuSubmitDelete } from "../ContextMenuSubmitDelete/ContextMenuSubmitDelete";
 import {
+  StyledCgMenuBoxed,
   StyledContextButtonGroup,
-  StyledTiDocumentText,
   StyledWrapper,
 } from "./ContextMenuStyles";
 
@@ -66,7 +66,7 @@ export const ContextMenu: React.FC<ContextMenu> = ({
           setShowMenu(false);
         }}
       >
-        <StyledTiDocumentText />
+        <StyledCgMenuBoxed size={18} />
         {showMenu && (
           <StyledContextButtonGroup
             $clientX={currentPosition.x}

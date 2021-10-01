@@ -5,14 +5,12 @@ import {
   heightHeader,
   panelWidths,
 } from "Theme/constants";
-import { TiDocumentText } from "react-icons/ti";
+import { CgMenuBoxed } from "react-icons/cg";
 
-interface StyledTiDocumentText {
+interface StyledCgMenuBoxed {
   $inverted?: boolean;
 }
-export const StyledTiDocumentText = styled(
-  TiDocumentText
-)<StyledTiDocumentText>`
+export const StyledCgMenuBoxed = styled(CgMenuBoxed)<StyledCgMenuBoxed>`
   color: ${({ theme }) => theme.color["primary"]};
   color: ${({ theme, $inverted }) =>
     $inverted ? theme.color["white"] : theme.color["primary"]};
@@ -36,7 +34,7 @@ export const StyledContextButtonGroup = styled(
   display: flex;
   flex-direction: row;
   position: absolute;
-  top: ${({ $clientY }) => `${($clientY - heightHeader - 2) / 10}rem`};
+  top: ${({ $clientY }) => `${($clientY - heightHeader) / 10}rem`};
   left: ${({ $clientX, $firstPanelExpanded }) =>
     `${
       ($clientX -

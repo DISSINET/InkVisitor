@@ -1,5 +1,4 @@
-import { FaChevronCircleDown } from "react-icons/fa";
-import { TiDocumentText } from "react-icons/ti";
+import { CgMenuBoxed } from "react-icons/cg";
 import { animated } from "react-spring";
 import styled from "styled-components";
 import { heightHeader } from "Theme/constants";
@@ -21,12 +20,12 @@ export const StyledContextButtonGroup = styled(
   display: flex;
   flex-direction: row;
   position: absolute;
-  top: ${({ $clientY }) => `${($clientY - heightHeader) / 10}rem`};
+  top: ${({ $clientY }) => `${($clientY - heightHeader - 2) / 10}rem`};
   left: ${({ $clientX }) => `${($clientX + 20) / 10}rem`};
   z-index: 100;
 `;
-export const StyledTiDocumentText = styled(TiDocumentText)`
+export const StyledCgMenuBoxed = styled(CgMenuBoxed)`
   color: ${({ theme }) => theme.color["primary"]};
-  margin: ${({ theme }) => `${theme.space[1]} ${theme.space[1]}`};
+  margin: ${({ theme }) => `0 ${theme.space[1]}`};
   cursor: pointer;
 `;
