@@ -22,6 +22,7 @@ export const StyledContextButtonGroup = styled(
   position: absolute;
   top: ${({ $clientY }) => `${($clientY - heightHeader - 2) / 10}rem`};
   left: ${({ $clientX }) => `${($clientX + 20) / 10}rem`};
+  box-shadow: ${({ theme }) => theme.boxShadow["normal"]};
   z-index: 100;
 `;
 export const StyledCgMenuBoxed = styled(CgMenuBoxed)`

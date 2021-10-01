@@ -44,4 +44,5 @@ export const StyledContextButtonGroup = styled(
       10
     }rem`};
   z-index: 100;
+  box-shadow: ${({ theme }) => theme.boxShadow["normal"]};
 `;
