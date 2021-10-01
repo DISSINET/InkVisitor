@@ -288,7 +288,19 @@ export const ActantDetailMetaTable: React.FC<ActantBookmarkFolderTable> = ({
                   },
                 });
               }}
-              categoryIds={["P", "G", "O", "C", "L", "V", "E", "S", "T", "R"]}
+              categoryIds={[
+                "A",
+                "P",
+                "G",
+                "O",
+                "C",
+                "L",
+                "V",
+                "E",
+                "S",
+                "T",
+                "R",
+              ]}
             />
           );
         },

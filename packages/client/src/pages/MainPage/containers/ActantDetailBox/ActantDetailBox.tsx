@@ -676,7 +676,7 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
       )}
 
       <Submit
-        title="Remove actant"
+        title="Remove entity"
         text="Do you really want to delete actant?"
         onSubmit={() => deleteActantMutation.mutate(actantId)}
         onCancel={() => setShowSubmit(false)}
