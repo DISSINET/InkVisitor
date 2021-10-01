@@ -26,6 +26,7 @@ export const StatementListContextMenu: React.FC<StatementListContextMenu> = ({
     x: 0,
     y: 0,
     height: 0,
+    width: 0,
   });
 
   const setDivPosition = () => {
@@ -35,6 +36,7 @@ export const StatementListContextMenu: React.FC<StatementListContextMenu> = ({
         x: rect["x"],
         y: rect["y"],
         height: rect["height"],
+        width: rect["width"],
       });
     }
   };
@@ -54,6 +56,7 @@ export const StatementListContextMenu: React.FC<StatementListContextMenu> = ({
           // onMenuClose();
           setShowMenu(false);
         }}
+        onClick={() => setShowMenu(false)}
       >
         <StyledTiDocumentText $inverted={inverted} size={16} />
 
