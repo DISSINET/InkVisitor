@@ -23,6 +23,8 @@ module.exports.loadSheet = async ({ spread, sheet, raw = false, headerRow = 0 })
 
     const sheets = google.sheets({ version: "v4", auth });
 
+    console.log(spread)
+
     let res = false;
     try {
         res = await sheets.spreadsheets.values.get({
@@ -38,33 +40,40 @@ module.exports.loadSheet = async ({ spread, sheet, raw = false, headerRow = 0 })
         return res.data.values;
     }
 
-
-    const data = res.data.values.filter(
-        (row) => row.filter((value) => value && value !== "#N/A").length > 1
-    );
-    console.log(data)
-
-    // divide data to rows and header
-    const header = data[headerRow];
-    const rows = data.filter((r, ri) => ri > headerRow);
-
-    // change rows to objects
-    const records = rows
-        .map((row) => {
-            const record = {};
-            row.map((val, vi) => {
-                record[header[vi]] = val;
-            });
-            return record;
-        })
-        /**
-         * filter out "empty" rows
-         * TODO: should be changed after tables will refactor
-         */
-        .filter((row) => row.id_action_or_relation || row.label);
-
-    fs.writeFileSync("sheetcache/" + tempFileName, JSON.stringify(records));
-    return records;
+    if (res.data) {
+        
+            const data = res.data.values.filter(
+                (row) => row.filter((value) => value && value !== "#N/A").length > 1
+            );
+        
+            // divide data to rows and header
+            const header = data[headerRow];
+            const rows = data.filter((r, ri) => ri > headerRow);
+        
+            // change rows to objects
+            const records = rows
+                .map((row) => {
+                    const record = {};
+                    row.map((val, vi) => {
+                        record[header[vi]] = val;
+                    });
+                    return record;
+                })
+                /**
+                 * filter out "empty" rows
+                 * TODO: should be changed after tables will refactor
+                 */
+                .filter((row) => row.id_action_or_relation || row.label);
+        
+            fs.mkdirSync('sheetcache/');
+            fs.writeFileSync("sheetcache/" + tempFileName, JSON.stringify(records));
+            
+            fs.writeFileSync("sheetcache/" + tempFileName, JSON.stringify(records));
+            return records;
+    }
+    else {
+        return []
+    }
 };
 
 /**
