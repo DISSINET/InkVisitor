@@ -2,7 +2,6 @@ import React, { useRef } from "react";
 import { FaGripVertical, FaTrashAlt, FaUnlink } from "react-icons/fa";
 import { useMutation, UseMutationResult, useQueryClient } from "react-query";
 import { AxiosResponse } from "axios";
-import { StatementEditorAttributes } from "../../StatementEditorBox/StatementEditorAttributes/StatementEditorAttributes";
 
 import { Button } from "components";
 import {

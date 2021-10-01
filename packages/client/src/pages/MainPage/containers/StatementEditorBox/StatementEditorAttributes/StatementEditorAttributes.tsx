@@ -200,7 +200,7 @@ export const StatementEditorAttributes: React.FC<StatementEditorAttributes> = ({
                 value={modalData.logic}
                 multi={false}
                 items={logicDict}
-                label="Logical level"
+                label="Logic"
                 attributeName="logic"
                 onChangeFn={(newValue: string | string[]) => {
                   handleModalDataChange("logic", newValue as Logic);

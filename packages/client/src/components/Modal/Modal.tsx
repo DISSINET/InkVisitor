@@ -1,6 +1,7 @@
 import React, { FC, ReactNode, useEffect } from "react";
 import { config, useSpring } from "react-spring";
 import { Colors } from "types";
+import useKeypress from "hooks/useKeyPress";
 
 import {
   StyledModalWrap,
@@ -15,21 +16,34 @@ import {
 interface Modal {
   children?: ReactNode;
   onClose?: () => void;
+  onEnterPress?: () => void;
   showModal: boolean;
   disableBgClick?: boolean;
   width?: "full" | "normal" | "thin";
+  closeOnEscape?: boolean;
 }
 export const Modal: FC<Modal> = ({
   children,
   onClose = () => {},
+  onEnterPress = () => {},
   showModal,
   disableBgClick = false,
   width = "normal",
+  closeOnEscape = false,
 }) => {
   const animatedMount = useSpring({
     opacity: showModal ? 1 : 0,
     config: config.stiff,
   });
+
+  useEffect(() => {
+    useKeypress("Enter", onEnterPress);
+  }, [onEnterPress]);
+
+  useEffect(() => {
+    useKeypress("Escape", onClose);
+  }, [closeOnEscape]);
+
   return (
     <>
       {showModal && (
