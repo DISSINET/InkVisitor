@@ -21,7 +21,7 @@ import { FaPlus, FaTrashAlt, FaUnlink } from "react-icons/fa";
 import { useMutation, UseMutationResult, useQueryClient } from "react-query";
 import { ActantType } from "@shared/enums";
 import { ActantDetailMetaTableRow } from "./ActantDetailMetaTableRow";
-import { StatementEditorAttributes } from "../../StatementEditorBox/StatementEditorAttributes/StatementEditorAttributes";
+import { AttributesEditor } from "../../AttributesEditor/AttributesEditor";
 
 interface ActantBookmarkFolderTable {
   metaStatements: IResponseStatement[];
@@ -63,7 +63,7 @@ export const ActantDetailMetaTable: React.FC<ActantBookmarkFolderTable> = ({
             : false;
 
           return typeActant && typeSActant ? (
-            <StatementEditorAttributes
+            <AttributesEditor
               modalTitle={typeActant.label}
               entityType={typeActant.class}
               data={{
@@ -72,7 +72,7 @@ export const ActantDetailMetaTable: React.FC<ActantBookmarkFolderTable> = ({
                 virtuality: typeSActant.virtuality,
                 partitivity: typeSActant.partitivity,
               }}
-              handleUpdate={(newData) => {
+              handleUpdate={(newData: any) => {
                 const metaStatementData = { ...data };
                 const updatedStatementActants = metaStatementData.actants.map(
                   (actant) =>
@@ -191,7 +191,7 @@ export const ActantDetailMetaTable: React.FC<ActantBookmarkFolderTable> = ({
             : false;
 
           return valueActant && valueSActant ? (
-            <StatementEditorAttributes
+            <AttributesEditor
               modalTitle={valueActant.label}
               entityType={valueActant.class}
               data={{
@@ -200,7 +200,7 @@ export const ActantDetailMetaTable: React.FC<ActantBookmarkFolderTable> = ({
                 virtuality: valueSActant.virtuality,
                 partitivity: valueSActant.partitivity,
               }}
-              handleUpdate={(newData) => {
+              handleUpdate={(newData: any) => {
                 const metaStatementData = { ...data };
                 const updatedStatementActants = metaStatementData.actants.map(
                   (actant) =>
@@ -323,7 +323,7 @@ export const ActantDetailMetaTable: React.FC<ActantBookmarkFolderTable> = ({
           return (
             <ButtonGroup noMargin>
               {statement && action && (
-                <StatementEditorAttributes
+                <AttributesEditor
                   modalTitle={statement.label}
                   entityType={statement.class}
                   data={{
@@ -336,7 +336,7 @@ export const ActantDetailMetaTable: React.FC<ActantBookmarkFolderTable> = ({
                     bundleStart: action.bundleStart,
                     bundleEnd: action.bundleEnd,
                   }}
-                  handleUpdate={(newData) => {
+                  handleUpdate={(newData: any) => {
                     const metaStatementData = { ...statement.data };
                     const updatedStatementActions = metaStatementData.actions.map(
                       (action) => ({ ...action, ...newData })

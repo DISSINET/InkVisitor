@@ -5,7 +5,7 @@ import {
   StyledAttributeModalRowLabel,
   StyledAttributeModalRowLabelIcon,
   StyledAttributeModalRowLabelText,
-} from "../StatementEditorAttributesStyles";
+} from "../AttributesEditorStyles";
 import { AttributeIcon, Checkbox } from "components";
 
 interface CheckboxRow {

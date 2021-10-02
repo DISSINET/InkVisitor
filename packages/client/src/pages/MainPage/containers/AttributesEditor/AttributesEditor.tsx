@@ -1,7 +1,7 @@
 import {
   StyledAttributeWrapper,
   StyledAttributeModalContent,
-} from "./StatementEditorAttributesStyles";
+} from "./AttributesEditorStyles";
 
 import {
   certaintyDict,
@@ -38,8 +38,6 @@ import {
   Operator,
 } from "@shared/enums";
 import React, { useState, useMemo, useEffect } from "react";
-import { ElvlToggle } from "../..";
-import { AttributeIcon } from "../../../../../components/AttributeIcon/AttributeIcon";
 import { Colors, Entities } from "types";
 import { CheckboxRow } from "./CheckboxRow/CheckboxRow";
 import { AttributeRow } from "./AttributeRow/AttributeRow";
@@ -79,7 +77,7 @@ interface StatementEditorAttributes {
   loading?: boolean;
 }
 
-export const StatementEditorAttributes: React.FC<StatementEditorAttributes> = ({
+export const AttributesEditor: React.FC<StatementEditorAttributes> = ({
   modalTitle,
   entityType,
   data,
