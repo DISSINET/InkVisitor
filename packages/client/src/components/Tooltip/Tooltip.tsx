@@ -9,6 +9,7 @@ interface Tooltip {
   on?: EventType | EventType[];
   label?: string;
   detail?: string;
+  text?: string;
   disabled?: boolean;
   attributes?: React.ReactElement[];
 }
@@ -17,9 +18,10 @@ export const Tooltip: React.FC<Tooltip> = ({
   position = ["bottom center", "right center", "top center"],
   on = ["hover", "focus"],
   label = "",
-  disabled = false,
-  detail = "",
+  detail,
+  text,
   attributes,
+  disabled = false,
 }) => {
   return (
     <StyledPopup
@@ -27,18 +29,14 @@ export const Tooltip: React.FC<Tooltip> = ({
       mouseLeaveDelay={0}
       position={position}
       on={on}
-      disabled={
-        disabled ||
-        (label.length === 0 && detail.length === 0 && attributes?.length === 0)
-      }
+      disabled={disabled}
     >
       <div>
         <StyledLabel>
           {!label && !attributes ? "(no label)" : label}
         </StyledLabel>
-        <StyledDetail>
-          {!detail && !attributes ? "(no detail)" : detail}
-        </StyledDetail>
+        <StyledDetail>{detail}</StyledDetail>
+        <StyledDetail>{text}</StyledDetail>
         {attributes}
       </div>
     </StyledPopup>

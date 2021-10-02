@@ -1,4 +1,4 @@
-import React, { ReactNode, useEffect, useRef, useState } from "react";
+import React, { ReactNode, useEffect, useRef } from "react";
 import {
   DragSourceMonitor,
   DropTargetMonitor,
@@ -15,10 +15,10 @@ import {
   ButtonWrapper,
   StyledTooltipSeparator,
 } from "./TagStyles";
-import { Tooltip } from "components";
 import { useAppDispatch } from "redux/hooks";
 import { setDraggedTerritory } from "redux/features/territoryTree/draggedTerritorySlice";
 import { useSearchParams } from "hooks";
+import { TagTooltip } from "./TagTooltip";
 
 interface TagProps {
   propId: string;
@@ -58,7 +58,7 @@ export const Tag: React.FC<TagProps> = ({
   propId,
   parentId,
   label = "",
-  detail = "",
+  detail,
   category = "T",
   mode = false,
   borderStyle = "solid",
@@ -147,7 +147,7 @@ export const Tag: React.FC<TagProps> = ({
   return (
     <>
       {short ? (
-        <Tooltip position={position} label={label} detail={detail}>
+        <TagTooltip position={position} label={label} detail={detail}>
           <div>
             <StyledTagWrapper
               ref={ref}
@@ -158,10 +158,10 @@ export const Tag: React.FC<TagProps> = ({
               {button && renderButton()}
             </StyledTagWrapper>
           </div>
-        </Tooltip>
+        </TagTooltip>
       ) : (
         <>
-          <Tooltip
+          <TagTooltip
             label={label}
             detail={detail}
             disabled={!enableTooltip}
@@ -186,7 +186,7 @@ export const Tag: React.FC<TagProps> = ({
                 {button && renderButton()}
               </StyledTagWrapper>
             </StyledTooltipSeparator>
-          </Tooltip>
+          </TagTooltip>
         </>
       )}
     </>
