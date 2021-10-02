@@ -1,4 +1,5 @@
 import React, { ReactElement } from "react";
+import { AiOutlineTag } from "react-icons/ai";
 import { PopupPosition, EventType } from "reactjs-popup/dist/types";
 
 import { StyledDetail, StyledLabel, StyledPopup } from "./TooltipStyles";
@@ -33,7 +34,9 @@ export const Tooltip: React.FC<Tooltip> = ({
     >
       <div>
         <StyledLabel>
-          {!label && !attributes ? "(no label)" : label}
+          {/* <AiOutlineTag /> */}
+          {/* {!label && !attributes ? "(no label)" : label} */}
+          {label}
         </StyledLabel>
         <StyledDetail>{detail}</StyledDetail>
         <StyledDetail>{text}</StyledDetail>

@@ -11,17 +11,17 @@ interface TagTooltip {
   disabled?: boolean;
 }
 export const TagTooltip: React.FC<TagTooltip> = ({
-  label = "(no label)",
-  detail = "(no detail)",
-  text = "(no text)",
+  label,
+  detail,
+  text,
   position,
   children,
   disabled,
 }) => {
   return (
     <Tooltip
-      label={label}
-      detail={detail}
+      label={label ? label : "(no label)"}
+      detail={detail ? detail : "(no detail)"}
       text={text}
       position={position}
       disabled={disabled}
