@@ -46,7 +46,7 @@ import {
 } from "./StatementEditorBoxStyles";
 import { StatementEditorActantTable } from "./StatementEditorActantTable/StatementEditorActantTable";
 import { StatementEditorActionTable } from "./StatementEditorActionTable/StatementEditorActionTable";
-import { StatementEditorAttributes } from "./StatementEditorAttributes/StatementEditorAttributes";
+import { AttributesEditor } from "../AttributesEditor/AttributesEditor";
 import { StyledSubRow } from "./StatementEditorActionTable/StatementEditorActionTableRow/StatementEditorActionTableRowStyles";
 import { ColumnInstance } from "react-table";
 import { useSearchParams } from "hooks";
@@ -467,7 +467,7 @@ export const StatementEditorBox: React.FC = () => {
                 }
               />
               <StyledPropButtonGroup>
-                <StatementEditorAttributes
+                <AttributesEditor
                   modalTitle={propTypeActant.label}
                   entityType={propTypeActant.class}
                   data={{
@@ -525,7 +525,7 @@ export const StatementEditorBox: React.FC = () => {
                 }
               />
               <StyledPropButtonGroup>
-                <StatementEditorAttributes
+                <AttributesEditor
                   modalTitle={propValueActant.label}
                   entityType={propValueActant.class}
                   data={{
@@ -560,7 +560,7 @@ export const StatementEditorBox: React.FC = () => {
 
         <StyledPropLineColumn lastSecondLevel={lastSecondLevel}>
           <StyledPropButtonGroup leftMargin={false}>
-            <StatementEditorAttributes
+            <AttributesEditor
               modalTitle={`${propValueActant?.label} - ${propTypeActant?.label}`}
               data={{
                 elvl: prop.elvl,

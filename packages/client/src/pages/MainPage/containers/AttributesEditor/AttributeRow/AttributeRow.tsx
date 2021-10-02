@@ -4,7 +4,7 @@ import {
   StyledAttributeModalRowLabel,
   StyledAttributeModalRowLabelIcon,
   StyledAttributeModalRowLabelText,
-} from "../StatementEditorAttributesStyles";
+} from "../AttributesEditorStyles";
 import { AttributeIcon, Dropdown } from "components";
 
 interface AttributeRow {
