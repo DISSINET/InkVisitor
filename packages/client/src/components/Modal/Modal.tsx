@@ -36,13 +36,10 @@ export const Modal: FC<Modal> = ({
     config: config.stiff,
   });
 
-  useEffect(() => {
-    useKeypress("Enter", onEnterPress);
-  }, [onEnterPress]);
-
-  useEffect(() => {
-    useKeypress("Escape", onClose);
-  }, [closeOnEscape]);
+  useKeypress("Enter", () => {
+    onEnterPress();
+  });
+  useKeypress("Escape", closeOnEscape ? onClose : () => {});
 
   return (
     <>
