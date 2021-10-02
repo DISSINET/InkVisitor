@@ -145,18 +145,22 @@ export const StatementEditorAttributes: React.FC<StatementEditorAttributes> = ({
   }, [modalData, data]);
 
   const handleAcceptClick = () => {
-    const updateModalData: AttributeData = {};
-    Object.keys(modalData).forEach((modelDataKey) => {
-      const modelDataValue = modalData[modelDataKey as AttributeName];
-
-      if (modelDataValue) {
-        //@ts-ignore
-        updateModalData[modelDataKey as AttributeName] = modelDataValue;
-      }
-    });
-    if (somethingWasUpdated) {
-      handleUpdate(updateModalData);
+    if (JSON.stringify(data) !== JSON.stringify(modalData)) {
+      handleUpdate(modalData);
+      setModalOpen(false);
     }
+    // const updateModalData: AttributeData = {};
+    // Object.keys(modalData).forEach((modelDataKey) => {
+    //   const modelDataValue = modalData[modelDataKey as AttributeName];
+
+    //   if (modelDataValue) {
+    //     //@ts-ignore
+    //     updateModalData[modelDataKey as AttributeName] = modelDataValue;
+    //   }
+    // });
+    // if (somethingWasUpdated) {
+    //   handleUpdate(updateModalData);
+    // }
   };
 
   const handleOpenModalClick = () => {
@@ -164,6 +168,7 @@ export const StatementEditorAttributes: React.FC<StatementEditorAttributes> = ({
   };
 
   const handleCancelClick = () => {
+    setModalData(data);
     setModalOpen(false);
   };
 
@@ -176,6 +181,7 @@ export const StatementEditorAttributes: React.FC<StatementEditorAttributes> = ({
         onClose={() => {
           handleCancelClick();
         }}
+        closeOnEscape={true}
       >
         <ModalHeader
           title={modalTitle}
