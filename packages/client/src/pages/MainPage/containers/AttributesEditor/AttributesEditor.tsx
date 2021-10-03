@@ -1,7 +1,9 @@
 import {
   StyledAttributeWrapper,
   StyledAttributeModalContent,
-} from "./StatementEditorAttributesStyles";
+  StyledAttributeModalHeaderWrapper,
+  StyledAttributeModalHeaderIcon,
+} from "./AttributesEditorStyles";
 
 import {
   certaintyDict,
@@ -38,8 +40,6 @@ import {
   Operator,
 } from "@shared/enums";
 import React, { useState, useMemo, useEffect } from "react";
-import { ElvlToggle } from "../..";
-import { AttributeIcon } from "../../../../../components/AttributeIcon/AttributeIcon";
 import { Colors, Entities } from "types";
 import { CheckboxRow } from "./CheckboxRow/CheckboxRow";
 import { AttributeRow } from "./AttributeRow/AttributeRow";
@@ -79,7 +79,7 @@ interface StatementEditorAttributes {
   loading?: boolean;
 }
 
-export const StatementEditorAttributes: React.FC<StatementEditorAttributes> = ({
+export const AttributesEditor: React.FC<StatementEditorAttributes> = ({
   modalTitle,
   entityType,
   data,
@@ -145,18 +145,22 @@ export const StatementEditorAttributes: React.FC<StatementEditorAttributes> = ({
   }, [modalData, data]);
 
   const handleAcceptClick = () => {
-    const updateModalData: AttributeData = {};
-    Object.keys(modalData).forEach((modelDataKey) => {
-      const modelDataValue = modalData[modelDataKey as AttributeName];
-
-      if (modelDataValue) {
-        //@ts-ignore
-        updateModalData[modelDataKey as AttributeName] = modelDataValue;
-      }
-    });
-    if (somethingWasUpdated) {
-      handleUpdate(updateModalData);
+    if (JSON.stringify(data) !== JSON.stringify(modalData)) {
+      handleUpdate(modalData);
+      setModalOpen(false);
     }
+    // const updateModalData: AttributeData = {};
+    // Object.keys(modalData).forEach((modelDataKey) => {
+    //   const modelDataValue = modalData[modelDataKey as AttributeName];
+
+    //   if (modelDataValue) {
+    //     //@ts-ignore
+    //     updateModalData[modelDataKey as AttributeName] = modelDataValue;
+    //   }
+    // });
+    // if (somethingWasUpdated) {
+    //   handleUpdate(updateModalData);
+    // }
   };
 
   const handleOpenModalClick = () => {
@@ -164,6 +168,7 @@ export const StatementEditorAttributes: React.FC<StatementEditorAttributes> = ({
   };
 
   const handleCancelClick = () => {
+    setModalData(data);
     setModalOpen(false);
   };
 
@@ -176,9 +181,17 @@ export const StatementEditorAttributes: React.FC<StatementEditorAttributes> = ({
         onClose={() => {
           handleCancelClick();
         }}
+        closeOnEscape={true}
       >
         <ModalHeader
-          title={modalTitle}
+          title={
+            <StyledAttributeModalHeaderWrapper>
+              <StyledAttributeModalHeaderIcon>
+                <MdSettings />
+              </StyledAttributeModalHeaderIcon>
+              {modalTitle}
+            </StyledAttributeModalHeaderWrapper>
+          }
           color={entityType ? Entities[entityType].color : undefined}
         />
         <ModalContent>
@@ -200,7 +213,7 @@ export const StatementEditorAttributes: React.FC<StatementEditorAttributes> = ({
                 value={modalData.logic}
                 multi={false}
                 items={logicDict}
-                label="Logical level"
+                label="Logic"
                 attributeName="logic"
                 onChangeFn={(newValue: string | string[]) => {
                   handleModalDataChange("logic", newValue as Logic);
