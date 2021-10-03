@@ -1,6 +1,8 @@
 import {
   StyledAttributeWrapper,
   StyledAttributeModalContent,
+  StyledAttributeModalHeaderWrapper,
+  StyledAttributeModalHeaderIcon,
 } from "./AttributesEditorStyles";
 
 import {
@@ -182,7 +184,14 @@ export const AttributesEditor: React.FC<StatementEditorAttributes> = ({
         closeOnEscape={true}
       >
         <ModalHeader
-          title={modalTitle}
+          title={
+            <StyledAttributeModalHeaderWrapper>
+              <StyledAttributeModalHeaderIcon>
+                <MdSettings />
+              </StyledAttributeModalHeaderIcon>
+              {modalTitle}
+            </StyledAttributeModalHeaderWrapper>
+          }
           color={entityType ? Entities[entityType].color : undefined}
         />
         <ModalContent>

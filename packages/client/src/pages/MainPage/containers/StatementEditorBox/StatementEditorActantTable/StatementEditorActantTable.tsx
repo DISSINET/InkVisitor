@@ -169,7 +169,7 @@ export const StatementEditorActantTable: React.FC<StatementEditorActantTable> = 
           } = row.values.data;
           return actant && sActant ? (
             <AttributesEditor
-              modalTitle={actant.label}
+              modalTitle={`Actant involvement [${actant.label}]`}
               entityType={actant.class}
               data={{
                 elvl: sActant.elvl,

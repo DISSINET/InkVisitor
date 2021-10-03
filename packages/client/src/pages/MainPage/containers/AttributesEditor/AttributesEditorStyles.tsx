@@ -25,4 +25,13 @@ export const StyledAttributeModalRowLabelText = styled.div`
   width: 10em;
 `;
 
+export const StyledAttributeModalHeaderWrapper = styled.div`
+  display: block;
+`;
 
+export const StyledAttributeModalHeaderIcon = styled.div`
+  display: inline-block;
+  margin-right: 2px;
+  width: auto;
+  vertical-align: text-top;
+`;
