@@ -71,6 +71,7 @@ export const ActantSuggester: React.FC<ActantSuggesterI> = ({
           color: entity.color,
           category: s.class,
           label: s.label,
+          detail: s.detail,
           id: s.id,
           icons: icons,
         };
@@ -157,6 +158,7 @@ export const ActantSuggester: React.FC<ActantSuggesterI> = ({
 
   return selectedCategory && allCategories ? (
     <Suggester
+      isFetching={isFetchingStatement}
       marginTop={false}
       suggestions={suggestions || []}
       placeholder={placeholder}

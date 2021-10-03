@@ -12,7 +12,7 @@ export const StyledPopup = styled(Popup)`
     display: flex;
     justify-content: right;
     align-items: right;
-    max-width: 30rem;
+    max-width: 40rem;
   }
   &-arrow {
     color: ${({ theme }) => theme.color["black"]};
@@ -25,7 +25,15 @@ export const StyledPopup = styled(Popup)`
   }
 `;
 
+export const StyledRow = styled.div`
+  display: flex;
+  /* align-items: center; */
+`;
 export const StyledLabel = styled.p`
   font-weight: ${({ theme }) => theme.fontWeight["bold"]};
 `;
 export const StyledDetail = styled.p``;
+export const StyledIconWrap = styled.span`
+  margin-top: 2px;
+  margin-right: ${({ theme }) => theme.space[2]};
+`;

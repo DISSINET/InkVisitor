@@ -1,7 +1,12 @@
 import { AttributeIcon } from "components";
 import React, { useMemo } from "react";
 import { DropdownItem } from "types";
-import { StyledRow, StyledValue } from "./TooltipAttributeRowStyles";
+import {
+  StyledIconWrap,
+  StyledRow,
+  StyledValue,
+  StyledValues,
+} from "./TooltipAttributeRowStyles";
 
 interface TooltipAttributeRow {
   attributeName: string;
@@ -25,11 +30,18 @@ export const TooltipAttributeRow: React.FC<TooltipAttributeRow> = ({
     <>
       {selectedItem && (
         <StyledRow key={attributeName}>
-          <AttributeIcon attributeName={attributeName} />
+          <StyledIconWrap>
+            <AttributeIcon attributeName={attributeName} />
+          </StyledIconWrap>
           {isArray ? (
-            (selectedItem as DropdownItem[]).map((item, key) => (
-              <StyledValue key={key}>{item.label}</StyledValue>
-            ))
+            <StyledValues>
+              {(selectedItem as DropdownItem[]).map((item, key) => (
+                <>
+                  <StyledValue key={key}>{item.label}</StyledValue>
+                  {key !== (selectedItem as DropdownItem[]).length - 1 && ","}
+                </>
+              ))}
+            </StyledValues>
           ) : (
             <StyledValue>{(selectedItem as DropdownItem)?.label}</StyledValue>
           )}
