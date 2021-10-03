@@ -371,9 +371,10 @@ export const StatementEditorBox: React.FC = () => {
         data: changes,
       }),
     {
-      onSuccess: () => {
+      onSuccess: (data, variables) => {
         queryClient.invalidateQueries("statement");
         queryClient.invalidateQueries("territory");
+        queryClient.invalidateQueries("actant");
       },
     }
   );

@@ -3,8 +3,8 @@ import { config, Transition } from "react-spring/renderprops";
 import { useAppSelector } from "redux/hooks";
 
 import {
+  StyledCgMenuBoxed,
   StyledContextButtonGroup,
-  StyledTiDocumentText,
   StyledWrapper,
 } from "./StatementListContextMenuStyles";
 
@@ -49,16 +49,14 @@ export const StatementListContextMenu: React.FC<StatementListContextMenu> = ({
           if (!showMenu) {
             setDivPosition();
           }
-          // onMenuOpen();
           setShowMenu(true);
         }}
         onMouseLeave={() => {
-          // onMenuClose();
           setShowMenu(false);
         }}
         onClick={() => setShowMenu(false)}
       >
-        <StyledTiDocumentText $inverted={inverted} size={16} />
+        <StyledCgMenuBoxed $inverted={inverted} size={18} />
 
         <Transition
           items={showMenu}

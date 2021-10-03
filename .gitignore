@@ -38,3 +38,5 @@ import/~$actants.xlsx
 
 # certificates
 *.pem
+
+.DS_Store
