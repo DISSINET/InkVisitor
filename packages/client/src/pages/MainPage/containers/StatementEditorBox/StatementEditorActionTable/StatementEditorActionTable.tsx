@@ -133,7 +133,7 @@ export const StatementEditorActionTable: React.FC<StatementEditorActionTable> = 
           const { action, sAction } = row.values.data;
           return action && sAction ? (
             <AttributesEditor
-              modalTitle={action.label}
+              modalTitle={`Action involvement [${action.label}]`}
               entityType={ActantType.Action}
               data={{
                 elvl: sAction.elvl,

@@ -468,7 +468,7 @@ export const StatementEditorBox: React.FC = () => {
               />
               <StyledPropButtonGroup>
                 <AttributesEditor
-                  modalTitle={propTypeActant.label}
+                  modalTitle={`Property Type attributes [${propTypeActant.label}]`}
                   entityType={propTypeActant.class}
                   data={{
                     elvl: prop.type.elvl,
@@ -526,7 +526,7 @@ export const StatementEditorBox: React.FC = () => {
               />
               <StyledPropButtonGroup>
                 <AttributesEditor
-                  modalTitle={propValueActant.label}
+                  modalTitle={`Property Value attributes [${propValueActant.label}]`}
                   entityType={propValueActant.class}
                   data={{
                     elvl: prop.value.elvl,
@@ -561,7 +561,7 @@ export const StatementEditorBox: React.FC = () => {
         <StyledPropLineColumn lastSecondLevel={lastSecondLevel}>
           <StyledPropButtonGroup leftMargin={false}>
             <AttributesEditor
-              modalTitle={`${propValueActant?.label} - ${propTypeActant?.label}`}
+              modalTitle={`Property Statement attributes [${propValueActant?.label} - ${propTypeActant?.label}]`}
               data={{
                 elvl: prop.elvl,
                 certainty: prop.certainty,

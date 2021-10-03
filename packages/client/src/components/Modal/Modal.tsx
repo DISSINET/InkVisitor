@@ -76,7 +76,7 @@ export const ModalCard: FC<ModalCard> = ({
 };
 
 interface ModalHeader {
-  title?: string;
+  title?: string | React.ReactElement;
   color?: typeof Colors[number];
 }
 export const ModalHeader: FC<ModalHeader> = ({ title, color = "white" }) => {
