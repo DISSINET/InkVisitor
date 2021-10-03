@@ -11,7 +11,7 @@ import {
   IStatementAction,
 } from "@shared/types";
 import { ActantSuggester, ActantTag } from "../..";
-import { StatementEditorAttributes } from "./../StatementEditorAttributes/StatementEditorAttributes";
+import { AttributesEditor } from "../../AttributesEditor/AttributesEditor";
 import { Button } from "components";
 import { FaPlus, FaTrashAlt, FaUnlink } from "react-icons/fa";
 import { UseMutationResult } from "react-query";
@@ -132,8 +132,8 @@ export const StatementEditorActionTable: React.FC<StatementEditorActionTable> = 
         Cell: ({ row }: Cell) => {
           const { action, sAction } = row.values.data;
           return action && sAction ? (
-            <StatementEditorAttributes
-              modalTitle={action.label}
+            <AttributesEditor
+              modalTitle={`Action involvement [${action.label}]`}
               entityType={ActantType.Action}
               data={{
                 elvl: sAction.elvl,
