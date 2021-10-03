@@ -559,7 +559,6 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
                       width="full"
                       onChangeFn={async (newValue: string) => {
                         const oldData = { ...actant.data };
-                        console.log(oldData);
                         updateActantMutation.mutate({
                           data: {
                             ...oldData,
