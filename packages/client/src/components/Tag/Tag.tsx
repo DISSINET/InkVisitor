@@ -24,7 +24,8 @@ interface TagProps {
   propId: string;
   parentId?: string;
   label?: string;
-  detail?: string;
+  tooltipDetail?: string;
+  tooltipText?: string;
   category: string;
   mode?: "selected" | "disabled" | "invalid" | false;
   borderStyle?: "solid" | "dashed" | "dotted";
@@ -58,7 +59,8 @@ export const Tag: React.FC<TagProps> = ({
   propId,
   parentId,
   label = "",
-  detail,
+  tooltipDetail,
+  tooltipText,
   category = "T",
   mode = false,
   borderStyle = "solid",
@@ -147,7 +149,12 @@ export const Tag: React.FC<TagProps> = ({
   return (
     <>
       {short ? (
-        <TagTooltip position={position} label={label} detail={detail}>
+        <TagTooltip
+          position={position}
+          label={label}
+          detail={tooltipDetail}
+          text={tooltipText}
+        >
           <div>
             <StyledTagWrapper
               ref={ref}
@@ -163,7 +170,8 @@ export const Tag: React.FC<TagProps> = ({
         <>
           <TagTooltip
             label={label}
-            detail={detail}
+            detail={tooltipDetail}
+            text={tooltipText}
             disabled={!enableTooltip}
             position={position}
           >

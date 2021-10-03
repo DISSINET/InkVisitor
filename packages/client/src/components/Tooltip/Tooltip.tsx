@@ -1,5 +1,7 @@
 import React, { ReactElement } from "react";
 import { AiOutlineTag } from "react-icons/ai";
+import { BiCommentDetail } from "react-icons/bi";
+import { BsCardText } from "react-icons/bs";
 import { PopupPosition, EventType } from "reactjs-popup/dist/types";
 
 import { StyledDetail, StyledLabel, StyledPopup } from "./TooltipStyles";
@@ -13,6 +15,7 @@ interface Tooltip {
   text?: string;
   disabled?: boolean;
   attributes?: React.ReactElement[];
+  tagTooltip?: boolean;
 }
 export const Tooltip: React.FC<Tooltip> = ({
   children,
@@ -22,6 +25,7 @@ export const Tooltip: React.FC<Tooltip> = ({
   detail,
   text,
   attributes,
+  tagTooltip = false,
   disabled = false,
 }) => {
   return (
@@ -33,14 +37,24 @@ export const Tooltip: React.FC<Tooltip> = ({
       disabled={disabled}
     >
       <div>
-        <StyledLabel>
-          {/* <AiOutlineTag /> */}
-          {/* {!label && !attributes ? "(no label)" : label} */}
-          {label}
-        </StyledLabel>
-        <StyledDetail>{detail}</StyledDetail>
-        <StyledDetail>{text}</StyledDetail>
-        {attributes}
+        {attributes ? (
+          attributes
+        ) : (
+          <>
+            <StyledLabel>
+              {tagTooltip && <AiOutlineTag />}
+              {label}
+            </StyledLabel>
+            <StyledDetail>
+              {text && <BsCardText />}
+              {text}
+            </StyledDetail>
+            <StyledDetail>
+              {tagTooltip && <BiCommentDetail />}
+              {detail}
+            </StyledDetail>
+          </>
+        )}
       </div>
     </StyledPopup>
   );

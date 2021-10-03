@@ -25,6 +25,7 @@ export const TagTooltip: React.FC<TagTooltip> = ({
       text={text}
       position={position}
       disabled={disabled}
+      tagTooltip
     >
       {children}
     </Tooltip>

@@ -242,7 +242,12 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
 
             <StyledActantPreviewRow>
               <StyledTagWrap>
-                <ActantTag actant={actant} propId={actant.id} fullWidth />
+                <ActantTag
+                  actant={actant}
+                  propId={actant.id}
+                  tooltipText={actant.data.text}
+                  fullWidth
+                />
               </StyledTagWrap>
               <ButtonGroup>
                 <Button
