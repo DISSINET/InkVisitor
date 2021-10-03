@@ -4,7 +4,13 @@ import { BiCommentDetail } from "react-icons/bi";
 import { BsCardText } from "react-icons/bs";
 import { PopupPosition, EventType } from "reactjs-popup/dist/types";
 
-import { StyledDetail, StyledLabel, StyledPopup } from "./TooltipStyles";
+import {
+  StyledDetail,
+  StyledIconWrap,
+  StyledLabel,
+  StyledPopup,
+  StyledRow,
+} from "./TooltipStyles";
 
 interface Tooltip {
   children: ReactElement;
@@ -41,18 +47,20 @@ export const Tooltip: React.FC<Tooltip> = ({
           attributes
         ) : (
           <>
-            <StyledLabel>
-              {tagTooltip && <AiOutlineTag />}
-              {label}
-            </StyledLabel>
-            <StyledDetail>
-              {text && <BsCardText />}
-              {text}
-            </StyledDetail>
-            <StyledDetail>
-              {tagTooltip && <BiCommentDetail />}
-              {detail}
-            </StyledDetail>
+            <StyledRow>
+              <StyledIconWrap>{tagTooltip && <AiOutlineTag />}</StyledIconWrap>
+              <StyledLabel>{label}</StyledLabel>
+            </StyledRow>
+            <StyledRow>
+              <StyledIconWrap>{text && <BsCardText />}</StyledIconWrap>
+              <StyledDetail>{text}</StyledDetail>
+            </StyledRow>
+            <StyledRow>
+              <StyledIconWrap>
+                {tagTooltip && <BiCommentDetail />}
+              </StyledIconWrap>
+              <StyledDetail>{detail}</StyledDetail>
+            </StyledRow>
           </>
         )}
       </div>

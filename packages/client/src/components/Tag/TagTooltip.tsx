@@ -20,8 +20,8 @@ export const TagTooltip: React.FC<TagTooltip> = ({
 }) => {
   return (
     <Tooltip
-      label={label ? label : "(no label)"}
-      detail={detail ? detail : "(no detail)"}
+      label={label}
+      detail={detail}
       text={text}
       position={position}
       disabled={disabled}
