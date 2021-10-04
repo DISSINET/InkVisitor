@@ -40,6 +40,7 @@ const ScrollHandler = () => {
       }, 200);
     }
   }, [statementId, statementListStatus]);
+
   useEffect(() => {
     if (treeStatus === "success") {
       setTimeout(() => {
