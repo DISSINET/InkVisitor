@@ -1,13 +1,16 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useQuery } from "react-query";
 
 import api from "api";
 import { TerritoryTreeNode } from "./TerritoryTreeNode/TerritoryTreeNode";
 import { IResponseTree } from "@shared/types";
-import { Loader } from "components";
+import { Button, Loader } from "components";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { setSelectedTerritoryPath } from "redux/features/territoryTree/selectedTerritoryPathSlice";
 import { useSearchParams } from "hooks";
+import { FaPlus } from "react-icons/fa";
+import { ContextMenuNewTerritoryModal } from "./ContextMenuNewTerritoryModal/ContextMenuNewTerritoryModal";
+import { rootTerritoryId } from "Theme/constants";
 
 export const TerritoryTreeBox: React.FC = () => {
   const { status, data, error, isFetching } = useQuery(
@@ -20,6 +23,7 @@ export const TerritoryTreeBox: React.FC = () => {
   );
 
   const { territoryId } = useSearchParams();
+  const [showCreate, setShowCreate] = useState(false);
 
   const dispatch = useAppDispatch();
   const selectedTerritoryPath = useAppSelector(
@@ -62,6 +66,17 @@ export const TerritoryTreeBox: React.FC = () => {
           statementsCount={data.statementsCount}
           initExpandedNodes={selectedTerritoryPath}
           empty={data.empty}
+        />
+      )}
+      <Button
+        label="new territory"
+        icon={<FaPlus />}
+        onClick={() => setShowCreate(true)}
+      />
+      {showCreate && (
+        <ContextMenuNewTerritoryModal
+          onClose={() => setShowCreate(false)}
+          territoryActantId={rootTerritoryId}
         />
       )}
       <Loader show={isFetching} />

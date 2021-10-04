@@ -149,7 +149,7 @@ export const Suggester: React.FC<SuggesterProps> = ({
                     <Tag
                       propId={suggestion.id}
                       label={suggestion.label}
-                      detail={suggestion.detail}
+                      tooltipDetail={suggestion.detail}
                       category={suggestion.category}
                     />
                   </StyledSuggestionLineTag>
