@@ -8,7 +8,7 @@ export const StyledPopup = styled(Popup)`
     border-radius: ${({ theme }) => theme.borderRadius["sm"]};
     font-size: ${({ theme }) => theme.fontSize["xxs"]};
     padding: ${({ theme }) => `${theme.space[2]} ${theme.space[3]}`};
-    min-width: ${({ theme }) => theme.space[16]};
+    min-width: ${({ theme }) => theme.space[8]};
     display: flex;
     justify-content: right;
     align-items: right;
@@ -27,7 +27,6 @@ export const StyledPopup = styled(Popup)`
 
 export const StyledRow = styled.div`
   display: flex;
-  /* align-items: center; */
 `;
 export const StyledLabel = styled.p`
   font-weight: ${({ theme }) => theme.fontWeight["bold"]};

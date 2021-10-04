@@ -51,16 +51,20 @@ export const Tooltip: React.FC<Tooltip> = ({
               <StyledIconWrap>{tagTooltip && <AiOutlineTag />}</StyledIconWrap>
               <StyledLabel>{label}</StyledLabel>
             </StyledRow>
-            <StyledRow>
-              <StyledIconWrap>{text && <BsCardText />}</StyledIconWrap>
-              <StyledDetail>{text}</StyledDetail>
-            </StyledRow>
-            <StyledRow>
-              <StyledIconWrap>
-                {tagTooltip && <BiCommentDetail />}
-              </StyledIconWrap>
-              <StyledDetail>{detail}</StyledDetail>
-            </StyledRow>
+            {text && (
+              <StyledRow>
+                <StyledIconWrap>{<BsCardText />}</StyledIconWrap>
+                <StyledDetail>{text}</StyledDetail>
+              </StyledRow>
+            )}
+            {(tagTooltip || detail) && (
+              <StyledRow>
+                <StyledIconWrap>
+                  {tagTooltip && <BiCommentDetail />}
+                </StyledIconWrap>
+                <StyledDetail>{detail}</StyledDetail>
+              </StyledRow>
+            )}
           </>
         )}
       </div>
