@@ -4,8 +4,6 @@ import MuniFont from "assets/fonts/muni-bold-webfont.woff2";
 import MuniArial from "assets/fonts/academicons.woff2";
 
 const GlobalStyle = createGlobalStyle`
-  @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@100;300;400;500;700;900&display=swap');
-
   html {
     font-size: 62.5%;
   }
