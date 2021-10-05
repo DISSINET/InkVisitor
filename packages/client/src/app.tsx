@@ -1,4 +1,4 @@
-import React, { useState, useLayoutEffect, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { Switch, Route, BrowserRouter } from "react-router-dom";
 import { ThemeProvider } from "styled-components";
 import { Helmet } from "react-helmet";
@@ -9,14 +9,14 @@ import GlobalStyle from "Theme/global";
 
 import AclPage from "./pages/Acl";
 
-import { QueryClient, QueryClientProvider, useQuery } from "react-query";
+import { QueryClient, QueryClientProvider } from "react-query";
 import { ReactQueryDevtools } from "react-query/devtools";
 import {
   layoutWidthBreakpoint,
   minLayoutWidth,
   percentPanelWidths,
 } from "Theme/constants";
-import { useAppDispatch, useAppSelector } from "redux/hooks";
+import { useAppDispatch } from "redux/hooks";
 import { setLayoutWidth } from "redux/features/layout/layoutWidthSlice";
 import { setPanelWidths } from "redux/features/layout/panelWidthsSlice";
 import { setSeparatorXPosition } from "redux/features/layout/separatorXPositionSlice";
@@ -66,6 +66,10 @@ export const App: React.FC<AppProps> = () => {
       <Helmet>
         <meta charSet="utf-8" />
         <title>InkVisitor</title>
+        {/* <link
+          href="https://fonts.googleapis.com/css2?family=Roboto:wght@100;300;400;500;700;900&display=swap"
+          rel="stylesheet"
+        /> */}
       </Helmet>
       <ThemeProvider theme={theme}>
         <GlobalStyle />

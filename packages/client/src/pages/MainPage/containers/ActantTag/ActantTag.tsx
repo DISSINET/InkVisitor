@@ -6,6 +6,7 @@ import { DragItem } from "types";
 interface IActantTag {
   actant: IActant | IEntity;
   tooltipText?: string;
+  tooltipDetail?: string;
   parentId?: string;
   mode?: "selected" | "disabled" | "invalid" | false;
   short?: boolean;
@@ -24,6 +25,7 @@ interface IActantTag {
 export const ActantTag: React.FC<IActantTag> = ({
   actant,
   tooltipText,
+  tooltipDetail,
   parentId,
   short = false,
   fullWidth,
@@ -43,7 +45,8 @@ export const ActantTag: React.FC<IActantTag> = ({
     <Tag
       propId={actant.id}
       label={actant.label}
-      detail={tooltipText ? tooltipText : actant.detail}
+      tooltipDetail={actant.detail}
+      tooltipText={tooltipText}
       short={short}
       button={button}
       moveFn={moveFn}
