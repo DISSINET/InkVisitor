@@ -75,7 +75,7 @@ export const ContextMenuNewTerritoryModal: React.FC<ContextMenuNewTerritoryModal
   return (
     <>
       <Modal onClose={() => onClose()} showModal={showModal} disableBgClick>
-        <ModalHeader title={"Add child Territory"} />
+        <ModalHeader title={"Add Territory"} />
         <ModalContent>
           <Input
             autoFocus
