@@ -3,13 +3,13 @@
  */
 
 import { IResponseActant, IResponseBookmarkFolder } from "./";
-import { UserRoles } from "./../enums";
+import { UserRole } from "./../enums";
 
 export interface IResponseUser {
   id: string;
   email: string;
   name: string;
-  role: UserRoles;
+  role: UserRole;
   bookmarks: IResponseBookmarkFolder[];
   storedTerritories: IResponseStoredTerritory[];
 }
