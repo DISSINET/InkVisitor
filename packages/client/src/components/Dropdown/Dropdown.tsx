@@ -15,6 +15,7 @@ interface Dropdown {
   onChange: (selectedOption: ValueType<OptionTypeBase, any>) => void;
   ref?: React.RefObject<ReactNode>;
   width?: number | "full";
+  disabled?: boolean;
   hideSelectedOptions?: boolean;
   noDropDownIndicator?: boolean;
   formatOptionLabel?: Function;
@@ -37,11 +38,13 @@ export const Dropdown: React.FC<Dropdown> = ({
   placeholder = "select..",
   isClearable = false,
   isMulti = false,
+  disabled = false,
 }) => {
   return (
     <StyledSelectWrapper width={width}>
       <StyledSelect
         isMulti={isMulti}
+        disabled={disabled}
         className="react-select-container"
         classNamePrefix="react-select"
         placeholder={placeholder}
