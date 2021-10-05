@@ -44,7 +44,7 @@ export const Dropdown: React.FC<Dropdown> = ({
     <StyledSelectWrapper width={width}>
       <StyledSelect
         isMulti={isMulti}
-        disabled={disabled}
+        isDisabled={disabled}
         className="react-select-container"
         classNamePrefix="react-select"
         placeholder={placeholder}
