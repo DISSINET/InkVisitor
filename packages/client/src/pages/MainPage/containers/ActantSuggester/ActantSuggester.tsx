@@ -42,7 +42,7 @@ export const ActantSuggester: React.FC<ActantSuggesterI> = ({
       //setTerritoryActantIds(res.data.actants.map((a) => a.id));
       return res.data;
     },
-    { initialData: [], enabled: !!territoryId }
+    { initialData: [], enabled: !!territoryId && api.isLoggedIn() }
   );
 
   // Suggesions query

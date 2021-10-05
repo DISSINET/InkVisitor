@@ -9,6 +9,7 @@ const ScrollHandler = () => {
   const { status: statementListStatus } = useQuery(
     ["territory", "statement-list", territoryId],
     async () => {
+      console.log("tu");
       const res = await api.territoryGet(territoryId);
       return res.data;
     },
