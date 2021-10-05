@@ -17,15 +17,22 @@ export interface IStatement extends IActant {
   data: {
     actions: IStatementAction[];
     text: string;
-    territory: {
-      id: string;
-      order: number;
-    };
+    territory: IStatementTerritory;
     actants: IStatementActant[];
     props: IStatementProp[];
     references: IStatementReference[];
     tags: string[]; // ids of IActant;
   };
+}
+
+export interface IStatementTerritory {
+  id: string;
+  order: number;
+  actions: {
+    id: string;
+    label: string;
+    detail: string;
+  }[];
 }
 
 export interface IStatementAction {
