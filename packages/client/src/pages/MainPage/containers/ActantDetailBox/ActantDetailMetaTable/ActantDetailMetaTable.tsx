@@ -141,6 +141,7 @@ export const ActantDetailMetaTable: React.FC<ActantBookmarkFolderTable> = ({
                 virtuality: typeSActant.virtuality,
                 partitivity: typeSActant.partitivity,
               }}
+              disabledData={["elvl"]}
               handleUpdate={(newData: any) => {
                 const metaStatementData = { ...data };
                 const updatedStatementActants = metaStatementData.actants.map(
@@ -281,6 +282,7 @@ export const ActantDetailMetaTable: React.FC<ActantBookmarkFolderTable> = ({
                 virtuality: valueSActant.virtuality,
                 partitivity: valueSActant.partitivity,
               }}
+              disabledData={["elvl"]}
               handleUpdate={(newData: any) => {
                 const metaStatementData = { ...data };
                 const updatedStatementActants = metaStatementData.actants.map(
@@ -355,6 +357,7 @@ export const ActantDetailMetaTable: React.FC<ActantBookmarkFolderTable> = ({
                     bundleStart: action.bundleStart,
                     bundleEnd: action.bundleEnd,
                   }}
+                  disabledData={["elvl"]}
                   handleUpdate={(newData: any) => {
                     const metaStatementData = { ...data };
                     const updatedStatementActions = metaStatementData.actions.map(

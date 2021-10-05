@@ -13,12 +13,14 @@ interface CheckboxRow {
   onChangeFn: (value: boolean) => void;
   label: string;
   attributeName: string;
+  disabled?: boolean;
 }
 export const CheckboxRow: React.FC<CheckboxRow> = ({
   value,
   onChangeFn,
   label,
   attributeName,
+  disabled = false,
 }) => {
   return (
     <StyledAttributeModalRow>
@@ -31,6 +33,7 @@ export const CheckboxRow: React.FC<CheckboxRow> = ({
         </StyledAttributeModalRowLabelText>
       </StyledAttributeModalRowLabel>
       <Checkbox
+        disabled={disabled}
         onChangeFn={(newValue: boolean) => onChangeFn(newValue)}
         id={label}
         value={value}

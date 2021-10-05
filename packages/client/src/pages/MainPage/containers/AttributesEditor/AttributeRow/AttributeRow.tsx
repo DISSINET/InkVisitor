@@ -14,6 +14,7 @@ interface AttributeRow {
   attributeName: string;
   multi: boolean;
   onChangeFn: (value: string | string[]) => void;
+  disabled?: boolean;
 }
 export const AttributeRow: React.FC<AttributeRow> = ({
   value,
@@ -22,6 +23,7 @@ export const AttributeRow: React.FC<AttributeRow> = ({
   attributeName,
   multi,
   onChangeFn,
+  disabled = false,
 }) => {
   const selectedItem = useMemo(() => {
     return multi
@@ -42,6 +44,7 @@ export const AttributeRow: React.FC<AttributeRow> = ({
       <Dropdown
         width="full"
         isMulti={multi}
+        disabled={disabled}
         options={items}
         value={selectedItem}
         onChange={(newValue: any) => {
