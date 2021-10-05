@@ -1,11 +1,11 @@
-import { UserRoles } from "./../enums";
+import { UserRole } from "./../enums";
 
 export interface IUser {
   id: string;
   email: string;
   name: string;
   password?: string;
-  role: UserRoles;
+  role: UserRole;
   options: IUserOptions;
   bookmarks: IBookmarkFolder[];
   storedTerritories: IStoredTerritory[];
