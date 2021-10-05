@@ -14,9 +14,13 @@ const CREDENTIALS_PATH = "datasets/util/credentials.json";
 // Load client secrets from a local file.
 module.exports.loadSheet = async ({ spread, sheet, raw = false, headerRow = 0 }) => {
     const tempFileName = spread + "_" + sheet + ".json";
+    if (!fs.existsSync('sheetcache/')){
+        fs.mkdirSync('sheetcache/');
+    }
     if (fs.existsSync("sheetcache/" + tempFileName)) {
         return JSON.parse(fs.readFileSync("sheetcache/" + tempFileName));
-    }
+    } 
+    
     const credentials = JSON.parse(fs.readFileSync(CREDENTIALS_PATH));
 
     const auth = await authorize(credentials);
@@ -65,10 +69,9 @@ module.exports.loadSheet = async ({ spread, sheet, raw = false, headerRow = 0 })
                  */
                 .filter((row) => row.id_action_or_relation || row.label);
         
-            fs.mkdirSync('sheetcache/');
-            fs.writeFileSync("sheetcache/" + tempFileName, JSON.stringify(records));
             
             fs.writeFileSync("sheetcache/" + tempFileName, JSON.stringify(records));
+
             return records;
     }
     else {
