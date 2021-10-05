@@ -19,10 +19,13 @@ import { UserListTableRow } from "./UserListTableRow/UserListTableRow";
 
 interface UserListModal {
   isOpen: boolean;
-  handler: Function;
+  onCloseFn: Function;
 }
 
-export const UserListModal: React.FC<UserListModal> = ({ isOpen, handler }) => {
+export const UserListModal: React.FC<UserListModal> = ({
+  isOpen,
+  onCloseFn,
+}) => {
   const { status, data, error, isFetching } = useQuery(
     ["users"],
     async () => {
@@ -116,7 +119,7 @@ export const UserListModal: React.FC<UserListModal> = ({ isOpen, handler }) => {
   });
 
   return (
-    <Modal showModal={isOpen} onClose={() => handler()} width="thin">
+    <Modal showModal={isOpen} onClose={() => onCloseFn()} width="thin">
       <ModalHeader title={"Manage Users"} />
       <ModalContent>
         <StyledTable {...getTableProps()}>
@@ -155,7 +158,7 @@ export const UserListModal: React.FC<UserListModal> = ({ isOpen, handler }) => {
             label="Close"
             color="primary"
             inverted
-            onClick={() => handler()}
+            onClick={() => onCloseFn()}
           />
         </ButtonGroup>
       </ModalFooter>
