@@ -6,12 +6,14 @@ interface Checkbox {
   onChangeFn: Function;
   label?: string;
   id?: string;
+  disabled?: boolean;
 }
 export const Checkbox: React.FC<Checkbox> = ({
   value,
   onChangeFn,
   label,
   id = "default",
+  disabled = false,
 }) => {
   const [checked, setChecked] = useState(value);
 
@@ -27,6 +29,7 @@ export const Checkbox: React.FC<Checkbox> = ({
         onChange={() => {
           setChecked(!checked);
         }}
+        disabled={disabled}
       />
       <label htmlFor={id}>{label}</label>
     </>
