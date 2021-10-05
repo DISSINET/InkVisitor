@@ -399,7 +399,8 @@ export const StatementListBox: React.FC = () => {
             />
             <Button
               icon={<FaEdit size={14} />}
-              color="warning"
+              color="plain"
+              inverted={statementId === row.values.id}
               tooltip="edit statement"
               onClick={() => {
                 selectStatementRow(row.values.id);

@@ -1,4 +1,4 @@
-import React, { ReactNode, useEffect, useRef, useState } from "react";
+import React, { ReactNode, useEffect, useRef } from "react";
 import {
   DragSourceMonitor,
   DropTargetMonitor,
@@ -15,16 +15,17 @@ import {
   ButtonWrapper,
   StyledTooltipSeparator,
 } from "./TagStyles";
-import { Tooltip } from "components";
 import { useAppDispatch } from "redux/hooks";
 import { setDraggedTerritory } from "redux/features/territoryTree/draggedTerritorySlice";
 import { useSearchParams } from "hooks";
+import { TagTooltip } from "./TagTooltip";
 
 interface TagProps {
   propId: string;
   parentId?: string;
   label?: string;
-  detail?: string;
+  tooltipDetail?: string;
+  tooltipText?: string;
   category: string;
   mode?: "selected" | "disabled" | "invalid" | false;
   borderStyle?: "solid" | "dashed" | "dotted";
@@ -58,7 +59,8 @@ export const Tag: React.FC<TagProps> = ({
   propId,
   parentId,
   label = "",
-  detail = "",
+  tooltipDetail,
+  tooltipText,
   category = "T",
   mode = false,
   borderStyle = "solid",
@@ -147,7 +149,12 @@ export const Tag: React.FC<TagProps> = ({
   return (
     <>
       {short ? (
-        <Tooltip position={position} label={label} detail={detail}>
+        <TagTooltip
+          position={position}
+          label={label}
+          detail={tooltipDetail}
+          text={tooltipText}
+        >
           <div>
             <StyledTagWrapper
               ref={ref}
@@ -158,12 +165,13 @@ export const Tag: React.FC<TagProps> = ({
               {button && renderButton()}
             </StyledTagWrapper>
           </div>
-        </Tooltip>
+        </TagTooltip>
       ) : (
         <>
-          <Tooltip
+          <TagTooltip
             label={label}
-            detail={detail}
+            detail={tooltipDetail}
+            text={tooltipText}
             disabled={!enableTooltip}
             position={position}
           >
@@ -186,7 +194,7 @@ export const Tag: React.FC<TagProps> = ({
                 {button && renderButton()}
               </StyledTagWrapper>
             </StyledTooltipSeparator>
-          </Tooltip>
+          </TagTooltip>
         </>
       )}
     </>

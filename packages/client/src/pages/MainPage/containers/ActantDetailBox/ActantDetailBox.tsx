@@ -207,8 +207,11 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
     {
       onSuccess: (data, variables) => {
         queryClient.invalidateQueries(["actant"]);
+
         if (variables.detail || variables.label) {
-          queryClient.invalidateQueries("tree");
+          if (actant?.class === ActantType.Territory) {
+            queryClient.invalidateQueries("tree");
+          }
           queryClient.invalidateQueries("territory");
           queryClient.invalidateQueries("statement");
           queryClient.invalidateQueries("bookmarks");
@@ -239,7 +242,12 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
 
             <StyledActantPreviewRow>
               <StyledTagWrap>
-                <ActantTag actant={actant} propId={actant.id} fullWidth />
+                <ActantTag
+                  actant={actant}
+                  propId={actant.id}
+                  tooltipText={actant.data.text}
+                  fullWidth
+                />
               </StyledTagWrap>
               <ButtonGroup>
                 <Button
@@ -551,7 +559,6 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
                       width="full"
                       onChangeFn={async (newValue: string) => {
                         const oldData = { ...actant.data };
-                        console.log(oldData);
                         updateActantMutation.mutate({
                           data: {
                             ...oldData,
@@ -658,7 +665,7 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
                         <Button
                           key="r"
                           icon={<FaEdit size={14} />}
-                          color="warning"
+                          color="plain"
                           tooltip="edit statement"
                           onClick={async () => {
                             setStatementId(statement.id);

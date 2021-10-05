@@ -1,6 +1,6 @@
 import React from "react";
 import { AttributeIcon } from "components";
-import { StyledRow } from "./TooltipBooleanRowStyles";
+import { StyledIconWrap, StyledRow } from "./TooltipBooleanRowStyles";
 
 interface TooltipBooleanRow {
   attributeName: string;
@@ -16,7 +16,9 @@ export const TooltipBooleanRow: React.FC<TooltipBooleanRow> = ({
     <>
       {show && (
         <StyledRow>
-          <AttributeIcon attributeName={attributeName} />
+          <StyledIconWrap>
+            <AttributeIcon attributeName={attributeName} />
+          </StyledIconWrap>
           {label}
         </StyledRow>
       )}
