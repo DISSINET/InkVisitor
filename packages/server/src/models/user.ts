@@ -6,8 +6,18 @@ import {
   IUserRight,
 } from "@shared/types";
 import { r as rethink, Connection, WriteResult } from "rethinkdb-ts";
-import { IDbModel } from "./common";
-import { UserRole } from "@shared/enums";
+import { IDbModel, fillArray } from "./common";
+import { UserRole, UserRoleMode } from "@shared/enums";
+
+export class UserRight implements IUserRight {
+  territory = "";
+  mode: UserRoleMode = UserRoleMode.Read;
+
+  constructor(data: IUserRight) {
+    this.territory = data.territory;
+    this.mode = data.mode;
+  }
+}
 
 export default class User implements IDbModel, IUser {
   id: string;
@@ -33,6 +43,8 @@ export default class User implements IDbModel, IUser {
     this.options = data.options;
     this.bookmarks = data.bookmarks;
     this.storedTerritories = data.storedTerritories;
+
+    fillArray<IUserRight>(this.rights, UserRight, data.rights);
   }
 
   async save(dbInstance: Connection | undefined): Promise<WriteResult> {
