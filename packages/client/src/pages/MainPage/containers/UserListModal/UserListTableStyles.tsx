@@ -30,3 +30,17 @@ export const StyledTr = styled.tr<StyledTr>`
     width: 1%;
   }
 `;
+
+export const StyledUserNameColumn = styled.div`
+  display: inline-flex;
+`;
+export const StyledUserNameColumnIcon = styled.div`
+  font-size: 1.5em;
+  margin: auto;
+  margin-right: 0.5em;
+`;
+export const StyledUserNameColumnText = styled.div`
+  * {
+    display: block;
+  }
+`;

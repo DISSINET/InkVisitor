@@ -11,11 +11,32 @@ import {
 import { useQuery } from "react-query";
 import api from "api";
 
-import { FaTrashAlt, FaPlus } from "react-icons/fa";
+import {
+  RiUserStarFill,
+  RiUserSearchFill,
+  RiUserSettingsFill,
+} from "react-icons/ri";
 
-import { StyledTable, StyledTHead, StyledTh } from "./UserListTableStyles";
+import {
+  FaTrashAlt,
+  FaPlus,
+  FaPen,
+  FaPencilAlt,
+  FaUnlink,
+} from "react-icons/fa";
+
+import {
+  StyledTable,
+  StyledTHead,
+  StyledTh,
+  StyledUserNameColumn,
+  StyledUserNameColumnIcon,
+  StyledUserNameColumnText,
+} from "./UserListTableStyles";
 
 import { UserListTableRow } from "./UserListTableRow/UserListTableRow";
+import { ActantSuggester } from "../ActantSuggester/ActantSuggester";
+import { ActantTag } from "../ActantTag/ActantTag";
 
 interface UserListModal {
   isOpen: boolean;
@@ -42,57 +63,100 @@ export const UserListModal: React.FC<UserListModal> = ({
   const columns: Column<{}>[] = useMemo(() => {
     return [
       {
-        Header: "Name (Email)",
+        Header: "User",
         id: "Name",
         accessor: "name",
         Cell: ({ row }: Cell) => {
-          const username = row.values.Name;
-          const mail = "me@mail.com"; //row.values.email;
+          const { name, email, role } = row.original as any;
+          let icon = <RiUserSearchFill />;
+          if (role === "admin") {
+            icon = <RiUserStarFill />;
+          }
+          if (role === "editor") {
+            icon = <RiUserSettingsFill />;
+          }
           return (
-            <>
-              <h6>{username}</h6>
-              <span>{mail}</span>
-            </>
+            <StyledUserNameColumn>
+              <StyledUserNameColumnIcon>{icon}</StyledUserNameColumnIcon>
+              <StyledUserNameColumnText>
+                <b>{name}</b>
+                <span>{email}</span>
+              </StyledUserNameColumnText>
+            </StyledUserNameColumn>
           );
-        },
-      },
-      {
-        Header: "Role",
-        id: "role",
-        accessor: "role",
-        Cell: ({ row }: Cell) => {
-          const role = row.values.role;
-          return <span>{role}</span>;
         },
       },
       {
         Header: "Territories",
         id: "territories",
+        Cell: ({ row }: Cell) => {
+          const {
+            rights,
+            territoryRights: territoryActants,
+          } = row.original as any;
+          return (
+            <>
+              <div>
+                {rights
+                  .filter((r: any) => r.mode === "edit")
+                  .map((territory: string) => {
+                    const territoryActant = territoryActants.find(
+                      (t: any) => t.id === territory
+                    );
+                    return territoryActant ? (
+                      <div key={territoryActant}>
+                        <ActantTag
+                          actant={territoryActant}
+                          short={false}
+                          button={
+                            <Button
+                              key="d"
+                              tooltip="unlink actant from tags"
+                              icon={<FaUnlink />}
+                              color="plain"
+                              inverted={true}
+                              onClick={() => {
+                                // =>
+                              }}
+                            />
+                          }
+                        />
+                      </div>
+                    ) : (
+                      <div>{territory} </div>
+                    );
+                  })}
+              </div>
+              {/* <ActantSuggester
+                allowCreate={false}
+                onSelected={(newSelectedId: string) => {
+                  //
+                }}
+                categoryIds={["T"]}
+                placeholder={"assign a territory"}
+              ></ActantSuggester> */}
+            </>
+          );
+        },
       },
       {
-        Header: "Password",
-        id: "password",
-        accessor: "password",
-      },
-      {
-        Header: "Actions",
         id: "actions",
         accessor: "actions",
         Cell: ({ row }: Cell) => {
           return (
             <ButtonGroup noMargin>
               <Button
-                key="add"
-                icon={<FaPlus size={14} />}
-                tooltip="add new user"
-                color="plain"
-                inverted
-              />
-              <Button
                 key="r"
                 icon={<FaTrashAlt size={14} />}
                 color="danger"
                 tooltip="delete"
+                inverted
+              />
+              <Button
+                key="e"
+                icon={<FaPencilAlt size={14} />}
+                color="warning"
+                tooltip="edit"
                 inverted
               />
             </ButtonGroup>
@@ -119,7 +183,7 @@ export const UserListModal: React.FC<UserListModal> = ({
   });
 
   return (
-    <Modal showModal={isOpen} onClose={() => onCloseFn()} width="thin">
+    <Modal showModal={isOpen} onClose={() => onCloseFn()}>
       <ModalHeader title={"Manage Users"} />
       <ModalContent>
         <StyledTable {...getTableProps()}>
