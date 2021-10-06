@@ -10,12 +10,15 @@ import {
   findActantById,
   findActants,
   findActantsById,
+  findActantsByIds,
 } from "@service/shorthands";
 import {
+  IAction,
   ITerritory,
   IResponseTerritory,
   IStatement,
   IResponseGeneric,
+  IResponseStatement,
 } from "@shared/types";
 import Statement from "@models/statement";
 
@@ -61,9 +64,24 @@ export default Router()
       const actantIds = Statement.getLinkedActantIdsForMany(statements);
       const actants = await findActantsById(request.db, actantIds);
 
+      const responseStatements: IResponseStatement[] = [];
+      for (const statement of statements) {
+        const response: IResponseStatement = {
+          ...statement,
+          actants: [],
+          actions: [],
+        };
+
+        response.actions = await findActantsByIds<IAction>(
+          request.db,
+          statement.data.actions.map((a) => a.action)
+        );
+        responseStatements.push(response);
+      }
+
       return {
         ...territory,
-        statements,
+        statements: responseStatements,
         actants,
       };
     })
