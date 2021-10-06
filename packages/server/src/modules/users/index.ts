@@ -249,6 +249,13 @@ export default Router()
       for (const user of await User.findAllUsers(request.db.connection)) {
         const userResponse: IResponseUser = {
           id: user.id,
+          options: {
+            defaultLanguage: "",
+            defaultTerritory: "",
+            searchLanguages: [],
+          },
+          rights: [],
+          territoryRights: [],
           email: user.email,
           name: user.name,
           role: user.role,
