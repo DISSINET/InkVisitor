@@ -42,7 +42,7 @@ server.use(profilerMiddleware);
 server.use(dbMiddleware);
 
 // uncomment this to enable auth
-//server.use(validateJwt().unless({ path: [/api\/v1\/users\/signin/] }));
+server.use(validateJwt().unless({ path: [/api\/v1\/users\/signin/] }));
 
 // Routing
 const routerV1 = Router();
@@ -51,7 +51,7 @@ server.use(apiPath, routerV1);
 
 // uncomment this to enable acl
 const acl = new Acl();
-//routerV1.use(acl.authorize);
+routerV1.use(acl.authorize);
 
 //routerV1.use('/statements', StatementRouter);
 routerV1.use("/acl", AclRouter);
