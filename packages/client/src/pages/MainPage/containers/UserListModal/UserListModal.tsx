@@ -127,14 +127,14 @@ export const UserListModal: React.FC<UserListModal> = ({
                     );
                   })}
               </div>
-              {/* <ActantSuggester
+              <ActantSuggester
                 allowCreate={false}
                 onSelected={(newSelectedId: string) => {
                   //
                 }}
                 categoryIds={["T"]}
                 placeholder={"assign a territory"}
-              ></ActantSuggester> */}
+              ></ActantSuggester>
             </>
           );
         },
