@@ -11,7 +11,12 @@
     },
     "bookmarks": null,
     "role": "admin",
-    "rights": []
+    "rights": [
+      {
+        "territory": "T0",
+        "mode": "admin"
+      }
+    ]
   },
   {
     "id": "2",
@@ -25,7 +30,24 @@
     },
     "bookmarks": null,
     "role": "editor",
-    "rights": []
+    "rights": [
+      {
+        "territory": "T1",
+        "mode": "write"
+      },
+      {
+        "territory": "T2",
+        "mode": "write"
+      },
+      {
+        "territory": "T3",
+        "mode": "write"
+      },
+      {
+        "territory": "T4",
+        "mode": "write"
+      }
+    ]
   },
   {
     "id": "3",
@@ -39,7 +61,12 @@
     },
     "bookmarks": null,
     "role": "editor",
-    "rights": []
+    "rights": [
+      {
+        "territory": " T40-01",
+        "mode": "write"
+      }
+    ]
   },
   {
     "id": "4",
@@ -53,6 +80,11 @@
     },
     "bookmarks": null,
     "role": "viewer",
-    "rights": []
+    "rights": [
+      {
+        "territory": " T40-01",
+        "mode": "read"
+      }
+    ]
   }
 ]
