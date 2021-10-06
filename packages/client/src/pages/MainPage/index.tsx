@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { toast } from "react-toastify";
-import { useQueryClient } from "react-query";
+import { useQueryClient, useQuery, useMutation } from "react-query";
 import { RiMenuFoldFill, RiMenuUnfoldFill } from "react-icons/ri";
 import { IoMdClose } from "react-icons/io";
 
@@ -66,6 +66,8 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
   const isLoggedIn = api.isLoggedIn();
   const dispatch = useAppDispatch();
   const username = useAppSelector((state) => state.username);
+  const userId = localStorage.getItem("userid");
+
   const firstPanelExpanded: boolean = useAppSelector(
     (state) => state.layout.firstPanelExpanded
   );
@@ -82,7 +84,29 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
     (state) => state.layout.separatorXPosition
   );
   const queryClient = useQueryClient();
-  const [modalOpen, setModalOpen] = useState<boolean>(false);
+
+  const {
+    status: statusUser,
+    data: user,
+    error: errorUser,
+    isFetching: isFetchingUser,
+  } = useQuery(
+    ["user", username],
+    async () => {
+      if (userId) {
+        const res = await api.usersGet(userId);
+        return res.data;
+      } else {
+        return false;
+      }
+    },
+    { enabled: !!userId && api.isLoggedIn(), retry: 2 }
+  );
+
+  const [
+    userAdministrationModalOpen,
+    setUserAdministrationModalOpen,
+  ] = useState<boolean>(false);
 
   const handleLogOut = () => {
     api.signOut();
@@ -92,12 +116,12 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
     queryClient.removeQueries();
   };
 
-  const handleUsersModalClic = () => {
-    setModalOpen(true);
+  const handleUsersModalClick = () => {
+    setUserAdministrationModalOpen(true);
   };
 
   const handleUsersModalCancelClick = () => {
-    setModalOpen(false);
+    setUserAdministrationModalOpen(false);
   };
 
   const heightContent = size[1] - heightHeader - heightFooter;
@@ -125,6 +149,7 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
     />
   );
 
+  console.log(user);
   return (
     <>
       <StyledPage layoutWidth={layoutWidth}>
@@ -157,7 +182,7 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
                         <Button
                           label="Manage Users"
                           color="info"
-                          onClick={() => handleUsersModalClic()}
+                          onClick={() => handleUsersModalClick()}
                         />
                       )
                     }
@@ -260,8 +285,8 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
         <Footer height={heightFooter} />
         {!isLoggedIn && <LoginModal />}
         <UserListModal
-          isOpen={modalOpen}
-          handler={handleUsersModalCancelClick}
+          isOpen={userAdministrationModalOpen}
+          onCloseFn={handleUsersModalCancelClick}
         />
       </StyledPage>
     </>

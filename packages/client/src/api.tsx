@@ -121,6 +121,7 @@ class Api {
     return storedToken && storedUsername ? true : false;
     // return {username: storedUsername ,token: storedToken};
   };
+
   /**
    * Authentication
    */
@@ -128,22 +129,24 @@ class Api {
   checkLogin() {
     let storedToken = localStorage.getItem("token");
     let storedUsername = localStorage.getItem("username");
+    let storedUserId = localStorage.getItem("userid");
 
-    if (!!storedToken && !!storedUsername) {
+    if (!!storedToken && !!storedUsername && !!storedUserId) {
       const parsedToken = parseJwt(storedToken);
 
       if (parsedToken && Date.now() < parsedToken.exp * 1000) {
         const username = parsedToken.user.name;
-        this.saveLogin(storedToken, username);
+        this.saveLogin(storedToken, username, storedUserId);
       } else {
         this.signOut();
       }
     }
   }
 
-  saveLogin(newToken: string, newUserName: string) {
+  saveLogin(newToken: string, newUserName: string, newUserId: string) {
     localStorage.setItem("token", newToken);
     localStorage.setItem("username", newUserName);
+    localStorage.setItem("userid", newUserId);
     this.token = newToken;
   }
 
@@ -160,7 +163,7 @@ class Api {
 
       if (response.status === 200) {
         const parsed = parseJwt(response.data.token);
-        this.saveLogin(response.data.token, parsed.user.name);
+        this.saveLogin(response.data.token, parsed.user.name, parsed.user.id);
         toast.success("Logged in");
       }
       return { ...response.data };
