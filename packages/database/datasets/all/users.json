@@ -10,12 +10,13 @@
       "searchLanguages": []
     },
     "bookmarks": null,
-    "role": "admin"
+    "role": "admin",
+    "rights": []
   },
   {
     "id": "2",
-    "name": "user1",
-    "email": "user1@inkvisitor.com",
+    "name": "editor1",
+    "email": "editor@inkvisitor.com",
     "password": "abc",
     "options": {
       "defaultTerritory": "",
@@ -23,12 +24,13 @@
       "searchLanguages": []
     },
     "bookmarks": null,
-    "role": "viewer"
+    "role": "editor",
+    "rights": []
   },
   {
     "id": "3",
-    "name": "user2",
-    "email": "user2@inkvisitor.com",
+    "name": "editor2",
+    "email": "editor2@inkvisitor.com",
     "password": "def",
     "options": {
       "defaultTerritory": "",
@@ -36,12 +38,13 @@
       "searchLanguages": []
     },
     "bookmarks": null,
-    "role": "viewer"
+    "role": "editor",
+    "rights": []
   },
   {
     "id": "4",
-    "name": "user3",
-    "email": "user3@inkvisitor.com",
+    "name": "viewer1",
+    "email": "viewer1@inkvisitor.com",
     "password": "ghi",
     "options": {
       "defaultTerritory": "",
@@ -49,6 +52,7 @@
       "searchLanguages": []
     },
     "bookmarks": null,
-    "role": "viewer"
+    "role": "viewer",
+    "rights": []
   }
 ]

@@ -39,6 +39,7 @@ interface SuggesterProps {
   inputWidth?: number;
   displayCancelButton?: boolean;
   allowCreate?: boolean;
+  allowDrop?: boolean;
   isFetching?: boolean;
 
   // events
@@ -65,6 +66,7 @@ export const Suggester: React.FC<SuggesterProps> = ({
   inputWidth = 100,
   displayCancelButton = false,
   allowCreate = true,
+  allowDrop = false,
 
   // events
   onType,
