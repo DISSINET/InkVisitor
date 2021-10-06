@@ -167,3 +167,9 @@ export enum UserRole {
   Editor = "editor",
   Viewer = "viewer",
 }
+
+export enum UserRoleMode {
+  Write = "write",
+  Read = "read",
+  Admin = "admin",
+}
