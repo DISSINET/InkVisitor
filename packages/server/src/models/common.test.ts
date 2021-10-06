@@ -24,6 +24,15 @@ describe("test fillArray", function () {
       expect(JSON.stringify(arr)).toEqual(JSON.stringify(["first", "second"]));
     });
   });
+  describe("generic object constructor", () => {
+    it("should return expected array", () => {
+      const arr: { testKey: string }[] = [];
+      fillArray(arr, Object, [{ testKey: "first" }, { testKey: "second" }]);
+      expect(JSON.stringify(arr)).toEqual(
+        JSON.stringify([{ testKey: "first" }, { testKey: "second" }])
+      );
+    });
+  });
   describe("custom classes", () => {
     it("should return expected array", () => {
       const arr: CustomClass[] = [];
