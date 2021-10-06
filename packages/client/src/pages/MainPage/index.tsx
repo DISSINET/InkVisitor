@@ -149,7 +149,6 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
     />
   );
 
-  console.log(user);
   return (
     <>
       <StyledPage layoutWidth={layoutWidth}>
@@ -279,15 +278,15 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
               </Box>
             </Panel>
           </StyledPanelWrap>
+          <UserListModal
+            isOpen={userAdministrationModalOpen}
+            onCloseFn={handleUsersModalCancelClick}
+          />
         </DndProvider>
 
         <Toast />
         <Footer height={heightFooter} />
         {!isLoggedIn && <LoginModal />}
-        <UserListModal
-          isOpen={userAdministrationModalOpen}
-          onCloseFn={handleUsersModalCancelClick}
-        />
       </StyledPage>
     </>
   );
