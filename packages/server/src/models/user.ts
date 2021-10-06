@@ -4,11 +4,9 @@ import {
   IBookmarkFolder,
   IStoredTerritory,
   IUserRight,
-  IUserRole,
 } from "@shared/types";
 import { r as rethink, Connection, WriteResult } from "rethinkdb-ts";
 import { IDbModel } from "./common";
-import { userRoleDict } from "@shared/dictionaries";
 import { UserRole } from "@shared/enums";
 
 export default class User implements IDbModel, IUser {
@@ -20,6 +18,7 @@ export default class User implements IDbModel, IUser {
   bookmarks: IBookmarkFolder[];
   storedTerritories: IStoredTerritory[];
   rights: IUserRight[];
+  password = "";
 
   static table = "users";
 
@@ -28,6 +27,7 @@ export default class User implements IDbModel, IUser {
 
     this.id = data.id;
     this.email = data.email;
+    this.password = data.password;
     this.name = data.name;
     this.role = data.role;
     this.options = data.options;
@@ -73,5 +73,32 @@ export default class User implements IDbModel, IUser {
   ): Promise<User> {
     const data = await rethink.table(User.table).get(id).run(dbInstance);
     return new User(data);
+  }
+
+  static async findAllUsers(
+    dbInstance: Connection | undefined
+  ): Promise<User[]> {
+    const data = await rethink
+      .table(User.table)
+      .orderBy(rethink.asc("role"), rethink.asc("name"))
+      .run(dbInstance);
+    return data.map((d) => new User(d));
+  }
+
+  static async findUserByLabel(
+    dbInstance: Connection | undefined,
+    label: string
+  ): Promise<User | null> {
+    const data = await rethink
+      .table(User.table)
+      .filter(function (user: any) {
+        return rethink.or(
+          rethink.row("name").eq(label),
+          rethink.row("email").eq(label)
+        );
+      })
+      .limit(1)
+      .run(dbInstance);
+    return data.length == 0 ? null : new User(data[0]);
   }
 }
