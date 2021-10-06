@@ -36,10 +36,10 @@ export const TooltipAttributeRow: React.FC<TooltipAttributeRow> = ({
           {isArray ? (
             <StyledValues>
               {(selectedItem as DropdownItem[]).map((item, key) => (
-                <>
-                  <StyledValue key={key}>{item.label}</StyledValue>
+                <React.Fragment key={key}>
+                  <StyledValue>{item.label}</StyledValue>
                   {key !== (selectedItem as DropdownItem[]).length - 1 && ","}
-                </>
+                </React.Fragment>
               ))}
             </StyledValues>
           ) : (
