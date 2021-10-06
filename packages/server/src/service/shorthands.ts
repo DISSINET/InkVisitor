@@ -7,49 +7,6 @@ import { IDbModel } from "@models/common";
 import { ModelNotValidError } from "@shared/types/errors";
 import { ActantType } from "@shared/enums";
 
-// USER
-export async function findAllUsers(db: Db): Promise<IUser[]> {
-  return await rethink.table("users").run(db.connection);
-}
-
-export async function findUserByName(db: Db, name: string): Promise<IUser> {
-  const data = await rethink
-    .table("users")
-    .filter({
-      name,
-    })
-    .limit(1)
-    .run(db.connection);
-  return data.length == 0 ? null : data[0];
-}
-
-export async function findUserById(db: Db, id: string): Promise<IUser> {
-  const data = await rethink
-    .table("users")
-    .filter({
-      id,
-    })
-    .limit(1)
-    .run(db.connection);
-  return data.length == 0 ? null : data[0];
-}
-
-export async function findUsersByLabel(
-  db: Db,
-  label: string
-): Promise<IUser[]> {
-  const data = await rethink
-    .table("users")
-    .filter(function (user: any) {
-      return rethink.or(
-        rethink.row("name").eq(label),
-        rethink.row("email").eq(label)
-      );
-    })
-    .run(db.connection);
-  return data;
-}
-
 export async function createUser(db: Db, data: IUser): Promise<WriteResult> {
   return rethink.table("users").insert(data).run(db.connection);
 }
