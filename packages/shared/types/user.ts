@@ -1,4 +1,6 @@
+import { IResponseActant } from "./";
 import { UserRole } from "./../enums";
+
 
 export interface IUser {
   id: string;
@@ -19,7 +21,7 @@ export interface IUserRole {
 
 export interface IUserRight {
   territory: string;
-  mode: string; // probably write | read | admin...
+  mode: 'write' | 'read'; // probably write | read | admin...
 }
 
 export interface IUserOptions {

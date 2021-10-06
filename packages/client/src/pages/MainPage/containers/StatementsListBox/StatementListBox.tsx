@@ -20,7 +20,7 @@ import { toast } from "react-toastify";
 import { Button, ButtonGroup, Loader, Submit, TagGroup } from "components";
 import { ActantTag } from "./../";
 import api from "api";
-import { IStatement, IActant, IStatementAction } from "@shared/types";
+import { IStatement, IActant, IStatementAction, IAction } from "@shared/types";
 import { StatementListTable } from "./StatementListTable/StatementListTable";
 import { StatementListHeader } from "./StatementListHeader/StatementListHeader";
 import { StyledDots, StyledText } from "./StatementLitBoxStyles";
@@ -266,37 +266,24 @@ export const StatementListBox: React.FC = () => {
       {
         Header: "Actions",
         Cell: ({ row }: Cell) => {
-          const {
-            actions,
-            actants,
-          }: {
-            actions: IStatementAction[];
-            actants: IActant[];
-          } = row.values.data;
-          // TODO: get right actants to filter
-          // const actants = row.values.actants;
-          const filteredActions: (IActant | undefined)[] = actions.map(
-            (sAction: IStatementAction) => {
-              // console.log(sAction.action);
-              // return actants.find((a: IActant) => a.id === sAction.action);
-              return actants.find((a: IActant) => a.id === sAction.action);
-            }
-          );
+          const { actions }: { actions?: IAction[] } = row.original;
 
-          // const isOversized = filteredActions.length > 2;
-          // const subjectIdsSlice = filteredActions.slice(0, 2);
-
-          return (
-            <>
-              {filteredActions?.map(
-                (action: IActant | undefined, key: number) => (
-                  <React.Fragment key={key}>
-                    {action && <ActantTag key={key} short actant={action} />}
-                  </React.Fragment>
-                )
-              )}
-            </>
-          );
+          if (actions) {
+            const isOversized = actions.length > 2;
+            const actionsSlice = actions?.slice(0, 2);
+            return (
+              <TagGroup>
+                {actionsSlice?.map(
+                  (action: IActant | undefined, key: number) => (
+                    <React.Fragment key={key}>
+                      {action && <ActantTag key={key} short actant={action} />}
+                    </React.Fragment>
+                  )
+                )}
+                {isOversized && <StyledDots>{"..."}</StyledDots>}
+              </TagGroup>
+            );
+          }
         },
       },
       {
