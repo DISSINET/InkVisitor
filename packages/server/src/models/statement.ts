@@ -1,6 +1,5 @@
 import {
   IStatement,
-  IStatementTerritory,
   IStatementActant,
   IStatementReference,
   IStatementProp,
@@ -77,23 +76,15 @@ class StatementReference implements IStatementReference, IModel {
   }
 }
 
-export class StatementTerritory implements IStatementTerritory {
+export class StatementTerritory {
   id = "";
   order = -1;
-  actions = [];
 
   constructor(data: UnknownObject) {
     if (!data) {
       return;
     }
     fillFlatObject(this, data);
-
-    const action = { id: "", label: "", detail: "" };
-    fillArray<typeof action>(
-      this.actions,
-      action.constructor as new (...data: any[]) => typeof action,
-      data.actions
-    );
   }
 
   /**
