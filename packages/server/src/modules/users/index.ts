@@ -1,16 +1,13 @@
 import { Request } from "express";
 import { Router } from "express";
 import { IUser } from "@shared/types/user";
+import User from "@models/user";
 import {
-  findUserByName,
-  findUserById,
-  findUsersByLabel,
   createUser,
   updateUser,
   deleteUser,
   findActantsById,
   findActantById,
-  findAllUsers,
   getActantUsage,
 } from "@service/shorthands";
 import {
@@ -41,7 +38,7 @@ export default Router()
         throw new BadParams("name and password have to be set");
       }
 
-      const user = await findUserByName(request.db, name);
+      const user = await User.findUserByLabel(request.db.connection, name);
       if (!user) {
         throw new UserDoesNotExits(`user ${name} was not found`, name);
       }
@@ -49,8 +46,6 @@ export default Router()
       if (!checkPassword(rawPassword, user.password || "")) {
         throw new BadCredentialsError("unknown credentials");
       }
-
-      user.password = undefined;
 
       return {
         token: generateAccessToken(user),
@@ -66,7 +61,7 @@ export default Router()
         throw new BadParams("userId has to be set");
       }
 
-      const user = await findUserById(request.db, userId as string);
+      const user = await User.getUser(request.db.connection, userId);
       if (!user) {
         throw new UserDoesNotExits(`user ${userId} was not found`, userId);
       }
@@ -80,10 +75,15 @@ export default Router()
       const label = request.body.label;
 
       if (!label) {
-        return await findAllUsers(request.db)
+        return await User.findAllUsers(request.db.connection);
       }
 
-      return await findUsersByLabel(request.db, label as string);
+      const byLabel = await User.findUserByLabel(request.db.connection, label);
+      if (byLabel) {
+        return [byLabel];
+      }
+
+      return [];
     })
   )
   .post(
@@ -142,9 +142,12 @@ export default Router()
         userData.password = hashPassword(userData.password);
       }
 
-      const existingUser = await findUserById(request.db, userId);
+      const existingUser = await User.getUser(request.db.connection, userId);
       if (!existingUser) {
-        throw new UserDoesNotExits(`user with id ${userId} does not exist`, userId);
+        throw new UserDoesNotExits(
+          `user with id ${userId} does not exist`,
+          userId
+        );
       }
 
       const result = await updateUser(request.db, userId, userData);
@@ -167,9 +170,12 @@ export default Router()
         throw new BadParams("user id has to be set");
       }
 
-      const existingUser = await findUserById(request.db, userId);
+      const existingUser = await User.getUser(request.db.connection, userId);
       if (!existingUser) {
-        throw new UserDoesNotExits(`user with id ${userId} does not exist`, userId);
+        throw new UserDoesNotExits(
+          `user with id ${userId} does not exist`,
+          userId
+        );
       }
 
       const result = await deleteUser(request.db, userId);
@@ -200,9 +206,12 @@ export default Router()
         throw new BadParams("user id has to be set");
       }
 
-      const user = await findUserById(request.db, userId);
+      const user = await User.getUser(request.db.connection, userId);
       if (!user) {
-        throw new UserDoesNotExits(`user with id ${userId} does not exist`, userId);
+        throw new UserDoesNotExits(
+          `user with id ${userId} does not exist`,
+          userId
+        );
       }
 
       const out: IResponseBookmarkFolder[] = [];
@@ -237,7 +246,7 @@ export default Router()
         users: [],
       };
 
-      for (const user of await findAllUsers(request.db)) {
+      for (const user of await User.findAllUsers(request.db.connection)) {
         const userResponse: IResponseUser = {
           id: user.id,
           email: user.email,
