@@ -136,17 +136,24 @@ class Api {
 
       if (parsedToken && Date.now() < parsedToken.exp * 1000) {
         const username = parsedToken.user.name;
-        this.saveLogin(storedToken, username, storedUserId);
+        const userrole = parsedToken.user.role;
+        this.saveLogin(storedToken, username, storedUserId, userrole);
       } else {
         this.signOut();
       }
     }
   }
 
-  saveLogin(newToken: string, newUserName: string, newUserId: string) {
+  saveLogin(
+    newToken: string,
+    newUserName: string,
+    newUserId: string,
+    newUserRole: string
+  ) {
     localStorage.setItem("token", newToken);
     localStorage.setItem("username", newUserName);
     localStorage.setItem("userid", newUserId);
+    localStorage.setItem("userrole", newUserRole);
     this.token = newToken;
   }
 
@@ -163,7 +170,12 @@ class Api {
 
       if (response.status === 200) {
         const parsed = parseJwt(response.data.token);
-        this.saveLogin(response.data.token, parsed.user.name, parsed.user.id);
+        this.saveLogin(
+          response.data.token,
+          parsed.user.name,
+          parsed.user.id,
+          parsed.user.role
+        );
         toast.success("Logged in");
       }
       return { ...response.data };
