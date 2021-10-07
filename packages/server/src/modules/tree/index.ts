@@ -19,13 +19,10 @@ import { IParentTerritory } from "@shared/types/territory";
 import { ActantType } from "@shared/enums";
 
 class TreeCreator {
-  parentMap: Record<string, ITerritory[]>; // map of rootId -> childs
+  parentMap: Record<string, Territory[]>; // map of rootId -> childs
   statementsMap: Record<string, number>; // map of territoryId -> number of statements
 
-  constructor(
-    territories: ITerritory[],
-    statementsMap: Record<string, number>
-  ) {
+  constructor(territories: Territory[], statementsMap: Record<string, number>) {
     this.parentMap = {};
     this.createParentMap(territories);
 
@@ -37,11 +34,11 @@ class TreeCreator {
     this.statementsMap = statementsMap;
   }
 
-  getRootTerritory(): ITerritory {
+  getRootTerritory(): Territory {
     return this.parentMap[""][0];
   }
 
-  createParentMap(territories: ITerritory[]) {
+  createParentMap(territories: Territory[]) {
     for (const territory of territories) {
       if (typeof territory.data.parent === "undefined") {
         continue;
@@ -58,7 +55,7 @@ class TreeCreator {
   }
 
   populateTree(
-    subtreeRoot: ITerritory,
+    subtreeRoot: Territory,
     lvl: number,
     parents: string[]
   ): IResponseTree {
@@ -122,18 +119,23 @@ export default Router()
   .get(
     "/get",
     asyncRouteHandler<IResponseTree>(async (request: Request) => {
-      const [territories, statementsCountMap] = await Promise.all([
+      const [territoriesData, statementsCountMap] = await Promise.all([
         getActants<ITerritory>(request.db, {
           class: "T",
         }),
         countStatements(request.db),
       ]);
-      const helper = new TreeCreator(
-        territories.sort(sortTerritories),
-        statementsCountMap
-      );
 
-      return helper.populateTree(helper.getRootTerritory(), 0, []);
+      const territories = territoriesData
+        .sort(sortTerritories)
+        .map((td) => new Territory({ ...td }));
+
+      const helper = new TreeCreator(territories, statementsCountMap);
+
+      const tree = helper.populateTree(helper.getRootTerritory(), 0, []);
+
+      (tree.territory as Territory).canBeViewedBy(request.getUserOrFail());
+      return tree;
     })
   )
   .post(
@@ -151,7 +153,10 @@ export default Router()
         class: ActantType.Territory,
       });
       if (!territory) {
-        throw new TerritoryDoesNotExits(`territory ${moveId} does not exist`, moveId);
+        throw new TerritoryDoesNotExits(
+          `territory ${moveId} does not exist`,
+          moveId
+        );
       }
 
       const parent = await findActantById<ITerritory>(request.db, parentId, {
@@ -159,7 +164,8 @@ export default Router()
       });
       if (!parent) {
         throw new TerritoryDoesNotExits(
-          `parent territory ${parentId} does not exist`, parentId
+          `parent territory ${parentId} does not exist`,
+          parentId
         );
       }
 
