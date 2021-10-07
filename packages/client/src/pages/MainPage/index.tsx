@@ -67,6 +67,7 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
   const dispatch = useAppDispatch();
   const username = useAppSelector((state) => state.username);
   const userId = localStorage.getItem("userid");
+  const userRole = localStorage.getItem("userrole");
 
   const firstPanelExpanded: boolean = useAppSelector(
     (state) => state.layout.firstPanelExpanded
@@ -103,10 +104,8 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
     { enabled: !!userId && api.isLoggedIn(), retry: 2 }
   );
 
-  const [
-    userAdministrationModalOpen,
-    setUserAdministrationModalOpen,
-  ] = useState<boolean>(false);
+  const [userAdministrationModalOpen, setUserAdministrationModalOpen] =
+    useState<boolean>(false);
 
   const handleLogOut = () => {
     api.signOut();
@@ -176,8 +175,7 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
                   </StyledUser>
                   <ButtonGroup>
                     {
-                      //TODO make condition based on user role
-                      username == "admin" && (
+                      userRole == "admin" && (
                         <Button
                           label="Manage Users"
                           color="info"
