@@ -4,6 +4,7 @@ import { r as rethink, Connection, WriteResult, RDatum } from "rethinkdb-ts";
 import { fillFlatObject, UnknownObject, IModel } from "./common";
 import Actant from "./actant";
 import { InternalServerError, InvalidDeleteError } from "@shared/types/errors";
+import { IUser } from "@shared/types";
 
 export class TerritoryParent implements IParentTerritory, IModel {
   id = "";
@@ -167,6 +168,10 @@ class Territory extends Actant implements ITerritory {
     }
 
     return out;
+  }
+
+  canBeViewedBy(user: IUser): boolean {
+    return true;
   }
 }
 

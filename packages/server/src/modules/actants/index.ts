@@ -43,7 +43,10 @@ export default Router()
       );
 
       if (!actant) {
-        throw new ActantDoesNotExits(`actant ${actantId} was not found`, actantId);
+        throw new ActantDoesNotExits(
+          `actant ${actantId} was not found`,
+          actantId
+        );
       }
 
       const usedInStatements = await Statement.findDependentStatements(
@@ -80,7 +83,7 @@ export default Router()
         throw new ModelNotValidError("");
       }
 
-      const result = await createActant(request.db, model);
+      const result = await model.save(request.db.connection);
 
       if (result.inserted === 1) {
         return {
@@ -106,7 +109,8 @@ export default Router()
       const existingActant = await findActantById(request.db, actantId);
       if (!existingActant) {
         throw new ActantDoesNotExits(
-          `actant with id ${actantId} does not exist`, actantId
+          `actant with id ${actantId} does not exist`,
+          actantId
         );
       }
 
@@ -147,7 +151,8 @@ export default Router()
       const existingActant = await findActantById(request.db, actantId);
       if (!existingActant) {
         throw new ActantDoesNotExits(
-          `actant with id ${actantId} does not exist`, actantId
+          `actant with id ${actantId} does not exist`,
+          actantId
         );
       }
 
@@ -184,7 +189,10 @@ export default Router()
 
       const actant = await findActantById<IActant>(request.db, actantId);
       if (!actant) {
-        throw new ActantDoesNotExits(`actant ${actantId} was not found`, actantId);
+        throw new ActantDoesNotExits(
+          `actant ${actantId} was not found`,
+          actantId
+        );
       }
 
       const meta: IResponseStatement[] = [];
