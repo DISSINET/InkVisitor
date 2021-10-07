@@ -1,25 +1,5 @@
-import {
-  Connection,
-  r as rethink,
-  isRethinkDBError,
-  MasterPool,
-} from "rethinkdb-ts";
-import { Express, NextFunction, Request, Response } from "express";
-import { RethinkDBError } from "rethinkdb-ts/lib/error/error";
-import Acl from "@middlewares/acl";
-import { IUser } from "@shared/types";
-
-declare global {
-  namespace Express {
-    export interface Request {
-      db: Db;
-      acl: Acl;
-      user?: {
-        user: IUser;
-      };
-    }
-  }
-}
+import { Connection, r as rethink } from "rethinkdb-ts";
+import { Request, Response } from "express";
 
 export const rethinkConfig = {
   db: process.env.DB_NAME,

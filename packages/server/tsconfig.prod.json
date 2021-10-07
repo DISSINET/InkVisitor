@@ -5,5 +5,9 @@
     "outDir": "dist",
     "baseUrl": "./"
   },
+  "ts-node": {
+    "files": true
+  },
+  "files": ["./src/custom.request.d.ts"],
   "exclude": ["spec", "src/**/*.mock.ts", "src/public/"]
 }
