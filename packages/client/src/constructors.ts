@@ -156,6 +156,7 @@ export const CMetaStatement = (subjectId: string): IStatement => ({
 export const DStatement = (statement: IStatement): IStatement => {
   const duplicatedStatement = { ...statement };
   duplicatedStatement.id = uuidv4();
+
   duplicatedStatement.data.actants.map((a) => (a.id = uuidv4()));
   duplicatedStatement.data.props.map((p) => (p.id = uuidv4()));
   duplicatedStatement.data.references.map((r) => (r.id = uuidv4()));
