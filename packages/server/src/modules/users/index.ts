@@ -116,26 +116,10 @@ export default Router()
     "/update/:userId?",
     asyncRouteHandler<IResponseGeneric>(async (request: Request) => {
       const userId = request.params.userId || (request as any).user.user.id;
-
-      console.log("userId", userId);
       const userData = request.body as IUser;
 
       if (!userId || !userData || Object.keys(userData).length === 0) {
         throw new BadParams("user id and data have to be set");
-      }
-
-      const allowedKeys = [
-        "email",
-        "name",
-        "password",
-        "role",
-        "bookmarks",
-        "storedTerritories",
-      ];
-      for (const key of Object.keys(userData)) {
-        if (allowedKeys.indexOf(key) === -1) {
-          throw new BadParams("user data have unsupported keys");
-        }
       }
 
       if (userData.password) {
@@ -150,7 +134,9 @@ export default Router()
         );
       }
 
-      const result = await updateUser(request.db, userId, userData);
+      const result = await existingUser.update(request.db.connection, {
+        ...userData,
+      });
 
       if (result.replaced) {
         return {
@@ -248,19 +234,10 @@ export default Router()
 
       for (const user of await User.findAllUsers(request.db.connection)) {
         const userResponse: IResponseUser = {
-          id: user.id,
-          options: {
-            defaultLanguage: "",
-            defaultTerritory: "",
-            searchLanguages: [],
-          },
-          rights: [],
-          territoryRights: [],
-          email: user.email,
-          name: user.name,
-          role: user.role,
+          ...user,
           bookmarks: [],
           storedTerritories: [],
+          territoryRights: [],
         };
 
         if (user.bookmarks) {
