@@ -316,6 +316,7 @@ class Api {
       );
       return response;
     } catch (err: any | AxiosError) {
+      console.log(err);
       throw { ...err.response.data };
     }
   }
