@@ -55,7 +55,7 @@ export default {
     entityP: "#F8BE78",
     entityR: "#9ECAE9",
     // vyssi kategorie
-    entityS: "#ed365b",
+    entityS: "#ff93ac",
     entityA: "#ed365b",
     entityT: "hsl(212, 78%, 50%)",
     // seda
