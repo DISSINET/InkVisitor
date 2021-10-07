@@ -20,7 +20,13 @@ import { toast } from "react-toastify";
 import { Button, ButtonGroup, Loader, Submit, TagGroup } from "components";
 import { ActantTag } from "./../";
 import api from "api";
-import { IStatement, IActant, IStatementAction, IAction } from "@shared/types";
+import {
+  IStatement,
+  IActant,
+  IStatementAction,
+  IAction,
+  IResponseStatement,
+} from "@shared/types";
 import { StatementListTable } from "./StatementListTable/StatementListTable";
 import { StatementListHeader } from "./StatementListHeader/StatementListHeader";
 import { StyledDots, StyledText } from "./StatementLitBoxStyles";
@@ -51,7 +57,10 @@ export const StatementListBox: React.FC = () => {
   } = useSearchParams();
 
   const [showSubmit, setShowSubmit] = useState(false);
-  const [statementToDelete, setStatementToDelete] = useState<IStatement>();
+  const [
+    statementToDelete,
+    setStatementToDelete,
+  ] = useState<IResponseStatement>();
   const history = useHistory();
 
   const { status, data, error, isFetching } = useQuery(
@@ -108,8 +117,15 @@ export const StatementListBox: React.FC = () => {
   );
 
   const duplicateStatementMutation = useMutation(
-    async (statementToDuplicate: IStatement) => {
-      const duplicatedStatement = DStatement(statementToDuplicate);
+    async (statementToDuplicate: IResponseStatement) => {
+      delete statementToDuplicate["actions"];
+      delete statementToDuplicate["audits"];
+      delete statementToDuplicate["usedIn"];
+      delete statementToDuplicate["actants"];
+
+      const duplicatedStatement = DStatement(
+        statementToDuplicate as IStatement
+      );
       await api.actantsCreate(duplicatedStatement);
     },
     {
@@ -117,6 +133,9 @@ export const StatementListBox: React.FC = () => {
         setStatementId(variables.id);
         toast.info(`Statement duplicated!`);
         queryClient.invalidateQueries("territory");
+      },
+      onError: () => {
+        toast.error(`Error: Statement not duplicated!`);
       },
     }
   );
@@ -216,20 +235,20 @@ export const StatementListBox: React.FC = () => {
         Header: "ID",
         accessor: "id",
       },
-      {
-        Header: "",
-        id: "Statement",
-        Cell: ({ row }: Cell) => {
-          const statement = row.original as IStatement;
-          return (
-            <ActantTag
-              actant={statement as IActant}
-              short
-              tooltipText={statement.data.text}
-            />
-          );
-        },
-      },
+      // {
+      //   Header: "",
+      //   id: "Statement",
+      //   Cell: ({ row }: Cell) => {
+      //     const statement = row.original as IStatement;
+      //     return (
+      //       <ActantTag
+      //         actant={statement as IActant}
+      //         short
+      //         tooltipText={statement.data.text}
+      //       />
+      //     );
+      //   },
+      // },
       {
         Header: "Subj.",
         accessor: "data",
@@ -283,6 +302,8 @@ export const StatementListBox: React.FC = () => {
                 {isOversized && <StyledDots>{"..."}</StyledDots>}
               </TagGroup>
             );
+          } else {
+            return <div />;
           }
         },
       },
@@ -343,7 +364,7 @@ export const StatementListBox: React.FC = () => {
                   color="danger"
                   tooltip="delete"
                   onClick={() => {
-                    setStatementToDelete(row.original as IStatement);
+                    setStatementToDelete(row.original as IResponseStatement);
                     setShowSubmit(true);
                   }}
                 />,
@@ -354,7 +375,7 @@ export const StatementListBox: React.FC = () => {
                   tooltip="duplicate"
                   onClick={() => {
                     duplicateStatementMutation.mutate(
-                      row.original as IStatement
+                      row.original as IResponseStatement
                     );
                   }}
                 />,
