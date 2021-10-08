@@ -83,7 +83,8 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
               key="refresh"
               icon={<FaRecycle size={14} />}
               tooltip="refresh data"
-              color="info"
+              inverted
+              color="primary"
               label="refresh"
               onClick={() => {
                 queryClient.invalidateQueries(["territory"]);

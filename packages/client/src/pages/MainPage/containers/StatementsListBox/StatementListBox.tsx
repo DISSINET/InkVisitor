@@ -49,18 +49,12 @@ const initialData: {
 export const StatementListBox: React.FC = () => {
   const queryClient = useQueryClient();
 
-  const {
-    territoryId,
-    setTerritoryId,
-    statementId,
-    setStatementId,
-  } = useSearchParams();
+  const { territoryId, setTerritoryId, statementId, setStatementId } =
+    useSearchParams();
 
   const [showSubmit, setShowSubmit] = useState(false);
-  const [
-    statementToDelete,
-    setStatementToDelete,
-  ] = useState<IResponseStatement>();
+  const [statementToDelete, setStatementToDelete] =
+    useState<IResponseStatement>();
   const history = useHistory();
 
   const { status, data, error, isFetching } = useQuery(
@@ -356,7 +350,6 @@ export const StatementListBox: React.FC = () => {
         Cell: ({ row }: Cell) => (
           <ButtonGroup>
             <StatementListContextMenu
-              inverted={statementId === row.values.id}
               buttons={[
                 <Button
                   key="r"
@@ -405,15 +398,6 @@ export const StatementListBox: React.FC = () => {
                 />,
               ]}
             />
-            <Button
-              icon={<FaEdit size={14} />}
-              color="plain"
-              inverted={statementId === row.values.id}
-              tooltip="edit statement"
-              onClick={() => {
-                selectStatementRow(row.values.id);
-              }}
-            />
             <span
               {...row.getToggleRowExpandedProps()}
               style={{
@@ -432,6 +416,15 @@ export const StatementListBox: React.FC = () => {
                 />
               )}
             </span>
+            <Button
+              icon={<FaEdit size={14} />}
+              color="plain"
+              inverted
+              tooltip="edit statement"
+              onClick={() => {
+                selectStatementRow(row.values.id);
+              }}
+            />
           </ButtonGroup>
         ),
       },
