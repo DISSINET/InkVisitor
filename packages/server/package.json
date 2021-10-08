@@ -11,6 +11,7 @@
     "pm2:test": "pm2 start npm --name \"inkvisitor-dev\" -- run start:test",
     "restart:prod": "pm2 restart inkvisitor-server",
     "stop:prod": "pm2 delete \"inkvisitor-server\"",
+    "jwt": "ts-node -r tsconfig-paths/register ./src/scripts/jwt.ts",
     "test": "jest -w 1 -t"
   },
   "nodemonConfig": {
