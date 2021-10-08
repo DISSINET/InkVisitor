@@ -1,6 +1,7 @@
 import { Db } from "./service/RethinkDB";
 import Acl from "./middlewares/acl";
 import { IUser } from "../../shared/types";
+import User from "@models/user";
 
 declare global {
   namespace Express {
@@ -10,7 +11,7 @@ declare global {
       user?: {
         user: IUser;
       };
-      getUserOrFail(): IUser;
+      getUserOrFail(): User;
     }
   }
 }
