@@ -8,6 +8,7 @@ import {
 import { r as rethink, Connection, WriteResult } from "rethinkdb-ts";
 import { IDbModel, fillArray } from "./common";
 import { UserRole, UserRoleMode } from "@shared/enums";
+import Territory from "./territory";
 
 export class UserRight implements IUserRight {
   territory = "";
@@ -77,6 +78,47 @@ export default class User implements IDbModel, IUser {
 
   isValid(): boolean {
     return true;
+  }
+
+  canView(territory: Territory): boolean {
+    // admin role has always the right
+    if (this.role === UserRole.Admin) {
+      return true;
+    }
+
+    console.log(JSON.stringify(this.rights));
+    return !!territory.getClosestRight(this.rights);
+  }
+
+  canWrite(territory: Territory): boolean {
+    // admin role has always the right
+    if (this.role === UserRole.Admin) {
+      return true;
+    }
+
+    const closestRight = territory.getClosestRight(this.rights);
+    if (!closestRight) {
+      return false;
+    }
+
+    return (
+      closestRight.mode === UserRoleMode.Admin ||
+      closestRight.mode === UserRoleMode.Write
+    );
+  }
+
+  canDelete(territory: Territory): boolean {
+    // admin role has always the right
+    if (this.role === UserRole.Admin) {
+      return true;
+    }
+
+    const closestRight = territory.getClosestRight(this.rights);
+    if (!closestRight) {
+      return false;
+    }
+
+    return closestRight.mode === UserRoleMode.Admin;
   }
 
   static async getUser(
