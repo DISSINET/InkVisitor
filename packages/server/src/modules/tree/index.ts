@@ -17,6 +17,7 @@ import { Db } from "@service/RethinkDB";
 import Territory from "@models/territory";
 import { IParentTerritory } from "@shared/types/territory";
 import { ActantType } from "@shared/enums";
+import User from "@models/user";
 
 class TreeCreator {
   parentMap: Record<string, Territory[]>; // map of rootId -> childs
@@ -115,6 +116,26 @@ async function countStatements(db: Db): Promise<Record<string, number>> {
   return statementsCountMap;
 }
 
+function filterTree(tree: IResponseTree, user: User): IResponseTree | null {
+  const filtered: IResponseTree[] = [];
+  for (const child of tree.children) {
+    const filteredChild = filterTree(child, user);
+    if (filteredChild) {
+      filtered.push(filteredChild);
+    }
+  }
+
+  if (
+    tree.lvl > 0 &&
+    filtered.length === 0 &&
+    !user.canView(tree.territory as Territory)
+  ) {
+    return null;
+  }
+
+  return { ...tree, children: filtered };
+}
+
 export default Router()
   .get(
     "/get",
@@ -134,8 +155,14 @@ export default Router()
 
       const tree = helper.populateTree(helper.getRootTerritory(), 0, []);
 
-      (tree.territory as Territory).canBeViewedBy(request.getUserOrFail());
-      return tree;
+      let filtered = filterTree(tree, request.getUserOrFail());
+
+      if (!filtered) {
+        filtered = { ...tree };
+        filtered.children = [];
+      }
+
+      return filtered;
     })
   )
   .post(

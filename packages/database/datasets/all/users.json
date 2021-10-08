@@ -63,7 +63,7 @@
     "role": "editor",
     "rights": [
       {
-        "territory": " T40-01",
+        "territory": "T40-01",
         "mode": "write"
       }
     ]
@@ -82,7 +82,7 @@
     "role": "viewer",
     "rights": [
       {
-        "territory": " T40-01",
+        "territory": "T40-01",
         "mode": "read"
       }
     ]
