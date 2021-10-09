@@ -4,23 +4,13 @@ import request, { Response } from "supertest";
 import { supertestConfig } from "..";
 import { apiPath } from "../../common/constants";
 import app from "../../Server";
-import { IAction } from "@shared/types";
 import { Db } from "@service/RethinkDB";
-import { deleteActions, createAction } from "@service/shorthands";
+import Action from "@models/action";
 
 const testValidAction = (res: Response) => {
   expect(res.body).toBeTruthy();
   expect(typeof res.body).toEqual("object");
-  const actionExample: IAction = {
-    id: "",
-    labels: [],
-    note: "",
-    parent: "",
-    rulesActants: [],
-    rulesProperties: [],
-    types: [],
-    valencies: [],
-  };
+  const actionExample = new Action({});
   expect(Object.keys(res.body)).toEqual(Object.keys(actionExample));
   expect(res.body.id).toBeTruthy();
 };
@@ -50,26 +40,8 @@ describe("Actions get", function () {
     it("should return a 200 code with user response", async (done) => {
       const db = new Db();
       await db.initDb();
-      const result = await createAction(
-        db,
-        {
-          id: "",
-          labels: [
-            {
-              id: "randomLabel",
-              lang: "en",
-              value: "randomLabel",
-            },
-          ],
-          note: "",
-          parent: false,
-          rulesActants: [],
-          rulesProperties: [],
-          types: [],
-          valencies: [],
-        },
-        false
-      );
+      const action = new Action({ label: "label" });
+      const result = await action.save(db.connection);
 
       let id = "";
       if (!result.generated_keys) {

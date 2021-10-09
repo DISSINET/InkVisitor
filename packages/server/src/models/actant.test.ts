@@ -294,21 +294,21 @@ describe("test Actant.update", function () {
               id: "2",
             },
           ],
-          certainty: "certain",
           text: "jea",
+          tags: ["origtag1", "origtag2"],
         },
       });
       await actant.save(db.connection);
 
       const actantRef = new Statement({ id: actant.id });
-      const changedTextValue = "changed";
+      const newTextValue = "changed";
       const newActantId = "3";
-      const newCertaintyValue = "";
+      const newTagsValue: string[] = [];
       await actantRef.update(db.connection, {
         data: {
-          text: changedTextValue,
+          text: newTextValue,
           actants: [{ id: newActantId }],
-          certainty: newCertaintyValue,
+          tags: newTagsValue,
         },
       });
 
@@ -317,7 +317,7 @@ describe("test Actant.update", function () {
         actant.id
       );
       // new value
-      expect(existingActantData.data.text).toEqual(changedTextValue);
+      expect(existingActantData.data.text).toEqual(newTextValue);
       //  territory data from the save call
       expect(existingActantData.data.territory.id).toEqual(
         actant.data.territory.id
@@ -325,8 +325,7 @@ describe("test Actant.update", function () {
       // actants field should be replaced
       expect(existingActantData.data.actants).toHaveLength(1);
       expect(existingActantData.data.actants[0].id).toEqual(newActantId);
-      // certainty should be erased - but the key should exist
-      expect(existingActantData.data.certainty).toEqual(newCertaintyValue);
+      expect(existingActantData.data.tags).toEqual(newTagsValue);
 
       await clean(db);
       done();
