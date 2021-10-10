@@ -1,10 +1,10 @@
-import { ActantStatus, ActantType } from "@shared/enums";
+import { ActantStatus, ActantType, UserRoleMode } from "@shared/enums";
 import "ts-jest";
 import Territory, { TerritoryData, TerritoryParent } from "./territory";
 import { Db } from "@service/RethinkDB";
 import { clean } from "@modules/common.test";
 import { findActantById, deleteActants } from "@service/shorthands";
-import { ITerritory } from "@shared/types";
+import { ITerritory, IUserRight } from "@shared/types";
 
 describe("Territory constructor test", function () {
   describe("empty data", () => {
@@ -282,6 +282,53 @@ describe("Territory - update territory", function () {
       expect((createdData.data.parent as any).order).toEqual(90);
       expect((createdData.data.parent as any).id).toEqual("new");
 
+      done();
+    });
+  });
+});
+
+describe("Territory - test getClosestRight", function () {
+  describe("no input rights", () => {
+    it("should return undefined as no closest right found", async (done) => {
+      const territory = new Territory(undefined);
+
+      expect(territory.getClosestRight([])).toEqual(undefined);
+      done();
+    });
+  });
+
+  describe("right with equal id", () => {
+    it("should return the right object", async (done) => {
+      const territory = new Territory({ id: "this" });
+      const right: IUserRight = {
+        mode: UserRoleMode.Admin,
+        territory: "this",
+      };
+      expect(territory.getClosestRight([right])).toEqual(right);
+      done();
+    });
+  });
+
+  describe("right defined for parent territory", () => {
+    it("should return the same right object as was defined for the parent", async (done) => {
+      const territory = new Territory({ id: "thisthat" });
+      const right: IUserRight = {
+        mode: UserRoleMode.Admin,
+        territory: "this",
+      };
+      expect(territory.getClosestRight([right])).toEqual(right);
+      done();
+    });
+  });
+
+  describe("right defined for child territory", () => {
+    it("should return undefined", async (done) => {
+      const territory = new Territory({ id: "that" });
+      const right: IUserRight = {
+        mode: UserRoleMode.Admin,
+        territory: "this",
+      };
+      expect(territory.getClosestRight([right])).toEqual(undefined);
       done();
     });
   });
