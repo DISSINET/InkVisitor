@@ -22,6 +22,7 @@ import { setPanelWidths } from "redux/features/layout/panelWidthsSlice";
 import { setSeparatorXPosition } from "redux/features/layout/separatorXPositionSlice";
 import api from "api";
 import { SearchParamsProvider } from "hooks/useParamsContext";
+import { useWindowSize } from "hooks/useWindowSize";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -34,17 +35,16 @@ const queryClient = new QueryClient({
 interface AppProps {}
 export const App: React.FC<AppProps> = () => {
   const [size, setSize] = useState([0, 0]);
+  const [width, height] = useWindowSize();
   const dispatch = useAppDispatch();
+  console.log(width, height);
 
   useEffect(() => {
     const handleResize = () => {
-      setSize([window.innerWidth, window.innerHeight]);
+      setSize([width, height]);
     };
     // count widths and set to REDUX
-    const layoutWidth =
-      window.innerWidth < layoutWidthBreakpoint
-        ? minLayoutWidth
-        : window.innerWidth;
+    const layoutWidth = width < layoutWidthBreakpoint ? minLayoutWidth : width;
     dispatch(setLayoutWidth(layoutWidth));
     const onePercent = layoutWidth / 100;
     const panels = [
@@ -59,7 +59,7 @@ export const App: React.FC<AppProps> = () => {
     window.addEventListener("resize", handleResize);
     handleResize();
     return () => window.removeEventListener("resize", handleResize);
-  }, []);
+  }, [width, height]);
 
   return (
     <>
