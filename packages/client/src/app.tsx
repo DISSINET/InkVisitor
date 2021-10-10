@@ -23,6 +23,7 @@ import { setSeparatorXPosition } from "redux/features/layout/separatorXPositionS
 import api from "api";
 import { SearchParamsProvider } from "hooks/useParamsContext";
 import { useWindowSize } from "hooks/useWindowSize";
+import { useDebounce } from "hooks";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -37,11 +38,13 @@ export const App: React.FC<AppProps> = () => {
   const [size, setSize] = useState([0, 0]);
   const [width, height] = useWindowSize();
   const dispatch = useAppDispatch();
-  console.log(width, height);
+  console.log([width, height]);
+  // const debouncedValues = useDebounce<number[]>([width, height], 500);
+  // console.log(debouncedValues);
 
   useEffect(() => {
     const handleResize = () => {
-      setSize([width, height]);
+      setSize([width, window.innerHeight]);
     };
     // count widths and set to REDUX
     const layoutWidth = width < layoutWidthBreakpoint ? minLayoutWidth : width;
@@ -59,7 +62,7 @@ export const App: React.FC<AppProps> = () => {
     window.addEventListener("resize", handleResize);
     handleResize();
     return () => window.removeEventListener("resize", handleResize);
-  }, [width, height]);
+  }, []);
 
   return (
     <>

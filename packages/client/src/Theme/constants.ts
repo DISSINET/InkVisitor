@@ -6,10 +6,11 @@ export const rootTerritoryId = "T0";
 export const heightHeader = 70;
 export const heightFooter = 30;
 
+// TODO: PUT BACK!!!
 export const minLayoutWidth = 1440;
 export const layoutWidthBreakpoint = 1200;
 // INIT PANEL WIDTHS
-export const panelWidths = [200, 570, 800, 350];
+export const initPanelWidths = [200, 570, 800, 350];
 // MORE PANEL WIDTHS
 export const collapsedPanelWidth = 32;
 export const secondPanelMinWidth = 450;
