@@ -62,6 +62,7 @@ interface MainPage {
 
 const MainPage: React.FC<MainPage> = ({ size }) => {
   const { actantId, setActantId } = useSearchParams();
+  const [width, height] = size;
 
   const isLoggedIn = api.isLoggedIn();
   const dispatch = useAppDispatch();
@@ -123,7 +124,7 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
     setUserAdministrationModalOpen(false);
   };
 
-  const heightContent = size[1] - heightHeader - heightFooter;
+  const heightContent = height - heightHeader - heightFooter;
 
   const firstPanelButton = () => (
     <Button
