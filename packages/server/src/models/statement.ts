@@ -24,7 +24,7 @@ import Actant from "./actant";
 import { r as rethink, Connection, RDatum, WriteResult } from "rethinkdb-ts";
 import { InternalServerError } from "@shared/types/errors";
 
-class StatementActant implements IStatementActant, IModel {
+export class StatementActant implements IStatementActant, IModel {
   id = "";
   actant = "";
   position: Position = Position.Subject;
@@ -53,7 +53,7 @@ class StatementActant implements IStatementActant, IModel {
   }
 }
 
-class StatementReference implements IStatementReference, IModel {
+export class StatementReference implements IStatementReference, IModel {
   id = "";
   resource = "";
   part = "";

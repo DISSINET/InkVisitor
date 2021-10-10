@@ -1,35 +1,31 @@
-import { ActantType } from "@shared/enums";
+import {
+  ActantStatus,
+  ActantType,
+  Certainty,
+  Elvl,
+  Language,
+  Logic,
+  Mood,
+  MoodVariant,
+  Operator,
+} from "@shared/enums";
 import "ts-jest";
-import Statement, { StatementTerritory } from "./statement";
+import Statement, {
+  StatementActant,
+  StatementAction,
+  StatementProp,
+  StatementReference,
+} from "./statement";
 import { Db } from "@service/RethinkDB";
 import { deleteActants, findActantById } from "@service/shorthands";
 import Territory from "./territory";
 import { IStatement } from "@shared/types/statement";
+import { IStatementAction, IStatementActant } from "@shared/types";
 
 describe("Statement constructor test", function () {
   describe("empty data", () => {
     const emptyData = {};
-    const emptyStatement: Statement = Object.create(Statement.prototype);
-    emptyStatement.id = "";
-    emptyStatement.class = ActantType.Statement;
-    emptyStatement.label = "";
-
-    emptyStatement.data = Object.create(StatementTerritory.prototype);
-    emptyStatement.data.action = "";
-    emptyStatement.data.certainty = "";
-    emptyStatement.data.elvl = "";
-    emptyStatement.data.modality = "";
-    emptyStatement.data.text = "";
-    emptyStatement.data.note = "";
-
-    emptyStatement.data.territory = Object.create(StatementTerritory.prototype);
-    emptyStatement.data.territory.id = "";
-    emptyStatement.data.territory.order = -1;
-
-    emptyStatement.data.actants = [];
-    emptyStatement.data.props = [];
-    emptyStatement.data.references = [];
-    emptyStatement.data.tags = [];
+    const emptyStatement = new Statement({});
 
     it("should return empty statement", () => {
       const out = new Statement(emptyData);
@@ -38,51 +34,44 @@ describe("Statement constructor test", function () {
   });
 
   describe("ok data", () => {
-    const fullData = {
+    const fullData: IStatement = {
       id: "id",
-      class: "S",
+      class: ActantType.Statement,
       label: "label",
       data: {
-        action: "action",
-        certainty: "certainty",
-        elvl: "elvl",
-        modality: "modality",
-        text: "text",
-        note: "note",
-        territory: {
-          id: "id",
-          order: 1,
-        },
+        actions: [
+          {
+            action: "action",
+            bundleEnd: false,
+            bundleStart: false,
+            certainty: Certainty.Certain,
+            elvl: Elvl.Inferential,
+            id: "actionm",
+            logic: Logic.Positive,
+            mood: [Mood.Ability],
+            moodvariant: MoodVariant.Irrealis,
+            operator: Operator.And,
+          } as IStatementAction,
+        ],
         actants: [],
         props: [],
         references: [],
         tags: [],
+        territory: {
+          id: "id",
+          order: 0,
+        },
+        text: "text",
       },
+      detail: "",
+      language: [Language.Czech],
+      notes: [],
+      status: ActantStatus.Pending,
     };
-    const fullStatement: Statement = Object.create(Statement.prototype);
-    fullStatement.id = "id";
-    fullStatement.class = ActantType.Statement;
-    fullStatement.label = "label";
-    fullStatement.data = Object.create(StatementTerritory.prototype);
-    fullStatement.data.action = "action";
-    fullStatement.data.certainty = "certainty";
-    fullStatement.data.elvl = "elvl";
-    fullStatement.data.modality = "modality";
-    fullStatement.data.text = "text";
-    fullStatement.data.note = "note";
-
-    fullStatement.data.territory = Object.create(StatementTerritory.prototype);
-    fullStatement.data.territory.id = "id";
-    fullStatement.data.territory.order = 1;
-
-    fullStatement.data.actants = [];
-    fullStatement.data.props = [];
-    fullStatement.data.references = [];
-    fullStatement.data.tags = [];
+    const fullStatement: Statement = new Statement({ ...fullData });
 
     it("should return full statement", () => {
-      const out = new Statement(fullData);
-      expect(out).toEqual(fullStatement);
+      expect(JSON.stringify(fullData)).toEqual(JSON.stringify(fullStatement));
     });
   });
 });
@@ -124,27 +113,8 @@ describe("Statement validate test", function () {
 
 describe("findDependentStatementIds", function () {
   let db: Db;
-  const baseStatementData: IStatement = {
-    class: ActantType.Statement,
-    id: "",
-    label: "",
-    data: {
-      action: "",
-      certainty: "",
-      elvl: "",
-      modality: "",
-      note: "",
-      props: [],
-      references: [],
-      tags: [],
-      territory: {
-        id: "",
-        order: 0,
-      },
-      text: "",
-      actants: [],
-    },
-  };
+  const baseStatementData = new Statement({});
+
   beforeAll(async () => {
     db = new Db();
     await db.initDb();
@@ -205,19 +175,14 @@ describe("findDependentStatementIds", function () {
       const territory = new Territory(undefined);
       await territory.save(db.connection);
 
-      const statementData: IStatement = JSON.parse(
-        JSON.stringify(baseStatementData)
+      const statement = new Statement(
+        JSON.parse(JSON.stringify(baseStatementData))
       );
-      statementData.data.actants = [
-        {
+      statement.data.actants = [
+        new StatementActant({
           actant: territory.id,
-          certainty: "",
-          elvl: "",
-          id: "",
-          position: "",
-        },
+        }),
       ];
-      const statement = new Statement({ ...statementData });
       await statement.save(db.connection);
 
       const statements = await Statement.findDependentStatements(
@@ -233,11 +198,10 @@ describe("findDependentStatementIds", function () {
       const territory = new Territory(undefined);
       await territory.save(db.connection);
 
-      const statementData: IStatement = JSON.parse(
-        JSON.stringify(baseStatementData)
+      const statement = new Statement(
+        JSON.parse(JSON.stringify(baseStatementData))
       );
-      statementData.data.tags = [territory.id];
-      const statement = new Statement({ ...statementData });
+      statement.data.tags = [territory.id];
       await statement.save(db.connection);
 
       const statements = await Statement.findDependentStatements(
@@ -253,29 +217,10 @@ describe("findDependentStatementIds", function () {
       const territory = new Territory(undefined);
       await territory.save(db.connection);
 
-      const statementData: IStatement = JSON.parse(
-        JSON.stringify(baseStatementData)
+      const statement = new Statement(
+        JSON.parse(JSON.stringify(baseStatementData))
       );
-      statementData.data.props = [
-        {
-          id: "",
-          certainty: "",
-          elvl: "",
-          modality: "",
-          origin: territory.id,
-          type: {
-            certainty: "",
-            elvl: "",
-            id: "",
-          },
-          value: {
-            certainty: "",
-            elvl: "",
-            id: "",
-          },
-        },
-      ];
-      const statement = new Statement({ ...statementData });
+      statement.data.props = [new StatementProp({ origin: territory.id })];
       await statement.save(db.connection);
 
       const statements = await Statement.findDependentStatements(
@@ -291,29 +236,12 @@ describe("findDependentStatementIds", function () {
       const territory = new Territory(undefined);
       await territory.save(db.connection);
 
-      const statementData: IStatement = JSON.parse(
-        JSON.stringify(baseStatementData)
+      const statement = new Statement(
+        JSON.parse(JSON.stringify(baseStatementData))
       );
-      statementData.data.props = [
-        {
-          id: "",
-          certainty: "",
-          elvl: "",
-          modality: "",
-          origin: "",
-          type: {
-            certainty: "",
-            elvl: "",
-            id: territory.id,
-          },
-          value: {
-            certainty: "",
-            elvl: "",
-            id: "",
-          },
-        },
+      statement.data.props = [
+        new StatementProp({ type: { id: territory.id } }),
       ];
-      const statement = new Statement({ ...statementData });
       await statement.save(db.connection);
 
       const statements = await Statement.findDependentStatements(
@@ -329,29 +257,12 @@ describe("findDependentStatementIds", function () {
       const territory = new Territory(undefined);
       await territory.save(db.connection);
 
-      const statementData: IStatement = JSON.parse(
-        JSON.stringify(baseStatementData)
+      const statement = new Statement(
+        JSON.parse(JSON.stringify(baseStatementData))
       );
-      statementData.data.props = [
-        {
-          id: "",
-          certainty: "",
-          elvl: "",
-          modality: "",
-          origin: "",
-          type: {
-            certainty: "",
-            elvl: "",
-            id: "",
-          },
-          value: {
-            certainty: "",
-            elvl: "",
-            id: territory.id,
-          },
-        },
+      statement.data.props = [
+        new StatementProp({ value: { id: territory.id } }),
       ];
-      const statement = new Statement({ ...statementData });
       await statement.save(db.connection);
 
       const statements = await Statement.findDependentStatements(
@@ -367,18 +278,12 @@ describe("findDependentStatementIds", function () {
       const territory = new Territory(undefined);
       await territory.save(db.connection);
 
-      const statementData: IStatement = JSON.parse(
-        JSON.stringify(baseStatementData)
+      const statement = new Statement(
+        JSON.parse(JSON.stringify(baseStatementData))
       );
-      statementData.data.references = [
-        {
-          id: "",
-          part: "",
-          resource: territory.id,
-          type: "",
-        },
+      statement.data.references = [
+        new StatementReference({ resource: territory.id }),
       ];
-      const statement = new Statement({ ...statementData });
       await statement.save(db.connection);
 
       const statements = await Statement.findDependentStatements(
@@ -394,11 +299,10 @@ describe("findDependentStatementIds", function () {
       const territory = new Territory(undefined);
       await territory.save(db.connection);
 
-      const statementData: IStatement = JSON.parse(
-        JSON.stringify(baseStatementData)
+      const statement = new Statement(
+        JSON.parse(JSON.stringify(baseStatementData))
       );
-      statementData.data.territory.id = territory.id;
-      const statement = new Statement({ ...statementData });
+      statement.data.territory.id = territory.id;
       await statement.save(db.connection);
 
       const statements = await Statement.findDependentStatements(
@@ -415,26 +319,19 @@ describe("findDependentStatementIds", function () {
       await territory.save(db.connection);
 
       // first statement linked via references array
-      const statementData1: IStatement = JSON.parse(
-        JSON.stringify(baseStatementData)
+      const statement1 = new Statement(
+        JSON.parse(JSON.stringify(baseStatementData))
       );
-      statementData1.data.references = [
-        {
-          id: "",
-          part: "",
-          resource: territory.id,
-          type: "",
-        },
+      statement1.data.references = [
+        new StatementReference({ resource: territory.id }),
       ];
-      const statement1 = new Statement({ ...statementData1 });
       await statement1.save(db.connection);
 
       // second statement linked via tags array
-      const statementData2: IStatement = JSON.parse(
-        JSON.stringify(baseStatementData)
+      const statement2 = new Statement(
+        JSON.parse(JSON.stringify(baseStatementData))
       );
-      statementData2.data.tags = [territory.id];
-      const statement2 = new Statement({ ...statementData2 });
+      statement2.data.tags = [territory.id];
       await statement2.save(db.connection);
 
       const statements = await Statement.findDependentStatements(
@@ -451,26 +348,18 @@ describe("findDependentStatementIds", function () {
       await territory.save(db.connection);
 
       // first statement linked via references array and tags
-      const statementData1: IStatement = JSON.parse(
-        JSON.stringify(baseStatementData)
+      const statement1 = new Statement(
+        JSON.parse(JSON.stringify(baseStatementData))
       );
-      statementData1.data.tags = [territory.id];
-      statementData1.data.references = [
-        {
-          id: "",
-          part: "",
-          resource: territory.id,
-          type: "",
-        },
+      statement1.data.tags = [territory.id];
+      statement1.data.references = [
+        new StatementReference({ resource: territory.id }),
       ];
-      // second statement is the same
-      const statementData2: IStatement = JSON.parse(
-        JSON.stringify(statementData1)
-      );
 
-      const statement1 = new Statement({ ...statementData1 });
+      // second statement is the same
+      const statement2 = new Statement(JSON.parse(JSON.stringify(statement1)));
+
       await statement1.save(db.connection);
-      const statement2 = new Statement({ ...statementData2 });
       await statement2.save(db.connection);
 
       const statements = await Statement.findDependentStatements(
