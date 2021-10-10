@@ -5,19 +5,11 @@ import { apiPath } from "../../common/constants";
 import app from "../../Server";
 import { IAction } from "@shared/types";
 import { Db } from "@service/RethinkDB";
-import { createAction, deleteActions } from "@service/shorthands";
+import { deleteActions } from "@service/shorthands";
+import Action from "@models/action";
 
 const checkArrayOfActions = (res: any) => {
-  const actionExample: IAction = {
-    id: "",
-    labels: [],
-    note: "",
-    parent: "",
-    rulesActants: [],
-    rulesProperties: [],
-    types: [],
-    valencies: [],
-  };
+  const actionExample = new Action({});
   expect(res.body).toBeTruthy();
   expect(res.body.constructor.name).toEqual("Array");
   expect(res.body.length).toBeGreaterThan(0);
@@ -32,26 +24,9 @@ describe("Actions getMore", function () {
       await db.initDb();
 
       const randomLabel = "actions-getMore-" + Math.random().toString();
-      await createAction(
-        db,
-        {
-          id: "",
-          labels: [
-            {
-              id: randomLabel,
-              lang: "en",
-              value: randomLabel,
-            },
-          ],
-          note: "",
-          parent: false,
-          rulesActants: [],
-          rulesProperties: [],
-          types: [],
-          valencies: [],
-        },
-        false
-      );
+      const action = new Action({ label: randomLabel });
+      await action.save(db.connection);
+
       await request(app)
         .post(`${apiPath}/actions/getMore`)
         .set("authorization", "Bearer " + supertestConfig.token)
@@ -59,8 +34,7 @@ describe("Actions getMore", function () {
         .expect((res) => {
           checkArrayOfActions(res);
           const foundLabel = (res.body as IAction[]).find(
-            (action) =>
-              !!action.labels.find((label) => label.value === randomLabel)
+            (action) => action.label === randomLabel
           );
           expect(foundLabel).not.toBeNull();
         });
@@ -75,26 +49,9 @@ describe("Actions getMore", function () {
       const db = new Db();
       await db.initDb();
       const randomLabel = "actions-getMore-" + Math.random().toString();
-      await createAction(
-        db,
-        {
-          id: "",
-          labels: [
-            {
-              id: randomLabel,
-              lang: "en",
-              value: randomLabel,
-            },
-          ],
-          note: "",
-          parent: false,
-          rulesActants: [],
-          rulesProperties: [],
-          types: [],
-          valencies: [],
-        },
-        false
-      );
+      const action = new Action({ label: randomLabel });
+      await action.save(db.connection);
+
       await request(app)
         .post(`${apiPath}/actions/getMore`)
         .send({ label: randomLabel })
@@ -104,8 +61,7 @@ describe("Actions getMore", function () {
           checkArrayOfActions(res);
           expect((res.body as []).length).toEqual(1);
           const foundLabel = (res.body as IAction[]).find(
-            (action) =>
-              !!action.labels.find((label) => label.value === randomLabel)
+            (action) => action.label === randomLabel
           );
           expect(foundLabel).not.toBeNull();
         });

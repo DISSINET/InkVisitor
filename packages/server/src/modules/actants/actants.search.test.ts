@@ -1,8 +1,4 @@
-import {
-  testErroneousResponse,
-  mockActantData,
-  mockStatementData,
-} from "@modules/common.test";
+import { testErroneousResponse } from "@modules/common.test";
 import { BadParams, PermissionDeniedError } from "@shared/types/errors";
 import request, { Response } from "supertest";
 import { apiPath } from "../../common/constants";
@@ -11,8 +7,23 @@ import { supertestConfig } from "..";
 import { Db } from "@service/RethinkDB";
 import "ts-jest";
 import { deleteActants } from "@service/shorthands";
-import { ActantType } from "@shared/enums";
+import {
+  ActantType,
+  Certainty,
+  Elvl,
+  Logic,
+  Mood,
+  MoodVariant,
+  Operator,
+  Partitivity,
+  Position,
+  Virtuality,
+} from "@shared/enums";
 import { getActantType } from "@models/factory";
+import Statement, { StatementActant, StatementAction } from "@models/statement";
+import { IStatementActant, IStatementAction } from "@shared/types";
+import Action from "@models/action";
+import Entity from "@models/entity";
 
 describe("Actants search", function () {
   describe("empty data", () => {
@@ -52,38 +63,56 @@ describe("Actants search", function () {
     let db: Db;
     const rand = Math.random().toString();
 
-    const actantData = mockActantData(`testactant${rand}`, ActantType.Person);
+    const actantData = new Entity({ id: `testactant${rand}` });
 
-    const linkedActantData = mockActantData(`link${rand}`, ActantType.Event);
+    const linkedActantData = new Entity({ id: `linkedaction-${rand}` });
 
-    const actionData = mockActantData(`testaction${rand}`, ActantType.Action);
+    const actionData = new Action({ id: `testaction-${rand}` });
 
-    const statementData = mockStatementData(`stat${rand}`);
-    statementData.data.actants = [
-      {
-        id: actantData.id,
-        actant: actantData.id,
-        position: "s",
-        mode: "1",
-        elvl: (Elvl = Elvl["Textual"]),
-        certainty: "1",
-      },
-      {
-        id: linkedActantData.id,
-        actant: linkedActantData.id,
-        position: "s",
-        mode: "1",
-        elvl: (Elvl = Elvl["Textual"]),
-        certainty: "1",
-      },
+    const statement = new Statement({ id: `teststatement-${rand}` });
+    statement.data.actants = [
+      new StatementActant({
+        ...({
+          id: actantData.id,
+          actant: actantData.id,
+          bundleEnd: false,
+          bundleStart: false,
+          elvl: Elvl.Inferential,
+          logic: Logic.Positive,
+          operator: Operator.And,
+          partitivity: Partitivity.DiscreteParts,
+          position: Position.Actant1,
+          virtuality: Virtuality.Allegation,
+        } as IStatementActant),
+      }),
+      new StatementActant({
+        ...({
+          id: linkedActantData.id,
+          actant: linkedActantData.id,
+          bundleEnd: false,
+          bundleStart: false,
+          elvl: Elvl.Inferential,
+          logic: Logic.Positive,
+          operator: Operator.And,
+          partitivity: Partitivity.DiscreteParts,
+          position: Position.Actant1,
+          virtuality: Virtuality.Allegation,
+        } as IStatementActant),
+      }),
     ];
-    statementData.data.actions = [
-      {
-        action: actionData.id,
-        certainty: "1",
-        elvl: (Elvl = Elvl["Textual"]),
-        id: "",
-      },
+    statement.data.actions = [
+      new StatementAction({
+        ...({
+          id: actionData.id,
+          action: actionData.id,
+          certainty: Certainty.Certain,
+          elvl: Elvl.Inferential,
+          logic: Logic.Negative,
+          mood: [Mood.Allegation],
+          moodvariant: MoodVariant.Irrealis,
+          operator: Operator.And,
+        } as IStatementAction),
+      }),
     ];
 
     beforeAll(async () => {
@@ -105,10 +134,7 @@ describe("Actants search", function () {
         await linkedActant.save(db.connection);
       }
 
-      const statement = getActantType(statementData as any);
-      if (statement) {
-        await statement.save(db.connection);
-      }
+      await statement.save(db.connection);
     });
 
     afterAll(async () => {
