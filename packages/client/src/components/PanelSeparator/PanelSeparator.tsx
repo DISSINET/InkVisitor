@@ -27,7 +27,6 @@ export const PanelSeparator: React.FC<PanelSeparator> = ({}) => {
   const LEFT_SIDE_MIN_WIDTH = secondPanelMinWidth + panelWidths[0];
   const LEFT_SIDE_MAX_WIDTH = layoutWidth - panelWidths[3] - thirdPanelMinWidth;
 
-  const [separatorInitialized, setseparatorInitialized] = useState(false);
   const [separatorXTempPosition, setSeparatorXTempPosition] = useState<
     undefined | number
   >(undefined);
@@ -36,15 +35,12 @@ export const PanelSeparator: React.FC<PanelSeparator> = ({}) => {
   const [hovered, setHovered] = useState(false);
 
   const animatedSeparator = useSpring({
-    left: `${(leftWidth - 2) / 10}rem`,
+    left: `${(leftWidth - 1) / 10}rem`,
     config: springConfig.separatorXPosition,
   });
 
   useEffect(() => {
-    if (!separatorInitialized) {
-      setLeftWidth(separatorXPosition);
-      setseparatorInitialized(true);
-    }
+    setLeftWidth(separatorXPosition);
     dispatch(
       setPanelWidths([
         panelWidths[0],
@@ -53,7 +49,13 @@ export const PanelSeparator: React.FC<PanelSeparator> = ({}) => {
         panelWidths[3],
       ])
     );
-  }, [separatorXPosition, separatorInitialized]);
+  }, [separatorXPosition]);
+
+  useEffect(() => {
+    if (!dragging) {
+      dispatch(setSeparatorXPosition(leftWidth));
+    }
+  }, [leftWidth, dragging]);
 
   const onMouseDown = (e: React.MouseEvent) => {
     setSeparatorXTempPosition(e.clientX);
@@ -76,12 +78,6 @@ export const PanelSeparator: React.FC<PanelSeparator> = ({}) => {
       setLeftWidth(newLeftWidth);
     }
   };
-
-  useEffect(() => {
-    if (!dragging) {
-      dispatch(setSeparatorXPosition(leftWidth));
-    }
-  }, [leftWidth, dragging]);
 
   const onMouseMove = (e: MouseEvent) => {
     e.preventDefault();

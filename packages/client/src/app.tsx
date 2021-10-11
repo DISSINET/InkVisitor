@@ -38,14 +38,17 @@ export const App: React.FC<AppProps> = () => {
   const dispatch = useAppDispatch();
 
   useEffect(() => {
-    const layoutWidth = width < layoutWidthBreakpoint ? minLayoutWidth : width;
-    dispatch(setLayoutWidth(layoutWidth));
-    const onePercent = layoutWidth / 100;
-    const panels = percentPanelWidths.map(
-      (percentWidth) => Math.floor(onePercent * percentWidth * 10) / 10
-    );
-    dispatch(setPanelWidths(panels));
-    dispatch(setSeparatorXPosition(panels[0] + panels[1]));
+    if (width > 0 && height > 0) {
+      const layoutWidth =
+        width < layoutWidthBreakpoint ? minLayoutWidth : width;
+      dispatch(setLayoutWidth(layoutWidth));
+      const onePercent = layoutWidth / 100;
+      const panels = percentPanelWidths.map(
+        (percentWidth) => Math.floor(onePercent * percentWidth * 10) / 10
+      );
+      dispatch(setPanelWidths(panels));
+      dispatch(setSeparatorXPosition(panels[0] + panels[1]));
+    }
   }, [width]);
 
   return (

@@ -111,10 +111,10 @@ export const StatementListBox: React.FC = () => {
         audits,
         usedIn,
         actants,
-        ...statementObject
+        ...newStatementObject
       } = statementToDuplicate;
 
-      const duplicatedStatement = DStatement(statementObject as IStatement);
+      const duplicatedStatement = DStatement(newStatementObject as IStatement);
       await api.actantsCreate(duplicatedStatement);
     },
     {
