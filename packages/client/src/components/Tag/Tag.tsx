@@ -19,6 +19,7 @@ import { useAppDispatch } from "redux/hooks";
 import { setDraggedTerritory } from "redux/features/territoryTree/draggedTerritorySlice";
 import { useSearchParams } from "hooks";
 import { TagTooltip } from "./TagTooltip";
+import { PopupPosition } from "reactjs-popup/dist/types";
 
 interface TagProps {
   propId: string;
@@ -36,20 +37,7 @@ interface TagProps {
   index?: number;
   moveFn?: (dragIndex: number, hoverIndex: number) => void;
   enableTooltip?: boolean;
-  position?:
-    | "top left"
-    | "top center"
-    | "top right"
-    | "right top"
-    | "right center"
-    | "right bottom"
-    | "bottom left"
-    | "bottom center"
-    | "bottom right"
-    | "left top"
-    | "left center"
-    | "left bottom"
-    | "center center";
+  tooltipPosition?: PopupPosition | PopupPosition[];
   updateOrderFn?: (item: DragItem) => void;
   lvl?: number;
   disabled?: boolean;
@@ -70,7 +58,7 @@ export const Tag: React.FC<TagProps> = ({
   fullWidth = false,
   index = -1,
   moveFn,
-  position = "right top",
+  tooltipPosition = "right top",
   enableTooltip = true,
   updateOrderFn = () => {},
   lvl,
@@ -150,7 +138,7 @@ export const Tag: React.FC<TagProps> = ({
     <>
       {short ? (
         <TagTooltip
-          position={position}
+          position={tooltipPosition}
           label={label}
           detail={tooltipDetail}
           text={tooltipText}
@@ -173,7 +161,7 @@ export const Tag: React.FC<TagProps> = ({
             detail={tooltipDetail}
             text={tooltipText}
             disabled={!enableTooltip}
-            position={position}
+            position={tooltipPosition}
           >
             <StyledTooltipSeparator>
               <StyledTagWrapper

@@ -268,7 +268,12 @@ export const StatementListBox: React.FC = () => {
 
                   return (
                     subjectObject && (
-                      <ActantTag key={ai} actant={subjectObject} short />
+                      <ActantTag
+                        key={ai}
+                        actant={subjectObject}
+                        short
+                        tooltipPosition="bottom center"
+                      />
                     )
                   );
                 })}
@@ -291,7 +296,14 @@ export const StatementListBox: React.FC = () => {
                 {actionsSlice?.map(
                   (action: IActant | undefined, key: number) => (
                     <React.Fragment key={key}>
-                      {action && <ActantTag key={key} short actant={action} />}
+                      {action && (
+                        <ActantTag
+                          key={key}
+                          short
+                          actant={action}
+                          tooltipPosition="bottom center"
+                        />
+                      )}
                     </React.Fragment>
                   )
                 )}
@@ -312,29 +324,52 @@ export const StatementListBox: React.FC = () => {
                 .map((a: any) => a.actant)
             : [];
           const isOversized = actantIds.length > 4;
-          const actantIdsSlice = actantIds.slice(0, 4);
+          // const actantIdsSlice = actantIds.slice(0, 4);
 
-          if (actants) {
-            const actantObjects = actantIds.map((actantId: string) => {
-              const actantObject = actants.find((a) => a && a.id === actantId);
-              return actantObject && actantObject;
-            });
-          }
+          const actantObjects = actantIds.map((actantId: string) => {
+            const actantObject =
+              actants && actants.find((a) => a && a.id === actantId);
+            return actantObject && actantObject;
+          });
 
           return (
             <TagGroup>
-              {actantIdsSlice.map((actantId: string, ai: number) => {
-                const actantObject =
-                  actants && actants.find((a) => a && a.id === actantId);
-
-                return (
-                  actantObject && (
-                    <ActantTag key={ai} actant={actantObject} short />
-                  )
-                );
-              })}
+              {actantObjects
+                .slice(0, 4)
+                .map((actantObject: IActant, ai: number) => {
+                  return (
+                    actantObject && (
+                      <ActantTag
+                        key={ai}
+                        actant={actantObject}
+                        short
+                        tooltipPosition="bottom center"
+                      />
+                    )
+                  );
+                })}
               {isOversized && (
-                <Tooltip>
+                <Tooltip
+                  position="right center"
+                  items={[
+                    <TagGroup>
+                      {actantObjects
+                        .slice(4)
+                        .map((actantObject: IActant, ai: number) => {
+                          return (
+                            actantObject && (
+                              <ActantTag
+                                key={ai}
+                                actant={actantObject}
+                                short
+                                tooltipPosition="bottom center"
+                              />
+                            )
+                          );
+                        })}
+                    </TagGroup>,
+                  ]}
+                >
                   <StyledDots>{"..."}</StyledDots>
                 </Tooltip>
               )}

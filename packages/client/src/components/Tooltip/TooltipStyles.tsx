@@ -19,7 +19,8 @@ export const StyledPopup = styled(Popup)<StyledPopup>`
     max-width: 40rem;
   }
   &-arrow {
-    color: ${({ theme }) => theme.color["black"]};
+    color: ${({ theme, noBackground }) =>
+      noBackground ? "transparent" : theme.color["black"]};
   }
   [role="tooltip"]&-content {
   }
