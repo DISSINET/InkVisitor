@@ -225,6 +225,19 @@ export const StatementListBox: React.FC = () => {
     queryClient.invalidateQueries("territory");
   };
 
+  const renderListActant = (actantObject: IActant, key: number) => {
+    return (
+      actantObject && (
+        <ActantTag
+          key={key}
+          actant={actantObject}
+          short
+          tooltipPosition="bottom center"
+        />
+      )
+    );
+  };
+
   const columns: Column<{}>[] = useMemo(() => {
     return [
       {
@@ -255,28 +268,24 @@ export const StatementListBox: React.FC = () => {
                 .map((a: any) => a.actant)
             : [];
 
+          const subjectObjects = subjectIds.map(
+            (actantId: string, ai: number) => {
+              const subjectObject =
+                actants && actants.find((a) => a.id === actantId);
+
+              return subjectObject;
+            }
+          );
+
           const isOversized = subjectIds.length > 2;
-          const subjectIdsSlice = subjectIds.slice(0, 2);
 
           return (
             <TagGroup>
-              {subjectIdsSlice
-                .filter((a: any) => a)
-                .map((actantId: string, ai: number) => {
-                  const subjectObject =
-                    actants && actants.find((a) => a.id === actantId);
-
-                  return (
-                    subjectObject && (
-                      <ActantTag
-                        key={ai}
-                        actant={subjectObject}
-                        short
-                        tooltipPosition="bottom center"
-                      />
-                    )
-                  );
-                })}
+              {subjectObjects
+                .slice(0, 2)
+                .map((subjectObject: IActant, ai: number) =>
+                  renderListActant(subjectObject, ai)
+                )}
               {isOversized && <StyledDots>{"..."}</StyledDots>}
             </TagGroup>
           );
@@ -294,18 +303,9 @@ export const StatementListBox: React.FC = () => {
               <TagGroup>
                 {actions
                   .slice(0, 2)
-                  .map((action: IActant | undefined, key: number) => (
-                    <React.Fragment key={key}>
-                      {action && (
-                        <ActantTag
-                          key={key}
-                          short
-                          actant={action}
-                          tooltipPosition="bottom center"
-                        />
-                      )}
-                    </React.Fragment>
-                  ))}
+                  .map((action: IActant, key: number) =>
+                    renderListActant(action, key)
+                  )}
                 {isOversized && (
                   <Tooltip
                     position="right center"
@@ -313,18 +313,9 @@ export const StatementListBox: React.FC = () => {
                       <TagGroup>
                         {actions
                           .slice(2)
-                          .map((action: IActant | undefined, key: number) => (
-                            <React.Fragment key={key}>
-                              {action && (
-                                <ActantTag
-                                  key={key}
-                                  short
-                                  actant={action}
-                                  tooltipPosition="bottom center"
-                                />
-                              )}
-                            </React.Fragment>
-                          ))}
+                          .map((action: IActant, key: number) =>
+                            renderListActant(action, key)
+                          )}
                       </TagGroup>,
                     ]}
                   >
@@ -358,18 +349,9 @@ export const StatementListBox: React.FC = () => {
             <TagGroup>
               {actantObjects
                 .slice(0, 4)
-                .map((actantObject: IActant, ai: number) => {
-                  return (
-                    actantObject && (
-                      <ActantTag
-                        key={ai}
-                        actant={actantObject}
-                        short
-                        tooltipPosition="bottom center"
-                      />
-                    )
-                  );
-                })}
+                .map((actantObject: IActant, ai: number) =>
+                  renderListActant(actantObject, ai)
+                )}
               {isOversized && (
                 <Tooltip
                   position="right center"
@@ -377,18 +359,9 @@ export const StatementListBox: React.FC = () => {
                     <TagGroup>
                       {actantObjects
                         .slice(4)
-                        .map((actantObject: IActant, ai: number) => {
-                          return (
-                            actantObject && (
-                              <ActantTag
-                                key={ai}
-                                actant={actantObject}
-                                short
-                                tooltipPosition="bottom center"
-                              />
-                            )
-                          );
-                        })}
+                        .map((actantObject: IActant, ai: number) =>
+                          renderListActant(actantObject, ai)
+                        )}
                     </TagGroup>,
                   ]}
                 >
