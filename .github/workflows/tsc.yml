@@ -14,6 +14,8 @@ jobs:
         node-version: 12
     - name: yarn install
       run: yarn install
+    - name: tsc
+      uses: icrawl/action-tsc@v1
     - name: tsc client
       uses: icrawl/action-tsc@v1
       with:
