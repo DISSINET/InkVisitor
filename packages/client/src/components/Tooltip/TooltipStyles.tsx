@@ -1,9 +1,13 @@
 import styled from "styled-components";
 import Popup from "reactjs-popup";
 
-export const StyledPopup = styled(Popup)`
+interface StyledPopup {
+  noBackground: boolean;
+}
+export const StyledPopup = styled(Popup)<StyledPopup>`
   &-content {
-    background: ${({ theme }) => theme.color["black"]};
+    background: ${({ theme, noBackground }) =>
+      noBackground ? "transparent" : theme.color["black"]};
     color: ${({ theme }) => theme.color["white"]};
     border-radius: ${({ theme }) => theme.borderRadius["sm"]};
     font-size: ${({ theme }) => theme.fontSize["xxs"]};
@@ -34,5 +38,8 @@ export const StyledLabel = styled.p`
 export const StyledDetail = styled.p``;
 export const StyledIconWrap = styled.span`
   margin-top: 2px;
-  margin-right: ${({ theme }) => theme.space[2]};
+  margin-right: ${({ theme }) => theme.space[1]};
+`;
+export const StyledItemsWrap = styled.div`
+  display: flex;
 `;

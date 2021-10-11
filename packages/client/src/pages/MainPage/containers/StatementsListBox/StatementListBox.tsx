@@ -11,7 +11,14 @@ import {
 } from "react-icons/fa";
 import { toast } from "react-toastify";
 
-import { Button, ButtonGroup, Loader, Submit, TagGroup } from "components";
+import {
+  Button,
+  ButtonGroup,
+  Loader,
+  Submit,
+  TagGroup,
+  Tooltip,
+} from "components";
 import { ActantTag } from "./../";
 import api from "api";
 import {
@@ -307,21 +314,30 @@ export const StatementListBox: React.FC = () => {
           const isOversized = actantIds.length > 4;
           const actantIdsSlice = actantIds.slice(0, 4);
 
+          if (actants) {
+            const actantObjects = actantIds.map((actantId: string) => {
+              const actantObject = actants.find((a) => a && a.id === actantId);
+              return actantObject && actantObject;
+            });
+          }
+
           return (
             <TagGroup>
-              {actantIdsSlice
-                .filter((a: any) => a)
-                .map((actantId: string, ai: number) => {
-                  const actantObject =
-                    actants && actants.find((a) => a && a.id === actantId);
+              {actantIdsSlice.map((actantId: string, ai: number) => {
+                const actantObject =
+                  actants && actants.find((a) => a && a.id === actantId);
 
-                  return (
-                    actantObject && (
-                      <ActantTag key={ai} actant={actantObject} short />
-                    )
-                  );
-                })}
-              {isOversized && <StyledDots>{"..."}</StyledDots>}
+                return (
+                  actantObject && (
+                    <ActantTag key={ai} actant={actantObject} short />
+                  )
+                );
+              })}
+              {isOversized && (
+                <Tooltip>
+                  <StyledDots>{"..."}</StyledDots>
+                </Tooltip>
+              )}
             </TagGroup>
           );
         },

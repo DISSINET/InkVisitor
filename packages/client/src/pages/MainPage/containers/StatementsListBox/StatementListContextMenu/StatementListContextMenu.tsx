@@ -1,5 +1,6 @@
 import React, { ReactNode, useRef, useState } from "react";
-import { config, Transition } from "react-spring/renderprops";
+import { useSpring } from "react-spring";
+import { config } from "react-spring/renderprops";
 import { useAppSelector } from "redux/hooks";
 
 import {
@@ -44,6 +45,11 @@ export const StatementListContextMenu: React.FC<StatementListContextMenu> = ({
     }
   };
 
+  const animatedMount = useSpring({
+    opacity: showMenu ? 1 : 0,
+    config: config.stiff,
+  });
+
   return (
     <>
       <StyledWrapper
@@ -60,29 +66,17 @@ export const StatementListContextMenu: React.FC<StatementListContextMenu> = ({
         onClick={() => setShowMenu(false)}
       >
         <StyledCgMenuBoxed $inverted={inverted} size={18} />
-
-        <Transition
-          items={showMenu}
-          from={{ opacity: 0 }}
-          enter={{ opacity: 1 }}
-          leave={{ opacity: 0 }}
-          config={config.stiff}
-        >
-          {(showMenu) =>
-            showMenu &&
-            ((styles) => (
-              <StyledContextButtonGroup
-                $clientX={currentPosition.x}
-                $clientY={currentPosition.y}
-                style={styles}
-                $firstPanelExpanded={firstPanelExpanded}
-                $panelWidths={panelWidths}
-              >
-                {buttons}
-              </StyledContextButtonGroup>
-            ))
-          }
-        </Transition>
+        {showMenu && (
+          <StyledContextButtonGroup
+            $clientX={currentPosition.x}
+            $clientY={currentPosition.y}
+            $firstPanelExpanded={firstPanelExpanded}
+            $panelWidths={panelWidths}
+            style={animatedMount}
+          >
+            {buttons}
+          </StyledContextButtonGroup>
+        )}
       </StyledWrapper>
     </>
   );

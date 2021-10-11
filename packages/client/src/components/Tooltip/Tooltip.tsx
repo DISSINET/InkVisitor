@@ -7,6 +7,7 @@ import { PopupPosition, EventType } from "reactjs-popup/dist/types";
 import {
   StyledDetail,
   StyledIconWrap,
+  StyledItemsWrap,
   StyledLabel,
   StyledPopup,
   StyledRow,
@@ -22,6 +23,8 @@ interface Tooltip {
   disabled?: boolean;
   attributes?: React.ReactElement[];
   tagTooltip?: boolean;
+  noBackground?: boolean;
+  items?: ReactElement[];
 }
 export const Tooltip: React.FC<Tooltip> = ({
   children,
@@ -33,6 +36,8 @@ export const Tooltip: React.FC<Tooltip> = ({
   attributes,
   tagTooltip = false,
   disabled = false,
+  noBackground = false,
+  items,
 }) => {
   return (
     <StyledPopup
@@ -41,6 +46,7 @@ export const Tooltip: React.FC<Tooltip> = ({
       position={position}
       on={on}
       disabled={disabled}
+      noBackground={noBackground}
     >
       <div>
         {attributes ? (
@@ -73,6 +79,7 @@ export const Tooltip: React.FC<Tooltip> = ({
             )}
           </>
         )}
+        {items && <StyledItemsWrap>{items}</StyledItemsWrap>}
       </div>
     </StyledPopup>
   );
