@@ -46,7 +46,7 @@ export const App: React.FC<AppProps> = () => {
     );
     dispatch(setPanelWidths(panels));
     dispatch(setSeparatorXPosition(panels[0] + panels[1]));
-  }, [width, height]);
+  }, [width]);
 
   return (
     <>

@@ -1,10 +1,4 @@
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Cell, Column } from "react-table";
 import { useMutation, useQuery, useQueryClient } from "react-query";
 import {
@@ -23,7 +17,6 @@ import api from "api";
 import {
   IStatement,
   IActant,
-  IStatementAction,
   IAction,
   IResponseStatement,
 } from "@shared/types";
@@ -33,7 +26,6 @@ import { StyledDots, StyledText } from "./StatementLitBoxStyles";
 import { CStatement, DStatement } from "constructors";
 import { useSearchParams } from "hooks";
 import { StatementListContextMenu } from "./StatementListContextMenu/StatementListContextMenu";
-import { useHistory } from "react-router";
 import { BsArrowUp, BsArrowDown } from "react-icons/bs";
 
 const initialData: {
@@ -49,13 +41,15 @@ const initialData: {
 export const StatementListBox: React.FC = () => {
   const queryClient = useQueryClient();
 
-  const { territoryId, setTerritoryId, statementId, setStatementId } =
-    useSearchParams();
+  const {
+    territoryId,
+    setTerritoryId,
+    statementId,
+    setStatementId,
+  } = useSearchParams();
 
   const [showSubmit, setShowSubmit] = useState(false);
-  const [statementToDelete, setStatementToDelete] =
-    useState<IResponseStatement>();
-  const history = useHistory();
+  const [statementToDelete, setStatementToDelete] = useState<IStatement>();
 
   const { status, data, error, isFetching } = useQuery(
     ["territory", "statement-list", territoryId],
@@ -112,14 +106,15 @@ export const StatementListBox: React.FC = () => {
 
   const duplicateStatementMutation = useMutation(
     async (statementToDuplicate: IResponseStatement) => {
-      delete statementToDuplicate["actions"];
-      delete statementToDuplicate["audits"];
-      delete statementToDuplicate["usedIn"];
-      delete statementToDuplicate["actants"];
+      const {
+        actions,
+        audits,
+        usedIn,
+        actants,
+        ...statementObject
+      } = statementToDuplicate;
 
-      const duplicatedStatement = DStatement(
-        statementToDuplicate as IStatement
-      );
+      const duplicatedStatement = DStatement(statementObject as IStatement);
       await api.actantsCreate(duplicatedStatement);
     },
     {
