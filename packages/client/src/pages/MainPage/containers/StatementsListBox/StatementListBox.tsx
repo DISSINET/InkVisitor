@@ -290,11 +290,11 @@ export const StatementListBox: React.FC = () => {
 
           if (actions) {
             const isOversized = actions.length > 2;
-            const actionsSlice = actions?.slice(0, 2);
             return (
               <TagGroup>
-                {actionsSlice?.map(
-                  (action: IActant | undefined, key: number) => (
+                {actions
+                  .slice(0, 2)
+                  .map((action: IActant | undefined, key: number) => (
                     <React.Fragment key={key}>
                       {action && (
                         <ActantTag
@@ -305,9 +305,32 @@ export const StatementListBox: React.FC = () => {
                         />
                       )}
                     </React.Fragment>
-                  )
+                  ))}
+                {isOversized && (
+                  <Tooltip
+                    position="right center"
+                    items={[
+                      <TagGroup>
+                        {actions
+                          .slice(2)
+                          .map((action: IActant | undefined, key: number) => (
+                            <React.Fragment key={key}>
+                              {action && (
+                                <ActantTag
+                                  key={key}
+                                  short
+                                  actant={action}
+                                  tooltipPosition="bottom center"
+                                />
+                              )}
+                            </React.Fragment>
+                          ))}
+                      </TagGroup>,
+                    ]}
+                  >
+                    <StyledDots>{"..."}</StyledDots>
+                  </Tooltip>
                 )}
-                {isOversized && <StyledDots>{"..."}</StyledDots>}
               </TagGroup>
             );
           } else {
@@ -324,7 +347,6 @@ export const StatementListBox: React.FC = () => {
                 .map((a: any) => a.actant)
             : [];
           const isOversized = actantIds.length > 4;
-          // const actantIdsSlice = actantIds.slice(0, 4);
 
           const actantObjects = actantIds.map((actantId: string) => {
             const actantObject =
