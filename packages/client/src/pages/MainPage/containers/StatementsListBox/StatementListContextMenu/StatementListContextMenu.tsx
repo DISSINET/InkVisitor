@@ -19,6 +19,9 @@ export const StatementListContextMenu: React.FC<StatementListContextMenu> = ({
   const firstPanelExpanded: boolean = useAppSelector(
     (state) => state.layout.firstPanelExpanded
   );
+  const panelWidths: number[] = useAppSelector(
+    (state) => state.layout.panelWidths
+  );
   const ref = useRef<HTMLDivElement>(null);
 
   const [showMenu, setShowMenu] = useState(false);
@@ -73,6 +76,7 @@ export const StatementListContextMenu: React.FC<StatementListContextMenu> = ({
                 $clientY={currentPosition.y}
                 style={styles}
                 $firstPanelExpanded={firstPanelExpanded}
+                $panelWidths={panelWidths}
               >
                 {buttons}
               </StyledContextButtonGroup>
