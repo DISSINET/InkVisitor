@@ -3,6 +3,7 @@ import { space1, space2 } from "Theme/constants";
 
 interface IValueStyle {
   inverted?: boolean;
+  suggester?: boolean;
   width?: number | "full";
   noBorder?: boolean;
 }
@@ -35,8 +36,8 @@ export const StyledInput = styled.input<IValueStyle>`
     inverted ? theme.color["primary"] : theme.color["white"]};
   border-width: ${({ theme, inverted }) =>
     inverted ? 0 : theme.borderWidth[1]};
-  border-color: ${({ inverted, theme }) =>
-    inverted ? theme.color["white"] : theme.color["gray"]["400"]};
+  border-color: ${({ suggester, theme }) =>
+    suggester ? theme.color["primary"] : theme.color["gray"]["400"]};
   font-size: ${({ theme }) => theme.fontSize["xs"]};
   padding: ${space1};
   width: ${({ width }) => getWidth(width)};
@@ -48,13 +49,11 @@ export const StyledInput = styled.input<IValueStyle>`
 export const StyledSelect = styled.select<IValueStyle>`
   height: ${({ theme }) => theme.space[10]};
   text-align: left;
-  color: ${({ inverted, theme }) =>
-    inverted ? theme.color["white"] : theme.color["primary"]};
   background-color: ${({ inverted, theme }) =>
-    inverted ? theme.color["primary"] : theme.color["white"]};
+    inverted ? theme.color["gray"][200] : theme.color["white"]};
   border-width: ${({ theme }) => theme.borderWidth[1]};
-  border-color: ${({ inverted, theme }) =>
-    inverted ? theme.color["gray"]["400"] : theme.color["gray"][400]};
+  border-color: ${({ suggester, theme }) =>
+    suggester ? theme.color["primary"] : theme.color["gray"][400]};
   font-size: ${({ theme }) => theme.fontSize["xs"]};
   font-weight: bold;
   width: ${({ width }) => getWidth(width)};
