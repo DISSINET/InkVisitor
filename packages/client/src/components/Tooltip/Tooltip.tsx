@@ -48,7 +48,11 @@ export const Tooltip: React.FC<Tooltip> = ({
         ) : (
           <>
             <StyledRow>
-              <StyledIconWrap>{tagTooltip && <AiOutlineTag />}</StyledIconWrap>
+              {tagTooltip && (
+                <StyledIconWrap>
+                  <AiOutlineTag />
+                </StyledIconWrap>
+              )}
               <StyledLabel>{label}</StyledLabel>
             </StyledRow>
             {text && (
@@ -59,9 +63,11 @@ export const Tooltip: React.FC<Tooltip> = ({
             )}
             {(tagTooltip || detail) && (
               <StyledRow>
-                <StyledIconWrap>
-                  {tagTooltip && <BiCommentDetail />}
-                </StyledIconWrap>
+                {tagTooltip && (
+                  <StyledIconWrap>
+                    <BiCommentDetail />
+                  </StyledIconWrap>
+                )}
                 <StyledDetail>{detail}</StyledDetail>
               </StyledRow>
             )}
