@@ -268,14 +268,12 @@ export const StatementListBox: React.FC = () => {
                 .map((a: any) => a.actant)
             : [];
 
-          const subjectObjects = subjectIds.map(
-            (actantId: string, ai: number) => {
-              const subjectObject =
-                actants && actants.find((a) => a.id === actantId);
+          const subjectObjects = subjectIds.map((actantId: string) => {
+            const subjectObject =
+              actants && actants.find((a) => a.id === actantId);
 
-              return subjectObject;
-            }
-          );
+            return subjectObject;
+          });
 
           const isOversized = subjectIds.length > 2;
 
@@ -293,11 +291,9 @@ export const StatementListBox: React.FC = () => {
                     <TagGroup>
                       {subjectObjects
                         .slice(2)
-                        .map((subjectObject: IActant, key: number) => (
-                          <React.Fragment key={key}>
-                            {renderListActant(subjectObject, key)}
-                          </React.Fragment>
-                        ))}
+                        .map((subjectObject: IActant, key: number) =>
+                          renderListActant(subjectObject, key)
+                        )}
                     </TagGroup>
                   }
                 >
@@ -308,7 +304,6 @@ export const StatementListBox: React.FC = () => {
           );
         },
       },
-
       {
         Header: "Actions",
         Cell: ({ row }: Cell) => {
@@ -318,11 +313,11 @@ export const StatementListBox: React.FC = () => {
             const isOversized = actions.length > 2;
             return (
               <TagGroup>
-                {actions.slice(0, 2).map((action: IActant, key: number) => (
-                  <React.Fragment key={key}>
-                    {renderListActant(action, key)}
-                  </React.Fragment>
-                ))}
+                {actions
+                  .slice(0, 2)
+                  .map((action: IActant, key: number) =>
+                    renderListActant(action, key)
+                  )}
                 {isOversized && (
                   <Tooltip
                     position="right center"
@@ -330,11 +325,9 @@ export const StatementListBox: React.FC = () => {
                       <TagGroup>
                         {actions
                           .slice(2)
-                          .map((action: IActant, key: number) => (
-                            <React.Fragment key={key}>
-                              {renderListActant(action, key)}
-                            </React.Fragment>
-                          ))}
+                          .map((action: IActant, key: number) =>
+                            renderListActant(action, key)
+                          )}
                       </TagGroup>
                     }
                   >
@@ -368,11 +361,9 @@ export const StatementListBox: React.FC = () => {
             <TagGroup>
               {actantObjects
                 .slice(0, 4)
-                .map((actantObject: IActant, key: number) => (
-                  <React.Fragment key={key}>
-                    {renderListActant(actantObject, key)}
-                  </React.Fragment>
-                ))}
+                .map((actantObject: IActant, key: number) =>
+                  renderListActant(actantObject, key)
+                )}
               {isOversized && (
                 <Tooltip
                   position="right center"
@@ -380,11 +371,9 @@ export const StatementListBox: React.FC = () => {
                     <TagGroup>
                       {actantObjects
                         .slice(4)
-                        .map((actantObject: IActant, key: number) => (
-                          <React.Fragment key={key}>
-                            {renderListActant(actantObject, key)}
-                          </React.Fragment>
-                        ))}
+                        .map((actantObject: IActant, key: number) =>
+                          renderListActant(actantObject, key)
+                        )}
                     </TagGroup>
                   }
                 >
@@ -420,8 +409,7 @@ export const StatementListBox: React.FC = () => {
                   icon={<FaTrashAlt size={14} />}
                   color="danger"
                   tooltip="delete"
-                  onClick={(e: React.MouseEvent) => {
-                    // e.stopPropagation();
+                  onClick={() => {
                     setStatementToDelete(row.original as IResponseStatement);
                     setShowSubmit(true);
                   }}
@@ -431,8 +419,7 @@ export const StatementListBox: React.FC = () => {
                   icon={<FaClone size={14} />}
                   color="warning"
                   tooltip="duplicate"
-                  onClick={(e: React.MouseEvent) => {
-                    // e.stopPropagation();
+                  onClick={() => {
                     duplicateStatementMutation.mutate(
                       row.original as IResponseStatement
                     );
@@ -448,8 +435,7 @@ export const StatementListBox: React.FC = () => {
                   }
                   tooltip="add new statement before"
                   color="info"
-                  onClick={(e: React.MouseEvent) => {
-                    // e.stopPropagation();
+                  onClick={() => {
                     addStatementAtCertainIndex(row.index - 1);
                   }}
                 />,
@@ -463,8 +449,7 @@ export const StatementListBox: React.FC = () => {
                   }
                   tooltip="add new statement after"
                   color="success"
-                  onClick={(e: React.MouseEvent) => {
-                    // e.stopPropagation();
+                  onClick={() => {
                     addStatementAtCertainIndex(row.index + 1);
                   }}
                 />,
@@ -484,25 +469,11 @@ export const StatementListBox: React.FC = () => {
             >
               {row.isExpanded ? <FaChevronCircleUp /> : <FaChevronCircleDown />}
             </span>
-            <Button
-              icon={<FaEdit size={14} />}
-              color="plain"
-              inverted
-              tooltip="edit statement"
-              onClick={(e: React.MouseEvent<HTMLElement, MouseEvent>) => {
-                e.stopPropagation();
-                selectStatementRow(row.values.id);
-              }}
-            />
           </ButtonGroup>
         ),
       },
     ];
   }, [data, statementId]);
-
-  const selectStatementRow = (rowId: string) => {
-    setStatementId(rowId);
-  };
 
   statements.sort((a, b) =>
     a.data.territory.order > b.data.territory.order ? 1 : -1
