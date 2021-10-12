@@ -10,6 +10,9 @@ interface ButtonProps {
   label?: string;
   icon?: JSX.Element;
   inverted?: boolean;
+  noBorder?: boolean;
+  radiusLeft?: boolean;
+  radiusRight?: boolean;
   disabled?: boolean;
   color?: typeof Colors[number];
   onClick?: MouseEventHandler<HTMLElement>;
@@ -21,6 +24,9 @@ export const Button: React.FC<ButtonProps> = ({
   label = "",
   icon,
   inverted = false,
+  noBorder = false,
+  radiusLeft = false,
+  radiusRight = false,
   disabled = false,
   color = "primary",
   onClick = () => {
@@ -35,6 +41,9 @@ export const Button: React.FC<ButtonProps> = ({
         hasIcon={icon && true}
         color={color}
         inverted={inverted}
+        noBorder={noBorder}
+        radiusLeft={radiusLeft}
+        radiusRight={radiusRight}
         fullWidth={fullWidth}
         disabled={disabled}
       >
