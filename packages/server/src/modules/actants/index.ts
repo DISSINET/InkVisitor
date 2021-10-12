@@ -43,7 +43,10 @@ export default Router()
       );
 
       if (!actant) {
-        throw new ActantDoesNotExits(`actant ${actantId} was not found`, actantId);
+        throw new ActantDoesNotExits(
+          `actant ${actantId} was not found`,
+          actantId
+        );
       }
 
       const usedInStatements = await Statement.findDependentStatements(
@@ -80,14 +83,21 @@ export default Router()
         throw new ModelNotValidError("");
       }
 
-      const result = await createActant(request.db, model);
+      const result = await model.save(request.db.connection);
+
+      if (
+        result.first_error &&
+        result.first_error.indexOf("Duplicate") !== -1
+      ) {
+        throw new ModelNotValidError("id already exists");
+      }
 
       if (result.inserted === 1) {
         return {
           result: true,
         };
       } else {
-        throw new InternalServerError("cannot create actant");
+        throw new InternalServerError(`cannot create actant`);
       }
     })
   )
@@ -106,7 +116,8 @@ export default Router()
       const existingActant = await findActantById(request.db, actantId);
       if (!existingActant) {
         throw new ActantDoesNotExits(
-          `actant with id ${actantId} does not exist`, actantId
+          `actant with id ${actantId} does not exist`,
+          actantId
         );
       }
 
@@ -147,7 +158,8 @@ export default Router()
       const existingActant = await findActantById(request.db, actantId);
       if (!existingActant) {
         throw new ActantDoesNotExits(
-          `actant with id ${actantId} does not exist`, actantId
+          `actant with id ${actantId} does not exist`,
+          actantId
         );
       }
 
@@ -184,7 +196,10 @@ export default Router()
 
       const actant = await findActantById<IActant>(request.db, actantId);
       if (!actant) {
-        throw new ActantDoesNotExits(`actant ${actantId} was not found`, actantId);
+        throw new ActantDoesNotExits(
+          `actant ${actantId} was not found`,
+          actantId
+        );
       }
 
       const meta: IResponseStatement[] = [];
