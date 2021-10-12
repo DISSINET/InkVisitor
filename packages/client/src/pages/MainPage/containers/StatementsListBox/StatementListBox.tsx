@@ -288,6 +288,7 @@ export const StatementListBox: React.FC = () => {
                 <Tooltip
                   position="right center"
                   color="success"
+                  noArrow
                   items={
                     <TagGroup>
                       {subjectObjects
@@ -323,6 +324,7 @@ export const StatementListBox: React.FC = () => {
                   <Tooltip
                     position="right center"
                     color="success"
+                    noArrow
                     items={
                       <TagGroup>
                         {actions
@@ -370,6 +372,7 @@ export const StatementListBox: React.FC = () => {
                 <Tooltip
                   position="right center"
                   color="success"
+                  noArrow
                   items={
                     <TagGroup>
                       {actantObjects
