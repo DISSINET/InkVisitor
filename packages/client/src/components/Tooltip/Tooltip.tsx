@@ -6,6 +6,7 @@ import { PopupPosition, EventType } from "reactjs-popup/dist/types";
 import { Colors } from "types";
 
 import {
+  StyledContentWrap,
   StyledDetail,
   StyledIconWrap,
   StyledItemsWrap,
@@ -53,10 +54,9 @@ export const Tooltip: React.FC<Tooltip> = ({
       color={color}
     >
       <div>
-        {attributes ? (
-          attributes
-        ) : (
-          <>
+        {attributes && <StyledContentWrap>{attributes}</StyledContentWrap>}
+        {(tagTooltip || text || detail || label) && (
+          <StyledContentWrap>
             <StyledRow>
               {tagTooltip && (
                 <StyledIconWrap>
@@ -81,7 +81,7 @@ export const Tooltip: React.FC<Tooltip> = ({
                 <StyledDetail>{detail}</StyledDetail>
               </StyledRow>
             )}
-          </>
+          </StyledContentWrap>
         )}
         {items && <StyledItemsWrap>{items}</StyledItemsWrap>}
       </div>

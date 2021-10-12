@@ -14,11 +14,10 @@ export const StyledPopup = styled(Popup)<StyledPopup>`
     color: ${({ theme }) => theme.color["white"]};
     border-radius: ${({ theme }) => theme.borderRadius["sm"]};
     font-size: ${({ theme }) => theme.fontSize["xxs"]};
-    padding: ${({ theme }) => `${theme.space[2]} ${theme.space[3]}`};
     min-width: ${({ theme }) => theme.space[8]};
     display: flex;
-    justify-content: right;
-    align-items: right;
+    justify-content: center;
+    align-items: center;
     max-width: 40rem;
   }
   &-arrow {
@@ -44,6 +43,9 @@ export const StyledIconWrap = styled.span`
   margin-top: 2px;
   margin-right: ${({ theme }) => theme.space[1]};
 `;
+export const StyledContentWrap = styled.div`
+  margin: ${({ theme }) => `${theme.space[2]} ${theme.space[3]}`};
+`;
 export const StyledItemsWrap = styled.div`
-  display: flex;
+  margin: ${({ theme }) => theme.space[2]};
 `;
