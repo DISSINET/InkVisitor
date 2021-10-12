@@ -10,7 +10,6 @@ export const StyledCgMenuBoxed = styled(CgMenuBoxed)<StyledCgMenuBoxed>`
   color: ${({ theme, $inverted }) =>
     $inverted ? theme.color["white"] : theme.color["primary"]};
   margin: ${({ theme }) => `${theme.space[1]} ${theme.space[1]}`};
-  cursor: pointer;
 `;
 export const StyledWrapper = styled.div`
   display: flex;

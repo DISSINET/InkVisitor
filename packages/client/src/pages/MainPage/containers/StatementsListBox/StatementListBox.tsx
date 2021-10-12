@@ -421,7 +421,7 @@ export const StatementListBox: React.FC = () => {
                   color="danger"
                   tooltip="delete"
                   onClick={(e: React.MouseEvent) => {
-                    e.stopPropagation();
+                    // e.stopPropagation();
                     setStatementToDelete(row.original as IResponseStatement);
                     setShowSubmit(true);
                   }}
@@ -432,7 +432,7 @@ export const StatementListBox: React.FC = () => {
                   color="warning"
                   tooltip="duplicate"
                   onClick={(e: React.MouseEvent) => {
-                    e.stopPropagation();
+                    // e.stopPropagation();
                     duplicateStatementMutation.mutate(
                       row.original as IResponseStatement
                     );
@@ -449,7 +449,7 @@ export const StatementListBox: React.FC = () => {
                   tooltip="add new statement before"
                   color="info"
                   onClick={(e: React.MouseEvent) => {
-                    e.stopPropagation();
+                    // e.stopPropagation();
                     addStatementAtCertainIndex(row.index - 1);
                   }}
                 />,
@@ -464,7 +464,7 @@ export const StatementListBox: React.FC = () => {
                   tooltip="add new statement after"
                   color="success"
                   onClick={(e: React.MouseEvent) => {
-                    e.stopPropagation();
+                    // e.stopPropagation();
                     addStatementAtCertainIndex(row.index + 1);
                   }}
                 />,

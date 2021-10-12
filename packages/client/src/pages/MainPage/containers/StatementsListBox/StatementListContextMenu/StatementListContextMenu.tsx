@@ -64,7 +64,11 @@ export const StatementListContextMenu: React.FC<StatementListContextMenu> = ({
           setShowMenu(false);
         }}
       >
-        <StyledCgMenuBoxed $inverted={inverted} size={18} />
+        <StyledCgMenuBoxed
+          onClick={(e: React.MouseEvent) => e.stopPropagation()}
+          $inverted={inverted}
+          size={18}
+        />
         {showMenu && (
           <StyledContextButtonGroup
             $clientX={currentPosition.x}
@@ -72,6 +76,10 @@ export const StatementListContextMenu: React.FC<StatementListContextMenu> = ({
             $firstPanelExpanded={firstPanelExpanded}
             $panelWidths={panelWidths}
             style={animatedMount}
+            onClick={(e: React.MouseEvent) => {
+              e.stopPropagation();
+              setShowMenu(false);
+            }}
           >
             {buttons}
           </StyledContextButtonGroup>
