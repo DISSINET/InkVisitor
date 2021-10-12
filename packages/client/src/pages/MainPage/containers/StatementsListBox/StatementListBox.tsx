@@ -287,6 +287,7 @@ export const StatementListBox: React.FC = () => {
               {isOversized && (
                 <Tooltip
                   position="right center"
+                  color="success"
                   items={
                     <TagGroup>
                       {subjectObjects
@@ -321,6 +322,7 @@ export const StatementListBox: React.FC = () => {
                 {isOversized && (
                   <Tooltip
                     position="right center"
+                    color="success"
                     items={
                       <TagGroup>
                         {actions
@@ -367,6 +369,7 @@ export const StatementListBox: React.FC = () => {
               {isOversized && (
                 <Tooltip
                   position="right center"
+                  color="success"
                   items={
                     <TagGroup>
                       {actantObjects
