@@ -58,7 +58,7 @@ export const StatementEditorActantTable: React.FC<StatementEditorActantTable> = 
 
   useEffect(() => {
     const filteredActants = statement.data.actants.map((sActant, key) => {
-      const actant = statement.actants.find((a) => a.id === sActant.actant);
+      const actant = statement.actants?.find((a) => a.id === sActant.actant);
       return { id: key, data: { actant, sActant } };
     });
     setFilteredActants(filteredActants);

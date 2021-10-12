@@ -3,10 +3,12 @@ import { AiOutlineTag } from "react-icons/ai";
 import { BiCommentDetail } from "react-icons/bi";
 import { BsCardText } from "react-icons/bs";
 import { PopupPosition, EventType } from "reactjs-popup/dist/types";
+import { Colors } from "types";
 
 import {
   StyledDetail,
   StyledIconWrap,
+  StyledItemsWrap,
   StyledLabel,
   StyledPopup,
   StyledRow,
@@ -22,6 +24,9 @@ interface Tooltip {
   disabled?: boolean;
   attributes?: React.ReactElement[];
   tagTooltip?: boolean;
+  noBackground?: boolean;
+  items?: ReactElement[] | ReactElement;
+  color?: typeof Colors[number];
 }
 export const Tooltip: React.FC<Tooltip> = ({
   children,
@@ -33,6 +38,9 @@ export const Tooltip: React.FC<Tooltip> = ({
   attributes,
   tagTooltip = false,
   disabled = false,
+  noBackground = false,
+  items,
+  color = "black",
 }) => {
   return (
     <StyledPopup
@@ -41,6 +49,8 @@ export const Tooltip: React.FC<Tooltip> = ({
       position={position}
       on={on}
       disabled={disabled}
+      noBackground={noBackground}
+      color={color}
     >
       <div>
         {attributes ? (
@@ -73,6 +83,7 @@ export const Tooltip: React.FC<Tooltip> = ({
             )}
           </>
         )}
+        {items && <StyledItemsWrap>{items}</StyledItemsWrap>}
       </div>
     </StyledPopup>
   );

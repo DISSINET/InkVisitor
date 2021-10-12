@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { MouseEventHandler, useEffect, useMemo, useState } from "react";
 import { Cell, Column } from "react-table";
 import { useMutation, useQuery, useQueryClient } from "react-query";
 import {
@@ -11,7 +11,14 @@ import {
 } from "react-icons/fa";
 import { toast } from "react-toastify";
 
-import { Button, ButtonGroup, Loader, Submit, TagGroup } from "components";
+import {
+  Button,
+  ButtonGroup,
+  Loader,
+  Submit,
+  TagGroup,
+  Tooltip,
+} from "components";
 import { ActantTag } from "./../";
 import api from "api";
 import {
@@ -218,6 +225,19 @@ export const StatementListBox: React.FC = () => {
     queryClient.invalidateQueries("territory");
   };
 
+  const renderListActant = (actantObject: IActant, key: number) => {
+    return (
+      actantObject && (
+        <ActantTag
+          key={key}
+          actant={actantObject}
+          short
+          tooltipPosition="bottom center"
+        />
+      )
+    );
+  };
+
   const columns: Column<{}>[] = useMemo(() => {
     return [
       {
@@ -248,29 +268,43 @@ export const StatementListBox: React.FC = () => {
                 .map((a: any) => a.actant)
             : [];
 
+          const subjectObjects = subjectIds.map((actantId: string) => {
+            const subjectObject =
+              actants && actants.find((a) => a.id === actantId);
+
+            return subjectObject;
+          });
+
           const isOversized = subjectIds.length > 2;
-          const subjectIdsSlice = subjectIds.slice(0, 2);
 
           return (
             <TagGroup>
-              {subjectIdsSlice
-                .filter((a: any) => a)
-                .map((actantId: string, ai: number) => {
-                  const subjectObject =
-                    actants && actants.find((a) => a.id === actantId);
-
-                  return (
-                    subjectObject && (
-                      <ActantTag key={ai} actant={subjectObject} short />
-                    )
-                  );
-                })}
-              {isOversized && <StyledDots>{"..."}</StyledDots>}
+              {subjectObjects
+                .slice(0, 2)
+                .map((subjectObject: IActant, key: number) =>
+                  renderListActant(subjectObject, key)
+                )}
+              {isOversized && (
+                <Tooltip
+                  position="right center"
+                  color="success"
+                  items={
+                    <TagGroup>
+                      {subjectObjects
+                        .slice(2)
+                        .map((subjectObject: IActant, key: number) =>
+                          renderListActant(subjectObject, key)
+                        )}
+                    </TagGroup>
+                  }
+                >
+                  <StyledDots>{"..."}</StyledDots>
+                </Tooltip>
+              )}
             </TagGroup>
           );
         },
       },
-
       {
         Header: "Actions",
         Cell: ({ row }: Cell) => {
@@ -278,17 +312,30 @@ export const StatementListBox: React.FC = () => {
 
           if (actions) {
             const isOversized = actions.length > 2;
-            const actionsSlice = actions?.slice(0, 2);
             return (
               <TagGroup>
-                {actionsSlice?.map(
-                  (action: IActant | undefined, key: number) => (
-                    <React.Fragment key={key}>
-                      {action && <ActantTag key={key} short actant={action} />}
-                    </React.Fragment>
-                  )
+                {actions
+                  .slice(0, 2)
+                  .map((action: IActant, key: number) =>
+                    renderListActant(action, key)
+                  )}
+                {isOversized && (
+                  <Tooltip
+                    position="right center"
+                    color="success"
+                    items={
+                      <TagGroup>
+                        {actions
+                          .slice(2)
+                          .map((action: IActant, key: number) =>
+                            renderListActant(action, key)
+                          )}
+                      </TagGroup>
+                    }
+                  >
+                    <StyledDots>{"..."}</StyledDots>
+                  </Tooltip>
                 )}
-                {isOversized && <StyledDots>{"..."}</StyledDots>}
               </TagGroup>
             );
           } else {
@@ -305,23 +352,37 @@ export const StatementListBox: React.FC = () => {
                 .map((a: any) => a.actant)
             : [];
           const isOversized = actantIds.length > 4;
-          const actantIdsSlice = actantIds.slice(0, 4);
+
+          const actantObjects = actantIds.map((actantId: string) => {
+            const actantObject =
+              actants && actants.find((a) => a && a.id === actantId);
+            return actantObject && actantObject;
+          });
 
           return (
             <TagGroup>
-              {actantIdsSlice
-                .filter((a: any) => a)
-                .map((actantId: string, ai: number) => {
-                  const actantObject =
-                    actants && actants.find((a) => a && a.id === actantId);
-
-                  return (
-                    actantObject && (
-                      <ActantTag key={ai} actant={actantObject} short />
-                    )
-                  );
-                })}
-              {isOversized && <StyledDots>{"..."}</StyledDots>}
+              {actantObjects
+                .slice(0, 4)
+                .map((actantObject: IActant, key: number) =>
+                  renderListActant(actantObject, key)
+                )}
+              {isOversized && (
+                <Tooltip
+                  position="right center"
+                  color="success"
+                  items={
+                    <TagGroup>
+                      {actantObjects
+                        .slice(4)
+                        .map((actantObject: IActant, key: number) =>
+                          renderListActant(actantObject, key)
+                        )}
+                    </TagGroup>
+                  }
+                >
+                  <StyledDots>{"..."}</StyledDots>
+                </Tooltip>
+              )}
             </TagGroup>
           );
         },
@@ -377,7 +438,9 @@ export const StatementListBox: React.FC = () => {
                   }
                   tooltip="add new statement before"
                   color="info"
-                  onClick={() => addStatementAtCertainIndex(row.index - 1)}
+                  onClick={() => {
+                    addStatementAtCertainIndex(row.index - 1);
+                  }}
                 />,
                 <Button
                   key="add-down"
@@ -389,7 +452,9 @@ export const StatementListBox: React.FC = () => {
                   }
                   tooltip="add new statement after"
                   color="success"
-                  onClick={() => addStatementAtCertainIndex(row.index + 1)}
+                  onClick={() => {
+                    addStatementAtCertainIndex(row.index + 1);
+                  }}
                 />,
               ]}
             />
@@ -400,35 +465,18 @@ export const StatementListBox: React.FC = () => {
                 display: "flex",
                 alignItems: "center",
               }}
-            >
-              {row.isExpanded ? (
-                <FaChevronCircleUp
-                  onClick={() => (row.isExpanded = !row.isExpanded)}
-                />
-              ) : (
-                <FaChevronCircleDown
-                  onClick={() => (row.isExpanded = !row.isExpanded)}
-                />
-              )}
-            </span>
-            <Button
-              icon={<FaEdit size={14} />}
-              color="plain"
-              inverted
-              tooltip="edit statement"
-              onClick={() => {
-                selectStatementRow(row.values.id);
+              onClick={(e: React.MouseEvent) => {
+                e.stopPropagation();
+                row.toggleRowExpanded();
               }}
-            />
+            >
+              {row.isExpanded ? <FaChevronCircleUp /> : <FaChevronCircleDown />}
+            </span>
           </ButtonGroup>
         ),
       },
     ];
   }, [data, statementId]);
-
-  const selectStatementRow = (rowId: string) => {
-    setStatementId(rowId);
-  };
 
   statements.sort((a, b) =>
     a.data.territory.order > b.data.territory.order ? 1 : -1
@@ -445,7 +493,7 @@ export const StatementListBox: React.FC = () => {
         data={statements}
         columns={columns}
         handleRowClick={(rowId: string) => {
-          // selectStatementRow(rowId)
+          setStatementId(rowId);
         }}
       />
       <Submit
