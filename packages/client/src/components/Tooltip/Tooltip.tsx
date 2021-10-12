@@ -25,7 +25,7 @@ interface Tooltip {
   disabled?: boolean;
   attributes?: React.ReactElement[];
   tagTooltip?: boolean;
-  noBackground?: boolean;
+  noArrow?: boolean;
   items?: ReactElement[] | ReactElement;
   color?: typeof Colors[number];
 }
@@ -39,7 +39,7 @@ export const Tooltip: React.FC<Tooltip> = ({
   attributes,
   tagTooltip = false,
   disabled = false,
-  noBackground = false,
+  noArrow = false,
   items,
   color = "black",
 }) => {
@@ -50,7 +50,7 @@ export const Tooltip: React.FC<Tooltip> = ({
       position={position}
       on={on}
       disabled={disabled}
-      noBackground={noBackground}
+      noArrow={noArrow}
       color={color}
     >
       <div>

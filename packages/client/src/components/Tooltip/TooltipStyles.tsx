@@ -3,13 +3,12 @@ import Popup from "reactjs-popup";
 import { Colors } from "types";
 
 interface StyledPopup {
-  noBackground: boolean;
+  noArrow: boolean;
   color: typeof Colors[number];
 }
 export const StyledPopup = styled(Popup)<StyledPopup>`
   &-content {
-    background-color: ${({ theme, color, noBackground }) =>
-      noBackground ? "transparent" : theme.color[color]};
+    background-color: ${({ theme, color }) => theme.color[color]};
 
     color: ${({ theme }) => theme.color["white"]};
     border-radius: ${({ theme }) => theme.borderRadius["sm"]};
@@ -19,10 +18,11 @@ export const StyledPopup = styled(Popup)<StyledPopup>`
     justify-content: center;
     align-items: center;
     max-width: 40rem;
+    transform: ${({ noArrow }) => (noArrow ? "translate(-2rem)" : 0)};
   }
   &-arrow {
-    color: ${({ theme, noBackground, color }) =>
-      noBackground ? "transparent" : theme.color[color]};
+    color: ${({ theme, noArrow, color }) =>
+      noArrow ? "transparent" : theme.color[color]};
   }
   [role="tooltip"]&-content {
   }
