@@ -24,7 +24,7 @@ interface Tooltip {
   attributes?: React.ReactElement[];
   tagTooltip?: boolean;
   noBackground?: boolean;
-  items?: ReactElement[];
+  items?: ReactElement[] | ReactElement;
 }
 export const Tooltip: React.FC<Tooltip> = ({
   children,

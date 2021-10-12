@@ -148,6 +148,9 @@ export const Tag: React.FC<TagProps> = ({
               ref={ref}
               borderStyle={borderStyle}
               onDoubleClick={(e: React.MouseEvent) => onDoubleClick(e)}
+              onClick={(e: React.MouseEvent<HTMLDivElement, MouseEvent>) =>
+                e.stopPropagation()
+              }
             >
               {renderEntityTag()}
               {button && renderButton()}
@@ -168,6 +171,9 @@ export const Tag: React.FC<TagProps> = ({
                 ref={ref}
                 borderStyle={borderStyle}
                 onDoubleClick={(e: React.MouseEvent) => onDoubleClick(e)}
+                onClick={(e: React.MouseEvent<HTMLDivElement, MouseEvent>) =>
+                  e.stopPropagation()
+                }
               >
                 {renderEntityTag()}
                 {label && (

@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { MouseEventHandler, useEffect, useMemo, useState } from "react";
 import { Cell, Column } from "react-table";
 import { useMutation, useQuery, useQueryClient } from "react-query";
 import {
@@ -283,10 +283,27 @@ export const StatementListBox: React.FC = () => {
             <TagGroup>
               {subjectObjects
                 .slice(0, 2)
-                .map((subjectObject: IActant, ai: number) =>
-                  renderListActant(subjectObject, ai)
+                .map((subjectObject: IActant, key: number) =>
+                  renderListActant(subjectObject, key)
                 )}
-              {isOversized && <StyledDots>{"..."}</StyledDots>}
+              {isOversized && (
+                <Tooltip
+                  position="right center"
+                  items={
+                    <TagGroup>
+                      {subjectObjects
+                        .slice(2)
+                        .map((subjectObject: IActant, key: number) => (
+                          <React.Fragment key={key}>
+                            {renderListActant(subjectObject, key)}
+                          </React.Fragment>
+                        ))}
+                    </TagGroup>
+                  }
+                >
+                  <StyledDots>{"..."}</StyledDots>
+                </Tooltip>
+              )}
             </TagGroup>
           );
         },
@@ -301,23 +318,25 @@ export const StatementListBox: React.FC = () => {
             const isOversized = actions.length > 2;
             return (
               <TagGroup>
-                {actions
-                  .slice(0, 2)
-                  .map((action: IActant, key: number) =>
-                    renderListActant(action, key)
-                  )}
+                {actions.slice(0, 2).map((action: IActant, key: number) => (
+                  <React.Fragment key={key}>
+                    {renderListActant(action, key)}
+                  </React.Fragment>
+                ))}
                 {isOversized && (
                   <Tooltip
                     position="right center"
-                    items={[
+                    items={
                       <TagGroup>
                         {actions
                           .slice(2)
-                          .map((action: IActant, key: number) =>
-                            renderListActant(action, key)
-                          )}
-                      </TagGroup>,
-                    ]}
+                          .map((action: IActant, key: number) => (
+                            <React.Fragment key={key}>
+                              {renderListActant(action, key)}
+                            </React.Fragment>
+                          ))}
+                      </TagGroup>
+                    }
                   >
                     <StyledDots>{"..."}</StyledDots>
                   </Tooltip>
@@ -349,21 +368,25 @@ export const StatementListBox: React.FC = () => {
             <TagGroup>
               {actantObjects
                 .slice(0, 4)
-                .map((actantObject: IActant, ai: number) =>
-                  renderListActant(actantObject, ai)
-                )}
+                .map((actantObject: IActant, key: number) => (
+                  <React.Fragment key={key}>
+                    {renderListActant(actantObject, key)}
+                  </React.Fragment>
+                ))}
               {isOversized && (
                 <Tooltip
                   position="right center"
-                  items={[
+                  items={
                     <TagGroup>
                       {actantObjects
                         .slice(4)
-                        .map((actantObject: IActant, ai: number) =>
-                          renderListActant(actantObject, ai)
-                        )}
-                    </TagGroup>,
-                  ]}
+                        .map((actantObject: IActant, key: number) => (
+                          <React.Fragment key={key}>
+                            {renderListActant(actantObject, key)}
+                          </React.Fragment>
+                        ))}
+                    </TagGroup>
+                  }
                 >
                   <StyledDots>{"..."}</StyledDots>
                 </Tooltip>
@@ -397,7 +420,8 @@ export const StatementListBox: React.FC = () => {
                   icon={<FaTrashAlt size={14} />}
                   color="danger"
                   tooltip="delete"
-                  onClick={() => {
+                  onClick={(e: React.MouseEvent<HTMLElement, MouseEvent>) => {
+                    e.stopPropagation();
                     setStatementToDelete(row.original as IResponseStatement);
                     setShowSubmit(true);
                   }}
@@ -407,7 +431,8 @@ export const StatementListBox: React.FC = () => {
                   icon={<FaClone size={14} />}
                   color="warning"
                   tooltip="duplicate"
-                  onClick={() => {
+                  onClick={(e: React.MouseEvent<HTMLElement, MouseEvent>) => {
+                    e.stopPropagation();
                     duplicateStatementMutation.mutate(
                       row.original as IResponseStatement
                     );
@@ -423,7 +448,10 @@ export const StatementListBox: React.FC = () => {
                   }
                   tooltip="add new statement before"
                   color="info"
-                  onClick={() => addStatementAtCertainIndex(row.index - 1)}
+                  onClick={(e: React.MouseEvent<HTMLElement, MouseEvent>) => {
+                    e.stopPropagation();
+                    addStatementAtCertainIndex(row.index - 1);
+                  }}
                 />,
                 <Button
                   key="add-down"
@@ -435,7 +463,10 @@ export const StatementListBox: React.FC = () => {
                   }
                   tooltip="add new statement after"
                   color="success"
-                  onClick={() => addStatementAtCertainIndex(row.index + 1)}
+                  onClick={(e: React.MouseEvent<HTMLElement, MouseEvent>) => {
+                    e.stopPropagation();
+                    addStatementAtCertainIndex(row.index + 1);
+                  }}
                 />,
               ]}
             />
@@ -449,11 +480,19 @@ export const StatementListBox: React.FC = () => {
             >
               {row.isExpanded ? (
                 <FaChevronCircleUp
-                  onClick={() => (row.isExpanded = !row.isExpanded)}
+                  onClick={
+                    (e: React.MouseEvent<SVGElement, MouseEvent>) =>
+                      (row.isExpanded = !row.isExpanded)
+                    // e.stopPropagation()
+                  }
                 />
               ) : (
                 <FaChevronCircleDown
-                  onClick={() => (row.isExpanded = !row.isExpanded)}
+                  onClick={
+                    (e: React.MouseEvent<SVGElement, MouseEvent>) =>
+                      (row.isExpanded = !row.isExpanded)
+                    // e.stopPropagation()
+                  }
                 />
               )}
             </span>
@@ -462,7 +501,8 @@ export const StatementListBox: React.FC = () => {
               color="plain"
               inverted
               tooltip="edit statement"
-              onClick={() => {
+              onClick={(e: React.MouseEvent<HTMLElement, MouseEvent>) => {
+                e.stopPropagation();
                 selectStatementRow(row.values.id);
               }}
             />
@@ -492,6 +532,8 @@ export const StatementListBox: React.FC = () => {
         columns={columns}
         handleRowClick={(rowId: string) => {
           // selectStatementRow(rowId)
+          console.log("ahoj", rowId);
+          setStatementId(rowId);
         }}
       />
       <Submit

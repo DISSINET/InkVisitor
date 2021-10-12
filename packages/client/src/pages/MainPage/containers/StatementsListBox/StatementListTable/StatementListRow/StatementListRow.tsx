@@ -85,8 +85,9 @@ export const StatementListRow: React.FC<StatementListRow> = ({
         opacity={opacity}
         isOdd={Boolean(index % 2)}
         isSelected={row.values.id === statementId}
-        onClick={() => {
+        onClick={(e: any) => {
           handleClick(row.values.id);
+          e.stopPropagation();
         }}
         id={`statement${row.values.id}`}
       >
