@@ -420,7 +420,7 @@ export const StatementListBox: React.FC = () => {
                   icon={<FaTrashAlt size={14} />}
                   color="danger"
                   tooltip="delete"
-                  onClick={(e: React.MouseEvent<HTMLElement, MouseEvent>) => {
+                  onClick={(e: React.MouseEvent) => {
                     e.stopPropagation();
                     setStatementToDelete(row.original as IResponseStatement);
                     setShowSubmit(true);
@@ -431,7 +431,7 @@ export const StatementListBox: React.FC = () => {
                   icon={<FaClone size={14} />}
                   color="warning"
                   tooltip="duplicate"
-                  onClick={(e: React.MouseEvent<HTMLElement, MouseEvent>) => {
+                  onClick={(e: React.MouseEvent) => {
                     e.stopPropagation();
                     duplicateStatementMutation.mutate(
                       row.original as IResponseStatement
@@ -448,7 +448,7 @@ export const StatementListBox: React.FC = () => {
                   }
                   tooltip="add new statement before"
                   color="info"
-                  onClick={(e: React.MouseEvent<HTMLElement, MouseEvent>) => {
+                  onClick={(e: React.MouseEvent) => {
                     e.stopPropagation();
                     addStatementAtCertainIndex(row.index - 1);
                   }}
@@ -463,7 +463,7 @@ export const StatementListBox: React.FC = () => {
                   }
                   tooltip="add new statement after"
                   color="success"
-                  onClick={(e: React.MouseEvent<HTMLElement, MouseEvent>) => {
+                  onClick={(e: React.MouseEvent) => {
                     e.stopPropagation();
                     addStatementAtCertainIndex(row.index + 1);
                   }}
@@ -480,19 +480,17 @@ export const StatementListBox: React.FC = () => {
             >
               {row.isExpanded ? (
                 <FaChevronCircleUp
-                  onClick={
-                    (e: React.MouseEvent<SVGElement, MouseEvent>) =>
-                      (row.isExpanded = !row.isExpanded)
-                    // e.stopPropagation()
-                  }
+                  onClick={(e: React.MouseEvent) => {
+                    e.stopPropagation();
+                    row.toggleRowExpanded();
+                  }}
                 />
               ) : (
                 <FaChevronCircleDown
-                  onClick={
-                    (e: React.MouseEvent<SVGElement, MouseEvent>) =>
-                      (row.isExpanded = !row.isExpanded)
-                    // e.stopPropagation()
-                  }
+                  onClick={(e: React.MouseEvent) => {
+                    e.stopPropagation();
+                    row.toggleRowExpanded();
+                  }}
                 />
               )}
             </span>
@@ -531,8 +529,6 @@ export const StatementListBox: React.FC = () => {
         data={statements}
         columns={columns}
         handleRowClick={(rowId: string) => {
-          // selectStatementRow(rowId)
-          console.log("ahoj", rowId);
           setStatementId(rowId);
         }}
       />

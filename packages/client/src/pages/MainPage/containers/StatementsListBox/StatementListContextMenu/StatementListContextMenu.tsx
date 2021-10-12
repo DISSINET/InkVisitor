@@ -63,7 +63,6 @@ export const StatementListContextMenu: React.FC<StatementListContextMenu> = ({
         onMouseLeave={() => {
           setShowMenu(false);
         }}
-        onClick={() => setShowMenu(false)}
       >
         <StyledCgMenuBoxed $inverted={inverted} size={18} />
         {showMenu && (

@@ -91,7 +91,11 @@ export const StatementListRow: React.FC<StatementListRow> = ({
         }}
         id={`statement${row.values.id}`}
       >
-        <td ref={dragRef} style={{ cursor: "move" }}>
+        <td
+          ref={dragRef}
+          style={{ cursor: "move" }}
+          onClick={(e: React.MouseEvent) => e.stopPropagation()}
+        >
           <FaGripVertical />
         </td>
         {row.cells.map((cell: Cell) => {
