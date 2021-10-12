@@ -77,8 +77,8 @@ export const StatementListTable: React.FC<StatementListTable> = ({
           prepareRow(row);
           return (
             <StatementListRow
-              handleClick={handleRowClick}
               index={i}
+              handleClick={handleRowClick}
               row={row}
               moveRow={moveRow}
               moveEndRow={moveEndRow}

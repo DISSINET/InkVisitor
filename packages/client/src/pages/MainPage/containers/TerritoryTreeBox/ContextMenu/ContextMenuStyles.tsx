@@ -28,5 +28,4 @@ export const StyledContextButtonGroup = styled(
 export const StyledCgMenuBoxed = styled(CgMenuBoxed)`
   color: ${({ theme }) => theme.color["primary"]};
   margin: ${({ theme }) => `0 ${theme.space[1]}`};
-  cursor: pointer;
 `;

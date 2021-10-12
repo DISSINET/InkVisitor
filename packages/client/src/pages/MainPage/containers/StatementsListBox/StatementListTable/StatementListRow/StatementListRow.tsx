@@ -85,12 +85,17 @@ export const StatementListRow: React.FC<StatementListRow> = ({
         opacity={opacity}
         isOdd={Boolean(index % 2)}
         isSelected={row.values.id === statementId}
-        onClick={() => {
+        onClick={(e: any) => {
           handleClick(row.values.id);
+          e.stopPropagation();
         }}
         id={`statement${row.values.id}`}
       >
-        <td ref={dragRef} style={{ cursor: "move" }}>
+        <td
+          ref={dragRef}
+          style={{ cursor: "move" }}
+          onClick={(e: React.MouseEvent) => e.stopPropagation()}
+        >
           <FaGripVertical />
         </td>
         {row.cells.map((cell: Cell) => {
