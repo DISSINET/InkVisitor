@@ -477,22 +477,12 @@ export const StatementListBox: React.FC = () => {
                 display: "flex",
                 alignItems: "center",
               }}
+              onClick={(e: React.MouseEvent) => {
+                e.stopPropagation();
+                row.toggleRowExpanded();
+              }}
             >
-              {row.isExpanded ? (
-                <FaChevronCircleUp
-                  onClick={(e: React.MouseEvent) => {
-                    e.stopPropagation();
-                    row.toggleRowExpanded();
-                  }}
-                />
-              ) : (
-                <FaChevronCircleDown
-                  onClick={(e: React.MouseEvent) => {
-                    e.stopPropagation();
-                    row.toggleRowExpanded();
-                  }}
-                />
-              )}
+              {row.isExpanded ? <FaChevronCircleUp /> : <FaChevronCircleDown />}
             </span>
             <Button
               icon={<FaEdit size={14} />}
