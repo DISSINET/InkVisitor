@@ -360,7 +360,6 @@ export const StatementListBox: React.FC = () => {
               actants && actants.find((a) => a && a.id === actantId);
             return actantObject && actantObject;
           });
-
           return (
             <TagGroup>
               {actantObjects

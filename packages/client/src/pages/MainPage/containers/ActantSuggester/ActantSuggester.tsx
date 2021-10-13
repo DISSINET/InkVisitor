@@ -6,7 +6,7 @@ import { IOption, IActant } from "@shared/types";
 import { FaHome } from "react-icons/fa";
 import { CActant } from "constructors";
 import { Entities } from "types";
-import { useMutation, useQuery, useQueryClient } from "react-query";
+import { useMutation, useQuery } from "react-query";
 import api from "api";
 import { CategoryActantType } from "@shared/enums";
 import { useDebounce, useSearchParams } from "hooks";
