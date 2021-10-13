@@ -107,6 +107,7 @@ export const StatementListBox: React.FC = () => {
         setStatementId("");
         queryClient.invalidateQueries("territory");
         queryClient.invalidateQueries("tree");
+        queryClient.invalidateQueries("actant");
       },
     }
   );
@@ -129,6 +130,7 @@ export const StatementListBox: React.FC = () => {
         setStatementId(variables.id);
         toast.info(`Statement duplicated!`);
         queryClient.invalidateQueries("territory");
+        queryClient.invalidateQueries("actant");
       },
       onError: () => {
         toast.error(`Error: Statement not duplicated!`);
