@@ -98,8 +98,6 @@ export const StatementEditorBox: React.FC = () => {
     }
   }, [errorStatement]);
 
-  // console.log(statement);
-
   // getting origin actants of properties
   const propsByOrigins = useMemo(() => {
     if (statement) {
@@ -150,8 +148,6 @@ export const StatementEditorBox: React.FC = () => {
           });
         });
       });
-
-      //console.log(originProps);
 
       return originProps;
     } else {
@@ -768,16 +764,40 @@ export const StatementEditorBox: React.FC = () => {
                           ></Input>
                         </StyledReferencesListColumn>
                         <StyledReferencesListColumn>
-                          <Input
-                            type="select"
-                            value={reference.type}
-                            options={referenceTypeDict}
-                            onChangeFn={(newType: any) => {
-                              updateReference(reference.id, {
-                                type: newType,
-                              });
-                            }}
-                          ></Input>
+                          <StyledPropButtonGroup
+                            leftMargin={false}
+                            border={true}
+                            round={true}
+                          >
+                            <Button
+                              key="p"
+                              label="prim"
+                              color="success"
+                              tooltip="primary"
+                              noBorder
+                              inverted={reference.type == "P" ? false : true}
+                              radiusLeft
+                              onClick={() => {
+                                updateReference(reference.id, {
+                                  type: "P",
+                                });
+                              }}
+                            />
+                            <Button
+                              key="s"
+                              label="sec"
+                              color="success"
+                              inverted={reference.type == "S" ? false : true}
+                              noBorder
+                              tooltip="secondary"
+                              radiusRight
+                              onClick={() => {
+                                updateReference(reference.id, {
+                                  type: "S",
+                                });
+                              }}
+                            />
+                          </StyledPropButtonGroup>
                         </StyledReferencesListColumn>
                         <StyledReferencesListColumn>
                           <Button
