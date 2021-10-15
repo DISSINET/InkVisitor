@@ -99,9 +99,22 @@ export const StatementListRow: React.FC<StatementListRow> = ({
           <FaGripVertical />
         </td>
         {row.cells.map((cell: Cell) => {
-          return (
-            <StyledTd {...cell.getCellProps()}>{cell.render("Cell")}</StyledTd>
-          );
+          if (
+            [
+              "Statement",
+              "Actions",
+              "Objects",
+              "data",
+              "Text",
+              "expander",
+            ].includes(cell.column.id)
+          ) {
+            return (
+              <StyledTd {...cell.getCellProps()}>
+                {cell.render("Cell")}
+              </StyledTd>
+            );
+          }
         })}
       </StyledTr>
       {row.isExpanded ? (

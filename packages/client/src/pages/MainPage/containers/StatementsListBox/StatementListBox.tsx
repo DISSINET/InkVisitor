@@ -48,12 +48,8 @@ const initialData: {
 export const StatementListBox: React.FC = () => {
   const queryClient = useQueryClient();
 
-  const {
-    territoryId,
-    setTerritoryId,
-    statementId,
-    setStatementId,
-  } = useSearchParams();
+  const { territoryId, setTerritoryId, statementId, setStatementId } =
+    useSearchParams();
 
   const [showSubmit, setShowSubmit] = useState(false);
   const [statementToDelete, setStatementToDelete] = useState<IStatement>();
@@ -114,13 +110,8 @@ export const StatementListBox: React.FC = () => {
 
   const duplicateStatementMutation = useMutation(
     async (statementToDuplicate: IResponseStatement) => {
-      const {
-        actions,
-        audits,
-        usedIn,
-        actants,
-        ...newStatementObject
-      } = statementToDuplicate;
+      const { actions, audits, usedIn, actants, ...newStatementObject } =
+        statementToDuplicate;
 
       const duplicatedStatement = DStatement(newStatementObject as IStatement);
       await api.actantsCreate(duplicatedStatement);
@@ -236,6 +227,20 @@ export const StatementListBox: React.FC = () => {
           short
           tooltipPosition="bottom center"
         />
+      )
+    );
+  };
+
+  const renderListActantLong = (actantObject: IActant, key: number) => {
+    return (
+      actantObject && (
+        <div style={{ marginTop: "4px" }}>
+          <ActantTag
+            key={key}
+            actant={actantObject}
+            tooltipPosition="bottom center"
+          />
+        </div>
       )
     );
   };
@@ -481,6 +486,116 @@ export const StatementListBox: React.FC = () => {
             </span>
           </ButtonGroup>
         ),
+      },
+      {
+        Header: "",
+        id: "exp-actions",
+        Cell: ({ row }: Cell) => {
+          const { actions }: { actions?: IAction[] } = row.original;
+
+          if (actions) {
+            return (
+              <>
+                <div>
+                  <i>Actions</i>
+                </div>
+                <TagGroup>
+                  <div style={{ display: "block" }}>
+                    {actions.map((action: IActant, key: number) =>
+                      renderListActantLong(action, key)
+                    )}
+                  </div>
+                </TagGroup>
+              </>
+            );
+          } else {
+            return <div />;
+          }
+        },
+      },
+      {
+        Header: false,
+        id: "exp-actants",
+        Cell: ({ row }: Cell) => {
+          const actantIds = row.values.data?.actants
+            ? row.values.data.actants.map((a: any) => a.actant)
+            : [];
+
+          const actantObjects = actantIds.map((actantId: string) => {
+            const actantObject =
+              actants && actants.find((a) => a && a.id === actantId);
+            return actantObject && actantObject;
+          });
+          return (
+            <>
+              <div>
+                <i>Actants</i>
+              </div>
+              <TagGroup>
+                <div style={{ display: "block" }}>
+                  {actantObjects.map((actantObject: IActant, key: number) =>
+                    renderListActantLong(actantObject, key)
+                  )}
+                </div>
+              </TagGroup>
+            </>
+          );
+        },
+      },
+      {
+        Header: "",
+        id: "exp-references",
+        Cell: ({ row }: Cell) => {
+          const refs = row.values.data?.references
+            ? row.values.data.references.map((a: any) => a.resource)
+            : [];
+
+          const actantObjects = refs.map((actantId: string) => {
+            const actantObject =
+              actants && actants.find((a) => a && a.id === actantId);
+            return actantObject && actantObject;
+          });
+          return (
+            <>
+              <div>
+                <i>References</i>
+              </div>
+              <TagGroup>
+                <div style={{ display: "block" }}>
+                  {actantObjects.map((actantObject: IActant, key: number) =>
+                    renderListActantLong(actantObject, key)
+                  )}
+                </div>
+              </TagGroup>
+            </>
+          );
+        },
+      },
+      {
+        Header: "",
+        id: "exp-tags",
+        Cell: ({ row }: Cell) => {
+          const actantIds = row.values.data?.tags ? row.values.data.tags : [];
+          const actantObjects = actantIds.map((actantId: string) => {
+            const actantObject =
+              actants && actants.find((a) => a && a.id === actantId);
+            return actantObject && actantObject;
+          });
+          return (
+            <>
+              <div>
+                <i>Tags</i>
+              </div>
+              <TagGroup>
+                <div style={{ display: "block" }}>
+                  {actantObjects.map((actantObject: IActant, key: number) =>
+                    renderListActantLong(actantObject, key)
+                  )}
+                </div>
+              </TagGroup>
+            </>
+          );
+        },
       },
     ];
   }, [data, statementId]);
