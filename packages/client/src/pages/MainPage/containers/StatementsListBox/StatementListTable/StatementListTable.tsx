@@ -64,11 +64,15 @@ export const StatementListTable: React.FC<StatementListTable> = ({
         {headerGroups.map((headerGroup, key) => (
           <tr {...headerGroup.getHeaderGroupProps()} key={key}>
             <th></th>
-            {headerGroup.headers.map((column, key) => (
-              <StyledTh {...column.getHeaderProps()} key={key}>
-                {column.render("Header")}
-              </StyledTh>
-            ))}
+            {headerGroup.headers.map((column, key) =>
+              key < 6 ? (
+                <StyledTh {...column.getHeaderProps()} key={key}>
+                  {column.render("Header")}
+                </StyledTh>
+              ) : (
+                ""
+              )
+            )}
           </tr>
         ))}
       </StyledTHead>
