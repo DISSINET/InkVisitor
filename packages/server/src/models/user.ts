@@ -6,7 +6,7 @@ import {
   IUserRight,
 } from "@shared/types";
 import { r as rethink, Connection, WriteResult } from "rethinkdb-ts";
-import { IDbModel, fillArray } from "./common";
+import { IDbModel, fillArray, fillFlatObject, UnknownObject } from "./common";
 import { UserRole, UserRoleMode } from "@shared/enums";
 import Territory from "./territory";
 
@@ -18,33 +18,104 @@ export class UserRight implements IUserRight {
     this.territory = data.territory;
     this.mode = data.mode;
   }
+
+  isValid(): boolean {
+    return !!this.territory;
+  }
+}
+
+export class UserOptions implements IUserOptions {
+  defaultTerritory: string = "";
+  defaultLanguage: string = "";
+  searchLanguages: string[] = [];
+
+  constructor(data: UnknownObject) {
+    if (!data) {
+      return;
+    }
+
+    fillFlatObject(this, data);
+    fillArray(this.searchLanguages, String, data.searchLanguages);
+  }
+
+  isValid(): boolean {
+    if (this.searchLanguages.find((lang) => !lang)) {
+      return false;
+    }
+
+    return true;
+  }
+}
+
+export class BookmarkFolder implements IBookmarkFolder {
+  id: string = "";
+  name: string = "";
+  actantIds: string[] = [];
+
+  constructor(data: UnknownObject) {
+    if (!data) {
+      return;
+    }
+
+    fillFlatObject(this, data);
+    fillArray(this.actantIds, String, data.actantIds);
+  }
+
+  isValid(): boolean {
+    if (!this.id) {
+      return false;
+    }
+
+    if (!this.name) {
+      return false;
+    }
+
+    if (this.actantIds.find((a) => !a)) {
+      return false;
+    }
+
+    return true;
+  }
+}
+
+export class StoredTerritory implements IStoredTerritory {
+  territoryId: string = "";
+
+  constructor(data: UnknownObject) {
+    if (!data) {
+      return;
+    }
+
+    fillFlatObject(this, data);
+  }
+
+  isValid(): boolean {
+    return !!this.territoryId;
+  }
 }
 
 export default class User implements IDbModel, IUser {
-  id: string;
-  email: string;
-  name: string;
-  role: UserRole;
-  options: IUserOptions;
-  bookmarks: IBookmarkFolder[];
-  storedTerritories: IStoredTerritory[];
-  rights: IUserRight[];
+  id: string = "";
+  email: string = "";
+  name: string = "";
+  role: UserRole = UserRole.Viewer;
+  options: UserOptions = new UserOptions({});
+  bookmarks: BookmarkFolder[] = [];
+  storedTerritories: StoredTerritory[] = [];
+  rights: UserRight[] = [];
   password = "";
 
   static table = "users";
 
   constructor(data: Record<string, any>) {
-    this.rights = []; // deprecated
+    if (!data) {
+      return;
+    }
 
-    this.id = data.id;
-    this.email = data.email;
-    this.password = data.password;
-    this.name = data.name;
-    this.role = data.role;
-    this.options = data.options;
-    this.bookmarks = data.bookmarks;
-    this.storedTerritories = data.storedTerritories;
-
+    fillFlatObject(this, data);
+    this.options = new UserOptions(data.options);
+    fillArray<IBookmarkFolder>(this.bookmarks, BookmarkFolder, data.bookmarks);
+    fillArray(this.storedTerritories, StoredTerritory, data.storedTerritories);
     fillArray<IUserRight>(this.rights, UserRight, data.rights);
   }
 
@@ -77,6 +148,19 @@ export default class User implements IDbModel, IUser {
   }
 
   isValid(): boolean {
+    if (this.email == "" || this.name == "") {
+      return false;
+    }
+
+    if (
+      !this.options.isValid() ||
+      !!this.bookmarks.find((b) => !b.isValid()) ||
+      !!this.storedTerritories.find((t) => !t.isValid()) ||
+      !!this.rights.find((t) => !t.isValid())
+    ) {
+      return false;
+    }
+
     return true;
   }
 
