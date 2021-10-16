@@ -2,6 +2,7 @@ import { Router, Request } from "express";
 import { findActantById, getActants } from "@service/shorthands";
 import {
   BadParams,
+  PermissionDeniedError,
   TerritoriesBrokenError,
   TerritoryDoesNotExits,
   TerrytoryInvalidMove,
@@ -178,6 +179,7 @@ export default Router()
 
       const user = request.getUserOrFail();
 
+      // check child territory
       const territoryData = await findActantById<ITerritory>(
         request.db,
         moveId,
@@ -191,7 +193,11 @@ export default Router()
           moveId
         );
       }
+      if (!user.canWrite(new Territory({ ...territoryData }))) {
+        throw new PermissionDeniedError(`cannot edit territorty ${moveId}`);
+      }
 
+      // check parent territory
       const parent = await findActantById<ITerritory>(request.db, parentId, {
         class: ActantType.Territory,
       });
@@ -201,7 +207,13 @@ export default Router()
           parentId
         );
       }
+      if (!user.canWrite(new Territory({ ...parent }))) {
+        throw new PermissionDeniedError(
+          `cannot edit parent territorty ${parentId}`
+        );
+      }
 
+      // alter data below
       const childsMap = await new Territory({ ...parent }).findChilds(
         request.db.connection
       );
