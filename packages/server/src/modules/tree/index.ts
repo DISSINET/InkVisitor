@@ -176,10 +176,16 @@ export default Router()
         throw new BadParams("moveId/parentId/newIndex has be set");
       }
 
-      const territory = await findActantById<ITerritory>(request.db, moveId, {
-        class: ActantType.Territory,
-      });
-      if (!territory) {
+      const user = request.getUserOrFail();
+
+      const territoryData = await findActantById<ITerritory>(
+        request.db,
+        moveId,
+        {
+          class: ActantType.Territory,
+        }
+      );
+      if (!territoryData) {
         throw new TerritoryDoesNotExits(
           `territory ${moveId} does not exist`,
           moveId
@@ -211,13 +217,13 @@ export default Router()
         result: true,
       };
 
-      if (!territory.data.parent) {
+      if (!territoryData.data.parent) {
         // root territory cannot be moved - or not yet implemented
         throw new TerrytoryInvalidMove("cannot move root territory");
-      } else if (territory.data.parent.id !== parentId) {
+      } else if (territoryData.data.parent.id !== parentId) {
         // change parent of the territory
-        territory.data.parent.id = parentId;
-        territory.data.parent.order = -1;
+        territoryData.data.parent.id = parentId;
+        territoryData.data.parent.order = -1;
       } else {
         const currentIndex = childsArray.findIndex((ter) => ter.id === moveId);
         if (currentIndex === -1) {
@@ -240,10 +246,10 @@ export default Router()
           ).order;
         }
 
-        territory.data.parent.order = newOrderValue;
+        territoryData.data.parent.order = newOrderValue;
       }
 
-      const childTerritory = new Territory({ ...territory });
+      const childTerritory = new Territory({ ...territoryData });
       childTerritory.setSiblings(childsMap);
       await childTerritory.update(request.db.connection, {
         data: childTerritory.data,

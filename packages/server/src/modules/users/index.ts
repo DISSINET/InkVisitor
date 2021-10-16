@@ -14,6 +14,7 @@ import {
   BadCredentialsError,
   BadParams,
   InternalServerError,
+  ModelNotValidError,
   UserDoesNotExits,
 } from "@shared/types/errors";
 import { checkPassword, generateAccessToken, hashPassword } from "@common/auth";
@@ -91,17 +92,12 @@ export default Router()
     asyncRouteHandler<IResponseGeneric>(async (request: Request) => {
       const userData = request.body as IUser;
 
-      if (
-        !userData ||
-        !userData.email ||
-        !userData.name ||
-        !userData.password
-      ) {
-        throw new BadParams("user data have to be set");
+      const user = new User(userData);
+      if (!user.isValid()) {
+        throw new ModelNotValidError("invalid model");
       }
 
-      userData.password = hashPassword(userData.password);
-      const result = await createUser(request.db, userData);
+      const result = await user.save(request.db.connection);
 
       if (result.inserted === 1) {
         return {
