@@ -10,6 +10,7 @@ import { IDbModel, fillArray, fillFlatObject, UnknownObject } from "./common";
 import { UserRole, UserRoleMode } from "@shared/enums";
 import Territory from "./territory";
 import { ModelNotValidError } from "@shared/types/errors";
+import { hashPassword } from "@common/auth";
 
 export class UserRight implements IUserRight {
   territory = "";
@@ -115,6 +116,10 @@ export default class User implements IDbModel, IUser {
     }
 
     fillFlatObject(this, data);
+    if (this.password) {
+      this.password = hashPassword(this.password);
+      console.log("hashin pass", data.password, this.password);
+    }
     this.options = new UserOptions(data.options);
     fillArray<IBookmarkFolder>(this.bookmarks, BookmarkFolder, data.bookmarks);
     fillArray(this.storedTerritories, StoredTerritory, data.storedTerritories);
@@ -138,10 +143,13 @@ export default class User implements IDbModel, IUser {
     dbInstance: Connection | undefined,
     updateData: Record<string, unknown>
   ): Promise<WriteResult> {
-    for (const key of Object.keys(updateData)) {
-      if (User.updatebleProps.indexOf(key) === -1) {
-        throw new ModelNotValidError(`property ${key} cannot be updated`);
-      }
+    const snapshot = new User({
+      ...JSON.parse(JSON.stringify(this)),
+      ...updateData,
+    });
+
+    if (!snapshot.isValid()) {
+      throw new ModelNotValidError("model not valid");
     }
 
     return rethink
@@ -216,9 +224,13 @@ export default class User implements IDbModel, IUser {
   static async getUser(
     dbInstance: Connection | undefined,
     id: string
-  ): Promise<User> {
+  ): Promise<User | null> {
     const data = await rethink.table(User.table).get(id).run(dbInstance);
-    return new User(data);
+    if (data) {
+      delete data.password;
+      return new User(data);
+    }
+    return null;
   }
 
   static async findAllUsers(

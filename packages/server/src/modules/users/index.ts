@@ -3,8 +3,6 @@ import { Router } from "express";
 import { IUser } from "@shared/types/user";
 import User from "@models/user";
 import {
-  createUser,
-  updateUser,
   deleteUser,
   findActantsById,
   findActantById,
@@ -17,7 +15,7 @@ import {
   ModelNotValidError,
   UserDoesNotExits,
 } from "@shared/types/errors";
-import { checkPassword, generateAccessToken, hashPassword } from "@common/auth";
+import { checkPassword, generateAccessToken } from "@common/auth";
 import { asyncRouteHandler } from "..";
 import {
   IResponseBookmarkFolder,
@@ -118,10 +116,6 @@ export default Router()
         throw new BadParams("user id and data have to be set");
       }
 
-      if (userData.password) {
-        userData.password = hashPassword(userData.password);
-      }
-
       const existingUser = await User.getUser(request.db.connection, userId);
       if (!existingUser) {
         throw new UserDoesNotExits(
@@ -134,7 +128,7 @@ export default Router()
         ...userData,
       });
 
-      if (result.replaced) {
+      if (result.replaced || result.unchanged) {
         return {
           result: true,
         };
