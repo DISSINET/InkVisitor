@@ -107,7 +107,6 @@ export default class User implements IDbModel, IUser {
   rights: UserRight[] = [];
   password = "";
 
-  static updatebleProps = ["name"];
   static table = "users";
 
   constructor(data: Record<string, any>) {
@@ -118,7 +117,6 @@ export default class User implements IDbModel, IUser {
     fillFlatObject(this, data);
     if (this.password) {
       this.password = hashPassword(this.password);
-      console.log("hashin pass", data.password, this.password);
     }
     this.options = new UserOptions(data.options);
     fillArray<IBookmarkFolder>(this.bookmarks, BookmarkFolder, data.bookmarks);
