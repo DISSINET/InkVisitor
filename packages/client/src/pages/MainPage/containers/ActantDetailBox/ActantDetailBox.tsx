@@ -141,11 +141,11 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
           );
 
           const typeActant1 = typeSActant1
-            ? s1.actants.find((a) => a.id === typeSActant1.actant)
+            ? s1.actants?.find((a) => a.id === typeSActant1.actant)
             : false;
 
           const typeActant2 = typeSActant2
-            ? s2.actants.find((a) => a.id === typeSActant2.actant)
+            ? s2.actants?.find((a) => a.id === typeSActant2.actant)
             : false;
 
           if (

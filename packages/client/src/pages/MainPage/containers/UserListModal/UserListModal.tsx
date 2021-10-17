@@ -8,7 +8,7 @@ import {
   Button,
   ButtonGroup,
 } from "components";
-import { useQuery } from "react-query";
+import { useMutation, useQuery, useQueryClient } from "react-query";
 import api from "api";
 
 import {
@@ -37,6 +37,7 @@ import {
 import { UserListTableRow } from "./UserListTableRow/UserListTableRow";
 import { ActantSuggester } from "../ActantSuggester/ActantSuggester";
 import { ActantTag } from "../ActantTag/ActantTag";
+import { IResponseUser, IUserRight } from "@shared/types";
 
 interface UserListModal {
   isOpen: boolean;
@@ -47,6 +48,8 @@ export const UserListModal: React.FC<UserListModal> = ({
   isOpen,
   onCloseFn,
 }) => {
+  const queryClient = useQueryClient();
+
   const { status, data, error, isFetching } = useQuery(
     ["users"],
     async () => {
@@ -55,6 +58,39 @@ export const UserListModal: React.FC<UserListModal> = ({
     },
     { enabled: api.isLoggedIn() }
   );
+
+  const userMutation = useMutation(
+    async (userChanges: any) =>
+      await api.usersUpdate(userChanges.id, userChanges),
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries(["users"]);
+      },
+    }
+  );
+
+  const addRightToUser = (
+    userId: string,
+    territoryId: string,
+    mode: "read" | "write"
+  ) => {
+    const oldUser = data?.find((u: IResponseUser) => u.id === userId);
+    if (oldUser) {
+      const newRights: IUserRight[] = [...oldUser.rights];
+      newRights.push({ territory: territoryId, mode: mode });
+      userMutation.mutate({ id: userId, rights: newRights });
+    }
+  };
+
+  const removeRightFromUser = (userId: string, territoryId: string) => {
+    const oldUser = data?.find((u: IResponseUser) => u.id === userId);
+    if (oldUser) {
+      const newRights: IUserRight[] = [
+        ...oldUser.rights.filter((right) => right.territory !== territoryId),
+      ];
+      userMutation.mutate({ id: userId, rights: newRights });
+    }
+  };
 
   const getRowId = useCallback((row) => {
     return row.id;
@@ -91,6 +127,7 @@ export const UserListModal: React.FC<UserListModal> = ({
         id: "territories",
         Cell: ({ row }: Cell) => {
           const {
+            id: userId,
             rights,
             territoryRights: territoryActants,
           } = row.original as any;
@@ -130,6 +167,7 @@ export const UserListModal: React.FC<UserListModal> = ({
               <ActantSuggester
                 allowCreate={false}
                 onSelected={(newSelectedId: string) => {
+                  addRightToUser(userId, newSelectedId, "write");
                   //
                 }}
                 categoryIds={["T"]}
