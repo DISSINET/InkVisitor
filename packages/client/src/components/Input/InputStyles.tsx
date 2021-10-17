@@ -63,6 +63,25 @@ export const StyledSelect = styled.select<IValueStyle>`
     outline: 0;
   }
 `;
+
+export const StyledSelectReadonly = styled.input<IValueStyle>`
+  width: ${({ width }) => getWidth(width)};
+  background-color: ${({ inverted, theme }) =>
+    inverted ? theme.color["gray"][200] : theme.color["white"]};
+  border-color: ${({ suggester, theme }) =>
+    suggester ? theme.color["primary"] : theme.color["gray"][400]};
+  border-width: ${({ theme }) => theme.borderWidth[1]};
+  font-weight: bold;
+  font-size: ${({ theme }) => theme.fontSize["xs"]};
+  padding-left: ${({ theme }) => theme.space[3]};
+  cursor: default;
+  border-right: none;
+
+  :focus {
+    outline: 0;
+  }
+`;
+
 export const StyledTextArea = styled.textarea<IValueStyle>`
   text-align: left;
   color: ${({ inverted, theme }) =>
