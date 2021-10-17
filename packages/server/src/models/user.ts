@@ -188,7 +188,7 @@ export default class User implements IDbModel, IUser {
     return !!territory.getClosestRight(this.rights);
   }
 
-  canWrite(territory: Territory): boolean {
+  canEdit(territory: Territory): boolean {
     // admin role has always the right
     if (this.role === UserRole.Admin) {
       return true;

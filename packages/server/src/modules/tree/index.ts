@@ -193,7 +193,7 @@ export default Router()
           moveId
         );
       }
-      if (!user.canWrite(new Territory({ ...territoryData }))) {
+      if (!user.canEdit(new Territory({ ...territoryData }))) {
         throw new PermissionDeniedError(`cannot edit territorty ${moveId}`);
       }
 
@@ -207,7 +207,7 @@ export default Router()
           parentId
         );
       }
-      if (!user.canWrite(new Territory({ ...parent }))) {
+      if (!user.canEdit(new Territory({ ...parent }))) {
         throw new PermissionDeniedError(
           `cannot edit parent territorty ${parentId}`
         );
