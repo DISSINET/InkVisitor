@@ -4,9 +4,10 @@ import { Db } from "@service/RethinkDB";
 import request from "supertest";
 import { apiPath } from "../../common/constants";
 import app from "../../Server";
-import { createAction, findActionById } from "../../service/shorthands";
+import { findActionById } from "../../service/shorthands";
 import { supertestConfig } from "..";
 import { successfulGenericResponse } from "@modules/common.test";
+import Action from "@models/action";
 
 describe("Actions delete", function () {
   describe("empty data", () => {
@@ -36,20 +37,8 @@ describe("Actions delete", function () {
       const db = new Db();
       await db.initDb();
       const testId = Math.random().toString();
-      await createAction(
-        db,
-        {
-          id: testId,
-          labels: [],
-          valencies: [],
-          types: [],
-          rulesProperties: [],
-          rulesActants: [],
-          parent: "",
-          note: "",
-        },
-        true
-      );
+      const action = new Action({ id: testId });
+      await action.save(db.connection);
 
       await request(app)
         .delete(`${apiPath}/actions/delete/${testId}`)

@@ -1,9 +1,16 @@
-import { ActantType, ActantStatus } from "@shared/enums";
+import {
+  ActantType,
+  ActantStatus,
+  UserRole,
+  UserRoleMode,
+} from "@shared/enums";
 import { ITerritory, IParentTerritory } from "@shared/types/territory";
 import { r as rethink, Connection, WriteResult, RDatum } from "rethinkdb-ts";
 import { fillFlatObject, UnknownObject, IModel } from "./common";
 import Actant from "./actant";
 import { InternalServerError, InvalidDeleteError } from "@shared/types/errors";
+import { IUser } from "@shared/types";
+import User, { UserRight } from "./user";
 
 export class TerritoryParent implements IParentTerritory, IModel {
   id = "";
@@ -177,6 +184,84 @@ class Territory extends Actant implements ITerritory {
     }
 
     return out;
+  }
+
+  /**
+   * find closest parent in the tree - this required the structure to respect tree naming ( ID0 -> ID0_1 -> ID0_1_1 etc)
+   * @param rights
+   * @returns
+   */
+  getClosestRight(rights: UserRight[]): UserRight | undefined {
+    let closestRight: UserRight | undefined;
+
+    for (const right of rights) {
+      // explicit right for this territory - use it and end
+      if (right.territory === this.id) {
+        return right;
+      }
+
+      // one of parents found
+      if (this.id.indexOf(right.territory) === 0) {
+        // test if it is closer match
+        if (
+          closestRight === undefined ||
+          closestRight.territory.length < right.territory.length
+        ) {
+          closestRight = right;
+        }
+      }
+    }
+
+    return closestRight;
+  }
+
+  canBeViewedByUser(user: User): boolean {
+    // admin role has always the right
+    if (user.role === UserRole.Admin) {
+      return true;
+    }
+
+    return !!this.getClosestRight(user.rights);
+  }
+
+  canBeEditedByUser(user: User): boolean {
+    if (
+      this.data.parent &&
+      !new Territory({ id: this.data.parent.id }).canBeEditedByUser(user)
+    ) {
+      return false;
+    }
+
+    // in case of create - no id provided yet
+    if (!this.id) {
+      return true;
+    }
+
+    // admin role has always the right
+    if (user.role === UserRole.Admin) {
+      return true;
+    }
+
+    const closestRight = this.getClosestRight(user.rights);
+    console.log("clsoest", closestRight, this.id);
+
+    if (!closestRight) {
+      return false;
+    }
+
+    return (
+      closestRight.mode === UserRoleMode.Admin ||
+      closestRight.mode === UserRoleMode.Write
+    );
+  }
+
+  canBeDeletedByUser(user: User): boolean {
+    // admin role has always the right
+    if (user.role === UserRole.Admin) {
+      return true;
+    }
+
+    return false;
   }
 }
 

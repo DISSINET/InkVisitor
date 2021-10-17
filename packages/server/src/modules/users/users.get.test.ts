@@ -20,7 +20,9 @@ describe("Users get", function () {
       return request(app)
         .get(`${apiPath}/users/get/123`)
         .set("authorization", "Bearer " + supertestConfig.token)
-        .expect(testErroneousResponse.bind(undefined, new UserDoesNotExits("")))
+        .expect(
+          testErroneousResponse.bind(undefined, new UserDoesNotExits("", ""))
+        )
         .then(() => done());
     });
   });

@@ -176,6 +176,7 @@ class StatementInvalidMove extends CustomError {
 class InternalServerError extends CustomError {
   public static code = 500;
   message = "Internal server error";
+  loggable = true;
 }
 
 /**

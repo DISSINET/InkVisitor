@@ -107,36 +107,3 @@ export async function clean(db: Db): Promise<void> {
 
   await db.close();
 }
-
-export function mockActantData(id: string, actantType: ActantType): IActant {
-  return {
-    id: id,
-    class: actantType,
-    data: {},
-    label: `label${id}`,
-    detail: "",
-    status: "0",
-    language: "",
-    notes: [],
-  };
-}
-
-export function mockStatementData(id: string): IStatement {
-  return {
-    ...mockActantData(id, ActantType.Statement),
-    class: ActantType.Statement,
-    data: {
-      actants: [],
-      actions: [],
-      modality: "",
-      props: [],
-      references: [],
-      tags: [],
-      territory: {
-        id: "",
-        order: 0,
-      },
-      text: "",
-    },
-  };
-}

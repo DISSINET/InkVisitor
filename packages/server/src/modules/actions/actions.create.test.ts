@@ -6,6 +6,7 @@ import app from "../../Server";
 import { supertestConfig } from "..";
 import { IAction } from "@shared/types";
 import { successfulGenericResponse } from "@modules/common.test";
+import Action from "@models/action";
 
 describe("Actions create", function () {
   describe("empty data", () => {
@@ -31,16 +32,8 @@ describe("Actions create", function () {
   });
   describe("ok data", () => {
     it("should return a 200 code with successful response", async (done) => {
-      const actionData: IAction = {
-        id: "",
-        labels: [],
-        note: "",
-        parent: "",
-        rulesActants: [],
-        rulesProperties: [],
-        types: [],
-        valencies: [],
-      };
+      const rand = Math.random().toString();
+      const actionData = new Action({ id: `action-${rand}` });
       request(app)
         .post(`${apiPath}/actions/create`)
         .send(actionData)

@@ -1,8 +1,9 @@
 import { IDbModel } from "./common";
 import { r as rethink, Connection, WriteResult } from "rethinkdb-ts";
 import { IStatement } from "@shared/types";
-import { ActantType } from "@shared/enums";
+import { ActantType, UserRoleMode } from "@shared/enums";
 import { InternalServerError } from "@shared/types/errors";
+import User from "./user";
 
 export default class Actant implements IDbModel {
   static table = "actants";
@@ -66,6 +67,18 @@ export default class Actant implements IDbModel {
   }
 
   isValid(): boolean {
+    return true;
+  }
+
+  canBeViewedByUser(user: User): boolean {
+    return true;
+  }
+
+  canBeEditedByUser(user: User): boolean {
+    return true;
+  }
+
+  canBeDeletedByUser(user: User): boolean {
     return true;
   }
 

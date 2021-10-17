@@ -27,6 +27,10 @@
     "types": ["node"],
     "typeRoots": ["node_modules/@types"]
   },
+  "ts-node": {
+    "files": true
+  },
+  "files": ["src/custom.request.d.ts"],
   "include": ["src/**/*.ts", "spec/**/*.ts"],
   "exclude": ["src/public/"]
 }

@@ -13,28 +13,8 @@ import Statement from "@models/statement";
 const testValidStatement = (res: any) => {
   expect(res.body).toBeTruthy();
   expect(typeof res.body).toEqual("object");
-  const actionExample: IResponseStatement = {
-    id: "",
-    class: ActantType.Statement,
-    data: {
-      action: "",
-      territory: {
-        id: "",
-        order: 0,
-      },
-      references: [],
-      tags: [],
-      certainty: "",
-      elvl: "",
-      modality: "",
-      text: "",
-      note: "",
-      props: [],
-      actants: [],
-    },
-    label: "",
-    actants: [],
-  };
+  const actionExample = new Statement({});
+
   expect(Object.keys(res.body).sort()).toEqual(
     Object.keys(actionExample).sort()
   );
@@ -57,7 +37,10 @@ describe("Statements get", function () {
         .get(`${apiPath}/statements/get/invalidId12345`)
         .set("authorization", "Bearer " + supertestConfig.token)
         .expect(
-          testErroneousResponse.bind(undefined, new StatementDoesNotExits("", ""))
+          testErroneousResponse.bind(
+            undefined,
+            new StatementDoesNotExits("", "")
+          )
         )
         .then(() => done());
     });

@@ -20,7 +20,9 @@ describe("Users signin", function () {
         .post(`${apiPath}/users/signin`)
         .send({ username: "fake", password: "fake" })
         .expect("Content-Type", /json/)
-        .expect(testErroneousResponse.bind(undefined, new UserDoesNotExits("")))
+        .expect(
+          testErroneousResponse.bind(undefined, new UserDoesNotExits("", ""))
+        )
         .then(() => done());
     });
   });

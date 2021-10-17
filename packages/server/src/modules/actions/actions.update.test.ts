@@ -4,7 +4,15 @@ import { apiPath } from "../../common/constants";
 import app from "../../Server";
 import { supertestConfig } from "..";
 import { Db } from "@service/RethinkDB";
-import { createAction, findActionById } from "@service/shorthands";
+import {
+  findActantById,
+} from "@service/shorthands";
+import {
+  testErroneousResponse,
+  clean,
+  successfulGenericResponse,
+} from "@modules/common.test";
+import Action from "@models/action";
 
 describe("Actions update", function () {
   describe("empty data", () => {
@@ -46,32 +54,20 @@ describe("Actions update", function () {
       const db = new Db();
       await db.initDb();
       const testId = Math.random().toString();
-      const changeNoteInto = "newnote";
-      await createAction(
-        db,
-        {
-          id: testId,
-          labels: [],
-          valencies: [],
-          types: [],
-          rulesProperties: [],
-          rulesActants: [],
-          parent: "",
-          note: "",
-        },
-        true
-      );
+      const changeLabelInto = "newnote";
+      const action = new Action({});
+      await action.save(db.connection);
 
       await request(app)
         .put(`${apiPath}/actions/update/${testId}`)
-        .send({ note: changeNoteInto })
+        .send({ label: changeLabelInto })
         .set("authorization", "Bearer " + supertestConfig.token)
         .expect("Content-Type", /json/)
         .expect(successfulGenericResponse)
         .expect(200)
         .expect(async () => {
-          const changedEntry = await findActionById(db, testId);
-          expect(changedEntry.note).toEqual(changeNoteInto);
+          const changedEntry = await findActantById(db, testId);
+          expect(changedEntry.label).toEqual(changeLabelInto);
         });
 
       await clean(db);

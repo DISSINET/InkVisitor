@@ -3,8 +3,6 @@ import { Router } from "express";
 import { IUser } from "@shared/types/user";
 import User from "@models/user";
 import {
-  createUser,
-  updateUser,
   deleteUser,
   findActantsById,
   findActantById,
@@ -14,9 +12,10 @@ import {
   BadCredentialsError,
   BadParams,
   InternalServerError,
+  ModelNotValidError,
   UserDoesNotExits,
 } from "@shared/types/errors";
-import { checkPassword, generateAccessToken, hashPassword } from "@common/auth";
+import { checkPassword, generateAccessToken } from "@common/auth";
 import { asyncRouteHandler } from "..";
 import {
   IResponseBookmarkFolder,
@@ -91,17 +90,12 @@ export default Router()
     asyncRouteHandler<IResponseGeneric>(async (request: Request) => {
       const userData = request.body as IUser;
 
-      if (
-        !userData ||
-        !userData.email ||
-        !userData.name ||
-        !userData.password
-      ) {
-        throw new BadParams("user data have to be set");
+      const user = new User(userData);
+      if (!user.isValid()) {
+        throw new ModelNotValidError("invalid model");
       }
 
-      userData.password = hashPassword(userData.password);
-      const result = await createUser(request.db, userData);
+      const result = await user.save(request.db.connection);
 
       if (result.inserted === 1) {
         return {
@@ -116,30 +110,10 @@ export default Router()
     "/update/:userId?",
     asyncRouteHandler<IResponseGeneric>(async (request: Request) => {
       const userId = request.params.userId || (request as any).user.user.id;
-
-      console.log("userId", userId);
       const userData = request.body as IUser;
 
       if (!userId || !userData || Object.keys(userData).length === 0) {
         throw new BadParams("user id and data have to be set");
-      }
-
-      const allowedKeys = [
-        "email",
-        "name",
-        "password",
-        "role",
-        "bookmarks",
-        "storedTerritories",
-      ];
-      for (const key of Object.keys(userData)) {
-        if (allowedKeys.indexOf(key) === -1) {
-          throw new BadParams("user data have unsupported keys");
-        }
-      }
-
-      if (userData.password) {
-        userData.password = hashPassword(userData.password);
       }
 
       const existingUser = await User.getUser(request.db.connection, userId);
@@ -150,9 +124,11 @@ export default Router()
         );
       }
 
-      const result = await updateUser(request.db, userId, userData);
+      const result = await existingUser.update(request.db.connection, {
+        ...userData,
+      });
 
-      if (result.replaced) {
+      if (result.replaced || result.unchanged) {
         return {
           result: true,
         };
@@ -248,19 +224,10 @@ export default Router()
 
       for (const user of await User.findAllUsers(request.db.connection)) {
         const userResponse: IResponseUser = {
-          id: user.id,
-          options: {
-            defaultLanguage: "",
-            defaultTerritory: "",
-            searchLanguages: [],
-          },
-          rights: [],
-          territoryRights: [],
-          email: user.email,
-          name: user.name,
-          role: user.role,
+          ...user,
           bookmarks: [],
           storedTerritories: [],
+          territoryRights: [],
         };
 
         if (user.bookmarks) {

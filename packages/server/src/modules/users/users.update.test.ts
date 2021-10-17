@@ -35,7 +35,9 @@ describe("Users update", function () {
         .set("authorization", "Bearer " + supertestConfig.token)
         .send({ email: "123" })
         .expect("Content-Type", /json/)
-        .expect(testErroneousResponse.bind(undefined, new UserDoesNotExits("")))
+        .expect(
+          testErroneousResponse.bind(undefined, new UserDoesNotExits("", ""))
+        )
         .then(() => done());
     });
   });

@@ -11,6 +11,7 @@ import ActionsRouter from "@modules/actions";
 import StatementsRouter from "@modules/statements";
 import TreeRouter from "@modules/tree";
 import Acl from "@middlewares/acl";
+import customizeRequest from "@middlewares/request";
 import dbMiddleware from "@middlewares/db";
 import profilerMiddleware from "@middlewares/profiler";
 import errorsMiddleware, { catchAll } from "@middlewares/errors";
@@ -21,6 +22,8 @@ const server = express();
 server.use(cors());
 server.use(express.json());
 server.use(express.urlencoded({ extended: true }));
+
+server.use(customizeRequest);
 
 // Show routes called in console during development
 if (process.env.NODE_ENV === "devel") {
