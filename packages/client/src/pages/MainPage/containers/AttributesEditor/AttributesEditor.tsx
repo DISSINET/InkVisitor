@@ -178,7 +178,7 @@ export const AttributesEditor: React.FC<StatementEditorAttributes> = ({
     return (
       <Modal
         key="edit-modal"
-        showModal={true}
+        showModal={showModal}
         disableBgClick={false}
         onClose={() => {
           handleCancelClick();

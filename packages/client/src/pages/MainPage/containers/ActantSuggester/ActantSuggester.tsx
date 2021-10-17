@@ -4,12 +4,13 @@ import { Suggester, SuggestionI } from "components/Suggester/Suggester";
 import { IOption, IActant } from "@shared/types";
 
 import { FaHome } from "react-icons/fa";
-import { CActant } from "constructors";
+import { CActant, CTerritoryActant } from "constructors";
 import { Entities } from "types";
 import { useMutation, useQuery, useQueryClient } from "react-query";
 import api from "api";
-import { CategoryActantType } from "@shared/enums";
+import { ActantType, CategoryActantType } from "@shared/enums";
 import { useDebounce, useSearchParams } from "hooks";
+import { rootTerritoryId } from "Theme/constants";
 
 interface ActantSuggesterI {
   categoryIds: string[];
@@ -26,6 +27,7 @@ export const ActantSuggester: React.FC<ActantSuggesterI> = ({
   allowCreate,
   inputWidth,
 }) => {
+  const queryClient = useQueryClient();
   const [typed, setTyped] = useState<string>("");
   const debouncedTyped = useDebounce(typed, 100);
   const [selectedCategory, setSelectedCategory] = useState<string>();
@@ -132,16 +134,34 @@ export const ActantSuggester: React.FC<ActantSuggesterI> = ({
       onSuccess: (data, variables) => {
         onSelected(variables.id);
         handleClean();
+        if (variables.class === "T") {
+          queryClient.invalidateQueries("tree");
+        }
       },
     }
   );
 
   const handleCreate = async (newCreated: {
     label: string;
-    category: CategoryActantType;
+    category: ActantType;
   }) => {
-    const newActant = CActant(newCreated.category, newCreated.label);
-    actantsCreateMutation.mutate(newActant);
+    if (newCreated.category === ActantType.Territory) {
+      const newActant = CTerritoryActant(newCreated.label, rootTerritoryId, -1);
+      actantsCreateMutation.mutate(newActant);
+    } else if (newCreated.category === ActantType.Statement) {
+      // TODO: CStatement create
+      // const newActant = CStatement(
+      //   newCreated.category as CategoryActantType,
+      //   newCreated.label
+      // );
+      // actantsCreateMutation.mutate(newActant);
+    } else {
+      const newActant = CActant(
+        newCreated.category as CategoryActantType,
+        newCreated.label
+      );
+      actantsCreateMutation.mutate(newActant);
+    }
   };
 
   const handlePick = (newPicked: SuggestionI) => {

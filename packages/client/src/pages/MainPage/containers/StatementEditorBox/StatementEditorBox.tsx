@@ -98,20 +98,18 @@ export const StatementEditorBox: React.FC = () => {
     }
   }, [errorStatement]);
 
-  // console.log(statement);
-
   // getting origin actants of properties
   const propsByOrigins = useMemo(() => {
     if (statement) {
       const allProps = statement?.data.props;
 
-      const statementActants = statement.actants.filter(
+      const statementActants = statement?.actants?.filter(
         (sa) =>
           statement.data.actants.map((a) => a.actant).includes(sa.id) ||
           statement.data.actions.map((a) => a.action).includes(sa.id)
       );
 
-      const allPossibleOrigins = [...statementActants];
+      const allPossibleOrigins = [...(statementActants || [])];
 
       const originProps: {
         [key: string]: {
@@ -150,8 +148,6 @@ export const StatementEditorBox: React.FC = () => {
           });
         });
       });
-
-      //console.log(originProps);
 
       return originProps;
     } else {
@@ -433,12 +429,14 @@ export const StatementEditorBox: React.FC = () => {
     order: number,
     lastSecondLevel: boolean
   ) => {
-    const propTypeActant = statement.actants.find((a) => a.id === prop.type.id);
-    const propValueActant = statement.actants.find(
+    const propTypeActant = statement?.actants?.find(
+      (a) => a.id === prop.type.id
+    );
+    const propValueActant = statement?.actants?.find(
       (a) => a.id === prop.value.id
     );
 
-    return (
+    return propTypeActant && propValueActant ? (
       <React.Fragment key={prop.origin + level + "|" + order}>
         <StyledPropLineColumn
           padded={level === "2"}
@@ -623,6 +621,8 @@ export const StatementEditorBox: React.FC = () => {
           </StyledPropButtonGroup>
         </StyledPropLineColumn>
       </React.Fragment>
+    ) : (
+      <div />
     );
   };
 
@@ -719,7 +719,7 @@ export const StatementEditorBox: React.FC = () => {
                 )}
                 {statement.data.references.map(
                   (reference: IStatementReference, ri) => {
-                    const referenceActant = statement.actants.find(
+                    const referenceActant = statement?.actants?.find(
                       (a) => a.id === reference.resource
                     );
 
@@ -768,16 +768,40 @@ export const StatementEditorBox: React.FC = () => {
                           ></Input>
                         </StyledReferencesListColumn>
                         <StyledReferencesListColumn>
-                          <Input
-                            type="select"
-                            value={reference.type}
-                            options={referenceTypeDict}
-                            onChangeFn={(newType: any) => {
-                              updateReference(reference.id, {
-                                type: newType,
-                              });
-                            }}
-                          ></Input>
+                          <StyledPropButtonGroup
+                            leftMargin={false}
+                            border={true}
+                            round={true}
+                          >
+                            <Button
+                              key="p"
+                              label="prim"
+                              color="success"
+                              tooltip="primary"
+                              noBorder
+                              inverted={reference.type == "P" ? false : true}
+                              radiusLeft
+                              onClick={() => {
+                                updateReference(reference.id, {
+                                  type: "P",
+                                });
+                              }}
+                            />
+                            <Button
+                              key="s"
+                              label="sec"
+                              color="success"
+                              inverted={reference.type == "S" ? false : true}
+                              noBorder
+                              tooltip="secondary"
+                              radiusRight
+                              onClick={() => {
+                                updateReference(reference.id, {
+                                  type: "S",
+                                });
+                              }}
+                            />
+                          </StyledPropButtonGroup>
                         </StyledReferencesListColumn>
                         <StyledReferencesListColumn>
                           <Button
@@ -812,7 +836,9 @@ export const StatementEditorBox: React.FC = () => {
             <StyledEditorSectionContent>
               <StyledTagsList>
                 {statement.data.tags.map((tag: string) => {
-                  const tagActant = statement.actants.find((a) => a.id === tag);
+                  const tagActant = statement?.actants?.find(
+                    (a) => a.id === tag
+                  );
                   return (
                     tagActant && (
                       <StyledTagsListItem key={tag}>

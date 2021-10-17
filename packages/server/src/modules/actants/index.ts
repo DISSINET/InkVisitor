@@ -90,12 +90,19 @@ export default Router()
 
       const result = await model.save(request.db.connection);
 
+      if (
+        result.first_error &&
+        result.first_error.indexOf("Duplicate") !== -1
+      ) {
+        throw new ModelNotValidError("id already exists");
+      }
+      
       if (result.inserted === 1) {
         return {
           result: true,
         };
       } else {
-        throw new InternalServerError("cannot create actant");
+        throw new InternalServerError(`cannot create actant`);
       }
     })
   )

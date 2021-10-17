@@ -51,7 +51,7 @@ export const StatementEditorActionTable: React.FC<StatementEditorActionTable> = 
 
   useEffect(() => {
     const filteredActions = statement.data.actions.map((sAction, key) => {
-      const action = statement.actants.find((a) => a.id === sAction.action);
+      const action = statement.actants?.find((a) => a.id === sAction.action);
       return { id: key, data: { action, sAction } };
     });
     setFilteredActions(filteredActions);

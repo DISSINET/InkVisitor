@@ -3,10 +3,13 @@ import { AiOutlineTag } from "react-icons/ai";
 import { BiCommentDetail } from "react-icons/bi";
 import { BsCardText } from "react-icons/bs";
 import { PopupPosition, EventType } from "reactjs-popup/dist/types";
+import { Colors } from "types";
 
 import {
+  StyledContentWrap,
   StyledDetail,
   StyledIconWrap,
+  StyledItemsWrap,
   StyledLabel,
   StyledPopup,
   StyledRow,
@@ -22,6 +25,9 @@ interface Tooltip {
   disabled?: boolean;
   attributes?: React.ReactElement[];
   tagTooltip?: boolean;
+  noArrow?: boolean;
+  items?: ReactElement[] | ReactElement;
+  color?: typeof Colors[number];
 }
 export const Tooltip: React.FC<Tooltip> = ({
   children,
@@ -33,6 +39,9 @@ export const Tooltip: React.FC<Tooltip> = ({
   attributes,
   tagTooltip = false,
   disabled = false,
+  noArrow = false,
+  items,
+  color = "black",
 }) => {
   return (
     <StyledPopup
@@ -41,14 +50,19 @@ export const Tooltip: React.FC<Tooltip> = ({
       position={position}
       on={on}
       disabled={disabled}
+      noArrow={noArrow}
+      color={color}
     >
       <div>
-        {attributes ? (
-          attributes
-        ) : (
-          <>
+        {attributes && <StyledContentWrap>{attributes}</StyledContentWrap>}
+        {(tagTooltip || text || detail || label) && (
+          <StyledContentWrap>
             <StyledRow>
-              <StyledIconWrap>{tagTooltip && <AiOutlineTag />}</StyledIconWrap>
+              {tagTooltip && (
+                <StyledIconWrap>
+                  <AiOutlineTag />
+                </StyledIconWrap>
+              )}
               <StyledLabel>{label}</StyledLabel>
             </StyledRow>
             {text && (
@@ -59,14 +73,17 @@ export const Tooltip: React.FC<Tooltip> = ({
             )}
             {(tagTooltip || detail) && (
               <StyledRow>
-                <StyledIconWrap>
-                  {tagTooltip && <BiCommentDetail />}
-                </StyledIconWrap>
+                {tagTooltip && (
+                  <StyledIconWrap>
+                    <BiCommentDetail />
+                  </StyledIconWrap>
+                )}
                 <StyledDetail>{detail}</StyledDetail>
               </StyledRow>
             )}
-          </>
+          </StyledContentWrap>
         )}
+        {items && <StyledItemsWrap>{items}</StyledItemsWrap>}
       </div>
     </StyledPopup>
   );

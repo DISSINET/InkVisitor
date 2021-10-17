@@ -71,7 +71,7 @@ export const MultiInput: React.FC<MultiInput> = ({
       })}
       <Button
         icon={<FaPlus />}
-        label={"New note"}
+        label={"new note"}
         onClick={() => handleAdd()}
       />
     </>
