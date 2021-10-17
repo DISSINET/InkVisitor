@@ -433,6 +433,8 @@ export const StatementEditorBox: React.FC = () => {
       (a) => a.id === prop.type.id
     );
     const propValueActant = statement?.actants?.find(
+      (a) => a.id === prop.value.id
+    );
 
     return propTypeActant && propValueActant ? (
       <React.Fragment key={prop.origin + level + "|" + order}>
