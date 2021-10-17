@@ -116,7 +116,7 @@ export default class User implements IDbModel, IUser {
     }
 
     fillFlatObject(this, data);
-    if (this.password) {
+    if (!this.id) {
       this.password = hashPassword(this.password);
     }
     this.options = new UserOptions(data.options);
