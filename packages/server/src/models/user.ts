@@ -11,6 +11,7 @@ import { UserRole, UserRoleMode } from "@shared/enums";
 import Territory from "./territory";
 import { ModelNotValidError } from "@shared/types/errors";
 import { hashPassword } from "@common/auth";
+import Actant from "./actant";
 
 export class UserRight implements IUserRight {
   territory = "";
@@ -176,47 +177,6 @@ export default class User implements IDbModel, IUser {
     }
 
     return true;
-  }
-
-  canView(territory: Territory): boolean {
-    // admin role has always the right
-    if (this.role === UserRole.Admin) {
-      return true;
-    }
-
-    console.log(JSON.stringify(this.rights));
-    return !!territory.getClosestRight(this.rights);
-  }
-
-  canEdit(territory: Territory): boolean {
-    // admin role has always the right
-    if (this.role === UserRole.Admin) {
-      return true;
-    }
-
-    const closestRight = territory.getClosestRight(this.rights);
-    if (!closestRight) {
-      return false;
-    }
-
-    return (
-      closestRight.mode === UserRoleMode.Admin ||
-      closestRight.mode === UserRoleMode.Write
-    );
-  }
-
-  canDelete(territory: Territory): boolean {
-    // admin role has always the right
-    if (this.role === UserRole.Admin) {
-      return true;
-    }
-
-    const closestRight = territory.getClosestRight(this.rights);
-    if (!closestRight) {
-      return false;
-    }
-
-    return closestRight.mode === UserRoleMode.Admin;
   }
 
   static async getUser(

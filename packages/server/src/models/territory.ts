@@ -10,7 +10,7 @@ import { fillFlatObject, UnknownObject, IModel } from "./common";
 import Actant from "./actant";
 import { InternalServerError, InvalidDeleteError } from "@shared/types/errors";
 import { IUser } from "@shared/types";
-import { UserRight } from "./user";
+import User, { UserRight } from "./user";
 
 export class TerritoryParent implements IParentTerritory, IModel {
   id = "";
@@ -199,6 +199,41 @@ class Territory extends Actant implements ITerritory {
     }
 
     return closestRight;
+  }
+
+  canBeViewedByUser(user: User): boolean {
+    // admin role has always the right
+    if (user.role === UserRole.Admin) {
+      return true;
+    }
+
+    return !!this.getClosestRight(user.rights);
+  }
+
+  canBeEditedByUser(user: User): boolean {
+    // admin role has always the right
+    if (user.role === UserRole.Admin) {
+      return true;
+    }
+
+    const closestRight = this.getClosestRight(user.rights);
+    if (!closestRight) {
+      return false;
+    }
+
+    return (
+      closestRight.mode === UserRoleMode.Admin ||
+      closestRight.mode === UserRoleMode.Write
+    );
+  }
+
+  canBeDeletedByUser(user: User): boolean {
+    // admin role has always the right
+    if (user.role === UserRole.Admin) {
+      return true;
+    }
+
+    return false;
   }
 }
 

@@ -88,14 +88,6 @@ class TreeCreator {
   }
 }
 
-function insertTerritoryToChilds(
-  array: ITerritory[],
-  onIndex: number,
-  item: ITerritory
-): ITerritory[] {
-  return [...array.slice(0, onIndex), item, ...array.slice(onIndex)];
-}
-
 const sortTerritories = (terA: ITerritory, terB: ITerritory): number =>
   (terA.data.parent ? terA.data.parent.order : 0) -
   (terB.data.parent ? terB.data.parent.order : 0);
@@ -129,7 +121,7 @@ function filterTree(tree: IResponseTree, user: User): IResponseTree | null {
   if (
     tree.lvl > 0 &&
     filtered.length === 0 &&
-    !user.canView(tree.territory as Territory)
+    !(tree.territory as Territory).canBeViewedByUser(user)
   ) {
     return null;
   }
@@ -177,8 +169,6 @@ export default Router()
         throw new BadParams("moveId/parentId/newIndex has be set");
       }
 
-      const user = request.getUserOrFail();
-
       // check child territory
       const territoryData = await findActantById<ITerritory>(
         request.db,
@@ -193,7 +183,11 @@ export default Router()
           moveId
         );
       }
-      if (!user.canEdit(new Territory({ ...territoryData }))) {
+      if (
+        !new Territory({ ...territoryData }).canBeEditedByUser(
+          request.getUserOrFail()
+        )
+      ) {
         throw new PermissionDeniedError(`cannot edit territorty ${moveId}`);
       }
 
@@ -207,7 +201,9 @@ export default Router()
           parentId
         );
       }
-      if (!user.canEdit(new Territory({ ...parent }))) {
+      if (
+        !new Territory({ ...parent }).canBeEditedByUser(request.getUserOrFail())
+      ) {
         throw new PermissionDeniedError(
           `cannot edit parent territorty ${parentId}`
         );
