@@ -270,6 +270,19 @@ export default Router()
           }
         }
 
+        if (user.rights.length) {
+          for (const right of user.rights) {
+            const territoryFromRights: IResponseStoredTerritory = {
+              territory: {
+                ...(await findActantById<IActant>(request.db, right.territory)),
+                usedCount: await getActantUsage(request.db, right.territory),
+                usedIn: [],
+              },
+            };
+            userResponse.territoryRights.push(territoryFromRights);
+          }
+        }
+
         out.users.push(userResponse);
       }
 
