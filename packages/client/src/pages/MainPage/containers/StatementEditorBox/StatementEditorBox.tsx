@@ -381,7 +381,6 @@ export const StatementEditorBox: React.FC = () => {
     visibleColumns: ColumnInstance<{}>[]
   ) => {
     const propOrigin = propsByOrigins[propOriginId];
-
     const originActant = propOrigin?.actant;
 
     if (originActant && propOrigin.props.length > 0) {
@@ -391,29 +390,28 @@ export const StatementEditorBox: React.FC = () => {
             <StyledSubRow>
               <React.Fragment key={originActant.id}>
                 <StyledPropsActantHeader></StyledPropsActantHeader>
-                {propOrigin.props.length > 0 ? (
-                  <StyledPropsActantList>
-                    <StyledListHeaderColumn>Type</StyledListHeaderColumn>
-                    <StyledListHeaderColumn>Value</StyledListHeaderColumn>
-                    <StyledListHeaderColumn></StyledListHeaderColumn>
-                    {propOrigin.props.map((prop1: any, pi1: number) => {
-                      return (
-                        <React.Fragment key={prop1 + pi1}>
-                          {renderPropRow(statement, prop1, "1", pi1, false)}
-                          {prop1.props.map((prop2: any, pi2: number) => {
-                            return renderPropRow(
-                              statement,
-                              prop2,
-                              "2",
-                              pi2,
-                              pi2 === prop1.props.length - 1
-                            );
-                          })}
-                        </React.Fragment>
-                      );
-                    })}
-                  </StyledPropsActantList>
-                ) : null}
+
+                <StyledPropsActantList>
+                  <StyledListHeaderColumn>Type</StyledListHeaderColumn>
+                  <StyledListHeaderColumn>Value</StyledListHeaderColumn>
+                  <StyledListHeaderColumn></StyledListHeaderColumn>
+                  {propOrigin.props.map((prop1: any, pi1: number) => {
+                    return (
+                      <React.Fragment key={prop1 + pi1}>
+                        {renderPropRow(statement, prop1, "1", pi1, false)}
+                        {prop1.props.map((prop2: any, pi2: number) => {
+                          return renderPropRow(
+                            statement,
+                            prop2,
+                            "2",
+                            pi2,
+                            pi2 === prop1.props.length - 1
+                          );
+                        })}
+                      </React.Fragment>
+                    );
+                  })}
+                </StyledPropsActantList>
               </React.Fragment>
             </StyledSubRow>
           </td>
@@ -436,7 +434,7 @@ export const StatementEditorBox: React.FC = () => {
       (a) => a.id === prop.value.id
     );
 
-    return propTypeActant && propValueActant ? (
+    return (
       <React.Fragment key={prop.origin + level + "|" + order}>
         <StyledPropLineColumn
           padded={level === "2"}
@@ -621,8 +619,6 @@ export const StatementEditorBox: React.FC = () => {
           </StyledPropButtonGroup>
         </StyledPropLineColumn>
       </React.Fragment>
-    ) : (
-      <div />
     );
   };
 
