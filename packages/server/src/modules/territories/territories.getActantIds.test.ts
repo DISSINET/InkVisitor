@@ -12,28 +12,7 @@ import { ActantType } from "@shared/enums";
 
 describe("Territories getActantIds", () => {
   let db: Db;
-  const baseStatementData: IStatement = {
-    id: "",
-    class: ActantType.Statement,
-    label: "",
-    detail: "",
-    status: "0",
-    language: "",
-    notes: [],
-    data: {
-      actions: [],
-      modality: "",
-      text: "",
-      territory: {
-        id: "",
-        order: 0,
-      },
-      actants: [],
-      props: [],
-      references: [],
-      tags: [],
-    },
-  };
+  const baseStatementData = new Statement({});
   beforeAll(async () => {
     db = new Db();
     await db.initDb();

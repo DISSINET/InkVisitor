@@ -2,6 +2,7 @@ import { Router, Request } from "express";
 import { findActantById, getActants } from "@service/shorthands";
 import {
   BadParams,
+  PermissionDeniedError,
   TerritoriesBrokenError,
   TerritoryDoesNotExits,
   TerrytoryInvalidMove,
@@ -17,15 +18,13 @@ import { Db } from "@service/RethinkDB";
 import Territory from "@models/territory";
 import { IParentTerritory } from "@shared/types/territory";
 import { ActantType } from "@shared/enums";
+import User from "@models/user";
 
 class TreeCreator {
-  parentMap: Record<string, ITerritory[]>; // map of rootId -> childs
+  parentMap: Record<string, Territory[]>; // map of rootId -> childs
   statementsMap: Record<string, number>; // map of territoryId -> number of statements
 
-  constructor(
-    territories: ITerritory[],
-    statementsMap: Record<string, number>
-  ) {
+  constructor(territories: Territory[], statementsMap: Record<string, number>) {
     this.parentMap = {};
     this.createParentMap(territories);
 
@@ -37,11 +36,11 @@ class TreeCreator {
     this.statementsMap = statementsMap;
   }
 
-  getRootTerritory(): ITerritory {
+  getRootTerritory(): Territory {
     return this.parentMap[""][0];
   }
 
-  createParentMap(territories: ITerritory[]) {
+  createParentMap(territories: Territory[]) {
     for (const territory of territories) {
       if (typeof territory.data.parent === "undefined") {
         continue;
@@ -58,7 +57,7 @@ class TreeCreator {
   }
 
   populateTree(
-    subtreeRoot: ITerritory,
+    subtreeRoot: Territory,
     lvl: number,
     parents: string[]
   ): IResponseTree {
@@ -89,14 +88,6 @@ class TreeCreator {
   }
 }
 
-function insertTerritoryToChilds(
-  array: ITerritory[],
-  onIndex: number,
-  item: ITerritory
-): ITerritory[] {
-  return [...array.slice(0, onIndex), item, ...array.slice(onIndex)];
-}
-
 const sortTerritories = (terA: ITerritory, terB: ITerritory): number =>
   (terA.data.parent ? terA.data.parent.order : 0) -
   (terB.data.parent ? terB.data.parent.order : 0);
@@ -118,22 +109,53 @@ async function countStatements(db: Db): Promise<Record<string, number>> {
   return statementsCountMap;
 }
 
+function filterTree(tree: IResponseTree, user: User): IResponseTree | null {
+  const filtered: IResponseTree[] = [];
+  for (const child of tree.children) {
+    const filteredChild = filterTree(child, user);
+    if (filteredChild) {
+      filtered.push(filteredChild);
+    }
+  }
+
+  if (
+    tree.lvl > 0 &&
+    filtered.length === 0 &&
+    !(tree.territory as Territory).canBeViewedByUser(user)
+  ) {
+    return null;
+  }
+
+  return { ...tree, children: filtered };
+}
+
 export default Router()
   .get(
     "/get",
     asyncRouteHandler<IResponseTree>(async (request: Request) => {
-      const [territories, statementsCountMap] = await Promise.all([
+      const [territoriesData, statementsCountMap] = await Promise.all([
         getActants<ITerritory>(request.db, {
           class: "T",
         }),
         countStatements(request.db),
       ]);
-      const helper = new TreeCreator(
-        territories.sort(sortTerritories),
-        statementsCountMap
-      );
 
-      return helper.populateTree(helper.getRootTerritory(), 0, []);
+      const territories = territoriesData
+        .sort(sortTerritories)
+        .map((td) => new Territory({ ...td }));
+
+      const helper = new TreeCreator(territories, statementsCountMap);
+
+      const tree = helper.populateTree(helper.getRootTerritory(), 0, []);
+
+      let filtered = filterTree(tree, request.getUserOrFail());
+
+      if (!filtered) {
+        filtered = { ...tree };
+        filtered.children = [];
+      }
+
+      return filtered;
     })
   )
   .post(
@@ -147,22 +169,47 @@ export default Router()
         throw new BadParams("moveId/parentId/newIndex has be set");
       }
 
-      const territory = await findActantById<ITerritory>(request.db, moveId, {
-        class: ActantType.Territory,
-      });
-      if (!territory) {
-        throw new TerritoryDoesNotExits(`territory ${moveId} does not exist`, moveId);
+      // check child territory
+      const territoryData = await findActantById<ITerritory>(
+        request.db,
+        moveId,
+        {
+          class: ActantType.Territory,
+        }
+      );
+      if (!territoryData) {
+        throw new TerritoryDoesNotExits(
+          `territory ${moveId} does not exist`,
+          moveId
+        );
+      }
+      if (
+        !new Territory({ ...territoryData }).canBeEditedByUser(
+          request.getUserOrFail()
+        )
+      ) {
+        throw new PermissionDeniedError(`cannot edit territorty ${moveId}`);
       }
 
+      // check parent territory
       const parent = await findActantById<ITerritory>(request.db, parentId, {
         class: ActantType.Territory,
       });
       if (!parent) {
         throw new TerritoryDoesNotExits(
-          `parent territory ${parentId} does not exist`, parentId
+          `parent territory ${parentId} does not exist`,
+          parentId
+        );
+      }
+      if (
+        !new Territory({ ...parent }).canBeEditedByUser(request.getUserOrFail())
+      ) {
+        throw new PermissionDeniedError(
+          `cannot edit parent territorty ${parentId}`
         );
       }
 
+      // alter data below
       const childsMap = await new Territory({ ...parent }).findChilds(
         request.db.connection
       );
@@ -178,13 +225,13 @@ export default Router()
         result: true,
       };
 
-      if (!territory.data.parent) {
+      if (!territoryData.data.parent) {
         // root territory cannot be moved - or not yet implemented
         throw new TerrytoryInvalidMove("cannot move root territory");
-      } else if (territory.data.parent.id !== parentId) {
+      } else if (territoryData.data.parent.id !== parentId) {
         // change parent of the territory
-        territory.data.parent.id = parentId;
-        territory.data.parent.order = -1;
+        territoryData.data.parent.id = parentId;
+        territoryData.data.parent.order = -1;
       } else {
         const currentIndex = childsArray.findIndex((ter) => ter.id === moveId);
         if (currentIndex === -1) {
@@ -207,10 +254,10 @@ export default Router()
           ).order;
         }
 
-        territory.data.parent.order = newOrderValue;
+        territoryData.data.parent.order = newOrderValue;
       }
 
-      const childTerritory = new Territory({ ...territory });
+      const childTerritory = new Territory({ ...territoryData });
       childTerritory.setSiblings(childsMap);
       await childTerritory.update(request.db.connection, {
         data: childTerritory.data,

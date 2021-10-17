@@ -10,6 +10,7 @@ import {
   testErroneousResponse,
 } from "../common.test";
 import { supertestConfig } from "..";
+import User from "@models/user";
 
 describe("Users delete", function () {
   describe("empty data", () => {
@@ -28,7 +29,9 @@ describe("Users delete", function () {
         .delete(`${apiPath}/users/delete/randomid12345`)
         .set("authorization", "Bearer " + supertestConfig.token)
         .expect("Content-Type", /json/)
-        .expect(testErroneousResponse.bind(undefined, new UserDoesNotExits("")))
+        .expect(
+          testErroneousResponse.bind(undefined, new UserDoesNotExits("", ""))
+        )
         .then(() => done());
     });
   });
@@ -37,21 +40,9 @@ describe("Users delete", function () {
       const db = new Db();
       await db.initDb();
       const testUserId = Math.random().toString();
-      await createUser(db, {
-        id: testUserId,
-        name: "test",
-        email: "test@test.test",
-        password: "test",
-        bookmarks: [],
-        role: "1",
-        storedTerritories: [],
-        rights: [],
-        options: {
-          defaultLanguage: "",
-          defaultTerritory: "",
-          searchLanguages: [],
-        },
-      });
+
+      const user = new User({ id: testUserId });
+      await user.save(db.connection);
 
       request(app)
         .delete(`${apiPath}/users/delete/${testUserId}`)

@@ -6,8 +6,9 @@ import Entity from "./entity";
 import Resource from "./resource";
 import { ModelNotValidError } from "@shared/types/errors";
 import Action from "./action";
+import Actant from "./actant";
 
-export function getActantType(data: UnknownObject): IDbModel {
+export function getActantType(data: UnknownObject): Actant {
   if (!data || typeof data !== "object" || Object.keys(data).length === 0) {
     throw new ModelNotValidError("bad input data for factory");
   }

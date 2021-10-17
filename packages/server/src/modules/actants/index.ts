@@ -14,6 +14,7 @@ import {
   ActantDoesNotExits,
   ModelNotValidError,
   InternalServerError,
+  PermissionDeniedError,
 } from "@shared/types/errors";
 import {
   IActant,
@@ -83,6 +84,10 @@ export default Router()
         throw new ModelNotValidError("");
       }
 
+      if (!model.canBeEditedByUser(request.getUserOrFail())) {
+        throw new PermissionDeniedError("actant cannot be saved");
+      }
+
       const result = await model.save(request.db.connection);
 
       if (
@@ -91,7 +96,7 @@ export default Router()
       ) {
         throw new ModelNotValidError("id already exists");
       }
-
+      
       if (result.inserted === 1) {
         return {
           result: true,
@@ -133,6 +138,10 @@ export default Router()
         throw new ModelNotValidError("");
       }
 
+      if (!model.canBeEditedByUser(request.getUserOrFail())) {
+        throw new PermissionDeniedError("actant cannot be saved");
+      }
+
       // update only the required fields
       const result = await model.update(request.db.connection, actantData);
 
@@ -169,9 +178,8 @@ export default Router()
         id: actantId,
       });
 
-      // class is from the db, so it must work, unless bad data
-      if (!model) {
-        throw new Error("internal error");
+      if (!model.canBeDeletedByUser(request.getUserOrFail())) {
+        throw new PermissionDeniedError("actant cannot be deleted");
       }
 
       const result = await model.delete(request.db.connection);

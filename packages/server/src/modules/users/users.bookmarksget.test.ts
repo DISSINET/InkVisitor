@@ -11,6 +11,8 @@ import {
 import { Db } from "@service/RethinkDB";
 import Statement from "@models/statement";
 import { supertestConfig } from "..";
+import User from "@models/user";
+import { IBookmarkFolder } from "@shared/types";
 
 describe("Users bookmarksGet", function () {
   describe("Empty param", () => {
@@ -27,7 +29,9 @@ describe("Users bookmarksGet", function () {
       return request(app)
         .get(`${apiPath}/users/bookmarksGet/123`)
         .set("authorization", "Bearer " + supertestConfig.token)
-        .expect(testErroneousResponse.bind(undefined, new UserDoesNotExits("")))
+        .expect(
+          testErroneousResponse.bind(undefined, new UserDoesNotExits("", ""))
+        )
         .then(() => done());
     });
   });
@@ -36,21 +40,8 @@ describe("Users bookmarksGet", function () {
       const db = new Db();
       await db.initDb();
       const testUserId = Math.random().toString();
-      await createUser(db, {
-        id: testUserId,
-        name: "test",
-        email: "test@test.test",
-        password: "test",
-        bookmarks: [], // empty array of mookmarks
-        role: "1",
-        storedTerritories: [],
-        rights: [],
-        options: {
-          defaultLanguage: "",
-          defaultTerritory: "",
-          searchLanguages: [],
-        },
-      });
+      const user = new User({ id: testUserId, bookmarks: [] });
+      await user.save(db.connection);
 
       request(app)
         .get(`${apiPath}/users/bookmarksGet/${testUserId}`)
@@ -75,27 +66,18 @@ describe("Users bookmarksGet", function () {
         db,
         new Statement({ id: testId, data: { territory: { id: "any" } } })
       );
-      await createUser(db, {
+
+      const user = new User({
         id: testId,
-        name: "test",
-        email: "test@test.test",
-        password: "test",
         bookmarks: [
           {
             id: "test",
             name: "test",
             actantIds: [testId], // this id should exist in actants
-          },
+          } as IBookmarkFolder,
         ],
-        role: "1",
-        storedTerritories: [],
-        rights: [],
-        options: {
-          defaultLanguage: "",
-          defaultTerritory: "",
-          searchLanguages: [],
-        },
       });
+      await user.save(db.connection);
 
       const bookmarkCountUsage = await getActantUsage(db, testId);
       request(app)
