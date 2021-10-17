@@ -69,12 +69,17 @@ export const StyledPropsActantList = styled(StyledGrid)<StyledPropsActantList>`
 
 interface StyledPropButtonGroup {
   leftMargin?: boolean;
+  border?: boolean;
+  round?: boolean;
 }
 export const StyledPropButtonGroup = styled.div<StyledPropButtonGroup>`
   margin-left: ${({ theme, leftMargin = true }) =>
     leftMargin ? theme.space[3] : theme.space[0]};
   vertical-align: middle;
   display: inline-flex;
+  border-radius: ${({ round }) => (round ? "8px" : "0")};
+  border: ${({ border }) => (border ? "1px" : 0)} solid
+    ${({ theme }) => theme.color["gray"][600]};
 `;
 
 interface StyledPropLineColumn {

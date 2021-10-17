@@ -7,12 +7,14 @@ import {
   StyledInput,
   StyledSelect,
   StyledTextArea,
+  StyledSelectReadonly,
 } from "./InputStyles";
 
 interface InputProps {
   label?: string;
   value?: string;
   inverted?: boolean;
+  suggester?: boolean;
   type?: "text" | "textarea" | "select";
   options?: IOption[];
   rows?: number;
@@ -29,6 +31,7 @@ interface InputProps {
 export const Input: React.FC<InputProps> = ({
   label = "",
   inverted = false,
+  suggester = false,
   value = "",
   type = "text",
   options = [],
@@ -75,6 +78,7 @@ export const Input: React.FC<InputProps> = ({
             }
           }}
           inverted={inverted}
+          suggester={suggester}
         />
       )}
       {type === "textarea" && (
@@ -103,30 +107,44 @@ export const Input: React.FC<InputProps> = ({
             }
           }}
           inverted={inverted}
+          suggester={suggester}
         />
       )}
       {type === "select" && options && (
-        <StyledSelect
-          className="value"
-          value={value}
-          width={width}
-          autoFocus={autoFocus}
-          onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
-            onChangeFn(e.target.value);
-          }}
-          onKeyPress={(event: React.KeyboardEvent) => {
-            if (event.key === "Enter") {
-              onEnterPressFn();
-            }
-          }}
-          inverted={inverted}
-        >
-          {options.map((option, oi) => (
-            <option key={oi} value={option.value}>
-              {option.label}
-            </option>
-          ))}
-        </StyledSelect>
+        <>
+          {options.length > 2 ? (
+            <StyledSelect
+              className="value"
+              value={value}
+              width={width}
+              autoFocus={autoFocus}
+              onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
+                onChangeFn(e.target.value);
+              }}
+              onKeyPress={(event: React.KeyboardEvent) => {
+                if (event.key === "Enter") {
+                  onEnterPressFn();
+                }
+              }}
+              inverted={inverted}
+              suggester={suggester}
+            >
+              {options.map((option, oi) => (
+                <option key={oi} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </StyledSelect>
+          ) : (
+            <StyledSelectReadonly
+              readOnly
+              width={suggester ? 30 : width}
+              value={displayValue}
+              inverted={inverted}
+              suggester={suggester}
+            />
+          )}
+        </>
       )}
     </Wrapper>
   );

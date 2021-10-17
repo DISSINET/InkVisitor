@@ -1,4 +1,4 @@
-import React, { ReactElement, useEffect } from "react";
+import React from "react";
 import { DragObjectWithType, DropTargetMonitor, useDrop } from "react-dnd";
 import { FaPlus, FaPlayCircle } from "react-icons/fa";
 import { MdCancel } from "react-icons/md";
@@ -16,6 +16,7 @@ import {
   StyledSuggestionLineActions,
   StyledSuggestionCancelButton,
   StyledRelativePosition,
+  StyledTypeBar,
 } from "./SuggesterStyles";
 
 export interface SuggestionI {
@@ -90,11 +91,13 @@ export const Suggester: React.FC<SuggesterProps> = ({
   return (
     <StyledSuggester marginTop={marginTop}>
       <StyledInputWrapper ref={dropRef} hasButton={allowCreate} isOver={isOver}>
+        <StyledTypeBar title={`entity${category}`}></StyledTypeBar>
         <Input
           type="select"
           value={category}
           options={categories}
           inverted
+          suggester
           onChangeFn={onChangeCategory}
         />
         <Input
@@ -102,6 +105,7 @@ export const Suggester: React.FC<SuggesterProps> = ({
           value={typed}
           onChangeFn={onType}
           placeholder={placeholder}
+          suggester
           changeOnType={true}
           width={inputWidth}
           onEnterPressFn={() => {
