@@ -34,5 +34,15 @@
     "controller": "users",
     "method": "bookmarksGet",
     "roles": ["admin"]
+  },
+  {
+    "controller": "actants",
+    "method": "create",
+    "roles": ["*"]
+  },
+  {
+    "controller": "actants",
+    "method": "update",
+    "roles": ["*"]
   }
 ]

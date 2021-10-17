@@ -176,7 +176,11 @@ class Territory extends Actant implements ITerritory {
     return out;
   }
 
-  // find closest parent in the tree - this required the structure to respect tree naming ( ID0 -> ID0_1 -> ID0_1_1 etc)
+  /**
+   * find closest parent in the tree - this required the structure to respect tree naming ( ID0 -> ID0_1 -> ID0_1_1 etc)
+   * @param rights
+   * @returns
+   */
   getClosestRight(rights: UserRight[]): UserRight | undefined {
     let closestRight: UserRight | undefined;
 
@@ -211,12 +215,26 @@ class Territory extends Actant implements ITerritory {
   }
 
   canBeEditedByUser(user: User): boolean {
+    if (
+      this.data.parent &&
+      !new Territory({ id: this.data.parent.id }).canBeEditedByUser(user)
+    ) {
+      return false;
+    }
+
+    // in case of create - no id provided yet
+    if (!this.id) {
+      return true;
+    }
+
     // admin role has always the right
     if (user.role === UserRole.Admin) {
       return true;
     }
 
     const closestRight = this.getClosestRight(user.rights);
+    console.log("clsoest", closestRight, this.id);
+
     if (!closestRight) {
       return false;
     }
