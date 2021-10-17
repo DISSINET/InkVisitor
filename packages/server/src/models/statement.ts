@@ -160,6 +160,7 @@ export class StatementProp implements IStatementProp, IModel {
     virtuality: Virtuality.Reality,
     partitivity: Partitivity.Unison,
   };
+  
   value: {
     id: string;
     elvl: Elvl;
