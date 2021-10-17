@@ -64,7 +64,7 @@ export const StyledSuggestionCancelButton = styled.div`
 interface StyledTypeBar {
   title: string;
 }
-export const StyledTypeBar = styled.div`
+export const StyledTypeBar = styled.div<StyledTypeBar>`
   position: absolute;
   background-color: ${({ theme, title }) => theme.color[title]};
   width: 3px;

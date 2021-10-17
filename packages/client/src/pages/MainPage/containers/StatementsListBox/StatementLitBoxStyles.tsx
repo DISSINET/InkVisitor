@@ -3,6 +3,7 @@ import styled from "styled-components";
 export const StyledDots = styled.div`
   display: flex;
   align-items: flex-end;
+  cursor: default;
 `;
 
 export const StyledLoaderWrap = styled.div`
@@ -27,4 +28,5 @@ export const StyledActionLabel = styled.div`
 `;
 export const StyledText = styled.p`
   font-size: ${({ theme }) => theme.fontSize["xs"]};
+  cursor: default;
 `;

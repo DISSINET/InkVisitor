@@ -1,4 +1,4 @@
-import React, { ReactElement, useEffect } from "react";
+import React from "react";
 import { DragObjectWithType, DropTargetMonitor, useDrop } from "react-dnd";
 import { FaPlus, FaPlayCircle } from "react-icons/fa";
 import { MdCancel } from "react-icons/md";

@@ -103,7 +103,7 @@ export const StatementEditorBox: React.FC = () => {
     if (statement) {
       const allProps = statement?.data.props;
 
-      const statementActants = statement.actants.filter(
+      const statementActants = statement.actants?.filter(
         (sa) =>
           statement.data.actants.map((a) => a.actant).includes(sa.id) ||
           statement.data.actions.map((a) => a.action).includes(sa.id)
@@ -429,8 +429,10 @@ export const StatementEditorBox: React.FC = () => {
     order: number,
     lastSecondLevel: boolean
   ) => {
-    const propTypeActant = statement.actants.find((a) => a.id === prop.type.id);
-    const propValueActant = statement.actants.find(
+    const propTypeActant = statement.actants?.find(
+      (a) => a.id === prop.type.id
+    );
+    const propValueActant = statement.actants?.find(
       (a) => a.id === prop.value.id
     );
 
@@ -715,7 +717,7 @@ export const StatementEditorBox: React.FC = () => {
                 )}
                 {statement.data.references.map(
                   (reference: IStatementReference, ri) => {
-                    const referenceActant = statement.actants.find(
+                    const referenceActant = statement.actants?.find(
                       (a) => a.id === reference.resource
                     );
 
@@ -832,7 +834,9 @@ export const StatementEditorBox: React.FC = () => {
             <StyledEditorSectionContent>
               <StyledTagsList>
                 {statement.data.tags.map((tag: string) => {
-                  const tagActant = statement.actants.find((a) => a.id === tag);
+                  const tagActant = statement.actants?.find(
+                    (a) => a.id === tag
+                  );
                   return (
                     tagActant && (
                       <StyledTagsListItem key={tag}>

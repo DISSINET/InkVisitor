@@ -7,6 +7,7 @@ import {
   StyledInput,
   StyledSelect,
   StyledTextArea,
+  StyledSelectReadonly,
 } from "./InputStyles";
 
 interface InputProps {
@@ -110,28 +111,40 @@ export const Input: React.FC<InputProps> = ({
         />
       )}
       {type === "select" && options && (
-        <StyledSelect
-          className="value"
-          value={value}
-          width={width}
-          autoFocus={autoFocus}
-          onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
-            onChangeFn(e.target.value);
-          }}
-          onKeyPress={(event: React.KeyboardEvent) => {
-            if (event.key === "Enter") {
-              onEnterPressFn();
-            }
-          }}
-          inverted={inverted}
-          suggester={suggester}
-        >
-          {options.map((option, oi) => (
-            <option key={oi} value={option.value}>
-              {option.label}
-            </option>
-          ))}
-        </StyledSelect>
+        <>
+          {options.length > 2 ? (
+            <StyledSelect
+              className="value"
+              value={value}
+              width={width}
+              autoFocus={autoFocus}
+              onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
+                onChangeFn(e.target.value);
+              }}
+              onKeyPress={(event: React.KeyboardEvent) => {
+                if (event.key === "Enter") {
+                  onEnterPressFn();
+                }
+              }}
+              inverted={inverted}
+              suggester={suggester}
+            >
+              {options.map((option, oi) => (
+                <option key={oi} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </StyledSelect>
+          ) : (
+            <StyledSelectReadonly
+              readOnly
+              width={suggester ? 30 : width}
+              value={displayValue}
+              inverted={inverted}
+              suggester={suggester}
+            />
+          )}
+        </>
       )}
     </Wrapper>
   );

@@ -43,313 +43,312 @@ interface StatementEditorActantTable {
     };
   };
 }
-export const StatementEditorActantTable: React.FC<StatementEditorActantTable> =
-  ({
-    statement,
-    statementId,
-    handleRowClick = () => {},
-    classEntitiesActant,
-    renderPropGroup,
-    updateActantsMutation,
-    addProp,
-    propsByOrigins,
-  }) => {
-    const [filteredActants, setFilteredActants] = useState<
-      FilteredActantObject[]
-    >([]);
+export const StatementEditorActantTable: React.FC<StatementEditorActantTable> = ({
+  statement,
+  statementId,
+  handleRowClick = () => {},
+  classEntitiesActant,
+  renderPropGroup,
+  updateActantsMutation,
+  addProp,
+  propsByOrigins,
+}) => {
+  const [filteredActants, setFilteredActants] = useState<
+    FilteredActantObject[]
+  >([]);
 
-    useEffect(() => {
-      const filteredActants = statement.data.actants.map((sActant, key) => {
-        const actant = statement.actants?.find((a) => a.id === sActant.actant);
-        return { id: key, data: { actant, sActant } };
-      });
-      setFilteredActants(filteredActants);
-    }, [statement]);
+  useEffect(() => {
+    const filteredActants = statement.data.actants.map((sActant, key) => {
+      const actant = statement.actants?.find((a) => a.id === sActant.actant);
+      return { id: key, data: { actant, sActant } };
+    });
+    setFilteredActants(filteredActants);
+  }, [statement]);
 
-    const updateActant = (statementActantId: string, changes: any) => {
-      if (statement && statementActantId) {
-        const updatedActants = statement.data.actants.map((a) =>
-          a.id === statementActantId ? { ...a, ...changes } : a
-        );
-        const newData = { actants: updatedActants };
-        updateActantsMutation.mutate(newData);
-      }
-    };
-    const removeActant = (statementActantId: string) => {
-      if (statement) {
-        const updatedActants = statement.data.actants.filter(
-          (a) => a.id !== statementActantId
-        );
-        const newData = { actants: updatedActants };
-        updateActantsMutation.mutate(newData);
-      }
-    };
-
-    const updateActantsOrder = () => {
-      const actants: IStatementActant[] = filteredActants.map(
-        (filteredActant) => filteredActant.data.sActant
+  const updateActant = (statementActantId: string, changes: any) => {
+    if (statement && statementActantId) {
+      const updatedActants = statement.data.actants.map((a) =>
+        a.id === statementActantId ? { ...a, ...changes } : a
       );
-      updateActantsMutation.mutate({ actants });
-    };
+      const newData = { actants: updatedActants };
+      updateActantsMutation.mutate(newData);
+    }
+  };
+  const removeActant = (statementActantId: string) => {
+    if (statement) {
+      const updatedActants = statement.data.actants.filter(
+        (a) => a.id !== statementActantId
+      );
+      const newData = { actants: updatedActants };
+      updateActantsMutation.mutate(newData);
+    }
+  };
 
-    const columns: Column<{}>[] = useMemo(() => {
-      return [
-        {
-          Header: "ID",
-          accessor: "id",
+  const updateActantsOrder = () => {
+    const actants: IStatementActant[] = filteredActants.map(
+      (filteredActant) => filteredActant.data.sActant
+    );
+    updateActantsMutation.mutate({ actants });
+  };
+
+  const columns: Column<{}>[] = useMemo(() => {
+    return [
+      {
+        Header: "ID",
+        accessor: "id",
+      },
+      {
+        Header: "Actant",
+        accessor: "data",
+        Cell: ({ row }: Cell) => {
+          const {
+            actant,
+            sActant,
+          }: {
+            actant: IActant;
+            sActant: IStatementActant | any;
+          } = row.values.data;
+          return actant ? (
+            <ActantTag
+              actant={actant}
+              short={false}
+              button={
+                <Button
+                  key="d"
+                  tooltip="unlink actant"
+                  icon={<FaUnlink />}
+                  color="plain"
+                  inverted={true}
+                  onClick={() => {
+                    updateActant(sActant.id, {
+                      actant: "",
+                    });
+                  }}
+                />
+              }
+            />
+          ) : (
+            <ActantSuggester
+              onSelected={(newSelectedId: string) => {
+                updateActant(sActant.id, {
+                  actant: newSelectedId,
+                });
+              }}
+              categoryIds={classEntitiesActant}
+            />
+          );
         },
-        {
-          Header: "Actant",
-          accessor: "data",
-          Cell: ({ row }: Cell) => {
-            const {
-              actant,
-              sActant,
-            }: {
-              actant: IActant;
-              sActant: IStatementActant | any;
-            } = row.values.data;
-            return actant ? (
-              <ActantTag
-                actant={actant}
-                short={false}
-                button={
-                  <Button
-                    key="d"
-                    tooltip="unlink actant"
-                    icon={<FaUnlink />}
-                    color="plain"
-                    inverted={true}
-                    onClick={() => {
-                      updateActant(sActant.id, {
-                        actant: "",
-                      });
-                    }}
-                  />
-                }
-              />
-            ) : (
-              <ActantSuggester
-                onSelected={(newSelectedId: string) => {
+      },
+      {
+        id: "position",
+        Header: "Position",
+        Cell: ({ row }: Cell) => {
+          const { sActant } = row.values.data;
+          return (
+            <StyledPropButtonGroup
+              leftMargin={false}
+              border={true}
+              round={true}
+            >
+              <Button
+                key="s"
+                label="s"
+                color="success"
+                tooltip="subject"
+                noBorder
+                inverted={sActant.position == "s" ? false : true}
+                radiusLeft
+                onClick={() => {
                   updateActant(sActant.id, {
-                    actant: newSelectedId,
+                    position: "s",
                   });
                 }}
-                categoryIds={classEntitiesActant}
               />
-            );
-          },
-        },
-        {
-          id: "position",
-          Header: "Position",
-          Cell: ({ row }: Cell) => {
-            const { sActant } = row.values.data;
-            return (
-              <StyledPropButtonGroup
-                leftMargin={false}
-                border={true}
-                round={true}
-              >
-                <Button
-                  key="s"
-                  label="s"
-                  color="success"
-                  tooltip="subject"
-                  noBorder
-                  inverted={sActant.position == "s" ? false : true}
-                  radiusLeft
-                  onClick={() => {
-                    updateActant(sActant.id, {
-                      position: "s",
-                    });
-                  }}
-                />
-                <Button
-                  key="a1"
-                  label="a1"
-                  color="success"
-                  inverted={sActant.position == "a1" ? false : true}
-                  noBorder
-                  tooltip="actant1"
-                  onClick={() => {
-                    updateActant(sActant.id, {
-                      position: "a1",
-                    });
-                  }}
-                />
-                <Button
-                  key="a2"
-                  label="a2"
-                  inverted={sActant.position == "a2" ? false : true}
-                  color="success"
-                  noBorder
-                  tooltip="actant2"
-                  onClick={() => {
-                    updateActant(sActant.id, {
-                      position: "a2",
-                    });
-                  }}
-                />
-                <Button
-                  key="p"
-                  label="ps.-a"
-                  color="success"
-                  inverted={sActant.position == "p" ? false : true}
-                  noBorder
-                  tooltip="pseudo-actant"
-                  radiusRight
-                  onClick={() => {
-                    updateActant(sActant.id, {
-                      position: "p",
-                    });
-                  }}
-                />
-              </StyledPropButtonGroup>
-            );
-          },
-        },
-        {
-          id: "Attributes",
-          Cell: ({ row }: Cell) => {
-            const {
-              actant,
-              sActant,
-            }: {
-              actant: IActant;
-              sActant: IStatementActant | any;
-            } = row.values.data;
-            return actant && sActant ? (
-              <AttributesEditor
-                modalTitle={`Actant involvement [${actant.label}]`}
-                entityType={actant.class}
-                data={{
-                  elvl: sActant.elvl,
-                  certainty: sActant.certainty,
-                  logic: sActant.logic,
-                  virtuality: sActant.virtuality,
-                  partitivity: sActant.partitivity,
-                  operator: sActant.operator,
-                  bundleStart: sActant.bundleStart,
-                  bundleEnd: sActant.bundleEnd,
+              <Button
+                key="a1"
+                label="a1"
+                color="success"
+                inverted={sActant.position == "a1" ? false : true}
+                noBorder
+                tooltip="actant1"
+                onClick={() => {
+                  updateActant(sActant.id, {
+                    position: "a1",
+                  });
                 }}
-                handleUpdate={(newData) => {
-                  updateActant(sActant.id, newData);
-                }}
-                loading={updateActantsMutation.isLoading}
               />
-            ) : (
-              <div />
-            );
-          },
+              <Button
+                key="a2"
+                label="a2"
+                inverted={sActant.position == "a2" ? false : true}
+                color="success"
+                noBorder
+                tooltip="actant2"
+                onClick={() => {
+                  updateActant(sActant.id, {
+                    position: "a2",
+                  });
+                }}
+              />
+              <Button
+                key="p"
+                label="ps.-a"
+                color="success"
+                inverted={sActant.position == "p" ? false : true}
+                noBorder
+                tooltip="pseudo-actant"
+                radiusRight
+                onClick={() => {
+                  updateActant(sActant.id, {
+                    position: "p",
+                  });
+                }}
+              />
+            </StyledPropButtonGroup>
+          );
         },
-        {
-          Header: "",
-          id: "remove",
-          Cell: ({ row }: Cell) => (
+      },
+      {
+        id: "Attributes",
+        Cell: ({ row }: Cell) => {
+          const {
+            actant,
+            sActant,
+          }: {
+            actant: IActant;
+            sActant: IStatementActant | any;
+          } = row.values.data;
+          return actant && sActant ? (
+            <AttributesEditor
+              modalTitle={`Actant involvement [${actant.label}]`}
+              entityType={actant.class}
+              data={{
+                elvl: sActant.elvl,
+                certainty: sActant.certainty,
+                logic: sActant.logic,
+                virtuality: sActant.virtuality,
+                partitivity: sActant.partitivity,
+                operator: sActant.operator,
+                bundleStart: sActant.bundleStart,
+                bundleEnd: sActant.bundleEnd,
+              }}
+              handleUpdate={(newData) => {
+                updateActant(sActant.id, newData);
+              }}
+              loading={updateActantsMutation.isLoading}
+            />
+          ) : (
+            <div />
+          );
+        },
+      },
+      {
+        Header: "",
+        id: "remove",
+        Cell: ({ row }: Cell) => (
+          <Button
+            key="d"
+            icon={<FaTrashAlt />}
+            color="plain"
+            inverted={true}
+            tooltip="remove actant row"
+            onClick={() => {
+              removeActant(row.values.data.sActant.id);
+            }}
+          />
+        ),
+      },
+      {
+        Header: "",
+        id: "add",
+        Cell: ({ row }: Cell) => {
+          const propOriginId = row.values.data.sActant.actant;
+          return (
             <Button
-              key="d"
-              icon={<FaTrashAlt />}
+              key="a"
+              icon={<FaPlus />}
               color="plain"
               inverted={true}
-              tooltip="remove actant row"
+              tooltip="add new prop"
               onClick={() => {
-                removeActant(row.values.data.sActant.id);
+                addProp(propOriginId);
               }}
             />
-          ),
-        },
-        {
-          Header: "",
-          id: "add",
-          Cell: ({ row }: Cell) => {
-            const propOriginId = row.values.data.sActant.actant;
-            return (
-              <Button
-                key="a"
-                icon={<FaPlus />}
-                color="plain"
-                inverted={true}
-                tooltip="add new prop"
-                onClick={() => {
-                  addProp(propOriginId);
-                }}
-              />
-            );
-          },
-        },
-      ];
-    }, [filteredActants, updateActantsMutation]);
-
-    const getRowId = useCallback((row) => {
-      return row.id;
-    }, []);
-    const {
-      getTableProps,
-      getTableBodyProps,
-      headerGroups,
-      rows,
-      prepareRow,
-      visibleColumns,
-    } = useTable(
-      {
-        columns,
-        data: filteredActants,
-        getRowId,
-        initialState: {
-          hiddenColumns: ["id"],
+          );
         },
       },
-      useExpanded
-    );
+    ];
+  }, [filteredActants, updateActantsMutation]);
 
-    const moveRow = useCallback(
-      (dragIndex: number, hoverIndex: number) => {
-        const dragRecord = filteredActants[dragIndex];
-        setFilteredActants(
-          update(filteredActants, {
-            $splice: [
-              [dragIndex, 1],
-              [hoverIndex, 0, dragRecord],
-            ],
-          })
-        );
+  const getRowId = useCallback((row) => {
+    return row.id;
+  }, []);
+  const {
+    getTableProps,
+    getTableBodyProps,
+    headerGroups,
+    rows,
+    prepareRow,
+    visibleColumns,
+  } = useTable(
+    {
+      columns,
+      data: filteredActants,
+      getRowId,
+      initialState: {
+        hiddenColumns: ["id"],
       },
-      [filteredActants]
-    );
+    },
+    useExpanded
+  );
 
-    return (
-      <StyledTable {...getTableProps()}>
-        <StyledTHead>
-          {headerGroups.map((headerGroup, key) => (
-            <tr {...headerGroup.getHeaderGroupProps()} key={key}>
-              <th></th>
-              {headerGroup.headers.map((column, key) => (
-                <StyledTh {...column.getHeaderProps()} key={key}>
-                  {column.render("Header")}
-                </StyledTh>
-              ))}
-            </tr>
-          ))}
-        </StyledTHead>
-        <tbody {...getTableBodyProps()}>
-          {rows.map((row: Row, i: number) => {
-            prepareRow(row);
-            return (
-              <StatementEditorActantTableRow
-                renderPropGroup={renderPropGroup}
-                handleClick={handleRowClick}
-                index={i}
-                row={row}
-                statement={statement}
-                moveRow={moveRow}
-                updateOrderFn={updateActantsOrder}
-                visibleColumns={visibleColumns}
-                {...row.getRowProps()}
-              />
-            );
-          })}
-        </tbody>
-      </StyledTable>
-    );
-  };
+  const moveRow = useCallback(
+    (dragIndex: number, hoverIndex: number) => {
+      const dragRecord = filteredActants[dragIndex];
+      setFilteredActants(
+        update(filteredActants, {
+          $splice: [
+            [dragIndex, 1],
+            [hoverIndex, 0, dragRecord],
+          ],
+        })
+      );
+    },
+    [filteredActants]
+  );
+
+  return (
+    <StyledTable {...getTableProps()}>
+      <StyledTHead>
+        {headerGroups.map((headerGroup, key) => (
+          <tr {...headerGroup.getHeaderGroupProps()} key={key}>
+            <th></th>
+            {headerGroup.headers.map((column, key) => (
+              <StyledTh {...column.getHeaderProps()} key={key}>
+                {column.render("Header")}
+              </StyledTh>
+            ))}
+          </tr>
+        ))}
+      </StyledTHead>
+      <tbody {...getTableBodyProps()}>
+        {rows.map((row: Row, i: number) => {
+          prepareRow(row);
+          return (
+            <StatementEditorActantTableRow
+              renderPropGroup={renderPropGroup}
+              handleClick={handleRowClick}
+              index={i}
+              row={row}
+              statement={statement}
+              moveRow={moveRow}
+              updateOrderFn={updateActantsOrder}
+              visibleColumns={visibleColumns}
+              {...row.getRowProps()}
+            />
+          );
+        })}
+      </tbody>
+    </StyledTable>
+  );
+};
