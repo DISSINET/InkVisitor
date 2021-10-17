@@ -61,6 +61,18 @@ export const StyledSuggestionCancelButton = styled.div`
   }
 `;
 
+interface StyledTypeBar {
+  title: string;
+}
+export const StyledTypeBar = styled.div<StyledTypeBar>`
+  position: absolute;
+  background-color: ${({ theme, title }) => theme.color[title]};
+  width: 3px;
+  left: 1px;
+  top: 1px;
+  bottom: 1px;
+`;
+
 export const StyledSuggestionLineIcons = styled.div``;
 
 export const StyledSuggestionLineTag = styled.div``;

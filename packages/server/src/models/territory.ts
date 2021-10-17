@@ -105,6 +105,16 @@ class Territory extends Actant implements ITerritory {
 
       const wantedOrder = this.data.parent.order;
       this.data.parent.order = Actant.determineOrder(wantedOrder, childs);
+    } else {
+      return {
+        deleted: 0,
+        first_error: "cannot create territory without a parent",
+        errors: 1,
+        inserted: 0,
+        replaced: 0,
+        skipped: 0,
+        unchanged: 0,
+      };
     }
 
     return super.save(db);

@@ -4,9 +4,12 @@ import { space1, space2 } from "Theme/constants";
 interface IButtonStyle {
   hasIcon?: boolean;
   fullWidth?: boolean;
+  noBorder?: boolean;
   inverted: boolean;
   color: string;
   disabled?: boolean;
+  radiusLeft?: boolean;
+  radiusRight?: boolean;
 }
 export const StyledButton = styled.button<IButtonStyle>`
   display: flex;
@@ -18,9 +21,10 @@ export const StyledButton = styled.button<IButtonStyle>`
   padding: ${space1} ${({ hasIcon }) => (hasIcon ? space1 : space2)};
   border-color: ${({ theme, disabled, color }) =>
     disabled ? theme.color["gray"][400] : theme.color[color]};
-  border-width: thin;
+  border-width: ${({ noBorder }) => (noBorder ? 0 : "thin")};
   border-style: solid;
-
+  border-radius: ${({ radiusLeft, radiusRight }) =>
+    radiusLeft ? "7px 0 0 7px" : radiusRight ? "0 7px 7px 0" : 0};
   color: ${({ theme, disabled, color, inverted }) =>
     disabled
       ? theme.color["gray"][200]

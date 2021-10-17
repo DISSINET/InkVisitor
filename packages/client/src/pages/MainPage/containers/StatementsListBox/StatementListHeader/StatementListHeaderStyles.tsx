@@ -14,7 +14,7 @@ export const StyledHeaderRow = styled.div`
   align-items: center;
   justify-content: space-between;
 `;
-export const StyledTitle = styled.h4`
+export const StyledTitle = styled.h3`
   display: inline-flex;
 `;
 export const StyledButtonGroup = styled(ButtonGroup)`

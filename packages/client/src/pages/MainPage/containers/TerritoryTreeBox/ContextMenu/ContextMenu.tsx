@@ -73,7 +73,6 @@ export const ContextMenu: React.FC<ContextMenu> = ({
             $clientY={currentPosition.y}
             height={currentPosition.height}
             style={animatedMount}
-            // style={styles}
           >
             <Button
               key="add"

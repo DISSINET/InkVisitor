@@ -6,7 +6,7 @@ interface TagGroup {
 }
 export const TagGroup = styled.div<TagGroup>`
   display: flex;
-  > div {
+  > div:not(:last-child) {
     margin-right: ${({ theme, noMargin }) => (noMargin ? 0 : theme.space[1])};
   }
 `;
