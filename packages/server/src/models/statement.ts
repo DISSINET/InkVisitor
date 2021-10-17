@@ -18,11 +18,15 @@ import {
   Virtuality,
   Partitivity,
   Operator,
+  UserRole,
+  UserRoleMode,
 } from "@shared/enums";
 
 import Actant from "./actant";
 import { r as rethink, Connection, RDatum, WriteResult } from "rethinkdb-ts";
 import { InternalServerError } from "@shared/types/errors";
+import User from "./user";
+import Territory from "./territory";
 
 export class StatementActant implements IStatementActant, IModel {
   id = "";
@@ -160,7 +164,7 @@ export class StatementProp implements IStatementProp, IModel {
     virtuality: Virtuality.Reality,
     partitivity: Partitivity.Unison,
   };
-  
+
   value: {
     id: string;
     elvl: Elvl;
@@ -288,6 +292,33 @@ class Statement extends Actant implements IStatement {
     }
 
     return this.data.isValid();
+  }
+
+  canBeEditedByUser(user: User): boolean {
+    // admin role has always the right
+    if (user.role === UserRole.Admin) {
+      return true;
+    }
+
+    const territory = new Territory({ id: this.data.territory.id });
+    const closestRight = territory.getClosestRight(user.rights);
+    if (!closestRight) {
+      return false;
+    }
+
+    return (
+      closestRight.mode === UserRoleMode.Admin ||
+      closestRight.mode === UserRoleMode.Write
+    );
+  }
+
+  canBeDeletedByUser(user: User): boolean {
+    // admin role has always the right
+    if (user.role === UserRole.Admin) {
+      return true;
+    }
+
+    return false;
   }
 
   /**
