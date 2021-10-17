@@ -5,7 +5,7 @@
 import { IAudit, IActant, IStatement, IAction } from ".";
 
 export interface IResponseStatement extends IStatement {
-  actants?: IActant[];
+  actants: IActant[];
   actions?: IAction[];
   audits?: IAudit[];
   usedIn?: IStatement[];
