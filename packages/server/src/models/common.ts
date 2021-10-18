@@ -53,6 +53,12 @@ export function fillArray<T>(
     return;
   }
   for (const sourceElement of source as unknown[]) {
-    ctx.push(new constructor(sourceElement));
+    switch (constructor.name) {
+      case "String":
+        ctx.push(sourceElement as T);
+        break;
+      default:
+        ctx.push(new constructor(sourceElement));
+    }
   }
 }
