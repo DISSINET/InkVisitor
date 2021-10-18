@@ -50,8 +50,8 @@ export const Tooltip: React.FC<Tooltip> = ({
       position={position}
       on={on}
       disabled={disabled}
-      noArrow={noArrow}
       color={color}
+      arrow={!noArrow}
     >
       <div>
         {attributes && <StyledContentWrap>{attributes}</StyledContentWrap>}
