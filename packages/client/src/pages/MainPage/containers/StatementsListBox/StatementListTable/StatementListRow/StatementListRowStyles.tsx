@@ -12,7 +12,7 @@ export const StyledTr = styled.tr<StyledTr>`
     isSelected ? theme.color["primary"] : theme.color["black"]};
   opacity: ${({ opacity }) => (opacity ? opacity : 1)};
   border-top: 1px solid ${({ theme }) => theme.color["gray"][500]};
-
+  cursor: ${({ isSelected }) => (isSelected ? "default" : "pointer")};
   td:first-child {
     padding-left: ${({ theme }) => theme.space[1]};
   }
@@ -21,7 +21,6 @@ export const StyledTd = styled.td`
   padding: ${({ theme }) => theme.space[2]};
   padding-left: 0;
   font-size: ${({ theme }) => theme.fontSize["sm"]};
-  cursor: pointer;
 `;
 export const StyledSubRow = styled.div`
   width: 100%;

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { DragObjectWithType, DropTargetMonitor, useDrop } from "react-dnd";
 import { FaPlus, FaPlayCircle } from "react-icons/fa";
 import { MdCancel } from "react-icons/md";
@@ -87,6 +87,8 @@ export const Suggester: React.FC<SuggesterProps> = ({
       isOver: !!monitor.isOver(),
     }),
   });
+  const [highlighted, setHighlighted] = useState();
+  const [isFocused, setIsFocused] = useState(false);
 
   return (
     <StyledSuggester marginTop={marginTop}>
@@ -99,6 +101,8 @@ export const Suggester: React.FC<SuggesterProps> = ({
           inverted
           suggester
           onChangeFn={onChangeCategory}
+          onFocus={() => setIsFocused(true)}
+          onBlur={() => setIsFocused(false)}
         />
         <Input
           type="text"
@@ -108,6 +112,8 @@ export const Suggester: React.FC<SuggesterProps> = ({
           suggester
           changeOnType={true}
           width={inputWidth}
+          onFocus={() => setIsFocused(true)}
+          onBlur={() => setIsFocused(false)}
           onEnterPressFn={() => {
             onCreate({
               label: typed,
@@ -137,7 +143,7 @@ export const Suggester: React.FC<SuggesterProps> = ({
           </StyledSuggesterButton>
         )}
       </StyledInputWrapper>
-      {suggestions.length || isFetching ? (
+      {isFocused && (suggestions.length || isFetching) ? (
         <StyledSuggesterList>
           <StyledRelativePosition>
             {suggestions
