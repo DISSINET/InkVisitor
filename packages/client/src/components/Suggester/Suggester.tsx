@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { DragObjectWithType, DropTargetMonitor, useDrop } from "react-dnd";
 import { FaPlus, FaPlayCircle } from "react-icons/fa";
 import { MdCancel } from "react-icons/md";
@@ -18,6 +18,7 @@ import {
   StyledRelativePosition,
   StyledTypeBar,
 } from "./SuggesterStyles";
+import { SuggesterKeyPress } from "./SuggesterKeyPress";
 
 export interface SuggestionI {
   id: string;
@@ -87,7 +88,7 @@ export const Suggester: React.FC<SuggesterProps> = ({
       isOver: !!monitor.isOver(),
     }),
   });
-  const [highlighted, setHighlighted] = useState();
+  const [selected, setSelected] = useState(-1);
   const [isFocused, setIsFocused] = useState(false);
 
   return (
@@ -101,7 +102,10 @@ export const Suggester: React.FC<SuggesterProps> = ({
           inverted
           suggester
           onChangeFn={onChangeCategory}
-          onFocus={() => setIsFocused(true)}
+          onFocus={() => {
+            setSelected(-1);
+            setIsFocused(true);
+          }}
           onBlur={() => setIsFocused(false)}
         />
         <Input
@@ -112,13 +116,20 @@ export const Suggester: React.FC<SuggesterProps> = ({
           suggester
           changeOnType={true}
           width={inputWidth}
-          onFocus={() => setIsFocused(true)}
+          onFocus={() => {
+            setSelected(-1);
+            setIsFocused(true);
+          }}
           onBlur={() => setIsFocused(false)}
           onEnterPressFn={() => {
-            onCreate({
-              label: typed,
-              category: category,
-            });
+            if (selected === -1) {
+              onCreate({
+                label: typed,
+                category: category,
+              });
+            } else if (selected > -1) {
+              onPick(suggestions[selected]);
+            }
           }}
         />
         {displayCancelButton && (
@@ -150,14 +161,14 @@ export const Suggester: React.FC<SuggesterProps> = ({
               .filter((s, si) => si < MAXSUGGESTIONDISPLAYED)
               .map((suggestion, si) => (
                 <React.Fragment key={si}>
-                  <StyledSuggestionLineActions>
+                  <StyledSuggestionLineActions isSelected={selected === si}>
                     <FaPlayCircle
                       onClick={() => {
                         onPick(suggestion);
                       }}
                     />
                   </StyledSuggestionLineActions>
-                  <StyledSuggestionLineTag>
+                  <StyledSuggestionLineTag isSelected={selected === si}>
                     <Tag
                       propId={suggestion.id}
                       label={suggestion.label}
@@ -165,13 +176,22 @@ export const Suggester: React.FC<SuggesterProps> = ({
                       category={suggestion.category}
                     />
                   </StyledSuggestionLineTag>
-                  <StyledSuggestionLineIcons>
+                  <StyledSuggestionLineIcons isSelected={selected === si}>
                     {suggestion.icons}
                   </StyledSuggestionLineIcons>
                 </React.Fragment>
               ))}
             <Loader size={30} show={isFetching} />
           </StyledRelativePosition>
+          <SuggesterKeyPress
+            onArrowDown={() => {
+              if (selected < suggestions.length - 1) setSelected(selected + 1);
+            }}
+            onArrowUp={() => {
+              if (selected > -1) setSelected(selected - 1);
+            }}
+            dependencyArr={[selected]}
+          />
         </StyledSuggesterList>
       ) : null}
     </StyledSuggester>
