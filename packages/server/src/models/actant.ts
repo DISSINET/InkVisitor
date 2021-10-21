@@ -1,9 +1,10 @@
-import { IDbModel } from "./common";
+import { IDbModel, UnknownObject, fillFlatObject } from "./common";
 import { r as rethink, Connection, WriteResult } from "rethinkdb-ts";
 import { IStatement } from "@shared/types";
 import { ActantType, UserRoleMode } from "@shared/enums";
 import { InternalServerError } from "@shared/types/errors";
 import User from "./user";
+import Statement from "./statement";
 
 export default class Actant implements IDbModel {
   static table = "actants";
@@ -33,34 +34,21 @@ export default class Actant implements IDbModel {
 
   async delete(db: Connection | undefined): Promise<WriteResult> {
     if (!this.id) {
-      throw new Error("delete called on actant with undefined id");
+      throw new InternalServerError(
+        "delete called on actant with undefined id"
+      );
     }
 
     for (const st of await this.getDependentStatements(db)) {
-      const actant = new Actant();
-      actant.id = st.id;
+      const statement = new Statement({ ...st });
 
-      let indexToRemove = st.data.actants.findIndex(
-        (a) => a.actant === this.id
-      );
-
-      if (indexToRemove !== -1) {
-        st.data.actants.splice(indexToRemove, 1);
-      } else {
-        indexToRemove = st.data.props.findIndex((a) => a.origin === this.id);
-        if (indexToRemove !== -1) {
-          st.data.props.splice(indexToRemove, 1);
-        }
-      }
-
-      // if neither works
-      if (indexToRemove === -1) {
+      if (!statement.unlinkActantId(this.id)) {
         throw new Error(
           "getDependentStatements returned non-dependent statement"
         );
       }
 
-      await actant.update(db, { data: st.data });
+      await statement.update(db, { data: st.data });
     }
 
     return rethink.table(Actant.table).get(this.id).delete().run(db);
