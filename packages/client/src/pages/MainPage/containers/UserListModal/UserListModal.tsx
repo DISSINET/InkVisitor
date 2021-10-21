@@ -22,6 +22,7 @@ import {
   FaTrashAlt,
   FaPlus,
   FaPen,
+  FaKey,
   FaPencilAlt,
   FaUnlink,
 } from "react-icons/fa";
@@ -41,6 +42,11 @@ import {
   StyledUserEditorRow,
   StyledUserEditorRowLabel,
   StyledUserEditorRowValue,
+  StyledUserEditorSection,
+  StyledTableWrapper,
+  StyledTerritoryColumn,
+  StyledTerritoryList,
+  StyledTerritoryListItem,
 } from "./UserListTableStyles";
 
 import { UserListTableRow } from "./UserListTableRow/UserListTableRow";
@@ -65,14 +71,14 @@ export const UserListModal: React.FC<UserListModal> = ({
   isOpen,
   onCloseFn,
 }) => {
-  const [editedUserId, setEditedUserId] = useState<false | string>(false);
+  const [editedUserId, setEditedUserId] = useState<false | string>("1");
   const queryClient = useQueryClient();
 
   const { status, data, error, isFetching } = useQuery(
     ["users"],
     async () => {
-      const res = await api.usersGetMore({});
-      return res.data;
+      const res = await api.administrationGet();
+      return res.data.users.sort((a, b) => (a.id > b.id ? 1 : -1));
     },
     { enabled: api.isLoggedIn() }
   );
@@ -121,7 +127,7 @@ export const UserListModal: React.FC<UserListModal> = ({
   const columns: Column<{}>[] = useMemo(() => {
     return [
       {
-        Header: "User",
+        Header: "",
         id: "Name",
         accessor: "name",
         Cell: ({ row }: Cell) => {
@@ -145,57 +151,212 @@ export const UserListModal: React.FC<UserListModal> = ({
         },
       },
       {
-        Header: "Territories",
-        id: "territories",
+        Header: "Username",
+        id: "Username",
+        Cell: ({ row }: Cell) => {
+          const { id, name, email, role } = row.original as any;
+          return (
+            <Input
+              value={name}
+              onChangeFn={async (newValue: string) => {
+                userMutation.mutate({
+                  id: id,
+                  name: newValue,
+                });
+              }}
+            />
+          );
+        },
+      },
+      {
+        Header: "Email",
+        id: "Email",
+        Cell: ({ row }: Cell) => {
+          const { id, name, email, role } = row.original as any;
+          return (
+            <Input
+              value={email}
+              onChangeFn={async (newValue: string) => {
+                userMutation.mutate({
+                  id: id,
+                  email: newValue,
+                });
+              }}
+            />
+          );
+        },
+      },
+      {
+        Header: "Role",
+        id: "Role",
+        Cell: ({ row }: Cell) => {
+          const { id, name, email, role } = row.original as any;
+          return (
+            <AttributeButtonGroup
+              options={[
+                {
+                  longValue: userRoleDict[0].label,
+                  shortValue: userRoleDict[0].label,
+                  selected: role === userRoleDict[0].value,
+                  onClick: () => {
+                    userMutation.mutate({
+                      id: id,
+                      role: userRoleDict[0].value,
+                    });
+                  },
+                },
+                {
+                  longValue: userRoleDict[1].label,
+                  shortValue: userRoleDict[1].label,
+                  selected: role === userRoleDict[1].value,
+                  onClick: () => {
+                    userMutation.mutate({
+                      id: id,
+                      role: userRoleDict[1].value,
+                    });
+                  },
+                },
+                {
+                  longValue: userRoleDict[2].label,
+                  shortValue: userRoleDict[2].label,
+                  selected: role === userRoleDict[2].value,
+                  onClick: () => {
+                    userMutation.mutate({
+                      id: id,
+                      role: userRoleDict[2].value,
+                    });
+                  },
+                },
+              ]}
+            />
+          );
+        },
+      },
+      {
+        Header: "Read Territories",
+        id: "territories-read",
         Cell: ({ row }: Cell) => {
           const {
             id: userId,
             rights,
             territoryRights: territoryActants,
           } = row.original as any;
+
+          const readTerritories = rights.filter(
+            (r: IUserRight) => r.mode === "read"
+          );
+
           return (
-            <>
-              <div>
-                {rights
-                  .filter((r: any) => r.mode === "edit")
-                  .map((territory: string) => {
-                    const territoryActant = territoryActants.find(
-                      (t: any) => t.id === territory
-                    );
-                    return territoryActant ? (
-                      <div key={territoryActant}>
-                        <ActantTag
-                          actant={territoryActant}
-                          short={false}
-                          button={
-                            <Button
-                              key="d"
-                              tooltip="unlink actant from tags"
-                              icon={<FaUnlink />}
-                              color="plain"
-                              inverted={true}
-                              onClick={() => {
-                                // =>
-                              }}
-                            />
-                          }
-                        />
-                      </div>
-                    ) : (
-                      <div>{territory} </div>
-                    );
-                  })}
-              </div>
+            <StyledTerritoryColumn>
               <ActantSuggester
                 allowCreate={false}
                 onSelected={(newSelectedId: string) => {
-                  addRightToUser(userId, newSelectedId, "write");
-                  //
+                  addRightToUser(userId, newSelectedId, "read");
                 }}
                 categoryIds={["T"]}
                 placeholder={"assign a territory"}
               ></ActantSuggester>
-            </>
+              <StyledTerritoryList>
+                {readTerritories.length && territoryActants ? (
+                  readTerritories.map((right: IUserRight) => {
+                    const territoryActant = territoryActants.find(
+                      (t: any) => t.territory.id === right.territory
+                    );
+
+                    return territoryActant && territoryActant.territory ? (
+                      <StyledTerritoryListItem key={right.territory}>
+                        <ActantTag
+                          actant={territoryActant.territory}
+                          short={false}
+                          button={
+                            <Button
+                              key="d"
+                              tooltip="remove territory from rights"
+                              icon={<FaUnlink />}
+                              color="plain"
+                              inverted={true}
+                              onClick={() => {
+                                removeRightFromUser(userId, right.territory);
+                              }}
+                            />
+                          }
+                        />
+                      </StyledTerritoryListItem>
+                    ) : (
+                      <StyledTerritoryListItem key={right.territory}>
+                        {right.territory}
+                      </StyledTerritoryListItem>
+                    );
+                  })
+                ) : (
+                  <div />
+                )}
+              </StyledTerritoryList>
+            </StyledTerritoryColumn>
+          );
+        },
+      },
+      {
+        Header: "Write Territories",
+        id: "territories-write",
+        Cell: ({ row }: Cell) => {
+          const {
+            id: userId,
+            rights,
+            territoryRights: territoryActants,
+          } = row.original as any;
+
+          const writeTerritories = rights.filter(
+            (r: IUserRight) => r.mode === "write"
+          );
+
+          return (
+            <StyledTerritoryColumn>
+              <ActantSuggester
+                allowCreate={false}
+                onSelected={(newSelectedId: string) => {
+                  addRightToUser(userId, newSelectedId, "write");
+                }}
+                categoryIds={["T"]}
+                placeholder={"assign a territory"}
+              ></ActantSuggester>
+              <StyledTerritoryList>
+                {writeTerritories.length && territoryActants ? (
+                  writeTerritories.map((right: IUserRight) => {
+                    const territoryActant = territoryActants.find(
+                      (t: any) => t.territory.id === right.territory
+                    );
+
+                    return territoryActant && territoryActant.territory ? (
+                      <StyledTerritoryListItem key={right.territory}>
+                        <ActantTag
+                          actant={territoryActant.territory}
+                          short={false}
+                          button={
+                            <Button
+                              key="d"
+                              tooltip="remove territory from rights"
+                              icon={<FaUnlink />}
+                              color="plain"
+                              inverted={true}
+                              onClick={() => {
+                                removeRightFromUser(userId, right.territory);
+                              }}
+                            />
+                          }
+                        />
+                      </StyledTerritoryListItem>
+                    ) : (
+                      <StyledTerritoryListItem key={right.territory}>
+                        {right.territory}
+                      </StyledTerritoryListItem>
+                    );
+                  })
+                ) : (
+                  <div />
+                )}
+              </StyledTerritoryList>
+            </StyledTerritoryColumn>
           );
         },
       },
@@ -216,17 +377,12 @@ export const UserListModal: React.FC<UserListModal> = ({
                 icon={<FaTrashAlt size={14} />}
                 color="danger"
                 tooltip="delete"
-                inverted
               />
               <Button
-                key="e"
-                icon={<FaPencilAlt size={14} />}
+                icon={<FaKey size={14} />}
+                tooltip="by clicking here, the user password will be restarted and new password send to an address"
                 color="warning"
-                tooltip="edit"
-                inverted={setEditedUserId !== userId}
-                onClick={() => {
-                  setEditedUserId(userId);
-                }}
+                onClick={() => {}}
               />
             </ButtonGroup>
           );
@@ -251,134 +407,152 @@ export const UserListModal: React.FC<UserListModal> = ({
     },
   });
 
-  console.log(editedUser);
-
   return (
     <Modal showModal={isOpen} onClose={() => onCloseFn()} width={"full"}>
       <ModalHeader title={"Manage Users"} />
       <ModalContent>
-        <StyledTable {...getTableProps()}>
-          <StyledTHead>
-            {headerGroups.map((headerGroup, key) => (
-              <tr {...headerGroup.getHeaderGroupProps()} key={key}>
-                {headerGroup.headers.map((column, key) => (
-                  <StyledTh {...column.getHeaderProps()} key={key}>
-                    {column.render("Header")}
-                  </StyledTh>
-                ))}
-              </tr>
-            ))}
-          </StyledTHead>
-          <tbody {...getTableBodyProps()}>
-            {rows.map((row: Row, i: number) => {
-              prepareRow(row);
-              console.log(row);
-              return (
-                <UserListTableRow
-                  isSelected={editedUserId === row.id}
-                  index={i}
-                  row={row}
-                  {...row.getRowProps()}
-                />
-              );
-            })}
-          </tbody>
-        </StyledTable>
-        {editedUser ? (
+        <StyledTableWrapper>
+          <StyledTable {...getTableProps()}>
+            <StyledTHead>
+              {headerGroups.map((headerGroup, key) => (
+                <tr {...headerGroup.getHeaderGroupProps()} key={key}>
+                  {headerGroup.headers.map((column, key) => (
+                    <StyledTh {...column.getHeaderProps()} key={key}>
+                      {column.render("Header")}
+                    </StyledTh>
+                  ))}
+                </tr>
+              ))}
+            </StyledTHead>
+            <tbody {...getTableBodyProps()}>
+              {rows.map((row: Row, i: number) => {
+                prepareRow(row);
+                return (
+                  <UserListTableRow
+                    isSelected={editedUserId === row.id}
+                    index={i}
+                    row={row}
+                    {...row.getRowProps()}
+                  />
+                );
+              })}
+            </tbody>
+          </StyledTable>
+        </StyledTableWrapper>
+        {/* {editedUser ? (
           <StyledUserEditor>
-            <StyledUserEditorTitle>{editedUser.name}</StyledUserEditorTitle>
-            <StyledUserEditorBody>
-              <StyledUserEditorForm>
-                <StyledUserEditorRow>
-                  <StyledUserEditorRowLabel>Username</StyledUserEditorRowLabel>
-                  <StyledUserEditorRowValue>
-                    <Input
-                      width="full"
-                      value={editedUser.name}
-                      onChangeFn={async (newValue: string) => {
-                        userMutation.mutate({ id: editedUser, name: newValue });
-                      }}
-                    />
-                  </StyledUserEditorRowValue>
-                </StyledUserEditorRow>
-                <StyledUserEditorRow>
-                  <StyledUserEditorRowLabel>Email</StyledUserEditorRowLabel>
-                  <StyledUserEditorRowValue>
-                    <Input
-                      width="full"
-                      value={editedUser.email}
-                      onChangeFn={async (newValue: string) => {
-                        userMutation.mutate({
-                          id: editedUser,
-                          email: newValue,
-                        });
-                      }}
-                    />
-                  </StyledUserEditorRowValue>
-                </StyledUserEditorRow>
-                <StyledUserEditorRow>
-                  <StyledUserEditorRowLabel>
-                    Restart Password
-                  </StyledUserEditorRowLabel>
-                  <StyledUserEditorRowValue>
-                    <Button
-                      label="reset password"
-                      tooltip="by clicking here, the user password will be restarted and new password send to an address"
-                      color="warning"
-                      onClick={() => {}}
-                    />
-                  </StyledUserEditorRowValue>
-                </StyledUserEditorRow>
+            <StyledUserEditorSection>
+              <StyledUserEditorTitle>{editedUser.name}</StyledUserEditorTitle>
+              <StyledUserEditorBody>
+                <StyledUserEditorForm>
+                  <StyledUserEditorRow>
+                    <StyledUserEditorRowLabel>
+                      Username
+                    </StyledUserEditorRowLabel>
+                    <StyledUserEditorRowValue>
+                      <Input
+                        width="full"
+                        value={editedUser.name}
+                        onChangeFn={async (newValue: string) => {
+                          userMutation.mutate({
+                            id: editedUser.id,
+                            name: newValue,
+                          });
+                        }}
+                      />
+                    </StyledUserEditorRowValue>
+                  </StyledUserEditorRow>
+                  <StyledUserEditorRow>
+                    <StyledUserEditorRowLabel>Email</StyledUserEditorRowLabel>
+                    <StyledUserEditorRowValue>
+                      <Input
+                        width="full"
+                        value={editedUser.email}
+                        onChangeFn={async (newValue: string) => {
+                          userMutation.mutate({
+                            id: editedUser.id,
+                            email: newValue,
+                          });
+                        }}
+                      />
+                    </StyledUserEditorRowValue>
+                  </StyledUserEditorRow>
+                  <StyledUserEditorRow>
+                    <StyledUserEditorRowLabel>
+                      Restart Password
+                    </StyledUserEditorRowLabel>
+                    <StyledUserEditorRowValue>
+                      <Button
+                        label="reset password"
+                        tooltip="by clicking here, the user password will be restarted and new password send to an address"
+                        color="warning"
+                        onClick={() => {}}
+                      />
+                    </StyledUserEditorRowValue>
+                  </StyledUserEditorRow>
 
-                <StyledUserEditorRow>
-                  <StyledUserEditorRowLabel>Role</StyledUserEditorRowLabel>
-                  <StyledUserEditorRowValue>
-                    <AttributeButtonGroup
-                      options={[
-                        {
-                          longValue: userRoleDict[0].label,
-                          shortValue: userRoleDict[0].label,
-                          selected: editedUser.role === userRoleDict[0].value,
-                          onClick: () => {
-                            userMutation.mutate({
-                              id: editedUser.id,
-                              role: userRoleDict[0].value,
-                            });
+                  <StyledUserEditorRow>
+                    <StyledUserEditorRowLabel>Role</StyledUserEditorRowLabel>
+                    <StyledUserEditorRowValue>
+                      <AttributeButtonGroup
+                        options={[
+                          {
+                            longValue: userRoleDict[0].label,
+                            shortValue: userRoleDict[0].label,
+                            selected: editedUser.role === userRoleDict[0].value,
+                            onClick: () => {
+                              userMutation.mutate({
+                                id: editedUser.id,
+                                role: userRoleDict[0].value,
+                              });
+                            },
                           },
-                        },
-                        {
-                          longValue: userRoleDict[1].label,
-                          shortValue: userRoleDict[1].label,
-                          selected: editedUser.role === userRoleDict[1].value,
-                          onClick: () => {
-                            userMutation.mutate({
-                              id: editedUser.id,
-                              role: userRoleDict[1].value,
-                            });
+                          {
+                            longValue: userRoleDict[1].label,
+                            shortValue: userRoleDict[1].label,
+                            selected: editedUser.role === userRoleDict[1].value,
+                            onClick: () => {
+                              userMutation.mutate({
+                                id: editedUser.id,
+                                role: userRoleDict[1].value,
+                              });
+                            },
                           },
-                        },
-                        {
-                          longValue: userRoleDict[2].label,
-                          shortValue: userRoleDict[2].label,
-                          selected: editedUser.role === userRoleDict[2].value,
-                          onClick: () => {
-                            userMutation.mutate({
-                              id: editedUser.id,
-                              role: userRoleDict[2].value,
-                            });
+                          {
+                            longValue: userRoleDict[2].label,
+                            shortValue: userRoleDict[2].label,
+                            selected: editedUser.role === userRoleDict[2].value,
+                            onClick: () => {
+                              userMutation.mutate({
+                                id: editedUser.id,
+                                role: userRoleDict[2].value,
+                              });
+                            },
                           },
-                        },
-                      ]}
-                    />
-                  </StyledUserEditorRowValue>
-                </StyledUserEditorRow>
-              </StyledUserEditorForm>
-            </StyledUserEditorBody>
-            <StyledUserEditorFoot></StyledUserEditorFoot>
+                        ]}
+                      />
+                    </StyledUserEditorRowValue>
+                  </StyledUserEditorRow>
+                </StyledUserEditorForm>
+              </StyledUserEditorBody>
+              <StyledUserEditorFoot></StyledUserEditorFoot>
+            </StyledUserEditorSection>
+            <StyledUserEditorSection>
+              <ActantSuggester
+                allowCreate={false}
+                onSelected={(newSelectedId: string) => {
+                  //addRightToUser(userId, newSelectedId, "write");
+                  //
+                }}
+                categoryIds={["T"]}
+                placeholder={"assign a territory"}
+              ></ActantSuggester>
+            </StyledUserEditorSection>
           </StyledUserEditor>
         ) : (
           <div />
         )}
+       */}
       </ModalContent>
       <ModalFooter>
         <ButtonGroup>

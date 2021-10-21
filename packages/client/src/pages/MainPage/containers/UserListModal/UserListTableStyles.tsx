@@ -1,8 +1,16 @@
 import styled from "styled-components";
 
+export const StyledTableWrapper = styled.div`
+  display: block;
+  width: 100%;
+  overflow-x: scroll;
+  overflow-y: hidden;
+`;
+
 export const StyledTable = styled.table`
-  border-spacing: 0;
   border-collapse: collapse;
+  width: 100%;
+  border-spacing: 0;
 `;
 export const StyledTHead = styled.thead`
   font-size: ${({ theme }) => theme.fontSize["sm"]};
@@ -22,13 +30,28 @@ interface StyledTr {
 }
 export const StyledTr = styled.tr<StyledTr>`
   opacity: ${({ opacity }) => (opacity ? opacity : 1)};
-  td:first-child {
+  td:first-child {StyledTable
     padding-left: ${({ theme }) => theme.space[2]};
     padding-right: ${({ theme }) => theme.space[2]};
   }
   td:not(:last-child) {
     width: 1%;
   }
+`;
+
+export const StyledTerritoryColumn = styled.div`
+  display: block;
+`;
+export const StyledTerritoryList = styled.div`
+  display: block;
+
+  padding-bottom: ${({ theme }) => theme.space[2]};
+  padding-top: ${({ theme }) => theme.space[2]};
+`;
+export const StyledTerritoryListItem = styled.div`
+  padding-right: ${({ theme }) => theme.space[2]};
+  padding-bottom: ${({ theme }) => theme.space[1]};
+  display: inline-block;
 `;
 
 export const StyledUserNameColumn = styled.div`
@@ -44,7 +67,12 @@ export const StyledUserNameColumnText = styled.div`
     display: block;
   }
 `;
-export const StyledUserEditor = styled.div``;
+export const StyledUserEditor = styled.div`
+  columns: auto auto;
+`;
+
+export const StyledUserEditorSection = styled.div``;
+
 export const StyledUserEditorTitle = styled.div``;
 export const StyledUserEditorBody = styled.div``;
 export const StyledUserEditorFoot = styled.div``;
