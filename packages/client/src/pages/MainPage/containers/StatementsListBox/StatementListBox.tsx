@@ -288,6 +288,7 @@ export const StatementListBox: React.FC = () => {
                 )}
               {isOversized && (
                 <Tooltip
+                  offsetX={-14}
                   position="right center"
                   color="success"
                   noArrow
@@ -324,6 +325,7 @@ export const StatementListBox: React.FC = () => {
                   )}
                 {isOversized && (
                   <Tooltip
+                    offsetX={-14}
                     position="right center"
                     color="success"
                     noArrow
@@ -371,6 +373,7 @@ export const StatementListBox: React.FC = () => {
                 )}
               {isOversized && (
                 <Tooltip
+                  offsetX={-14}
                   position="right center"
                   color="success"
                   noArrow

@@ -12,6 +12,7 @@ export const StyledTr = styled.tr<StyledTr>`
     isSelected ? theme.color["primary"] : theme.color["black"]};
   opacity: ${({ opacity }) => (opacity ? opacity : 1)};
   border-top: 1px solid ${({ theme }) => theme.color["gray"][500]};
+  cursor: ${({ isSelected }) => (isSelected ? "default" : "pointer")};
   td:first-child {
     padding-left: ${({ theme }) => theme.space[1]};
   }

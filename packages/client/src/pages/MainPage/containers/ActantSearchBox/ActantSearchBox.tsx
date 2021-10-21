@@ -19,7 +19,7 @@ import { IOption, IResponseSearch } from "@shared/types";
 import { FaUnlink } from "react-icons/fa";
 import { useDebounce } from "hooks";
 
-const classesActants = ["A", "P", "G", "O", "C", "L", "V", "E", "S", "T", "R"];
+const classesActants = ["A", "P", "G", "O", "C", "L", "V", "E", "T", "R"];
 
 const initValues: IRequestSearch = {
   actantId: "",
@@ -169,7 +169,7 @@ export const ActantSearchBox: React.FC = () => {
                 {results.map((result: IResponseSearch, key: number) => (
                   <StyledResultItem key={key}>
                     <Tag
-                      position="left top"
+                      tooltipPosition="left top"
                       propId={result.actantId}
                       label={result.actantLabel}
                       category={result.class}

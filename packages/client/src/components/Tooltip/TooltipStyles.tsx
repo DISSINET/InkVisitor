@@ -3,7 +3,6 @@ import Popup from "reactjs-popup";
 import { Colors } from "types";
 
 interface StyledPopup {
-  noArrow: boolean;
   color: typeof Colors[number];
 }
 export const StyledPopup = styled(Popup)<StyledPopup>`
@@ -18,11 +17,9 @@ export const StyledPopup = styled(Popup)<StyledPopup>`
     justify-content: center;
     align-items: center;
     max-width: 40rem;
-    transform: ${({ noArrow }) => (noArrow ? "translate(-2rem)" : 0)};
   }
   &-arrow {
-    color: ${({ theme, noArrow, color }) =>
-      noArrow ? "transparent" : theme.color[color]};
+    color: ${({ theme, color }) => theme.color[color]};
   }
   [role="tooltip"]&-content {
   }

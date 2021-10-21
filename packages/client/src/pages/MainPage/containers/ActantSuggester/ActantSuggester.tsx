@@ -148,13 +148,6 @@ export const ActantSuggester: React.FC<ActantSuggesterI> = ({
     if (newCreated.category === ActantType.Territory) {
       const newActant = CTerritoryActant(newCreated.label, rootTerritoryId, -1);
       actantsCreateMutation.mutate(newActant);
-    } else if (newCreated.category === ActantType.Statement) {
-      // TODO: CStatement create
-      // const newActant = CStatement(
-      //   newCreated.category as CategoryActantType,
-      //   newCreated.label
-      // );
-      // actantsCreateMutation.mutate(newActant);
     } else {
       const newActant = CActant(
         newCreated.category as CategoryActantType,

@@ -18,11 +18,9 @@ import {
   CStatementAction,
 } from "constructors";
 
-import { referenceTypeDict } from "./../../../../../../shared/dictionaries";
 import {
   IActant,
   IStatementProp,
-  IStatement,
   IStatementReference,
   IResponseStatement,
 } from "@shared/types";
@@ -52,7 +50,7 @@ import { ColumnInstance } from "react-table";
 import { useSearchParams } from "hooks";
 import { AttributeButtonGroup } from "../AttributeButtonGroup/AttributeButtonGroup";
 
-const classesActants = ["A", "P", "G", "O", "C", "L", "V", "E", "S", "T", "R"];
+const classesActants = ["A", "T", "R", "P", "G", "O", "C", "L", "V", "E"];
 const classesPropType = ["C"];
 const classesPropValue = [
   "A",
@@ -68,7 +66,7 @@ const classesPropValue = [
   "R",
 ];
 const classesResources = ["R"];
-const classesTags = ["A", "C", "P", "G", "O", "L", "V", "E", "S", "T", "R"];
+const classesTags = ["A", "T", "R", "P", "G", "O", "C", "L", "V", "E"];
 
 export const StatementEditorBox: React.FC = () => {
   const { statementId, setStatementId } = useSearchParams();

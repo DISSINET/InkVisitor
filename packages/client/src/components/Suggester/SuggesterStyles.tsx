@@ -38,7 +38,6 @@ export const StyledSuggesterList = styled.div`
 export const StyledRelativePosition = styled.div`
   position: relative;
   background-color: ${({ theme }) => theme.color["blue"][50]};
-  padding: ${space1};
   width: auto;
   display: grid;
   grid-template-columns: 1.5em 10em 2em;
@@ -72,11 +71,33 @@ export const StyledTypeBar = styled.div<StyledTypeBar>`
   top: 1px;
   bottom: 1px;
 `;
+interface Column {
+  isSelected: boolean;
+}
+export const StyledSuggestionLineIcons = styled.div<Column>`
+  display: grid;
+  height: 100%;
+  align-items: center;
+  justify-content: center;
+  background-color: ${({ theme, isSelected }) =>
+    isSelected ? theme.color["blue"][100] : "transparent"};
+`;
 
-export const StyledSuggestionLineIcons = styled.div``;
+export const StyledSuggestionLineTag = styled.div<Column>`
+  display: grid;
+  align-items: center;
+  height: 100%;
+  background-color: ${({ theme, isSelected }) =>
+    isSelected ? theme.color["blue"][100] : "transparent"};
+`;
 
-export const StyledSuggestionLineTag = styled.div``;
+export const StyledSuggestionLineActions = styled.div<Column>`
+  display: grid;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  background-color: ${({ theme, isSelected }) =>
+    isSelected ? theme.color["blue"][100] : "transparent"};
 
-export const StyledSuggestionLineActions = styled.div`
   cursor: pointer;
 `;
