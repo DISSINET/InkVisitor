@@ -96,7 +96,7 @@ export default Router()
       ) {
         throw new ModelNotValidError("id already exists");
       }
-      
+
       if (result.inserted === 1) {
         return {
           result: true,
@@ -253,16 +253,16 @@ export default Router()
       }
 
       let associatedActantIds: string[] | undefined = undefined;
-      if (req.actantId || req.actionId) {
+      if (req.actantId) {
         associatedActantIds = await findAssociatedActantIds(
           httpRequest.db,
-          req.actantId,
-          req.actionId
+          req.actantId
         );
-      }
 
-      if (associatedActantIds && !associatedActantIds.length) {
-        return [];
+        // actant id provided, but not found within statements - end now
+        if (!associatedActantIds.length) {
+          return [];
+        }
       }
 
       const actants = await filterActantsByWildcard(
