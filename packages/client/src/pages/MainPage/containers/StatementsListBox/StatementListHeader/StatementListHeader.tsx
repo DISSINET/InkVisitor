@@ -3,7 +3,6 @@ import { UseMutationResult, useQueryClient } from "react-query";
 import { FaPlus, FaRecycle } from "react-icons/fa";
 
 import {
-  StyledButtonGroup,
   StyledHeader,
   StyledHeaderBreadcrumbRow,
   StyledTitle,
@@ -52,7 +51,7 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
   return (
     <StyledHeader>
       <StyledHeaderBreadcrumbRow>
-        <StyledButtonGroup noMargin>
+        <ButtonGroup noMargin>
           {selectedTerritoryPath &&
             selectedTerritoryPath.map((territory: string, key: number) => {
               return (
@@ -61,7 +60,7 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
                 </React.Fragment>
               );
             })}
-        </StyledButtonGroup>
+        </ButtonGroup>
       </StyledHeaderBreadcrumbRow>
       <StyledHeaderRow>
         <StyledTitle>

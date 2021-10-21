@@ -17,6 +17,3 @@ export const StyledHeaderRow = styled.div`
 export const StyledTitle = styled.h3`
   display: inline-flex;
 `;
-export const StyledButtonGroup = styled(ButtonGroup)`
-  flex-wrap: wrap;
-`;
