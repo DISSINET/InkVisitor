@@ -20,6 +20,7 @@ import { setDraggedTerritory } from "redux/features/territoryTree/draggedTerrito
 import { useSearchParams } from "hooks";
 import { TagTooltip } from "./TagTooltip";
 import { PopupPosition } from "reactjs-popup/dist/types";
+import { Tooltip } from "components";
 
 interface TagProps {
   propId: string;
@@ -137,11 +138,12 @@ export const Tag: React.FC<TagProps> = ({
   return (
     <>
       {short ? (
-        <TagTooltip
+        <Tooltip
           position={tooltipPosition}
           label={label}
           detail={tooltipDetail}
           text={tooltipText}
+          tagTooltip
         >
           <div>
             <StyledTagWrapper
@@ -153,15 +155,16 @@ export const Tag: React.FC<TagProps> = ({
               {button && renderButton()}
             </StyledTagWrapper>
           </div>
-        </TagTooltip>
+        </Tooltip>
       ) : (
         <>
-          <TagTooltip
+          <Tooltip
             label={label}
             detail={tooltipDetail}
             text={tooltipText}
             disabled={!enableTooltip}
             position={tooltipPosition}
+            tagTooltip
           >
             <StyledTooltipSeparator>
               <StyledTagWrapper
@@ -182,7 +185,7 @@ export const Tag: React.FC<TagProps> = ({
                 {button && renderButton()}
               </StyledTagWrapper>
             </StyledTooltipSeparator>
-          </TagTooltip>
+          </Tooltip>
         </>
       )}
     </>

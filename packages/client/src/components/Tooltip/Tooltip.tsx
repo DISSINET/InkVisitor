@@ -28,6 +28,8 @@ interface Tooltip {
   noArrow?: boolean;
   items?: ReactElement[] | ReactElement;
   color?: typeof Colors[number];
+  offsetX?: number;
+  offsetY?: number;
 }
 export const Tooltip: React.FC<Tooltip> = ({
   children,
@@ -42,6 +44,8 @@ export const Tooltip: React.FC<Tooltip> = ({
   noArrow = false,
   items,
   color = "black",
+  offsetX,
+  offsetY,
 }) => {
   return (
     <StyledPopup
@@ -50,8 +54,10 @@ export const Tooltip: React.FC<Tooltip> = ({
       position={position}
       on={on}
       disabled={disabled}
-      noArrow={noArrow}
       color={color}
+      arrow={!noArrow}
+      offsetX={offsetX}
+      offsetY={offsetY}
     >
       <div>
         {attributes && <StyledContentWrap>{attributes}</StyledContentWrap>}

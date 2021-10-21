@@ -22,6 +22,8 @@ interface InputProps {
   width?: number | "full";
   onChangeFn: Function;
   onEnterPressFn?: Function;
+  onFocus?: () => void;
+  onBlur?: () => void;
   placeholder?: string;
   changeOnType?: boolean;
   password?: boolean;
@@ -44,6 +46,8 @@ export const Input: React.FC<InputProps> = ({
   placeholder,
   password = false,
   autoFocus = false,
+  onFocus = () => {},
+  onBlur = () => {},
 }) => {
   const [displayValue, setDisplayValue] = useState(value);
   useEffect(() => {
@@ -72,10 +76,12 @@ export const Input: React.FC<InputProps> = ({
               onEnterPressFn();
             }
           }}
+          onFocus={() => onFocus()}
           onBlur={() => {
             if (displayValue !== value && !changeOnType) {
               onChangeFn(displayValue);
             }
+            onBlur();
           }}
           inverted={inverted}
           suggester={suggester}
@@ -96,10 +102,12 @@ export const Input: React.FC<InputProps> = ({
               onChangeFn(e.currentTarget.value);
             }
           }}
+          onFocus={() => onFocus()}
           onBlur={() => {
             if (!changeOnType) {
               onChangeFn(displayValue);
             }
+            onBlur();
           }}
           onKeyPress={(event: React.KeyboardEvent) => {
             if (event.key === "Enter") {
@@ -128,6 +136,8 @@ export const Input: React.FC<InputProps> = ({
               }}
               inverted={inverted}
               suggester={suggester}
+              onFocus={() => onFocus()}
+              onBlur={() => onBlur()}
             >
               {options.map((option, oi) => (
                 <option key={oi} value={option.value}>
@@ -138,7 +148,7 @@ export const Input: React.FC<InputProps> = ({
           ) : (
             <StyledSelectReadonly
               readOnly
-              width={suggester ? 30 : width}
+              width={suggester ? 36 : width}
               value={displayValue}
               inverted={inverted}
               suggester={suggester}

@@ -28,5 +28,4 @@ export const StyledActionLabel = styled.div`
 `;
 export const StyledText = styled.p`
   font-size: ${({ theme }) => theme.fontSize["xs"]};
-  cursor: default;
 `;
