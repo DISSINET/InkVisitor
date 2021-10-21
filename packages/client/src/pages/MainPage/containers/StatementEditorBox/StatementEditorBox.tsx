@@ -766,9 +766,6 @@ export const StatementEditorBox: React.FC = () => {
                         </StyledReferencesListColumn>
                         <StyledReferencesListColumn>
                           <AttributeButtonGroup
-                            leftMargin={false}
-                            border={true}
-                            round={true}
                             options={[
                               {
                                 longValue: "primary",

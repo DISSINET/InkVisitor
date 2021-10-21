@@ -146,9 +146,6 @@ export const StatementEditorActantTable: React.FC<StatementEditorActantTable> = 
           const { sActant } = row.values.data;
           return (
             <AttributeButtonGroup
-              leftMargin={false}
-              border={true}
-              round={true}
               options={[
                 {
                   longValue: "subject",

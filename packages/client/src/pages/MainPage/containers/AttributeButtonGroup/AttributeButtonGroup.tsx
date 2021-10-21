@@ -16,7 +16,12 @@ export const AttributeButtonGroup: React.FC<IAttributeButtonGroup> = ({
   options = [],
 }) => {
   return (
-    <StyledPropButtonGroup leftMargin={true} border={true} round={false}>
+    <StyledPropButtonGroup
+      leftMargin={true}
+      rightMargin={true}
+      border={true}
+      round={false}
+    >
       {options.map((option, oi) => {
         const firstInRow = oi === 0;
         const lastInRow = oi === options.length - 1;
