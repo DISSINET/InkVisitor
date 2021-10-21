@@ -20,7 +20,7 @@ export const AttributeButtonGroup: React.FC<IAttributeButtonGroup> = ({
       leftMargin={true}
       rightMargin={true}
       border={true}
-      round={false}
+      round={true}
     >
       {options.map((option, oi) => {
         const firstInRow = oi === 0;
@@ -31,9 +31,11 @@ export const AttributeButtonGroup: React.FC<IAttributeButtonGroup> = ({
             label={option.selected ? option.longValue : option.shortValue}
             tooltip={option.longValue}
             noBorder
-            inverted={!option.selected}
-            // radiusLeft={firstInRow}
-            // radiusRight={lastInRow}
+            inverted
+            color={option.selected ? "success" : "plain"}
+            textRegular={option.selected ? false : true}
+            radiusLeft={firstInRow}
+            radiusRight={lastInRow}
             onClick={() => {
               if (!option.selected) {
                 option.onClick();
