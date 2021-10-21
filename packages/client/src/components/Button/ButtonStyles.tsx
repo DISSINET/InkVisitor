@@ -5,6 +5,7 @@ interface IButtonStyle {
   hasIcon?: boolean;
   fullWidth?: boolean;
   noBorder?: boolean;
+  textRegular?: boolean;
   inverted: boolean;
   color: string;
   disabled?: boolean;
@@ -17,7 +18,7 @@ export const StyledButton = styled.button<IButtonStyle>`
   justify-content: center;
   width: ${({ fullWidth }) => (fullWidth ? "100%" : "auto")};
   font-size: ${({ theme }) => theme.fontSize["xs"]};
-  font-weight: 900;
+  font-weight: ${({ textRegular }) => (textRegular ? 500 : 900)};
   padding: ${space1} ${({ hasIcon }) => (hasIcon ? space1 : space2)};
   border-color: ${({ theme, disabled, color }) =>
     disabled ? theme.color["gray"][400] : theme.color[color]};

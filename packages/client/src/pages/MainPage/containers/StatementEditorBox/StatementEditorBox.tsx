@@ -778,7 +778,7 @@ export const StatementEditorBox: React.FC = () => {
                                 selected: reference.type === "P",
                               },
                               {
-                                longValue: "seccondary",
+                                longValue: "secondary",
                                 shortValue: "sec",
                                 onClick: () => {
                                   if (reference.type !== "S") {

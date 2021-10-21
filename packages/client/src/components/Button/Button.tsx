@@ -11,6 +11,7 @@ interface ButtonProps {
   icon?: JSX.Element;
   inverted?: boolean;
   noBorder?: boolean;
+  textRegular?: boolean;
   radiusLeft?: boolean;
   radiusRight?: boolean;
   disabled?: boolean;
@@ -27,6 +28,7 @@ export const Button: React.FC<ButtonProps> = ({
   noBorder = false,
   radiusLeft = false,
   radiusRight = false,
+  textRegular = false,
   disabled = false,
   color = "primary",
   onClick = () => {
@@ -41,6 +43,7 @@ export const Button: React.FC<ButtonProps> = ({
         hasIcon={icon && true}
         color={color}
         inverted={inverted}
+        textRegular={textRegular}
         noBorder={noBorder}
         radiusLeft={radiusLeft}
         radiusRight={radiusRight}
