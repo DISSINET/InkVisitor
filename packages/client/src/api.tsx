@@ -216,13 +216,12 @@ class Api {
     }
   }
 
-  async usersCreate(
-    userId: string,
-    userData: IUser
-  ): Promise<AxiosResponse<IResponseGeneric>> {
+  async usersCreate(userData: {
+    name: string;
+    email: string;
+  }): Promise<AxiosResponse<IResponseGeneric>> {
     try {
-      const response = await this.connection.post(`/users/create`);
-      return response;
+      const response = await this.connection.post(`/users/create`, userData);
     } catch (err: any | AxiosError) {
       throw { ...err.response.data };
     }
