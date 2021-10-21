@@ -104,7 +104,10 @@ export const UserListModal: React.FC<UserListModal> = ({
   ) => {
     const oldUser = data?.find((u: IResponseUser) => u.id === userId);
     if (oldUser) {
-      const newRights: IUserRight[] = [...oldUser.rights];
+      // remove this territory from the list if it was added before
+      const newRights: IUserRight[] = [
+        ...oldUser.rights.filter((right) => right.territory !== territoryId),
+      ];
       newRights.push({ territory: territoryId, mode: mode as UserRoleMode });
       userMutation.mutate({ id: userId, rights: newRights });
     }
