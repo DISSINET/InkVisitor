@@ -8,7 +8,7 @@ import {
 } from "./StatementEditorActantTableStyles";
 import { StatementEditorActantTableRow } from "./StatementEditorActantTableRow/StatementEditorActantTableRow";
 import { AttributesEditor } from "../../AttributesEditor/AttributesEditor";
-import { StyledPropButtonGroup } from "../StatementEditorBoxStyles";
+import { AttributeButtonGroup } from "../../AttributeButtonGroup/AttributeButtonGroup";
 
 import {
   IActant,
@@ -145,66 +145,49 @@ export const StatementEditorActantTable: React.FC<StatementEditorActantTable> = 
         Cell: ({ row }: Cell) => {
           const { sActant } = row.values.data;
           return (
-            <StyledPropButtonGroup
+            <AttributeButtonGroup
               leftMargin={false}
               border={true}
               round={true}
-            >
-              <Button
-                key="s"
-                label="s"
-                color="success"
-                tooltip="subject"
-                noBorder
-                inverted={sActant.position == "s" ? false : true}
-                radiusLeft
-                onClick={() => {
-                  updateActant(sActant.id, {
-                    position: "s",
-                  });
-                }}
-              />
-              <Button
-                key="a1"
-                label="a1"
-                color="success"
-                inverted={sActant.position == "a1" ? false : true}
-                noBorder
-                tooltip="actant1"
-                onClick={() => {
-                  updateActant(sActant.id, {
-                    position: "a1",
-                  });
-                }}
-              />
-              <Button
-                key="a2"
-                label="a2"
-                inverted={sActant.position == "a2" ? false : true}
-                color="success"
-                noBorder
-                tooltip="actant2"
-                onClick={() => {
-                  updateActant(sActant.id, {
-                    position: "a2",
-                  });
-                }}
-              />
-              <Button
-                key="p"
-                label="ps.-a"
-                color="success"
-                inverted={sActant.position == "p" ? false : true}
-                noBorder
-                tooltip="pseudo-actant"
-                radiusRight
-                onClick={() => {
-                  updateActant(sActant.id, {
-                    position: "p",
-                  });
-                }}
-              />
-            </StyledPropButtonGroup>
+              options={[
+                {
+                  longValue: "subject",
+                  shortValue: "s",
+                  onClick: () =>
+                    updateActant(sActant.id, {
+                      position: "s",
+                    }),
+                  selected: sActant.position == "s",
+                },
+                {
+                  longValue: "actant1",
+                  shortValue: "a1",
+                  onClick: () =>
+                    updateActant(sActant.id, {
+                      position: "a1",
+                    }),
+                  selected: sActant.position == "a1",
+                },
+                {
+                  longValue: "actant2",
+                  shortValue: "a2",
+                  onClick: () =>
+                    updateActant(sActant.id, {
+                      position: "a2",
+                    }),
+                  selected: sActant.position == "a2",
+                },
+                {
+                  longValue: "pseudo-actant",
+                  shortValue: "pa",
+                  onClick: () =>
+                    updateActant(sActant.id, {
+                      position: "p",
+                    }),
+                  selected: sActant.position == "p",
+                },
+              ]}
+            />
           );
         },
       },

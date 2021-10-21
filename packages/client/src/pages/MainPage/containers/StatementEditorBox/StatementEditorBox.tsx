@@ -34,7 +34,6 @@ import {
   StyledListHeaderColumn,
   StyledPropsActantHeader,
   StyledPropsActantList,
-  StyledPropButtonGroup,
   StyledPropLineColumn,
   StyledReferencesList,
   StyledTagsList,
@@ -43,6 +42,7 @@ import {
   StyledEditorSectionContent,
   StyledEditorSectionHeader,
   StyledEditorActantTableWrapper,
+  StyledPropButtonGroup,
 } from "./StatementEditorBoxStyles";
 import { StatementEditorActantTable } from "./StatementEditorActantTable/StatementEditorActantTable";
 import { StatementEditorActionTable } from "./StatementEditorActionTable/StatementEditorActionTable";
@@ -50,6 +50,7 @@ import { AttributesEditor } from "../AttributesEditor/AttributesEditor";
 import { StyledSubRow } from "./StatementEditorActionTable/StatementEditorActionTableRow/StatementEditorActionTableRowStyles";
 import { ColumnInstance } from "react-table";
 import { useSearchParams } from "hooks";
+import { AttributeButtonGroup } from "../AttributeButtonGroup/AttributeButtonGroup";
 
 const classesActants = ["A", "P", "G", "O", "C", "L", "V", "E", "S", "T", "R"];
 const classesPropType = ["C"];
@@ -427,14 +428,14 @@ export const StatementEditorBox: React.FC = () => {
     order: number,
     lastSecondLevel: boolean
   ) => {
-    const propTypeActant = statement?.actants?.find(
+    const propTypeActant = statement.actants?.find(
       (a) => a.id === prop.type.id
     );
-    const propValueActant = statement?.actants?.find(
+    const propValueActant = statement.actants?.find(
       (a) => a.id === prop.value.id
     );
 
-    return propTypeActant && propValueActant ? (
+    return (
       <React.Fragment key={prop.origin + level + "|" + order}>
         <StyledPropLineColumn
           padded={level === "2"}
@@ -619,8 +620,6 @@ export const StatementEditorBox: React.FC = () => {
           </StyledPropButtonGroup>
         </StyledPropLineColumn>
       </React.Fragment>
-    ) : (
-      <div />
     );
   };
 
@@ -766,40 +765,37 @@ export const StatementEditorBox: React.FC = () => {
                           ></Input>
                         </StyledReferencesListColumn>
                         <StyledReferencesListColumn>
-                          <StyledPropButtonGroup
+                          <AttributeButtonGroup
                             leftMargin={false}
                             border={true}
                             round={true}
-                          >
-                            <Button
-                              key="p"
-                              label="prim"
-                              color="success"
-                              tooltip="primary"
-                              noBorder
-                              inverted={reference.type == "P" ? false : true}
-                              radiusLeft
-                              onClick={() => {
-                                updateReference(reference.id, {
-                                  type: "P",
-                                });
-                              }}
-                            />
-                            <Button
-                              key="s"
-                              label="sec"
-                              color="success"
-                              inverted={reference.type == "S" ? false : true}
-                              noBorder
-                              tooltip="secondary"
-                              radiusRight
-                              onClick={() => {
-                                updateReference(reference.id, {
-                                  type: "S",
-                                });
-                              }}
-                            />
-                          </StyledPropButtonGroup>
+                            options={[
+                              {
+                                longValue: "primary",
+                                shortValue: "prim",
+                                onClick: () => {
+                                  if (reference.type !== "P") {
+                                    updateReference(reference.id, {
+                                      type: "P",
+                                    });
+                                  }
+                                },
+                                selected: reference.type === "P",
+                              },
+                              {
+                                longValue: "seccondary",
+                                shortValue: "sec",
+                                onClick: () => {
+                                  if (reference.type !== "S") {
+                                    updateReference(reference.id, {
+                                      type: "S",
+                                    });
+                                  }
+                                },
+                                selected: reference.type === "S",
+                              },
+                            ]}
+                          />
                         </StyledReferencesListColumn>
                         <StyledReferencesListColumn>
                           <Button
