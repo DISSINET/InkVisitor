@@ -416,6 +416,34 @@ class Statement extends Actant implements IStatement {
     return Object.keys(actantIds);
   }
 
+  unlinkActantId(actantIdToUnlink: string): boolean {
+    let indexToRemove = this.data.actants.findIndex(
+      (a) => a.actant === actantIdToUnlink
+    );
+    if (indexToRemove !== -1) {
+      this.data.actants.splice(indexToRemove, 1);
+      return true;
+    }
+
+    indexToRemove = this.data.props.findIndex(
+      (a) => a.origin === actantIdToUnlink
+    );
+    if (indexToRemove !== -1) {
+      this.data.props.splice(indexToRemove, 1);
+      return true;
+    }
+
+    indexToRemove = this.data.actions.findIndex(
+      (a) => a.action === actantIdToUnlink
+    );
+    if (indexToRemove !== -1) {
+      this.data.actions.splice(indexToRemove, 1);
+      return true;
+    }
+
+    return false;
+  }
+
   /**
    * getLinkedActantIds wrapped in foreach cycle
    * @param statements list of scanned statements
