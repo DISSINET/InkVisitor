@@ -52,6 +52,7 @@ export enum EntityLogicalType {
   Definite = "1",
   Indefinite = "2",
   Hypothetical = "3",
+  Generic = "4",
 }
 
 export enum ActantStatus {
