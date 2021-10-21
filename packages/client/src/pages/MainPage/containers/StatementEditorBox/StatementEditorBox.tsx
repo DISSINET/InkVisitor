@@ -626,13 +626,13 @@ export const StatementEditorBox: React.FC = () => {
       {statement ? (
         <div style={{ marginBottom: "4rem" }} key={statement.id}>
           <StyledEditorSection firstSection key="editor-section-summary">
-            <StyledEditorSectionHeader>Text</StyledEditorSectionHeader>
             <StyledEditorSectionContent>
               <div>
                 <div>
                   <Input
                     type="textarea"
                     width="full"
+                    placeholder="Insert statement text here"
                     onChangeFn={(newValue: string) => {
                       if (newValue !== statement.data.text) {
                         const newData = {
