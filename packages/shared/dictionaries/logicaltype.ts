@@ -20,4 +20,9 @@ export const actantLogicalTypeDict: {
     label: "hypothetical",
     info: "",
   },
+  {
+    value: EntityLogicalType.Generic,
+    label: "generic",
+    info: "",
+  },
 ];
