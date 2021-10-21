@@ -430,21 +430,23 @@ export const UserListModal: React.FC<UserListModal> = ({
           } = row.original as any;
           return (
             <ButtonGroup noMargin>
-              <Button
-                key="r"
-                icon={<FaTrashAlt size={14} />}
-                color="danger"
-                tooltip="delete"
-                onClick={() => {
-                  setRemovingUserId(userId);
-                }}
-              />
+              {userId !== localStorage.getItem("userid") && (
+                <Button
+                  key="r"
+                  icon={<FaTrashAlt size={14} />}
+                  color="danger"
+                  tooltip="delete"
+                  onClick={() => {
+                    setRemovingUserId(userId);
+                  }}
+                />
+              )}
               <Button
                 icon={<FaKey size={14} />}
                 tooltip="reset password"
                 color="warning"
                 onClick={() => {
-                  restartPassword(userId);
+                  api.restartPassword(userId);
                 }}
               />
             </ButtonGroup>
