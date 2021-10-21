@@ -218,7 +218,7 @@ describe("Actants search", function () {
           .post(`${apiPath}/actants/search`)
           .send({
             class: linkedActantData.class,
-            actionId: actionData.id,
+            actantId: actionData.id,
           })
           .set("authorization", "Bearer " + supertestConfig.token)
           .expect("Content-Type", /json/)
@@ -233,11 +233,11 @@ describe("Actants search", function () {
     });
 
     describe("search only by non-existing action in statement", () => {
-      it("should return a 200 code with successful response", async (done) => {
+      it("should return a 200 code with empty response", async (done) => {
         await request(app)
           .post(`${apiPath}/actants/search`)
           .send({
-            actionId: actionData.id + "xxx", // does not exist
+            actantId: actionData.id + "xxx", // does not exist
           })
           .set("authorization", "Bearer " + supertestConfig.token)
           .expect("Content-Type", /json/)
@@ -251,44 +251,86 @@ describe("Actants search", function () {
     });
 
     describe("search by all params", () => {
-      it("should return a 200 code with successful response", async (done) => {
-        await request(app)
-          .post(`${apiPath}/actants/search`)
-          .send({
-            class: linkedActantData.class,
-            actantId: actantData.id,
-            actionId: actionData.id,
-            label: linkedActantData.label,
-          })
-          .set("authorization", "Bearer " + supertestConfig.token)
-          .expect("Content-Type", /json/)
-          .expect(200)
-          .expect((res: Response) => {
-            expect(res.body[0].actantId).toEqual(linkedActantData.id);
-          });
+      describe("using actant id", () => {
+        it("should return a 200 code with successful response", async (done) => {
+          await request(app)
+            .post(`${apiPath}/actants/search`)
+            .send({
+              class: linkedActantData.class,
+              actantId: actantData.id,
+              label: linkedActantData.label,
+            })
+            .set("authorization", "Bearer " + supertestConfig.token)
+            .expect("Content-Type", /json/)
+            .expect(200)
+            .expect((res: Response) => {
+              expect(res.body[0].actantId).toEqual(linkedActantData.id);
+            });
 
-        done();
+          done();
+        });
+      });
+
+      describe("using action id", () => {
+        it("should return a 200 code with successful response", async (done) => {
+          await request(app)
+            .post(`${apiPath}/actants/search`)
+            .send({
+              class: linkedActantData.class,
+              actantId: actionData.id,
+              label: linkedActantData.label,
+            })
+            .set("authorization", "Bearer " + supertestConfig.token)
+            .expect("Content-Type", /json/)
+            .expect(200)
+            .expect((res: Response) => {
+              expect(res.body[0].actantId).toEqual(linkedActantData.id);
+            });
+
+          done();
+        });
       });
     });
 
     describe("search by all params + misused label", () => {
-      it("should return a 200 code with successful response", async (done) => {
-        await request(app)
-          .post(`${apiPath}/actants/search`)
-          .send({
-            class: linkedActantData.class,
-            actantId: actantData.id,
-            actionId: actionData.id,
-            label: linkedActantData.label + "xxx", // does not exist
-          })
-          .set("authorization", "Bearer " + supertestConfig.token)
-          .expect("Content-Type", /json/)
-          .expect(200)
-          .expect((res: Response) => {
-            expect(res.body).toHaveLength(0);
-          });
+      describe("using actant id", () => {
+        it("should return a 200 code with empty response", async (done) => {
+          await request(app)
+            .post(`${apiPath}/actants/search`)
+            .send({
+              class: linkedActantData.class,
+              actantId: actantData.id,
+              label: linkedActantData.label + "xxx", // does not exist
+            })
+            .set("authorization", "Bearer " + supertestConfig.token)
+            .expect("Content-Type", /json/)
+            .expect(200)
+            .expect((res: Response) => {
+              expect(res.body).toHaveLength(0);
+            });
 
-        done();
+          done();
+        });
+      });
+
+      describe("using action id", () => {
+        it("should return a 200 code with empty response", async (done) => {
+          await request(app)
+            .post(`${apiPath}/actants/search`)
+            .send({
+              class: linkedActantData.class,
+              actantId: actionData.id,
+              label: linkedActantData.label + "xxx", // does not exist
+            })
+            .set("authorization", "Bearer " + supertestConfig.token)
+            .expect("Content-Type", /json/)
+            .expect(200)
+            .expect((res: Response) => {
+              expect(res.body).toHaveLength(0);
+            });
+
+          done();
+        });
       });
     });
   });

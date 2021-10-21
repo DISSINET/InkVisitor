@@ -176,38 +176,22 @@ export async function deleteActant(
 
 export async function findAssociatedActantIds(
   db: Db,
-  actantId: string | false,
-  actionId: string | false
+  actantId: string
 ): Promise<string[]> {
   const statements = await rethink
     .table("actants")
     .filter({
-      class: "S",
+      class: ActantType.Statement,
     })
     .filter(function (row: RDatum) {
-      const tests = [];
-      if (actantId) {
-        tests.push(
-          row("data")("actants").contains((actantObj: RDatum) =>
-            actantObj("actant").eq(actantId)
-          )
-        );
-      }
-      if (actionId) {
-        tests.push(
-          row("data")("actions").contains((actionObj: RDatum) =>
-            actionObj("action").eq(actionId)
-          )
-        );
-      }
-
-      if (!tests.length) {
-        return null;
-      } else if (tests.length === 1) {
-        return rethink.and(tests[0]);
-      } else {
-        return rethink.and(tests[0], tests[1]);
-      }
+      return rethink.or(
+        row("data")("actants").contains((actantObj: RDatum) =>
+          actantObj("actant").eq(actantId)
+        ),
+        row("data")("actions").contains((actionObj: RDatum) =>
+          actionObj("action").eq(actantId)
+        )
+      );
     })
     .run(db.connection);
 

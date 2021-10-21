@@ -8,20 +8,17 @@ import { BadParams } from "./errors";
 export interface IResponseSearch {
   class: ActantType | false;
   label: string | false;
-  actionId: string | false;
   actantId: string | false;
 }
 
 export class RequestSearch implements IResponseSearch {
   class: ActantType | false;
   label: string | false;
-  actionId: string | false;
   actantId: string | false;
 
   constructor(requestData: IResponseSearch) {
     this.class = requestData.class || false;
     this.label = requestData.label || false;
-    this.actionId = requestData.actionId || false;
     this.actantId = requestData.actantId || false;
   }
 
@@ -30,7 +27,7 @@ export class RequestSearch implements IResponseSearch {
       return new BadParams("invalid 'class' value");
     }
 
-    if (!this.label && !this.actionId && !this.actantId) {
+    if (!this.label && !this.actantId) {
       return new BadParams("at least some search field has to be set");
     }
 
