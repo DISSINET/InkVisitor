@@ -8,6 +8,7 @@ import {
   Button,
   ButtonGroup,
   Input,
+  Submit,
 } from "components";
 import { useMutation, useQuery, useQueryClient } from "react-query";
 import api from "api";
@@ -47,20 +48,17 @@ import {
   StyledTerritoryColumn,
   StyledTerritoryList,
   StyledTerritoryListItem,
-} from "./UserListTableStyles";
+} from "./UserListModalStyles";
 
 import { UserListTableRow } from "./UserListTableRow/UserListTableRow";
 import { ActantSuggester } from "../ActantSuggester/ActantSuggester";
 import { ActantTag } from "../ActantTag/ActantTag";
 import { IResponseUser, IUserRight } from "@shared/types";
 import { UserRole, UserRoleMode } from "@shared/enums";
-import {
-  StyledEditorSection,
-  StyledEditorSectionHeader,
-  StyledEditorSectionContent,
-} from "../StatementEditorBox/StatementEditorBoxStyles";
 import { userRoleDict } from "@shared/dictionaries";
 import { AttributeButtonGroup } from "../AttributeButtonGroup/AttributeButtonGroup";
+import { toast } from "react-toastify";
+import { findDOMNode } from "react-dom";
 
 interface UserListModal {
   isOpen: boolean;
@@ -71,7 +69,11 @@ export const UserListModal: React.FC<UserListModal> = ({
   isOpen,
   onCloseFn,
 }) => {
-  const [editedUserId, setEditedUserId] = useState<false | string>("1");
+  const [newUserName, setNewUserName] = useState<string>("");
+  const [newUserEmail, setNewUserEmail] = useState<string>("");
+
+  const [removingUserId, setRemovingUserId] = useState<false | string>("");
+
   const queryClient = useQueryClient();
 
   const { status, data, error, isFetching } = useQuery(
@@ -83,9 +85,20 @@ export const UserListModal: React.FC<UserListModal> = ({
     { enabled: api.isLoggedIn() }
   );
 
-  const editedUser = useMemo(() => {
-    return data ? data.find((d) => d.id === editedUserId) : false;
-  }, [editedUserId, data]);
+  const removingUser = useMemo(() => {
+    return removingUserId ? data?.find((d) => d.id === removingUserId) : false;
+  }, [removingUserId]);
+
+  const validNewUserName = useMemo(() => {
+    return (
+      newUserName.length > 3 && !data?.find((user) => user.name === newUserName)
+    );
+  }, [newUserName, data]);
+
+  const validNewUserEmail = useMemo(() => {
+    const re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    return re.test(String(newUserEmail).toLowerCase());
+  }, [newUserEmail, data]);
 
   const userMutation = useMutation(
     async (userChanges: any) =>
@@ -96,6 +109,32 @@ export const UserListModal: React.FC<UserListModal> = ({
       },
     }
   );
+
+  const createNewUser = async () => {
+    const res: any = await api.usersCreate({
+      name: newUserName,
+      email: newUserEmail,
+    });
+    if (res?.status === 200) {
+      toast.success(`User ${newUserName} created!`);
+    } else {
+      toast.warning(`problem creating user!`);
+    }
+    setNewUserName("");
+    setNewUserEmail("");
+    queryClient.invalidateQueries("users");
+  };
+
+  const removeUser = async () => {
+    if (removingUser) {
+      const res: any = await api.usersDelete(removingUser.id);
+      if (res.status === 200) {
+        toast.warning(`User ${removingUser.name} removed!`);
+        queryClient.invalidateQueries("users");
+        setRemovingUserId(false);
+      }
+    }
+  };
 
   const addRightToUser = (
     userId: string,
@@ -396,10 +435,13 @@ export const UserListModal: React.FC<UserListModal> = ({
                 icon={<FaTrashAlt size={14} />}
                 color="danger"
                 tooltip="delete"
+                onClick={() => {
+                  setRemovingUserId(userId);
+                }}
               />
               <Button
                 icon={<FaKey size={14} />}
-                tooltip="by clicking here, the user password will be restarted and new password send to an address"
+                tooltip="reset password"
                 color="warning"
                 onClick={() => {}}
               />
@@ -428,6 +470,20 @@ export const UserListModal: React.FC<UserListModal> = ({
 
   return (
     <Modal showModal={isOpen} onClose={() => onCloseFn()} width={"full"}>
+      <Submit
+        title={`Delete User ${removingUser ? removingUser.name : ""}`}
+        text={`Do you really want do delete User ${
+          removingUser ? removingUser.name : ""
+        }?`}
+        show={removingUser != false}
+        onSubmit={() => {
+          removeUser();
+        }}
+        onCancel={() => {
+          setRemovingUserId(false);
+        }}
+        loading={false}
+      />
       <ModalHeader title={"Manage Users"} />
       <ModalContent>
         <StyledTableWrapper>
@@ -448,7 +504,6 @@ export const UserListModal: React.FC<UserListModal> = ({
                 prepareRow(row);
                 return (
                   <UserListTableRow
-                    isSelected={editedUserId === row.id}
                     index={i}
                     row={row}
                     {...row.getRowProps()}
@@ -458,130 +513,40 @@ export const UserListModal: React.FC<UserListModal> = ({
             </tbody>
           </StyledTable>
         </StyledTableWrapper>
-        {/* {editedUser ? (
-          <StyledUserEditor>
-            <StyledUserEditorSection>
-              <StyledUserEditorTitle>{editedUser.name}</StyledUserEditorTitle>
-              <StyledUserEditorBody>
-                <StyledUserEditorForm>
-                  <StyledUserEditorRow>
-                    <StyledUserEditorRowLabel>
-                      Username
-                    </StyledUserEditorRowLabel>
-                    <StyledUserEditorRowValue>
-                      <Input
-                        width="full"
-                        value={editedUser.name}
-                        onChangeFn={async (newValue: string) => {
-                          userMutation.mutate({
-                            id: editedUser.id,
-                            name: newValue,
-                          });
-                        }}
-                      />
-                    </StyledUserEditorRowValue>
-                  </StyledUserEditorRow>
-                  <StyledUserEditorRow>
-                    <StyledUserEditorRowLabel>Email</StyledUserEditorRowLabel>
-                    <StyledUserEditorRowValue>
-                      <Input
-                        width="full"
-                        value={editedUser.email}
-                        onChangeFn={async (newValue: string) => {
-                          userMutation.mutate({
-                            id: editedUser.id,
-                            email: newValue,
-                          });
-                        }}
-                      />
-                    </StyledUserEditorRowValue>
-                  </StyledUserEditorRow>
-                  <StyledUserEditorRow>
-                    <StyledUserEditorRowLabel>
-                      Restart Password
-                    </StyledUserEditorRowLabel>
-                    <StyledUserEditorRowValue>
-                      <Button
-                        label="reset password"
-                        tooltip="by clicking here, the user password will be restarted and new password send to an address"
-                        color="warning"
-                        onClick={() => {}}
-                      />
-                    </StyledUserEditorRowValue>
-                  </StyledUserEditorRow>
-
-                  <StyledUserEditorRow>
-                    <StyledUserEditorRowLabel>Role</StyledUserEditorRowLabel>
-                    <StyledUserEditorRowValue>
-                      <AttributeButtonGroup
-                        options={[
-                          {
-                            longValue: userRoleDict[0].label,
-                            shortValue: userRoleDict[0].label,
-                            selected: editedUser.role === userRoleDict[0].value,
-                            onClick: () => {
-                              userMutation.mutate({
-                                id: editedUser.id,
-                                role: userRoleDict[0].value,
-                              });
-                            },
-                          },
-                          {
-                            longValue: userRoleDict[1].label,
-                            shortValue: userRoleDict[1].label,
-                            selected: editedUser.role === userRoleDict[1].value,
-                            onClick: () => {
-                              userMutation.mutate({
-                                id: editedUser.id,
-                                role: userRoleDict[1].value,
-                              });
-                            },
-                          },
-                          {
-                            longValue: userRoleDict[2].label,
-                            shortValue: userRoleDict[2].label,
-                            selected: editedUser.role === userRoleDict[2].value,
-                            onClick: () => {
-                              userMutation.mutate({
-                                id: editedUser.id,
-                                role: userRoleDict[2].value,
-                              });
-                            },
-                          },
-                        ]}
-                      />
-                    </StyledUserEditorRowValue>
-                  </StyledUserEditorRow>
-                </StyledUserEditorForm>
-              </StyledUserEditorBody>
-              <StyledUserEditorFoot></StyledUserEditorFoot>
-            </StyledUserEditorSection>
-            <StyledUserEditorSection>
-              <ActantSuggester
-                allowCreate={false}
-                onSelected={(newSelectedId: string) => {
-                  //addRightToUser(userId, newSelectedId, "write");
-                  //
-                }}
-                categoryIds={["T"]}
-                placeholder={"assign a territory"}
-              ></ActantSuggester>
-            </StyledUserEditorSection>
-          </StyledUserEditor>
-        ) : (
-          <div />
-        )}
-       */}
       </ModalContent>
       <ModalFooter>
-        <ButtonGroup>
+        <StyledUserEditorForm>
+          <Input
+            width={200}
+            value={newUserName}
+            placeholder="username"
+            changeOnType
+            onChangeFn={async (newValue: string) => {
+              setNewUserName(newValue);
+            }}
+          />
+          <Input
+            width={200}
+            value={newUserEmail}
+            placeholder="email"
+            changeOnType
+            onChangeFn={async (newValue: string) => {
+              setNewUserEmail(newValue);
+            }}
+          />
           <Button
             key="add"
+            disabled={!(validNewUserEmail && validNewUserName)}
             icon={<FaPlus size={14} />}
-            tooltip="add new user"
+            tooltip="create user"
             color="primary"
             label="new user"
+            onClick={() => {
+              createNewUser();
+            }}
           />
+        </StyledUserEditorForm>
+        <ButtonGroup>
           <Button
             key="close"
             label="Close"

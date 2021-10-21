@@ -20,6 +20,8 @@ export const StyledTh = styled.th`
   font-style: italic;
   font-weight: ${({ theme }) => theme.fontWeight["light"]};
   padding-bottom: ${({ theme }) => theme.space[2]};
+  padding-left: ${({ theme }) => theme.space[3]};
+  padding-right: ${({ theme }) => theme.space[3]};
   color: ${({ theme }) => theme.color["info"]};
 `;
 
@@ -29,14 +31,34 @@ interface StyledTr {
   opacity?: number;
 }
 export const StyledTr = styled.tr<StyledTr>`
+  background-color: ${({ theme, isSelected }) =>
+    isSelected ? theme.color["invertedBg"]["info"] : theme.color["white"]};
+  color: ${({ theme, isSelected }) =>
+    isSelected ? theme.color["primary"] : theme.color["black"]};
   opacity: ${({ opacity }) => (opacity ? opacity : 1)};
-  td:first-child {StyledTable
+  padding: ${({ theme }) => theme.space[1]};
+  border: 1px solid ${({ theme }) => theme.color["gray"][400]};
+
+  td:first-child {
     padding-left: ${({ theme }) => theme.space[2]};
     padding-right: ${({ theme }) => theme.space[2]};
   }
   td:not(:last-child) {
     width: 1%;
   }
+  td,
+  th {
+    padding-left: ${({ theme }) => theme.space[3]};
+    padding-right: ${({ theme }) => theme.space[3]};
+  }
+`;
+
+export const StyledTd = styled.td`
+  padding-top: ${({ theme }) => `${theme.space[1]}`};
+  padding-right: ${({ theme }) => `${theme.space[2]}`};
+  padding-bottom: ${({ theme }) => `${theme.space[1]}`};
+  padding-left: 0;
+  font-size: ${({ theme }) => theme.fontSize["sm"]};
 `;
 
 export const StyledTerritoryColumn = styled.div`
@@ -90,25 +112,10 @@ export const StyledUserEditorRowValue = styled.div`
 `;
 
 export const StyledUserEditorForm = styled.div`
-  display: table;
+  display: inline-flex;
   width: 100%;
   padding-right: ${({ theme }) => theme.space[6]};
-  ${StyledUserEditorRow} {
-    display: table-row;
-    width: 100%;
-    ${StyledUserEditorRowLabel} {
-      width: 1%;
-      white-space: nowrap;
-      display: table-cell;
-      padding: ${({ theme }) => theme.space[2]};
-      vertical-align: top;
-      text-align: right;
-      float: initial;
-    }
-    ${StyledUserEditorRowValue} {
-      display: table-cell;
-      width: 100%;
-      padding: ${({ theme }) => theme.space[1]};
-    }
+  input {
+    margin: 0 ${({ theme }) => theme.space[3]};
   }
 `;

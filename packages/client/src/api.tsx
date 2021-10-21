@@ -222,6 +222,7 @@ class Api {
   }): Promise<AxiosResponse<IResponseGeneric>> {
     try {
       const response = await this.connection.post(`/users/create`, userData);
+      return response;
     } catch (err: any | AxiosError) {
       throw { ...err.response.data };
     }
