@@ -25,7 +25,8 @@ export const StyledEditorSection = styled.div<StyledEditorSection>`
   border-bottom-width: ${({ theme, lastSection = false }) =>
     lastSection ? theme.borderWidth[0] : theme.borderWidth[1]};
   border-bottom-color: ${({ theme }) => theme.color["gray"][500]};
-  background-color: ${({ theme }) => theme.color["gray"][200]};
+  background-color: ${({ theme }) => theme.color["white"]};
+  box-shadow: ${({ theme }) => theme.boxShadow["subtle"]}; 
   border-bottom-style: solid;
 `;
 
