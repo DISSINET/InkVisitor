@@ -443,7 +443,9 @@ export const UserListModal: React.FC<UserListModal> = ({
                 icon={<FaKey size={14} />}
                 tooltip="reset password"
                 color="warning"
-                onClick={() => {}}
+                onClick={() => {
+                  restartPassword(userId);
+                }}
               />
             </ButtonGroup>
           );
