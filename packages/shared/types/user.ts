@@ -12,10 +12,6 @@ export interface IUser {
   rights: IUserRight[];
 }
 
-export interface IUserRole {
-  label: string;
-  info: string;
-}
 
 export interface IUserRight {
   territory: string; // actant id
