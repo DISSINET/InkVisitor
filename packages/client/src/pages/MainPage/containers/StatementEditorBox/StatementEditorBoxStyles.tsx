@@ -24,10 +24,17 @@ export const StyledEditorSection = styled.div<StyledEditorSection>`
   padding: ${({ theme }) => theme.space[6]};
   border-bottom-width: ${({ theme, lastSection = false }) =>
     lastSection ? theme.borderWidth[0] : theme.borderWidth[1]};
-  border-bottom-color: ${({ theme }) => theme.color["gray"][500]};
+  border-bottom-color: ${({ theme }) => theme.color["gray"][400]};
   background-color: ${({ theme }) => theme.color["white"]};
   box-shadow: ${({ theme }) => theme.boxShadow["subtle"]}; 
+  border-left: ${({ theme, firstSection = false }) =>
+     firstSection ? "3px solid " + theme.color["success"] : "" };
+  background-color: ${({ theme, firstSection = false }) =>
+     firstSection ?  theme.color["white"] : theme.color["gray"][200]};
   border-bottom-style: solid;
+  :hover {
+    background-color: ${({ theme }) => theme.color["gray"][100]};
+  }
 `;
 
 interface StyledEditorSectionHeader {}
