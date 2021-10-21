@@ -53,7 +53,7 @@ import { UserListTableRow } from "./UserListTableRow/UserListTableRow";
 import { ActantSuggester } from "../ActantSuggester/ActantSuggester";
 import { ActantTag } from "../ActantTag/ActantTag";
 import { IResponseUser, IUserRight } from "@shared/types";
-import { UserRoleMode } from "@shared/enums";
+import { UserRole, UserRoleMode } from "@shared/enums";
 import {
   StyledEditorSection,
   StyledEditorSectionHeader,
@@ -243,6 +243,7 @@ export const UserListModal: React.FC<UserListModal> = ({
             id: userId,
             rights,
             territoryRights: territoryActants,
+            role: userRole,
           } = row.original as any;
 
           const readTerritories = rights.filter(
@@ -251,50 +252,57 @@ export const UserListModal: React.FC<UserListModal> = ({
 
           return (
             <StyledTerritoryColumn>
-              <ActantSuggester
-                allowCreate={false}
-                onSelected={(newSelectedId: string) => {
-                  addRightToUser(userId, newSelectedId, "read");
-                }}
-                categoryIds={["T"]}
-                placeholder={"assign a territory"}
-              ></ActantSuggester>
-              <StyledTerritoryList>
-                {readTerritories.length && territoryActants ? (
-                  readTerritories.map((right: IUserRight) => {
-                    const territoryActant = territoryActants.find(
-                      (t: any) => t.territory.id === right.territory
-                    );
+              {userRole !== UserRole.Admin && (
+                <React.Fragment>
+                  <ActantSuggester
+                    allowCreate={false}
+                    onSelected={(newSelectedId: string) => {
+                      addRightToUser(userId, newSelectedId, "read");
+                    }}
+                    categoryIds={["T"]}
+                    placeholder={"assign a territory"}
+                  ></ActantSuggester>
+                  <StyledTerritoryList>
+                    {readTerritories.length && territoryActants ? (
+                      readTerritories.map((right: IUserRight) => {
+                        const territoryActant = territoryActants.find(
+                          (t: any) => t.territory.id === right.territory
+                        );
 
-                    return territoryActant && territoryActant.territory ? (
-                      <StyledTerritoryListItem key={right.territory}>
-                        <ActantTag
-                          actant={territoryActant.territory}
-                          short={false}
-                          button={
-                            <Button
-                              key="d"
-                              tooltip="remove territory from rights"
-                              icon={<FaUnlink />}
-                              color="plain"
-                              inverted={true}
-                              onClick={() => {
-                                removeRightFromUser(userId, right.territory);
-                              }}
+                        return territoryActant && territoryActant.territory ? (
+                          <StyledTerritoryListItem key={right.territory}>
+                            <ActantTag
+                              actant={territoryActant.territory}
+                              short={false}
+                              button={
+                                <Button
+                                  key="d"
+                                  tooltip="remove territory from rights"
+                                  icon={<FaUnlink />}
+                                  color="plain"
+                                  inverted={true}
+                                  onClick={() => {
+                                    removeRightFromUser(
+                                      userId,
+                                      right.territory
+                                    );
+                                  }}
+                                />
+                              }
                             />
-                          }
-                        />
-                      </StyledTerritoryListItem>
+                          </StyledTerritoryListItem>
+                        ) : (
+                          <StyledTerritoryListItem key={right.territory}>
+                            {right.territory}
+                          </StyledTerritoryListItem>
+                        );
+                      })
                     ) : (
-                      <StyledTerritoryListItem key={right.territory}>
-                        {right.territory}
-                      </StyledTerritoryListItem>
-                    );
-                  })
-                ) : (
-                  <div />
-                )}
-              </StyledTerritoryList>
+                      <div />
+                    )}
+                  </StyledTerritoryList>
+                </React.Fragment>
+              )}
             </StyledTerritoryColumn>
           );
         },
@@ -307,6 +315,7 @@ export const UserListModal: React.FC<UserListModal> = ({
             id: userId,
             rights,
             territoryRights: territoryActants,
+            role: userRole,
           } = row.original as any;
 
           const writeTerritories = rights.filter(
@@ -315,50 +324,57 @@ export const UserListModal: React.FC<UserListModal> = ({
 
           return (
             <StyledTerritoryColumn>
-              <ActantSuggester
-                allowCreate={false}
-                onSelected={(newSelectedId: string) => {
-                  addRightToUser(userId, newSelectedId, "write");
-                }}
-                categoryIds={["T"]}
-                placeholder={"assign a territory"}
-              ></ActantSuggester>
-              <StyledTerritoryList>
-                {writeTerritories.length && territoryActants ? (
-                  writeTerritories.map((right: IUserRight) => {
-                    const territoryActant = territoryActants.find(
-                      (t: any) => t.territory.id === right.territory
-                    );
+              {userRole === UserRole.Editor && (
+                <React.Fragment>
+                  <ActantSuggester
+                    allowCreate={false}
+                    onSelected={(newSelectedId: string) => {
+                      addRightToUser(userId, newSelectedId, "write");
+                    }}
+                    categoryIds={["T"]}
+                    placeholder={"assign a territory"}
+                  ></ActantSuggester>
+                  <StyledTerritoryList>
+                    {writeTerritories.length && territoryActants ? (
+                      writeTerritories.map((right: IUserRight) => {
+                        const territoryActant = territoryActants.find(
+                          (t: any) => t.territory.id === right.territory
+                        );
 
-                    return territoryActant && territoryActant.territory ? (
-                      <StyledTerritoryListItem key={right.territory}>
-                        <ActantTag
-                          actant={territoryActant.territory}
-                          short={false}
-                          button={
-                            <Button
-                              key="d"
-                              tooltip="remove territory from rights"
-                              icon={<FaUnlink />}
-                              color="plain"
-                              inverted={true}
-                              onClick={() => {
-                                removeRightFromUser(userId, right.territory);
-                              }}
+                        return territoryActant && territoryActant.territory ? (
+                          <StyledTerritoryListItem key={right.territory}>
+                            <ActantTag
+                              actant={territoryActant.territory}
+                              short={false}
+                              button={
+                                <Button
+                                  key="d"
+                                  tooltip="remove territory from rights"
+                                  icon={<FaUnlink />}
+                                  color="plain"
+                                  inverted={true}
+                                  onClick={() => {
+                                    removeRightFromUser(
+                                      userId,
+                                      right.territory
+                                    );
+                                  }}
+                                />
+                              }
                             />
-                          }
-                        />
-                      </StyledTerritoryListItem>
+                          </StyledTerritoryListItem>
+                        ) : (
+                          <StyledTerritoryListItem key={right.territory}>
+                            {right.territory}
+                          </StyledTerritoryListItem>
+                        );
+                      })
                     ) : (
-                      <StyledTerritoryListItem key={right.territory}>
-                        {right.territory}
-                      </StyledTerritoryListItem>
-                    );
-                  })
-                ) : (
-                  <div />
-                )}
-              </StyledTerritoryList>
+                      <div />
+                    )}
+                  </StyledTerritoryList>
+                </React.Fragment>
+              )}
             </StyledTerritoryColumn>
           );
         },
