@@ -53,11 +53,13 @@ export const ActantBookmarkFolderTable: React.FC<ActantBookmarkFolderTable> = ({
             <ActantTag
               actant={actant as IActant}
               short={false}
+              status={actant.status}
               button={
                 <Button
                   key="d"
                   icon={<FaUnlink />}
-                  color="danger"
+                  color="plain"
+                  inverted
                   tooltip="unlink actant"
                   onClick={() => {
                     removeBookmark(folder.id, actant.id);
