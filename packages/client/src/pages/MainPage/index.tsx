@@ -105,8 +105,10 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
     { enabled: !!userId && api.isLoggedIn(), retry: 2 }
   );
 
-  const [userAdministrationModalOpen, setUserAdministrationModalOpen] =
-    useState<boolean>(false);
+  const [
+    userAdministrationModalOpen,
+    setUserAdministrationModalOpen,
+  ] = useState<boolean>(true);
 
   const handleLogOut = () => {
     api.signOut();
@@ -175,15 +177,13 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
                     <StyledUsername>{username}</StyledUsername>
                   </StyledUser>
                   <ButtonGroup>
-                    {
-                      userRole == "admin" && (
-                        <Button
-                          label="Manage Users"
-                          color="info"
-                          onClick={() => handleUsersModalClick()}
-                        />
-                      )
-                    }
+                    {userRole == "admin" && (
+                      <Button
+                        label="Manage Users"
+                        color="info"
+                        onClick={() => handleUsersModalClick()}
+                      />
+                    )}
                     <Button
                       label="Log Out"
                       color="danger"

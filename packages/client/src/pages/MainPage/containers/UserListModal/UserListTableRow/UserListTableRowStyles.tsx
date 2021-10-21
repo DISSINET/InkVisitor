@@ -6,6 +6,10 @@ interface StyledTr {
   opacity?: number;
 }
 export const StyledTr = styled.tr<StyledTr>`
+  background-color: ${({ theme, isSelected }) =>
+    isSelected ? theme.color["invertedBg"]["info"] : theme.color["white"]};
+  color: ${({ theme, isSelected }) =>
+    isSelected ? theme.color["primary"] : theme.color["black"]};
   opacity: ${({ opacity }) => (opacity ? opacity : 1)};
   padding: ${({ theme }) => theme.space[1]};
   border: 1px solid ${({ theme }) => theme.color["gray"][400]};
@@ -15,8 +19,6 @@ export const StyledTr = styled.tr<StyledTr>`
   td:not(:last-child) {
     width: 1%;
   }
-  background-color: ${({ theme, isOdd }) =>
-    isOdd ? theme.color["white"] : theme.color["gray"][200]};
 `;
 export const StyledTd = styled.td`
   padding-top: ${({ theme }) => `${theme.space[1]}`};

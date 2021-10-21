@@ -44,3 +44,43 @@ export const StyledUserNameColumnText = styled.div`
     display: block;
   }
 `;
+export const StyledUserEditor = styled.div``;
+export const StyledUserEditorTitle = styled.div``;
+export const StyledUserEditorBody = styled.div``;
+export const StyledUserEditorFoot = styled.div``;
+
+export const StyledUserEditorRow = styled.div`
+  /* class: row; */
+  /* display: flex; */
+`;
+export const StyledUserEditorRowLabel = styled.div`
+  float: left;
+  font-size: ${({ theme }) => theme.fontSize["sm"]};
+`;
+export const StyledUserEditorRowValue = styled.div`
+  float: right;
+`;
+
+export const StyledUserEditorForm = styled.div`
+  display: table;
+  width: 100%;
+  padding-right: ${({ theme }) => theme.space[6]};
+  ${StyledUserEditorRow} {
+    display: table-row;
+    width: 100%;
+    ${StyledUserEditorRowLabel} {
+      width: 1%;
+      white-space: nowrap;
+      display: table-cell;
+      padding: ${({ theme }) => theme.space[2]};
+      vertical-align: top;
+      text-align: right;
+      float: initial;
+    }
+    ${StyledUserEditorRowValue} {
+      display: table-cell;
+      width: 100%;
+      padding: ${({ theme }) => theme.space[1]};
+    }
+  }
+`;
