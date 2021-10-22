@@ -17,6 +17,7 @@ interface ActantSuggesterI {
   onSelected: Function;
   placeholder?: string;
   allowCreate?: boolean;
+  disableWildCard?: boolean;
   inputWidth?: number;
 }
 
@@ -26,7 +27,9 @@ export const ActantSuggester: React.FC<ActantSuggesterI> = ({
   placeholder = "",
   allowCreate,
   inputWidth,
+  disableWildCard = false,
 }) => {
+  const wildCardChar = "*";
   const queryClient = useQueryClient();
   const [typed, setTyped] = useState<string>("");
   const debouncedTyped = useDebounce(typed, 100);
@@ -58,7 +61,7 @@ export const ActantSuggester: React.FC<ActantSuggesterI> = ({
     async () => {
       const resSuggestions = await api.actantsGetMore({
         label: debouncedTyped,
-        class: selectedCategory,
+        class: selectedCategory === wildCardChar ? false : selectedCategory,
       });
       return resSuggestions.data.map((s: IActant) => {
         const entity = Entities[s.class];
@@ -116,6 +119,9 @@ export const ActantSuggester: React.FC<ActantSuggesterI> = ({
         });
       }
     });
+    if (categories.length > 1 && !disableWildCard) {
+      categories.unshift({ label: wildCardChar, value: wildCardChar });
+    }
     if (categories.length) {
       setAllCategories(categories);
       setSelectedCategory(categories[0].value);
