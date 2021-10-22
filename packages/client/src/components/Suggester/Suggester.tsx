@@ -19,6 +19,7 @@ import {
   StyledTypeBar,
 } from "./SuggesterStyles";
 import { SuggesterKeyPress } from "./SuggesterKeyPress";
+import { toast } from "react-toastify";
 
 export interface SuggestionI {
   id: string;
@@ -129,13 +130,16 @@ export const Suggester: React.FC<SuggesterProps> = ({
           }}
           onBlur={() => setIsFocused(false)}
           onEnterPressFn={() => {
-            if (selected === -1) {
+            if (selected === -1 && typed.length > 0) {
+              console.log(typed);
               onCreate({
                 label: typed,
                 category: category,
               });
             } else if (selected > -1) {
               onPick(suggestions[selected]);
+            } else {
+              toast.info("Fill label to create actant");
             }
           }}
         />
