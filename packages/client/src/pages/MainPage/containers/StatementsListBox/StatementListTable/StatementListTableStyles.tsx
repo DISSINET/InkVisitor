@@ -7,6 +7,7 @@ export const StyledTable = styled.table`
   border-width: ${({ theme }) => theme.borderWidth[1]};
   border-style: solid;
   border-color: ${({ theme }) => theme.color["gray"][500]};
+  box-shadow: ${({ theme }) => theme.boxShadow["subtle"]};
 `;
 export const StyledTHead = styled.thead`
   border-width: ${({ theme }) => theme.borderWidth[1]};
