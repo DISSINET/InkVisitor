@@ -62,7 +62,7 @@ export const StyledRelativePosition = styled.div`
   position: relative;
   background-color: ${({ theme }) => theme.color["blue"][50]};
   min-width: 16.1rem;
-  max-width: 21rem;
+  max-width: 24rem;
   display: grid;
 
   grid-template-columns: 2.5rem auto 3rem;
@@ -101,4 +101,8 @@ export const StyledSuggestionLineIcons = styled.div<Column>`
   justify-content: center;
   background-color: ${({ theme, isSelected }) =>
     isSelected ? theme.color["blue"][100] : "transparent"};
+`;
+export const StyledTagWrapper = styled.div`
+  display: inline-flex;
+  overflow: hidden;
 `;
