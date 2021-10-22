@@ -32,7 +32,7 @@ export const AttributeButtonGroup: React.FC<IAttributeButtonGroup> = ({
             tooltip={option.longValue}
             noBorder
             inverted
-            color={option.selected ? "success" : "plain"}
+            color={option.selected ? "primary" : "greyer"}
             textRegular={option.selected ? false : true}
             radiusLeft={firstInRow}
             radiusRight={lastInRow}
