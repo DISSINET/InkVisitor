@@ -6,6 +6,7 @@ export const StyledTable = styled.table`
   border-collapse: collapse;
   border-width: ${({ theme }) => theme.borderWidth[1]};
   border-style: solid;
+  margin-top: 90px;
   border-color: ${({ theme }) => theme.color["gray"][500]};
   box-shadow: ${({ theme }) => theme.boxShadow["subtle"]};
 `;
