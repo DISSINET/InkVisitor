@@ -9,6 +9,17 @@ export const StyledSuggester = styled.div<StyledSuggester>`
   margin-top: ${({ marginTop }) => (marginTop ? space2 : 0)};
 `;
 
+export const StyledTypeBar = styled.div<StyledTypeBar>`
+  position: absolute;
+  background-color: ${({ theme, entity }) => theme.color[entity]};
+  width: 3px;
+  left: 1px;
+  top: 1px;
+  bottom: 1px;
+`;
+interface Column {
+  isSelected: boolean;
+}
 interface InputWrapper {
   isOver: boolean;
   hasButton: boolean;
@@ -30,27 +41,6 @@ export const StyledInputWrapper = styled.div<InputWrapper>`
 export const StyledSuggesterButton = styled.div`
   border: 1px solid ${({ theme }) => theme.color["primary"]};
 `;
-export const StyledSuggesterList = styled.div`
-  position: absolute;
-  left: 0;
-  z-index: 10;
-`;
-export const StyledRelativePosition = styled.div`
-  position: relative;
-  background-color: ${({ theme }) => theme.color["blue"][50]};
-  width: auto;
-  display: grid;
-  grid-template-columns: 1.5em 10em 2em;
-  grid-template-rows: auto;
-  grid-auto-flow: row;
-  align-items: center;
-  min-height: 3rem;
-
-  > div {
-    margin-bottom: ${space1};
-  }
-`;
-
 export const StyledSuggestionCancelButton = styled.div`
   position: absolute;
   left: 7.5em;
@@ -59,36 +49,32 @@ export const StyledSuggestionCancelButton = styled.div`
     color: ${({ theme }) => theme.color["danger"]};
   }
 `;
-
 interface StyledTypeBar {
-  title: string;
+  entity: string;
 }
-export const StyledTypeBar = styled.div<StyledTypeBar>`
-  position: absolute;
-  background-color: ${({ theme, title }) => theme.color[title]};
-  width: 3px;
-  left: 1px;
-  top: 1px;
-  bottom: 1px;
-`;
-interface Column {
-  isSelected: boolean;
-}
-export const StyledSuggestionLineIcons = styled.div<Column>`
-  display: grid;
-  height: 100%;
-  align-items: center;
-  justify-content: center;
-  background-color: ${({ theme, isSelected }) =>
-    isSelected ? theme.color["blue"][100] : "transparent"};
-`;
 
-export const StyledSuggestionLineTag = styled.div<Column>`
+export const StyledSuggesterList = styled.div`
+  position: absolute;
+  left: 0;
+  z-index: 10;
+`;
+export const StyledRelativePosition = styled.div`
+  position: relative;
+  background-color: ${({ theme }) => theme.color["blue"][50]};
+  min-width: 16.1rem;
+  max-width: 21rem;
   display: grid;
+
+  grid-template-columns: 2.5rem auto 3rem;
+  grid-template-rows: auto;
+  grid-auto-flow: row;
   align-items: center;
-  height: 100%;
-  background-color: ${({ theme, isSelected }) =>
-    isSelected ? theme.color["blue"][100] : "transparent"};
+  min-height: 3rem;
+  padding-bottom: ${space1};
+
+  > div {
+    padding-top: ${space1};
+  }
 `;
 
 export const StyledSuggestionLineActions = styled.div<Column>`
@@ -100,4 +86,19 @@ export const StyledSuggestionLineActions = styled.div<Column>`
     isSelected ? theme.color["blue"][100] : "transparent"};
 
   cursor: pointer;
+`;
+export const StyledSuggestionLineTag = styled.div<Column>`
+  display: grid;
+  align-items: center;
+  height: 100%;
+  background-color: ${({ theme, isSelected }) =>
+    isSelected ? theme.color["blue"][100] : "transparent"};
+`;
+export const StyledSuggestionLineIcons = styled.div<Column>`
+  display: grid;
+  height: 100%;
+  align-items: center;
+  justify-content: center;
+  background-color: ${({ theme, isSelected }) =>
+    isSelected ? theme.color["blue"][100] : "transparent"};
 `;

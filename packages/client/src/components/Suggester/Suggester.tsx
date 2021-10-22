@@ -97,7 +97,7 @@ export const Suggester: React.FC<SuggesterProps> = ({
   return (
     <StyledSuggester marginTop={marginTop}>
       <StyledInputWrapper ref={dropRef} hasButton={allowCreate} isOver={isOver}>
-        <StyledTypeBar title={`entity${category}`}></StyledTypeBar>
+        <StyledTypeBar entity={`entity${category}`}></StyledTypeBar>
         <Input
           type="select"
           value={category}
@@ -157,7 +157,8 @@ export const Suggester: React.FC<SuggesterProps> = ({
           </StyledSuggesterButton>
         )}
       </StyledInputWrapper>
-      {(isFocused || isHovered) && (suggestions.length || isFetching) ? (
+      {/* {(isFocused || isHovered) &&  */}
+      {suggestions.length || isFetching ? (
         <StyledSuggesterList
           onMouseOver={() => setIsHovered(true)}
           onMouseOut={() => setIsHovered(false)}
@@ -175,14 +176,16 @@ export const Suggester: React.FC<SuggesterProps> = ({
                     />
                   </StyledSuggestionLineActions>
                   <StyledSuggestionLineTag isSelected={selected === si}>
-                    <Tag
-                      propId={suggestion.id}
-                      label={suggestion.label}
-                      status={suggestion.status}
-                      ltype={suggestion.ltype}
-                      tooltipDetail={suggestion.detail}
-                      category={suggestion.category}
-                    />
+                    <div>
+                      <Tag
+                        propId={suggestion.id}
+                        label={suggestion.label}
+                        status={suggestion.status}
+                        ltype={suggestion.ltype}
+                        tooltipDetail={suggestion.detail}
+                        category={suggestion.category}
+                      />
+                    </div>
                   </StyledSuggestionLineTag>
                   <StyledSuggestionLineIcons isSelected={selected === si}>
                     {suggestion.icons}
