@@ -128,9 +128,6 @@ export const ActantSuggester: React.FC<ActantSuggesterI> = ({
     }
   }, [categoryIds]);
 
-  const handleTyped = (newType: string) => {
-    setTyped(newType);
-  };
   const handleCategoryChanged = (newCategory: string) => {
     setSelectedCategory(newCategory);
   };
@@ -198,7 +195,7 @@ export const ActantSuggester: React.FC<ActantSuggesterI> = ({
       }}
       //disabled?: boolean; // todo not implemented yet
       onType={(newType: string) => {
-        handleTyped(newType);
+        setTyped(newType);
       }}
       onChangeCategory={(newCategory: string) =>
         handleCategoryChanged(newCategory)

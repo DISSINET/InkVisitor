@@ -47,7 +47,7 @@ interface SuggesterProps {
   isFetching?: boolean;
 
   // events
-  onType: Function;
+  onType: (newType: string) => void;
   onChangeCategory: Function;
   onCreate: Function;
   onPick: Function;
@@ -94,6 +94,10 @@ export const Suggester: React.FC<SuggesterProps> = ({
   const [isFocused, setIsFocused] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
 
+  const onTypeFn = (newType: string) => {
+    setSelected(-1);
+    onType(newType);
+  };
   return (
     <StyledSuggester marginTop={marginTop}>
       <StyledInputWrapper ref={dropRef} hasButton={allowCreate} isOver={isOver}>
@@ -114,7 +118,7 @@ export const Suggester: React.FC<SuggesterProps> = ({
         <Input
           type="text"
           value={typed}
-          onChangeFn={onType}
+          onChangeFn={(newType: string) => onTypeFn(newType)}
           placeholder={placeholder}
           suggester
           changeOnType={true}
@@ -157,8 +161,7 @@ export const Suggester: React.FC<SuggesterProps> = ({
           </StyledSuggesterButton>
         )}
       </StyledInputWrapper>
-      {/* {(isFocused || isHovered) &&  */}
-      {suggestions.length || isFetching ? (
+      {((isFocused || isHovered) && suggestions.length) || isFetching ? (
         <StyledSuggesterList
           onMouseOver={() => setIsHovered(true)}
           onMouseOut={() => setIsHovered(false)}
@@ -194,7 +197,7 @@ export const Suggester: React.FC<SuggesterProps> = ({
               ))}
             <Loader size={30} show={isFetching} />
           </StyledRelativePosition>
-          {/* <SuggesterKeyPress
+          <SuggesterKeyPress
             onArrowDown={() => {
               if (selected < suggestions.length - 1) setSelected(selected + 1);
             }}
@@ -202,7 +205,7 @@ export const Suggester: React.FC<SuggesterProps> = ({
               if (selected > -1) setSelected(selected - 1);
             }}
             dependencyArr={[selected]}
-          /> */}
+          />
         </StyledSuggesterList>
       ) : null}
     </StyledSuggester>
