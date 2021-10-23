@@ -27,6 +27,11 @@ import { r as rethink, Connection, RDatum, WriteResult } from "rethinkdb-ts";
 import { InternalServerError } from "@shared/types/errors";
 import User from "./user";
 import Territory from "./territory";
+import {
+  Constraint,
+  ConstraintableModel,
+  ConstraintAction,
+} from "./constraints/types";
 
 export class StatementActant implements IStatementActant, IModel {
   id = "";
@@ -564,6 +569,48 @@ class Statement extends Actant implements IStatement {
       })
       .map((s) => new Statement({ ...s }));
   }
+
+  static constraints: Constraint[] = [
+    {
+      fetchAffected: async (
+        db: Connection,
+        actantId: string
+      ): Promise<Actant[]> => {
+        const entries = await rethink
+          .table(Actant.table)
+          .filter({ class: ActantType.Statement })
+          .filter((row: any) => {
+            return row("data")("actants").contains((actantElement: any) =>
+              actantElement("actant").eq(actantId)
+            );
+          })
+          .run(db);
+
+        return entries.map((e) => new Statement({ ...e }));
+      },
+      name: "data.actants.actant",
+      handleChange: async (
+        db: Connection,
+        actantIdToUnlink: string,
+        actant: Actant
+      ): Promise<boolean> => {
+        const st = actant as Statement;
+        let indexToRemove = st.data.actants.findIndex(
+          (a) => a.actant === actantIdToUnlink
+        );
+        if (indexToRemove === -1) {
+          return false;
+        }
+
+        st.data.actants.splice(indexToRemove, 1);
+
+        const result = await st.update(db, {
+          data: { actants: st.data.actants },
+        });
+        return !!result.replaced;
+      },
+    },
+  ];
 }
 
 export default Statement;

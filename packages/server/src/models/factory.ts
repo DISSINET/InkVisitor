@@ -7,6 +7,7 @@ import Resource from "./resource";
 import { ModelNotValidError } from "@shared/types/errors";
 import Action from "./action";
 import Actant from "./actant";
+import { ConstraintableModel } from "./constraints/types";
 
 export function getActantType(data: UnknownObject): Actant {
   if (!data || typeof data !== "object" || Object.keys(data).length === 0) {
