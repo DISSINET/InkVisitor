@@ -246,20 +246,20 @@ export const StatementListBox: React.FC = () => {
         Header: "ID",
         accessor: "id",
       },
-      // {
-      //   Header: "",
-      //   id: "Statement",
-      //   Cell: ({ row }: Cell) => {
-      //     const statement = row.original as IStatement;
-      //     return (
-      //       <ActantTag
-      //         actant={statement as IActant}
-      //         short
-      //         tooltipText={statement.data.text}
-      //       />
-      //     );
-      //   },
-      // },
+      {
+        Header: "",
+        id: "Statement",
+        Cell: ({ row }: Cell) => {
+          const statement = row.original as IStatement;
+          return (
+            <ActantTag
+              actant={statement as IActant}
+              short
+              tooltipText={statement.data.text}
+            />
+          );
+        },
+      },
       {
         Header: "Subj.",
         accessor: "data",
