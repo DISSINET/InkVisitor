@@ -26,6 +26,9 @@ export const StyledTd = styled.td`
 export const StyledSubRow = styled.div`
   width: 100%;
   padding: ${({ theme }) => theme.space[2]};
-  background-color: ${({ theme }) => theme.color["gray"][300]};
+  border-left: 1px dashed;
+  border-left-color: ${({ theme }) => theme.color["gray"][800]};
+  margin-left: ${({ theme }) => `${theme.space[10]}`};
+  margin-bottom: ${({ theme }) => `${theme.space[2]}`};
 `;
 

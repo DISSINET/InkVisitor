@@ -90,6 +90,7 @@ export const Suggester: React.FC<SuggesterProps> = ({
   });
   const [selected, setSelected] = useState(-1);
   const [isFocused, setIsFocused] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
 
   return (
     <StyledSuggester marginTop={marginTop}>
@@ -154,8 +155,11 @@ export const Suggester: React.FC<SuggesterProps> = ({
           </StyledSuggesterButton>
         )}
       </StyledInputWrapper>
-      {suggestions.length || isFetching ? (
-        <StyledSuggesterList>
+      {(isFocused || isHovered) && (suggestions.length || isFetching) ? (
+        <StyledSuggesterList
+          onMouseOver={() => setIsHovered(true)}
+          onMouseOut={() => setIsHovered(false)}
+        >
           <StyledRelativePosition>
             {suggestions
               .filter((s, si) => si < MAXSUGGESTIONDISPLAYED)

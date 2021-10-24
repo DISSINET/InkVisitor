@@ -31,12 +31,14 @@ export default {
       success: "#F6F4FF",
       primary: "#E6F6FF",
       grey: "#fff",
+      greyer: "#fff",
       warning: "#FFFBEA",
     },
     black: "#000",
     white: "#fff",
     whiteTransparent: "rgba(255,255,255,0.3)",
     grey: "#C4C4C4",
+    greyer: "#4a5568",
     text: "#383737",
     primary: "#091034",
     success: "#6174C2",
@@ -136,5 +138,8 @@ export default {
   },
   boxShadow: {
     normal: "1px 1px 3px rgba(0, 0, 0, 0.4)",
+    subtle: "0 1px 3px hsla(0,0%,0%,0.12), 0 1px 2px hsla(0,0%,0%,0.24)",
+    high: "0 15px 25px hsla(0,0%,0%,0.15), 0 5px 10px hsla(0,0%,0%,0.05)",
+    inset: "0 2px 0px hsl(220, 7%, 83%, 0.5), inset 0 2px 2px hsla(0, 0%, 0%, 0.1)",
   },
 };

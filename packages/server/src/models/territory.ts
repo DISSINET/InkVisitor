@@ -243,7 +243,6 @@ class Territory extends Actant implements ITerritory {
     }
 
     const closestRight = this.getClosestRight(user.rights);
-    console.log("clsoest", closestRight, this.id);
 
     if (!closestRight) {
       return false;

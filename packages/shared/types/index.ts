@@ -9,7 +9,6 @@ import {
   IStoredTerritory,
   IUserOptions,
   IUserRight,
-  IUserRole,
 } from "./user";
 import { IResource } from "./resource";
 import { IResponseDetail } from "./response-detail";
@@ -53,7 +52,6 @@ export type {
   IStatementReference,
   ITerritory,
   IUser,
-  IUserRole,
   IUserOptions,
   IUserRight,
   IBookmarkFolder,

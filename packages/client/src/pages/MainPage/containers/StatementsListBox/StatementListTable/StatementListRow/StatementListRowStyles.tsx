@@ -12,14 +12,19 @@ export const StyledTr = styled.tr<StyledTr>`
     isSelected ? theme.color["primary"] : theme.color["black"]};
   opacity: ${({ opacity }) => (opacity ? opacity : 1)};
   border-top: 1px solid ${({ theme }) => theme.color["gray"][500]};
+  border-left: ${({ theme, isSelected }) =>
+    isSelected ? "4px solid " + theme.color["success"] : ""};
   cursor: ${({ isSelected }) => (isSelected ? "default" : "pointer")};
   td:first-child {
     padding-left: ${({ theme }) => theme.space[1]};
   }
+  :hover {
+    background-color: ${({ theme }) => theme.color["gray"][100]};
+  }
 `;
 export const StyledTd = styled.td`
   padding: ${({ theme }) => theme.space[2]};
-  padding-left: 0;
+  padding-left: ${({ theme }) => theme.space[4]};
   font-size: ${({ theme }) => theme.fontSize["sm"]};
 `;
 export const StyledSubRow = styled.div`

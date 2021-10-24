@@ -23,8 +23,6 @@ server.use(cors());
 server.use(express.json());
 server.use(express.urlencoded({ extended: true }));
 
-server.use(customizeRequest);
-
 // Show routes called in console during development
 if (process.env.NODE_ENV === "devel") {
   server.use(morgan("dev"));
@@ -46,6 +44,7 @@ server.use(dbMiddleware);
 
 // uncomment this to enable auth
 server.use(validateJwt().unless({ path: [/api\/v1\/users\/signin/] }));
+server.use(customizeRequest);
 
 // Routing
 const routerV1 = Router();
