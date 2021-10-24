@@ -86,8 +86,6 @@ export const ActantSuggester: React.FC<ActantSuggesterI> = ({
     }
   );
 
-  console.log(suggestions);
-
   const handleClean = () => {
     setTyped("");
   };
