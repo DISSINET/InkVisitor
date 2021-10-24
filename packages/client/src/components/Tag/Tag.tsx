@@ -18,7 +18,7 @@ import {
 import { useAppDispatch } from "redux/hooks";
 import { setDraggedTerritory } from "redux/features/territoryTree/draggedTerritorySlice";
 import { useSearchParams } from "hooks";
-import { TagTooltip } from "./TagTooltip";
+import { TagTooltip } from "../TagTooltip";
 import { PopupPosition } from "reactjs-popup/dist/types";
 import { Tooltip } from "components";
 
@@ -29,6 +29,7 @@ interface TagProps {
   tooltipDetail?: string;
   tooltipText?: string;
   category: string;
+  status: string;
   mode?: "selected" | "disabled" | "invalid" | false;
   borderStyle?: "solid" | "dashed" | "dotted";
   button?: ReactNode;
@@ -51,6 +52,7 @@ export const Tag: React.FC<TagProps> = ({
   tooltipDetail,
   tooltipText,
   category = "T",
+  status = "1",
   mode = false,
   borderStyle = "solid",
   button,
@@ -126,7 +128,7 @@ export const Tag: React.FC<TagProps> = ({
       {category}
     </StyledEntityTag>
   );
-  const renderButton = () => <ButtonWrapper>{button}</ButtonWrapper>;
+  const renderButton = () => <ButtonWrapper status={status} >{button}</ButtonWrapper>;
 
   const onDoubleClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -148,6 +150,7 @@ export const Tag: React.FC<TagProps> = ({
           <div>
             <StyledTagWrapper
               ref={ref}
+              status={status}
               borderStyle={borderStyle}
               onDoubleClick={(e: React.MouseEvent) => onDoubleClick(e)}
             >
@@ -170,12 +173,14 @@ export const Tag: React.FC<TagProps> = ({
               <StyledTagWrapper
                 ref={ref}
                 borderStyle={borderStyle}
+                status={status}
                 onDoubleClick={(e: React.MouseEvent) => onDoubleClick(e)}
               >
                 {renderEntityTag()}
                 {label && (
                   <StyledLabel
                     invertedLabel={invertedLabel}
+                    status={status}
                     borderStyle={borderStyle}
                     fullWidth={fullWidth}
                   >

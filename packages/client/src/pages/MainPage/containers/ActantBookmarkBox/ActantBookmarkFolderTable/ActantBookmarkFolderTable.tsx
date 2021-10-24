@@ -53,6 +53,7 @@ export const ActantBookmarkFolderTable: React.FC<ActantBookmarkFolderTable> = ({
             <ActantTag
               actant={actant as IActant}
               short={false}
+              status={actant.status}
               button={
                 <Button
                   key="d"
