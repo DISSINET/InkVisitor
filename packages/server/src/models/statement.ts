@@ -265,7 +265,7 @@ class Statement extends Actant implements IStatement {
   id = "";
   class: ActantType.Statement = ActantType.Statement;
   data = new StatementData({});
-  label = "";
+  label: string = "";
   detail: string = "";
   status: ActantStatus = ActantStatus.Pending;
   language: string[] = ["eng"];

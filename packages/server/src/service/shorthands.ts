@@ -6,6 +6,7 @@ import { IAction, IStatement, ITerritory } from "@shared/types";
 import { IDbModel } from "@models/common";
 import { ModelNotValidError } from "@shared/types/errors";
 import { ActantType } from "@shared/enums";
+import { regExpEscape } from "@common/functions";
 
 export async function createUser(db: Db, data: IUser): Promise<WriteResult> {
   return rethink.table("users").insert(data).run(db.connection);
@@ -197,7 +198,9 @@ export async function filterActantsByWildcard(
 
   if (actantLabel) {
     query = query.filter(function (row: RDatum) {
-      return row("label").downcase().match(`^${actantLabel.toLowerCase()}`);
+      return row("label")
+        .downcase()
+        .match(`^${regExpEscape(actantLabel.toLowerCase())}`);
     });
   }
 
