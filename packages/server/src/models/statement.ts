@@ -8,7 +8,6 @@ import { fillFlatObject, fillArray, UnknownObject, IModel } from "./common";
 import {
   ActantType,
   ActantStatus,
-  EntityActantType,
   Certainty,
   Elvl,
   Position,
@@ -27,6 +26,7 @@ import { r as rethink, Connection, RDatum, WriteResult } from "rethinkdb-ts";
 import { InternalServerError } from "@shared/types/errors";
 import User from "./user";
 import Territory from "./territory";
+import { EventMapSingle, EventTypes } from "./events/types";
 
 export class StatementActant implements IStatementActant, IModel {
   id = "";
@@ -333,7 +333,8 @@ class Statement extends Actant implements IStatement {
       siblings
     );
 
-    return super.save(db);
+    const res = await super.save(db);
+    return res;
   }
 
   /**
@@ -416,6 +417,61 @@ class Statement extends Actant implements IStatement {
     return Object.keys(actantIds);
   }
 
+  async unlinkActantId(
+    db: Connection,
+    actantIdToUnlink: string
+  ): Promise<boolean> {
+    const indexToRemove = this.data.actants.findIndex(
+      (a) => a.actant === actantIdToUnlink
+    );
+    if (indexToRemove === -1) {
+      return false;
+    }
+
+    this.data.actants.splice(indexToRemove, 1);
+    const result = await this.update(db, {
+      data: { actants: this.data.actants },
+    });
+    return !!result.replaced;
+  }
+
+  async unlinkPropId(
+    db: Connection,
+    actantIdToUnlink: string
+  ): Promise<boolean> {
+    const indexToRemove = this.data.props.findIndex(
+      (a) => a.origin === actantIdToUnlink
+    );
+    if (indexToRemove === -1) {
+      return false;
+    }
+
+    this.data.props.splice(indexToRemove, 1);
+    const result = await this.update(db, {
+      data: { props: this.data.props },
+    });
+
+    return !!result.replaced;
+  }
+
+  async unlinkActionId(
+    db: Connection,
+    actantIdToUnlink: string
+  ): Promise<boolean> {
+    const indexToRemove = this.data.actions.findIndex(
+      (a) => a.action === actantIdToUnlink
+    );
+    if (indexToRemove === -1) {
+      return false;
+    }
+
+    this.data.actions.splice(indexToRemove, 1);
+    const result = await this.update(db, {
+      data: { props: this.data.props },
+    });
+    return !!result.replaced;
+  }
+
   /**
    * getLinkedActantIds wrapped in foreach cycle
    * @param statements list of scanned statements
@@ -460,7 +516,7 @@ class Statement extends Actant implements IStatement {
   }
 
   /**
-   * finds statements which are under specific territory
+   * finds statements which are linked to different actant
    * @param db db connection
    * @param territoryId id of the actant
    * @returns list of statements data
@@ -536,6 +592,58 @@ class Statement extends Actant implements IStatement {
       })
       .map((s) => new Statement({ ...s }));
   }
+
+  static events: EventMapSingle = {
+    [EventTypes.BEFORE_ACTANT_DELETE]: async (
+      db: Connection,
+      actantId: string
+    ): Promise<void> => {
+      const linkedToActant = await rethink
+        .table(Actant.table)
+        .filter({ class: ActantType.Statement })
+        .filter((row: any) => {
+          return row("data")("actants").contains((actantElement: any) =>
+            actantElement("actant").eq(actantId)
+          );
+        })
+        .run(db);
+
+      for (const stData of linkedToActant) {
+        const st = new Statement({ ...stData });
+        await st.unlinkActantId(db, actantId);
+      }
+
+      const linkedToProps = await rethink
+        .table(Actant.table)
+        .filter({ class: ActantType.Statement })
+        .filter((row: any) => {
+          return row("data")("props").contains((actantElement: any) =>
+            actantElement("origin").eq(actantId)
+          );
+        })
+        .run(db);
+
+      for (const stData of linkedToProps) {
+        const st = new Statement({ ...stData });
+        await st.unlinkPropId(db, actantId);
+      }
+
+      const linkedToActions = await rethink
+        .table(Actant.table)
+        .filter({ class: ActantType.Statement })
+        .filter((row: any) => {
+          return row("data")("actions").contains((actantElement: any) =>
+            actantElement("action").eq(actantId)
+          );
+        })
+        .run(db);
+
+      for (const stData of linkedToActions) {
+        const st = new Statement({ ...stData });
+        await st.unlinkActionId(db, actantId);
+      }
+    },
+  };
 }
 
 export default Statement;

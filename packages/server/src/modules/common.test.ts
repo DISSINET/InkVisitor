@@ -9,6 +9,7 @@ import Territory from "@models/territory";
 import { CustomError } from "@shared/types/errors";
 import { errorTypes } from "@shared/types/response-generic";
 import { ActantType } from "@shared/enums";
+import "@models/events/register";
 
 describe("common", function () {
   it("should work", () => undefined);

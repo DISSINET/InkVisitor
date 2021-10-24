@@ -1,9 +1,12 @@
-import { IDbModel } from "./common";
+import { IDbModel, UnknownObject, fillFlatObject } from "./common";
 import { r as rethink, Connection, WriteResult } from "rethinkdb-ts";
 import { IStatement } from "@shared/types";
 import { ActantType, UserRoleMode } from "@shared/enums";
 import { InternalServerError } from "@shared/types/errors";
 import User from "./user";
+import Statement from "./statement";
+import emitter from "./events/emitter";
+import { EventTypes } from "./events/types";
 
 export default class Actant implements IDbModel {
   static table = "actants";
@@ -33,37 +36,26 @@ export default class Actant implements IDbModel {
 
   async delete(db: Connection | undefined): Promise<WriteResult> {
     if (!this.id) {
-      throw new Error("delete called on actant with undefined id");
-    }
-
-    for (const st of await this.getDependentStatements(db)) {
-      const actant = new Actant();
-      actant.id = st.id;
-
-      let indexToRemove = st.data.actants.findIndex(
-        (a) => a.actant === this.id
+      throw new InternalServerError(
+        "delete called on actant with undefined id"
       );
-
-      if (indexToRemove !== -1) {
-        st.data.actants.splice(indexToRemove, 1);
-      } else {
-        indexToRemove = st.data.props.findIndex((a) => a.origin === this.id);
-        if (indexToRemove !== -1) {
-          st.data.props.splice(indexToRemove, 1);
-        }
-      }
-
-      // if neither works
-      if (indexToRemove === -1) {
-        throw new Error(
-          "getDependentStatements returned non-dependent statement"
-        );
-      }
-
-      await actant.update(db, { data: st.data });
     }
 
-    return rethink.table(Actant.table).get(this.id).delete().run(db);
+    if (db) {
+      await emitter.emit(EventTypes.BEFORE_ACTANT_DELETE, db, this.id);
+    }
+
+    const result = await rethink
+      .table(Actant.table)
+      .get(this.id)
+      .delete()
+      .run(db);
+
+    if (result.deleted && db) {
+      await emitter.emit(EventTypes.AFTER_ACTANT_DELETE, db, this.id);
+    }
+
+    return result;
   }
 
   isValid(): boolean {
@@ -80,23 +72,6 @@ export default class Actant implements IDbModel {
 
   canBeDeletedByUser(user: User): boolean {
     return true;
-  }
-
-  getDependentStatements(db: Connection | undefined): Promise<IStatement[]> {
-    return rethink
-      .table(Actant.table)
-      .filter({ class: ActantType.Statement })
-      .filter((row: any) => {
-        return rethink.or(
-          row("data")("actants").contains((actantElement: any) =>
-            actantElement("actant").eq(this.id)
-          ),
-          row("data")("props").contains((actantElement: any) =>
-            actantElement("origin").eq(this.id)
-          )
-        );
-      })
-      .run(db);
   }
 
   static determineOrder(want: number, sibl: Record<number, unknown>): number {
