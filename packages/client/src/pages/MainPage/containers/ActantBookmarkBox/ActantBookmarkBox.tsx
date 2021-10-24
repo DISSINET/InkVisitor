@@ -210,9 +210,8 @@ export const ActantBookmarkBox: React.FC = () => {
   const createFolderMutation = useMutation(
     async () => {
       if (bookmarkFolders) {
-        const newBookmarkFolder: IBookmarkFolder = CBookmarkFolder(
-          editingFolderName
-        );
+        const newBookmarkFolder: IBookmarkFolder =
+          CBookmarkFolder(editingFolderName);
 
         const newBookmarks: IBookmarkFolder[] | false = getBookmarksCopy();
         if (newBookmarks) {
@@ -307,12 +306,12 @@ export const ActantBookmarkBox: React.FC = () => {
 
             return (
               <StyledFolderWrapper key={bookmarkFolder.id}>
-                <StyledFolderHeader>
-                  <StyledFolderWrapperOpenArea
-                    onClick={() => {
-                      handleClickFolder(bookmarkFolder.id);
-                    }}
-                  >
+                <StyledFolderHeader
+                  onClick={() => {
+                    handleClickFolder(bookmarkFolder.id);
+                  }}
+                >
+                  <StyledFolderWrapperOpenArea>
                     {(() => {
                       if (open) {
                         if (empty) {
@@ -333,11 +332,12 @@ export const ActantBookmarkBox: React.FC = () => {
                     </StyledFolderHeaderText>
                   </StyledFolderWrapperOpenArea>
                   <StyledFolderHeaderButtons>
-                    <ButtonGroup noMargin={true}>
+                    <ButtonGroup>
                       <Button
                         key="edit"
                         icon={<FaEdit size={12} />}
-                        color="warning"
+                        color="plain"
+                        inverted
                         onClick={() => {
                           startEditingFolder(bookmarkFolder);
                         }}
@@ -346,6 +346,7 @@ export const ActantBookmarkBox: React.FC = () => {
                         key="remove"
                         icon={<FaTrash size={12} />}
                         color="danger"
+                        inverted
                         onClick={() => {
                           askRemoveFolder(bookmarkFolder.id);
                         }}

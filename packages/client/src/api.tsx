@@ -216,12 +216,12 @@ class Api {
     }
   }
 
-  async usersCreate(
-    userId: string,
-    userData: IUser
-  ): Promise<AxiosResponse<IResponseGeneric>> {
+  async usersCreate(userData: {
+    name: string;
+    email: string;
+  }): Promise<AxiosResponse<IResponseGeneric>> {
     try {
-      const response = await this.connection.post(`/users/create`);
+      const response = await this.connection.post(`/users/create`, userData);
       return response;
     } catch (err: any | AxiosError) {
       throw { ...err.response.data };
@@ -246,6 +246,22 @@ class Api {
   async usersDelete(userId: string): Promise<AxiosResponse<IResponseGeneric>> {
     try {
       const response = await this.connection.delete(`/users/delete/${userId}`);
+      return response;
+    } catch (err: any | AxiosError) {
+      throw { ...err.response.data };
+    }
+  }
+
+  /*
+    This request will restart the password of the user with userId and send the new password to his email address
+  */
+  async restartPassword(
+    userId: string
+  ): Promise<AxiosResponse<IResponseGeneric>> {
+    try {
+      const response = await this.connection.get(
+        `/users/restart-password/${userId}`
+      );
       return response;
     } catch (err: any | AxiosError) {
       throw { ...err.response.data };

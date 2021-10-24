@@ -16,14 +16,22 @@ export const StyledFolderList = styled.div`
   width: 100%;
 `;
 export const StyledFolderWrapper = styled.div`
-  margin-bottom: ${({ theme }) => theme.space[2]};
+  margin-bottom: ${({ theme }) => theme.space[0]};
   width: 100%;
+  border-width: ${({ theme }) => theme.borderWidth[1]};
+  border-style: solid;
+  border-color: ${({ theme }) => theme.color["gray"][400]};
+  box-shadow: ${({ theme }) => theme.boxShadow["subtle"]};
+  background-color: ${({ theme }) => theme.color["white"]};
+  :hover {
+    background-color: ${({ theme }) => theme.color["gray"][100]};
+  }
 `;
 export const StyledFolderHeader = styled.div`
   width: 100%;
   height: ${({ theme }) => theme.space[14]};
   display: inline-block;
-  background-color: ${({ theme }) => theme.color["gray"][400]};
+  color: ${({ theme }) => theme.color["gray"][700]};
   padding: ${({ theme }) => theme.space[3]};
 `;
 export const StyledFolderHeaderText = styled.span`

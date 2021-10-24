@@ -4,6 +4,10 @@ import styled from "styled-components";
 export const StyledHeader = styled.div`
   display: flex;
   flex-direction: column;
+  width: 100%;
+  position: absolute;
+  padding: ${({ theme }) => theme.space[3]};
+  background: ${({ theme }) => theme.color["gray"][200]};
 `;
 export const StyledHeaderBreadcrumbRow = styled.div`
   display: flex;
