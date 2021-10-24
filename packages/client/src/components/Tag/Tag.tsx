@@ -156,6 +156,7 @@ export const Tag: React.FC<TagProps> = ({
               status={status}
               ltype={ltype}
               borderStyle={borderStyle}
+              onClick={(e: React.MouseEvent) => e.stopPropagation()}
               onDoubleClick={(e: React.MouseEvent) => onDoubleClick(e)}
             >
               {renderEntityTag()}
@@ -179,6 +180,7 @@ export const Tag: React.FC<TagProps> = ({
                 borderStyle={borderStyle}
                 status={status}
                 ltype={ltype}
+                onClick={(e: React.MouseEvent) => e.stopPropagation()}
                 onDoubleClick={(e: React.MouseEvent) => onDoubleClick(e)}
               >
                 {renderEntityTag()}

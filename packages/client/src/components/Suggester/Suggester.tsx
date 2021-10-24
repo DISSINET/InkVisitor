@@ -3,7 +3,17 @@ import { DragObjectWithType, DropTargetMonitor, useDrop } from "react-dnd";
 import { FaPlus, FaPlayCircle } from "react-icons/fa";
 import { MdCancel } from "react-icons/md";
 
-import { Button, Input, Loader, Tag } from "components";
+import {
+  Button,
+  ButtonGroup,
+  Input,
+  Loader,
+  Modal,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+  Tag,
+} from "components";
 import { IOption } from "@shared/types";
 import { ItemTypes } from "types";
 import {
@@ -83,6 +93,7 @@ export const Suggester: React.FC<SuggesterProps> = ({
   onCancel = () => {},
   isFetching,
 }) => {
+  const [showModal, setShowModal] = useState(false);
   const [{ isOver }, dropRef] = useDrop({
     accept: ItemTypes.TAG,
     drop: (item: DragObjectWithType) => {
@@ -101,119 +112,173 @@ export const Suggester: React.FC<SuggesterProps> = ({
     onType(newType);
   };
   return (
-    <StyledSuggester marginTop={marginTop}>
-      <StyledInputWrapper ref={dropRef} hasButton={allowCreate} isOver={isOver}>
-        <StyledTypeBar entity={`entity${category}`}></StyledTypeBar>
-        <Input
-          type="select"
-          value={category}
-          options={categories}
-          inverted
-          suggester
-          onChangeFn={onChangeCategory}
-          onFocus={() => {
-            setSelected(-1);
-            setIsFocused(true);
-          }}
-          onBlur={() => setIsFocused(false)}
-        />
-        <Input
-          type="text"
-          value={typed}
-          onChangeFn={(newType: string) => onTypeFn(newType)}
-          placeholder={placeholder}
-          suggester
-          changeOnType={true}
-          width={inputWidth}
-          onFocus={() => {
-            setSelected(-1);
-            setIsFocused(true);
-          }}
-          onBlur={() => setIsFocused(false)}
-          onEnterPressFn={() => {
-            if (selected === -1 && typed.length > 0) {
-              console.log(typed);
-              onCreate({
-                label: typed,
-                category: category,
-              });
-            } else if (selected > -1) {
-              onPick(suggestions[selected]);
-            } else {
-              toast.info("Fill label to create actant");
-            }
-          }}
-        />
-        {displayCancelButton && (
-          <StyledSuggestionCancelButton>
-            <MdCancel onClick={() => onCancel()} />
-          </StyledSuggestionCancelButton>
-        )}
-
-        {allowCreate && (
-          <StyledSuggesterButton>
-            <Button
-              icon={<FaPlus style={{ fontSize: "16px", padding: "2px" }} />}
-              tooltip="create new actant"
-              color="primary"
-              onClick={() => {
+    <>
+      <StyledSuggester marginTop={marginTop}>
+        <StyledInputWrapper
+          ref={dropRef}
+          hasButton={allowCreate}
+          isOver={isOver}
+        >
+          <StyledTypeBar entity={`entity${category}`}></StyledTypeBar>
+          <Input
+            type="select"
+            value={category}
+            options={categories}
+            inverted
+            suggester
+            onChangeFn={onChangeCategory}
+            onFocus={() => {
+              setSelected(-1);
+              setIsFocused(true);
+            }}
+            onBlur={() => setIsFocused(false)}
+          />
+          <Input
+            type="text"
+            value={typed}
+            onChangeFn={(newType: string) => onTypeFn(newType)}
+            placeholder={placeholder}
+            suggester
+            changeOnType={true}
+            width={inputWidth}
+            onFocus={() => {
+              setSelected(-1);
+              setIsFocused(true);
+            }}
+            onBlur={() => setIsFocused(false)}
+            onEnterPressFn={() => {
+              if (selected === -1 && typed.length > 0) {
+                // nothing selected -> create new
                 onCreate({
                   label: typed,
                   category: category,
                 });
+              } else if (selected > -1) {
+                onPick(suggestions[selected]);
+              } else {
+                toast.info("Fill label to create actant");
+              }
+            }}
+          />
+          {displayCancelButton && (
+            <StyledSuggestionCancelButton>
+              <MdCancel onClick={() => onCancel()} />
+            </StyledSuggestionCancelButton>
+          )}
+
+          {allowCreate && (
+            <StyledSuggesterButton>
+              <Button
+                icon={<FaPlus style={{ fontSize: "16px", padding: "2px" }} />}
+                tooltip="create new actant"
+                color="primary"
+                onClick={() => {
+                  if (typed.length > 0) {
+                    onCreate({
+                      label: typed,
+                      category: category,
+                    });
+                  } else {
+                    toast.info("Fill label to create actant");
+                  }
+                }}
+              />
+            </StyledSuggesterButton>
+          )}
+        </StyledInputWrapper>
+        {((isFocused || isHovered) && suggestions.length) || isFetching ? (
+          <StyledSuggesterList
+            onMouseOver={() => setIsHovered(true)}
+            onMouseOut={() => setIsHovered(false)}
+          >
+            <StyledRelativePosition>
+              {suggestions
+                .filter((s, si) => si < MAXSUGGESTIONDISPLAYED)
+                .map((suggestion, si) => (
+                  <React.Fragment key={si}>
+                    <StyledSuggestionLineActions isSelected={selected === si}>
+                      <FaPlayCircle
+                        onClick={() => {
+                          onPick(suggestion);
+                        }}
+                      />
+                    </StyledSuggestionLineActions>
+                    <StyledSuggestionLineTag isSelected={selected === si}>
+                      <StyledTagWrapper>
+                        <Tag
+                          fullWidth
+                          propId={suggestion.id}
+                          label={suggestion.label}
+                          status={suggestion.status}
+                          ltype={suggestion.ltype}
+                          tooltipDetail={suggestion.detail}
+                          category={suggestion.category}
+                        />
+                      </StyledTagWrapper>
+                    </StyledSuggestionLineTag>
+                    <StyledSuggestionLineIcons isSelected={selected === si}>
+                      {suggestion.icons}
+                    </StyledSuggestionLineIcons>
+                  </React.Fragment>
+                ))}
+              <Loader size={30} show={isFetching} />
+            </StyledRelativePosition>
+            <SuggesterKeyPress
+              onArrowDown={() => {
+                if (selected < suggestions.length - 1)
+                  setSelected(selected + 1);
+              }}
+              onArrowUp={() => {
+                if (selected > -1) setSelected(selected - 1);
+              }}
+              dependencyArr={[selected]}
+            />
+          </StyledSuggesterList>
+        ) : null}
+      </StyledSuggester>
+      <Modal showModal={showModal}>
+        <ModalHeader title="Create actant" />
+        <ModalContent>
+          <Input
+            type="select"
+            value={category}
+            options={categories}
+            inverted
+            suggester
+            onChangeFn={onChangeCategory}
+          />
+          <Input
+            label="Label: "
+            value={typed}
+            onChangeFn={(newType: string) => onTypeFn(newType)}
+            changeOnType
+            autoFocus
+            onEnterPressFn={() => {
+              // acceptEditingFolderMutation.mutate();
+            }}
+          />
+        </ModalContent>
+        <ModalFooter>
+          <ButtonGroup>
+            <Button
+              key="cancel"
+              label="Cancel"
+              color="warning"
+              onClick={() => {
+                setShowModal(false);
               }}
             />
-          </StyledSuggesterButton>
-        )}
-      </StyledInputWrapper>
-      {((isFocused || isHovered) && suggestions.length) || isFetching ? (
-        <StyledSuggesterList
-          onMouseOver={() => setIsHovered(true)}
-          onMouseOut={() => setIsHovered(false)}
-        >
-          <StyledRelativePosition>
-            {suggestions
-              .filter((s, si) => si < MAXSUGGESTIONDISPLAYED)
-              .map((suggestion, si) => (
-                <React.Fragment key={si}>
-                  <StyledSuggestionLineActions isSelected={selected === si}>
-                    <FaPlayCircle
-                      onClick={() => {
-                        onPick(suggestion);
-                      }}
-                    />
-                  </StyledSuggestionLineActions>
-                  <StyledSuggestionLineTag isSelected={selected === si}>
-                    <StyledTagWrapper>
-                      <Tag
-                        fullWidth
-                        propId={suggestion.id}
-                        label={suggestion.label}
-                        status={suggestion.status}
-                        ltype={suggestion.ltype}
-                        tooltipDetail={suggestion.detail}
-                        category={suggestion.category}
-                      />
-                    </StyledTagWrapper>
-                  </StyledSuggestionLineTag>
-                  <StyledSuggestionLineIcons isSelected={selected === si}>
-                    {suggestion.icons}
-                  </StyledSuggestionLineIcons>
-                </React.Fragment>
-              ))}
-            <Loader size={30} show={isFetching} />
-          </StyledRelativePosition>
-          <SuggesterKeyPress
-            onArrowDown={() => {
-              if (selected < suggestions.length - 1) setSelected(selected + 1);
-            }}
-            onArrowUp={() => {
-              if (selected > -1) setSelected(selected - 1);
-            }}
-            dependencyArr={[selected]}
-          />
-        </StyledSuggesterList>
-      ) : null}
-    </StyledSuggester>
+            <Button
+              key="submit"
+              label="Submit"
+              color="primary"
+              onClick={() => {
+                // acceptEditingFolderMutation.mutate();
+              }}
+            />
+          </ButtonGroup>
+        </ModalFooter>
+      </Modal>
+    </>
   );
 };
