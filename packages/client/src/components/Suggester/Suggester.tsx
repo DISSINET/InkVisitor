@@ -31,6 +31,7 @@ import {
 } from "./SuggesterStyles";
 import { SuggesterKeyPress } from "./SuggesterKeyPress";
 import { toast } from "react-toastify";
+import { SuggesterModal } from "./SuggesterModal";
 
 export interface SuggestionI {
   id: string;
@@ -112,20 +113,9 @@ export const Suggester: React.FC<SuggesterProps> = ({
     onType(newType);
   };
 
-  const handleCreateActant = () => {
-    onCreate({
-      label: typed,
-      category: category,
-    });
-  };
-
   const handleEnterPress = () => {
     if (selected === -1 && typed.length > 1) {
-      if (category === "*") {
-        setShowModal(true);
-      } else {
-        handleCreateActant();
-      }
+      setShowModal(true);
     } else if (selected > -1) {
       onPick(suggestions[selected]);
     } else {
@@ -135,11 +125,7 @@ export const Suggester: React.FC<SuggesterProps> = ({
 
   const handleAddBtnClick = () => {
     if (typed.length > 1) {
-      if (category === "*") {
-        setShowModal(true);
-      } else {
-        handleCreateActant();
-      }
+      setShowModal(true);
     } else {
       toast.info("Min label length is 2 characters");
     }
@@ -254,47 +240,16 @@ export const Suggester: React.FC<SuggesterProps> = ({
         ) : null}
       </StyledSuggester>
 
-      <Modal showModal={showModal}>
-        <ModalHeader title="Create actant" />
-        <ModalContent>
-          <Input
-            type="select"
-            value={category}
-            options={categories}
-            inverted
-            suggester
-            onChangeFn={onChangeCategory}
-          />
-          <Input
-            label="Label: "
-            value={typed}
-            onChangeFn={(newType: string) => onTypeFn(newType)}
-            changeOnType
-            autoFocus
-          />
-        </ModalContent>
-        <ModalFooter>
-          <ButtonGroup>
-            <Button
-              key="cancel"
-              label="Cancel"
-              color="warning"
-              onClick={() => {
-                setShowModal(false);
-              }}
-            />
-            <Button
-              key="submit"
-              label="Submit"
-              color="primary"
-              onClick={() => {
-                handleCreateActant();
-                setShowModal(false);
-              }}
-            />
-          </ButtonGroup>
-        </ModalFooter>
-      </Modal>
+      {showModal && (
+        <SuggesterModal
+          show={showModal}
+          typed={typed}
+          category={category}
+          categories={categories}
+          onCreate={onCreate}
+          closeModal={() => setShowModal(false)}
+        />
+      )}
     </>
   );
 };

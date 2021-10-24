@@ -106,3 +106,8 @@ export const StyledTagWrapper = styled.div`
   display: inline-flex;
   overflow: hidden;
 `;
+
+export const StyledForm = styled.div`
+  display: flex;
+  flex-direction: column;
+`;
