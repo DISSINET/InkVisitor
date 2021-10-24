@@ -16,6 +16,7 @@ import dbMiddleware from "@middlewares/db";
 import profilerMiddleware from "@middlewares/profiler";
 import errorsMiddleware, { catchAll } from "@middlewares/errors";
 import { validateJwt } from "@common/auth";
+import "@models/events/register";
 
 const server = express();
 

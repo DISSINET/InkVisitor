@@ -13,10 +13,10 @@ class Emitter {
     this.registered[type]?.push(cb);
   }
 
-  emit(type: EventTypes, db: Connection, actantId: string) {
+  async emit(type: EventTypes, db: Connection, actantId: string) {
     if (this.registered[type]) {
       for (const cb of this.registered[type] as EmitterCb[]) {
-        cb(db, actantId);
+        await cb(db, actantId);
       }
     }
   }

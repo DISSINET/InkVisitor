@@ -9,7 +9,12 @@ export interface EmittableModel {
 // sorry about this
 const hookers: EmittableModel[] = [Statement];
 
-export const registerHooks = () => {
+let registered = false;
+const registerHooks = () => {
+  if (registered) {
+    return false;
+  }
+
   hookers.forEach((h) => {
     for (const key in h.events) {
       const cb = h.events[key as EventTypes];
@@ -18,4 +23,7 @@ export const registerHooks = () => {
       }
     }
   });
+  registered = true;
 };
+
+registerHooks();

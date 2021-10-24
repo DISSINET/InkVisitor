@@ -333,7 +333,8 @@ class Statement extends Actant implements IStatement {
       siblings
     );
 
-    return super.save(db);
+    const res = await super.save(db);
+    return res;
   }
 
   /**
@@ -449,6 +450,7 @@ class Statement extends Actant implements IStatement {
     const result = await this.update(db, {
       data: { props: this.data.props },
     });
+
     return !!result.replaced;
   }
 
@@ -514,7 +516,7 @@ class Statement extends Actant implements IStatement {
   }
 
   /**
-   * finds statements which are under specific territory
+   * finds statements which are linked to different actant
    * @param db db connection
    * @param territoryId id of the actant
    * @returns list of statements data

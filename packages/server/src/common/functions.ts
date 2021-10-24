@@ -41,3 +41,9 @@ export function mergeDeep(target: any, ...sources: any): any {
 
   return mergeDeep(target, ...sources);
 }
+
+export function timeout(mseconds: number): Promise<void> {
+  return new Promise((resolve: Function) => {
+    setTimeout(resolve, mseconds);
+  });
+}
