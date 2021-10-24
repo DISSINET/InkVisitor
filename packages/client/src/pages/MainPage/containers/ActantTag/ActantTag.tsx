@@ -46,6 +46,7 @@ export const ActantTag: React.FC<IActantTag> = ({
     <Tag
       propId={actant.id}
       label={actant.label}
+      status={actant.status}
       tooltipDetail={actant.detail}
       tooltipText={tooltipText}
       short={short}

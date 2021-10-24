@@ -3,13 +3,14 @@ import styled from "styled-components";
 interface StyledTagWrapper {
   hasMarginRight?: boolean;
   borderStyle: "solid" | "dashed" | "dotted";
+  status: string;
 }
 export const StyledTagWrapper = styled.div<StyledTagWrapper>`
   display: inline-flex;
   overflow: hidden;
   border: ${({ theme }) => theme.borderWidth[2]};
   border-style: ${({ borderStyle }) => borderStyle};
-  border-color: ${({ theme }) => theme.color["black"]};
+  border-color: ${({ theme, status }) => theme.color[status]};
   border-radius: ${({ theme }) => theme.borderRadius["sm"]};
   margin-right: ${({ theme, hasMarginRight }) =>
     hasMarginRight && theme.space[1]};
@@ -36,6 +37,7 @@ interface StyledLabel {
   invertedLabel?: boolean;
   borderStyle: "solid" | "dashed" | "dotted";
   fullWidth: boolean;
+  status: string;
 }
 export const StyledLabel = styled.div<StyledLabel>`
   display: inline-block;
@@ -50,16 +52,20 @@ export const StyledLabel = styled.div<StyledLabel>`
     invertedLabel ? theme.color["white"] : theme.color["black"]};
   border-left-width: ${({ theme }) => theme.borderWidth[2]};
   border-left-style: ${({ borderStyle }) => borderStyle};
-  border-left-color: ${({ theme }) => theme.color["black"]};
+  border-left-color: ${({ theme, status }) => theme.color[status]};
   max-width: ${({ theme, fullWidth }) =>
     fullWidth ? "100%" : theme.space[52]};
 `;
 
+interface ButtonWrapper {
+  status: string;
+}
 export const ButtonWrapper = styled.div`
   display: flex;
   button {
     border-width: 0;
     border-left-width: ${({ theme }) => theme.borderWidth[2]};
+    border-left-color: ${({ theme, status }) => theme.color[status]};
     border-left-style: solid;
   }
 `;

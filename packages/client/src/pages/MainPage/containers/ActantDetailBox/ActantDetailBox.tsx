@@ -218,7 +218,7 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
       onSuccess: (data, variables) => {
         queryClient.invalidateQueries(["actant"]);
 
-        if (variables.detail || variables.label) {
+        if (variables.detail || variables.label || variables.status) {
           if (actant?.class === ActantType.Territory) {
             queryClient.invalidateQueries("tree");
           }
