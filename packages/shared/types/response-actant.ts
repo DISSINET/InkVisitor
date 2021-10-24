@@ -8,5 +8,5 @@ import { UserRoleMode } from "../enums";
 export interface IResponseActant extends IActant {
   usedCount?: number;
   usedIn?: IStatement[];
-  right: UserRoleMode;
+  right?: UserRoleMode;
 }
