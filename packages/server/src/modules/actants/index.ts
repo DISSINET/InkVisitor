@@ -38,28 +38,29 @@ export default Router()
         throw new BadParams("actantId has to be set");
       }
 
-      const actant = await findActantById<IActant>(
+      const actantData = await findActantById<IActant>(
         request.db,
         actantId as string
       );
-
-      if (!actant) {
+      if (!actantData) {
         throw new ActantDoesNotExits(
           `actant ${actantId} was not found`,
           actantId
         );
       }
+      const actant = getActantType({ ...actantData });
 
       const usedInStatements = await Statement.findDependentStatements(
         request.db.connection,
-        actant.id
+        actant.id as string
       );
 
       return {
         ...actant,
         usedCount: usedInStatements.length,
         usedIn: usedInStatements,
-      };
+        right: actant.getUserRoleMode(request.getUserOrFail()),
+      } as IResponseActant;
     })
   )
   .post(
@@ -72,7 +73,19 @@ export default Router()
         throw new BadParams("label or class has to be set");
       }
 
-      return await findActantsByLabelOrClass(request.db, label, classParam);
+      const actants = await findActantsByLabelOrClass(
+        request.db,
+        label,
+        classParam
+      );
+
+      return actants.map((a) => {
+        const actantInstance = getActantType({ ...a });
+        return {
+          ...a,
+          right: actantInstance.getUserRoleMode(request.getUserOrFail()),
+        } as IResponseActant;
+      });
     })
   )
   .post(
@@ -202,19 +215,20 @@ export default Router()
         throw new BadParams("actant id has to be set");
       }
 
-      const actant = await findActantById<IActant>(request.db, actantId);
-      if (!actant) {
+      const actantData = await findActantById(request.db, actantId);
+      if (!actantData) {
         throw new ActantDoesNotExits(
           `actant ${actantId} was not found`,
           actantId
         );
       }
+      const actant = getActantType({ ...actantData });
 
       const meta: IResponseStatement[] = [];
 
       const statements = await Statement.findMetaStatements(
         request.db.connection,
-        actant.id
+        actant.id as string
       );
 
       for (const statement of statements) {
@@ -231,7 +245,7 @@ export default Router()
 
       const usedInStatements = await Statement.findDependentStatements(
         request.db.connection,
-        actant.id
+        actant.id as string
       );
 
       return {
@@ -239,7 +253,8 @@ export default Router()
         usedCount: usedInStatements.length,
         usedIn: usedInStatements,
         metaStatements: meta,
-      };
+        right: actant.getUserRoleMode(request.getUserOrFail()),
+      } as IResponseDetail;
     })
   )
   .post(
