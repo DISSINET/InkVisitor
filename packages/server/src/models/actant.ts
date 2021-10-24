@@ -5,6 +5,8 @@ import { ActantType, UserRoleMode } from "@shared/enums";
 import { InternalServerError } from "@shared/types/errors";
 import User from "./user";
 import Statement from "./statement";
+import emitter from "./events/emitter";
+import { EventTypes } from "./events/types";
 
 export default class Actant implements IDbModel {
   static table = "actants";
@@ -39,19 +41,21 @@ export default class Actant implements IDbModel {
       );
     }
 
-    for (const st of await this.getDependentStatements(db)) {
-      const statement = new Statement({ ...st });
-
-      if (!statement.unlinkActantId(this.id)) {
-        throw new Error(
-          "getDependentStatements returned non-dependent statement"
-        );
-      }
-
-      await statement.update(db, { data: st.data });
+    if (db) {
+      emitter.emit(EventTypes.BEFORE_ACTANT_DELETE, db, this.id);
     }
 
-    return rethink.table(Actant.table).get(this.id).delete().run(db);
+    const result = await rethink
+      .table(Actant.table)
+      .get(this.id)
+      .delete()
+      .run(db);
+
+    if (db) {
+      emitter.emit(EventTypes.AFTER_ACTANT_DELETE, db, this.id);
+    }
+
+    return result;
   }
 
   isValid(): boolean {
@@ -68,23 +72,6 @@ export default class Actant implements IDbModel {
 
   canBeDeletedByUser(user: User): boolean {
     return true;
-  }
-
-  getDependentStatements(db: Connection | undefined): Promise<IStatement[]> {
-    return rethink
-      .table(Actant.table)
-      .filter({ class: ActantType.Statement })
-      .filter((row: any) => {
-        return rethink.or(
-          row("data")("actants").contains((actantElement: any) =>
-            actantElement("actant").eq(this.id)
-          ),
-          row("data")("props").contains((actantElement: any) =>
-            actantElement("origin").eq(this.id)
-          )
-        );
-      })
-      .run(db);
   }
 
   static determineOrder(want: number, sibl: Record<number, unknown>): number {
