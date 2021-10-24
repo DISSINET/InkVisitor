@@ -42,7 +42,7 @@ export default class Actant implements IDbModel {
     }
 
     if (db) {
-      emitter.emit(EventTypes.BEFORE_ACTANT_DELETE, db, this.id);
+      await emitter.emit(EventTypes.BEFORE_ACTANT_DELETE, db, this.id);
     }
 
     const result = await rethink
@@ -51,8 +51,8 @@ export default class Actant implements IDbModel {
       .delete()
       .run(db);
 
-    if (db) {
-      emitter.emit(EventTypes.AFTER_ACTANT_DELETE, db, this.id);
+    if (result.deleted && db) {
+      await emitter.emit(EventTypes.AFTER_ACTANT_DELETE, db, this.id);
     }
 
     return result;

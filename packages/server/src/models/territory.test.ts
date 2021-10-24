@@ -5,6 +5,7 @@ import { Db } from "@service/RethinkDB";
 import { clean } from "@modules/common.test";
 import { findActantById, deleteActants } from "@service/shorthands";
 import { ITerritory, IUserRight } from "@shared/types";
+import { UserRight } from "./user";
 
 describe("Territory constructor test", function () {
   describe("empty data", () => {
@@ -300,10 +301,10 @@ describe("Territory - test getClosestRight", function () {
   describe("right with equal id", () => {
     it("should return the right object", async (done) => {
       const territory = new Territory({ id: "this" });
-      const right: IUserRight = {
+      const right = new UserRight({
         mode: UserRoleMode.Admin,
         territory: "this",
-      };
+      });
       expect(territory.getClosestRight([right])).toEqual(right);
       done();
     });
@@ -312,10 +313,10 @@ describe("Territory - test getClosestRight", function () {
   describe("right defined for parent territory", () => {
     it("should return the same right object as was defined for the parent", async (done) => {
       const territory = new Territory({ id: "thisthat" });
-      const right: IUserRight = {
+      const right = new UserRight({
         mode: UserRoleMode.Admin,
         territory: "this",
-      };
+      });
       expect(territory.getClosestRight([right])).toEqual(right);
       done();
     });
@@ -324,10 +325,10 @@ describe("Territory - test getClosestRight", function () {
   describe("right defined for child territory", () => {
     it("should return undefined", async (done) => {
       const territory = new Territory({ id: "that" });
-      const right: IUserRight = {
+      const right = new UserRight({
         mode: UserRoleMode.Admin,
         territory: "this",
-      };
+      });
       expect(territory.getClosestRight([right])).toEqual(undefined);
       done();
     });
