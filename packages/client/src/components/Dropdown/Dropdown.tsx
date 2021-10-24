@@ -13,6 +13,7 @@ interface Dropdown {
   options?: OptionsType<OptionTypeBase> | GroupedOptionsType<OptionTypeBase>;
   value?: ValueType<OptionTypeBase, any>;
   onChange: (selectedOption: ValueType<OptionTypeBase, any>) => void;
+  components?: any;
   ref?: React.RefObject<ReactNode>;
   width?: number | "full";
   disabled?: boolean;
@@ -22,6 +23,7 @@ interface Dropdown {
   isOptionSelected?: Function;
   getOptionLabel?: Function;
   placeholder?: string;
+  noOptionsMessage?: Function;
   isClearable?: boolean;
   isMulti?: boolean;
 }
@@ -29,6 +31,7 @@ export const Dropdown: React.FC<Dropdown> = ({
   options,
   value,
   onChange,
+  components = undefined,
   width,
   isOptionSelected,
   getOptionLabel,
@@ -36,6 +39,7 @@ export const Dropdown: React.FC<Dropdown> = ({
   hideSelectedOptions = false,
   noDropDownIndicator = false,
   placeholder = "select..",
+  noOptionsMessage = () => "no option selected",
   isClearable = false,
   isMulti = false,
   disabled = false,
@@ -48,7 +52,9 @@ export const Dropdown: React.FC<Dropdown> = ({
         className="react-select-container"
         classNamePrefix="react-select"
         placeholder={placeholder}
+        noOptionsMessage={noOptionsMessage}
         isClearable={isClearable}
+        components={{ components }}
         {...(getOptionLabel ? { getOptionLabel: getOptionLabel } : {})}
         {...(formatOptionLabel ? { formatOptionLabel: formatOptionLabel } : {})}
         {...(isOptionSelected ? { isOptionSelected: isOptionSelected } : {})}

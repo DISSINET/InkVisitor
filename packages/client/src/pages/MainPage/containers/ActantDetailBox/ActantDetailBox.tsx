@@ -189,6 +189,16 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
     }
   );
 
+  const allEntityTypes = entitiesDict.map((ent) => ent.value);
+
+  const allEntitiesOption = {
+    value: "*",
+    label: "*",
+    info: "",
+  };
+  const entityOptions = [...entitiesDict] as any;
+  entityOptions.push(allEntitiesOption);
+
   // TODO: what is metastatement?!
   const updateMetaStatementMutation = useMutation(
     async (metaStatementObject: { metaStatementId: string; changes: object }) =>
@@ -369,7 +379,9 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
                         actant.data.entities.s.includes(i.value)
                       )}
                       width="full"
-                      placeholder={"*"}
+                      noOptionsMessage={() => "* any"}
+                      placeholder={"* any"}
+                      hideSelectedOptions={true}
                       onChange={(newValue: any) => {
                         const oldData = { ...actant.data };
                         updateActantMutation.mutate({
@@ -432,8 +444,9 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
                       value={entitiesDict.filter((i: any) =>
                         actant.data.entities.a1.includes(i.value)
                       )}
+                      placeholder={"* any"}
                       width="full"
-                      placeholder={"*"}
+                      hideSelectedOptions={true}
                       onChange={(newValue: any) => {
                         const oldData = { ...actant.data };
                         updateActantMutation.mutate({
@@ -497,8 +510,9 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
                       value={entitiesDict.filter((i: any) =>
                         actant.data.entities.a2.includes(i.value)
                       )}
+                      hideSelectedOptions={true}
+                      placeholder={"* any"}
                       width="full"
-                      placeholder={"*"}
                       onChange={(newValue: any) => {
                         const oldData = { ...actant.data };
                         updateActantMutation.mutate({
