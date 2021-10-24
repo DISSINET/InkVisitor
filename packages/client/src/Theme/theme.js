@@ -143,6 +143,13 @@ export default {
     lg: "0.5rem",
     full: "9999px",
   },
+  borderStyle: {
+    //logical type
+    1: "solid", //definite
+    2: "dotted", //indefinite
+    3: "dashed", //hypothetical
+    4: "none", //generic
+  },
   boxShadow: {
     normal: "1px 1px 3px rgba(0, 0, 0, 0.4)",
     subtle: "0 1px 3px hsla(0,0%,0%,0.12), 0 1px 2px hsla(0,0%,0%,0.24)",
