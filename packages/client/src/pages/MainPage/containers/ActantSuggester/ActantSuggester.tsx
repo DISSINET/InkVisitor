@@ -37,7 +37,7 @@ export const ActantSuggester: React.FC<ActantSuggesterI> = ({
   const [allCategories, setAllCategories] = useState<false | IOption[]>();
   //const [territoryActantIds, setTerritoryActantIds] = useState<string[]>([]);
 
-  const { territoryId } = useSearchParams();
+  const { territoryId, setActantId } = useSearchParams();
 
   // territory query
   const { status, data: territoryActants, error, isFetching } = useQuery(
@@ -141,6 +141,7 @@ export const ActantSuggester: React.FC<ActantSuggesterI> = ({
         if (variables.class === "T") {
           queryClient.invalidateQueries("tree");
         }
+        setActantId(variables.id);
       },
     }
   );

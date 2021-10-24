@@ -93,7 +93,6 @@ export const Suggester: React.FC<SuggesterProps> = ({
   onCancel = () => {},
   isFetching,
 }) => {
-  const [showModal, setShowModal] = useState(false);
   const [{ isOver }, dropRef] = useDrop({
     accept: ItemTypes.TAG,
     drop: (item: DragObjectWithType) => {
@@ -106,11 +105,46 @@ export const Suggester: React.FC<SuggesterProps> = ({
   const [selected, setSelected] = useState(-1);
   const [isFocused, setIsFocused] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
+  const [showModal, setShowModal] = useState(false);
 
   const onTypeFn = (newType: string) => {
     setSelected(-1);
     onType(newType);
   };
+
+  const handleCreateActant = () => {
+    onCreate({
+      label: typed,
+      category: category,
+    });
+  };
+
+  const handleEnterPress = () => {
+    if (selected === -1 && typed.length > 1) {
+      if (category === "*") {
+        setShowModal(true);
+      } else {
+        handleCreateActant();
+      }
+    } else if (selected > -1) {
+      onPick(suggestions[selected]);
+    } else {
+      toast.info("Min label length is 2 characters");
+    }
+  };
+
+  const handleAddBtnClick = () => {
+    if (typed.length > 1) {
+      if (category === "*") {
+        setShowModal(true);
+      } else {
+        handleCreateActant();
+      }
+    } else {
+      toast.info("Min label length is 2 characters");
+    }
+  };
+
   return (
     <>
       <StyledSuggester marginTop={marginTop}>
@@ -147,17 +181,7 @@ export const Suggester: React.FC<SuggesterProps> = ({
             }}
             onBlur={() => setIsFocused(false)}
             onEnterPressFn={() => {
-              if (selected === -1 && typed.length > 0) {
-                // nothing selected -> create new
-                onCreate({
-                  label: typed,
-                  category: category,
-                });
-              } else if (selected > -1) {
-                onPick(suggestions[selected]);
-              } else {
-                toast.info("Fill label to create actant");
-              }
+              handleEnterPress();
             }}
           />
           {displayCancelButton && (
@@ -173,14 +197,7 @@ export const Suggester: React.FC<SuggesterProps> = ({
                 tooltip="create new actant"
                 color="primary"
                 onClick={() => {
-                  if (typed.length > 0) {
-                    onCreate({
-                      label: typed,
-                      category: category,
-                    });
-                  } else {
-                    toast.info("Fill label to create actant");
-                  }
+                  handleAddBtnClick();
                 }}
               />
             </StyledSuggesterButton>
@@ -236,6 +253,7 @@ export const Suggester: React.FC<SuggesterProps> = ({
           </StyledSuggesterList>
         ) : null}
       </StyledSuggester>
+
       <Modal showModal={showModal}>
         <ModalHeader title="Create actant" />
         <ModalContent>
@@ -253,9 +271,6 @@ export const Suggester: React.FC<SuggesterProps> = ({
             onChangeFn={(newType: string) => onTypeFn(newType)}
             changeOnType
             autoFocus
-            onEnterPressFn={() => {
-              // acceptEditingFolderMutation.mutate();
-            }}
           />
         </ModalContent>
         <ModalFooter>
@@ -273,7 +288,8 @@ export const Suggester: React.FC<SuggesterProps> = ({
               label="Submit"
               color="primary"
               onClick={() => {
-                // acceptEditingFolderMutation.mutate();
+                handleCreateActant();
+                setShowModal(false);
               }}
             />
           </ButtonGroup>
