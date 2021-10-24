@@ -129,34 +129,6 @@ export async function findActantsById(
   return data;
 }
 
-export async function findActantsByLabelOrClass(
-  db: Db,
-  label: string,
-  classParam: string
-): Promise<IActant[]> {
-  const data = await rethink
-    .table("actants")
-    .filter(function (actant: any) {
-      const tests = [];
-      if (typeof label !== "undefined") {
-        tests.push(actant("label").downcase().match(`^${label.toLowerCase()}`));
-      }
-      if (typeof classParam !== "undefined") {
-        tests.push(actant("class").match(classParam));
-      }
-
-      if (!tests.length) {
-        return null;
-      } else if (tests.length === 1) {
-        return rethink.and(tests[0]);
-      } else {
-        return rethink.and(tests[0], tests[1]);
-      }
-    })
-    .run(db.connection);
-  return data;
-}
-
 export async function createActant(
   db: Db,
   data: IDbModel

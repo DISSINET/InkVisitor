@@ -72,7 +72,7 @@ export default Router()
         throw new BadParams("label or class has to be set");
       }
 
-      return await findActantsByLabelOrClass(request.db, label, classParam);
+      return await filterActantsByWildcard(request.db, classParam, label);
     })
   )
   .post(
