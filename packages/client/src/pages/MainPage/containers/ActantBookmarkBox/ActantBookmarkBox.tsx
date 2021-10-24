@@ -210,8 +210,9 @@ export const ActantBookmarkBox: React.FC = () => {
   const createFolderMutation = useMutation(
     async () => {
       if (bookmarkFolders) {
-        const newBookmarkFolder: IBookmarkFolder =
-          CBookmarkFolder(editingFolderName);
+        const newBookmarkFolder: IBookmarkFolder = CBookmarkFolder(
+          editingFolderName
+        );
 
         const newBookmarks: IBookmarkFolder[] | false = getBookmarksCopy();
         if (newBookmarks) {
@@ -338,7 +339,8 @@ export const ActantBookmarkBox: React.FC = () => {
                         icon={<FaEdit size={12} />}
                         color="plain"
                         inverted
-                        onClick={() => {
+                        onClick={(e: React.MouseEvent) => {
+                          e.stopPropagation();
                           startEditingFolder(bookmarkFolder);
                         }}
                       />
@@ -347,7 +349,8 @@ export const ActantBookmarkBox: React.FC = () => {
                         icon={<FaTrash size={12} />}
                         color="danger"
                         inverted
-                        onClick={() => {
+                        onClick={(e: React.MouseEvent) => {
+                          e.stopPropagation();
                           askRemoveFolder(bookmarkFolder.id);
                         }}
                       />
