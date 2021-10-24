@@ -74,6 +74,7 @@ export const ActantSuggester: React.FC<ActantSuggesterI> = ({
           category: s.class,
           label: s.label,
           detail: s.detail,
+          status: s.status,
           id: s.id,
           icons: icons,
         };
@@ -84,6 +85,8 @@ export const ActantSuggester: React.FC<ActantSuggesterI> = ({
         debouncedTyped.length > 2 && !!selectedCategory && api.isLoggedIn(),
     }
   );
+
+  console.log(suggestions);
 
   const handleClean = () => {
     setTyped("");
