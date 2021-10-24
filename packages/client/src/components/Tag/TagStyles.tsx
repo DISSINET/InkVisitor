@@ -4,6 +4,7 @@ interface StyledTagWrapper {
   hasMarginRight?: boolean;
   borderStyle: "solid" | "dashed" | "dotted";
   status: string;
+  ltype: string;
 }
 export const StyledTagWrapper = styled.div<StyledTagWrapper>`
   display: inline-flex;
@@ -15,6 +16,7 @@ export const StyledTagWrapper = styled.div<StyledTagWrapper>`
   margin-right: ${({ theme, hasMarginRight }) =>
     hasMarginRight && theme.space[1]};
   cursor: move;
+  border-style: ${({ theme, ltype }) => "solid solid solid " + theme.borderStyle[ltype]};
   color: ${({ theme }) => theme.color["black"]};
   font-size: ${({ theme }) => theme.fontSize["xxs"]};
   height: 2.25rem;

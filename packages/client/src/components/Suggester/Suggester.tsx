@@ -24,6 +24,8 @@ export interface SuggestionI {
   id: string;
   label: string;
   detail: string;
+  ltype: string;
+  status: string;
   category: string;
   color: string;
   icons?: React.ReactNode[];
@@ -177,6 +179,7 @@ export const Suggester: React.FC<SuggesterProps> = ({
                       propId={suggestion.id}
                       label={suggestion.label}
                       status={suggestion.status}
+                      ltype={suggestion.ltype}
                       tooltipDetail={suggestion.detail}
                       category={suggestion.category}
                     />

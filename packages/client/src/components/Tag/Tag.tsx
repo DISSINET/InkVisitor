@@ -30,6 +30,7 @@ interface TagProps {
   tooltipText?: string;
   category: string;
   status: string;
+  ltype: string;
   mode?: "selected" | "disabled" | "invalid" | false;
   borderStyle?: "solid" | "dashed" | "dotted";
   button?: ReactNode;
@@ -53,6 +54,7 @@ export const Tag: React.FC<TagProps> = ({
   tooltipText,
   category = "T",
   status = "1",
+  ltype = "1",
   mode = false,
   borderStyle = "solid",
   button,
@@ -151,6 +153,7 @@ export const Tag: React.FC<TagProps> = ({
             <StyledTagWrapper
               ref={ref}
               status={status}
+              ltype={ltype}
               borderStyle={borderStyle}
               onDoubleClick={(e: React.MouseEvent) => onDoubleClick(e)}
             >
@@ -174,6 +177,7 @@ export const Tag: React.FC<TagProps> = ({
                 ref={ref}
                 borderStyle={borderStyle}
                 status={status}
+                ltype={ltype}
                 onDoubleClick={(e: React.MouseEvent) => onDoubleClick(e)}
               >
                 {renderEntityTag()}
