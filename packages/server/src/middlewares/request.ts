@@ -1,21 +1,27 @@
-import { IUser } from "@shared/types";
 import { InternalServerError } from "@shared/types/errors";
 import { Response, Request, NextFunction } from "express";
 import User from "@models/user";
 
-export default function customizeRequest(
+// todo this can be optimized
+export default async function customizeRequest(
   req: Request,
   res: Response,
   next: NextFunction
-): void {
+): Promise<void> {
+  let user: User | null;
+  if (req.user && req.user.user) {
+    user = await User.getUser(req.db.connection, req.user.user.id);
+  }
+
   req.getUserOrFail = function (): User {
-    if (req.user && req.user.user) {
-      return new User({ ...req.user.user });
+    if (user) {
+      return user;
     } else {
       throw new InternalServerError(
         "User is required for the action, but not set"
       );
     }
   };
+
   next();
 }
