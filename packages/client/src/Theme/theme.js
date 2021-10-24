@@ -62,6 +62,13 @@ export default {
     entityT: "hsl(212, 78%, 50%)",
     // seda
     entityV: "#BAB0AC",
+
+    // tag status
+    0: "#a0aec0", // pending
+    1: "#000", //approved
+    2: "#BA2525", //discouraged
+    3: "#D8AA37" //warning
+
   },
   space: {
     px: "1px",
