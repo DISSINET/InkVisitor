@@ -12,7 +12,6 @@ export interface IUser {
   rights: IUserRight[];
 }
 
-
 export interface IUserRight {
   territory: string; // actant id
   mode: UserRoleMode;

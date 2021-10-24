@@ -1,7 +1,7 @@
 import { IDbModel } from "./common";
 import { r as rethink, Connection, WriteResult } from "rethinkdb-ts";
 import { IStatement } from "@shared/types";
-import { ActantType, UserRoleMode } from "@shared/enums";
+import { ActantType, UserRole, UserRoleMode } from "@shared/enums";
 import { InternalServerError } from "@shared/types/errors";
 import User from "./user";
 
@@ -80,6 +80,24 @@ export default class Actant implements IDbModel {
 
   canBeDeletedByUser(user: User): boolean {
     return true;
+  }
+
+  /**
+   * getUserRoleMode returns derived user role mode for this instance.
+   * By default this method counts with default right to view - helps with performance.
+   * @param user
+   * @returns
+   */
+  getUserRoleMode(user: User): UserRoleMode {
+    if (user.role === UserRole.Admin) {
+      return UserRoleMode.Admin;
+    }
+
+    if (this.canBeEditedByUser(user)) {
+      return UserRoleMode.Write;
+    }
+
+    return UserRoleMode.Read;
   }
 
   getDependentStatements(db: Connection | undefined): Promise<IStatement[]> {
