@@ -1,21 +1,28 @@
-import { IUser } from "@shared/types";
 import { InternalServerError } from "@shared/types/errors";
 import { Response, Request, NextFunction } from "express";
 import User from "@models/user";
 
-export default function customizeRequest(
+const getUserOrFail = function (user: User | null): User {
+  if (user) {
+    return user;
+  } else {
+    throw new InternalServerError(
+      "User is required for the action, but not set"
+    );
+  }
+};
+
+export default async function customizeRequest(
   req: Request,
   res: Response,
   next: NextFunction
-): void {
-  req.getUserOrFail = function (): User {
-    if (req.user && req.user.user) {
-      return new User({ ...req.user.user });
-    } else {
-      throw new InternalServerError(
-        "User is required for the action, but not set"
-      );
-    }
-  };
+): Promise<void> {
+  let user: User | null = null;
+  if (req.user && req.user.user) {
+    user = await User.getUser(req.db.connection, req.user.user.id);
+  }
+
+  req.getUserOrFail = getUserOrFail.bind(undefined, user);
+
   next();
 }

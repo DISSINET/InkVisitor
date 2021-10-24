@@ -108,7 +108,7 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
   const [
     userAdministrationModalOpen,
     setUserAdministrationModalOpen,
-  ] = useState<boolean>(true);
+  ] = useState<boolean>(false);
 
   const handleLogOut = () => {
     api.signOut();
