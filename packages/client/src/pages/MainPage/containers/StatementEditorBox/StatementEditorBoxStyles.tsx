@@ -22,16 +22,18 @@ interface StyledEditorSection {
 }
 export const StyledEditorSection = styled.div<StyledEditorSection>`
   padding: ${({ theme }) => theme.space[6]};
-  border-bottom-width: ${({ theme, lastSection = false }) =>
-    lastSection ? theme.borderWidth[0] : theme.borderWidth[1]};
-  border-bottom-color: ${({ theme }) => theme.color["gray"][400]};
+  border-bottom-width: ${({ theme }) => theme.borderWidth[1]};
+  border-bottom-color: ${({ theme }) => theme.color["gray"][500]};
   background-color: ${({ theme }) => theme.color["white"]};
-  box-shadow: ${({ theme }) => theme.boxShadow["subtle"]}; 
+  box-shadow: ${({ theme, firstSection = false }) =>
+    firstSection ? theme.boxShadow["subtle"] : ""};
   border-left: ${({ theme, firstSection = false }) =>
-     firstSection ? "3px solid " + theme.color["success"] : "" };
+    firstSection ? "3px solid " + theme.color["success"] : ""};
   background-color: ${({ theme, firstSection = false }) =>
-     firstSection ?  theme.color["white"] : theme.color["gray"][200]};
+    firstSection ? theme.color["white"] : theme.color["gray"][200]};
   border-bottom-style: solid;
+  margin: ${({ theme, firstSection = false }) =>
+    firstSection ? "" : "0.2rem 0 0 2rem"};
   :hover {
     background-color: ${({ theme }) => theme.color["gray"][100]};
   }
@@ -45,9 +47,13 @@ export const StyledEditorSectionHeader = styled.div<StyledEditorSectionHeader>`
   color: ${({ theme }) => theme.color["primary"]};
 `;
 
+interface StyledEditorSectionContent {
+  firstSection?: boolean;
+}
 interface StyledEditorSectionContent {}
 export const StyledEditorSectionContent = styled.div<StyledEditorSectionContent>`
-  padding-left: ${({ theme }) => theme.space[0]};
+  padding-left: ${({ theme, firstSection = false }) =>
+    firstSection ? "" : theme.space[10]};
 `;
 
 // Grids

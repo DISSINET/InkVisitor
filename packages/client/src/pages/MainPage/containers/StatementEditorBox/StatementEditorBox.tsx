@@ -626,7 +626,7 @@ export const StatementEditorBox: React.FC = () => {
       {statement ? (
         <div style={{ marginBottom: "4rem" }} key={statement.id}>
           <StyledEditorSection firstSection key="editor-section-summary">
-            <StyledEditorSectionContent>
+            <StyledEditorSectionContent firstSection>
               <div>
                 <div>
                   <Input
