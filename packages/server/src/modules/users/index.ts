@@ -25,6 +25,7 @@ import {
   IActant,
   IResponseGeneric,
 } from "@shared/types";
+import { UserRoleMode } from "@shared/enums";
 
 export default Router()
   .post(
