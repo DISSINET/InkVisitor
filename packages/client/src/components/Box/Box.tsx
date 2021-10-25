@@ -25,7 +25,7 @@ interface BoxProps {
 
 export const Box: React.FC<BoxProps> = ({
   label = "",
-  color = "primary",
+  color = "",
   height,
   noPadding = true,
   isExpanded = true,

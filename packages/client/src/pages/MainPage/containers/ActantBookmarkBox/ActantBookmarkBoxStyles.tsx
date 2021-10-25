@@ -5,6 +5,7 @@ export const StyledContent = styled.div`
   display: flex;
   flex-direction: column;
   align-items: start;
+  background-color: ${({ theme }) => theme.color["white"]};
 `;
 
 export const StyledHeader = styled.div`
