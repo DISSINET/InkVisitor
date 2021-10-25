@@ -18,7 +18,7 @@ interface StyledHead {
   color: string;
 }
 export const StyledHead = styled(animated.div)<StyledHead>`
-  background-color: ${({ theme, color }) => theme.color["gray"]["300"]};
+  background-color: ${({ theme, color }) => color ? color : theme.color["gray"]["200"]};
   color: ${({ theme }) => theme.color["gray"]["600"]};
   padding: ${space2};
   font-size: ${({ theme }) => theme.fontSize["base"]};
@@ -27,10 +27,9 @@ export const StyledHead = styled(animated.div)<StyledHead>`
   font-weight: ${({ theme }) => theme.fontWeight["bold"]};
   font-style: normal;
   text-transform: uppercase;
-  border-color: ${({ theme }) => theme.color["grey"]};
-  border-style: dashed;
-  border-width: ${({ theme }) => theme.borderWidth[1]};
-  border-bottom: none;
+  border-left-color: ${({ theme }) => theme.color["gray"][200]};
+  border-left-style: solid;
+  border-left-width: ${({ theme }) => theme.borderWidth[4]};
 `;
 interface StyledContent {
   $noPadding: boolean;
@@ -39,10 +38,10 @@ interface StyledContent {
 }
 export const StyledContent = styled(animated.div)<StyledContent>`
   background-color: ${({ theme }) => theme.color["grey"]};
-  padding: ${({ theme, $noPadding }) => ($noPadding ? 0 : theme.space[2])};
   display: flex;
   flex-direction: column;
-  overflow: auto;
+  overflow-y: auto;
+  overflow-x: hidden;
   height: 100%;
   font-size: ${({ theme }) => theme.fontSize["base"]};
 
