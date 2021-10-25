@@ -261,6 +261,7 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
               <Box
                 height={400}
                 label="Search"
+                color="white"
                 isExpanded={fourthPanelExpanded}
                 button={fourthPanelButton()}
               >
@@ -269,6 +270,7 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
               <Box
                 height={heightContent - 400}
                 label="Bookmarks"
+                color="white"
                 isExpanded={fourthPanelExpanded}
                 button={fourthPanelButton()}
               >

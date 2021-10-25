@@ -33,7 +33,7 @@ export const StyledEditorSection = styled.div<StyledEditorSection>`
     firstSection ? theme.color["white"] : theme.color["gray"][200]};
   border-bottom-style: solid;
   margin: ${({ theme, firstSection = false }) =>
-    firstSection ? "" : "0.2rem 0 0 2rem"};
+    firstSection ? "0 0 0 0.7rem" : "0.2rem 0 0 2rem"};
   :hover {
     background-color: ${({ theme }) => theme.color["gray"][100]};
   }
