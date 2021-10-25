@@ -2,10 +2,10 @@ import styled from "styled-components";
 import { ActantTag } from "..";
 
 export const StyledContent = styled.div`
-  height: 100%;
   display: flex;
   flex-direction: column;
   align-items: start;
+  border-left: 2px solid red;
 `;
 
 interface StyledSection {
@@ -18,7 +18,7 @@ export const StyledSection = styled.div<StyledSection>`
   border-bottom-width: ${({ theme, lastSection = false }) =>
     lastSection ? theme.borderWidth[0] : theme.borderWidth[1]};
   border-bottom-color: ${({ theme }) => theme.color["gray"][500]};
-  background-color: ${({ theme }) => theme.color["gray"][200]};
+  background-color: ${({ theme }) => theme.color["gray"][100]};
   border-bottom-style: solid;
   width: 100%;
 `;
@@ -37,10 +37,10 @@ export const StyledTagWrap = styled.div`
 `;
 
 export const StyledSectionHeader = styled.div`
-  font-weight: ${({ theme }) => theme.fontWeight.bold};
-  font-size: ${({ theme }) => theme.fontSize.xl};
+  font-weight: ${({ theme }) => theme.fontWeight.regular};
+  font-size: ${({ theme }) => theme.fontSize.l};
   margin-bottom: ${({ theme }) => theme.space[4]};
-  color: ${({ theme }) => theme.color["gray"][600]};
+  color: ${({ theme }) => theme.color["primary"]};
 `;
 
 export const StyledContentRow = styled.div`
