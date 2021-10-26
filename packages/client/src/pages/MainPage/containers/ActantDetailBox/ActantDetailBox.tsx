@@ -52,15 +52,12 @@ import { ActantType, Position } from "@shared/enums";
 import { toast } from "react-toastify";
 import { ActantDetailMetaTable } from "./ActantDetailMetaTable/ActantDetailMetaTable";
 import { useSearchParams } from "hooks";
+import { AttributeButtonGroup } from "../AttributeButtonGroup/AttributeButtonGroup";
 
 interface ActantDetailBox {}
 export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
-  const {
-    actantId,
-    setActantId,
-    setStatementId,
-    setTerritoryId,
-  } = useSearchParams();
+  const { actantId, setActantId, setStatementId, setTerritoryId } =
+    useSearchParams();
 
   const [showSubmit, setShowSubmit] = useState(false);
   const [usedInPage, setUsedInPage] = useState<number>(0);
@@ -68,7 +65,12 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
 
   const queryClient = useQueryClient();
 
-  const { status, data: actant, error, isFetching } = useQuery(
+  const {
+    status,
+    data: actant,
+    error,
+    isFetching,
+  } = useQuery(
     ["actant", actantId],
     async () => {
       const res = await api.detailGet(actantId);
@@ -218,7 +220,12 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
       onSuccess: (data, variables) => {
         queryClient.invalidateQueries(["actant"]);
 
-        if (variables.detail || variables.label || variables.status || variables.data.logicalType ) {
+        if (
+          variables.detail ||
+          variables.label ||
+          variables.status ||
+          variables.data.logicalType
+        ) {
           if (actant?.class === ActantType.Territory) {
             queryClient.invalidateQueries("tree");
           }
@@ -248,7 +255,6 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
       {actant && (
         <StyledContent type={actant.class}>
           <StyledSection firstSection>
-
             <StyledActantPreviewRow>
               <StyledTagWrap>
                 <ActantTag
@@ -314,14 +320,53 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
               <StyledContentRow>
                 <StyledContentRowLabel>Status</StyledContentRowLabel>
                 <StyledContentRowValue>
-                  <Input
-                    value={actant.status}
-                    type="select"
-                    width="full"
-                    options={actantStatusDict}
-                    onChangeFn={async (newValue: string) => {
-                      updateActantMutation.mutate({ status: newValue });
-                    }}
+                  <AttributeButtonGroup
+                    options={[
+                      {
+                        longValue: actantStatusDict[0]["label"],
+                        shortValue: actantStatusDict[0]["label"],
+                        onClick: () => {
+                          updateActantMutation.mutate({
+                            status: actantStatusDict[0]["value"],
+                          });
+                        },
+                        selected:
+                          actantStatusDict[0]["value"] === actant.status,
+                      },
+                      {
+                        longValue: actantStatusDict[1]["label"],
+                        shortValue: actantStatusDict[1]["label"],
+                        onClick: () => {
+                          updateActantMutation.mutate({
+                            status: actantStatusDict[1]["value"],
+                          });
+                        },
+                        selected:
+                          actantStatusDict[1]["value"] === actant.status,
+                      },
+                      {
+                        longValue: actantStatusDict[2]["label"],
+                        shortValue: actantStatusDict[2]["label"],
+                        onClick: () => {
+                          updateActantMutation.mutate({
+                            status: actantStatusDict[2]["value"],
+                          });
+                        },
+                        selected:
+                          actantStatusDict[2]["value"] === actant.status,
+                      },
+                      {
+                        longValue: actantStatusDict[3]["label"],
+                        shortValue: actantStatusDict[3]["label"],
+                        onClick: () => {
+                          updateActantMutation.mutate({
+                            status: actantStatusDict[3]["value"],
+                          });
+                        },
+                        selected:
+                          actantStatusDict[3]["value"] === actant.status,
+                      },
+                    ]}
                   />
                 </StyledContentRowValue>
               </StyledContentRow>
@@ -349,16 +394,65 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
                 <StyledContentRow>
                   <StyledContentRowLabel>Logical Type</StyledContentRowLabel>
                   <StyledContentRowValue>
-                    <Input
-                      value={actant.data.logicalType}
-                      type="select"
-                      width="full"
-                      options={actantLogicalTypeDict}
-                      onChangeFn={(newValue: string) => {
-                        updateActantMutation.mutate({
-                          data: { logicalType: newValue },
-                        });
-                      }}
+                    <AttributeButtonGroup
+                      options={[
+                        {
+                          longValue: actantLogicalTypeDict[0]["label"],
+                          shortValue: actantLogicalTypeDict[0]["label"],
+                          onClick: () => {
+                            updateActantMutation.mutate({
+                              data: {
+                                logicalType: actantLogicalTypeDict[0]["value"],
+                              },
+                            });
+                          },
+                          selected:
+                            actantLogicalTypeDict[0]["value"] ===
+                            actant.data.logicalType,
+                        },
+                        {
+                          longValue: actantLogicalTypeDict[1]["label"],
+                          shortValue: actantLogicalTypeDict[1]["label"],
+                          onClick: () => {
+                            updateActantMutation.mutate({
+                              data: {
+                                logicalType: actantLogicalTypeDict[1]["value"],
+                              },
+                            });
+                          },
+                          selected:
+                            actantLogicalTypeDict[1]["value"] ===
+                            actant.data.logicalType,
+                        },
+                        {
+                          longValue: actantLogicalTypeDict[2]["label"],
+                          shortValue: actantLogicalTypeDict[2]["label"],
+                          onClick: () => {
+                            updateActantMutation.mutate({
+                              data: {
+                                logicalType: actantLogicalTypeDict[2]["value"],
+                              },
+                            });
+                          },
+                          selected:
+                            actantLogicalTypeDict[2]["value"] ===
+                            actant.data.logicalType,
+                        },
+                        {
+                          longValue: actantLogicalTypeDict[3]["label"],
+                          shortValue: actantLogicalTypeDict[3]["label"],
+                          onClick: () => {
+                            updateActantMutation.mutate({
+                              data: {
+                                logicalType: actantLogicalTypeDict[3]["value"],
+                              },
+                            });
+                          },
+                          selected:
+                            actantLogicalTypeDict[3]["value"] ===
+                            actant.data.logicalType,
+                        },
+                      ]}
                     />
                   </StyledContentRowValue>
                 </StyledContentRow>
