@@ -19,6 +19,7 @@ interface ActantSuggesterI {
   allowCreate?: boolean;
   disableWildCard?: boolean;
   inputWidth?: number;
+  openDetailOnCreate?: boolean;
 }
 
 export const ActantSuggester: React.FC<ActantSuggesterI> = ({
@@ -28,6 +29,7 @@ export const ActantSuggester: React.FC<ActantSuggesterI> = ({
   allowCreate,
   inputWidth,
   disableWildCard = false,
+  openDetailOnCreate = false,
 }) => {
   const wildCardChar = "*";
   const queryClient = useQueryClient();
@@ -141,7 +143,9 @@ export const ActantSuggester: React.FC<ActantSuggesterI> = ({
         if (variables.class === "T") {
           queryClient.invalidateQueries("tree");
         }
-        setActantId(variables.id);
+        if (openDetailOnCreate) {
+          setActantId(variables.id);
+        }
       },
     }
   );
@@ -149,6 +153,7 @@ export const ActantSuggester: React.FC<ActantSuggesterI> = ({
   const handleCreate = async (newCreated: {
     label: string;
     category: ActantType;
+    detail: string;
   }) => {
     if (newCreated.category === ActantType.Territory) {
       const newActant = CTerritoryActant(
@@ -204,6 +209,7 @@ export const ActantSuggester: React.FC<ActantSuggesterI> = ({
       onCreate={(newCreated: {
         label: string;
         category: CategoryActantType;
+        detail: string;
       }) => {
         handleCreate(newCreated);
       }}

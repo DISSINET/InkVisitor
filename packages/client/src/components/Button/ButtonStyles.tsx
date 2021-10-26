@@ -7,7 +7,7 @@ interface IButtonStyle {
   noBorder?: boolean;
   textRegular?: boolean;
   inverted: boolean;
-  color: string;
+  color: any;
   disabled?: boolean;
   radiusLeft?: boolean;
   radiusRight?: boolean;
@@ -40,6 +40,8 @@ export const StyledButton = styled.button<IButtonStyle>`
       : theme.color[color]};
   cursor: ${({ disabled }) => (disabled ? "not-allowed" : "pointer")};
   white-space: nowrap;
+
+  transition: border-color 0.2s, color 0.2s, background-color 0.2s;
   :focus {
     outline: 0;
   }

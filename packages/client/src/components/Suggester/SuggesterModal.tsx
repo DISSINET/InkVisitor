@@ -34,10 +34,20 @@ export const SuggesterModal: React.FC<SuggesterModal> = ({
 
   const handleCreateActant = () => {
     onCreate({
-      label: typed,
-      category: category,
+      label: label,
+      category: selectedCategory,
+      detail: detail,
     });
   };
+
+  // if (categories[0].value === false) {
+  //   categories.shift();
+  // }
+
+  //   const index = categories.indexOf("*");
+  // if (index > -1) {
+  //   categories.splice(index, 1);
+  // }
 
   return (
     <Modal showModal={show}>

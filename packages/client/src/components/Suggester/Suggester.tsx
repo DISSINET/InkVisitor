@@ -182,6 +182,7 @@ export const Suggester: React.FC<SuggesterProps> = ({
                 icon={<FaPlus style={{ fontSize: "16px", padding: "2px" }} />}
                 tooltip="create new actant"
                 color="primary"
+                inverted={selected !== -1}
                 onClick={() => {
                   handleAddBtnClick();
                 }}
