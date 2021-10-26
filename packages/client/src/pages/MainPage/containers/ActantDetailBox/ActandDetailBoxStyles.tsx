@@ -1,11 +1,15 @@
 import styled from "styled-components";
 import { ActantTag } from "..";
 
+interface StyledContent {
+  type: string;
+}
 export const StyledContent = styled.div`
   display: flex;
   flex-direction: column;
   align-items: start;
-  border-left: 2px solid red;
+  border-left: 3px solid;
+  border-left-color: ${({ theme, type}) => theme.color["entity"+type]};
 `;
 
 interface StyledSection {
@@ -18,10 +22,11 @@ export const StyledSection = styled.div<StyledSection>`
   border-bottom-width: ${({ theme, lastSection = false }) =>
     lastSection ? theme.borderWidth[0] : theme.borderWidth[1]};
   border-bottom-color: ${({ theme }) => theme.color["gray"][500]};
-  background-color: ${({ theme }) => theme.color["gray"][100]};
+  background-color: ${({ theme }) => theme.color["gray"][200]};
   border-bottom-style: solid;
   width: 100%;
 `;
+
 
 export const StyledActantPreviewRow = styled.div`
   display: flex;

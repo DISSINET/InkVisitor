@@ -226,10 +226,11 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
               {actantId && (
                 <Box
                   height={heightContent - 400}
-                  label="Detail"
+                  label="Actant Detail"
                   button={
                     actantId && (
                       <Button
+                        inverted
                         icon={<IoMdClose />}
                         onClick={() => {
                           setActantId("");

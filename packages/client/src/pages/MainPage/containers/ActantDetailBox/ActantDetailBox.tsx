@@ -246,9 +246,8 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
   return (
     <>
       {actant && (
-        <StyledContent>
+        <StyledContent type={actant.class}>
           <StyledSection firstSection>
-            <StyledSectionHeader>Actant detail</StyledSectionHeader>
 
             <StyledActantPreviewRow>
               <StyledTagWrap>
@@ -261,7 +260,7 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
               </StyledTagWrap>
               <ButtonGroup>
                 <Button
-                  color="danger"
+                  color="primary"
                   icon={<FaTrashAlt />}
                   label="remove actant"
                   inverted={true}
@@ -274,7 +273,7 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
                   icon={<FaRecycle size={14} />}
                   tooltip="refresh data"
                   inverted={true}
-                  color="info"
+                  color="primary"
                   label="refresh"
                   onClick={() => {
                     queryClient.invalidateQueries(["actant"]);
