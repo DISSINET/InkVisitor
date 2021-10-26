@@ -26,7 +26,7 @@ export const StyledResultsWrapper = styled.div`
   height: 100%;
   max-height: 100%;
   max-width: 100%;
-  overflow: scroll;
+  overflow-y: scroll;
   position: relative;
 `;
 export const StyledResults = styled.div`
