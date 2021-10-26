@@ -201,7 +201,7 @@ class Territory extends Actant implements ITerritory {
       }
 
       // one of parents found
-      if (this.id.indexOf(right.territory) === 0) {
+      if (this.id.indexOf(right.territory + "-") === 0) {
         // test if it is closer match
         if (
           closestRight === undefined ||
