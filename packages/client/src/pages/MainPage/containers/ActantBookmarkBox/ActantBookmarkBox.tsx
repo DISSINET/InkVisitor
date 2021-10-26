@@ -368,6 +368,7 @@ export const ActantBookmarkBox: React.FC = () => {
                     </StyledFolderContentTags>
                     <StyledFolderSuggester>
                       <ActantSuggester
+                        openDetailOnCreate
                         onSelected={(bookmarkId: string) => {
                           addBookmark(bookmarkFolder.id, bookmarkId);
                         }}

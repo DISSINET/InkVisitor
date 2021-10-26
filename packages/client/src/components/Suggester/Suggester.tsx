@@ -115,7 +115,11 @@ export const Suggester: React.FC<SuggesterProps> = ({
 
   const handleEnterPress = () => {
     if (selected === -1 && typed.length > 1) {
-      setShowModal(true);
+      if (category === "*") {
+        setShowModal(true);
+      } else {
+        onCreate({ label: typed, category: category });
+      }
     } else if (selected > -1) {
       onPick(suggestions[selected]);
     } else {
@@ -125,7 +129,11 @@ export const Suggester: React.FC<SuggesterProps> = ({
 
   const handleAddBtnClick = () => {
     if (typed.length > 1) {
-      setShowModal(true);
+      if (category === "*") {
+        setShowModal(true);
+      } else {
+        onCreate({ label: typed, category: category });
+      }
     } else {
       toast.info("Min label length is 2 characters");
     }

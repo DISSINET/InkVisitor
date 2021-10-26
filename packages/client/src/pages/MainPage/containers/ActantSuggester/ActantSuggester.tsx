@@ -167,7 +167,8 @@ export const ActantSuggester: React.FC<ActantSuggesterI> = ({
       const newActant = CActant(
         newCreated.category as CategoryActantType,
         newCreated.label,
-        localStorage.getItem("userrole") as UserRole
+        localStorage.getItem("userrole") as UserRole,
+        newCreated.detail
       );
       actantsCreateMutation.mutate(newActant);
     }
@@ -211,6 +212,7 @@ export const ActantSuggester: React.FC<ActantSuggesterI> = ({
         category: CategoryActantType;
         detail: string;
       }) => {
+        console.log(newCreated.detail);
         handleCreate(newCreated);
       }}
       onPick={(newPicked: SuggestionI) => {
