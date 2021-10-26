@@ -40,17 +40,8 @@ export const SuggesterModal: React.FC<SuggesterModal> = ({
     });
   };
 
-  // if (categories[0].value === false) {
-  //   categories.shift();
-  // }
-
-  //   const index = categories.indexOf("*");
-  // if (index > -1) {
-  //   categories.splice(index, 1);
-  // }
-
   return (
-    <Modal showModal={show}>
+    <Modal showModal={show} width="thin">
       <ModalHeader title="Create actant" />
       <ModalContent>
         <StyledForm>
@@ -58,7 +49,7 @@ export const SuggesterModal: React.FC<SuggesterModal> = ({
             type="select"
             label="Category: "
             value={selectedCategory}
-            options={categories}
+            options={categories.slice(1)}
             inverted
             suggester
             onChangeFn={(newCategory: string) =>

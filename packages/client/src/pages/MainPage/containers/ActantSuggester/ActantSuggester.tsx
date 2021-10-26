@@ -212,7 +212,6 @@ export const ActantSuggester: React.FC<ActantSuggesterI> = ({
         category: CategoryActantType;
         detail: string;
       }) => {
-        console.log(newCreated.detail);
         handleCreate(newCreated);
       }}
       onPick={(newPicked: SuggestionI) => {

@@ -114,7 +114,7 @@ export const Suggester: React.FC<SuggesterProps> = ({
   };
 
   const handleEnterPress = () => {
-    if (selected === -1 && typed.length > 1) {
+    if (selected === -1 && typed.length > 0) {
       if (category === "*") {
         setShowModal(true);
       } else {
@@ -123,20 +123,22 @@ export const Suggester: React.FC<SuggesterProps> = ({
     } else if (selected > -1) {
       onPick(suggestions[selected]);
     } else {
-      toast.info("Min label length is 2 characters");
+      toast.info("Fill at least 1 character");
     }
+    setSelected(-1);
   };
 
   const handleAddBtnClick = () => {
-    if (typed.length > 1) {
+    if (typed.length > 0) {
       if (category === "*") {
         setShowModal(true);
       } else {
         onCreate({ label: typed, category: category });
       }
     } else {
-      toast.info("Min label length is 2 characters");
+      toast.info("Fill at least 1 character");
     }
+    setSelected(-1);
   };
 
   return (
@@ -169,11 +171,11 @@ export const Suggester: React.FC<SuggesterProps> = ({
             suggester
             changeOnType={true}
             width={inputWidth}
-            onFocus={() => {
+            onFocus={() => setIsFocused(true)}
+            onBlur={() => {
+              setIsFocused(false);
               setSelected(-1);
-              setIsFocused(true);
             }}
-            onBlur={() => setIsFocused(false)}
             onEnterPressFn={() => {
               handleEnterPress();
             }}
