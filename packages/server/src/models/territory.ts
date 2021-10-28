@@ -41,11 +41,9 @@ export class TerritoryData implements IModel {
       return;
     }
 
-    const parentData = data.parent;
-    delete data.parent;
     fillFlatObject(this, data);
-    if (parentData) {
-      this.parent = new TerritoryParent(parentData as Record<string, unknown>);
+    if (data.parent) {
+      this.parent = new TerritoryParent(data.parent as UnknownObject);
     }
   }
 
