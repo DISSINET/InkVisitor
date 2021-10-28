@@ -38,7 +38,6 @@ export function fillFlatObject<T>(
       wantedType === "boolean" &&
       (ctx as Record<string, unknown>)[key] === false
     ) {
-      console.log("optional object ", source[key]);
       continue;
     }
 

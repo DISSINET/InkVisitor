@@ -6,6 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "parse": "ts-node datasets/all/parse.ts",
+    "fix-t-orders": "npx ts-node scripts/fix-t-order.ts",
     "import-remote:all": "npx ts-node scripts/import.ts all prod",
     "import-local:all": "npx ts-node scripts/import.ts all local",
     "import-remote:mock": "npx ts-node scripts/import.ts mock prod",
