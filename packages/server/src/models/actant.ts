@@ -86,14 +86,19 @@ export default class Actant implements IDbModel {
       // if there is a conflict - order number already exist
       for (let i = 0; i < sortedOrders.length; i++) {
         if (sortedOrders[i] === want) {
+          // conflict occured on the biggest number - use closest bigger free integer
           if (sortedOrders.length === i + 1) {
-            // conflict occured on the biggest number - use closest bigger free integer
             const ceiled = Math.ceil(sortedOrders[i]);
             out = ceiled === sortedOrders[i] ? ceiled + 1 : ceiled;
             break;
           }
-          // new number would be slightly bigger than conflicted and slightly lower than the bigger one
+
+          // new number would be somewhere behind the wanted one(i) and before the next one(i+1)
           out = sortedOrders[i] + (sortedOrders[i + 1] - sortedOrders[i]) / 2;
+          if (!sibl[Math.round(out)]) {
+            out = Math.round(out);
+          }
+
           break;
         }
       }
