@@ -32,6 +32,16 @@ export function fillFlatObject<T>(
     }
 
     const gotType = typeof source[key];
+
+    if (
+      gotType === "object" &&
+      wantedType === "boolean" &&
+      (ctx as Record<string, unknown>)[key] === false
+    ) {
+      console.log("optional object ", source[key]);
+      continue;
+    }
+
     if (wantedType !== gotType) {
       throw new Error(
         `cannot parse key ${key}(wants ${wantedType}, got ${gotType})`
