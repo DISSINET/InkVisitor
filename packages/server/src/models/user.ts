@@ -100,13 +100,14 @@ export class StoredTerritory implements IStoredTerritory {
 export default class User implements IDbModel, IUser {
   id: string = "";
   email: string = "";
+  password: string = "";
   name: string = "";
   role: UserRole = UserRole.Viewer;
+  active: boolean = false;
   options: UserOptions = new UserOptions({});
   bookmarks: BookmarkFolder[] = [];
   storedTerritories: StoredTerritory[] = [];
   rights: UserRight[] = [];
-  password = "";
 
   static table = "users";
 
