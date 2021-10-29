@@ -4,6 +4,7 @@
     "name": "admin",
     "email": "admin@admin.com",
     "password": "admin",
+    "active": true,
     "options": {
       "defaultTerritory": "",
       "defaultLanguage": "",
@@ -23,6 +24,7 @@
     "name": "editor1",
     "email": "editor@inkvisitor.com",
     "password": "abc",
+    "active": true,
     "options": {
       "defaultTerritory": "",
       "defaultLanguage": "",
@@ -54,6 +56,7 @@
     "name": "editor2",
     "email": "editor2@inkvisitor.com",
     "password": "def",
+    "active": true,
     "options": {
       "defaultTerritory": "",
       "defaultLanguage": "",
@@ -73,6 +76,7 @@
     "name": "viewer1",
     "email": "viewer1@inkvisitor.com",
     "password": "ghi",
+    "active": true,
     "options": {
       "defaultTerritory": "",
       "defaultLanguage": "",
