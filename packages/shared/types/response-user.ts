@@ -3,9 +3,9 @@
  */
 
 import { IResponseActant, IUser, IResponseBookmarkFolder } from "./";
-import { UserRole } from "./../enums";
 
-export interface IResponseUser extends Omit<IUser, 'bookmarks' | 'storedTerritories' | 'password'> {
+export interface IResponseUser
+  extends Omit<IUser, "bookmarks" | "storedTerritories" | "password"> {
   bookmarks: IResponseBookmarkFolder[];
   storedTerritories: IResponseStoredTerritory[];
   territoryRights: IResponseStoredTerritory[];

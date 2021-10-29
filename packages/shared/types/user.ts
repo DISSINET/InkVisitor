@@ -10,8 +10,8 @@ export interface IUser {
   bookmarks: IBookmarkFolder[];
   storedTerritories: IStoredTerritory[];
   rights: IUserRight[];
+  active: boolean;
 }
-
 
 export interface IUserRight {
   territory: string; // actant id
