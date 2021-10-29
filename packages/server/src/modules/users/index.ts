@@ -14,6 +14,7 @@ import {
   InternalServerError,
   ModelNotValidError,
   UserDoesNotExits,
+  UserNotActiveError,
 } from "@shared/types/errors";
 import { checkPassword, generateAccessToken } from "@common/auth";
 import { asyncRouteHandler } from "..";
@@ -40,6 +41,10 @@ export default Router()
       const user = await User.findUserByLabel(request.db.connection, name);
       if (!user) {
         throw new UserDoesNotExits(`user ${name} was not found`, name);
+      }
+
+      if (!user.active) {
+        throw new UserNotActiveError(name);
       }
 
       if (!checkPassword(rawPassword, user.password || "")) {

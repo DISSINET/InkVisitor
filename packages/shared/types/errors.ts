@@ -8,7 +8,9 @@ export class CustomError extends Error {
   public static code: number = 400; // html code
   public loggable: boolean = false; // errors could be logged into console as warn messages
   public log: string = ""; // same as first constructor argument - wont be thrown in realtime, but it will be printed as warning
-  public message: string = ""; // this is what will be printed in output - public text, some error classes have overriden message attr
+
+  // the following is commented, it should be inherited from base Error
+  //public message: string = ""; // this is what will be printed in output - public text, some error classes have overriden message attr
 
   constructor(m: string) {
     super(m);
@@ -78,6 +80,18 @@ class UserDoesNotExits extends CustomError {
   constructor(m: string, userId: string) {
     super(m);
     this.message = this.message.replace("$1", userId);
+  }
+}
+
+/**
+ * UserDoesNotExits will be thrown when attempting to remove/update the user entry, which does not exist
+ */
+class UserNotActiveError extends CustomError {
+  public static code = 405;
+  public static message = "User $1 is not active";
+
+  constructor(userId: string) {
+    super(UserNotActiveError.message.replace("$1", userId));
   }
 }
 
@@ -213,6 +227,7 @@ const allErrors: Record<string, any> = {
   NotFound,
   BadParams,
   UserDoesNotExits,
+  UserNotActiveError,
   ActantDoesNotExits,
   ActionDoesNotExits,
   StatementDoesNotExits,
@@ -237,6 +252,7 @@ export {
   NotFound,
   BadParams,
   UserDoesNotExits,
+  UserNotActiveError,
   ActantDoesNotExits,
   ActionDoesNotExits,
   StatementDoesNotExits,
