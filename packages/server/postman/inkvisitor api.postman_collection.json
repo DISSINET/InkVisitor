@@ -244,7 +244,7 @@
 					"response": []
 				},
 				{
-					"name": "admin create user",
+					"name": "editor get tree",
 					"request": {
 						"method": "GET",
 						"header": [
@@ -440,13 +440,13 @@
 						"header": [
 							{
 								"key": "Authorization",
-								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiNCIsImVtYWlsIjoidmlld2VyMUBpbmt2aXNpdG9yLmNvbSIsIm5hbWUiOiJ2aWV3ZXIxIiwicm9sZSI6InZpZXdlciIsIm9wdGlvbnMiOnsiZGVmYXVsdFRlcnJpdG9yeSI6IiIsImRlZmF1bHRMYW5ndWFnZSI6IiIsInNlYXJjaExhbmd1YWdlcyI6W119LCJib29rbWFya3MiOltdLCJzdG9yZWRUZXJyaXRvcmllcyI6W10sInJpZ2h0cyI6W3sidGVycml0b3J5IjoiVDQwLTAxIiwibW9kZSI6InJlYWQifV0sInBhc3N3b3JkIjoiJDJiJDEwJGNCL3FVWTFaekxrcnNlS1NvdnloSWVqcVUvNWJJOW5aYnd2L3BxckM3Qi5ZOTBFdERFUkFXIn0sImV4cCI6MTYzNzA5NjgyOSwiaWF0IjoxNjM0NTA0ODI5fQ.B2zbs4yL4G5pAlCKJ6385AnWV8rvkG42l_q9jLTy7Lg",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiNCIsImVtYWlsIjoidmlld2VyMUBpbmt2aXNpdG9yLmNvbSIsIm5hbWUiOiJ2aWV3ZXIxIiwicm9sZSI6InZpZXdlciIsIm9wdGlvbnMiOnsiZGVmYXVsdFRlcnJpdG9yeSI6IiIsImRlZmF1bHRMYW5ndWFnZSI6IiIsInNlYXJjaExhbmd1YWdlcyI6W119LCJib29rbWFya3MiOltdLCJzdG9yZWRUZXJyaXRvcmllcyI6W10sInJpZ2h0cyI6W10sInBhc3N3b3JkIjoicnRlIn0sImV4cCI6MTYzNzY2OTAyNSwiaWF0IjoxNjM1MDc3MDI1fQ.MWuS8wZ3skiAk80K373pBiLDdINo3Ltsw7Y6fVinL6I",
 								"type": "text"
 							}
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"class\": \"S\",\n    \"data\": {\n        \"territory\": {\n            \"id\": \"T40\",\n            \"order\": 0\n        }\n    }\n}",
+							"raw": "{\n    \"class\": \"S\",\n    \"data\": {\n        \"territory\": {\n            \"id\": \"T40\",\n            \"order\": 0\n        },\n    },\n            \"label\": \"[assdasda]\"\n\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -734,6 +734,137 @@
 								"users",
 								"bookmarks",
 								"4"
+							]
+						},
+						"description": "search by class + actantId"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "api/v1/users/create",
+			"item": [
+				{
+					"name": "admin create user",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiMSIsImVtYWlsIjoiYWRtaW5AYWRtaW4uY29tIiwibmFtZSI6ImFkbWluIiwicm9sZSI6ImFkbWluIiwib3B0aW9ucyI6eyJkZWZhdWx0VGVycml0b3J5IjoiIiwiZGVmYXVsdExhbmd1YWdlIjoiIiwic2VhcmNoTGFuZ3VhZ2VzIjpbXX0sImJvb2ttYXJrcyI6W10sInN0b3JlZFRlcnJpdG9yaWVzIjpbXSwicmlnaHRzIjpbeyJ0ZXJyaXRvcnkiOiJUMCIsIm1vZGUiOiJhZG1pbiJ9XSwicGFzc3dvcmQiOiIkMmIkMTAkQk1DQnBzZ25PWHBRdkd0VlVPaEx3dTFsV2RueVNETkF4enBDUjJDYVkxbXZ3ZEdRY0FoVGkifSwiZXhwIjoxNjM3MDk2ODI5LCJpYXQiOjE2MzQ1MDQ4Mjl9.bN72efWONf3lHHflcaDM0gdvD4DqgTGu-OICksQWT8I"
+							},
+							{
+								"key": "",
+								"value": "",
+								"disabled": true
+							}
+						],
+						"url": {
+							"raw": "http://localhost:4000/api/v1/tree/get",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "4000",
+							"path": [
+								"api",
+								"v1",
+								"tree",
+								"get"
+							]
+						},
+						"description": "search by class + actantId"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "api/v1/users/signin",
+			"item": [
+				{
+					"name": "sign in as active viewer",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiMSIsImVtYWlsIjoiYWRtaW5AYWRtaW4uY29tIiwibmFtZSI6ImFkbWluIiwicm9sZSI6ImFkbWluIiwib3B0aW9ucyI6eyJkZWZhdWx0VGVycml0b3J5IjoiIiwiZGVmYXVsdExhbmd1YWdlIjoiIiwic2VhcmNoTGFuZ3VhZ2VzIjpbXX0sImJvb2ttYXJrcyI6W10sInN0b3JlZFRlcnJpdG9yaWVzIjpbXSwicmlnaHRzIjpbeyJ0ZXJyaXRvcnkiOiJUMCIsIm1vZGUiOiJhZG1pbiJ9XSwicGFzc3dvcmQiOiIkMmIkMTAkQk1DQnBzZ25PWHBRdkd0VlVPaEx3dTFsV2RueVNETkF4enBDUjJDYVkxbXZ3ZEdRY0FoVGkifSwiZXhwIjoxNjM3MDk2ODI5LCJpYXQiOjE2MzQ1MDQ4Mjl9.bN72efWONf3lHHflcaDM0gdvD4DqgTGu-OICksQWT8I",
+								"disabled": true
+							},
+							{
+								"key": "",
+								"value": "",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\":\"viewer1@inkvisitor.com\",\n    \"password\": \"ghi\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:4000/api/v1/users/signin",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "4000",
+							"path": [
+								"api",
+								"v1",
+								"users",
+								"signin"
+							]
+						},
+						"description": "search by class + actantId"
+					},
+					"response": []
+				},
+				{
+					"name": "sign in as inactive viewer",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiMSIsImVtYWlsIjoiYWRtaW5AYWRtaW4uY29tIiwibmFtZSI6ImFkbWluIiwicm9sZSI6ImFkbWluIiwib3B0aW9ucyI6eyJkZWZhdWx0VGVycml0b3J5IjoiIiwiZGVmYXVsdExhbmd1YWdlIjoiIiwic2VhcmNoTGFuZ3VhZ2VzIjpbXX0sImJvb2ttYXJrcyI6W10sInN0b3JlZFRlcnJpdG9yaWVzIjpbXSwicmlnaHRzIjpbeyJ0ZXJyaXRvcnkiOiJUMCIsIm1vZGUiOiJhZG1pbiJ9XSwicGFzc3dvcmQiOiIkMmIkMTAkQk1DQnBzZ25PWHBRdkd0VlVPaEx3dTFsV2RueVNETkF4enBDUjJDYVkxbXZ3ZEdRY0FoVGkifSwiZXhwIjoxNjM3MDk2ODI5LCJpYXQiOjE2MzQ1MDQ4Mjl9.bN72efWONf3lHHflcaDM0gdvD4DqgTGu-OICksQWT8I",
+								"disabled": true
+							},
+							{
+								"key": "",
+								"value": "",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\":\"inactive@inkvisitor.com\",\n    \"password\": \"inactive\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:4000/api/v1/users/signin",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "4000",
+							"path": [
+								"api",
+								"v1",
+								"users",
+								"signin"
 							]
 						},
 						"description": "search by class + actantId"
