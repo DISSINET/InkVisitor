@@ -90,5 +90,20 @@
         "mode": "read"
       }
     ]
+  },
+  {
+    "id": "5",
+    "name": "inactive",
+    "email": "inactive@inkvisitor.com",
+    "password": "inactive",
+    "active": false,
+    "options": {
+      "defaultTerritory": "",
+      "defaultLanguage": "",
+      "searchLanguages": []
+    },
+    "bookmarks": null,
+    "role": "viewer",
+    "rights": []
   }
 ]
