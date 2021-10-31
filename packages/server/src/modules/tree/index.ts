@@ -23,6 +23,7 @@ import User from "@models/user";
 class TreeCreator {
   parentMap: Record<string, Territory[]>; // map of rootId -> childs
   statementsMap: Record<string, number>; // map of territoryId -> number of statements
+  fullTree: IResponseTree;
 
   constructor(territories: Territory[], statementsMap: Record<string, number>) {
     this.parentMap = {};
@@ -34,6 +35,15 @@ class TreeCreator {
     }
 
     this.statementsMap = statementsMap;
+    this.fullTree = {
+      children: [],
+      lvl: 0,
+      path: [],
+      right: UserRoleMode.Read,
+      statementsCount: 0,
+      territory: new Territory({}),
+      empty: true,
+    };
   }
 
   getRootTerritory(): Territory {
@@ -77,61 +87,68 @@ class TreeCreator {
 
     const childsAreEmpty = !childs.find((ch) => !ch.empty);
 
-    return {
+    this.fullTree = {
       territory: subtreeRoot,
       statementsCount: noOfStatements,
       lvl,
       children: childs,
       path: parents,
       empty: childsAreEmpty && !noOfStatements,
-      right: UserRoleMode.Read, // default, will be filtered later
+      right: UserRoleMode.Read,
     };
+
+    return this.fullTree;
   }
-}
 
-const sortTerritories = (terA: ITerritory, terB: ITerritory): number =>
-  (terA.data.parent ? terA.data.parent.order : 0) -
-  (terB.data.parent ? terB.data.parent.order : 0);
-
-async function countStatements(db: Db): Promise<Record<string, number>> {
-  const statements = (await getActants<IStatement>(db, { class: "S" })).filter(
-    (s) => s.data.territory && s.data.territory.id
-  );
-  const statementsCountMap: Record<string, number> = {}; // key is territoryid
-  for (const statement of statements) {
-    const terId = statement.data.territory.id;
-    if (!statementsCountMap[terId]) {
-      statementsCountMap[terId] = 0;
+  applyPermissions(tree: IResponseTree, user: User): IResponseTree | null {
+    const filtered: IResponseTree[] = [];
+    for (const child of tree.children) {
+      const filteredChild = this.applyPermissions(child, user);
+      if (filteredChild) {
+        filtered.push(filteredChild);
+      }
     }
 
-    statementsCountMap[terId]++;
-  }
-
-  return statementsCountMap;
-}
-
-function filterTree(tree: IResponseTree, user: User): IResponseTree | null {
-  const filtered: IResponseTree[] = [];
-  for (const child of tree.children) {
-    const filteredChild = filterTree(child, user);
-    if (filteredChild) {
-      filtered.push(filteredChild);
+    if (
+      tree.lvl > 0 &&
+      filtered.length === 0 &&
+      !(tree.territory as Territory).canBeViewedByUser(user)
+    ) {
+      return null;
     }
+
+    this.fullTree = {
+      ...tree,
+      children: filtered,
+      right: (tree.territory as Territory).getUserRoleMode(user),
+    };
+
+    return this.fullTree;
   }
 
-  if (
-    tree.lvl > 0 &&
-    filtered.length === 0 &&
-    !(tree.territory as Territory).canBeViewedByUser(user)
-  ) {
-    return null;
+  static sortTerritories(terA: ITerritory, terB: ITerritory): number {
+    return (
+      (terA.data.parent ? terA.data.parent.order : 0) -
+      (terB.data.parent ? terB.data.parent.order : 0)
+    );
   }
 
-  return {
-    ...tree,
-    children: filtered,
-    right: (tree.territory as Territory).getUserRoleMode(user),
-  };
+  static async countStatements(db: Db): Promise<Record<string, number>> {
+    const statements = (
+      await getActants<IStatement>(db, { class: "S" })
+    ).filter((s) => s.data.territory && s.data.territory.id);
+    const statementsCountMap: Record<string, number> = {}; // key is territoryid
+    for (const statement of statements) {
+      const terId = statement.data.territory.id;
+      if (!statementsCountMap[terId]) {
+        statementsCountMap[terId] = 0;
+      }
+
+      statementsCountMap[terId]++;
+    }
+
+    return statementsCountMap;
+  }
 }
 
 export default Router()
@@ -142,25 +159,20 @@ export default Router()
         getActants<ITerritory>(request.db, {
           class: ActantType.Territory,
         }),
-        countStatements(request.db),
+        TreeCreator.countStatements(request.db),
       ]);
 
-      const territories = territoriesData
-        .sort(sortTerritories)
-        .map((td) => new Territory({ ...td }));
+      const helper = new TreeCreator(
+        territoriesData
+          .sort(TreeCreator.sortTerritories)
+          .map((td) => new Territory({ ...td })),
+        statementsCountMap
+      );
 
-      const helper = new TreeCreator(territories, statementsCountMap);
+      helper.populateTree(helper.getRootTerritory(), 0, []);
+      helper.applyPermissions(helper.fullTree, request.getUserOrFail());
 
-      const tree = helper.populateTree(helper.getRootTerritory(), 0, []);
-
-      let filtered = filterTree(tree, request.getUserOrFail());
-
-      if (!filtered) {
-        filtered = { ...tree };
-        filtered.children = [];
-      }
-
-      return filtered;
+      return helper.fullTree;
     })
   )
   .post(
@@ -218,7 +230,9 @@ export default Router()
       const childsMap = await new Territory({ ...parent }).findChilds(
         request.db.connection
       );
-      const childsArray = Object.values(childsMap).sort(sortTerritories);
+      const childsArray = Object.values(childsMap).sort(
+        TreeCreator.sortTerritories
+      );
 
       if (newIndex < 0 || newIndex > childsArray.length) {
         throw new TerrytoryInvalidMove(
