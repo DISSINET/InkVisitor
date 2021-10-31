@@ -105,6 +105,8 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
         return "territory";
       } else if (actantClass === ActantType.Resource) {
         return "resource";
+      } else if (actantClass === ActantType.Concept) {
+        return "concept";
       }
     }
     return "entity";
