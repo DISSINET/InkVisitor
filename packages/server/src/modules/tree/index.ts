@@ -17,7 +17,7 @@ import {
 import { Db } from "@service/RethinkDB";
 import Territory from "@models/territory";
 import { IParentTerritory } from "@shared/types/territory";
-import { ActantType } from "@shared/enums";
+import { ActantType, UserRole, UserRoleMode } from "@shared/enums";
 import User from "@models/user";
 
 class TreeCreator {
@@ -84,6 +84,7 @@ class TreeCreator {
       children: childs,
       path: parents,
       empty: childsAreEmpty && !noOfStatements,
+      right: UserRoleMode.Read, // default, will be filtered later
     };
   }
 }
@@ -126,7 +127,11 @@ function filterTree(tree: IResponseTree, user: User): IResponseTree | null {
     return null;
   }
 
-  return { ...tree, children: filtered };
+  return {
+    ...tree,
+    children: filtered,
+    right: (tree.territory as Territory).getUserRoleMode(user),
+  };
 }
 
 export default Router()
@@ -135,7 +140,7 @@ export default Router()
     asyncRouteHandler<IResponseTree>(async (request: Request) => {
       const [territoriesData, statementsCountMap] = await Promise.all([
         getActants<ITerritory>(request.db, {
-          class: "T",
+          class: ActantType.Territory,
         }),
         countStatements(request.db),
       ]);

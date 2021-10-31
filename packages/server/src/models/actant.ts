@@ -1,7 +1,7 @@
 import { IDbModel, UnknownObject, fillFlatObject } from "./common";
 import { r as rethink, Connection, WriteResult } from "rethinkdb-ts";
 import { IStatement } from "@shared/types";
-import { ActantType, UserRoleMode } from "@shared/enums";
+import { ActantType, UserRole, UserRoleMode } from "@shared/enums";
 import { InternalServerError } from "@shared/types/errors";
 import User from "./user";
 import Statement from "./statement";
@@ -72,6 +72,41 @@ export default class Actant implements IDbModel {
 
   canBeDeletedByUser(user: User): boolean {
     return true;
+  }
+
+  /**
+   * getUserRoleMode returns derived user role mode for this instance.
+   * By default this method counts with default right to view - helps with performance.
+   * @param user
+   * @returns
+   */
+  getUserRoleMode(user: User): UserRoleMode {
+    if (user.role === UserRole.Admin) {
+      return UserRoleMode.Admin;
+    }
+
+    if (this.canBeEditedByUser(user)) {
+      return UserRoleMode.Write;
+    }
+
+    return UserRoleMode.Read;
+  }
+
+  getDependentStatements(db: Connection | undefined): Promise<IStatement[]> {
+    return rethink
+      .table(Actant.table)
+      .filter({ class: ActantType.Statement })
+      .filter((row: any) => {
+        return rethink.or(
+          row("data")("actants").contains((actantElement: any) =>
+            actantElement("actant").eq(this.id)
+          ),
+          row("data")("props").contains((actantElement: any) =>
+            actantElement("origin").eq(this.id)
+          )
+        );
+      })
+      .run(db);
   }
 
   static determineOrder(want: number, sibl: Record<number, unknown>): number {
