@@ -131,9 +131,9 @@ export const StatementEditorActionTable: React.FC<StatementEditorActionTable> = 
         id: "Attributes",
         Cell: ({ row }: Cell) => {
           const { action, sAction } = row.values.data;
-          return action && sAction ? (
+          return sAction ? (
             <AttributesEditor
-              modalTitle={`Action involvement [${action.label}]`}
+              modalTitle={`Action involvement [${action ? action.label : ""}]`}
               entityType={ActantType.Action}
               data={{
                 elvl: sAction.elvl,
