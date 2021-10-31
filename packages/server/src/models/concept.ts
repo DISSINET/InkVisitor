@@ -5,11 +5,10 @@ import {
   ActantStatus,
   EntityLogicalType,
 } from "@shared/enums";
-import { IEntity } from "@shared/types/entity";
 import Actant from "./actant";
+import { IActant } from "@shared/types";
 
-class EntityData implements IModel {
-  logicalType: EntityLogicalType = EntityLogicalType.Definite;
+class ConceptData implements IModel {
   constructor(data: UnknownObject) {
     if (!data) {
       return;
@@ -21,12 +20,12 @@ class EntityData implements IModel {
   }
 }
 
-class Entity extends Actant implements IEntity {
+class Concept extends Actant implements IActant {
   static table = "actants";
 
   id = "";
-  class: EntityActantType = ActantType.Person; // just default
-  data = new EntityData({});
+  class: ActantType.Concept = ActantType.Concept; // just default
+  data: any = {};
 
   label: string = "";
   detail: string = "";
@@ -40,20 +39,18 @@ class Entity extends Actant implements IEntity {
     if (!data) {
       return;
     }
+    
 
     fillFlatObject(this, data);
-    this.data = new EntityData(data.data as UnknownObject);
+    this.data = new ConceptData({} as UnknownObject);
   }
 
   isValid(): boolean {
     const alloweedClasses = [
-      ActantType.Person,
-      ActantType.Group,
-      ActantType.Object,
-      ActantType.Location,
-      ActantType.Value,
-      ActantType.Event,
+      ActantType.Concept,
     ];
+
+    console.log()
     if (alloweedClasses.indexOf(this.class) === -1) {
       return false;
     }
@@ -62,4 +59,4 @@ class Entity extends Actant implements IEntity {
   }
 }
 
-export default Entity;
+export default Concept;

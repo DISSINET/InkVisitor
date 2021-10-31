@@ -19,6 +19,7 @@ import api from "api";
 import { setTreeInitialized } from "redux/features/territoryTree/treeInitializeSlice";
 import { useAppDispatch } from "redux/hooks";
 import { useSearchParams } from "hooks";
+import { UserRole } from "@shared/enums";
 
 interface ContextMenuNewTerritoryModal {
   territoryActantId: string;
@@ -61,7 +62,8 @@ export const ContextMenuNewTerritoryModal: React.FC<ContextMenuNewTerritoryModal
       const newTerritory: ITerritory = CTerritoryActant(
         territoryName,
         territoryActantId,
-        -1
+        -1,
+        localStorage.getItem("userrole") as UserRole
       );
       createTerritoryMutation.mutate(newTerritory);
     } else {

@@ -6,6 +6,7 @@ import {
   ActantType,
   ActantStatus,
   EntityActantType,
+  AllActantType,
   Certainty,
   Elvl,
   Position,
@@ -304,7 +305,7 @@ const loadStatementsTables = async (next: Function) => {
       addEntityActant(
         entitySheet.id + "_" + entityRow.id,
         entityRow.label,
-        entitySheet.entityType as EntityActantType
+        entitySheet.entityType as AllActantType
       );
 
       parseEntityPropsInRow(entityRow, "T0");
@@ -535,19 +536,19 @@ const checkValidId = (idValue: string) => {
 /***
  * TODO: logical type
  */
-const addEntityActant = (id: string, label: string, type: EntityActantType) => {
-  const newEntityActant: IEntity = {
-    id,
-    class: type,
-    data: {
-      logicalType: EntityLogicalType["Definite"],
-    },
-    label: label,
-    detail: "",
-    status: ActantStatus["Approved"],
-    language: ["eng"],
-    notes: [],
-  };
+const addEntityActant = (id: string, label: string, type: AllActantType) => {
+    const newEntityActant: IEntity | IActant = {
+      id,
+      class: type,
+      data: type === ActantType.Concept ? {} : {
+        logicalType: EntityLogicalType["Definite"],
+      } ,
+      label: label,
+      detail: "",
+      status: ActantStatus["Approved"],
+      language: ["eng"],
+      notes: [],
+    } 
   if (id) {
     actants.push(newEntityActant);
   }
@@ -940,7 +941,7 @@ const createNewActantIfNeeded = (actantValue: string) => {
       addEntityActant(
         newActantId,
         newActantLabel,
-        newActantType as EntityActantType
+        newActantType as AllActantType
       );
 
     return newActantId;
