@@ -63,7 +63,7 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
     setTerritoryId,
   } = useSearchParams();
 
-  const [showSubmit, setShowSubmit] = useState(false);
+  const [showRemoveSubmit, setShowRemoveSubmit] = useState(false);
   const [usedInPage, setUsedInPage] = useState<number>(0);
   const statementsPerPage = 20;
 
@@ -272,7 +272,7 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
                   label="remove actant"
                   inverted={true}
                   onClick={() => {
-                    setShowSubmit(true);
+                    setShowRemoveSubmit(true);
                   }}
                 />
                 <Button
@@ -797,8 +797,8 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
         title="Remove entity"
         text="Do you really want to delete actant?"
         onSubmit={() => deleteActantMutation.mutate(actantId)}
-        onCancel={() => setShowSubmit(false)}
-        show={showSubmit}
+        onCancel={() => setShowRemoveSubmit(false)}
+        show={showRemoveSubmit}
         loading={deleteActantMutation.isLoading}
       />
       <Loader
