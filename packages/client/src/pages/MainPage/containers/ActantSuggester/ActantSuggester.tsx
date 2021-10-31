@@ -8,7 +8,7 @@ import { CActant, CTerritoryActant } from "constructors";
 import { Entities } from "types";
 import { useMutation, useQuery, useQueryClient } from "react-query";
 import api from "api";
-import { ActantType, CategoryActantType } from "@shared/enums";
+import { ActantType, CategoryActantType, UserRole } from "@shared/enums";
 import { useDebounce, useSearchParams } from "hooks";
 import { rootTerritoryId } from "Theme/constants";
 
@@ -147,12 +147,18 @@ export const ActantSuggester: React.FC<ActantSuggesterI> = ({
     category: ActantType;
   }) => {
     if (newCreated.category === ActantType.Territory) {
-      const newActant = CTerritoryActant(newCreated.label, rootTerritoryId, -1);
+      const newActant = CTerritoryActant(
+        newCreated.label,
+        rootTerritoryId,
+        -1,
+        localStorage.getItem("userrole") as UserRole
+      );
       actantsCreateMutation.mutate(newActant);
     } else {
       const newActant = CActant(
         newCreated.category as CategoryActantType,
-        newCreated.label
+        newCreated.label,
+        localStorage.getItem("userrole") as UserRole
       );
       actantsCreateMutation.mutate(newActant);
     }

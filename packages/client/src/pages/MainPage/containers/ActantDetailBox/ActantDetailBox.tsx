@@ -48,7 +48,7 @@ import {
   languageDict,
   entitiesDict,
 } from "@shared/dictionaries";
-import { ActantType, Position } from "@shared/enums";
+import { ActantType, Position, UserRole } from "@shared/enums";
 import { toast } from "react-toastify";
 import { ActantDetailMetaTable } from "./ActantDetailMetaTable/ActantDetailMetaTable";
 import { useSearchParams } from "hooks";
@@ -56,8 +56,12 @@ import { AttributeButtonGroup } from "../AttributeButtonGroup/AttributeButtonGro
 
 interface ActantDetailBox {}
 export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
-  const { actantId, setActantId, setStatementId, setTerritoryId } =
-    useSearchParams();
+  const {
+    actantId,
+    setActantId,
+    setStatementId,
+    setTerritoryId,
+  } = useSearchParams();
 
   const [showSubmit, setShowSubmit] = useState(false);
   const [usedInPage, setUsedInPage] = useState<number>(0);
@@ -65,12 +69,7 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
 
   const queryClient = useQueryClient();
 
-  const {
-    status,
-    data: actant,
-    error,
-    isFetching,
-  } = useQuery(
+  const { status, data: actant, error, isFetching } = useQuery(
     ["actant", actantId],
     async () => {
       const res = await api.detailGet(actantId);
@@ -707,7 +706,10 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
               label="create new meta statement"
               icon={<FaPlus />}
               onClick={async () => {
-                const newStatement = CMetaStatement(actant.id);
+                const newStatement = CMetaStatement(
+                  actant.id,
+                  localStorage.getItem("userrole") as UserRole
+                );
 
                 actantsCreateMutation.mutate(newStatement);
               }}

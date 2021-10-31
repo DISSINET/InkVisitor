@@ -21,6 +21,7 @@ import {
   Partitivity,
   ActantStatus,
   Position,
+  UserRole,
 } from "@shared/enums";
 import { v4 as uuidv4 } from "uuid";
 
@@ -58,12 +59,12 @@ export const CProp = (): IStatementProp => ({
   },
 });
 
-export const CStatement = (territoryId: string): IStatement => ({
+export const CStatement = (territoryId: string, userRole: UserRole): IStatement => ({
   id: uuidv4(),
   class: ActantType.Statement,
   label: "",
   detail: "",
-  status: ActantStatus["Approved"],
+  status: userRole === UserRole['Admin'] ? ActantStatus["Approved"] : ActantStatus["Pending"],
   language: ["eng"],
   notes: [],
   data: {
@@ -80,12 +81,12 @@ export const CStatement = (territoryId: string): IStatement => ({
   },
 });
 
-export const CMetaStatement = (subjectId: string): IStatement => ({
+export const CMetaStatement = (subjectId: string, userRole: UserRole): IStatement => ({
   id: uuidv4(),
   class: ActantType.Statement,
   label: "",
   detail: "",
-  status: ActantStatus["Approved"],
+  status: userRole === UserRole['Admin'] ? ActantStatus["Approved"] : ActantStatus["Pending"],
   language: ["eng"],
   notes: [],
   data: {
@@ -194,13 +195,14 @@ export const CStatementAction = (actionId: string): IStatementAction => ({
 export const CTerritoryActant = (
   label: string,
   parentId: string,
-  parentOrder: number
+  parentOrder: number,
+  userRole: UserRole
 ): ITerritory => ({
   id: uuidv4(),
   class: ActantType.Territory,
   label: label,
   detail: "",
-  status: ActantStatus["Approved"],
+  status: userRole === UserRole['Admin'] ? ActantStatus["Approved"] : ActantStatus["Pending"],
   language: ["eng"],
   notes: [],
   data: {
@@ -210,14 +212,15 @@ export const CTerritoryActant = (
 
 export const CActant = (
   category: CategoryActantType,
-  label: string
+  label: string,
+  userRole: UserRole
 ): IActant => ({
   id: uuidv4(),
   class: category,
   label: label,
   detail: "",
   data: {},
-  status: ActantStatus["Approved"],
+  status: userRole === UserRole['Admin'] ? ActantStatus["Approved"] : ActantStatus["Pending"],
   language: ["eng"],
   notes: [],
 });
