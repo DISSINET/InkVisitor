@@ -440,45 +440,27 @@ export const StatementEditorBox: React.FC = () => {
           lastSecondLevel={lastSecondLevel}
         >
           {propTypeActant ? (
-            <React.Fragment>
-              <ActantTag
-                actant={propTypeActant}
-                short={false}
-                button={
-                  <Button
-                    key="d"
-                    icon={<FaUnlink />}
-                    color="plain"
-                    inverted={true}
-                    tooltip="unlink actant"
-                    onClick={() => {
-                      updateProp(prop.id, {
-                        type: {
-                          ...prop.type,
-                          ...{ id: "" },
-                        },
-                      });
-                    }}
-                  />
-                }
-              />
-              <StyledPropButtonGroup>
-                <AttributesEditor
-                  modalTitle={`Property Type attributes [${propTypeActant.label}]`}
-                  entityType={propTypeActant.class}
-                  data={{
-                    elvl: prop.type.elvl,
-                    logic: prop.type.logic,
-                    virtuality: prop.type.virtuality,
-                    partitivity: prop.type.partitivity,
+            <ActantTag
+              actant={propTypeActant}
+              short={false}
+              button={
+                <Button
+                  key="d"
+                  icon={<FaUnlink />}
+                  color="plain"
+                  inverted={true}
+                  tooltip="unlink actant"
+                  onClick={() => {
+                    updateProp(prop.id, {
+                      type: {
+                        ...prop.type,
+                        ...{ id: "" },
+                      },
+                    });
                   }}
-                  handleUpdate={(newData) => {
-                    updateProp(prop.id, { type: { ...prop.type, ...newData } });
-                  }}
-                  loading={updateActantsDataMutation.isLoading}
                 />
-              </StyledPropButtonGroup>
-            </React.Fragment>
+              }
+            />
           ) : (
             <ActantSuggester
               onSelected={(newSelectedId: string) => {
@@ -492,53 +474,51 @@ export const StatementEditorBox: React.FC = () => {
               categoryIds={classesPropType}
             ></ActantSuggester>
           )}
+          <StyledPropButtonGroup>
+            <AttributesEditor
+              modalTitle={`Property Type attributes [${
+                propTypeActant ? propTypeActant.label : ""
+              }]`}
+              entityType={propTypeActant ? propTypeActant.class : false}
+              data={{
+                elvl: prop.type.elvl,
+                logic: prop.type.logic,
+                virtuality: prop.type.virtuality,
+                partitivity: prop.type.partitivity,
+              }}
+              handleUpdate={(newData) => {
+                updateProp(prop.id, { type: { ...prop.type, ...newData } });
+              }}
+              loading={updateActantsDataMutation.isLoading}
+            />
+          </StyledPropButtonGroup>
         </StyledPropLineColumn>
         <StyledPropLineColumn
           padded={level === "2"}
           lastSecondLevel={lastSecondLevel}
         >
           {propValueActant ? (
-            <React.Fragment>
-              <ActantTag
-                actant={propValueActant}
-                short={false}
-                button={
-                  <Button
-                    key="d"
-                    icon={<FaUnlink />}
-                    tooltip="unlink actant"
-                    color="plain"
-                    inverted={true}
-                    onClick={() => {
-                      updateProp(prop.id, {
-                        value: {
-                          ...prop.value,
-                          ...{ id: "" },
-                        },
-                      });
-                    }}
-                  />
-                }
-              />
-              <StyledPropButtonGroup>
-                <AttributesEditor
-                  modalTitle={`Property Value attributes [${propValueActant.label}]`}
-                  entityType={propValueActant.class}
-                  data={{
-                    elvl: prop.value.elvl,
-                    logic: prop.value.logic,
-                    virtuality: prop.value.virtuality,
-                    partitivity: prop.value.partitivity,
-                  }}
-                  handleUpdate={(newData) => {
+            <ActantTag
+              actant={propValueActant}
+              short={false}
+              button={
+                <Button
+                  key="d"
+                  icon={<FaUnlink />}
+                  tooltip="unlink actant"
+                  color="plain"
+                  inverted={true}
+                  onClick={() => {
                     updateProp(prop.id, {
-                      value: { ...prop.value, ...newData },
+                      value: {
+                        ...prop.value,
+                        ...{ id: "" },
+                      },
                     });
                   }}
-                  loading={updateActantsDataMutation.isLoading}
                 />
-              </StyledPropButtonGroup>
-            </React.Fragment>
+              }
+            />
           ) : (
             <ActantSuggester
               onSelected={(newSelectedId: string) => {
@@ -552,6 +532,26 @@ export const StatementEditorBox: React.FC = () => {
               categoryIds={classesPropValue}
             ></ActantSuggester>
           )}
+          <StyledPropButtonGroup>
+            <AttributesEditor
+              modalTitle={`Property Value attributes [${
+                propValueActant ? propValueActant.label : ""
+              }]`}
+              entityType={propValueActant ? propValueActant.class : false}
+              data={{
+                elvl: prop.value.elvl,
+                logic: prop.value.logic,
+                virtuality: prop.value.virtuality,
+                partitivity: prop.value.partitivity,
+              }}
+              handleUpdate={(newData) => {
+                updateProp(prop.id, {
+                  value: { ...prop.value, ...newData },
+                });
+              }}
+              loading={updateActantsDataMutation.isLoading}
+            />
+          </StyledPropButtonGroup>
         </StyledPropLineColumn>
 
         <StyledPropLineColumn lastSecondLevel={lastSecondLevel}>

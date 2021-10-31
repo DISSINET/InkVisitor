@@ -131,10 +131,12 @@ export const ActantDetailMetaTable: React.FC<ActantBookmarkFolderTable> = ({
             ? actants.find((a) => a.id === typeSActant.actant)
             : false;
 
-          return typeActant && typeSActant ? (
+          return typeSActant ? (
             <AttributesEditor
-              modalTitle={`Property Type attributes [${typeActant.label}]`}
-              entityType={typeActant.class}
+              modalTitle={`Property Type attributes [${
+                typeActant ? typeActant.label : "undefined"
+              }]`}
+              entityType={typeActant ? typeActant.class : false}
               data={{
                 elvl: typeSActant.elvl,
                 logic: typeSActant.logic,
@@ -272,10 +274,12 @@ export const ActantDetailMetaTable: React.FC<ActantBookmarkFolderTable> = ({
             ? actants.find((a) => a.id === valueSActant.actant)
             : false;
 
-          return valueActant && valueSActant ? (
+          return valueSActant ? (
             <AttributesEditor
-              modalTitle={`Property Value attributes [${valueActant.label}]`}
-              entityType={valueActant.class}
+              modalTitle={`Property Value attributes [${
+                valueActant ? valueActant.label : ""
+              }]`}
+              entityType={valueActant ? valueActant.class : false}
               data={{
                 elvl: valueSActant.elvl,
                 logic: valueSActant.logic,

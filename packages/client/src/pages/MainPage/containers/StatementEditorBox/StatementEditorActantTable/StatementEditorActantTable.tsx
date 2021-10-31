@@ -198,10 +198,12 @@ export const StatementEditorActantTable: React.FC<StatementEditorActantTable> = 
             actant: IActant;
             sActant: IStatementActant | any;
           } = row.values.data;
-          return actant && sActant ? (
+          return sActant ? (
             <AttributesEditor
-              modalTitle={`Actant involvement [${actant.label}]`}
-              entityType={actant.class}
+              modalTitle={`Actant involvement [${
+                actant ? actant.label : "undefined"
+              }]`}
+              entityType={actant ? actant.class : false}
               data={{
                 elvl: sActant.elvl,
                 certainty: sActant.certainty,
