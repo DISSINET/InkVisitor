@@ -63,7 +63,7 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
     setTerritoryId,
   } = useSearchParams();
 
-  const [showSubmit, setShowSubmit] = useState(false);
+  const [showRemoveSubmit, setShowRemoveSubmit] = useState(false);
   const [usedInPage, setUsedInPage] = useState<number>(0);
   const statementsPerPage = 20;
 
@@ -95,6 +95,10 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
   useEffect(() => {
     setUsedInPage(0);
   }, [actantId]);
+
+  const mayBeRemoved = useMemo(() => {
+    return actant && actant.usedIn && actant.usedIn.length === 0;
+  }, [actant]);
 
   const actantMode = useMemo(() => {
     const actantClass = actant?.class;
@@ -266,15 +270,17 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
                 />
               </StyledTagWrap>
               <ButtonGroup>
-                <Button
-                  color="primary"
-                  icon={<FaTrashAlt />}
-                  label="remove actant"
-                  inverted={true}
-                  onClick={() => {
-                    setShowSubmit(true);
-                  }}
-                />
+                {mayBeRemoved && (
+                  <Button
+                    color="primary"
+                    icon={<FaTrashAlt />}
+                    label="remove actant"
+                    inverted={true}
+                    onClick={() => {
+                      setShowRemoveSubmit(true);
+                    }}
+                  />
+                )}
                 <Button
                   key="refresh"
                   icon={<FaRecycle size={14} />}
@@ -286,6 +292,20 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
                     queryClient.invalidateQueries(["actant"]);
                   }}
                 />
+                {actant.class === ActantType.Statement && (
+                  <Button
+                    key="edit"
+                    icon={<FaEdit size={14} />}
+                    tooltip="open statement in editor"
+                    inverted={true}
+                    color="primary"
+                    label="open statement"
+                    onClick={() => {
+                      setStatementId(actant.id);
+                      setTerritoryId(actant.data.territory.id);
+                    }}
+                  />
+                )}
               </ButtonGroup>
             </StyledActantPreviewRow>
 
@@ -774,7 +794,7 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
                     <StyledSectionMetaTableCell borderless>
                       <StyledSectionMetaTableButtonGroup>
                         <Button
-                          key="r"
+                          key="e"
                           icon={<FaEdit size={14} />}
                           color="plain"
                           tooltip="edit statement"
@@ -797,8 +817,8 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
         title="Remove entity"
         text="Do you really want to delete actant?"
         onSubmit={() => deleteActantMutation.mutate(actantId)}
-        onCancel={() => setShowSubmit(false)}
-        show={showSubmit}
+        onCancel={() => setShowRemoveSubmit(false)}
+        show={showRemoveSubmit}
         loading={deleteActantMutation.isLoading}
       />
       <Loader

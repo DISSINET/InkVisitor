@@ -73,7 +73,7 @@ interface AttributeData {
 
 interface StatementEditorAttributes {
   modalTitle: string;
-  entityType?: ActantType;
+  entityType?: ActantType | false;
   data: AttributeData;
   handleUpdate: (data: AttributeData) => void;
   loading?: boolean;
