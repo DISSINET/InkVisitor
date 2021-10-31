@@ -96,6 +96,10 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
     setUsedInPage(0);
   }, [actantId]);
 
+  const mayBeRemoved = useMemo(() => {
+    return actant && actant.usedIn && actant.usedIn.length === 0;
+  }, [actant]);
+
   const actantMode = useMemo(() => {
     const actantClass = actant?.class;
     if (actantClass) {
@@ -266,15 +270,17 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
                 />
               </StyledTagWrap>
               <ButtonGroup>
-                <Button
-                  color="primary"
-                  icon={<FaTrashAlt />}
-                  label="remove actant"
-                  inverted={true}
-                  onClick={() => {
-                    setShowRemoveSubmit(true);
-                  }}
-                />
+                {mayBeRemoved && (
+                  <Button
+                    color="primary"
+                    icon={<FaTrashAlt />}
+                    label="remove actant"
+                    inverted={true}
+                    onClick={() => {
+                      setShowRemoveSubmit(true);
+                    }}
+                  />
+                )}
                 <Button
                   key="refresh"
                   icon={<FaRecycle size={14} />}
