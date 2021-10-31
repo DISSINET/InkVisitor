@@ -4,12 +4,12 @@ import { ActantTag } from "..";
 interface StyledContent {
   type: string;
 }
-export const StyledContent = styled.div`
+export const StyledContent = styled.div<StyledContent>`
   display: flex;
   flex-direction: column;
   align-items: start;
   border-left: 3px solid;
-  border-left-color: ${({ theme, type}) => theme.color["entity"+type]};
+  border-left-color: ${({ theme, type }) => theme.color["entity" + type]};
 `;
 
 interface StyledSection {
@@ -26,7 +26,6 @@ export const StyledSection = styled.div<StyledSection>`
   border-bottom-style: solid;
   width: 100%;
 `;
-
 
 export const StyledActantPreviewRow = styled.div`
   display: flex;
