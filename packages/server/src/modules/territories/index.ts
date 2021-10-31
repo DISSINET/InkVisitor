@@ -21,6 +21,8 @@ import {
   IResponseStatement,
 } from "@shared/types";
 import Statement from "@models/statement";
+import { ActantType } from "@shared/enums";
+import Territory from "@models/territory";
 
 function insertIStatementToChilds(
   array: IStatement[],
@@ -46,7 +48,7 @@ export default Router()
         request.db,
         territoryId,
         {
-          class: "T",
+          class: ActantType.Territory,
         }
       );
       if (!territory) {
@@ -83,6 +85,9 @@ export default Router()
         ...territory,
         statements: responseStatements,
         actants,
+        right: new Territory({ id: territoryId }).getUserRoleMode(
+          request.getUserOrFail()
+        ),
       };
     })
   )
@@ -98,7 +103,7 @@ export default Router()
         request.db,
         territoryId,
         {
-          class: "T",
+          class: ActantType.Territory,
         }
       );
       if (!territory) {

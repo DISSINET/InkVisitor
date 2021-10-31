@@ -32,6 +32,7 @@ export default Router().get(
     return {
       ...statementData,
       actants,
+      right: statementModel.getUserRoleMode(request.getUserOrFail())
     };
   })
 );

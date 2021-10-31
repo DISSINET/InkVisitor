@@ -414,7 +414,7 @@ class Statement extends Actant implements IStatement {
       actantIds[p.resource] = null;
     });
     actantIds[this.data.territory.id] = null;
-    
+
     return Object.keys(actantIds);
   }
 
