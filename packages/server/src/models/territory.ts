@@ -223,13 +223,6 @@ class Territory extends Actant implements ITerritory {
   }
 
   canBeEditedByUser(user: User): boolean {
-    if (
-      this.data.parent &&
-      !new Territory({ id: this.data.parent.id }).canBeEditedByUser(user)
-    ) {
-      return false;
-    }
-
     // in case of create - no id provided yet
     if (!this.id) {
       return true;
