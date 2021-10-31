@@ -20,6 +20,17 @@
     "method": "get",
     "roles": ["*"]
   },
+
+  {
+    "controller": "territories",
+    "method": "get",
+    "roles": ["*"]
+  },
+  {
+    "controller": "territories",
+    "method": "getActantIds",
+    "roles": ["*"]
+  },
   {
     "controller": "tree",
     "method": "get",
@@ -33,7 +44,17 @@
   {
     "controller": "users",
     "method": "bookmarksGet",
-    "roles": ["admin"]
+    "roles": ["*"]
+  },
+  {
+    "controller": "users",
+    "method": "bookmarks",
+    "roles": ["*"]
+  },
+  {
+    "controller": "users",
+    "method": "get",
+    "roles": ["*"]
   },
   {
     "controller": "actants",
