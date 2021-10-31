@@ -82,7 +82,7 @@ export const UserListModal: React.FC<UserListModal> = ({
       const res = await api.administrationGet();
       return res.data.users.sort((a, b) => (a.id > b.id ? 1 : -1));
     },
-    { enabled: api.isLoggedIn() }
+    { enabled: api.isLoggedIn() && isOpen }
   );
 
   const removingUser = useMemo(() => {
