@@ -70,5 +70,10 @@
     "controller": "actants",
     "method": "detail",
     "roles": ["*"]
+  },
+  {
+    "controller": "actants",
+    "method": "getMore",
+    "roles": ["*"]
   }
 ]
