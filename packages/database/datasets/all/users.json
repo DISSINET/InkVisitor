@@ -75,7 +75,7 @@
     "id": "4",
     "name": "viewer1",
     "email": "viewer1@inkvisitor.com",
-    "password": "ghi",
+    "password": "viewer",
     "active": true,
     "options": {
       "defaultTerritory": "",

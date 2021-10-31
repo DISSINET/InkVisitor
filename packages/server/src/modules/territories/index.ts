@@ -3,6 +3,7 @@ import {
   StatementDoesNotExits,
   TerritoryDoesNotExits,
   StatementInvalidMove,
+  PermissionDeniedError,
 } from "@shared/types/errors";
 import { Router, Request } from "express";
 import { asyncRouteHandler } from "..";
@@ -56,6 +57,14 @@ export default Router()
           `territory ${territoryId} was not found`,
           territoryId
         );
+      }
+
+      if (
+        !new Territory({ id: territoryId }).canBeViewedByUser(
+          request.getUserOrFail()
+        )
+      ) {
+        throw new PermissionDeniedError(`cannot view actant ${territoryId}`);
       }
 
       const statements = await Statement.findStatementsInTerritory(

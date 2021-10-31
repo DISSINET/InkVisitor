@@ -222,6 +222,10 @@ export default Router()
       }
       const actant = getActantType({ ...actantData });
 
+      if (!actant.canBeViewedByUser(request.getUserOrFail())) {
+        throw new PermissionDeniedError(`cannot view actant ${actantId}`);
+      }
+
       const meta: IResponseStatement[] = [];
 
       const statements = await Statement.findMetaStatements(
