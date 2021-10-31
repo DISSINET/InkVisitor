@@ -292,6 +292,20 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
                     queryClient.invalidateQueries(["actant"]);
                   }}
                 />
+                {actant.class === ActantType.Statement && (
+                  <Button
+                    key="edit"
+                    icon={<FaEdit size={14} />}
+                    tooltip="open statement in editor"
+                    inverted={true}
+                    color="primary"
+                    label="open statement"
+                    onClick={() => {
+                      setStatementId(actant.id);
+                      setTerritoryId(actant.data.territory.id);
+                    }}
+                  />
+                )}
               </ButtonGroup>
             </StyledActantPreviewRow>
 
@@ -780,7 +794,7 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
                     <StyledSectionMetaTableCell borderless>
                       <StyledSectionMetaTableButtonGroup>
                         <Button
-                          key="r"
+                          key="e"
                           icon={<FaEdit size={14} />}
                           color="plain"
                           tooltip="edit statement"
