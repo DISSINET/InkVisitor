@@ -7,6 +7,7 @@ import Resource from "./resource";
 import { ModelNotValidError } from "@shared/types/errors";
 import Action from "./action";
 import Actant from "./actant";
+import Concept from "./concept";
 
 export function getActantType(data: UnknownObject): Actant {
   if (!data || typeof data !== "object" || Object.keys(data).length === 0) {
@@ -25,7 +26,7 @@ export function getActantType(data: UnknownObject): Actant {
     case ActantType.Object:
       return new Entity(data);
     case ActantType.Concept:
-      return new Entity(data);
+      return new Concept(data);
     case ActantType.Location:
       return new Entity(data);
     case ActantType.Value:

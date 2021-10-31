@@ -91,6 +91,7 @@ export async function findActantsByIds<T extends IActant>(
     .table("actants")
     .getAll(rethink.args(ids))
     .run(db.connection);
+
   return data;
 }
 

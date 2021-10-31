@@ -65,5 +65,15 @@
     "controller": "actants",
     "method": "update",
     "roles": ["*"]
+  },
+  {
+    "controller": "actants",
+    "method": "detail",
+    "roles": ["*"]
+  },
+  {
+    "controller": "actants",
+    "method": "getMore",
+    "roles": ["*"]
   }
 ]

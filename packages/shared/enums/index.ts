@@ -30,6 +30,19 @@ export function isValidActantType(input: ActantType): boolean {
   );
 }
 
+export type AllActantType =
+  | ActantType.Action
+  | ActantType.Territory
+  | ActantType.Statement
+  | ActantType.Resource
+  | ActantType.Person
+  | ActantType.Group
+  | ActantType.Object
+  | ActantType.Concept
+  | ActantType.Location
+  | ActantType.Value
+  | ActantType.Event;
+
 export type CategoryActantType =
   | ActantType.Person
   | ActantType.Group
@@ -43,7 +56,6 @@ export type EntityActantType =
   | ActantType.Person
   | ActantType.Group
   | ActantType.Object
-  | ActantType.Concept
   | ActantType.Location
   | ActantType.Value
   | ActantType.Event;
