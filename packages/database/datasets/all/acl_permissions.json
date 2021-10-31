@@ -37,6 +37,11 @@
     "roles": ["*"]
   },
   {
+    "controller": "tree",
+    "method": "moveTerritory",
+    "roles": ["admin", "editor"]
+  },
+  {
     "controller": "users",
     "method": "signin",
     "roles": ["*"]
