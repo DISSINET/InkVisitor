@@ -192,6 +192,7 @@ class Territory extends Actant implements ITerritory {
   getClosestRight(rights: UserRight[]): UserRight | undefined {
     let closestRight: UserRight | undefined;
 
+    // search in parents or if ids are equal
     for (const right of rights) {
       // explicit right for this territory - use it and end
       if (right.territory === this.id) {
@@ -210,6 +211,23 @@ class Territory extends Actant implements ITerritory {
       }
     }
 
+    if (closestRight) {
+      return closestRight;
+    }
+
+    // if parent not found, search in childs
+    for (const right of rights) {
+      if (right.territory.indexOf(this.id + "-") === 0) {
+        // test if it is closer match
+        if (
+          closestRight === undefined ||
+          closestRight.territory.length > right.territory.length
+        ) {
+          closestRight = right;
+        }
+      }
+    }
+
     return closestRight;
   }
 
@@ -219,7 +237,12 @@ class Territory extends Actant implements ITerritory {
       return true;
     }
 
-    return !!this.getClosestRight(user.rights);
+    const result = !!this.getClosestRight(user.rights);
+    if (!result && this.id === "T0") {
+      return true;
+    }
+
+    return result;
   }
 
   canBeEditedByUser(user: User): boolean {
