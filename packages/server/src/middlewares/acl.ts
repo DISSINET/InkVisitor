@@ -3,7 +3,9 @@ import User from "@models/user";
 import { CustomError, PermissionDeniedError } from "@shared/types/errors";
 import { Response, Request, NextFunction, Router } from "express";
 
-export const permissionDeniedErr = new PermissionDeniedError("");
+export const permissionDeniedErr = new PermissionDeniedError(
+  "Endpoint not allowed"
+);
 
 interface RouterLayer {
   stack: RouterLayer[];

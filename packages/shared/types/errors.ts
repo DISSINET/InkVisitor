@@ -40,7 +40,10 @@ class BadCredentialsError extends CustomError {
  */
 class PermissionDeniedError extends CustomError {
   public static code = 403;
-  message = "Permission denied";
+
+  constructor(message: string) {
+    super(message);
+  }
 }
 
 /**
