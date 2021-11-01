@@ -24,7 +24,7 @@ import { IRequestSearch } from "types";
 
 type FilterActantsI = {
   label?: string;
-  class?: string;
+  class?: string | false;
 };
 
 type FilterUsersI = {
@@ -315,6 +315,9 @@ class Api {
     filter: FilterActantsI
   ): Promise<AxiosResponse<IResponseActant[]>> {
     try {
+      if (filter.class === false) {
+        delete filter.class;
+      }
       const response = await this.connection.post(`/actants/getMore`, filter);
       return response;
     } catch (err: any | AxiosError) {

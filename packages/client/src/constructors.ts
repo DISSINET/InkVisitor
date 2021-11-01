@@ -59,12 +59,18 @@ export const CProp = (): IStatementProp => ({
   },
 });
 
-export const CStatement = (territoryId: string, userRole: UserRole): IStatement => ({
+export const CStatement = (
+  territoryId: string,
+  userRole: UserRole
+): IStatement => ({
   id: uuidv4(),
   class: ActantType.Statement,
   label: "",
   detail: "",
-  status: userRole === UserRole['Admin'] ? ActantStatus["Approved"] : ActantStatus["Pending"],
+  status:
+    userRole === UserRole["Admin"]
+      ? ActantStatus["Approved"]
+      : ActantStatus["Pending"],
   language: ["eng"],
   notes: [],
   data: {
@@ -81,12 +87,18 @@ export const CStatement = (territoryId: string, userRole: UserRole): IStatement 
   },
 });
 
-export const CMetaStatement = (subjectId: string, userRole: UserRole): IStatement => ({
+export const CMetaStatement = (
+  subjectId: string,
+  userRole: UserRole
+): IStatement => ({
   id: uuidv4(),
   class: ActantType.Statement,
   label: "",
   detail: "",
-  status: userRole === UserRole['Admin'] ? ActantStatus["Approved"] : ActantStatus["Pending"],
+  status:
+    userRole === UserRole["Admin"]
+      ? ActantStatus["Approved"]
+      : ActantStatus["Pending"],
   language: ["eng"],
   notes: [],
   data: {
@@ -202,7 +214,10 @@ export const CTerritoryActant = (
   class: ActantType.Territory,
   label: label,
   detail: "",
-  status: userRole === UserRole['Admin'] ? ActantStatus["Approved"] : ActantStatus["Pending"],
+  status:
+    userRole === UserRole["Admin"]
+      ? ActantStatus["Approved"]
+      : ActantStatus["Pending"],
   language: ["eng"],
   notes: [],
   data: {
@@ -213,14 +228,18 @@ export const CTerritoryActant = (
 export const CActant = (
   category: CategoryActantType,
   label: string,
-  userRole: UserRole
+  userRole: UserRole,
+  detail?: string
 ): IActant => ({
   id: uuidv4(),
   class: category,
   label: label,
-  detail: "",
+  detail: detail ? detail : "",
   data: {},
-  status: userRole === UserRole['Admin'] ? ActantStatus["Approved"] : ActantStatus["Pending"],
+  status:
+    userRole === UserRole["Admin"]
+      ? ActantStatus["Approved"]
+      : ActantStatus["Pending"],
   language: ["eng"],
   notes: [],
 });
