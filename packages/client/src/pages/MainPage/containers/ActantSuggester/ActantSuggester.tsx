@@ -17,7 +17,9 @@ interface ActantSuggesterI {
   onSelected: Function;
   placeholder?: string;
   allowCreate?: boolean;
+  disableWildCard?: boolean;
   inputWidth?: number;
+  openDetailOnCreate?: boolean;
 }
 
 export const ActantSuggester: React.FC<ActantSuggesterI> = ({
@@ -26,7 +28,10 @@ export const ActantSuggester: React.FC<ActantSuggesterI> = ({
   placeholder = "",
   allowCreate,
   inputWidth,
+  disableWildCard = false,
+  openDetailOnCreate = false,
 }) => {
+  const wildCardChar = "*";
   const queryClient = useQueryClient();
   const [typed, setTyped] = useState<string>("");
   const debouncedTyped = useDebounce(typed, 100);
@@ -34,7 +39,7 @@ export const ActantSuggester: React.FC<ActantSuggesterI> = ({
   const [allCategories, setAllCategories] = useState<false | IOption[]>();
   //const [territoryActantIds, setTerritoryActantIds] = useState<string[]>([]);
 
-  const { territoryId } = useSearchParams();
+  const { territoryId, setActantId } = useSearchParams();
 
   // territory query
   const { status, data: territoryActants, error, isFetching } = useQuery(
@@ -58,7 +63,7 @@ export const ActantSuggester: React.FC<ActantSuggesterI> = ({
     async () => {
       const resSuggestions = await api.actantsGetMore({
         label: debouncedTyped,
-        class: selectedCategory,
+        class: selectedCategory === wildCardChar ? false : selectedCategory,
       });
       return resSuggestions.data.map((s: IActant) => {
         const entity = Entities[s.class];
@@ -116,15 +121,15 @@ export const ActantSuggester: React.FC<ActantSuggesterI> = ({
         });
       }
     });
+    if (categories.length > 1 && !disableWildCard) {
+      categories.unshift({ label: wildCardChar, value: wildCardChar });
+    }
     if (categories.length) {
       setAllCategories(categories);
       setSelectedCategory(categories[0].value);
     }
   }, [categoryIds]);
 
-  const handleTyped = (newType: string) => {
-    setTyped(newType);
-  };
   const handleCategoryChanged = (newCategory: string) => {
     setSelectedCategory(newCategory);
   };
@@ -138,6 +143,9 @@ export const ActantSuggester: React.FC<ActantSuggesterI> = ({
         if (variables.class === "T") {
           queryClient.invalidateQueries("tree");
         }
+        if (openDetailOnCreate) {
+          setActantId(variables.id);
+        }
       },
     }
   );
@@ -145,6 +153,7 @@ export const ActantSuggester: React.FC<ActantSuggesterI> = ({
   const handleCreate = async (newCreated: {
     label: string;
     category: ActantType;
+    detail: string;
   }) => {
     if (newCreated.category === ActantType.Territory) {
       const newActant = CTerritoryActant(
@@ -158,7 +167,8 @@ export const ActantSuggester: React.FC<ActantSuggesterI> = ({
       const newActant = CActant(
         newCreated.category as CategoryActantType,
         newCreated.label,
-        localStorage.getItem("userrole") as UserRole
+        localStorage.getItem("userrole") as UserRole,
+        newCreated.detail
       );
       actantsCreateMutation.mutate(newActant);
     }
@@ -192,7 +202,7 @@ export const ActantSuggester: React.FC<ActantSuggesterI> = ({
       }}
       //disabled?: boolean; // todo not implemented yet
       onType={(newType: string) => {
-        handleTyped(newType);
+        setTyped(newType);
       }}
       onChangeCategory={(newCategory: string) =>
         handleCategoryChanged(newCategory)
@@ -200,6 +210,7 @@ export const ActantSuggester: React.FC<ActantSuggesterI> = ({
       onCreate={(newCreated: {
         label: string;
         category: CategoryActantType;
+        detail: string;
       }) => {
         handleCreate(newCreated);
       }}

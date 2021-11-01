@@ -463,6 +463,7 @@ export const StatementEditorBox: React.FC = () => {
             />
           ) : (
             <ActantSuggester
+              openDetailOnCreate
               onSelected={(newSelectedId: string) => {
                 updateProp(prop.id, {
                   type: {
@@ -521,6 +522,7 @@ export const StatementEditorBox: React.FC = () => {
             />
           ) : (
             <ActantSuggester
+              openDetailOnCreate
               onSelected={(newSelectedId: string) => {
                 updateProp(prop.id, {
                   value: {
@@ -664,6 +666,7 @@ export const StatementEditorBox: React.FC = () => {
               </StyledEditorActantTableWrapper>
 
               <ActantSuggester
+                openDetailOnCreate
                 onSelected={(newSelectedId: string) => {
                   addAction(newSelectedId);
                 }}
@@ -690,6 +693,7 @@ export const StatementEditorBox: React.FC = () => {
               </StyledEditorActantTableWrapper>
 
               <ActantSuggester
+                openDetailOnCreate
                 onSelected={(newSelectedId: string) => {
                   addActant(newSelectedId);
                 }}
@@ -742,6 +746,7 @@ export const StatementEditorBox: React.FC = () => {
                             />
                           ) : (
                             <ActantSuggester
+                              openDetailOnCreate
                               onSelected={(newSelectedId: string) => {
                                 updateReference(reference.id, {
                                   resource: newSelectedId,
@@ -810,6 +815,7 @@ export const StatementEditorBox: React.FC = () => {
                 )}
               </StyledReferencesList>
               <ActantSuggester
+                openDetailOnCreate
                 onSelected={(newSelectedId: string) => {
                   addReference(newSelectedId);
                 }}
@@ -853,6 +859,7 @@ export const StatementEditorBox: React.FC = () => {
                 })}
               </StyledTagsList>
               <ActantSuggester
+                openDetailOnCreate
                 onSelected={(newSelectedId: string) => {
                   addTag(newSelectedId);
                 }}
