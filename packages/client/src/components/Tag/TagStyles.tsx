@@ -16,7 +16,8 @@ export const StyledTagWrapper = styled.div<StyledTagWrapper>`
   margin-right: ${({ theme, hasMarginRight }) =>
     hasMarginRight && theme.space[1]};
   cursor: move;
-  border-style: ${({ theme, ltype }) => "solid solid solid " + theme.borderStyle[ltype]};
+  border-style: ${({ theme, ltype }) =>
+    "solid solid solid " + theme.borderStyle[ltype]};
   color: ${({ theme }) => theme.color["black"]};
   font-size: ${({ theme }) => theme.fontSize["xxs"]};
   height: 2.25rem;
@@ -62,7 +63,7 @@ export const StyledLabel = styled.div<StyledLabel>`
 interface ButtonWrapper {
   status: string;
 }
-export const ButtonWrapper = styled.div`
+export const ButtonWrapper = styled.div<ButtonWrapper>`
   display: flex;
   button {
     border-width: 0;
