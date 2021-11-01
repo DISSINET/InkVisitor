@@ -18,7 +18,6 @@ import {
 import { useAppDispatch } from "redux/hooks";
 import { setDraggedTerritory } from "redux/features/territoryTree/draggedTerritorySlice";
 import { useSearchParams } from "hooks";
-import { TagTooltip } from "../TagTooltip";
 import { PopupPosition } from "reactjs-popup/dist/types";
 import { Tooltip } from "components";
 
@@ -130,7 +129,9 @@ export const Tag: React.FC<TagProps> = ({
       {category}
     </StyledEntityTag>
   );
-  const renderButton = () => <ButtonWrapper status={status} >{button}</ButtonWrapper>;
+  const renderButton = () => (
+    <ButtonWrapper status={status}>{button}</ButtonWrapper>
+  );
 
   const onDoubleClick = (e: React.MouseEvent) => {
     e.stopPropagation();
