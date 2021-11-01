@@ -49,6 +49,7 @@ import { StyledSubRow } from "./StatementEditorActionTable/StatementEditorAction
 import { ColumnInstance } from "react-table";
 import { useSearchParams } from "hooks";
 import { AttributeButtonGroup } from "../AttributeButtonGroup/AttributeButtonGroup";
+import { UserRoleMode } from "@shared/enums";
 
 const classesActants = ["A", "T", "R", "P", "G", "O", "C", "L", "V", "E"];
 const classesPropType = ["C"];
@@ -87,6 +88,16 @@ export const StatementEditorBox: React.FC = () => {
     },
     { enabled: !!statementId && api.isLoggedIn(), retry: 2 }
   );
+
+  const userCanEdit: boolean = useMemo(() => {
+    return (
+      !!statement &&
+      (statement.right === UserRoleMode.Admin ||
+        statement.right === UserRoleMode.Write)
+    );
+  }, [statement]);
+
+  console.log("user can edit", userCanEdit);
 
   useEffect(() => {
     if (
@@ -632,6 +643,7 @@ export const StatementEditorBox: React.FC = () => {
               <div>
                 <div>
                   <Input
+                    disabled={!userCanEdit}
                     type="textarea"
                     width="full"
                     placeholder="Insert statement text here"
@@ -665,14 +677,16 @@ export const StatementEditorBox: React.FC = () => {
                 />
               </StyledEditorActantTableWrapper>
 
-              <ActantSuggester
-                openDetailOnCreate
-                onSelected={(newSelectedId: string) => {
-                  addAction(newSelectedId);
-                }}
-                categoryIds={["A"]}
-                placeholder={"add new action"}
-              ></ActantSuggester>
+              {userCanEdit && (
+                <ActantSuggester
+                  openDetailOnCreate
+                  onSelected={(newSelectedId: string) => {
+                    addAction(newSelectedId);
+                  }}
+                  categoryIds={["A"]}
+                  placeholder={"add new action"}
+                ></ActantSuggester>
+              )}
             </StyledEditorSectionContent>
           </StyledEditorSection>
 
@@ -691,15 +705,16 @@ export const StatementEditorBox: React.FC = () => {
                   propsByOrigins={propsByOrigins}
                 />
               </StyledEditorActantTableWrapper>
-
-              <ActantSuggester
-                openDetailOnCreate
-                onSelected={(newSelectedId: string) => {
-                  addActant(newSelectedId);
-                }}
-                categoryIds={classesActants}
-                placeholder={"add new actant"}
-              ></ActantSuggester>
+              {userCanEdit && (
+                <ActantSuggester
+                  openDetailOnCreate
+                  onSelected={(newSelectedId: string) => {
+                    addActant(newSelectedId);
+                  }}
+                  categoryIds={classesActants}
+                  placeholder={"add new actant"}
+                ></ActantSuggester>
+              )}
             </StyledEditorSectionContent>
           </StyledEditorSection>
 
@@ -814,14 +829,16 @@ export const StatementEditorBox: React.FC = () => {
                   }
                 )}
               </StyledReferencesList>
-              <ActantSuggester
-                openDetailOnCreate
-                onSelected={(newSelectedId: string) => {
-                  addReference(newSelectedId);
-                }}
-                categoryIds={classesResources}
-                placeholder={"add new reference"}
-              ></ActantSuggester>
+              {userCanEdit && (
+                <ActantSuggester
+                  openDetailOnCreate
+                  onSelected={(newSelectedId: string) => {
+                    addReference(newSelectedId);
+                  }}
+                  categoryIds={classesResources}
+                  placeholder={"add new reference"}
+                ></ActantSuggester>
+              )}
             </StyledEditorSectionContent>
           </StyledEditorSection>
 
@@ -858,14 +875,16 @@ export const StatementEditorBox: React.FC = () => {
                   );
                 })}
               </StyledTagsList>
-              <ActantSuggester
-                openDetailOnCreate
-                onSelected={(newSelectedId: string) => {
-                  addTag(newSelectedId);
-                }}
-                categoryIds={classesTags}
-                placeholder={"add new tag"}
-              ></ActantSuggester>
+              {userCanEdit && (
+                <ActantSuggester
+                  openDetailOnCreate
+                  onSelected={(newSelectedId: string) => {
+                    addTag(newSelectedId);
+                  }}
+                  categoryIds={classesTags}
+                  placeholder={"add new tag"}
+                ></ActantSuggester>
+              )}
             </StyledEditorSectionContent>
           </StyledEditorSection>
 
