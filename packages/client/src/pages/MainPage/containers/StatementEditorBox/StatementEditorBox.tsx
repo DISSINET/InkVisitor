@@ -668,6 +668,7 @@ export const StatementEditorBox: React.FC = () => {
             <StyledEditorSectionContent>
               <StyledEditorActantTableWrapper>
                 <StatementEditorActionTable
+                  userCanEdit={userCanEdit}
                   statement={statement}
                   statementId={statementId}
                   updateActionsMutation={updateActionsRefreshListMutation}

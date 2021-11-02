@@ -23,6 +23,7 @@ interface FilteredActionObject {
 interface StatementEditorActionTable {
   statement: IResponseStatement;
   statementId: string;
+  userCanEdit?: boolean;
   handleRowClick?: Function;
   renderPropGroup: Function;
   updateActionsMutation: UseMutationResult<any, unknown, object, unknown>;
@@ -39,6 +40,7 @@ interface StatementEditorActionTable {
 export const StatementEditorActionTable: React.FC<StatementEditorActionTable> = ({
   statement,
   statementId,
+  userCanEdit = false,
   handleRowClick = () => {},
   renderPropGroup,
   updateActionsMutation,
@@ -100,30 +102,34 @@ export const StatementEditorActionTable: React.FC<StatementEditorActionTable> = 
             <ActantTag
               actant={action}
               button={
-                <Button
-                  key="d"
-                  tooltip="unlink action"
-                  icon={<FaUnlink />}
-                  inverted
-                  color="plain"
-                  onClick={() => {
-                    updateAction(sAction.id, {
-                      action: "",
-                    });
-                  }}
-                />
+                userCanEdit && (
+                  <Button
+                    key="d"
+                    tooltip="unlink action"
+                    icon={<FaUnlink />}
+                    inverted
+                    color="plain"
+                    onClick={() => {
+                      updateAction(sAction.id, {
+                        action: "",
+                      });
+                    }}
+                  />
+                )
               }
             />
           ) : (
-            <ActantSuggester
-              onSelected={(newSelectedId: string) => {
-                updateAction(sAction.id, {
-                  action: newSelectedId,
-                });
-              }}
-              categoryIds={["A"]}
-              placeholder={"add new action"}
-            />
+            userCanEdit && (
+              <ActantSuggester
+                onSelected={(newSelectedId: string) => {
+                  updateAction(sAction.id, {
+                    action: newSelectedId,
+                  });
+                }}
+                categoryIds={["A"]}
+                placeholder={"add new action"}
+              />
+            )
           );
         },
       },
@@ -158,18 +164,19 @@ export const StatementEditorActionTable: React.FC<StatementEditorActionTable> = 
       {
         Header: "",
         id: "remove",
-        Cell: ({ row }: Cell) => (
-          <Button
-            key="d"
-            icon={<FaTrashAlt />}
-            color="plain"
-            inverted={true}
-            tooltip="remove action row"
-            onClick={() => {
-              removeAction(row.values.data.sAction.id);
-            }}
-          />
-        ),
+        Cell: ({ row }: Cell) =>
+          userCanEdit && (
+            <Button
+              key="d"
+              icon={<FaTrashAlt />}
+              color="plain"
+              inverted={true}
+              tooltip="remove action row"
+              onClick={() => {
+                removeAction(row.values.data.sAction.id);
+              }}
+            />
+          ),
       },
       {
         Header: "",
@@ -180,16 +187,18 @@ export const StatementEditorActionTable: React.FC<StatementEditorActionTable> = 
           // const propOrigin = propsByOrigins[propOriginId];
           // const originActant = propOrigin?.actant;
           return (
-            <Button
-              key="a"
-              icon={<FaPlus />}
-              color="plain"
-              inverted={true}
-              tooltip="add new prop"
-              onClick={() => {
-                addProp(propOriginId);
-              }}
-            />
+            userCanEdit && (
+              <Button
+                key="a"
+                icon={<FaPlus />}
+                color="plain"
+                inverted={true}
+                tooltip="add new prop"
+                onClick={() => {
+                  addProp(propOriginId);
+                }}
+              />
+            )
           );
         },
       },
