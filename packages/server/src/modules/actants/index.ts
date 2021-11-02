@@ -40,6 +40,7 @@ export default Router()
         request.db,
         actantId as string
       );
+
       if (!actantData) {
         throw new ActantDoesNotExits(
           `actant ${actantId} was not found`,
@@ -220,6 +221,8 @@ export default Router()
           actantId
         );
       }
+
+      
       const actant = getActantType({ ...actantData });
 
       if (!actant.canBeViewedByUser(request.getUserOrFail())) {

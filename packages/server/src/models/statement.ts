@@ -274,11 +274,16 @@ class Statement extends Actant implements IStatement {
   constructor(data: UnknownObject) {
     super();
 
+    
     if (!data) {
       return;
     }
-
+    
     fillFlatObject(this, data);
+
+    fillArray(this.notes, String, data.notes);
+    fillArray(this.language, String, data.language);
+    
     this.data = new StatementData(data.data as UnknownObject);
   }
 

@@ -27,11 +27,11 @@ export function fillFlatObject<T>(
   }
   for (const key of Object.keys(source)) {
     const wantedType = typeof (ctx as Record<string, unknown>)[key];
+    
     if (wantedType === "object") {
       // only flat object's props
       continue;
     }
-
     const gotType = typeof source[key];
 
     if (
@@ -47,7 +47,7 @@ export function fillFlatObject<T>(
         `cannot parse key ${key}(wants ${wantedType}, got ${gotType})`
       );
     }
-
+    
     (ctx as Record<string, unknown>)[key] = source[key];
   }
 }
