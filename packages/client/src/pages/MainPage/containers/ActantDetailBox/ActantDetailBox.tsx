@@ -78,8 +78,6 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
     { enabled: !!actantId && api.isLoggedIn(), retry: 2 }
   );
 
-  console.log("actant rights", actant);
-
   const userCanAdmin: boolean = useMemo(() => {
     return !!actant && actant.right === UserRoleMode.Admin;
   }, [actant]);

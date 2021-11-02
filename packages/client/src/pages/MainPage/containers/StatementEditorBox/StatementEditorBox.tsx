@@ -97,8 +97,6 @@ export const StatementEditorBox: React.FC = () => {
     );
   }, [statement]);
 
-  console.log("user can edit", userCanEdit);
-
   useEffect(() => {
     if (
       errorStatement &&
