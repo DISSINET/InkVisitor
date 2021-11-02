@@ -70,7 +70,7 @@ export const StatementListTable: React.FC<StatementListTable> = ({
                   {column.render("Header")}
                 </StyledTh>
               ) : (
-                ""
+                <th key={key}></th>
               )
             )}
           </tr>
