@@ -8,6 +8,7 @@ import { IActant, IAction, ILabel, IStatementActant } from "@shared/types";
 import api from "api";
 import { StyledSubRow } from "./StatementListRowStyles";
 import { StyledTr, StyledTd } from "./StatementListRowStyles";
+import { StyledSubRowTd } from "pages/MainPage/containers/StatementEditorBox/StatementEditorActionTable/StatementEditorActionTableRow/StatementEditorActionTableRowStyles";
 
 interface StatementListRowExpanded {
   row: Row;
@@ -19,13 +20,23 @@ export const StatementListRowExpanded: React.FC<StatementListRowExpanded> = ({
 }) => {
   const [actants, setActants] = useState<IStatementActant[]>([]);
 
-  const { actantId, setActantId, setStatementId, setTerritoryId } =
-    useSearchParams();
+  const {
+    actantId,
+    setActantId,
+    setStatementId,
+    setTerritoryId,
+  } = useSearchParams();
 
   const renderRowSubComponent = React.useCallback(
     ({ row }) => {
-      const { actions, actants, text, note, references, tags } =
-        row.values.data;
+      const {
+        actions,
+        actants,
+        text,
+        note,
+        references,
+        tags,
+      } = row.values.data;
       return (
         <>
           <StyledSubRow id={`statement${row.values.id}`}>
@@ -39,9 +50,9 @@ export const StatementListRowExpanded: React.FC<StatementListRowExpanded> = ({
                 ].includes(cell.column.id)
               ) {
                 return (
-                  <StyledTd {...cell.getCellProps()}>
+                  <StyledSubRowTd {...cell.getCellProps()}>
                     {cell.render("Cell")}
-                  </StyledTd>
+                  </StyledSubRowTd>
                 );
               }
             })}
