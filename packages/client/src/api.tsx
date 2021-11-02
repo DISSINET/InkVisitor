@@ -389,6 +389,7 @@ class Api {
   async detailGet(actantId: string): Promise<AxiosResponse<IResponseDetail>> {
     try {
       const response = await this.connection.get(`/actants/detail/${actantId}`);
+      console.log(response);
       return response;
     } catch (err: any | AxiosError) {
       throw { ...err.response.data };

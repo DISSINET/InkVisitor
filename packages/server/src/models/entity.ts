@@ -1,4 +1,4 @@
-import { fillFlatObject, UnknownObject, IModel } from "./common";
+import { fillFlatObject, UnknownObject, IModel, fillArray } from "./common";
 import {
   ActantType,
   EntityActantType,
@@ -40,8 +40,9 @@ class Entity extends Actant implements IEntity {
     if (!data) {
       return;
     }
-
     fillFlatObject(this, data);
+    fillArray(this.notes, String, data.notes);
+    fillArray(this.language, String, data.language);
     this.data = new EntityData(data.data as UnknownObject);
   }
 
