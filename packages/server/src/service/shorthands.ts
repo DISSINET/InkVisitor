@@ -80,6 +80,7 @@ export async function findActantById<T extends IActant>(
     })
     .limit(1)
     .run(db.connection);
+
   return data.length == 0 ? null : data[0];
 }
 
