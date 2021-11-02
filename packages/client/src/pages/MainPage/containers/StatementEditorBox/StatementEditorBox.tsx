@@ -747,35 +747,40 @@ export const StatementEditorBox: React.FC = () => {
                               actant={referenceActant}
                               short={false}
                               button={
-                                <Button
-                                  key="d"
-                                  tooltip="unlink actant"
-                                  icon={<FaUnlink />}
-                                  inverted={true}
-                                  color="plain"
-                                  onClick={() => {
-                                    updateReference(reference.id, {
-                                      resource: "",
-                                    });
-                                  }}
-                                />
+                                userCanEdit && (
+                                  <Button
+                                    key="d"
+                                    tooltip="unlink actant"
+                                    icon={<FaUnlink />}
+                                    inverted={true}
+                                    color="plain"
+                                    onClick={() => {
+                                      updateReference(reference.id, {
+                                        resource: "",
+                                      });
+                                    }}
+                                  />
+                                )
                               }
                             />
                           ) : (
-                            <ActantSuggester
-                              openDetailOnCreate
-                              onSelected={(newSelectedId: string) => {
-                                updateReference(reference.id, {
-                                  resource: newSelectedId,
-                                });
-                              }}
-                              categoryIds={classesResources}
-                            ></ActantSuggester>
+                            userCanEdit && (
+                              <ActantSuggester
+                                openDetailOnCreate
+                                onSelected={(newSelectedId: string) => {
+                                  updateReference(reference.id, {
+                                    resource: newSelectedId,
+                                  });
+                                }}
+                                categoryIds={classesResources}
+                              ></ActantSuggester>
+                            )
                           )}
                         </StyledReferencesListColumn>
                         <StyledReferencesListColumn>
                           <Input
                             type="text"
+                            disabled={!userCanEdit}
                             value={reference.part}
                             onChangeFn={(newPart: string) => {
                               updateReference(reference.id, {
@@ -786,6 +791,7 @@ export const StatementEditorBox: React.FC = () => {
                         </StyledReferencesListColumn>
                         <StyledReferencesListColumn>
                           <AttributeButtonGroup
+                            disabled={!userCanEdit}
                             options={[
                               {
                                 longValue: "primary",
@@ -815,16 +821,18 @@ export const StatementEditorBox: React.FC = () => {
                           />
                         </StyledReferencesListColumn>
                         <StyledReferencesListColumn>
-                          <Button
-                            key="delete"
-                            tooltip="remove reference row"
-                            inverted={true}
-                            icon={<FaTrashAlt />}
-                            color="plain"
-                            onClick={() => {
-                              removeReference(reference.id);
-                            }}
-                          />
+                          {userCanEdit && (
+                            <Button
+                              key="delete"
+                              tooltip="remove reference row"
+                              inverted={true}
+                              icon={<FaTrashAlt />}
+                              color="plain"
+                              onClick={() => {
+                                removeReference(reference.id);
+                              }}
+                            />
+                          )}
                         </StyledReferencesListColumn>
                       </React.Fragment>
                     );

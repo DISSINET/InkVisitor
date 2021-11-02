@@ -79,12 +79,14 @@ export const StatementEditorActionTable: React.FC<StatementEditorActionTable> = 
   };
 
   const updateActionOrder = () => {
-    const actions: IStatementAction[] = filteredActions.map(
-      (filteredAction) => filteredAction.data.sAction
-    );
-    updateActionsMutation.mutate({
-      actions: actions,
-    });
+    if (userCanEdit) {
+      const actions: IStatementAction[] = filteredActions.map(
+        (filteredAction) => filteredAction.data.sAction
+      );
+      updateActionsMutation.mutate({
+        actions: actions,
+      });
+    }
   };
 
   const columns: Column<{}>[] = useMemo(() => {
@@ -257,6 +259,7 @@ export const StatementEditorActionTable: React.FC<StatementEditorActionTable> = 
               row={row}
               statement={statement}
               moveRow={moveRow}
+              userCanEdit={userCanEdit}
               updateOrderFn={updateActionOrder}
               visibleColumns={visibleColumns}
               {...row.getRowProps()}

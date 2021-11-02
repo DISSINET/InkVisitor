@@ -87,10 +87,12 @@ export const StatementEditorActantTable: React.FC<StatementEditorActantTable> = 
   };
 
   const updateActantsOrder = () => {
-    const actants: IStatementActant[] = filteredActants.map(
-      (filteredActant) => filteredActant.data.sActant
-    );
-    updateActantsMutation.mutate({ actants });
+    if (userCanEdit) {
+      const actants: IStatementActant[] = filteredActants.map(
+        (filteredActant) => filteredActant.data.sActant
+      );
+      updateActantsMutation.mutate({ actants });
+    }
   };
 
   const columns: Column<{}>[] = useMemo(() => {
@@ -335,6 +337,7 @@ export const StatementEditorActantTable: React.FC<StatementEditorActantTable> = 
               row={row}
               statement={statement}
               moveRow={moveRow}
+              userCanEdit={userCanEdit}
               updateOrderFn={updateActantsOrder}
               visibleColumns={visibleColumns}
               {...row.getRowProps()}
