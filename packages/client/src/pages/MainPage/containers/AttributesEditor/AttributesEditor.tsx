@@ -78,6 +78,7 @@ interface StatementEditorAttributes {
   handleUpdate: (data: AttributeData) => void;
   loading?: boolean;
   disabledData?: AttributeName[];
+  userCanEdit?: boolean;
 }
 
 export const AttributesEditor: React.FC<StatementEditorAttributes> = ({
@@ -87,6 +88,7 @@ export const AttributesEditor: React.FC<StatementEditorAttributes> = ({
   handleUpdate,
   loading,
   disabledData = [],
+  userCanEdit = false,
 }) => {
   const [modalData, setModalData] = useState<AttributeData>(data);
   const [modalOpen, setModalOpen] = useState<boolean>(false);
@@ -200,7 +202,7 @@ export const AttributesEditor: React.FC<StatementEditorAttributes> = ({
           <StyledAttributeModalContent>
             {modalData.elvl && (
               <AttributeRow
-                disabled={disabledData.includes("elvl")}
+                disabled={!userCanEdit || disabledData.includes("elvl")}
                 value={modalData.elvl}
                 multi={false}
                 items={elvlDict}
@@ -213,7 +215,7 @@ export const AttributesEditor: React.FC<StatementEditorAttributes> = ({
             )}
             {modalData.logic && (
               <AttributeRow
-                disabled={disabledData.includes("logic")}
+                disabled={!userCanEdit || disabledData.includes("logic")}
                 value={modalData.logic}
                 multi={false}
                 items={logicDict}
@@ -226,7 +228,7 @@ export const AttributesEditor: React.FC<StatementEditorAttributes> = ({
             )}
             {modalData.certainty && (
               <AttributeRow
-                disabled={disabledData.includes("certainty")}
+                disabled={!userCanEdit || disabledData.includes("certainty")}
                 value={modalData.certainty}
                 multi={false}
                 items={certaintyDict}
@@ -239,7 +241,7 @@ export const AttributesEditor: React.FC<StatementEditorAttributes> = ({
             )}
             {modalData.mood && (
               <AttributeRow
-                disabled={disabledData.includes("mood")}
+                disabled={!userCanEdit || disabledData.includes("mood")}
                 value={modalData.mood}
                 multi={true}
                 items={moodDict}
@@ -252,7 +254,7 @@ export const AttributesEditor: React.FC<StatementEditorAttributes> = ({
             )}
             {modalData.moodvariant && (
               <AttributeRow
-                disabled={disabledData.includes("moodvariant")}
+                disabled={!userCanEdit || disabledData.includes("moodvariant")}
                 value={modalData.moodvariant}
                 multi={false}
                 items={moodVariantsDict}
@@ -265,7 +267,7 @@ export const AttributesEditor: React.FC<StatementEditorAttributes> = ({
             )}
             {modalData.virtuality && (
               <AttributeRow
-                disabled={disabledData.includes("virtuality")}
+                disabled={!userCanEdit || disabledData.includes("virtuality")}
                 value={modalData.virtuality}
                 multi={false}
                 items={virtualityDict}
@@ -278,7 +280,7 @@ export const AttributesEditor: React.FC<StatementEditorAttributes> = ({
             )}
             {modalData.partitivity && (
               <AttributeRow
-                disabled={disabledData.includes("partitivity")}
+                disabled={!userCanEdit || disabledData.includes("partitivity")}
                 value={modalData.partitivity}
                 multi={false}
                 items={partitivityDict}
@@ -291,7 +293,7 @@ export const AttributesEditor: React.FC<StatementEditorAttributes> = ({
             )}
             {modalData.operator && (
               <AttributeRow
-                disabled={disabledData.includes("operator")}
+                disabled={!userCanEdit || disabledData.includes("operator")}
                 value={modalData.operator}
                 multi={false}
                 items={operatorDict}
@@ -304,7 +306,7 @@ export const AttributesEditor: React.FC<StatementEditorAttributes> = ({
             )}
             {modalData.operator && (
               <CheckboxRow
-                disabled={disabledData.includes("bundleStart")}
+                disabled={!userCanEdit || disabledData.includes("bundleStart")}
                 value={modalData.bundleStart ? modalData.bundleStart : false}
                 label="Bundle start"
                 attributeName="bundleStart"
@@ -315,7 +317,7 @@ export const AttributesEditor: React.FC<StatementEditorAttributes> = ({
             )}
             {modalData.operator && (
               <CheckboxRow
-                disabled={disabledData.includes("bundleEnd")}
+                disabled={!userCanEdit || disabledData.includes("bundleEnd")}
                 value={modalData.bundleEnd ? modalData.bundleEnd : false}
                 label="Bundle end"
                 attributeName="bundleEnd"
@@ -342,7 +344,7 @@ export const AttributesEditor: React.FC<StatementEditorAttributes> = ({
               key="submit"
               label="Apply changes"
               color="primary"
-              disabled={!somethingWasUpdated}
+              disabled={!userCanEdit || !somethingWasUpdated}
               onClick={() => {
                 handleAcceptClick();
               }}

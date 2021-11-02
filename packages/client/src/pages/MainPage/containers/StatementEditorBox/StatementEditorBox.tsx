@@ -49,6 +49,7 @@ import { StyledSubRow } from "./StatementEditorActionTable/StatementEditorAction
 import { ColumnInstance } from "react-table";
 import { useSearchParams } from "hooks";
 import { AttributeButtonGroup } from "../AttributeButtonGroup/AttributeButtonGroup";
+import { UserRoleMode } from "@shared/enums";
 
 const classesActants = ["A", "T", "R", "P", "G", "O", "C", "L", "V", "E"];
 const classesPropType = ["C"];
@@ -87,6 +88,14 @@ export const StatementEditorBox: React.FC = () => {
     },
     { enabled: !!statementId && api.isLoggedIn(), retry: 2 }
   );
+
+  const userCanEdit: boolean = useMemo(() => {
+    return (
+      !!statement &&
+      (statement.right === UserRoleMode.Admin ||
+        statement.right === UserRoleMode.Write)
+    );
+  }, [statement]);
 
   useEffect(() => {
     if (
@@ -632,6 +641,7 @@ export const StatementEditorBox: React.FC = () => {
               <div>
                 <div>
                   <Input
+                    disabled={!userCanEdit}
                     type="textarea"
                     width="full"
                     placeholder="Insert statement text here"
@@ -656,6 +666,7 @@ export const StatementEditorBox: React.FC = () => {
             <StyledEditorSectionContent>
               <StyledEditorActantTableWrapper>
                 <StatementEditorActionTable
+                  userCanEdit={userCanEdit}
                   statement={statement}
                   statementId={statementId}
                   updateActionsMutation={updateActionsRefreshListMutation}
@@ -665,14 +676,16 @@ export const StatementEditorBox: React.FC = () => {
                 />
               </StyledEditorActantTableWrapper>
 
-              <ActantSuggester
-                openDetailOnCreate
-                onSelected={(newSelectedId: string) => {
-                  addAction(newSelectedId);
-                }}
-                categoryIds={["A"]}
-                placeholder={"add new action"}
-              ></ActantSuggester>
+              {userCanEdit && (
+                <ActantSuggester
+                  openDetailOnCreate
+                  onSelected={(newSelectedId: string) => {
+                    addAction(newSelectedId);
+                  }}
+                  categoryIds={["A"]}
+                  placeholder={"add new action"}
+                ></ActantSuggester>
+              )}
             </StyledEditorSectionContent>
           </StyledEditorSection>
 
@@ -683,6 +696,7 @@ export const StatementEditorBox: React.FC = () => {
               <StyledEditorActantTableWrapper>
                 <StatementEditorActantTable
                   statement={statement}
+                  userCanEdit={userCanEdit}
                   statementId={statementId}
                   classEntitiesActant={classesActants}
                   updateActantsMutation={updateActantsRefreshListMutation}
@@ -691,15 +705,16 @@ export const StatementEditorBox: React.FC = () => {
                   propsByOrigins={propsByOrigins}
                 />
               </StyledEditorActantTableWrapper>
-
-              <ActantSuggester
-                openDetailOnCreate
-                onSelected={(newSelectedId: string) => {
-                  addActant(newSelectedId);
-                }}
-                categoryIds={classesActants}
-                placeholder={"add new actant"}
-              ></ActantSuggester>
+              {userCanEdit && (
+                <ActantSuggester
+                  openDetailOnCreate
+                  onSelected={(newSelectedId: string) => {
+                    addActant(newSelectedId);
+                  }}
+                  categoryIds={classesActants}
+                  placeholder={"add new actant"}
+                ></ActantSuggester>
+              )}
             </StyledEditorSectionContent>
           </StyledEditorSection>
 
@@ -730,35 +745,40 @@ export const StatementEditorBox: React.FC = () => {
                               actant={referenceActant}
                               short={false}
                               button={
-                                <Button
-                                  key="d"
-                                  tooltip="unlink actant"
-                                  icon={<FaUnlink />}
-                                  inverted={true}
-                                  color="plain"
-                                  onClick={() => {
-                                    updateReference(reference.id, {
-                                      resource: "",
-                                    });
-                                  }}
-                                />
+                                userCanEdit && (
+                                  <Button
+                                    key="d"
+                                    tooltip="unlink actant"
+                                    icon={<FaUnlink />}
+                                    inverted={true}
+                                    color="plain"
+                                    onClick={() => {
+                                      updateReference(reference.id, {
+                                        resource: "",
+                                      });
+                                    }}
+                                  />
+                                )
                               }
                             />
                           ) : (
-                            <ActantSuggester
-                              openDetailOnCreate
-                              onSelected={(newSelectedId: string) => {
-                                updateReference(reference.id, {
-                                  resource: newSelectedId,
-                                });
-                              }}
-                              categoryIds={classesResources}
-                            ></ActantSuggester>
+                            userCanEdit && (
+                              <ActantSuggester
+                                openDetailOnCreate
+                                onSelected={(newSelectedId: string) => {
+                                  updateReference(reference.id, {
+                                    resource: newSelectedId,
+                                  });
+                                }}
+                                categoryIds={classesResources}
+                              ></ActantSuggester>
+                            )
                           )}
                         </StyledReferencesListColumn>
                         <StyledReferencesListColumn>
                           <Input
                             type="text"
+                            disabled={!userCanEdit}
                             value={reference.part}
                             onChangeFn={(newPart: string) => {
                               updateReference(reference.id, {
@@ -769,6 +789,7 @@ export const StatementEditorBox: React.FC = () => {
                         </StyledReferencesListColumn>
                         <StyledReferencesListColumn>
                           <AttributeButtonGroup
+                            disabled={!userCanEdit}
                             options={[
                               {
                                 longValue: "primary",
@@ -798,30 +819,34 @@ export const StatementEditorBox: React.FC = () => {
                           />
                         </StyledReferencesListColumn>
                         <StyledReferencesListColumn>
-                          <Button
-                            key="delete"
-                            tooltip="remove reference row"
-                            inverted={true}
-                            icon={<FaTrashAlt />}
-                            color="plain"
-                            onClick={() => {
-                              removeReference(reference.id);
-                            }}
-                          />
+                          {userCanEdit && (
+                            <Button
+                              key="delete"
+                              tooltip="remove reference row"
+                              inverted={true}
+                              icon={<FaTrashAlt />}
+                              color="plain"
+                              onClick={() => {
+                                removeReference(reference.id);
+                              }}
+                            />
+                          )}
                         </StyledReferencesListColumn>
                       </React.Fragment>
                     );
                   }
                 )}
               </StyledReferencesList>
-              <ActantSuggester
-                openDetailOnCreate
-                onSelected={(newSelectedId: string) => {
-                  addReference(newSelectedId);
-                }}
-                categoryIds={classesResources}
-                placeholder={"add new reference"}
-              ></ActantSuggester>
+              {userCanEdit && (
+                <ActantSuggester
+                  openDetailOnCreate
+                  onSelected={(newSelectedId: string) => {
+                    addReference(newSelectedId);
+                  }}
+                  categoryIds={classesResources}
+                  placeholder={"add new reference"}
+                ></ActantSuggester>
+              )}
             </StyledEditorSectionContent>
           </StyledEditorSection>
 
@@ -858,14 +883,16 @@ export const StatementEditorBox: React.FC = () => {
                   );
                 })}
               </StyledTagsList>
-              <ActantSuggester
-                openDetailOnCreate
-                onSelected={(newSelectedId: string) => {
-                  addTag(newSelectedId);
-                }}
-                categoryIds={classesTags}
-                placeholder={"add new tag"}
-              ></ActantSuggester>
+              {userCanEdit && (
+                <ActantSuggester
+                  openDetailOnCreate
+                  onSelected={(newSelectedId: string) => {
+                    addTag(newSelectedId);
+                  }}
+                  categoryIds={classesTags}
+                  placeholder={"add new tag"}
+                ></ActantSuggester>
+              )}
             </StyledEditorSectionContent>
           </StyledEditorSection>
 
@@ -874,6 +901,7 @@ export const StatementEditorBox: React.FC = () => {
             <StyledEditorSectionHeader>Notes</StyledEditorSectionHeader>
             <StyledEditorSectionContent>
               <MultiInput
+                disabled={!userCanEdit}
                 values={statement.notes}
                 onChange={(newValues: string[]) => {
                   updateActantMutation.mutate({ notes: newValues });

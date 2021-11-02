@@ -18,6 +18,7 @@ interface StatementEditorActantTableRow {
   row: any;
   index: number;
   moveRow: any;
+  userCanEdit?: boolean;
   updateOrderFn: () => void;
   handleClick: Function;
   renderPropGroup: Function;
@@ -30,6 +31,7 @@ export const StatementEditorActantTableRow: React.FC<StatementEditorActantTableR
   index,
   moveRow,
   statement,
+  userCanEdit = false,
   updateOrderFn,
   handleClick = () => {},
   renderPropGroup,
@@ -93,9 +95,11 @@ export const StatementEditorActantTableRow: React.FC<StatementEditorActantTableR
           handleClick(row.values.id);
         }}
       >
-        <td ref={dragRef} style={{ cursor: "move" }}>
-          <FaGripVertical />
-        </td>
+        {userCanEdit && (
+          <td ref={dragRef} style={{ cursor: "move" }}>
+            <FaGripVertical />
+          </td>
+        )}
         {row.cells.map((cell: Cell) => {
           return (
             <StyledTd {...cell.getCellProps()}>{cell.render("Cell")}</StyledTd>

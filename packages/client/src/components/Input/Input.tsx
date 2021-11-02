@@ -28,6 +28,7 @@ interface InputProps {
   changeOnType?: boolean;
   password?: boolean;
   autoFocus?: boolean;
+  disabled?: boolean;
 }
 
 export const Input: React.FC<InputProps> = ({
@@ -46,6 +47,7 @@ export const Input: React.FC<InputProps> = ({
   placeholder,
   password = false,
   autoFocus = false,
+  disabled = false,
   onFocus = () => {},
   onBlur = () => {},
 }) => {
@@ -59,6 +61,7 @@ export const Input: React.FC<InputProps> = ({
       {label && <Label className="label"> {label}</Label>}
       {type === "text" && (
         <StyledInput
+          disabled={disabled}
           type={password ? "password" : "text"}
           width={width}
           autoFocus={autoFocus}
@@ -89,6 +92,7 @@ export const Input: React.FC<InputProps> = ({
       )}
       {type === "textarea" && (
         <StyledTextArea
+          disabled={disabled}
           className="value"
           placeholder={placeholder}
           value={displayValue}
@@ -122,6 +126,7 @@ export const Input: React.FC<InputProps> = ({
         <>
           {options.length > 2 ? (
             <StyledSelect
+              disabled={disabled}
               className="value"
               value={value}
               width={width}
