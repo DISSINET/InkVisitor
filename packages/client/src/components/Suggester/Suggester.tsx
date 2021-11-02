@@ -32,13 +32,14 @@ import {
 import { SuggesterKeyPress } from "./SuggesterKeyPress";
 import { toast } from "react-toastify";
 import { SuggesterModal } from "./SuggesterModal";
+import { ActantStatus } from "@shared/enums";
 
 export interface SuggestionI {
   id: string;
   label: string;
   detail: string;
   ltype: string;
-  status: string;
+  status: ActantStatus;
   category: string;
   color: string;
   icons?: React.ReactNode[];
@@ -207,7 +208,11 @@ export const Suggester: React.FC<SuggesterProps> = ({
           >
             <StyledRelativePosition>
               {suggestions
-                .filter((s, si) => si < MAXSUGGESTIONDISPLAYED)
+                .filter(
+                  (s, si) =>
+                    s.status !== ActantStatus.Discouraged &&
+                    si < MAXSUGGESTIONDISPLAYED
+                )
                 .map((suggestion, si) => (
                   <React.Fragment key={si}>
                     <StyledSuggestionLineActions isSelected={selected === si}>

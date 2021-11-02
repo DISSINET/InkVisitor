@@ -11,6 +11,7 @@ import {
 } from "components";
 import { IOption } from "@shared/types";
 import { StyledForm } from "./SuggesterStyles";
+import useKeypress from "hooks/useKeyPress";
 
 interface SuggesterModal {
   show?: boolean;
@@ -28,7 +29,9 @@ export const SuggesterModal: React.FC<SuggesterModal> = ({
   onCreate,
   closeModal,
 }) => {
-  const [selectedCategory, setSelectedCategory] = useState<string>(category);
+  const [selectedCategory, setSelectedCategory] = useState<string>(
+    categories[0].label
+  );
   const [label, setLabel] = useState(typed);
   const [detail, setDetail] = useState("");
 
@@ -39,6 +42,9 @@ export const SuggesterModal: React.FC<SuggesterModal> = ({
       detail: detail,
     });
   };
+
+  // useKeypress("Enter", handleCreateActant, [label, detail]);
+  // useKeypress("Escape", closeModal());
 
   return (
     <Modal showModal={show} width="thin">
