@@ -14,6 +14,7 @@ import { CStatement } from "constructors";
 import { Button, ButtonGroup } from "components";
 import { useAppSelector } from "redux/hooks";
 import { useSearchParams } from "hooks";
+import { UserRole } from "@shared/enums";
 
 interface StatementListHeader {
   data: {
@@ -40,7 +41,10 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
   );
 
   const handleCreateStatement = () => {
-    const newStatement: IStatement = CStatement(territoryId);
+    const newStatement: IStatement = CStatement(
+      territoryId,
+      localStorage.getItem("userrole") as UserRole
+    );
     const { statements } = data;
     newStatement.data.territory.order = statements.length
       ? statements[statements.length - 1].data.territory.order + 1

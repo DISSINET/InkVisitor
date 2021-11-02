@@ -34,6 +34,7 @@ import { CStatement, DStatement } from "constructors";
 import { useSearchParams } from "hooks";
 import { StatementListContextMenu } from "./StatementListContextMenu/StatementListContextMenu";
 import { BsArrowUp, BsArrowDown } from "react-icons/bs";
+import { UserRole } from "@shared/enums";
 
 const initialData: {
   statements: IStatement[];
@@ -48,8 +49,12 @@ const initialData: {
 export const StatementListBox: React.FC = () => {
   const queryClient = useQueryClient();
 
-  const { territoryId, setTerritoryId, statementId, setStatementId } =
-    useSearchParams();
+  const {
+    territoryId,
+    setTerritoryId,
+    statementId,
+    setStatementId,
+  } = useSearchParams();
 
   const [showSubmit, setShowSubmit] = useState(false);
   const [statementToDelete, setStatementToDelete] = useState<IStatement>();
@@ -110,8 +115,13 @@ export const StatementListBox: React.FC = () => {
 
   const duplicateStatementMutation = useMutation(
     async (statementToDuplicate: IResponseStatement) => {
-      const { actions, audits, usedIn, actants, ...newStatementObject } =
-        statementToDuplicate;
+      const {
+        actions,
+        audits,
+        usedIn,
+        actants,
+        ...newStatementObject
+      } = statementToDuplicate;
 
       const duplicatedStatement = DStatement(newStatementObject as IStatement);
       await api.actantsCreate(duplicatedStatement);
@@ -169,7 +179,10 @@ export const StatementListBox: React.FC = () => {
             statements[index].data.territory.order) /
           2;
 
-    const newStatement: IStatement = CStatement(territoryId);
+    const newStatement: IStatement = CStatement(
+      territoryId,
+      localStorage.getItem("userrole") as UserRole
+    );
     newStatement.data.territory.order = newOrder;
 
     actantsCreateMutation.mutate(newStatement);
@@ -234,7 +247,7 @@ export const StatementListBox: React.FC = () => {
   const renderListActantLong = (actantObject: IActant, key: number) => {
     return (
       actantObject && (
-        <div style={{ marginTop: "4px" }}>
+        <div style={{ marginTop: "4px" }} key={key}>
           <ActantTag
             key={key}
             actant={actantObject}

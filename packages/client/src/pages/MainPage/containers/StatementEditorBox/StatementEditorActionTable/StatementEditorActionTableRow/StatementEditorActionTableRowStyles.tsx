@@ -24,6 +24,7 @@ export const StyledTd = styled.td`
 `;
 
 export const StyledSubRow = styled.div`
+  display: table-row;
   width: 100%;
   padding: ${({ theme }) => theme.space[2]};
   border-left: 1px dashed;
@@ -32,3 +33,11 @@ export const StyledSubRow = styled.div`
   margin-bottom: ${({ theme }) => `${theme.space[2]}`};
 `;
 
+export const StyledSubRowTd = styled.div`
+  display: table-cell;
+  padding-top: ${({ theme }) => `${theme.space[1]}`};
+  padding-right: ${({ theme }) => `${theme.space[2]}`};
+  padding-bottom: ${({ theme }) => `${theme.space[1]}`};
+  padding-left: 0;
+  font-size: ${({ theme }) => theme.fontSize["sm"]};
+`;
