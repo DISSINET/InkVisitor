@@ -8,11 +8,13 @@ interface MultiInput {
   values: string[];
   onChange: Function;
   width?: number | "full";
+  disabled?: boolean;
 }
 export const MultiInput: React.FC<MultiInput> = ({
   values,
   onChange,
   width,
+  disabled = true,
 }) => {
   const [displayValues, setDisplayValues] = useState(values);
   useEffect(() => {
@@ -52,6 +54,7 @@ export const MultiInput: React.FC<MultiInput> = ({
           <StyledRow key={key}>
             <Input
               key={key}
+              disabled={disabled}
               type="textarea"
               onChangeFn={(newValue: string) => {
                 handleChange(key, newValue);
@@ -60,20 +63,24 @@ export const MultiInput: React.FC<MultiInput> = ({
               value={value}
             />
             <div style={{ display: "flex" }}>
-              <Button
-                color="danger"
-                icon={<FaTrashAlt />}
-                onClick={() => handleDelete(key)}
-              />
+              {!disabled && (
+                <Button
+                  color="danger"
+                  icon={<FaTrashAlt />}
+                  onClick={() => handleDelete(key)}
+                />
+              )}
             </div>
           </StyledRow>
         );
       })}
-      <Button
-        icon={<FaPlus />}
-        label={"new note"}
-        onClick={() => handleAdd()}
-      />
+      {!disabled && (
+        <Button
+          icon={<FaPlus />}
+          label={"new note"}
+          onClick={() => handleAdd()}
+        />
+      )}
     </>
   );
 };

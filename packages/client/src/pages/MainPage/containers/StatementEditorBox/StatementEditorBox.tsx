@@ -903,6 +903,7 @@ export const StatementEditorBox: React.FC = () => {
             <StyledEditorSectionHeader>Notes</StyledEditorSectionHeader>
             <StyledEditorSectionContent>
               <MultiInput
+                disabled={!userCanEdit}
                 values={statement.notes}
                 onChange={(newValues: string[]) => {
                   updateActantMutation.mutate({ notes: newValues });
