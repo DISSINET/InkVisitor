@@ -247,7 +247,7 @@ export const StatementListBox: React.FC = () => {
   const renderListActantLong = (actantObject: IActant, key: number) => {
     return (
       actantObject && (
-        <div style={{ marginTop: "4px" }}>
+        <div style={{ marginTop: "4px" }} key={key}>
           <ActantTag
             key={key}
             actant={actantObject}
