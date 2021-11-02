@@ -29,6 +29,7 @@ interface FilteredActantObject {
 interface StatementEditorActantTable {
   statement: IResponseStatement;
   statementId: string;
+  userCanEdit?: boolean;
   handleRowClick?: Function;
   renderPropGroup: Function;
   classEntitiesActant: string[];
@@ -46,6 +47,7 @@ interface StatementEditorActantTable {
 export const StatementEditorActantTable: React.FC<StatementEditorActantTable> = ({
   statement,
   statementId,
+  userCanEdit = false,
   handleRowClick = () => {},
   classEntitiesActant,
   renderPropGroup,
@@ -85,10 +87,12 @@ export const StatementEditorActantTable: React.FC<StatementEditorActantTable> = 
   };
 
   const updateActantsOrder = () => {
-    const actants: IStatementActant[] = filteredActants.map(
-      (filteredActant) => filteredActant.data.sActant
-    );
-    updateActantsMutation.mutate({ actants });
+    if (userCanEdit) {
+      const actants: IStatementActant[] = filteredActants.map(
+        (filteredActant) => filteredActant.data.sActant
+      );
+      updateActantsMutation.mutate({ actants });
+    }
   };
 
   const columns: Column<{}>[] = useMemo(() => {
@@ -113,29 +117,33 @@ export const StatementEditorActantTable: React.FC<StatementEditorActantTable> = 
               actant={actant}
               short={false}
               button={
-                <Button
-                  key="d"
-                  tooltip="unlink actant"
-                  icon={<FaUnlink />}
-                  color="plain"
-                  inverted={true}
-                  onClick={() => {
-                    updateActant(sActant.id, {
-                      actant: "",
-                    });
-                  }}
-                />
+                userCanEdit && (
+                  <Button
+                    key="d"
+                    tooltip="unlink actant"
+                    icon={<FaUnlink />}
+                    color="plain"
+                    inverted={true}
+                    onClick={() => {
+                      updateActant(sActant.id, {
+                        actant: "",
+                      });
+                    }}
+                  />
+                )
               }
             />
           ) : (
-            <ActantSuggester
-              onSelected={(newSelectedId: string) => {
-                updateActant(sActant.id, {
-                  actant: newSelectedId,
-                });
-              }}
-              categoryIds={classEntitiesActant}
-            />
+            userCanEdit && (
+              <ActantSuggester
+                onSelected={(newSelectedId: string) => {
+                  updateActant(sActant.id, {
+                    actant: newSelectedId,
+                  });
+                }}
+                categoryIds={classEntitiesActant}
+              />
+            )
           );
         },
       },
@@ -146,6 +154,7 @@ export const StatementEditorActantTable: React.FC<StatementEditorActantTable> = 
           const { sActant } = row.values.data;
           return (
             <AttributeButtonGroup
+              disabled={!userCanEdit}
               options={[
                 {
                   longValue: "subject",
@@ -203,6 +212,7 @@ export const StatementEditorActantTable: React.FC<StatementEditorActantTable> = 
               modalTitle={`Actant involvement [${
                 actant ? actant.label : "undefined"
               }]`}
+              userCanEdit={userCanEdit}
               entityType={actant ? actant.class : false}
               data={{
                 elvl: sActant.elvl,
@@ -227,18 +237,19 @@ export const StatementEditorActantTable: React.FC<StatementEditorActantTable> = 
       {
         Header: "",
         id: "remove",
-        Cell: ({ row }: Cell) => (
-          <Button
-            key="d"
-            icon={<FaTrashAlt />}
-            color="plain"
-            inverted={true}
-            tooltip="remove actant row"
-            onClick={() => {
-              removeActant(row.values.data.sActant.id);
-            }}
-          />
-        ),
+        Cell: ({ row }: Cell) =>
+          userCanEdit && (
+            <Button
+              key="d"
+              icon={<FaTrashAlt />}
+              color="plain"
+              inverted={true}
+              tooltip="remove actant row"
+              onClick={() => {
+                removeActant(row.values.data.sActant.id);
+              }}
+            />
+          ),
       },
       {
         Header: "",
@@ -246,16 +257,18 @@ export const StatementEditorActantTable: React.FC<StatementEditorActantTable> = 
         Cell: ({ row }: Cell) => {
           const propOriginId = row.values.data.sActant.actant;
           return (
-            <Button
-              key="a"
-              icon={<FaPlus />}
-              color="plain"
-              inverted={true}
-              tooltip="add new prop"
-              onClick={() => {
-                addProp(propOriginId);
-              }}
-            />
+            userCanEdit && (
+              <Button
+                key="a"
+                icon={<FaPlus />}
+                color="plain"
+                inverted={true}
+                tooltip="add new prop"
+                onClick={() => {
+                  addProp(propOriginId);
+                }}
+              />
+            )
           );
         },
       },
@@ -324,6 +337,7 @@ export const StatementEditorActantTable: React.FC<StatementEditorActantTable> = 
               row={row}
               statement={statement}
               moveRow={moveRow}
+              userCanEdit={userCanEdit}
               updateOrderFn={updateActantsOrder}
               visibleColumns={visibleColumns}
               {...row.getRowProps()}

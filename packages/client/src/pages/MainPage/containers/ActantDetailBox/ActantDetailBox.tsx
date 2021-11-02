@@ -48,7 +48,7 @@ import {
   languageDict,
   entitiesDict,
 } from "@shared/dictionaries";
-import { ActantType, Position, UserRole } from "@shared/enums";
+import { ActantType, Position, UserRole, UserRoleMode } from "@shared/enums";
 import { toast } from "react-toastify";
 import { ActantDetailMetaTable } from "./ActantDetailMetaTable/ActantDetailMetaTable";
 import { useSearchParams } from "hooks";
@@ -77,6 +77,18 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
     },
     { enabled: !!actantId && api.isLoggedIn(), retry: 2 }
   );
+
+  const userCanAdmin: boolean = useMemo(() => {
+    return !!actant && actant.right === UserRoleMode.Admin;
+  }, [actant]);
+
+  const userCanEdit: boolean = useMemo(() => {
+    return (
+      !!actant &&
+      (actant.right === UserRoleMode.Admin ||
+        actant.right === UserRoleMode.Write)
+    );
+  }, [actant]);
 
   useEffect(() => {
     if (error && (error as any).error === "ActantDoesNotExits") {
@@ -314,6 +326,7 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
                 <StyledContentRowLabel>Label</StyledContentRowLabel>
                 <StyledContentRowValue>
                   <Input
+                    disabled={!userCanEdit}
                     width="full"
                     value={actant.label}
                     onChangeFn={async (newLabel: string) => {
@@ -330,6 +343,7 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
                 <StyledContentRowLabel>Detail</StyledContentRowLabel>
                 <StyledContentRowValue>
                   <Input
+                    disabled={!userCanEdit}
                     width="full"
                     value={actant.detail}
                     onChangeFn={async (newValue: string) => {
@@ -342,6 +356,7 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
                 <StyledContentRowLabel>Status</StyledContentRowLabel>
                 <StyledContentRowValue>
                   <AttributeButtonGroup
+                    disabled={!userCanAdmin}
                     options={[
                       {
                         longValue: actantStatusDict[0]["label"],
@@ -395,6 +410,7 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
                 <StyledContentRowLabel>Language</StyledContentRowLabel>
                 <StyledContentRowValue>
                   <Dropdown
+                    disabled={!userCanEdit}
                     isMulti={true}
                     width="full"
                     options={languageDict}
@@ -416,6 +432,7 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
                   <StyledContentRowLabel>Logical Type</StyledContentRowLabel>
                   <StyledContentRowValue>
                     <AttributeButtonGroup
+                      disabled={!userCanEdit}
                       options={[
                         {
                           longValue: actantLogicalTypeDict[0]["label"],
@@ -487,6 +504,7 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
                   </StyledContentRowLabel>
                   <StyledContentRowValue>
                     <Dropdown
+                      disabled={!userCanEdit}
                       isMulti={true}
                       options={entitiesDict}
                       value={entitiesDict.filter((i: any) =>
@@ -524,6 +542,7 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
                   <StyledContentRowLabel>Subject valency</StyledContentRowLabel>
                   <StyledContentRowValue>
                     <Input
+                      disabled={!userCanEdit}
                       value={actant.data.valencies.s}
                       width="full"
                       onChangeFn={async (newValue: string) => {
@@ -553,6 +572,7 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
                   </StyledContentRowLabel>
                   <StyledContentRowValue>
                     <Dropdown
+                      disabled={!userCanEdit}
                       isMulti={true}
                       options={entitiesDict}
                       value={entitiesDict.filter((i: any) =>
@@ -590,6 +610,7 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
                   <StyledContentRowLabel>Actant1 valency</StyledContentRowLabel>
                   <StyledContentRowValue>
                     <Input
+                      disabled={!userCanEdit}
                       value={actant.data.valencies.a1}
                       width="full"
                       onChangeFn={async (newValue: string) => {
@@ -619,6 +640,7 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
                   </StyledContentRowLabel>
                   <StyledContentRowValue>
                     <Dropdown
+                      disabled={!userCanEdit}
                       isMulti={true}
                       options={entitiesDict}
                       value={entitiesDict.filter((i: any) =>
@@ -656,6 +678,7 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
                   <StyledContentRowLabel>Actant2 valency</StyledContentRowLabel>
                   <StyledContentRowValue>
                     <Input
+                      disabled={!userCanEdit}
                       value={actant.data.valencies.a2}
                       width="full"
                       onChangeFn={async (newValue: string) => {
@@ -683,6 +706,7 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
                   <StyledContentRowLabel>URL</StyledContentRowLabel>
                   <StyledContentRowValue>
                     <Input
+                      disabled={!userCanEdit}
                       value={actant.data.url}
                       width="full"
                       onChangeFn={async (newValue: string) => {
@@ -705,6 +729,7 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
                 <StyledContentRowLabel>Notes</StyledContentRowLabel>
                 <StyledContentRowValue>
                   <MultiInput
+                    disabled={!userCanEdit}
                     values={actant.notes}
                     width="full"
                     onChange={(newValues: string[]) => {
@@ -719,23 +744,26 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
             <StyledSectionHeader>Meta statements</StyledSectionHeader>
 
             <ActantDetailMetaTable
+              userCanEdit={userCanEdit}
               metaStatements={metaStatements}
               updateMetaStatement={updateMetaStatementMutation}
               removeMetaStatement={actantsDeleteMutation}
             />
-            <Button
-              color="primary"
-              label="create new meta statement"
-              icon={<FaPlus />}
-              onClick={async () => {
-                const newStatement = CMetaStatement(
-                  actant.id,
-                  localStorage.getItem("userrole") as UserRole
-                );
+            {userCanEdit && (
+              <Button
+                color="primary"
+                label="create new meta statement"
+                icon={<FaPlus />}
+                onClick={async () => {
+                  const newStatement = CMetaStatement(
+                    actant.id,
+                    localStorage.getItem("userrole") as UserRole
+                  );
 
-                actantsCreateMutation.mutate(newStatement);
-              }}
-            />
+                  actantsCreateMutation.mutate(newStatement);
+                }}
+              />
+            )}
           </StyledSection>
           <StyledSection lastSection>
             <StyledSectionHeader>Used in statements:</StyledSectionHeader>

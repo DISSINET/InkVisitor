@@ -23,12 +23,14 @@ import { ActantType } from "@shared/enums";
 import { ActantDetailMetaTableRow } from "./ActantDetailMetaTableRow";
 import { AttributesEditor } from "../../AttributesEditor/AttributesEditor";
 
-interface ActantBookmarkFolderTable {
+interface ActantDetailMetaTable {
+  userCanEdit?: boolean;
   metaStatements: IResponseStatement[];
   updateMetaStatement: any;
   removeMetaStatement: any;
 }
-export const ActantDetailMetaTable: React.FC<ActantBookmarkFolderTable> = ({
+export const ActantDetailMetaTable: React.FC<ActantDetailMetaTable> = ({
+  userCanEdit = false,
   metaStatements,
   updateMetaStatement,
   removeMetaStatement,
@@ -66,51 +68,55 @@ export const ActantDetailMetaTable: React.FC<ActantBookmarkFolderTable> = ({
               actant={typeActant}
               short={false}
               button={
-                <Button
-                  key="d"
-                  tooltip="unlink actant"
-                  icon={<FaUnlink />}
-                  color="plain"
-                  inverted={true}
-                  onClick={() => {
-                    const metaStatementData = { ...data };
-                    const updatedStatementActants = metaStatementData.actants.map(
-                      (actant) =>
-                        actant.position === "a1"
-                          ? { ...actant, ...{ actant: "" } }
-                          : actant
-                    );
-                    updateMetaStatement.mutate({
-                      metaStatementId: statementId,
-                      changes: {
-                        ...metaStatementData,
-                        ...{ actants: updatedStatementActants },
-                      },
-                    });
-                  }}
-                />
+                userCanEdit && (
+                  <Button
+                    key="d"
+                    tooltip="unlink actant"
+                    icon={<FaUnlink />}
+                    color="plain"
+                    inverted={true}
+                    onClick={() => {
+                      const metaStatementData = { ...data };
+                      const updatedStatementActants = metaStatementData.actants.map(
+                        (actant) =>
+                          actant.position === "a1"
+                            ? { ...actant, ...{ actant: "" } }
+                            : actant
+                      );
+                      updateMetaStatement.mutate({
+                        metaStatementId: statementId,
+                        changes: {
+                          ...metaStatementData,
+                          ...{ actants: updatedStatementActants },
+                        },
+                      });
+                    }}
+                  />
+                )
               }
             />
           ) : (
-            <ActantSuggester
-              onSelected={(newSelectedId: string) => {
-                const metaStatementData = { ...data };
-                const updatedStatementActants = metaStatementData.actants.map(
-                  (actant) =>
-                    actant.position === "a1"
-                      ? { ...actant, ...{ actant: newSelectedId } }
-                      : actant
-                );
-                updateMetaStatement.mutate({
-                  metaStatementId: statementId,
-                  changes: {
-                    ...metaStatementData,
-                    ...{ actants: updatedStatementActants },
-                  },
-                });
-              }}
-              categoryIds={["C"]}
-            />
+            userCanEdit && (
+              <ActantSuggester
+                onSelected={(newSelectedId: string) => {
+                  const metaStatementData = { ...data };
+                  const updatedStatementActants = metaStatementData.actants.map(
+                    (actant) =>
+                      actant.position === "a1"
+                        ? { ...actant, ...{ actant: newSelectedId } }
+                        : actant
+                  );
+                  updateMetaStatement.mutate({
+                    metaStatementId: statementId,
+                    changes: {
+                      ...metaStatementData,
+                      ...{ actants: updatedStatementActants },
+                    },
+                  });
+                }}
+                categoryIds={["C"]}
+              />
+            )
           );
         },
       },
@@ -133,6 +139,7 @@ export const ActantDetailMetaTable: React.FC<ActantBookmarkFolderTable> = ({
 
           return typeSActant ? (
             <AttributesEditor
+              userCanEdit={userCanEdit}
               modalTitle={`Property Type attributes [${
                 typeActant ? typeActant.label : "undefined"
               }]`}
@@ -197,63 +204,67 @@ export const ActantDetailMetaTable: React.FC<ActantBookmarkFolderTable> = ({
               actant={valueActant}
               short={false}
               button={
-                <Button
-                  key="d"
-                  tooltip="unlink actant"
-                  icon={<FaUnlink />}
-                  color="plain"
-                  inverted={true}
-                  onClick={() => {
-                    const metaStatementData = { ...data };
-                    const updatedStatementActants = metaStatementData.actants.map(
-                      (actant) =>
-                        actant.position === "a2"
-                          ? { ...actant, ...{ actant: "" } }
-                          : actant
-                    );
-                    updateMetaStatement.mutate({
-                      metaStatementId: statementId,
-                      changes: {
-                        ...metaStatementData,
-                        ...{ actants: updatedStatementActants },
-                      },
-                    });
-                  }}
-                />
+                userCanEdit && (
+                  <Button
+                    key="d"
+                    tooltip="unlink actant"
+                    icon={<FaUnlink />}
+                    color="plain"
+                    inverted={true}
+                    onClick={() => {
+                      const metaStatementData = { ...data };
+                      const updatedStatementActants = metaStatementData.actants.map(
+                        (actant) =>
+                          actant.position === "a2"
+                            ? { ...actant, ...{ actant: "" } }
+                            : actant
+                      );
+                      updateMetaStatement.mutate({
+                        metaStatementId: statementId,
+                        changes: {
+                          ...metaStatementData,
+                          ...{ actants: updatedStatementActants },
+                        },
+                      });
+                    }}
+                  />
+                )
               }
             />
           ) : (
-            <ActantSuggester
-              onSelected={(newSelectedId: string) => {
-                const metaStatementData = { ...data };
-                const updatedStatementActants = metaStatementData.actants.map(
-                  (actant) =>
-                    actant.position === "a2"
-                      ? { ...actant, ...{ actant: newSelectedId } }
-                      : actant
-                );
-                updateMetaStatement.mutate({
-                  metaStatementId: statementId,
-                  changes: {
-                    ...metaStatementData,
-                    ...{ actants: updatedStatementActants },
-                  },
-                });
-              }}
-              categoryIds={[
-                "A",
-                "P",
-                "G",
-                "O",
-                "C",
-                "L",
-                "V",
-                "E",
-                "S",
-                "T",
-                "R",
-              ]}
-            />
+            userCanEdit && (
+              <ActantSuggester
+                onSelected={(newSelectedId: string) => {
+                  const metaStatementData = { ...data };
+                  const updatedStatementActants = metaStatementData.actants.map(
+                    (actant) =>
+                      actant.position === "a2"
+                        ? { ...actant, ...{ actant: newSelectedId } }
+                        : actant
+                  );
+                  updateMetaStatement.mutate({
+                    metaStatementId: statementId,
+                    changes: {
+                      ...metaStatementData,
+                      ...{ actants: updatedStatementActants },
+                    },
+                  });
+                }}
+                categoryIds={[
+                  "A",
+                  "P",
+                  "G",
+                  "O",
+                  "C",
+                  "L",
+                  "V",
+                  "E",
+                  "S",
+                  "T",
+                  "R",
+                ]}
+              />
+            )
           );
         },
       },
@@ -276,6 +287,7 @@ export const ActantDetailMetaTable: React.FC<ActantBookmarkFolderTable> = ({
 
           return valueSActant ? (
             <AttributesEditor
+              userCanEdit={userCanEdit}
               modalTitle={`Property Value attributes [${
                 valueActant ? valueActant.label : ""
               }]`}
@@ -349,6 +361,7 @@ export const ActantDetailMetaTable: React.FC<ActantBookmarkFolderTable> = ({
             <ButtonGroup noMargin>
               {data && action && (
                 <AttributesEditor
+                  userCanEdit={userCanEdit}
                   modalTitle={`Property Type attributes [${typeLabel} - ${valueLabel}]`}
                   entityType={statementClass}
                   data={{
@@ -378,16 +391,18 @@ export const ActantDetailMetaTable: React.FC<ActantBookmarkFolderTable> = ({
                   loading={updateMetaStatement.isLoading}
                 />
               )}
-              <Button
-                key="d"
-                icon={<FaTrashAlt />}
-                color="plain"
-                inverted={true}
-                tooltip="remove actant row"
-                onClick={() => {
-                  removeMetaStatement.mutate(statementId);
-                }}
-              />
+              {userCanEdit && (
+                <Button
+                  key="d"
+                  icon={<FaTrashAlt />}
+                  color="plain"
+                  inverted={true}
+                  tooltip="remove actant row"
+                  onClick={() => {
+                    removeMetaStatement.mutate(statementId);
+                  }}
+                />
+              )}
             </ButtonGroup>
           );
         },

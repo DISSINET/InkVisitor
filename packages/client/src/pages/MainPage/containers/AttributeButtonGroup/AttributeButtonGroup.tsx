@@ -10,10 +10,12 @@ interface IAttributeButtonGroup {
     onClick: Function;
     selected: boolean;
   }[];
+  disabled?: boolean;
 }
 
 export const AttributeButtonGroup: React.FC<IAttributeButtonGroup> = ({
   options = [],
+  disabled = false,
 }) => {
   return (
     <StyledPropButtonGroup
@@ -27,6 +29,7 @@ export const AttributeButtonGroup: React.FC<IAttributeButtonGroup> = ({
         const lastInRow = oi === options.length - 1;
         return (
           <Button
+            disabled={disabled}
             key={oi}
             label={option.selected ? option.longValue : option.shortValue}
             tooltip={option.longValue}
@@ -37,7 +40,7 @@ export const AttributeButtonGroup: React.FC<IAttributeButtonGroup> = ({
             radiusLeft={firstInRow}
             radiusRight={lastInRow}
             onClick={() => {
-              if (!option.selected) {
+              if (!option.selected && !disabled) {
                 option.onClick();
               }
             }}
