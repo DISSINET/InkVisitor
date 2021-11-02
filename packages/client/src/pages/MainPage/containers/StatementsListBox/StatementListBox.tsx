@@ -514,7 +514,7 @@ export const StatementListBox: React.FC = () => {
             return (
               <>
                 <div>
-                  <i>Actions</i>
+                  {actions.length > 0 ? <i>Actions</i> : ""}
                 </div>
                 <TagGroup>
                   <div style={{ display: "block" }}>
@@ -546,7 +546,7 @@ export const StatementListBox: React.FC = () => {
           return (
             <>
               <div>
-                <i>Actants</i>
+                {actantObjects.length > 0 ? <i>Actants</i> : ""}
               </div>
               <TagGroup>
                 <div style={{ display: "block" }}>
@@ -575,7 +575,7 @@ export const StatementListBox: React.FC = () => {
           return (
             <>
               <div>
-                <i>References</i>
+                {actantObjects.length > 0 ? <i>References</i> : ""}
               </div>
               <TagGroup>
                 <div style={{ display: "block" }}>
@@ -601,7 +601,7 @@ export const StatementListBox: React.FC = () => {
           return (
             <>
               <div>
-                <i>Tags</i>
+                {actantObjects.length > 0 ? <i>Tags</i> : ""}
               </div>
               <TagGroup>
                 <div style={{ display: "block" }}>
