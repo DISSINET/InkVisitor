@@ -75,8 +75,17 @@ export const Input: React.FC<InputProps> = ({
             }
           }}
           onKeyPress={(event: React.KeyboardEvent) => {
-            if (event.key === "Enter") {
-              onEnterPressFn();
+            switch (event.key) {
+              case "Enter":
+                onEnterPressFn();
+            }
+          }}
+          onKeyDown={(event: React.KeyboardEvent) => {
+            switch (event.key) {
+              case "ArrowUp":
+                event.preventDefault();
+              case "ArrowDown":
+                event.preventDefault();
             }
           }}
           onFocus={() => onFocus()}
