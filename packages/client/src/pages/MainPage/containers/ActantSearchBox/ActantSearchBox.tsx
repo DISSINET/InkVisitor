@@ -97,7 +97,16 @@ export const ActantSearchBox: React.FC = () => {
   return (
     <StyledBoxContent>
       <StyledRow>
-        <StyledRowHeader>Class</StyledRowHeader>
+        <StyledRowHeader>Label</StyledRowHeader>
+        <Input
+          width={150}
+          placeholder="search"
+          changeOnType
+          onChangeFn={(value: string) => handleChange("label", value)}
+        />
+      </StyledRow>
+      <StyledRow>
+        <StyledRowHeader>Limit by class</StyledRowHeader>
         <Dropdown
           placeholder={""}
           width={150}
@@ -109,19 +118,11 @@ export const ActantSearchBox: React.FC = () => {
           }}
         />
       </StyledRow>
-      <StyledRow>
-        <StyledRowHeader>Label</StyledRowHeader>
-        <Input
-          width={150}
-          placeholder="search"
-          changeOnType
-          onChangeFn={(value: string) => handleChange("label", value)}
-        />
-      </StyledRow>
+
       <StyledRow>
         <StyledRowHeader>
           {/* used with */}
-          Actant
+          Limit by co-occurrence
         </StyledRowHeader>
         <ActantSuggester
           categoryIds={classesActants}

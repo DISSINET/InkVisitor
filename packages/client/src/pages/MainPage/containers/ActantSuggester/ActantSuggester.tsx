@@ -26,6 +26,7 @@ interface ActantSuggesterI {
   disableWildCard?: boolean;
   inputWidth?: number;
   openDetailOnCreate?: boolean;
+  statementTerritoryId?: string;
 }
 
 export const ActantSuggester: React.FC<ActantSuggesterI> = ({
@@ -36,6 +37,7 @@ export const ActantSuggester: React.FC<ActantSuggesterI> = ({
   inputWidth,
   disableWildCard = false,
   openDetailOnCreate = false,
+  statementTerritoryId,
 }) => {
   const wildCardChar = "*";
   const queryClient = useQueryClient();
@@ -43,19 +45,19 @@ export const ActantSuggester: React.FC<ActantSuggesterI> = ({
   const debouncedTyped = useDebounce(typed, 100);
   const [selectedCategory, setSelectedCategory] = useState<string>();
   const [allCategories, setAllCategories] = useState<false | IOption[]>();
-  //const [territoryActantIds, setTerritoryActantIds] = useState<string[]>([]);
 
-  const { territoryId, setActantId } = useSearchParams();
+  const { setActantId } = useSearchParams();
 
   // territory query
   const { status, data: territoryActants, error, isFetching } = useQuery(
-    ["territory", "suggesters", territoryId],
+    ["territory", "suggesters", statementTerritoryId],
     async () => {
-      const res = await api.actantIdsInTerritory(territoryId);
-      //setTerritoryActantIds(res.data.actants.map((a) => a.id));
-      return res.data;
+      if (statementTerritoryId) {
+        const res = await api.actantIdsInTerritory(statementTerritoryId);
+        return res.data;
+      }
     },
-    { initialData: [], enabled: !!territoryId && api.isLoggedIn() }
+    { initialData: [], enabled: !!statementTerritoryId && api.isLoggedIn() }
   );
 
   // Suggesions query
@@ -102,8 +104,6 @@ export const ActantSuggester: React.FC<ActantSuggesterI> = ({
   const handleClean = () => {
     setTyped("");
   };
-
-  useKeypress("Escape", () => handleClean());
 
   // initial load of categories
   useEffect(() => {
