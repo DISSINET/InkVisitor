@@ -33,6 +33,7 @@ import { SuggesterKeyPress } from "./SuggesterKeyPress";
 import { toast } from "react-toastify";
 import { SuggesterModal } from "./SuggesterModal";
 import { ActantStatus } from "@shared/enums";
+import useKeypress from "hooks/useKeyPress";
 
 export interface SuggestionI {
   id: string;
@@ -108,6 +109,14 @@ export const Suggester: React.FC<SuggesterProps> = ({
   const [isFocused, setIsFocused] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const [showModal, setShowModal] = useState(false);
+
+  useKeypress(
+    "Escape",
+    () => {
+      if (!showModal) onCancel();
+    },
+    [showModal]
+  );
 
   const onTypeFn = (newType: string) => {
     setSelected(-1);

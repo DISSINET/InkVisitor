@@ -105,8 +105,6 @@ export const ActantSuggester: React.FC<ActantSuggesterI> = ({
     setTyped("");
   };
 
-  useKeypress("Escape", () => handleClean());
-
   // initial load of categories
   useEffect(() => {
     const categories: IOption[] = [];
