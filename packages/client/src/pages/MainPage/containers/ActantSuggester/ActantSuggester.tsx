@@ -8,9 +8,15 @@ import { CActant, CTerritoryActant } from "constructors";
 import { Entities } from "types";
 import { useMutation, useQuery, useQueryClient } from "react-query";
 import api from "api";
-import { ActantType, CategoryActantType, UserRole } from "@shared/enums";
+import {
+  ActantStatus,
+  ActantType,
+  CategoryActantType,
+  UserRole,
+} from "@shared/enums";
 import { useDebounce, useSearchParams } from "hooks";
 import { rootTerritoryId } from "Theme/constants";
+import useKeypress from "hooks/useKeyPress";
 
 interface ActantSuggesterI {
   categoryIds: string[];
@@ -65,25 +71,27 @@ export const ActantSuggester: React.FC<ActantSuggesterI> = ({
         label: debouncedTyped,
         class: selectedCategory === wildCardChar ? false : selectedCategory,
       });
-      return resSuggestions.data.map((s: IActant) => {
-        const entity = Entities[s.class];
+      return resSuggestions.data
+        .filter((s) => s.status !== ActantStatus.Discouraged)
+        .map((s: IActant) => {
+          const entity = Entities[s.class];
 
-        const icons: React.ReactNode[] = [];
+          const icons: React.ReactNode[] = [];
 
-        if ((territoryActants as string[])?.includes(s.id)) {
-          icons.push(<FaHome key={s.id} color="" />);
-        }
-        return {
-          color: entity.color,
-          category: s.class,
-          label: s.label,
-          detail: s.detail,
-          status: s.status,
-          ltype: s.data.logicalType,
-          id: s.id,
-          icons: icons,
-        };
-      });
+          if ((territoryActants as string[])?.includes(s.id)) {
+            icons.push(<FaHome key={s.id} color="" />);
+          }
+          return {
+            color: entity.color,
+            category: s.class,
+            label: s.label,
+            detail: s.detail,
+            status: s.status,
+            ltype: s.data.logicalType,
+            id: s.id,
+            icons: icons,
+          };
+        });
     },
     {
       enabled:
@@ -95,19 +103,7 @@ export const ActantSuggester: React.FC<ActantSuggesterI> = ({
     setTyped("");
   };
 
-  const handleKeyPress = (event: KeyboardEvent) => {
-    if (event.key === "Escape") {
-      handleClean();
-    }
-  };
-
-  // clean on escape press
-  useEffect(() => {
-    document.addEventListener("keydown", handleKeyPress);
-    return () => {
-      window.removeEventListener("keydown", handleKeyPress);
-    };
-  }, []);
+  useKeypress("Escape", () => handleClean());
 
   // initial load of categories
   useEffect(() => {
