@@ -28,8 +28,8 @@ interface TagProps {
   tooltipDetail?: string;
   tooltipText?: string;
   category: string;
-  status: string;
-  ltype: string;
+  status?: string;
+  ltype?: string;
   mode?: "selected" | "disabled" | "invalid" | false;
   borderStyle?: "solid" | "dashed" | "dotted";
   button?: ReactNode;
