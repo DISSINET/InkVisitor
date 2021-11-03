@@ -10,8 +10,13 @@ import {
   Button,
 } from "components";
 import { IOption } from "@shared/types";
-import { StyledForm } from "./SuggesterStyles";
 import useKeypress from "hooks/useKeyPress";
+import {
+  StyledModalForm,
+  StyledModalInputWrap,
+  StyledModalLabel,
+  StyledTypeBar,
+} from "./SuggesterStyles";
 
 interface SuggesterModal {
   show?: boolean;
@@ -41,6 +46,7 @@ export const SuggesterModal: React.FC<SuggesterModal> = ({
       category: selectedCategory,
       detail: detail,
     });
+    closeModal();
   };
 
   useKeypress("Enter", () => handleCreateActant(), [label, detail]);
@@ -54,35 +60,39 @@ export const SuggesterModal: React.FC<SuggesterModal> = ({
     >
       <ModalHeader title="Create actant" />
       <ModalContent>
-        <StyledForm>
-          <Input
-            type="select"
-            label="Category: "
-            value={selectedCategory}
-            options={categories}
-            inverted
-            suggester
-            onChangeFn={(newCategory: string) =>
-              setSelectedCategory(newCategory)
-            }
-            // onEnterPressFn={handleCreateActant}
-          />
-          <Input
-            label="Label: "
-            value={label}
-            onChangeFn={(newType: string) => setLabel(newType)}
-            changeOnType
-            autoFocus
-            // onEnterPressFn={handleCreateActant}
-          />
-          <Input
-            label="Detail: "
-            value={detail}
-            onChangeFn={(newType: string) => setDetail(newType)}
-            changeOnType
-            // onEnterPressFn={handleCreateActant}
-          />
-        </StyledForm>
+        <StyledModalForm>
+          <StyledModalLabel>{"Category: "}</StyledModalLabel>
+          <StyledModalInputWrap>
+            <Input
+              type="select"
+              value={selectedCategory}
+              options={categories}
+              inverted
+              suggester
+              onChangeFn={(newCategory: string) =>
+                setSelectedCategory(newCategory)
+              }
+            />
+            <StyledTypeBar entity={`entity${selectedCategory}`}></StyledTypeBar>
+          </StyledModalInputWrap>
+          <StyledModalLabel>{"Label: "}</StyledModalLabel>
+          <StyledModalInputWrap>
+            <Input
+              value={label}
+              onChangeFn={(newType: string) => setLabel(newType)}
+              changeOnType
+              autoFocus
+            />
+          </StyledModalInputWrap>
+          <StyledModalLabel>{"Detail: "}</StyledModalLabel>
+          <StyledModalInputWrap>
+            <Input
+              value={detail}
+              onChangeFn={(newType: string) => setDetail(newType)}
+              changeOnType
+            />
+          </StyledModalInputWrap>
+        </StyledModalForm>
       </ModalContent>
       <ModalFooter>
         <ButtonGroup>

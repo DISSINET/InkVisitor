@@ -150,7 +150,6 @@ export const Suggester: React.FC<SuggesterProps> = ({
           hasButton={allowCreate}
           isOver={isOver}
         >
-          <StyledTypeBar entity={`entity${category}`}></StyledTypeBar>
           <Input
             type="select"
             value={category}
@@ -164,6 +163,7 @@ export const Suggester: React.FC<SuggesterProps> = ({
             }}
             onBlur={() => setIsFocused(false)}
           />
+          <StyledTypeBar entity={`entity${category}`}></StyledTypeBar>
           <Input
             type="text"
             value={typed}

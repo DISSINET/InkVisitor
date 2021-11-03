@@ -8,7 +8,9 @@ export const StyledSuggester = styled.div<StyledSuggester>`
   position: relative;
   margin-top: ${({ marginTop }) => (marginTop ? space2 : 0)};
 `;
-
+interface StyledTypeBar {
+  entity: string;
+}
 export const StyledTypeBar = styled.div<StyledTypeBar>`
   position: absolute;
   background-color: ${({ theme, entity }) => theme.color[entity]};
@@ -49,9 +51,6 @@ export const StyledSuggestionCancelButton = styled.div`
     color: ${({ theme }) => theme.color["danger"]};
   }
 `;
-interface StyledTypeBar {
-  entity: string;
-}
 
 export const StyledSuggesterList = styled.div`
   position: absolute;
@@ -107,7 +106,19 @@ export const StyledTagWrapper = styled.div`
   overflow: hidden;
 `;
 
-export const StyledForm = styled.div`
-  display: flex;
-  flex-direction: column;
+export const StyledModalForm = styled.div`
+  display: grid;
+  grid-template-columns: auto auto;
+`;
+export const StyledModalLabel = styled.p`
+  display: grid;
+  justify-content: flex-end;
+  align-items: center;
+  margin-right: ${({ theme }) => theme.space[2]};
+  margin-bottom: ${({ theme }) => theme.space[1]};
+`;
+export const StyledModalInputWrap = styled.div`
+  display: grid;
+  position: relative;
+  margin-bottom: ${({ theme }) => theme.space[1]};
 `;
