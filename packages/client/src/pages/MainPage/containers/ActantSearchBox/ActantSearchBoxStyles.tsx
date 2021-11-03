@@ -7,6 +7,7 @@ export const StyledBoxContent = styled.div`
   background-color: ${({ theme }) => theme.color["white"]};
 `;
 export const StyledRow = styled.div`
+  position: relative;
   display: flex;
   justify-content: flex-end;
   align-items: center;
@@ -43,4 +44,7 @@ export const StyledResultItem = styled.div`
   display: inline-flex;
   overflow: hidden;
   margin-bottom: ${({ theme }) => theme.space[1]};
+`;
+export const StyledTagLoaderWrap = styled.div`
+  min-height: 3rem;
 `;
