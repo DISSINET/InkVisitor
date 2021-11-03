@@ -10,6 +10,7 @@ import {
   StyledResultsWrapper,
   StyledRow,
   StyledRowHeader,
+  StyledTagLoaderWrap,
 } from "./ActantSearchBoxStyles";
 import { ActantSuggester } from "..";
 import { useMutation, useQuery } from "react-query";
@@ -135,11 +136,15 @@ export const ActantSearchBox: React.FC = () => {
         />
       </StyledRow>
       <StyledRow>
+        <StyledTagLoaderWrap>
+          <Loader size={26} show={isFetching} />
+        </StyledTagLoaderWrap>
         {actant && (
           <Tag
             propId={actant.id}
             label={actant.label}
             category={actant.class}
+            tooltipPosition={"left center"}
             button={
               <Button
                 key="d"
