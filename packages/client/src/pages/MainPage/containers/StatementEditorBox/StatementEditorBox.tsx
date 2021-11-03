@@ -472,6 +472,7 @@ export const StatementEditorBox: React.FC = () => {
             />
           ) : (
             <ActantSuggester
+              statementTerritoryId={statement.data.territory.id}
               openDetailOnCreate
               onSelected={(newSelectedId: string) => {
                 updateProp(prop.id, {
@@ -531,6 +532,7 @@ export const StatementEditorBox: React.FC = () => {
             />
           ) : (
             <ActantSuggester
+              statementTerritoryId={statement.data.territory.id}
               openDetailOnCreate
               onSelected={(newSelectedId: string) => {
                 updateProp(prop.id, {
@@ -678,6 +680,7 @@ export const StatementEditorBox: React.FC = () => {
 
               {userCanEdit && (
                 <ActantSuggester
+                  statementTerritoryId={statement.data.territory.id}
                   openDetailOnCreate
                   onSelected={(newSelectedId: string) => {
                     addAction(newSelectedId);
@@ -707,6 +710,7 @@ export const StatementEditorBox: React.FC = () => {
               </StyledEditorActantTableWrapper>
               {userCanEdit && (
                 <ActantSuggester
+                  statementTerritoryId={statement.data.territory.id}
                   openDetailOnCreate
                   onSelected={(newSelectedId: string) => {
                     addActant(newSelectedId);
@@ -764,6 +768,9 @@ export const StatementEditorBox: React.FC = () => {
                           ) : (
                             userCanEdit && (
                               <ActantSuggester
+                                statementTerritoryId={
+                                  statement.data.territory.id
+                                }
                                 openDetailOnCreate
                                 onSelected={(newSelectedId: string) => {
                                   updateReference(reference.id, {
@@ -839,6 +846,7 @@ export const StatementEditorBox: React.FC = () => {
               </StyledReferencesList>
               {userCanEdit && (
                 <ActantSuggester
+                  statementTerritoryId={statement.data.territory.id}
                   openDetailOnCreate
                   onSelected={(newSelectedId: string) => {
                     addReference(newSelectedId);
@@ -885,6 +893,7 @@ export const StatementEditorBox: React.FC = () => {
               </StyledTagsList>
               {userCanEdit && (
                 <ActantSuggester
+                  statementTerritoryId={statement.data.territory.id}
                   openDetailOnCreate
                   onSelected={(newSelectedId: string) => {
                     addTag(newSelectedId);
