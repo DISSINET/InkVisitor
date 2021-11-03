@@ -208,11 +208,7 @@ export const Suggester: React.FC<SuggesterProps> = ({
           >
             <StyledRelativePosition>
               {suggestions
-                .filter(
-                  (s, si) =>
-                    s.status !== ActantStatus.Discouraged &&
-                    si < MAXSUGGESTIONDISPLAYED
-                )
+                .filter((s, si) => si < MAXSUGGESTIONDISPLAYED)
                 .map((suggestion, si) => (
                   <React.Fragment key={si}>
                     <StyledSuggestionLineActions isSelected={selected === si}>
@@ -258,10 +254,10 @@ export const Suggester: React.FC<SuggesterProps> = ({
 
       {showModal && (
         <SuggesterModal
-          show={showModal}
+          show={true}
           typed={typed}
           category={category}
-          categories={categories}
+          categories={categories.slice(1)}
           onCreate={onCreate}
           closeModal={() => setShowModal(false)}
         />

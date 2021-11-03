@@ -43,11 +43,15 @@ export const SuggesterModal: React.FC<SuggesterModal> = ({
     });
   };
 
-  // useKeypress("Enter", handleCreateActant, [label, detail]);
-  // useKeypress("Escape", closeModal());
+  useKeypress("Enter", () => handleCreateActant(), [label, detail]);
 
   return (
-    <Modal showModal={show} width="thin">
+    <Modal
+      showModal={show}
+      width="thin"
+      closeOnEscape
+      onClose={() => closeModal()}
+    >
       <ModalHeader title="Create actant" />
       <ModalContent>
         <StyledForm>
@@ -55,12 +59,13 @@ export const SuggesterModal: React.FC<SuggesterModal> = ({
             type="select"
             label="Category: "
             value={selectedCategory}
-            options={categories.slice(1)}
+            options={categories}
             inverted
             suggester
             onChangeFn={(newCategory: string) =>
               setSelectedCategory(newCategory)
             }
+            // onEnterPressFn={handleCreateActant}
           />
           <Input
             label="Label: "
@@ -68,12 +73,14 @@ export const SuggesterModal: React.FC<SuggesterModal> = ({
             onChangeFn={(newType: string) => setLabel(newType)}
             changeOnType
             autoFocus
+            // onEnterPressFn={handleCreateActant}
           />
           <Input
             label="Detail: "
             value={detail}
             onChangeFn={(newType: string) => setDetail(newType)}
             changeOnType
+            // onEnterPressFn={handleCreateActant}
           />
         </StyledForm>
       </ModalContent>
