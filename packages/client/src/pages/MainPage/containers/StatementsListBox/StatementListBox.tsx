@@ -628,7 +628,7 @@ export const StatementListBox: React.FC = () => {
         addStatementAtTheEndMutation={addStatementAtTheEndMutation}
       />
 
-      <StyledTableWrapper>
+      <StyledTableWrapper id="Statements-box-table">
         <StatementListTable
           moveEndRow={moveEndRow}
           data={statements}
