@@ -16,7 +16,7 @@ export const StyledRow = styled.div`
 export const StyledRowHeader = styled.div`
   display: flex;
   margin-right: ${({ theme }) => theme.space[2]};
-  font-size: ${({ theme }) => theme.fontSize["sm"]};
+  font-size: ${({ theme }) => theme.fontSize["xs"]};
 `;
 export const StyledRowContent = styled.div`
   display: flex;
