@@ -11,6 +11,8 @@ import Actant from "./actant";
 import { InternalServerError, InvalidDeleteError } from "@shared/types/errors";
 import { IUser } from "@shared/types";
 import User, { UserRight } from "./user";
+import treeCache from "@service/treeCache";
+import tree from "@modules/tree";
 
 export class TerritoryParent implements IParentTerritory, IModel {
   id = "";
@@ -184,65 +186,13 @@ class Territory extends Actant implements ITerritory {
     return out;
   }
 
-  /**
-   * find closest parent in the tree - this required the structure to respect tree naming ( ID0 -> ID0_1 -> ID0_1_1 etc)
-   * @param rights
-   * @returns
-   */
-  getClosestRight(rights: UserRight[]): UserRight | undefined {
-    let closestRight: UserRight | undefined;
-
-    // search in parents or if ids are equal
-    for (const right of rights) {
-      // explicit right for this territory - use it and end
-      if (right.territory === this.id) {
-        return right;
-      }
-
-      // one of parents found
-      if (this.id.indexOf(right.territory + "-") === 0) {
-        // test if it is closer match
-        if (
-          closestRight === undefined ||
-          closestRight.territory.length < right.territory.length
-        ) {
-          closestRight = right;
-        }
-      }
-    }
-
-    if (closestRight) {
-      return closestRight;
-    }
-
-    // if parent not found, search in childs
-    for (const right of rights) {
-      if (right.territory.indexOf(this.id + "-") === 0) {
-        // test if it is closer match
-        if (
-          closestRight === undefined ||
-          closestRight.territory.length > right.territory.length
-        ) {
-          closestRight = right;
-        }
-      }
-    }
-
-    return closestRight;
-  }
-
   canBeViewedByUser(user: User): boolean {
     // admin role has always the right
     if (user.role === UserRole.Admin) {
       return true;
     }
 
-    const result = !!this.getClosestRight(user.rights);
-    if (!result && this.id === "T0") {
-      return true;
-    }
-
-    return result;
+    return !!treeCache.getRightForTerritory(this.id, user.rights);
   }
 
   canBeEditedByUser(user: User): boolean {
@@ -256,7 +206,7 @@ class Territory extends Actant implements ITerritory {
       return true;
     }
 
-    const closestRight = this.getClosestRight(user.rights);
+    const closestRight = treeCache.getRightForTerritory(this.id, user.rights);
 
     if (!closestRight) {
       return false;
