@@ -25,8 +25,10 @@ import {
   IStatement,
   IActant,
   IAction,
+  IStatementAction,
   IResponseStatement,
 } from "@shared/types";
+import { AttributesEditor } from "../AttributesEditor/AttributesEditor";
 import { StatementListTable } from "./StatementListTable/StatementListTable";
 import { StatementListHeader } from "./StatementListHeader/StatementListHeader";
 import {
@@ -53,12 +55,8 @@ const initialData: {
 export const StatementListBox: React.FC = () => {
   const queryClient = useQueryClient();
 
-  const {
-    territoryId,
-    setTerritoryId,
-    statementId,
-    setStatementId,
-  } = useSearchParams();
+  const { territoryId, setTerritoryId, statementId, setStatementId } =
+    useSearchParams();
 
   const [showSubmit, setShowSubmit] = useState(false);
   const [statementToDelete, setStatementToDelete] = useState<IStatement>();
@@ -119,13 +117,8 @@ export const StatementListBox: React.FC = () => {
 
   const duplicateStatementMutation = useMutation(
     async (statementToDuplicate: IResponseStatement) => {
-      const {
-        actions,
-        audits,
-        usedIn,
-        actants,
-        ...newStatementObject
-      } = statementToDuplicate;
+      const { actions, audits, usedIn, actants, ...newStatementObject } =
+        statementToDuplicate;
 
       const duplicatedStatement = DStatement(newStatementObject as IStatement);
       await api.actantsCreate(duplicatedStatement);
@@ -248,15 +241,44 @@ export const StatementListBox: React.FC = () => {
     );
   };
 
-  const renderListActantLong = (actantObject: IActant, key: number) => {
+  const renderListActantLong = (
+    actantObject: IActant,
+    key: number,
+    attributes?: boolean
+  ) => {
     return (
       actantObject && (
-        <div style={{ marginTop: "4px" }} key={key}>
+        <div style={{ marginTop: "4px", display: "flex" }} key={key}>
           <ActantTag
             key={key}
             actant={actantObject}
             tooltipPosition="bottom center"
           />
+          {attributes ? (
+            <AttributesEditor
+              modalTitle={`Actant involvement [${
+                actantObject ? actantObject.label : "undefined"
+              }]`}
+              userCanEdit={false}
+              disabled
+              entityType={actantObject ? actantObject.class : false}
+              data={{
+              /* TODO make this work
+                elvl: actantObject.data.elvl,
+                certainty: actantObject.data.certainty,
+                logic: actantObject.data.logic,
+                virtuality: actantObject.data.virtuality,
+                partitivity: actantObject.data.partitivity,
+                operator: actantObject.data.operator,
+                bundleStart: actantObject.data.bundleStart,
+                bundleEnd: actantObject.data.bundleEnd,
+              */
+              }}
+              handleUpdate={(newData) => {}}
+            />
+          ) : (
+            ""
+          )}
         </div>
       )
     );
@@ -509,17 +531,14 @@ export const StatementListBox: React.FC = () => {
         id: "exp-actions",
         Cell: ({ row }: Cell) => {
           const { actions }: { actions?: IAction[] } = row.original;
-
           if (actions) {
             return (
               <>
-                <div>
-                  {actions.length > 0 ? <i>Actions</i> : ""}
-                </div>
+                <div>{actions.length > 0 ? <i>Actions</i> : ""}</div>
                 <TagGroup>
                   <div style={{ display: "block" }}>
-                    {actions.map((action: IActant, key: number) =>
-                      renderListActantLong(action, key)
+                    {actions.map((action: IAction, key: number) =>
+                      renderListActantLong(action, key, true)
                     )}
                   </div>
                 </TagGroup>
@@ -545,13 +564,11 @@ export const StatementListBox: React.FC = () => {
           });
           return (
             <>
-              <div>
-                {actantObjects.length > 0 ? <i>Actants</i> : ""}
-              </div>
+              <div>{actantObjects.length > 0 ? <i>Actants</i> : ""}</div>
               <TagGroup>
                 <div style={{ display: "block" }}>
                   {actantObjects.map((actantObject: IActant, key: number) =>
-                    renderListActantLong(actantObject, key)
+                    renderListActantLong(actantObject, key, true)
                   )}
                 </div>
               </TagGroup>
@@ -574,9 +591,7 @@ export const StatementListBox: React.FC = () => {
           });
           return (
             <>
-              <div>
-                {actantObjects.length > 0 ? <i>References</i> : ""}
-              </div>
+              <div>{actantObjects.length > 0 ? <i>References</i> : ""}</div>
               <TagGroup>
                 <div style={{ display: "block" }}>
                   {actantObjects.map((actantObject: IActant, key: number) =>
@@ -600,9 +615,7 @@ export const StatementListBox: React.FC = () => {
           });
           return (
             <>
-              <div>
-                {actantObjects.length > 0 ? <i>Tags</i> : ""}
-              </div>
+              <div>{actantObjects.length > 0 ? <i>Tags</i> : ""}</div>
               <TagGroup>
                 <div style={{ display: "block" }}>
                   {actantObjects.map((actantObject: IActant, key: number) =>
