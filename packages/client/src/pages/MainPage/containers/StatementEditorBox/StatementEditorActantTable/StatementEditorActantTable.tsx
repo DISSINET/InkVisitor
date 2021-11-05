@@ -91,7 +91,9 @@ export const StatementEditorActantTable: React.FC<StatementEditorActantTable> = 
       const actants: IStatementActant[] = filteredActants.map(
         (filteredActant) => filteredActant.data.sActant
       );
-      updateActantsMutation.mutate({ actants });
+      if (JSON.stringify(statement.data.actants) !== JSON.stringify(actants)) {
+        updateActantsMutation.mutate({ actants });
+      }
     }
   };
 
