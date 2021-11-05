@@ -29,7 +29,11 @@ import {
 } from "@shared/types";
 import { StatementListTable } from "./StatementListTable/StatementListTable";
 import { StatementListHeader } from "./StatementListHeader/StatementListHeader";
-import { StyledDots, StyledText } from "./StatementLitBoxStyles";
+import {
+  StyledDots,
+  StyledTableWrapper,
+  StyledText,
+} from "./StatementLitBoxStyles";
 import { CStatement, DStatement } from "constructors";
 import { useSearchParams } from "hooks";
 import { StatementListContextMenu } from "./StatementListContextMenu/StatementListContextMenu";
@@ -623,14 +627,18 @@ export const StatementListBox: React.FC = () => {
         data={data ? data : initialData}
         addStatementAtTheEndMutation={addStatementAtTheEndMutation}
       />
-      <StatementListTable
-        moveEndRow={moveEndRow}
-        data={statements}
-        columns={columns}
-        handleRowClick={(rowId: string) => {
-          setStatementId(rowId);
-        }}
-      />
+
+      <StyledTableWrapper id="Statements-box-table">
+        <StatementListTable
+          moveEndRow={moveEndRow}
+          data={statements}
+          columns={columns}
+          handleRowClick={(rowId: string) => {
+            setStatementId(rowId);
+          }}
+        />
+      </StyledTableWrapper>
+
       <Submit
         title="Delete statement"
         text={`Do you really want to delete statement [${

@@ -32,10 +32,10 @@ const ScrollHandler = () => {
         const statementInTable = document.getElementById(
           `statement${statementId}`
         );
-        const statementBox = document.getElementById(`Statements-box-content`);
+        const statementBox = document.getElementById(`Statements-box-table`);
         statementBox?.scrollTo({
           behavior: statementInTable ? "smooth" : "auto",
-          top: statementInTable ? statementInTable.offsetTop : 0,
+          top: statementInTable ? statementInTable.offsetTop - 34 : 0,
         });
       }, 200);
     }

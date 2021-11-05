@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import { Column, useTable, useExpanded, Row } from "react-table";
 import update from "immutability-helper";
 import { StyledTable, StyledTHead, StyledTh } from "./StatementListTableStyles";
-import { StatementListRow } from "./StatementListRow/StatementListRow";
+import { StatementListRow } from "./StatementListRow";
 
 interface StatementListTable {
   data: {}[];

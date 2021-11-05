@@ -18,7 +18,8 @@ interface StyledHead {
   color: string;
 }
 export const StyledHead = styled(animated.div)<StyledHead>`
-  background-color: ${({ theme, color }) => color ? color : theme.color["gray"]["200"]};
+  background-color: ${({ theme, color }) =>
+    color ? color : theme.color["gray"]["200"]};
   color: ${({ theme }) => theme.color["gray"]["600"]};
   padding: ${space2};
   font-size: ${({ theme }) => theme.fontSize["base"]};
