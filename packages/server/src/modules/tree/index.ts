@@ -3,176 +3,21 @@ import { findActantById, getActants } from "@service/shorthands";
 import {
   BadParams,
   PermissionDeniedError,
-  TerritoriesBrokenError,
   TerritoryDoesNotExits,
   TerrytoryInvalidMove,
 } from "@shared/types/errors";
 import { asyncRouteHandler } from "..";
-import {
-  IResponseGeneric,
-  IResponseTree,
-  IStatement,
-  ITerritory,
-} from "@shared/types";
-import { Db } from "@service/RethinkDB";
+import { IResponseGeneric, IResponseTree, ITerritory } from "@shared/types";
 import Territory from "@models/territory";
 import { IParentTerritory } from "@shared/types/territory";
-import { ActantType, UserRole, UserRoleMode } from "@shared/enums";
-import User from "@models/user";
-
-class TreeCreator {
-  parentMap: Record<string, Territory[]>; // map of rootId -> childs
-  statementsMap: Record<string, number>; // map of territoryId -> number of statements
-  fullTree: IResponseTree;
-
-  constructor(territories: Territory[], statementsMap: Record<string, number>) {
-    this.parentMap = {};
-    this.createParentMap(territories);
-
-    // only one root possible
-    if (this.parentMap[""]?.length != 1) {
-      throw new TerritoriesBrokenError("Territories tree is broken");
-    }
-
-    this.statementsMap = statementsMap;
-    this.fullTree = {
-      children: [],
-      lvl: 0,
-      path: [],
-      right: UserRoleMode.Read,
-      statementsCount: 0,
-      territory: new Territory({}),
-      empty: true,
-    };
-  }
-
-  getRootTerritory(): Territory {
-    return this.parentMap[""][0];
-  }
-
-  createParentMap(territories: Territory[]) {
-    for (const territory of territories) {
-      if (typeof territory.data.parent === "undefined") {
-        continue;
-      }
-
-      const parentId: string = territory.data.parent
-        ? territory.data.parent.id
-        : "";
-      if (!this.parentMap[parentId]) {
-        this.parentMap[parentId] = [];
-      }
-      this.parentMap[parentId].push(territory);
-    }
-  }
-
-  populateTree(
-    subtreeRoot: Territory,
-    lvl: number,
-    parents: string[]
-  ): IResponseTree {
-    const subtreeRootId = subtreeRoot.id;
-    let childs: IResponseTree[] = [];
-    let noOfStatements = 0;
-
-    if (this.parentMap[subtreeRootId]) {
-      childs = this.parentMap[subtreeRootId].map((ter) =>
-        this.populateTree(ter, lvl + 1, [...parents, subtreeRootId])
-      );
-    }
-
-    if (this.statementsMap[subtreeRootId]) {
-      noOfStatements = this.statementsMap[subtreeRootId];
-    }
-
-    const childsAreEmpty = !childs.find((ch) => !ch.empty);
-
-    this.fullTree = {
-      territory: subtreeRoot,
-      statementsCount: noOfStatements,
-      lvl,
-      children: childs,
-      path: parents,
-      empty: childsAreEmpty && !noOfStatements,
-      right: UserRoleMode.Read,
-    };
-
-    return this.fullTree;
-  }
-
-  applyPermissions(tree: IResponseTree, user: User): IResponseTree | null {
-    const filtered: IResponseTree[] = [];
-    for (const child of tree.children) {
-      const filteredChild = this.applyPermissions(child, user);
-      if (filteredChild) {
-        filtered.push(filteredChild);
-      }
-    }
-
-    if (
-      tree.lvl > 0 &&
-      filtered.length === 0 &&
-      !(tree.territory as Territory).canBeViewedByUser(user)
-    ) {
-      return null;
-    }
-
-    this.fullTree = {
-      ...tree,
-      children: filtered,
-      right: (tree.territory as Territory).getUserRoleMode(user),
-    };
-
-    return this.fullTree;
-  }
-
-  static sortTerritories(terA: ITerritory, terB: ITerritory): number {
-    return (
-      (terA.data.parent ? terA.data.parent.order : 0) -
-      (terB.data.parent ? terB.data.parent.order : 0)
-    );
-  }
-
-  static async countStatements(db: Db): Promise<Record<string, number>> {
-    const statements = (
-      await getActants<IStatement>(db, { class: "S" })
-    ).filter((s) => s.data.territory && s.data.territory.id);
-    const statementsCountMap: Record<string, number> = {}; // key is territoryid
-    for (const statement of statements) {
-      const terId = statement.data.territory.id;
-      if (!statementsCountMap[terId]) {
-        statementsCountMap[terId] = 0;
-      }
-
-      statementsCountMap[terId]++;
-    }
-
-    return statementsCountMap;
-  }
-}
+import { ActantType } from "@shared/enums";
+import treeCache, { TreeCreator } from "@service/treeCache";
 
 export default Router()
   .get(
     "/get",
     asyncRouteHandler<IResponseTree>(async (request: Request) => {
-      const [territoriesData, statementsCountMap] = await Promise.all([
-        getActants<ITerritory>(request.db, {
-          class: ActantType.Territory,
-        }),
-        TreeCreator.countStatements(request.db),
-      ]);
-
-      const helper = new TreeCreator(
-        territoriesData
-          .sort(TreeCreator.sortTerritories)
-          .map((td) => new Territory({ ...td })),
-        statementsCountMap
-      );
-
-      helper.populateTree(helper.getRootTerritory(), 0, []);
-      helper.applyPermissions(helper.fullTree, request.getUserOrFail());
-
-      return helper.fullTree;
+      return treeCache.forUser(request.getUserOrFail());
     })
   )
   .post(
