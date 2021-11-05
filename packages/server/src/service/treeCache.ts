@@ -3,26 +3,19 @@ import { TerritoriesBrokenError } from "@shared/types/errors";
 import { IResponseTree, IStatement, ITerritory } from "@shared/types";
 import { Db } from "@service/RethinkDB";
 import Territory from "@models/territory";
-import { ActantType, UserRoleMode } from "@shared/enums";
-import User from "@models/user";
+import { ActantType, UserRole, UserRoleMode } from "@shared/enums";
+import User, { UserRight } from "@models/user";
 
 export class TreeCreator {
   parentMap: Record<string, Territory[]>; // map of rootId -> childs
   statementsMap: Record<string, number>; // map of territoryId -> number of statements
-  fullTree: IResponseTree;
+  fullTree: IResponseTree | undefined;
+  idMap: Record<string, IResponseTree>;
 
   constructor() {
     this.parentMap = {};
     this.statementsMap = {};
-    this.fullTree = {
-      children: [],
-      lvl: 0,
-      path: [],
-      right: UserRoleMode.Read,
-      statementsCount: 0,
-      territory: new Territory({}),
-      empty: true,
-    };
+    this.idMap = {};
   }
 
   getRootTerritory(): Territory {
@@ -60,9 +53,14 @@ export class TreeCreator {
     let noOfStatements = 0;
 
     if (this.parentMap[subtreeRootId]) {
-      childs = this.parentMap[subtreeRootId].map((ter) =>
-        this.populateTree(ter, lvl + 1, [...parents, subtreeRootId])
-      );
+      childs = this.parentMap[subtreeRootId].map((ter) => {
+        const path = [];
+        for (const parent of parents) {
+          path.push(parent);
+        }
+        path.push(subtreeRootId);
+        return this.populateTree(ter, lvl + 1, path);
+      });
     }
 
     if (this.statementsMap[subtreeRootId]) {
@@ -71,7 +69,7 @@ export class TreeCreator {
 
     const childsAreEmpty = !childs.find((ch) => !ch.empty);
 
-    this.fullTree = {
+    this.idMap[subtreeRoot.id] = {
       territory: subtreeRoot,
       statementsCount: noOfStatements,
       lvl,
@@ -81,10 +79,19 @@ export class TreeCreator {
       right: UserRoleMode.Read,
     };
 
+    this.fullTree = this.idMap[subtreeRoot.id];
+
     return this.fullTree;
   }
 
-  applyPermissions(tree: IResponseTree, user: User): IResponseTree | null {
+  applyPermissions(
+    tree: IResponseTree | undefined,
+    user: User
+  ): IResponseTree | null {
+    if (!tree) {
+      return null;
+    }
+
     const filtered: IResponseTree[] = [];
     for (const child of tree.children) {
       const filteredChild = this.applyPermissions(child, user);
@@ -176,6 +183,83 @@ class TreeCache {
     }
 
     return out;
+  }
+
+  findRightInParentTerritory(
+    terId: string,
+    rights: UserRight[]
+  ): UserRight | undefined {
+    const ter = this.tree.idMap[terId];
+    if (!ter) {
+      return undefined;
+    }
+
+    // array of [T0, T1, T1-1, T1-1-3] etc, needs to be reversed to go from closest to farthest
+    for (let i = ter.path.length - 1; i >= 0; i--) {
+      const parentId = ter.path[i];
+      for (const right of rights) {
+        if (right.territory === parentId) {
+          // this is automatically closest match
+          return right;
+        }
+      }
+    }
+
+    // sadly, no right found upwards (towards the T0)
+    return undefined;
+  }
+
+  findRightInChildTerritory(
+    terId: string,
+    rights: UserRight[]
+  ): UserRight | undefined {
+    const ter = this.tree.idMap[terId];
+    if (!ter) {
+      return undefined;
+    }
+
+    for (const right of rights) {
+      if (right.territory === terId) {
+        // this is automatically the closest match
+        return right;
+      }
+
+      // go deeper for each child
+      for (const child of ter.children) {
+        const rightInChild = this.findRightInChildTerritory(
+          child.territory.id,
+          rights
+        );
+        if (rightInChild) {
+          return rightInChild;
+        }
+      }
+    }
+
+    // sadly, no right found upwards (towards the T0)
+    return undefined;
+  }
+
+  getRightForTerritory(
+    terId: string,
+    rights: UserRight[]
+  ): UserRight | undefined {
+    const exactRight = rights.find((r) => r.territory === terId);
+    if (exactRight) {
+      return exactRight;
+    }
+
+    let derivedRight = this.findRightInParentTerritory(terId, rights);
+    if (derivedRight) {
+      return derivedRight;
+    }
+
+    derivedRight = this.findRightInChildTerritory(terId, rights);
+    if (derivedRight) {
+      return derivedRight;
+    }
+
+    return undefined;
   }
 }
 
