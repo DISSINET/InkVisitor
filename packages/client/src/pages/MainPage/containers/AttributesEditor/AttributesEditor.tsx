@@ -79,6 +79,7 @@ interface StatementEditorAttributes {
   loading?: boolean;
   disabledData?: AttributeName[];
   userCanEdit?: boolean;
+  disabled?: boolean;
 }
 
 export const AttributesEditor: React.FC<StatementEditorAttributes> = ({
@@ -89,6 +90,7 @@ export const AttributesEditor: React.FC<StatementEditorAttributes> = ({
   loading,
   disabledData = [],
   userCanEdit = false,
+  disabled = false,
 }) => {
   const [modalData, setModalData] = useState<AttributeData>(data);
   const [modalOpen, setModalOpen] = useState<boolean>(false);
@@ -430,6 +432,7 @@ export const AttributesEditor: React.FC<StatementEditorAttributes> = ({
               key="settings"
               icon={<MdSettings />}
               inverted={true}
+              disabled={disabled}
               color="plain"
               onClick={() => {
                 handleOpenModalClick();
