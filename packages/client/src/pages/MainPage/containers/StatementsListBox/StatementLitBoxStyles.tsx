@@ -34,5 +34,5 @@ export const StyledTableWrapper = styled.div`
   display: flex;
   flex-direction: column;
   overflow-y: auto;
-  overflow-x: hidden;
+  overflow-x: auto;
 `;
