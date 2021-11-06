@@ -4,6 +4,7 @@ import { space1, space2 } from "Theme/constants";
 interface IValueStyle {
   inverted?: boolean;
   suggester?: boolean;
+  disabled?: boolean;
   width?: number | "full";
   noBorder?: boolean;
 }
@@ -41,6 +42,9 @@ export const StyledInput = styled.input<IValueStyle>`
   font-size: ${({ theme }) => theme.fontSize["xs"]};
   padding: ${space1};
   width: ${({ width }) => getWidth(width)};
+  background: ${({ disabled, theme }) =>
+    disabled ? theme.background["stripes"] : ""};
+  cursor: ${({ disabled }) => (disabled ? "not-allowed" : "default")};
   resize: none;
   :focus {
     outline: 0;
@@ -58,6 +62,9 @@ export const StyledSelect = styled.select<IValueStyle>`
   font-weight: bold;
   width: ${({ width }) => getWidth(width)};
   padding: ${space1};
+  background: ${({ disabled, theme }) =>
+    disabled ? theme.background["stripes"] : ""};
+  cursor: ${({ disabled }) => (disabled ? "not-allowed" : "default")};
   resize: none;
   :focus {
     outline: 0;
@@ -93,6 +100,9 @@ export const StyledTextArea = styled.textarea<IValueStyle>`
   font-size: ${({ theme }) => theme.fontSize["xs"]};
   width: ${({ width }) => getWidth(width)};
   padding: ${space1};
+  background: ${({ disabled, theme }) =>
+    disabled ? theme.background["stripes"] : ""};
+  cursor: ${({ disabled }) => (disabled ? "not-allowed" : "default")};
   resize: none;
   line-height: 1.2;
   :focus {
