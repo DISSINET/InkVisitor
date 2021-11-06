@@ -1,5 +1,5 @@
 import React, { MouseEventHandler, useEffect, useMemo, useState } from "react";
-import { Cell, Column } from "react-table";
+import { Cell, Column, ColumnInstance } from "react-table";
 import { useMutation, useQuery, useQueryClient } from "react-query";
 import {
   FaTrashAlt,
@@ -26,6 +26,7 @@ import {
   IActant,
   IAction,
   IStatementAction,
+  IStatementProp,
   IResponseStatement,
 } from "@shared/types";
 import { AttributesEditor } from "../AttributesEditor/AttributesEditor";
@@ -36,6 +37,11 @@ import {
   StyledTableWrapper,
   StyledText,
 } from "./StatementLitBoxStyles";
+
+import {
+  StyledPropsActantList,
+  StyledPropLineColumn,
+} from "../StatementEditorBox/StatementEditorBoxStyles";
 import { CStatement, DStatement } from "constructors";
 import { useSearchParams } from "hooks";
 import { StatementListContextMenu } from "./StatementListContextMenu/StatementListContextMenu";
@@ -114,6 +120,130 @@ export const StatementListBox: React.FC = () => {
       },
     }
   );
+
+  const renderPropGroup = (
+    propOriginId: string,
+    statement: IResponseStatement
+  ) => {
+    // getting origin actants of properties
+    const propsByOrigins = useMemo(() => {
+      if (statement) {
+        const allProps = statement?.data.props;
+        const statementActants = statement.data.actants.concat(
+          statement.data.actions
+        );
+        const allPossibleOrigins = [...(statementActants || [])];
+
+        const originProps: {
+          [key: string]: {
+            //type: "action" | "actant";
+            origin: string;
+            props: any[];
+            actant: IActant;
+          };
+        } = {};
+
+        allPossibleOrigins.forEach((origin) => {
+          originProps[origin.actant || (origin.action as string)] = {
+            //type: origin.class === "A" ? "action" : "actant",
+            origin: origin.actant || origin.action,
+            props: [],
+            actant: origin,
+          };
+        });
+
+        // 1st level
+        allProps.forEach((prop) => {
+          const originProp = originProps[prop.origin];
+          if (originProp) {
+            originProp.props.push({ ...prop, ...{ props: [] } });
+          }
+        });
+
+        // 2nd level
+        allProps.forEach((prop) => {
+          Object.keys(originProps).forEach((opKey: string) => {
+            const op = originProps[opKey];
+            op.props.forEach((op2) => {
+              if (op2.id === prop.origin) {
+                op2.props.push(prop);
+              }
+            });
+          });
+        });
+
+        return originProps;
+      } else {
+        return {};
+      }
+    }, [JSON.stringify(statement)]);
+
+    const propOrigin = propsByOrigins[propOriginId];
+    const originActant = propOrigin?.actant;
+
+    if (originActant && propOrigin.props.length > 0) {
+      return (
+        <React.Fragment key={originActant.id}>
+          {propOrigin.props.map((prop1: any, pi1: number) => {
+            return (
+              <React.Fragment key={prop1 + pi1}>
+                {renderPropRow(statement, prop1, "1", pi1, false)}
+                {prop1.props.map((prop2: any, pi2: number) => {
+                  return renderPropRow(
+                    statement,
+                    prop2,
+                    "2",
+                    pi2,
+                    pi2 === prop1.props.length - 1
+                  );
+                })}
+              </React.Fragment>
+            );
+          })}
+        </React.Fragment>
+      );
+    }
+  };
+
+  const renderPropRow = (
+    statement: IResponseStatement,
+    prop: IStatementProp,
+    level: "1" | "2",
+    order: number,
+    lastSecondLevel: boolean
+  ) => {
+    const propTypeActant =
+      actants && actants.find((a) => a && a.id === prop.type.id);
+    const propValueActant =
+      actants && actants.find((a) => a && a.id === prop.value.id);
+
+    return (
+      <React.Fragment key={prop.origin + level + "|" + order}>
+        <div style={{ display: "flex" }}>
+          <StyledPropLineColumn
+            padded={level === "2"}
+            lastSecondLevel={lastSecondLevel}
+          >
+            {propTypeActant ? (
+              <ActantTag actant={propTypeActant} short={false} />
+            ) : (
+              ""
+            )}
+          </StyledPropLineColumn>
+          <StyledPropLineColumn
+            padded={level === "2"}
+            lastSecondLevel={lastSecondLevel}
+          >
+            {propValueActant ? (
+              <ActantTag actant={propValueActant} short={false} />
+            ) : (
+              ""
+            )}
+          </StyledPropLineColumn>
+        </div>
+      </React.Fragment>
+    );
+  };
 
   const duplicateStatementMutation = useMutation(
     async (statementToDuplicate: IResponseStatement) => {
@@ -244,26 +374,29 @@ export const StatementListBox: React.FC = () => {
   const renderListActantLong = (
     actantObject: IActant,
     key: number,
-    attributes?: boolean
+    attributes?: boolean,
+    statement?: IResponseStatement
   ) => {
     return (
       actantObject && (
-        <div style={{ marginTop: "4px", display: "flex" }} key={key}>
-          <ActantTag
-            key={key}
-            actant={actantObject}
-            tooltipPosition="bottom center"
-          />
-          {attributes ? (
-            <AttributesEditor
-              modalTitle={`Actant involvement [${
-                actantObject ? actantObject.label : "undefined"
-              }]`}
-              userCanEdit={false}
-              disabled
-              entityType={actantObject ? actantObject.class : false}
-              data={{
-              /* TODO make this work
+        <div key={key}>
+          <div style={{ marginTop: "4px", display: "flex" }}>
+            <ActantTag
+              key={key}
+              actant={actantObject}
+              tooltipPosition="bottom center"
+            />
+            {attributes ? (
+              <AttributesEditor
+                modalTitle={`Actant involvement [${
+                  actantObject ? actantObject.label : "undefined"
+                }]`}
+                userCanEdit={false}
+                disabled
+                entityType={actantObject ? actantObject.class : false}
+                data={
+                  {
+                    /* TODO make this work
                 elvl: actantObject.data.elvl,
                 certainty: actantObject.data.certainty,
                 logic: actantObject.data.logic,
@@ -273,12 +406,17 @@ export const StatementListBox: React.FC = () => {
                 bundleStart: actantObject.data.bundleStart,
                 bundleEnd: actantObject.data.bundleEnd,
               */
-              }}
-              handleUpdate={(newData) => {}}
-            />
-          ) : (
-            ""
-          )}
+                  }
+                }
+                handleUpdate={(newData) => {}}
+              />
+            ) : (
+              ""
+            )}
+          </div>
+          <div>
+            {statement ? renderPropGroup(actantObject.id, statement) : ""}
+          </div>
         </div>
       )
     );
@@ -531,6 +669,7 @@ export const StatementListBox: React.FC = () => {
         id: "exp-actions",
         Cell: ({ row }: Cell) => {
           const { actions }: { actions?: IAction[] } = row.original;
+          const statement = row.original as IResponseStatement;
           if (actions) {
             return (
               <>
@@ -538,7 +677,7 @@ export const StatementListBox: React.FC = () => {
                 <TagGroup>
                   <div style={{ display: "block" }}>
                     {actions.map((action: IAction, key: number) =>
-                      renderListActantLong(action, key, true)
+                      renderListActantLong(action, key, true, statement)
                     )}
                   </div>
                 </TagGroup>
@@ -556,19 +695,20 @@ export const StatementListBox: React.FC = () => {
           const actantIds = row.values.data?.actants
             ? row.values.data.actants.map((a: any) => a.actant)
             : [];
-
+          const statement = row.original as IResponseStatement;
           const actantObjects = actantIds.map((actantId: string) => {
             const actantObject =
               actants && actants.find((a) => a && a.id === actantId);
             return actantObject && actantObject;
           });
+
           return (
             <>
               <div>{actantObjects.length > 0 ? <i>Actants</i> : ""}</div>
               <TagGroup>
                 <div style={{ display: "block" }}>
                   {actantObjects.map((actantObject: IActant, key: number) =>
-                    renderListActantLong(actantObject, key, true)
+                    renderListActantLong(actantObject, key, true, statement)
                   )}
                 </div>
               </TagGroup>
