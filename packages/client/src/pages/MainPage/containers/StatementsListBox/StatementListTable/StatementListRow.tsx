@@ -12,7 +12,7 @@ import { Cell, ColumnInstance } from "react-table";
 
 import { DragItem, ItemTypes } from "types";
 import { StatementListRowExpanded } from "./StatementListRowExpanded";
-import { StyledTr, StyledTd } from "./StatementListRowStyles";
+import { StyledTd, StyledTr } from "./StatementListTableStyles";
 
 interface StatementListRow {
   row: any;

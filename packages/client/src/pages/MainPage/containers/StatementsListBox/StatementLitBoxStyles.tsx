@@ -29,3 +29,10 @@ export const StyledActionLabel = styled.div`
 export const StyledText = styled.p`
   font-size: ${({ theme }) => theme.fontSize["xs"]};
 `;
+export const StyledTableWrapper = styled.div`
+  margin-top: 90px;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  overflow-x: hidden;
+`;
