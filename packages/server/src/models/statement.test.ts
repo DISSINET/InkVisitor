@@ -12,7 +12,6 @@ import {
 import "ts-jest";
 import Statement, {
   StatementActant,
-  StatementAction,
   StatementProp,
   StatementReference,
 } from "./statement";
@@ -20,9 +19,9 @@ import { Db } from "@service/RethinkDB";
 import { deleteActants, findActantById } from "@service/shorthands";
 import Territory from "./territory";
 import { IStatement } from "@shared/types/statement";
-import { IStatementAction, IStatementActant } from "@shared/types";
+import { IStatementAction } from "@shared/types";
 
-describe("Statement constructor test", function () {
+describe("Statement constructor test", function () {  
   describe("empty data", () => {
     const emptyData = {};
     const emptyStatement = new Statement({});
@@ -71,7 +70,7 @@ describe("Statement constructor test", function () {
     const fullStatement: Statement = new Statement({ ...fullData });
 
     it("should return full statement", () => {
-      expect(JSON.stringify(fullData)).toEqual(JSON.stringify(fullStatement));
+      expect(fullData).toEqual(fullStatement);
     });
   });
 });
@@ -90,16 +89,12 @@ describe("Statement validate test", function () {
         class: "S",
         label: "label",
         data: {
-          action: "action",
-          certainty: "certainty",
-          elvl: "elvl",
-          modality: "modality",
           text: "text",
-          note: "note",
           territory: {
             id: "id",
             order: 1,
           },
+          actions: [],
           actants: [],
           props: [],
           references: [],
@@ -436,18 +431,12 @@ describe("Statement - save territory order", function () {
       expect(createdData1.data.territory.id).toEqual(
         createdData1.data.territory.id
       );
-      expect(createdData1.data.territory.order).toEqual(
-        createdData1.data.territory.order
-      );
       expect(createdData1.data.territory.order).toEqual(0);
 
       // second statement provides order = -1, which should result in save '1' value
       const createdData2 = await findActantById<IStatement>(db, statement2.id);
       expect(createdData2.data.territory.id).toEqual(
         createdData2.data.territory.id
-      );
-      expect(createdData2.data.territory.order).toEqual(
-        createdData2.data.territory.order
       );
       expect(createdData2.data.territory.order).toEqual(1);
       done();

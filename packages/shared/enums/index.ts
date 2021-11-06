@@ -10,6 +10,7 @@ export enum ActantType {
   Location = "L",
   Value = "V",
   Event = "E",
+  Unknown = "",
 }
 
 export function isValidActantType(input: ActantType): boolean {

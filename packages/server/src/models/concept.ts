@@ -23,34 +23,23 @@ class ConceptData implements IModel {
 class Concept extends Actant implements IActant {
   static table = "actants";
 
-  id = "";
   class: ActantType.Concept = ActantType.Concept; // just default
-  data: any = {};
-
-  label: string = "";
-  detail: string = "";
-  status: ActantStatus = ActantStatus.Pending;
-  language: string[] = ["eng"];
-  notes: string[] = [];
+  data: ConceptData;
 
   constructor(data: UnknownObject) {
-    super();
+    super(data);
 
     if (!data) {
-      return;
+      data = {};
     }
-    
 
-    fillFlatObject(this, data);
     this.data = new ConceptData({} as UnknownObject);
   }
 
   isValid(): boolean {
-    const alloweedClasses = [
-      ActantType.Concept,
-    ];
+    const alloweedClasses = [ActantType.Concept];
 
-    console.log()
+    console.log();
     if (alloweedClasses.indexOf(this.class) === -1) {
       return false;
     }

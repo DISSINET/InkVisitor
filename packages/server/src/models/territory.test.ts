@@ -36,7 +36,7 @@ describe("Territory constructor test", function () {
     const fullTerritory = new Territory({ ...fullData });
 
     it("should return full territory", () => {
-      expect(JSON.stringify(fullData)).toEqual(JSON.stringify(fullTerritory));
+      expect({ ...fullData, _siblings: {} }).toEqual(fullTerritory);
     });
   });
 });
@@ -52,16 +52,12 @@ describe("Territory validate test", function () {
     it("should return true", () => {
       const okData = new Territory({
         id: "id",
-        class: "T",
         label: "label",
         data: {
           parent: {
             id: "2",
             order: 1,
           },
-          type: "type",
-          content: "content",
-          lang: "lang",
         },
       });
       expect(okData.isValid()).toEqual(true);
@@ -138,6 +134,7 @@ describe("Territory - save territory", function () {
   describe("save territory without parent", () => {
     it("should have empty parent prop", async (done) => {
       const territory = new Territory(undefined);
+      territory.id = "T0";
       await territory.save(db.connection);
 
       const createdData = await findActantById<ITerritory>(db, territory.id);
@@ -241,6 +238,7 @@ describe("Territory - update territory", function () {
   describe("update territory without parent", () => {
     it("should have empty parent prop, but set lavel prop", async (done) => {
       const territory = new Territory(undefined);
+      territory.id = "T0";
       await territory.save(db.connection);
 
       await territory.update(db.connection, { label: "new label" });
@@ -256,6 +254,7 @@ describe("Territory - update territory", function () {
   describe("update territory with new parent without explicit order", () => {
     it("should have order as expected", async (done) => {
       const territory = new Territory(undefined);
+      territory.id = "T0";
       await territory.save(db.connection);
       await territory.update(db.connection, {
         data: { parent: { id: "new" } },
@@ -273,6 +272,7 @@ describe("Territory - update territory", function () {
   describe("update territory with new parent with explicit order", () => {
     it("should have order as expected", async (done) => {
       const territory = new Territory(undefined);
+      territory.id = "T0";
       await territory.save(db.connection);
       await territory.update(db.connection, {
         data: { parent: { id: "new", order: 90 } },

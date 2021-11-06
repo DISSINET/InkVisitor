@@ -44,6 +44,7 @@ export class TerritoryData implements IModel {
     }
 
     fillFlatObject(this, data);
+
     if (data.parent) {
       this.parent = new TerritoryParent(data.parent as UnknownObject);
     }
@@ -61,25 +62,18 @@ export class TerritoryData implements IModel {
 class Territory extends Actant implements ITerritory {
   static table = "actants";
 
-  id = "";
   class: ActantType.Territory = ActantType.Territory;
-  data = new TerritoryData({});
-  label: string = "";
-  detail: string = "";
-  status: ActantStatus = ActantStatus.Pending;
-  language: string[] = ["eng"];
-  notes: string[] = [];
+  data: TerritoryData;
 
   _siblings: Record<number, ITerritory> = {};
 
   constructor(data: UnknownObject) {
-    super();
+    super(data);
 
     if (!data) {
-      return;
+      data = {};
     }
 
-    fillFlatObject(this, data);
     this.data = new TerritoryData(data.data as UnknownObject);
   }
 
@@ -105,7 +99,7 @@ class Territory extends Actant implements ITerritory {
 
       const wantedOrder = this.data.parent.order;
       this.data.parent.order = Actant.determineOrder(wantedOrder, childs);
-    } else {
+    } else if (this.id !== "T0") {
       return {
         deleted: 0,
         first_error: "cannot create territory without a parent",
