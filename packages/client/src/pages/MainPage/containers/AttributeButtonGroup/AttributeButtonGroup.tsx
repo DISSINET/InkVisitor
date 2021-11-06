@@ -17,7 +17,12 @@ export const AttributeButtonGroup: React.FC<IAttributeButtonGroup> = ({
   options = [],
   disabled = false,
 }) => {
-  return (
+  return disabled ? (
+    <Button
+      disabled
+      label={options.find((o) => o.selected)?.longValue}
+    ></Button>
+  ) : (
     <StyledPropButtonGroup
       leftMargin={true}
       rightMargin={true}
@@ -29,7 +34,6 @@ export const AttributeButtonGroup: React.FC<IAttributeButtonGroup> = ({
         const lastInRow = oi === options.length - 1;
         return (
           <Button
-            disabled={disabled}
             key={oi}
             label={option.selected ? option.longValue : option.shortValue}
             tooltip={option.longValue}
