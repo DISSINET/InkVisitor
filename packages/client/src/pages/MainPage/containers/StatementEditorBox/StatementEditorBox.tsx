@@ -89,6 +89,8 @@ export const StatementEditorBox: React.FC = () => {
     { enabled: !!statementId && api.isLoggedIn(), retry: 2 }
   );
 
+  console.log(statement);
+
   const userCanEdit: boolean = useMemo(() => {
     return (
       !!statement &&
