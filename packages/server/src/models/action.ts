@@ -31,24 +31,15 @@ class ActionData implements IModel {
 class Action extends Actant implements IAction {
   static table = "actants";
 
-  id = "";
   class: ActantType.Action = ActantType.Action; // just default
-  data = new ActionData({});
-
-  label: string = "";
-  detail: string = "";
-  status: ActantStatus = ActantStatus.Pending;
-  language: string[] = ["eng"];
-  notes: string[] = [];
+  data: ActionData;
 
   constructor(data: UnknownObject) {
-    super();
+    super(data);
 
     if (!data) {
-      return;
+      data = {};
     }
-
-    fillFlatObject(this, data);
 
     this.data = new ActionData(data.data as UnknownObject);
   }

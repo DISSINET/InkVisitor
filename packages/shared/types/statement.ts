@@ -15,12 +15,12 @@ import {
 export interface IStatement extends IActant {
   class: ActantType.Statement;
   data: {
-    actions: IStatementAction[];
     text: string;
     territory: {
       id: string;
       order: number;
     };
+    actions: IStatementAction[];
     actants: IStatementActant[];
     props: IStatementProp[];
     references: IStatementReference[];
