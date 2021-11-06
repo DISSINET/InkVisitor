@@ -8,11 +8,11 @@ import fs from "fs";
 import https from "https";
 import http from "http";
 import { prepareTreeCache } from "@service/treeCache";
+import "@service/mailer";
 
 // Start the server
 (async () => {
   await prepareTreeCache();
-
   const port = Number(process.env.PORT || 3000);
   const httpServer = http.createServer(server);
   const httpsServer = https.createServer(
