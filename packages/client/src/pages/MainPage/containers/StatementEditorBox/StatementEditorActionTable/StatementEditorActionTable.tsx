@@ -83,11 +83,28 @@ export const StatementEditorActionTable: React.FC<StatementEditorActionTable> = 
       const actions: IStatementAction[] = filteredActions.map(
         (filteredAction) => filteredAction.data.sAction
       );
-      updateActionsMutation.mutate({
-        actions: actions,
-      });
+      if (JSON.stringify(statement.data.actions) !== JSON.stringify(actions)) {
+        updateActionsMutation.mutate({
+          actions: actions,
+        });
+      }
     }
   };
+
+  const moveRow = useCallback(
+    (dragIndex: number, hoverIndex: number) => {
+      const dragRecord = filteredActions[dragIndex];
+      setFilteredActions(
+        update(filteredActions, {
+          $splice: [
+            [dragIndex, 1],
+            [hoverIndex, 0, dragRecord],
+          ],
+        })
+      );
+    },
+    [filteredActions]
+  );
 
   const columns: Column<{}>[] = useMemo(() => {
     return [
@@ -229,21 +246,6 @@ export const StatementEditorActionTable: React.FC<StatementEditorActionTable> = 
       },
     },
     useExpanded
-  );
-
-  const moveRow = useCallback(
-    (dragIndex: number, hoverIndex: number) => {
-      const dragRecord = filteredActions[dragIndex];
-      setFilteredActions(
-        update(filteredActions, {
-          $splice: [
-            [dragIndex, 1],
-            [hoverIndex, 0, dragRecord],
-          ],
-        })
-      );
-    },
-    [filteredActions]
   );
 
   return (

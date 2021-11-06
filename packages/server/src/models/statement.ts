@@ -27,6 +27,7 @@ import { InternalServerError } from "@shared/types/errors";
 import User from "./user";
 import Territory from "./territory";
 import { EventMapSingle, EventTypes } from "./events/types";
+import treeCache from "@service/treeCache";
 
 export class StatementActant implements IStatementActant, IModel {
   id = "";
@@ -294,8 +295,10 @@ class Statement extends Actant implements IStatement {
       return true;
     }
 
-    const territory = new Territory({ id: this.data.territory.id });
-    const closestRight = territory.getClosestRight(user.rights);
+    const closestRight = treeCache.getRightForTerritory(
+      this.data.territory.id,
+      user.rights
+    );
     if (!closestRight) {
       return false;
     }

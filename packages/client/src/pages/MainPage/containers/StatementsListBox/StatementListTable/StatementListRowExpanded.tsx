@@ -1,14 +1,10 @@
 import React, { useState } from "react";
-import { useQuery } from "react-query";
 import { useSearchParams } from "hooks";
-import { Cell, ColumnInstance, Row, useTable } from "react-table";
-import { ActantTag } from "../../../";
+import { Cell, ColumnInstance, Row } from "react-table";
 
-import { IActant, IAction, ILabel, IStatementActant } from "@shared/types";
-import api from "api";
-import { StyledSubRow } from "./StatementListRowStyles";
-import { StyledTr, StyledTd } from "./StatementListRowStyles";
+import { IStatementActant } from "@shared/types";
 import { StyledSubRowTd } from "pages/MainPage/containers/StatementEditorBox/StatementEditorActionTable/StatementEditorActionTableRow/StatementEditorActionTableRowStyles";
+import { StyledSubRow } from "./StatementListTableStyles";
 
 interface StatementListRowExpanded {
   row: Row;
