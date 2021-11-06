@@ -17,6 +17,7 @@ import {
 interface ContextMenu {
   territoryActant: IActant;
   right: UserRoleMode;
+  empty: boolean;
   onMenuOpen: () => void;
   onMenuClose: () => void;
 }
@@ -25,6 +26,7 @@ export const ContextMenu: React.FC<ContextMenu> = ({
   onMenuOpen,
   onMenuClose,
   right,
+  empty,
 }) => {
   const ref = useRef<HTMLDivElement>(null);
 
@@ -103,17 +105,20 @@ export const ContextMenu: React.FC<ContextMenu> = ({
                 );
               }}
             />
-            <Button
-              key="delete"
-              tooltip="delete territory"
-              icon={<FaTrashAlt size={14} />}
-              color="danger"
-              onClick={() => {
-                setShowSubmit(true);
-                setShowMenu(false);
-                onMenuClose();
-              }}
-            />
+            {(right === UserRoleMode.Admin ||
+              (right === UserRoleMode.Write && empty)) && (
+              <Button
+                key="delete"
+                tooltip="delete territory"
+                icon={<FaTrashAlt size={14} />}
+                color="danger"
+                onClick={() => {
+                  setShowSubmit(true);
+                  setShowMenu(false);
+                  onMenuClose();
+                }}
+              />
+            )}
           </StyledContextButtonGroup>
         )}
       </StyledWrapper>
