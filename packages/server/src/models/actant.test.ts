@@ -12,7 +12,7 @@ describe("test Actant.delete", function () {
       const db = new Db();
       await db.initDb();
 
-      const actant = new Actant();
+      const actant = new Actant({});
       await actant.save(db.connection);
       const statement = new Statement({
         data: {
@@ -45,7 +45,7 @@ describe("test Actant.delete", function () {
 
     beforeAll(async () => {
       await db.initDb();
-      const actant = new Actant();
+      const actant = new Actant({});
       await actant.save(db.connection);
       statementViaActants = new Statement({
         data: {

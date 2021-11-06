@@ -123,6 +123,7 @@ export class StatementAction {
       return;
     }
     fillFlatObject(this, data);
+    fillArray(this.mood, String, data.mood);
   }
 
   /**
@@ -263,26 +264,15 @@ export class StatementData implements IModel {
 class Statement extends Actant implements IStatement {
   static table = "actants";
 
-  id = "";
   class: ActantType.Statement = ActantType.Statement;
-  data = new StatementData({});
-  label: string = "";
-  detail: string = "";
-  status: ActantStatus = ActantStatus.Pending;
-  language: string[] = ["eng"];
-  notes: string[] = [];
+  data: StatementData;
 
   constructor(data: UnknownObject) {
-    super();
+    super(data);
 
     if (!data) {
-      return;
+      data = {};
     }
-
-    fillFlatObject(this, data);
-
-    fillArray(this.notes, String, data.notes);
-    fillArray(this.language, String, data.language);
 
     this.data = new StatementData(data.data as UnknownObject);
   }

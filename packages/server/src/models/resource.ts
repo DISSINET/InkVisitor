@@ -22,23 +22,16 @@ class ResourceData implements IModel {
 class Resource extends Actant implements IResource {
   static table = "actants";
 
-  id = "";
   class: ActantType.Resource = ActantType.Resource;
-  data = new ResourceData({});
-  label: string = "";
-  detail: string = "";
-  status: ActantStatus = ActantStatus.Pending;
-  language: string[] = ["eng"];
-  notes: string[] = [];
+  data: ResourceData;
 
   constructor(data: UnknownObject) {
-    super();
+    super(data);
 
     if (!data) {
-      return;
+      data = {};
     }
 
-    fillFlatObject(this, data);
     this.data = new ResourceData(data.data as UnknownObject);
   }
 

@@ -24,25 +24,16 @@ class EntityData implements IModel {
 class Entity extends Actant implements IEntity {
   static table = "actants";
 
-  id = "";
   class: EntityActantType = ActantType.Person; // just default
-  data = new EntityData({});
-
-  label: string = "";
-  detail: string = "";
-  status: ActantStatus = ActantStatus.Pending;
-  language: string[] = ["eng"];
-  notes: string[] = [];
+  data: EntityData;
 
   constructor(data: UnknownObject) {
-    super();
+    super(data);
 
     if (!data) {
-      return;
+      data = {};
     }
-    fillFlatObject(this, data);
-    fillArray(this.notes, String, data.notes);
-    fillArray(this.language, String, data.language);
+
     this.data = new EntityData(data.data as UnknownObject);
   }
 
