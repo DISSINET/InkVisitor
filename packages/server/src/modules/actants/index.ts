@@ -293,12 +293,16 @@ export default Router()
         }
       }
 
+      // filter out duplicates
+      associatedActantIds = [...new Set(associatedActantIds)]
+
       const actants = await filterActantsByWildcard(
         httpRequest.db,
         req.class,
         req.label,
         associatedActantIds
       );
+
 
       return actants.map((a: IActant) => {
         const out: IResponseSearch = {
