@@ -25,6 +25,7 @@ import {
 } from "@shared/types";
 import { mergeDeep } from "@common/functions";
 import Statement from "@models/statement";
+import { ActantStatus, UserRole } from "@shared/enums";
 
 export default Router()
   .get(
@@ -100,6 +101,10 @@ export default Router()
         throw new PermissionDeniedError("actant cannot be saved");
       }
 
+      if (request.getUserOrFail().role !== UserRole.Admin) {
+        model.status = ActantStatus.Pending;
+      }
+
       const result = await model.save(request.db.connection);
 
       if (
@@ -152,6 +157,10 @@ export default Router()
 
       if (!model.canBeEditedByUser(request.getUserOrFail())) {
         throw new PermissionDeniedError("actant cannot be saved");
+      }
+
+      if (request.getUserOrFail().role !== UserRole.Admin) {
+        model.status = ActantStatus.Pending;
       }
 
       // update only the required fields
@@ -222,7 +231,6 @@ export default Router()
         );
       }
 
-      
       const actant = getActantType({ ...actantData });
 
       if (!actant.canBeViewedByUser(request.getUserOrFail())) {
