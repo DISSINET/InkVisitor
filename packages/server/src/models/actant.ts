@@ -1,18 +1,39 @@
-import { IDbModel, UnknownObject, fillFlatObject } from "./common";
+import { IDbModel, UnknownObject, fillFlatObject, fillArray } from "./common";
 import { r as rethink, Connection, WriteResult } from "rethinkdb-ts";
-import { IStatement } from "@shared/types";
-import { ActantType, UserRole, UserRoleMode } from "@shared/enums";
+import { IStatement, IActant } from "@shared/types";
+import {
+  ActantStatus,
+  ActantType,
+  Language,
+  UserRole,
+  UserRoleMode,
+} from "@shared/enums";
 import { InternalServerError } from "@shared/types/errors";
 import User from "./user";
-import Statement from "./statement";
 import emitter from "./events/emitter";
 import { EventTypes } from "./events/types";
 
-export default class Actant implements IDbModel {
+export default class Actant implements IActant, IDbModel {
   static table = "actants";
 
-  id?: string;
-  language: string[] = ["eng"];
+  id: string = "";
+  class: ActantType = ActantType.Unknown;
+  data: any = undefined;
+  label: string = "";
+  detail: string = "";
+  status: ActantStatus = ActantStatus.Pending;
+  language: string[] = [];
+  notes: string[] = [];
+
+  constructor(data: UnknownObject) {
+    if (!data) {
+      return;
+    }
+
+    fillFlatObject(this, { ...data, data: undefined });
+    fillArray(this.language, String, data.language);
+    fillArray(this.notes, String, data.notes);
+  }
 
   async save(db: Connection | undefined): Promise<WriteResult> {
     const result = await rethink
@@ -115,7 +136,7 @@ export default class Actant implements IDbModel {
       .sort((a, b) => a - b);
     let out = -1;
 
-    if (want === undefined) {
+    if (want < 0 || want === undefined) {
       out = sortedOrders.length ? sortedOrders[sortedOrders.length - 1] + 1 : 0;
     } else if (sibl[want]) {
       // if there is a conflict - order number already exist
