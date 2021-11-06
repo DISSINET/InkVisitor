@@ -1,3 +1,4 @@
+import { UserRoleMode } from "@shared/enums";
 import { IActant } from "@shared/types";
 import { Button } from "components";
 import React, { useRef, useState } from "react";
@@ -15,6 +16,7 @@ import {
 
 interface ContextMenu {
   territoryActant: IActant;
+  right: UserRoleMode;
   onMenuOpen: () => void;
   onMenuClose: () => void;
 }
@@ -22,6 +24,7 @@ export const ContextMenu: React.FC<ContextMenu> = ({
   territoryActant,
   onMenuOpen,
   onMenuClose,
+  right,
 }) => {
   const ref = useRef<HTMLDivElement>(null);
 
@@ -74,18 +77,20 @@ export const ContextMenu: React.FC<ContextMenu> = ({
             height={currentPosition.height}
             style={animatedMount}
           >
-            <Button
-              key="add"
-              tooltip="add child territory"
-              icon={<FaPlus size={14} />}
-              color="info"
-              onClick={() => {
-                // add child
-                setShowCreate(true);
-                setShowMenu(false);
-                onMenuClose();
-              }}
-            />
+            {right !== UserRoleMode.Read && (
+              <Button
+                key="add"
+                tooltip="add child territory"
+                icon={<FaPlus size={14} />}
+                color="info"
+                onClick={() => {
+                  // add child
+                  setShowCreate(true);
+                  setShowMenu(false);
+                  onMenuClose();
+                }}
+              />
+            )}
             <Button
               key="favorites"
               tooltip="add to favorites"

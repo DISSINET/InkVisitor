@@ -283,6 +283,7 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
                   territoryActant={territoryActant}
                   onMenuOpen={() => setContextMenuOpen(true)}
                   onMenuClose={() => setContextMenuOpen(false)}
+                  right={right}
                 />
               </StyledTerritoryTagWrap>
             ) : (
