@@ -60,6 +60,7 @@ export const TerritoryTreeBox: React.FC = () => {
     <>
       {data && (
         <TerritoryTreeNode
+          right={data.right}
           territory={data.territory}
           children={data.children}
           lvl={data.lvl}
