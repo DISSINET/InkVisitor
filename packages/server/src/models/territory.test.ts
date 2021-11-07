@@ -287,7 +287,7 @@ describe("Territory - update territory", function () {
     });
   });
 });
-
+/*
 describe("Territory - test getClosestRight", function () {
   describe("no input rights", () => {
     it("should return undefined as no closest right found", async (done) => {
@@ -334,3 +334,4 @@ describe("Territory - test getClosestRight", function () {
     });
   });
 });
+*/
