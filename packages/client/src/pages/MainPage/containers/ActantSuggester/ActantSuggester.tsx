@@ -97,7 +97,7 @@ export const ActantSuggester: React.FC<ActantSuggesterI> = ({
     },
     {
       enabled:
-        debouncedTyped.length > 2 && !!selectedCategory && api.isLoggedIn(),
+        debouncedTyped.length > 1 && !!selectedCategory && api.isLoggedIn(),
     }
   );
 
