@@ -1,10 +1,5 @@
-import { fillFlatObject, UnknownObject, IModel } from "./common";
-import {
-  ActantType,
-  EntityActantType,
-  ActantStatus,
-  EntityLogicalType,
-} from "@shared/enums";
+import { UnknownObject, IModel } from "./common";
+import { ActantType } from "@shared/enums";
 import Actant from "./actant";
 import { IActant } from "@shared/types";
 
