@@ -18,7 +18,8 @@ export const StyledButton = styled.button<IButtonStyle>`
   justify-content: center;
   width: ${({ fullWidth }) => (fullWidth ? "100%" : "auto")};
   font-size: ${({ theme }) => theme.fontSize["xs"]};
-  font-weight: ${({ textRegular }) => (textRegular ? 500 : 900)};
+  font-weight: ${({ disabled, textRegular }) =>
+    disabled ? 400 : textRegular ? 500 : 900};
   padding: ${space1} ${({ hasIcon }) => (hasIcon ? space1 : space2)};
   border-color: ${({ theme, disabled, color }) =>
     disabled ? theme.color["gray"][400] : theme.color[color]};
@@ -28,13 +29,13 @@ export const StyledButton = styled.button<IButtonStyle>`
     radiusLeft ? "7px 0 0 7px" : radiusRight ? "0 7px 7px 0" : 0};
   color: ${({ theme, disabled, color, inverted }) =>
     disabled
-      ? theme.color["gray"][200]
+      ? theme.color["gray"][800]
       : inverted
       ? theme.color[color]
       : theme.color["white"]};
-  background-color: ${({ theme, disabled, color, inverted }) =>
+  background: ${({ theme, disabled, color, inverted }) =>
     disabled
-      ? theme.color["gray"][400]
+      ? "repeating-linear-gradient(-45deg,#cbd5e0,#cbd5e0,1px,#fff 1px,#fff 12px)"
       : inverted
       ? theme.color["invertedBg"][color]
       : theme.color[color]};

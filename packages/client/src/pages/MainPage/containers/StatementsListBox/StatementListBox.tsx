@@ -83,26 +83,6 @@ export const StatementListBox: React.FC = () => {
     }
   );
 
-  const {
-    status: statusStatement,
-    data: statement,
-    error: errorStatement,
-    isFetching: isFetchingStatement,
-  } = useQuery(
-    ["statement", statementId],
-    async () => {
-      const res = await api.statementGet(statementId);
-      return res.data;
-    },
-    { enabled: !!statementId && api.isLoggedIn(), retry: 2 }
-  );
-
-  useEffect(() => {
-    if (statement && !territoryId) {
-      setTerritoryId(statement.data.territory.id);
-    }
-  }, [statement, territoryId]);
-
   useEffect(() => {
     if (error && (error as any).error === "TerritoryDoesNotExits") {
       setTerritoryId("");
@@ -123,130 +103,6 @@ export const StatementListBox: React.FC = () => {
       },
     }
   );
-
-  const renderPropGroup = (
-    propOriginId: string,
-    statement: IResponseStatement
-  ) => {
-    // getting origin actants of properties
-    const propsByOrigins = useMemo(() => {
-      if (statement) {
-        const allProps = statement?.data.props;
-        const statementActants = statement.data.actants.concat(
-          statement.data.actions
-        );
-        const allPossibleOrigins = [...(statementActants || [])];
-
-        const originProps: {
-          [key: string]: {
-            //type: "action" | "actant";
-            origin: string;
-            props: any[];
-            actant: IActant;
-          };
-        } = {};
-
-        allPossibleOrigins.forEach((origin) => {
-          originProps[origin.actant || (origin.action as string)] = {
-            //type: origin.class === "A" ? "action" : "actant",
-            origin: origin.actant || origin.action,
-            props: [],
-            actant: origin,
-          };
-        });
-
-        // 1st level
-        allProps.forEach((prop) => {
-          const originProp = originProps[prop.origin];
-          if (originProp) {
-            originProp.props.push({ ...prop, ...{ props: [] } });
-          }
-        });
-
-        // 2nd level
-        allProps.forEach((prop) => {
-          Object.keys(originProps).forEach((opKey: string) => {
-            const op = originProps[opKey];
-            op.props.forEach((op2) => {
-              if (op2.id === prop.origin) {
-                op2.props.push(prop);
-              }
-            });
-          });
-        });
-
-        return originProps;
-      } else {
-        return {};
-      }
-    }, [JSON.stringify(statement)]);
-
-    const propOrigin = propsByOrigins[propOriginId];
-    const originActant = propOrigin?.actant;
-
-    if (originActant && propOrigin.props.length > 0) {
-      return (
-        <React.Fragment key={originActant.id}>
-          {propOrigin.props.map((prop1: any, pi1: number) => {
-            return (
-              <React.Fragment key={prop1 + pi1}>
-                {renderPropRow(statement, prop1, "1", pi1, false)}
-                {prop1.props.map((prop2: any, pi2: number) => {
-                  return renderPropRow(
-                    statement,
-                    prop2,
-                    "2",
-                    pi2,
-                    pi2 === prop1.props.length - 1
-                  );
-                })}
-              </React.Fragment>
-            );
-          })}
-        </React.Fragment>
-      );
-    }
-  };
-
-  const renderPropRow = (
-    statement: IResponseStatement,
-    prop: IStatementProp,
-    level: "1" | "2",
-    order: number,
-    lastSecondLevel: boolean
-  ) => {
-    const propTypeActant =
-      actants && actants.find((a) => a && a.id === prop.type.id);
-    const propValueActant =
-      actants && actants.find((a) => a && a.id === prop.value.id);
-
-    return (
-      <React.Fragment key={prop.origin + level + "|" + order}>
-        <div style={{ display: "flex" }}>
-          <StyledPropLineColumn
-            padded={level === "2"}
-            lastSecondLevel={lastSecondLevel}
-          >
-            {propTypeActant ? (
-              <ActantTag actant={propTypeActant} short={false} />
-            ) : (
-              ""
-            )}
-          </StyledPropLineColumn>
-          <StyledPropLineColumn
-            padded={level === "2"}
-            lastSecondLevel={lastSecondLevel}
-          >
-            {propValueActant ? (
-              <ActantTag actant={propValueActant} short={false} />
-            ) : (
-              ""
-            )}
-          </StyledPropLineColumn>
-        </div>
-      </React.Fragment>
-    );
-  };
 
   const duplicateStatementMutation = useMutation(
     async (statementToDuplicate: IResponseStatement) => {
@@ -394,36 +250,9 @@ export const StatementListBox: React.FC = () => {
               actant={actantObject}
               tooltipPosition="bottom center"
             />
-            {attributes ? (
-              <AttributesEditor
-                modalTitle={`Actant involvement [${
-                  actantObject ? actantObject.label : "undefined"
-                }]`}
-                userCanEdit={false}
-                disabled
-                entityType={actantObject ? actantObject.class : false}
-                data={
-                  {
-                    /* TODO make this work
-                elvl: actantObject.data.elvl,
-                certainty: actantObject.data.certainty,
-                logic: actantObject.data.logic,
-                virtuality: actantObject.data.virtuality,
-                partitivity: actantObject.data.partitivity,
-                operator: actantObject.data.operator,
-                bundleStart: actantObject.data.bundleStart,
-                bundleEnd: actantObject.data.bundleEnd,
-              */
-                  }
-                }
-                handleUpdate={(newData) => {}}
-              />
-            ) : (
-              ""
-            )}
           </div>
           <div>
-            {statement ? renderPropGroup(actantObject.id, statement) : ""}
+            {/* {statement ? renderPropGroup(actantObject.id, statement) : ""} */}
           </div>
         </div>
       )

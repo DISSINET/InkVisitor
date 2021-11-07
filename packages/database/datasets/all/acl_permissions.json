@@ -83,6 +83,11 @@
   },
   {
     "controller": "actants",
+    "method": "get",
+    "roles": ["*"]
+  },
+  {
+    "controller": "actants",
     "method": "getMore",
     "roles": ["*"]
   }
