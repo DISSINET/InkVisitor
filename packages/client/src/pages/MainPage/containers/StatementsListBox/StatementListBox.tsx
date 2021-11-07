@@ -46,23 +46,27 @@ import { CStatement, DStatement } from "constructors";
 import { useSearchParams } from "hooks";
 import { StatementListContextMenu } from "./StatementListContextMenu/StatementListContextMenu";
 import { BsArrowUp, BsArrowDown } from "react-icons/bs";
-import { UserRole } from "@shared/enums";
+import { UserRole, UserRoleMode } from "@shared/enums";
 
 const initialData: {
   statements: IStatement[];
   actants: IActant[];
-  label: string;
+  right: UserRoleMode;
 } = {
   statements: [],
   actants: [],
-  label: "",
+  right: UserRoleMode.Read,
 };
 
 export const StatementListBox: React.FC = () => {
   const queryClient = useQueryClient();
 
-  const { territoryId, setTerritoryId, statementId, setStatementId } =
-    useSearchParams();
+  const {
+    territoryId,
+    setTerritoryId,
+    statementId,
+    setStatementId,
+  } = useSearchParams();
 
   const [showSubmit, setShowSubmit] = useState(false);
   const [statementToDelete, setStatementToDelete] = useState<IStatement>();
@@ -74,7 +78,6 @@ export const StatementListBox: React.FC = () => {
       return res.data;
     },
     {
-      initialData: initialData,
       enabled: !!territoryId && api.isLoggedIn(),
       retry: 2,
     }
@@ -247,8 +250,13 @@ export const StatementListBox: React.FC = () => {
 
   const duplicateStatementMutation = useMutation(
     async (statementToDuplicate: IResponseStatement) => {
-      const { actions, audits, usedIn, actants, ...newStatementObject } =
-        statementToDuplicate;
+      const {
+        actions,
+        audits,
+        usedIn,
+        actants,
+        ...newStatementObject
+      } = statementToDuplicate;
 
       const duplicatedStatement = DStatement(newStatementObject as IStatement);
       await api.actantsCreate(duplicatedStatement);
@@ -592,77 +600,87 @@ export const StatementListBox: React.FC = () => {
         Header: "",
         id: "expander",
         width: 300,
-        Cell: ({ row }: Cell) => (
-          <ButtonGroup>
-            <StatementListContextMenu
-              buttons={[
-                <Button
-                  key="r"
-                  icon={<FaTrashAlt size={14} />}
-                  color="danger"
-                  tooltip="delete"
-                  onClick={() => {
-                    setStatementToDelete(row.original as IResponseStatement);
-                    setShowSubmit(true);
-                  }}
-                />,
-                <Button
-                  key="d"
-                  icon={<FaClone size={14} />}
-                  color="warning"
-                  tooltip="duplicate"
-                  onClick={() => {
-                    duplicateStatementMutation.mutate(
-                      row.original as IResponseStatement
-                    );
-                  }}
-                />,
-                <Button
-                  key="add-up"
-                  icon={
-                    <>
-                      <FaPlus size={14} />
-                      <BsArrowUp size={14} />
-                    </>
-                  }
-                  tooltip="add new statement before"
-                  color="info"
-                  onClick={() => {
-                    addStatementAtCertainIndex(row.index - 1);
-                  }}
-                />,
-                <Button
-                  key="add-down"
-                  icon={
-                    <>
-                      <FaPlus size={14} />
-                      <BsArrowDown size={14} />
-                    </>
-                  }
-                  tooltip="add new statement after"
-                  color="success"
-                  onClick={() => {
-                    addStatementAtCertainIndex(row.index + 1);
-                  }}
-                />,
-              ]}
-            />
-            <span
-              {...row.getToggleRowExpandedProps()}
-              style={{
-                cursor: "pointer",
-                display: "flex",
-                alignItems: "center",
-              }}
-              onClick={(e: React.MouseEvent) => {
-                e.stopPropagation();
-                row.toggleRowExpanded();
-              }}
-            >
-              {row.isExpanded ? <FaChevronCircleUp /> : <FaChevronCircleDown />}
-            </span>
-          </ButtonGroup>
-        ),
+        Cell: ({ row }: Cell) => {
+          return (
+            <ButtonGroup>
+              {data?.right !== UserRoleMode.Read && (
+                <StatementListContextMenu
+                  buttons={[
+                    <Button
+                      key="r"
+                      icon={<FaTrashAlt size={14} />}
+                      color="danger"
+                      tooltip="delete"
+                      onClick={() => {
+                        setStatementToDelete(
+                          row.original as IResponseStatement
+                        );
+                        setShowSubmit(true);
+                      }}
+                    />,
+                    <Button
+                      key="d"
+                      icon={<FaClone size={14} />}
+                      color="warning"
+                      tooltip="duplicate"
+                      onClick={() => {
+                        duplicateStatementMutation.mutate(
+                          row.original as IResponseStatement
+                        );
+                      }}
+                    />,
+                    <Button
+                      key="add-up"
+                      icon={
+                        <>
+                          <FaPlus size={14} />
+                          <BsArrowUp size={14} />
+                        </>
+                      }
+                      tooltip="add new statement before"
+                      color="info"
+                      onClick={() => {
+                        addStatementAtCertainIndex(row.index - 1);
+                      }}
+                    />,
+                    <Button
+                      key="add-down"
+                      icon={
+                        <>
+                          <FaPlus size={14} />
+                          <BsArrowDown size={14} />
+                        </>
+                      }
+                      tooltip="add new statement after"
+                      color="success"
+                      onClick={() => {
+                        addStatementAtCertainIndex(row.index + 1);
+                      }}
+                    />,
+                  ]}
+                />
+              )}
+              <span
+                {...row.getToggleRowExpandedProps()}
+                style={{
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                }}
+                onClick={(e: React.MouseEvent) => {
+                  e.stopPropagation();
+                  row.toggleRowExpanded();
+                }}
+              >
+                {row.isExpanded ? (
+                  <FaChevronCircleUp />
+                ) : (
+                  <FaChevronCircleDown />
+                )}
+              </span>
+            </ButtonGroup>
+          );
+        },
       },
       {
         Header: "",
@@ -776,10 +794,12 @@ export const StatementListBox: React.FC = () => {
 
   return (
     <>
-      <StatementListHeader
-        data={data ? data : initialData}
-        addStatementAtTheEndMutation={addStatementAtTheEndMutation}
-      />
+      {data && (
+        <StatementListHeader
+          data={data}
+          addStatementAtTheEndMutation={addStatementAtTheEndMutation}
+        />
+      )}
 
       <StyledTableWrapper id="Statements-box-table">
         <StatementListTable
