@@ -8,6 +8,10 @@ export function hashPassword(rawPassword: string): string {
   return bcrypt.hashSync(rawPassword, 10);
 }
 
+export function generateRandomString(len: number): string {
+  return Math.random().toString(36).slice(-len);
+}
+
 export function checkPassword(
   rawPassword: string,
   storedHash: string
