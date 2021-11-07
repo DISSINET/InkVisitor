@@ -10,7 +10,7 @@ import { IDbModel, fillArray, fillFlatObject, UnknownObject } from "./common";
 import { UserRole, UserRoleMode } from "@shared/enums";
 import Territory from "./territory";
 import { ModelNotValidError } from "@shared/types/errors";
-import { hashPassword } from "@common/auth";
+import { generateRandomString, hashPassword } from "@common/auth";
 import Actant from "./actant";
 
 export class UserRight implements IUserRight {
@@ -178,6 +178,12 @@ export default class User implements IDbModel, IUser {
     }
 
     return true;
+  }
+
+  generatePassword(): string {
+    const raw = generateRandomString(10);
+    this.password = hashPassword(raw);
+    return raw;
   }
 
   static async getUser(

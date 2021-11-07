@@ -260,7 +260,7 @@ class Api {
   ): Promise<AxiosResponse<IResponseGeneric>> {
     try {
       const response = await this.connection.get(
-        `/users/restart-password/${userId}`
+        `/users/reset-password/${userId}`
       );
       return response;
     } catch (err: any | AxiosError) {
