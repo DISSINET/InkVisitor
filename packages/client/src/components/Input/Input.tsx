@@ -29,6 +29,7 @@ interface InputProps {
   password?: boolean;
   autoFocus?: boolean;
   disabled?: boolean;
+  noBorder?: boolean;
 }
 
 export const Input: React.FC<InputProps> = ({
@@ -48,6 +49,7 @@ export const Input: React.FC<InputProps> = ({
   password = false,
   autoFocus = false,
   disabled = false,
+  noBorder = false,
   onFocus = () => {},
   onBlur = () => {},
 }) => {
@@ -128,6 +130,7 @@ export const Input: React.FC<InputProps> = ({
             }
           }}
           inverted={inverted}
+          noBorder={noBorder}
           suggester={suggester}
         />
       )}

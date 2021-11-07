@@ -45,6 +45,7 @@ import {
   StyledEditorPreSection,
   StyledGrid,
   StyledGridCell,
+  StyledListHeaderColumn,
 } from "./StatementEditorBoxStyles";
 import { StatementEditorActantTable } from "./StatementEditorActantTable/StatementEditorActantTable";
 import { StatementEditorActionTable } from "./StatementEditorActionTable/StatementEditorActionTable";
@@ -671,7 +672,11 @@ export const StatementEditorBox: React.FC = () => {
 
             {territoryData && (
               <StyledGrid>
-                <StyledGridCell>Statement territory</StyledGridCell>
+                <StyledGridCell>
+                  <StyledListHeaderColumn>
+                    Statement territory
+                  </StyledListHeaderColumn>
+                </StyledGridCell>
                 <StyledGridCell>
                   <ActantTag actant={territoryData} short={false} />
                 </StyledGridCell>
@@ -694,7 +699,6 @@ export const StatementEditorBox: React.FC = () => {
             )}
           </StyledEditorPreSection>
           <StyledEditorSection firstSection key="editor-section-summary">
-            <StyledEditorSectionHeader>Text</StyledEditorSectionHeader>
             <StyledEditorSectionContent firstSection>
               <div>
                 <div>
@@ -702,6 +706,7 @@ export const StatementEditorBox: React.FC = () => {
                     disabled={!userCanEdit}
                     type="textarea"
                     width="full"
+                    noBorder
                     placeholder="Insert statement text here"
                     onChangeFn={(newValue: string) => {
                       if (newValue !== statement.data.text) {
