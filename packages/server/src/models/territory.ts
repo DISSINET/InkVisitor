@@ -113,7 +113,7 @@ class Territory extends Actant implements ITerritory {
 
     const result = await super.save(db);
 
-    treeCache.initialize();
+    await treeCache.initialize();
 
     return result;
   }
@@ -146,7 +146,7 @@ class Territory extends Actant implements ITerritory {
       .update(updateData)
       .run(db);
 
-    treeCache.initialize();
+    await treeCache.initialize();
 
     return result;
   }
@@ -165,7 +165,7 @@ class Territory extends Actant implements ITerritory {
 
     const result = await super.delete(db);
 
-    treeCache.initialize();
+    await treeCache.initialize();
 
     return result;
   }
