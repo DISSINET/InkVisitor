@@ -34,6 +34,7 @@ class Entity extends Actant implements IEntity {
       data = {};
     }
 
+    this.class = data.class as EntityActantType;
     this.data = new EntityData(data.data as UnknownObject);
   }
 
