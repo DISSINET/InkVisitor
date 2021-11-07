@@ -127,8 +127,6 @@ export default Router()
         data: childTerritory.data,
       });
 
-      await treeCache.initialize();
-
       return out;
     })
   );
