@@ -1,7 +1,7 @@
 import { Request } from "express";
 import { Router } from "express";
 import { findActantById, findActantsByIds } from "@service/shorthands";
-import { BadParams, StatementDoesNotExits } from "@shared/types/errors";
+import { BadParams, PermissionDeniedError, StatementDoesNotExits } from "@shared/types/errors";
 import { asyncRouteHandler } from "..";
 import { IResponseStatement, IStatement, IActant } from "@shared/types";
 import Statement from "@models/statement";
@@ -24,6 +24,12 @@ export default Router().get(
     }
 
     const statementModel = new Statement({ ...statementData });
+
+    if (!statementModel.canBeViewedByUser(request.getUserOrFail())) {
+      throw new PermissionDeniedError("statement cannot be accessed");
+    }
+
+
     const actants = await findActantsByIds<IActant>(
       request.db,
       statementModel.getLinkedActantIds()

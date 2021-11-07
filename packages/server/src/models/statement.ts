@@ -309,6 +309,18 @@ class Statement extends Actant implements IStatement {
     );
   }
 
+  canBeViewedByUser(user: User): boolean {
+    // admin role has always the right
+    if (user.role === UserRole.Admin) {
+      return true;
+    }
+
+    return !!treeCache.getRightForTerritory(
+      this.data.territory.id,
+      user.rights
+    );
+  }
+
   canBeDeletedByUser(user: User): boolean {
     // admin role has always the right
     if (user.role === UserRole.Admin) {
