@@ -27,6 +27,7 @@ import {
   IResponseGeneric,
 } from "@shared/types";
 import { UserRoleMode } from "@shared/enums";
+import mailer, { EmailSubject, EmailTpl } from "@service/mailer";
 
 export default Router()
   .post(
@@ -293,5 +294,41 @@ export default Router()
       }
 
       return out;
+    })
+  )
+  .get(
+    "/reset-password/:userId?",
+    asyncRouteHandler<IResponseGeneric>(async (request: Request) => {
+      const userId = request.params.userId;
+
+      if (!userId) {
+        throw new BadParams("userId has to be set");
+      }
+
+      const user = await User.getUser(request.db.connection, userId);
+      if (!user) {
+        throw new UserDoesNotExits(`user ${userId} was not found`, userId);
+      }
+
+      const raw = user.generatePassword();
+
+      const result = await user.update(request.db.connection, {
+        password: user.password,
+      });
+
+      if (!result.replaced && !result.unchanged) {
+        throw new InternalServerError(`cannot update user ${userId}`);
+      }
+
+      console.log(`Password reset for ${user.email}: ${raw}`);
+
+      mailer.sendPasswordReset("johnny.mert@gmail.com", {
+        email: user.email,
+        password: raw,
+      });
+
+      return {
+        result: true,
+      };
     })
   );

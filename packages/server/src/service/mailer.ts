@@ -3,12 +3,12 @@ import Email from "email-templates";
 import nodemailerSendgrid from "nodemailer-sendgrid";
 const path = require("path");
 
-enum EmailTpl {
+export enum EmailTpl {
   Test = "test",
   PasswordReset = "password_reset",
 }
 
-enum EmailSubject {
+export enum EmailSubject {
   Test = "Test mail",
   PasswordReset = "Password reset",
 }
@@ -55,30 +55,34 @@ class Mailer {
       .catch((e) => console.log("[Mailer.test]: ", e));
   }
 
-  sendPasswordReset(
-    recipient: string,
-    subject: EmailSubject,
-    tpl: EmailTpl,
-    data: any
-  ) {
+  sendPasswordReset(recipient: string, data: any) {
     const email = new Email({
       message: {
-        from: "johnny.mert@gmail.com",
+        from: process.env.MAILER_SENDER,
       },
       send: process.env.NODE_ENV === "production",
       transport: this.nodeTransporter,
     });
 
+    console.log(
+      process.env.MAILER_SENDER,
+      recipient,
+      EmailSubject.PasswordReset,
+      data
+    );
+
     email
       .send({
-        template: path.join(__dirname, "emails", tpl),
+        template: path.join(__dirname, "emails", EmailTpl.PasswordReset),
         message: {
           to: recipient,
-          subject: subject,
+          subject: EmailSubject.PasswordReset,
         },
         locals: data,
       })
-      .catch((e) => console.log("[Mailer.test]: ", e));
+      .catch((e) =>
+        console.log("[Mailer.sendPasswordReset]: ", JSON.stringify(e))
+      );
   }
 }
 
