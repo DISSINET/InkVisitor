@@ -19,6 +19,7 @@ export const StyledSelectWrapper = styled.div<StyledSelectWrapper>`
 `;
 interface StyledSelect {
   width?: number | "full";
+  disabled?: boolean;
 }
 export const StyledSelect = styled(Select)`
   font-weight: bold;
@@ -26,6 +27,7 @@ export const StyledSelect = styled(Select)`
   min-height: ${({ theme }) => theme.space[10]};
   vertical-align: bottom;
   font-size: ${({ theme }) => theme.fontSize["xs"]};
+
   max-width: 100%;
   width: 100%;
   .react-select__control {
@@ -37,6 +39,16 @@ export const StyledSelect = styled(Select)`
     :hover {
       border-color: black;
     }
+  }
+  .react-select__control--is-disabled {
+    background: repeating-linear-gradient(
+      -45deg,
+      #cbd5e0,
+      #cbd5e0,
+      1px,
+      #fff 1px,
+      #fff 12px
+    );
   }
   .react-select__control--is-focused {
     box-shadow: none;
