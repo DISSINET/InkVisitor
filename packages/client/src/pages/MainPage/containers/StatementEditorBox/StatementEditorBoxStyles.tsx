@@ -1,6 +1,6 @@
 import styled from "styled-components";
 
-const StyledGrid = styled.div`
+export const StyledGrid = styled.div`
   display: grid;
   align-items: center;
   padding-left: ${({ theme }) => theme.space[0]};
@@ -11,11 +11,15 @@ const StyledGrid = styled.div`
   padding-bottom: ${({ theme }) => theme.space[6]};
 `;
 
-const StyledGridCell = styled.div`
+export const StyledGridCell = styled.div`
   margin: ${({ theme }) => theme.space[1]};
 `;
 
 // Editor Section
+interface StyledEditorPreSection {}
+export const StyledEditorPreSection = styled.div<StyledEditorPreSection>`
+  padding: ${({ theme }) => theme.space[6]};
+`;
 interface StyledEditorSection {
   firstSection?: boolean;
   lastSection?: boolean;
@@ -27,12 +31,12 @@ export const StyledEditorSection = styled.div<StyledEditorSection>`
   background-color: ${({ theme }) => theme.color["white"]};
   box-shadow: ${({ theme, firstSection = false }) =>
     firstSection ? theme.boxShadow["subtle"] : ""};
-  border-left: ${({ theme, firstSection = false }) =>
+  // border-left: ${({ theme, firstSection = false }) =>
     firstSection ? "3px solid " + theme.color["success"] : ""};
-  background-color: ${({ theme, firstSection = false }) =>
+  // background-color: ${({ theme, firstSection = false }) =>
     firstSection ? theme.color["white"] : theme.color["gray"][200]};
   border-bottom-style: solid;
-  margin: ${({ theme, firstSection = false }) =>
+  // margin: ${({ theme, firstSection = false }) =>
     firstSection ? "0 0 0 0.7rem" : "0.2rem 0 0 2rem"};
   :hover {
     background-color: ${({ theme }) => theme.color["gray"][100]};
