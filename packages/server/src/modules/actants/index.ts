@@ -166,7 +166,7 @@ export default Router()
       // update only the required fields
       const result = await model.update(request.db.connection, actantData);
 
-      if (result.replaced) {
+      if (result.replaced || result.unchanged) {
         return {
           result: true,
         };
