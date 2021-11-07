@@ -331,6 +331,9 @@ class Statement extends Actant implements IStatement {
     );
 
     const res = await super.save(db);
+
+    treeCache.initialize();
+
     return res;
   }
 
@@ -360,7 +363,19 @@ class Statement extends Actant implements IStatement {
       territoryData.order = this.data.territory.order;
     }
 
-    return super.update(db, updateData);
+    const result = await super.update(db, updateData);
+
+    treeCache.initialize();
+
+    return result;
+  }
+
+  async delete(db: Connection | undefined): Promise<WriteResult> {
+    const result = await super.delete(db);
+
+    treeCache.initialize();
+
+    return result;
   }
 
   /**
