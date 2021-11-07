@@ -75,7 +75,6 @@ const classesTags = ["A", "T", "R", "P", "G", "O", "C", "L", "V", "E"];
 
 export const StatementEditorBox: React.FC = () => {
   const { statementId, setStatementId } = useSearchParams();
-
   const { territoryId, setTerritoryId } = useSearchParams();
 
   const queryClient = useQueryClient();

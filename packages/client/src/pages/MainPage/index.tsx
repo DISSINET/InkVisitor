@@ -62,6 +62,8 @@ interface MainPage {
 
 const MainPage: React.FC<MainPage> = ({ size }) => {
   const { actantId, setActantId } = useSearchParams();
+  const { statementId, setStatementId } = useSearchParams();
+  const { territoryId, setTerritoryId } = useSearchParams();
   const [width, height] = size;
 
   const isLoggedIn = api.isLoggedIn();
@@ -116,6 +118,9 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
     dispatch(setAuthToken(""));
     toast.success("You've been successfully logged out!");
     queryClient.removeQueries();
+    setActantId("");
+    setStatementId("");
+    setTerritoryId("");
   };
 
   const handleUsersModalClick = () => {
