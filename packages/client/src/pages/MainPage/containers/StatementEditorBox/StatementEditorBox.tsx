@@ -45,7 +45,6 @@ import {
   StyledEditorPreSection,
   StyledGrid,
   StyledGridCell,
-  StyledListHeaderColumn,
 } from "./StatementEditorBoxStyles";
 import { StatementEditorActantTable } from "./StatementEditorActantTable/StatementEditorActantTable";
 import { StatementEditorActionTable } from "./StatementEditorActionTable/StatementEditorActionTable";
