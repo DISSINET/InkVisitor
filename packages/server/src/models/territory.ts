@@ -111,7 +111,11 @@ class Territory extends Actant implements ITerritory {
       };
     }
 
-    return super.save(db);
+    const result = await super.save(db);
+
+    treeCache.initialize();
+
+    return result;
   }
 
   async update(
@@ -136,7 +140,15 @@ class Territory extends Actant implements ITerritory {
       parentData.order = this.data.parent.order;
     }
 
-    return rethink.table(Actant.table).get(this.id).update(updateData).run(db);
+    const result = await rethink
+      .table(Actant.table)
+      .get(this.id)
+      .update(updateData)
+      .run(db);
+
+    treeCache.initialize();
+
+    return result;
   }
 
   async delete(db: Connection | undefined): Promise<WriteResult> {
@@ -151,7 +163,11 @@ class Territory extends Actant implements ITerritory {
       throw new InvalidDeleteError("cannot delete territory with childs");
     }
 
-    return super.delete(db);
+    const result = await super.delete(db);
+
+    treeCache.initialize();
+
+    return result;
   }
 
   async findChilds(

@@ -148,6 +148,8 @@ class TreeCache {
   }
 
   async initialize() {
+    const newTree = new TreeCreator();
+
     const db = new Db();
     await db.initDb();
 
@@ -158,14 +160,17 @@ class TreeCache {
       TreeCreator.countStatements(db),
     ]);
 
-    this.tree.createParentMap(
+    newTree.createParentMap(
       territoriesData
         .sort(TreeCreator.sortTerritories)
         .map((td) => new Territory({ ...td }))
     );
-    this.tree.statementsMap = statementsCountMap;
+    newTree.statementsMap = statementsCountMap;
 
-    this.tree.populateTree(this.tree.getRootTerritory(), 0, []);
+    newTree.populateTree(newTree.getRootTerritory(), 0, []);
+
+    this.tree = newTree;
+    console.log("[TreeCache.initialize]: done");
   }
 
   forUser(user: User): IResponseTree {
@@ -268,5 +273,4 @@ export default treeCache;
 
 export async function prepareTreeCache() {
   await treeCache.initialize();
-  console.log("[tree cache]: prepared");
 }
