@@ -344,7 +344,7 @@ class Statement extends Actant implements IStatement {
 
     const res = await super.save(db);
 
-    treeCache.initialize();
+    await treeCache.initialize();
 
     return res;
   }
@@ -377,7 +377,7 @@ class Statement extends Actant implements IStatement {
 
     const result = await super.update(db, updateData);
 
-    treeCache.initialize();
+    await treeCache.initialize();
 
     return result;
   }
@@ -385,7 +385,7 @@ class Statement extends Actant implements IStatement {
   async delete(db: Connection | undefined): Promise<WriteResult> {
     const result = await super.delete(db);
 
-    treeCache.initialize();
+    await treeCache.initialize();
 
     return result;
   }
