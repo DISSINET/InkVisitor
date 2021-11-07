@@ -9,7 +9,7 @@ import {
 } from "./StatementListHeaderStyles";
 import { StyledHeaderRow } from "./StatementListHeaderStyles";
 import { StatementListBreadcrumbItem } from "./StatementListBreadcrumbItem/StatementListBreadcrumbItem";
-import { IActant, IStatement } from "@shared/types";
+import { IActant, IResponseTerritory, IStatement } from "@shared/types";
 import { CStatement } from "constructors";
 import { Button, ButtonGroup } from "components";
 import { useAppSelector } from "redux/hooks";
@@ -17,11 +17,7 @@ import { useSearchParams } from "hooks";
 import { UserRole } from "@shared/enums";
 
 interface StatementListHeader {
-  data: {
-    statements: IStatement[];
-    actants: IActant[];
-    label: string;
-  };
+  data: IResponseTerritory;
   addStatementAtTheEndMutation: UseMutationResult<
     void,
     unknown,

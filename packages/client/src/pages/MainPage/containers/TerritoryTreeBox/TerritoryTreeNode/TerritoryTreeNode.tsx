@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import update from "immutability-helper";
 import {
   BsCaretRightFill,
@@ -28,6 +28,7 @@ import { IParentTerritory } from "@shared/types/territory";
 import { useMutation, useQueryClient } from "react-query";
 import { DraggedTerritoryItem, DragItem } from "types";
 import { useSearchParams } from "hooks";
+import { UserRole, UserRoleMode } from "@shared/enums";
 
 interface TerritoryTreeNode {
   territory: ITerritory;
@@ -39,6 +40,7 @@ interface TerritoryTreeNode {
   index?: number;
   moveFn?: (dragIndex: number, hoverIndex: number) => void;
   empty?: boolean;
+  right: UserRoleMode;
 }
 export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
   territory,
@@ -50,6 +52,7 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
   index,
   moveFn,
   empty,
+  right,
 }) => {
   const dispatch = useAppDispatch();
   const treeInitialized = useAppSelector((state) => state.treeInitialized);
@@ -68,6 +71,12 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
     overflow: "hidden",
     config: config.stiff,
   });
+
+  const symbolColor = useMemo(() => {
+    return right === UserRoleMode.Read
+      ? theme.color.gray[600]
+      : theme.color.gray[800];
+  }, [right]);
 
   useEffect(() => {
     setChildTerritories(children);
@@ -134,10 +143,10 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
             <BsCaretDownFill
               size={14}
               onClick={() => onCaretClick(id)}
+              color={symbolColor}
               style={{
                 strokeWidth: "2",
                 strokeLinejoin: "bevel",
-                color: theme.color["primary"],
                 marginRight: "2px",
               }}
             />
@@ -145,10 +154,10 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
             <BsCaretRightFill
               size={14}
               onClick={() => onCaretClick(id)}
+              color={symbolColor}
               style={{
                 strokeWidth: "2",
                 strokeLinejoin: "bevel",
-                color: theme.color["primary"],
                 marginRight: "2px",
               }}
             />
@@ -163,10 +172,11 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
             <BsCaretDown
               size={14}
               onClick={() => onCaretClick(id)}
+              color={symbolColor}
               style={{
                 strokeWidth: "2",
                 strokeLinejoin: "bevel",
-                color: theme.color["primary"],
+
                 marginRight: "2px",
               }}
             />
@@ -174,10 +184,10 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
             <BsCaretRight
               size={14}
               onClick={() => onCaretClick(id)}
+              color={symbolColor}
               style={{
                 strokeWidth: "2",
                 strokeLinejoin: "bevel",
-                color: theme.color["primary"],
                 marginRight: "2px",
               }}
             />
@@ -223,6 +233,7 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
     hasChildren: boolean
   ) => {
     const parent = territory.data.parent as IParentTerritory;
+
     return (
       <>
         {id !== rootTerritoryId && (
@@ -237,6 +248,7 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
                       {statementsCount > 0 ? (
                         <StyledFaCircle
                           size={11}
+                          color={symbolColor}
                           onClick={() => {
                             setTerritoryId(id);
                           }}
@@ -244,6 +256,7 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
                       ) : (
                         <StyledFaDotCircle
                           size={11}
+                          color={symbolColor}
                           onClick={() => {
                             setTerritoryId(id);
                           }}
@@ -270,6 +283,8 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
                   territoryActant={territoryActant}
                   onMenuOpen={() => setContextMenuOpen(true)}
                   onMenuClose={() => setContextMenuOpen(false)}
+                  right={right}
+                  empty={empty || false}
                 />
               </StyledTerritoryTagWrap>
             ) : (
@@ -293,6 +308,7 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
               key={`${key}_${child.id}`}
               territory={child.territory}
               children={child.children}
+              right={child.right}
               lvl={child.lvl}
               statementsCount={child.statementsCount}
               initExpandedNodes={initExpandedNodes}
