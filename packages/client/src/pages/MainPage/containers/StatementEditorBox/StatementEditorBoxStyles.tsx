@@ -31,12 +31,12 @@ export const StyledEditorSection = styled.div<StyledEditorSection>`
   background-color: ${({ theme }) => theme.color["white"]};
   box-shadow: ${({ theme, firstSection = false }) =>
     firstSection ? theme.boxShadow["subtle"] : ""};
-  // border-left: ${({ theme, firstSection = false }) =>
+  border-left: ${({ theme, firstSection = false }) =>
     firstSection ? "3px solid " + theme.color["success"] : ""};
-  // background-color: ${({ theme, firstSection = false }) =>
+  background-color: ${({ theme, firstSection = false }) =>
     firstSection ? theme.color["white"] : theme.color["gray"][200]};
   border-bottom-style: solid;
-  // margin: ${({ theme, firstSection = false }) =>
+  margin: ${({ theme, firstSection = false }) =>
     firstSection ? "0 0 0 0.7rem" : "0.2rem 0 0 2rem"};
   :hover {
     background-color: ${({ theme }) => theme.color["gray"][100]};
