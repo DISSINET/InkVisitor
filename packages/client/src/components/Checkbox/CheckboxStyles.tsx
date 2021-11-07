@@ -1,7 +1,9 @@
 import styled from "styled-components";
 import { space1 } from "Theme/constants";
 
-interface StyledCheckbox {}
+interface StyledCheckbox {
+  disabled: boolean;
+}
 export const StyledCheckbox = styled.input<StyledCheckbox>`
   height: ${({ theme }) => theme.space[10]};
   text-align: left;

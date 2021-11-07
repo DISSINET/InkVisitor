@@ -8,6 +8,7 @@ import {
   FaUnlink,
   FaCaretUp,
   FaCaretDown,
+  FaArrowAltCircleLeft,
 } from "react-icons/fa";
 
 import { ActantTag } from "./../";
@@ -41,6 +42,9 @@ import {
   StyledEditorSectionHeader,
   StyledEditorActantTableWrapper,
   StyledPropButtonGroup,
+  StyledEditorPreSection,
+  StyledGrid,
+  StyledGridCell,
 } from "./StatementEditorBoxStyles";
 import { StatementEditorActantTable } from "./StatementEditorActantTable/StatementEditorActantTable";
 import { StatementEditorActionTable } from "./StatementEditorActionTable/StatementEditorActionTable";
@@ -72,13 +76,15 @@ const classesTags = ["A", "T", "R", "P", "G", "O", "C", "L", "V", "E"];
 export const StatementEditorBox: React.FC = () => {
   const { statementId, setStatementId } = useSearchParams();
 
+  const { territoryId, setTerritoryId } = useSearchParams();
+
   const queryClient = useQueryClient();
 
   // Statement query
   const {
     status: statusStatement,
     data: statement,
-    error: errorStatement,
+    error: statementError,
     isFetching: isFetchingStatement,
   } = useQuery(
     ["statement", statementId],
@@ -89,7 +95,28 @@ export const StatementEditorBox: React.FC = () => {
     { enabled: !!statementId && api.isLoggedIn(), retry: 2 }
   );
 
-  console.log(statement);
+  // stores territory id
+  const statementTerritoryId: string | undefined = useMemo(() => {
+    return statement?.data.territory.id;
+  }, [statement]);
+
+  // get data for territory
+  const {
+    status: territoryStatus,
+    data: territoryData,
+    error: territoryError,
+    isFetching: isFetchingTerritory,
+  } = useQuery(
+    ["territory", statementTerritoryId],
+    async () => {
+      const res = await api.actantsGet(statementTerritoryId as string);
+      return res.data;
+    },
+    {
+      enabled: !!statementId && !!statementTerritoryId,
+      retry: 2,
+    }
+  );
 
   const userCanEdit: boolean = useMemo(() => {
     return (
@@ -101,12 +128,12 @@ export const StatementEditorBox: React.FC = () => {
 
   useEffect(() => {
     if (
-      errorStatement &&
-      (errorStatement as any).error === "StatementDoesNotExits"
+      statementError &&
+      (statementError as any).error === "StatementDoesNotExits"
     ) {
       setStatementId("");
     }
-  }, [errorStatement]);
+  }, [statementError]);
 
   // getting origin actants of properties
   const propsByOrigins = useMemo(() => {
@@ -640,7 +667,35 @@ export const StatementEditorBox: React.FC = () => {
     <>
       {statement ? (
         <div style={{ marginBottom: "4rem" }} key={statement.id}>
+          <StyledEditorPreSection>
+            {/* breadcrumb */}
+
+            {territoryData && (
+              <StyledGrid>
+                <StyledGridCell>Statement territory</StyledGridCell>
+                <StyledGridCell>
+                  <ActantTag actant={territoryData} short={false} />
+                </StyledGridCell>
+                <StyledGridCell>
+                  {territoryData.id !== territoryId && (
+                    <Button
+                      key="d"
+                      icon={<FaArrowAltCircleLeft />}
+                      tooltip="load territory"
+                      color="plain"
+                      label="open territory"
+                      inverted={true}
+                      onClick={() => {
+                        setTerritoryId(territoryData.id);
+                      }}
+                    />
+                  )}
+                </StyledGridCell>
+              </StyledGrid>
+            )}
+          </StyledEditorPreSection>
           <StyledEditorSection firstSection key="editor-section-summary">
+            <StyledEditorSectionHeader>Text</StyledEditorSectionHeader>
             <StyledEditorSectionContent firstSection>
               <div>
                 <div>

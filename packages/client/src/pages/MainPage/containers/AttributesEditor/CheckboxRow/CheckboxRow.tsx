@@ -8,6 +8,9 @@ import {
 } from "../AttributesEditorStyles";
 import { AttributeIcon, Checkbox } from "components";
 
+import { ImCross } from "react-icons/im";
+import { FaCheck } from "react-icons/fa";
+
 interface CheckboxRow {
   value: boolean;
   onChangeFn: (value: boolean) => void;
@@ -32,12 +35,21 @@ export const CheckboxRow: React.FC<CheckboxRow> = ({
           {label}
         </StyledAttributeModalRowLabelText>
       </StyledAttributeModalRowLabel>
-      <Checkbox
-        disabled={disabled}
-        onChangeFn={(newValue: boolean) => onChangeFn(newValue)}
-        id={label}
-        value={value}
-      />
+
+      {disabled ? (
+        value ? (
+          <FaCheck />
+        ) : (
+          <ImCross />
+        )
+      ) : (
+        <Checkbox
+          disabled={disabled}
+          onChangeFn={(newValue: boolean) => onChangeFn(newValue)}
+          id={label}
+          value={value}
+        />
+      )}
     </StyledAttributeModalRow>
   );
 };
