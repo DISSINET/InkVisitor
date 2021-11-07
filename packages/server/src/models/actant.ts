@@ -136,7 +136,7 @@ export default class Actant implements IActant, IDbModel {
       .sort((a, b) => a - b);
     let out = -1;
 
-    if (want < 0 || want === undefined) {
+    if (want === undefined) {
       out = sortedOrders.length ? sortedOrders[sortedOrders.length - 1] + 1 : 0;
     } else if (sibl[want]) {
       // if there is a conflict - order number already exist
