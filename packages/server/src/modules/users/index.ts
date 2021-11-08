@@ -323,6 +323,7 @@ export default Router()
       console.log(`Password reset for ${user.email}: ${raw}`);
 
       mailer.sendPasswordReset(user.email, {
+        login: user.name,
         email: user.email,
         password: raw,
       });
