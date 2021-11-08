@@ -97,8 +97,8 @@ export default Router()
         throw new ModelNotValidError("");
       }
 
-      if (!model.canBeEditedByUser(request.getUserOrFail())) {
-        throw new PermissionDeniedError("actant cannot be saved");
+      if (!model.canBeCreatedByUser(request.getUserOrFail())) {
+        throw new PermissionDeniedError("actant cannot be created");
       }
 
       if (request.getUserOrFail().role !== UserRole.Admin) {
@@ -294,7 +294,7 @@ export default Router()
       }
 
       // filter out duplicates
-      associatedActantIds = [...new Set(associatedActantIds)]
+      associatedActantIds = [...new Set(associatedActantIds)];
 
       const actants = await filterActantsByWildcard(
         httpRequest.db,
@@ -302,7 +302,6 @@ export default Router()
         req.label,
         associatedActantIds
       );
-
 
       return actants.map((a: IActant) => {
         const out: IResponseSearch = {

@@ -87,6 +87,10 @@ export default class Actant implements IActant, IDbModel {
     return true;
   }
 
+  canBeCreatedByUser(user: User): boolean {
+    return true;
+  }
+
   canBeEditedByUser(user: User): boolean {
     return true;
   }
