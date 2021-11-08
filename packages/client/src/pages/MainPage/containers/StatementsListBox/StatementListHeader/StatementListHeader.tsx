@@ -14,7 +14,7 @@ import { CStatement } from "constructors";
 import { Button, ButtonGroup } from "components";
 import { useAppSelector } from "redux/hooks";
 import { useSearchParams } from "hooks";
-import { UserRole } from "@shared/enums";
+import { UserRole, UserRoleMode } from "@shared/enums";
 
 interface StatementListHeader {
   data: IResponseTerritory;
@@ -68,16 +68,18 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
         </StyledTitle>
         {territoryId && (
           <ButtonGroup>
-            <Button
-              key="add"
-              icon={<FaPlus size={14} />}
-              tooltip="add new statement at the end of the list"
-              color="primary"
-              label="new statement"
-              onClick={() => {
-                handleCreateStatement();
-              }}
-            />
+            {data.right !== UserRoleMode.Read && (
+              <Button
+                key="add"
+                icon={<FaPlus size={14} />}
+                tooltip="add new statement at the end of the list"
+                color="primary"
+                label="new statement"
+                onClick={() => {
+                  handleCreateStatement();
+                }}
+              />
+            )}
             <Button
               key="refresh"
               icon={<FaRecycle size={14} />}
