@@ -102,9 +102,16 @@ export default Router()
         throw new ModelNotValidError("invalid model");
       }
 
+      const rawpassword = user.generatePassword();
+
       const result = await user.save(request.db.connection);
 
       if (result.inserted === 1) {
+        mailer.sendNewUser(user.email, {
+          login: user.name,
+          password: rawpassword,
+        });
+
         return {
           result: true,
         };
