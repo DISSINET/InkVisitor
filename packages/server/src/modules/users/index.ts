@@ -26,8 +26,7 @@ import {
   IActant,
   IResponseGeneric,
 } from "@shared/types";
-import { UserRoleMode } from "@shared/enums";
-import mailer, { EmailSubject, EmailTpl } from "@service/mailer";
+import mailer from "@service/mailer";
 
 export default Router()
   .post(
@@ -103,7 +102,7 @@ export default Router()
       }
 
       const rawpassword = user.generatePassword();
-
+      user.active = true;
       const result = await user.save(request.db.connection);
 
       if (result.inserted === 1) {
