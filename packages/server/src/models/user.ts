@@ -117,9 +117,6 @@ export default class User implements IDbModel, IUser {
     }
 
     fillFlatObject(this, data);
-    if (!this.id) {
-      this.password = hashPassword(this.password);
-    }
     this.options = new UserOptions(data.options);
     fillArray<IBookmarkFolder>(this.bookmarks, BookmarkFolder, data.bookmarks);
     fillArray(this.storedTerritories, StoredTerritory, data.storedTerritories);
