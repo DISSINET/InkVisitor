@@ -206,6 +206,24 @@ class Territory extends Actant implements ITerritory {
   }
 
   canBeEditedByUser(user: User): boolean {
+    // admin role has always the right
+    if (user.role === UserRole.Admin) {
+      return true;
+    }
+
+    const closestRight = treeCache.getRightForTerritory(this.id, user.rights);
+
+    if (!closestRight) {
+      return false;
+    }
+
+    return (
+      closestRight.mode === UserRoleMode.Admin ||
+      closestRight.mode === UserRoleMode.Write
+    );
+  }
+
+  canBeCreatedByUser(user: User): boolean {
     // in case of create - no id provided yet
     if (!this.id) {
       return true;
@@ -216,7 +234,14 @@ class Territory extends Actant implements ITerritory {
       return true;
     }
 
-    const closestRight = treeCache.getRightForTerritory(this.id, user.rights);
+    if (!this.data.parent) {
+      return false;
+    }
+
+    const closestRight = treeCache.getRightForTerritory(
+      this.data.parent.id,
+      user.rights
+    );
 
     if (!closestRight) {
       return false;
