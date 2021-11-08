@@ -202,7 +202,7 @@ export async function filterActantsByWildcard(
     query = query.filter(function (row: RDatum) {
       return row("label")
         .downcase()
-        .match(`^${regExpEscape(actantLabel.toLowerCase())}`);
+        .match(`${regExpEscape(actantLabel.toLowerCase())}`);
     });
   }
 
