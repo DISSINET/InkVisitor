@@ -274,6 +274,9 @@ export default Router()
     "/search",
     asyncRouteHandler<IResponseSearch[]>(async (httpRequest: Request) => {
       const req = new RequestSearch(httpRequest.body);
+      if (req.label && req.label.length < 4) {
+        return [];
+      }
 
       const err = req.validate();
       if (err) {
