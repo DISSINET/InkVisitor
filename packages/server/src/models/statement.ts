@@ -295,6 +295,11 @@ class Statement extends Actant implements IStatement {
       return true;
     }
 
+    // editors should be able to access META statements
+    if (user.role === UserRole.Editor && this.data.territory.id === "T0") {
+      return true;
+    }
+
     const closestRight = treeCache.getRightForTerritory(
       this.data.territory.id,
       user.rights
