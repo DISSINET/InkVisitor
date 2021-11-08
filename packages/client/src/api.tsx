@@ -3,11 +3,8 @@ import axios, { AxiosError, AxiosInstance, AxiosResponse } from "axios";
 import {
   IResponseUser,
   IResponseActant,
-  IResponseAction,
   IResponseTree,
   IResponseTerritory,
-  IUser,
-  IAction,
   IActant,
   IResponseDetail,
   IResponseStatement,
@@ -28,10 +25,6 @@ type FilterActantsI = {
 };
 
 type FilterUsersI = {
-  label?: string;
-};
-
-type FilterActionsI = {
   label?: string;
 };
 
