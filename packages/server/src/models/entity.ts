@@ -10,10 +10,13 @@ import Actant from "./actant";
 
 class EntityData implements IModel {
   logicalType: EntityLogicalType = EntityLogicalType.Definite;
+
   constructor(data: UnknownObject) {
     if (!data) {
       return;
     }
+
+    fillFlatObject(this, data);
   }
 
   isValid(): boolean {
