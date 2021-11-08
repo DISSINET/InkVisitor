@@ -1,5 +1,5 @@
 import { fillFlatObject, UnknownObject, IModel } from "./common";
-import { ActantType, ActantStatus } from "@shared/enums";
+import { ActantType } from "@shared/enums";
 import Actant from "./actant";
 import { IAction } from "@shared/types";
 import { ActionEntity, ActionValency } from "@shared/types/action";
@@ -20,6 +20,14 @@ class ActionData implements IModel {
   constructor(data: UnknownObject) {
     if (!data) {
       return;
+    }
+
+    fillFlatObject(this.valencies, data.valencies as any);
+    if (data.entities) {
+      this.entities = data.entities as any;
+    }
+    if (data.properties) {
+      this.properties = data.properties as any;
     }
   }
 
