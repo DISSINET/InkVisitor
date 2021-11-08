@@ -6,11 +6,13 @@ const path = require("path");
 export enum EmailTpl {
   Test = "test",
   PasswordReset = "password_reset",
+  AccountCreated = "new_user",
 }
 
 export enum EmailSubject {
   Test = "Test mail",
   PasswordReset = "Password reset",
+  AccountCreated = "Account created",
 }
 
 class Mailer {
@@ -83,6 +85,27 @@ class Mailer {
       .catch((e) =>
         console.log("[Mailer.sendPasswordReset]: ", JSON.stringify(e))
       );
+  }
+
+  sendNewUser(recipient: string, data: any) {
+    const email = new Email({
+      message: {
+        from: process.env.MAILER_SENDER,
+      },
+      send: process.env.NODE_ENV === "production",
+      transport: this.nodeTransporter,
+    });
+
+    email
+      .send({
+        template: path.join(__dirname, "emails", EmailTpl.AccountCreated),
+        message: {
+          to: recipient,
+          subject: EmailSubject.AccountCreated,
+        },
+        locals: data,
+      })
+      .catch((e) => console.log("[Mailer.sendNewUser]: ", JSON.stringify(e)));
   }
 }
 
