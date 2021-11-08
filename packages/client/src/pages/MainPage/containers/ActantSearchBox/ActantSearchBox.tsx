@@ -98,7 +98,7 @@ export const ActantSearchBox: React.FC = () => {
   return (
     <StyledBoxContent>
       <StyledRow>
-        <StyledRowHeader>Label</StyledRowHeader>
+        <StyledRowHeader>Label (at least 4 characters)</StyledRowHeader>
         <Input
           width={150}
           placeholder="search"
