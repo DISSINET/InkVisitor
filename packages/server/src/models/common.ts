@@ -43,11 +43,9 @@ export function fillFlatObject<T>(
     }
 
     if (wantedType !== gotType) {
-      throw new Error(
-        `cannot parse key ${key}(wants ${wantedType}, got ${gotType})`
-      );
+      continue;
     }
-    
+
     (ctx as Record<string, unknown>)[key] = source[key];
   }
 }
