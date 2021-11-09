@@ -131,7 +131,7 @@ const importData = async () => {
       await r.tableCreate(table.name).run(conn);
       if (table.indexes) {
         for (const index of table.indexes) {
-          await doIndex(index, conn);
+          //await doIndex(index, conn);
         }
       }
 

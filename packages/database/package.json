@@ -9,6 +9,7 @@
     "fix-t-orders": "npx ts-node scripts/fix-t-order.ts",
     "benchmark": "npx ts-node scripts/index-benchmark.ts",
     "import-remote": "npx ts-node scripts/import.ts all prod",
+    "import-remote-sandbox": "npx ts-node scripts/import.ts all sandbox",
     "import-local": "npx ts-node scripts/import.ts all local"
   },
   "author": "",
