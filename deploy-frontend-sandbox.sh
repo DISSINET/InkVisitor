@@ -6,4 +6,4 @@ echo -n "Enter host [ENTER]: "
 read host
 
 # use rsync
-scp -r packages/client/dist/* ${username}@${host}:/var/www/html/apps/inkvisitor-dev
+scp -r packages/client/dist/* ${username}@${host}:/var/www/html/apps/inkvisitor-sandbox
