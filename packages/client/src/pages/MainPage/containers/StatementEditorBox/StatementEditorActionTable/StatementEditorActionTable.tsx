@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { Column, useTable, useExpanded, Row, Cell } from "react-table";
 import update from "immutability-helper";
 import { StyledTable } from "../StatementEditorActionTable/StatementEditorActionTableStyles";
-import { StatementEditorActionTableRow } from "./StatementEditorActionTableRow/StatementEditorActionTableRow";
+import { StatementEditorActionTableRow } from "./StatementEditorActionTableRow";
 import {
   IAction,
   IActant,
