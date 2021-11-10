@@ -6,7 +6,6 @@ import {
   StyledTHead,
   StyledTh,
   StyledTagWrapper,
-  StyledTableWrapper,
 } from "./StatementEditorActantTableStyles";
 import { StatementEditorActantTableRow } from "./StatementEditorActantTableRow";
 import { AttributesEditor } from "../../AttributesEditor/AttributesEditor";
@@ -318,7 +317,7 @@ export const StatementEditorActantTable: React.FC<StatementEditorActantTable> = 
   );
 
   return (
-    <StyledTableWrapper>
+    <>
       <StyledTable {...getTableProps()}>
         <StyledTHead>
           {headerGroups.map((headerGroup, key) => (
@@ -352,6 +351,6 @@ export const StatementEditorActantTable: React.FC<StatementEditorActantTable> = 
           })}
         </tbody>
       </StyledTable>
-    </StyledTableWrapper>
+    </>
   );
 };

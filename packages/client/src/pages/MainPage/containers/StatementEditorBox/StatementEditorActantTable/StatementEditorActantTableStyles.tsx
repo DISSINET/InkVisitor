@@ -1,9 +1,5 @@
 import styled from "styled-components";
 
-export const StyledTableWrapper = styled.div`
-  display: inline-flex;
-  overflow-x: auto;
-`;
 export const StyledTable = styled.table`
   width: 100%;
   border-spacing: 0;
