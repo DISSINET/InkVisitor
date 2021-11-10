@@ -1,10 +1,13 @@
 import styled from "styled-components";
 
+export const StyledTableWrapper = styled.div`
+  display: inline-flex;
+  overflow-x: hidden;
+`;
 export const StyledTable = styled.table`
   width: 100%;
   border-spacing: 0;
   border-collapse: collapse;
-  background-color: palevioletred;
 `;
 export const StyledTHead = styled.thead`
   font-size: ${({ theme }) => theme.fontSize["sm"]};
@@ -28,9 +31,12 @@ export const StyledTr = styled.tr<StyledTr>`
     padding-left: ${({ theme }) => theme.space[1]};
     padding-right: ${({ theme }) => theme.space[2]};
   }
-  > td {
+  td:not(:last-child) {
     width: 1%;
   }
+  /* td {
+    width: fit-content;
+  } */
 `;
 export const StyledTd = styled.td`
   padding-top: ${({ theme }) => `${theme.space[1]}`};
@@ -38,4 +44,9 @@ export const StyledTd = styled.td`
   padding-bottom: ${({ theme }) => `${theme.space[1]}`};
   padding-left: 0;
   font-size: ${({ theme }) => theme.fontSize["sm"]};
+`;
+
+export const StyledTagWrapper = styled.div`
+  display: inline-flex;
+  overflow: hidden;
 `;
