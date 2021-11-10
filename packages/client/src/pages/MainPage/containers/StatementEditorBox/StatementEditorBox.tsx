@@ -49,11 +49,11 @@ import {
 import { StatementEditorActantTable } from "./StatementEditorActantTable/StatementEditorActantTable";
 import { StatementEditorActionTable } from "./StatementEditorActionTable/StatementEditorActionTable";
 import { AttributesEditor } from "../AttributesEditor/AttributesEditor";
-import { StyledSubRow } from "./StatementEditorActionTable/StatementEditorActionTableRow/StatementEditorActionTableRowStyles";
 import { ColumnInstance } from "react-table";
 import { useSearchParams } from "hooks";
 import { AttributeButtonGroup } from "../AttributeButtonGroup/AttributeButtonGroup";
 import { UserRoleMode } from "@shared/enums";
+import { StyledSubRow } from "./StatementEditorActionTable/StatementEditorActionTableStyles";
 
 const classesActants = ["A", "T", "R", "P", "G", "O", "C", "L", "V", "E"];
 const classesPropType = ["C"];

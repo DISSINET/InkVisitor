@@ -3,8 +3,7 @@ import { useSearchParams } from "hooks";
 import { Cell, ColumnInstance, Row } from "react-table";
 
 import { IStatementActant } from "@shared/types";
-import { StyledSubRowTd } from "pages/MainPage/containers/StatementEditorBox/StatementEditorActionTable/StatementEditorActionTableRow/StatementEditorActionTableRowStyles";
-import { StyledSubRow } from "./StatementListTableStyles";
+import { StyledSubRow, StyledSubRowTd } from "./StatementListTableStyles";
 
 interface StatementListRowExpanded {
   row: Row;

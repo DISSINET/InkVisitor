@@ -116,7 +116,7 @@ export const StatementEditorActantTable: React.FC<StatementEditorActantTable> = 
           return actant ? (
             <ActantTag
               actant={actant}
-              // fullWidth
+              fullWidth
               button={
                 userCanEdit && (
                   <Button
