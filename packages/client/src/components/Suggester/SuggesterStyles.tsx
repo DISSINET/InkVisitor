@@ -101,6 +101,10 @@ export const StyledSuggestionLineIcons = styled.div<Column>`
   background-color: ${({ theme, isSelected }) =>
     isSelected ? theme.color["blue"][100] : "transparent"};
 `;
+export const StyledTagWrapper = styled.div`
+  display: inline-flex;
+  overflow: hidden;
+`;
 
 export const StyledModalForm = styled.div`
   display: grid;

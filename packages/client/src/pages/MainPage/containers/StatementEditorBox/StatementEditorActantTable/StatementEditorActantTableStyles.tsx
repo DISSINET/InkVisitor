@@ -2,7 +2,7 @@ import styled from "styled-components";
 
 export const StyledTableWrapper = styled.div`
   display: inline-flex;
-  overflow-x: hidden;
+  overflow-x: auto;
 `;
 export const StyledTable = styled.table`
   width: 100%;
@@ -34,9 +34,6 @@ export const StyledTr = styled.tr<StyledTr>`
   td:not(:last-child) {
     width: 1%;
   }
-  /* td {
-    width: fit-content;
-  } */
 `;
 export const StyledTd = styled.td`
   padding-top: ${({ theme }) => `${theme.space[1]}`};

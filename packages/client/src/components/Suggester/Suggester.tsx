@@ -27,6 +27,7 @@ import {
   StyledSuggestionCancelButton,
   StyledRelativePosition,
   StyledTypeBar,
+  StyledTagWrapper,
 } from "./SuggesterStyles";
 import { SuggesterKeyPress } from "./SuggesterKeyPress";
 import { toast } from "react-toastify";
@@ -227,15 +228,17 @@ export const Suggester: React.FC<SuggesterProps> = ({
                       />
                     </StyledSuggestionLineActions>
                     <StyledSuggestionLineTag isSelected={selected === si}>
-                      <Tag
-                        fullWidth
-                        propId={suggestion.id}
-                        label={suggestion.label}
-                        status={suggestion.status}
-                        ltype={suggestion.ltype}
-                        tooltipDetail={suggestion.detail}
-                        category={suggestion.category}
-                      />
+                      <StyledTagWrapper>
+                        <Tag
+                          fullWidth
+                          propId={suggestion.id}
+                          label={suggestion.label}
+                          status={suggestion.status}
+                          ltype={suggestion.ltype}
+                          tooltipDetail={suggestion.detail}
+                          category={suggestion.category}
+                        />
+                      </StyledTagWrapper>
                     </StyledSuggestionLineTag>
                     <StyledSuggestionLineIcons isSelected={selected === si}>
                       {suggestion.icons}

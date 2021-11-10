@@ -45,6 +45,7 @@ import {
   StyledEditorPreSection,
   StyledGrid,
   StyledGridCell,
+  StyledTagWrapper,
 } from "./StatementEditorBoxStyles";
 import { StatementEditorActantTable } from "./StatementEditorActantTable/StatementEditorActantTable";
 import { StatementEditorActionTable } from "./StatementEditorActionTable/StatementEditorActionTable";
@@ -677,7 +678,7 @@ export const StatementEditorBox: React.FC = () => {
                   </StyledListHeaderColumn>
                 </StyledGridCell>
                 <StyledGridCell>
-                  <ActantTag actant={territoryData} />
+                  <ActantTag actant={territoryData} fullWidth />
                 </StyledGridCell>
                 <StyledGridCell>
                   {territoryData.id !== territoryId && (
@@ -805,26 +806,28 @@ export const StatementEditorBox: React.FC = () => {
                       <React.Fragment key={ri}>
                         <StyledReferencesListColumn>
                           {referenceActant ? (
-                            <ActantTag
-                              actant={referenceActant}
-                              // fullWidth
-                              button={
-                                userCanEdit && (
-                                  <Button
-                                    key="d"
-                                    tooltip="unlink actant"
-                                    icon={<FaUnlink />}
-                                    inverted={true}
-                                    color="plain"
-                                    onClick={() => {
-                                      updateReference(reference.id, {
-                                        resource: "",
-                                      });
-                                    }}
-                                  />
-                                )
-                              }
-                            />
+                            <StyledTagWrapper>
+                              <ActantTag
+                                actant={referenceActant}
+                                fullWidth
+                                button={
+                                  userCanEdit && (
+                                    <Button
+                                      key="d"
+                                      tooltip="unlink actant"
+                                      icon={<FaUnlink />}
+                                      inverted={true}
+                                      color="plain"
+                                      onClick={() => {
+                                        updateReference(reference.id, {
+                                          resource: "",
+                                        });
+                                      }}
+                                    />
+                                  )
+                                }
+                              />
+                            </StyledTagWrapper>
                           ) : (
                             userCanEdit && (
                               <ActantSuggester
@@ -855,35 +858,37 @@ export const StatementEditorBox: React.FC = () => {
                           ></Input>
                         </StyledReferencesListColumn>
                         <StyledReferencesListColumn>
-                          <AttributeButtonGroup
-                            disabled={!userCanEdit}
-                            options={[
-                              {
-                                longValue: "primary",
-                                shortValue: "prim",
-                                onClick: () => {
-                                  if (reference.type !== "P") {
-                                    updateReference(reference.id, {
-                                      type: "P",
-                                    });
-                                  }
+                          <div>
+                            <AttributeButtonGroup
+                              disabled={!userCanEdit}
+                              options={[
+                                {
+                                  longValue: "primary",
+                                  shortValue: "prim",
+                                  onClick: () => {
+                                    if (reference.type !== "P") {
+                                      updateReference(reference.id, {
+                                        type: "P",
+                                      });
+                                    }
+                                  },
+                                  selected: reference.type === "P",
                                 },
-                                selected: reference.type === "P",
-                              },
-                              {
-                                longValue: "secondary",
-                                shortValue: "sec",
-                                onClick: () => {
-                                  if (reference.type !== "S") {
-                                    updateReference(reference.id, {
-                                      type: "S",
-                                    });
-                                  }
+                                {
+                                  longValue: "secondary",
+                                  shortValue: "sec",
+                                  onClick: () => {
+                                    if (reference.type !== "S") {
+                                      updateReference(reference.id, {
+                                        type: "S",
+                                      });
+                                    }
+                                  },
+                                  selected: reference.type === "S",
                                 },
-                                selected: reference.type === "S",
-                              },
-                            ]}
-                          />
+                              ]}
+                            />
+                          </div>
                         </StyledReferencesListColumn>
                         <StyledReferencesListColumn>
                           {userCanEdit && (
@@ -932,7 +937,8 @@ export const StatementEditorBox: React.FC = () => {
                       <StyledTagsListItem key={tag}>
                         <ActantTag
                           actant={tagActant}
-                          // fullWidth
+                          fullWidth
+                          tooltipPosition="left top"
                           button={
                             <Button
                               key="d"
