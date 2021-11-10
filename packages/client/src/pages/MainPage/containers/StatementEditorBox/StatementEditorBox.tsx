@@ -479,7 +479,7 @@ export const StatementEditorBox: React.FC = () => {
           {propTypeActant ? (
             <ActantTag
               actant={propTypeActant}
-              fullWidth
+              // fullWidth
               button={
                 <Button
                   key="d"
@@ -539,7 +539,7 @@ export const StatementEditorBox: React.FC = () => {
           {propValueActant ? (
             <ActantTag
               actant={propValueActant}
-              fullWidth
+              // fullWidth
               button={
                 <Button
                   key="d"
@@ -677,7 +677,7 @@ export const StatementEditorBox: React.FC = () => {
                   </StyledListHeaderColumn>
                 </StyledGridCell>
                 <StyledGridCell>
-                  <ActantTag actant={territoryData} short={false} />
+                  <ActantTag actant={territoryData} />
                 </StyledGridCell>
                 <StyledGridCell>
                   {territoryData.id !== territoryId && (
@@ -807,7 +807,7 @@ export const StatementEditorBox: React.FC = () => {
                           {referenceActant ? (
                             <ActantTag
                               actant={referenceActant}
-                              fullWidth
+                              // fullWidth
                               button={
                                 userCanEdit && (
                                   <Button
@@ -932,7 +932,7 @@ export const StatementEditorBox: React.FC = () => {
                       <StyledTagsListItem key={tag}>
                         <ActantTag
                           actant={tagActant}
-                          fullWidth
+                          // fullWidth
                           button={
                             <Button
                               key="d"
