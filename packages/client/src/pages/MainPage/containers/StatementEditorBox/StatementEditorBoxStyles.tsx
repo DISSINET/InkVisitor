@@ -19,7 +19,9 @@ export const StyledGridCell = styled.div`
 // Editor Section
 interface StyledEditorPreSection {}
 export const StyledEditorPreSection = styled.div<StyledEditorPreSection>`
-  padding: ${({ theme }) => theme.space[6]};
+  padding: ${({ theme }) => theme.space[3]};
+  color: ${({ theme }) => theme.color["info"]};
+
 `;
 interface StyledEditorSection {
   firstSection?: boolean;
