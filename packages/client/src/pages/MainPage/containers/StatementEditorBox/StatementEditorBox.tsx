@@ -25,7 +25,7 @@ import {
   IStatementReference,
   IResponseStatement,
 } from "@shared/types";
-import { Button, Input, Loader, MultiInput } from "components";
+import { Button, ButtonGroup, Input, Loader, MultiInput } from "components";
 import { ActantSuggester } from "./../";
 
 import {
@@ -51,10 +51,18 @@ import { StatementEditorActantTable } from "./StatementEditorActantTable/Stateme
 import { StatementEditorActionTable } from "./StatementEditorActionTable/StatementEditorActionTable";
 import { AttributesEditor } from "../AttributesEditor/AttributesEditor";
 import { ColumnInstance } from "react-table";
+import { useAppSelector } from "redux/hooks";
 import { useSearchParams } from "hooks";
 import { AttributeButtonGroup } from "../AttributeButtonGroup/AttributeButtonGroup";
 import { UserRoleMode } from "@shared/enums";
 import { StyledSubRow } from "./StatementEditorActionTable/StatementEditorActionTableStyles";
+import {
+  StyledHeader,
+  StyledHeaderBreadcrumbRow,
+  StyledTitle,
+} from "../StatementsListBox/StatementListHeader/StatementListHeaderStyles";
+import { StatementListBreadcrumbItem } from "../StatementsListBox/StatementListHeader/StatementListBreadcrumbItem/StatementListBreadcrumbItem";
+
 
 const classesActants = ["A", "T", "R", "P", "G", "O", "C", "L", "V", "E"];
 const classesPropType = ["C"];
@@ -118,6 +126,8 @@ export const StatementEditorBox: React.FC = () => {
     }
   );
 
+  //TODO recurse to get all parents
+  const territoryPath = territoryData && Array(territoryData["data"]["parent"]["id"])
   const userCanEdit: boolean = useMemo(() => {
     return (
       !!statement &&
@@ -668,14 +678,20 @@ export const StatementEditorBox: React.FC = () => {
       {statement ? (
         <div style={{ marginBottom: "4rem" }} key={statement.id}>
           <StyledEditorPreSection>
-            {/* breadcrumb */}
-
             {territoryData && (
               <StyledGrid>
                 <StyledGridCell>
-                  <StyledListHeaderColumn>
-                    Statement territory
-                  </StyledListHeaderColumn>
+                <ButtonGroup noMargin>
+                  {territoryPath &&
+                    territoryPath.map((territory: string, key: number) => {
+                      return (
+                        <React.Fragment key={key}>
+                          <StatementListBreadcrumbItem territoryId={territory} />
+                        </React.Fragment>
+                      );
+                    })}
+                    {"/"}
+                </ButtonGroup>
                 </StyledGridCell>
                 <StyledGridCell>
                   <ActantTag actant={territoryData} fullWidth />
