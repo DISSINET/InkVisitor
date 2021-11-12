@@ -1,6 +1,8 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
-const initialState: boolean = true;
+const initialState: boolean = localStorage.getItem("firstPanelExpanded")
+  ? localStorage.getItem("firstPanelExpanded") === "true"
+  : true;
 
 const firstPanelExpandedSlice = createSlice({
   name: "firstPanelExpanded",
