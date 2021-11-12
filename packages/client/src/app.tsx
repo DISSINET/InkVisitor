@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Switch, Route, BrowserRouter } from "react-router-dom";
 import { ThemeProvider } from "styled-components";
 import { Helmet } from "react-helmet";
@@ -15,6 +15,7 @@ import {
   layoutWidthBreakpoint,
   minLayoutWidth,
   percentPanelWidths,
+  separatorXPercentPosition,
 } from "Theme/constants";
 import { useAppDispatch } from "redux/hooks";
 import { setLayoutWidth } from "redux/features/layout/layoutWidthSlice";
@@ -32,10 +33,11 @@ const queryClient = new QueryClient({
   },
 });
 
-interface AppProps {}
-export const App: React.FC<AppProps> = () => {
+export const App: React.FC = () => {
   const [width, height] = useWindowSize();
   const dispatch = useAppDispatch();
+
+  useEffect(() => {}, []);
 
   useEffect(() => {
     if (width > 0 && height > 0) {
@@ -43,9 +45,44 @@ export const App: React.FC<AppProps> = () => {
         width < layoutWidthBreakpoint ? minLayoutWidth : width;
       dispatch(setLayoutWidth(layoutWidth));
       const onePercent = layoutWidth / 100;
-      const panels = percentPanelWidths.map(
-        (percentWidth) => Math.floor(onePercent * percentWidth * 10) / 10
+
+      // localStorage.removeItem("separatorXPosition");
+
+      const separatorXStoragePosition = localStorage.getItem(
+        "separatorXPosition"
       );
+      const separatorPercentPosition: number = separatorXStoragePosition
+        ? Number(separatorXStoragePosition)
+        : separatorXPercentPosition;
+
+      if (!separatorXStoragePosition) {
+        localStorage.setItem(
+          "separatorXPosition",
+          separatorPercentPosition.toString()
+        );
+      }
+
+      const firstPanel =
+        Math.floor(onePercent * percentPanelWidths[0] * 10) / 10;
+      const secondPanel = Math.floor(
+        (onePercent * (separatorPercentPosition - percentPanelWidths[0]) * 10) /
+          10
+      );
+      const thirdPanel = Math.floor(
+        layoutWidth -
+          (onePercent *
+            (separatorPercentPosition - percentPanelWidths[3]) *
+            10) /
+            10
+      );
+      const fourthPanel =
+        Math.floor(onePercent * percentPanelWidths[3] * 10) / 10;
+
+      // const panels = percentPanelWidths.map(
+      //   (percentPanelWidth) =>
+      //     Math.floor(onePercent * percentPanelWidth * 10) / 10
+      // );
+      const panels = [firstPanel, secondPanel, thirdPanel, fourthPanel];
       dispatch(setPanelWidths(panels));
       dispatch(setSeparatorXPosition(panels[0] + panels[1]));
     }

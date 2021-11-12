@@ -138,8 +138,6 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
 
   const heightContent = height - heightHeader - heightFooter;
 
-  console.log(window.localStorage);
-
   const firstPanelButton = () => (
     <Button
       onClick={() => {
