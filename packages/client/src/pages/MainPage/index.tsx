@@ -61,9 +61,14 @@ interface MainPage {
 }
 
 const MainPage: React.FC<MainPage> = ({ size }) => {
-  const { actantId, setActantId } = useSearchParams();
-  const { statementId, setStatementId } = useSearchParams();
-  const { territoryId, setTerritoryId } = useSearchParams();
+  const {
+    actantId,
+    setActantId,
+    statementId,
+    setStatementId,
+    territoryId,
+    setTerritoryId,
+  } = useSearchParams();
   const [width, height] = size;
 
   const isLoggedIn = api.isLoggedIn();
@@ -133,24 +138,34 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
 
   const heightContent = height - heightHeader - heightFooter;
 
+  console.log(window.localStorage);
+
   const firstPanelButton = () => (
     <Button
-      onClick={() =>
-        firstPanelExpanded
-          ? dispatch(setFirstPanelExpanded(false))
-          : dispatch(setFirstPanelExpanded(true))
-      }
+      onClick={() => {
+        if (firstPanelExpanded) {
+          dispatch(setFirstPanelExpanded(false));
+          localStorage.setItem("firstPanelExpanded", "false");
+        } else {
+          dispatch(setFirstPanelExpanded(true));
+          localStorage.setItem("firstPanelExpanded", "true");
+        }
+      }}
       inverted
       icon={firstPanelExpanded ? <RiMenuFoldFill /> : <RiMenuUnfoldFill />}
     />
   );
   const fourthPanelButton = () => (
     <Button
-      onClick={() =>
-        fourthPanelExpanded
-          ? dispatch(setFourthPanelExpanded(false))
-          : dispatch(setFourthPanelExpanded(true))
-      }
+      onClick={() => {
+        if (fourthPanelExpanded) {
+          dispatch(setFourthPanelExpanded(false));
+          localStorage.setItem("fourthPanelExpanded", "false");
+        } else {
+          dispatch(setFourthPanelExpanded(true));
+          localStorage.setItem("fourthPanelExpanded", "true");
+        }
+      }}
       inverted
       icon={fourthPanelExpanded ? <RiMenuUnfoldFill /> : <RiMenuFoldFill />}
     />
