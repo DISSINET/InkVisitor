@@ -41,11 +41,20 @@ export const PanelSeparator: React.FC<PanelSeparator> = ({}) => {
 
   useEffect(() => {
     setLeftWidth(separatorXPosition);
+
+    const onePercent = layoutWidth / 100;
+    const separatorXPercentPosition =
+      Math.floor((separatorXPosition / onePercent) * 10) / 10;
+    localStorage.setItem(
+      "separatorXPosition",
+      separatorXPercentPosition.toString()
+    );
+
     dispatch(
       setPanelWidths([
         panelWidths[0],
         separatorXPosition - panelWidths[0],
-        panelWidths[0] + panelWidths[1] + panelWidths[2] - separatorXPosition,
+        layoutWidth - panelWidths[3] - separatorXPosition,
         panelWidths[3],
       ])
     );

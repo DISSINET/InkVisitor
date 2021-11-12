@@ -9,6 +9,7 @@ import {
   ButtonGroup,
   Input,
   Submit,
+  Loader,
 } from "components";
 import { useMutation, useQuery, useQueryClient } from "react-query";
 import api from "api";
@@ -517,6 +518,7 @@ export const UserListModal: React.FC<UserListModal> = ({
             </tbody>
           </StyledTable>
         </StyledTableWrapper>
+        <Loader show={isFetching} />
       </ModalContent>
       <ModalFooter>
         <StyledUserEditorForm>

@@ -16,6 +16,7 @@ export const secondPanelMinWidth = 450;
 export const thirdPanelMinWidth = 470;
 // % PERCENT PANEL WIDTHS
 export const percentPanelWidths = [10, 31, 41, 18];
+export const separatorXPercentPosition = 42;
 
 // animations
 export const springConfig: { [key: string]: {} } = {
