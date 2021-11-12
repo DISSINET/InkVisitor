@@ -237,13 +237,16 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
                   : panelWidths[1] + panelWidths[0] - collapsedPanelWidth
               }
             >
-              <Box height={actantId ? 400 : heightContent} label="Statements">
+              <Box
+                height={actantId ? heightContent / 2 : heightContent}
+                label="Statements"
+              >
                 <ScrollHandler />
                 <StatementListBox />
               </Box>
               {actantId && (
                 <Box
-                  height={heightContent - 400}
+                  height={heightContent / 2}
                   label="Actant Detail"
                   button={
                     actantId && (
@@ -278,7 +281,7 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
               width={fourthPanelExpanded ? panelWidths[3] : collapsedPanelWidth}
             >
               <Box
-                height={400}
+                height={heightContent / 2}
                 label="Search"
                 color="white"
                 isExpanded={fourthPanelExpanded}
@@ -287,7 +290,7 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
                 <ActantSearchBox />
               </Box>
               <Box
-                height={heightContent - 400}
+                height={heightContent / 2}
                 label="Bookmarks"
                 color="white"
                 isExpanded={fourthPanelExpanded}

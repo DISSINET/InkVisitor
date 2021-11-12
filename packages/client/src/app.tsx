@@ -46,8 +46,6 @@ export const App: React.FC = () => {
       dispatch(setLayoutWidth(layoutWidth));
       const onePercent = layoutWidth / 100;
 
-      // localStorage.removeItem("separatorXPosition");
-
       const separatorXStoragePosition = localStorage.getItem(
         "separatorXPosition"
       );
