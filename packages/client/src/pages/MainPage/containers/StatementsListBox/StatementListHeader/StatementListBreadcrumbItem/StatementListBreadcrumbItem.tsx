@@ -32,10 +32,12 @@ export const StatementListBreadcrumbItem: React.FC<StatementListBreadcrumbItem> 
     <>
       {territoryId !== rootTerritoryId && (
         <StyledItemBox>
+          {"/"}
           <Button
             label={data ? data.label : territoryId}
             color="info"
             inverted
+            noBorder
             onClick={() => {
               dispatch(setTreeInitialized(false));
               setTerritoryId(territoryId);

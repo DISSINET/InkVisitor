@@ -7,11 +7,10 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "parse": "ts-node datasets/all/parse.ts",
     "fix-t-orders": "npx ts-node scripts/fix-t-order.ts",
-    "import-remote:all": "npx ts-node scripts/import.ts all prod",
-    "import-local:all": "npx ts-node scripts/import.ts all local",
-    "import-remote:mock": "npx ts-node scripts/import.ts mock prod",
-    "import-local:mock": "npx ts-node scripts/import.ts mock local",
-    "import:remote": "npx ts-node  scripts/import.ts all remote"
+    "benchmark": "npx ts-node scripts/index-benchmark.ts",
+    "import-remote": "npx ts-node scripts/import.ts all prod",
+    "import-remote-sandbox": "npx ts-node scripts/import.ts all sandbox",
+    "import-local": "npx ts-node scripts/import.ts all local"
   },
   "author": "",
   "license": "ISC",
@@ -21,8 +20,10 @@
     "readline": "^1.3.0",
     "readline-sync": "^1.4.10",
     "rethinkdb": "^2.4.2",
+    "rethinkdb-ts": "^2.4.14",
     "ts-node": "^10.2.1",
     "tunnel-ssh": "^4.1.4",
+    "typescript": "^4.4.3",
     "uuid": "^8.3.2"
   },
   "devDependencies": {

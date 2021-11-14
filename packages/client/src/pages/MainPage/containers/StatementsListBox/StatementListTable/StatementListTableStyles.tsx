@@ -58,3 +58,11 @@ export const StyledSubRow = styled.div`
   font-size: ${({ theme }) => theme.fontSize["xs"]};
   color: ${({ theme }) => theme.color["black"]};
 `;
+export const StyledSubRowTd = styled.div`
+  display: table-cell;
+  padding-top: ${({ theme }) => `${theme.space[1]}`};
+  padding-right: ${({ theme }) => `${theme.space[2]}`};
+  padding-bottom: ${({ theme }) => `${theme.space[1]}`};
+  padding-left: 0;
+  font-size: ${({ theme }) => theme.fontSize["sm"]};
+`;

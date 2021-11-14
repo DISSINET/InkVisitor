@@ -7,6 +7,7 @@
     "test": "jest",
     "start": "webpack-dev-server --open --config webpack.development.js",
     "build": "webpack --config webpack.production.js",
+    "build-sandbox": "webpack --config webpack.sandbox.js",
     "storybook": "start-storybook -p 6006",
     "build-storybook": "build-storybook"
   },

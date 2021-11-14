@@ -79,8 +79,8 @@ export const ActantSearchBox: React.FC = () => {
   };
 
   useEffect(() => {
-    if (searchData.actantId || searchData.label) {
-      searchActantsMutation.mutate(searchData);
+    if (debouncedValues.actantId || debouncedValues.label) {
+      searchActantsMutation.mutate(debouncedValues);
     } else {
       setResults([]);
     }
