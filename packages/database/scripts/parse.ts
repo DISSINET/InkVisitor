@@ -17,22 +17,17 @@ import {
   Partitivity,
   Operator,
   EntityLogicalType,
-} from "../../../shared/enums";
+} from "../../shared/enums";
 import {
-  IAudit,
   IAction,
   IActant,
   IEntity,
-  ILabel,
-  IOption,
   IStatement,
   ITerritory,
   IResource,
-  IStatementProp,
-  IUser,
-} from "./../../../shared/types";
+} from "../../shared/types";
 
-import { actantStatusDict } from "./../../../shared/dictionaries";
+import { actantStatusDict } from "../../shared/dictionaries";
 
 /**
  * waterfall processing

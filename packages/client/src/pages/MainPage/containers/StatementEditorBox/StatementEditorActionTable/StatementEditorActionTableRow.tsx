@@ -12,7 +12,7 @@ import { FaGripVertical } from "react-icons/fa";
 import { Cell, ColumnInstance } from "react-table";
 
 import { DragItem, ItemTypes } from "types";
-import { StyledTr, StyledTd } from "./StatementEditorActionTableRowStyles";
+import { StyledTr, StyledTd } from "./StatementEditorActionTableStyles";
 
 interface StatementEditorActionTableRow {
   row: any;

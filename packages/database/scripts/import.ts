@@ -8,40 +8,67 @@ const datasets: Record<string, any> = {
   all: [
     {
       name: "acl_permissions",
-      path: "datasets/all/acl_permissions.json",
+      data: "datasets/all/acl_permissions.json",
     },
     {
       name: "actants",
-      path: "datasets/all/actants.json",
+      data: "datasets/all/actants.json",
+      indexes: [
+        r.table("actants").indexCreate("class"),
+        r.table("actants").indexCreate("label"),
+        r
+          .table("actants")
+          .indexCreate(
+            "data.actants.actant",
+            r.row("data")("actants")("actant")
+          ),
+        r
+          .table("actants")
+          .indexCreate(
+            "data.actions.action",
+            r.row("data")("actions")("action")
+          ),
+        r.table("actants").indexCreate("data.tags", r.row("data")("tags")),
+        r
+          .table("actants")
+          .indexCreate(
+            "data.props.type.id",
+            r.row("data")("props")("type")("id")
+          ),
+        r
+          .table("actants")
+          .indexCreate(
+            "data.props.value.id",
+            r.row("data")("props")("value")("id")
+          ),
+        r
+          .table("actants")
+          .indexCreate(
+            "data.references.resource",
+            r.row("data")("references")("resource")
+          ),
+        r
+          .table("actants")
+          .indexCreate("data.props.origin", r.row("data")("props")("origin")),
+        r
+          .table("actants")
+          .indexCreate("data.territory.id", r.row("data")("territory")("id")),
+        r
+          .table("actants")
+          .indexCreate("data.parent.id", r.row("data")("parent")("id")),
+      ],
     },
     {
       name: "users",
-      path: "datasets/all/users.json",
+      data: "datasets/all/users.json",
     },
     {
       name: "audits",
-      path: "datasets/all/audits.json",
-    },
-  ],
-  mock: [
-    {
-      name: "acl_permissions",
-      path: "datasets/mock/acl_permissions.json",
-    },
-    {
-      name: "actants",
-      path: "datasets/mock/actants.json",
-    },
-    {
-      name: "users",
-      path: "datasets/mock/users.json",
-    },
-    {
-      name: "audits",
-      path: "datasets/mock/audits.json",
+      data: "datasets/all/audits.json",
     },
   ],
 };
+
 const datasetId: string = process.argv[2];
 const dbMode = process.argv[3];
 
@@ -49,10 +76,14 @@ const envData = require("dotenv").config({ path: `env/.env.${dbMode}` }).parsed;
 
 const tablesToImport = datasets[datasetId];
 
-console.log(dbMode, envData);
-
 console.log(`***importing dataset ${datasetId}***`);
 console.log("");
+
+function doIndex(statement: any, connection: any): Promise<any> {
+  return new Promise((resolve) => {
+    statement.run(connection, resolve);
+  });
+}
 
 //-----------------------------------------------------------------------------
 // Main
@@ -92,15 +123,21 @@ const importData = async () => {
 
     // set default database
     conn.use(config.db);
-    
+
     // Insert data to tables.
     for (let i = 0; i < config.tables.length; ++i) {
       const table = config.tables[i];
 
       await r.tableCreate(table.name).run(conn);
-      await console.log(`table ${table.name} created`);
+      if (table.indexes) {
+        for (const index of table.indexes) {
+          //await doIndex(index, conn);
+        }
+      }
 
-      let data = JSON.parse(fs.readFileSync(table.path));
+      console.log(`table ${table.name} created`);
+
+      let data = JSON.parse(fs.readFileSync(table.data));
       if (table.name === "users") {
         data = data.map((user: IUser) => {
           user.password = hashPassword(user.password ? user.password : "");
@@ -109,7 +146,7 @@ const importData = async () => {
       }
 
       await r.table(table.name).insert(data).run(conn);
-      await console.log(`data into the table ${table.name} inserted`);
+      console.log(`data into the table ${table.name} inserted`);
     }
   } catch (error) {
     console.log(error);
@@ -128,7 +165,7 @@ if (dbMode == "prod") {
       port: 28015,
       dstPort: 28017,
       username: envData.SSH_USERNAME,
-      password: envData.SSH_LOGIN,
+      password: envData.SSH_PASSWORD,
     },
     function (error: any, tnl: any) {
       console.log("in the tunnel");

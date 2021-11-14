@@ -13,12 +13,15 @@ export const StyledGrid = styled.div`
 
 export const StyledGridCell = styled.div`
   margin: ${({ theme }) => theme.space[1]};
+  display: grid;
 `;
 
 // Editor Section
 interface StyledEditorPreSection {}
 export const StyledEditorPreSection = styled.div<StyledEditorPreSection>`
-  padding: ${({ theme }) => theme.space[6]};
+  padding: ${({ theme }) => theme.space[3]};
+  color: ${({ theme }) => theme.color["info"]};
+
 `;
 interface StyledEditorSection {
   firstSection?: boolean;
@@ -129,6 +132,7 @@ export const StyledPropLineColumn = styled(
 interface StyledReferencesList {}
 export const StyledReferencesList = styled(StyledGrid)<StyledReferencesList>`
   grid-template-columns: auto auto auto auto;
+  /* width: 50rem; */
 `;
 
 interface StyledReferencesListColumn {}
@@ -147,9 +151,15 @@ interface StyledTagsListItem {}
 export const StyledTagsListItem = styled.div<StyledTagsListItem>`
   padding-right: ${({ theme }) => theme.space[2]};
   padding-bottom: ${({ theme }) => theme.space[1]};
-  display: inline-block;
+  display: inline-flex;
+  overflow: hidden;
+  max-width: 100%;
 `;
 
 export const StyledEditorActantTableWrapper = styled.div`
   margin-bottom: ${({ theme }) => theme.space[4]};
+`;
+export const StyledTagWrapper = styled.div`
+  display: inline-flex;
+  overflow: hidden;
 `;

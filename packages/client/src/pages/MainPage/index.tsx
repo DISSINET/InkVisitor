@@ -61,9 +61,14 @@ interface MainPage {
 }
 
 const MainPage: React.FC<MainPage> = ({ size }) => {
-  const { actantId, setActantId } = useSearchParams();
-  const { statementId, setStatementId } = useSearchParams();
-  const { territoryId, setTerritoryId } = useSearchParams();
+  const {
+    actantId,
+    setActantId,
+    statementId,
+    setStatementId,
+    territoryId,
+    setTerritoryId,
+  } = useSearchParams();
   const [width, height] = size;
 
   const isLoggedIn = api.isLoggedIn();
@@ -135,22 +140,30 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
 
   const firstPanelButton = () => (
     <Button
-      onClick={() =>
-        firstPanelExpanded
-          ? dispatch(setFirstPanelExpanded(false))
-          : dispatch(setFirstPanelExpanded(true))
-      }
+      onClick={() => {
+        if (firstPanelExpanded) {
+          dispatch(setFirstPanelExpanded(false));
+          localStorage.setItem("firstPanelExpanded", "false");
+        } else {
+          dispatch(setFirstPanelExpanded(true));
+          localStorage.setItem("firstPanelExpanded", "true");
+        }
+      }}
       inverted
       icon={firstPanelExpanded ? <RiMenuFoldFill /> : <RiMenuUnfoldFill />}
     />
   );
   const fourthPanelButton = () => (
     <Button
-      onClick={() =>
-        fourthPanelExpanded
-          ? dispatch(setFourthPanelExpanded(false))
-          : dispatch(setFourthPanelExpanded(true))
-      }
+      onClick={() => {
+        if (fourthPanelExpanded) {
+          dispatch(setFourthPanelExpanded(false));
+          localStorage.setItem("fourthPanelExpanded", "false");
+        } else {
+          dispatch(setFourthPanelExpanded(true));
+          localStorage.setItem("fourthPanelExpanded", "true");
+        }
+      }}
       inverted
       icon={fourthPanelExpanded ? <RiMenuUnfoldFill /> : <RiMenuFoldFill />}
     />
@@ -224,13 +237,16 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
                   : panelWidths[1] + panelWidths[0] - collapsedPanelWidth
               }
             >
-              <Box height={actantId ? 400 : heightContent} label="Statements">
+              <Box
+                height={actantId ? heightContent / 2 : heightContent}
+                label="Statements"
+              >
                 <ScrollHandler />
                 <StatementListBox />
               </Box>
               {actantId && (
                 <Box
-                  height={heightContent - 400}
+                  height={heightContent / 2}
                   label="Actant Detail"
                   button={
                     actantId && (
@@ -265,7 +281,7 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
               width={fourthPanelExpanded ? panelWidths[3] : collapsedPanelWidth}
             >
               <Box
-                height={400}
+                height={heightContent / 2}
                 label="Search"
                 color="white"
                 isExpanded={fourthPanelExpanded}
@@ -274,7 +290,7 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
                 <ActantSearchBox />
               </Box>
               <Box
-                height={heightContent - 400}
+                height={heightContent / 2}
                 label="Bookmarks"
                 color="white"
                 isExpanded={fourthPanelExpanded}

@@ -5,22 +5,22 @@ import {
   StyledTable,
   StyledTHead,
   StyledTh,
+  StyledTagWrapper,
 } from "./StatementEditorActantTableStyles";
-import { StatementEditorActantTableRow } from "./StatementEditorActantTableRow/StatementEditorActantTableRow";
+import { StatementEditorActantTableRow } from "./StatementEditorActantTableRow";
 import { AttributesEditor } from "../../AttributesEditor/AttributesEditor";
 import { AttributeButtonGroup } from "../../AttributeButtonGroup/AttributeButtonGroup";
 
 import {
   IActant,
-  IResponseGeneric,
   IResponseStatement,
   IStatementActant,
   IStatementProp,
 } from "@shared/types";
-import { ActantSuggester, ActantTag, CertaintyToggle, ElvlToggle } from "../..";
-import { Button, ButtonGroup, Input, Loader } from "components";
+import { ActantSuggester, ActantTag } from "../..";
+import { Button } from "components";
 import { FaTrashAlt, FaUnlink, FaPlus } from "react-icons/fa";
-import { useMutation, UseMutationResult, useQueryClient } from "react-query";
+import { UseMutationResult } from "react-query";
 import { actantPositionDict } from "@shared/dictionaries";
 
 interface FilteredActantObject {
@@ -115,26 +115,28 @@ export const StatementEditorActantTable: React.FC<StatementEditorActantTable> = 
             sActant: IStatementActant | any;
           } = row.values.data;
           return actant ? (
-            <ActantTag
-              actant={actant}
-              short={false}
-              button={
-                userCanEdit && (
-                  <Button
-                    key="d"
-                    tooltip="unlink actant"
-                    icon={<FaUnlink />}
-                    color="plain"
-                    inverted={true}
-                    onClick={() => {
-                      updateActant(sActant.id, {
-                        actant: "",
-                      });
-                    }}
-                  />
-                )
-              }
-            />
+            <StyledTagWrapper>
+              <ActantTag
+                actant={actant}
+                // fullWidth
+                button={
+                  userCanEdit && (
+                    <Button
+                      key="d"
+                      tooltip="unlink actant"
+                      icon={<FaUnlink />}
+                      color="plain"
+                      inverted={true}
+                      onClick={() => {
+                        updateActant(sActant.id, {
+                          actant: "",
+                        });
+                      }}
+                    />
+                  )
+                }
+              />
+            </StyledTagWrapper>
           ) : (
             userCanEdit && (
               <ActantSuggester
@@ -315,38 +317,40 @@ export const StatementEditorActantTable: React.FC<StatementEditorActantTable> = 
   );
 
   return (
-    <StyledTable {...getTableProps()}>
-      <StyledTHead>
-        {headerGroups.map((headerGroup, key) => (
-          <tr {...headerGroup.getHeaderGroupProps()} key={key}>
-            <th></th>
-            {headerGroup.headers.map((column, key) => (
-              <StyledTh {...column.getHeaderProps()} key={key}>
-                {column.render("Header")}
-              </StyledTh>
-            ))}
-          </tr>
-        ))}
-      </StyledTHead>
-      <tbody {...getTableBodyProps()}>
-        {rows.map((row: Row, i: number) => {
-          prepareRow(row);
-          return (
-            <StatementEditorActantTableRow
-              renderPropGroup={renderPropGroup}
-              handleClick={handleRowClick}
-              index={i}
-              row={row}
-              statement={statement}
-              moveRow={moveRow}
-              userCanEdit={userCanEdit}
-              updateOrderFn={updateActantsOrder}
-              visibleColumns={visibleColumns}
-              {...row.getRowProps()}
-            />
-          );
-        })}
-      </tbody>
-    </StyledTable>
+    <>
+      <StyledTable {...getTableProps()}>
+        <StyledTHead>
+          {headerGroups.map((headerGroup, key) => (
+            <tr {...headerGroup.getHeaderGroupProps()} key={key}>
+              <th></th>
+              {headerGroup.headers.map((column, key) => (
+                <StyledTh {...column.getHeaderProps()} key={key}>
+                  {column.render("Header")}
+                </StyledTh>
+              ))}
+            </tr>
+          ))}
+        </StyledTHead>
+        <tbody {...getTableBodyProps()}>
+          {rows.map((row: Row, i: number) => {
+            prepareRow(row);
+            return (
+              <StatementEditorActantTableRow
+                renderPropGroup={renderPropGroup}
+                handleClick={handleRowClick}
+                index={i}
+                row={row}
+                statement={statement}
+                moveRow={moveRow}
+                userCanEdit={userCanEdit}
+                updateOrderFn={updateActantsOrder}
+                visibleColumns={visibleColumns}
+                {...row.getRowProps()}
+              />
+            );
+          })}
+        </tbody>
+      </StyledTable>
+    </>
   );
 };
