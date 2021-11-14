@@ -216,7 +216,7 @@ export const StatementEditorActantTable: React.FC<StatementEditorActantTable> = 
               modalTitle={`Actant involvement [${
                 actant ? actant.label : "undefined"
               }]`}
-              userCanEdit={userCanEdit}
+              disabledAllAttributes={!userCanEdit}
               entityType={actant ? actant.class : false}
               data={{
                 elvl: sActant.elvl,

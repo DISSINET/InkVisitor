@@ -139,7 +139,7 @@ export const ActantDetailMetaTable: React.FC<ActantDetailMetaTable> = ({
 
           return typeSActant ? (
             <AttributesEditor
-              userCanEdit={userCanEdit}
+              disabledAllAttributes={!userCanEdit}
               modalTitle={`Property Type attributes [${
                 typeActant ? typeActant.label : "undefined"
               }]`}
@@ -150,7 +150,7 @@ export const ActantDetailMetaTable: React.FC<ActantDetailMetaTable> = ({
                 virtuality: typeSActant.virtuality,
                 partitivity: typeSActant.partitivity,
               }}
-              disabledData={["elvl"]}
+              disabledAttributes={["elvl"]}
               handleUpdate={(newData: any) => {
                 const metaStatementData = { ...data };
                 const updatedStatementActants = metaStatementData.actants.map(
@@ -287,7 +287,7 @@ export const ActantDetailMetaTable: React.FC<ActantDetailMetaTable> = ({
 
           return valueSActant ? (
             <AttributesEditor
-              userCanEdit={userCanEdit}
+              disabledAllAttributes={!userCanEdit}
               modalTitle={`Property Value attributes [${
                 valueActant ? valueActant.label : ""
               }]`}
@@ -298,7 +298,7 @@ export const ActantDetailMetaTable: React.FC<ActantDetailMetaTable> = ({
                 virtuality: valueSActant.virtuality,
                 partitivity: valueSActant.partitivity,
               }}
-              disabledData={["elvl"]}
+              disabledAttributes={["elvl"]}
               handleUpdate={(newData: any) => {
                 const metaStatementData = { ...data };
                 const updatedStatementActants = metaStatementData.actants.map(
@@ -361,7 +361,7 @@ export const ActantDetailMetaTable: React.FC<ActantDetailMetaTable> = ({
             <ButtonGroup noMargin>
               {data && action && (
                 <AttributesEditor
-                  userCanEdit={userCanEdit}
+                  disabledAllAttributes={!userCanEdit}
                   modalTitle={`Property Type attributes [${typeLabel} - ${valueLabel}]`}
                   entityType={statementClass}
                   data={{
@@ -374,7 +374,7 @@ export const ActantDetailMetaTable: React.FC<ActantDetailMetaTable> = ({
                     bundleStart: action.bundleStart,
                     bundleEnd: action.bundleEnd,
                   }}
-                  disabledData={["elvl"]}
+                  disabledAttributes={["elvl"]}
                   handleUpdate={(newData: any) => {
                     const metaStatementData = { ...data };
                     const updatedStatementActions = metaStatementData.actions.map(
