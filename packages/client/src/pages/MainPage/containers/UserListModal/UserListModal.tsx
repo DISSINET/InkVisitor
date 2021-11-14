@@ -49,6 +49,7 @@ import {
   StyledTerritoryColumn,
   StyledTerritoryList,
   StyledTerritoryListItem,
+  StyledTerritoryColumnAllLabel,
 } from "./UserListModalStyles";
 
 import { UserListTableRow } from "./UserListTableRow/UserListTableRow";
@@ -292,7 +293,7 @@ export const UserListModal: React.FC<UserListModal> = ({
 
           return (
             <StyledTerritoryColumn>
-              {userRole !== UserRole.Admin && (
+              {userRole !== UserRole.Admin ? (
                 <React.Fragment>
                   <ActantSuggester
                     allowCreate={false}
@@ -342,6 +343,10 @@ export const UserListModal: React.FC<UserListModal> = ({
                     )}
                   </StyledTerritoryList>
                 </React.Fragment>
+              ) : (
+                <StyledTerritoryColumnAllLabel>
+                  all
+                </StyledTerritoryColumnAllLabel>
               )}
             </StyledTerritoryColumn>
           );
@@ -364,56 +369,67 @@ export const UserListModal: React.FC<UserListModal> = ({
 
           return (
             <StyledTerritoryColumn>
-              {userRole === UserRole.Editor && (
-                <React.Fragment>
-                  <ActantSuggester
-                    allowCreate={false}
-                    onSelected={(newSelectedId: string) => {
-                      addRightToUser(userId, newSelectedId, "write");
-                    }}
-                    categoryIds={["T"]}
-                    placeholder={"assign a territory"}
-                  ></ActantSuggester>
-                  <StyledTerritoryList>
-                    {writeTerritories.length && territoryActants ? (
-                      writeTerritories.map((right: IUserRight) => {
-                        const territoryActant = territoryActants.find(
-                          (t: any) => t.territory.id === right.territory
-                        );
+              {userRole !== UserRole.Admin ? (
+                userRole === UserRole.Editor ? (
+                  <React.Fragment>
+                    <ActantSuggester
+                      allowCreate={false}
+                      onSelected={(newSelectedId: string) => {
+                        addRightToUser(userId, newSelectedId, "write");
+                      }}
+                      categoryIds={["T"]}
+                      placeholder={"assign a territory"}
+                    ></ActantSuggester>
+                    <StyledTerritoryList>
+                      {writeTerritories.length && territoryActants ? (
+                        writeTerritories.map((right: IUserRight) => {
+                          const territoryActant = territoryActants.find(
+                            (t: any) => t.territory.id === right.territory
+                          );
 
-                        return territoryActant && territoryActant.territory ? (
-                          <StyledTerritoryListItem key={right.territory}>
-                            <ActantTag
-                              actant={territoryActant.territory}
-                              short={false}
-                              button={
-                                <Button
-                                  key="d"
-                                  tooltip="remove territory from rights"
-                                  icon={<FaUnlink />}
-                                  color="plain"
-                                  inverted={true}
-                                  onClick={() => {
-                                    removeRightFromUser(
-                                      userId,
-                                      right.territory
-                                    );
-                                  }}
-                                />
-                              }
-                            />
-                          </StyledTerritoryListItem>
-                        ) : (
-                          <StyledTerritoryListItem key={right.territory}>
-                            {right.territory}
-                          </StyledTerritoryListItem>
-                        );
-                      })
-                    ) : (
-                      <div />
-                    )}
-                  </StyledTerritoryList>
-                </React.Fragment>
+                          return territoryActant &&
+                            territoryActant.territory ? (
+                            <StyledTerritoryListItem key={right.territory}>
+                              <ActantTag
+                                actant={territoryActant.territory}
+                                short={false}
+                                button={
+                                  <Button
+                                    key="d"
+                                    tooltip="remove territory from rights"
+                                    icon={<FaUnlink />}
+                                    color="plain"
+                                    inverted={true}
+                                    onClick={() => {
+                                      removeRightFromUser(
+                                        userId,
+                                        right.territory
+                                      );
+                                    }}
+                                  />
+                                }
+                              />
+                            </StyledTerritoryListItem>
+                          ) : (
+                            <StyledTerritoryListItem key={right.territory}>
+                              {right.territory}
+                            </StyledTerritoryListItem>
+                          );
+                        })
+                      ) : (
+                        <div />
+                      )}
+                    </StyledTerritoryList>
+                  </React.Fragment>
+                ) : (
+                  <StyledTerritoryColumnAllLabel>
+                    -
+                  </StyledTerritoryColumnAllLabel>
+                )
+              ) : (
+                <StyledTerritoryColumnAllLabel>
+                  all
+                </StyledTerritoryColumnAllLabel>
               )}
             </StyledTerritoryColumn>
           );
