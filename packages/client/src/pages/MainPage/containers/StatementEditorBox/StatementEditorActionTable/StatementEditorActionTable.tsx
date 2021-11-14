@@ -159,7 +159,7 @@ export const StatementEditorActionTable: React.FC<StatementEditorActionTable> = 
           return sAction ? (
             <AttributesEditor
               modalTitle={`Action involvement [${action ? action.label : ""}]`}
-              userCanEdit={userCanEdit}
+              disabledAllAttributes={!userCanEdit}
               entityType={ActantType.Action}
               data={{
                 elvl: sAction.elvl,

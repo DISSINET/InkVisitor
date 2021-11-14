@@ -11,6 +11,7 @@ import { useSearchParams } from "hooks";
 import { FaPlus } from "react-icons/fa";
 import { ContextMenuNewTerritoryModal } from "./ContextMenuNewTerritoryModal/ContextMenuNewTerritoryModal";
 import { rootTerritoryId } from "Theme/constants";
+import { UserRoleMode } from "@shared/enums";
 
 export const TerritoryTreeBox: React.FC = () => {
   const { status, data, error, isFetching } = useQuery(
@@ -22,6 +23,7 @@ export const TerritoryTreeBox: React.FC = () => {
     { enabled: api.isLoggedIn() }
   );
 
+  const userRole = localStorage.getItem("userrole");
   const { territoryId } = useSearchParams();
   const [showCreate, setShowCreate] = useState(false);
 
@@ -69,11 +71,14 @@ export const TerritoryTreeBox: React.FC = () => {
           empty={data.empty}
         />
       )}
-      <Button
-        label="new territory"
-        icon={<FaPlus />}
-        onClick={() => setShowCreate(true)}
-      />
+      {userRole === UserRoleMode.Admin && (
+        <Button
+          label="new territory"
+          icon={<FaPlus />}
+          onClick={() => setShowCreate(true)}
+        />
+      )}
+
       {showCreate && (
         <ContextMenuNewTerritoryModal
           onClose={() => setShowCreate(false)}
