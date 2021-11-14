@@ -64,6 +64,9 @@ export const StyledTd = styled.td`
 export const StyledTerritoryColumn = styled.div`
   display: block;
 `;
+
+export const StyledTerritoryColumnAllLabel = styled.div``;
+
 export const StyledTerritoryList = styled.div`
   display: block;
 

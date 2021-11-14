@@ -63,7 +63,6 @@ import {
 } from "../StatementsListBox/StatementListHeader/StatementListHeaderStyles";
 import { StatementListBreadcrumbItem } from "../StatementsListBox/StatementListHeader/StatementListBreadcrumbItem/StatementListBreadcrumbItem";
 
-
 const classesActants = ["A", "T", "R", "P", "G", "O", "C", "L", "V", "E"];
 const classesPropType = ["C"];
 const classesPropValue = [
@@ -127,7 +126,8 @@ export const StatementEditorBox: React.FC = () => {
   );
 
   //TODO recurse to get all parents
-  const territoryPath = territoryData && Array(territoryData["data"]["parent"]["id"])
+  const territoryPath =
+    territoryData && Array(territoryData["data"]["parent"]["id"]);
   const userCanEdit: boolean = useMemo(() => {
     return (
       !!statement &&
@@ -529,6 +529,7 @@ export const StatementEditorBox: React.FC = () => {
               modalTitle={`Property Type attributes [${
                 propTypeActant ? propTypeActant.label : ""
               }]`}
+              disabledAllAttributes={!userCanEdit}
               entityType={propTypeActant ? propTypeActant.class : false}
               data={{
                 elvl: prop.type.elvl,
@@ -589,6 +590,7 @@ export const StatementEditorBox: React.FC = () => {
               modalTitle={`Property Value attributes [${
                 propValueActant ? propValueActant.label : ""
               }]`}
+              disabledAllAttributes={!userCanEdit}
               entityType={propValueActant ? propValueActant.class : false}
               data={{
                 elvl: prop.value.elvl,
@@ -610,6 +612,7 @@ export const StatementEditorBox: React.FC = () => {
           <StyledPropButtonGroup leftMargin={false}>
             <AttributesEditor
               modalTitle={`Property Statement attributes [${propValueActant?.label} - ${propTypeActant?.label}]`}
+              disabledAllAttributes={!userCanEdit}
               data={{
                 elvl: prop.elvl,
                 certainty: prop.certainty,
@@ -681,17 +684,19 @@ export const StatementEditorBox: React.FC = () => {
             {territoryData && (
               <StyledGrid>
                 <StyledGridCell>
-                <ButtonGroup noMargin>
-                  {territoryPath &&
-                    territoryPath.map((territory: string, key: number) => {
-                      return (
-                        <React.Fragment key={key}>
-                          <StatementListBreadcrumbItem territoryId={territory} />
-                        </React.Fragment>
-                      );
-                    })}
+                  <ButtonGroup noMargin>
+                    {territoryPath &&
+                      territoryPath.map((territory: string, key: number) => {
+                        return (
+                          <React.Fragment key={key}>
+                            <StatementListBreadcrumbItem
+                              territoryId={territory}
+                            />
+                          </React.Fragment>
+                        );
+                      })}
                     {"/"}
-                </ButtonGroup>
+                  </ButtonGroup>
                 </StyledGridCell>
                 <StyledGridCell>
                   <ActantTag actant={territoryData} fullWidth />
