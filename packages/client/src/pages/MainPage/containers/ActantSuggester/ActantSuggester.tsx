@@ -24,7 +24,7 @@ interface ActantSuggesterI {
   placeholder?: string;
   allowCreate?: boolean;
   disableWildCard?: boolean;
-  inputWidth?: number;
+  inputWidth?: number | "full";
   openDetailOnCreate?: boolean;
   statementTerritoryId?: string;
 }

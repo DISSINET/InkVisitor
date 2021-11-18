@@ -55,7 +55,7 @@ interface SuggesterProps {
   categories: IOption[]; // all possible categories
   suggestionListPosition?: string; // todo not implemented yet
   disabled?: boolean; // todo not implemented yet
-  inputWidth?: number;
+  inputWidth?: number | "full";
   displayCancelButton?: boolean;
   allowCreate?: boolean;
   allowDrop?: boolean;

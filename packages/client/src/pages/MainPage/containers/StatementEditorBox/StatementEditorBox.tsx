@@ -82,8 +82,12 @@ const classesResources = ["R"];
 const classesTags = ["A", "T", "R", "P", "G", "O", "C", "L", "V", "E"];
 
 export const StatementEditorBox: React.FC = () => {
-  const { statementId, setStatementId } = useSearchParams();
-  const { territoryId, setTerritoryId } = useSearchParams();
+  const {
+    statementId,
+    setStatementId,
+    territoryId,
+    setTerritoryId,
+  } = useSearchParams();
 
   const queryClient = useQueryClient();
 
@@ -106,6 +110,12 @@ export const StatementEditorBox: React.FC = () => {
   const statementTerritoryId: string | undefined = useMemo(() => {
     return statement?.data.territory.id;
   }, [statement]);
+
+  useEffect(() => {
+    if (!territoryId && statementId && statementTerritoryId) {
+      setTerritoryId(statementTerritoryId);
+    }
+  }, [territoryId, statementId, statementTerritoryId]);
 
   // get data for territory
   const {
@@ -523,6 +533,7 @@ export const StatementEditorBox: React.FC = () => {
                 });
               }}
               categoryIds={classesPropType}
+              inputWidth={"full"}
             ></ActantSuggester>
           )}
           <StyledPropButtonGroup>
@@ -585,6 +596,7 @@ export const StatementEditorBox: React.FC = () => {
                 });
               }}
               categoryIds={classesPropValue}
+              inputWidth={"full"}
             ></ActantSuggester>
           )}
           <StyledPropButtonGroup>
