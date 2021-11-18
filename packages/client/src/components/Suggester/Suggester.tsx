@@ -56,7 +56,6 @@ interface SuggesterProps {
   suggestionListPosition?: string; // todo not implemented yet
   disabled?: boolean; // todo not implemented yet
   inputWidth?: number | "full";
-  displayCancelButton?: boolean;
   allowCreate?: boolean;
   allowDrop?: boolean;
   isFetching?: boolean;
@@ -83,7 +82,6 @@ export const Suggester: React.FC<SuggesterProps> = ({
   suggestionListPosition,
   disabled,
   inputWidth = 100,
-  displayCancelButton = false,
   allowCreate = true,
   allowDrop = false,
 
@@ -190,7 +188,7 @@ export const Suggester: React.FC<SuggesterProps> = ({
               handleEnterPress();
             }}
           />
-          {displayCancelButton && (
+          {typed.length > 0 && (
             <StyledSuggestionCancelButton>
               <MdCancel onClick={() => onCancel()} />
             </StyledSuggestionCancelButton>

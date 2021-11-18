@@ -6,6 +6,7 @@ interface StyledSuggester {
 }
 export const StyledSuggester = styled.div<StyledSuggester>`
   position: relative;
+  display: inline-flex;
   margin-top: ${({ marginTop }) => (marginTop ? space2 : 0)};
 `;
 interface StyledTypeBar {
@@ -45,7 +46,7 @@ export const StyledSuggesterButton = styled.div`
 `;
 export const StyledSuggestionCancelButton = styled.div`
   position: absolute;
-  left: 7.5em;
+  right: 2.5rem;
   top: 4px;
   svg {
     color: ${({ theme }) => theme.color["danger"]};
@@ -54,6 +55,7 @@ export const StyledSuggestionCancelButton = styled.div`
 
 export const StyledSuggesterList = styled.div`
   position: absolute;
+  top: 2.5rem;
   left: 0;
   z-index: 20;
 `;
