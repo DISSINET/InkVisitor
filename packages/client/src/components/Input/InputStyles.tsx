@@ -42,6 +42,7 @@ export const StyledInput = styled.input<IValueStyle>`
   font-size: ${({ theme }) => theme.fontSize["xs"]};
   padding: ${space1};
   width: ${({ width }) => getWidth(width)};
+  min-width: 6rem;
   background: ${({ disabled, theme }) =>
     disabled ? theme.background["stripes"] : ""};
   cursor: ${({ disabled }) => (disabled ? "not-allowed" : "default")};

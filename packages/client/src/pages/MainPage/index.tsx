@@ -69,6 +69,7 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
     territoryId,
     setTerritoryId,
   } = useSearchParams();
+
   const [width, height] = size;
 
   const isLoggedIn = api.isLoggedIn();

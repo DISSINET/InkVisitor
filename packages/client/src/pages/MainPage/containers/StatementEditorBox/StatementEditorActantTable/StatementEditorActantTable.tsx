@@ -18,7 +18,7 @@ import {
   IStatementProp,
 } from "@shared/types";
 import { ActantSuggester, ActantTag } from "../..";
-import { Button } from "components";
+import { Button, ButtonGroup } from "components";
 import { FaTrashAlt, FaUnlink, FaPlus } from "react-icons/fa";
 import { UseMutationResult } from "react-query";
 import { actantPositionDict } from "@shared/dictionaries";
@@ -211,68 +211,59 @@ export const StatementEditorActantTable: React.FC<StatementEditorActantTable> = 
             actant: IActant;
             sActant: IStatementActant | any;
           } = row.values.data;
-          return sActant ? (
-            <AttributesEditor
-              modalTitle={`Actant involvement [${
-                actant ? actant.label : "undefined"
-              }]`}
-              disabledAllAttributes={!userCanEdit}
-              entityType={actant ? actant.class : false}
-              data={{
-                elvl: sActant.elvl,
-                certainty: sActant.certainty,
-                logic: sActant.logic,
-                virtuality: sActant.virtuality,
-                partitivity: sActant.partitivity,
-                operator: sActant.operator,
-                bundleStart: sActant.bundleStart,
-                bundleEnd: sActant.bundleEnd,
-              }}
-              handleUpdate={(newData) => {
-                updateActant(sActant.id, newData);
-              }}
-              loading={updateActantsMutation.isLoading}
-            />
-          ) : (
-            <div />
-          );
-        },
-      },
-      {
-        Header: "",
-        id: "remove",
-        Cell: ({ row }: Cell) =>
-          userCanEdit && (
-            <Button
-              key="d"
-              icon={<FaTrashAlt />}
-              color="plain"
-              inverted={true}
-              tooltip="remove actant row"
-              onClick={() => {
-                removeActant(row.values.data.sActant.id);
-              }}
-            />
-          ),
-      },
-      {
-        Header: "",
-        id: "add",
-        Cell: ({ row }: Cell) => {
           const propOriginId = row.values.data.sActant.actant;
           return (
-            userCanEdit && (
-              <Button
-                key="a"
-                icon={<FaPlus />}
-                color="plain"
-                inverted={true}
-                tooltip="add new prop"
-                onClick={() => {
-                  addProp(propOriginId);
-                }}
-              />
-            )
+            <ButtonGroup noMargin>
+              {sActant ? (
+                <AttributesEditor
+                  modalTitle={`Actant involvement [${
+                    actant ? actant.label : "undefined"
+                  }]`}
+                  disabledAllAttributes={!userCanEdit}
+                  entityType={actant ? actant.class : false}
+                  data={{
+                    elvl: sActant.elvl,
+                    certainty: sActant.certainty,
+                    logic: sActant.logic,
+                    virtuality: sActant.virtuality,
+                    partitivity: sActant.partitivity,
+                    operator: sActant.operator,
+                    bundleStart: sActant.bundleStart,
+                    bundleEnd: sActant.bundleEnd,
+                  }}
+                  handleUpdate={(newData) => {
+                    updateActant(sActant.id, newData);
+                  }}
+                  loading={updateActantsMutation.isLoading}
+                />
+              ) : (
+                <div />
+              )}
+              {userCanEdit && (
+                <Button
+                  key="d"
+                  icon={<FaTrashAlt />}
+                  color="plain"
+                  inverted={true}
+                  tooltip="remove actant row"
+                  onClick={() => {
+                    removeActant(row.values.data.sActant.id);
+                  }}
+                />
+              )}
+              {userCanEdit && (
+                <Button
+                  key="a"
+                  icon={<FaPlus />}
+                  color="plain"
+                  inverted={true}
+                  tooltip="add new prop"
+                  onClick={() => {
+                    addProp(propOriginId);
+                  }}
+                />
+              )}
+            </ButtonGroup>
           );
         },
       },
