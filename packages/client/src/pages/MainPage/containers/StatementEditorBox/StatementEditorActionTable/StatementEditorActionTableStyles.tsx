@@ -4,7 +4,6 @@ export const StyledTable = styled.table`
   width: 100%;
   border-spacing: 0;
   border-collapse: collapse;
-  background-color: lightpink;
 `;
 export const StyledTHead = styled.thead`
   font-size: ${({ theme }) => theme.fontSize["sm"]};

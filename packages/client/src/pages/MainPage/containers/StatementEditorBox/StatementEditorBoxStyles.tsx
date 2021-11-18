@@ -85,7 +85,6 @@ interface StyledPropsActantList {}
 export const StyledPropsActantList = styled(StyledGrid)<StyledPropsActantList>`
   padding-left: ${({ theme }) => theme.space[6]};
   padding-bottom: ${({ theme }) => theme.space[10]};
-  background-color: lightblue;
   width: 100%;
 `;
 
@@ -115,6 +114,7 @@ export const StyledPropButtonGroup = styled.div<StyledPropButtonGroup>`
 interface StyledPropLineColumn {
   padded?: boolean;
   lastSecondLevel?: boolean;
+  isTag?: boolean;
 }
 export const StyledPropLineColumn = styled(
   StyledGridCell
@@ -127,9 +127,7 @@ export const StyledPropLineColumn = styled(
     padded ? theme.space[6] : theme.space[0]};
   padding-right: 5px;
   border-right: 1px dashed black;
-
-  overflow-y: visible;
-  overflow-x: hidden;
+  overflow: ${({ isTag }) => (isTag ? "hidden" : "visible")};
 `;
 
 // references

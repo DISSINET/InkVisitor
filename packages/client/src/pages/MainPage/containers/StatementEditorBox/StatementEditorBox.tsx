@@ -486,6 +486,7 @@ export const StatementEditorBox: React.FC = () => {
         <StyledPropLineColumn
           padded={level === "2"}
           lastSecondLevel={lastSecondLevel}
+          isTag={propTypeActant ? true : false}
         >
           {propTypeActant ? (
             <ActantTag
@@ -547,6 +548,7 @@ export const StatementEditorBox: React.FC = () => {
         <StyledPropLineColumn
           padded={level === "2"}
           lastSecondLevel={lastSecondLevel}
+          isTag={propValueActant ? true : false}
         >
           {propValueActant ? (
             <ActantTag
