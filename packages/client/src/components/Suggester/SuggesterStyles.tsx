@@ -55,7 +55,7 @@ export const StyledSuggestionCancelButton = styled.div`
 export const StyledSuggesterList = styled.div`
   position: absolute;
   left: 0;
-  z-index: 10;
+  z-index: 20;
 `;
 export const StyledRelativePosition = styled.div`
   position: relative;

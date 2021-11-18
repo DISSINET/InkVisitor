@@ -490,7 +490,7 @@ export const StatementEditorBox: React.FC = () => {
           {propTypeActant ? (
             <ActantTag
               actant={propTypeActant}
-              // fullWidth
+              fullWidth
               button={
                 <Button
                   key="d"
@@ -551,7 +551,7 @@ export const StatementEditorBox: React.FC = () => {
           {propValueActant ? (
             <ActantTag
               actant={propValueActant}
-              // fullWidth
+              fullWidth
               button={
                 <Button
                   key="d"

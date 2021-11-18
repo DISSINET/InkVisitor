@@ -21,7 +21,6 @@ interface StyledEditorPreSection {}
 export const StyledEditorPreSection = styled.div<StyledEditorPreSection>`
   padding: ${({ theme }) => theme.space[3]};
   color: ${({ theme }) => theme.color["info"]};
-
 `;
 interface StyledEditorSection {
   firstSection?: boolean;
@@ -84,8 +83,10 @@ export const StyledPropsActantHeader = styled.div<StyledPropsActantHeader>`
 
 interface StyledPropsActantList {}
 export const StyledPropsActantList = styled(StyledGrid)<StyledPropsActantList>`
-  margin-left: ${({ theme }) => theme.space[6]};
+  padding-left: ${({ theme }) => theme.space[6]};
   padding-bottom: ${({ theme }) => theme.space[10]};
+  background-color: lightblue;
+  width: 100%;
 `;
 
 interface StyledPropButtonGroup {
@@ -126,6 +127,9 @@ export const StyledPropLineColumn = styled(
     padded ? theme.space[6] : theme.space[0]};
   padding-right: 5px;
   border-right: 1px dashed black;
+
+  overflow-y: visible;
+  overflow-x: hidden;
 `;
 
 // references
