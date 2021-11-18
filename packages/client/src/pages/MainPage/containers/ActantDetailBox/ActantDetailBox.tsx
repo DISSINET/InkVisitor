@@ -855,7 +855,8 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
           actantsCreateMutation.isLoading ||
           actantsDeleteMutation.isLoading ||
           updateActantMutation.isLoading ||
-          deleteActantMutation.isLoading
+          deleteActantMutation.isLoading ||
+          updateMetaStatementMutation.isLoading
         }
       />
     </>

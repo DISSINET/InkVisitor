@@ -45,9 +45,9 @@ interface StyledLabel {
 export const StyledLabel = styled.div<StyledLabel>`
   display: inline-block;
   vertical-align: middle;
+  white-space: nowrap;
   overflow: hidden !important;
   text-overflow: ellipsis;
-  white-space: nowrap;
   padding: ${({ theme }) => `${theme.space[1]} ${theme.space[2]}`};
   background-color: ${({ theme, invertedLabel }) =>
     invertedLabel ? theme.color["primary"] : theme.color["white"]};
