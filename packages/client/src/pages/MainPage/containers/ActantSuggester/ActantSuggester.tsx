@@ -24,7 +24,7 @@ interface ActantSuggesterI {
   placeholder?: string;
   allowCreate?: boolean;
   disableWildCard?: boolean;
-  inputWidth?: number;
+  inputWidth?: number | "full";
   openDetailOnCreate?: boolean;
   statementTerritoryId?: string;
 }
@@ -192,7 +192,6 @@ export const ActantSuggester: React.FC<ActantSuggesterI> = ({
       category={selectedCategory} // selected category
       categories={allCategories} // all possible categories
       suggestionListPosition={""} // todo not implemented yet
-      displayCancelButton={typed.length > 0}
       onCancel={() => {
         handleClean();
       }}

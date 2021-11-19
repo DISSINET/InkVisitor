@@ -12,7 +12,7 @@ import {
 } from "@shared/types";
 import { ActantSuggester, ActantTag } from "../..";
 import { AttributesEditor } from "../../AttributesEditor/AttributesEditor";
-import { Button } from "components";
+import { Button, ButtonGroup } from "components";
 import { FaPlus, FaTrashAlt, FaUnlink } from "react-icons/fa";
 import { UseMutationResult } from "react-query";
 import { ActantType } from "@shared/enums";
@@ -153,72 +153,62 @@ export const StatementEditorActionTable: React.FC<StatementEditorActionTable> = 
         },
       },
       {
-        id: "Attributes",
+        id: "Attributes & Buttons",
         Cell: ({ row }: Cell) => {
           const { action, sAction } = row.values.data;
-          return sAction ? (
-            <AttributesEditor
-              modalTitle={`Action involvement [${action ? action.label : ""}]`}
-              disabledAllAttributes={!userCanEdit}
-              entityType={ActantType.Action}
-              data={{
-                elvl: sAction.elvl,
-                certainty: sAction.certainty,
-                logic: sAction.logic,
-                mood: sAction.mood,
-                moodvariant: sAction.moodvariant,
-                operator: sAction.operator,
-                bundleStart: sAction.bundleStart,
-                bundleEnd: sAction.bundleEnd,
-              }}
-              handleUpdate={(newData) => {
-                updateAction(sAction.id, newData);
-              }}
-              loading={updateActionsMutation.isLoading}
-            />
-          ) : (
-            <div />
-          );
-        },
-      },
-      {
-        Header: "",
-        id: "remove",
-        Cell: ({ row }: Cell) =>
-          userCanEdit && (
-            <Button
-              key="d"
-              icon={<FaTrashAlt />}
-              color="plain"
-              inverted={true}
-              tooltip="remove action row"
-              onClick={() => {
-                removeAction(row.values.data.sAction.id);
-              }}
-            />
-          ),
-      },
-      {
-        Header: "",
-        id: "add",
-        Cell: ({ row }: Cell) => {
           const propOriginId = row.values.data.sAction.action;
-          // const propOriginId = row.values.data.action.id;
-          // const propOrigin = propsByOrigins[propOriginId];
-          // const originActant = propOrigin?.actant;
           return (
-            userCanEdit && (
-              <Button
-                key="a"
-                icon={<FaPlus />}
-                color="plain"
-                inverted={true}
-                tooltip="add new prop"
-                onClick={() => {
-                  addProp(propOriginId);
-                }}
-              />
-            )
+            <ButtonGroup noMargin>
+              {sAction ? (
+                <AttributesEditor
+                  modalTitle={`Action involvement [${
+                    action ? action.label : ""
+                  }]`}
+                  disabledAllAttributes={!userCanEdit}
+                  entityType={ActantType.Action}
+                  data={{
+                    elvl: sAction.elvl,
+                    certainty: sAction.certainty,
+                    logic: sAction.logic,
+                    mood: sAction.mood,
+                    moodvariant: sAction.moodvariant,
+                    operator: sAction.operator,
+                    bundleStart: sAction.bundleStart,
+                    bundleEnd: sAction.bundleEnd,
+                  }}
+                  handleUpdate={(newData) => {
+                    updateAction(sAction.id, newData);
+                  }}
+                  loading={updateActionsMutation.isLoading}
+                />
+              ) : (
+                <div />
+              )}
+              {userCanEdit && (
+                <Button
+                  key="d"
+                  icon={<FaTrashAlt />}
+                  color="plain"
+                  inverted={true}
+                  tooltip="remove action row"
+                  onClick={() => {
+                    removeAction(row.values.data.sAction.id);
+                  }}
+                />
+              )}
+              {userCanEdit && (
+                <Button
+                  key="a"
+                  icon={<FaPlus />}
+                  color="plain"
+                  inverted={true}
+                  tooltip="add new prop"
+                  onClick={() => {
+                    addProp(propOriginId);
+                  }}
+                />
+              )}
+            </ButtonGroup>
           );
         },
       },
