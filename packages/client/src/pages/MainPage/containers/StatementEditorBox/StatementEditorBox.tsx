@@ -787,7 +787,7 @@ export const StatementEditorBox: React.FC = () => {
                   categoryIds={["A"]}
                   excludedEntities={excludedSuggesterEntities}
                   placeholder={"add new action"}
-                ></ActantSuggester>
+                />
               )}
             </StyledEditorSectionContent>
           </StyledEditorSection>
@@ -818,7 +818,7 @@ export const StatementEditorBox: React.FC = () => {
                   categoryIds={classesActants}
                   placeholder={"add new actant"}
                   excludedEntities={excludedSuggesterEntities}
-                ></ActantSuggester>
+                />
               )}
             </StyledEditorSectionContent>
           </StyledEditorSection>
@@ -881,7 +881,7 @@ export const StatementEditorBox: React.FC = () => {
                                   });
                                 }}
                                 categoryIds={classesResources}
-                              ></ActantSuggester>
+                              />
                             )
                           )}
                         </StyledReferencesListColumn>
@@ -958,7 +958,7 @@ export const StatementEditorBox: React.FC = () => {
                   }}
                   categoryIds={classesResources}
                   placeholder={"add new reference"}
-                ></ActantSuggester>
+                />
               )}
             </StyledEditorSectionContent>
           </StyledEditorSection>
@@ -1007,7 +1007,7 @@ export const StatementEditorBox: React.FC = () => {
                   categoryIds={classesTags}
                   placeholder={"add new tag"}
                   excludedEntities={excludedSuggesterEntities}
-                ></ActantSuggester>
+                />
               )}
             </StyledEditorSectionContent>
           </StyledEditorSection>
