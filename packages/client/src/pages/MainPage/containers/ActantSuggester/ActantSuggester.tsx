@@ -5,7 +5,7 @@ import { IOption, IActant } from "@shared/types";
 
 import { FaHome } from "react-icons/fa";
 import { CActant, CTerritoryActant } from "constructors";
-import { Entities } from "types";
+import { Entities, EntityKeys } from "types";
 import { useMutation, useQuery, useQueryClient } from "react-query";
 import api from "api";
 import {
@@ -16,7 +16,6 @@ import {
 } from "@shared/enums";
 import { useDebounce, useSearchParams } from "hooks";
 import { rootTerritoryId } from "Theme/constants";
-import useKeypress from "hooks/useKeyPress";
 
 interface ActantSuggesterI {
   categoryIds: string[];
@@ -27,6 +26,7 @@ interface ActantSuggesterI {
   inputWidth?: number | "full";
   openDetailOnCreate?: boolean;
   statementTerritoryId?: string;
+  excludeEntities?: string[];
 }
 
 export const ActantSuggester: React.FC<ActantSuggesterI> = ({
@@ -38,6 +38,7 @@ export const ActantSuggester: React.FC<ActantSuggesterI> = ({
   disableWildCard = false,
   openDetailOnCreate = false,
   statementTerritoryId,
+  excludeEntities = [],
 }) => {
   const wildCardChar = "*";
   const queryClient = useQueryClient();
@@ -97,7 +98,10 @@ export const ActantSuggester: React.FC<ActantSuggesterI> = ({
     },
     {
       enabled:
-        debouncedTyped.length > 1 && !!selectedCategory && api.isLoggedIn(),
+        debouncedTyped.length > 1 &&
+        !!selectedCategory &&
+        !excludeEntities.includes(selectedCategory) &&
+        api.isLoggedIn(),
     }
   );
 
@@ -110,6 +114,7 @@ export const ActantSuggester: React.FC<ActantSuggesterI> = ({
     const categories: IOption[] = [];
     categoryIds.forEach((categoryId) => {
       const foundEntityCategory = Entities[categoryId];
+
       if (foundEntityCategory) {
         categories.push({
           label: foundEntityCategory.id,

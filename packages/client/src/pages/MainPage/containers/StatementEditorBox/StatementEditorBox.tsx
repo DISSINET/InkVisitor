@@ -534,7 +534,8 @@ export const StatementEditorBox: React.FC = () => {
               }}
               categoryIds={classesPropType}
               inputWidth={"full"}
-            ></ActantSuggester>
+              excludeEntities={["V"]}
+            />
           )}
           <StyledPropButtonGroup>
             <AttributesEditor
@@ -597,7 +598,8 @@ export const StatementEditorBox: React.FC = () => {
               }}
               categoryIds={classesPropValue}
               inputWidth={"full"}
-            ></ActantSuggester>
+              excludeEntities={["V"]}
+            />
           )}
           <StyledPropButtonGroup>
             <AttributesEditor
@@ -663,7 +665,7 @@ export const StatementEditorBox: React.FC = () => {
               onClick={() => {
                 removeProp(prop.id);
               }}
-            />{" "}
+            />
             <Button
               key="up"
               inverted
@@ -782,6 +784,7 @@ export const StatementEditorBox: React.FC = () => {
                     addAction(newSelectedId);
                   }}
                   categoryIds={["A"]}
+                  excludeEntities={["V"]}
                   placeholder={"add new action"}
                 ></ActantSuggester>
               )}
@@ -813,6 +816,7 @@ export const StatementEditorBox: React.FC = () => {
                   }}
                   categoryIds={classesActants}
                   placeholder={"add new actant"}
+                  excludeEntities={["V"]}
                 ></ActantSuggester>
               )}
             </StyledEditorSectionContent>
@@ -1001,6 +1005,7 @@ export const StatementEditorBox: React.FC = () => {
                   }}
                   categoryIds={classesTags}
                   placeholder={"add new tag"}
+                  excludeEntities={["V"]}
                 ></ActantSuggester>
               )}
             </StyledEditorSectionContent>

@@ -146,6 +146,7 @@ export const StatementEditorActantTable: React.FC<StatementEditorActantTable> = 
                   });
                 }}
                 categoryIds={classEntitiesActant}
+                excludeEntities={["V"]}
               />
             )
           );

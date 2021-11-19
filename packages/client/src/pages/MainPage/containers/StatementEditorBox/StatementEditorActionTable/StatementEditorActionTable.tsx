@@ -146,6 +146,7 @@ export const StatementEditorActionTable: React.FC<StatementEditorActionTable> = 
                   });
                 }}
                 categoryIds={["A"]}
+                excludeEntities={["V"]}
                 placeholder={"add new action"}
               />
             )
