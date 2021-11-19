@@ -115,20 +115,22 @@ const loadStatementsTables = async (next: Function) => {
   const tableTexts = await loadSheet({
     spread: "13eVorFf7J9R8YzO7TmJRVLzIIwRJS737r7eFbH1boyE",
     sheet: "Texts",
+    headerRow: 2,
+    validRowFn: (vals: any) => vals.label !== ''
   });
 
-  //  addTerritoryActant("entity-tables", "entity tables", "T0", 0);
-
-  tableTexts.forEach((text: { id: string; label: string }, ti: number) => {
-    addTerritoryActant(text.id, text.label, "T0", ti + 1);
+  
+  tableTexts.forEach((text: { id: string; label: string, language: Language }, ti: number) => {
+    addTerritoryActant(text.id, text.label, "T0", ti + 1, text.language);
   });
-
+  
   addTerritoryActant(rootTerritory, "everything", false, 0);
-
+  
   // parse resources
   const tableManuscripts = await loadSheet({
     spread: "13eVorFf7J9R8YzO7TmJRVLzIIwRJS737r7eFbH1boyE",
     sheet: "Manuscripts",
+    headerRow: 4,
   });
 
   type IRowResources = {
@@ -154,6 +156,7 @@ const loadStatementsTables = async (next: Function) => {
   const tableResources: IRowResources[] = await loadSheet({
     spread: "13eVorFf7J9R8YzO7TmJRVLzIIwRJS737r7eFbH1boyE",
     sheet: "Resources",
+    headerRow: 4,
   });
 
   tableManuscripts.forEach((manuscript: { id: string; label: string }) => {
@@ -196,6 +199,7 @@ const loadStatementsTables = async (next: Function) => {
     ? await loadSheet({
         spread: conceptSheet.spread,
         sheet: conceptSheet.sheet,
+        headerRow: 3,
       })
     : [];
 
@@ -281,22 +285,8 @@ const loadStatementsTables = async (next: Function) => {
 
     const entitySheetTerritory = "T_" + entitySheet.id;
 
-    // addTerritoryActant(
-    //   entitySheetTerritory,
-    //   entitySheet.label,
-    //   "entity-tables",
-    //   esi
-    // );
-
     data.forEach((entityRow: any, eri: number) => {
-      //const entityRowTerritory = entitySheetTerritory + "_" + entityRow.id;
 
-      // addTerritoryActant(
-      //   entityRowTerritory,
-      //   entitySheet.label + "_" + entityRow.id,
-      //   entitySheetTerritory,
-      //   eri
-      // );
 
       addEntityActant(
         entitySheet.id + "_" + entityRow.id,
@@ -554,6 +544,7 @@ const addTerritoryActant = (
   label: string,
   parentId: string | false,
   order: number,
+  language: Language = Language.Latin
   
 ) => {
   if (id) {
@@ -572,7 +563,7 @@ const addTerritoryActant = (
         label: label.trim(),
         detail: "",
         status: ActantStatus.Approved,
-        language: Language.Latin,
+        language: language,
         notes: [],
       };
 
