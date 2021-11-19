@@ -26,7 +26,7 @@ interface ActantSuggesterI {
   inputWidth?: number | "full";
   openDetailOnCreate?: boolean;
   statementTerritoryId?: string;
-  excludeEntities?: string[];
+  excludedEntities?: string[];
 }
 
 export const ActantSuggester: React.FC<ActantSuggesterI> = ({
@@ -38,7 +38,7 @@ export const ActantSuggester: React.FC<ActantSuggesterI> = ({
   disableWildCard = false,
   openDetailOnCreate = false,
   statementTerritoryId,
-  excludeEntities = [],
+  excludedEntities = [],
 }) => {
   const wildCardChar = "*";
   const queryClient = useQueryClient();
@@ -75,7 +75,11 @@ export const ActantSuggester: React.FC<ActantSuggesterI> = ({
         class: selectedCategory === wildCardChar ? false : selectedCategory,
       });
       return resSuggestions.data
-        .filter((s) => s.status !== ActantStatus.Discouraged)
+        .filter(
+          (s) =>
+            s.status !== ActantStatus.Discouraged &&
+            !excludedEntities.includes(s.class)
+        )
         .map((s: IActant) => {
           const entity = Entities[s.class];
 
@@ -100,7 +104,7 @@ export const ActantSuggester: React.FC<ActantSuggesterI> = ({
       enabled:
         debouncedTyped.length > 1 &&
         !!selectedCategory &&
-        !excludeEntities.includes(selectedCategory) &&
+        !excludedEntities.includes(selectedCategory) &&
         api.isLoggedIn(),
     }
   );

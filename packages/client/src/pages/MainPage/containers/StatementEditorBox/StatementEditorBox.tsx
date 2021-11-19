@@ -62,6 +62,7 @@ import {
   StyledTitle,
 } from "../StatementsListBox/StatementListHeader/StatementListHeaderStyles";
 import { StatementListBreadcrumbItem } from "../StatementsListBox/StatementListHeader/StatementListBreadcrumbItem/StatementListBreadcrumbItem";
+import { excludedSuggesterEntities } from "Theme/constants";
 
 const classesActants = ["A", "T", "R", "P", "G", "O", "C", "L", "V", "E"];
 const classesPropType = ["C"];
@@ -534,7 +535,7 @@ export const StatementEditorBox: React.FC = () => {
               }}
               categoryIds={classesPropType}
               inputWidth={"full"}
-              excludeEntities={["V"]}
+              excludedEntities={excludedSuggesterEntities}
             />
           )}
           <StyledPropButtonGroup>
@@ -598,7 +599,7 @@ export const StatementEditorBox: React.FC = () => {
               }}
               categoryIds={classesPropValue}
               inputWidth={"full"}
-              excludeEntities={["V"]}
+              excludedEntities={excludedSuggesterEntities}
             />
           )}
           <StyledPropButtonGroup>
@@ -784,7 +785,7 @@ export const StatementEditorBox: React.FC = () => {
                     addAction(newSelectedId);
                   }}
                   categoryIds={["A"]}
-                  excludeEntities={["V"]}
+                  excludedEntities={excludedSuggesterEntities}
                   placeholder={"add new action"}
                 ></ActantSuggester>
               )}
@@ -816,7 +817,7 @@ export const StatementEditorBox: React.FC = () => {
                   }}
                   categoryIds={classesActants}
                   placeholder={"add new actant"}
-                  excludeEntities={["V"]}
+                  excludedEntities={excludedSuggesterEntities}
                 ></ActantSuggester>
               )}
             </StyledEditorSectionContent>
@@ -1005,7 +1006,7 @@ export const StatementEditorBox: React.FC = () => {
                   }}
                   categoryIds={classesTags}
                   placeholder={"add new tag"}
-                  excludeEntities={["V"]}
+                  excludedEntities={excludedSuggesterEntities}
                 ></ActantSuggester>
               )}
             </StyledEditorSectionContent>

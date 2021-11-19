@@ -16,6 +16,7 @@ import { Button, ButtonGroup } from "components";
 import { FaPlus, FaTrashAlt, FaUnlink } from "react-icons/fa";
 import { UseMutationResult } from "react-query";
 import { ActantType } from "@shared/enums";
+import { excludedSuggesterEntities } from "Theme/constants";
 
 interface FilteredActionObject {
   data: { action: IActant | undefined; sAction: IStatementAction };
@@ -146,7 +147,7 @@ export const StatementEditorActionTable: React.FC<StatementEditorActionTable> = 
                   });
                 }}
                 categoryIds={["A"]}
-                excludeEntities={["V"]}
+                excludedEntities={excludedSuggesterEntities}
                 placeholder={"add new action"}
               />
             )
