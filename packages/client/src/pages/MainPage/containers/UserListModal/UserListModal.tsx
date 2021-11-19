@@ -302,7 +302,7 @@ export const UserListModal: React.FC<UserListModal> = ({
                     }}
                     categoryIds={["T"]}
                     placeholder={"assign a territory"}
-                  ></ActantSuggester>
+                  />
                   <StyledTerritoryList>
                     {readTerritories.length && territoryActants ? (
                       readTerritories.map((right: IUserRight) => {
@@ -379,7 +379,7 @@ export const UserListModal: React.FC<UserListModal> = ({
                       }}
                       categoryIds={["T"]}
                       placeholder={"assign a territory"}
-                    ></ActantSuggester>
+                    />
                     <StyledTerritoryList>
                       {writeTerritories.length && territoryActants ? (
                         writeTerritories.map((right: IUserRight) => {
