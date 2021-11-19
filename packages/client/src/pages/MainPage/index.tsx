@@ -248,7 +248,7 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
               {actantId && (
                 <Box
                   height={heightContent / 2}
-                  label="Actant Detail"
+                  label="Detail"
                   button={
                     actantId && (
                       <Button
