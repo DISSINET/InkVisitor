@@ -35,28 +35,28 @@ export const CBookmarkFolder = (bookmarkName: string): IBookmarkFolder => ({
 export const CProp = (): IStatementProp => ({
   id: uuidv4(),
   origin: "",
-  elvl: Elvl["Textual"],
+  elvl: Elvl.Textual,
   certainty: Certainty.Empty,
-  logic: Logic["Positive"],
+  logic: Logic.Positive,
   mood: [Mood.Indication],
   moodvariant: MoodVariant.Realis,
-  operator: Operator["And"],
+  operator: Operator.And,
   bundleStart: false,
   bundleEnd: false,
 
   type: {
     id: "",
-    elvl: Elvl["Textual"],
-    logic: Logic["Positive"],
+    elvl: Elvl.Textual,
+    logic: Logic.Positive,
     virtuality: Virtuality.Reality,
-    partitivity: Partitivity["Unison"],
+    partitivity: Partitivity.Unison,
   },
   value: {
     id: "",
-    elvl: Elvl["Textual"],
-    logic: Logic["Positive"],
+    elvl: Elvl.Textual,
+    logic: Logic.Positive,
     virtuality: Virtuality.Reality,
-    partitivity: Partitivity["Unison"],
+    partitivity: Partitivity.Unison,
   },
 });
 
@@ -69,9 +69,9 @@ export const CStatement = (
   label: "",
   detail: "",
   status:
-    userRole === UserRole["Admin"]
-      ? ActantStatus["Approved"]
-      : ActantStatus["Pending"],
+    userRole === UserRole.Admin
+      ? ActantStatus.Approved
+      : ActantStatus.Pending,
   language: [Language.Latin],
   notes: [],
   data: {
@@ -97,9 +97,9 @@ export const CMetaStatement = (
   label: "",
   detail: "",
   status:
-    userRole === UserRole["Admin"]
-      ? ActantStatus["Approved"]
-      : ActantStatus["Pending"],
+    userRole === UserRole.Admin
+      ? ActantStatus.Approved
+      : ActantStatus.Pending,
   language: [Language.Latin],
   notes: [],
   data: {
@@ -108,11 +108,11 @@ export const CMetaStatement = (
         id: uuidv4(),
         action: "A0093",
         certainty: Certainty.Empty,
-        elvl: Elvl["Inferential"],
-        logic: Logic["Positive"],
-        mood: [Mood["Indication"]],
+        elvl: Elvl.Inferential,
+        logic: Logic.Positive,
+        mood: [Mood.Indication],
         moodvariant: MoodVariant.Realis,
-        operator: Operator["And"],
+        operator: Operator.And,
         bundleStart: false,
         bundleEnd: false,
       },
@@ -126,12 +126,12 @@ export const CMetaStatement = (
       {
         id: uuidv4(),
         actant: subjectId,
-        position: Position["Subject"],
-        elvl: Elvl["Inferential"],
-        logic: Logic["Positive"],
+        position: Position.Subject,
+        elvl: Elvl.Inferential,
+        logic: Logic.Positive,
         virtuality: Virtuality.Reality,
-        partitivity: Partitivity["Unison"],
-        operator: Operator["And"],
+        partitivity: Partitivity.Unison,
+        operator: Operator.And,
         bundleStart: false,
         bundleEnd: false,
       },
@@ -139,11 +139,11 @@ export const CMetaStatement = (
         id: uuidv4(),
         actant: "",
         position: Position["Actant1"],
-        elvl: Elvl["Inferential"],
-        logic: Logic["Positive"],
+        elvl: Elvl.Inferential,
+        logic: Logic.Positive,
         virtuality: Virtuality.Reality,
-        partitivity: Partitivity["Unison"],
-        operator: Operator["And"],
+        partitivity: Partitivity.Unison,
+        operator: Operator.And,
         bundleStart: false,
         bundleEnd: false,
       },
@@ -151,11 +151,11 @@ export const CMetaStatement = (
         id: uuidv4(),
         actant: "",
         position: Position["Actant2"],
-        elvl: Elvl["Inferential"],
-        logic: Logic["Positive"],
+        elvl: Elvl.Inferential,
+        logic: Logic.Positive,
         virtuality: Virtuality.Reality,
-        partitivity: Partitivity["Unison"],
-        operator: Operator["And"],
+        partitivity: Partitivity.Unison,
+        operator: Operator.And,
         bundleStart: false,
         bundleEnd: false,
       },
@@ -182,12 +182,12 @@ export const DStatement = (statement: IStatement): IStatement => {
 export const CStatementActant = (): IStatementActant => ({
   id: uuidv4(),
   actant: "",
-  position: Position["Subject"],
-  elvl: Elvl["Textual"],
-  logic: Logic["Positive"],
+  position: Position.Subject,
+  elvl: Elvl.Textual,
+  logic: Logic.Positive,
   virtuality: Virtuality.Reality,
-  partitivity: Partitivity["Unison"],
-  operator: Operator["And"],
+  partitivity: Partitivity.Unison,
+  operator: Operator.And,
   bundleStart: false,
   bundleEnd: false,
 });
@@ -196,11 +196,11 @@ export const CStatementAction = (actionId: string): IStatementAction => ({
   id: uuidv4(),
   action: actionId,
   certainty: Certainty.Empty,
-  elvl: Elvl["Textual"],
-  logic: Logic["Positive"],
-  mood: [Mood["Indication"]],
+  elvl: Elvl.Textual,
+  logic: Logic.Positive,
+  mood: [Mood.Indication],
   moodvariant: MoodVariant.Realis,
-  operator: Operator["And"],
+  operator: Operator.And,
   bundleStart: false,
   bundleEnd: false,
 });
@@ -216,9 +216,9 @@ export const CTerritoryActant = (
   label: label,
   detail: "",
   status:
-    userRole === UserRole["Admin"]
-      ? ActantStatus["Approved"]
-      : ActantStatus["Pending"],
+    userRole === UserRole.Admin
+      ? ActantStatus.Approved
+      : ActantStatus.Pending,
   language: [Language.Latin],
   notes: [],
   data: {
@@ -238,9 +238,9 @@ export const CActant = (
   detail: detail ? detail : "",
   data: {},
   status:
-    userRole === UserRole["Admin"]
-      ? ActantStatus["Approved"]
-      : ActantStatus["Pending"],
+    userRole === UserRole.Admin
+      ? ActantStatus.Approved
+      : ActantStatus.Pending,
   language: [Language.Latin],
   notes: [],
 });
