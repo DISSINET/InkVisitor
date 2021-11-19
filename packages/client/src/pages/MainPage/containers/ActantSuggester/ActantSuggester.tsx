@@ -78,6 +78,7 @@ export const ActantSuggester: React.FC<ActantSuggesterI> = ({
         .filter(
           (s) =>
             s.status !== ActantStatus.Discouraged &&
+            // TODO: could be removed after BE implementation of excluding
             !excludedEntities.includes(s.class)
         )
         .map((s: IActant) => {
