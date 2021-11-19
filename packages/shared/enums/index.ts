@@ -154,6 +154,7 @@ export enum Operator {
 }
 
 export enum Language {
+  Empty = "",
   Latin = "lat",
   English = "eng",
   MiddleEnglish = "enm",

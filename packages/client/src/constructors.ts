@@ -72,7 +72,7 @@ export const CStatement = (
     userRole === UserRole.Admin
       ? ActantStatus.Approved
       : ActantStatus.Pending,
-  language: [Language.Latin],
+  language: Language.Latin,
   notes: [],
   data: {
     actions: [],
@@ -100,7 +100,7 @@ export const CMetaStatement = (
     userRole === UserRole.Admin
       ? ActantStatus.Approved
       : ActantStatus.Pending,
-  language: [Language.Latin],
+  language: Language.Latin,
   notes: [],
   data: {
     actions: [
@@ -219,7 +219,7 @@ export const CTerritoryActant = (
     userRole === UserRole.Admin
       ? ActantStatus.Approved
       : ActantStatus.Pending,
-  language: [Language.Latin],
+  language: Language.Latin,
   notes: [],
   data: {
     parent: { id: parentId, order: parentOrder },
@@ -241,7 +241,7 @@ export const CActant = (
     userRole === UserRole.Admin
       ? ActantStatus.Approved
       : ActantStatus.Pending,
-  language: [Language.Latin],
+  language: Language.Latin,
   notes: [],
 });
 

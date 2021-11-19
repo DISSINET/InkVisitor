@@ -63,7 +63,7 @@ describe("Statement constructor test", function () {
         text: "text",
       },
       detail: "",
-      language: [Language.Czech],
+      language: Language.Czech,
       notes: [],
       status: ActantStatus.Pending,
     };

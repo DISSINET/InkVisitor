@@ -1,4 +1,4 @@
-var { loadSheet } = require("./../util/loadsheet");
+var { loadSheet } = require("./loadsheet.js");
 var { v4 } = require("uuid");
 var fs = require("fs");
 
@@ -99,7 +99,7 @@ const loadStatementsTables = async (next: Function) => {
           },
           properties: [],
         },
-        language: action.language === "English" ? [Language.English] : [Language.Latin],
+        language: action.language === "English" ? Language.English : Language.Latin,
         status: statusOption
           ? (statusOption.value as ActantStatus)
           : ("0" as ActantStatus),
@@ -397,7 +397,7 @@ const loadStatementsTables = async (next: Function) => {
         notes: [],
         label: statement.id,
         detail: "",
-        language: [Language.Latin],
+        language: Language.Latin,
         status: ActantStatus.Approved,
       };
 
@@ -542,7 +542,7 @@ const addEntityActant = (id: string, label: string, type: AllActantType) => {
       label: label,
       detail: "",
       status: ActantStatus.Approved,
-      language: [Language.Latin],
+      language: Language.Latin,
       notes: [],
     } 
   if (id) {
@@ -553,7 +553,8 @@ const addTerritoryActant = (
   id: string,
   label: string,
   parentId: string | false,
-  order: number
+  order: number,
+  
 ) => {
   if (id) {
     if (!actants.some((a) => a.id == id)) {
@@ -571,7 +572,7 @@ const addTerritoryActant = (
         label: label.trim(),
         detail: "",
         status: ActantStatus.Approved,
-        language: [Language.Latin],
+        language: Language.Latin,
         notes: [],
       };
 
@@ -590,7 +591,7 @@ const addResourceActant = (id: string, label: string) => {
       label: label.trim(),
       detail: "",
       status: ActantStatus.Approved,
-      language: [Language.Latin],
+      language: Language.Latin,
       notes: [],
     };
     actants.push(newResource);
@@ -723,7 +724,7 @@ const createEmptyPropStatement = (
       },
       detail: "",
       status: ActantStatus.Approved,
-      language: [Language.Latin],
+      language: Language.Latin,
       notes: [],
     };
     actants.push(newEmptyStatement);
