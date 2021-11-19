@@ -22,7 +22,7 @@ export default class Actant implements IActant, IDbModel {
   label: string = "";
   detail: string = "";
   status: ActantStatus = ActantStatus.Pending;
-  language: string[] = [];
+  language: Language = Language.Latin;
   notes: string[] = [];
 
   constructor(data: UnknownObject) {
@@ -31,7 +31,6 @@ export default class Actant implements IActant, IDbModel {
     }
 
     fillFlatObject(this, { ...data, data: undefined });
-    fillArray(this.language, String, data.language);
     fillArray(this.notes, String, data.notes);
   }
 
