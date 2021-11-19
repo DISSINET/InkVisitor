@@ -35,7 +35,7 @@ export const CProp = (): IStatementProp => ({
   id: uuidv4(),
   origin: "",
   elvl: Elvl["Textual"],
-  certainty: Certainty["Certain"],
+  certainty: Certainty["Empty"],
   logic: Logic["Positive"],
   mood: [],
   moodvariant: MoodVariant["Realis"],
@@ -106,7 +106,7 @@ export const CMetaStatement = (
       {
         id: uuidv4(),
         action: "A0093",
-        certainty: Certainty["Certain"],
+        certainty: Certainty["Empty"],
         elvl: Elvl["Inferential"],
         logic: Logic["Positive"],
         mood: [Mood["Certitude"]],
@@ -194,7 +194,7 @@ export const CStatementActant = (): IStatementActant => ({
 export const CStatementAction = (actionId: string): IStatementAction => ({
   id: uuidv4(),
   action: actionId,
-  certainty: Certainty["Certain"],
+  certainty: Certainty["Empty"],
   elvl: Elvl["Textual"],
   logic: Logic["Positive"],
   mood: [Mood["Certitude"]],

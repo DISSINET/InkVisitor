@@ -76,7 +76,7 @@ export enum ActantStatus {
 }
 
 export enum Certainty {
-  Certainty0 = "0", // this is not used in dicts (@see ../disctionaries/certainty.ts)
+  Empty = "0", // this is not used in dicts (@see ../disctionaries/certainty.ts)
   Certain = "1",
   AlmostCertain = "2",
   Probable = "3",
