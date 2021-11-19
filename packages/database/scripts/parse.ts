@@ -120,10 +120,27 @@ const loadStatementsTables = async (next: Function) => {
   });
 
   
-  tableTexts.forEach((text: { id: string; label: string, language: Language }, ti: number) => {
-    addTerritoryActant(text.id, text.label, "T0", ti + 1, text.language);
+  tableTexts.forEach((text: { id: string; label: string, language: Language, detail: string, note: string }, ti: number) => {
+    addTerritoryActant(text.id, text.label, "T0", ti + 1, text.detail, text.language, text.note ? text.note.split('#') : []);
   });
-  
+
+  // props
+  // language_id -> C0732
+  // genre_id -> C0335
+  // milieu_of_provenance_id -> C1178
+  // origin_id -> C0399
+  // manuscript_witness_1 -> C1181
+  // manuscript_witness_2 -> C1181
+  // manuscript_witness_3 -> C1181
+  // manuscript_witness_4 -> C1181
+  // manuscript_witness_5 -> C1181
+  // manuscript_witness_6 -> C1181
+  // manuscript_witness_7 -> C1181
+  // manuscript_witness_8 -> C1181
+  // manuscript_witness_9 -> C1181
+  // manuscript_witness_10 -> C1181
+  // manuscript_witness_11 -> C1181
+   
   addTerritoryActant(rootTerritory, "everything", false, 0);
   
   // parse resources
@@ -544,8 +561,9 @@ const addTerritoryActant = (
   label: string,
   parentId: string | false,
   order: number,
-  language: Language = Language.Latin
-  
+  detail: string = '',
+  language: string = 'Latin',
+  notes: string[]= []
 ) => {
   if (id) {
     if (!actants.some((a) => a.id == id)) {
@@ -561,10 +579,11 @@ const addTerritoryActant = (
             : false,
         },
         label: label.trim(),
-        detail: "",
+        detail: detail,
         status: ActantStatus.Approved,
-        language: language,
-        notes: [],
+        // @ts-ignore
+        language: Language[language] as Language,
+        notes: notes,
       };
 
       actants.push(newTerritory);
