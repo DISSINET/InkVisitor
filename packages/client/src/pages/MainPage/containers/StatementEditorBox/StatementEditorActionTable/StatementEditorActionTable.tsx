@@ -161,7 +161,7 @@ export const StatementEditorActionTable: React.FC<StatementEditorActionTable> = 
             <ButtonGroup noMargin>
               {sAction ? (
                 <AttributesEditor
-                  modalTitle={`Action involvement [${
+                  modalTitle={`Action attributes [${
                     action ? action.label : ""
                   }]`}
                   disabledAllAttributes={!userCanEdit}
