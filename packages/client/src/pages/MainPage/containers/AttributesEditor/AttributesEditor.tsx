@@ -114,9 +114,6 @@ export const AttributesEditor: React.FC<StatementEditorAttributes> = ({
       case "logic":
         newModalData["logic"] = newValue as Logic;
         break;
-      case "certainty":
-        newModalData["certainty"] = newValue as Certainty;
-        break;
       case "elvl":
         newModalData["elvl"] = newValue as Elvl;
         break;
@@ -140,6 +137,9 @@ export const AttributesEditor: React.FC<StatementEditorAttributes> = ({
         break;
       case "bundleEnd":
         newModalData["bundleEnd"] = newValue as boolean;
+        break;
+      case "certainty":
+        newModalData["certainty"] = newValue as Certainty;
         break;
     }
 
@@ -229,22 +229,6 @@ export const AttributesEditor: React.FC<StatementEditorAttributes> = ({
                 attributeName="logic"
                 onChangeFn={(newValue: string | string[]) => {
                   handleModalDataChange("logic", newValue as Logic);
-                }}
-              />
-            )}
-            {modalData.certainty && (
-              <AttributeRow
-                disabled={
-                  disabledAllAttributes ||
-                  disabledAttributes.includes("certainty")
-                }
-                value={modalData.certainty}
-                multi={false}
-                items={certaintyDict}
-                label="Certainty"
-                attributeName="certainty"
-                onChangeFn={(newValue: string | string[]) => {
-                  handleModalDataChange("certainty", newValue as Certainty);
                 }}
               />
             )}
@@ -355,6 +339,22 @@ export const AttributesEditor: React.FC<StatementEditorAttributes> = ({
                 }}
               />
             )}
+            {modalData.certainty && (
+              <AttributeRow
+                disabled={
+                  disabledAllAttributes ||
+                  disabledAttributes.includes("certainty")
+                }
+                value={modalData.certainty}
+                multi={false}
+                items={certaintyDict}
+                label="Certainty"
+                attributeName="certainty"
+                onChangeFn={(newValue: string | string[]) => {
+                  handleModalDataChange("certainty", newValue as Certainty);
+                }}
+              ></AttributeRow>
+            )}
           </StyledAttributeModalContent>
         </ModalContent>
 
@@ -405,12 +405,6 @@ export const AttributesEditor: React.FC<StatementEditorAttributes> = ({
               items={logicDict}
             />,
             <TooltipAttributeRow
-              key="certainty"
-              attributeName="certainty"
-              value={data.certainty}
-              items={certaintyDict}
-            />,
-            <TooltipAttributeRow
               key="mood"
               attributeName="mood"
               value={data.mood}
@@ -451,6 +445,12 @@ export const AttributesEditor: React.FC<StatementEditorAttributes> = ({
               attributeName="bundleEnd"
               label="bundle end"
               show={data.bundleEnd ? data.bundleEnd : false}
+            />,
+            <TooltipAttributeRow
+              key="certainty"
+              attributeName="certainty"
+              value={data.certainty}
+              items={certaintyDict}
             />,
           ]}
         >
