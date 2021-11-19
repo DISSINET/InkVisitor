@@ -48,7 +48,9 @@ export const ActantSearchBox: React.FC = () => {
         return res.data;
       }
     },
-    { enabled: !!searchData.actantId && api.isLoggedIn() }
+    {
+      enabled: !!searchData.actantId && api.isLoggedIn(),
+    }
   );
 
   useEffect(() => {
@@ -79,7 +81,7 @@ export const ActantSearchBox: React.FC = () => {
   };
 
   useEffect(() => {
-    if (debouncedValues.actantId || debouncedValues.label) {
+    if (debouncedValues.actantId || debouncedValues.label.length > 3) {
       searchActantsMutation.mutate(debouncedValues);
     } else {
       setResults([]);
