@@ -135,7 +135,7 @@ const importData = async () => {
                 elvl: Elvl.Inferential,
                 id: i.toString(),
                 logic: Logic.Negative,
-                mood: [],
+                mood: [Mood.Indication],
                 moodvariant: MoodVariant.Irrealis,
                 operator: Operator.And,
               },

@@ -110,9 +110,9 @@ export class StatementAction {
   id = "";
   action: string = "";
   elvl: Elvl = Elvl.Textual;
-  certainty: Certainty = Certainty.Certain;
+  certainty: Certainty = Certainty.Empty;
   logic: Logic = Logic.Positive;
-  mood: Mood[] = [];
+  mood: Mood[] = [Mood.Indication];
   moodvariant: MoodVariant = MoodVariant.Realis;
   operator: Operator = Operator.And;
   bundleStart: boolean = false;
@@ -145,7 +145,7 @@ export class StatementProp implements IStatementProp, IModel {
 
   origin = "";
   elvl: Elvl = Elvl.Textual;
-  certainty: Certainty = Certainty.Certain;
+  certainty: Certainty = Certainty.Empty;
   logic: Logic = Logic.Positive;
   mood: Mood[] = [];
   moodvariant: MoodVariant = MoodVariant.Realis;

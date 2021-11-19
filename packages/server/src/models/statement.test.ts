@@ -43,7 +43,7 @@ describe("Statement constructor test", function () {
             action: "action",
             bundleEnd: false,
             bundleStart: false,
-            certainty: Certainty.Certain,
+            certainty: Certainty.Empty,
             elvl: Elvl.Inferential,
             id: "actionm",
             logic: Logic.Positive,

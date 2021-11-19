@@ -105,7 +105,7 @@ describe("Actants search", function () {
         ...({
           id: actionData.id,
           action: actionData.id,
-          certainty: Certainty.Certain,
+          certainty: Certainty.Empty,
           elvl: Elvl.Inferential,
           logic: Logic.Negative,
           mood: [Mood.Allegation],
