@@ -113,8 +113,8 @@ export interface DraggedTerritoryItem {
 }
 export interface IRequestSearch {
   class?: ActantType;
-  label?: string;
-  actantId?: string;
+  label: string;
+  actantId: string;
 }
 export type DropdownItem = { value: string; label: string };
 
