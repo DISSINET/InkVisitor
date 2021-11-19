@@ -50,7 +50,9 @@ export const AttributeRow: React.FC<AttributeRow> = ({
         onChange={(newValue: any) => {
           onChangeFn(
             multi
-              ? newValue.map((v: any) => v.value)
+              ? newValue
+                ? newValue.map((v: any) => v.value)
+                : []
               : (newValue.value as string | string[])
           );
         }}
