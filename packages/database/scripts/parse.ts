@@ -17,6 +17,7 @@ import {
   Partitivity,
   Operator,
   EntityLogicalType,
+  Language,
 } from "../../shared/enums";
 import {
   IAction,
@@ -98,7 +99,7 @@ const loadStatementsTables = async (next: Function) => {
           },
           properties: [],
         },
-        language: action.language === "English" ? ["eng"] : ["lat"],
+        language: action.language === "English" ? [Language.English] : [Language.Latin],
         status: statusOption
           ? (statusOption.value as ActantStatus)
           : ("0" as ActantStatus),
@@ -396,7 +397,7 @@ const loadStatementsTables = async (next: Function) => {
         notes: [],
         label: statement.id,
         detail: "",
-        language: ["eng"],
+        language: [Language.Latin],
         status: ActantStatus["Approved"],
       };
 
@@ -541,7 +542,7 @@ const addEntityActant = (id: string, label: string, type: AllActantType) => {
       label: label,
       detail: "",
       status: ActantStatus["Approved"],
-      language: ["eng"],
+      language: [Language.Latin],
       notes: [],
     } 
   if (id) {
@@ -570,7 +571,7 @@ const addTerritoryActant = (
         label: label.trim(),
         detail: "",
         status: ActantStatus["Approved"],
-        language: ["eng"],
+        language: [Language.Latin],
         notes: [],
       };
 
@@ -589,7 +590,7 @@ const addResourceActant = (id: string, label: string) => {
       label: label.trim(),
       detail: "",
       status: ActantStatus["Approved"],
-      language: ["eng"],
+      language: [Language.Latin],
       notes: [],
     };
     actants.push(newResource);
@@ -722,7 +723,7 @@ const createEmptyPropStatement = (
       },
       detail: "",
       status: ActantStatus["Approved"],
-      language: ["eng"],
+      language: [Language.Latin],
       notes: [],
     };
     actants.push(newEmptyStatement);

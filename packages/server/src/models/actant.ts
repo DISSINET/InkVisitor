@@ -22,7 +22,7 @@ export default class Actant implements IActant, IDbModel {
   label: string = "";
   detail: string = "";
   status: ActantStatus = ActantStatus.Pending;
-  language: string[] = [];
+  language: string[] = [Language.Latin];
   notes: string[] = [];
 
   constructor(data: UnknownObject) {

@@ -108,7 +108,7 @@ const importData = async () => {
           detail: "",
           id: i.toString(),
           label: "",
-          language: [Language.English],
+          language: [Language.Latin],
           notes: [],
           status: ActantStatus.Pending,
           data: {
@@ -159,7 +159,7 @@ const importData = async () => {
           detail: "",
           id: i.toString(),
           label: "",
-          language: [Language.English],
+          language: [Language.Latin],
           notes: [],
           status: ActantStatus.Pending,
           data: {
@@ -177,7 +177,7 @@ const importData = async () => {
           detail: "",
           id: i.toString(),
           label: "",
-          language: [Language.English],
+          language: [Language.Latin],
           notes: [],
           status: ActantStatus.Pending,
           data: {
@@ -196,7 +196,7 @@ const importData = async () => {
           detail: "",
           id: i.toString(),
           label: "",
-          language: [Language.English],
+          language: [Language.Latin],
           notes: [],
           status: ActantStatus.Pending,
         };
