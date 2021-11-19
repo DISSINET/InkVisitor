@@ -117,7 +117,7 @@ export const ActantDetailMetaTableRow: React.FC<ActantDetailMetaTableRow> = ({
     //         }}
     //         categoryIds={["C"]}
     //         placeholder={"add new reference"}
-    //       ></ActantSuggester>
+    //       />
     //     )}
     //   </StyledSectionMetaTableCell>
 
@@ -162,7 +162,7 @@ export const ActantDetailMetaTableRow: React.FC<ActantDetailMetaTableRow> = ({
     //         }}
     //         categoryIds={["P", "G", "O", "C", "L", "V", "E", "S", "T", "R"]}
     //         placeholder={"add new reference"}
-    //       ></ActantSuggester>
+    //       />
     //     )}
     //   </StyledSectionMetaTableCell>
 

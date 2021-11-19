@@ -215,7 +215,7 @@ export const AttributesEditor: React.FC<StatementEditorAttributes> = ({
                   handleModalDataChange("elvl", newValue as Elvl);
                 }}
                 attributeName="elvl"
-              ></AttributeRow>
+              />
             )}
             {modalData.logic && (
               <AttributeRow
@@ -230,7 +230,7 @@ export const AttributesEditor: React.FC<StatementEditorAttributes> = ({
                 onChangeFn={(newValue: string | string[]) => {
                   handleModalDataChange("logic", newValue as Logic);
                 }}
-              ></AttributeRow>
+              />
             )}
             {modalData.mood && (
               <AttributeRow
@@ -245,7 +245,7 @@ export const AttributesEditor: React.FC<StatementEditorAttributes> = ({
                 onChangeFn={(newValue: string | string[]) => {
                   handleModalDataChange("mood", newValue as Mood[]);
                 }}
-              ></AttributeRow>
+              />
             )}
             {modalData.moodvariant && (
               <AttributeRow
@@ -261,7 +261,7 @@ export const AttributesEditor: React.FC<StatementEditorAttributes> = ({
                 onChangeFn={(newValue: string | string[]) => {
                   handleModalDataChange("moodvariant", newValue as MoodVariant);
                 }}
-              ></AttributeRow>
+              />
             )}
             {modalData.virtuality && (
               <AttributeRow
@@ -277,7 +277,7 @@ export const AttributesEditor: React.FC<StatementEditorAttributes> = ({
                 onChangeFn={(newValue: string | string[]) => {
                   handleModalDataChange("virtuality", newValue as Virtuality);
                 }}
-              ></AttributeRow>
+              />
             )}
             {modalData.partitivity && (
               <AttributeRow
@@ -293,7 +293,7 @@ export const AttributesEditor: React.FC<StatementEditorAttributes> = ({
                 onChangeFn={(newValue: string | string[]) => {
                   handleModalDataChange("partitivity", newValue as Partitivity);
                 }}
-              ></AttributeRow>
+              />
             )}
             {modalData.operator && (
               <AttributeRow
@@ -309,7 +309,7 @@ export const AttributesEditor: React.FC<StatementEditorAttributes> = ({
                 onChangeFn={(newValue: string | string[]) => {
                   handleModalDataChange("operator", newValue as Operator);
                 }}
-              ></AttributeRow>
+              />
             )}
             {modalData.operator && (
               <CheckboxRow

@@ -3,17 +3,7 @@ import { DragObjectWithType, DropTargetMonitor, useDrop } from "react-dnd";
 import { FaPlus, FaPlayCircle } from "react-icons/fa";
 import { MdCancel } from "react-icons/md";
 
-import {
-  Button,
-  ButtonGroup,
-  Input,
-  Loader,
-  Modal,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
-  Tag,
-} from "components";
+import { Button, Input, Loader, Tag } from "components";
 import { IOption } from "@shared/types";
 import { ItemTypes } from "types";
 import {
