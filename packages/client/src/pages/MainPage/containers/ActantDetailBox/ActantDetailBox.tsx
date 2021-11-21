@@ -407,7 +407,7 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
                 </StyledContentRowValue>
               </StyledContentRow>
               <StyledContentRow>
-                <StyledContentRowLabel>Language</StyledContentRowLabel>
+                <StyledContentRowLabel>Label language</StyledContentRowLabel>
                 <StyledContentRowValue>
                   <Dropdown
                     disabled={!userCanEdit}

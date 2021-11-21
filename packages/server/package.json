@@ -57,7 +57,7 @@
     "pug": "^3.0.2",
     "randomstring": "^1.1.5",
     "rethinkdb": "^2.4.2",
-    "rethinkdb-ts": "^2.4.5",
+    "rethinkdb-ts": "^2.4.18",
     "uuid": "^8.1.0",
     "winston": "^3.2.1"
   },

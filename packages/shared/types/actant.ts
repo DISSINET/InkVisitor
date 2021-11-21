@@ -1,4 +1,4 @@
-import { ActantType, ActantStatus } from "../enums";
+import { ActantType, ActantStatus, Language } from "../enums";
 
 export interface IActant {
   id: string;
@@ -7,6 +7,6 @@ export interface IActant {
   label: string;
   detail: string;
   status: ActantStatus;
-  language: string[];
+  language: Language;
   notes: string[];
 }

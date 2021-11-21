@@ -62,6 +62,7 @@ import {
   StyledTitle,
 } from "../StatementsListBox/StatementListHeader/StatementListHeaderStyles";
 import { StatementListBreadcrumbItem } from "../StatementsListBox/StatementListHeader/StatementListBreadcrumbItem/StatementListBreadcrumbItem";
+import { excludedSuggesterEntities } from "Theme/constants";
 
 const classesActants = ["A", "T", "R", "P", "G", "O", "C", "L", "V", "E"];
 const classesPropType = ["C"];
@@ -534,7 +535,8 @@ export const StatementEditorBox: React.FC = () => {
               }}
               categoryIds={classesPropType}
               inputWidth={"full"}
-            ></ActantSuggester>
+              excludedEntities={excludedSuggesterEntities}
+            />
           )}
           <StyledPropButtonGroup>
             <AttributesEditor
@@ -597,7 +599,8 @@ export const StatementEditorBox: React.FC = () => {
               }}
               categoryIds={classesPropValue}
               inputWidth={"full"}
-            ></ActantSuggester>
+              excludedEntities={excludedSuggesterEntities}
+            />
           )}
           <StyledPropButtonGroup>
             <AttributesEditor
@@ -663,7 +666,7 @@ export const StatementEditorBox: React.FC = () => {
               onClick={() => {
                 removeProp(prop.id);
               }}
-            />{" "}
+            />
             <Button
               key="up"
               inverted
@@ -782,8 +785,9 @@ export const StatementEditorBox: React.FC = () => {
                     addAction(newSelectedId);
                   }}
                   categoryIds={["A"]}
+                  excludedEntities={excludedSuggesterEntities}
                   placeholder={"add new action"}
-                ></ActantSuggester>
+                />
               )}
             </StyledEditorSectionContent>
           </StyledEditorSection>
@@ -813,7 +817,8 @@ export const StatementEditorBox: React.FC = () => {
                   }}
                   categoryIds={classesActants}
                   placeholder={"add new actant"}
-                ></ActantSuggester>
+                  excludedEntities={excludedSuggesterEntities}
+                />
               )}
             </StyledEditorSectionContent>
           </StyledEditorSection>
@@ -876,7 +881,7 @@ export const StatementEditorBox: React.FC = () => {
                                   });
                                 }}
                                 categoryIds={classesResources}
-                              ></ActantSuggester>
+                              />
                             )
                           )}
                         </StyledReferencesListColumn>
@@ -953,7 +958,7 @@ export const StatementEditorBox: React.FC = () => {
                   }}
                   categoryIds={classesResources}
                   placeholder={"add new reference"}
-                ></ActantSuggester>
+                />
               )}
             </StyledEditorSectionContent>
           </StyledEditorSection>
@@ -1001,7 +1006,8 @@ export const StatementEditorBox: React.FC = () => {
                   }}
                   categoryIds={classesTags}
                   placeholder={"add new tag"}
-                ></ActantSuggester>
+                  excludedEntities={excludedSuggesterEntities}
+                />
               )}
             </StyledEditorSectionContent>
           </StyledEditorSection>

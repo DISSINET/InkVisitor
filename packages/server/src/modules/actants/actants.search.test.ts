@@ -51,7 +51,7 @@ describe("Actants search", function () {
     it("should return a BadParams error wrapped in IResponseGeneric", (done) => {
       return request(app)
         .post(`${apiPath}/actants/search`)
-        .send({ class: "something", label: "mn" })
+        .send({ class: "something", label: "mnop" })
         .set("authorization", "Bearer " + supertestConfig.token)
         .expect("Content-Type", /json/)
         .expect(testErroneousResponse.bind(undefined, new BadParams("")))
@@ -59,17 +59,32 @@ describe("Actants search", function () {
     });
   });
 
-  describe("search by params", () => {
+  describe("ssearch by params", () => {
     let db: Db;
     const rand = Math.random().toString();
 
-    const actantData = new Entity({ id: `testactant${rand}` });
+    const actantData = new Entity({
+      id: `testactant-${rand}`,
+      label: "actant",
+      class: ActantType.Person,
+    });
 
-    const linkedActantData = new Entity({ id: `linkedaction-${rand}` });
+    const linkedActantData = new Entity({
+      id: `linkedaction-${rand}`,
+      label: "linked-actant",
+      class: ActantType.Concept,
+    });
 
-    const actionData = new Action({ id: `testaction-${rand}` });
+    const actionData = new Action({
+      id: `testaction-${rand}`,
+      label: "action",
+    });
 
-    const statement = new Statement({ id: `teststatement-${rand}` });
+    const statement = new Statement({
+      id: `teststatement-${rand}`,
+      label: "statement",
+    });
+
     statement.data.actants = [
       new StatementActant({
         ...({
@@ -105,7 +120,7 @@ describe("Actants search", function () {
         ...({
           id: actionData.id,
           action: actionData.id,
-          certainty: Certainty.Certain,
+          certainty: Certainty.Empty,
           elvl: Elvl.Inferential,
           logic: Logic.Negative,
           mood: [Mood.Allegation],
@@ -162,7 +177,7 @@ describe("Actants search", function () {
       it("should return a 400 code with successful response for invalid label", async (done) => {
         await request(app)
           .post(`${apiPath}/actants/search`)
-          .send({ label: actantData.label + "xxx" })
+          .send({ label: actantData.label + "xxxx" })
           .set("authorization", "Bearer " + supertestConfig.token)
           .expect("Content-Type", /json/)
           .expect(200)
@@ -300,7 +315,7 @@ describe("Actants search", function () {
             .send({
               class: linkedActantData.class,
               actantId: actantData.id,
-              label: linkedActantData.label + "xxx", // does not exist
+              label: linkedActantData.label + "xxxx", // does not exist
             })
             .set("authorization", "Bearer " + supertestConfig.token)
             .expect("Content-Type", /json/)
@@ -320,7 +335,7 @@ describe("Actants search", function () {
             .send({
               class: linkedActantData.class,
               actantId: actionData.id,
-              label: linkedActantData.label + "xxx", // does not exist
+              label: linkedActantData.label + "xxxx", // does not exist
             })
             .set("authorization", "Bearer " + supertestConfig.token)
             .expect("Content-Type", /json/)

@@ -1,6 +1,7 @@
 import theme from "./theme";
 
 export const rootTerritoryId = "T0";
+export const excludedSuggesterEntities = ["V"];
 
 // layout
 export const heightHeader = 70;
