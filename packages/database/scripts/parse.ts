@@ -1,4 +1,4 @@
-var { loadSheet } = require("./../util/loadsheet");
+var { loadSheet } = require("./loadsheet.js");
 var { v4 } = require("uuid");
 var fs = require("fs");
 
@@ -17,6 +17,7 @@ import {
   Partitivity,
   Operator,
   EntityLogicalType,
+  Language,
 } from "../../shared/enums";
 import {
   IAction,
@@ -98,7 +99,7 @@ const loadStatementsTables = async (next: Function) => {
           },
           properties: [],
         },
-        language: action.language === "English" ? ["eng"] : ["lat"],
+        language: action.language === "English" ? Language.English : Language.Latin,
         status: statusOption
           ? (statusOption.value as ActantStatus)
           : ("0" as ActantStatus),
@@ -114,20 +115,39 @@ const loadStatementsTables = async (next: Function) => {
   const tableTexts = await loadSheet({
     spread: "13eVorFf7J9R8YzO7TmJRVLzIIwRJS737r7eFbH1boyE",
     sheet: "Texts",
+    headerRow: 2,
+    validRowFn: (vals: any) => vals.label !== ''
   });
 
-  //  addTerritoryActant("entity-tables", "entity tables", "T0", 0);
-
-  tableTexts.forEach((text: { id: string; label: string }, ti: number) => {
-    addTerritoryActant(text.id, text.label, "T0", ti + 1);
+  
+  tableTexts.forEach((text: { id: string; label: string, language: Language, detail: string, note: string }, ti: number) => {
+    addTerritoryActant(text.id, text.label, "T0", ti + 1, text.detail, text.language, text.note ? text.note.split('#') : []);
   });
 
+  // props
+  // language_id -> C0732
+  // genre_id -> C0335
+  // milieu_of_provenance_id -> C1178
+  // origin_id -> C0399
+  // manuscript_witness_1 -> C1181
+  // manuscript_witness_2 -> C1181
+  // manuscript_witness_3 -> C1181
+  // manuscript_witness_4 -> C1181
+  // manuscript_witness_5 -> C1181
+  // manuscript_witness_6 -> C1181
+  // manuscript_witness_7 -> C1181
+  // manuscript_witness_8 -> C1181
+  // manuscript_witness_9 -> C1181
+  // manuscript_witness_10 -> C1181
+  // manuscript_witness_11 -> C1181
+   
   addTerritoryActant(rootTerritory, "everything", false, 0);
-
+  
   // parse resources
   const tableManuscripts = await loadSheet({
     spread: "13eVorFf7J9R8YzO7TmJRVLzIIwRJS737r7eFbH1boyE",
     sheet: "Manuscripts",
+    headerRow: 4,
   });
 
   type IRowResources = {
@@ -153,6 +173,7 @@ const loadStatementsTables = async (next: Function) => {
   const tableResources: IRowResources[] = await loadSheet({
     spread: "13eVorFf7J9R8YzO7TmJRVLzIIwRJS737r7eFbH1boyE",
     sheet: "Resources",
+    headerRow: 4,
   });
 
   tableManuscripts.forEach((manuscript: { id: string; label: string }) => {
@@ -195,6 +216,7 @@ const loadStatementsTables = async (next: Function) => {
     ? await loadSheet({
         spread: conceptSheet.spread,
         sheet: conceptSheet.sheet,
+        headerRow: 3,
       })
     : [];
 
@@ -280,22 +302,8 @@ const loadStatementsTables = async (next: Function) => {
 
     const entitySheetTerritory = "T_" + entitySheet.id;
 
-    // addTerritoryActant(
-    //   entitySheetTerritory,
-    //   entitySheet.label,
-    //   "entity-tables",
-    //   esi
-    // );
-
     data.forEach((entityRow: any, eri: number) => {
-      //const entityRowTerritory = entitySheetTerritory + "_" + entityRow.id;
 
-      // addTerritoryActant(
-      //   entityRowTerritory,
-      //   entitySheet.label + "_" + entityRow.id,
-      //   entitySheetTerritory,
-      //   eri
-      // );
 
       addEntityActant(
         entitySheet.id + "_" + entityRow.id,
@@ -360,12 +368,12 @@ const loadStatementsTables = async (next: Function) => {
             {
               id: v4(),
               action: statement.id_action_or_relation,
-              elvl: Elvl["Textual"],
-              certainty: Certainty["Certain"],
-              logic: Logic["Positive"],
-              mood: [Mood['Indication']],
-              moodvariant: MoodVariant["Realis"],
-              operator: Operator["And"],
+              elvl: Elvl.Textual,
+              certainty: Certainty.Empty,
+              logic: Logic.Positive,
+              mood: [Mood.Indication],
+              moodvariant: MoodVariant.Realis,
+              operator: Operator.And,
               bundleStart: false,
               bundleEnd: false,
             },
@@ -396,8 +404,8 @@ const loadStatementsTables = async (next: Function) => {
         notes: [],
         label: statement.id,
         detail: "",
-        language: ["eng"],
-        status: ActantStatus["Approved"],
+        language: Language.Latin,
+        status: ActantStatus.Approved,
       };
 
       statement.note && mainStatement.notes.push(statement.note);
@@ -418,7 +426,7 @@ const loadStatementsTables = async (next: Function) => {
       // actant1
       processActant(
         mainStatement,
-        Position["Actant1"],
+        Position.Actant1,
         statement.id_actant1,
         statement.actant1_property_type_id,
         statement.actant1_property_value_id,
@@ -428,7 +436,7 @@ const loadStatementsTables = async (next: Function) => {
       // actant2
       processActant(
         mainStatement,
-        Position["Actant2"],
+        Position.Actant2,
         statement.id_actant2,
         statement.actant2_property_type_id,
         statement.actant2_property_value_id,
@@ -473,27 +481,27 @@ const loadStatementsTables = async (next: Function) => {
         mainStatement.data.props.push({
           id: v4(),
           origin: statement.id,
-          elvl: Elvl["Textual"],
-          certainty: Certainty["Certain"],
-          logic: Logic["Positive"],
-          mood: [Mood['Indication']],
-          moodvariant: MoodVariant["Realis"],
-          operator: Operator["And"],
+          elvl: Elvl.Textual,
+          certainty: Certainty.Empty,
+          logic: Logic.Positive,
+          mood: [Mood.Indication],
+          moodvariant: MoodVariant.Realis,
+          operator: Operator.And,
           bundleStart: false,
           bundleEnd: false,
           type: {
             id: propActant1Id,
-            elvl: Elvl["Textual"],
-            logic: Logic["Positive"],
-            virtuality: Virtuality["Certitude"],
-            partitivity: Partitivity["Unison"],
+            elvl: Elvl.Textual,
+            logic: Logic.Positive,
+            virtuality: Virtuality.Reality,
+            partitivity: Partitivity.Unison,
           },
           value: {
             id: propActant2Id,
-            elvl: Elvl["Textual"],
-            logic: Logic["Positive"],
-            virtuality: Virtuality["Certitude"],
-            partitivity: Partitivity["Unison"],
+            elvl: Elvl.Textual,
+            logic: Logic.Positive,
+            virtuality: Virtuality.Reality,
+            partitivity: Partitivity.Unison,
           },
         });
       }
@@ -536,12 +544,12 @@ const addEntityActant = (id: string, label: string, type: AllActantType) => {
       id,
       class: type,
       data: type === ActantType.Concept ? {} : {
-        logicalType: EntityLogicalType["Definite"],
+        logicalType: EntityLogicalType.Definite,
       } ,
       label: label,
       detail: "",
-      status: ActantStatus["Approved"],
-      language: ["eng"],
+      status: ActantStatus.Approved,
+      language: Language.Latin,
       notes: [],
     } 
   if (id) {
@@ -552,7 +560,10 @@ const addTerritoryActant = (
   id: string,
   label: string,
   parentId: string | false,
-  order: number
+  order: number,
+  detail: string = '',
+  language: string = 'Latin',
+  notes: string[]= []
 ) => {
   if (id) {
     if (!actants.some((a) => a.id == id)) {
@@ -568,10 +579,11 @@ const addTerritoryActant = (
             : false,
         },
         label: label.trim(),
-        detail: "",
-        status: ActantStatus["Approved"],
-        language: ["eng"],
-        notes: [],
+        detail: detail,
+        status: ActantStatus.Approved,
+        // @ts-ignore
+        language: Language[language] as Language,
+        notes: notes,
       };
 
       actants.push(newTerritory);
@@ -588,8 +600,8 @@ const addResourceActant = (id: string, label: string) => {
       },
       label: label.trim(),
       detail: "",
-      status: ActantStatus["Approved"],
-      language: ["eng"],
+      status: ActantStatus.Approved,
+      language: Language.Latin,
       notes: [],
     };
     actants.push(newResource);
@@ -663,12 +675,12 @@ const createEmptyPropStatement = (
           {
             id: v4(),
             action: "A0093",
-            certainty: Certainty["Certain"],
-            elvl: Elvl["Textual"],
-            logic: Logic["Positive"],
-            mood: [Mood['Indication']],
-            moodvariant: MoodVariant["Realis"],
-            operator: Operator["And"],
+            certainty: Certainty.Empty,
+            elvl: Elvl.Textual,
+            logic: Logic.Positive,
+            mood: [Mood.Indication],
+            moodvariant: MoodVariant.Realis,
+            operator: Operator.And,
             bundleStart: false,
             bundleEnd: false,
           },
@@ -685,44 +697,44 @@ const createEmptyPropStatement = (
           {
             id: v4(),
             actant: idSubject,
-            position: Position["Subject"],
-            elvl: Elvl["Inferential"],
-            logic: Logic["Positive"],
-            virtuality: Virtuality["Reality"],
-            partitivity: Partitivity["Unison"],
-            operator: Operator["And"],
+            position: Position.Subject,
+            elvl: Elvl.Inferential,
+            logic: Logic.Positive,
+            virtuality: Virtuality.Reality,
+            partitivity: Partitivity.Unison,
+            operator: Operator.And,
             bundleStart: false,
             bundleEnd: false,
           },
           {
             id: v4(),
             actant: idActant1,
-            position: Position["Actant1"],
-            elvl: Elvl["Inferential"],
-            logic: Logic["Positive"],
-            virtuality: Virtuality["Reality"],
-            partitivity: Partitivity["Unison"],
-            operator: Operator["And"],
+            position: Position.Actant1,
+            elvl: Elvl.Inferential,
+            logic: Logic.Positive,
+            virtuality: Virtuality.Reality,
+            partitivity: Partitivity.Unison,
+            operator: Operator.And,
             bundleStart: false,
             bundleEnd: false,
           },
           {
             id: v4(),
             actant: idActant2,
-            position: Position["Actant2"],
-            elvl: Elvl["Inferential"],
-            logic: Logic["Positive"],
-            virtuality: Virtuality["Reality"],
-            partitivity: Partitivity["Unison"],
-            operator: Operator["And"],
+            position: Position.Actant2,
+            elvl: Elvl.Inferential,
+            logic: Logic.Positive,
+            virtuality: Virtuality.Reality,
+            partitivity: Partitivity.Unison,
+            operator: Operator.And,
             bundleStart: false,
             bundleEnd: false,
           },
         ],
       },
       detail: "",
-      status: ActantStatus["Approved"],
-      language: ["eng"],
+      status: ActantStatus.Approved,
+      language: Language.Latin,
       notes: [],
     };
     actants.push(newEmptyStatement);
@@ -782,55 +794,55 @@ const processLocation = (
           statement.data.props.push({
             id: v4(),
             origin: statement.id,
-            certainty: Certainty["Certain"],
-            elvl: Elvl["Textual"],
-            logic: Logic["Positive"],
-            mood: [Mood['Indication']],
-            moodvariant: MoodVariant["Realis"],
-            operator: Operator["And"],
+            certainty: Certainty.Empty,
+            elvl: Elvl.Textual,
+            logic: Logic.Positive,
+            mood: [Mood.Indication],
+            moodvariant: MoodVariant.Realis,
+            operator: Operator.And,
             bundleStart: false,
             bundleEnd: false,
 
             type: {
               id: sameLocationType,
-              elvl: Elvl["Textual"],
-              logic: Logic["Positive"],
-              virtuality: Virtuality["Certitude"],
-              partitivity: Partitivity["Unison"],
+              elvl: Elvl.Textual,
+              logic: Logic.Positive,
+              virtuality: Virtuality.Reality,
+              partitivity: Partitivity.Unison,
             },
             value: {
               id: statementLocationId,
-              elvl: Elvl["Textual"],
-              logic: Logic["Positive"],
-              virtuality: Virtuality["Certitude"],
-              partitivity: Partitivity["Unison"],
+              elvl: Elvl.Textual,
+              logic: Logic.Positive,
+              virtuality: Virtuality.Reality,
+              partitivity: Partitivity.Unison,
             },
           });
         } else {
           statement.data.props.push({
             id: v4(),
             origin: statement.id,
-            elvl: Elvl["Textual"],
-            certainty: Certainty["Certain"],
-            logic: Logic["Positive"],
-            mood: [Mood['Indication']],
-            moodvariant: MoodVariant["Realis"],
-            operator: Operator["And"],
+            elvl: Elvl.Textual,
+            certainty: Certainty.Empty,
+            logic: Logic.Positive,
+            mood: [Mood.Indication],
+            moodvariant: MoodVariant.Realis,
+            operator: Operator.And,
             bundleStart: false,
             bundleEnd: false,
             type: {
               id: locationType.concept,
-              elvl: Elvl["Textual"],
-              logic: Logic["Positive"],
-              virtuality: Virtuality["Certitude"],
-              partitivity: Partitivity["Unison"],
+              elvl: Elvl.Textual,
+              logic: Logic.Positive,
+              virtuality: Virtuality.Reality,
+              partitivity: Partitivity.Unison,
             },
             value: {
               id: locationIdValue,
-              elvl: Elvl["Textual"],
-              logic: Logic["Positive"],
-              virtuality: Virtuality["Certitude"],
-              partitivity: Partitivity["Unison"],
+              elvl: Elvl.Textual,
+              logic: Logic.Positive,
+              virtuality: Virtuality.Reality,
+              partitivity: Partitivity.Unison,
             },
           });
         }
@@ -853,7 +865,7 @@ const processActant = (
 
       let elvl: Elvl = actantIdValue.includes("[")
         ? Elvl["Interpretive"]
-        : Elvl["Textual"];
+        : Elvl.Textual;
 
       // remove brackets
       const actantIdClean: string = actantIdValue
@@ -871,10 +883,10 @@ const processActant = (
         actant: actantId,
         position: position,
         elvl: elvl,
-        logic: Logic["Positive"],
-        virtuality: Virtuality["Certitude"],
-        partitivity: Partitivity["Unison"],
-        operator: Operator["And"],
+        logic: Logic.Positive,
+        virtuality: Virtuality.Reality,
+        partitivity: Partitivity.Unison,
+        operator: Operator.And,
         bundleStart: false,
         bundleEnd: false,
       });
@@ -896,28 +908,28 @@ const processActant = (
         statement.data.props.push({
           id: v4(),
           origin: statementActantId,
-          elvl: Elvl["Textual"],
-          certainty: Certainty["Certain"],
-          logic: Logic["Positive"],
-          mood: [Mood['Indication']],
-          moodvariant: MoodVariant["Realis"],
-          operator: Operator["And"],
+          elvl: Elvl.Textual,
+          certainty: Certainty.Empty,
+          logic: Logic.Positive,
+          mood: [Mood.Indication],
+          moodvariant: MoodVariant.Realis,
+          operator: Operator.And,
           bundleStart: false,
           bundleEnd: false,
 
           type: {
             id: propActant1Id,
-            elvl: Elvl["Textual"],
-            logic: Logic["Positive"],
-            virtuality: Virtuality["Certitude"],
-            partitivity: Partitivity["Unison"],
+            elvl: Elvl.Textual,
+            logic: Logic.Positive,
+            virtuality: Virtuality.Reality,
+            partitivity: Partitivity.Unison,
           },
           value: {
             id: propActant2Id,
-            elvl: Elvl["Textual"],
-            logic: Logic["Positive"],
-            virtuality: Virtuality["Certitude"],
-            partitivity: Partitivity["Unison"],
+            elvl: Elvl.Textual,
+            logic: Logic.Positive,
+            virtuality: Virtuality.Reality,
+            partitivity: Partitivity.Unison,
           },
         });
       }

@@ -22,6 +22,7 @@ import { Button, ButtonGroup } from "components";
 import { FaTrashAlt, FaUnlink, FaPlus } from "react-icons/fa";
 import { UseMutationResult } from "react-query";
 import { actantPositionDict } from "@shared/dictionaries";
+import { excludedSuggesterEntities } from "Theme/constants";
 
 interface FilteredActantObject {
   data: { actant: IActant | undefined; sActant: IStatementActant };
@@ -146,6 +147,7 @@ export const StatementEditorActantTable: React.FC<StatementEditorActantTable> = 
                   });
                 }}
                 categoryIds={classEntitiesActant}
+                excludedEntities={excludedSuggesterEntities}
               />
             )
           );

@@ -1,4 +1,4 @@
-import { ActantStatus, ActantType, UserRoleMode } from "@shared/enums";
+import { ActantStatus, ActantType, Language, UserRoleMode } from "@shared/enums";
 import "ts-jest";
 import Territory, { TerritoryData, TerritoryParent } from "./territory";
 import { Db } from "@service/RethinkDB";
@@ -21,7 +21,7 @@ describe("Territory constructor test", function () {
     const fullData: ITerritory = {
       id: "id",
       detail: "detail",
-      language: ["lang"],
+      language: Language.Latin,
       notes: [],
       status: ActantStatus.Pending,
       label: "label",

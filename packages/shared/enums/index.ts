@@ -1,4 +1,5 @@
 export enum ActantType {
+  Unknown = "", // default in actant model, invalid
   Action = "A",
   Territory = "T",
   Statement = "S",
@@ -10,7 +11,6 @@ export enum ActantType {
   Location = "L",
   Value = "V",
   Event = "E",
-  Unknown = "",
 }
 
 export function isValidActantType(input: ActantType): boolean {
@@ -76,7 +76,7 @@ export enum ActantStatus {
 }
 
 export enum Certainty {
-  Certainty0 = "0", // this is not used in dicts (@see ../disctionaries/certainty.ts)
+  Empty = "0", // this is not used in dicts (@see ../disctionaries/certainty.ts)
   Certain = "1",
   AlmostCertain = "2",
   Probable = "3",
@@ -154,6 +154,7 @@ export enum Operator {
 }
 
 export enum Language {
+  Empty = "",
   Latin = "lat",
   English = "eng",
   MiddleEnglish = "enm",

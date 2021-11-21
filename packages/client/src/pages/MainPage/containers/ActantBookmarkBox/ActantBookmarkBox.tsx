@@ -374,7 +374,7 @@ export const ActantBookmarkBox: React.FC = () => {
                         }}
                         categoryIds={bookmarkEntities}
                         placeholder={"add new bookmark"}
-                      ></ActantSuggester>
+                      />
                     </StyledFolderSuggester>
                   </StyledFolderContent>
                 )}
