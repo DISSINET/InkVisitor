@@ -15,11 +15,19 @@ export class RequestSearch implements IResponseSearch {
   class: ActantType | false;
   label: string | false;
   actantId: string | false;
+  excluded?: ActantType[];
 
-  constructor(requestData: IResponseSearch) {
+  constructor(requestData: IResponseSearch & { excluded?: ActantType[] }) {
     this.class = requestData.class || false;
     this.label = requestData.label || false;
     this.actantId = requestData.actantId || false;
+    if (requestData.excluded) {
+      if (requestData.excluded.constructor.name === "String") {
+        requestData.excluded = [requestData.excluded as any];
+      }
+      this.excluded = requestData.excluded;
+    }
+
   }
 
   validate(): Error | void {

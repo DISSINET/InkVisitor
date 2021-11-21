@@ -76,6 +76,7 @@ export default Router()
       const actants = await filterActantsByWildcard(
         request.db,
         classParam,
+        undefined,
         label
       );
 
@@ -302,6 +303,7 @@ export default Router()
       const actants = await filterActantsByWildcard(
         httpRequest.db,
         req.class,
+        req.excluded,
         req.label,
         associatedActantIds
       );
