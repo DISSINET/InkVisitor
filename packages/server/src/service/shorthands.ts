@@ -183,6 +183,7 @@ export async function findAssociatedActantIds(
 export async function filterActantsByWildcard(
   db: Db,
   actantClass: ActantType | false,
+  actantClassExcluded: ActantType[] | undefined,
   actantLabel: string | false,
   actantIds?: string[]
 ): Promise<IActant[]> {
@@ -195,6 +196,18 @@ export async function filterActantsByWildcard(
   if (actantClass) {
     query = query.filter({
       class: actantClass,
+    });
+  }
+
+  if (actantClassExcluded) {
+    query = query.filter(function (row: RDatum) {
+      return rethink.and.apply(
+        rethink,
+        actantClassExcluded.map((c) => row("class").ne(c)) as [
+          RDatum<boolean>,
+          ...RDatum<boolean>[]
+        ]
+      );
     });
   }
 
