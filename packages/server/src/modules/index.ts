@@ -30,6 +30,5 @@ export function asyncRouteHandler<T = unknown>(
 }
 
 export const supertestConfig = {
-  token:
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImJvb2ttYXJrcyI6bnVsbCwiZW1haWwiOiJhZG1pbkBhZG1pbi5jb20iLCJpZCI6IjEiLCJuYW1lIjoiYWRtaW4iLCJvcHRpb25zIjp7ImRlZmF1bHRMYW5ndWFnZSI6IiIsImRlZmF1bHRUZXJyaXRvcnkiOiIiLCJzZWFyY2hMYW5ndWFnZXMiOltdfSwicm9sZSI6ImFkbWluIn0sImV4cCI6MTYzMDc4NjUwNSwiaWF0IjoxNjI4MTk0NTA1fQ.qtONK8yRBOWkn3CxV_bWfzJKUUIHVVkEIculdAcN9rg",
+  token: process.env.TEST_JWT_TOKEN,
 };
