@@ -222,6 +222,18 @@ export const StatementEditorActionTable: React.FC<StatementEditorActionTable> = 
               ) : (
                 <div />
               )}
+              {sAction.operator ? (
+                <Button
+                  key="oper"
+                  tooltip="Logical operator type"
+                  color="success"
+                  inverted={true}
+                  noBorder
+                  icon={sAction.operator}
+                />
+              ) : (
+                <div />
+              )}
             </ButtonGroup>
           );
         },
