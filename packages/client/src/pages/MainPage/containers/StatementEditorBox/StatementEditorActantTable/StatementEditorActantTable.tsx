@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { AttributeIcon } from "components";
 import { Column, useTable, useExpanded, Row, Cell } from "react-table";
 import update from "immutability-helper";
 import {
@@ -264,6 +265,18 @@ export const StatementEditorActantTable: React.FC<StatementEditorActantTable> = 
                     addProp(propOriginId);
                   }}
                 />
+              )}
+              {sActant.logic == "2" ? (
+                <Button
+                  key="neg"
+                  tooltip="Negative logic"
+                  color="success"
+                  inverted={true}
+                  noBorder
+                  icon={<AttributeIcon attributeName={"negation"} />}
+                />
+              ) : (
+                <div />
               )}
             </ButtonGroup>
           );
