@@ -12,7 +12,7 @@ import {
 } from "@shared/types";
 import { ActantSuggester, ActantTag } from "../..";
 import { AttributesEditor } from "../../AttributesEditor/AttributesEditor";
-import { Button, ButtonGroup } from "components";
+import { AttributeIcon, Button, ButtonGroup } from "components";
 import { FaPlus, FaTrashAlt, FaUnlink } from "react-icons/fa";
 import { UseMutationResult } from "react-query";
 import { ActantType } from "@shared/enums";
@@ -209,6 +209,18 @@ export const StatementEditorActionTable: React.FC<StatementEditorActionTable> = 
                     addProp(propOriginId);
                   }}
                 />
+              )}
+              {sAction.logic == "2" ? (
+                <Button
+                  key="neg"
+                  tooltip="Negative logic"
+                  color="success"
+                  inverted={true}
+                  noBorder
+                  icon={<AttributeIcon attributeName={"negation"} />}
+                />
+              ) : (
+                <div />
               )}
             </ButtonGroup>
           );
