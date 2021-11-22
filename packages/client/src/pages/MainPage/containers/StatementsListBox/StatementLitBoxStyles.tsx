@@ -30,7 +30,6 @@ export const StyledText = styled.p`
   font-size: ${({ theme }) => theme.fontSize["xs"]};
 `;
 export const StyledTableWrapper = styled.div`
-  margin-top: 9rem;
   display: flex;
   flex-direction: column;
   overflow-y: auto;
