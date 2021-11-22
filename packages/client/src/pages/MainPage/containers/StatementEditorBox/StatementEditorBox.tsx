@@ -25,7 +25,14 @@ import {
   IStatementReference,
   IResponseStatement,
 } from "@shared/types";
-import { Button, ButtonGroup, Input, Loader, MultiInput } from "components";
+import {
+  AttributeIcon,
+  Button,
+  ButtonGroup,
+  Input,
+  Loader,
+  MultiInput,
+} from "components";
 import { ActantSuggester } from "./../";
 
 import {
@@ -556,6 +563,18 @@ export const StatementEditorBox: React.FC = () => {
               }}
               loading={updateActantsDataMutation.isLoading}
             />
+            {prop.type.logic == "2" ? (
+              <Button
+                key="neg"
+                tooltip="Negative logic"
+                color="success"
+                inverted={true}
+                noBorder
+                icon={<AttributeIcon attributeName={"negation"} />}
+              />
+            ) : (
+              <div />
+            )}
           </StyledPropButtonGroup>
         </StyledPropLineColumn>
         <StyledPropLineColumn
@@ -622,6 +641,18 @@ export const StatementEditorBox: React.FC = () => {
               }}
               loading={updateActantsDataMutation.isLoading}
             />
+            {prop.value.logic == "2" ? (
+              <Button
+                key="neg"
+                tooltip="Negative logic"
+                color="success"
+                inverted={true}
+                noBorder
+                icon={<AttributeIcon attributeName={"negation"} />}
+              />
+            ) : (
+              <div />
+            )}
           </StyledPropButtonGroup>
         </StyledPropLineColumn>
 
@@ -687,6 +718,18 @@ export const StatementEditorBox: React.FC = () => {
                 movePropDown(prop.id);
               }}
             />
+            {prop.logic == "2" ? (
+              <Button
+                key="neg"
+                tooltip="Negative logic"
+                color="success"
+                inverted={true}
+                noBorder
+                icon={<AttributeIcon attributeName={"negation"} />}
+              />
+            ) : (
+              <div />
+            )}
           </StyledPropButtonGroup>
         </StyledPropLineColumn>
       </React.Fragment>
