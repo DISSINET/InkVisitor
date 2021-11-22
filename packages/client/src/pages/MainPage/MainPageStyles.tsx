@@ -44,3 +44,14 @@ export const StyledHeaderLogo = styled.img<StyledHeaderLogo>`
   height: ${({ height }) => (height ? `${height / 10}rem` : "auto")};
   padding: ${({ theme }) => theme.space[4]};
 `;
+
+export const StyledHeader = styled.div`
+  display: flex;
+`;
+
+export const StyledHeaderTag = styled.div`
+  font-size: 12px;
+  margin-top: 28px;
+  opacity: 0.8;
+  padding: ${({ theme }) => theme.space[2]};
+`;

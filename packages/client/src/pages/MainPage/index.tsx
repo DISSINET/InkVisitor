@@ -6,6 +6,8 @@ import { useQueryClient, useQuery, useMutation } from "react-query";
 import { RiMenuFoldFill, RiMenuUnfoldFill } from "react-icons/ri";
 import { IoMdClose } from "react-icons/io";
 
+import packageJson from "../../../package.json";
+
 import {
   Box,
   Button,
@@ -34,7 +36,9 @@ import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { setAuthToken } from "redux/features/authTokenSlice";
 import { setUsername } from "redux/features/usernameSlice";
 import {
+  StyledHeader,
   StyledHeaderLogo,
+  StyledHeaderTag,
   StyledUserBox,
   StyledPanelWrap,
   StyledUser,
@@ -178,13 +182,14 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
           paddingY={0}
           paddingX={10}
           left={
-            <div>
+            <StyledHeader>
               <StyledHeaderLogo
                 height={heightHeader - 10}
                 src={LogoInkvisitor}
                 alt="React Logo"
               />
-            </div>
+              <StyledHeaderTag>v. {packageJson.version}</StyledHeaderTag>
+            </StyledHeader>
           }
           right={
             <div>
