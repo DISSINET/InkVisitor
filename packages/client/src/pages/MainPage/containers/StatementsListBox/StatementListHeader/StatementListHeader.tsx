@@ -48,6 +48,14 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
     addStatementAtTheEndMutation.mutate(newStatement);
   };
 
+  const trimTerritoryLabel = (label: string) => {
+    const maxLettersCount = 70;
+    if (label.length > maxLettersCount) {
+      return `${label.slice(0, maxLettersCount)}...`;
+    }
+    return `${label}`;
+  };
+
   return (
     <StyledHeader>
       <StyledHeaderBreadcrumbRow>
@@ -64,7 +72,9 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
       </StyledHeaderBreadcrumbRow>
       <StyledHeaderRow>
         <StyledTitle>
-          {territoryId ? `T: ${data.label}` : "no territory selected"}
+          {territoryId
+            ? `T: ${trimTerritoryLabel(data.label)}`
+            : "no territory selected"}
         </StyledTitle>
         {territoryId && (
           <ButtonGroup>
