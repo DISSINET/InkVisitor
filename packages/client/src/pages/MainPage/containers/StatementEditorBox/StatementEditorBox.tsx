@@ -730,6 +730,18 @@ export const StatementEditorBox: React.FC = () => {
             ) : (
               <div />
             )}
+            {prop.operator ? (
+              <Button
+                key="oper"
+                tooltip="Logical operator type"
+                color="success"
+                inverted={true}
+                noBorder
+                icon={prop.operator}
+              />
+            ) : (
+              <div />
+            )}
           </StyledPropButtonGroup>
         </StyledPropLineColumn>
       </React.Fragment>

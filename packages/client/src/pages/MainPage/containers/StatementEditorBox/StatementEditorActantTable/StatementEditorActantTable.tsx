@@ -278,6 +278,18 @@ export const StatementEditorActantTable: React.FC<StatementEditorActantTable> = 
               ) : (
                 <div />
               )}
+              {sActant.operator ? (
+                <Button
+                  key="oper"
+                  tooltip="Logical operator type"
+                  color="success"
+                  inverted={true}
+                  noBorder
+                  icon={sActant.operator}
+                />
+              ) : (
+                <div />
+              )}
             </ButtonGroup>
           );
         },
