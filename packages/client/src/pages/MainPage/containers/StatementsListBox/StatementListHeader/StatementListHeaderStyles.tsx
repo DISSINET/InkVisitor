@@ -8,6 +8,7 @@ export const StyledHeader = styled.div`
   position: absolute;
   padding: ${({ theme }) => theme.space[3]};
   background: ${({ theme }) => theme.color["gray"][200]};
+  /* max-height: 9rem; */
 `;
 export const StyledHeaderBreadcrumbRow = styled.div`
   display: flex;

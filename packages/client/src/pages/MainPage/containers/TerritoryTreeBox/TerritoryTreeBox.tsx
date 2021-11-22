@@ -12,6 +12,7 @@ import { FaPlus } from "react-icons/fa";
 import { ContextMenuNewTerritoryModal } from "./ContextMenuNewTerritoryModal/ContextMenuNewTerritoryModal";
 import { rootTerritoryId } from "Theme/constants";
 import { UserRoleMode } from "@shared/enums";
+import { StyledTreeWrapper } from "./TerritoryTreeBoxStyles";
 
 export const TerritoryTreeBox: React.FC = () => {
   const { status, data, error, isFetching } = useQuery(
@@ -60,17 +61,6 @@ export const TerritoryTreeBox: React.FC = () => {
 
   return (
     <>
-      {data && (
-        <TerritoryTreeNode
-          right={data.right}
-          territory={data.territory}
-          children={data.children}
-          lvl={data.lvl}
-          statementsCount={data.statementsCount}
-          initExpandedNodes={selectedTerritoryPath}
-          empty={data.empty}
-        />
-      )}
       {userRole === UserRoleMode.Admin && (
         <Button
           label="new territory"
@@ -78,6 +68,20 @@ export const TerritoryTreeBox: React.FC = () => {
           onClick={() => setShowCreate(true)}
         />
       )}
+
+      <StyledTreeWrapper>
+        {data && (
+          <TerritoryTreeNode
+            right={data.right}
+            territory={data.territory}
+            children={data.children}
+            lvl={data.lvl}
+            statementsCount={data.statementsCount}
+            initExpandedNodes={selectedTerritoryPath}
+            empty={data.empty}
+          />
+        )}
+      </StyledTreeWrapper>
 
       {showCreate && (
         <ContextMenuNewTerritoryModal
