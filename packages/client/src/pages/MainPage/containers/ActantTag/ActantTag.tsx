@@ -20,6 +20,7 @@ interface IActantTag {
   tooltipPosition?: PopupPosition | PopupPosition[];
   updateOrderFn?: (item: DragItem) => void;
   lvl?: number;
+  statementsCount?: number;
   disabled?: boolean;
 }
 
@@ -38,6 +39,7 @@ export const ActantTag: React.FC<IActantTag> = ({
   tooltipPosition,
   updateOrderFn,
   lvl,
+  statementsCount,
   disabled,
 }) => {
   const classId = actant.class;
@@ -64,6 +66,7 @@ export const ActantTag: React.FC<IActantTag> = ({
       parentId={parentId}
       lvl={lvl}
       fullWidth={fullWidth}
+      statementsCount={statementsCount}
     />
   );
 };

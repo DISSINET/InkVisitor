@@ -277,6 +277,7 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
                     enableTooltip
                     moveFn={moveFn}
                     updateOrderFn={moveTerritoryMutation.mutate}
+                    statementsCount={statementsCount}
                   />
                 </animated.div>
                 <ContextMenu
