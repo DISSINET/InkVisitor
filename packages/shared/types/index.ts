@@ -4,6 +4,7 @@ import { IAction } from "./action";
 import { IActant } from "./actant";
 import { IEntity } from "./entity";
 import { ILabel } from "./label";
+import { IProp } from "./prop";
 import {
   IUser,
   IBookmarkFolder,
@@ -29,7 +30,6 @@ import {
   IStatement,
   IStatementActant,
   IStatementAction,
-  IStatementProp,
   IStatementReference,
 } from "./statement";
 import { ITerritory } from "./territory";
@@ -46,10 +46,10 @@ export type {
   IEntity,
   ILabel,
   IOption,
+  IProp,
   IStatement,
   IStatementAction,
   IStatementActant,
-  IStatementProp,
   IStatementReference,
   ITerritory,
   IUser,
