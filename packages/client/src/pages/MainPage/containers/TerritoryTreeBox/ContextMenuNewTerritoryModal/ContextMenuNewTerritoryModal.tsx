@@ -14,7 +14,6 @@ import {
 } from "components";
 import { ITerritory } from "@shared/types";
 import { CTerritoryActant } from "constructors";
-import useKeypress from "hooks/useKeyPress";
 import api from "api";
 import { setTreeInitialized } from "redux/features/territoryTree/treeInitializeSlice";
 import { useAppDispatch } from "redux/hooks";
@@ -71,12 +70,14 @@ export const ContextMenuNewTerritoryModal: React.FC<ContextMenuNewTerritoryModal
     }
   };
 
-  useKeypress("Enter", handleCreateTerritory, [territoryName]);
-  useKeypress("Escape", onClose);
-
   return (
     <>
-      <Modal onClose={() => onClose()} showModal={showModal} disableBgClick>
+      <Modal
+        onEnterPress={handleCreateTerritory}
+        onClose={() => onClose()}
+        showModal={showModal}
+        disableBgClick
+      >
         <ModalHeader title={"Add Territory"} />
         <ModalContent>
           <Input

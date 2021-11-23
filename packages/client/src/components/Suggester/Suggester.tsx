@@ -101,9 +101,9 @@ export const Suggester: React.FC<SuggesterProps> = ({
   useKeypress(
     "Escape",
     () => {
-      if (!showModal) onCancel();
+      if (!showModal && isFocused) onCancel();
     },
-    [showModal]
+    [showModal, isFocused]
   );
 
   const onTypeFn = (newType: string) => {
