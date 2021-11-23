@@ -12,6 +12,7 @@ import {
   StyledCardBody,
   StyledFooter,
 } from "./ModalStyles";
+import { ModalKeyPress } from "./ModalKeyPress";
 
 interface Modal {
   children?: ReactNode;
@@ -36,23 +37,24 @@ export const Modal: FC<Modal> = ({
     config: config.stiff,
   });
 
-  useKeypress("Enter", () => {
-    onEnterPress();
-  });
-  useKeypress("Escape", closeOnEscape ? onClose : () => {});
-
   return (
     <>
       {showModal && (
-        <StyledModalWrap>
-          <StyledBackground
-            style={animatedMount}
-            onClick={disableBgClick ? () => {} : onClose}
+        <>
+          <StyledModalWrap>
+            <StyledBackground
+              style={animatedMount}
+              onClick={disableBgClick ? () => {} : onClose}
+            />
+            <ModalCard animatedMount={animatedMount} width={width}>
+              {children}
+            </ModalCard>
+          </StyledModalWrap>
+          <ModalKeyPress
+            onEnter={onEnterPress}
+            onEscape={closeOnEscape ? onClose : () => {}}
           />
-          <ModalCard animatedMount={animatedMount} width={width}>
-            {children}
-          </ModalCard>
-        </StyledModalWrap>
+        </>
       )}
     </>
   );
