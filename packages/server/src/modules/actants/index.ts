@@ -26,6 +26,7 @@ import {
 import { mergeDeep } from "@common/functions";
 import Statement from "@models/statement";
 import { ActantStatus, UserRole } from "@shared/enums";
+import Audit from "@models/audit";
 
 export default Router()
   .get(
@@ -168,6 +169,13 @@ export default Router()
       const result = await model.update(request.db.connection, actantData);
 
       if (result.replaced || result.unchanged) {
+        await Audit.createNew(
+          request.db.connection,
+          request.getUserOrFail(),
+          actantId,
+          actantData
+        );
+
         return {
           result: true,
         };
