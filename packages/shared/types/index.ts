@@ -1,4 +1,5 @@
 import { IAudit } from "./audit";
+import { IResponseAudit } from "./response-audit";
 import { IAction } from "./action";
 import { IActant } from "./actant";
 import { IEntity } from "./entity";
@@ -57,6 +58,7 @@ export type {
   IBookmarkFolder,
   IStoredTerritory,
   IResource,
+  IResponseAudit,
   IResponseActant,
   IResponseAction,
   IResponseDetail,
