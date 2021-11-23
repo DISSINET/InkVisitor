@@ -13,7 +13,6 @@ import { useAppDispatch } from "redux/hooks";
 import { toast } from "react-toastify";
 import { setAuthToken } from "redux/features/authTokenSlice";
 import { setUsername } from "redux/features/usernameSlice";
-import useKeypress from "hooks/useKeyPress";
 
 export const LoginModal: React.FC = () => {
   const dispatch = useAppDispatch();
@@ -39,10 +38,8 @@ export const LoginModal: React.FC = () => {
     }
   };
 
-  useKeypress("Enter", handleLogIn, [usernameLocal, password]);
-
   return (
-    <Modal showModal disableBgClick width="thin">
+    <Modal showModal disableBgClick width="thin" onEnterPress={handleLogIn}>
       <StyledContentWrap>
         <StyledHeading>{"Log In"}</StyledHeading>
         <StyledInputRow>

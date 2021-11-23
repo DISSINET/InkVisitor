@@ -5,7 +5,6 @@ import { toast } from "react-toastify";
 import api from "api";
 import { IActant } from "@shared/types";
 import { Submit } from "components";
-import useKeypress from "hooks/useKeyPress";
 import { useSearchParams } from "hooks";
 
 interface ContextMenuSubmitDelete {
@@ -55,9 +54,6 @@ export const ContextMenuSubmitDelete: React.FC<ContextMenuSubmitDelete> = ({
   const onSubmitDelete = () => {
     deleteTerritoryMutation.mutate();
   };
-
-  useKeypress("Enter", onSubmitDelete);
-  useKeypress("Escape", onClose);
 
   return (
     <Submit

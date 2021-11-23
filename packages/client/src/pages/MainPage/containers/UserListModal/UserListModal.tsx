@@ -490,12 +490,7 @@ export const UserListModal: React.FC<UserListModal> = ({
   });
 
   return (
-    <Modal
-      showModal={isOpen}
-      onClose={() => onCloseFn()}
-      width={"full"}
-      closeOnEscape
-    >
+    <Modal showModal={isOpen} onClose={() => onCloseFn()} width={"full"}>
       <Submit
         title={`Delete User ${removingUser ? removingUser.name : ""}`}
         text={`Do you really want do delete User ${
