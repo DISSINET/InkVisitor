@@ -21,7 +21,7 @@ interface Modal {
   showModal: boolean;
   disableBgClick?: boolean;
   width?: "full" | "normal" | "thin";
-  closeOnEscape?: boolean;
+  disableEscapeClose?: boolean;
 }
 export const Modal: FC<Modal> = ({
   children,
@@ -30,7 +30,7 @@ export const Modal: FC<Modal> = ({
   showModal,
   disableBgClick = false,
   width = "normal",
-  closeOnEscape = false,
+  disableEscapeClose = false,
 }) => {
   const animatedMount = useSpring({
     opacity: showModal ? 1 : 0,
@@ -52,7 +52,7 @@ export const Modal: FC<Modal> = ({
           </StyledModalWrap>
           <ModalKeyPress
             onEnter={onEnterPress}
-            onEscape={closeOnEscape ? onClose : () => {}}
+            onEscape={disableEscapeClose ? () => {} : onClose}
           />
         </>
       )}

@@ -187,7 +187,6 @@ export const AttributesEditor: React.FC<StatementEditorAttributes> = ({
         onClose={() => {
           handleCancelClick();
         }}
-        closeOnEscape={true}
       >
         <ModalHeader
           title={
