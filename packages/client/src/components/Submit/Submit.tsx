@@ -29,7 +29,12 @@ export const Submit: React.FC<Submit> = ({
 }) => {
   return (
     <>
-      <Modal onClose={onCancel} showModal={show} disableBgClick>
+      <Modal
+        onEnterPress={onSubmit}
+        onClose={onCancel}
+        showModal={show}
+        disableBgClick
+      >
         <ModalHeader title={title} />
         <ModalContent>
           <p>{text}</p>
