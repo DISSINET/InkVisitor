@@ -56,9 +56,6 @@ export const ContextMenuSubmitDelete: React.FC<ContextMenuSubmitDelete> = ({
     deleteTerritoryMutation.mutate();
   };
 
-  useKeypress("Enter", onSubmitDelete);
-  useKeypress("Escape", onClose);
-
   return (
     <Submit
       title={"Delete Territory"}
