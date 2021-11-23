@@ -49,10 +49,13 @@ export const SuggesterModal: React.FC<SuggesterModal> = ({
     closeModal();
   };
 
-  useKeypress("Enter", () => handleCreateActant(), [label, detail]);
-
   return (
-    <Modal showModal={show} width="thin" onClose={() => closeModal()}>
+    <Modal
+      showModal={show}
+      width="thin"
+      onEnterPress={handleCreateActant}
+      onClose={() => closeModal()}
+    >
       <ModalHeader title="Create actant" />
       <ModalContent>
         <StyledModalForm>

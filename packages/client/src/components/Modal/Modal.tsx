@@ -1,7 +1,6 @@
-import React, { FC, ReactNode, useEffect } from "react";
+import React, { FC, ReactNode } from "react";
 import { config, useSpring } from "react-spring";
 import { Colors } from "types";
-import useKeypress from "hooks/useKeyPress";
 
 import {
   StyledModalWrap,

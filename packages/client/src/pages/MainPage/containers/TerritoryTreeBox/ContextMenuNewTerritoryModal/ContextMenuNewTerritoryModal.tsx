@@ -14,7 +14,6 @@ import {
 } from "components";
 import { ITerritory } from "@shared/types";
 import { CTerritoryActant } from "constructors";
-import useKeypress from "hooks/useKeyPress";
 import api from "api";
 import { setTreeInitialized } from "redux/features/territoryTree/treeInitializeSlice";
 import { useAppDispatch } from "redux/hooks";
