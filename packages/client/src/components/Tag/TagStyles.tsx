@@ -54,17 +54,15 @@ export const StyledLabel = styled.div<StyledLabel>`
     invertedLabel
       ? theme.color["primary"]
       : favorited
-      ? theme.color["warning"]
+      ? theme.color["blue"][100]
       : theme.color["white"]};
-  color: ${({ theme, invertedLabel }) =>
+  color: ${({ theme, invertedLabel, favorited }) =>
     invertedLabel ? theme.color["white"] : theme.color["black"]};
   border-left-width: ${({ theme }) => theme.borderWidth[2]};
   border-left-style: ${({ borderStyle }) => borderStyle};
   border-left-color: ${({ theme, status }) => theme.color[status]};
   max-width: ${({ theme, fullWidth }) =>
     fullWidth ? "100%" : theme.space[52]};
-  font-weight: ${({ theme, favorited }) =>
-    favorited ? theme.fontWeight["bold"] : theme.fontWeight["normal"]};
 `;
 
 interface ButtonWrapper {

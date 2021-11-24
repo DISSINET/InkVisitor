@@ -118,14 +118,12 @@ export const ContextMenu: React.FC<ContextMenu> = ({
                   updateUserMutation.mutate({ storedTerritories: newStored });
                 } else {
                   // add to favorites
-                  console.log("here");
                   const newStored = [
                     ...storedTerritories.map((storedTerritory) => ({
                       territoryId: storedTerritory,
                     })),
                     { territoryId: territoryActant.id },
                   ];
-                  console.log(newStored);
                   updateUserMutation.mutate({ storedTerritories: newStored });
                 }
               }}

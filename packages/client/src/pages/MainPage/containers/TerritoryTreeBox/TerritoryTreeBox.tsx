@@ -50,7 +50,6 @@ export const TerritoryTreeBox: React.FC = () => {
         userData.storedTerritories.map((territory) => territory.territory.id)
       );
     }
-    console.log(userData?.storedTerritories);
   }, [userData?.storedTerritories]);
 
   const updateUserMutation = useMutation(
@@ -66,10 +65,6 @@ export const TerritoryTreeBox: React.FC = () => {
       },
     }
   );
-
-  useEffect(() => {
-    console.log(storedTerritoryIds);
-  }, [storedTerritoryIds]);
 
   const userRole = localStorage.getItem("userrole");
   const { territoryId } = useSearchParams();
