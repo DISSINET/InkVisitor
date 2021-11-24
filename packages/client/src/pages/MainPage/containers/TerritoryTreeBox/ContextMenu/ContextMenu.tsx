@@ -106,9 +106,6 @@ export const ContextMenu: React.FC<ContextMenu> = ({
               onClick={() => {
                 // add to favorites
                 addToFavoritesMutation.mutate(territoryActant.id);
-                // toast.success(
-                //   `You're adding territory [${territoryActant.label}] to favorites. (not implemented yet)`
-                // );
               }}
             />
             {(right === UserRoleMode.Admin ||

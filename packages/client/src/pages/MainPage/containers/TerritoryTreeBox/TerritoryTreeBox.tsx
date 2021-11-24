@@ -43,17 +43,13 @@ export const TerritoryTreeBox: React.FC = () => {
     { enabled: api.isLoggedIn() }
   );
 
-  useEffect(() => {
-    console.log(userData);
-  }, [userData]);
-
   const addToFavoritesMutation = useMutation(
     async (favoritedTerritory: string) => {
       if (userId && userData) {
         await api.usersUpdate(userId, {
           storedTerritories: [
-            ...userData.storedTerritories,
-            favoritedTerritory,
+            // ...userData.storedTerritories.map(storedTerritory => {"territoryId": storedTerritory.territory.id}),
+            { territoryId: favoritedTerritory },
           ],
         });
       }
@@ -61,9 +57,14 @@ export const TerritoryTreeBox: React.FC = () => {
     {
       onSuccess: () => {
         queryClient.invalidateQueries(["tree"]);
+        queryClient.invalidateQueries(["user"]);
       },
     }
   );
+
+  useEffect(() => {
+    console.log(userData?.storedTerritories);
+  }, [userData]);
 
   const userRole = localStorage.getItem("userrole");
   const { territoryId } = useSearchParams();
@@ -120,7 +121,9 @@ export const TerritoryTreeBox: React.FC = () => {
             statementsCount={data.statementsCount}
             initExpandedNodes={selectedTerritoryPath}
             empty={data.empty}
-            storedTerritories={userData?.storedTerritories}
+            // storedTerritories={userData?.storedTerritories?.map((territory) =>
+            //   console.log(territory?.territory?.id)
+            // )}
             addToFavoritesMutation={addToFavoritesMutation}
           />
         )}

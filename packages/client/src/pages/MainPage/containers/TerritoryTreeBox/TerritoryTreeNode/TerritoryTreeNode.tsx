@@ -29,7 +29,6 @@ import { useMutation, UseMutationResult, useQueryClient } from "react-query";
 import { DraggedTerritoryItem, DragItem } from "types";
 import { useSearchParams } from "hooks";
 import { UserRoleMode } from "@shared/enums";
-import { AxiosResponse } from "axios";
 
 interface TerritoryTreeNode {
   territory: ITerritory;
@@ -42,7 +41,7 @@ interface TerritoryTreeNode {
   moveFn?: (dragIndex: number, hoverIndex: number) => void;
   empty?: boolean;
   right: UserRoleMode;
-  storedTerritories?: IResponseStoredTerritory[];
+  storedTerritories?: string[];
   addToFavoritesMutation: UseMutationResult<void, unknown, string, unknown>;
 }
 export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
@@ -283,6 +282,7 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
                     moveFn={moveFn}
                     updateOrderFn={moveTerritoryMutation.mutate}
                     statementsCount={statementsCount}
+                    favorited={storedTerritories?.includes(territoryActant.id)}
                   />
                 </animated.div>
                 <ContextMenu
