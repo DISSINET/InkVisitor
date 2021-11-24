@@ -61,7 +61,7 @@ export default Router()
   )
   .get(
     "/get/:userId?",
-    asyncRouteHandler<IUser>(async (request: Request) => {
+    asyncRouteHandler<IResponseUser>(async (request: Request) => {
       const userId = request.params.userId;
 
       if (!userId) {
@@ -73,7 +73,7 @@ export default Router()
         throw new UserDoesNotExits(`user ${userId} was not found`, userId);
       }
 
-      return user;
+      return await getResponseForUser(user, request.db);
     })
   )
   .post(
