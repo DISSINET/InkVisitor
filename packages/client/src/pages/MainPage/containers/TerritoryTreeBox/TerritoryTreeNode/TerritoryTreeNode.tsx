@@ -41,8 +41,8 @@ interface TerritoryTreeNode {
   moveFn?: (dragIndex: number, hoverIndex: number) => void;
   empty?: boolean;
   right: UserRoleMode;
-  storedTerritories?: string[];
-  addToFavoritesMutation: UseMutationResult<void, unknown, string, unknown>;
+  storedTerritories: string[];
+  updateUserMutation: UseMutationResult<void, unknown, object, unknown>;
 }
 export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
   territory,
@@ -56,7 +56,7 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
   empty,
   right,
   storedTerritories,
-  addToFavoritesMutation,
+  updateUserMutation,
 }) => {
   const dispatch = useAppDispatch();
   const treeInitialized = useAppSelector((state) => state.treeInitialized);
@@ -291,7 +291,8 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
                   onMenuClose={() => setContextMenuOpen(false)}
                   right={right}
                   empty={empty || false}
-                  addToFavoritesMutation={addToFavoritesMutation}
+                  storedTerritories={storedTerritories}
+                  updateUserMutation={updateUserMutation}
                 />
               </StyledTerritoryTagWrap>
             ) : (
@@ -324,7 +325,7 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
               empty={child.empty}
               moveFn={moveChildFn}
               storedTerritories={storedTerritories}
-              addToFavoritesMutation={addToFavoritesMutation}
+              updateUserMutation={updateUserMutation}
             />
           ))}
       </StyledChildrenWrap>

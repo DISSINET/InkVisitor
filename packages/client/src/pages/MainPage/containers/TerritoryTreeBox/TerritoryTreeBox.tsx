@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "react-query";
 
 import api from "api";
@@ -43,14 +43,21 @@ export const TerritoryTreeBox: React.FC = () => {
     { enabled: api.isLoggedIn() }
   );
 
-  const addToFavoritesMutation = useMutation(
-    async (favoritedTerritory: string) => {
-      if (userId && userData) {
+  const [storedTerritoryIds, setStoredTerritoryIds] = useState<string[]>([]);
+  useEffect(() => {
+    if (userData?.storedTerritories) {
+      setStoredTerritoryIds(
+        userData.storedTerritories.map((territory) => territory.territory.id)
+      );
+    }
+    console.log(userData?.storedTerritories);
+  }, [userData?.storedTerritories]);
+
+  const updateUserMutation = useMutation(
+    async (changes: object) => {
+      if (userId) {
         await api.usersUpdate(userId, {
-          storedTerritories: [
-            // ...userData.storedTerritories.map(storedTerritory => {"territoryId": storedTerritory.territory.id}),
-            { territoryId: favoritedTerritory },
-          ],
+          changes,
         });
       }
     },
@@ -63,8 +70,8 @@ export const TerritoryTreeBox: React.FC = () => {
   );
 
   useEffect(() => {
-    console.log(userData?.storedTerritories);
-  }, [userData]);
+    console.log(storedTerritoryIds);
+  }, [storedTerritoryIds]);
 
   const userRole = localStorage.getItem("userrole");
   const { territoryId } = useSearchParams();
@@ -121,10 +128,8 @@ export const TerritoryTreeBox: React.FC = () => {
             statementsCount={data.statementsCount}
             initExpandedNodes={selectedTerritoryPath}
             empty={data.empty}
-            // storedTerritories={userData?.storedTerritories?.map((territory) =>
-            //   console.log(territory?.territory?.id)
-            // )}
-            addToFavoritesMutation={addToFavoritesMutation}
+            storedTerritories={storedTerritoryIds ? storedTerritoryIds : []}
+            updateUserMutation={updateUserMutation}
           />
         )}
       </StyledTreeWrapper>
@@ -135,7 +140,7 @@ export const TerritoryTreeBox: React.FC = () => {
           territoryActantId={rootTerritoryId}
         />
       )}
-      <Loader show={isFetching} />
+      <Loader show={isFetching || updateUserMutation.isLoading} />
     </>
   );
 };

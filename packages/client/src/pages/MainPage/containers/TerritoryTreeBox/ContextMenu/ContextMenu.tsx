@@ -1,14 +1,12 @@
 import { UserRoleMode } from "@shared/enums";
 import { IActant, IResponseGeneric } from "@shared/types";
 import api from "api";
-import { AxiosResponse } from "axios";
 import { Button } from "components";
 import React, { useRef, useState } from "react";
 import { FaPlus, FaStar, FaTrashAlt } from "react-icons/fa";
 import { useMutation, UseMutationResult, useQueryClient } from "react-query";
 import { useSpring } from "react-spring";
 import { config } from "react-spring/renderprops";
-import { toast } from "react-toastify";
 import { ContextMenuNewTerritoryModal } from "../ContextMenuNewTerritoryModal/ContextMenuNewTerritoryModal";
 import { ContextMenuSubmitDelete } from "../ContextMenuSubmitDelete/ContextMenuSubmitDelete";
 import {
@@ -23,7 +21,8 @@ interface ContextMenu {
   empty: boolean;
   onMenuOpen: () => void;
   onMenuClose: () => void;
-  addToFavoritesMutation: UseMutationResult<void, unknown, string, unknown>;
+  storedTerritories: string[];
+  updateUserMutation: UseMutationResult<void, unknown, object, unknown>;
 }
 export const ContextMenu: React.FC<ContextMenu> = ({
   territoryActant,
@@ -31,7 +30,8 @@ export const ContextMenu: React.FC<ContextMenu> = ({
   onMenuClose,
   right,
   empty,
-  addToFavoritesMutation,
+  storedTerritories,
+  updateUserMutation,
 }) => {
   const ref = useRef<HTMLDivElement>(null);
 
@@ -104,8 +104,28 @@ export const ContextMenu: React.FC<ContextMenu> = ({
               icon={<FaStar size={14} />}
               color="warning"
               onClick={() => {
-                // add to favorites
-                addToFavoritesMutation.mutate(territoryActant.id);
+                if (storedTerritories?.includes(territoryActant.id)) {
+                  // remove from favorites
+                  const index = storedTerritories.indexOf(territoryActant.id);
+                  if (index > -1) {
+                    storedTerritories.splice(index, 1);
+                  }
+                  const newStored = [
+                    ...storedTerritories.map((storedTerritory) => ({
+                      territoryId: storedTerritory,
+                    })),
+                  ];
+                  updateUserMutation.mutate({ storedTerritories: newStored });
+                } else {
+                  // add to favorites
+                  const newStored = [
+                    ...storedTerritories.map((storedTerritory) => ({
+                      territoryId: storedTerritory,
+                    })),
+                    { territoryId: territoryActant.id },
+                  ];
+                  updateUserMutation.mutate({ storedTerritories: newStored });
+                }
               }}
             />
             {(right === UserRoleMode.Admin ||
