@@ -27,6 +27,8 @@ import {
   IResponseGeneric,
 } from "@shared/types";
 import mailer from "@service/mailer";
+import { Db } from "@service/RethinkDB";
+import { Connection } from "rethinkdb-ts";
 
 export default Router()
   .post(
@@ -59,7 +61,7 @@ export default Router()
   )
   .get(
     "/get/:userId?",
-    asyncRouteHandler<IUser>(async (request: Request) => {
+    asyncRouteHandler<IResponseUser>(async (request: Request) => {
       const userId = request.params.userId;
 
       if (!userId) {
@@ -71,7 +73,7 @@ export default Router()
         throw new UserDoesNotExits(`user ${userId} was not found`, userId);
       }
 
-      return user;
+      return await getResponseForUser(user, request.db);
     })
   )
   .post(
@@ -236,67 +238,7 @@ export default Router()
       };
 
       for (const user of await User.findAllUsers(request.db.connection)) {
-        const userResponse: IResponseUser = {
-          ...user,
-          bookmarks: [],
-          storedTerritories: [],
-          territoryRights: [],
-        };
-
-        if (user.bookmarks) {
-          for (const bookmark of user.bookmarks) {
-            const bookmarkResponse: IResponseBookmarkFolder = {
-              id: bookmark.id,
-              name: bookmark.name,
-              actants: [],
-            };
-            if (bookmark.actantIds && bookmark.actantIds.length) {
-              for (const actant of await findActantsById(
-                request.db,
-                bookmark.actantIds
-              )) {
-                bookmarkResponse.actants.push({
-                  ...actant,
-                });
-              }
-            }
-            userResponse.bookmarks.push(bookmarkResponse);
-          }
-        }
-
-        if (user.storedTerritories) {
-          for (const territory of user.storedTerritories) {
-            const territoryResponse: IResponseStoredTerritory = {
-              territory: {
-                ...(await findActantById<IActant>(
-                  request.db,
-                  territory.territoryId
-                )),
-                usedCount: await getActantUsage(
-                  request.db,
-                  territory.territoryId
-                ),
-                usedIn: [],
-              },
-            };
-            userResponse.storedTerritories.push(territoryResponse);
-          }
-        }
-
-        if (user.rights.length) {
-          for (const right of user.rights) {
-            const territoryFromRights: IResponseStoredTerritory = {
-              territory: {
-                ...(await findActantById<IActant>(request.db, right.territory)),
-                usedCount: await getActantUsage(request.db, right.territory),
-                usedIn: [],
-              },
-            };
-            userResponse.territoryRights.push(territoryFromRights);
-          }
-        }
-
-        out.users.push(userResponse);
+        out.users.push(await getResponseForUser(user, request.db));
       }
 
       return out;
@@ -338,4 +280,66 @@ export default Router()
         result: true,
       };
     })
+  )
+  .get(
+    "/me",
+    asyncRouteHandler<IResponseUser>(async (request: Request) => {
+      const user = request.getUserOrFail();
+      return await getResponseForUser(user, request.db);
+    })
   );
+
+async function getResponseForUser(user: User, db: Db): Promise<IResponseUser> {
+  const userResponse: IResponseUser = {
+    ...user,
+    bookmarks: [],
+    storedTerritories: [],
+    territoryRights: [],
+  };
+
+  if (user.bookmarks) {
+    for (const bookmark of user.bookmarks) {
+      const bookmarkResponse: IResponseBookmarkFolder = {
+        id: bookmark.id,
+        name: bookmark.name,
+        actants: [],
+      };
+      if (bookmark.actantIds && bookmark.actantIds.length) {
+        for (const actant of await findActantsById(db, bookmark.actantIds)) {
+          bookmarkResponse.actants.push({
+            ...actant,
+          });
+        }
+      }
+      userResponse.bookmarks.push(bookmarkResponse);
+    }
+  }
+
+  if (user.storedTerritories) {
+    for (const territory of user.storedTerritories) {
+      const territoryResponse: IResponseStoredTerritory = {
+        territory: {
+          ...(await findActantById<IActant>(db, territory.territoryId)),
+          usedCount: await getActantUsage(db, territory.territoryId),
+          usedIn: [],
+        },
+      };
+      userResponse.storedTerritories.push(territoryResponse);
+    }
+  }
+
+  if (user.rights.length) {
+    for (const right of user.rights) {
+      const territoryFromRights: IResponseStoredTerritory = {
+        territory: {
+          ...(await findActantById<IActant>(db, right.territory)),
+          usedCount: await getActantUsage(db, right.territory),
+          usedIn: [],
+        },
+      };
+      userResponse.territoryRights.push(territoryFromRights);
+    }
+  }
+
+  return userResponse;
+}
