@@ -237,6 +237,7 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
     hasChildren: boolean
   ) => {
     const parent = territory.data.parent as IParentTerritory;
+    const isFavorited = storedTerritories?.includes(territoryActant.id);
 
     return (
       <>
@@ -282,7 +283,7 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
                     moveFn={moveFn}
                     updateOrderFn={moveTerritoryMutation.mutate}
                     statementsCount={statementsCount}
-                    favorited={storedTerritories?.includes(territoryActant.id)}
+                    isFavorited={isFavorited}
                   />
                 </animated.div>
                 <ContextMenu
@@ -293,6 +294,7 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
                   empty={empty || false}
                   storedTerritories={storedTerritories}
                   updateUserMutation={updateUserMutation}
+                  isFavorited={isFavorited}
                 />
               </StyledTerritoryTagWrap>
             ) : (

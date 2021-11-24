@@ -23,6 +23,7 @@ interface ContextMenu {
   onMenuClose: () => void;
   storedTerritories: string[];
   updateUserMutation: UseMutationResult<void, unknown, object, unknown>;
+  isFavorited?: boolean;
 }
 export const ContextMenu: React.FC<ContextMenu> = ({
   territoryActant,
@@ -32,6 +33,7 @@ export const ContextMenu: React.FC<ContextMenu> = ({
   empty,
   storedTerritories,
   updateUserMutation,
+  isFavorited,
 }) => {
   const ref = useRef<HTMLDivElement>(null);
 
@@ -100,11 +102,13 @@ export const ContextMenu: React.FC<ContextMenu> = ({
             )}
             <Button
               key="favorites"
-              tooltip="add to favorites"
+              tooltip={
+                isFavorited ? "remove from favorites" : "add to favorites"
+              }
               icon={<FaStar size={14} />}
-              color="warning"
+              color={isFavorited ? "grey" : "warning"}
               onClick={() => {
-                if (storedTerritories?.includes(territoryActant.id)) {
+                if (isFavorited) {
                   // remove from favorites
                   const index = storedTerritories.indexOf(territoryActant.id);
                   if (index > -1) {
@@ -126,6 +130,8 @@ export const ContextMenu: React.FC<ContextMenu> = ({
                   ];
                   updateUserMutation.mutate({ storedTerritories: newStored });
                 }
+                setShowMenu(false);
+                onMenuClose();
               }}
             />
             {(right === UserRoleMode.Admin ||
