@@ -51,7 +51,6 @@ import {
   collapsedPanelWidth,
   heightFooter,
   heightHeader,
-  layoutWidthBreakpoint,
 } from "Theme/constants";
 import { setFirstPanelExpanded } from "redux/features/layout/firstPanelExpandedSlice";
 import { setFourthPanelExpanded } from "redux/features/layout/fourthPanelExpandedSlice";
