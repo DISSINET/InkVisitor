@@ -50,8 +50,12 @@ export const StyledLabel = styled.div<StyledLabel>`
   overflow: hidden !important;
   text-overflow: ellipsis;
   padding: ${({ theme }) => `${theme.space[1]} ${theme.space[2]}`};
-  background-color: ${({ theme, invertedLabel }) =>
-    invertedLabel ? theme.color["primary"] : theme.color["white"]};
+  background-color: ${({ theme, invertedLabel, favorited }) =>
+    invertedLabel
+      ? theme.color["primary"]
+      : favorited
+      ? theme.color["warning"]
+      : theme.color["white"]};
   color: ${({ theme, invertedLabel }) =>
     invertedLabel ? theme.color["white"] : theme.color["black"]};
   border-left-width: ${({ theme }) => theme.borderWidth[2]};

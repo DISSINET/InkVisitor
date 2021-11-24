@@ -56,9 +56,7 @@ export const TerritoryTreeBox: React.FC = () => {
   const updateUserMutation = useMutation(
     async (changes: object) => {
       if (userId) {
-        await api.usersUpdate(userId, {
-          changes,
-        });
+        await api.usersUpdate(userId, changes);
       }
     },
     {
