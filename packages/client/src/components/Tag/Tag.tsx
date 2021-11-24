@@ -43,6 +43,7 @@ interface TagProps {
   updateOrderFn?: (item: DragItem) => void;
   lvl?: number;
   statementsCount?: number;
+  favorited?: boolean;
   disabled?: boolean;
 }
 
@@ -67,6 +68,7 @@ export const Tag: React.FC<TagProps> = ({
   enableTooltip = true,
   updateOrderFn = () => {},
   statementsCount,
+  favorited = false,
   lvl,
 }) => {
   const { setActantId } = useSearchParams();
@@ -194,6 +196,7 @@ export const Tag: React.FC<TagProps> = ({
                     status={status}
                     borderStyle={borderStyle}
                     fullWidth={fullWidth}
+                    favorited={favorited}
                   >
                     {label}
                   </StyledLabel>

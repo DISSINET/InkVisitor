@@ -1,8 +1,11 @@
 import { UserRoleMode } from "@shared/enums";
-import { IActant } from "@shared/types";
+import { IActant, IResponseGeneric } from "@shared/types";
+import api from "api";
+import { AxiosResponse } from "axios";
 import { Button } from "components";
 import React, { useRef, useState } from "react";
 import { FaPlus, FaStar, FaTrashAlt } from "react-icons/fa";
+import { useMutation, UseMutationResult, useQueryClient } from "react-query";
 import { useSpring } from "react-spring";
 import { config } from "react-spring/renderprops";
 import { toast } from "react-toastify";
@@ -20,6 +23,7 @@ interface ContextMenu {
   empty: boolean;
   onMenuOpen: () => void;
   onMenuClose: () => void;
+  addToFavoritesMutation: UseMutationResult<void, unknown, string, unknown>;
 }
 export const ContextMenu: React.FC<ContextMenu> = ({
   territoryActant,
@@ -27,6 +31,7 @@ export const ContextMenu: React.FC<ContextMenu> = ({
   onMenuClose,
   right,
   empty,
+  addToFavoritesMutation,
 }) => {
   const ref = useRef<HTMLDivElement>(null);
 
@@ -100,9 +105,10 @@ export const ContextMenu: React.FC<ContextMenu> = ({
               color="warning"
               onClick={() => {
                 // add to favorites
-                toast.success(
-                  `You're adding territory [${territoryActant.label}] to favorites. (not implemented yet)`
-                );
+                addToFavoritesMutation.mutate(territoryActant.id);
+                // toast.success(
+                //   `You're adding territory [${territoryActant.label}] to favorites. (not implemented yet)`
+                // );
               }}
             />
             {(right === UserRoleMode.Admin ||

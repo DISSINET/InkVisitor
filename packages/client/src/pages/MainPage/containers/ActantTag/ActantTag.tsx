@@ -21,6 +21,7 @@ interface IActantTag {
   updateOrderFn?: (item: DragItem) => void;
   lvl?: number;
   statementsCount?: number;
+  favorited?: boolean;
   disabled?: boolean;
 }
 
@@ -40,6 +41,7 @@ export const ActantTag: React.FC<IActantTag> = ({
   updateOrderFn,
   lvl,
   statementsCount,
+  favorited,
   disabled,
 }) => {
   const classId = actant.class;
@@ -66,6 +68,7 @@ export const ActantTag: React.FC<IActantTag> = ({
       parentId={parentId}
       lvl={lvl}
       fullWidth={fullWidth}
+      favorited={favorited}
       statementsCount={statementsCount}
     />
   );

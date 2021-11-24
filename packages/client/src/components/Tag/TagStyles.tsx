@@ -41,6 +41,7 @@ interface StyledLabel {
   borderStyle: "solid" | "dashed" | "dotted";
   fullWidth: boolean;
   status: string;
+  favorited: boolean;
 }
 export const StyledLabel = styled.div<StyledLabel>`
   display: inline-block;
@@ -58,6 +59,8 @@ export const StyledLabel = styled.div<StyledLabel>`
   border-left-color: ${({ theme, status }) => theme.color[status]};
   max-width: ${({ theme, fullWidth }) =>
     fullWidth ? "100%" : theme.space[52]};
+  font-weight: ${({ theme, favorited }) =>
+    favorited ? theme.fontWeight["bold"] : theme.fontWeight["normal"]};
 `;
 
 interface ButtonWrapper {

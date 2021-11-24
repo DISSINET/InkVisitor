@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { useQuery } from "react-query";
+import { useMutation, useQuery, useQueryClient } from "react-query";
 
 import api from "api";
 import { TerritoryTreeNode } from "./TerritoryTreeNode/TerritoryTreeNode";
-import { IResponseTree } from "@shared/types";
+import { IResponseTree, IResponseUser } from "@shared/types";
 import { Button, Loader } from "components";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { setSelectedTerritoryPath } from "redux/features/territoryTree/selectedTerritoryPathSlice";
@@ -15,6 +15,8 @@ import { UserRoleMode } from "@shared/enums";
 import { StyledTreeWrapper } from "./TerritoryTreeBoxStyles";
 
 export const TerritoryTreeBox: React.FC = () => {
+  const queryClient = useQueryClient();
+
   const { status, data, error, isFetching } = useQuery(
     ["tree"],
     async () => {
@@ -22,6 +24,45 @@ export const TerritoryTreeBox: React.FC = () => {
       return res.data;
     },
     { enabled: api.isLoggedIn() }
+  );
+  const userId = localStorage.getItem("userid");
+
+  const {
+    status: userStatus,
+    data: userData,
+    error: userError,
+    isFetching: userIsFetching,
+  } = useQuery(
+    ["user"],
+    async () => {
+      if (userId) {
+        const res = await api.usersGet(userId);
+        return res.data;
+      }
+    },
+    { enabled: api.isLoggedIn() }
+  );
+
+  useEffect(() => {
+    console.log(userData);
+  }, [userData]);
+
+  const addToFavoritesMutation = useMutation(
+    async (favoritedTerritory: string) => {
+      if (userId && userData) {
+        await api.usersUpdate(userId, {
+          storedTerritories: [
+            ...userData.storedTerritories,
+            favoritedTerritory,
+          ],
+        });
+      }
+    },
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries(["tree"]);
+      },
+    }
   );
 
   const userRole = localStorage.getItem("userrole");
@@ -79,6 +120,8 @@ export const TerritoryTreeBox: React.FC = () => {
             statementsCount={data.statementsCount}
             initExpandedNodes={selectedTerritoryPath}
             empty={data.empty}
+            storedTerritories={userData?.storedTerritories}
+            addToFavoritesMutation={addToFavoritesMutation}
           />
         )}
       </StyledTreeWrapper>
