@@ -14,6 +14,7 @@ import {
   IResponseSearch,
   IResponsePermission,
   RequestPermissionUpdate,
+  IResponseAudit,
 } from "@shared/types";
 import * as errors from "@shared/types/errors";
 import { toast } from "react-toastify";
@@ -465,6 +466,18 @@ class Api {
           newIndex,
         }
       );
+      return response;
+    } catch (err: any | AxiosError) {
+      throw { ...err.response.data };
+    }
+  }
+
+  /**
+   * Audit
+   */
+  async auditGet(actantId: string): Promise<AxiosResponse<IResponseAudit>> {
+    try {
+      const response = await this.connection.get(`/audit/get/${actantId}`);
       return response;
     } catch (err: any | AxiosError) {
       throw { ...err.response.data };

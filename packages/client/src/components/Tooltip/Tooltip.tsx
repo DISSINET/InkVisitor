@@ -2,6 +2,7 @@ import React, { ReactElement } from "react";
 import { AiOutlineTag } from "react-icons/ai";
 import { BiCommentDetail } from "react-icons/bi";
 import { BsCardText } from "react-icons/bs";
+import { ImListNumbered } from "react-icons/im";
 import { PopupPosition, EventType } from "reactjs-popup/dist/types";
 import { Colors } from "types";
 
@@ -24,6 +25,7 @@ interface Tooltip {
   text?: string;
   disabled?: boolean;
   attributes?: React.ReactElement[];
+  itemsCount?: number;
   tagTooltip?: boolean;
   noArrow?: boolean;
   items?: ReactElement[] | ReactElement;
@@ -39,6 +41,7 @@ export const Tooltip: React.FC<Tooltip> = ({
   detail,
   text,
   attributes,
+  itemsCount,
   tagTooltip = false,
   disabled = false,
   noArrow = false,
@@ -85,6 +88,14 @@ export const Tooltip: React.FC<Tooltip> = ({
                   </StyledIconWrap>
                 )}
                 <StyledDetail>{detail}</StyledDetail>
+              </StyledRow>
+            )}
+            {itemsCount !== undefined && (
+              <StyledRow>
+                <StyledIconWrap>
+                  <ImListNumbered />
+                </StyledIconWrap>
+                <StyledDetail>{itemsCount}</StyledDetail>
               </StyledRow>
             )}
           </StyledContentWrap>
