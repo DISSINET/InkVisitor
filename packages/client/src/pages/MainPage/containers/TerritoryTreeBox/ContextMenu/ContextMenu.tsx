@@ -1,11 +1,12 @@
 import { UserRoleMode } from "@shared/enums";
-import { IActant } from "@shared/types";
+import { IActant, IResponseGeneric } from "@shared/types";
+import api from "api";
 import { Button } from "components";
 import React, { useRef, useState } from "react";
 import { FaPlus, FaStar, FaTrashAlt } from "react-icons/fa";
+import { useMutation, UseMutationResult, useQueryClient } from "react-query";
 import { useSpring } from "react-spring";
 import { config } from "react-spring/renderprops";
-import { toast } from "react-toastify";
 import { ContextMenuNewTerritoryModal } from "../ContextMenuNewTerritoryModal/ContextMenuNewTerritoryModal";
 import { ContextMenuSubmitDelete } from "../ContextMenuSubmitDelete/ContextMenuSubmitDelete";
 import {
@@ -20,6 +21,9 @@ interface ContextMenu {
   empty: boolean;
   onMenuOpen: () => void;
   onMenuClose: () => void;
+  storedTerritories: string[];
+  updateUserMutation: UseMutationResult<void, unknown, object, unknown>;
+  isFavorited?: boolean;
 }
 export const ContextMenu: React.FC<ContextMenu> = ({
   territoryActant,
@@ -27,6 +31,9 @@ export const ContextMenu: React.FC<ContextMenu> = ({
   onMenuClose,
   right,
   empty,
+  storedTerritories,
+  updateUserMutation,
+  isFavorited,
 }) => {
   const ref = useRef<HTMLDivElement>(null);
 
@@ -95,14 +102,36 @@ export const ContextMenu: React.FC<ContextMenu> = ({
             )}
             <Button
               key="favorites"
-              tooltip="add to favorites"
+              tooltip={
+                isFavorited ? "remove from favorites" : "add to favorites"
+              }
               icon={<FaStar size={14} />}
-              color="warning"
+              color={isFavorited ? "grey" : "warning"}
               onClick={() => {
-                // add to favorites
-                toast.success(
-                  `You're adding territory [${territoryActant.label}] to favorites. (not implemented yet)`
-                );
+                if (isFavorited) {
+                  // remove from favorites
+                  const index = storedTerritories.indexOf(territoryActant.id);
+                  if (index > -1) {
+                    storedTerritories.splice(index, 1).slice;
+                  }
+                  const newStored = [
+                    ...storedTerritories.map((storedTerritory) => ({
+                      territoryId: storedTerritory,
+                    })),
+                  ];
+                  updateUserMutation.mutate({ storedTerritories: newStored });
+                } else {
+                  // add to favorites
+                  const newStored = [
+                    ...storedTerritories.map((storedTerritory) => ({
+                      territoryId: storedTerritory,
+                    })),
+                    { territoryId: territoryActant.id },
+                  ];
+                  updateUserMutation.mutate({ storedTerritories: newStored });
+                }
+                setShowMenu(false);
+                onMenuClose();
               }}
             />
             {(right === UserRoleMode.Admin ||

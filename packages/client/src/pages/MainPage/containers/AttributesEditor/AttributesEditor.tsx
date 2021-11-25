@@ -39,8 +39,8 @@ import {
   Partitivity,
   Operator,
 } from "@shared/enums";
-import React, { useState, useMemo, useEffect } from "react";
-import { Colors, Entities } from "types";
+import React, { useState, useMemo } from "react";
+import { Entities } from "types";
 import { CheckboxRow } from "./CheckboxRow/CheckboxRow";
 import { AttributeRow } from "./AttributeRow/AttributeRow";
 import { TooltipAttributeRow } from "./TooltipAttributeRow/TooltipAttributeRow";
@@ -187,7 +187,7 @@ export const AttributesEditor: React.FC<StatementEditorAttributes> = ({
         onClose={() => {
           handleCancelClick();
         }}
-        closeOnEscape={true}
+        onEnterPress={handleAcceptClick}
       >
         <ModalHeader
           title={

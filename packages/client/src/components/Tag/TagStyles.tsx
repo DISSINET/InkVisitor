@@ -1,3 +1,4 @@
+import { animated } from "react-spring";
 import styled from "styled-components";
 
 interface StyledTagWrapper {
@@ -41,6 +42,7 @@ interface StyledLabel {
   borderStyle: "solid" | "dashed" | "dotted";
   fullWidth: boolean;
   status: string;
+  isFavorited: boolean;
 }
 export const StyledLabel = styled.div<StyledLabel>`
   display: inline-block;
@@ -49,8 +51,12 @@ export const StyledLabel = styled.div<StyledLabel>`
   overflow: hidden !important;
   text-overflow: ellipsis;
   padding: ${({ theme }) => `${theme.space[1]} ${theme.space[2]}`};
-  background-color: ${({ theme, invertedLabel }) =>
-    invertedLabel ? theme.color["primary"] : theme.color["white"]};
+  background-color: ${({ theme, invertedLabel, isFavorited }) =>
+    invertedLabel
+      ? theme.color["primary"]
+      : isFavorited
+      ? theme.color["blue"][100]
+      : theme.color["white"]};
   color: ${({ theme, invertedLabel }) =>
     invertedLabel ? theme.color["white"] : theme.color["black"]};
   border-left-width: ${({ theme }) => theme.borderWidth[2]};
