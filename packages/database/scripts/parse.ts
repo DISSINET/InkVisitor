@@ -26,6 +26,7 @@ import {
   IStatement,
   ITerritory,
   IResource,
+  IStatementActant,
 } from "../../shared/types";
 
 import { actantStatusDict } from "../../shared/dictionaries";
@@ -48,7 +49,7 @@ const loadStatementsTables = async (next: Function) => {
   const tableActions = await loadSheet({
     spread: "1vzY6opQeR9hZVW6fmuZu2sgy_izF8vqGGhBQDxqT_eQ",
     sheet: "Statements",
-    headerRow: 3,
+    headerRow: 4,
   });
 
   /**
@@ -97,15 +98,16 @@ const loadStatementsTables = async (next: Function) => {
             a1: parseEntities(action.actant1_entity_type),
             a2: parseEntities(action.actant2_entity_type),
           },
-          properties: [],
         },
-        language: action.language === "English" ? Language.English : Language.Latin,
+        language:
+          action.language === "English" ? Language.English : Language.Latin,
         status: statusOption
           ? (statusOption.value as ActantStatus)
           : ("0" as ActantStatus),
         notes: action.note ? [action.note] : [],
         label: action.label,
         detail: action.detail_incl_valency,
+        props: [],
       };
       actants.push(newAction);
     }
@@ -115,34 +117,35 @@ const loadStatementsTables = async (next: Function) => {
   const tableTexts = await loadSheet({
     spread: "13eVorFf7J9R8YzO7TmJRVLzIIwRJS737r7eFbH1boyE",
     sheet: "Texts",
-    headerRow: 2,
-    validRowFn: (vals: any) => vals.label !== ''
+    headerRow: 4,
+    validRowFn: (vals: any) => vals.label !== "",
   });
 
-  
-  tableTexts.forEach((text: { id: string; label: string, language: Language, detail: string, note: string }, ti: number) => {
-    addTerritoryActant(text.id, text.label, "T0", ti + 1, text.detail, text.language, text.note ? text.note.split('#') : []);
-  });
+  tableTexts.forEach(
+    (
+      text: {
+        id: string;
+        label: string;
+        language: Language;
+        detail: string;
+        note: string;
+      },
+      ti: number
+    ) => {
+      addTerritoryActant(
+        text.id,
+        text.label,
+        rootTerritory,
+        ti + 1,
+        text.detail,
+        text.language,
+        text.note ? text.note.split("#") : []
+      );
+    }
+  );
 
-  // props
-  // language_id -> C0732
-  // genre_id -> C0335
-  // milieu_of_provenance_id -> C1178
-  // origin_id -> C0399
-  // manuscript_witness_1 -> C1181
-  // manuscript_witness_2 -> C1181
-  // manuscript_witness_3 -> C1181
-  // manuscript_witness_4 -> C1181
-  // manuscript_witness_5 -> C1181
-  // manuscript_witness_6 -> C1181
-  // manuscript_witness_7 -> C1181
-  // manuscript_witness_8 -> C1181
-  // manuscript_witness_9 -> C1181
-  // manuscript_witness_10 -> C1181
-  // manuscript_witness_11 -> C1181
-   
   addTerritoryActant(rootTerritory, "everything", false, 0);
-  
+
   // parse resources
   const tableManuscripts = await loadSheet({
     spread: "13eVorFf7J9R8YzO7TmJRVLzIIwRJS737r7eFbH1boyE",
@@ -157,9 +160,14 @@ const loadStatementsTables = async (next: Function) => {
     text_id: string;
     spreadsheet_id: string;
     sheet_name: string;
+    texts: string[];
+    parsing_type: string; // todo
+    parsing_entity: string; // todo
+    related_text_id: string;
     entity_type: string;
     spread: string;
     sheet: string;
+    class_id: string;
   };
   type ICodingSheet = {
     id: string;
@@ -177,11 +185,12 @@ const loadStatementsTables = async (next: Function) => {
   });
 
   tableManuscripts.forEach((manuscript: { id: string; label: string }) => {
-    addResourceActant(manuscript.id, manuscript.label);
+    // parse as objects #629
+    //addResourceActant(manuscript.id, manuscript.label);
   });
 
   const codingSheets: ICodingSheet[] = tableResources
-    .filter((row) => row["type"] === "coding sheet")
+    .filter((row) => row["parsing_type"] === "coding-sheet") // coding sheet
     .map((row) => {
       return {
         id: row["id"],
@@ -194,12 +203,12 @@ const loadStatementsTables = async (next: Function) => {
     });
 
   const entitySheets = tableResources
-    .filter((row) => row["type"] === "entity table")
+    .filter((row) => row["parsing_type"] === "entity-table")
     .filter((row) => row["spreadsheet_id"])
     .map((row) => {
       return {
         id: row["id"],
-        texts: row["text_id"].split(" #"),
+        texts: row["related_text_id"].split(" #"),
         label: row["label"],
         entityType: row["entity_type"],
         spread: row["spreadsheet_id"],
@@ -216,7 +225,7 @@ const loadStatementsTables = async (next: Function) => {
     ? await loadSheet({
         spread: conceptSheet.spread,
         sheet: conceptSheet.sheet,
-        headerRow: 3,
+        headerRow: 4,
       })
     : [];
 
@@ -261,7 +270,7 @@ const loadStatementsTables = async (next: Function) => {
   Object.keys(propsList).forEach((propName: string) => {
     const propValues = propsList[propName];
 
-    if (propValues.length === 1) {
+    if (propValues.length !== -1) {
       const prop: IConceptProp = {
         type: "value",
         conceptId: propValues[0].id,
@@ -303,15 +312,13 @@ const loadStatementsTables = async (next: Function) => {
     const entitySheetTerritory = "T_" + entitySheet.id;
 
     data.forEach((entityRow: any, eri: number) => {
-
-
       addEntityActant(
         entitySheet.id + "_" + entityRow.id,
         entityRow.label,
         entitySheet.entityType as AllActantType
       );
 
-      parseEntityPropsInRow(entityRow, "T0");
+      parseEntityPropsInRow(entityRow);
     });
 
     entitySheet.texts.forEach((text) => {
@@ -327,193 +334,200 @@ const loadStatementsTables = async (next: Function) => {
    * parse CODING SHEETS
    */
   for (var csi = 0; csi < codingSheets.length; csi++) {
-    const codingSheet = codingSheets[csi];
+    if (csi === 0) {
+      const codingSheet = codingSheets[csi];
+      //console.log(codingSheet);
 
-    const data = await loadSheet({
-      spread: codingSheet["spread"],
-      sheet: codingSheet["sheet"],
-    });
+      const data = await loadSheet({
+        spread: codingSheet["spread"],
+        sheet: codingSheet["sheet"],
+        headerRow: 1,
+        validRowFn: (a: any) => a && (a["text"] || a["id"]),
+      });
 
-    // territories
-    const territoryIds: string[] = [];
+      // territories
+      const territoryIds: string[] = [];
 
-    data.forEach((s: { text_part_id: string }) => {
-      const textPartId = s.text_part_id;
-      if (textPartId && !territoryIds.includes(textPartId)) {
-        territoryIds.push(textPartId);
-      }
-    });
+      data.forEach((s: { text_part_id: string }) => {
+        const textPartId = s.text_part_id;
+        if (textPartId && !territoryIds.includes(textPartId)) {
+          territoryIds.push(textPartId);
+        }
+      });
 
-    // add sub-territories
-    territoryIds.forEach((territoryId: string, ti: number) => {
-      addTerritoryActant(
-        territoryId,
-        territoryId,
-        territoryId.includes("-")
-          ? territoryId.split("-").slice(0, -1).join("-")
-          : "",
-        ti
-      );
-    });
+      // add sub-territories
+      territoryIds.forEach((territoryId: string, ti: number) => {
+        addTerritoryActant(
+          territoryId,
+          territoryId,
+          territoryId.includes("-")
+            ? territoryId.split("-").slice(0, -1).join("-")
+            : "",
+          ti
+        );
+      });
 
-    data.forEach((statement: any, si: number) => {
-      // the main statement
+      data.forEach((statement: any, si: number) => {
+        // the main statement
 
-      // parse the statement id but keep the order somehow
-      const mainStatement: IStatement = {
-        id: v4(),
-        class: ActantType.Statement,
-        data: {
-          actions: [
-            {
-              id: v4(),
-              action: statement.id_action_or_relation,
-              elvl: Elvl.Textual,
-              certainty: Certainty.Empty,
-              logic: Logic.Positive,
-              mood: [Mood.Indication],
-              moodvariant: MoodVariant.Realis,
-              operator: Operator.And,
-              bundleStart: false,
-              bundleEnd: false,
-            },
-          ],
-          territory: {
-            id: statement.text_part_id,
-            order: si,
-          },
-          references: [
-            {
-              id: v4(),
-              resource: statement.primary_reference_id,
-              part: statement.primary_reference_part,
-              type: "P",
-            },
-            {
-              id: v4(),
-              resource: statement.secondary_reference_id,
-              part: statement.secondary_reference_part,
-              type: "S",
-            },
-          ],
-          tags: statement.tags_id.split(" #").filter((t: string) => t),
-          text: statement.text,
-          props: [],
-          actants: [],
-        },
-        notes: [],
-        label: statement.id,
-        detail: "",
-        language: Language.Latin,
-        status: ActantStatus.Approved,
-      };
-
-      statement.note && mainStatement.notes.push(statement.note);
-      statement.location_text &&
-        mainStatement.notes.push(statement.location_text);
-      statement.time_note && mainStatement.notes.push(statement.time_note);
-
-      //subject
-      processActant(
-        mainStatement,
-        Position["Subject"],
-        statement.id_subject,
-        statement.subject_property_type_id,
-        statement.subject_property_value_id,
-        codingSheet.entities
-      );
-
-      // actant1
-      processActant(
-        mainStatement,
-        Position.Actant1,
-        statement.id_actant1,
-        statement.actant1_property_type_id,
-        statement.actant1_property_value_id,
-        codingSheet.entities
-      );
-
-      // actant2
-      processActant(
-        mainStatement,
-        Position.Actant2,
-        statement.id_actant2,
-        statement.actant2_property_type_id,
-        statement.actant2_property_value_id,
-        codingSheet.entities
-      );
-
-      // location
-      processLocation(
-        mainStatement,
-        statement.id_location,
-        statement.id_location_from,
-        statement.id_location_to
-      );
-
-      // time
-      // TODO
-      //processTime(mainStatement, statement);
-
-      // ar property
-      if (
-        checkValidId(statement.action_or_relation_property_type_id) &&
-        checkValidId(statement.action_or_relation_property_value_id)
-      ) {
-        const propActant1Id =
-          createNewActantIfNeeded(
-            statement.action_or_relation_property_type_id
-          ) ||
-          addResourceToEntityId(
-            statement.action_or_relation_property_type_id,
-            codingSheet.entities
-          );
-
-        const propActant2Id =
-          createNewActantIfNeeded(
-            statement.action_or_relation_property_value_id
-          ) ||
-          addResourceToEntityId(
-            statement.action_or_relation_property_value_id,
-            codingSheet.entities
-          );
-
-        mainStatement.data.props.push({
+        // parse the statement id but keep the order somehow sorted
+        const mainStatement: IStatement = {
           id: v4(),
-          origin: statement.id,
-          elvl: Elvl.Textual,
-          certainty: Certainty.Empty,
-          logic: Logic.Positive,
-          mood: [Mood.Indication],
-          moodvariant: MoodVariant.Realis,
-          operator: Operator.And,
-          bundleStart: false,
-          bundleEnd: false,
-          type: {
-            id: propActant1Id,
-            elvl: Elvl.Textual,
-            logic: Logic.Positive,
-            virtuality: Virtuality.Reality,
-            partitivity: Partitivity.Unison,
+          class: ActantType.Statement,
+          props: [],
+          data: {
+            actions: [
+              {
+                id: v4(),
+                action: statement.id_action_or_relation,
+                elvl: Elvl.Textual,
+                certainty: Certainty.Empty,
+                logic: Logic.Positive,
+                mood: [Mood.Indication],
+                moodvariant: MoodVariant.Realis,
+                operator: Operator.And,
+                bundleStart: false,
+                bundleEnd: false,
+                props: [],
+              },
+            ],
+            territory: {
+              id: statement.text_part_id,
+              order: si,
+            },
+            references: [
+              {
+                id: v4(),
+                resource: statement.primary_reference_id,
+                part: statement.primary_reference_part,
+                type: "P",
+              },
+              {
+                id: v4(),
+                resource: statement.secondary_reference_id,
+                part: statement.secondary_reference_part,
+                type: "S",
+              },
+            ],
+            tags: statement.tags_id.split(" #").filter((t: string) => t),
+            text: statement.text,
+            actants: [],
           },
-          value: {
-            id: propActant2Id,
+          notes: [],
+          label: statement.id,
+          detail: "",
+          language: Language.Latin,
+          status: ActantStatus.Approved,
+        };
+
+        statement.note && mainStatement.notes.push(statement.note);
+        statement.location_text &&
+          mainStatement.notes.push(statement.location_text);
+        statement.time_note && mainStatement.notes.push(statement.time_note);
+
+        //subject
+        processActant(
+          mainStatement,
+          Position.Subject,
+          statement.id_subject,
+          statement.subject_property_type_id,
+          statement.subject_property_value_id,
+          codingSheet.entities
+        );
+
+        // actant1
+        processActant(
+          mainStatement,
+          Position.Actant1,
+          statement.id_actant1,
+          statement.actant1_property_type_id,
+          statement.actant1_property_value_id,
+          codingSheet.entities
+        );
+
+        // actant2
+        processActant(
+          mainStatement,
+          Position.Actant2,
+          statement.id_actant2,
+          statement.actant2_property_type_id,
+          statement.actant2_property_value_id,
+          codingSheet.entities
+        );
+
+        // location
+        processLocation(
+          mainStatement,
+          statement.id_location,
+          statement.id_location_from,
+          statement.id_location_to
+        );
+
+        // time
+        // TODO
+        //processTime(mainStatement, statement);
+
+        // ar property
+        if (
+          checkValidId(statement.action_or_relation_property_type_id) &&
+          checkValidId(statement.action_or_relation_property_value_id)
+        ) {
+          const propActant1Id =
+            createNewActantIfNeeded(
+              statement.action_or_relation_property_type_id
+            ) ||
+            addResourceToEntityId(
+              statement.action_or_relation_property_type_id,
+              codingSheet.entities
+            );
+
+          const propActant2Id =
+            createNewActantIfNeeded(
+              statement.action_or_relation_property_value_id
+            ) ||
+            addResourceToEntityId(
+              statement.action_or_relation_property_value_id,
+              codingSheet.entities
+            );
+
+          mainStatement.data.actions[0].props.push({
+            id: v4(),
             elvl: Elvl.Textual,
+            certainty: Certainty.Empty,
             logic: Logic.Positive,
-            virtuality: Virtuality.Reality,
-            partitivity: Partitivity.Unison,
-          },
-        });
-      }
+            mood: [Mood.Indication],
+            moodvariant: MoodVariant.Realis,
+            operator: Operator.And,
+            bundleStart: false,
+            bundleEnd: false,
 
-      /**
-       * TODO
-       * Time
-       * Location
-       */
+            children: [],
+            type: {
+              id: propActant1Id,
+              elvl: Elvl.Textual,
+              logic: Logic.Positive,
+              virtuality: Virtuality.Reality,
+              partitivity: Partitivity.Unison,
+            },
+            value: {
+              id: propActant2Id,
+              elvl: Elvl.Textual,
+              logic: Logic.Positive,
+              virtuality: Virtuality.Reality,
+              partitivity: Partitivity.Unison,
+            },
+          });
+        }
 
-      actants.push(mainStatement);
-    });
+        /**
+         * TODO
+         * Time
+         * Location
+         */
+
+        actants.push(mainStatement);
+      });
+    }
   }
 
   next();
@@ -540,18 +554,22 @@ const checkValidId = (idValue: string) => {
  * TODO: logical type
  */
 const addEntityActant = (id: string, label: string, type: AllActantType) => {
-    const newEntityActant: IEntity | IActant = {
-      id,
-      class: type,
-      data: type === ActantType.Concept ? {} : {
-        logicalType: EntityLogicalType.Definite,
-      } ,
-      label: label,
-      detail: "",
-      status: ActantStatus.Approved,
-      language: Language.Latin,
-      notes: [],
-    } 
+  const newEntityActant: IEntity | IActant = {
+    id,
+    class: type,
+    data:
+      type === ActantType.Concept
+        ? {}
+        : {
+            logicalType: EntityLogicalType.Definite,
+          },
+    label: label,
+    detail: "",
+    status: ActantStatus.Approved,
+    language: Language.Latin,
+    notes: [],
+    props: [],
+  };
   if (id) {
     actants.push(newEntityActant);
   }
@@ -561,9 +579,9 @@ const addTerritoryActant = (
   label: string,
   parentId: string | false,
   order: number,
-  detail: string = '',
-  language: string = 'Latin',
-  notes: string[]= []
+  detail: string = "",
+  language: string = "Latin",
+  notes: string[] = []
 ) => {
   if (id) {
     if (!actants.some((a) => a.id == id)) {
@@ -584,6 +602,7 @@ const addTerritoryActant = (
         // @ts-ignore
         language: Language[language] as Language,
         notes: notes,
+        props: [],
       };
 
       actants.push(newTerritory);
@@ -603,13 +622,14 @@ const addResourceActant = (id: string, label: string) => {
       status: ActantStatus.Approved,
       language: Language.Latin,
       notes: [],
+      props: [],
     };
     actants.push(newResource);
   }
 };
 
 // Parsing props in entity tables
-const parseEntityPropsInRow = (row: any, territory: string) => {
+const parseEntityPropsInRow = (row: any) => {
   const entityProps = Object.keys(row) as Array<keyof string>;
 
   entityProps.forEach((tableProp: any, tpi: number) => {
@@ -624,13 +644,13 @@ const parseEntityPropsInRow = (row: any, territory: string) => {
             propsConfig[tableProp].mappingDict?.[row[tableProp]];
 
           if (conceptValueId) {
-            createEmptyPropStatement(
-              row.id,
-              propsConfig[tableProp].conceptId,
-              conceptValueId,
-              territory,
-              tpi
-            );
+            // createEmptyPropStatement(
+            //   row.id,
+            //   propsConfig[tableProp].conceptId,
+            //   conceptValueId,
+            //   territory,
+            //   tpi
+            // );
           }
           // VALUE type
         } else if (propType === "value") {
@@ -641,13 +661,13 @@ const parseEntityPropsInRow = (row: any, territory: string) => {
           addEntityActant(valueId, value, ActantType.Value);
 
           // add statement
-          createEmptyPropStatement(
-            row.id,
-            propsConfig[tableProp].conceptId,
-            valueId,
-            territory,
-            tpi
-          );
+          // createEmptyPropStatement(
+          //   row.id,
+          //   propsConfig[tableProp].conceptId,
+          //   valueId,
+          //   territory,
+          //   tpi
+          // );
         }
       }
     }
@@ -668,7 +688,7 @@ const createEmptyPropStatement = (
     const newEmptyStatement: IStatement = {
       id: v4(),
       class: ActantType.Statement,
-
+      props: [],
       label: "",
       data: {
         actions: [
@@ -683,6 +703,7 @@ const createEmptyPropStatement = (
             operator: Operator.And,
             bundleStart: false,
             bundleEnd: false,
+            props: [],
           },
         ],
         territory: {
@@ -692,7 +713,6 @@ const createEmptyPropStatement = (
         references: [],
         tags: [],
         text: "",
-        props: [],
         actants: [
           {
             id: v4(),
@@ -705,6 +725,7 @@ const createEmptyPropStatement = (
             operator: Operator.And,
             bundleStart: false,
             bundleEnd: false,
+            props: [],
           },
           {
             id: v4(),
@@ -717,6 +738,7 @@ const createEmptyPropStatement = (
             operator: Operator.And,
             bundleStart: false,
             bundleEnd: false,
+            props: [],
           },
           {
             id: v4(),
@@ -729,6 +751,7 @@ const createEmptyPropStatement = (
             operator: Operator.And,
             bundleStart: false,
             bundleEnd: false,
+            props: [],
           },
         ],
       },
@@ -791,9 +814,8 @@ const processLocation = (
           const statementLocationId = locationIdValue
             .replace("<", "")
             .replace(">", "");
-          statement.data.props.push({
+          statement.data.actions[0].props.push({
             id: v4(),
-            origin: statement.id,
             certainty: Certainty.Empty,
             elvl: Elvl.Textual,
             logic: Logic.Positive,
@@ -802,6 +824,8 @@ const processLocation = (
             operator: Operator.And,
             bundleStart: false,
             bundleEnd: false,
+
+            children: [],
 
             type: {
               id: sameLocationType,
@@ -819,9 +843,8 @@ const processLocation = (
             },
           });
         } else {
-          statement.data.props.push({
+          statement.data.actions[0].props.push({
             id: v4(),
-            origin: statement.id,
             elvl: Elvl.Textual,
             certainty: Certainty.Empty,
             logic: Logic.Positive,
@@ -830,6 +853,8 @@ const processLocation = (
             operator: Operator.And,
             bundleStart: false,
             bundleEnd: false,
+
+            children: [],
             type: {
               id: locationType.concept,
               elvl: Elvl.Textual,
@@ -878,7 +903,8 @@ const processActant = (
         addResourceToEntityId(actantIdClean, codingSheetEntities);
 
       const statementActantId = v4();
-      statement.data.actants.push({
+
+      const actant: IStatementActant = {
         id: statementActantId,
         actant: actantId,
         position: position,
@@ -889,9 +915,11 @@ const processActant = (
         operator: Operator.And,
         bundleStart: false,
         bundleEnd: false,
-      });
+        props: [],
+      };
 
       // create a prop if there is one
+
       if (checkValidId(propActant1Value) && checkValidId(propActant2Value)) {
         const propActant1Id =
           createNewActantIfNeeded(propActant1Value) ||
@@ -905,9 +933,8 @@ const processActant = (
          * TODO
          * elvl and certainty
          */
-        statement.data.props.push({
+        actant.props.push({
           id: v4(),
-          origin: statementActantId,
           elvl: Elvl.Textual,
           certainty: Certainty.Empty,
           logic: Logic.Positive,
@@ -916,6 +943,8 @@ const processActant = (
           operator: Operator.And,
           bundleStart: false,
           bundleEnd: false,
+
+          children: [],
 
           type: {
             id: propActant1Id,
@@ -933,6 +962,8 @@ const processActant = (
           },
         });
       }
+
+      statement.data.actants.push(actant);
     });
   }
 };
@@ -958,5 +989,6 @@ const createNewActantIfNeeded = (actantValue: string) => {
 };
 
 loadStatementsTables(() => {
+  console.log(actants.length);
   fs.writeFileSync("datasets/all/actants.json", JSON.stringify(actants));
 });
