@@ -12,7 +12,7 @@ export interface IProp {
     bundleStart: boolean;
     bundleEnd: boolean;
   
-    childOf?: string;
+    children: IProp[];
   
     type: {
       id: string;

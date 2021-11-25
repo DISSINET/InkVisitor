@@ -1,6 +1,6 @@
 import { IDbModel, UnknownObject, fillFlatObject, fillArray } from "./common";
 import { r as rethink, Connection, WriteResult } from "rethinkdb-ts";
-import { IStatement, IActant } from "@shared/types";
+import { IStatement, IActant, IProp } from "@shared/types";
 import {
   ActantStatus,
   ActantType,
@@ -24,6 +24,7 @@ export default class Actant implements IActant, IDbModel {
   status: ActantStatus = ActantStatus.Pending;
   language: Language = Language.Latin;
   notes: string[] = [];
+  props: IProp[] = [];
 
   constructor(data: UnknownObject) {
     if (!data) {
@@ -32,6 +33,7 @@ export default class Actant implements IActant, IDbModel {
 
     fillFlatObject(this, { ...data, data: undefined });
     fillArray(this.notes, String, data.notes);
+    fillArray(this.props, Object, data.props);
   }
 
   async save(db: Connection | undefined): Promise<WriteResult> {
