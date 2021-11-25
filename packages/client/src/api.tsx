@@ -61,6 +61,7 @@ class Api {
     this.baseUrl = process.env.APIURL + "/api/v1";
     this.headers = {
       "Content-Type": "application/json",
+      "Content-Encoding": "gzip",
     };
 
     this.connection = axios.create({
