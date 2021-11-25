@@ -48,7 +48,13 @@ import {
   languageDict,
   entitiesDict,
 } from "@shared/dictionaries";
-import { ActantType, Position, UserRole, UserRoleMode } from "@shared/enums";
+import {
+  ActantType,
+  Language,
+  Position,
+  UserRole,
+  UserRoleMode,
+} from "@shared/enums";
 import { toast } from "react-toastify";
 import { ActantDetailMetaTable } from "./ActantDetailMetaTable/ActantDetailMetaTable";
 import { useSearchParams } from "hooks";
@@ -411,17 +417,15 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
                 <StyledContentRowValue>
                   <Dropdown
                     disabled={!userCanEdit}
-                    isMulti={true}
+                    isMulti={false}
                     width="full"
                     options={languageDict}
-                    value={languageDict.filter((i: any) =>
-                      actant.language.includes(i.value)
+                    value={languageDict.find(
+                      (i: any) => i.value === actant.language
                     )}
                     onChange={(newValue: any) => {
                       updateActantMutation.mutate({
-                        language: newValue
-                          ? (newValue as string[]).map((v: any) => v.value)
-                          : [],
+                        language: newValue.value || Language.Empty,
                       });
                     }}
                   />
