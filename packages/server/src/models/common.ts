@@ -28,6 +28,9 @@ export function fillFlatObject<T>(
   }
   for (const key of Object.keys(source)) {
     const wantedType = typeof (ctx as Record<string, unknown>)[key];
+    if (wantedType === "undefined") {
+      continue;
+    }
 
     if (
       ((ctx as Record<string, unknown>)[key] as any).constructor.name === "Date"
