@@ -1,32 +1,9 @@
 import { asyncRouteHandler } from "../index";
 import { Router, Request } from "express";
-import {
-  findActantById,
-  findActantsByIds,
-  findAssociatedActantIds,
-  filterActantsByWildcard,
-} from "@service/shorthands";
-import { getActantType } from "@models/factory";
-import {
-  BadParams,
-  ActantDoesNotExits,
-  ModelNotValidError,
-  InternalServerError,
-  PermissionDeniedError,
-} from "@shared/types/errors";
-import {
-  IActant,
-  IResponseDetail,
-  IResponseGeneric,
-  IResponseStatement,
-  IResponseActant,
-  IResponseSearch,
-  RequestSearch,
-  IResponseAudit,
-} from "@shared/types";
-import { mergeDeep } from "@common/functions";
-import Statement from "@models/statement";
-import { ActantStatus, UserRole } from "@shared/enums";
+import { findActantById } from "@service/shorthands";
+import { BadParams, ActantDoesNotExits } from "@shared/types/errors";
+import { IResponseAudit } from "@shared/types";
+import Audit from "@models/audit";
 
 export default Router().get(
   "/get/:actantId?",
@@ -37,19 +14,28 @@ export default Router().get(
       throw new BadParams("actantId has to be set");
     }
 
-    
-    const actant = getActantType({ ...actantData });
+    // actantId must be already in the db
+    const existingActant = await findActantById(request.db, actantId);
+    if (!existingActant) {
+      throw new ActantDoesNotExits(
+        `actant with id ${actantId} does not exist`,
+        actantId
+      );
+    }
 
-    const usedInStatements = await Statement.findDependentStatements(
+    const out: IResponseAudit = {
+      actant: actantId,
+      last: await Audit.getLastNForActant(request.db.connection, actantId),
+    };
+
+    const first = await Audit.getFirstForActant(
       request.db.connection,
-      actant.id as string
+      actantId
     );
+    if (first) {
+      out.first = first;
+    }
 
-    return {
-      ...actant,
-      usedCount: usedInStatements.length,
-      usedIn: usedInStatements,
-      right: actant.getUserRoleMode(request.getUserOrFail()),
-    } as IResponseActant;
+    return out;
   })
 );
