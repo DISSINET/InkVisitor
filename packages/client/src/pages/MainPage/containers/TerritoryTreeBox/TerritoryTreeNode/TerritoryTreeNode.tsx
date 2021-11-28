@@ -7,7 +7,7 @@ import {
   BsCaretDown,
 } from "react-icons/bs";
 
-import { IActant, ITerritory } from "@shared/types";
+import { IActant, IResponseStoredTerritory, ITerritory } from "@shared/types";
 import {
   StyledChildrenWrap,
   StyledDisabledTag,
@@ -25,10 +25,10 @@ import { rootTerritoryId } from "Theme/constants";
 import { animated, config, useSpring } from "react-spring";
 import api from "api";
 import { IParentTerritory } from "@shared/types/territory";
-import { useMutation, useQueryClient } from "react-query";
+import { useMutation, UseMutationResult, useQueryClient } from "react-query";
 import { DraggedTerritoryItem, DragItem } from "types";
 import { useSearchParams } from "hooks";
-import { UserRole, UserRoleMode } from "@shared/enums";
+import { UserRoleMode } from "@shared/enums";
 
 interface TerritoryTreeNode {
   territory: ITerritory;
@@ -41,6 +41,8 @@ interface TerritoryTreeNode {
   moveFn?: (dragIndex: number, hoverIndex: number) => void;
   empty?: boolean;
   right: UserRoleMode;
+  storedTerritories: string[];
+  updateUserMutation: UseMutationResult<void, unknown, object, unknown>;
 }
 export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
   territory,
@@ -53,6 +55,8 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
   moveFn,
   empty,
   right,
+  storedTerritories,
+  updateUserMutation,
 }) => {
   const dispatch = useAppDispatch();
   const treeInitialized = useAppSelector((state) => state.treeInitialized);
@@ -233,6 +237,7 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
     hasChildren: boolean
   ) => {
     const parent = territory.data.parent as IParentTerritory;
+    const isFavorited = storedTerritories?.includes(territoryActant.id);
 
     return (
       <>
@@ -277,6 +282,8 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
                     enableTooltip
                     moveFn={moveFn}
                     updateOrderFn={moveTerritoryMutation.mutate}
+                    statementsCount={statementsCount}
+                    isFavorited={isFavorited}
                   />
                 </animated.div>
                 <ContextMenu
@@ -285,6 +292,9 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
                   onMenuClose={() => setContextMenuOpen(false)}
                   right={right}
                   empty={empty || false}
+                  storedTerritories={storedTerritories}
+                  updateUserMutation={updateUserMutation}
+                  isFavorited={isFavorited}
                 />
               </StyledTerritoryTagWrap>
             ) : (
@@ -316,6 +326,8 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
               index={key}
               empty={child.empty}
               moveFn={moveChildFn}
+              storedTerritories={storedTerritories}
+              updateUserMutation={updateUserMutation}
             />
           ))}
       </StyledChildrenWrap>

@@ -90,5 +90,10 @@
     "controller": "actants",
     "method": "getMore",
     "roles": ["*"]
+  },
+  {
+    "controller": "audits",
+    "method": "get",
+    "roles": ["*"]
   }
 ]

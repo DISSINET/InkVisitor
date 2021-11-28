@@ -43,3 +43,8 @@ export const StyledTagWrapper = styled.div`
   display: inline-flex;
   overflow: hidden;
 `;
+
+export const StyledMarkerWrap = styled.div`
+  margin-left: ${({ theme }) => `${theme.space[1]}`};
+  color: ${({ theme }) => theme.color["success"]};
+`;

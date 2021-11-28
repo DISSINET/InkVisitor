@@ -42,6 +42,8 @@ interface TagProps {
   tooltipPosition?: PopupPosition | PopupPosition[];
   updateOrderFn?: (item: DragItem) => void;
   lvl?: number;
+  statementsCount?: number;
+  isFavorited?: boolean;
   disabled?: boolean;
 }
 
@@ -65,6 +67,8 @@ export const Tag: React.FC<TagProps> = ({
   tooltipPosition = "right top",
   enableTooltip = true,
   updateOrderFn = () => {},
+  statementsCount,
+  isFavorited = false,
   lvl,
 }) => {
   const { setActantId } = useSearchParams();
@@ -149,6 +153,7 @@ export const Tag: React.FC<TagProps> = ({
           detail={tooltipDetail}
           text={tooltipText}
           tagTooltip
+          itemsCount={statementsCount}
         >
           <div>
             <StyledTagWrapper
@@ -173,6 +178,7 @@ export const Tag: React.FC<TagProps> = ({
             disabled={!enableTooltip}
             position={tooltipPosition}
             tagTooltip
+            itemsCount={statementsCount}
           >
             <StyledTooltipSeparator>
               <StyledTagWrapper
@@ -190,6 +196,7 @@ export const Tag: React.FC<TagProps> = ({
                     status={status}
                     borderStyle={borderStyle}
                     fullWidth={fullWidth}
+                    isFavorited={isFavorited}
                   >
                     {label}
                   </StyledLabel>

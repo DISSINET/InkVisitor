@@ -1,6 +1,7 @@
-import {IAudit} from "./";
+import { IAudit } from "./";
 
 export interface IResponseAudit {
   actant: string;
-  logs: IAudit[];
+  last: IAudit[];
+  first?: IAudit;
 }

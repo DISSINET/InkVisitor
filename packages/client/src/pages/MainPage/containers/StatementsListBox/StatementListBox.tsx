@@ -1,11 +1,10 @@
-import React, { MouseEventHandler, useEffect, useMemo, useState } from "react";
-import { Cell, Column, ColumnInstance } from "react-table";
+import React, { useEffect, useMemo, useState } from "react";
+import { Cell, Column } from "react-table";
 import { useMutation, useQuery, useQueryClient } from "react-query";
 import {
   FaTrashAlt,
   FaPlus,
   FaClone,
-  FaEdit,
   FaChevronCircleDown,
   FaChevronCircleUp,
 } from "react-icons/fa";
@@ -25,11 +24,8 @@ import {
   IStatement,
   IActant,
   IAction,
-  IStatementAction,
-  IStatementProp,
   IResponseStatement,
 } from "@shared/types";
-import { AttributesEditor } from "../AttributesEditor/AttributesEditor";
 import { StatementListTable } from "./StatementListTable/StatementListTable";
 import { StatementListHeader } from "./StatementListHeader/StatementListHeader";
 import {
@@ -38,10 +34,6 @@ import {
   StyledText,
 } from "./StatementLitBoxStyles";
 
-import {
-  StyledPropsActantList,
-  StyledPropLineColumn,
-} from "../StatementEditorBox/StatementEditorBoxStyles";
 import { CStatement, DStatement } from "constructors";
 import { useSearchParams } from "hooks";
 import { StatementListContextMenu } from "./StatementListContextMenu/StatementListContextMenu";

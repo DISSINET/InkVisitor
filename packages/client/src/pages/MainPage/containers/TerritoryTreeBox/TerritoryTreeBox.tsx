@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from "react";
-import { useQuery } from "react-query";
+import React, { useEffect, useMemo, useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "react-query";
 
 import api from "api";
 import { TerritoryTreeNode } from "./TerritoryTreeNode/TerritoryTreeNode";
-import { IResponseTree } from "@shared/types";
+import { IResponseTree, IResponseUser } from "@shared/types";
 import { Button, Loader } from "components";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { setSelectedTerritoryPath } from "redux/features/territoryTree/selectedTerritoryPathSlice";
@@ -12,8 +12,11 @@ import { FaPlus } from "react-icons/fa";
 import { ContextMenuNewTerritoryModal } from "./ContextMenuNewTerritoryModal/ContextMenuNewTerritoryModal";
 import { rootTerritoryId } from "Theme/constants";
 import { UserRoleMode } from "@shared/enums";
+import { StyledTreeWrapper } from "./TerritoryTreeBoxStyles";
 
 export const TerritoryTreeBox: React.FC = () => {
+  const queryClient = useQueryClient();
+
   const { status, data, error, isFetching } = useQuery(
     ["tree"],
     async () => {
@@ -21,6 +24,46 @@ export const TerritoryTreeBox: React.FC = () => {
       return res.data;
     },
     { enabled: api.isLoggedIn() }
+  );
+  const userId = localStorage.getItem("userid");
+
+  const {
+    status: userStatus,
+    data: userData,
+    error: userError,
+    isFetching: userIsFetching,
+  } = useQuery(
+    ["user"],
+    async () => {
+      if (userId) {
+        const res = await api.usersGet(userId);
+        return res.data;
+      }
+    },
+    { enabled: api.isLoggedIn() }
+  );
+
+  const [storedTerritoryIds, setStoredTerritoryIds] = useState<string[]>([]);
+  useEffect(() => {
+    if (userData?.storedTerritories) {
+      setStoredTerritoryIds(
+        userData.storedTerritories.map((territory) => territory.territory.id)
+      );
+    }
+  }, [userData?.storedTerritories]);
+
+  const updateUserMutation = useMutation(
+    async (changes: object) => {
+      if (userId) {
+        await api.usersUpdate(userId, changes);
+      }
+    },
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries(["tree"]);
+        queryClient.invalidateQueries(["user"]);
+      },
+    }
   );
 
   const userRole = localStorage.getItem("userrole");
@@ -60,17 +103,6 @@ export const TerritoryTreeBox: React.FC = () => {
 
   return (
     <>
-      {data && (
-        <TerritoryTreeNode
-          right={data.right}
-          territory={data.territory}
-          children={data.children}
-          lvl={data.lvl}
-          statementsCount={data.statementsCount}
-          initExpandedNodes={selectedTerritoryPath}
-          empty={data.empty}
-        />
-      )}
       {userRole === UserRoleMode.Admin && (
         <Button
           label="new territory"
@@ -79,13 +111,29 @@ export const TerritoryTreeBox: React.FC = () => {
         />
       )}
 
+      <StyledTreeWrapper>
+        {data && (
+          <TerritoryTreeNode
+            right={data.right}
+            territory={data.territory}
+            children={data.children}
+            lvl={data.lvl}
+            statementsCount={data.statementsCount}
+            initExpandedNodes={selectedTerritoryPath}
+            empty={data.empty}
+            storedTerritories={storedTerritoryIds ? storedTerritoryIds : []}
+            updateUserMutation={updateUserMutation}
+          />
+        )}
+      </StyledTreeWrapper>
+
       {showCreate && (
         <ContextMenuNewTerritoryModal
           onClose={() => setShowCreate(false)}
           territoryActantId={rootTerritoryId}
         />
       )}
-      <Loader show={isFetching} />
+      <Loader show={isFetching || updateUserMutation.isLoading} />
     </>
   );
 };
