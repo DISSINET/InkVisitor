@@ -1,7 +1,6 @@
-import React, { FC, ReactNode, useEffect } from "react";
+import React, { FC, ReactNode } from "react";
 import { config, useSpring } from "react-spring";
 import { Colors } from "types";
-import useKeypress from "hooks/useKeyPress";
 
 import {
   StyledModalWrap,
@@ -12,6 +11,7 @@ import {
   StyledCardBody,
   StyledFooter,
 } from "./ModalStyles";
+import { ModalKeyPress } from "./ModalKeyPress";
 
 interface Modal {
   children?: ReactNode;
@@ -20,7 +20,7 @@ interface Modal {
   showModal: boolean;
   disableBgClick?: boolean;
   width?: "full" | "normal" | "thin";
-  closeOnEscape?: boolean;
+  disableEscapeClose?: boolean;
 }
 export const Modal: FC<Modal> = ({
   children,
@@ -29,30 +29,31 @@ export const Modal: FC<Modal> = ({
   showModal,
   disableBgClick = false,
   width = "normal",
-  closeOnEscape = false,
+  disableEscapeClose = false,
 }) => {
   const animatedMount = useSpring({
     opacity: showModal ? 1 : 0,
     config: config.stiff,
   });
 
-  useKeypress("Enter", () => {
-    onEnterPress();
-  });
-  useKeypress("Escape", closeOnEscape ? onClose : () => {});
-
   return (
     <>
       {showModal && (
-        <StyledModalWrap>
-          <StyledBackground
-            style={animatedMount}
-            onClick={disableBgClick ? () => {} : onClose}
+        <>
+          <StyledModalWrap>
+            <StyledBackground
+              style={animatedMount}
+              onClick={disableBgClick ? () => {} : onClose}
+            />
+            <ModalCard animatedMount={animatedMount} width={width}>
+              {children}
+            </ModalCard>
+          </StyledModalWrap>
+          <ModalKeyPress
+            onEnter={onEnterPress}
+            onEscape={disableEscapeClose ? () => {} : onClose}
           />
-          <ModalCard animatedMount={animatedMount} width={width}>
-            {children}
-          </ModalCard>
-        </StyledModalWrap>
+        </>
       )}
     </>
   );
