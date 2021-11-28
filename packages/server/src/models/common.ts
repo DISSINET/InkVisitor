@@ -1,7 +1,8 @@
 import { Db } from "@service/RethinkDB";
 import { Connection, WriteResult } from "rethinkdb-ts";
 
-export type UnknownObject = Record<string, unknown> | undefined;
+type GenericObject = { [key: string]: any };
+export type UnknownObject = GenericObject | undefined;
 
 export interface IModel {
   isValid(): boolean; // validate model before inserting to the db
@@ -27,11 +28,19 @@ export function fillFlatObject<T>(
   }
   for (const key of Object.keys(source)) {
     const wantedType = typeof (ctx as Record<string, unknown>)[key];
-    
+
+    if (
+      ((ctx as Record<string, unknown>)[key] as any).constructor.name === "Date"
+    ) {
+      (ctx as Record<string, unknown>)[key] = source[key];
+      continue;
+    }
+
     if (wantedType === "object") {
       // only flat object's props
       continue;
     }
+
     const gotType = typeof source[key];
 
     if (
