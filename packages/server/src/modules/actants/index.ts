@@ -26,6 +26,7 @@ import {
 import { mergeDeep } from "@common/functions";
 import Statement from "@models/statement";
 import { ActantStatus, UserRole } from "@shared/enums";
+import Audit from "@models/audit";
 
 export default Router()
   .get(
@@ -98,11 +99,13 @@ export default Router()
         throw new ModelNotValidError("");
       }
 
-      if (!model.canBeCreatedByUser(request.getUserOrFail())) {
+      const user = request.getUserOrFail();
+
+      if (!model.canBeCreatedByUser(user)) {
         throw new PermissionDeniedError("actant cannot be created");
       }
 
-      if (request.getUserOrFail().role !== UserRole.Admin) {
+      if (user.role !== UserRole.Admin) {
         model.status = ActantStatus.Pending;
       }
 
@@ -116,6 +119,12 @@ export default Router()
       }
 
       if (result.inserted === 1) {
+        await Audit.createNew(
+          request.db.connection,
+          user,
+          model.id,
+          request.body
+        );
         return {
           result: true,
         };
@@ -168,6 +177,13 @@ export default Router()
       const result = await model.update(request.db.connection, actantData);
 
       if (result.replaced || result.unchanged) {
+        await Audit.createNew(
+          request.db.connection,
+          request.getUserOrFail(),
+          actantId,
+          actantData
+        );
+
         return {
           result: true,
         };
