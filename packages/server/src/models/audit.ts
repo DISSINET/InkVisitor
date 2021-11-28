@@ -67,6 +67,8 @@ export default class Audit implements IAudit, IDbModel {
     const result = await rethink
       .table(Audit.table)
       .filter({ actantId })
+      .orderBy(rethink.asc("date"))
+      .limit(1)
       .run(db);
 
     if (!result || !result.length) {

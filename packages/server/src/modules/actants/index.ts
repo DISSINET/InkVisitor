@@ -99,11 +99,13 @@ export default Router()
         throw new ModelNotValidError("");
       }
 
-      if (!model.canBeCreatedByUser(request.getUserOrFail())) {
+      const user = request.getUserOrFail();
+
+      if (!model.canBeCreatedByUser(user)) {
         throw new PermissionDeniedError("actant cannot be created");
       }
 
-      if (request.getUserOrFail().role !== UserRole.Admin) {
+      if (user.role !== UserRole.Admin) {
         model.status = ActantStatus.Pending;
       }
 
@@ -117,6 +119,12 @@ export default Router()
       }
 
       if (result.inserted === 1) {
+        await Audit.createNew(
+          request.db.connection,
+          user,
+          model.id,
+          request.body
+        );
         return {
           result: true,
         };
