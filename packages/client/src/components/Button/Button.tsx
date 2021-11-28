@@ -4,8 +4,6 @@ import { Colors } from "types";
 import { StyledButton, StyledButtonLabel } from "./ButtonStyles";
 
 import { Tooltip } from "components";
-import { useSpring } from "react-spring";
-import theme from "Theme/theme";
 
 interface ButtonProps {
   tooltip?: string;
