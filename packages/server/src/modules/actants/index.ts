@@ -25,7 +25,7 @@ import {
 } from "@shared/types";
 import { mergeDeep } from "@common/functions";
 import Statement from "@models/statement";
-import { ActantStatus, UserRole } from "@shared/enums";
+import { ActantStatus, ActantType, UserRole } from "@shared/enums";
 import Audit from "@models/audit";
 
 export default Router()
@@ -69,15 +69,23 @@ export default Router()
     asyncRouteHandler<IResponseActant[]>(async (request: Request) => {
       const label = request.body.label;
       const classParam = request.body.class;
+      const excluded: ActantType[] = request.body.excluded;
 
       if (!label && !classParam) {
         throw new BadParams("label or class has to be set");
       }
 
+      if (
+        typeof excluded !== "undefined" &&
+        excluded.constructor.name !== "Array"
+      ) {
+        throw new BadParams("excluded need to be array");
+      }
+
       const actants = await filterActantsByWildcard(
         request.db,
         classParam,
-        undefined,
+        excluded,
         label
       );
 
@@ -101,7 +109,7 @@ export default Router()
 
       const user = request.getUserOrFail();
 
-      if (!model.canBeCreatedByUser(user)) {
+      if (!model.canBeCreatedByUser(user)) {  
         throw new PermissionDeniedError("actant cannot be created");
       }
 
