@@ -1,5 +1,5 @@
 import "ts-jest";
-import { IActant, IAction, IResponseGeneric, IStatement } from "@shared/types";
+import { IResponseGeneric, IStatement } from "@shared/types";
 import "ts-jest";
 import { ITerritory } from "@shared/types/index";
 import { Db } from "@service/RethinkDB";
@@ -8,8 +8,9 @@ import Statement from "@models/statement";
 import Territory from "@models/territory";
 import { CustomError } from "@shared/types/errors";
 import { errorTypes } from "@shared/types/response-generic";
-import { ActantType } from "@shared/enums";
 import "@models/events/register";
+import { r as rethink } from "rethinkdb-ts";
+import Audit from "@models/audit";
 
 describe("common", function () {
   it("should work", () => undefined);
@@ -106,5 +107,10 @@ export async function createMockStatements(
 export async function clean(db: Db): Promise<void> {
   await deleteActants(db);
 
+  await db.close();
+}
+
+export async function clearAudits(db: Db): Promise<void> {
+  await rethink.table(Audit.table).delete().run(db.connection);
   await db.close();
 }
