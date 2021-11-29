@@ -19,10 +19,12 @@ import {
 import * as errors from "@shared/types/errors";
 import { toast } from "react-toastify";
 import { IRequestSearch } from "types";
+import { ActantType } from "@shared/enums";
 
 type FilterActantsI = {
   label?: string;
   class?: string | false;
+  excluded?: ActantType[];
 };
 
 type FilterUsersI = {

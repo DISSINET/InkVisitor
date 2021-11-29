@@ -4,11 +4,12 @@ import { Colors } from "types";
 import { StyledButton, StyledButtonLabel } from "./ButtonStyles";
 
 import { Tooltip } from "components";
+import { Operator } from "@shared/enums";
 
 interface ButtonProps {
   tooltip?: string;
   label?: string;
-  icon?: JSX.Element;
+  icon?: JSX.Element | Operator;
   inverted?: boolean;
   noBorder?: boolean;
   textRegular?: boolean;

@@ -22,7 +22,7 @@ import {
 import { SuggesterKeyPress } from "./SuggesterKeyPress";
 import { toast } from "react-toastify";
 import { SuggesterModal } from "./SuggesterModal";
-import { ActantStatus } from "@shared/enums";
+import { ActantStatus, ActantType } from "@shared/enums";
 import useKeypress from "hooks/useKeyPress";
 
 export interface SuggestionI {
@@ -113,7 +113,7 @@ export const Suggester: React.FC<SuggesterProps> = ({
 
   const handleEnterPress = () => {
     if (selected === -1 && typed.length > 0) {
-      if (category === "*") {
+      if (category === "") {
         setShowModal(true);
       } else {
         onCreate({ label: typed, category: category });
@@ -128,7 +128,7 @@ export const Suggester: React.FC<SuggesterProps> = ({
 
   const handleAddBtnClick = () => {
     if (typed.length > 0) {
-      if (category === "*") {
+      if (category === "") {
         setShowModal(true);
       } else {
         onCreate({ label: typed, category: category });
