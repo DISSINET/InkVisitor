@@ -57,7 +57,7 @@ export const StyledSuggesterList = styled.div`
   position: absolute;
   top: 2.5rem;
   left: 0;
-  z-index: 20;
+  z-index: 40;
 `;
 export const StyledRelativePosition = styled.div`
   position: relative;

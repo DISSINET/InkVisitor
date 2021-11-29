@@ -90,7 +90,7 @@ export const StyledCardBody = styled.section`
   padding: ${space5} ${space7};
 
   font-size: ${({ theme }) => theme.fontSize["sm"]};
-  -webkit-overflow-scrolling: touch;
+  /* -webkit-overflow-scrolling: touch; */
 `;
 export const StyledFooter = styled.div`
   border-top-style: solid;
