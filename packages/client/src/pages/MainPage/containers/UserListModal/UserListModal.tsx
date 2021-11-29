@@ -56,7 +56,7 @@ import { UserListTableRow } from "./UserListTableRow/UserListTableRow";
 import { ActantSuggester } from "../ActantSuggester/ActantSuggester";
 import { ActantTag } from "../ActantTag/ActantTag";
 import { IResponseUser, IUserRight } from "@shared/types";
-import { UserRole, UserRoleMode } from "@shared/enums";
+import { ActantType, UserRole, UserRoleMode } from "@shared/enums";
 import { userRoleDict } from "@shared/dictionaries";
 import { AttributeButtonGroup } from "../AttributeButtonGroup/AttributeButtonGroup";
 import { toast } from "react-toastify";
@@ -300,7 +300,7 @@ export const UserListModal: React.FC<UserListModal> = ({
                     onSelected={(newSelectedId: string) => {
                       addRightToUser(userId, newSelectedId, "read");
                     }}
-                    categoryIds={["T"]}
+                    categoryIds={[ActantType.Territory]}
                     placeholder={"assign a territory"}
                   />
                   <StyledTerritoryList>
@@ -377,7 +377,7 @@ export const UserListModal: React.FC<UserListModal> = ({
                       onSelected={(newSelectedId: string) => {
                         addRightToUser(userId, newSelectedId, "write");
                       }}
-                      categoryIds={["T"]}
+                      categoryIds={[ActantType.Territory]}
                       placeholder={"assign a territory"}
                     />
                     <StyledTerritoryList>
