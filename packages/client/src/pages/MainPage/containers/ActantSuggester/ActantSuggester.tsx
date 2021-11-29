@@ -84,7 +84,7 @@ export const ActantSuggester: React.FC<ActantSuggesterI> = ({
           selectedCategory === wildCardCategory.valueOf()
             ? false
             : selectedCategory,
-        excluded: excludedEntities,
+        excluded: excludedEntities.length ? excludedEntities : undefined,
       });
       return resSuggestions.data
         .filter((s) => s.status !== ActantStatus.Discouraged)
