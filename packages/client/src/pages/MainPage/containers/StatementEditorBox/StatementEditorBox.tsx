@@ -58,36 +58,52 @@ import { StatementEditorActantTable } from "./StatementEditorActantTable/Stateme
 import { StatementEditorActionTable } from "./StatementEditorActionTable/StatementEditorActionTable";
 import { AttributesEditor } from "../AttributesEditor/AttributesEditor";
 import { ColumnInstance } from "react-table";
-import { useAppSelector } from "redux/hooks";
 import { useSearchParams } from "hooks";
 import { AttributeButtonGroup } from "../AttributeButtonGroup/AttributeButtonGroup";
-import { UserRoleMode } from "@shared/enums";
+import { ActantType, UserRoleMode } from "@shared/enums";
 import { StyledSubRow } from "./StatementEditorActionTable/StatementEditorActionTableStyles";
-import {
-  StyledHeader,
-  StyledHeaderBreadcrumbRow,
-  StyledTitle,
-} from "../StatementsListBox/StatementListHeader/StatementListHeaderStyles";
 import { StatementListBreadcrumbItem } from "../StatementsListBox/StatementListHeader/StatementListBreadcrumbItem/StatementListBreadcrumbItem";
 import { excludedSuggesterEntities } from "Theme/constants";
 
-const classesActants = ["A", "T", "R", "P", "G", "O", "C", "L", "V", "E"];
-const classesPropType = ["C"];
-const classesPropValue = [
-  "A",
-  "P",
-  "G",
-  "O",
-  "C",
-  "L",
-  "V",
-  "E",
-  "S",
-  "T",
-  "R",
+const classesActants = [
+  ActantType.Action,
+  ActantType.Territory,
+  ActantType.Resource,
+  ActantType.Person,
+  ActantType.Group,
+  ActantType.Object,
+  ActantType.Concept,
+  ActantType.Location,
+  ActantType.Value,
+  ActantType.Event,
 ];
-const classesResources = ["R"];
-const classesTags = ["A", "T", "R", "P", "G", "O", "C", "L", "V", "E"];
+const classesPropType = [ActantType.Concept];
+const classesPropValue = [
+  ActantType.Action,
+  ActantType.Person,
+  ActantType.Group,
+  ActantType.Object,
+  ActantType.Concept,
+  ActantType.Location,
+  ActantType.Value,
+  ActantType.Event,
+  ActantType.Statement,
+  ActantType.Territory,
+  ActantType.Resource,
+];
+const classesResources = [ActantType.Resource];
+const classesTags = [
+  ActantType.Action,
+  ActantType.Territory,
+  ActantType.Resource,
+  ActantType.Person,
+  ActantType.Group,
+  ActantType.Object,
+  ActantType.Concept,
+  ActantType.Location,
+  ActantType.Value,
+  ActantType.Event,
+];
 
 export const StatementEditorBox: React.FC = () => {
   const {
@@ -839,7 +855,7 @@ export const StatementEditorBox: React.FC = () => {
                   onSelected={(newSelectedId: string) => {
                     addAction(newSelectedId);
                   }}
-                  categoryIds={["A"]}
+                  categoryIds={[ActantType.Action]}
                   excludedEntities={excludedSuggesterEntities}
                   placeholder={"add new action"}
                 />

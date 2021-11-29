@@ -5,7 +5,7 @@ import { IOption, IActant } from "@shared/types";
 
 import { FaHome } from "react-icons/fa";
 import { CActant, CTerritoryActant } from "constructors";
-import { Entities, EntityKeys } from "types";
+import { Entities } from "types";
 import { useMutation, useQuery, useQueryClient } from "react-query";
 import api from "api";
 import {
@@ -18,7 +18,7 @@ import { useDebounce, useSearchParams } from "hooks";
 import { rootTerritoryId } from "Theme/constants";
 
 interface ActantSuggesterI {
-  categoryIds: string[];
+  categoryIds: ActantType[];
   onSelected: Function;
   placeholder?: string;
   allowCreate?: boolean;
@@ -26,7 +26,7 @@ interface ActantSuggesterI {
   inputWidth?: number | "full";
   openDetailOnCreate?: boolean;
   statementTerritoryId?: string;
-  excludedEntities?: string[];
+  excludedEntities?: ActantType[];
 }
 
 export const ActantSuggester: React.FC<ActantSuggesterI> = ({
@@ -40,12 +40,12 @@ export const ActantSuggester: React.FC<ActantSuggesterI> = ({
   statementTerritoryId,
   excludedEntities = [],
 }) => {
-  const wildCardChar = "*";
+  const wildCardCategory = ActantType.Any;
   const queryClient = useQueryClient();
   const [typed, setTyped] = useState<string>("");
   const debouncedTyped = useDebounce(typed, 100);
   const [selectedCategory, setSelectedCategory] = useState<string>();
-  const [allCategories, setAllCategories] = useState<false | IOption[]>();
+  const [allCategories, setAllCategories] = useState<IOption[]>();
 
   const { setActantId } = useSearchParams();
 
@@ -61,6 +61,14 @@ export const ActantSuggester: React.FC<ActantSuggesterI> = ({
     { initialData: [], enabled: !!statementTerritoryId && api.isLoggedIn() }
   );
 
+  const isExcluded = (selectedCategory: ActantType) => {
+    if (selectedCategory && excludedEntities.includes(selectedCategory)) {
+      return true;
+    } else {
+      return false;
+    }
+  };
+
   // Suggesions query
   const {
     status: statusStatement,
@@ -72,15 +80,14 @@ export const ActantSuggester: React.FC<ActantSuggesterI> = ({
     async () => {
       const resSuggestions = await api.actantsGetMore({
         label: debouncedTyped,
-        class: selectedCategory === wildCardChar ? false : selectedCategory,
+        class:
+          selectedCategory === wildCardCategory.valueOf()
+            ? false
+            : selectedCategory,
+        excluded: excludedEntities,
       });
       return resSuggestions.data
-        .filter(
-          (s) =>
-            s.status !== ActantStatus.Discouraged &&
-            // TODO: could be removed after BE implementation of excluding
-            !excludedEntities.includes(s.class)
-        )
+        .filter((s) => s.status !== ActantStatus.Discouraged)
         .map((s: IActant) => {
           const entity = Entities[s.class];
 
@@ -105,7 +112,9 @@ export const ActantSuggester: React.FC<ActantSuggesterI> = ({
       enabled:
         debouncedTyped.length > 1 &&
         !!selectedCategory &&
-        !excludedEntities.includes(selectedCategory) &&
+        !excludedEntities
+          .map((key) => key.valueOf())
+          .includes(selectedCategory) &&
         api.isLoggedIn(),
     }
   );
@@ -117,18 +126,17 @@ export const ActantSuggester: React.FC<ActantSuggesterI> = ({
   // initial load of categories
   useEffect(() => {
     const categories: IOption[] = [];
-    categoryIds.forEach((categoryId) => {
-      const foundEntityCategory = Entities[categoryId];
-
-      if (foundEntityCategory) {
-        categories.push({
-          label: foundEntityCategory.id,
-          value: foundEntityCategory.id,
-        });
-      }
+    categoryIds.forEach((category) => {
+      categories.push({
+        label: category.valueOf(),
+        value: category.valueOf(),
+      });
     });
     if (categories.length > 1 && !disableWildCard) {
-      categories.unshift({ label: wildCardChar, value: wildCardChar });
+      categories.unshift({
+        label: wildCardCategory.valueOf(),
+        value: wildCardCategory.valueOf(),
+      });
     }
     if (categories.length) {
       setAllCategories(categories);
@@ -229,6 +237,6 @@ export const ActantSuggester: React.FC<ActantSuggesterI> = ({
       inputWidth={inputWidth}
     />
   ) : (
-    <div></div>
+    <div />
   );
 };
