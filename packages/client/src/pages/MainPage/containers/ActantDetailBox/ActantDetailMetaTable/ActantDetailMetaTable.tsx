@@ -114,7 +114,7 @@ export const ActantDetailMetaTable: React.FC<ActantDetailMetaTable> = ({
                     },
                   });
                 }}
-                categoryIds={["C"]}
+                categoryIds={[ActantType.Concept]}
               />
             )
           );
@@ -251,17 +251,17 @@ export const ActantDetailMetaTable: React.FC<ActantDetailMetaTable> = ({
                   });
                 }}
                 categoryIds={[
-                  "A",
-                  "P",
-                  "G",
-                  "O",
-                  "C",
-                  "L",
-                  "V",
-                  "E",
-                  "S",
-                  "T",
-                  "R",
+                  ActantType.Action,
+                  ActantType.Person,
+                  ActantType.Group,
+                  ActantType.Object,
+                  ActantType.Concept,
+                  ActantType.Location,
+                  ActantType.Value,
+                  ActantType.Event,
+                  ActantType.Statement,
+                  ActantType.Territory,
+                  ActantType.Resource,
                 ]}
               />
             )
