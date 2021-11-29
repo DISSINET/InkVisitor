@@ -55,7 +55,7 @@ export const StyledLabel = styled.div<StyledLabel>`
     invertedLabel
       ? theme.color["primary"]
       : isFavorited
-      ? theme.color["blue"][100]
+      ? theme.color["warning"]
       : theme.color["white"]};
   color: ${({ theme, invertedLabel }) =>
     invertedLabel ? theme.color["white"] : theme.color["black"]};

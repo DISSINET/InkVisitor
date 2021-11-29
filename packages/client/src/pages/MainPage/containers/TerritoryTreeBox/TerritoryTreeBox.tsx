@@ -133,7 +133,9 @@ export const TerritoryTreeBox: React.FC = () => {
           territoryActantId={rootTerritoryId}
         />
       )}
-      <Loader show={isFetching || updateUserMutation.isLoading} />
+      <Loader
+        show={isFetching || userIsFetching || updateUserMutation.isLoading}
+      />
     </>
   );
 };
