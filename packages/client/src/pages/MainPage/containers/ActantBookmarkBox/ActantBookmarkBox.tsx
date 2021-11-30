@@ -57,21 +57,21 @@ import {
   IBookmarkFolder,
   IResponseBookmarkFolder,
 } from "@shared/types";
-import { Cell, Column, useTable } from "react-table";
 import { ActantBookmarkFolderTable } from "./ActantBookmarkFolderTable/ActantBookmarkFolderTable";
+import { ActantType } from "@shared/enums";
 
 const bookmarkEntities = [
-  "A",
-  "P",
-  "G",
-  "O",
-  "C",
-  "L",
-  "V",
-  "E",
-  "S",
-  "T",
-  "R",
+  ActantType.Action,
+  ActantType.Person,
+  ActantType.Group,
+  ActantType.Object,
+  ActantType.Concept,
+  ActantType.Location,
+  ActantType.Value,
+  ActantType.Event,
+  ActantType.Statement,
+  ActantType.Territory,
+  ActantType.Resource,
 ];
 
 export const ActantBookmarkBox: React.FC = () => {
@@ -372,7 +372,7 @@ export const ActantBookmarkBox: React.FC = () => {
                         onSelected={(bookmarkId: string) => {
                           addBookmark(bookmarkFolder.id, bookmarkId);
                         }}
-                        categoryIds={bookmarkEntities}
+                        categoryTypes={bookmarkEntities}
                         placeholder={"add new bookmark"}
                       />
                     </StyledFolderSuggester>

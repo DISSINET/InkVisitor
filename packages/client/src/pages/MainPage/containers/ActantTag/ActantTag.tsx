@@ -9,7 +9,8 @@ interface IActantTag {
   tooltipText?: string;
   parentId?: string;
   mode?: "selected" | "disabled" | "invalid" | false;
-  short?: boolean;
+  // short?: boolean;
+  showOnly?: "entity" | "label";
   fullWidth?: boolean;
   button?: ReactNode;
   propId?: string;
@@ -29,7 +30,8 @@ export const ActantTag: React.FC<IActantTag> = ({
   actant,
   tooltipText,
   parentId,
-  short = false,
+  // short = false,
+  showOnly,
   fullWidth,
   mode,
   button,
@@ -54,7 +56,8 @@ export const ActantTag: React.FC<IActantTag> = ({
       ltype={actant.data.logicalType ?? "1"}
       tooltipDetail={actant.detail}
       tooltipText={tooltipText}
-      short={short}
+      // short={short}
+      showOnly={showOnly}
       button={button}
       moveFn={moveFn}
       category={classId}

@@ -18,7 +18,7 @@ import { useDebounce, useSearchParams } from "hooks";
 import { rootTerritoryId } from "Theme/constants";
 
 interface ActantSuggesterI {
-  categoryIds: ActantType[];
+  categoryTypes: ActantType[];
   onSelected: Function;
   placeholder?: string;
   allowCreate?: boolean;
@@ -30,7 +30,7 @@ interface ActantSuggesterI {
 }
 
 export const ActantSuggester: React.FC<ActantSuggesterI> = ({
-  categoryIds,
+  categoryTypes,
   onSelected,
   placeholder = "",
   allowCreate,
@@ -60,14 +60,6 @@ export const ActantSuggester: React.FC<ActantSuggesterI> = ({
     },
     { initialData: [], enabled: !!statementTerritoryId && api.isLoggedIn() }
   );
-
-  const isExcluded = (selectedCategory: ActantType) => {
-    if (selectedCategory && excludedEntities.includes(selectedCategory)) {
-      return true;
-    } else {
-      return false;
-    }
-  };
 
   // Suggesions query
   const {
@@ -126,7 +118,7 @@ export const ActantSuggester: React.FC<ActantSuggesterI> = ({
   // initial load of categories
   useEffect(() => {
     const categories: IOption[] = [];
-    categoryIds.forEach((category) => {
+    categoryTypes.forEach((category) => {
       categories.push({
         label: category.valueOf(),
         value: category.valueOf(),
@@ -142,7 +134,7 @@ export const ActantSuggester: React.FC<ActantSuggesterI> = ({
       setAllCategories(categories);
       setSelectedCategory(categories[0].value);
     }
-  }, [categoryIds]);
+  }, [categoryTypes]);
 
   const handleCategoryChanged = (newCategory: string) => {
     setSelectedCategory(newCategory);
@@ -194,7 +186,7 @@ export const ActantSuggester: React.FC<ActantSuggesterI> = ({
   };
   const handleDropped = (newDropped: any) => {
     const droppedCategory = newDropped.category;
-    if (categoryIds.includes(droppedCategory)) {
+    if (categoryTypes.includes(droppedCategory)) {
       onSelected(newDropped.id);
     }
     handleClean();
