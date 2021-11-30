@@ -10,6 +10,7 @@ export const StyledHeader = styled.div`
 export const StyledHeaderBreadcrumbRow = styled.div`
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
 `;
 export const StyledHeaderRow = styled.div`
   display: inline-flex;

@@ -165,3 +165,9 @@ export const StyledTagWrapper = styled.div`
   display: inline-flex;
   overflow: hidden;
 `;
+
+export const StyledBreadcrumbWrap = styled.div`
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+`;

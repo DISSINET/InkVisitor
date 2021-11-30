@@ -10,7 +10,7 @@ import { rootTerritoryId } from "Theme/constants";
 import { useSearchParams } from "hooks";
 import { ActantTag } from "pages/MainPage/containers";
 import { ActantStatus, ActantType, Language } from "@shared/enums";
-import { BsArrow90DegLeft } from "react-icons/bs";
+import { BsArrow90DegLeft, BsArrowRightShort } from "react-icons/bs";
 
 interface StatementListBreadcrumbItem {
   territoryId: string;
@@ -50,7 +50,7 @@ export const StatementListBreadcrumbItem: React.FC<StatementListBreadcrumbItem> 
     <>
       {territoryId !== rootTerritoryId && (
         <StyledItemBox>
-          {"/"}
+          <BsArrowRightShort />
           <ActantTag
             actant={territoryData ? territoryData : initialData}
             button={
