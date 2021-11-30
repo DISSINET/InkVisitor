@@ -22,8 +22,8 @@ import { ActantSuggester, ActantTag } from "../..";
 import { Button, ButtonGroup } from "components";
 import { FaTrashAlt, FaUnlink, FaPlus } from "react-icons/fa";
 import { UseMutationResult } from "react-query";
-import { actantPositionDict } from "@shared/dictionaries";
 import { excludedSuggesterEntities } from "Theme/constants";
+import { ActantType } from "@shared/enums";
 
 interface FilteredActantObject {
   data: { actant: IActant | undefined; sActant: IStatementActant };
@@ -34,7 +34,7 @@ interface StatementEditorActantTable {
   userCanEdit?: boolean;
   handleRowClick?: Function;
   renderPropGroup: Function;
-  classEntitiesActant: string[];
+  classEntitiesActant: ActantType[];
   updateActantsMutation: UseMutationResult<any, unknown, object, unknown>;
   addProp: (originId: string) => void;
   propsByOrigins: {
@@ -147,7 +147,7 @@ export const StatementEditorActantTable: React.FC<StatementEditorActantTable> = 
                     actant: newSelectedId,
                   });
                 }}
-                categoryIds={classEntitiesActant}
+                categoryTypes={classEntitiesActant}
                 excludedEntities={excludedSuggesterEntities}
               />
             )

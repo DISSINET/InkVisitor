@@ -114,7 +114,7 @@ export const ActantDetailMetaTable: React.FC<ActantDetailMetaTable> = ({
                     },
                   });
                 }}
-                categoryIds={[ActantType.Concept]}
+                categoryTypes={[ActantType.Concept]}
               />
             )
           );
@@ -250,7 +250,7 @@ export const ActantDetailMetaTable: React.FC<ActantDetailMetaTable> = ({
                     },
                   });
                 }}
-                categoryIds={[
+                categoryTypes={[
                   ActantType.Action,
                   ActantType.Person,
                   ActantType.Group,

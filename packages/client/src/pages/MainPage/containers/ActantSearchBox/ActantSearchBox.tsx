@@ -19,8 +19,20 @@ import { Entities, IRequestSearch } from "types";
 import { IOption, IResponseSearch } from "@shared/types";
 import { FaUnlink } from "react-icons/fa";
 import { useDebounce } from "hooks";
+import { ActantType } from "@shared/enums";
 
-const classesActants = ["A", "P", "G", "O", "C", "L", "V", "E", "T", "R"];
+const classesActants = [
+  ActantType.Action,
+  ActantType.Person,
+  ActantType.Group,
+  ActantType.Object,
+  ActantType.Concept,
+  ActantType.Location,
+  ActantType.Value,
+  ActantType.Event,
+  ActantType.Territory,
+  ActantType.Resource,
+];
 
 const initValues: IRequestSearch = {
   actantId: "",
@@ -128,7 +140,7 @@ export const ActantSearchBox: React.FC = () => {
           Limit by co-occurrence
         </StyledRowHeader>
         <ActantSuggester
-          categoryIds={classesActants}
+          categoryTypes={classesActants}
           onSelected={(newSelectedId: string) => {
             handleChange("actantId", newSelectedId);
           }}
