@@ -111,7 +111,7 @@ export const TerritoryTreeBox: React.FC = () => {
         />
       )}
 
-      <StyledTreeWrapper>
+      <StyledTreeWrapper id="Territories-box-content">
         {data && (
           <TerritoryTreeNode
             right={data.right}

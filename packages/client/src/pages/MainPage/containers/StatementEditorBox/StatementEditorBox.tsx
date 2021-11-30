@@ -8,7 +8,6 @@ import {
   FaUnlink,
   FaCaretUp,
   FaCaretDown,
-  FaArrowAltCircleLeft,
 } from "react-icons/fa";
 
 import { ActantTag } from "./../";
@@ -53,6 +52,7 @@ import {
   StyledGrid,
   StyledGridCell,
   StyledTagWrapper,
+  StyledBreadcrumbWrap,
 } from "./StatementEditorBoxStyles";
 import { StatementEditorActantTable } from "./StatementEditorActantTable/StatementEditorActantTable";
 import { StatementEditorActionTable } from "./StatementEditorActionTable/StatementEditorActionTable";
@@ -64,6 +64,8 @@ import { ActantType, UserRoleMode } from "@shared/enums";
 import { StyledSubRow } from "./StatementEditorActionTable/StatementEditorActionTableStyles";
 import { StatementListBreadcrumbItem } from "../StatementsListBox/StatementListHeader/StatementListBreadcrumbItem/StatementListBreadcrumbItem";
 import { excludedSuggesterEntities } from "Theme/constants";
+import { BsArrow90DegLeft, BsArrowRightShort } from "react-icons/bs";
+import { StyledItemBox } from "../StatementsListBox/StatementListHeader/StatementListBreadcrumbItem/StatementListBreadcrumbItemStyles";
 
 const classesActants = [
   ActantType.Action,
@@ -769,43 +771,35 @@ export const StatementEditorBox: React.FC = () => {
       {statement ? (
         <div style={{ marginBottom: "4rem" }} key={statement.id}>
           <StyledEditorPreSection>
-            {territoryData && (
-              <StyledGrid>
-                <StyledGridCell>
-                  <ButtonGroup noMargin>
-                    {territoryPath &&
-                      territoryPath.map((territory: string, key: number) => {
-                        return (
-                          <React.Fragment key={key}>
-                            <StatementListBreadcrumbItem
-                              territoryId={territory}
-                            />
-                          </React.Fragment>
-                        );
-                      })}
-                    {"/"}
-                  </ButtonGroup>
-                </StyledGridCell>
-                <StyledGridCell>
-                  <ActantTag actant={territoryData} fullWidth />
-                </StyledGridCell>
-                <StyledGridCell>
-                  {territoryData.id !== territoryId && (
-                    <Button
-                      key="d"
-                      icon={<FaArrowAltCircleLeft />}
-                      tooltip="load territory"
-                      color="plain"
-                      label="open territory"
-                      inverted={true}
-                      onClick={() => {
-                        setTerritoryId(territoryData.id);
-                      }}
-                    />
-                  )}
-                </StyledGridCell>
-              </StyledGrid>
-            )}
+            <StyledBreadcrumbWrap>
+              {territoryPath &&
+                territoryPath.map((territory: string, key: number) => {
+                  return (
+                    <React.Fragment key={key}>
+                      <StatementListBreadcrumbItem territoryId={territory} />
+                    </React.Fragment>
+                  );
+                })}
+              {territoryData && (
+                <StyledItemBox>
+                  <BsArrowRightShort />
+                  <ActantTag
+                    actant={territoryData}
+                    button={
+                      <Button
+                        icon={<BsArrow90DegLeft />}
+                        tooltip="got to territory"
+                        color="plain"
+                        inverted
+                        onClick={() => {
+                          setTerritoryId(territoryData.id);
+                        }}
+                      />
+                    }
+                  />
+                </StyledItemBox>
+              )}
+            </StyledBreadcrumbWrap>
           </StyledEditorPreSection>
           <StyledEditorSection firstSection key="editor-section-summary">
             <StyledEditorSectionContent firstSection>

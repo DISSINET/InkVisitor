@@ -34,7 +34,6 @@ interface TagProps {
   borderStyle?: "solid" | "dashed" | "dotted";
   button?: ReactNode;
   invertedLabel?: boolean;
-  // short?: boolean;
   showOnly?: "entity" | "label";
   fullWidth?: boolean;
   index?: number;
@@ -61,7 +60,6 @@ export const Tag: React.FC<TagProps> = ({
   borderStyle = "solid",
   button,
   invertedLabel,
-  // short = false,
   showOnly,
   fullWidth = false,
   index = -1,
