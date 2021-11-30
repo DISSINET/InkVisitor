@@ -34,7 +34,8 @@ interface TagProps {
   borderStyle?: "solid" | "dashed" | "dotted";
   button?: ReactNode;
   invertedLabel?: boolean;
-  short?: boolean;
+  // short?: boolean;
+  showOnly?: "entity" | "label";
   fullWidth?: boolean;
   index?: number;
   moveFn?: (dragIndex: number, hoverIndex: number) => void;
@@ -60,7 +61,8 @@ export const Tag: React.FC<TagProps> = ({
   borderStyle = "solid",
   button,
   invertedLabel,
-  short = false,
+  // short = false,
+  showOnly,
   fullWidth = false,
   index = -1,
   moveFn,
@@ -144,9 +146,9 @@ export const Tag: React.FC<TagProps> = ({
     setActantId(propId);
   };
 
-  return (
-    <>
-      {short ? (
+  const getShortTag = () => {
+    if (showOnly === "entity") {
+      return (
         <Tooltip
           position={tooltipPosition}
           label={label}
@@ -169,6 +171,50 @@ export const Tag: React.FC<TagProps> = ({
             </StyledTagWrapper>
           </div>
         </Tooltip>
+      );
+    } else if ((showOnly = "label")) {
+      return (
+        <Tooltip
+          position={tooltipPosition}
+          label={label}
+          detail={tooltipDetail}
+          text={tooltipText}
+          tagTooltip
+          itemsCount={statementsCount}
+        >
+          <StyledTooltipSeparator>
+            <StyledTagWrapper
+              ref={ref}
+              status={status}
+              ltype={ltype}
+              borderStyle={borderStyle}
+              onClick={(e: React.MouseEvent) => e.stopPropagation()}
+              onDoubleClick={(e: React.MouseEvent) => onDoubleClick(e)}
+            >
+              {label && (
+                <StyledLabel
+                  invertedLabel={invertedLabel}
+                  status={status}
+                  borderStyle={borderStyle}
+                  fullWidth={fullWidth}
+                  isFavorited={isFavorited}
+                  labelOnly
+                >
+                  {label}
+                </StyledLabel>
+              )}
+              {button && renderButton()}
+            </StyledTagWrapper>
+          </StyledTooltipSeparator>
+        </Tooltip>
+      );
+    }
+  };
+
+  return (
+    <>
+      {showOnly ? (
+        <>{getShortTag()}</>
       ) : (
         <>
           <Tooltip

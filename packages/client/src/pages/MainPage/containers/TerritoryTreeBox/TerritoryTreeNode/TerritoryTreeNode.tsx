@@ -284,6 +284,7 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
                     updateOrderFn={moveTerritoryMutation.mutate}
                     statementsCount={statementsCount}
                     isFavorited={isFavorited}
+                    showOnly="label"
                   />
                 </animated.div>
                 <ContextMenu

@@ -811,7 +811,7 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
                       <ActantTag
                         key={statement.id}
                         actant={statement}
-                        short
+                        showOnly="entity"
                         tooltipText={statement.data.text}
                       />
                     </StyledSectionUsedTableCell>

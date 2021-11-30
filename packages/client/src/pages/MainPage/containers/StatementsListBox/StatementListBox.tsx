@@ -220,7 +220,7 @@ export const StatementListBox: React.FC = () => {
         <ActantTag
           key={key}
           actant={actantObject}
-          short
+          showOnly="entity"
           tooltipPosition="bottom center"
         />
       )
@@ -265,7 +265,7 @@ export const StatementListBox: React.FC = () => {
           return (
             <ActantTag
               actant={statement as IActant}
-              short
+              showOnly="entity"
               tooltipText={statement.data.text}
             />
           );

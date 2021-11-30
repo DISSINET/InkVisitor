@@ -66,7 +66,6 @@ export const ActantDetailMetaTable: React.FC<ActantDetailMetaTable> = ({
           return typeActant && typeSActant ? (
             <ActantTag
               actant={typeActant}
-              short={false}
               button={
                 userCanEdit && (
                   <Button
@@ -202,7 +201,6 @@ export const ActantDetailMetaTable: React.FC<ActantDetailMetaTable> = ({
           return valueSActant && valueActant ? (
             <ActantTag
               actant={valueActant}
-              short={false}
               button={
                 userCanEdit && (
                   <Button

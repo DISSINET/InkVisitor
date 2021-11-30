@@ -43,6 +43,7 @@ interface StyledLabel {
   fullWidth: boolean;
   status: string;
   isFavorited: boolean;
+  labelOnly?: boolean;
 }
 export const StyledLabel = styled.div<StyledLabel>`
   display: inline-block;
@@ -59,7 +60,8 @@ export const StyledLabel = styled.div<StyledLabel>`
       : theme.color["white"]};
   color: ${({ theme, invertedLabel }) =>
     invertedLabel ? theme.color["white"] : theme.color["black"]};
-  border-left-width: ${({ theme }) => theme.borderWidth[2]};
+  border-left-width: ${({ theme, labelOnly }) =>
+    labelOnly ? 0 : theme.borderWidth[2]};
   border-left-style: ${({ borderStyle }) => borderStyle};
   border-left-color: ${({ theme, status }) => theme.color[status]};
   max-width: ${({ theme, fullWidth }) =>

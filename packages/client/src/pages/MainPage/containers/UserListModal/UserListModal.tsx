@@ -314,7 +314,6 @@ export const UserListModal: React.FC<UserListModal> = ({
                           <StyledTerritoryListItem key={right.territory}>
                             <ActantTag
                               actant={territoryActant.territory}
-                              short={false}
                               button={
                                 <Button
                                   key="d"
@@ -392,7 +391,6 @@ export const UserListModal: React.FC<UserListModal> = ({
                             <StyledTerritoryListItem key={right.territory}>
                               <ActantTag
                                 actant={territoryActant.territory}
-                                short={false}
                                 button={
                                   <Button
                                     key="d"
