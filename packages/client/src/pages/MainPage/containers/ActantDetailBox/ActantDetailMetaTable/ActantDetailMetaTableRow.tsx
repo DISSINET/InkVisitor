@@ -115,7 +115,7 @@ export const ActantDetailMetaTableRow: React.FC<ActantDetailMetaTableRow> = ({
     //             actant: newActantId,
     //           });
     //         }}
-    //         categoryIds={["C"]}
+    //         categories={["C"]}
     //         placeholder={"add new reference"}
     //       />
     //     )}
@@ -160,7 +160,7 @@ export const ActantDetailMetaTableRow: React.FC<ActantDetailMetaTableRow> = ({
     //             actant: newActantId,
     //           });
     //         }}
-    //         categoryIds={["P", "G", "O", "C", "L", "V", "E", "S", "T", "R"]}
+    //         categories={["P", "G", "O", "C", "L", "V", "E", "S", "T", "R"]}
     //         placeholder={"add new reference"}
     //       />
     //     )}

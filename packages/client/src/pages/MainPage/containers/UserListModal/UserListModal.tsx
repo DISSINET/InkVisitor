@@ -300,7 +300,7 @@ export const UserListModal: React.FC<UserListModal> = ({
                     onSelected={(newSelectedId: string) => {
                       addRightToUser(userId, newSelectedId, "read");
                     }}
-                    categoryIds={[ActantType.Territory]}
+                    categoryTypes={[ActantType.Territory]}
                     placeholder={"assign a territory"}
                   />
                   <StyledTerritoryList>
@@ -314,7 +314,6 @@ export const UserListModal: React.FC<UserListModal> = ({
                           <StyledTerritoryListItem key={right.territory}>
                             <ActantTag
                               actant={territoryActant.territory}
-                              short={false}
                               button={
                                 <Button
                                   key="d"
@@ -377,7 +376,7 @@ export const UserListModal: React.FC<UserListModal> = ({
                       onSelected={(newSelectedId: string) => {
                         addRightToUser(userId, newSelectedId, "write");
                       }}
-                      categoryIds={[ActantType.Territory]}
+                      categoryTypes={[ActantType.Territory]}
                       placeholder={"assign a territory"}
                     />
                     <StyledTerritoryList>
@@ -392,7 +391,6 @@ export const UserListModal: React.FC<UserListModal> = ({
                             <StyledTerritoryListItem key={right.territory}>
                               <ActantTag
                                 actant={territoryActant.territory}
-                                short={false}
                                 button={
                                   <Button
                                     key="d"

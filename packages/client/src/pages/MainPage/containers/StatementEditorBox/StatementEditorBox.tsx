@@ -556,7 +556,7 @@ export const StatementEditorBox: React.FC = () => {
                   },
                 });
               }}
-              categoryIds={classesPropType}
+              categoryTypes={classesPropType}
               inputWidth={"full"}
               excludedEntities={excludedSuggesterEntities}
             />
@@ -632,7 +632,7 @@ export const StatementEditorBox: React.FC = () => {
                   },
                 });
               }}
-              categoryIds={classesPropValue}
+              categoryTypes={classesPropValue}
               inputWidth={"full"}
               excludedEntities={excludedSuggesterEntities}
             />
@@ -855,7 +855,7 @@ export const StatementEditorBox: React.FC = () => {
                   onSelected={(newSelectedId: string) => {
                     addAction(newSelectedId);
                   }}
-                  categoryIds={[ActantType.Action]}
+                  categoryTypes={[ActantType.Action]}
                   excludedEntities={excludedSuggesterEntities}
                   placeholder={"add new action"}
                 />
@@ -886,7 +886,7 @@ export const StatementEditorBox: React.FC = () => {
                   onSelected={(newSelectedId: string) => {
                     addActant(newSelectedId);
                   }}
-                  categoryIds={classesActants}
+                  categoryTypes={classesActants}
                   placeholder={"add new actant"}
                   excludedEntities={excludedSuggesterEntities}
                 />
@@ -951,7 +951,7 @@ export const StatementEditorBox: React.FC = () => {
                                     resource: newSelectedId,
                                   });
                                 }}
-                                categoryIds={classesResources}
+                                categoryTypes={classesResources}
                               />
                             )
                           )}
@@ -1027,7 +1027,7 @@ export const StatementEditorBox: React.FC = () => {
                   onSelected={(newSelectedId: string) => {
                     addReference(newSelectedId);
                   }}
-                  categoryIds={classesResources}
+                  categoryTypes={classesResources}
                   placeholder={"add new reference"}
                 />
               )}
@@ -1075,7 +1075,7 @@ export const StatementEditorBox: React.FC = () => {
                   onSelected={(newSelectedId: string) => {
                     addTag(newSelectedId);
                   }}
-                  categoryIds={classesTags}
+                  categoryTypes={classesTags}
                   placeholder={"add new tag"}
                   excludedEntities={excludedSuggesterEntities}
                 />

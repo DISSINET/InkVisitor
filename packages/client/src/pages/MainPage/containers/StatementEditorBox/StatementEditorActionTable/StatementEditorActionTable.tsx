@@ -146,7 +146,7 @@ export const StatementEditorActionTable: React.FC<StatementEditorActionTable> = 
                     action: newSelectedId,
                   });
                 }}
-                categoryIds={[ActantType.Action]}
+                categoryTypes={[ActantType.Action]}
                 excludedEntities={excludedSuggesterEntities}
                 placeholder={"add new action"}
               />
