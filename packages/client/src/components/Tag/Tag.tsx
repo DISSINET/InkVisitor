@@ -147,68 +147,47 @@ export const Tag: React.FC<TagProps> = ({
   };
 
   const getShortTag = () => {
-    if (showOnly === "entity") {
-      return (
-        <Tooltip
-          position={tooltipPosition}
-          label={label}
-          detail={tooltipDetail}
-          text={tooltipText}
-          tagTooltip
-          itemsCount={statementsCount}
-        >
-          <div>
-            <StyledTagWrapper
-              ref={ref}
-              status={status}
-              ltype={ltype}
-              borderStyle={borderStyle}
-              onClick={(e: React.MouseEvent) => e.stopPropagation()}
-              onDoubleClick={(e: React.MouseEvent) => onDoubleClick(e)}
-            >
-              {renderEntityTag()}
-              {button && renderButton()}
-            </StyledTagWrapper>
-          </div>
-        </Tooltip>
-      );
-    } else if ((showOnly = "label")) {
-      return (
-        <Tooltip
-          position={tooltipPosition}
-          label={label}
-          detail={tooltipDetail}
-          text={tooltipText}
-          tagTooltip
-          itemsCount={statementsCount}
-        >
-          <StyledTooltipSeparator>
-            <StyledTagWrapper
-              ref={ref}
-              status={status}
-              ltype={ltype}
-              borderStyle={borderStyle}
-              onClick={(e: React.MouseEvent) => e.stopPropagation()}
-              onDoubleClick={(e: React.MouseEvent) => onDoubleClick(e)}
-            >
-              {label && (
-                <StyledLabel
-                  invertedLabel={invertedLabel}
-                  status={status}
-                  borderStyle={borderStyle}
-                  fullWidth={fullWidth}
-                  isFavorited={isFavorited}
-                  labelOnly
-                >
-                  {label}
-                </StyledLabel>
-              )}
-              {button && renderButton()}
-            </StyledTagWrapper>
-          </StyledTooltipSeparator>
-        </Tooltip>
-      );
-    }
+    return (
+      <Tooltip
+        position={tooltipPosition}
+        label={label}
+        detail={tooltipDetail}
+        text={tooltipText}
+        tagTooltip
+        itemsCount={statementsCount}
+      >
+        <StyledTooltipSeparator>
+          <StyledTagWrapper
+            ref={ref}
+            status={status}
+            ltype={ltype}
+            borderStyle={borderStyle}
+            onClick={(e: React.MouseEvent) => e.stopPropagation()}
+            onDoubleClick={(e: React.MouseEvent) => onDoubleClick(e)}
+          >
+            {showOnly === "entity" ? (
+              <>{renderEntityTag()}</>
+            ) : (
+              <>
+                {label && (
+                  <StyledLabel
+                    invertedLabel={invertedLabel}
+                    status={status}
+                    borderStyle={borderStyle}
+                    fullWidth={fullWidth}
+                    isFavorited={isFavorited}
+                    labelOnly
+                  >
+                    {label}
+                  </StyledLabel>
+                )}
+              </>
+            )}
+            {button && renderButton()}
+          </StyledTagWrapper>
+        </StyledTooltipSeparator>
+      </Tooltip>
+    );
   };
 
   return (
