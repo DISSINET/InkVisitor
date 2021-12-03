@@ -169,10 +169,6 @@ export const AttributesEditor: React.FC<StatementEditorAttributes> = ({
     // }
   };
 
-  const handleOpenModalClick = () => {
-    setModalOpen(true);
-  };
-
   const handleCancelClick = () => {
     setModalData(data);
     setModalOpen(false);
@@ -461,9 +457,7 @@ export const AttributesEditor: React.FC<StatementEditorAttributes> = ({
               icon={<MdSettings />}
               inverted={true}
               color="plain"
-              onClick={() => {
-                handleOpenModalClick();
-              }}
+              onClick={() => setModalOpen(true)}
             />
           </div>
         </Tooltip>

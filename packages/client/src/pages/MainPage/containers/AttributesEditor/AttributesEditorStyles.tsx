@@ -35,3 +35,13 @@ export const StyledAttributeModalHeaderIcon = styled.div`
   width: auto;
   vertical-align: text-top;
 `;
+
+export const StyledGridColumns = styled.div`
+  display: grid;
+
+  grid-template-columns: auto auto auto;
+  grid-template-rows: auto;
+  grid-auto-flow: row;
+  width: 100%;
+  height: 100%;
+`;

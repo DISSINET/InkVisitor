@@ -68,6 +68,7 @@ import { BsArrow90DegLeft, BsArrowRightShort } from "react-icons/bs";
 import { StyledItemBox } from "../StatementsListBox/StatementListHeader/StatementListBreadcrumbItem/StatementListBreadcrumbItemStyles";
 import { AuditTable } from "./../AuditTable/AuditTable";
 import { JSONExplorer } from "../JSONExplorer/JSONExplorer";
+import { AttributesGroupEditor } from "../AttributesEditor/AttributesGroupEditor";
 
 const classesActants = [
   ActantType.Statement,
@@ -111,8 +112,12 @@ const classesTags = [
 ];
 
 export const StatementEditorBox: React.FC = () => {
-  const { statementId, setStatementId, territoryId, setTerritoryId } =
-    useSearchParams();
+  const {
+    statementId,
+    setStatementId,
+    territoryId,
+    setTerritoryId,
+  } = useSearchParams();
 
   const queryClient = useQueryClient();
 
@@ -183,6 +188,7 @@ export const StatementEditorBox: React.FC = () => {
   //TODO recurse to get all parents
   const territoryPath =
     territoryData && Array(territoryData["data"]["parent"]["id"]);
+
   const userCanEdit: boolean = useMemo(() => {
     return (
       !!statement &&
@@ -297,6 +303,7 @@ export const StatementEditorBox: React.FC = () => {
       newProp.origin = originId;
 
       const newData = { props: [...statement.data.props, newProp] };
+
       updateActantsDataMutation.mutate(newData);
     }
   };
@@ -695,7 +702,7 @@ export const StatementEditorBox: React.FC = () => {
 
         <StyledPropLineColumn lastSecondLevel={lastSecondLevel}>
           <StyledPropButtonGroup leftMargin={false}>
-            <AttributesEditor
+            {/* <AttributesEditor
               modalTitle={`Property Statement attributes [${propValueActant?.label} - ${propTypeActant?.label}]`}
               disabledAllAttributes={!userCanEdit}
               data={{
@@ -712,7 +719,40 @@ export const StatementEditorBox: React.FC = () => {
                 updateProp(prop.id, newData);
               }}
               loading={updateActantsDataMutation.isLoading}
+            /> */}
+            <AttributesGroupEditor
+              modalTitle={`Property attributes [${propValueActant?.label} - ${propTypeActant?.label}]`}
+              disabledAllAttributes={!userCanEdit}
+              data={{
+                type: {
+                  elvl: prop.type.elvl,
+                  logic: prop.type.logic,
+                  virtuality: prop.type.virtuality,
+                  partitivity: prop.type.partitivity,
+                },
+                value: {
+                  elvl: prop.value.elvl,
+                  logic: prop.value.logic,
+                  virtuality: prop.value.virtuality,
+                  partitivity: prop.value.partitivity,
+                },
+                statement: {
+                  elvl: prop.elvl,
+                  certainty: prop.certainty,
+                  logic: prop.logic,
+                  mood: prop.mood,
+                  moodvariant: prop.moodvariant,
+                  operator: prop.operator,
+                  bundleStart: prop.bundleStart,
+                  bundleEnd: prop.bundleEnd,
+                },
+              }}
+              handleUpdate={(newData) => {
+                updateProp(prop.id, newData);
+              }}
+              loading={updateActantsDataMutation.isLoading}
             />
+
             {level === "1" && (
               <Button
                 key="add"
@@ -818,6 +858,10 @@ export const StatementEditorBox: React.FC = () => {
                   />
                 </StyledItemBox>
               )}
+              <Loader
+                size={20}
+                show={!isFetchingStatement && isFetchingTerritory}
+              />
             </StyledBreadcrumbWrap>
           </StyledEditorPreSection>
           <StyledEditorSection firstSection key="editor-section-summary">
@@ -1127,10 +1171,15 @@ export const StatementEditorBox: React.FC = () => {
           </StyledEditorSection>
         </div>
       ) : (
-        "no statement selected"
+        <>{"no statement selected"}</>
       )}
       <Loader
-        show={isFetchingStatement || updateActantsRefreshListMutation.isLoading}
+        show={
+          isFetchingStatement ||
+          updateActionsRefreshListMutation.isLoading ||
+          updateActantsRefreshListMutation.isLoading ||
+          updateActantsDataMutation.isLoading
+        }
       />
     </>
   );
