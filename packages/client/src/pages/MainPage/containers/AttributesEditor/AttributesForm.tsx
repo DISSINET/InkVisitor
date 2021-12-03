@@ -19,35 +19,9 @@ import {
   Certainty,
 } from "@shared/enums";
 import React from "react";
+import { GroupName, AttributeData, AttributeName } from "types";
 import { AttributeRow } from "./AttributeRow/AttributeRow";
 import { CheckboxRow } from "./CheckboxRow/CheckboxRow";
-
-type GroupName = "type" | "value" | "statement";
-
-type AttributeName =
-  | "certainty"
-  | "elvl"
-  | "logic"
-  | "mood"
-  | "moodvariant"
-  | "virtuality"
-  | "partitivity"
-  | "operator"
-  | "bundleStart"
-  | "bundleEnd";
-
-interface AttributeData {
-  certainty?: Certainty;
-  elvl?: Elvl;
-  logic?: Logic;
-  mood?: Mood[];
-  moodvariant?: MoodVariant;
-  virtuality?: Virtuality;
-  partitivity?: Partitivity;
-  operator?: Operator;
-  bundleStart?: boolean;
-  bundleEnd?: boolean;
-}
 
 interface AttributesForm {
   groupName: GroupName;
@@ -79,7 +53,7 @@ export const AttributesForm: React.FC<AttributesForm> = ({
   // const [modalData, setModalData] = useState<AttributeData>(data);
 
   return (
-    <>
+    <div>
       {modalData.elvl && (
         <AttributeRow
           disabled={
@@ -246,6 +220,6 @@ export const AttributesForm: React.FC<AttributesForm> = ({
           }}
         ></AttributeRow>
       )}
-    </>
+    </div>
   );
 };

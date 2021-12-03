@@ -69,6 +69,7 @@ import { StyledItemBox } from "../StatementsListBox/StatementListHeader/Statemen
 import { AuditTable } from "./../AuditTable/AuditTable";
 import { JSONExplorer } from "../JSONExplorer/JSONExplorer";
 import { AttributesGroupEditor } from "../AttributesEditor/AttributesGroupEditor";
+import { AttributeDataObject } from "types";
 
 const classesActants = [
   ActantType.Statement,
@@ -724,6 +725,16 @@ export const StatementEditorBox: React.FC = () => {
               modalTitle={`Property attributes [${propValueActant?.label} - ${propTypeActant?.label}]`}
               disabledAllAttributes={!userCanEdit}
               data={{
+                statement: {
+                  elvl: prop.elvl,
+                  certainty: prop.certainty,
+                  logic: prop.logic,
+                  mood: prop.mood,
+                  moodvariant: prop.moodvariant,
+                  operator: prop.operator,
+                  bundleStart: prop.bundleStart,
+                  bundleEnd: prop.bundleEnd,
+                },
                 type: {
                   elvl: prop.type.elvl,
                   logic: prop.type.logic,
@@ -736,18 +747,8 @@ export const StatementEditorBox: React.FC = () => {
                   virtuality: prop.value.virtuality,
                   partitivity: prop.value.partitivity,
                 },
-                statement: {
-                  elvl: prop.elvl,
-                  certainty: prop.certainty,
-                  logic: prop.logic,
-                  mood: prop.mood,
-                  moodvariant: prop.moodvariant,
-                  operator: prop.operator,
-                  bundleStart: prop.bundleStart,
-                  bundleEnd: prop.bundleEnd,
-                },
               }}
-              handleUpdate={(newData) => {
+              handleUpdate={(newData: AttributeDataObject) => {
                 updateProp(prop.id, newData);
               }}
               loading={updateActantsDataMutation.isLoading}

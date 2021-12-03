@@ -40,36 +40,11 @@ import {
   Operator,
 } from "@shared/enums";
 import React, { useState, useMemo } from "react";
-import { Entities } from "types";
+import { AttributeData, AttributeName, Entities } from "types";
 import { CheckboxRow } from "./CheckboxRow/CheckboxRow";
 import { AttributeRow } from "./AttributeRow/AttributeRow";
 import { TooltipAttributeRow } from "./TooltipAttributeRow/TooltipAttributeRow";
 import { TooltipBooleanRow } from "./TooltipBooleanRow/TooltipBooleanRow";
-
-type AttributeName =
-  | "certainty"
-  | "elvl"
-  | "logic"
-  | "mood"
-  | "moodvariant"
-  | "virtuality"
-  | "partitivity"
-  | "operator"
-  | "bundleStart"
-  | "bundleEnd";
-
-interface AttributeData {
-  certainty?: Certainty;
-  elvl?: Elvl;
-  logic?: Logic;
-  mood?: Mood[];
-  moodvariant?: MoodVariant;
-  virtuality?: Virtuality;
-  partitivity?: Partitivity;
-  operator?: Operator;
-  bundleStart?: boolean;
-  bundleEnd?: boolean;
-}
 
 interface StatementEditorAttributes {
   modalTitle: string;

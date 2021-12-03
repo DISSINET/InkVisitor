@@ -1,4 +1,14 @@
-import { ActantType } from "@shared/enums";
+import {
+  ActantType,
+  Certainty,
+  Elvl,
+  Logic,
+  Mood,
+  MoodVariant,
+  Operator,
+  Partitivity,
+  Virtuality,
+} from "@shared/enums";
 
 export const Colors = [
   "black",
@@ -123,3 +133,36 @@ export type SearchParams = {
   statement?: string;
   actant?: string;
 };
+
+// Attribute Editor
+export type AttributeName =
+  | "certainty"
+  | "elvl"
+  | "logic"
+  | "mood"
+  | "moodvariant"
+  | "virtuality"
+  | "partitivity"
+  | "operator"
+  | "bundleStart"
+  | "bundleEnd";
+
+export type GroupName = "type" | "value" | "statement";
+
+export interface AttributeData {
+  certainty?: Certainty;
+  elvl?: Elvl;
+  logic?: Logic;
+  mood?: Mood[];
+  moodvariant?: MoodVariant;
+  virtuality?: Virtuality;
+  partitivity?: Partitivity;
+  operator?: Operator;
+  bundleStart?: boolean;
+  bundleEnd?: boolean;
+}
+export interface AttributeDataObject {
+  type: AttributeData;
+  value: AttributeData;
+  statement: AttributeData;
+}

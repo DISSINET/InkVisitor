@@ -40,40 +40,8 @@ import {
 } from "./AttributesEditorStyles";
 import { TooltipAttributeRow } from "./TooltipAttributeRow/TooltipAttributeRow";
 import { TooltipBooleanRow } from "./TooltipBooleanRow/TooltipBooleanRow";
-import { Entities } from "types";
+import { AttributeDataObject, AttributeName, Entities, GroupName } from "types";
 import { AttributesForm } from "./AttributesForm";
-
-type AttributeName =
-  | "certainty"
-  | "elvl"
-  | "logic"
-  | "mood"
-  | "moodvariant"
-  | "virtuality"
-  | "partitivity"
-  | "operator"
-  | "bundleStart"
-  | "bundleEnd";
-
-type GroupName = "type" | "value" | "statement";
-
-interface AttributeData {
-  certainty?: Certainty;
-  elvl?: Elvl;
-  logic?: Logic;
-  mood?: Mood[];
-  moodvariant?: MoodVariant;
-  virtuality?: Virtuality;
-  partitivity?: Partitivity;
-  operator?: Operator;
-  bundleStart?: boolean;
-  bundleEnd?: boolean;
-}
-interface AttributeDataObject {
-  type: AttributeData;
-  value: AttributeData;
-  statement: AttributeData;
-}
 
 interface AttributesGroupEditor {
   modalTitle: string;
@@ -268,21 +236,27 @@ export const AttributesGroupEditor: React.FC<AttributesGroupEditor> = ({
         />
         <ModalContent>
           <StyledGridColumns>
-            <AttributesForm
-              groupName="type"
-              modalData={modalData.type}
-              handleModalDataChange={handleModalDataChange}
-            />
-            <AttributesForm
-              groupName="value"
-              modalData={modalData.value}
-              handleModalDataChange={handleModalDataChange}
-            />
-            <AttributesForm
-              groupName="statement"
-              modalData={modalData.statement}
-              handleModalDataChange={handleModalDataChange}
-            />
+            <div style={{ display: "grid" }}>
+              <AttributesForm
+                groupName="statement"
+                modalData={modalData.statement}
+                handleModalDataChange={handleModalDataChange}
+              />
+            </div>
+            <div style={{ display: "grid" }}>
+              <AttributesForm
+                groupName="type"
+                modalData={modalData.type}
+                handleModalDataChange={handleModalDataChange}
+              />
+            </div>
+            <div style={{ display: "grid" }}>
+              <AttributesForm
+                groupName="value"
+                modalData={modalData.value}
+                handleModalDataChange={handleModalDataChange}
+              />
+            </div>
           </StyledGridColumns>
         </ModalContent>
         <ModalFooter>
