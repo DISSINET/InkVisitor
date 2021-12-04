@@ -479,7 +479,7 @@ class Api {
    */
   async auditGet(actantId: string): Promise<AxiosResponse<IResponseAudit>> {
     try {
-      const response = await this.connection.get(`/audit/get/${actantId}`);
+      const response = await this.connection.get(`/audits/get/${actantId}`);
       return response;
     } catch (err: any | AxiosError) {
       throw { ...err.response.data };
