@@ -10,6 +10,7 @@ import {
   StyledAuditTable,
 } from "./AuditTableStyles";
 import { RiTimeLine } from "react-icons/ri";
+import { MdAddCircleOutline } from "react-icons/md";
 import { Extend } from "webpack/node_modules/schema-utils/declarations/validate";
 
 export const AuditTable: React.FC<IResponseAudit> = ({
@@ -64,9 +65,7 @@ export const AuditTableRow: React.FC<IAuditTableRow> = ({
   );
 
   const changedKeys =
-    mode === "create"
-      ? ["Created"]
-      : Object.keys(changes).length === 1 && Object.keys(changes)[0] === "data"
+    Object.keys(changes).length === 1 && Object.keys(changes)[0] === "data"
       ? Object.keys((changes as { data: object }).data)
       : Object.keys(changes);
 
@@ -94,8 +93,8 @@ export const AuditTableRow: React.FC<IAuditTableRow> = ({
           {prettyTime}
         </StyledAuditColumn>
         <StyledAuditColumn>
-          <FaExchangeAlt />
-          {changedKeys.join(", ")}
+          {mode === "create" ? <MdAddCircleOutline /> : <FaExchangeAlt />}
+          {mode === "create" ? "" : changedKeys.join(", ")}
         </StyledAuditColumn>
       </StyledAuditRow>
     </div>
