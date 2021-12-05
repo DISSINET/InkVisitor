@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import { ActantTag } from "..";
+import { EntityTag } from "..";
 
 interface StyledContent {
   type: string;

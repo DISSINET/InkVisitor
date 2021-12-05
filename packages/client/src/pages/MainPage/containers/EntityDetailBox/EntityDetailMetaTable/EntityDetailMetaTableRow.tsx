@@ -13,16 +13,16 @@ import {
 } from "@shared/types";
 import api from "api";
 import { Cell, ColumnInstance } from "react-table";
-import { StyledTd, StyledTr } from "./ActantDetailMetaTableStyles";
+import { StyledTd, StyledTr } from "./EntityDetailMetaTableStyles";
 
 import { DragItem, ItemTypes } from "types";
 
-interface ActantDetailMetaTableRow {
+interface EntityDetailMetaTableRow {
   row: any;
   index: number;
   visibleColumns: ColumnInstance<{}>[];
 }
-export const ActantDetailMetaTableRow: React.FC<ActantDetailMetaTableRow> = ({
+export const EntityDetailMetaTableRow: React.FC<EntityDetailMetaTableRow> = ({
   row,
   index,
   visibleColumns,
@@ -80,7 +80,7 @@ export const ActantDetailMetaTableRow: React.FC<ActantDetailMetaTableRow> = ({
     //   <StyledSectionMetaTableCell>
     //     {typeSActant && typeActant ? (
     //       <React.Fragment>
-    //         <ActantTag
+    //         <EntityTag
     //           actant={typeActant}
     //           short={false}
     //           button={
@@ -109,7 +109,7 @@ export const ActantDetailMetaTableRow: React.FC<ActantDetailMetaTableRow> = ({
     //         </StyledSectionMetaTableButtonGroup>
     //       </React.Fragment>
     //     ) : (
-    //       <ActantSuggester
+    //       <EntitySuggester
     //         onSelected={async (newActantId: string) => {
     //           updateStatementActant(metaStatement.id, typeSActant.id, {
     //             actant: newActantId,
@@ -125,7 +125,7 @@ export const ActantDetailMetaTableRow: React.FC<ActantDetailMetaTableRow> = ({
     //   <StyledSectionMetaTableCell>
     //     {valueSActant && valueActant ? (
     //       <React.Fragment>
-    //         <ActantTag
+    //         <EntityTag
     //           actant={valueActant}
     //           short={false}
     //           button={
@@ -154,7 +154,7 @@ export const ActantDetailMetaTableRow: React.FC<ActantDetailMetaTableRow> = ({
     //         </StyledSectionMetaTableButtonGroup>
     //       </React.Fragment>
     //     ) : (
-    //       <ActantSuggester
+    //       <EntitySuggester
     //         onSelected={async (newActantId: string) => {
     //           updateStatementActant(metaStatement.id, valueSActant.id, {
     //             actant: newActantId,

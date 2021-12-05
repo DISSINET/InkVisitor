@@ -17,7 +17,7 @@ import {
 import { useDebounce, useSearchParams } from "hooks";
 import { rootTerritoryId } from "Theme/constants";
 
-interface ActantSuggesterI {
+interface EntitySuggesterI {
   categoryTypes: ActantType[];
   onSelected: Function;
   placeholder?: string;
@@ -29,7 +29,7 @@ interface ActantSuggesterI {
   excludedEntities?: ActantType[];
 }
 
-export const ActantSuggester: React.FC<ActantSuggesterI> = ({
+export const EntitySuggester: React.FC<EntitySuggesterI> = ({
   categoryTypes,
   onSelected,
   placeholder = "",

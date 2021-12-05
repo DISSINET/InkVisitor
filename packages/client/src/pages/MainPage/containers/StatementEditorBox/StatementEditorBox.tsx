@@ -10,7 +10,7 @@ import {
   FaCaretDown,
 } from "react-icons/fa";
 
-import { ActantTag } from "./../";
+import { EntityTag } from "./../";
 import {
   CProp,
   CReference,
@@ -32,7 +32,7 @@ import {
   Loader,
   MultiInput,
 } from "components";
-import { ActantSuggester } from "./../";
+import { EntitySuggester } from "./../";
 
 import {
   StyledReferencesListColumn,
@@ -546,7 +546,7 @@ export const StatementEditorBox: React.FC = () => {
           isTag={propTypeActant ? true : false}
         >
           {propTypeActant ? (
-            <ActantTag
+            <EntityTag
               actant={propTypeActant}
               fullWidth
               button={
@@ -568,7 +568,7 @@ export const StatementEditorBox: React.FC = () => {
               }
             />
           ) : (
-            <ActantSuggester
+            <EntitySuggester
               statementTerritoryId={statement.data.territory.id}
               openDetailOnCreate
               onSelected={(newSelectedId: string) => {
@@ -622,7 +622,7 @@ export const StatementEditorBox: React.FC = () => {
           isTag={propValueActant ? true : false}
         >
           {propValueActant ? (
-            <ActantTag
+            <EntityTag
               actant={propValueActant}
               fullWidth
               button={
@@ -644,7 +644,7 @@ export const StatementEditorBox: React.FC = () => {
               }
             />
           ) : (
-            <ActantSuggester
+            <EntitySuggester
               statementTerritoryId={statement.data.territory.id}
               openDetailOnCreate
               onSelected={(newSelectedId: string) => {
@@ -804,7 +804,7 @@ export const StatementEditorBox: React.FC = () => {
               {territoryData && (
                 <StyledItemBox>
                   <BsArrowRightShort />
-                  <ActantTag
+                  <EntityTag
                     actant={territoryData}
                     button={
                       <Button
@@ -864,7 +864,7 @@ export const StatementEditorBox: React.FC = () => {
               </StyledEditorActantTableWrapper>
 
               {userCanEdit && (
-                <ActantSuggester
+                <EntitySuggester
                   statementTerritoryId={statement.data.territory.id}
                   openDetailOnCreate
                   onSelected={(newSelectedId: string) => {
@@ -895,7 +895,7 @@ export const StatementEditorBox: React.FC = () => {
                 />
               </StyledEditorActantTableWrapper>
               {userCanEdit && (
-                <ActantSuggester
+                <EntitySuggester
                   statementTerritoryId={statement.data.territory.id}
                   openDetailOnCreate
                   onSelected={(newSelectedId: string) => {
@@ -933,7 +933,7 @@ export const StatementEditorBox: React.FC = () => {
                         <StyledReferencesListColumn>
                           {referenceActant ? (
                             <StyledTagWrapper>
-                              <ActantTag
+                              <EntityTag
                                 actant={referenceActant}
                                 fullWidth
                                 button={
@@ -956,7 +956,7 @@ export const StatementEditorBox: React.FC = () => {
                             </StyledTagWrapper>
                           ) : (
                             userCanEdit && (
-                              <ActantSuggester
+                              <EntitySuggester
                                 statementTerritoryId={
                                   statement.data.territory.id
                                 }
@@ -1036,7 +1036,7 @@ export const StatementEditorBox: React.FC = () => {
                 )}
               </StyledReferencesList>
               {userCanEdit && (
-                <ActantSuggester
+                <EntitySuggester
                   statementTerritoryId={statement.data.territory.id}
                   openDetailOnCreate
                   onSelected={(newSelectedId: string) => {
@@ -1061,7 +1061,7 @@ export const StatementEditorBox: React.FC = () => {
                   return (
                     tagActant && (
                       <StyledTagsListItem key={tag}>
-                        <ActantTag
+                        <EntityTag
                           actant={tagActant}
                           fullWidth
                           tooltipPosition="left top"
@@ -1084,7 +1084,7 @@ export const StatementEditorBox: React.FC = () => {
                 })}
               </StyledTagsList>
               {userCanEdit && (
-                <ActantSuggester
+                <EntitySuggester
                   statementTerritoryId={statement.data.territory.id}
                   openDetailOnCreate
                   onSelected={(newSelectedId: string) => {

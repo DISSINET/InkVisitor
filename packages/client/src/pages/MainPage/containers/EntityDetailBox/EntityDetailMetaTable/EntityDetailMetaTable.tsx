@@ -6,7 +6,7 @@ import {
   StyledTHead,
   StyledTh,
   StyledPipe,
-} from "./ActantDetailMetaTableStyles";
+} from "./EntityDetailMetaTableStyles";
 import {
   IAction,
   IActant,
@@ -15,12 +15,12 @@ import {
   IStatementAction,
   IResponseBookmarkFolder,
 } from "@shared/types";
-import { ActantSuggester, ActantTag, CertaintyToggle, ElvlToggle } from "../..";
+import { EntitySuggester, EntityTag, CertaintyToggle, ElvlToggle } from "../..";
 import { Button, ButtonGroup, Input } from "components";
 import { FaPlus, FaTrashAlt, FaUnlink } from "react-icons/fa";
 import { useMutation, UseMutationResult, useQueryClient } from "react-query";
 import { ActantType } from "@shared/enums";
-import { ActantDetailMetaTableRow } from "./ActantDetailMetaTableRow";
+import { EntityDetailMetaTableRow } from "./EntityDetailMetaTableRow";
 import { AttributesEditor } from "../../AttributesEditor/AttributesEditor";
 
 interface ActantDetailMetaTable {
@@ -64,7 +64,7 @@ export const ActantDetailMetaTable: React.FC<ActantDetailMetaTable> = ({
             : false;
 
           return typeActant && typeSActant ? (
-            <ActantTag
+            <EntityTag
               actant={typeActant}
               button={
                 userCanEdit && (
@@ -96,7 +96,7 @@ export const ActantDetailMetaTable: React.FC<ActantDetailMetaTable> = ({
             />
           ) : (
             userCanEdit && (
-              <ActantSuggester
+              <EntitySuggester
                 onSelected={(newSelectedId: string) => {
                   const metaStatementData = { ...data };
                   const updatedStatementActants = metaStatementData.actants.map(
@@ -199,7 +199,7 @@ export const ActantDetailMetaTable: React.FC<ActantDetailMetaTable> = ({
             : false;
 
           return valueSActant && valueActant ? (
-            <ActantTag
+            <EntityTag
               actant={valueActant}
               button={
                 userCanEdit && (
@@ -231,7 +231,7 @@ export const ActantDetailMetaTable: React.FC<ActantDetailMetaTable> = ({
             />
           ) : (
             userCanEdit && (
-              <ActantSuggester
+              <EntitySuggester
                 onSelected={(newSelectedId: string) => {
                   const metaStatementData = { ...data };
                   const updatedStatementActants = metaStatementData.actants.map(
@@ -444,7 +444,7 @@ export const ActantDetailMetaTable: React.FC<ActantDetailMetaTable> = ({
         {rows.map((row: Row, i: number) => {
           prepareRow(row);
           return (
-            <ActantDetailMetaTableRow
+            <EntityDetailMetaTableRow
               index={i}
               row={row}
               visibleColumns={visibleColumns}
