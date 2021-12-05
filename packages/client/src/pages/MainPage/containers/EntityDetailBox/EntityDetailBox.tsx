@@ -23,6 +23,7 @@ import {
   StyledDetailSectionUsedPageManager,
   StyledDetailContentRowLabel,
   StyledDetailContentRowValue,
+  StyledDetailContentRowValueID,
   StyledActantPreviewRow,
   StyledTagWrap,
   StyledDetailSectionContentUsedIn,
@@ -39,6 +40,7 @@ import {
   FaStepBackward,
   FaStepForward,
   FaRecycle,
+  FaRegCopy,
 } from "react-icons/fa";
 import { EntityTag } from "..";
 
@@ -354,6 +356,23 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
               </StyledActantPreviewRow>
 
               <StyledDetailForm>
+                <StyledDetailContentRow>
+                  <StyledDetailContentRowLabel>ID</StyledDetailContentRowLabel>
+                  <StyledDetailContentRowValue>
+                    <StyledDetailContentRowValueID>
+                      {actant.id}
+                      <Button
+                        inverted
+                        color="primary"
+                        label=""
+                        icon={<FaRegCopy />}
+                        onClick={async () => {
+                          await navigator.clipboard.writeText(actant.id);
+                        }}
+                      />
+                    </StyledDetailContentRowValueID>
+                  </StyledDetailContentRowValue>
+                </StyledDetailContentRow>
                 <StyledDetailContentRow>
                   <StyledDetailContentRowLabel>
                     Label

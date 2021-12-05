@@ -58,6 +58,16 @@ export const StyledDetailContentRowLabel = styled.div`
 export const StyledDetailContentRowValue = styled.div`
   float: right;
 `;
+export const StyledDetailContentRowValueID = styled.div`
+  display: inline-flex;
+  font-style: italic;
+  font-size: ${({ theme }) => theme.fontSize["xs"]};
+  align-items: baseline;
+
+  button {
+    margin-left: ${({ theme }) => theme.space["2"]};
+  }
+`;
 
 export const StyledDetailForm = styled.div`
   display: table;
