@@ -1,5 +1,7 @@
+import api from "api";
 import { useSearchParams } from "hooks";
-import React, { useRef } from "react";
+import React, { useMemo, useRef } from "react";
+import { useQuery, useMutation, useQueryClient } from "react-query";
 import {
   DragSourceMonitor,
   DropTargetMonitor,
@@ -12,7 +14,11 @@ import { Cell, ColumnInstance } from "react-table";
 
 import { DragItem, ItemTypes } from "types";
 import { StatementListRowExpanded } from "./StatementListRowExpanded";
-import { StyledTd, StyledTr } from "./StatementListTableStyles";
+import {
+  StyledTd,
+  StyledTdLastEdit,
+  StyledTr,
+} from "./StatementListTableStyles";
 
 interface StatementListRow {
   row: any;
@@ -32,6 +38,44 @@ export const StatementListRow: React.FC<StatementListRow> = ({
   visibleColumns,
 }) => {
   const { statementId } = useSearchParams();
+
+  const {
+    status: statusAudit,
+    data: audit,
+    error: auditError,
+    isFetching: isFetchingAudit,
+  } = useQuery(
+    ["audit", row.values.id],
+    async () => {
+      const res = await api.auditGet(row.values.id);
+      return res.data;
+    },
+    { enabled: row && !!row.values.id, retry: 2 }
+  );
+
+  const lastEditdateText = useMemo(() => {
+    if (audit && audit.last && audit.last[0].date) {
+      const today = new Date().setHours(0, 0, 0, 0);
+      const lastEditDate = audit.last[0].date;
+      const lastEditDay = new Date(lastEditDate).setHours(0, 0, 0, 0);
+
+      if (today === lastEditDay) {
+        return (
+          "today " +
+          new Date(lastEditDate).toLocaleTimeString("en-GB", {
+            hour: "2-digit",
+            minute: "2-digit",
+          })
+        );
+      } else {
+        new Date(lastEditDate).toLocaleDateString("en-GB");
+      }
+    } else {
+      return "";
+    }
+
+    return;
+  }, [audit]);
 
   const dropRef = useRef<HTMLTableRowElement>(null);
   const dragRef = useRef<HTMLTableDataCellElement>(null);
@@ -99,6 +143,13 @@ export const StatementListRow: React.FC<StatementListRow> = ({
           <FaGripVertical />
         </td>
         {row.cells.map((cell: Cell) => {
+          if (cell.column.id === "lastEdit") {
+            return (
+              <StyledTdLastEdit key="audit">
+                {lastEditdateText}
+              </StyledTdLastEdit>
+            );
+          }
           if (
             [
               "Statement",
