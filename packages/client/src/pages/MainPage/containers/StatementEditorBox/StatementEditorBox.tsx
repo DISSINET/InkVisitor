@@ -10,7 +10,7 @@ import {
   FaCaretDown,
 } from "react-icons/fa";
 
-import { ActantTag } from "./../";
+import { EntityTag } from "./../";
 import {
   CProp,
   CReference,
@@ -546,7 +546,7 @@ export const StatementEditorBox: React.FC = () => {
           isTag={propTypeActant ? true : false}
         >
           {propTypeActant ? (
-            <ActantTag
+            <EntityTag
               actant={propTypeActant}
               fullWidth
               button={
@@ -622,7 +622,7 @@ export const StatementEditorBox: React.FC = () => {
           isTag={propValueActant ? true : false}
         >
           {propValueActant ? (
-            <ActantTag
+            <EntityTag
               actant={propValueActant}
               fullWidth
               button={
@@ -804,7 +804,7 @@ export const StatementEditorBox: React.FC = () => {
               {territoryData && (
                 <StyledItemBox>
                   <BsArrowRightShort />
-                  <ActantTag
+                  <EntityTag
                     actant={territoryData}
                     button={
                       <Button
@@ -933,7 +933,7 @@ export const StatementEditorBox: React.FC = () => {
                         <StyledReferencesListColumn>
                           {referenceActant ? (
                             <StyledTagWrapper>
-                              <ActantTag
+                              <EntityTag
                                 actant={referenceActant}
                                 fullWidth
                                 button={
@@ -1061,7 +1061,7 @@ export const StatementEditorBox: React.FC = () => {
                   return (
                     tagActant && (
                       <StyledTagsListItem key={tag}>
-                        <ActantTag
+                        <EntityTag
                           actant={tagActant}
                           fullWidth
                           tooltipPosition="left top"

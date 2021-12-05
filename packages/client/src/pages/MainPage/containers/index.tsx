@@ -1,6 +1,6 @@
 import { ActantSearchBox } from "./ActantSearchBox/ActantSearchBox";
 import { EntityDetailBox } from "./EntityDetailBox/EntityDetailBox";
-import { ActantTag } from "./ActantTag/ActantTag";
+import { EntityTag } from "./EntityTag/EntityTag";
 import { ActantSuggester } from "./ActantSuggester/ActantSuggester";
 import { ActionModal } from "./ActionModal/ActionModal";
 import { ActantBookmarkBox } from "./ActantBookmarkBox/ActantBookmarkBox";
@@ -17,7 +17,7 @@ export {
   ActantSearchBox,
   EntityDetailBox,
   ActantSuggester,
-  ActantTag,
+  EntityTag,
   ActionModal,
   ActantBookmarkBox,
   StatementEditorBox,

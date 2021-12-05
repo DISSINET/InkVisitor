@@ -10,7 +10,7 @@ import {
   IResponseStatement,
   IStatementAction,
 } from "@shared/types";
-import { ActantSuggester, ActantTag } from "../..";
+import { ActantSuggester, EntityTag } from "../..";
 import { AttributesEditor } from "../../AttributesEditor/AttributesEditor";
 import { AttributeIcon, Button, ButtonGroup } from "components";
 import { FaPlus, FaTrashAlt, FaUnlink } from "react-icons/fa";
@@ -119,7 +119,7 @@ export const StatementEditorActionTable: React.FC<StatementEditorActionTable> = 
         Cell: ({ row }: Cell) => {
           const { action, sAction } = row.values.data;
           return action ? (
-            <ActantTag
+            <EntityTag
               actant={action}
               button={
                 userCanEdit && (

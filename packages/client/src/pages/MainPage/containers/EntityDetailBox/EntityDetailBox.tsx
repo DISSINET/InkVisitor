@@ -40,7 +40,7 @@ import {
   FaStepForward,
   FaRecycle,
 } from "react-icons/fa";
-import { ActantTag } from "..";
+import { EntityTag } from "..";
 
 import { CMetaStatement } from "constructors";
 import { findPositionInStatement } from "utils";
@@ -305,7 +305,7 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
             <StyledDetailSectionContent>
               <StyledActantPreviewRow>
                 <StyledTagWrap>
-                  <ActantTag
+                  <EntityTag
                     actant={actant}
                     propId={actant.id}
                     tooltipText={actant.data.text}
@@ -870,7 +870,7 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                   return (
                     <React.Fragment key={statement.id}>
                       <StyledDetailSectionUsedTableCell>
-                        <ActantTag
+                        <EntityTag
                           key={statement.id}
                           actant={statement}
                           showOnly="entity"

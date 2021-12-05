@@ -15,7 +15,7 @@ import {
   IStatementAction,
   IResponseBookmarkFolder,
 } from "@shared/types";
-import { ActantSuggester, ActantTag, CertaintyToggle, ElvlToggle } from "../..";
+import { ActantSuggester, EntityTag, CertaintyToggle, ElvlToggle } from "../..";
 import { Button, ButtonGroup, Input } from "components";
 import { FaPlus, FaTrashAlt, FaUnlink } from "react-icons/fa";
 import { useMutation, UseMutationResult, useQueryClient } from "react-query";
@@ -64,7 +64,7 @@ export const ActantDetailMetaTable: React.FC<ActantDetailMetaTable> = ({
             : false;
 
           return typeActant && typeSActant ? (
-            <ActantTag
+            <EntityTag
               actant={typeActant}
               button={
                 userCanEdit && (
@@ -199,7 +199,7 @@ export const ActantDetailMetaTable: React.FC<ActantDetailMetaTable> = ({
             : false;
 
           return valueSActant && valueActant ? (
-            <ActantTag
+            <EntityTag
               actant={valueActant}
               button={
                 userCanEdit && (

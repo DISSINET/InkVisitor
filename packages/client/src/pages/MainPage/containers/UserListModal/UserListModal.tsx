@@ -54,7 +54,7 @@ import {
 
 import { UserListTableRow } from "./UserListTableRow/UserListTableRow";
 import { ActantSuggester } from "../ActantSuggester/ActantSuggester";
-import { ActantTag } from "../ActantTag/ActantTag";
+import { EntityTag } from "../EntityTag/EntityTag";
 import { IResponseUser, IUserRight } from "@shared/types";
 import { ActantType, UserRole, UserRoleMode } from "@shared/enums";
 import { userRoleDict } from "@shared/dictionaries";
@@ -312,7 +312,7 @@ export const UserListModal: React.FC<UserListModal> = ({
 
                         return territoryActant && territoryActant.territory ? (
                           <StyledTerritoryListItem key={right.territory}>
-                            <ActantTag
+                            <EntityTag
                               actant={territoryActant.territory}
                               button={
                                 <Button
@@ -389,7 +389,7 @@ export const UserListModal: React.FC<UserListModal> = ({
                           return territoryActant &&
                             territoryActant.territory ? (
                             <StyledTerritoryListItem key={right.territory}>
-                              <ActantTag
+                              <EntityTag
                                 actant={territoryActant.territory}
                                 button={
                                   <Button

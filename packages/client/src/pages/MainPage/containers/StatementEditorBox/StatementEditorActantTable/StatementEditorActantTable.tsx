@@ -18,7 +18,7 @@ import {
   IStatementActant,
   IStatementProp,
 } from "@shared/types";
-import { ActantSuggester, ActantTag } from "../..";
+import { ActantSuggester, EntityTag } from "../..";
 import { Button, ButtonGroup } from "components";
 import { FaTrashAlt, FaUnlink, FaPlus } from "react-icons/fa";
 import { UseMutationResult } from "react-query";
@@ -118,7 +118,7 @@ export const StatementEditorActantTable: React.FC<StatementEditorActantTable> = 
           } = row.values.data;
           return actant ? (
             <StyledTagWrapper>
-              <ActantTag
+              <EntityTag
                 actant={actant}
                 // fullWidth
                 button={

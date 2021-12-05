@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "react-query";
 import api from "api";
 import { toast } from "react-toastify";
 
-import { ActantTag, ActantSuggester } from "..";
+import { EntityTag, ActantSuggester } from "..";
 
 import { CBookmarkFolder } from "constructors";
 

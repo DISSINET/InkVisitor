@@ -80,7 +80,7 @@ export const EntityDetailMetaTableRow: React.FC<EntityDetailMetaTableRow> = ({
     //   <StyledSectionMetaTableCell>
     //     {typeSActant && typeActant ? (
     //       <React.Fragment>
-    //         <ActantTag
+    //         <EntityTag
     //           actant={typeActant}
     //           short={false}
     //           button={
@@ -125,7 +125,7 @@ export const EntityDetailMetaTableRow: React.FC<EntityDetailMetaTableRow> = ({
     //   <StyledSectionMetaTableCell>
     //     {valueSActant && valueActant ? (
     //       <React.Fragment>
-    //         <ActantTag
+    //         <EntityTag
     //           actant={valueActant}
     //           short={false}
     //           button={
