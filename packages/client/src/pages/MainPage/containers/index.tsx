@@ -1,5 +1,5 @@
 import { ActantSearchBox } from "./ActantSearchBox/ActantSearchBox";
-import { ActantDetailBox } from "./ActantDetailBox/ActantDetailBox";
+import { EntityDetailBox } from "./EntityDetailBox/EntityDetailBox";
 import { ActantTag } from "./ActantTag/ActantTag";
 import { ActantSuggester } from "./ActantSuggester/ActantSuggester";
 import { ActionModal } from "./ActionModal/ActionModal";
@@ -15,7 +15,7 @@ import { ElvlToggle } from "./toggles/ElvlToggle";
 
 export {
   ActantSearchBox,
-  ActantDetailBox,
+  EntityDetailBox,
   ActantSuggester,
   ActantTag,
   ActionModal,

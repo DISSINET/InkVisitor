@@ -6,7 +6,7 @@ import {
   StyledTHead,
   StyledTh,
   StyledPipe,
-} from "./ActantDetailMetaTableStyles";
+} from "./EntityDetailMetaTableStyles";
 import {
   IAction,
   IActant,
@@ -20,7 +20,7 @@ import { Button, ButtonGroup, Input } from "components";
 import { FaPlus, FaTrashAlt, FaUnlink } from "react-icons/fa";
 import { useMutation, UseMutationResult, useQueryClient } from "react-query";
 import { ActantType } from "@shared/enums";
-import { ActantDetailMetaTableRow } from "./ActantDetailMetaTableRow";
+import { EntityDetailMetaTableRow } from "./EntityDetailMetaTableRow";
 import { AttributesEditor } from "../../AttributesEditor/AttributesEditor";
 
 interface ActantDetailMetaTable {
@@ -444,7 +444,7 @@ export const ActantDetailMetaTable: React.FC<ActantDetailMetaTable> = ({
         {rows.map((row: Row, i: number) => {
           prepareRow(row);
           return (
-            <ActantDetailMetaTableRow
+            <EntityDetailMetaTableRow
               index={i}
               row={row}
               visibleColumns={visibleColumns}

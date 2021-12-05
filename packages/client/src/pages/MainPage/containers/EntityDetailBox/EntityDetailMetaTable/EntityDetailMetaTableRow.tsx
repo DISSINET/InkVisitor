@@ -13,16 +13,16 @@ import {
 } from "@shared/types";
 import api from "api";
 import { Cell, ColumnInstance } from "react-table";
-import { StyledTd, StyledTr } from "./ActantDetailMetaTableStyles";
+import { StyledTd, StyledTr } from "./EntityDetailMetaTableStyles";
 
 import { DragItem, ItemTypes } from "types";
 
-interface ActantDetailMetaTableRow {
+interface EntityDetailMetaTableRow {
   row: any;
   index: number;
   visibleColumns: ColumnInstance<{}>[];
 }
-export const ActantDetailMetaTableRow: React.FC<ActantDetailMetaTableRow> = ({
+export const EntityDetailMetaTableRow: React.FC<EntityDetailMetaTableRow> = ({
   row,
   index,
   visibleColumns,
