@@ -59,6 +59,7 @@ import { toast } from "react-toastify";
 import { ActantDetailMetaTable } from "./ActantDetailMetaTable/ActantDetailMetaTable";
 import { useSearchParams } from "hooks";
 import { AttributeButtonGroup } from "../AttributeButtonGroup/AttributeButtonGroup";
+import { AuditTable } from "../AuditTable/AuditTable";
 
 interface ActantDetailBox {}
 export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
@@ -83,6 +84,26 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
     },
     { enabled: !!actantId && api.isLoggedIn(), retry: 2 }
   );
+
+  // Audit query
+  const {
+    status: statusAudit,
+    data: audit,
+    error: auditError,
+    isFetching: isFetchingAudit,
+  } = useQuery(
+    ["audit", actantId],
+    async () => {
+      const res = await api.auditGet(actantId);
+      return res.data;
+    },
+    { enabled: !!actantId && api.isLoggedIn(), retry: 2 }
+  );
+
+  // refetch audit when statement changes
+  useEffect(() => {
+    queryClient.invalidateQueries("audit");
+  }, [actant]);
 
   const userCanAdmin: boolean = useMemo(() => {
     return !!actant && actant.right === UserRoleMode.Admin;
@@ -841,6 +862,12 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
                 );
               })}
             </StyledSectionUsedTable>
+          </StyledSection>
+
+          {/* Audits */}
+          <StyledSection key="editor-section-audits">
+            <StyledSectionHeader>Audits</StyledSectionHeader>
+            {audit && <AuditTable {...audit} />}
           </StyledSection>
         </StyledContent>
       )}
