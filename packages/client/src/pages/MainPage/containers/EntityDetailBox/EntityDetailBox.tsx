@@ -28,7 +28,7 @@ import {
   StyledTagWrap,
   StyledDetailSectionContentUsedIn,
   StyledDetailSectionContent,
-} from "./ActandDetailBoxStyles";
+} from "./EntityDetailBoxStyles";
 import api from "api";
 import { useMutation, useQuery, useQueryClient } from "react-query";
 import { IResponseStatement, IStatement } from "@shared/types";
@@ -40,7 +40,7 @@ import {
   FaStepForward,
   FaRecycle,
 } from "react-icons/fa";
-import { ActantTag } from "..";
+import { EntityTag } from "..";
 
 import { CMetaStatement } from "constructors";
 import { findPositionInStatement } from "utils";
@@ -58,13 +58,13 @@ import {
   UserRoleMode,
 } from "@shared/enums";
 import { toast } from "react-toastify";
-import { ActantDetailMetaTable } from "./ActantDetailMetaTable/ActantDetailMetaTable";
+import { ActantDetailMetaTable } from "./EntityDetailMetaTable/EntityDetailMetaTable";
 import { useSearchParams } from "hooks";
 import { AttributeButtonGroup } from "../AttributeButtonGroup/AttributeButtonGroup";
 import { AuditTable } from "../AuditTable/AuditTable";
 
-interface ActantDetailBox {}
-export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
+interface EntityDetailBox {}
+export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
   const {
     actantId,
     setActantId,
@@ -305,7 +305,7 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
             <StyledDetailSectionContent>
               <StyledActantPreviewRow>
                 <StyledTagWrap>
-                  <ActantTag
+                  <EntityTag
                     actant={actant}
                     propId={actant.id}
                     tooltipText={actant.data.text}
@@ -870,7 +870,7 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
                   return (
                     <React.Fragment key={statement.id}>
                       <StyledDetailSectionUsedTableCell>
-                        <ActantTag
+                        <EntityTag
                           key={statement.id}
                           actant={statement}
                           showOnly="entity"

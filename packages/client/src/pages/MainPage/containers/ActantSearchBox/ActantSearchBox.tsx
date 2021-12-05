@@ -12,7 +12,7 @@ import {
   StyledRowHeader,
   StyledTagLoaderWrap,
 } from "./ActantSearchBoxStyles";
-import { ActantSuggester } from "..";
+import { EntitySuggester } from "..";
 import { useMutation, useQuery } from "react-query";
 import api from "api";
 import { Entities, IRequestSearch } from "types";
@@ -139,7 +139,7 @@ export const ActantSearchBox: React.FC = () => {
           {/* used with */}
           Limit by co-occurrence
         </StyledRowHeader>
-        <ActantSuggester
+        <EntitySuggester
           categoryTypes={classesActants}
           onSelected={(newSelectedId: string) => {
             handleChange("actantId", newSelectedId);

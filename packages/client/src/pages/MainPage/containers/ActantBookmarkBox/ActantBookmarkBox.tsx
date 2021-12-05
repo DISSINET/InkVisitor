@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "react-query";
 import api from "api";
 import { toast } from "react-toastify";
 
-import { ActantTag, ActantSuggester } from "..";
+import { EntityTag, EntitySuggester } from "..";
 
 import { CBookmarkFolder } from "constructors";
 
@@ -367,7 +367,7 @@ export const ActantBookmarkBox: React.FC = () => {
                       ></ActantBookmarkFolderTable>
                     </StyledFolderContentTags>
                     <StyledFolderSuggester>
-                      <ActantSuggester
+                      <EntitySuggester
                         openDetailOnCreate
                         onSelected={(bookmarkId: string) => {
                           addBookmark(bookmarkFolder.id, bookmarkId);

@@ -8,7 +8,7 @@ import { useAppDispatch } from "redux/hooks";
 import { setTreeInitialized } from "redux/features/territoryTree/treeInitializeSlice";
 import { rootTerritoryId } from "Theme/constants";
 import { useSearchParams } from "hooks";
-import { ActantTag } from "pages/MainPage/containers";
+import { EntityTag } from "pages/MainPage/containers";
 import { ActantStatus, ActantType, Language } from "@shared/enums";
 import { BsArrow90DegLeft, BsArrowRightShort } from "react-icons/bs";
 
@@ -51,7 +51,7 @@ export const StatementListBreadcrumbItem: React.FC<StatementListBreadcrumbItem> 
       {territoryId !== rootTerritoryId && (
         <StyledItemBox>
           <BsArrowRightShort />
-          <ActantTag
+          <EntityTag
             actant={territoryData ? territoryData : initialData}
             button={
               <Button

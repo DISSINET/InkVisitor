@@ -18,7 +18,7 @@ import {
   TagGroup,
   Tooltip,
 } from "components";
-import { ActantTag } from "./../";
+import { EntityTag } from "./../";
 import api from "api";
 import {
   IStatement,
@@ -217,7 +217,7 @@ export const StatementListBox: React.FC = () => {
   const renderListActant = (actantObject: IActant, key: number) => {
     return (
       actantObject && (
-        <ActantTag
+        <EntityTag
           key={key}
           actant={actantObject}
           showOnly="entity"
@@ -237,7 +237,7 @@ export const StatementListBox: React.FC = () => {
       actantObject && (
         <div key={key}>
           <div style={{ marginTop: "4px", display: "flex" }}>
-            <ActantTag
+            <EntityTag
               key={key}
               actant={actantObject}
               tooltipPosition="bottom center"
@@ -263,7 +263,7 @@ export const StatementListBox: React.FC = () => {
         Cell: ({ row }: Cell) => {
           const statement = row.original as IStatement;
           return (
-            <ActantTag
+            <EntityTag
               actant={statement as IActant}
               showOnly="entity"
               tooltipText={statement.data.text}
