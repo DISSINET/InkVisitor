@@ -1,10 +1,10 @@
 import styled from "styled-components";
 import { EntityTag } from "..";
 
-interface StyledContent {
+interface StyledDetailWrapper {
   type: string;
 }
-export const StyledContent = styled.div<StyledContent>`
+export const StyledDetailWrapper = styled.div<StyledDetailWrapper>`
   display: flex;
   flex-direction: column;
   align-items: start;

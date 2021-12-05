@@ -62,6 +62,7 @@ import { ActantDetailMetaTable } from "./EntityDetailMetaTable/EntityDetailMetaT
 import { useSearchParams } from "hooks";
 import { AttributeButtonGroup } from "../AttributeButtonGroup/AttributeButtonGroup";
 import { AuditTable } from "../AuditTable/AuditTable";
+import { JSONExplorer } from "../JSONExplorer/JSONExplorer";
 
 interface EntityDetailBox {}
 export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
@@ -299,7 +300,7 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
   return (
     <>
       {actant && (
-        <StyledContent type={actant.class}>
+        <StyledDetailWrapper type={actant.class}>
           {/* form section */}
           <StyledDetailSection firstSection>
             <StyledDetailSectionContent>
@@ -915,9 +916,16 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
               {audit && <AuditTable {...audit} />}
             </StyledDetailSectionContent>
           </StyledDetailSection>
-        </StyledContent>
-      )}
 
+          {/* JSON */}
+          <StyledDetailSection key="editor-section-json">
+            <StyledDetailSectionHeader>JSON</StyledDetailSectionHeader>
+            <StyledDetailSectionContent>
+              {actant && <JSONExplorer data={actant} />}
+            </StyledDetailSectionContent>
+          </StyledDetailSection>
+        </StyledDetailWrapper>
+      )}
       <Submit
         title="Remove entity"
         text="Do you really want to delete actant?"
