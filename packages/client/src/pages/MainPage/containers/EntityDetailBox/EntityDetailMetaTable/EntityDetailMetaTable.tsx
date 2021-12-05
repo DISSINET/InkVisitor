@@ -15,7 +15,7 @@ import {
   IStatementAction,
   IResponseBookmarkFolder,
 } from "@shared/types";
-import { ActantSuggester, EntityTag, CertaintyToggle, ElvlToggle } from "../..";
+import { EntitySuggester, EntityTag, CertaintyToggle, ElvlToggle } from "../..";
 import { Button, ButtonGroup, Input } from "components";
 import { FaPlus, FaTrashAlt, FaUnlink } from "react-icons/fa";
 import { useMutation, UseMutationResult, useQueryClient } from "react-query";
@@ -96,7 +96,7 @@ export const ActantDetailMetaTable: React.FC<ActantDetailMetaTable> = ({
             />
           ) : (
             userCanEdit && (
-              <ActantSuggester
+              <EntitySuggester
                 onSelected={(newSelectedId: string) => {
                   const metaStatementData = { ...data };
                   const updatedStatementActants = metaStatementData.actants.map(
@@ -231,7 +231,7 @@ export const ActantDetailMetaTable: React.FC<ActantDetailMetaTable> = ({
             />
           ) : (
             userCanEdit && (
-              <ActantSuggester
+              <EntitySuggester
                 onSelected={(newSelectedId: string) => {
                   const metaStatementData = { ...data };
                   const updatedStatementActants = metaStatementData.actants.map(

@@ -14,7 +14,7 @@ import {
   IStatementAction,
   IResponseBookmarkFolder,
 } from "@shared/types";
-import { ActantSuggester, EntityTag, CertaintyToggle, ElvlToggle } from "../..";
+import { EntitySuggester, EntityTag, CertaintyToggle, ElvlToggle } from "../..";
 import { Button, Input } from "components";
 import { FaPlus, FaTrashAlt, FaUnlink } from "react-icons/fa";
 import { useMutation, UseMutationResult, useQueryClient } from "react-query";

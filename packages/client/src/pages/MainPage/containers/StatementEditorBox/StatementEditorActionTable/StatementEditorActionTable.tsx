@@ -10,7 +10,7 @@ import {
   IResponseStatement,
   IStatementAction,
 } from "@shared/types";
-import { ActantSuggester, EntityTag } from "../..";
+import { EntitySuggester, EntityTag } from "../..";
 import { AttributesEditor } from "../../AttributesEditor/AttributesEditor";
 import { AttributeIcon, Button, ButtonGroup } from "components";
 import { FaPlus, FaTrashAlt, FaUnlink } from "react-icons/fa";
@@ -140,7 +140,7 @@ export const StatementEditorActionTable: React.FC<StatementEditorActionTable> = 
             />
           ) : (
             userCanEdit && (
-              <ActantSuggester
+              <EntitySuggester
                 onSelected={(newSelectedId: string) => {
                   updateAction(sAction.id, {
                     action: newSelectedId,

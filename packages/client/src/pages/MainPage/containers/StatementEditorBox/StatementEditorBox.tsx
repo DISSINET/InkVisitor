@@ -32,7 +32,7 @@ import {
   Loader,
   MultiInput,
 } from "components";
-import { ActantSuggester } from "./../";
+import { EntitySuggester } from "./../";
 
 import {
   StyledReferencesListColumn,
@@ -568,7 +568,7 @@ export const StatementEditorBox: React.FC = () => {
               }
             />
           ) : (
-            <ActantSuggester
+            <EntitySuggester
               statementTerritoryId={statement.data.territory.id}
               openDetailOnCreate
               onSelected={(newSelectedId: string) => {
@@ -644,7 +644,7 @@ export const StatementEditorBox: React.FC = () => {
               }
             />
           ) : (
-            <ActantSuggester
+            <EntitySuggester
               statementTerritoryId={statement.data.territory.id}
               openDetailOnCreate
               onSelected={(newSelectedId: string) => {
@@ -864,7 +864,7 @@ export const StatementEditorBox: React.FC = () => {
               </StyledEditorActantTableWrapper>
 
               {userCanEdit && (
-                <ActantSuggester
+                <EntitySuggester
                   statementTerritoryId={statement.data.territory.id}
                   openDetailOnCreate
                   onSelected={(newSelectedId: string) => {
@@ -895,7 +895,7 @@ export const StatementEditorBox: React.FC = () => {
                 />
               </StyledEditorActantTableWrapper>
               {userCanEdit && (
-                <ActantSuggester
+                <EntitySuggester
                   statementTerritoryId={statement.data.territory.id}
                   openDetailOnCreate
                   onSelected={(newSelectedId: string) => {
@@ -956,7 +956,7 @@ export const StatementEditorBox: React.FC = () => {
                             </StyledTagWrapper>
                           ) : (
                             userCanEdit && (
-                              <ActantSuggester
+                              <EntitySuggester
                                 statementTerritoryId={
                                   statement.data.territory.id
                                 }
@@ -1036,7 +1036,7 @@ export const StatementEditorBox: React.FC = () => {
                 )}
               </StyledReferencesList>
               {userCanEdit && (
-                <ActantSuggester
+                <EntitySuggester
                   statementTerritoryId={statement.data.territory.id}
                   openDetailOnCreate
                   onSelected={(newSelectedId: string) => {
@@ -1084,7 +1084,7 @@ export const StatementEditorBox: React.FC = () => {
                 })}
               </StyledTagsList>
               {userCanEdit && (
-                <ActantSuggester
+                <EntitySuggester
                   statementTerritoryId={statement.data.territory.id}
                   openDetailOnCreate
                   onSelected={(newSelectedId: string) => {

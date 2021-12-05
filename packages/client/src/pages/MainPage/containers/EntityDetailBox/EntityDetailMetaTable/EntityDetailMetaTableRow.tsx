@@ -109,7 +109,7 @@ export const EntityDetailMetaTableRow: React.FC<EntityDetailMetaTableRow> = ({
     //         </StyledSectionMetaTableButtonGroup>
     //       </React.Fragment>
     //     ) : (
-    //       <ActantSuggester
+    //       <EntitySuggester
     //         onSelected={async (newActantId: string) => {
     //           updateStatementActant(metaStatement.id, typeSActant.id, {
     //             actant: newActantId,
@@ -154,7 +154,7 @@ export const EntityDetailMetaTableRow: React.FC<EntityDetailMetaTableRow> = ({
     //         </StyledSectionMetaTableButtonGroup>
     //       </React.Fragment>
     //     ) : (
-    //       <ActantSuggester
+    //       <EntitySuggester
     //         onSelected={async (newActantId: string) => {
     //           updateStatementActant(metaStatement.id, valueSActant.id, {
     //             actant: newActantId,

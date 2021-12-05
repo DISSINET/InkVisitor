@@ -18,7 +18,7 @@ import {
   IStatementActant,
   IStatementProp,
 } from "@shared/types";
-import { ActantSuggester, EntityTag } from "../..";
+import { EntitySuggester, EntityTag } from "../..";
 import { Button, ButtonGroup } from "components";
 import { FaTrashAlt, FaUnlink, FaPlus } from "react-icons/fa";
 import { UseMutationResult } from "react-query";
@@ -141,7 +141,7 @@ export const StatementEditorActantTable: React.FC<StatementEditorActantTable> = 
             </StyledTagWrapper>
           ) : (
             userCanEdit && (
-              <ActantSuggester
+              <EntitySuggester
                 onSelected={(newSelectedId: string) => {
                   updateActant(sActant.id, {
                     actant: newSelectedId,
