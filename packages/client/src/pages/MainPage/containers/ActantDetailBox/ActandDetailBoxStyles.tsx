@@ -42,8 +42,8 @@ export const StyledTagWrap = styled.div`
 
 export const StyledDetailSectionHeader = styled.div`
   font-weight: ${({ theme }) => theme.fontWeight.regular};
-  font-size: ${({ theme }) => theme.fontSize.l};
-  margin-bottom: ${({ theme }) => theme.space[4]};
+  font-size: ${({ theme }) => theme.fontSize.lg};
+  margin-bottom: ${({ theme }) => theme.space["4"]};
   color: ${({ theme }) => theme.color["primary"]};
 `;
 
@@ -111,6 +111,20 @@ export const StyledDetailSectionUsedText = styled.div`
   overflow: hidden;
   text-overflow: ellipsis;
 `;
+
+interface StyledDetailSectionContent {
+  firstSection?: boolean;
+}
+interface StyledDetailSectionContent {}
+export const StyledDetailSectionContent = styled.div<StyledDetailSectionContent>`
+  padding-left: ${({ theme, firstSection = false }) =>
+    firstSection ? "" : theme.space[10]};
+`;
+
+// usedIn section
+export const StyledDetailSectionContentUsedIn = styled(
+  StyledDetailSectionContent
+)``;
 
 export const StyledDetailSectionUsedPageManager = styled.div`
   font-size: ${({ theme }) => theme.fontSize["xs"]};

@@ -10,7 +10,7 @@ export const StyledAuditRow = styled.div`
 export const StyledAuditColumn = styled.div`
   display: table-cell;
   padding-left: ${({ theme }) => theme.space[6]};
-  font-size: ${({ theme }) => theme.fontSize.sm};
+  font-size: ${({ theme }) => theme.fontSize.xs};
   svg {
     vertical-align: text-top;
     margin-right: ${({ theme }) => theme.space[2]};
