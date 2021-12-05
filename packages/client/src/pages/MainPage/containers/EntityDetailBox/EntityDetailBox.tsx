@@ -10,7 +10,6 @@ import {
   Submit,
 } from "components";
 import {
-  StyledContent,
   StyledDetailSection,
   StyledDetailSectionHeader,
   StyledDetailSectionUsedTable,
@@ -28,6 +27,7 @@ import {
   StyledTagWrap,
   StyledDetailSectionContentUsedIn,
   StyledDetailSectionContent,
+  StyledDetailWrapper,
 } from "./EntityDetailBoxStyles";
 import api from "api";
 import { useMutation, useQuery, useQueryClient } from "react-query";
