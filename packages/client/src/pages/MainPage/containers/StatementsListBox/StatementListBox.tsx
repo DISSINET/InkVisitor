@@ -418,6 +418,13 @@ export const StatementListBox: React.FC = () => {
         },
       },
       {
+        id: "lastEdit",
+        Header: "Edited",
+        Cell: ({ row }: Cell) => {
+          return false;
+        },
+      },
+      {
         Header: "",
         id: "expander",
         width: 300,
