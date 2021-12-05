@@ -16,6 +16,7 @@ export default Router().get(
 
     // actantId must be already in the db
     const existingActant = await findActantById(request.db, actantId);
+
     if (!existingActant) {
       throw new ActantDoesNotExits(
         `actant with id ${actantId} does not exist`,

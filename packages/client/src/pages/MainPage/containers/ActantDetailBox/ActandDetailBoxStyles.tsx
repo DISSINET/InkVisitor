@@ -12,12 +12,12 @@ export const StyledContent = styled.div<StyledContent>`
   border-left-color: ${({ theme, type }) => theme.color["entity" + type]};
 `;
 
-interface StyledSection {
+interface StyledDetailSection {
   firstSection?: boolean;
   lastSection?: boolean;
 }
 
-export const StyledSection = styled.div<StyledSection>`
+export const StyledDetailSection = styled.div<StyledDetailSection>`
   padding: ${({ theme }) => theme.space[6]};
   border-bottom-width: ${({ theme, lastSection = false }) =>
     lastSection ? theme.borderWidth[0] : theme.borderWidth[1]};
@@ -40,33 +40,33 @@ export const StyledTagWrap = styled.div`
   overflow: hidden;
 `;
 
-export const StyledSectionHeader = styled.div`
+export const StyledDetailSectionHeader = styled.div`
   font-weight: ${({ theme }) => theme.fontWeight.regular};
-  font-size: ${({ theme }) => theme.fontSize.l};
-  margin-bottom: ${({ theme }) => theme.space[4]};
+  font-size: ${({ theme }) => theme.fontSize.lg};
+  margin-bottom: ${({ theme }) => theme.space["4"]};
   color: ${({ theme }) => theme.color["primary"]};
 `;
 
-export const StyledContentRow = styled.div`
+export const StyledDetailContentRow = styled.div`
   /* class: row; */
   /* display: flex; */
 `;
-export const StyledContentRowLabel = styled.div`
+export const StyledDetailContentRowLabel = styled.div`
   float: left;
   font-size: ${({ theme }) => theme.fontSize["sm"]};
 `;
-export const StyledContentRowValue = styled.div`
+export const StyledDetailContentRowValue = styled.div`
   float: right;
 `;
 
-export const StyledForm = styled.div`
+export const StyledDetailForm = styled.div`
   display: table;
   width: 100%;
   padding-right: ${({ theme }) => theme.space[6]};
-  ${StyledContentRow} {
+  ${StyledDetailContentRow} {
     display: table-row;
     width: 100%;
-    ${StyledContentRowLabel} {
+    ${StyledDetailContentRowLabel} {
       width: 1%;
       white-space: nowrap;
       display: table-cell;
@@ -75,7 +75,7 @@ export const StyledForm = styled.div`
       text-align: right;
       float: initial;
     }
-    ${StyledContentRowValue} {
+    ${StyledDetailContentRowValue} {
       display: table-cell;
       width: 100%;
       padding: ${({ theme }) => theme.space[1]};
@@ -83,7 +83,7 @@ export const StyledForm = styled.div`
   }
 `;
 
-export const StyledSectionUsedTable = styled.div`
+export const StyledDetailSectionUsedTable = styled.div`
   display: grid;
   align-items: center;
   padding-left: ${({ theme }) => theme.space[0]};
@@ -95,8 +95,8 @@ export const StyledSectionUsedTable = styled.div`
   padding-bottom: ${({ theme }) => theme.space[6]};
 `;
 
-interface StyledHeaderColumn {}
-export const StyledHeaderColumn = styled.div<StyledHeaderColumn>`
+interface StyledDetailHeaderColumn {}
+export const StyledDetailHeaderColumn = styled.div<StyledDetailHeaderColumn>`
   font-weight: ${({ theme }) => theme.fontWeight.light};
   margin-left: ${({ theme }) => theme.space[1]};
   font-size: ${({ theme }) => theme.fontSize["sm"]};
@@ -104,7 +104,7 @@ export const StyledHeaderColumn = styled.div<StyledHeaderColumn>`
   font-style: italic;
 `;
 
-export const StyledSectionUsedText = styled.div`
+export const StyledDetailSectionUsedText = styled.div`
   font-size: ${({ theme }) => theme.fontSize["xs"]};
   max-width: 20em;
   white-space: nowrap;
@@ -112,7 +112,21 @@ export const StyledSectionUsedText = styled.div`
   text-overflow: ellipsis;
 `;
 
-export const StyledSectionUsedPageManager = styled.div`
+interface StyledDetailSectionContent {
+  firstSection?: boolean;
+}
+interface StyledDetailSectionContent {}
+export const StyledDetailSectionContent = styled.div<StyledDetailSectionContent>`
+  padding-left: ${({ theme, firstSection = false }) =>
+    firstSection ? "" : theme.space[10]};
+`;
+
+// usedIn section
+export const StyledDetailSectionContentUsedIn = styled(
+  StyledDetailSectionContent
+)``;
+
+export const StyledDetailSectionUsedPageManager = styled.div`
   font-size: ${({ theme }) => theme.fontSize["xs"]};
   display: inline-flex;
   align-items: center;
@@ -121,7 +135,7 @@ export const StyledSectionUsedPageManager = styled.div`
   }
 `;
 
-export const StyledSectionUsedTableCell = styled.div<StyledSectionMetaTableCell>`
+export const StyledDetailSectionUsedTableCell = styled.div<StyledDetailSectionMetaTableCell>`
   display: inline-flex;
   margin-bottom: ${({ theme, lastSecondLevel }) =>
     lastSecondLevel ? theme.space[2] : theme.space[2]};
@@ -131,7 +145,7 @@ export const StyledSectionUsedTableCell = styled.div<StyledSectionMetaTableCell>
     borderless ? "none" : "1px dashed black"};
 `;
 
-export const StyledSectionMetaTable = styled.div`
+export const StyledDetailSectionMetaTable = styled.div`
   display: grid;
   align-items: center;
   padding-left: ${({ theme }) => theme.space[0]};
@@ -143,22 +157,22 @@ export const StyledSectionMetaTable = styled.div`
   padding-bottom: ${({ theme }) => theme.space[6]};
 `;
 
-interface StyledSectionMetaTableButtonGroup {
+interface StyledDetailSectionMetaTableButtonGroup {
   leftMargin?: boolean;
 }
-export const StyledSectionMetaTableButtonGroup = styled.div<StyledSectionMetaTableButtonGroup>`
+export const StyledDetailSectionMetaTableButtonGroup = styled.div<StyledDetailSectionMetaTableButtonGroup>`
   margin-left: ${({ theme, leftMargin = true }) =>
     leftMargin ? theme.space[3] : theme.space[0]};
   vertical-align: middle;
   display: inline-flex;
 `;
 
-interface StyledSectionMetaTableCell {
+interface StyledDetailSectionMetaTableCell {
   padded?: boolean;
   lastSecondLevel?: boolean;
   borderless?: boolean;
 }
-export const StyledSectionMetaTableCell = styled.div<StyledSectionMetaTableCell>`
+export const StyledDetailSectionMetaTableCell = styled.div<StyledDetailSectionMetaTableCell>`
   display: inline-flex;
   margin-bottom: ${({ theme, lastSecondLevel }) =>
     lastSecondLevel ? theme.space[2] : theme.space[2]};

@@ -11,21 +11,23 @@ import {
 } from "components";
 import {
   StyledContent,
-  StyledSection,
-  StyledSectionHeader,
-  StyledSectionUsedTable,
-  StyledHeaderColumn,
-  StyledSectionUsedTableCell,
-  StyledSectionMetaTableButtonGroup,
-  StyledSectionMetaTableCell,
-  StyledContentRow,
-  StyledForm,
-  StyledSectionUsedText,
-  StyledSectionUsedPageManager,
-  StyledContentRowLabel,
-  StyledContentRowValue,
+  StyledDetailSection,
+  StyledDetailSectionHeader,
+  StyledDetailSectionUsedTable,
+  StyledDetailHeaderColumn,
+  StyledDetailSectionUsedTableCell,
+  StyledDetailSectionMetaTableButtonGroup,
+  StyledDetailSectionMetaTableCell,
+  StyledDetailContentRow,
+  StyledDetailForm,
+  StyledDetailSectionUsedText,
+  StyledDetailSectionUsedPageManager,
+  StyledDetailContentRowLabel,
+  StyledDetailContentRowValue,
   StyledActantPreviewRow,
   StyledTagWrap,
+  StyledDetailSectionContentUsedIn,
+  StyledDetailSectionContent,
 } from "./ActandDetailBoxStyles";
 import api from "api";
 import { useMutation, useQuery, useQueryClient } from "react-query";
@@ -59,6 +61,7 @@ import { toast } from "react-toastify";
 import { ActantDetailMetaTable } from "./ActantDetailMetaTable/ActantDetailMetaTable";
 import { useSearchParams } from "hooks";
 import { AttributeButtonGroup } from "../AttributeButtonGroup/AttributeButtonGroup";
+import { AuditTable } from "../AuditTable/AuditTable";
 
 interface ActantDetailBox {}
 export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
@@ -83,6 +86,26 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
     },
     { enabled: !!actantId && api.isLoggedIn(), retry: 2 }
   );
+
+  // Audit query
+  const {
+    status: statusAudit,
+    data: audit,
+    error: auditError,
+    isFetching: isFetchingAudit,
+  } = useQuery(
+    ["audit", actantId],
+    async () => {
+      const res = await api.auditGet(actantId);
+      return res.data;
+    },
+    { enabled: !!actantId && api.isLoggedIn(), retry: 2 }
+  );
+
+  // refetch audit when statement changes
+  useEffect(() => {
+    queryClient.invalidateQueries("audit");
+  }, [actant]);
 
   const userCanAdmin: boolean = useMemo(() => {
     return !!actant && actant.right === UserRoleMode.Admin;
@@ -277,571 +300,621 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
     <>
       {actant && (
         <StyledContent type={actant.class}>
-          <StyledSection firstSection>
-            <StyledActantPreviewRow>
-              <StyledTagWrap>
-                <ActantTag
-                  actant={actant}
-                  propId={actant.id}
-                  tooltipText={actant.data.text}
-                  fullWidth
-                />
-              </StyledTagWrap>
-              <ButtonGroup>
-                {mayBeRemoved && (
-                  <Button
-                    color="primary"
-                    icon={<FaTrashAlt />}
-                    label="remove actant"
-                    inverted={true}
-                    onClick={() => {
-                      setShowRemoveSubmit(true);
-                    }}
+          {/* form section */}
+          <StyledDetailSection firstSection>
+            <StyledDetailSectionContent>
+              <StyledActantPreviewRow>
+                <StyledTagWrap>
+                  <ActantTag
+                    actant={actant}
+                    propId={actant.id}
+                    tooltipText={actant.data.text}
+                    fullWidth
                   />
-                )}
-                <Button
-                  key="refresh"
-                  icon={<FaRecycle size={14} />}
-                  tooltip="refresh data"
-                  inverted={true}
-                  color="primary"
-                  label="refresh"
-                  onClick={() => {
-                    queryClient.invalidateQueries(["actant"]);
-                  }}
-                />
-                {actant.class === ActantType.Statement && (
+                </StyledTagWrap>
+                <ButtonGroup>
+                  {mayBeRemoved && (
+                    <Button
+                      color="primary"
+                      icon={<FaTrashAlt />}
+                      label="remove actant"
+                      inverted={true}
+                      onClick={() => {
+                        setShowRemoveSubmit(true);
+                      }}
+                    />
+                  )}
                   <Button
-                    key="edit"
-                    icon={<FaEdit size={14} />}
-                    tooltip="open statement in editor"
+                    key="refresh"
+                    icon={<FaRecycle size={14} />}
+                    tooltip="refresh data"
                     inverted={true}
                     color="primary"
-                    label="open statement"
+                    label="refresh"
                     onClick={() => {
-                      setStatementId(actant.id);
-                      setTerritoryId(actant.data.territory.id);
+                      queryClient.invalidateQueries(["actant"]);
                     }}
                   />
-                )}
-              </ButtonGroup>
-            </StyledActantPreviewRow>
+                  {actant.class === ActantType.Statement && (
+                    <Button
+                      key="edit"
+                      icon={<FaEdit size={14} />}
+                      tooltip="open statement in editor"
+                      inverted={true}
+                      color="primary"
+                      label="open statement"
+                      onClick={() => {
+                        setStatementId(actant.id);
+                        setTerritoryId(actant.data.territory.id);
+                      }}
+                    />
+                  )}
+                </ButtonGroup>
+              </StyledActantPreviewRow>
 
-            <StyledForm>
-              <StyledContentRow>
-                <StyledContentRowLabel>Label</StyledContentRowLabel>
-                <StyledContentRowValue>
-                  <Input
-                    disabled={!userCanEdit}
-                    width="full"
-                    value={actant.label}
-                    onChangeFn={async (newLabel: string) => {
-                      if (newLabel !== actant.label) {
-                        updateActantMutation.mutate({
-                          label: newLabel,
-                        });
-                      }
-                    }}
-                  />
-                </StyledContentRowValue>
-              </StyledContentRow>
-              <StyledContentRow>
-                <StyledContentRowLabel>Detail</StyledContentRowLabel>
-                <StyledContentRowValue>
-                  <Input
-                    disabled={!userCanEdit}
-                    width="full"
-                    value={actant.detail}
-                    onChangeFn={async (newValue: string) => {
-                      updateActantMutation.mutate({ detail: newValue });
-                    }}
-                  />
-                </StyledContentRowValue>
-              </StyledContentRow>
-              <StyledContentRow>
-                <StyledContentRowLabel>Status</StyledContentRowLabel>
-                <StyledContentRowValue>
-                  <AttributeButtonGroup
-                    disabled={!userCanAdmin}
-                    options={[
-                      {
-                        longValue: actantStatusDict[0]["label"],
-                        shortValue: actantStatusDict[0]["label"],
-                        onClick: () => {
-                          updateActantMutation.mutate({
-                            status: actantStatusDict[0]["value"],
-                          });
-                        },
-                        selected:
-                          actantStatusDict[0]["value"] === actant.status,
-                      },
-                      {
-                        longValue: actantStatusDict[1]["label"],
-                        shortValue: actantStatusDict[1]["label"],
-                        onClick: () => {
-                          updateActantMutation.mutate({
-                            status: actantStatusDict[1]["value"],
-                          });
-                        },
-                        selected:
-                          actantStatusDict[1]["value"] === actant.status,
-                      },
-                      {
-                        longValue: actantStatusDict[2]["label"],
-                        shortValue: actantStatusDict[2]["label"],
-                        onClick: () => {
-                          updateActantMutation.mutate({
-                            status: actantStatusDict[2]["value"],
-                          });
-                        },
-                        selected:
-                          actantStatusDict[2]["value"] === actant.status,
-                      },
-                      {
-                        longValue: actantStatusDict[3]["label"],
-                        shortValue: actantStatusDict[3]["label"],
-                        onClick: () => {
-                          updateActantMutation.mutate({
-                            status: actantStatusDict[3]["value"],
-                          });
-                        },
-                        selected:
-                          actantStatusDict[3]["value"] === actant.status,
-                      },
-                    ]}
-                  />
-                </StyledContentRowValue>
-              </StyledContentRow>
-              <StyledContentRow>
-                <StyledContentRowLabel>Label language</StyledContentRowLabel>
-                <StyledContentRowValue>
-                  <Dropdown
-                    disabled={!userCanEdit}
-                    isMulti={false}
-                    width="full"
-                    options={languageDict}
-                    value={languageDict.find(
-                      (i: any) => i.value === actant.language
-                    )}
-                    onChange={(newValue: any) => {
-                      updateActantMutation.mutate({
-                        language: newValue.value || Language.Empty,
-                      });
-                    }}
-                  />
-                </StyledContentRowValue>
-              </StyledContentRow>
-              {actantMode === "entity" && actant.data?.logicalType && (
-                <StyledContentRow>
-                  <StyledContentRowLabel>Logical Type</StyledContentRowLabel>
-                  <StyledContentRowValue>
-                    <AttributeButtonGroup
+              <StyledDetailForm>
+                <StyledDetailContentRow>
+                  <StyledDetailContentRowLabel>
+                    Label
+                  </StyledDetailContentRowLabel>
+                  <StyledDetailContentRowValue>
+                    <Input
                       disabled={!userCanEdit}
+                      width="full"
+                      value={actant.label}
+                      onChangeFn={async (newLabel: string) => {
+                        if (newLabel !== actant.label) {
+                          updateActantMutation.mutate({
+                            label: newLabel,
+                          });
+                        }
+                      }}
+                    />
+                  </StyledDetailContentRowValue>
+                </StyledDetailContentRow>
+                <StyledDetailContentRow>
+                  <StyledDetailContentRowLabel>
+                    Detail
+                  </StyledDetailContentRowLabel>
+                  <StyledDetailContentRowValue>
+                    <Input
+                      disabled={!userCanEdit}
+                      width="full"
+                      value={actant.detail}
+                      onChangeFn={async (newValue: string) => {
+                        updateActantMutation.mutate({ detail: newValue });
+                      }}
+                    />
+                  </StyledDetailContentRowValue>
+                </StyledDetailContentRow>
+                <StyledDetailContentRow>
+                  <StyledDetailContentRowLabel>
+                    Status
+                  </StyledDetailContentRowLabel>
+                  <StyledDetailContentRowValue>
+                    <AttributeButtonGroup
+                      disabled={!userCanAdmin}
                       options={[
                         {
-                          longValue: actantLogicalTypeDict[0]["label"],
-                          shortValue: actantLogicalTypeDict[0]["label"],
+                          longValue: actantStatusDict[0]["label"],
+                          shortValue: actantStatusDict[0]["label"],
                           onClick: () => {
                             updateActantMutation.mutate({
-                              data: {
-                                logicalType: actantLogicalTypeDict[0]["value"],
-                              },
+                              status: actantStatusDict[0]["value"],
                             });
                           },
                           selected:
-                            actantLogicalTypeDict[0]["value"] ===
-                            actant.data.logicalType,
+                            actantStatusDict[0]["value"] === actant.status,
                         },
                         {
-                          longValue: actantLogicalTypeDict[1]["label"],
-                          shortValue: actantLogicalTypeDict[1]["label"],
+                          longValue: actantStatusDict[1]["label"],
+                          shortValue: actantStatusDict[1]["label"],
                           onClick: () => {
                             updateActantMutation.mutate({
-                              data: {
-                                logicalType: actantLogicalTypeDict[1]["value"],
-                              },
+                              status: actantStatusDict[1]["value"],
                             });
                           },
                           selected:
-                            actantLogicalTypeDict[1]["value"] ===
-                            actant.data.logicalType,
+                            actantStatusDict[1]["value"] === actant.status,
                         },
                         {
-                          longValue: actantLogicalTypeDict[2]["label"],
-                          shortValue: actantLogicalTypeDict[2]["label"],
+                          longValue: actantStatusDict[2]["label"],
+                          shortValue: actantStatusDict[2]["label"],
                           onClick: () => {
                             updateActantMutation.mutate({
-                              data: {
-                                logicalType: actantLogicalTypeDict[2]["value"],
-                              },
+                              status: actantStatusDict[2]["value"],
                             });
                           },
                           selected:
-                            actantLogicalTypeDict[2]["value"] ===
-                            actant.data.logicalType,
+                            actantStatusDict[2]["value"] === actant.status,
                         },
                         {
-                          longValue: actantLogicalTypeDict[3]["label"],
-                          shortValue: actantLogicalTypeDict[3]["label"],
+                          longValue: actantStatusDict[3]["label"],
+                          shortValue: actantStatusDict[3]["label"],
                           onClick: () => {
                             updateActantMutation.mutate({
-                              data: {
-                                logicalType: actantLogicalTypeDict[3]["value"],
-                              },
+                              status: actantStatusDict[3]["value"],
                             });
                           },
                           selected:
-                            actantLogicalTypeDict[3]["value"] ===
-                            actant.data.logicalType,
+                            actantStatusDict[3]["value"] === actant.status,
                         },
                       ]}
                     />
-                  </StyledContentRowValue>
-                </StyledContentRow>
-              )}
-
-              {/* Actions */}
-              {actantMode === "action" && (
-                <StyledContentRow>
-                  <StyledContentRowLabel>
-                    Subject entity type
-                  </StyledContentRowLabel>
-                  <StyledContentRowValue>
+                  </StyledDetailContentRowValue>
+                </StyledDetailContentRow>
+                <StyledDetailContentRow>
+                  <StyledDetailContentRowLabel>
+                    Label language
+                  </StyledDetailContentRowLabel>
+                  <StyledDetailContentRowValue>
                     <Dropdown
                       disabled={!userCanEdit}
-                      isMulti={true}
-                      options={entitiesDict}
-                      value={entitiesDict.filter((i: any) =>
-                        actant.data.entities.s.includes(i.value)
+                      isMulti={false}
+                      width="full"
+                      options={languageDict}
+                      value={languageDict.find(
+                        (i: any) => i.value === actant.language
                       )}
-                      width="full"
-                      noOptionsMessage={() => "* any"}
-                      placeholder={"* any"}
-                      hideSelectedOptions={true}
                       onChange={(newValue: any) => {
-                        const oldData = { ...actant.data };
                         updateActantMutation.mutate({
-                          data: {
-                            ...oldData,
-                            ...{
-                              entities: {
-                                s: newValue
-                                  ? (newValue as string[]).map(
-                                      (v: any) => v.value
-                                    )
-                                  : [],
-                                a1: actant.data.entities.a1,
-                                a2: actant.data.entities.a2,
+                          language: newValue.value || Language.Empty,
+                        });
+                      }}
+                    />
+                  </StyledDetailContentRowValue>
+                </StyledDetailContentRow>
+                {actantMode === "entity" && actant.data?.logicalType && (
+                  <StyledDetailContentRow>
+                    <StyledDetailContentRowLabel>
+                      Logical Type
+                    </StyledDetailContentRowLabel>
+                    <StyledDetailContentRowValue>
+                      <AttributeButtonGroup
+                        disabled={!userCanEdit}
+                        options={[
+                          {
+                            longValue: actantLogicalTypeDict[0]["label"],
+                            shortValue: actantLogicalTypeDict[0]["label"],
+                            onClick: () => {
+                              updateActantMutation.mutate({
+                                data: {
+                                  logicalType:
+                                    actantLogicalTypeDict[0]["value"],
+                                },
+                              });
+                            },
+                            selected:
+                              actantLogicalTypeDict[0]["value"] ===
+                              actant.data.logicalType,
+                          },
+                          {
+                            longValue: actantLogicalTypeDict[1]["label"],
+                            shortValue: actantLogicalTypeDict[1]["label"],
+                            onClick: () => {
+                              updateActantMutation.mutate({
+                                data: {
+                                  logicalType:
+                                    actantLogicalTypeDict[1]["value"],
+                                },
+                              });
+                            },
+                            selected:
+                              actantLogicalTypeDict[1]["value"] ===
+                              actant.data.logicalType,
+                          },
+                          {
+                            longValue: actantLogicalTypeDict[2]["label"],
+                            shortValue: actantLogicalTypeDict[2]["label"],
+                            onClick: () => {
+                              updateActantMutation.mutate({
+                                data: {
+                                  logicalType:
+                                    actantLogicalTypeDict[2]["value"],
+                                },
+                              });
+                            },
+                            selected:
+                              actantLogicalTypeDict[2]["value"] ===
+                              actant.data.logicalType,
+                          },
+                          {
+                            longValue: actantLogicalTypeDict[3]["label"],
+                            shortValue: actantLogicalTypeDict[3]["label"],
+                            onClick: () => {
+                              updateActantMutation.mutate({
+                                data: {
+                                  logicalType:
+                                    actantLogicalTypeDict[3]["value"],
+                                },
+                              });
+                            },
+                            selected:
+                              actantLogicalTypeDict[3]["value"] ===
+                              actant.data.logicalType,
+                          },
+                        ]}
+                      />
+                    </StyledDetailContentRowValue>
+                  </StyledDetailContentRow>
+                )}
+
+                {/* Actions */}
+                {actantMode === "action" && (
+                  <StyledDetailContentRow>
+                    <StyledDetailContentRowLabel>
+                      Subject entity type
+                    </StyledDetailContentRowLabel>
+                    <StyledDetailContentRowValue>
+                      <Dropdown
+                        disabled={!userCanEdit}
+                        isMulti={true}
+                        options={entitiesDict}
+                        value={entitiesDict.filter((i: any) =>
+                          actant.data.entities.s.includes(i.value)
+                        )}
+                        width="full"
+                        noOptionsMessage={() => "* any"}
+                        placeholder={"* any"}
+                        hideSelectedOptions={true}
+                        onChange={(newValue: any) => {
+                          const oldData = { ...actant.data };
+                          updateActantMutation.mutate({
+                            data: {
+                              ...oldData,
+                              ...{
+                                entities: {
+                                  s: newValue
+                                    ? (newValue as string[]).map(
+                                        (v: any) => v.value
+                                      )
+                                    : [],
+                                  a1: actant.data.entities.a1,
+                                  a2: actant.data.entities.a2,
+                                },
                               },
                             },
-                          },
-                        });
-                      }}
-                    />
-                  </StyledContentRowValue>
-                </StyledContentRow>
-              )}
-              {actantMode === "action" && (
-                <StyledContentRow>
-                  <StyledContentRowLabel>Subject valency</StyledContentRowLabel>
-                  <StyledContentRowValue>
-                    <Input
-                      disabled={!userCanEdit}
-                      value={actant.data.valencies.s}
-                      width="full"
-                      onChangeFn={async (newValue: string) => {
-                        const oldData = { ...actant.data };
-                        updateActantMutation.mutate({
-                          data: {
-                            ...oldData,
-                            ...{
-                              valencies: {
-                                s: newValue,
-                                a1: actant.data.valencies.a1,
-                                a2: actant.data.valencies.a2,
+                          });
+                        }}
+                      />
+                    </StyledDetailContentRowValue>
+                  </StyledDetailContentRow>
+                )}
+                {actantMode === "action" && (
+                  <StyledDetailContentRow>
+                    <StyledDetailContentRowLabel>
+                      Subject valency
+                    </StyledDetailContentRowLabel>
+                    <StyledDetailContentRowValue>
+                      <Input
+                        disabled={!userCanEdit}
+                        value={actant.data.valencies.s}
+                        width="full"
+                        onChangeFn={async (newValue: string) => {
+                          const oldData = { ...actant.data };
+                          updateActantMutation.mutate({
+                            data: {
+                              ...oldData,
+                              ...{
+                                valencies: {
+                                  s: newValue,
+                                  a1: actant.data.valencies.a1,
+                                  a2: actant.data.valencies.a2,
+                                },
                               },
                             },
-                          },
-                        });
-                      }}
-                    />
-                  </StyledContentRowValue>
-                </StyledContentRow>
-              )}
+                          });
+                        }}
+                      />
+                    </StyledDetailContentRowValue>
+                  </StyledDetailContentRow>
+                )}
 
-              {actantMode === "action" && (
-                <StyledContentRow>
-                  <StyledContentRowLabel>
-                    Actant1 entity type
-                  </StyledContentRowLabel>
-                  <StyledContentRowValue>
-                    <Dropdown
-                      disabled={!userCanEdit}
-                      isMulti={true}
-                      options={entitiesDict}
-                      value={entitiesDict.filter((i: any) =>
-                        actant.data.entities.a1.includes(i.value)
-                      )}
-                      placeholder={"* any"}
-                      width="full"
-                      hideSelectedOptions={true}
-                      onChange={(newValue: any) => {
-                        const oldData = { ...actant.data };
-                        updateActantMutation.mutate({
-                          data: {
-                            ...oldData,
-                            ...{
-                              entities: {
-                                a1: newValue
-                                  ? (newValue as string[]).map(
-                                      (v: any) => v.value
-                                    )
-                                  : [],
-                                s: actant.data.entities.s,
-                                a2: actant.data.entities.a2,
+                {actantMode === "action" && (
+                  <StyledDetailContentRow>
+                    <StyledDetailContentRowLabel>
+                      Actant1 entity type
+                    </StyledDetailContentRowLabel>
+                    <StyledDetailContentRowValue>
+                      <Dropdown
+                        disabled={!userCanEdit}
+                        isMulti={true}
+                        options={entitiesDict}
+                        value={entitiesDict.filter((i: any) =>
+                          actant.data.entities.a1.includes(i.value)
+                        )}
+                        placeholder={"* any"}
+                        width="full"
+                        hideSelectedOptions={true}
+                        onChange={(newValue: any) => {
+                          const oldData = { ...actant.data };
+                          updateActantMutation.mutate({
+                            data: {
+                              ...oldData,
+                              ...{
+                                entities: {
+                                  a1: newValue
+                                    ? (newValue as string[]).map(
+                                        (v: any) => v.value
+                                      )
+                                    : [],
+                                  s: actant.data.entities.s,
+                                  a2: actant.data.entities.a2,
+                                },
                               },
                             },
-                          },
-                        });
-                      }}
-                    />
-                  </StyledContentRowValue>
-                </StyledContentRow>
-              )}
+                          });
+                        }}
+                      />
+                    </StyledDetailContentRowValue>
+                  </StyledDetailContentRow>
+                )}
 
-              {actantMode === "action" && (
-                <StyledContentRow>
-                  <StyledContentRowLabel>Actant1 valency</StyledContentRowLabel>
-                  <StyledContentRowValue>
-                    <Input
-                      disabled={!userCanEdit}
-                      value={actant.data.valencies.a1}
-                      width="full"
-                      onChangeFn={async (newValue: string) => {
-                        const oldData = { ...actant.data };
-                        updateActantMutation.mutate({
-                          data: {
-                            ...oldData,
-                            ...{
-                              valencies: {
-                                s: actant.data.valencies.s,
-                                a1: newValue,
-                                a2: actant.data.valencies.a2,
+                {actantMode === "action" && (
+                  <StyledDetailContentRow>
+                    <StyledDetailContentRowLabel>
+                      Actant1 valency
+                    </StyledDetailContentRowLabel>
+                    <StyledDetailContentRowValue>
+                      <Input
+                        disabled={!userCanEdit}
+                        value={actant.data.valencies.a1}
+                        width="full"
+                        onChangeFn={async (newValue: string) => {
+                          const oldData = { ...actant.data };
+                          updateActantMutation.mutate({
+                            data: {
+                              ...oldData,
+                              ...{
+                                valencies: {
+                                  s: actant.data.valencies.s,
+                                  a1: newValue,
+                                  a2: actant.data.valencies.a2,
+                                },
                               },
                             },
-                          },
-                        });
-                      }}
-                    />
-                  </StyledContentRowValue>
-                </StyledContentRow>
-              )}
+                          });
+                        }}
+                      />
+                    </StyledDetailContentRowValue>
+                  </StyledDetailContentRow>
+                )}
 
-              {actantMode === "action" && (
-                <StyledContentRow>
-                  <StyledContentRowLabel>
-                    Actant2 entity type
-                  </StyledContentRowLabel>
-                  <StyledContentRowValue>
-                    <Dropdown
-                      disabled={!userCanEdit}
-                      isMulti={true}
-                      options={entitiesDict}
-                      value={entitiesDict.filter((i: any) =>
-                        actant.data.entities.a2.includes(i.value)
-                      )}
-                      hideSelectedOptions={true}
-                      placeholder={"* any"}
-                      width="full"
-                      onChange={(newValue: any) => {
-                        const oldData = { ...actant.data };
-                        updateActantMutation.mutate({
-                          data: {
-                            ...oldData,
-                            ...{
-                              entities: {
-                                a2: newValue
-                                  ? (newValue as string[]).map(
-                                      (v: any) => v.value
-                                    )
-                                  : [],
-                                s: actant.data.entities.s,
-                                a1: actant.data.entities.a1,
+                {actantMode === "action" && (
+                  <StyledDetailContentRow>
+                    <StyledDetailContentRowLabel>
+                      Actant2 entity type
+                    </StyledDetailContentRowLabel>
+                    <StyledDetailContentRowValue>
+                      <Dropdown
+                        disabled={!userCanEdit}
+                        isMulti={true}
+                        options={entitiesDict}
+                        value={entitiesDict.filter((i: any) =>
+                          actant.data.entities.a2.includes(i.value)
+                        )}
+                        hideSelectedOptions={true}
+                        placeholder={"* any"}
+                        width="full"
+                        onChange={(newValue: any) => {
+                          const oldData = { ...actant.data };
+                          updateActantMutation.mutate({
+                            data: {
+                              ...oldData,
+                              ...{
+                                entities: {
+                                  a2: newValue
+                                    ? (newValue as string[]).map(
+                                        (v: any) => v.value
+                                      )
+                                    : [],
+                                  s: actant.data.entities.s,
+                                  a1: actant.data.entities.a1,
+                                },
                               },
                             },
-                          },
-                        });
-                      }}
-                    />
-                  </StyledContentRowValue>
-                </StyledContentRow>
-              )}
+                          });
+                        }}
+                      />
+                    </StyledDetailContentRowValue>
+                  </StyledDetailContentRow>
+                )}
 
-              {actantMode === "action" && (
-                <StyledContentRow>
-                  <StyledContentRowLabel>Actant2 valency</StyledContentRowLabel>
-                  <StyledContentRowValue>
-                    <Input
-                      disabled={!userCanEdit}
-                      value={actant.data.valencies.a2}
-                      width="full"
-                      onChangeFn={async (newValue: string) => {
-                        const oldData = { ...actant.data };
-                        updateActantMutation.mutate({
-                          data: {
-                            ...oldData,
-                            ...{
-                              valencies: {
-                                s: actant.data.valencies.s,
-                                a1: actant.data.valencies.a1,
-                                a2: newValue,
+                {actantMode === "action" && (
+                  <StyledDetailContentRow>
+                    <StyledDetailContentRowLabel>
+                      Actant2 valency
+                    </StyledDetailContentRowLabel>
+                    <StyledDetailContentRowValue>
+                      <Input
+                        disabled={!userCanEdit}
+                        value={actant.data.valencies.a2}
+                        width="full"
+                        onChangeFn={async (newValue: string) => {
+                          const oldData = { ...actant.data };
+                          updateActantMutation.mutate({
+                            data: {
+                              ...oldData,
+                              ...{
+                                valencies: {
+                                  s: actant.data.valencies.s,
+                                  a1: actant.data.valencies.a1,
+                                  a2: newValue,
+                                },
                               },
                             },
-                          },
-                        });
-                      }}
-                    />
-                  </StyledContentRowValue>
-                </StyledContentRow>
-              )}
+                          });
+                        }}
+                      />
+                    </StyledDetailContentRowValue>
+                  </StyledDetailContentRow>
+                )}
 
-              {actantMode === "resource" && (
-                <StyledContentRow>
-                  <StyledContentRowLabel>URL</StyledContentRowLabel>
-                  <StyledContentRowValue>
-                    <Input
-                      disabled={!userCanEdit}
-                      value={actant.data.url}
-                      width="full"
-                      onChangeFn={async (newValue: string) => {
-                        const oldData = { ...actant.data };
-                        updateActantMutation.mutate({
-                          data: {
-                            ...oldData,
-                            ...{
-                              link: newValue,
+                {actantMode === "resource" && (
+                  <StyledDetailContentRow>
+                    <StyledDetailContentRowLabel>
+                      URL
+                    </StyledDetailContentRowLabel>
+                    <StyledDetailContentRowValue>
+                      <Input
+                        disabled={!userCanEdit}
+                        value={actant.data.url}
+                        width="full"
+                        onChangeFn={async (newValue: string) => {
+                          const oldData = { ...actant.data };
+                          updateActantMutation.mutate({
+                            data: {
+                              ...oldData,
+                              ...{
+                                link: newValue,
+                              },
                             },
-                          },
-                        });
+                          });
+                        }}
+                      />
+                    </StyledDetailContentRowValue>
+                  </StyledDetailContentRow>
+                )}
+
+                <StyledDetailContentRow>
+                  <StyledDetailContentRowLabel>
+                    Notes
+                  </StyledDetailContentRowLabel>
+                  <StyledDetailContentRowValue>
+                    <MultiInput
+                      disabled={!userCanEdit}
+                      values={actant.notes}
+                      width="full"
+                      onChange={(newValues: string[]) => {
+                        updateActantMutation.mutate({ notes: newValues });
                       }}
                     />
-                  </StyledContentRowValue>
-                </StyledContentRow>
-              )}
+                  </StyledDetailContentRowValue>
+                </StyledDetailContentRow>
+              </StyledDetailForm>
+            </StyledDetailSectionContent>
+          </StyledDetailSection>
 
-              <StyledContentRow>
-                <StyledContentRowLabel>Notes</StyledContentRowLabel>
-                <StyledContentRowValue>
-                  <MultiInput
-                    disabled={!userCanEdit}
-                    values={actant.notes}
-                    width="full"
-                    onChange={(newValues: string[]) => {
-                      updateActantMutation.mutate({ notes: newValues });
+          {/* meta statements section */}
+          <StyledDetailSection>
+            <StyledDetailSectionHeader>
+              Meta statements
+            </StyledDetailSectionHeader>
+            <StyledDetailSectionContent>
+              <ActantDetailMetaTable
+                userCanEdit={userCanEdit}
+                metaStatements={metaStatements}
+                updateMetaStatement={updateMetaStatementMutation}
+                removeMetaStatement={actantsDeleteMutation}
+              />
+              {userCanEdit && (
+                <Button
+                  color="primary"
+                  label="create new meta statement"
+                  icon={<FaPlus />}
+                  onClick={async () => {
+                    const newStatement = CMetaStatement(
+                      actant.id,
+                      localStorage.getItem("userrole") as UserRole
+                    );
+
+                    actantsCreateMutation.mutate(newStatement);
+                  }}
+                />
+              )}
+            </StyledDetailSectionContent>
+          </StyledDetailSection>
+
+          {/* usedId section */}
+          <StyledDetailSection lastSection>
+            <StyledDetailSectionHeader>
+              Used in statements:
+            </StyledDetailSectionHeader>
+            <StyledDetailSectionContentUsedIn>
+              <StyledDetailSectionUsedPageManager>
+                <StyledDetailSectionUsedTable>
+                  {`Page ${usedInPage + 1} / ${usedInPages}`}
+                  <Button
+                    key="previous"
+                    disabled={usedInPage === 0}
+                    icon={<FaStepBackward size={14} />}
+                    color="primary"
+                    tooltip="previous page"
+                    onClick={() => {
+                      if (usedInPage !== 0) {
+                        setUsedInPage(usedInPage - 1);
+                      }
                     }}
                   />
-                </StyledContentRowValue>
-              </StyledContentRow>
-            </StyledForm>
-          </StyledSection>
-          <StyledSection>
-            <StyledSectionHeader>Meta statements</StyledSectionHeader>
-
-            <ActantDetailMetaTable
-              userCanEdit={userCanEdit}
-              metaStatements={metaStatements}
-              updateMetaStatement={updateMetaStatementMutation}
-              removeMetaStatement={actantsDeleteMutation}
-            />
-            {userCanEdit && (
-              <Button
-                color="primary"
-                label="create new meta statement"
-                icon={<FaPlus />}
-                onClick={async () => {
-                  const newStatement = CMetaStatement(
-                    actant.id,
-                    localStorage.getItem("userrole") as UserRole
-                  );
-
-                  actantsCreateMutation.mutate(newStatement);
-                }}
-              />
-            )}
-          </StyledSection>
-          <StyledSection lastSection>
-            <StyledSectionHeader>Used in statements:</StyledSectionHeader>
-            <StyledSectionUsedPageManager>
-              {`Page ${usedInPage + 1} / ${usedInPages}`}
-              <Button
-                key="previous"
-                disabled={usedInPage === 0}
-                icon={<FaStepBackward size={14} />}
-                color="primary"
-                tooltip="previous page"
-                onClick={() => {
-                  if (usedInPage !== 0) {
-                    setUsedInPage(usedInPage - 1);
-                  }
-                }}
-              />
-              <Button
-                key="next"
-                disabled={usedInPage === usedInPages - 1}
-                icon={<FaStepForward size={14} />}
-                color="primary"
-                tooltip="next page"
-                onClick={() => {
-                  if (usedInPage !== usedInPages - 1) {
-                    setUsedInPage(usedInPage + 1);
-                  }
-                }}
-              />
-            </StyledSectionUsedPageManager>
-            <StyledSectionUsedTable>
-              <StyledHeaderColumn></StyledHeaderColumn>
-              <StyledHeaderColumn>Text</StyledHeaderColumn>
-              <StyledHeaderColumn>Position</StyledHeaderColumn>
-              <StyledHeaderColumn></StyledHeaderColumn>
-              {usedInStatements.map((usedInStatement) => {
-                const { statement, position } = usedInStatement;
-                return (
-                  <React.Fragment key={statement.id}>
-                    <StyledSectionUsedTableCell>
-                      <ActantTag
-                        key={statement.id}
-                        actant={statement}
-                        showOnly="entity"
-                        tooltipText={statement.data.text}
-                      />
-                    </StyledSectionUsedTableCell>
-                    <StyledSectionUsedTableCell>
-                      <StyledSectionUsedText>
-                        {statement.data.text}
-                      </StyledSectionUsedText>
-                    </StyledSectionUsedTableCell>
-                    <StyledSectionUsedTableCell>
-                      <StyledSectionUsedText>{position}</StyledSectionUsedText>
-                    </StyledSectionUsedTableCell>
-                    <StyledSectionMetaTableCell borderless>
-                      <StyledSectionMetaTableButtonGroup>
-                        <Button
-                          key="e"
-                          icon={<FaEdit size={14} />}
-                          color="plain"
-                          tooltip="edit statement"
-                          onClick={async () => {
-                            setStatementId(statement.id);
-                            setTerritoryId(statement.data.territory.id);
-                          }}
+                  <Button
+                    key="next"
+                    disabled={usedInPage === usedInPages - 1}
+                    icon={<FaStepForward size={14} />}
+                    color="primary"
+                    tooltip="next page"
+                    onClick={() => {
+                      if (usedInPage !== usedInPages - 1) {
+                        setUsedInPage(usedInPage + 1);
+                      }
+                    }}
+                  />
+                </StyledDetailSectionUsedTable>
+              </StyledDetailSectionUsedPageManager>
+              <StyledDetailSectionUsedTable>
+                <StyledDetailHeaderColumn></StyledDetailHeaderColumn>
+                <StyledDetailHeaderColumn>Text</StyledDetailHeaderColumn>
+                <StyledDetailHeaderColumn>Position</StyledDetailHeaderColumn>
+                <StyledDetailHeaderColumn></StyledDetailHeaderColumn>
+                {usedInStatements.map((usedInStatement) => {
+                  const { statement, position } = usedInStatement;
+                  return (
+                    <React.Fragment key={statement.id}>
+                      <StyledDetailSectionUsedTableCell>
+                        <ActantTag
+                          key={statement.id}
+                          actant={statement}
+                          showOnly="entity"
+                          tooltipText={statement.data.text}
                         />
-                      </StyledSectionMetaTableButtonGroup>
-                    </StyledSectionMetaTableCell>
-                  </React.Fragment>
-                );
-              })}
-            </StyledSectionUsedTable>
-          </StyledSection>
+                      </StyledDetailSectionUsedTableCell>
+                      <StyledDetailSectionUsedTableCell>
+                        <StyledDetailSectionUsedText>
+                          {statement.data.text}
+                        </StyledDetailSectionUsedText>
+                      </StyledDetailSectionUsedTableCell>
+                      <StyledDetailSectionUsedTableCell>
+                        <StyledDetailSectionUsedText>
+                          {position}
+                        </StyledDetailSectionUsedText>
+                      </StyledDetailSectionUsedTableCell>
+                      <StyledDetailSectionMetaTableCell borderless>
+                        <StyledDetailSectionMetaTableButtonGroup>
+                          <Button
+                            key="e"
+                            icon={<FaEdit size={14} />}
+                            color="plain"
+                            tooltip="edit statement"
+                            onClick={async () => {
+                              setStatementId(statement.id);
+                              setTerritoryId(statement.data.territory.id);
+                            }}
+                          />
+                        </StyledDetailSectionMetaTableButtonGroup>
+                      </StyledDetailSectionMetaTableCell>
+                    </React.Fragment>
+                  );
+                })}
+              </StyledDetailSectionUsedTable>
+            </StyledDetailSectionContentUsedIn>
+          </StyledDetailSection>
+
+          {/* Audits */}
+          <StyledDetailSection key="editor-section-audits">
+            <StyledDetailSectionHeader>Audits</StyledDetailSectionHeader>
+            <StyledDetailSectionContent>
+              {audit && <AuditTable {...audit} />}
+            </StyledDetailSectionContent>
+          </StyledDetailSection>
         </StyledContent>
       )}
 
