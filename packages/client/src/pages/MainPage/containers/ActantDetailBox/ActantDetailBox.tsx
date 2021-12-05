@@ -11,19 +11,19 @@ import {
 } from "components";
 import {
   StyledContent,
-  StyledSection,
-  StyledSectionHeader,
-  StyledSectionUsedTable,
-  StyledHeaderColumn,
-  StyledSectionUsedTableCell,
-  StyledSectionMetaTableButtonGroup,
-  StyledSectionMetaTableCell,
-  StyledContentRow,
-  StyledForm,
-  StyledSectionUsedText,
-  StyledSectionUsedPageManager,
-  StyledContentRowLabel,
-  StyledContentRowValue,
+  StyledDetailSection,
+  StyledDetailSectionHeader,
+  StyledDetailSectionUsedTable,
+  StyledDetailHeaderColumn,
+  StyledDetailSectionUsedTableCell,
+  StyledDetailSectionMetaTableButtonGroup,
+  StyledDetailSectionMetaTableCell,
+  StyledDetailContentRow,
+  StyledDetailForm,
+  StyledDetailSectionUsedText,
+  StyledDetailSectionUsedPageManager,
+  StyledDetailContentRowLabel,
+  StyledDetailContentRowValue,
   StyledActantPreviewRow,
   StyledTagWrap,
 } from "./ActandDetailBoxStyles";
@@ -298,7 +298,7 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
     <>
       {actant && (
         <StyledContent type={actant.class}>
-          <StyledSection firstSection>
+          <StyledDetailSection firstSection>
             <StyledActantPreviewRow>
               <StyledTagWrap>
                 <ActantTag
@@ -348,10 +348,10 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
               </ButtonGroup>
             </StyledActantPreviewRow>
 
-            <StyledForm>
-              <StyledContentRow>
-                <StyledContentRowLabel>Label</StyledContentRowLabel>
-                <StyledContentRowValue>
+            <StyledDetailForm>
+              <StyledDetailContentRow>
+                <StyledDetailContentRowLabel>Label</StyledDetailContentRowLabel>
+                <StyledDetailContentRowValue>
                   <Input
                     disabled={!userCanEdit}
                     width="full"
@@ -364,11 +364,13 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
                       }
                     }}
                   />
-                </StyledContentRowValue>
-              </StyledContentRow>
-              <StyledContentRow>
-                <StyledContentRowLabel>Detail</StyledContentRowLabel>
-                <StyledContentRowValue>
+                </StyledDetailContentRowValue>
+              </StyledDetailContentRow>
+              <StyledDetailContentRow>
+                <StyledDetailContentRowLabel>
+                  Detail
+                </StyledDetailContentRowLabel>
+                <StyledDetailContentRowValue>
                   <Input
                     disabled={!userCanEdit}
                     width="full"
@@ -377,11 +379,13 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
                       updateActantMutation.mutate({ detail: newValue });
                     }}
                   />
-                </StyledContentRowValue>
-              </StyledContentRow>
-              <StyledContentRow>
-                <StyledContentRowLabel>Status</StyledContentRowLabel>
-                <StyledContentRowValue>
+                </StyledDetailContentRowValue>
+              </StyledDetailContentRow>
+              <StyledDetailContentRow>
+                <StyledDetailContentRowLabel>
+                  Status
+                </StyledDetailContentRowLabel>
+                <StyledDetailContentRowValue>
                   <AttributeButtonGroup
                     disabled={!userCanAdmin}
                     options={[
@@ -431,11 +435,13 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
                       },
                     ]}
                   />
-                </StyledContentRowValue>
-              </StyledContentRow>
-              <StyledContentRow>
-                <StyledContentRowLabel>Label language</StyledContentRowLabel>
-                <StyledContentRowValue>
+                </StyledDetailContentRowValue>
+              </StyledDetailContentRow>
+              <StyledDetailContentRow>
+                <StyledDetailContentRowLabel>
+                  Label language
+                </StyledDetailContentRowLabel>
+                <StyledDetailContentRowValue>
                   <Dropdown
                     disabled={!userCanEdit}
                     isMulti={false}
@@ -450,12 +456,14 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
                       });
                     }}
                   />
-                </StyledContentRowValue>
-              </StyledContentRow>
+                </StyledDetailContentRowValue>
+              </StyledDetailContentRow>
               {actantMode === "entity" && actant.data?.logicalType && (
-                <StyledContentRow>
-                  <StyledContentRowLabel>Logical Type</StyledContentRowLabel>
-                  <StyledContentRowValue>
+                <StyledDetailContentRow>
+                  <StyledDetailContentRowLabel>
+                    Logical Type
+                  </StyledDetailContentRowLabel>
+                  <StyledDetailContentRowValue>
                     <AttributeButtonGroup
                       disabled={!userCanEdit}
                       options={[
@@ -517,17 +525,17 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
                         },
                       ]}
                     />
-                  </StyledContentRowValue>
-                </StyledContentRow>
+                  </StyledDetailContentRowValue>
+                </StyledDetailContentRow>
               )}
 
               {/* Actions */}
               {actantMode === "action" && (
-                <StyledContentRow>
-                  <StyledContentRowLabel>
+                <StyledDetailContentRow>
+                  <StyledDetailContentRowLabel>
                     Subject entity type
-                  </StyledContentRowLabel>
-                  <StyledContentRowValue>
+                  </StyledDetailContentRowLabel>
+                  <StyledDetailContentRowValue>
                     <Dropdown
                       disabled={!userCanEdit}
                       isMulti={true}
@@ -559,13 +567,15 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
                         });
                       }}
                     />
-                  </StyledContentRowValue>
-                </StyledContentRow>
+                  </StyledDetailContentRowValue>
+                </StyledDetailContentRow>
               )}
               {actantMode === "action" && (
-                <StyledContentRow>
-                  <StyledContentRowLabel>Subject valency</StyledContentRowLabel>
-                  <StyledContentRowValue>
+                <StyledDetailContentRow>
+                  <StyledDetailContentRowLabel>
+                    Subject valency
+                  </StyledDetailContentRowLabel>
+                  <StyledDetailContentRowValue>
                     <Input
                       disabled={!userCanEdit}
                       value={actant.data.valencies.s}
@@ -586,16 +596,16 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
                         });
                       }}
                     />
-                  </StyledContentRowValue>
-                </StyledContentRow>
+                  </StyledDetailContentRowValue>
+                </StyledDetailContentRow>
               )}
 
               {actantMode === "action" && (
-                <StyledContentRow>
-                  <StyledContentRowLabel>
+                <StyledDetailContentRow>
+                  <StyledDetailContentRowLabel>
                     Actant1 entity type
-                  </StyledContentRowLabel>
-                  <StyledContentRowValue>
+                  </StyledDetailContentRowLabel>
+                  <StyledDetailContentRowValue>
                     <Dropdown
                       disabled={!userCanEdit}
                       isMulti={true}
@@ -626,14 +636,16 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
                         });
                       }}
                     />
-                  </StyledContentRowValue>
-                </StyledContentRow>
+                  </StyledDetailContentRowValue>
+                </StyledDetailContentRow>
               )}
 
               {actantMode === "action" && (
-                <StyledContentRow>
-                  <StyledContentRowLabel>Actant1 valency</StyledContentRowLabel>
-                  <StyledContentRowValue>
+                <StyledDetailContentRow>
+                  <StyledDetailContentRowLabel>
+                    Actant1 valency
+                  </StyledDetailContentRowLabel>
+                  <StyledDetailContentRowValue>
                     <Input
                       disabled={!userCanEdit}
                       value={actant.data.valencies.a1}
@@ -654,16 +666,16 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
                         });
                       }}
                     />
-                  </StyledContentRowValue>
-                </StyledContentRow>
+                  </StyledDetailContentRowValue>
+                </StyledDetailContentRow>
               )}
 
               {actantMode === "action" && (
-                <StyledContentRow>
-                  <StyledContentRowLabel>
+                <StyledDetailContentRow>
+                  <StyledDetailContentRowLabel>
                     Actant2 entity type
-                  </StyledContentRowLabel>
-                  <StyledContentRowValue>
+                  </StyledDetailContentRowLabel>
+                  <StyledDetailContentRowValue>
                     <Dropdown
                       disabled={!userCanEdit}
                       isMulti={true}
@@ -694,14 +706,16 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
                         });
                       }}
                     />
-                  </StyledContentRowValue>
-                </StyledContentRow>
+                  </StyledDetailContentRowValue>
+                </StyledDetailContentRow>
               )}
 
               {actantMode === "action" && (
-                <StyledContentRow>
-                  <StyledContentRowLabel>Actant2 valency</StyledContentRowLabel>
-                  <StyledContentRowValue>
+                <StyledDetailContentRow>
+                  <StyledDetailContentRowLabel>
+                    Actant2 valency
+                  </StyledDetailContentRowLabel>
+                  <StyledDetailContentRowValue>
                     <Input
                       disabled={!userCanEdit}
                       value={actant.data.valencies.a2}
@@ -722,14 +736,14 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
                         });
                       }}
                     />
-                  </StyledContentRowValue>
-                </StyledContentRow>
+                  </StyledDetailContentRowValue>
+                </StyledDetailContentRow>
               )}
 
               {actantMode === "resource" && (
-                <StyledContentRow>
-                  <StyledContentRowLabel>URL</StyledContentRowLabel>
-                  <StyledContentRowValue>
+                <StyledDetailContentRow>
+                  <StyledDetailContentRowLabel>URL</StyledDetailContentRowLabel>
+                  <StyledDetailContentRowValue>
                     <Input
                       disabled={!userCanEdit}
                       value={actant.data.url}
@@ -746,13 +760,13 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
                         });
                       }}
                     />
-                  </StyledContentRowValue>
-                </StyledContentRow>
+                  </StyledDetailContentRowValue>
+                </StyledDetailContentRow>
               )}
 
-              <StyledContentRow>
-                <StyledContentRowLabel>Notes</StyledContentRowLabel>
-                <StyledContentRowValue>
+              <StyledDetailContentRow>
+                <StyledDetailContentRowLabel>Notes</StyledDetailContentRowLabel>
+                <StyledDetailContentRowValue>
                   <MultiInput
                     disabled={!userCanEdit}
                     values={actant.notes}
@@ -761,12 +775,14 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
                       updateActantMutation.mutate({ notes: newValues });
                     }}
                   />
-                </StyledContentRowValue>
-              </StyledContentRow>
-            </StyledForm>
-          </StyledSection>
-          <StyledSection>
-            <StyledSectionHeader>Meta statements</StyledSectionHeader>
+                </StyledDetailContentRowValue>
+              </StyledDetailContentRow>
+            </StyledDetailForm>
+          </StyledDetailSection>
+          <StyledDetailSection>
+            <StyledDetailSectionHeader>
+              Meta statements
+            </StyledDetailSectionHeader>
 
             <ActantDetailMetaTable
               userCanEdit={userCanEdit}
@@ -789,10 +805,12 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
                 }}
               />
             )}
-          </StyledSection>
-          <StyledSection lastSection>
-            <StyledSectionHeader>Used in statements:</StyledSectionHeader>
-            <StyledSectionUsedPageManager>
+          </StyledDetailSection>
+          <StyledDetailSection lastSection>
+            <StyledDetailSectionHeader>
+              Used in statements:
+            </StyledDetailSectionHeader>
+            <StyledDetailSectionUsedPageManager>
               {`Page ${usedInPage + 1} / ${usedInPages}`}
               <Button
                 key="previous"
@@ -818,34 +836,36 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
                   }
                 }}
               />
-            </StyledSectionUsedPageManager>
-            <StyledSectionUsedTable>
-              <StyledHeaderColumn></StyledHeaderColumn>
-              <StyledHeaderColumn>Text</StyledHeaderColumn>
-              <StyledHeaderColumn>Position</StyledHeaderColumn>
-              <StyledHeaderColumn></StyledHeaderColumn>
+            </StyledDetailSectionUsedPageManager>
+            <StyledDetailSectionUsedTable>
+              <StyledDetailHeaderColumn></StyledDetailHeaderColumn>
+              <StyledDetailHeaderColumn>Text</StyledDetailHeaderColumn>
+              <StyledDetailHeaderColumn>Position</StyledDetailHeaderColumn>
+              <StyledDetailHeaderColumn></StyledDetailHeaderColumn>
               {usedInStatements.map((usedInStatement) => {
                 const { statement, position } = usedInStatement;
                 return (
                   <React.Fragment key={statement.id}>
-                    <StyledSectionUsedTableCell>
+                    <StyledDetailSectionUsedTableCell>
                       <ActantTag
                         key={statement.id}
                         actant={statement}
                         showOnly="entity"
                         tooltipText={statement.data.text}
                       />
-                    </StyledSectionUsedTableCell>
-                    <StyledSectionUsedTableCell>
-                      <StyledSectionUsedText>
+                    </StyledDetailSectionUsedTableCell>
+                    <StyledDetailSectionUsedTableCell>
+                      <StyledDetailSectionUsedText>
                         {statement.data.text}
-                      </StyledSectionUsedText>
-                    </StyledSectionUsedTableCell>
-                    <StyledSectionUsedTableCell>
-                      <StyledSectionUsedText>{position}</StyledSectionUsedText>
-                    </StyledSectionUsedTableCell>
-                    <StyledSectionMetaTableCell borderless>
-                      <StyledSectionMetaTableButtonGroup>
+                      </StyledDetailSectionUsedText>
+                    </StyledDetailSectionUsedTableCell>
+                    <StyledDetailSectionUsedTableCell>
+                      <StyledDetailSectionUsedText>
+                        {position}
+                      </StyledDetailSectionUsedText>
+                    </StyledDetailSectionUsedTableCell>
+                    <StyledDetailSectionMetaTableCell borderless>
+                      <StyledDetailSectionMetaTableButtonGroup>
                         <Button
                           key="e"
                           icon={<FaEdit size={14} />}
@@ -856,19 +876,19 @@ export const ActantDetailBox: React.FC<ActantDetailBox> = ({}) => {
                             setTerritoryId(statement.data.territory.id);
                           }}
                         />
-                      </StyledSectionMetaTableButtonGroup>
-                    </StyledSectionMetaTableCell>
+                      </StyledDetailSectionMetaTableButtonGroup>
+                    </StyledDetailSectionMetaTableCell>
                   </React.Fragment>
                 );
               })}
-            </StyledSectionUsedTable>
-          </StyledSection>
+            </StyledDetailSectionUsedTable>
+          </StyledDetailSection>
 
           {/* Audits */}
-          <StyledSection key="editor-section-audits">
-            <StyledSectionHeader>Audits</StyledSectionHeader>
+          <StyledDetailSection key="editor-section-audits">
+            <StyledDetailSectionHeader>Audits</StyledDetailSectionHeader>
             {audit && <AuditTable {...audit} />}
-          </StyledSection>
+          </StyledDetailSection>
         </StyledContent>
       )}
 
