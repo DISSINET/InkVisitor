@@ -67,6 +67,7 @@ import { excludedSuggesterEntities } from "Theme/constants";
 import { BsArrow90DegLeft, BsArrowRightShort } from "react-icons/bs";
 import { StyledItemBox } from "../StatementsListBox/StatementListHeader/StatementListBreadcrumbItem/StatementListBreadcrumbItemStyles";
 import { AuditTable } from "./../AuditTable/AuditTable";
+import { JSONExplorer } from "../JSONExplorer/JSONExplorer";
 
 const classesActants = [
   ActantType.Action,
@@ -1117,6 +1118,14 @@ export const StatementEditorBox: React.FC = () => {
             <StyledEditorSectionHeader>Audits</StyledEditorSectionHeader>
             <StyledEditorSectionContent>
               {audit && <AuditTable {...audit} />}
+            </StyledEditorSectionContent>
+          </StyledEditorSection>
+
+          {/* JSON */}
+          <StyledEditorSection key="editor-section-json">
+            <StyledEditorSectionHeader>JSON</StyledEditorSectionHeader>
+            <StyledEditorSectionContent>
+              {statement && <JSONExplorer data={statement} />}
             </StyledEditorSectionContent>
           </StyledEditorSection>
         </div>
