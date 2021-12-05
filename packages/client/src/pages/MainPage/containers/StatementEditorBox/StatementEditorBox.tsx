@@ -66,6 +66,7 @@ import { StatementListBreadcrumbItem } from "../StatementsListBox/StatementListH
 import { excludedSuggesterEntities } from "Theme/constants";
 import { BsArrow90DegLeft, BsArrowRightShort } from "react-icons/bs";
 import { StyledItemBox } from "../StatementsListBox/StatementListHeader/StatementListBreadcrumbItem/StatementListBreadcrumbItemStyles";
+import { AuditTable } from "./../AuditTable/AuditTable";
 
 const classesActants = [
   ActantType.Action,
@@ -131,6 +132,26 @@ export const StatementEditorBox: React.FC = () => {
     },
     { enabled: !!statementId && api.isLoggedIn(), retry: 2 }
   );
+
+  // Audit query
+  const {
+    status: statusAudit,
+    data: audit,
+    error: auditError,
+    isFetching: isFetchingAudit,
+  } = useQuery(
+    ["audit", statementId],
+    async () => {
+      const res = await api.auditGet(statementId);
+      return res.data;
+    },
+    { enabled: !!statementId && api.isLoggedIn(), retry: 2 }
+  );
+
+  // refetch audit when statement changes
+  useEffect(() => {
+    queryClient.invalidateQueries("audit");
+  }, [statement]);
 
   // stores territory id
   const statementTerritoryId: string | undefined = useMemo(() => {
@@ -1088,6 +1109,14 @@ export const StatementEditorBox: React.FC = () => {
                   updateActantMutation.mutate({ notes: newValues });
                 }}
               />
+            </StyledEditorSectionContent>
+          </StyledEditorSection>
+
+          {/* Audits */}
+          <StyledEditorSection key="editor-section-audits">
+            <StyledEditorSectionHeader>Audits</StyledEditorSectionHeader>
+            <StyledEditorSectionContent>
+              {audit && <AuditTable {...audit} />}
             </StyledEditorSectionContent>
           </StyledEditorSection>
         </div>
