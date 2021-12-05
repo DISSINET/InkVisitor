@@ -51,6 +51,9 @@ export const StyledTd = styled.td`
   padding-left: ${({ theme }) => theme.space[4]};
   font-size: ${({ theme }) => theme.fontSize["sm"]};
 `;
+export const StyledTdLastEdit = styled(StyledTd)`
+  font-size: ${({ theme }) => theme.fontSize["xxs"]};
+`;
 export const StyledSubRow = styled.div`
   width: 100%;
   padding: ${({ theme }) => theme.space[2]};
