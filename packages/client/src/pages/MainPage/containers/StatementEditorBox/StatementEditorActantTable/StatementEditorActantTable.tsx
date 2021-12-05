@@ -336,39 +336,41 @@ export const StatementEditorActantTable: React.FC<StatementEditorActantTable> = 
 
   return (
     <>
-      <StyledTable {...getTableProps()}>
-        <StyledTHead>
-          {headerGroups.map((headerGroup, key) => (
-            <tr {...headerGroup.getHeaderGroupProps()} key={key}>
-              <th></th>
-              {headerGroup.headers.map((column, key) => (
-                <StyledTh {...column.getHeaderProps()} key={key}>
-                  {column.render("Header")}
-                </StyledTh>
-              ))}
-            </tr>
-          ))}
-        </StyledTHead>
-        <tbody {...getTableBodyProps()}>
-          {rows.map((row: Row, i: number) => {
-            prepareRow(row);
-            return (
-              <StatementEditorActantTableRow
-                renderPropGroup={renderPropGroup}
-                handleClick={handleRowClick}
-                index={i}
-                row={row}
-                statement={statement}
-                moveRow={moveRow}
-                userCanEdit={userCanEdit}
-                updateOrderFn={updateActantsOrder}
-                visibleColumns={visibleColumns}
-                {...row.getRowProps()}
-              />
-            );
-          })}
-        </tbody>
-      </StyledTable>
+      {rows.length > 0 && (
+        <StyledTable {...getTableProps()}>
+          <StyledTHead>
+            {headerGroups.map((headerGroup, key) => (
+              <tr {...headerGroup.getHeaderGroupProps()} key={key}>
+                <th></th>
+                {headerGroup.headers.map((column, key) => (
+                  <StyledTh {...column.getHeaderProps()} key={key}>
+                    {column.render("Header")}
+                  </StyledTh>
+                ))}
+              </tr>
+            ))}
+          </StyledTHead>
+          <tbody {...getTableBodyProps()}>
+            {rows.map((row: Row, i: number) => {
+              prepareRow(row);
+              return (
+                <StatementEditorActantTableRow
+                  renderPropGroup={renderPropGroup}
+                  handleClick={handleRowClick}
+                  index={i}
+                  row={row}
+                  statement={statement}
+                  moveRow={moveRow}
+                  userCanEdit={userCanEdit}
+                  updateOrderFn={updateActantsOrder}
+                  visibleColumns={visibleColumns}
+                  {...row.getRowProps()}
+                />
+              );
+            })}
+          </tbody>
+        </StyledTable>
+      )}
     </>
   );
 };
