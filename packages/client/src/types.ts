@@ -135,6 +135,7 @@ export type SearchParams = {
 };
 
 // Attribute Editor
+// TODO: delete what is not used
 export type AttributeName =
   | "certainty"
   | "elvl"
@@ -162,7 +163,7 @@ export interface AttributeData {
   bundleEnd?: boolean;
 }
 export interface AttributeDataObject {
+  statement: AttributeData;
   type: AttributeData;
   value: AttributeData;
-  statement: AttributeData;
 }

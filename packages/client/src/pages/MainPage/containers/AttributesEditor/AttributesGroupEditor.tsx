@@ -237,6 +237,7 @@ export const AttributesGroupEditor: React.FC<AttributesGroupEditor> = ({
         <ModalContent>
           <StyledGridColumns>
             <div style={{ display: "grid" }}>
+              <h6>Statement</h6>
               <AttributesForm
                 groupName="statement"
                 modalData={modalData.statement}
@@ -244,6 +245,7 @@ export const AttributesGroupEditor: React.FC<AttributesGroupEditor> = ({
               />
             </div>
             <div style={{ display: "grid" }}>
+              <h6>Type</h6>
               <AttributesForm
                 groupName="type"
                 modalData={modalData.type}
@@ -251,6 +253,7 @@ export const AttributesGroupEditor: React.FC<AttributesGroupEditor> = ({
               />
             </div>
             <div style={{ display: "grid" }}>
+              <h6>Value</h6>
               <AttributesForm
                 groupName="value"
                 modalData={modalData.value}
