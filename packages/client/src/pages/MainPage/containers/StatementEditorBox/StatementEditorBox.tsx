@@ -110,12 +110,8 @@ const classesTags = [
 ];
 
 export const StatementEditorBox: React.FC = () => {
-  const {
-    statementId,
-    setStatementId,
-    territoryId,
-    setTerritoryId,
-  } = useSearchParams();
+  const { statementId, setStatementId, territoryId, setTerritoryId } =
+    useSearchParams();
 
   const queryClient = useQueryClient();
 
@@ -810,7 +806,7 @@ export const StatementEditorBox: React.FC = () => {
                     button={
                       <Button
                         icon={<BsArrow90DegLeft />}
-                        tooltip="got to territory"
+                        tooltip="go to territory"
                         color="plain"
                         inverted
                         onClick={() => {
