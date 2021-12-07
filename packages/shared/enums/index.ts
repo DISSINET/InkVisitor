@@ -1,5 +1,5 @@
 export enum ActantType {
-  Unknown = "", // default in actant model, invalid
+  Any = "*",
   Action = "A",
   Territory = "T",
   Statement = "S",

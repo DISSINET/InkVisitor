@@ -48,7 +48,7 @@ export const StyledEditorSection = styled.div<StyledEditorSection>`
 interface StyledEditorSectionHeader {}
 export const StyledEditorSectionHeader = styled.div<StyledEditorSectionHeader>`
   font-weight: ${({ theme }) => theme.fontWeight.regular};
-  font-size: ${({ theme }) => theme.fontSize.xl};
+  font-size: ${({ theme }) => theme.fontSize.lg};
   margin-bottom: ${({ theme }) => theme.space["4"]};
   color: ${({ theme }) => theme.color["primary"]};
 `;
@@ -164,4 +164,10 @@ export const StyledEditorActantTableWrapper = styled.div`
 export const StyledTagWrapper = styled.div`
   display: inline-flex;
   overflow: hidden;
+`;
+
+export const StyledBreadcrumbWrap = styled.div`
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
 `;

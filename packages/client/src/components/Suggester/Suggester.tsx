@@ -22,7 +22,7 @@ import {
 import { SuggesterKeyPress } from "./SuggesterKeyPress";
 import { toast } from "react-toastify";
 import { SuggesterModal } from "./SuggesterModal";
-import { ActantStatus } from "@shared/enums";
+import { ActantStatus, ActantType } from "@shared/enums";
 import useKeypress from "hooks/useKeyPress";
 
 export interface SuggestionI {

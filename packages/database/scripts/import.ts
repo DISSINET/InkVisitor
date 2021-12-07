@@ -1,5 +1,6 @@
 import { IUser } from "../../shared/types/user";
 import { hashPassword } from "../../server/src/common/auth";
+import { IAudit } from "../../shared/types";
 const fs = require("fs");
 const r = require("rethinkdb");
 var tunnel = require("tunnel-ssh");
@@ -142,6 +143,13 @@ const importData = async () => {
         data = data.map((user: IUser) => {
           user.password = hashPassword(user.password ? user.password : "");
           return user;
+        });
+      }
+
+      if (table.name === "audits") {
+        data = data.map((audit: IAudit) => {
+          audit.date = new Date(audit.date);
+          return audit;
         });
       }
 

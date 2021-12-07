@@ -19,10 +19,12 @@ import {
 import * as errors from "@shared/types/errors";
 import { toast } from "react-toastify";
 import { IRequestSearch } from "types";
+import { ActantType } from "@shared/enums";
 
 type FilterActantsI = {
   label?: string;
   class?: string | false;
+  excluded?: ActantType[];
 };
 
 type FilterUsersI = {
@@ -478,7 +480,7 @@ class Api {
    */
   async auditGet(actantId: string): Promise<AxiosResponse<IResponseAudit>> {
     try {
-      const response = await this.connection.get(`/audit/get/${actantId}`);
+      const response = await this.connection.get(`/audits/get/${actantId}`);
       return response;
     } catch (err: any | AxiosError) {
       throw { ...err.response.data };

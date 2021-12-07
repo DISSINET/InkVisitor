@@ -8,10 +8,9 @@ import {
   FaUnlink,
   FaCaretUp,
   FaCaretDown,
-  FaArrowAltCircleLeft,
 } from "react-icons/fa";
 
-import { ActantTag } from "./../";
+import { EntityTag } from "./../";
 import {
   CProp,
   CReference,
@@ -33,7 +32,7 @@ import {
   Loader,
   MultiInput,
 } from "components";
-import { ActantSuggester } from "./../";
+import { EntitySuggester } from "./../";
 
 import {
   StyledReferencesListColumn,
@@ -53,41 +52,62 @@ import {
   StyledGrid,
   StyledGridCell,
   StyledTagWrapper,
+  StyledBreadcrumbWrap,
 } from "./StatementEditorBoxStyles";
 import { StatementEditorActantTable } from "./StatementEditorActantTable/StatementEditorActantTable";
 import { StatementEditorActionTable } from "./StatementEditorActionTable/StatementEditorActionTable";
 import { AttributesEditor } from "../AttributesEditor/AttributesEditor";
 import { ColumnInstance } from "react-table";
-import { useAppSelector } from "redux/hooks";
 import { useSearchParams } from "hooks";
 import { AttributeButtonGroup } from "../AttributeButtonGroup/AttributeButtonGroup";
-import { UserRoleMode } from "@shared/enums";
+import { ActantType, UserRoleMode } from "@shared/enums";
 import { StyledSubRow } from "./StatementEditorActionTable/StatementEditorActionTableStyles";
-import {
-  StyledHeader,
-  StyledHeaderBreadcrumbRow,
-  StyledTitle,
-} from "../StatementsListBox/StatementListHeader/StatementListHeaderStyles";
 import { StatementListBreadcrumbItem } from "../StatementsListBox/StatementListHeader/StatementListBreadcrumbItem/StatementListBreadcrumbItem";
 import { excludedSuggesterEntities } from "Theme/constants";
+import { BsArrow90DegLeft, BsArrowRightShort } from "react-icons/bs";
+import { StyledItemBox } from "../StatementsListBox/StatementListHeader/StatementListBreadcrumbItem/StatementListBreadcrumbItemStyles";
+import { AuditTable } from "./../AuditTable/AuditTable";
+import { JSONExplorer } from "../JSONExplorer/JSONExplorer";
 
-const classesActants = ["A", "T", "R", "P", "G", "O", "C", "L", "V", "E"];
-const classesPropType = ["C"];
-const classesPropValue = [
-  "A",
-  "P",
-  "G",
-  "O",
-  "C",
-  "L",
-  "V",
-  "E",
-  "S",
-  "T",
-  "R",
+const classesActants = [
+  ActantType.Action,
+  ActantType.Territory,
+  ActantType.Resource,
+  ActantType.Person,
+  ActantType.Group,
+  ActantType.Object,
+  ActantType.Concept,
+  ActantType.Location,
+  ActantType.Value,
+  ActantType.Event,
 ];
-const classesResources = ["R"];
-const classesTags = ["A", "T", "R", "P", "G", "O", "C", "L", "V", "E"];
+const classesPropType = [ActantType.Concept];
+const classesPropValue = [
+  ActantType.Action,
+  ActantType.Person,
+  ActantType.Group,
+  ActantType.Object,
+  ActantType.Concept,
+  ActantType.Location,
+  ActantType.Value,
+  ActantType.Event,
+  ActantType.Statement,
+  ActantType.Territory,
+  ActantType.Resource,
+];
+const classesResources = [ActantType.Resource];
+const classesTags = [
+  ActantType.Action,
+  ActantType.Territory,
+  ActantType.Resource,
+  ActantType.Person,
+  ActantType.Group,
+  ActantType.Object,
+  ActantType.Concept,
+  ActantType.Location,
+  ActantType.Value,
+  ActantType.Event,
+];
 
 export const StatementEditorBox: React.FC = () => {
   const {
@@ -113,6 +133,26 @@ export const StatementEditorBox: React.FC = () => {
     },
     { enabled: !!statementId && api.isLoggedIn(), retry: 2 }
   );
+
+  // Audit query
+  const {
+    status: statusAudit,
+    data: audit,
+    error: auditError,
+    isFetching: isFetchingAudit,
+  } = useQuery(
+    ["audit", statementId],
+    async () => {
+      const res = await api.auditGet(statementId);
+      return res.data;
+    },
+    { enabled: !!statementId && api.isLoggedIn(), retry: 2 }
+  );
+
+  // refetch audit when statement changes
+  useEffect(() => {
+    queryClient.invalidateQueries("audit");
+  }, [statement]);
 
   // stores territory id
   const statementTerritoryId: string | undefined = useMemo(() => {
@@ -507,7 +547,7 @@ export const StatementEditorBox: React.FC = () => {
           isTag={propTypeActant ? true : false}
         >
           {propTypeActant ? (
-            <ActantTag
+            <EntityTag
               actant={propTypeActant}
               fullWidth
               button={
@@ -529,7 +569,7 @@ export const StatementEditorBox: React.FC = () => {
               }
             />
           ) : (
-            <ActantSuggester
+            <EntitySuggester
               statementTerritoryId={statement.data.territory.id}
               openDetailOnCreate
               onSelected={(newSelectedId: string) => {
@@ -540,7 +580,7 @@ export const StatementEditorBox: React.FC = () => {
                   },
                 });
               }}
-              categoryIds={classesPropType}
+              categoryTypes={classesPropType}
               inputWidth={"full"}
               excludedEntities={excludedSuggesterEntities}
             />
@@ -583,7 +623,7 @@ export const StatementEditorBox: React.FC = () => {
           isTag={propValueActant ? true : false}
         >
           {propValueActant ? (
-            <ActantTag
+            <EntityTag
               actant={propValueActant}
               fullWidth
               button={
@@ -605,7 +645,7 @@ export const StatementEditorBox: React.FC = () => {
               }
             />
           ) : (
-            <ActantSuggester
+            <EntitySuggester
               statementTerritoryId={statement.data.territory.id}
               openDetailOnCreate
               onSelected={(newSelectedId: string) => {
@@ -616,7 +656,7 @@ export const StatementEditorBox: React.FC = () => {
                   },
                 });
               }}
-              categoryIds={classesPropValue}
+              categoryTypes={classesPropValue}
               inputWidth={"full"}
               excludedEntities={excludedSuggesterEntities}
             />
@@ -753,43 +793,35 @@ export const StatementEditorBox: React.FC = () => {
       {statement ? (
         <div style={{ marginBottom: "4rem" }} key={statement.id}>
           <StyledEditorPreSection>
-            {territoryData && (
-              <StyledGrid>
-                <StyledGridCell>
-                  <ButtonGroup noMargin>
-                    {territoryPath &&
-                      territoryPath.map((territory: string, key: number) => {
-                        return (
-                          <React.Fragment key={key}>
-                            <StatementListBreadcrumbItem
-                              territoryId={territory}
-                            />
-                          </React.Fragment>
-                        );
-                      })}
-                    {"/"}
-                  </ButtonGroup>
-                </StyledGridCell>
-                <StyledGridCell>
-                  <ActantTag actant={territoryData} fullWidth />
-                </StyledGridCell>
-                <StyledGridCell>
-                  {territoryData.id !== territoryId && (
-                    <Button
-                      key="d"
-                      icon={<FaArrowAltCircleLeft />}
-                      tooltip="load territory"
-                      color="plain"
-                      label="open territory"
-                      inverted={true}
-                      onClick={() => {
-                        setTerritoryId(territoryData.id);
-                      }}
-                    />
-                  )}
-                </StyledGridCell>
-              </StyledGrid>
-            )}
+            <StyledBreadcrumbWrap>
+              {territoryPath &&
+                territoryPath.map((territory: string, key: number) => {
+                  return (
+                    <React.Fragment key={key}>
+                      <StatementListBreadcrumbItem territoryId={territory} />
+                    </React.Fragment>
+                  );
+                })}
+              {territoryData && (
+                <StyledItemBox>
+                  <BsArrowRightShort />
+                  <EntityTag
+                    actant={territoryData}
+                    button={
+                      <Button
+                        icon={<BsArrow90DegLeft />}
+                        tooltip="got to territory"
+                        color="plain"
+                        inverted
+                        onClick={() => {
+                          setTerritoryId(territoryData.id);
+                        }}
+                      />
+                    }
+                  />
+                </StyledItemBox>
+              )}
+            </StyledBreadcrumbWrap>
           </StyledEditorPreSection>
           <StyledEditorSection firstSection key="editor-section-summary">
             <StyledEditorSectionContent firstSection>
@@ -833,13 +865,13 @@ export const StatementEditorBox: React.FC = () => {
               </StyledEditorActantTableWrapper>
 
               {userCanEdit && (
-                <ActantSuggester
+                <EntitySuggester
                   statementTerritoryId={statement.data.territory.id}
                   openDetailOnCreate
                   onSelected={(newSelectedId: string) => {
                     addAction(newSelectedId);
                   }}
-                  categoryIds={["A"]}
+                  categoryTypes={[ActantType.Action]}
                   excludedEntities={excludedSuggesterEntities}
                   placeholder={"add new action"}
                 />
@@ -864,13 +896,13 @@ export const StatementEditorBox: React.FC = () => {
                 />
               </StyledEditorActantTableWrapper>
               {userCanEdit && (
-                <ActantSuggester
+                <EntitySuggester
                   statementTerritoryId={statement.data.territory.id}
                   openDetailOnCreate
                   onSelected={(newSelectedId: string) => {
                     addActant(newSelectedId);
                   }}
-                  categoryIds={classesActants}
+                  categoryTypes={classesActants}
                   placeholder={"add new actant"}
                   excludedEntities={excludedSuggesterEntities}
                 />
@@ -902,7 +934,7 @@ export const StatementEditorBox: React.FC = () => {
                         <StyledReferencesListColumn>
                           {referenceActant ? (
                             <StyledTagWrapper>
-                              <ActantTag
+                              <EntityTag
                                 actant={referenceActant}
                                 fullWidth
                                 button={
@@ -925,7 +957,7 @@ export const StatementEditorBox: React.FC = () => {
                             </StyledTagWrapper>
                           ) : (
                             userCanEdit && (
-                              <ActantSuggester
+                              <EntitySuggester
                                 statementTerritoryId={
                                   statement.data.territory.id
                                 }
@@ -935,7 +967,7 @@ export const StatementEditorBox: React.FC = () => {
                                     resource: newSelectedId,
                                   });
                                 }}
-                                categoryIds={classesResources}
+                                categoryTypes={classesResources}
                               />
                             )
                           )}
@@ -1005,13 +1037,13 @@ export const StatementEditorBox: React.FC = () => {
                 )}
               </StyledReferencesList>
               {userCanEdit && (
-                <ActantSuggester
+                <EntitySuggester
                   statementTerritoryId={statement.data.territory.id}
                   openDetailOnCreate
                   onSelected={(newSelectedId: string) => {
                     addReference(newSelectedId);
                   }}
-                  categoryIds={classesResources}
+                  categoryTypes={classesResources}
                   placeholder={"add new reference"}
                 />
               )}
@@ -1030,7 +1062,7 @@ export const StatementEditorBox: React.FC = () => {
                   return (
                     tagActant && (
                       <StyledTagsListItem key={tag}>
-                        <ActantTag
+                        <EntityTag
                           actant={tagActant}
                           fullWidth
                           tooltipPosition="left top"
@@ -1053,13 +1085,13 @@ export const StatementEditorBox: React.FC = () => {
                 })}
               </StyledTagsList>
               {userCanEdit && (
-                <ActantSuggester
+                <EntitySuggester
                   statementTerritoryId={statement.data.territory.id}
                   openDetailOnCreate
                   onSelected={(newSelectedId: string) => {
                     addTag(newSelectedId);
                   }}
-                  categoryIds={classesTags}
+                  categoryTypes={classesTags}
                   placeholder={"add new tag"}
                   excludedEntities={excludedSuggesterEntities}
                 />
@@ -1078,6 +1110,22 @@ export const StatementEditorBox: React.FC = () => {
                   updateActantMutation.mutate({ notes: newValues });
                 }}
               />
+            </StyledEditorSectionContent>
+          </StyledEditorSection>
+
+          {/* Audits */}
+          <StyledEditorSection key="editor-section-audits">
+            <StyledEditorSectionHeader>Audits</StyledEditorSectionHeader>
+            <StyledEditorSectionContent>
+              {audit && <AuditTable {...audit} />}
+            </StyledEditorSectionContent>
+          </StyledEditorSection>
+
+          {/* JSON */}
+          <StyledEditorSection key="editor-section-json">
+            <StyledEditorSectionHeader>JSON</StyledEditorSectionHeader>
+            <StyledEditorSectionContent>
+              {statement && <JSONExplorer data={statement} />}
             </StyledEditorSectionContent>
           </StyledEditorSection>
         </div>

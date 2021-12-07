@@ -1,7 +1,8 @@
+import { ActantType } from "@shared/enums";
 import theme from "./theme";
 
 export const rootTerritoryId = "T0";
-export const excludedSuggesterEntities = ["V"];
+export const excludedSuggesterEntities = [ActantType.Value];
 
 // layout
 export const heightHeader = 70;

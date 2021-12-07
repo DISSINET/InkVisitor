@@ -17,7 +17,7 @@ export default class Actant implements IActant, IDbModel {
   static table = "actants";
 
   id: string = "";
-  class: ActantType = ActantType.Unknown;
+  class: ActantType = ActantType.Any;
   data: any = undefined;
   label: string = "";
   detail: string = "";

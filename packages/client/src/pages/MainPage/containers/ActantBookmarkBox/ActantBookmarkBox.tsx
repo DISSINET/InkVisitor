@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "react-query";
 import api from "api";
 import { toast } from "react-toastify";
 
-import { ActantTag, ActantSuggester } from "..";
+import { EntityTag, EntitySuggester } from "..";
 
 import { CBookmarkFolder } from "constructors";
 
@@ -57,21 +57,21 @@ import {
   IBookmarkFolder,
   IResponseBookmarkFolder,
 } from "@shared/types";
-import { Cell, Column, useTable } from "react-table";
 import { ActantBookmarkFolderTable } from "./ActantBookmarkFolderTable/ActantBookmarkFolderTable";
+import { ActantType } from "@shared/enums";
 
 const bookmarkEntities = [
-  "A",
-  "P",
-  "G",
-  "O",
-  "C",
-  "L",
-  "V",
-  "E",
-  "S",
-  "T",
-  "R",
+  ActantType.Action,
+  ActantType.Person,
+  ActantType.Group,
+  ActantType.Object,
+  ActantType.Concept,
+  ActantType.Location,
+  ActantType.Value,
+  ActantType.Event,
+  ActantType.Statement,
+  ActantType.Territory,
+  ActantType.Resource,
 ];
 
 export const ActantBookmarkBox: React.FC = () => {
@@ -367,12 +367,12 @@ export const ActantBookmarkBox: React.FC = () => {
                       ></ActantBookmarkFolderTable>
                     </StyledFolderContentTags>
                     <StyledFolderSuggester>
-                      <ActantSuggester
+                      <EntitySuggester
                         openDetailOnCreate
                         onSelected={(bookmarkId: string) => {
                           addBookmark(bookmarkFolder.id, bookmarkId);
                         }}
-                        categoryIds={bookmarkEntities}
+                        categoryTypes={bookmarkEntities}
                         placeholder={"add new bookmark"}
                       />
                     </StyledFolderSuggester>

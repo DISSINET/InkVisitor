@@ -1,7 +1,7 @@
 import { ActantSearchBox } from "./ActantSearchBox/ActantSearchBox";
-import { ActantDetailBox } from "./ActantDetailBox/ActantDetailBox";
-import { ActantTag } from "./ActantTag/ActantTag";
-import { ActantSuggester } from "./ActantSuggester/ActantSuggester";
+import { EntityDetailBox } from "./EntityDetailBox/EntityDetailBox";
+import { EntityTag } from "./EntityTag/EntityTag";
+import { EntitySuggester } from "./EntitySuggester/EntitySuggester";
 import { ActionModal } from "./ActionModal/ActionModal";
 import { ActantBookmarkBox } from "./ActantBookmarkBox/ActantBookmarkBox";
 import { StatementEditorBox } from "./StatementEditorBox/StatementEditorBox";
@@ -15,9 +15,9 @@ import { ElvlToggle } from "./toggles/ElvlToggle";
 
 export {
   ActantSearchBox,
-  ActantDetailBox,
-  ActantSuggester,
-  ActantTag,
+  EntityDetailBox,
+  EntitySuggester,
+  EntityTag,
   ActionModal,
   ActantBookmarkBox,
   StatementEditorBox,

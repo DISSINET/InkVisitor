@@ -4,7 +4,7 @@ export const StyledTableWrapper = styled.div`
   display: block;
   width: 100%;
   overflow-x: scroll;
-  overflow-y: hidden;
+  overflow-y: visible;
 `;
 
 export const StyledTable = styled.table`

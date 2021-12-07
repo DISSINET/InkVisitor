@@ -4,12 +4,12 @@ import { IActant, IEntity } from "@shared/types";
 import { DragItem } from "types";
 import { PopupPosition } from "reactjs-popup/dist/types";
 
-interface IActantTag {
+interface IEntityTag {
   actant: IActant | IEntity;
   tooltipText?: string;
   parentId?: string;
   mode?: "selected" | "disabled" | "invalid" | false;
-  short?: boolean;
+  showOnly?: "entity" | "label";
   fullWidth?: boolean;
   button?: ReactNode;
   propId?: string;
@@ -25,11 +25,11 @@ interface IActantTag {
   disabled?: boolean;
 }
 
-export const ActantTag: React.FC<IActantTag> = ({
+export const EntityTag: React.FC<IEntityTag> = ({
   actant,
   tooltipText,
   parentId,
-  short = false,
+  showOnly,
   fullWidth,
   mode,
   button,
@@ -54,7 +54,7 @@ export const ActantTag: React.FC<IActantTag> = ({
       ltype={actant.data.logicalType ?? "1"}
       tooltipDetail={actant.detail}
       tooltipText={tooltipText}
-      short={short}
+      showOnly={showOnly}
       button={button}
       moveFn={moveFn}
       category={classId}

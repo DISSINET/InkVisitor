@@ -1,5 +1,20 @@
 [
   {
+    "id": "0",
+    "name": "import",
+    "email": "import@inkvisitor.com",
+    "password": "import",
+    "active": false,
+    "options": {
+      "defaultTerritory": "",
+      "defaultLanguage": "",
+      "searchLanguages": []
+    },
+    "bookmarks": null,
+    "role": "admin",
+    "rights": []
+  },
+  {
     "id": "1",
     "name": "admin",
     "email": "admin@admin.com",

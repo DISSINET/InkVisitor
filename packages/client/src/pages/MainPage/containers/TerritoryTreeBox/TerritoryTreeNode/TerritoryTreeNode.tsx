@@ -17,7 +17,7 @@ import {
   StyledTerritoryTagWrap,
 } from "./TerritoryTreeNodeStyles";
 import { ContextMenu } from "../ContextMenu/ContextMenu";
-import { ActantTag } from "../..";
+import { EntityTag } from "../..";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { setTreeInitialized } from "redux/features/territoryTree/treeInitializeSlice";
 import theme from "Theme/theme";
@@ -271,7 +271,7 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
                   )}
                 </StyledIconWrap>
                 <animated.div style={animatedStyle}>
-                  <ActantTag
+                  <EntityTag
                     actant={territoryActant}
                     parentId={parent.id}
                     lvl={lvl}
@@ -284,6 +284,7 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
                     updateOrderFn={moveTerritoryMutation.mutate}
                     statementsCount={statementsCount}
                     isFavorited={isFavorited}
+                    showOnly="label"
                   />
                 </animated.div>
                 <ContextMenu

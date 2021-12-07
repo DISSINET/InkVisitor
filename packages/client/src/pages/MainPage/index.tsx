@@ -21,7 +21,7 @@ import {
 
 import {
   ActantSearchBox,
-  ActantDetailBox,
+  EntityDetailBox,
   ActantBookmarkBox,
   StatementEditorBox,
   StatementListBox,
@@ -265,7 +265,7 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
                     )
                   }
                 >
-                  <ActantDetailBox />
+                  <EntityDetailBox />
                 </Box>
               )}
             </Panel>

@@ -18,12 +18,12 @@ import {
   IStatementActant,
   IStatementProp,
 } from "@shared/types";
-import { ActantSuggester, ActantTag } from "../..";
+import { EntitySuggester, EntityTag } from "../..";
 import { Button, ButtonGroup } from "components";
 import { FaTrashAlt, FaUnlink, FaPlus } from "react-icons/fa";
 import { UseMutationResult } from "react-query";
-import { actantPositionDict } from "@shared/dictionaries";
 import { excludedSuggesterEntities } from "Theme/constants";
+import { ActantType } from "@shared/enums";
 
 interface FilteredActantObject {
   data: { actant: IActant | undefined; sActant: IStatementActant };
@@ -34,7 +34,7 @@ interface StatementEditorActantTable {
   userCanEdit?: boolean;
   handleRowClick?: Function;
   renderPropGroup: Function;
-  classEntitiesActant: string[];
+  classEntitiesActant: ActantType[];
   updateActantsMutation: UseMutationResult<any, unknown, object, unknown>;
   addProp: (originId: string) => void;
   propsByOrigins: {
@@ -118,7 +118,7 @@ export const StatementEditorActantTable: React.FC<StatementEditorActantTable> = 
           } = row.values.data;
           return actant ? (
             <StyledTagWrapper>
-              <ActantTag
+              <EntityTag
                 actant={actant}
                 // fullWidth
                 button={
@@ -141,13 +141,13 @@ export const StatementEditorActantTable: React.FC<StatementEditorActantTable> = 
             </StyledTagWrapper>
           ) : (
             userCanEdit && (
-              <ActantSuggester
+              <EntitySuggester
                 onSelected={(newSelectedId: string) => {
                   updateActant(sActant.id, {
                     actant: newSelectedId,
                   });
                 }}
-                categoryIds={classEntitiesActant}
+                categoryTypes={classEntitiesActant}
                 excludedEntities={excludedSuggesterEntities}
               />
             )
@@ -336,39 +336,41 @@ export const StatementEditorActantTable: React.FC<StatementEditorActantTable> = 
 
   return (
     <>
-      <StyledTable {...getTableProps()}>
-        <StyledTHead>
-          {headerGroups.map((headerGroup, key) => (
-            <tr {...headerGroup.getHeaderGroupProps()} key={key}>
-              <th></th>
-              {headerGroup.headers.map((column, key) => (
-                <StyledTh {...column.getHeaderProps()} key={key}>
-                  {column.render("Header")}
-                </StyledTh>
-              ))}
-            </tr>
-          ))}
-        </StyledTHead>
-        <tbody {...getTableBodyProps()}>
-          {rows.map((row: Row, i: number) => {
-            prepareRow(row);
-            return (
-              <StatementEditorActantTableRow
-                renderPropGroup={renderPropGroup}
-                handleClick={handleRowClick}
-                index={i}
-                row={row}
-                statement={statement}
-                moveRow={moveRow}
-                userCanEdit={userCanEdit}
-                updateOrderFn={updateActantsOrder}
-                visibleColumns={visibleColumns}
-                {...row.getRowProps()}
-              />
-            );
-          })}
-        </tbody>
-      </StyledTable>
+      {rows.length > 0 && (
+        <StyledTable {...getTableProps()}>
+          <StyledTHead>
+            {headerGroups.map((headerGroup, key) => (
+              <tr {...headerGroup.getHeaderGroupProps()} key={key}>
+                <th></th>
+                {headerGroup.headers.map((column, key) => (
+                  <StyledTh {...column.getHeaderProps()} key={key}>
+                    {column.render("Header")}
+                  </StyledTh>
+                ))}
+              </tr>
+            ))}
+          </StyledTHead>
+          <tbody {...getTableBodyProps()}>
+            {rows.map((row: Row, i: number) => {
+              prepareRow(row);
+              return (
+                <StatementEditorActantTableRow
+                  renderPropGroup={renderPropGroup}
+                  handleClick={handleRowClick}
+                  index={i}
+                  row={row}
+                  statement={statement}
+                  moveRow={moveRow}
+                  userCanEdit={userCanEdit}
+                  updateOrderFn={updateActantsOrder}
+                  visibleColumns={visibleColumns}
+                  {...row.getRowProps()}
+                />
+              );
+            })}
+          </tbody>
+        </StyledTable>
+      )}
     </>
   );
 };

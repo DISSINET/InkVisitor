@@ -50,7 +50,7 @@ const ScrollHandler = () => {
         const territoryBox = document.getElementById(`Territories-box-content`);
         territoryBox?.scrollTo({
           behavior: territoryInTree ? "smooth" : "auto",
-          top: territoryInTree ? territoryInTree.offsetTop - 82 : 0,
+          top: territoryInTree ? territoryInTree.offsetTop - 103 : 0,
         });
       }, 200);
     }

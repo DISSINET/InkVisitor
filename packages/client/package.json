@@ -8,6 +8,7 @@
     "start": "webpack-dev-server --open --config webpack.development.js",
     "build": "webpack --config webpack.production.js",
     "build-sandbox": "webpack --config webpack.sandbox.js",
+    "build-stage": "webpack --config webpack.stage.js",
     "storybook": "start-storybook -p 6006",
     "build-storybook": "build-storybook"
   },
@@ -24,6 +25,7 @@
     "react-dom": "^16.13.1",
     "react-helmet": "^6.1.0",
     "react-icons": "^3.11.0",
+    "react-json-view": "^1.21.3",
     "react-query": "^3.12.1",
     "react-redux": "^7.2.0",
     "react-router": "^5.2.1",

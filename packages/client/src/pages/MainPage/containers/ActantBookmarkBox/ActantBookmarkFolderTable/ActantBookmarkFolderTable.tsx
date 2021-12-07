@@ -14,7 +14,7 @@ import {
   IStatementAction,
   IResponseBookmarkFolder,
 } from "@shared/types";
-import { ActantSuggester, ActantTag, CertaintyToggle, ElvlToggle } from "../..";
+import { EntitySuggester, EntityTag, CertaintyToggle, ElvlToggle } from "../..";
 import { Button, Input } from "components";
 import { FaPlus, FaTrashAlt, FaUnlink } from "react-icons/fa";
 import { useMutation, UseMutationResult, useQueryClient } from "react-query";
@@ -50,9 +50,8 @@ export const ActantBookmarkFolderTable: React.FC<ActantBookmarkFolderTable> = ({
           const actant = row.original as IActant;
 
           return (
-            <ActantTag
+            <EntityTag
               actant={actant as IActant}
-              short={false}
               button={
                 <Button
                   key="d"

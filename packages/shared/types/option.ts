@@ -1,5 +1,5 @@
 export interface IOption {
-    value: string;
-    label: string;
-    info?: string;
+  value: string;
+  label: string;
+  info?: string;
 }

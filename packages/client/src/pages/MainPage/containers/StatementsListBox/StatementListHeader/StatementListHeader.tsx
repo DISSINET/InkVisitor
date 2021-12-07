@@ -59,16 +59,14 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
   return (
     <StyledHeader>
       <StyledHeaderBreadcrumbRow>
-        <ButtonGroup noMargin>
-          {selectedTerritoryPath &&
-            selectedTerritoryPath.map((territory: string, key: number) => {
-              return (
-                <React.Fragment key={key}>
-                  <StatementListBreadcrumbItem territoryId={territory} />
-                </React.Fragment>
-              );
-            })}
-        </ButtonGroup>
+        {selectedTerritoryPath &&
+          selectedTerritoryPath.map((territory: string, key: number) => {
+            return (
+              <React.Fragment key={key}>
+                <StatementListBreadcrumbItem territoryId={territory} />
+              </React.Fragment>
+            );
+          })}
       </StyledHeaderBreadcrumbRow>
       <StyledHeaderRow>
         <StyledTitle>

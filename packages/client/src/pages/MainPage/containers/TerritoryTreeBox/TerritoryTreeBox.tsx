@@ -111,7 +111,7 @@ export const TerritoryTreeBox: React.FC = () => {
         />
       )}
 
-      <StyledTreeWrapper>
+      <StyledTreeWrapper id="Territories-box-content">
         {data && (
           <TerritoryTreeNode
             right={data.right}
@@ -133,7 +133,9 @@ export const TerritoryTreeBox: React.FC = () => {
           territoryActantId={rootTerritoryId}
         />
       )}
-      <Loader show={isFetching || updateUserMutation.isLoading} />
+      <Loader
+        show={isFetching || userIsFetching || updateUserMutation.isLoading}
+      />
     </>
   );
 };
