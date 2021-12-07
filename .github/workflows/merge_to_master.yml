@@ -1,0 +1,67 @@
+# CI stages to execute against master branch on PR merge
+name: deploy stage
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  stagedeploy:
+    name: Deploy to stage environment
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout InkVisitor
+        uses: actions/checkout@v2
+
+      - name: Install SSH Key
+        uses: shimataro/ssh-key-action@v2
+        with:
+          key: ${{ secrets.SSH_PRIVATE_KEY }} 
+          known_hosts: ${{ secrets.KNOWN_HOSTS }} 
+
+      - name: Create env file for server
+        run: |
+          touch packages/server/env/.env.stage
+          echo "$SERVER_ENV" >> packages/server/env/.env.stage
+        env:
+          SERVER_ENV: ${{secrets.SERVER_ENV}}
+
+      - name: Create env file for client
+        run: |
+          touch packages/client/env/.env.stage
+          echo "$CLIENT_ENV" >> packages/client/env/.env.stage
+        env:
+          CLIENT_ENV: ${{secrets.CLIENT_ENV}}
+
+      - name: Build client
+        run: |
+          cd packages/client
+          npm install
+          npm run build-stage
+
+      - name: Install OpenVPN
+        run: |
+          sudo apt install -y openvpn openvpn-systemd-resolved
+
+      - name: Prepare OpenVPN creds file
+        run: |
+          touch pass.txt
+          echo ${{ secrets.VPN_USER }} >> pass.txt
+          echo ${{ secrets.VPN_PASS }} >> pass.txt
+
+      - name: Pull OpenVPN Config
+        run: |
+          curl https://it.muni.cz/media/3240842/muni-linux.ovpn -o muni-linux.ovpn
+
+      - name: Connect to VPN and deploy
+        run: |
+          sudo openvpn --config muni-linux.ovpn --auth-user-pass pass.txt --daemon
+          sleep 20s
+
+      - name: Deploy backend
+        run: ./deploy-backend-stage.sh ${{ secrets.SSH_USER }} ${{ secrets.SSH_HOST }}
+
+      - name: Deploy frontend
+        run: ./deploy-frontend-stage.sh ${{ secrets.SSH_USER }} ${{ secrets.SSH_HOST }}
