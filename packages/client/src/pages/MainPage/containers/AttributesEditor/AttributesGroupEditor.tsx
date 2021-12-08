@@ -72,7 +72,6 @@ export const AttributesGroupEditor: React.FC<AttributesGroupEditor> = ({
   }, [modalData, data]);
 
   const handleAcceptClick = () => {
-    console.log(modalData);
     if (JSON.stringify(data) !== JSON.stringify(modalData)) {
       handleUpdate(modalData);
       setModalOpen(false);

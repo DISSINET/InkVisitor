@@ -8,7 +8,7 @@ export const StyledColumnHeading = styled.h6`
 
 export const StyledGridColumns = styled.div`
   display: grid;
-  grid-template-columns: auto auto auto;
+  grid-template-columns: 1fr 1fr 1fr;
   grid-auto-flow: row;
   width: 100%;
   height: 100%;

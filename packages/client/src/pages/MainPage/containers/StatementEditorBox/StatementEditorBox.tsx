@@ -438,7 +438,6 @@ export const StatementEditorBox: React.FC = () => {
 
   const updateActantsDataMutation = useMutation(
     async (changes: object) => {
-      console.log(changes);
       await api.actantsUpdate(statementId, {
         data: changes,
       });
@@ -707,7 +706,6 @@ export const StatementEditorBox: React.FC = () => {
                   ...newData,
                 };
                 const { statement, ...statementPropObject } = newDataObject;
-                console.log(statementPropObject);
                 updateProp(prop.id, statementPropObject);
               }}
               loading={updateActantsDataMutation.isLoading}
