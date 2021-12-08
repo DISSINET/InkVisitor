@@ -13,16 +13,6 @@ import {
   Operator,
 } from "@shared/enums";
 import {
-  elvlDict,
-  logicDict,
-  moodDict,
-  moodVariantsDict,
-  virtualityDict,
-  partitivityDict,
-  operatorDict,
-  certaintyDict,
-} from "@shared/dictionaries";
-import {
   Tooltip,
   Button,
   Modal,
@@ -240,7 +230,6 @@ export const AttributesGroupEditor: React.FC<AttributesGroupEditor> = ({
               {modalTitle}
             </StyledAttributeModalHeaderWrapper>
           }
-          // color={entityType ? Entities[entityType].color : undefined}
         />
         <ModalContent>
           <StyledGridColumns>

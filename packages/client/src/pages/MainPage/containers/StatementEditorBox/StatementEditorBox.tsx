@@ -751,7 +751,12 @@ export const StatementEditorBox: React.FC = () => {
                 },
               }}
               handleUpdate={(newData: AttributeDataObject) => {
-                updateProp(prop.id, newData);
+                const newDataObject = {
+                  ...newData.statement,
+                  ...newData,
+                };
+                const { statement, ...statementPropObject } = newDataObject;
+                updateProp(prop.id, statementPropObject);
               }}
               loading={updateActantsDataMutation.isLoading}
             />
