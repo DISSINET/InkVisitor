@@ -591,7 +591,7 @@ export const StatementEditorBox: React.FC = () => {
             />
           )}
           <StyledPropButtonGroup>
-            <AttributesEditor
+            {/* <AttributesEditor
               modalTitle={`Property Type attributes [${
                 propTypeActant ? propTypeActant.label : ""
               }]`}
@@ -607,7 +607,7 @@ export const StatementEditorBox: React.FC = () => {
                 updateProp(prop.id, { type: { ...prop.type, ...newData } });
               }}
               loading={updateActantsDataMutation.isLoading}
-            />
+            /> */}
             {prop.type.logic == "2" ? (
               <Button
                 key="neg"
@@ -667,7 +667,7 @@ export const StatementEditorBox: React.FC = () => {
             />
           )}
           <StyledPropButtonGroup>
-            <AttributesEditor
+            {/* <AttributesEditor
               modalTitle={`Property Value attributes [${
                 propValueActant ? propValueActant.label : ""
               }]`}
@@ -685,7 +685,7 @@ export const StatementEditorBox: React.FC = () => {
                 });
               }}
               loading={updateActantsDataMutation.isLoading}
-            />
+            /> */}
             {prop.value.logic == "2" ? (
               <Button
                 key="neg"
@@ -724,6 +724,8 @@ export const StatementEditorBox: React.FC = () => {
             <AttributesGroupEditor
               modalTitle={`Property attributes [${propValueActant?.label} - ${propTypeActant?.label}]`}
               disabledAllAttributes={!userCanEdit}
+              typeClass={propTypeActant?.class}
+              valueClass={propValueActant?.class}
               data={{
                 statement: {
                   elvl: prop.elvl,

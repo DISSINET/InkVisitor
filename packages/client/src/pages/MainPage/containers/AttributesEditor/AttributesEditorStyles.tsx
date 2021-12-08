@@ -8,6 +8,7 @@ export const StyledAttributeModalContent = styled.div`
 `;
 export const StyledAttributeModalRow = styled.div`
   display: inline-flex;
+  /* flex-direction: column; */
   padding-bottom: ${({ theme }) => theme.space[1]};
   width: 100%;
 `;
@@ -34,14 +35,4 @@ export const StyledAttributeModalHeaderIcon = styled.div`
   margin-right: 2px;
   width: auto;
   vertical-align: text-top;
-`;
-
-export const StyledGridColumns = styled.div`
-  display: grid;
-
-  grid-template-columns: auto auto auto;
-  grid-template-rows: auto;
-  grid-auto-flow: row;
-  width: 100%;
-  height: 100%;
 `;

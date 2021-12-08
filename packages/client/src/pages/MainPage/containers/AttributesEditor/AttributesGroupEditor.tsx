@@ -36,16 +36,22 @@ import {
   StyledAttributeModalHeaderIcon,
   StyledAttributeModalHeaderWrapper,
   StyledAttributeWrapper,
-  StyledGridColumns,
 } from "./AttributesEditorStyles";
 import { TooltipAttributeRow } from "./TooltipAttributeRow/TooltipAttributeRow";
 import { TooltipBooleanRow } from "./TooltipBooleanRow/TooltipBooleanRow";
 import { AttributeDataObject, AttributeName, Entities, GroupName } from "types";
 import { AttributesForm } from "./AttributesForm";
+import {
+  StyledAttributesColumn,
+  StyledColumnHeading,
+  StyledColumnWrap,
+  StyledGridColumns,
+} from "./AttributesGroupEditorStyles";
 
 interface AttributesGroupEditor {
   modalTitle: string;
-  entityType?: ActantType | false;
+  typeClass?: ActantType;
+  valueClass?: ActantType;
   data: AttributeDataObject;
   handleUpdate: (data: AttributeDataObject) => void;
   loading?: boolean;
@@ -56,7 +62,8 @@ interface AttributesGroupEditor {
 
 export const AttributesGroupEditor: React.FC<AttributesGroupEditor> = ({
   modalTitle,
-  entityType,
+  typeClass,
+  valueClass,
   data,
   handleUpdate,
   loading,
@@ -213,6 +220,7 @@ export const AttributesGroupEditor: React.FC<AttributesGroupEditor> = ({
         </div>
         {/* </Tooltip> */}
       </StyledAttributeWrapper>
+
       <Modal
         key="edit-modal"
         showModal={modalOpen}
@@ -232,34 +240,44 @@ export const AttributesGroupEditor: React.FC<AttributesGroupEditor> = ({
               {modalTitle}
             </StyledAttributeModalHeaderWrapper>
           }
-          color={entityType ? Entities[entityType].color : undefined}
+          // color={entityType ? Entities[entityType].color : undefined}
         />
         <ModalContent>
           <StyledGridColumns>
-            <div style={{ display: "grid" }}>
-              <h6>Statement</h6>
-              <AttributesForm
-                groupName="statement"
-                modalData={modalData.statement}
-                handleModalDataChange={handleModalDataChange}
-              />
-            </div>
-            <div style={{ display: "grid" }}>
-              <h6>Type</h6>
-              <AttributesForm
-                groupName="type"
-                modalData={modalData.type}
-                handleModalDataChange={handleModalDataChange}
-              />
-            </div>
-            <div style={{ display: "grid" }}>
-              <h6>Value</h6>
-              <AttributesForm
-                groupName="value"
-                modalData={modalData.value}
-                handleModalDataChange={handleModalDataChange}
-              />
-            </div>
+            <StyledAttributesColumn>
+              <StyledColumnWrap color={Entities[ActantType.Statement].color}>
+                <StyledColumnHeading>Statement</StyledColumnHeading>
+                <AttributesForm
+                  groupName="statement"
+                  modalData={modalData.statement}
+                  handleModalDataChange={handleModalDataChange}
+                />
+              </StyledColumnWrap>
+            </StyledAttributesColumn>
+            <StyledAttributesColumn>
+              <StyledColumnWrap
+                color={typeClass ? Entities[typeClass].color : undefined}
+              >
+                <StyledColumnHeading>Type</StyledColumnHeading>
+                <AttributesForm
+                  groupName="type"
+                  modalData={modalData.type}
+                  handleModalDataChange={handleModalDataChange}
+                />
+              </StyledColumnWrap>
+            </StyledAttributesColumn>
+            <StyledAttributesColumn>
+              <StyledColumnWrap
+                color={valueClass ? Entities[valueClass].color : undefined}
+              >
+                <StyledColumnHeading>Value</StyledColumnHeading>
+                <AttributesForm
+                  groupName="value"
+                  modalData={modalData.value}
+                  handleModalDataChange={handleModalDataChange}
+                />
+              </StyledColumnWrap>
+            </StyledAttributesColumn>
           </StyledGridColumns>
         </ModalContent>
         <ModalFooter>
