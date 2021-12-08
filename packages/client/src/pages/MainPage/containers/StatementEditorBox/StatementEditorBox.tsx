@@ -437,21 +437,14 @@ export const StatementEditorBox: React.FC = () => {
   };
 
   const updateActantsDataMutation = useMutation(
-    async (changes: object) =>
+    async (changes: object) => {
+      console.log(changes);
       await api.actantsUpdate(statementId, {
         data: changes,
-      }),
+      });
+    },
     {
       onSuccess: (data, variables) => {
-        queryClient.invalidateQueries(["statement"]);
-      },
-    }
-  );
-
-  const updateActantMutation = useMutation(
-    async (changes: object) => await api.actantsUpdate(statementId, changes),
-    {
-      onSuccess: () => {
         queryClient.invalidateQueries(["statement"]);
       },
     }
@@ -467,6 +460,15 @@ export const StatementEditorBox: React.FC = () => {
       onSuccess: () => {
         queryClient.invalidateQueries("statement");
         queryClient.invalidateQueries("territory");
+      },
+    }
+  );
+
+  const updateActantMutation = useMutation(
+    async (changes: object) => await api.actantsUpdate(statementId, changes),
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries(["statement"]);
       },
     }
   );
@@ -591,23 +593,6 @@ export const StatementEditorBox: React.FC = () => {
             />
           )}
           <StyledPropButtonGroup>
-            {/* <AttributesEditor
-              modalTitle={`Property Type attributes [${
-                propTypeActant ? propTypeActant.label : ""
-              }]`}
-              disabledAllAttributes={!userCanEdit}
-              entityType={propTypeActant ? propTypeActant.class : false}
-              data={{
-                elvl: prop.type.elvl,
-                logic: prop.type.logic,
-                virtuality: prop.type.virtuality,
-                partitivity: prop.type.partitivity,
-              }}
-              handleUpdate={(newData) => {
-                updateProp(prop.id, { type: { ...prop.type, ...newData } });
-              }}
-              loading={updateActantsDataMutation.isLoading}
-            /> */}
             {prop.type.logic == "2" ? (
               <Button
                 key="neg"
@@ -667,25 +652,6 @@ export const StatementEditorBox: React.FC = () => {
             />
           )}
           <StyledPropButtonGroup>
-            {/* <AttributesEditor
-              modalTitle={`Property Value attributes [${
-                propValueActant ? propValueActant.label : ""
-              }]`}
-              disabledAllAttributes={!userCanEdit}
-              entityType={propValueActant ? propValueActant.class : false}
-              data={{
-                elvl: prop.value.elvl,
-                logic: prop.value.logic,
-                virtuality: prop.value.virtuality,
-                partitivity: prop.value.partitivity,
-              }}
-              handleUpdate={(newData) => {
-                updateProp(prop.id, {
-                  value: { ...prop.value, ...newData },
-                });
-              }}
-              loading={updateActantsDataMutation.isLoading}
-            /> */}
             {prop.value.logic == "2" ? (
               <Button
                 key="neg"
@@ -703,24 +669,6 @@ export const StatementEditorBox: React.FC = () => {
 
         <StyledPropLineColumn lastSecondLevel={lastSecondLevel}>
           <StyledPropButtonGroup leftMargin={false}>
-            {/* <AttributesEditor
-              modalTitle={`Property Statement attributes [${propValueActant?.label} - ${propTypeActant?.label}]`}
-              disabledAllAttributes={!userCanEdit}
-              data={{
-                elvl: prop.elvl,
-                certainty: prop.certainty,
-                logic: prop.logic,
-                mood: prop.mood,
-                moodvariant: prop.moodvariant,
-                operator: prop.operator,
-                bundleStart: prop.bundleStart,
-                bundleEnd: prop.bundleEnd,
-              }}
-              handleUpdate={(newData) => {
-                updateProp(prop.id, newData);
-              }}
-              loading={updateActantsDataMutation.isLoading}
-            /> */}
             <AttributesGroupEditor
               modalTitle={`Property attributes [${propValueActant?.label} - ${propTypeActant?.label}]`}
               disabledAllAttributes={!userCanEdit}
@@ -728,6 +676,7 @@ export const StatementEditorBox: React.FC = () => {
               valueClass={propValueActant?.class}
               data={{
                 statement: {
+                  id: prop.id,
                   elvl: prop.elvl,
                   certainty: prop.certainty,
                   logic: prop.logic,
@@ -738,12 +687,14 @@ export const StatementEditorBox: React.FC = () => {
                   bundleEnd: prop.bundleEnd,
                 },
                 type: {
+                  id: prop.type.id,
                   elvl: prop.type.elvl,
                   logic: prop.type.logic,
                   virtuality: prop.type.virtuality,
                   partitivity: prop.type.partitivity,
                 },
                 value: {
+                  id: prop.value.id,
                   elvl: prop.value.elvl,
                   logic: prop.value.logic,
                   virtuality: prop.value.virtuality,
@@ -756,6 +707,7 @@ export const StatementEditorBox: React.FC = () => {
                   ...newData,
                 };
                 const { statement, ...statementPropObject } = newDataObject;
+                console.log(statementPropObject);
                 updateProp(prop.id, statementPropObject);
               }}
               loading={updateActantsDataMutation.isLoading}

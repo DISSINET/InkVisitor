@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 
 import { MdSettings } from "react-icons/md";
 import {
@@ -25,7 +25,6 @@ import {
 import {
   StyledAttributeModalHeaderIcon,
   StyledAttributeModalHeaderWrapper,
-  StyledAttributeWrapper,
 } from "./AttributesEditorStyles";
 import { TooltipAttributeRow } from "./TooltipAttributeRow/TooltipAttributeRow";
 import { TooltipBooleanRow } from "./TooltipBooleanRow/TooltipBooleanRow";
@@ -61,14 +60,19 @@ export const AttributesGroupEditor: React.FC<AttributesGroupEditor> = ({
   disabledAllAttributes = false,
   disabledOpenModal = false,
 }) => {
-  const [modalData, setModalData] = useState<AttributeDataObject>(data);
   const [modalOpen, setModalOpen] = useState<boolean>(false);
+  const [modalData, setModalData] = useState<AttributeDataObject>(data);
+
+  useEffect(() => {
+    setModalData(data);
+  }, [data]);
 
   const somethingWasUpdated = useMemo(() => {
     return JSON.stringify(data) !== JSON.stringify(modalData);
   }, [modalData, data]);
 
   const handleAcceptClick = () => {
+    console.log(modalData);
     if (JSON.stringify(data) !== JSON.stringify(modalData)) {
       handleUpdate(modalData);
       setModalOpen(false);
@@ -81,7 +85,6 @@ export const AttributesGroupEditor: React.FC<AttributesGroupEditor> = ({
   };
 
   const handleModalDataChange = (
-    groupName: GroupName,
     attributeName: AttributeName,
     newValue:
       | Certainty
@@ -92,49 +95,51 @@ export const AttributesGroupEditor: React.FC<AttributesGroupEditor> = ({
       | Virtuality
       | Partitivity
       | Operator
-      | boolean
+      | boolean,
+    groupName?: GroupName
   ) => {
-    const newModalData = Object.assign({}, modalData[groupName]);
+    if (groupName) {
+      const newModalData = Object.assign({}, modalData[groupName]);
 
-    switch (attributeName) {
-      case "logic":
-        newModalData["logic"] = newValue as Logic;
-        break;
-      case "elvl":
-        newModalData["elvl"] = newValue as Elvl;
-        break;
-      case "mood":
-        newModalData["mood"] = newValue as Mood[];
-        break;
-      case "moodvariant":
-        newModalData["moodvariant"] = newValue as MoodVariant;
-        break;
-      case "virtuality":
-        newModalData["virtuality"] = newValue as Virtuality;
-        break;
-      case "partitivity":
-        newModalData["partitivity"] = newValue as Partitivity;
-        break;
-      case "operator":
-        newModalData["operator"] = newValue as Operator;
-        break;
-      case "bundleStart":
-        newModalData["bundleStart"] = newValue as boolean;
-        break;
-      case "bundleEnd":
-        newModalData["bundleEnd"] = newValue as boolean;
-        break;
-      case "certainty":
-        newModalData["certainty"] = newValue as Certainty;
-        break;
+      switch (attributeName) {
+        case "logic":
+          newModalData["logic"] = newValue as Logic;
+          break;
+        case "elvl":
+          newModalData["elvl"] = newValue as Elvl;
+          break;
+        case "mood":
+          newModalData["mood"] = newValue as Mood[];
+          break;
+        case "moodvariant":
+          newModalData["moodvariant"] = newValue as MoodVariant;
+          break;
+        case "virtuality":
+          newModalData["virtuality"] = newValue as Virtuality;
+          break;
+        case "partitivity":
+          newModalData["partitivity"] = newValue as Partitivity;
+          break;
+        case "operator":
+          newModalData["operator"] = newValue as Operator;
+          break;
+        case "bundleStart":
+          newModalData["bundleStart"] = newValue as boolean;
+          break;
+        case "bundleEnd":
+          newModalData["bundleEnd"] = newValue as boolean;
+          break;
+        case "certainty":
+          newModalData["certainty"] = newValue as Certainty;
+          break;
+      }
+      setModalData({ ...modalData, [groupName]: newModalData });
     }
-    setModalData({ ...modalData, [groupName]: newModalData });
   };
 
   return (
     <div>
-      <StyledAttributeWrapper>
-        {/* <Tooltip
+      {/* <Tooltip
           attributes={[
             <TooltipAttributeRow
               key="elvl"
@@ -198,18 +203,17 @@ export const AttributesGroupEditor: React.FC<AttributesGroupEditor> = ({
             />,
           ]}
         > */}
-        <div>
-          <Button
-            key="settings"
-            disabled={disabledOpenModal}
-            icon={<MdSettings />}
-            inverted={true}
-            color="plain"
-            onClick={() => setModalOpen(true)}
-          />
-        </div>
-        {/* </Tooltip> */}
-      </StyledAttributeWrapper>
+      <div>
+        <Button
+          key="settings"
+          disabled={disabledOpenModal}
+          icon={<MdSettings />}
+          inverted={true}
+          color="plain"
+          onClick={() => setModalOpen(true)}
+        />
+      </div>
+      {/* </Tooltip> */}
 
       <Modal
         key="edit-modal"

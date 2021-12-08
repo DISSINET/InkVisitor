@@ -1,6 +1,4 @@
 import {
-  StyledAttributeWrapper,
-  StyledAttributeModalContent,
   StyledAttributeModalHeaderWrapper,
   StyledAttributeModalHeaderIcon,
 } from "./AttributesEditorStyles";
@@ -45,6 +43,7 @@ import { CheckboxRow } from "./CheckboxRow/CheckboxRow";
 import { AttributeRow } from "./AttributeRow/AttributeRow";
 import { TooltipAttributeRow } from "./TooltipAttributeRow/TooltipAttributeRow";
 import { TooltipBooleanRow } from "./TooltipBooleanRow/TooltipBooleanRow";
+import { AttributesForm } from "./AttributesForm";
 
 interface StatementEditorAttributes {
   modalTitle: string;
@@ -172,161 +171,12 @@ export const AttributesEditor: React.FC<StatementEditorAttributes> = ({
           color={entityType ? Entities[entityType].color : undefined}
         />
         <ModalContent>
-          <StyledAttributeModalContent>
-            {modalData.elvl && (
-              <AttributeRow
-                disabled={
-                  disabledAllAttributes || disabledAttributes.includes("elvl")
-                }
-                value={modalData.elvl}
-                multi={false}
-                items={elvlDict}
-                label="Epistemic level"
-                onChangeFn={(newValue: string | string[]) => {
-                  handleModalDataChange("elvl", newValue as Elvl);
-                }}
-                attributeName="elvl"
-              />
-            )}
-            {modalData.logic && (
-              <AttributeRow
-                disabled={
-                  disabledAllAttributes || disabledAttributes.includes("logic")
-                }
-                value={modalData.logic}
-                multi={false}
-                items={logicDict}
-                label="Logic"
-                attributeName="logic"
-                onChangeFn={(newValue: string | string[]) => {
-                  handleModalDataChange("logic", newValue as Logic);
-                }}
-              />
-            )}
-            {modalData.mood && (
-              <AttributeRow
-                disabled={
-                  disabledAllAttributes || disabledAttributes.includes("mood")
-                }
-                value={modalData.mood}
-                multi={true}
-                items={moodDict}
-                label="Mood"
-                attributeName="mood"
-                onChangeFn={(newValue: string | string[]) => {
-                  handleModalDataChange("mood", newValue as Mood[]);
-                }}
-              />
-            )}
-            {modalData.moodvariant && (
-              <AttributeRow
-                disabled={
-                  disabledAllAttributes ||
-                  disabledAttributes.includes("moodvariant")
-                }
-                value={modalData.moodvariant}
-                multi={false}
-                items={moodVariantsDict}
-                label="Mood Variant"
-                attributeName="moodvariant"
-                onChangeFn={(newValue: string | string[]) => {
-                  handleModalDataChange("moodvariant", newValue as MoodVariant);
-                }}
-              />
-            )}
-            {modalData.virtuality && (
-              <AttributeRow
-                disabled={
-                  disabledAllAttributes ||
-                  disabledAttributes.includes("virtuality")
-                }
-                value={modalData.virtuality}
-                multi={false}
-                items={virtualityDict}
-                label="Virtuality"
-                attributeName="virtuality"
-                onChangeFn={(newValue: string | string[]) => {
-                  handleModalDataChange("virtuality", newValue as Virtuality);
-                }}
-              />
-            )}
-            {modalData.partitivity && (
-              <AttributeRow
-                disabled={
-                  disabledAllAttributes ||
-                  disabledAttributes.includes("partitivity")
-                }
-                value={modalData.partitivity}
-                multi={false}
-                items={partitivityDict}
-                label="Partitivity"
-                attributeName="partitivity"
-                onChangeFn={(newValue: string | string[]) => {
-                  handleModalDataChange("partitivity", newValue as Partitivity);
-                }}
-              />
-            )}
-            {modalData.operator && (
-              <AttributeRow
-                disabled={
-                  disabledAllAttributes ||
-                  disabledAttributes.includes("operator")
-                }
-                value={modalData.operator}
-                multi={false}
-                items={operatorDict}
-                label="Logical Operator"
-                attributeName="operator"
-                onChangeFn={(newValue: string | string[]) => {
-                  handleModalDataChange("operator", newValue as Operator);
-                }}
-              />
-            )}
-            {modalData.operator && (
-              <CheckboxRow
-                disabled={
-                  disabledAllAttributes ||
-                  disabledAttributes.includes("bundleStart")
-                }
-                value={modalData.bundleStart ? modalData.bundleStart : false}
-                label="Bundle start"
-                attributeName="bundleStart"
-                onChangeFn={(newValue: boolean) => {
-                  handleModalDataChange("bundleStart", newValue as boolean);
-                }}
-              />
-            )}
-            {modalData.operator && (
-              <CheckboxRow
-                disabled={
-                  disabledAllAttributes ||
-                  disabledAttributes.includes("bundleEnd")
-                }
-                value={modalData.bundleEnd ? modalData.bundleEnd : false}
-                label="Bundle end"
-                attributeName="bundleEnd"
-                onChangeFn={(newValue: boolean) => {
-                  handleModalDataChange("bundleEnd", newValue as boolean);
-                }}
-              />
-            )}
-            {modalData.certainty && (
-              <AttributeRow
-                disabled={
-                  disabledAllAttributes ||
-                  disabledAttributes.includes("certainty")
-                }
-                value={modalData.certainty}
-                multi={false}
-                items={certaintyDict}
-                label="Certainty"
-                attributeName="certainty"
-                onChangeFn={(newValue: string | string[]) => {
-                  handleModalDataChange("certainty", newValue as Certainty);
-                }}
-              ></AttributeRow>
-            )}
-          </StyledAttributeModalContent>
+          <AttributesForm
+            handleModalDataChange={handleModalDataChange}
+            modalData={modalData}
+            disabledAllAttributes={disabledAllAttributes}
+            disabledAttributes={disabledAttributes}
+          />
         </ModalContent>
 
         <ModalFooter>
@@ -360,7 +210,7 @@ export const AttributesEditor: React.FC<StatementEditorAttributes> = ({
     <>
       {modalOpen && renderModal(modalOpen)}
 
-      <StyledAttributeWrapper>
+      <div>
         <Tooltip
           attributes={[
             <TooltipAttributeRow
@@ -436,7 +286,7 @@ export const AttributesEditor: React.FC<StatementEditorAttributes> = ({
             />
           </div>
         </Tooltip>
-      </StyledAttributeWrapper>
+      </div>
     </>
   );
 };

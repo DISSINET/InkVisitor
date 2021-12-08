@@ -1,14 +1,7 @@
 import styled from "styled-components";
 
-export const StyledAttributeWrapper = styled.div`
-  //width: 100%;
-`;
-export const StyledAttributeModalContent = styled.div`
-  height: 100%;
-`;
 export const StyledAttributeModalRow = styled.div`
   display: inline-flex;
-  /* flex-direction: column; */
   padding-bottom: ${({ theme }) => theme.space[1]};
   width: 100%;
 `;
