@@ -37,7 +37,7 @@ import {
   Partitivity,
   Operator,
 } from "@shared/enums";
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { AttributeData, AttributeName, Entities } from "types";
 import { CheckboxRow } from "./CheckboxRow/CheckboxRow";
 import { AttributeRow } from "./AttributeRow/AttributeRow";
@@ -68,6 +68,10 @@ export const AttributesEditor: React.FC<StatementEditorAttributes> = ({
 }) => {
   const [modalData, setModalData] = useState<AttributeData>(data);
   const [modalOpen, setModalOpen] = useState<boolean>(false);
+
+  useEffect(() => {
+    setModalData(data);
+  }, [data]);
 
   const handleModalDataChange = (
     attributeName: AttributeName,
