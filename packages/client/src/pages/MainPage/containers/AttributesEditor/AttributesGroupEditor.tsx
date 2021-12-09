@@ -28,14 +28,32 @@ import {
 } from "./AttributesEditorStyles";
 import { TooltipAttributeRow } from "./TooltipAttributeRow/TooltipAttributeRow";
 import { TooltipBooleanRow } from "./TooltipBooleanRow/TooltipBooleanRow";
-import { AttributeDataObject, AttributeName, Entities, GroupName } from "types";
+import {
+  AttributeData,
+  AttributeDataObject,
+  AttributeName,
+  Entities,
+  GroupName,
+} from "types";
 import { AttributesForm } from "./AttributesForm";
 import {
   StyledAttributesColumn,
   StyledColumnHeading,
   StyledColumnWrap,
   StyledGridColumns,
+  StyledTooltipGrid,
+  StyledTooltipHeading,
 } from "./AttributesGroupEditorStyles";
+import {
+  elvlDict,
+  logicDict,
+  moodDict,
+  moodVariantsDict,
+  virtualityDict,
+  partitivityDict,
+  operatorDict,
+  certaintyDict,
+} from "@shared/dictionaries";
 
 interface AttributesGroupEditor {
   modalTitle: string;
@@ -98,7 +116,7 @@ export const AttributesGroupEditor: React.FC<AttributesGroupEditor> = ({
     groupName?: GroupName
   ) => {
     if (groupName) {
-      const newModalData = Object.assign({}, modalData[groupName]);
+      const newModalData = { ...modalData[groupName] };
 
       switch (attributeName) {
         case "logic":
@@ -136,83 +154,125 @@ export const AttributesGroupEditor: React.FC<AttributesGroupEditor> = ({
     }
   };
 
+  const getTooltipColumn = (data: AttributeData) => {
+    return (
+      <div>
+        {data.elvl && (
+          <TooltipAttributeRow
+            key="elvl"
+            attributeName="elvl"
+            value={data.elvl}
+            items={elvlDict}
+          />
+        )}
+        {data.logic && (
+          <TooltipAttributeRow
+            key="logic"
+            attributeName="logic"
+            value={data.logic}
+            items={logicDict}
+          />
+        )}
+        {data.mood && (
+          <TooltipAttributeRow
+            key="mood"
+            attributeName="mood"
+            value={data.mood}
+            items={moodDict}
+          />
+        )}
+        {data.moodvariant && (
+          <TooltipAttributeRow
+            key="moodvariant"
+            attributeName="moodvariant"
+            value={data.moodvariant}
+            items={moodVariantsDict}
+          />
+        )}
+        {data.virtuality && (
+          <TooltipAttributeRow
+            key="virtuality"
+            attributeName="virtuality"
+            value={data.virtuality}
+            items={virtualityDict}
+          />
+        )}
+        {data.partitivity && (
+          <TooltipAttributeRow
+            key="partitivity"
+            attributeName="partitivity"
+            value={data.partitivity}
+            items={partitivityDict}
+          />
+        )}
+        {data.operator && (
+          <TooltipAttributeRow
+            key="operator"
+            attributeName="operator"
+            value={data.operator}
+            items={operatorDict}
+          />
+        )}
+        {data.bundleStart && (
+          <TooltipBooleanRow
+            key="bundleStart"
+            attributeName="bundleStart"
+            label="bundle start"
+            show={data.bundleStart ? data.bundleStart : false}
+          />
+        )}
+        {data.bundleEnd && (
+          <TooltipBooleanRow
+            key="bundleEnd"
+            attributeName="bundleEnd"
+            label="bundle end"
+            show={data.bundleEnd ? data.bundleEnd : false}
+          />
+        )}
+        {data.certainty && (
+          <TooltipAttributeRow
+            key="certainty"
+            attributeName="certainty"
+            value={data.certainty}
+            items={certaintyDict}
+          />
+        )}
+      </div>
+    );
+  };
+
   return (
     <div>
-      {/* <Tooltip
-          attributes={[
-            <TooltipAttributeRow
-              key="elvl"
-              attributeName="elvl"
-              value={data.elvl}
-              items={elvlDict}
-            />,
-            <TooltipAttributeRow
-              key="logic"
-              attributeName="logic"
-              value={data.logic}
-              items={logicDict}
-            />,
-            <TooltipAttributeRow
-              key="mood"
-              attributeName="mood"
-              value={data.mood}
-              items={moodDict}
-            />,
-            <TooltipAttributeRow
-              key="moodvariant"
-              attributeName="moodvariant"
-              value={data.moodvariant}
-              items={moodVariantsDict}
-            />,
-            <TooltipAttributeRow
-              key="virtuality"
-              attributeName="virtuality"
-              value={data.virtuality}
-              items={virtualityDict}
-            />,
-            <TooltipAttributeRow
-              key="partitivity"
-              attributeName="partitivity"
-              value={data.partitivity}
-              items={partitivityDict}
-            />,
-            <TooltipAttributeRow
-              key="operator"
-              attributeName="operator"
-              value={data.operator}
-              items={operatorDict}
-            />,
-            <TooltipBooleanRow
-              key="bundleStart"
-              attributeName="bundleStart"
-              label="bundle start"
-              show={data.bundleStart ? data.bundleStart : false}
-            />,
-            <TooltipBooleanRow
-              key="bundleEnd"
-              attributeName="bundleEnd"
-              label="bundle end"
-              show={data.bundleEnd ? data.bundleEnd : false}
-            />,
-            <TooltipAttributeRow
-              key="certainty"
-              attributeName="certainty"
-              value={data.certainty}
-              items={certaintyDict}
-            />,
-          ]}
-        > */}
-      <div>
-        <Button
-          key="settings"
-          disabled={disabledOpenModal}
-          icon={<MdSettings />}
-          inverted={true}
-          color="plain"
-          onClick={() => setModalOpen(true)}
-        />
-      </div>
-      {/* </Tooltip> */}
+      <Tooltip
+        position="top right"
+        attributes={
+          <StyledTooltipGrid>
+            <div>
+              <StyledTooltipHeading>Statement</StyledTooltipHeading>
+              {getTooltipColumn(modalData.statement)}
+            </div>
+            <div>
+              <StyledTooltipHeading>Type</StyledTooltipHeading>
+              {getTooltipColumn(modalData.type)}
+            </div>
+            <div>
+              <StyledTooltipHeading>Value</StyledTooltipHeading>
+              {getTooltipColumn(modalData.value)}
+            </div>
+          </StyledTooltipGrid>
+        }
+      >
+        <div>
+          <Button
+            key="settings"
+            disabled={disabledOpenModal}
+            icon={<MdSettings />}
+            inverted={true}
+            color="plain"
+            onClick={() => setModalOpen(true)}
+          />
+        </div>
+      </Tooltip>
 
       <Modal
         key="edit-modal"

@@ -29,3 +29,17 @@ export const StyledColumnWrap = styled.div<StyledColumnWrap>`
   border-left-width: ${({ color }) => (color ? "3px" : "1px")};
   border-left-style: ${({ color }) => (color ? "solid" : "dashed")};
 `;
+export const StyledTooltipGrid = styled.div`
+  display: grid;
+  grid-template-columns: auto auto auto;
+  grid-auto-flow: row;
+  > div:not(:last-child) {
+    padding-right: 1rem;
+  }
+`;
+export const StyledTooltipHeading = styled.p`
+  font-weight: bold;
+  text-decoration: underline;
+  margin-bottom: 0.2rem;
+`;
+export const StyledTooltipColumn = styled.div``;

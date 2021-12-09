@@ -86,7 +86,7 @@ export const AttributesEditor: React.FC<StatementEditorAttributes> = ({
       | Operator
       | boolean
   ) => {
-    const newModalData = Object.assign({}, modalData);
+    const newModalData = { ...modalData };
 
     switch (attributeName) {
       case "logic":
@@ -133,18 +133,6 @@ export const AttributesEditor: React.FC<StatementEditorAttributes> = ({
       handleUpdate(modalData);
       setModalOpen(false);
     }
-    // const updateModalData: AttributeData = {};
-    // Object.keys(modalData).forEach((modelDataKey) => {
-    //   const modelDataValue = modalData[modelDataKey as AttributeName];
-
-    //   if (modelDataValue) {
-    //     //@ts-ignore
-    //     updateModalData[modelDataKey as AttributeName] = modelDataValue;
-    //   }
-    // });
-    // if (somethingWasUpdated) {
-    //   handleUpdate(updateModalData);
-    // }
   };
 
   const handleCancelClick = () => {
