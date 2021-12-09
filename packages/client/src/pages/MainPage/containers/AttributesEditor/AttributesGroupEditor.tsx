@@ -101,55 +101,11 @@ export const AttributesGroupEditor: React.FC<AttributesGroupEditor> = ({
     setModalOpen(false);
   };
 
-  const handleModalDataChange = (
-    attributeName: AttributeName,
-    newValue:
-      | Certainty
-      | Elvl
-      | Logic
-      | Mood[]
-      | MoodVariant
-      | Virtuality
-      | Partitivity
-      | Operator
-      | boolean,
+  const handleSetModalData = (
+    newModalData: AttributeData,
     groupName?: GroupName
   ) => {
     if (groupName) {
-      const newModalData = { ...modalData[groupName] };
-
-      switch (attributeName) {
-        case "logic":
-          newModalData["logic"] = newValue as Logic;
-          break;
-        case "elvl":
-          newModalData["elvl"] = newValue as Elvl;
-          break;
-        case "mood":
-          newModalData["mood"] = newValue as Mood[];
-          break;
-        case "moodvariant":
-          newModalData["moodvariant"] = newValue as MoodVariant;
-          break;
-        case "virtuality":
-          newModalData["virtuality"] = newValue as Virtuality;
-          break;
-        case "partitivity":
-          newModalData["partitivity"] = newValue as Partitivity;
-          break;
-        case "operator":
-          newModalData["operator"] = newValue as Operator;
-          break;
-        case "bundleStart":
-          newModalData["bundleStart"] = newValue as boolean;
-          break;
-        case "bundleEnd":
-          newModalData["bundleEnd"] = newValue as boolean;
-          break;
-        case "certainty":
-          newModalData["certainty"] = newValue as Certainty;
-          break;
-      }
       setModalData({ ...modalData, [groupName]: newModalData });
     }
   };
@@ -302,7 +258,7 @@ export const AttributesGroupEditor: React.FC<AttributesGroupEditor> = ({
                 <AttributesForm
                   groupName="statement"
                   modalData={modalData.statement}
-                  handleModalDataChange={handleModalDataChange}
+                  setNewModalData={handleSetModalData}
                 />
               </StyledColumnWrap>
             </StyledAttributesColumn>
@@ -314,7 +270,7 @@ export const AttributesGroupEditor: React.FC<AttributesGroupEditor> = ({
                 <AttributesForm
                   groupName="type"
                   modalData={modalData.type}
-                  handleModalDataChange={handleModalDataChange}
+                  setNewModalData={handleSetModalData}
                 />
               </StyledColumnWrap>
             </StyledAttributesColumn>
@@ -326,7 +282,7 @@ export const AttributesGroupEditor: React.FC<AttributesGroupEditor> = ({
                 <AttributesForm
                   groupName="value"
                   modalData={modalData.value}
-                  handleModalDataChange={handleModalDataChange}
+                  setNewModalData={handleSetModalData}
                 />
               </StyledColumnWrap>
             </StyledAttributesColumn>

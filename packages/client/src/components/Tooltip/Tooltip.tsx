@@ -24,7 +24,7 @@ interface Tooltip {
   detail?: string;
   text?: string;
   itemsCount?: number;
-  attributes?: ReactElement[] | ReactElement;
+  attributes?: ReactElement;
   items?: ReactElement[] | ReactElement;
   color?: typeof Colors[number];
   tagTooltip?: boolean;

@@ -28,7 +28,16 @@ interface AttributesForm {
   modalData: AttributeData;
   disabledAttributes?: AttributeName[];
   disabledAllAttributes?: boolean;
-  handleModalDataChange: (
+  setNewModalData: (newModalData: AttributeData, groupName?: GroupName) => void;
+}
+export const AttributesForm: React.FC<AttributesForm> = ({
+  groupName,
+  modalData,
+  disabledAttributes = [],
+  disabledAllAttributes = false,
+  setNewModalData,
+}) => {
+  const handleDataChange = (
     attributeName: AttributeName,
     newValue:
       | Certainty
@@ -41,15 +50,43 @@ interface AttributesForm {
       | Operator
       | boolean,
     groupName?: GroupName
-  ) => void;
-}
-export const AttributesForm: React.FC<AttributesForm> = ({
-  groupName,
-  modalData,
-  disabledAttributes = [],
-  disabledAllAttributes = false,
-  handleModalDataChange,
-}) => {
+  ) => {
+    const newModalData = { ...modalData };
+
+    switch (attributeName) {
+      case "logic":
+        newModalData["logic"] = newValue as Logic;
+        break;
+      case "elvl":
+        newModalData["elvl"] = newValue as Elvl;
+        break;
+      case "mood":
+        newModalData["mood"] = newValue as Mood[];
+        break;
+      case "moodvariant":
+        newModalData["moodvariant"] = newValue as MoodVariant;
+        break;
+      case "virtuality":
+        newModalData["virtuality"] = newValue as Virtuality;
+        break;
+      case "partitivity":
+        newModalData["partitivity"] = newValue as Partitivity;
+        break;
+      case "operator":
+        newModalData["operator"] = newValue as Operator;
+        break;
+      case "bundleStart":
+        newModalData["bundleStart"] = newValue as boolean;
+        break;
+      case "bundleEnd":
+        newModalData["bundleEnd"] = newValue as boolean;
+        break;
+      case "certainty":
+        newModalData["certainty"] = newValue as Certainty;
+        break;
+    }
+    setNewModalData(newModalData, groupName);
+  };
   return (
     <div>
       {modalData.elvl && (
@@ -62,7 +99,7 @@ export const AttributesForm: React.FC<AttributesForm> = ({
           items={elvlDict}
           label="Epistemic level"
           onChangeFn={(newValue: string | string[]) => {
-            handleModalDataChange("elvl", newValue as Elvl, groupName);
+            handleDataChange("elvl", newValue as Elvl, groupName);
           }}
           attributeName="elvl"
         />
@@ -78,7 +115,7 @@ export const AttributesForm: React.FC<AttributesForm> = ({
           label="Logic"
           attributeName="logic"
           onChangeFn={(newValue: string | string[]) => {
-            handleModalDataChange("logic", newValue as Logic, groupName);
+            handleDataChange("logic", newValue as Logic, groupName);
           }}
         />
       )}
@@ -93,7 +130,7 @@ export const AttributesForm: React.FC<AttributesForm> = ({
           label="Mood"
           attributeName="mood"
           onChangeFn={(newValue: string | string[]) => {
-            handleModalDataChange("mood", newValue as Mood[], groupName);
+            handleDataChange("mood", newValue as Mood[], groupName);
           }}
         />
       )}
@@ -108,11 +145,7 @@ export const AttributesForm: React.FC<AttributesForm> = ({
           label="Mood Variant"
           attributeName="moodvariant"
           onChangeFn={(newValue: string | string[]) => {
-            handleModalDataChange(
-              "moodvariant",
-              newValue as MoodVariant,
-              groupName
-            );
+            handleDataChange("moodvariant", newValue as MoodVariant, groupName);
           }}
         />
       )}
@@ -127,11 +160,7 @@ export const AttributesForm: React.FC<AttributesForm> = ({
           label="Virtuality"
           attributeName="virtuality"
           onChangeFn={(newValue: string | string[]) => {
-            handleModalDataChange(
-              "virtuality",
-              newValue as Virtuality,
-              groupName
-            );
+            handleDataChange("virtuality", newValue as Virtuality, groupName);
           }}
         />
       )}
@@ -146,11 +175,7 @@ export const AttributesForm: React.FC<AttributesForm> = ({
           label="Partitivity"
           attributeName="partitivity"
           onChangeFn={(newValue: string | string[]) => {
-            handleModalDataChange(
-              "partitivity",
-              newValue as Partitivity,
-              groupName
-            );
+            handleDataChange("partitivity", newValue as Partitivity, groupName);
           }}
         />
       )}
@@ -165,7 +190,7 @@ export const AttributesForm: React.FC<AttributesForm> = ({
           label="Logical Operator"
           attributeName="operator"
           onChangeFn={(newValue: string | string[]) => {
-            handleModalDataChange("operator", newValue as Operator, groupName);
+            handleDataChange("operator", newValue as Operator, groupName);
           }}
         />
       )}
@@ -178,11 +203,7 @@ export const AttributesForm: React.FC<AttributesForm> = ({
           label="Bundle start"
           attributeName="bundleStart"
           onChangeFn={(newValue: boolean) => {
-            handleModalDataChange(
-              "bundleStart",
-              newValue as boolean,
-              groupName
-            );
+            handleDataChange("bundleStart", newValue as boolean, groupName);
           }}
         />
       )}
@@ -195,7 +216,7 @@ export const AttributesForm: React.FC<AttributesForm> = ({
           label="Bundle end"
           attributeName="bundleEnd"
           onChangeFn={(newValue: boolean) => {
-            handleModalDataChange("bundleEnd", newValue as boolean, groupName);
+            handleDataChange("bundleEnd", newValue as boolean, groupName);
           }}
         />
       )}
@@ -210,11 +231,7 @@ export const AttributesForm: React.FC<AttributesForm> = ({
           label="Certainty"
           attributeName="certainty"
           onChangeFn={(newValue: string | string[]) => {
-            handleModalDataChange(
-              "certainty",
-              newValue as Certainty,
-              groupName
-            );
+            handleDataChange("certainty", newValue as Certainty, groupName);
           }}
         ></AttributeRow>
       )}

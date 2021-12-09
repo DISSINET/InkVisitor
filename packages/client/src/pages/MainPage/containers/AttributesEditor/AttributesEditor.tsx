@@ -73,54 +73,7 @@ export const AttributesEditor: React.FC<StatementEditorAttributes> = ({
     setModalData(data);
   }, [data]);
 
-  const handleModalDataChange = (
-    attributeName: AttributeName,
-    newValue:
-      | Certainty
-      | Elvl
-      | Logic
-      | Mood[]
-      | MoodVariant
-      | Virtuality
-      | Partitivity
-      | Operator
-      | boolean
-  ) => {
-    const newModalData = { ...modalData };
-
-    switch (attributeName) {
-      case "logic":
-        newModalData["logic"] = newValue as Logic;
-        break;
-      case "elvl":
-        newModalData["elvl"] = newValue as Elvl;
-        break;
-      case "mood":
-        newModalData["mood"] = newValue as Mood[];
-        break;
-      case "moodvariant":
-        newModalData["moodvariant"] = newValue as MoodVariant;
-        break;
-      case "virtuality":
-        newModalData["virtuality"] = newValue as Virtuality;
-        break;
-      case "partitivity":
-        newModalData["partitivity"] = newValue as Partitivity;
-        break;
-      case "operator":
-        newModalData["operator"] = newValue as Operator;
-        break;
-      case "bundleStart":
-        newModalData["bundleStart"] = newValue as boolean;
-        break;
-      case "bundleEnd":
-        newModalData["bundleEnd"] = newValue as boolean;
-        break;
-      case "certainty":
-        newModalData["certainty"] = newValue as Certainty;
-        break;
-    }
-
+  const handleSetModalData = (newModalData: AttributeData) => {
     setModalData(newModalData);
   };
 
@@ -164,10 +117,10 @@ export const AttributesEditor: React.FC<StatementEditorAttributes> = ({
         />
         <ModalContent>
           <AttributesForm
-            handleModalDataChange={handleModalDataChange}
             modalData={modalData}
             disabledAllAttributes={disabledAllAttributes}
             disabledAttributes={disabledAttributes}
+            setNewModalData={handleSetModalData}
           />
         </ModalContent>
 
@@ -198,75 +151,76 @@ export const AttributesEditor: React.FC<StatementEditorAttributes> = ({
     );
   };
 
+  const getTooltipAttributes = () => (
+    <>
+      <TooltipAttributeRow
+        key="elvl"
+        attributeName="elvl"
+        value={data.elvl}
+        items={elvlDict}
+      />
+      <TooltipAttributeRow
+        key="logic"
+        attributeName="logic"
+        value={data.logic}
+        items={logicDict}
+      />
+      <TooltipAttributeRow
+        key="mood"
+        attributeName="mood"
+        value={data.mood}
+        items={moodDict}
+      />
+      <TooltipAttributeRow
+        key="moodvariant"
+        attributeName="moodvariant"
+        value={data.moodvariant}
+        items={moodVariantsDict}
+      />
+      <TooltipAttributeRow
+        key="virtuality"
+        attributeName="virtuality"
+        value={data.virtuality}
+        items={virtualityDict}
+      />
+      <TooltipAttributeRow
+        key="partitivity"
+        attributeName="partitivity"
+        value={data.partitivity}
+        items={partitivityDict}
+      />
+      <TooltipAttributeRow
+        key="operator"
+        attributeName="operator"
+        value={data.operator}
+        items={operatorDict}
+      />
+      <TooltipBooleanRow
+        key="bundleStart"
+        attributeName="bundleStart"
+        label="bundle start"
+        show={data.bundleStart ? data.bundleStart : false}
+      />
+      <TooltipBooleanRow
+        key="bundleEnd"
+        attributeName="bundleEnd"
+        label="bundle end"
+        show={data.bundleEnd ? data.bundleEnd : false}
+      />
+      <TooltipAttributeRow
+        key="certainty"
+        attributeName="certainty"
+        value={data.certainty}
+        items={certaintyDict}
+      />
+    </>
+  );
   return (
     <>
       {modalOpen && renderModal(modalOpen)}
 
       <div>
-        <Tooltip
-          attributes={[
-            <TooltipAttributeRow
-              key="elvl"
-              attributeName="elvl"
-              value={data.elvl}
-              items={elvlDict}
-            />,
-            <TooltipAttributeRow
-              key="logic"
-              attributeName="logic"
-              value={data.logic}
-              items={logicDict}
-            />,
-            <TooltipAttributeRow
-              key="mood"
-              attributeName="mood"
-              value={data.mood}
-              items={moodDict}
-            />,
-            <TooltipAttributeRow
-              key="moodvariant"
-              attributeName="moodvariant"
-              value={data.moodvariant}
-              items={moodVariantsDict}
-            />,
-            <TooltipAttributeRow
-              key="virtuality"
-              attributeName="virtuality"
-              value={data.virtuality}
-              items={virtualityDict}
-            />,
-            <TooltipAttributeRow
-              key="partitivity"
-              attributeName="partitivity"
-              value={data.partitivity}
-              items={partitivityDict}
-            />,
-            <TooltipAttributeRow
-              key="operator"
-              attributeName="operator"
-              value={data.operator}
-              items={operatorDict}
-            />,
-            <TooltipBooleanRow
-              key="bundleStart"
-              attributeName="bundleStart"
-              label="bundle start"
-              show={data.bundleStart ? data.bundleStart : false}
-            />,
-            <TooltipBooleanRow
-              key="bundleEnd"
-              attributeName="bundleEnd"
-              label="bundle end"
-              show={data.bundleEnd ? data.bundleEnd : false}
-            />,
-            <TooltipAttributeRow
-              key="certainty"
-              attributeName="certainty"
-              value={data.certainty}
-              items={certaintyDict}
-            />,
-          ]}
-        >
+        <Tooltip attributes={<div>{getTooltipAttributes()}</div>}>
           <div>
             <Button
               key="settings"
