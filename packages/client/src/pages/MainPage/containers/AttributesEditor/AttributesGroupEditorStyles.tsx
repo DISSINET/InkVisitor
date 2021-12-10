@@ -14,20 +14,26 @@ export const StyledGridColumns = styled.div`
   height: 100%;
 `;
 
-export const StyledAttributesColumn = styled.div`
-  display: grid;
-  padding-right: 2rem;
-  justify-content: flex-start;
-`;
 interface StyledColumnWrap {
   color?: typeof Colors[number];
 }
 export const StyledColumnWrap = styled.div<StyledColumnWrap>`
+  display: grid;
+  grid-auto-rows: min-content;
+  overflow: hidden;
+  align-items: start;
+  justify-content: start;
+  padding-right: 2rem;
   padding-left: 1rem;
+  padding-top: 0.5rem;
   border-left-color: ${({ theme, color }) =>
     color ? theme.color[color] : "black"};
   border-left-width: ${({ color }) => (color ? "3px" : "1px")};
   border-left-style: ${({ color }) => (color ? "solid" : "dashed")};
+
+  :hover {
+    background-color: ${({ theme }) => theme.color["white"]};
+  }
 `;
 export const StyledTooltipGrid = styled.div`
   display: grid;
@@ -43,3 +49,8 @@ export const StyledTooltipHeading = styled.p`
   margin-bottom: 0.2rem;
 `;
 export const StyledTooltipColumn = styled.div``;
+export const StyledEntityWrap = styled.div`
+  display: grid;
+  overflow: hidden;
+  margin-top: 2rem;
+`;

@@ -37,9 +37,9 @@ import {
 } from "types";
 import { AttributesForm } from "./AttributesForm";
 import {
-  StyledAttributesColumn,
   StyledColumnHeading,
   StyledColumnWrap,
+  StyledEntityWrap,
   StyledGridColumns,
   StyledTooltipGrid,
   StyledTooltipHeading,
@@ -54,11 +54,17 @@ import {
   operatorDict,
   certaintyDict,
 } from "@shared/dictionaries";
+import { IActant } from "@shared/types";
+import { EntitySuggester, EntityTag } from "..";
+import { FaUnlink } from "react-icons/fa";
 
 interface AttributesGroupEditor {
   modalTitle: string;
-  typeClass?: ActantType;
-  valueClass?: ActantType;
+  propTypeActant?: IActant;
+  classesPropType: ActantType[];
+  propValueActant?: IActant;
+  classesPropValue: ActantType[];
+  excludedSuggesterEntities: ActantType[];
   data: AttributeDataObject;
   handleUpdate: (data: AttributeDataObject) => void;
   loading?: boolean;
@@ -69,8 +75,11 @@ interface AttributesGroupEditor {
 
 export const AttributesGroupEditor: React.FC<AttributesGroupEditor> = ({
   modalTitle,
-  typeClass,
-  valueClass,
+  propTypeActant,
+  classesPropType,
+  propValueActant,
+  classesPropValue,
+  excludedSuggesterEntities,
   data,
   handleUpdate,
   loading,
@@ -252,40 +261,127 @@ export const AttributesGroupEditor: React.FC<AttributesGroupEditor> = ({
         />
         <ModalContent>
           <StyledGridColumns>
-            <StyledAttributesColumn>
-              <StyledColumnWrap color={Entities[ActantType.Statement].color}>
-                <StyledColumnHeading>Statement</StyledColumnHeading>
-                <AttributesForm
-                  groupName="statement"
-                  modalData={modalData.statement}
-                  setNewModalData={handleSetModalData}
-                />
-              </StyledColumnWrap>
-            </StyledAttributesColumn>
-            <StyledAttributesColumn>
-              <StyledColumnWrap
-                color={typeClass ? Entities[typeClass].color : undefined}
-              >
-                <StyledColumnHeading>Type</StyledColumnHeading>
-                <AttributesForm
-                  groupName="type"
-                  modalData={modalData.type}
-                  setNewModalData={handleSetModalData}
-                />
-              </StyledColumnWrap>
-            </StyledAttributesColumn>
-            <StyledAttributesColumn>
-              <StyledColumnWrap
-                color={valueClass ? Entities[valueClass].color : undefined}
-              >
-                <StyledColumnHeading>Value</StyledColumnHeading>
-                <AttributesForm
-                  groupName="value"
-                  modalData={modalData.value}
-                  setNewModalData={handleSetModalData}
-                />
-              </StyledColumnWrap>
-            </StyledAttributesColumn>
+            <StyledColumnWrap color={Entities[ActantType.Statement].color}>
+              <StyledColumnHeading>Statement</StyledColumnHeading>
+
+              <AttributesForm
+                groupName="statement"
+                modalData={modalData.statement}
+                setNewModalData={handleSetModalData}
+              />
+            </StyledColumnWrap>
+            <StyledColumnWrap
+              color={
+                propTypeActant
+                  ? Entities[propTypeActant.class].color
+                  : undefined
+              }
+            >
+              <StyledColumnHeading>Type</StyledColumnHeading>
+
+              <AttributesForm
+                groupName="type"
+                modalData={modalData.type}
+                setNewModalData={handleSetModalData}
+              />
+              <StyledEntityWrap>
+                {propTypeActant ? (
+                  <EntityTag
+                    actant={propTypeActant}
+                    fullWidth
+                    button={
+                      <Button
+                        key="d"
+                        icon={<FaUnlink />}
+                        color="plain"
+                        inverted={true}
+                        tooltip="unlink actant"
+                        onClick={() => {
+                          // updateProp(prop.id, {
+                          //   type: {
+                          //     ...prop.type,
+                          //     ...{ id: "" },
+                          //   },
+                          // });
+                        }}
+                      />
+                    }
+                  />
+                ) : (
+                  <EntitySuggester
+                    // statementTerritoryId={statement.data.territory.id}
+                    openDetailOnCreate
+                    onSelected={(newSelectedId: string) => {
+                      // updateProp(prop.id, {
+                      //   type: {
+                      //     ...prop.type,
+                      //     ...{ id: newSelectedId },
+                      //   },
+                      // });
+                    }}
+                    categoryTypes={classesPropType}
+                    inputWidth={"full"}
+                    excludedEntities={excludedSuggesterEntities}
+                  />
+                )}
+              </StyledEntityWrap>
+            </StyledColumnWrap>
+            <StyledColumnWrap
+              color={
+                propValueActant
+                  ? Entities[propValueActant.class].color
+                  : undefined
+              }
+            >
+              <StyledColumnHeading>Value</StyledColumnHeading>
+              <AttributesForm
+                groupName="value"
+                modalData={modalData.value}
+                setNewModalData={handleSetModalData}
+              />
+              <StyledEntityWrap>
+                {propValueActant ? (
+                  <EntityTag
+                    actant={propValueActant}
+                    fullWidth
+                    tooltipPosition="left center"
+                    button={
+                      <Button
+                        key="d"
+                        icon={<FaUnlink />}
+                        tooltip="unlink actant"
+                        color="plain"
+                        inverted={true}
+                        onClick={() => {
+                          // updateProp(prop.id, {
+                          //   value: {
+                          //     ...prop.value,
+                          //     ...{ id: "" },
+                          //   },
+                          // });
+                        }}
+                      />
+                    }
+                  />
+                ) : (
+                  <EntitySuggester
+                    // statementTerritoryId={statement.data.territory.id}
+                    openDetailOnCreate
+                    onSelected={(newSelectedId: string) => {
+                      // updateProp(prop.id, {
+                      //   value: {
+                      //     ...prop.type,
+                      //     ...{ id: newSelectedId },
+                      //   },
+                      // });
+                    }}
+                    categoryTypes={classesPropValue}
+                    inputWidth={"full"}
+                    excludedEntities={excludedSuggesterEntities}
+                  />
+                )}
+              </StyledEntityWrap>
+            </StyledColumnWrap>
           </StyledGridColumns>
         </ModalContent>
         <ModalFooter>

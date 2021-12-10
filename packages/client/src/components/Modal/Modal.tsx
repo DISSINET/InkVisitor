@@ -80,7 +80,7 @@ interface ModalHeader {
   title?: string | React.ReactElement;
   color?: typeof Colors[number];
 }
-export const ModalHeader: FC<ModalHeader> = ({ title, color = "white" }) => {
+export const ModalHeader: FC<ModalHeader> = ({ title, color }) => {
   return (
     <>
       <StyledCardHeader color={color}>

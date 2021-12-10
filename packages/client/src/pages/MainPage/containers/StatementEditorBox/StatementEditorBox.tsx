@@ -671,8 +671,11 @@ export const StatementEditorBox: React.FC = () => {
             <AttributesGroupEditor
               modalTitle={`Property attributes [${propValueActant?.label} - ${propTypeActant?.label}]`}
               disabledAllAttributes={!userCanEdit}
-              typeClass={propTypeActant?.class}
-              valueClass={propValueActant?.class}
+              propTypeActant={propTypeActant}
+              propValueActant={propValueActant}
+              excludedSuggesterEntities={excludedSuggesterEntities}
+              classesPropType={classesPropType}
+              classesPropValue={classesPropValue}
               data={{
                 statement: {
                   id: prop.id,

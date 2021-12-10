@@ -17,6 +17,7 @@ export const StyledAttributeModalRowLabelIcon = styled.div`
 export const StyledAttributeModalRowLabelText = styled.div`
   display: inline-flex;
   width: 10em;
+  cursor: default;
 `;
 
 export const StyledAttributeModalHeaderWrapper = styled.div`
