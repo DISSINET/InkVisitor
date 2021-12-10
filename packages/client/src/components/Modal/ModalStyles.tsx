@@ -35,16 +35,20 @@ export const StyledBackground = styled(animated.div)`
 `;
 
 interface Card {
-  width: "full" | "normal" | "thin";
+  width: "full" | "normal" | "thin" | number;
 }
-const getWidth = (width: "full" | "normal" | "thin") => {
-  switch (width) {
-    case "full":
-      return "calc(100vw - 40px)";
-    case "normal":
-      return "50rem";
-    case "thin":
-      return "auto";
+const getWidth = (width: "full" | "normal" | "thin" | number) => {
+  if (typeof width === "number") {
+    return `${width / 10}rem`;
+  } else {
+    switch (width) {
+      case "full":
+        return "calc(100vw - 40px)";
+      case "normal":
+        return "50rem";
+      case "thin":
+        return "auto";
+    }
   }
 };
 export const StyledCard = styled(animated.div)<Card>`

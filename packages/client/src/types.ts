@@ -163,7 +163,7 @@ export interface AttributeData {
   bundleStart?: boolean;
   bundleEnd?: boolean;
 }
-export interface AttributeDataObject {
+export interface AttributeGroupDataObject {
   statement: AttributeData;
   type: AttributeData;
   value: AttributeData;

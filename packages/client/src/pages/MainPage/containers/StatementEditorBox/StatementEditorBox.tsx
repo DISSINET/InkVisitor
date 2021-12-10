@@ -69,7 +69,7 @@ import { StyledItemBox } from "../StatementsListBox/StatementListHeader/Statemen
 import { AuditTable } from "./../AuditTable/AuditTable";
 import { JSONExplorer } from "../JSONExplorer/JSONExplorer";
 import { AttributesGroupEditor } from "../AttributesEditor/AttributesGroupEditor";
-import { AttributeDataObject } from "types";
+import { AttributeGroupDataObject } from "types";
 
 const classesActants = [
   ActantType.Statement,
@@ -723,7 +723,7 @@ export const StatementEditorBox: React.FC = () => {
                   partitivity: prop.value.partitivity,
                 },
               }}
-              handleUpdate={(newData: AttributeDataObject) => {
+              handleUpdate={(newData: AttributeGroupDataObject) => {
                 const newDataObject = {
                   ...newData.statement,
                   ...newData,

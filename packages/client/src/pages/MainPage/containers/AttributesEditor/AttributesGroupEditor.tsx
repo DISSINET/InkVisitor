@@ -30,7 +30,7 @@ import { TooltipAttributeRow } from "./TooltipAttributeRow/TooltipAttributeRow";
 import { TooltipBooleanRow } from "./TooltipBooleanRow/TooltipBooleanRow";
 import {
   AttributeData,
-  AttributeDataObject,
+  AttributeGroupDataObject,
   AttributeName,
   Entities,
   GroupName,
@@ -66,8 +66,8 @@ interface AttributesGroupEditor {
   propValueActant?: IActant;
   classesPropValue: ActantType[];
   excludedSuggesterEntities: ActantType[];
-  data: AttributeDataObject;
-  handleUpdate: (data: AttributeDataObject) => void;
+  data: AttributeGroupDataObject;
+  handleUpdate: (data: AttributeGroupDataObject) => void;
   updateProp: (propId: string, changes: any) => void;
   loading?: boolean;
   disabledAttributes?: AttributeName[];
@@ -91,7 +91,7 @@ export const AttributesGroupEditor: React.FC<AttributesGroupEditor> = ({
   disabledOpenModal = false,
 }) => {
   const [modalOpen, setModalOpen] = useState<boolean>(false);
-  const [modalData, setModalData] = useState<AttributeDataObject>(data);
+  const [modalData, setModalData] = useState<AttributeGroupDataObject>(data);
 
   useEffect(() => {
     setModalData(data);
@@ -250,7 +250,7 @@ export const AttributesGroupEditor: React.FC<AttributesGroupEditor> = ({
           handleCancelClick();
         }}
         onEnterPress={handleAcceptClick}
-        width="full"
+        width={1200}
       >
         <ModalHeader
           title={
