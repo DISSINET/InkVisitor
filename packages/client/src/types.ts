@@ -151,7 +151,7 @@ export type AttributeName =
 export type GroupName = "type" | "value" | "statement";
 
 export interface AttributeData {
-  id?: string;
+  id: string;
   certainty?: Certainty;
   elvl?: Elvl;
   logic?: Logic;

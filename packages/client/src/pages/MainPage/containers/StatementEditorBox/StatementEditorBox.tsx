@@ -152,6 +152,25 @@ export const StatementEditorBox: React.FC = () => {
     { enabled: !!statementId && api.isLoggedIn(), retry: 2 }
   );
 
+  // territory query
+  const { status, data: territoryActants, error, isFetching } = useQuery(
+    ["territoryActants", statement?.data.territory.id],
+    async () => {
+      if (statement?.data.territory.id) {
+        const res = await api.actantIdsInTerritory(
+          statement?.data.territory.id
+        );
+        return res.data;
+      } else {
+        return [];
+      }
+    },
+    {
+      initialData: [],
+      enabled: !!statement?.data.territory.id && api.isLoggedIn(),
+    }
+  );
+
   // refetch audit when statement changes
   useEffect(() => {
     queryClient.invalidateQueries("audit");
@@ -576,7 +595,7 @@ export const StatementEditorBox: React.FC = () => {
             />
           ) : (
             <EntitySuggester
-              statementTerritoryId={statement.data.territory.id}
+              territoryActants={territoryActants}
               openDetailOnCreate
               onSelected={(newSelectedId: string) => {
                 updateProp(prop.id, {
@@ -635,7 +654,7 @@ export const StatementEditorBox: React.FC = () => {
             />
           ) : (
             <EntitySuggester
-              statementTerritoryId={statement.data.territory.id}
+              territoryActants={territoryActants}
               openDetailOnCreate
               onSelected={(newSelectedId: string) => {
                 updateProp(prop.id, {
@@ -676,6 +695,7 @@ export const StatementEditorBox: React.FC = () => {
               excludedSuggesterEntities={excludedSuggesterEntities}
               classesPropType={classesPropType}
               classesPropValue={classesPropValue}
+              updateProp={updateProp}
               data={{
                 statement: {
                   id: prop.id,
@@ -868,7 +888,7 @@ export const StatementEditorBox: React.FC = () => {
 
               {userCanEdit && (
                 <EntitySuggester
-                  statementTerritoryId={statement.data.territory.id}
+                  territoryActants={territoryActants}
                   openDetailOnCreate
                   onSelected={(newSelectedId: string) => {
                     addAction(newSelectedId);
@@ -899,7 +919,7 @@ export const StatementEditorBox: React.FC = () => {
               </StyledEditorActantTableWrapper>
               {userCanEdit && (
                 <EntitySuggester
-                  statementTerritoryId={statement.data.territory.id}
+                  territoryActants={territoryActants}
                   openDetailOnCreate
                   onSelected={(newSelectedId: string) => {
                     addActant(newSelectedId);
@@ -960,9 +980,7 @@ export const StatementEditorBox: React.FC = () => {
                           ) : (
                             userCanEdit && (
                               <EntitySuggester
-                                statementTerritoryId={
-                                  statement.data.territory.id
-                                }
+                                territoryActants={territoryActants}
                                 openDetailOnCreate
                                 onSelected={(newSelectedId: string) => {
                                   updateReference(reference.id, {
@@ -1040,7 +1058,7 @@ export const StatementEditorBox: React.FC = () => {
               </StyledReferencesList>
               {userCanEdit && (
                 <EntitySuggester
-                  statementTerritoryId={statement.data.territory.id}
+                  territoryActants={territoryActants}
                   openDetailOnCreate
                   onSelected={(newSelectedId: string) => {
                     addReference(newSelectedId);
@@ -1088,7 +1106,7 @@ export const StatementEditorBox: React.FC = () => {
               </StyledTagsList>
               {userCanEdit && (
                 <EntitySuggester
-                  statementTerritoryId={statement.data.territory.id}
+                  territoryActants={territoryActants}
                   openDetailOnCreate
                   onSelected={(newSelectedId: string) => {
                     addTag(newSelectedId);

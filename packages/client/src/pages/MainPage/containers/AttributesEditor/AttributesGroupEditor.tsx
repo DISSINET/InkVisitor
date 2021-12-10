@@ -41,6 +41,7 @@ import {
   StyledColumnWrap,
   StyledEntityWrap,
   StyledGridColumns,
+  StyledSuggesterWrap,
   StyledTooltipGrid,
   StyledTooltipHeading,
 } from "./AttributesGroupEditorStyles";
@@ -67,6 +68,7 @@ interface AttributesGroupEditor {
   excludedSuggesterEntities: ActantType[];
   data: AttributeDataObject;
   handleUpdate: (data: AttributeDataObject) => void;
+  updateProp: (propId: string, changes: any) => void;
   loading?: boolean;
   disabledAttributes?: AttributeName[];
   disabledAllAttributes?: boolean;
@@ -82,6 +84,7 @@ export const AttributesGroupEditor: React.FC<AttributesGroupEditor> = ({
   excludedSuggesterEntities,
   data,
   handleUpdate,
+  updateProp,
   loading,
   disabledAttributes = [],
   disabledAllAttributes = false,
@@ -232,7 +235,7 @@ export const AttributesGroupEditor: React.FC<AttributesGroupEditor> = ({
             key="settings"
             disabled={disabledOpenModal}
             icon={<MdSettings />}
-            inverted={true}
+            inverted
             color="plain"
             onClick={() => setModalOpen(true)}
           />
@@ -284,8 +287,8 @@ export const AttributesGroupEditor: React.FC<AttributesGroupEditor> = ({
                 modalData={modalData.type}
                 setNewModalData={handleSetModalData}
               />
-              <StyledEntityWrap>
-                {propTypeActant ? (
+              {propTypeActant ? (
+                <StyledEntityWrap>
                   <EntityTag
                     actant={propTypeActant}
                     fullWidth
@@ -294,37 +297,38 @@ export const AttributesGroupEditor: React.FC<AttributesGroupEditor> = ({
                         key="d"
                         icon={<FaUnlink />}
                         color="plain"
-                        inverted={true}
+                        inverted
                         tooltip="unlink actant"
                         onClick={() => {
-                          // updateProp(prop.id, {
-                          //   type: {
-                          //     ...prop.type,
-                          //     ...{ id: "" },
-                          //   },
-                          // });
+                          updateProp(data.statement.id, {
+                            type: {
+                              ...data.type,
+                              ...{ id: "" },
+                            },
+                          });
                         }}
                       />
                     }
                   />
-                ) : (
+                </StyledEntityWrap>
+              ) : (
+                <StyledSuggesterWrap>
                   <EntitySuggester
-                    // statementTerritoryId={statement.data.territory.id}
                     openDetailOnCreate
                     onSelected={(newSelectedId: string) => {
-                      // updateProp(prop.id, {
-                      //   type: {
-                      //     ...prop.type,
-                      //     ...{ id: newSelectedId },
-                      //   },
-                      // });
+                      updateProp(data.statement.id, {
+                        type: {
+                          ...data.type,
+                          ...{ id: newSelectedId },
+                        },
+                      });
                     }}
                     categoryTypes={classesPropType}
                     inputWidth={"full"}
                     excludedEntities={excludedSuggesterEntities}
                   />
-                )}
-              </StyledEntityWrap>
+                </StyledSuggesterWrap>
+              )}
             </StyledColumnWrap>
             <StyledColumnWrap
               color={
@@ -339,8 +343,8 @@ export const AttributesGroupEditor: React.FC<AttributesGroupEditor> = ({
                 modalData={modalData.value}
                 setNewModalData={handleSetModalData}
               />
-              <StyledEntityWrap>
-                {propValueActant ? (
+              {propValueActant ? (
+                <StyledEntityWrap>
                   <EntityTag
                     actant={propValueActant}
                     fullWidth
@@ -351,36 +355,37 @@ export const AttributesGroupEditor: React.FC<AttributesGroupEditor> = ({
                         icon={<FaUnlink />}
                         tooltip="unlink actant"
                         color="plain"
-                        inverted={true}
+                        inverted
                         onClick={() => {
-                          // updateProp(prop.id, {
-                          //   value: {
-                          //     ...prop.value,
-                          //     ...{ id: "" },
-                          //   },
-                          // });
+                          updateProp(data.statement.id, {
+                            value: {
+                              ...data.value,
+                              ...{ id: "" },
+                            },
+                          });
                         }}
                       />
                     }
                   />
-                ) : (
+                </StyledEntityWrap>
+              ) : (
+                <StyledSuggesterWrap>
                   <EntitySuggester
-                    // statementTerritoryId={statement.data.territory.id}
                     openDetailOnCreate
                     onSelected={(newSelectedId: string) => {
-                      // updateProp(prop.id, {
-                      //   value: {
-                      //     ...prop.type,
-                      //     ...{ id: newSelectedId },
-                      //   },
-                      // });
+                      updateProp(data.statement.id, {
+                        value: {
+                          ...data.type,
+                          ...{ id: newSelectedId },
+                        },
+                      });
                     }}
                     categoryTypes={classesPropValue}
                     inputWidth={"full"}
                     excludedEntities={excludedSuggesterEntities}
                   />
-                )}
-              </StyledEntityWrap>
+                </StyledSuggesterWrap>
+              )}
             </StyledColumnWrap>
           </StyledGridColumns>
         </ModalContent>
@@ -389,7 +394,7 @@ export const AttributesGroupEditor: React.FC<AttributesGroupEditor> = ({
             <Button
               key="cancel"
               label="Cancel"
-              inverted={true}
+              inverted
               color="primary"
               onClick={() => {
                 handleCancelClick();

@@ -50,7 +50,11 @@ export const StyledTooltipHeading = styled.p`
 `;
 export const StyledTooltipColumn = styled.div``;
 export const StyledEntityWrap = styled.div`
-  display: grid;
+  display: inline-flex;
   overflow: hidden;
-  margin-top: 2rem;
+  margin-top: 1rem;
+`;
+export const StyledSuggesterWrap = styled.div`
+  display: inline-flex;
+  margin-top: 1rem;
 `;
