@@ -116,10 +116,8 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
     { enabled: !!userId && api.isLoggedIn(), retry: 2 }
   );
 
-  const [
-    userAdministrationModalOpen,
-    setUserAdministrationModalOpen,
-  ] = useState<boolean>(false);
+  const [userAdministrationModalOpen, setUserAdministrationModalOpen] =
+    useState<boolean>(false);
 
   const handleLogOut = () => {
     api.signOut();
@@ -139,6 +137,13 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
   const handleUsersModalCancelClick = () => {
     setUserAdministrationModalOpen(false);
   };
+
+  const rootUrl = process.env.ROOT_URL ?? "";
+  const environment = rootUrl.includes("staging")
+    ? "staging"
+    : rootUrl.includes("sandbox")
+    ? "sandbox"
+    : "";
 
   const heightContent = height - heightHeader - heightFooter;
 
@@ -180,6 +185,7 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
           height={heightHeader}
           paddingY={0}
           paddingX={10}
+          color={(environment == '') ? "primary" : environment}
           left={
             <StyledHeader>
               <StyledHeaderLogo
@@ -187,7 +193,9 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
                 src={LogoInkvisitor}
                 alt="React Logo"
               />
-              <StyledHeaderTag>v. {packageJson.version}</StyledHeaderTag>
+              <StyledHeaderTag>
+                v. {packageJson.version} {environment}
+              </StyledHeaderTag>
             </StyledHeader>
           }
           right={
