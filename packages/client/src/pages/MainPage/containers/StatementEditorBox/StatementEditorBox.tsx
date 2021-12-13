@@ -689,7 +689,7 @@ export const StatementEditorBox: React.FC = () => {
         <StyledPropLineColumn lastSecondLevel={lastSecondLevel}>
           <StyledPropButtonGroup leftMargin={false}>
             <AttributesGroupEditor
-              modalTitle={`Property attributes [${propValueActant?.label} - ${propTypeActant?.label}]`}
+              modalTitle={`Property attributes`}
               disabledAllAttributes={!userCanEdit}
               propTypeActant={propTypeActant}
               propValueActant={propValueActant}

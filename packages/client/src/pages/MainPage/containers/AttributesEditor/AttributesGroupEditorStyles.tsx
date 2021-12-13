@@ -20,7 +20,6 @@ interface StyledColumnWrap {
 export const StyledColumnWrap = styled.div<StyledColumnWrap>`
   display: grid;
   grid-auto-rows: min-content;
-  overflow: hidden;
   align-items: start;
   justify-content: start;
   padding-right: 2rem;
