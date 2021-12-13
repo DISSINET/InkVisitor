@@ -838,10 +838,7 @@ export const StatementEditorBox: React.FC = () => {
                   />
                 </StyledItemBox>
               )}
-              <Loader
-                size={20}
-                show={!isFetchingStatement && isFetchingTerritory}
-              />
+              <Loader size={20} show={isFetchingTerritory} />
             </StyledBreadcrumbWrap>
           </StyledEditorPreSection>
           <StyledEditorSection firstSection key="editor-section-summary">
