@@ -61,6 +61,7 @@ import { FaUnlink } from "react-icons/fa";
 
 interface AttributesGroupEditor {
   modalTitle: string;
+  statementId: string;
   propTypeActant?: IActant;
   classesPropType: ActantType[];
   propValueActant?: IActant;
@@ -89,13 +90,10 @@ export const AttributesGroupEditor: React.FC<AttributesGroupEditor> = ({
   disabledAttributes = [],
   disabledAllAttributes = false,
   disabledOpenModal = false,
+  statementId,
 }) => {
   const [modalOpen, setModalOpen] = useState<boolean>(false);
   const [modalData, setModalData] = useState<AttributeGroupDataObject>(data);
-
-  useEffect(() => {
-    setModalData(data);
-  }, [data]);
 
   const somethingWasUpdated = useMemo(() => {
     return JSON.stringify(data) !== JSON.stringify(modalData);
@@ -103,7 +101,18 @@ export const AttributesGroupEditor: React.FC<AttributesGroupEditor> = ({
 
   const handleAcceptClick = () => {
     if (JSON.stringify(data) !== JSON.stringify(modalData)) {
-      handleUpdate(modalData);
+      const newModalData = {
+        ...modalData,
+        type: {
+          ...{ id: propTypeActant?.id },
+          ...modalData.type,
+        },
+        value: {
+          ...{ id: propValueActant?.id },
+          ...modalData.value,
+        },
+      };
+      handleUpdate(newModalData);
       setModalOpen(false);
     }
   };
@@ -300,7 +309,7 @@ export const AttributesGroupEditor: React.FC<AttributesGroupEditor> = ({
                         inverted
                         tooltip="unlink actant"
                         onClick={() => {
-                          updateProp(data.statement.id, {
+                          updateProp(statementId, {
                             type: {
                               ...data.type,
                               ...{ id: "" },
@@ -316,7 +325,7 @@ export const AttributesGroupEditor: React.FC<AttributesGroupEditor> = ({
                   <EntitySuggester
                     openDetailOnCreate
                     onSelected={(newSelectedId: string) => {
-                      updateProp(data.statement.id, {
+                      updateProp(statementId, {
                         type: {
                           ...data.type,
                           ...{ id: newSelectedId },
@@ -357,7 +366,7 @@ export const AttributesGroupEditor: React.FC<AttributesGroupEditor> = ({
                         color="plain"
                         inverted
                         onClick={() => {
-                          updateProp(data.statement.id, {
+                          updateProp(statementId, {
                             value: {
                               ...data.value,
                               ...{ id: "" },
@@ -373,7 +382,7 @@ export const AttributesGroupEditor: React.FC<AttributesGroupEditor> = ({
                   <EntitySuggester
                     openDetailOnCreate
                     onSelected={(newSelectedId: string) => {
-                      updateProp(data.statement.id, {
+                      updateProp(statementId, {
                         value: {
                           ...data.type,
                           ...{ id: newSelectedId },

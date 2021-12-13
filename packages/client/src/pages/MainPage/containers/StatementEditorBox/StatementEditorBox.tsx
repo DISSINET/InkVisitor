@@ -113,12 +113,8 @@ const classesTags = [
 ];
 
 export const StatementEditorBox: React.FC = () => {
-  const {
-    statementId,
-    setStatementId,
-    territoryId,
-    setTerritoryId,
-  } = useSearchParams();
+  const { statementId, setStatementId, territoryId, setTerritoryId } =
+    useSearchParams();
 
   const queryClient = useQueryClient();
 
@@ -153,7 +149,12 @@ export const StatementEditorBox: React.FC = () => {
   );
 
   // territory query
-  const { status, data: territoryActants, error, isFetching } = useQuery(
+  const {
+    status,
+    data: territoryActants,
+    error,
+    isFetching,
+  } = useQuery(
     ["territoryActants", statement?.data.territory.id],
     async () => {
       if (statement?.data.territory.id) {
@@ -696,9 +697,9 @@ export const StatementEditorBox: React.FC = () => {
               classesPropType={classesPropType}
               classesPropValue={classesPropValue}
               updateProp={updateProp}
+              statementId={prop.id}
               data={{
                 statement: {
-                  id: prop.id,
                   elvl: prop.elvl,
                   certainty: prop.certainty,
                   logic: prop.logic,
@@ -709,14 +710,12 @@ export const StatementEditorBox: React.FC = () => {
                   bundleEnd: prop.bundleEnd,
                 },
                 type: {
-                  id: prop.type.id,
                   elvl: prop.type.elvl,
                   logic: prop.type.logic,
                   virtuality: prop.type.virtuality,
                   partitivity: prop.type.partitivity,
                 },
                 value: {
-                  id: prop.value.id,
                   elvl: prop.value.elvl,
                   logic: prop.value.logic,
                   virtuality: prop.value.virtuality,
