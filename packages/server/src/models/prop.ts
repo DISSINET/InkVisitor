@@ -9,7 +9,28 @@ import {
   Virtuality,
 } from "@shared/enums";
 import { IProp } from "@shared/types";
+import { IPropSpec } from "@shared/types/prop";
 import { fillArray, fillFlatObject, IModel, UnknownObject } from "./common";
+
+export class StatementPropSpec implements IPropSpec, IModel {
+  id: string = "";
+  elvl: Elvl = Elvl.Textual;
+  logic: Logic = Logic.Positive;
+  virtuality: Virtuality = Virtuality.Reality;
+  partitivity: Partitivity = Partitivity.Unison;
+
+  constructor(data: UnknownObject) {
+    if (!data) {
+      return;
+    }
+
+    fillFlatObject(this, data);
+  }
+
+  isValid(): boolean {
+    return true; // always true - no rules yet
+  }
+}
 
 export class StatementProp implements IProp, IModel {
   id = "";
@@ -24,33 +45,8 @@ export class StatementProp implements IProp, IModel {
 
   children: StatementProp[] = [];
 
-  type: {
-    id: string;
-    elvl: Elvl;
-    logic: Logic;
-    virtuality: Virtuality;
-    partitivity: Partitivity;
-  } = {
-    id: "",
-    elvl: Elvl.Textual,
-    logic: Logic.Positive,
-    virtuality: Virtuality.Reality,
-    partitivity: Partitivity.Unison,
-  };
-
-  value: {
-    id: string;
-    elvl: Elvl;
-    logic: Logic;
-    virtuality: Virtuality;
-    partitivity: Partitivity;
-  } = {
-    id: "",
-    elvl: Elvl.Textual,
-    logic: Logic.Positive,
-    virtuality: Virtuality.Reality,
-    partitivity: Partitivity.Unison,
-  };
+  type: StatementPropSpec = new StatementPropSpec({});
+  value: StatementPropSpec = new StatementPropSpec({});
 
   constructor(data: UnknownObject) {
     if (!data) {
@@ -58,10 +54,10 @@ export class StatementProp implements IProp, IModel {
     }
 
     fillFlatObject(this, data);
+    fillArray(this.mood, String, data.mood);
 
-    fillFlatObject(this.type, data.type as Record<string, unknown>);
-
-    fillFlatObject(this.value, data.value as Record<string, unknown>);
+    this.type = new StatementPropSpec(data.type);
+    this.value = new StatementPropSpec(data.value);
 
     fillArray<StatementProp>(this.children, StatementProp, data.children);
   }
