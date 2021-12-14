@@ -14,17 +14,19 @@ import {
 
 export interface IStatement extends IActant {
   class: ActantType.Statement;
-  data: {
-    text: string;
-    territory: {
-      id: string;
-      order: number;
-    };
-    actions: IStatementAction[];
-    actants: IStatementActant[];
-    references: IStatementReference[];
-    tags: string[]; // ids of IActant;
+  data: IStatementData;
+}
+
+export interface IStatementData {
+  text: string;
+  territory: {
+    id: string;
+    order: number;
   };
+  actions: IStatementAction[];
+  actants: IStatementActant[];
+  references: IStatementReference[];
+  tags: string[]; // ids of IActant;
 }
 
 export interface IStatementAction {
@@ -38,7 +40,7 @@ export interface IStatementAction {
   operator: Operator;
   bundleStart: boolean;
   bundleEnd: boolean;
-  props: IProp[]
+  props: IProp[];
 }
 
 export interface IStatementActant {
@@ -52,7 +54,7 @@ export interface IStatementActant {
   operator: Operator;
   bundleStart: boolean;
   bundleEnd: boolean;
-  props: IProp[]
+  props: IProp[];
 }
 
 export interface IStatementReference {

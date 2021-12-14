@@ -28,6 +28,7 @@ import { IResponseTerritory } from "./response-territory";
 import { IResponseUser, IResponseStoredTerritory } from "./response-user";
 import {
   IStatement,
+  IStatementData,
   IStatementActant,
   IStatementAction,
   IStatementReference,
@@ -48,6 +49,7 @@ export type {
   IOption,
   IProp,
   IStatement,
+  IStatementData,
   IStatementAction,
   IStatementActant,
   IStatementReference,
