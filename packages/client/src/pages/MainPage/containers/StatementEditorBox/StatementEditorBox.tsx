@@ -49,14 +49,11 @@ import {
   StyledEditorActantTableWrapper,
   StyledPropButtonGroup,
   StyledEditorPreSection,
-  StyledGrid,
-  StyledGridCell,
   StyledTagWrapper,
   StyledBreadcrumbWrap,
 } from "./StatementEditorBoxStyles";
 import { StatementEditorActantTable } from "./StatementEditorActantTable/StatementEditorActantTable";
 import { StatementEditorActionTable } from "./StatementEditorActionTable/StatementEditorActionTable";
-import { AttributesEditor } from "../AttributesEditor/AttributesEditor";
 import { ColumnInstance } from "react-table";
 import { useSearchParams } from "hooks";
 import { AttributeButtonGroup } from "../AttributeButtonGroup/AttributeButtonGroup";
@@ -730,6 +727,7 @@ export const StatementEditorBox: React.FC = () => {
                 const { statement, ...statementPropObject } = newDataObject;
                 updateProp(prop.id, statementPropObject);
               }}
+              userCanEdit={userCanEdit}
               loading={updateActantsDataMutation.isLoading}
             />
 

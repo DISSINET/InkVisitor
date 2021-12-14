@@ -1,6 +1,9 @@
 import {
   StyledAttributeModalHeaderWrapper,
   StyledAttributeModalHeaderIcon,
+  StyledEntityWrap,
+  StyledSuggesterWrap,
+  StyledContentWrap,
 } from "./AttributesEditorStyles";
 
 import {
@@ -39,39 +42,41 @@ import {
 } from "@shared/enums";
 import React, { useState, useMemo, useEffect } from "react";
 import { AttributeData, AttributeName, Entities } from "types";
-import { CheckboxRow } from "./CheckboxRow/CheckboxRow";
-import { AttributeRow } from "./AttributeRow/AttributeRow";
 import { TooltipAttributeRow } from "./TooltipAttributeRow/TooltipAttributeRow";
 import { TooltipBooleanRow } from "./TooltipBooleanRow/TooltipBooleanRow";
 import { AttributesForm } from "./AttributesForm";
+import { EntitySuggester, EntityTag } from "..";
+import { IActant } from "@shared/types";
+import { FaUnlink } from "react-icons/fa";
+import { excludedSuggesterEntities } from "Theme/constants";
 
 interface StatementEditorAttributes {
   modalTitle: string;
-  entityType?: ActantType | false;
+  actant?: IActant;
   data: AttributeData;
-  handleUpdate: (data: AttributeData) => void;
+  handleUpdate: (data: AttributeData | { actant: string }) => void;
+  classEntitiesActant: ActantType[];
   loading?: boolean;
   disabledAttributes?: AttributeName[];
   disabledAllAttributes?: boolean;
   disabledOpenModal?: boolean;
+  userCanEdit?: boolean;
 }
 
 export const AttributesEditor: React.FC<StatementEditorAttributes> = ({
   modalTitle,
-  entityType,
+  actant,
   data,
   handleUpdate,
+  classEntitiesActant,
   loading,
   disabledAttributes = [],
   disabledAllAttributes = false,
   disabledOpenModal = false,
+  userCanEdit = false,
 }) => {
   const [modalData, setModalData] = useState<AttributeData>(data);
   const [modalOpen, setModalOpen] = useState<boolean>(false);
-
-  useEffect(() => {
-    setModalData(data);
-  }, [data]);
 
   const handleSetModalData = (newModalData: AttributeData) => {
     setModalData(newModalData);
@@ -91,64 +96,6 @@ export const AttributesEditor: React.FC<StatementEditorAttributes> = ({
   const handleCancelClick = () => {
     setModalData(data);
     setModalOpen(false);
-  };
-
-  const renderModal = (showModal: boolean) => {
-    return (
-      <Modal
-        key="edit-modal"
-        showModal={showModal}
-        disableBgClick={false}
-        onClose={() => {
-          handleCancelClick();
-        }}
-        onEnterPress={handleAcceptClick}
-      >
-        <ModalHeader
-          title={
-            <StyledAttributeModalHeaderWrapper>
-              <StyledAttributeModalHeaderIcon>
-                <MdSettings />
-              </StyledAttributeModalHeaderIcon>
-              {modalTitle}
-            </StyledAttributeModalHeaderWrapper>
-          }
-          color={entityType ? Entities[entityType].color : undefined}
-        />
-        <ModalContent>
-          <AttributesForm
-            modalData={modalData}
-            disabledAllAttributes={disabledAllAttributes}
-            disabledAttributes={disabledAttributes}
-            setNewModalData={handleSetModalData}
-          />
-        </ModalContent>
-
-        <ModalFooter>
-          <ButtonGroup>
-            <Button
-              key="cancel"
-              label="Cancel"
-              inverted={true}
-              color="primary"
-              onClick={() => {
-                handleCancelClick();
-              }}
-            />
-            <Button
-              key="submit"
-              label="Apply changes"
-              color="primary"
-              disabled={disabledAllAttributes || !somethingWasUpdated}
-              onClick={() => {
-                handleAcceptClick();
-              }}
-            />
-          </ButtonGroup>
-        </ModalFooter>
-        <Loader show={loading} />
-      </Modal>
-    );
   };
 
   const getTooltipAttributes = () => (
@@ -217,8 +164,6 @@ export const AttributesEditor: React.FC<StatementEditorAttributes> = ({
   );
   return (
     <>
-      {modalOpen && renderModal(modalOpen)}
-
       <div>
         <Tooltip attributes={<div>{getTooltipAttributes()}</div>}>
           <div>
@@ -233,6 +178,102 @@ export const AttributesEditor: React.FC<StatementEditorAttributes> = ({
           </div>
         </Tooltip>
       </div>
+
+      <Modal
+        key="edit-modal"
+        width="normal"
+        showModal={modalOpen}
+        disableBgClick={false}
+        onClose={() => {
+          handleCancelClick();
+        }}
+        onEnterPress={handleAcceptClick}
+      >
+        <ModalHeader
+          title={
+            <StyledAttributeModalHeaderWrapper>
+              <StyledAttributeModalHeaderIcon>
+                <MdSettings />
+              </StyledAttributeModalHeaderIcon>
+              {modalTitle}
+            </StyledAttributeModalHeaderWrapper>
+          }
+        />
+        <ModalContent>
+          <StyledContentWrap
+            color={actant ? Entities[actant.class].color : undefined}
+          >
+            <AttributesForm
+              modalData={modalData}
+              disabledAllAttributes={disabledAllAttributes}
+              disabledAttributes={disabledAttributes}
+              setNewModalData={handleSetModalData}
+            />
+            {actant ? (
+              <StyledEntityWrap>
+                <EntityTag
+                  actant={actant}
+                  fullWidth
+                  button={
+                    userCanEdit && (
+                      <Button
+                        key="d"
+                        tooltip="unlink actant"
+                        icon={<FaUnlink />}
+                        color="plain"
+                        inverted={true}
+                        onClick={() => {
+                          handleUpdate({
+                            actant: "",
+                          });
+                        }}
+                      />
+                    )
+                  }
+                />
+              </StyledEntityWrap>
+            ) : (
+              userCanEdit && (
+                <StyledSuggesterWrap>
+                  <EntitySuggester
+                    onSelected={(newSelectedId: string) => {
+                      handleUpdate({
+                        actant: newSelectedId,
+                      });
+                    }}
+                    categoryTypes={classEntitiesActant}
+                    excludedEntities={excludedSuggesterEntities}
+                  />
+                </StyledSuggesterWrap>
+              )
+            )}
+          </StyledContentWrap>
+        </ModalContent>
+
+        <ModalFooter>
+          <ButtonGroup>
+            <Button
+              key="cancel"
+              label="Cancel"
+              inverted={true}
+              color="primary"
+              onClick={() => {
+                handleCancelClick();
+              }}
+            />
+            <Button
+              key="submit"
+              label="Apply changes"
+              color="primary"
+              disabled={disabledAllAttributes || !somethingWasUpdated}
+              onClick={() => {
+                handleAcceptClick();
+              }}
+            />
+          </ButtonGroup>
+        </ModalFooter>
+        <Loader show={loading} />
+      </Modal>
     </>
   );
 };

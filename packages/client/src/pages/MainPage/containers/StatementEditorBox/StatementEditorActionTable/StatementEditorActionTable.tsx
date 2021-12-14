@@ -38,7 +38,9 @@ interface StatementEditorActionTable {
     };
   };
 }
-export const StatementEditorActionTable: React.FC<StatementEditorActionTable> = ({
+export const StatementEditorActionTable: React.FC<
+  StatementEditorActionTable
+> = ({
   statement,
   statementId,
   userCanEdit = false,
@@ -163,11 +165,9 @@ export const StatementEditorActionTable: React.FC<StatementEditorActionTable> = 
             <ButtonGroup noMargin>
               {sAction ? (
                 <AttributesEditor
-                  modalTitle={`Action attributes [${
-                    action ? action.label : ""
-                  }]`}
+                  modalTitle={`Action attribute`}
+                  actant={action}
                   disabledAllAttributes={!userCanEdit}
-                  entityType={ActantType.Action}
                   data={{
                     elvl: sAction.elvl,
                     certainty: sAction.certainty,
@@ -181,6 +181,8 @@ export const StatementEditorActionTable: React.FC<StatementEditorActionTable> = 
                   handleUpdate={(newData) => {
                     updateAction(sAction.id, newData);
                   }}
+                  userCanEdit={userCanEdit}
+                  classEntitiesActant={[ActantType.Action]}
                   loading={updateActionsMutation.isLoading}
                 />
               ) : (

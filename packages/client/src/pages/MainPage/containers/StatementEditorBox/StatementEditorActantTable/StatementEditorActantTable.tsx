@@ -46,7 +46,9 @@ interface StatementEditorActantTable {
     };
   };
 }
-export const StatementEditorActantTable: React.FC<StatementEditorActantTable> = ({
+export const StatementEditorActantTable: React.FC<
+  StatementEditorActantTable
+> = ({
   statement,
   statementId,
   userCanEdit = false,
@@ -219,11 +221,10 @@ export const StatementEditorActantTable: React.FC<StatementEditorActantTable> = 
             <ButtonGroup noMargin>
               {sActant ? (
                 <AttributesEditor
-                  modalTitle={`Actant involvement [${
-                    actant ? actant.label : "undefined"
-                  }]`}
+                  modalTitle={`Actant involvement`}
+                  actant={actant}
                   disabledAllAttributes={!userCanEdit}
-                  entityType={actant ? actant.class : false}
+                  userCanEdit={userCanEdit}
                   data={{
                     elvl: sActant.elvl,
                     certainty: sActant.certainty,
@@ -237,6 +238,7 @@ export const StatementEditorActantTable: React.FC<StatementEditorActantTable> = 
                   handleUpdate={(newData) => {
                     updateActant(sActant.id, newData);
                   }}
+                  classEntitiesActant={classEntitiesActant}
                   loading={updateActantsMutation.isLoading}
                 />
               ) : (

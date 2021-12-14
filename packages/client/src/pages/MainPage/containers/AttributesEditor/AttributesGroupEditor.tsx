@@ -74,6 +74,7 @@ interface AttributesGroupEditor {
   disabledAttributes?: AttributeName[];
   disabledAllAttributes?: boolean;
   disabledOpenModal?: boolean;
+  userCanEdit?: boolean;
 }
 
 export const AttributesGroupEditor: React.FC<AttributesGroupEditor> = ({
@@ -91,6 +92,7 @@ export const AttributesGroupEditor: React.FC<AttributesGroupEditor> = ({
   disabledAllAttributes = false,
   disabledOpenModal = false,
   statementId,
+  userCanEdit,
 }) => {
   const [modalOpen, setModalOpen] = useState<boolean>(false);
   const [modalData, setModalData] = useState<AttributeGroupDataObject>(data);
@@ -321,22 +323,24 @@ export const AttributesGroupEditor: React.FC<AttributesGroupEditor> = ({
                   />
                 </StyledEntityWrap>
               ) : (
-                <StyledSuggesterWrap>
-                  <EntitySuggester
-                    openDetailOnCreate
-                    onSelected={(newSelectedId: string) => {
-                      updateProp(statementId, {
-                        type: {
-                          ...data.type,
-                          ...{ id: newSelectedId },
-                        },
-                      });
-                    }}
-                    categoryTypes={classesPropType}
-                    inputWidth={"full"}
-                    excludedEntities={excludedSuggesterEntities}
-                  />
-                </StyledSuggesterWrap>
+                userCanEdit && (
+                  <StyledSuggesterWrap>
+                    <EntitySuggester
+                      openDetailOnCreate
+                      onSelected={(newSelectedId: string) => {
+                        updateProp(statementId, {
+                          type: {
+                            ...data.type,
+                            ...{ id: newSelectedId },
+                          },
+                        });
+                      }}
+                      categoryTypes={classesPropType}
+                      inputWidth={"full"}
+                      excludedEntities={excludedSuggesterEntities}
+                    />
+                  </StyledSuggesterWrap>
+                )
               )}
             </StyledColumnWrap>
             <StyledColumnWrap
@@ -378,22 +382,24 @@ export const AttributesGroupEditor: React.FC<AttributesGroupEditor> = ({
                   />
                 </StyledEntityWrap>
               ) : (
-                <StyledSuggesterWrap>
-                  <EntitySuggester
-                    openDetailOnCreate
-                    onSelected={(newSelectedId: string) => {
-                      updateProp(statementId, {
-                        value: {
-                          ...data.type,
-                          ...{ id: newSelectedId },
-                        },
-                      });
-                    }}
-                    categoryTypes={classesPropValue}
-                    inputWidth={"full"}
-                    excludedEntities={excludedSuggesterEntities}
-                  />
-                </StyledSuggesterWrap>
+                userCanEdit && (
+                  <StyledSuggesterWrap>
+                    <EntitySuggester
+                      openDetailOnCreate
+                      onSelected={(newSelectedId: string) => {
+                        updateProp(statementId, {
+                          value: {
+                            ...data.type,
+                            ...{ id: newSelectedId },
+                          },
+                        });
+                      }}
+                      categoryTypes={classesPropValue}
+                      inputWidth={"full"}
+                      excludedEntities={excludedSuggesterEntities}
+                    />
+                  </StyledSuggesterWrap>
+                )
               )}
             </StyledColumnWrap>
           </StyledGridColumns>
