@@ -34,11 +34,11 @@ export const StyledAttributeModalHeaderIcon = styled.div`
 export const StyledEntityWrap = styled.div`
   display: inline-flex;
   overflow: hidden;
-  margin-top: 1rem;
+  margin-top: 1.5rem;
 `;
 export const StyledSuggesterWrap = styled.div`
   display: inline-flex;
-  margin-top: 1rem;
+  margin-top: 1.5rem;
 `;
 interface StyledContentWrap {
   color?: typeof Colors[number];

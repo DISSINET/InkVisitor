@@ -238,6 +238,9 @@ export const StatementEditorActantTable: React.FC<
                   handleUpdate={(newData) => {
                     updateActant(sActant.id, newData);
                   }}
+                  updateActantId={(newId: string) => {
+                    updateActant(sActant.id, { actant: newId });
+                  }}
                   classEntitiesActant={classEntitiesActant}
                   loading={updateActantsMutation.isLoading}
                 />
@@ -297,7 +300,7 @@ export const StatementEditorActantTable: React.FC<
         },
       },
     ];
-  }, [filteredActants, updateActantsMutation]);
+  }, [filteredActants, updateActantsMutation.isLoading]);
 
   const getRowId = useCallback((row) => {
     return row.id;

@@ -40,7 +40,7 @@ import {
   Partitivity,
   Operator,
 } from "@shared/enums";
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo } from "react";
 import { AttributeData, AttributeName, Entities } from "types";
 import { TooltipAttributeRow } from "./TooltipAttributeRow/TooltipAttributeRow";
 import { TooltipBooleanRow } from "./TooltipBooleanRow/TooltipBooleanRow";
@@ -54,7 +54,10 @@ interface StatementEditorAttributes {
   modalTitle: string;
   actant?: IActant;
   data: AttributeData;
-  handleUpdate: (data: AttributeData | { actant: string }) => void;
+  handleUpdate: (
+    data: AttributeData | { actant: string } | { action: string }
+  ) => void;
+  updateActantId: (newId: string) => void;
   classEntitiesActant: ActantType[];
   loading?: boolean;
   disabledAttributes?: AttributeName[];
@@ -68,6 +71,7 @@ export const AttributesEditor: React.FC<StatementEditorAttributes> = ({
   actant,
   data,
   handleUpdate,
+  updateActantId,
   classEntitiesActant,
   loading,
   disabledAttributes = [],
@@ -77,10 +81,6 @@ export const AttributesEditor: React.FC<StatementEditorAttributes> = ({
 }) => {
   const [modalData, setModalData] = useState<AttributeData>(data);
   const [modalOpen, setModalOpen] = useState<boolean>(false);
-
-  const handleSetModalData = (newModalData: AttributeData) => {
-    setModalData(newModalData);
-  };
 
   const somethingWasUpdated = useMemo(() => {
     return JSON.stringify(data) !== JSON.stringify(modalData);
@@ -183,7 +183,6 @@ export const AttributesEditor: React.FC<StatementEditorAttributes> = ({
         key="edit-modal"
         width="normal"
         showModal={modalOpen}
-        disableBgClick={false}
         onClose={() => {
           handleCancelClick();
         }}
@@ -207,7 +206,9 @@ export const AttributesEditor: React.FC<StatementEditorAttributes> = ({
               modalData={modalData}
               disabledAllAttributes={disabledAllAttributes}
               disabledAttributes={disabledAttributes}
-              setNewModalData={handleSetModalData}
+              setNewModalData={(newModalData: AttributeData) => {
+                setModalData(newModalData);
+              }}
             />
             {actant ? (
               <StyledEntityWrap>
@@ -223,9 +224,7 @@ export const AttributesEditor: React.FC<StatementEditorAttributes> = ({
                         color="plain"
                         inverted={true}
                         onClick={() => {
-                          handleUpdate({
-                            actant: "",
-                          });
+                          updateActantId("");
                         }}
                       />
                     )
@@ -237,9 +236,7 @@ export const AttributesEditor: React.FC<StatementEditorAttributes> = ({
                 <StyledSuggesterWrap>
                   <EntitySuggester
                     onSelected={(newSelectedId: string) => {
-                      handleUpdate({
-                        actant: newSelectedId,
-                      });
+                      updateActantId(newSelectedId);
                     }}
                     categoryTypes={classEntitiesActant}
                     excludedEntities={excludedSuggesterEntities}

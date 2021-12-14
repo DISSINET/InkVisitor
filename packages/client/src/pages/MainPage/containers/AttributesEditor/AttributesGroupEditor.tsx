@@ -256,7 +256,6 @@ export const AttributesGroupEditor: React.FC<AttributesGroupEditor> = ({
       <Modal
         key="edit-modal"
         showModal={modalOpen}
-        disableBgClick={false}
         onClose={() => {
           handleCancelClick();
         }}

@@ -181,6 +181,9 @@ export const StatementEditorActionTable: React.FC<
                   handleUpdate={(newData) => {
                     updateAction(sAction.id, newData);
                   }}
+                  updateActantId={(newId: string) => {
+                    updateAction(sAction.id, { action: newId });
+                  }}
                   userCanEdit={userCanEdit}
                   classEntitiesActant={[ActantType.Action]}
                   loading={updateActionsMutation.isLoading}
@@ -241,7 +244,7 @@ export const StatementEditorActionTable: React.FC<
         },
       },
     ];
-  }, [filteredActions, updateActionsMutation]);
+  }, [filteredActions, updateActionsMutation.isLoading]);
 
   const getRowId = useCallback((row) => {
     return row.id;
