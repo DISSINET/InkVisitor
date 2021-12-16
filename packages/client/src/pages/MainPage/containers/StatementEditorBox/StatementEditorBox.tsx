@@ -70,6 +70,7 @@ import { AuditTable } from "./../AuditTable/AuditTable";
 import { JSONExplorer } from "../JSONExplorer/JSONExplorer";
 
 const classesActants = [
+  ActantType.Statement,
   ActantType.Action,
   ActantType.Territory,
   ActantType.Resource,
