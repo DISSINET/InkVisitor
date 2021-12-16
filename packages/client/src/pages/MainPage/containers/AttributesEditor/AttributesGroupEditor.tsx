@@ -1,17 +1,7 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { Profiler, useEffect, useMemo, useState } from "react";
 
 import { MdSettings } from "react-icons/md";
-import {
-  ActantType,
-  Certainty,
-  Elvl,
-  Logic,
-  Mood,
-  MoodVariant,
-  Virtuality,
-  Partitivity,
-  Operator,
-} from "@shared/enums";
+import { ActantType } from "@shared/enums";
 import {
   Tooltip,
   Button,

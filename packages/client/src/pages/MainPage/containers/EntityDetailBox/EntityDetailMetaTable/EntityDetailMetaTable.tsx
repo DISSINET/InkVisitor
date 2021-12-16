@@ -21,7 +21,8 @@ import { FaPlus, FaTrashAlt, FaUnlink } from "react-icons/fa";
 import { useMutation, UseMutationResult, useQueryClient } from "react-query";
 import { ActantType } from "@shared/enums";
 import { EntityDetailMetaTableRow } from "./EntityDetailMetaTableRow";
-import { AttributesEditor } from "../../AttributesEditor/AttributesEditor";
+import AttributesEditor from "../../AttributesEditor/AttributesEditor";
+// import { AttributesEditor } from "../../AttributesEditor/AttributesEditor";
 
 interface ActantDetailMetaTable {
   userCanEdit?: boolean;
@@ -76,12 +77,12 @@ export const ActantDetailMetaTable: React.FC<ActantDetailMetaTable> = ({
                     inverted={true}
                     onClick={() => {
                       const metaStatementData = { ...data };
-                      const updatedStatementActants = metaStatementData.actants.map(
-                        (actant) =>
+                      const updatedStatementActants =
+                        metaStatementData.actants.map((actant) =>
                           actant.position === "a1"
                             ? { ...actant, ...{ actant: "" } }
                             : actant
-                      );
+                        );
                       updateMetaStatement.mutate({
                         metaStatementId: statementId,
                         changes: {
@@ -134,7 +135,7 @@ export const ActantDetailMetaTable: React.FC<ActantDetailMetaTable> = ({
           const typeSActant = data.actants.find((a) => a.position == "a1");
           const typeActant = typeSActant
             ? actants.find((a) => a.id === typeSActant.actant)
-            : false;
+            : undefined;
 
           return typeSActant ? (
             <AttributesEditor
@@ -142,7 +143,7 @@ export const ActantDetailMetaTable: React.FC<ActantDetailMetaTable> = ({
               modalTitle={`Property Type attributes [${
                 typeActant ? typeActant.label : "undefined"
               }]`}
-              entityType={typeActant ? typeActant.class : false}
+              actant={typeActant}
               data={{
                 elvl: typeSActant.elvl,
                 logic: typeSActant.logic,
@@ -211,12 +212,12 @@ export const ActantDetailMetaTable: React.FC<ActantDetailMetaTable> = ({
                     inverted={true}
                     onClick={() => {
                       const metaStatementData = { ...data };
-                      const updatedStatementActants = metaStatementData.actants.map(
-                        (actant) =>
+                      const updatedStatementActants =
+                        metaStatementData.actants.map((actant) =>
                           actant.position === "a2"
                             ? { ...actant, ...{ actant: "" } }
                             : actant
-                      );
+                        );
                       updateMetaStatement.mutate({
                         metaStatementId: statementId,
                         changes: {
@@ -281,7 +282,7 @@ export const ActantDetailMetaTable: React.FC<ActantDetailMetaTable> = ({
           const valueSActant = data.actants.find((a) => a.position == "a2");
           const valueActant = valueSActant
             ? actants.find((a) => a.id === valueSActant.actant)
-            : false;
+            : undefined;
 
           return valueSActant ? (
             <AttributesEditor
@@ -289,7 +290,7 @@ export const ActantDetailMetaTable: React.FC<ActantDetailMetaTable> = ({
               modalTitle={`Property Value attributes [${
                 valueActant ? valueActant.label : ""
               }]`}
-              entityType={valueActant ? valueActant.class : false}
+              actant={valueActant}
               data={{
                 elvl: valueSActant.elvl,
                 logic: valueSActant.logic,
@@ -361,7 +362,6 @@ export const ActantDetailMetaTable: React.FC<ActantDetailMetaTable> = ({
                 <AttributesEditor
                   disabledAllAttributes={!userCanEdit}
                   modalTitle={`Property Type attributes [${typeLabel} - ${valueLabel}]`}
-                  entityType={statementClass}
                   data={{
                     elvl: action.elvl,
                     certainty: action.certainty,
@@ -375,9 +375,11 @@ export const ActantDetailMetaTable: React.FC<ActantDetailMetaTable> = ({
                   disabledAttributes={["elvl"]}
                   handleUpdate={(newData: any) => {
                     const metaStatementData = { ...data };
-                    const updatedStatementActions = metaStatementData.actions.map(
-                      (action) => ({ ...action, ...newData })
-                    );
+                    const updatedStatementActions =
+                      metaStatementData.actions.map((action) => ({
+                        ...action,
+                        ...newData,
+                      }));
                     updateMetaStatement.mutate({
                       metaStatementId: statementId,
                       changes: {

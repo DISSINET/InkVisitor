@@ -1,6 +1,6 @@
 import { IResponseStatement } from "@shared/types";
 import { useSearchParams } from "hooks";
-import React, { useRef } from "react";
+import React, { Profiler, useRef } from "react";
 import {
   DragSourceMonitor,
   DropTargetMonitor,
@@ -26,7 +26,9 @@ interface StatementEditorActionTableRow {
   visibleColumns: ColumnInstance<{}>[];
 }
 
-export const StatementEditorActionTableRow: React.FC<StatementEditorActionTableRow> = ({
+export const StatementEditorActionTableRow: React.FC<
+  StatementEditorActionTableRow
+> = ({
   row,
   index,
   moveRow,
@@ -86,26 +88,30 @@ export const StatementEditorActionTableRow: React.FC<StatementEditorActionTableR
 
   return (
     <React.Fragment key={index}>
-      <StyledTr
-        ref={dropRef}
-        opacity={opacity}
-        isOdd={Boolean(index % 2)}
-        isSelected={row.values.id === statementId}
-        onClick={() => {
-          handleClick(row.values.id);
-        }}
-      >
-        {userCanEdit && (
-          <td ref={dragRef} style={{ cursor: "move" }}>
-            <FaGripVertical />
-          </td>
-        )}
-        {row.cells.map((cell: Cell) => {
-          return (
-            <StyledTd {...cell.getCellProps()}>{cell.render("Cell")}</StyledTd>
-          );
-        })}
-      </StyledTr>
+      <Profiler id="StyledTR" onRender={(id, phase) => console.log(id, phase)}>
+        <StyledTr
+          ref={dropRef}
+          opacity={opacity}
+          isOdd={Boolean(index % 2)}
+          isSelected={row.values.id === statementId}
+          onClick={() => {
+            handleClick(row.values.id);
+          }}
+        >
+          {userCanEdit && (
+            <td ref={dragRef} style={{ cursor: "move" }}>
+              <FaGripVertical />
+            </td>
+          )}
+          {row.cells.map((cell: Cell) => {
+            return (
+              <StyledTd {...cell.getCellProps()}>
+                {cell.render("Cell")}
+              </StyledTd>
+            );
+          })}
+        </StyledTr>
+      </Profiler>
 
       {renderPropGroup(
         row.values.data.sAction.action,

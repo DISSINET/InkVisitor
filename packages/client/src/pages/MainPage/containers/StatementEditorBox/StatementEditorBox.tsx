@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo, useEffect, Profiler } from "react";
 import { useQuery, useMutation, useQueryClient } from "react-query";
 import api from "api";
 
@@ -684,7 +684,7 @@ export const StatementEditorBox: React.FC = () => {
         </StyledPropLineColumn>
 
         <StyledPropLineColumn lastSecondLevel={lastSecondLevel}>
-          <StyledPropButtonGroup leftMargin={false}>
+          <StyledPropButtonGroup>
             <AttributesGroupEditor
               modalTitle={`Property attributes`}
               disabledAllAttributes={!userCanEdit}

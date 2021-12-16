@@ -9,7 +9,7 @@ import {
   StyledTagWrapper,
 } from "./StatementEditorActantTableStyles";
 import { StatementEditorActantTableRow } from "./StatementEditorActantTableRow";
-import { AttributesEditor } from "../../AttributesEditor/AttributesEditor";
+// import { AttributesEditor } from "../../AttributesEditor/AttributesEditor";
 import { AttributeButtonGroup } from "../../AttributeButtonGroup/AttributeButtonGroup";
 
 import {
@@ -24,6 +24,7 @@ import { FaTrashAlt, FaUnlink, FaPlus } from "react-icons/fa";
 import { UseMutationResult } from "react-query";
 import { excludedSuggesterEntities } from "Theme/constants";
 import { ActantType } from "@shared/enums";
+import AttributesEditor from "../../AttributesEditor/AttributesEditor";
 
 interface FilteredActantObject {
   data: { actant: IActant | undefined; sActant: IStatementActant };
@@ -63,7 +64,7 @@ export const StatementEditorActantTable: React.FC<
     FilteredActantObject[]
   >([]);
 
-  useEffect(() => {
+  useMemo(() => {
     const filteredActants = statement.data.actants.map((sActant, key) => {
       const actant = statement.actants?.find((a) => a.id === sActant.actant);
       return { id: key, data: { actant, sActant } };
@@ -219,7 +220,7 @@ export const StatementEditorActantTable: React.FC<
           const propOriginId = row.values.data.sActant.actant;
           return (
             <ButtonGroup noMargin>
-              {sActant ? (
+              {sActant && (
                 <AttributesEditor
                   modalTitle={`Actant involvement`}
                   actant={actant}
@@ -244,8 +245,6 @@ export const StatementEditorActantTable: React.FC<
                   classEntitiesActant={classEntitiesActant}
                   loading={updateActantsMutation.isLoading}
                 />
-              ) : (
-                <div />
               )}
               {userCanEdit && (
                 <Button
@@ -271,7 +270,7 @@ export const StatementEditorActantTable: React.FC<
                   }}
                 />
               )}
-              {sActant.logic == "2" ? (
+              {sActant.logic == "2" && (
                 <Button
                   key="neg"
                   tooltip="Negative logic"
@@ -280,10 +279,8 @@ export const StatementEditorActantTable: React.FC<
                   noBorder
                   icon={<AttributeIcon attributeName={"negation"} />}
                 />
-              ) : (
-                <div />
               )}
-              {sActant.operator ? (
+              {sActant.operator && (
                 <Button
                   key="oper"
                   tooltip="Logical operator type"
@@ -292,8 +289,6 @@ export const StatementEditorActantTable: React.FC<
                   noBorder
                   icon={sActant.operator}
                 />
-              ) : (
-                <div />
               )}
             </ButtonGroup>
           );

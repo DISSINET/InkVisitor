@@ -40,7 +40,7 @@ import {
   Partitivity,
   Operator,
 } from "@shared/enums";
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, Profiler } from "react";
 import { AttributeData, AttributeName, Entities } from "types";
 import { TooltipAttributeRow } from "./TooltipAttributeRow/TooltipAttributeRow";
 import { TooltipBooleanRow } from "./TooltipBooleanRow/TooltipBooleanRow";
@@ -57,22 +57,22 @@ interface StatementEditorAttributes {
   handleUpdate: (
     data: AttributeData | { actant: string } | { action: string }
   ) => void;
-  updateActantId: (newId: string) => void;
-  classEntitiesActant: ActantType[];
-  loading?: boolean;
+  updateActantId?: (newId: string) => void;
+  classEntitiesActant?: ActantType[];
+  loading: boolean;
   disabledAttributes?: AttributeName[];
   disabledAllAttributes?: boolean;
   disabledOpenModal?: boolean;
   userCanEdit?: boolean;
 }
 
-export const AttributesEditor: React.FC<StatementEditorAttributes> = ({
+const AttributesEditor: React.FC<StatementEditorAttributes> = ({
   modalTitle,
   actant,
   data,
   handleUpdate,
-  updateActantId,
-  classEntitiesActant,
+  updateActantId = () => {},
+  classEntitiesActant = [],
   loading,
   disabledAttributes = [],
   disabledAllAttributes = false,
@@ -274,3 +274,5 @@ export const AttributesEditor: React.FC<StatementEditorAttributes> = ({
     </>
   );
 };
+
+export default AttributesEditor;

@@ -1,22 +1,22 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, {
+  Profiler,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { Column, useTable, useExpanded, Row, Cell } from "react-table";
 import update from "immutability-helper";
 import { StyledTable } from "../StatementEditorActionTable/StatementEditorActionTableStyles";
 import { StatementEditorActionTableRow } from "./StatementEditorActionTableRow";
-import {
-  IAction,
-  IActant,
-  IResponseGeneric,
-  IResponseStatement,
-  IStatementAction,
-} from "@shared/types";
+import { IActant, IResponseStatement, IStatementAction } from "@shared/types";
 import { EntitySuggester, EntityTag } from "../..";
-import { AttributesEditor } from "../../AttributesEditor/AttributesEditor";
 import { AttributeIcon, Button, ButtonGroup } from "components";
 import { FaPlus, FaTrashAlt, FaUnlink } from "react-icons/fa";
 import { UseMutationResult } from "react-query";
 import { ActantType } from "@shared/enums";
 import { excludedSuggesterEntities } from "Theme/constants";
+import AttributesEditor from "../../AttributesEditor/AttributesEditor";
 
 interface FilteredActionObject {
   data: { action: IActant | undefined; sAction: IStatementAction };
@@ -161,9 +161,10 @@ export const StatementEditorActionTable: React.FC<
         Cell: ({ row }: Cell) => {
           const { action, sAction } = row.values.data;
           const propOriginId = row.values.data.sAction.action;
+
           return (
             <ButtonGroup noMargin>
-              {sAction ? (
+              {sAction && (
                 <AttributesEditor
                   modalTitle={`Action attribute`}
                   actant={action}
@@ -188,8 +189,6 @@ export const StatementEditorActionTable: React.FC<
                   classEntitiesActant={[ActantType.Action]}
                   loading={updateActionsMutation.isLoading}
                 />
-              ) : (
-                <div />
               )}
               {userCanEdit && (
                 <Button
@@ -215,7 +214,7 @@ export const StatementEditorActionTable: React.FC<
                   }}
                 />
               )}
-              {sAction.logic == "2" ? (
+              {sAction.logic == "2" && (
                 <Button
                   key="neg"
                   tooltip="Negative logic"
@@ -224,10 +223,8 @@ export const StatementEditorActionTable: React.FC<
                   noBorder
                   icon={<AttributeIcon attributeName={"negation"} />}
                 />
-              ) : (
-                <div />
               )}
-              {sAction.operator ? (
+              {sAction.operator && (
                 <Button
                   key="oper"
                   tooltip="Logical operator type"
@@ -236,8 +233,6 @@ export const StatementEditorActionTable: React.FC<
                   noBorder
                   icon={sAction.operator}
                 />
-              ) : (
-                <div />
               )}
             </ButtonGroup>
           );
@@ -270,26 +265,28 @@ export const StatementEditorActionTable: React.FC<
   );
 
   return (
-    <StyledTable {...getTableProps()}>
-      <tbody {...getTableBodyProps()}>
-        {rows.map((row: Row, i: number) => {
-          prepareRow(row);
-          return (
-            <StatementEditorActionTableRow
-              renderPropGroup={renderPropGroup}
-              handleClick={handleRowClick}
-              index={i}
-              row={row}
-              statement={statement}
-              moveRow={moveRow}
-              userCanEdit={userCanEdit}
-              updateOrderFn={updateActionOrder}
-              visibleColumns={visibleColumns}
-              {...row.getRowProps()}
-            />
-          );
-        })}
-      </tbody>
-    </StyledTable>
+    <>
+      <StyledTable {...getTableProps()}>
+        <tbody {...getTableBodyProps()}>
+          {rows.map((row: Row, i: number) => {
+            prepareRow(row);
+            return (
+              <StatementEditorActionTableRow
+                renderPropGroup={renderPropGroup}
+                handleClick={handleRowClick}
+                index={i}
+                row={row}
+                statement={statement}
+                moveRow={moveRow}
+                userCanEdit={userCanEdit}
+                updateOrderFn={updateActionOrder}
+                visibleColumns={visibleColumns}
+                {...row.getRowProps()}
+              />
+            );
+          })}
+        </tbody>
+      </StyledTable>
+    </>
   );
 };
