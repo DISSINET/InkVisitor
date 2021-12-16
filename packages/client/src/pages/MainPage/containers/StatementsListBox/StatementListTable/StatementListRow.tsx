@@ -54,7 +54,7 @@ export const StatementListRow: React.FC<StatementListRow> = ({
   );
 
   const lastEditdateText = useMemo(() => {
-    if (audit && audit.last && audit.last[0].date) {
+    if (audit && audit.last && audit.last[0] && audit.last[0].date) {
       const today = new Date().setHours(0, 0, 0, 0);
       const lastEditDate = audit.last[0].date;
       const lastEditDay = new Date(lastEditDate).setHours(0, 0, 0, 0);
