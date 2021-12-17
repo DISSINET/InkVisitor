@@ -1,22 +1,10 @@
-import React, {
-  Profiler,
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
-import { Column, useTable, useExpanded, Row, Cell } from "react-table";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { Column, useTable, useExpanded, Row } from "react-table";
 import update from "immutability-helper";
 import { StyledTable } from "../StatementEditorActionTable/StatementEditorActionTableStyles";
 import { StatementEditorActionTableRow } from "./StatementEditorActionTableRow";
 import { IActant, IResponseStatement, IStatementAction } from "@shared/types";
-import { EntitySuggester, EntityTag } from "../..";
-import { AttributeIcon, Button, ButtonGroup } from "components";
-import { FaPlus, FaTrashAlt, FaUnlink } from "react-icons/fa";
 import { UseMutationResult } from "react-query";
-import { ActantType } from "@shared/enums";
-import { excludedSuggesterEntities } from "Theme/constants";
-import AttributesEditor from "../../AttributesEditor/AttributesEditor";
 
 interface FilteredActionObject {
   data: { action: IActant | undefined; sAction: IStatementAction };
