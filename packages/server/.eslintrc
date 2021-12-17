@@ -1,15 +1,18 @@
 {
   "root": true,
   "parser": "@typescript-eslint/parser",
-  "plugins": ["@typescript-eslint"],
+  "plugins": ["@typescript-eslint", "react-hooks"],
   "extends": [
     "eslint:recommended",
     "plugin:@typescript-eslint/eslint-recommended",
-    "plugin:@typescript-eslint/recommended"
+    "plugin:@typescript-eslint/recommended",
+    "plugin:react-hooks/recommended"
   ],
   "rules": {
     "quotes": "off",
     "@typescript-eslint/quotes": ["error", "double"],
-    "@typescript-eslint/lines-between-class-members": "off"
+    "@typescript-eslint/lines-between-class-members": "off",
+    "react-hooks/rules-of-hooks": "error",
+    "react-hooks/exhaustive-deps": "warn"
   }
 }
