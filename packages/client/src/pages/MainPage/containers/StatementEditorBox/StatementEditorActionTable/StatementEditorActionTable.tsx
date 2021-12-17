@@ -62,25 +62,6 @@ export const StatementEditorActionTable: React.FC<
     setFilteredActions(filteredActions);
   }, [statement]);
 
-  const updateAction = (statementActionId: string, changes: any) => {
-    if (statement && statementActionId) {
-      const updatedActions = statement.data.actions.map((a) =>
-        a.id === statementActionId ? { ...a, ...changes } : a
-      );
-      const newData = { actions: updatedActions };
-      updateActionsMutation.mutate(newData);
-    }
-  };
-  const removeAction = (statementActionId: string) => {
-    if (statement) {
-      const updatedActions = statement.data.actions.filter(
-        (a) => a.id !== statementActionId
-      );
-      const newData = { actions: updatedActions };
-      updateActionsMutation.mutate(newData);
-    }
-  };
-
   const updateActionOrder = () => {
     if (userCanEdit) {
       const actions: IStatementAction[] = filteredActions.map(
@@ -118,125 +99,9 @@ export const StatementEditorActionTable: React.FC<
       {
         Header: "Action",
         accessor: "data",
-        Cell: ({ row }: Cell) => {
-          const { action, sAction } = row.values.data;
-          return action ? (
-            <EntityTag
-              actant={action}
-              button={
-                userCanEdit && (
-                  <Button
-                    key="d"
-                    tooltip="unlink action"
-                    icon={<FaUnlink />}
-                    inverted
-                    color="plain"
-                    onClick={() => {
-                      updateAction(sAction.id, {
-                        action: "",
-                      });
-                    }}
-                  />
-                )
-              }
-            />
-          ) : (
-            userCanEdit && (
-              <EntitySuggester
-                onSelected={(newSelectedId: string) => {
-                  updateAction(sAction.id, {
-                    action: newSelectedId,
-                  });
-                }}
-                categoryTypes={[ActantType.Action]}
-                excludedEntities={excludedSuggesterEntities}
-                placeholder={"add new action"}
-              />
-            )
-          );
-        },
       },
       {
         id: "Attributes & Buttons",
-        Cell: ({ row }: Cell) => {
-          const { action, sAction } = row.values.data;
-          const propOriginId = row.values.data.sAction.action;
-
-          return (
-            <ButtonGroup noMargin>
-              {sAction && (
-                <AttributesEditor
-                  modalTitle={`Action attribute`}
-                  actant={action}
-                  disabledAllAttributes={!userCanEdit}
-                  data={{
-                    elvl: sAction.elvl,
-                    certainty: sAction.certainty,
-                    logic: sAction.logic,
-                    mood: sAction.mood,
-                    moodvariant: sAction.moodvariant,
-                    operator: sAction.operator,
-                    bundleStart: sAction.bundleStart,
-                    bundleEnd: sAction.bundleEnd,
-                  }}
-                  handleUpdate={(newData) => {
-                    updateAction(sAction.id, newData);
-                  }}
-                  updateActantId={(newId: string) => {
-                    updateAction(sAction.id, { action: newId });
-                  }}
-                  userCanEdit={userCanEdit}
-                  classEntitiesActant={[ActantType.Action]}
-                  loading={updateActionsMutation.isLoading}
-                />
-              )}
-              {userCanEdit && (
-                <Button
-                  key="d"
-                  icon={<FaTrashAlt />}
-                  color="plain"
-                  inverted={true}
-                  tooltip="remove action row"
-                  onClick={() => {
-                    removeAction(row.values.data.sAction.id);
-                  }}
-                />
-              )}
-              {userCanEdit && (
-                <Button
-                  key="a"
-                  icon={<FaPlus />}
-                  color="plain"
-                  inverted={true}
-                  tooltip="add new prop"
-                  onClick={() => {
-                    addProp(propOriginId);
-                  }}
-                />
-              )}
-              {sAction.logic == "2" && (
-                <Button
-                  key="neg"
-                  tooltip="Negative logic"
-                  color="success"
-                  inverted={true}
-                  noBorder
-                  icon={<AttributeIcon attributeName={"negation"} />}
-                />
-              )}
-              {sAction.operator && (
-                <Button
-                  key="oper"
-                  tooltip="Logical operator type"
-                  color="success"
-                  inverted={true}
-                  noBorder
-                  icon={sAction.operator}
-                />
-              )}
-            </ButtonGroup>
-          );
-        },
       },
     ];
   }, [filteredActions, updateActionsMutation.isLoading]);
@@ -281,6 +146,8 @@ export const StatementEditorActionTable: React.FC<
                 userCanEdit={userCanEdit}
                 updateOrderFn={updateActionOrder}
                 visibleColumns={visibleColumns}
+                updateActionsMutation={updateActionsMutation}
+                addProp={addProp}
                 {...row.getRowProps()}
               />
             );
