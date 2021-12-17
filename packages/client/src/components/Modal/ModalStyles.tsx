@@ -35,16 +35,20 @@ export const StyledBackground = styled(animated.div)`
 `;
 
 interface Card {
-  width: "full" | "normal" | "thin";
+  width: "full" | "normal" | "thin" | number;
 }
-const getWidth = (width: "full" | "normal" | "thin") => {
-  switch (width) {
-    case "full":
-      return "calc(100vw - 40px)";
-    case "normal":
-      return "50rem";
-    case "thin":
-      return "auto";
+const getWidth = (width: "full" | "normal" | "thin" | number) => {
+  if (typeof width === "number") {
+    return `${width / 10}rem`;
+  } else {
+    switch (width) {
+      case "full":
+        return "calc(100vw - 40px)";
+      case "normal":
+        return "50rem";
+      case "thin":
+        return "auto";
+    }
   }
 };
 export const StyledCard = styled(animated.div)<Card>`
@@ -54,14 +58,14 @@ export const StyledCard = styled(animated.div)<Card>`
   max-height: calc(100vh - 40px);
   /* overflow: hidden; */
   z-index: 50;
-  background-color: ${({ theme }) => theme.color["white"]};
+  background-color: ${({ theme }) => theme.color["gray"][100]};
   color: ${({ theme }) => theme.color["black"]};
   border-radius: ${({ theme }) => theme.borderRadius["sm"]};
   position: relative;
 `;
 
 interface StyledCardHeader {
-  color: typeof Colors[number];
+  color?: typeof Colors[number];
 }
 export const StyledCardHeader = styled.header<StyledCardHeader>`
   display: flex;
@@ -69,7 +73,8 @@ export const StyledCardHeader = styled.header<StyledCardHeader>`
   align-items: center;
   flex-shrink: 0;
   padding: ${space4} ${space6} ${space2} ${space6};
-  background-color: ${({ theme, color }) => theme.color[color]};
+  background-color: ${({ theme, color }) =>
+    color ? theme.color[color] : "transparent"};
   border-top-left-radius: ${({ theme }) => theme.borderRadius["sm"]};
   border-top-right-radius: ${({ theme }) => theme.borderRadius["sm"]};
 
@@ -84,15 +89,12 @@ export const StyledCardTitle = styled.h2`
 `;
 export const StyledCardBody = styled.section`
   display: flex;
-  /* flex-shrink: 1; */
-  /* flex-grow: 1; */
-  /* overflow: auto; */
   padding: ${space5} ${space7};
 
   font-size: ${({ theme }) => theme.fontSize["sm"]};
-  /* -webkit-overflow-scrolling: touch; */
 `;
-export const StyledFooter = styled.div`
+interface StyledFooter {}
+export const StyledFooter = styled.div<StyledFooter>`
   border-top-style: solid;
   border-top-width: ${({ theme }) => theme.borderWidth["default"]};
   border-top-color: ${({ theme }) => theme.color["gray"][400]};

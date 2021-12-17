@@ -1,7 +1,6 @@
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useMemo, useEffect, Profiler } from "react";
 import { useQuery, useMutation, useQueryClient } from "react-query";
 import api from "api";
-
 import {
   FaTrashAlt,
   FaPlus,
@@ -9,7 +8,6 @@ import {
   FaCaretUp,
   FaCaretDown,
 } from "react-icons/fa";
-
 import { EntityTag } from "./../";
 import {
   CProp,
@@ -17,7 +15,6 @@ import {
   CStatementActant,
   CStatementAction,
 } from "constructors";
-
 import {
   IActant,
   IStatementProp,
@@ -33,7 +30,6 @@ import {
   MultiInput,
 } from "components";
 import { EntitySuggester } from "./../";
-
 import {
   StyledReferencesListColumn,
   StyledListHeaderColumn,
@@ -49,14 +45,11 @@ import {
   StyledEditorActantTableWrapper,
   StyledPropButtonGroup,
   StyledEditorPreSection,
-  StyledGrid,
-  StyledGridCell,
   StyledTagWrapper,
   StyledBreadcrumbWrap,
 } from "./StatementEditorBoxStyles";
 import { StatementEditorActantTable } from "./StatementEditorActantTable/StatementEditorActantTable";
 import { StatementEditorActionTable } from "./StatementEditorActionTable/StatementEditorActionTable";
-import { AttributesEditor } from "../AttributesEditor/AttributesEditor";
 import { ColumnInstance } from "react-table";
 import { useSearchParams } from "hooks";
 import { AttributeButtonGroup } from "../AttributeButtonGroup/AttributeButtonGroup";
@@ -68,6 +61,8 @@ import { BsArrow90DegLeft, BsArrowRightShort } from "react-icons/bs";
 import { StyledItemBox } from "../StatementsListBox/StatementListHeader/StatementListBreadcrumbItem/StatementListBreadcrumbItemStyles";
 import { AuditTable } from "./../AuditTable/AuditTable";
 import { JSONExplorer } from "../JSONExplorer/JSONExplorer";
+import { AttributesGroupEditor } from "../AttributesEditor/AttributesGroupEditor";
+import { AttributeGroupDataObject } from "types";
 
 const classesActants = [
   ActantType.Statement,
@@ -146,6 +141,30 @@ export const StatementEditorBox: React.FC = () => {
     { enabled: !!statementId && api.isLoggedIn(), retry: 2 }
   );
 
+  // territory query
+  const {
+    status,
+    data: territoryActants,
+    error,
+    isFetching,
+  } = useQuery(
+    ["territoryActants", statement?.data.territory.id],
+    async () => {
+      if (statement?.data.territory.id) {
+        const res = await api.actantIdsInTerritory(
+          statement?.data.territory.id
+        );
+        return res.data;
+      } else {
+        return [];
+      }
+    },
+    {
+      initialData: [],
+      enabled: !!statement?.data.territory.id && api.isLoggedIn(),
+    }
+  );
+
   // refetch audit when statement changes
   useEffect(() => {
     queryClient.invalidateQueries("audit");
@@ -183,6 +202,7 @@ export const StatementEditorBox: React.FC = () => {
   //TODO recurse to get all parents
   const territoryPath =
     territoryData && Array(territoryData["data"]["parent"]["id"]);
+
   const userCanEdit: boolean = useMemo(() => {
     return (
       !!statement &&
@@ -297,6 +317,7 @@ export const StatementEditorBox: React.FC = () => {
       newProp.origin = originId;
 
       const newData = { props: [...statement.data.props, newProp] };
+
       updateActantsDataMutation.mutate(newData);
     }
   };
@@ -429,21 +450,13 @@ export const StatementEditorBox: React.FC = () => {
   };
 
   const updateActantsDataMutation = useMutation(
-    async (changes: object) =>
+    async (changes: object) => {
       await api.actantsUpdate(statementId, {
         data: changes,
-      }),
+      });
+    },
     {
       onSuccess: (data, variables) => {
-        queryClient.invalidateQueries(["statement"]);
-      },
-    }
-  );
-
-  const updateActantMutation = useMutation(
-    async (changes: object) => await api.actantsUpdate(statementId, changes),
-    {
-      onSuccess: () => {
         queryClient.invalidateQueries(["statement"]);
       },
     }
@@ -459,6 +472,15 @@ export const StatementEditorBox: React.FC = () => {
       onSuccess: () => {
         queryClient.invalidateQueries("statement");
         queryClient.invalidateQueries("territory");
+      },
+    }
+  );
+
+  const updateActantMutation = useMutation(
+    async (changes: object) => await api.actantsUpdate(statementId, changes),
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries(["statement"]);
       },
     }
   );
@@ -567,7 +589,7 @@ export const StatementEditorBox: React.FC = () => {
             />
           ) : (
             <EntitySuggester
-              statementTerritoryId={statement.data.territory.id}
+              territoryActants={territoryActants}
               openDetailOnCreate
               onSelected={(newSelectedId: string) => {
                 updateProp(prop.id, {
@@ -583,23 +605,6 @@ export const StatementEditorBox: React.FC = () => {
             />
           )}
           <StyledPropButtonGroup>
-            <AttributesEditor
-              modalTitle={`Property Type attributes [${
-                propTypeActant ? propTypeActant.label : ""
-              }]`}
-              disabledAllAttributes={!userCanEdit}
-              entityType={propTypeActant ? propTypeActant.class : false}
-              data={{
-                elvl: prop.type.elvl,
-                logic: prop.type.logic,
-                virtuality: prop.type.virtuality,
-                partitivity: prop.type.partitivity,
-              }}
-              handleUpdate={(newData) => {
-                updateProp(prop.id, { type: { ...prop.type, ...newData } });
-              }}
-              loading={updateActantsDataMutation.isLoading}
-            />
             {prop.type.logic == "2" ? (
               <Button
                 key="neg"
@@ -643,7 +648,7 @@ export const StatementEditorBox: React.FC = () => {
             />
           ) : (
             <EntitySuggester
-              statementTerritoryId={statement.data.territory.id}
+              territoryActants={territoryActants}
               openDetailOnCreate
               onSelected={(newSelectedId: string) => {
                 updateProp(prop.id, {
@@ -659,25 +664,6 @@ export const StatementEditorBox: React.FC = () => {
             />
           )}
           <StyledPropButtonGroup>
-            <AttributesEditor
-              modalTitle={`Property Value attributes [${
-                propValueActant ? propValueActant.label : ""
-              }]`}
-              disabledAllAttributes={!userCanEdit}
-              entityType={propValueActant ? propValueActant.class : false}
-              data={{
-                elvl: prop.value.elvl,
-                logic: prop.value.logic,
-                virtuality: prop.value.virtuality,
-                partitivity: prop.value.partitivity,
-              }}
-              handleUpdate={(newData) => {
-                updateProp(prop.id, {
-                  value: { ...prop.value, ...newData },
-                });
-              }}
-              loading={updateActantsDataMutation.isLoading}
-            />
             {prop.value.logic == "2" ? (
               <Button
                 key="neg"
@@ -694,25 +680,53 @@ export const StatementEditorBox: React.FC = () => {
         </StyledPropLineColumn>
 
         <StyledPropLineColumn lastSecondLevel={lastSecondLevel}>
-          <StyledPropButtonGroup leftMargin={false}>
-            <AttributesEditor
-              modalTitle={`Property Statement attributes [${propValueActant?.label} - ${propTypeActant?.label}]`}
+          <StyledPropButtonGroup>
+            <AttributesGroupEditor
+              modalTitle={`Property attributes`}
               disabledAllAttributes={!userCanEdit}
+              propTypeActant={propTypeActant}
+              propValueActant={propValueActant}
+              excludedSuggesterEntities={excludedSuggesterEntities}
+              classesPropType={classesPropType}
+              classesPropValue={classesPropValue}
+              updateProp={updateProp}
+              statementId={prop.id}
               data={{
-                elvl: prop.elvl,
-                certainty: prop.certainty,
-                logic: prop.logic,
-                mood: prop.mood,
-                moodvariant: prop.moodvariant,
-                operator: prop.operator,
-                bundleStart: prop.bundleStart,
-                bundleEnd: prop.bundleEnd,
+                statement: {
+                  elvl: prop.elvl,
+                  certainty: prop.certainty,
+                  logic: prop.logic,
+                  mood: prop.mood,
+                  moodvariant: prop.moodvariant,
+                  operator: prop.operator,
+                  bundleStart: prop.bundleStart,
+                  bundleEnd: prop.bundleEnd,
+                },
+                type: {
+                  elvl: prop.type.elvl,
+                  logic: prop.type.logic,
+                  virtuality: prop.type.virtuality,
+                  partitivity: prop.type.partitivity,
+                },
+                value: {
+                  elvl: prop.value.elvl,
+                  logic: prop.value.logic,
+                  virtuality: prop.value.virtuality,
+                  partitivity: prop.value.partitivity,
+                },
               }}
-              handleUpdate={(newData) => {
-                updateProp(prop.id, newData);
+              handleUpdate={(newData: AttributeGroupDataObject) => {
+                const newDataObject = {
+                  ...newData.statement,
+                  ...newData,
+                };
+                const { statement, ...statementPropObject } = newDataObject;
+                updateProp(prop.id, statementPropObject);
               }}
+              userCanEdit={userCanEdit}
               loading={updateActantsDataMutation.isLoading}
             />
+
             {level === "1" && (
               <Button
                 key="add"
@@ -818,6 +832,7 @@ export const StatementEditorBox: React.FC = () => {
                   />
                 </StyledItemBox>
               )}
+              <Loader size={20} show={isFetchingTerritory} />
             </StyledBreadcrumbWrap>
           </StyledEditorPreSection>
           <StyledEditorSection firstSection key="editor-section-summary">
@@ -863,7 +878,7 @@ export const StatementEditorBox: React.FC = () => {
 
               {userCanEdit && (
                 <EntitySuggester
-                  statementTerritoryId={statement.data.territory.id}
+                  territoryActants={territoryActants}
                   openDetailOnCreate
                   onSelected={(newSelectedId: string) => {
                     addAction(newSelectedId);
@@ -894,7 +909,7 @@ export const StatementEditorBox: React.FC = () => {
               </StyledEditorActantTableWrapper>
               {userCanEdit && (
                 <EntitySuggester
-                  statementTerritoryId={statement.data.territory.id}
+                  territoryActants={territoryActants}
                   openDetailOnCreate
                   onSelected={(newSelectedId: string) => {
                     addActant(newSelectedId);
@@ -955,9 +970,7 @@ export const StatementEditorBox: React.FC = () => {
                           ) : (
                             userCanEdit && (
                               <EntitySuggester
-                                statementTerritoryId={
-                                  statement.data.territory.id
-                                }
+                                territoryActants={territoryActants}
                                 openDetailOnCreate
                                 onSelected={(newSelectedId: string) => {
                                   updateReference(reference.id, {
@@ -1035,7 +1048,7 @@ export const StatementEditorBox: React.FC = () => {
               </StyledReferencesList>
               {userCanEdit && (
                 <EntitySuggester
-                  statementTerritoryId={statement.data.territory.id}
+                  territoryActants={territoryActants}
                   openDetailOnCreate
                   onSelected={(newSelectedId: string) => {
                     addReference(newSelectedId);
@@ -1083,7 +1096,7 @@ export const StatementEditorBox: React.FC = () => {
               </StyledTagsList>
               {userCanEdit && (
                 <EntitySuggester
-                  statementTerritoryId={statement.data.territory.id}
+                  territoryActants={territoryActants}
                   openDetailOnCreate
                   onSelected={(newSelectedId: string) => {
                     addTag(newSelectedId);
@@ -1127,10 +1140,15 @@ export const StatementEditorBox: React.FC = () => {
           </StyledEditorSection>
         </div>
       ) : (
-        "no statement selected"
+        <>{"no statement selected"}</>
       )}
       <Loader
-        show={isFetchingStatement || updateActantsRefreshListMutation.isLoading}
+        show={
+          isFetchingStatement ||
+          updateActionsRefreshListMutation.isLoading ||
+          updateActantsRefreshListMutation.isLoading ||
+          updateActantsDataMutation.isLoading
+        }
       />
     </>
   );

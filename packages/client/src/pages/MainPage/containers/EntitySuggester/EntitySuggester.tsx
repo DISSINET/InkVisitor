@@ -25,7 +25,7 @@ interface EntitySuggesterI {
   disableWildCard?: boolean;
   inputWidth?: number | "full";
   openDetailOnCreate?: boolean;
-  statementTerritoryId?: string;
+  territoryActants?: string[];
   excludedEntities?: ActantType[];
 }
 
@@ -37,7 +37,7 @@ export const EntitySuggester: React.FC<EntitySuggesterI> = ({
   inputWidth,
   disableWildCard = false,
   openDetailOnCreate = false,
-  statementTerritoryId,
+  territoryActants,
   excludedEntities = [],
 }) => {
   const wildCardCategory = ActantType.Any;
@@ -48,18 +48,6 @@ export const EntitySuggester: React.FC<EntitySuggesterI> = ({
   const [allCategories, setAllCategories] = useState<IOption[]>();
 
   const { setActantId } = useSearchParams();
-
-  // territory query
-  const { status, data: territoryActants, error, isFetching } = useQuery(
-    ["territory", "suggesters", statementTerritoryId],
-    async () => {
-      if (statementTerritoryId) {
-        const res = await api.actantIdsInTerritory(statementTerritoryId);
-        return res.data;
-      }
-    },
-    { initialData: [], enabled: !!statementTerritoryId && api.isLoggedIn() }
-  );
 
   // Suggesions query
   const {
@@ -85,7 +73,7 @@ export const EntitySuggester: React.FC<EntitySuggesterI> = ({
 
           const icons: React.ReactNode[] = [];
 
-          if ((territoryActants as string[])?.includes(s.id)) {
+          if (territoryActants?.includes(s.id)) {
             icons.push(<FaHome key={s.id} color="" />);
           }
           return {
