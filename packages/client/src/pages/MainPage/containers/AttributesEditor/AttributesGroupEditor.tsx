@@ -1,4 +1,4 @@
-import React, { Profiler, useEffect, useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 
 import { MdSettings } from "react-icons/md";
 import { ActantType } from "@shared/enums";

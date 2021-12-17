@@ -1,7 +1,6 @@
-import React, { useState, useMemo, useEffect, Profiler } from "react";
+import React, { useMemo, useEffect, Profiler } from "react";
 import { useQuery, useMutation, useQueryClient } from "react-query";
 import api from "api";
-
 import {
   FaTrashAlt,
   FaPlus,
@@ -9,7 +8,6 @@ import {
   FaCaretUp,
   FaCaretDown,
 } from "react-icons/fa";
-
 import { EntityTag } from "./../";
 import {
   CProp,
@@ -17,7 +15,6 @@ import {
   CStatementActant,
   CStatementAction,
 } from "constructors";
-
 import {
   IActant,
   IStatementProp,
@@ -33,7 +30,6 @@ import {
   MultiInput,
 } from "components";
 import { EntitySuggester } from "./../";
-
 import {
   StyledReferencesListColumn,
   StyledListHeaderColumn,

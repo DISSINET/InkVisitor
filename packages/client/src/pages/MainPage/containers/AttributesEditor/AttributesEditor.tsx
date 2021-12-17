@@ -29,18 +29,8 @@ import {
 } from "components";
 
 import { MdSettings } from "react-icons/md";
-import {
-  ActantType,
-  Certainty,
-  Elvl,
-  Logic,
-  Mood,
-  MoodVariant,
-  Virtuality,
-  Partitivity,
-  Operator,
-} from "@shared/enums";
-import React, { useState, useMemo, Profiler } from "react";
+import { ActantType } from "@shared/enums";
+import React, { useState, useMemo } from "react";
 import { AttributeData, AttributeName, Entities } from "types";
 import { TooltipAttributeRow } from "./TooltipAttributeRow/TooltipAttributeRow";
 import { TooltipBooleanRow } from "./TooltipBooleanRow/TooltipBooleanRow";

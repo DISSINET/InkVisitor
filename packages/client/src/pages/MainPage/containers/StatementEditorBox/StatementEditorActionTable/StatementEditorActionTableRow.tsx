@@ -2,7 +2,7 @@ import { ActantType } from "@shared/enums";
 import { IResponseStatement } from "@shared/types";
 import { AttributeIcon, Button, ButtonGroup } from "components";
 import { useSearchParams } from "hooks";
-import React, { Profiler, useRef } from "react";
+import React, { useRef } from "react";
 import {
   DragSourceMonitor,
   DropTargetMonitor,
@@ -12,7 +12,7 @@ import {
 } from "react-dnd";
 import { FaGripVertical, FaPlus, FaTrashAlt, FaUnlink } from "react-icons/fa";
 import { UseMutationResult } from "react-query";
-import { Cell, ColumnInstance, Row } from "react-table";
+import { ColumnInstance } from "react-table";
 import { excludedSuggesterEntities } from "Theme/constants";
 
 import { DragItem, ItemTypes } from "types";

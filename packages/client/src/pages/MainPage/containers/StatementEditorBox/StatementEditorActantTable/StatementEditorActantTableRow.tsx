@@ -12,7 +12,7 @@ import {
 } from "react-dnd";
 import { FaGripVertical, FaPlus, FaTrashAlt, FaUnlink } from "react-icons/fa";
 import { UseMutationResult } from "react-query";
-import { Cell, ColumnInstance } from "react-table";
+import { ColumnInstance } from "react-table";
 import { excludedSuggesterEntities } from "Theme/constants";
 
 import { DragItem, ItemTypes } from "types";
@@ -320,11 +320,6 @@ export const StatementEditorActantTableRow: React.FC<
         <StyledTd>{renderActantCell()}</StyledTd>
         <StyledTd>{renderPositionCell()}</StyledTd>
         <StyledTd>{renderAttributesCell()}</StyledTd>
-        {/* {row.cells.map((cell: Cell) => {
-          return (
-            <StyledTd {...cell.getCellProps()}>{cell.render("Cell")}</StyledTd>
-          );
-        })} */}
       </StyledTr>
 
       {renderPropGroup(
