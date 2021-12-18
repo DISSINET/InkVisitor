@@ -2,8 +2,7 @@
  * Very extensive object showing all the details about one actant
  */
 
-import { IActant, IResponseActant, IStatement } from ".";
-import { UserRoleMode } from "../enums";
+import { IResponseActant } from ".";
 
 export interface IResponseDetail extends IResponseActant {
   usedCount: number;

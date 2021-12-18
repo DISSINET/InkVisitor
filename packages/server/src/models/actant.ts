@@ -174,4 +174,19 @@ export default class Actant implements IActant, IDbModel {
 
     return out;
   }
+
+  /**
+   * Returns actant ids that are present in data fields
+   * @returns list of ids
+   */
+  getEntitiesIds(): string[] {
+    const actantsIds: Record<string, null> = {};
+
+    this.props.forEach((p) => {
+      actantsIds[p.type.id] = null;
+      actantsIds[p.value.id] = null;
+    });
+
+    return Object.keys(actantsIds);
+  }
 }

@@ -109,7 +109,7 @@ export default Router()
 
       const user = request.getUserOrFail();
 
-      if (!model.canBeCreatedByUser(user)) {  
+      if (!model.canBeCreatedByUser(user)) {
         throw new PermissionDeniedError("actant cannot be created");
       }
 
@@ -262,24 +262,10 @@ export default Router()
         throw new PermissionDeniedError(`cannot view actant ${actantId}`);
       }
 
-      const meta: IResponseStatement[] = [];
-
-      const statements = await Statement.findMetaStatements(
-        request.db.connection,
-        actant.id as string
+      const entities = await findActantsByIds(
+        request.db,
+        actant.getEntitiesIds()
       );
-
-      for (const statement of statements) {
-        const metaActants = await findActantsByIds(
-          request.db,
-          statement.getLinkedActantIds()
-        );
-
-        meta.push({
-          ...statement,
-          actants: metaActants,
-        });
-      }
 
       const usedInStatements = await Statement.findDependentStatements(
         request.db.connection,
@@ -290,7 +276,7 @@ export default Router()
         ...actant,
         usedCount: usedInStatements.length,
         usedIn: usedInStatements,
-        metaStatements: meta,
+        entities,
         right: actant.getUserRoleMode(request.getUserOrFail()),
       } as IResponseDetail;
     })

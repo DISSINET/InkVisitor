@@ -72,7 +72,7 @@ export default Router()
         territoryId
       );
 
-      const actantIds = Statement.getLinkedActantIdsForMany(statements);
+      const actantIds = Statement.getEntitiesIdsForMany(statements);
       const actants = await findActantsById(request.db, actantIds);
 
       const responseStatements: IResponseStatement[] = [];
@@ -128,7 +128,7 @@ export default Router()
           territoryId
         );
 
-      return Statement.getLinkedActantIdsForMany(dependentStatements);
+      return Statement.getEntitiesIdsForMany(dependentStatements);
     })
   )
   .post(
