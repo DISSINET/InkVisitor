@@ -16,9 +16,17 @@ import dbMiddleware from "@middlewares/db";
 import profilerMiddleware from "@middlewares/profiler";
 import errorsMiddleware, { catchAll } from "@middlewares/errors";
 import { validateJwt } from "@common/auth";
+import compression from "compression";
+
 import "@models/events/register";
 
 const server = express();
+
+server.use(
+  compression({
+    threshold: 0,
+  })
+);
 
 server.use(cors());
 server.use(express.json());
