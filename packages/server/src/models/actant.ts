@@ -12,6 +12,7 @@ import { InternalServerError } from "@shared/types/errors";
 import User from "./user";
 import emitter from "./events/emitter";
 import { EventTypes } from "./events/types";
+import { findActantsByIds } from "@service/shorthands";
 
 export default class Actant implements IActant, IDbModel {
   static table = "actants";
@@ -188,5 +189,9 @@ export default class Actant implements IActant, IDbModel {
     });
 
     return Object.keys(actantsIds);
+  }
+
+  async getEntities(db: Connection): Promise<IActant[]> {
+    return findActantsByIds<IActant>(db, this.getEntitiesIds());
   }
 }

@@ -27,6 +27,7 @@ import { mergeDeep } from "@common/functions";
 import Statement from "@models/statement";
 import { ActantStatus, ActantType, UserRole } from "@shared/enums";
 import Audit from "@models/audit";
+import { Connection } from "rethinkdb-ts";
 
 export default Router()
   .get(
@@ -262,21 +263,16 @@ export default Router()
         throw new PermissionDeniedError(`cannot view actant ${actantId}`);
       }
 
-      const entities = await findActantsByIds(
-        request.db,
-        actant.getEntitiesIds()
-      );
-
       const usedInStatements = await Statement.findDependentStatements(
         request.db.connection,
-        actant.id as string
+        actant.id
       );
 
       return {
         ...actant,
         usedCount: usedInStatements.length,
         usedIn: usedInStatements,
-        entities,
+        entities: await actant.getEntities(request.db.connection as Connection),
         right: actant.getUserRoleMode(request.getUserOrFail()),
       } as IResponseDetail;
     })

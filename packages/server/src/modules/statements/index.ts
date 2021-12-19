@@ -9,6 +9,7 @@ import {
 import { asyncRouteHandler } from "..";
 import { IResponseStatement, IStatement, IActant } from "@shared/types";
 import Statement from "@models/statement";
+import { Connection } from "rethinkdb-ts";
 
 export default Router().get(
   "/get/:statementId?",
@@ -36,14 +37,11 @@ export default Router().get(
       throw new PermissionDeniedError("statement cannot be accessed");
     }
 
-    const entities = await findActantsByIds<IActant>(
-      request.db,
-      statementModel.getEntitiesIds()
-    );
-
     return {
       ...statementData,
-      entities,
+      entities: await statementModel.getEntities(
+        request.db.connection as Connection
+      ),
       right: statementModel.getUserRoleMode(request.getUserOrFail()),
     };
   })
