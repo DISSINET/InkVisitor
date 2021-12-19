@@ -36,14 +36,14 @@ export default Router().get(
       throw new PermissionDeniedError("statement cannot be accessed");
     }
 
-    const actants = await findActantsByIds<IActant>(
+    const entities = await findActantsByIds<IActant>(
       request.db,
       statementModel.getEntitiesIds()
     );
 
     return {
       ...statementData,
-      actants,
+      entities,
       right: statementModel.getUserRoleMode(request.getUserOrFail()),
     };
   })
