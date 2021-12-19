@@ -5,6 +5,5 @@
 import { IResponseActant } from ".";
 
 export interface IResponseDetail extends IResponseActant {
-  // usedCount: number;
   entities: object; // all entities (IActant) from props.type/value
 }

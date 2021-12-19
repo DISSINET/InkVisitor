@@ -17,7 +17,6 @@ import { IResponseDetail } from "./response-detail";
 import { IResponseBookmarkFolder } from "./response-bookmarks";
 import { IResponseAdministration } from "./response-administration";
 import { IResponseActant } from "./response-actant";
-import { IResponseAction } from "./response-action";
 import { IResponseStatement } from "./response-statement";
 import {
   IResponseTree,
@@ -62,7 +61,6 @@ export type {
   IResource,
   IResponseAudit,
   IResponseActant,
-  IResponseAction,
   IResponseDetail,
   IResponseBookmarkFolder,
   IResponseAdministration,
