@@ -59,7 +59,6 @@ export default Router()
 
       return {
         ...actant,
-        usedCount: usedInStatements.length,
         usedIn: usedInStatements,
         right: actant.getUserRoleMode(request.getUserOrFail()),
       } as IResponseActant;
@@ -270,7 +269,6 @@ export default Router()
 
       return {
         ...actant,
-        usedCount: usedInStatements.length,
         usedIn: usedInStatements,
         entities: await actant.getEntities(request.db.connection as Connection),
         right: actant.getUserRoleMode(request.getUserOrFail()),

@@ -90,9 +90,6 @@ describe("Users bookmarksGet", function () {
           res.body.bookmarks.should.be.a("array");
           res.body.bookmarks.should.have.lengthOf(1);
           res.body.bookmarks[0].actants.should.have.lengthOf(1);
-          expect(res.body.bookmarks[0].actants[0].usedCount).toEqual(
-            bookmarkCountUsage
-          );
         })
         .expect(200, done);
     });
