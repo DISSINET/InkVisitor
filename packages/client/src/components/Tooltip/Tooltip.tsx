@@ -23,13 +23,13 @@ interface Tooltip {
   label?: string;
   detail?: string;
   text?: string;
-  disabled?: boolean;
-  attributes?: React.ReactElement[];
   itemsCount?: number;
-  tagTooltip?: boolean;
-  noArrow?: boolean;
+  attributes?: ReactElement;
   items?: ReactElement[] | ReactElement;
   color?: typeof Colors[number];
+  tagTooltip?: boolean;
+  noArrow?: boolean;
+  disabled?: boolean;
   offsetX?: number;
   offsetY?: number;
 }

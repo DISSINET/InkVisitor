@@ -1,11 +1,6 @@
 import styled from "styled-components";
+import { Colors } from "types";
 
-export const StyledAttributeWrapper = styled.div`
-  //width: 100%;
-`;
-export const StyledAttributeModalContent = styled.div`
-  height: 100%;
-`;
 export const StyledAttributeModalRow = styled.div`
   display: inline-flex;
   padding-bottom: ${({ theme }) => theme.space[1]};
@@ -23,6 +18,7 @@ export const StyledAttributeModalRowLabelIcon = styled.div`
 export const StyledAttributeModalRowLabelText = styled.div`
   display: inline-flex;
   width: 10em;
+  cursor: default;
 `;
 
 export const StyledAttributeModalHeaderWrapper = styled.div`
@@ -34,4 +30,27 @@ export const StyledAttributeModalHeaderIcon = styled.div`
   margin-right: 2px;
   width: auto;
   vertical-align: text-top;
+`;
+export const StyledEntityWrap = styled.div`
+  display: inline-flex;
+  overflow: hidden;
+  margin-top: 1.5rem;
+`;
+export const StyledSuggesterWrap = styled.div`
+  display: inline-flex;
+  margin-top: 1.5rem;
+`;
+interface StyledContentWrap {
+  color?: typeof Colors[number];
+}
+export const StyledContentWrap = styled.div<StyledContentWrap>`
+  display: grid;
+  max-width: 100%;
+  padding-right: 2rem;
+  padding-left: 1rem;
+
+  border-left-color: ${({ theme, color }) =>
+    color ? theme.color[color] : "black"};
+  border-left-width: ${({ color }) => (color ? "3px" : "1px")};
+  border-left-style: ${({ color }) => (color ? "solid" : "dashed")};
 `;

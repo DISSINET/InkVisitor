@@ -19,7 +19,7 @@ interface Modal {
   onEnterPress?: () => void;
   showModal: boolean;
   disableBgClick?: boolean;
-  width?: "full" | "normal" | "thin";
+  width?: "full" | "normal" | "thin" | number;
   disableEscapeClose?: boolean;
 }
 export const Modal: FC<Modal> = ({
@@ -61,7 +61,7 @@ export const Modal: FC<Modal> = ({
 
 interface ModalCard {
   children?: ReactNode;
-  width: "full" | "normal" | "thin";
+  width: "full" | "normal" | "thin" | number;
   animatedMount: any;
 }
 export const ModalCard: FC<ModalCard> = ({
@@ -80,7 +80,7 @@ interface ModalHeader {
   title?: string | React.ReactElement;
   color?: typeof Colors[number];
 }
-export const ModalHeader: FC<ModalHeader> = ({ title, color = "white" }) => {
+export const ModalHeader: FC<ModalHeader> = ({ title, color }) => {
   return (
     <>
       <StyledCardHeader color={color}>

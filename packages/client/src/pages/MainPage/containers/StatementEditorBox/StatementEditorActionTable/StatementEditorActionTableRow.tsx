@@ -1,4 +1,6 @@
+import { ActantType } from "@shared/enums";
 import { IResponseStatement } from "@shared/types";
+import { AttributeIcon, Button, ButtonGroup } from "components";
 import { useSearchParams } from "hooks";
 import React, { useRef } from "react";
 import {
@@ -8,10 +10,14 @@ import {
   useDrop,
   XYCoord,
 } from "react-dnd";
-import { FaGripVertical } from "react-icons/fa";
-import { Cell, ColumnInstance } from "react-table";
+import { FaGripVertical, FaPlus, FaTrashAlt, FaUnlink } from "react-icons/fa";
+import { UseMutationResult } from "react-query";
+import { ColumnInstance } from "react-table";
+import { excludedSuggesterEntities } from "Theme/constants";
 
 import { DragItem, ItemTypes } from "types";
+import { EntitySuggester, EntityTag } from "../..";
+import AttributesEditor from "../../AttributesEditor/AttributesEditor";
 import { StyledTr, StyledTd } from "./StatementEditorActionTableStyles";
 
 interface StatementEditorActionTableRow {
@@ -21,18 +27,24 @@ interface StatementEditorActionTableRow {
   statement: IResponseStatement;
   userCanEdit?: boolean;
   updateOrderFn: () => void;
+  addProp: (originId: string) => void;
   handleClick: Function;
   renderPropGroup: Function;
   visibleColumns: ColumnInstance<{}>[];
+  updateActionsMutation: UseMutationResult<any, unknown, object, unknown>;
 }
 
-export const StatementEditorActionTableRow: React.FC<StatementEditorActionTableRow> = ({
+export const StatementEditorActionTableRow: React.FC<
+  StatementEditorActionTableRow
+> = ({
   row,
   index,
   moveRow,
   statement,
   userCanEdit = false,
   updateOrderFn,
+  addProp,
+  updateActionsMutation,
   handleClick = () => {},
   renderPropGroup,
   visibleColumns,
@@ -41,6 +53,25 @@ export const StatementEditorActionTableRow: React.FC<StatementEditorActionTableR
 
   const dropRef = useRef<HTMLTableRowElement>(null);
   const dragRef = useRef<HTMLTableDataCellElement>(null);
+
+  const updateAction = (statementActionId: string, changes: any) => {
+    if (statement && statementActionId) {
+      const updatedActions = statement.data.actions.map((a) =>
+        a.id === statementActionId ? { ...a, ...changes } : a
+      );
+      const newData = { actions: updatedActions };
+      updateActionsMutation.mutate(newData);
+    }
+  };
+  const removeAction = (statementActionId: string) => {
+    if (statement) {
+      const updatedActions = statement.data.actions.filter(
+        (a) => a.id !== statementActionId
+      );
+      const newData = { actions: updatedActions };
+      updateActionsMutation.mutate(newData);
+    }
+  };
 
   const [, drop] = useDrop({
     accept: ItemTypes.ACTANT_ROW,
@@ -84,6 +115,124 @@ export const StatementEditorActionTableRow: React.FC<StatementEditorActionTableR
   preview(drop(dropRef));
   drag(dragRef);
 
+  const renderActionCell = () => {
+    const { action, sAction } = row.values.data;
+    return action ? (
+      <EntityTag
+        actant={action}
+        button={
+          userCanEdit && (
+            <Button
+              key="d"
+              tooltip="unlink action"
+              icon={<FaUnlink />}
+              inverted
+              color="plain"
+              onClick={() => {
+                updateAction(sAction.id, {
+                  action: "",
+                });
+              }}
+            />
+          )
+        }
+      />
+    ) : (
+      userCanEdit && (
+        <EntitySuggester
+          onSelected={(newSelectedId: string) => {
+            updateAction(sAction.id, {
+              action: newSelectedId,
+            });
+          }}
+          categoryTypes={[ActantType.Action]}
+          excludedEntities={excludedSuggesterEntities}
+          placeholder={"add new action"}
+        />
+      )
+    );
+  };
+
+  const renderButtonsCell = () => {
+    const { action, sAction } = row.values.data;
+    const propOriginId = row.values.data.sAction.action;
+
+    return (
+      <ButtonGroup noMargin>
+        {sAction && (
+          <AttributesEditor
+            modalTitle={`Action attribute`}
+            actant={action}
+            disabledAllAttributes={!userCanEdit}
+            data={{
+              elvl: sAction.elvl,
+              certainty: sAction.certainty,
+              logic: sAction.logic,
+              mood: sAction.mood,
+              moodvariant: sAction.moodvariant,
+              operator: sAction.operator,
+              bundleStart: sAction.bundleStart,
+              bundleEnd: sAction.bundleEnd,
+            }}
+            handleUpdate={(newData) => {
+              updateAction(sAction.id, newData);
+            }}
+            updateActantId={(newId: string) => {
+              updateAction(sAction.id, { action: newId });
+            }}
+            userCanEdit={userCanEdit}
+            classEntitiesActant={[ActantType.Action]}
+            loading={updateActionsMutation.isLoading}
+          />
+        )}
+        {userCanEdit && (
+          <Button
+            key="d"
+            icon={<FaTrashAlt />}
+            color="plain"
+            inverted={true}
+            tooltip="remove action row"
+            onClick={() => {
+              removeAction(row.values.data.sAction.id);
+            }}
+          />
+        )}
+        {userCanEdit && (
+          <Button
+            key="a"
+            icon={<FaPlus />}
+            color="plain"
+            inverted={true}
+            tooltip="add new prop"
+            onClick={() => {
+              addProp(propOriginId);
+            }}
+          />
+        )}
+        {sAction.logic == "2" && (
+          <Button
+            key="neg"
+            tooltip="Negative logic"
+            color="success"
+            inverted={true}
+            noBorder
+            icon={<AttributeIcon attributeName={"negation"} />}
+          />
+        )}
+        {sAction.operator && (
+          <Button
+            key="oper"
+            tooltip="Logical operator type"
+            color="success"
+            inverted={true}
+            noBorder
+            icon={sAction.operator}
+          />
+        )}
+      </ButtonGroup>
+    );
+  };
+
   return (
     <React.Fragment key={index}>
       <StyledTr
@@ -100,11 +249,8 @@ export const StatementEditorActionTableRow: React.FC<StatementEditorActionTableR
             <FaGripVertical />
           </td>
         )}
-        {row.cells.map((cell: Cell) => {
-          return (
-            <StyledTd {...cell.getCellProps()}>{cell.render("Cell")}</StyledTd>
-          );
-        })}
+        <StyledTd>{renderActionCell()}</StyledTd>
+        <StyledTd>{renderButtonsCell()}</StyledTd>
       </StyledTr>
 
       {renderPropGroup(

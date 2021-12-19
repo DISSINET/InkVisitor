@@ -27,6 +27,7 @@ interface StyledEditorSection {
   lastSection?: boolean;
 }
 export const StyledEditorSection = styled.div<StyledEditorSection>`
+  position: relative;
   padding: ${({ theme }) => theme.space[6]};
   border-bottom-width: ${({ theme }) => theme.borderWidth[1]};
   border-bottom-color: ${({ theme }) => theme.color["gray"][500]};
@@ -170,4 +171,6 @@ export const StyledBreadcrumbWrap = styled.div`
   width: 100%;
   display: flex;
   flex-wrap: wrap;
+  min-height: 2rem;
+  position: relative;
 `;

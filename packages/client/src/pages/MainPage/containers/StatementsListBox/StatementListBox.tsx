@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { Profiler, useEffect, useMemo, useState } from "react";
 import { Cell, Column } from "react-table";
 import { useMutation, useQuery, useQueryClient } from "react-query";
 import {
@@ -53,12 +53,8 @@ const initialData: {
 export const StatementListBox: React.FC = () => {
   const queryClient = useQueryClient();
 
-  const {
-    territoryId,
-    setTerritoryId,
-    statementId,
-    setStatementId,
-  } = useSearchParams();
+  const { territoryId, setTerritoryId, statementId, setStatementId } =
+    useSearchParams();
 
   const [showSubmit, setShowSubmit] = useState(false);
   const [statementToDelete, setStatementToDelete] = useState<IStatement>();
@@ -98,12 +94,8 @@ export const StatementListBox: React.FC = () => {
 
   const duplicateStatementMutation = useMutation(
     async (statementToDuplicate: IResponseStatement) => {
-      const {
-        actions,
-        usedIn,
-        actants,
-        ...newStatementObject
-      } = statementToDuplicate;
+      const { actions, audits, usedIn, actants, ...newStatementObject } =
+        statementToDuplicate;
 
       const duplicatedStatement = DStatement(newStatementObject as IStatement);
       await api.actantsCreate(duplicatedStatement);

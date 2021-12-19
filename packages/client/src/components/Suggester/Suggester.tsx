@@ -113,7 +113,7 @@ export const Suggester: React.FC<SuggesterProps> = ({
 
   const handleEnterPress = () => {
     if (selected === -1 && typed.length > 0) {
-      if (category === "*") {
+      if (category === ActantType.Any) {
         setShowModal(true);
       } else {
         onCreate({ label: typed, category: category });
@@ -128,7 +128,7 @@ export const Suggester: React.FC<SuggesterProps> = ({
 
   const handleAddBtnClick = () => {
     if (typed.length > 0) {
-      if (category === "*") {
+      if (category === ActantType.Any) {
         setShowModal(true);
       } else {
         onCreate({ label: typed, category: category });
