@@ -100,7 +100,6 @@ export const StatementListBox: React.FC = () => {
     async (statementToDuplicate: IResponseStatement) => {
       const {
         actions,
-        audits,
         usedIn,
         actants,
         ...newStatementObject

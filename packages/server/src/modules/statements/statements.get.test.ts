@@ -4,10 +4,8 @@ import request from "supertest";
 import { supertestConfig } from "..";
 import { apiPath } from "../../common/constants";
 import app from "../../Server";
-import { IResponseStatement } from "@shared/types";
 import { Db } from "@service/RethinkDB";
 import { createActant } from "@service/shorthands";
-import { ActantType } from "@shared/enums";
 import Statement from "@models/statement";
 
 const testValidStatement = (res: any) => {

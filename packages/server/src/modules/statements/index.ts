@@ -1,13 +1,13 @@
 import { Request } from "express";
 import { Router } from "express";
-import { findActantById, findActantsByIds } from "@service/shorthands";
+import { findActantById } from "@service/shorthands";
 import {
   BadParams,
   PermissionDeniedError,
   StatementDoesNotExits,
 } from "@shared/types/errors";
 import { asyncRouteHandler } from "..";
-import { IResponseStatement, IStatement, IActant } from "@shared/types";
+import { IResponseStatement, IStatement } from "@shared/types";
 import Statement from "@models/statement";
 import { Connection } from "rethinkdb-ts";
 

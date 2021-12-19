@@ -18,7 +18,6 @@ import {
   IActant,
   IResponseDetail,
   IResponseGeneric,
-  IResponseStatement,
   IResponseActant,
   IResponseSearch,
   RequestSearch,
