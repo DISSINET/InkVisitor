@@ -336,15 +336,16 @@ const loadStatementsTables = async (next: Function) => {
   for (var csi = 0; csi < codingSheets.length; csi++) {
     if (csi === 0) {
       const codingSheet = codingSheets[csi];
-      //console.log(codingSheet);
 
       const data = await loadSheet({
         spread: codingSheet["spread"],
         sheet: codingSheet["sheet"],
         headerRow: 1,
-        validRowFn: (a: any) => a && (a["text"] || a["id"]),
+        validRowFn: (a: any, ai: number) =>
+          ai != 0 && a && (a["text"] || a["id"]),
       });
 
+      //console.log(data);
       // territories
       const territoryIds: string[] = [];
 
@@ -357,6 +358,7 @@ const loadStatementsTables = async (next: Function) => {
 
       // add sub-territories
       territoryIds.forEach((territoryId: string, ti: number) => {
+        console.log(territoryId);
         addTerritoryActant(
           territoryId,
           territoryId,
