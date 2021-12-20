@@ -84,7 +84,7 @@ export default Router()
 
         responseStatements.push({
           ...statement,
-          entities,
+          entities: Object.assign({}, ...entities.map((x) => ({ [x.id]: x }))),
         });
       }
 

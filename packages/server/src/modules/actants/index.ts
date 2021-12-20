@@ -266,10 +266,13 @@ export default Router()
         actant.id
       );
 
+      const entities = await actant.getEntities(
+        request.db.connection as Connection
+      );
       return {
         ...actant,
         usedIn: usedInStatements,
-        entities: await actant.getEntities(request.db.connection as Connection),
+        entities: Object.assign({}, ...entities.map((x) => ({ [x.id]: x }))),
         right: actant.getUserRoleMode(request.getUserOrFail()),
       } as IResponseDetail;
     })

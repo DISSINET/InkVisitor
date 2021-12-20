@@ -2,8 +2,8 @@
  * Very extensive object showing all the details about one actant
  */
 
-import { IResponseActant } from ".";
+import { IActant, IResponseActant } from ".";
 
 export interface IResponseDetail extends IResponseActant {
-  entities: object; // all entities (IActant) from props.type/value
+  entities: { [key: string]: IActant }; // all entities (IActant) from props.type/value
 }

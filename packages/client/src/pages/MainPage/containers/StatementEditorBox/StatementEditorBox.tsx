@@ -17,9 +17,9 @@ import {
 } from "constructors";
 import {
   IActant,
-  IStatementProp,
   IStatementReference,
   IResponseStatement,
+  IProp,
 } from "@shared/types";
 import {
   AttributeIcon,
@@ -127,6 +127,8 @@ export const StatementEditorBox: React.FC = () => {
   );
 
   console.log(statement);
+
+  //console.log(statement);
   // Audit query
   const {
     status: statusAudit,
@@ -221,63 +223,6 @@ export const StatementEditorBox: React.FC = () => {
     }
   }, [statementError]);
 
-  // getting origin actants of properties
-  const propsByOrigins = useMemo(() => {
-    if (statement) {
-      const allProps = statement?.data.props;
-
-      const statementActants = statement?.actants?.filter(
-        (sa) =>
-          statement.data.actants.map((a) => a.actant).includes(sa.id) ||
-          statement.data.actions.map((a) => a.action).includes(sa.id)
-      );
-
-      const allPossibleOrigins = [...(statementActants || [])];
-
-      const originProps: {
-        [key: string]: {
-          type: "action" | "actant";
-          origin: string;
-          props: any[];
-          actant: IActant;
-        };
-      } = {};
-
-      allPossibleOrigins.forEach((origin) => {
-        originProps[origin.id as string] = {
-          type: origin.class === "A" ? "action" : "actant",
-          origin: origin.id,
-          props: [],
-          actant: origin,
-        };
-      });
-
-      // 1st level
-      allProps.forEach((prop) => {
-        const originProp = originProps[prop.origin];
-        if (originProp) {
-          originProp.props.push({ ...prop, ...{ props: [] } });
-        }
-      });
-
-      // 2nd level
-      allProps.forEach((prop) => {
-        Object.keys(originProps).forEach((opKey: string) => {
-          const op = originProps[opKey];
-          op.props.forEach((op2) => {
-            if (op2.id === prop.origin) {
-              op2.props.push(prop);
-            }
-          });
-        });
-      });
-
-      return originProps;
-    } else {
-      return {};
-    }
-  }, [JSON.stringify(statement)]);
-
   // actions
   const addAction = (newActionId: string) => {
     if (statement) {
@@ -303,12 +248,11 @@ export const StatementEditorBox: React.FC = () => {
 
   const updateProp = (propId: string, changes: any) => {
     if (statement && propId) {
-      const updatedProps = statement.data.props.map((p) =>
-        p.id === propId ? { ...p, ...changes } : p
-      );
-
-      const newData = { ...{ props: updatedProps } };
-      updateActantsDataMutation.mutate(newData);
+      // const updatedProps = statement.data.props.map((p) =>
+      //   p.id === propId ? { ...p, ...changes } : p
+      // );
+      // const newData = { ...{ props: updatedProps } };
+      // updateActantsDataMutation.mutate(newData);
     }
   };
 
@@ -317,90 +261,82 @@ export const StatementEditorBox: React.FC = () => {
       const newProp = CProp();
       newProp.origin = originId;
 
-      const newData = { props: [...statement.data.props, newProp] };
+      // const newData = { props: [...statement.data.props, newProp] };
 
-      updateActantsDataMutation.mutate(newData);
+      // updateActantsDataMutation.mutate(newData);
     }
   };
 
   const removeProp = (propId: string) => {
     if (statement && propId) {
-      const newData = {
-        props: statement.data.props.filter((p) => p.id !== propId),
-      };
-      updateActantsDataMutation.mutate(newData);
+      // const newData = {
+      //   props: statement.data.props.filter((p) => p.id !== propId),
+      // };
+      // updateActantsDataMutation.mutate(newData);
     }
   };
 
   const movePropUp = (propId: string) => {
     if (statement) {
-      const propToMove = statement.data.props.find((p) => p.id === propId);
-      if (propToMove) {
-        const propsForOriginIds = statement.data.props
-          .filter((p) => p.origin === propToMove.origin)
-          .map((p) => p.id);
-        if (propsForOriginIds.length > 1) {
-          const statementsPropIds = statement.data.props.map((p) => p.id);
-          const oldIndex = statementsPropIds.indexOf(propId);
-          const oldIndexInPropsForOriginId = propsForOriginIds.indexOf(propId);
-
-          if (oldIndex !== 0 && oldIndexInPropsForOriginId !== 0) {
-            const previousIndexInPropsForOriginId =
-              oldIndexInPropsForOriginId - 1;
-            const previousIndexInProps = statementsPropIds.indexOf(
-              propsForOriginIds[previousIndexInPropsForOriginId]
-            );
-            const oldIndex = statementsPropIds.indexOf(propId);
-
-            const newStatementProps = [...statement.data.props];
-
-            newStatementProps.splice(
-              oldIndex,
-              0,
-              newStatementProps.splice(previousIndexInProps, 1)[0]
-            );
-
-            updateActantsDataMutation.mutate({ props: newStatementProps });
-          }
-        }
-      }
+      // const propToMove = statement.data.props.find((p) => p.id === propId);
+      // if (propToMove) {
+      //   const propsForOriginIds = statement.data.props
+      //     .filter((p) => p.origin === propToMove.origin)
+      //     .map((p) => p.id);
+      //   if (propsForOriginIds.length > 1) {
+      //     const statementsPropIds = statement.data.props.map((p) => p.id);
+      //     const oldIndex = statementsPropIds.indexOf(propId);
+      //     const oldIndexInPropsForOriginId = propsForOriginIds.indexOf(propId);
+      //     if (oldIndex !== 0 && oldIndexInPropsForOriginId !== 0) {
+      //       const previousIndexInPropsForOriginId =
+      //         oldIndexInPropsForOriginId - 1;
+      //       const previousIndexInProps = statementsPropIds.indexOf(
+      //         propsForOriginIds[previousIndexInPropsForOriginId]
+      //       );
+      //       const oldIndex = statementsPropIds.indexOf(propId);
+      //       const newStatementProps = [...statement.data.props];
+      //       newStatementProps.splice(
+      //         oldIndex,
+      //         0,
+      //         newStatementProps.splice(previousIndexInProps, 1)[0]
+      //       );
+      //       updateActantsDataMutation.mutate({ props: newStatementProps });
+      //     }
+      //   }
+      // }
     }
   };
 
   const movePropDown = (propId: string) => {
     if (statement) {
-      const propToMove = statement.data.props.find((p) => p.id === propId);
-      if (propToMove) {
-        const propsForOriginIds = statement.data.props
-          .filter((p) => p.origin === propToMove.origin)
-          .map((p) => p.id);
-        if (propsForOriginIds.length > 1) {
-          const statementsPropIds = statement.data.props.map((p) => p.id);
-          const oldIndex = statementsPropIds.indexOf(propId);
-          const oldIndexInPropsForOriginId = propsForOriginIds.indexOf(propId);
-
-          if (
-            oldIndex !== statementsPropIds.length &&
-            oldIndexInPropsForOriginId !== propsForOriginIds.length
-          ) {
-            const nextIndexInPropsForOriginId = oldIndexInPropsForOriginId + 1;
-            const nextIndexInProps = statementsPropIds.indexOf(
-              propsForOriginIds[nextIndexInPropsForOriginId]
-            );
-            const oldIndex = statementsPropIds.indexOf(propId);
-
-            const newStatementProps = [...statement.data.props];
-
-            newStatementProps.splice(
-              oldIndex,
-              0,
-              newStatementProps.splice(nextIndexInProps, 1)[0]
-            );
-
-            updateActantsDataMutation.mutate({ props: newStatementProps });
-          }
-        }
-      }
+      // const propToMove = statement.data.props.find((p) => p.id === propId);
+      // if (propToMove) {
+      //   const propsForOriginIds = statement.data.props
+      //     .filter((p) => p.origin === propToMove.origin)
+      //     .map((p) => p.id);
+      //   if (propsForOriginIds.length > 1) {
+      //     const statementsPropIds = statement.data.props.map((p) => p.id);
+      //     const oldIndex = statementsPropIds.indexOf(propId);
+      //     const oldIndexInPropsForOriginId = propsForOriginIds.indexOf(propId);
+      //     if (
+      //       oldIndex !== statementsPropIds.length &&
+      //       oldIndexInPropsForOriginId !== propsForOriginIds.length
+      //     ) {
+      //       const nextIndexInPropsForOriginId = oldIndexInPropsForOriginId + 1;
+      //       const nextIndexInProps = statementsPropIds.indexOf(
+      //         propsForOriginIds[nextIndexInPropsForOriginId]
+      //       );
+      //       const oldIndex = statementsPropIds.indexOf(propId);
+      //       const newStatementProps = [...statement.data.props];
+      //       newStatementProps.splice(
+      //         oldIndex,
+      //         0,
+      //         newStatementProps.splice(nextIndexInProps, 1)[0]
+      //       );
+      //       updateActantsDataMutation.mutate({ props: newStatementProps });
+      //     }
+      //   }
+      // }
     }
   };
 
@@ -501,14 +437,14 @@ export const StatementEditorBox: React.FC = () => {
   );
 
   const renderPropGroup = (
-    propOriginId: string,
+    originId: string,
+    props: IProp[],
     statement: IResponseStatement,
     visibleColumns: ColumnInstance<{}>[]
   ) => {
-    const propOrigin = propsByOrigins[propOriginId];
-    const originActant = propOrigin?.actant;
+    const originActant = statement.entities[originId];
 
-    if (originActant && propOrigin.props.length > 0) {
+    if (originActant && props.length > 0) {
       return (
         <tr>
           <td colSpan={visibleColumns.length + 1}>
@@ -520,17 +456,25 @@ export const StatementEditorBox: React.FC = () => {
                   <StyledListHeaderColumn>Type</StyledListHeaderColumn>
                   <StyledListHeaderColumn>Value</StyledListHeaderColumn>
                   <StyledListHeaderColumn></StyledListHeaderColumn>
-                  {propOrigin.props.map((prop1: any, pi1: number) => {
+                  {props.map((prop1: IProp, pi1: number) => {
                     return (
-                      <React.Fragment key={prop1 + pi1}>
-                        {renderPropRow(statement, prop1, "1", pi1, false)}
-                        {prop1.props.map((prop2: any, pi2: number) => {
+                      <React.Fragment key={prop1.id}>
+                        {renderPropRow(
+                          statement,
+                          originId,
+                          prop1,
+                          "1",
+                          pi1,
+                          false
+                        )}
+                        {prop1.children.map((prop2: any, pi2: number) => {
                           return renderPropRow(
                             statement,
+                            originId,
                             prop2,
                             "2",
                             pi2,
-                            pi2 === prop1.props.length - 1
+                            pi2 === prop1.children.length - 1
                           );
                         })}
                       </React.Fragment>
@@ -547,20 +491,17 @@ export const StatementEditorBox: React.FC = () => {
 
   const renderPropRow = (
     statement: IResponseStatement,
-    prop: IStatementProp,
+    originId: string,
+    prop: IProp,
     level: "1" | "2",
     order: number,
     lastSecondLevel: boolean
   ) => {
-    const propTypeActant = statement.actants?.find(
-      (a) => a.id === prop.type.id
-    );
-    const propValueActant = statement.actants?.find(
-      (a) => a.id === prop.value.id
-    );
+    const propTypeActant = statement.entities[prop.type.id];
+    const propValueActant = statement.entities[prop.value.id];
 
     return (
-      <React.Fragment key={prop.origin + level + "|" + order}>
+      <React.Fragment key={originId + level + "|" + order}>
         <StyledPropLineColumn
           padded={level === "2"}
           lastSecondLevel={lastSecondLevel}
@@ -873,7 +814,6 @@ export const StatementEditorBox: React.FC = () => {
                   updateActionsMutation={updateActionsRefreshListMutation}
                   renderPropGroup={renderPropGroup}
                   addProp={addProp}
-                  propsByOrigins={propsByOrigins}
                 />
               </StyledEditorActantTableWrapper>
 
@@ -905,7 +845,6 @@ export const StatementEditorBox: React.FC = () => {
                   updateActantsMutation={updateActantsRefreshListMutation}
                   renderPropGroup={renderPropGroup}
                   addProp={addProp}
-                  propsByOrigins={propsByOrigins}
                 />
               </StyledEditorActantTableWrapper>
               {userCanEdit && (
@@ -938,9 +877,8 @@ export const StatementEditorBox: React.FC = () => {
                 )}
                 {statement.data.references.map(
                   (reference: IStatementReference, ri) => {
-                    const referenceActant = statement?.actants?.find(
-                      (a) => a.id === reference.resource
-                    );
+                    const referenceActant =
+                      statement?.entities[reference.resource];
 
                     return (
                       <React.Fragment key={ri}>
@@ -1067,9 +1005,7 @@ export const StatementEditorBox: React.FC = () => {
             <StyledEditorSectionContent>
               <StyledTagsList>
                 {statement.data.tags.map((tag: string) => {
-                  const tagActant = statement?.actants?.find(
-                    (a) => a.id === tag
-                  );
+                  const tagActant = statement?.entities[tag];
                   return (
                     tagActant && (
                       <StyledTagsListItem key={tag}>

@@ -8,12 +8,7 @@ import {
 } from "./StatementEditorActantTableStyles";
 import { StatementEditorActantTableRow } from "./StatementEditorActantTableRow";
 
-import {
-  IActant,
-  IResponseStatement,
-  IStatementActant,
-  IStatementProp,
-} from "@shared/types";
+import { IActant, IResponseStatement, IStatementActant } from "@shared/types";
 import { UseMutationResult } from "react-query";
 import { ActantType } from "@shared/enums";
 
@@ -29,14 +24,6 @@ interface StatementEditorActantTable {
   classEntitiesActant: ActantType[];
   updateActantsMutation: UseMutationResult<any, unknown, object, unknown>;
   addProp: (originId: string) => void;
-  propsByOrigins: {
-    [key: string]: {
-      type: "action" | "actant";
-      origin: string;
-      props: IStatementProp[];
-      actant: IActant;
-    };
-  };
 }
 export const StatementEditorActantTable: React.FC<
   StatementEditorActantTable
@@ -49,7 +36,6 @@ export const StatementEditorActantTable: React.FC<
   renderPropGroup,
   updateActantsMutation,
   addProp,
-  propsByOrigins,
 }) => {
   const [filteredActants, setFilteredActants] = useState<
     FilteredActantObject[]
@@ -57,7 +43,7 @@ export const StatementEditorActantTable: React.FC<
 
   useMemo(() => {
     const filteredActants = statement.data.actants.map((sActant, key) => {
-      const actant = statement.actants?.find((a) => a.id === sActant.actant);
+      const actant = statement.entities[sActant.actant];
       return { id: key, data: { actant, sActant } };
     });
     setFilteredActants(filteredActants);

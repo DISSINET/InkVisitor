@@ -37,11 +37,13 @@ export default Router().get(
       throw new PermissionDeniedError("statement cannot be accessed");
     }
 
+    const entities = await statementModel.getEntities(
+      request.db.connection as Connection
+    );
+
     return {
       ...statementData,
-      entities: await statementModel.getEntities(
-        request.db.connection as Connection
-      ),
+      entities: Object.assign({}, ...entities.map((x) => ({ [x.id]: x }))),
       right: statementModel.getUserRoleMode(request.getUserOrFail()),
     };
   })

@@ -17,14 +17,6 @@ interface StatementEditorActionTable {
   renderPropGroup: Function;
   updateActionsMutation: UseMutationResult<any, unknown, object, unknown>;
   addProp: (originId: string) => void;
-  propsByOrigins: {
-    [key: string]: {
-      type: "action" | "actant";
-      origin: string;
-      props: any[];
-      actant: IActant;
-    };
-  };
 }
 export const StatementEditorActionTable: React.FC<
   StatementEditorActionTable
@@ -36,7 +28,6 @@ export const StatementEditorActionTable: React.FC<
   renderPropGroup,
   updateActionsMutation,
   addProp,
-  propsByOrigins,
 }) => {
   const [filteredActions, setFilteredActions] = useState<
     FilteredActionObject[]
@@ -44,7 +35,7 @@ export const StatementEditorActionTable: React.FC<
 
   useEffect(() => {
     const filteredActions = statement.data.actions.map((sAction, key) => {
-      const action = statement.actants?.find((a) => a.id === sAction.action);
+      const action = statement.entities[sAction.action];
       return { id: key, data: { action, sAction } };
     });
     setFilteredActions(filteredActions);
