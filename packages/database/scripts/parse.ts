@@ -146,13 +146,6 @@ const loadStatementsTables = async (next: Function) => {
 
   addTerritoryActant(rootTerritory, "everything", false, 0);
 
-  // parse resources
-  const tableManuscripts = await loadSheet({
-    spread: "13eVorFf7J9R8YzO7TmJRVLzIIwRJS737r7eFbH1boyE",
-    sheet: "Manuscripts",
-    headerRow: 4,
-  });
-
   type IRowResources = {
     type: string;
     id: string;
@@ -178,29 +171,30 @@ const loadStatementsTables = async (next: Function) => {
     entities: { [key: string]: string };
   };
 
-  const tableResources: IRowResources[] = await loadSheet({
+  // parse resources
+  const tableManuscripts = await loadSheet({
     spread: "13eVorFf7J9R8YzO7TmJRVLzIIwRJS737r7eFbH1boyE",
-    sheet: "Resources",
+    sheet: "Manuscripts",
     headerRow: 4,
   });
 
   tableManuscripts.forEach((manuscript: { id: string; label: string }) => {
     // parse as objects #629
     //addResourceActant(manuscript.id, manuscript.label);
+    addEntityActant(manuscript.id, manuscript.label, ActantType.Object);
   });
 
-  const codingSheets: ICodingSheet[] = tableResources
-    .filter((row) => row["parsing_type"] === "coding-sheet") // coding sheet
-    .map((row) => {
-      return {
-        id: row["id"],
-        textId: row["text_id"],
-        label: row["label"],
-        spread: row["spreadsheet_id"],
-        sheet: row["sheet_name"],
-        entities: {},
-      };
-    });
+  const tableResources: IRowResources[] = await loadSheet({
+    spread: "13eVorFf7J9R8YzO7TmJRVLzIIwRJS737r7eFbH1boyE",
+    sheet: "Resources",
+    headerRow: 4,
+  });
+
+  // add resources
+  tableResources.forEach((resource: { id: string; label: string }) => {
+    // parse as objects #629
+    addResourceActant(resource.id, resource.label);
+  });
 
   const entitySheets = tableResources
     .filter((row) => row["parsing_type"] === "entity-table")
@@ -210,9 +204,31 @@ const loadStatementsTables = async (next: Function) => {
         id: row["id"],
         texts: row["related_text_id"].split(" #"),
         label: row["label"],
-        entityType: row["entity_type"],
+        entityType: row["parsing_entity"],
         spread: row["spreadsheet_id"],
         sheet: row["sheet_name"],
+      };
+    });
+
+  const codingSheets: ICodingSheet[] = tableResources
+    .filter((row) => row["parsing_type"] === "coding-sheet") // coding sheet
+    .map((row) => {
+      const relTextId = row["related_text_id"];
+      const relEntitySheets = entitySheets.filter((es) =>
+        es.texts.includes(relTextId)
+      );
+      const relEntityDict: { [key: string]: string } = {};
+      relEntitySheets.forEach((res) => {
+        relEntityDict[res.entityType] = res.id;
+      });
+
+      return {
+        id: row["id"],
+        textId: row["text_id"],
+        label: row["label"],
+        spread: row["spreadsheet_id"],
+        sheet: row["sheet_name"],
+        entities: relEntityDict,
       };
     });
 
@@ -307,6 +323,7 @@ const loadStatementsTables = async (next: Function) => {
     const data = await loadSheet({
       spread: entitySheet.spread,
       sheet: entitySheet.sheet,
+      headerRow: 4,
     });
 
     const entitySheetTerritory = "T_" + entitySheet.id;
