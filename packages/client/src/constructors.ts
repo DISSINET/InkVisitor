@@ -1,5 +1,5 @@
 import {
-  IStatementProp,
+  IProp,
   IStatementActant,
   IStatementAction,
   IActant,
@@ -32,9 +32,8 @@ export const CBookmarkFolder = (bookmarkName: string): IBookmarkFolder => ({
   actantIds: [],
 });
 
-export const CProp = (): IStatementProp => ({
+export const CProp = (): IProp => ({
   id: uuidv4(),
-  origin: "",
   elvl: Elvl.Textual,
   certainty: Certainty.Empty,
   logic: Logic.Positive,
@@ -43,6 +42,7 @@ export const CProp = (): IStatementProp => ({
   operator: Operator.And,
   bundleStart: false,
   bundleEnd: false,
+  children: [],
 
   type: {
     id: "",
@@ -69,9 +69,7 @@ export const CStatement = (
   label: "",
   detail: "",
   status:
-    userRole === UserRole.Admin
-      ? ActantStatus.Approved
-      : ActantStatus.Pending,
+    userRole === UserRole.Admin ? ActantStatus.Approved : ActantStatus.Pending,
   language: Language.Latin,
   notes: [],
   data: {
@@ -82,10 +80,10 @@ export const CStatement = (
       order: -1,
     },
     actants: [],
-    props: [],
     references: [],
     tags: [],
   },
+  props: [],
 });
 
 export const CMetaStatement = (
@@ -97,9 +95,7 @@ export const CMetaStatement = (
   label: "",
   detail: "",
   status:
-    userRole === UserRole.Admin
-      ? ActantStatus.Approved
-      : ActantStatus.Pending,
+    userRole === UserRole.Admin ? ActantStatus.Approved : ActantStatus.Pending,
   language: Language.Latin,
   notes: [],
   data: {
@@ -115,6 +111,7 @@ export const CMetaStatement = (
         operator: Operator.And,
         bundleStart: false,
         bundleEnd: false,
+        props: [],
       },
     ],
     text: "",
@@ -134,6 +131,7 @@ export const CMetaStatement = (
         operator: Operator.And,
         bundleStart: false,
         bundleEnd: false,
+        props: [],
       },
       {
         id: uuidv4(),
@@ -146,6 +144,7 @@ export const CMetaStatement = (
         operator: Operator.And,
         bundleStart: false,
         bundleEnd: false,
+        props: [],
       },
       {
         id: uuidv4(),
@@ -158,12 +157,13 @@ export const CMetaStatement = (
         operator: Operator.And,
         bundleStart: false,
         bundleEnd: false,
+        props: [],
       },
     ],
-    props: [],
     references: [],
     tags: [],
   },
+  props: [],
 });
 
 // duplicate statement
@@ -172,7 +172,7 @@ export const DStatement = (statement: IStatement): IStatement => {
   duplicatedStatement.id = uuidv4();
 
   duplicatedStatement.data.actants.map((a) => (a.id = uuidv4()));
-  duplicatedStatement.data.props.map((p) => (p.id = uuidv4()));
+  duplicatedStatement.props.map((p) => (p.id = uuidv4()));
   duplicatedStatement.data.references.map((r) => (r.id = uuidv4()));
   duplicatedStatement.data.territory.order += 0.00001;
 
@@ -190,6 +190,7 @@ export const CStatementActant = (): IStatementActant => ({
   operator: Operator.And,
   bundleStart: false,
   bundleEnd: false,
+  props: [],
 });
 
 export const CStatementAction = (actionId: string): IStatementAction => ({
@@ -203,6 +204,7 @@ export const CStatementAction = (actionId: string): IStatementAction => ({
   operator: Operator.And,
   bundleStart: false,
   bundleEnd: false,
+  props: [],
 });
 
 export const CTerritoryActant = (
@@ -216,14 +218,13 @@ export const CTerritoryActant = (
   label: label,
   detail: "",
   status:
-    userRole === UserRole.Admin
-      ? ActantStatus.Approved
-      : ActantStatus.Pending,
+    userRole === UserRole.Admin ? ActantStatus.Approved : ActantStatus.Pending,
   language: Language.Latin,
   notes: [],
   data: {
     parent: { id: parentId, order: parentOrder },
   },
+  props: [],
 });
 
 export const CActant = (
@@ -238,11 +239,10 @@ export const CActant = (
   detail: detail ? detail : "",
   data: {},
   status:
-    userRole === UserRole.Admin
-      ? ActantStatus.Approved
-      : ActantStatus.Pending,
+    userRole === UserRole.Admin ? ActantStatus.Approved : ActantStatus.Pending,
   language: Language.Latin,
   notes: [],
+  props: [],
 });
 
 export const CReference = (resourceId: string): IStatementReference => ({

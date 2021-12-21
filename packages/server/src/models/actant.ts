@@ -192,6 +192,7 @@ export default class Actant implements IActant, IDbModel {
   }
 
   async getEntities(db: Connection): Promise<IActant[]> {
-    return findActantsByIds<IActant>(db, this.getEntitiesIds());
+    const entities = findActantsByIds<IActant>(db, this.getEntitiesIds());
+    return entities;
   }
 }
