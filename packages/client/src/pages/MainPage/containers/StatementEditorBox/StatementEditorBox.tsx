@@ -20,6 +20,8 @@ import {
   IStatementReference,
   IResponseStatement,
   IProp,
+  IStatementAction,
+  IStatementActant,
 } from "@shared/types";
 import {
   AttributeIcon,
@@ -256,14 +258,44 @@ export const StatementEditorBox: React.FC = () => {
     }
   };
 
-  const addProp = (originId: string) => {
+  const addProp = (
+    originId: string,
+    mode: "actions" | "actants" = "actants"
+  ) => {
     if (statement && originId) {
       const newProp = CProp();
-      newProp.origin = originId;
+      const newStatementData = { ...statement.data };
+      newStatementData[mode].forEach((potentialPropOrigin) => {
+        if (
+          (mode === "actants" &&
+            (potentialPropOrigin as IStatementActant).actant === originId) ||
+          (mode === "actions" &&
+            (potentialPropOrigin as IStatementAction).action === originId)
+        ) {
+          potentialPropOrigin.props.push(newProp);
+        }
+      });
 
-      // const newData = { props: [...statement.data.props, newProp] };
+      updateActantsDataMutation.mutate(newStatementData);
+    }
+  };
 
-      // updateActantsDataMutation.mutate(newData);
+  const addPropSecondLvl = (
+    originId: string,
+    mode: "actions" | "actants" = "actants"
+  ) => {
+    if (statement && originId) {
+      const newProp = CProp();
+      const newStatementData = { ...statement.data };
+      newStatementData[mode].forEach((actantOrActionInStatement) => {
+        actantOrActionInStatement.props.forEach((potentialPropOrigin) => {
+          if ((potentialPropOrigin as IProp).id === originId) {
+            potentialPropOrigin.children.push(newProp);
+          }
+        });
+      });
+
+      updateActantsDataMutation.mutate(newStatementData);
     }
   };
 
@@ -440,7 +472,8 @@ export const StatementEditorBox: React.FC = () => {
     originId: string,
     props: IProp[],
     statement: IResponseStatement,
-    visibleColumns: ColumnInstance<{}>[]
+    visibleColumns: ColumnInstance<{}>[],
+    mode: "actions" | "actants" = "actants"
   ) => {
     const originActant = statement.entities[originId];
 
@@ -465,7 +498,8 @@ export const StatementEditorBox: React.FC = () => {
                           prop1,
                           "1",
                           pi1,
-                          false
+                          false,
+                          mode
                         )}
                         {prop1.children.map((prop2: any, pi2: number) => {
                           return renderPropRow(
@@ -474,7 +508,8 @@ export const StatementEditorBox: React.FC = () => {
                             prop2,
                             "2",
                             pi2,
-                            pi2 === prop1.children.length - 1
+                            pi2 === prop1.children.length - 1,
+                            mode
                           );
                         })}
                       </React.Fragment>
@@ -495,7 +530,8 @@ export const StatementEditorBox: React.FC = () => {
     prop: IProp,
     level: "1" | "2",
     order: number,
-    lastSecondLevel: boolean
+    lastSecondLevel: boolean,
+    mode: "actions" | "actants" = "actants"
   ) => {
     const propTypeActant = statement.entities[prop.type.id];
     const propValueActant = statement.entities[prop.value.id];
@@ -677,7 +713,7 @@ export const StatementEditorBox: React.FC = () => {
                 color="plain"
                 inverted={true}
                 onClick={() => {
-                  addProp(prop.id);
+                  addPropSecondLvl(prop.id, mode);
                 }}
               />
             )}
