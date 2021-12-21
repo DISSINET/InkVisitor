@@ -214,9 +214,9 @@ const loadStatementsTables = async (next: Function) => {
     .filter((row) => row["parsing_type"] === "coding-sheet") // coding sheet
     .map((row) => {
       const relTextId = row["related_text_id"];
-      const relEntitySheets = entitySheets.filter((es) =>
-        es.texts.includes(relTextId)
-      );
+      const relEntitySheets = entitySheets.filter((es) => {
+        return es.texts.includes(relTextId) || es.texts.includes("*");
+      });
       const relEntityDict: { [key: string]: string } = {};
       relEntitySheets.forEach((res) => {
         relEntityDict[res.entityType] = res.id;
@@ -325,18 +325,21 @@ const loadStatementsTables = async (next: Function) => {
       sheet: entitySheet.sheet,
       headerRow: 4,
     });
+    //console.log(entitySheet);
 
     const entitySheetTerritory = "T_" + entitySheet.id;
 
-    data.forEach((entityRow: any, eri: number) => {
-      addEntityActant(
-        entitySheet.id + "_" + entityRow.id,
-        entityRow.label,
-        entitySheet.entityType as AllActantType
-      );
+    data
+      .filter((er: any) => er.label)
+      .forEach((entityRow: any, eri: number) => {
+        addEntityActant(
+          entitySheet.id + "_" + entityRow.id,
+          entityRow.label,
+          entitySheet.entityType as AllActantType
+        );
 
-      parseEntityPropsInRow(entityRow);
-    });
+        parseEntityPropsInRow(entityRow);
+      });
 
     entitySheet.texts.forEach((text) => {
       const sheets = codingSheets.filter((cs) => cs.textId === text);
