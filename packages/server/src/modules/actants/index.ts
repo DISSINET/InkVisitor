@@ -22,6 +22,7 @@ import {
   IResponseActant,
   IResponseSearch,
   RequestSearch,
+  IEntity,
 } from "@shared/types";
 import { mergeDeep } from "@common/functions";
 import Statement from "@models/statement";
@@ -109,7 +110,7 @@ export default Router()
 
       const user = request.getUserOrFail();
 
-      if (!model.canBeCreatedByUser(user)) {  
+      if (!model.canBeCreatedByUser(user)) {
         throw new PermissionDeniedError("actant cannot be created");
       }
 
@@ -338,6 +339,11 @@ export default Router()
           actantLabel: a.label,
           class: a.class,
         };
+
+        // only for Entity (grouped actant of EntityActantType)
+        if (a.data.logicalType) {
+          out.logicalType = (a as IEntity).data.logicalType;
+        }
         return out;
       });
     })
