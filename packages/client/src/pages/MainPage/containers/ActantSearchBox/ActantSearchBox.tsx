@@ -52,7 +52,12 @@ export const ActantSearchBox: React.FC = () => {
 
   const [results, setResults] = useState<IResponseSearch[]>([]);
 
-  const { status, data: actant, error, isFetching } = useQuery(
+  const {
+    status,
+    data: actant,
+    error,
+    isFetching,
+  } = useQuery(
     ["actant", searchData.actantId],
     async () => {
       if (searchData.actantId) {
@@ -194,6 +199,7 @@ export const ActantSearchBox: React.FC = () => {
                       label={result.actantLabel}
                       category={result.class}
                       fullWidth
+                      ltype={result.logicalType}
                     />
                   </StyledResultItem>
                 ))}
