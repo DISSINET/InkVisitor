@@ -71,6 +71,33 @@ export const StatementListBox: React.FC = () => {
     }
   );
 
+  const userId = localStorage.getItem("userid");
+  const {
+    status: userStatus,
+    data: userData,
+    error: userError,
+    isFetching: userIsFetching,
+  } = useQuery(
+    ["user"],
+    async () => {
+      if (userId) {
+        const res = await api.usersGet(userId);
+        return res.data;
+      }
+    },
+    { enabled: api.isLoggedIn() }
+  );
+
+  const [storedTerritoryIds, setStoredTerritoryIds] = useState<string[]>([]);
+  useEffect(() => {
+    if (userData?.storedTerritories) {
+      setStoredTerritoryIds(
+        userData.storedTerritories.map((territory) => territory.territory.id)
+      );
+    }
+  }, [userData?.storedTerritories]);
+  const isFavorited = data && storedTerritoryIds?.includes(data.id);
+
   useEffect(() => {
     if (error && (error as any).error === "TerritoryDoesNotExits") {
       setTerritoryId("");
@@ -146,7 +173,7 @@ export const StatementListBox: React.FC = () => {
   );
 
   const addStatementAtCertainIndex = async (index: number) => {
-    let newOrder =
+    const newOrder =
       index === 0
         ? statements[0].data.territory.order - 1
         : (statements[index - 1].data.territory.order +
@@ -617,6 +644,7 @@ export const StatementListBox: React.FC = () => {
         <StatementListHeader
           data={data}
           addStatementAtTheEndMutation={addStatementAtTheEndMutation}
+          isFavorited={isFavorited}
         />
       )}
 

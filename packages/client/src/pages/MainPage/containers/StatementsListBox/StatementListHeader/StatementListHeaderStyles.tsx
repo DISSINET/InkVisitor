@@ -1,3 +1,4 @@
+import { FaRegStar, FaStar } from "react-icons/fa";
 import styled from "styled-components";
 
 export const StyledHeader = styled.div`
@@ -12,11 +13,16 @@ export const StyledHeaderBreadcrumbRow = styled.div`
   align-items: center;
   flex-wrap: wrap;
 `;
-export const StyledHeaderRow = styled.div`
-  display: inline-flex;
-  align-items: center;
-  justify-content: space-between;
+export const StyledHeaderRow = styled.h3`
+  overflow: hidden;
 `;
-export const StyledTitle = styled.h3`
-  display: inline-flex;
+export const StyledFaStar = styled(FaStar)`
+  float: left;
+  margin-top: 0.5rem;
+  margin-right: 0.3rem;
+`;
+export const StyledButtons = styled.div`
+  float: right;
+  margin-top: 0.3rem;
+  margin-left: 0.3rem;
 `;
