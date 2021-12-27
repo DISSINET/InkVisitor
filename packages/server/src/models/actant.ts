@@ -1,6 +1,6 @@
 import { IDbModel, UnknownObject, fillFlatObject, fillArray } from "./common";
-import { r as rethink, Connection, WriteResult } from "rethinkdb-ts";
-import { IStatement, IActant } from "@shared/types";
+import { r as rethink, Connection, WriteResult, RDatum } from "rethinkdb-ts";
+import { IStatement, IActant, IResponseActant, IUser } from "@shared/types";
 import {
   ActantStatus,
   ActantType,
@@ -18,12 +18,15 @@ export default class Actant implements IActant, IDbModel {
 
   id: string = "";
   class: ActantType = ActantType.Any;
-  data: any = undefined;
+  data: any = {};
   label: string = "";
   detail: string = "";
   status: ActantStatus = ActantStatus.Pending;
   language: Language = Language.Latin;
   notes: string[] = [];
+
+  usedIn: IStatement[] = [];
+  right: UserRoleMode = UserRoleMode.Read;
 
   constructor(data: UnknownObject) {
     if (!data) {
@@ -171,5 +174,72 @@ export default class Actant implements IActant, IDbModel {
     }
 
     return out;
+  }
+
+  /**
+   * finds statements which are linked to current actant
+   * @param db db connection
+   * @param territoryId id of the actant
+   * @returns list of statements data
+   */
+  async findDependentStatements(
+    db: Connection | undefined
+  ): Promise<IStatement[]> {
+    const statements = await rethink
+      .table(Actant.table)
+      .filter({
+        class: ActantType.Statement,
+      })
+      .filter((row: RDatum) => {
+        return rethink.or(
+          row("data")("territory")("id").eq(this.id),
+          row("data")("actions").contains((entry: RDatum) =>
+            entry("action").eq(this.id)
+          ),
+          row("data")("actants").contains((entry: RDatum) =>
+            entry("actant").eq(this.id)
+          ),
+          row("data")("tags").contains(this.id),
+          row("data")("props").contains((entry: RDatum) =>
+            entry("value")("id").eq(this.id)
+          ),
+          row("data")("props").contains((entry: RDatum) =>
+            entry("type")("id").eq(this.id)
+          ),
+          row("data")("props").contains((entry: RDatum) =>
+            entry("origin").eq(this.id)
+          ),
+          row("data")("references").contains((entry: RDatum) =>
+            entry("resource").eq(this.id)
+          )
+        );
+      })
+      .run(db);
+
+    return statements.sort((a, b) => {
+      return a.data.territory.order - b.data.territory.order;
+    });
+  }
+
+  async prepareResponseFields(user: User, db: Connection | undefined) {
+    this.usedIn = await this.findDependentStatements(db);
+    this.right = this.getUserRoleMode(user);
+  }
+
+  static getPublicFields(a: Actant): string[] {
+    return Object.keys(a).filter((k) => k.indexOf("_") !== 0);
+  }
+
+  toJSON(): IResponseActant {
+    const actant = this;
+    const strippedObject: IActant = Actant.getPublicFields(this).reduce(
+      (acc, curr) => {
+        acc[curr] = (actant as Record<string, unknown>)[curr];
+        return acc;
+      },
+      {} as any
+    );
+
+    return strippedObject;
   }
 }
