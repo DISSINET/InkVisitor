@@ -149,3 +149,14 @@ describe("test Actant.update", function () {
     });
   });
 });
+
+describe("test Actant.toJSON", function () {
+  describe("without response fields", () => {
+    const instance = new Actant({});
+
+    it("should correctly remove serialize", () => {
+      const newKeys = Object.keys(JSON.parse(JSON.stringify(instance)));
+      expect(newKeys).toEqual(Actant.getPublicFields(instance));
+    });
+  });
+});
