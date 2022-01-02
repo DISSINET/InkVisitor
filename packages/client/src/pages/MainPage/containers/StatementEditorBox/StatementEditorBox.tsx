@@ -273,7 +273,6 @@ export const StatementEditorBox: React.FC = () => {
         }
       );
 
-      console.log("update prop", newStatementData);
       updateStatementDataMutation.mutate(newStatementData);
     }
   };
@@ -342,67 +341,64 @@ export const StatementEditorBox: React.FC = () => {
     }
   };
 
+  //actant.props = actant.props.splice(index + 1, 0, actant.props.splice(index, 1)[0]);
   const movePropUp = (propId: string) => {
     if (statement) {
-      // const propToMove = statement.data.props.find((p) => p.id === propId);
-      // if (propToMove) {
-      //   const propsForOriginIds = statement.data.props
-      //     .filter((p) => p.origin === propToMove.origin)
-      //     .map((p) => p.id);
-      //   if (propsForOriginIds.length > 1) {
-      //     const statementsPropIds = statement.data.props.map((p) => p.id);
-      //     const oldIndex = statementsPropIds.indexOf(propId);
-      //     const oldIndexInPropsForOriginId = propsForOriginIds.indexOf(propId);
-      //     if (oldIndex !== 0 && oldIndexInPropsForOriginId !== 0) {
-      //       const previousIndexInPropsForOriginId =
-      //         oldIndexInPropsForOriginId - 1;
-      //       const previousIndexInProps = statementsPropIds.indexOf(
-      //         propsForOriginIds[previousIndexInPropsForOriginId]
-      //       );
-      //       const oldIndex = statementsPropIds.indexOf(propId);
-      //       const newStatementProps = [...statement.data.props];
-      //       newStatementProps.splice(
-      //         oldIndex,
-      //         0,
-      //         newStatementProps.splice(previousIndexInProps, 1)[0]
-      //       );
-      //       updateStatementDataMutation.mutate({ props: newStatementProps });
-      //     }
-      //   }
-      // }
+      const newStatementData = { ...statement.data };
+
+      [...newStatementData.actants, ...newStatementData.actions].forEach(
+        (actant: IStatementActant | IStatementAction) => {
+          actant.props.forEach((actantProp, pi) => {
+            console.log({ ...actant });
+            if (actantProp.id === propId) {
+              actant.props.splice(pi - 1, 0, actant.props.splice(pi, 1)[0]);
+            }
+
+            console.log(actant);
+            actant.props[pi].children.forEach((actantPropProp, pii) => {
+              if (actantPropProp.id === propId) {
+                actant.props[pi].children.splice(
+                  pii - 1,
+                  0,
+                  actant.props[pi].children.splice(pii, 1)[0]
+                );
+              }
+            });
+          });
+        }
+      );
+
+      updateStatementDataMutation.mutate(newStatementData);
     }
   };
 
   const movePropDown = (propId: string) => {
     if (statement) {
-      // const propToMove = statement.data.props.find((p) => p.id === propId);
-      // if (propToMove) {
-      //   const propsForOriginIds = statement.data.props
-      //     .filter((p) => p.origin === propToMove.origin)
-      //     .map((p) => p.id);
-      //   if (propsForOriginIds.length > 1) {
-      //     const statementsPropIds = statement.data.props.map((p) => p.id);
-      //     const oldIndex = statementsPropIds.indexOf(propId);
-      //     const oldIndexInPropsForOriginId = propsForOriginIds.indexOf(propId);
-      //     if (
-      //       oldIndex !== statementsPropIds.length &&
-      //       oldIndexInPropsForOriginId !== propsForOriginIds.length
-      //     ) {
-      //       const nextIndexInPropsForOriginId = oldIndexInPropsForOriginId + 1;
-      //       const nextIndexInProps = statementsPropIds.indexOf(
-      //         propsForOriginIds[nextIndexInPropsForOriginId]
-      //       );
-      //       const oldIndex = statementsPropIds.indexOf(propId);
-      //       const newStatementProps = [...statement.data.props];
-      //       newStatementProps.splice(
-      //         oldIndex,
-      //         0,
-      //         newStatementProps.splice(nextIndexInProps, 1)[0]
-      //       );
-      //       updateStatementDataMutation.mutate({ props: newStatementProps });
-      //     }
-      //   }
-      // }
+      const newStatementData = { ...statement.data };
+
+      [...newStatementData.actants, ...newStatementData.actions].forEach(
+        (actant: IStatementActant | IStatementAction) => {
+          actant.props.forEach((actantProp, pi) => {
+            console.log({ ...actant });
+            if (actantProp.id === propId) {
+              actant.props.splice(pi + 1, 0, actant.props.splice(pi, 1)[0]);
+            }
+
+            console.log(actant);
+            actant.props[pi].children.forEach((actantPropProp, pii) => {
+              if (actantPropProp.id === propId) {
+                actant.props[pi].children.splice(
+                  pii + 1,
+                  0,
+                  actant.props[pi].children.splice(pii, 1)[0]
+                );
+              }
+            });
+          });
+        }
+      );
+
+      updateStatementDataMutation.mutate(newStatementData);
     }
   };
 
