@@ -250,11 +250,31 @@ export const StatementEditorBox: React.FC = () => {
 
   const updateProp = (propId: string, changes: any) => {
     if (statement && propId) {
-      // const updatedProps = statement.data.props.map((p) =>
-      //   p.id === propId ? { ...p, ...changes } : p
-      // );
-      // const newData = { ...{ props: updatedProps } };
-      // updateActantsDataMutation.mutate(newData);
+      const newStatementData = { ...statement.data };
+
+      // this is probably an overkill
+      [...newStatementData.actants, ...newStatementData.actions].forEach(
+        (actant: IStatementActant | IStatementAction) => {
+          actant.props.forEach((actantProp, pi) => {
+            if (actantProp.id === propId) {
+              actant.props[pi] = { ...actant.props[pi], ...changes };
+            }
+
+            actant.props[pi].children.forEach((actantPropProp, pii) => {
+              if (actantPropProp.id === propId) {
+                actant.props[pi].children[pii] = {
+                  ...actant.props[pi].children[pii],
+                  ...changes,
+                };
+                console.log("update prop", changes);
+              }
+            });
+          });
+        }
+      );
+
+      console.log("update prop", newStatementData);
+      updateStatementDataMutation.mutate(newStatementData);
     }
   };
 
@@ -276,7 +296,7 @@ export const StatementEditorBox: React.FC = () => {
         }
       });
 
-      updateActantsDataMutation.mutate(newStatementData);
+      updateStatementDataMutation.mutate(newStatementData);
     }
   };
 
@@ -287,6 +307,7 @@ export const StatementEditorBox: React.FC = () => {
     if (statement && originId) {
       const newProp = CProp();
       const newStatementData = { ...statement.data };
+
       newStatementData[mode].forEach((actantOrActionInStatement) => {
         actantOrActionInStatement.props.forEach((potentialPropOrigin) => {
           if ((potentialPropOrigin as IProp).id === originId) {
@@ -295,16 +316,29 @@ export const StatementEditorBox: React.FC = () => {
         });
       });
 
-      updateActantsDataMutation.mutate(newStatementData);
+      updateStatementDataMutation.mutate(newStatementData);
     }
   };
 
   const removeProp = (propId: string) => {
     if (statement && propId) {
-      // const newData = {
-      //   props: statement.data.props.filter((p) => p.id !== propId),
-      // };
-      // updateActantsDataMutation.mutate(newData);
+      const newStatementData = { ...statement.data };
+
+      [...newStatementData.actants, ...newStatementData.actions].forEach(
+        (actant: IStatementActant | IStatementAction) => {
+          actant.props = actant.props.filter(
+            (actantProp) => actantProp.id !== propId
+          );
+
+          actant.props.forEach((actantProp, pi) => {
+            actant.props[pi].children = actant.props[pi].children.filter(
+              (childProp) => childProp.id != propId
+            );
+          });
+        }
+      );
+
+      updateStatementDataMutation.mutate(newStatementData);
     }
   };
 
@@ -332,7 +366,7 @@ export const StatementEditorBox: React.FC = () => {
       //         0,
       //         newStatementProps.splice(previousIndexInProps, 1)[0]
       //       );
-      //       updateActantsDataMutation.mutate({ props: newStatementProps });
+      //       updateStatementDataMutation.mutate({ props: newStatementProps });
       //     }
       //   }
       // }
@@ -365,7 +399,7 @@ export const StatementEditorBox: React.FC = () => {
       //         0,
       //         newStatementProps.splice(nextIndexInProps, 1)[0]
       //       );
-      //       updateActantsDataMutation.mutate({ props: newStatementProps });
+      //       updateStatementDataMutation.mutate({ props: newStatementProps });
       //     }
       //   }
       // }
@@ -379,7 +413,7 @@ export const StatementEditorBox: React.FC = () => {
       const newData = {
         references: [...statement.data.references, newReference],
       };
-      updateActantsDataMutation.mutate(newData);
+      updateStatementDataMutation.mutate(newData);
     }
   };
   const updateReference = (referenceId: string, changes: any) => {
@@ -390,7 +424,7 @@ export const StatementEditorBox: React.FC = () => {
       const newData = {
         references: updatedReferences,
       };
-      updateActantsDataMutation.mutate(newData);
+      updateStatementDataMutation.mutate(newData);
     }
   };
   const removeReference = (referenceId: string) => {
@@ -400,7 +434,7 @@ export const StatementEditorBox: React.FC = () => {
           (p) => p.id !== referenceId
         ),
       };
-      updateActantsDataMutation.mutate(newData);
+      updateStatementDataMutation.mutate(newData);
     }
   };
 
@@ -408,17 +442,17 @@ export const StatementEditorBox: React.FC = () => {
   const addTag = (tagId: string) => {
     if (statement && tagId) {
       const newData = { tags: [...statement.data.tags, tagId] };
-      updateActantsDataMutation.mutate(newData);
+      updateStatementDataMutation.mutate(newData);
     }
   };
   const removeTag = (tagId: string) => {
     if (statement && tagId) {
       const newData = { tags: statement.data.tags.filter((p) => p !== tagId) };
-      updateActantsDataMutation.mutate(newData);
+      updateStatementDataMutation.mutate(newData);
     }
   };
 
-  const updateActantsDataMutation = useMutation(
+  const updateStatementDataMutation = useMutation(
     async (changes: object) => {
       await api.actantsUpdate(statementId, {
         data: changes,
@@ -702,7 +736,7 @@ export const StatementEditorBox: React.FC = () => {
                 updateProp(prop.id, statementPropObject);
               }}
               userCanEdit={userCanEdit}
-              loading={updateActantsDataMutation.isLoading}
+              loading={updateStatementDataMutation.isLoading}
             />
 
             {level === "1" && (
@@ -1120,7 +1154,7 @@ export const StatementEditorBox: React.FC = () => {
           isFetchingStatement ||
           updateActionsRefreshListMutation.isLoading ||
           updateActantsRefreshListMutation.isLoading ||
-          updateActantsDataMutation.isLoading
+          updateStatementDataMutation.isLoading
         }
       />
     </>
