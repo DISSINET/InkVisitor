@@ -528,6 +528,7 @@ export const StatementEditorBox: React.FC = () => {
                           prop1,
                           "1",
                           pi1,
+                          props.length,
                           false,
                           mode
                         )}
@@ -538,6 +539,7 @@ export const StatementEditorBox: React.FC = () => {
                             prop2,
                             "2",
                             pi2,
+                            props.length,
                             pi2 === prop1.children.length - 1,
                             mode
                           );
@@ -560,6 +562,7 @@ export const StatementEditorBox: React.FC = () => {
     prop: IProp,
     level: "1" | "2",
     order: number,
+    allPropsAtTheLevelNo: number,
     lastSecondLevel: boolean,
     mode: "actions" | "actants" = "actants"
   ) => {
@@ -760,6 +763,7 @@ export const StatementEditorBox: React.FC = () => {
             <Button
               key="up"
               inverted
+              disabled={order === 0}
               icon={<FaCaretUp />}
               tooltip="move prop up"
               color="plain"
@@ -770,6 +774,7 @@ export const StatementEditorBox: React.FC = () => {
             <Button
               key="down"
               inverted
+              disabled={order === allPropsAtTheLevelNo - 1}
               icon={<FaCaretDown />}
               tooltip="move prop down"
               color="plain"
