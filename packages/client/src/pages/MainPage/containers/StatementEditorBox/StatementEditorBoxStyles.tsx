@@ -127,7 +127,6 @@ export const StyledPropLineColumn = styled(
   padding-left: ${({ theme, padded }) =>
     padded ? theme.space[6] : theme.space[0]};
   padding-right: 5px;
-  border-right: 1px dashed black;
   overflow: ${({ isTag }) => (isTag ? "hidden" : "visible")};
 `;
 
