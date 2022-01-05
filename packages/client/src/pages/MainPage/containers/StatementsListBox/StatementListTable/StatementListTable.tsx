@@ -3,18 +3,21 @@ import { Column, useTable, useExpanded, Row } from "react-table";
 import update from "immutability-helper";
 import { StyledTable, StyledTHead, StyledTh } from "./StatementListTableStyles";
 import { StatementListRow } from "./StatementListRow";
+import { IActant } from "@shared/types";
 
 interface StatementListTable {
   data: {}[];
   columns: Column<{}>[];
   handleRowClick?: Function;
   moveEndRow: Function;
+  actants: IActant[];
 }
 export const StatementListTable: React.FC<StatementListTable> = ({
   data,
   columns,
   handleRowClick = () => {},
   moveEndRow,
+  actants,
 }) => {
   const [records, setRecords] = useState<{}[]>([]);
   useEffect(() => {
@@ -81,6 +84,7 @@ export const StatementListTable: React.FC<StatementListTable> = ({
           prepareRow(row);
           return (
             <StatementListRow
+              actants={actants}
               index={i}
               handleClick={handleRowClick}
               row={row}

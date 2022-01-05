@@ -9,7 +9,14 @@ import {
   useDrop,
   XYCoord,
 } from "react-dnd";
-import { FaGripVertical } from "react-icons/fa";
+import {
+  FaChevronCircleDown,
+  FaChevronCircleUp,
+  FaClone,
+  FaGripVertical,
+  FaPlus,
+  FaTrashAlt,
+} from "react-icons/fa";
 import { Cell, ColumnInstance } from "react-table";
 
 import { DragItem, ItemTypes } from "types";
@@ -19,6 +26,18 @@ import {
   StyledTdLastEdit,
   StyledTr,
 } from "./StatementListTableStyles";
+import {
+  IStatement,
+  IActant,
+  IAction,
+  IResponseStatement,
+} from "@shared/types";
+import { EntityTag } from "../..";
+import { Button, ButtonGroup, TagGroup, Tooltip } from "components";
+import { StyledDots, StyledText } from "../StatementLitBoxStyles";
+import { UserRoleMode } from "@shared/enums";
+import { BsArrowUp, BsArrowDown } from "react-icons/bs";
+import { StatementListContextMenu } from "../StatementListContextMenu/StatementListContextMenu";
 
 interface StatementListRow {
   row: any;
@@ -27,6 +46,7 @@ interface StatementListRow {
   moveEndRow: Function;
   handleClick: Function;
   visibleColumns: ColumnInstance<{}>[];
+  actants: IActant[];
 }
 
 export const StatementListRow: React.FC<StatementListRow> = ({
@@ -36,6 +56,7 @@ export const StatementListRow: React.FC<StatementListRow> = ({
   moveEndRow,
   handleClick = () => {},
   visibleColumns,
+  actants,
 }) => {
   const { statementId } = useSearchParams();
 
@@ -122,6 +143,248 @@ export const StatementListRow: React.FC<StatementListRow> = ({
   preview(drop(dropRef));
   drag(dragRef);
 
+  const renderListActant = (actantObject: IActant, key: number) => {
+    return (
+      actantObject && (
+        <EntityTag
+          key={key}
+          actant={actantObject}
+          showOnly="entity"
+          tooltipPosition="bottom center"
+        />
+      )
+    );
+  };
+
+  const renderStatementCell = () => {
+    const statement = row.original as IStatement;
+    return (
+      <EntityTag
+        actant={statement as IActant}
+        showOnly="entity"
+        tooltipText={statement.data.text}
+      />
+    );
+  };
+
+  const renderSubjectCell = () => {
+    const subjectIds = row.values.data?.actants
+      ? row.values.data.actants
+          .filter((a: any) => a.position === "s")
+          .map((a: any) => a.actant)
+      : [];
+
+    const subjectObjects = subjectIds.map((actantId: string) => {
+      const subjectObject = actants && actants.find((a) => a.id === actantId);
+
+      return subjectObject;
+    });
+
+    const isOversized = subjectIds.length > 2;
+
+    return (
+      <TagGroup>
+        {subjectObjects
+          .slice(0, 2)
+          .map((subjectObject: IActant, key: number) =>
+            renderListActant(subjectObject, key)
+          )}
+        {isOversized && (
+          <Tooltip
+            offsetX={-14}
+            position="right center"
+            color="success"
+            noArrow
+            items={
+              <TagGroup>
+                {subjectObjects
+                  .slice(2)
+                  .map((subjectObject: IActant, key: number) =>
+                    renderListActant(subjectObject, key)
+                  )}
+              </TagGroup>
+            }
+          >
+            <StyledDots>{"..."}</StyledDots>
+          </Tooltip>
+        )}
+      </TagGroup>
+    );
+  };
+
+  const renderActionsCell = () => {
+    const { actions }: { actions?: IAction[] } = row.original;
+
+    if (actions) {
+      const isOversized = actions.length > 2;
+      return (
+        <TagGroup>
+          {actions
+            .slice(0, 2)
+            .map((action: IActant, key: number) =>
+              renderListActant(action, key)
+            )}
+          {isOversized && (
+            <Tooltip
+              offsetX={-14}
+              position="right center"
+              color="success"
+              noArrow
+              items={
+                <TagGroup>
+                  {actions
+                    .slice(2)
+                    .map((action: IActant, key: number) =>
+                      renderListActant(action, key)
+                    )}
+                </TagGroup>
+              }
+            >
+              <StyledDots>{"..."}</StyledDots>
+            </Tooltip>
+          )}
+        </TagGroup>
+      );
+    } else {
+      return <div />;
+    }
+  };
+
+  const renderObjectsCell = () => {
+    const actantIds = row.values.data?.actants
+      ? row.values.data.actants
+          .filter((a: any) => a.position !== "s")
+          .map((a: any) => a.actant)
+      : [];
+    const isOversized = actantIds.length > 4;
+
+    const actantObjects = actantIds.map((actantId: string) => {
+      const actantObject =
+        actants && actants.find((a) => a && a.id === actantId);
+      return actantObject && actantObject;
+    });
+    return (
+      <TagGroup>
+        {actantObjects
+          .slice(0, 4)
+          .map((actantObject: IActant, key: number) =>
+            renderListActant(actantObject, key)
+          )}
+        {isOversized && (
+          <Tooltip
+            offsetX={-14}
+            position="right center"
+            color="success"
+            noArrow
+            items={
+              <TagGroup>
+                {actantObjects
+                  .slice(4)
+                  .map((actantObject: IActant, key: number) =>
+                    renderListActant(actantObject, key)
+                  )}
+              </TagGroup>
+            }
+          >
+            <StyledDots>{"..."}</StyledDots>
+          </Tooltip>
+        )}
+      </TagGroup>
+    );
+  };
+
+  const renderTextCell = () => {
+    const { text } = row.values.data;
+    const maxWordsCount = 20;
+    const trimmedText = text.split(" ").slice(0, maxWordsCount).join(" ");
+    if (text?.match(/(\w+)/g)?.length > maxWordsCount) {
+      return <StyledText>{trimmedText}...</StyledText>;
+    }
+    return <StyledText>{trimmedText}</StyledText>;
+  };
+
+  // const renderExpanderCell = () => {
+  //   return (
+  //     <ButtonGroup>
+  //       {data?.right !== UserRoleMode.Read && (
+  //         <StatementListContextMenu
+  //           buttons={[
+  //             <Button
+  //               key="r"
+  //               icon={<FaTrashAlt size={14} />}
+  //               color="danger"
+  //               tooltip="delete"
+  //               onClick={() => {
+  //                 setStatementToDelete(
+  //                   row.original as IResponseStatement
+  //                 );
+  //                 setShowSubmit(true);
+  //               }}
+  //             />,
+  //             <Button
+  //               key="d"
+  //               icon={<FaClone size={14} />}
+  //               color="warning"
+  //               tooltip="duplicate"
+  //               onClick={() => {
+  //                 duplicateStatementMutation.mutate(
+  //                   row.original as IResponseStatement
+  //                 );
+  //               }}
+  //             />,
+  //             <Button
+  //               key="add-up"
+  //               icon={
+  //                 <>
+  //                   <FaPlus size={14} />
+  //                   <BsArrowUp size={14} />
+  //                 </>
+  //               }
+  //               tooltip="add new statement before"
+  //               color="info"
+  //               onClick={() => {
+  //                 addStatementAtCertainIndex(row.index - 1);
+  //               }}
+  //             />,
+  //             <Button
+  //               key="add-down"
+  //               icon={
+  //                 <>
+  //                   <FaPlus size={14} />
+  //                   <BsArrowDown size={14} />
+  //                 </>
+  //               }
+  //               tooltip="add new statement after"
+  //               color="success"
+  //               onClick={() => {
+  //                 addStatementAtCertainIndex(row.index + 1);
+  //               }}
+  //             />,
+  //           ]}
+  //         />
+  //       )}
+  //       <span
+  //         {...row.getToggleRowExpandedProps()}
+  //         style={{
+  //           cursor: "pointer",
+  //           display: "flex",
+  //           alignItems: "center",
+  //         }}
+  //         onClick={(e: React.MouseEvent) => {
+  //           e.stopPropagation();
+  //           row.toggleRowExpanded();
+  //         }}
+  //       >
+  //         {row.isExpanded ? (
+  //           <FaChevronCircleUp />
+  //         ) : (
+  //           <FaChevronCircleDown />
+  //         )}
+  //       </span>
+  //     </ButtonGroup>
+  //   );
+  // }
+
   return (
     <React.Fragment key={row.values.data.territory.order}>
       <StyledTr
@@ -142,24 +405,14 @@ export const StatementListRow: React.FC<StatementListRow> = ({
         >
           <FaGripVertical />
         </td>
+        <StyledTd>{renderStatementCell()}</StyledTd>
+        <StyledTd>{renderSubjectCell()}</StyledTd>
+        <StyledTd>{renderActionsCell()}</StyledTd>
+        <StyledTd>{renderObjectsCell()}</StyledTd>
+        <StyledTd>{renderTextCell()}</StyledTd>
+        <StyledTdLastEdit key="audit">{lastEditdateText}</StyledTdLastEdit>
         {row.cells.map((cell: Cell) => {
-          if (cell.column.id === "lastEdit") {
-            return (
-              <StyledTdLastEdit key="audit">
-                {lastEditdateText}
-              </StyledTdLastEdit>
-            );
-          }
-          if (
-            [
-              "Statement",
-              "Actions",
-              "Objects",
-              "data",
-              "Text",
-              "expander",
-            ].includes(cell.column.id)
-          ) {
+          if (["expander"].includes(cell.column.id)) {
             return (
               <StyledTd {...cell.getCellProps()}>
                 {cell.render("Cell")}

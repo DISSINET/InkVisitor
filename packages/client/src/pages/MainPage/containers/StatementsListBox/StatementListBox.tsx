@@ -232,6 +232,7 @@ export const StatementListBox: React.FC = () => {
     queryClient.invalidateQueries("territory");
   };
 
+  // TODO: remove
   const renderListActant = (actantObject: IActant, key: number) => {
     return (
       actantObject && (
@@ -278,169 +279,162 @@ export const StatementListBox: React.FC = () => {
       {
         Header: "",
         id: "Statement",
-        Cell: ({ row }: Cell) => {
-          const statement = row.original as IStatement;
-          return (
-            <EntityTag
-              actant={statement as IActant}
-              showOnly="entity"
-              tooltipText={statement.data.text}
-            />
-          );
-        },
+        // Cell: ({ row }: Cell) => {
+        //   const statement = row.original as IStatement;
+        //   return (
+        //     <EntityTag
+        //       actant={statement as IActant}
+        //       showOnly="entity"
+        //       tooltipText={statement.data.text}
+        //     />
+        //   );
+        // },
       },
       {
         Header: "Subj.",
         accessor: "data",
-        Cell: ({ row }: Cell) => {
-          const subjectIds = row.values.data?.actants
-            ? row.values.data.actants
-                .filter((a: any) => a.position === "s")
-                .map((a: any) => a.actant)
-            : [];
-
-          const subjectObjects = subjectIds.map((actantId: string) => {
-            const subjectObject =
-              actants && actants.find((a) => a.id === actantId);
-
-            return subjectObject;
-          });
-
-          const isOversized = subjectIds.length > 2;
-
-          return (
-            <TagGroup>
-              {subjectObjects
-                .slice(0, 2)
-                .map((subjectObject: IActant, key: number) =>
-                  renderListActant(subjectObject, key)
-                )}
-              {isOversized && (
-                <Tooltip
-                  offsetX={-14}
-                  position="right center"
-                  color="success"
-                  noArrow
-                  items={
-                    <TagGroup>
-                      {subjectObjects
-                        .slice(2)
-                        .map((subjectObject: IActant, key: number) =>
-                          renderListActant(subjectObject, key)
-                        )}
-                    </TagGroup>
-                  }
-                >
-                  <StyledDots>{"..."}</StyledDots>
-                </Tooltip>
-              )}
-            </TagGroup>
-          );
-        },
+        // Cell: ({ row }: Cell) => {
+        //   const subjectIds = row.values.data?.actants
+        //     ? row.values.data.actants
+        //         .filter((a: any) => a.position === "s")
+        //         .map((a: any) => a.actant)
+        //     : [];
+        //   const subjectObjects = subjectIds.map((actantId: string) => {
+        //     const subjectObject =
+        //       actants && actants.find((a) => a.id === actantId);
+        //     return subjectObject;
+        //   });
+        //   const isOversized = subjectIds.length > 2;
+        //   return (
+        //     <TagGroup>
+        //       {subjectObjects
+        //         .slice(0, 2)
+        //         .map((subjectObject: IActant, key: number) =>
+        //           renderListActant(subjectObject, key)
+        //         )}
+        //       {isOversized && (
+        //         <Tooltip
+        //           offsetX={-14}
+        //           position="right center"
+        //           color="success"
+        //           noArrow
+        //           items={
+        //             <TagGroup>
+        //               {subjectObjects
+        //                 .slice(2)
+        //                 .map((subjectObject: IActant, key: number) =>
+        //                   renderListActant(subjectObject, key)
+        //                 )}
+        //             </TagGroup>
+        //           }
+        //         >
+        //           <StyledDots>{"..."}</StyledDots>
+        //         </Tooltip>
+        //       )}
+        //     </TagGroup>
+        //   );
+        // },
       },
       {
         Header: "Actions",
-        Cell: ({ row }: Cell) => {
-          const { actions }: { actions?: IAction[] } = row.original;
+        // Cell: ({ row }: Cell) => {
+        //   const { actions }: { actions?: IAction[] } = row.original;
 
-          if (actions) {
-            const isOversized = actions.length > 2;
-            return (
-              <TagGroup>
-                {actions
-                  .slice(0, 2)
-                  .map((action: IActant, key: number) =>
-                    renderListActant(action, key)
-                  )}
-                {isOversized && (
-                  <Tooltip
-                    offsetX={-14}
-                    position="right center"
-                    color="success"
-                    noArrow
-                    items={
-                      <TagGroup>
-                        {actions
-                          .slice(2)
-                          .map((action: IActant, key: number) =>
-                            renderListActant(action, key)
-                          )}
-                      </TagGroup>
-                    }
-                  >
-                    <StyledDots>{"..."}</StyledDots>
-                  </Tooltip>
-                )}
-              </TagGroup>
-            );
-          } else {
-            return <div />;
-          }
-        },
+        //   if (actions) {
+        //     const isOversized = actions.length > 2;
+        //     return (
+        //       <TagGroup>
+        //         {actions
+        //           .slice(0, 2)
+        //           .map((action: IActant, key: number) =>
+        //             renderListActant(action, key)
+        //           )}
+        //         {isOversized && (
+        //           <Tooltip
+        //             offsetX={-14}
+        //             position="right center"
+        //             color="success"
+        //             noArrow
+        //             items={
+        //               <TagGroup>
+        //                 {actions
+        //                   .slice(2)
+        //                   .map((action: IActant, key: number) =>
+        //                     renderListActant(action, key)
+        //                   )}
+        //               </TagGroup>
+        //             }
+        //           >
+        //             <StyledDots>{"..."}</StyledDots>
+        //           </Tooltip>
+        //         )}
+        //       </TagGroup>
+        //     );
+        //   } else {
+        //     return <div />;
+        //   }
+        // },
       },
       {
         Header: "Objects",
-        Cell: ({ row }: Cell) => {
-          const actantIds = row.values.data?.actants
-            ? row.values.data.actants
-                .filter((a: any) => a.position !== "s")
-                .map((a: any) => a.actant)
-            : [];
-          const isOversized = actantIds.length > 4;
+        // Cell: ({ row }: Cell) => {
+        //   const actantIds = row.values.data?.actants
+        //     ? row.values.data.actants
+        //         .filter((a: any) => a.position !== "s")
+        //         .map((a: any) => a.actant)
+        //     : [];
+        //   const isOversized = actantIds.length > 4;
 
-          const actantObjects = actantIds.map((actantId: string) => {
-            const actantObject =
-              actants && actants.find((a) => a && a.id === actantId);
-            return actantObject && actantObject;
-          });
-          return (
-            <TagGroup>
-              {actantObjects
-                .slice(0, 4)
-                .map((actantObject: IActant, key: number) =>
-                  renderListActant(actantObject, key)
-                )}
-              {isOversized && (
-                <Tooltip
-                  offsetX={-14}
-                  position="right center"
-                  color="success"
-                  noArrow
-                  items={
-                    <TagGroup>
-                      {actantObjects
-                        .slice(4)
-                        .map((actantObject: IActant, key: number) =>
-                          renderListActant(actantObject, key)
-                        )}
-                    </TagGroup>
-                  }
-                >
-                  <StyledDots>{"..."}</StyledDots>
-                </Tooltip>
-              )}
-            </TagGroup>
-          );
-        },
+        //   const actantObjects = actantIds.map((actantId: string) => {
+        //     const actantObject =
+        //       actants && actants.find((a) => a && a.id === actantId);
+        //     return actantObject && actantObject;
+        //   });
+        //   return (
+        //     <TagGroup>
+        //       {actantObjects
+        //         .slice(0, 4)
+        //         .map((actantObject: IActant, key: number) =>
+        //           renderListActant(actantObject, key)
+        //         )}
+        //       {isOversized && (
+        //         <Tooltip
+        //           offsetX={-14}
+        //           position="right center"
+        //           color="success"
+        //           noArrow
+        //           items={
+        //             <TagGroup>
+        //               {actantObjects
+        //                 .slice(4)
+        //                 .map((actantObject: IActant, key: number) =>
+        //                   renderListActant(actantObject, key)
+        //                 )}
+        //             </TagGroup>
+        //           }
+        //         >
+        //           <StyledDots>{"..."}</StyledDots>
+        //         </Tooltip>
+        //       )}
+        //     </TagGroup>
+        //   );
+        // },
       },
       {
         Header: "Text",
-        Cell: ({ row }: Cell) => {
-          const { text } = row.values.data;
-          const maxWordsCount = 20;
-          const trimmedText = text.split(" ").slice(0, maxWordsCount).join(" ");
-          if (text?.match(/(\w+)/g)?.length > maxWordsCount) {
-            return <StyledText>{trimmedText}...</StyledText>;
-          }
-          return <StyledText>{trimmedText}</StyledText>;
-        },
+        // Cell: ({ row }: Cell) => {
+        //   const { text } = row.values.data;
+        //   const maxWordsCount = 20;
+        //   const trimmedText = text.split(" ").slice(0, maxWordsCount).join(" ");
+        //   if (text?.match(/(\w+)/g)?.length > maxWordsCount) {
+        //     return <StyledText>{trimmedText}...</StyledText>;
+        //   }
+        //   return <StyledText>{trimmedText}</StyledText>;
+        // },
       },
       {
         id: "lastEdit",
         Header: "Edited",
-        Cell: ({ row }: Cell) => {
-          return false;
-        },
       },
       {
         Header: "",
@@ -652,6 +646,7 @@ export const StatementListBox: React.FC = () => {
         <StatementListTable
           moveEndRow={moveEndRow}
           data={statements}
+          actants={actants}
           columns={columns}
           handleRowClick={(rowId: string) => {
             setStatementId(rowId);
