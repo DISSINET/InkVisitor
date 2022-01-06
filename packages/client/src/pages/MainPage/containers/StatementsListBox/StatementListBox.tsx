@@ -56,7 +56,7 @@ export const StatementListBox: React.FC = () => {
   const { territoryId, setTerritoryId, statementId, setStatementId } =
     useSearchParams();
 
-  const [showSubmit, setShowSubmit] = useState(false);
+  // const [showSubmit, setShowSubmit] = useState(false);
   const [statementToDelete, setStatementToDelete] = useState<IStatement>();
 
   const { status, data, error, isFetching } = useQuery(
@@ -232,19 +232,6 @@ export const StatementListBox: React.FC = () => {
     queryClient.invalidateQueries("territory");
   };
 
-  const renderListActant = (actantObject: IActant, key: number) => {
-    return (
-      actantObject && (
-        <EntityTag
-          key={key}
-          actant={actantObject}
-          showOnly="entity"
-          tooltipPosition="bottom center"
-        />
-      )
-    );
-  };
-
   const renderListActantLong = (
     actantObject: IActant,
     key: number,
@@ -278,255 +265,28 @@ export const StatementListBox: React.FC = () => {
       {
         Header: "",
         id: "Statement",
-        Cell: ({ row }: Cell) => {
-          const statement = row.original as IStatement;
-          return (
-            <EntityTag
-              actant={statement as IActant}
-              showOnly="entity"
-              tooltipText={statement.data.text}
-            />
-          );
-        },
       },
       {
         Header: "Subj.",
         accessor: "data",
-        Cell: ({ row }: Cell) => {
-          const subjectIds = row.values.data?.actants
-            ? row.values.data.actants
-                .filter((a: any) => a.position === "s")
-                .map((a: any) => a.actant)
-            : [];
-
-          const subjectObjects = subjectIds.map((actantId: string) => {
-            const subjectObject =
-              actants && actants.find((a) => a.id === actantId);
-
-            return subjectObject;
-          });
-
-          const isOversized = subjectIds.length > 2;
-
-          return (
-            <TagGroup>
-              {subjectObjects
-                .slice(0, 2)
-                .map((subjectObject: IActant, key: number) =>
-                  renderListActant(subjectObject, key)
-                )}
-              {isOversized && (
-                <Tooltip
-                  offsetX={-14}
-                  position="right center"
-                  color="success"
-                  noArrow
-                  items={
-                    <TagGroup>
-                      {subjectObjects
-                        .slice(2)
-                        .map((subjectObject: IActant, key: number) =>
-                          renderListActant(subjectObject, key)
-                        )}
-                    </TagGroup>
-                  }
-                >
-                  <StyledDots>{"..."}</StyledDots>
-                </Tooltip>
-              )}
-            </TagGroup>
-          );
-        },
       },
       {
         Header: "Actions",
-        Cell: ({ row }: Cell) => {
-          const { actions }: { actions?: IAction[] } = row.original;
-
-          if (actions) {
-            const isOversized = actions.length > 2;
-            return (
-              <TagGroup>
-                {actions
-                  .slice(0, 2)
-                  .map((action: IActant, key: number) =>
-                    renderListActant(action, key)
-                  )}
-                {isOversized && (
-                  <Tooltip
-                    offsetX={-14}
-                    position="right center"
-                    color="success"
-                    noArrow
-                    items={
-                      <TagGroup>
-                        {actions
-                          .slice(2)
-                          .map((action: IActant, key: number) =>
-                            renderListActant(action, key)
-                          )}
-                      </TagGroup>
-                    }
-                  >
-                    <StyledDots>{"..."}</StyledDots>
-                  </Tooltip>
-                )}
-              </TagGroup>
-            );
-          } else {
-            return <div />;
-          }
-        },
       },
       {
         Header: "Objects",
-        Cell: ({ row }: Cell) => {
-          const actantIds = row.values.data?.actants
-            ? row.values.data.actants
-                .filter((a: any) => a.position !== "s")
-                .map((a: any) => a.actant)
-            : [];
-          const isOversized = actantIds.length > 4;
-
-          const actantObjects = actantIds.map((actantId: string) => {
-            const actantObject =
-              actants && actants.find((a) => a && a.id === actantId);
-            return actantObject && actantObject;
-          });
-          return (
-            <TagGroup>
-              {actantObjects
-                .slice(0, 4)
-                .map((actantObject: IActant, key: number) =>
-                  renderListActant(actantObject, key)
-                )}
-              {isOversized && (
-                <Tooltip
-                  offsetX={-14}
-                  position="right center"
-                  color="success"
-                  noArrow
-                  items={
-                    <TagGroup>
-                      {actantObjects
-                        .slice(4)
-                        .map((actantObject: IActant, key: number) =>
-                          renderListActant(actantObject, key)
-                        )}
-                    </TagGroup>
-                  }
-                >
-                  <StyledDots>{"..."}</StyledDots>
-                </Tooltip>
-              )}
-            </TagGroup>
-          );
-        },
       },
       {
         Header: "Text",
-        Cell: ({ row }: Cell) => {
-          const { text } = row.values.data;
-          const maxWordsCount = 20;
-          const trimmedText = text.split(" ").slice(0, maxWordsCount).join(" ");
-          if (text?.match(/(\w+)/g)?.length > maxWordsCount) {
-            return <StyledText>{trimmedText}...</StyledText>;
-          }
-          return <StyledText>{trimmedText}</StyledText>;
-        },
       },
       {
         id: "lastEdit",
         Header: "Edited",
-        Cell: ({ row }: Cell) => {
-          return false;
-        },
       },
       {
         Header: "",
         id: "expander",
         width: 300,
-        Cell: ({ row }: Cell) => {
-          return (
-            <ButtonGroup>
-              {data?.right !== UserRoleMode.Read && (
-                <StatementListContextMenu
-                  buttons={[
-                    <Button
-                      key="r"
-                      icon={<FaTrashAlt size={14} />}
-                      color="danger"
-                      tooltip="delete"
-                      onClick={() => {
-                        setStatementToDelete(
-                          row.original as IResponseStatement
-                        );
-                        setShowSubmit(true);
-                      }}
-                    />,
-                    <Button
-                      key="d"
-                      icon={<FaClone size={14} />}
-                      color="warning"
-                      tooltip="duplicate"
-                      onClick={() => {
-                        duplicateStatementMutation.mutate(
-                          row.original as IResponseStatement
-                        );
-                      }}
-                    />,
-                    <Button
-                      key="add-up"
-                      icon={
-                        <>
-                          <FaPlus size={14} />
-                          <BsArrowUp size={14} />
-                        </>
-                      }
-                      tooltip="add new statement before"
-                      color="info"
-                      onClick={() => {
-                        addStatementAtCertainIndex(row.index - 1);
-                      }}
-                    />,
-                    <Button
-                      key="add-down"
-                      icon={
-                        <>
-                          <FaPlus size={14} />
-                          <BsArrowDown size={14} />
-                        </>
-                      }
-                      tooltip="add new statement after"
-                      color="success"
-                      onClick={() => {
-                        addStatementAtCertainIndex(row.index + 1);
-                      }}
-                    />,
-                  ]}
-                />
-              )}
-              <span
-                {...row.getToggleRowExpandedProps()}
-                style={{
-                  cursor: "pointer",
-                  display: "flex",
-                  alignItems: "center",
-                }}
-                onClick={(e: React.MouseEvent) => {
-                  e.stopPropagation();
-                  row.toggleRowExpanded();
-                }}
-              >
-                {row.isExpanded ? (
-                  <FaChevronCircleUp />
-                ) : (
-                  <FaChevronCircleDown />
-                )}
-              </span>
-            </ButtonGroup>
-          );
-        },
       },
       {
         Header: "",
@@ -651,35 +411,17 @@ export const StatementListBox: React.FC = () => {
       <StyledTableWrapper id="Statements-box-table">
         <StatementListTable
           moveEndRow={moveEndRow}
-          data={statements}
+          data={data}
+          duplicateStatementMutation={duplicateStatementMutation}
+          removeStatementMutation={removeStatementMutation}
           columns={columns}
           handleRowClick={(rowId: string) => {
             setStatementId(rowId);
           }}
+          addStatementAtCertainIndex={addStatementAtCertainIndex}
         />
       </StyledTableWrapper>
 
-      <Submit
-        title="Delete statement"
-        text={`Do you really want to delete statement [${
-          statementToDelete?.label
-            ? statementToDelete.label
-            : statementToDelete?.id
-        }]?`}
-        show={showSubmit}
-        onCancel={() => {
-          setShowSubmit(false);
-          setStatementToDelete(undefined);
-        }}
-        onSubmit={() => {
-          if (statementToDelete) {
-            removeStatementMutation.mutate(statementToDelete.id);
-            setShowSubmit(false);
-            setStatementToDelete(undefined);
-          }
-        }}
-        loading={removeStatementMutation.isLoading}
-      />
       <Loader
         show={
           isFetching ||
