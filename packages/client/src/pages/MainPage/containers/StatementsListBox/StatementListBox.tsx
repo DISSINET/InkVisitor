@@ -232,7 +232,6 @@ export const StatementListBox: React.FC = () => {
     queryClient.invalidateQueries("territory");
   };
 
-  // TODO: remove
   const renderListActantLong = (
     actantObject: IActant,
     key: number,
