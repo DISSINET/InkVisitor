@@ -1,7 +1,7 @@
 import api from "api";
 import { useSearchParams } from "hooks";
-import React, { useMemo, useRef } from "react";
-import { useQuery, useMutation, useQueryClient } from "react-query";
+import React, { useMemo, useRef, useState } from "react";
+import { UseMutationResult, useQuery } from "react-query";
 import {
   DragSourceMonitor,
   DropTargetMonitor,
@@ -31,9 +31,10 @@ import {
   IActant,
   IAction,
   IResponseStatement,
+  IResponseTerritory,
 } from "@shared/types";
 import { EntityTag } from "../..";
-import { Button, ButtonGroup, TagGroup, Tooltip } from "components";
+import { Button, ButtonGroup, Submit, TagGroup, Tooltip } from "components";
 import { StyledDots, StyledText } from "../StatementLitBoxStyles";
 import { UserRoleMode } from "@shared/enums";
 import { BsArrowUp, BsArrowDown } from "react-icons/bs";
@@ -47,6 +48,15 @@ interface StatementListRow {
   handleClick: Function;
   visibleColumns: ColumnInstance<{}>[];
   actants: IActant[];
+  data?: IResponseTerritory;
+  duplicateStatementMutation: UseMutationResult<
+    void,
+    unknown,
+    IResponseStatement,
+    unknown
+  >;
+  removeStatementMutation: UseMutationResult<void, unknown, string, unknown>;
+  addStatementAtCertainIndex: (index: number) => Promise<void>;
 }
 
 export const StatementListRow: React.FC<StatementListRow> = ({
@@ -57,8 +67,13 @@ export const StatementListRow: React.FC<StatementListRow> = ({
   handleClick = () => {},
   visibleColumns,
   actants,
+  data,
+  duplicateStatementMutation,
+  addStatementAtCertainIndex,
+  removeStatementMutation,
 }) => {
   const { statementId } = useSearchParams();
+  const [showSubmit, setShowSubmit] = useState(false);
 
   const {
     status: statusAudit,
@@ -303,87 +318,125 @@ export const StatementListRow: React.FC<StatementListRow> = ({
     return <StyledText>{trimmedText}</StyledText>;
   };
 
-  // const renderExpanderCell = () => {
-  //   return (
-  //     <ButtonGroup>
-  //       {data?.right !== UserRoleMode.Read && (
-  //         <StatementListContextMenu
-  //           buttons={[
-  //             <Button
-  //               key="r"
-  //               icon={<FaTrashAlt size={14} />}
-  //               color="danger"
-  //               tooltip="delete"
-  //               onClick={() => {
-  //                 setStatementToDelete(
-  //                   row.original as IResponseStatement
-  //                 );
-  //                 setShowSubmit(true);
-  //               }}
-  //             />,
-  //             <Button
-  //               key="d"
-  //               icon={<FaClone size={14} />}
-  //               color="warning"
-  //               tooltip="duplicate"
-  //               onClick={() => {
-  //                 duplicateStatementMutation.mutate(
-  //                   row.original as IResponseStatement
-  //                 );
-  //               }}
-  //             />,
-  //             <Button
-  //               key="add-up"
-  //               icon={
-  //                 <>
-  //                   <FaPlus size={14} />
-  //                   <BsArrowUp size={14} />
-  //                 </>
-  //               }
-  //               tooltip="add new statement before"
-  //               color="info"
-  //               onClick={() => {
-  //                 addStatementAtCertainIndex(row.index - 1);
-  //               }}
-  //             />,
-  //             <Button
-  //               key="add-down"
-  //               icon={
-  //                 <>
-  //                   <FaPlus size={14} />
-  //                   <BsArrowDown size={14} />
-  //                 </>
-  //               }
-  //               tooltip="add new statement after"
-  //               color="success"
-  //               onClick={() => {
-  //                 addStatementAtCertainIndex(row.index + 1);
-  //               }}
-  //             />,
-  //           ]}
-  //         />
-  //       )}
-  //       <span
-  //         {...row.getToggleRowExpandedProps()}
-  //         style={{
-  //           cursor: "pointer",
-  //           display: "flex",
-  //           alignItems: "center",
-  //         }}
-  //         onClick={(e: React.MouseEvent) => {
-  //           e.stopPropagation();
-  //           row.toggleRowExpanded();
-  //         }}
-  //       >
-  //         {row.isExpanded ? (
-  //           <FaChevronCircleUp />
-  //         ) : (
-  //           <FaChevronCircleDown />
-  //         )}
-  //       </span>
-  //     </ButtonGroup>
-  //   );
-  // }
+  const renderExpanderCell = () => {
+    return (
+      <ButtonGroup>
+        {data?.right !== UserRoleMode.Read && (
+          <StatementListContextMenu
+            buttons={[
+              <Button
+                key="r"
+                icon={<FaTrashAlt size={14} />}
+                color="danger"
+                tooltip="delete"
+                onClick={() => {
+                  setShowSubmit(true);
+                }}
+              />,
+              <Button
+                key="d"
+                icon={<FaClone size={14} />}
+                color="warning"
+                tooltip="duplicate"
+                onClick={() => {
+                  duplicateStatementMutation.mutate(
+                    row.original as IResponseStatement
+                  );
+                }}
+              />,
+              <Button
+                key="add-up"
+                icon={
+                  <>
+                    <FaPlus size={14} />
+                    <BsArrowUp size={14} />
+                  </>
+                }
+                tooltip="add new statement before"
+                color="info"
+                onClick={() => {
+                  addStatementAtCertainIndex(row.index - 1);
+                }}
+              />,
+              <Button
+                key="add-down"
+                icon={
+                  <>
+                    <FaPlus size={14} />
+                    <BsArrowDown size={14} />
+                  </>
+                }
+                tooltip="add new statement after"
+                color="success"
+                onClick={() => {
+                  addStatementAtCertainIndex(row.index + 1);
+                }}
+              />,
+            ]}
+          />
+        )}
+        <span
+          {...row.getToggleRowExpandedProps()}
+          style={{
+            cursor: "pointer",
+            display: "flex",
+            alignItems: "center",
+          }}
+          onClick={(e: React.MouseEvent) => {
+            e.stopPropagation();
+            row.toggleRowExpanded();
+          }}
+        >
+          {row.isExpanded ? <FaChevronCircleUp /> : <FaChevronCircleDown />}
+        </span>
+      </ButtonGroup>
+    );
+  };
+
+  const renderListActantLong = (
+    actantObject: IActant,
+    key: number,
+    attributes?: boolean,
+    statement?: IResponseStatement
+  ) => {
+    return (
+      actantObject && (
+        <div key={key}>
+          <div style={{ marginTop: "4px", display: "flex" }}>
+            <EntityTag
+              key={key}
+              actant={actantObject}
+              tooltipPosition="bottom center"
+            />
+          </div>
+          <div>
+            {/* {statement ? renderPropGroup(actantObject.id, statement) : ""} */}
+          </div>
+        </div>
+      )
+    );
+  };
+
+  const renderExpActions = () => {
+    const { actions }: { actions?: IAction[] } = row.original;
+    const statement = row.original as IResponseStatement;
+    if (actions) {
+      return (
+        <>
+          <div>{actions.length > 0 ? <i>Actions</i> : ""}</div>
+          <TagGroup>
+            <div style={{ display: "block" }}>
+              {actions.map((action: IAction, key: number) =>
+                renderListActantLong(action, key, true, statement)
+              )}
+            </div>
+          </TagGroup>
+        </>
+      );
+    } else {
+      return <div />;
+    }
+  };
 
   return (
     <React.Fragment key={row.values.data.territory.order}>
@@ -411,19 +464,29 @@ export const StatementListRow: React.FC<StatementListRow> = ({
         <StyledTd>{renderObjectsCell()}</StyledTd>
         <StyledTd>{renderTextCell()}</StyledTd>
         <StyledTdLastEdit key="audit">{lastEditdateText}</StyledTdLastEdit>
-        {row.cells.map((cell: Cell) => {
-          if (["expander"].includes(cell.column.id)) {
-            return (
-              <StyledTd {...cell.getCellProps()}>
-                {cell.render("Cell")}
-              </StyledTd>
-            );
-          }
-        })}
+        <StyledTd>{renderExpanderCell()}</StyledTd>
       </StyledTr>
       {row.isExpanded ? (
         <StatementListRowExpanded row={row} visibleColumns={visibleColumns} />
       ) : null}
+
+      <Submit
+        title="Delete statement"
+        text={`Do you really want to delete statement [${
+          row.original?.label ? row.original.label : row.original?.id
+        }]?`}
+        show={showSubmit}
+        onCancel={() => {
+          setShowSubmit(false);
+        }}
+        onSubmit={() => {
+          if (row.original) {
+            removeStatementMutation.mutate(row.original.id);
+            setShowSubmit(false);
+          }
+        }}
+        loading={removeStatementMutation.isLoading}
+      />
     </React.Fragment>
   );
 };

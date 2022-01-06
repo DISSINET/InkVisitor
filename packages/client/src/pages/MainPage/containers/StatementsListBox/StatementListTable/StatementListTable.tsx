@@ -3,26 +3,39 @@ import { Column, useTable, useExpanded, Row } from "react-table";
 import update from "immutability-helper";
 import { StyledTable, StyledTHead, StyledTh } from "./StatementListTableStyles";
 import { StatementListRow } from "./StatementListRow";
-import { IActant } from "@shared/types";
+import { IResponseStatement, IResponseTerritory } from "@shared/types";
+import { UseMutationResult } from "react-query";
 
 interface StatementListTable {
-  data: {}[];
+  data?: IResponseTerritory;
   columns: Column<{}>[];
   handleRowClick?: Function;
   moveEndRow: Function;
-  actants: IActant[];
+  duplicateStatementMutation: UseMutationResult<
+    void,
+    unknown,
+    IResponseStatement,
+    unknown
+  >;
+  addStatementAtCertainIndex: (index: number) => Promise<void>;
+  removeStatementMutation: UseMutationResult<void, unknown, string, unknown>;
 }
 export const StatementListTable: React.FC<StatementListTable> = ({
   data,
   columns,
   handleRowClick = () => {},
   moveEndRow,
-  actants,
+  duplicateStatementMutation,
+  addStatementAtCertainIndex,
+  removeStatementMutation,
 }) => {
   const [records, setRecords] = useState<{}[]>([]);
+
   useEffect(() => {
-    setRecords(data);
-  }, [data]);
+    if (data) {
+      setRecords(data.statements);
+    }
+  }, [data?.statements]);
 
   const getRowId = useCallback((row) => {
     return row.id;
@@ -84,7 +97,9 @@ export const StatementListTable: React.FC<StatementListTable> = ({
           prepareRow(row);
           return (
             <StatementListRow
-              actants={actants}
+              actants={data ? data.actants : []}
+              data={data}
+              duplicateStatementMutation={duplicateStatementMutation}
               index={i}
               handleClick={handleRowClick}
               row={row}
@@ -92,6 +107,8 @@ export const StatementListTable: React.FC<StatementListTable> = ({
               moveEndRow={moveEndRow}
               {...row.getRowProps()}
               visibleColumns={visibleColumns}
+              addStatementAtCertainIndex={addStatementAtCertainIndex}
+              removeStatementMutation={removeStatementMutation}
             />
           );
         })}
