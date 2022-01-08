@@ -31,7 +31,7 @@ interface StatementEditorActantTableRow {
   moveRow: any;
   userCanEdit?: boolean;
   updateOrderFn: () => void;
-  addProp: (originId: string, mode: string) => void;
+  addProp: (originId: string) => void;
   handleClick: Function;
   renderPropGroup: Function;
   visibleColumns: ColumnInstance<{}>[];
@@ -274,7 +274,7 @@ export const StatementEditorActantTableRow: React.FC<
             inverted={true}
             tooltip="add new prop"
             onClick={() => {
-              addProp(propOriginId, "actants");
+              addProp(propOriginId);
             }}
           />
         )}
@@ -326,9 +326,7 @@ export const StatementEditorActantTableRow: React.FC<
       {renderPropGroup(
         row.values.data.sActant.actant,
         row.values.data.sActant.props,
-        statement,
-        visibleColumns,
-        "actants"
+        statement
       )}
     </React.Fragment>
   );

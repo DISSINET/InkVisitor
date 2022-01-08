@@ -67,12 +67,12 @@ export const StatementEditorActantTable: React.FC<
         accessor: "id",
       },
       {
-        Header: "Actant",
+        Header: "",
         accessor: "data",
       },
       {
         id: "position",
-        Header: "Position",
+        Header: "",
       },
       {
         id: "Attributes",

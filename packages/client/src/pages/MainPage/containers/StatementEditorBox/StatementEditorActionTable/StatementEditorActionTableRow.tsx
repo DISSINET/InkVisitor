@@ -27,7 +27,7 @@ interface StatementEditorActionTableRow {
   statement: IResponseStatement;
   userCanEdit?: boolean;
   updateOrderFn: () => void;
-  addProp: (originId: string, mode: string) => void;
+  addProp: (originId: string) => void;
   handleClick: Function;
   renderPropGroup: Function;
   visibleColumns: ColumnInstance<{}>[];
@@ -205,7 +205,7 @@ export const StatementEditorActionTableRow: React.FC<
             inverted={true}
             tooltip="add new prop"
             onClick={() => {
-              addProp(propOriginId, "actions");
+              addProp(propOriginId);
             }}
           />
         )}
@@ -256,9 +256,7 @@ export const StatementEditorActionTableRow: React.FC<
       {renderPropGroup(
         row.values.data.sAction.action,
         row.values.data.sAction.props,
-        statement,
-        visibleColumns,
-        "actions"
+        statement
       )}
     </React.Fragment>
   );

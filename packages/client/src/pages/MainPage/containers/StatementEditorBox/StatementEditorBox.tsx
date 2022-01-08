@@ -65,6 +65,7 @@ import { AuditTable } from "./../AuditTable/AuditTable";
 import { JSONExplorer } from "../JSONExplorer/JSONExplorer";
 import { AttributesGroupEditor } from "../AttributesEditor/AttributesGroupEditor";
 import { AttributeGroupDataObject } from "types";
+import { PropGroup } from "../PropGroup/PropGroup";
 
 const classesActants = [
   ActantType.Statement,
@@ -127,8 +128,6 @@ export const StatementEditorBox: React.FC = () => {
     },
     { enabled: !!statementId && api.isLoggedIn(), retry: 2 }
   );
-
-  console.log(statement);
 
   //console.log(statement);
   // Audit query
@@ -248,6 +247,32 @@ export const StatementEditorBox: React.FC = () => {
     }
   };
 
+  // Props handling
+  const addProp = (originId: string) => {
+    if (statement) {
+      const newProp = CProp();
+      const newStatementData = { ...statement.data };
+      [...newStatementData.actants, ...newStatementData.actions].forEach(
+        (actant: IStatementActant | IStatementAction) => {
+          const actantId = "actant" in actant ? actant.actant : actant.action;
+          if (actantId === originId) {
+            actant.props = [...actant.props, newProp];
+          }
+          actant.props.forEach((prop, pi) => {
+            if (prop.id == originId) {
+              actant.props[pi].children = [
+                ...actant.props[pi].children,
+                newProp,
+              ];
+            }
+          });
+        }
+      );
+
+      updateStatementDataMutation.mutate(newStatementData);
+    }
+  };
+
   const updateProp = (propId: string, changes: any) => {
     if (statement && propId) {
       const newStatementData = { ...statement.data };
@@ -266,54 +291,11 @@ export const StatementEditorBox: React.FC = () => {
                   ...actant.props[pi].children[pii],
                   ...changes,
                 };
-                console.log("update prop", changes);
               }
             });
           });
         }
       );
-
-      updateStatementDataMutation.mutate(newStatementData);
-    }
-  };
-
-  const addProp = (
-    originId: string,
-    mode: "actions" | "actants" = "actants"
-  ) => {
-    if (statement && originId) {
-      const newProp = CProp();
-      const newStatementData = { ...statement.data };
-      newStatementData[mode].forEach((potentialPropOrigin) => {
-        if (
-          (mode === "actants" &&
-            (potentialPropOrigin as IStatementActant).actant === originId) ||
-          (mode === "actions" &&
-            (potentialPropOrigin as IStatementAction).action === originId)
-        ) {
-          potentialPropOrigin.props.push(newProp);
-        }
-      });
-
-      updateStatementDataMutation.mutate(newStatementData);
-    }
-  };
-
-  const addPropSecondLvl = (
-    originId: string,
-    mode: "actions" | "actants" = "actants"
-  ) => {
-    if (statement && originId) {
-      const newProp = CProp();
-      const newStatementData = { ...statement.data };
-
-      newStatementData[mode].forEach((actantOrActionInStatement) => {
-        actantOrActionInStatement.props.forEach((potentialPropOrigin) => {
-          if ((potentialPropOrigin as IProp).id === originId) {
-            potentialPropOrigin.children.push(newProp);
-          }
-        });
-      });
 
       updateStatementDataMutation.mutate(newStatementData);
     }
@@ -349,12 +331,10 @@ export const StatementEditorBox: React.FC = () => {
       [...newStatementData.actants, ...newStatementData.actions].forEach(
         (actant: IStatementActant | IStatementAction) => {
           actant.props.forEach((actantProp, pi) => {
-            console.log({ ...actant });
             if (actantProp.id === propId) {
               actant.props.splice(pi - 1, 0, actant.props.splice(pi, 1)[0]);
             }
 
-            console.log(actant);
             actant.props[pi].children.forEach((actantPropProp, pii) => {
               if (actantPropProp.id === propId) {
                 actant.props[pi].children.splice(
@@ -379,12 +359,10 @@ export const StatementEditorBox: React.FC = () => {
       [...newStatementData.actants, ...newStatementData.actions].forEach(
         (actant: IStatementActant | IStatementAction) => {
           actant.props.forEach((actantProp, pi) => {
-            console.log({ ...actant });
             if (actantProp.id === propId) {
               actant.props.splice(pi + 1, 0, actant.props.splice(pi, 1)[0]);
             }
 
-            console.log(actant);
             actant.props[pi].children.forEach((actantPropProp, pii) => {
               if (actantPropProp.id === propId) {
                 actant.props[pi].children.splice(
@@ -501,315 +479,27 @@ export const StatementEditorBox: React.FC = () => {
   const renderPropGroup = (
     originId: string,
     props: IProp[],
-    statement: IResponseStatement,
-    visibleColumns: ColumnInstance<{}>[],
-    mode: "actions" | "actants" = "actants"
+    statement: IResponseStatement
   ) => {
     const originActant = statement.entities[originId];
 
     if (originActant && props.length > 0) {
       return (
-        <tr>
-          <td colSpan={visibleColumns.length + 1}>
-            <StyledSubRow>
-              <React.Fragment key={originActant.id}>
-                <StyledPropsActantHeader></StyledPropsActantHeader>
-
-                <StyledPropsActantList>
-                  <StyledListHeaderColumn>Type</StyledListHeaderColumn>
-                  <StyledListHeaderColumn>Value</StyledListHeaderColumn>
-                  <StyledListHeaderColumn></StyledListHeaderColumn>
-                  {props.map((prop1: IProp, pi1: number) => {
-                    return (
-                      <React.Fragment key={prop1.id}>
-                        {renderPropRow(
-                          statement,
-                          originId,
-                          prop1,
-                          "1",
-                          pi1,
-                          props.length,
-                          false,
-                          mode
-                        )}
-                        {prop1.children.map((prop2: any, pi2: number) => {
-                          return renderPropRow(
-                            statement,
-                            originId,
-                            prop2,
-                            "2",
-                            pi2,
-                            props.length,
-                            pi2 === prop1.children.length - 1,
-                            mode
-                          );
-                        })}
-                      </React.Fragment>
-                    );
-                  })}
-                </StyledPropsActantList>
-              </React.Fragment>
-            </StyledSubRow>
-          </td>
-        </tr>
+        <PropGroup
+          originId={originActant.id}
+          entities={statement.entities}
+          props={props}
+          territoryId={territoryId}
+          updateProp={updateProp}
+          removeProp={removeProp}
+          addProp={addProp}
+          movePropDown={movePropDown}
+          movePropUp={movePropUp}
+          userCanEdit={userCanEdit}
+          openDetailOnCreate={false}
+        />
       );
     }
-  };
-
-  const renderPropRow = (
-    statement: IResponseStatement,
-    originId: string,
-    prop: IProp,
-    level: "1" | "2",
-    order: number,
-    allPropsAtTheLevelNo: number,
-    lastSecondLevel: boolean,
-    mode: "actions" | "actants" = "actants"
-  ) => {
-    const propTypeActant = statement.entities[prop.type.id];
-    const propValueActant = statement.entities[prop.value.id];
-
-    return (
-      <React.Fragment key={originId + level + "|" + order}>
-        <StyledPropLineColumn
-          padded={level === "2"}
-          lastSecondLevel={lastSecondLevel}
-          isTag={propTypeActant ? true : false}
-        >
-          {propTypeActant ? (
-            <EntityTag
-              actant={propTypeActant}
-              fullWidth
-              button={
-                <Button
-                  key="d"
-                  icon={<FaUnlink />}
-                  color="plain"
-                  inverted={true}
-                  tooltip="unlink actant"
-                  onClick={() => {
-                    updateProp(prop.id, {
-                      type: {
-                        ...prop.type,
-                        ...{ id: "" },
-                      },
-                    });
-                  }}
-                />
-              }
-            />
-          ) : (
-            <EntitySuggester
-              territoryActants={territoryActants}
-              openDetailOnCreate
-              onSelected={(newSelectedId: string) => {
-                updateProp(prop.id, {
-                  type: {
-                    ...prop.type,
-                    ...{ id: newSelectedId },
-                  },
-                });
-              }}
-              categoryTypes={classesPropType}
-              inputWidth={"full"}
-              excludedEntities={excludedSuggesterEntities}
-            />
-          )}
-          <StyledPropButtonGroup>
-            {prop.type.logic == "2" ? (
-              <Button
-                key="neg"
-                tooltip="Negative logic"
-                color="success"
-                inverted={true}
-                noBorder
-                icon={<AttributeIcon attributeName={"negation"} />}
-              />
-            ) : (
-              <div />
-            )}
-          </StyledPropButtonGroup>
-        </StyledPropLineColumn>
-        <StyledPropLineColumn
-          padded={level === "2"}
-          lastSecondLevel={lastSecondLevel}
-          isTag={propValueActant ? true : false}
-        >
-          {propValueActant ? (
-            <EntityTag
-              actant={propValueActant}
-              fullWidth
-              button={
-                <Button
-                  key="d"
-                  icon={<FaUnlink />}
-                  tooltip="unlink actant"
-                  color="plain"
-                  inverted={true}
-                  onClick={() => {
-                    updateProp(prop.id, {
-                      value: {
-                        ...prop.value,
-                        ...{ id: "" },
-                      },
-                    });
-                  }}
-                />
-              }
-            />
-          ) : (
-            <EntitySuggester
-              territoryActants={territoryActants}
-              openDetailOnCreate
-              onSelected={(newSelectedId: string) => {
-                updateProp(prop.id, {
-                  value: {
-                    ...prop.type,
-                    ...{ id: newSelectedId },
-                  },
-                });
-              }}
-              categoryTypes={classesPropValue}
-              inputWidth={"full"}
-              excludedEntities={excludedSuggesterEntities}
-            />
-          )}
-          <StyledPropButtonGroup>
-            {prop.value.logic == "2" ? (
-              <Button
-                key="neg"
-                tooltip="Negative logic"
-                color="success"
-                inverted={true}
-                noBorder
-                icon={<AttributeIcon attributeName={"negation"} />}
-              />
-            ) : (
-              <div />
-            )}
-          </StyledPropButtonGroup>
-        </StyledPropLineColumn>
-
-        <StyledPropLineColumn lastSecondLevel={lastSecondLevel}>
-          <StyledPropButtonGroup>
-            <AttributesGroupEditor
-              modalTitle={`Property attributes`}
-              disabledAllAttributes={!userCanEdit}
-              propTypeActant={propTypeActant}
-              propValueActant={propValueActant}
-              excludedSuggesterEntities={excludedSuggesterEntities}
-              classesPropType={classesPropType}
-              classesPropValue={classesPropValue}
-              updateProp={updateProp}
-              statementId={prop.id}
-              data={{
-                statement: {
-                  elvl: prop.elvl,
-                  certainty: prop.certainty,
-                  logic: prop.logic,
-                  mood: prop.mood,
-                  moodvariant: prop.moodvariant,
-                  operator: prop.operator,
-                  bundleStart: prop.bundleStart,
-                  bundleEnd: prop.bundleEnd,
-                },
-                type: {
-                  elvl: prop.type.elvl,
-                  logic: prop.type.logic,
-                  virtuality: prop.type.virtuality,
-                  partitivity: prop.type.partitivity,
-                },
-                value: {
-                  elvl: prop.value.elvl,
-                  logic: prop.value.logic,
-                  virtuality: prop.value.virtuality,
-                  partitivity: prop.value.partitivity,
-                },
-              }}
-              handleUpdate={(newData: AttributeGroupDataObject) => {
-                const newDataObject = {
-                  ...newData.statement,
-                  ...newData,
-                };
-                const { statement, ...statementPropObject } = newDataObject;
-                updateProp(prop.id, statementPropObject);
-              }}
-              userCanEdit={userCanEdit}
-              loading={updateStatementDataMutation.isLoading}
-            />
-
-            {level === "1" && (
-              <Button
-                key="add"
-                icon={<FaPlus />}
-                tooltip="add second level prop"
-                color="plain"
-                inverted={true}
-                onClick={() => {
-                  addPropSecondLvl(prop.id, mode);
-                }}
-              />
-            )}
-            <Button
-              key="delete"
-              icon={<FaTrashAlt />}
-              tooltip="remove prop row"
-              color="plain"
-              inverted={true}
-              onClick={() => {
-                removeProp(prop.id);
-              }}
-            />
-            <Button
-              key="up"
-              inverted
-              disabled={order === 0}
-              icon={<FaCaretUp />}
-              tooltip="move prop up"
-              color="plain"
-              onClick={() => {
-                movePropUp(prop.id);
-              }}
-            />
-            <Button
-              key="down"
-              inverted
-              disabled={order === allPropsAtTheLevelNo - 1}
-              icon={<FaCaretDown />}
-              tooltip="move prop down"
-              color="plain"
-              onClick={() => {
-                movePropDown(prop.id);
-              }}
-            />
-            {prop.logic == "2" ? (
-              <Button
-                key="neg"
-                tooltip="Negative logic"
-                color="success"
-                inverted={true}
-                noBorder
-                icon={<AttributeIcon attributeName={"negation"} />}
-              />
-            ) : (
-              <div />
-            )}
-            {prop.operator ? (
-              <Button
-                key="oper"
-                tooltip="Logical operator type"
-                color="success"
-                inverted={true}
-                noBorder
-                icon={prop.operator}
-              />
-            ) : (
-              <div />
-            )}
-          </StyledPropButtonGroup>
-        </StyledPropLineColumn>
-      </React.Fragment>
-    );
   };
 
   return (

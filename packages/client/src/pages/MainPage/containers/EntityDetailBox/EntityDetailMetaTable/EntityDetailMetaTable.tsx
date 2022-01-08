@@ -14,6 +14,8 @@ import {
   IResponseStatement,
   IStatementAction,
   IResponseBookmarkFolder,
+  IProp,
+  IResponseDetail,
 } from "@shared/types";
 import { EntitySuggester, EntityTag, CertaintyToggle, ElvlToggle } from "../..";
 import { Button, ButtonGroup, Input } from "components";
@@ -24,23 +26,25 @@ import { EntityDetailMetaTableRow } from "./EntityDetailMetaTableRow";
 import AttributesEditor from "../../AttributesEditor/AttributesEditor";
 // import { AttributesEditor } from "../../AttributesEditor/AttributesEditor";
 
-interface ActantDetailMetaTable {
+interface EntityDetailMetaTable {
+  entity: IResponseDetail;
   userCanEdit?: boolean;
-  metaStatements: IResponseStatement[];
+  metaProps: IProp[];
   updateMetaStatement: any;
   removeMetaStatement: any;
 }
-export const ActantDetailMetaTable: React.FC<ActantDetailMetaTable> = ({
+export const EntityDetailMetaTable: React.FC<EntityDetailMetaTable> = ({
+  entity,
   userCanEdit = false,
-  metaStatements,
+  metaProps,
   updateMetaStatement,
   removeMetaStatement,
 }) => {
-  const [statements, setStatements] = useState(metaStatements);
+  // const [statements, setStatements] = useState(metaProps);
 
-  useEffect(() => {
-    setStatements(metaStatements);
-  }, [metaStatements]);
+  // useEffect(() => {
+  //   setStatements(metaStatements);
+  // }, [metaStatements]);
 
   const columns: Column<{}>[] = useMemo(() => {
     return [
@@ -53,15 +57,11 @@ export const ActantDetailMetaTable: React.FC<ActantDetailMetaTable> = ({
         id: "type",
         accessor: "",
         Cell: ({ row }: Cell) => {
-          const {
-            id: statementId,
-            data,
-            actants,
-          } = row.original as IResponseStatement;
+          const { id: statementId, data } = row.original as IResponseStatement;
 
           const typeSActant = data.actants.find((a) => a.position == "a1");
           const typeActant = typeSActant
-            ? actants.find((a) => a.id === typeSActant.actant)
+            ? entity.entities[typeSActant.actant]
             : false;
 
           return typeActant && typeSActant ? (
@@ -408,7 +408,7 @@ export const ActantDetailMetaTable: React.FC<ActantDetailMetaTable> = ({
         },
       },
     ];
-  }, [statements]);
+  }, [metaProps]);
 
   const getRowId = useCallback((row) => {
     return row.id;
