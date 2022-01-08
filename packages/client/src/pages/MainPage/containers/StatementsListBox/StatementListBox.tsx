@@ -173,7 +173,9 @@ export const StatementListBox: React.FC = () => {
 
   const addStatementAtCertainIndex = async (index: number) => {
     const newOrder =
-      index === 0
+      index + 1 > statements.length
+        ? statements.length
+        : index < 1
         ? statements[0].data.territory.order - 1
         : (statements[index - 1].data.territory.order +
             statements[index].data.territory.order) /
