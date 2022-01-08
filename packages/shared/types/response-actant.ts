@@ -6,7 +6,7 @@ import { IActant, IStatement } from ".";
 import { UserRoleMode } from "../enums";
 
 export interface IResponseActant extends IActant {
-  usedCount?: number;
+  // usedCount?: number;
   usedIn?: IStatement[];
   right?: UserRoleMode;
 }

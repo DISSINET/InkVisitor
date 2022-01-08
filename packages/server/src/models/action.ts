@@ -1,7 +1,7 @@
 import { fillFlatObject, UnknownObject, IModel } from "./common";
 import { ActantType } from "@shared/enums";
 import Actant from "./actant";
-import { IAction } from "@shared/types";
+import { IAction, IProp } from "@shared/types";
 import { ActionEntity, ActionValency } from "@shared/types/action";
 
 class ActionData implements IModel {
@@ -15,7 +15,6 @@ class ActionData implements IModel {
     a2: [],
     s: [],
   };
-  properties: any[] = [];
 
   constructor(data: UnknownObject) {
     if (!data) {
@@ -25,9 +24,6 @@ class ActionData implements IModel {
     fillFlatObject(this.valencies, data.valencies as any);
     if (data.entities) {
       this.entities = data.entities as any;
-    }
-    if (data.properties) {
-      this.properties = data.properties as any;
     }
   }
 
@@ -41,6 +37,7 @@ class Action extends Actant implements IAction {
 
   class: ActantType.Action = ActantType.Action; // just default
   data: ActionData;
+  props: IProp[] = [];
 
   constructor(data: UnknownObject) {
     super(data);

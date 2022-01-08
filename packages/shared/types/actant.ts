@@ -1,4 +1,5 @@
-import { ActantType, ActantStatus, Language } from "../enums";
+import { IProp } from ".";
+import { ActantType, ActantStatus, Language, Certainty, Elvl, Logic, Mood, MoodVariant, Operator, Partitivity, Virtuality } from "../enums";
 
 export interface IActant {
   id: string;
@@ -9,4 +10,5 @@ export interface IActant {
   status: ActantStatus;
   language: Language;
   notes: string[];
+  props: IProp[]
 }

@@ -1,10 +1,15 @@
 import { Request } from "express";
 import { Router } from "express";
-import { findActantById, findActantsByIds } from "@service/shorthands";
-import { BadParams, PermissionDeniedError, StatementDoesNotExits } from "@shared/types/errors";
+import { findActantById } from "@service/shorthands";
+import {
+  BadParams,
+  PermissionDeniedError,
+  StatementDoesNotExits,
+} from "@shared/types/errors";
 import { asyncRouteHandler } from "..";
-import { IResponseStatement, IStatement, IActant } from "@shared/types";
+import { IResponseStatement, IStatement } from "@shared/types";
 import Statement from "@models/statement";
+import { Connection } from "rethinkdb-ts";
 
 export default Router().get(
   "/get/:statementId?",
@@ -20,7 +25,10 @@ export default Router().get(
       statementId
     );
     if (!statementData) {
-      throw new StatementDoesNotExits(`statement ${statementId} was not found`, statementId);
+      throw new StatementDoesNotExits(
+        `statement ${statementId} was not found`,
+        statementId
+      );
     }
 
     const statementModel = new Statement({ ...statementData });
@@ -29,16 +37,14 @@ export default Router().get(
       throw new PermissionDeniedError("statement cannot be accessed");
     }
 
-
-    const actants = await findActantsByIds<IActant>(
-      request.db,
-      statementModel.getLinkedActantIds()
+    const entities = await statementModel.getEntities(
+      request.db.connection as Connection
     );
 
     return {
       ...statementData,
-      actants,
-      right: statementModel.getUserRoleMode(request.getUserOrFail())
+      entities: Object.assign({}, ...entities.map((x) => ({ [x.id]: x }))),
+      right: statementModel.getUserRoleMode(request.getUserOrFail()),
     };
   })
 );

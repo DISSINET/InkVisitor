@@ -320,8 +320,6 @@ async function getResponseForUser(user: User, db: Db): Promise<IResponseUser> {
       const territoryResponse: IResponseStoredTerritory = {
         territory: {
           ...(await findActantById<IActant>(db, territory.territoryId)),
-          usedCount: await getActantUsage(db, territory.territoryId),
-          usedIn: [],
         },
       };
       userResponse.storedTerritories.push(territoryResponse);
@@ -333,8 +331,6 @@ async function getResponseForUser(user: User, db: Db): Promise<IResponseUser> {
       const territoryFromRights: IResponseStoredTerritory = {
         territory: {
           ...(await findActantById<IActant>(db, right.territory)),
-          usedCount: await getActantUsage(db, right.territory),
-          usedIn: [],
         },
       };
       userResponse.territoryRights.push(territoryFromRights);

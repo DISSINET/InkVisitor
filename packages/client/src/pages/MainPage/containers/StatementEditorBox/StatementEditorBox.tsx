@@ -17,9 +17,11 @@ import {
 } from "constructors";
 import {
   IActant,
-  IStatementProp,
   IStatementReference,
   IResponseStatement,
+  IProp,
+  IStatementAction,
+  IStatementActant,
 } from "@shared/types";
 import {
   AttributeIcon,
@@ -63,6 +65,7 @@ import { AuditTable } from "./../AuditTable/AuditTable";
 import { JSONExplorer } from "../JSONExplorer/JSONExplorer";
 import { AttributesGroupEditor } from "../AttributesEditor/AttributesGroupEditor";
 import { AttributeGroupDataObject } from "types";
+import { PropGroup } from "../PropGroup/PropGroup";
 
 const classesActants = [
   ActantType.Statement,
@@ -126,6 +129,7 @@ export const StatementEditorBox: React.FC = () => {
     { enabled: !!statementId && api.isLoggedIn(), retry: 2 }
   );
 
+  //console.log(statement);
   // Audit query
   const {
     status: statusAudit,
@@ -220,63 +224,6 @@ export const StatementEditorBox: React.FC = () => {
     }
   }, [statementError]);
 
-  // getting origin actants of properties
-  const propsByOrigins = useMemo(() => {
-    if (statement) {
-      const allProps = statement?.data.props;
-
-      const statementActants = statement?.actants?.filter(
-        (sa) =>
-          statement.data.actants.map((a) => a.actant).includes(sa.id) ||
-          statement.data.actions.map((a) => a.action).includes(sa.id)
-      );
-
-      const allPossibleOrigins = [...(statementActants || [])];
-
-      const originProps: {
-        [key: string]: {
-          type: "action" | "actant";
-          origin: string;
-          props: any[];
-          actant: IActant;
-        };
-      } = {};
-
-      allPossibleOrigins.forEach((origin) => {
-        originProps[origin.id as string] = {
-          type: origin.class === "A" ? "action" : "actant",
-          origin: origin.id,
-          props: [],
-          actant: origin,
-        };
-      });
-
-      // 1st level
-      allProps.forEach((prop) => {
-        const originProp = originProps[prop.origin];
-        if (originProp) {
-          originProp.props.push({ ...prop, ...{ props: [] } });
-        }
-      });
-
-      // 2nd level
-      allProps.forEach((prop) => {
-        Object.keys(originProps).forEach((opKey: string) => {
-          const op = originProps[opKey];
-          op.props.forEach((op2) => {
-            if (op2.id === prop.origin) {
-              op2.props.push(prop);
-            }
-          });
-        });
-      });
-
-      return originProps;
-    } else {
-      return {};
-    }
-  }, [JSON.stringify(statement)]);
-
   // actions
   const addAction = (newActionId: string) => {
     if (statement) {
@@ -300,106 +247,136 @@ export const StatementEditorBox: React.FC = () => {
     }
   };
 
-  const updateProp = (propId: string, changes: any) => {
-    if (statement && propId) {
-      const updatedProps = statement.data.props.map((p) =>
-        p.id === propId ? { ...p, ...changes } : p
+  // Props handling
+  const addProp = (originId: string) => {
+    if (statement) {
+      const newProp = CProp();
+      const newStatementData = { ...statement.data };
+      [...newStatementData.actants, ...newStatementData.actions].forEach(
+        (actant: IStatementActant | IStatementAction) => {
+          const actantId = "actant" in actant ? actant.actant : actant.action;
+          if (actantId === originId) {
+            actant.props = [...actant.props, newProp];
+          }
+          actant.props.forEach((prop, pi) => {
+            if (prop.id == originId) {
+              actant.props[pi].children = [
+                ...actant.props[pi].children,
+                newProp,
+              ];
+            }
+          });
+        }
       );
 
-      const newData = { ...{ props: updatedProps } };
-      updateActantsDataMutation.mutate(newData);
+      updateStatementDataMutation.mutate(newStatementData);
     }
   };
 
-  const addProp = (originId: string) => {
-    if (statement && originId) {
-      const newProp = CProp();
-      newProp.origin = originId;
+  const updateProp = (propId: string, changes: any) => {
+    if (statement && propId) {
+      const newStatementData = { ...statement.data };
 
-      const newData = { props: [...statement.data.props, newProp] };
+      // this is probably an overkill
+      [...newStatementData.actants, ...newStatementData.actions].forEach(
+        (actant: IStatementActant | IStatementAction) => {
+          actant.props.forEach((actantProp, pi) => {
+            if (actantProp.id === propId) {
+              actant.props[pi] = { ...actant.props[pi], ...changes };
+            }
 
-      updateActantsDataMutation.mutate(newData);
+            actant.props[pi].children.forEach((actantPropProp, pii) => {
+              if (actantPropProp.id === propId) {
+                actant.props[pi].children[pii] = {
+                  ...actant.props[pi].children[pii],
+                  ...changes,
+                };
+              }
+            });
+          });
+        }
+      );
+
+      updateStatementDataMutation.mutate(newStatementData);
     }
   };
 
   const removeProp = (propId: string) => {
     if (statement && propId) {
-      const newData = {
-        props: statement.data.props.filter((p) => p.id !== propId),
-      };
-      updateActantsDataMutation.mutate(newData);
+      const newStatementData = { ...statement.data };
+
+      [...newStatementData.actants, ...newStatementData.actions].forEach(
+        (actant: IStatementActant | IStatementAction) => {
+          actant.props = actant.props.filter(
+            (actantProp) => actantProp.id !== propId
+          );
+
+          actant.props.forEach((actantProp, pi) => {
+            actant.props[pi].children = actant.props[pi].children.filter(
+              (childProp) => childProp.id != propId
+            );
+          });
+        }
+      );
+
+      updateStatementDataMutation.mutate(newStatementData);
     }
   };
 
+  //actant.props = actant.props.splice(index + 1, 0, actant.props.splice(index, 1)[0]);
   const movePropUp = (propId: string) => {
     if (statement) {
-      const propToMove = statement.data.props.find((p) => p.id === propId);
-      if (propToMove) {
-        const propsForOriginIds = statement.data.props
-          .filter((p) => p.origin === propToMove.origin)
-          .map((p) => p.id);
-        if (propsForOriginIds.length > 1) {
-          const statementsPropIds = statement.data.props.map((p) => p.id);
-          const oldIndex = statementsPropIds.indexOf(propId);
-          const oldIndexInPropsForOriginId = propsForOriginIds.indexOf(propId);
+      const newStatementData = { ...statement.data };
 
-          if (oldIndex !== 0 && oldIndexInPropsForOriginId !== 0) {
-            const previousIndexInPropsForOriginId =
-              oldIndexInPropsForOriginId - 1;
-            const previousIndexInProps = statementsPropIds.indexOf(
-              propsForOriginIds[previousIndexInPropsForOriginId]
-            );
-            const oldIndex = statementsPropIds.indexOf(propId);
+      [...newStatementData.actants, ...newStatementData.actions].forEach(
+        (actant: IStatementActant | IStatementAction) => {
+          actant.props.forEach((actantProp, pi) => {
+            if (actantProp.id === propId) {
+              actant.props.splice(pi - 1, 0, actant.props.splice(pi, 1)[0]);
+            }
 
-            const newStatementProps = [...statement.data.props];
-
-            newStatementProps.splice(
-              oldIndex,
-              0,
-              newStatementProps.splice(previousIndexInProps, 1)[0]
-            );
-
-            updateActantsDataMutation.mutate({ props: newStatementProps });
-          }
+            actant.props[pi].children.forEach((actantPropProp, pii) => {
+              if (actantPropProp.id === propId) {
+                actant.props[pi].children.splice(
+                  pii - 1,
+                  0,
+                  actant.props[pi].children.splice(pii, 1)[0]
+                );
+              }
+            });
+          });
         }
-      }
+      );
+
+      updateStatementDataMutation.mutate(newStatementData);
     }
   };
 
   const movePropDown = (propId: string) => {
     if (statement) {
-      const propToMove = statement.data.props.find((p) => p.id === propId);
-      if (propToMove) {
-        const propsForOriginIds = statement.data.props
-          .filter((p) => p.origin === propToMove.origin)
-          .map((p) => p.id);
-        if (propsForOriginIds.length > 1) {
-          const statementsPropIds = statement.data.props.map((p) => p.id);
-          const oldIndex = statementsPropIds.indexOf(propId);
-          const oldIndexInPropsForOriginId = propsForOriginIds.indexOf(propId);
+      const newStatementData = { ...statement.data };
 
-          if (
-            oldIndex !== statementsPropIds.length &&
-            oldIndexInPropsForOriginId !== propsForOriginIds.length
-          ) {
-            const nextIndexInPropsForOriginId = oldIndexInPropsForOriginId + 1;
-            const nextIndexInProps = statementsPropIds.indexOf(
-              propsForOriginIds[nextIndexInPropsForOriginId]
-            );
-            const oldIndex = statementsPropIds.indexOf(propId);
+      [...newStatementData.actants, ...newStatementData.actions].forEach(
+        (actant: IStatementActant | IStatementAction) => {
+          actant.props.forEach((actantProp, pi) => {
+            if (actantProp.id === propId) {
+              actant.props.splice(pi + 1, 0, actant.props.splice(pi, 1)[0]);
+            }
 
-            const newStatementProps = [...statement.data.props];
-
-            newStatementProps.splice(
-              oldIndex,
-              0,
-              newStatementProps.splice(nextIndexInProps, 1)[0]
-            );
-
-            updateActantsDataMutation.mutate({ props: newStatementProps });
-          }
+            actant.props[pi].children.forEach((actantPropProp, pii) => {
+              if (actantPropProp.id === propId) {
+                actant.props[pi].children.splice(
+                  pii + 1,
+                  0,
+                  actant.props[pi].children.splice(pii, 1)[0]
+                );
+              }
+            });
+          });
         }
-      }
+      );
+
+      updateStatementDataMutation.mutate(newStatementData);
     }
   };
 
@@ -410,7 +387,7 @@ export const StatementEditorBox: React.FC = () => {
       const newData = {
         references: [...statement.data.references, newReference],
       };
-      updateActantsDataMutation.mutate(newData);
+      updateStatementDataMutation.mutate(newData);
     }
   };
   const updateReference = (referenceId: string, changes: any) => {
@@ -421,7 +398,7 @@ export const StatementEditorBox: React.FC = () => {
       const newData = {
         references: updatedReferences,
       };
-      updateActantsDataMutation.mutate(newData);
+      updateStatementDataMutation.mutate(newData);
     }
   };
   const removeReference = (referenceId: string) => {
@@ -431,7 +408,7 @@ export const StatementEditorBox: React.FC = () => {
           (p) => p.id !== referenceId
         ),
       };
-      updateActantsDataMutation.mutate(newData);
+      updateStatementDataMutation.mutate(newData);
     }
   };
 
@@ -439,17 +416,17 @@ export const StatementEditorBox: React.FC = () => {
   const addTag = (tagId: string) => {
     if (statement && tagId) {
       const newData = { tags: [...statement.data.tags, tagId] };
-      updateActantsDataMutation.mutate(newData);
+      updateStatementDataMutation.mutate(newData);
     }
   };
   const removeTag = (tagId: string) => {
     if (statement && tagId) {
       const newData = { tags: statement.data.tags.filter((p) => p !== tagId) };
-      updateActantsDataMutation.mutate(newData);
+      updateStatementDataMutation.mutate(newData);
     }
   };
 
-  const updateActantsDataMutation = useMutation(
+  const updateStatementDataMutation = useMutation(
     async (changes: object) => {
       await api.actantsUpdate(statementId, {
         data: changes,
@@ -500,303 +477,29 @@ export const StatementEditorBox: React.FC = () => {
   );
 
   const renderPropGroup = (
-    propOriginId: string,
-    statement: IResponseStatement,
-    visibleColumns: ColumnInstance<{}>[]
+    originId: string,
+    props: IProp[],
+    statement: IResponseStatement
   ) => {
-    const propOrigin = propsByOrigins[propOriginId];
-    const originActant = propOrigin?.actant;
+    const originActant = statement.entities[originId];
 
-    if (originActant && propOrigin.props.length > 0) {
+    if (originActant && props.length > 0) {
       return (
-        <tr>
-          <td colSpan={visibleColumns.length + 1}>
-            <StyledSubRow>
-              <React.Fragment key={originActant.id}>
-                <StyledPropsActantHeader></StyledPropsActantHeader>
-
-                <StyledPropsActantList>
-                  <StyledListHeaderColumn>Type</StyledListHeaderColumn>
-                  <StyledListHeaderColumn>Value</StyledListHeaderColumn>
-                  <StyledListHeaderColumn></StyledListHeaderColumn>
-                  {propOrigin.props.map((prop1: any, pi1: number) => {
-                    return (
-                      <React.Fragment key={prop1 + pi1}>
-                        {renderPropRow(statement, prop1, "1", pi1, false)}
-                        {prop1.props.map((prop2: any, pi2: number) => {
-                          return renderPropRow(
-                            statement,
-                            prop2,
-                            "2",
-                            pi2,
-                            pi2 === prop1.props.length - 1
-                          );
-                        })}
-                      </React.Fragment>
-                    );
-                  })}
-                </StyledPropsActantList>
-              </React.Fragment>
-            </StyledSubRow>
-          </td>
-        </tr>
+        <PropGroup
+          originId={originActant.id}
+          entities={statement.entities}
+          props={props}
+          territoryId={territoryId}
+          updateProp={updateProp}
+          removeProp={removeProp}
+          addProp={addProp}
+          movePropDown={movePropDown}
+          movePropUp={movePropUp}
+          userCanEdit={userCanEdit}
+          openDetailOnCreate={false}
+        />
       );
     }
-  };
-
-  const renderPropRow = (
-    statement: IResponseStatement,
-    prop: IStatementProp,
-    level: "1" | "2",
-    order: number,
-    lastSecondLevel: boolean
-  ) => {
-    const propTypeActant = statement.actants?.find(
-      (a) => a.id === prop.type.id
-    );
-    const propValueActant = statement.actants?.find(
-      (a) => a.id === prop.value.id
-    );
-
-    return (
-      <React.Fragment key={prop.origin + level + "|" + order}>
-        <StyledPropLineColumn
-          padded={level === "2"}
-          lastSecondLevel={lastSecondLevel}
-          isTag={propTypeActant ? true : false}
-        >
-          {propTypeActant ? (
-            <EntityTag
-              actant={propTypeActant}
-              fullWidth
-              button={
-                <Button
-                  key="d"
-                  icon={<FaUnlink />}
-                  color="plain"
-                  inverted={true}
-                  tooltip="unlink actant"
-                  onClick={() => {
-                    updateProp(prop.id, {
-                      type: {
-                        ...prop.type,
-                        ...{ id: "" },
-                      },
-                    });
-                  }}
-                />
-              }
-            />
-          ) : (
-            <EntitySuggester
-              territoryActants={territoryActants}
-              openDetailOnCreate
-              onSelected={(newSelectedId: string) => {
-                updateProp(prop.id, {
-                  type: {
-                    ...prop.type,
-                    ...{ id: newSelectedId },
-                  },
-                });
-              }}
-              categoryTypes={classesPropType}
-              inputWidth={"full"}
-              excludedEntities={excludedSuggesterEntities}
-            />
-          )}
-          <StyledPropButtonGroup>
-            {prop.type.logic == "2" ? (
-              <Button
-                key="neg"
-                tooltip="Negative logic"
-                color="success"
-                inverted={true}
-                noBorder
-                icon={<AttributeIcon attributeName={"negation"} />}
-              />
-            ) : (
-              <div />
-            )}
-          </StyledPropButtonGroup>
-        </StyledPropLineColumn>
-        <StyledPropLineColumn
-          padded={level === "2"}
-          lastSecondLevel={lastSecondLevel}
-          isTag={propValueActant ? true : false}
-        >
-          {propValueActant ? (
-            <EntityTag
-              actant={propValueActant}
-              fullWidth
-              button={
-                <Button
-                  key="d"
-                  icon={<FaUnlink />}
-                  tooltip="unlink actant"
-                  color="plain"
-                  inverted={true}
-                  onClick={() => {
-                    updateProp(prop.id, {
-                      value: {
-                        ...prop.value,
-                        ...{ id: "" },
-                      },
-                    });
-                  }}
-                />
-              }
-            />
-          ) : (
-            <EntitySuggester
-              territoryActants={territoryActants}
-              openDetailOnCreate
-              onSelected={(newSelectedId: string) => {
-                updateProp(prop.id, {
-                  value: {
-                    ...prop.type,
-                    ...{ id: newSelectedId },
-                  },
-                });
-              }}
-              categoryTypes={classesPropValue}
-              inputWidth={"full"}
-              excludedEntities={excludedSuggesterEntities}
-            />
-          )}
-          <StyledPropButtonGroup>
-            {prop.value.logic == "2" ? (
-              <Button
-                key="neg"
-                tooltip="Negative logic"
-                color="success"
-                inverted={true}
-                noBorder
-                icon={<AttributeIcon attributeName={"negation"} />}
-              />
-            ) : (
-              <div />
-            )}
-          </StyledPropButtonGroup>
-        </StyledPropLineColumn>
-
-        <StyledPropLineColumn lastSecondLevel={lastSecondLevel}>
-          <StyledPropButtonGroup>
-            <AttributesGroupEditor
-              modalTitle={`Property attributes`}
-              disabledAllAttributes={!userCanEdit}
-              propTypeActant={propTypeActant}
-              propValueActant={propValueActant}
-              excludedSuggesterEntities={excludedSuggesterEntities}
-              classesPropType={classesPropType}
-              classesPropValue={classesPropValue}
-              updateProp={updateProp}
-              statementId={prop.id}
-              data={{
-                statement: {
-                  elvl: prop.elvl,
-                  certainty: prop.certainty,
-                  logic: prop.logic,
-                  mood: prop.mood,
-                  moodvariant: prop.moodvariant,
-                  operator: prop.operator,
-                  bundleStart: prop.bundleStart,
-                  bundleEnd: prop.bundleEnd,
-                },
-                type: {
-                  elvl: prop.type.elvl,
-                  logic: prop.type.logic,
-                  virtuality: prop.type.virtuality,
-                  partitivity: prop.type.partitivity,
-                },
-                value: {
-                  elvl: prop.value.elvl,
-                  logic: prop.value.logic,
-                  virtuality: prop.value.virtuality,
-                  partitivity: prop.value.partitivity,
-                },
-              }}
-              handleUpdate={(newData: AttributeGroupDataObject) => {
-                const newDataObject = {
-                  ...newData.statement,
-                  ...newData,
-                };
-                const { statement, ...statementPropObject } = newDataObject;
-                updateProp(prop.id, statementPropObject);
-              }}
-              userCanEdit={userCanEdit}
-              loading={updateActantsDataMutation.isLoading}
-            />
-
-            {level === "1" && (
-              <Button
-                key="add"
-                icon={<FaPlus />}
-                tooltip="add second level prop"
-                color="plain"
-                inverted={true}
-                onClick={() => {
-                  addProp(prop.id);
-                }}
-              />
-            )}
-            <Button
-              key="delete"
-              icon={<FaTrashAlt />}
-              tooltip="remove prop row"
-              color="plain"
-              inverted={true}
-              onClick={() => {
-                removeProp(prop.id);
-              }}
-            />
-            <Button
-              key="up"
-              inverted
-              icon={<FaCaretUp />}
-              tooltip="move prop up"
-              color="plain"
-              onClick={() => {
-                movePropUp(prop.id);
-              }}
-            />
-            <Button
-              key="down"
-              inverted
-              icon={<FaCaretDown />}
-              tooltip="move prop down"
-              color="plain"
-              onClick={() => {
-                movePropDown(prop.id);
-              }}
-            />
-            {prop.logic == "2" ? (
-              <Button
-                key="neg"
-                tooltip="Negative logic"
-                color="success"
-                inverted={true}
-                noBorder
-                icon={<AttributeIcon attributeName={"negation"} />}
-              />
-            ) : (
-              <div />
-            )}
-            {prop.operator ? (
-              <Button
-                key="oper"
-                tooltip="Logical operator type"
-                color="success"
-                inverted={true}
-                noBorder
-                icon={prop.operator}
-              />
-            ) : (
-              <div />
-            )}
-          </StyledPropButtonGroup>
-        </StyledPropLineColumn>
-      </React.Fragment>
-    );
   };
 
   return (
@@ -872,7 +575,6 @@ export const StatementEditorBox: React.FC = () => {
                   updateActionsMutation={updateActionsRefreshListMutation}
                   renderPropGroup={renderPropGroup}
                   addProp={addProp}
-                  propsByOrigins={propsByOrigins}
                 />
               </StyledEditorActantTableWrapper>
 
@@ -904,7 +606,6 @@ export const StatementEditorBox: React.FC = () => {
                   updateActantsMutation={updateActantsRefreshListMutation}
                   renderPropGroup={renderPropGroup}
                   addProp={addProp}
-                  propsByOrigins={propsByOrigins}
                 />
               </StyledEditorActantTableWrapper>
               {userCanEdit && (
@@ -937,9 +638,8 @@ export const StatementEditorBox: React.FC = () => {
                 )}
                 {statement.data.references.map(
                   (reference: IStatementReference, ri) => {
-                    const referenceActant = statement?.actants?.find(
-                      (a) => a.id === reference.resource
-                    );
+                    const referenceActant =
+                      statement?.entities[reference.resource];
 
                     return (
                       <React.Fragment key={ri}>
@@ -1066,9 +766,7 @@ export const StatementEditorBox: React.FC = () => {
             <StyledEditorSectionContent>
               <StyledTagsList>
                 {statement.data.tags.map((tag: string) => {
-                  const tagActant = statement?.actants?.find(
-                    (a) => a.id === tag
-                  );
+                  const tagActant = statement?.entities[tag];
                   return (
                     tagActant && (
                       <StyledTagsListItem key={tag}>
@@ -1147,7 +845,7 @@ export const StatementEditorBox: React.FC = () => {
           isFetchingStatement ||
           updateActionsRefreshListMutation.isLoading ||
           updateActantsRefreshListMutation.isLoading ||
-          updateActantsDataMutation.isLoading
+          updateStatementDataMutation.isLoading
         }
       />
     </>

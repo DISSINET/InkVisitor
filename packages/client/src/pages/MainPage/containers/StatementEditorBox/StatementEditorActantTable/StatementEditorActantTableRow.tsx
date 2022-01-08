@@ -224,6 +224,7 @@ export const StatementEditorActantTableRow: React.FC<
       actant: IActant;
       sActant: IStatementActant | any;
     } = row.values.data;
+
     const propOriginId = row.values.data.sActant.actant;
     return (
       <ButtonGroup noMargin>
@@ -324,8 +325,8 @@ export const StatementEditorActantTableRow: React.FC<
 
       {renderPropGroup(
         row.values.data.sActant.actant,
-        statement,
-        visibleColumns
+        row.values.data.sActant.props,
+        statement
       )}
     </React.Fragment>
   );
