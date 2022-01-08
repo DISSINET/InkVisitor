@@ -186,6 +186,11 @@ export default class Actant implements IActant, IDbModel {
     this.props.forEach((p) => {
       actantsIds[p.type.id] = null;
       actantsIds[p.value.id] = null;
+
+      p.children.forEach((p2) => {
+        actantsIds[p2.type.id] = null;
+        actantsIds[p2.value.id] = null;
+      });
     });
 
     return Object.keys(actantsIds);
