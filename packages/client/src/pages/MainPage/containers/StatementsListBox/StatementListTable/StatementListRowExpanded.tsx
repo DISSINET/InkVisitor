@@ -1,4 +1,4 @@
-import React, { Profiler, useState } from "react";
+import React, { useState } from "react";
 import { useSearchParams } from "hooks";
 import { Cell, ColumnInstance, Row } from "react-table";
 
