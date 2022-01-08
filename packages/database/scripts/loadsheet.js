@@ -16,7 +16,7 @@ module.exports.loadSheet = async ({
   spread,
   sheet,
   raw = false,
-  headerRow = 0,
+  headerRow = 1,
   validRowFn = () => true,
 }) => {
   const tempFileName = spread + "_" + sheet + ".json";
@@ -56,7 +56,9 @@ module.exports.loadSheet = async ({
     );
 
     // divide data to rows and header
-    const header = data[headerRow];
+
+    const header = data[0];
+    console.log(header);
     const rows = data; //.filter((r, ri) => ri > headerRow);
 
     // change rows to objects

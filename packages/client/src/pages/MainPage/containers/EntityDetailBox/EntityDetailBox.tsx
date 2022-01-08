@@ -32,7 +32,7 @@ import {
 } from "./EntityDetailBoxStyles";
 import api from "api";
 import { useMutation, useQuery, useQueryClient } from "react-query";
-import { IResponseStatement, IStatement } from "@shared/types";
+import { IProp, IResponseStatement, IStatement } from "@shared/types";
 import {
   FaEdit,
   FaPlus,
@@ -44,7 +44,7 @@ import {
 } from "react-icons/fa";
 import { EntityTag } from "..";
 
-import { CMetaStatement } from "constructors";
+import { CMetaStatement, CProp } from "constructors";
 import { findPositionInStatement } from "utils";
 import {
   actantLogicalTypeDict,
@@ -60,20 +60,17 @@ import {
   UserRoleMode,
 } from "@shared/enums";
 import { toast } from "react-toastify";
-import { ActantDetailMetaTable } from "./EntityDetailMetaTable/EntityDetailMetaTable";
+import { EntityDetailMetaTable } from "./EntityDetailMetaTable/EntityDetailMetaTable";
 import { useSearchParams } from "hooks";
 import { AttributeButtonGroup } from "../AttributeButtonGroup/AttributeButtonGroup";
 import { AuditTable } from "../AuditTable/AuditTable";
 import { JSONExplorer } from "../JSONExplorer/JSONExplorer";
+import { PropGroup } from "../PropGroup/PropGroup";
 
 interface EntityDetailBox {}
 export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
-  const {
-    actantId,
-    setActantId,
-    setStatementId,
-    setTerritoryId,
-  } = useSearchParams();
+  const { actantId, setActantId, setStatementId, territoryId, setTerritoryId } =
+    useSearchParams();
 
   const [showRemoveSubmit, setShowRemoveSubmit] = useState(false);
   const [usedInPage, setUsedInPage] = useState<number>(0);
@@ -81,7 +78,12 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
 
   const queryClient = useQueryClient();
 
-  const { status, data: actant, error, isFetching } = useQuery(
+  const {
+    status,
+    data: actant,
+    error,
+    isFetching,
+  } = useQuery(
     ["actant", actantId],
     async () => {
       const res = await api.detailGet(actantId);
@@ -121,6 +123,153 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
         actant.right === UserRoleMode.Write)
     );
   }, [actant]);
+
+  // mutations
+  const allEntitiesOption = {
+    value: "*",
+    label: "*",
+    info: "",
+  };
+  const entityOptions = [...entitiesDict] as any;
+  entityOptions.push(allEntitiesOption);
+
+  const updateActantMutation = useMutation(
+    async (changes: any) => await api.actantsUpdate(actantId, changes),
+    {
+      onSuccess: (data, variables) => {
+        queryClient.invalidateQueries(["actant"]);
+
+        if (
+          variables.detail ||
+          variables.label ||
+          variables.status ||
+          variables.data?.logicalType
+        ) {
+          if (actant?.class === ActantType.Territory) {
+            queryClient.invalidateQueries("tree");
+          }
+          queryClient.invalidateQueries("territory");
+          queryClient.invalidateQueries("statement");
+          queryClient.invalidateQueries("bookmarks");
+        }
+      },
+    }
+  );
+
+  const deleteActantMutation = useMutation(
+    async (actantId: string) => await api.actantsDelete(actantId),
+    {
+      onSuccess: (data, actantId) => {
+        toast.info(`Actant deleted!`);
+        queryClient.invalidateQueries("statement");
+        queryClient.invalidateQueries("territory");
+        queryClient.invalidateQueries("tree");
+        setActantId("");
+      },
+    }
+  );
+
+  // Props handling
+
+  const addProp = (originId: string) => {
+    if (actant) {
+      const newProp = CProp();
+      const newProps = [...actant.props];
+
+      newProps.forEach((prop1, pi1) => {
+        if (prop1.id === originId) {
+          newProps[pi1].children = [...newProps[pi1].children, newProp];
+        }
+      });
+
+      updateActantMutation.mutate({ props: newProps });
+    }
+  };
+
+  const updateProp = (propId: string, changes: any) => {
+    if (actant) {
+      console.log(propId, changes);
+      const newProps = [...actant.props];
+      console.log(newProps);
+
+      newProps.forEach((prop1, pi1) => {
+        if (prop1.id === propId) {
+          newProps[pi1] = { ...newProps[pi1], ...changes };
+        }
+        prop1.children.forEach((prop2, pi2) => {
+          if (prop2.id === propId) {
+            newProps[pi1].children[pi2] = {
+              ...newProps[pi1].children[pi2],
+              ...changes,
+            };
+          }
+        });
+      });
+      updateActantMutation.mutate({ props: newProps });
+    }
+  };
+
+  const removeProp = (propId: string) => {
+    if (actant) {
+      const newProps = [...actant.props].filter(
+        (prop, pi) => prop.id !== propId
+      );
+
+      newProps.forEach((prop1, pi1) => {
+        newProps[pi1].children = prop1.children.filter(
+          (child) => child.id !== propId
+        );
+      });
+
+      updateActantMutation.mutate({ props: newProps });
+    }
+  };
+
+  const movePropUp = (propId: string) => {
+    if (actant) {
+      const newProps = [...actant.props];
+
+      newProps.forEach((prop1, pi1) => {
+        if (prop1.id === propId) {
+          newProps.splice(pi1 - 1, 0, newProps.splice(pi1, 1)[0]);
+        }
+        prop1.children.forEach((prop2, pi2) => {
+          if (prop2.id === propId) {
+            newProps[pi1].children.splice(
+              pi2 - 1,
+              0,
+              newProps[pi1].children.splice(pi2, 1)[0]
+            );
+          }
+        });
+      });
+
+      updateActantMutation.mutate({ props: newProps });
+    }
+  };
+
+  const movePropDown = (propId: string) => {
+    if (actant) {
+      const newProps = [...actant.props];
+
+      newProps.forEach((prop1, pi1) => {
+        if (prop1.id === propId) {
+          newProps.splice(pi1 + 1, 0, newProps.splice(pi1, 1)[0]);
+        }
+        prop1.children.forEach((prop2, pi2) => {
+          if (prop2.id === propId) {
+            newProps[pi1].children.splice(
+              pi2 + 1,
+              0,
+              newProps[pi1].children.splice(pi2, 1)[0]
+            );
+          }
+        });
+      });
+
+      updateActantMutation.mutate({ props: newProps });
+    }
+  };
 
   useEffect(() => {
     if (error && (error as any).error === "ActantDoesNotExits") {
@@ -180,124 +329,47 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
 
   // sort meta statements by type label
   const metaStatements = useMemo(() => {
-    if (actant && actant.metaStatements) {
-      const sorteMetaStatements = [...actant.metaStatements];
-      sorteMetaStatements.sort(
-        (s1: IResponseStatement, s2: IResponseStatement) => {
-          const typeSActant1 = s1.data.actants.find(
-            (a) => a.position == Position.Actant1
-          );
-          const typeSActant2 = s2.data.actants.find(
-            (a) => a.position == Position.Actant1
-          );
+    if (actant && actant.props) {
+      const sorteMetaProps = [...actant.props];
+      // sorteMetaStatements.sort(
+      //   (s1: IProp, s2: IProp) => {
+      //     const typeSActant1 = s1.data.actants.find(
+      //       (a) => a.position == Position.Actant1
+      //     );
+      //     const typeSActant2 = s2.data.actants.find(
+      //       (a) => a.position == Position.Actant1
+      //     );
 
-          const typeActant1 = typeSActant1
-            ? s1.actants?.find((a) => a.id === typeSActant1.actant)
-            : false;
+      //     const typeActant1 = typeSActant1
+      //       ? s1.actants?.find((a) => a.id === typeSActant1.actant)
+      //       : false;
 
-          const typeActant2 = typeSActant2
-            ? s2.actants?.find((a) => a.id === typeSActant2.actant)
-            : false;
+      //     const typeActant2 = typeSActant2
+      //       ? s2.actants?.find((a) => a.id === typeSActant2.actant)
+      //       : false;
 
-          if (
-            typeActant1 === false ||
-            typeSActant1?.actant === "" ||
-            !typeActant1
-          ) {
-            return 1;
-          } else if (
-            typeActant2 === false ||
-            typeSActant2?.actant === "" ||
-            !typeActant2
-          ) {
-            return -1;
-          } else {
-            return typeActant1.label > typeActant2.label ? 1 : -1;
-          }
-        }
-      );
-      return sorteMetaStatements;
+      //     if (
+      //       typeActant1 === false ||
+      //       typeSActant1?.actant === "" ||
+      //       !typeActant1
+      //     ) {
+      //       return 1;
+      //     } else if (
+      //       typeActant2 === false ||
+      //       typeSActant2?.actant === "" ||
+      //       !typeActant2
+      //     ) {
+      //       return -1;
+      //     } else {
+      //       return typeActant1.label > typeActant2.label ? 1 : -1;
+      //     }
+      //   }
+      // );
+      return sorteMetaProps;
     } else {
       return [];
     }
   }, [actant]);
-
-  const actantsCreateMutation = useMutation(
-    async (newStatement: IStatement) => await api.actantsCreate(newStatement),
-    {
-      onSuccess: () => {
-        queryClient.invalidateQueries("actant");
-      },
-    }
-  );
-
-  const actantsDeleteMutation = useMutation(
-    async (metaStatementId: string) => await api.actantsDelete(metaStatementId),
-    {
-      onSuccess: () => {
-        queryClient.invalidateQueries("actant");
-      },
-    }
-  );
-
-  const allEntityTypes = entitiesDict.map((ent) => ent.value);
-
-  const allEntitiesOption = {
-    value: "*",
-    label: "*",
-    info: "",
-  };
-  const entityOptions = [...entitiesDict] as any;
-  entityOptions.push(allEntitiesOption);
-
-  // TODO: what is metastatement?!
-  const updateMetaStatementMutation = useMutation(
-    async (metaStatementObject: { metaStatementId: string; changes: object }) =>
-      await api.actantsUpdate(metaStatementObject.metaStatementId, {
-        data: metaStatementObject.changes,
-      }),
-    {
-      onSuccess: () => {
-        queryClient.invalidateQueries(["actant"]);
-      },
-    }
-  );
-
-  const updateActantMutation = useMutation(
-    async (changes: any) => await api.actantsUpdate(actantId, changes),
-    {
-      onSuccess: (data, variables) => {
-        queryClient.invalidateQueries(["actant"]);
-
-        if (
-          variables.detail ||
-          variables.label ||
-          variables.status ||
-          variables.data?.logicalType
-        ) {
-          if (actant?.class === ActantType.Territory) {
-            queryClient.invalidateQueries("tree");
-          }
-          queryClient.invalidateQueries("territory");
-          queryClient.invalidateQueries("statement");
-          queryClient.invalidateQueries("bookmarks");
-        }
-      },
-    }
-  );
-
-  const deleteActantMutation = useMutation(
-    async (actantId: string) => await api.actantsDelete(actantId),
-    {
-      onSuccess: (data, actantId) => {
-        toast.info(`Actant deleted!`);
-        queryClient.invalidateQueries("statement");
-        queryClient.invalidateQueries("territory");
-        queryClient.invalidateQueries("tree");
-        setActantId("");
-      },
-    }
-  );
 
   return (
     <>
@@ -815,30 +887,47 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
             </StyledDetailSectionContent>
           </StyledDetailSection>
 
-          {/* meta statements section */}
+          {/* meta props section */}
           <StyledDetailSection>
             <StyledDetailSectionHeader>
-              Meta statements
+              Meta properties
             </StyledDetailSectionHeader>
             <StyledDetailSectionContent>
-              <ActantDetailMetaTable
+              {/* <EntityDetailMetaTable
+                entity={actant}
                 userCanEdit={userCanEdit}
-                metaStatements={metaStatements}
+                metaProps={metaStatements}
                 updateMetaStatement={updateMetaStatementMutation}
                 removeMetaStatement={actantsDeleteMutation}
-              />
+              /> */}
+              <table>
+                <tbody>
+                  <PropGroup
+                    originId={actant.id}
+                    entities={actant.entities}
+                    props={actant.props}
+                    territoryId={territoryId}
+                    updateProp={updateProp}
+                    removeProp={removeProp}
+                    addProp={addProp}
+                    movePropDown={movePropDown}
+                    movePropUp={movePropUp}
+                    userCanEdit={userCanEdit}
+                    openDetailOnCreate={false}
+                  />
+                </tbody>
+              </table>
               {userCanEdit && (
                 <Button
                   color="primary"
-                  label="create new meta statement"
+                  label="create new meta property"
                   icon={<FaPlus />}
                   onClick={async () => {
-                    const newStatement = CMetaStatement(
-                      actant.id,
-                      localStorage.getItem("userrole") as UserRole
-                    );
+                    const newProp = CProp();
+                    const newActant = { ...actant };
+                    newActant.props.push(newProp);
 
-                    actantsCreateMutation.mutate(newStatement);
+                    updateActantMutation.mutate({ props: newActant.props });
                   }}
                 />
               )}
@@ -956,11 +1045,8 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
       <Loader
         show={
           isFetching ||
-          actantsCreateMutation.isLoading ||
-          actantsDeleteMutation.isLoading ||
           updateActantMutation.isLoading ||
-          deleteActantMutation.isLoading ||
-          updateMetaStatementMutation.isLoading
+          deleteActantMutation.isLoading
         }
       />
     </>

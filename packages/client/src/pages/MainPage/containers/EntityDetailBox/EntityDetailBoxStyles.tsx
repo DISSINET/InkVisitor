@@ -128,7 +128,7 @@ interface StyledDetailSectionContent {
 interface StyledDetailSectionContent {}
 export const StyledDetailSectionContent = styled.div<StyledDetailSectionContent>`
   padding-left: ${({ theme, firstSection = false }) =>
-    firstSection ? "" : theme.space[10]};
+    firstSection ? "" : theme.space[4]};
 `;
 
 // usedIn section

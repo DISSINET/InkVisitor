@@ -18,7 +18,6 @@ import {
   IActant,
   IResponseDetail,
   IResponseGeneric,
-  IResponseStatement,
   IResponseActant,
   IResponseSearch,
   RequestSearch,
@@ -28,6 +27,7 @@ import { mergeDeep } from "@common/functions";
 import Statement from "@models/statement";
 import { ActantStatus, ActantType, UserRole } from "@shared/enums";
 import Audit from "@models/audit";
+import { Connection } from "rethinkdb-ts";
 
 export default Router()
   .get(
@@ -59,7 +59,6 @@ export default Router()
 
       return {
         ...actant,
-        usedCount: usedInStatements.length,
         usedIn: usedInStatements,
         right: actant.getUserRoleMode(request.getUserOrFail()),
       } as IResponseActant;
@@ -263,35 +262,18 @@ export default Router()
         throw new PermissionDeniedError(`cannot view actant ${actantId}`);
       }
 
-      const meta: IResponseStatement[] = [];
-
-      const statements = await Statement.findMetaStatements(
-        request.db.connection,
-        actant.id as string
-      );
-
-      for (const statement of statements) {
-        const metaActants = await findActantsByIds(
-          request.db,
-          statement.getLinkedActantIds()
-        );
-
-        meta.push({
-          ...statement,
-          actants: metaActants,
-        });
-      }
-
       const usedInStatements = await Statement.findDependentStatements(
         request.db.connection,
-        actant.id as string
+        actant.id
       );
 
+      const entities = await actant.getEntities(
+        request.db.connection as Connection
+      );
       return {
         ...actant,
-        usedCount: usedInStatements.length,
         usedIn: usedInStatements,
-        metaStatements: meta,
+        entities: Object.assign({}, ...entities.map((x) => ({ [x.id]: x }))),
         right: actant.getUserRoleMode(request.getUserOrFail()),
       } as IResponseDetail;
     })

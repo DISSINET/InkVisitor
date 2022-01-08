@@ -5,7 +5,6 @@ export interface IAction extends IActant {
   data: {
     valencies: ActionValency;
     entities: ActionEntity;
-    properties: any[];
   };
 }
 

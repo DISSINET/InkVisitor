@@ -168,3 +168,18 @@ export interface AttributeGroupDataObject {
   type: AttributeData;
   value: AttributeData;
 }
+
+export const classesPropType = [ActantType.Concept];
+export const classesPropValue = [
+  ActantType.Action,
+  ActantType.Person,
+  ActantType.Group,
+  ActantType.Object,
+  ActantType.Concept,
+  ActantType.Location,
+  ActantType.Value,
+  ActantType.Event,
+  ActantType.Statement,
+  ActantType.Territory,
+  ActantType.Resource,
+];
