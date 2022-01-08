@@ -9,40 +9,12 @@ import {
   FaCaretDown,
 } from "react-icons/fa";
 import { EntityTag } from "./../";
-import {
-  CProp,
-  CReference,
-  CStatementActant,
-  CStatementAction,
-} from "constructors";
-import {
-  IActant,
-  IStatementReference,
-  IResponseStatement,
-  IProp,
-  IStatementAction,
-  IStatementActant,
-} from "@shared/types";
-import {
-  AttributeIcon,
-  Button,
-  ButtonGroup,
-  Input,
-  Loader,
-  MultiInput,
-} from "components";
+
+import { IActant, IProp } from "@shared/types";
+import { AttributeIcon, Button } from "components";
 import { EntitySuggester } from "./../";
 
-import { ColumnInstance } from "react-table";
-import { useSearchParams } from "hooks";
-import { AttributeButtonGroup } from "../AttributeButtonGroup/AttributeButtonGroup";
-import { ActantType, UserRoleMode } from "@shared/enums";
-import { StatementListBreadcrumbItem } from "../StatementsListBox/StatementListHeader/StatementListBreadcrumbItem/StatementListBreadcrumbItem";
 import { excludedSuggesterEntities } from "Theme/constants";
-import { BsArrow90DegLeft, BsArrowRightShort } from "react-icons/bs";
-import { StyledItemBox } from "../StatementsListBox/StatementListHeader/StatementListBreadcrumbItem/StatementListBreadcrumbItemStyles";
-import { AuditTable } from "./../AuditTable/AuditTable";
-import { JSONExplorer } from "../JSONExplorer/JSONExplorer";
 import { AttributesGroupEditor } from "../AttributesEditor/AttributesGroupEditor";
 import {
   AttributeGroupDataObject,
@@ -50,11 +22,10 @@ import {
   classesPropValue,
 } from "types";
 import {
+  StyledGrid,
   StyledListHeaderColumn,
   StyledPropButtonGroup,
   StyledPropLineColumn,
-  StyledPropsActantList,
-  StyledSubRow,
 } from "./PropGroupStyles";
 
 interface IPropGroup {
@@ -70,6 +41,7 @@ interface IPropGroup {
   movePropUp: (propId: string) => void;
 
   userCanEdit: boolean;
+  openDetailOnCreate: boolean;
 }
 
 export const PropGroup: React.FC<IPropGroup> = ({
@@ -85,6 +57,7 @@ export const PropGroup: React.FC<IPropGroup> = ({
   movePropUp,
 
   userCanEdit,
+  openDetailOnCreate = false,
 }) => {
   // territory query
   const {
@@ -108,60 +81,66 @@ export const PropGroup: React.FC<IPropGroup> = ({
     }
   );
 
-  return (
+  return props.length > 0 ? (
     <tr>
-      <td colSpan={1}>
-        <StyledSubRow>
+      <td colSpan={4}>
+        <StyledGrid>
           <React.Fragment key={originId}>
-            <StyledPropsActantList>
-              <StyledListHeaderColumn>Type</StyledListHeaderColumn>
-              <StyledListHeaderColumn>Value</StyledListHeaderColumn>
-              <StyledListHeaderColumn></StyledListHeaderColumn>
-              {props.map((prop1: IProp, pi1: number) => {
-                return (
-                  <React.Fragment key={prop1.id}>
-                    <PropGroupRow
-                      prop={prop1}
-                      entities={entities}
-                      level={"1"}
-                      order={pi1}
-                      firstRowinGroup={pi1 === 0}
-                      lastRowinGroup={pi1 === props.length - 1}
-                      lastSecondLevel={false}
-                      updateProp={updateProp}
-                      removeProp={removeProp}
-                      addProp={addProp}
-                      movePropDown={movePropDown}
-                      movePropUp={movePropUp}
-                      userCanEdit={userCanEdit}
-                      territoryActants={territoryActants || []}
-                    />
-                    {prop1.children.map((prop2: IProp, pi2: number) => {
-                      <PropGroupRow
-                        prop={prop2}
-                        entities={entities}
-                        level={"2"}
-                        order={pi2}
-                        firstRowinGroup={pi2 === 0}
-                        lastRowinGroup={pi2 === prop1.children.length - 1}
-                        lastSecondLevel={pi2 === prop1.children.length - 1}
-                        updateProp={updateProp}
-                        removeProp={removeProp}
-                        addProp={addProp}
-                        movePropDown={movePropDown}
-                        movePropUp={movePropUp}
-                        userCanEdit={userCanEdit}
-                        territoryActants={territoryActants || []}
-                      />;
-                    })}
-                  </React.Fragment>
-                );
-              })}
-            </StyledPropsActantList>
+            <StyledListHeaderColumn>Type</StyledListHeaderColumn>
+            <StyledListHeaderColumn>Value</StyledListHeaderColumn>
+            <StyledListHeaderColumn></StyledListHeaderColumn>
+            {props.map((prop1: IProp, pi1: number) => {
+              return (
+                <React.Fragment key={prop1.id}>
+                  <PropGroupRow
+                    prop={prop1}
+                    entities={entities}
+                    level={"1"}
+                    order={pi1}
+                    firstRowinGroup={pi1 === 0}
+                    lastRowinGroup={pi1 === props.length - 1}
+                    lastSecondLevel={false}
+                    updateProp={updateProp}
+                    removeProp={removeProp}
+                    addProp={addProp}
+                    movePropDown={movePropDown}
+                    movePropUp={movePropUp}
+                    userCanEdit={userCanEdit}
+                    territoryActants={territoryActants || []}
+                    openDetailOnCreate={openDetailOnCreate}
+                  />
+                  {prop1.children.map((prop2: IProp, pi2: number) => {
+                    return (
+                      <React.Fragment key={prop2.id}>
+                        <PropGroupRow
+                          prop={prop2}
+                          entities={entities}
+                          level={"2"}
+                          order={pi2}
+                          firstRowinGroup={pi2 === 0}
+                          lastRowinGroup={pi2 === prop1.children.length - 1}
+                          lastSecondLevel={pi2 === prop1.children.length - 1}
+                          updateProp={updateProp}
+                          removeProp={removeProp}
+                          addProp={addProp}
+                          movePropDown={movePropDown}
+                          movePropUp={movePropUp}
+                          userCanEdit={userCanEdit}
+                          territoryActants={territoryActants || []}
+                          openDetailOnCreate={openDetailOnCreate}
+                        />
+                      </React.Fragment>
+                    );
+                  })}
+                </React.Fragment>
+              );
+            })}
           </React.Fragment>
-        </StyledSubRow>
+        </StyledGrid>
       </td>
     </tr>
+  ) : (
+    <tr />
   );
 };
 
@@ -182,6 +161,7 @@ interface IPropGroupRow {
 
   userCanEdit: boolean;
   territoryActants: string[];
+  openDetailOnCreate: boolean;
 }
 
 const PropGroupRow: React.FC<IPropGroupRow> = ({
@@ -199,6 +179,7 @@ const PropGroupRow: React.FC<IPropGroupRow> = ({
   movePropUp,
   userCanEdit,
   territoryActants = [],
+  openDetailOnCreate = false,
 }) => {
   const propTypeEntity: IActant = entities[prop.type.id];
   const propValueEntity = entities[prop.value.id];
@@ -235,7 +216,6 @@ const PropGroupRow: React.FC<IPropGroupRow> = ({
         ) : (
           <EntitySuggester
             territoryActants={territoryActants}
-            openDetailOnCreate
             onSelected={(newSelectedId: string) => {
               updateProp(prop.id, {
                 type: {
@@ -244,6 +224,7 @@ const PropGroupRow: React.FC<IPropGroupRow> = ({
                 },
               });
             }}
+            openDetailOnCreate={openDetailOnCreate}
             categoryTypes={classesPropType}
             inputWidth={"full"}
             excludedEntities={excludedSuggesterEntities}
@@ -294,7 +275,6 @@ const PropGroupRow: React.FC<IPropGroupRow> = ({
         ) : (
           <EntitySuggester
             territoryActants={[]}
-            openDetailOnCreate
             onSelected={(newSelectedId: string) => {
               updateProp(prop.id, {
                 value: {
@@ -303,6 +283,7 @@ const PropGroupRow: React.FC<IPropGroupRow> = ({
                 },
               });
             }}
+            openDetailOnCreate={openDetailOnCreate}
             categoryTypes={classesPropValue}
             inputWidth={"full"}
             excludedEntities={excludedSuggesterEntities}

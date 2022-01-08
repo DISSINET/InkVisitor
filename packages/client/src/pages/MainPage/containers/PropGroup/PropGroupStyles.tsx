@@ -2,8 +2,9 @@ import styled from "styled-components";
 
 export const StyledGrid = styled.div`
   display: grid;
+
   align-items: center;
-  padding-left: ${({ theme }) => theme.space[0]};
+  padding-left: ${({ theme }) => theme.space[10]};
   grid-template-columns: auto auto auto;
   width: fit-content;
   grid-template-rows: auto;
@@ -14,22 +15,6 @@ export const StyledGrid = styled.div`
 export const StyledGridCell = styled.div`
   margin: ${({ theme }) => theme.space[1]};
   display: grid;
-`;
-
-export const StyledSubRow = styled.div`
-  display: table-row;
-  width: 100%;
-  padding: ${({ theme }) => theme.space[2]};
-  border-left-color: ${({ theme }) => theme.color["gray"][800]};
-  margin-left: ${({ theme }) => `${theme.space[10]}`};
-  margin-bottom: ${({ theme }) => `${theme.space[2]}`};
-`;
-
-interface StyledPropsActantList {}
-export const StyledPropsActantList = styled(StyledGrid)<StyledPropsActantList>`
-  padding-left: ${({ theme }) => theme.space[6]};
-  padding-bottom: ${({ theme }) => theme.space[10]};
-  width: 100%;
 `;
 
 interface StyledListHeaderColumn {}
@@ -55,7 +40,7 @@ export const StyledPropLineColumn = styled(
     lastSecondLevel ? theme.space[4] : theme.space[0]};
   align-items: center;
   padding-left: ${({ theme, padded }) =>
-    padded ? theme.space[6] : theme.space[0]};
+    padded ? theme.space[8] : theme.space[0]};
   padding-right: 5px;
   overflow: ${({ isTag }) => (isTag ? "hidden" : "visible")};
 `;
