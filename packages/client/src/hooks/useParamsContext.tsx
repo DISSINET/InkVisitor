@@ -57,7 +57,7 @@ export const SearchParamsProvider = ({
     statementId
       ? params.set("statement", statementId)
       : params.delete("statement");
-    actantId ? params.set("actant", actantId) : params.delete("actant");
+    actantId ? params.set("detail", actantId) : params.delete("detail");
     history.push({
       hash: `${params}`,
     });
