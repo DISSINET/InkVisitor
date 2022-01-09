@@ -27,7 +27,7 @@ export const Box: React.FC<BoxProps> = ({
   label = "",
   color = "",
   height,
-  noPadding = true,
+  noPadding = false,
   isExpanded = true,
   button,
   children,
@@ -50,7 +50,7 @@ export const Box: React.FC<BoxProps> = ({
 
   return (
     <StyledBox height={height}>
-      <StyledHead color={color} $noPadding={noPadding}>
+      <StyledHead $isExpanded={isExpanded} color={color} $noPadding={noPadding}>
         {!hideContent && (
           <animated.div style={animatedExpand}>{label}</animated.div>
         )}
