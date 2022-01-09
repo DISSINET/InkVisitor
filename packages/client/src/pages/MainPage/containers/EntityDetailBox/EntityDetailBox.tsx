@@ -435,11 +435,13 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                       {actant.id}
                       <Button
                         inverted
+                        tooltip="copy ID"
                         color="primary"
                         label=""
                         icon={<FaRegCopy />}
                         onClick={async () => {
                           await navigator.clipboard.writeText(actant.id);
+                          toast.info("ID copied to clipboard!");
                         }}
                       />
                     </StyledDetailContentRowValueID>
