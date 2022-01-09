@@ -185,7 +185,7 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
           height={heightHeader}
           paddingY={0}
           paddingX={10}
-          color={(environment == '') ? "primary" : environment}
+          color={environment == "" ? "primary" : environment}
           left={
             <StyledHeader>
               <StyledHeaderLogo
@@ -238,6 +238,7 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
                 label="Territories"
                 isExpanded={firstPanelExpanded}
                 button={firstPanelButton()}
+                noPadding
               >
                 <TerritoryTreeBox />
               </Box>
@@ -285,7 +286,7 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
                   : panelWidths[2] + panelWidths[3] - collapsedPanelWidth
               }
             >
-              <Box height={heightContent} label="Editor" noPadding={false}>
+              <Box height={heightContent} label="Editor">
                 <StatementEditorBox />
               </Box>
             </Panel>
