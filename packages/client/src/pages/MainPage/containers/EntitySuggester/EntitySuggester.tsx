@@ -16,6 +16,7 @@ import {
 } from "@shared/enums";
 import { useDebounce, useSearchParams } from "hooks";
 import { rootTerritoryId } from "Theme/constants";
+import { DragObjectWithType } from "react-dnd";
 
 interface EntitySuggesterI {
   categoryTypes: ActantType[];
@@ -180,6 +181,17 @@ export const EntitySuggester: React.FC<EntitySuggesterI> = ({
     handleClean();
   };
 
+  const [isWrongDropCategory, setIsWrongDropCategory] = useState(false);
+
+  const handleHoverred = (newHoverred: any) => {
+    const hoverredCategory = newHoverred.category;
+    if (!categoryTypes.includes(hoverredCategory)) {
+      setIsWrongDropCategory(true);
+    } else {
+      setIsWrongDropCategory(false);
+    }
+  };
+
   return selectedCategory && allCategories ? (
     <Suggester
       isFetching={isFetchingStatement}
@@ -210,9 +222,13 @@ export const EntitySuggester: React.FC<EntitySuggesterI> = ({
       onPick={(newPicked: SuggestionI) => {
         handlePick(newPicked);
       }}
-      onDrop={(newDropped: any) => {
+      onDrop={(newDropped: DragObjectWithType) => {
         handleDropped(newDropped);
       }}
+      onHover={(newHoverred: DragObjectWithType) => {
+        handleHoverred(newHoverred);
+      }}
+      isWrongDropCategory={isWrongDropCategory}
       allowCreate={allowCreate}
       inputWidth={inputWidth}
     />
