@@ -1,3 +1,4 @@
+import { AiOutlineWarning } from "react-icons/ai";
 import styled from "styled-components";
 import { space1, space2, space4, space36 } from "Theme/constants";
 
@@ -124,4 +125,8 @@ export const StyledModalInputWrap = styled.div`
   display: grid;
   position: relative;
   margin-bottom: ${({ theme }) => theme.space[1]};
+`;
+export const StyledAiOutlineWarning = styled(AiOutlineWarning)`
+  margin-top: 0.1rem;
+  margin-left: 0.5rem;
 `;

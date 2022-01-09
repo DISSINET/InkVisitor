@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { DragObjectWithType, DropTargetMonitor, useDrop } from "react-dnd";
 import { FaPlus, FaPlayCircle } from "react-icons/fa";
 import { MdCancel } from "react-icons/md";
@@ -18,12 +18,14 @@ import {
   StyledRelativePosition,
   StyledTypeBar,
   StyledTagWrapper,
+  StyledAiOutlineWarning,
 } from "./SuggesterStyles";
 import { SuggesterKeyPress } from "./SuggesterKeyPress";
 import { toast } from "react-toastify";
 import { SuggesterModal } from "./SuggesterModal";
 import { ActantStatus, ActantType } from "@shared/enums";
 import useKeypress from "hooks/useKeyPress";
+import theme from "Theme/theme";
 
 export interface SuggestionI {
   id: string;
@@ -56,8 +58,10 @@ interface SuggesterProps {
   onCreate: Function;
   onPick: Function;
   onDrop: Function;
+  onHover?: Function;
   onCancel?: Function;
   cleanOnSelect?: boolean;
+  isWrongDropCategory?: boolean;
 }
 
 const MAXSUGGESTIONDISPLAYED = 10;
@@ -81,13 +85,18 @@ export const Suggester: React.FC<SuggesterProps> = ({
   onCreate,
   onPick,
   onDrop,
+  onHover,
   onCancel = () => {},
   isFetching,
+  isWrongDropCategory,
 }) => {
   const [{ isOver }, dropRef] = useDrop({
     accept: ItemTypes.TAG,
     drop: (item: DragObjectWithType) => {
       onDrop(item);
+    },
+    hover: (item: DragObjectWithType) => {
+      onHover && onHover(item);
     },
     collect: (monitor: DropTargetMonitor) => ({
       isOver: !!monitor.isOver(),
@@ -198,6 +207,11 @@ export const Suggester: React.FC<SuggesterProps> = ({
             </StyledSuggesterButton>
           )}
         </StyledInputWrapper>
+
+        {isWrongDropCategory && isOver && (
+          <StyledAiOutlineWarning size={22} color={theme.color["warning"]} />
+        )}
+
         {((isFocused || isHovered) && suggestions.length) || isFetching ? (
           <StyledSuggesterList
             onMouseOver={() => setIsHovered(true)}
