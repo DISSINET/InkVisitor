@@ -47,7 +47,7 @@ export const SearchParamsProvider = ({
     typeof parsedParams.statement === "string" ? parsedParams.statement : ""
   );
   const [actantId, setActantId] = useState<string>(
-    typeof parsedParams.actant === "string" ? parsedParams.actant : ""
+    typeof parsedParams.detail === "string" ? parsedParams.detail : ""
   );
 
   useEffect(() => {
