@@ -96,9 +96,9 @@ interface StyledPropButtonGroup {
   round?: boolean;
 }
 export const StyledPropButtonGroup = styled.div<StyledPropButtonGroup>`
-  margin-left: ${({ theme, leftMargin = true }) =>
+  margin-left: ${({ theme, leftMargin }) =>
     leftMargin ? theme.space[3] : theme.space[0]};
-  margin-right: ${({ theme, rightMargin = true }) =>
+  margin-right: ${({ theme, rightMargin }) =>
     rightMargin ? theme.space[3] : theme.space[0]};
   vertical-align: middle;
   display: inline-flex;

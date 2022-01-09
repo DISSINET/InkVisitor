@@ -28,6 +28,7 @@ interface EntitySuggesterI {
   openDetailOnCreate?: boolean;
   territoryActants?: string[];
   excludedEntities?: ActantType[];
+  filterEditorRights?: boolean;
 }
 
 export const EntitySuggester: React.FC<EntitySuggesterI> = ({
@@ -40,6 +41,7 @@ export const EntitySuggester: React.FC<EntitySuggesterI> = ({
   openDetailOnCreate = false,
   territoryActants,
   excludedEntities = [],
+  filterEditorRights,
 }) => {
   const wildCardCategory = ActantType.Any;
   const queryClient = useQueryClient();

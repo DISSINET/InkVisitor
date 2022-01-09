@@ -17,6 +17,10 @@ import {
   StyledModalLabel,
   StyledTypeBar,
 } from "./SuggesterStyles";
+import { EntitySuggester } from "pages/MainPage/containers";
+import { ActantType } from "@shared/enums";
+import { AttributeButtonGroup } from "pages/MainPage/containers/AttributeButtonGroup/AttributeButtonGroup";
+import { userRoleDict } from "@shared/dictionaries";
 
 interface SuggesterModal {
   show?: boolean;
@@ -39,6 +43,7 @@ export const SuggesterModal: React.FC<SuggesterModal> = ({
   );
   const [label, setLabel] = useState(typed);
   const [detail, setDetail] = useState("");
+  const [role, setRole] = useState(userRoleDict[1].value);
 
   const handleCreateActant = () => {
     onCreate({
@@ -90,6 +95,61 @@ export const SuggesterModal: React.FC<SuggesterModal> = ({
               changeOnType
             />
           </StyledModalInputWrap>
+          {/* Suggester territory */}
+          {(selectedCategory === "T" || selectedCategory === "S") && (
+            <>
+              <StyledModalLabel>
+                {selectedCategory === "T" ? "Parent territory" : "Territory: "}
+              </StyledModalLabel>
+              <StyledModalInputWrap>
+                <EntitySuggester
+                  inputWidth={96}
+                  allowCreate={false}
+                  categoryTypes={[ActantType.Territory]}
+                  onSelected={(newSelectedId: string) =>
+                    console.log(newSelectedId)
+                  }
+                />
+              </StyledModalInputWrap>
+            </>
+          )}
+          {/* UserRole */}
+          {selectedCategory === "T" && (
+            <>
+              <StyledModalLabel>{"User role: "}</StyledModalLabel>
+              <StyledModalInputWrap>
+                <AttributeButtonGroup
+                  noMargin
+                  options={[
+                    {
+                      longValue: userRoleDict[0].label,
+                      shortValue: userRoleDict[0].label,
+                      selected: role === userRoleDict[0].value,
+                      onClick: () => {
+                        setRole(userRoleDict[0].value);
+                      },
+                    },
+                    {
+                      longValue: userRoleDict[1].label,
+                      shortValue: userRoleDict[1].label,
+                      selected: role === userRoleDict[1].value,
+                      onClick: () => {
+                        setRole(userRoleDict[1].value);
+                      },
+                    },
+                    {
+                      longValue: userRoleDict[2].label,
+                      shortValue: userRoleDict[2].label,
+                      selected: role === userRoleDict[2].value,
+                      onClick: () => {
+                        setRole(userRoleDict[2].value);
+                      },
+                    },
+                  ]}
+                />
+              </StyledModalInputWrap>
+            </>
+          )}
         </StyledModalForm>
       </ModalContent>
       <ModalFooter>
