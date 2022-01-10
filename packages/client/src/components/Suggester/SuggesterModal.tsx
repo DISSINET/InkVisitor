@@ -1,17 +1,21 @@
-import React, { useEffect, useState } from "react";
-
+import { ActantType, UserRole } from "@shared/enums";
+import { IOption } from "@shared/types";
+import api from "api";
 import {
-  Modal,
-  ModalHeader,
-  ModalContent,
-  Input,
-  ModalFooter,
-  ButtonGroup,
   Button,
+  ButtonGroup,
+  Input,
+  Modal,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
   Tag,
 } from "components";
-import { IOption } from "@shared/types";
-import useKeypress from "hooks/useKeyPress";
+import { EntitySuggester } from "pages/MainPage/containers";
+import React, { useState } from "react";
+import { FaUnlink } from "react-icons/fa";
+import { useQuery } from "react-query";
+import { toast } from "react-toastify";
 import {
   StyledContent,
   StyledModalForm,
@@ -20,14 +24,6 @@ import {
   StyledNote,
   StyledTypeBar,
 } from "./SuggesterStyles";
-import { EntitySuggester } from "pages/MainPage/containers";
-import { ActantType, UserRole } from "@shared/enums";
-import { AttributeButtonGroup } from "pages/MainPage/containers/AttributeButtonGroup/AttributeButtonGroup";
-import { userRoleDict } from "@shared/dictionaries";
-import { useQuery } from "react-query";
-import api from "api";
-import { FaUnlink } from "react-icons/fa";
-import { toast } from "react-toastify";
 
 interface SuggesterModal {
   show?: boolean;
@@ -46,7 +42,7 @@ export const SuggesterModal: React.FC<SuggesterModal> = ({
   closeModal,
 }) => {
   const [selectedCategory, setSelectedCategory] = useState<string>(
-    category ? category : categories[0].label
+    category && category !== "*" ? category : categories[0].label
   );
   const [label, setLabel] = useState<string>(typed);
   const [detail, setDetail] = useState<string>("");

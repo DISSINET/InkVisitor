@@ -18,6 +18,7 @@ import {
 import { useDebounce, useSearchParams } from "hooks";
 import { rootTerritoryId } from "Theme/constants";
 import { DragObjectWithType } from "react-dnd";
+import { toast } from "react-toastify";
 
 interface EntitySuggesterI {
   categoryTypes: ActantType[];
@@ -140,6 +141,13 @@ export const EntitySuggester: React.FC<EntitySuggesterI> = ({
         handleClean();
         if (variables.class === "T") {
           queryClient.invalidateQueries("tree");
+          toast.info(`Terrritory [${variables.label}] created!`);
+        } else if (variables.class === "S") {
+          toast.info(`Statement [${variables.label}] created!`);
+        } else if (variables.class === "A") {
+          toast.info(`Action [${variables.label}] created!`);
+        } else {
+          toast.info(`Actant [${variables.label}] created!`);
         }
         if (openDetailOnCreate) {
           setActantId(variables.id);
