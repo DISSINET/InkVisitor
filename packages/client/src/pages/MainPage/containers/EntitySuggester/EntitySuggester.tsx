@@ -4,13 +4,14 @@ import { Suggester, SuggestionI } from "components/Suggester/Suggester";
 import { IOption, IActant } from "@shared/types";
 
 import { FaHome } from "react-icons/fa";
-import { CActant, CTerritoryActant } from "constructors";
+import { CActant, CStatement, CTerritoryActant } from "constructors";
 import { Entities } from "types";
 import { useMutation, useQuery, useQueryClient } from "react-query";
 import api from "api";
 import {
   ActantStatus,
   ActantType,
+  AllActantType,
   CategoryActantType,
   UserRole,
 } from "@shared/enums";
@@ -151,8 +152,19 @@ export const EntitySuggester: React.FC<EntitySuggesterI> = ({
     label: string;
     category: ActantType;
     detail: string;
+    territoryId?: string;
   }) => {
-    if (newCreated.category === ActantType.Territory) {
+    if (
+      newCreated.category === ActantType.Statement &&
+      newCreated.territoryId
+    ) {
+      const newStatement = CStatement(
+        newCreated.territoryId,
+        localStorage.getItem("userrole") as UserRole
+      );
+      actantsCreateMutation.mutate(newStatement);
+    } else if (newCreated.category === ActantType.Territory) {
+      // TODO: add possibility to select territory
       const newActant = CTerritoryActant(
         newCreated.label,
         rootTerritoryId,
@@ -216,8 +228,9 @@ export const EntitySuggester: React.FC<EntitySuggesterI> = ({
       }
       onCreate={(newCreated: {
         label: string;
-        category: CategoryActantType;
+        category: AllActantType;
         detail: string;
+        territoryId?: string;
       }) => {
         handleCreate(newCreated);
       }}

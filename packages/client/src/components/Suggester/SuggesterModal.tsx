@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 import {
   Modal,
@@ -8,6 +8,7 @@ import {
   ModalFooter,
   ButtonGroup,
   Button,
+  Tag,
 } from "components";
 import { IOption } from "@shared/types";
 import useKeypress from "hooks/useKeyPress";
@@ -18,9 +19,12 @@ import {
   StyledTypeBar,
 } from "./SuggesterStyles";
 import { EntitySuggester } from "pages/MainPage/containers";
-import { ActantType } from "@shared/enums";
+import { ActantType, UserRole } from "@shared/enums";
 import { AttributeButtonGroup } from "pages/MainPage/containers/AttributeButtonGroup/AttributeButtonGroup";
 import { userRoleDict } from "@shared/dictionaries";
+import { useQuery } from "react-query";
+import api from "api";
+import { FaUnlink } from "react-icons/fa";
 
 interface SuggesterModal {
   show?: boolean;
@@ -41,18 +45,45 @@ export const SuggesterModal: React.FC<SuggesterModal> = ({
   const [selectedCategory, setSelectedCategory] = useState<string>(
     categories[0].label
   );
-  const [label, setLabel] = useState(typed);
-  const [detail, setDetail] = useState("");
-  const [role, setRole] = useState(userRoleDict[1].value);
+  const [label, setLabel] = useState<string>(typed);
+  const [detail, setDetail] = useState<string>("");
+  const [role, setRole] = useState<UserRole>(userRoleDict[1].value);
+  const [territoryId, setTerritoryId] = useState<string>("");
 
   const handleCreateActant = () => {
     onCreate({
       label: label,
       category: selectedCategory,
       detail: detail,
+      territoryId: territoryId,
     });
     closeModal();
   };
+
+  const {
+    status,
+    data: territory,
+    error,
+    isFetching,
+  } = useQuery(
+    ["territory", territoryId],
+    async () => {
+      if (territoryId) {
+        const res = await api.territoryGet(territoryId);
+        return res.data;
+      }
+    },
+    {
+      enabled: !!territoryId && api.isLoggedIn(),
+    }
+  );
+
+  useEffect(() => {
+    console.log(territory);
+    // if (territory) {
+    //   setRole(UserRole[territory.right]);
+    // }
+  }, [territory]);
 
   return (
     <Modal
@@ -102,14 +133,35 @@ export const SuggesterModal: React.FC<SuggesterModal> = ({
                 {selectedCategory === "T" ? "Parent territory" : "Territory: "}
               </StyledModalLabel>
               <StyledModalInputWrap>
-                <EntitySuggester
-                  inputWidth={96}
-                  allowCreate={false}
-                  categoryTypes={[ActantType.Territory]}
-                  onSelected={(newSelectedId: string) =>
-                    console.log(newSelectedId)
-                  }
-                />
+                {territory ? (
+                  <Tag
+                    propId={territory.id}
+                    label={territory.label}
+                    category={territory.class}
+                    tooltipPosition={"left center"}
+                    button={
+                      <Button
+                        key="d"
+                        icon={<FaUnlink />}
+                        color="danger"
+                        inverted={true}
+                        tooltip="unlink actant"
+                        onClick={() => {
+                          setTerritoryId("");
+                        }}
+                      />
+                    }
+                  />
+                ) : (
+                  <EntitySuggester
+                    inputWidth={96}
+                    allowCreate={false}
+                    categoryTypes={[ActantType.Territory]}
+                    onSelected={(newSelectedId: string) => {
+                      setTerritoryId(newSelectedId);
+                    }}
+                  />
+                )}
               </StyledModalInputWrap>
             </>
           )}
@@ -159,10 +211,12 @@ export const SuggesterModal: React.FC<SuggesterModal> = ({
             label="Cancel"
             color="warning"
             onClick={() => {
+              setTerritoryId("");
               closeModal();
             }}
           />
           <Button
+            // disabled
             key="submit"
             label="Submit"
             color="primary"

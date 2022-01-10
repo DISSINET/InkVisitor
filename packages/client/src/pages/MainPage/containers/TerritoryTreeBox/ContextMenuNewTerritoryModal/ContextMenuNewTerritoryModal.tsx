@@ -24,10 +24,9 @@ interface ContextMenuNewTerritoryModal {
   territoryActantId: string;
   onClose: () => void;
 }
-export const ContextMenuNewTerritoryModal: React.FC<ContextMenuNewTerritoryModal> = ({
-  onClose,
-  territoryActantId,
-}) => {
+export const ContextMenuNewTerritoryModal: React.FC<
+  ContextMenuNewTerritoryModal
+> = ({ onClose, territoryActantId }) => {
   const [territoryName, setTerritoryName] = useState("");
   const [showModal, setShowModal] = useState(false);
   useEffect(() => {
