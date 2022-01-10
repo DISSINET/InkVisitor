@@ -152,6 +152,7 @@ export const SuggesterModal: React.FC<SuggesterModal> = ({
                     />
                   ) : (
                     <EntitySuggester
+                      filterEditorRights
                       inputWidth={96}
                       allowCreate={false}
                       categoryTypes={[ActantType.Territory]}

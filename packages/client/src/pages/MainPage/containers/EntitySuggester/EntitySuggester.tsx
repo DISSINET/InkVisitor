@@ -14,6 +14,7 @@ import {
   AllActantType,
   CategoryActantType,
   UserRole,
+  UserRoleMode,
 } from "@shared/enums";
 import { useDebounce, useSearchParams } from "hooks";
 import { rootTerritoryId } from "Theme/constants";
@@ -43,7 +44,7 @@ export const EntitySuggester: React.FC<EntitySuggesterI> = ({
   openDetailOnCreate = false,
   territoryActants,
   excludedEntities = [],
-  filterEditorRights,
+  filterEditorRights = false,
 }) => {
   const wildCardCategory = ActantType.Any;
   const queryClient = useQueryClient();
@@ -53,6 +54,7 @@ export const EntitySuggester: React.FC<EntitySuggesterI> = ({
   const [allCategories, setAllCategories] = useState<IOption[]>();
 
   const { setActantId } = useSearchParams();
+  const userRole = localStorage.getItem("userrole");
 
   // Suggesions query
   const {
@@ -73,6 +75,11 @@ export const EntitySuggester: React.FC<EntitySuggesterI> = ({
       });
       return resSuggestions.data
         .filter((s) => s.status !== ActantStatus.Discouraged)
+        .filter((s) =>
+          filterEditorRights && userRole !== UserRole.Admin
+            ? s.right === UserRoleMode.Write
+            : s
+        )
         .map((s: IActant) => {
           const entity = Entities[s.class];
 
@@ -81,6 +88,7 @@ export const EntitySuggester: React.FC<EntitySuggesterI> = ({
           if (territoryActants?.includes(s.id)) {
             icons.push(<FaHome key={s.id} color="" />);
           }
+
           return {
             color: entity.color,
             category: s.class,
