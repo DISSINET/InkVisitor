@@ -130,3 +130,12 @@ export const StyledAiOutlineWarning = styled(AiOutlineWarning)`
   margin-top: 0.1rem;
   margin-left: 0.5rem;
 `;
+export const StyledContent = styled.div`
+  display: flex;
+  flex-direction: column;
+`;
+export const StyledNote = styled.i`
+  margin-top: ${({ theme }) => theme.space[2]};
+  font-size: ${({ theme }) => theme.fontSize["xs"]};
+  text-align: right;
+`;

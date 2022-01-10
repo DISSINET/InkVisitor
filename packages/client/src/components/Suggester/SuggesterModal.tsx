@@ -13,9 +13,11 @@ import {
 import { IOption } from "@shared/types";
 import useKeypress from "hooks/useKeyPress";
 import {
+  StyledContent,
   StyledModalForm,
   StyledModalInputWrap,
   StyledModalLabel,
+  StyledNote,
   StyledTypeBar,
 } from "./SuggesterStyles";
 import { EntitySuggester } from "pages/MainPage/containers";
@@ -44,11 +46,13 @@ export const SuggesterModal: React.FC<SuggesterModal> = ({
   closeModal,
 }) => {
   const [selectedCategory, setSelectedCategory] = useState<string>(
-    categories[0].label
+    category ? category : categories[0].label
   );
   const [label, setLabel] = useState<string>(typed);
   const [detail, setDetail] = useState<string>("");
   const [territoryId, setTerritoryId] = useState<string>("");
+
+  const userRole = localStorage.getItem("userrole") as UserRole;
 
   const handleCreateActant = () => {
     onCreate({
@@ -87,85 +91,97 @@ export const SuggesterModal: React.FC<SuggesterModal> = ({
     >
       <ModalHeader title="Create actant" />
       <ModalContent>
-        <StyledModalForm>
-          <StyledModalLabel>{"Category: "}</StyledModalLabel>
-          <StyledModalInputWrap>
-            <Input
-              type="select"
-              value={selectedCategory}
-              options={categories}
-              inverted
-              suggester
-              onChangeFn={(newCategory: string) =>
-                setSelectedCategory(newCategory)
-              }
-            />
-            <StyledTypeBar entity={`entity${selectedCategory}`}></StyledTypeBar>
-          </StyledModalInputWrap>
-          <StyledModalLabel>{"Label: "}</StyledModalLabel>
-          <StyledModalInputWrap>
-            <Input
-              value={label}
-              onChangeFn={(newType: string) => setLabel(newType)}
-              changeOnType
-              autoFocus
-            />
-          </StyledModalInputWrap>
-          <StyledModalLabel>{"Detail: "}</StyledModalLabel>
-          <StyledModalInputWrap>
-            <Input
-              value={detail}
-              onChangeFn={(newType: string) => setDetail(newType)}
-              changeOnType
-            />
-          </StyledModalInputWrap>
-          {/* Suggester territory */}
-          {(selectedCategory === "T" || selectedCategory === "S") && (
+        <StyledContent>
+          <StyledModalForm>
+            <StyledModalLabel>{"Category: "}</StyledModalLabel>
+            <StyledModalInputWrap>
+              <Input
+                type="select"
+                value={selectedCategory}
+                options={categories}
+                inverted
+                suggester
+                onChangeFn={(newCategory: string) =>
+                  setSelectedCategory(newCategory)
+                }
+              />
+              <StyledTypeBar
+                entity={`entity${selectedCategory}`}
+              ></StyledTypeBar>
+            </StyledModalInputWrap>
+            <StyledModalLabel>{"Label: "}</StyledModalLabel>
+            <StyledModalInputWrap>
+              <Input
+                value={label}
+                onChangeFn={(newType: string) => setLabel(newType)}
+                changeOnType
+                autoFocus
+              />
+            </StyledModalInputWrap>
+            <StyledModalLabel>{"Detail: "}</StyledModalLabel>
+            <StyledModalInputWrap>
+              <Input
+                value={detail}
+                onChangeFn={(newType: string) => setDetail(newType)}
+                changeOnType
+              />
+            </StyledModalInputWrap>
+            {/* Suggester territory */}
+            {(selectedCategory === "T" || selectedCategory === "S") && (
+              <>
+                <StyledModalLabel>
+                  {selectedCategory === "T"
+                    ? "Parent territory: "
+                    : "Territory: "}
+                </StyledModalLabel>
+                <StyledModalInputWrap>
+                  {territory ? (
+                    <Tag
+                      propId={territory.id}
+                      label={territory.label}
+                      category={territory.class}
+                      tooltipPosition={"left center"}
+                      button={
+                        <Button
+                          key="d"
+                          icon={<FaUnlink />}
+                          color="danger"
+                          inverted={true}
+                          tooltip="unlink actant"
+                          onClick={() => {
+                            setTerritoryId("");
+                          }}
+                        />
+                      }
+                    />
+                  ) : (
+                    <EntitySuggester
+                      inputWidth={96}
+                      allowCreate={false}
+                      categoryTypes={[ActantType.Territory]}
+                      onSelected={(newSelectedId: string) => {
+                        setTerritoryId(newSelectedId);
+                      }}
+                    />
+                  )}
+                </StyledModalInputWrap>
+              </>
+            )}
+          </StyledModalForm>
+          {userRole === UserRole.Admin && (
             <>
-              <StyledModalLabel>
-                {selectedCategory === "T"
-                  ? "Parent territory: "
-                  : "Territory: "}
-              </StyledModalLabel>
-              <StyledModalInputWrap>
-                {territory ? (
-                  <Tag
-                    propId={territory.id}
-                    label={territory.label}
-                    category={territory.class}
-                    tooltipPosition={"left center"}
-                    button={
-                      <Button
-                        key="d"
-                        icon={<FaUnlink />}
-                        color="danger"
-                        inverted={true}
-                        tooltip="unlink actant"
-                        onClick={() => {
-                          setTerritoryId("");
-                        }}
-                      />
-                    }
-                  />
-                ) : (
-                  <EntitySuggester
-                    inputWidth={96}
-                    allowCreate={false}
-                    categoryTypes={[ActantType.Territory]}
-                    onSelected={(newSelectedId: string) => {
-                      setTerritoryId(newSelectedId);
-                    }}
-                  />
-                )}
-              </StyledModalInputWrap>
+              {selectedCategory === "T" && !territoryId ? (
+                <StyledNote>
+                  {"Territory will be added under root"}
+                  <br />
+                  {"when nothing is selected"}
+                </StyledNote>
+              ) : (
+                <div />
+              )}
             </>
           )}
-        </StyledModalForm>
-        <i>
-          {selectedCategory === "T" && !territoryId
-            ? "Territory will be added under root when nothing is selected"
-            : ""}
-        </i>
+        </StyledContent>
       </ModalContent>
       <ModalFooter>
         <ButtonGroup>
@@ -185,7 +201,11 @@ export const SuggesterModal: React.FC<SuggesterModal> = ({
             onClick={() => {
               if (selectedCategory === "S" && !territoryId) {
                 toast.warning("Territory is required!");
-              } else if (selectedCategory === "T" && !territoryId) {
+              } else if (
+                selectedCategory === "T" &&
+                !territoryId &&
+                userRole !== UserRole.Admin
+              ) {
                 toast.warning("Parent territory is required!");
               } else {
                 handleCreateActant();
