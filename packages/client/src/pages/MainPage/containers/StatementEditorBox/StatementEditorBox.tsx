@@ -513,18 +513,20 @@ export const StatementEditorBox: React.FC = () => {
               <Loader size={20} show={isFetchingTerritory} />
             </StyledBreadcrumbWrap>
           </StyledEditorPreSection>
-          <StyledEditorPreSection>
-            {"Move to territory: "}
-            <EntitySuggester
-              filterEditorRights
-              inputWidth={96}
-              allowCreate={false}
-              categoryTypes={[ActantType.Territory]}
-              onSelected={(newSelectedId: string) => {
-                moveStatementMutation.mutate(newSelectedId);
-              }}
-            />
-          </StyledEditorPreSection>
+          {userCanEdit && (
+            <StyledEditorPreSection>
+              {"Move to territory: "}
+              <EntitySuggester
+                filterEditorRights
+                inputWidth={96}
+                allowCreate={false}
+                categoryTypes={[ActantType.Territory]}
+                onSelected={(newSelectedId: string) => {
+                  moveStatementMutation.mutate(newSelectedId);
+                }}
+              />
+            </StyledEditorPreSection>
+          )}
           <StyledEditorSection firstSection key="editor-section-summary">
             <StyledEditorSectionContent firstSection>
               <div>
