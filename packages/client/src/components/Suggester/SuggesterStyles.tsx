@@ -46,9 +46,13 @@ export const StyledInputWrapper = styled.div<InputWrapper>`
 export const StyledSuggesterButton = styled.div`
   border: 1px solid ${({ theme }) => theme.color["primary"]};
 `;
-export const StyledSuggestionCancelButton = styled.div`
+interface StyledSuggestionCancelButton {
+  hasButton: boolean;
+}
+export const StyledSuggestionCancelButton = styled.div<StyledSuggestionCancelButton>`
   position: absolute;
-  right: 2.5rem;
+  right: ${({ theme, hasButton }) =>
+    hasButton ? theme.space[10] : theme.space[1]};
   top: 4px;
   svg {
     color: ${({ theme }) => theme.color["danger"]};
