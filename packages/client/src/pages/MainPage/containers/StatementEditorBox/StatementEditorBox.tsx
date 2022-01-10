@@ -479,6 +479,20 @@ export const StatementEditorBox: React.FC = () => {
     }
   };
 
+  const moveStatementMutation = useMutation(
+    async (newTerritoryId: string) => {
+      console.log(newTerritoryId);
+      await api.actantsUpdate(statementId, {
+        data: { territory: { id: newTerritoryId, order: -1 } },
+      });
+    },
+    {
+      onSuccess: (data, variables) => {
+        setTerritoryId(variables);
+      },
+    }
+  );
+
   return (
     <>
       {statement ? (
@@ -499,6 +513,20 @@ export const StatementEditorBox: React.FC = () => {
               <Loader size={20} show={isFetchingTerritory} />
             </StyledBreadcrumbWrap>
           </StyledEditorPreSection>
+          {userCanEdit && (
+            <StyledEditorPreSection>
+              {"Move to territory: "}
+              <EntitySuggester
+                filterEditorRights
+                inputWidth={96}
+                allowCreate={false}
+                categoryTypes={[ActantType.Territory]}
+                onSelected={(newSelectedId: string) => {
+                  moveStatementMutation.mutate(newSelectedId);
+                }}
+              />
+            </StyledEditorPreSection>
+          )}
           <StyledEditorSection firstSection key="editor-section-summary">
             <StyledEditorSectionContent firstSection>
               <div>

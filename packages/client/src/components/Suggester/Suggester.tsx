@@ -195,7 +195,7 @@ export const Suggester: React.FC<SuggesterProps> = ({
             }}
           />
           {typed.length > 0 && (
-            <StyledSuggestionCancelButton>
+            <StyledSuggestionCancelButton hasButton={allowCreate}>
               <MdCancel onClick={() => onCancel()} />
             </StyledSuggestionCancelButton>
           )}
@@ -231,6 +231,7 @@ export const Suggester: React.FC<SuggesterProps> = ({
                   <React.Fragment key={si}>
                     <StyledSuggestionLineActions isSelected={selected === si}>
                       <FaPlayCircle
+                        color={theme.color["black"]}
                         onClick={() => {
                           onPick(suggestion);
                         }}

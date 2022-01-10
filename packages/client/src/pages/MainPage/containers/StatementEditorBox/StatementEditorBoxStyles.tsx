@@ -21,6 +21,7 @@ interface StyledEditorPreSection {}
 export const StyledEditorPreSection = styled.div<StyledEditorPreSection>`
   padding: ${({ theme }) => theme.space[3]};
   color: ${({ theme }) => theme.color["info"]};
+  font-size: ${({ theme }) => theme.fontSize["sm"]};
 `;
 interface StyledEditorSection {
   firstSection?: boolean;
