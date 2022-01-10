@@ -25,6 +25,7 @@ import { userRoleDict } from "@shared/dictionaries";
 import { useQuery } from "react-query";
 import api from "api";
 import { FaUnlink } from "react-icons/fa";
+import { toast } from "react-toastify";
 
 interface SuggesterModal {
   show?: boolean;
@@ -47,7 +48,6 @@ export const SuggesterModal: React.FC<SuggesterModal> = ({
   );
   const [label, setLabel] = useState<string>(typed);
   const [detail, setDetail] = useState<string>("");
-  const [role, setRole] = useState<UserRole>(userRoleDict[1].value);
   const [territoryId, setTerritoryId] = useState<string>("");
 
   const handleCreateActant = () => {
@@ -77,13 +77,6 @@ export const SuggesterModal: React.FC<SuggesterModal> = ({
       enabled: !!territoryId && api.isLoggedIn(),
     }
   );
-
-  useEffect(() => {
-    console.log(territory);
-    // if (territory) {
-    //   setRole(UserRole[territory.right]);
-    // }
-  }, [territory]);
 
   return (
     <Modal
@@ -130,7 +123,9 @@ export const SuggesterModal: React.FC<SuggesterModal> = ({
           {(selectedCategory === "T" || selectedCategory === "S") && (
             <>
               <StyledModalLabel>
-                {selectedCategory === "T" ? "Parent territory" : "Territory: "}
+                {selectedCategory === "T"
+                  ? "Parent territory: "
+                  : "Territory: "}
               </StyledModalLabel>
               <StyledModalInputWrap>
                 {territory ? (
@@ -165,44 +160,12 @@ export const SuggesterModal: React.FC<SuggesterModal> = ({
               </StyledModalInputWrap>
             </>
           )}
-          {/* UserRole */}
-          {selectedCategory === "T" && (
-            <>
-              <StyledModalLabel>{"User role: "}</StyledModalLabel>
-              <StyledModalInputWrap>
-                <AttributeButtonGroup
-                  noMargin
-                  options={[
-                    {
-                      longValue: userRoleDict[0].label,
-                      shortValue: userRoleDict[0].label,
-                      selected: role === userRoleDict[0].value,
-                      onClick: () => {
-                        setRole(userRoleDict[0].value);
-                      },
-                    },
-                    {
-                      longValue: userRoleDict[1].label,
-                      shortValue: userRoleDict[1].label,
-                      selected: role === userRoleDict[1].value,
-                      onClick: () => {
-                        setRole(userRoleDict[1].value);
-                      },
-                    },
-                    {
-                      longValue: userRoleDict[2].label,
-                      shortValue: userRoleDict[2].label,
-                      selected: role === userRoleDict[2].value,
-                      onClick: () => {
-                        setRole(userRoleDict[2].value);
-                      },
-                    },
-                  ]}
-                />
-              </StyledModalInputWrap>
-            </>
-          )}
         </StyledModalForm>
+        <i>
+          {selectedCategory === "T" && !territoryId
+            ? "Territory will be added under root when nothing is selected"
+            : ""}
+        </i>
       </ModalContent>
       <ModalFooter>
         <ButtonGroup>
@@ -216,13 +179,18 @@ export const SuggesterModal: React.FC<SuggesterModal> = ({
             }}
           />
           <Button
-            // disabled
             key="submit"
             label="Submit"
             color="primary"
             onClick={() => {
-              handleCreateActant();
-              closeModal();
+              if (selectedCategory === "S" && !territoryId) {
+                toast.warning("Territory is required!");
+              } else if (selectedCategory === "T" && !territoryId) {
+                toast.warning("Parent territory is required!");
+              } else {
+                handleCreateActant();
+                closeModal();
+              }
             }}
           />
         </ButtonGroup>

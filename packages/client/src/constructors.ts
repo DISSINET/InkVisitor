@@ -62,12 +62,14 @@ export const CProp = (): IProp => ({
 
 export const CStatement = (
   territoryId: string,
-  userRole: UserRole
+  userRole: UserRole,
+  label?: string,
+  detail?: string
 ): IStatement => ({
   id: uuidv4(),
   class: ActantType.Statement,
-  label: "",
-  detail: "",
+  label: label ? label : "",
+  detail: detail ? detail : "",
   status:
     userRole === UserRole.Admin ? ActantStatus.Approved : ActantStatus.Pending,
   language: Language.Latin,
@@ -211,12 +213,13 @@ export const CTerritoryActant = (
   label: string,
   parentId: string,
   parentOrder: number,
-  userRole: UserRole
+  userRole: UserRole,
+  detail?: string
 ): ITerritory => ({
   id: uuidv4(),
   class: ActantType.Territory,
   label: label,
-  detail: "",
+  detail: detail ? detail : "",
   status:
     userRole === UserRole.Admin ? ActantStatus.Approved : ActantStatus.Pending,
   language: Language.Latin,

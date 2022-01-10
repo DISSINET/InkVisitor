@@ -160,16 +160,21 @@ export const EntitySuggester: React.FC<EntitySuggesterI> = ({
     ) {
       const newStatement = CStatement(
         newCreated.territoryId,
-        localStorage.getItem("userrole") as UserRole
+        localStorage.getItem("userrole") as UserRole,
+        newCreated.label,
+        newCreated.detail
       );
       actantsCreateMutation.mutate(newStatement);
-    } else if (newCreated.category === ActantType.Territory) {
-      // TODO: add possibility to select territory
+    } else if (
+      newCreated.category === ActantType.Territory &&
+      newCreated.territoryId
+    ) {
       const newActant = CTerritoryActant(
         newCreated.label,
-        rootTerritoryId,
+        newCreated.territoryId,
         -1,
-        localStorage.getItem("userrole") as UserRole
+        localStorage.getItem("userrole") as UserRole,
+        newCreated.detail
       );
       actantsCreateMutation.mutate(newActant);
     } else {
