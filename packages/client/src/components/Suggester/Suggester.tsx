@@ -231,6 +231,7 @@ export const Suggester: React.FC<SuggesterProps> = ({
                   <React.Fragment key={si}>
                     <StyledSuggestionLineActions isSelected={selected === si}>
                       <FaPlayCircle
+                        color={theme.color["black"]}
                         onClick={() => {
                           onPick(suggestion);
                         }}

@@ -479,6 +479,20 @@ export const StatementEditorBox: React.FC = () => {
     }
   };
 
+  const moveStatementMutation = useMutation(
+    async (newTerritoryId: string) => {
+      console.log(newTerritoryId);
+      await api.actantsUpdate(statementId, {
+        data: { territory: { id: newTerritoryId, order: -1 } },
+      });
+    },
+    {
+      onSuccess: (data, variables) => {
+        setTerritoryId(variables);
+      },
+    }
+  );
+
   return (
     <>
       {statement ? (
@@ -507,8 +521,7 @@ export const StatementEditorBox: React.FC = () => {
               allowCreate={false}
               categoryTypes={[ActantType.Territory]}
               onSelected={(newSelectedId: string) => {
-                // Move to different territory
-                console.log(newSelectedId);
+                moveStatementMutation.mutate(newSelectedId);
               }}
             />
           </StyledEditorPreSection>

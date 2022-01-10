@@ -42,7 +42,7 @@ export const SuggesterModal: React.FC<SuggesterModal> = ({
   closeModal,
 }) => {
   const [selectedCategory, setSelectedCategory] = useState<string>(
-    category && category !== "*" ? category : categories[0].label
+    category !== ActantType.Any ? category : categories[0].label
   );
   const [label, setLabel] = useState<string>(typed);
   const [detail, setDetail] = useState<string>("");
