@@ -25,10 +25,10 @@ const initialData = {
   language: Language.Empty,
   notes: [],
 };
-export const StatementListBreadcrumbItem: React.FC<StatementListBreadcrumbItem> = ({
-  territoryId,
-}) => {
-  const { setTerritoryId } = useSearchParams();
+export const StatementListBreadcrumbItem: React.FC<
+  StatementListBreadcrumbItem
+> = ({ territoryId }) => {
+  const { setTerritoryId, territoryId: paramsTerritoryId } = useSearchParams();
 
   const dispatch = useAppDispatch();
 
@@ -54,16 +54,18 @@ export const StatementListBreadcrumbItem: React.FC<StatementListBreadcrumbItem> 
           <EntityTag
             actant={territoryData ? territoryData : initialData}
             button={
-              <Button
-                icon={<BsArrow90DegLeft />}
-                color="plain"
-                inverted={true}
-                tooltip="go to territory"
-                onClick={() => {
-                  dispatch(setTreeInitialized(false));
-                  setTerritoryId(territoryId);
-                }}
-              />
+              paramsTerritoryId !== territoryId && (
+                <Button
+                  icon={<BsArrow90DegLeft />}
+                  color="plain"
+                  inverted={true}
+                  tooltip="go to territory"
+                  onClick={() => {
+                    dispatch(setTreeInitialized(false));
+                    setTerritoryId(territoryId);
+                  }}
+                />
+              )
             }
           />
           <Loader show={territoryIsFetching && !territoryData} size={18} />

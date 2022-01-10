@@ -1,71 +1,48 @@
-import React, { useMemo, useEffect, Profiler } from "react";
-import { useQuery, useMutation, useQueryClient } from "react-query";
-import api from "api";
+import { ActantType, UserRoleMode } from "@shared/enums";
 import {
-  FaTrashAlt,
-  FaPlus,
-  FaUnlink,
-  FaCaretUp,
-  FaCaretDown,
-} from "react-icons/fa";
-import { EntityTag } from "./../";
+  IProp,
+  IResponseStatement,
+  IStatementActant,
+  IStatementAction,
+  IStatementReference,
+} from "@shared/types";
+import api from "api";
+import { Button, Input, Loader, MultiInput } from "components";
 import {
   CProp,
   CReference,
   CStatementActant,
   CStatementAction,
 } from "constructors";
+import { useSearchParams } from "hooks";
+import React, { useEffect, useMemo } from "react";
+import { BsArrow90DegLeft, BsArrowRightShort } from "react-icons/bs";
+import { FaTrashAlt, FaUnlink } from "react-icons/fa";
+import { useMutation, useQuery, useQueryClient } from "react-query";
+import { excludedSuggesterEntities } from "Theme/constants";
+import { AttributeButtonGroup } from "../AttributeButtonGroup/AttributeButtonGroup";
+import { JSONExplorer } from "../JSONExplorer/JSONExplorer";
+import { PropGroup } from "../PropGroup/PropGroup";
+import { StatementListBreadcrumbItem } from "../StatementsListBox/StatementListHeader/StatementListBreadcrumbItem/StatementListBreadcrumbItem";
+import { StyledItemBox } from "../StatementsListBox/StatementListHeader/StatementListBreadcrumbItem/StatementListBreadcrumbItemStyles";
+import { EntitySuggester, EntityTag } from "./../";
+import { AuditTable } from "./../AuditTable/AuditTable";
+import { StatementEditorActantTable } from "./StatementEditorActantTable/StatementEditorActantTable";
+import { StatementEditorActionTable } from "./StatementEditorActionTable/StatementEditorActionTable";
 import {
-  IActant,
-  IStatementReference,
-  IResponseStatement,
-  IProp,
-  IStatementAction,
-  IStatementActant,
-} from "@shared/types";
-import {
-  AttributeIcon,
-  Button,
-  ButtonGroup,
-  Input,
-  Loader,
-  MultiInput,
-} from "components";
-import { EntitySuggester } from "./../";
-import {
-  StyledReferencesListColumn,
-  StyledListHeaderColumn,
-  StyledPropsActantHeader,
-  StyledPropsActantList,
-  StyledPropLineColumn,
-  StyledReferencesList,
-  StyledTagsList,
-  StyledTagsListItem,
+  StyledBreadcrumbWrap,
+  StyledEditorActantTableWrapper,
+  StyledEditorPreSection,
   StyledEditorSection,
   StyledEditorSectionContent,
   StyledEditorSectionHeader,
-  StyledEditorActantTableWrapper,
-  StyledPropButtonGroup,
-  StyledEditorPreSection,
+  StyledListHeaderColumn,
+  StyledReferencesList,
+  StyledReferencesListColumn,
+  StyledTagsList,
+  StyledTagsListItem,
   StyledTagWrapper,
-  StyledBreadcrumbWrap,
 } from "./StatementEditorBoxStyles";
-import { StatementEditorActantTable } from "./StatementEditorActantTable/StatementEditorActantTable";
-import { StatementEditorActionTable } from "./StatementEditorActionTable/StatementEditorActionTable";
-import { ColumnInstance } from "react-table";
-import { useSearchParams } from "hooks";
-import { AttributeButtonGroup } from "../AttributeButtonGroup/AttributeButtonGroup";
-import { ActantType, UserRoleMode } from "@shared/enums";
-import { StyledSubRow } from "./StatementEditorActionTable/StatementEditorActionTableStyles";
-import { StatementListBreadcrumbItem } from "../StatementsListBox/StatementListHeader/StatementListBreadcrumbItem/StatementListBreadcrumbItem";
-import { excludedSuggesterEntities } from "Theme/constants";
-import { BsArrow90DegLeft, BsArrowRightShort } from "react-icons/bs";
-import { StyledItemBox } from "../StatementsListBox/StatementListHeader/StatementListBreadcrumbItem/StatementListBreadcrumbItemStyles";
-import { AuditTable } from "./../AuditTable/AuditTable";
-import { JSONExplorer } from "../JSONExplorer/JSONExplorer";
-import { AttributesGroupEditor } from "../AttributesEditor/AttributesGroupEditor";
-import { AttributeGroupDataObject } from "types";
-import { PropGroup } from "../PropGroup/PropGroup";
 
 const classesActants = [
   ActantType.Statement,
@@ -517,23 +494,7 @@ export const StatementEditorBox: React.FC = () => {
                   );
                 })}
               {territoryData && (
-                <StyledItemBox>
-                  <BsArrowRightShort />
-                  <EntityTag
-                    actant={territoryData}
-                    button={
-                      <Button
-                        icon={<BsArrow90DegLeft />}
-                        tooltip="go to territory"
-                        color="plain"
-                        inverted
-                        onClick={() => {
-                          setTerritoryId(territoryData.id);
-                        }}
-                      />
-                    }
-                  />
-                </StyledItemBox>
+                <StatementListBreadcrumbItem territoryId={territoryData.id} />
               )}
               <Loader size={20} show={isFetchingTerritory} />
             </StyledBreadcrumbWrap>
