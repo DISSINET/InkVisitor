@@ -1,31 +1,30 @@
+import { ActantStatus, ActantType } from "@shared/enums";
+import { IOption } from "@shared/types";
+import { Button, Input, Loader, Tag } from "components";
+import useKeypress from "hooks/useKeyPress";
 import React, { useState } from "react";
 import { DragObjectWithType, DropTargetMonitor, useDrop } from "react-dnd";
-import { FaPlus, FaPlayCircle } from "react-icons/fa";
+import { FaPlayCircle, FaPlus } from "react-icons/fa";
 import { MdCancel } from "react-icons/md";
-
-import { Button, Input, Loader, Tag } from "components";
-import { IOption } from "@shared/types";
+import { toast } from "react-toastify";
+import theme from "Theme/theme";
 import { ItemTypes } from "types";
+import { SuggesterKeyPress } from "./SuggesterKeyPress";
+import { SuggesterModal } from "./SuggesterModal";
 import {
-  StyledSuggester,
+  StyledAiOutlineWarning,
   StyledInputWrapper,
+  StyledRelativePosition,
+  StyledSuggester,
   StyledSuggesterButton,
   StyledSuggesterList,
+  StyledSuggestionCancelButton,
+  StyledSuggestionLineActions,
   StyledSuggestionLineIcons,
   StyledSuggestionLineTag,
-  StyledSuggestionLineActions,
-  StyledSuggestionCancelButton,
-  StyledRelativePosition,
-  StyledTypeBar,
   StyledTagWrapper,
-  StyledAiOutlineWarning,
+  StyledTypeBar,
 } from "./SuggesterStyles";
-import { SuggesterKeyPress } from "./SuggesterKeyPress";
-import { toast } from "react-toastify";
-import { SuggesterModal } from "./SuggesterModal";
-import { ActantStatus, ActantType } from "@shared/enums";
-import useKeypress from "hooks/useKeyPress";
-import theme from "Theme/theme";
 
 export interface SuggestionI {
   id: string;
@@ -122,7 +121,11 @@ export const Suggester: React.FC<SuggesterProps> = ({
 
   const handleEnterPress = () => {
     if (selected === -1 && typed.length > 0) {
-      if (category === ActantType.Any) {
+      if (
+        category === ActantType.Any ||
+        category === ActantType.Statement ||
+        category === ActantType.Territory
+      ) {
         setShowModal(true);
       } else {
         onCreate({ label: typed, category: category });
@@ -137,7 +140,11 @@ export const Suggester: React.FC<SuggesterProps> = ({
 
   const handleAddBtnClick = () => {
     if (typed.length > 0) {
-      if (category === ActantType.Any) {
+      if (
+        category === ActantType.Any ||
+        category === ActantType.Statement ||
+        category === ActantType.Territory
+      ) {
         setShowModal(true);
       } else {
         onCreate({ label: typed, category: category });
