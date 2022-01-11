@@ -122,12 +122,12 @@ const MultiValue = (props: MultiValueProps<any>): React.ReactElement => {
 const ValueContainer = ({
   children,
   ...props
-}: {
-  children: any;
-  props: ValueContainerProps<any, any, any>;
-}): React.ReactElement => {
-  const currentValues: DropdownItem[] = props.getValue();
-  console.log(currentValues);
+}: { children: any } & ValueContainerProps<
+  any,
+  any,
+  any
+>): React.ReactElement => {
+  const currentValues: DropdownItem[] = props.getValue().map((v) => v);
   let toBeRendered = children;
   if (currentValues.some((val) => val.value === allEntities.value)) {
     toBeRendered = [[children[0][0]], children[1]];
