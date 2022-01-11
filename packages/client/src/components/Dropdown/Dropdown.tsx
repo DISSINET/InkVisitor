@@ -1,6 +1,4 @@
-import { entitiesDict } from "@shared/dictionaries";
 import { allEntities } from "@shared/dictionaries/entity";
-import { ActantType } from "@shared/enums";
 import React, { ReactNode } from "react";
 import {
   GroupedOptionsType,
@@ -11,6 +9,7 @@ import {
   MultiValueProps,
   ValueContainerProps,
 } from "react-select";
+import { DropdownItem } from "types";
 import { StyledSelect, StyledSelectWrapper } from "./DropdownStyles";
 
 interface Dropdown {
@@ -84,10 +83,8 @@ export const Dropdown: React.FC<Dropdown> = ({
             let result = [];
             if (selected.length === options.length) {
               // kdyz jsou vybrany vsechny
-              console.log("all selected before change");
               if (selected.includes(allEntities)) {
                 //
-                console.log("before removing allEntities", selected);
                 result = selected.filter(
                   (option: { label: string; value: string }) =>
                     option.value !== allEntities.value
@@ -129,8 +126,8 @@ const ValueContainer = ({
   children: any;
   props: ValueContainerProps<any, any, any>;
 }): React.ReactElement => {
-  const currentValues = props.getValue();
-
+  const currentValues: DropdownItem[] = props.getValue();
+  console.log(currentValues);
   let toBeRendered = children;
   if (currentValues.some((val) => val.value === allEntities.value)) {
     toBeRendered = [[children[0][0]], children[1]];

@@ -4,6 +4,7 @@ import {
   entitiesDict,
   languageDict,
 } from "@shared/dictionaries";
+import { allEntities } from "@shared/dictionaries/entity";
 import { ActantType, Language, UserRoleMode } from "@shared/enums";
 import { IStatement } from "@shared/types";
 import api from "api";
@@ -636,13 +637,14 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                         isMulti
                         allowSelectAll
                         options={entitiesDict}
-                        value={entitiesDict.filter((i: any) =>
-                          actant.data.entities.s.includes(i.value)
-                        )}
+                        value={[allEntities]
+                          .concat(entitiesDict)
+                          .filter((i: any) =>
+                            actant.data.entities.s.includes(i.value)
+                          )}
                         width="full"
                         noOptionsMessage={() => "no entity"}
                         placeholder={"no entity"}
-                        // hideSelectedOptions
                         onChange={(newValue: any) => {
                           const oldData = { ...actant.data };
                           updateActantMutation.mutate({
@@ -705,13 +707,15 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                       <Dropdown
                         disabled={!userCanEdit}
                         isMulti
+                        allowSelectAll
                         options={entitiesDict}
-                        value={entitiesDict.filter((i: any) =>
-                          actant.data.entities.a1.includes(i.value)
-                        )}
+                        value={[allEntities]
+                          .concat(entitiesDict)
+                          .filter((i: any) =>
+                            actant.data.entities.a1.includes(i.value)
+                          )}
                         placeholder={"no entity"}
                         width="full"
-                        hideSelectedOptions={true}
                         onChange={(newValue: any) => {
                           const oldData = { ...actant.data };
                           updateActantMutation.mutate({
@@ -775,11 +779,13 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                       <Dropdown
                         disabled={!userCanEdit}
                         isMulti
+                        allowSelectAll
                         options={entitiesDict}
-                        value={entitiesDict.filter((i: any) =>
-                          actant.data.entities.a2.includes(i.value)
-                        )}
-                        hideSelectedOptions={true}
+                        value={[allEntities]
+                          .concat(entitiesDict)
+                          .filter((i: any) =>
+                            actant.data.entities.a2.includes(i.value)
+                          )}
                         placeholder={"no entity"}
                         width="full"
                         onChange={(newValue: any) => {

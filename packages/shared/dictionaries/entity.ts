@@ -1,11 +1,13 @@
+import { DropdownItem } from "@shared/packages/client/src/types";
 import { ActantType } from "../enums";
 
-export const allEntities = {
+export const allEntities: DropdownItem = {
   value: ActantType.Any,
   label: "Any",
   info: "",
 };
-export const entitiesDict = [
+
+export const entitiesDict: DropdownItem[] = [
   {
     value: ActantType.Action,
     label: "Action",
