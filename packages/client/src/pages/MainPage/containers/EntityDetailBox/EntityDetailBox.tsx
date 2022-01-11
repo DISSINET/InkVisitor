@@ -1,5 +1,13 @@
-import React, { useEffect, useState, useMemo } from "react";
-
+import {
+  actantLogicalTypeDict,
+  actantStatusDict,
+  entitiesDict,
+  languageDict,
+} from "@shared/dictionaries";
+import { allEntities } from "@shared/dictionaries/entity";
+import { ActantType, Language, UserRoleMode } from "@shared/enums";
+import { IStatement } from "@shared/types";
+import api from "api";
 import {
   Button,
   ButtonGroup,
@@ -9,63 +17,47 @@ import {
   MultiInput,
   Submit,
 } from "components";
-import {
-  StyledDetailSection,
-  StyledDetailSectionHeader,
-  StyledDetailSectionUsedTable,
-  StyledDetailHeaderColumn,
-  StyledDetailSectionUsedTableCell,
-  StyledDetailSectionMetaTableButtonGroup,
-  StyledDetailSectionMetaTableCell,
-  StyledDetailContentRow,
-  StyledDetailForm,
-  StyledDetailSectionUsedText,
-  StyledDetailSectionUsedPageManager,
-  StyledDetailContentRowLabel,
-  StyledDetailContentRowValue,
-  StyledDetailContentRowValueID,
-  StyledActantPreviewRow,
-  StyledTagWrap,
-  StyledDetailSectionContentUsedIn,
-  StyledDetailSectionContent,
-  StyledDetailWrapper,
-} from "./EntityDetailBoxStyles";
-import api from "api";
-import { useMutation, useQuery, useQueryClient } from "react-query";
-import { IProp, IResponseStatement, IStatement } from "@shared/types";
+import { CProp } from "constructors";
+import { useSearchParams } from "hooks";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   FaEdit,
   FaPlus,
-  FaTrashAlt,
-  FaStepBackward,
-  FaStepForward,
   FaRecycle,
   FaRegCopy,
+  FaStepBackward,
+  FaStepForward,
+  FaTrashAlt,
 } from "react-icons/fa";
-import { EntityTag } from "..";
-
-import { CMetaStatement, CProp } from "constructors";
-import { findPositionInStatement } from "utils";
-import {
-  actantLogicalTypeDict,
-  actantStatusDict,
-  languageDict,
-  entitiesDict,
-} from "@shared/dictionaries";
-import {
-  ActantType,
-  Language,
-  Position,
-  UserRole,
-  UserRoleMode,
-} from "@shared/enums";
+import { useMutation, useQuery, useQueryClient } from "react-query";
 import { toast } from "react-toastify";
-import { EntityDetailMetaTable } from "./EntityDetailMetaTable/EntityDetailMetaTable";
-import { useSearchParams } from "hooks";
+import { findPositionInStatement } from "utils";
+import { EntityTag } from "..";
 import { AttributeButtonGroup } from "../AttributeButtonGroup/AttributeButtonGroup";
 import { AuditTable } from "../AuditTable/AuditTable";
 import { JSONExplorer } from "../JSONExplorer/JSONExplorer";
 import { PropGroup } from "../PropGroup/PropGroup";
+import {
+  StyledActantPreviewRow,
+  StyledDetailContentRow,
+  StyledDetailContentRowLabel,
+  StyledDetailContentRowValue,
+  StyledDetailContentRowValueID,
+  StyledDetailForm,
+  StyledDetailHeaderColumn,
+  StyledDetailSection,
+  StyledDetailSectionContent,
+  StyledDetailSectionContentUsedIn,
+  StyledDetailSectionHeader,
+  StyledDetailSectionMetaTableButtonGroup,
+  StyledDetailSectionMetaTableCell,
+  StyledDetailSectionUsedPageManager,
+  StyledDetailSectionUsedTable,
+  StyledDetailSectionUsedTableCell,
+  StyledDetailSectionUsedText,
+  StyledDetailWrapper,
+  StyledTagWrap,
+} from "./EntityDetailBoxStyles";
 
 interface EntityDetailBox {}
 export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
@@ -642,15 +634,17 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                     <StyledDetailContentRowValue>
                       <Dropdown
                         disabled={!userCanEdit}
-                        isMulti={true}
+                        isMulti
+                        allowSelectAll
                         options={entitiesDict}
-                        value={entitiesDict.filter((i: any) =>
-                          actant.data.entities.s.includes(i.value)
-                        )}
+                        value={[allEntities]
+                          .concat(entitiesDict)
+                          .filter((i: any) =>
+                            actant.data.entities.s.includes(i.value)
+                          )}
                         width="full"
-                        noOptionsMessage={() => "* any"}
-                        placeholder={"* any"}
-                        hideSelectedOptions={true}
+                        noOptionsMessage={() => "no entity"}
+                        placeholder={"no entity"}
                         onChange={(newValue: any) => {
                           const oldData = { ...actant.data };
                           updateActantMutation.mutate({
@@ -712,14 +706,16 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                     <StyledDetailContentRowValue>
                       <Dropdown
                         disabled={!userCanEdit}
-                        isMulti={true}
+                        isMulti
+                        allowSelectAll
                         options={entitiesDict}
-                        value={entitiesDict.filter((i: any) =>
-                          actant.data.entities.a1.includes(i.value)
-                        )}
-                        placeholder={"* any"}
+                        value={[allEntities]
+                          .concat(entitiesDict)
+                          .filter((i: any) =>
+                            actant.data.entities.a1.includes(i.value)
+                          )}
+                        placeholder={"no entity"}
                         width="full"
-                        hideSelectedOptions={true}
                         onChange={(newValue: any) => {
                           const oldData = { ...actant.data };
                           updateActantMutation.mutate({
@@ -782,13 +778,15 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                     <StyledDetailContentRowValue>
                       <Dropdown
                         disabled={!userCanEdit}
-                        isMulti={true}
+                        isMulti
+                        allowSelectAll
                         options={entitiesDict}
-                        value={entitiesDict.filter((i: any) =>
-                          actant.data.entities.a2.includes(i.value)
-                        )}
-                        hideSelectedOptions={true}
-                        placeholder={"* any"}
+                        value={[allEntities]
+                          .concat(entitiesDict)
+                          .filter((i: any) =>
+                            actant.data.entities.a2.includes(i.value)
+                          )}
+                        placeholder={"no entity"}
                         width="full"
                         onChange={(newValue: any) => {
                           const oldData = { ...actant.data };
