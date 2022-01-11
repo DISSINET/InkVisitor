@@ -1,7 +1,7 @@
 # Dropdown
 
-## Any select
+## Any select setup
 
 - allowSelectAll = true
-- add "Any" entity to dictionary when defining prop value
-- example: entity.ts -> allEntities added before entitiesDictionary in value prop
+- concat "Any" entity to dictionary array when defining prop value (with type DropdownItem from types)
+- example: entity.ts -> allEntities added before entitiesDictionary in value prop before filtering selected values
