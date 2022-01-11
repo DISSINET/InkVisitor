@@ -251,16 +251,16 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
                   : panelWidths[1] + panelWidths[0] - collapsedPanelWidth
               }
             >
-              <Box
+              {/* <Box
                 height={actantId ? heightContent / 2 : heightContent}
                 label="Statements"
               >
                 <ScrollHandler />
                 <StatementListBox />
-              </Box>
+              </Box> */}
               {actantId && (
                 <Box
-                  height={heightContent / 2}
+                  // height={heightContent / 2}
                   label="Detail"
                   button={
                     actantId && (

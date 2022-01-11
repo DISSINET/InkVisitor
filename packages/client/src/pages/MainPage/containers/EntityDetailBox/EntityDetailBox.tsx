@@ -1,5 +1,12 @@
-import React, { useEffect, useState, useMemo } from "react";
-
+import {
+  actantLogicalTypeDict,
+  actantStatusDict,
+  entitiesDict,
+  languageDict,
+} from "@shared/dictionaries";
+import { ActantType, Language, UserRoleMode } from "@shared/enums";
+import { IStatement } from "@shared/types";
+import api from "api";
 import {
   Button,
   ButtonGroup,
@@ -9,63 +16,47 @@ import {
   MultiInput,
   Submit,
 } from "components";
-import {
-  StyledDetailSection,
-  StyledDetailSectionHeader,
-  StyledDetailSectionUsedTable,
-  StyledDetailHeaderColumn,
-  StyledDetailSectionUsedTableCell,
-  StyledDetailSectionMetaTableButtonGroup,
-  StyledDetailSectionMetaTableCell,
-  StyledDetailContentRow,
-  StyledDetailForm,
-  StyledDetailSectionUsedText,
-  StyledDetailSectionUsedPageManager,
-  StyledDetailContentRowLabel,
-  StyledDetailContentRowValue,
-  StyledDetailContentRowValueID,
-  StyledActantPreviewRow,
-  StyledTagWrap,
-  StyledDetailSectionContentUsedIn,
-  StyledDetailSectionContent,
-  StyledDetailWrapper,
-} from "./EntityDetailBoxStyles";
-import api from "api";
-import { useMutation, useQuery, useQueryClient } from "react-query";
-import { IProp, IResponseStatement, IStatement } from "@shared/types";
+import { CProp } from "constructors";
+import { useSearchParams } from "hooks";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   FaEdit,
   FaPlus,
-  FaTrashAlt,
-  FaStepBackward,
-  FaStepForward,
   FaRecycle,
   FaRegCopy,
+  FaStepBackward,
+  FaStepForward,
+  FaTrashAlt,
 } from "react-icons/fa";
-import { EntityTag } from "..";
-
-import { CMetaStatement, CProp } from "constructors";
-import { findPositionInStatement } from "utils";
-import {
-  actantLogicalTypeDict,
-  actantStatusDict,
-  languageDict,
-  entitiesDict,
-} from "@shared/dictionaries";
-import {
-  ActantType,
-  Language,
-  Position,
-  UserRole,
-  UserRoleMode,
-} from "@shared/enums";
+import { useMutation, useQuery, useQueryClient } from "react-query";
 import { toast } from "react-toastify";
-import { EntityDetailMetaTable } from "./EntityDetailMetaTable/EntityDetailMetaTable";
-import { useSearchParams } from "hooks";
+import { findPositionInStatement } from "utils";
+import { EntityTag } from "..";
 import { AttributeButtonGroup } from "../AttributeButtonGroup/AttributeButtonGroup";
 import { AuditTable } from "../AuditTable/AuditTable";
 import { JSONExplorer } from "../JSONExplorer/JSONExplorer";
 import { PropGroup } from "../PropGroup/PropGroup";
+import {
+  StyledActantPreviewRow,
+  StyledDetailContentRow,
+  StyledDetailContentRowLabel,
+  StyledDetailContentRowValue,
+  StyledDetailContentRowValueID,
+  StyledDetailForm,
+  StyledDetailHeaderColumn,
+  StyledDetailSection,
+  StyledDetailSectionContent,
+  StyledDetailSectionContentUsedIn,
+  StyledDetailSectionHeader,
+  StyledDetailSectionMetaTableButtonGroup,
+  StyledDetailSectionMetaTableCell,
+  StyledDetailSectionUsedPageManager,
+  StyledDetailSectionUsedTable,
+  StyledDetailSectionUsedTableCell,
+  StyledDetailSectionUsedText,
+  StyledDetailWrapper,
+  StyledTagWrap,
+} from "./EntityDetailBoxStyles";
 
 interface EntityDetailBox {}
 export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
@@ -651,7 +642,7 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                         width="full"
                         noOptionsMessage={() => "no entity"}
                         placeholder={"no entity"}
-                        hideSelectedOptions={true}
+                        // hideSelectedOptions
                         onChange={(newValue: any) => {
                           const oldData = { ...actant.data };
                           updateActantMutation.mutate({

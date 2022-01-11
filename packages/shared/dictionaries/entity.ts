@@ -1,5 +1,10 @@
 import { ActantType } from "../enums";
 
+export const allEntities = {
+  value: ActantType.Any,
+  label: "Any",
+  info: "",
+};
 export const entitiesDict = [
   {
     value: ActantType.Action,
