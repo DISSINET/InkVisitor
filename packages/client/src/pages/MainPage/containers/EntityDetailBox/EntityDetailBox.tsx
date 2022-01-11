@@ -642,14 +642,15 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                     <StyledDetailContentRowValue>
                       <Dropdown
                         disabled={!userCanEdit}
-                        isMulti={true}
+                        isMulti
+                        allowSelectAll
                         options={entitiesDict}
                         value={entitiesDict.filter((i: any) =>
                           actant.data.entities.s.includes(i.value)
                         )}
                         width="full"
-                        noOptionsMessage={() => "* any"}
-                        placeholder={"* any"}
+                        noOptionsMessage={() => "no entity"}
+                        placeholder={"no entity"}
                         hideSelectedOptions={true}
                         onChange={(newValue: any) => {
                           const oldData = { ...actant.data };
@@ -712,12 +713,12 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                     <StyledDetailContentRowValue>
                       <Dropdown
                         disabled={!userCanEdit}
-                        isMulti={true}
+                        isMulti
                         options={entitiesDict}
                         value={entitiesDict.filter((i: any) =>
                           actant.data.entities.a1.includes(i.value)
                         )}
-                        placeholder={"* any"}
+                        placeholder={"no entity"}
                         width="full"
                         hideSelectedOptions={true}
                         onChange={(newValue: any) => {
@@ -782,13 +783,13 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                     <StyledDetailContentRowValue>
                       <Dropdown
                         disabled={!userCanEdit}
-                        isMulti={true}
+                        isMulti
                         options={entitiesDict}
                         value={entitiesDict.filter((i: any) =>
                           actant.data.entities.a2.includes(i.value)
                         )}
                         hideSelectedOptions={true}
-                        placeholder={"* any"}
+                        placeholder={"no entity"}
                         width="full"
                         onChange={(newValue: any) => {
                           const oldData = { ...actant.data };

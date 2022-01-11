@@ -1,13 +1,17 @@
 import React, { ReactNode } from "react";
 import {
+  GroupedOptionsType,
   OptionsType,
   OptionTypeBase,
-  GroupedOptionsType,
   ValueType,
 } from "react-select";
-
+import { DropdownItem } from "types";
 import { StyledSelect, StyledSelectWrapper } from "./DropdownStyles";
-import { Tooltip } from "components";
+
+const allOption = {
+  label: "Select all",
+  value: "*",
+};
 
 interface Dropdown {
   options?: OptionsType<OptionTypeBase> | GroupedOptionsType<OptionTypeBase>;
@@ -26,9 +30,10 @@ interface Dropdown {
   noOptionsMessage?: Function;
   isClearable?: boolean;
   isMulti?: boolean;
+  allowSelectAll?: boolean;
 }
 export const Dropdown: React.FC<Dropdown> = ({
-  options,
+  options = [],
   value,
   onChange,
   components = undefined,
@@ -43,6 +48,7 @@ export const Dropdown: React.FC<Dropdown> = ({
   isClearable = false,
   isMulti = false,
   disabled = false,
+  allowSelectAll = false,
 }) => {
   return (
     <StyledSelectWrapper width={width}>
@@ -67,7 +73,9 @@ export const Dropdown: React.FC<Dropdown> = ({
           },
         }}
         onChange={onChange}
-        options={options}
+        options={
+          allowSelectAll ? [allOption, ...options[Symbol.iterator]()] : options
+        }
         width={width}
         hideSelectedOptions={hideSelectedOptions}
       />
