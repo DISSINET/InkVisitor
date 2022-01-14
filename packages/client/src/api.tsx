@@ -18,7 +18,11 @@ import {
 } from "@shared/types";
 import * as errors from "@shared/types/errors";
 import { toast } from "react-toastify";
-import { IRequestSearch } from "types";
+import {
+  IRequestSearch,
+  IRequestSearchEntity,
+  IRequestSearchStatement,
+} from "types";
 import { ActantType } from "@shared/enums";
 
 type FilterActantsI = {
@@ -364,13 +368,47 @@ class Api {
       throw { ...err.response.data };
     }
   }
+  /**
+   * Search
+   */
 
+  // deprecated method
   async actantsSearch(
     searchData: IRequestSearch
   ): Promise<AxiosResponse<IResponseSearch[]>> {
     try {
       const response = await this.connection.post(
         `/actants/search`,
+        searchData
+      );
+      return response;
+    } catch (err: any | AxiosError) {
+      throw { ...err.response.data };
+    }
+  }
+
+  // searching entity
+  async entitySearch(
+    searchData: IRequestSearchEntity
+  ): Promise<AxiosResponse<IResponseSearch[]>> {
+    try {
+      const response = await this.connection.post(
+        `/actants/search-entity`,
+        searchData
+      );
+      return response;
+    } catch (err: any | AxiosError) {
+      throw { ...err.response.data };
+    }
+  }
+
+  // searching statement
+  async statementSearch(
+    searchData: IRequestSearchStatement
+  ): Promise<AxiosResponse<IResponseSearch[]>> {
+    try {
+      const response = await this.connection.post(
+        `/actants/search-statement`,
         searchData
       );
       return response;
