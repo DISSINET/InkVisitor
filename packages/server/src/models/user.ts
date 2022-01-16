@@ -181,15 +181,6 @@ export default class User implements IDbModel, IUser {
     return raw;
   }
 
-  toJSON(): string {
-    const clone = {
-      ...this,
-    } as Record<string, unknown>;
-
-    delete clone.password;
-    return JSON.stringify(clone);
-  }
-
   static async getUser(
     dbInstance: Connection | undefined,
     id: string
