@@ -1,7 +1,4 @@
 import {
-  ActantType,
-  ActantStatus,
-  Language,
   Certainty,
   Elvl,
   Logic,

@@ -1,6 +1,6 @@
 import { IDbModel, UnknownObject, fillFlatObject, fillArray } from "./common";
 import { r as rethink, Connection, WriteResult, RDatum } from "rethinkdb-ts";
-import { IStatement, IActant, IResponseActant, IUser, IProp } from "@shared/types";
+import { IStatement, IActant, IResponseActant, IProp } from "@shared/types";
 import {
   ActantStatus,
   ActantType,
