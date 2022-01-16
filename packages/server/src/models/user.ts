@@ -8,10 +8,8 @@ import {
 import { r as rethink, Connection, WriteResult } from "rethinkdb-ts";
 import { IDbModel, fillArray, fillFlatObject, UnknownObject } from "./common";
 import { UserRole, UserRoleMode } from "@shared/enums";
-import Territory from "./territory";
 import { ModelNotValidError } from "@shared/types/errors";
 import { generateRandomString, hashPassword } from "@common/auth";
-import Actant from "./actant";
 
 export class UserRight implements IUserRight {
   territory = "";
