@@ -625,3 +625,25 @@ describe("Statement - findMetaStatements", function () {
     });
   });
 });
+
+describe("test Statement.toJSON", function () {
+  const instance = new Statement({});
+  for (const fieldName of Statement.publicFields) {
+    (instance as any)[fieldName] = `value for ${fieldName}`;
+  }
+  const jsoned = JSON.parse(JSON.stringify(instance));
+  const newKeys = Object.keys(jsoned);
+  const newValues = Object.values(jsoned);
+
+  it("should correctly map to pub lic fields", () => {
+    expect(newKeys).toEqual(Statement.publicFields);
+  });
+
+  it("should correctly assign values", () => {
+    console.log(newKeys);
+    console.log(newValues);
+    expect(newValues).toEqual(
+      Statement.publicFields.map((fieldName) => (instance as any)[fieldName])
+    );
+  });
+});

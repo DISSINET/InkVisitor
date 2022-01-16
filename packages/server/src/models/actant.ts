@@ -13,9 +13,11 @@ import User from "./user";
 import emitter from "./events/emitter";
 import { EventTypes } from "./events/types";
 import { findActantsByIds } from "@service/shorthands";
+import Base from "./base";
 
-export default class Actant implements IActant, IDbModel {
+export default class Actant extends Base implements IActant, IDbModel {
   static table = "actants";
+  static publicFields: string[] = ["id"];
 
   id: string = "";
   class: ActantType = ActantType.Any;
@@ -31,6 +33,8 @@ export default class Actant implements IActant, IDbModel {
   right: UserRoleMode = UserRoleMode.Read;
 
   constructor(data: UnknownObject) {
+    super();
+
     if (!data) {
       return;
     }
@@ -254,13 +258,9 @@ export default class Actant implements IActant, IDbModel {
     this.right = this.getUserRoleMode(user);
   }
 
-  static getPublicFields(a: Actant): string[] {
-    return Object.keys(a).filter((k) => k.indexOf("_") !== 0);
-  }
-
   toJSON(): IResponseActant {
     const actant = this;
-    const strippedObject: IActant = Actant.getPublicFields(this).reduce(
+    const strippedObject: IActant = this.getPublicFields().reduce(
       (acc, curr) => {
         acc[curr] = (actant as Record<string, unknown>)[curr];
         return acc;
