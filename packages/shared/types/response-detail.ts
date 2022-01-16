@@ -2,9 +2,8 @@
  * Very extensive object showing all the details about one actant
  */
 
-import { IResponseActant, IResponseStatement } from ".";
+import { IActant, IResponseActant } from ".";
 
 export interface IResponseDetail extends IResponseActant {
-  usedCount: number;
-  metaStatements: IResponseStatement[]; // statements with territory T0
+  entities: { [key: string]: IActant }; // all entities (IActant) from props.type/value
 }

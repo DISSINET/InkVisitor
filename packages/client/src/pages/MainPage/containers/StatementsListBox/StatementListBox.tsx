@@ -121,8 +121,7 @@ export const StatementListBox: React.FC = () => {
 
   const duplicateStatementMutation = useMutation(
     async (statementToDuplicate: IResponseStatement) => {
-      const { actions, audits, usedIn, actants, ...newStatementObject } =
-        statementToDuplicate;
+      const { ...newStatementObject } = statementToDuplicate;
 
       const duplicatedStatement = DStatement(newStatementObject as IStatement);
       await api.actantsCreate(duplicatedStatement);
@@ -174,7 +173,9 @@ export const StatementListBox: React.FC = () => {
 
   const addStatementAtCertainIndex = async (index: number) => {
     const newOrder =
-      index === 0
+      index + 1 > statements.length
+        ? statements.length
+        : index < 1
         ? statements[0].data.territory.order - 1
         : (statements[index - 1].data.territory.order +
             statements[index].data.territory.order) /
@@ -341,15 +342,23 @@ export const StatementListBox: React.FC = () => {
       {
         Header: "Actions",
         Cell: ({ row }: Cell) => {
-          const { actions }: { actions?: IAction[] } = row.original;
+          const actionIds = row.values.data?.actants
+            ? row.values.data.actions.map((a: any) => a.action)
+            : [];
 
-          if (actions) {
-            const isOversized = actions.length > 2;
+          const actionObjects = actionIds.map((actionId: string) => {
+            const actantObject =
+              actants && actants.find((a) => a && a.id === actionId);
+            return actantObject && actantObject;
+          });
+
+          if (actionObjects) {
+            const isOversized = actionIds.length > 2;
             return (
               <TagGroup>
-                {actions
+                {actionObjects
                   .slice(0, 2)
-                  .map((action: IActant, key: number) =>
+                  .map((action: IAction, key: number) =>
                     renderListActant(action, key)
                   )}
                 {isOversized && (
@@ -360,9 +369,9 @@ export const StatementListBox: React.FC = () => {
                     noArrow
                     items={
                       <TagGroup>
-                        {actions
+                        {actionObjects
                           .slice(2)
-                          .map((action: IActant, key: number) =>
+                          .map((action: IAction, key: number) =>
                             renderListActant(action, key)
                           )}
                       </TagGroup>
@@ -648,16 +657,18 @@ export const StatementListBox: React.FC = () => {
         />
       )}
 
-      <StyledTableWrapper id="Statements-box-table">
-        <StatementListTable
-          moveEndRow={moveEndRow}
-          data={statements}
-          columns={columns}
-          handleRowClick={(rowId: string) => {
-            setStatementId(rowId);
-          }}
-        />
-      </StyledTableWrapper>
+      {statements && (
+        <StyledTableWrapper id="Statements-box-table">
+          <StatementListTable
+            moveEndRow={moveEndRow}
+            data={statements}
+            columns={columns}
+            handleRowClick={(rowId: string) => {
+              setStatementId(rowId);
+            }}
+          />
+        </StyledTableWrapper>
+      )}
 
       <Submit
         title="Delete statement"

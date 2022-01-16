@@ -4,18 +4,22 @@ import { Suggester, SuggestionI } from "components/Suggester/Suggester";
 import { IOption, IActant } from "@shared/types";
 
 import { FaHome } from "react-icons/fa";
-import { CActant, CTerritoryActant } from "constructors";
+import { CActant, CStatement, CTerritoryActant } from "constructors";
 import { Entities } from "types";
 import { useMutation, useQuery, useQueryClient } from "react-query";
 import api from "api";
 import {
   ActantStatus,
   ActantType,
+  AllActantType,
   CategoryActantType,
   UserRole,
+  UserRoleMode,
 } from "@shared/enums";
 import { useDebounce, useSearchParams } from "hooks";
 import { rootTerritoryId } from "Theme/constants";
+import { DragObjectWithType } from "react-dnd";
+import { toast } from "react-toastify";
 
 interface EntitySuggesterI {
   categoryTypes: ActantType[];
@@ -27,6 +31,7 @@ interface EntitySuggesterI {
   openDetailOnCreate?: boolean;
   territoryActants?: string[];
   excludedEntities?: ActantType[];
+  filterEditorRights?: boolean;
 }
 
 export const EntitySuggester: React.FC<EntitySuggesterI> = ({
@@ -39,6 +44,7 @@ export const EntitySuggester: React.FC<EntitySuggesterI> = ({
   openDetailOnCreate = false,
   territoryActants,
   excludedEntities = [],
+  filterEditorRights = false,
 }) => {
   const wildCardCategory = ActantType.Any;
   const queryClient = useQueryClient();
@@ -48,6 +54,7 @@ export const EntitySuggester: React.FC<EntitySuggesterI> = ({
   const [allCategories, setAllCategories] = useState<IOption[]>();
 
   const { setActantId } = useSearchParams();
+  const userRole = localStorage.getItem("userrole");
 
   // Suggesions query
   const {
@@ -68,6 +75,11 @@ export const EntitySuggester: React.FC<EntitySuggesterI> = ({
       });
       return resSuggestions.data
         .filter((s) => s.status !== ActantStatus.Discouraged)
+        .filter((s) =>
+          filterEditorRights && userRole !== UserRole.Admin
+            ? s.right === UserRoleMode.Write
+            : s
+        )
         .map((s: IActant) => {
           const entity = Entities[s.class];
 
@@ -76,6 +88,7 @@ export const EntitySuggester: React.FC<EntitySuggesterI> = ({
           if (territoryActants?.includes(s.id)) {
             icons.push(<FaHome key={s.id} color="" />);
           }
+
           return {
             color: entity.color,
             category: s.class,
@@ -136,6 +149,13 @@ export const EntitySuggester: React.FC<EntitySuggesterI> = ({
         handleClean();
         if (variables.class === "T") {
           queryClient.invalidateQueries("tree");
+          toast.info(`Terrritory [${variables.label}] created!`);
+        } else if (variables.class === "S") {
+          toast.info(`Statement [${variables.label}] created!`);
+        } else if (variables.class === "A") {
+          toast.info(`Action [${variables.label}] created!`);
+        } else {
+          toast.info(`Actant [${variables.label}] created!`);
         }
         if (openDetailOnCreate) {
           setActantId(variables.id);
@@ -148,13 +168,26 @@ export const EntitySuggester: React.FC<EntitySuggesterI> = ({
     label: string;
     category: ActantType;
     detail: string;
+    territoryId?: string;
   }) => {
-    if (newCreated.category === ActantType.Territory) {
+    if (
+      newCreated.category === ActantType.Statement &&
+      newCreated.territoryId
+    ) {
+      const newStatement = CStatement(
+        newCreated.territoryId,
+        localStorage.getItem("userrole") as UserRole,
+        newCreated.label,
+        newCreated.detail
+      );
+      actantsCreateMutation.mutate(newStatement);
+    } else if (newCreated.category === ActantType.Territory) {
       const newActant = CTerritoryActant(
         newCreated.label,
-        rootTerritoryId,
+        newCreated.territoryId ? newCreated.territoryId : rootTerritoryId,
         -1,
-        localStorage.getItem("userrole") as UserRole
+        localStorage.getItem("userrole") as UserRole,
+        newCreated.detail
       );
       actantsCreateMutation.mutate(newActant);
     } else {
@@ -180,6 +213,17 @@ export const EntitySuggester: React.FC<EntitySuggesterI> = ({
     handleClean();
   };
 
+  const [isWrongDropCategory, setIsWrongDropCategory] = useState(false);
+
+  const handleHoverred = (newHoverred: any) => {
+    const hoverredCategory = newHoverred.category;
+    if (!categoryTypes.includes(hoverredCategory)) {
+      setIsWrongDropCategory(true);
+    } else {
+      setIsWrongDropCategory(false);
+    }
+  };
+
   return selectedCategory && allCategories ? (
     <Suggester
       isFetching={isFetchingStatement}
@@ -202,17 +246,22 @@ export const EntitySuggester: React.FC<EntitySuggesterI> = ({
       }
       onCreate={(newCreated: {
         label: string;
-        category: CategoryActantType;
+        category: AllActantType;
         detail: string;
+        territoryId?: string;
       }) => {
         handleCreate(newCreated);
       }}
       onPick={(newPicked: SuggestionI) => {
         handlePick(newPicked);
       }}
-      onDrop={(newDropped: any) => {
+      onDrop={(newDropped: DragObjectWithType) => {
         handleDropped(newDropped);
       }}
+      onHover={(newHoverred: DragObjectWithType) => {
+        handleHoverred(newHoverred);
+      }}
+      isWrongDropCategory={isWrongDropCategory}
       allowCreate={allowCreate}
       inputWidth={inputWidth}
     />

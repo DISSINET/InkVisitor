@@ -11,11 +11,13 @@ interface IAttributeButtonGroup {
     selected: boolean;
   }[];
   disabled?: boolean;
+  noMargin?: boolean;
 }
 
 export const AttributeButtonGroup: React.FC<IAttributeButtonGroup> = ({
   options = [],
   disabled = false,
+  noMargin = false,
 }) => {
   return disabled ? (
     <Button
@@ -24,8 +26,8 @@ export const AttributeButtonGroup: React.FC<IAttributeButtonGroup> = ({
     ></Button>
   ) : (
     <StyledPropButtonGroup
-      leftMargin={true}
-      rightMargin={true}
+      leftMargin={!noMargin}
+      rightMargin={!noMargin}
       border={true}
       round={true}
     >

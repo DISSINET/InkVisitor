@@ -27,7 +27,7 @@ export const Box: React.FC<BoxProps> = ({
   label = "",
   color = "",
   height,
-  noPadding = true,
+  noPadding = false,
   isExpanded = true,
   button,
   children,
@@ -36,7 +36,6 @@ export const Box: React.FC<BoxProps> = ({
   const [showContentLabel, setShowContentLabel] = useState<boolean>(false);
 
   const animatedExpand = useSpring({
-    height: "100%",
     opacity: isExpanded ? 1 : 0,
     contentLabelOpacity: isExpanded ? 0 : 1,
     contentBackgroundColor: isExpanded
@@ -50,9 +49,11 @@ export const Box: React.FC<BoxProps> = ({
   });
 
   return (
-    <StyledBox color={color} height={height}>
-      <StyledHead color={color}>
-        <animated.div style={animatedExpand}>{label}</animated.div>
+    <StyledBox height={height}>
+      <StyledHead $isExpanded={isExpanded} color={color} $noPadding={noPadding}>
+        {!hideContent && (
+          <animated.div style={animatedExpand}>{label}</animated.div>
+        )}
         <StyledButtonWrap>{button && button}</StyledButtonWrap>
       </StyledHead>
       <StyledContent

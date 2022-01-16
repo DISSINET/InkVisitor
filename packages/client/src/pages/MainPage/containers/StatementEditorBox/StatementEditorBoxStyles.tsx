@@ -21,6 +21,7 @@ interface StyledEditorPreSection {}
 export const StyledEditorPreSection = styled.div<StyledEditorPreSection>`
   padding: ${({ theme }) => theme.space[3]};
   color: ${({ theme }) => theme.color["info"]};
+  font-size: ${({ theme }) => theme.fontSize["sm"]};
 `;
 interface StyledEditorSection {
   firstSection?: boolean;
@@ -60,7 +61,7 @@ interface StyledEditorSectionContent {
 interface StyledEditorSectionContent {}
 export const StyledEditorSectionContent = styled.div<StyledEditorSectionContent>`
   padding-left: ${({ theme, firstSection = false }) =>
-    firstSection ? "" : theme.space[10]};
+    firstSection ? "" : theme.space[6]};
 `;
 
 // Grids
@@ -84,7 +85,7 @@ export const StyledPropsActantHeader = styled.div<StyledPropsActantHeader>`
 
 interface StyledPropsActantList {}
 export const StyledPropsActantList = styled(StyledGrid)<StyledPropsActantList>`
-  padding-left: ${({ theme }) => theme.space[6]};
+  padding-left: ${({ theme }) => theme.space[10]};
   padding-bottom: ${({ theme }) => theme.space[10]};
   width: 100%;
 `;
@@ -96,9 +97,9 @@ interface StyledPropButtonGroup {
   round?: boolean;
 }
 export const StyledPropButtonGroup = styled.div<StyledPropButtonGroup>`
-  margin-left: ${({ theme, leftMargin = true }) =>
+  margin-left: ${({ theme, leftMargin }) =>
     leftMargin ? theme.space[3] : theme.space[0]};
-  margin-right: ${({ theme, rightMargin = true }) =>
+  margin-right: ${({ theme, rightMargin }) =>
     rightMargin ? theme.space[3] : theme.space[0]};
   vertical-align: middle;
   display: inline-flex;
@@ -127,7 +128,6 @@ export const StyledPropLineColumn = styled(
   padding-left: ${({ theme, padded }) =>
     padded ? theme.space[6] : theme.space[0]};
   padding-right: 5px;
-  border-right: 1px dashed black;
   overflow: ${({ isTag }) => (isTag ? "hidden" : "visible")};
 `;
 
@@ -173,4 +173,13 @@ export const StyledBreadcrumbWrap = styled.div`
   flex-wrap: wrap;
   min-height: 2rem;
   position: relative;
+`;
+
+export const StyledSubRow = styled.div`
+  display: table-row;
+  width: 100%;
+  padding: ${({ theme }) => theme.space[2]};
+  border-left-color: ${({ theme }) => theme.color["gray"][800]};
+  margin-left: ${({ theme }) => `${theme.space[10]}`};
+  margin-bottom: ${({ theme }) => `${theme.space[2]}`};
 `;

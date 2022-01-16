@@ -47,7 +47,7 @@ export const SearchParamsProvider = ({
     typeof parsedParams.statement === "string" ? parsedParams.statement : ""
   );
   const [actantId, setActantId] = useState<string>(
-    typeof parsedParams.actant === "string" ? parsedParams.actant : ""
+    typeof parsedParams.detail === "string" ? parsedParams.detail : ""
   );
 
   useEffect(() => {
@@ -57,7 +57,7 @@ export const SearchParamsProvider = ({
     statementId
       ? params.set("statement", statementId)
       : params.delete("statement");
-    actantId ? params.set("actant", actantId) : params.delete("actant");
+    actantId ? params.set("detail", actantId) : params.delete("detail");
     history.push({
       hash: `${params}`,
     });

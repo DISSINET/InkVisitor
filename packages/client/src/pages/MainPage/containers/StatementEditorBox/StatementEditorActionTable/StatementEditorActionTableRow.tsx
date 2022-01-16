@@ -255,8 +255,8 @@ export const StatementEditorActionTableRow: React.FC<
 
       {renderPropGroup(
         row.values.data.sAction.action,
-        statement,
-        visibleColumns
+        row.values.data.sAction.props,
+        statement
       )}
     </React.Fragment>
   );

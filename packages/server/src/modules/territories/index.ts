@@ -72,22 +72,20 @@ export default Router()
         territoryId
       );
 
-      const actantIds = Statement.getLinkedActantIdsForMany(statements);
+      const actantIds = Statement.getEntitiesIdsForMany(statements);
       const actants = await findActantsById(request.db, actantIds);
 
       const responseStatements: IResponseStatement[] = [];
       for (const statement of statements) {
-        const response: IResponseStatement = {
-          ...statement,
-          actants: [],
-          actions: [],
-        };
-
-        response.actions = await findActantsByIds<IAction>(
+        const entities = await findActantsByIds<IAction>(
           request.db,
           statement.data.actions.map((a) => a.action)
         );
-        responseStatements.push(response);
+
+        responseStatements.push({
+          ...statement,
+          entities: Object.assign({}, ...entities.map((x) => ({ [x.id]: x }))),
+        });
       }
 
       return {
@@ -128,7 +126,7 @@ export default Router()
           territoryId
         );
 
-      return Statement.getLinkedActantIdsForMany(dependentStatements);
+      return Statement.getEntitiesIdsForMany(dependentStatements);
     })
   )
   .post(
@@ -168,7 +166,9 @@ export default Router()
       };
 
       let statementsForTerritory = (
-        await findActants<IStatement>(request.db, { class: "S" })
+        await findActants<IStatement>(request.db, {
+          class: ActantType.Statement,
+        })
       )
         .filter((s) => s.data.territory.id === territory.id)
         .sort(sortStatements);
