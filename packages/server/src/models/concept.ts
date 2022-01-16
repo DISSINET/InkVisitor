@@ -17,6 +17,18 @@ class ConceptData implements IModel {
 
 class Concept extends Actant implements IActant {
   static table = "actants";
+  static publicFields: string[] = [
+    "id",
+    "class",
+    "data",
+    "label",
+    "label",
+    "detail",
+    "status",
+    "language",
+    "notes",
+    "props",
+  ];
 
   class: ActantType.Concept = ActantType.Concept; // just default
   data: ConceptData;
