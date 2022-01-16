@@ -17,7 +17,18 @@ import Base from "./base";
 
 export default class Actant extends Base implements IActant, IDbModel {
   static table = "actants";
-  static publicFields: string[] = ["id"];
+  static publicFields: string[] = [
+    "id",
+    "class",
+    "data",
+    "label",
+    "label",
+    "detail",
+    "status",
+    "language",
+    "notes",
+    "props",
+  ];
 
   id: string = "";
   class: ActantType = ActantType.Any;
@@ -256,18 +267,5 @@ export default class Actant extends Base implements IActant, IDbModel {
   async prepareResponseFields(user: User, db: Connection | undefined) {
     this.usedIn = await this.findDependentStatements(db);
     this.right = this.getUserRoleMode(user);
-  }
-
-  toJSON(): IResponseActant {
-    const actant = this;
-    const strippedObject: IActant = this.getPublicFields().reduce(
-      (acc, curr) => {
-        acc[curr] = (actant as Record<string, unknown>)[curr];
-        return acc;
-      },
-      {} as any
-    );
-
-    return strippedObject;
   }
 }

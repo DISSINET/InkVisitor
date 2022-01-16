@@ -291,7 +291,7 @@ export default Router()
 
 async function getResponseForUser(user: User, db: Db): Promise<IResponseUser> {
   const userResponse: IResponseUser = {
-    ...user,
+    ...(user.toJSON() as IUser),
     bookmarks: [],
     storedTerritories: [],
     territoryRights: [],

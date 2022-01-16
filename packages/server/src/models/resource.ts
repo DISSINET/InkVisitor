@@ -21,6 +21,18 @@ class ResourceData implements IModel {
 
 class Resource extends Actant implements IResource {
   static table = "actants";
+  static publicFields: string[] = [
+    "id",
+    "class",
+    "data",
+    "label",
+    "label",
+    "detail",
+    "status",
+    "language",
+    "notes",
+    "props",
+  ];
 
   class: ActantType.Resource = ActantType.Resource;
   data: ResourceData;
