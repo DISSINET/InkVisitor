@@ -1,6 +1,6 @@
 import { IDbModel, UnknownObject, fillFlatObject, fillArray } from "./common";
 import { r as rethink, Connection, WriteResult, RDatum } from "rethinkdb-ts";
-import { IStatement, IActant, IResponseActant, IUser } from "@shared/types";
+import { IStatement, IActant, IResponseActant, IUser, IProp } from "@shared/types";
 import {
   ActantStatus,
   ActantType,
@@ -12,6 +12,7 @@ import { InternalServerError } from "@shared/types/errors";
 import User from "./user";
 import emitter from "./events/emitter";
 import { EventTypes } from "./events/types";
+import { findActantsByIds } from "@service/shorthands";
 
 export default class Actant implements IActant, IDbModel {
   static table = "actants";
@@ -24,6 +25,7 @@ export default class Actant implements IActant, IDbModel {
   status: ActantStatus = ActantStatus.Pending;
   language: Language = Language.Latin;
   notes: string[] = [];
+  props: IProp[] = [];
 
   usedIn: IStatement[] = [];
   right: UserRoleMode = UserRoleMode.Read;
@@ -35,6 +37,7 @@ export default class Actant implements IActant, IDbModel {
 
     fillFlatObject(this, { ...data, data: undefined });
     fillArray(this.notes, String, data.notes);
+    fillArray(this.props, Object, data.props);
   }
 
   async save(db: Connection | undefined): Promise<WriteResult> {
@@ -177,6 +180,31 @@ export default class Actant implements IActant, IDbModel {
   }
 
   /**
+   * Returns actant ids that are present in data fields
+   * @returns list of ids
+   */
+  getEntitiesIds(): string[] {
+    const actantsIds: Record<string, null> = {};
+
+    this.props.forEach((p) => {
+      actantsIds[p.type.id] = null;
+      actantsIds[p.value.id] = null;
+
+      p.children.forEach((p2) => {
+        actantsIds[p2.type.id] = null;
+        actantsIds[p2.value.id] = null;
+      });
+    });
+
+    return Object.keys(actantsIds);
+  }
+
+  async getEntities(db: Connection): Promise<IActant[]> {
+    const entities = findActantsByIds<IActant>(db, this.getEntitiesIds());
+    return entities;
+  }
+
+  /*
    * finds statements which are linked to current actant
    * @param db db connection
    * @param territoryId id of the actant

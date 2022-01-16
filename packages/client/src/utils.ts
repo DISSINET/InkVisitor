@@ -32,10 +32,30 @@ export const findPositionInStatement = (
     return "tag";
   } else if (statement.data.territory.id === actant.id) {
     return "territory";
-  } else if (statement.data.props.find((p) => p.value.id === actant.id)) {
-    return "property value";
-  } else if (statement.data.props.find((p) => p.type.id === actant.id)) {
-    return "property type";
+  } else if (
+    statement.data.actants.find((act) =>
+      act.props.find((p) => p.value.id === actant.id)
+    )
+  ) {
+    return "actant property value";
+  } else if (
+    statement.data.actants.find((act) =>
+      act.props.find((p) => p.type.id === actant.id)
+    )
+  ) {
+    return "actant property type";
+  } else if (
+    statement.data.actions.find((act) =>
+      act.props.find((p) => p.value.id === actant.id)
+    )
+  ) {
+    return "action property value";
+  } else if (
+    statement.data.actions.find((act) =>
+      act.props.find((p) => p.type.id === actant.id)
+    )
+  ) {
+    return "action property type";
   } else if (statement.data.references.find((r) => r.resource === actant.id)) {
     return "reference";
   }

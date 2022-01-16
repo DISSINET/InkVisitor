@@ -1,4 +1,4 @@
-import { IActant } from "./";
+import { IActant, IProp } from "./";
 import {
   ActantType,
   Certainty,
@@ -14,18 +14,19 @@ import {
 
 export interface IStatement extends IActant {
   class: ActantType.Statement;
-  data: {
-    text: string;
-    territory: {
-      id: string;
-      order: number;
-    };
-    actions: IStatementAction[];
-    actants: IStatementActant[];
-    props: IStatementProp[];
-    references: IStatementReference[];
-    tags: string[]; // ids of IActant;
+  data: IStatementData;
+}
+
+export interface IStatementData {
+  text: string;
+  territory: {
+    id: string;
+    order: number;
   };
+  actions: IStatementAction[];
+  actants: IStatementActant[];
+  references: IStatementReference[];
+  tags: string[]; // ids of IActant;
 }
 
 export interface IStatementAction {
@@ -39,6 +40,7 @@ export interface IStatementAction {
   operator: Operator;
   bundleStart: boolean;
   bundleEnd: boolean;
+  props: IProp[];
 }
 
 export interface IStatementActant {
@@ -52,35 +54,7 @@ export interface IStatementActant {
   operator: Operator;
   bundleStart: boolean;
   bundleEnd: boolean;
-}
-
-export interface IStatementProp {
-  id: string;
-  elvl: Elvl;
-  certainty: Certainty;
-  logic: Logic;
-  mood: Mood[];
-  moodvariant: MoodVariant;
-  operator: Operator;
-  bundleStart: boolean;
-  bundleEnd: boolean;
-
-  origin: string;
-  // todo: make mandatory
-  type: {
-    id: string;
-    elvl: Elvl;
-    logic: Logic;
-    virtuality: Virtuality;
-    partitivity: Partitivity;
-  };
-  value: {
-    id: string;
-    elvl: Elvl;
-    logic: Logic;
-    virtuality: Virtuality;
-    partitivity: Partitivity;
-  };
+  props: IProp[];
 }
 
 export interface IStatementReference {

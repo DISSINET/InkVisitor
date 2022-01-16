@@ -1,7 +1,10 @@
 import {
+  ActantStatus,
   ActantType,
   Certainty,
   Elvl,
+  EntityLogicalType,
+  Language,
   Logic,
   Mood,
   MoodVariant,
@@ -126,7 +129,74 @@ export interface IRequestSearch {
   label: string;
   actantId: string;
 }
-export type DropdownItem = { value: string; label: string };
+
+export type searchPositionInStatement =
+  | "any"
+  | "action"
+  | "actant"
+  | "tag"
+  | "reference"
+  | "prop value"
+  | "prop type";
+
+export interface IRequestSearchEntity {
+  class?: string; //izy
+  label?: string; // regex, should also work from the middle...
+  detail?: string; // also regex
+  notes?: string; // is the text used within any note
+  status?: ActantStatus; // izy
+  language?: Language; //izy
+  logicalType?: EntityLogicalType;
+  hasProps?: entityHasProps[]; //this should be checked within meta props and within all statements where the entity is used as the prop origin
+  territories?: entityUsedInTerritory[]; // this is probably little bit complicated
+  statements?: entityUsedInStatementWith[]; // and this is supposed to be complicated as well
+}
+
+interface entityHasProps {
+  value?: string; // ' as default
+  type?: string; // 'any' as default
+  operator: "and" | "or"; // and on default and may be implemented in 1.4.0
+  bundleStart: boolean; // false on default and may be implemented in 1.4.0
+  bundleEnd: boolean; // false on default and may be implemented in 1.4.0
+}
+interface entityUsedInTerritory {
+  territoryId: string;
+  position: searchPositionInStatement; // any as default, may be implemented in 1.4.0
+  negative: boolean; // positive as default, should be within 1.3.0
+  operator: "and" | "or"; // and on default and may be implemented in 1.4.0
+  bundleStart: boolean; // false on default and may be implemented in 1.4.0
+  bundleEnd: boolean; // false on default and may be implemented in 1.4.0
+}
+
+interface entityUsedInStatementWith {
+  withEntity: string; // entity that is used within the same statement
+  withEntityPosition: searchPositionInStatement; // what is this "with" entity position? default any
+  entityPosition: searchPositionInStatement; // position in the statement of the original entity
+  negative: boolean; // positive as default, should be within 1.3.0
+  operator: "and" | "or"; // and on default and may be implemented in 1.4.0
+  bundleStart: boolean; // false on default and may be implemented in 1.4.0
+  bundleEnd: boolean; // false on default and may be implemented in 1.4.0
+}
+
+export interface IRequestSearchStatement {
+  text?: string; // izy
+  author?: string; // is author of the statement the user with this id ?
+  editor?: string; // is user id in any audit?
+  note?: string; // is the text used within any note
+  territory?: string; // check the whole tree to the root
+  usedEntities?: usedEntityStatement[]; // see below
+}
+
+interface usedEntityStatement {
+  entityId: string;
+  position: searchPositionInStatement;
+  negative: boolean; // positive as default, should be within 1.3.0
+  operator: "and" | "or"; // and on default and may be implemented in 1.4.0
+  bundleStart: boolean; // false on default and may be implemented in 1.4.0
+  bundleEnd: boolean; // false on default and may be implemented in 1.4.0
+}
+
+export type DropdownItem = { value: string; label: string; info?: string };
 
 export type SearchParams = {
   territory?: string;
@@ -168,3 +238,18 @@ export interface AttributeGroupDataObject {
   type: AttributeData;
   value: AttributeData;
 }
+
+export const classesPropType = [ActantType.Concept];
+export const classesPropValue = [
+  ActantType.Action,
+  ActantType.Person,
+  ActantType.Group,
+  ActantType.Object,
+  ActantType.Concept,
+  ActantType.Location,
+  ActantType.Value,
+  ActantType.Event,
+  ActantType.Statement,
+  ActantType.Territory,
+  ActantType.Resource,
+];

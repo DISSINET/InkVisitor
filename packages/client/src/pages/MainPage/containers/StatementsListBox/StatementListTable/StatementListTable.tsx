@@ -3,9 +3,14 @@ import { Column, useTable, useExpanded, Row } from "react-table";
 import update from "immutability-helper";
 import { StyledTable, StyledTHead, StyledTh } from "./StatementListTableStyles";
 import { StatementListRow } from "./StatementListRow";
+import {
+  IResponseStatement,
+  IResponseTerritory,
+  IStatement,
+} from "@shared/types";
 
 interface StatementListTable {
-  data: {}[];
+  data: IStatement[];
   columns: Column<{}>[];
   handleRowClick?: Function;
   moveEndRow: Function;
@@ -16,7 +21,7 @@ export const StatementListTable: React.FC<StatementListTable> = ({
   handleRowClick = () => {},
   moveEndRow,
 }) => {
-  const [records, setRecords] = useState<{}[]>([]);
+  const [records, setRecords] = useState<IStatement[]>([]);
   useEffect(() => {
     setRecords(data);
   }, [data]);

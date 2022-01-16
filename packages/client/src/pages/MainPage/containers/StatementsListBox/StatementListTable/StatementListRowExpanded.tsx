@@ -15,23 +15,13 @@ export const StatementListRowExpanded: React.FC<StatementListRowExpanded> = ({
 }) => {
   const [actants, setActants] = useState<IStatementActant[]>([]);
 
-  const {
-    actantId,
-    setActantId,
-    setStatementId,
-    setTerritoryId,
-  } = useSearchParams();
+  const { actantId, setActantId, setStatementId, setTerritoryId } =
+    useSearchParams();
 
   const renderRowSubComponent = React.useCallback(
     ({ row }) => {
-      const {
-        actions,
-        actants,
-        text,
-        note,
-        references,
-        tags,
-      } = row.values.data;
+      const { actions, actants, text, note, references, tags } =
+        row.values.data;
       return (
         <>
           <StyledSubRow id={`statement${row.values.id}`}>

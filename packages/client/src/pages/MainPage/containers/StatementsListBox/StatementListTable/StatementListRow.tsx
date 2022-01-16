@@ -108,12 +108,12 @@ export const StatementListRow: React.FC<StatementListRow> = ({
   });
 
   const [{ isDragging }, drag, preview] = useDrag({
-    item: { type: ItemTypes.STATEMENT_ROW, index, id: row.values.id },
+    item: { type: ItemTypes.STATEMENT_ROW, index, id: row.original.id },
     collect: (monitor: DragSourceMonitor) => ({
       isDragging: monitor.isDragging(),
     }),
     end: (item: DragItem | undefined, monitor: DragSourceMonitor) => {
-      moveEndRow(row.values, index);
+      moveEndRow(row.original, index);
     },
   });
 
@@ -123,17 +123,17 @@ export const StatementListRow: React.FC<StatementListRow> = ({
   drag(dragRef);
 
   return (
-    <React.Fragment key={row.values.data.territory.order}>
+    <React.Fragment key={row.original.data.territory.order}>
       <StyledTr
         ref={dropRef}
         opacity={opacity}
         isOdd={Boolean(index % 2)}
-        isSelected={row.values.id === statementId}
+        isSelected={row.original.id === statementId}
         onClick={(e: any) => {
-          handleClick(row.values.id);
+          handleClick(row.original.id);
           e.stopPropagation();
         }}
-        id={`statement${row.values.id}`}
+        id={`statement${row.original.id}`}
       >
         <td
           ref={dragRef}

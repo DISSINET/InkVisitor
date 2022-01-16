@@ -1,3 +1,4 @@
+import { AiOutlineWarning } from "react-icons/ai";
 import styled from "styled-components";
 import { space1, space2, space4, space36 } from "Theme/constants";
 
@@ -45,9 +46,13 @@ export const StyledInputWrapper = styled.div<InputWrapper>`
 export const StyledSuggesterButton = styled.div`
   border: 1px solid ${({ theme }) => theme.color["primary"]};
 `;
-export const StyledSuggestionCancelButton = styled.div`
+interface StyledSuggestionCancelButton {
+  hasButton: boolean;
+}
+export const StyledSuggestionCancelButton = styled.div<StyledSuggestionCancelButton>`
   position: absolute;
-  right: 2.5rem;
+  right: ${({ theme, hasButton }) =>
+    hasButton ? theme.space[10] : theme.space[1]};
   top: 4px;
   svg {
     color: ${({ theme }) => theme.color["danger"]};
@@ -124,4 +129,17 @@ export const StyledModalInputWrap = styled.div`
   display: grid;
   position: relative;
   margin-bottom: ${({ theme }) => theme.space[1]};
+`;
+export const StyledAiOutlineWarning = styled(AiOutlineWarning)`
+  margin-top: 0.1rem;
+  margin-left: 0.5rem;
+`;
+export const StyledContent = styled.div`
+  display: flex;
+  flex-direction: column;
+`;
+export const StyledNote = styled.i`
+  margin-top: ${({ theme }) => theme.space[2]};
+  font-size: ${({ theme }) => theme.fontSize["xs"]};
+  text-align: right;
 `;

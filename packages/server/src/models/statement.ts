@@ -1,13 +1,13 @@
 import {
   IStatement,
+  IStatementData,
   IStatementActant,
   IStatementReference,
-  IStatementProp,
+  IStatementAction,
 } from "@shared/types";
 import { fillFlatObject, fillArray, UnknownObject, IModel } from "./common";
 import {
   ActantType,
-  ActantStatus,
   Certainty,
   Elvl,
   Position,
@@ -25,9 +25,9 @@ import Actant from "./actant";
 import { r as rethink, Connection, RDatum, WriteResult } from "rethinkdb-ts";
 import { InternalServerError } from "@shared/types/errors";
 import User from "./user";
-import Territory from "./territory";
 import { EventMapSingle, EventTypes } from "./events/types";
 import treeCache from "@service/treeCache";
+import { StatementProp } from "./prop";
 
 export class StatementActant implements IStatementActant, IModel {
   id = "";
@@ -40,6 +40,7 @@ export class StatementActant implements IStatementActant, IModel {
   operator: Operator = Operator.And;
   bundleStart: boolean = false;
   bundleEnd: boolean = false;
+  props: StatementProp[] = [];
 
   constructor(data: UnknownObject) {
     if (!data) {
@@ -47,6 +48,7 @@ export class StatementActant implements IStatementActant, IModel {
     }
 
     fillFlatObject(this, data);
+    fillArray<StatementProp>(this.props, StatementProp, data.props);
   }
 
   /**
@@ -106,7 +108,7 @@ export class StatementTerritory {
   }
 }
 
-export class StatementAction {
+export class StatementAction implements IStatementAction {
   id = "";
   action: string = "";
   elvl: Elvl = Elvl.Textual;
@@ -117,6 +119,7 @@ export class StatementAction {
   operator: Operator = Operator.And;
   bundleStart: boolean = false;
   bundleEnd: boolean = false;
+  props: StatementProp[] = [];
 
   constructor(data: UnknownObject) {
     if (!data) {
@@ -124,6 +127,7 @@ export class StatementAction {
     }
     fillFlatObject(this, data);
     fillArray(this.mood, String, data.mood);
+    fillArray<StatementProp>(this.props, StatementProp, data.props);
   }
 
   /**
@@ -140,72 +144,13 @@ export class StatementAction {
   }
 }
 
-export class StatementProp implements IStatementProp, IModel {
-  id = "";
-
-  origin = "";
-  elvl: Elvl = Elvl.Textual;
-  certainty: Certainty = Certainty.Empty;
-  logic: Logic = Logic.Positive;
-  mood: Mood[] = [];
-  moodvariant: MoodVariant = MoodVariant.Realis;
-  operator: Operator = Operator.And;
-  bundleStart: boolean = false;
-  bundleEnd: boolean = false;
-
-  type: {
-    id: string;
-    elvl: Elvl;
-    logic: Logic;
-    virtuality: Virtuality;
-    partitivity: Partitivity;
-  } = {
-    id: "",
-    elvl: Elvl.Textual,
-    logic: Logic.Positive,
-    virtuality: Virtuality.Reality,
-    partitivity: Partitivity.Unison,
-  };
-
-  value: {
-    id: string;
-    elvl: Elvl;
-    logic: Logic;
-    virtuality: Virtuality;
-    partitivity: Partitivity;
-  } = {
-    id: "",
-    elvl: Elvl.Textual,
-    logic: Logic.Positive,
-    virtuality: Virtuality.Reality,
-    partitivity: Partitivity.Unison,
-  };
-
-  constructor(data: UnknownObject) {
-    if (!data) {
-      return;
-    }
-
-    fillFlatObject(this, data);
-
-    fillFlatObject(this.type, data.type as Record<string, unknown>);
-
-    fillFlatObject(this.value, data.value as Record<string, unknown>);
-  }
-
-  isValid(): boolean {
-    return true; // always true - no rules yet
-  }
-}
-
-export class StatementData implements IModel {
-  actions = [] as StatementAction[];
+export class StatementData implements IModel, IStatementData {
   text = "";
   territory = new StatementTerritory({});
-  actants = [] as StatementActant[];
-  props = [] as StatementProp[];
-  references = [] as StatementReference[];
-  tags = [] as string[];
+  actions: StatementAction[] = [];
+  actants: StatementActant[] = [];
+  references: StatementReference[] = [];
+  tags: string[] = [];
 
   constructor(data: UnknownObject) {
     if (!data) {
@@ -213,17 +158,14 @@ export class StatementData implements IModel {
     }
 
     fillFlatObject(this, data);
-
-    fillArray<StatementAction>(this.actions, StatementAction, data.actions);
-
     this.territory = new StatementTerritory(data.territory as UnknownObject);
-
+    fillArray<StatementAction>(this.actions, StatementAction, data.actions);
     fillArray<StatementActant>(this.actants, StatementActant, data.actants);
-
-    fillArray<StatementProp>(this.props, StatementProp, data.props);
-
-    const refs = data.references; // to enable one-liner below (line lenth, formatter issue ^^)
-    fillArray<StatementReference>(this.references, StatementReference, refs);
+    fillArray<StatementReference>(
+      this.references,
+      StatementReference,
+      data.references
+    );
 
     // fill array uses constructors - which string[] cannot use (will create an object instead of string type)
     if (data.tags) {
@@ -241,20 +183,14 @@ export class StatementData implements IModel {
     if (!this.territory.isValid()) {
       return false;
     }
-    for (const actant of this.actants) {
-      if (!actant.isValid()) {
-        return false;
-      }
+    if (this.actions.find((a) => !a.isValid())) {
+      return false;
     }
-    for (const prop of this.props) {
-      if (!prop.isValid()) {
-        return false;
-      }
+    if (this.actants.find((a) => !a.isValid())) {
+      return false;
     }
-    for (const reference of this.references) {
-      if (!reference.isValid()) {
-        return false;
-      }
+    if (this.references.find((r) => !r.isValid())) {
+      return false;
     }
 
     return true;
@@ -428,23 +364,43 @@ class Statement extends Actant implements IStatement {
    * Returns actant ids that are present in data fields
    * @returns list of ids
    */
-  getLinkedActantIds(): string[] {
-    const actantIds: Record<string, null> = {};
+  getEntitiesIds(): string[] {
+    const actantsIds: Record<string, null> = {};
 
-    this.data.actants.forEach((a) => (actantIds[a.actant] = null));
-    this.data.tags.forEach((t) => (actantIds[t] = null));
-    this.data.actions.forEach((t) => (actantIds[t.action] = null));
-    this.data.props.forEach((p) => {
-      actantIds[p.value.id] = null;
-      actantIds[p.type.id] = null;
-      actantIds[p.origin] = null;
+    this.data.actions.forEach((a) => {
+      actantsIds[a.action] = null;
+      a.props.forEach((prop) => {
+        actantsIds[prop.type.id] = null;
+        actantsIds[prop.value.id] = null;
+
+        prop.children.forEach((propChild) => {
+          actantsIds[propChild.type.id] = null;
+          actantsIds[propChild.value.id] = null;
+        });
+      });
     });
+
+    this.data.actants.forEach((a) => {
+      actantsIds[a.actant] = null;
+      a.props.forEach((prop) => {
+        actantsIds[prop.type.id] = null;
+        actantsIds[prop.value.id] = null;
+        prop.children.forEach((propChild) => {
+          actantsIds[propChild.type.id] = null;
+          actantsIds[propChild.value.id] = null;
+        });
+      });
+    });
+
+    actantsIds[this.data.territory.id] = null;
+
     this.data.references.forEach((p) => {
-      actantIds[p.resource] = null;
+      actantsIds[p.resource] = null;
     });
-    actantIds[this.data.territory.id] = null;
 
-    return Object.keys(actantIds);
+    this.data.tags.forEach((t) => (actantsIds[t] = null));
+
+    return Object.keys(actantsIds);
   }
 
   async unlinkActantId(
@@ -465,25 +421,6 @@ class Statement extends Actant implements IStatement {
     return !!result.replaced;
   }
 
-  async unlinkPropId(
-    db: Connection,
-    actantIdToUnlink: string
-  ): Promise<boolean> {
-    const indexToRemove = this.data.props.findIndex(
-      (a) => a.origin === actantIdToUnlink
-    );
-    if (indexToRemove === -1) {
-      return false;
-    }
-
-    this.data.props.splice(indexToRemove, 1);
-    const result = await this.update(db, {
-      data: { props: this.data.props },
-    });
-
-    return !!result.replaced;
-  }
-
   async unlinkActionId(
     db: Connection,
     actantIdToUnlink: string
@@ -497,22 +434,22 @@ class Statement extends Actant implements IStatement {
 
     this.data.actions.splice(indexToRemove, 1);
     const result = await this.update(db, {
-      data: { props: this.data.props },
+      data: { actions: this.data.actions },
     });
     return !!result.replaced;
   }
 
   /**
-   * getLinkedActantIds wrapped in foreach cycle
+   * getEntitiesIdsForMany wrapped in foreach cycle
    * @param statements list of scanned statements
    * @returns list of ids unique for multiple statements
    */
-  static getLinkedActantIdsForMany(statements: IStatement[]): string[] {
+  static getEntitiesIdsForMany(statements: IStatement[]): string[] {
     const actantIds: Record<string, null> = {}; // unique check
 
     const stModel = new Statement(undefined);
     for (const statement of statements) {
-      stModel.getLinkedActantIds
+      stModel.getEntitiesIds
         .call(statement)
         .forEach((id) => (actantIds[id] = null));
     }
@@ -652,11 +589,6 @@ class Statement extends Actant implements IStatement {
           );
         })
         .run(db);
-
-      for (const stData of linkedToProps) {
-        const st = new Statement({ ...stData });
-        await st.unlinkPropId(db, actantId);
-      }
 
       const linkedToActions = await rethink
         .table(Actant.table)

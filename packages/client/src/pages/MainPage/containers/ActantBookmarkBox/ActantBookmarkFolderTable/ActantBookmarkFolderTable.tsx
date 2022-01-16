@@ -1,25 +1,12 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { Column, useTable, useExpanded, Row, Cell } from "react-table";
+import { IActant, IResponseBookmarkFolder } from "@shared/types";
+import { Button } from "components";
 import update from "immutability-helper";
-import {
-  StyledTable,
-  StyledTHead,
-  StyledTh,
-} from "./ActantBookmarkFolderTableStyles";
-import {
-  IAction,
-  IActant,
-  IResponseGeneric,
-  IResponseStatement,
-  IStatementAction,
-  IResponseBookmarkFolder,
-} from "@shared/types";
-import { EntitySuggester, EntityTag, CertaintyToggle, ElvlToggle } from "../..";
-import { Button, Input } from "components";
-import { FaPlus, FaTrashAlt, FaUnlink } from "react-icons/fa";
-import { useMutation, UseMutationResult, useQueryClient } from "react-query";
-import { ActantType } from "@shared/enums";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { FaUnlink } from "react-icons/fa";
+import { Cell, Column, Row, useTable } from "react-table";
+import { EntityTag } from "../..";
 import { ActantBookmarkFolderTableRow } from "./ActantBookmarkFolderTableRow";
+import { StyledTable } from "./ActantBookmarkFolderTableStyles";
 
 interface ActantBookmarkFolderTable {
   folder: IResponseBookmarkFolder;
