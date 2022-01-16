@@ -1,27 +1,16 @@
-import {
-  ActantStatus,
-  ActantType,
-  Certainty,
-  Elvl,
-  Language,
-  Logic,
-  Mood,
-  MoodVariant,
-  Operator,
-} from "@shared/enums";
 import "ts-jest";
-import Statement, {
-  StatementActant,
-  StatementProp,
-  StatementReference,
-} from "./statement";
+import Statement, { StatementActant, StatementReference } from "./statement";
 import { Db } from "@service/RethinkDB";
 import { deleteActants, findActantById } from "@service/shorthands";
 import Territory from "./territory";
 import { IStatement } from "@shared/types/statement";
-import { IStatementAction } from "@shared/types";
+import {
+  getIStatementActionMock,
+  getIStatementMock,
+} from "@modules/common.test";
+import { Prop } from "./prop";
 
-describe("Statement constructor test", function () {  
+describe("Statement constructor test", function () {
   describe("empty data", () => {
     const emptyData = {};
     const emptyStatement = new Statement({});
@@ -33,40 +22,8 @@ describe("Statement constructor test", function () {
   });
 
   describe("ok data", () => {
-    const fullData: IStatement = {
-      id: "id",
-      class: ActantType.Statement,
-      label: "label",
-      data: {
-        actions: [
-          {
-            action: "action",
-            bundleEnd: false,
-            bundleStart: false,
-            certainty: Certainty.Empty,
-            elvl: Elvl.Inferential,
-            id: "actionm",
-            logic: Logic.Positive,
-            mood: [Mood.Ability],
-            moodvariant: MoodVariant.Irrealis,
-            operator: Operator.And,
-          } as IStatementAction,
-        ],
-        actants: [],
-        props: [],
-        references: [],
-        tags: [],
-        territory: {
-          id: "id",
-          order: 0,
-        },
-        text: "text",
-      },
-      detail: "",
-      language: Language.Czech,
-      notes: [],
-      status: ActantStatus.Pending,
-    };
+    const fullData = getIStatementMock();
+    fullData.data.actions.push(getIStatementActionMock());
     const fullStatement: Statement = new Statement({ ...fullData });
 
     it("should return full statement", () => {
@@ -215,7 +172,7 @@ describe("findDependentStatementIds", function () {
       const statement = new Statement(
         JSON.parse(JSON.stringify(baseStatementData))
       );
-      statement.data.props = [new StatementProp({ origin: territory.id })];
+      statement.props = [new Prop({ origin: territory.id })];
       await statement.save(db.connection);
 
       const statements = await Statement.findDependentStatements(
@@ -234,9 +191,7 @@ describe("findDependentStatementIds", function () {
       const statement = new Statement(
         JSON.parse(JSON.stringify(baseStatementData))
       );
-      statement.data.props = [
-        new StatementProp({ type: { id: territory.id } }),
-      ];
+      statement.props = [new Prop({ type: { id: territory.id } })];
       await statement.save(db.connection);
 
       const statements = await Statement.findDependentStatements(
@@ -255,9 +210,7 @@ describe("findDependentStatementIds", function () {
       const statement = new Statement(
         JSON.parse(JSON.stringify(baseStatementData))
       );
-      statement.data.props = [
-        new StatementProp({ value: { id: territory.id } }),
-      ];
+      statement.props = [new Prop({ value: { id: territory.id } })];
       await statement.save(db.connection);
 
       const statements = await Statement.findDependentStatements(

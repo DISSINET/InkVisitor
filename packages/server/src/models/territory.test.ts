@@ -1,11 +1,9 @@
-import { ActantStatus, ActantType, Language, UserRoleMode } from "@shared/enums";
 import "ts-jest";
-import Territory, { TerritoryData, TerritoryParent } from "./territory";
+import Territory from "./territory";
 import { Db } from "@service/RethinkDB";
-import { clean } from "@modules/common.test";
+import { clean, getITerritoryMock } from "@modules/common.test";
 import { findActantById, deleteActants } from "@service/shorthands";
-import { ITerritory, IUserRight } from "@shared/types";
-import { UserRight } from "./user";
+import { ITerritory } from "@shared/types";
 
 describe("Territory constructor test", function () {
   describe("empty data", () => {
@@ -18,22 +16,12 @@ describe("Territory constructor test", function () {
   });
 
   describe("ok data", () => {
-    const fullData: ITerritory = {
-      id: "id",
-      detail: "detail",
-      language: Language.Latin,
-      notes: [],
-      status: ActantStatus.Pending,
-      label: "label",
-      data: {
-        parent: {
-          id: "2",
-          order: -1,
-        },
-      },
-      class: ActantType.Territory,
+    const fullData = getITerritoryMock();
+    fullData.data.parent = {
+      id: "2",
+      order: -1,
     };
-    const fullTerritory = new Territory({ ...fullData });
+    const fullTerritory = new Territory(fullData);
 
     it("should return full territory", () => {
       expect({ ...fullData, _siblings: {} }).toEqual(fullTerritory);

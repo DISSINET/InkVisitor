@@ -27,7 +27,7 @@ import { InternalServerError } from "@shared/types/errors";
 import User from "./user";
 import { EventMapSingle, EventTypes } from "./events/types";
 import treeCache from "@service/treeCache";
-import { StatementProp } from "./prop";
+import { Prop } from "./prop";
 
 export class StatementActant implements IStatementActant, IModel {
   id = "";
@@ -40,7 +40,7 @@ export class StatementActant implements IStatementActant, IModel {
   operator: Operator = Operator.And;
   bundleStart: boolean = false;
   bundleEnd: boolean = false;
-  props: StatementProp[] = [];
+  props: Prop[] = [];
 
   constructor(data: UnknownObject) {
     if (!data) {
@@ -48,7 +48,7 @@ export class StatementActant implements IStatementActant, IModel {
     }
 
     fillFlatObject(this, data);
-    fillArray<StatementProp>(this.props, StatementProp, data.props);
+    fillArray<Prop>(this.props, Prop, data.props);
   }
 
   /**
@@ -119,7 +119,7 @@ export class StatementAction implements IStatementAction {
   operator: Operator = Operator.And;
   bundleStart: boolean = false;
   bundleEnd: boolean = false;
-  props: StatementProp[] = [];
+  props: Prop[] = [];
 
   constructor(data: UnknownObject) {
     if (!data) {
@@ -127,7 +127,7 @@ export class StatementAction implements IStatementAction {
     }
     fillFlatObject(this, data);
     fillArray(this.mood, String, data.mood);
-    fillArray<StatementProp>(this.props, StatementProp, data.props);
+    fillArray<Prop>(this.props, Prop, data.props);
   }
 
   /**
