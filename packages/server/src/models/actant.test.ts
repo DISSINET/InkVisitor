@@ -41,7 +41,7 @@ describe("test Actant.delete", function () {
   describe("two existing linked statements", () => {
     const db = new Db();
     let statementViaActants: Statement;
-    let statementViaProps: Statement;
+    let statementViaActions: Statement;
 
     beforeAll(async () => {
       await db.initDb();
@@ -57,16 +57,16 @@ describe("test Actant.delete", function () {
         },
       });
       await statementViaActants.save(db.connection);
-      statementViaProps = new Statement({
+      statementViaActions = new Statement({
         data: {
-          props: [
+          actions: [
             {
-              origin: actant.id,
+              action: actant.id,
             },
           ],
         },
       });
-      await statementViaProps.save(db.connection);
+      await statementViaActions.save(db.connection);
       await actant.delete(db.connection);
     });
     afterAll(async () => await clean(db));
@@ -80,13 +80,13 @@ describe("test Actant.delete", function () {
       expect(existinStatementViaActants.data.actants).toHaveLength(0);
     });
 
-    it("should correctly remove actant from props array for the second statement", async () => {
+    it("should correctly remove actant from actions array for the second statement", async () => {
       // after the deletion, the linked statement should reflect this -> empty actants array
-      const existinStatementViaProps = await findActantById<IStatement>(
+      const existinStatementViaAction = await findActantById<IStatement>(
         db,
-        statementViaProps.id
+        statementViaActions.id
       );
-      expect(existinStatementViaProps.data.props).toHaveLength(0);
+      expect(existinStatementViaAction.data.actions).toHaveLength(0);
     });
   });
 });

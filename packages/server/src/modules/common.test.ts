@@ -1,5 +1,5 @@
 import "ts-jest";
-import { IResponseGeneric, IStatement } from "@shared/types";
+import { IResponseGeneric, IStatement, IStatementAction } from "@shared/types";
 import "ts-jest";
 import { ITerritory } from "@shared/types/index";
 import { Db } from "@service/RethinkDB";
@@ -11,6 +11,17 @@ import { errorTypes } from "@shared/types/response-generic";
 import "@models/events/register";
 import { r as rethink } from "rethinkdb-ts";
 import Audit from "@models/audit";
+import {
+  ActantStatus,
+  ActantType,
+  Certainty,
+  Elvl,
+  Language,
+  Logic,
+  Mood,
+  MoodVariant,
+  Operator,
+} from "@shared/enums";
 
 describe("common", function () {
   it("should work", () => undefined);
@@ -37,6 +48,64 @@ export function testErroneousResponse(
 
 function getRandomFromArray<T>(input: T[]): T {
   return input[Math.floor(Math.random() * input.length)];
+}
+
+export function getITerritoryMock(): ITerritory {
+  const fullData: ITerritory = {
+    id: "id",
+    detail: "detail",
+    language: Language.Latin,
+    notes: [],
+    status: ActantStatus.Pending,
+    label: "label",
+    data: {
+      parent: false,
+    },
+    props: [],
+    class: ActantType.Territory,
+  };
+
+  return fullData;
+}
+
+export function getIStatementActionMock(): IStatementAction {
+  return {
+    action: "action",
+    bundleEnd: false,
+    bundleStart: false,
+    certainty: Certainty.Empty,
+    elvl: Elvl.Inferential,
+    id: "action",
+    logic: Logic.Positive,
+    mood: [Mood.Ability],
+    moodvariant: MoodVariant.Irrealis,
+    operator: Operator.And,
+  } as IStatementAction;
+}
+
+export function getIStatementMock(): IStatement {
+  const fullData: IStatement = {
+    id: "id",
+    class: ActantType.Statement,
+    label: "label",
+    data: {
+      actions: [],
+      actants: [],
+      references: [],
+      tags: [],
+      territory: {
+        id: "id",
+        order: 0,
+      },
+      text: "text",
+    },
+    props: [],
+    detail: "",
+    language: Language.Czech,
+    notes: [],
+    status: ActantStatus.Pending,
+  };
+  return fullData;
 }
 
 export async function createMockTree(
