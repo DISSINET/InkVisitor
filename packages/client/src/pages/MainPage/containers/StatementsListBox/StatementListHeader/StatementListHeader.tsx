@@ -79,7 +79,7 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
         )}
         <StyledHeading>
           {territoryId
-            ? `T: ${trimTerritoryLabel(data.label)}`
+            ? `T:\xa0${trimTerritoryLabel(data.label)}`
             : "no territory selected"}
         </StyledHeading>
         {territoryId && (
