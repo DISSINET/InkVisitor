@@ -26,3 +26,6 @@ export const StyledButtons = styled.div`
   margin-top: 0.3rem;
   margin-left: 0.3rem;
 `;
+export const StyledHeading = styled.span`
+  word-wrap: break-word;
+`;

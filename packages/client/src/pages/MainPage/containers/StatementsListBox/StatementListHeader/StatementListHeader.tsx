@@ -7,6 +7,7 @@ import {
   StyledFaStar,
   StyledHeader,
   StyledHeaderBreadcrumbRow,
+  StyledHeading,
 } from "./StatementListHeaderStyles";
 import { StyledHeaderRow } from "./StatementListHeaderStyles";
 import { StatementListBreadcrumbItem } from "./StatementListBreadcrumbItem/StatementListBreadcrumbItem";
@@ -76,9 +77,11 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
         {isFavorited && (
           <StyledFaStar size={18} color={theme.color["warning"]} />
         )}
-        {territoryId
-          ? `T: ${trimTerritoryLabel(data.label)}`
-          : "no territory selected"}
+        <StyledHeading>
+          {territoryId
+            ? `T: ${trimTerritoryLabel(data.label)}`
+            : "no territory selected"}
+        </StyledHeading>
         {territoryId && (
           <StyledButtons>
             <ButtonGroup>
