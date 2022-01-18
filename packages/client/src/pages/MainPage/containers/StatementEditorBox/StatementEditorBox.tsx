@@ -4,7 +4,7 @@ import {
   IResponseStatement,
   IStatementActant,
   IStatementAction,
-  IStatementReference,
+  IStatementReference
 } from "@shared/types";
 import api from "api";
 import { Button, Input, Loader, MultiInput } from "components";
@@ -12,11 +12,10 @@ import {
   CProp,
   CReference,
   CStatementActant,
-  CStatementAction,
+  CStatementAction
 } from "constructors";
 import { useSearchParams } from "hooks";
 import React, { useEffect, useMemo } from "react";
-import { BsArrow90DegLeft, BsArrowRightShort } from "react-icons/bs";
 import { FaTrashAlt, FaUnlink } from "react-icons/fa";
 import { useMutation, useQuery, useQueryClient } from "react-query";
 import { excludedSuggesterEntities } from "Theme/constants";
@@ -24,7 +23,6 @@ import { AttributeButtonGroup } from "../AttributeButtonGroup/AttributeButtonGro
 import { JSONExplorer } from "../JSONExplorer/JSONExplorer";
 import { PropGroup } from "../PropGroup/PropGroup";
 import { StatementListBreadcrumbItem } from "../StatementsListBox/StatementListHeader/StatementListBreadcrumbItem/StatementListBreadcrumbItem";
-import { StyledItemBox } from "../StatementsListBox/StatementListHeader/StatementListBreadcrumbItem/StatementListBreadcrumbItemStyles";
 import { EntitySuggester, EntityTag } from "./../";
 import { AuditTable } from "./../AuditTable/AuditTable";
 import { StatementEditorActantTable } from "./StatementEditorActantTable/StatementEditorActantTable";
@@ -41,7 +39,7 @@ import {
   StyledReferencesListColumn,
   StyledTagsList,
   StyledTagsListItem,
-  StyledTagWrapper,
+  StyledTagWrapper
 } from "./StatementEditorBoxStyles";
 
 const classesActants = [

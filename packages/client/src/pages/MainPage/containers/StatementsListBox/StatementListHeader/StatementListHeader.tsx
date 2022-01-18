@@ -1,5 +1,5 @@
 import React from "react";
-import { UseMutationResult, useQueryClient } from "react-query";
+import { useMutation, UseMutationResult, useQueryClient } from "react-query";
 import { FaPlus, FaRecycle } from "react-icons/fa";
 
 import {
@@ -11,13 +11,20 @@ import {
 } from "./StatementListHeaderStyles";
 import { StyledHeaderRow } from "./StatementListHeaderStyles";
 import { StatementListBreadcrumbItem } from "./StatementListBreadcrumbItem/StatementListBreadcrumbItem";
-import { IResponseTerritory, IStatement } from "@shared/types";
+import {
+  IResponseGeneric,
+  IResponseTerritory,
+  IStatement,
+} from "@shared/types";
 import { CStatement } from "constructors";
 import { Button, ButtonGroup } from "components";
 import { useAppSelector } from "redux/hooks";
 import { useSearchParams } from "hooks";
-import { UserRole, UserRoleMode } from "@shared/enums";
+import { UserRole, UserRoleMode, ActantType } from "@shared/enums";
 import theme from "Theme/theme";
+import { EntitySuggester } from "../..";
+import api from "api";
+import { AxiosResponse } from "axios";
 
 interface StatementListHeader {
   data: IResponseTerritory;
@@ -27,11 +34,18 @@ interface StatementListHeader {
     IStatement,
     unknown
   >;
+  moveTerritoryMutation: UseMutationResult<
+    AxiosResponse<IResponseGeneric>,
+    unknown,
+    string,
+    unknown
+  >;
   isFavorited?: boolean;
 }
 export const StatementListHeader: React.FC<StatementListHeader> = ({
   data,
   addStatementAtTheEndMutation,
+  moveTerritoryMutation,
   isFavorited,
 }) => {
   const queryClient = useQueryClient();
@@ -112,6 +126,19 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
           </StyledButtons>
         )}
       </StyledHeaderRow>
+
+      {"Move territory to parent: "}
+      <div>
+        <EntitySuggester
+          filterEditorRights
+          inputWidth={96}
+          allowCreate={false}
+          categoryTypes={[ActantType.Territory]}
+          onSelected={(newSelectedId: string) => {
+            moveTerritoryMutation.mutate(newSelectedId);
+          }}
+        />
+      </div>
     </StyledHeader>
   );
 };

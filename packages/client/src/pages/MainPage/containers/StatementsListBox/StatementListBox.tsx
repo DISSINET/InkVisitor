@@ -647,12 +647,24 @@ export const StatementListBox: React.FC = () => {
     a.data.territory.order > b.data.territory.order ? 1 : -1
   );
 
+  const moveTerritoryMutation = useMutation(
+    async (newParentId: string) =>
+      await api.treeMoveTerritory(territoryId, newParentId, 0),
+    {
+      onSuccess: (data, variables) => {
+        queryClient.invalidateQueries("tree");
+        queryClient.invalidateQueries("territory");
+      },
+    }
+  );
+
   return (
     <>
       {data && (
         <StatementListHeader
           data={data}
           addStatementAtTheEndMutation={addStatementAtTheEndMutation}
+          moveTerritoryMutation={moveTerritoryMutation}
           isFavorited={isFavorited}
         />
       )}
@@ -697,7 +709,8 @@ export const StatementListBox: React.FC = () => {
           removeStatementMutation.isLoading ||
           duplicateStatementMutation.isLoading ||
           addStatementAtTheEndMutation.isLoading ||
-          actantsCreateMutation.isLoading
+          actantsCreateMutation.isLoading ||
+          moveTerritoryMutation.isLoading
         }
       />
     </>
