@@ -95,3 +95,11 @@ export const StyledSelect = styled(Select)`
     background-color: ${({ theme }) => theme.color["blue"][200]};
   }
 `;
+interface StyledEntityValue {
+  color?: string;
+}
+export const StyledEntityValue = styled.div<StyledEntityValue>`
+  border-left-style: solid;
+  border-left-width: 3px;
+  border-left-color: ${({ theme, color }) => (color ? theme.color[color] : "")};
+`;

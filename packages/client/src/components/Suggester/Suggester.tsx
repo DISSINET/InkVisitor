@@ -1,11 +1,12 @@
 import { ActantStatus, ActantType } from "@shared/enums";
 import { IOption } from "@shared/types";
-import { Button, Input, Loader, Tag } from "components";
+import { Button, Dropdown, Input, Loader, Tag } from "components";
 import useKeypress from "hooks/useKeyPress";
 import React, { useState } from "react";
 import { DragObjectWithType, DropTargetMonitor, useDrop } from "react-dnd";
 import { FaPlayCircle, FaPlus } from "react-icons/fa";
 import { MdCancel } from "react-icons/md";
+import { ValueType, OptionTypeBase } from "react-select";
 import { toast } from "react-toastify";
 import theme from "Theme/theme";
 import { ItemTypes } from "types";
@@ -42,7 +43,7 @@ interface SuggesterProps {
   suggestions: SuggestionI[];
   placeholder?: string; // text to display when typed === ""
   typed: string; // input value
-  category: string; // selected category
+  category: IOption; // selected category
   categories: IOption[]; // all possible categories
   suggestionListPosition?: string; // todo not implemented yet
   disabled?: boolean; // todo not implemented yet
@@ -53,7 +54,7 @@ interface SuggesterProps {
 
   // events
   onType: (newType: string) => void;
-  onChangeCategory: Function;
+  onChangeCategory: (selectedOption: ValueType<OptionTypeBase, any>) => void;
   onCreate: Function;
   onPick: Function;
   onDrop: Function;
@@ -122,9 +123,9 @@ export const Suggester: React.FC<SuggesterProps> = ({
   const handleEnterPress = () => {
     if (selected === -1 && typed.length > 0) {
       if (
-        category === ActantType.Any ||
-        category === ActantType.Statement ||
-        category === ActantType.Territory
+        category.value === ActantType.Any ||
+        category.value === ActantType.Statement ||
+        category.value === ActantType.Territory
       ) {
         setShowModal(true);
       } else {
@@ -141,9 +142,9 @@ export const Suggester: React.FC<SuggesterProps> = ({
   const handleAddBtnClick = () => {
     if (typed.length > 0) {
       if (
-        category === ActantType.Any ||
-        category === ActantType.Statement ||
-        category === ActantType.Territory
+        category.value === ActantType.Any ||
+        category.value === ActantType.Statement ||
+        category.value === ActantType.Territory
       ) {
         setShowModal(true);
       } else {
@@ -163,7 +164,7 @@ export const Suggester: React.FC<SuggesterProps> = ({
           hasButton={allowCreate}
           isOver={isOver}
         >
-          <Input
+          {/* <Input
             type="select"
             value={category}
             options={categories}
@@ -175,6 +176,18 @@ export const Suggester: React.FC<SuggesterProps> = ({
               setIsFocused(true);
             }}
             onBlur={() => setIsFocused(false)}
+          /> */}
+          <Dropdown
+            value={{ label: category.value, value: category.value }}
+            options={categories}
+            onChange={onChangeCategory}
+            width={40}
+            entityDropdown
+            // onFocus={() => {
+            //   setSelected(-1);
+            //   setIsFocused(true);
+            // }}
+            // onBlur={() => setIsFocused(false)}
           />
           <StyledTypeBar entity={`entity${category}`}></StyledTypeBar>
           <Input
@@ -275,7 +288,7 @@ export const Suggester: React.FC<SuggesterProps> = ({
         <SuggesterModal
           show={true}
           typed={typed}
-          category={category}
+          category={category.value}
           categories={categories.slice(1)}
           onCreate={onCreate}
           closeModal={() => setShowModal(false)}

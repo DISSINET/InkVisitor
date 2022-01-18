@@ -1,5 +1,5 @@
 import { allEntities } from "@shared/dictionaries/entity";
-import React, { ReactNode } from "react";
+import React, { ReactNode, Ref } from "react";
 import {
   GroupedOptionsType,
   OptionsType,
@@ -8,9 +8,15 @@ import {
   components,
   MultiValueProps,
   ValueContainerProps,
+  SingleValueProps,
 } from "react-select";
-import { DropdownItem } from "types";
-import { StyledSelect, StyledSelectWrapper } from "./DropdownStyles";
+import { OptionProps } from "react-select/src/types";
+import { DropdownItem, Entities } from "types";
+import {
+  StyledEntityValue,
+  StyledSelect,
+  StyledSelectWrapper,
+} from "./DropdownStyles";
 
 interface Dropdown {
   options?: OptionsType<OptionTypeBase> | GroupedOptionsType<OptionTypeBase>;
@@ -30,6 +36,7 @@ interface Dropdown {
   isClearable?: boolean;
   isMulti?: boolean;
   allowSelectAll?: boolean;
+  entityDropdown?: boolean;
 }
 export const Dropdown: React.FC<Dropdown> = ({
   options = [],
@@ -48,6 +55,7 @@ export const Dropdown: React.FC<Dropdown> = ({
   isMulti = false,
   disabled = false,
   allowSelectAll = false,
+  entityDropdown = false,
 }) => {
   const optionsWithIterator = options[Symbol.iterator]();
 
@@ -56,12 +64,19 @@ export const Dropdown: React.FC<Dropdown> = ({
       <StyledSelect
         isMulti={isMulti}
         isDisabled={disabled}
+        entityDropdown={entityDropdown}
         className="react-select-container"
         classNamePrefix="react-select"
         placeholder={placeholder}
         noOptionsMessage={noOptionsMessage}
         isClearable={isClearable}
-        components={{ components, MultiValue, ValueContainer }}
+        components={{
+          components,
+          Option,
+          SingleValue,
+          MultiValue,
+          ValueContainer,
+        }}
         {...(getOptionLabel ? { getOptionLabel: getOptionLabel } : {})}
         {...(formatOptionLabel ? { formatOptionLabel: formatOptionLabel } : {})}
         {...(isOptionSelected ? { isOptionSelected: isOptionSelected } : {})}
@@ -107,6 +122,41 @@ export const Dropdown: React.FC<Dropdown> = ({
   );
 };
 
+const SingleValue = (props: SingleValueProps<any>): React.ReactElement => {
+  const { entityDropdown, value } = props.selectProps;
+  return (
+    <>
+      {entityDropdown ? (
+        <components.SingleValue {...props}>
+          {props.data.label}
+        </components.SingleValue>
+      ) : (
+        <components.SingleValue {...props}>
+          {props.data.label}
+        </components.SingleValue>
+      )}
+    </>
+  );
+};
+
+const Option = ({ ...props }: { props: OptionProps }): React.ReactElement => {
+  const { entityDropdown } = props.selectProps;
+  console.log(props.value);
+  return (
+    <>
+      {entityDropdown && props.value && props.value !== "*" ? (
+        <components.Option {...props}>
+          <StyledEntityValue color={Entities[props.value].color}>
+            {props.label}
+          </StyledEntityValue>
+        </components.Option>
+      ) : (
+        <components.Option {...props}></components.Option>
+      )}
+    </>
+  );
+};
+
 const MultiValue = (props: MultiValueProps<any>): React.ReactElement => {
   let labelToBeDisplayed = `${props.data.label}`;
   if (props.data.value === allEntities.value) {
@@ -127,6 +177,8 @@ const ValueContainer = ({
   any,
   any
 >): React.ReactElement => {
+  const { entityDropdown, value } = props.selectProps;
+
   const currentValues: DropdownItem[] = props.getValue().map((v) => v);
   let toBeRendered = children;
   if (currentValues.some((val) => val.value === allEntities.value)) {
@@ -134,8 +186,18 @@ const ValueContainer = ({
   }
 
   return (
-    <components.ValueContainer {...props}>
-      {toBeRendered}
-    </components.ValueContainer>
+    <>
+      {entityDropdown && value.value && value.value !== "*" ? (
+        <components.ValueContainer {...props}>
+          <StyledEntityValue color={Entities[value.value].color}>
+            {toBeRendered}
+          </StyledEntityValue>
+        </components.ValueContainer>
+      ) : (
+        <components.ValueContainer {...props}>
+          {toBeRendered}
+        </components.ValueContainer>
+      )}
+    </>
   );
 };
