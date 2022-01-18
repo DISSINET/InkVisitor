@@ -123,18 +123,11 @@ export const Dropdown: React.FC<Dropdown> = ({
 };
 
 const SingleValue = (props: SingleValueProps<any>): React.ReactElement => {
-  const { entityDropdown, value } = props.selectProps;
   return (
     <>
-      {entityDropdown ? (
-        <components.SingleValue {...props}>
-          {props.data.label}
-        </components.SingleValue>
-      ) : (
-        <components.SingleValue {...props}>
-          {props.data.label}
-        </components.SingleValue>
-      )}
+      <components.SingleValue {...props}>
+        {props.data.label}
+      </components.SingleValue>
     </>
   );
 };
