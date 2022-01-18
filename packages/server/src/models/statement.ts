@@ -199,19 +199,8 @@ export class StatementData implements IModel, IStatementData {
 
 class Statement extends Actant implements IStatement {
   static table = "actants";
-  static publicFields: string[] = [
-    "id",
-    "class",
-    "data",
-    "label",
-    "label",
-    "detail",
-    "status",
-    "language",
-    "notes",
-    "props",
-  ];
-  
+  static publicFields = Actant.publicFields;
+
   class: ActantType.Statement = ActantType.Statement;
   data: StatementData;
 

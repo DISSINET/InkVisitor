@@ -34,18 +34,7 @@ class ActionData implements IModel {
 
 class Action extends Actant implements IAction {
   static table = "actants";
-  static publicFields: string[] = [
-    "id",
-    "class",
-    "data",
-    "label",
-    "label",
-    "detail",
-    "status",
-    "language",
-    "notes",
-    "props",
-  ];
+  static publicFields = Actant.publicFields;
 
   class: ActantType.Action = ActantType.Action; // just default
   data: ActionData;

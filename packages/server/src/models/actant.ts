@@ -22,7 +22,6 @@ export default class Actant extends Base implements IActant, IDbModel {
     "class",
     "data",
     "label",
-    "label",
     "detail",
     "status",
     "language",

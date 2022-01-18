@@ -588,13 +588,11 @@ describe("test Statement.toJSON", function () {
   const newKeys = Object.keys(jsoned);
   const newValues = Object.values(jsoned);
 
-  it("should correctly map to pub lic fields", () => {
+  it("should correctly map to public fields", () => {
     expect(newKeys).toEqual(Statement.publicFields);
   });
 
   it("should correctly assign values", () => {
-    console.log(newKeys);
-    console.log(newValues);
     expect(newValues).toEqual(
       Statement.publicFields.map((fieldName) => (instance as any)[fieldName])
     );
