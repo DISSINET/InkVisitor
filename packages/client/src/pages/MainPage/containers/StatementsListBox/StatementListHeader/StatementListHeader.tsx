@@ -8,6 +8,7 @@ import {
   StyledHeader,
   StyledHeaderBreadcrumbRow,
   StyledHeading,
+  StyledSuggesterRow,
 } from "./StatementListHeaderStyles";
 import { StyledHeaderRow } from "./StatementListHeaderStyles";
 import { StatementListBreadcrumbItem } from "./StatementListBreadcrumbItem/StatementListBreadcrumbItem";
@@ -127,18 +128,20 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
         )}
       </StyledHeaderRow>
 
-      {"Move territory to parent: "}
-      <div>
-        <EntitySuggester
-          filterEditorRights
-          inputWidth={96}
-          allowCreate={false}
-          categoryTypes={[ActantType.Territory]}
-          onSelected={(newSelectedId: string) => {
-            moveTerritoryMutation.mutate(newSelectedId);
-          }}
-        />
-      </div>
+      <StyledSuggesterRow>
+        {"Move territory to parent:\xa0"}
+        <div>
+          <EntitySuggester
+            filterEditorRights
+            inputWidth={96}
+            allowCreate={false}
+            categoryTypes={[ActantType.Territory]}
+            onSelected={(newSelectedId: string) => {
+              moveTerritoryMutation.mutate(newSelectedId);
+            }}
+          />
+        </div>
+      </StyledSuggesterRow>
     </StyledHeader>
   );
 };
