@@ -14,6 +14,7 @@ import {
   StyledLabel,
   ButtonWrapper,
   StyledTooltipSeparator,
+  StyledItalic,
 } from "./TagStyles";
 import { useAppDispatch } from "redux/hooks";
 import { setDraggedTerritory } from "redux/features/territoryTree/draggedTerritorySlice";
@@ -167,18 +168,16 @@ export const Tag: React.FC<TagProps> = ({
               <>{renderEntityTag()}</>
             ) : (
               <>
-                {label && (
-                  <StyledLabel
-                    invertedLabel={invertedLabel}
-                    status={status}
-                    borderStyle={borderStyle}
-                    fullWidth={fullWidth}
-                    isFavorited={isFavorited}
-                    labelOnly
-                  >
-                    {label}
-                  </StyledLabel>
-                )}
+                <StyledLabel
+                  invertedLabel={invertedLabel}
+                  status={status}
+                  borderStyle={borderStyle}
+                  fullWidth={fullWidth}
+                  isFavorited={isFavorited}
+                  labelOnly
+                >
+                  {label ? label : <i>{"no label"}</i>}
+                </StyledLabel>
               </>
             )}
             {button && renderButton()}
@@ -213,17 +212,17 @@ export const Tag: React.FC<TagProps> = ({
                 onDoubleClick={(e: React.MouseEvent) => onDoubleClick(e)}
               >
                 {renderEntityTag()}
-                {label && (
-                  <StyledLabel
-                    invertedLabel={invertedLabel}
-                    status={status}
-                    borderStyle={borderStyle}
-                    fullWidth={fullWidth}
-                    isFavorited={isFavorited}
-                  >
-                    {label}
-                  </StyledLabel>
-                )}
+
+                <StyledLabel
+                  invertedLabel={invertedLabel}
+                  status={status}
+                  borderStyle={borderStyle}
+                  fullWidth={fullWidth}
+                  isFavorited={isFavorited}
+                >
+                  {label ? label : <StyledItalic>{"no label"}</StyledItalic>}
+                </StyledLabel>
+
                 {button && renderButton()}
               </StyledTagWrapper>
             </StyledTooltipSeparator>
