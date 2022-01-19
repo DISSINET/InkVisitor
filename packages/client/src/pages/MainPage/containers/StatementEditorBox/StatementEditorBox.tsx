@@ -16,7 +16,6 @@ import {
 } from "constructors";
 import { useSearchParams } from "hooks";
 import React, { useEffect, useMemo } from "react";
-import { BsArrow90DegLeft, BsArrowRightShort } from "react-icons/bs";
 import { FaTrashAlt, FaUnlink } from "react-icons/fa";
 import { useMutation, useQuery, useQueryClient } from "react-query";
 import { excludedSuggesterEntities } from "Theme/constants";
@@ -24,7 +23,6 @@ import { AttributeButtonGroup } from "../AttributeButtonGroup/AttributeButtonGro
 import { JSONExplorer } from "../JSONExplorer/JSONExplorer";
 import { PropGroup } from "../PropGroup/PropGroup";
 import { StatementListBreadcrumbItem } from "../StatementsListBox/StatementListHeader/StatementListBreadcrumbItem/StatementListBreadcrumbItem";
-import { StyledItemBox } from "../StatementsListBox/StatementListHeader/StatementListBreadcrumbItem/StatementListBreadcrumbItemStyles";
 import { EntitySuggester, EntityTag } from "./../";
 import { AuditTable } from "./../AuditTable/AuditTable";
 import { StatementEditorActantTable } from "./StatementEditorActantTable/StatementEditorActantTable";
@@ -481,7 +479,6 @@ export const StatementEditorBox: React.FC = () => {
 
   const moveStatementMutation = useMutation(
     async (newTerritoryId: string) => {
-      console.log(newTerritoryId);
       await api.actantsUpdate(statementId, {
         data: { territory: { id: newTerritoryId, order: -1 } },
       });
