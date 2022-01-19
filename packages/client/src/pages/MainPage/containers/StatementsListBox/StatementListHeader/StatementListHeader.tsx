@@ -129,7 +129,7 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
       </StyledHeaderRow>
 
       <StyledSuggesterRow>
-        {"Move territory to parent:\xa0"}
+        {"Move to parent:\xa0"}
         <div>
           <EntitySuggester
             filterEditorRights

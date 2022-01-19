@@ -1,4 +1,4 @@
-import { IActant, IStatement } from "@shared/types";
+import { IActant, IResponseTree, IStatement } from "@shared/types";
 
 export const findPositionInStatement = (
   statement: IStatement,
@@ -59,4 +59,21 @@ export const findPositionInStatement = (
   } else if (statement.data.references.find((r) => r.resource === actant.id)) {
     return "reference";
   }
+};
+
+export const searchTree = (
+  element: IResponseTree,
+  matchingTitle: string
+): IResponseTree | null => {
+  if (element.territory.id === matchingTitle) {
+    return element;
+  } else if (element.children != null) {
+    var i;
+    var result = null;
+    for (i = 0; result === null && i < element.children.length; i++) {
+      result = searchTree(element.children[i], matchingTitle);
+    }
+    return result;
+  }
+  return null;
 };

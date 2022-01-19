@@ -13,6 +13,7 @@ import { ContextMenuNewTerritoryModal } from "./ContextMenuNewTerritoryModal/Con
 import { rootTerritoryId } from "Theme/constants";
 import { UserRoleMode } from "@shared/enums";
 import { StyledTreeWrapper } from "./TerritoryTreeBoxStyles";
+import { searchTree } from "utils";
 
 export const TerritoryTreeBox: React.FC = () => {
   const queryClient = useQueryClient();
@@ -74,23 +75,6 @@ export const TerritoryTreeBox: React.FC = () => {
   const selectedTerritoryPath = useAppSelector(
     (state) => state.territoryTree.selectedTerritoryPath
   );
-
-  const searchTree = (
-    element: IResponseTree,
-    matchingTitle: string
-  ): IResponseTree | null => {
-    if (element.territory.id === matchingTitle) {
-      return element;
-    } else if (element.children != null) {
-      var i;
-      var result = null;
-      for (i = 0; result === null && i < element.children.length; i++) {
-        result = searchTree(element.children[i], matchingTitle);
-      }
-      return result;
-    }
-    return null;
-  };
 
   useEffect(() => {
     if (data) {
