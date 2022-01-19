@@ -144,10 +144,6 @@ export const EntitySuggester: React.FC<EntitySuggesterI> = ({
     }
   }, [categoryTypes]);
 
-  // const handleCategoryChanged = (newCategory: string) => {
-  //   setSelectedCategory(newCategory);
-  // };
-
   const actantsCreateMutation = useMutation(
     async (newActant: IActant) => await api.actantsCreate(newActant),
     {
@@ -262,6 +258,7 @@ export const EntitySuggester: React.FC<EntitySuggesterI> = ({
         detail: string;
         territoryId?: string;
       }) => {
+        console.log(newCreated);
         handleCreate(newCreated);
       }}
       onPick={(newPicked: SuggestionI) => {

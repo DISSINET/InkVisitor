@@ -1,4 +1,5 @@
 import { allEntities } from "@shared/dictionaries/entity";
+import { ActantType } from "@shared/enums";
 import React, { ReactNode, Ref } from "react";
 import {
   GroupedOptionsType,
@@ -126,7 +127,7 @@ const SingleValue = (props: SingleValueProps<any>): React.ReactElement => {
   return (
     <>
       <components.SingleValue {...props}>
-        {props.data.label}
+        {/* {props.data.label} */}
       </components.SingleValue>
     </>
   );
@@ -134,10 +135,9 @@ const SingleValue = (props: SingleValueProps<any>): React.ReactElement => {
 
 const Option = ({ ...props }: { props: OptionProps }): React.ReactElement => {
   const { entityDropdown } = props.selectProps;
-  console.log(props.value);
   return (
     <>
-      {entityDropdown && props.value && props.value !== "*" ? (
+      {entityDropdown && props.value && props.value !== ActantType.Any ? (
         <components.Option {...props}>
           <StyledEntityValue color={Entities[props.value].color}>
             {props.label}
