@@ -129,7 +129,7 @@ export const Suggester: React.FC<SuggesterProps> = ({
       ) {
         setShowModal(true);
       } else {
-        onCreate({ label: typed, category: category });
+        onCreate({ label: typed, category: category.value });
       }
     } else if (selected > -1) {
       onPick(suggestions[selected]);
@@ -148,7 +148,7 @@ export const Suggester: React.FC<SuggesterProps> = ({
       ) {
         setShowModal(true);
       } else {
-        onCreate({ label: typed, category: category });
+        onCreate({ label: typed, category: category.value });
       }
     } else {
       toast.info("Fill at least 1 character");

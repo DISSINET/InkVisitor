@@ -247,7 +247,6 @@ export const EntitySuggester: React.FC<EntitySuggesterI> = ({
       onChangeCategory={(option: ValueType<OptionTypeBase, any>) => {
         console.log(option);
         setSelectedCategory(option);
-        // setSelectedCategory(option.)
       }}
       // onChangeCategory={(newCategory: string) =>
       //   handleCategoryChanged(newCategory)
@@ -258,7 +257,6 @@ export const EntitySuggester: React.FC<EntitySuggesterI> = ({
         detail: string;
         territoryId?: string;
       }) => {
-        console.log(newCreated);
         handleCreate(newCreated);
       }}
       onPick={(newPicked: SuggestionI) => {
