@@ -59,12 +59,14 @@ export const Dropdown: React.FC<Dropdown> = ({
   entityDropdown = false,
 }) => {
   const optionsWithIterator = options[Symbol.iterator]();
+  const isOneOptionSingleSelect = options.length < 2 && !isMulti;
 
   return (
     <StyledSelectWrapper width={width}>
       <StyledSelect
         isMulti={isMulti}
-        isDisabled={disabled || options.length < 2}
+        isDisabled={disabled || isOneOptionSingleSelect}
+        isOneOptionSingleSelect={isOneOptionSingleSelect}
         entityDropdown={entityDropdown}
         className="react-select-container"
         classNamePrefix="react-select"
@@ -85,7 +87,8 @@ export const Dropdown: React.FC<Dropdown> = ({
         styles={{
           dropdownIndicator: () => {
             return {
-              display: noDropDownIndicator ? "none" : "",
+              display:
+                noDropDownIndicator || isOneOptionSingleSelect ? "none" : "",
             };
           },
         }}

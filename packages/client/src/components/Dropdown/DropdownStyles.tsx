@@ -20,6 +20,7 @@ export const StyledSelectWrapper = styled.div<StyledSelectWrapper>`
 interface StyledSelect {
   width?: number | "full";
   disabled?: boolean;
+  isOneOptionSingleSelect?: boolean;
 }
 export const StyledSelect = styled(Select)`
   font-weight: bold;
@@ -41,14 +42,17 @@ export const StyledSelect = styled(Select)`
     }
   }
   .react-select__control--is-disabled {
-    background: repeating-linear-gradient(
+    background: ${({ isOneOptionSingleSelect }) =>
+      isOneOptionSingleSelect
+        ? ""
+        : `repeating-linear-gradient(
       -45deg,
       #cbd5e0,
       #cbd5e0,
       1px,
       #fff 1px,
       #fff 12px
-    );
+    )`};
   }
   .react-select__control--is-focused {
     box-shadow: none;
