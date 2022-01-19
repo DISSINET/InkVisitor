@@ -183,11 +183,11 @@ export const Suggester: React.FC<SuggesterProps> = ({
             onChange={onChangeCategory}
             width={40}
             entityDropdown
-            // onFocus={() => {
-            //   setSelected(-1);
-            //   setIsFocused(true);
-            // }}
-            // onBlur={() => setIsFocused(false)}
+            onFocus={() => {
+              setSelected(-1);
+              setIsFocused(true);
+            }}
+            onBlur={() => setIsFocused(false)}
           />
           <StyledTypeBar entity={`entity${category}`}></StyledTypeBar>
           <Input

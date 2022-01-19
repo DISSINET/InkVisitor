@@ -38,6 +38,8 @@ interface Dropdown {
   isMulti?: boolean;
   allowSelectAll?: boolean;
   entityDropdown?: boolean;
+  onFocus?: () => void;
+  onBlur?: () => void;
 }
 export const Dropdown: React.FC<Dropdown> = ({
   options = [],
@@ -57,6 +59,8 @@ export const Dropdown: React.FC<Dropdown> = ({
   disabled = false,
   allowSelectAll = false,
   entityDropdown = false,
+  onFocus = () => {},
+  onBlur = () => {},
 }) => {
   const optionsWithIterator = options[Symbol.iterator]();
   const isOneOptionSingleSelect = options.length < 2 && !isMulti;
@@ -64,6 +68,8 @@ export const Dropdown: React.FC<Dropdown> = ({
   return (
     <StyledSelectWrapper width={width}>
       <StyledSelect
+        onFocus={onFocus}
+        onBlur={onBlur}
         isMulti={isMulti}
         isDisabled={disabled || isOneOptionSingleSelect}
         isOneOptionSingleSelect={isOneOptionSingleSelect}
