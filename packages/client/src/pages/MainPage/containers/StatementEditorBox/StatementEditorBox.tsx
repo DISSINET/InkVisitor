@@ -4,7 +4,7 @@ import {
   IResponseStatement,
   IStatementActant,
   IStatementAction,
-  IStatementReference
+  IStatementReference,
 } from "@shared/types";
 import api from "api";
 import { Button, Input, Loader, MultiInput } from "components";
@@ -12,7 +12,7 @@ import {
   CProp,
   CReference,
   CStatementActant,
-  CStatementAction
+  CStatementAction,
 } from "constructors";
 import { useSearchParams } from "hooks";
 import React, { useEffect, useMemo } from "react";
@@ -39,7 +39,7 @@ import {
   StyledReferencesListColumn,
   StyledTagsList,
   StyledTagsListItem,
-  StyledTagWrapper
+  StyledTagWrapper,
 } from "./StatementEditorBoxStyles";
 
 const classesActants = [
@@ -479,7 +479,6 @@ export const StatementEditorBox: React.FC = () => {
 
   const moveStatementMutation = useMutation(
     async (newTerritoryId: string) => {
-      console.log(newTerritoryId);
       await api.actantsUpdate(statementId, {
         data: { territory: { id: newTerritoryId, order: -1 } },
       });

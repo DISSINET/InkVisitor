@@ -1,19 +1,17 @@
-import React, { useEffect, useMemo, useState } from "react";
-import { useMutation, useQuery, useQueryClient } from "react-query";
-
-import api from "api";
-import { TerritoryTreeNode } from "./TerritoryTreeNode/TerritoryTreeNode";
-import { IResponseTree, IResponseUser } from "@shared/types";
-import { Button, Loader } from "components";
-import { useAppDispatch, useAppSelector } from "redux/hooks";
-import { setSelectedTerritoryPath } from "redux/features/territoryTree/selectedTerritoryPathSlice";
-import { useSearchParams } from "hooks";
-import { FaPlus } from "react-icons/fa";
-import { ContextMenuNewTerritoryModal } from "./ContextMenuNewTerritoryModal/ContextMenuNewTerritoryModal";
-import { rootTerritoryId } from "Theme/constants";
 import { UserRoleMode } from "@shared/enums";
-import { StyledTreeWrapper } from "./TerritoryTreeBoxStyles";
+import api from "api";
+import { Button, Loader } from "components";
+import { useSearchParams } from "hooks";
+import React, { useEffect, useState } from "react";
+import { FaPlus } from "react-icons/fa";
+import { useMutation, useQuery, useQueryClient } from "react-query";
+import { setSelectedTerritoryPath } from "redux/features/territoryTree/selectedTerritoryPathSlice";
+import { useAppDispatch, useAppSelector } from "redux/hooks";
+import { rootTerritoryId } from "Theme/constants";
 import { searchTree } from "utils";
+import { ContextMenuNewTerritoryModal } from "./ContextMenuNewTerritoryModal/ContextMenuNewTerritoryModal";
+import { StyledTreeWrapper } from "./TerritoryTreeBoxStyles";
+import { TerritoryTreeNode } from "./TerritoryTreeNode/TerritoryTreeNode";
 
 export const TerritoryTreeBox: React.FC = () => {
   const queryClient = useQueryClient();

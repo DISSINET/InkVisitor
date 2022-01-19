@@ -1,5 +1,10 @@
-import React from "react";
-import { useMutation, UseMutationResult, useQueryClient } from "react-query";
+import React, { useEffect, useState } from "react";
+import {
+  useMutation,
+  UseMutationResult,
+  useQuery,
+  useQueryClient,
+} from "react-query";
 import { FaPlus, FaRecycle } from "react-icons/fa";
 
 import {
@@ -15,6 +20,7 @@ import { StatementListBreadcrumbItem } from "./StatementListBreadcrumbItem/State
 import {
   IResponseGeneric,
   IResponseTerritory,
+  IResponseTree,
   IStatement,
 } from "@shared/types";
 import { CStatement } from "constructors";
@@ -26,6 +32,7 @@ import theme from "Theme/theme";
 import { EntitySuggester } from "../..";
 import api from "api";
 import { AxiosResponse } from "axios";
+import { searchTree } from "utils";
 
 interface StatementListHeader {
   data: IResponseTerritory;
@@ -51,6 +58,59 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
 }) => {
   const queryClient = useQueryClient();
   const { territoryId } = useSearchParams();
+
+  const {
+    status,
+    data: treeData,
+    error,
+    isFetching,
+  } = useQuery(
+    ["tree"],
+    async () => {
+      const res = await api.treeGet();
+      return res.data;
+    },
+    { enabled: api.isLoggedIn() }
+  );
+
+  const collectTerritoryChildren = (
+    element: IResponseTree,
+    childArray: string[]
+  ): string[] | null => {
+    if (element.children.length) {
+      element.children.map((child) => {
+        childArray.push(child.territory.id);
+      });
+      for (var i = 0; i < element.children.length; i++) {
+        collectTerritoryChildren(element.children[i], childArray);
+      }
+    } else {
+      return childArray;
+    }
+    return childArray;
+  };
+
+  const [excludedMoveTerritories, setExcludedMoveTerritories] = useState<
+    string[]
+  >([territoryId]);
+
+  useEffect(() => {
+    const toExclude = [territoryId];
+    if (treeData) {
+      const currentTerritory = searchTree(treeData, territoryId);
+      if (currentTerritory?.territory.data.parent) {
+        toExclude.push(currentTerritory.territory.data.parent.id);
+      }
+      if (currentTerritory) {
+        const childArr = collectTerritoryChildren(currentTerritory, []);
+        if (childArr?.length) {
+          setExcludedMoveTerritories([...toExclude, ...childArr]);
+        } else {
+          setExcludedMoveTerritories(toExclude);
+        }
+      }
+    }
+  }, [treeData, territoryId]);
 
   const selectedTerritoryPath = useAppSelector(
     (state) => state.territoryTree.selectedTerritoryPath
@@ -139,6 +199,7 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
             onSelected={(newSelectedId: string) => {
               moveTerritoryMutation.mutate(newSelectedId);
             }}
+            excludedActantIds={excludedMoveTerritories}
           />
         </div>
       </StyledSuggesterRow>
