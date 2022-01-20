@@ -52,16 +52,12 @@ export default Router()
       }
       const actant = getActantType({ ...actantData });
 
-      const usedInStatements = await Statement.findDependentStatements(
-        request.db.connection,
-        actant.id as string
+      await actant.prepareResponseFields(
+        request.getUserOrFail(),
+        request.db.connection
       );
 
-      return {
-        ...actant,
-        usedIn: usedInStatements,
-        right: actant.getUserRoleMode(request.getUserOrFail()),
-      } as IResponseActant;
+      return actant;
     })
   )
   .post(

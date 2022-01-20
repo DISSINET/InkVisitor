@@ -12,7 +12,7 @@ import { IProp } from "@shared/types";
 import { IPropSpec } from "@shared/types/prop";
 import { fillArray, fillFlatObject, IModel, UnknownObject } from "./common";
 
-export class StatementPropSpec implements IPropSpec, IModel {
+export class PropSpec implements IPropSpec, IModel {
   id: string = "";
   elvl: Elvl = Elvl.Textual;
   logic: Logic = Logic.Positive;
@@ -32,7 +32,7 @@ export class StatementPropSpec implements IPropSpec, IModel {
   }
 }
 
-export class StatementProp implements IProp, IModel {
+export class Prop implements IProp, IModel {
   id = "";
   elvl: Elvl = Elvl.Textual;
   certainty: Certainty = Certainty.Empty;
@@ -43,10 +43,10 @@ export class StatementProp implements IProp, IModel {
   bundleStart: boolean = false;
   bundleEnd: boolean = false;
 
-  children: StatementProp[] = [];
+  children: Prop[] = [];
 
-  type: StatementPropSpec = new StatementPropSpec({});
-  value: StatementPropSpec = new StatementPropSpec({});
+  type: PropSpec = new PropSpec({});
+  value: PropSpec = new PropSpec({});
 
   constructor(data: UnknownObject) {
     if (!data) {
@@ -56,10 +56,10 @@ export class StatementProp implements IProp, IModel {
     fillFlatObject(this, data);
     fillArray(this.mood, String, data.mood);
 
-    this.type = new StatementPropSpec(data.type);
-    this.value = new StatementPropSpec(data.value);
+    this.type = new PropSpec(data.type);
+    this.value = new PropSpec(data.value);
 
-    fillArray<StatementProp>(this.children, StatementProp, data.children);
+    fillArray<Prop>(this.children, Prop, data.children);
   }
 
   isValid(): boolean {
