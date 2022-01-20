@@ -31,6 +31,7 @@ interface EntitySuggesterI {
   openDetailOnCreate?: boolean;
   territoryActants?: string[];
   excludedEntities?: ActantType[];
+  excludedActantIds?: string[];
   filterEditorRights?: boolean;
 }
 
@@ -45,6 +46,7 @@ export const EntitySuggester: React.FC<EntitySuggesterI> = ({
   territoryActants,
   excludedEntities = [],
   filterEditorRights = false,
+  excludedActantIds = [],
 }) => {
   const wildCardCategory = ActantType.Any;
   const queryClient = useQueryClient();
@@ -79,6 +81,9 @@ export const EntitySuggester: React.FC<EntitySuggesterI> = ({
           filterEditorRights && userRole !== UserRole.Admin
             ? s.right === UserRoleMode.Write
             : s
+        )
+        .filter((s) =>
+          excludedActantIds.length ? !excludedActantIds.includes(s.id) : s
         )
         .map((s: IActant) => {
           const entity = Entities[s.class];
