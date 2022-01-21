@@ -40,3 +40,5 @@ import/~$actants.xlsx
 *.pem
 
 .DS_Store
+
+.idea
