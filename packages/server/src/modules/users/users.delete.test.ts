@@ -2,9 +2,8 @@ import "@modules/common.test";
 import { BadParams, UserDoesNotExits } from "@shared/types/errors";
 import { Db } from "@service/RethinkDB";
 import request from "supertest";
-import { apiPath } from "../../common/constants";
+import { apiPath } from "@common/constants";
 import app from "../../Server";
-import { createUser } from "../../service/shorthands";
 import {
   successfulGenericResponse,
   testErroneousResponse,

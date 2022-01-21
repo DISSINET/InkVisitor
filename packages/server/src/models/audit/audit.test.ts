@@ -1,12 +1,8 @@
 import "ts-jest";
 import { Db } from "@service/RethinkDB";
-import Actant from "./actant";
-import Statement from "./statement";
-import { clean, clearAudits } from "@modules/common.test";
-import { findActantById } from "@service/shorthands";
+import { clearAudits } from "@modules/common.test";
 import { IAudit, IStatement } from "@shared/types";
 import Audit from "./audit";
-import { UnknownObject } from "./common";
 
 describe("test Audit.save", function () {
   const rand = Math.random().toString();

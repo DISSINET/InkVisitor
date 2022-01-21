@@ -2,13 +2,13 @@ import "ts-jest";
 import Statement, { StatementActant, StatementReference } from "./statement";
 import { Db } from "@service/RethinkDB";
 import { deleteActants, findActantById } from "@service/shorthands";
-import Territory from "./territory";
+import Territory from "@models/territory";
 import { IStatement } from "@shared/types/statement";
 import {
   getIStatementActionMock,
   getIStatementMock,
 } from "@modules/common.test";
-import { Prop } from "./prop";
+import Prop from "@models/prop";
 
 describe("Statement constructor test", function () {
   describe("empty data", () => {
@@ -379,14 +379,16 @@ describe("Statement - save territory order", function () {
       });
       await statement2.save(db.connection);
 
-      // first statement provides order = -1, which should result in save '0' value
+      // first statement provides order = -1, which should result in save '0'
+      // value
       const createdData1 = await findActantById<IStatement>(db, statement1.id);
       expect(createdData1.data.territory.id).toEqual(
         createdData1.data.territory.id
       );
       expect(createdData1.data.territory.order).toEqual(0);
 
-      // second statement provides order = -1, which should result in save '1' value
+      // second statement provides order = -1, which should result in save '1'
+      // value
       const createdData2 = await findActantById<IStatement>(db, statement2.id);
       expect(createdData2.data.territory.id).toEqual(
         createdData2.data.territory.id

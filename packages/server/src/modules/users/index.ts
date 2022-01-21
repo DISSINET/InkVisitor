@@ -6,7 +6,6 @@ import {
   deleteUser,
   findActantsById,
   findActantById,
-  getActantUsage,
 } from "@service/shorthands";
 import {
   BadCredentialsError,
@@ -28,7 +27,6 @@ import {
 } from "@shared/types";
 import mailer from "@service/mailer";
 import { Db } from "@service/RethinkDB";
-import { Connection } from "rethinkdb-ts";
 
 export default Router()
   .post(

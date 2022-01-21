@@ -1,6 +1,6 @@
-import { UnknownObject, IModel } from "./common";
+import { UnknownObject, IModel } from "@models/common";
 import { ActantType } from "@shared/enums";
-import Actant from "./actant";
+import Actant from "@models/actant";
 import { IActant } from "@shared/types";
 
 class ConceptData implements IModel {

@@ -6,7 +6,7 @@ import {
 import { createActant } from "@service/shorthands";
 import request from "supertest";
 import { supertestConfig } from "..";
-import { apiPath } from "../../common/constants";
+import { apiPath } from "@common/constants";
 import app from "../../Server";
 import Territory from "@models/territory";
 import { IResponseTree, IStatement, ITerritory } from "@shared/types";

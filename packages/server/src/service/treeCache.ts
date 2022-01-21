@@ -3,7 +3,7 @@ import { TerritoriesBrokenError } from "@shared/types/errors";
 import { IResponseTree, IStatement, ITerritory } from "@shared/types";
 import { Db } from "@service/RethinkDB";
 import Territory from "@models/territory";
-import { ActantType, UserRole, UserRoleMode } from "@shared/enums";
+import { ActantType, UserRoleMode } from "@shared/enums";
 import User, { UserRight } from "@models/user";
 
 export class TreeCreator {

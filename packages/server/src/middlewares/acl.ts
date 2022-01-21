@@ -1,5 +1,4 @@
-import AclPermission from "@models/acl_permission";
-import User from "@models/user";
+import AclPermission from "@models/acl";
 import { CustomError, PermissionDeniedError } from "@shared/types/errors";
 import { Response, Request, NextFunction, Router } from "express";
 

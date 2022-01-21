@@ -6,9 +6,9 @@ import {
 } from "@shared/types/errors";
 import { Db } from "@service/RethinkDB";
 import request from "supertest";
-import { apiPath } from "../../common/constants";
+import { apiPath } from "@common/constants";
 import app from "../../Server";
-import { findActantById } from "../../service/shorthands";
+import { findActantById } from "@service/shorthands";
 import { supertestConfig } from "..";
 import { IActant } from "@shared/types";
 import Territory from "@models/territory";

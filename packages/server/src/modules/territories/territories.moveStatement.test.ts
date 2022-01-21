@@ -1,13 +1,12 @@
 import "@modules/common.test";
 import request from "supertest";
 import { supertestConfig } from "..";
-import { apiPath } from "../../common/constants";
+import { apiPath } from "@common/constants";
 import app from "../../Server";
 import { IStatement } from "@shared/types";
 import { Db } from "@service/RethinkDB";
 import {
   createActant,
-  deleteActant,
   findActantById,
 } from "@service/shorthands";
 import Territory from "@models/territory";
@@ -15,6 +14,7 @@ import Statement from "@models/statement";
 import { clean } from "@modules/common.test";
 
 const randSuffix = Math.random();
+
 async function createMockStatementsWithTerritory(db: Db): Promise<Statement[]> {
   const ter: Territory = new Territory({
     id: `root-${randSuffix}`,

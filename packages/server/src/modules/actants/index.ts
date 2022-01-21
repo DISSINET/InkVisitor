@@ -2,7 +2,6 @@ import { asyncRouteHandler } from "../index";
 import { Router, Request } from "express";
 import {
   findActantById,
-  findActantsByIds,
   findAssociatedActantIds,
   filterActantsByWildcard,
 } from "@service/shorthands";

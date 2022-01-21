@@ -1,6 +1,6 @@
 import { IResponsePermission } from "@shared/types";
 import { r as rethink, Connection, WriteResult } from "rethinkdb-ts";
-import { IDbModel } from "./common";
+import { IDbModel } from "@models/common";
 
 export default class AclPermission implements IDbModel {
   id?: string;
@@ -18,10 +18,9 @@ export default class AclPermission implements IDbModel {
   }
 
   async save(dbInstance: Connection | undefined): Promise<WriteResult> {
-    const result = await rethink
-      .table(AclPermission.table)
-      .insert({ ...this, id: this.id || undefined })
-      .run(dbInstance);
+    const result = await rethink.table(AclPermission.table).
+      insert({ ...this, id: this.id || undefined }).
+      run(dbInstance);
 
     if (result.generated_keys) {
       this.id = result.generated_keys[0];
@@ -32,21 +31,19 @@ export default class AclPermission implements IDbModel {
 
   update(
     dbInstance: Connection | undefined,
-    updateData: Record<string, unknown>
+    updateData: Record<string, unknown>,
   ): Promise<WriteResult> {
-    return rethink
-      .table(AclPermission.table)
-      .get(this.id)
-      .update(updateData)
-      .run(dbInstance);
+    return rethink.table(AclPermission.table).
+      get(this.id).
+      update(updateData).
+      run(dbInstance);
   }
 
   delete(dbInstance: Connection | undefined): Promise<WriteResult> {
-    return rethink
-      .table(AclPermission.table)
-      .get(this.id)
-      .delete()
-      .run(dbInstance);
+    return rethink.table(AclPermission.table).
+      get(this.id).
+      delete().
+      run(dbInstance);
   }
 
   isValid(): boolean {
@@ -64,15 +61,12 @@ export default class AclPermission implements IDbModel {
   static async findByPath(
     dbInstance: Connection | undefined,
     ctrlName: string,
-    method: string
+    method: string,
   ): Promise<AclPermission | null> {
-    const data = await rethink
-      .table(AclPermission.table)
-      .filter({
-        controller: ctrlName,
-        method: method,
-      })
-      .run(dbInstance);
+    const data = await rethink.table(AclPermission.table).filter({
+      controller: ctrlName,
+      method: method,
+    }).run(dbInstance);
 
     if (!data.length) {
       return null;
@@ -82,12 +76,11 @@ export default class AclPermission implements IDbModel {
 
   static async findById(
     dbInstance: Connection | undefined,
-    id: string
+    id: string,
   ): Promise<AclPermission | null> {
-    const data = await rethink
-      .table(AclPermission.table)
-      .get(id)
-      .run(dbInstance);
+    const data = await rethink.table(AclPermission.table).
+      get(id).
+      run(dbInstance);
 
     if (!data) {
       return null;
@@ -96,7 +89,7 @@ export default class AclPermission implements IDbModel {
   }
 
   static async fetchAll(
-    dbInstance: Connection | undefined
+    dbInstance: Connection | undefined,
   ): Promise<IResponsePermission[]> {
     const data = await rethink.table(AclPermission.table).run(dbInstance);
     return data;

@@ -1,7 +1,7 @@
-import { fillFlatObject, UnknownObject, IModel } from "./common";
-import { ActantType, ActantStatus, Language } from "@shared/enums";
+import { fillFlatObject, UnknownObject, IModel } from "@models/common";
+import { ActantType } from "@shared/enums";
 import { IResource } from "@shared/types/resource";
-import Actant from "./actant";
+import Actant from "@models/actant";
 
 class ResourceData implements IModel {
   link: string = "";

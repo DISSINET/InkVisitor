@@ -1,5 +1,5 @@
 import { Router, Request } from "express";
-import { findActantById, getActants } from "@service/shorthands";
+import { findActantById } from "@service/shorthands";
 import {
   BadParams,
   PermissionDeniedError,

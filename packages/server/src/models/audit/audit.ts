@@ -1,18 +1,8 @@
-import { IDbModel, UnknownObject, fillFlatObject, fillArray } from "./common";
+import { IDbModel, UnknownObject, fillFlatObject } from "@models/common";
 import { r as rethink, Connection, WriteResult } from "rethinkdb-ts";
 import { IStatement, IActant, IAudit } from "@shared/types";
-import {
-  ActantStatus,
-  ActantType,
-  Language,
-  UserRole,
-  UserRoleMode,
-} from "@shared/enums";
 import { InternalServerError } from "@shared/types/errors";
-import User from "./user";
-import emitter from "./events/emitter";
-import { EventTypes } from "./events/types";
-import Actant from "./actant";
+import User from "@models/user";
 
 export default class Audit implements IAudit, IDbModel {
   static table = "audits";
@@ -33,10 +23,9 @@ export default class Audit implements IAudit, IDbModel {
   }
 
   async save(db: Connection | undefined): Promise<WriteResult> {
-    const result = await rethink
-      .table(Audit.table)
-      .insert({ ...this, id: this.id || undefined })
-      .run(db);
+    const result = await rethink.table(Audit.table).
+      insert({ ...this, id: this.id || undefined }).
+      run(db);
 
     if (result.generated_keys) {
       this.id = result.generated_keys[0];
@@ -47,7 +36,7 @@ export default class Audit implements IAudit, IDbModel {
 
   update(
     db: Connection | undefined,
-    updateData: Record<string, unknown>
+    updateData: Record<string, unknown>,
   ): Promise<WriteResult> {
     throw new InternalServerError("Audit entry cannot be updated");
   }
@@ -62,14 +51,13 @@ export default class Audit implements IAudit, IDbModel {
 
   static async getFirstForActant(
     db: Connection | undefined,
-    actantId: string
+    actantId: string,
   ): Promise<Audit | null> {
-    const result = await rethink
-      .table(Audit.table)
-      .filter({ actantId })
-      .orderBy(rethink.asc("date"))
-      .limit(1)
-      .run(db);
+    const result = await rethink.table(Audit.table).
+      filter({ actantId }).
+      orderBy(rethink.asc("date")).
+      limit(1).
+      run(db);
 
     if (!result || !result.length) {
       return null;
@@ -81,14 +69,13 @@ export default class Audit implements IAudit, IDbModel {
   static async getLastNForActant(
     db: Connection | undefined,
     actantId: string,
-    n: number = 5
+    n: number = 5,
   ): Promise<Audit[]> {
-    const result = await rethink
-      .table(Audit.table)
-      .filter({ actantId })
-      .orderBy(rethink.desc("date"))
-      .limit(n)
-      .run(db);
+    const result = await rethink.table(Audit.table).
+      filter({ actantId }).
+      orderBy(rethink.desc("date")).
+      limit(n).
+      run(db);
 
     if (!result || !result.length) {
       return [];
@@ -101,7 +88,7 @@ export default class Audit implements IAudit, IDbModel {
     db: Connection | undefined,
     user: User,
     actantId: string,
-    updateData: object
+    updateData: object,
   ): Promise<WriteResult> {
     const entry = new Audit({
       actantId,
