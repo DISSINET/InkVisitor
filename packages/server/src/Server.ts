@@ -2,7 +2,7 @@ import morgan from "morgan";
 import helmet from "helmet";
 import express, { Router } from "express";
 import cors from "cors";
-import { apiPath } from "./common/constants";
+import { apiPath } from "@common/constants";
 import ActantsRouter from "@modules/actants";
 import AuditsRouter from "@modules/audits";
 import TerritoriesRouter from "@modules/territories";

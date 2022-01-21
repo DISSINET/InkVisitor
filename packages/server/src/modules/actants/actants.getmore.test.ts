@@ -2,7 +2,7 @@ import { testErroneousResponse, clean } from "@modules/common.test";
 import { BadParams } from "@shared/types/errors";
 import request, { Response } from "supertest";
 import { supertestConfig } from "..";
-import { apiPath } from "../../common/constants";
+import { apiPath } from "@common/constants";
 import app from "../../Server";
 import Statement from "@models/statement";
 import { Db } from "@service/RethinkDB";

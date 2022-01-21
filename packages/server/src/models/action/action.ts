@@ -1,6 +1,6 @@
-import { fillFlatObject, UnknownObject, IModel } from "./common";
+import { fillFlatObject, UnknownObject, IModel } from "@models/common";
 import { ActantType } from "@shared/enums";
-import Actant from "./actant";
+import Actant from "@models/actant";
 import { IAction, IProp } from "@shared/types";
 import { ActionEntity, ActionValency } from "@shared/types/action";
 

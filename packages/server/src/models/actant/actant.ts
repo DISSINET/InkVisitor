@@ -1,4 +1,9 @@
-import { IDbModel, UnknownObject, fillFlatObject, fillArray } from "./common";
+import {
+  IDbModel,
+  UnknownObject,
+  fillFlatObject,
+  fillArray,
+} from "@models/common";
 import { r as rethink, Connection, WriteResult, RDatum } from "rethinkdb-ts";
 import { IStatement, IActant, IResponseActant, IProp } from "@shared/types";
 import {
@@ -9,9 +14,9 @@ import {
   UserRoleMode,
 } from "@shared/enums";
 import { InternalServerError } from "@shared/types/errors";
-import User from "./user";
-import emitter from "./events/emitter";
-import { EventTypes } from "./events/types";
+import User from "@models/user";
+import emitter from "@models/events/emitter";
+import { EventTypes } from "@models/events/types";
 import { findActantsByIds } from "@service/shorthands";
 
 export default class Actant implements IActant, IDbModel {
@@ -41,10 +46,9 @@ export default class Actant implements IActant, IDbModel {
   }
 
   async save(db: Connection | undefined): Promise<WriteResult> {
-    const result = await rethink
-      .table(Actant.table)
-      .insert({ ...this, id: this.id || undefined })
-      .run(db);
+    const result = await rethink.table(Actant.table).
+      insert({ ...this, id: this.id || undefined }).
+      run(db);
 
     if (result.generated_keys) {
       this.id = result.generated_keys[0];
@@ -55,7 +59,7 @@ export default class Actant implements IActant, IDbModel {
 
   update(
     db: Connection | undefined,
-    updateData: Record<string, unknown>
+    updateData: Record<string, unknown>,
   ): Promise<WriteResult> {
     return rethink.table(Actant.table).get(this.id).update(updateData).run(db);
   }
@@ -63,7 +67,7 @@ export default class Actant implements IActant, IDbModel {
   async delete(db: Connection | undefined): Promise<WriteResult> {
     if (!this.id) {
       throw new InternalServerError(
-        "delete called on actant with undefined id"
+        "delete called on actant with undefined id",
       );
     }
 
@@ -71,11 +75,10 @@ export default class Actant implements IActant, IDbModel {
       await emitter.emit(EventTypes.BEFORE_ACTANT_DELETE, db, this.id);
     }
 
-    const result = await rethink
-      .table(Actant.table)
-      .get(this.id)
-      .delete()
-      .run(db);
+    const result = await rethink.table(Actant.table).
+      get(this.id).
+      delete().
+      run(db);
 
     if (result.deleted && db) {
       await emitter.emit(EventTypes.AFTER_ACTANT_DELETE, db, this.id);
@@ -106,7 +109,8 @@ export default class Actant implements IActant, IDbModel {
 
   /**
    * getUserRoleMode returns derived user role mode for this instance.
-   * By default this method counts with default right to view - helps with performance.
+   * By default this method counts with default right to view - helps with
+   * performance.
    * @param user
    * @returns
    */
@@ -123,26 +127,25 @@ export default class Actant implements IActant, IDbModel {
   }
 
   getDependentStatements(db: Connection | undefined): Promise<IStatement[]> {
-    return rethink
-      .table(Actant.table)
-      .filter({ class: ActantType.Statement })
-      .filter((row: any) => {
+    return rethink.table(Actant.table).
+      filter({ class: ActantType.Statement }).
+      filter((row: any) => {
         return rethink.or(
           row("data")("actants").contains((actantElement: any) =>
-            actantElement("actant").eq(this.id)
+            actantElement("actant").eq(this.id),
           ),
           row("data")("props").contains((actantElement: any) =>
-            actantElement("origin").eq(this.id)
-          )
+            actantElement("origin").eq(this.id),
+          ),
         );
-      })
-      .run(db);
+      }).
+      run(db);
   }
 
   static determineOrder(want: number, sibl: Record<number, unknown>): number {
-    const sortedOrders: number[] = Object.keys(sibl)
-      .map((k) => parseFloat(k))
-      .sort((a, b) => a - b);
+    const sortedOrders: number[] = Object.keys(sibl).
+      map((k) => parseFloat(k)).
+      sort((a, b) => a - b);
     let out = -1;
 
     if (want === undefined) {
@@ -151,14 +154,16 @@ export default class Actant implements IActant, IDbModel {
       // if there is a conflict - order number already exist
       for (let i = 0; i < sortedOrders.length; i++) {
         if (sortedOrders[i] === want) {
-          // conflict occured on the biggest number - use closest bigger free integer
+          // conflict occured on the biggest number - use closest bigger free
+          // integer
           if (sortedOrders.length === i + 1) {
             const ceiled = Math.ceil(sortedOrders[i]);
             out = ceiled === sortedOrders[i] ? ceiled + 1 : ceiled;
             break;
           }
 
-          // new number would be somewhere behind the wanted one(i) and before the next one(i+1)
+          // new number would be somewhere behind the wanted one(i) and before
+          // the next one(i+1)
           out = sortedOrders[i] + (sortedOrders[i + 1] - sortedOrders[i]) / 2;
           if (!sibl[Math.round(out)]) {
             out = Math.round(out);
@@ -211,38 +216,34 @@ export default class Actant implements IActant, IDbModel {
    * @returns list of statements data
    */
   async findDependentStatements(
-    db: Connection | undefined
+    db: Connection | undefined,
   ): Promise<IStatement[]> {
-    const statements = await rethink
-      .table(Actant.table)
-      .filter({
-        class: ActantType.Statement,
-      })
-      .filter((row: RDatum) => {
-        return rethink.or(
-          row("data")("territory")("id").eq(this.id),
-          row("data")("actions").contains((entry: RDatum) =>
-            entry("action").eq(this.id)
-          ),
-          row("data")("actants").contains((entry: RDatum) =>
-            entry("actant").eq(this.id)
-          ),
-          row("data")("tags").contains(this.id),
-          row("data")("props").contains((entry: RDatum) =>
-            entry("value")("id").eq(this.id)
-          ),
-          row("data")("props").contains((entry: RDatum) =>
-            entry("type")("id").eq(this.id)
-          ),
-          row("data")("props").contains((entry: RDatum) =>
-            entry("origin").eq(this.id)
-          ),
-          row("data")("references").contains((entry: RDatum) =>
-            entry("resource").eq(this.id)
-          )
-        );
-      })
-      .run(db);
+    const statements = await rethink.table(Actant.table).filter({
+      class: ActantType.Statement,
+    }).filter((row: RDatum) => {
+      return rethink.or(
+        row("data")("territory")("id").eq(this.id),
+        row("data")("actions").contains((entry: RDatum) =>
+          entry("action").eq(this.id),
+        ),
+        row("data")("actants").contains((entry: RDatum) =>
+          entry("actant").eq(this.id),
+        ),
+        row("data")("tags").contains(this.id),
+        row("data")("props").contains((entry: RDatum) =>
+          entry("value")("id").eq(this.id),
+        ),
+        row("data")("props").contains((entry: RDatum) =>
+          entry("type")("id").eq(this.id),
+        ),
+        row("data")("props").contains((entry: RDatum) =>
+          entry("origin").eq(this.id),
+        ),
+        row("data")("references").contains((entry: RDatum) =>
+          entry("resource").eq(this.id),
+        ),
+      );
+    }).run(db);
 
     return statements.sort((a, b) => {
       return a.data.territory.order - b.data.territory.order;
@@ -265,7 +266,7 @@ export default class Actant implements IActant, IDbModel {
         acc[curr] = (actant as Record<string, unknown>)[curr];
         return acc;
       },
-      {} as any
+      {} as any,
     );
 
     return strippedObject;

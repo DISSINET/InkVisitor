@@ -5,7 +5,12 @@ import {
   IStatementReference,
   IStatementAction,
 } from "@shared/types";
-import { fillFlatObject, fillArray, UnknownObject, IModel } from "./common";
+import {
+  fillFlatObject,
+  fillArray,
+  UnknownObject,
+  IModel,
+} from "@models/common";
 import {
   ActantType,
   Certainty,
@@ -21,13 +26,13 @@ import {
   UserRoleMode,
 } from "@shared/enums";
 
-import Actant from "./actant";
+import Actant from "@models/actant";
 import { r as rethink, Connection, RDatum, WriteResult } from "rethinkdb-ts";
 import { InternalServerError } from "@shared/types/errors";
-import User from "./user";
-import { EventMapSingle, EventTypes } from "./events/types";
+import User from "@models/user";
+import { EventMapSingle, EventTypes } from "@models/events/types";
 import treeCache from "@service/treeCache";
-import { Prop } from "./prop";
+import Prop from "@models/prop";
 
 export class StatementActant implements IStatementActant, IModel {
   id = "";
@@ -99,7 +104,8 @@ export class StatementTerritory {
    * @returns boolean result
    */
   isValid(): boolean {
-    // order is optional, it will be fixed in underlaying call to Actant.determineOrder
+    // order is optional, it will be fixed in underlaying call to
+    // Actant.determineOrder
     if (this.id === "") {
       return false;
     }
@@ -167,7 +173,8 @@ export class StatementData implements IModel, IStatementData {
       data.references
     );
 
-    // fill array uses constructors - which string[] cannot use (will create an object instead of string type)
+    // fill array uses constructors - which string[] cannot use (will create an
+    // object instead of string type)
     if (data.tags) {
       for (const tag of data.tags as string[]) {
         this.tags.push(tag);
@@ -291,7 +298,8 @@ class Statement extends Actant implements IStatement {
   }
 
   /**
-   * Updates the statement db entry. This method attempts to alter the territory.order value to better fit the real number value.
+   * Updates the statement db entry. This method attempts to alter the
+   * territory.order value to better fit the real number value.
    * @param db db connection
    * @param updateData raw data object to be merged with db entry
    * @returns write result of the db operation
@@ -332,7 +340,8 @@ class Statement extends Actant implements IStatement {
   }
 
   /**
-   * Finds statements that are stored under the same territory (while not being the same statement as the received)
+   * Finds statements that are stored under the same territory (while not being
+   * the same statement as the received)
    * @param db db connection
    * @returns map of order value as the key and statement data as the value
    */
@@ -529,7 +538,8 @@ class Statement extends Actant implements IStatement {
   }
 
   /**
-   * finds statements that are linked via data.actants array to wanted actant id and are linked to the root territory
+   * finds statements that are linked via data.actants array to wanted actant
+   * id and are linked to the root territory
    * @param db db connection
    * @param actantId id of the actant
    * @returns list of statement objects sorted by territory order

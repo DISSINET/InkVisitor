@@ -1,6 +1,6 @@
 import "@modules/common.test";
 import request from "supertest";
-import { apiPath } from "../../common/constants";
+import { apiPath } from "@common/constants";
 import app from "../../Server";
 import { supertestConfig } from "..";
 

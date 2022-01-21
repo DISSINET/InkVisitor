@@ -4,7 +4,7 @@ import { Db } from "@service/RethinkDB";
 import { createActant, deleteActants } from "@service/shorthands";
 import Territory from "@models/territory";
 import request from "supertest";
-import { apiPath } from "../../common/constants";
+import { apiPath } from "@common/constants";
 import app from "../../Server";
 import Statement from "@models/statement";
 import { supertestConfig } from "..";

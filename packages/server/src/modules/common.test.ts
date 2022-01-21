@@ -1,6 +1,5 @@
 import "ts-jest";
 import { IResponseGeneric, IStatement, IStatementAction } from "@shared/types";
-import "ts-jest";
 import { ITerritory } from "@shared/types/index";
 import { Db } from "@service/RethinkDB";
 import { createActant, deleteActants } from "@service/shorthands";
