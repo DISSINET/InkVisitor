@@ -9,7 +9,8 @@ export const rethinkConfig = {
 };
 
 export class Db {
-  connection?: Connection;
+  // force type
+  connection: Connection = {} as Connection;
 
   constructor() {
     if (!rethinkConfig.db || !rethinkConfig.host || !rethinkConfig.port) {
