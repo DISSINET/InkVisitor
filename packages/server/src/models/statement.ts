@@ -199,6 +199,7 @@ export class StatementData implements IModel, IStatementData {
 
 class Statement extends Actant implements IStatement {
   static table = "actants";
+  static publicFields = Actant.publicFields;
 
   class: ActantType.Statement = ActantType.Statement;
   data: StatementData;
@@ -484,6 +485,7 @@ class Statement extends Actant implements IStatement {
 
   /**
    * finds statements which are linked to different actant
+   * in other words, find statements which store passed actant id in on of their possible fields
    * @param db db connection
    * @param territoryId id of the actant
    * @returns list of statements data

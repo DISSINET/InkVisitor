@@ -26,6 +26,7 @@ class EntityData implements IModel {
 
 class Entity extends Actant implements IEntity {
   static table = "actants";
+  static publicFields = Actant.publicFields;
 
   class: EntityActantType = ActantType.Person; // just default
   data: EntityData;

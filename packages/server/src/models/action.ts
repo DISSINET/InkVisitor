@@ -34,10 +34,10 @@ class ActionData implements IModel {
 
 class Action extends Actant implements IAction {
   static table = "actants";
+  static publicFields = Actant.publicFields;
 
   class: ActantType.Action = ActantType.Action; // just default
   data: ActionData;
-  props: IProp[] = [];
 
   constructor(data: UnknownObject) {
     super(data);
