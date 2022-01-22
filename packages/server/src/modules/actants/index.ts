@@ -27,6 +27,7 @@ import Statement from "@models/statement";
 import { ActantStatus, ActantType, UserRole } from "@shared/enums";
 import Audit from "@models/audit";
 import { Connection } from "rethinkdb-ts";
+import { ResponseActant } from "@models/actant/response";
 
 export default Router()
   .get(
@@ -51,12 +52,10 @@ export default Router()
       }
       const actant = getActantType({ ...actantData });
 
-      await actant.prepareResponseFields(
-        request.getUserOrFail(),
-        request.db.connection
-      );
+      const response = new ResponseActant(actant);
+      await response.prepare(request);
 
-      return actant;
+      return response;
     })
   )
   .post(
@@ -84,13 +83,14 @@ export default Router()
         label
       );
 
-      return actants.map((a) => {
-        const actantInstance = getActantType({ ...a });
-        return {
-          ...a,
-          right: actantInstance.getUserRoleMode(request.getUserOrFail()),
-        } as IResponseActant;
-      });
+      const responses: IResponseActant[] = [];
+      for (const actant of actants) {
+        const response = new ResponseActant(actant);
+        await response.prepare(request);
+        responses.push(response);
+      }
+
+      return responses;
     })
   )
   .post(
