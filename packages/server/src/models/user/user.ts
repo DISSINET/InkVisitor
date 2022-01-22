@@ -115,6 +115,7 @@ export default class User extends Base implements IDbModel, IUser {
 
   static table = "users";
   static publicFields: string[] = [
+    "id",
     "email",
     "name",
     "role",
