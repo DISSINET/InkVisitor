@@ -18,9 +18,21 @@ import User from "@models/user";
 import emitter from "@models/events/emitter";
 import { EventTypes } from "@models/events/types";
 import { findActantsByIds } from "@service/shorthands";
+import Base from "./base";
 
-export default class Actant implements IActant, IDbModel {
+export default class Actant extends Base implements IActant, IDbModel {
   static table = "actants";
+  static publicFields: string[] = [
+    "id",
+    "class",
+    "data",
+    "label",
+    "detail",
+    "status",
+    "language",
+    "notes",
+    "props",
+  ];
 
   id: string = "";
   class: ActantType = ActantType.Any;
@@ -36,6 +48,8 @@ export default class Actant implements IActant, IDbModel {
   right: UserRoleMode = UserRoleMode.Read;
 
   constructor(data: UnknownObject) {
+    super();
+
     if (!data) {
       return;
     }

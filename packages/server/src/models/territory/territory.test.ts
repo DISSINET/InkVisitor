@@ -323,3 +323,23 @@ describe("Territory - test getClosestRight", function () {
   });
 });
 */
+
+describe("test Territory.toJSON", function () {
+  const instance = new Territory({});
+  for (const fieldName of Territory.publicFields) {
+    (instance as any)[fieldName] = `value for ${fieldName}`;
+  }
+  const jsoned = JSON.parse(JSON.stringify(instance));
+  const newKeys = Object.keys(jsoned);
+  const newValues = Object.values(jsoned);
+
+  it("should correctly map to public fields", () => {
+    expect(newKeys).toEqual(Territory.publicFields);
+  });
+
+  it("should correctly assign values", () => {
+    expect(newValues).toEqual(
+      Territory.publicFields.map((fieldName) => (instance as any)[fieldName])
+    );
+  });
+});
