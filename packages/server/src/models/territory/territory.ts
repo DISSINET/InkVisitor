@@ -59,6 +59,7 @@ export class TerritoryData implements IModel {
 
 class Territory extends Actant implements ITerritory {
   static table = "actants";
+  static publicFields = Actant.publicFields;
 
   class: ActantType.Territory = ActantType.Territory;
   data: TerritoryData;

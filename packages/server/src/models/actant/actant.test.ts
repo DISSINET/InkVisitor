@@ -159,12 +159,21 @@ describe("test Actant.update", function () {
 });
 
 describe("test Actant.toJSON", function () {
-  describe("without response fields", () => {
-    const instance = new Actant({});
+  const instance = new Actant({});
+  for (const fieldName of Actant.publicFields) {
+    (instance as any)[fieldName] = `value for ${fieldName}`;
+  }
+  const jsoned = JSON.parse(JSON.stringify(instance));
+  const newKeys = Object.keys(jsoned);
+  const newValues = Object.values(jsoned);
 
-    it("should correctly remove serialize", () => {
-      const newKeys = Object.keys(JSON.parse(JSON.stringify(instance)));
-      expect(newKeys).toEqual(Actant.getPublicFields(instance));
-    });
+  it("should correctly map to pub lic fields", () => {
+    expect(newKeys).toEqual(Actant.publicFields);
+  });
+
+  it("should correctly assign values", () => {
+    expect(newValues).toEqual(
+      Actant.publicFields.map((fieldName) => (instance as any)[fieldName])
+    );
   });
 });
