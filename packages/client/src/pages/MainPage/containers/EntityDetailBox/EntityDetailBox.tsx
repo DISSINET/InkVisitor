@@ -270,8 +270,8 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
   }, [error]);
 
   const usedInPages = useMemo(() => {
-    if (actant && actant.usedIn) {
-      return Math.ceil(actant.usedIn.length / statementsPerPage);
+    if (actant && actant.usedInStatement) {
+      return Math.ceil(actant.usedInStatement.length / statementsPerPage);
     } else {
       return 0;
     }
@@ -282,7 +282,9 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
   }, [actantId]);
 
   const mayBeRemoved = useMemo(() => {
-    return actant && actant.usedIn && actant.usedIn.length === 0;
+    return (
+      actant && actant.usedInStatement && actant.usedInStatement.length === 0
+    );
   }, [actant]);
 
   const actantMode = useMemo(() => {
@@ -302,8 +304,8 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
   }, [actant]);
 
   const usedInStatements = useMemo(() => {
-    if (actant && actant.usedIn) {
-      const displayStatements = actant.usedIn.slice(
+    if (actant && actant.usedInStatement) {
+      const displayStatements = actant.usedInStatement.slice(
         statementsPerPage * usedInPage,
         statementsPerPage * (usedInPage + 1)
       );

@@ -390,7 +390,7 @@ class Api {
   // searching entity
   async entitySearch(
     searchData: IRequestSearchEntity
-  ): Promise<AxiosResponse<IResponseSearch[]>> {
+  ): Promise<AxiosResponse<IResponseActant[]>> {
     try {
       const response = await this.connection.post(
         `/actants/search-entity`,
@@ -405,7 +405,7 @@ class Api {
   // searching statement
   async statementSearch(
     searchData: IRequestSearchStatement
-  ): Promise<AxiosResponse<IResponseSearch[]>> {
+  ): Promise<AxiosResponse<IResponseStatement[]>> {
     try {
       const response = await this.connection.post(
         `/actants/search-statement`,
