@@ -1,10 +1,4 @@
 import "ts-jest";
-import { Db } from "@service/RethinkDB";
-import Actant from "./actant";
-import Statement from "./statement";
-import { clean } from "@modules/common.test";
-import { findActantById } from "@service/shorthands";
-import { IStatement } from "@shared/types";
 import Entity from "./entity";
 import { ActantType } from "@shared/enums";
 
@@ -18,5 +12,25 @@ describe("test Entity constructor", function () {
       expect(object.class).toEqual(ActantType.Object);
       expect(ter.class).toEqual(ActantType.Territory);
     });
+  });
+});
+
+describe("test Entity.toJSON", function () {
+  const instance = new Entity({});
+  for (const fieldName of Entity.publicFields) {
+    (instance as any)[fieldName] = `value for ${fieldName}`;
+  }
+  const jsoned = JSON.parse(JSON.stringify(instance));
+  const newKeys = Object.keys(jsoned);
+  const newValues = Object.values(jsoned);
+
+  it("should correctly map to public fields", () => {
+    expect(newKeys).toEqual(Entity.publicFields);
+  });
+
+  it("should correctly assign values", () => {
+    expect(newValues).toEqual(
+      Entity.publicFields.map((fieldName) => (instance as any)[fieldName])
+    );
   });
 });
