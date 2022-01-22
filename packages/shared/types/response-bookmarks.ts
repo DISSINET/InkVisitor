@@ -2,7 +2,7 @@
  *
  */
 
-import { IActant, IResponseActant } from ".";
+import { IActant } from ".";
 
 export interface IResponseBookmarkFolder {
   id: string;
