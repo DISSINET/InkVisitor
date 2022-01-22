@@ -1,4 +1,4 @@
-import { Request } from "express";
+import { request, Request } from "express";
 import { UserRoleMode } from "@shared/enums";
 import {
   IActant,
@@ -8,6 +8,7 @@ import {
 } from "@shared/types";
 import { Connection } from "rethinkdb-ts";
 import Actant from ".";
+import Statement from "@models/statement";
 
 export class ResponseActant extends Actant implements IResponseActant {
   right: UserRoleMode = UserRoleMode.Read;
@@ -33,5 +34,17 @@ export class ResponseActantDetail
     super(actant);
 
     this.entities = {};
+  }
+
+  async prepare(req: Request): Promise<void> {
+    super.prepare(req);
+
+    this.usedInStatement = await Statement.findDependentStatements(
+      req.db.connection,
+      this.id
+    );
+
+    const entities = await this.getEntities(req.db.connection as Connection);
+    this.entities = Object.assign({}, ...entities.map((x) => ({ [x.id]: x })));
   }
 }
