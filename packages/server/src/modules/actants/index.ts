@@ -23,10 +23,8 @@ import {
   IEntity,
 } from "@shared/types";
 import { mergeDeep } from "@common/functions";
-import Statement from "@models/statement";
 import { ActantStatus, ActantType, UserRole } from "@shared/enums";
 import Audit from "@models/audit";
-import { Connection } from "rethinkdb-ts";
 import { ResponseActant, ResponseActantDetail } from "@models/actant/response";
 
 export default Router()
@@ -259,7 +257,7 @@ export default Router()
 
       const response = new ResponseActantDetail(actant);
       await response.prepare(request);
-      
+
       return response;
     })
   )
