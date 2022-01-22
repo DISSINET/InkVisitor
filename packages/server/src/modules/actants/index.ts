@@ -27,7 +27,7 @@ import Statement from "@models/statement";
 import { ActantStatus, ActantType, UserRole } from "@shared/enums";
 import Audit from "@models/audit";
 import { Connection } from "rethinkdb-ts";
-import { ResponseActant } from "@models/actant/response";
+import { ResponseActant, ResponseActantDetail } from "@models/actant/response";
 
 export default Router()
   .get(
@@ -257,20 +257,10 @@ export default Router()
         throw new PermissionDeniedError(`cannot view actant ${actantId}`);
       }
 
-      const usedInStatements = await Statement.findDependentStatements(
-        request.db.connection,
-        actant.id
-      );
-
-      const entities = await actant.getEntities(
-        request.db.connection as Connection
-      );
-      return {
-        ...actant,
-        usedIn: usedInStatements,
-        entities: Object.assign({}, ...entities.map((x) => ({ [x.id]: x }))),
-        right: actant.getUserRoleMode(request.getUserOrFail()),
-      } as IResponseDetail;
+      const response = new ResponseActantDetail(actant);
+      await response.prepare(request);
+      
+      return response;
     })
   )
   .post(
