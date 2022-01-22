@@ -15,7 +15,7 @@ import {
 import { UserRole, UserRoleMode } from "@shared/enums";
 import { ModelNotValidError } from "@shared/types/errors";
 import { generateRandomString, hashPassword } from "@common/auth";
-import Base from "./base";
+import Base from "../base";
 
 export class UserRight implements IUserRight {
   territory = "";
@@ -140,9 +140,10 @@ export default class User extends Base implements IDbModel, IUser {
   }
 
   async save(dbInstance: Connection | undefined): Promise<WriteResult> {
-    const result = await rethink.table(User.table).
-      insert({ ...this, id: this.id || undefined }).
-      run(dbInstance);
+    const result = await rethink
+      .table(User.table)
+      .insert({ ...this, id: this.id || undefined })
+      .run(dbInstance);
 
     if (result.generated_keys) {
       this.id = result.generated_keys[0];
@@ -153,7 +154,7 @@ export default class User extends Base implements IDbModel, IUser {
 
   update(
     dbInstance: Connection | undefined,
-    updateData: Record<string, unknown>,
+    updateData: Record<string, unknown>
   ): Promise<WriteResult> {
     const snapshot = new User({
       ...JSON.parse(JSON.stringify(this)),
@@ -164,10 +165,11 @@ export default class User extends Base implements IDbModel, IUser {
       throw new ModelNotValidError("model not valid");
     }
 
-    return rethink.table(User.table).
-      get(this.id).
-      update(updateData).
-      run(dbInstance);
+    return rethink
+      .table(User.table)
+      .get(this.id)
+      .update(updateData)
+      .run(dbInstance);
   }
 
   delete(dbInstance: Connection | undefined): Promise<WriteResult> {
@@ -199,7 +201,7 @@ export default class User extends Base implements IDbModel, IUser {
 
   static async getUser(
     dbInstance: Connection | undefined,
-    id: string,
+    id: string
   ): Promise<User | null> {
     const data = await rethink.table(User.table).get(id).run(dbInstance);
     if (data) {
@@ -210,24 +212,29 @@ export default class User extends Base implements IDbModel, IUser {
   }
 
   static async findAllUsers(
-    dbInstance: Connection | undefined,
+    dbInstance: Connection | undefined
   ): Promise<User[]> {
-    const data = await rethink.table(User.table).
-      orderBy(rethink.asc("role"), rethink.asc("name")).
-      run(dbInstance);
+    const data = await rethink
+      .table(User.table)
+      .orderBy(rethink.asc("role"), rethink.asc("name"))
+      .run(dbInstance);
     return data.map((d) => new User(d));
   }
 
   static async findUserByLabel(
     dbInstance: Connection | undefined,
-    label: string,
+    label: string
   ): Promise<User | null> {
-    const data = await rethink.table(User.table).filter(function (user: any) {
-      return rethink.or(
-        rethink.row("name").eq(label),
-        rethink.row("email").eq(label),
-      );
-    }).limit(1).run(dbInstance);
+    const data = await rethink
+      .table(User.table)
+      .filter(function (user: any) {
+        return rethink.or(
+          rethink.row("name").eq(label),
+          rethink.row("email").eq(label)
+        );
+      })
+      .limit(1)
+      .run(dbInstance);
     return data.length == 0 ? null : new User(data[0]);
   }
 }
