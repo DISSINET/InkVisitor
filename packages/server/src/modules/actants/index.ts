@@ -52,7 +52,7 @@ export default Router()
       }
       const actant = getActantType({ ...actantData });
 
-      actant.prepareResponseFields(
+      await actant.prepareResponseFields(
         request.getUserOrFail(),
         request.db.connection
       );

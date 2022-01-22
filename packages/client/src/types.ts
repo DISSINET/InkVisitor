@@ -130,7 +130,7 @@ export interface IRequestSearch {
   actantId: string;
 }
 
-export type searchPositionInStatement =
+export type ISearchPositionInStatement =
   | "any"
   | "action"
   | "actant"
@@ -147,35 +147,36 @@ export interface IRequestSearchEntity {
   status?: ActantStatus; // izy
   language?: Language; //izy
   logicalType?: EntityLogicalType;
-  hasProps?: entityHasProps[]; //this should be checked within meta props and within all statements where the entity is used as the prop origin
-  territories?: entityUsedInTerritory[]; // this is probably little bit complicated
-  statements?: entityUsedInStatementWith[]; // and this is supposed to be complicated as well
+  hasProps?: IEntityHasProps[]; //this should be checked within meta props and within all statements where the entity is used as the prop origin
+  usedInTerritories?: IEntityUsedInTerritory[]; // this is probably little bit complicated
+  usedInStatements?: IEntityUsedInStatementWith[]; // and this is supposed to be complicated as well
 }
 
-interface entityHasProps {
-  value?: string; // ' as default
-  type?: string; // 'any' as default
-  operator: "and" | "or"; // and on default and may be implemented in 1.4.0
-  bundleStart: boolean; // false on default and may be implemented in 1.4.0
-  bundleEnd: boolean; // false on default and may be implemented in 1.4.0
+interface IEntityHasProps {
+  value?: string; // 'any' as default, otherwise this is the id of the actant that was used as the value within prop
+  type?: string; // 'any' as default, id of the actat used as the type of the prop
+  negative?: boolean; // false on default
+  operator?: "and" | "or"; // and on default and may be implemented in 1.4.0
+  bundleStart?: boolean; // false on default and may be implemented in 1.4.0
+  bundleEnd?: boolean; // false on default and may be implemented in 1.4.0
 }
-interface entityUsedInTerritory {
-  territoryId: string;
-  position: searchPositionInStatement; // any as default, may be implemented in 1.4.0
-  negative: boolean; // positive as default, should be within 1.3.0
-  operator: "and" | "or"; // and on default and may be implemented in 1.4.0
-  bundleStart: boolean; // false on default and may be implemented in 1.4.0
-  bundleEnd: boolean; // false on default and may be implemented in 1.4.0
+interface IEntityUsedInTerritory {
+  territoryId?: string;
+  position?: ISearchPositionInStatement; // any as default, may be implemented in 1.4.0
+  negative?: boolean; // false on default
+  operator?: "and" | "or"; // and on default and may be implemented in 1.4.0
+  bundleStart?: boolean; // false on default and may be implemented in 1.4.0
+  bundleEnd?: boolean; // false on default and may be implemented in 1.4.0
 }
 
-interface entityUsedInStatementWith {
-  withEntity: string; // entity that is used within the same statement
-  withEntityPosition: searchPositionInStatement; // what is this "with" entity position? default any
-  entityPosition: searchPositionInStatement; // position in the statement of the original entity
-  negative: boolean; // positive as default, should be within 1.3.0
-  operator: "and" | "or"; // and on default and may be implemented in 1.4.0
-  bundleStart: boolean; // false on default and may be implemented in 1.4.0
-  bundleEnd: boolean; // false on default and may be implemented in 1.4.0
+interface IEntityUsedInStatementWith {
+  entityPosition?: ISearchPositionInStatement; // position of the original entity within the statement
+  withEntity?: string; // entity that is used within the same statement
+  withEntityPosition?: ISearchPositionInStatement; // what is this "with" entity position? default any
+  negative?: boolean; // false as default, should be within 1.3.0
+  operator?: "and" | "or"; // and on default and may be implemented in 1.4.0
+  bundleStart?: boolean; // false on default and may be implemented in 1.4.0
+  bundleEnd?: boolean; // false on default and may be implemented in 1.4.0
 }
 
 export interface IRequestSearchStatement {
@@ -184,16 +185,16 @@ export interface IRequestSearchStatement {
   editor?: string; // is user id in any audit?
   note?: string; // is the text used within any note
   territory?: string; // check the whole tree to the root
-  usedEntities?: usedEntityStatement[]; // see below
+  usedEntities?: IUsedEntityStatement[]; // see below
 }
 
-interface usedEntityStatement {
-  entityId: string;
-  position: searchPositionInStatement;
-  negative: boolean; // positive as default, should be within 1.3.0
-  operator: "and" | "or"; // and on default and may be implemented in 1.4.0
-  bundleStart: boolean; // false on default and may be implemented in 1.4.0
-  bundleEnd: boolean; // false on default and may be implemented in 1.4.0
+interface IUsedEntityStatement {
+  entityId?: string;
+  position?: ISearchPositionInStatement;
+  negative?: boolean; // positive as default, should be within 1.3.0
+  operator?: "and" | "or"; // and on default and may be implemented in 1.4.0
+  bundleStart?: boolean; // false on default and may be implemented in 1.4.0
+  bundleEnd?: boolean; // false on default and may be implemented in 1.4.0
 }
 
 export type DropdownItem = { value: string; label: string; info?: string };
