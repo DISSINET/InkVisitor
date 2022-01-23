@@ -6,11 +6,16 @@ import {
   IUserRight,
 } from "@shared/types";
 import { r as rethink, Connection, WriteResult } from "rethinkdb-ts";
-import { IDbModel, fillArray, fillFlatObject, UnknownObject } from "./common";
+import {
+  IDbModel,
+  fillArray,
+  fillFlatObject,
+  UnknownObject,
+} from "@models/common";
 import { UserRole, UserRoleMode } from "@shared/enums";
 import { ModelNotValidError } from "@shared/types/errors";
 import { generateRandomString, hashPassword } from "@common/auth";
-import Base from "./base";
+import Base from "../base";
 
 export class UserRight implements IUserRight {
   territory = "";

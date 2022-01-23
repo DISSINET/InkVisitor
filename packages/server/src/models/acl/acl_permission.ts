@@ -1,9 +1,9 @@
 import { IResponsePermission } from "@shared/types";
 import { r as rethink, Connection, WriteResult } from "rethinkdb-ts";
-import { IDbModel } from "./common";
+import { IDbModel } from "@models/common";
 
-export default class AclPermission implements IDbModel {
-  id?: string;
+export default class AclPermission implements IDbModel, IResponsePermission {
+  id: string;
   controller: string;
   method: string;
   roles: string[];

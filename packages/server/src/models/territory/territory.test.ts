@@ -141,10 +141,10 @@ describe("Territory - save territory", function () {
 
       const createdData = await findActantById<ITerritory>(db, territory.id);
       expect((createdData.data.parent as any).id).toEqual(
-        (territory.data.parent as any).id
+        (territory.data.parent as any).id,
       );
       expect((createdData.data.parent as any).order).toEqual(
-        (territory.data.parent as any).order
+        (territory.data.parent as any).order,
       );
       done();
     });

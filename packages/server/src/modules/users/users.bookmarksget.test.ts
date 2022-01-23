@@ -1,13 +1,12 @@
 import { testErroneousResponse } from "@modules/common.test";
 import { BadParams, UserDoesNotExits } from "@shared/types/errors";
 import request from "supertest";
-import { apiPath } from "../../common/constants";
+import { apiPath } from "@common/constants";
 import app from "../../Server";
 import {
   createActant,
-  createUser,
   getActantUsage,
-} from "../../service/shorthands";
+} from "@service/shorthands";
 import { Db } from "@service/RethinkDB";
 import Statement from "@models/statement";
 import { supertestConfig } from "..";

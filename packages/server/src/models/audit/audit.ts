@@ -1,18 +1,8 @@
-import { IDbModel, UnknownObject, fillFlatObject, fillArray } from "./common";
+import { IDbModel, UnknownObject, fillFlatObject } from "@models/common";
 import { r as rethink, Connection, WriteResult } from "rethinkdb-ts";
-import { IStatement, IActant, IAudit } from "@shared/types";
-import {
-  ActantStatus,
-  ActantType,
-  Language,
-  UserRole,
-  UserRoleMode,
-} from "@shared/enums";
+import { IAudit } from "@shared/types";
 import { InternalServerError } from "@shared/types/errors";
-import User from "./user";
-import emitter from "./events/emitter";
-import { EventTypes } from "./events/types";
-import Actant from "./actant";
+import User from "@models/user";
 
 export default class Audit implements IAudit, IDbModel {
   static table = "audits";
@@ -58,43 +48,6 @@ export default class Audit implements IAudit, IDbModel {
 
   isValid(): boolean {
     return true;
-  }
-
-  static async getFirstForActant(
-    db: Connection | undefined,
-    actantId: string
-  ): Promise<Audit | null> {
-    const result = await rethink
-      .table(Audit.table)
-      .filter({ actantId })
-      .orderBy(rethink.asc("date"))
-      .limit(1)
-      .run(db);
-
-    if (!result || !result.length) {
-      return null;
-    }
-
-    return new Audit(result[0]);
-  }
-
-  static async getLastNForActant(
-    db: Connection | undefined,
-    actantId: string,
-    n: number = 5
-  ): Promise<Audit[]> {
-    const result = await rethink
-      .table(Audit.table)
-      .filter({ actantId })
-      .orderBy(rethink.desc("date"))
-      .limit(n)
-      .run(db);
-
-    if (!result || !result.length) {
-      return [];
-    }
-
-    return result.map((r) => new Audit(r));
   }
 
   static async createNew(

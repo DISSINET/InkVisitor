@@ -2,12 +2,7 @@ import { Request } from "express";
 import { Router } from "express";
 import { IUser } from "@shared/types/user";
 import User from "@models/user";
-import {
-  deleteUser,
-  findActantsById,
-  findActantById,
-  getActantUsage,
-} from "@service/shorthands";
+import { deleteUser } from "@service/shorthands";
 import {
   BadCredentialsError,
   BadParams,
@@ -21,14 +16,11 @@ import { asyncRouteHandler } from "..";
 import {
   IResponseBookmarkFolder,
   IResponseUser,
-  IResponseStoredTerritory,
   IResponseAdministration,
-  IActant,
   IResponseGeneric,
 } from "@shared/types";
 import mailer from "@service/mailer";
-import { Db } from "@service/RethinkDB";
-import { Connection } from "rethinkdb-ts";
+import { ResponseUser } from "@models/user/response";
 
 export default Router()
   .post(
@@ -73,7 +65,10 @@ export default Router()
         throw new UserDoesNotExits(`user ${userId} was not found`, userId);
       }
 
-      return await getResponseForUser(user, request.db);
+      const response = new ResponseUser(user);
+      await response.unwindAll(request);
+
+      return response;
     })
   )
   .post(
@@ -205,29 +200,10 @@ export default Router()
         );
       }
 
-      const out: IResponseBookmarkFolder[] = [];
+      const response = new ResponseUser(user);
+      await response.unwindBookmarks(request);
 
-      if (user.bookmarks) {
-        for (const bookmark of user.bookmarks) {
-          const bookmarkResponse: IResponseBookmarkFolder = {
-            name: bookmark.name,
-            id: bookmark.id,
-            actants: [],
-          };
-          if (bookmark.actantIds && bookmark.actantIds.length) {
-            for (const actant of await findActantsById(
-              request.db,
-              bookmark.actantIds
-            )) {
-              bookmarkResponse.actants[bookmark.actantIds.indexOf(actant.id)] =
-                actant;
-            }
-          }
-          out.push(bookmarkResponse);
-        }
-      }
-
-      return out;
+      return response.bookmarks;
     })
   )
   .get(
@@ -238,7 +214,9 @@ export default Router()
       };
 
       for (const user of await User.findAllUsers(request.db.connection)) {
-        out.users.push(await getResponseForUser(user, request.db));
+        const response = new ResponseUser(user);
+        await response.unwindAll(request);
+        out.users.push(response);
       }
 
       return out;
@@ -285,57 +263,9 @@ export default Router()
     "/me",
     asyncRouteHandler<IResponseUser>(async (request: Request) => {
       const user = request.getUserOrFail();
-      return await getResponseForUser(user, request.db);
+      const response = new ResponseUser(user);
+      await response.unwindAll(request);
+
+      return response;
     })
   );
-
-async function getResponseForUser(user: User, db: Db): Promise<IResponseUser> {
-  const userResponse: IResponseUser = {
-    ...(user.toJSON() as IUser),
-    bookmarks: [],
-    storedTerritories: [],
-    territoryRights: [],
-  };
-
-  if (user.bookmarks) {
-    for (const bookmark of user.bookmarks) {
-      const bookmarkResponse: IResponseBookmarkFolder = {
-        id: bookmark.id,
-        name: bookmark.name,
-        actants: [],
-      };
-      if (bookmark.actantIds && bookmark.actantIds.length) {
-        for (const actant of await findActantsById(db, bookmark.actantIds)) {
-          bookmarkResponse.actants.push({
-            ...actant,
-          });
-        }
-      }
-      userResponse.bookmarks.push(bookmarkResponse);
-    }
-  }
-
-  if (user.storedTerritories) {
-    for (const territory of user.storedTerritories) {
-      const territoryResponse: IResponseStoredTerritory = {
-        territory: {
-          ...(await findActantById<IActant>(db, territory.territoryId)),
-        },
-      };
-      userResponse.storedTerritories.push(territoryResponse);
-    }
-  }
-
-  if (user.rights.length) {
-    for (const right of user.rights) {
-      const territoryFromRights: IResponseStoredTerritory = {
-        territory: {
-          ...(await findActantById<IActant>(db, right.territory)),
-        },
-      };
-      userResponse.territoryRights.push(territoryFromRights);
-    }
-  }
-
-  return userResponse;
-}

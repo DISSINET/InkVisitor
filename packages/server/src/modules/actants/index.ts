@@ -2,7 +2,6 @@ import { asyncRouteHandler } from "../index";
 import { Router, Request } from "express";
 import {
   findActantById,
-  findActantsByIds,
   findAssociatedActantIds,
   filterActantsByWildcard,
 } from "@service/shorthands";
@@ -24,10 +23,9 @@ import {
   IEntity,
 } from "@shared/types";
 import { mergeDeep } from "@common/functions";
-import Statement from "@models/statement";
 import { ActantStatus, ActantType, UserRole } from "@shared/enums";
 import Audit from "@models/audit";
-import { Connection } from "rethinkdb-ts";
+import { ResponseActant, ResponseActantDetail } from "@models/actant/response";
 
 export default Router()
   .get(
@@ -52,12 +50,10 @@ export default Router()
       }
       const actant = getActantType({ ...actantData });
 
-      await actant.prepareResponseFields(
-        request.getUserOrFail(),
-        request.db.connection
-      );
+      const response = new ResponseActant(actant);
+      await response.prepare(request);
 
-      return actant;
+      return response;
     })
   )
   .post(
@@ -85,13 +81,14 @@ export default Router()
         label
       );
 
-      return actants.map((a) => {
-        const actantInstance = getActantType({ ...a });
-        return {
-          ...a,
-          right: actantInstance.getUserRoleMode(request.getUserOrFail()),
-        } as IResponseActant;
-      });
+      const responses: IResponseActant[] = [];
+      for (const actant of actants) {
+        const response = new ResponseActant(actant);
+        await response.prepare(request);
+        responses.push(response);
+      }
+
+      return responses;
     })
   )
   .post(
@@ -258,20 +255,10 @@ export default Router()
         throw new PermissionDeniedError(`cannot view actant ${actantId}`);
       }
 
-      const usedInStatements = await Statement.findDependentStatements(
-        request.db.connection,
-        actant.id
-      );
+      const response = new ResponseActantDetail(actant);
+      await response.prepare(request);
 
-      const entities = await actant.getEntities(
-        request.db.connection as Connection
-      );
-      return {
-        ...actant,
-        usedIn: usedInStatements,
-        entities: Object.assign({}, ...entities.map((x) => ({ [x.id]: x }))),
-        right: actant.getUserRoleMode(request.getUserOrFail()),
-      } as IResponseDetail;
+      return response;
     })
   )
   .post(

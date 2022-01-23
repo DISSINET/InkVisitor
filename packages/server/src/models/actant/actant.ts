@@ -1,4 +1,9 @@
-import { IDbModel, UnknownObject, fillFlatObject, fillArray } from "./common";
+import {
+  IDbModel,
+  UnknownObject,
+  fillFlatObject,
+  fillArray,
+} from "@models/common";
 import { r as rethink, Connection, WriteResult, RDatum } from "rethinkdb-ts";
 import { IStatement, IActant, IResponseActant, IProp } from "@shared/types";
 import {
@@ -9,11 +14,11 @@ import {
   UserRoleMode,
 } from "@shared/enums";
 import { InternalServerError } from "@shared/types/errors";
-import User from "./user";
-import emitter from "./events/emitter";
-import { EventTypes } from "./events/types";
+import User from "@models/user";
+import emitter from "@models/events/emitter";
+import { EventTypes } from "@models/events/types";
 import { findActantsByIds } from "@service/shorthands";
-import Base from "./base";
+import Base from "../base";
 
 export default class Actant extends Base implements IActant, IDbModel {
   static table = "actants";
@@ -120,7 +125,8 @@ export default class Actant extends Base implements IActant, IDbModel {
 
   /**
    * getUserRoleMode returns derived user role mode for this instance.
-   * By default this method counts with default right to view - helps with performance.
+   * By default this method counts with default right to view - helps with
+   * performance.
    * @param user
    * @returns
    */
@@ -165,14 +171,16 @@ export default class Actant extends Base implements IActant, IDbModel {
       // if there is a conflict - order number already exist
       for (let i = 0; i < sortedOrders.length; i++) {
         if (sortedOrders[i] === want) {
-          // conflict occured on the biggest number - use closest bigger free integer
+          // conflict occured on the biggest number - use closest bigger free
+          // integer
           if (sortedOrders.length === i + 1) {
             const ceiled = Math.ceil(sortedOrders[i]);
             out = ceiled === sortedOrders[i] ? ceiled + 1 : ceiled;
             break;
           }
 
-          // new number would be somewhere behind the wanted one(i) and before the next one(i+1)
+          // new number would be somewhere behind the wanted one(i) and before
+          // the next one(i+1)
           out = sortedOrders[i] + (sortedOrders[i + 1] - sortedOrders[i]) / 2;
           if (!sibl[Math.round(out)]) {
             out = Math.round(out);
@@ -266,5 +274,22 @@ export default class Actant extends Base implements IActant, IDbModel {
   async prepareResponseFields(user: User, db: Connection | undefined) {
     this.usedIn = await this.findDependentStatements(db);
     this.right = this.getUserRoleMode(user);
+  }
+
+  static getPublicFields(a: Actant): string[] {
+    return Object.keys(a).filter((k) => k.indexOf("_") !== 0);
+  }
+
+  toJSON(): IResponseActant {
+    const actant = this;
+    const strippedObject: IActant = Actant.getPublicFields(this).reduce(
+      (acc, curr) => {
+        acc[curr] = (actant as Record<string, unknown>)[curr];
+        return acc;
+      },
+      {} as any
+    );
+
+    return strippedObject;
   }
 }

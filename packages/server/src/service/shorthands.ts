@@ -1,6 +1,6 @@
 import { Connection, r as rethink, RDatum, WriteResult } from "rethinkdb-ts";
-import { IUser } from "../../../shared/types/user";
-import { IActant } from "../../../shared/types/actant";
+import { IUser } from "@shared/types/user";
+import { IActant } from "@shared/types/actant";
 import { Db } from "./RethinkDB";
 import { IAction, IStatement, ITerritory } from "@shared/types";
 import { IDbModel } from "@models/common";
