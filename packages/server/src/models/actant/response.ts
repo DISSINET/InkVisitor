@@ -36,12 +36,12 @@ export class ResponseActantDetail
   async prepare(req: Request): Promise<void> {
     super.prepare(req);
 
-    const usedInStatement = await Statement.findDependentStatements(
+    const usedInStatement = await Statement.findUsed(
       req.db.connection,
       this.id
     );
 
-    const usedInStatementProps = await Statement.findDependentStatementsProps(
+    const usedInStatementProps = await Statement.findUsedInProps(
       req.db.connection,
       this.id
     );

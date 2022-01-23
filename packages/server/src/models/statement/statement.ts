@@ -499,7 +499,7 @@ class Statement extends Actant implements IStatement {
    * @param territoryId id of the actant
    * @returns list of statements data
    */
-  static async findDependentStatements(
+  static async findUsed(
     db: Connection | undefined,
     actantId: string
   ): Promise<IStatement[]> {
@@ -526,7 +526,7 @@ class Statement extends Actant implements IStatement {
     });
   }
 
-  static async findDependentStatementsProps(
+  static async findUsedInProps(
     db: Connection | undefined,
     actantId: string
   ): Promise<IStatement[]> {
