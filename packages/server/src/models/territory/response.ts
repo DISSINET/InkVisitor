@@ -1,4 +1,4 @@
-import { request, Request } from "express";
+import { Request } from "express";
 import { UserRoleMode } from "@shared/enums";
 import { IActant, IResponseStatement, IResponseTerritory } from "@shared/types";
 import Territory from ".";
@@ -18,7 +18,7 @@ export class ResponseTerritory extends Territory implements IResponseTerritory {
   }
 
   async prepare(req: Request): Promise<void> {
-    this.right = this.getUserRoleMode(request.getUserOrFail());
+    this.right = this.getUserRoleMode(req.getUserOrFail());
 
     const statements = await Statement.findStatementsInTerritory(
       req.db.connection,
