@@ -2,7 +2,7 @@
  * type of the /user endpoint response
  */
 
-import { IActant, IStatement } from ".";
+import { IActant } from ".";
 import { UserRoleMode } from "../enums";
 
 export interface IResponseActant extends IActant {
