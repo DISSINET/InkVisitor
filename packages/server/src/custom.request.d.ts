@@ -1,4 +1,4 @@
-import { Db } from "./service/RethinkDB";
+import { Db } from "@service/RethinkDB";
 import Acl from "./middlewares/acl";
 import { IUser } from "../../shared/types";
 import User from "@models/user";

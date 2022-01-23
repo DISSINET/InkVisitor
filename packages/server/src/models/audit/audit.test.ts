@@ -1,12 +1,9 @@
 import "ts-jest";
 import { Db } from "@service/RethinkDB";
-import Actant from "./actant";
-import Statement from "./statement";
-import { clean, clearAudits } from "@modules/common.test";
-import { findActantById } from "@service/shorthands";
-import { IAudit, IStatement } from "@shared/types";
+import { clearAudits } from "@modules/common.test";
+import { IAudit } from "@shared/types";
 import Audit from "./audit";
-import { UnknownObject } from "./common";
+import { ResponseAudit } from "./response";
 
 describe("test Audit.save", function () {
   const rand = Math.random().toString();
@@ -71,10 +68,11 @@ describe("test Audit.getFirstForActant", function () {
   afterAll(async () => await clearAudits(db));
 
   it("should return exactly the first audit entry", async () => {
-    const firstAudit = await Audit.getFirstForActant(db.connection, actantId);
-    expect(firstAudit).not.toBe(null);
-    if (firstAudit) {
-      expect(firstAudit.id).not.toBe("");
+    const response = new ResponseAudit(actantId);
+    await response.getFirstForActant(db.connection);
+    expect(response.first).not.toBe(null);
+    if (response.first) {
+      expect(response.first.id).not.toBe("");
     }
   });
 });
@@ -117,17 +115,17 @@ describe("test Audit.getLastNForActant", function () {
   afterAll(async () => await clearAudits(db));
 
   it("should return both entries", async () => {
-    const audits = await Audit.getLastNForActant(db.connection, actantId, 2);
-    expect(audits.constructor.name).toEqual("Array");
-    expect(audits).toHaveLength(2);
-    expect(audits[0].date).toEqual(auditData[1].date);
-    expect(audits[1].date).toEqual(auditData[0].date);
+    const response = new ResponseAudit(actantId);
+    await response.getLastNForActant(db.connection, 2);
+    expect(response.last).toHaveLength(2);
+    expect(response.last[0].date).toEqual(auditData[1].date);
+    expect(response.last[1].date).toEqual(auditData[0].date);
   });
 
   it("should return one last entry", async () => {
-    const audits = await Audit.getLastNForActant(db.connection, actantId, 1);
-    expect(audits.constructor.name).toEqual("Array");
-    expect(audits).toHaveLength(1);
-    expect(audits[0].date).toEqual(auditData[1].date);
+    const response = new ResponseAudit(actantId);
+    await response.getLastNForActant(db.connection, 1);
+    expect(response.last).toHaveLength(1);
+    expect(response.last[0].date).toEqual(auditData[1].date);
   });
 });

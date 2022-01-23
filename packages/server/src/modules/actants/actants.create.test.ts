@@ -3,9 +3,9 @@ import {
   successfulGenericResponse,
   testErroneousResponse,
 } from "@modules/common.test";
-import { BadParams, ModelNotValidError } from "@shared/types/errors";
+import { ModelNotValidError } from "@shared/types/errors";
 import request from "supertest";
-import { apiPath } from "../../common/constants";
+import { apiPath } from "@common/constants";
 import app from "../../Server";
 import { supertestConfig } from "..";
 import Statement from "@models/statement";

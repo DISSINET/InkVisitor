@@ -3,7 +3,7 @@ import { Router, Request } from "express";
 import { findActantById } from "@service/shorthands";
 import { BadParams, ActantDoesNotExits } from "@shared/types/errors";
 import { IResponseAudit } from "@shared/types";
-import Audit from "@models/audit";
+import { ResponseAudit } from "@models/audit/response";
 
 export default Router().get(
   "/get/:actantId?",
@@ -24,19 +24,10 @@ export default Router().get(
       );
     }
 
-    const out: IResponseAudit = {
-      actant: actantId,
-      last: await Audit.getLastNForActant(request.db.connection, actantId),
-    };
+    const response = new ResponseAudit(actantId);
+    await response.getLastNForActant(request.db.connection);
+    await response.getFirstForActant(request.db.connection);
 
-    const first = await Audit.getFirstForActant(
-      request.db.connection,
-      actantId
-    );
-    if (first) {
-      out.first = first;
-    }
-
-    return out;
+    return response;
   })
 );

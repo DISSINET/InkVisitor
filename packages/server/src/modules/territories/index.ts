@@ -7,23 +7,17 @@ import {
 } from "@shared/types/errors";
 import { Router, Request } from "express";
 import { asyncRouteHandler } from "..";
+import { findActantById, findActants } from "@service/shorthands";
 import {
-  findActantById,
-  findActants,
-  findActantsById,
-  findActantsByIds,
-} from "@service/shorthands";
-import {
-  IAction,
   ITerritory,
   IResponseTerritory,
   IStatement,
   IResponseGeneric,
-  IResponseStatement,
 } from "@shared/types";
 import Statement from "@models/statement";
 import { ActantType } from "@shared/enums";
 import Territory from "@models/territory";
+import { ResponseTerritory } from "@models/territory/response";
 
 function insertIStatementToChilds(
   array: IStatement[],
@@ -67,35 +61,10 @@ export default Router()
         throw new PermissionDeniedError(`cannot view actant ${territoryId}`);
       }
 
-      const statements = await Statement.findStatementsInTerritory(
-        request.db.connection,
-        territoryId
-      );
+      const response = new ResponseTerritory(territory);
+      await response.prepare(request);
 
-      const actantIds = Statement.getEntitiesIdsForMany(statements);
-      const actants = await findActantsById(request.db, actantIds);
-
-      const responseStatements: IResponseStatement[] = [];
-      for (const statement of statements) {
-        const entities = await findActantsByIds<IAction>(
-          request.db,
-          statement.data.actions.map((a) => a.action)
-        );
-
-        responseStatements.push({
-          ...statement,
-          entities: Object.assign({}, ...entities.map((x) => ({ [x.id]: x }))),
-        });
-      }
-
-      return {
-        ...territory,
-        statements: responseStatements,
-        actants,
-        right: new Territory({ id: territoryId }).getUserRoleMode(
-          request.getUserOrFail()
-        ),
-      };
+      return response;
     })
   )
   .get(

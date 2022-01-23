@@ -1,7 +1,7 @@
 import { createMockTree, clean } from "@modules/common.test";
 import request from "supertest";
 import { supertestConfig } from "..";
-import { apiPath } from "../../common/constants";
+import { apiPath } from "@common/constants";
 import app from "../../Server";
 import { ITerritory } from "@shared/types";
 import { Db } from "@service/RethinkDB";

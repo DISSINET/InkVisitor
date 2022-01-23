@@ -10,7 +10,12 @@ import {
 } from "@shared/enums";
 import { IProp } from "@shared/types";
 import { IPropSpec } from "@shared/types/prop";
-import { fillArray, fillFlatObject, IModel, UnknownObject } from "./common";
+import {
+  fillArray,
+  fillFlatObject,
+  IModel,
+  UnknownObject,
+} from "@models/common";
 
 export class PropSpec implements IPropSpec, IModel {
   id: string = "";
@@ -32,7 +37,7 @@ export class PropSpec implements IPropSpec, IModel {
   }
 }
 
-export class Prop implements IProp, IModel {
+export default class Prop implements IProp, IModel {
   id = "";
   elvl: Elvl = Elvl.Textual;
   certainty: Certainty = Certainty.Empty;

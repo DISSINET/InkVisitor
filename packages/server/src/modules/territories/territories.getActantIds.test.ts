@@ -1,14 +1,13 @@
 import "ts-jest";
 import request from "supertest";
 import { supertestConfig } from "..";
-import { apiPath } from "../../common/constants";
+import { apiPath } from "@common/constants";
 import app from "../../Server";
 import { IStatement } from "@shared/types";
 import { Db } from "@service/RethinkDB";
 import { deleteActants } from "@service/shorthands";
 import Territory from "@models/territory";
 import Statement from "@models/statement";
-import { ActantType } from "@shared/enums";
 
 describe("Territories getActantIds", () => {
   let db: Db;

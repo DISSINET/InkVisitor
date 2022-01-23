@@ -1,6 +1,6 @@
 import * as bcrypt from "bcrypt";
 import { sign as signJwt } from "jsonwebtoken";
-import { IUser } from "../../../shared/types/user";
+import { IUser } from "@shared/types/user";
 import jwt, { secretType } from "express-jwt";
 import { Request } from "express";
 
