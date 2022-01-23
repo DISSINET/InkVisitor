@@ -1,4 +1,4 @@
-import { request, Request } from "express";
+import { Request } from "express";
 import { UserRoleMode } from "@shared/enums";
 import { IActant, IResponseStatement } from "@shared/types";
 import { Connection } from "rethinkdb-ts";
@@ -15,7 +15,7 @@ export class ResponseStatement extends Statement implements IResponseStatement {
   }
 
   async prepare(req: Request) {
-    this.right = this.getUserRoleMode(request.getUserOrFail());
+    this.right = this.getUserRoleMode(req.getUserOrFail());
     const entities = await this.getEntities(req.db.connection as Connection);
     this.entities = Object.assign({}, ...entities.map((x) => ({ [x.id]: x })));
   }
