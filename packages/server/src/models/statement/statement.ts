@@ -504,31 +504,44 @@ class Statement extends Actant implements IStatement {
     actantId: string
   ): Promise<IStatement[]> {
     const statements = await rethink
-      .table("actants")
+      .table(Statement.table)
       .filter({
         class: ActantType.Statement,
       })
       .filter((row: RDatum) => {
         return rethink.or(
-          row("data")("territory")("id").eq(actantId),
           row("data")("actions").contains((entry: RDatum) =>
             entry("action").eq(actantId)
           ),
           row("data")("actants").contains((entry: RDatum) =>
             entry("actant").eq(actantId)
           ),
-          row("data")("tags").contains(actantId),
-          row("data")("props").contains((entry: RDatum) =>
+          row("data")("tags").contains(actantId)
+        );
+      })
+      .run(db);
+
+    return statements.sort((a, b) => {
+      return a.data.territory.order - b.data.territory.order;
+    });
+  }
+
+  static async findDependentStatementsProps(
+    db: Connection | undefined,
+    actantId: string
+  ): Promise<IStatement[]> {
+    const statements = await rethink
+      .table(Statement.table)
+      .filter({
+        class: ActantType.Statement,
+      })
+      .filter((row: RDatum) => {
+        return rethink.or(
+          row("props").contains((entry: RDatum) =>
             entry("value")("id").eq(actantId)
           ),
           row("data")("props").contains((entry: RDatum) =>
             entry("type")("id").eq(actantId)
-          ),
-          row("data")("props").contains((entry: RDatum) =>
-            entry("origin").eq(actantId)
-          ),
-          row("data")("references").contains((entry: RDatum) =>
-            entry("resource").eq(actantId)
           )
         );
       })
