@@ -2,7 +2,7 @@ import { IDbModel, UnknownObject, fillFlatObject } from "@models/common";
 import { r as rethink, Connection, WriteResult } from "rethinkdb-ts";
 import { IAudit } from "@shared/types";
 import { InternalServerError } from "@shared/types/errors";
-import User from "@models/user";
+import User from "@models/user/user";
 
 export default class Audit implements IAudit, IDbModel {
   static table = "audits";

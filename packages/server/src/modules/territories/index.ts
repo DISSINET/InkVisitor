@@ -14,9 +14,9 @@ import {
   IStatement,
   IResponseGeneric,
 } from "@shared/types";
-import Statement from "@models/statement";
+import Statement from "@models/statement/statement";
 import { ActantType } from "@shared/enums";
-import Territory from "@models/territory";
+import Territory from "@models/territory/territory";
 import { ResponseTerritory } from "@models/territory/response";
 
 function insertIStatementToChilds(

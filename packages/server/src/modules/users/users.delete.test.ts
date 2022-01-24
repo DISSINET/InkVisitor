@@ -9,7 +9,7 @@ import {
   testErroneousResponse,
 } from "../common.test";
 import { supertestConfig } from "..";
-import User from "@models/user";
+import User from "@models/user/user";
 
 describe("Users delete", function () {
   describe("empty data", () => {

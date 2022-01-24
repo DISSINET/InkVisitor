@@ -8,7 +8,7 @@ import {
 } from "@shared/types/errors";
 import { asyncRouteHandler } from "..";
 import { IResponseStatement, IStatement } from "@shared/types";
-import Statement from "@models/statement";
+import Statement from "@models/statement/statement";
 import { ResponseStatement } from "@models/statement/response";
 
 export default Router().get(

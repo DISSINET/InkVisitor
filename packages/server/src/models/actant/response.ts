@@ -1,4 +1,4 @@
-import { request, Request } from "express";
+import { Request } from "express";
 import { UserRoleMode } from "@shared/enums";
 import {
   IActant,
@@ -7,8 +7,8 @@ import {
   IStatement,
 } from "@shared/types";
 import { Connection } from "rethinkdb-ts";
-import Actant from ".";
-import Statement from "@models/statement";
+import Actant from "./actant";
+import Statement from "@models/statement/statement";
 
 export class ResponseActant extends Actant implements IResponseActant {
   right: UserRoleMode = UserRoleMode.Read;

@@ -6,8 +6,8 @@ import app from "../../Server";
 import { IStatement } from "@shared/types";
 import { Db } from "@service/RethinkDB";
 import { deleteActants } from "@service/shorthands";
-import Territory from "@models/territory";
-import Statement from "@models/statement";
+import Territory from "@models/territory/territory";
+import Statement from "@models/statement/statement";
 
 describe("Territories getActantIds", () => {
   let db: Db;

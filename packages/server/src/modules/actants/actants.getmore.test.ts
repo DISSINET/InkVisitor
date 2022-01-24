@@ -4,9 +4,9 @@ import request, { Response } from "supertest";
 import { supertestConfig } from "..";
 import { apiPath } from "@common/constants";
 import app from "../../Server";
-import Statement from "@models/statement";
+import Statement from "@models/statement/statement";
 import { Db } from "@service/RethinkDB";
-import Territory from "@models/territory";
+import Territory from "@models/territory/territory";
 
 const expectNonEmptyArrayOfActants = (res: Response) => {
   expect(res.body.constructor.name).toBe("Array");

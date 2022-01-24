@@ -1,7 +1,7 @@
 import { Request } from "express";
 import { Router } from "express";
 import { IUser } from "@shared/types/user";
-import User from "@models/user";
+import User from "@models/user/user";
 import { deleteUser } from "@service/shorthands";
 import {
   BadCredentialsError,
