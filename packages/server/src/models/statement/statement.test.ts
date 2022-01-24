@@ -2,13 +2,13 @@ import "ts-jest";
 import Statement, { StatementActant, StatementReference } from "./statement";
 import { Db } from "@service/RethinkDB";
 import { deleteActants, findActantById } from "@service/shorthands";
-import Territory from "@models/territory";
+import Territory from "@models/territory/territory";
 import { IStatement } from "@shared/types/statement";
 import {
   getIStatementActionMock,
   getIStatementMock,
 } from "@modules/common.test";
-import Prop from "@models/prop";
+import Prop from "@models/prop/prop";
 
 describe("Statement constructor test", function () {
   describe("empty data", () => {

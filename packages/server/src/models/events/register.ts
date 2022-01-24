@@ -1,4 +1,4 @@
-import Statement from "@models/statement";
+import Statement from "@models/statement/statement";
 import emitter from "./emitter";
 import { EventTypes, EventMapSingle } from "./types";
 

@@ -11,7 +11,7 @@ import app from "../../Server";
 import { findActantById } from "@service/shorthands";
 import { supertestConfig } from "..";
 import { IActant } from "@shared/types";
-import Territory from "@models/territory";
+import Territory from "@models/territory/territory";
 
 describe("Actants delete", function () {
   describe("empty data", () => {

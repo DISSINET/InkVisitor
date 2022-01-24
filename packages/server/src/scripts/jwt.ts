@@ -1,7 +1,7 @@
 import "../settings"; // Must be the first import
 
 import { generateAccessToken } from "@common/auth";
-import User from "@models/user";
+import User from "@models/user/user";
 import { Db } from "@service/RethinkDB";
 
 (async () => {

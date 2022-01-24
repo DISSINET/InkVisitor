@@ -7,7 +7,7 @@ import { supertestConfig } from "..";
 import { Db } from "@service/RethinkDB";
 import { findActantById } from "@service/shorthands";
 import { IActant } from "@shared/types";
-import Statement from "@models/statement";
+import Statement from "@models/statement/statement";
 import { successfulGenericResponse } from "@modules/common.test";
 
 describe("Actants update", function () {

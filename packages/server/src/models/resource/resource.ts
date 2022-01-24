@@ -1,7 +1,7 @@
 import { fillFlatObject, UnknownObject, IModel } from "@models/common";
 import { ActantType } from "@shared/enums";
 import { IResource } from "@shared/types/resource";
-import Actant from "@models/actant";
+import Actant from "@models/actant/actant";
 
 class ResourceData implements IModel {
   link: string = "";

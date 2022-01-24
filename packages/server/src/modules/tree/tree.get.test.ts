@@ -8,7 +8,7 @@ import request from "supertest";
 import { supertestConfig } from "..";
 import { apiPath } from "@common/constants";
 import app from "../../Server";
-import Territory from "@models/territory";
+import Territory from "@models/territory/territory";
 import { IResponseTree, IStatement, ITerritory } from "@shared/types";
 import { Db } from "@service/RethinkDB";
 

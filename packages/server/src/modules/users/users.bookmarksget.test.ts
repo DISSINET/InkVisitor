@@ -8,9 +8,9 @@ import {
   getActantUsage,
 } from "@service/shorthands";
 import { Db } from "@service/RethinkDB";
-import Statement from "@models/statement";
+import Statement from "@models/statement/statement";
 import { supertestConfig } from "..";
-import User from "@models/user";
+import User from "@models/user/user";
 import { IBookmarkFolder } from "@shared/types";
 
 describe("Users bookmarksGet", function () {

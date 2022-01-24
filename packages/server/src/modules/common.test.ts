@@ -3,13 +3,13 @@ import { IResponseGeneric, IStatement, IStatementAction } from "@shared/types";
 import { ITerritory } from "@shared/types/index";
 import { Db } from "@service/RethinkDB";
 import { createActant, deleteActants } from "@service/shorthands";
-import Statement from "@models/statement";
-import Territory from "@models/territory";
+import Statement from "@models/statement/statement";
+import Territory from "@models/territory/territory";
 import { CustomError } from "@shared/types/errors";
 import { errorTypes } from "@shared/types/response-generic";
 import "@models/events/register";
 import { r as rethink } from "rethinkdb-ts";
-import Audit from "@models/audit";
+import Audit from "@models/audit/audit";
 import {
   ActantStatus,
   ActantType,

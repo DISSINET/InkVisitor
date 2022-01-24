@@ -5,7 +5,7 @@ import { supertestConfig } from "..";
 import { apiPath } from "@common/constants";
 import app from "../../Server";
 import { Db } from "@service/RethinkDB";
-import Statement from "@models/statement";
+import Statement from "@models/statement/statement";
 
 describe("Actants detail", function () {
   describe("Empty param", () => {

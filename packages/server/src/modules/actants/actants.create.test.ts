@@ -8,14 +8,14 @@ import request from "supertest";
 import { apiPath } from "@common/constants";
 import app from "../../Server";
 import { supertestConfig } from "..";
-import Statement from "@models/statement";
+import Statement from "@models/statement/statement";
 import {
   deleteActants,
   findActantById,
   findActants,
 } from "@service/shorthands";
 import { Db } from "@service/RethinkDB";
-import Territory from "@models/territory";
+import Territory from "@models/territory/territory";
 import "ts-jest";
 
 describe("Actants create", function () {

@@ -26,13 +26,13 @@ import {
   UserRoleMode,
 } from "@shared/enums";
 
-import Actant from "@models/actant";
+import Actant from "@models/actant/actant";
 import { r as rethink, Connection, RDatum, WriteResult } from "rethinkdb-ts";
 import { InternalServerError } from "@shared/types/errors";
-import User from "@models/user";
+import User from "@models/user/user";
 import { EventMapSingle, EventTypes } from "@models/events/types";
 import treeCache from "@service/treeCache";
-import Prop from "@models/prop";
+import Prop from "@models/prop/prop";
 
 export class StatementActant implements IStatementActant, IModel {
   id = "";
