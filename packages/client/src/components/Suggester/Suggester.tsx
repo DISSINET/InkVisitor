@@ -188,6 +188,7 @@ export const Suggester: React.FC<SuggesterProps> = ({
               setIsFocused(true);
             }}
             onBlur={() => setIsFocused(false)}
+            disableTyping
           />
           <StyledTypeBar entity={`entity${category}`}></StyledTypeBar>
           <Input

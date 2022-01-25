@@ -40,6 +40,7 @@ interface Dropdown {
   entityDropdown?: boolean;
   onFocus?: () => void;
   onBlur?: () => void;
+  disableTyping?: boolean;
 }
 export const Dropdown: React.FC<Dropdown> = ({
   options = [],
@@ -61,6 +62,7 @@ export const Dropdown: React.FC<Dropdown> = ({
   entityDropdown = false,
   onFocus = () => {},
   onBlur = () => {},
+  disableTyping = false,
 }) => {
   const optionsWithIterator = options[Symbol.iterator]();
   const isOneOptionSingleSelect = options.length < 2 && !isMulti;
@@ -86,6 +88,7 @@ export const Dropdown: React.FC<Dropdown> = ({
           MultiValue,
           ValueContainer,
         }}
+        isSearchable={!disableTyping}
         {...(getOptionLabel ? { getOptionLabel: getOptionLabel } : {})}
         {...(formatOptionLabel ? { formatOptionLabel: formatOptionLabel } : {})}
         {...(isOptionSelected ? { isOptionSelected: isOptionSelected } : {})}
