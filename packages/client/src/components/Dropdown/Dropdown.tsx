@@ -12,7 +12,7 @@ import {
   SingleValueProps,
 } from "react-select";
 import { OptionProps } from "react-select/src/types";
-import { DropdownItem, Entities } from "types";
+import { DropdownAny, DropdownItem, Entities } from "types";
 import {
   StyledEntityValue,
   StyledSelect,
@@ -135,9 +135,7 @@ export const Dropdown: React.FC<Dropdown> = ({
 const SingleValue = (props: SingleValueProps<any>): React.ReactElement => {
   return (
     <>
-      <components.SingleValue {...props}>
-        {/* {props.data.label} */}
-      </components.SingleValue>
+      <components.SingleValue {...props}></components.SingleValue>
     </>
   );
 };
@@ -146,7 +144,7 @@ const Option = ({ ...props }: { props: OptionProps }): React.ReactElement => {
   const { entityDropdown } = props.selectProps;
   return (
     <>
-      {entityDropdown && props.value && props.value !== ActantType.Any ? (
+      {entityDropdown && props.value && props.value !== DropdownAny ? (
         <components.Option {...props}>
           <StyledEntityValue color={Entities[props.value].color}>
             {props.label}
@@ -189,7 +187,7 @@ const ValueContainer = ({
 
   return (
     <>
-      {entityDropdown && value.value && value.value !== "*" ? (
+      {entityDropdown && value.value && value.value !== DropdownAny ? (
         <components.ValueContainer {...props}>
           <StyledEntityValue color={Entities[value.value].color}>
             {toBeRendered}

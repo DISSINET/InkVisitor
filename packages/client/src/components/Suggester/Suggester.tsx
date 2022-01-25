@@ -9,7 +9,7 @@ import { MdCancel } from "react-icons/md";
 import { ValueType, OptionTypeBase } from "react-select";
 import { toast } from "react-toastify";
 import theme from "Theme/theme";
-import { ItemTypes } from "types";
+import { DropdownAny, ItemTypes } from "types";
 import { SuggesterKeyPress } from "./SuggesterKeyPress";
 import { SuggesterModal } from "./SuggesterModal";
 import {
@@ -123,7 +123,7 @@ export const Suggester: React.FC<SuggesterProps> = ({
   const handleEnterPress = () => {
     if (selected === -1 && typed.length > 0) {
       if (
-        category.value === ActantType.Any ||
+        category.value === DropdownAny ||
         category.value === ActantType.Statement ||
         category.value === ActantType.Territory
       ) {
@@ -142,7 +142,7 @@ export const Suggester: React.FC<SuggesterProps> = ({
   const handleAddBtnClick = () => {
     if (typed.length > 0) {
       if (
-        category.value === ActantType.Any ||
+        category.value === DropdownAny ||
         category.value === ActantType.Statement ||
         category.value === ActantType.Territory
       ) {
@@ -178,7 +178,7 @@ export const Suggester: React.FC<SuggesterProps> = ({
             onBlur={() => setIsFocused(false)}
           /> */}
           <Dropdown
-            value={{ label: category.value, value: category.value }}
+            value={{ label: category.label, value: category.value }}
             options={categories}
             onChange={onChangeCategory}
             width={40}
@@ -288,7 +288,7 @@ export const Suggester: React.FC<SuggesterProps> = ({
         <SuggesterModal
           show={true}
           typed={typed}
-          category={category.value}
+          category={category}
           categories={categories.slice(1)}
           onCreate={onCreate}
           closeModal={() => setShowModal(false)}

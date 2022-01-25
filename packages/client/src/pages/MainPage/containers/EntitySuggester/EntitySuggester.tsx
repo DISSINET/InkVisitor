@@ -5,7 +5,7 @@ import { IOption, IActant } from "@shared/types";
 
 import { FaHome } from "react-icons/fa";
 import { CActant, CStatement, CTerritoryActant } from "constructors";
-import { Entities } from "types";
+import { DropdownAny, Entities } from "types";
 import { useMutation, useQuery, useQueryClient } from "react-query";
 import api from "api";
 import {
@@ -135,7 +135,7 @@ export const EntitySuggester: React.FC<EntitySuggesterI> = ({
     if (categories.length > 1 && !disableWildCard) {
       categories.unshift({
         label: wildCardCategory.valueOf(),
-        value: wildCardCategory.valueOf(),
+        value: DropdownAny,
       });
     }
     if (categories.length) {
@@ -245,7 +245,6 @@ export const EntitySuggester: React.FC<EntitySuggesterI> = ({
         setTyped(newType);
       }}
       onChangeCategory={(option: ValueType<OptionTypeBase, any>) => {
-        console.log(option);
         setSelectedCategory(option);
       }}
       // onChangeCategory={(newCategory: string) =>
