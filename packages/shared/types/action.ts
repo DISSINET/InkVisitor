@@ -1,7 +1,9 @@
+import { ActantType } from "../enums";
 import { IActant } from "./";
 
 // TODO
 export interface IAction extends IActant {
+  class: ActantType.Action;
   data: {
     valencies: ActionValency;
     entities: ActionEntity;
