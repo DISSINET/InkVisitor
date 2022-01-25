@@ -179,8 +179,7 @@ export const StatementEditorBox: React.FC = () => {
   );
 
   //TODO recurse to get all parents
-  const territoryPath =
-    territoryData && Array(territoryData["data"]["parent"]["id"]);
+  const territoryPath = territoryData && Array(territoryData.data?.parent?.id);
 
   const userCanEdit: boolean = useMemo(() => {
     return (
