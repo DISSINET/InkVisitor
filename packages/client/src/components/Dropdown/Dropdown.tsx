@@ -1,6 +1,7 @@
 import { allEntities } from "@shared/dictionaries/entity";
 import { ActantType } from "@shared/enums";
-import React, { ReactNode, Ref } from "react";
+import { IOption } from "@shared/types";
+import React, { ReactNode, Ref, useEffect, useState } from "react";
 import { FaChevronDown } from "react-icons/fa";
 import { RiArrowDownSLine } from "react-icons/ri";
 import {
@@ -158,12 +159,22 @@ const Option = ({ ...props }: { props: OptionProps }): React.ReactElement => {
   const { entityDropdown } = props.selectProps;
   return (
     <>
-      {entityDropdown && props.value && props.value !== DropdownAny ? (
-        <components.Option {...props}>
-          <StyledEntityValue color={Entities[props.value].color}>
-            {props.label}
-          </StyledEntityValue>
-        </components.Option>
+      {entityDropdown ? (
+        <>
+          {props.value && props.value !== DropdownAny ? (
+            <components.Option {...props}>
+              <StyledEntityValue color={Entities[props.value].color}>
+                {props.label}
+              </StyledEntityValue>
+            </components.Option>
+          ) : (
+            <components.Option {...props}>
+              <StyledEntityValue color={"transparent"}>
+                {props.label}
+              </StyledEntityValue>
+            </components.Option>
+          )}
+        </>
       ) : (
         <components.Option {...props}></components.Option>
       )}

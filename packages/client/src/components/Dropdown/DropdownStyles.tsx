@@ -103,6 +103,9 @@ export const StyledSelect = styled(Select)`
   }
   .react-select__option {
     margin: 0;
+    padding: ${({ oneLetter }) => (oneLetter ? 0 : "")};
+    height: ${({ oneLetter }) => (oneLetter ? "2.5rem" : "")};
+
     :hover {
     }
   }
@@ -122,9 +125,10 @@ interface StyledEntityValue {
 }
 export const StyledEntityValue = styled.div<StyledEntityValue>`
   border-left-style: solid;
-  border-left-width: 3px;
-  height: 100%;
+  border-left-width: 4px;
   border-left-color: ${({ theme, color }) => (color ? theme.color[color] : "")};
+  height: 100%;
+  padding: 5px;
 `;
 export const StyledFaChevronDown = styled(FaChevronDown)`
   margin-right: 4px;
