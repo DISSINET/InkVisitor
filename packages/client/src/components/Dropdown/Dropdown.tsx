@@ -1,6 +1,8 @@
 import { allEntities } from "@shared/dictionaries/entity";
 import { ActantType } from "@shared/enums";
 import React, { ReactNode, Ref } from "react";
+import { FaChevronDown } from "react-icons/fa";
+import { RiArrowDownSLine } from "react-icons/ri";
 import {
   GroupedOptionsType,
   OptionsType,
@@ -10,11 +12,13 @@ import {
   MultiValueProps,
   ValueContainerProps,
   SingleValueProps,
+  IndicatorProps,
 } from "react-select";
 import { OptionProps } from "react-select/src/types";
 import { DropdownAny, DropdownItem, Entities } from "types";
 import {
   StyledEntityValue,
+  StyledFaChevronDown,
   StyledSelect,
   StyledSelectWrapper,
 } from "./DropdownStyles";
@@ -41,6 +45,7 @@ interface Dropdown {
   onFocus?: () => void;
   onBlur?: () => void;
   disableTyping?: boolean;
+  suggester?: boolean;
 }
 export const Dropdown: React.FC<Dropdown> = ({
   options = [],
@@ -63,6 +68,7 @@ export const Dropdown: React.FC<Dropdown> = ({
   onFocus = () => {},
   onBlur = () => {},
   disableTyping = false,
+  suggester = false,
 }) => {
   const optionsWithIterator = options[Symbol.iterator]();
   const isOneOptionSingleSelect = options.length < 2 && !isMulti;
@@ -70,6 +76,7 @@ export const Dropdown: React.FC<Dropdown> = ({
   return (
     <StyledSelectWrapper width={width}>
       <StyledSelect
+        suggester={suggester}
         onFocus={onFocus}
         onBlur={onBlur}
         isMulti={isMulti}
@@ -87,6 +94,7 @@ export const Dropdown: React.FC<Dropdown> = ({
           SingleValue,
           MultiValue,
           ValueContainer,
+          DropdownIndicator,
         }}
         isSearchable={!disableTyping}
         {...(getOptionLabel ? { getOptionLabel: getOptionLabel } : {})}
@@ -180,8 +188,6 @@ const ValueContainer = ({
   any,
   any
 >): React.ReactElement => {
-  const { entityDropdown, value } = props.selectProps;
-
   const currentValues: DropdownItem[] = props.getValue().map((v) => v);
   let toBeRendered = children;
   if (currentValues.some((val) => val.value === allEntities.value)) {
@@ -190,17 +196,17 @@ const ValueContainer = ({
 
   return (
     <>
-      {entityDropdown && value.value && value.value !== DropdownAny ? (
-        <components.ValueContainer {...props}>
-          <StyledEntityValue color={Entities[value.value].color}>
-            {toBeRendered}
-          </StyledEntityValue>
-        </components.ValueContainer>
-      ) : (
-        <components.ValueContainer {...props}>
-          {toBeRendered}
-        </components.ValueContainer>
-      )}
+      <components.ValueContainer {...props}>
+        {toBeRendered}
+      </components.ValueContainer>
     </>
+  );
+};
+
+const DropdownIndicator = (props: IndicatorProps<any, any>) => {
+  return (
+    <components.DropdownIndicator {...props}>
+      <StyledFaChevronDown size={10} />
+    </components.DropdownIndicator>
   );
 };

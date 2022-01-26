@@ -1,4 +1,6 @@
+import { FaChevronDown } from "react-icons/fa";
 import Select from "react-select";
+import { ValueContainer } from "react-select/src/components/containers";
 import styled from "styled-components";
 
 const getWidth = (width?: number | "full") => {
@@ -21,6 +23,7 @@ interface StyledSelect {
   width?: number | "full";
   disabled?: boolean;
   isOneOptionSingleSelect?: boolean;
+  suggester?: boolean;
 }
 export const StyledSelect = styled(Select)`
   font-weight: bold;
@@ -58,13 +61,21 @@ export const StyledSelect = styled(Select)`
     box-shadow: none;
   }
   .react-select__value-container {
-    padding: 0 0.25rem;
+    height: 100%;
+    padding: 0;
+    margin: 0;
     width: ${({ width }) => getWidth(width)};
   }
   .react-select__single-value {
-    font-size: ${({ theme }) => theme.fontSize["sm"]};
+    font-size: ${({ theme, suggester }) =>
+      suggester ? theme.fontSize["xs"] : theme.fontSize["sm"]};
+    font-weight: ${({ theme, suggester }) =>
+      suggester ? theme.fontWeight["bold"] : theme.fontWeight["normal"]};
     top: 50%;
-    font-weight: normal;
+    margin-left: ${({ theme, suggester }) =>
+      suggester ? theme.space[3] : theme.space[2]};
+    margin-top: ${({ suggester }) => (suggester ? "1px" : 0)};
+
     color: black;
     vertical-align: middle;
   }
@@ -105,5 +116,10 @@ interface StyledEntityValue {
 export const StyledEntityValue = styled.div<StyledEntityValue>`
   border-left-style: solid;
   border-left-width: 3px;
+  height: 100%;
   border-left-color: ${({ theme, color }) => (color ? theme.color[color] : "")};
+`;
+export const StyledFaChevronDown = styled(FaChevronDown)`
+  margin-right: 5px;
+  margin-left: 3px;
 `;

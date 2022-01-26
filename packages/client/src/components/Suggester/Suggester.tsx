@@ -164,19 +164,6 @@ export const Suggester: React.FC<SuggesterProps> = ({
           hasButton={allowCreate}
           isOver={isOver}
         >
-          {/* <Input
-            type="select"
-            value={category}
-            options={categories}
-            inverted
-            suggester
-            onChangeFn={onChangeCategory}
-            onFocus={() => {
-              setSelected(-1);
-              setIsFocused(true);
-            }}
-            onBlur={() => setIsFocused(false)}
-          /> */}
           <Dropdown
             value={{ label: category.label, value: category.value }}
             options={categories}
@@ -189,8 +176,9 @@ export const Suggester: React.FC<SuggesterProps> = ({
             }}
             onBlur={() => setIsFocused(false)}
             disableTyping
+            suggester
           />
-          <StyledTypeBar entity={`entity${category}`}></StyledTypeBar>
+          <StyledTypeBar entity={`entity${category.value}`}></StyledTypeBar>
           <Input
             type="text"
             value={typed}

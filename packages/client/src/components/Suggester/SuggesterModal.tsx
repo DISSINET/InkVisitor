@@ -95,16 +95,6 @@ export const SuggesterModal: React.FC<SuggesterModal> = ({
           <StyledModalForm>
             <StyledModalLabel>{"Category: "}</StyledModalLabel>
             <StyledModalInputWrap>
-              {/* <Input
-                type="select"
-                value={selectedCategory}
-                options={categories}
-                inverted
-                suggester
-                onChangeFn={(newCategory: string) =>
-                  setSelectedCategory(newCategory)
-                }
-              /> */}
               <Dropdown
                 value={{
                   label: selectedCategory.label,
@@ -116,6 +106,7 @@ export const SuggesterModal: React.FC<SuggesterModal> = ({
                 }}
                 width={40}
                 entityDropdown
+                disableTyping
               />
               <StyledTypeBar
                 entity={`entity${selectedCategory}`}

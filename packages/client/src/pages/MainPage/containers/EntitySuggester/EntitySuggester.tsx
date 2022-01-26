@@ -53,7 +53,6 @@ export const EntitySuggester: React.FC<EntitySuggesterI> = ({
   const queryClient = useQueryClient();
   const [typed, setTyped] = useState<string>("");
   const debouncedTyped = useDebounce(typed, 100);
-  // const [selectedCategory, setSelectedCategory] = useState<string>();
   const [selectedCategory, setSelectedCategory] = useState<any>();
   const [allCategories, setAllCategories] = useState<IOption[]>();
 
@@ -247,9 +246,6 @@ export const EntitySuggester: React.FC<EntitySuggesterI> = ({
       onChangeCategory={(option: ValueType<OptionTypeBase, any>) => {
         setSelectedCategory(option);
       }}
-      // onChangeCategory={(newCategory: string) =>
-      //   handleCategoryChanged(newCategory)
-      // }
       onCreate={(newCreated: {
         label: string;
         category: AllActantType;
