@@ -24,6 +24,7 @@ interface StyledSelect {
   disabled?: boolean;
   isOneOptionSingleSelect?: boolean;
   suggester?: boolean;
+  oneLetter?: boolean;
 }
 export const StyledSelect = styled(Select)`
   font-weight: bold;
@@ -38,8 +39,14 @@ export const StyledSelect = styled(Select)`
     width: ${({ width }) => getWidth(width)};
     max-width: 100%;
     min-height: ${({ theme }) => theme.space[10]};
-    border: 1px solid ${({ theme }) => theme.color["gray"]["400"]};
+    border-width: 1px;
+    border-style: solid;
+    border-color: ${({ theme, suggester }) =>
+      suggester ? theme.color["black"] : theme.color["gray"]["400"]};
+    border-right: ${({ suggester }) => (suggester ? "none" : "")};
     border-radius: 0;
+    background-color: ${({ theme, oneLetter }) =>
+      oneLetter ? theme.color["gray"][200] : ""};
     :hover {
       border-color: black;
     }
@@ -67,14 +74,14 @@ export const StyledSelect = styled(Select)`
     width: ${({ width }) => getWidth(width)};
   }
   .react-select__single-value {
-    font-size: ${({ theme, suggester }) =>
-      suggester ? theme.fontSize["xs"] : theme.fontSize["sm"]};
-    font-weight: ${({ theme, suggester }) =>
-      suggester ? theme.fontWeight["bold"] : theme.fontWeight["normal"]};
+    font-size: ${({ theme, oneLetter }) =>
+      oneLetter ? theme.fontSize["xs"] : theme.fontSize["sm"]};
+    font-weight: ${({ theme, oneLetter }) =>
+      oneLetter ? theme.fontWeight["bold"] : theme.fontWeight["normal"]};
     top: 50%;
-    margin-left: ${({ theme, suggester }) =>
-      suggester ? theme.space[3] : theme.space[2]};
-    margin-top: ${({ suggester }) => (suggester ? "1px" : 0)};
+    margin-left: ${({ theme, oneLetter }) =>
+      oneLetter ? theme.space[3] : theme.space[2]};
+    margin-top: ${({ oneLetter }) => (oneLetter ? "1px" : 0)};
 
     color: black;
     vertical-align: middle;
@@ -120,6 +127,6 @@ export const StyledEntityValue = styled.div<StyledEntityValue>`
   border-left-color: ${({ theme, color }) => (color ? theme.color[color] : "")};
 `;
 export const StyledFaChevronDown = styled(FaChevronDown)`
-  margin-right: 5px;
-  margin-left: 3px;
+  margin-right: 4px;
+  margin-left: 1px;
 `;

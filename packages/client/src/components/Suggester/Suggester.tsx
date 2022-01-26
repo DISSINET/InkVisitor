@@ -168,7 +168,7 @@ export const Suggester: React.FC<SuggesterProps> = ({
             value={{ label: category.label, value: category.value }}
             options={categories}
             onChange={onChangeCategory}
-            width={40}
+            width={36}
             entityDropdown
             onFocus={() => {
               setSelected(-1);
@@ -177,6 +177,7 @@ export const Suggester: React.FC<SuggesterProps> = ({
             onBlur={() => setIsFocused(false)}
             disableTyping
             suggester
+            oneLetter
           />
           <StyledTypeBar entity={`entity${category.value}`}></StyledTypeBar>
           <Input

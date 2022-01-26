@@ -46,6 +46,7 @@ interface Dropdown {
   onBlur?: () => void;
   disableTyping?: boolean;
   suggester?: boolean;
+  oneLetter?: boolean;
 }
 export const Dropdown: React.FC<Dropdown> = ({
   options = [],
@@ -69,6 +70,7 @@ export const Dropdown: React.FC<Dropdown> = ({
   onBlur = () => {},
   disableTyping = false,
   suggester = false,
+  oneLetter = false,
 }) => {
   const optionsWithIterator = options[Symbol.iterator]();
   const isOneOptionSingleSelect = options.length < 2 && !isMulti;
@@ -77,6 +79,7 @@ export const Dropdown: React.FC<Dropdown> = ({
     <StyledSelectWrapper width={width}>
       <StyledSelect
         suggester={suggester}
+        oneLetter={oneLetter}
         onFocus={onFocus}
         onBlur={onBlur}
         isMulti={isMulti}
@@ -206,7 +209,7 @@ const ValueContainer = ({
 const DropdownIndicator = (props: IndicatorProps<any, any>) => {
   return (
     <components.DropdownIndicator {...props}>
-      <StyledFaChevronDown size={10} />
+      <StyledFaChevronDown size={9} />
     </components.DropdownIndicator>
   );
 };
