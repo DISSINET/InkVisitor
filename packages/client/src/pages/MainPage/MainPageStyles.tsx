@@ -27,6 +27,7 @@ export const StyledPanelWrap = styled.div`
 `;
 
 export const StyledFaUserAlt = styled(FaUserAlt)`
+  cursor: pointer;
   margin-left: ${({ theme }) => theme.space[2]};
   margin-right: ${({ theme }) => theme.space[1]};
 `;
@@ -34,6 +35,7 @@ export const StyledText = styled.div`
   font-size: ${({ theme }) => theme.fontSize["sm"]};
 `;
 export const StyledUsername = styled.div`
+  cursor: pointer;
   font-weight: ${({ theme }) => theme.fontWeight["bold"]};
 `;
 

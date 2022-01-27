@@ -1,6 +1,7 @@
 import { languageDict } from "@shared/dictionaries";
 import { ActantType, Language } from "@shared/enums";
 import { IResponseUser } from "@shared/types";
+import api from "api";
 import {
   Button,
   ButtonGroup,
@@ -13,9 +14,13 @@ import {
   ModalInputForm,
   ModalInputLabel,
   ModalInputWrap,
+  Tag,
 } from "components";
 import React, { useEffect, useMemo, useState } from "react";
+import { FaUnlink } from "react-icons/fa";
+import { useMutation, useQuery, useQueryClient } from "react-query";
 import { ValueType, OptionTypeBase } from "react-select";
+import { toast } from "react-toastify";
 import { EntitySuggester } from "..";
 
 interface DataObject {
@@ -25,7 +30,6 @@ interface DataObject {
     label: string;
     value: Language;
   } | null;
-
   searchLanguages:
     | (
         | {
@@ -35,11 +39,7 @@ interface DataObject {
         | undefined
       )[]
     | null;
-
-  defaultTerritory: {
-    label: string;
-    value: Language;
-  } | null;
+  defaultTerritory: string | null;
 }
 interface UserCustomizationModal {
   user: IResponseUser;
@@ -52,31 +52,20 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
   const { options, name, email } = user;
 
   const initialValues = useMemo(() => {
-    // console.log(user);
     const defaultLanguageObject = languageDict.find(
       (i: any) => i.value === options.defaultLanguage
     );
     const searchLanguagesObject = options.searchLanguages.map((sL) => {
       return languageDict.find((i: any) => i.value === sL);
     });
-    const defaultTerritoryObject = languageDict.find(
-      (i: any) => i.value === options.defaultTerritory
-    );
-
-    console.log({
-      name: name,
-      email: email,
-      defaultLanguage: defaultLanguageObject ? defaultLanguageObject : null,
-      searchLanguages: searchLanguagesObject ? searchLanguagesObject : null,
-      defaultTerritory: defaultTerritoryObject ? defaultTerritoryObject : null,
-    });
 
     return {
       name: name,
       email: email,
       defaultLanguage: defaultLanguageObject ? defaultLanguageObject : null,
-      searchLanguages: searchLanguagesObject ? searchLanguagesObject : [],
-      defaultTerritory: defaultTerritoryObject ? defaultTerritoryObject : null,
+      searchLanguages:
+        searchLanguagesObject.length > 0 ? searchLanguagesObject : null,
+      defaultTerritory: options.defaultTerritory,
     };
   }, [user]);
 
@@ -92,16 +81,57 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
     });
   };
 
-  useEffect(() => {
-    console.log(data);
-  }, [data]);
+  const {
+    status,
+    data: territory,
+    error,
+    isFetching,
+  } = useQuery(
+    ["territory", data.defaultTerritory],
+    async () => {
+      if (data.defaultTerritory) {
+        const res = await api.territoryGet(data.defaultTerritory);
+        return res.data;
+      }
+    },
+    {
+      enabled: !!data.defaultTerritory && api.isLoggedIn(),
+    }
+  );
+
+  const queryClient = useQueryClient();
+
+  const updateUserMutation = useMutation(
+    async (changes: any) => await api.usersUpdate(user.id, changes),
+    {
+      onSuccess: (data, variables) => {
+        queryClient.invalidateQueries(["user"]);
+        toast.info("User updated!");
+        onClose();
+      },
+    }
+  );
+
+  const handleSubmit = () => {
+    if (JSON.stringify(data) !== JSON.stringify(initialValues)) {
+      updateUserMutation.mutate({
+        name: data.name,
+        email: data.email,
+        options: {
+          defaultLanguage: data.defaultLanguage?.value || Language.Empty,
+          searchLanguages: data.searchLanguages?.map((sL) => sL?.value),
+          defaultTerritory: data.defaultTerritory,
+        },
+      });
+    }
+  };
 
   return (
     <div>
       <Modal
         showModal={true}
         width="thin"
-        // onEnterPress={handleCreateActant}
+        // onEnterPress={() => handleSubmit()}
         onClose={() => onClose()}
       >
         <ModalHeader title="User customization" />
@@ -110,6 +140,7 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
             <ModalInputLabel>{"name"}</ModalInputLabel>
             <ModalInputWrap>
               <Input
+                changeOnType
                 value={name}
                 onChangeFn={(value: string) => handleChange("name", value)}
               />
@@ -117,6 +148,7 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
             <ModalInputLabel>{"email"}</ModalInputLabel>
             <ModalInputWrap>
               <Input
+                changeOnType
                 value={email}
                 onChangeFn={(value: string) => handleChange("email", value)}
               />
@@ -146,13 +178,36 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
             </ModalInputWrap>
             <ModalInputLabel>{"default territory"}</ModalInputLabel>
             <ModalInputWrap>
-              <EntitySuggester
-                categoryTypes={[ActantType.Territory]}
-                onSelected={(selected: any) =>
-                  handleChange("defaultTerritory", selected)
-                }
-                inputWidth={71}
-              />
+              {territory ? (
+                <Tag
+                  propId={territory.id}
+                  label={territory.label}
+                  category={territory.class}
+                  tooltipPosition={"left center"}
+                  button={
+                    <Button
+                      key="d"
+                      icon={<FaUnlink />}
+                      color="danger"
+                      inverted={true}
+                      tooltip="unlink actant"
+                      onClick={() => {
+                        handleChange("defaultTerritory", "");
+                      }}
+                    />
+                  }
+                />
+              ) : (
+                <div>
+                  <EntitySuggester
+                    categoryTypes={[ActantType.Territory]}
+                    onSelected={(selected: any) =>
+                      handleChange("defaultTerritory", selected)
+                    }
+                    inputWidth={71}
+                  />
+                </div>
+              )}
             </ModalInputWrap>
           </ModalInputForm>
         </ModalContent>
@@ -167,12 +222,11 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
               }}
             />
             <Button
+              disabled={JSON.stringify(data) === JSON.stringify(initialValues)}
               key="submit"
               label="Submit"
               color="primary"
-              onClick={() => {
-                console.log("submit");
-              }}
+              onClick={() => handleSubmit()}
             />
           </ButtonGroup>
         </ModalFooter>

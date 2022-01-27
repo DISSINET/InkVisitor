@@ -207,11 +207,14 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
                 <StyledUserBox>
                   <StyledUser>
                     <StyledText>logged as</StyledText>
-                    <StyledFaUserAlt size={14} />
+                    <StyledFaUserAlt
+                      size={14}
+                      onClick={() => setUserCustomizationOpen(true)}
+                    />
                     <StyledUsername
                       onClick={() => setUserCustomizationOpen(true)}
                     >
-                      {username}
+                      {user ? user.name : ""}
                     </StyledUsername>
                   </StyledUser>
                   <ButtonGroup>
