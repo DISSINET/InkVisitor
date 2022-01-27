@@ -71,7 +71,6 @@ export const Dropdown: React.FC<Dropdown> = ({
   onBlur = () => {},
   disableTyping = false,
   suggester = false,
-  oneLetter = false,
 }) => {
   const optionsWithIterator = options[Symbol.iterator]();
   const isOneOptionSingleSelect = options.length < 2 && !isMulti;
@@ -80,7 +79,6 @@ export const Dropdown: React.FC<Dropdown> = ({
     <StyledSelectWrapper width={width}>
       <StyledSelect
         suggester={suggester}
-        oneLetter={oneLetter}
         onFocus={onFocus}
         onBlur={onBlur}
         isMulti={isMulti}
