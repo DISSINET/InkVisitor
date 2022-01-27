@@ -256,6 +256,8 @@ export default Router()
       }
 
       const response = new ResponseActantDetail(actant);
+
+      console.log(response);
       await response.prepare(request);
 
       return response;
