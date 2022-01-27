@@ -138,23 +138,25 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
         <ModalContent>
           <ModalInputForm>
             <ModalInputLabel>{"name"}</ModalInputLabel>
-            <ModalInputWrap>
+            <ModalInputWrap width={160}>
               <Input
+                width="full"
                 changeOnType
                 value={name}
                 onChangeFn={(value: string) => handleChange("name", value)}
               />
             </ModalInputWrap>
             <ModalInputLabel>{"email"}</ModalInputLabel>
-            <ModalInputWrap>
+            <ModalInputWrap width={160}>
               <Input
+                width="full"
                 changeOnType
                 value={email}
                 onChangeFn={(value: string) => handleChange("email", value)}
               />
             </ModalInputWrap>
             <ModalInputLabel>{"default language"}</ModalInputLabel>
-            <ModalInputWrap>
+            <ModalInputWrap width={160}>
               <Dropdown
                 width="full"
                 value={data.defaultLanguage}
@@ -165,7 +167,7 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
               />
             </ModalInputWrap>
             <ModalInputLabel>{"search languages"}</ModalInputLabel>
-            <ModalInputWrap>
+            <ModalInputWrap width={160}>
               <Dropdown
                 value={data.searchLanguages}
                 width="full"
@@ -173,11 +175,13 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
                 onChange={(selectedOption) =>
                   handleChange("searchLanguages", selectedOption)
                 }
-                options={languageDict}
+                options={languageDict.filter(
+                  (lang) => lang.value !== Language.Empty
+                )}
               />
             </ModalInputWrap>
             <ModalInputLabel>{"default territory"}</ModalInputLabel>
-            <ModalInputWrap>
+            <ModalInputWrap width={160}>
               {territory ? (
                 <Tag
                   propId={territory.id}
@@ -204,7 +208,7 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
                     onSelected={(selected: any) =>
                       handleChange("defaultTerritory", selected)
                     }
-                    inputWidth={71}
+                    inputWidth={99}
                   />
                 </div>
               )}

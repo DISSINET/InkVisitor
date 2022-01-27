@@ -117,7 +117,11 @@ export const StyledModalInputLabel = styled.p`
   margin-right: ${({ theme }) => theme.space[2]};
   margin-bottom: ${({ theme }) => theme.space[1]};
 `;
-export const StyledModalInputWrap = styled.div`
+interface StyledModalInputWrap {
+  width?: number;
+}
+export const StyledModalInputWrap = styled.div<StyledModalInputWrap>`
+  width: ${({ width }) => (width ? `${width / 10}rem` : "auto")};
   display: grid;
   position: relative;
   margin-bottom: ${({ theme }) => theme.space[1]};

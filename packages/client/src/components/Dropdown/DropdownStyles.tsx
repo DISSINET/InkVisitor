@@ -24,7 +24,7 @@ interface StyledSelect {
   disabled?: boolean;
   isOneOptionSingleSelect?: boolean;
   suggester?: boolean;
-  oneLetter?: boolean;
+  entityDropdown?: boolean;
 }
 export const StyledSelect = styled(Select)`
   font-weight: bold;
@@ -45,8 +45,8 @@ export const StyledSelect = styled(Select)`
       suggester ? theme.color["black"] : theme.color["gray"]["400"]};
     border-right: ${({ suggester }) => (suggester ? "none" : "")};
     border-radius: 0;
-    background-color: ${({ theme, oneLetter }) =>
-      oneLetter ? theme.color["gray"][200] : ""};
+    background-color: ${({ theme, entityDropdown }) =>
+      entityDropdown ? theme.color["gray"][200] : ""};
     :hover {
       border-color: black;
     }
@@ -74,14 +74,14 @@ export const StyledSelect = styled(Select)`
     width: ${({ width }) => getWidth(width)};
   }
   .react-select__single-value {
-    font-size: ${({ theme, oneLetter }) =>
-      oneLetter ? theme.fontSize["xs"] : theme.fontSize["sm"]};
-    font-weight: ${({ theme, oneLetter }) =>
-      oneLetter ? theme.fontWeight["bold"] : theme.fontWeight["normal"]};
+    font-size: ${({ theme, entityDropdown }) =>
+      entityDropdown ? theme.fontSize["xs"] : theme.fontSize["sm"]};
+    font-weight: ${({ theme, entityDropdown }) =>
+      entityDropdown ? theme.fontWeight["bold"] : theme.fontWeight["normal"]};
     top: 50%;
-    margin-left: ${({ theme, oneLetter }) =>
-      oneLetter ? theme.space[3] : theme.space[2]};
-    margin-top: ${({ oneLetter }) => (oneLetter ? "1px" : 0)};
+    margin-left: ${({ theme, entityDropdown }) =>
+      entityDropdown ? theme.space[3] : theme.space[2]};
+    margin-top: ${({ entityDropdown }) => (entityDropdown ? "1px" : 0)};
 
     color: black;
     vertical-align: middle;
@@ -103,9 +103,9 @@ export const StyledSelect = styled(Select)`
   }
   .react-select__option {
     margin: 0;
-    padding: ${({ oneLetter }) => (oneLetter ? "2px" : "")};
-    padding-left: ${({ oneLetter }) => (oneLetter ? 0 : "")};
-    height: ${({ oneLetter }) => (oneLetter ? "2.5rem" : "")};
+    padding: ${({ entityDropdown }) => (entityDropdown ? "2px" : "")};
+    padding-left: ${({ entityDropdown }) => (entityDropdown ? 0 : "")};
+    height: ${({ entityDropdown }) => (entityDropdown ? "2.5rem" : "")};
 
     :hover {
     }

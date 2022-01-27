@@ -121,8 +121,12 @@ export const ModalInputLabel: React.FC<ModalInputLabel> = ({ children }) => {
   return <StyledModalInputLabel>{children}</StyledModalInputLabel>;
 };
 interface ModalInputWrap {
+  width?: number;
   children?: React.ReactNode;
 }
-export const ModalInputWrap: React.FC<ModalInputWrap> = ({ children }) => {
-  return <StyledModalInputWrap>{children}</StyledModalInputWrap>;
+export const ModalInputWrap: React.FC<ModalInputWrap> = ({
+  width,
+  children,
+}) => {
+  return <StyledModalInputWrap width={width}>{children}</StyledModalInputWrap>;
 };
