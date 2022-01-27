@@ -15,7 +15,7 @@ import {
   SingleValueProps,
   IndicatorProps,
 } from "react-select";
-import { OptionProps } from "react-select/src/types";
+import { CommonProps, OptionProps } from "react-select/src/types";
 import { DropdownAny, DropdownItem, Entities } from "types";
 import {
   StyledEntityValue,
@@ -155,7 +155,7 @@ const SingleValue = (props: SingleValueProps<any>): React.ReactElement => {
   );
 };
 
-const Option = ({ ...props }: { props: OptionProps }): React.ReactElement => {
+const Option = ({ ...props }: OptionProps | any): React.ReactElement => {
   const { entityDropdown } = props.selectProps;
   return (
     <>
@@ -176,7 +176,7 @@ const Option = ({ ...props }: { props: OptionProps }): React.ReactElement => {
           )}
         </>
       ) : (
-        <components.Option {...props}></components.Option>
+        <components.Option {...props} />
       )}
     </>
   );
