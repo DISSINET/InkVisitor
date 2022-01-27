@@ -26,6 +26,8 @@ import { AttributeButtonGroup } from "../AttributeButtonGroup/AttributeButtonGro
 import {
   StyledRightsHeading,
   StyledRightsWrap,
+  StyledUserRightHeading,
+  StyledUserRightItem,
   StyledUserRights,
 } from "./UserCustomizationModalStyles";
 import { UserRightItem } from "./UserRightItem/UserRightItem";
@@ -235,34 +237,36 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
             <b>{"User rights"}</b>
           </StyledRightsHeading>
           <StyledUserRights>
-            <ModalInputLabel>{"role"}</ModalInputLabel>
-            <ModalInputWrap width={60}>
-              <AttributeButtonGroup
-                disabled
-                options={[
-                  {
-                    longValue: userRoleDict[0].label,
-                    shortValue: userRoleDict[0].label,
-                    selected: role === userRoleDict[0].value,
-                    onClick: () => {},
-                  },
-                  {
-                    longValue: userRoleDict[1].label,
-                    shortValue: userRoleDict[1].label,
-                    selected: role === userRoleDict[1].value,
-                    onClick: () => {},
-                  },
-                  {
-                    longValue: userRoleDict[2].label,
-                    shortValue: userRoleDict[2].label,
-                    selected: role === userRoleDict[2].value,
-                    onClick: () => {},
-                  },
-                ]}
-              />
-            </ModalInputWrap>
-            <ModalInputLabel>{"read"}</ModalInputLabel>
-            <ModalInputWrap width={165}>
+            <StyledUserRightHeading>{"role"}</StyledUserRightHeading>
+            <StyledUserRightItem>
+              <div>
+                <AttributeButtonGroup
+                  disabled
+                  options={[
+                    {
+                      longValue: userRoleDict[0].label,
+                      shortValue: userRoleDict[0].label,
+                      selected: role === userRoleDict[0].value,
+                      onClick: () => {},
+                    },
+                    {
+                      longValue: userRoleDict[1].label,
+                      shortValue: userRoleDict[1].label,
+                      selected: role === userRoleDict[1].value,
+                      onClick: () => {},
+                    },
+                    {
+                      longValue: userRoleDict[2].label,
+                      shortValue: userRoleDict[2].label,
+                      selected: role === userRoleDict[2].value,
+                      onClick: () => {},
+                    },
+                  ]}
+                />
+              </div>
+            </StyledUserRightItem>
+            <StyledUserRightHeading>{"read"}</StyledUserRightHeading>
+            <StyledUserRightItem>
               <StyledRightsWrap>
                 {role !== UserRole.Admin
                   ? readRights.map((right, key) => (
@@ -270,9 +274,9 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
                     ))
                   : "all"}
               </StyledRightsWrap>
-            </ModalInputWrap>
-            <ModalInputLabel>{"write"}</ModalInputLabel>
-            <ModalInputWrap width={165}>
+            </StyledUserRightItem>
+            <StyledUserRightHeading>{"write"}</StyledUserRightHeading>
+            <StyledUserRightItem>
               <StyledRightsWrap>
                 {role !== UserRole.Admin
                   ? writeRights.map((right, key) => (
@@ -280,7 +284,7 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
                     ))
                   : "all"}
               </StyledRightsWrap>
-            </ModalInputWrap>
+            </StyledUserRightItem>
           </StyledUserRights>
         </ModalContent>
         <ModalFooter>

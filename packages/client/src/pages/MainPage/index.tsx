@@ -179,7 +179,7 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
     />
   );
 
-  const [userCustomizationOpen, setUserCustomizationOpen] = useState(true);
+  const [userCustomizationOpen, setUserCustomizationOpen] = useState(false);
 
   return (
     <>
