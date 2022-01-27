@@ -179,7 +179,7 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
     />
   );
 
-  const [userCustomizationOpen, setUserCustomizationOpen] = useState(false);
+  const [userCustomizationOpen, setUserCustomizationOpen] = useState(true);
 
   return (
     <>
@@ -325,16 +325,17 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
             isOpen={userAdministrationModalOpen}
             onCloseFn={handleUsersModalCancelClick}
           />
+          {user && userCustomizationOpen && (
+            <UserCustomizationModal
+              user={user}
+              onClose={() => setUserCustomizationOpen(false)}
+            />
+          )}
         </DndProvider>
 
         <Toast />
         <Footer height={heightFooter} />
         {!isLoggedIn && <LoginModal />}
-        {userCustomizationOpen && (
-          <UserCustomizationModal
-            onClose={() => setUserCustomizationOpen(false)}
-          />
-        )}
       </StyledPage>
     </>
   );
