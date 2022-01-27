@@ -45,7 +45,7 @@ export const SuggesterModal: React.FC<SuggesterModal> = ({
   closeModal,
 }) => {
   const [selectedCategory, setSelectedCategory] = useState<any>(
-    category.value !== DropdownAny ? category.value : categories[0].label
+    category.value !== DropdownAny ? category : categories[0]
   );
 
   const [label, setLabel] = useState<string>(typed);
@@ -57,7 +57,7 @@ export const SuggesterModal: React.FC<SuggesterModal> = ({
   const handleCreateActant = () => {
     onCreate({
       label: label,
-      category: selectedCategory,
+      category: selectedCategory.value,
       detail: detail,
       territoryId: territoryId,
     });
