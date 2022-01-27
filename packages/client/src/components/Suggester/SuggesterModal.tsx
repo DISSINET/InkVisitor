@@ -10,6 +10,9 @@ import {
   ModalContent,
   ModalFooter,
   ModalHeader,
+  ModalInputForm,
+  ModalInputLabel,
+  ModalInputWrap,
   Tag,
 } from "components";
 import { EntitySuggester } from "pages/MainPage/containers";
@@ -19,14 +22,7 @@ import { useQuery } from "react-query";
 import { ValueType, OptionTypeBase } from "react-select";
 import { toast } from "react-toastify";
 import { DropdownAny } from "types";
-import {
-  StyledContent,
-  StyledModalForm,
-  StyledModalInputWrap,
-  StyledModalLabel,
-  StyledNote,
-  StyledTypeBar,
-} from "./SuggesterStyles";
+import { StyledContent, StyledNote, StyledTypeBar } from "./SuggesterStyles";
 
 interface SuggesterModal {
   show?: boolean;
@@ -105,9 +101,9 @@ export const SuggesterModal: React.FC<SuggesterModal> = ({
       <ModalHeader title="Create actant" />
       <ModalContent>
         <StyledContent>
-          <StyledModalForm>
-            <StyledModalLabel>{"Category: "}</StyledModalLabel>
-            <StyledModalInputWrap>
+          <ModalInputForm>
+            <ModalInputLabel>{"Category: "}</ModalInputLabel>
+            <ModalInputWrap>
               <Dropdown
                 value={{
                   label: selectedCategory.label,
@@ -125,34 +121,34 @@ export const SuggesterModal: React.FC<SuggesterModal> = ({
               <StyledTypeBar
                 entity={`entity${selectedCategory.value}`}
               ></StyledTypeBar>
-            </StyledModalInputWrap>
-            <StyledModalLabel>{"Label: "}</StyledModalLabel>
-            <StyledModalInputWrap>
+            </ModalInputWrap>
+            <ModalInputLabel>{"Label: "}</ModalInputLabel>
+            <ModalInputWrap>
               <Input
                 value={label}
                 onChangeFn={(newType: string) => setLabel(newType)}
                 changeOnType
                 autoFocus
               />
-            </StyledModalInputWrap>
-            <StyledModalLabel>{"Detail: "}</StyledModalLabel>
-            <StyledModalInputWrap>
+            </ModalInputWrap>
+            <ModalInputLabel>{"Detail: "}</ModalInputLabel>
+            <ModalInputWrap>
               <Input
                 value={detail}
                 onChangeFn={(newType: string) => setDetail(newType)}
                 changeOnType
               />
-            </StyledModalInputWrap>
+            </ModalInputWrap>
             {/* Suggester territory */}
             {(selectedCategory.value === "T" ||
               selectedCategory.value === "S") && (
               <>
-                <StyledModalLabel>
+                <ModalInputLabel>
                   {selectedCategory === "T"
                     ? "Parent territory: "
                     : "Territory: "}
-                </StyledModalLabel>
-                <StyledModalInputWrap>
+                </ModalInputLabel>
+                <ModalInputWrap>
                   {territory ? (
                     <Tag
                       propId={territory.id}
@@ -183,10 +179,10 @@ export const SuggesterModal: React.FC<SuggesterModal> = ({
                       }}
                     />
                   )}
-                </StyledModalInputWrap>
+                </ModalInputWrap>
               </>
             )}
-          </StyledModalForm>
+          </ModalInputForm>
           {userRole === UserRole.Admin && (
             <>
               {selectedCategory.value === "T" && !territoryId ? (

@@ -20,6 +20,9 @@ import {
   ModalHeader,
   ModalContent,
   ModalFooter,
+  ModalInputForm,
+  ModalInputLabel,
+  ModalInputWrap,
 } from "components/Modal/Modal";
 import { PanelSeparator } from "./PanelSeparator/PanelSeparator";
 import { Checkbox } from "./Checkbox/Checkbox";
@@ -47,6 +50,9 @@ export {
   ModalHeader,
   ModalContent,
   ModalFooter,
+  ModalInputForm,
+  ModalInputLabel,
+  ModalInputWrap,
   Submit,
   PanelSeparator,
   Tooltip,

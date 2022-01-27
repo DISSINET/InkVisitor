@@ -10,6 +10,9 @@ import {
   StyledCardTitle,
   StyledCardBody,
   StyledFooter,
+  StyledModalInputForm,
+  StyledModalInputLabel,
+  StyledModalInputWrap,
 } from "./ModalStyles";
 import { ModalKeyPress } from "./ModalKeyPress";
 
@@ -91,10 +94,11 @@ export const ModalHeader: FC<ModalHeader> = ({ title, color }) => {
 };
 
 interface ModalContent {
+  column?: boolean;
   children?: ReactNode;
 }
-export const ModalContent: FC<ModalContent> = ({ children }) => {
-  return <StyledCardBody>{children}</StyledCardBody>;
+export const ModalContent: FC<ModalContent> = ({ children, column }) => {
+  return <StyledCardBody column={column}>{children}</StyledCardBody>;
 };
 
 interface ModalFooter {
@@ -102,4 +106,28 @@ interface ModalFooter {
 }
 export const ModalFooter: FC<ModalFooter> = ({ children }) => {
   return <StyledFooter>{children}</StyledFooter>;
+};
+
+// Input form helpers
+interface ModalInputForm {
+  children?: React.ReactNode;
+}
+export const ModalInputForm: React.FC<ModalInputForm> = ({ children }) => {
+  return <StyledModalInputForm>{children}</StyledModalInputForm>;
+};
+interface ModalInputLabel {
+  children?: React.ReactNode;
+}
+export const ModalInputLabel: React.FC<ModalInputLabel> = ({ children }) => {
+  return <StyledModalInputLabel>{children}</StyledModalInputLabel>;
+};
+interface ModalInputWrap {
+  width?: number;
+  children?: React.ReactNode;
+}
+export const ModalInputWrap: React.FC<ModalInputWrap> = ({
+  width,
+  children,
+}) => {
+  return <StyledModalInputWrap width={width}>{children}</StyledModalInputWrap>;
 };
