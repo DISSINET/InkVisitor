@@ -87,8 +87,12 @@ export const StyledCardTitle = styled.h2`
   font-weight: ${({ theme }) => theme.fontWeight["medium"]};
   font-size: ${({ theme }) => theme.fontSize["xl"]};
 `;
-export const StyledCardBody = styled.section`
+interface StyledCardBody {
+  column?: boolean;
+}
+export const StyledCardBody = styled.section<StyledCardBody>`
   display: flex;
+  flex-direction: ${({ column }) => (column ? "column" : "row")};
   padding: ${space5} ${space7};
 
   font-size: ${({ theme }) => theme.fontSize["sm"]};

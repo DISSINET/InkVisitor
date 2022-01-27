@@ -1,5 +1,5 @@
-import { languageDict } from "@shared/dictionaries";
-import { ActantType, Language } from "@shared/enums";
+import { languageDict, userRoleDict } from "@shared/dictionaries";
+import { ActantType, Language, UserRole, UserRoleMode } from "@shared/enums";
 import { IResponseUser } from "@shared/types";
 import api from "api";
 import {
@@ -22,6 +22,13 @@ import { useMutation, useQuery, useQueryClient } from "react-query";
 import { ValueType, OptionTypeBase } from "react-select";
 import { toast } from "react-toastify";
 import { EntitySuggester } from "..";
+import { AttributeButtonGroup } from "../AttributeButtonGroup/AttributeButtonGroup";
+import {
+  StyledRightsHeading,
+  StyledRightsWrap,
+  StyledUserRights,
+} from "./UserCustomizationModalStyles";
+import { UserRightItem } from "./UserRightItem/UserRightItem";
 
 interface DataObject {
   name: string;
@@ -49,7 +56,7 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
   user,
   onClose = () => {},
 }) => {
-  const { options, name, email } = user;
+  const { options, name, email, role, rights } = useMemo(() => user, [user]);
 
   const initialValues = useMemo(() => {
     const defaultLanguageObject = languageDict.find(
@@ -126,19 +133,28 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
     }
   };
 
+  const readRights = useMemo(
+    () => rights.filter((r) => r.mode === UserRoleMode.Read),
+    [rights]
+  );
+  const writeRights = useMemo(
+    () => rights.filter((r) => r.mode === UserRoleMode.Write),
+    [rights]
+  );
+
   return (
     <div>
       <Modal
         showModal={true}
         width="thin"
-        // onEnterPress={() => handleSubmit()}
+        onEnterPress={() => handleSubmit()}
         onClose={() => onClose()}
       >
         <ModalHeader title="User customization" />
-        <ModalContent>
+        <ModalContent column>
           <ModalInputForm>
             <ModalInputLabel>{"name"}</ModalInputLabel>
-            <ModalInputWrap width={160}>
+            <ModalInputWrap width={165}>
               <Input
                 width="full"
                 changeOnType
@@ -147,7 +163,7 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
               />
             </ModalInputWrap>
             <ModalInputLabel>{"email"}</ModalInputLabel>
-            <ModalInputWrap width={160}>
+            <ModalInputWrap width={165}>
               <Input
                 width="full"
                 changeOnType
@@ -156,7 +172,7 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
               />
             </ModalInputWrap>
             <ModalInputLabel>{"default language"}</ModalInputLabel>
-            <ModalInputWrap width={160}>
+            <ModalInputWrap width={165}>
               <Dropdown
                 width="full"
                 value={data.defaultLanguage}
@@ -167,7 +183,7 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
               />
             </ModalInputWrap>
             <ModalInputLabel>{"search languages"}</ModalInputLabel>
-            <ModalInputWrap width={160}>
+            <ModalInputWrap width={165}>
               <Dropdown
                 value={data.searchLanguages}
                 width="full"
@@ -181,7 +197,7 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
               />
             </ModalInputWrap>
             <ModalInputLabel>{"default territory"}</ModalInputLabel>
-            <ModalInputWrap width={160}>
+            <ModalInputWrap width={165}>
               {territory ? (
                 <Tag
                   propId={territory.id}
@@ -208,12 +224,64 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
                     onSelected={(selected: any) =>
                       handleChange("defaultTerritory", selected)
                     }
-                    inputWidth={99}
+                    inputWidth={104}
                   />
                 </div>
               )}
             </ModalInputWrap>
           </ModalInputForm>
+
+          <StyledRightsHeading>
+            <b>{"User rights"}</b>
+          </StyledRightsHeading>
+          <StyledUserRights>
+            <ModalInputLabel>{"role"}</ModalInputLabel>
+            <ModalInputWrap width={60}>
+              <AttributeButtonGroup
+                disabled
+                options={[
+                  {
+                    longValue: userRoleDict[0].label,
+                    shortValue: userRoleDict[0].label,
+                    selected: role === userRoleDict[0].value,
+                    onClick: () => {},
+                  },
+                  {
+                    longValue: userRoleDict[1].label,
+                    shortValue: userRoleDict[1].label,
+                    selected: role === userRoleDict[1].value,
+                    onClick: () => {},
+                  },
+                  {
+                    longValue: userRoleDict[2].label,
+                    shortValue: userRoleDict[2].label,
+                    selected: role === userRoleDict[2].value,
+                    onClick: () => {},
+                  },
+                ]}
+              />
+            </ModalInputWrap>
+            <ModalInputLabel>{"read"}</ModalInputLabel>
+            <ModalInputWrap width={165}>
+              <StyledRightsWrap>
+                {role !== UserRole.Admin
+                  ? readRights.map((right, key) => (
+                      <UserRightItem key={key} territoryId={right.territory} />
+                    ))
+                  : "all"}
+              </StyledRightsWrap>
+            </ModalInputWrap>
+            <ModalInputLabel>{"write"}</ModalInputLabel>
+            <ModalInputWrap width={165}>
+              <StyledRightsWrap>
+                {role !== UserRole.Admin
+                  ? writeRights.map((right, key) => (
+                      <UserRightItem key={key} territoryId={right.territory} />
+                    ))
+                  : "all"}
+              </StyledRightsWrap>
+            </ModalInputWrap>
+          </StyledUserRights>
         </ModalContent>
         <ModalFooter>
           <ButtonGroup>

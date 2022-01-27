@@ -94,10 +94,11 @@ export const ModalHeader: FC<ModalHeader> = ({ title, color }) => {
 };
 
 interface ModalContent {
+  column?: boolean;
   children?: ReactNode;
 }
-export const ModalContent: FC<ModalContent> = ({ children }) => {
-  return <StyledCardBody>{children}</StyledCardBody>;
+export const ModalContent: FC<ModalContent> = ({ children, column }) => {
+  return <StyledCardBody column={column}>{children}</StyledCardBody>;
 };
 
 interface ModalFooter {
