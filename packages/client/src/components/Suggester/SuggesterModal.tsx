@@ -4,6 +4,7 @@ import api from "api";
 import {
   Button,
   ButtonGroup,
+  Dropdown,
   Input,
   Modal,
   ModalContent,
@@ -12,10 +13,12 @@ import {
   Tag,
 } from "components";
 import { EntitySuggester } from "pages/MainPage/containers";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { FaUnlink } from "react-icons/fa";
 import { useQuery } from "react-query";
+import { ValueType, OptionTypeBase } from "react-select";
 import { toast } from "react-toastify";
+import { DropdownAny } from "types";
 import {
   StyledContent,
   StyledModalForm,
@@ -28,7 +31,7 @@ import {
 interface SuggesterModal {
   show?: boolean;
   typed: string;
-  category: string;
+  category: IOption;
   categories: IOption[];
   onCreate: Function;
   closeModal: Function;
@@ -41,9 +44,10 @@ export const SuggesterModal: React.FC<SuggesterModal> = ({
   onCreate,
   closeModal,
 }) => {
-  const [selectedCategory, setSelectedCategory] = useState<string>(
-    category !== ActantType.Any ? category : categories[0].label
+  const [selectedCategory, setSelectedCategory] = useState<any>(
+    category.value !== DropdownAny ? category : categories[0]
   );
+
   const [label, setLabel] = useState<string>(typed);
   const [detail, setDetail] = useState<string>("");
   const [territoryId, setTerritoryId] = useState<string>("");
@@ -53,7 +57,7 @@ export const SuggesterModal: React.FC<SuggesterModal> = ({
   const handleCreateActant = () => {
     onCreate({
       label: label,
-      category: selectedCategory,
+      category: selectedCategory.value,
       detail: detail,
       territoryId: territoryId,
     });
@@ -91,18 +95,22 @@ export const SuggesterModal: React.FC<SuggesterModal> = ({
           <StyledModalForm>
             <StyledModalLabel>{"Category: "}</StyledModalLabel>
             <StyledModalInputWrap>
-              <Input
-                type="select"
-                value={selectedCategory}
+              <Dropdown
+                value={{
+                  label: selectedCategory.label,
+                  value: selectedCategory.value,
+                }}
                 options={categories}
-                inverted
-                suggester
-                onChangeFn={(newCategory: string) =>
-                  setSelectedCategory(newCategory)
-                }
+                onChange={(option: ValueType<OptionTypeBase, any>) => {
+                  setSelectedCategory(option);
+                }}
+                width={40}
+                entityDropdown
+                disableTyping
+                oneLetter
               />
               <StyledTypeBar
-                entity={`entity${selectedCategory}`}
+                entity={`entity${selectedCategory.value}`}
               ></StyledTypeBar>
             </StyledModalInputWrap>
             <StyledModalLabel>{"Label: "}</StyledModalLabel>
@@ -123,7 +131,8 @@ export const SuggesterModal: React.FC<SuggesterModal> = ({
               />
             </StyledModalInputWrap>
             {/* Suggester territory */}
-            {(selectedCategory === "T" || selectedCategory === "S") && (
+            {(selectedCategory.value === "T" ||
+              selectedCategory.value === "S") && (
               <>
                 <StyledModalLabel>
                   {selectedCategory === "T"
@@ -167,7 +176,7 @@ export const SuggesterModal: React.FC<SuggesterModal> = ({
           </StyledModalForm>
           {userRole === UserRole.Admin && (
             <>
-              {selectedCategory === "T" && !territoryId ? (
+              {selectedCategory.value === "T" && !territoryId ? (
                 <StyledNote>
                   {"Territory will be added under root"}
                   <br />
@@ -196,10 +205,10 @@ export const SuggesterModal: React.FC<SuggesterModal> = ({
             label="Submit"
             color="primary"
             onClick={() => {
-              if (selectedCategory === "S" && !territoryId) {
+              if (selectedCategory.value === "S" && !territoryId) {
                 toast.warning("Territory is required!");
               } else if (
-                selectedCategory === "T" &&
+                selectedCategory.value === "T" &&
                 !territoryId &&
                 userRole !== UserRole.Admin
               ) {

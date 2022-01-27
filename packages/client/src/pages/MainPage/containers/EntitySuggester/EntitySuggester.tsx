@@ -5,7 +5,7 @@ import { IOption, IActant } from "@shared/types";
 
 import { FaHome } from "react-icons/fa";
 import { CActant, CStatement, CTerritoryActant } from "constructors";
-import { Entities } from "types";
+import { DropdownAny, Entities } from "types";
 import { useMutation, useQuery, useQueryClient } from "react-query";
 import api from "api";
 import {
@@ -20,6 +20,7 @@ import { useDebounce, useSearchParams } from "hooks";
 import { rootTerritoryId } from "Theme/constants";
 import { DragObjectWithType } from "react-dnd";
 import { toast } from "react-toastify";
+import { ValueType, OptionTypeBase } from "react-select";
 
 interface EntitySuggesterI {
   categoryTypes: ActantType[];
@@ -52,7 +53,7 @@ export const EntitySuggester: React.FC<EntitySuggesterI> = ({
   const queryClient = useQueryClient();
   const [typed, setTyped] = useState<string>("");
   const debouncedTyped = useDebounce(typed, 100);
-  const [selectedCategory, setSelectedCategory] = useState<string>();
+  const [selectedCategory, setSelectedCategory] = useState<any>();
   const [allCategories, setAllCategories] = useState<IOption[]>();
 
   const { setActantId } = useSearchParams();
@@ -70,9 +71,9 @@ export const EntitySuggester: React.FC<EntitySuggesterI> = ({
       const resSuggestions = await api.actantsGetMore({
         label: debouncedTyped,
         class:
-          selectedCategory === wildCardCategory.valueOf()
+          selectedCategory?.value === wildCardCategory.valueOf()
             ? false
-            : selectedCategory,
+            : selectedCategory?.value,
         excluded: excludedEntities.length ? excludedEntities : undefined,
       });
       return resSuggestions.data
@@ -112,7 +113,7 @@ export const EntitySuggester: React.FC<EntitySuggesterI> = ({
         !!selectedCategory &&
         !excludedEntities
           .map((key) => key.valueOf())
-          .includes(selectedCategory) &&
+          .includes(selectedCategory.value) &&
         api.isLoggedIn(),
     }
   );
@@ -133,18 +134,14 @@ export const EntitySuggester: React.FC<EntitySuggesterI> = ({
     if (categories.length > 1 && !disableWildCard) {
       categories.unshift({
         label: wildCardCategory.valueOf(),
-        value: wildCardCategory.valueOf(),
+        value: DropdownAny,
       });
     }
     if (categories.length) {
       setAllCategories(categories);
-      setSelectedCategory(categories[0].value);
+      setSelectedCategory(categories[0]);
     }
   }, [categoryTypes]);
-
-  const handleCategoryChanged = (newCategory: string) => {
-    setSelectedCategory(newCategory);
-  };
 
   const actantsCreateMutation = useMutation(
     async (newActant: IActant) => await api.actantsCreate(newActant),
@@ -246,9 +243,9 @@ export const EntitySuggester: React.FC<EntitySuggesterI> = ({
       onType={(newType: string) => {
         setTyped(newType);
       }}
-      onChangeCategory={(newCategory: string) =>
-        handleCategoryChanged(newCategory)
-      }
+      onChangeCategory={(option: ValueType<OptionTypeBase, any>) => {
+        setSelectedCategory(option);
+      }}
       onCreate={(newCreated: {
         label: string;
         category: AllActantType;
