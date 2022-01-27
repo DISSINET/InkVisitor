@@ -103,7 +103,8 @@ export const StyledSelect = styled(Select)`
   }
   .react-select__option {
     margin: 0;
-    padding: ${({ oneLetter }) => (oneLetter ? 0 : "")};
+    padding: ${({ oneLetter }) => (oneLetter ? "2px" : "")};
+    padding-left: ${({ oneLetter }) => (oneLetter ? 0 : "")};
     height: ${({ oneLetter }) => (oneLetter ? "2.5rem" : "")};
 
     :hover {
