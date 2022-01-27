@@ -10,6 +10,9 @@ import {
   StyledCardTitle,
   StyledCardBody,
   StyledFooter,
+  StyledModalInputForm,
+  StyledModalInputLabel,
+  StyledModalInputWrap,
 } from "./ModalStyles";
 import { ModalKeyPress } from "./ModalKeyPress";
 
@@ -102,4 +105,24 @@ interface ModalFooter {
 }
 export const ModalFooter: FC<ModalFooter> = ({ children }) => {
   return <StyledFooter>{children}</StyledFooter>;
+};
+
+// Input form helpers
+interface ModalInputForm {
+  children?: React.ReactNode;
+}
+export const ModalInputForm: React.FC<ModalInputForm> = ({ children }) => {
+  return <StyledModalInputForm>{children}</StyledModalInputForm>;
+};
+interface ModalInputLabel {
+  children?: React.ReactNode;
+}
+export const ModalInputLabel: React.FC<ModalInputLabel> = ({ children }) => {
+  return <StyledModalInputLabel>{children}</StyledModalInputLabel>;
+};
+interface ModalInputWrap {
+  children?: React.ReactNode;
+}
+export const ModalInputWrap: React.FC<ModalInputWrap> = ({ children }) => {
+  return <StyledModalInputWrap>{children}</StyledModalInputWrap>;
 };

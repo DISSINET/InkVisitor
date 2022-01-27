@@ -105,3 +105,20 @@ export const StyledFooter = styled.div<StyledFooter>`
   justify-content: flex-end;
   padding: ${({ theme }) => theme.space[4]};
 `;
+
+export const StyledModalInputForm = styled.div`
+  display: grid;
+  grid-template-columns: auto auto;
+`;
+export const StyledModalInputLabel = styled.p`
+  display: grid;
+  justify-content: flex-end;
+  align-items: center;
+  margin-right: ${({ theme }) => theme.space[2]};
+  margin-bottom: ${({ theme }) => theme.space[1]};
+`;
+export const StyledModalInputWrap = styled.div`
+  display: grid;
+  position: relative;
+  margin-bottom: ${({ theme }) => theme.space[1]};
+`;

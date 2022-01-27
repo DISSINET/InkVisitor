@@ -58,6 +58,7 @@ import { useSearchParams } from "hooks";
 import ScrollHandler from "hooks/ScrollHandler";
 
 import LogoInkvisitor from "assets/logos/inkvisitor-full.svg";
+import { UserCustomizationModal } from "./containers/UserCustomizationModal/UserCustomizationModal";
 
 interface MainPage {
   size: number[];
@@ -178,6 +179,8 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
     />
   );
 
+  const [userCustomizationOpen, setUserCustomizationOpen] = useState(false);
+
   return (
     <>
       <StyledPage layoutWidth={layoutWidth}>
@@ -205,7 +208,11 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
                   <StyledUser>
                     <StyledText>logged as</StyledText>
                     <StyledFaUserAlt size={14} />
-                    <StyledUsername>{username}</StyledUsername>
+                    <StyledUsername
+                      onClick={() => setUserCustomizationOpen(true)}
+                    >
+                      {username}
+                    </StyledUsername>
                   </StyledUser>
                   <ButtonGroup>
                     {userRole == "admin" && (
@@ -323,6 +330,11 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
         <Toast />
         <Footer height={heightFooter} />
         {!isLoggedIn && <LoginModal />}
+        {userCustomizationOpen && (
+          <UserCustomizationModal
+            onClose={() => setUserCustomizationOpen(false)}
+          />
+        )}
       </StyledPage>
     </>
   );
