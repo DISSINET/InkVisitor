@@ -77,3 +77,20 @@ export const searchTree = (
   }
   return null;
 };
+
+export const collectTerritoryChildren = (
+  element: IResponseTree,
+  childArray: string[] = []
+): string[] => {
+  if (element.children.length) {
+    element.children.map((child) => {
+      childArray.push(child.territory.id);
+    });
+    for (var i = 0; i < element.children.length; i++) {
+      collectTerritoryChildren(element.children[i], childArray);
+    }
+  } else {
+    return childArray;
+  }
+  return childArray;
+};

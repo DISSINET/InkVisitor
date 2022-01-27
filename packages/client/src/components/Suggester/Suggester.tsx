@@ -1,14 +1,15 @@
 import { ActantStatus, ActantType } from "@shared/enums";
 import { IOption } from "@shared/types";
-import { Button, Input, Loader, Tag } from "components";
+import { Button, Dropdown, Input, Loader, Tag } from "components";
 import useKeypress from "hooks/useKeyPress";
 import React, { useState } from "react";
 import { DragObjectWithType, DropTargetMonitor, useDrop } from "react-dnd";
 import { FaPlayCircle, FaPlus } from "react-icons/fa";
 import { MdCancel } from "react-icons/md";
+import { ValueType, OptionTypeBase } from "react-select";
 import { toast } from "react-toastify";
 import theme from "Theme/theme";
-import { ItemTypes } from "types";
+import { DropdownAny, ItemTypes } from "types";
 import { SuggesterKeyPress } from "./SuggesterKeyPress";
 import { SuggesterModal } from "./SuggesterModal";
 import {
@@ -42,7 +43,7 @@ interface SuggesterProps {
   suggestions: SuggestionI[];
   placeholder?: string; // text to display when typed === ""
   typed: string; // input value
-  category: string; // selected category
+  category: IOption; // selected category
   categories: IOption[]; // all possible categories
   suggestionListPosition?: string; // todo not implemented yet
   disabled?: boolean; // todo not implemented yet
@@ -53,7 +54,7 @@ interface SuggesterProps {
 
   // events
   onType: (newType: string) => void;
-  onChangeCategory: Function;
+  onChangeCategory: (selectedOption: ValueType<OptionTypeBase, any>) => void;
   onCreate: Function;
   onPick: Function;
   onDrop: Function;
@@ -122,13 +123,13 @@ export const Suggester: React.FC<SuggesterProps> = ({
   const handleEnterPress = () => {
     if (selected === -1 && typed.length > 0) {
       if (
-        category === ActantType.Any ||
-        category === ActantType.Statement ||
-        category === ActantType.Territory
+        category.value === DropdownAny ||
+        category.value === ActantType.Statement ||
+        category.value === ActantType.Territory
       ) {
         setShowModal(true);
       } else {
-        onCreate({ label: typed, category: category });
+        onCreate({ label: typed, category: category.value });
       }
     } else if (selected > -1) {
       onPick(suggestions[selected]);
@@ -141,13 +142,13 @@ export const Suggester: React.FC<SuggesterProps> = ({
   const handleAddBtnClick = () => {
     if (typed.length > 0) {
       if (
-        category === ActantType.Any ||
-        category === ActantType.Statement ||
-        category === ActantType.Territory
+        category.value === DropdownAny ||
+        category.value === ActantType.Statement ||
+        category.value === ActantType.Territory
       ) {
         setShowModal(true);
       } else {
-        onCreate({ label: typed, category: category });
+        onCreate({ label: typed, category: category.value });
       }
     } else {
       toast.info("Fill at least 1 character");
@@ -163,20 +164,22 @@ export const Suggester: React.FC<SuggesterProps> = ({
           hasButton={allowCreate}
           isOver={isOver}
         >
-          <Input
-            type="select"
-            value={category}
+          <Dropdown
+            value={{ label: category.label, value: category.value }}
             options={categories}
-            inverted
-            suggester
-            onChangeFn={onChangeCategory}
+            onChange={onChangeCategory}
+            width={36}
+            entityDropdown
             onFocus={() => {
               setSelected(-1);
               setIsFocused(true);
             }}
             onBlur={() => setIsFocused(false)}
+            disableTyping
+            suggester
+            oneLetter
           />
-          <StyledTypeBar entity={`entity${category}`}></StyledTypeBar>
+          <StyledTypeBar entity={`entity${category.value}`}></StyledTypeBar>
           <Input
             type="text"
             value={typed}
