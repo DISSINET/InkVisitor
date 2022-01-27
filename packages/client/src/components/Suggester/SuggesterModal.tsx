@@ -86,7 +86,20 @@ export const SuggesterModal: React.FC<SuggesterModal> = ({
     <Modal
       showModal={show}
       width="thin"
-      onEnterPress={handleCreateActant}
+      onEnterPress={() => {
+        if (selectedCategory.value === "S" && !territoryId) {
+          toast.warning("Territory is required!");
+        } else if (
+          selectedCategory.value === "T" &&
+          !territoryId &&
+          userRole !== UserRole.Admin
+        ) {
+          toast.warning("Parent territory is required!");
+        } else {
+          handleCreateActant();
+          closeModal();
+        }
+      }}
       onClose={() => closeModal()}
     >
       <ModalHeader title="Create actant" />
