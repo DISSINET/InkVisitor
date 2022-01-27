@@ -6,7 +6,7 @@ import {
 } from "@shared/dictionaries";
 import { allEntities } from "@shared/dictionaries/entity";
 import { ActantType, Language, UserRoleMode } from "@shared/enums";
-import { IStatement } from "@shared/types";
+import { IAction, IResponseActant, IStatement } from "@shared/types";
 import api from "api";
 import {
   Button,
@@ -180,9 +180,7 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
 
   const updateProp = (propId: string, changes: any) => {
     if (actant) {
-      console.log(propId, changes);
       const newProps = [...actant.props];
-      console.log(newProps);
 
       newProps.forEach((prop1, pi1) => {
         if (prop1.id === propId) {
@@ -642,7 +640,9 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                         value={[allEntities]
                           .concat(entitiesDict)
                           .filter((i: any) =>
-                            actant.data.entities.s.includes(i.value)
+                            (actant as IAction).data.entities?.s.includes(
+                              i.value
+                            )
                           )}
                         width="full"
                         noOptionsMessage={() => "no entity"}
@@ -678,7 +678,7 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                     <StyledDetailContentRowValue>
                       <Input
                         disabled={!userCanEdit}
-                        value={actant.data.valencies.s}
+                        value={(actant as IAction).data.valencies?.s}
                         width="full"
                         onChangeFn={async (newValue: string) => {
                           const oldData = { ...actant.data };
@@ -714,7 +714,9 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                         value={[allEntities]
                           .concat(entitiesDict)
                           .filter((i: any) =>
-                            actant.data.entities.a1.includes(i.value)
+                            (actant as IAction).data.entities?.a1.includes(
+                              i.value
+                            )
                           )}
                         placeholder={"no entity"}
                         width="full"
@@ -750,7 +752,7 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                     <StyledDetailContentRowValue>
                       <Input
                         disabled={!userCanEdit}
-                        value={actant.data.valencies.a1}
+                        value={(actant as IAction).data.valencies?.a1}
                         width="full"
                         onChangeFn={async (newValue: string) => {
                           const oldData = { ...actant.data };
@@ -786,12 +788,16 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                         value={[allEntities]
                           .concat(entitiesDict)
                           .filter((i: any) =>
-                            actant.data.entities.a2.includes(i.value)
+                            (actant as IAction).data.entities?.a2.includes(
+                              i.value
+                            )
                           )}
                         placeholder={"no entity"}
                         width="full"
                         onChange={(newValue: any) => {
                           const oldData = { ...actant.data };
+
+                          console.log(actant.data.entities);
                           updateActantMutation.mutate({
                             data: {
                               ...oldData,
@@ -822,7 +828,7 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                     <StyledDetailContentRowValue>
                       <Input
                         disabled={!userCanEdit}
-                        value={actant.data.valencies.a2}
+                        value={(actant as IAction).data.valencies?.a2}
                         width="full"
                         onChangeFn={async (newValue: string) => {
                           const oldData = { ...actant.data };

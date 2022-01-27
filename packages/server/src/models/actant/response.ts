@@ -2,9 +2,13 @@ import { Request } from "express";
 import { UserRoleMode } from "@shared/enums";
 import {
   IActant,
+  IAction,
+  IEntity,
+  IResource,
   IResponseActant,
   IResponseDetail,
   IStatement,
+  ITerritory,
 } from "@shared/types";
 import { Connection } from "rethinkdb-ts";
 import Actant from "./actant";
@@ -29,10 +33,17 @@ export class ResponseActantDetail
   entities: { [key: string]: IActant };
   usedInStatement?: IStatement[] | undefined;
   usedInStatementProps?: IStatement[] | undefined;
+  data:
+    | IActant["data"]
+    | IAction["data"]
+    | IEntity["data"]
+    | ITerritory["data"]
+    | IResource["data"]
+    | IStatement["data"];
 
   constructor(actant: IActant) {
     super(actant);
-
+    this.data = actant.data;
     this.entities = {};
   }
 
