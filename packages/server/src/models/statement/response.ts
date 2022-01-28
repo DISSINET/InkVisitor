@@ -9,8 +9,11 @@ export class ResponseStatement extends Statement implements IResponseStatement {
   right: UserRoleMode = UserRoleMode.Read;
 
   constructor(actant: IActant) {
-    super(actant);
-
+    super({});
+    for (const key of Object.keys(actant)) {
+      (this as any)[key] = (actant as any)[key];
+    }
+    
     this.entities = {};
   }
 

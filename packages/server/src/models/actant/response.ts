@@ -18,7 +18,10 @@ export class ResponseActant extends Actant implements IResponseActant {
   right: UserRoleMode = UserRoleMode.Read;
 
   constructor(actant: IActant) {
-    super(actant);
+    super({});
+    for (const key of Object.keys(actant)) {
+      (this as any)[key] = (actant as any)[key];
+    }
   }
 
   async prepare(request: Request) {
@@ -33,17 +36,9 @@ export class ResponseActantDetail
   entities: { [key: string]: IActant };
   usedInStatement?: IStatement[] | undefined;
   usedInStatementProps?: IStatement[] | undefined;
-  data:
-    | IActant["data"]
-    | IAction["data"]
-    | IEntity["data"]
-    | ITerritory["data"]
-    | IResource["data"]
-    | IStatement["data"];
 
   constructor(actant: IActant) {
     super(actant);
-    this.data = actant.data;
     this.entities = {};
   }
 
