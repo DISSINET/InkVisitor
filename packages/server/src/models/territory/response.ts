@@ -11,7 +11,10 @@ export class ResponseTerritory extends Territory implements IResponseTerritory {
   right: UserRoleMode = UserRoleMode.Read;
 
   constructor(actant: IActant) {
-    super(actant);
+    super({});
+    for (const key of Object.keys(actant)) {
+      (this as any)[key] = (actant as any)[key];
+    }
 
     this.statements = [];
     this.actants = [];
