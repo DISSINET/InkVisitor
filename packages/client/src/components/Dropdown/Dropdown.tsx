@@ -180,7 +180,7 @@ const Option = ({ ...props }: OptionProps | any): React.ReactElement => {
 const MultiValue = (props: MultiValueProps<any>): React.ReactElement => {
   let labelToBeDisplayed = `${props.data.label}`;
   if (props.data.value === allEntities.value) {
-    labelToBeDisplayed = "All is selected";
+    labelToBeDisplayed = "All options selected";
   }
   return (
     <components.MultiValue {...props}>

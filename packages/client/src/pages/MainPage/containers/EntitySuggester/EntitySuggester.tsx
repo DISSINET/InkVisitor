@@ -49,7 +49,6 @@ export const EntitySuggester: React.FC<EntitySuggesterI> = ({
   filterEditorRights = false,
   excludedActantIds = [],
 }) => {
-  const wildCardCategory = ActantType.Any;
   const queryClient = useQueryClient();
   const [typed, setTyped] = useState<string>("");
   const debouncedTyped = useDebounce(typed, 100);
@@ -71,9 +70,9 @@ export const EntitySuggester: React.FC<EntitySuggesterI> = ({
       const resSuggestions = await api.actantsGetMore({
         label: debouncedTyped,
         class:
-          selectedCategory?.label === wildCardCategory.valueOf()
+          selectedCategory?.value === DropdownAny
             ? false
-            : wildCardCategory.valueOf(),
+            : selectedCategory.value,
         excluded: excludedEntities.length ? excludedEntities : undefined,
       });
 
@@ -145,7 +144,7 @@ export const EntitySuggester: React.FC<EntitySuggesterI> = ({
     });
     if (categories.length > 1 && !disableWildCard) {
       categories.unshift({
-        label: wildCardCategory.valueOf(),
+        label: ActantType.Any,
         value: DropdownAny,
       });
     }
