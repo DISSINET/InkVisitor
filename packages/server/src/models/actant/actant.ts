@@ -8,7 +8,7 @@ import { r as rethink, Connection, WriteResult, RDatum } from "rethinkdb-ts";
 import { IStatement, IActant, IResponseActant, IProp } from "@shared/types";
 import {
   ActantStatus,
-  ActantType,
+  EntityClass,
   Language,
   UserRole,
   UserRoleMode,
@@ -35,7 +35,7 @@ export default class Actant extends Base implements IActant, IDbModel {
   ];
 
   id: string = "";
-  class: ActantType = ActantType.Any;
+  class: EntityClass = EntityClass.Person;
   data: any = {};
   label: string = "";
   detail: string = "";
@@ -145,7 +145,7 @@ export default class Actant extends Base implements IActant, IDbModel {
   getDependentStatements(db: Connection | undefined): Promise<IStatement[]> {
     return rethink
       .table(Actant.table)
-      .filter({ class: ActantType.Statement })
+      .filter({ class: EntityClass.Statement })
       .filter((row: any) => {
         return rethink.or(
           row("data")("actants").contains((actantElement: any) =>
@@ -238,7 +238,7 @@ export default class Actant extends Base implements IActant, IDbModel {
     const statements = await rethink
       .table(Actant.table)
       .filter({
-        class: ActantType.Statement,
+        class: EntityClass.Statement,
       })
       .filter((row: RDatum) => {
         return rethink.or(

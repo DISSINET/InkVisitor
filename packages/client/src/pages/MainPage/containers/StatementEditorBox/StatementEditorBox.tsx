@@ -1,4 +1,4 @@
-import { ActantType, UserRoleMode } from "@shared/enums";
+import { EntityClass, UserRoleMode } from "@shared/enums";
 import {
   IProp,
   IResponseStatement,
@@ -43,44 +43,30 @@ import {
 } from "./StatementEditorBoxStyles";
 
 const classesActants = [
-  ActantType.Statement,
-  ActantType.Action,
-  ActantType.Territory,
-  ActantType.Resource,
-  ActantType.Person,
-  ActantType.Group,
-  ActantType.Object,
-  ActantType.Concept,
-  ActantType.Location,
-  ActantType.Value,
-  ActantType.Event,
+  EntityClass.Statement,
+  EntityClass.Action,
+  EntityClass.Territory,
+  EntityClass.Resource,
+  EntityClass.Person,
+  EntityClass.Group,
+  EntityClass.Object,
+  EntityClass.Concept,
+  EntityClass.Location,
+  EntityClass.Value,
+  EntityClass.Event,
 ];
-const classesPropType = [ActantType.Concept];
-const classesPropValue = [
-  ActantType.Action,
-  ActantType.Person,
-  ActantType.Group,
-  ActantType.Object,
-  ActantType.Concept,
-  ActantType.Location,
-  ActantType.Value,
-  ActantType.Event,
-  ActantType.Statement,
-  ActantType.Territory,
-  ActantType.Resource,
-];
-const classesResources = [ActantType.Resource];
+const classesResources = [EntityClass.Resource];
 const classesTags = [
-  ActantType.Action,
-  ActantType.Territory,
-  ActantType.Resource,
-  ActantType.Person,
-  ActantType.Group,
-  ActantType.Object,
-  ActantType.Concept,
-  ActantType.Location,
-  ActantType.Value,
-  ActantType.Event,
+  EntityClass.Action,
+  EntityClass.Territory,
+  EntityClass.Resource,
+  EntityClass.Person,
+  EntityClass.Group,
+  EntityClass.Object,
+  EntityClass.Concept,
+  EntityClass.Location,
+  EntityClass.Value,
+  EntityClass.Event,
 ];
 
 export const StatementEditorBox: React.FC = () => {
@@ -517,7 +503,7 @@ export const StatementEditorBox: React.FC = () => {
                 filterEditorRights
                 inputWidth={96}
                 allowCreate={false}
-                categoryTypes={[ActantType.Territory]}
+                categoryTypes={[EntityClass.Territory]}
                 onSelected={(newSelectedId: string) => {
                   moveStatementMutation.mutate(newSelectedId);
                 }}
@@ -571,7 +557,7 @@ export const StatementEditorBox: React.FC = () => {
                   onSelected={(newSelectedId: string) => {
                     addAction(newSelectedId);
                   }}
-                  categoryTypes={[ActantType.Action]}
+                  categoryTypes={[EntityClass.Action]}
                   excludedEntities={excludedSuggesterEntities}
                   placeholder={"add new action"}
                 />

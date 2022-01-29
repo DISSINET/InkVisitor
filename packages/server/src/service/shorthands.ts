@@ -5,7 +5,7 @@ import { Db } from "./RethinkDB";
 import { IAction, IStatement, ITerritory } from "@shared/types";
 import { IDbModel } from "@models/common";
 import { ModelNotValidError } from "@shared/types/errors";
-import { ActantType } from "@shared/enums";
+import { EntityClass } from "@shared/enums";
 import { regExpEscape } from "@common/functions";
 
 export async function createUser(db: Db, data: IUser): Promise<WriteResult> {
@@ -157,7 +157,7 @@ export async function findAssociatedActantIds(
   const statements = await rethink
     .table("actants")
     .filter({
-      class: ActantType.Statement,
+      class: EntityClass.Statement,
     })
     .filter(function (row: RDatum) {
       return rethink.or(
@@ -183,8 +183,8 @@ export async function findAssociatedActantIds(
 
 export async function filterActantsByWildcard(
   db: Db,
-  actantClass: ActantType | false,
-  actantClassExcluded: ActantType[] | undefined,
+  actantClass: EntityClass | false,
+  actantClassExcluded: EntityClass[] | undefined,
   actantLabel: string | false,
   actantIds?: string[]
 ): Promise<IActant[]> {

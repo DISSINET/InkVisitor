@@ -1,4 +1,4 @@
-import { ActantStatus, ActantType } from "@shared/enums";
+import { ActantStatus, EntityClass } from "@shared/enums";
 import { IOption } from "@shared/types";
 import { Button, Dropdown, Input, Loader, Tag } from "components";
 import useKeypress from "hooks/useKeyPress";
@@ -124,8 +124,8 @@ export const Suggester: React.FC<SuggesterProps> = ({
     if (selected === -1 && typed.length > 0) {
       if (
         category.value === DropdownAny ||
-        category.value === ActantType.Statement ||
-        category.value === ActantType.Territory
+        category.value === EntityClass.Statement ||
+        category.value === EntityClass.Territory
       ) {
         setShowModal(true);
       } else {
@@ -143,8 +143,8 @@ export const Suggester: React.FC<SuggesterProps> = ({
     if (typed.length > 0) {
       if (
         category.value === DropdownAny ||
-        category.value === ActantType.Statement ||
-        category.value === ActantType.Territory
+        category.value === EntityClass.Statement ||
+        category.value === EntityClass.Territory
       ) {
         setShowModal(true);
       } else {

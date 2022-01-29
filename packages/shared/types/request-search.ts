@@ -1,23 +1,23 @@
 /**
- * type of the /user endpoint response
+ * Deprecated
  */
 
-import { ActantType, isValidActantType } from "../enums";
+import { EntityClass, isValidEntityClass } from "../enums";
 import { BadParams } from "./errors";
 
 export interface IResponseSearch {
-  class: ActantType | false;
+  class: EntityClass | false;
   label: string | false;
   actantId: string | false;
 }
 
 export class RequestSearch implements IResponseSearch {
-  class: ActantType | false;
+  class: EntityClass | false;
   label: string | false;
   actantId: string | false;
-  excluded?: ActantType[];
+  excluded?: EntityClass[];
 
-  constructor(requestData: IResponseSearch & { excluded?: ActantType[] }) {
+  constructor(requestData: IResponseSearch & { excluded?: EntityClass[] }) {
     this.class = requestData.class || false;
     this.label = requestData.label || false;
     this.actantId = requestData.actantId || false;
@@ -27,11 +27,10 @@ export class RequestSearch implements IResponseSearch {
       }
       this.excluded = requestData.excluded;
     }
-
   }
 
   validate(): Error | void {
-    if (this.class !== false && !isValidActantType(this.class)) {
+    if (this.class !== false && !isValidEntityClass(this.class)) {
       return new BadParams("invalid 'class' value");
     }
 

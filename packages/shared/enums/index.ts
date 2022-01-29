@@ -1,5 +1,4 @@
-export enum ActantType {
-  Any = "*",
+export enum EntityClass {
   Action = "A",
   Territory = "T",
   Statement = "S",
@@ -13,53 +12,42 @@ export enum ActantType {
   Event = "E",
 }
 
-export function isValidActantType(input: ActantType): boolean {
+export enum EntityExtension {
+  Any = "*",
+}
+
+export type ExtendedEntityClass = EntityClass | EntityExtension;
+
+export function isValidEntityClass(input: EntityClass): boolean {
   return (
     [
-      ActantType.Action,
-      ActantType.Territory,
-      ActantType.Statement,
-      ActantType.Resource,
-      ActantType.Person,
-      ActantType.Group,
-      ActantType.Object,
-      ActantType.Concept,
-      ActantType.Location,
-      ActantType.Value,
-      ActantType.Event,
+      EntityClass.Action,
+      EntityClass.Territory,
+      EntityClass.Statement,
+      EntityClass.Resource,
+      EntityClass.Person,
+      EntityClass.Group,
+      EntityClass.Object,
+      EntityClass.Concept,
+      EntityClass.Location,
+      EntityClass.Value,
+      EntityClass.Event,
     ].indexOf(input) !== -1
   );
 }
 
-export type AllActantType =
-  | ActantType.Action
-  | ActantType.Territory
-  | ActantType.Statement
-  | ActantType.Resource
-  | ActantType.Person
-  | ActantType.Group
-  | ActantType.Object
-  | ActantType.Concept
-  | ActantType.Location
-  | ActantType.Value
-  | ActantType.Event;
-
-export type CategoryActantType =
-  | ActantType.Person
-  | ActantType.Group
-  | ActantType.Object
-  | ActantType.Concept
-  | ActantType.Location
-  | ActantType.Value
-  | ActantType.Event;
-
-export type EntityActantType =
-  | ActantType.Person
-  | ActantType.Group
-  | ActantType.Object
-  | ActantType.Location
-  | ActantType.Value
-  | ActantType.Event;
+export type IEntityClass =
+  | EntityClass.Action
+  | EntityClass.Territory
+  | EntityClass.Statement
+  | EntityClass.Resource
+  | EntityClass.Person
+  | EntityClass.Group
+  | EntityClass.Object
+  | EntityClass.Concept
+  | EntityClass.Location
+  | EntityClass.Value
+  | EntityClass.Event;
 
 export enum EntityLogicalType {
   Definite = "1",

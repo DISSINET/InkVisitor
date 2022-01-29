@@ -5,7 +5,7 @@ import {
   languageDict,
 } from "@shared/dictionaries";
 import { allEntities } from "@shared/dictionaries/entity";
-import { ActantType, Language, UserRoleMode } from "@shared/enums";
+import { EntityClass, Language, UserRoleMode } from "@shared/enums";
 import { IAction, IResponseActant, IStatement } from "@shared/types";
 import api from "api";
 import {
@@ -137,7 +137,7 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
           variables.status ||
           variables.data?.logicalType
         ) {
-          if (actant?.class === ActantType.Territory) {
+          if (actant?.class === EntityClass.Territory) {
             queryClient.invalidateQueries("tree");
           }
           queryClient.invalidateQueries("territory");
@@ -288,13 +288,13 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
   const actantMode = useMemo(() => {
     const actantClass = actant?.class;
     if (actantClass) {
-      if (actantClass === ActantType.Action) {
+      if (actantClass === EntityClass.Action) {
         return "action";
-      } else if (actantClass === ActantType.Territory) {
+      } else if (actantClass === EntityClass.Territory) {
         return "territory";
-      } else if (actantClass === ActantType.Resource) {
+      } else if (actantClass === EntityClass.Resource) {
         return "resource";
-      } else if (actantClass === ActantType.Concept) {
+      } else if (actantClass === EntityClass.Concept) {
         return "concept";
       }
     }
@@ -402,7 +402,7 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                       queryClient.invalidateQueries(["actant"]);
                     }}
                   />
-                  {actant.class === ActantType.Statement && (
+                  {actant.class === EntityClass.Statement && (
                     <Button
                       key="edit"
                       icon={<FaEdit size={14} />}

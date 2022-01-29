@@ -1,29 +1,27 @@
-import React, { useEffect, useState } from "react";
-
-import { Suggester, SuggestionI } from "components/Suggester/Suggester";
-import { IOption, IActant } from "@shared/types";
-
-import { FaHome } from "react-icons/fa";
-import { CActant, CStatement, CTerritoryActant } from "constructors";
-import { DropdownAny, Entities } from "types";
-import { useMutation, useQuery, useQueryClient } from "react-query";
-import api from "api";
 import {
   ActantStatus,
-  ActantType,
-  AllActantType,
-  CategoryActantType,
+  EntityClass,
+  EntityExtension,
+  ExtendedEntityClass,
   UserRole,
   UserRoleMode,
 } from "@shared/enums";
+import { IActant, IOption } from "@shared/types";
+import api from "api";
+import { Suggester, SuggestionI } from "components/Suggester/Suggester";
+import { CEntity, CStatement, CTerritoryActant } from "constructors";
 import { useDebounce, useSearchParams } from "hooks";
-import { rootTerritoryId } from "Theme/constants";
+import React, { useEffect, useState } from "react";
 import { DragObjectWithType } from "react-dnd";
+import { FaHome } from "react-icons/fa";
+import { useMutation, useQuery, useQueryClient } from "react-query";
+import { OptionTypeBase, ValueType } from "react-select";
 import { toast } from "react-toastify";
-import { ValueType, OptionTypeBase } from "react-select";
+import { rootTerritoryId } from "Theme/constants";
+import { DropdownAny, Entities } from "types";
 
 interface EntitySuggesterI {
-  categoryTypes: ActantType[];
+  categoryTypes: EntityClass[];
   onSelected: Function;
   placeholder?: string;
   allowCreate?: boolean;
@@ -31,7 +29,7 @@ interface EntitySuggesterI {
   inputWidth?: number | "full";
   openDetailOnCreate?: boolean;
   territoryActants?: string[];
-  excludedEntities?: ActantType[];
+  excludedEntities?: EntityClass[];
   excludedActantIds?: string[];
   filterEditorRights?: boolean;
 }
@@ -49,7 +47,7 @@ export const EntitySuggester: React.FC<EntitySuggesterI> = ({
   filterEditorRights = false,
   excludedActantIds = [],
 }) => {
-  const wildCardCategory = ActantType.Any;
+  const wildCardCategory = EntityExtension.Any;
   const queryClient = useQueryClient();
   const [typed, setTyped] = useState<string>("");
   const debouncedTyped = useDebounce(typed, 100);
@@ -168,12 +166,12 @@ export const EntitySuggester: React.FC<EntitySuggesterI> = ({
 
   const handleCreate = async (newCreated: {
     label: string;
-    category: ActantType;
+    category: ExtendedEntityClass;
     detail: string;
     territoryId?: string;
   }) => {
     if (
-      newCreated.category === ActantType.Statement &&
+      newCreated.category === EntityClass.Statement &&
       newCreated.territoryId
     ) {
       const newStatement = CStatement(
@@ -183,7 +181,7 @@ export const EntitySuggester: React.FC<EntitySuggesterI> = ({
         newCreated.detail
       );
       actantsCreateMutation.mutate(newStatement);
-    } else if (newCreated.category === ActantType.Territory) {
+    } else if (newCreated.category === EntityClass.Territory) {
       const newActant = CTerritoryActant(
         newCreated.label,
         newCreated.territoryId ? newCreated.territoryId : rootTerritoryId,
@@ -193,8 +191,8 @@ export const EntitySuggester: React.FC<EntitySuggesterI> = ({
       );
       actantsCreateMutation.mutate(newActant);
     } else {
-      const newActant = CActant(
-        newCreated.category as CategoryActantType,
+      const newActant = CEntity(
+        newCreated.category as EntityClass,
         newCreated.label,
         localStorage.getItem("userrole") as UserRole,
         newCreated.detail
@@ -248,7 +246,7 @@ export const EntitySuggester: React.FC<EntitySuggesterI> = ({
       }}
       onCreate={(newCreated: {
         label: string;
-        category: AllActantType;
+        category: EntityClass;
         detail: string;
         territoryId?: string;
       }) => {

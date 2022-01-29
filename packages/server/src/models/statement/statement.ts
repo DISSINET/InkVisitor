@@ -12,7 +12,7 @@ import {
   IModel,
 } from "@models/common";
 import {
-  ActantType,
+  EntityClass,
   Certainty,
   Elvl,
   Position,
@@ -208,7 +208,7 @@ class Statement extends Actant implements IStatement {
   static table = "actants";
   static publicFields = Actant.publicFields;
 
-  class: ActantType.Statement = ActantType.Statement;
+  class: EntityClass.Statement = EntityClass.Statement;
   data: StatementData;
 
   constructor(data: UnknownObject) {
@@ -226,7 +226,7 @@ class Statement extends Actant implements IStatement {
    * @returns boolean result
    */
   isValid(): boolean {
-    if (this.class != ActantType.Statement) {
+    if (this.class != EntityClass.Statement) {
       return false;
     }
 
@@ -352,7 +352,7 @@ class Statement extends Actant implements IStatement {
     const list: IStatement[] = await rethink
       .table(Actant.table)
       .filter({
-        class: ActantType.Statement,
+        class: EntityClass.Statement,
       })
       .filter((entry: RDatum) => {
         return rethink.and(
@@ -480,7 +480,7 @@ class Statement extends Actant implements IStatement {
     const statements = await rethink
       .table("actants")
       .filter({
-        class: ActantType.Statement,
+        class: EntityClass.Statement,
       })
       .filter((row: RDatum) => {
         return row("data")("territory")("id").eq(territoryId);
@@ -506,7 +506,7 @@ class Statement extends Actant implements IStatement {
     const statements = await rethink
       .table("actants")
       .filter({
-        class: ActantType.Statement,
+        class: EntityClass.Statement,
       })
       .filter((row: RDatum) => {
         return rethink.or(
@@ -553,7 +553,7 @@ class Statement extends Actant implements IStatement {
     const statements = await rethink
       .table("actants")
       .filter({
-        class: ActantType.Statement,
+        class: EntityClass.Statement,
       })
       .filter((row: RDatum) => {
         return rethink.and(
@@ -579,7 +579,7 @@ class Statement extends Actant implements IStatement {
     ): Promise<void> => {
       const linkedToActant = await rethink
         .table(Actant.table)
-        .filter({ class: ActantType.Statement })
+        .filter({ class: EntityClass.Statement })
         .filter((row: any) => {
           return row("data")("actants").contains((actantElement: any) =>
             actantElement("actant").eq(actantId)
@@ -594,7 +594,7 @@ class Statement extends Actant implements IStatement {
 
       const linkedToProps = await rethink
         .table(Actant.table)
-        .filter({ class: ActantType.Statement })
+        .filter({ class: EntityClass.Statement })
         .filter((row: any) => {
           return row("data")("props").contains((actantElement: any) =>
             actantElement("origin").eq(actantId)
@@ -604,7 +604,7 @@ class Statement extends Actant implements IStatement {
 
       const linkedToActions = await rethink
         .table(Actant.table)
-        .filter({ class: ActantType.Statement })
+        .filter({ class: EntityClass.Statement })
         .filter((row: any) => {
           return row("data")("actions").contains((actantElement: any) =>
             actantElement("action").eq(actantId)

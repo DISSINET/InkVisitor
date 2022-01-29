@@ -1,5 +1,5 @@
 import { UnknownObject, IModel } from "@models/common";
-import { ActantType } from "@shared/enums";
+import { EntityClass } from "@shared/enums";
 import Actant from "@models/actant/actant";
 import { IActant } from "@shared/types";
 
@@ -19,7 +19,7 @@ class Concept extends Actant implements IActant {
   static table = "actants";
   static publicFields = Actant.publicFields;
 
-  class: ActantType.Concept = ActantType.Concept; // just default
+  class: EntityClass.Concept = EntityClass.Concept; // just default
   data: ConceptData;
 
   constructor(data: UnknownObject) {
@@ -33,7 +33,7 @@ class Concept extends Actant implements IActant {
   }
 
   isValid(): boolean {
-    const alloweedClasses = [ActantType.Concept];
+    const alloweedClasses = [EntityClass.Concept];
 
     console.log();
     if (alloweedClasses.indexOf(this.class) === -1) {

@@ -2,10 +2,10 @@
  * type of the /user endpoint response
  */
 
-import { ActantType, EntityLogicalType } from "../enums";
+import { EntityClass, EntityLogicalType } from "../enums";
 
 export interface IResponseSearch {
-  class: ActantType;
+  class: EntityClass;
   actantId: string;
   actantLabel: string;
   logicalType?: EntityLogicalType;

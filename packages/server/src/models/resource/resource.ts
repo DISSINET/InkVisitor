@@ -1,5 +1,5 @@
 import { fillFlatObject, UnknownObject, IModel } from "@models/common";
-import { ActantType } from "@shared/enums";
+import { EntityClass } from "@shared/enums";
 import { IResource } from "@shared/types/resource";
 import Actant from "@models/actant/actant";
 
@@ -23,7 +23,7 @@ class Resource extends Actant implements IResource {
   static table = "actants";
   static publicFields = Actant.publicFields;
 
-  class: ActantType.Resource = ActantType.Resource;
+  class: EntityClass.Resource = EntityClass.Resource;
   data: ResourceData;
 
   constructor(data: UnknownObject) {
@@ -37,7 +37,7 @@ class Resource extends Actant implements IResource {
   }
 
   isValid(): boolean {
-    if (this.class !== ActantType.Resource) {
+    if (this.class !== EntityClass.Resource) {
       return false;
     }
 

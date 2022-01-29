@@ -10,7 +10,7 @@ import { asyncRouteHandler } from "..";
 import { IResponseGeneric, IResponseTree, ITerritory } from "@shared/types";
 import Territory from "@models/territory/territory";
 import { IParentTerritory } from "@shared/types/territory";
-import { ActantType } from "@shared/enums";
+import { EntityClass } from "@shared/enums";
 import treeCache, { TreeCreator } from "@service/treeCache";
 
 export default Router()
@@ -36,7 +36,7 @@ export default Router()
         request.db,
         moveId,
         {
-          class: ActantType.Territory,
+          class: EntityClass.Territory,
         }
       );
       if (!territoryData) {
@@ -55,7 +55,7 @@ export default Router()
 
       // check parent territory
       const parent = await findActantById<ITerritory>(request.db, parentId, {
-        class: ActantType.Territory,
+        class: EntityClass.Territory,
       });
       if (!parent) {
         throw new TerritoryDoesNotExits(

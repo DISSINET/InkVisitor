@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from "react";
 
 import { MdSettings } from "react-icons/md";
-import { ActantType } from "@shared/enums";
+import { EntityClass } from "@shared/enums";
 import {
   Tooltip,
   Button,
@@ -53,10 +53,10 @@ interface AttributesGroupEditor {
   modalTitle: string;
   statementId: string;
   propTypeActant?: IActant;
-  classesPropType: ActantType[];
+  classesPropType: EntityClass[];
   propValueActant?: IActant;
-  classesPropValue: ActantType[];
-  excludedSuggesterEntities: ActantType[];
+  classesPropValue: EntityClass[];
+  excludedSuggesterEntities: EntityClass[];
   data: AttributeGroupDataObject;
   handleUpdate: (data: AttributeGroupDataObject) => void;
   updateProp: (propId: string, changes: any) => void;
@@ -264,7 +264,7 @@ export const AttributesGroupEditor: React.FC<AttributesGroupEditor> = ({
         />
         <ModalContent>
           <StyledGridColumns>
-            <StyledColumnWrap color={Entities[ActantType.Statement].color}>
+            <StyledColumnWrap color={Entities[EntityClass.Statement].color}>
               <StyledColumnHeading>Statement</StyledColumnHeading>
 
               <AttributesForm

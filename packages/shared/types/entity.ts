@@ -1,8 +1,8 @@
 import { IActant } from "./";
-import { EntityActantType, EntityLogicalType } from "../enums";
+import { EntityClass, EntityLogicalType } from "../enums";
 
 export interface IEntity extends IActant {
-  class: EntityActantType;
+  class: EntityClass;
   data: {
     logicalType: EntityLogicalType;
   };

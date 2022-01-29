@@ -1,6 +1,6 @@
 import {
   ActantStatus,
-  ActantType,
+  EntityClass,
   Certainty,
   Elvl,
   EntityLogicalType,
@@ -11,6 +11,7 @@ import {
   Operator,
   Partitivity,
   Virtuality,
+  ExtendedEntityClass,
 } from "@shared/enums";
 
 export const Colors = [
@@ -125,7 +126,7 @@ export interface DraggedTerritoryItem {
   index?: number;
 }
 export interface IRequestSearch {
-  class?: ActantType;
+  class?: ExtendedEntityClass;
   label: string;
   actantId: string;
 }
@@ -240,19 +241,19 @@ export interface AttributeGroupDataObject {
   value: AttributeData;
 }
 
-export const classesPropType = [ActantType.Concept];
+export const classesPropType = [EntityClass.Concept];
 export const classesPropValue = [
-  ActantType.Action,
-  ActantType.Person,
-  ActantType.Group,
-  ActantType.Object,
-  ActantType.Concept,
-  ActantType.Location,
-  ActantType.Value,
-  ActantType.Event,
-  ActantType.Statement,
-  ActantType.Territory,
-  ActantType.Resource,
+  EntityClass.Action,
+  EntityClass.Person,
+  EntityClass.Group,
+  EntityClass.Object,
+  EntityClass.Concept,
+  EntityClass.Location,
+  EntityClass.Value,
+  EntityClass.Event,
+  EntityClass.Statement,
+  EntityClass.Territory,
+  EntityClass.Resource,
 ];
 
 export const DropdownAny = "any";

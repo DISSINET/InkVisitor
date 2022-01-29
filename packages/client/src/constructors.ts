@@ -1,7 +1,6 @@
 import {
   ActantStatus,
-  ActantType,
-  CategoryActantType,
+  EntityClass,
   Certainty,
   Elvl,
   Language,
@@ -67,7 +66,7 @@ export const CStatement = (
   detail?: string
 ): IStatement => ({
   id: uuidv4(),
-  class: ActantType.Statement,
+  class: EntityClass.Statement,
   label: label ? label : "",
   detail: detail ? detail : "",
   status:
@@ -101,6 +100,20 @@ export const DStatement = (statement: IStatement): IStatement => {
   return duplicatedStatement;
 };
 
+export const CStatementActant = (): IStatementActant => ({
+  id: uuidv4(),
+  actant: "",
+  position: Position.Subject,
+  elvl: Elvl.Textual,
+  logic: Logic.Positive,
+  virtuality: Virtuality.Reality,
+  partitivity: Partitivity.Unison,
+  operator: Operator.And,
+  bundleStart: false,
+  bundleEnd: false,
+  props: [],
+});
+
 export const CStatementAction = (actionId: string): IStatementAction => ({
   id: uuidv4(),
   action: actionId,
@@ -123,7 +136,7 @@ export const CTerritoryActant = (
   detail?: string
 ): ITerritory => ({
   id: uuidv4(),
-  class: ActantType.Territory,
+  class: EntityClass.Territory,
   label: label,
   detail: detail ? detail : "",
   status:
@@ -136,14 +149,14 @@ export const CTerritoryActant = (
   props: [],
 });
 
-export const CActant = (
-  category: CategoryActantType,
+export const CEntity = (
+  entityClass: EntityClass,
   label: string,
   userRole: UserRole,
   detail?: string
 ): IActant => ({
   id: uuidv4(),
-  class: category,
+  class: entityClass,
   label: label,
   detail: detail ? detail : "",
   data: {},

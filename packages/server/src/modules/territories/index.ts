@@ -1,23 +1,23 @@
-import {
-  BadParams,
-  StatementDoesNotExits,
-  TerritoryDoesNotExits,
-  StatementInvalidMove,
-  PermissionDeniedError,
-} from "@shared/types/errors";
-import { Router, Request } from "express";
-import { asyncRouteHandler } from "..";
+import Statement from "@models/statement/statement";
+import { ResponseTerritory } from "@models/territory/response";
+import Territory from "@models/territory/territory";
 import { findActantById, findActants } from "@service/shorthands";
+import { EntityClass } from "@shared/enums";
 import {
-  ITerritory,
+  IResponseGeneric,
   IResponseTerritory,
   IStatement,
-  IResponseGeneric,
+  ITerritory,
 } from "@shared/types";
-import Statement from "@models/statement/statement";
-import { ActantType } from "@shared/enums";
-import Territory from "@models/territory/territory";
-import { ResponseTerritory } from "@models/territory/response";
+import {
+  BadParams,
+  PermissionDeniedError,
+  StatementDoesNotExits,
+  StatementInvalidMove,
+  TerritoryDoesNotExits,
+} from "@shared/types/errors";
+import { Request, Router } from "express";
+import { asyncRouteHandler } from "..";
 
 function insertIStatementToChilds(
   array: IStatement[],
@@ -43,7 +43,7 @@ export default Router()
         request.db,
         territoryId,
         {
-          class: ActantType.Territory,
+          class: EntityClass.Territory,
         }
       );
       if (!territory) {
@@ -79,7 +79,7 @@ export default Router()
         request.db,
         territoryId,
         {
-          class: ActantType.Territory,
+          class: EntityClass.Territory,
         }
       );
       if (!territory) {
@@ -136,7 +136,7 @@ export default Router()
 
       let statementsForTerritory = (
         await findActants<IStatement>(request.db, {
-          class: ActantType.Statement,
+          class: EntityClass.Statement,
         })
       )
         .filter((s) => s.data.territory.id === territory.id)

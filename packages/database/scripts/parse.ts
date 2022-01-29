@@ -3,10 +3,8 @@ var { v4 } = require("uuid");
 var fs = require("fs");
 
 import {
-  ActantType,
+  EntityClass,
   ActantStatus,
-  EntityActantType,
-  AllActantType,
   Certainty,
   Elvl,
   Position,
@@ -72,7 +70,7 @@ const loadStatementsTables = async (next: Function) => {
             if (part === "NULL") {
               out.push("NULL");
             } else {
-              Object.values(ActantType).forEach((type) => {
+              Object.values(EntityClass).forEach((type) => {
                 if (part.includes(type)) {
                   out.push(type);
                 }
@@ -86,7 +84,7 @@ const loadStatementsTables = async (next: Function) => {
 
       const newAction: IAction = {
         id: action.id,
-        class: ActantType.Action,
+        class: EntityClass.Action,
         data: {
           valencies: {
             s: action.subject_valency,
@@ -181,7 +179,7 @@ const loadStatementsTables = async (next: Function) => {
   tableManuscripts.forEach((manuscript: { id: string; label: string }) => {
     // parse as objects #629
     //addResourceActant(manuscript.id, manuscript.label);
-    addEntityActant(manuscript.id, manuscript.label, ActantType.Object);
+    addEntityActant(manuscript.id, manuscript.label, EntityClass.Object);
   });
 
   const tableResources: IRowResources[] = await loadSheet({
@@ -335,7 +333,7 @@ const loadStatementsTables = async (next: Function) => {
         addEntityActant(
           entitySheet.id + "_" + entityRow.id,
           entityRow.label,
-          entitySheet.entityType as AllActantType
+          entitySheet.entityType as EntityClass
         );
 
         parseEntityPropsInRow(entityRow);
@@ -395,7 +393,7 @@ const loadStatementsTables = async (next: Function) => {
         // parse the statement id but keep the order somehow sorted
         const mainStatement: IStatement = {
           id: v4(),
-          class: ActantType.Statement,
+          class: EntityClass.Statement,
           props: [],
           data: {
             actions: [
@@ -575,12 +573,12 @@ const checkValidId = (idValue: string) => {
 /***
  * TODO: logical type
  */
-const addEntityActant = (id: string, label: string, type: AllActantType) => {
+const addEntityActant = (id: string, label: string, type: EntityClass) => {
   const newEntityActant: IEntity | IActant = {
     id,
     class: type,
     data:
-      type === ActantType.Concept
+      type === EntityClass.Concept
         ? {}
         : {
             logicalType: EntityLogicalType.Definite,
@@ -609,7 +607,7 @@ const addTerritoryActant = (
     if (!actants.some((a) => a.id == id)) {
       const newTerritory: ITerritory = {
         id,
-        class: ActantType.Territory,
+        class: EntityClass.Territory,
         data: {
           parent: parentId
             ? {
@@ -635,7 +633,7 @@ const addResourceActant = (id: string, label: string) => {
   if (id) {
     const newResource: IResource = {
       id,
-      class: ActantType.Resource,
+      class: EntityClass.Resource,
       data: {
         link: "",
       },
@@ -680,7 +678,7 @@ const parseEntityPropsInRow = (row: any) => {
           const valueId = v4();
 
           // add actant
-          addEntityActant(valueId, value, ActantType.Value);
+          addEntityActant(valueId, value, EntityClass.Value);
 
           // add statement
           // createEmptyPropStatement(
@@ -709,7 +707,7 @@ const createEmptyPropStatement = (
   if (idSubject && idActant1 && idActant2) {
     const newEmptyStatement: IStatement = {
       id: v4(),
-      class: ActantType.Statement,
+      class: EntityClass.Statement,
       props: [],
       label: "",
       data: {
@@ -1001,7 +999,7 @@ const createNewActantIfNeeded = (actantValue: string) => {
       addEntityActant(
         newActantId,
         newActantLabel,
-        newActantType as AllActantType
+        newActantType as EntityClass
       );
 
     return newActantId;

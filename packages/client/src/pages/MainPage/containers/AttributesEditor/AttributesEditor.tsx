@@ -29,7 +29,7 @@ import {
 } from "components";
 
 import { MdSettings } from "react-icons/md";
-import { ActantType } from "@shared/enums";
+import { EntityClass } from "@shared/enums";
 import React, { useState, useMemo } from "react";
 import { AttributeData, AttributeName, Entities } from "types";
 import { TooltipAttributeRow } from "./TooltipAttributeRow/TooltipAttributeRow";
@@ -48,7 +48,7 @@ interface StatementEditorAttributes {
     data: AttributeData | { actant: string } | { action: string }
   ) => void;
   updateActantId?: (newId: string) => void;
-  classEntitiesActant?: ActantType[];
+  classEntitiesActant?: EntityClass[];
   loading: boolean;
   disabledAttributes?: AttributeName[];
   disabledAllAttributes?: boolean;

@@ -1,31 +1,31 @@
-import { asyncRouteHandler } from "../index";
-import { Router, Request } from "express";
+import { mergeDeep } from "@common/functions";
+import { ResponseActant, ResponseActantDetail } from "@models/actant/response";
+import Audit from "@models/audit/audit";
+import { getEntityClass } from "@models/factory";
 import {
+  filterActantsByWildcard,
   findActantById,
   findAssociatedActantIds,
-  filterActantsByWildcard,
 } from "@service/shorthands";
-import { getActantType } from "@models/factory";
-import {
-  BadParams,
-  ActantDoesNotExits,
-  ModelNotValidError,
-  InternalServerError,
-  PermissionDeniedError,
-} from "@shared/types/errors";
+import { ActantStatus, EntityClass, UserRole } from "@shared/enums";
 import {
   IActant,
+  IEntity,
+  IResponseActant,
   IResponseDetail,
   IResponseGeneric,
-  IResponseActant,
   IResponseSearch,
   RequestSearch,
-  IEntity,
 } from "@shared/types";
-import { mergeDeep } from "@common/functions";
-import { ActantStatus, ActantType, UserRole } from "@shared/enums";
-import Audit from "@models/audit/audit";
-import { ResponseActant, ResponseActantDetail } from "@models/actant/response";
+import {
+  ActantDoesNotExits,
+  BadParams,
+  InternalServerError,
+  ModelNotValidError,
+  PermissionDeniedError,
+} from "@shared/types/errors";
+import { Request, Router } from "express";
+import { asyncRouteHandler } from "../index";
 
 export default Router()
   .get(
@@ -48,7 +48,7 @@ export default Router()
           actantId
         );
       }
-      const actant = getActantType({ ...actantData });
+      const actant = getEntityClass({ ...actantData });
 
       const response = new ResponseActant(actant);
       await response.prepare(request);
@@ -61,7 +61,7 @@ export default Router()
     asyncRouteHandler<IResponseActant[]>(async (request: Request) => {
       const label = request.body.label;
       const classParam = request.body.class;
-      const excluded: ActantType[] = request.body.excluded;
+      const excluded: EntityClass[] = request.body.excluded;
 
       if (!label && !classParam) {
         throw new BadParams("label or class has to be set");
@@ -94,7 +94,7 @@ export default Router()
   .post(
     "/create",
     asyncRouteHandler<IResponseGeneric>(async (request: Request) => {
-      const model = getActantType(request.body as Record<string, unknown>);
+      const model = getEntityClass(request.body as Record<string, unknown>);
 
       if (!model.isValid()) {
         throw new ModelNotValidError("");
@@ -155,7 +155,7 @@ export default Router()
       }
 
       // get correct IDbModel implementation
-      const model = getActantType({
+      const model = getEntityClass({
         ...mergeDeep(existingActant, actantData),
         class: existingActant.class,
         id: actantId,
@@ -212,7 +212,7 @@ export default Router()
       }
 
       // get correct IDbModel implementation
-      const model = getActantType({
+      const model = getEntityClass({
         class: existingActant.class,
         id: actantId,
       });
@@ -249,7 +249,7 @@ export default Router()
         );
       }
 
-      const actant = getActantType({ ...actantData });
+      const actant = getEntityClass({ ...actantData });
 
       if (!actant.canBeViewedByUser(request.getUserOrFail())) {
         throw new PermissionDeniedError(`cannot view actant ${actantId}`);
@@ -307,7 +307,7 @@ export default Router()
           class: a.class,
         };
 
-        // only for Entity (grouped actant of EntityActantType)
+        // only for Entity (grouped actant of EntityClass)
         if (a.data.logicalType) {
           out.logicalType = (a as IEntity).data.logicalType;
         }

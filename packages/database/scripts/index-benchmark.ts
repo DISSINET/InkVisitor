@@ -9,7 +9,7 @@ import {
 } from "../../shared/types";
 import {
   ActantStatus,
-  ActantType,
+  EntityClass,
   Certainty,
   Elvl,
   Language,
@@ -104,7 +104,7 @@ const importData = async () => {
 
       for (let i = 0; i < 100; i++) {
         const entry: IStatement = {
-          class: ActantType.Statement,
+          class: EntityClass.Statement,
           detail: "",
           id: i.toString(),
           label: "",
@@ -155,7 +155,7 @@ const importData = async () => {
 
       for (let i = 5000; i < 5100; i++) {
         const entry: ITerritory = {
-          class: ActantType.Territory,
+          class: EntityClass.Territory,
           detail: "",
           id: i.toString(),
           label: "",
@@ -173,7 +173,7 @@ const importData = async () => {
 
         // parentless
         const entry2: ITerritory = {
-          class: ActantType.Territory,
+          class: EntityClass.Territory,
           detail: "",
           id: i.toString(),
           label: "",
@@ -189,7 +189,7 @@ const importData = async () => {
 
       for (let i = 20000; i < 20010; i++) {
         const entry: IResource = {
-          class: ActantType.Resource,
+          class: EntityClass.Resource,
           data: {
             link: "wdew",
           },
@@ -214,7 +214,7 @@ const testClass = async () => {
   let start = performance.now();
   let items = await r
     .table(indexedTable)
-    .getAll(ActantType.Resource, { index: "class" })
+    .getAll(EntityClass.Resource, { index: "class" })
     .run(conn);
   let end = performance.now();
   console.log(`testClass(${indexedTable}) took ${end - start} milliseconds.`);
@@ -223,7 +223,7 @@ const testClass = async () => {
   await r
     .table(unindexedTable)
     .filter({
-      class: ActantType.Resource,
+      class: EntityClass.Resource,
     })
     .run(conn);
   end = performance.now();

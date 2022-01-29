@@ -1,6 +1,6 @@
 import { IActant, IProp } from "./";
 import {
-  ActantType,
+  EntityClass,
   Certainty,
   Elvl,
   Position,
@@ -13,7 +13,7 @@ import {
 } from "../enums";
 
 export interface IStatement extends IActant {
-  class: ActantType.Statement;
+  class: EntityClass.Statement;
   data: IStatementData;
 }
 

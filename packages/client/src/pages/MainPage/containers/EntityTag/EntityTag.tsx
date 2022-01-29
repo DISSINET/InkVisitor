@@ -1,6 +1,11 @@
 import React, { ReactNode } from "react";
 import { Tag } from "components";
-import { IActant, IEntity } from "@shared/types";
+import {
+  IActant,
+  IEntity,
+  IResponseTerritory,
+  ITerritory,
+} from "@shared/types";
 import { DragItem } from "types";
 import { PopupPosition } from "reactjs-popup/dist/types";
 

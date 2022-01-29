@@ -19,19 +19,19 @@ import { Entities, IRequestSearch } from "types";
 import { IOption, IResponseSearch } from "@shared/types";
 import { FaUnlink } from "react-icons/fa";
 import { useDebounce } from "hooks";
-import { ActantType } from "@shared/enums";
+import { EntityClass } from "@shared/enums";
 
 const classesActants = [
-  ActantType.Action,
-  ActantType.Person,
-  ActantType.Group,
-  ActantType.Object,
-  ActantType.Concept,
-  ActantType.Location,
-  ActantType.Value,
-  ActantType.Event,
-  ActantType.Territory,
-  ActantType.Resource,
+  EntityClass.Action,
+  EntityClass.Person,
+  EntityClass.Group,
+  EntityClass.Object,
+  EntityClass.Concept,
+  EntityClass.Location,
+  EntityClass.Value,
+  EntityClass.Event,
+  EntityClass.Territory,
+  EntityClass.Resource,
 ];
 
 const initValues: IRequestSearch = {

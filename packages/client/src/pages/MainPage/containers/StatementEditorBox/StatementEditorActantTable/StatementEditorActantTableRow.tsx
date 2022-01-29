@@ -1,4 +1,4 @@
-import { ActantType } from "@shared/enums";
+import { EntityClass } from "@shared/enums";
 import { IActant, IResponseStatement, IStatementActant } from "@shared/types";
 import { AttributeIcon, Button, ButtonGroup } from "components";
 import { useSearchParams } from "hooks";
@@ -14,15 +14,14 @@ import { FaGripVertical, FaPlus, FaTrashAlt, FaUnlink } from "react-icons/fa";
 import { UseMutationResult } from "react-query";
 import { ColumnInstance } from "react-table";
 import { excludedSuggesterEntities } from "Theme/constants";
-
 import { DragItem, ItemTypes } from "types";
-import { EntityTag, EntitySuggester } from "../..";
+import { EntitySuggester, EntityTag } from "../..";
 import { AttributeButtonGroup } from "../../AttributeButtonGroup/AttributeButtonGroup";
 import AttributesEditor from "../../AttributesEditor/AttributesEditor";
 import {
-  StyledTr,
-  StyledTd,
   StyledTagWrapper,
+  StyledTd,
+  StyledTr,
 } from "./StatementEditorActantTableStyles";
 
 interface StatementEditorActantTableRow {
@@ -36,7 +35,7 @@ interface StatementEditorActantTableRow {
   renderPropGroup: Function;
   visibleColumns: ColumnInstance<{}>[];
   statement: IResponseStatement;
-  classEntitiesActant: ActantType[];
+  classEntitiesActant: EntityClass[];
   updateActantsMutation: UseMutationResult<any, unknown, object, unknown>;
 }
 

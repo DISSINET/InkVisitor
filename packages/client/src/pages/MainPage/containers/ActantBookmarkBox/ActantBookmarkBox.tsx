@@ -58,20 +58,20 @@ import {
   IResponseBookmarkFolder,
 } from "@shared/types";
 import { ActantBookmarkFolderTable } from "./ActantBookmarkFolderTable/ActantBookmarkFolderTable";
-import { ActantType } from "@shared/enums";
+import { EntityClass } from "@shared/enums";
 
 const bookmarkEntities = [
-  ActantType.Action,
-  ActantType.Person,
-  ActantType.Group,
-  ActantType.Object,
-  ActantType.Concept,
-  ActantType.Location,
-  ActantType.Value,
-  ActantType.Event,
-  ActantType.Statement,
-  ActantType.Territory,
-  ActantType.Resource,
+  EntityClass.Action,
+  EntityClass.Person,
+  EntityClass.Group,
+  EntityClass.Object,
+  EntityClass.Concept,
+  EntityClass.Location,
+  EntityClass.Value,
+  EntityClass.Event,
+  EntityClass.Statement,
+  EntityClass.Territory,
+  EntityClass.Resource,
 ];
 
 export const ActantBookmarkBox: React.FC = () => {
@@ -210,9 +210,8 @@ export const ActantBookmarkBox: React.FC = () => {
   const createFolderMutation = useMutation(
     async () => {
       if (bookmarkFolders) {
-        const newBookmarkFolder: IBookmarkFolder = CBookmarkFolder(
-          editingFolderName
-        );
+        const newBookmarkFolder: IBookmarkFolder =
+          CBookmarkFolder(editingFolderName);
 
         const newBookmarks: IBookmarkFolder[] | false = getBookmarksCopy();
         if (newBookmarks) {

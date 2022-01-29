@@ -1,10 +1,10 @@
-import { getActants } from "@service/shorthands";
-import { TerritoriesBrokenError } from "@shared/types/errors";
-import { IResponseTree, IStatement, ITerritory } from "@shared/types";
-import { Db } from "@service/RethinkDB";
 import Territory from "@models/territory/territory";
-import { ActantType, UserRoleMode } from "@shared/enums";
 import User, { UserRight } from "@models/user/user";
+import { Db } from "@service/RethinkDB";
+import { getActants } from "@service/shorthands";
+import { EntityClass, UserRoleMode } from "@shared/enums";
+import { IResponseTree, IStatement, ITerritory } from "@shared/types";
+import { TerritoriesBrokenError } from "@shared/types/errors";
 
 export class TreeCreator {
   parentMap: Record<string, Territory[]>; // map of rootId -> childs
@@ -158,7 +158,7 @@ class TreeCache {
 
     const [territoriesData, statementsCountMap] = await Promise.all([
       getActants<ITerritory>(db, {
-        class: ActantType.Territory,
+        class: EntityClass.Territory,
       }),
       TreeCreator.countStatements(db),
     ]);

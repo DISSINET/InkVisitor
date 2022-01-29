@@ -1,4 +1,4 @@
-import { ActantType, UserRole, UserRoleMode } from "@shared/enums";
+import { EntityClass, UserRole, UserRoleMode } from "@shared/enums";
 import {
   IResponseGeneric,
   IResponseTerritory,
@@ -171,7 +171,7 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
             filterEditorRights
             inputWidth={96}
             allowCreate={false}
-            categoryTypes={[ActantType.Territory]}
+            categoryTypes={[EntityClass.Territory]}
             onSelected={(newSelectedId: string) => {
               moveTerritoryMutation.mutate(newSelectedId);
             }}

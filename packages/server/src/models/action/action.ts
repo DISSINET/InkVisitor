@@ -1,5 +1,5 @@
 import { fillFlatObject, UnknownObject, IModel } from "@models/common";
-import { ActantType } from "@shared/enums";
+import { EntityClass } from "@shared/enums";
 import Actant from "@models/actant/actant";
 import { IAction, IProp } from "@shared/types";
 import { ActionEntity, ActionValency } from "@shared/types/action";
@@ -36,7 +36,7 @@ class Action extends Actant implements IAction {
   static table = "actants";
   static publicFields = Actant.publicFields;
 
-  class: ActantType.Action = ActantType.Action; // just default
+  class: EntityClass.Action = EntityClass.Action; // just default
   data: ActionData;
 
   constructor(data: UnknownObject) {
@@ -50,7 +50,7 @@ class Action extends Actant implements IAction {
   }
 
   isValid(): boolean {
-    if (this.class !== ActantType.Action) {
+    if (this.class !== EntityClass.Action) {
       return false;
     }
 

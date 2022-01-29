@@ -2,34 +2,7 @@ var { loadSheet } = require("./loadsheet.js");
 var { v4 } = require("uuid");
 var fs = require("fs");
 
-import {
-  ActantType,
-  ActantStatus,
-  EntityActantType,
-  AllActantType,
-  Certainty,
-  Elvl,
-  Position,
-  Logic,
-  Mood,
-  MoodVariant,
-  Virtuality,
-  Partitivity,
-  Operator,
-  EntityLogicalType,
-  Language,
-} from "../../shared/enums";
-import {
-  IAudit,
-  IAction,
-  IActant,
-  IEntity,
-  IStatement,
-  ITerritory,
-  IResource,
-} from "../../shared/types";
-
-import { actantStatusDict } from "../../shared/dictionaries";
+import { IActant } from "../../shared/types";
 
 const entitites = JSON.parse(fs.readFileSync("datasets/all/actants.json"));
 

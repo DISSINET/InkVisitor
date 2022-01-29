@@ -1,4 +1,4 @@
-import { ActantType } from "@shared/enums";
+import { EntityClass } from "@shared/enums";
 import { IResponseStatement } from "@shared/types";
 import { AttributeIcon, Button, ButtonGroup } from "components";
 import { useSearchParams } from "hooks";
@@ -14,11 +14,10 @@ import { FaGripVertical, FaPlus, FaTrashAlt, FaUnlink } from "react-icons/fa";
 import { UseMutationResult } from "react-query";
 import { ColumnInstance } from "react-table";
 import { excludedSuggesterEntities } from "Theme/constants";
-
 import { DragItem, ItemTypes } from "types";
 import { EntitySuggester, EntityTag } from "../..";
 import AttributesEditor from "../../AttributesEditor/AttributesEditor";
-import { StyledTr, StyledTd } from "./StatementEditorActionTableStyles";
+import { StyledTd, StyledTr } from "./StatementEditorActionTableStyles";
 
 interface StatementEditorActionTableRow {
   row: any;
@@ -145,7 +144,7 @@ export const StatementEditorActionTableRow: React.FC<
               action: newSelectedId,
             });
           }}
-          categoryTypes={[ActantType.Action]}
+          categoryTypes={[EntityClass.Action]}
           excludedEntities={excludedSuggesterEntities}
           placeholder={"add new action"}
         />
@@ -181,7 +180,7 @@ export const StatementEditorActionTableRow: React.FC<
               updateAction(sAction.id, { action: newId });
             }}
             userCanEdit={userCanEdit}
-            classEntitiesActant={[ActantType.Action]}
+            classEntitiesActant={[EntityClass.Action]}
             loading={updateActionsMutation.isLoading}
           />
         )}

@@ -56,7 +56,7 @@ import { UserListTableRow } from "./UserListTableRow/UserListTableRow";
 import { EntitySuggester } from "../EntitySuggester/EntitySuggester";
 import { EntityTag } from "../EntityTag/EntityTag";
 import { IResponseUser, IUserRight } from "@shared/types";
-import { ActantType, UserRole, UserRoleMode } from "@shared/enums";
+import { EntityClass, UserRole, UserRoleMode } from "@shared/enums";
 import { userRoleDict } from "@shared/dictionaries";
 import { AttributeButtonGroup } from "../AttributeButtonGroup/AttributeButtonGroup";
 import { toast } from "react-toastify";
@@ -98,7 +98,8 @@ export const UserListModal: React.FC<UserListModal> = ({
   }, [newUserName, data]);
 
   const validNewUserEmail = useMemo(() => {
-    const re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    const re =
+      /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
     return re.test(String(newUserEmail).toLowerCase());
   }, [newUserEmail, data]);
 
@@ -300,7 +301,7 @@ export const UserListModal: React.FC<UserListModal> = ({
                     onSelected={(newSelectedId: string) => {
                       addRightToUser(userId, newSelectedId, "read");
                     }}
-                    categoryTypes={[ActantType.Territory]}
+                    categoryTypes={[EntityClass.Territory]}
                     placeholder={"assign a territory"}
                   />
                   <StyledTerritoryList>
@@ -376,7 +377,7 @@ export const UserListModal: React.FC<UserListModal> = ({
                       onSelected={(newSelectedId: string) => {
                         addRightToUser(userId, newSelectedId, "write");
                       }}
-                      categoryTypes={[ActantType.Territory]}
+                      categoryTypes={[EntityClass.Territory]}
                       placeholder={"assign a territory"}
                     />
                     <StyledTerritoryList>

@@ -1,16 +1,18 @@
-import { testErroneousResponse } from "@modules/common.test";
-import { BadParams } from "@shared/types/errors";
-import request, { Response } from "supertest";
 import { apiPath } from "@common/constants";
-import app from "../../Server";
-import { supertestConfig } from "..";
+import Action from "@models/action/action";
+import Entity from "@models/entity/entity";
+import { getEntityClass } from "@models/factory";
+import Statement, {
+  StatementActant,
+  StatementAction,
+} from "@models/statement/statement";
+import { testErroneousResponse } from "@modules/common.test";
 import { Db } from "@service/RethinkDB";
-import "ts-jest";
 import { deleteActants } from "@service/shorthands";
 import {
-  ActantType,
   Certainty,
   Elvl,
+  EntityClass,
   Logic,
   Mood,
   MoodVariant,
@@ -19,11 +21,12 @@ import {
   Position,
   Virtuality,
 } from "@shared/enums";
-import { getActantType } from "@models/factory";
-import Statement, { StatementActant, StatementAction } from "@models/statement/statement";
 import { IStatementActant, IStatementAction } from "@shared/types";
-import Action from "@models/action/action";
-import Entity from "@models/entity/entity";
+import { BadParams } from "@shared/types/errors";
+import request, { Response } from "supertest";
+import "ts-jest";
+import { supertestConfig } from "..";
+import app from "../../Server";
 
 describe("Actants search", function () {
   describe("empty data", () => {
@@ -40,7 +43,7 @@ describe("Actants search", function () {
     it("should return a BadParams error wrapped in IResponseGeneric", (done) => {
       return request(app)
         .post(`${apiPath}/actants/search`)
-        .send({ class: ActantType.Concept })
+        .send({ class: EntityClass.Concept })
         .set("authorization", "Bearer " + supertestConfig.token)
         .expect("Content-Type", /json/)
         .expect(testErroneousResponse.bind(undefined, new BadParams("")))
@@ -66,13 +69,13 @@ describe("Actants search", function () {
     const actantData = new Entity({
       id: `testactant-${rand}`,
       label: "actant",
-      class: ActantType.Person,
+      class: EntityClass.Person,
     });
 
     const linkedActantData = new Entity({
       id: `linkedaction-${rand}`,
       label: "linked-actant",
-      class: ActantType.Concept,
+      class: EntityClass.Concept,
     });
 
     const actionData = new Action({
@@ -134,17 +137,17 @@ describe("Actants search", function () {
       db = new Db();
       await db.initDb();
 
-      const actantA = getActantType(actionData as any);
+      const actantA = getEntityClass(actionData as any);
       if (actantA) {
         await actantA.save(db.connection);
       }
 
-      const actantP = getActantType(actantData as any);
+      const actantP = getEntityClass(actantData as any);
       if (actantP) {
         await actantP.save(db.connection);
       }
 
-      const linkedActant = getActantType(linkedActantData as any);
+      const linkedActant = getEntityClass(linkedActantData as any);
       if (linkedActant) {
         await linkedActant.save(db.connection);
       }

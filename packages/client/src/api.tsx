@@ -1,34 +1,34 @@
-import React from "react";
-import axios, { AxiosError, AxiosInstance, AxiosResponse } from "axios";
+import { EntityClass } from "@shared/enums";
 import {
-  IResponseUser,
-  IResponseActant,
-  IResponseTree,
-  IResponseTerritory,
   IActant,
-  IResponseDetail,
-  IResponseStatement,
-  IResponseGeneric,
+  IResponseActant,
   IResponseAdministration,
-  IResponseBookmarkFolder,
-  IResponseSearch,
-  IResponsePermission,
-  RequestPermissionUpdate,
   IResponseAudit,
+  IResponseBookmarkFolder,
+  IResponseDetail,
+  IResponseGeneric,
+  IResponsePermission,
+  IResponseSearch,
+  IResponseStatement,
+  IResponseTerritory,
+  IResponseTree,
+  IResponseUser,
+  RequestPermissionUpdate,
 } from "@shared/types";
 import * as errors from "@shared/types/errors";
+import axios, { AxiosError, AxiosInstance, AxiosResponse } from "axios";
+import React from "react";
 import { toast } from "react-toastify";
 import {
   IRequestSearch,
   IRequestSearchEntity,
   IRequestSearchStatement,
 } from "types";
-import { ActantType } from "@shared/enums";
 
 type FilterActantsI = {
   label?: string;
   class?: string | false;
-  excluded?: ActantType[];
+  excluded?: EntityClass[];
 };
 
 type FilterUsersI = {
