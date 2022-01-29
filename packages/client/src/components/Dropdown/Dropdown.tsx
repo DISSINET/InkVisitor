@@ -38,7 +38,6 @@ interface Dropdown {
   noOptionsMessage?: Function;
   isClearable?: boolean;
   isMulti?: boolean;
-  allowSelectAll?: boolean;
   entityDropdown?: boolean;
   onFocus?: () => void;
   onBlur?: () => void;
@@ -62,7 +61,6 @@ export const Dropdown: React.FC<Dropdown> = ({
   isClearable = false,
   isMulti = false,
   disabled = false,
-  allowSelectAll = false,
   entityDropdown = false,
   onFocus = () => {},
   onBlur = () => {},
@@ -132,9 +130,7 @@ export const Dropdown: React.FC<Dropdown> = ({
           }
           return onChange(selected);
         }}
-        options={
-          allowSelectAll ? [allEntities, ...optionsWithIterator] : options
-        }
+        options={isMulti ? [allEntities, ...optionsWithIterator] : options}
         width={width}
         hideSelectedOptions={hideSelectedOptions}
       />
