@@ -1,22 +1,19 @@
 import { allEntities } from "@shared/dictionaries/entity";
-import { ActantType } from "@shared/enums";
-import { IOption } from "@shared/types";
-import React, { ReactNode, Ref, useEffect, useState } from "react";
-import { FaChevronDown } from "react-icons/fa";
-import { RiArrowDownSLine } from "react-icons/ri";
+import React, { ReactNode } from "react";
 import {
+  components,
   GroupedOptionsType,
+  IndicatorProps,
+  MultiValueProps,
   OptionsType,
   OptionTypeBase,
-  ValueType,
-  components,
-  MultiValueProps,
-  ValueContainerProps,
   SingleValueProps,
-  IndicatorProps,
+  ValueContainerProps,
+  ValueType,
 } from "react-select";
-import { CommonProps, OptionProps } from "react-select/src/types";
-import { DropdownAny, DropdownItem, Entities } from "types";
+import { OptionProps } from "react-select/src/types";
+import { DropdownAny } from "Theme/constants";
+import { DropdownItem, Entities } from "types";
 import {
   StyledEntityValue,
   StyledFaChevronDown,

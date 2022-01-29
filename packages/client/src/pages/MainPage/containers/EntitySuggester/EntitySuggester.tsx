@@ -5,7 +5,7 @@ import { IOption, IActant } from "@shared/types";
 
 import { FaHome } from "react-icons/fa";
 import { CActant, CStatement, CTerritoryActant } from "constructors";
-import { DropdownAny, Entities } from "types";
+import { Entities } from "types";
 import { useMutation, useQuery, useQueryClient } from "react-query";
 import api from "api";
 import {
@@ -17,7 +17,7 @@ import {
   UserRoleMode,
 } from "@shared/enums";
 import { useDebounce, useSearchParams } from "hooks";
-import { rootTerritoryId } from "Theme/constants";
+import { DropdownAny, rootTerritoryId } from "Theme/constants";
 import { DragObjectWithType } from "react-dnd";
 import { toast } from "react-toastify";
 import { ValueType, OptionTypeBase } from "react-select";
@@ -71,9 +71,9 @@ export const EntitySuggester: React.FC<EntitySuggesterI> = ({
       const resSuggestions = await api.actantsGetMore({
         label: debouncedTyped,
         class:
-          selectedCategory?.value === wildCardCategory.valueOf()
+          selectedCategory?.label === wildCardCategory.valueOf()
             ? false
-            : selectedCategory?.value,
+            : wildCardCategory.valueOf(),
         excluded: excludedEntities.length ? excludedEntities : undefined,
       });
 
