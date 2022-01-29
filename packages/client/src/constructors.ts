@@ -1,29 +1,29 @@
 import {
-  IProp,
-  IStatementActant,
-  IStatementAction,
-  IActant,
-  ITerritory,
-  IStatement,
-  IBookmarkFolder,
-  IStatementReference,
-} from "@shared/types";
-import {
-  CategoryActantType,
+  ActantStatus,
   ActantType,
+  CategoryActantType,
   Certainty,
   Elvl,
+  Language,
+  Logic,
   Mood,
   MoodVariant,
   Operator,
-  Logic,
-  Virtuality,
   Partitivity,
-  ActantStatus,
   Position,
   UserRole,
-  Language,
+  Virtuality,
 } from "@shared/enums";
+import {
+  IActant,
+  IBookmarkFolder,
+  IProp,
+  IStatement,
+  IStatementActant,
+  IStatementAction,
+  IStatementReference,
+  ITerritory,
+} from "@shared/types";
 import { v4 as uuidv4 } from "uuid";
 
 export const CBookmarkFolder = (bookmarkName: string): IBookmarkFolder => ({
@@ -88,86 +88,6 @@ export const CStatement = (
   props: [],
 });
 
-export const CMetaStatement = (
-  subjectId: string,
-  userRole: UserRole
-): IStatement => ({
-  id: uuidv4(),
-  class: ActantType.Statement,
-  label: "",
-  detail: "",
-  status:
-    userRole === UserRole.Admin ? ActantStatus.Approved : ActantStatus.Pending,
-  language: Language.Latin,
-  notes: [],
-  data: {
-    actions: [
-      {
-        id: uuidv4(),
-        action: "A0093",
-        certainty: Certainty.Empty,
-        elvl: Elvl.Inferential,
-        logic: Logic.Positive,
-        mood: [Mood.Indication],
-        moodvariant: MoodVariant.Realis,
-        operator: Operator.And,
-        bundleStart: false,
-        bundleEnd: false,
-        props: [],
-      },
-    ],
-    text: "",
-    territory: {
-      id: "T0",
-      order: -1,
-    },
-    actants: [
-      {
-        id: uuidv4(),
-        actant: subjectId,
-        position: Position.Subject,
-        elvl: Elvl.Inferential,
-        logic: Logic.Positive,
-        virtuality: Virtuality.Reality,
-        partitivity: Partitivity.Unison,
-        operator: Operator.And,
-        bundleStart: false,
-        bundleEnd: false,
-        props: [],
-      },
-      {
-        id: uuidv4(),
-        actant: "",
-        position: Position["Actant1"],
-        elvl: Elvl.Inferential,
-        logic: Logic.Positive,
-        virtuality: Virtuality.Reality,
-        partitivity: Partitivity.Unison,
-        operator: Operator.And,
-        bundleStart: false,
-        bundleEnd: false,
-        props: [],
-      },
-      {
-        id: uuidv4(),
-        actant: "",
-        position: Position["Actant2"],
-        elvl: Elvl.Inferential,
-        logic: Logic.Positive,
-        virtuality: Virtuality.Reality,
-        partitivity: Partitivity.Unison,
-        operator: Operator.And,
-        bundleStart: false,
-        bundleEnd: false,
-        props: [],
-      },
-    ],
-    references: [],
-    tags: [],
-  },
-  props: [],
-});
-
 // duplicate statement
 export const DStatement = (statement: IStatement): IStatement => {
   const duplicatedStatement = { ...statement };
@@ -180,20 +100,6 @@ export const DStatement = (statement: IStatement): IStatement => {
 
   return duplicatedStatement;
 };
-
-export const CStatementActant = (): IStatementActant => ({
-  id: uuidv4(),
-  actant: "",
-  position: Position.Subject,
-  elvl: Elvl.Textual,
-  logic: Logic.Positive,
-  virtuality: Virtuality.Reality,
-  partitivity: Partitivity.Unison,
-  operator: Operator.And,
-  bundleStart: false,
-  bundleEnd: false,
-  props: [],
-});
 
 export const CStatementAction = (actionId: string): IStatementAction => ({
   id: uuidv4(),
