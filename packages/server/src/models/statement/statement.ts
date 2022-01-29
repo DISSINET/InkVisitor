@@ -379,27 +379,36 @@ class Statement extends Actant implements IStatement {
 
     this.data.actions.forEach((a) => {
       actantsIds[a.action] = null;
-      a.props.forEach((prop) => {
-        actantsIds[prop.type.id] = null;
-        actantsIds[prop.value.id] = null;
+      if (a.props) {
+        a.props.forEach((prop) => {
+          actantsIds[prop.type.id] = null;
+          actantsIds[prop.value.id] = null;
 
-        prop.children.forEach((propChild) => {
-          actantsIds[propChild.type.id] = null;
-          actantsIds[propChild.value.id] = null;
+          if (prop.children) {
+            prop.children.forEach((propChild) => {
+              actantsIds[propChild.type.id] = null;
+              actantsIds[propChild.value.id] = null;
+            });
+          }
         });
-      });
+      }
     });
 
     this.data.actants.forEach((a) => {
       actantsIds[a.actant] = null;
-      a.props.forEach((prop) => {
-        actantsIds[prop.type.id] = null;
-        actantsIds[prop.value.id] = null;
-        prop.children.forEach((propChild) => {
-          actantsIds[propChild.type.id] = null;
-          actantsIds[propChild.value.id] = null;
+      if (a.props) {
+        a.props.forEach((prop) => {
+          actantsIds[prop.type.id] = null;
+          actantsIds[prop.value.id] = null;
+
+          if (prop.children) {
+            prop.children.forEach((propChild) => {
+              actantsIds[propChild.type.id] = null;
+              actantsIds[propChild.value.id] = null;
+            });
+          }
         });
-      });
+      }
     });
 
     actantsIds[this.data.territory.id] = null;

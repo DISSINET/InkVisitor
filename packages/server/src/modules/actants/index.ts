@@ -51,7 +51,6 @@ export default Router()
       const actant = getActantType({ ...actantData });
 
       const response = new ResponseActant(actant);
-      console.log(response.data);
 
       await response.prepare(request);
 
@@ -259,7 +258,6 @@ export default Router()
 
       const response = new ResponseActantDetail(actant);
 
-      console.log(response);
       await response.prepare(request);
 
       return response;
