@@ -52,6 +52,8 @@ export class StatementActant implements IStatementActant, IModel {
       return;
     }
 
+    // TODO: If admin ? model.status = ActantStatus.Approved : model.status = ActantStatus.Pending
+
     fillFlatObject(this, data);
     fillArray<Prop>(this.props, Prop, data.props);
   }

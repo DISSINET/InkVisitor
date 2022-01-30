@@ -1,13 +1,16 @@
 import { UnknownObject, IModel } from "@models/common";
-import { EntityClass } from "@shared/enums";
+import { EntityClass, EntityStatus } from "@shared/enums";
 import Actant from "@models/actant/actant";
-import { IEntity } from "@shared/types";
+import { IConcept, IEntity } from "@shared/types";
 
 class ConceptData implements IModel {
+  status: EntityStatus = EntityStatus.Pending;
   constructor(data: UnknownObject) {
     if (!data) {
       return;
     }
+
+    // TODO: If admin ? model.status = ActantStatus.Approved : model.status = ActantStatus.Pending
   }
 
   isValid(): boolean {
@@ -15,7 +18,7 @@ class ConceptData implements IModel {
   }
 }
 
-class Concept extends Actant implements IEntity {
+class Concept extends Actant implements IConcept {
   static table = "actants";
   static publicFields = Actant.publicFields;
 

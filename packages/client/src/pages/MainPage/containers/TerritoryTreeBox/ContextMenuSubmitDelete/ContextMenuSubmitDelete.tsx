@@ -22,7 +22,7 @@ export const ContextMenuSubmitDelete: React.FC<ContextMenuSubmitDelete> = ({
   }, []);
 
   const queryClient = useQueryClient();
-  const { territoryId, setTerritoryId, actantId, setActantId } =
+  const { territoryId, setTerritoryId, detailId, setDetailId } =
     useSearchParams();
 
   const deleteTerritoryMutation = useMutation(
@@ -36,8 +36,8 @@ export const ContextMenuSubmitDelete: React.FC<ContextMenuSubmitDelete> = ({
         if (territoryId === territoryActant.id) {
           setTerritoryId("");
         }
-        if (actantId === territoryActant.id) {
-          setActantId("");
+        if (detailId === territoryActant.id) {
+          setDetailId("");
         }
         onClose();
       },

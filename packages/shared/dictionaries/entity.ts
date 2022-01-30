@@ -1,5 +1,5 @@
-import { DropdownItem } from "@shared/packages/client/src/types";
 import { EntityClass, EntityExtension } from "../enums";
+export type DropdownItem = { value: string; label: string; info?: string };
 
 export const allEntities: DropdownItem = {
   value: EntityExtension.Any,

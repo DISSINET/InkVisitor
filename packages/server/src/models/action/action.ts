@@ -15,7 +15,7 @@ class ActionData implements IModel {
     a2: [],
     s: [],
   };
-  status: EntityStatus = EntityStatus.Approved;
+  status: EntityStatus = EntityStatus.Pending;
 
   constructor(data: UnknownObject) {
     if (!data) {

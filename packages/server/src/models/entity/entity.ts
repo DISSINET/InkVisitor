@@ -1,7 +1,7 @@
 import Actant from "@models/actant/actant";
 import { fillFlatObject, IModel, UnknownObject } from "@models/common";
 import { EntityClass, EntityLogicalType } from "@shared/enums";
-import { IEntity } from "@shared/types/entity";
+import { IEntity } from "@shared/types";
 
 class EntityData implements IModel {
   logicalType: EntityLogicalType = EntityLogicalType.Definite;

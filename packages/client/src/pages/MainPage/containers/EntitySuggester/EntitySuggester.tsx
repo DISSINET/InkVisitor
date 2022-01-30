@@ -54,7 +54,7 @@ export const EntitySuggester: React.FC<EntitySuggesterI> = ({
   const [selectedCategory, setSelectedCategory] = useState<any>();
   const [allCategories, setAllCategories] = useState<IOption[]>();
 
-  const { setActantId } = useSearchParams();
+  const { setDetailId } = useSearchParams();
   const userRole = localStorage.getItem("userrole");
 
   // Suggesions query
@@ -160,7 +160,7 @@ export const EntitySuggester: React.FC<EntitySuggesterI> = ({
           toast.info(`Actant [${variables.label}] created!`);
         }
         if (openDetailOnCreate) {
-          setActantId(variables.id);
+          setDetailId(variables.id);
         }
       },
     }

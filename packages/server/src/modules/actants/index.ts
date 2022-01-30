@@ -7,7 +7,7 @@ import {
   findActantById,
   findAssociatedActantIds,
 } from "@service/shorthands";
-import { EntityStatus, EntityClass, UserRole } from "@shared/enums";
+import { EntityClass, UserRole } from "@shared/enums";
 import {
   IEntity,
   IResponseActant,

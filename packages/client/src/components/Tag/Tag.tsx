@@ -72,7 +72,7 @@ export const Tag: React.FC<TagProps> = ({
   isFavorited = false,
   lvl,
 }) => {
-  const { setActantId } = useSearchParams();
+  const { setDetailId } = useSearchParams();
   const dispatch = useAppDispatch();
 
   const ref = useRef<HTMLDivElement>(null);
@@ -142,7 +142,7 @@ export const Tag: React.FC<TagProps> = ({
     e.stopPropagation();
     e.nativeEvent.stopImmediatePropagation();
 
-    setActantId(propId);
+    setDetailId(propId);
   };
 
   const getShortTag = () => {

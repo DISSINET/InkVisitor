@@ -10,10 +10,17 @@ import {
   Virtuality,
   Partitivity,
   Operator,
+  Language,
 } from "../enums";
 
 export interface IStatement extends IEntity {
+  id: string;
   class: EntityClass.Statement;
+  label: string;
+  detail: string;
+  language: Language;
+  props: IProp[];
+  notes: string[];
   data: IStatementData;
 }
 

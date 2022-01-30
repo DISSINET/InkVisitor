@@ -413,7 +413,7 @@ export const StatementEditorBox: React.FC = () => {
     }
   );
 
-  const updateActantMutation = useMutation(
+  const updateEntityMutation = useMutation(
     async (changes: object) => await api.actantsUpdate(statementId, changes),
     {
       onSuccess: () => {
@@ -787,7 +787,7 @@ export const StatementEditorBox: React.FC = () => {
                 disabled={!userCanEdit}
                 values={statement.notes}
                 onChange={(newValues: string[]) => {
-                  updateActantMutation.mutate({ notes: newValues });
+                  updateEntityMutation.mutate({ notes: newValues });
                 }}
               />
             </StyledEditorSectionContent>
