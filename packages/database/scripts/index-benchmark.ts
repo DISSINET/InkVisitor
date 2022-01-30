@@ -36,8 +36,8 @@ function doIndex(statement: any, connection: any): Promise<any> {
 // Main
 //-----------------------------------------------------------------------------
 
-const indexedTable = "actants";
-const unindexedTable = "actants_raw";
+const indexedTable = "entities";
+const unindexedTable = "entities_raw";
 
 let conn: any;
 

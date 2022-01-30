@@ -23,7 +23,7 @@ import {
   IStatement,
   ITerritory,
   IResource,
-  IStatementActant,
+  IStatementEntity,
 } from "../../shared/types";
 
 import { entityStatusDict } from "../../shared/dictionaries";
@@ -31,7 +31,7 @@ import { entityStatusDict } from "../../shared/dictionaries";
 /**
  * waterfall processing
  */
-var actants: IEntity[] = [];
+var entities: IEntity[] = [];
 
 type IConceptProp = {
   type: "value" | "concept";
@@ -106,7 +106,7 @@ const loadStatementsTables = async (next: Function) => {
         detail: action.detail_incl_valency,
         props: [],
       };
-      actants.push(newAction);
+      entities.push(newAction);
     }
   });
 
@@ -543,7 +543,7 @@ const loadStatementsTables = async (next: Function) => {
          * Location
          */
 
-        actants.push(mainStatement);
+        entities.push(mainStatement);
       });
     }
   }
@@ -590,7 +590,7 @@ const addEntity = (id: string, label: string, type: EntityClass) => {
     props: [],
   };
   if (id) {
-    actants.push(newEntity);
+    entities.push(newEntity);
   }
 };
 const addTerritoryEntity = (
@@ -603,7 +603,7 @@ const addTerritoryEntity = (
   notes: string[] = []
 ) => {
   if (id) {
-    if (!actants.some((a) => a.id == id)) {
+    if (!entities.some((a) => a.id == id)) {
       const newTerritory: ITerritory = {
         id,
         class: EntityClass.Territory,
@@ -623,7 +623,7 @@ const addTerritoryEntity = (
         props: [],
       };
 
-      actants.push(newTerritory);
+      entities.push(newTerritory);
     }
   }
 };
@@ -641,7 +641,7 @@ const addResourceActant = (id: string, label: string) => {
       notes: [],
       props: [],
     };
-    actants.push(newResource);
+    entities.push(newResource);
   }
 };
 
@@ -776,7 +776,7 @@ const createEmptyPropStatement = (
       language: Language.Latin,
       notes: [],
     };
-    actants.push(newEmptyStatement);
+    entities.push(newEmptyStatement);
   }
 };
 
@@ -920,7 +920,7 @@ const processActant = (
 
       const statementActantId = v4();
 
-      const actant: IStatementActant = {
+      const actant: IStatementEntity = {
         id: statementActantId,
         actant: actantId,
         position: position,
@@ -1001,6 +1001,6 @@ const createNewActantIfNeeded = (actantValue: string) => {
 };
 
 loadStatementsTables(() => {
-  console.log(actants.length);
-  fs.writeFileSync("datasets/all/actants.json", JSON.stringify(actants));
+  console.log(entities.length);
+  fs.writeFileSync("datasets/all/entities.json", JSON.stringify(entities));
 });

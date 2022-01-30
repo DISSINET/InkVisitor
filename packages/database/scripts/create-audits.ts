@@ -4,14 +4,14 @@ var fs = require("fs");
 
 import { IEntity } from "../../shared/types";
 
-const entitites = JSON.parse(fs.readFileSync("datasets/all/actants.json"));
+const entitites = JSON.parse(fs.readFileSync("datasets/all/entities.json"));
 
 // console.log(entitites);
 const now = new Date();
 const audits = entitites.map((entity: IEntity, ei: number) => {
   return {
     id: v4(),
-    actantId: entity.id,
+    entityId: entity.id,
     user: "0",
     date: now,
     changes: {},
