@@ -189,7 +189,7 @@ export enum UserRoleMode {
   Admin = "admin",
 }
 
-export enum TerritoryOrder {
+export enum Order {
   First = -9999,
   Last = 9999,
 }

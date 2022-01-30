@@ -10,6 +10,7 @@ import {
   ActantStatus,
   ActantType,
   Language,
+  Order,
   UserRole,
   UserRoleMode,
 } from "@shared/enums";
@@ -163,24 +164,38 @@ export default class Actant extends Base implements IActant, IDbModel {
     const sortedOrders: number[] = Object.keys(sibl)
       .map((k) => parseFloat(k))
       .sort((a, b) => a - b);
-    let out = -1;
+
+    if (!sortedOrders.length) {
+      // no sibling - use default position 0
+      return 0;
+    }
 
     if (want === undefined) {
-      out = sortedOrders.length ? sortedOrders[sortedOrders.length - 1] + 1 : 0;
-    } else if (sibl[want]) {
-      // if there is a conflict - order number already exist
+      // if want is not provided, use Last position by default
+      want = Order.Last;
+    }
+
+    if (want === Order.Last) {
+      return sortedOrders[sortedOrders.length - 1] + 1;
+    } else if (want === Order.First) {
+      return sortedOrders[0] - 1;
+    }
+
+    let out = -1;
+
+    if (sibl[want]) {
+      // if there is a conflict - wanted order value already exists
       for (let i = 0; i < sortedOrders.length; i++) {
         if (sortedOrders[i] === want) {
-          // conflict occured on the biggest number - use closest bigger free
-          // integer
           if (sortedOrders.length === i + 1) {
+            // conflict occured on the biggest number - use closest bigger free integer
             const ceiled = Math.ceil(sortedOrders[i]);
             out = ceiled === sortedOrders[i] ? ceiled + 1 : ceiled;
             break;
           }
 
-          // new number would be somewhere behind the wanted one(i) and before
-          // the next one(i+1)
+          // new number would be somewhere behind the wanted position(i) and before
+          // the next position(i+1)
           out = sortedOrders[i] + (sortedOrders[i + 1] - sortedOrders[i]) / 2;
           if (!sibl[Math.round(out)]) {
             out = Math.round(out);
