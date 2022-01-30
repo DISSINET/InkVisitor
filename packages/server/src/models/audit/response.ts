@@ -3,19 +3,19 @@ import { IAudit, IResponseAudit } from "@shared/types";
 import Audit from "./audit";
 
 export class ResponseAudit implements IResponseAudit {
-  actant: string;
+  entity: string;
   last: IAudit[];
   first?: IAudit;
 
-  constructor(actantId: string) {
-    this.actant = actantId;
+  constructor(entityId: string) {
+    this.entity = entityId;
     this.last = [];
   }
 
-  async getLastNForActant(dbConn: Connection, n: number = 5): Promise<void> {
+  async getLastNForEntity(dbConn: Connection, n: number = 5): Promise<void> {
     const result = await rethink
       .table(Audit.table)
-      .filter({ actantId: this.actant })
+      .filter({ entityId: this.entity })
       .orderBy(rethink.desc("date"))
       .limit(n)
       .run(dbConn);
@@ -28,10 +28,10 @@ export class ResponseAudit implements IResponseAudit {
     this.last = result.map((r) => new Audit(r));
   }
 
-  async getFirstForActant(db: Connection): Promise<void> {
+  async getFirstForEntity(db: Connection): Promise<void> {
     const result = await rethink
       .table(Audit.table)
-      .filter({ actantId: this.actant })
+      .filter({ entityId: this.entity })
       .orderBy(rethink.asc("date"))
       .limit(1)
       .run(db);

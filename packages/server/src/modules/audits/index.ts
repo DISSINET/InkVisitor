@@ -6,27 +6,27 @@ import { IResponseAudit } from "@shared/types";
 import { ResponseAudit } from "@models/audit/response";
 
 export default Router().get(
-  "/get/:actantId?",
+  "/get/:entityId?",
   asyncRouteHandler<IResponseAudit>(async (request: Request) => {
-    const actantId = request.params.actantId;
+    const entityId = request.params.entityId;
 
-    if (!actantId) {
-      throw new BadParams("actantId has to be set");
+    if (!entityId) {
+      throw new BadParams("entityId has to be set");
     }
 
     // actantId must be already in the db
-    const existingActant = await findActantById(request.db, actantId);
+    const existingActant = await findActantById(request.db, entityId);
 
     if (!existingActant) {
       throw new ActantDoesNotExits(
-        `actant with id ${actantId} does not exist`,
-        actantId
+        `entity with id ${entityId} does not exist`,
+        entityId
       );
     }
 
-    const response = new ResponseAudit(actantId);
-    await response.getLastNForActant(request.db.connection);
-    await response.getFirstForActant(request.db.connection);
+    const response = new ResponseAudit(entityId);
+    await response.getLastNForEntity(request.db.connection);
+    await response.getFirstForEntity(request.db.connection);
 
     return response;
   })
