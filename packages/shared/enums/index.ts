@@ -56,7 +56,7 @@ export enum EntityLogicalType {
   Generic = "4",
 }
 
-export enum ActantStatus {
+export enum EntityStatus {
   Pending = "0",
   Approved = "1",
   Discouraged = "2",

@@ -1,4 +1,4 @@
-import { EntityClass } from "../enums";
+import { EntityClass, EntityStatus } from "../enums";
 import { IActant } from "./";
 
 // TODO
@@ -7,6 +7,7 @@ export interface IAction extends IActant {
   data: {
     valencies: ActionValency;
     entities: ActionEntity;
+    status: EntityStatus;
   };
 }
 

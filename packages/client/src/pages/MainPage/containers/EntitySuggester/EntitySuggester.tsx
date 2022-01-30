@@ -1,5 +1,5 @@
 import {
-  ActantStatus,
+  EntityStatus,
   EntityClass,
   EntityExtension,
   ExtendedEntityClass,
@@ -75,7 +75,9 @@ export const EntitySuggester: React.FC<EntitySuggesterI> = ({
         excluded: excludedEntities.length ? excludedEntities : undefined,
       });
       return resSuggestions.data
-        .filter((s) => s.status !== ActantStatus.Discouraged)
+        .filter(
+          (s) => s.data.status && s.data.status !== EntityStatus.Discouraged
+        )
         .filter((s) =>
           filterEditorRights && userRole !== UserRole.Admin
             ? s.right === UserRoleMode.Write
@@ -98,7 +100,7 @@ export const EntitySuggester: React.FC<EntitySuggesterI> = ({
             category: s.class,
             label: s.label,
             detail: s.detail,
-            status: s.status,
+            status: s.data.status,
             ltype: s.data.logicalType,
             id: s.id,
             icons: icons,

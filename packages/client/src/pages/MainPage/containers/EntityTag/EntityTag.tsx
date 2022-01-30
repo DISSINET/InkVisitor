@@ -55,7 +55,7 @@ export const EntityTag: React.FC<IEntityTag> = ({
     <Tag
       propId={actant.id}
       label={actant.label}
-      status={actant.status}
+      status={actant.data.status}
       ltype={actant.data.logicalType ?? "1"}
       tooltipDetail={actant.detail}
       tooltipText={tooltipText}

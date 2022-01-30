@@ -1,9 +1,10 @@
 import {
-  ActantStatus,
-  EntityClass,
   Certainty,
   Elvl,
+  EntityClass,
   EntityLogicalType,
+  EntityStatus,
+  ExtendedEntityClass,
   Language,
   Logic,
   Mood,
@@ -11,7 +12,6 @@ import {
   Operator,
   Partitivity,
   Virtuality,
-  ExtendedEntityClass,
 } from "@shared/enums";
 
 export const Colors = [
@@ -145,7 +145,7 @@ export interface IRequestSearchEntity {
   label?: string; // regex, should also work from the middle...
   detail?: string; // also regex
   notes?: string; // is the text used within any note
-  status?: ActantStatus; // izy
+  status?: EntityStatus; // izy
   language?: Language; //izy
   logicalType?: EntityLogicalType;
   hasProps?: IEntityHasProps[]; //this should be checked within meta props and within all statements where the entity is used as the prop origin

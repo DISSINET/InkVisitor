@@ -307,14 +307,16 @@ export const UserListModal: React.FC<UserListModal> = ({
                   <StyledTerritoryList>
                     {readTerritories.length && territoryActants ? (
                       readTerritories.map((right: IUserRight) => {
-                        const territoryActant = territoryActants.find(
+                        const territoryEntity = territoryActants.find(
                           (t: any) => t.territory.id === right.territory
                         );
 
-                        return territoryActant && territoryActant.territory ? (
+                        console.log(territoryEntity);
+
+                        return territoryEntity && territoryEntity.territory ? (
                           <StyledTerritoryListItem key={right.territory}>
                             <EntityTag
-                              actant={territoryActant.territory}
+                              actant={territoryEntity.territory}
                               button={
                                 <Button
                                   key="d"
@@ -366,6 +368,8 @@ export const UserListModal: React.FC<UserListModal> = ({
           const writeTerritories = rights.filter(
             (r: IUserRight) => r.mode === "write"
           );
+
+          console.log(territoryActants);
 
           return (
             <StyledTerritoryColumn>

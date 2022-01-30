@@ -7,7 +7,7 @@ import {
 import { r as rethink, Connection, WriteResult, RDatum } from "rethinkdb-ts";
 import { IStatement, IActant, IResponseActant, IProp } from "@shared/types";
 import {
-  ActantStatus,
+  EntityStatus,
   EntityClass,
   Language,
   UserRole,
@@ -39,7 +39,6 @@ export default class Actant extends Base implements IActant, IDbModel {
   data: any = {};
   label: string = "";
   detail: string = "";
-  status: ActantStatus = ActantStatus.Pending;
   language: Language = Language.Latin;
   notes: string[] = [];
   props: IProp[] = [];

@@ -8,7 +8,7 @@ import {
   ITerritory,
 } from "../../shared/types";
 import {
-  ActantStatus,
+  EntityStatus,
   EntityClass,
   Certainty,
   Elvl,
@@ -110,7 +110,7 @@ const importData = async () => {
           label: "",
           language: Language.Latin,
           notes: [],
-          status: ActantStatus.Pending,
+          props: [],
           data: {
             actants: [
               {
@@ -124,6 +124,7 @@ const importData = async () => {
                 partitivity: Partitivity.DiscreteParts,
                 position: Position.Actant1,
                 virtuality: Virtuality.Allegation,
+                props: [],
               },
             ],
             actions: [
@@ -138,9 +139,9 @@ const importData = async () => {
                 mood: [Mood.Indication],
                 moodvariant: MoodVariant.Irrealis,
                 operator: Operator.And,
+                props: [],
               },
             ],
-            props: [],
             references: [],
             tags: [`tag${i}`],
             territory: {
@@ -161,7 +162,7 @@ const importData = async () => {
           label: "",
           language: Language.Latin,
           notes: [],
-          status: ActantStatus.Pending,
+          props: [],
           data: {
             parent: {
               id: "parent" + i.toString(),
@@ -179,7 +180,7 @@ const importData = async () => {
           label: "",
           language: Language.Latin,
           notes: [],
-          status: ActantStatus.Pending,
+          props: [],
           data: {
             parent: false,
           },
@@ -190,6 +191,7 @@ const importData = async () => {
       for (let i = 20000; i < 20010; i++) {
         const entry: IResource = {
           class: EntityClass.Resource,
+          props: [],
           data: {
             link: "wdew",
           },
@@ -198,7 +200,6 @@ const importData = async () => {
           label: "",
           language: Language.Latin,
           notes: [],
-          status: ActantStatus.Pending,
         };
         await r.table(tableName).insert(entry).run(conn);
       }

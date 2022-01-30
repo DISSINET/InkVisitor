@@ -4,7 +4,7 @@ var fs = require("fs");
 
 import {
   EntityClass,
-  ActantStatus,
+  EntityStatus,
   Certainty,
   Elvl,
   Position,
@@ -27,7 +27,7 @@ import {
   IStatementActant,
 } from "../../shared/types";
 
-import { actantStatusDict } from "../../shared/dictionaries";
+import { entityStatusDict } from "../../shared/dictionaries";
 
 /**
  * waterfall processing
@@ -55,7 +55,7 @@ const loadStatementsTables = async (next: Function) => {
    */
   tableActions.forEach((action: any) => {
     if (action.label) {
-      const statusOption = actantStatusDict.find(
+      const statusOption = entityStatusDict.find(
         (o) => o.label === action.status
       );
 
@@ -96,12 +96,12 @@ const loadStatementsTables = async (next: Function) => {
             a1: parseEntities(action.actant1_entity_type),
             a2: parseEntities(action.actant2_entity_type),
           },
+          status: statusOption
+            ? (statusOption.value as EntityStatus)
+            : ("0" as EntityStatus),
         },
         language:
           action.language === "English" ? Language.English : Language.Latin,
-        status: statusOption
-          ? (statusOption.value as ActantStatus)
-          : ("0" as ActantStatus),
         notes: action.note ? [action.note] : [],
         label: action.label,
         detail: action.detail_incl_valency,
@@ -437,7 +437,6 @@ const loadStatementsTables = async (next: Function) => {
           label: statement.id,
           detail: "",
           language: Language.Latin,
-          status: ActantStatus.Approved,
         };
 
         statement.note && mainStatement.notes.push(statement.note);
@@ -579,13 +578,14 @@ const addEntityActant = (id: string, label: string, type: EntityClass) => {
     class: type,
     data:
       type === EntityClass.Concept
-        ? {}
+        ? {
+            status: EntityStatus.Approved,
+          }
         : {
             logicalType: EntityLogicalType.Definite,
           },
     label: label,
     detail: "",
-    status: ActantStatus.Approved,
     language: Language.Latin,
     notes: [],
     props: [],
@@ -618,7 +618,6 @@ const addTerritoryActant = (
         },
         label: label.trim(),
         detail: detail,
-        status: ActantStatus.Approved,
         // @ts-ignore
         language: Language[language] as Language,
         notes: notes,
@@ -639,7 +638,6 @@ const addResourceActant = (id: string, label: string) => {
       },
       label: label.trim(),
       detail: "",
-      status: ActantStatus.Approved,
       language: Language.Latin,
       notes: [],
       props: [],
@@ -776,7 +774,6 @@ const createEmptyPropStatement = (
         ],
       },
       detail: "",
-      status: ActantStatus.Approved,
       language: Language.Latin,
       notes: [],
     };

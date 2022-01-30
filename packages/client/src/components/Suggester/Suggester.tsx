@@ -1,4 +1,4 @@
-import { ActantStatus, EntityClass } from "@shared/enums";
+import { EntityStatus, EntityClass } from "@shared/enums";
 import { IOption } from "@shared/types";
 import { Button, Dropdown, Input, Loader, Tag } from "components";
 import useKeypress from "hooks/useKeyPress";
@@ -32,7 +32,7 @@ export interface SuggestionI {
   label: string;
   detail: string;
   ltype: string;
-  status: ActantStatus;
+  status: EntityStatus;
   category: string;
   color: string;
   icons?: React.ReactNode[];

@@ -1,6 +1,6 @@
 import {
   actantLogicalTypeDict,
-  actantStatusDict,
+  entityStatusDict,
   entitiesDict,
   languageDict,
 } from "@shared/dictionaries";
@@ -473,62 +473,69 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                     />
                   </StyledDetailContentRowValue>
                 </StyledDetailContentRow>
-                <StyledDetailContentRow>
-                  <StyledDetailContentRowLabel>
-                    Status
-                  </StyledDetailContentRowLabel>
-                  <StyledDetailContentRowValue>
-                    <AttributeButtonGroup
-                      disabled={!userCanAdmin}
-                      options={[
-                        {
-                          longValue: actantStatusDict[0]["label"],
-                          shortValue: actantStatusDict[0]["label"],
-                          onClick: () => {
-                            updateActantMutation.mutate({
-                              status: actantStatusDict[0]["value"],
-                            });
+
+                {(actantMode === "action" || actantMode === "concept") && (
+                  <StyledDetailContentRow>
+                    <StyledDetailContentRowLabel>
+                      Status
+                    </StyledDetailContentRowLabel>
+                    <StyledDetailContentRowValue>
+                      <AttributeButtonGroup
+                        disabled={!userCanAdmin}
+                        options={[
+                          {
+                            longValue: entityStatusDict[0]["label"],
+                            shortValue: entityStatusDict[0]["label"],
+                            onClick: () => {
+                              updateActantMutation.mutate({
+                                status: entityStatusDict[0]["value"],
+                              });
+                            },
+                            selected:
+                              entityStatusDict[0]["value"] ===
+                              actant.data.status,
                           },
-                          selected:
-                            actantStatusDict[0]["value"] === actant.status,
-                        },
-                        {
-                          longValue: actantStatusDict[1]["label"],
-                          shortValue: actantStatusDict[1]["label"],
-                          onClick: () => {
-                            updateActantMutation.mutate({
-                              status: actantStatusDict[1]["value"],
-                            });
+                          {
+                            longValue: entityStatusDict[1]["label"],
+                            shortValue: entityStatusDict[1]["label"],
+                            onClick: () => {
+                              updateActantMutation.mutate({
+                                status: entityStatusDict[1]["value"],
+                              });
+                            },
+                            selected:
+                              entityStatusDict[1]["value"] ===
+                              actant.data.status,
                           },
-                          selected:
-                            actantStatusDict[1]["value"] === actant.status,
-                        },
-                        {
-                          longValue: actantStatusDict[2]["label"],
-                          shortValue: actantStatusDict[2]["label"],
-                          onClick: () => {
-                            updateActantMutation.mutate({
-                              status: actantStatusDict[2]["value"],
-                            });
+                          {
+                            longValue: entityStatusDict[2]["label"],
+                            shortValue: entityStatusDict[2]["label"],
+                            onClick: () => {
+                              updateActantMutation.mutate({
+                                status: entityStatusDict[2]["value"],
+                              });
+                            },
+                            selected:
+                              entityStatusDict[2]["value"] ===
+                              actant.data.status,
                           },
-                          selected:
-                            actantStatusDict[2]["value"] === actant.status,
-                        },
-                        {
-                          longValue: actantStatusDict[3]["label"],
-                          shortValue: actantStatusDict[3]["label"],
-                          onClick: () => {
-                            updateActantMutation.mutate({
-                              status: actantStatusDict[3]["value"],
-                            });
+                          {
+                            longValue: entityStatusDict[3]["label"],
+                            shortValue: entityStatusDict[3]["label"],
+                            onClick: () => {
+                              updateActantMutation.mutate({
+                                status: entityStatusDict[3]["value"],
+                              });
+                            },
+                            selected:
+                              entityStatusDict[3]["value"] ===
+                              actant.data.status,
                           },
-                          selected:
-                            actantStatusDict[3]["value"] === actant.status,
-                        },
-                      ]}
-                    />
-                  </StyledDetailContentRowValue>
-                </StyledDetailContentRow>
+                        ]}
+                      />
+                    </StyledDetailContentRowValue>
+                  </StyledDetailContentRow>
+                )}
                 <StyledDetailContentRow>
                   <StyledDetailContentRowLabel>
                     Label language

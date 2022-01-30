@@ -1,27 +1,27 @@
-import { ActantStatus } from "../enums";
+import { EntityStatus } from "../enums";
 
-export const actantStatusDict: {
+export const entityStatusDict: {
   value: string;
   label: string;
   info?: string;
 }[] = [
   {
-    value: ActantStatus.Pending,
+    value: EntityStatus.Pending,
     label: "pending",
     info: "",
   },
   {
-    value: ActantStatus.Approved,
+    value: EntityStatus.Approved,
     label: "approved",
     info: "",
   },
   {
-    value: ActantStatus.Discouraged,
+    value: EntityStatus.Discouraged,
     label: "discouraged",
     info: "",
   },
   {
-    value: ActantStatus.Warning,
+    value: EntityStatus.Warning,
     label: "warning",
     info: "",
   },

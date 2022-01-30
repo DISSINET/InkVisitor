@@ -118,12 +118,12 @@ export const EntityDetailMetaTable: React.FC<EntityDetailMetaTable> = ({
           const {
             id: statementId,
             data,
-            actants,
+            entities,
           } = row.original as IResponseStatement;
 
           const typeSActant = data.actants.find((a) => a.position == "a1");
           const typeActant = typeSActant
-            ? actants.find((a) => a.id === typeSActant.actant)
+            ? entities.find((a) => a.id === typeSActant.actant)
             : undefined;
 
           return typeSActant ? (
@@ -180,12 +180,12 @@ export const EntityDetailMetaTable: React.FC<EntityDetailMetaTable> = ({
           const {
             id: statementId,
             data,
-            actants,
+            entities,
           } = row.original as IResponseStatement;
 
           const valueSActant = data.actants.find((a) => a.position == "a2");
           const valueActant = valueSActant
-            ? actants.find((a) => a.id === valueSActant.actant)
+            ? entities.find((a) => a.id === valueSActant.actant)
             : false;
 
           return valueSActant && valueActant ? (
@@ -327,19 +327,19 @@ export const EntityDetailMetaTable: React.FC<EntityDetailMetaTable> = ({
             id: statementId,
             class: statementClass,
             data: data,
-            actants,
+            entities,
           } = row.original as IResponseStatement;
 
           const action = data?.actions[0];
 
           const valueSActant = data.actants.find((a) => a.position == "a2");
           const valueActant = valueSActant
-            ? actants.find((a) => a.id === valueSActant.actant)
+            ? entities.find((a) => a.id === valueSActant.actant)
             : false;
 
           const typeSActant = data.actants.find((a) => a.position == "a1");
           const typeActant = typeSActant
-            ? actants.find((a) => a.id === typeSActant.actant)
+            ? entities.find((a) => a.id === typeSActant.actant)
             : false;
 
           const typeLabel = typeActant ? typeActant.label : "undefined";

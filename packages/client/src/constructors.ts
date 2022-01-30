@@ -1,5 +1,5 @@
 import {
-  ActantStatus,
+  EntityStatus,
   EntityClass,
   Certainty,
   Elvl,
@@ -12,6 +12,7 @@ import {
   Position,
   UserRole,
   Virtuality,
+  EntityLogicalType,
 } from "@shared/enums";
 import {
   IActant,
@@ -69,8 +70,6 @@ export const CStatement = (
   class: EntityClass.Statement,
   label: label ? label : "",
   detail: detail ? detail : "",
-  status:
-    userRole === UserRole.Admin ? ActantStatus.Approved : ActantStatus.Pending,
   language: Language.Latin,
   notes: [],
   data: {
@@ -139,8 +138,6 @@ export const CTerritoryActant = (
   class: EntityClass.Territory,
   label: label,
   detail: detail ? detail : "",
-  status:
-    userRole === UserRole.Admin ? ActantStatus.Approved : ActantStatus.Pending,
   language: Language.Latin,
   notes: [],
   data: {
@@ -154,18 +151,18 @@ export const CEntity = (
   label: string,
   userRole: UserRole,
   detail?: string
-): IActant => ({
-  id: uuidv4(),
-  class: entityClass,
-  label: label,
-  detail: detail ? detail : "",
-  data: {},
-  status:
-    userRole === UserRole.Admin ? ActantStatus.Approved : ActantStatus.Pending,
-  language: Language.Latin,
-  notes: [],
-  props: [],
-});
+): IActant => {
+  return {
+    id: uuidv4(),
+    class: entityClass,
+    label: label,
+    detail: detail ? detail : "",
+    data: {},
+    language: Language.Latin,
+    notes: [],
+    props: [],
+  };
+};
 
 export const CReference = (resourceId: string): IStatementReference => ({
   id: uuidv4(),

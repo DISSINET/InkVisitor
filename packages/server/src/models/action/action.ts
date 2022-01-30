@@ -1,7 +1,7 @@
 import { fillFlatObject, UnknownObject, IModel } from "@models/common";
-import { EntityClass } from "@shared/enums";
+import { EntityClass, EntityStatus } from "@shared/enums";
 import Actant from "@models/actant/actant";
-import { IAction, IProp } from "@shared/types";
+import { IAction, IEntity, IProp } from "@shared/types";
 import { ActionEntity, ActionValency } from "@shared/types/action";
 
 class ActionData implements IModel {
@@ -15,6 +15,7 @@ class ActionData implements IModel {
     a2: [],
     s: [],
   };
+  status: EntityStatus = EntityStatus.Approved;
 
   constructor(data: UnknownObject) {
     if (!data) {

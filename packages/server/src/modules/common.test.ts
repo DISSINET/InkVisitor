@@ -5,7 +5,7 @@ import Territory from "@models/territory/territory";
 import { Db } from "@service/RethinkDB";
 import { createActant, deleteActants } from "@service/shorthands";
 import {
-  ActantStatus,
+  EntityStatus,
   Certainty,
   Elvl,
   EntityClass,
@@ -55,7 +55,6 @@ export function getITerritoryMock(): ITerritory {
     detail: "detail",
     language: Language.Latin,
     notes: [],
-    status: ActantStatus.Pending,
     label: "label",
     data: {
       parent: false,
@@ -102,7 +101,6 @@ export function getIStatementMock(): IStatement {
     detail: "",
     language: Language.Czech,
     notes: [],
-    status: ActantStatus.Pending,
   };
   return fullData;
 }

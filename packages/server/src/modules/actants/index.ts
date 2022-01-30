@@ -7,7 +7,7 @@ import {
   findActantById,
   findAssociatedActantIds,
 } from "@service/shorthands";
-import { ActantStatus, EntityClass, UserRole } from "@shared/enums";
+import { EntityStatus, EntityClass, UserRole } from "@shared/enums";
 import {
   IActant,
   IEntity,
@@ -106,10 +106,6 @@ export default Router()
         throw new PermissionDeniedError("actant cannot be created");
       }
 
-      if (user.role !== UserRole.Admin) {
-        model.status = ActantStatus.Pending;
-      }
-
       const result = await model.save(request.db.connection);
 
       if (
@@ -168,10 +164,6 @@ export default Router()
 
       if (!model.canBeEditedByUser(request.getUserOrFail())) {
         throw new PermissionDeniedError("actant cannot be saved");
-      }
-
-      if (request.getUserOrFail().role !== UserRole.Admin) {
-        model.status = ActantStatus.Pending;
       }
 
       // update only the required fields
