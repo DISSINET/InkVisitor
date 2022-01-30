@@ -254,5 +254,3 @@ export const classesPropValue = [
   ActantType.Territory,
   ActantType.Resource,
 ];
-
-export const DropdownAny = "any";

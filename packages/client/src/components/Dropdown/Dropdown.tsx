@@ -1,22 +1,19 @@
 import { allEntities } from "@shared/dictionaries/entity";
-import { ActantType } from "@shared/enums";
-import { IOption } from "@shared/types";
-import React, { ReactNode, Ref, useEffect, useState } from "react";
-import { FaChevronDown } from "react-icons/fa";
-import { RiArrowDownSLine } from "react-icons/ri";
+import React, { ReactNode } from "react";
 import {
+  components,
   GroupedOptionsType,
+  IndicatorProps,
+  MultiValueProps,
   OptionsType,
   OptionTypeBase,
-  ValueType,
-  components,
-  MultiValueProps,
-  ValueContainerProps,
   SingleValueProps,
-  IndicatorProps,
+  ValueContainerProps,
+  ValueType,
 } from "react-select";
-import { CommonProps, OptionProps } from "react-select/src/types";
-import { DropdownAny, DropdownItem, Entities } from "types";
+import { OptionProps } from "react-select/src/types";
+import { DropdownAny } from "Theme/constants";
+import { DropdownItem, Entities } from "types";
 import {
   StyledEntityValue,
   StyledFaChevronDown,
@@ -41,7 +38,6 @@ interface Dropdown {
   noOptionsMessage?: Function;
   isClearable?: boolean;
   isMulti?: boolean;
-  allowSelectAll?: boolean;
   entityDropdown?: boolean;
   onFocus?: () => void;
   onBlur?: () => void;
@@ -65,7 +61,6 @@ export const Dropdown: React.FC<Dropdown> = ({
   isClearable = false,
   isMulti = false,
   disabled = false,
-  allowSelectAll = false,
   entityDropdown = false,
   onFocus = () => {},
   onBlur = () => {},
@@ -135,9 +130,7 @@ export const Dropdown: React.FC<Dropdown> = ({
           }
           return onChange(selected);
         }}
-        options={
-          allowSelectAll ? [allEntities, ...optionsWithIterator] : options
-        }
+        options={isMulti ? [allEntities, ...optionsWithIterator] : options}
         width={width}
         hideSelectedOptions={hideSelectedOptions}
       />
@@ -183,7 +176,7 @@ const Option = ({ ...props }: OptionProps | any): React.ReactElement => {
 const MultiValue = (props: MultiValueProps<any>): React.ReactElement => {
   let labelToBeDisplayed = `${props.data.label}`;
   if (props.data.value === allEntities.value) {
-    labelToBeDisplayed = "All is selected";
+    labelToBeDisplayed = "All options selected";
   }
   return (
     <components.MultiValue {...props}>
