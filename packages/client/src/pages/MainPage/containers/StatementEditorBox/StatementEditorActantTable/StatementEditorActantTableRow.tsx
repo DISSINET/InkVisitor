@@ -1,5 +1,5 @@
 import { EntityClass } from "@shared/enums";
-import { IActant, IResponseStatement, IStatementActant } from "@shared/types";
+import { IEntity, IResponseStatement, IStatementActant } from "@shared/types";
 import { AttributeIcon, Button, ButtonGroup } from "components";
 import { useSearchParams } from "hooks";
 import React, { useRef } from "react";
@@ -127,7 +127,7 @@ export const StatementEditorActantTableRow: React.FC<
       actant,
       sActant,
     }: {
-      actant: IActant;
+      actant: IEntity;
       sActant: IStatementActant | any;
     } = row.values.data;
     return actant ? (
@@ -220,7 +220,7 @@ export const StatementEditorActantTableRow: React.FC<
       actant,
       sActant,
     }: {
-      actant: IActant;
+      actant: IEntity;
       sActant: IStatementActant | any;
     } = row.values.data;
 

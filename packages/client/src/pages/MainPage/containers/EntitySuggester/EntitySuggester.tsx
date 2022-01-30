@@ -6,7 +6,7 @@ import {
   UserRole,
   UserRoleMode,
 } from "@shared/enums";
-import { IActant, IOption } from "@shared/types";
+import { IEntity, IOption } from "@shared/types";
 import api from "api";
 import { Suggester, SuggestionI } from "components/Suggester/Suggester";
 import { CEntity, CStatement, CTerritoryActant } from "constructors";
@@ -86,7 +86,7 @@ export const EntitySuggester: React.FC<EntitySuggesterI> = ({
         .filter((s) =>
           excludedActantIds.length ? !excludedActantIds.includes(s.id) : s
         )
-        .map((s: IActant) => {
+        .map((s: IEntity) => {
           const entity = Entities[s.class];
 
           const icons: React.ReactNode[] = [];
@@ -144,7 +144,7 @@ export const EntitySuggester: React.FC<EntitySuggesterI> = ({
   }, [categoryTypes]);
 
   const actantsCreateMutation = useMutation(
-    async (newActant: IActant) => await api.actantsCreate(newActant),
+    async (newActant: IEntity) => await api.actantsCreate(newActant),
     {
       onSuccess: (data, variables) => {
         onSelected(variables.id);

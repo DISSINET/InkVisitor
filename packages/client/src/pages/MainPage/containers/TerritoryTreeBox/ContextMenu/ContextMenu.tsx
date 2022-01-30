@@ -1,5 +1,5 @@
 import { UserRoleMode } from "@shared/enums";
-import { IActant, IResponseGeneric } from "@shared/types";
+import { IEntity, IResponseGeneric } from "@shared/types";
 import api from "api";
 import { Button } from "components";
 import React, { useRef, useState } from "react";
@@ -16,7 +16,7 @@ import {
 } from "./ContextMenuStyles";
 
 interface ContextMenu {
-  territoryActant: IActant;
+  territoryActant: IEntity;
   right: UserRoleMode;
   empty: boolean;
   onMenuOpen: () => void;

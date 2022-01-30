@@ -45,16 +45,16 @@ import {
   operatorDict,
   certaintyDict,
 } from "@shared/dictionaries";
-import { IActant } from "@shared/types";
+import { IEntity } from "@shared/types";
 import { EntitySuggester, EntityTag } from "..";
 import { FaUnlink } from "react-icons/fa";
 
 interface AttributesGroupEditor {
   modalTitle: string;
   statementId: string;
-  propTypeActant?: IActant;
+  propTypeActant?: IEntity;
   classesPropType: EntityClass[];
-  propValueActant?: IActant;
+  propValueActant?: IEntity;
   classesPropValue: EntityClass[];
   excludedSuggesterEntities: EntityClass[];
   data: AttributeGroupDataObject;

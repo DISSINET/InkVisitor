@@ -10,7 +10,7 @@ import {
 } from "react-icons/fa";
 import { EntityTag } from "./../";
 
-import { IActant, IProp } from "@shared/types";
+import { IEntity, IProp } from "@shared/types";
 import { AttributeIcon, Button } from "components";
 import { EntitySuggester } from "./../";
 
@@ -30,7 +30,7 @@ import {
 
 interface IPropGroup {
   originId: string;
-  entities: { [key: string]: IActant };
+  entities: { [key: string]: IEntity };
   props: IProp[];
   territoryId: string;
 
@@ -146,7 +146,7 @@ export const PropGroup: React.FC<IPropGroup> = ({
 
 interface IPropGroupRow {
   prop: IProp;
-  entities: { [key: string]: IActant };
+  entities: { [key: string]: IEntity };
   level: "1" | "2";
   order: number;
   firstRowinGroup?: boolean;
@@ -181,7 +181,7 @@ const PropGroupRow: React.FC<IPropGroupRow> = ({
   territoryActants = [],
   openDetailOnCreate = false,
 }) => {
-  const propTypeEntity: IActant = entities[prop.type.id];
+  const propTypeEntity: IEntity = entities[prop.type.id];
   const propValueEntity = entities[prop.value.id];
 
   return (

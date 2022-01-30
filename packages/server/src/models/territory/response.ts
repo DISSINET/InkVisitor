@@ -1,16 +1,16 @@
 import { Request } from "express";
 import { UserRoleMode } from "@shared/enums";
-import { IActant, IResponseStatement, IResponseTerritory } from "@shared/types";
+import { IEntity, IResponseStatement, IResponseTerritory } from "@shared/types";
 import Territory from "./territory";
 import Statement from "@models/statement/statement";
 import { findActantsById, findActantsByIds } from "@service/shorthands";
 
 export class ResponseTerritory extends Territory implements IResponseTerritory {
   statements: IResponseStatement[];
-  actants: IActant[];
+  actants: IEntity[];
   right: UserRoleMode = UserRoleMode.Read;
 
-  constructor(actant: IActant) {
+  constructor(actant: IEntity) {
     super(actant);
 
     this.statements = [];

@@ -1,7 +1,7 @@
 import { UnknownObject, IModel } from "@models/common";
 import { EntityClass } from "@shared/enums";
 import Actant from "@models/actant/actant";
-import { IActant } from "@shared/types";
+import { IEntity } from "@shared/types";
 
 class ConceptData implements IModel {
   constructor(data: UnknownObject) {
@@ -15,7 +15,7 @@ class ConceptData implements IModel {
   }
 }
 
-class Concept extends Actant implements IActant {
+class Concept extends Actant implements IEntity {
   static table = "actants";
   static publicFields = Actant.publicFields;
 

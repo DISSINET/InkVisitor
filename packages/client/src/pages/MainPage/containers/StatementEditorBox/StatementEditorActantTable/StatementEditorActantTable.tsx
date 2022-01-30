@@ -1,5 +1,5 @@
 import { EntityClass } from "@shared/enums";
-import { IActant, IResponseStatement, IStatementActant } from "@shared/types";
+import { IEntity, IResponseStatement, IStatementActant } from "@shared/types";
 import update from "immutability-helper";
 import React, { useCallback, useMemo, useState } from "react";
 import { UseMutationResult } from "react-query";
@@ -12,7 +12,7 @@ import {
 } from "./StatementEditorActantTableStyles";
 
 interface FilteredActantObject {
-  data: { actant: IActant | undefined; sActant: IStatementActant };
+  data: { actant: IEntity | undefined; sActant: IStatementActant };
 }
 interface StatementEditorActantTable {
   statement: IResponseStatement;

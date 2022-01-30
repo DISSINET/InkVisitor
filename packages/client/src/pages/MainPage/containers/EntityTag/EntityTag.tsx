@@ -1,16 +1,11 @@
 import React, { ReactNode } from "react";
 import { Tag } from "components";
-import {
-  IActant,
-  IEntity,
-  IResponseTerritory,
-  ITerritory,
-} from "@shared/types";
+import { IEntity, IResponseTerritory, ITerritory } from "@shared/types";
 import { DragItem } from "types";
 import { PopupPosition } from "reactjs-popup/dist/types";
 
 interface IEntityTag {
-  actant: IActant | IEntity;
+  actant: IEntity;
   tooltipText?: string;
   parentId?: string;
   mode?: "selected" | "disabled" | "invalid" | false;

@@ -1,4 +1,4 @@
-import { IActant, IProp } from "./";
+import { IEntity, IProp } from "./";
 import {
   EntityClass,
   Certainty,
@@ -12,7 +12,7 @@ import {
   Operator,
 } from "../enums";
 
-export interface IStatement extends IActant {
+export interface IStatement extends IEntity {
   class: EntityClass.Statement;
   data: IStatementData;
 }
@@ -26,7 +26,7 @@ export interface IStatementData {
   actions: IStatementAction[];
   actants: IStatementActant[];
   references: IStatementReference[];
-  tags: string[]; // ids of IActant;
+  tags: string[]; // ids of IEntity;
 }
 
 export interface IStatementAction {

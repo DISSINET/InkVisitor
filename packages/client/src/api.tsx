@@ -1,6 +1,6 @@
 import { EntityClass } from "@shared/enums";
 import {
-  IActant,
+  IEntity,
   IResponseActant,
   IResponseAdministration,
   IResponseAudit,
@@ -327,7 +327,7 @@ class Api {
   }
 
   async actantsCreate(
-    newActantData: IActant
+    newActantData: IEntity
   ): Promise<AxiosResponse<IResponseGeneric>> {
     try {
       const response = await this.connection.post(

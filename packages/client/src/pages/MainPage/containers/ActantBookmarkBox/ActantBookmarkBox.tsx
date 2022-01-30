@@ -53,7 +53,7 @@ import {
 } from "./../../../../../../shared/dictionaries";
 
 import {
-  IActant,
+  IEntity,
   IBookmarkFolder,
   IResponseBookmarkFolder,
 } from "@shared/types";
@@ -116,7 +116,7 @@ export const ActantBookmarkBox: React.FC = () => {
         return {
           id: bookmark.id,
           name: bookmark.name,
-          actantIds: bookmark.actants.map((a: IActant) => a.id),
+          actantIds: bookmark.actants.map((a: IEntity) => a.id),
         };
       });
     } else {

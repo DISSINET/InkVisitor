@@ -22,7 +22,7 @@ import { EntityTag } from "./../";
 import api from "api";
 import {
   IStatement,
-  IActant,
+  IEntity,
   IAction,
   IResponseStatement,
 } from "@shared/types";
@@ -42,7 +42,7 @@ import { UserRole, UserRoleMode } from "@shared/enums";
 
 const initialData: {
   statements: IStatement[];
-  actants: IActant[];
+  actants: IEntity[];
   right: UserRoleMode;
 } = {
   statements: [],
@@ -233,7 +233,7 @@ export const StatementListBox: React.FC = () => {
     queryClient.invalidateQueries("territory");
   };
 
-  const renderListActant = (actantObject: IActant, key: number) => {
+  const renderListActant = (actantObject: IEntity, key: number) => {
     return (
       actantObject && (
         <EntityTag
@@ -247,7 +247,7 @@ export const StatementListBox: React.FC = () => {
   };
 
   const renderListActantLong = (
-    actantObject: IActant,
+    actantObject: IEntity,
     key: number,
     attributes?: boolean,
     statement?: IResponseStatement
@@ -283,7 +283,7 @@ export const StatementListBox: React.FC = () => {
           const statement = row.original as IStatement;
           return (
             <EntityTag
-              actant={statement as IActant}
+              actant={statement as IEntity}
               showOnly="entity"
               tooltipText={statement.data.text}
             />
@@ -313,7 +313,7 @@ export const StatementListBox: React.FC = () => {
             <TagGroup>
               {subjectObjects
                 .slice(0, 2)
-                .map((subjectObject: IActant, key: number) =>
+                .map((subjectObject: IEntity, key: number) =>
                   renderListActant(subjectObject, key)
                 )}
               {isOversized && (
@@ -326,7 +326,7 @@ export const StatementListBox: React.FC = () => {
                     <TagGroup>
                       {subjectObjects
                         .slice(2)
-                        .map((subjectObject: IActant, key: number) =>
+                        .map((subjectObject: IEntity, key: number) =>
                           renderListActant(subjectObject, key)
                         )}
                     </TagGroup>
@@ -406,7 +406,7 @@ export const StatementListBox: React.FC = () => {
             <TagGroup>
               {actantObjects
                 .slice(0, 4)
-                .map((actantObject: IActant, key: number) =>
+                .map((actantObject: IEntity, key: number) =>
                   renderListActant(actantObject, key)
                 )}
               {isOversized && (
@@ -419,7 +419,7 @@ export const StatementListBox: React.FC = () => {
                     <TagGroup>
                       {actantObjects
                         .slice(4)
-                        .map((actantObject: IActant, key: number) =>
+                        .map((actantObject: IEntity, key: number) =>
                           renderListActant(actantObject, key)
                         )}
                     </TagGroup>
@@ -580,7 +580,7 @@ export const StatementListBox: React.FC = () => {
               <div>{actantObjects.length > 0 ? <i>Actants</i> : ""}</div>
               <TagGroup>
                 <div style={{ display: "block" }}>
-                  {actantObjects.map((actantObject: IActant, key: number) =>
+                  {actantObjects.map((actantObject: IEntity, key: number) =>
                     renderListActantLong(actantObject, key, true, statement)
                   )}
                 </div>
@@ -607,7 +607,7 @@ export const StatementListBox: React.FC = () => {
               <div>{actantObjects.length > 0 ? <i>References</i> : ""}</div>
               <TagGroup>
                 <div style={{ display: "block" }}>
-                  {actantObjects.map((actantObject: IActant, key: number) =>
+                  {actantObjects.map((actantObject: IEntity, key: number) =>
                     renderListActantLong(actantObject, key)
                   )}
                 </div>
@@ -631,7 +631,7 @@ export const StatementListBox: React.FC = () => {
               <div>{actantObjects.length > 0 ? <i>Tags</i> : ""}</div>
               <TagGroup>
                 <div style={{ display: "block" }}>
-                  {actantObjects.map((actantObject: IActant, key: number) =>
+                  {actantObjects.map((actantObject: IEntity, key: number) =>
                     renderListActantLong(actantObject, key)
                   )}
                 </div>

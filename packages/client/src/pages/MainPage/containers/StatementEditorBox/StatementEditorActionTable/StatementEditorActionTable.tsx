@@ -3,11 +3,11 @@ import { Column, useTable, useExpanded, Row } from "react-table";
 import update from "immutability-helper";
 import { StyledTable } from "../StatementEditorActionTable/StatementEditorActionTableStyles";
 import { StatementEditorActionTableRow } from "./StatementEditorActionTableRow";
-import { IActant, IResponseStatement, IStatementAction } from "@shared/types";
+import { IEntity, IResponseStatement, IStatementAction } from "@shared/types";
 import { UseMutationResult } from "react-query";
 
 interface FilteredActionObject {
-  data: { action: IActant | undefined; sAction: IStatementAction };
+  data: { action: IEntity | undefined; sAction: IStatementAction };
 }
 interface StatementEditorActionTable {
   statement: IResponseStatement;

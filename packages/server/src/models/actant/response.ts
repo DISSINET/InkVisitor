@@ -1,7 +1,6 @@
 import { Request } from "express";
 import { UserRoleMode } from "@shared/enums";
 import {
-  IActant,
   IAction,
   IEntity,
   IResource,
@@ -17,7 +16,7 @@ import Statement from "@models/statement/statement";
 export class ResponseActant extends Actant implements IResponseActant {
   right: UserRoleMode = UserRoleMode.Read;
 
-  constructor(actant: IActant) {
+  constructor(actant: IEntity) {
     super(actant);
   }
 
@@ -30,18 +29,17 @@ export class ResponseActantDetail
   extends ResponseActant
   implements IResponseDetail
 {
-  entities: { [key: string]: IActant };
+  entities: { [key: string]: IEntity };
   usedInStatement?: IStatement[] | undefined;
   usedInStatementProps?: IStatement[] | undefined;
   data:
-    | IActant["data"]
-    | IAction["data"]
     | IEntity["data"]
+    | IAction["data"]
     | ITerritory["data"]
     | IResource["data"]
     | IStatement["data"];
 
-  constructor(actant: IActant) {
+  constructor(actant: IEntity) {
     super(actant);
     this.data = actant.data;
     this.entities = {};

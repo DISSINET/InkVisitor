@@ -3,12 +3,12 @@ import { useMutation, useQueryClient } from "react-query";
 import { toast } from "react-toastify";
 
 import api from "api";
-import { IActant } from "@shared/types";
+import { IEntity } from "@shared/types";
 import { Submit } from "components";
 import { useSearchParams } from "hooks";
 
 interface ContextMenuSubmitDelete {
-  territoryActant: IActant;
+  territoryActant: IEntity;
   onClose: () => void;
 }
 export const ContextMenuSubmitDelete: React.FC<ContextMenuSubmitDelete> = ({
@@ -22,12 +22,8 @@ export const ContextMenuSubmitDelete: React.FC<ContextMenuSubmitDelete> = ({
   }, []);
 
   const queryClient = useQueryClient();
-  const {
-    territoryId,
-    setTerritoryId,
-    actantId,
-    setActantId,
-  } = useSearchParams();
+  const { territoryId, setTerritoryId, actantId, setActantId } =
+    useSearchParams();
 
   const deleteTerritoryMutation = useMutation(
     async () => await api.actantsDelete(territoryActant.id),

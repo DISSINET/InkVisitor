@@ -10,7 +10,7 @@ import { apiPath } from "@common/constants";
 import app from "../../Server";
 import { findActantById } from "@service/shorthands";
 import { supertestConfig } from "..";
-import { IActant } from "@shared/types";
+import { IEntity } from "@shared/types";
 import Territory from "@models/territory/territory";
 
 describe("Actants delete", function () {
@@ -49,7 +49,7 @@ describe("Actants delete", function () {
         .expect("Content-Type", /json/)
         .expect(200)
         .expect(async () => {
-          const deletedActant = await findActantById<IActant>(db, territory.id);
+          const deletedActant = await findActantById<IEntity>(db, territory.id);
           expect(deletedActant).toBeNull();
         });
 

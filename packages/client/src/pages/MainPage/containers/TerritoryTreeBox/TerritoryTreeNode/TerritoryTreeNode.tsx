@@ -7,7 +7,7 @@ import {
   BsCaretDown,
 } from "react-icons/bs";
 
-import { IActant, IResponseStoredTerritory, ITerritory } from "@shared/types";
+import { IEntity, IResponseStoredTerritory, ITerritory } from "@shared/types";
 import {
   StyledChildrenWrap,
   StyledDisabledTag,
@@ -232,7 +232,7 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
   }, [draggedTerritory]);
 
   const renderTerritoryTag = (
-    territoryActant: IActant,
+    territoryActant: IEntity,
     id: string,
     hasChildren: boolean
   ) => {

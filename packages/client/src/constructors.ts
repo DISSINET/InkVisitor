@@ -15,7 +15,7 @@ import {
   EntityLogicalType,
 } from "@shared/enums";
 import {
-  IActant,
+  IEntity,
   IBookmarkFolder,
   IProp,
   IStatement,
@@ -151,7 +151,7 @@ export const CEntity = (
   label: string,
   userRole: UserRole,
   detail?: string
-): IActant => {
+): IEntity => {
   return {
     id: uuidv4(),
     class: entityClass,

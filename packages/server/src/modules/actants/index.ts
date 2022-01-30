@@ -9,7 +9,6 @@ import {
 } from "@service/shorthands";
 import { EntityStatus, EntityClass, UserRole } from "@shared/enums";
 import {
-  IActant,
   IEntity,
   IResponseActant,
   IResponseDetail,
@@ -37,7 +36,7 @@ export default Router()
         throw new BadParams("actantId has to be set");
       }
 
-      const actantData = await findActantById<IActant>(
+      const actantData = await findActantById<IEntity>(
         request.db,
         actantId as string
       );
@@ -292,7 +291,7 @@ export default Router()
         associatedActantIds
       );
 
-      return actants.map((a: IActant) => {
+      return actants.map((a: IEntity) => {
         const out: IResponseSearch = {
           actantId: a.id,
           actantLabel: a.label,

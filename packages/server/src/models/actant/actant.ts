@@ -5,7 +5,7 @@ import {
   fillArray,
 } from "@models/common";
 import { r as rethink, Connection, WriteResult, RDatum } from "rethinkdb-ts";
-import { IStatement, IActant, IResponseActant, IProp } from "@shared/types";
+import { IStatement, IEntity, IResponseActant, IProp } from "@shared/types";
 import {
   EntityStatus,
   EntityClass,
@@ -20,7 +20,7 @@ import { EventTypes } from "@models/events/types";
 import { findActantsByIds } from "@service/shorthands";
 import Base from "../base";
 
-export default class Actant extends Base implements IActant, IDbModel {
+export default class Actant extends Base implements IEntity, IDbModel {
   static table = "actants";
   static publicFields: string[] = [
     "id",
@@ -220,8 +220,8 @@ export default class Actant extends Base implements IActant, IDbModel {
     return Object.keys(actantsIds);
   }
 
-  async getEntities(db: Connection): Promise<IActant[]> {
-    const entities = findActantsByIds<IActant>(db, this.getEntitiesIds());
+  async getEntities(db: Connection): Promise<IEntity[]> {
+    const entities = findActantsByIds<IEntity>(db, this.getEntitiesIds());
     return entities;
   }
 
@@ -281,7 +281,7 @@ export default class Actant extends Base implements IActant, IDbModel {
 
   toJSON(): IResponseActant {
     const actant = this;
-    const strippedObject: IActant = Actant.getPublicFields(this).reduce(
+    const strippedObject: IEntity = Actant.getPublicFields(this).reduce(
       (acc, curr) => {
         acc[curr] = (actant as Record<string, unknown>)[curr];
         return acc;

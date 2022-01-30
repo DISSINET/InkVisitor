@@ -2,13 +2,13 @@ var { loadSheet } = require("./loadsheet.js");
 var { v4 } = require("uuid");
 var fs = require("fs");
 
-import { IActant } from "../../shared/types";
+import { IEntity } from "../../shared/types";
 
 const entitites = JSON.parse(fs.readFileSync("datasets/all/actants.json"));
 
 // console.log(entitites);
 const now = new Date();
-const audits = entitites.map((entity: IActant, ei: number) => {
+const audits = entitites.map((entity: IEntity, ei: number) => {
   return {
     id: v4(),
     actantId: entity.id,

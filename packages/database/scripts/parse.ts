@@ -19,7 +19,7 @@ import {
 } from "../../shared/enums";
 import {
   IAction,
-  IActant,
+  IEntity,
   IEntity,
   IStatement,
   ITerritory,
@@ -32,7 +32,7 @@ import { entityStatusDict } from "../../shared/dictionaries";
 /**
  * waterfall processing
  */
-var actants: IActant[] = [];
+var actants: IEntity[] = [];
 
 type IConceptProp = {
   type: "value" | "concept";
@@ -573,7 +573,7 @@ const checkValidId = (idValue: string) => {
  * TODO: logical type
  */
 const addEntityActant = (id: string, label: string, type: EntityClass) => {
-  const newEntityActant: IEntity | IActant = {
+  const newEntityActant: IEntity | IEntity = {
     id,
     class: type,
     data:

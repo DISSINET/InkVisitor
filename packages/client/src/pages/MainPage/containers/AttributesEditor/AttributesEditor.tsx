@@ -36,13 +36,13 @@ import { TooltipAttributeRow } from "./TooltipAttributeRow/TooltipAttributeRow";
 import { TooltipBooleanRow } from "./TooltipBooleanRow/TooltipBooleanRow";
 import { AttributesForm } from "./AttributesForm";
 import { EntitySuggester, EntityTag } from "..";
-import { IActant } from "@shared/types";
+import { IEntity } from "@shared/types";
 import { FaUnlink } from "react-icons/fa";
 import { excludedSuggesterEntities } from "Theme/constants";
 
 interface StatementEditorAttributes {
   modalTitle: string;
-  actant?: IActant;
+  actant?: IEntity;
   data: AttributeData;
   handleUpdate: (
     data: AttributeData | { actant: string } | { action: string }

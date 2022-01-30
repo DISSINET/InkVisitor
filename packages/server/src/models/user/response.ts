@@ -1,4 +1,4 @@
-import { Request } from "express";
+import { findActantById, findActantsById } from "@service/shorthands";
 import { UserRole } from "@shared/enums";
 import {
   IBookmarkFolder,
@@ -10,7 +10,7 @@ import {
   IUserOptions,
   IUserRight,
 } from "@shared/types";
-import { findActantById, findActantsById } from "@service/shorthands";
+import { Request } from "express";
 
 export class ResponseUser implements IResponseUser {
   id: string;

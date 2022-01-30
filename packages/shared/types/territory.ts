@@ -1,7 +1,7 @@
-import { IActant } from "./actant";
+import { IEntity } from "./entity";
 import { EntityClass } from "../enums";
 
-export interface ITerritory extends IActant {
+export interface ITerritory extends IEntity {
   class: EntityClass.Territory;
   data: {
     parent: IParentTerritory | false;

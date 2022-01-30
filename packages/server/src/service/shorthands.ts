@@ -1,6 +1,6 @@
 import { Connection, r as rethink, RDatum, WriteResult } from "rethinkdb-ts";
 import { IUser } from "@shared/types/user";
-import { IActant } from "@shared/types/actant";
+import { IEntity } from "@shared/types";
 import { Db } from "./RethinkDB";
 import { IAction, IStatement, ITerritory } from "@shared/types";
 import { IDbModel } from "@models/common";
@@ -67,7 +67,7 @@ export async function getTerritoryChilds(
     .run(db.connection);
 }
 
-export async function findActantById<T extends IActant>(
+export async function findActantById<T extends IEntity>(
   db: Db,
   id: string,
   additionalFilter: Record<string, unknown> = {}
@@ -84,7 +84,7 @@ export async function findActantById<T extends IActant>(
   return data.length == 0 ? null : data[0];
 }
 
-export async function findActantsByIds<T extends IActant>(
+export async function findActantsByIds<T extends IEntity>(
   db: Db | Connection,
   ids: string[]
 ): Promise<T[]> {
@@ -97,7 +97,7 @@ export async function findActantsByIds<T extends IActant>(
   }
 }
 
-export async function findActants<T extends IActant>(
+export async function findActants<T extends IEntity>(
   db: Db,
   additionalFilter: Record<string, unknown> = {}
 ): Promise<T[]> {
@@ -125,7 +125,7 @@ export async function getActantUsage(db: Db, id: string): Promise<number> {
 export async function findActantsById(
   db: Db,
   ids: string[]
-): Promise<IActant[]> {
+): Promise<IEntity[]> {
   const data = await rethink
     .table("actants")
     .getAll(...ids)
@@ -187,7 +187,7 @@ export async function filterActantsByWildcard(
   actantClassExcluded: EntityClass[] | undefined,
   actantLabel: string | false,
   actantIds?: string[]
-): Promise<IActant[]> {
+): Promise<IEntity[]> {
   let query = rethink.table("actants");
 
   if (actantIds && actantIds.length) {
