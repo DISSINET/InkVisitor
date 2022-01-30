@@ -76,6 +76,16 @@ export const EntitySuggester: React.FC<EntitySuggesterI> = ({
             : selectedCategory?.value,
         excluded: excludedEntities.length ? excludedEntities : undefined,
       });
+
+      // TODO: status -> data.status
+      const suggestions = resSuggestions.data;
+      suggestions.sort((a, b) => {
+        if (a.status == ActantStatus.Discouraged) {
+          return 1;
+        } else {
+          return -1;
+        }
+      });
       return (
         resSuggestions.data
           //.filter((s) => s.status !== ActantStatus.Discouraged)
