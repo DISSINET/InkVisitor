@@ -14,7 +14,7 @@ import { MdAddCircleOutline } from "react-icons/md";
 import { Extend } from "webpack/node_modules/schema-utils/declarations/validate";
 
 export const AuditTable: React.FC<IResponseAudit> = ({
-  actant,
+  entity,
   last,
   first,
 }) => {
@@ -41,7 +41,7 @@ type IAuditTableRow = { mode: "edit" | "create" } & IAudit;
 
 export const AuditTableRow: React.FC<IAuditTableRow> = ({
   id,
-  actantId,
+  entityId,
   user,
   date,
   changes,
