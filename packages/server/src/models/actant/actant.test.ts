@@ -172,3 +172,28 @@ describe("test Actant.toJSON", function () {
     );
   });
 });
+
+describe("test Actant.determineOrder", function () {
+  describe("when wanting already used order value", () => {
+    const takenIndex = -2;
+    const siblings: Record<number, unknown> = { [takenIndex]: true };
+
+    it("should choose slightly bigger real number", () => {
+      expect(Actant.determineOrder(takenIndex, siblings)).toBe(takenIndex + 1);
+    });
+  });
+
+  describe("when wanting already used order value with already used following index (+1)", () => {
+    const takenIndex = -2;
+    const siblings: Record<number, unknown> = {};
+    for (let i = takenIndex; i < 5; i++) {
+      siblings[i] = true;
+    }
+
+    it("should choose slightly bigger decimal number", () => {
+      expect(Actant.determineOrder(takenIndex, siblings)).toBe(
+        takenIndex + 0.5
+      );
+    });
+  });
+});
