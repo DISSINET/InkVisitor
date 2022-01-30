@@ -20,7 +20,6 @@ import {
 import {
   IAction,
   IEntity,
-  IEntity,
   IStatement,
   ITerritory,
   IResource,
@@ -98,7 +97,7 @@ const loadStatementsTables = async (next: Function) => {
           },
           status: statusOption
             ? (statusOption.value as EntityStatus)
-            : ("0" as EntityStatus),
+            : EntityStatus.Pending,
         },
         language:
           action.language === "English" ? Language.English : Language.Latin,
@@ -130,7 +129,7 @@ const loadStatementsTables = async (next: Function) => {
       },
       ti: number
     ) => {
-      addTerritoryActant(
+      addTerritoryEntity(
         text.id,
         text.label,
         rootTerritory,
@@ -142,7 +141,7 @@ const loadStatementsTables = async (next: Function) => {
     }
   );
 
-  addTerritoryActant(rootTerritory, "everything", false, 0);
+  addTerritoryEntity(rootTerritory, "everything", false, 0);
 
   type IRowResources = {
     type: string;
@@ -179,7 +178,7 @@ const loadStatementsTables = async (next: Function) => {
   tableManuscripts.forEach((manuscript: { id: string; label: string }) => {
     // parse as objects #629
     //addResourceActant(manuscript.id, manuscript.label);
-    addEntityActant(manuscript.id, manuscript.label, EntityClass.Object);
+    addEntity(manuscript.id, manuscript.label, EntityClass.Object);
   });
 
   const tableResources: IRowResources[] = await loadSheet({
@@ -330,7 +329,7 @@ const loadStatementsTables = async (next: Function) => {
     data
       .filter((er: any) => er.label)
       .forEach((entityRow: any, eri: number) => {
-        addEntityActant(
+        addEntity(
           entitySheet.id + "_" + entityRow.id,
           entityRow.label,
           entitySheet.entityType as EntityClass
@@ -377,7 +376,7 @@ const loadStatementsTables = async (next: Function) => {
       // add sub-territories
       territoryIds.forEach((territoryId: string, ti: number) => {
         console.log(territoryId);
-        addTerritoryActant(
+        addTerritoryEntity(
           territoryId,
           territoryId,
           territoryId.includes("-")
@@ -572,8 +571,8 @@ const checkValidId = (idValue: string) => {
 /***
  * TODO: logical type
  */
-const addEntityActant = (id: string, label: string, type: EntityClass) => {
-  const newEntityActant: IEntity | IEntity = {
+const addEntity = (id: string, label: string, type: EntityClass) => {
+  const newEntity: IEntity | IEntity = {
     id,
     class: type,
     data:
@@ -591,10 +590,10 @@ const addEntityActant = (id: string, label: string, type: EntityClass) => {
     props: [],
   };
   if (id) {
-    actants.push(newEntityActant);
+    actants.push(newEntity);
   }
 };
-const addTerritoryActant = (
+const addTerritoryEntity = (
   id: string,
   label: string,
   parentId: string | false,
@@ -676,7 +675,7 @@ const parseEntityPropsInRow = (row: any) => {
           const valueId = v4();
 
           // add actant
-          addEntityActant(valueId, value, EntityClass.Value);
+          addEntity(valueId, value, EntityClass.Value);
 
           // add statement
           // createEmptyPropStatement(
@@ -993,11 +992,7 @@ const createNewActantIfNeeded = (actantValue: string) => {
     const newActantLabel: string = actantValue.split("~")[2];
 
     if (["P", "G", "O", "C", "L", "V", "E"].indexOf(newActantType) > -1)
-      addEntityActant(
-        newActantId,
-        newActantLabel,
-        newActantType as EntityClass
-      );
+      addEntity(newActantId, newActantLabel, newActantType as EntityClass);
 
     return newActantId;
   } else {
