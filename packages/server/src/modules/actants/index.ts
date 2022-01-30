@@ -219,7 +219,9 @@ export default Router()
       });
 
       if (!model.canBeDeletedByUser(request.getUserOrFail())) {
-        throw new PermissionDeniedError("actant cannot be deleted");
+        throw new PermissionDeniedError(
+          "actant cannot be deleted by current user"
+        );
       }
 
       const result = await model.delete(request.db.connection);
