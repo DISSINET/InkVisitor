@@ -635,7 +635,6 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                       <Dropdown
                         disabled={!userCanEdit}
                         isMulti
-                        allowSelectAll
                         options={entitiesDict}
                         value={[allEntities]
                           .concat(entitiesDict)
@@ -709,7 +708,6 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                       <Dropdown
                         disabled={!userCanEdit}
                         isMulti
-                        allowSelectAll
                         options={entitiesDict}
                         value={[allEntities]
                           .concat(entitiesDict)
@@ -783,7 +781,6 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                       <Dropdown
                         disabled={!userCanEdit}
                         isMulti
-                        allowSelectAll
                         options={entitiesDict}
                         value={[allEntities]
                           .concat(entitiesDict)
@@ -797,7 +794,6 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                         onChange={(newValue: any) => {
                           const oldData = { ...actant.data };
 
-                          console.log(actant.data.entities);
                           updateActantMutation.mutate({
                             data: {
                               ...oldData,
