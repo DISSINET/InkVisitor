@@ -1,9 +1,9 @@
 import Actant from "@models/actant/actant";
 import { fillFlatObject, IModel, UnknownObject } from "@models/common";
 import { EntityClass, EntityLogicalType } from "@shared/enums";
-import { IEntity } from "@shared/types";
+import { IPerson } from "@shared/types";
 
-class EntityData implements IModel {
+class PersonData implements IModel {
   logicalType: EntityLogicalType = EntityLogicalType.Definite;
 
   constructor(data: UnknownObject) {
@@ -19,12 +19,12 @@ class EntityData implements IModel {
   }
 }
 
-class Entity extends Actant implements IEntity {
+class Person extends Actant implements IPerson {
   static table = "actants";
   static publicFields = Actant.publicFields;
 
-  class: EntityClass = EntityClass.Person; // just default
-  data: EntityData;
+  class: EntityClass.Person = EntityClass.Person; // just default
+  data: PersonData;
 
   constructor(data: UnknownObject) {
     super(data);
@@ -33,20 +33,11 @@ class Entity extends Actant implements IEntity {
       data = {};
     }
 
-    this.class = data.class as EntityClass;
-    this.data = new EntityData(data.data as UnknownObject);
+    this.data = new PersonData(data.data as UnknownObject);
   }
 
   isValid(): boolean {
-    const alloweedClasses = [
-      EntityClass.Person,
-      EntityClass.Group,
-      EntityClass.Object,
-      EntityClass.Location,
-      EntityClass.Value,
-      EntityClass.Event,
-    ];
-    if (alloweedClasses.indexOf(this.class) === -1) {
+    if (this.class !== EntityClass.Person) {
       return false;
     }
 
@@ -54,4 +45,4 @@ class Entity extends Actant implements IEntity {
   }
 }
 
-export default Entity;
+export default Person;

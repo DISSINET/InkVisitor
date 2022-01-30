@@ -1,13 +1,18 @@
-import { IDbModel, UnknownObject } from "./common";
+import { UnknownObject } from "./common";
 import { EntityClass } from "@shared/enums";
 import Territory from "./territory/territory";
 import Statement from "./statement/statement";
-import Entity from "./entity/entity";
 import Resource from "./resource/resource";
 import { ModelNotValidError } from "@shared/types/errors";
 import Action from "./action/action";
 import Actant from "./actant/actant";
 import Concept from "./concept/concept";
+import Person from "./person/person";
+import Group from "./group/group";
+import ObjectEntity from "./object/object";
+import Location from "./location/location";
+import Value from "./value/value";
+import Event from "./event/event";
 
 export function getEntityClass(data: UnknownObject): Actant {
   if (!data || typeof data !== "object" || Object.keys(data).length === 0) {
@@ -20,19 +25,19 @@ export function getEntityClass(data: UnknownObject): Actant {
     case EntityClass.Statement:
       return new Statement(data);
     case EntityClass.Person:
-      return new Entity(data);
+      return new Person(data);
     case EntityClass.Group:
-      return new Entity(data);
+      return new Group(data);
     case EntityClass.Object:
-      return new Entity(data);
+      return new ObjectEntity(data);
     case EntityClass.Concept:
       return new Concept(data);
     case EntityClass.Location:
-      return new Entity(data);
+      return new Location(data);
     case EntityClass.Value:
-      return new Entity(data);
+      return new Value(data);
     case EntityClass.Event:
-      return new Entity(data);
+      return new Event(data);
     case EntityClass.Resource:
       return new Resource(data);
     case EntityClass.Action:
