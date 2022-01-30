@@ -38,7 +38,7 @@ import { CStatement, DStatement } from "constructors";
 import { useSearchParams } from "hooks";
 import { StatementListContextMenu } from "./StatementListContextMenu/StatementListContextMenu";
 import { BsArrowUp, BsArrowDown } from "react-icons/bs";
-import { UserRole, UserRoleMode } from "@shared/enums";
+import { TerritoryOrder, UserRole, UserRoleMode } from "@shared/enums";
 
 const initialData: {
   statements: IStatement[];
@@ -174,9 +174,9 @@ export const StatementListBox: React.FC = () => {
   const addStatementAtCertainIndex = async (index: number) => {
     const newOrder =
       index + 1 > statements.length
-        ? statements.length
+        ? TerritoryOrder.Last
         : index < 1
-        ? statements[0].data.territory.order - 1
+        ? TerritoryOrder.First
         : (statements[index - 1].data.territory.order +
             statements[index].data.territory.order) /
           2;

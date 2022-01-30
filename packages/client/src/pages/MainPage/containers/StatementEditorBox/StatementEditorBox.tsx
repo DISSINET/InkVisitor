@@ -1,4 +1,4 @@
-import { ActantType, UserRoleMode } from "@shared/enums";
+import { ActantType, TerritoryOrder, UserRoleMode } from "@shared/enums";
 import {
   IProp,
   IResponseStatement,
@@ -479,7 +479,7 @@ export const StatementEditorBox: React.FC = () => {
   const moveStatementMutation = useMutation(
     async (newTerritoryId: string) => {
       await api.actantsUpdate(statementId, {
-        data: { territory: { id: newTerritoryId, order: -1 } },
+        data: { territory: { id: newTerritoryId, order: TerritoryOrder.Last } },
       });
     },
     {

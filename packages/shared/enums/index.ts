@@ -188,3 +188,8 @@ export enum UserRoleMode {
   Read = "read",
   Admin = "admin",
 }
+
+export enum TerritoryOrder {
+  First = -9999,
+  Last = 9999,
+}
