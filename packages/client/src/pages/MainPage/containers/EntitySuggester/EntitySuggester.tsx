@@ -76,36 +76,38 @@ export const EntitySuggester: React.FC<EntitySuggesterI> = ({
             : selectedCategory?.value,
         excluded: excludedEntities.length ? excludedEntities : undefined,
       });
-      return resSuggestions.data
-        .filter((s) => s.status !== ActantStatus.Discouraged)
-        .filter((s) =>
-          filterEditorRights && userRole !== UserRole.Admin
-            ? s.right === UserRoleMode.Write
-            : s
-        )
-        .filter((s) =>
-          excludedActantIds.length ? !excludedActantIds.includes(s.id) : s
-        )
-        .map((s: IActant) => {
-          const entity = Entities[s.class];
+      return (
+        resSuggestions.data
+          //.filter((s) => s.status !== ActantStatus.Discouraged)
+          .filter((s) =>
+            filterEditorRights && userRole !== UserRole.Admin
+              ? s.right === UserRoleMode.Write
+              : s
+          )
+          .filter((s) =>
+            excludedActantIds.length ? !excludedActantIds.includes(s.id) : s
+          )
+          .map((s: IActant) => {
+            const entity = Entities[s.class];
 
-          const icons: React.ReactNode[] = [];
+            const icons: React.ReactNode[] = [];
 
-          if (territoryActants?.includes(s.id)) {
-            icons.push(<FaHome key={s.id} color="" />);
-          }
+            if (territoryActants?.includes(s.id)) {
+              icons.push(<FaHome key={s.id} color="" />);
+            }
 
-          return {
-            color: entity.color,
-            category: s.class,
-            label: s.label,
-            detail: s.detail,
-            status: s.status,
-            ltype: s.data.logicalType,
-            id: s.id,
-            icons: icons,
-          };
-        });
+            return {
+              color: entity.color,
+              category: s.class,
+              label: s.label,
+              detail: s.detail,
+              status: s.status,
+              ltype: s.data.logicalType,
+              id: s.id,
+              icons: icons,
+            };
+          })
+      );
     },
     {
       enabled:
