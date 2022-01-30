@@ -78,6 +78,11 @@
   },
   {
     "controller": "actants",
+    "method": "delete",
+    "roles": ["*"]
+  },
+  {
+    "controller": "actants",
     "method": "detail",
     "roles": ["*"]
   },
