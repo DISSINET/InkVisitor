@@ -14,7 +14,7 @@ import { EventTypes } from "@models/events/types";
 import { findActantsByIds } from "@service/shorthands";
 import Base from "../base";
 
-export default class Actant extends Base implements IEntity, IDbModel {
+export default class Entity extends Base implements IEntity, IDbModel {
   static table = "actants";
   static publicFields: string[] = [
     "id",
@@ -54,7 +54,7 @@ export default class Actant extends Base implements IEntity, IDbModel {
 
   async save(db: Connection | undefined): Promise<WriteResult> {
     const result = await rethink
-      .table(Actant.table)
+      .table(Entity.table)
       .insert({ ...this, id: this.id || undefined })
       .run(db);
 
@@ -69,7 +69,7 @@ export default class Actant extends Base implements IEntity, IDbModel {
     db: Connection | undefined,
     updateData: Record<string, unknown>
   ): Promise<WriteResult> {
-    return rethink.table(Actant.table).get(this.id).update(updateData).run(db);
+    return rethink.table(Entity.table).get(this.id).update(updateData).run(db);
   }
 
   async delete(db: Connection | undefined): Promise<WriteResult> {
@@ -84,7 +84,7 @@ export default class Actant extends Base implements IEntity, IDbModel {
     }
 
     const result = await rethink
-      .table(Actant.table)
+      .table(Entity.table)
       .get(this.id)
       .delete()
       .run(db);
@@ -137,7 +137,7 @@ export default class Actant extends Base implements IEntity, IDbModel {
 
   getDependentStatements(db: Connection | undefined): Promise<IStatement[]> {
     return rethink
-      .table(Actant.table)
+      .table(Entity.table)
       .filter({ class: EntityClass.Statement })
       .filter((row: any) => {
         return rethink.or(
@@ -229,7 +229,7 @@ export default class Actant extends Base implements IEntity, IDbModel {
     db: Connection | undefined
   ): Promise<IStatement[]> {
     const statements = await rethink
-      .table(Actant.table)
+      .table(Entity.table)
       .filter({
         class: EntityClass.Statement,
       })
@@ -269,13 +269,13 @@ export default class Actant extends Base implements IEntity, IDbModel {
     this.right = this.getUserRoleMode(user);
   }
 
-  static getPublicFields(a: Actant): string[] {
+  static getPublicFields(a: Entity): string[] {
     return Object.keys(a).filter((k) => k.indexOf("_") !== 0);
   }
 
   toJSON(): IResponseEntity {
     const entity = this;
-    const strippedObject: IEntity = Actant.getPublicFields(this).reduce(
+    const strippedObject: IEntity = Entity.getPublicFields(this).reduce(
       (acc, curr) => {
         acc[curr] = (entity as Record<string, unknown>)[curr];
         return acc;

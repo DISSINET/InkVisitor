@@ -1,5 +1,5 @@
 import { mergeDeep } from "@common/functions";
-import { ResponseActant, ResponseActantDetail } from "@models/actant/response";
+import { ResponseEntity, ResponseEntityDetail } from "@models/entity/response";
 import Audit from "@models/audit/audit";
 import { getEntityClass } from "@models/factory";
 import {
@@ -7,10 +7,10 @@ import {
   findActantById,
   findAssociatedActantIds,
 } from "@service/shorthands";
-import { EntityClass, UserRole } from "@shared/enums";
+import { EntityClass } from "@shared/enums";
 import {
   IEntity,
-  IResponseActant,
+  IResponseEntity,
   IResponseDetail,
   IResponseGeneric,
   IResponseSearch,
@@ -28,28 +28,28 @@ import { asyncRouteHandler } from "../index";
 
 export default Router()
   .get(
-    "/get/:actantId?",
-    asyncRouteHandler<IResponseActant>(async (request: Request) => {
-      const actantId = request.params.actantId;
+    "/get/:entityId?",
+    asyncRouteHandler<IResponseEntity>(async (request: Request) => {
+      const entityId = request.params.entityId;
 
-      if (!actantId) {
-        throw new BadParams("actantId has to be set");
+      if (!entityId) {
+        throw new BadParams("entityId has to be set");
       }
 
-      const actantData = await findActantById<IEntity>(
+      const entityData = await findActantById<IEntity>(
         request.db,
-        actantId as string
+        entityId as string
       );
 
-      if (!actantData) {
+      if (!entityData) {
         throw new ActantDoesNotExits(
-          `actant ${actantId} was not found`,
-          actantId
+          `entity ${entityId} was not found`,
+          entityId
         );
       }
-      const actant = getEntityClass({ ...actantData });
+      const entity = getEntityClass({ ...entityData });
 
-      const response = new ResponseActant(actant);
+      const response = new ResponseEntity(entity);
 
       await response.prepare(request);
 
@@ -58,7 +58,7 @@ export default Router()
   )
   .post(
     "/getMore",
-    asyncRouteHandler<IResponseActant[]>(async (request: Request) => {
+    asyncRouteHandler<IResponseEntity[]>(async (request: Request) => {
       const label = request.body.label;
       const classParam = request.body.class;
       const excluded: EntityClass[] = request.body.excluded;
@@ -74,16 +74,16 @@ export default Router()
         throw new BadParams("excluded need to be array");
       }
 
-      const actants = await filterActantsByWildcard(
+      const entities = await filterActantsByWildcard(
         request.db,
         classParam,
         excluded,
         label
       );
 
-      const responses: IResponseActant[] = [];
-      for (const actant of actants) {
-        const response = new ResponseActant(actant);
+      const responses: IResponseEntity[] = [];
+      for (const entity of entities) {
+        const response = new ResponseEntity(entity);
         await response.prepare(request);
         responses.push(response);
       }
@@ -103,7 +103,7 @@ export default Router()
       const user = request.getUserOrFail();
 
       if (!model.canBeCreatedByUser(user)) {
-        throw new PermissionDeniedError("actant cannot be created");
+        throw new PermissionDeniedError("entity cannot be created");
       }
 
       const result = await model.save(request.db.connection);
@@ -126,35 +126,35 @@ export default Router()
           result: true,
         };
       } else {
-        throw new InternalServerError(`cannot create actant`);
+        throw new InternalServerError(`cannot create entity`);
       }
     })
   )
   .put(
-    "/update/:actantId?",
+    "/update/:entityId?",
     asyncRouteHandler<IResponseGeneric>(async (request: Request) => {
-      const actantId = request.params.actantId;
-      const actantData = request.body as Record<string, unknown>;
+      const entityId = request.params.entityId;
+      const entityData = request.body as Record<string, unknown>;
 
       // not validation, just required data for this operation
-      if (!actantId || !actantData || Object.keys(actantData).length === 0) {
-        throw new BadParams("actant id and data have to be set");
+      if (!entityId || !entityData || Object.keys(entityData).length === 0) {
+        throw new BadParams("entity id and data have to be set");
       }
 
-      // actantId must be already in the db
-      const existingActant = await findActantById(request.db, actantId);
-      if (!existingActant) {
+      // entityId must be already in the db
+      const existingEntity = await findActantById(request.db, entityId);
+      if (!existingEntity) {
         throw new ActantDoesNotExits(
-          `actant with id ${actantId} does not exist`,
-          actantId
+          `entity with id ${entityId} does not exist`,
+          entityId
         );
       }
 
       // get correct IDbModel implementation
       const model = getEntityClass({
-        ...mergeDeep(existingActant, actantData),
-        class: existingActant.class,
-        id: actantId,
+        ...mergeDeep(existingEntity, entityData),
+        class: existingEntity.class,
+        id: entityId,
       });
 
       // checking the validity of the final model (already has updated data)
@@ -163,55 +163,55 @@ export default Router()
       }
 
       if (!model.canBeEditedByUser(request.getUserOrFail())) {
-        throw new PermissionDeniedError("actant cannot be saved");
+        throw new PermissionDeniedError("entity cannot be saved");
       }
 
       // update only the required fields
-      const result = await model.update(request.db.connection, actantData);
+      const result = await model.update(request.db.connection, entityData);
 
       if (result.replaced || result.unchanged) {
         await Audit.createNew(
           request.db.connection,
           request.getUserOrFail(),
-          actantId,
-          actantData
+          entityId,
+          entityData
         );
 
         return {
           result: true,
         };
       } else {
-        throw new InternalServerError(`cannot update actant ${actantId}`);
+        throw new InternalServerError(`cannot update entity ${entityId}`);
       }
     })
   )
   .delete(
-    "/delete/:actantId?",
+    "/delete/:entityId?",
     asyncRouteHandler<IResponseGeneric>(async (request: Request) => {
-      const actantId = request.params.actantId;
+      const entityId = request.params.entityId;
 
-      if (!actantId) {
-        throw new BadParams("actant id has to be set");
+      if (!entityId) {
+        throw new BadParams("entity id has to be set");
       }
 
-      // actantId must be already in the db
-      const existingActant = await findActantById(request.db, actantId);
-      if (!existingActant) {
+      // entityId must be already in the db
+      const existingEntity = await findActantById(request.db, entityId);
+      if (!existingEntity) {
         throw new ActantDoesNotExits(
-          `actant with id ${actantId} does not exist`,
-          actantId
+          `entity with id ${entityId} does not exist`,
+          entityId
         );
       }
 
       // get correct IDbModel implementation
       const model = getEntityClass({
-        class: existingActant.class,
-        id: actantId,
+        class: existingEntity.class,
+        id: entityId,
       });
 
       if (!model.canBeDeletedByUser(request.getUserOrFail())) {
         throw new PermissionDeniedError(
-          "actant cannot be deleted by current user"
+          "entity cannot be deleted by current user"
         );
       }
 
@@ -222,34 +222,34 @@ export default Router()
           result: true,
         };
       } else {
-        throw new InternalServerError(`cannot delete actant ${actantId}`);
+        throw new InternalServerError(`cannot delete entity ${entityId}`);
       }
     })
   )
   .get(
-    "/detail/:actantId?",
+    "/detail/:entityId?",
     asyncRouteHandler<IResponseDetail>(async (request: Request) => {
-      const actantId = request.params.actantId;
+      const entityId = request.params.entityId;
 
-      if (!actantId) {
-        throw new BadParams("actant id has to be set");
+      if (!entityId) {
+        throw new BadParams("entity id has to be set");
       }
 
-      const actantData = await findActantById(request.db, actantId);
-      if (!actantData) {
+      const entityData = await findActantById(request.db, entityId);
+      if (!entityData) {
         throw new ActantDoesNotExits(
-          `actant ${actantId} was not found`,
-          actantId
+          `entity ${entityId} was not found`,
+          entityId
         );
       }
 
-      const actant = getEntityClass({ ...actantData });
+      const entity = getEntityClass({ ...entityData });
 
-      if (!actant.canBeViewedByUser(request.getUserOrFail())) {
-        throw new PermissionDeniedError(`cannot view actant ${actantId}`);
+      if (!entity.canBeViewedByUser(request.getUserOrFail())) {
+        throw new PermissionDeniedError(`cannot view entity ${entityId}`);
       }
 
-      const response = new ResponseActantDetail(actant);
+      const response = new ResponseEntityDetail(entity);
 
       await response.prepare(request);
 
@@ -269,38 +269,38 @@ export default Router()
         throw err;
       }
 
-      let associatedActantIds: string[] | undefined = undefined;
-      if (req.actantId) {
-        associatedActantIds = await findAssociatedActantIds(
+      let associatedEntityIds: string[] | undefined = undefined;
+      if (req.entityId) {
+        associatedEntityIds = await findAssociatedActantIds(
           httpRequest.db,
-          req.actantId
+          req.entityId
         );
 
-        // actant id provided, but not found within statements - end now
-        if (!associatedActantIds.length) {
+        // entity id provided, but not found within statements - end now
+        if (!associatedEntityIds.length) {
           return [];
         }
       }
 
       // filter out duplicates
-      associatedActantIds = [...new Set(associatedActantIds)];
+      associatedEntityIds = [...new Set(associatedEntityIds)];
 
-      const actants = await filterActantsByWildcard(
+      const entities = await filterActantsByWildcard(
         httpRequest.db,
         req.class,
         req.excluded,
         req.label,
-        associatedActantIds
+        associatedEntityIds
       );
 
-      return actants.map((a: IEntity) => {
+      return entities.map((a: IEntity) => {
         const out: IResponseSearch = {
-          actantId: a.id,
-          actantLabel: a.label,
+          entityId: a.id,
+          entityLabel: a.label,
           class: a.class,
         };
 
-        // only for Entity (grouped actant of EntityClass)
+        // only for Entity (grouped entity of EntityClass)
         if (a.data.logicalType) {
           out.logicalType = (a as IEntity).data.logicalType;
         }

@@ -1,4 +1,4 @@
-import Actant from "@models/actant/actant";
+import Entity from "@models/entity/entity";
 import { fillFlatObject, IModel, UnknownObject } from "@models/common";
 import { EntityClass, EntityLogicalType } from "@shared/enums";
 import { IPerson } from "@shared/types";
@@ -19,9 +19,9 @@ class PersonData implements IModel {
   }
 }
 
-class Person extends Actant implements IPerson {
+class Person extends Entity implements IPerson {
   static table = "actants";
-  static publicFields = Actant.publicFields;
+  static publicFields = Entity.publicFields;
 
   class: EntityClass.Person = EntityClass.Person; // just default
   data: PersonData;

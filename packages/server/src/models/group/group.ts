@@ -1,4 +1,4 @@
-import Actant from "@models/actant/actant";
+import Entity from "@models/entity/entity";
 import { fillFlatObject, IModel, UnknownObject } from "@models/common";
 import { EntityClass, EntityLogicalType } from "@shared/enums";
 import { IGroup } from "@shared/types";
@@ -19,9 +19,9 @@ class GroupData implements IModel {
   }
 }
 
-class Group extends Actant implements IGroup {
+class Group extends Entity implements IGroup {
   static table = "actants";
-  static publicFields = Actant.publicFields;
+  static publicFields = Entity.publicFields;
 
   class: EntityClass.Group = EntityClass.Group; // just default
   data: GroupData;

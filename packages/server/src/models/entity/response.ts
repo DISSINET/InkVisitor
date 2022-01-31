@@ -7,10 +7,10 @@ import {
   IStatement,
 } from "@shared/types";
 import { Connection } from "rethinkdb-ts";
-import Actant from "./actant";
+import Entity from "./entity";
 import Statement from "@models/statement/statement";
 
-export class ResponseActant extends Actant implements IResponseEntity {
+export class ResponseEntity extends Entity implements IResponseEntity {
   right: UserRoleMode = UserRoleMode.Read;
 
   constructor(entity: IEntity) {
@@ -25,16 +25,16 @@ export class ResponseActant extends Actant implements IResponseEntity {
   }
 }
 
-export class ResponseActantDetail
-  extends ResponseActant
+export class ResponseEntityDetail
+  extends ResponseEntity
   implements IResponseDetail
 {
   entities: { [key: string]: IEntity };
   usedInStatement?: IStatement[] | undefined;
   usedInStatementProps?: IStatement[] | undefined;
 
-  constructor(actant: IEntity) {
-    super(actant);
+  constructor(entity: IEntity) {
+    super(entity);
     this.entities = {};
   }
 

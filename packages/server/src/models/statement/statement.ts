@@ -26,7 +26,7 @@ import {
   UserRoleMode,
 } from "@shared/enums";
 
-import Actant from "@models/actant/actant";
+import Entity from "@models/entity/entity";
 import { r as rethink, Connection, RDatum, WriteResult } from "rethinkdb-ts";
 import { InternalServerError } from "@shared/types/errors";
 import User from "@models/user/user";
@@ -206,9 +206,9 @@ export class StatementData implements IModel, IStatementData {
   }
 }
 
-class Statement extends Actant implements IStatement {
+class Statement extends Entity implements IStatement {
   static table = "actants";
-  static publicFields = Actant.publicFields;
+  static publicFields = Entity.publicFields;
 
   class: EntityClass.Statement = EntityClass.Statement;
   data: StatementData;
@@ -288,7 +288,7 @@ class Statement extends Actant implements IStatement {
    */
   async save(db: Connection | undefined): Promise<WriteResult> {
     const siblings = await this.findTerritorySiblings(db);
-    this.data.territory.order = Actant.determineOrder(
+    this.data.territory.order = Entity.determineOrder(
       this.data.territory.order,
       siblings
     );
@@ -323,7 +323,7 @@ class Statement extends Actant implements IStatement {
       const wantedOrder = territoryData.order;
 
       const siblings = await this.findTerritorySiblings(db);
-      this.data.territory.order = Actant.determineOrder(wantedOrder, siblings);
+      this.data.territory.order = Entity.determineOrder(wantedOrder, siblings);
       territoryData.order = this.data.territory.order;
     }
 
@@ -352,7 +352,7 @@ class Statement extends Actant implements IStatement {
     db: Connection | undefined
   ): Promise<Record<number, IStatement>> {
     const list: IStatement[] = await rethink
-      .table(Actant.table)
+      .table(Entity.table)
       .filter({
         class: EntityClass.Statement,
       })
@@ -589,7 +589,7 @@ class Statement extends Actant implements IStatement {
       actantId: string
     ): Promise<void> => {
       const linkedToActant = await rethink
-        .table(Actant.table)
+        .table(Entity.table)
         .filter({ class: EntityClass.Statement })
         .filter((row: any) => {
           return row("data")("actants").contains((actantElement: any) =>
@@ -604,7 +604,7 @@ class Statement extends Actant implements IStatement {
       }
 
       const linkedToProps = await rethink
-        .table(Actant.table)
+        .table(Entity.table)
         .filter({ class: EntityClass.Statement })
         .filter((row: any) => {
           return row("data")("props").contains((actantElement: any) =>
@@ -614,7 +614,7 @@ class Statement extends Actant implements IStatement {
         .run(db);
 
       const linkedToActions = await rethink
-        .table(Actant.table)
+        .table(Entity.table)
         .filter({ class: EntityClass.Statement })
         .filter((row: any) => {
           return row("data")("actions").contains((actantElement: any) =>

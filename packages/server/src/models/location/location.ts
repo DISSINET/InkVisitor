@@ -1,4 +1,4 @@
-import Actant from "@models/actant/actant";
+import Entity from "@models/entity/entity";
 import { fillFlatObject, IModel, UnknownObject } from "@models/common";
 import { EntityClass, EntityLogicalType } from "@shared/enums";
 import { ILocation } from "@shared/types";
@@ -19,9 +19,9 @@ class LocationData implements IModel {
   }
 }
 
-class Location extends Actant implements ILocation {
+class Location extends Entity implements ILocation {
   static table = "actants";
-  static publicFields = Actant.publicFields;
+  static publicFields = Entity.publicFields;
 
   class: EntityClass.Location = EntityClass.Location; // just default
   data: LocationData;

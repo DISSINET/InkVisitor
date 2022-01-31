@@ -1,4 +1,4 @@
-import Actant from "@models/actant/actant";
+import Entity from "@models/entity/entity";
 import { fillFlatObject, IModel, UnknownObject } from "@models/common";
 import { EntityClass, EntityLogicalType } from "@shared/enums";
 import { IEvent } from "@shared/types";
@@ -19,9 +19,9 @@ class EventData implements IModel {
   }
 }
 
-class Event extends Actant implements IEvent {
+class Event extends Entity implements IEvent {
   static table = "actants";
-  static publicFields = Actant.publicFields;
+  static publicFields = Entity.publicFields;
 
   class: EntityClass.Event = EntityClass.Event; // just default
   data: EventData;

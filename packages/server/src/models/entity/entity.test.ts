@@ -1,31 +1,31 @@
 import "ts-jest";
 import { Db } from "@service/RethinkDB";
-import Actant from "./actant";
+import Entity from "./entity";
 import Statement from "@models/statement/statement";
 import { clean } from "@modules/common.test";
 import { findActantById } from "@service/shorthands";
 import { IStatement } from "@shared/types";
 
-describe("test Actant.delete", function () {
+describe("test Entity.delete", function () {
   describe("one existing linked statement", () => {
     it("should correctly remove actant from statement's data.actants", async () => {
       const db = new Db();
       await db.initDb();
 
-      const actant = new Actant({});
-      await actant.save(db.connection);
+      const entity = new Entity({});
+      await entity.save(db.connection);
       const statement = new Statement({
         data: {
           actants: [
             {
-              actant: actant.id,
+              actant: entity.id,
             },
           ],
         },
       });
       await statement.save(db.connection);
 
-      await actant.delete(db.connection);
+      await entity.delete(db.connection);
 
       // after the deletion, the linked statement should reflect this ->
       // empty actants array
@@ -46,13 +46,13 @@ describe("test Actant.delete", function () {
 
     beforeAll(async () => {
       await db.initDb();
-      const actant = new Actant({});
-      await actant.save(db.connection);
+      const entity = new Entity({});
+      await entity.save(db.connection);
       statementViaActants = new Statement({
         data: {
           actants: [
             {
-              actant: actant.id,
+              actant: entity.id,
             },
           ],
         },
@@ -62,13 +62,13 @@ describe("test Actant.delete", function () {
         data: {
           actions: [
             {
-              action: actant.id,
+              action: entity.id,
             },
           ],
         },
       });
       await statementViaActions.save(db.connection);
-      await actant.delete(db.connection);
+      await entity.delete(db.connection);
     });
     afterAll(async () => await clean(db));
 
@@ -94,13 +94,13 @@ describe("test Actant.delete", function () {
   });
 });
 
-describe("test Actant.update", function () {
+describe("test Entity.update", function () {
   describe("if providing only part of nested data", () => {
     it("should update it as merge operation", async (done) => {
       const db = new Db();
       await db.initDb();
 
-      const actant = new Statement({
+      const entity = new Statement({
         data: {
           territory: {
             id: "territoryId",
@@ -118,34 +118,34 @@ describe("test Actant.update", function () {
           tags: ["origtag1", "origtag2"],
         },
       });
-      await actant.save(db.connection);
+      await entity.save(db.connection);
 
-      const actantRef = new Statement({ id: actant.id });
+      const entityRef = new Statement({ id: entity.id });
       const newTextValue = "changed";
-      const newActantId = "3";
+      const newEntityId = "3";
       const newTagsValue: string[] = [];
-      await actantRef.update(db.connection, {
+      await entityRef.update(db.connection, {
         data: {
           text: newTextValue,
-          actants: [{ id: newActantId }],
+          actants: [{ id: newEntityId }],
           tags: newTagsValue,
         },
       });
 
-      const existingActantData = await findActantById<IStatement>(
+      const existingEntityData = await findActantById<IStatement>(
         db,
-        actant.id
+        entity.id
       );
       // new value
-      expect(existingActantData.data.text).toEqual(newTextValue);
+      expect(existingEntityData.data.text).toEqual(newTextValue);
       //  territory data from the save call
-      expect(existingActantData.data.territory.id).toEqual(
-        actant.data.territory.id
+      expect(existingEntityData.data.territory.id).toEqual(
+        entity.data.territory.id
       );
       // actants field should be replaced
-      expect(existingActantData.data.actants).toHaveLength(1);
-      expect(existingActantData.data.actants[0].id).toEqual(newActantId);
-      expect(existingActantData.data.tags).toEqual(newTagsValue);
+      expect(existingEntityData.data.actants).toHaveLength(1);
+      expect(existingEntityData.data.actants[0].id).toEqual(newEntityId);
+      expect(existingEntityData.data.tags).toEqual(newTagsValue);
 
       await clean(db);
       done();
@@ -153,9 +153,9 @@ describe("test Actant.update", function () {
   });
 });
 
-describe("test Actant.toJSON", function () {
-  const instance = new Actant({});
-  for (const fieldName of Actant.publicFields) {
+describe("test Entity.toJSON", function () {
+  const instance = new Entity({});
+  for (const fieldName of Entity.publicFields) {
     (instance as any)[fieldName] = `value for ${fieldName}`;
   }
   const jsoned = JSON.parse(JSON.stringify(instance));
@@ -163,12 +163,12 @@ describe("test Actant.toJSON", function () {
   const newValues = Object.values(jsoned);
 
   it("should correctly map to pub lic fields", () => {
-    expect(newKeys).toEqual(Actant.publicFields);
+    expect(newKeys).toEqual(Entity.publicFields);
   });
 
   it("should correctly assign values", () => {
     expect(newValues).toEqual(
-      Actant.publicFields.map((fieldName) => (instance as any)[fieldName])
+      Entity.publicFields.map((fieldName) => (instance as any)[fieldName])
     );
   });
 });

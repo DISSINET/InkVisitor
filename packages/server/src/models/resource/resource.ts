@@ -1,7 +1,7 @@
 import { fillFlatObject, UnknownObject, IModel } from "@models/common";
 import { EntityClass } from "@shared/enums";
 import { IResource } from "@shared/types/resource";
-import Actant from "@models/actant/actant";
+import Entity from "@models/entity/entity";
 
 class ResourceData implements IModel {
   link: string = "";
@@ -19,9 +19,9 @@ class ResourceData implements IModel {
   }
 }
 
-class Resource extends Actant implements IResource {
+class Resource extends Entity implements IResource {
   static table = "actants";
-  static publicFields = Actant.publicFields;
+  static publicFields = Entity.publicFields;
 
   class: EntityClass.Resource = EntityClass.Resource;
   data: ResourceData;

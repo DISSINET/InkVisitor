@@ -6,7 +6,7 @@ import { EntityClass, EntityLogicalType } from "../enums";
 
 export interface IResponseSearch {
   class: EntityClass;
-  actantId: string;
-  actantLabel: string;
+  entityId: string;
+  entityLabel: string;
   logicalType?: EntityLogicalType;
 }

@@ -1,6 +1,6 @@
 import { UnknownObject, IModel } from "@models/common";
 import { EntityClass, EntityStatus } from "@shared/enums";
-import Actant from "@models/actant/actant";
+import Entity from "@models/entity/entity";
 import { IConcept, IEntity } from "@shared/types";
 
 class ConceptData implements IModel {
@@ -18,9 +18,9 @@ class ConceptData implements IModel {
   }
 }
 
-class Concept extends Actant implements IConcept {
+class Concept extends Entity implements IConcept {
   static table = "actants";
-  static publicFields = Actant.publicFields;
+  static publicFields = Entity.publicFields;
 
   class: EntityClass.Concept = EntityClass.Concept; // just default
   data: ConceptData;

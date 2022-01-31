@@ -1,6 +1,6 @@
 import { fillFlatObject, UnknownObject, IModel } from "@models/common";
 import { EntityClass, EntityStatus } from "@shared/enums";
-import Actant from "@models/actant/actant";
+import Entity from "@models/entity/entity";
 import { IAction } from "@shared/types";
 import { ActionEntity, ActionValency } from "@shared/types/action";
 
@@ -33,9 +33,9 @@ class ActionData implements IModel {
   }
 }
 
-class Action extends Actant implements IAction {
+class Action extends Entity implements IAction {
   static table = "actants";
-  static publicFields = Actant.publicFields;
+  static publicFields = Entity.publicFields;
 
   class: EntityClass.Action = EntityClass.Action; // just default
   data: ActionData;

@@ -2,7 +2,7 @@ import { EntityClass, UserRole, UserRoleMode } from "@shared/enums";
 import { ITerritory, IParentTerritory } from "@shared/types/territory";
 import { r as rethink, Connection, WriteResult, RDatum } from "rethinkdb-ts";
 import { fillFlatObject, UnknownObject, IModel } from "@models/common";
-import Actant from "@models/actant/actant";
+import Entity from "@models/entity/entity";
 import { InternalServerError, InvalidDeleteError } from "@shared/types/errors";
 import User from "@models/user/user";
 import treeCache from "@service/treeCache";
@@ -52,9 +52,9 @@ export class TerritoryData implements IModel {
   }
 }
 
-class Territory extends Actant implements ITerritory {
+class Territory extends Entity implements ITerritory {
   static table = "actants";
-  static publicFields = Actant.publicFields;
+  static publicFields = Entity.publicFields;
 
   class: EntityClass.Territory = EntityClass.Territory;
   data: TerritoryData;
@@ -93,7 +93,7 @@ class Territory extends Actant implements ITerritory {
       );
 
       const wantedOrder = this.data.parent.order;
-      this.data.parent.order = Actant.determineOrder(wantedOrder, childs);
+      this.data.parent.order = Entity.determineOrder(wantedOrder, childs);
     } else if (this.id !== "T0") {
       return {
         deleted: 0,
@@ -130,13 +130,13 @@ class Territory extends Actant implements ITerritory {
 
       this.data.parent = new TerritoryParent({
         id: parentId,
-        order: Actant.determineOrder(parentData.order, this._siblings),
+        order: Entity.determineOrder(parentData.order, this._siblings),
       });
       parentData.order = this.data.parent.order;
     }
 
     const result = await rethink
-      .table(Actant.table)
+      .table(Entity.table)
       .get(this.id)
       .update(updateData)
       .run(db);

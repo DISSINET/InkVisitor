@@ -5,7 +5,7 @@ import Statement from "./statement/statement";
 import Resource from "./resource/resource";
 import { ModelNotValidError } from "@shared/types/errors";
 import Action from "./action/action";
-import Actant from "./actant/actant";
+import Entity from "./entity/entity";
 import Concept from "./concept/concept";
 import Person from "./person/person";
 import Group from "./group/group";
@@ -14,7 +14,7 @@ import Location from "./location/location";
 import Value from "./value/value";
 import Event from "./event/event";
 
-export function getEntityClass(data: UnknownObject): Actant {
+export function getEntityClass(data: UnknownObject): Entity {
   if (!data || typeof data !== "object" || Object.keys(data).length === 0) {
     throw new ModelNotValidError("bad input data for factory");
   }
