@@ -8,8 +8,9 @@ import { FaPlayCircle, FaPlus } from "react-icons/fa";
 import { MdCancel } from "react-icons/md";
 import { ValueType, OptionTypeBase } from "react-select";
 import { toast } from "react-toastify";
+import { DropdownAny } from "Theme/constants";
 import theme from "Theme/theme";
-import { DropdownAny, ItemTypes } from "types";
+import { ItemTypes } from "types";
 import { SuggesterKeyPress } from "./SuggesterKeyPress";
 import { SuggesterModal } from "./SuggesterModal";
 import {
@@ -233,12 +234,14 @@ export const Suggester: React.FC<SuggesterProps> = ({
                 .map((suggestion, si) => (
                   <React.Fragment key={si}>
                     <StyledSuggestionLineActions isSelected={selected === si}>
-                      <FaPlayCircle
-                        color={theme.color["black"]}
-                        onClick={() => {
-                          onPick(suggestion);
-                        }}
-                      />
+                      {suggestion.status !== ActantStatus.Discouraged && (
+                        <FaPlayCircle
+                          color={theme.color["black"]}
+                          onClick={() => {
+                            onPick(suggestion);
+                          }}
+                        />
+                      )}
                     </StyledSuggestionLineActions>
                     <StyledSuggestionLineTag isSelected={selected === si}>
                       <StyledTagWrapper>

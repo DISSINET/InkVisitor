@@ -10,8 +10,11 @@ export class ResponseTerritory extends Territory implements IResponseTerritory {
   actants: IEntity[];
   right: UserRoleMode = UserRoleMode.Read;
 
-  constructor(actant: IEntity) {
-    super(actant);
+  constructor(entity: IEntity) {
+    super({});
+    for (const key of Object.keys(entity)) {
+      (this as any)[key] = (entity as any)[key];
+    }
 
     this.statements = [];
     this.actants = [];
@@ -25,8 +28,8 @@ export class ResponseTerritory extends Territory implements IResponseTerritory {
       this.id
     );
 
-    const actantIds = Statement.getEntitiesIdsForMany(statements);
-    this.actants = await findActantsById(req.db, actantIds);
+    const entityIds = Statement.getEntitiesIdsForMany(statements);
+    this.actants = await findActantsById(req.db, entityIds);
 
     for (const statement of statements) {
       const entities = await findActantsByIds(

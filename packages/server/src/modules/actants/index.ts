@@ -50,6 +50,7 @@ export default Router()
       const actant = getEntityClass({ ...actantData });
 
       const response = new ResponseActant(actant);
+
       await response.prepare(request);
 
       return response;
@@ -209,7 +210,9 @@ export default Router()
       });
 
       if (!model.canBeDeletedByUser(request.getUserOrFail())) {
-        throw new PermissionDeniedError("actant cannot be deleted");
+        throw new PermissionDeniedError(
+          "actant cannot be deleted by current user"
+        );
       }
 
       const result = await model.delete(request.db.connection);
@@ -248,7 +251,6 @@ export default Router()
 
       const response = new ResponseActantDetail(actant);
 
-      console.log(response);
       await response.prepare(request);
 
       return response;

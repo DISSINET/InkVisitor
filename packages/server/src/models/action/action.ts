@@ -1,7 +1,7 @@
 import { fillFlatObject, UnknownObject, IModel } from "@models/common";
 import { EntityClass, EntityStatus } from "@shared/enums";
 import Actant from "@models/actant/actant";
-import { IAction, IEntity, IProp } from "@shared/types";
+import { IAction } from "@shared/types";
 import { ActionEntity, ActionValency } from "@shared/types/action";
 
 class ActionData implements IModel {

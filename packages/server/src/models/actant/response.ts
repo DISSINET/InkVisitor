@@ -1,23 +1,23 @@
 import { Request } from "express";
 import { UserRoleMode } from "@shared/enums";
 import {
-  IAction,
   IEntity,
-  IResource,
-  IResponseActant,
   IResponseDetail,
+  IResponseEntity,
   IStatement,
-  ITerritory,
 } from "@shared/types";
 import { Connection } from "rethinkdb-ts";
 import Actant from "./actant";
 import Statement from "@models/statement/statement";
 
-export class ResponseActant extends Actant implements IResponseActant {
+export class ResponseActant extends Actant implements IResponseEntity {
   right: UserRoleMode = UserRoleMode.Read;
 
-  constructor(actant: IEntity) {
-    super(actant);
+  constructor(entity: IEntity) {
+    super({});
+    for (const key of Object.keys(entity)) {
+      (this as any)[key] = (entity as any)[key];
+    }
   }
 
   async prepare(request: Request) {
@@ -32,16 +32,9 @@ export class ResponseActantDetail
   entities: { [key: string]: IEntity };
   usedInStatement?: IStatement[] | undefined;
   usedInStatementProps?: IStatement[] | undefined;
-  data:
-    | IEntity["data"]
-    | IAction["data"]
-    | ITerritory["data"]
-    | IResource["data"]
-    | IStatement["data"];
 
   constructor(actant: IEntity) {
     super(actant);
-    this.data = actant.data;
     this.entities = {};
   }
 

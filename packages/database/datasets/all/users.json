@@ -49,11 +49,11 @@
     "role": "editor",
     "rights": [
       {
-        "territory": "T3-1-01",
+        "territory": "T107-1-01",
         "mode": "read"
       },
       {
-        "territory": "T3-1-02",
+        "territory": "T107-1-02",
         "mode": "write"
       }
     ]

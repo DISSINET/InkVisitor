@@ -5,14 +5,8 @@ import {
   fillArray,
 } from "@models/common";
 import { r as rethink, Connection, WriteResult, RDatum } from "rethinkdb-ts";
-import { IStatement, IEntity, IResponseActant, IProp } from "@shared/types";
-import {
-  EntityStatus,
-  EntityClass,
-  Language,
-  UserRole,
-  UserRoleMode,
-} from "@shared/enums";
+import { IStatement, IEntity, IResponseEntity, IProp } from "@shared/types";
+import { EntityClass, Language, UserRole, UserRoleMode } from "@shared/enums";
 import { InternalServerError } from "@shared/types/errors";
 import User from "@models/user/user";
 import emitter from "@models/events/emitter";
@@ -81,12 +75,12 @@ export default class Actant extends Base implements IEntity, IDbModel {
   async delete(db: Connection | undefined): Promise<WriteResult> {
     if (!this.id) {
       throw new InternalServerError(
-        "delete called on actant with undefined id"
+        "delete called on entity with undefined id"
       );
     }
 
     if (db) {
-      await emitter.emit(EventTypes.BEFORE_ACTANT_DELETE, db, this.id);
+      await emitter.emit(EventTypes.BEFORE_ENTITY_DELETE, db, this.id);
     }
 
     const result = await rethink
@@ -96,7 +90,7 @@ export default class Actant extends Base implements IEntity, IDbModel {
       .run(db);
 
     if (result.deleted && db) {
-      await emitter.emit(EventTypes.AFTER_ACTANT_DELETE, db, this.id);
+      await emitter.emit(EventTypes.AFTER_ENTITY_DELETE, db, this.id);
     }
 
     return result;
@@ -150,8 +144,8 @@ export default class Actant extends Base implements IEntity, IDbModel {
           row("data")("actants").contains((actantElement: any) =>
             actantElement("actant").eq(this.id)
           ),
-          row("data")("props").contains((actantElement: any) =>
-            actantElement("origin").eq(this.id)
+          row("data")("props").contains((propElement: any) =>
+            propElement("origin").eq(this.id)
           )
         );
       })
@@ -201,23 +195,23 @@ export default class Actant extends Base implements IEntity, IDbModel {
   }
 
   /**
-   * Returns actant ids that are present in data fields
+   * Returns entity ids that are present in data fields
    * @returns list of ids
    */
   getEntitiesIds(): string[] {
-    const actantsIds: Record<string, null> = {};
+    const entityIds: Record<string, null> = {};
 
     this.props.forEach((p) => {
-      actantsIds[p.type.id] = null;
-      actantsIds[p.value.id] = null;
+      entityIds[p.type.id] = null;
+      entityIds[p.value.id] = null;
 
       p.children.forEach((p2) => {
-        actantsIds[p2.type.id] = null;
-        actantsIds[p2.value.id] = null;
+        entityIds[p2.type.id] = null;
+        entityIds[p2.value.id] = null;
       });
     });
 
-    return Object.keys(actantsIds);
+    return Object.keys(entityIds);
   }
 
   async getEntities(db: Connection): Promise<IEntity[]> {
@@ -226,9 +220,9 @@ export default class Actant extends Base implements IEntity, IDbModel {
   }
 
   /*
-   * finds statements which are linked to current actant
+   * finds statements which are linked to current entity
    * @param db db connection
-   * @param territoryId id of the actant
+   * @param territoryId id of the entity
    * @returns list of statements data
    */
   async findDependentStatements(
@@ -279,11 +273,11 @@ export default class Actant extends Base implements IEntity, IDbModel {
     return Object.keys(a).filter((k) => k.indexOf("_") !== 0);
   }
 
-  toJSON(): IResponseActant {
-    const actant = this;
+  toJSON(): IResponseEntity {
+    const entity = this;
     const strippedObject: IEntity = Actant.getPublicFields(this).reduce(
       (acc, curr) => {
-        acc[curr] = (actant as Record<string, unknown>)[curr];
+        acc[curr] = (entity as Record<string, unknown>)[curr];
         return acc;
       },
       {} as any

@@ -10,7 +10,7 @@ class ConceptData implements IModel {
       return;
     }
 
-    // TODO: If admin ? model.status = ActantStatus.Approved : model.status = ActantStatus.Pending
+    // TODO: If admin ? model.status = EntityStatus.Approved : model.status = EntityStatus.Pending
   }
 
   isValid(): boolean {

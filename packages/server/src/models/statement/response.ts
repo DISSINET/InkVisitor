@@ -8,9 +8,12 @@ export class ResponseStatement extends Statement implements IResponseStatement {
   entities: { [key: string]: IEntity };
   right: UserRoleMode = UserRoleMode.Read;
 
-  constructor(actant: IEntity) {
-    super(actant);
-
+  constructor(entity: IEntity) {
+    super({});
+    for (const key of Object.keys(entity)) {
+      (this as any)[key] = (entity as any)[key];
+    }
+    
     this.entities = {};
   }
 
