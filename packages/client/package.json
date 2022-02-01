@@ -9,6 +9,7 @@
     "build": "webpack --config webpack.production.js",
     "build-sandbox": "webpack --config webpack.sandbox.js",
     "build-stage": "webpack --config webpack.stage.js",
+    "build-data-import": "webpack --config webpack.data-import.js",
     "storybook": "start-storybook -p 6006",
     "build-storybook": "build-storybook"
   },
