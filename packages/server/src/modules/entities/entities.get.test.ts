@@ -11,7 +11,7 @@ describe("Entities get method", function () {
   describe("Empty param", () => {
     it("should return a BadParams error wrapped in IResponseGeneric", (done) => {
       return request(app)
-        .get(`${apiPath}/actants/get`)
+        .get(`${apiPath}/entities/get`)
         .set("authorization", "Bearer " + supertestConfig.token)
         .expect(testErroneousResponse.bind(undefined, new BadParams("")))
         .then(() => done());
@@ -20,7 +20,7 @@ describe("Entities get method", function () {
   describe("Wrong param", () => {
     it("should return an ActantDoesNotExits error wrapped in IResponseGeneric", (done) => {
       return request(app)
-        .get(`${apiPath}/actants/get/123`)
+        .get(`${apiPath}/entities/get/123`)
         .set("authorization", "Bearer " + supertestConfig.token)
         .expect(
           testErroneousResponse.bind(undefined, new ActantDoesNotExits("", ""))
@@ -46,7 +46,7 @@ describe("Entities get method", function () {
       await entityData.save(db.connection);
 
       await request(app)
-        .get(`${apiPath}/actants/get/${statementRandomId}`)
+        .get(`${apiPath}/entities/get/${statementRandomId}`)
         .set("authorization", "Bearer " + supertestConfig.token)
         .expect(200)
         .expect((res) => {

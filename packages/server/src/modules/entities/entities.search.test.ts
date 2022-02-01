@@ -32,7 +32,7 @@ describe("Entities search", function () {
   describe("empty data", () => {
     it("should return a BadParams error wrapped in IResponseGeneric", (done) => {
       return request(app)
-        .post(`${apiPath}/actants/search`)
+        .post(`${apiPath}/entities/search`)
         .set("authorization", "Bearer " + supertestConfig.token)
         .expect("Content-Type", /json/)
         .expect(testErroneousResponse.bind(undefined, new BadParams("")))
@@ -42,7 +42,7 @@ describe("Entities search", function () {
   describe("invalid request data(only class)", () => {
     it("should return a BadParams error wrapped in IResponseGeneric", (done) => {
       return request(app)
-        .post(`${apiPath}/actants/search`)
+        .post(`${apiPath}/entities/search`)
         .send({ class: EntityClass.Concept })
         .set("authorization", "Bearer " + supertestConfig.token)
         .expect("Content-Type", /json/)
@@ -53,7 +53,7 @@ describe("Entities search", function () {
   describe("invalid class data", () => {
     it("should return a BadParams error wrapped in IResponseGeneric", (done) => {
       return request(app)
-        .post(`${apiPath}/actants/search`)
+        .post(`${apiPath}/entities/search`)
         .send({ class: "something", label: "mnop" })
         .set("authorization", "Bearer " + supertestConfig.token)
         .expect("Content-Type", /json/)
@@ -163,7 +163,7 @@ describe("Entities search", function () {
     describe("search only class + by existing label", () => {
       it("should return a 200 code with successful response", async (done) => {
         await request(app)
-          .post(`${apiPath}/actants/search`)
+          .post(`${apiPath}/entities/search`)
           .send({ class: entityData.class, label: entityData.label })
           .set("authorization", "Bearer " + supertestConfig.token)
           .expect("Content-Type", /json/)
@@ -179,7 +179,7 @@ describe("Entities search", function () {
     describe("search only by non-existing label", () => {
       it("should return a 400 code with successful response for invalid label", async (done) => {
         await request(app)
-          .post(`${apiPath}/actants/search`)
+          .post(`${apiPath}/entities/search`)
           .send({ label: entityData.label + "xxxx" })
           .set("authorization", "Bearer " + supertestConfig.token)
           .expect("Content-Type", /json/)
@@ -195,7 +195,7 @@ describe("Entities search", function () {
     describe("search only by class + existing entity in statement", () => {
       it("should return a 200 code with successful response", async (done) => {
         await request(app)
-          .post(`${apiPath}/actants/search`)
+          .post(`${apiPath}/entities/search`)
           .send({
             class: linkedEntityData.class,
             entityId: entityData.id,
@@ -215,7 +215,7 @@ describe("Entities search", function () {
     describe("search only by non-existing entity in statement", () => {
       it("should return a 200 code with successful response", async (done) => {
         await request(app)
-          .post(`${apiPath}/actants/search`)
+          .post(`${apiPath}/entities/search`)
           .send({
             entityId: entityData.id + "xxx", // does not exist
           })
@@ -233,7 +233,7 @@ describe("Entities search", function () {
     describe("search only by class + existing action in statement", () => {
       it("should return a 200 code with successful response", async (done) => {
         await request(app)
-          .post(`${apiPath}/actants/search`)
+          .post(`${apiPath}/entities/search`)
           .send({
             class: linkedEntityData.class,
             entityId: actionData.id,
@@ -253,7 +253,7 @@ describe("Entities search", function () {
     describe("search only by non-existing action in statement", () => {
       it("should return a 200 code with empty response", async (done) => {
         await request(app)
-          .post(`${apiPath}/actants/search`)
+          .post(`${apiPath}/entities/search`)
           .send({
             entityId: actionData.id + "xxx", // does not exist
           })
@@ -272,7 +272,7 @@ describe("Entities search", function () {
       describe("using entity id", () => {
         it("should return a 200 code with successful response", async (done) => {
           await request(app)
-            .post(`${apiPath}/actants/search`)
+            .post(`${apiPath}/entities/search`)
             .send({
               class: linkedEntityData.class,
               entityId: entityData.id,
@@ -292,7 +292,7 @@ describe("Entities search", function () {
       describe("using action id", () => {
         it("should return a 200 code with successful response", async (done) => {
           await request(app)
-            .post(`${apiPath}/actants/search`)
+            .post(`${apiPath}/entities/search`)
             .send({
               class: linkedEntityData.class,
               entityId: actionData.id,
@@ -314,12 +314,11 @@ describe("Entities search", function () {
       describe("using entity id", () => {
         it("should return a 200 code with empty response", async (done) => {
           await request(app)
-            .post(`${apiPath}/actants/search`)
+            .post(`${apiPath}/entities/search`)
             .send({
               class: linkedEntityData.class,
               entityId: entityData.id,
-              label: linkedEntityData.label + "({
-            actxxxx", // does not exist
+              label: linkedEntityData.label + "xxxx",
             })
             .set("authorization", "Bearer " + supertestConfig.token)
             .expect("Content-Type", /json/)
@@ -335,7 +334,7 @@ describe("Entities search", function () {
       describe("using action id", () => {
         it("should return a 200 code with empty response", async (done) => {
           await request(app)
-            .post(`${apiPath}/actants/search`)
+            .post(`${apiPath}/entities/search`)
             .send({
               class: linkedEntityData.class,
               entityId: actionData.id,

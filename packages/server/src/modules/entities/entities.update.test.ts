@@ -14,7 +14,7 @@ describe("Entities update", function () {
   describe("empty data", () => {
     it("should return a BadParams error wrapped in IResponseGeneric", (done) => {
       return request(app)
-        .put(`${apiPath}/actants/update/1`)
+        .put(`${apiPath}/entities/update/1`)
         .set("authorization", "Bearer " + supertestConfig.token)
         .expect("Content-Type", /json/)
         .expect(testErroneousResponse.bind(undefined, new BadParams("")))
@@ -24,7 +24,7 @@ describe("Entities update", function () {
   describe("faulty data ", () => {
     it("should return an ActantDoesNotExits error wrapped in IResponseGeneric", (done) => {
       return request(app)
-        .put(`${apiPath}/actants/update/1`)
+        .put(`${apiPath}/entities/update/1`)
         .send({ test: "" })
         .set("authorization", "Bearer " + supertestConfig.token)
         .expect("Content-Type", /json/)
@@ -50,7 +50,7 @@ describe("Entities update", function () {
       await statementData.save(db.connection);
 
       await request(app)
-        .put(`${apiPath}/actants/update/${testId}`)
+        .put(`${apiPath}/entities/update/${testId}`)
         .send({ label: changeLabelTo })
         .set("authorization", "Bearer " + supertestConfig.token)
         .expect("Content-Type", /json/)
