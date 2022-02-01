@@ -8,18 +8,18 @@ import Statement from "@models/statement/statement";
 import { Db } from "@service/RethinkDB";
 import Territory from "@models/territory/territory";
 
-const expectNonEmptyArrayOfActants = (res: Response) => {
+const expectNonEmptyArrayOfEntities = (res: Response) => {
   expect(res.body.constructor.name).toBe("Array");
   expect(res.body.length).toBeGreaterThan(0);
   expect(res.body[0].id).toBeTruthy();
 };
 
-const expectEmptyArrayOfActants = (res: Response) => {
+const expectEmptyArrayOfEntities = (res: Response) => {
   expect(res.body.constructor.name).toEqual("Array");
   expect(res.body).toHaveLength(0);
 };
 
-describe("Actants getMore", function () {
+describe("Entities getMore", function () {
   describe("Empty param", () => {
     it("should return a BadParams error wrapped in IResponseGeneric", (done) => {
       return request(app)
@@ -44,7 +44,7 @@ describe("Actants getMore", function () {
       const db = new Db();
       await db.initDb();
 
-      const actantData = new Statement({
+      const entityData = new Statement({
         label: "testlabel",
         data: {
           territory: {
@@ -52,13 +52,13 @@ describe("Actants getMore", function () {
           },
         },
       });
-      await actantData.save(db.connection);
+      await entityData.save(db.connection);
 
       await request(app)
         .post(`${apiPath}/actants/getMore`)
-        .send({ label: actantData.label + "somethingdifferent" })
+        .send({ label: entityData.label + "somethingdifferent" })
         .set("authorization", "Bearer " + supertestConfig.token)
-        .expect(expectEmptyArrayOfActants);
+        .expect(expectEmptyArrayOfEntities);
 
       await clean(db);
       done();
@@ -69,7 +69,7 @@ describe("Actants getMore", function () {
       const db = new Db();
       await db.initDb();
 
-      const actantData = new Statement({
+      const entityData = new Statement({
         label: "testlabel",
         data: {
           territory: {
@@ -77,14 +77,14 @@ describe("Actants getMore", function () {
           },
         },
       });
-      await actantData.save(db.connection);
+      await entityData.save(db.connection);
 
       await request(app)
         .post(`${apiPath}/actants/getMore`)
-        .send({ label: actantData.label })
+        .send({ label: entityData.label })
         .set("authorization", "Bearer " + supertestConfig.token)
         .expect(200)
-        .expect(expectNonEmptyArrayOfActants);
+        .expect(expectNonEmptyArrayOfEntities);
 
       await clean(db);
       done();
@@ -104,7 +104,7 @@ describe("Actants getMore", function () {
         .set("authorization", "Bearer " + supertestConfig.token)
         .expect("Content-Type", /json/)
         .expect(200)
-        .expect(expectNonEmptyArrayOfActants);
+        .expect(expectNonEmptyArrayOfEntities);
 
       await clean(db);
       done();
@@ -116,7 +116,7 @@ describe("Actants getMore", function () {
       await db.initDb();
 
       const statementRandomId = Math.random().toString();
-      const actantData = new Statement({
+      const entityData = new Statement({
         id: statementRandomId,
         label: "testlabel" + statementRandomId,
         data: {
@@ -126,14 +126,14 @@ describe("Actants getMore", function () {
         },
       });
 
-      await actantData.save(db.connection);
+      await entityData.save(db.connection);
 
       await request(app)
         .post(`${apiPath}/actants/getMore`)
-        .send({ label: actantData.label, class: actantData.class })
+        .send({ label: entityData.label, class: entityData.class })
         .set("authorization", "Bearer " + supertestConfig.token)
         .expect(200)
-        .expect(expectNonEmptyArrayOfActants);
+        .expect(expectNonEmptyArrayOfEntities);
 
       await clean(db);
       done();

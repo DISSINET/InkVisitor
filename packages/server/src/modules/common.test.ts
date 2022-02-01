@@ -5,7 +5,6 @@ import Territory from "@models/territory/territory";
 import { Db } from "@service/RethinkDB";
 import { createActant, deleteActants } from "@service/shorthands";
 import {
-  EntityStatus,
   Certainty,
   Elvl,
   EntityClass,

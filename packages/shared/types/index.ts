@@ -13,7 +13,7 @@ import { IProp } from "./prop";
 import { RequestPermissionUpdate } from "./request-permission";
 import { RequestSearch } from "./request-search";
 import { IResource } from "./resource";
-import { IResponseActant } from "./response-actant";
+import { IResponseEntity } from "./response-actant";
 import { IResponseAdministration } from "./response-administration";
 import { IResponseAudit } from "./response-audit";
 import { IResponseBookmarkFolder } from "./response-bookmarks";
@@ -72,7 +72,7 @@ export type {
   IBookmarkFolder,
   IStoredTerritory,
   IResponseAudit,
-  IResponseActant,
+  IResponseEntity,
   IResponseDetail,
   IResponseBookmarkFolder,
   IResponseAdministration,

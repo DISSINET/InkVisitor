@@ -3,7 +3,7 @@ import helmet from "helmet";
 import express, { Router } from "express";
 import cors from "cors";
 import { apiPath } from "@common/constants";
-import ActantsRouter from "@modules/actants";
+import ActantsRouter from "@modules/entities";
 import AuditsRouter from "@modules/audits";
 import TerritoriesRouter from "@modules/territories";
 import UsersRouter from "@modules/users";

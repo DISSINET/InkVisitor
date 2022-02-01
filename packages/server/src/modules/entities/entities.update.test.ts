@@ -10,7 +10,7 @@ import { IEntity } from "@shared/types";
 import Statement from "@models/statement/statement";
 import { successfulGenericResponse } from "@modules/common.test";
 
-describe("Actants update", function () {
+describe("Entities update", function () {
   describe("empty data", () => {
     it("should return a BadParams error wrapped in IResponseGeneric", (done) => {
       return request(app)

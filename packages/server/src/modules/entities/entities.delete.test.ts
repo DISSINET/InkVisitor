@@ -13,7 +13,7 @@ import { supertestConfig } from "..";
 import { IEntity } from "@shared/types";
 import Territory from "@models/territory/territory";
 
-describe("Actants delete", function () {
+describe("Entities delete", function () {
   describe("empty data", () => {
     it("should return a BadParams error wrapped in IResponseGeneric", (done) => {
       return request(app)
@@ -49,8 +49,8 @@ describe("Actants delete", function () {
         .expect("Content-Type", /json/)
         .expect(200)
         .expect(async () => {
-          const deletedActant = await findActantById<IEntity>(db, territory.id);
-          expect(deletedActant).toBeNull();
+          const deletedEntity = await findActantById<IEntity>(db, territory.id);
+          expect(deletedEntity).toBeNull();
         });
 
       await clean(db);

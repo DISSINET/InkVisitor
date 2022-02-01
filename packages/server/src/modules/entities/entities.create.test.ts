@@ -18,7 +18,7 @@ import { Db } from "@service/RethinkDB";
 import Territory from "@models/territory/territory";
 import "ts-jest";
 
-describe("Actants create", function () {
+describe("Entities create", function () {
   describe("empty data", () => {
     it("should return a ModelNotValid error wrapped in IResponseGeneric", (done) => {
       return request(app)
@@ -50,7 +50,7 @@ describe("Actants create", function () {
       await db.initDb();
 
       const statementRandomId = Math.random().toString();
-      const actantData = new Statement({
+      const entityData = new Statement({
         id: statementRandomId,
         data: {
           territory: {
@@ -61,7 +61,7 @@ describe("Actants create", function () {
 
       await request(app)
         .post(`${apiPath}/actants/create`)
-        .send(actantData)
+        .send(entityData)
         .set("authorization", "Bearer " + supertestConfig.token)
         .expect(200)
         .expect("Content-Type", /json/)
@@ -89,8 +89,8 @@ describe("Actants create", function () {
         .expect("Content-Type", /json/)
         .expect(successfulGenericResponse);
 
-      const createdActantData = await findActantById(db, randomId);
-      expect(createdActantData).not.toBeNull();
+      const createdEntityData = await findActantById(db, randomId);
+      expect(createdEntityData).not.toBeNull();
 
       await clean(db);
       done();
@@ -113,10 +113,10 @@ describe("Actants create", function () {
         .expect("Content-Type", /json/)
         .expect(successfulGenericResponse);
 
-      const allActants = await findActants(db);
-      expect(allActants).toHaveLength(1);
-      expect(allActants[0].id).not.toBe("");
-      expect(allActants[0].label).toBe(territoryData.label);
+      const allEntities = await findActants(db);
+      expect(allEntities).toHaveLength(1);
+      expect(allEntities[0].id).not.toBe("");
+      expect(allEntities[0].label).toBe(territoryData.label);
 
       await clean(db);
       done();
