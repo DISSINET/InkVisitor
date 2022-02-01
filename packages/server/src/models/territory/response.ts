@@ -3,7 +3,7 @@ import { UserRoleMode } from "@shared/enums";
 import { IEntity, IResponseStatement, IResponseTerritory } from "@shared/types";
 import Territory from "./territory";
 import Statement from "@models/statement/statement";
-import { findActantsById, findActantsByIds } from "@service/shorthands";
+import { findEntitiesById, findEntitiesByIds } from "@service/shorthands";
 
 export class ResponseTerritory extends Territory implements IResponseTerritory {
   statements: IResponseStatement[];
@@ -29,10 +29,10 @@ export class ResponseTerritory extends Territory implements IResponseTerritory {
     );
 
     const entityIds = Statement.getEntitiesIdsForMany(statements);
-    this.actants = await findActantsById(req.db, entityIds);
+    this.actants = await findEntitiesById(req.db, entityIds);
 
     for (const statement of statements) {
-      const entities = await findActantsByIds(
+      const entities = await findEntitiesByIds(
         req.db,
         statement.data.actions.map((a) => a.action)
       );

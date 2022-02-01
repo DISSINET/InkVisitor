@@ -1,5 +1,5 @@
 import { Router, Request } from "express";
-import { findActantById } from "@service/shorthands";
+import { findEntityById } from "@service/shorthands";
 import {
   BadParams,
   PermissionDeniedError,
@@ -32,7 +32,7 @@ export default Router()
       }
 
       // check child territory
-      const territoryData = await findActantById<ITerritory>(
+      const territoryData = await findEntityById<ITerritory>(
         request.db,
         moveId,
         {
@@ -54,7 +54,7 @@ export default Router()
       }
 
       // check parent territory
-      const parent = await findActantById<ITerritory>(request.db, parentId, {
+      const parent = await findEntityById<ITerritory>(request.db, parentId, {
         class: EntityClass.Territory,
       });
       if (!parent) {

@@ -5,7 +5,7 @@ import { apiPath } from "@common/constants";
 import app from "../../Server";
 import { supertestConfig } from "..";
 import { Db } from "@service/RethinkDB";
-import { findActantById } from "@service/shorthands";
+import { findEntityById } from "@service/shorthands";
 import { IEntity } from "@shared/types";
 import Statement from "@models/statement/statement";
 import { successfulGenericResponse } from "@modules/common.test";
@@ -57,7 +57,7 @@ describe("Entities update", function () {
         .expect(200)
         .expect(successfulGenericResponse)
         .expect(async () => {
-          const changedEntry = await findActantById<IEntity>(db, testId);
+          const changedEntry = await findEntityById<IEntity>(db, testId);
           expect(changedEntry.label).toEqual(changeLabelTo);
         });
 

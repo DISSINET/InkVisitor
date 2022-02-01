@@ -3,7 +3,7 @@ import "@models/events/register";
 import Statement from "@models/statement/statement";
 import Territory from "@models/territory/territory";
 import { Db } from "@service/RethinkDB";
-import { createActant, deleteActants } from "@service/shorthands";
+import { createEntity, deleteEntities } from "@service/shorthands";
 import {
   Certainty,
   Elvl,
@@ -108,7 +108,7 @@ export async function createMockTree(
   db: Db,
   randSuffix: string
 ): Promise<ITerritory[]> {
-  await deleteActants(db);
+  await deleteEntities(db);
   const out: Territory[] = [
     new Territory({
       id: `root-${randSuffix}`,
@@ -134,7 +134,7 @@ export async function createMockTree(
   ];
 
   for (const ter of out) {
-    await createActant(db, ter);
+    await createEntity(db, ter);
   }
   return out;
 }
@@ -164,13 +164,13 @@ export async function createMockStatements(
   }
 
   for (const ter of out) {
-    await createActant(db, ter);
+    await createEntity(db, ter);
   }
   return out;
 }
 
 export async function clean(db: Db): Promise<void> {
-  await deleteActants(db);
+  await deleteEntities(db);
 
   await db.close();
 }

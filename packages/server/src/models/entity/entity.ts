@@ -11,7 +11,7 @@ import { InternalServerError } from "@shared/types/errors";
 import User from "@models/user/user";
 import emitter from "@models/events/emitter";
 import { EventTypes } from "@models/events/types";
-import { findActantsByIds } from "@service/shorthands";
+import { findEntitiesByIds } from "@service/shorthands";
 import Base from "../base";
 
 export default class Entity extends Base implements IEntity, IDbModel {
@@ -215,7 +215,7 @@ export default class Entity extends Base implements IEntity, IDbModel {
   }
 
   async getEntities(db: Connection): Promise<IEntity[]> {
-    const entities = findActantsByIds<IEntity>(db, this.getEntitiesIds());
+    const entities = findEntitiesByIds<IEntity>(db, this.getEntitiesIds());
     return entities;
   }
 

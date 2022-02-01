@@ -8,7 +8,7 @@ import Statement, {
 } from "@models/statement/statement";
 import { testErroneousResponse } from "@modules/common.test";
 import { Db } from "@service/RethinkDB";
-import { deleteActants } from "@service/shorthands";
+import { deleteEntities } from "@service/shorthands";
 import {
   Certainty,
   Elvl,
@@ -156,7 +156,7 @@ describe("Entities search", function () {
     });
 
     afterAll(async () => {
-      await deleteActants(db);
+      await deleteEntities(db);
       await db.close();
     });
 

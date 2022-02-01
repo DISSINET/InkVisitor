@@ -1,6 +1,6 @@
 import { asyncRouteHandler } from "../index";
 import { Router, Request } from "express";
-import { findActantById } from "@service/shorthands";
+import { findEntityById } from "@service/shorthands";
 import { BadParams, ActantDoesNotExits } from "@shared/types/errors";
 import { IResponseAudit } from "@shared/types";
 import { ResponseAudit } from "@models/audit/response";
@@ -15,7 +15,7 @@ export default Router().get(
     }
 
     // actantId must be already in the db
-    const existingActant = await findActantById(request.db, entityId);
+    const existingActant = await findEntityById(request.db, entityId);
 
     if (!existingActant) {
       throw new ActantDoesNotExits(

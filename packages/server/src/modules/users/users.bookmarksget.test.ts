@@ -4,8 +4,8 @@ import request from "supertest";
 import { apiPath } from "@common/constants";
 import app from "../../Server";
 import {
-  createActant,
-  getActantUsage,
+  createEntity,
+  getEntityUsage,
 } from "@service/shorthands";
 import { Db } from "@service/RethinkDB";
 import Statement from "@models/statement/statement";
@@ -61,7 +61,7 @@ describe("Users bookmarksGet", function () {
       await db.initDb();
       const testId = Math.random().toString();
 
-      await createActant(
+      await createEntity(
         db,
         new Statement({ id: testId, data: { territory: { id: "any" } } })
       );
@@ -78,7 +78,7 @@ describe("Users bookmarksGet", function () {
       });
       await user.save(db.connection);
 
-      const bookmarkCountUsage = await getActantUsage(db, testId);
+      const bookmarkCountUsage = await getEntityUsage(db, testId);
       request(app)
         .get(`${apiPath}/users/bookmarksGet/${testId}`)
         .set("authorization", "Bearer " + supertestConfig.token)

@@ -8,7 +8,7 @@ import { Db } from "@service/RethinkDB";
 import request from "supertest";
 import { apiPath } from "@common/constants";
 import app from "../../Server";
-import { findActantById } from "@service/shorthands";
+import { findEntityById } from "@service/shorthands";
 import { supertestConfig } from "..";
 import { IEntity } from "@shared/types";
 import Territory from "@models/territory/territory";
@@ -49,7 +49,7 @@ describe("Entities delete", function () {
         .expect("Content-Type", /json/)
         .expect(200)
         .expect(async () => {
-          const deletedEntity = await findActantById<IEntity>(db, territory.id);
+          const deletedEntity = await findEntityById<IEntity>(db, territory.id);
           expect(deletedEntity).toBeNull();
         });
 

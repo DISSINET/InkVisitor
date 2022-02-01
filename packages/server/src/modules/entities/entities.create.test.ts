@@ -10,9 +10,9 @@ import app from "../../Server";
 import { supertestConfig } from "..";
 import Statement from "@models/statement/statement";
 import {
-  deleteActants,
-  findActantById,
-  findActants,
+  deleteEntities,
+  findEntityById,
+  findEntities,
 } from "@service/shorthands";
 import { Db } from "@service/RethinkDB";
 import Territory from "@models/territory/territory";
@@ -89,7 +89,7 @@ describe("Entities create", function () {
         .expect("Content-Type", /json/)
         .expect(successfulGenericResponse);
 
-      const createdEntityData = await findActantById(db, randomId);
+      const createdEntityData = await findEntityById(db, randomId);
       expect(createdEntityData).not.toBeNull();
 
       await clean(db);
@@ -101,7 +101,7 @@ describe("Entities create", function () {
     it("should create the entry with new id", async (done) => {
       const db = new Db();
       await db.initDb();
-      await deleteActants(db);
+      await deleteEntities(db);
 
       const territoryData = new Territory({ label: "22323" });
 
@@ -113,7 +113,7 @@ describe("Entities create", function () {
         .expect("Content-Type", /json/)
         .expect(successfulGenericResponse);
 
-      const allEntities = await findActants(db);
+      const allEntities = await findEntities(db);
       expect(allEntities).toHaveLength(1);
       expect(allEntities[0].id).not.toBe("");
       expect(allEntities[0].label).toBe(territoryData.label);

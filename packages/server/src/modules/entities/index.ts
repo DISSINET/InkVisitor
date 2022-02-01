@@ -3,9 +3,9 @@ import { ResponseEntity, ResponseEntityDetail } from "@models/entity/response";
 import Audit from "@models/audit/audit";
 import { getEntityClass } from "@models/factory";
 import {
-  filterActantsByWildcard,
-  findActantById,
-  findAssociatedActantIds,
+  filterEntitiesByWildcard,
+  findEntityById,
+  findAssociatedEntityIds,
 } from "@service/shorthands";
 import { EntityClass } from "@shared/enums";
 import {
@@ -36,7 +36,7 @@ export default Router()
         throw new BadParams("entityId has to be set");
       }
 
-      const entityData = await findActantById<IEntity>(
+      const entityData = await findEntityById<IEntity>(
         request.db,
         entityId as string
       );
@@ -74,7 +74,7 @@ export default Router()
         throw new BadParams("excluded need to be array");
       }
 
-      const entities = await filterActantsByWildcard(
+      const entities = await filterEntitiesByWildcard(
         request.db,
         classParam,
         excluded,
@@ -142,7 +142,7 @@ export default Router()
       }
 
       // entityId must be already in the db
-      const existingEntity = await findActantById(request.db, entityId);
+      const existingEntity = await findEntityById(request.db, entityId);
       if (!existingEntity) {
         throw new ActantDoesNotExits(
           `entity with id ${entityId} does not exist`,
@@ -195,7 +195,7 @@ export default Router()
       }
 
       // entityId must be already in the db
-      const existingEntity = await findActantById(request.db, entityId);
+      const existingEntity = await findEntityById(request.db, entityId);
       if (!existingEntity) {
         throw new ActantDoesNotExits(
           `entity with id ${entityId} does not exist`,
@@ -235,7 +235,7 @@ export default Router()
         throw new BadParams("entity id has to be set");
       }
 
-      const entityData = await findActantById(request.db, entityId);
+      const entityData = await findEntityById(request.db, entityId);
       if (!entityData) {
         throw new ActantDoesNotExits(
           `entity ${entityId} was not found`,
@@ -271,7 +271,7 @@ export default Router()
 
       let associatedEntityIds: string[] | undefined = undefined;
       if (req.entityId) {
-        associatedEntityIds = await findAssociatedActantIds(
+        associatedEntityIds = await findAssociatedEntityIds(
           httpRequest.db,
           req.entityId
         );
@@ -285,7 +285,7 @@ export default Router()
       // filter out duplicates
       associatedEntityIds = [...new Set(associatedEntityIds)];
 
-      const entities = await filterActantsByWildcard(
+      const entities = await filterEntitiesByWildcard(
         httpRequest.db,
         req.class,
         req.excluded,

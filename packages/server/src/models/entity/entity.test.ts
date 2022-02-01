@@ -3,7 +3,7 @@ import { Db } from "@service/RethinkDB";
 import Entity from "./entity";
 import Statement from "@models/statement/statement";
 import { clean } from "@modules/common.test";
-import { findActantById } from "@service/shorthands";
+import { findEntityById } from "@service/shorthands";
 import { IStatement } from "@shared/types";
 
 describe("test Entity.delete", function () {
@@ -29,7 +29,7 @@ describe("test Entity.delete", function () {
 
       // after the deletion, the linked statement should reflect this ->
       // empty actants array
-      const existingStatement = await findActantById<IStatement>(
+      const existingStatement = await findEntityById<IStatement>(
         db,
         statement.id
       );
@@ -75,7 +75,7 @@ describe("test Entity.delete", function () {
     it("should correctly remove actant from actants array for the first statement", async () => {
       // after the deletion, the linked statement should reflect this ->
       // empty actants array
-      const existinStatementViaActants = await findActantById<IStatement>(
+      const existinStatementViaActants = await findEntityById<IStatement>(
         db,
         statementViaActants.id
       );
@@ -85,7 +85,7 @@ describe("test Entity.delete", function () {
     it("should correctly remove actant from actions array for the second statement", async () => {
       // after the deletion, the linked statement should reflect this ->
       // empty actants array
-      const existinStatementViaAction = await findActantById<IStatement>(
+      const existinStatementViaAction = await findEntityById<IStatement>(
         db,
         statementViaActions.id
       );
@@ -132,7 +132,7 @@ describe("test Entity.update", function () {
         },
       });
 
-      const existingEntityData = await findActantById<IStatement>(
+      const existingEntityData = await findEntityById<IStatement>(
         db,
         entity.id
       );
