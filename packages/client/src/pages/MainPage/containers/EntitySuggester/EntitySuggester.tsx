@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 
-import { Suggester, SuggestionI } from "components/Suggester/Suggester";
+import { EntitySuggestionI, Suggester } from "components/Suggester/Suggester";
 import { IOption, IActant } from "@shared/types";
 
 import { FaHome } from "react-icons/fa";
@@ -214,7 +214,7 @@ export const EntitySuggester: React.FC<EntitySuggesterI> = ({
     }
   };
 
-  const handlePick = (newPicked: SuggestionI) => {
+  const handlePick = (newPicked: EntitySuggestionI) => {
     onSelected(newPicked.id);
     handleClean();
   };
@@ -265,7 +265,7 @@ export const EntitySuggester: React.FC<EntitySuggesterI> = ({
       }) => {
         handleCreate(newCreated);
       }}
-      onPick={(newPicked: SuggestionI) => {
+      onPick={(newPicked: EntitySuggestionI) => {
         handlePick(newPicked);
       }}
       onDrop={(newDropped: DragObjectWithType) => {
