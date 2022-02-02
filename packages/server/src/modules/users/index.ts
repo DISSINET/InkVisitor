@@ -78,14 +78,10 @@ export default Router()
 
       if (!label) {
         return await User.findAllUsers(request.db.connection);
+      } else if (label.length < 2) {
+        return [];
       }
-
-      const byLabel = await User.findUserByLabel(request.db.connection, label);
-      if (byLabel) {
-        return [byLabel];
-      }
-
-      return [];
+      return await User.findUsersByLabel(request.db.connection, label);
     })
   )
   .post(
