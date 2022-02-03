@@ -6,7 +6,7 @@ import React, { useState } from "react";
 import { DragObjectWithType, DropTargetMonitor, useDrop } from "react-dnd";
 import { FaPlayCircle, FaPlus } from "react-icons/fa";
 import { MdCancel } from "react-icons/md";
-import { ValueType, OptionTypeBase } from "react-select";
+import { OptionTypeBase, ValueType } from "react-select";
 import { toast } from "react-toastify";
 import { DropdownAny } from "Theme/constants";
 import theme from "Theme/theme";

@@ -3,9 +3,8 @@ import { AiOutlineTag } from "react-icons/ai";
 import { BiCommentDetail } from "react-icons/bi";
 import { BsCardText } from "react-icons/bs";
 import { ImListNumbered } from "react-icons/im";
-import { PopupPosition, EventType } from "reactjs-popup/dist/types";
+import { EventType, PopupPosition } from "reactjs-popup/dist/types";
 import { Colors } from "types";
-
 import {
   StyledContentWrap,
   StyledDetail,

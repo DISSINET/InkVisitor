@@ -1,6 +1,5 @@
 import React from "react";
 import "react-toastify/dist/ReactToastify.css";
-
 import { StyledToastContainer } from "./ToastStyles";
 
 interface Toast {}

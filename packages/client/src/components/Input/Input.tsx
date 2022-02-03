@@ -1,13 +1,12 @@
-import React, { useState, useEffect, Ref } from "react";
-
 import { IOption } from "@shared/types";
+import React, { useEffect, useState } from "react";
 import {
-  Wrapper,
   Label,
   StyledInput,
   StyledSelect,
-  StyledTextArea,
   StyledSelectReadonly,
+  StyledTextArea,
+  Wrapper,
 } from "./InputStyles";
 
 interface InputProps {

@@ -1,10 +1,8 @@
+import { Operator } from "@shared/enums";
+import { Tooltip } from "components";
 import React, { MouseEventHandler } from "react";
-
 import { Colors } from "types";
 import { StyledButton, StyledButtonLabel } from "./ButtonStyles";
-
-import { Tooltip } from "components";
-import { Operator } from "@shared/enums";
 
 interface ButtonProps {
   tooltip?: string;
