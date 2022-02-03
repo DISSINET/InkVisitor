@@ -14,15 +14,14 @@ import { FaGripVertical, FaPlus, FaTrashAlt, FaUnlink } from "react-icons/fa";
 import { UseMutationResult } from "react-query";
 import { ColumnInstance } from "react-table";
 import { excludedSuggesterEntities } from "Theme/constants";
-
 import { DragItem, ItemTypes } from "types";
-import { EntityTag, EntitySuggester } from "../..";
+import { EntitySuggester, EntityTag } from "../..";
 import { AttributeButtonGroup } from "../../AttributeButtonGroup/AttributeButtonGroup";
 import AttributesEditor from "../../AttributesEditor/AttributesEditor";
 import {
-  StyledTr,
-  StyledTd,
   StyledTagWrapper,
+  StyledTd,
+  StyledTr,
 } from "./StatementEditorActantTableStyles";
 
 interface StatementEditorActantTableRow {

@@ -1,6 +1,5 @@
 import React from "react";
 import { useAppSelector } from "redux/hooks";
-
 import { Colors } from "types";
 import { StyledHeader, TextLeft, TextRight } from "./HeaderStyles";
 

@@ -1,6 +1,5 @@
 import { Button } from "components";
-import React, { ReactNode } from "react";
-import styled from "styled-components";
+import React from "react";
 import { StyledPropButtonGroup } from "./../StatementEditorBox/StatementEditorBoxStyles";
 
 interface IAttributeButtonGroup {

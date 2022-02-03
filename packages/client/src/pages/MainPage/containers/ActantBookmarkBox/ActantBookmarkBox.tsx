@@ -1,64 +1,49 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "react-query";
-import api from "api";
-import { toast } from "react-toastify";
-
-import { EntityTag, EntitySuggester } from "..";
-
-import { CBookmarkFolder } from "constructors";
-
-import {
-  Button,
-  ButtonGroup,
-  Loader,
-  Modal,
-  ModalHeader,
-  ModalContent,
-  ModalFooter,
-  Input,
-  Submit,
-  Tooltip,
-} from "components";
-
-import {
-  FaPlus,
-  FaTrash,
-  FaEdit,
-  FaFolder,
-  FaFolderOpen,
-  FaRegFolder,
-  FaRegFolderOpen,
-  FaUnlink,
-  FaTrashAlt,
-} from "react-icons/fa";
-
-import {
-  StyledContent,
-  StyledHeader,
-  StyledFolderWrapper,
-  StyledFolderHeader,
-  StyledFolderContent,
-  StyledFolderList,
-  StyledFolderHeaderText,
-  StyledFolderHeaderButtons,
-  StyledFolderWrapperOpenArea,
-  StyledFolderContentTag,
-  StyledFolderContentTags,
-  StyledFolderSuggester,
-} from "./ActantBookmarkBoxStyles";
-
-import {
-  actantPositionDict,
-  referenceTypeDict,
-} from "./../../../../../../shared/dictionaries";
-
+import { ActantType } from "@shared/enums";
 import {
   IActant,
   IBookmarkFolder,
   IResponseBookmarkFolder,
 } from "@shared/types";
+import api from "api";
+import {
+  Button,
+  ButtonGroup,
+  Input,
+  Loader,
+  Modal,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+  Submit,
+} from "components";
+import { CBookmarkFolder } from "constructors";
+import React, { useMemo, useState } from "react";
+import {
+  FaEdit,
+  FaFolder,
+  FaFolderOpen,
+  FaPlus,
+  FaRegFolder,
+  FaRegFolderOpen,
+  FaTrash,
+} from "react-icons/fa";
+import { useMutation, useQuery, useQueryClient } from "react-query";
+import { toast } from "react-toastify";
+import { EntitySuggester } from "..";
+import {
+  StyledContent,
+  StyledFolderContent,
+  StyledFolderContentTags,
+  StyledFolderHeader,
+  StyledFolderHeaderButtons,
+  StyledFolderHeaderText,
+  StyledFolderList,
+  StyledFolderSuggester,
+  StyledFolderWrapper,
+  StyledFolderWrapperOpenArea,
+  StyledHeader,
+} from "./ActantBookmarkBoxStyles";
 import { ActantBookmarkFolderTable } from "./ActantBookmarkFolderTable/ActantBookmarkFolderTable";
-import { ActantType } from "@shared/enums";
 
 const bookmarkEntities = [
   ActantType.Action,
@@ -210,9 +195,8 @@ export const ActantBookmarkBox: React.FC = () => {
   const createFolderMutation = useMutation(
     async () => {
       if (bookmarkFolders) {
-        const newBookmarkFolder: IBookmarkFolder = CBookmarkFolder(
-          editingFolderName
-        );
+        const newBookmarkFolder: IBookmarkFolder =
+          CBookmarkFolder(editingFolderName);
 
         const newBookmarks: IBookmarkFolder[] | false = getBookmarksCopy();
         if (newBookmarks) {

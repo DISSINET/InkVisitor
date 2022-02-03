@@ -1,13 +1,3 @@
-import React, { useEffect, useState } from "react";
-
-import { Suggester, SuggestionI } from "components/Suggester/Suggester";
-import { IOption, IActant } from "@shared/types";
-
-import { FaHome } from "react-icons/fa";
-import { CActant, CStatement, CTerritoryActant } from "constructors";
-import { DropdownAny, Entities } from "types";
-import { useMutation, useQuery, useQueryClient } from "react-query";
-import api from "api";
 import {
   ActantStatus,
   ActantType,
@@ -16,11 +6,19 @@ import {
   UserRole,
   UserRoleMode,
 } from "@shared/enums";
+import { IActant, IOption } from "@shared/types";
+import api from "api";
+import { EntitySuggestionI, Suggester } from "components/Suggester/Suggester";
+import { CActant, CStatement, CTerritoryActant } from "constructors";
 import { useDebounce, useSearchParams } from "hooks";
-import { rootTerritoryId } from "Theme/constants";
+import React, { useEffect, useState } from "react";
 import { DragObjectWithType } from "react-dnd";
+import { FaHome } from "react-icons/fa";
+import { useMutation, useQuery, useQueryClient } from "react-query";
+import { OptionTypeBase, ValueType } from "react-select";
 import { toast } from "react-toastify";
-import { ValueType, OptionTypeBase } from "react-select";
+import { DropdownAny, rootTerritoryId } from "Theme/constants";
+import { Entities } from "types";
 
 interface EntitySuggesterI {
   categoryTypes: ActantType[];
@@ -49,7 +47,6 @@ export const EntitySuggester: React.FC<EntitySuggesterI> = ({
   filterEditorRights = false,
   excludedActantIds = [],
 }) => {
-  const wildCardCategory = ActantType.Any;
   const queryClient = useQueryClient();
   const [typed, setTyped] = useState<string>("");
   const debouncedTyped = useDebounce(typed, 100);
@@ -71,9 +68,9 @@ export const EntitySuggester: React.FC<EntitySuggesterI> = ({
       const resSuggestions = await api.actantsGetMore({
         label: debouncedTyped,
         class:
-          selectedCategory?.value === wildCardCategory.valueOf()
+          selectedCategory?.value === DropdownAny
             ? false
-            : selectedCategory?.value,
+            : selectedCategory.value,
         excluded: excludedEntities.length ? excludedEntities : undefined,
       });
 
@@ -145,7 +142,7 @@ export const EntitySuggester: React.FC<EntitySuggesterI> = ({
     });
     if (categories.length > 1 && !disableWildCard) {
       categories.unshift({
-        label: wildCardCategory.valueOf(),
+        label: ActantType.Any,
         value: DropdownAny,
       });
     }
@@ -215,7 +212,7 @@ export const EntitySuggester: React.FC<EntitySuggesterI> = ({
     }
   };
 
-  const handlePick = (newPicked: SuggestionI) => {
+  const handlePick = (newPicked: EntitySuggestionI) => {
     onSelected(newPicked.id);
     handleClean();
   };
@@ -266,7 +263,7 @@ export const EntitySuggester: React.FC<EntitySuggesterI> = ({
       }) => {
         handleCreate(newCreated);
       }}
-      onPick={(newPicked: SuggestionI) => {
+      onPick={(newPicked: EntitySuggestionI) => {
         handlePick(newPicked);
       }}
       onDrop={(newDropped: DragObjectWithType) => {

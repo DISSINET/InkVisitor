@@ -1,3 +1,4 @@
+import { AttributeIcon, Dropdown } from "components";
 import React, { useMemo } from "react";
 import {
   StyledAttributeModalRow,
@@ -5,7 +6,6 @@ import {
   StyledAttributeModalRowLabelIcon,
   StyledAttributeModalRowLabelText,
 } from "../AttributesEditorStyles";
-import { AttributeIcon, Dropdown } from "components";
 
 interface AttributeRow {
   value: string | string[];
