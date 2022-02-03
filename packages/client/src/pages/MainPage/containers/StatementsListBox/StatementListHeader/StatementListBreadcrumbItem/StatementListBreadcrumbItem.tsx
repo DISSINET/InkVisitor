@@ -1,4 +1,5 @@
 import { ActantStatus, ActantType, Language } from "@shared/enums";
+import { ITerritory } from "@shared/types";
 import api from "api";
 import { Button, Loader } from "components";
 import { useSearchParams } from "hooks";
@@ -22,6 +23,7 @@ const initialData = {
   detail: "",
   status: ActantStatus.Approved,
   language: Language.Empty,
+  props: [],
   notes: [],
 };
 export const StatementListBreadcrumbItem: React.FC<
