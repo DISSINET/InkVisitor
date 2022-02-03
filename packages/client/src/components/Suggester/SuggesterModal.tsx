@@ -16,12 +16,12 @@ import {
   Tag,
 } from "components";
 import { EntitySuggester } from "pages/MainPage/containers";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { FaUnlink } from "react-icons/fa";
 import { useQuery } from "react-query";
-import { ValueType, OptionTypeBase } from "react-select";
+import { OptionTypeBase, ValueType } from "react-select";
 import { toast } from "react-toastify";
-import { DropdownAny } from "types";
+import { DropdownAny } from "Theme/constants";
 import { StyledContent, StyledNote, StyledTypeBar } from "./SuggesterStyles";
 
 interface SuggesterModal {

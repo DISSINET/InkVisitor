@@ -6,10 +6,11 @@ import React, { useState } from "react";
 import { DragObjectWithType, DropTargetMonitor, useDrop } from "react-dnd";
 import { FaPlayCircle, FaPlus } from "react-icons/fa";
 import { MdCancel } from "react-icons/md";
-import { ValueType, OptionTypeBase } from "react-select";
+import { OptionTypeBase, ValueType } from "react-select";
 import { toast } from "react-toastify";
+import { DropdownAny } from "Theme/constants";
 import theme from "Theme/theme";
-import { DropdownAny, ItemTypes } from "types";
+import { ItemTypes } from "types";
 import { SuggesterKeyPress } from "./SuggesterKeyPress";
 import { SuggesterModal } from "./SuggesterModal";
 import {
@@ -27,7 +28,7 @@ import {
   StyledTypeBar,
 } from "./SuggesterStyles";
 
-export interface SuggestionI {
+export interface EntitySuggestionI {
   id: string;
   label: string;
   detail: string;
@@ -37,10 +38,16 @@ export interface SuggestionI {
   color: string;
   icons?: React.ReactNode[];
 }
+export interface UserSuggestionI {
+  id: string;
+  label: string;
+  icons?: React.ReactNode[];
+}
 
 interface SuggesterProps {
   marginTop?: boolean;
-  suggestions: SuggestionI[];
+  suggesterType?: "entity" | "user";
+  suggestions: EntitySuggestionI[] | UserSuggestionI[];
   placeholder?: string; // text to display when typed === ""
   typed: string; // input value
   category: IOption; // selected category
@@ -55,9 +62,9 @@ interface SuggesterProps {
   // events
   onType: (newType: string) => void;
   onChangeCategory: (selectedOption: ValueType<OptionTypeBase, any>) => void;
-  onCreate: Function;
+  onCreate?: Function;
   onPick: Function;
-  onDrop: Function;
+  onDrop?: Function;
   onHover?: Function;
   onCancel?: Function;
   cleanOnSelect?: boolean;
@@ -68,6 +75,7 @@ const MAXSUGGESTIONDISPLAYED = 10;
 
 export const Suggester: React.FC<SuggesterProps> = ({
   marginTop,
+  suggesterType = "entity",
   suggestions = [],
   placeholder = "",
   typed,
@@ -82,9 +90,9 @@ export const Suggester: React.FC<SuggesterProps> = ({
   // events
   onType,
   onChangeCategory,
-  onCreate,
+  onCreate = () => {},
   onPick,
-  onDrop,
+  onDrop = () => {},
   onHover,
   onCancel = () => {},
   isFetching,
@@ -154,6 +162,79 @@ export const Suggester: React.FC<SuggesterProps> = ({
       toast.info("Fill at least 1 character");
     }
     setSelected(-1);
+  };
+
+  const renderEntitySuggestions = () => {
+    return (
+      <>
+        {(suggestions as EntitySuggestionI[])
+          .filter((s, si) => si < MAXSUGGESTIONDISPLAYED)
+          .map((suggestion, si) => (
+            <React.Fragment key={si}>
+              <StyledSuggestionLineActions isSelected={selected === si}>
+                {suggestion.status !== ActantStatus.Discouraged && (
+                  <FaPlayCircle
+                    color={theme.color["black"]}
+                    onClick={() => {
+                      onPick(suggestion);
+                    }}
+                  />
+                )}
+              </StyledSuggestionLineActions>
+              <StyledSuggestionLineTag isSelected={selected === si}>
+                <StyledTagWrapper>
+                  <Tag
+                    fullWidth
+                    propId={suggestion.id}
+                    label={suggestion.label}
+                    status={suggestion.status}
+                    ltype={suggestion.ltype}
+                    tooltipDetail={suggestion.detail}
+                    category={suggestion.category}
+                  />
+                </StyledTagWrapper>
+              </StyledSuggestionLineTag>
+              <StyledSuggestionLineIcons isSelected={selected === si}>
+                {suggestion.icons}
+              </StyledSuggestionLineIcons>
+            </React.Fragment>
+          ))}
+      </>
+    );
+  };
+
+  const renderUserSuggestions = () => {
+    return (
+      <>
+        {(suggestions as UserSuggestionI[])
+          .filter((s, si) => si < MAXSUGGESTIONDISPLAYED)
+          .map((suggestion, si) => (
+            <React.Fragment key={si}>
+              <StyledSuggestionLineActions isSelected={selected === si}>
+                <FaPlayCircle
+                  color={theme.color["black"]}
+                  onClick={() => {
+                    onPick(suggestion);
+                  }}
+                />
+              </StyledSuggestionLineActions>
+              <StyledSuggestionLineTag isSelected={selected === si}>
+                <StyledTagWrapper>
+                  <Tag
+                    fullWidth
+                    propId={suggestion.id}
+                    label={suggestion.label}
+                    category={"U"}
+                  />
+                </StyledTagWrapper>
+              </StyledSuggestionLineTag>
+              <StyledSuggestionLineIcons isSelected={selected === si}>
+                {suggestion.icons}
+              </StyledSuggestionLineIcons>
+            </React.Fragment>
+          ))}
+      </>
+    );
   };
 
   return (
@@ -228,38 +309,8 @@ export const Suggester: React.FC<SuggesterProps> = ({
             onMouseOut={() => setIsHovered(false)}
           >
             <StyledRelativePosition>
-              {suggestions
-                .filter((s, si) => si < MAXSUGGESTIONDISPLAYED)
-                .map((suggestion, si) => (
-                  <React.Fragment key={si}>
-                    <StyledSuggestionLineActions isSelected={selected === si}>
-                      {suggestion.status !== ActantStatus.Discouraged && (
-                        <FaPlayCircle
-                          color={theme.color["black"]}
-                          onClick={() => {
-                            onPick(suggestion);
-                          }}
-                        />
-                      )}
-                    </StyledSuggestionLineActions>
-                    <StyledSuggestionLineTag isSelected={selected === si}>
-                      <StyledTagWrapper>
-                        <Tag
-                          fullWidth
-                          propId={suggestion.id}
-                          label={suggestion.label}
-                          status={suggestion.status}
-                          ltype={suggestion.ltype}
-                          tooltipDetail={suggestion.detail}
-                          category={suggestion.category}
-                        />
-                      </StyledTagWrapper>
-                    </StyledSuggestionLineTag>
-                    <StyledSuggestionLineIcons isSelected={selected === si}>
-                      {suggestion.icons}
-                    </StyledSuggestionLineIcons>
-                  </React.Fragment>
-                ))}
+              {suggesterType === "entity" && <>{renderEntitySuggestions()}</>}
+              {suggesterType === "user" && <>{renderUserSuggestions()}</>}
               <Loader size={30} show={isFetching} />
             </StyledRelativePosition>
             <SuggesterKeyPress

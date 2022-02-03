@@ -1,44 +1,41 @@
 import {
-  StyledAttributeModalHeaderWrapper,
-  StyledAttributeModalHeaderIcon,
-  StyledEntityWrap,
-  StyledSuggesterWrap,
-  StyledContentWrap,
-} from "./AttributesEditorStyles";
-
-import {
   certaintyDict,
   elvlDict,
   logicDict,
   moodDict,
   moodVariantsDict,
+  operatorDict,
   partitivityDict,
   virtualityDict,
-  operatorDict,
 } from "@shared/dictionaries";
-
+import { ActantType } from "@shared/enums";
+import { IActant } from "@shared/types";
 import {
   Button,
   ButtonGroup,
+  Loader,
   Modal,
-  ModalHeader,
   ModalContent,
   ModalFooter,
+  ModalHeader,
   Tooltip,
-  Loader,
 } from "components";
-
+import React, { useMemo, useState } from "react";
+import { FaUnlink } from "react-icons/fa";
 import { MdSettings } from "react-icons/md";
-import { ActantType } from "@shared/enums";
-import React, { useState, useMemo } from "react";
+import { excludedSuggesterEntities } from "Theme/constants";
 import { AttributeData, AttributeName, Entities } from "types";
+import { EntitySuggester, EntityTag } from "..";
+import {
+  StyledAttributeModalHeaderIcon,
+  StyledAttributeModalHeaderWrapper,
+  StyledContentWrap,
+  StyledEntityWrap,
+  StyledSuggesterWrap,
+} from "./AttributesEditorStyles";
+import { AttributesForm } from "./AttributesForm";
 import { TooltipAttributeRow } from "./TooltipAttributeRow/TooltipAttributeRow";
 import { TooltipBooleanRow } from "./TooltipBooleanRow/TooltipBooleanRow";
-import { AttributesForm } from "./AttributesForm";
-import { EntitySuggester, EntityTag } from "..";
-import { IActant } from "@shared/types";
-import { FaUnlink } from "react-icons/fa";
-import { excludedSuggesterEntities } from "Theme/constants";
 
 interface StatementEditorAttributes {
   modalTitle: string;

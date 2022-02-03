@@ -21,11 +21,11 @@ export function checkPassword(
 
 const defaultJwtAlgo = "HS256";
 
-export function generateAccessToken(user: IUser): string {
+export function generateAccessToken(user: IUser, expDays: number = 30): string {
   return signJwt(
     {
       user,
-      exp: Math.floor(Date.now() / 1000) + 86400 * 30,
+      exp: Math.floor(Date.now() / 1000) + 86400 * expDays,
     },
     process.env.SECRET as string,
     {
