@@ -1,26 +1,23 @@
-import React, { useMemo, useEffect, Profiler } from "react";
-import { useQuery, useMutation, useQueryClient } from "react-query";
-import api from "api";
-import {
-  FaTrashAlt,
-  FaPlus,
-  FaUnlink,
-  FaCaretUp,
-  FaCaretDown,
-} from "react-icons/fa";
-import { EntityTag } from "./../";
-
 import { IActant, IProp } from "@shared/types";
+import api from "api";
 import { AttributeIcon, Button } from "components";
-import { EntitySuggester } from "./../";
-
+import React from "react";
+import {
+  FaCaretDown,
+  FaCaretUp,
+  FaPlus,
+  FaTrashAlt,
+  FaUnlink,
+} from "react-icons/fa";
+import { useQuery } from "react-query";
 import { excludedSuggesterEntities } from "Theme/constants";
-import { AttributesGroupEditor } from "../AttributesEditor/AttributesGroupEditor";
 import {
   AttributeGroupDataObject,
   classesPropType,
   classesPropValue,
 } from "types";
+import { AttributesGroupEditor } from "../AttributesEditor/AttributesGroupEditor";
+import { EntitySuggester, EntityTag } from "./../";
 import {
   StyledGrid,
   StyledListHeaderColumn,

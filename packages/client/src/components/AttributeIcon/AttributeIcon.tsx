@@ -1,18 +1,17 @@
+import React from "react";
+import { AiOutlineApartment } from "react-icons/ai";
+import { BiChevronLeft, BiChevronRight } from "react-icons/bi";
 import {
-  FaQuestionCircle,
   FaBook,
-  FaRegObjectGroup,
-  FaMinusSquare,
   FaMinusCircle,
+  FaQuestionCircle,
+  FaRegObjectGroup,
 } from "react-icons/fa";
-import { TiPlus } from "react-icons/ti";
 import { MdMood } from "react-icons/md";
 import { SiRealm } from "react-icons/si";
-import { AiOutlineApartment, AiOutlineMinusCircle } from "react-icons/ai";
-import { BiChevronLeft, BiChevronRight, BiMinus } from "react-icons/bi";
+import { TiPlus } from "react-icons/ti";
 import { VscDebugDisconnect } from "react-icons/vsc";
 
-import React from "react";
 export const attributeIcons = {
   certainty: <FaQuestionCircle />,
   elvl: <FaBook />,

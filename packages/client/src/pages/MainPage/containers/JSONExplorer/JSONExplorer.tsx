@@ -1,6 +1,6 @@
-import React, { useState, useMemo, useEffect } from "react";
-import { StyledJSONExplorerWrapper } from "./JSONExplorerStyles";
+import React from "react";
 import ReactJson from "react-json-view";
+import { StyledJSONExplorerWrapper } from "./JSONExplorerStyles";
 
 interface IJSONDisplay {
   data: object;

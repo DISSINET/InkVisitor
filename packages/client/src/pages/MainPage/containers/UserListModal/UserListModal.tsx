@@ -1,66 +1,46 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { Column, useTable, useExpanded, Row, Cell } from "react-table";
+import { userRoleDict } from "@shared/dictionaries";
+import { ActantType, UserRole, UserRoleMode } from "@shared/enums";
+import { IResponseUser, IUserRight } from "@shared/types";
+import api from "api";
 import {
-  Modal,
-  ModalHeader,
-  ModalContent,
-  ModalFooter,
   Button,
   ButtonGroup,
   Input,
-  Submit,
   Loader,
+  Modal,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+  Submit,
 } from "components";
-import { useMutation, useQuery, useQueryClient } from "react-query";
-import api from "api";
-
+import React, { useCallback, useMemo, useState } from "react";
+import { FaKey, FaPlus, FaTrashAlt, FaUnlink } from "react-icons/fa";
 import {
-  RiUserStarFill,
   RiUserSearchFill,
   RiUserSettingsFill,
+  RiUserStarFill,
 } from "react-icons/ri";
-
-import {
-  FaTrashAlt,
-  FaPlus,
-  FaPen,
-  FaKey,
-  FaPencilAlt,
-  FaUnlink,
-} from "react-icons/fa";
-
+import { useMutation, useQuery, useQueryClient } from "react-query";
+import { Cell, Column, Row, useTable } from "react-table";
+import { toast } from "react-toastify";
+import { AttributeButtonGroup } from "../AttributeButtonGroup/AttributeButtonGroup";
+import { EntitySuggester } from "../EntitySuggester/EntitySuggester";
+import { EntityTag } from "../EntityTag/EntityTag";
 import {
   StyledTable,
-  StyledTHead,
+  StyledTableWrapper,
+  StyledTerritoryColumn,
+  StyledTerritoryColumnAllLabel,
+  StyledTerritoryList,
+  StyledTerritoryListItem,
   StyledTh,
+  StyledTHead,
+  StyledUserEditorForm,
   StyledUserNameColumn,
   StyledUserNameColumnIcon,
   StyledUserNameColumnText,
-  StyledUserEditor,
-  StyledUserEditorBody,
-  StyledUserEditorFoot,
-  StyledUserEditorTitle,
-  StyledUserEditorForm,
-  StyledUserEditorRow,
-  StyledUserEditorRowLabel,
-  StyledUserEditorRowValue,
-  StyledUserEditorSection,
-  StyledTableWrapper,
-  StyledTerritoryColumn,
-  StyledTerritoryList,
-  StyledTerritoryListItem,
-  StyledTerritoryColumnAllLabel,
 } from "./UserListModalStyles";
-
 import { UserListTableRow } from "./UserListTableRow/UserListTableRow";
-import { EntitySuggester } from "../EntitySuggester/EntitySuggester";
-import { EntityTag } from "../EntityTag/EntityTag";
-import { IResponseUser, IUserRight } from "@shared/types";
-import { ActantType, UserRole, UserRoleMode } from "@shared/enums";
-import { userRoleDict } from "@shared/dictionaries";
-import { AttributeButtonGroup } from "../AttributeButtonGroup/AttributeButtonGroup";
-import { toast } from "react-toastify";
-import { findDOMNode } from "react-dom";
 
 interface UserListModal {
   isOpen: boolean;
@@ -98,7 +78,8 @@ export const UserListModal: React.FC<UserListModal> = ({
   }, [newUserName, data]);
 
   const validNewUserEmail = useMemo(() => {
-    const re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    const re =
+      /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
     return re.test(String(newUserEmail).toLowerCase());
   }, [newUserEmail, data]);
 

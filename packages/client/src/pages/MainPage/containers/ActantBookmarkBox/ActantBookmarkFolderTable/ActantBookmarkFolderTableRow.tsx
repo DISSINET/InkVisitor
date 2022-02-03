@@ -1,4 +1,4 @@
-import { IResponseBookmarkFolder, IResponseStatement } from "@shared/types";
+import { IResponseBookmarkFolder } from "@shared/types";
 import React, { useRef } from "react";
 import {
   DragSourceMonitor,
@@ -9,9 +9,8 @@ import {
 } from "react-dnd";
 import { FaGripVertical } from "react-icons/fa";
 import { Cell, ColumnInstance } from "react-table";
-
 import { DragItem, ItemTypes } from "types";
-import { StyledTr, StyledTd } from "./ActantBookmarkFolderTableStyles";
+import { StyledTd, StyledTr } from "./ActantBookmarkFolderTableStyles";
 
 interface ActantBookmarkFolderTableRow {
   row: any;
@@ -22,14 +21,9 @@ interface ActantBookmarkFolderTableRow {
   visibleColumns: ColumnInstance<{}>[];
 }
 
-export const ActantBookmarkFolderTableRow: React.FC<ActantBookmarkFolderTableRow> = ({
-  row,
-  index,
-  moveRow,
-  folder,
-  updateOrderFn,
-  visibleColumns,
-}) => {
+export const ActantBookmarkFolderTableRow: React.FC<
+  ActantBookmarkFolderTableRow
+> = ({ row, index, moveRow, folder, updateOrderFn, visibleColumns }) => {
   const dropRef = useRef<HTMLTableRowElement>(null);
   const dragRef = useRef<HTMLTableDataCellElement>(null);
 

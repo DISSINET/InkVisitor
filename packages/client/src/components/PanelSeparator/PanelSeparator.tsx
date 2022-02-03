@@ -8,7 +8,6 @@ import {
   springConfig,
   thirdPanelMinWidth,
 } from "Theme/constants";
-
 import { StyledPanelSeparator } from "./PanelSeparatorStyles";
 
 interface PanelSeparator {}

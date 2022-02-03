@@ -1,7 +1,6 @@
 import React from "react";
 import { useAppSelector } from "redux/hooks";
 import { Colors } from "types";
-
 import { StyledFooter } from "./FooterStyles";
 
 interface Footer {
