@@ -14,11 +14,10 @@ import { FaGripVertical, FaPlus, FaTrashAlt, FaUnlink } from "react-icons/fa";
 import { UseMutationResult } from "react-query";
 import { ColumnInstance } from "react-table";
 import { excludedSuggesterEntities } from "Theme/constants";
-
 import { DragItem, ItemTypes } from "types";
 import { EntitySuggester, EntityTag } from "../..";
 import AttributesEditor from "../../AttributesEditor/AttributesEditor";
-import { StyledTr, StyledTd } from "./StatementEditorActionTableStyles";
+import { StyledTd, StyledTr } from "./StatementEditorActionTableStyles";
 
 interface StatementEditorActionTableRow {
   row: any;

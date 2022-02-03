@@ -1,9 +1,7 @@
-import React, { useMemo } from "react";
-import styled from "styled-components";
-import { FaBook } from "react-icons/fa";
-
 import { Dropdown } from "components";
-
+import React, { useMemo } from "react";
+import { FaBook } from "react-icons/fa";
+import styled from "styled-components";
 import { elvlDict } from "./../../../../../../shared/dictionaries";
 
 interface IElvlToggle {

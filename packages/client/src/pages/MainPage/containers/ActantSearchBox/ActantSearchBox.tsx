@@ -1,7 +1,14 @@
-import React, { useEffect, useState } from "react";
-import { OptionsType, OptionTypeBase, ValueType } from "react-select";
-
+import { ActantType } from "@shared/enums";
+import { IOption, IResponseSearch } from "@shared/types";
+import api from "api";
 import { Button, Dropdown, Input, Loader, Tag } from "components";
+import { useDebounce } from "hooks";
+import React, { useEffect, useState } from "react";
+import { FaUnlink } from "react-icons/fa";
+import { useMutation, useQuery } from "react-query";
+import { OptionsType, OptionTypeBase, ValueType } from "react-select";
+import { Entities, IRequestSearch } from "types";
+import { EntitySuggester } from "..";
 import {
   StyledBoxContent,
   StyledResultHeading,
@@ -12,14 +19,6 @@ import {
   StyledRowHeader,
   StyledTagLoaderWrap,
 } from "./ActantSearchBoxStyles";
-import { EntitySuggester } from "..";
-import { useMutation, useQuery } from "react-query";
-import api from "api";
-import { Entities, IRequestSearch } from "types";
-import { IOption, IResponseSearch } from "@shared/types";
-import { FaUnlink } from "react-icons/fa";
-import { useDebounce } from "hooks";
-import { ActantType } from "@shared/enums";
 
 const classesActants = [
   ActantType.Action,
