@@ -12,6 +12,7 @@
     "import-remote": "npx ts-node scripts/import.ts all prod",
     "import-remote-sandbox": "npx ts-node scripts/import.ts all sandbox",
     "import-remote-stage": "npx ts-node scripts/import.ts all stage",
+    "import-remote-importdata": "npx ts-node scripts/import.ts all importdata",
     "import-local": "npx ts-node scripts/import.ts all local"
   },
   "author": "",
