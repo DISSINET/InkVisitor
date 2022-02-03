@@ -1,16 +1,15 @@
-import React from "react";
-import { useQuery } from "react-query";
-
-import { Button, Loader } from "components";
+import { ActantStatus, ActantType, Language } from "@shared/enums";
 import api from "api";
-import { StyledItemBox } from "./StatementListBreadcrumbItemStyles";
-import { useAppDispatch } from "redux/hooks";
-import { setTreeInitialized } from "redux/features/territoryTree/treeInitializeSlice";
-import { rootTerritoryId } from "Theme/constants";
+import { Button, Loader } from "components";
 import { useSearchParams } from "hooks";
 import { EntityTag } from "pages/MainPage/containers";
-import { ActantStatus, ActantType, Language } from "@shared/enums";
+import React from "react";
 import { BsArrow90DegLeft, BsArrowRightShort } from "react-icons/bs";
+import { useQuery } from "react-query";
+import { setTreeInitialized } from "redux/features/territoryTree/treeInitializeSlice";
+import { useAppDispatch } from "redux/hooks";
+import { rootTerritoryId } from "Theme/constants";
+import { StyledItemBox } from "./StatementListBreadcrumbItemStyles";
 
 interface StatementListBreadcrumbItem {
   territoryId: string;

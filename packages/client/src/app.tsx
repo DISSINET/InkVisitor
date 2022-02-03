@@ -1,29 +1,26 @@
-import React, { useEffect, useState } from "react";
-import { Switch, Route, BrowserRouter } from "react-router-dom";
-import { ThemeProvider } from "styled-components";
+import api from "api";
+import { SearchParamsProvider } from "hooks/useParamsContext";
+import { useWindowSize } from "hooks/useWindowSize";
+import React, { useEffect } from "react";
 import { Helmet } from "react-helmet";
-
-import theme from "./Theme/theme";
-import MainPage from "./pages/MainPage";
-import GlobalStyle from "Theme/global";
-
-import AclPage from "./pages/Acl";
-
 import { QueryClient, QueryClientProvider } from "react-query";
 import { ReactQueryDevtools } from "react-query/devtools";
+import { BrowserRouter, Route, Switch } from "react-router-dom";
+import { setLayoutWidth } from "redux/features/layout/layoutWidthSlice";
+import { setPanelWidths } from "redux/features/layout/panelWidthsSlice";
+import { setSeparatorXPosition } from "redux/features/layout/separatorXPositionSlice";
+import { useAppDispatch } from "redux/hooks";
+import { ThemeProvider } from "styled-components";
 import {
   layoutWidthBreakpoint,
   minLayoutWidth,
   percentPanelWidths,
   separatorXPercentPosition,
 } from "Theme/constants";
-import { useAppDispatch } from "redux/hooks";
-import { setLayoutWidth } from "redux/features/layout/layoutWidthSlice";
-import { setPanelWidths } from "redux/features/layout/panelWidthsSlice";
-import { setSeparatorXPosition } from "redux/features/layout/separatorXPositionSlice";
-import api from "api";
-import { SearchParamsProvider } from "hooks/useParamsContext";
-import { useWindowSize } from "hooks/useWindowSize";
+import GlobalStyle from "Theme/global";
+import AclPage from "./pages/Acl";
+import MainPage from "./pages/MainPage";
+import theme from "./Theme/theme";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -46,9 +43,8 @@ export const App: React.FC = () => {
       dispatch(setLayoutWidth(layoutWidth));
       const onePercent = layoutWidth / 100;
 
-      const separatorXStoragePosition = localStorage.getItem(
-        "separatorXPosition"
-      );
+      const separatorXStoragePosition =
+        localStorage.getItem("separatorXPosition");
       const separatorPercentPosition: number = separatorXStoragePosition
         ? Number(separatorXStoragePosition)
         : separatorXPercentPosition;

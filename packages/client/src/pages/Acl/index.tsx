@@ -1,24 +1,22 @@
-import React, { useEffect, useState } from "react";
-import { toast } from "react-toastify";
-
-import { Box, Button, Footer, Header, Toast } from "components";
-
+import { userRoleDict } from "@shared/dictionaries";
+import { IResponsePermission, RequestPermissionUpdate } from "@shared/types";
 import api from "api";
-import { useAppDispatch, useAppSelector } from "redux/hooks";
+import { Box, Button, Footer, Header, Toast } from "components";
+import React, { useState } from "react";
+import { useQuery } from "react-query";
+import { toast } from "react-toastify";
 import { setAuthToken } from "redux/features/authTokenSlice";
 import { setUsername } from "redux/features/usernameSlice";
-import {
-  StyledUserBox,
-  StyledUser,
-  StyledFaUserAlt,
-  StyledText,
-  StyledUsername,
-  StyledPage,
-} from "./AclStyles";
+import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { heightFooter, heightHeader } from "Theme/constants";
-import { useQuery } from "react-query";
-import { IResponsePermission, RequestPermissionUpdate } from "@shared/types";
-import { userRoleDict } from "@shared/dictionaries";
+import {
+  StyledFaUserAlt,
+  StyledPage,
+  StyledText,
+  StyledUser,
+  StyledUserBox,
+  StyledUsername,
+} from "./AclStyles";
 
 interface AclPage {
   size: number[];

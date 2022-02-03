@@ -1,13 +1,9 @@
-import React, { useCallback, useEffect, useState } from "react";
-import { Column, useTable, useExpanded, Row } from "react-table";
+import { IStatement } from "@shared/types";
 import update from "immutability-helper";
-import { StyledTable, StyledTHead, StyledTh } from "./StatementListTableStyles";
+import React, { useCallback, useEffect, useState } from "react";
+import { Column, Row, useExpanded, useTable } from "react-table";
 import { StatementListRow } from "./StatementListRow";
-import {
-  IResponseStatement,
-  IResponseTerritory,
-  IStatement,
-} from "@shared/types";
+import { StyledTable, StyledTh, StyledTHead } from "./StatementListTableStyles";
 
 interface StatementListTable {
   data: IStatement[];

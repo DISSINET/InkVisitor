@@ -1,11 +1,10 @@
+import { IActant } from "@shared/types";
+import api from "api";
+import { Submit } from "components";
+import { useSearchParams } from "hooks";
 import React, { useEffect, useState } from "react";
 import { useMutation, useQueryClient } from "react-query";
 import { toast } from "react-toastify";
-
-import api from "api";
-import { IActant } from "@shared/types";
-import { Submit } from "components";
-import { useSearchParams } from "hooks";
 
 interface ContextMenuSubmitDelete {
   territoryActant: IActant;
@@ -22,12 +21,8 @@ export const ContextMenuSubmitDelete: React.FC<ContextMenuSubmitDelete> = ({
   }, []);
 
   const queryClient = useQueryClient();
-  const {
-    territoryId,
-    setTerritoryId,
-    actantId,
-    setActantId,
-  } = useSearchParams();
+  const { territoryId, setTerritoryId, actantId, setActantId } =
+    useSearchParams();
 
   const deleteTerritoryMutation = useMutation(
     async () => await api.actantsDelete(territoryActant.id),

@@ -6,7 +6,7 @@ import {
 } from "@shared/dictionaries";
 import { allEntities } from "@shared/dictionaries/entity";
 import { ActantType, Language, UserRoleMode } from "@shared/enums";
-import { IAction, IResponseActant, IStatement } from "@shared/types";
+import { IAction, IStatement } from "@shared/types";
 import api from "api";
 import {
   Button,

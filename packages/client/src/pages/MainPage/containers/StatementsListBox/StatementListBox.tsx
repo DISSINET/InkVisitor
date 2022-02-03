@@ -1,15 +1,11 @@
-import React, { Profiler, useEffect, useMemo, useState } from "react";
-import { Cell, Column } from "react-table";
-import { useMutation, useQuery, useQueryClient } from "react-query";
+import { UserRole, UserRoleMode } from "@shared/enums";
 import {
-  FaTrashAlt,
-  FaPlus,
-  FaClone,
-  FaChevronCircleDown,
-  FaChevronCircleUp,
-} from "react-icons/fa";
-import { toast } from "react-toastify";
-
+  IActant,
+  IAction,
+  IResponseStatement,
+  IStatement,
+} from "@shared/types";
+import api from "api";
 import {
   Button,
   ButtonGroup,
@@ -18,27 +14,29 @@ import {
   TagGroup,
   Tooltip,
 } from "components";
-import { EntityTag } from "./../";
-import api from "api";
+import { CStatement, DStatement } from "constructors";
+import { useSearchParams } from "hooks";
+import React, { useEffect, useMemo, useState } from "react";
+import { BsArrowDown, BsArrowUp } from "react-icons/bs";
 import {
-  IStatement,
-  IActant,
-  IAction,
-  IResponseStatement,
-} from "@shared/types";
-import { StatementListTable } from "./StatementListTable/StatementListTable";
+  FaChevronCircleDown,
+  FaChevronCircleUp,
+  FaClone,
+  FaPlus,
+  FaTrashAlt,
+} from "react-icons/fa";
+import { useMutation, useQuery, useQueryClient } from "react-query";
+import { Cell, Column } from "react-table";
+import { toast } from "react-toastify";
+import { EntityTag } from "./../";
+import { StatementListContextMenu } from "./StatementListContextMenu/StatementListContextMenu";
 import { StatementListHeader } from "./StatementListHeader/StatementListHeader";
+import { StatementListTable } from "./StatementListTable/StatementListTable";
 import {
   StyledDots,
   StyledTableWrapper,
   StyledText,
 } from "./StatementLitBoxStyles";
-
-import { CStatement, DStatement } from "constructors";
-import { useSearchParams } from "hooks";
-import { StatementListContextMenu } from "./StatementListContextMenu/StatementListContextMenu";
-import { BsArrowUp, BsArrowDown } from "react-icons/bs";
-import { UserRole, UserRoleMode } from "@shared/enums";
 
 const initialData: {
   statements: IStatement[];

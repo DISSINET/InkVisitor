@@ -1,13 +1,3 @@
-import React, { useEffect, useState } from "react";
-
-import { EntitySuggestionI, Suggester } from "components/Suggester/Suggester";
-import { IOption, IActant } from "@shared/types";
-
-import { FaHome } from "react-icons/fa";
-import { CActant, CStatement, CTerritoryActant } from "constructors";
-import { Entities } from "types";
-import { useMutation, useQuery, useQueryClient } from "react-query";
-import api from "api";
 import {
   ActantStatus,
   ActantType,
@@ -16,11 +6,19 @@ import {
   UserRole,
   UserRoleMode,
 } from "@shared/enums";
+import { IActant, IOption } from "@shared/types";
+import api from "api";
+import { EntitySuggestionI, Suggester } from "components/Suggester/Suggester";
+import { CActant, CStatement, CTerritoryActant } from "constructors";
 import { useDebounce, useSearchParams } from "hooks";
-import { DropdownAny, rootTerritoryId } from "Theme/constants";
+import React, { useEffect, useState } from "react";
 import { DragObjectWithType } from "react-dnd";
+import { FaHome } from "react-icons/fa";
+import { useMutation, useQuery, useQueryClient } from "react-query";
+import { OptionTypeBase, ValueType } from "react-select";
 import { toast } from "react-toastify";
-import { ValueType, OptionTypeBase } from "react-select";
+import { DropdownAny, rootTerritoryId } from "Theme/constants";
+import { Entities } from "types";
 
 interface EntitySuggesterI {
   categoryTypes: ActantType[];

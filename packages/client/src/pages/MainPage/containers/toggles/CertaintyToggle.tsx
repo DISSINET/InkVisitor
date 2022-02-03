@@ -1,9 +1,7 @@
-import React, { useMemo } from "react";
-import styled from "styled-components";
-
-import { FaQuestionCircle } from "react-icons/fa";
-
 import { Dropdown } from "components";
+import React, { useMemo } from "react";
+import { FaQuestionCircle } from "react-icons/fa";
+import styled from "styled-components";
 import { certaintyDict } from "./../../../../../../shared/dictionaries";
 
 interface ICertaintyToggle {
