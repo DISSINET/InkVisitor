@@ -6,10 +6,10 @@ export default class Base {
   }
 
   toJSON(): object {
-    const actant = this;
+    const obj = this;
     const strippedObject: object = this.getPublicFields().reduce(
       (acc, curr) => {
-        acc[curr] = (actant as Record<string, unknown>)[curr];
+        acc[curr] = (obj as Record<string, unknown>)[curr];
         return acc;
       },
       {} as any

@@ -15,7 +15,7 @@ import { findEntitiesByIds } from "@service/shorthands";
 import Base from "../base";
 
 export default class Entity extends Base implements IEntity, IDbModel {
-  static table = "actants";
+  static table = "entities";
   static publicFields: string[] = [
     "id",
     "class",

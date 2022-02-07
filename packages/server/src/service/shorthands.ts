@@ -167,8 +167,8 @@ export async function findAssociatedEntityIds(
     })
     .filter(function (row: RDatum) {
       return rethink.or(
-        row("data")("actants").contains((entityObj: RDatum) =>
-          entityObj("actant").eq(entityId)
+        row("data")("actants").contains((actantObj: RDatum) =>
+          actantObj("actant").eq(entityId)
         ),
         row("data")("actions").contains((actionObj: RDatum) =>
           actionObj("action").eq(entityId)

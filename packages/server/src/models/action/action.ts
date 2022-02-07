@@ -34,7 +34,7 @@ class ActionData implements IModel {
 }
 
 class Action extends Entity implements IAction {
-  static table = "actants";
+  static table = "entities";
   static publicFields = Entity.publicFields;
 
   class: EntityClass.Action = EntityClass.Action; // just default

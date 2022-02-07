@@ -207,7 +207,6 @@ export class StatementData implements IModel, IStatementData {
 }
 
 class Statement extends Entity implements IStatement {
-  static table = "actants";
   static publicFields = Entity.publicFields;
 
   class: EntityClass.Statement = EntityClass.Statement;
@@ -489,7 +488,7 @@ class Statement extends Entity implements IStatement {
     territoryId: string
   ): Promise<IStatement[]> {
     const statements = await rethink
-      .table("actants")
+      .table(Entity.table)
       .filter({
         class: EntityClass.Statement,
       })
@@ -515,7 +514,7 @@ class Statement extends Entity implements IStatement {
     actantId: string
   ): Promise<IStatement[]> {
     const statements = await rethink
-      .table("actants")
+      .table(Entity.table)
       .filter({
         class: EntityClass.Statement,
       })
@@ -562,7 +561,7 @@ class Statement extends Entity implements IStatement {
     actantId: string
   ): Promise<Statement[]> {
     const statements = await rethink
-      .table("actants")
+      .table(Entity.table)
       .filter({
         class: EntityClass.Statement,
       })

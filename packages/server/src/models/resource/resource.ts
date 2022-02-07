@@ -20,7 +20,6 @@ class ResourceData implements IModel {
 }
 
 class Resource extends Entity implements IResource {
-  static table = "actants";
   static publicFields = Entity.publicFields;
 
   class: EntityClass.Resource = EntityClass.Resource;

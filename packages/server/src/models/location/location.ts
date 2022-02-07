@@ -20,7 +20,6 @@ class LocationData implements IModel {
 }
 
 class Location extends Entity implements ILocation {
-  static table = "actants";
   static publicFields = Entity.publicFields;
 
   class: EntityClass.Location = EntityClass.Location; // just default

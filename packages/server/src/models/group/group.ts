@@ -20,7 +20,6 @@ class GroupData implements IModel {
 }
 
 class Group extends Entity implements IGroup {
-  static table = "actants";
   static publicFields = Entity.publicFields;
 
   class: EntityClass.Group = EntityClass.Group; // just default

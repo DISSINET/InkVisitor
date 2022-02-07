@@ -20,7 +20,6 @@ class ValueData implements IModel {
 }
 
 class Value extends Entity implements IValue {
-  static table = "actants";
   static publicFields = Entity.publicFields;
 
   class: EntityClass.Value = EntityClass.Value; // just default
