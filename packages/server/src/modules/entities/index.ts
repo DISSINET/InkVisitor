@@ -17,7 +17,7 @@ import {
   RequestSearch,
 } from "@shared/types";
 import {
-  ActantDoesNotExits,
+  EntityDoesNotExits,
   BadParams,
   InternalServerError,
   ModelNotValidError,
@@ -42,7 +42,7 @@ export default Router()
       );
 
       if (!entityData) {
-        throw new ActantDoesNotExits(
+        throw new EntityDoesNotExits(
           `entity ${entityId} was not found`,
           entityId
         );
@@ -144,7 +144,7 @@ export default Router()
       // entityId must be already in the db
       const existingEntity = await findEntityById(request.db, entityId);
       if (!existingEntity) {
-        throw new ActantDoesNotExits(
+        throw new EntityDoesNotExits(
           `entity with id ${entityId} does not exist`,
           entityId
         );
@@ -197,7 +197,7 @@ export default Router()
       // entityId must be already in the db
       const existingEntity = await findEntityById(request.db, entityId);
       if (!existingEntity) {
-        throw new ActantDoesNotExits(
+        throw new EntityDoesNotExits(
           `entity with id ${entityId} does not exist`,
           entityId
         );
@@ -237,7 +237,7 @@ export default Router()
 
       const entityData = await findEntityById(request.db, entityId);
       if (!entityData) {
-        throw new ActantDoesNotExits(
+        throw new EntityDoesNotExits(
           `entity ${entityId} was not found`,
           entityId
         );

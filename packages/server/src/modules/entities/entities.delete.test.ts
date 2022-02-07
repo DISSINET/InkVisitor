@@ -1,6 +1,6 @@
 import { clean, testErroneousResponse } from "@modules/common.test";
 import {
-  ActantDoesNotExits,
+  EntityDoesNotExits,
   BadParams,
   InvalidDeleteError,
 } from "@shared/types/errors";
@@ -25,13 +25,13 @@ describe("Entities delete", function () {
     });
   });
   describe("faulty data", () => {
-    it("should return a ActantDoesNotExits error wrapped in IResponseGeneric", (done) => {
+    it("should return a EntityDoesNotExits error wrapped in IResponseGeneric", (done) => {
       return request(app)
         .delete(`${apiPath}/entities/delete/randomid12345`)
         .set("authorization", "Bearer " + supertestConfig.token)
         .expect("Content-Type", /json/)
         .expect(
-          testErroneousResponse.bind(undefined, new ActantDoesNotExits("", ""))
+          testErroneousResponse.bind(undefined, new EntityDoesNotExits("", ""))
         )
         .then(() => done());
     });

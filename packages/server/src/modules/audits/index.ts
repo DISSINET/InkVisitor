@@ -1,7 +1,7 @@
 import { asyncRouteHandler } from "../index";
 import { Router, Request } from "express";
 import { findEntityById } from "@service/shorthands";
-import { BadParams, ActantDoesNotExits } from "@shared/types/errors";
+import { BadParams, EntityDoesNotExits } from "@shared/types/errors";
 import { IResponseAudit } from "@shared/types";
 import { ResponseAudit } from "@models/audit/response";
 
@@ -14,11 +14,11 @@ export default Router().get(
       throw new BadParams("entityId has to be set");
     }
 
-    // actantId must be already in the db
-    const existingActant = await findEntityById(request.db, entityId);
+    // entityId must be already in the db
+    const existingEntity = await findEntityById(request.db, entityId);
 
-    if (!existingActant) {
-      throw new ActantDoesNotExits(
+    if (!existingEntity) {
+      throw new EntityDoesNotExits(
         `entity with id ${entityId} does not exist`,
         entityId
       );

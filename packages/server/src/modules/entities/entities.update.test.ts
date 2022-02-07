@@ -1,5 +1,5 @@
 import { clean, testErroneousResponse } from "@modules/common.test";
-import { ActantDoesNotExits, BadParams } from "@shared/types/errors";
+import { EntityDoesNotExits, BadParams } from "@shared/types/errors";
 import request from "supertest";
 import { apiPath } from "@common/constants";
 import app from "../../Server";
@@ -22,14 +22,14 @@ describe("Entities update", function () {
     });
   });
   describe("faulty data ", () => {
-    it("should return an ActantDoesNotExits error wrapped in IResponseGeneric", (done) => {
+    it("should return an EntityDoesNotExits error wrapped in IResponseGeneric", (done) => {
       return request(app)
         .put(`${apiPath}/entities/update/1`)
         .send({ test: "" })
         .set("authorization", "Bearer " + supertestConfig.token)
         .expect("Content-Type", /json/)
         .expect(
-          testErroneousResponse.bind(undefined, new ActantDoesNotExits("", ""))
+          testErroneousResponse.bind(undefined, new EntityDoesNotExits("", ""))
         )
         .then(() => done());
     });
