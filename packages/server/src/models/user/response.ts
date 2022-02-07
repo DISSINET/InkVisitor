@@ -52,15 +52,15 @@ export class ResponseUser implements IResponseUser {
       const bookmarkResponse: IResponseBookmarkFolder = {
         id: bookmark.id,
         name: bookmark.name,
-        actants: [],
+        entities: [],
       };
-      if (bookmark.actantIds && bookmark.actantIds.length) {
-        for (const actant of await findEntitiesById(
+      if (bookmark.entityIds && bookmark.entityIds.length) {
+        for (const entity of await findEntitiesById(
           req.db,
-          bookmark.actantIds
+          bookmark.entityIds
         )) {
-          bookmarkResponse.actants.push({
-            ...actant,
+          bookmarkResponse.entities.push({
+            ...entity,
           });
         }
       }

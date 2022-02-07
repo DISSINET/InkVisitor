@@ -3,10 +3,7 @@ import { BadParams, UserDoesNotExits } from "@shared/types/errors";
 import request from "supertest";
 import { apiPath } from "@common/constants";
 import app from "../../Server";
-import {
-  createEntity,
-  getEntityUsage,
-} from "@service/shorthands";
+import { createEntity, getEntityUsage } from "@service/shorthands";
 import { Db } from "@service/RethinkDB";
 import Statement from "@models/statement/statement";
 import { supertestConfig } from "..";
@@ -34,7 +31,7 @@ describe("Users bookmarksGet", function () {
         .then(() => done());
     });
   });
-  describe("Correct param with nonexistent actant", () => {
+  describe("Correct param with nonexistent entity", () => {
     it("should return a 200 code with empty array of bookmarks", async (done) => {
       const db = new Db();
       await db.initDb();
@@ -55,7 +52,7 @@ describe("Users bookmarksGet", function () {
         .expect(200, done);
     });
   });
-  describe("Correct param with existing actant", () => {
+  describe("Correct param with existing entity", () => {
     it("should return a 200 code with non-empty array of bookmarks", async (done) => {
       const db = new Db();
       await db.initDb();
@@ -72,7 +69,7 @@ describe("Users bookmarksGet", function () {
           {
             id: "test",
             name: "test",
-            actantIds: [testId], // this id should exist in actants
+            entityIds: [testId], // this id should exist in entities
           } as IBookmarkFolder,
         ],
       });
@@ -88,7 +85,7 @@ describe("Users bookmarksGet", function () {
           res.body.should.have.keys("bookmarks");
           res.body.bookmarks.should.be.a("array");
           res.body.bookmarks.should.have.lengthOf(1);
-          res.body.bookmarks[0].actants.should.have.lengthOf(1);
+          res.body.bookmarks[0].entities.should.have.lengthOf(1);
         })
         .expect(200, done);
     });

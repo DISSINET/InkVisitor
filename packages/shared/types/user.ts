@@ -14,7 +14,7 @@ export interface IUser {
 }
 
 export interface IUserRight {
-  territory: string; // actant id
+  territory: string; // entity id
   mode: UserRoleMode;
 }
 
@@ -25,12 +25,12 @@ export interface IUserOptions {
 }
 
 export interface IStoredTerritory {
-  territoryId: string; // reference to actants table, for response type see IResponseStoredTerritory
+  territoryId: string; // reference to entities table, for response type see IResponseStoredTerritory
   // more field could be added here
 }
 
 export interface IBookmarkFolder {
   id: string;
   name: string;
-  actantIds: string[]; // list of ids are stored in the db, for response type see IResponseBookmarks
+  entityIds: string[]; // list of ids are stored in the db, for response type see IResponseBookmarks
 }
