@@ -58,7 +58,7 @@ export default Router()
           request.getUserOrFail()
         )
       ) {
-        throw new PermissionDeniedError(`cannot view actant ${territoryId}`);
+        throw new PermissionDeniedError(`cannot view entity ${territoryId}`);
       }
 
       const response = new ResponseTerritory(territory);
@@ -68,7 +68,7 @@ export default Router()
     })
   )
   .get(
-    "/getActantIds/:territoryId?",
+    "/getEntityIds/:territoryId?",
     asyncRouteHandler<string[]>(async (request: Request) => {
       const territoryId = request.params.territoryId;
       if (!territoryId) {

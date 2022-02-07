@@ -9,7 +9,7 @@ import { deleteEntities } from "@service/shorthands";
 import Territory from "@models/territory/territory";
 import Statement from "@models/statement/statement";
 
-describe("Territories getActantIds", () => {
+describe("Territories getEntityIds", () => {
   let db: Db;
   const baseStatementData = new Statement({});
   beforeAll(async () => {
@@ -25,7 +25,6 @@ describe("Territories getActantIds", () => {
     await db.close();
   });
 
-  // TODO THERE WAS MORE TESTS LIKE THIS>>>WHERE ARE THEY
   describe("one territory, two linked statement via references.resource and tags at once", () => {
     it("should return empty array", async (done) => {
       const territory = new Territory(undefined);
@@ -56,7 +55,7 @@ describe("Territories getActantIds", () => {
       await statement2.save(db.connection);
 
       await request(app)
-        .get(`${apiPath}/territories/getActantIds/${territory.id}`)
+        .get(`${apiPath}/territories/getEntityIds/${territory.id}`)
         .set("authorization", "Bearer " + supertestConfig.token)
         .expect(200)
         .expect((res: Request) => {

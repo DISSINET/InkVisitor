@@ -52,7 +52,7 @@ export class StatementActant implements IStatementActant, IModel {
       return;
     }
 
-    // TODO: If admin ? model.status = ActantStatus.Approved : model.status = ActantStatus.Pending
+    // TODO: If admin ? model.status = EntityStatus.Approved : model.status = EntityStatus.Pending
 
     fillFlatObject(this, data);
     fillArray<Prop>(this.props, Prop, data.props);
@@ -107,7 +107,7 @@ export class StatementTerritory {
    */
   isValid(): boolean {
     // order is optional, it will be fixed in underlaying call to
-    // Actant.determineOrder
+    // Entity.determineOrder
     if (this.id === "") {
       return false;
     }
@@ -376,19 +376,19 @@ class Statement extends Entity implements IStatement {
    * @returns list of ids
    */
   getEntitiesIds(): string[] {
-    const actantsIds: Record<string, null> = {};
+    const entitiesIds: Record<string, null> = {};
 
     this.data.actions.forEach((a) => {
-      actantsIds[a.action] = null;
+      entitiesIds[a.action] = null;
       if (a.props) {
         a.props.forEach((prop) => {
-          actantsIds[prop.type.id] = null;
-          actantsIds[prop.value.id] = null;
+          entitiesIds[prop.type.id] = null;
+          entitiesIds[prop.value.id] = null;
 
           if (prop.children) {
             prop.children.forEach((propChild) => {
-              actantsIds[propChild.type.id] = null;
-              actantsIds[propChild.value.id] = null;
+              entitiesIds[propChild.type.id] = null;
+              entitiesIds[propChild.value.id] = null;
             });
           }
         });
@@ -396,31 +396,31 @@ class Statement extends Entity implements IStatement {
     });
 
     this.data.actants.forEach((a) => {
-      actantsIds[a.actant] = null;
+      entitiesIds[a.actant] = null;
       if (a.props) {
         a.props.forEach((prop) => {
-          actantsIds[prop.type.id] = null;
-          actantsIds[prop.value.id] = null;
+          entitiesIds[prop.type.id] = null;
+          entitiesIds[prop.value.id] = null;
 
           if (prop.children) {
             prop.children.forEach((propChild) => {
-              actantsIds[propChild.type.id] = null;
-              actantsIds[propChild.value.id] = null;
+              entitiesIds[propChild.type.id] = null;
+              entitiesIds[propChild.value.id] = null;
             });
           }
         });
       }
     });
 
-    actantsIds[this.data.territory.id] = null;
+    entitiesIds[this.data.territory.id] = null;
 
     this.data.references.forEach((p) => {
-      actantsIds[p.resource] = null;
+      entitiesIds[p.resource] = null;
     });
 
-    this.data.tags.forEach((t) => (actantsIds[t] = null));
+    this.data.tags.forEach((t) => (entitiesIds[t] = null));
 
-    return Object.keys(actantsIds);
+    return Object.keys(entitiesIds);
   }
 
   async unlinkActantId(
@@ -465,22 +465,22 @@ class Statement extends Entity implements IStatement {
    * @returns list of ids unique for multiple statements
    */
   static getEntitiesIdsForMany(statements: IStatement[]): string[] {
-    const actantIds: Record<string, null> = {}; // unique check
+    const entityIds: Record<string, null> = {}; // unique check
 
     const stModel = new Statement(undefined);
     for (const statement of statements) {
       stModel.getEntitiesIds
         .call(statement)
-        .forEach((id) => (actantIds[id] = null));
+        .forEach((id) => (entityIds[id] = null));
     }
 
-    return Object.keys(actantIds);
+    return Object.keys(entityIds);
   }
 
   /**
    * finds statements which are under specific territory
    * @param db db connection
-   * @param territoryId id of the actant
+   * @param territoryId id of the territory
    * @returns list of statements data
    */
   static async findStatementsInTerritory(
@@ -503,15 +503,15 @@ class Statement extends Entity implements IStatement {
   }
 
   /**
-   * finds statements which are linked to different actant
-   * in other words, find statements which store passed actant id in on of their possible fields
+   * finds statements which are linked to different entity
+   * in other words, find statements which store passed entity id in on of their possible fields
    * @param db db connection
-   * @param territoryId id of the actant
+   * @param entityId id of the entity
    * @returns list of statements data
    */
   static async findDependentStatements(
     db: Connection | undefined,
-    actantId: string
+    entityId: string
   ): Promise<IStatement[]> {
     const statements = await rethink
       .table(Entity.table)
@@ -520,25 +520,25 @@ class Statement extends Entity implements IStatement {
       })
       .filter((row: RDatum) => {
         return rethink.or(
-          row("data")("territory")("id").eq(actantId),
+          row("data")("territory")("id").eq(entityId),
           row("data")("actions").contains((entry: RDatum) =>
-            entry("action").eq(actantId)
+            entry("action").eq(entityId)
           ),
           row("data")("actants").contains((entry: RDatum) =>
-            entry("actant").eq(actantId)
+            entry("actant").eq(entityId)
           ),
-          row("data")("tags").contains(actantId),
+          row("data")("tags").contains(entityId),
           row("data")("props").contains((entry: RDatum) =>
-            entry("value")("id").eq(actantId)
-          ),
-          row("data")("props").contains((entry: RDatum) =>
-            entry("type")("id").eq(actantId)
+            entry("value")("id").eq(entityId)
           ),
           row("data")("props").contains((entry: RDatum) =>
-            entry("origin").eq(actantId)
+            entry("type")("id").eq(entityId)
+          ),
+          row("data")("props").contains((entry: RDatum) =>
+            entry("origin").eq(entityId)
           ),
           row("data")("references").contains((entry: RDatum) =>
-            entry("resource").eq(actantId)
+            entry("resource").eq(entityId)
           )
         );
       })

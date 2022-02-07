@@ -525,7 +525,7 @@ describe("Statement - findMetaStatements", function () {
     await db.close();
   });
 
-  describe("bad territory or actant", () => {
+  describe("bad territory or entity", () => {
     it("should return empty list", async (done) => {
       const wantedActantId = "A0";
       const statement1 = new Statement({

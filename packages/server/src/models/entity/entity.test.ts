@@ -8,7 +8,7 @@ import { IStatement } from "@shared/types";
 
 describe("test Entity.delete", function () {
   describe("one existing linked statement", () => {
-    it("should correctly remove actant from statement's data.actants", async () => {
+    it("should correctly remove entity from statement's data.actants", async () => {
       const db = new Db();
       await db.initDb();
 
