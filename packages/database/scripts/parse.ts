@@ -23,7 +23,7 @@ import {
   IStatement,
   ITerritory,
   IResource,
-  IStatementEntity,
+  IStatementActant,
 } from "../../shared/types";
 
 import { entityStatusDict } from "../../shared/dictionaries";
@@ -456,7 +456,7 @@ const loadStatementsTables = async (next: Function) => {
         // actant1
         processActant(
           mainStatement,
-          Position.Actant1,
+          Position.Entity1,
           statement.id_actant1,
           statement.actant1_property_type_id,
           statement.actant1_property_value_id,
@@ -466,7 +466,7 @@ const loadStatementsTables = async (next: Function) => {
         // actant2
         processActant(
           mainStatement,
-          Position.Actant2,
+          Position.Entity2,
           statement.id_actant2,
           statement.actant2_property_type_id,
           statement.actant2_property_value_id,
@@ -747,7 +747,7 @@ const createEmptyPropStatement = (
           {
             id: v4(),
             actant: idActant1,
-            position: Position.Actant1,
+            position: Position.Entity1,
             elvl: Elvl.Inferential,
             logic: Logic.Positive,
             virtuality: Virtuality.Reality,
@@ -760,7 +760,7 @@ const createEmptyPropStatement = (
           {
             id: v4(),
             actant: idActant2,
-            position: Position.Actant2,
+            position: Position.Entity2,
             elvl: Elvl.Inferential,
             logic: Logic.Positive,
             virtuality: Virtuality.Reality,
@@ -920,7 +920,7 @@ const processActant = (
 
       const statementActantId = v4();
 
-      const actant: IStatementEntity = {
+      const actant: IStatementActant = {
         id: statementActantId,
         actant: actantId,
         position: position,

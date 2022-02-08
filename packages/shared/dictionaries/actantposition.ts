@@ -7,17 +7,17 @@ export const actantPositionDict = [
     info: "",
   },
   {
-    value: Position.Actant1,
+    value: Position.Entity1,
     label: "actant1",
     info: "",
   },
   {
-    value: Position.Actant2,
+    value: Position.Entity2,
     label: "actant2",
     info: "",
   },
   {
-    value: Position.PseudoActant,
+    value: Position.PseudoEntity,
     label: "pseudo-actant",
     info: "",
   },

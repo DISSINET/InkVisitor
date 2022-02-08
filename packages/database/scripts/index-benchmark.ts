@@ -122,7 +122,7 @@ const importData = async () => {
                 logic: Logic.Negative,
                 operator: Operator.And,
                 partitivity: Partitivity.DiscreteParts,
-                position: Position.Actant1,
+                position: Position.Entity1,
                 virtuality: Virtuality.Allegation,
                 props: [],
               },
