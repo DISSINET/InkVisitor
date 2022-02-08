@@ -1,5 +1,5 @@
 import { UserRoleMode } from "@shared/enums";
-import { IActant, ITerritory } from "@shared/types";
+import { IEntity, ITerritory } from "@shared/types";
 import { IParentTerritory } from "@shared/types/territory";
 import api from "api";
 import { useSearchParams } from "hooks";
@@ -231,7 +231,7 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
   }, [draggedTerritory]);
 
   const renderTerritoryTag = (
-    territoryActant: IActant,
+    territoryActant: IEntity,
     id: string,
     hasChildren: boolean
   ) => {

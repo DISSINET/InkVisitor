@@ -146,9 +146,9 @@ export const ActantSearchBox: React.FC = () => {
         <EntitySuggester
           categoryTypes={classesActants}
           onSelected={(newSelectedId: string) => {
-            handleChange("actantId", newSelectedId);
+            handleChange("entityId", newSelectedId);
           }}
-          placeholder={"actant"}
+          placeholder={"entity"}
           allowCreate={false}
           inputWidth={114}
         />
@@ -169,9 +169,9 @@ export const ActantSearchBox: React.FC = () => {
                 icon={<FaUnlink />}
                 color="danger"
                 inverted={true}
-                tooltip="unlink actant"
+                tooltip="unlink entity"
                 onClick={() => {
-                  handleChange("actantId", "");
+                  handleChange("entityId", "");
                 }}
               />
             }

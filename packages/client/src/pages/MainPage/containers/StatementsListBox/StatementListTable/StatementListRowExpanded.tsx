@@ -14,7 +14,7 @@ export const StatementListRowExpanded: React.FC<StatementListRowExpanded> = ({
 }) => {
   const [actants, setActants] = useState<IStatementActant[]>([]);
 
-  const { actantId, setActantId, setStatementId, setTerritoryId } =
+  const { detailId, setDetailId, setStatementId, setTerritoryId } =
     useSearchParams();
 
   const renderRowSubComponent = React.useCallback(

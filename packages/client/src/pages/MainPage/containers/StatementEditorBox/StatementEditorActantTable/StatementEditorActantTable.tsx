@@ -1,5 +1,5 @@
-import { ActantType } from "@shared/enums";
-import { IActant, IResponseStatement, IStatementActant } from "@shared/types";
+import { EntityClass } from "@shared/enums";
+import { IEntity, IResponseStatement, IStatementActant } from "@shared/types";
 import update from "immutability-helper";
 import React, { useCallback, useMemo, useState } from "react";
 import { UseMutationResult } from "react-query";
@@ -12,7 +12,7 @@ import {
 } from "./StatementEditorActantTableStyles";
 
 interface FilteredActantObject {
-  data: { actant: IActant | undefined; sActant: IStatementActant };
+  data: { actant: IEntity | undefined; sActant: IStatementActant };
 }
 interface StatementEditorActantTable {
   statement: IResponseStatement;
@@ -20,7 +20,7 @@ interface StatementEditorActantTable {
   userCanEdit?: boolean;
   handleRowClick?: Function;
   renderPropGroup: Function;
-  classEntitiesActant: ActantType[];
+  classEntitiesActant: EntityClass[];
   updateActantsMutation: UseMutationResult<any, unknown, object, unknown>;
   addProp: (originId: string) => void;
 }
