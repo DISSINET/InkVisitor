@@ -1,11 +1,11 @@
 import React, {
   createContext,
-  useState,
-  useEffect,
-  useContext,
   ReactElement,
+  useContext,
+  useEffect,
+  useState,
 } from "react";
-import { useLocation, useHistory } from "react-router-dom";
+import { useHistory, useLocation } from "react-router-dom";
 
 const UNINITIALISED = (): void => {
   throw `function uninitialised`;

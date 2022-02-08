@@ -1,6 +1,10 @@
-import React, { useState } from "react";
 import api from "api";
 import { Button, Input, Modal } from "components";
+import React, { useState } from "react";
+import { toast } from "react-toastify";
+import { setAuthToken } from "redux/features/authTokenSlice";
+import { setUsername } from "redux/features/usernameSlice";
+import { useAppDispatch } from "redux/hooks";
 import {
   StyledButtonWrap,
   StyledContentWrap,
@@ -9,10 +13,6 @@ import {
   StyledHeading,
   StyledInputRow,
 } from "./LoginModalStyles";
-import { useAppDispatch } from "redux/hooks";
-import { toast } from "react-toastify";
-import { setAuthToken } from "redux/features/authTokenSlice";
-import { setUsername } from "redux/features/usernameSlice";
 
 export const LoginModal: React.FC = () => {
   const dispatch = useAppDispatch();

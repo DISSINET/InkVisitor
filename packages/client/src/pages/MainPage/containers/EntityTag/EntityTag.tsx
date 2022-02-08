@@ -1,11 +1,11 @@
-import React, { ReactNode } from "react";
+import { IActant, IEntity } from "@shared/types";
 import { Tag } from "components";
-import { IEntity, IResponseTerritory, ITerritory } from "@shared/types";
-import { DragItem } from "types";
+import React, { ReactNode } from "react";
 import { PopupPosition } from "reactjs-popup/dist/types";
+import { DragItem } from "types";
 
 interface IEntityTag {
-  actant: IEntity;
+  actant: IActant | IEntity;
   tooltipText?: string;
   parentId?: string;
   mode?: "selected" | "disabled" | "invalid" | false;
@@ -50,7 +50,7 @@ export const EntityTag: React.FC<IEntityTag> = ({
     <Tag
       propId={actant.id}
       label={actant.label}
-      status={actant.data.status}
+      status={actant.status}
       ltype={actant.data.logicalType ?? "1"}
       tooltipDetail={actant.detail}
       tooltipText={tooltipText}

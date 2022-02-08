@@ -1,8 +1,7 @@
-import React, { useState } from "react";
-import { useSearchParams } from "hooks";
-import { Cell, ColumnInstance, Row } from "react-table";
-
 import { IStatementActant } from "@shared/types";
+import { useSearchParams } from "hooks";
+import React, { useState } from "react";
+import { Cell, ColumnInstance, Row } from "react-table";
 import { StyledSubRow, StyledSubRowTd } from "./StatementListTableStyles";
 
 interface StatementListRowExpanded {

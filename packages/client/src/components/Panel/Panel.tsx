@@ -1,6 +1,5 @@
 import React, { ReactNode } from "react";
 import { useSpring } from "react-spring";
-
 import { springConfig } from "Theme/constants";
 import { StyledPanel } from "./PanelStyles";
 

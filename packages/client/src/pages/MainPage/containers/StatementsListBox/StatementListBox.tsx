@@ -1,15 +1,11 @@
-import React, { Profiler, useEffect, useMemo, useState } from "react";
-import { Cell, Column } from "react-table";
-import { useMutation, useQuery, useQueryClient } from "react-query";
+import { UserRole, UserRoleMode } from "@shared/enums";
 import {
-  FaTrashAlt,
-  FaPlus,
-  FaClone,
-  FaChevronCircleDown,
-  FaChevronCircleUp,
-} from "react-icons/fa";
-import { toast } from "react-toastify";
-
+  IActant,
+  IAction,
+  IResponseStatement,
+  IStatement,
+} from "@shared/types";
+import api from "api";
 import {
   Button,
   ButtonGroup,
@@ -18,31 +14,33 @@ import {
   TagGroup,
   Tooltip,
 } from "components";
-import { EntityTag } from "./../";
-import api from "api";
+import { CStatement, DStatement } from "constructors";
+import { useSearchParams } from "hooks";
+import React, { useEffect, useMemo, useState } from "react";
+import { BsArrowDown, BsArrowUp } from "react-icons/bs";
 import {
-  IStatement,
-  IEntity,
-  IAction,
-  IResponseStatement,
-} from "@shared/types";
-import { StatementListTable } from "./StatementListTable/StatementListTable";
+  FaChevronCircleDown,
+  FaChevronCircleUp,
+  FaClone,
+  FaPlus,
+  FaTrashAlt,
+} from "react-icons/fa";
+import { useMutation, useQuery, useQueryClient } from "react-query";
+import { Cell, Column } from "react-table";
+import { toast } from "react-toastify";
+import { EntityTag } from "./../";
+import { StatementListContextMenu } from "./StatementListContextMenu/StatementListContextMenu";
 import { StatementListHeader } from "./StatementListHeader/StatementListHeader";
+import { StatementListTable } from "./StatementListTable/StatementListTable";
 import {
   StyledDots,
   StyledTableWrapper,
   StyledText,
 } from "./StatementLitBoxStyles";
 
-import { CStatement, DStatement } from "constructors";
-import { useSearchParams } from "hooks";
-import { StatementListContextMenu } from "./StatementListContextMenu/StatementListContextMenu";
-import { BsArrowUp, BsArrowDown } from "react-icons/bs";
-import { UserRole, UserRoleMode } from "@shared/enums";
-
 const initialData: {
   statements: IStatement[];
-  actants: IEntity[];
+  actants: IActant[];
   right: UserRoleMode;
 } = {
   statements: [],
@@ -106,7 +104,7 @@ export const StatementListBox: React.FC = () => {
 
   const removeStatementMutation = useMutation(
     async (sId: string) => {
-      await api.entityDelete(sId);
+      await api.actantsDelete(sId);
     },
     {
       onSuccess: () => {
@@ -124,7 +122,7 @@ export const StatementListBox: React.FC = () => {
       const { ...newStatementObject } = statementToDuplicate;
 
       const duplicatedStatement = DStatement(newStatementObject as IStatement);
-      await api.entityCreate(duplicatedStatement);
+      await api.actantsCreate(duplicatedStatement);
     },
     {
       onSuccess: (data, variables) => {
@@ -141,7 +139,7 @@ export const StatementListBox: React.FC = () => {
 
   const addStatementAtTheEndMutation = useMutation(
     async (newStatement: IStatement) => {
-      await api.entityCreate(newStatement);
+      await api.actantsCreate(newStatement);
     },
     {
       onSuccess: (data, variables) => {
@@ -153,7 +151,7 @@ export const StatementListBox: React.FC = () => {
   );
 
   const actantsCreateMutation = useMutation(
-    async (newStatement: IStatement) => await api.entityCreate(newStatement),
+    async (newStatement: IStatement) => await api.actantsCreate(newStatement),
     {
       onSuccess: (data, variables) => {
         toast.info(`Statement created!`);
@@ -222,7 +220,7 @@ export const StatementListBox: React.FC = () => {
       allOrders[index] = (allOrders[index - 1] + allOrders[index + 1]) / 2;
     }
 
-    const res = await api.entityUpdate(statementToMove.id, {
+    const res = await api.actantsUpdate(statementToMove.id, {
       data: {
         territory: {
           id: statementToMove.data.territory.id,
@@ -233,7 +231,7 @@ export const StatementListBox: React.FC = () => {
     queryClient.invalidateQueries("territory");
   };
 
-  const renderListActant = (actantObject: IEntity, key: number) => {
+  const renderListActant = (actantObject: IActant, key: number) => {
     return (
       actantObject && (
         <EntityTag
@@ -247,7 +245,7 @@ export const StatementListBox: React.FC = () => {
   };
 
   const renderListActantLong = (
-    actantObject: IEntity,
+    actantObject: IActant,
     key: number,
     attributes?: boolean,
     statement?: IResponseStatement
@@ -283,7 +281,7 @@ export const StatementListBox: React.FC = () => {
           const statement = row.original as IStatement;
           return (
             <EntityTag
-              actant={statement as IEntity}
+              actant={statement as IActant}
               showOnly="entity"
               tooltipText={statement.data.text}
             />
@@ -313,7 +311,7 @@ export const StatementListBox: React.FC = () => {
             <TagGroup>
               {subjectObjects
                 .slice(0, 2)
-                .map((subjectObject: IEntity, key: number) =>
+                .map((subjectObject: IActant, key: number) =>
                   renderListActant(subjectObject, key)
                 )}
               {isOversized && (
@@ -326,7 +324,7 @@ export const StatementListBox: React.FC = () => {
                     <TagGroup>
                       {subjectObjects
                         .slice(2)
-                        .map((subjectObject: IEntity, key: number) =>
+                        .map((subjectObject: IActant, key: number) =>
                           renderListActant(subjectObject, key)
                         )}
                     </TagGroup>
@@ -406,7 +404,7 @@ export const StatementListBox: React.FC = () => {
             <TagGroup>
               {actantObjects
                 .slice(0, 4)
-                .map((actantObject: IEntity, key: number) =>
+                .map((actantObject: IActant, key: number) =>
                   renderListActant(actantObject, key)
                 )}
               {isOversized && (
@@ -419,7 +417,7 @@ export const StatementListBox: React.FC = () => {
                     <TagGroup>
                       {actantObjects
                         .slice(4)
-                        .map((actantObject: IEntity, key: number) =>
+                        .map((actantObject: IActant, key: number) =>
                           renderListActant(actantObject, key)
                         )}
                     </TagGroup>
@@ -580,7 +578,7 @@ export const StatementListBox: React.FC = () => {
               <div>{actantObjects.length > 0 ? <i>Actants</i> : ""}</div>
               <TagGroup>
                 <div style={{ display: "block" }}>
-                  {actantObjects.map((actantObject: IEntity, key: number) =>
+                  {actantObjects.map((actantObject: IActant, key: number) =>
                     renderListActantLong(actantObject, key, true, statement)
                   )}
                 </div>
@@ -607,7 +605,7 @@ export const StatementListBox: React.FC = () => {
               <div>{actantObjects.length > 0 ? <i>References</i> : ""}</div>
               <TagGroup>
                 <div style={{ display: "block" }}>
-                  {actantObjects.map((actantObject: IEntity, key: number) =>
+                  {actantObjects.map((actantObject: IActant, key: number) =>
                     renderListActantLong(actantObject, key)
                   )}
                 </div>
@@ -631,7 +629,7 @@ export const StatementListBox: React.FC = () => {
               <div>{actantObjects.length > 0 ? <i>Tags</i> : ""}</div>
               <TagGroup>
                 <div style={{ display: "block" }}>
-                  {actantObjects.map((actantObject: IEntity, key: number) =>
+                  {actantObjects.map((actantObject: IActant, key: number) =>
                     renderListActantLong(actantObject, key)
                   )}
                 </div>

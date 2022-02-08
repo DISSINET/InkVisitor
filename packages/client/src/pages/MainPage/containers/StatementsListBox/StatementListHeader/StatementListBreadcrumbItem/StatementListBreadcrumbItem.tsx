@@ -1,3 +1,5 @@
+import { ActantStatus, ActantType, Language } from "@shared/enums";
+import { ITerritory } from "@shared/types";
 import api from "api";
 import { Button, Loader } from "components";
 import { useSearchParams } from "hooks";
@@ -13,7 +15,17 @@ import { StyledItemBox } from "./StatementListBreadcrumbItemStyles";
 interface StatementListBreadcrumbItem {
   territoryId: string;
 }
-
+const initialData = {
+  id: "",
+  class: ActantType.Territory,
+  data: {},
+  label: "",
+  detail: "",
+  status: ActantStatus.Approved,
+  language: Language.Empty,
+  props: [],
+  notes: [],
+};
 export const StatementListBreadcrumbItem: React.FC<
   StatementListBreadcrumbItem
 > = ({ territoryId }) => {
@@ -37,11 +49,11 @@ export const StatementListBreadcrumbItem: React.FC<
 
   return (
     <>
-      {territoryId !== rootTerritoryId && territoryData && (
+      {territoryId !== rootTerritoryId && (
         <StyledItemBox>
           <BsArrowRightShort />
           <EntityTag
-            actant={territoryData}
+            actant={territoryData ? territoryData : initialData}
             button={
               paramsTerritoryId !== territoryId && (
                 <Button

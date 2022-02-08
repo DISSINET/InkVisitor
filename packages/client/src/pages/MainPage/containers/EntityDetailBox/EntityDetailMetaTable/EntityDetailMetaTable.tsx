@@ -1,4 +1,4 @@
-import { EntityClass } from "@shared/enums";
+import { ActantType } from "@shared/enums";
 import { IProp, IResponseDetail, IResponseStatement } from "@shared/types";
 import { Button, ButtonGroup } from "components";
 import React, { useCallback, useMemo } from "react";
@@ -103,7 +103,7 @@ export const EntityDetailMetaTable: React.FC<EntityDetailMetaTable> = ({
                     },
                   });
                 }}
-                categoryTypes={[EntityClass.Concept]}
+                categoryTypes={[ActantType.Concept]}
               />
             )
           );
@@ -118,12 +118,12 @@ export const EntityDetailMetaTable: React.FC<EntityDetailMetaTable> = ({
           const {
             id: statementId,
             data,
-            entities,
+            actants,
           } = row.original as IResponseStatement;
 
           const typeSActant = data.actants.find((a) => a.position == "a1");
           const typeActant = typeSActant
-            ? entities.find((a) => a.id === typeSActant.actant)
+            ? actants.find((a) => a.id === typeSActant.actant)
             : undefined;
 
           return typeSActant ? (
@@ -180,12 +180,12 @@ export const EntityDetailMetaTable: React.FC<EntityDetailMetaTable> = ({
           const {
             id: statementId,
             data,
-            entities,
+            actants,
           } = row.original as IResponseStatement;
 
           const valueSActant = data.actants.find((a) => a.position == "a2");
           const valueActant = valueSActant
-            ? entities.find((a) => a.id === valueSActant.actant)
+            ? actants.find((a) => a.id === valueSActant.actant)
             : false;
 
           return valueSActant && valueActant ? (
@@ -239,17 +239,17 @@ export const EntityDetailMetaTable: React.FC<EntityDetailMetaTable> = ({
                   });
                 }}
                 categoryTypes={[
-                  EntityClass.Action,
-                  EntityClass.Person,
-                  EntityClass.Group,
-                  EntityClass.Object,
-                  EntityClass.Concept,
-                  EntityClass.Location,
-                  EntityClass.Value,
-                  EntityClass.Event,
-                  EntityClass.Statement,
-                  EntityClass.Territory,
-                  EntityClass.Resource,
+                  ActantType.Action,
+                  ActantType.Person,
+                  ActantType.Group,
+                  ActantType.Object,
+                  ActantType.Concept,
+                  ActantType.Location,
+                  ActantType.Value,
+                  ActantType.Event,
+                  ActantType.Statement,
+                  ActantType.Territory,
+                  ActantType.Resource,
                 ]}
               />
             )
@@ -327,19 +327,19 @@ export const EntityDetailMetaTable: React.FC<EntityDetailMetaTable> = ({
             id: statementId,
             class: statementClass,
             data: data,
-            entities,
+            actants,
           } = row.original as IResponseStatement;
 
           const action = data?.actions[0];
 
           const valueSActant = data.actants.find((a) => a.position == "a2");
           const valueActant = valueSActant
-            ? entities.find((a) => a.id === valueSActant.actant)
+            ? actants.find((a) => a.id === valueSActant.actant)
             : false;
 
           const typeSActant = data.actants.find((a) => a.position == "a1");
           const typeActant = typeSActant
-            ? entities.find((a) => a.id === typeSActant.actant)
+            ? actants.find((a) => a.id === typeSActant.actant)
             : false;
 
           const typeLabel = typeActant ? typeActant.label : "undefined";

@@ -1,14 +1,13 @@
+import { IActant } from "@shared/types";
+import api from "api";
+import { Submit } from "components";
+import { useSearchParams } from "hooks";
 import React, { useEffect, useState } from "react";
 import { useMutation, useQueryClient } from "react-query";
 import { toast } from "react-toastify";
 
-import api from "api";
-import { IEntity } from "@shared/types";
-import { Submit } from "components";
-import { useSearchParams } from "hooks";
-
 interface ContextMenuSubmitDelete {
-  territoryActant: IEntity;
+  territoryActant: IActant;
   onClose: () => void;
 }
 export const ContextMenuSubmitDelete: React.FC<ContextMenuSubmitDelete> = ({
@@ -22,11 +21,11 @@ export const ContextMenuSubmitDelete: React.FC<ContextMenuSubmitDelete> = ({
   }, []);
 
   const queryClient = useQueryClient();
-  const { territoryId, setTerritoryId, detailId, setDetailId } =
+  const { territoryId, setTerritoryId, actantId, setActantId } =
     useSearchParams();
 
   const deleteTerritoryMutation = useMutation(
-    async () => await api.entityDelete(territoryActant.id),
+    async () => await api.actantsDelete(territoryActant.id),
     {
       onSuccess: () => {
         toast.info(`Territory [${territoryActant.label}] deleted!`);
@@ -36,8 +35,8 @@ export const ContextMenuSubmitDelete: React.FC<ContextMenuSubmitDelete> = ({
         if (territoryId === territoryActant.id) {
           setTerritoryId("");
         }
-        if (detailId === territoryActant.id) {
-          setDetailId("");
+        if (actantId === territoryActant.id) {
+          setActantId("");
         }
         onClose();
       },

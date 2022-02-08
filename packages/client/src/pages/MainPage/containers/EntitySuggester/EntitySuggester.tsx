@@ -1,15 +1,15 @@
 import {
-  EntityStatus,
-  EntityClass,
-  EntityExtension,
-  ExtendedEntityClass,
+  ActantStatus,
+  ActantType,
+  AllActantType,
+  CategoryActantType,
   UserRole,
   UserRoleMode,
 } from "@shared/enums";
-import { IEntity, IOption } from "@shared/types";
+import { IActant, IOption } from "@shared/types";
 import api from "api";
-import { Suggester, SuggestionI } from "components/Suggester/Suggester";
-import { CEntity, CStatement, CTerritoryActant } from "constructors";
+import { EntitySuggestionI, Suggester } from "components/Suggester/Suggester";
+import { CActant, CStatement, CTerritoryActant } from "constructors";
 import { useDebounce, useSearchParams } from "hooks";
 import React, { useEffect, useState } from "react";
 import { DragObjectWithType } from "react-dnd";
@@ -17,11 +17,11 @@ import { FaHome } from "react-icons/fa";
 import { useMutation, useQuery, useQueryClient } from "react-query";
 import { OptionTypeBase, ValueType } from "react-select";
 import { toast } from "react-toastify";
-import { rootTerritoryId } from "Theme/constants";
-import { DropdownAny, Entities } from "types";
+import { DropdownAny, rootTerritoryId } from "Theme/constants";
+import { Entities } from "types";
 
 interface EntitySuggesterI {
-  categoryTypes: EntityClass[];
+  categoryTypes: ActantType[];
   onSelected: Function;
   placeholder?: string;
   allowCreate?: boolean;
@@ -29,7 +29,7 @@ interface EntitySuggesterI {
   inputWidth?: number | "full";
   openDetailOnCreate?: boolean;
   territoryActants?: string[];
-  excludedEntities?: EntityClass[];
+  excludedEntities?: ActantType[];
   excludedActantIds?: string[];
   filterEditorRights?: boolean;
 }
@@ -47,14 +47,13 @@ export const EntitySuggester: React.FC<EntitySuggesterI> = ({
   filterEditorRights = false,
   excludedActantIds = [],
 }) => {
-  const wildCardCategory = EntityExtension.Any;
   const queryClient = useQueryClient();
   const [typed, setTyped] = useState<string>("");
   const debouncedTyped = useDebounce(typed, 100);
   const [selectedCategory, setSelectedCategory] = useState<any>();
   const [allCategories, setAllCategories] = useState<IOption[]>();
 
-  const { setDetailId } = useSearchParams();
+  const { setActantId } = useSearchParams();
   const userRole = localStorage.getItem("userrole");
 
   // Suggesions query
@@ -66,46 +65,56 @@ export const EntitySuggester: React.FC<EntitySuggesterI> = ({
   } = useQuery(
     ["suggestion", debouncedTyped, selectedCategory],
     async () => {
-      const resSuggestions = await api.entitiesGetMore({
+      const resSuggestions = await api.actantsGetMore({
         label: debouncedTyped,
         class:
-          selectedCategory?.value === wildCardCategory.valueOf()
+          selectedCategory?.value === DropdownAny
             ? false
-            : selectedCategory?.value,
+            : selectedCategory.value,
         excluded: excludedEntities.length ? excludedEntities : undefined,
       });
-      return resSuggestions.data
-        .filter(
-          (s) => s.data.status && s.data.status !== EntityStatus.Discouraged
-        )
-        .filter((s) =>
-          filterEditorRights && userRole !== UserRole.Admin
-            ? s.right === UserRoleMode.Write
-            : s
-        )
-        .filter((s) =>
-          excludedActantIds.length ? !excludedActantIds.includes(s.id) : s
-        )
-        .map((s: IEntity) => {
-          const entity = Entities[s.class];
 
-          const icons: React.ReactNode[] = [];
+      // TODO: status -> data.status
+      const suggestions = resSuggestions.data;
+      suggestions.sort((a, b) => {
+        if (a.status == ActantStatus.Discouraged) {
+          return 1;
+        } else {
+          return -1;
+        }
+      });
+      return (
+        resSuggestions.data
+          //.filter((s) => s.status !== ActantStatus.Discouraged)
+          .filter((s) =>
+            filterEditorRights && userRole !== UserRole.Admin
+              ? s.right === UserRoleMode.Write
+              : s
+          )
+          .filter((s) =>
+            excludedActantIds.length ? !excludedActantIds.includes(s.id) : s
+          )
+          .map((s: IActant) => {
+            const entity = Entities[s.class];
 
-          if (territoryActants?.includes(s.id)) {
-            icons.push(<FaHome key={s.id} color="" />);
-          }
+            const icons: React.ReactNode[] = [];
 
-          return {
-            color: entity.color,
-            category: s.class,
-            label: s.label,
-            detail: s.detail,
-            status: s.data.status,
-            ltype: s.data.logicalType,
-            id: s.id,
-            icons: icons,
-          };
-        });
+            if (territoryActants?.includes(s.id)) {
+              icons.push(<FaHome key={s.id} color="" />);
+            }
+
+            return {
+              color: entity.color,
+              category: s.class,
+              label: s.label,
+              detail: s.detail,
+              status: s.status,
+              ltype: s.data.logicalType,
+              id: s.id,
+              icons: icons,
+            };
+          })
+      );
     },
     {
       enabled:
@@ -133,7 +142,7 @@ export const EntitySuggester: React.FC<EntitySuggesterI> = ({
     });
     if (categories.length > 1 && !disableWildCard) {
       categories.unshift({
-        label: wildCardCategory.valueOf(),
+        label: ActantType.Any,
         value: DropdownAny,
       });
     }
@@ -144,7 +153,7 @@ export const EntitySuggester: React.FC<EntitySuggesterI> = ({
   }, [categoryTypes]);
 
   const actantsCreateMutation = useMutation(
-    async (newActant: IEntity) => await api.entityCreate(newActant),
+    async (newActant: IActant) => await api.actantsCreate(newActant),
     {
       onSuccess: (data, variables) => {
         onSelected(variables.id);
@@ -160,7 +169,7 @@ export const EntitySuggester: React.FC<EntitySuggesterI> = ({
           toast.info(`Actant [${variables.label}] created!`);
         }
         if (openDetailOnCreate) {
-          setDetailId(variables.id);
+          setActantId(variables.id);
         }
       },
     }
@@ -168,12 +177,12 @@ export const EntitySuggester: React.FC<EntitySuggesterI> = ({
 
   const handleCreate = async (newCreated: {
     label: string;
-    category: ExtendedEntityClass;
+    category: ActantType;
     detail: string;
     territoryId?: string;
   }) => {
     if (
-      newCreated.category === EntityClass.Statement &&
+      newCreated.category === ActantType.Statement &&
       newCreated.territoryId
     ) {
       const newStatement = CStatement(
@@ -183,7 +192,7 @@ export const EntitySuggester: React.FC<EntitySuggesterI> = ({
         newCreated.detail
       );
       actantsCreateMutation.mutate(newStatement);
-    } else if (newCreated.category === EntityClass.Territory) {
+    } else if (newCreated.category === ActantType.Territory) {
       const newActant = CTerritoryActant(
         newCreated.label,
         newCreated.territoryId ? newCreated.territoryId : rootTerritoryId,
@@ -193,8 +202,8 @@ export const EntitySuggester: React.FC<EntitySuggesterI> = ({
       );
       actantsCreateMutation.mutate(newActant);
     } else {
-      const newActant = CEntity(
-        newCreated.category as EntityClass,
+      const newActant = CActant(
+        newCreated.category as CategoryActantType,
         newCreated.label,
         localStorage.getItem("userrole") as UserRole,
         newCreated.detail
@@ -203,7 +212,7 @@ export const EntitySuggester: React.FC<EntitySuggesterI> = ({
     }
   };
 
-  const handlePick = (newPicked: SuggestionI) => {
+  const handlePick = (newPicked: EntitySuggestionI) => {
     onSelected(newPicked.id);
     handleClean();
   };
@@ -248,13 +257,13 @@ export const EntitySuggester: React.FC<EntitySuggesterI> = ({
       }}
       onCreate={(newCreated: {
         label: string;
-        category: EntityClass;
+        category: AllActantType;
         detail: string;
         territoryId?: string;
       }) => {
         handleCreate(newCreated);
       }}
-      onPick={(newPicked: SuggestionI) => {
+      onPick={(newPicked: EntitySuggestionI) => {
         handlePick(newPicked);
       }}
       onDrop={(newDropped: DragObjectWithType) => {

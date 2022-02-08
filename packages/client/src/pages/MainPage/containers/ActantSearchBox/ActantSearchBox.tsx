@@ -1,7 +1,14 @@
-import React, { useEffect, useState } from "react";
-import { OptionsType, OptionTypeBase, ValueType } from "react-select";
-
+import { ActantType } from "@shared/enums";
+import { IOption, IResponseSearch } from "@shared/types";
+import api from "api";
 import { Button, Dropdown, Input, Loader, Tag } from "components";
+import { useDebounce } from "hooks";
+import React, { useEffect, useState } from "react";
+import { FaUnlink } from "react-icons/fa";
+import { useMutation, useQuery } from "react-query";
+import { OptionsType, OptionTypeBase, ValueType } from "react-select";
+import { Entities, IRequestSearch } from "types";
+import { EntitySuggester } from "..";
 import {
   StyledBoxContent,
   StyledResultHeading,
@@ -12,26 +19,18 @@ import {
   StyledRowHeader,
   StyledTagLoaderWrap,
 } from "./ActantSearchBoxStyles";
-import { EntitySuggester } from "..";
-import { useMutation, useQuery } from "react-query";
-import api from "api";
-import { Entities, IRequestSearch } from "types";
-import { IOption, IResponseSearch } from "@shared/types";
-import { FaUnlink } from "react-icons/fa";
-import { useDebounce } from "hooks";
-import { EntityClass } from "@shared/enums";
 
 const classesActants = [
-  EntityClass.Action,
-  EntityClass.Person,
-  EntityClass.Group,
-  EntityClass.Object,
-  EntityClass.Concept,
-  EntityClass.Location,
-  EntityClass.Value,
-  EntityClass.Event,
-  EntityClass.Territory,
-  EntityClass.Resource,
+  ActantType.Action,
+  ActantType.Person,
+  ActantType.Group,
+  ActantType.Object,
+  ActantType.Concept,
+  ActantType.Location,
+  ActantType.Value,
+  ActantType.Event,
+  ActantType.Territory,
+  ActantType.Resource,
 ];
 
 const initValues: IRequestSearch = {
@@ -106,7 +105,7 @@ export const ActantSearchBox: React.FC = () => {
   }, [debouncedValues]);
 
   const searchActantsMutation = useMutation(
-    async (searchData: IRequestSearch) => api.entitiesSearch(searchData),
+    async (searchData: IRequestSearch) => api.actantsSearch(searchData),
     {
       onSuccess: (data) => {
         setResults(data.data);

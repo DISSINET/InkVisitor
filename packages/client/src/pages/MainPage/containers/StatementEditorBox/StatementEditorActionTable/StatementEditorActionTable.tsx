@@ -1,13 +1,13 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { Column, useTable, useExpanded, Row } from "react-table";
+import { IActant, IResponseStatement, IStatementAction } from "@shared/types";
 import update from "immutability-helper";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { UseMutationResult } from "react-query";
+import { Column, Row, useExpanded, useTable } from "react-table";
 import { StyledTable } from "../StatementEditorActionTable/StatementEditorActionTableStyles";
 import { StatementEditorActionTableRow } from "./StatementEditorActionTableRow";
-import { IEntity, IResponseStatement, IStatementAction } from "@shared/types";
-import { UseMutationResult } from "react-query";
 
 interface FilteredActionObject {
-  data: { action: IEntity | undefined; sAction: IStatementAction };
+  data: { action: IActant | undefined; sAction: IStatementAction };
 }
 interface StatementEditorActionTable {
   statement: IResponseStatement;

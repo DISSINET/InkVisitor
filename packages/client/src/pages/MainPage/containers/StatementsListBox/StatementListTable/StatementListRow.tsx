@@ -1,7 +1,6 @@
 import api from "api";
 import { useSearchParams } from "hooks";
 import React, { useMemo, useRef } from "react";
-import { useQuery, useMutation, useQueryClient } from "react-query";
 import {
   DragSourceMonitor,
   DropTargetMonitor,
@@ -10,8 +9,8 @@ import {
   XYCoord,
 } from "react-dnd";
 import { FaGripVertical } from "react-icons/fa";
+import { useQuery } from "react-query";
 import { Cell, ColumnInstance } from "react-table";
-
 import { DragItem, ItemTypes } from "types";
 import { StatementListRowExpanded } from "./StatementListRowExpanded";
 import {

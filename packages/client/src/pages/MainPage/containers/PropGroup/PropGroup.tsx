@@ -1,26 +1,23 @@
-import React, { useMemo, useEffect, Profiler } from "react";
-import { useQuery, useMutation, useQueryClient } from "react-query";
+import { IActant, IProp } from "@shared/types";
 import api from "api";
-import {
-  FaTrashAlt,
-  FaPlus,
-  FaUnlink,
-  FaCaretUp,
-  FaCaretDown,
-} from "react-icons/fa";
-import { EntityTag } from "./../";
-
-import { IEntity, IProp } from "@shared/types";
 import { AttributeIcon, Button } from "components";
-import { EntitySuggester } from "./../";
-
+import React from "react";
+import {
+  FaCaretDown,
+  FaCaretUp,
+  FaPlus,
+  FaTrashAlt,
+  FaUnlink,
+} from "react-icons/fa";
+import { useQuery } from "react-query";
 import { excludedSuggesterEntities } from "Theme/constants";
-import { AttributesGroupEditor } from "../AttributesEditor/AttributesGroupEditor";
 import {
   AttributeGroupDataObject,
   classesPropType,
   classesPropValue,
 } from "types";
+import { AttributesGroupEditor } from "../AttributesEditor/AttributesGroupEditor";
+import { EntitySuggester, EntityTag } from "./../";
 import {
   StyledGrid,
   StyledListHeaderColumn,
@@ -30,7 +27,7 @@ import {
 
 interface IPropGroup {
   originId: string;
-  entities: { [key: string]: IEntity };
+  entities: { [key: string]: IActant };
   props: IProp[];
   territoryId: string;
 
@@ -69,7 +66,7 @@ export const PropGroup: React.FC<IPropGroup> = ({
     ["territoryActants", territoryId],
     async () => {
       if (territoryId) {
-        const res = await api.entityIdsInTerritory(territoryId);
+        const res = await api.actantIdsInTerritory(territoryId);
         return res.data;
       } else {
         return [];
@@ -146,7 +143,7 @@ export const PropGroup: React.FC<IPropGroup> = ({
 
 interface IPropGroupRow {
   prop: IProp;
-  entities: { [key: string]: IEntity };
+  entities: { [key: string]: IActant };
   level: "1" | "2";
   order: number;
   firstRowinGroup?: boolean;
@@ -181,7 +178,7 @@ const PropGroupRow: React.FC<IPropGroupRow> = ({
   territoryActants = [],
   openDetailOnCreate = false,
 }) => {
-  const propTypeEntity: IEntity = entities[prop.type.id];
+  const propTypeEntity: IActant = entities[prop.type.id];
   const propValueEntity = entities[prop.value.id];
 
   return (
