@@ -60,8 +60,8 @@ interface MainPage {
 
 const MainPage: React.FC<MainPage> = ({ size }) => {
   const {
-    detailId,
-    setDetailId,
+    actantId,
+    setActantId,
     statementId,
     setStatementId,
     territoryId,
@@ -120,7 +120,7 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
     dispatch(setAuthToken(""));
     toast.success("You've been successfully logged out!");
     queryClient.removeQueries();
-    setDetailId("");
+    setActantId("");
     setStatementId("");
     setTerritoryId("");
   };
@@ -256,23 +256,23 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
               }
             >
               <Box
-                height={detailId ? heightContent / 2 : heightContent}
+                height={actantId ? heightContent / 2 : heightContent}
                 label="Statements"
               >
                 <ScrollHandler />
                 <StatementListBox />
               </Box>
-              {detailId && (
+              {actantId && (
                 <Box
                   height={heightContent / 2}
                   label="Detail"
                   button={
-                    detailId && (
+                    actantId && (
                       <Button
                         inverted
                         icon={<IoMdClose />}
                         onClick={() => {
-                          setDetailId("");
+                          setActantId("");
                         }}
                       />
                     )

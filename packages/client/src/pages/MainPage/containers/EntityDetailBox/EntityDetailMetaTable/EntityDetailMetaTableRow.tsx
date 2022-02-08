@@ -5,7 +5,7 @@ import { AxiosResponse } from "axios";
 
 import { Button } from "components";
 import {
-  IEntity,
+  IActant,
   IResponseDetail,
   IResponseGeneric,
   IResponseStatement,

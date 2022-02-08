@@ -1,3 +1,4 @@
+import { ActantType } from "@shared/enums";
 import styled from "styled-components";
 import { Colors } from "types";
 

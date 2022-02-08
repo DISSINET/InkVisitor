@@ -1,5 +1,4 @@
-import { ActantStatus, ActantType, Language } from "@shared/enums";
-import { ITerritory } from "@shared/types";
+import { EntityStatus, EntityClass, Language } from "@shared/enums";
 import api from "api";
 import { Button, Loader } from "components";
 import { useSearchParams } from "hooks";
@@ -17,11 +16,11 @@ interface StatementListBreadcrumbItem {
 }
 const initialData = {
   id: "",
-  class: ActantType.Territory,
+  class: EntityClass.Territory,
   data: {},
   label: "",
   detail: "",
-  status: ActantStatus.Approved,
+  status: EntityStatus.Approved,
   language: Language.Empty,
   props: [],
   notes: [],

@@ -1,4 +1,4 @@
-import { IEntity, IResponseBookmarkFolder } from "@shared/types";
+import { IActant, IResponseBookmarkFolder } from "@shared/types";
 import { Button } from "components";
 import update from "immutability-helper";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
@@ -34,11 +34,11 @@ export const ActantBookmarkFolderTable: React.FC<ActantBookmarkFolderTable> = ({
         id: "Action",
         accessor: "data",
         Cell: ({ row }: Cell) => {
-          const actant = row.original as IEntity;
+          const actant = row.original as IActant;
 
           return (
             <EntityTag
-              actant={actant as IEntity}
+              actant={actant as IActant}
               button={
                 <Button
                   key="d"

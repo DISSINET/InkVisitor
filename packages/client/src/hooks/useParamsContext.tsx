@@ -24,7 +24,7 @@ interface SearchParamsContext {
   statementId: string;
   setStatementId: (statement: string) => void;
   detailId: string;
-  setDetailId: (actant: string) => void;
+  setDetailId: (detail: string) => void;
 }
 const SearchParamsContext = createContext<SearchParamsContext>(INITIAL_CONTEXT);
 
@@ -70,8 +70,8 @@ export const SearchParamsProvider = ({
         setTerritoryId,
         statementId,
         setStatementId,
-        detailId,
-        setDetailId,
+        detailId: detailId,
+        setDetailId: setDetailId,
       }}
     >
       {children}

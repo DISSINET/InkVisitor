@@ -1,10 +1,9 @@
 import {
+  EntityStatus,
+  EntityClass,
   Certainty,
   Elvl,
-  EntityClass,
   EntityLogicalType,
-  EntityStatus,
-  ExtendedEntityClass,
   Language,
   Logic,
   Mood,
@@ -126,9 +125,9 @@ export interface DraggedTerritoryItem {
   index?: number;
 }
 export interface IRequestSearch {
-  class?: ExtendedEntityClass;
+  class?: EntityClass;
   label: string;
-  actantId: string;
+  entityId: string;
 }
 
 export type ISearchPositionInStatement =

@@ -12,7 +12,8 @@ import {
   ValueType,
 } from "react-select";
 import { OptionProps } from "react-select/src/types";
-import { DropdownAny, DropdownItem, Entities } from "types";
+import { DropdownAny } from "Theme/constants";
+import { DropdownItem, Entities } from "types";
 import {
   StyledEntityValue,
   StyledFaChevronDown,
@@ -37,7 +38,6 @@ interface Dropdown {
   noOptionsMessage?: Function;
   isClearable?: boolean;
   isMulti?: boolean;
-  allowSelectAll?: boolean;
   entityDropdown?: boolean;
   onFocus?: () => void;
   onBlur?: () => void;
@@ -61,7 +61,6 @@ export const Dropdown: React.FC<Dropdown> = ({
   isClearable = false,
   isMulti = false,
   disabled = false,
-  allowSelectAll = false,
   entityDropdown = false,
   onFocus = () => {},
   onBlur = () => {},
@@ -131,9 +130,7 @@ export const Dropdown: React.FC<Dropdown> = ({
           }
           return onChange(selected);
         }}
-        options={
-          allowSelectAll ? [allEntities, ...optionsWithIterator] : options
-        }
+        options={isMulti ? [allEntities, ...optionsWithIterator] : options}
         width={width}
         hideSelectedOptions={hideSelectedOptions}
       />
@@ -179,7 +176,7 @@ const Option = ({ ...props }: OptionProps | any): React.ReactElement => {
 const MultiValue = (props: MultiValueProps<any>): React.ReactElement => {
   let labelToBeDisplayed = `${props.data.label}`;
   if (props.data.value === allEntities.value) {
-    labelToBeDisplayed = "All is selected";
+    labelToBeDisplayed = "All options selected";
   }
   return (
     <components.MultiValue {...props}>

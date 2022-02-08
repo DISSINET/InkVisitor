@@ -1,35 +1,33 @@
 import {
-  EntityStatus,
-  EntityClass,
+  IProp,
+  IStatementActant,
+  IStatementAction,
+  IEntity,
+  ITerritory,
+  IStatement,
+  IBookmarkFolder,
+  IStatementReference,
+} from "@shared/types";
+import {
   Certainty,
   Elvl,
-  Language,
-  Logic,
   Mood,
   MoodVariant,
   Operator,
+  Logic,
+  Virtuality,
   Partitivity,
   Position,
   UserRole,
-  Virtuality,
-  EntityLogicalType,
+  Language,
+  EntityClass,
 } from "@shared/enums";
-import {
-  IEntity,
-  IBookmarkFolder,
-  IProp,
-  IStatement,
-  IStatementActant,
-  IStatementAction,
-  IStatementReference,
-  ITerritory,
-} from "@shared/types";
 import { v4 as uuidv4 } from "uuid";
 
 export const CBookmarkFolder = (bookmarkName: string): IBookmarkFolder => ({
   id: uuidv4(),
   name: bookmarkName,
-  actantIds: [],
+  entityIds: [],
 });
 
 export const CProp = (): IProp => ({
@@ -70,6 +68,8 @@ export const CStatement = (
   class: EntityClass.Statement,
   label: label ? label : "",
   detail: detail ? detail : "",
+  //status:
+  //  userRole === UserRole.Admin ? EntityStatus.Approved : EntityStatus.Pending,
   language: Language.Latin,
   notes: [],
   data: {
@@ -138,6 +138,8 @@ export const CTerritoryActant = (
   class: EntityClass.Territory,
   label: label,
   detail: detail ? detail : "",
+  // status:
+  //   userRole === UserRole.Admin ? EntityStatus.Approved : EntityStatus.Pending,
   language: Language.Latin,
   notes: [],
   data: {
@@ -158,6 +160,8 @@ export const CEntity = (
     label: label,
     detail: detail ? detail : "",
     data: {},
+    //status:
+    //   userRole === UserRole.Admin ? EntityStatus.Approved : EntityStatus.Pending,
     language: Language.Latin,
     notes: [],
     props: [],

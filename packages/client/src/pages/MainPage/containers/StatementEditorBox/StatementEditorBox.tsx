@@ -55,6 +55,20 @@ const classesActants = [
   EntityClass.Value,
   EntityClass.Event,
 ];
+const classesPropType = [EntityClass.Concept];
+const classesPropValue = [
+  EntityClass.Action,
+  EntityClass.Person,
+  EntityClass.Group,
+  EntityClass.Object,
+  EntityClass.Concept,
+  EntityClass.Location,
+  EntityClass.Value,
+  EntityClass.Event,
+  EntityClass.Statement,
+  EntityClass.Territory,
+  EntityClass.Resource,
+];
 const classesResources = [EntityClass.Resource];
 const classesTags = [
   EntityClass.Action,
@@ -413,7 +427,7 @@ export const StatementEditorBox: React.FC = () => {
     }
   );
 
-  const updateEntityMutation = useMutation(
+  const updateActantMutation = useMutation(
     async (changes: object) => await api.entityUpdate(statementId, changes),
     {
       onSuccess: () => {
@@ -431,7 +445,7 @@ export const StatementEditorBox: React.FC = () => {
       onSuccess: (data, variables) => {
         queryClient.invalidateQueries("statement");
         queryClient.invalidateQueries("territory");
-        queryClient.invalidateQueries("actant");
+        queryClient.invalidateQueries("entity");
       },
     }
   );
@@ -787,7 +801,7 @@ export const StatementEditorBox: React.FC = () => {
                 disabled={!userCanEdit}
                 values={statement.notes}
                 onChange={(newValues: string[]) => {
-                  updateEntityMutation.mutate({ notes: newValues });
+                  updateActantMutation.mutate({ notes: newValues });
                 }}
               />
             </StyledEditorSectionContent>

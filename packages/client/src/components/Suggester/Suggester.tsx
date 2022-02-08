@@ -172,7 +172,7 @@ export const Suggester: React.FC<SuggesterProps> = ({
           .map((suggestion, si) => (
             <React.Fragment key={si}>
               <StyledSuggestionLineActions isSelected={selected === si}>
-                {suggestion.status !== ActantStatus.Discouraged && (
+                {suggestion.status !== EntityStatus.Discouraged && (
                   <FaPlayCircle
                     color={theme.color["black"]}
                     onClick={() => {

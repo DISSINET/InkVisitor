@@ -13,7 +13,7 @@ import {
 } from "./AuditTableStyles";
 
 export const AuditTable: React.FC<IResponseAudit> = ({
-  entity,
+  actant,
   last,
   first,
 }) => {
@@ -40,7 +40,7 @@ type IAuditTableRow = { mode: "edit" | "create" } & IAudit;
 
 export const AuditTableRow: React.FC<IAuditTableRow> = ({
   id,
-  entityId,
+  actantId,
   user,
   date,
   changes,

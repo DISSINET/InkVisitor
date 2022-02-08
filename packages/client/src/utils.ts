@@ -1,8 +1,8 @@
-import { IEntity, IResponseTree, IStatement } from "@shared/types";
+import { IActant, IResponseTree, IStatement } from "@shared/types";
 
 export const findPositionInStatement = (
   statement: IStatement,
-  actant: IEntity
+  actant: IActant
 ) => {
   if (
     statement.data.actants
