@@ -1,15 +1,13 @@
+import { AttributeIcon, Checkbox } from "components";
 import React from "react";
-
+import { FaCheck } from "react-icons/fa";
+import { ImCross } from "react-icons/im";
 import {
   StyledAttributeModalRow,
   StyledAttributeModalRowLabel,
   StyledAttributeModalRowLabelIcon,
   StyledAttributeModalRowLabelText,
 } from "../AttributesEditorStyles";
-import { AttributeIcon, Checkbox } from "components";
-
-import { ImCross } from "react-icons/im";
-import { FaCheck } from "react-icons/fa";
 
 interface CheckboxRow {
   value: boolean;

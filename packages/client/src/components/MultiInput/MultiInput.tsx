@@ -1,6 +1,5 @@
-import React, { useEffect, useState } from "react";
-
 import { Button, Input } from "components";
+import React, { useEffect, useState } from "react";
 import { FaPlus, FaTrashAlt } from "react-icons/fa";
 import { StyledRow } from "./MultiInputStyles";
 

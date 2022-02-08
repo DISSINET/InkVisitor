@@ -2,7 +2,6 @@ import React, { ReactNode, useRef, useState } from "react";
 import { useSpring } from "react-spring";
 import { config } from "react-spring/renderprops";
 import { useAppSelector } from "redux/hooks";
-
 import {
   StyledCgMenuBoxed,
   StyledContextButtonGroup,
