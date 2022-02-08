@@ -66,7 +66,7 @@ export const EntitySuggester: React.FC<EntitySuggesterI> = ({
   } = useQuery(
     ["suggestion", debouncedTyped, selectedCategory],
     async () => {
-      const resSuggestions = await api.actantsGetMore({
+      const resSuggestions = await api.entitiesGetMore({
         label: debouncedTyped,
         class:
           selectedCategory?.value === wildCardCategory.valueOf()
@@ -144,7 +144,7 @@ export const EntitySuggester: React.FC<EntitySuggesterI> = ({
   }, [categoryTypes]);
 
   const actantsCreateMutation = useMutation(
-    async (newActant: IEntity) => await api.actantsCreate(newActant),
+    async (newActant: IEntity) => await api.entityCreate(newActant),
     {
       onSuccess: (data, variables) => {
         onSelected(variables.id);

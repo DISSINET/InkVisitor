@@ -26,7 +26,7 @@ export const ContextMenuSubmitDelete: React.FC<ContextMenuSubmitDelete> = ({
     useSearchParams();
 
   const deleteTerritoryMutation = useMutation(
-    async () => await api.actantsDelete(territoryActant.id),
+    async () => await api.entityDelete(territoryActant.id),
     {
       onSuccess: () => {
         toast.info(`Territory [${territoryActant.label}] deleted!`);

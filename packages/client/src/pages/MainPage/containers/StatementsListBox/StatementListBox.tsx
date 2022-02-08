@@ -106,7 +106,7 @@ export const StatementListBox: React.FC = () => {
 
   const removeStatementMutation = useMutation(
     async (sId: string) => {
-      await api.actantsDelete(sId);
+      await api.entityDelete(sId);
     },
     {
       onSuccess: () => {
@@ -124,7 +124,7 @@ export const StatementListBox: React.FC = () => {
       const { ...newStatementObject } = statementToDuplicate;
 
       const duplicatedStatement = DStatement(newStatementObject as IStatement);
-      await api.actantsCreate(duplicatedStatement);
+      await api.entityCreate(duplicatedStatement);
     },
     {
       onSuccess: (data, variables) => {
@@ -141,7 +141,7 @@ export const StatementListBox: React.FC = () => {
 
   const addStatementAtTheEndMutation = useMutation(
     async (newStatement: IStatement) => {
-      await api.actantsCreate(newStatement);
+      await api.entityCreate(newStatement);
     },
     {
       onSuccess: (data, variables) => {
@@ -153,7 +153,7 @@ export const StatementListBox: React.FC = () => {
   );
 
   const actantsCreateMutation = useMutation(
-    async (newStatement: IStatement) => await api.actantsCreate(newStatement),
+    async (newStatement: IStatement) => await api.entityCreate(newStatement),
     {
       onSuccess: (data, variables) => {
         toast.info(`Statement created!`);
@@ -222,7 +222,7 @@ export const StatementListBox: React.FC = () => {
       allOrders[index] = (allOrders[index - 1] + allOrders[index + 1]) / 2;
     }
 
-    const res = await api.actantsUpdate(statementToMove.id, {
+    const res = await api.entityUpdate(statementToMove.id, {
       data: {
         territory: {
           id: statementToMove.data.territory.id,

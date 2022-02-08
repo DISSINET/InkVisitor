@@ -69,7 +69,7 @@ export const PropGroup: React.FC<IPropGroup> = ({
     ["territoryActants", territoryId],
     async () => {
       if (territoryId) {
-        const res = await api.actantIdsInTerritory(territoryId);
+        const res = await api.entityIdsInTerritory(territoryId);
         return res.data;
       } else {
         return [];

@@ -126,7 +126,7 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
   entityOptions.push(allEntitiesOption);
 
   const updateEntityMutation = useMutation(
-    async (changes: any) => await api.actantsUpdate(detailId, changes),
+    async (changes: any) => await api.entityUpdate(detailId, changes),
     {
       onSuccess: (data, variables) => {
         queryClient.invalidateQueries(["actant"]);
@@ -149,7 +149,7 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
   );
 
   const deleteActantMutation = useMutation(
-    async (detailId: string) => await api.actantsDelete(detailId),
+    async (detailId: string) => await api.entityDelete(detailId),
     {
       onSuccess: (data, detailId) => {
         toast.info(`Actant deleted!`);

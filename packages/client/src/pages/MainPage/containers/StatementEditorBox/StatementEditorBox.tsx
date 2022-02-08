@@ -116,7 +116,7 @@ export const StatementEditorBox: React.FC = () => {
     ["territoryActants", statement?.data.territory.id],
     async () => {
       if (statement?.data.territory.id) {
-        const res = await api.actantIdsInTerritory(
+        const res = await api.entityIdsInTerritory(
           statement?.data.territory.id
         );
         return res.data;
@@ -155,7 +155,7 @@ export const StatementEditorBox: React.FC = () => {
   } = useQuery(
     ["territory", statementTerritoryId],
     async () => {
-      const res = await api.actantsGet(statementTerritoryId as string);
+      const res = await api.entitiesGet(statementTerritoryId as string);
       return res.data;
     },
     {
@@ -388,7 +388,7 @@ export const StatementEditorBox: React.FC = () => {
 
   const updateStatementDataMutation = useMutation(
     async (changes: object) => {
-      await api.actantsUpdate(statementId, {
+      await api.entityUpdate(statementId, {
         data: changes,
       });
     },
@@ -401,7 +401,7 @@ export const StatementEditorBox: React.FC = () => {
 
   const updateActionsRefreshListMutation = useMutation(
     async (changes: object) => {
-      await api.actantsUpdate(statementId, {
+      await api.entityUpdate(statementId, {
         data: changes,
       });
     },
@@ -414,7 +414,7 @@ export const StatementEditorBox: React.FC = () => {
   );
 
   const updateEntityMutation = useMutation(
-    async (changes: object) => await api.actantsUpdate(statementId, changes),
+    async (changes: object) => await api.entityUpdate(statementId, changes),
     {
       onSuccess: () => {
         queryClient.invalidateQueries(["statement"]);
@@ -424,7 +424,7 @@ export const StatementEditorBox: React.FC = () => {
 
   const updateActantsRefreshListMutation = useMutation(
     async (changes: object) =>
-      await api.actantsUpdate(statementId, {
+      await api.entityUpdate(statementId, {
         data: changes,
       }),
     {
@@ -464,7 +464,7 @@ export const StatementEditorBox: React.FC = () => {
 
   const moveStatementMutation = useMutation(
     async (newTerritoryId: string) => {
-      await api.actantsUpdate(statementId, {
+      await api.entityUpdate(statementId, {
         data: { territory: { id: newTerritoryId, order: -1 } },
       });
     },

@@ -106,7 +106,7 @@ export const ActantSearchBox: React.FC = () => {
   }, [debouncedValues]);
 
   const searchActantsMutation = useMutation(
-    async (searchData: IRequestSearch) => api.actantsSearch(searchData),
+    async (searchData: IRequestSearch) => api.entitiesSearch(searchData),
     {
       onSuccess: (data) => {
         setResults(data.data);
