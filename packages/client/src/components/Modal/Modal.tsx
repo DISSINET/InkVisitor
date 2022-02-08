@@ -1,20 +1,19 @@
 import React, { FC, ReactNode } from "react";
 import { config, useSpring } from "react-spring";
 import { Colors } from "types";
-
+import { ModalKeyPress } from "./ModalKeyPress";
 import {
-  StyledModalWrap,
   StyledBackground,
   StyledCard,
+  StyledCardBody,
   StyledCardHeader,
   StyledCardTitle,
-  StyledCardBody,
   StyledFooter,
   StyledModalInputForm,
   StyledModalInputLabel,
   StyledModalInputWrap,
+  StyledModalWrap,
 } from "./ModalStyles";
-import { ModalKeyPress } from "./ModalKeyPress";
 
 interface Modal {
   children?: ReactNode;

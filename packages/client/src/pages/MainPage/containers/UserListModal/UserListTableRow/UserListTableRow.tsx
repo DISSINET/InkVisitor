@@ -1,7 +1,6 @@
 import React from "react";
 import { Cell } from "react-table";
-
-import { StyledTr, StyledTd } from "./../UserListModalStyles";
+import { StyledTd, StyledTr } from "./../UserListModalStyles";
 
 interface UserListTableRow {
   row: any;

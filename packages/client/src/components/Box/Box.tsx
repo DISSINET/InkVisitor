@@ -2,7 +2,6 @@ import React, { ReactNode, useState } from "react";
 import { animated, useSpring } from "react-spring";
 import { springConfig } from "Theme/constants";
 import theme from "Theme/theme";
-
 import { Colors } from "types";
 import {
   StyledBox,

@@ -1,16 +1,15 @@
-import React, { useCallback, useMemo, useState } from "react";
-import { Column, useTable, useExpanded, Row } from "react-table";
+import { ActantType } from "@shared/enums";
+import { IActant, IResponseStatement, IStatementActant } from "@shared/types";
 import update from "immutability-helper";
+import React, { useCallback, useMemo, useState } from "react";
+import { UseMutationResult } from "react-query";
+import { Column, Row, useExpanded, useTable } from "react-table";
+import { StatementEditorActantTableRow } from "./StatementEditorActantTableRow";
 import {
   StyledTable,
-  StyledTHead,
   StyledTh,
+  StyledTHead,
 } from "./StatementEditorActantTableStyles";
-import { StatementEditorActantTableRow } from "./StatementEditorActantTableRow";
-
-import { IActant, IResponseStatement, IStatementActant } from "@shared/types";
-import { UseMutationResult } from "react-query";
-import { ActantType } from "@shared/enums";
 
 interface FilteredActantObject {
   data: { actant: IActant | undefined; sActant: IStatementActant };

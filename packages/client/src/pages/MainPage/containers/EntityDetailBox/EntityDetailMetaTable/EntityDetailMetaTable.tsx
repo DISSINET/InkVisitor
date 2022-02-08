@@ -1,29 +1,18 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { Column, useTable, useExpanded, Row, Cell } from "react-table";
-import update from "immutability-helper";
-import {
-  StyledTable,
-  StyledTHead,
-  StyledTh,
-  StyledPipe,
-} from "./EntityDetailMetaTableStyles";
-import {
-  IAction,
-  IActant,
-  IResponseGeneric,
-  IResponseStatement,
-  IStatementAction,
-  IResponseBookmarkFolder,
-  IProp,
-  IResponseDetail,
-} from "@shared/types";
-import { EntitySuggester, EntityTag, CertaintyToggle, ElvlToggle } from "../..";
-import { Button, ButtonGroup, Input } from "components";
-import { FaPlus, FaTrashAlt, FaUnlink } from "react-icons/fa";
-import { useMutation, UseMutationResult, useQueryClient } from "react-query";
 import { ActantType } from "@shared/enums";
-import { EntityDetailMetaTableRow } from "./EntityDetailMetaTableRow";
+import { IProp, IResponseDetail, IResponseStatement } from "@shared/types";
+import { Button, ButtonGroup } from "components";
+import React, { useCallback, useMemo } from "react";
+import { FaTrashAlt, FaUnlink } from "react-icons/fa";
+import { Cell, Column, Row, useTable } from "react-table";
+import { EntitySuggester, EntityTag } from "../..";
 import AttributesEditor from "../../AttributesEditor/AttributesEditor";
+import { EntityDetailMetaTableRow } from "./EntityDetailMetaTableRow";
+import {
+  StyledPipe,
+  StyledTable,
+  StyledTh,
+  StyledTHead,
+} from "./EntityDetailMetaTableStyles";
 // import { AttributesEditor } from "../../AttributesEditor/AttributesEditor";
 
 interface EntityDetailMetaTable {
