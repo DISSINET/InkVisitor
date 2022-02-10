@@ -2,11 +2,11 @@ import { clean, testErroneousResponse } from "@modules/common.test";
 import { BadParams, TerritoryDoesNotExits } from "@shared/types/errors";
 import { Db } from "@service/RethinkDB";
 import { createActant, deleteActants } from "@service/shorthands";
-import Territory from "@models/territory";
+import Territory from "@models/territory/territory";
 import request from "supertest";
 import { apiPath } from "@common/constants";
 import app from "../../Server";
-import Statement from "@models/statement";
+import Statement from "@models/statement/statement";
 import { supertestConfig } from "..";
 
 describe("Territories get query", function () {

@@ -1,6 +1,8 @@
 import { ActantType } from "@shared/enums";
 import theme from "./theme";
 
+export const DropdownAny = "any";
+
 export const rootTerritoryId = "T0";
 export const excludedSuggesterEntities = [ActantType.Value];
 

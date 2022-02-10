@@ -4,31 +4,30 @@ import api from "api";
 import {
   Button,
   ButtonGroup,
+  Dropdown,
   Input,
   Modal,
   ModalContent,
   ModalFooter,
   ModalHeader,
+  ModalInputForm,
+  ModalInputLabel,
+  ModalInputWrap,
   Tag,
 } from "components";
 import { EntitySuggester } from "pages/MainPage/containers";
 import React, { useState } from "react";
 import { FaUnlink } from "react-icons/fa";
 import { useQuery } from "react-query";
+import { OptionTypeBase, ValueType } from "react-select";
 import { toast } from "react-toastify";
-import {
-  StyledContent,
-  StyledModalForm,
-  StyledModalInputWrap,
-  StyledModalLabel,
-  StyledNote,
-  StyledTypeBar,
-} from "./SuggesterStyles";
+import { DropdownAny } from "Theme/constants";
+import { StyledContent, StyledNote, StyledTypeBar } from "./SuggesterStyles";
 
 interface SuggesterModal {
   show?: boolean;
   typed: string;
-  category: string;
+  category: IOption;
   categories: IOption[];
   onCreate: Function;
   closeModal: Function;
@@ -41,9 +40,10 @@ export const SuggesterModal: React.FC<SuggesterModal> = ({
   onCreate,
   closeModal,
 }) => {
-  const [selectedCategory, setSelectedCategory] = useState<string>(
-    category !== ActantType.Any ? category : categories[0].label
+  const [selectedCategory, setSelectedCategory] = useState<any>(
+    category.value !== DropdownAny ? category : categories[0]
   );
+
   const [label, setLabel] = useState<string>(typed);
   const [detail, setDetail] = useState<string>("");
   const [territoryId, setTerritoryId] = useState<string>("");
@@ -53,7 +53,7 @@ export const SuggesterModal: React.FC<SuggesterModal> = ({
   const handleCreateActant = () => {
     onCreate({
       label: label,
-      category: selectedCategory,
+      category: selectedCategory.value,
       detail: detail,
       territoryId: territoryId,
     });
@@ -82,55 +82,73 @@ export const SuggesterModal: React.FC<SuggesterModal> = ({
     <Modal
       showModal={show}
       width="thin"
-      onEnterPress={handleCreateActant}
+      onEnterPress={() => {
+        if (selectedCategory.value === "S" && !territoryId) {
+          toast.warning("Territory is required!");
+        } else if (
+          selectedCategory.value === "T" &&
+          !territoryId &&
+          userRole !== UserRole.Admin
+        ) {
+          toast.warning("Parent territory is required!");
+        } else {
+          handleCreateActant();
+          closeModal();
+        }
+      }}
       onClose={() => closeModal()}
     >
       <ModalHeader title="Create actant" />
       <ModalContent>
         <StyledContent>
-          <StyledModalForm>
-            <StyledModalLabel>{"Category: "}</StyledModalLabel>
-            <StyledModalInputWrap>
-              <Input
-                type="select"
-                value={selectedCategory}
+          <ModalInputForm>
+            <ModalInputLabel>{"Category: "}</ModalInputLabel>
+            <ModalInputWrap>
+              <Dropdown
+                value={{
+                  label: selectedCategory.label,
+                  value: selectedCategory.value,
+                }}
                 options={categories}
-                inverted
-                suggester
-                onChangeFn={(newCategory: string) =>
-                  setSelectedCategory(newCategory)
-                }
+                onChange={(option: ValueType<OptionTypeBase, any>) => {
+                  setSelectedCategory(option);
+                }}
+                width={40}
+                entityDropdown
+                disableTyping
+                oneLetter
               />
               <StyledTypeBar
-                entity={`entity${selectedCategory}`}
+                entity={`entity${selectedCategory.value}`}
               ></StyledTypeBar>
-            </StyledModalInputWrap>
-            <StyledModalLabel>{"Label: "}</StyledModalLabel>
-            <StyledModalInputWrap>
+            </ModalInputWrap>
+            <ModalInputLabel>{"Label: "}</ModalInputLabel>
+            <ModalInputWrap>
               <Input
                 value={label}
                 onChangeFn={(newType: string) => setLabel(newType)}
                 changeOnType
                 autoFocus
               />
-            </StyledModalInputWrap>
-            <StyledModalLabel>{"Detail: "}</StyledModalLabel>
-            <StyledModalInputWrap>
+            </ModalInputWrap>
+            <ModalInputLabel>{"Detail: "}</ModalInputLabel>
+            <ModalInputWrap>
               <Input
                 value={detail}
                 onChangeFn={(newType: string) => setDetail(newType)}
                 changeOnType
               />
-            </StyledModalInputWrap>
+            </ModalInputWrap>
             {/* Suggester territory */}
-            {(selectedCategory === "T" || selectedCategory === "S") && (
+            {(selectedCategory.value === "T" ||
+              selectedCategory.value === "S") && (
               <>
-                <StyledModalLabel>
+                <ModalInputLabel>
                   {selectedCategory === "T"
                     ? "Parent territory: "
                     : "Territory: "}
-                </StyledModalLabel>
-                <StyledModalInputWrap>
+                </ModalInputLabel>
+                <ModalInputWrap>
                   {territory ? (
                     <Tag
                       propId={territory.id}
@@ -161,13 +179,13 @@ export const SuggesterModal: React.FC<SuggesterModal> = ({
                       }}
                     />
                   )}
-                </StyledModalInputWrap>
+                </ModalInputWrap>
               </>
             )}
-          </StyledModalForm>
+          </ModalInputForm>
           {userRole === UserRole.Admin && (
             <>
-              {selectedCategory === "T" && !territoryId ? (
+              {selectedCategory.value === "T" && !territoryId ? (
                 <StyledNote>
                   {"Territory will be added under root"}
                   <br />
@@ -196,10 +214,10 @@ export const SuggesterModal: React.FC<SuggesterModal> = ({
             label="Submit"
             color="primary"
             onClick={() => {
-              if (selectedCategory === "S" && !territoryId) {
+              if (selectedCategory.value === "S" && !territoryId) {
                 toast.warning("Territory is required!");
               } else if (
-                selectedCategory === "T" &&
+                selectedCategory.value === "T" &&
                 !territoryId &&
                 userRole !== UserRole.Admin
               ) {

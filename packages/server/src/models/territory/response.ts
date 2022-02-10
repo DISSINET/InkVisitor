@@ -1,8 +1,8 @@
 import { Request } from "express";
 import { UserRoleMode } from "@shared/enums";
 import { IActant, IResponseStatement, IResponseTerritory } from "@shared/types";
-import Territory from ".";
-import Statement from "@models/statement";
+import Territory from "./territory";
+import Statement from "@models/statement/statement";
 import { findActantsById, findActantsByIds } from "@service/shorthands";
 
 export class ResponseTerritory extends Territory implements IResponseTerritory {
@@ -11,7 +11,10 @@ export class ResponseTerritory extends Territory implements IResponseTerritory {
   right: UserRoleMode = UserRoleMode.Read;
 
   constructor(actant: IActant) {
-    super(actant);
+    super({});
+    for (const key of Object.keys(actant)) {
+      (this as any)[key] = (actant as any)[key];
+    }
 
     this.statements = [];
     this.actants = [];

@@ -7,7 +7,7 @@ import {
   PermissionDoesNotExits,
 } from "@shared/types/errors";
 import { IResponseGeneric, IResponsePermission } from "@shared/types";
-import AclPermission from "@models/acl";
+import AclPermission from "@models/acl/acl_permission";
 
 export default Router()
   .get(

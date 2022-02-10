@@ -6,7 +6,7 @@ import app from "../../Server";
 import { supertestConfig } from "..";
 import { IAction } from "@shared/types";
 import { successfulGenericResponse } from "@modules/common.test";
-import Action from "@models/action";
+import Action from "@models/action/action";
 
 describe("Actions create", function () {
   describe("empty data", () => {

@@ -1,6 +1,6 @@
 import { r as rethink, Connection } from "rethinkdb-ts";
 import { IAudit, IResponseAudit } from "@shared/types";
-import Audit from ".";
+import Audit from "./audit";
 
 export class ResponseAudit implements IResponseAudit {
   actant: string;

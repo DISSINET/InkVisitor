@@ -24,7 +24,7 @@ import {
 } from "@shared/types";
 import { mergeDeep } from "@common/functions";
 import { ActantStatus, ActantType, UserRole } from "@shared/enums";
-import Audit from "@models/audit";
+import Audit from "@models/audit/audit";
 import { ResponseActant, ResponseActantDetail } from "@models/actant/response";
 
 export default Router()
@@ -51,6 +51,7 @@ export default Router()
       const actant = getActantType({ ...actantData });
 
       const response = new ResponseActant(actant);
+
       await response.prepare(request);
 
       return response;
@@ -218,7 +219,9 @@ export default Router()
       });
 
       if (!model.canBeDeletedByUser(request.getUserOrFail())) {
-        throw new PermissionDeniedError("actant cannot be deleted");
+        throw new PermissionDeniedError(
+          "actant cannot be deleted by current user"
+        );
       }
 
       const result = await model.delete(request.db.connection);
@@ -256,6 +259,7 @@ export default Router()
       }
 
       const response = new ResponseActantDetail(actant);
+
       await response.prepare(request);
 
       return response;

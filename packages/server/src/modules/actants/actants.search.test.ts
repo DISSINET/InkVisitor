@@ -20,10 +20,10 @@ import {
   Virtuality,
 } from "@shared/enums";
 import { getActantType } from "@models/factory";
-import Statement, { StatementActant, StatementAction } from "@models/statement";
+import Statement, { StatementActant, StatementAction } from "@models/statement/statement";
 import { IStatementActant, IStatementAction } from "@shared/types";
-import Action from "@models/action";
-import Entity from "@models/entity";
+import Action from "@models/action/action";
+import Entity from "@models/entity/entity";
 
 describe("Actants search", function () {
   describe("empty data", () => {

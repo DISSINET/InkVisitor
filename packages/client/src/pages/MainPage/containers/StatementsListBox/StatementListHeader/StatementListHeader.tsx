@@ -1,38 +1,31 @@
-import React, { useEffect, useState } from "react";
+import { ActantType, UserRole, UserRoleMode } from "@shared/enums";
 import {
-  useMutation,
-  UseMutationResult,
-  useQuery,
-  useQueryClient,
-} from "react-query";
+  IResponseGeneric,
+  IResponseTerritory,
+  IStatement,
+} from "@shared/types";
+import api from "api";
+import { AxiosResponse } from "axios";
+import { Button, ButtonGroup } from "components";
+import { CStatement } from "constructors";
+import { useSearchParams } from "hooks";
+import React, { useEffect, useState } from "react";
 import { FaPlus, FaRecycle } from "react-icons/fa";
-
+import { UseMutationResult, useQuery, useQueryClient } from "react-query";
+import { useAppSelector } from "redux/hooks";
+import theme from "Theme/theme";
+import { collectTerritoryChildren, searchTree } from "utils";
+import { EntitySuggester } from "../..";
+import { StatementListBreadcrumbItem } from "./StatementListBreadcrumbItem/StatementListBreadcrumbItem";
 import {
   StyledButtons,
   StyledFaStar,
   StyledHeader,
   StyledHeaderBreadcrumbRow,
+  StyledHeaderRow,
   StyledHeading,
   StyledSuggesterRow,
 } from "./StatementListHeaderStyles";
-import { StyledHeaderRow } from "./StatementListHeaderStyles";
-import { StatementListBreadcrumbItem } from "./StatementListBreadcrumbItem/StatementListBreadcrumbItem";
-import {
-  IResponseGeneric,
-  IResponseTerritory,
-  IResponseTree,
-  IStatement,
-} from "@shared/types";
-import { CStatement } from "constructors";
-import { Button, ButtonGroup } from "components";
-import { useAppSelector } from "redux/hooks";
-import { useSearchParams } from "hooks";
-import { UserRole, UserRoleMode, ActantType } from "@shared/enums";
-import theme from "Theme/theme";
-import { EntitySuggester } from "../..";
-import api from "api";
-import { AxiosResponse } from "axios";
-import { searchTree } from "utils";
 
 interface StatementListHeader {
   data: IResponseTerritory;
@@ -73,23 +66,6 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
     { enabled: api.isLoggedIn() }
   );
 
-  const collectTerritoryChildren = (
-    element: IResponseTree,
-    childArray: string[]
-  ): string[] | null => {
-    if (element.children.length) {
-      element.children.map((child) => {
-        childArray.push(child.territory.id);
-      });
-      for (var i = 0; i < element.children.length; i++) {
-        collectTerritoryChildren(element.children[i], childArray);
-      }
-    } else {
-      return childArray;
-    }
-    return childArray;
-  };
-
   const [excludedMoveTerritories, setExcludedMoveTerritories] = useState<
     string[]
   >([territoryId]);
@@ -102,8 +78,8 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
         toExclude.push(currentTerritory.territory.data.parent.id);
       }
       if (currentTerritory) {
-        const childArr = collectTerritoryChildren(currentTerritory, []);
-        if (childArr?.length) {
+        const childArr = collectTerritoryChildren(currentTerritory);
+        if (childArr.length) {
           setExcludedMoveTerritories([...toExclude, ...childArr]);
         } else {
           setExcludedMoveTerritories(toExclude);

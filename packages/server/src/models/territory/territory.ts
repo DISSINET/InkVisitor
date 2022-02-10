@@ -6,10 +6,10 @@ import {
 import { ITerritory, IParentTerritory } from "@shared/types/territory";
 import { r as rethink, Connection, WriteResult, RDatum } from "rethinkdb-ts";
 import { fillFlatObject, UnknownObject, IModel } from "@models/common";
-import Actant from "@models/actant";
+import Actant from "@models/actant/actant";
 import { InternalServerError, InvalidDeleteError } from "@shared/types/errors";
 import { IUser } from "@shared/types";
-import User from "@models/user";
+import User from "@models/user/user";
 import treeCache from "@service/treeCache";
 
 export class TerritoryParent implements IParentTerritory, IModel {

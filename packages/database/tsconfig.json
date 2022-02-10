@@ -1,23 +1,31 @@
 {
-    "compilerOptions": {
-        "baseUrl": "./",
-        "emitDecoratorMetadata": true,
-        "esModuleInterop": true,
-        "experimentalDecorators": true,
-        "importHelpers": true,
-        "module": "commonjs",
-        "outDir": "build",
-        "removeComments": true,
-        "sourceMap": true,
-        "strict": true,
-        "target": "es6",
-        "moduleResolution": "node",
-        "resolveJsonModule": true,
-        "paths": {
-            "@shared/*": ["./../../shared/*"]
-        },
-        "types": ["node"],
-        "typeRoots": ["node_modules/@types"]
+  "compilerOptions": {
+    "baseUrl": "./",
+    "emitDecoratorMetadata": true,
+    "esModuleInterop": true,
+    "experimentalDecorators": true,
+    "importHelpers": true,
+    "module": "commonjs",
+    "outDir": "build",
+    "removeComments": true,
+    "sourceMap": true,
+    "strict": true,
+    "target": "es6",
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "paths": {
+      "@daos/*": ["src/mocks/*"],
+      "@entities/*": ["src/domain/*"],
+      "@common/*": ["src/common/*"],
+      "@shared/*": ["./../shared/*"],
+      "@server/*": ["src/server"],
+      "@modules/*": ["src/modules/*"],
+      "@service/*": ["src/service/*"],
+      "@models/*": ["src/models/*"],
+      "@middlewares/*": ["src/middlewares/*"]
     },
-    "include": ["./scripts/**/*", "./datasets/**/*.ts"]
+    "types": ["node"],
+    "typeRoots": ["node_modules/@types"]
+  },
+  "include": ["./scripts/**/*", "./datasets/**/*.ts"]
 }

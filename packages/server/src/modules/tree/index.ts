@@ -8,7 +8,7 @@ import {
 } from "@shared/types/errors";
 import { asyncRouteHandler } from "..";
 import { IResponseGeneric, IResponseTree, ITerritory } from "@shared/types";
-import Territory from "@models/territory";
+import Territory from "@models/territory/territory";
 import { IParentTerritory } from "@shared/types/territory";
 import { ActantType } from "@shared/enums";
 import treeCache, { TreeCreator } from "@service/treeCache";

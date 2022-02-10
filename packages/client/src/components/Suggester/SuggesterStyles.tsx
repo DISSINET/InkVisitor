@@ -113,23 +113,6 @@ export const StyledTagWrapper = styled.div`
   display: inline-flex;
   overflow: hidden;
 `;
-
-export const StyledModalForm = styled.div`
-  display: grid;
-  grid-template-columns: auto auto;
-`;
-export const StyledModalLabel = styled.p`
-  display: grid;
-  justify-content: flex-end;
-  align-items: center;
-  margin-right: ${({ theme }) => theme.space[2]};
-  margin-bottom: ${({ theme }) => theme.space[1]};
-`;
-export const StyledModalInputWrap = styled.div`
-  display: grid;
-  position: relative;
-  margin-bottom: ${({ theme }) => theme.space[1]};
-`;
 export const StyledAiOutlineWarning = styled(AiOutlineWarning)`
   margin-top: 0.1rem;
   margin-left: 0.5rem;

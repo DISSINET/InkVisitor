@@ -87,8 +87,12 @@ export const StyledCardTitle = styled.h2`
   font-weight: ${({ theme }) => theme.fontWeight["medium"]};
   font-size: ${({ theme }) => theme.fontSize["xl"]};
 `;
-export const StyledCardBody = styled.section`
+interface StyledCardBody {
+  column?: boolean;
+}
+export const StyledCardBody = styled.section<StyledCardBody>`
   display: flex;
+  flex-direction: ${({ column }) => (column ? "column" : "row")};
   padding: ${space5} ${space7};
 
   font-size: ${({ theme }) => theme.fontSize["sm"]};
@@ -104,4 +108,25 @@ export const StyledFooter = styled.div<StyledFooter>`
   flex-shrink: 0;
   justify-content: flex-end;
   padding: ${({ theme }) => theme.space[4]};
+`;
+
+export const StyledModalInputForm = styled.div`
+  display: grid;
+  grid-template-columns: auto auto;
+`;
+export const StyledModalInputLabel = styled.p`
+  display: grid;
+  justify-content: flex-end;
+  align-items: center;
+  margin-right: ${({ theme }) => theme.space[2]};
+  margin-bottom: ${({ theme }) => theme.space[1]};
+`;
+interface StyledModalInputWrap {
+  width?: number;
+}
+export const StyledModalInputWrap = styled.div<StyledModalInputWrap>`
+  width: ${({ width }) => (width ? `${width / 10}rem` : "auto")};
+  display: grid;
+  position: relative;
+  margin-bottom: ${({ theme }) => theme.space[1]};
 `;
