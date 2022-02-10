@@ -98,6 +98,11 @@ export enum Position {
   PseudoActant = "p",
 }
 
+export enum PositionContext {
+  Value = "value",
+  Type = "type",
+}
+
 export enum Logic {
   Positive = "1",
   Negative = "2",
