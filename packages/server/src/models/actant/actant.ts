@@ -14,7 +14,7 @@ import {
   UserRoleMode,
 } from "@shared/enums";
 import { InternalServerError } from "@shared/types/errors";
-import User from "@models/user";
+import User from "@models/user/user";
 import emitter from "@models/events/emitter";
 import { EventTypes } from "@models/events/types";
 import { findActantsByIds } from "@service/shorthands";

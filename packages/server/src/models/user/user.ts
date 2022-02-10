@@ -16,6 +16,7 @@ import { UserRole, UserRoleMode } from "@shared/enums";
 import { ModelNotValidError } from "@shared/types/errors";
 import { generateRandomString, hashPassword } from "@common/auth";
 import Base from "../base";
+import { regExpEscape } from "@common/functions";
 
 export class UserRight implements IUserRight {
   territory = "";
@@ -237,5 +238,29 @@ export default class User extends Base implements IDbModel, IUser {
       .limit(1)
       .run(dbInstance);
     return data.length == 0 ? null : new User(data[0]);
+  }
+
+  static async findUsersByLabel(
+    dbInstance: Connection | undefined,
+    label: string
+  ): Promise<User[]> {
+    const data = await rethink
+      .table(User.table)
+      .filter(function (user: any) {
+        return rethink.or(
+          rethink
+            .row("name")
+            .downcase()
+            .match(`${regExpEscape(label.toLowerCase())}`)
+            .or(),
+          rethink
+            .row("email")
+            .downcase()
+            .match(`${regExpEscape(label.toLowerCase())}`)
+            .or()
+        );
+      })
+      .run(dbInstance);
+    return data.map((d) => new User(d));
   }
 }

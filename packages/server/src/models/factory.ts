@@ -1,13 +1,13 @@
 import { IDbModel, UnknownObject } from "./common";
 import { ActantType } from "@shared/enums";
-import Territory from "./territory";
-import Statement from "./statement";
-import Entity from "./entity";
-import Resource from "./resource";
+import Territory from "./territory/territory";
+import Statement from "./statement/statement";
+import Entity from "./entity/entity";
+import Resource from "./resource/resource";
 import { ModelNotValidError } from "@shared/types/errors";
-import Action from "./action";
-import Actant from "./actant";
-import Concept from "./concept";
+import Action from "./action/action";
+import Actant from "./actant/actant";
+import Concept from "./concept/concept";
 
 export function getActantType(data: UnknownObject): Actant {
   if (!data || typeof data !== "object" || Object.keys(data).length === 0) {

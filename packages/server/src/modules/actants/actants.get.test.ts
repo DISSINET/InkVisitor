@@ -4,7 +4,7 @@ import request from "supertest";
 import { supertestConfig } from "..";
 import { apiPath } from "@common/constants";
 import app from "../../Server";
-import Statement from "@models/statement";
+import Statement from "@models/statement/statement";
 import { Db } from "@service/RethinkDB";
 
 describe("Actants get method", function () {

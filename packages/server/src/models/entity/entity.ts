@@ -5,7 +5,7 @@ import {
   EntityLogicalType,
 } from "@shared/enums";
 import { IEntity } from "@shared/types/entity";
-import Actant from "@models/actant";
+import Actant from "@models/actant/actant";
 
 class EntityData implements IModel {
   logicalType: EntityLogicalType = EntityLogicalType.Definite;

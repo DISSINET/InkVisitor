@@ -2,9 +2,9 @@ import { getActants } from "@service/shorthands";
 import { TerritoriesBrokenError } from "@shared/types/errors";
 import { IResponseTree, IStatement, ITerritory } from "@shared/types";
 import { Db } from "@service/RethinkDB";
-import Territory from "@models/territory";
+import Territory from "@models/territory/territory";
 import { ActantType, UserRoleMode } from "@shared/enums";
-import User, { UserRight } from "@models/user";
+import User, { UserRight } from "@models/user/user";
 
 export class TreeCreator {
   parentMap: Record<string, Territory[]>; // map of rootId -> childs

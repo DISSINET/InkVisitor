@@ -74,13 +74,12 @@ To administrate the users rights, admin roles may acces the **administration win
 
 ### Database
 
-- (create folder `data` and folder `database/schema/tables.sql`)
 - run docker -`docker-compose up` | `-docker-compose down` | `docker-compose up -d` ...
 - import data
   - `cd ./packages/database`
-  - `npm install`
-  - `npm run import-local:all` to import datasets to the local database (`.env.devel`)
-  - `npm run import:remote:all` to import datasets to the remote database (`.env.prod`)
+  - (`npm install`)
+  - `npm run import-local` to import datasets to the local database (`.env.devel`)
+  - `npm run import-remote` to import datasets to the remote database (`.env.prod`) (`import-remote-sandbox` and `import-remote-stage`, and `import-remote-importdata` for specific deploys)
 
 ### Client
 

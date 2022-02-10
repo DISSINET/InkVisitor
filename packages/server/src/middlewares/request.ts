@@ -1,6 +1,6 @@
 import { InternalServerError } from "@shared/types/errors";
 import { Response, Request, NextFunction } from "express";
-import User from "@models/user";
+import User from "@models/user/user";
 
 const getUserOrFail = function (user: User | null): User {
   if (user) {

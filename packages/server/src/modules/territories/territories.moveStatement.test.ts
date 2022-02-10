@@ -9,8 +9,8 @@ import {
   createActant,
   findActantById,
 } from "@service/shorthands";
-import Territory from "@models/territory";
-import Statement from "@models/statement";
+import Territory from "@models/territory/territory";
+import Statement from "@models/statement/statement";
 import { clean } from "@modules/common.test";
 
 const randSuffix = Math.random();

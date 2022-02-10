@@ -26,13 +26,13 @@ import {
   UserRoleMode,
 } from "@shared/enums";
 
-import Actant from "@models/actant";
+import Actant from "@models/actant/actant";
 import { r as rethink, Connection, RDatum, WriteResult } from "rethinkdb-ts";
 import { InternalServerError } from "@shared/types/errors";
-import User from "@models/user";
+import User from "@models/user/user";
 import { EventMapSingle, EventTypes } from "@models/events/types";
 import treeCache from "@service/treeCache";
-import Prop from "@models/prop";
+import Prop from "@models/prop/prop";
 
 export class StatementActant implements IStatementActant, IModel {
   id = "";
@@ -379,27 +379,36 @@ class Statement extends Actant implements IStatement {
 
     this.data.actions.forEach((a) => {
       actantsIds[a.action] = null;
-      a.props.forEach((prop) => {
-        actantsIds[prop.type.id] = null;
-        actantsIds[prop.value.id] = null;
+      if (a.props) {
+        a.props.forEach((prop) => {
+          actantsIds[prop.type.id] = null;
+          actantsIds[prop.value.id] = null;
 
-        prop.children.forEach((propChild) => {
-          actantsIds[propChild.type.id] = null;
-          actantsIds[propChild.value.id] = null;
+          if (prop.children) {
+            prop.children.forEach((propChild) => {
+              actantsIds[propChild.type.id] = null;
+              actantsIds[propChild.value.id] = null;
+            });
+          }
         });
-      });
+      }
     });
 
     this.data.actants.forEach((a) => {
       actantsIds[a.actant] = null;
-      a.props.forEach((prop) => {
-        actantsIds[prop.type.id] = null;
-        actantsIds[prop.value.id] = null;
-        prop.children.forEach((propChild) => {
-          actantsIds[propChild.type.id] = null;
-          actantsIds[propChild.value.id] = null;
+      if (a.props) {
+        a.props.forEach((prop) => {
+          actantsIds[prop.type.id] = null;
+          actantsIds[prop.value.id] = null;
+
+          if (prop.children) {
+            prop.children.forEach((propChild) => {
+              actantsIds[propChild.type.id] = null;
+              actantsIds[propChild.value.id] = null;
+            });
+          }
         });
-      });
+      }
     });
 
     actantsIds[this.data.territory.id] = null;

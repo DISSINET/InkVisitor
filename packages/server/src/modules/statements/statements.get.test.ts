@@ -6,7 +6,7 @@ import { apiPath } from "@common/constants";
 import app from "../../Server";
 import { Db } from "@service/RethinkDB";
 import { createActant } from "@service/shorthands";
-import Statement from "@models/statement";
+import Statement from "@models/statement/statement";
 
 const testValidStatement = (res: any) => {
   expect(res.body).toBeTruthy();

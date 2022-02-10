@@ -1,7 +1,7 @@
 import { Request } from "express";
 import { Router } from "express";
 import { IUser } from "@shared/types/user";
-import User from "@models/user";
+import User from "@models/user/user";
 import { deleteUser } from "@service/shorthands";
 import {
   BadCredentialsError,
@@ -78,14 +78,10 @@ export default Router()
 
       if (!label) {
         return await User.findAllUsers(request.db.connection);
+      } else if (label.length < 2) {
+        return [];
       }
-
-      const byLabel = await User.findUserByLabel(request.db.connection, label);
-      if (byLabel) {
-        return [byLabel];
-      }
-
-      return [];
+      return await User.findUsersByLabel(request.db.connection, label);
     })
   )
   .post(

@@ -1,16 +1,25 @@
 import { allEntities } from "@shared/dictionaries/entity";
 import React, { ReactNode } from "react";
 import {
+  components,
   GroupedOptionsType,
+  IndicatorProps,
+  MultiValueProps,
   OptionsType,
   OptionTypeBase,
-  ValueType,
-  components,
-  MultiValueProps,
+  SingleValueProps,
   ValueContainerProps,
+  ValueType,
 } from "react-select";
-import { DropdownItem } from "types";
-import { StyledSelect, StyledSelectWrapper } from "./DropdownStyles";
+import { OptionProps } from "react-select/src/types";
+import { DropdownAny } from "Theme/constants";
+import { DropdownItem, Entities } from "types";
+import {
+  StyledEntityValue,
+  StyledFaChevronDown,
+  StyledSelect,
+  StyledSelectWrapper,
+} from "./DropdownStyles";
 
 interface Dropdown {
   options?: OptionsType<OptionTypeBase> | GroupedOptionsType<OptionTypeBase>;
@@ -29,7 +38,12 @@ interface Dropdown {
   noOptionsMessage?: Function;
   isClearable?: boolean;
   isMulti?: boolean;
-  allowSelectAll?: boolean;
+  entityDropdown?: boolean;
+  onFocus?: () => void;
+  onBlur?: () => void;
+  disableTyping?: boolean;
+  suggester?: boolean;
+  oneLetter?: boolean;
 }
 export const Dropdown: React.FC<Dropdown> = ({
   options = [],
@@ -47,21 +61,39 @@ export const Dropdown: React.FC<Dropdown> = ({
   isClearable = false,
   isMulti = false,
   disabled = false,
-  allowSelectAll = false,
+  entityDropdown = false,
+  onFocus = () => {},
+  onBlur = () => {},
+  disableTyping = false,
+  suggester = false,
 }) => {
   const optionsWithIterator = options[Symbol.iterator]();
+  const isOneOptionSingleSelect = options.length < 2 && !isMulti;
 
   return (
     <StyledSelectWrapper width={width}>
       <StyledSelect
+        suggester={suggester}
+        onFocus={onFocus}
+        onBlur={onBlur}
         isMulti={isMulti}
-        isDisabled={disabled}
+        isDisabled={disabled || isOneOptionSingleSelect}
+        isOneOptionSingleSelect={isOneOptionSingleSelect}
+        entityDropdown={entityDropdown}
         className="react-select-container"
         classNamePrefix="react-select"
         placeholder={placeholder}
         noOptionsMessage={noOptionsMessage}
         isClearable={isClearable}
-        components={{ components, MultiValue, ValueContainer }}
+        components={{
+          components,
+          Option,
+          SingleValue,
+          MultiValue,
+          ValueContainer,
+          DropdownIndicator,
+        }}
+        isSearchable={!disableTyping}
         {...(getOptionLabel ? { getOptionLabel: getOptionLabel } : {})}
         {...(formatOptionLabel ? { formatOptionLabel: formatOptionLabel } : {})}
         {...(isOptionSelected ? { isOptionSelected: isOptionSelected } : {})}
@@ -69,7 +101,8 @@ export const Dropdown: React.FC<Dropdown> = ({
         styles={{
           dropdownIndicator: () => {
             return {
-              display: noDropDownIndicator ? "none" : "",
+              display:
+                noDropDownIndicator || isOneOptionSingleSelect ? "none" : "",
             };
           },
         }}
@@ -97,9 +130,7 @@ export const Dropdown: React.FC<Dropdown> = ({
           }
           return onChange(selected);
         }}
-        options={
-          allowSelectAll ? [allEntities, ...optionsWithIterator] : options
-        }
+        options={isMulti ? [allEntities, ...optionsWithIterator] : options}
         width={width}
         hideSelectedOptions={hideSelectedOptions}
       />
@@ -107,10 +138,45 @@ export const Dropdown: React.FC<Dropdown> = ({
   );
 };
 
+const SingleValue = (props: SingleValueProps<any>): React.ReactElement => {
+  return (
+    <>
+      <components.SingleValue {...props}></components.SingleValue>
+    </>
+  );
+};
+
+const Option = ({ ...props }: OptionProps | any): React.ReactElement => {
+  const { entityDropdown } = props.selectProps;
+  return (
+    <>
+      {entityDropdown ? (
+        <>
+          {props.value && props.value !== DropdownAny ? (
+            <components.Option {...props}>
+              <StyledEntityValue color={Entities[props.value].color}>
+                {props.label}
+              </StyledEntityValue>
+            </components.Option>
+          ) : (
+            <components.Option {...props}>
+              <StyledEntityValue color={"transparent"}>
+                {props.label}
+              </StyledEntityValue>
+            </components.Option>
+          )}
+        </>
+      ) : (
+        <components.Option {...props} />
+      )}
+    </>
+  );
+};
+
 const MultiValue = (props: MultiValueProps<any>): React.ReactElement => {
   let labelToBeDisplayed = `${props.data.label}`;
   if (props.data.value === allEntities.value) {
-    labelToBeDisplayed = "All is selected";
+    labelToBeDisplayed = "All options selected";
   }
   return (
     <components.MultiValue {...props}>
@@ -134,8 +200,18 @@ const ValueContainer = ({
   }
 
   return (
-    <components.ValueContainer {...props}>
-      {toBeRendered}
-    </components.ValueContainer>
+    <>
+      <components.ValueContainer {...props}>
+        {toBeRendered}
+      </components.ValueContainer>
+    </>
+  );
+};
+
+const DropdownIndicator = (props: IndicatorProps<any, any>) => {
+  return (
+    <components.DropdownIndicator {...props}>
+      <StyledFaChevronDown size={9} />
+    </components.DropdownIndicator>
   );
 };
