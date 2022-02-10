@@ -1,14 +1,10 @@
 import { Request } from "express";
-import { UserRoleMode } from "@shared/enums";
+import { Position, PositionContext, UserRoleMode } from "@shared/enums";
 import {
   IActant,
-  IAction,
-  IEntity,
-  IResource,
   IResponseActant,
   IResponseDetail,
-  IStatement,
-  ITerritory,
+  IResponseUsedStatement,
 } from "@shared/types";
 import { Connection } from "rethinkdb-ts";
 import Actant from "./actant";
@@ -34,14 +30,16 @@ export class ResponseActantDetail
   implements IResponseDetail
 {
   entities: { [key: string]: IActant };
-  usedInStatement: string[];
-  usedInStatementProps: string[];
+  usedInStatementEntities: IResponseUsedStatement<Position | "action">[];
+  usedInStatementProps: IResponseUsedStatement<PositionContext>[];
+  usedInMetaProps: string[];
 
   constructor(actant: IActant) {
     super(actant);
     this.entities = {};
-    this.usedInStatement = [];
+    this.usedInStatementEntities = [];
     this.usedInStatementProps = [];
+    this.usedInMetaProps = [];
   }
 
   async prepare(req: Request): Promise<void> {
@@ -67,7 +65,13 @@ export class ResponseActantDetail
       this.entities[statement.id] = statement;
     }
 
-    this.usedInStatement = usedInStatement.map((s) => s.id);
-    this.usedInStatementProps = usedInStatementProps.map((s) => s.id);
+    this.usedInStatementEntities = usedInStatement.map((s) => ({
+      statement: s,
+      position: Position.Actant1, // todo
+    }));
+    this.usedInStatementProps = usedInStatementProps.map((s) => ({
+      statement: s,
+      position: PositionContext.Type, // todo
+    }));
   }
 }

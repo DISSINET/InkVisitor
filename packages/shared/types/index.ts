@@ -13,7 +13,7 @@ import {
   IUserRight,
 } from "./user";
 import { IResource } from "./resource";
-import { IResponseDetail } from "./response-detail";
+import { IResponseDetail, IResponseUsedStatement } from "./response-detail";
 import { IResponseBookmarkFolder } from "./response-bookmarks";
 import { IResponseAdministration } from "./response-administration";
 import { IResponseActant } from "./response-actant";
@@ -62,6 +62,7 @@ export type {
   IResponseAudit,
   IResponseActant,
   IResponseDetail,
+  IResponseUsedStatement,
   IResponseBookmarkFolder,
   IResponseAdministration,
   IResponseStatement,
