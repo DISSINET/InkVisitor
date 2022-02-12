@@ -271,6 +271,22 @@ export default class Actant extends Base implements IActant, IDbModel {
     });
   }
 
+  static async  findUsedInProps(
+    db: Connection | undefined,
+    actantId: string
+  ): Promise<IActant[]> {
+    const entries = await rethink
+      .table(Actant.table)
+      .filter((row: RDatum) => {
+        return row("props").contains((entry: RDatum) =>
+          entry("value")("id").eq(actantId).or(entry("type")("id").eq(actantId))
+        );
+      })
+      .run(db);
+
+    return entries;
+  }
+
   async prepareResponseFields(user: User, db: Connection | undefined) {
     this.usedIn = await this.findDependentStatements(db);
     this.right = this.getUserRoleMode(user);

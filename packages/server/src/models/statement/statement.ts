@@ -535,32 +535,6 @@ class Statement extends Actant implements IStatement {
     });
   }
 
-  static async findUsedInProps(
-    db: Connection | undefined,
-    actantId: string
-  ): Promise<IStatement[]> {
-    const statements = await rethink
-      .table(Statement.table)
-      .filter({
-        class: ActantType.Statement,
-      })
-      .filter((row: RDatum) => {
-        return rethink.or(
-          row("props").contains((entry: RDatum) =>
-            entry("value")("id").eq(actantId)
-          ),
-          row("data")("props").contains((entry: RDatum) =>
-            entry("type")("id").eq(actantId)
-          )
-        );
-      })
-      .run(db);
-
-    return statements.sort((a, b) => {
-      return a.data.territory.order - b.data.territory.order;
-    });
-  }
-
   /**
    * finds statements that are linked via data.actants array to wanted actant
    * id and are linked to the root territory
