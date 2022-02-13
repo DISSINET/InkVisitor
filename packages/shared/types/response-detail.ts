@@ -3,13 +3,13 @@
  */
 
 import { IActant, IResponseActant, IStatement } from ".";
-import { Position, PositionContext } from "../enums";
+import { Position, UsedInPosition } from "../enums";
 
 export interface IResponseDetail extends IResponseActant {
   entities: { [key: string]: IActant }; // all entities from IStatement and entityIds...
-  usedInStatement: IResponseUsedInStatement<Position | "action">[]; // all statements, where the detail id is used as an actant, action, or tag
-  usedInStatementProps: IResponseUsedInStatement<PositionContext>[]; // all statements, where the detail id is used in props
-  usedInMetaProps: IResponseUsedInMetaProp<PositionContext>[]; // all entities, where the detail id is used in props
+  usedInStatement: IResponseUsedInStatement<UsedInPosition>[]; // all statements, where the detail id is used as an actant, action, or tag
+  usedInStatementProps: IResponseUsedInStatement<UsedInPosition>[]; // all statements, where the detail id is used in props
+  usedInMetaProps: IResponseUsedInMetaProp<UsedInPosition>[]; // all entities, where the detail id is used in props
 }
 
 export interface IResponseUsedInStatement<PositionEnum> {
