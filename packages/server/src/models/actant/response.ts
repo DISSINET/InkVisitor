@@ -27,6 +27,10 @@ export class ResponseActant extends Actant implements IResponseActant {
     }
   }
 
+  /**
+   * Loads additional fields to satisfy the IResponseDetail interface
+   * @param req
+   */
   async prepare(request: Request) {
     this.right = this.getUserRoleMode(request.getUserOrFail());
   }
@@ -65,7 +69,9 @@ export class ResponseActantDetail
         this.addUsedInMetaProp(actant, UsedInPosition.Value);
       }
 
-      this.walkPropsStatements(actant, prop.children);
+      if (prop.children.length) {
+        this.walkPropsStatements(actant, prop.children);
+      }
     }
   }
 
@@ -133,6 +139,10 @@ export class ResponseActantDetail
     this.entities[statement.id] = statement;
   }
 
+  /**
+   * Loads additional fields to satisfy the IResponseDetail interface
+   * @param req
+   */
   async prepare(req: Request): Promise<void> {
     super.prepare(req);
 

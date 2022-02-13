@@ -82,10 +82,7 @@ describe("findDependentStatementIds", function () {
 
   describe("empty db", () => {
     it("should return empty array", async (done) => {
-      const statements = await Statement.findDependentStatements(
-        db.connection,
-        ""
-      );
+      const statements = await Statement.findUsed(db.connection, "");
       expect(statements).toHaveLength(0);
       done();
     });
@@ -96,10 +93,7 @@ describe("findDependentStatementIds", function () {
       const territory = new Territory(undefined);
       await territory.save(db.connection);
 
-      const statements = await Statement.findDependentStatements(
-        db.connection,
-        territory.id
-      );
+      const statements = await Statement.findUsed(db.connection, territory.id);
       expect(statements).toHaveLength(0);
     });
   });
@@ -114,10 +108,7 @@ describe("findDependentStatementIds", function () {
       });
       await statement.save(db.connection);
 
-      const statements = await Statement.findDependentStatements(
-        db.connection,
-        territory.id
-      );
+      const statements = await Statement.findUsed(db.connection, territory.id);
       expect(statements).toHaveLength(0);
     });
   });
@@ -137,10 +128,7 @@ describe("findDependentStatementIds", function () {
       ];
       await statement.save(db.connection);
 
-      const statements = await Statement.findDependentStatements(
-        db.connection,
-        territory.id
-      );
+      const statements = await Statement.findUsed(db.connection, territory.id);
       expect(statements).toHaveLength(1);
     });
   });
@@ -156,10 +144,7 @@ describe("findDependentStatementIds", function () {
       statement.data.tags = [territory.id];
       await statement.save(db.connection);
 
-      const statements = await Statement.findDependentStatements(
-        db.connection,
-        territory.id
-      );
+      const statements = await Statement.findUsed(db.connection, territory.id);
       expect(statements).toHaveLength(1);
     });
   });
@@ -175,10 +160,7 @@ describe("findDependentStatementIds", function () {
       statement.props = [new Prop({ origin: territory.id })];
       await statement.save(db.connection);
 
-      const statements = await Statement.findDependentStatements(
-        db.connection,
-        territory.id
-      );
+      const statements = await Statement.findUsed(db.connection, territory.id);
       expect(statements).toHaveLength(1);
     });
   });
@@ -194,10 +176,7 @@ describe("findDependentStatementIds", function () {
       statement.props = [new Prop({ type: { id: territory.id } })];
       await statement.save(db.connection);
 
-      const statements = await Statement.findDependentStatements(
-        db.connection,
-        territory.id
-      );
+      const statements = await Statement.findUsed(db.connection, territory.id);
       expect(statements).toHaveLength(1);
     });
   });
@@ -213,10 +192,7 @@ describe("findDependentStatementIds", function () {
       statement.props = [new Prop({ value: { id: territory.id } })];
       await statement.save(db.connection);
 
-      const statements = await Statement.findDependentStatements(
-        db.connection,
-        territory.id
-      );
+      const statements = await Statement.findUsed(db.connection, territory.id);
       expect(statements).toHaveLength(1);
     });
   });
@@ -234,10 +210,7 @@ describe("findDependentStatementIds", function () {
       ];
       await statement.save(db.connection);
 
-      const statements = await Statement.findDependentStatements(
-        db.connection,
-        territory.id
-      );
+      const statements = await Statement.findUsed(db.connection, territory.id);
       expect(statements).toHaveLength(1);
     });
   });
@@ -253,10 +226,7 @@ describe("findDependentStatementIds", function () {
       statement.data.territory.id = territory.id;
       await statement.save(db.connection);
 
-      const statements = await Statement.findDependentStatements(
-        db.connection,
-        territory.id
-      );
+      const statements = await Statement.findUsed(db.connection, territory.id);
       expect(statements).toHaveLength(1);
     });
   });
@@ -282,10 +252,7 @@ describe("findDependentStatementIds", function () {
       statement2.data.tags = [territory.id];
       await statement2.save(db.connection);
 
-      const statements = await Statement.findDependentStatements(
-        db.connection,
-        territory.id
-      );
+      const statements = await Statement.findUsed(db.connection, territory.id);
       expect(statements).toHaveLength(2);
     });
   });
@@ -310,10 +277,7 @@ describe("findDependentStatementIds", function () {
       await statement1.save(db.connection);
       await statement2.save(db.connection);
 
-      const statements = await Statement.findDependentStatements(
-        db.connection,
-        territory.id
-      );
+      const statements = await Statement.findUsed(db.connection, territory.id);
       expect(statements).toHaveLength(2);
     });
   });
