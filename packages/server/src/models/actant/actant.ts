@@ -271,7 +271,7 @@ export default class Actant extends Base implements IActant, IDbModel {
     });
   }
 
-  static async  findUsedInProps(
+  static async findUsedInProps(
     db: Connection | undefined,
     actantId: string
   ): Promise<IActant[]> {
@@ -279,7 +279,28 @@ export default class Actant extends Base implements IActant, IDbModel {
       .table(Actant.table)
       .filter((row: RDatum) => {
         return row("props").contains((entry: RDatum) =>
-          entry("value")("id").eq(actantId).or(entry("type")("id").eq(actantId))
+          rethink.or(
+            entry("value")("id").eq(actantId),
+            entry("type")("id").eq(actantId),
+            entry("children").contains((ch1: RDatum) =>
+              rethink.or(
+                ch1("value")("id").eq(actantId),
+                ch1("type")("id").eq(actantId),
+                ch1("children").contains((ch2: RDatum) =>
+                  rethink.or(
+                    ch2("value")("id").eq(actantId),
+                    ch2("type")("id").eq(actantId),
+                    ch2("children").contains((ch3: RDatum) =>
+                      rethink.or(
+                        ch3("value")("id").eq(actantId),
+                        ch3("type")("id").eq(actantId)
+                      )
+                    )
+                  )
+                )
+              )
+            )
+          )
         );
       })
       .run(db);
