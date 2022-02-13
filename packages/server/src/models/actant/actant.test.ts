@@ -5,6 +5,7 @@ import Statement from "@models/statement/statement";
 import { clean } from "@modules/common.test";
 import { findActantById } from "@service/shorthands";
 import { IStatement } from "@shared/types";
+import Prop, { PropSpec } from "@models/prop/prop";
 
 describe("test Actant.delete", function () {
   describe("one existing linked statement", () => {
@@ -170,5 +171,64 @@ describe("test Actant.toJSON", function () {
     expect(newValues).toEqual(
       Actant.publicFields.map((fieldName) => (instance as any)[fieldName])
     );
+  });
+});
+
+describe("test Actant.findUsedInProps", function () {
+  const db = new Db();
+  const rs = Math.random();
+  const actant = new Actant({ id: `a-${rs}` });
+  actant.props.push(new Prop({}));
+  const prop1 = actant.props[0];
+  prop1.type = new PropSpec({ id: `p-type-${rs}` });
+
+  prop1.children.push(new Prop({}));
+  const child1 = prop1.children[0];
+  child1.type = new PropSpec({ id: `p-ch1-type-${rs}` });
+
+  child1.children.push(new Prop({}));
+  const child2 = child1.children[0];
+  child2.type = new PropSpec({ id: `p-ch2-type-${rs}` });
+
+  child2.children.push(new Prop({}));
+  const child3 = child2.children[0];
+  child3.type = new PropSpec({ id: `p-ch3-type-${rs}` });
+
+  beforeAll(async () => {
+    await db.initDb();
+    await actant.save(db.connection);
+  });
+  afterAll(async () => await clean(db));
+
+  describe("search in prop.type", () => {
+    it("should find the actant in child1.type.id", async () => {
+      const found = await Actant.findUsedInProps(db.connection, prop1.type.id);
+      expect(found.length).toEqual(1);
+      expect(found[0].id).toEqual(actant.id);
+    });
+  });
+
+  describe("search in child level 1 type", () => {
+    it("should find the actant in child1.type.id", async () => {
+      const found = await Actant.findUsedInProps(db.connection, child1.type.id);
+      expect(found.length).toEqual(1);
+      expect(found[0].id).toEqual(actant.id);
+    });
+  });
+
+  describe("search in child level 2 type", () => {
+    it("should find the actant in child1.type.id", async () => {
+      const found = await Actant.findUsedInProps(db.connection, child2.type.id);
+      expect(found.length).toEqual(1);
+      expect(found[0].id).toEqual(actant.id);
+    });
+  });
+
+  describe("search in child level 3 type", () => {
+    it("should find the actant in child1.type.id", async () => {
+      const found = await Actant.findUsedInProps(db.connection, child3.type.id);
+      expect(found.length).toEqual(1);
+      expect(found[0].id).toEqual(actant.id);
+    });
   });
 });
