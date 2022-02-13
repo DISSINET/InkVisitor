@@ -98,9 +98,12 @@ export enum Position {
   PseudoActant = "p",
 }
 
-export enum PositionContext {
+export enum UsedInPosition {
   Value = "value",
   Type = "type",
+  Actant = "actatn",
+  Action = "action",
+  Tag = "tag",
 }
 
 export enum Logic {

@@ -2,7 +2,7 @@ import { Request } from "express";
 import {
   ActantType,
   Position,
-  PositionContext,
+  UsedInPosition,
   UserRoleMode,
 } from "@shared/enums";
 import {
@@ -37,9 +37,9 @@ export class ResponseActantDetail
   implements IResponseDetail
 {
   entities: { [key: string]: IActant };
-  usedInStatement: IResponseUsedInStatement<Position | "action">[];
-  usedInStatementProps: IResponseUsedInStatement<PositionContext>[];
-  usedInMetaProps: IResponseUsedInMetaProp<PositionContext>[];
+  usedInStatement: IResponseUsedInStatement<UsedInPosition>[];
+  usedInStatementProps: IResponseUsedInStatement<UsedInPosition>[];
+  usedInMetaProps: IResponseUsedInMetaProp<UsedInPosition>[];
 
   constructor(actant: IActant) {
     super(actant);
@@ -49,77 +49,88 @@ export class ResponseActantDetail
     this.usedInMetaProps = [];
   }
 
-  walkProps(actant: IActant, props: IProp[]) {
+  /**
+   * Walks through props arrays recursively to gather required entries for usedInMetaProps & usedInStatementProps fields.
+   * Also populates entities map.
+   * @param actant
+   * @param props
+   */
+  walkPropsStatements(actant: IActant, props: IProp[]) {
     for (const prop of props) {
       if (prop.type.id === this.id) {
-        this.usedInMetaProps.push({
-          entityId: actant.id,
-          position: PositionContext.Type,
-        });
-        if (actant.class === ActantType.Statement) {
-          this.usedInStatementProps.push({
-            statement: actant as IStatement,
-            position: PositionContext.Type,
-            //originId: // todo
-          });
-        }
-
-        this.entities[actant.id] = actant;
+        this.addUsedInMetaProp(actant, UsedInPosition.Type);
       }
+
       if (prop.value.id === this.id) {
-        this.usedInMetaProps.push({
-          entityId: actant.id,
-          position: PositionContext.Value,
-        });
-        if (actant.class === ActantType.Statement) {
-          this.usedInStatementProps.push({
-            statement: actant as IStatement,
-            position: PositionContext.Value,
-            //originId: // todo
-          });
-        }
-
-        this.entities[actant.id] = actant;
+        this.addUsedInMetaProp(actant, UsedInPosition.Value);
       }
 
-      this.walkProps(actant, prop.children);
+      this.walkPropsStatements(actant, prop.children);
     }
   }
 
-  walkBasicStatements(statements: IStatement[]) {
+  /**
+   * add entry to usedInMetaProps, usedInStatementProps and entities fields
+   * @param actant
+   * @param position
+   */
+  addUsedInMetaProp(actant: IActant, position: UsedInPosition) {
+    this.usedInMetaProps.push({
+      entityId: actant.id,
+      position,
+    });
+
+    if (actant.class === ActantType.Statement) {
+      this.usedInStatementProps.push({
+        statement: actant as IStatement,
+        position,
+        //originId: // todo
+      });
+    }
+
+    this.entities[actant.id] = actant;
+  }
+
+  /**
+   * Walks through basic statement fields to gather required entries for usedInStatement field.
+   * Also populates entities map.
+   * @param statements
+   */
+  walkLinkedStatements(statements: IStatement[]) {
     for (const statement of statements) {
       for (const action of statement.data.actions) {
         if (action.action === this.id) {
-          this.usedInStatement.push({
-            position: "action",
-            statement: statement,
-            // originId:
-          });
-
-          this.entities[statement.id] = statement;
+          this.addLinkedStatement(statement, UsedInPosition.Action);
         }
       }
 
       for (const actant of statement.data.actants) {
-        this.usedInStatement.push({
-          position: Position.Actant1,
-          statement: statement,
-          // originId:
-        });
-
-        this.entities[statement.id] = statement;
+        if (actant.actant === this.id) {
+          this.addLinkedStatement(statement, UsedInPosition.Actant);
+        }
       }
 
       for (const tag of statement.data.tags) {
-        this.usedInStatement.push({
-          position: Position.PseudoActant,
-          statement: statement,
-          // originId:
-        });
-
-        this.entities[statement.id] = statement;
+        if (tag === this.id) {
+          this.addLinkedStatement(statement, UsedInPosition.Tag);
+        }
       }
     }
+  }
+
+  /**
+   * Adds statement to usedInStatement & entities fields
+   * @param statement
+   * @param position
+   */
+  addLinkedStatement(statement: IStatement, position: UsedInPosition) {
+    this.usedInStatement.push({
+      statement,
+      position,
+      // originId:
+    });
+
+    this.entities[statement.id] = statement;
   }
 
   async prepare(req: Request): Promise<void> {
@@ -131,7 +142,7 @@ export class ResponseActantDetail
     );
 
     for (const actant of usedInProps) {
-      this.walkProps(actant, actant.props);
+      this.walkPropsStatements(actant, actant.props);
     }
 
     const usedInStatements = await Statement.findUsed(
@@ -139,6 +150,6 @@ export class ResponseActantDetail
       this.id
     );
 
-    this.walkBasicStatements(usedInStatements);
+    this.walkLinkedStatements(usedInStatements);
   }
 }
