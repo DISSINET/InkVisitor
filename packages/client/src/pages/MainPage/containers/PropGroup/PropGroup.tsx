@@ -79,61 +79,62 @@ export const PropGroup: React.FC<IPropGroup> = ({
     []
   );
 
-  const renderFirsLevelPropRow = useCallback((prop1: IProp, pi1: number) => {
-    return (
-      <div key={prop1.id}>
-        <PropGroupRow
-          prop={prop1}
-          entities={entities}
-          level={"1"}
-          order={pi1}
-          firstRowinGroup={pi1 === 0}
-          lastRowinGroup={pi1 === props.length - 1}
-          lastSecondLevel={false}
-          updateProp={updateProp}
-          removeProp={removeProp}
-          addProp={addProp}
-          movePropDown={movePropDown}
-          movePropUp={movePropUp}
-          userCanEdit={userCanEdit}
-          territoryActants={territoryActants || []}
-          openDetailOnCreate={openDetailOnCreate}
-        />
-        {prop1.children.map((prop2: IProp, pi2: number) =>
-          renderSecondLevelPropRow(prop2, pi2, prop1)
-        )}
-      </div>
-    );
-  }, []);
+  // PREPARATION FOR DRAG AND DROP
+  // const renderFirsLevelPropRow = useCallback((prop1: IProp, pi1: number) => {
+  //   return (
+  //     <div key={prop1.id}>
+  //       <PropGroupRow
+  //         prop={prop1}
+  //         entities={entities}
+  //         level={"1"}
+  //         order={pi1}
+  //         firstRowinGroup={pi1 === 0}
+  //         lastRowinGroup={pi1 === props.length - 1}
+  //         lastSecondLevel={false}
+  //         updateProp={updateProp}
+  //         removeProp={removeProp}
+  //         addProp={addProp}
+  //         movePropDown={movePropDown}
+  //         movePropUp={movePropUp}
+  //         userCanEdit={userCanEdit}
+  //         territoryActants={territoryActants || []}
+  //         openDetailOnCreate={openDetailOnCreate}
+  //       />
+  //       {prop1.children.map((prop2: IProp, pi2: number) =>
+  //         renderSecondLevelPropRow(prop2, pi2, prop1)
+  //       )}
+  //     </div>
+  //   );
+  // }, []);
 
-  const renderSecondLevelPropRow = useCallback(
-    (prop2: IProp, pi2: number, prop1: IProp) => {
-      return (
-        <div key={prop2.id}>
-          <PropGroupRow
-            prop={prop2}
-            entities={entities}
-            level={"2"}
-            order={pi2}
-            firstRowinGroup={pi2 === 0}
-            lastRowinGroup={pi2 === prop1.children.length - 1}
-            lastSecondLevel={pi2 === prop1.children.length - 1}
-            updateProp={updateProp}
-            removeProp={removeProp}
-            addProp={addProp}
-            movePropDown={movePropDown}
-            movePropUp={movePropUp}
-            userCanEdit={userCanEdit}
-            territoryActants={territoryActants || []}
-            openDetailOnCreate={openDetailOnCreate}
-          />
-        </div>
-      );
-    },
-    []
-  );
+  // const renderSecondLevelPropRow = useCallback(
+  //   (prop2: IProp, pi2: number, prop1: IProp) => {
+  //     return (
+  //       <div key={prop2.id}>
+  //         <PropGroupRow
+  //           prop={prop2}
+  //           entities={entities}
+  //           level={"2"}
+  //           order={pi2}
+  //           firstRowinGroup={pi2 === 0}
+  //           lastRowinGroup={pi2 === prop1.children.length - 1}
+  //           lastSecondLevel={pi2 === prop1.children.length - 1}
+  //           updateProp={updateProp}
+  //           removeProp={removeProp}
+  //           addProp={addProp}
+  //           movePropDown={movePropDown}
+  //           movePropUp={movePropUp}
+  //           userCanEdit={userCanEdit}
+  //           territoryActants={territoryActants || []}
+  //           openDetailOnCreate={openDetailOnCreate}
+  //         />
+  //       </div>
+  //     );
+  //   },
+  //   []
+  // );
 
-  return firstLevelProps.length > 0 ? (
+  return props.length > 0 ? (
     <tr>
       <td colSpan={4}>
         <React.Fragment key={originId}>
@@ -144,9 +145,52 @@ export const PropGroup: React.FC<IPropGroup> = ({
             <StyledListHeaderColumn></StyledListHeaderColumn>
           </StyledGrid>
           {/* Rows */}
-          {firstLevelProps.map((prop1: IProp, pi1: number) =>
-            renderFirsLevelPropRow(prop1, pi1)
-          )}
+          {props.map((prop1: IProp, pi1: number) => {
+            return (
+              <div key={prop1.id}>
+                <PropGroupRow
+                  prop={prop1}
+                  entities={entities}
+                  level={"1"}
+                  order={pi1}
+                  firstRowinGroup={pi1 === 0}
+                  lastRowinGroup={pi1 === props.length - 1}
+                  lastSecondLevel={false}
+                  updateProp={updateProp}
+                  removeProp={removeProp}
+                  addProp={addProp}
+                  movePropDown={movePropDown}
+                  movePropUp={movePropUp}
+                  userCanEdit={userCanEdit}
+                  territoryActants={territoryActants || []}
+                  openDetailOnCreate={openDetailOnCreate}
+                />
+                {prop1.children.map((prop2: IProp, pi2: number) => {
+                  return (
+                    <div key={prop2.id}>
+                      <PropGroupRow
+                        prop={prop2}
+                        entities={entities}
+                        level={"2"}
+                        order={pi2}
+                        firstRowinGroup={pi2 === 0}
+                        lastRowinGroup={pi2 === prop1.children.length - 1}
+                        lastSecondLevel={pi2 === prop1.children.length - 1}
+                        updateProp={updateProp}
+                        removeProp={removeProp}
+                        addProp={addProp}
+                        movePropDown={movePropDown}
+                        movePropUp={movePropUp}
+                        userCanEdit={userCanEdit}
+                        territoryActants={territoryActants || []}
+                        openDetailOnCreate={openDetailOnCreate}
+                      />
+                    </div>
+                  );
+                })}
+              </div>
+            );
+          })}
         </React.Fragment>
       </td>
     </tr>
