@@ -23,7 +23,6 @@ import {
   StyledListHeaderColumn,
   StyledPropButtonGroup,
   StyledPropLineColumn,
-  StyledTagWrap,
 } from "./PropGroupStyles";
 
 interface IPropGroup {
@@ -193,29 +192,27 @@ const PropGroupRow: React.FC<IPropGroupRow> = ({
           isTag={propTypeEntity ? true : false}
         >
           {propTypeEntity ? (
-            <StyledTagWrap>
-              <EntityTag
-                actant={propTypeEntity}
-                fullWidth
-                button={
-                  <Button
-                    key="d"
-                    icon={<FaUnlink />}
-                    color="plain"
-                    inverted={true}
-                    tooltip="unlink actant"
-                    onClick={() => {
-                      updateProp(prop.id, {
-                        type: {
-                          ...prop.type,
-                          ...{ id: "" },
-                        },
-                      });
-                    }}
-                  />
-                }
-              />
-            </StyledTagWrap>
+            <EntityTag
+              actant={propTypeEntity}
+              fullWidth
+              button={
+                <Button
+                  key="d"
+                  icon={<FaUnlink />}
+                  color="plain"
+                  inverted={true}
+                  tooltip="unlink actant"
+                  onClick={() => {
+                    updateProp(prop.id, {
+                      type: {
+                        ...prop.type,
+                        ...{ id: "" },
+                      },
+                    });
+                  }}
+                />
+              }
+            />
           ) : (
             <EntitySuggester
               territoryActants={territoryActants}
@@ -229,7 +226,7 @@ const PropGroupRow: React.FC<IPropGroupRow> = ({
               }}
               openDetailOnCreate={openDetailOnCreate}
               categoryTypes={classesPropType}
-              inputWidth={"full"}
+              inputWidth={90}
               excludedEntities={excludedSuggesterEntities}
             />
           )}
@@ -249,34 +246,31 @@ const PropGroupRow: React.FC<IPropGroupRow> = ({
           </StyledPropButtonGroup>
         </StyledPropLineColumn>
         <StyledPropLineColumn
-          padded={level === "2"}
           lastSecondLevel={lastSecondLevel}
           isTag={propValueEntity ? true : false}
         >
           {propValueEntity ? (
-            <StyledTagWrap>
-              <EntityTag
-                actant={propValueEntity}
-                fullWidth
-                button={
-                  <Button
-                    key="d"
-                    icon={<FaUnlink />}
-                    tooltip="unlink actant"
-                    color="plain"
-                    inverted={true}
-                    onClick={() => {
-                      updateProp(prop.id, {
-                        value: {
-                          ...prop.value,
-                          ...{ id: "" },
-                        },
-                      });
-                    }}
-                  />
-                }
-              />
-            </StyledTagWrap>
+            <EntityTag
+              actant={propValueEntity}
+              fullWidth
+              button={
+                <Button
+                  key="d"
+                  icon={<FaUnlink />}
+                  tooltip="unlink actant"
+                  color="plain"
+                  inverted={true}
+                  onClick={() => {
+                    updateProp(prop.id, {
+                      value: {
+                        ...prop.value,
+                        ...{ id: "" },
+                      },
+                    });
+                  }}
+                />
+              }
+            />
           ) : (
             <EntitySuggester
               territoryActants={[]}
@@ -290,7 +284,7 @@ const PropGroupRow: React.FC<IPropGroupRow> = ({
               }}
               openDetailOnCreate={openDetailOnCreate}
               categoryTypes={classesPropValue}
-              inputWidth={"full"}
+              inputWidth={90}
               excludedEntities={excludedSuggesterEntities}
             />
           )}

@@ -17,7 +17,7 @@ export const StyledGrid = styled.div`
 
   align-items: center;
   padding-left: ${({ theme }) => theme.space[10]};
-  grid-template-columns: auto auto 11rem;
+  grid-template-columns: 1fr 1fr 11rem;
   width: fit-content;
   grid-template-rows: auto;
   grid-auto-flow: row;
@@ -56,7 +56,7 @@ export const StyledPropLineColumn = styled(
     padded ? theme.space[8] : theme.space[0]};
   padding-right: 5px;
   overflow: ${({ isTag }) => (isTag ? "hidden" : "visible")};
-  border: 1px dashed hotpink;
+  // border: 1px dashed hotpink;
 `;
 
 interface StyledPropButtonGroup {
@@ -80,11 +80,4 @@ export const StyledPropButtonGroup = styled.div<StyledPropButtonGroup>`
   button[disabled] {
     //background-color: ${({ theme }) => theme.color["gray"][1000]};
   }
-`;
-
-export const StyledTagWrap = styled.div`
-  display: inline-flex;
-  overflow: hidden;
-  min-width: 16rem;
-  border: 1px solid blue;
 `;
