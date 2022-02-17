@@ -456,7 +456,7 @@ const loadStatementsTables = async (next: Function) => {
         // actant1
         processActant(
           mainStatement,
-          Position.Entity1,
+          Position.Actant1,
           statement.id_actant1,
           statement.actant1_property_type_id,
           statement.actant1_property_value_id,
@@ -466,7 +466,7 @@ const loadStatementsTables = async (next: Function) => {
         // actant2
         processActant(
           mainStatement,
-          Position.Entity2,
+          Position.Actant2,
           statement.id_actant2,
           statement.actant2_property_type_id,
           statement.actant2_property_value_id,
@@ -747,7 +747,7 @@ const createEmptyPropStatement = (
           {
             id: v4(),
             actant: idActant1,
-            position: Position.Entity1,
+            position: Position.Actant1,
             elvl: Elvl.Inferential,
             logic: Logic.Positive,
             virtuality: Virtuality.Reality,
@@ -760,7 +760,7 @@ const createEmptyPropStatement = (
           {
             id: v4(),
             actant: idActant2,
-            position: Position.Entity2,
+            position: Position.Actant2,
             elvl: Elvl.Inferential,
             logic: Logic.Positive,
             virtuality: Virtuality.Reality,

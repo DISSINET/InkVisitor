@@ -81,9 +81,9 @@ export enum Elvl {
 
 export enum Position {
   Subject = "s",
-  Entity1 = "e1",
-  Entity2 = "e2",
-  PseudoEntity = "p",
+  Actant1 = "a1",
+  Actant2 = "a2",
+  PseudoActant = "p",
 }
 
 export enum Logic {
