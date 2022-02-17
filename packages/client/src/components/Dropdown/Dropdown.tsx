@@ -1,5 +1,5 @@
 import { allEntities } from "@shared/dictionaries/entity";
-import React, { ReactNode } from "react";
+import React, { ReactNode, useEffect, useState } from "react";
 import {
   components,
   GroupedOptionsType,
@@ -44,6 +44,7 @@ interface Dropdown {
   disableTyping?: boolean;
   suggester?: boolean;
   oneLetter?: boolean;
+  allowAny?: boolean;
 }
 export const Dropdown: React.FC<Dropdown> = ({
   options = [],
@@ -66,9 +67,15 @@ export const Dropdown: React.FC<Dropdown> = ({
   onBlur = () => {},
   disableTyping = false,
   suggester = false,
+  allowAny = false,
 }) => {
   const optionsWithIterator = options[Symbol.iterator]();
   const isOneOptionSingleSelect = options.length < 2 && !isMulti;
+
+  const [displayValue, setDisplayValue] = useState(value);
+  useEffect(() => {
+    setDisplayValue(value);
+  }, [value]);
 
   return (
     <StyledSelectWrapper width={width}>
@@ -97,7 +104,7 @@ export const Dropdown: React.FC<Dropdown> = ({
         {...(getOptionLabel ? { getOptionLabel: getOptionLabel } : {})}
         {...(formatOptionLabel ? { formatOptionLabel: formatOptionLabel } : {})}
         {...(isOptionSelected ? { isOptionSelected: isOptionSelected } : {})}
-        value={value}
+        value={displayValue}
         styles={{
           dropdownIndicator: () => {
             return {
