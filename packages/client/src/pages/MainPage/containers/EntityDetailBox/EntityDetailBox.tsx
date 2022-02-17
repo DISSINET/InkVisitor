@@ -633,6 +633,7 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                     </StyledDetailContentRowLabel>
                     <StyledDetailContentRowValue>
                       <Dropdown
+                        allowAny
                         disabled={!userCanEdit}
                         isMulti
                         options={entitiesDict}
