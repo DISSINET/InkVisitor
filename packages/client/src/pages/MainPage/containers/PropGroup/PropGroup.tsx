@@ -1,30 +1,10 @@
 import { IActant, IProp } from "@shared/types";
 import api from "api";
-import { AttributeIcon, Button } from "components";
-import React from "react";
-import {
-  FaCaretDown,
-  FaCaretUp,
-  FaPlus,
-  FaTrashAlt,
-  FaUnlink,
-} from "react-icons/fa";
+import React, { useCallback, useEffect, useState } from "react";
 import { useQuery } from "react-query";
-import { excludedSuggesterEntities } from "Theme/constants";
-import {
-  AttributeGroupDataObject,
-  classesPropType,
-  classesPropValue,
-} from "types";
-import { AttributesGroupEditor } from "../AttributesEditor/AttributesGroupEditor";
-import { EntitySuggester, EntityTag } from "./../";
 import { PropGroupRow } from "./PropGroupRow/PropGroupRow";
-import {
-  StyledGrid,
-  StyledListHeaderColumn,
-  StyledPropButtonGroup,
-  StyledPropLineColumn,
-} from "./PropGroupStyles";
+import { StyledGrid, StyledListHeaderColumn } from "./PropGroupStyles";
+import update from "immutability-helper";
 
 interface IPropGroup {
   originId: string;
@@ -79,7 +59,81 @@ export const PropGroup: React.FC<IPropGroup> = ({
     }
   );
 
-  return props.length > 0 ? (
+  useEffect(() => {
+    setFirstLevelProps(props);
+  }, [props]);
+
+  const [firstLevelProps, setFirstLevelProps] = useState<IProp[]>([]);
+
+  const moveFirstLevelProp = useCallback(
+    (dragIndex: number, hoverIndex: number) => {
+      setFirstLevelProps((prevCards) =>
+        update(prevCards, {
+          $splice: [
+            [dragIndex, 1],
+            [hoverIndex, 0, prevCards[dragIndex]],
+          ],
+        })
+      );
+    },
+    []
+  );
+
+  const renderFirsLevelPropRow = useCallback((prop1: IProp, pi1: number) => {
+    return (
+      <div key={prop1.id}>
+        <PropGroupRow
+          prop={prop1}
+          entities={entities}
+          level={"1"}
+          order={pi1}
+          firstRowinGroup={pi1 === 0}
+          lastRowinGroup={pi1 === props.length - 1}
+          lastSecondLevel={false}
+          updateProp={updateProp}
+          removeProp={removeProp}
+          addProp={addProp}
+          movePropDown={movePropDown}
+          movePropUp={movePropUp}
+          userCanEdit={userCanEdit}
+          territoryActants={territoryActants || []}
+          openDetailOnCreate={openDetailOnCreate}
+        />
+        {prop1.children.map((prop2: IProp, pi2: number) =>
+          renderSecondLevelPropRow(prop2, pi2, prop1)
+        )}
+      </div>
+    );
+  }, []);
+
+  const renderSecondLevelPropRow = useCallback(
+    (prop2: IProp, pi2: number, prop1: IProp) => {
+      return (
+        <div key={prop2.id}>
+          <PropGroupRow
+            prop={prop2}
+            entities={entities}
+            level={"2"}
+            order={pi2}
+            firstRowinGroup={pi2 === 0}
+            lastRowinGroup={pi2 === prop1.children.length - 1}
+            lastSecondLevel={pi2 === prop1.children.length - 1}
+            updateProp={updateProp}
+            removeProp={removeProp}
+            addProp={addProp}
+            movePropDown={movePropDown}
+            movePropUp={movePropUp}
+            userCanEdit={userCanEdit}
+            territoryActants={territoryActants || []}
+            openDetailOnCreate={openDetailOnCreate}
+          />
+        </div>
+      );
+    },
+    []
+  );
+
+  return firstLevelProps.length > 0 ? (
     <tr>
       <td colSpan={4}>
         <React.Fragment key={originId}>
@@ -90,52 +144,9 @@ export const PropGroup: React.FC<IPropGroup> = ({
             <StyledListHeaderColumn></StyledListHeaderColumn>
           </StyledGrid>
           {/* Rows */}
-          {props.map((prop1: IProp, pi1: number) => {
-            return (
-              <React.Fragment key={prop1.id}>
-                <PropGroupRow
-                  prop={prop1}
-                  entities={entities}
-                  level={"1"}
-                  order={pi1}
-                  firstRowinGroup={pi1 === 0}
-                  lastRowinGroup={pi1 === props.length - 1}
-                  lastSecondLevel={false}
-                  updateProp={updateProp}
-                  removeProp={removeProp}
-                  addProp={addProp}
-                  movePropDown={movePropDown}
-                  movePropUp={movePropUp}
-                  userCanEdit={userCanEdit}
-                  territoryActants={territoryActants || []}
-                  openDetailOnCreate={openDetailOnCreate}
-                />
-                {prop1.children.map((prop2: IProp, pi2: number) => {
-                  return (
-                    <React.Fragment key={prop2.id}>
-                      <PropGroupRow
-                        prop={prop2}
-                        entities={entities}
-                        level={"2"}
-                        order={pi2}
-                        firstRowinGroup={pi2 === 0}
-                        lastRowinGroup={pi2 === prop1.children.length - 1}
-                        lastSecondLevel={pi2 === prop1.children.length - 1}
-                        updateProp={updateProp}
-                        removeProp={removeProp}
-                        addProp={addProp}
-                        movePropDown={movePropDown}
-                        movePropUp={movePropUp}
-                        userCanEdit={userCanEdit}
-                        territoryActants={territoryActants || []}
-                        openDetailOnCreate={openDetailOnCreate}
-                      />
-                    </React.Fragment>
-                  );
-                })}
-              </React.Fragment>
-            );
-          })}
+          {firstLevelProps.map((prop1: IProp, pi1: number) =>
+            renderFirsLevelPropRow(prop1, pi1)
+          )}
         </React.Fragment>
       </td>
     </tr>
