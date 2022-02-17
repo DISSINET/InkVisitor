@@ -101,7 +101,7 @@ export enum Position {
 export enum UsedInPosition {
   Value = "value",
   Type = "type",
-  Actant = "actatn",
+  Actant = "actant",
   Action = "action",
   Tag = "tag",
 }
