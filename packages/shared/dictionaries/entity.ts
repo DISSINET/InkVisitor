@@ -1,3 +1,4 @@
+//@ts-ignore
 import { DropdownItem } from "@shared/packages/client/src/types";
 import { ActantType } from "../enums";
 

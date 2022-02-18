@@ -20,7 +20,7 @@ export const attributeIcons = {
   moodvariant: <SiRealm />,
   virtuality: <FaRegObjectGroup />,
   partitivity: <AiOutlineApartment />,
-  operator: <VscDebugDisconnect />,
+  bundleOperator: <VscDebugDisconnect />,
   bundleStart: <BiChevronLeft />,
   bundleEnd: <BiChevronRight />,
   negation: <FaMinusCircle />,

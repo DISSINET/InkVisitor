@@ -37,7 +37,7 @@ export interface IStatementAction {
   logic: Logic;
   mood: Mood[];
   moodvariant: MoodVariant;
-  operator: Operator;
+  bundleOperator: Operator;
   bundleStart: boolean;
   bundleEnd: boolean;
   props: IProp[];
@@ -51,7 +51,7 @@ export interface IStatementActant {
   logic: Logic;
   virtuality: Virtuality;
   partitivity: Partitivity;
-  operator: Operator;
+  bundleOperator: Operator;
   bundleStart: boolean;
   bundleEnd: boolean;
   props: IProp[];

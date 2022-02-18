@@ -202,7 +202,7 @@ export const PropGroupRow: React.FC<IPropGroupRow> = ({
                   logic: prop.logic,
                   mood: prop.mood,
                   moodvariant: prop.moodvariant,
-                  operator: prop.operator,
+                  bundleOperator: prop.bundleOperator,
                   bundleStart: prop.bundleStart,
                   bundleEnd: prop.bundleEnd,
                 },
@@ -286,14 +286,14 @@ export const PropGroupRow: React.FC<IPropGroupRow> = ({
             ) : (
               <div />
             )}
-            {prop.operator ? (
+            {prop.bundleOperator ? (
               <Button
                 key="oper"
                 tooltip="Logical operator type"
                 color="success"
                 inverted={true}
                 noBorder
-                icon={prop.operator}
+                icon={prop.bundleOperator}
               />
             ) : (
               <div />

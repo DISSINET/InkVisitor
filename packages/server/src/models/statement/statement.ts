@@ -42,7 +42,7 @@ export class StatementActant implements IStatementActant, IModel {
   logic: Logic = Logic.Positive;
   virtuality: Virtuality = Virtuality.Reality;
   partitivity: Partitivity = Partitivity.Unison;
-  operator: Operator = Operator.And;
+  bundleOperator: Operator = Operator.And;
   bundleStart: boolean = false;
   bundleEnd: boolean = false;
   props: Prop[] = [];
@@ -122,7 +122,7 @@ export class StatementAction implements IStatementAction {
   logic: Logic = Logic.Positive;
   mood: Mood[] = [Mood.Indication];
   moodvariant: MoodVariant = MoodVariant.Realis;
-  operator: Operator = Operator.And;
+  bundleOperator: Operator = Operator.And;
   bundleStart: boolean = false;
   bundleEnd: boolean = false;
   props: Prop[] = [];
