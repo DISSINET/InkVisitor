@@ -42,7 +42,7 @@ export class StatementActant implements IStatementActant, IModel {
   logic: Logic = Logic.Positive;
   virtuality: Virtuality = Virtuality.Reality;
   partitivity: Partitivity = Partitivity.Unison;
-  operator: Operator = Operator.And;
+  bundleOperator: Operator = Operator.And;
   bundleStart: boolean = false;
   bundleEnd: boolean = false;
   props: Prop[] = [];
@@ -124,7 +124,7 @@ export class StatementAction implements IStatementAction {
   logic: Logic = Logic.Positive;
   mood: Mood[] = [Mood.Indication];
   moodvariant: MoodVariant = MoodVariant.Realis;
-  operator: Operator = Operator.And;
+  bundleOperator: Operator = Operator.And;
   bundleStart: boolean = false;
   bundleEnd: boolean = false;
   props: Prop[] = [];
@@ -365,7 +365,9 @@ class Statement extends Entity implements IStatement {
 
     const out: Record<number, IStatement> = {};
     for (const ter of list) {
-      out[ter.data.territory.order] = ter;
+      if (ter.data.territory) {
+        out[ter.data.territory.order] = ter;
+      }
     }
 
     return out;

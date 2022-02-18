@@ -174,11 +174,11 @@ export const AttributesGroupEditor: React.FC<AttributesGroupEditor> = ({
             items={partitivityDict}
           />
         )}
-        {data.operator && (
+        {data.bundleOperator && (
           <TooltipAttributeRow
             key="operator"
             attributeName="operator"
-            value={data.operator}
+            value={data.bundleOperator}
             items={operatorDict}
           />
         )}

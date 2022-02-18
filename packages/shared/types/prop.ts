@@ -16,7 +16,7 @@ export interface IProp {
   logic: Logic;
   mood: Mood[];
   moodvariant: MoodVariant;
-  operator: Operator;
+  bundleOperator: Operator;
   bundleStart: boolean;
   bundleEnd: boolean;
 
