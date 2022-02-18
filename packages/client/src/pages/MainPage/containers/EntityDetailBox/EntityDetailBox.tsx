@@ -84,6 +84,8 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
     { enabled: !!detailId && api.isLoggedIn(), retry: 2 }
   );
 
+  console.log(entity);
+
   // Audit query
   const {
     status: statusAudit,
@@ -300,24 +302,6 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
     }
     return "entity";
   }, [entity]);
-
-  const usedInStatements = useMemo(() => {
-    if (entity && entity.usedInStatement) {
-      const displayStatements = entity.usedInStatement.slice(
-        statementsPerPage * usedInPage,
-        statementsPerPage * (usedInPage + 1)
-      );
-
-      return displayStatements.map((statement: IStatement) => {
-        return {
-          position: findPositionInStatement(statement, entity),
-          statement: statement,
-        };
-      });
-    } else {
-      return [];
-    }
-  }, [usedInPage, detailId, entity]);
 
   // sort meta statements by type label
   const metaStatements = useMemo(() => {
@@ -633,6 +617,7 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                     </StyledDetailContentRowLabel>
                     <StyledDetailContentRowValue>
                       <Dropdown
+                        allowAny
                         disabled={!userCanEdit}
                         isMulti
                         options={entitiesDict}
@@ -978,8 +963,8 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                 <StyledDetailHeaderColumn>Text</StyledDetailHeaderColumn>
                 <StyledDetailHeaderColumn>Position</StyledDetailHeaderColumn>
                 <StyledDetailHeaderColumn></StyledDetailHeaderColumn>
-                {usedInStatements.map((usedInStatement) => {
-                  const { statement, position } = usedInStatement;
+                {entity.usedInStatement.map((usedInStatement) => {
+                  const { statement, position, originId } = usedInStatement;
                   return (
                     <React.Fragment key={statement.id}>
                       <StyledDetailSectionUsedTableCell>

@@ -509,7 +509,7 @@ class Statement extends Entity implements IStatement {
    * @param entityId id of the entity
    * @returns list of statements data
    */
-  static async findDependentStatements(
+  static async findUsed(
     db: Connection | undefined,
     entityId: string
   ): Promise<IStatement[]> {
@@ -520,26 +520,13 @@ class Statement extends Entity implements IStatement {
       })
       .filter((row: RDatum) => {
         return rethink.or(
-          row("data")("territory")("id").eq(entityId),
           row("data")("actions").contains((entry: RDatum) =>
             entry("action").eq(entityId)
           ),
           row("data")("actants").contains((entry: RDatum) =>
             entry("actant").eq(entityId)
           ),
-          row("data")("tags").contains(entityId),
-          row("data")("props").contains((entry: RDatum) =>
-            entry("value")("id").eq(entityId)
-          ),
-          row("data")("props").contains((entry: RDatum) =>
-            entry("type")("id").eq(entityId)
-          ),
-          row("data")("props").contains((entry: RDatum) =>
-            entry("origin").eq(entityId)
-          ),
-          row("data")("references").contains((entry: RDatum) =>
-            entry("resource").eq(entityId)
-          )
+          row("data")("tags").contains(entityId)
         );
       })
       .run(db);

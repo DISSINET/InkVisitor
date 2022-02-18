@@ -101,7 +101,7 @@ const importData = async () => {
     tables: tablesToImport,
   };
 
-  let conn = null;
+  let conn: any = null;
 
   try {
     conn = await r.connect(config);
@@ -131,32 +131,35 @@ const importData = async () => {
     for (let i = 0; i < config.tables.length; ++i) {
       const table = config.tables[i];
 
-      await r.tableCreate(table.name).run(conn);
-      if (table.indexes) {
-        for (const index of table.indexes) {
-          //await doIndex(index, conn);
+      r.tableCreate(table.name).run(conn, async () => {
+        if (table.indexes) {
+          for (const index of table.indexes) {
+            //await doIndex(index, conn);
+          }
         }
-      }
 
-      console.log(`table ${table.name} created`);
+        console.log(`table ${table.name} created`);
 
-      let data = JSON.parse(fs.readFileSync(table.data));
-      if (table.name === "users") {
-        data = data.map((user: IUser) => {
-          user.password = hashPassword(user.password ? user.password : "");
-          return user;
-        });
-      }
+        let data = JSON.parse(fs.readFileSync(table.data));
+        if (table.name === "users") {
+          data = data.map((user: IUser) => {
+            user.password = hashPassword(user.password ? user.password : "");
+            return user;
+          });
+        }
 
-      if (table.name === "audits") {
-        data = data.map((audit: IAudit) => {
-          audit.date = new Date(audit.date);
-          return audit;
-        });
-      }
+        if (table.name === "audits") {
+          data = data.map((audit: IAudit) => {
+            audit.date = new Date(audit.date);
+            return audit;
+          });
+        }
 
-      await r.table(table.name).insert(data).run(conn);
-      console.log(`data into the table ${table.name} inserted`);
+        r.table(table.name)
+          .insert(data)
+          .run(conn, () => {});
+        console.log(`data into the table ${table.name} inserted`);
+      });
     }
   } catch (error) {
     console.log(error);

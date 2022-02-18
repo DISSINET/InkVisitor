@@ -86,6 +86,14 @@ export enum Position {
   PseudoActant = "p",
 }
 
+export enum UsedInPosition {
+  Value = "value",
+  Type = "type",
+  Actant = "actant",
+  Action = "action",
+  Tag = "tag",
+}
+
 export enum Logic {
   Positive = "1",
   Negative = "2",

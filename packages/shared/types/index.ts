@@ -13,11 +13,14 @@ import { IProp } from "./prop";
 import { RequestPermissionUpdate } from "./request-permission";
 import { RequestSearch } from "./request-search";
 import { IResource } from "./resource";
-import { IResponseEntity } from "./response-actant";
+import {
+  IResponseDetail,
+  IResponseUsedInMetaProp,
+  IResponseUsedInStatement,
+} from "./response-detail";
+import { IResponseBookmarkFolder } from "./response-bookmarks";
 import { IResponseAdministration } from "./response-administration";
 import { IResponseAudit } from "./response-audit";
-import { IResponseBookmarkFolder } from "./response-bookmarks";
-import { IResponseDetail } from "./response-detail";
 import { IResponseGeneric } from "./response-generic";
 import { IResponsePermission } from "./response-permission";
 import { IResponseSearch } from "./response-search";
@@ -44,6 +47,7 @@ import {
   IUserRight,
 } from "./user";
 import { IValue } from "./value";
+import { IResponseEntity } from "./response-actant";
 
 export type {
   IAudit,
@@ -74,6 +78,8 @@ export type {
   IResponseAudit,
   IResponseEntity,
   IResponseDetail,
+  IResponseUsedInMetaProp,
+  IResponseUsedInStatement,
   IResponseBookmarkFolder,
   IResponseAdministration,
   IResponseStatement,
