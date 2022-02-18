@@ -2,7 +2,7 @@
  * type of the /users endpoint response
  */
 
-import { IResponseActant, IUser, IResponseBookmarkFolder } from "./";
+import { IResponseEntity, IUser, IResponseBookmarkFolder } from "./";
 
 export interface IResponseUser
   extends Omit<IUser, "bookmarks" | "storedTerritories" | "password"> {
@@ -18,5 +18,5 @@ export interface UserOptions {
 }
 
 export interface IResponseStoredTerritory {
-  territory: IResponseActant;
+  territory: IResponseEntity;
 }

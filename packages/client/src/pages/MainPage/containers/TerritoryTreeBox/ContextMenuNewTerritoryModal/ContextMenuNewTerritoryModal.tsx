@@ -38,7 +38,7 @@ export const ContextMenuNewTerritoryModal: React.FC<
   const dispatch = useAppDispatch();
 
   const createTerritoryMutation = useMutation(
-    async (newTerritory: ITerritory) => await api.actantsCreate(newTerritory),
+    async (newTerritory: ITerritory) => await api.entityCreate(newTerritory),
     {
       onSuccess: (data, variables) => {
         onClose();

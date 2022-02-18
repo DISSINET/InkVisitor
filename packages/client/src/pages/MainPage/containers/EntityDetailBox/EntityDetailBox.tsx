@@ -1,11 +1,11 @@
 import {
   actantLogicalTypeDict,
-  actantStatusDict,
+  entityStatusDict,
   entitiesDict,
   languageDict,
 } from "@shared/dictionaries";
 import { allEntities } from "@shared/dictionaries/entity";
-import { ActantType, Language, UserRoleMode } from "@shared/enums";
+import { EntityClass, Language, UserRoleMode } from "@shared/enums";
 import { IAction, IStatement } from "@shared/types";
 import api from "api";
 import {
@@ -61,7 +61,7 @@ import {
 
 interface EntityDetailBox {}
 export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
-  const { actantId, setActantId, setStatementId, territoryId, setTerritoryId } =
+  const { detailId, setDetailId, setStatementId, territoryId, setTerritoryId } =
     useSearchParams();
 
   const [showRemoveSubmit, setShowRemoveSubmit] = useState(false);
@@ -72,19 +72,19 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
 
   const {
     status,
-    data: detailData,
+    data: entity,
     error,
     isFetching,
   } = useQuery(
-    ["actant", actantId],
+    ["entity", detailId],
     async () => {
-      const res = await api.detailGet(actantId);
+      const res = await api.detailGet(detailId);
       return res.data;
     },
-    { enabled: !!actantId && api.isLoggedIn(), retry: 2 }
+    { enabled: !!detailId && api.isLoggedIn(), retry: 2 }
   );
 
-  console.log(detailData);
+  console.log(entity);
 
   // Audit query
   const {
@@ -93,30 +93,30 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
     error: auditError,
     isFetching: isFetchingAudit,
   } = useQuery(
-    ["audit", actantId],
+    ["audit", detailId],
     async () => {
-      const res = await api.auditGet(actantId);
+      const res = await api.auditGet(detailId);
       return res.data;
     },
-    { enabled: !!actantId && api.isLoggedIn(), retry: 2 }
+    { enabled: !!detailId && api.isLoggedIn(), retry: 2 }
   );
 
   // refetch audit when statement changes
   useEffect(() => {
     queryClient.invalidateQueries("audit");
-  }, [detailData]);
+  }, [entity]);
 
   const userCanAdmin: boolean = useMemo(() => {
-    return !!detailData && detailData.right === UserRoleMode.Admin;
-  }, [detailData]);
+    return !!entity && entity.right === UserRoleMode.Admin;
+  }, [entity]);
 
   const userCanEdit: boolean = useMemo(() => {
     return (
-      !!detailData &&
-      (detailData.right === UserRoleMode.Admin ||
-        detailData.right === UserRoleMode.Write)
+      !!entity &&
+      (entity.right === UserRoleMode.Admin ||
+        entity.right === UserRoleMode.Write)
     );
-  }, [detailData]);
+  }, [entity]);
 
   // mutations
   const allEntitiesOption = {
@@ -127,11 +127,11 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
   const entityOptions = [...entitiesDict] as any;
   entityOptions.push(allEntitiesOption);
 
-  const updateActantMutation = useMutation(
-    async (changes: any) => await api.actantsUpdate(actantId, changes),
+  const updateEntityMutation = useMutation(
+    async (changes: any) => await api.entityUpdate(detailId, changes),
     {
       onSuccess: (data, variables) => {
-        queryClient.invalidateQueries(["actant"]);
+        queryClient.invalidateQueries(["entity"]);
 
         if (
           variables.detail ||
@@ -139,7 +139,7 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
           variables.status ||
           variables.data?.logicalType
         ) {
-          if (detailData?.class === ActantType.Territory) {
+          if (entity?.class === EntityClass.Territory) {
             queryClient.invalidateQueries("tree");
           }
           queryClient.invalidateQueries("territory");
@@ -150,15 +150,15 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
     }
   );
 
-  const deleteActantMutation = useMutation(
-    async (actantId: string) => await api.actantsDelete(actantId),
+  const deleteEntityMutation = useMutation(
+    async (entityId: string) => await api.entityDelete(entityId),
     {
-      onSuccess: (data, actantId) => {
-        toast.info(`Actant deleted!`);
+      onSuccess: (data, entityId) => {
+        toast.info(`Entity deleted!`);
         queryClient.invalidateQueries("statement");
         queryClient.invalidateQueries("territory");
         queryClient.invalidateQueries("tree");
-        setActantId("");
+        setDetailId("");
       },
     }
   );
@@ -166,9 +166,9 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
   // Props handling
 
   const addProp = (originId: string) => {
-    if (detailData) {
+    if (entity) {
       const newProp = CProp();
-      const newProps = [...detailData.props];
+      const newProps = [...entity.props];
 
       newProps.forEach((prop1, pi1) => {
         if (prop1.id === originId) {
@@ -176,13 +176,13 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
         }
       });
 
-      updateActantMutation.mutate({ props: newProps });
+      updateEntityMutation.mutate({ props: newProps });
     }
   };
 
   const updateProp = (propId: string, changes: any) => {
-    if (detailData) {
-      const newProps = [...detailData.props];
+    if (entity) {
+      const newProps = [...entity.props];
 
       newProps.forEach((prop1, pi1) => {
         if (prop1.id === propId) {
@@ -197,13 +197,13 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
           }
         });
       });
-      updateActantMutation.mutate({ props: newProps });
+      updateEntityMutation.mutate({ props: newProps });
     }
   };
 
   const removeProp = (propId: string) => {
-    if (detailData) {
-      const newProps = [...detailData.props].filter(
+    if (entity) {
+      const newProps = [...entity.props].filter(
         (prop, pi) => prop.id !== propId
       );
 
@@ -213,13 +213,13 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
         );
       });
 
-      updateActantMutation.mutate({ props: newProps });
+      updateEntityMutation.mutate({ props: newProps });
     }
   };
 
   const movePropUp = (propId: string) => {
-    if (detailData) {
-      const newProps = [...detailData.props];
+    if (entity) {
+      const newProps = [...entity.props];
 
       newProps.forEach((prop1, pi1) => {
         if (prop1.id === propId) {
@@ -236,13 +236,13 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
         });
       });
 
-      updateActantMutation.mutate({ props: newProps });
+      updateEntityMutation.mutate({ props: newProps });
     }
   };
 
   const movePropDown = (propId: string) => {
-    if (detailData) {
-      const newProps = [...detailData.props];
+    if (entity) {
+      const newProps = [...entity.props];
 
       newProps.forEach((prop1, pi1) => {
         if (prop1.id === propId) {
@@ -259,56 +259,54 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
         });
       });
 
-      updateActantMutation.mutate({ props: newProps });
+      updateEntityMutation.mutate({ props: newProps });
     }
   };
 
   useEffect(() => {
-    if (error && (error as any).error === "ActantDoesNotExits") {
-      setActantId("");
+    if (error && (error as any).error === "EntityDoesNotExits") {
+      setDetailId("");
     }
   }, [error]);
 
   const usedInPages = useMemo(() => {
-    if (detailData && detailData.usedInStatement) {
-      return Math.ceil(detailData.usedInStatement.length / statementsPerPage);
+    if (entity && entity.usedInStatement) {
+      return Math.ceil(entity.usedInStatement.length / statementsPerPage);
     } else {
       return 0;
     }
-  }, [actantId, detailData]);
+  }, [detailId, entity]);
 
   useEffect(() => {
     setUsedInPage(0);
-  }, [actantId]);
+  }, [detailId]);
 
   const mayBeRemoved = useMemo(() => {
     return (
-      detailData &&
-      detailData.usedInStatement &&
-      detailData.usedInStatement.length === 0
+      entity && entity.usedInStatement && entity.usedInStatement.length === 0
     );
-  }, [detailData]);
+  }, [entity]);
 
   const actantMode = useMemo(() => {
-    const actantClass = detailData?.class;
+    const actantClass = entity?.class;
     if (actantClass) {
-      if (actantClass === ActantType.Action) {
+      if (actantClass === EntityClass.Action) {
         return "action";
-      } else if (actantClass === ActantType.Territory) {
+      } else if (actantClass === EntityClass.Territory) {
         return "territory";
-      } else if (actantClass === ActantType.Resource) {
+      } else if (actantClass === EntityClass.Resource) {
         return "resource";
-      } else if (actantClass === ActantType.Concept) {
+      } else if (actantClass === EntityClass.Concept) {
         return "concept";
       }
     }
     return "entity";
-  }, [detailData]);
+  }, [entity]);
 
   // sort meta statements by type label
   const metaStatements = useMemo(() => {
-    if (detailData && detailData.props) {
-      const sorteMetaProps = [...detailData.props];
+    if (entity && entity.props) {
+      const sorteMetaProps = [...entity.props];
       // sorteMetaStatements.sort(
       //   (s1: IProp, s2: IProp) => {
       //     const typeSActant1 = s1.data.actants.find(
@@ -347,21 +345,21 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
     } else {
       return [];
     }
-  }, [detailData]);
+  }, [entity]);
 
   return (
     <>
-      {detailData && (
-        <StyledDetailWrapper type={detailData.class}>
+      {entity && (
+        <StyledDetailWrapper type={entity.class}>
           {/* form section */}
           <StyledDetailSection firstSection>
             <StyledDetailSectionContent>
               <StyledActantPreviewRow>
                 <StyledTagWrap>
                   <EntityTag
-                    actant={detailData}
-                    propId={detailData.id}
-                    tooltipText={detailData.data.text}
+                    actant={entity}
+                    propId={entity.id}
+                    tooltipText={entity.data.text}
                     fullWidth
                   />
                 </StyledTagWrap>
@@ -370,7 +368,7 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                     <Button
                       color="primary"
                       icon={<FaTrashAlt />}
-                      label="remove actant"
+                      label="remove entity"
                       inverted={true}
                       onClick={() => {
                         setShowRemoveSubmit(true);
@@ -385,10 +383,10 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                     color="primary"
                     label="refresh"
                     onClick={() => {
-                      queryClient.invalidateQueries(["actant"]);
+                      queryClient.invalidateQueries(["entity"]);
                     }}
                   />
-                  {detailData.class === ActantType.Statement && (
+                  {entity.class === EntityClass.Statement && (
                     <Button
                       key="edit"
                       icon={<FaEdit size={14} />}
@@ -397,8 +395,8 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                       color="primary"
                       label="open statement"
                       onClick={() => {
-                        setStatementId(detailData.id);
-                        setTerritoryId(detailData.data.territory.id);
+                        setStatementId(entity.id);
+                        setTerritoryId(entity.data.territory.id);
                       }}
                     />
                   )}
@@ -410,7 +408,7 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                   <StyledDetailContentRowLabel>ID</StyledDetailContentRowLabel>
                   <StyledDetailContentRowValue>
                     <StyledDetailContentRowValueID>
-                      {detailData.id}
+                      {entity.id}
                       <Button
                         inverted
                         tooltip="copy ID"
@@ -418,7 +416,7 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                         label=""
                         icon={<FaRegCopy />}
                         onClick={async () => {
-                          await navigator.clipboard.writeText(detailData.id);
+                          await navigator.clipboard.writeText(entity.id);
                           toast.info("ID copied to clipboard!");
                         }}
                       />
@@ -433,10 +431,10 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                     <Input
                       disabled={!userCanEdit}
                       width="full"
-                      value={detailData.label}
+                      value={entity.label}
                       onChangeFn={async (newLabel: string) => {
-                        if (newLabel !== detailData.label) {
-                          updateActantMutation.mutate({
+                        if (newLabel !== entity.label) {
+                          updateEntityMutation.mutate({
                             label: newLabel,
                           });
                         }
@@ -452,9 +450,9 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                     <Input
                       disabled={!userCanEdit}
                       width="full"
-                      value={detailData.detail}
+                      value={entity.detail}
                       onChangeFn={async (newValue: string) => {
-                        updateActantMutation.mutate({ detail: newValue });
+                        updateEntityMutation.mutate({ detail: newValue });
                       }}
                     />
                   </StyledDetailContentRowValue>
@@ -468,48 +466,48 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                       disabled={!userCanAdmin}
                       options={[
                         {
-                          longValue: actantStatusDict[0]["label"],
-                          shortValue: actantStatusDict[0]["label"],
+                          longValue: entityStatusDict[0]["label"],
+                          shortValue: entityStatusDict[0]["label"],
                           onClick: () => {
-                            updateActantMutation.mutate({
-                              status: actantStatusDict[0]["value"],
+                            updateEntityMutation.mutate({
+                              status: entityStatusDict[0]["value"],
                             });
                           },
                           selected:
-                            actantStatusDict[0]["value"] === detailData.status,
+                            entityStatusDict[0]["value"] === entity.data.status,
                         },
                         {
-                          longValue: actantStatusDict[1]["label"],
-                          shortValue: actantStatusDict[1]["label"],
+                          longValue: entityStatusDict[1]["label"],
+                          shortValue: entityStatusDict[1]["label"],
                           onClick: () => {
-                            updateActantMutation.mutate({
-                              status: actantStatusDict[1]["value"],
+                            updateEntityMutation.mutate({
+                              status: entityStatusDict[1]["value"],
                             });
                           },
                           selected:
-                            actantStatusDict[1]["value"] === detailData.status,
+                            entityStatusDict[1]["value"] === entity.data.status,
                         },
                         {
-                          longValue: actantStatusDict[2]["label"],
-                          shortValue: actantStatusDict[2]["label"],
+                          longValue: entityStatusDict[2]["label"],
+                          shortValue: entityStatusDict[2]["label"],
                           onClick: () => {
-                            updateActantMutation.mutate({
-                              status: actantStatusDict[2]["value"],
+                            updateEntityMutation.mutate({
+                              status: entityStatusDict[2]["value"],
                             });
                           },
                           selected:
-                            actantStatusDict[2]["value"] === detailData.status,
+                            entityStatusDict[2]["value"] === entity.data.status,
                         },
                         {
-                          longValue: actantStatusDict[3]["label"],
-                          shortValue: actantStatusDict[3]["label"],
+                          longValue: entityStatusDict[3]["label"],
+                          shortValue: entityStatusDict[3]["label"],
                           onClick: () => {
-                            updateActantMutation.mutate({
-                              status: actantStatusDict[3]["value"],
+                            updateEntityMutation.mutate({
+                              status: entityStatusDict[3]["value"],
                             });
                           },
                           selected:
-                            actantStatusDict[3]["value"] === detailData.status,
+                            entityStatusDict[3]["value"] === entity.data.status,
                         },
                       ]}
                     />
@@ -526,17 +524,17 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                       width="full"
                       options={languageDict}
                       value={languageDict.find(
-                        (i: any) => i.value === detailData.language
+                        (i: any) => i.value === entity.language
                       )}
                       onChange={(newValue: any) => {
-                        updateActantMutation.mutate({
+                        updateEntityMutation.mutate({
                           language: newValue.value || Language.Empty,
                         });
                       }}
                     />
                   </StyledDetailContentRowValue>
                 </StyledDetailContentRow>
-                {actantMode === "entity" && detailData.data?.logicalType && (
+                {actantMode === "entity" && entity.data?.logicalType && (
                   <StyledDetailContentRow>
                     <StyledDetailContentRowLabel>
                       Logical Type
@@ -549,7 +547,7 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                             longValue: actantLogicalTypeDict[0]["label"],
                             shortValue: actantLogicalTypeDict[0]["label"],
                             onClick: () => {
-                              updateActantMutation.mutate({
+                              updateEntityMutation.mutate({
                                 data: {
                                   logicalType:
                                     actantLogicalTypeDict[0]["value"],
@@ -558,13 +556,13 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                             },
                             selected:
                               actantLogicalTypeDict[0]["value"] ===
-                              detailData.data.logicalType,
+                              entity.data.logicalType,
                           },
                           {
                             longValue: actantLogicalTypeDict[1]["label"],
                             shortValue: actantLogicalTypeDict[1]["label"],
                             onClick: () => {
-                              updateActantMutation.mutate({
+                              updateEntityMutation.mutate({
                                 data: {
                                   logicalType:
                                     actantLogicalTypeDict[1]["value"],
@@ -573,13 +571,13 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                             },
                             selected:
                               actantLogicalTypeDict[1]["value"] ===
-                              detailData.data.logicalType,
+                              entity.data.logicalType,
                           },
                           {
                             longValue: actantLogicalTypeDict[2]["label"],
                             shortValue: actantLogicalTypeDict[2]["label"],
                             onClick: () => {
-                              updateActantMutation.mutate({
+                              updateEntityMutation.mutate({
                                 data: {
                                   logicalType:
                                     actantLogicalTypeDict[2]["value"],
@@ -588,13 +586,13 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                             },
                             selected:
                               actantLogicalTypeDict[2]["value"] ===
-                              detailData.data.logicalType,
+                              entity.data.logicalType,
                           },
                           {
                             longValue: actantLogicalTypeDict[3]["label"],
                             shortValue: actantLogicalTypeDict[3]["label"],
                             onClick: () => {
-                              updateActantMutation.mutate({
+                              updateEntityMutation.mutate({
                                 data: {
                                   logicalType:
                                     actantLogicalTypeDict[3]["value"],
@@ -603,7 +601,7 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                             },
                             selected:
                               actantLogicalTypeDict[3]["value"] ===
-                              detailData.data.logicalType,
+                              entity.data.logicalType,
                           },
                         ]}
                       />
@@ -626,7 +624,7 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                         value={[allEntities]
                           .concat(entitiesDict)
                           .filter((i: any) =>
-                            (detailData as IAction).data.entities?.s.includes(
+                            (entity as IAction).data.entities?.s.includes(
                               i.value
                             )
                           )}
@@ -634,8 +632,8 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                         noOptionsMessage={() => "no entity"}
                         placeholder={"no entity"}
                         onChange={(newValue: any) => {
-                          const oldData = { ...detailData.data };
-                          updateActantMutation.mutate({
+                          const oldData = { ...entity.data };
+                          updateEntityMutation.mutate({
                             data: {
                               ...oldData,
                               ...{
@@ -645,8 +643,8 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                                         (v: any) => v.value
                                       )
                                     : [],
-                                  a1: detailData.data.entities.a1,
-                                  a2: detailData.data.entities.a2,
+                                  a1: entity.data.entities.a1,
+                                  a2: entity.data.entities.a2,
                                 },
                               },
                             },
@@ -664,18 +662,18 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                     <StyledDetailContentRowValue>
                       <Input
                         disabled={!userCanEdit}
-                        value={(detailData as IAction).data.valencies?.s}
+                        value={(entity as IAction).data.valencies?.s}
                         width="full"
                         onChangeFn={async (newValue: string) => {
-                          const oldData = { ...detailData.data };
-                          updateActantMutation.mutate({
+                          const oldData = { ...entity.data };
+                          updateEntityMutation.mutate({
                             data: {
                               ...oldData,
                               ...{
                                 valencies: {
                                   s: newValue,
-                                  a1: detailData.data.valencies.a1,
-                                  a2: detailData.data.valencies.a2,
+                                  a1: entity.data.valencies.a1,
+                                  a2: entity.data.valencies.a2,
                                 },
                               },
                             },
@@ -699,15 +697,15 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                         value={[allEntities]
                           .concat(entitiesDict)
                           .filter((i: any) =>
-                            (detailData as IAction).data.entities?.a1.includes(
+                            (entity as IAction).data.entities?.a1.includes(
                               i.value
                             )
                           )}
                         placeholder={"no entity"}
                         width="full"
                         onChange={(newValue: any) => {
-                          const oldData = { ...detailData.data };
-                          updateActantMutation.mutate({
+                          const oldData = { ...entity.data };
+                          updateEntityMutation.mutate({
                             data: {
                               ...oldData,
                               ...{
@@ -717,8 +715,8 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                                         (v: any) => v.value
                                       )
                                     : [],
-                                  s: detailData.data.entities.s,
-                                  a2: detailData.data.entities.a2,
+                                  s: entity.data.entities.s,
+                                  a2: entity.data.entities.a2,
                                 },
                               },
                             },
@@ -737,18 +735,18 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                     <StyledDetailContentRowValue>
                       <Input
                         disabled={!userCanEdit}
-                        value={(detailData as IAction).data.valencies?.a1}
+                        value={(entity as IAction).data.valencies?.a1}
                         width="full"
                         onChangeFn={async (newValue: string) => {
-                          const oldData = { ...detailData.data };
-                          updateActantMutation.mutate({
+                          const oldData = { ...entity.data };
+                          updateEntityMutation.mutate({
                             data: {
                               ...oldData,
                               ...{
                                 valencies: {
-                                  s: detailData.data.valencies.s,
+                                  s: entity.data.valencies.s,
                                   a1: newValue,
-                                  a2: detailData.data.valencies.a2,
+                                  a2: entity.data.valencies.a2,
                                 },
                               },
                             },
@@ -772,16 +770,16 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                         value={[allEntities]
                           .concat(entitiesDict)
                           .filter((i: any) =>
-                            (detailData as IAction).data.entities?.a2.includes(
+                            (entity as IAction).data.entities?.a2.includes(
                               i.value
                             )
                           )}
                         placeholder={"no entity"}
                         width="full"
                         onChange={(newValue: any) => {
-                          const oldData = { ...detailData.data };
+                          const oldData = { ...entity.data };
 
-                          updateActantMutation.mutate({
+                          updateEntityMutation.mutate({
                             data: {
                               ...oldData,
                               ...{
@@ -791,8 +789,8 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                                         (v: any) => v.value
                                       )
                                     : [],
-                                  s: detailData.data.entities.s,
-                                  a1: detailData.data.entities.a1,
+                                  s: entity.data.entities.s,
+                                  a1: entity.data.entities.a1,
                                 },
                               },
                             },
@@ -811,17 +809,17 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                     <StyledDetailContentRowValue>
                       <Input
                         disabled={!userCanEdit}
-                        value={(detailData as IAction).data.valencies?.a2}
+                        value={(entity as IAction).data.valencies?.a2}
                         width="full"
                         onChangeFn={async (newValue: string) => {
-                          const oldData = { ...detailData.data };
-                          updateActantMutation.mutate({
+                          const oldData = { ...entity.data };
+                          updateEntityMutation.mutate({
                             data: {
                               ...oldData,
                               ...{
                                 valencies: {
-                                  s: detailData.data.valencies.s,
-                                  a1: detailData.data.valencies.a1,
+                                  s: entity.data.valencies.s,
+                                  a1: entity.data.valencies.a1,
                                   a2: newValue,
                                 },
                               },
@@ -841,11 +839,11 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                     <StyledDetailContentRowValue>
                       <Input
                         disabled={!userCanEdit}
-                        value={detailData.data.url}
+                        value={entity.data.url}
                         width="full"
                         onChangeFn={async (newValue: string) => {
-                          const oldData = { ...detailData.data };
-                          updateActantMutation.mutate({
+                          const oldData = { ...entity.data };
+                          updateEntityMutation.mutate({
                             data: {
                               ...oldData,
                               ...{
@@ -866,10 +864,10 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                   <StyledDetailContentRowValue>
                     <MultiInput
                       disabled={!userCanEdit}
-                      values={detailData.notes}
+                      values={entity.notes}
                       width="full"
                       onChange={(newValues: string[]) => {
-                        updateActantMutation.mutate({ notes: newValues });
+                        updateEntityMutation.mutate({ notes: newValues });
                       }}
                     />
                   </StyledDetailContentRowValue>
@@ -894,9 +892,9 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
               <table>
                 <tbody>
                   <PropGroup
-                    originId={detailData.id}
-                    entities={detailData.entities}
-                    props={detailData.props}
+                    originId={entity.id}
+                    entities={entity.entities}
+                    props={entity.props}
                     territoryId={territoryId}
                     updateProp={updateProp}
                     removeProp={removeProp}
@@ -915,10 +913,10 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                   icon={<FaPlus />}
                   onClick={async () => {
                     const newProp = CProp();
-                    const newActant = { ...detailData };
+                    const newActant = { ...entity };
                     newActant.props.push(newProp);
 
-                    updateActantMutation.mutate({ props: newActant.props });
+                    updateEntityMutation.mutate({ props: newActant.props });
                   }}
                 />
               )}
@@ -965,7 +963,7 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                 <StyledDetailHeaderColumn>Text</StyledDetailHeaderColumn>
                 <StyledDetailHeaderColumn>Position</StyledDetailHeaderColumn>
                 <StyledDetailHeaderColumn></StyledDetailHeaderColumn>
-                {detailData.usedInStatement.map((usedInStatement) => {
+                {entity.usedInStatement.map((usedInStatement) => {
                   const { statement, position, originId } = usedInStatement;
                   return (
                     <React.Fragment key={statement.id}>
@@ -1020,24 +1018,24 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
           <StyledDetailSection key="editor-section-json">
             <StyledDetailSectionHeader>JSON</StyledDetailSectionHeader>
             <StyledDetailSectionContent>
-              {detailData && <JSONExplorer data={detailData} />}
+              {entity && <JSONExplorer data={entity} />}
             </StyledDetailSectionContent>
           </StyledDetailSection>
         </StyledDetailWrapper>
       )}
       <Submit
         title="Remove entity"
-        text="Do you really want to delete actant?"
-        onSubmit={() => deleteActantMutation.mutate(actantId)}
+        text="Do you really want to delete the entity?"
+        onSubmit={() => deleteEntityMutation.mutate(detailId)}
         onCancel={() => setShowRemoveSubmit(false)}
         show={showRemoveSubmit}
-        loading={deleteActantMutation.isLoading}
+        loading={deleteEntityMutation.isLoading}
       />
       <Loader
         show={
           isFetching ||
-          updateActantMutation.isLoading ||
-          deleteActantMutation.isLoading
+          updateEntityMutation.isLoading ||
+          deleteEntityMutation.isLoading
         }
       />
     </>

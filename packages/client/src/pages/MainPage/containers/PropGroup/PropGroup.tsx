@@ -1,4 +1,4 @@
-import { IActant, IProp } from "@shared/types";
+import { IEntity, IProp } from "@shared/types";
 import api from "api";
 import React, { useCallback, useEffect, useState } from "react";
 import { useQuery } from "react-query";
@@ -8,7 +8,7 @@ import update from "immutability-helper";
 
 interface IPropGroup {
   originId: string;
-  entities: { [key: string]: IActant };
+  entities: { [key: string]: IEntity };
   props: IProp[];
   territoryId: string;
 
@@ -47,7 +47,7 @@ export const PropGroup: React.FC<IPropGroup> = ({
     ["territoryActants", territoryId],
     async () => {
       if (territoryId) {
-        const res = await api.actantIdsInTerritory(territoryId);
+        const res = await api.entityIdsInTerritory(territoryId);
         return res.data;
       } else {
         return [];

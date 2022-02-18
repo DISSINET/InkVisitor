@@ -1,6 +1,6 @@
 import { clean, testErroneousResponse } from "@modules/common.test";
 import {
-  ActantDoesNotExits,
+  EntityDoesNotExits,
   BadParams,
   InvalidDeleteError,
 } from "@shared/types/errors";
@@ -8,16 +8,16 @@ import { Db } from "@service/RethinkDB";
 import request from "supertest";
 import { apiPath } from "@common/constants";
 import app from "../../Server";
-import { findActantById } from "@service/shorthands";
+import { findEntityById } from "@service/shorthands";
 import { supertestConfig } from "..";
-import { IActant } from "@shared/types";
+import { IEntity } from "@shared/types";
 import Territory from "@models/territory/territory";
 
-describe("Actants delete", function () {
+describe("Entities delete", function () {
   describe("empty data", () => {
     it("should return a BadParams error wrapped in IResponseGeneric", (done) => {
       return request(app)
-        .delete(`${apiPath}/actants/delete`)
+        .delete(`${apiPath}/entities/delete`)
         .set("authorization", "Bearer " + supertestConfig.token)
         .expect("Content-Type", /json/)
         .expect(testErroneousResponse.bind(undefined, new BadParams("")))
@@ -25,13 +25,13 @@ describe("Actants delete", function () {
     });
   });
   describe("faulty data", () => {
-    it("should return a ActantDoesNotExits error wrapped in IResponseGeneric", (done) => {
+    it("should return a EntityDoesNotExits error wrapped in IResponseGeneric", (done) => {
       return request(app)
-        .delete(`${apiPath}/actants/delete/randomid12345`)
+        .delete(`${apiPath}/entities/delete/randomid12345`)
         .set("authorization", "Bearer " + supertestConfig.token)
         .expect("Content-Type", /json/)
         .expect(
-          testErroneousResponse.bind(undefined, new ActantDoesNotExits("", ""))
+          testErroneousResponse.bind(undefined, new EntityDoesNotExits("", ""))
         )
         .then(() => done());
     });
@@ -44,13 +44,13 @@ describe("Actants delete", function () {
       await territory.save(db.connection);
 
       await request(app)
-        .delete(`${apiPath}/actants/delete/${territory.id}`)
+        .delete(`${apiPath}/entities/delete/${territory.id}`)
         .set("authorization", "Bearer " + supertestConfig.token)
         .expect("Content-Type", /json/)
         .expect(200)
         .expect(async () => {
-          const deletedActant = await findActantById<IActant>(db, territory.id);
-          expect(deletedActant).toBeNull();
+          const deletedEntity = await findEntityById<IEntity>(db, territory.id);
+          expect(deletedEntity).toBeNull();
         });
 
       await clean(db);
@@ -70,7 +70,7 @@ describe("Actants delete", function () {
       await leaf.save(db.connection);
 
       await request(app)
-        .delete(`${apiPath}/actants/delete/${root.id}`)
+        .delete(`${apiPath}/entities/delete/${root.id}`)
         .set("authorization", "Bearer " + supertestConfig.token)
         .expect("Content-Type", /json/)
         .expect(

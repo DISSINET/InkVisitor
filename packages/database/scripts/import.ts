@@ -5,6 +5,8 @@ const fs = require("fs");
 const r = require("rethinkdb");
 var tunnel = require("tunnel-ssh");
 
+const entitiesTable = "entities";
+
 const datasets: Record<string, any> = {
   all: [
     {
@@ -12,50 +14,50 @@ const datasets: Record<string, any> = {
       data: "datasets/all/acl_permissions.json",
     },
     {
-      name: "actants",
-      data: "datasets/all/actants.json",
+      name: "entities",
+      data: "datasets/all/entities.json",
       indexes: [
-        r.table("actants").indexCreate("class"),
-        r.table("actants").indexCreate("label"),
+        r.table(entitiesTable).indexCreate("class"),
+        r.table(entitiesTable).indexCreate("label"),
         r
-          .table("actants")
+          .table(entitiesTable)
           .indexCreate(
             "data.actants.actant",
             r.row("data")("actants")("actant")
           ),
         r
-          .table("actants")
+          .table(entitiesTable)
           .indexCreate(
             "data.actions.action",
             r.row("data")("actions")("action")
           ),
-        r.table("actants").indexCreate("data.tags", r.row("data")("tags")),
+        r.table(entitiesTable).indexCreate("data.tags", r.row("data")("tags")),
         r
-          .table("actants")
+          .table(entitiesTable)
           .indexCreate(
             "data.props.type.id",
             r.row("data")("props")("type")("id")
           ),
         r
-          .table("actants")
+          .table(entitiesTable)
           .indexCreate(
             "data.props.value.id",
             r.row("data")("props")("value")("id")
           ),
         r
-          .table("actants")
+          .table(entitiesTable)
           .indexCreate(
             "data.references.resource",
             r.row("data")("references")("resource")
           ),
         r
-          .table("actants")
+          .table(entitiesTable)
           .indexCreate("data.props.origin", r.row("data")("props")("origin")),
         r
-          .table("actants")
+          .table(entitiesTable)
           .indexCreate("data.territory.id", r.row("data")("territory")("id")),
         r
-          .table("actants")
+          .table(entitiesTable)
           .indexCreate("data.parent.id", r.row("data")("parent")("id")),
       ],
     },

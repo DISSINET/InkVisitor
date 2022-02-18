@@ -1,8 +1,6 @@
-import { ILabel } from ".";
-
 export interface IAudit {
   id: string;
-  actantId: string;
+  entityId: string;
   user: string;
   date: Date;
   changes: object;

@@ -1,4 +1,4 @@
-import { ActantType, UserRoleMode } from "@shared/enums";
+import { EntityClass, UserRoleMode } from "@shared/enums";
 import {
   IProp,
   IResponseStatement,
@@ -43,44 +43,44 @@ import {
 } from "./StatementEditorBoxStyles";
 
 const classesActants = [
-  ActantType.Statement,
-  ActantType.Action,
-  ActantType.Territory,
-  ActantType.Resource,
-  ActantType.Person,
-  ActantType.Group,
-  ActantType.Object,
-  ActantType.Concept,
-  ActantType.Location,
-  ActantType.Value,
-  ActantType.Event,
+  EntityClass.Statement,
+  EntityClass.Action,
+  EntityClass.Territory,
+  EntityClass.Resource,
+  EntityClass.Person,
+  EntityClass.Group,
+  EntityClass.Object,
+  EntityClass.Concept,
+  EntityClass.Location,
+  EntityClass.Value,
+  EntityClass.Event,
 ];
-const classesPropType = [ActantType.Concept];
+const classesPropType = [EntityClass.Concept];
 const classesPropValue = [
-  ActantType.Action,
-  ActantType.Person,
-  ActantType.Group,
-  ActantType.Object,
-  ActantType.Concept,
-  ActantType.Location,
-  ActantType.Value,
-  ActantType.Event,
-  ActantType.Statement,
-  ActantType.Territory,
-  ActantType.Resource,
+  EntityClass.Action,
+  EntityClass.Person,
+  EntityClass.Group,
+  EntityClass.Object,
+  EntityClass.Concept,
+  EntityClass.Location,
+  EntityClass.Value,
+  EntityClass.Event,
+  EntityClass.Statement,
+  EntityClass.Territory,
+  EntityClass.Resource,
 ];
-const classesResources = [ActantType.Resource];
+const classesResources = [EntityClass.Resource];
 const classesTags = [
-  ActantType.Action,
-  ActantType.Territory,
-  ActantType.Resource,
-  ActantType.Person,
-  ActantType.Group,
-  ActantType.Object,
-  ActantType.Concept,
-  ActantType.Location,
-  ActantType.Value,
-  ActantType.Event,
+  EntityClass.Action,
+  EntityClass.Territory,
+  EntityClass.Resource,
+  EntityClass.Person,
+  EntityClass.Group,
+  EntityClass.Object,
+  EntityClass.Concept,
+  EntityClass.Location,
+  EntityClass.Value,
+  EntityClass.Event,
 ];
 
 export const StatementEditorBox: React.FC = () => {
@@ -130,7 +130,7 @@ export const StatementEditorBox: React.FC = () => {
     ["territoryActants", statement?.data.territory.id],
     async () => {
       if (statement?.data.territory.id) {
-        const res = await api.actantIdsInTerritory(
+        const res = await api.entityIdsInTerritory(
           statement?.data.territory.id
         );
         return res.data;
@@ -169,7 +169,7 @@ export const StatementEditorBox: React.FC = () => {
   } = useQuery(
     ["territory", statementTerritoryId],
     async () => {
-      const res = await api.actantsGet(statementTerritoryId as string);
+      const res = await api.entitiesGet(statementTerritoryId as string);
       return res.data;
     },
     {
@@ -402,7 +402,7 @@ export const StatementEditorBox: React.FC = () => {
 
   const updateStatementDataMutation = useMutation(
     async (changes: object) => {
-      await api.actantsUpdate(statementId, {
+      await api.entityUpdate(statementId, {
         data: changes,
       });
     },
@@ -415,7 +415,7 @@ export const StatementEditorBox: React.FC = () => {
 
   const updateActionsRefreshListMutation = useMutation(
     async (changes: object) => {
-      await api.actantsUpdate(statementId, {
+      await api.entityUpdate(statementId, {
         data: changes,
       });
     },
@@ -428,7 +428,7 @@ export const StatementEditorBox: React.FC = () => {
   );
 
   const updateActantMutation = useMutation(
-    async (changes: object) => await api.actantsUpdate(statementId, changes),
+    async (changes: object) => await api.entityUpdate(statementId, changes),
     {
       onSuccess: () => {
         queryClient.invalidateQueries(["statement"]);
@@ -438,14 +438,14 @@ export const StatementEditorBox: React.FC = () => {
 
   const updateActantsRefreshListMutation = useMutation(
     async (changes: object) =>
-      await api.actantsUpdate(statementId, {
+      await api.entityUpdate(statementId, {
         data: changes,
       }),
     {
       onSuccess: (data, variables) => {
         queryClient.invalidateQueries("statement");
         queryClient.invalidateQueries("territory");
-        queryClient.invalidateQueries("actant");
+        queryClient.invalidateQueries("entity");
       },
     }
   );
@@ -478,7 +478,7 @@ export const StatementEditorBox: React.FC = () => {
 
   const moveStatementMutation = useMutation(
     async (newTerritoryId: string) => {
-      await api.actantsUpdate(statementId, {
+      await api.entityUpdate(statementId, {
         data: { territory: { id: newTerritoryId, order: -1 } },
       });
     },
@@ -517,7 +517,7 @@ export const StatementEditorBox: React.FC = () => {
                 filterEditorRights
                 inputWidth={96}
                 allowCreate={false}
-                categoryTypes={[ActantType.Territory]}
+                categoryTypes={[EntityClass.Territory]}
                 onSelected={(newSelectedId: string) => {
                   moveStatementMutation.mutate(newSelectedId);
                 }}
@@ -571,7 +571,7 @@ export const StatementEditorBox: React.FC = () => {
                   onSelected={(newSelectedId: string) => {
                     addAction(newSelectedId);
                   }}
-                  categoryTypes={[ActantType.Action]}
+                  categoryTypes={[EntityClass.Action]}
                   excludedEntities={excludedSuggesterEntities}
                   placeholder={"add new action"}
                 />

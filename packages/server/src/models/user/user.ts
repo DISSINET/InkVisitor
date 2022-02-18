@@ -58,7 +58,7 @@ export class UserOptions implements IUserOptions {
 export class BookmarkFolder implements IBookmarkFolder {
   id: string = "";
   name: string = "";
-  actantIds: string[] = [];
+  entityIds: string[] = [];
 
   constructor(data: UnknownObject) {
     if (!data) {
@@ -66,7 +66,7 @@ export class BookmarkFolder implements IBookmarkFolder {
     }
 
     fillFlatObject(this, data);
-    fillArray(this.actantIds, String, data.actantIds);
+    fillArray(this.entityIds, String, data.entityIds);
   }
 
   isValid(): boolean {
@@ -78,7 +78,7 @@ export class BookmarkFolder implements IBookmarkFolder {
       return false;
     }
 
-    if (this.actantIds.find((a) => !a)) {
+    if (this.entityIds.find((a) => !a)) {
       return false;
     }
 

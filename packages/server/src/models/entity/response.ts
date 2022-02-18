@@ -1,29 +1,31 @@
 import { Request } from "express";
 import {
-  ActantType,
+  EntityClass,
   Position,
   UsedInPosition,
   UserRoleMode,
 } from "@shared/enums";
 import {
-  IActant,
+  IEntity,
   IProp,
-  IResponseActant,
   IResponseDetail,
-  IStatement,
+  IResponseEntity,
   IResponseUsedInMetaProp,
   IResponseUsedInStatement,
+  IStatement,
 } from "@shared/types";
-import Actant from "./actant";
+import { Connection } from "rethinkdb-ts";
+import Entity from "./entity";
 import Statement from "@models/statement/statement";
+import Actant from "@models/actant/actant";
 
-export class ResponseActant extends Actant implements IResponseActant {
+export class ResponseEntity extends Entity implements IResponseEntity {
   right: UserRoleMode = UserRoleMode.Read;
 
-  constructor(actant: IActant) {
+  constructor(entity: IEntity) {
     super({});
-    for (const key of Object.keys(actant)) {
-      (this as any)[key] = (actant as any)[key];
+    for (const key of Object.keys(entity)) {
+      (this as any)[key] = (entity as any)[key];
     }
   }
 
@@ -36,17 +38,17 @@ export class ResponseActant extends Actant implements IResponseActant {
   }
 }
 
-export class ResponseActantDetail
-  extends ResponseActant
+export class ResponseEntityDetail
+  extends ResponseEntity
   implements IResponseDetail
 {
-  entities: { [key: string]: IActant };
+  entities: { [key: string]: IEntity };
   usedInStatement: IResponseUsedInStatement<UsedInPosition>[];
   usedInStatementProps: IResponseUsedInStatement<UsedInPosition>[];
   usedInMetaProps: IResponseUsedInMetaProp<UsedInPosition>[];
 
-  constructor(actant: IActant) {
-    super(actant);
+  constructor(entity: IEntity) {
+    super(entity);
     this.entities = {};
     this.usedInStatement = [];
     this.usedInStatementProps = [];
@@ -59,7 +61,7 @@ export class ResponseActantDetail
    * @param actant
    * @param props
    */
-  walkPropsStatements(actant: IActant, props: IProp[]) {
+  walkPropsStatements(actant: IEntity, props: IProp[]) {
     for (const prop of props) {
       if (prop.type.id === this.id) {
         this.addUsedInMetaProp(actant, UsedInPosition.Type);
@@ -80,13 +82,13 @@ export class ResponseActantDetail
    * @param actant
    * @param position
    */
-  addUsedInMetaProp(actant: IActant, position: UsedInPosition) {
+  addUsedInMetaProp(actant: IEntity, position: UsedInPosition) {
     this.usedInMetaProps.push({
       entityId: actant.id,
       position,
     });
 
-    if (actant.class === ActantType.Statement) {
+    if (actant.class === EntityClass.Statement) {
       this.usedInStatementProps.push({
         statement: actant as IStatement,
         position,

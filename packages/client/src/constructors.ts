@@ -2,15 +2,13 @@ import {
   IProp,
   IStatementActant,
   IStatementAction,
-  IActant,
+  IEntity,
   ITerritory,
   IStatement,
   IBookmarkFolder,
   IStatementReference,
 } from "@shared/types";
 import {
-  CategoryActantType,
-  ActantType,
   Certainty,
   Elvl,
   Mood,
@@ -19,17 +17,17 @@ import {
   Logic,
   Virtuality,
   Partitivity,
-  ActantStatus,
   Position,
   UserRole,
   Language,
+  EntityClass,
 } from "@shared/enums";
 import { v4 as uuidv4 } from "uuid";
 
 export const CBookmarkFolder = (bookmarkName: string): IBookmarkFolder => ({
   id: uuidv4(),
   name: bookmarkName,
-  actantIds: [],
+  entityIds: [],
 });
 
 export const CProp = (): IProp => ({
@@ -67,11 +65,11 @@ export const CStatement = (
   detail?: string
 ): IStatement => ({
   id: uuidv4(),
-  class: ActantType.Statement,
+  class: EntityClass.Statement,
   label: label ? label : "",
   detail: detail ? detail : "",
-  status:
-    userRole === UserRole.Admin ? ActantStatus.Approved : ActantStatus.Pending,
+  //status:
+  //  userRole === UserRole.Admin ? EntityStatus.Approved : EntityStatus.Pending,
   language: Language.Latin,
   notes: [],
   data: {
@@ -82,86 +80,6 @@ export const CStatement = (
       order: -1,
     },
     actants: [],
-    references: [],
-    tags: [],
-  },
-  props: [],
-});
-
-export const CMetaStatement = (
-  subjectId: string,
-  userRole: UserRole
-): IStatement => ({
-  id: uuidv4(),
-  class: ActantType.Statement,
-  label: "",
-  detail: "",
-  status:
-    userRole === UserRole.Admin ? ActantStatus.Approved : ActantStatus.Pending,
-  language: Language.Latin,
-  notes: [],
-  data: {
-    actions: [
-      {
-        id: uuidv4(),
-        action: "A0093",
-        certainty: Certainty.Empty,
-        elvl: Elvl.Inferential,
-        logic: Logic.Positive,
-        mood: [Mood.Indication],
-        moodvariant: MoodVariant.Realis,
-        operator: Operator.And,
-        bundleStart: false,
-        bundleEnd: false,
-        props: [],
-      },
-    ],
-    text: "",
-    territory: {
-      id: "T0",
-      order: -1,
-    },
-    actants: [
-      {
-        id: uuidv4(),
-        actant: subjectId,
-        position: Position.Subject,
-        elvl: Elvl.Inferential,
-        logic: Logic.Positive,
-        virtuality: Virtuality.Reality,
-        partitivity: Partitivity.Unison,
-        operator: Operator.And,
-        bundleStart: false,
-        bundleEnd: false,
-        props: [],
-      },
-      {
-        id: uuidv4(),
-        actant: "",
-        position: Position["Actant1"],
-        elvl: Elvl.Inferential,
-        logic: Logic.Positive,
-        virtuality: Virtuality.Reality,
-        partitivity: Partitivity.Unison,
-        operator: Operator.And,
-        bundleStart: false,
-        bundleEnd: false,
-        props: [],
-      },
-      {
-        id: uuidv4(),
-        actant: "",
-        position: Position["Actant2"],
-        elvl: Elvl.Inferential,
-        logic: Logic.Positive,
-        virtuality: Virtuality.Reality,
-        partitivity: Partitivity.Unison,
-        operator: Operator.And,
-        bundleStart: false,
-        bundleEnd: false,
-        props: [],
-      },
-    ],
     references: [],
     tags: [],
   },
@@ -217,11 +135,11 @@ export const CTerritoryActant = (
   detail?: string
 ): ITerritory => ({
   id: uuidv4(),
-  class: ActantType.Territory,
+  class: EntityClass.Territory,
   label: label,
   detail: detail ? detail : "",
-  status:
-    userRole === UserRole.Admin ? ActantStatus.Approved : ActantStatus.Pending,
+  // status:
+  //   userRole === UserRole.Admin ? EntityStatus.Approved : EntityStatus.Pending,
   language: Language.Latin,
   notes: [],
   data: {
@@ -230,23 +148,25 @@ export const CTerritoryActant = (
   props: [],
 });
 
-export const CActant = (
-  category: CategoryActantType,
+export const CEntity = (
+  entityClass: EntityClass,
   label: string,
   userRole: UserRole,
   detail?: string
-): IActant => ({
-  id: uuidv4(),
-  class: category,
-  label: label,
-  detail: detail ? detail : "",
-  data: {},
-  status:
-    userRole === UserRole.Admin ? ActantStatus.Approved : ActantStatus.Pending,
-  language: Language.Latin,
-  notes: [],
-  props: [],
-});
+): IEntity => {
+  return {
+    id: uuidv4(),
+    class: entityClass,
+    label: label,
+    detail: detail ? detail : "",
+    data: {},
+    //status:
+    //   userRole === UserRole.Admin ? EntityStatus.Approved : EntityStatus.Pending,
+    language: Language.Latin,
+    notes: [],
+    props: [],
+  };
+};
 
 export const CReference = (resourceId: string): IStatementReference => ({
   id: uuidv4(),

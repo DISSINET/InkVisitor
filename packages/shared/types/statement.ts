@@ -1,6 +1,6 @@
-import { IActant, IProp } from "./";
+import { IEntity, IProp } from "./";
 import {
-  ActantType,
+  EntityClass,
   Certainty,
   Elvl,
   Position,
@@ -10,10 +10,17 @@ import {
   Virtuality,
   Partitivity,
   Operator,
+  Language,
 } from "../enums";
 
-export interface IStatement extends IActant {
-  class: ActantType.Statement;
+export interface IStatement extends IEntity {
+  id: string;
+  class: EntityClass.Statement;
+  label: string;
+  detail: string;
+  language: Language;
+  props: IProp[];
+  notes: string[];
   data: IStatementData;
 }
 
@@ -26,7 +33,7 @@ export interface IStatementData {
   actions: IStatementAction[];
   actants: IStatementActant[];
   references: IStatementReference[];
-  tags: string[]; // ids of IActant;
+  tags: string[]; // ids of IEntity;
 }
 
 export interface IStatementAction {

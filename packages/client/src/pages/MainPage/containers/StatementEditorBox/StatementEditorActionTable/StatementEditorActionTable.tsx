@@ -1,4 +1,4 @@
-import { IActant, IResponseStatement, IStatementAction } from "@shared/types";
+import { IEntity, IResponseStatement, IStatementAction } from "@shared/types";
 import update from "immutability-helper";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { UseMutationResult } from "react-query";
@@ -7,7 +7,7 @@ import { StyledTable } from "../StatementEditorActionTable/StatementEditorAction
 import { StatementEditorActionTableRow } from "./StatementEditorActionTableRow";
 
 interface FilteredActionObject {
-  data: { action: IActant | undefined; sAction: IStatementAction };
+  data: { action: IEntity | undefined; sAction: IStatementAction };
 }
 interface StatementEditorActionTable {
   statement: IResponseStatement;
