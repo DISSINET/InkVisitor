@@ -17,7 +17,6 @@ import {
 import { Connection } from "rethinkdb-ts";
 import Entity from "./entity";
 import Statement from "@models/statement/statement";
-import Actant from "@models/actant/actant";
 
 export class ResponseEntity extends Entity implements IResponseEntity {
   right: UserRoleMode = UserRoleMode.Read;
@@ -148,7 +147,7 @@ export class ResponseEntityDetail
   async prepare(req: Request): Promise<void> {
     super.prepare(req);
 
-    const usedInProps = await Actant.findUsedInProps(
+    const usedInProps = await Entity.findUsedInProps(
       req.db.connection,
       this.id
     );
