@@ -989,16 +989,20 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                       </StyledDetailSectionUsedTableCell>
                       <StyledDetailSectionMetaTableCell borderless>
                         <StyledDetailSectionMetaTableButtonGroup>
-                          <Button
-                            key="e"
-                            icon={<FaEdit size={14} />}
-                            color="plain"
-                            tooltip="edit statement"
-                            onClick={async () => {
-                              setStatementId(statement.id);
-                              setTerritoryId(statement.data.territory.id);
-                            }}
-                          />
+                          {statement.data.territory?.id && (
+                            <Button
+                              key="e"
+                              icon={<FaEdit size={14} />}
+                              color="plain"
+                              tooltip="edit statement"
+                              onClick={async () => {
+                                if (statement.data.territory) {
+                                  setStatementId(statement.id);
+                                  setTerritoryId(statement.data.territory.id);
+                                }
+                              }}
+                            />
+                          )}
                         </StyledDetailSectionMetaTableButtonGroup>
                       </StyledDetailSectionMetaTableCell>
                     </React.Fragment>
