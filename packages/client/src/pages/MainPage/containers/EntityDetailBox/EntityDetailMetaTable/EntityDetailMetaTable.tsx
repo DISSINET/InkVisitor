@@ -1,7 +1,7 @@
 import { ActantType } from "@shared/enums";
 import { IProp, IResponseDetail, IResponseStatement } from "@shared/types";
 import { Button, ButtonGroup } from "components";
-import React, { useCallback, useMemo } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import { FaTrashAlt, FaUnlink } from "react-icons/fa";
 import { Cell, Column, Row, useTable } from "react-table";
 import { EntitySuggester, EntityTag } from "../..";
@@ -29,7 +29,7 @@ export const EntityDetailMetaTable: React.FC<EntityDetailMetaTable> = ({
   updateMetaStatement,
   removeMetaStatement,
 }) => {
-  // const [statements, setStatements] = useState(metaProps);
+  const [statements, setStatements] = useState(metaProps);
 
   // useEffect(() => {
   //   setStatements(metaStatements);
@@ -118,12 +118,12 @@ export const EntityDetailMetaTable: React.FC<EntityDetailMetaTable> = ({
           const {
             id: statementId,
             data,
-            actants,
+            entities,
           } = row.original as IResponseStatement;
 
           const typeSActant = data.actants.find((a) => a.position == "a1");
           const typeActant = typeSActant
-            ? actants.find((a) => a.id === typeSActant.actant)
+            ? entities[typeSActant.actant]
             : undefined;
 
           return typeSActant ? (
@@ -185,7 +185,7 @@ export const EntityDetailMetaTable: React.FC<EntityDetailMetaTable> = ({
 
           const valueSActant = data.actants.find((a) => a.position == "a2");
           const valueActant = valueSActant
-            ? entities.find((a) => a.id === valueSActant.actant)
+            ? entities[valueSActant.actant]
             : false;
 
           return valueSActant && valueActant ? (
@@ -270,7 +270,7 @@ export const EntityDetailMetaTable: React.FC<EntityDetailMetaTable> = ({
 
           const valueSActant = data.actants.find((a) => a.position == "a2");
           const valueActant = valueSActant
-            ? entities.find((a) => a.id === valueSActant.actant)
+            ? entities[valueSActant.actant]
             : undefined;
 
           return valueSActant ? (
@@ -334,13 +334,11 @@ export const EntityDetailMetaTable: React.FC<EntityDetailMetaTable> = ({
 
           const valueSActant = data.actants.find((a) => a.position == "a2");
           const valueActant = valueSActant
-            ? entities.find((a) => a.id === valueSActant.actant)
+            ? entities[valueSActant.actant]
             : false;
 
           const typeSActant = data.actants.find((a) => a.position == "a1");
-          const typeActant = typeSActant
-            ? entities.find((a) => a.id === typeSActant.actant)
-            : false;
+          const typeActant = typeSActant ? entities[typeSActant.actant] : false;
 
           const typeLabel = typeActant ? typeActant.label : "undefined";
           const valueLabel = valueActant ? valueActant.label : "undefined";

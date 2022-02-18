@@ -364,7 +364,9 @@ class Statement extends Actant implements IStatement {
 
     const out: Record<number, IStatement> = {};
     for (const ter of list) {
-      out[ter.data.territory.order] = ter;
+      if (ter.data.territory) {
+        out[ter.data.territory.order] = ter;
+      }
     }
 
     return out;

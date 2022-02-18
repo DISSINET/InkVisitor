@@ -19,7 +19,7 @@ export interface IStatement extends IActant {
 
 export interface IStatementData {
   text: string;
-  territory: {
+  territory?: {
     id: string;
     order: number;
   };
