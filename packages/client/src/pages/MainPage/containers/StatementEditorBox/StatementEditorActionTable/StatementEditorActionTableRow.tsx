@@ -169,7 +169,7 @@ export const StatementEditorActionTableRow: React.FC<
               logic: sAction.logic,
               mood: sAction.mood,
               moodvariant: sAction.moodvariant,
-              operator: sAction.operator,
+              bundleOperator: sAction.bundleOperator,
               bundleStart: sAction.bundleStart,
               bundleEnd: sAction.bundleEnd,
             }}
@@ -218,14 +218,14 @@ export const StatementEditorActionTableRow: React.FC<
             icon={<AttributeIcon attributeName={"negation"} />}
           />
         )}
-        {sAction.operator && (
+        {sAction.bundleOperator && (
           <Button
             key="oper"
             tooltip="Logical operator type"
             color="success"
             inverted={true}
             noBorder
-            icon={sAction.operator}
+            icon={sAction.bundleOperator}
           />
         )}
       </ButtonGroup>

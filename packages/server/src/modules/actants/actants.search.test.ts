@@ -20,7 +20,10 @@ import {
   Virtuality,
 } from "@shared/enums";
 import { getActantType } from "@models/factory";
-import Statement, { StatementActant, StatementAction } from "@models/statement/statement";
+import Statement, {
+  StatementActant,
+  StatementAction,
+} from "@models/statement/statement";
 import { IStatementActant, IStatementAction } from "@shared/types";
 import Action from "@models/action/action";
 import Entity from "@models/entity/entity";
@@ -94,7 +97,7 @@ describe("Actants search", function () {
           bundleStart: false,
           elvl: Elvl.Inferential,
           logic: Logic.Positive,
-          operator: Operator.And,
+          bundleOperator: Operator.And,
           partitivity: Partitivity.DiscreteParts,
           position: Position.Actant1,
           virtuality: Virtuality.Allegation,
@@ -108,7 +111,7 @@ describe("Actants search", function () {
           bundleStart: false,
           elvl: Elvl.Inferential,
           logic: Logic.Positive,
-          operator: Operator.And,
+          bundleOperator: Operator.And,
           partitivity: Partitivity.DiscreteParts,
           position: Position.Actant1,
           virtuality: Virtuality.Allegation,
@@ -125,7 +128,7 @@ describe("Actants search", function () {
           logic: Logic.Negative,
           mood: [Mood.Allegation],
           moodvariant: MoodVariant.Irrealis,
-          operator: Operator.And,
+          bundleOperator: Operator.And,
         } as IStatementAction),
       }),
     ];
