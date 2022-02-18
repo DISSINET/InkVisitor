@@ -1,10 +1,10 @@
-import { ActantType } from "@shared/enums";
+import { EntityClass } from "@shared/enums";
 import theme from "./theme";
 
 export const DropdownAny = "any";
 
 export const rootTerritoryId = "T0";
-export const excludedSuggesterEntities = [ActantType.Value];
+export const excludedSuggesterEntities = [EntityClass.Value];
 
 // layout
 export const heightHeader = 70;

@@ -1,6 +1,6 @@
 import {
-  ActantStatus,
-  ActantType,
+  EntityStatus,
+  EntityClass,
   Certainty,
   Elvl,
   EntityLogicalType,
@@ -125,9 +125,9 @@ export interface DraggedTerritoryItem {
   index?: number;
 }
 export interface IRequestSearch {
-  class?: ActantType;
+  class?: EntityClass;
   label: string;
-  actantId: string;
+  entityId: string;
 }
 
 export type ISearchPositionInStatement =
@@ -144,7 +144,7 @@ export interface IRequestSearchEntity {
   label?: string; // regex, should also work from the middle...
   detail?: string; // also regex
   notes?: string; // is the text used within any note
-  status?: ActantStatus; // izy
+  status?: EntityStatus; // izy
   language?: Language; //izy
   logicalType?: EntityLogicalType;
   hasProps?: IEntityHasProps[]; //this should be checked within meta props and within all statements where the entity is used as the prop origin
@@ -240,17 +240,17 @@ export interface AttributeGroupDataObject {
   value: AttributeData;
 }
 
-export const classesPropType = [ActantType.Concept];
+export const classesPropType = [EntityClass.Concept];
 export const classesPropValue = [
-  ActantType.Action,
-  ActantType.Person,
-  ActantType.Group,
-  ActantType.Object,
-  ActantType.Concept,
-  ActantType.Location,
-  ActantType.Value,
-  ActantType.Event,
-  ActantType.Statement,
-  ActantType.Territory,
-  ActantType.Resource,
+  EntityClass.Action,
+  EntityClass.Person,
+  EntityClass.Group,
+  EntityClass.Object,
+  EntityClass.Concept,
+  EntityClass.Location,
+  EntityClass.Value,
+  EntityClass.Event,
+  EntityClass.Statement,
+  EntityClass.Territory,
+  EntityClass.Resource,
 ];

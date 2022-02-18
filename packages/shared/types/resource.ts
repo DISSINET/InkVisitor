@@ -1,8 +1,8 @@
-import { IActant } from ".";
-import { ActantType } from "../enums";
+import { EntityClass } from "../enums";
+import { IEntity } from "./entity";
 
-export interface IResource extends IActant {
-  class: ActantType.Resource;
+export interface IResource extends IEntity {
+  class: EntityClass.Resource;
   data: {
     link: string;
   };

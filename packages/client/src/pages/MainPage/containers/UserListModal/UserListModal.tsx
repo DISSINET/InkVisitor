@@ -1,5 +1,5 @@
 import { userRoleDict } from "@shared/dictionaries";
-import { ActantType, UserRole, UserRoleMode } from "@shared/enums";
+import { EntityClass, UserRole, UserRoleMode } from "@shared/enums";
 import { IResponseUser, IUserRight } from "@shared/types";
 import api from "api";
 import {
@@ -281,7 +281,7 @@ export const UserListModal: React.FC<UserListModal> = ({
                     onSelected={(newSelectedId: string) => {
                       addRightToUser(userId, newSelectedId, "read");
                     }}
-                    categoryTypes={[ActantType.Territory]}
+                    categoryTypes={[EntityClass.Territory]}
                     placeholder={"assign a territory"}
                   />
                   <StyledTerritoryList>
@@ -357,7 +357,7 @@ export const UserListModal: React.FC<UserListModal> = ({
                       onSelected={(newSelectedId: string) => {
                         addRightToUser(userId, newSelectedId, "write");
                       }}
-                      categoryTypes={[ActantType.Territory]}
+                      categoryTypes={[EntityClass.Territory]}
                       placeholder={"assign a territory"}
                     />
                     <StyledTerritoryList>

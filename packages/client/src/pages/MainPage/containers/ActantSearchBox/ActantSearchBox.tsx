@@ -1,4 +1,4 @@
-import { ActantType } from "@shared/enums";
+import { EntityClass } from "@shared/enums";
 import { IOption, IResponseSearch } from "@shared/types";
 import api from "api";
 import { Button, Dropdown, Input, Loader, Tag } from "components";
@@ -21,20 +21,20 @@ import {
 } from "./ActantSearchBoxStyles";
 
 const classesActants = [
-  ActantType.Action,
-  ActantType.Person,
-  ActantType.Group,
-  ActantType.Object,
-  ActantType.Concept,
-  ActantType.Location,
-  ActantType.Value,
-  ActantType.Event,
-  ActantType.Territory,
-  ActantType.Resource,
+  EntityClass.Action,
+  EntityClass.Person,
+  EntityClass.Group,
+  EntityClass.Object,
+  EntityClass.Concept,
+  EntityClass.Location,
+  EntityClass.Value,
+  EntityClass.Event,
+  EntityClass.Territory,
+  EntityClass.Resource,
 ];
 
 const initValues: IRequestSearch = {
-  actantId: "",
+  entityId: "",
   label: "",
 };
 
@@ -53,19 +53,19 @@ export const ActantSearchBox: React.FC = () => {
 
   const {
     status,
-    data: actant,
+    data: entity,
     error,
     isFetching,
   } = useQuery(
-    ["actant", searchData.actantId],
+    ["entity", searchData.entityId],
     async () => {
-      if (searchData.actantId) {
-        const res = await api.detailGet(searchData.actantId);
+      if (searchData.entityId) {
+        const res = await api.detailGet(searchData.entityId);
         return res.data;
       }
     },
     {
-      enabled: !!searchData.actantId && api.isLoggedIn(),
+      enabled: !!searchData.entityId && api.isLoggedIn(),
     }
   );
 
@@ -97,7 +97,7 @@ export const ActantSearchBox: React.FC = () => {
   };
 
   useEffect(() => {
-    if (debouncedValues.actantId || debouncedValues.label.length > 3) {
+    if (debouncedValues.entityId || debouncedValues.label.length > 3) {
       searchActantsMutation.mutate(debouncedValues);
     } else {
       setResults([]);
@@ -105,7 +105,7 @@ export const ActantSearchBox: React.FC = () => {
   }, [debouncedValues]);
 
   const searchActantsMutation = useMutation(
-    async (searchData: IRequestSearch) => api.actantsSearch(searchData),
+    async (searchData: IRequestSearch) => api.entitiesSearch(searchData),
     {
       onSuccess: (data) => {
         setResults(data.data);
@@ -146,9 +146,9 @@ export const ActantSearchBox: React.FC = () => {
         <EntitySuggester
           categoryTypes={classesActants}
           onSelected={(newSelectedId: string) => {
-            handleChange("actantId", newSelectedId);
+            handleChange("entityId", newSelectedId);
           }}
-          placeholder={"actant"}
+          placeholder={"entity"}
           allowCreate={false}
           inputWidth={114}
         />
@@ -157,11 +157,11 @@ export const ActantSearchBox: React.FC = () => {
         <StyledTagLoaderWrap>
           <Loader size={26} show={isFetching} />
         </StyledTagLoaderWrap>
-        {actant && (
+        {entity && (
           <Tag
-            propId={actant.id}
-            label={actant.label}
-            category={actant.class}
+            propId={entity.id}
+            label={entity.label}
+            category={entity.class}
             tooltipPosition={"left center"}
             button={
               <Button
@@ -169,9 +169,9 @@ export const ActantSearchBox: React.FC = () => {
                 icon={<FaUnlink />}
                 color="danger"
                 inverted={true}
-                tooltip="unlink actant"
+                tooltip="unlink entity"
                 onClick={() => {
-                  handleChange("actantId", "");
+                  handleChange("entityId", "");
                 }}
               />
             }
@@ -194,8 +194,8 @@ export const ActantSearchBox: React.FC = () => {
                   <StyledResultItem key={key}>
                     <Tag
                       tooltipPosition="left top"
-                      propId={result.actantId}
-                      label={result.actantLabel}
+                      propId={result.entityId}
+                      label={result.entityLabel}
                       category={result.class}
                       fullWidth
                       ltype={result.logicalType}

@@ -1,29 +1,29 @@
-import { ActantType } from "@shared/enums";
+import { EntityClass } from "@shared/enums";
 import "ts-jest";
-import { getActantType } from "./factory";
+import { getEntityClass } from "./factory";
 import "ts-jest";
 
 describe("Factory test", function () {
   describe("known types", () => {
     it("should return implementation", () => {
-      for (const aType of Object.values(ActantType)) {
-        expect(getActantType({ class: aType })).not.toBeNull();
+      for (const aType of Object.values(EntityClass)) {
+        expect(getEntityClass({ class: aType })).not.toBeNull();
       }
     });
   });
   describe("unknown types", () => {
     it("should return null", () => {
-      expect(getActantType({ class: "random" })).toBeNull();
+      expect(getEntityClass({ class: "random" })).toBeNull();
     });
   });
   describe("empty type", () => {
     it("should return null", () => {
-      expect(getActantType({})).toBeNull();
+      expect(getEntityClass({})).toBeNull();
     });
   });
   describe("undefined input", () => {
     it("should return null", () => {
-      expect(getActantType(undefined)).toBeNull();
+      expect(getEntityClass(undefined)).toBeNull();
     });
   });
 });

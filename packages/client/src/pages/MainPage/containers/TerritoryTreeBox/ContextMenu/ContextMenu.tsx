@@ -1,5 +1,5 @@
 import { UserRoleMode } from "@shared/enums";
-import { IActant } from "@shared/types";
+import { IEntity } from "@shared/types";
 import { Button } from "components";
 import React, { useRef, useState } from "react";
 import { FaPlus, FaStar, FaTrashAlt } from "react-icons/fa";
@@ -15,7 +15,7 @@ import {
 } from "./ContextMenuStyles";
 
 interface ContextMenu {
-  territoryActant: IActant;
+  territoryActant: IEntity;
   right: UserRoleMode;
   empty: boolean;
   onMenuOpen: () => void;

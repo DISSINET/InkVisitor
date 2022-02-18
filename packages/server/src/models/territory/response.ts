@@ -1,23 +1,23 @@
 import { Request } from "express";
 import { UserRoleMode } from "@shared/enums";
-import { IActant, IResponseStatement, IResponseTerritory } from "@shared/types";
+import { IEntity, IResponseStatement, IResponseTerritory } from "@shared/types";
 import Territory from "./territory";
 import Statement from "@models/statement/statement";
-import { findActantsById, findActantsByIds } from "@service/shorthands";
+import { findEntitiesById, findEntitiesByIds } from "@service/shorthands";
 
 export class ResponseTerritory extends Territory implements IResponseTerritory {
   statements: IResponseStatement[];
-  actants: IActant[];
+  entities: IEntity[];
   right: UserRoleMode = UserRoleMode.Read;
 
-  constructor(actant: IActant) {
+  constructor(entity: IEntity) {
     super({});
-    for (const key of Object.keys(actant)) {
-      (this as any)[key] = (actant as any)[key];
+    for (const key of Object.keys(entity)) {
+      (this as any)[key] = (entity as any)[key];
     }
 
     this.statements = [];
-    this.actants = [];
+    this.entities = [];
   }
 
   async prepare(req: Request): Promise<void> {
@@ -28,11 +28,11 @@ export class ResponseTerritory extends Territory implements IResponseTerritory {
       this.id
     );
 
-    const actantIds = Statement.getEntitiesIdsForMany(statements);
-    this.actants = await findActantsById(req.db, actantIds);
+    const entityIds = Statement.getEntitiesIdsForMany(statements);
+    this.entities = await findEntitiesById(req.db, entityIds);
 
     for (const statement of statements) {
-      const entities = await findActantsByIds(
+      const entities = await findEntitiesByIds(
         req.db,
         statement.data.actions.map((a) => a.action)
       );

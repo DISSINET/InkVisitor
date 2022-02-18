@@ -1,7 +1,7 @@
 import "ts-jest";
 import Statement, { StatementActant, StatementReference } from "./statement";
 import { Db } from "@service/RethinkDB";
-import { deleteActants, findActantById } from "@service/shorthands";
+import { deleteEntities, findEntityById } from "@service/shorthands";
 import Territory from "@models/territory/territory";
 import { IStatement } from "@shared/types/statement";
 import {
@@ -73,7 +73,7 @@ describe("findDependentStatementIds", function () {
   });
 
   beforeEach(async () => {
-    await deleteActants(db);
+    await deleteEntities(db);
   });
 
   afterAll(async () => {
@@ -291,7 +291,7 @@ describe("Statement - save territory order", function () {
   });
 
   beforeEach(async () => {
-    await deleteActants(db);
+    await deleteEntities(db);
   });
 
   afterAll(async () => {
@@ -303,7 +303,7 @@ describe("Statement - save territory order", function () {
       const statement = new Statement({ data: { territory: { id: "any" } } });
       await statement.save(db.connection);
 
-      const createdData = await findActantById<IStatement>(db, statement.id);
+      const createdData = await findEntityById<IStatement>(db, statement.id);
       expect(createdData.data.territory.id).toEqual(
         statement.data.territory.id
       );
@@ -320,7 +320,7 @@ describe("Statement - save territory order", function () {
       });
       await statement.save(db.connection);
 
-      const createdData = await findActantById<IStatement>(db, statement.id);
+      const createdData = await findEntityById<IStatement>(db, statement.id);
       expect(createdData.data.territory.id).toEqual(
         statement.data.territory.id
       );
@@ -345,7 +345,7 @@ describe("Statement - save territory order", function () {
 
       // first statement provides order = -1, which should result in save '0'
       // value
-      const createdData1 = await findActantById<IStatement>(db, statement1.id);
+      const createdData1 = await findEntityById<IStatement>(db, statement1.id);
       expect(createdData1.data.territory.id).toEqual(
         createdData1.data.territory.id
       );
@@ -353,7 +353,7 @@ describe("Statement - save territory order", function () {
 
       // second statement provides order = -1, which should result in save '1'
       // value
-      const createdData2 = await findActantById<IStatement>(db, statement2.id);
+      const createdData2 = await findEntityById<IStatement>(db, statement2.id);
       expect(createdData2.data.territory.id).toEqual(
         createdData2.data.territory.id
       );
@@ -371,7 +371,7 @@ describe("Statement - update territory order", function () {
   });
 
   beforeEach(async () => {
-    await deleteActants(db);
+    await deleteEntities(db);
   });
 
   afterAll(async () => {
@@ -386,7 +386,7 @@ describe("Statement - update territory order", function () {
       await statement.update(db.connection, {
         data: { territory: { order: wantedNewOrder } },
       });
-      const createdData = await findActantById<IStatement>(db, statement.id);
+      const createdData = await findEntityById<IStatement>(db, statement.id);
       expect(createdData.data.territory.order).toEqual(wantedNewOrder);
 
       done();
@@ -406,7 +406,7 @@ describe("Statement - update territory order", function () {
         data: { territory: { order: wantedNewOrder } },
       });
 
-      const createdData = await findActantById<IStatement>(db, statement2.id);
+      const createdData = await findEntityById<IStatement>(db, statement2.id);
       expect(createdData.data.territory.order).toEqual(wantedNewOrder);
 
       done();
@@ -426,11 +426,11 @@ describe("Statement - update territory order", function () {
       });
 
       // second statement's order is still 1... 0 is taken
-      const createdData2 = await findActantById<IStatement>(db, statement2.id);
+      const createdData2 = await findEntityById<IStatement>(db, statement2.id);
       expect(createdData2.data.territory.order).toEqual(1);
 
       // first statement's order remains 0
-      const createdData1 = await findActantById<IStatement>(db, statement1.id);
+      const createdData1 = await findEntityById<IStatement>(db, statement1.id);
       expect(createdData1.data.territory.order).toEqual(0);
 
       done();
@@ -454,19 +454,19 @@ describe("Statement - update territory order", function () {
       });
 
       // first statement should retain its order
-      const createdData1 = await findActantById<IStatement>(db, statement1.id);
+      const createdData1 = await findEntityById<IStatement>(db, statement1.id);
       expect(createdData1.data.territory.order).toEqual(
         statement1.data.territory.order
       );
 
       // second statement should retain its order
-      const createdData2 = await findActantById<IStatement>(db, statement2.id);
+      const createdData2 = await findEntityById<IStatement>(db, statement2.id);
       expect(createdData2.data.territory.order).toEqual(
         statement2.data.territory.order
       );
 
       // thirs statement should be before the 1 and 2
-      const createdData3 = await findActantById<IStatement>(db, statement3.id);
+      const createdData3 = await findEntityById<IStatement>(db, statement3.id);
       expect(createdData3.data.territory.order).toEqual(0.5);
 
       done();
@@ -482,14 +482,14 @@ describe("Statement - findMetaStatements", function () {
   });
 
   beforeEach(async () => {
-    await deleteActants(db);
+    await deleteEntities(db);
   });
 
   afterAll(async () => {
     await db.close();
   });
 
-  describe("bad territory or actant", () => {
+  describe("bad territory or entity", () => {
     it("should return empty list", async (done) => {
       const wantedActantId = "A0";
       const statement1 = new Statement({

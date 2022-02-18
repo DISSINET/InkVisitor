@@ -1,4 +1,4 @@
-import { ActantType, UserRole } from "@shared/enums";
+import { EntityClass, UserRole } from "@shared/enums";
 import { IOption } from "@shared/types";
 import api from "api";
 import {
@@ -173,7 +173,7 @@ export const SuggesterModal: React.FC<SuggesterModal> = ({
                       filterEditorRights
                       inputWidth={96}
                       allowCreate={false}
-                      categoryTypes={[ActantType.Territory]}
+                      categoryTypes={[EntityClass.Territory]}
                       onSelected={(newSelectedId: string) => {
                         setTerritoryId(newSelectedId);
                       }}

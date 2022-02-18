@@ -1,23 +1,23 @@
+import Statement from "@models/statement/statement";
+import { ResponseTerritory } from "@models/territory/response";
+import Territory from "@models/territory/territory";
+import { findEntityById, findEntities } from "@service/shorthands";
+import { EntityClass } from "@shared/enums";
 import {
-  BadParams,
-  StatementDoesNotExits,
-  TerritoryDoesNotExits,
-  StatementInvalidMove,
-  PermissionDeniedError,
-} from "@shared/types/errors";
-import { Router, Request } from "express";
-import { asyncRouteHandler } from "..";
-import { findActantById, findActants } from "@service/shorthands";
-import {
-  ITerritory,
+  IResponseGeneric,
   IResponseTerritory,
   IStatement,
-  IResponseGeneric,
+  ITerritory,
 } from "@shared/types";
-import Statement from "@models/statement/statement";
-import { ActantType } from "@shared/enums";
-import Territory from "@models/territory/territory";
-import { ResponseTerritory } from "@models/territory/response";
+import {
+  BadParams,
+  PermissionDeniedError,
+  StatementDoesNotExits,
+  StatementInvalidMove,
+  TerritoryDoesNotExits,
+} from "@shared/types/errors";
+import { Request, Router } from "express";
+import { asyncRouteHandler } from "..";
 
 function insertIStatementToChilds(
   array: IStatement[],
@@ -39,11 +39,11 @@ export default Router()
         throw new BadParams("territoryId has to be set");
       }
 
-      const territory = await findActantById<ITerritory>(
+      const territory = await findEntityById<ITerritory>(
         request.db,
         territoryId,
         {
-          class: ActantType.Territory,
+          class: EntityClass.Territory,
         }
       );
       if (!territory) {
@@ -58,7 +58,7 @@ export default Router()
           request.getUserOrFail()
         )
       ) {
-        throw new PermissionDeniedError(`cannot view actant ${territoryId}`);
+        throw new PermissionDeniedError(`cannot view entity ${territoryId}`);
       }
 
       const response = new ResponseTerritory(territory);
@@ -68,18 +68,18 @@ export default Router()
     })
   )
   .get(
-    "/getActantIds/:territoryId?",
+    "/getEntityIds/:territoryId?",
     asyncRouteHandler<string[]>(async (request: Request) => {
       const territoryId = request.params.territoryId;
       if (!territoryId) {
         throw new BadParams("territoryId has to be set");
       }
 
-      const territory = await findActantById<ITerritory>(
+      const territory = await findEntityById<ITerritory>(
         request.db,
         territoryId,
         {
-          class: ActantType.Territory,
+          class: EntityClass.Territory,
         }
       );
       if (!territory) {
@@ -108,7 +108,7 @@ export default Router()
         throw new BadParams("moveId/newIndex has be set");
       }
 
-      const statement: IStatement = await findActantById<IStatement>(
+      const statement: IStatement = await findEntityById<IStatement>(
         request.db,
         moveId
       );
@@ -119,7 +119,7 @@ export default Router()
         );
       }
 
-      const territory: ITerritory = await findActantById<ITerritory>(
+      const territory: ITerritory = await findEntityById<ITerritory>(
         request.db,
         statement.data.territory.id
       );
@@ -135,8 +135,8 @@ export default Router()
       };
 
       let statementsForTerritory = (
-        await findActants<IStatement>(request.db, {
-          class: ActantType.Statement,
+        await findEntities<IStatement>(request.db, {
+          class: EntityClass.Statement,
         })
       )
         .filter((s) => s.data.territory.id === territory.id)

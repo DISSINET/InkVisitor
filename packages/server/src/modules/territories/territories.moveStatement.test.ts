@@ -6,8 +6,8 @@ import app from "../../Server";
 import { IStatement } from "@shared/types";
 import { Db } from "@service/RethinkDB";
 import {
-  createActant,
-  findActantById,
+  createEntity,
+  findEntityById,
 } from "@service/shorthands";
 import Territory from "@models/territory/territory";
 import Statement from "@models/statement/statement";
@@ -21,7 +21,7 @@ async function createMockStatementsWithTerritory(db: Db): Promise<Statement[]> {
   });
 
   // create the territory first
-  await createActant(db, ter);
+  await createEntity(db, ter);
 
   const out: Statement[] = [
     new Statement({
@@ -45,7 +45,7 @@ async function createMockStatementsWithTerritory(db: Db): Promise<Statement[]> {
   ];
 
   for (const stat of out) {
-    await createActant(db, stat);
+    await createEntity(db, stat);
   }
   return out;
 }
@@ -56,8 +56,8 @@ describe("Territories moveStatement", function () {
       const db = new Db();
       await db.initDb();
       const statements = await createMockStatementsWithTerritory(db);
-      let s1 = await findActantById<IStatement>(db, statements[0].id);
-      let s2 = await findActantById<IStatement>(db, statements[1].id);
+      let s1 = await findEntityById<IStatement>(db, statements[0].id);
+      let s2 = await findEntityById<IStatement>(db, statements[1].id);
 
       expect(s1.data.territory.order).toEqual(1);
       expect(s2.data.territory.order).toEqual(2);
@@ -72,8 +72,8 @@ describe("Territories moveStatement", function () {
         .expect(200)
         .expect({ result: true });
 
-      s1 = await findActantById<IStatement>(db, statements[0].id);
-      s2 = await findActantById<IStatement>(db, statements[1].id);
+      s1 = await findEntityById<IStatement>(db, statements[0].id);
+      s2 = await findEntityById<IStatement>(db, statements[1].id);
 
       expect(s1.data.territory.order).toEqual(3);
       expect(s2.data.territory.order).toEqual(2);

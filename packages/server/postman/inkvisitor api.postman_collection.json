@@ -1,1289 +1,1048 @@
 {
-	"info": {
-		"_postman_id": "819821a5-ee52-430c-8f7f-6f47b7d12fce",
-		"name": "inkvisitor api",
-		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
-	},
-	"item": [
-		{
-			"name": "api/v1/actants/search",
-			"item": [
-				{
-					"name": "search by class and label",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							},
-							{
-								"key": "Authorization",
-								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiMSIsImVtYWlsIjoiYWRtaW5AYWRtaW4uY29tIiwibmFtZSI6ImFkbWluIiwicm9sZSI6ImFkbWluIiwib3B0aW9ucyI6eyJkZWZhdWx0VGVycml0b3J5IjoiIiwiZGVmYXVsdExhbmd1YWdlIjoiIiwic2VhcmNoTGFuZ3VhZ2VzIjpbXX0sImJvb2ttYXJrcyI6W10sInN0b3JlZFRlcnJpdG9yaWVzIjpbXSwicmlnaHRzIjpbeyJ0ZXJyaXRvcnkiOiJUMCIsIm1vZGUiOiJhZG1pbiJ9XSwicGFzc3dvcmQiOiIkMmIkMTAkQk1DQnBzZ25PWHBRdkd0VlVPaEx3dTFsV2RueVNETkF4enBDUjJDYVkxbXZ3ZEdRY0FoVGkifSwiZXhwIjoxNjM3MDk2ODI5LCJpYXQiOjE2MzQ1MDQ4Mjl9.bN72efWONf3lHHflcaDM0gdvD4DqgTGu-OICksQWT8I",
-								"type": "text"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n\t\"class\": \"T\",\n\t\"label\": \"t\"\n}"
-						},
-						"url": {
-							"raw": "http://localhost:4000/api/v1/actants/search",
-							"protocol": "http",
-							"host": [
-								"localhost"
-							],
-							"port": "4000",
-							"path": [
-								"api",
-								"v1",
-								"actants",
-								"search"
-							]
-						},
-						"description": "search by class + label"
-					},
-					"response": []
-				},
-				{
-					"name": "search by class and id",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							},
-							{
-								"key": "Authorization",
-								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiMSIsImVtYWlsIjoiYWRtaW5AYWRtaW4uY29tIiwibmFtZSI6ImFkbWluIiwicm9sZSI6ImFkbWluIiwib3B0aW9ucyI6eyJkZWZhdWx0VGVycml0b3J5IjoiIiwiZGVmYXVsdExhbmd1YWdlIjoiIiwic2VhcmNoTGFuZ3VhZ2VzIjpbXX0sImJvb2ttYXJrcyI6W10sInN0b3JlZFRlcnJpdG9yaWVzIjpbXSwicmlnaHRzIjpbXSwicGFzc3dvcmQiOiIkMmIkMTAkRmFmUzZ0dm1UNlgxRDdGQ1ZoUml5ZU0uR1pIR3FIVmcxODkvQXBUUUdKbi9Gdm9YVzU4Q0MifSwiZXhwIjoxNjM3NDM1MjYyLCJpYXQiOjE2MzQ4NDMyNjJ9.YNww5HKUZ3nbdkimNRnD7EEpDFs5MXQ4ldXkiyxDUu4",
-								"type": "text"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n\t\"class\": \"V\",\n    \"actantId\": \"bd11c582-b3d5-4dc9-800b-17a609bc30d8\"\n}"
-						},
-						"url": {
-							"raw": "http://localhost:4000/api/v1/actants/search",
-							"protocol": "http",
-							"host": [
-								"localhost"
-							],
-							"port": "4000",
-							"path": [
-								"api",
-								"v1",
-								"actants",
-								"search"
-							]
-						},
-						"description": "search by class + actionId"
-					},
-					"response": []
-				},
-				{
-					"name": "search by id",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							},
-							{
-								"key": "Authorization",
-								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiMSIsImVtYWlsIjoiYWRtaW5AYWRtaW4uY29tIiwibmFtZSI6ImFkbWluIiwicm9sZSI6ImFkbWluIiwib3B0aW9ucyI6eyJkZWZhdWx0VGVycml0b3J5IjoiIiwiZGVmYXVsdExhbmd1YWdlIjoiIiwic2VhcmNoTGFuZ3VhZ2VzIjpbXX0sImJvb2ttYXJrcyI6W10sInN0b3JlZFRlcnJpdG9yaWVzIjpbXSwicmlnaHRzIjpbXSwicGFzc3dvcmQiOiIkMmIkMTAkRmFmUzZ0dm1UNlgxRDdGQ1ZoUml5ZU0uR1pIR3FIVmcxODkvQXBUUUdKbi9Gdm9YVzU4Q0MifSwiZXhwIjoxNjM3NDM1MjYyLCJpYXQiOjE2MzQ4NDMyNjJ9.YNww5HKUZ3nbdkimNRnD7EEpDFs5MXQ4ldXkiyxDUu4"
-							},
-							{
-								"key": "",
-								"value": "",
-								"disabled": true
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n\t\"actantId\": \"bd11c582-b3d5-4dc9-800b-17a609bc30d8\"\n}"
-						},
-						"url": {
-							"raw": "http://localhost:4000/api/v1/actants/search",
-							"protocol": "http",
-							"host": [
-								"localhost"
-							],
-							"port": "4000",
-							"path": [
-								"api",
-								"v1",
-								"actants",
-								"search"
-							]
-						},
-						"description": "search by class + actantId"
-					},
-					"response": []
-				},
-				{
-					"name": "search by class, label and id",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							},
-							{
-								"key": "Authorization",
-								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiMSIsImVtYWlsIjoiYWRtaW5AYWRtaW4uY29tIiwibmFtZSI6ImFkbWluIiwicm9sZSI6ImFkbWluIiwib3B0aW9ucyI6eyJkZWZhdWx0VGVycml0b3J5IjoiIiwiZGVmYXVsdExhbmd1YWdlIjoiIiwic2VhcmNoTGFuZ3VhZ2VzIjpbXX0sImJvb2ttYXJrcyI6W10sInN0b3JlZFRlcnJpdG9yaWVzIjpbXSwicmlnaHRzIjpbXSwicGFzc3dvcmQiOiIkMmIkMTAkRmFmUzZ0dm1UNlgxRDdGQ1ZoUml5ZU0uR1pIR3FIVmcxODkvQXBUUUdKbi9Gdm9YVzU4Q0MifSwiZXhwIjoxNjM3NDM1MjYyLCJpYXQiOjE2MzQ4NDMyNjJ9.YNww5HKUZ3nbdkimNRnD7EEpDFs5MXQ4ldXkiyxDUu4"
-							},
-							{
-								"key": "",
-								"value": "",
-								"disabled": true
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"class\": \"V\",\n    \"label\": \"chan\",\n    \"actantId\": \"bd11c582-b3d5-4dc9-800b-17a609bc30d8\"\n}"
-						},
-						"url": {
-							"raw": "http://localhost:4000/api/v1/actants/search",
-							"protocol": "http",
-							"host": [
-								"localhost"
-							],
-							"port": "4000",
-							"path": [
-								"api",
-								"v1",
-								"actants",
-								"search"
-							]
-						},
-						"description": "search by class + actantId"
-					},
-					"response": []
-				},
-				{
-					"name": "search by label and exclusion",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							},
-							{
-								"key": "Authorization",
-								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiMSIsImVtYWlsIjoiYWRtaW5AYWRtaW4uY29tIiwibmFtZSI6ImFkbWluIiwicm9sZSI6ImFkbWluIiwib3B0aW9ucyI6eyJkZWZhdWx0VGVycml0b3J5IjoiIiwiZGVmYXVsdExhbmd1YWdlIjoiIiwic2VhcmNoTGFuZ3VhZ2VzIjpbXX0sImJvb2ttYXJrcyI6W10sInN0b3JlZFRlcnJpdG9yaWVzIjpbXSwicmlnaHRzIjpbeyJ0ZXJyaXRvcnkiOiJUMCIsIm1vZGUiOiJhZG1pbiJ9XSwicGFzc3dvcmQiOiIkMmIkMTAkQk1DQnBzZ25PWHBRdkd0VlVPaEx3dTFsV2RueVNETkF4enBDUjJDYVkxbXZ3ZEdRY0FoVGkifSwiZXhwIjoxNjM3MDk2ODI5LCJpYXQiOjE2MzQ1MDQ4Mjl9.bN72efWONf3lHHflcaDM0gdvD4DqgTGu-OICksQWT8I",
-								"type": "text"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n\t\"label\": \"a\",\n    \"excluded\": [\"E\",\"V\", \"P\", \"C\"]\n}"
-						},
-						"url": {
-							"raw": "http://localhost:4000/api/v1/actants/search",
-							"protocol": "http",
-							"host": [
-								"localhost"
-							],
-							"port": "4000",
-							"path": [
-								"api",
-								"v1",
-								"actants",
-								"search"
-							]
-						},
-						"description": "search by class + label"
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "api/v1/tree/get",
-			"item": [
-				{
-					"name": "viewer get tree",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							},
-							{
-								"key": "Authorization",
-								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiNCIsImVtYWlsIjoidmlld2VyMUBpbmt2aXNpdG9yLmNvbSIsIm5hbWUiOiJ2aWV3ZXIxIiwicm9sZSI6InZpZXdlciIsIm9wdGlvbnMiOnsiZGVmYXVsdFRlcnJpdG9yeSI6IiIsImRlZmF1bHRMYW5ndWFnZSI6IiIsInNlYXJjaExhbmd1YWdlcyI6W119LCJib29rbWFya3MiOltdLCJzdG9yZWRUZXJyaXRvcmllcyI6W10sInJpZ2h0cyI6W3sidGVycml0b3J5IjoiVDQwLTAxIiwibW9kZSI6InJlYWQifV0sInBhc3N3b3JkIjoiJDJiJDEwJGNCL3FVWTFaekxrcnNlS1NvdnloSWVqcVUvNWJJOW5aYnd2L3BxckM3Qi5ZOTBFdERFUkFXIn0sImV4cCI6MTYzNzA5NjgyOSwiaWF0IjoxNjM0NTA0ODI5fQ.B2zbs4yL4G5pAlCKJ6385AnWV8rvkG42l_q9jLTy7Lg"
-							},
-							{
-								"key": "",
-								"value": "",
-								"disabled": true
-							}
-						],
-						"url": {
-							"raw": "http://localhost:4000/api/v1/tree/get",
-							"protocol": "http",
-							"host": [
-								"localhost"
-							],
-							"port": "4000",
-							"path": [
-								"api",
-								"v1",
-								"tree",
-								"get"
-							]
-						},
-						"description": "search by class + actantId"
-					},
-					"response": []
-				},
-				{
-					"name": "admin get tree",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							},
-							{
-								"key": "Authorization",
-								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiMSIsImVtYWlsIjoiYWRtaW5AYWRtaW4uY29tIiwibmFtZSI6ImFkbWluIiwicm9sZSI6ImFkbWluIiwib3B0aW9ucyI6eyJkZWZhdWx0VGVycml0b3J5IjoiIiwiZGVmYXVsdExhbmd1YWdlIjoiIiwic2VhcmNoTGFuZ3VhZ2VzIjpbXX0sImJvb2ttYXJrcyI6W10sInN0b3JlZFRlcnJpdG9yaWVzIjpbXSwicmlnaHRzIjpbeyJ0ZXJyaXRvcnkiOiJUMCIsIm1vZGUiOiJhZG1pbiJ9XSwicGFzc3dvcmQiOiIkMmIkMTAkQk1DQnBzZ25PWHBRdkd0VlVPaEx3dTFsV2RueVNETkF4enBDUjJDYVkxbXZ3ZEdRY0FoVGkifSwiZXhwIjoxNjM3MDk2ODI5LCJpYXQiOjE2MzQ1MDQ4Mjl9.bN72efWONf3lHHflcaDM0gdvD4DqgTGu-OICksQWT8I"
-							},
-							{
-								"key": "",
-								"value": "",
-								"disabled": true
-							}
-						],
-						"url": {
-							"raw": "http://localhost:4000/api/v1/tree/get",
-							"protocol": "http",
-							"host": [
-								"localhost"
-							],
-							"port": "4000",
-							"path": [
-								"api",
-								"v1",
-								"tree",
-								"get"
-							]
-						},
-						"description": "search by class + actantId"
-					},
-					"response": []
-				},
-				{
-					"name": "editor get tree",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							},
-							{
-								"key": "Authorization",
-								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiMiIsImVtYWlsIjoiZWRpdG9yQGlua3Zpc2l0b3IuY29tIiwicGFzc3dvcmQiOiIkMmIkMTAkamU5SFB0bDRuN3I4RTBacU4yTHpvLkVZUWJLMW5LVHA2RExwNFkuOXJtWGx0TmdYRGlWdkMiLCJuYW1lIjoiZWRpdG9yMSIsInJvbGUiOiJlZGl0b3IiLCJhY3RpdmUiOnRydWUsIm9wdGlvbnMiOnsiZGVmYXVsdFRlcnJpdG9yeSI6IiIsImRlZmF1bHRMYW5ndWFnZSI6IiIsInNlYXJjaExhbmd1YWdlcyI6W119LCJib29rbWFya3MiOltdLCJzdG9yZWRUZXJyaXRvcmllcyI6W10sInJpZ2h0cyI6W3sidGVycml0b3J5IjoiVDMtMS0wOCIsIm1vZGUiOiJyZWFkIn0seyJ0ZXJyaXRvcnkiOiJUMy0xLTA3IiwibW9kZSI6IndyaXRlIn1dfSwiZXhwIjoxNjM4MzA2OTY3LCJpYXQiOjE2MzU3MTQ5Njd9.9K35K9jqRCAsJk3oB9649hFmvjivyMk3EiJaEDOlPHc"
-							},
-							{
-								"key": "",
-								"value": "",
-								"disabled": true
-							}
-						],
-						"url": {
-							"raw": "http://localhost:4000/api/v1/tree/get",
-							"protocol": "http",
-							"host": [
-								"localhost"
-							],
-							"port": "4000",
-							"path": [
-								"api",
-								"v1",
-								"tree",
-								"get"
-							]
-						},
-						"description": "search by class + actantId"
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "api/v1/actants/create",
-			"item": [
-				{
-					"name": "create a territory as admin - valid",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiMSIsImVtYWlsIjoiYWRtaW5AYWRtaW4uY29tIiwicGFzc3dvcmQiOiIkMmIkMTAkNnFuRFBUU0drN01tNTdaOTE1NTlPZWxXdGNvSGFUWkVnSFRidHouSUJVNzVZSzBMMjVmWGUiLCJuYW1lIjoiYWRtaW4iLCJyb2xlIjoiYWRtaW4iLCJhY3RpdmUiOnRydWUsIm9wdGlvbnMiOnsiZGVmYXVsdFRlcnJpdG9yeSI6IiIsImRlZmF1bHRMYW5ndWFnZSI6IiIsInNlYXJjaExhbmd1YWdlcyI6W119LCJib29rbWFya3MiOltdLCJzdG9yZWRUZXJyaXRvcmllcyI6W3sidGVycml0b3J5SWQiOiIzIn1dLCJyaWdodHMiOlt7InRlcnJpdG9yeSI6IlQwIiwibW9kZSI6ImFkbWluIn1dfSwiZXhwIjoxNjQwNzIwMDA4LCJpYXQiOjE2MzgxMjgwMDh9.Im4cEyGMkbVUCyTUYD5gqleRFsa3ukA2q5qFYuR3O14",
-								"type": "text"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n        \"language\": [\n            \"eng\"\n        ],\n        \"class\": \"E\"\n     \n    }",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "http://localhost:4000/api/v1/actants/create",
-							"protocol": "http",
-							"host": [
-								"localhost"
-							],
-							"port": "4000",
-							"path": [
-								"api",
-								"v1",
-								"actants",
-								"create"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "create a territory as admin - invalid(no parent)",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiMSIsImVtYWlsIjoiYWRtaW5AYWRtaW4uY29tIiwibmFtZSI6ImFkbWluIiwicm9sZSI6ImFkbWluIiwib3B0aW9ucyI6eyJkZWZhdWx0VGVycml0b3J5IjoiIiwiZGVmYXVsdExhbmd1YWdlIjoiIiwic2VhcmNoTGFuZ3VhZ2VzIjpbXX0sImJvb2ttYXJrcyI6W10sInN0b3JlZFRlcnJpdG9yaWVzIjpbXSwicmlnaHRzIjpbeyJ0ZXJyaXRvcnkiOiJUMCIsIm1vZGUiOiJhZG1pbiJ9XSwicGFzc3dvcmQiOiIkMmIkMTAkQk1DQnBzZ25PWHBRdkd0VlVPaEx3dTFsV2RueVNETkF4enBDUjJDYVkxbXZ3ZEdRY0FoVGkifSwiZXhwIjoxNjM3MDk2ODI5LCJpYXQiOjE2MzQ1MDQ4Mjl9.bN72efWONf3lHHflcaDM0gdvD4DqgTGu-OICksQWT8I",
-								"type": "text"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n        \"language\": [\n            \"eng\"\n        ],\n        \"class\": \"T\",\n        \"data\": {\n            \"parent\": false\n        },\n        \"label\": \"everything\",\n        \"detail\": \"\",\n        \"status\": \"1\",\n        \"notes\": [],\n        \"_siblings\": {}\n    }",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "http://localhost:4000/api/v1/actants/create",
-							"protocol": "http",
-							"host": [
-								"localhost"
-							],
-							"port": "4000",
-							"path": [
-								"api",
-								"v1",
-								"actants",
-								"create"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "create a territory as viewer without rights",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiNCIsImVtYWlsIjoidmlld2VyMUBpbmt2aXNpdG9yLmNvbSIsIm5hbWUiOiJ2aWV3ZXIxIiwicm9sZSI6InZpZXdlciIsIm9wdGlvbnMiOnsiZGVmYXVsdFRlcnJpdG9yeSI6IiIsImRlZmF1bHRMYW5ndWFnZSI6IiIsInNlYXJjaExhbmd1YWdlcyI6W119LCJib29rbWFya3MiOltdLCJzdG9yZWRUZXJyaXRvcmllcyI6W10sInJpZ2h0cyI6W3sidGVycml0b3J5IjoiVDQwLTAxIiwibW9kZSI6InJlYWQifV0sInBhc3N3b3JkIjoiJDJiJDEwJGNCL3FVWTFaekxrcnNlS1NvdnloSWVqcVUvNWJJOW5aYnd2L3BxckM3Qi5ZOTBFdERFUkFXIn0sImV4cCI6MTYzNzA5NjgyOSwiaWF0IjoxNjM0NTA0ODI5fQ.B2zbs4yL4G5pAlCKJ6385AnWV8rvkG42l_q9jLTy7Lg",
-								"type": "text"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n        \"language\": [\n            \"eng\"\n        ],\n        \"class\": \"T\",\n        \"data\": {\n            \"parent\": {\n                \"id\": \"T80\"\n            }\n        },\n        \"label\": \"everything\",\n        \"detail\": \"\",\n        \"status\": \"1\",\n        \"notes\": [],\n        \"_siblings\": {}\n    }",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "http://localhost:4000/api/v1/actants/create",
-							"protocol": "http",
-							"host": [
-								"localhost"
-							],
-							"port": "4000",
-							"path": [
-								"api",
-								"v1",
-								"actants",
-								"create"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "create a territory as editor with rights",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiMyIsImVtYWlsIjoiZWRpdG9yMkBpbmt2aXNpdG9yLmNvbSIsIm5hbWUiOiJlZGl0b3IyIiwicm9sZSI6ImVkaXRvciIsIm9wdGlvbnMiOnsiZGVmYXVsdFRlcnJpdG9yeSI6IiIsImRlZmF1bHRMYW5ndWFnZSI6IiIsInNlYXJjaExhbmd1YWdlcyI6W119LCJib29rbWFya3MiOltdLCJzdG9yZWRUZXJyaXRvcmllcyI6W10sInJpZ2h0cyI6W3sidGVycml0b3J5IjoiVDQwLTAxIiwibW9kZSI6IndyaXRlIn1dLCJwYXNzd29yZCI6IiQyYiQxMCQyMXhrMy9FcUNCUm5LeUFKMlVhRUcuZ0hURXdOa1dYNUdSVjJLaHIuODZiZEJ3cnJQTDJTUyJ9LCJleHAiOjE2MzcwOTgwNjcsImlhdCI6MTYzNDUwNjA2N30.JGL0eOEPfuDZHVnW1V-UaXRB4_bxs9pqIFxr2-gePQQ",
-								"type": "text"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n        \"language\": [\n            \"eng\"\n        ],\n        \"class\": \"T\",\n        \"data\": {\n            \"parent\": {\n                \"id\": \"T40-01\"\n            }\n        },\n        \"label\": \"everything\",\n        \"detail\": \"\",\n        \"status\": \"1\",\n        \"notes\": [],\n        \"_siblings\": {}\n    }",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "http://localhost:4000/api/v1/actants/create",
-							"protocol": "http",
-							"host": [
-								"localhost"
-							],
-							"port": "4000",
-							"path": [
-								"api",
-								"v1",
-								"actants",
-								"create"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "create a statement as viewer without rights",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiNCIsImVtYWlsIjoidmlld2VyMUBpbmt2aXNpdG9yLmNvbSIsIm5hbWUiOiJ2aWV3ZXIxIiwicm9sZSI6InZpZXdlciIsIm9wdGlvbnMiOnsiZGVmYXVsdFRlcnJpdG9yeSI6IiIsImRlZmF1bHRMYW5ndWFnZSI6IiIsInNlYXJjaExhbmd1YWdlcyI6W119LCJib29rbWFya3MiOltdLCJzdG9yZWRUZXJyaXRvcmllcyI6W10sInJpZ2h0cyI6W10sInBhc3N3b3JkIjoicnRlIn0sImV4cCI6MTYzNzY2OTAyNSwiaWF0IjoxNjM1MDc3MDI1fQ.MWuS8wZ3skiAk80K373pBiLDdINo3Ltsw7Y6fVinL6I",
-								"type": "text"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"class\": \"S\",\n    \"data\": {\n        \"territory\": {\n            \"id\": \"T40\",\n            \"order\": 0\n        },\n    },\n            \"label\": \"[assdasda]\"\n\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "http://localhost:4000/api/v1/actants/create",
-							"protocol": "http",
-							"host": [
-								"localhost"
-							],
-							"port": "4000",
-							"path": [
-								"api",
-								"v1",
-								"actants",
-								"create"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "create a statement as editor with rights",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiMyIsImVtYWlsIjoiZWRpdG9yMkBpbmt2aXNpdG9yLmNvbSIsIm5hbWUiOiJlZGl0b3IyIiwicm9sZSI6ImVkaXRvciIsIm9wdGlvbnMiOnsiZGVmYXVsdFRlcnJpdG9yeSI6IiIsImRlZmF1bHRMYW5ndWFnZSI6IiIsInNlYXJjaExhbmd1YWdlcyI6W119LCJib29rbWFya3MiOltdLCJzdG9yZWRUZXJyaXRvcmllcyI6W10sInJpZ2h0cyI6W3sidGVycml0b3J5IjoiVDQwLTAxIiwibW9kZSI6IndyaXRlIn1dLCJwYXNzd29yZCI6IiQyYiQxMCQyMXhrMy9FcUNCUm5LeUFKMlVhRUcuZ0hURXdOa1dYNUdSVjJLaHIuODZiZEJ3cnJQTDJTUyJ9LCJleHAiOjE2MzcwOTgwNjcsImlhdCI6MTYzNDUwNjA2N30.JGL0eOEPfuDZHVnW1V-UaXRB4_bxs9pqIFxr2-gePQQ",
-								"type": "text"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"class\": \"S\",\n    \"data\": {\n        \"territory\": {\n            \"id\": \"T40-01\",\n            \"order\": 0\n        }\n    }\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "http://localhost:4000/api/v1/actants/create",
-							"protocol": "http",
-							"host": [
-								"localhost"
-							],
-							"port": "4000",
-							"path": [
-								"api",
-								"v1",
-								"actants",
-								"create"
-							]
-						}
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "api/v1/tree/moveTerritory",
-			"item": [
-				{
-					"name": "viewer move territory",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							},
-							{
-								"key": "Authorization",
-								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiNCIsImVtYWlsIjoidmlld2VyMUBpbmt2aXNpdG9yLmNvbSIsIm5hbWUiOiJ2aWV3ZXIxIiwicm9sZSI6InZpZXdlciIsIm9wdGlvbnMiOnsiZGVmYXVsdFRlcnJpdG9yeSI6IiIsImRlZmF1bHRMYW5ndWFnZSI6IiIsInNlYXJjaExhbmd1YWdlcyI6W119LCJib29rbWFya3MiOltdLCJzdG9yZWRUZXJyaXRvcmllcyI6W10sInJpZ2h0cyI6W3sidGVycml0b3J5IjoiVDQwLTAxIiwibW9kZSI6InJlYWQifV0sInBhc3N3b3JkIjoiJDJiJDEwJGNCL3FVWTFaekxrcnNlS1NvdnloSWVqcVUvNWJJOW5aYnd2L3BxckM3Qi5ZOTBFdERFUkFXIn0sImV4cCI6MTYzNzA5NjgyOSwiaWF0IjoxNjM0NTA0ODI5fQ.B2zbs4yL4G5pAlCKJ6385AnWV8rvkG42l_q9jLTy7Lg"
-							},
-							{
-								"key": "",
-								"value": "",
-								"disabled": true
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"moveId\": \"\"\n}"
-						},
-						"url": {
-							"raw": "http://localhost:4000/api/v1/tree/moveTerritory",
-							"protocol": "http",
-							"host": [
-								"localhost"
-							],
-							"port": "4000",
-							"path": [
-								"api",
-								"v1",
-								"tree",
-								"moveTerritory"
-							]
-						},
-						"description": "search by class + actantId"
-					},
-					"response": []
-				},
-				{
-					"name": "admin move territory",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							},
-							{
-								"key": "Authorization",
-								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiMSIsImVtYWlsIjoiYWRtaW5AYWRtaW4uY29tIiwibmFtZSI6ImFkbWluIiwicm9sZSI6ImFkbWluIiwib3B0aW9ucyI6eyJkZWZhdWx0VGVycml0b3J5IjoiIiwiZGVmYXVsdExhbmd1YWdlIjoiIiwic2VhcmNoTGFuZ3VhZ2VzIjpbXX0sImJvb2ttYXJrcyI6W10sInN0b3JlZFRlcnJpdG9yaWVzIjpbXSwicmlnaHRzIjpbeyJ0ZXJyaXRvcnkiOiJUMCIsIm1vZGUiOiJhZG1pbiJ9XSwicGFzc3dvcmQiOiIkMmIkMTAkQk1DQnBzZ25PWHBRdkd0VlVPaEx3dTFsV2RueVNETkF4enBDUjJDYVkxbXZ3ZEdRY0FoVGkifSwiZXhwIjoxNjM3MDk2ODI5LCJpYXQiOjE2MzQ1MDQ4Mjl9.bN72efWONf3lHHflcaDM0gdvD4DqgTGu-OICksQWT8I"
-							},
-							{
-								"key": "",
-								"value": "",
-								"disabled": true
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"moveId\": \"\"\n}"
-						},
-						"url": {
-							"raw": "http://localhost:4000/api/v1/tree/moveTerritory",
-							"protocol": "http",
-							"host": [
-								"localhost"
-							],
-							"port": "4000",
-							"path": [
-								"api",
-								"v1",
-								"tree",
-								"moveTerritory"
-							]
-						},
-						"description": "search by class + actantId"
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "api/v1/users/update/",
-			"item": [
-				{
-					"name": "admin update user rights",
-					"request": {
-						"method": "PUT",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							},
-							{
-								"key": "Authorization",
-								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiMSIsImVtYWlsIjoiYWRtaW5AYWRtaW4uY29tIiwibmFtZSI6ImFkbWluIiwicm9sZSI6ImFkbWluIiwib3B0aW9ucyI6eyJkZWZhdWx0VGVycml0b3J5IjoiIiwiZGVmYXVsdExhbmd1YWdlIjoiIiwic2VhcmNoTGFuZ3VhZ2VzIjpbXX0sImJvb2ttYXJrcyI6W10sInN0b3JlZFRlcnJpdG9yaWVzIjpbXSwicmlnaHRzIjpbeyJ0ZXJyaXRvcnkiOiJUMCIsIm1vZGUiOiJhZG1pbiJ9XSwicGFzc3dvcmQiOiIkMmIkMTAkQk1DQnBzZ25PWHBRdkd0VlVPaEx3dTFsV2RueVNETkF4enBDUjJDYVkxbXZ3ZEdRY0FoVGkifSwiZXhwIjoxNjM3MDk2ODI5LCJpYXQiOjE2MzQ1MDQ4Mjl9.bN72efWONf3lHHflcaDM0gdvD4DqgTGu-OICksQWT8I"
-							},
-							{
-								"key": "",
-								"value": "",
-								"disabled": true
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"rights\": []\n}"
-						},
-						"url": {
-							"raw": "http://localhost:4000/api/v1/users/update/4",
-							"protocol": "http",
-							"host": [
-								"localhost"
-							],
-							"port": "4000",
-							"path": [
-								"api",
-								"v1",
-								"users",
-								"update",
-								"4"
-							],
-							"query": [
-								{
-									"key": "rights",
-									"value": "[]",
-									"disabled": true
-								}
-							]
-						},
-						"description": "search by class + actantId"
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "api/v1/users/administration",
-			"item": [
-				{
-					"name": "get users",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							},
-							{
-								"key": "Authorization",
-								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiMSIsImVtYWlsIjoiYWRtaW5AYWRtaW4uY29tIiwibmFtZSI6ImFkbWluIiwicm9sZSI6ImFkbWluIiwib3B0aW9ucyI6eyJkZWZhdWx0VGVycml0b3J5IjoiIiwiZGVmYXVsdExhbmd1YWdlIjoiIiwic2VhcmNoTGFuZ3VhZ2VzIjpbXX0sImJvb2ttYXJrcyI6W10sInN0b3JlZFRlcnJpdG9yaWVzIjpbXSwicmlnaHRzIjpbeyJ0ZXJyaXRvcnkiOiJUMCIsIm1vZGUiOiJhZG1pbiJ9XSwicGFzc3dvcmQiOiIkMmIkMTAkQk1DQnBzZ25PWHBRdkd0VlVPaEx3dTFsV2RueVNETkF4enBDUjJDYVkxbXZ3ZEdRY0FoVGkifSwiZXhwIjoxNjM3MDk2ODI5LCJpYXQiOjE2MzQ1MDQ4Mjl9.bN72efWONf3lHHflcaDM0gdvD4DqgTGu-OICksQWT8I"
-							},
-							{
-								"key": "",
-								"value": "",
-								"disabled": true
-							}
-						],
-						"url": {
-							"raw": "http://localhost:4000/api/v1/users/administration",
-							"protocol": "http",
-							"host": [
-								"localhost"
-							],
-							"port": "4000",
-							"path": [
-								"api",
-								"v1",
-								"users",
-								"administration"
-							],
-							"query": [
-								{
-									"key": "rights",
-									"value": "[]",
-									"disabled": true
-								}
-							]
-						},
-						"description": "search by class + actantId"
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "api/v1/users/bookmarks",
-			"item": [
-				{
-					"name": "get viewer's bookmarks",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							},
-							{
-								"key": "Authorization",
-								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiMSIsImVtYWlsIjoiYWRtaW5AYWRtaW4uY29tIiwibmFtZSI6ImFkbWluIiwicm9sZSI6ImFkbWluIiwib3B0aW9ucyI6eyJkZWZhdWx0VGVycml0b3J5IjoiIiwiZGVmYXVsdExhbmd1YWdlIjoiIiwic2VhcmNoTGFuZ3VhZ2VzIjpbXX0sImJvb2ttYXJrcyI6W10sInN0b3JlZFRlcnJpdG9yaWVzIjpbXSwicmlnaHRzIjpbeyJ0ZXJyaXRvcnkiOiJUMCIsIm1vZGUiOiJhZG1pbiJ9XSwicGFzc3dvcmQiOiIkMmIkMTAkQk1DQnBzZ25PWHBRdkd0VlVPaEx3dTFsV2RueVNETkF4enBDUjJDYVkxbXZ3ZEdRY0FoVGkifSwiZXhwIjoxNjM3MDk2ODI5LCJpYXQiOjE2MzQ1MDQ4Mjl9.bN72efWONf3lHHflcaDM0gdvD4DqgTGu-OICksQWT8I"
-							},
-							{
-								"key": "",
-								"value": "",
-								"disabled": true
-							}
-						],
-						"url": {
-							"raw": "http://localhost:4000/api/v1/users/bookmarks/4",
-							"protocol": "http",
-							"host": [
-								"localhost"
-							],
-							"port": "4000",
-							"path": [
-								"api",
-								"v1",
-								"users",
-								"bookmarks",
-								"4"
-							]
-						},
-						"description": "search by class + actantId"
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "api/v1/users/create",
-			"item": [
-				{
-					"name": "admin create user",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							},
-							{
-								"key": "Authorization",
-								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiMSIsImVtYWlsIjoiYWRtaW5AYWRtaW4uY29tIiwibmFtZSI6ImFkbWluIiwicm9sZSI6ImFkbWluIiwib3B0aW9ucyI6eyJkZWZhdWx0VGVycml0b3J5IjoiIiwiZGVmYXVsdExhbmd1YWdlIjoiIiwic2VhcmNoTGFuZ3VhZ2VzIjpbXX0sImJvb2ttYXJrcyI6W10sInN0b3JlZFRlcnJpdG9yaWVzIjpbXSwicmlnaHRzIjpbeyJ0ZXJyaXRvcnkiOiJUMCIsIm1vZGUiOiJhZG1pbiJ9XSwicGFzc3dvcmQiOiIkMmIkMTAkQk1DQnBzZ25PWHBRdkd0VlVPaEx3dTFsV2RueVNETkF4enBDUjJDYVkxbXZ3ZEdRY0FoVGkifSwiZXhwIjoxNjM3MDk2ODI5LCJpYXQiOjE2MzQ1MDQ4Mjl9.bN72efWONf3lHHflcaDM0gdvD4DqgTGu-OICksQWT8I"
-							},
-							{
-								"key": "",
-								"value": "",
-								"disabled": true
-							}
-						],
-						"url": {
-							"raw": "http://localhost:4000/api/v1/tree/get",
-							"protocol": "http",
-							"host": [
-								"localhost"
-							],
-							"port": "4000",
-							"path": [
-								"api",
-								"v1",
-								"tree",
-								"get"
-							]
-						},
-						"description": "search by class + actantId"
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "api/v1/users/signin",
-			"item": [
-				{
-					"name": "sign in as active viewer",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							},
-							{
-								"key": "Authorization",
-								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiMSIsImVtYWlsIjoiYWRtaW5AYWRtaW4uY29tIiwibmFtZSI6ImFkbWluIiwicm9sZSI6ImFkbWluIiwib3B0aW9ucyI6eyJkZWZhdWx0VGVycml0b3J5IjoiIiwiZGVmYXVsdExhbmd1YWdlIjoiIiwic2VhcmNoTGFuZ3VhZ2VzIjpbXX0sImJvb2ttYXJrcyI6W10sInN0b3JlZFRlcnJpdG9yaWVzIjpbXSwicmlnaHRzIjpbeyJ0ZXJyaXRvcnkiOiJUMCIsIm1vZGUiOiJhZG1pbiJ9XSwicGFzc3dvcmQiOiIkMmIkMTAkQk1DQnBzZ25PWHBRdkd0VlVPaEx3dTFsV2RueVNETkF4enBDUjJDYVkxbXZ3ZEdRY0FoVGkifSwiZXhwIjoxNjM3MDk2ODI5LCJpYXQiOjE2MzQ1MDQ4Mjl9.bN72efWONf3lHHflcaDM0gdvD4DqgTGu-OICksQWT8I",
-								"disabled": true
-							},
-							{
-								"key": "",
-								"value": "",
-								"disabled": true
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"username\":\"viewer1@inkvisitor.com\",\n    \"password\": \"ghi\"\n}"
-						},
-						"url": {
-							"raw": "http://localhost:4000/api/v1/users/signin",
-							"protocol": "http",
-							"host": [
-								"localhost"
-							],
-							"port": "4000",
-							"path": [
-								"api",
-								"v1",
-								"users",
-								"signin"
-							]
-						},
-						"description": "search by class + actantId"
-					},
-					"response": []
-				},
-				{
-					"name": "sign in as inactive viewer",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							},
-							{
-								"key": "Authorization",
-								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiMSIsImVtYWlsIjoiYWRtaW5AYWRtaW4uY29tIiwibmFtZSI6ImFkbWluIiwicm9sZSI6ImFkbWluIiwib3B0aW9ucyI6eyJkZWZhdWx0VGVycml0b3J5IjoiIiwiZGVmYXVsdExhbmd1YWdlIjoiIiwic2VhcmNoTGFuZ3VhZ2VzIjpbXX0sImJvb2ttYXJrcyI6W10sInN0b3JlZFRlcnJpdG9yaWVzIjpbXSwicmlnaHRzIjpbeyJ0ZXJyaXRvcnkiOiJUMCIsIm1vZGUiOiJhZG1pbiJ9XSwicGFzc3dvcmQiOiIkMmIkMTAkQk1DQnBzZ25PWHBRdkd0VlVPaEx3dTFsV2RueVNETkF4enBDUjJDYVkxbXZ3ZEdRY0FoVGkifSwiZXhwIjoxNjM3MDk2ODI5LCJpYXQiOjE2MzQ1MDQ4Mjl9.bN72efWONf3lHHflcaDM0gdvD4DqgTGu-OICksQWT8I",
-								"disabled": true
-							},
-							{
-								"key": "",
-								"value": "",
-								"disabled": true
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"username\":\"inactive@inkvisitor.com\",\n    \"password\": \"inactive\"\n}"
-						},
-						"url": {
-							"raw": "http://localhost:4000/api/v1/users/signin",
-							"protocol": "http",
-							"host": [
-								"localhost"
-							],
-							"port": "4000",
-							"path": [
-								"api",
-								"v1",
-								"users",
-								"signin"
-							]
-						},
-						"description": "search by class + actantId"
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "api/v1/territories/get",
-			"item": [
-				{
-					"name": "api/v1/territories/get",
-					"item": [
-						{
-							"name": "admin get territory",
-							"request": {
-								"method": "GET",
-								"header": [
-									{
-										"key": "Content-Type",
-										"value": "application/json"
-									},
-									{
-										"key": "Authorization",
-										"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiMSIsImVtYWlsIjoiYWRtaW5AYWRtaW4uY29tIiwibmFtZSI6ImFkbWluIiwicm9sZSI6ImFkbWluIiwib3B0aW9ucyI6eyJkZWZhdWx0VGVycml0b3J5IjoiIiwiZGVmYXVsdExhbmd1YWdlIjoiIiwic2VhcmNoTGFuZ3VhZ2VzIjpbXX0sImJvb2ttYXJrcyI6W10sInN0b3JlZFRlcnJpdG9yaWVzIjpbXSwicmlnaHRzIjpbeyJ0ZXJyaXRvcnkiOiJUMCIsIm1vZGUiOiJhZG1pbiJ9XSwicGFzc3dvcmQiOiIkMmIkMTAkQk1DQnBzZ25PWHBRdkd0VlVPaEx3dTFsV2RueVNETkF4enBDUjJDYVkxbXZ3ZEdRY0FoVGkifSwiZXhwIjoxNjM3MDk2ODI5LCJpYXQiOjE2MzQ1MDQ4Mjl9.bN72efWONf3lHHflcaDM0gdvD4DqgTGu-OICksQWT8I"
-									},
-									{
-										"key": "",
-										"value": "",
-										"disabled": true
-									}
-								],
-								"url": {
-									"raw": "http://localhost:4000/api/v1/tree/get",
-									"protocol": "http",
-									"host": [
-										"localhost"
-									],
-									"port": "4000",
-									"path": [
-										"api",
-										"v1",
-										"tree",
-										"get"
-									]
-								},
-								"description": "search by class + actantId"
-							},
-							"response": []
-						}
-					]
-				},
-				{
-					"name": "admin get territory",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							},
-							{
-								"key": "Authorization",
-								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiMSIsImVtYWlsIjoiYWRtaW5AYWRtaW4uY29tIiwibmFtZSI6ImFkbWluIiwicm9sZSI6ImFkbWluIiwib3B0aW9ucyI6eyJkZWZhdWx0VGVycml0b3J5IjoiIiwiZGVmYXVsdExhbmd1YWdlIjoiIiwic2VhcmNoTGFuZ3VhZ2VzIjpbXX0sImJvb2ttYXJrcyI6W10sInN0b3JlZFRlcnJpdG9yaWVzIjpbXSwicmlnaHRzIjpbeyJ0ZXJyaXRvcnkiOiJUMCIsIm1vZGUiOiJhZG1pbiJ9XSwicGFzc3dvcmQiOiIkMmIkMTAkQk1DQnBzZ25PWHBRdkd0VlVPaEx3dTFsV2RueVNETkF4enBDUjJDYVkxbXZ3ZEdRY0FoVGkifSwiZXhwIjoxNjM3MDk2ODI5LCJpYXQiOjE2MzQ1MDQ4Mjl9.bN72efWONf3lHHflcaDM0gdvD4DqgTGu-OICksQWT8I"
-							},
-							{
-								"key": "",
-								"value": "",
-								"disabled": true
-							}
-						],
-						"url": {
-							"raw": "http://localhost:4000/api/v1/territories/get/T3-1",
-							"protocol": "http",
-							"host": [
-								"localhost"
-							],
-							"port": "4000",
-							"path": [
-								"api",
-								"v1",
-								"territories",
-								"get",
-								"T3-1"
-							]
-						},
-						"description": "search by class + actantId"
-					},
-					"response": []
-				},
-				{
-					"name": "editor get territory",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							},
-							{
-								"key": "Authorization",
-								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiMiIsImVtYWlsIjoiZWRpdG9yQGlua3Zpc2l0b3IuY29tIiwicGFzc3dvcmQiOiIkMmIkMTAkamU5SFB0bDRuN3I4RTBacU4yTHpvLkVZUWJLMW5LVHA2RExwNFkuOXJtWGx0TmdYRGlWdkMiLCJuYW1lIjoiZWRpdG9yMSIsInJvbGUiOiJlZGl0b3IiLCJhY3RpdmUiOnRydWUsIm9wdGlvbnMiOnsiZGVmYXVsdFRlcnJpdG9yeSI6IiIsImRlZmF1bHRMYW5ndWFnZSI6IiIsInNlYXJjaExhbmd1YWdlcyI6W119LCJib29rbWFya3MiOltdLCJzdG9yZWRUZXJyaXRvcmllcyI6W10sInJpZ2h0cyI6W3sidGVycml0b3J5IjoiVDMtMS0wOCIsIm1vZGUiOiJyZWFkIn0seyJ0ZXJyaXRvcnkiOiJUMy0xLTA3IiwibW9kZSI6IndyaXRlIn1dfSwiZXhwIjoxNjM4MzA2OTY3LCJpYXQiOjE2MzU3MTQ5Njd9.9K35K9jqRCAsJk3oB9649hFmvjivyMk3EiJaEDOlPHc"
-							},
-							{
-								"key": "",
-								"value": "",
-								"disabled": true
-							}
-						],
-						"url": {
-							"raw": "http://localhost:4000/api/v1/territories/get/T3-1",
-							"protocol": "http",
-							"host": [
-								"localhost"
-							],
-							"port": "4000",
-							"path": [
-								"api",
-								"v1",
-								"territories",
-								"get",
-								"T3-1"
-							]
-						},
-						"description": "search by class + actantId"
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "api/v1/actants/update",
-			"item": [
-				{
-					"name": "update an entity as admin",
-					"request": {
-						"method": "PUT",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiMSIsImVtYWlsIjoiYWRtaW5AYWRtaW4uY29tIiwicGFzc3dvcmQiOiIkMmIkMTAkNnFuRFBUU0drN01tNTdaOTE1NTlPZWxXdGNvSGFUWkVnSFRidHouSUJVNzVZSzBMMjVmWGUiLCJuYW1lIjoiYWRtaW4iLCJyb2xlIjoiYWRtaW4iLCJhY3RpdmUiOnRydWUsIm9wdGlvbnMiOnsiZGVmYXVsdFRlcnJpdG9yeSI6IiIsImRlZmF1bHRMYW5ndWFnZSI6IiIsInNlYXJjaExhbmd1YWdlcyI6W119LCJib29rbWFya3MiOltdLCJzdG9yZWRUZXJyaXRvcmllcyI6W3sidGVycml0b3J5SWQiOiIzIn1dLCJyaWdodHMiOlt7InRlcnJpdG9yeSI6IlQwIiwibW9kZSI6ImFkbWluIn1dfSwiZXhwIjoxNjQwNzIwMDA4LCJpYXQiOjE2MzgxMjgwMDh9.Im4cEyGMkbVUCyTUYD5gqleRFsa3ukA2q5qFYuR3O14",
-								"type": "text"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"data\": {\n        \"logicalType\": \"1\"\n    }\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "http://localhost:4000/api/v1/actants/update/0e2e0d90-4d8d-42ae-8121-cd3648b3d541",
-							"protocol": "http",
-							"host": [
-								"localhost"
-							],
-							"port": "4000",
-							"path": [
-								"api",
-								"v1",
-								"actants",
-								"update",
-								"0e2e0d90-4d8d-42ae-8121-cd3648b3d541"
-							]
-						}
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "api/v1/users/me",
-			"item": [
-				{
-					"name": "admin get me",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							},
-							{
-								"key": "Authorization",
-								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiMSIsImVtYWlsIjoiYWRtaW5AYWRtaW4uY29tIiwibmFtZSI6ImFkbWluIiwicm9sZSI6ImFkbWluIiwib3B0aW9ucyI6eyJkZWZhdWx0VGVycml0b3J5IjoiIiwiZGVmYXVsdExhbmd1YWdlIjoiIiwic2VhcmNoTGFuZ3VhZ2VzIjpbXX0sImJvb2ttYXJrcyI6W10sInN0b3JlZFRlcnJpdG9yaWVzIjpbXSwicmlnaHRzIjpbeyJ0ZXJyaXRvcnkiOiJUMCIsIm1vZGUiOiJhZG1pbiJ9XSwicGFzc3dvcmQiOiIkMmIkMTAkQk1DQnBzZ25PWHBRdkd0VlVPaEx3dTFsV2RueVNETkF4enBDUjJDYVkxbXZ3ZEdRY0FoVGkifSwiZXhwIjoxNjM3MDk2ODI5LCJpYXQiOjE2MzQ1MDQ4Mjl9.bN72efWONf3lHHflcaDM0gdvD4DqgTGu-OICksQWT8I"
-							},
-							{
-								"key": "",
-								"value": "",
-								"disabled": true
-							}
-						],
-						"url": {
-							"raw": "http://localhost:4000/api/v1/tree/get",
-							"protocol": "http",
-							"host": [
-								"localhost"
-							],
-							"port": "4000",
-							"path": [
-								"api",
-								"v1",
-								"tree",
-								"get"
-							]
-						},
-						"description": "search by class + actantId"
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "api/v1/users/get",
-			"item": [
-				{
-					"name": "admin get 1",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							},
-							{
-								"key": "Authorization",
-								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiMSIsImVtYWlsIjoiYWRtaW5AYWRtaW4uY29tIiwibmFtZSI6ImFkbWluIiwicm9sZSI6ImFkbWluIiwib3B0aW9ucyI6eyJkZWZhdWx0VGVycml0b3J5IjoiIiwiZGVmYXVsdExhbmd1YWdlIjoiIiwic2VhcmNoTGFuZ3VhZ2VzIjpbXX0sImJvb2ttYXJrcyI6W10sInN0b3JlZFRlcnJpdG9yaWVzIjpbXSwicmlnaHRzIjpbeyJ0ZXJyaXRvcnkiOiJUMCIsIm1vZGUiOiJhZG1pbiJ9XSwicGFzc3dvcmQiOiIkMmIkMTAkQk1DQnBzZ25PWHBRdkd0VlVPaEx3dTFsV2RueVNETkF4enBDUjJDYVkxbXZ3ZEdRY0FoVGkifSwiZXhwIjoxNjM3MDk2ODI5LCJpYXQiOjE2MzQ1MDQ4Mjl9.bN72efWONf3lHHflcaDM0gdvD4DqgTGu-OICksQWT8I"
-							},
-							{
-								"key": "",
-								"value": "",
-								"disabled": true
-							}
-						],
-						"url": {
-							"raw": "http://localhost:4000/api/v1/tree/get",
-							"protocol": "http",
-							"host": [
-								"localhost"
-							],
-							"port": "4000",
-							"path": [
-								"api",
-								"v1",
-								"tree",
-								"get"
-							]
-						},
-						"description": "search by class + actantId"
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "api/v1/audits/get",
-			"item": [
-				{
-					"name": "get audits for actant",
-					"protocolProfileBehavior": {
-						"disableBodyPruning": true
-					},
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiMSIsImVtYWlsIjoiYWRtaW5AYWRtaW4uY29tIiwicGFzc3dvcmQiOiIkMmIkMTAkNnFuRFBUU0drN01tNTdaOTE1NTlPZWxXdGNvSGFUWkVnSFRidHouSUJVNzVZSzBMMjVmWGUiLCJuYW1lIjoiYWRtaW4iLCJyb2xlIjoiYWRtaW4iLCJhY3RpdmUiOnRydWUsIm9wdGlvbnMiOnsiZGVmYXVsdFRlcnJpdG9yeSI6IiIsImRlZmF1bHRMYW5ndWFnZSI6IiIsInNlYXJjaExhbmd1YWdlcyI6W119LCJib29rbWFya3MiOltdLCJzdG9yZWRUZXJyaXRvcmllcyI6W3sidGVycml0b3J5SWQiOiIzIn1dLCJyaWdodHMiOlt7InRlcnJpdG9yeSI6IlQwIiwibW9kZSI6ImFkbWluIn1dfSwiZXhwIjoxNjQwNzIwMDA4LCJpYXQiOjE2MzgxMjgwMDh9.Im4cEyGMkbVUCyTUYD5gqleRFsa3ukA2q5qFYuR3O14",
-								"type": "text"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"data\": {\n        \"logicalType\": \"1\"\n    }\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "http://localhost:4000/api/v1/audits/get/0e2e0d90-4d8d-42ae-8121-cd3648b3d541",
-							"protocol": "http",
-							"host": [
-								"localhost"
-							],
-							"port": "4000",
-							"path": [
-								"api",
-								"v1",
-								"audits",
-								"get",
-								"0e2e0d90-4d8d-42ae-8121-cd3648b3d541"
-							]
-						}
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "api/v1/actants/getMore",
-			"item": [
-				{
-					"name": "get more by class",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							},
-							{
-								"key": "Authorization",
-								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiMSIsImVtYWlsIjoiYWRtaW5AYWRtaW4uY29tIiwicGFzc3dvcmQiOiIkMmIkMTAkNnFuRFBUU0drN01tNTdaOTE1NTlPZWxXdGNvSGFUWkVnSFRidHouSUJVNzVZSzBMMjVmWGUiLCJuYW1lIjoiYWRtaW4iLCJyb2xlIjoiYWRtaW4iLCJhY3RpdmUiOnRydWUsIm9wdGlvbnMiOnsiZGVmYXVsdFRlcnJpdG9yeSI6IiIsImRlZmF1bHRMYW5ndWFnZSI6IiIsInNlYXJjaExhbmd1YWdlcyI6W119LCJib29rbWFya3MiOltdLCJzdG9yZWRUZXJyaXRvcmllcyI6W3sidGVycml0b3J5SWQiOiIzIn1dLCJyaWdodHMiOlt7InRlcnJpdG9yeSI6IlQwIiwibW9kZSI6ImFkbWluIn1dfSwiZXhwIjoxNjQwNzIwMDA4LCJpYXQiOjE2MzgxMjgwMDh9.Im4cEyGMkbVUCyTUYD5gqleRFsa3ukA2q5qFYuR3O14",
-								"type": "text"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n\t\"class\": \"E\",\n    \"excluded\": [\"E\",\"V\", \"P\", \"C\"]\n}"
-						},
-						"url": {
-							"raw": "http://localhost:4000/api/v1/actants/getMore",
-							"protocol": "http",
-							"host": [
-								"localhost"
-							],
-							"port": "4000",
-							"path": [
-								"api",
-								"v1",
-								"actants",
-								"getMore"
-							]
-						},
-						"description": "search by class + label"
-					},
-					"response": []
-				},
-				{
-					"name": "get more by class + excludwed",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							},
-							{
-								"key": "Authorization",
-								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiMSIsImVtYWlsIjoiYWRtaW5AYWRtaW4uY29tIiwicGFzc3dvcmQiOiIkMmIkMTAkNnFuRFBUU0drN01tNTdaOTE1NTlPZWxXdGNvSGFUWkVnSFRidHouSUJVNzVZSzBMMjVmWGUiLCJuYW1lIjoiYWRtaW4iLCJyb2xlIjoiYWRtaW4iLCJhY3RpdmUiOnRydWUsIm9wdGlvbnMiOnsiZGVmYXVsdFRlcnJpdG9yeSI6IiIsImRlZmF1bHRMYW5ndWFnZSI6IiIsInNlYXJjaExhbmd1YWdlcyI6W119LCJib29rbWFya3MiOltdLCJzdG9yZWRUZXJyaXRvcmllcyI6W3sidGVycml0b3J5SWQiOiIzIn1dLCJyaWdodHMiOlt7InRlcnJpdG9yeSI6IlQwIiwibW9kZSI6ImFkbWluIn1dfSwiZXhwIjoxNjQwNzIwMDA4LCJpYXQiOjE2MzgxMjgwMDh9.Im4cEyGMkbVUCyTUYD5gqleRFsa3ukA2q5qFYuR3O14",
-								"type": "text"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n\t\"class\": \"E\",\n    \"excludedd\": [\"E\",\"V\", \"P\", \"C\"]\n}"
-						},
-						"url": {
-							"raw": "http://localhost:4000/api/v1/actants/getMore",
-							"protocol": "http",
-							"host": [
-								"localhost"
-							],
-							"port": "4000",
-							"path": [
-								"api",
-								"v1",
-								"actants",
-								"getMore"
-							]
-						},
-						"description": "search by class + label"
-					},
-					"response": []
-				}
-			]
-		}
-	]
+  "info": {
+    "_postman_id": "819821a5-ee52-430c-8f7f-6f47b7d12fce",
+    "name": "inkvisitor api",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "api/v1/entities/search",
+      "item": [
+        {
+          "name": "search by class and label",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiMSIsImVtYWlsIjoiYWRtaW5AYWRtaW4uY29tIiwibmFtZSI6ImFkbWluIiwicm9sZSI6ImFkbWluIiwib3B0aW9ucyI6eyJkZWZhdWx0VGVycml0b3J5IjoiIiwiZGVmYXVsdExhbmd1YWdlIjoiIiwic2VhcmNoTGFuZ3VhZ2VzIjpbXX0sImJvb2ttYXJrcyI6W10sInN0b3JlZFRlcnJpdG9yaWVzIjpbXSwicmlnaHRzIjpbeyJ0ZXJyaXRvcnkiOiJUMCIsIm1vZGUiOiJhZG1pbiJ9XSwicGFzc3dvcmQiOiIkMmIkMTAkQk1DQnBzZ25PWHBRdkd0VlVPaEx3dTFsV2RueVNETkF4enBDUjJDYVkxbXZ3ZEdRY0FoVGkifSwiZXhwIjoxNjM3MDk2ODI5LCJpYXQiOjE2MzQ1MDQ4Mjl9.bN72efWONf3lHHflcaDM0gdvD4DqgTGu-OICksQWT8I",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n\t\"class\": \"T\",\n\t\"label\": \"t\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:4000/api/v1/entities/search",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "4000",
+              "path": ["api", "v1", "entities", "search"]
+            },
+            "description": "search by class + label"
+          },
+          "response": []
+        },
+        {
+          "name": "search by id",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiMSIsImVtYWlsIjoiYWRtaW5AYWRtaW4uY29tIiwibmFtZSI6ImFkbWluIiwicm9sZSI6ImFkbWluIiwib3B0aW9ucyI6eyJkZWZhdWx0VGVycml0b3J5IjoiIiwiZGVmYXVsdExhbmd1YWdlIjoiIiwic2VhcmNoTGFuZ3VhZ2VzIjpbXX0sImJvb2ttYXJrcyI6W10sInN0b3JlZFRlcnJpdG9yaWVzIjpbXSwicmlnaHRzIjpbXSwicGFzc3dvcmQiOiIkMmIkMTAkRmFmUzZ0dm1UNlgxRDdGQ1ZoUml5ZU0uR1pIR3FIVmcxODkvQXBUUUdKbi9Gdm9YVzU4Q0MifSwiZXhwIjoxNjM3NDM1MjYyLCJpYXQiOjE2MzQ4NDMyNjJ9.YNww5HKUZ3nbdkimNRnD7EEpDFs5MXQ4ldXkiyxDUu4"
+              },
+              {
+                "key": "",
+                "value": "",
+                "disabled": true
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n\t\"entityId\": \"bd11c582-b3d5-4dc9-800b-17a609bc30d8\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:4000/api/v1/entities/search",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "4000",
+              "path": ["api", "v1", "entities", "search"]
+            },
+            "description": "search by class + entityId"
+          },
+          "response": []
+        },
+        {
+          "name": "search by class, label and id",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiMSIsImVtYWlsIjoiYWRtaW5AYWRtaW4uY29tIiwibmFtZSI6ImFkbWluIiwicm9sZSI6ImFkbWluIiwib3B0aW9ucyI6eyJkZWZhdWx0VGVycml0b3J5IjoiIiwiZGVmYXVsdExhbmd1YWdlIjoiIiwic2VhcmNoTGFuZ3VhZ2VzIjpbXX0sImJvb2ttYXJrcyI6W10sInN0b3JlZFRlcnJpdG9yaWVzIjpbXSwicmlnaHRzIjpbXSwicGFzc3dvcmQiOiIkMmIkMTAkRmFmUzZ0dm1UNlgxRDdGQ1ZoUml5ZU0uR1pIR3FIVmcxODkvQXBUUUdKbi9Gdm9YVzU4Q0MifSwiZXhwIjoxNjM3NDM1MjYyLCJpYXQiOjE2MzQ4NDMyNjJ9.YNww5HKUZ3nbdkimNRnD7EEpDFs5MXQ4ldXkiyxDUu4"
+              },
+              {
+                "key": "",
+                "value": "",
+                "disabled": true
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"class\": \"V\",\n    \"label\": \"chan\",\n    \"entityId\": \"bd11c582-b3d5-4dc9-800b-17a609bc30d8\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:4000/api/v1/entities/search",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "4000",
+              "path": ["api", "v1", "entities", "search"]
+            },
+            "description": "search by class + entityId"
+          },
+          "response": []
+        },
+        {
+          "name": "search by label and exclusion",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiMSIsImVtYWlsIjoiYWRtaW5AYWRtaW4uY29tIiwibmFtZSI6ImFkbWluIiwicm9sZSI6ImFkbWluIiwib3B0aW9ucyI6eyJkZWZhdWx0VGVycml0b3J5IjoiIiwiZGVmYXVsdExhbmd1YWdlIjoiIiwic2VhcmNoTGFuZ3VhZ2VzIjpbXX0sImJvb2ttYXJrcyI6W10sInN0b3JlZFRlcnJpdG9yaWVzIjpbXSwicmlnaHRzIjpbeyJ0ZXJyaXRvcnkiOiJUMCIsIm1vZGUiOiJhZG1pbiJ9XSwicGFzc3dvcmQiOiIkMmIkMTAkQk1DQnBzZ25PWHBRdkd0VlVPaEx3dTFsV2RueVNETkF4enBDUjJDYVkxbXZ3ZEdRY0FoVGkifSwiZXhwIjoxNjM3MDk2ODI5LCJpYXQiOjE2MzQ1MDQ4Mjl9.bN72efWONf3lHHflcaDM0gdvD4DqgTGu-OICksQWT8I",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n\t\"label\": \"a\",\n    \"excluded\": [\"E\",\"V\", \"P\", \"C\"]\n}"
+            },
+            "url": {
+              "raw": "http://localhost:4000/api/v1/entities/search",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "4000",
+              "path": ["api", "v1", "entities", "search"]
+            },
+            "description": "search by class + label"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "api/v1/tree/get",
+      "item": [
+        {
+          "name": "viewer get tree",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiNCIsImVtYWlsIjoidmlld2VyMUBpbmt2aXNpdG9yLmNvbSIsIm5hbWUiOiJ2aWV3ZXIxIiwicm9sZSI6InZpZXdlciIsIm9wdGlvbnMiOnsiZGVmYXVsdFRlcnJpdG9yeSI6IiIsImRlZmF1bHRMYW5ndWFnZSI6IiIsInNlYXJjaExhbmd1YWdlcyI6W119LCJib29rbWFya3MiOltdLCJzdG9yZWRUZXJyaXRvcmllcyI6W10sInJpZ2h0cyI6W3sidGVycml0b3J5IjoiVDQwLTAxIiwibW9kZSI6InJlYWQifV0sInBhc3N3b3JkIjoiJDJiJDEwJGNCL3FVWTFaekxrcnNlS1NvdnloSWVqcVUvNWJJOW5aYnd2L3BxckM3Qi5ZOTBFdERFUkFXIn0sImV4cCI6MTYzNzA5NjgyOSwiaWF0IjoxNjM0NTA0ODI5fQ.B2zbs4yL4G5pAlCKJ6385AnWV8rvkG42l_q9jLTy7Lg"
+              },
+              {
+                "key": "",
+                "value": "",
+                "disabled": true
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:4000/api/v1/tree/get",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "4000",
+              "path": ["api", "v1", "tree", "get"]
+            },
+            "description": "search by class + entityId"
+          },
+          "response": []
+        },
+        {
+          "name": "admin get tree",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiMSIsImVtYWlsIjoiYWRtaW5AYWRtaW4uY29tIiwibmFtZSI6ImFkbWluIiwicm9sZSI6ImFkbWluIiwib3B0aW9ucyI6eyJkZWZhdWx0VGVycml0b3J5IjoiIiwiZGVmYXVsdExhbmd1YWdlIjoiIiwic2VhcmNoTGFuZ3VhZ2VzIjpbXX0sImJvb2ttYXJrcyI6W10sInN0b3JlZFRlcnJpdG9yaWVzIjpbXSwicmlnaHRzIjpbeyJ0ZXJyaXRvcnkiOiJUMCIsIm1vZGUiOiJhZG1pbiJ9XSwicGFzc3dvcmQiOiIkMmIkMTAkQk1DQnBzZ25PWHBRdkd0VlVPaEx3dTFsV2RueVNETkF4enBDUjJDYVkxbXZ3ZEdRY0FoVGkifSwiZXhwIjoxNjM3MDk2ODI5LCJpYXQiOjE2MzQ1MDQ4Mjl9.bN72efWONf3lHHflcaDM0gdvD4DqgTGu-OICksQWT8I"
+              },
+              {
+                "key": "",
+                "value": "",
+                "disabled": true
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:4000/api/v1/tree/get",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "4000",
+              "path": ["api", "v1", "tree", "get"]
+            },
+            "description": "search by class + entityId"
+          },
+          "response": []
+        },
+        {
+          "name": "editor get tree",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiMiIsImVtYWlsIjoiZWRpdG9yQGlua3Zpc2l0b3IuY29tIiwicGFzc3dvcmQiOiIkMmIkMTAkamU5SFB0bDRuN3I4RTBacU4yTHpvLkVZUWJLMW5LVHA2RExwNFkuOXJtWGx0TmdYRGlWdkMiLCJuYW1lIjoiZWRpdG9yMSIsInJvbGUiOiJlZGl0b3IiLCJhY3RpdmUiOnRydWUsIm9wdGlvbnMiOnsiZGVmYXVsdFRlcnJpdG9yeSI6IiIsImRlZmF1bHRMYW5ndWFnZSI6IiIsInNlYXJjaExhbmd1YWdlcyI6W119LCJib29rbWFya3MiOltdLCJzdG9yZWRUZXJyaXRvcmllcyI6W10sInJpZ2h0cyI6W3sidGVycml0b3J5IjoiVDMtMS0wOCIsIm1vZGUiOiJyZWFkIn0seyJ0ZXJyaXRvcnkiOiJUMy0xLTA3IiwibW9kZSI6IndyaXRlIn1dfSwiZXhwIjoxNjM4MzA2OTY3LCJpYXQiOjE2MzU3MTQ5Njd9.9K35K9jqRCAsJk3oB9649hFmvjivyMk3EiJaEDOlPHc"
+              },
+              {
+                "key": "",
+                "value": "",
+                "disabled": true
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:4000/api/v1/tree/get",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "4000",
+              "path": ["api", "v1", "tree", "get"]
+            },
+            "description": "search by class + entityId"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "api/v1/entities/create",
+      "item": [
+        {
+          "name": "create a territory as admin - valid",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiMSIsImVtYWlsIjoiYWRtaW5AYWRtaW4uY29tIiwicGFzc3dvcmQiOiIkMmIkMTAkNnFuRFBUU0drN01tNTdaOTE1NTlPZWxXdGNvSGFUWkVnSFRidHouSUJVNzVZSzBMMjVmWGUiLCJuYW1lIjoiYWRtaW4iLCJyb2xlIjoiYWRtaW4iLCJhY3RpdmUiOnRydWUsIm9wdGlvbnMiOnsiZGVmYXVsdFRlcnJpdG9yeSI6IiIsImRlZmF1bHRMYW5ndWFnZSI6IiIsInNlYXJjaExhbmd1YWdlcyI6W119LCJib29rbWFya3MiOltdLCJzdG9yZWRUZXJyaXRvcmllcyI6W3sidGVycml0b3J5SWQiOiIzIn1dLCJyaWdodHMiOlt7InRlcnJpdG9yeSI6IlQwIiwibW9kZSI6ImFkbWluIn1dfSwiZXhwIjoxNjQwNzIwMDA4LCJpYXQiOjE2MzgxMjgwMDh9.Im4cEyGMkbVUCyTUYD5gqleRFsa3ukA2q5qFYuR3O14",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n        \"language\": [\n            \"eng\"\n        ],\n        \"class\": \"E\"\n     \n    }",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:4000/api/v1/entities/create",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "4000",
+              "path": ["api", "v1", "entities", "create"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "create a territory as admin - invalid(no parent)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiMSIsImVtYWlsIjoiYWRtaW5AYWRtaW4uY29tIiwibmFtZSI6ImFkbWluIiwicm9sZSI6ImFkbWluIiwib3B0aW9ucyI6eyJkZWZhdWx0VGVycml0b3J5IjoiIiwiZGVmYXVsdExhbmd1YWdlIjoiIiwic2VhcmNoTGFuZ3VhZ2VzIjpbXX0sImJvb2ttYXJrcyI6W10sInN0b3JlZFRlcnJpdG9yaWVzIjpbXSwicmlnaHRzIjpbeyJ0ZXJyaXRvcnkiOiJUMCIsIm1vZGUiOiJhZG1pbiJ9XSwicGFzc3dvcmQiOiIkMmIkMTAkQk1DQnBzZ25PWHBRdkd0VlVPaEx3dTFsV2RueVNETkF4enBDUjJDYVkxbXZ3ZEdRY0FoVGkifSwiZXhwIjoxNjM3MDk2ODI5LCJpYXQiOjE2MzQ1MDQ4Mjl9.bN72efWONf3lHHflcaDM0gdvD4DqgTGu-OICksQWT8I",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n        \"language\": [\n            \"eng\"\n        ],\n        \"class\": \"T\",\n        \"data\": {\n            \"parent\": false\n        },\n        \"label\": \"everything\",\n        \"detail\": \"\",\n        \"status\": \"1\",\n        \"notes\": [],\n        \"_siblings\": {}\n    }",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:4000/api/v1/entities/create",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "4000",
+              "path": ["api", "v1", "entities", "create"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "create a territory as viewer without rights",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiNCIsImVtYWlsIjoidmlld2VyMUBpbmt2aXNpdG9yLmNvbSIsIm5hbWUiOiJ2aWV3ZXIxIiwicm9sZSI6InZpZXdlciIsIm9wdGlvbnMiOnsiZGVmYXVsdFRlcnJpdG9yeSI6IiIsImRlZmF1bHRMYW5ndWFnZSI6IiIsInNlYXJjaExhbmd1YWdlcyI6W119LCJib29rbWFya3MiOltdLCJzdG9yZWRUZXJyaXRvcmllcyI6W10sInJpZ2h0cyI6W3sidGVycml0b3J5IjoiVDQwLTAxIiwibW9kZSI6InJlYWQifV0sInBhc3N3b3JkIjoiJDJiJDEwJGNCL3FVWTFaekxrcnNlS1NvdnloSWVqcVUvNWJJOW5aYnd2L3BxckM3Qi5ZOTBFdERFUkFXIn0sImV4cCI6MTYzNzA5NjgyOSwiaWF0IjoxNjM0NTA0ODI5fQ.B2zbs4yL4G5pAlCKJ6385AnWV8rvkG42l_q9jLTy7Lg",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n        \"language\": [\n            \"eng\"\n        ],\n        \"class\": \"T\",\n        \"data\": {\n            \"parent\": {\n                \"id\": \"T80\"\n            }\n        },\n        \"label\": \"everything\",\n        \"detail\": \"\",\n        \"status\": \"1\",\n        \"notes\": [],\n        \"_siblings\": {}\n    }",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:4000/api/v1/entities/create",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "4000",
+              "path": ["api", "v1", "entities", "create"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "create a territory as editor with rights",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiMyIsImVtYWlsIjoiZWRpdG9yMkBpbmt2aXNpdG9yLmNvbSIsIm5hbWUiOiJlZGl0b3IyIiwicm9sZSI6ImVkaXRvciIsIm9wdGlvbnMiOnsiZGVmYXVsdFRlcnJpdG9yeSI6IiIsImRlZmF1bHRMYW5ndWFnZSI6IiIsInNlYXJjaExhbmd1YWdlcyI6W119LCJib29rbWFya3MiOltdLCJzdG9yZWRUZXJyaXRvcmllcyI6W10sInJpZ2h0cyI6W3sidGVycml0b3J5IjoiVDQwLTAxIiwibW9kZSI6IndyaXRlIn1dLCJwYXNzd29yZCI6IiQyYiQxMCQyMXhrMy9FcUNCUm5LeUFKMlVhRUcuZ0hURXdOa1dYNUdSVjJLaHIuODZiZEJ3cnJQTDJTUyJ9LCJleHAiOjE2MzcwOTgwNjcsImlhdCI6MTYzNDUwNjA2N30.JGL0eOEPfuDZHVnW1V-UaXRB4_bxs9pqIFxr2-gePQQ",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n        \"language\": [\n            \"eng\"\n        ],\n        \"class\": \"T\",\n        \"data\": {\n            \"parent\": {\n                \"id\": \"T40-01\"\n            }\n        },\n        \"label\": \"everything\",\n        \"detail\": \"\",\n        \"status\": \"1\",\n        \"notes\": [],\n        \"_siblings\": {}\n    }",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:4000/api/v1/entities/create",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "4000",
+              "path": ["api", "v1", "entities", "create"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "create a statement as viewer without rights",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiNCIsImVtYWlsIjoidmlld2VyMUBpbmt2aXNpdG9yLmNvbSIsIm5hbWUiOiJ2aWV3ZXIxIiwicm9sZSI6InZpZXdlciIsIm9wdGlvbnMiOnsiZGVmYXVsdFRlcnJpdG9yeSI6IiIsImRlZmF1bHRMYW5ndWFnZSI6IiIsInNlYXJjaExhbmd1YWdlcyI6W119LCJib29rbWFya3MiOltdLCJzdG9yZWRUZXJyaXRvcmllcyI6W10sInJpZ2h0cyI6W10sInBhc3N3b3JkIjoicnRlIn0sImV4cCI6MTYzNzY2OTAyNSwiaWF0IjoxNjM1MDc3MDI1fQ.MWuS8wZ3skiAk80K373pBiLDdINo3Ltsw7Y6fVinL6I",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"class\": \"S\",\n    \"data\": {\n        \"territory\": {\n            \"id\": \"T40\",\n            \"order\": 0\n        },\n    },\n            \"label\": \"[assdasda]\"\n\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:4000/api/v1/entities/create",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "4000",
+              "path": ["api", "v1", "entities", "create"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "create a statement as editor with rights",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiMyIsImVtYWlsIjoiZWRpdG9yMkBpbmt2aXNpdG9yLmNvbSIsIm5hbWUiOiJlZGl0b3IyIiwicm9sZSI6ImVkaXRvciIsIm9wdGlvbnMiOnsiZGVmYXVsdFRlcnJpdG9yeSI6IiIsImRlZmF1bHRMYW5ndWFnZSI6IiIsInNlYXJjaExhbmd1YWdlcyI6W119LCJib29rbWFya3MiOltdLCJzdG9yZWRUZXJyaXRvcmllcyI6W10sInJpZ2h0cyI6W3sidGVycml0b3J5IjoiVDQwLTAxIiwibW9kZSI6IndyaXRlIn1dLCJwYXNzd29yZCI6IiQyYiQxMCQyMXhrMy9FcUNCUm5LeUFKMlVhRUcuZ0hURXdOa1dYNUdSVjJLaHIuODZiZEJ3cnJQTDJTUyJ9LCJleHAiOjE2MzcwOTgwNjcsImlhdCI6MTYzNDUwNjA2N30.JGL0eOEPfuDZHVnW1V-UaXRB4_bxs9pqIFxr2-gePQQ",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"class\": \"S\",\n    \"data\": {\n        \"territory\": {\n            \"id\": \"T40-01\",\n            \"order\": 0\n        }\n    }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:4000/api/v1/entities/create",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "4000",
+              "path": ["api", "v1", "entities", "create"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "api/v1/tree/moveTerritory",
+      "item": [
+        {
+          "name": "viewer move territory",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiNCIsImVtYWlsIjoidmlld2VyMUBpbmt2aXNpdG9yLmNvbSIsIm5hbWUiOiJ2aWV3ZXIxIiwicm9sZSI6InZpZXdlciIsIm9wdGlvbnMiOnsiZGVmYXVsdFRlcnJpdG9yeSI6IiIsImRlZmF1bHRMYW5ndWFnZSI6IiIsInNlYXJjaExhbmd1YWdlcyI6W119LCJib29rbWFya3MiOltdLCJzdG9yZWRUZXJyaXRvcmllcyI6W10sInJpZ2h0cyI6W3sidGVycml0b3J5IjoiVDQwLTAxIiwibW9kZSI6InJlYWQifV0sInBhc3N3b3JkIjoiJDJiJDEwJGNCL3FVWTFaekxrcnNlS1NvdnloSWVqcVUvNWJJOW5aYnd2L3BxckM3Qi5ZOTBFdERFUkFXIn0sImV4cCI6MTYzNzA5NjgyOSwiaWF0IjoxNjM0NTA0ODI5fQ.B2zbs4yL4G5pAlCKJ6385AnWV8rvkG42l_q9jLTy7Lg"
+              },
+              {
+                "key": "",
+                "value": "",
+                "disabled": true
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"moveId\": \"\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:4000/api/v1/tree/moveTerritory",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "4000",
+              "path": ["api", "v1", "tree", "moveTerritory"]
+            },
+            "description": "search by class + entityId"
+          },
+          "response": []
+        },
+        {
+          "name": "admin move territory",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiMSIsImVtYWlsIjoiYWRtaW5AYWRtaW4uY29tIiwibmFtZSI6ImFkbWluIiwicm9sZSI6ImFkbWluIiwib3B0aW9ucyI6eyJkZWZhdWx0VGVycml0b3J5IjoiIiwiZGVmYXVsdExhbmd1YWdlIjoiIiwic2VhcmNoTGFuZ3VhZ2VzIjpbXX0sImJvb2ttYXJrcyI6W10sInN0b3JlZFRlcnJpdG9yaWVzIjpbXSwicmlnaHRzIjpbeyJ0ZXJyaXRvcnkiOiJUMCIsIm1vZGUiOiJhZG1pbiJ9XSwicGFzc3dvcmQiOiIkMmIkMTAkQk1DQnBzZ25PWHBRdkd0VlVPaEx3dTFsV2RueVNETkF4enBDUjJDYVkxbXZ3ZEdRY0FoVGkifSwiZXhwIjoxNjM3MDk2ODI5LCJpYXQiOjE2MzQ1MDQ4Mjl9.bN72efWONf3lHHflcaDM0gdvD4DqgTGu-OICksQWT8I"
+              },
+              {
+                "key": "",
+                "value": "",
+                "disabled": true
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"moveId\": \"\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:4000/api/v1/tree/moveTerritory",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "4000",
+              "path": ["api", "v1", "tree", "moveTerritory"]
+            },
+            "description": "search by class + entityId"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "api/v1/users/update/",
+      "item": [
+        {
+          "name": "admin update user rights",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiMSIsImVtYWlsIjoiYWRtaW5AYWRtaW4uY29tIiwibmFtZSI6ImFkbWluIiwicm9sZSI6ImFkbWluIiwib3B0aW9ucyI6eyJkZWZhdWx0VGVycml0b3J5IjoiIiwiZGVmYXVsdExhbmd1YWdlIjoiIiwic2VhcmNoTGFuZ3VhZ2VzIjpbXX0sImJvb2ttYXJrcyI6W10sInN0b3JlZFRlcnJpdG9yaWVzIjpbXSwicmlnaHRzIjpbeyJ0ZXJyaXRvcnkiOiJUMCIsIm1vZGUiOiJhZG1pbiJ9XSwicGFzc3dvcmQiOiIkMmIkMTAkQk1DQnBzZ25PWHBRdkd0VlVPaEx3dTFsV2RueVNETkF4enBDUjJDYVkxbXZ3ZEdRY0FoVGkifSwiZXhwIjoxNjM3MDk2ODI5LCJpYXQiOjE2MzQ1MDQ4Mjl9.bN72efWONf3lHHflcaDM0gdvD4DqgTGu-OICksQWT8I"
+              },
+              {
+                "key": "",
+                "value": "",
+                "disabled": true
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"rights\": []\n}"
+            },
+            "url": {
+              "raw": "http://localhost:4000/api/v1/users/update/4",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "4000",
+              "path": ["api", "v1", "users", "update", "4"],
+              "query": [
+                {
+                  "key": "rights",
+                  "value": "[]",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "search by class + entityId"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "api/v1/users/administration",
+      "item": [
+        {
+          "name": "get users",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiMSIsImVtYWlsIjoiYWRtaW5AYWRtaW4uY29tIiwibmFtZSI6ImFkbWluIiwicm9sZSI6ImFkbWluIiwib3B0aW9ucyI6eyJkZWZhdWx0VGVycml0b3J5IjoiIiwiZGVmYXVsdExhbmd1YWdlIjoiIiwic2VhcmNoTGFuZ3VhZ2VzIjpbXX0sImJvb2ttYXJrcyI6W10sInN0b3JlZFRlcnJpdG9yaWVzIjpbXSwicmlnaHRzIjpbeyJ0ZXJyaXRvcnkiOiJUMCIsIm1vZGUiOiJhZG1pbiJ9XSwicGFzc3dvcmQiOiIkMmIkMTAkQk1DQnBzZ25PWHBRdkd0VlVPaEx3dTFsV2RueVNETkF4enBDUjJDYVkxbXZ3ZEdRY0FoVGkifSwiZXhwIjoxNjM3MDk2ODI5LCJpYXQiOjE2MzQ1MDQ4Mjl9.bN72efWONf3lHHflcaDM0gdvD4DqgTGu-OICksQWT8I"
+              },
+              {
+                "key": "",
+                "value": "",
+                "disabled": true
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:4000/api/v1/users/administration",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "4000",
+              "path": ["api", "v1", "users", "administration"],
+              "query": [
+                {
+                  "key": "rights",
+                  "value": "[]",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "search by class + entityId"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "api/v1/users/bookmarks",
+      "item": [
+        {
+          "name": "get viewer's bookmarks",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiMSIsImVtYWlsIjoiYWRtaW5AYWRtaW4uY29tIiwibmFtZSI6ImFkbWluIiwicm9sZSI6ImFkbWluIiwib3B0aW9ucyI6eyJkZWZhdWx0VGVycml0b3J5IjoiIiwiZGVmYXVsdExhbmd1YWdlIjoiIiwic2VhcmNoTGFuZ3VhZ2VzIjpbXX0sImJvb2ttYXJrcyI6W10sInN0b3JlZFRlcnJpdG9yaWVzIjpbXSwicmlnaHRzIjpbeyJ0ZXJyaXRvcnkiOiJUMCIsIm1vZGUiOiJhZG1pbiJ9XSwicGFzc3dvcmQiOiIkMmIkMTAkQk1DQnBzZ25PWHBRdkd0VlVPaEx3dTFsV2RueVNETkF4enBDUjJDYVkxbXZ3ZEdRY0FoVGkifSwiZXhwIjoxNjM3MDk2ODI5LCJpYXQiOjE2MzQ1MDQ4Mjl9.bN72efWONf3lHHflcaDM0gdvD4DqgTGu-OICksQWT8I"
+              },
+              {
+                "key": "",
+                "value": "",
+                "disabled": true
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:4000/api/v1/users/bookmarks/4",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "4000",
+              "path": ["api", "v1", "users", "bookmarks", "4"]
+            },
+            "description": "search by class + entityId"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "api/v1/users/create",
+      "item": [
+        {
+          "name": "admin create user",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiMSIsImVtYWlsIjoiYWRtaW5AYWRtaW4uY29tIiwibmFtZSI6ImFkbWluIiwicm9sZSI6ImFkbWluIiwib3B0aW9ucyI6eyJkZWZhdWx0VGVycml0b3J5IjoiIiwiZGVmYXVsdExhbmd1YWdlIjoiIiwic2VhcmNoTGFuZ3VhZ2VzIjpbXX0sImJvb2ttYXJrcyI6W10sInN0b3JlZFRlcnJpdG9yaWVzIjpbXSwicmlnaHRzIjpbeyJ0ZXJyaXRvcnkiOiJUMCIsIm1vZGUiOiJhZG1pbiJ9XSwicGFzc3dvcmQiOiIkMmIkMTAkQk1DQnBzZ25PWHBRdkd0VlVPaEx3dTFsV2RueVNETkF4enBDUjJDYVkxbXZ3ZEdRY0FoVGkifSwiZXhwIjoxNjM3MDk2ODI5LCJpYXQiOjE2MzQ1MDQ4Mjl9.bN72efWONf3lHHflcaDM0gdvD4DqgTGu-OICksQWT8I"
+              },
+              {
+                "key": "",
+                "value": "",
+                "disabled": true
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:4000/api/v1/tree/get",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "4000",
+              "path": ["api", "v1", "tree", "get"]
+            },
+            "description": "search by class + entityId"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "api/v1/users/signin",
+      "item": [
+        {
+          "name": "sign in as active viewer",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiMSIsImVtYWlsIjoiYWRtaW5AYWRtaW4uY29tIiwibmFtZSI6ImFkbWluIiwicm9sZSI6ImFkbWluIiwib3B0aW9ucyI6eyJkZWZhdWx0VGVycml0b3J5IjoiIiwiZGVmYXVsdExhbmd1YWdlIjoiIiwic2VhcmNoTGFuZ3VhZ2VzIjpbXX0sImJvb2ttYXJrcyI6W10sInN0b3JlZFRlcnJpdG9yaWVzIjpbXSwicmlnaHRzIjpbeyJ0ZXJyaXRvcnkiOiJUMCIsIm1vZGUiOiJhZG1pbiJ9XSwicGFzc3dvcmQiOiIkMmIkMTAkQk1DQnBzZ25PWHBRdkd0VlVPaEx3dTFsV2RueVNETkF4enBDUjJDYVkxbXZ3ZEdRY0FoVGkifSwiZXhwIjoxNjM3MDk2ODI5LCJpYXQiOjE2MzQ1MDQ4Mjl9.bN72efWONf3lHHflcaDM0gdvD4DqgTGu-OICksQWT8I",
+                "disabled": true
+              },
+              {
+                "key": "",
+                "value": "",
+                "disabled": true
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"username\":\"viewer1@inkvisitor.com\",\n    \"password\": \"ghi\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:4000/api/v1/users/signin",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "4000",
+              "path": ["api", "v1", "users", "signin"]
+            },
+            "description": "search by class + entityId"
+          },
+          "response": []
+        },
+        {
+          "name": "sign in as inactive viewer",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiMSIsImVtYWlsIjoiYWRtaW5AYWRtaW4uY29tIiwibmFtZSI6ImFkbWluIiwicm9sZSI6ImFkbWluIiwib3B0aW9ucyI6eyJkZWZhdWx0VGVycml0b3J5IjoiIiwiZGVmYXVsdExhbmd1YWdlIjoiIiwic2VhcmNoTGFuZ3VhZ2VzIjpbXX0sImJvb2ttYXJrcyI6W10sInN0b3JlZFRlcnJpdG9yaWVzIjpbXSwicmlnaHRzIjpbeyJ0ZXJyaXRvcnkiOiJUMCIsIm1vZGUiOiJhZG1pbiJ9XSwicGFzc3dvcmQiOiIkMmIkMTAkQk1DQnBzZ25PWHBRdkd0VlVPaEx3dTFsV2RueVNETkF4enBDUjJDYVkxbXZ3ZEdRY0FoVGkifSwiZXhwIjoxNjM3MDk2ODI5LCJpYXQiOjE2MzQ1MDQ4Mjl9.bN72efWONf3lHHflcaDM0gdvD4DqgTGu-OICksQWT8I",
+                "disabled": true
+              },
+              {
+                "key": "",
+                "value": "",
+                "disabled": true
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"username\":\"inactive@inkvisitor.com\",\n    \"password\": \"inactive\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:4000/api/v1/users/signin",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "4000",
+              "path": ["api", "v1", "users", "signin"]
+            },
+            "description": "search by class + entityId"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "api/v1/territories/get",
+      "item": [
+        {
+          "name": "api/v1/territories/get",
+          "item": [
+            {
+              "name": "admin get territory",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiMSIsImVtYWlsIjoiYWRtaW5AYWRtaW4uY29tIiwibmFtZSI6ImFkbWluIiwicm9sZSI6ImFkbWluIiwib3B0aW9ucyI6eyJkZWZhdWx0VGVycml0b3J5IjoiIiwiZGVmYXVsdExhbmd1YWdlIjoiIiwic2VhcmNoTGFuZ3VhZ2VzIjpbXX0sImJvb2ttYXJrcyI6W10sInN0b3JlZFRlcnJpdG9yaWVzIjpbXSwicmlnaHRzIjpbeyJ0ZXJyaXRvcnkiOiJUMCIsIm1vZGUiOiJhZG1pbiJ9XSwicGFzc3dvcmQiOiIkMmIkMTAkQk1DQnBzZ25PWHBRdkd0VlVPaEx3dTFsV2RueVNETkF4enBDUjJDYVkxbXZ3ZEdRY0FoVGkifSwiZXhwIjoxNjM3MDk2ODI5LCJpYXQiOjE2MzQ1MDQ4Mjl9.bN72efWONf3lHHflcaDM0gdvD4DqgTGu-OICksQWT8I"
+                  },
+                  {
+                    "key": "",
+                    "value": "",
+                    "disabled": true
+                  }
+                ],
+                "url": {
+                  "raw": "http://localhost:4000/api/v1/tree/get",
+                  "protocol": "http",
+                  "host": ["localhost"],
+                  "port": "4000",
+                  "path": ["api", "v1", "tree", "get"]
+                },
+                "description": "search by class + entityId"
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "admin get territory",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiMSIsImVtYWlsIjoiYWRtaW5AYWRtaW4uY29tIiwibmFtZSI6ImFkbWluIiwicm9sZSI6ImFkbWluIiwib3B0aW9ucyI6eyJkZWZhdWx0VGVycml0b3J5IjoiIiwiZGVmYXVsdExhbmd1YWdlIjoiIiwic2VhcmNoTGFuZ3VhZ2VzIjpbXX0sImJvb2ttYXJrcyI6W10sInN0b3JlZFRlcnJpdG9yaWVzIjpbXSwicmlnaHRzIjpbeyJ0ZXJyaXRvcnkiOiJUMCIsIm1vZGUiOiJhZG1pbiJ9XSwicGFzc3dvcmQiOiIkMmIkMTAkQk1DQnBzZ25PWHBRdkd0VlVPaEx3dTFsV2RueVNETkF4enBDUjJDYVkxbXZ3ZEdRY0FoVGkifSwiZXhwIjoxNjM3MDk2ODI5LCJpYXQiOjE2MzQ1MDQ4Mjl9.bN72efWONf3lHHflcaDM0gdvD4DqgTGu-OICksQWT8I"
+              },
+              {
+                "key": "",
+                "value": "",
+                "disabled": true
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:4000/api/v1/territories/get/T3-1",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "4000",
+              "path": ["api", "v1", "territories", "get", "T3-1"]
+            },
+            "description": "search by class + entityId"
+          },
+          "response": []
+        },
+        {
+          "name": "editor get territory",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiMiIsImVtYWlsIjoiZWRpdG9yQGlua3Zpc2l0b3IuY29tIiwicGFzc3dvcmQiOiIkMmIkMTAkamU5SFB0bDRuN3I4RTBacU4yTHpvLkVZUWJLMW5LVHA2RExwNFkuOXJtWGx0TmdYRGlWdkMiLCJuYW1lIjoiZWRpdG9yMSIsInJvbGUiOiJlZGl0b3IiLCJhY3RpdmUiOnRydWUsIm9wdGlvbnMiOnsiZGVmYXVsdFRlcnJpdG9yeSI6IiIsImRlZmF1bHRMYW5ndWFnZSI6IiIsInNlYXJjaExhbmd1YWdlcyI6W119LCJib29rbWFya3MiOltdLCJzdG9yZWRUZXJyaXRvcmllcyI6W10sInJpZ2h0cyI6W3sidGVycml0b3J5IjoiVDMtMS0wOCIsIm1vZGUiOiJyZWFkIn0seyJ0ZXJyaXRvcnkiOiJUMy0xLTA3IiwibW9kZSI6IndyaXRlIn1dfSwiZXhwIjoxNjM4MzA2OTY3LCJpYXQiOjE2MzU3MTQ5Njd9.9K35K9jqRCAsJk3oB9649hFmvjivyMk3EiJaEDOlPHc"
+              },
+              {
+                "key": "",
+                "value": "",
+                "disabled": true
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:4000/api/v1/territories/get/T3-1",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "4000",
+              "path": ["api", "v1", "territories", "get", "T3-1"]
+            },
+            "description": "search by class + entity"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "api/v1/entities/update",
+      "item": [
+        {
+          "name": "update an entity as admin",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiMSIsImVtYWlsIjoiYWRtaW5AYWRtaW4uY29tIiwicGFzc3dvcmQiOiIkMmIkMTAkNnFuRFBUU0drN01tNTdaOTE1NTlPZWxXdGNvSGFUWkVnSFRidHouSUJVNzVZSzBMMjVmWGUiLCJuYW1lIjoiYWRtaW4iLCJyb2xlIjoiYWRtaW4iLCJhY3RpdmUiOnRydWUsIm9wdGlvbnMiOnsiZGVmYXVsdFRlcnJpdG9yeSI6IiIsImRlZmF1bHRMYW5ndWFnZSI6IiIsInNlYXJjaExhbmd1YWdlcyI6W119LCJib29rbWFya3MiOltdLCJzdG9yZWRUZXJyaXRvcmllcyI6W3sidGVycml0b3J5SWQiOiIzIn1dLCJyaWdodHMiOlt7InRlcnJpdG9yeSI6IlQwIiwibW9kZSI6ImFkbWluIn1dfSwiZXhwIjoxNjQwNzIwMDA4LCJpYXQiOjE2MzgxMjgwMDh9.Im4cEyGMkbVUCyTUYD5gqleRFsa3ukA2q5qFYuR3O14",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"data\": {\n        \"logicalType\": \"1\"\n    }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:4000/api/v1/entities/update/0e2e0d90-4d8d-42ae-8121-cd3648b3d541",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "4000",
+              "path": [
+                "api",
+                "v1",
+                "entities",
+                "update",
+                "0e2e0d90-4d8d-42ae-8121-cd3648b3d541"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "api/v1/users/me",
+      "item": [
+        {
+          "name": "admin get me",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiMSIsImVtYWlsIjoiYWRtaW5AYWRtaW4uY29tIiwibmFtZSI6ImFkbWluIiwicm9sZSI6ImFkbWluIiwib3B0aW9ucyI6eyJkZWZhdWx0VGVycml0b3J5IjoiIiwiZGVmYXVsdExhbmd1YWdlIjoiIiwic2VhcmNoTGFuZ3VhZ2VzIjpbXX0sImJvb2ttYXJrcyI6W10sInN0b3JlZFRlcnJpdG9yaWVzIjpbXSwicmlnaHRzIjpbeyJ0ZXJyaXRvcnkiOiJUMCIsIm1vZGUiOiJhZG1pbiJ9XSwicGFzc3dvcmQiOiIkMmIkMTAkQk1DQnBzZ25PWHBRdkd0VlVPaEx3dTFsV2RueVNETkF4enBDUjJDYVkxbXZ3ZEdRY0FoVGkifSwiZXhwIjoxNjM3MDk2ODI5LCJpYXQiOjE2MzQ1MDQ4Mjl9.bN72efWONf3lHHflcaDM0gdvD4DqgTGu-OICksQWT8I"
+              },
+              {
+                "key": "",
+                "value": "",
+                "disabled": true
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:4000/api/v1/tree/get",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "4000",
+              "path": ["api", "v1", "tree", "get"]
+            },
+            "description": "search by class + entityId"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "api/v1/users/get",
+      "item": [
+        {
+          "name": "admin get 1",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiMSIsImVtYWlsIjoiYWRtaW5AYWRtaW4uY29tIiwibmFtZSI6ImFkbWluIiwicm9sZSI6ImFkbWluIiwib3B0aW9ucyI6eyJkZWZhdWx0VGVycml0b3J5IjoiIiwiZGVmYXVsdExhbmd1YWdlIjoiIiwic2VhcmNoTGFuZ3VhZ2VzIjpbXX0sImJvb2ttYXJrcyI6W10sInN0b3JlZFRlcnJpdG9yaWVzIjpbXSwicmlnaHRzIjpbeyJ0ZXJyaXRvcnkiOiJUMCIsIm1vZGUiOiJhZG1pbiJ9XSwicGFzc3dvcmQiOiIkMmIkMTAkQk1DQnBzZ25PWHBRdkd0VlVPaEx3dTFsV2RueVNETkF4enBDUjJDYVkxbXZ3ZEdRY0FoVGkifSwiZXhwIjoxNjM3MDk2ODI5LCJpYXQiOjE2MzQ1MDQ4Mjl9.bN72efWONf3lHHflcaDM0gdvD4DqgTGu-OICksQWT8I"
+              },
+              {
+                "key": "",
+                "value": "",
+                "disabled": true
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:4000/api/v1/tree/get",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "4000",
+              "path": ["api", "v1", "tree", "get"]
+            },
+            "description": "search by class + entityId"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "api/v1/audits/get",
+      "item": [
+        {
+          "name": "get audits for entity",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiMSIsImVtYWlsIjoiYWRtaW5AYWRtaW4uY29tIiwicGFzc3dvcmQiOiIkMmIkMTAkNnFuRFBUU0drN01tNTdaOTE1NTlPZWxXdGNvSGFUWkVnSFRidHouSUJVNzVZSzBMMjVmWGUiLCJuYW1lIjoiYWRtaW4iLCJyb2xlIjoiYWRtaW4iLCJhY3RpdmUiOnRydWUsIm9wdGlvbnMiOnsiZGVmYXVsdFRlcnJpdG9yeSI6IiIsImRlZmF1bHRMYW5ndWFnZSI6IiIsInNlYXJjaExhbmd1YWdlcyI6W119LCJib29rbWFya3MiOltdLCJzdG9yZWRUZXJyaXRvcmllcyI6W3sidGVycml0b3J5SWQiOiIzIn1dLCJyaWdodHMiOlt7InRlcnJpdG9yeSI6IlQwIiwibW9kZSI6ImFkbWluIn1dfSwiZXhwIjoxNjQwNzIwMDA4LCJpYXQiOjE2MzgxMjgwMDh9.Im4cEyGMkbVUCyTUYD5gqleRFsa3ukA2q5qFYuR3O14",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"data\": {\n        \"logicalType\": \"1\"\n    }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:4000/api/v1/audits/get/0e2e0d90-4d8d-42ae-8121-cd3648b3d541",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "4000",
+              "path": [
+                "api",
+                "v1",
+                "audits",
+                "get",
+                "0e2e0d90-4d8d-42ae-8121-cd3648b3d541"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "api/v1/entities/getMore",
+      "item": [
+        {
+          "name": "get more by class",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiMSIsImVtYWlsIjoiYWRtaW5AYWRtaW4uY29tIiwicGFzc3dvcmQiOiIkMmIkMTAkNnFuRFBUU0drN01tNTdaOTE1NTlPZWxXdGNvSGFUWkVnSFRidHouSUJVNzVZSzBMMjVmWGUiLCJuYW1lIjoiYWRtaW4iLCJyb2xlIjoiYWRtaW4iLCJhY3RpdmUiOnRydWUsIm9wdGlvbnMiOnsiZGVmYXVsdFRlcnJpdG9yeSI6IiIsImRlZmF1bHRMYW5ndWFnZSI6IiIsInNlYXJjaExhbmd1YWdlcyI6W119LCJib29rbWFya3MiOltdLCJzdG9yZWRUZXJyaXRvcmllcyI6W3sidGVycml0b3J5SWQiOiIzIn1dLCJyaWdodHMiOlt7InRlcnJpdG9yeSI6IlQwIiwibW9kZSI6ImFkbWluIn1dfSwiZXhwIjoxNjQwNzIwMDA4LCJpYXQiOjE2MzgxMjgwMDh9.Im4cEyGMkbVUCyTUYD5gqleRFsa3ukA2q5qFYuR3O14",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n\t\"class\": \"E\",\n    \"excluded\": [\"E\",\"V\", \"P\", \"C\"]\n}"
+            },
+            "url": {
+              "raw": "http://localhost:4000/api/v1/entities/getMore",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "4000",
+              "path": ["api", "v1", "entities", "getMore"]
+            },
+            "description": "search by class + label"
+          },
+          "response": []
+        },
+        {
+          "name": "get more by class + excludwed",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiMSIsImVtYWlsIjoiYWRtaW5AYWRtaW4uY29tIiwicGFzc3dvcmQiOiIkMmIkMTAkNnFuRFBUU0drN01tNTdaOTE1NTlPZWxXdGNvSGFUWkVnSFRidHouSUJVNzVZSzBMMjVmWGUiLCJuYW1lIjoiYWRtaW4iLCJyb2xlIjoiYWRtaW4iLCJhY3RpdmUiOnRydWUsIm9wdGlvbnMiOnsiZGVmYXVsdFRlcnJpdG9yeSI6IiIsImRlZmF1bHRMYW5ndWFnZSI6IiIsInNlYXJjaExhbmd1YWdlcyI6W119LCJib29rbWFya3MiOltdLCJzdG9yZWRUZXJyaXRvcmllcyI6W3sidGVycml0b3J5SWQiOiIzIn1dLCJyaWdodHMiOlt7InRlcnJpdG9yeSI6IlQwIiwibW9kZSI6ImFkbWluIn1dfSwiZXhwIjoxNjQwNzIwMDA4LCJpYXQiOjE2MzgxMjgwMDh9.Im4cEyGMkbVUCyTUYD5gqleRFsa3ukA2q5qFYuR3O14",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n\t\"class\": \"E\",\n    \"excludedd\": [\"E\",\"V\", \"P\", \"C\"]\n}"
+            },
+            "url": {
+              "raw": "http://localhost:4000/api/v1/entities/getMore",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "4000",
+              "path": ["api", "v1", "entities", "getMore"]
+            },
+            "description": "search by class + label"
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
 }

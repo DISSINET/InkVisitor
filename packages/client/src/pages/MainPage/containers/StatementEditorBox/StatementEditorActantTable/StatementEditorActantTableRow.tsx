@@ -1,5 +1,5 @@
-import { ActantType } from "@shared/enums";
-import { IActant, IResponseStatement, IStatementActant } from "@shared/types";
+import { EntityClass } from "@shared/enums";
+import { IEntity, IResponseStatement, IStatementActant } from "@shared/types";
 import { AttributeIcon, Button, ButtonGroup } from "components";
 import { useSearchParams } from "hooks";
 import React, { useRef } from "react";
@@ -35,7 +35,7 @@ interface StatementEditorActantTableRow {
   renderPropGroup: Function;
   visibleColumns: ColumnInstance<{}>[];
   statement: IResponseStatement;
-  classEntitiesActant: ActantType[];
+  classEntitiesActant: EntityClass[];
   updateActantsMutation: UseMutationResult<any, unknown, object, unknown>;
 }
 
@@ -127,7 +127,7 @@ export const StatementEditorActantTableRow: React.FC<
       actant,
       sActant,
     }: {
-      actant: IActant;
+      actant: IEntity;
       sActant: IStatementActant | any;
     } = row.values.data;
     return actant ? (
@@ -220,7 +220,7 @@ export const StatementEditorActantTableRow: React.FC<
       actant,
       sActant,
     }: {
-      actant: IActant;
+      actant: IEntity;
       sActant: IStatementActant | any;
     } = row.values.data;
 

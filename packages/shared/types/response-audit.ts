@@ -1,7 +1,7 @@
 import { IAudit } from "./";
 
 export interface IResponseAudit {
-  actant: string;
+  entity: string;
   last: IAudit[];
   first?: IAudit;
 }

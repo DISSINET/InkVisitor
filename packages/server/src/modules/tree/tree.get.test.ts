@@ -3,7 +3,7 @@ import {
   createMockStatements,
   clean,
 } from "@modules/common.test";
-import { createActant } from "@service/shorthands";
+import { createEntity } from "@service/shorthands";
 import request from "supertest";
 import { supertestConfig } from "..";
 import { apiPath } from "@common/constants";
@@ -119,7 +119,7 @@ describe("Tree get", function () {
         },
       },
     });
-    await createActant(db, additionalEmptyTerritory);
+    await createEntity(db, additionalEmptyTerritory);
 
     await request(app)
       .get(`${apiPath}/tree/get`)

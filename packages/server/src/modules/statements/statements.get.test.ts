@@ -5,7 +5,7 @@ import { supertestConfig } from "..";
 import { apiPath } from "@common/constants";
 import app from "../../Server";
 import { Db } from "@service/RethinkDB";
-import { createActant } from "@service/shorthands";
+import { createEntity } from "@service/shorthands";
 import Statement from "@models/statement/statement";
 
 const testValidStatement = (res: any) => {
@@ -48,7 +48,7 @@ describe("Statements get", function () {
       const db = new Db();
       await db.initDb();
       const randomId = Math.random().toString();
-      await createActant(
+      await createEntity(
         db,
         new Statement({ id: randomId, data: { territory: { id: "2" } } })
       );
