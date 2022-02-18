@@ -37,7 +37,7 @@ export const CProp = (): IProp => ({
   logic: Logic.Positive,
   mood: [Mood.Indication],
   moodvariant: MoodVariant.Realis,
-  operator: Operator.And,
+  bundleOperator: Operator.And,
   bundleStart: false,
   bundleEnd: false,
   children: [],
@@ -94,7 +94,10 @@ export const DStatement = (statement: IStatement): IStatement => {
   duplicatedStatement.data.actants.map((a) => (a.id = uuidv4()));
   duplicatedStatement.props.map((p) => (p.id = uuidv4()));
   duplicatedStatement.data.references.map((r) => (r.id = uuidv4()));
-  duplicatedStatement.data.territory.order += 0.00001;
+
+  if (duplicatedStatement.data.territory) {
+    duplicatedStatement.data.territory.order += 0.00001;
+  }
 
   return duplicatedStatement;
 };
@@ -107,7 +110,7 @@ export const CStatementActant = (): IStatementActant => ({
   logic: Logic.Positive,
   virtuality: Virtuality.Reality,
   partitivity: Partitivity.Unison,
-  operator: Operator.And,
+  bundleOperator: Operator.And,
   bundleStart: false,
   bundleEnd: false,
   props: [],
@@ -121,7 +124,7 @@ export const CStatementAction = (actionId: string): IStatementAction => ({
   logic: Logic.Positive,
   mood: [Mood.Indication],
   moodvariant: MoodVariant.Realis,
-  operator: Operator.And,
+  bundleOperator: Operator.And,
   bundleStart: false,
   bundleEnd: false,
   props: [],

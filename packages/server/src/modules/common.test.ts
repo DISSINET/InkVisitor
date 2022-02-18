@@ -76,7 +76,7 @@ export function getIStatementActionMock(): IStatementAction {
     logic: Logic.Positive,
     mood: [Mood.Ability],
     moodvariant: MoodVariant.Irrealis,
-    operator: Operator.And,
+    bundleOperator: Operator.And,
   } as IStatementAction;
 }
 
