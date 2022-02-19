@@ -117,7 +117,12 @@ export const PropGroup: React.FC<IPropGroup> = ({
   );
 
   const renderSecondLevelPropRow = useCallback(
-    (prop2: IProp, pi2: number, prop1: IProp) => {
+    (
+      prop2: IProp,
+      pi2: number,
+      prop1: IProp,
+      moveProp: (dragIndex: number, hoverIndex: number) => void
+    ) => {
       return (
         <div key={prop2.id}>
           <PropGroupRow
@@ -153,7 +158,13 @@ export const PropGroup: React.FC<IPropGroup> = ({
   );
 
   const renderThirdLevelPropRow = useCallback(
-    (prop3: IProp, pi3: number, prop1: IProp, pi2: number) => {
+    (
+      prop3: IProp,
+      pi3: number,
+      prop1: IProp,
+      pi2: number,
+      moveProp: (dragIndex: number, hoverIndex: number) => void
+    ) => {
       return (
         <div key={prop3.id}>
           <PropGroupRow
