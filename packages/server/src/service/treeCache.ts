@@ -3,7 +3,7 @@ import User, { UserRight } from "@models/user/user";
 import { Db } from "@service/RethinkDB";
 import { getEntities } from "@service/shorthands";
 import { EntityClass, UserRoleMode } from "@shared/enums";
-import { IResponseTree, IStatement, ITerritory } from "@shared/types";
+import { IEntity, IResponseTree, IStatement, ITerritory } from "@shared/types";
 import { TerritoriesBrokenError } from "@shared/types/errors";
 
 export class TreeCreator {
@@ -24,6 +24,7 @@ export class TreeCreator {
 
   createParentMap(territories: Territory[]) {
     for (const territory of territories) {
+      console.log(territory);
       if (typeof territory.data.parent === "undefined") {
         continue;
       }
@@ -37,6 +38,7 @@ export class TreeCreator {
       this.parentMap[parentId].push(territory);
     }
 
+    console.log(this.parentMap);
     // only one root possible
     if (this.parentMap[""]?.length != 1) {
       throw new TerritoriesBrokenError("Territories tree is broken");
@@ -128,12 +130,13 @@ export class TreeCreator {
     ).filter((s) => s.data.territory && s.data.territory.id);
     const statementsCountMap: Record<string, number> = {}; // key is territoryid
     for (const statement of statements) {
-      const terId = statement.data.territory.id;
-      if (!statementsCountMap[terId]) {
-        statementsCountMap[terId] = 0;
+      if (statement.data.territory) {
+        const terId = statement.data.territory.id;
+        if (!statementsCountMap[terId]) {
+          statementsCountMap[terId] = 0;
+        }
+        statementsCountMap[terId]++;
       }
-
-      statementsCountMap[terId]++;
     }
 
     return statementsCountMap;
@@ -162,6 +165,8 @@ class TreeCache {
       }),
       TreeCreator.countStatements(db),
     ]);
+
+    const evr = getEntities<IEntity>(db, {});
 
     newTree.createParentMap(
       territoriesData

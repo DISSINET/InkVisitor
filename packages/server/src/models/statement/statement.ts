@@ -391,6 +391,14 @@ class Statement extends Entity implements IStatement {
             prop.children.forEach((propChild) => {
               entitiesIds[propChild.type.id] = null;
               entitiesIds[propChild.value.id] = null;
+
+              // 3rd level
+              if (propChild.children) {
+                propChild.children.forEach((propChild2) => {
+                  entitiesIds[propChild2.type.id] = null;
+                  entitiesIds[propChild2.value.id] = null;
+                });
+              }
             });
           }
         });
@@ -408,6 +416,14 @@ class Statement extends Entity implements IStatement {
             prop.children.forEach((propChild) => {
               entitiesIds[propChild.type.id] = null;
               entitiesIds[propChild.value.id] = null;
+
+              // 3rd level
+              if (propChild.children) {
+                propChild.children.forEach((propChild2) => {
+                  entitiesIds[propChild2.type.id] = null;
+                  entitiesIds[propChild2.value.id] = null;
+                });
+              }
             });
           }
         });
