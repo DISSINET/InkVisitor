@@ -226,19 +226,32 @@ export const StatementEditorBox: React.FC = () => {
     if (statement) {
       const newProp = CProp();
       const newStatementData = { ...statement.data };
+
       [...newStatementData.actants, ...newStatementData.actions].forEach(
         (actant: IStatementActant | IStatementAction) => {
           const actantId = "actant" in actant ? actant.actant : actant.action;
+          // adding 1st level prop
           if (actantId === originId) {
             actant.props = [...actant.props, newProp];
           }
-          actant.props.forEach((prop, pi) => {
-            if (prop.id == originId) {
-              actant.props[pi].children = [
-                ...actant.props[pi].children,
+          // adding 2nd level prop
+          actant.props.forEach((prop1, pi1) => {
+            if (prop1.id == originId) {
+              actant.props[pi1].children = [
+                ...actant.props[pi1].children,
                 newProp,
               ];
             }
+
+            // adding 3rd level prop
+            actant.props[pi1].children.forEach((prop2, pi2) => {
+              if (prop2.id == originId) {
+                actant.props[pi1].children[pi2].children = [
+                  ...actant.props[pi1].children[pi2].children,
+                  newProp,
+                ];
+              }
+            });
           });
         }
       );
@@ -254,18 +267,30 @@ export const StatementEditorBox: React.FC = () => {
       // this is probably an overkill
       [...newStatementData.actants, ...newStatementData.actions].forEach(
         (actant: IStatementActant | IStatementAction) => {
-          actant.props.forEach((actantProp, pi) => {
-            if (actantProp.id === propId) {
-              actant.props[pi] = { ...actant.props[pi], ...changes };
+          actant.props.forEach((prop1, pi1) => {
+            // 1st level
+            if (prop1.id === propId) {
+              actant.props[pi1] = { ...actant.props[pi1], ...changes };
             }
 
-            actant.props[pi].children.forEach((actantPropProp, pii) => {
-              if (actantPropProp.id === propId) {
-                actant.props[pi].children[pii] = {
-                  ...actant.props[pi].children[pii],
+            // 2nd level
+            actant.props[pi1].children.forEach((prop2, pi2) => {
+              if (prop2.id === propId) {
+                actant.props[pi1].children[pi2] = {
+                  ...actant.props[pi1].children[pi2],
                   ...changes,
                 };
               }
+
+              // 3rd level
+              actant.props[pi1].children[pi2].children.forEach((prop3, pi3) => {
+                if (prop3.id === propId) {
+                  actant.props[pi1].children[pi2].children[pi3] = {
+                    ...actant.props[pi1].children[pi2].children[pi3],
+                    ...changes,
+                  };
+                }
+              });
             });
           });
         }
@@ -285,10 +310,20 @@ export const StatementEditorBox: React.FC = () => {
             (actantProp) => actantProp.id !== propId
           );
 
-          actant.props.forEach((actantProp, pi) => {
-            actant.props[pi].children = actant.props[pi].children.filter(
+          // 2nd level
+          actant.props.forEach((prop1, pi1) => {
+            actant.props[pi1].children = actant.props[pi1].children.filter(
               (childProp) => childProp.id != propId
             );
+
+            // 3rd level
+            actant.props[pi1].children.forEach((prop2, pi2) => {
+              actant.props[pi1].children[pi2].children = actant.props[
+                pi1
+              ].children[pi2].children.filter(
+                (childProp) => childProp.id != propId
+              );
+            });
           });
         }
       );
