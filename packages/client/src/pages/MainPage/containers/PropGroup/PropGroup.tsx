@@ -79,6 +79,8 @@ export const PropGroup: React.FC<IPropGroup> = ({
     []
   );
 
+  console.log(props);
+
   // PREPARATION FOR DRAG AND DROP
   // const renderFirsLevelPropRow = useCallback((prop1: IProp, pi1: number) => {
   //   return (
@@ -155,7 +157,6 @@ export const PropGroup: React.FC<IPropGroup> = ({
                   order={pi1}
                   firstRowinGroup={pi1 === 0}
                   lastRowinGroup={pi1 === props.length - 1}
-                  lastSecondLevel={false}
                   updateProp={updateProp}
                   removeProp={removeProp}
                   addProp={addProp}
@@ -165,6 +166,7 @@ export const PropGroup: React.FC<IPropGroup> = ({
                   territoryActants={territoryActants || []}
                   openDetailOnCreate={openDetailOnCreate}
                 />
+                {/* 2nd level */}
                 {prop1.children.map((prop2: IProp, pi2: number) => {
                   return (
                     <div key={prop2.id}>
@@ -175,7 +177,7 @@ export const PropGroup: React.FC<IPropGroup> = ({
                         order={pi2}
                         firstRowinGroup={pi2 === 0}
                         lastRowinGroup={pi2 === prop1.children.length - 1}
-                        lastSecondLevel={pi2 === prop1.children.length - 1}
+                        lastInGroup={pi2 === prop1.children.length - 1}
                         updateProp={updateProp}
                         removeProp={removeProp}
                         addProp={addProp}
@@ -185,6 +187,37 @@ export const PropGroup: React.FC<IPropGroup> = ({
                         territoryActants={territoryActants || []}
                         openDetailOnCreate={openDetailOnCreate}
                       />
+                      {/* 3rd level */}
+                      {prop1.children[pi2].children.map(
+                        (prop3: IProp, pi3: number) => {
+                          return (
+                            <div key={prop3.id}>
+                              <PropGroupRow
+                                prop={prop3}
+                                entities={entities}
+                                level={"3"}
+                                order={pi3}
+                                firstRowinGroup={pi3 === 0}
+                                lastRowinGroup={
+                                  pi3 === prop1.children.length - 1
+                                }
+                                lastInGroup={
+                                  pi3 ===
+                                  prop1.children[pi2].children.length - 1
+                                }
+                                updateProp={updateProp}
+                                removeProp={removeProp}
+                                addProp={addProp}
+                                movePropDown={movePropDown}
+                                movePropUp={movePropUp}
+                                userCanEdit={userCanEdit}
+                                territoryActants={territoryActants || []}
+                                openDetailOnCreate={openDetailOnCreate}
+                              />
+                            </div>
+                          );
+                        }
+                      )}
                     </div>
                   );
                 })}
