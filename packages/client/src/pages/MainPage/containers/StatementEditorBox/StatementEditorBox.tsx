@@ -127,9 +127,9 @@ export const StatementEditorBox: React.FC = () => {
     error,
     isFetching,
   } = useQuery(
-    ["territoryActants", statement?.data.territory.id],
+    ["territoryActants", statement?.data?.territory?.id],
     async () => {
-      if (statement?.data.territory.id) {
+      if (statement?.data?.territory?.id) {
         const res = await api.entityIdsInTerritory(
           statement?.data.territory.id
         );
@@ -140,7 +140,7 @@ export const StatementEditorBox: React.FC = () => {
     },
     {
       initialData: [],
-      enabled: !!statement?.data.territory.id && api.isLoggedIn(),
+      enabled: !!statement?.data?.territory?.id && api.isLoggedIn(),
     }
   );
 
@@ -151,7 +151,7 @@ export const StatementEditorBox: React.FC = () => {
 
   // stores territory id
   const statementTerritoryId: string | undefined = useMemo(() => {
-    return statement?.data.territory.id;
+    return statement?.data?.territory?.id;
   }, [statement]);
 
   useEffect(() => {
