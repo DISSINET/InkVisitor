@@ -79,8 +79,6 @@ export const PropGroup: React.FC<IPropGroup> = ({
     []
   );
 
-  console.log(props);
-
   // PREPARATION FOR DRAG AND DROP
   // const renderFirsLevelPropRow = useCallback((prop1: IProp, pi1: number) => {
   //   return (
