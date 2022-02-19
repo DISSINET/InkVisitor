@@ -285,10 +285,13 @@ export const StatementEditorBox: React.FC = () => {
               // 3rd level
               actant.props[pi1].children[pi2].children.forEach((prop3, pi3) => {
                 if (prop3.id === propId) {
+                  console.log("here we are");
                   actant.props[pi1].children[pi2].children[pi3] = {
                     ...actant.props[pi1].children[pi2].children[pi3],
                     ...changes,
                   };
+                  console.log(changes);
+                  console.log(actant.props[pi1].children[pi2].children[pi3]);
                 }
               });
             });

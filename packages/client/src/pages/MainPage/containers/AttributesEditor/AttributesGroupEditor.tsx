@@ -176,8 +176,8 @@ export const AttributesGroupEditor: React.FC<AttributesGroupEditor> = ({
         )}
         {data.bundleOperator && (
           <TooltipAttributeRow
-            key="operator"
-            attributeName="operator"
+            key="bundleOperator"
+            attributeName="bundleOperator"
             value={data.bundleOperator}
             items={operatorDict}
           />
