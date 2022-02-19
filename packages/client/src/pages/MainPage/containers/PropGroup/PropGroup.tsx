@@ -5,6 +5,8 @@ import { useQuery } from "react-query";
 import { PropGroupRow } from "./PropGroupRow/PropGroupRow";
 import { StyledGrid, StyledListHeaderColumn } from "./PropGroupStyles";
 import update from "immutability-helper";
+import { SecondLevelPropGroup } from "./SecondLevelPropGroup/SecondLevelPropGroup";
+import { ThirdLevelPropGroup } from "./ThirdLevelPropGroup/ThirdLevelPropGroup";
 
 interface IPropGroup {
   originId: string;
@@ -101,9 +103,13 @@ export const PropGroup: React.FC<IPropGroup> = ({
             openDetailOnCreate={openDetailOnCreate}
           />
           {/* 2nd level */}
-          {prop1.children.map((prop2: IProp, pi2: number) =>
+          {/* {prop1.children.map((prop2: IProp, pi2: number) =>
             renderSecondLevelPropRow(prop2, pi2, prop1)
-          )}
+          )} */}
+          <SecondLevelPropGroup
+            prop1={prop1}
+            renderSecondLevelPropRow={renderSecondLevelPropRow}
+          />
         </div>
       );
     },
@@ -132,9 +138,14 @@ export const PropGroup: React.FC<IPropGroup> = ({
             openDetailOnCreate={openDetailOnCreate}
           />
           {/* 3rd level */}
-          {prop1.children[pi2].children.map((prop3: IProp, pi3: number) =>
+          {/* {prop1.children[pi2].children.map((prop3: IProp, pi3: number) =>
             renderThirdLevelPropRow(prop3, pi3, prop1, pi2)
-          )}
+          )} */}
+          <ThirdLevelPropGroup
+            prop1={prop1}
+            pi2={pi2}
+            renderThirdLevelPropRow={renderThirdLevelPropRow}
+          />
         </div>
       );
     },
@@ -168,7 +179,7 @@ export const PropGroup: React.FC<IPropGroup> = ({
     [entities]
   );
 
-  return props.length > 0 ? (
+  return firstLevelProps.length > 0 ? (
     <tr>
       <td colSpan={4}>
         <React.Fragment key={originId}>
@@ -179,7 +190,7 @@ export const PropGroup: React.FC<IPropGroup> = ({
             <StyledListHeaderColumn></StyledListHeaderColumn>
           </StyledGrid>
           {/* Rows */}
-          {props.map((prop1: IProp, pi1: number) =>
+          {firstLevelProps.map((prop1: IProp, pi1: number) =>
             renderFirsLevelPropRow(prop1, pi1)
           )}
         </React.Fragment>
