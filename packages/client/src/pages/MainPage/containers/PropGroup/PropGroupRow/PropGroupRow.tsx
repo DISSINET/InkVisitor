@@ -1,4 +1,4 @@
-import { IActant, IProp } from "@shared/types";
+import { IEntity, IProp } from "@shared/types";
 import { Button, AttributeIcon } from "components";
 import React from "react";
 import {
@@ -24,7 +24,7 @@ import {
 
 interface IPropGroupRow {
   prop: IProp;
-  entities: { [key: string]: IActant };
+  entities: { [key: string]: IEntity };
   level: "1" | "2";
   order: number;
   firstRowinGroup?: boolean;
@@ -59,7 +59,7 @@ export const PropGroupRow: React.FC<IPropGroupRow> = ({
   territoryActants = [],
   openDetailOnCreate = false,
 }) => {
-  const propTypeEntity: IActant = entities[prop.type.id];
+  const propTypeEntity: IEntity = entities[prop.type.id];
   const propValueEntity = entities[prop.value.id];
 
   return (
