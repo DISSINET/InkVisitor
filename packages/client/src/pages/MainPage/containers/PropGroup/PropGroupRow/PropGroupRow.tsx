@@ -1,4 +1,4 @@
-import { IActant, IProp } from "@shared/types";
+import { IEntity, IProp } from "@shared/types";
 import { Button, AttributeIcon } from "components";
 import React from "react";
 import {
@@ -24,12 +24,12 @@ import {
 
 interface IPropGroupRow {
   prop: IProp;
-  entities: { [key: string]: IActant };
-  level: "1" | "2";
+  entities: { [key: string]: IEntity };
+  level: "1" | "2" | "3";
   order: number;
   firstRowinGroup?: boolean;
   lastRowinGroup?: boolean;
-  lastSecondLevel?: boolean;
+  lastInGroup?: boolean;
 
   updateProp: (propId: string, changes: any) => void;
   removeProp: (propId: string) => void;
@@ -49,7 +49,6 @@ export const PropGroupRow: React.FC<IPropGroupRow> = ({
   order,
   firstRowinGroup = false,
   lastRowinGroup = false,
-  lastSecondLevel = false,
   updateProp,
   removeProp,
   addProp,
@@ -59,15 +58,14 @@ export const PropGroupRow: React.FC<IPropGroupRow> = ({
   territoryActants = [],
   openDetailOnCreate = false,
 }) => {
-  const propTypeEntity: IActant = entities[prop.type.id];
+  const propTypeEntity: IEntity = entities[prop.type.id];
   const propValueEntity = entities[prop.value.id];
 
   return (
     <React.Fragment key={level + "|" + order}>
       <StyledGrid>
         <StyledPropLineColumn
-          padded={level === "2"}
-          lastSecondLevel={lastSecondLevel}
+          level={level}
           isTag={propTypeEntity ? true : false}
         >
           {propTypeEntity ? (
@@ -124,10 +122,7 @@ export const PropGroupRow: React.FC<IPropGroupRow> = ({
             )}
           </StyledPropButtonGroup>
         </StyledPropLineColumn>
-        <StyledPropLineColumn
-          lastSecondLevel={lastSecondLevel}
-          isTag={propValueEntity ? true : false}
-        >
+        <StyledPropLineColumn isTag={propValueEntity ? true : false}>
           {propValueEntity ? (
             <EntityTag
               actant={propValueEntity}
@@ -183,7 +178,7 @@ export const PropGroupRow: React.FC<IPropGroupRow> = ({
           </StyledPropButtonGroup>
         </StyledPropLineColumn>
 
-        <StyledPropLineColumn lastSecondLevel={lastSecondLevel}>
+        <StyledPropLineColumn>
           <StyledPropButtonGroup>
             <AttributesGroupEditor
               modalTitle={`Property attributes`}
@@ -230,11 +225,11 @@ export const PropGroupRow: React.FC<IPropGroupRow> = ({
               userCanEdit={userCanEdit}
             />
 
-            {level === "1" && (
+            {(level === "1" || level === "2") && (
               <Button
                 key="add"
                 icon={<FaPlus />}
-                tooltip="add second level prop"
+                tooltip="add child prop"
                 color="plain"
                 inverted={true}
                 onClick={() => {

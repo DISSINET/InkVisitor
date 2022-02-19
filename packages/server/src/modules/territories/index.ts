@@ -27,8 +27,13 @@ function insertIStatementToChilds(
   return [...array.slice(0, onIndex), item, ...array.slice(onIndex)];
 }
 
-const sortStatements = (terA: IStatement, terB: IStatement): number =>
-  terA.data.territory.order - terB.data.territory.order;
+const sortStatements = (terA: IStatement, terB: IStatement): number => {
+  if (terA.data.territory && terB.data.territory) {
+    return terA.data.territory.order - terB.data.territory.order;
+  } else {
+    return 0;
+  }
+};
 
 export default Router()
   .get(
@@ -100,6 +105,8 @@ export default Router()
   )
   .post(
     "/moveStatement",
+
+    //@ts-ignore
     asyncRouteHandler<IResponseGeneric>(async (request: Request) => {
       const moveId = request.body.moveId;
       const newIndex = request.body.newIndex;
@@ -112,6 +119,14 @@ export default Router()
         request.db,
         moveId
       );
+
+      if (!statement.data.territory) {
+        throw new StatementDoesNotExits(
+          `statement ${moveId} has no territory`,
+          moveId
+        );
+      }
+
       if (!statement) {
         throw new StatementDoesNotExits(
           `statement ${moveId} does not exist`,
@@ -139,7 +154,7 @@ export default Router()
           class: EntityClass.Statement,
         })
       )
-        .filter((s) => s.data.territory.id === territory.id)
+        .filter((s) => s.data.territory && s.data.territory.id === territory.id)
         .sort(sortStatements);
       if (newIndex < 0 || newIndex > statementsForTerritory.length) {
         throw new StatementInvalidMove(
@@ -168,9 +183,10 @@ export default Router()
       for (let i = 0; i < statementsForTerritory.length; i++) {
         const statement = new Statement({ ...statementsForTerritory[i] });
         statement.data.territory.order = i + 1;
-        await statement.update(request.db.connection, { data: statement.data });
+        await statement.update(request.db.connection, {
+          data: statement.data,
+        });
+        return out;
       }
-
-      return out;
     })
   );

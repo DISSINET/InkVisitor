@@ -165,6 +165,7 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
 
   // Props handling
 
+  // adding only second or third level
   const addProp = (originId: string) => {
     if (entity) {
       const newProp = CProp();
@@ -174,6 +175,16 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
         if (prop1.id === originId) {
           newProps[pi1].children = [...newProps[pi1].children, newProp];
         }
+
+        // 3rd level
+        newProps[pi1].children.forEach((prop2, pi2) => {
+          if (prop2.id == originId) {
+            newProps[pi1].children[pi2].children = [
+              ...newProps[pi1].children[pi2].children,
+              newProp,
+            ];
+          }
+        });
       });
 
       updateEntityMutation.mutate({ props: newProps });
@@ -185,9 +196,12 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
       const newProps = [...entity.props];
 
       newProps.forEach((prop1, pi1) => {
+        // 1st level
         if (prop1.id === propId) {
           newProps[pi1] = { ...newProps[pi1], ...changes };
         }
+
+        // 2nd level
         prop1.children.forEach((prop2, pi2) => {
           if (prop2.id === propId) {
             newProps[pi1].children[pi2] = {
@@ -195,6 +209,16 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
               ...changes,
             };
           }
+
+          // 3rd level
+          prop1.children[pi2].children.forEach((prop3, pi3) => {
+            if (prop3.id === propId) {
+              newProps[pi1].children[pi2].children[pi3] = {
+                ...newProps[pi1].children[pi2].children[pi3],
+                ...changes,
+              };
+            }
+          });
         });
       });
       updateEntityMutation.mutate({ props: newProps });
@@ -207,10 +231,18 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
         (prop, pi) => prop.id !== propId
       );
 
+      // 2nd level
       newProps.forEach((prop1, pi1) => {
         newProps[pi1].children = prop1.children.filter(
           (child) => child.id !== propId
         );
+
+        // 3rd level
+        newProps[pi1].children.forEach((prop2, pi2) => {
+          newProps[pi1].children[pi2].children = newProps[pi1].children[
+            pi2
+          ].children.filter((child) => child.id !== propId);
+        });
       });
 
       updateEntityMutation.mutate({ props: newProps });

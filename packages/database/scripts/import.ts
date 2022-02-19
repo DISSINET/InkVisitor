@@ -157,8 +157,17 @@ const importData = async () => {
 
         r.table(table.name)
           .insert(data)
-          .run(conn, () => {});
-        console.log(`data into the table ${table.name} inserted`);
+          .run(conn, () => {
+            if (table.name === "entities") {
+              r.table("entities").run(conn, (err: any, cursor: any) => {
+                cursor.toArray().then((results: any) => {
+                  console.log(`number of entities imported ${results.length}`);
+                });
+
+                //console.log(`data into the table ${table.name} inserted`);
+              });
+            }
+          });
       });
     }
   } catch (error) {
@@ -166,7 +175,10 @@ const importData = async () => {
   } finally {
     console.log("closing connection");
     if (conn) {
-      conn.close();
+      // TODO  this is bad
+      setTimeout(() => {
+        conn.close();
+      }, 5000);
     }
   }
 };

@@ -152,6 +152,43 @@ export default class Entity extends Base implements IEntity, IDbModel {
       .run(db);
   }
 
+  static async findUsedInProps(
+    db: Connection | undefined,
+    entityId: string
+  ): Promise<IEntity[]> {
+    const entries = await rethink
+      .table(Entity.table)
+      .filter((row: RDatum) => {
+        return row("props").contains((entry: RDatum) =>
+          rethink.or(
+            entry("value")("id").eq(entityId),
+            entry("type")("id").eq(entityId),
+            entry("children").contains((ch1: RDatum) =>
+              rethink.or(
+                ch1("value")("id").eq(entityId),
+                ch1("type")("id").eq(entityId),
+                ch1("children").contains((ch2: RDatum) =>
+                  rethink.or(
+                    ch2("value")("id").eq(entityId),
+                    ch2("type")("id").eq(entityId),
+                    ch2("children").contains((ch3: RDatum) =>
+                      rethink.or(
+                        ch3("value")("id").eq(entityId),
+                        ch3("type")("id").eq(entityId)
+                      )
+                    )
+                  )
+                )
+              )
+            )
+          )
+        );
+      })
+      .run(db);
+
+    return entries;
+  }
+
   static determineOrder(want: number, sibl: Record<number, unknown>): number {
     const sortedOrders: number[] = Object.keys(sibl)
       .map((k) => parseFloat(k))

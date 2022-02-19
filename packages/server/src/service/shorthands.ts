@@ -51,10 +51,9 @@ export async function getStatementsForTerritory(
     .run(db.connection);
 }
 
-export async function getEntities<T = IAction | IStatement | ITerritory>(
-  db: Db,
-  filter: object = {}
-): Promise<T[]> {
+export async function getEntities<
+  T = IAction | IStatement | ITerritory | IEntity
+>(db: Db, filter: object = {}): Promise<T[]> {
   return rethink.table(Entity.table).filter(filter).run(db.connection);
 }
 
