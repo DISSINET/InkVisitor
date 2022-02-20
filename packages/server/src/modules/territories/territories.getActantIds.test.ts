@@ -34,7 +34,7 @@ describe("Territories getEntityIds", () => {
       const statementData1: IStatement = JSON.parse(
         JSON.stringify(baseStatementData)
       );
-      statementData1.data.territory.id = territory.id;
+      statementData1.data.territory = { id: territory.id, order: 0 };
       statementData1.data.tags = ["tagid"];
       statementData1.data.references = [
         {

@@ -1,10 +1,5 @@
 import { Request } from "express";
-import {
-  EntityClass,
-  Position,
-  UsedInPosition,
-  UserRoleMode,
-} from "@shared/enums";
+import { UsedInPosition, UserRoleMode } from "@shared/enums";
 import {
   IEntity,
   IProp,
@@ -14,7 +9,6 @@ import {
   IResponseUsedInStatement,
   IStatement,
 } from "@shared/types";
-import { Connection } from "rethinkdb-ts";
 import Entity from "./entity";
 import Statement from "@models/statement/statement";
 
@@ -55,12 +49,36 @@ export class ResponseEntityDetail
   }
 
   /**
-   * Walks through props arrays recursively to gather required entries for usedInMetaProps & usedInStatementProps fields.
-   * Also populates entities map.
+   * Loads additional fields to satisfy the IResponseDetail interface
+   * @param req
+   */
+  async prepare(req: Request): Promise<void> {
+    super.prepare(req);
+
+    const usedInEntityProps = await Entity.findUsedInProps(
+      req.db.connection,
+      this.id
+    );
+
+    for (const entity of usedInEntityProps) {
+      this.walkEntityProps(entity, entity.props);
+    }
+
+    this.walkStatementsDataEntities(
+      await Statement.findUsedInDataEntities(req.db.connection, this.id)
+    );
+
+    this.walkStatementsDataProps(
+      await Statement.findUsedInDataProps(req.db.connection, this.id)
+    );
+  }
+
+  /**
+   * Walks through props array recursively to gather required entries for addUsedInMetaProp method.
    * @param actant
    * @param props
    */
-  walkPropsStatements(actant: IEntity, props: IProp[]) {
+  walkEntityProps(actant: IEntity, props: IProp[]) {
     for (const prop of props) {
       if (prop.type.id === this.id) {
         this.addUsedInMetaProp(actant, UsedInPosition.Type);
@@ -71,13 +89,13 @@ export class ResponseEntityDetail
       }
 
       if (prop.children.length) {
-        this.walkPropsStatements(actant, prop.children);
+        this.walkEntityProps(actant, prop.children);
       }
     }
   }
 
   /**
-   * add entry to usedInMetaProps, usedInStatementProps and entities fields
+   * add entry to usedInMetaProps and entities fields
    * @param actant
    * @param position
    */
@@ -87,39 +105,30 @@ export class ResponseEntityDetail
       position,
     });
 
-    if (actant.class === EntityClass.Statement) {
-      this.usedInStatementProps.push({
-        statement: actant as IStatement,
-        position,
-        //originId: // todo
-      });
-    }
-
     this.entities[actant.id] = actant;
   }
 
   /**
-   * Walks through basic statement fields to gather required entries for usedInStatement field.
-   * Also populates entities map.
+   * Walks through data-entities arrays to gather required entries for addUsedInStatement method.
    * @param statements
    */
-  walkLinkedStatements(statements: IStatement[]) {
+  walkStatementsDataEntities(statements: IStatement[]) {
     for (const statement of statements) {
       for (const action of statement.data.actions) {
         if (action.action === this.id) {
-          this.addLinkedStatement(statement, UsedInPosition.Action);
+          this.addUsedInStatement(statement, UsedInPosition.Action);
         }
       }
 
       for (const actant of statement.data.actants) {
         if (actant.actant === this.id) {
-          this.addLinkedStatement(statement, UsedInPosition.Actant);
+          this.addUsedInStatement(statement, UsedInPosition.Actant);
         }
       }
 
       for (const tag of statement.data.tags) {
         if (tag === this.id) {
-          this.addLinkedStatement(statement, UsedInPosition.Tag);
+          this.addUsedInStatement(statement, UsedInPosition.Tag);
         }
       }
     }
@@ -130,37 +139,82 @@ export class ResponseEntityDetail
    * @param statement
    * @param position
    */
-  addLinkedStatement(statement: IStatement, position: UsedInPosition) {
+  addUsedInStatement(statement: IStatement, position: UsedInPosition) {
     this.usedInStatement.push({
       statement,
       position,
-      // originId:
     });
 
     this.entities[statement.id] = statement;
   }
 
   /**
-   * Loads additional fields to satisfy the IResponseDetail interface
-   * @param req
+   * Walks through statements data-entities and call walkStatementDataRecursiveProps method accordingly.
+   * @param statements
    */
-  async prepare(req: Request): Promise<void> {
-    super.prepare(req);
+  walkStatementsDataProps(statements: IStatement[]) {
+    for (const statement of statements) {
+      for (const action of statement.data.actions) {
+        this.walkStatementDataRecursiveProps(
+          statement,
+          action.id,
+          action.props
+        );
+      }
 
-    const usedInProps = await Entity.findUsedInProps(
-      req.db.connection,
-      this.id
-    );
-
-    for (const actant of usedInProps) {
-      this.walkPropsStatements(actant, actant.props);
+      for (const actant of statement.data.actants) {
+        this.walkStatementDataRecursiveProps(
+          statement,
+          actant.id,
+          actant.props
+        );
+      }
     }
+  }
 
-    const usedInStatements = await Statement.findUsed(
-      req.db.connection,
-      this.id
-    );
+  /**
+   * Adds statement to usedInStatement & entities fields
+   * @param statement
+   * @param originId
+   * @param props
+   */
+  walkStatementDataRecursiveProps(
+    statement: IStatement,
+    originId: string,
+    props: IProp[]
+  ) {
+    for (const prop of props) {
+      if (prop.type.id === this.id) {
+        this.addUsedInStatementProp(statement, UsedInPosition.Type, originId);
+      }
 
-    this.walkLinkedStatements(usedInStatements);
+      if (prop.value.id === this.id) {
+        this.addUsedInStatementProp(statement, UsedInPosition.Value, originId);
+      }
+
+      if (prop.children.length) {
+        this.walkStatementDataRecursiveProps(statement, origin, prop.children);
+      }
+    }
+  }
+
+  /**
+   * add entry to usedInStatementProps and entities fields
+   * @param statement
+   * @param position
+   * @param originId
+   */
+  addUsedInStatementProp(
+    statement: IStatement,
+    position: UsedInPosition,
+    originId: string
+  ) {
+    this.usedInStatementProps.push({
+      statement,
+      position,
+      originId,
+    });
+
+    this.entities[statement.id] = statement;
   }
 }
