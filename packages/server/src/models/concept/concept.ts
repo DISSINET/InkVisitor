@@ -37,7 +37,6 @@ class Concept extends Entity implements IConcept {
   isValid(): boolean {
     const alloweedClasses = [EntityClass.Concept];
 
-    console.log();
     if (alloweedClasses.indexOf(this.class) === -1) {
       return false;
     }
