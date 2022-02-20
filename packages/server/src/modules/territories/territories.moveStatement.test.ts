@@ -5,10 +5,7 @@ import { apiPath } from "@common/constants";
 import app from "../../Server";
 import { IStatement } from "@shared/types";
 import { Db } from "@service/RethinkDB";
-import {
-  createEntity,
-  findEntityById,
-} from "@service/shorthands";
+import { createEntity, findEntityById } from "@service/shorthands";
 import Territory from "@models/territory/territory";
 import Statement from "@models/statement/statement";
 import { clean } from "@modules/common.test";
@@ -59,8 +56,8 @@ describe("Territories moveStatement", function () {
       let s1 = await findEntityById<IStatement>(db, statements[0].id);
       let s2 = await findEntityById<IStatement>(db, statements[1].id);
 
-      expect(s1.data.territory.order).toEqual(1);
-      expect(s2.data.territory.order).toEqual(2);
+      expect(s1.data.territory?.order).toEqual(1);
+      expect(s2.data.territory?.order).toEqual(2);
 
       await request(app)
         .post(`${apiPath}/territories/moveStatement`)
@@ -75,8 +72,8 @@ describe("Territories moveStatement", function () {
       s1 = await findEntityById<IStatement>(db, statements[0].id);
       s2 = await findEntityById<IStatement>(db, statements[1].id);
 
-      expect(s1.data.territory.order).toEqual(3);
-      expect(s2.data.territory.order).toEqual(2);
+      expect(s1.data.territory?.order).toEqual(3);
+      expect(s2.data.territory?.order).toEqual(2);
 
       await clean(db);
       return done();
