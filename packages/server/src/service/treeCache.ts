@@ -24,7 +24,6 @@ export class TreeCreator {
 
   createParentMap(territories: Territory[]) {
     for (const territory of territories) {
-      console.log(territory);
       if (typeof territory.data.parent === "undefined") {
         continue;
       }
@@ -38,7 +37,6 @@ export class TreeCreator {
       this.parentMap[parentId].push(territory);
     }
 
-    console.log(this.parentMap);
     // only one root possible
     if (this.parentMap[""]?.length != 1) {
       throw new TerritoriesBrokenError("Territories tree is broken");
