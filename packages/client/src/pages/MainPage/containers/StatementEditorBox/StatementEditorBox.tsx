@@ -17,6 +17,7 @@ import {
 import { useSearchParams } from "hooks";
 import React, { useEffect, useMemo } from "react";
 import { FaTrashAlt, FaUnlink } from "react-icons/fa";
+import { BsInfoCircle } from "react-icons/bs";
 import { useMutation, useQuery, useQueryClient } from "react-query";
 import { excludedSuggesterEntities } from "Theme/constants";
 import { AttributeButtonGroup } from "../AttributeButtonGroup/AttributeButtonGroup";
@@ -31,6 +32,7 @@ import {
   StyledBreadcrumbWrap,
   StyledEditorActantTableWrapper,
   StyledEditorPreSection,
+  StyledEditorEmptyState,
   StyledEditorSection,
   StyledEditorSectionContent,
   StyledEditorSectionHeader,
@@ -862,7 +864,14 @@ export const StatementEditorBox: React.FC = () => {
           </StyledEditorSection>
         </div>
       ) : (
-        <>{"no statement selected"}</>
+        <>
+          <StyledEditorEmptyState>
+            <BsInfoCircle size="23" />
+          </StyledEditorEmptyState>
+          <StyledEditorEmptyState>
+            {"No statement selected yet. Pick one from the statements table"}
+          </StyledEditorEmptyState>
+        </>
       )}
       <Loader
         show={
