@@ -111,6 +111,7 @@ export const ItemTypes = {
   TAG: "TAG",
   STATEMENT_ROW: "STATEMENT_ROW",
   ACTANT_ROW: "ACTANT_ROW",
+  PROP_ROW: "PROP_ROW",
 };
 
 export type DragItem = {

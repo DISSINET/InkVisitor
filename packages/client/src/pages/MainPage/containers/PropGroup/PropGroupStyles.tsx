@@ -1,16 +1,5 @@
+import { FaGripVertical } from "react-icons/fa";
 import styled from "styled-components";
-
-export const StyledGridOld = styled.div`
-  display: grid;
-
-  align-items: center;
-  padding-left: ${({ theme }) => theme.space[10]};
-  grid-template-columns: auto auto auto;
-  width: fit-content;
-  grid-template-rows: auto;
-  grid-auto-flow: row;
-  padding-bottom: ${({ theme }) => theme.space[6]};
-`;
 
 export const StyledGrid = styled.div`
   display: grid;
@@ -49,7 +38,7 @@ export const StyledPropLineColumn = styled(
 )<StyledPropLineColumn>`
   display: inline-flex;
   align-items: center;
-  padding-left: ${({ theme, level = "1" }) => {
+  margin-left: ${({ theme, level = "1" }) => {
     if (level === "1") {
       return theme.space[0];
     } else if (level === "2") {
@@ -84,4 +73,8 @@ export const StyledPropButtonGroup = styled.div<StyledPropButtonGroup>`
   button[disabled] {
     //background-color: ${({ theme }) => theme.color["gray"][1000]};
   }
+`;
+export const StyledFaGripVertical = styled(FaGripVertical)`
+  margin-right: ${({ theme }) => theme.space[2]};
+  cursor: move;
 `;

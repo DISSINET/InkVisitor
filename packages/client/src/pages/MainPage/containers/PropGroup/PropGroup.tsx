@@ -101,6 +101,7 @@ export const PropGroup: React.FC<IPropGroup> = ({
             userCanEdit={userCanEdit}
             territoryActants={territoryActants || []}
             openDetailOnCreate={openDetailOnCreate}
+            moveProp={moveFirstLevelProp}
           />
           {/* 2nd level */}
           {/* {prop1.children.map((prop2: IProp, pi2: number) =>
@@ -141,6 +142,7 @@ export const PropGroup: React.FC<IPropGroup> = ({
             userCanEdit={userCanEdit}
             territoryActants={territoryActants || []}
             openDetailOnCreate={openDetailOnCreate}
+            moveProp={moveProp}
           />
           {/* 3rd level */}
           {/* {prop1.children[pi2].children.map((prop3: IProp, pi3: number) =>
@@ -183,6 +185,7 @@ export const PropGroup: React.FC<IPropGroup> = ({
             userCanEdit={userCanEdit}
             territoryActants={territoryActants || []}
             openDetailOnCreate={openDetailOnCreate}
+            moveProp={moveProp}
           />
         </div>
       );
