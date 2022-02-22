@@ -2,14 +2,14 @@ import React, { useRef } from "react";
 import { useDrop, DropTargetMonitor, XYCoord, useDrag } from "react-dnd";
 import { ItemTypes, DragItem } from "types";
 
-interface ThirdLevelPropGroupRow {
+interface PropGroupRowDndWrapper {
   renderPropRow: React.ReactElement;
   id: string;
   index: number;
   moveProp: (dragIndex: number, hoverIndex: number) => void;
   itemType: ItemTypes;
 }
-export const ThirdLevelPropGroupRow: React.FC<ThirdLevelPropGroupRow> = ({
+export const PropGroupRowDndWrapper: React.FC<PropGroupRowDndWrapper> = ({
   renderPropRow,
   id,
   index,
