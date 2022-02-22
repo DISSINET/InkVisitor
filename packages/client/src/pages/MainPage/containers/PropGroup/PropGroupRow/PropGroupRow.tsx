@@ -1,7 +1,6 @@
 import { IEntity, IProp } from "@shared/types";
 import { AttributeIcon, Button } from "components";
-import React, { useRef } from "react";
-import { DropTargetMonitor, useDrag, useDrop, XYCoord } from "react-dnd";
+import React from "react";
 import {
   FaCaretDown,
   FaCaretUp,
@@ -14,8 +13,6 @@ import {
   AttributeGroupDataObject,
   classesPropType,
   classesPropValue,
-  DragItem,
-  ItemTypes,
 } from "types";
 import { EntitySuggester, EntityTag } from "../..";
 import { AttributesGroupEditor } from "../../AttributesEditor/AttributesGroupEditor";
@@ -67,55 +64,6 @@ export const PropGroupRow: React.FC<IPropGroupRow> = ({
 }) => {
   const propTypeEntity: IEntity = entities[prop.type.id];
   const propValueEntity = entities[prop.value.id];
-
-  // const ref = useRef<HTMLDivElement>(null);
-
-  // const [{ handlerId }, drop] = useDrop({
-  //   accept: ItemTypes.PROP_ROW,
-  //   collect(monitor) {
-  //     return {
-  //       handlerId: monitor.getHandlerId(),
-  //     };
-  //   },
-  //   hover(item: DragItem, monitor: DropTargetMonitor) {
-  //     if (!ref.current) {
-  //       return;
-  //     }
-  //     const dragIndex: number = item.index;
-  //     const hoverIndex: number | undefined = index;
-
-  //     if (dragIndex === hoverIndex) {
-  //       return;
-  //     }
-
-  //     const hoverBoundingRect = ref.current?.getBoundingClientRect();
-  //     const hoverMiddleY =
-  //       (hoverBoundingRect.bottom - hoverBoundingRect.top) / 2;
-  //     const clientOffset = monitor.getClientOffset();
-  //     const hoverClientY = (clientOffset as XYCoord).y - hoverBoundingRect.top;
-  //     if (hoverIndex === undefined) {
-  //       return;
-  //     }
-  //     if (dragIndex < hoverIndex && hoverClientY < hoverMiddleY) {
-  //       return;
-  //     }
-
-  //     if (dragIndex > hoverIndex && hoverClientY > hoverMiddleY) {
-  //       return;
-  //     }
-  //     moveProp(dragIndex, hoverIndex);
-  //     item.index = hoverIndex;
-  //   },
-  // });
-
-  // const [{ isDragging }, drag] = useDrag({
-  //   item: { type: ItemTypes.PROP_ROW, id, index },
-  //   collect: (monitor) => ({
-  //     isDragging: monitor.isDragging(),
-  //   }),
-  // });
-
-  // drag(drop(ref));
 
   return (
     <StyledGrid key={level + "|" + order}>
