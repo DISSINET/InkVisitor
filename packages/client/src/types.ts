@@ -112,6 +112,9 @@ export const ItemTypes = {
   STATEMENT_ROW: "STATEMENT_ROW",
   ACTANT_ROW: "ACTANT_ROW",
   PROP_ROW: "PROP_ROW",
+  PROP_ROW1: "PROP_ROW1",
+  PROP_ROW2: "PROP_ROW2",
+  PROP_ROW3: "PROP_ROW3",
 };
 
 export type DragItem = {

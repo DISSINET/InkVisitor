@@ -1,6 +1,7 @@
 import { IProp } from "@shared/types";
 import React, { useCallback, useEffect, useState } from "react";
 import update from "immutability-helper";
+import { ThirdLevelPropGroupRow } from "../ThirdLevelPropGroupRow/ThirdLevelPropGroupRow";
 
 interface ThirdLevelPropGroup {
   prop1: IProp;
@@ -37,9 +38,21 @@ export const ThirdLevelPropGroup: React.FC<ThirdLevelPropGroup> = ({
 
   return (
     <>
-      {thirdLevelProps.map((prop3: IProp, pi3: number) =>
-        renderThirdLevelPropRow(prop3, pi3, prop1, pi2, moveProp)
-      )}
+      {thirdLevelProps.map((prop3: IProp, pi3: number) => (
+        <ThirdLevelPropGroupRow
+          key={pi3}
+          renderThirdLevelPropRow={renderThirdLevelPropRow(
+            prop3,
+            pi3,
+            prop1,
+            pi2,
+            moveProp
+          )}
+          id={prop3.id}
+          index={pi3}
+          moveProp={moveProp}
+        />
+      ))}
     </>
   );
 };

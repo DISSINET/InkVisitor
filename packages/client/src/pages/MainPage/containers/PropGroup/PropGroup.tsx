@@ -7,6 +7,7 @@ import { StyledGrid, StyledListHeaderColumn } from "./PropGroupStyles";
 import update from "immutability-helper";
 import { SecondLevelPropGroup } from "./SecondLevelPropGroup/SecondLevelPropGroup";
 import { ThirdLevelPropGroup } from "./ThirdLevelPropGroup/ThirdLevelPropGroup";
+import { ItemTypes } from "types";
 
 interface IPropGroup {
   originId: string;
@@ -87,6 +88,9 @@ export const PropGroup: React.FC<IPropGroup> = ({
       return (
         <div key={prop1.id}>
           <PropGroupRow
+            key={prop1.id}
+            id={prop1.id}
+            index={pi1}
             prop={prop1}
             entities={entities}
             level={"1"}
@@ -104,9 +108,6 @@ export const PropGroup: React.FC<IPropGroup> = ({
             moveProp={moveFirstLevelProp}
           />
           {/* 2nd level */}
-          {/* {prop1.children.map((prop2: IProp, pi2: number) =>
-            renderSecondLevelPropRow(prop2, pi2, prop1)
-          )} */}
           <SecondLevelPropGroup
             prop1={prop1}
             renderSecondLevelPropRow={renderSecondLevelPropRow}
@@ -127,6 +128,9 @@ export const PropGroup: React.FC<IPropGroup> = ({
       return (
         <div key={prop2.id}>
           <PropGroupRow
+            key={prop2.id}
+            id={prop2.id}
+            index={pi2}
             prop={prop2}
             entities={entities}
             level={"2"}
@@ -145,9 +149,6 @@ export const PropGroup: React.FC<IPropGroup> = ({
             moveProp={moveProp}
           />
           {/* 3rd level */}
-          {/* {prop1.children[pi2].children.map((prop3: IProp, pi3: number) =>
-            renderThirdLevelPropRow(prop3, pi3, prop1, pi2)
-          )} */}
           <ThirdLevelPropGroup
             prop1={prop1}
             pi2={pi2}
@@ -168,26 +169,27 @@ export const PropGroup: React.FC<IPropGroup> = ({
       moveProp: (dragIndex: number, hoverIndex: number) => void
     ) => {
       return (
-        <div key={prop3.id}>
-          <PropGroupRow
-            prop={prop3}
-            entities={entities}
-            level={"3"}
-            order={pi3}
-            firstRowinGroup={pi3 === 0}
-            lastRowinGroup={pi3 === prop1.children.length - 1}
-            lastInGroup={pi3 === prop1.children[pi2].children.length - 1}
-            updateProp={updateProp}
-            removeProp={removeProp}
-            addProp={addProp}
-            movePropDown={movePropDown}
-            movePropUp={movePropUp}
-            userCanEdit={userCanEdit}
-            territoryActants={territoryActants || []}
-            openDetailOnCreate={openDetailOnCreate}
-            moveProp={moveProp}
-          />
-        </div>
+        <PropGroupRow
+          key={pi3}
+          id={prop3.id}
+          index={pi3}
+          prop={prop3}
+          entities={entities}
+          level={"3"}
+          order={pi3}
+          firstRowinGroup={pi3 === 0}
+          lastRowinGroup={pi3 === prop1.children.length - 1}
+          lastInGroup={pi3 === prop1.children[pi2].children.length - 1}
+          updateProp={updateProp}
+          removeProp={removeProp}
+          addProp={addProp}
+          movePropDown={movePropDown}
+          movePropUp={movePropUp}
+          userCanEdit={userCanEdit}
+          territoryActants={territoryActants || []}
+          openDetailOnCreate={openDetailOnCreate}
+          moveProp={moveProp}
+        />
       );
     },
     [entities]

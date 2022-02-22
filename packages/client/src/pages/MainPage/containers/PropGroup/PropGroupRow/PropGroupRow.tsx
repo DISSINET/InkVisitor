@@ -73,57 +73,57 @@ export const PropGroupRow: React.FC<IPropGroupRow> = ({
   const propTypeEntity: IEntity = entities[prop.type.id];
   const propValueEntity = entities[prop.value.id];
 
-  const ref = useRef<HTMLDivElement>(null);
+  // const ref = useRef<HTMLDivElement>(null);
 
-  const [{ handlerId }, drop] = useDrop({
-    accept: ItemTypes.PROP_ROW,
-    collect(monitor) {
-      return {
-        handlerId: monitor.getHandlerId(),
-      };
-    },
-    hover(item: DragItem, monitor: DropTargetMonitor) {
-      if (!ref.current) {
-        return;
-      }
-      const dragIndex: number = item.index;
-      const hoverIndex: number | undefined = index;
+  // const [{ handlerId }, drop] = useDrop({
+  //   accept: ItemTypes.PROP_ROW,
+  //   collect(monitor) {
+  //     return {
+  //       handlerId: monitor.getHandlerId(),
+  //     };
+  //   },
+  //   hover(item: DragItem, monitor: DropTargetMonitor) {
+  //     if (!ref.current) {
+  //       return;
+  //     }
+  //     const dragIndex: number = item.index;
+  //     const hoverIndex: number | undefined = index;
 
-      if (dragIndex === hoverIndex) {
-        return;
-      }
+  //     if (dragIndex === hoverIndex) {
+  //       return;
+  //     }
 
-      const hoverBoundingRect = ref.current?.getBoundingClientRect();
-      const hoverMiddleY =
-        (hoverBoundingRect.bottom - hoverBoundingRect.top) / 2;
-      const clientOffset = monitor.getClientOffset();
-      const hoverClientY = (clientOffset as XYCoord).y - hoverBoundingRect.top;
-      if (hoverIndex === undefined) {
-        return;
-      }
-      if (dragIndex < hoverIndex && hoverClientY < hoverMiddleY) {
-        return;
-      }
+  //     const hoverBoundingRect = ref.current?.getBoundingClientRect();
+  //     const hoverMiddleY =
+  //       (hoverBoundingRect.bottom - hoverBoundingRect.top) / 2;
+  //     const clientOffset = monitor.getClientOffset();
+  //     const hoverClientY = (clientOffset as XYCoord).y - hoverBoundingRect.top;
+  //     if (hoverIndex === undefined) {
+  //       return;
+  //     }
+  //     if (dragIndex < hoverIndex && hoverClientY < hoverMiddleY) {
+  //       return;
+  //     }
 
-      if (dragIndex > hoverIndex && hoverClientY > hoverMiddleY) {
-        return;
-      }
-      moveProp(dragIndex, hoverIndex);
-      item.index = hoverIndex;
-    },
-  });
+  //     if (dragIndex > hoverIndex && hoverClientY > hoverMiddleY) {
+  //       return;
+  //     }
+  //     moveProp(dragIndex, hoverIndex);
+  //     item.index = hoverIndex;
+  //   },
+  // });
 
-  const [{ isDragging }, drag] = useDrag({
-    item: { type: ItemTypes.PROP_ROW, id, index },
-    collect: (monitor) => ({
-      isDragging: monitor.isDragging(),
-    }),
-  });
+  // const [{ isDragging }, drag] = useDrag({
+  //   item: { type: ItemTypes.PROP_ROW, id, index },
+  //   collect: (monitor) => ({
+  //     isDragging: monitor.isDragging(),
+  //   }),
+  // });
 
-  drag(drop(ref));
+  // drag(drop(ref));
 
   return (
-    <StyledGrid key={level + "|" + order} ref={ref} data-handler-id={handlerId}>
+    <StyledGrid key={level + "|" + order}>
       <StyledPropLineColumn level={level} isTag={propTypeEntity ? true : false}>
         <StyledFaGripVertical />
         {propTypeEntity ? (
