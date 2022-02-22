@@ -1,14 +1,15 @@
 import { IProp } from "@shared/types";
 import React, { useCallback, useEffect, useState } from "react";
 import update from "immutability-helper";
+import { PropGroupRowDndWrapper } from "../PropGroupRowDndWrapper/PropGroupRowDndWrapper";
+import { ItemTypes } from "types";
 
 interface SecondLevelPropGroup {
   prop1: IProp;
   renderSecondLevelPropRow: (
     prop2: IProp,
     pi2: number,
-    prop1: IProp,
-    moveProp: (dragIndex: number, hoverIndex: number) => void
+    prop1: IProp
   ) => JSX.Element;
 }
 export const SecondLevelPropGroup: React.FC<SecondLevelPropGroup> = ({
@@ -34,9 +35,16 @@ export const SecondLevelPropGroup: React.FC<SecondLevelPropGroup> = ({
 
   return (
     <>
-      {secondLevelProps.map((prop2: IProp, pi2: number) =>
-        renderSecondLevelPropRow(prop2, pi2, prop1, moveProp)
-      )}
+      {secondLevelProps.map((prop2: IProp, pi2: number) => (
+        <PropGroupRowDndWrapper
+          key={pi2}
+          id={prop2.id}
+          index={pi2}
+          itemType={ItemTypes.PROP_ROW2}
+          moveProp={moveProp}
+          renderPropRow={renderSecondLevelPropRow(prop2, pi2, prop1)}
+        />
+      ))}
     </>
   );
 };

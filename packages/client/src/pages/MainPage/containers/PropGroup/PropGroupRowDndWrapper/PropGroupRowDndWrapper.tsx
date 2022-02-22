@@ -16,10 +16,8 @@ export const PropGroupRowDndWrapper: React.FC<PropGroupRowDndWrapper> = ({
   moveProp,
   itemType,
 }) => {
-  // useRef
   const ref = useRef<HTMLDivElement>(null);
 
-  // useDrop
   const [{ handlerId }, drop] = useDrop({
     accept: itemType,
     collect(monitor) {
@@ -58,7 +56,6 @@ export const PropGroupRowDndWrapper: React.FC<PropGroupRowDndWrapper> = ({
     },
   });
 
-  // useDrag
   const [{ isDragging }, drag] = useDrag({
     item: { type: itemType, id, index },
     collect: (monitor) => ({
