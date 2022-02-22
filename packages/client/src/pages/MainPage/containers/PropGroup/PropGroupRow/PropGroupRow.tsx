@@ -41,8 +41,6 @@ interface IPropGroupRow {
   movePropDown: (propId: string) => void;
   movePropUp: (propId: string) => void;
 
-  moveProp: (dragIndex: number, hoverIndex: number) => void;
-
   userCanEdit: boolean;
   territoryActants: string[];
   openDetailOnCreate: boolean;
@@ -63,12 +61,9 @@ export const PropGroupRow: React.FC<IPropGroupRow> = ({
   addProp,
   movePropDown,
   movePropUp,
-  moveProp,
   userCanEdit,
   territoryActants = [],
   openDetailOnCreate = false,
-  id,
-  index,
 }) => {
   const propTypeEntity: IEntity = entities[prop.type.id];
   const propValueEntity = entities[prop.value.id];

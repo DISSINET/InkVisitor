@@ -107,15 +107,15 @@ export interface Node {
   label: string;
   children: Array<Node>;
 }
-export const ItemTypes = {
-  TAG: "TAG",
-  STATEMENT_ROW: "STATEMENT_ROW",
-  ACTANT_ROW: "ACTANT_ROW",
-  PROP_ROW: "PROP_ROW",
-  PROP_ROW1: "PROP_ROW1",
-  PROP_ROW2: "PROP_ROW2",
-  PROP_ROW3: "PROP_ROW3",
-};
+export enum ItemTypes {
+  TAG = "TAG",
+  STATEMENT_ROW = "STATEMENT_ROW",
+  ACTANT_ROW = "ACTANT_ROW",
+  PROP_ROW = "PROP_ROW",
+  PROP_ROW1 = "PROP_ROW1",
+  PROP_ROW2 = "PROP_ROW2",
+  PROP_ROW3 = "PROP_ROW3",
+}
 
 export type DragItem = {
   index: number;

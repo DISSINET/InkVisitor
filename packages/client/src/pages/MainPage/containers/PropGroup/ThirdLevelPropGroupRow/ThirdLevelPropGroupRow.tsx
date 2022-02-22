@@ -3,23 +3,25 @@ import { useDrop, DropTargetMonitor, XYCoord, useDrag } from "react-dnd";
 import { ItemTypes, DragItem } from "types";
 
 interface ThirdLevelPropGroupRow {
-  renderThirdLevelPropRow: React.ReactElement;
+  renderPropRow: React.ReactElement;
   id: string;
   index: number;
   moveProp: (dragIndex: number, hoverIndex: number) => void;
+  itemType: ItemTypes;
 }
 export const ThirdLevelPropGroupRow: React.FC<ThirdLevelPropGroupRow> = ({
-  renderThirdLevelPropRow,
+  renderPropRow,
   id,
   index,
   moveProp,
+  itemType,
 }) => {
   // useRef
   const ref = useRef<HTMLDivElement>(null);
 
   // useDrop
   const [{ handlerId }, drop] = useDrop({
-    accept: ItemTypes.PROP_ROW,
+    accept: itemType,
     collect(monitor) {
       return {
         handlerId: monitor.getHandlerId(),
@@ -58,7 +60,7 @@ export const ThirdLevelPropGroupRow: React.FC<ThirdLevelPropGroupRow> = ({
 
   // useDrag
   const [{ isDragging }, drag] = useDrag({
-    item: { type: ItemTypes.PROP_ROW, id, index },
+    item: { type: itemType, id, index },
     collect: (monitor) => ({
       isDragging: monitor.isDragging(),
     }),
@@ -68,7 +70,7 @@ export const ThirdLevelPropGroupRow: React.FC<ThirdLevelPropGroupRow> = ({
 
   return (
     <div ref={ref} data-handler-id={handlerId}>
-      {renderThirdLevelPropRow}
+      {renderPropRow}
     </div>
   );
 };

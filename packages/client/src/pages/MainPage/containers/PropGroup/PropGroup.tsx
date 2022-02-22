@@ -105,7 +105,6 @@ export const PropGroup: React.FC<IPropGroup> = ({
             userCanEdit={userCanEdit}
             territoryActants={territoryActants || []}
             openDetailOnCreate={openDetailOnCreate}
-            moveProp={moveFirstLevelProp}
           />
           {/* 2nd level */}
           <SecondLevelPropGroup
@@ -146,7 +145,6 @@ export const PropGroup: React.FC<IPropGroup> = ({
             userCanEdit={userCanEdit}
             territoryActants={territoryActants || []}
             openDetailOnCreate={openDetailOnCreate}
-            moveProp={moveProp}
           />
           {/* 3rd level */}
           <ThirdLevelPropGroup
@@ -188,7 +186,6 @@ export const PropGroup: React.FC<IPropGroup> = ({
           userCanEdit={userCanEdit}
           territoryActants={territoryActants || []}
           openDetailOnCreate={openDetailOnCreate}
-          moveProp={moveProp}
         />
       );
     },
