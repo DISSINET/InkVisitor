@@ -8,6 +8,7 @@ import update from "immutability-helper";
 import { SecondLevelPropGroup } from "./SecondLevelPropGroup/SecondLevelPropGroup";
 import { ThirdLevelPropGroup } from "./ThirdLevelPropGroup/ThirdLevelPropGroup";
 import { ItemTypes } from "types";
+import { FirstLevelPropGroup } from "./FirstLevelPropGroup/FirstLevelPropGroup";
 
 interface IPropGroup {
   originId: string;
@@ -60,26 +61,6 @@ export const PropGroup: React.FC<IPropGroup> = ({
       initialData: [],
       enabled: !!territoryId && api.isLoggedIn(),
     }
-  );
-
-  useEffect(() => {
-    setFirstLevelProps(props);
-  }, [props]);
-
-  const [firstLevelProps, setFirstLevelProps] = useState<IProp[]>([]);
-
-  const moveFirstLevelProp = useCallback(
-    (dragIndex: number, hoverIndex: number) => {
-      setFirstLevelProps((prevCards) =>
-        update(prevCards, {
-          $splice: [
-            [dragIndex, 1],
-            [hoverIndex, 0, prevCards[dragIndex]],
-          ],
-        })
-      );
-    },
-    []
   );
 
   // PREPARATION FOR DRAG AND DROP
@@ -182,7 +163,7 @@ export const PropGroup: React.FC<IPropGroup> = ({
     [entities]
   );
 
-  return firstLevelProps.length > 0 ? (
+  return props.length > 0 ? (
     <tr>
       <td colSpan={4}>
         <React.Fragment key={originId}>
@@ -193,9 +174,10 @@ export const PropGroup: React.FC<IPropGroup> = ({
             <StyledListHeaderColumn></StyledListHeaderColumn>
           </StyledGrid>
           {/* Rows */}
-          {firstLevelProps.map((prop1: IProp, pi1: number) =>
-            renderFirsLevelPropRow(prop1, pi1)
-          )}
+          <FirstLevelPropGroup
+            props={props}
+            renderFirsLevelPropRow={renderFirsLevelPropRow}
+          />
         </React.Fragment>
       </td>
     </tr>
