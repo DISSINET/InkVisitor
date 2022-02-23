@@ -128,6 +128,12 @@ export interface DraggedTerritoryItem {
   lvl?: number;
   index?: number;
 }
+export interface DraggedPropRowItem {
+  id?: string;
+  parentId?: string;
+  lvl?: number;
+  index?: number;
+}
 export interface IRequestSearch {
   class?: EntityClass;
   label: string;

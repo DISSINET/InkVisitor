@@ -119,6 +119,7 @@ export const PropGroup: React.FC<IPropGroup> = ({
 
   const renderSecondLevelPropRow = useCallback(
     (prop2: IProp, pi2: number, prop1: IProp) => {
+      prop2.children;
       return (
         <div key={prop2.id}>
           <PropGroupRow

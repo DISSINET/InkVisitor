@@ -37,8 +37,10 @@ export const SecondLevelPropGroup: React.FC<SecondLevelPropGroup> = ({
     <>
       {secondLevelProps.map((prop2: IProp, pi2: number) => (
         <PropGroupRowDndWrapper
-          key={pi2}
+          key={prop1.id + "|" + pi2}
           id={prop2.id}
+          lvl={2}
+          parentId={prop1.id}
           index={pi2}
           itemType={ItemTypes.PROP_ROW2}
           moveProp={moveProp}

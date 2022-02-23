@@ -40,10 +40,12 @@ export const ThirdLevelPropGroup: React.FC<ThirdLevelPropGroup> = ({
     <>
       {thirdLevelProps.map((prop3: IProp, pi3: number) => (
         <PropGroupRowDndWrapper
-          key={pi3}
+          key={prop1.children[pi2].id + "|" + pi3}
           renderPropRow={renderThirdLevelPropRow(prop3, pi3, prop1, pi2)}
           id={prop3.id}
           index={pi3}
+          parentId={prop1.children[pi2].id}
+          lvl={3}
           moveProp={moveProp}
           itemType={ItemTypes.PROP_ROW3}
         />

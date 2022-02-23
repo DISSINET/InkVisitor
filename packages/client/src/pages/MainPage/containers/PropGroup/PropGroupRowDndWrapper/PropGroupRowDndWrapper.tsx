@@ -1,5 +1,7 @@
-import React, { useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import { useDrop, DropTargetMonitor, XYCoord, useDrag } from "react-dnd";
+import { setDraggedPropRow } from "redux/features/propGroup/draggedPropRowSlice";
+import { useAppDispatch } from "redux/hooks";
 import { ItemTypes, DragItem } from "types";
 
 interface PropGroupRowDndWrapper {
@@ -8,6 +10,8 @@ interface PropGroupRowDndWrapper {
   index: number;
   moveProp: (dragIndex: number, hoverIndex: number) => void;
   itemType: ItemTypes;
+  lvl: 1 | 2 | 3;
+  parentId: string;
 }
 export const PropGroupRowDndWrapper: React.FC<PropGroupRowDndWrapper> = ({
   renderPropRow,
@@ -15,7 +19,10 @@ export const PropGroupRowDndWrapper: React.FC<PropGroupRowDndWrapper> = ({
   index,
   moveProp,
   itemType,
+  lvl,
+  parentId,
 }) => {
+  const dispatch = useAppDispatch();
   const ref = useRef<HTMLDivElement>(null);
 
   const [{ handlerId }, drop] = useDrop({
@@ -64,6 +71,14 @@ export const PropGroupRowDndWrapper: React.FC<PropGroupRowDndWrapper> = ({
   });
 
   drag(drop(ref));
+
+  useEffect(() => {
+    if (isDragging) {
+      dispatch(setDraggedPropRow({ id, parentId, index, lvl }));
+    } else {
+      dispatch(setDraggedPropRow({}));
+    }
+  }, [isDragging]);
 
   return (
     <div ref={ref} data-handler-id={handlerId}>
