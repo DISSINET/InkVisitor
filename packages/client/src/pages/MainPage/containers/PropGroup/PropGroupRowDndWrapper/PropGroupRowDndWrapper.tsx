@@ -1,8 +1,9 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useDrop, DropTargetMonitor, XYCoord, useDrag } from "react-dnd";
 import { setDraggedPropRow } from "redux/features/propGroup/draggedPropRowSlice";
-import { useAppDispatch } from "redux/hooks";
-import { ItemTypes, DragItem } from "types";
+import { useAppDispatch, useAppSelector } from "redux/hooks";
+import { ItemTypes, DragItem, DraggedPropRowItem } from "types";
+import { StyledDndWrapper } from "./PropGroupRowDndWrapperStyles";
 
 interface PropGroupRowDndWrapper {
   renderPropRow: React.ReactElement;
@@ -80,9 +81,17 @@ export const PropGroupRowDndWrapper: React.FC<PropGroupRowDndWrapper> = ({
     }
   }, [isDragging]);
 
+  const tempDisabled = false;
+
   return (
-    <div ref={ref} data-handler-id={handlerId}>
-      {renderPropRow}
-    </div>
+    <>
+      {!tempDisabled ? (
+        <StyledDndWrapper ref={ref} data-handler-id={handlerId}>
+          {renderPropRow}
+        </StyledDndWrapper>
+      ) : (
+        <StyledDndWrapper>{renderPropRow}</StyledDndWrapper>
+      )}
+    </>
   );
 };

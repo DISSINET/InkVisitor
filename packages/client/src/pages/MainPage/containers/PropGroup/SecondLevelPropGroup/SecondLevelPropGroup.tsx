@@ -1,8 +1,8 @@
 import { IProp } from "@shared/types";
-import React, { useCallback, useEffect, useState } from "react";
 import update from "immutability-helper";
-import { PropGroupRowDndWrapper } from "../PropGroupRowDndWrapper/PropGroupRowDndWrapper";
+import React, { useCallback, useEffect, useState } from "react";
 import { ItemTypes } from "types";
+import { PropGroupRowDndWrapper } from "../PropGroupRowDndWrapper/PropGroupRowDndWrapper";
 
 interface SecondLevelPropGroup {
   prop1: IProp;

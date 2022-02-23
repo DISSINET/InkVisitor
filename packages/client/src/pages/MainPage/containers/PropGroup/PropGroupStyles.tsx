@@ -15,6 +15,7 @@ export const StyledGrid = styled.div<StyledGrid>`
   grid-auto-flow: row;
   padding-bottom: ${({ theme }) => theme.space[1]};
   width: 100%;
+
   background-color: ${({ tempDisabled }) =>
     tempDisabled ? "hotpink" : "transparent"};
 `;
