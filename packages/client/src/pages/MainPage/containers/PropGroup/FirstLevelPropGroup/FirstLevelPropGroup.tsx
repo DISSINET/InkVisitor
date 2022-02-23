@@ -7,10 +7,12 @@ import { PropGroupRowDndWrapper } from "../PropGroupRowDndWrapper/PropGroupRowDn
 interface FirstLevelPropGroup {
   props: IProp[];
   renderFirsLevelPropRow: (prop1: IProp, pi1: number) => JSX.Element;
+  parentId: string;
 }
 export const FirstLevelPropGroup: React.FC<FirstLevelPropGroup> = ({
   props,
   renderFirsLevelPropRow,
+  parentId,
 }) => {
   useEffect(() => {
     setFirstLevelProps(props);
@@ -39,7 +41,7 @@ export const FirstLevelPropGroup: React.FC<FirstLevelPropGroup> = ({
           lvl={1}
           itemType={ItemTypes.PROP_ROW1}
           moveProp={moveProp}
-          parentId={""}
+          parentId={parentId}
           renderPropRow={renderFirsLevelPropRow(prop1, pi1)}
         />
       ))}

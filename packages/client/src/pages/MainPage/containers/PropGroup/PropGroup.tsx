@@ -1,14 +1,12 @@
 import { IEntity, IProp } from "@shared/types";
 import api from "api";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback } from "react";
 import { useQuery } from "react-query";
+import { FirstLevelPropGroup } from "./FirstLevelPropGroup/FirstLevelPropGroup";
 import { PropGroupRow } from "./PropGroupRow/PropGroupRow";
 import { StyledGrid, StyledListHeaderColumn } from "./PropGroupStyles";
-import update from "immutability-helper";
 import { SecondLevelPropGroup } from "./SecondLevelPropGroup/SecondLevelPropGroup";
 import { ThirdLevelPropGroup } from "./ThirdLevelPropGroup/ThirdLevelPropGroup";
-import { ItemTypes } from "types";
-import { FirstLevelPropGroup } from "./FirstLevelPropGroup/FirstLevelPropGroup";
 
 interface IPropGroup {
   originId: string;
@@ -63,15 +61,12 @@ export const PropGroup: React.FC<IPropGroup> = ({
     }
   );
 
-  // PREPARATION FOR DRAG AND DROP
   const renderFirsLevelPropRow = useCallback(
     (prop1: IProp, pi1: number) => {
       return (
         <div key={prop1.id}>
           <PropGroupRow
-            key={prop1.id}
-            id={prop1.id}
-            index={pi1}
+            parentId={originId}
             prop={prop1}
             entities={entities}
             level={"1"}
@@ -100,13 +95,10 @@ export const PropGroup: React.FC<IPropGroup> = ({
 
   const renderSecondLevelPropRow = useCallback(
     (prop2: IProp, pi2: number, prop1: IProp) => {
-      prop2.children;
       return (
         <div key={prop2.id}>
           <PropGroupRow
-            key={prop2.id}
-            id={prop2.id}
-            index={pi2}
+            parentId={prop1.id}
             prop={prop2}
             entities={entities}
             level={"2"}
@@ -139,9 +131,7 @@ export const PropGroup: React.FC<IPropGroup> = ({
     (prop3: IProp, pi3: number, prop1: IProp, pi2: number) => {
       return (
         <PropGroupRow
-          key={pi3}
-          id={prop3.id}
-          index={pi3}
+          parentId={prop1.children[pi2].id}
           prop={prop3}
           entities={entities}
           level={"3"}
@@ -177,6 +167,7 @@ export const PropGroup: React.FC<IPropGroup> = ({
           <FirstLevelPropGroup
             props={props}
             renderFirsLevelPropRow={renderFirsLevelPropRow}
+            parentId={originId}
           />
         </React.Fragment>
       </td>

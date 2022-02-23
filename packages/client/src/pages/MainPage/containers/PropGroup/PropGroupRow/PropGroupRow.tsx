@@ -1,6 +1,6 @@
 import { IEntity, IProp } from "@shared/types";
 import { AttributeIcon, Button } from "components";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   FaCaretDown,
   FaCaretUp,
@@ -8,11 +8,13 @@ import {
   FaTrashAlt,
   FaUnlink,
 } from "react-icons/fa";
+import { useAppSelector } from "redux/hooks";
 import { excludedSuggesterEntities } from "Theme/constants";
 import {
   AttributeGroupDataObject,
   classesPropType,
   classesPropValue,
+  DraggedPropRowItem,
 } from "types";
 import { EntitySuggester, EntityTag } from "../..";
 import { AttributesGroupEditor } from "../../AttributesEditor/AttributesGroupEditor";
@@ -42,8 +44,7 @@ interface IPropGroupRow {
   territoryActants: string[];
   openDetailOnCreate: boolean;
 
-  id?: string;
-  index?: number;
+  parentId: string;
 }
 
 export const PropGroupRow: React.FC<IPropGroupRow> = ({
@@ -61,12 +62,27 @@ export const PropGroupRow: React.FC<IPropGroupRow> = ({
   userCanEdit,
   territoryActants = [],
   openDetailOnCreate = false,
+  parentId,
 }) => {
   const propTypeEntity: IEntity = entities[prop.type.id];
   const propValueEntity = entities[prop.value.id];
 
+  const draggePropRow: DraggedPropRowItem = useAppSelector(
+    (state) => state.propGroup.draggedPropRow
+  );
+
+  const [tempDisabled, setTempDisabled] = useState(false);
+
+  useEffect(() => {
+    if (draggePropRow.parentId && draggePropRow.parentId !== parentId) {
+      setTempDisabled(true);
+    } else {
+      setTempDisabled(false);
+    }
+  }, [draggePropRow]);
+
   return (
-    <StyledGrid key={level + "|" + order}>
+    <StyledGrid key={level + "|" + order} tempDisabled={tempDisabled}>
       <StyledPropLineColumn level={level} isTag={propTypeEntity ? true : false}>
         <StyledFaGripVertical />
         {propTypeEntity ? (

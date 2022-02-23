@@ -1,7 +1,10 @@
 import { FaGripVertical } from "react-icons/fa";
 import styled from "styled-components";
 
-export const StyledGrid = styled.div`
+interface StyledGrid {
+  tempDisabled?: boolean;
+}
+export const StyledGrid = styled.div<StyledGrid>`
   display: grid;
 
   align-items: center;
@@ -12,6 +15,8 @@ export const StyledGrid = styled.div`
   grid-auto-flow: row;
   padding-bottom: ${({ theme }) => theme.space[1]};
   width: 100%;
+  background-color: ${({ tempDisabled }) =>
+    tempDisabled ? "hotpink" : "transparent"};
 `;
 
 export const StyledGridCell = styled.div`
