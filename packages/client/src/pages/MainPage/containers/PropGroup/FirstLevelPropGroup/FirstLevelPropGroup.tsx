@@ -1,12 +1,14 @@
 import { IProp } from "@shared/types";
 import update from "immutability-helper";
 import React, { useCallback, useEffect, useState } from "react";
-import { ItemTypes } from "types";
-import { PropGroupRowDndWrapper } from "../PropGroupRowDndWrapper/PropGroupRowDndWrapper";
 
 interface FirstLevelPropGroup {
   props: IProp[];
-  renderFirsLevelPropRow: (prop1: IProp, pi1: number) => JSX.Element;
+  renderFirsLevelPropRow: (
+    prop1: IProp,
+    pi1: number,
+    moveProp: (dragIndex: number, hoverIndex: number) => void
+  ) => JSX.Element;
   parentId: string;
 }
 export const FirstLevelPropGroup: React.FC<FirstLevelPropGroup> = ({
@@ -33,18 +35,9 @@ export const FirstLevelPropGroup: React.FC<FirstLevelPropGroup> = ({
 
   return (
     <>
-      {firstLevelProps.map((prop1: IProp, pi1: number) => (
-        <PropGroupRowDndWrapper
-          key={prop1.id}
-          index={pi1}
-          id={prop1.id}
-          lvl={1}
-          itemType={ItemTypes.PROP_ROW1}
-          moveProp={moveProp}
-          parentId={parentId}
-          renderPropRow={renderFirsLevelPropRow(prop1, pi1)}
-        />
-      ))}
+      {firstLevelProps.map((prop1: IProp, pi1: number) =>
+        renderFirsLevelPropRow(prop1, pi1, moveProp)
+      )}
     </>
   );
 };

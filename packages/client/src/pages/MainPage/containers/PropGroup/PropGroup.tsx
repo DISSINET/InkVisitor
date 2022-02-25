@@ -2,6 +2,7 @@ import { IEntity, IProp } from "@shared/types";
 import api from "api";
 import React, { useCallback } from "react";
 import { useQuery } from "react-query";
+import { ItemTypes } from "types";
 import { FirstLevelPropGroup } from "./FirstLevelPropGroup/FirstLevelPropGroup";
 import { PropGroupRow } from "./PropGroupRow/PropGroupRow";
 import { StyledGrid, StyledListHeaderColumn } from "./PropGroupStyles";
@@ -62,10 +63,17 @@ export const PropGroup: React.FC<IPropGroup> = ({
   );
 
   const renderFirsLevelPropRow = useCallback(
-    (prop1: IProp, pi1: number) => {
+    (
+      prop1: IProp,
+      pi1: number,
+      moveProp: (dragIndex: number, hoverIndex: number) => void
+    ) => {
       return (
-        <div key={prop1.id}>
+        <React.Fragment key={prop1.id}>
           <PropGroupRow
+            id={prop1.id}
+            index={pi1}
+            itemType={ItemTypes.PROP_ROW1}
             parentId={originId}
             prop={prop1}
             entities={entities}
@@ -81,23 +89,32 @@ export const PropGroup: React.FC<IPropGroup> = ({
             userCanEdit={userCanEdit}
             territoryActants={territoryActants || []}
             openDetailOnCreate={openDetailOnCreate}
+            moveProp={moveProp}
           />
           {/* 2nd level */}
           <SecondLevelPropGroup
             prop1={prop1}
             renderSecondLevelPropRow={renderSecondLevelPropRow}
           />
-        </div>
+        </React.Fragment>
       );
     },
     [entities]
   );
 
   const renderSecondLevelPropRow = useCallback(
-    (prop2: IProp, pi2: number, prop1: IProp) => {
+    (
+      prop2: IProp,
+      pi2: number,
+      prop1: IProp,
+      moveProp: (dragIndex: number, hoverIndex: number) => void
+    ) => {
       return (
-        <div key={prop2.id}>
+        <React.Fragment key={prop2.id}>
           <PropGroupRow
+            id={prop2.id}
+            index={pi2}
+            itemType={ItemTypes.PROP_ROW2}
             parentId={prop1.id}
             prop={prop2}
             entities={entities}
@@ -114,6 +131,7 @@ export const PropGroup: React.FC<IPropGroup> = ({
             userCanEdit={userCanEdit}
             territoryActants={territoryActants || []}
             openDetailOnCreate={openDetailOnCreate}
+            moveProp={moveProp}
           />
           {/* 3rd level */}
           <ThirdLevelPropGroup
@@ -121,16 +139,25 @@ export const PropGroup: React.FC<IPropGroup> = ({
             pi2={pi2}
             renderThirdLevelPropRow={renderThirdLevelPropRow}
           />
-        </div>
+        </React.Fragment>
       );
     },
     [entities]
   );
 
   const renderThirdLevelPropRow = useCallback(
-    (prop3: IProp, pi3: number, prop1: IProp, pi2: number) => {
+    (
+      prop3: IProp,
+      pi3: number,
+      prop1: IProp,
+      pi2: number,
+      moveProp: (dragIndex: number, hoverIndex: number) => void
+    ) => {
       return (
         <PropGroupRow
+          id={prop3.id}
+          index={pi3}
+          itemType={ItemTypes.PROP_ROW3}
           parentId={prop1.children[pi2].id}
           prop={prop3}
           entities={entities}
@@ -147,6 +174,7 @@ export const PropGroup: React.FC<IPropGroup> = ({
           userCanEdit={userCanEdit}
           territoryActants={territoryActants || []}
           openDetailOnCreate={openDetailOnCreate}
+          moveProp={moveProp}
         />
       );
     },

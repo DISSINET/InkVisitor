@@ -1,8 +1,6 @@
 import { IProp } from "@shared/types";
-import React, { useCallback, useEffect, useState } from "react";
 import update from "immutability-helper";
-import { ItemTypes } from "types";
-import { PropGroupRowDndWrapper } from "../PropGroupRowDndWrapper/PropGroupRowDndWrapper";
+import React, { useCallback, useEffect, useState } from "react";
 
 interface ThirdLevelPropGroup {
   prop1: IProp;
@@ -11,7 +9,8 @@ interface ThirdLevelPropGroup {
     prop3: IProp,
     pi3: number,
     prop1: IProp,
-    pi2: number
+    pi2: number,
+    moveProp: (dragIndex: number, hoverIndex: number) => void
   ) => JSX.Element;
 }
 export const ThirdLevelPropGroup: React.FC<ThirdLevelPropGroup> = ({
@@ -38,18 +37,9 @@ export const ThirdLevelPropGroup: React.FC<ThirdLevelPropGroup> = ({
 
   return (
     <>
-      {thirdLevelProps.map((prop3: IProp, pi3: number) => (
-        <PropGroupRowDndWrapper
-          key={prop1.children[pi2].id + "|" + pi3}
-          renderPropRow={renderThirdLevelPropRow(prop3, pi3, prop1, pi2)}
-          id={prop3.id}
-          index={pi3}
-          parentId={prop1.children[pi2].id}
-          lvl={3}
-          moveProp={moveProp}
-          itemType={ItemTypes.PROP_ROW3}
-        />
-      ))}
+      {thirdLevelProps.map((prop3: IProp, pi3: number) =>
+        renderThirdLevelPropRow(prop3, pi3, prop1, pi2, moveProp)
+      )}
     </>
   );
 };
