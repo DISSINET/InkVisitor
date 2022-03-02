@@ -15,6 +15,7 @@ export const FirstLevelPropGroup: React.FC<FirstLevelPropGroup> = ({
   renderFirsLevelPropRow,
 }) => {
   useEffect(() => {
+    // update jen po fetch ze serveru
     setFirstLevelProps(props);
   }, [props]);
 

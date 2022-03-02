@@ -20,6 +20,7 @@ export const SecondLevelPropGroup: React.FC<SecondLevelPropGroup> = ({
   const [props, setProps] = useState<IProp[]>([]);
 
   useEffect(() => {
+    // update jen po fetch ze serveru
     setProps(secondLevelProps);
   }, [secondLevelProps]);
 

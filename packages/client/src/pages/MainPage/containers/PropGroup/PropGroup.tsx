@@ -135,12 +135,12 @@ export const PropGroup: React.FC<IPropGroup> = ({
             moveProp={moveProp}
           />
           {/* 3rd level */}
-          <ThirdLevelPropGroup
+          {/* <ThirdLevelPropGroup
             prop1={prop1}
             pi2={pi2}
             renderThirdLevelPropRow={renderThirdLevelPropRow}
             thirdLevelProps={prop1.children[pi2].children}
-          />
+          /> */}
         </React.Fragment>
       );
     },
