@@ -1,7 +1,13 @@
 import { IEntity, IProp } from "@shared/types";
 import { AttributeIcon, Button } from "components";
 import React, { useEffect, useRef, useState } from "react";
-import { useDrop, DropTargetMonitor, XYCoord, useDrag } from "react-dnd";
+import {
+  useDrop,
+  DropTargetMonitor,
+  XYCoord,
+  useDrag,
+  DragSourceMonitor,
+} from "react-dnd";
 import {
   FaCaretDown,
   FaCaretUp,
@@ -104,6 +110,9 @@ export const PropGroupRow: React.FC<IPropGroupRow> = ({
       };
     },
     hover(item: DragItem, monitor: DropTargetMonitor) {
+      if (tempDisabled) {
+        return;
+      }
       if (!ref.current) {
         return;
       }
@@ -153,7 +162,10 @@ export const PropGroupRow: React.FC<IPropGroupRow> = ({
 
   const renderPropRow = () => {
     return (
-      <StyledGrid key={level + "|" + order} tempDisabled={tempDisabled}>
+      <StyledGrid
+        key={level + "|" + order + "|" + id}
+        tempDisabled={tempDisabled}
+      >
         <StyledPropLineColumn
           level={level}
           isTag={propTypeEntity ? true : false}
@@ -392,13 +404,9 @@ export const PropGroupRow: React.FC<IPropGroupRow> = ({
 
   return (
     <>
-      {!tempDisabled ? (
-        <div ref={ref} data-handler-id={handlerId}>
-          {renderPropRow()}
-        </div>
-      ) : (
-        <>{renderPropRow()}</>
-      )}
+      <div ref={ref} data-handler-id={handlerId}>
+        {renderPropRow()}
+      </div>
     </>
   );
 };

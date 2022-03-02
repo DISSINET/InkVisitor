@@ -9,12 +9,10 @@ interface FirstLevelPropGroup {
     pi1: number,
     moveProp: (dragIndex: number, hoverIndex: number) => void
   ) => JSX.Element;
-  parentId: string;
 }
 export const FirstLevelPropGroup: React.FC<FirstLevelPropGroup> = ({
   props,
   renderFirsLevelPropRow,
-  parentId,
 }) => {
   useEffect(() => {
     setFirstLevelProps(props);

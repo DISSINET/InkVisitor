@@ -12,20 +12,22 @@ interface ThirdLevelPropGroup {
     pi2: number,
     moveProp: (dragIndex: number, hoverIndex: number) => void
   ) => JSX.Element;
+  thirdLevelProps: IProp[];
 }
 export const ThirdLevelPropGroup: React.FC<ThirdLevelPropGroup> = ({
   prop1,
   pi2,
   renderThirdLevelPropRow,
+  thirdLevelProps,
 }) => {
-  const [thirdLevelProps, setThirdLevelProps] = useState<IProp[]>([]);
+  const [props, setProps] = useState<IProp[]>([]);
 
   useEffect(() => {
-    setThirdLevelProps(prop1.children[pi2].children);
-  }, [prop1.children[pi2].children]);
+    setProps(thirdLevelProps);
+  }, [thirdLevelProps]);
 
   const moveProp = useCallback((dragIndex: number, hoverIndex: number) => {
-    setThirdLevelProps((prevCards) =>
+    setProps((prevCards) =>
       update(prevCards, {
         $splice: [
           [dragIndex, 1],
@@ -37,7 +39,7 @@ export const ThirdLevelPropGroup: React.FC<ThirdLevelPropGroup> = ({
 
   return (
     <>
-      {thirdLevelProps.map((prop3: IProp, pi3: number) =>
+      {props.map((prop3: IProp, pi3: number) =>
         renderThirdLevelPropRow(prop3, pi3, prop1, pi2, moveProp)
       )}
     </>

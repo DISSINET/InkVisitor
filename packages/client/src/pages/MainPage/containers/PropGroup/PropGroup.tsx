@@ -95,6 +95,7 @@ export const PropGroup: React.FC<IPropGroup> = ({
           <SecondLevelPropGroup
             prop1={prop1}
             renderSecondLevelPropRow={renderSecondLevelPropRow}
+            secondLevelProps={prop1.children}
           />
         </React.Fragment>
       );
@@ -138,6 +139,7 @@ export const PropGroup: React.FC<IPropGroup> = ({
             prop1={prop1}
             pi2={pi2}
             renderThirdLevelPropRow={renderThirdLevelPropRow}
+            thirdLevelProps={prop1.children[pi2].children}
           />
         </React.Fragment>
       );
@@ -155,6 +157,7 @@ export const PropGroup: React.FC<IPropGroup> = ({
     ) => {
       return (
         <PropGroupRow
+          key={prop3.id + "|" + pi3}
           id={prop3.id}
           index={pi3}
           itemType={ItemTypes.PROP_ROW3}
@@ -195,7 +198,6 @@ export const PropGroup: React.FC<IPropGroup> = ({
           <FirstLevelPropGroup
             props={props}
             renderFirsLevelPropRow={renderFirsLevelPropRow}
-            parentId={originId}
           />
         </React.Fragment>
       </td>

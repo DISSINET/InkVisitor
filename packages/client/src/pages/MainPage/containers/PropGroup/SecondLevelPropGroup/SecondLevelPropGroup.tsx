@@ -10,19 +10,21 @@ interface SecondLevelPropGroup {
     prop1: IProp,
     moveProp: (dragIndex: number, hoverIndex: number) => void
   ) => JSX.Element;
+  secondLevelProps: IProp[];
 }
 export const SecondLevelPropGroup: React.FC<SecondLevelPropGroup> = ({
   prop1,
   renderSecondLevelPropRow,
+  secondLevelProps,
 }) => {
-  const [secondLevelProps, setSecondLevelProps] = useState<IProp[]>([]);
+  const [props, setProps] = useState<IProp[]>([]);
 
   useEffect(() => {
-    setSecondLevelProps(prop1.children);
-  }, [prop1.children]);
+    setProps(secondLevelProps);
+  }, [secondLevelProps]);
 
   const moveProp = useCallback((dragIndex: number, hoverIndex: number) => {
-    setSecondLevelProps((prevCards) =>
+    setProps((prevCards) =>
       update(prevCards, {
         $splice: [
           [dragIndex, 1],
@@ -34,7 +36,7 @@ export const SecondLevelPropGroup: React.FC<SecondLevelPropGroup> = ({
 
   return (
     <>
-      {secondLevelProps.map((prop2: IProp, pi2: number) =>
+      {props.map((prop2: IProp, pi2: number) =>
         renderSecondLevelPropRow(prop2, pi2, prop1, moveProp)
       )}
     </>
