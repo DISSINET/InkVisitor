@@ -4,11 +4,13 @@ import React, { useCallback, useEffect, useState } from "react";
 
 interface ThirdLevelPropGroup {
   prop1: IProp;
+  prop2: IProp;
   pi2: number;
   renderThirdLevelPropRow: (
     prop3: IProp,
     pi3: number,
     prop1: IProp,
+    prop2: IProp,
     pi2: number,
     moveProp: (dragIndex: number, hoverIndex: number) => void
   ) => JSX.Element;
@@ -16,6 +18,7 @@ interface ThirdLevelPropGroup {
 }
 export const ThirdLevelPropGroup: React.FC<ThirdLevelPropGroup> = ({
   prop1,
+  prop2,
   pi2,
   renderThirdLevelPropRow,
   thirdLevelProps,
@@ -41,7 +44,7 @@ export const ThirdLevelPropGroup: React.FC<ThirdLevelPropGroup> = ({
   return (
     <>
       {props.map((prop3: IProp, pi3: number) =>
-        renderThirdLevelPropRow(prop3, pi3, prop1, pi2, moveProp)
+        renderThirdLevelPropRow(prop3, pi3, prop1, prop2, pi2, moveProp)
       )}
     </>
   );

@@ -20,6 +20,7 @@ interface IPropGroup {
   addProp: (originId: string) => void;
   movePropDown: (propId: string) => void;
   movePropUp: (propId: string) => void;
+  movePropToIndex: (propId: string, oldIndex: number, newIndex: number) => void;
 
   userCanEdit: boolean;
   openDetailOnCreate: boolean;
@@ -36,6 +37,7 @@ export const PropGroup: React.FC<IPropGroup> = ({
   addProp,
   movePropDown,
   movePropUp,
+  movePropToIndex,
 
   userCanEdit,
   openDetailOnCreate = false,
@@ -90,6 +92,7 @@ export const PropGroup: React.FC<IPropGroup> = ({
             territoryActants={territoryActants || []}
             openDetailOnCreate={openDetailOnCreate}
             moveProp={moveProp}
+            movePropToIndex={movePropToIndex}
           />
           {/* 2nd level */}
           <SecondLevelPropGroup
@@ -133,13 +136,15 @@ export const PropGroup: React.FC<IPropGroup> = ({
             territoryActants={territoryActants || []}
             openDetailOnCreate={openDetailOnCreate}
             moveProp={moveProp}
+            movePropToIndex={movePropToIndex}
           />
           {/* 3rd level */}
           {/* <ThirdLevelPropGroup
             prop1={prop1}
             pi2={pi2}
+            prop2={prop2}
             renderThirdLevelPropRow={renderThirdLevelPropRow}
-            thirdLevelProps={prop1.children[pi2].children}
+            thirdLevelProps={prop2.children}
           /> */}
         </React.Fragment>
       );
@@ -152,6 +157,7 @@ export const PropGroup: React.FC<IPropGroup> = ({
       prop3: IProp,
       pi3: number,
       prop1: IProp,
+      prop2: IProp,
       pi2: number,
       moveProp: (dragIndex: number, hoverIndex: number) => void
     ) => {
@@ -161,14 +167,14 @@ export const PropGroup: React.FC<IPropGroup> = ({
           id={prop3.id}
           index={pi3}
           itemType={ItemTypes.PROP_ROW3}
-          parentId={prop1.children[pi2].id}
+          parentId={prop2.id}
           prop={prop3}
           entities={entities}
           level={"3"}
           order={pi3}
           firstRowinGroup={pi3 === 0}
           lastRowinGroup={pi3 === prop1.children.length - 1}
-          lastInGroup={pi3 === prop1.children[pi2].children.length - 1}
+          lastInGroup={pi3 === prop2.children.length - 1}
           updateProp={updateProp}
           removeProp={removeProp}
           addProp={addProp}
@@ -178,6 +184,7 @@ export const PropGroup: React.FC<IPropGroup> = ({
           territoryActants={territoryActants || []}
           openDetailOnCreate={openDetailOnCreate}
           moveProp={moveProp}
+          movePropToIndex={movePropToIndex}
         />
       );
     },

@@ -49,14 +49,15 @@ interface IPropGroupRow {
   addProp: (originId: string) => void;
   movePropDown: (propId: string) => void;
   movePropUp: (propId: string) => void;
+  movePropToIndex: (propId: string, oldIndex: number, newIndex: number) => void;
 
   userCanEdit: boolean;
   territoryActants: string[];
   openDetailOnCreate: boolean;
 
   parentId: string;
-  id?: string;
-  index?: number;
+  id: string;
+  index: number;
   moveProp: (dragIndex: number, hoverIndex: number) => void;
   itemType?: ItemTypes;
 }
@@ -74,6 +75,7 @@ export const PropGroupRow: React.FC<IPropGroupRow> = ({
   movePropDown,
   movePropUp,
   moveProp,
+  movePropToIndex,
   userCanEdit,
   territoryActants = [],
   openDetailOnCreate = false,
@@ -141,6 +143,10 @@ export const PropGroupRow: React.FC<IPropGroupRow> = ({
       moveProp(dragIndex, hoverIndex);
       item.index = hoverIndex;
     },
+    // drop: (item: DragItem, monitor: DropTargetMonitor) => {
+    //   console.log("item", item.index);
+    //   console.log("index", index);
+    // },
   });
 
   const [{ isDragging }, drag] = useDrag({
@@ -148,6 +154,16 @@ export const PropGroupRow: React.FC<IPropGroupRow> = ({
     collect: (monitor) => ({
       isDragging: monitor.isDragging(),
     }),
+    end: (item: DragItem | undefined, monitor: DragSourceMonitor) => {
+      // console.log("item", item?.index);
+      // console.log("index", draggePropRow.index);
+      if (
+        item &&
+        draggePropRow.index !== undefined &&
+        item.index !== draggePropRow.index
+      )
+        movePropToIndex(id, draggePropRow.index, item.index);
+    },
   });
 
   drag(drop(ref));
@@ -402,9 +418,11 @@ export const PropGroupRow: React.FC<IPropGroupRow> = ({
     );
   };
 
+  const opacity = isDragging ? 0.5 : 1;
+
   return (
     <>
-      <div ref={ref} data-handler-id={handlerId}>
+      <div ref={ref} data-handler-id={handlerId} style={{ opacity: opacity }}>
         {renderPropRow()}
       </div>
     </>

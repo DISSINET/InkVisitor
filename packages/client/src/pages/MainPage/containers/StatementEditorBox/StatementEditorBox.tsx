@@ -361,6 +361,7 @@ export const StatementEditorBox: React.FC = () => {
           });
         }
       );
+      console.log(newStatementData);
 
       updateStatementDataMutation.mutate(newStatementData);
     }
@@ -393,6 +394,57 @@ export const StatementEditorBox: React.FC = () => {
       updateStatementDataMutation.mutate(newStatementData);
     }
   };
+
+  const movePropToIndex = (
+    propId: string,
+    oldIndex: number,
+    newIndex: number
+  ) => {
+    console.log("old: ", oldIndex);
+    console.log("new: ", newIndex);
+    if (statement) {
+      const newStatementData = { ...statement.data };
+      [...newStatementData.actants, ...newStatementData.actions].forEach(
+        (actant: IStatementActant | IStatementAction) => {
+          actant.props.forEach((actantProp, pi) => {
+            if (actantProp.id === propId) {
+              console.log("actant.props before", actant.props);
+              actant.props.splice(
+                newIndex,
+                0,
+                actant.props.splice(oldIndex, 1)[0]
+              );
+              console.log("actant.props after", actant.props);
+            }
+
+            actant.props[pi].children.forEach((actantPropProp, pii) => {
+              if (actantPropProp.id === propId) {
+                actant.props[pi].children.splice(
+                  newIndex,
+                  0,
+                  actant.props[pi].children.splice(oldIndex, 1)[0]
+                );
+              }
+            });
+          });
+        }
+      );
+      console.log(newStatementData.actions[0].props);
+      // console.log(newStatementData.actions[0].props[0]);
+      updateStatementDataMutation.mutate(newStatementData);
+    }
+  };
+
+  useEffect(() => {
+    // nahoru
+    const arr = [1, 2, 3, 4];
+    arr.splice(3, 0, arr.splice(0, 1)[0]);
+    console.log(arr);
+    // dolu
+    const arr2 = [1, 2, 3, 4];
+    arr2.splice(0, 0, arr2.splice(2, 1)[0]);
+    console.log(arr2);
+  }, []);
 
   // references
   const addReference = (resourceId: string) => {
@@ -509,6 +561,7 @@ export const StatementEditorBox: React.FC = () => {
           addProp={addProp}
           movePropDown={movePropDown}
           movePropUp={movePropUp}
+          movePropToIndex={movePropToIndex}
           userCanEdit={userCanEdit}
           openDetailOnCreate={false}
         />
