@@ -14,9 +14,14 @@ import { FaGripVertical, FaPlus, FaTrashAlt, FaUnlink } from "react-icons/fa";
 import { UseMutationResult } from "react-query";
 import { ColumnInstance } from "react-table";
 import { setDraggedActantRow } from "redux/features/rowDnd/draggedActantRowSlice";
-import { useAppDispatch } from "redux/hooks";
+import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { excludedSuggesterEntities } from "Theme/constants";
-import { DraggedPropRowCategory, DragItem, ItemTypes } from "types";
+import {
+  DraggedActantRowItem,
+  DraggedPropRowCategory,
+  DragItem,
+  ItemTypes,
+} from "types";
 import { EntitySuggester, EntityTag } from "../..";
 import { AttributeButtonGroup } from "../../AttributeButtonGroup/AttributeButtonGroup";
 import AttributesEditor from "../../AttributesEditor/AttributesEditor";
@@ -304,11 +309,14 @@ export const StatementEditorActantTableRow: React.FC<
   };
 
   const dispatch = useAppDispatch();
+  const draggedActantRow: DraggedActantRowItem = useAppSelector(
+    (state) => state.rowDnd.draggedActantRow
+  );
 
   useEffect(() => {
     if (isDragging) {
       dispatch(
-        setDraggedActantRow({ category: DraggedPropRowCategory.ACTION })
+        setDraggedActantRow({ category: DraggedPropRowCategory.ACTANT })
       );
     } else {
       dispatch(setDraggedActantRow({}));
@@ -336,12 +344,16 @@ export const StatementEditorActantTableRow: React.FC<
         <StyledTd>{renderAttributesCell()}</StyledTd>
       </StyledTr>
 
-      {renderPropGroup(
-        row.values.data.sActant.actant,
-        row.values.data.sActant.props,
-        statement,
-        DraggedPropRowCategory.ACTANT
-      )}
+      {!(
+        draggedActantRow.category &&
+        draggedActantRow.category === DraggedPropRowCategory.ACTANT
+      ) &&
+        renderPropGroup(
+          row.values.data.sActant.actant,
+          row.values.data.sActant.props,
+          statement,
+          DraggedPropRowCategory.ACTANT
+        )}
     </React.Fragment>
   );
 };

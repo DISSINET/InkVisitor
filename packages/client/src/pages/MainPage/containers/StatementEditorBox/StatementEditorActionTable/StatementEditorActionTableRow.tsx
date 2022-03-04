@@ -14,9 +14,14 @@ import { FaGripVertical, FaPlus, FaTrashAlt, FaUnlink } from "react-icons/fa";
 import { UseMutationResult } from "react-query";
 import { ColumnInstance } from "react-table";
 import { setDraggedActantRow } from "redux/features/rowDnd/draggedActantRowSlice";
-import { useAppDispatch } from "redux/hooks";
+import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { excludedSuggesterEntities } from "Theme/constants";
-import { DraggedPropRowCategory, DragItem, ItemTypes } from "types";
+import {
+  DraggedActantRowItem,
+  DraggedPropRowCategory,
+  DragItem,
+  ItemTypes,
+} from "types";
 import { EntitySuggester, EntityTag } from "../..";
 import AttributesEditor from "../../AttributesEditor/AttributesEditor";
 import { StyledTd, StyledTr } from "./StatementEditorActionTableStyles";
@@ -235,6 +240,9 @@ export const StatementEditorActionTableRow: React.FC<
   };
 
   const dispatch = useAppDispatch();
+  const draggedActantRow: DraggedActantRowItem = useAppSelector(
+    (state) => state.rowDnd.draggedActantRow
+  );
 
   useEffect(() => {
     if (isDragging) {
@@ -266,12 +274,16 @@ export const StatementEditorActionTableRow: React.FC<
         <StyledTd>{renderButtonsCell()}</StyledTd>
       </StyledTr>
 
-      {renderPropGroup(
-        row.values.data.sAction.action,
-        row.values.data.sAction.props,
-        statement,
-        DraggedPropRowCategory.ACTION
-      )}
+      {!(
+        draggedActantRow.category &&
+        draggedActantRow.category === DraggedPropRowCategory.ACTION
+      ) &&
+        renderPropGroup(
+          row.values.data.sAction.action,
+          row.values.data.sAction.props,
+          statement,
+          DraggedPropRowCategory.ACTION
+        )}
     </React.Fragment>
   );
 };
