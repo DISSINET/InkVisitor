@@ -40,7 +40,7 @@ export const SecondLevelPropGroup: React.FC<SecondLevelPropGroup> = ({
   }, []);
 
   const draggedPropRow: DraggedPropRowItem = useAppSelector(
-    (state) => state.propGroup.draggedPropRow
+    (state) => state.rowDnd.draggedPropRow
   );
 
   const [hideChildren, setHideChildren] = useState(false);

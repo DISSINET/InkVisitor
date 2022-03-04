@@ -2,7 +2,7 @@ import { EntityClass } from "@shared/enums";
 import { IResponseStatement } from "@shared/types";
 import { AttributeIcon, Button, ButtonGroup } from "components";
 import { useSearchParams } from "hooks";
-import React, { useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import {
   DragSourceMonitor,
   DropTargetMonitor,
@@ -13,6 +13,8 @@ import {
 import { FaGripVertical, FaPlus, FaTrashAlt, FaUnlink } from "react-icons/fa";
 import { UseMutationResult } from "react-query";
 import { ColumnInstance } from "react-table";
+import { setDraggedActantRow } from "redux/features/rowDnd/draggedActantRowSlice";
+import { useAppDispatch } from "redux/hooks";
 import { excludedSuggesterEntities } from "Theme/constants";
 import { DraggedPropRowCategory, DragItem, ItemTypes } from "types";
 import { EntitySuggester, EntityTag } from "../..";
@@ -73,7 +75,7 @@ export const StatementEditorActionTableRow: React.FC<
   };
 
   const [, drop] = useDrop({
-    accept: ItemTypes.ACTANT_ROW,
+    accept: ItemTypes.ACTION_ROW,
     hover(item: DragItem, monitor: DropTargetMonitor) {
       if (!dropRef.current) {
         return;
@@ -100,7 +102,7 @@ export const StatementEditorActionTableRow: React.FC<
   });
 
   const [{ isDragging }, drag, preview] = useDrag({
-    item: { type: ItemTypes.ACTANT_ROW, index, id: row.values.id },
+    item: { type: ItemTypes.ACTION_ROW, index, id: row.values.id },
     collect: (monitor: DragSourceMonitor) => ({
       isDragging: monitor.isDragging(),
     }),
@@ -231,6 +233,18 @@ export const StatementEditorActionTableRow: React.FC<
       </ButtonGroup>
     );
   };
+
+  const dispatch = useAppDispatch();
+
+  useEffect(() => {
+    if (isDragging) {
+      dispatch(
+        setDraggedActantRow({ category: DraggedPropRowCategory.ACTION })
+      );
+    } else {
+      dispatch(setDraggedActantRow({}));
+    }
+  }, [isDragging]);
 
   return (
     <React.Fragment key={index}>

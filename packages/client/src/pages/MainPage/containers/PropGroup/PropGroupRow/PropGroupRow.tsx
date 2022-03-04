@@ -9,7 +9,7 @@ import {
   XYCoord,
 } from "react-dnd";
 import { FaPlus, FaTrashAlt, FaUnlink } from "react-icons/fa";
-import { setDraggedPropRow } from "redux/features/propGroup/draggedPropRowSlice";
+import { setDraggedPropRow } from "redux/features/rowDnd/draggedPropRowSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { excludedSuggesterEntities } from "Theme/constants";
 import {
@@ -74,13 +74,16 @@ export const PropGroupRow: React.FC<IPropGroupRow> = ({
   const propValueEntity = entities[prop.value.id];
 
   const draggePropRow: DraggedPropRowItem = useAppSelector(
-    (state) => state.propGroup.draggedPropRow
+    (state) => state.rowDnd.draggedPropRow
   );
 
   const [tempDisabled, setTempDisabled] = useState(false);
 
   useEffect(() => {
-    if (draggePropRow.parentId && draggePropRow.parentId !== parentId) {
+    if (
+      (draggePropRow.parentId && draggePropRow.parentId !== parentId) ||
+      (draggePropRow.category && draggePropRow.category !== category)
+    ) {
       setTempDisabled(true);
     } else {
       setTempDisabled(false);

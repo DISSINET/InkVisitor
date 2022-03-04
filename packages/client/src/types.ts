@@ -111,12 +111,11 @@ export enum ItemTypes {
   TAG = "TAG",
   STATEMENT_ROW = "STATEMENT_ROW",
   ACTANT_ROW = "ACTANT_ROW",
+  ACTION_ROW = "ACTION_ROW",
   PROP_ROW = "PROP_ROW",
   PROP_ROW1 = "PROP_ROW1",
   PROP_ROW2 = "PROP_ROW2",
   PROP_ROW3 = "PROP_ROW3",
-  // ACTION_ROW
-  // META_PROP_ROW
 }
 
 export type DragItem = {
@@ -131,15 +130,18 @@ export interface DraggedTerritoryItem {
   index?: number;
 }
 export enum DraggedPropRowCategory {
-  ACTANT,
-  ACTION,
-  META_PROP,
+  ACTANT = "ACTANT",
+  ACTION = "ACTION",
+  META_PROP = "META_PROP",
 }
 export interface DraggedPropRowItem {
   id?: string;
   parentId?: string;
   lvl?: number;
   index?: number;
+  category?: DraggedPropRowCategory;
+}
+export interface DraggedActantRowItem {
   category?: DraggedPropRowCategory;
 }
 export interface IRequestSearch {

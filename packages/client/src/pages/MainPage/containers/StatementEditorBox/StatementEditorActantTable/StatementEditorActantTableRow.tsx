@@ -2,7 +2,7 @@ import { EntityClass } from "@shared/enums";
 import { IEntity, IResponseStatement, IStatementActant } from "@shared/types";
 import { AttributeIcon, Button, ButtonGroup } from "components";
 import { useSearchParams } from "hooks";
-import React, { useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import {
   DragSourceMonitor,
   DropTargetMonitor,
@@ -13,6 +13,8 @@ import {
 import { FaGripVertical, FaPlus, FaTrashAlt, FaUnlink } from "react-icons/fa";
 import { UseMutationResult } from "react-query";
 import { ColumnInstance } from "react-table";
+import { setDraggedActantRow } from "redux/features/rowDnd/draggedActantRowSlice";
+import { useAppDispatch } from "redux/hooks";
 import { excludedSuggesterEntities } from "Theme/constants";
 import { DraggedPropRowCategory, DragItem, ItemTypes } from "types";
 import { EntitySuggester, EntityTag } from "../..";
@@ -300,6 +302,18 @@ export const StatementEditorActantTableRow: React.FC<
       </ButtonGroup>
     );
   };
+
+  const dispatch = useAppDispatch();
+
+  useEffect(() => {
+    if (isDragging) {
+      dispatch(
+        setDraggedActantRow({ category: DraggedPropRowCategory.ACTION })
+      );
+    } else {
+      dispatch(setDraggedActantRow({}));
+    }
+  }, [isDragging]);
 
   return (
     <React.Fragment key={index}>
