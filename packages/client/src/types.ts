@@ -115,6 +115,8 @@ export enum ItemTypes {
   PROP_ROW1 = "PROP_ROW1",
   PROP_ROW2 = "PROP_ROW2",
   PROP_ROW3 = "PROP_ROW3",
+  // ACTION_ROW
+  // META_PROP_ROW
 }
 
 export type DragItem = {

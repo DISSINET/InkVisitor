@@ -38,6 +38,7 @@ interface IPropGroupRow {
   updateProp: (propId: string, changes: any) => void;
   removeProp: (propId: string) => void;
   addProp: (originId: string) => void;
+  moveProp: (dragIndex: number, hoverIndex: number) => void;
   movePropToIndex: (propId: string, oldIndex: number, newIndex: number) => void;
 
   userCanEdit: boolean;
@@ -47,7 +48,6 @@ interface IPropGroupRow {
   parentId: string;
   id: string;
   index: number;
-  moveProp: (dragIndex: number, hoverIndex: number) => void;
   itemType?: ItemTypes;
   category: DraggedPropRowCategory;
 }
@@ -68,6 +68,7 @@ export const PropGroupRow: React.FC<IPropGroupRow> = ({
   id,
   index,
   itemType,
+  category,
 }) => {
   const propTypeEntity: IEntity = entities[prop.type.id];
   const propValueEntity = entities[prop.value.id];
@@ -149,7 +150,9 @@ export const PropGroupRow: React.FC<IPropGroupRow> = ({
 
   useEffect(() => {
     if (isDragging) {
-      dispatch(setDraggedPropRow({ id, index, lvl: level, parentId }));
+      dispatch(
+        setDraggedPropRow({ id, index, lvl: level, parentId, category })
+      );
     } else {
       dispatch(setDraggedPropRow({}));
     }

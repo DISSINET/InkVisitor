@@ -93,6 +93,7 @@ export const PropGroup: React.FC<IPropGroup> = ({
             prop1={prop1}
             renderSecondLevelPropRow={renderSecondLevelPropRow}
             secondLevelProps={prop1.children}
+            category={category}
           />
         </React.Fragment>
       );
@@ -134,6 +135,7 @@ export const PropGroup: React.FC<IPropGroup> = ({
             prop2={prop2}
             renderThirdLevelPropRow={renderThirdLevelPropRow}
             thirdLevelProps={prop2.children}
+            category={category}
           />
         </React.Fragment>
       );
