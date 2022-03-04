@@ -2,19 +2,13 @@ import { IEntity, IProp } from "@shared/types";
 import { AttributeIcon, Button } from "components";
 import React, { useEffect, useRef, useState } from "react";
 import {
-  useDrop,
-  DropTargetMonitor,
-  XYCoord,
-  useDrag,
   DragSourceMonitor,
+  DropTargetMonitor,
+  useDrag,
+  useDrop,
+  XYCoord,
 } from "react-dnd";
-import {
-  FaCaretDown,
-  FaCaretUp,
-  FaPlus,
-  FaTrashAlt,
-  FaUnlink,
-} from "react-icons/fa";
+import { FaPlus, FaTrashAlt, FaUnlink } from "react-icons/fa";
 import { setDraggedPropRow } from "redux/features/propGroup/draggedPropRowSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { excludedSuggesterEntities } from "Theme/constants";
@@ -39,16 +33,10 @@ interface IPropGroupRow {
   prop: IProp;
   entities: { [key: string]: IEntity };
   level: 1 | 2 | 3;
-  order: number;
-  firstRowinGroup?: boolean;
-  lastRowinGroup?: boolean;
-  lastInGroup?: boolean;
 
   updateProp: (propId: string, changes: any) => void;
   removeProp: (propId: string) => void;
   addProp: (originId: string) => void;
-  movePropDown: (propId: string) => void;
-  movePropUp: (propId: string) => void;
   movePropToIndex: (propId: string, oldIndex: number, newIndex: number) => void;
 
   userCanEdit: boolean;
@@ -66,14 +54,9 @@ export const PropGroupRow: React.FC<IPropGroupRow> = ({
   prop,
   entities,
   level,
-  order,
-  firstRowinGroup = false,
-  lastRowinGroup = false,
   updateProp,
   removeProp,
   addProp,
-  movePropDown,
-  movePropUp,
   moveProp,
   movePropToIndex,
   userCanEdit,
@@ -143,10 +126,6 @@ export const PropGroupRow: React.FC<IPropGroupRow> = ({
       moveProp(dragIndex, hoverIndex);
       item.index = hoverIndex;
     },
-    // drop: (item: DragItem, monitor: DropTargetMonitor) => {
-    //   console.log("item", item.index);
-    //   console.log("index", index);
-    // },
   });
 
   const [{ isDragging }, drag] = useDrag({
@@ -155,8 +134,6 @@ export const PropGroupRow: React.FC<IPropGroupRow> = ({
       isDragging: monitor.isDragging(),
     }),
     end: (item: DragItem | undefined, monitor: DragSourceMonitor) => {
-      // console.log("item", item?.index);
-      // console.log("index", draggePropRow.index);
       if (
         item &&
         draggePropRow.index !== undefined &&
@@ -179,7 +156,7 @@ export const PropGroupRow: React.FC<IPropGroupRow> = ({
   const renderPropRow = () => {
     return (
       <StyledGrid
-        key={level + "|" + order + "|" + id}
+        key={level + "|" + index + "|" + id}
         tempDisabled={tempDisabled}
       >
         <StyledPropLineColumn
@@ -364,28 +341,6 @@ export const PropGroupRow: React.FC<IPropGroupRow> = ({
               inverted={true}
               onClick={() => {
                 removeProp(prop.id);
-              }}
-            />
-            <Button
-              key="up"
-              inverted
-              disabled={firstRowinGroup}
-              icon={<FaCaretUp />}
-              tooltip="move prop up"
-              color="plain"
-              onClick={() => {
-                movePropUp(prop.id);
-              }}
-            />
-            <Button
-              key="down"
-              inverted
-              disabled={lastRowinGroup}
-              icon={<FaCaretDown />}
-              tooltip="move prop down"
-              color="plain"
-              onClick={() => {
-                movePropDown(prop.id);
               }}
             />
             {prop.logic == "2" ? (

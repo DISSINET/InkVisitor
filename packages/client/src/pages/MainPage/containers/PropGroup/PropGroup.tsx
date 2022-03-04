@@ -80,14 +80,9 @@ export const PropGroup: React.FC<IPropGroup> = ({
             prop={prop1}
             entities={entities}
             level={1}
-            order={pi1}
-            firstRowinGroup={pi1 === 0}
-            lastRowinGroup={pi1 === props.length - 1}
             updateProp={updateProp}
             removeProp={removeProp}
             addProp={addProp}
-            movePropDown={movePropDown}
-            movePropUp={movePropUp}
             userCanEdit={userCanEdit}
             territoryActants={territoryActants || []}
             openDetailOnCreate={openDetailOnCreate}
@@ -123,15 +118,9 @@ export const PropGroup: React.FC<IPropGroup> = ({
             prop={prop2}
             entities={entities}
             level={2}
-            order={pi2}
-            firstRowinGroup={pi2 === 0}
-            lastRowinGroup={pi2 === prop1.children.length - 1}
-            lastInGroup={pi2 === prop1.children.length - 1}
             updateProp={updateProp}
             removeProp={removeProp}
             addProp={addProp}
-            movePropDown={movePropDown}
-            movePropUp={movePropUp}
             userCanEdit={userCanEdit}
             territoryActants={territoryActants || []}
             openDetailOnCreate={openDetailOnCreate}
@@ -171,15 +160,9 @@ export const PropGroup: React.FC<IPropGroup> = ({
           prop={prop3}
           entities={entities}
           level={3}
-          order={pi3}
-          firstRowinGroup={pi3 === 0}
-          lastRowinGroup={pi3 === prop1.children.length - 1}
-          lastInGroup={pi3 === prop2.children.length - 1}
           updateProp={updateProp}
           removeProp={removeProp}
           addProp={addProp}
-          movePropDown={movePropDown}
-          movePropUp={movePropUp}
           userCanEdit={userCanEdit}
           territoryActants={territoryActants || []}
           openDetailOnCreate={openDetailOnCreate}

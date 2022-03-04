@@ -967,6 +967,10 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                     movePropUp={movePropUp}
                     userCanEdit={userCanEdit}
                     openDetailOnCreate={false}
+                    movePropToIndex={(propId, oldIndex, newIndex) => {
+                      console.log("oldIndex", oldIndex);
+                      console.log("newIndex", newIndex);
+                    }}
                   />
                 </tbody>
               </table>
