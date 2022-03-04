@@ -14,7 +14,7 @@ import { FaGripVertical, FaPlus, FaTrashAlt, FaUnlink } from "react-icons/fa";
 import { UseMutationResult } from "react-query";
 import { ColumnInstance } from "react-table";
 import { excludedSuggesterEntities } from "Theme/constants";
-import { DragItem, ItemTypes } from "types";
+import { DraggedPropRowCategory, DragItem, ItemTypes } from "types";
 import { EntitySuggester, EntityTag } from "../..";
 import AttributesEditor from "../../AttributesEditor/AttributesEditor";
 import { StyledTd, StyledTr } from "./StatementEditorActionTableStyles";
@@ -255,7 +255,8 @@ export const StatementEditorActionTableRow: React.FC<
       {renderPropGroup(
         row.values.data.sAction.action,
         row.values.data.sAction.props,
-        statement
+        statement,
+        DraggedPropRowCategory.ACTION
       )}
     </React.Fragment>
   );

@@ -128,11 +128,17 @@ export interface DraggedTerritoryItem {
   lvl?: number;
   index?: number;
 }
+export enum DraggedPropRowCategory {
+  ACTANT,
+  ACTION,
+  META_PROP,
+}
 export interface DraggedPropRowItem {
   id?: string;
   parentId?: string;
   lvl?: number;
   index?: number;
+  category?: DraggedPropRowCategory;
 }
 export interface IRequestSearch {
   class?: EntityClass;

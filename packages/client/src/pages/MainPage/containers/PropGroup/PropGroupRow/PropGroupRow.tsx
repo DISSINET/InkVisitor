@@ -16,6 +16,7 @@ import {
   AttributeGroupDataObject,
   classesPropType,
   classesPropValue,
+  DraggedPropRowCategory,
   DraggedPropRowItem,
   DragItem,
   ItemTypes,
@@ -48,6 +49,7 @@ interface IPropGroupRow {
   index: number;
   moveProp: (dragIndex: number, hoverIndex: number) => void;
   itemType?: ItemTypes;
+  category: DraggedPropRowCategory;
 }
 
 export const PropGroupRow: React.FC<IPropGroupRow> = ({

@@ -43,6 +43,7 @@ import {
   StyledTagsListItem,
   StyledTagWrapper,
 } from "./StatementEditorBoxStyles";
+import { DraggedPropRowCategory } from "types";
 
 const classesActants = [
   EntityClass.Statement,
@@ -548,7 +549,8 @@ export const StatementEditorBox: React.FC = () => {
   const renderPropGroup = (
     originId: string,
     props: IProp[],
-    statement: IResponseStatement
+    statement: IResponseStatement,
+    category: DraggedPropRowCategory
   ) => {
     const originActant = statement.entities[originId];
 
@@ -562,11 +564,10 @@ export const StatementEditorBox: React.FC = () => {
           updateProp={updateProp}
           removeProp={removeProp}
           addProp={addProp}
-          movePropDown={movePropDown}
-          movePropUp={movePropUp}
           movePropToIndex={movePropToIndex}
           userCanEdit={userCanEdit}
           openDetailOnCreate={false}
+          category={category}
         />
       );
     }

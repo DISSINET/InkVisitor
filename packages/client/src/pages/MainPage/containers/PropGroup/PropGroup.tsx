@@ -2,7 +2,7 @@ import { IEntity, IProp } from "@shared/types";
 import api from "api";
 import React, { useCallback } from "react";
 import { useQuery } from "react-query";
-import { ItemTypes } from "types";
+import { DraggedPropRowCategory, ItemTypes } from "types";
 import { FirstLevelPropGroup } from "./FirstLevelPropGroup/FirstLevelPropGroup";
 import { PropGroupRow } from "./PropGroupRow/PropGroupRow";
 import { StyledGrid, StyledListHeaderColumn } from "./PropGroupStyles";
@@ -18,12 +18,11 @@ interface IPropGroup {
   updateProp: (propId: string, changes: any) => void;
   removeProp: (propId: string) => void;
   addProp: (originId: string) => void;
-  movePropDown: (propId: string) => void;
-  movePropUp: (propId: string) => void;
   movePropToIndex: (propId: string, oldIndex: number, newIndex: number) => void;
 
   userCanEdit: boolean;
   openDetailOnCreate: boolean;
+  category: DraggedPropRowCategory;
 }
 
 export const PropGroup: React.FC<IPropGroup> = ({
@@ -35,12 +34,11 @@ export const PropGroup: React.FC<IPropGroup> = ({
   updateProp,
   removeProp,
   addProp,
-  movePropDown,
-  movePropUp,
   movePropToIndex,
 
   userCanEdit,
   openDetailOnCreate = false,
+  category,
 }) => {
   // territory query
   const {
@@ -88,6 +86,7 @@ export const PropGroup: React.FC<IPropGroup> = ({
             openDetailOnCreate={openDetailOnCreate}
             moveProp={moveProp}
             movePropToIndex={movePropToIndex}
+            category={category}
           />
           {/* 2nd level */}
           <SecondLevelPropGroup
@@ -126,6 +125,7 @@ export const PropGroup: React.FC<IPropGroup> = ({
             openDetailOnCreate={openDetailOnCreate}
             moveProp={moveProp}
             movePropToIndex={movePropToIndex}
+            category={category}
           />
           {/* 3rd level */}
           <ThirdLevelPropGroup
@@ -168,6 +168,7 @@ export const PropGroup: React.FC<IPropGroup> = ({
           openDetailOnCreate={openDetailOnCreate}
           moveProp={moveProp}
           movePropToIndex={movePropToIndex}
+          category={category}
         />
       );
     },

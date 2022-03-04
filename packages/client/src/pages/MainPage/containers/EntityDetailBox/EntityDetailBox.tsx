@@ -32,6 +32,7 @@ import {
 } from "react-icons/fa";
 import { useMutation, useQuery, useQueryClient } from "react-query";
 import { toast } from "react-toastify";
+import { DraggedPropRowCategory } from "types";
 import { findPositionInStatement } from "utils";
 import { EntityTag } from "..";
 import { AttributeButtonGroup } from "../AttributeButtonGroup/AttributeButtonGroup";
@@ -963,14 +964,13 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                     updateProp={updateProp}
                     removeProp={removeProp}
                     addProp={addProp}
-                    movePropDown={movePropDown}
-                    movePropUp={movePropUp}
                     userCanEdit={userCanEdit}
                     openDetailOnCreate={false}
                     movePropToIndex={(propId, oldIndex, newIndex) => {
                       console.log("oldIndex", oldIndex);
                       console.log("newIndex", newIndex);
                     }}
+                    category={DraggedPropRowCategory.META_PROP}
                   />
                 </tbody>
               </table>
