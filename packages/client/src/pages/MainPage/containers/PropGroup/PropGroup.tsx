@@ -79,7 +79,7 @@ export const PropGroup: React.FC<IPropGroup> = ({
             parentId={originId}
             prop={prop1}
             entities={entities}
-            level={"1"}
+            level={1}
             order={pi1}
             firstRowinGroup={pi1 === 0}
             lastRowinGroup={pi1 === props.length - 1}
@@ -122,7 +122,7 @@ export const PropGroup: React.FC<IPropGroup> = ({
             parentId={prop1.id}
             prop={prop2}
             entities={entities}
-            level={"2"}
+            level={2}
             order={pi2}
             firstRowinGroup={pi2 === 0}
             lastRowinGroup={pi2 === prop1.children.length - 1}
@@ -139,13 +139,13 @@ export const PropGroup: React.FC<IPropGroup> = ({
             movePropToIndex={movePropToIndex}
           />
           {/* 3rd level */}
-          {/* <ThirdLevelPropGroup
+          <ThirdLevelPropGroup
             prop1={prop1}
             pi2={pi2}
             prop2={prop2}
             renderThirdLevelPropRow={renderThirdLevelPropRow}
             thirdLevelProps={prop2.children}
-          /> */}
+          />
         </React.Fragment>
       );
     },
@@ -170,7 +170,7 @@ export const PropGroup: React.FC<IPropGroup> = ({
           parentId={prop2.id}
           prop={prop3}
           entities={entities}
-          level={"3"}
+          level={3}
           order={pi3}
           firstRowinGroup={pi3 === 0}
           lastRowinGroup={pi3 === prop1.children.length - 1}

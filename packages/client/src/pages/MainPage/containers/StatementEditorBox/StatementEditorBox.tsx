@@ -395,6 +395,42 @@ export const StatementEditorBox: React.FC = () => {
     }
   };
 
+  const changeOrder = (
+    propId: string,
+    actants: IStatementActant[] | IStatementAction[],
+    oldIndex: number,
+    newIndex: number
+  ) => {
+    for (let action of actants) {
+      for (let prop of action.props) {
+        if (prop.id === propId) {
+          action.props.splice(newIndex, 0, action.props.splice(oldIndex, 1)[0]);
+          return;
+        }
+        for (let prop1 of prop.children) {
+          if (prop1.id === propId) {
+            prop.children.splice(
+              newIndex,
+              0,
+              prop.children.splice(oldIndex, 1)[0]
+            );
+            return;
+          }
+          for (let prop2 of prop1.children) {
+            if (prop2.id === propId) {
+              prop1.children.splice(
+                newIndex,
+                0,
+                prop1.children.splice(oldIndex, 1)[0]
+              );
+              return;
+            }
+          }
+        }
+      }
+    }
+  };
+
   const movePropToIndex = (
     propId: string,
     oldIndex: number,
@@ -403,48 +439,15 @@ export const StatementEditorBox: React.FC = () => {
     console.log("old: ", oldIndex);
     console.log("new: ", newIndex);
     if (statement) {
-      const newStatementData = { ...statement.data };
-      [...newStatementData.actants, ...newStatementData.actions].forEach(
-        (actant: IStatementActant | IStatementAction) => {
-          actant.props.forEach((actantProp, pi) => {
-            if (actantProp.id === propId) {
-              console.log("actant.props before", actant.props);
-              actant.props.splice(
-                newIndex,
-                0,
-                actant.props.splice(oldIndex, 1)[0]
-              );
-              console.log("actant.props after", actant.props);
-            }
+      const { actions, actants, ...dataWithoutActants } = statement.data;
+      changeOrder(propId, actions, oldIndex, newIndex);
+      changeOrder(propId, actants, oldIndex, newIndex);
 
-            actant.props[pi].children.forEach((actantPropProp, pii) => {
-              if (actantPropProp.id === propId) {
-                actant.props[pi].children.splice(
-                  newIndex,
-                  0,
-                  actant.props[pi].children.splice(oldIndex, 1)[0]
-                );
-              }
-            });
-          });
-        }
-      );
-      console.log(newStatementData.actions[0].props);
-      // console.log(newStatementData.actions[0].props[0]);
+      const newStatementData = { actions, actants, ...dataWithoutActants };
+
       updateStatementDataMutation.mutate(newStatementData);
     }
   };
-
-  useEffect(() => {
-    // nahoru
-    const arr = [1, 2, 3, 4];
-    arr.splice(3, 0, arr.splice(0, 1)[0]);
-    console.log(arr);
-    // dolu
-    const arr2 = [1, 2, 3, 4];
-    arr2.splice(0, 0, arr2.splice(2, 1)[0]);
-    console.log(arr2);
-  }, []);
 
   // references
   const addReference = (resourceId: string) => {

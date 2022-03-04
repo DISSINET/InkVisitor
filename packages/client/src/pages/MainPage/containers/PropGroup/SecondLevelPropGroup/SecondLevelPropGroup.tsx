@@ -1,6 +1,8 @@
 import { IProp } from "@shared/types";
 import update from "immutability-helper";
 import React, { useCallback, useEffect, useState } from "react";
+import { useAppSelector } from "redux/hooks";
+import { DraggedPropRowItem } from "types";
 
 interface SecondLevelPropGroup {
   prop1: IProp;
@@ -35,11 +37,26 @@ export const SecondLevelPropGroup: React.FC<SecondLevelPropGroup> = ({
     );
   }, []);
 
+  const draggedPropRow: DraggedPropRowItem = useAppSelector(
+    (state) => state.propGroup.draggedPropRow
+  );
+
+  const [hideChildren, setHideChildren] = useState(false);
+
+  useEffect(() => {
+    if (draggedPropRow && draggedPropRow.lvl === 1) {
+      setHideChildren(true);
+    } else {
+      setHideChildren(false);
+    }
+  }, [draggedPropRow]);
+
   return (
     <>
-      {props.map((prop2: IProp, pi2: number) =>
-        renderSecondLevelPropRow(prop2, pi2, prop1, moveProp)
-      )}
+      {!hideChildren &&
+        props.map((prop2: IProp, pi2: number) =>
+          renderSecondLevelPropRow(prop2, pi2, prop1, moveProp)
+        )}
     </>
   );
 };

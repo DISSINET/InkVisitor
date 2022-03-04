@@ -1,6 +1,8 @@
 import { IProp } from "@shared/types";
 import update from "immutability-helper";
 import React, { useCallback, useEffect, useState } from "react";
+import { useAppSelector } from "redux/hooks";
+import { DraggedPropRowItem } from "types";
 
 interface ThirdLevelPropGroup {
   prop1: IProp;
@@ -41,11 +43,26 @@ export const ThirdLevelPropGroup: React.FC<ThirdLevelPropGroup> = ({
     );
   }, []);
 
+  const draggedPropRow: DraggedPropRowItem = useAppSelector(
+    (state) => state.propGroup.draggedPropRow
+  );
+
+  const [hideChildren, setHideChildren] = useState(false);
+
+  useEffect(() => {
+    if (draggedPropRow && draggedPropRow.lvl === 2) {
+      setHideChildren(true);
+    } else {
+      setHideChildren(false);
+    }
+  }, [draggedPropRow]);
+
   return (
     <>
-      {props.map((prop3: IProp, pi3: number) =>
-        renderThirdLevelPropRow(prop3, pi3, prop1, prop2, pi2, moveProp)
-      )}
+      {!hideChildren &&
+        props.map((prop3: IProp, pi3: number) =>
+          renderThirdLevelPropRow(prop3, pi3, prop1, prop2, pi2, moveProp)
+        )}
     </>
   );
 };

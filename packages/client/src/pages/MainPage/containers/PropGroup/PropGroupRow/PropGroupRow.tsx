@@ -38,7 +38,7 @@ import {
 interface IPropGroupRow {
   prop: IProp;
   entities: { [key: string]: IEntity };
-  level: "1" | "2" | "3";
+  level: 1 | 2 | 3;
   order: number;
   firstRowinGroup?: boolean;
   lastRowinGroup?: boolean;
@@ -170,7 +170,7 @@ export const PropGroupRow: React.FC<IPropGroupRow> = ({
 
   useEffect(() => {
     if (isDragging) {
-      dispatch(setDraggedPropRow({ id, parentId, index }));
+      dispatch(setDraggedPropRow({ id, index, lvl: level, parentId }));
     } else {
       dispatch(setDraggedPropRow({}));
     }
@@ -344,7 +344,7 @@ export const PropGroupRow: React.FC<IPropGroupRow> = ({
               userCanEdit={userCanEdit}
             />
 
-            {(level === "1" || level === "2") && (
+            {(level === 1 || level === 2) && (
               <Button
                 key="add"
                 icon={<FaPlus />}

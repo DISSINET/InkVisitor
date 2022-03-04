@@ -36,7 +36,7 @@ export const StyledListHeaderColumn = styled.div<StyledListHeaderColumn>`
 `;
 
 interface StyledPropLineColumn {
-  level?: "1" | "2" | "3";
+  level?: 1 | 2 | 3;
   isTag?: boolean;
 }
 export const StyledPropLineColumn = styled(
@@ -44,12 +44,12 @@ export const StyledPropLineColumn = styled(
 )<StyledPropLineColumn>`
   display: inline-flex;
   align-items: center;
-  margin-left: ${({ theme, level = "1" }) => {
-    if (level === "1") {
+  margin-left: ${({ theme, level = 1 }) => {
+    if (level === 1) {
       return theme.space[0];
-    } else if (level === "2") {
+    } else if (level === 2) {
       return theme.space[6];
-    } else if (level === "3") {
+    } else if (level === 3) {
       return theme.space[12];
     }
   }};
