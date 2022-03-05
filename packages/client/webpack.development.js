@@ -13,7 +13,7 @@ module.exports = merge(common, {
   },
   plugins: [
     new Dotenv({
-      path: "./env/.env.devel",
+      path: "./env/.env.development",
       systemvars: true,
     }),
   ],
