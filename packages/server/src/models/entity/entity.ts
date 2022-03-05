@@ -39,7 +39,8 @@ export default class Entity extends Base implements IEntity, IDbModel {
   notes: string[] = [];
   props: IProp[] = [];
 
-  template: boolean = false;
+  isTemplate: boolean = false;
+  usedTemplate: boolean = false;
   templateData: object = {};
 
   usedIn: IStatement[] = [];

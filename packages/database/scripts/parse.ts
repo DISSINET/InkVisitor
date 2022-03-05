@@ -105,7 +105,7 @@ const loadStatementsTables = async (next: Function) => {
         label: action.label,
         detail: action.detail_incl_valency,
         props: [],
-        template: false,
+        isTemplate: false,
       };
       entities.push(newAction);
     }
@@ -437,7 +437,7 @@ const loadStatementsTables = async (next: Function) => {
           label: statement.id,
           detail: "",
           language: Language.Latin,
-          template: false,
+          isisTemplate: false,
         };
 
         statement.note && mainStatement.notes.push(statement.note);
@@ -590,7 +590,7 @@ const addEntity = (id: string, label: string, type: EntityClass) => {
     language: Language.Latin,
     notes: [],
     props: [],
-    template: false,
+    isTemplate: false,
   };
   if (id) {
     entities.push(newEntity);
@@ -624,7 +624,7 @@ const addTerritoryEntity = (
         language: Language[language] as Language,
         notes: notes,
         props: [],
-        template: false,
+        isTemplate: false,
       };
 
       entities.push(newTerritory);
@@ -644,7 +644,7 @@ const addResourceActant = (id: string, label: string) => {
       language: Language.Latin,
       notes: [],
       props: [],
-      template: false,
+      isTemplate: false,
     };
     entities.push(newResource);
   }
@@ -780,7 +780,7 @@ const createEmptyPropStatement = (
       detail: "",
       language: Language.Latin,
       notes: [],
-      template: false,
+      isTemplate: false,
     };
     entities.push(newEmptyStatement);
   }
