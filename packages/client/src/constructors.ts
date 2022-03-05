@@ -85,6 +85,8 @@ export const CStatement = (
     tags: [],
   },
   props: [],
+  references: [],
+  isTemplate: false,
 });
 
 // duplicate statement
@@ -150,6 +152,8 @@ export const CTerritoryActant = (
     parent: { id: parentId, order: parentOrder },
   },
   props: [],
+  references: [],
+  isTemplate: false,
 });
 
 export const CEntity = (
@@ -169,6 +173,8 @@ export const CEntity = (
     language: Language.Latin,
     notes: [],
     props: [],
+    references: [],
+    isTemplate: false,
   };
 };
 
