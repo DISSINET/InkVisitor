@@ -4,23 +4,18 @@ const common = require("./webpack.common.js");
 const Dotenv = require("dotenv-webpack");
 
 module.exports = merge(common, {
-  mode: "development",
-  devtool: "cheap-source-map",
-  devServer: {
-    hot: true,
-    historyApiFallback: true,
-    port: 8000,
-  },
+  mode: "production",
+  devtool: "source-map",
+
   plugins: [
     new Dotenv({
-      path: "./env/.env.development",
+      path: "./env/.env.data-import",
       systemvars: true,
     }),
   ],
 
   output: {
     filename: "[name].bundle.js",
-    path: path.resolve(__dirname, "build"),
-    publicPath: "/",
+    path: path.resolve(__dirname, "dist"),
   },
 });

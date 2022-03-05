@@ -1,10 +1,8 @@
-Realease guide
---------
+## Realease guide
 
 ## Branching strategy
 
-*GitHub flow* <https://guides.github.com/introduction/flow/> -- open a PR to master from a branch in your fork (what we already use).
-
+_GitHub flow_ <https://guides.github.com/introduction/flow/> -- open a PR to master from a branch in your fork (what we already use).
 
 ## Creating a release
 
@@ -22,7 +20,6 @@ Realease guide
 
 4. Build and deploy from the tagged commit
 
-
 ## Moving a tag
 
 For some specific situations (like build that requires new commits), you can move an existing tag:
@@ -31,7 +28,6 @@ For some specific situations (like build that requires new commits), you can mov
 > git push <remote> <tag_name> --force
 
 More on tagging <https://git-scm.com/book/en/v2/Git-Basics-Tagging>
-
 
 ## Versioning
 
@@ -45,7 +41,7 @@ Most likely we will most often do y releases. For a planned release just create 
 
 ## Hotfixes
 
-Releases that fix high priority bugs/security issues that cannot wait until the next planned release. In such cases we don't want to release from master so that we don't publish any in-progress feature work that may have been created after the last planned release. Hotfix procedure: 
+Releases that fix high priority bugs/security issues that cannot wait until the next planned release. In such cases we don't want to release from master so that we don't publish any in-progress feature work that may have been created after the last planned release. Hotfix procedure:
 
 1. fix the issue, create a PR and merge to master as usual. Notice the commit id
 
@@ -55,7 +51,7 @@ Releases that fix high priority bugs/security issues that cannot wait until the 
 
 3. Create a branch from the tagged commit and checkout to it
 
-> git checkout -b  <branch-name>
+> git checkout -b <branch-name>
 
 4. cherrypick the fix from master
 
@@ -63,12 +59,10 @@ Releases that fix high priority bugs/security issues that cannot wait until the 
 
 5. Create a build, tag the commit with the z version, push the branch and create a release
 
-
 # TODOs?
 
 - releasever in ui -- some automated way <https://www.npmjs.com/package/git-tag-version>
 - bumping realase version in package.js
-- CI for stage deploys -- mirror master
-- Testing 
+- CI for staging deploys -- mirror master
+- Testing
 - db backup on release event
-
