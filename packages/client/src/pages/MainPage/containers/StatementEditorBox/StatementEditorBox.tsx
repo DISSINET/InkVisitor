@@ -17,6 +17,7 @@ import {
 import { useSearchParams } from "hooks";
 import React, { useEffect, useMemo } from "react";
 import { FaTrashAlt, FaUnlink } from "react-icons/fa";
+import { BsInfoCircle } from "react-icons/bs";
 import { useMutation, useQuery, useQueryClient } from "react-query";
 import { excludedSuggesterEntities } from "Theme/constants";
 import { AttributeButtonGroup } from "../AttributeButtonGroup/AttributeButtonGroup";
@@ -31,6 +32,7 @@ import {
   StyledBreadcrumbWrap,
   StyledEditorActantTableWrapper,
   StyledEditorPreSection,
+  StyledEditorEmptyState,
   StyledEditorSection,
   StyledEditorSectionContent,
   StyledEditorSectionHeader,
@@ -127,9 +129,9 @@ export const StatementEditorBox: React.FC = () => {
     error,
     isFetching,
   } = useQuery(
-    ["territoryActants", statement?.data.territory.id],
+    ["territoryActants", statement?.data?.territory?.id],
     async () => {
-      if (statement?.data.territory.id) {
+      if (statement?.data?.territory?.id) {
         const res = await api.entityIdsInTerritory(
           statement?.data.territory.id
         );
@@ -140,7 +142,7 @@ export const StatementEditorBox: React.FC = () => {
     },
     {
       initialData: [],
-      enabled: !!statement?.data.territory.id && api.isLoggedIn(),
+      enabled: !!statement?.data?.territory?.id && api.isLoggedIn(),
     }
   );
 
@@ -151,7 +153,7 @@ export const StatementEditorBox: React.FC = () => {
 
   // stores territory id
   const statementTerritoryId: string | undefined = useMemo(() => {
-    return statement?.data.territory.id;
+    return statement?.data?.territory?.id;
   }, [statement]);
 
   useEffect(() => {
@@ -226,19 +228,32 @@ export const StatementEditorBox: React.FC = () => {
     if (statement) {
       const newProp = CProp();
       const newStatementData = { ...statement.data };
+
       [...newStatementData.actants, ...newStatementData.actions].forEach(
         (actant: IStatementActant | IStatementAction) => {
           const actantId = "actant" in actant ? actant.actant : actant.action;
+          // adding 1st level prop
           if (actantId === originId) {
             actant.props = [...actant.props, newProp];
           }
-          actant.props.forEach((prop, pi) => {
-            if (prop.id == originId) {
-              actant.props[pi].children = [
-                ...actant.props[pi].children,
+          // adding 2nd level prop
+          actant.props.forEach((prop1, pi1) => {
+            if (prop1.id == originId) {
+              actant.props[pi1].children = [
+                ...actant.props[pi1].children,
                 newProp,
               ];
             }
+
+            // adding 3rd level prop
+            actant.props[pi1].children.forEach((prop2, pi2) => {
+              if (prop2.id == originId) {
+                actant.props[pi1].children[pi2].children = [
+                  ...actant.props[pi1].children[pi2].children,
+                  newProp,
+                ];
+              }
+            });
           });
         }
       );
@@ -254,18 +269,33 @@ export const StatementEditorBox: React.FC = () => {
       // this is probably an overkill
       [...newStatementData.actants, ...newStatementData.actions].forEach(
         (actant: IStatementActant | IStatementAction) => {
-          actant.props.forEach((actantProp, pi) => {
-            if (actantProp.id === propId) {
-              actant.props[pi] = { ...actant.props[pi], ...changes };
+          actant.props.forEach((prop1, pi1) => {
+            // 1st level
+            if (prop1.id === propId) {
+              actant.props[pi1] = { ...actant.props[pi1], ...changes };
             }
 
-            actant.props[pi].children.forEach((actantPropProp, pii) => {
-              if (actantPropProp.id === propId) {
-                actant.props[pi].children[pii] = {
-                  ...actant.props[pi].children[pii],
+            // 2nd level
+            actant.props[pi1].children.forEach((prop2, pi2) => {
+              if (prop2.id === propId) {
+                actant.props[pi1].children[pi2] = {
+                  ...actant.props[pi1].children[pi2],
                   ...changes,
                 };
               }
+
+              // 3rd level
+              actant.props[pi1].children[pi2].children.forEach((prop3, pi3) => {
+                if (prop3.id === propId) {
+                  console.log("here we are");
+                  actant.props[pi1].children[pi2].children[pi3] = {
+                    ...actant.props[pi1].children[pi2].children[pi3],
+                    ...changes,
+                  };
+                  console.log(changes);
+                  console.log(actant.props[pi1].children[pi2].children[pi3]);
+                }
+              });
             });
           });
         }
@@ -285,10 +315,20 @@ export const StatementEditorBox: React.FC = () => {
             (actantProp) => actantProp.id !== propId
           );
 
-          actant.props.forEach((actantProp, pi) => {
-            actant.props[pi].children = actant.props[pi].children.filter(
+          // 2nd level
+          actant.props.forEach((prop1, pi1) => {
+            actant.props[pi1].children = actant.props[pi1].children.filter(
               (childProp) => childProp.id != propId
             );
+
+            // 3rd level
+            actant.props[pi1].children.forEach((prop2, pi2) => {
+              actant.props[pi1].children[pi2].children = actant.props[
+                pi1
+              ].children[pi2].children.filter(
+                (childProp) => childProp.id != propId
+              );
+            });
           });
         }
       );
@@ -824,7 +864,14 @@ export const StatementEditorBox: React.FC = () => {
           </StyledEditorSection>
         </div>
       ) : (
-        <>{"no statement selected"}</>
+        <>
+          <StyledEditorEmptyState>
+            <BsInfoCircle size="23" />
+          </StyledEditorEmptyState>
+          <StyledEditorEmptyState>
+            {"No statement selected yet. Pick one from the statements table"}
+          </StyledEditorEmptyState>
+        </>
       )}
       <Loader
         show={

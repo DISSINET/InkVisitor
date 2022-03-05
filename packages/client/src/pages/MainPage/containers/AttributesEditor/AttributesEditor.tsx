@@ -124,9 +124,9 @@ const AttributesEditor: React.FC<StatementEditorAttributes> = ({
         items={partitivityDict}
       />
       <TooltipAttributeRow
-        key="operator"
-        attributeName="operator"
-        value={data.operator}
+        key="bundleOperator"
+        attributeName="bundleOperator"
+        value={data.bundleOperator}
         items={operatorDict}
       />
       <TooltipBooleanRow

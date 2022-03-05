@@ -391,6 +391,14 @@ class Statement extends Entity implements IStatement {
             prop.children.forEach((propChild) => {
               entitiesIds[propChild.type.id] = null;
               entitiesIds[propChild.value.id] = null;
+
+              // 3rd level
+              if (propChild.children) {
+                propChild.children.forEach((propChild2) => {
+                  entitiesIds[propChild2.type.id] = null;
+                  entitiesIds[propChild2.value.id] = null;
+                });
+              }
             });
           }
         });
@@ -408,6 +416,14 @@ class Statement extends Entity implements IStatement {
             prop.children.forEach((propChild) => {
               entitiesIds[propChild.type.id] = null;
               entitiesIds[propChild.value.id] = null;
+
+              // 3rd level
+              if (propChild.children) {
+                propChild.children.forEach((propChild2) => {
+                  entitiesIds[propChild2.type.id] = null;
+                  entitiesIds[propChild2.value.id] = null;
+                });
+              }
             });
           }
         });
@@ -511,7 +527,7 @@ class Statement extends Entity implements IStatement {
    * @param entityId id of the entity
    * @returns list of statements data
    */
-  static async findUsed(
+  static async findUsedInDataEntities(
     db: Connection | undefined,
     entityId: string
   ): Promise<IStatement[]> {
@@ -529,6 +545,86 @@ class Statement extends Entity implements IStatement {
             entry("actant").eq(entityId)
           ),
           row("data")("tags").contains(entityId)
+        );
+      })
+      .run(db);
+
+    return statements.sort((a, b) => {
+      return a.data.territory.order - b.data.territory.order;
+    });
+  }
+
+  /**
+   * finds statements which are linked to different entity
+   * using statement.data.actions[].props or statement.data.actants[].props
+   * searches also in props.children to lvl3
+   * @param db db connection
+   * @param entityId id of the entity
+   * @returns list of statements data
+   */
+  static async findUsedInDataProps(
+    db: Connection | undefined,
+    entityId: string
+  ): Promise<IStatement[]> {
+    const statements = await rethink
+      .table(Entity.table)
+      .filter({
+        class: EntityClass.Statement,
+      })
+      .filter((row: RDatum) => {
+        return rethink.or(
+          row("data")("actions").contains((action: RDatum) =>
+            action("props").contains((entry: RDatum) =>
+              rethink.or(
+                entry("value")("id").eq(entityId),
+                entry("type")("id").eq(entityId),
+                entry("children").contains((ch1: RDatum) =>
+                  rethink.or(
+                    ch1("value")("id").eq(entityId),
+                    ch1("type")("id").eq(entityId),
+                    ch1("children").contains((ch2: RDatum) =>
+                      rethink.or(
+                        ch2("value")("id").eq(entityId),
+                        ch2("type")("id").eq(entityId),
+                        ch2("children").contains((ch3: RDatum) =>
+                          rethink.or(
+                            ch3("value")("id").eq(entityId),
+                            ch3("type")("id").eq(entityId)
+                          )
+                        )
+                      )
+                    )
+                  )
+                )
+              )
+            )
+          ),
+          row("data")("actants").contains((actant: RDatum) =>
+            actant("props").contains((prop: RDatum) =>
+              rethink.or(
+                prop("value")("id").eq(entityId),
+                prop("type")("id").eq(entityId),
+                prop("children").contains((ch1: RDatum) =>
+                  rethink.or(
+                    ch1("value")("id").eq(entityId),
+                    ch1("type")("id").eq(entityId),
+                    ch1("children").contains((ch2: RDatum) =>
+                      rethink.or(
+                        ch2("value")("id").eq(entityId),
+                        ch2("type")("id").eq(entityId),
+                        ch2("children").contains((ch3: RDatum) =>
+                          rethink.or(
+                            ch3("value")("id").eq(entityId),
+                            ch3("type")("id").eq(entityId)
+                          )
+                        )
+                      )
+                    )
+                  )
+                )
+              )
+            )
+          )
         );
       })
       .run(db);
