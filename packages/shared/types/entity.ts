@@ -10,7 +10,13 @@ export interface IEntity {
   language: Language;
   notes: string[];
   props: IProp[];
+  references: IEntityReference[];
   isTemplate?: boolean;
   usedTemplate?: boolean;
   templateData?: object;
+}
+
+export interface IEntityReference {
+  source: string;
+  value: string;
 }

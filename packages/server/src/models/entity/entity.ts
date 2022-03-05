@@ -5,7 +5,13 @@ import {
   fillArray,
 } from "@models/common";
 import { r as rethink, Connection, WriteResult, RDatum } from "rethinkdb-ts";
-import { IStatement, IEntity, IResponseEntity, IProp } from "@shared/types";
+import {
+  IStatement,
+  IEntity,
+  IResponseEntity,
+  IProp,
+  IEntityReference,
+} from "@shared/types";
 import { EntityClass, Language, UserRole, UserRoleMode } from "@shared/enums";
 import { InternalServerError } from "@shared/types/errors";
 import User from "@models/user/user";
@@ -26,7 +32,9 @@ export default class Entity extends Base implements IEntity, IDbModel {
     "language",
     "notes",
     "props",
-    "template",
+    "references",
+    "isTemplate",
+    "usedTemplate",
     "templateData",
   ];
 
@@ -38,6 +46,7 @@ export default class Entity extends Base implements IEntity, IDbModel {
   language: Language = Language.Latin;
   notes: string[] = [];
   props: IProp[] = [];
+  references: IEntityReference[] = [];
 
   isTemplate: boolean = false;
   usedTemplate: boolean = false;
@@ -54,6 +63,7 @@ export default class Entity extends Base implements IEntity, IDbModel {
     }
 
     fillFlatObject(this, { ...data, data: undefined });
+    fillArray(this.references, Object, data.references);
     fillArray(this.notes, String, data.notes);
     fillArray(this.props, Object, data.props);
   }
