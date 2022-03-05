@@ -26,6 +26,8 @@ export default class Entity extends Base implements IEntity, IDbModel {
     "language",
     "notes",
     "props",
+    "template",
+    "templateData",
   ];
 
   id: string = "";
@@ -36,6 +38,9 @@ export default class Entity extends Base implements IEntity, IDbModel {
   language: Language = Language.Latin;
   notes: string[] = [];
   props: IProp[] = [];
+
+  template: boolean = false;
+  templateData: object = {};
 
   usedIn: IStatement[] = [];
   right: UserRoleMode = UserRoleMode.Read;

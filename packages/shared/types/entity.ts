@@ -10,4 +10,6 @@ export interface IEntity {
   language: Language;
   notes: string[];
   props: IProp[];
+  template?: boolean;
+  templateData?: object;
 }
