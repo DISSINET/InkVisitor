@@ -1,6 +1,6 @@
-import { ActantType } from "@shared/enums";
+import { EntityClass } from "@shared/enums";
 import {
-  IActant,
+  IEntity,
   IBookmarkFolder,
   IResponseBookmarkFolder,
 } from "@shared/types";
@@ -46,17 +46,17 @@ import {
 import { ActantBookmarkFolderTable } from "./ActantBookmarkFolderTable/ActantBookmarkFolderTable";
 
 const bookmarkEntities = [
-  ActantType.Action,
-  ActantType.Person,
-  ActantType.Group,
-  ActantType.Object,
-  ActantType.Concept,
-  ActantType.Location,
-  ActantType.Value,
-  ActantType.Event,
-  ActantType.Statement,
-  ActantType.Territory,
-  ActantType.Resource,
+  EntityClass.Action,
+  EntityClass.Person,
+  EntityClass.Group,
+  EntityClass.Object,
+  EntityClass.Concept,
+  EntityClass.Location,
+  EntityClass.Value,
+  EntityClass.Event,
+  EntityClass.Statement,
+  EntityClass.Territory,
+  EntityClass.Resource,
 ];
 
 export const ActantBookmarkBox: React.FC = () => {
@@ -101,7 +101,7 @@ export const ActantBookmarkBox: React.FC = () => {
         return {
           id: bookmark.id,
           name: bookmark.name,
-          actantIds: bookmark.actants.map((a: IActant) => a.id),
+          entityIds: bookmark.entities.map((a: IEntity) => a.id),
         };
       });
     } else {
@@ -231,8 +231,8 @@ export const ActantBookmarkBox: React.FC = () => {
       const folder = newBookmarks.find((b) => b.id === folderId);
 
       if (folder) {
-        if (!folder.actantIds.includes(bookmarkId)) {
-          folder.actantIds.push(bookmarkId);
+        if (!folder.entityIds.includes(bookmarkId)) {
+          folder.entityIds.push(bookmarkId);
           changeBookmarksMutation.mutate(newBookmarks);
         }
       }
@@ -244,8 +244,8 @@ export const ActantBookmarkBox: React.FC = () => {
     if (newBookmarks) {
       const folder = newBookmarks.find((b) => b.id === folderId);
       if (folder) {
-        if (folder.actantIds.includes(bookmarkId)) {
-          folder.actantIds = folder.actantIds.filter((a) => a !== bookmarkId);
+        if (folder.entityIds.includes(bookmarkId)) {
+          folder.entityIds = folder.entityIds.filter((a) => a !== bookmarkId);
           changeBookmarksMutation.mutate(newBookmarks);
         }
       }
@@ -267,7 +267,7 @@ export const ActantBookmarkBox: React.FC = () => {
     if (newBookmarks) {
       const folder = newBookmarks.find((b) => b.id === folderId);
       if (folder) {
-        folder.actantIds = newActantIds;
+        folder.entityIds = newActantIds;
         changeBookmarksMutation.mutate(newBookmarks);
       }
     }
@@ -287,7 +287,7 @@ export const ActantBookmarkBox: React.FC = () => {
         <StyledFolderList>
           {bookmarkFolders.map((bookmarkFolder: IResponseBookmarkFolder) => {
             const open = openedFolders.includes(bookmarkFolder.id);
-            const empty = bookmarkFolder.actants.length === 0;
+            const empty = bookmarkFolder.entities.length === 0;
 
             return (
               <StyledFolderWrapper key={bookmarkFolder.id}>

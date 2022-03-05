@@ -1,10 +1,10 @@
-import { getActants } from "@service/shorthands";
-import { TerritoriesBrokenError } from "@shared/types/errors";
-import { IResponseTree, IStatement, ITerritory } from "@shared/types";
-import { Db } from "@service/RethinkDB";
 import Territory from "@models/territory/territory";
-import { ActantType, UserRoleMode } from "@shared/enums";
 import User, { UserRight } from "@models/user/user";
+import { Db } from "@service/RethinkDB";
+import { getEntities } from "@service/shorthands";
+import { EntityClass, UserRoleMode } from "@shared/enums";
+import { IEntity, IResponseTree, IStatement, ITerritory } from "@shared/types";
+import { TerritoriesBrokenError } from "@shared/types/errors";
 
 export class TreeCreator {
   parentMap: Record<string, Territory[]>; // map of rootId -> childs
@@ -124,16 +124,17 @@ export class TreeCreator {
 
   static async countStatements(db: Db): Promise<Record<string, number>> {
     const statements = (
-      await getActants<IStatement>(db, { class: "S" })
+      await getEntities<IStatement>(db, { class: "S" })
     ).filter((s) => s.data.territory && s.data.territory.id);
     const statementsCountMap: Record<string, number> = {}; // key is territoryid
     for (const statement of statements) {
-      const terId = statement.data.territory.id;
-      if (!statementsCountMap[terId]) {
-        statementsCountMap[terId] = 0;
+      if (statement.data.territory) {
+        const terId = statement.data.territory.id;
+        if (!statementsCountMap[terId]) {
+          statementsCountMap[terId] = 0;
+        }
+        statementsCountMap[terId]++;
       }
-
-      statementsCountMap[terId]++;
     }
 
     return statementsCountMap;
@@ -157,11 +158,13 @@ class TreeCache {
     await db.initDb();
 
     const [territoriesData, statementsCountMap] = await Promise.all([
-      getActants<ITerritory>(db, {
-        class: ActantType.Territory,
+      getEntities<ITerritory>(db, {
+        class: EntityClass.Territory,
       }),
       TreeCreator.countStatements(db),
     ]);
+
+    const evr = getEntities<IEntity>(db, {});
 
     newTree.createParentMap(
       territoriesData

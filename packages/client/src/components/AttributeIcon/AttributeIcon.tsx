@@ -20,7 +20,7 @@ export const attributeIcons = {
   moodvariant: <SiRealm />,
   virtuality: <FaRegObjectGroup />,
   partitivity: <AiOutlineApartment />,
-  operator: <VscDebugDisconnect />,
+  bundleOperator: <VscDebugDisconnect />,
   bundleStart: <BiChevronLeft />,
   bundleEnd: <BiChevronRight />,
   negation: <FaMinusCircle />,
@@ -29,6 +29,11 @@ export const attributeIcons = {
 export const AttributeIcon: React.FC<{ attributeName: string }> = ({
   attributeName,
 }) => {
-  //@ts-ignore
-  return attributeIcons[attributeName];
+  if (Object.keys(attributeIcons).includes(attributeName)) {
+    //@ts-ignore
+    return attributeIcons[attributeName];
+  } else {
+    console.log(attributeName);
+    return <div />;
+  }
 };

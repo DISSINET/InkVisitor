@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from "react";
 
 import { MdSettings } from "react-icons/md";
-import { ActantType } from "@shared/enums";
+import { EntityClass } from "@shared/enums";
 import {
   Tooltip,
   Button,
@@ -45,18 +45,18 @@ import {
   operatorDict,
   certaintyDict,
 } from "@shared/dictionaries";
-import { IActant } from "@shared/types";
+import { IEntity } from "@shared/types";
 import { EntitySuggester, EntityTag } from "..";
 import { FaUnlink } from "react-icons/fa";
 
 interface AttributesGroupEditor {
   modalTitle: string;
   statementId: string;
-  propTypeActant?: IActant;
-  classesPropType: ActantType[];
-  propValueActant?: IActant;
-  classesPropValue: ActantType[];
-  excludedSuggesterEntities: ActantType[];
+  propTypeActant?: IEntity;
+  classesPropType: EntityClass[];
+  propValueActant?: IEntity;
+  classesPropValue: EntityClass[];
+  excludedSuggesterEntities: EntityClass[];
   data: AttributeGroupDataObject;
   handleUpdate: (data: AttributeGroupDataObject) => void;
   updateProp: (propId: string, changes: any) => void;
@@ -174,11 +174,11 @@ export const AttributesGroupEditor: React.FC<AttributesGroupEditor> = ({
             items={partitivityDict}
           />
         )}
-        {data.operator && (
+        {data.bundleOperator && (
           <TooltipAttributeRow
-            key="operator"
-            attributeName="operator"
-            value={data.operator}
+            key="bundleOperator"
+            attributeName="bundleOperator"
+            value={data.bundleOperator}
             items={operatorDict}
           />
         )}
@@ -264,7 +264,7 @@ export const AttributesGroupEditor: React.FC<AttributesGroupEditor> = ({
         />
         <ModalContent>
           <StyledGridColumns>
-            <StyledColumnWrap color={Entities[ActantType.Statement].color}>
+            <StyledColumnWrap color={Entities[EntityClass.Statement].color}>
               <StyledColumnHeading>Statement</StyledColumnHeading>
 
               <AttributesForm

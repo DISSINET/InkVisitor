@@ -44,7 +44,7 @@ export default class Prop implements IProp, IModel {
   logic: Logic = Logic.Positive;
   mood: Mood[] = [];
   moodvariant: MoodVariant = MoodVariant.Realis;
-  operator: Operator = Operator.And;
+  bundleOperator: Operator = Operator.And;
   bundleStart: boolean = false;
   bundleEnd: boolean = false;
 

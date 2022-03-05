@@ -8,8 +8,8 @@ import {
   partitivityDict,
   virtualityDict,
 } from "@shared/dictionaries";
-import { ActantType } from "@shared/enums";
-import { IActant } from "@shared/types";
+import { EntityClass } from "@shared/enums";
+import { IEntity } from "@shared/types";
 import {
   Button,
   ButtonGroup,
@@ -39,13 +39,13 @@ import { TooltipBooleanRow } from "./TooltipBooleanRow/TooltipBooleanRow";
 
 interface StatementEditorAttributes {
   modalTitle: string;
-  actant?: IActant;
+  actant?: IEntity;
   data: AttributeData;
   handleUpdate: (
     data: AttributeData | { actant: string } | { action: string }
   ) => void;
   updateActantId?: (newId: string) => void;
-  classEntitiesActant?: ActantType[];
+  classEntitiesActant?: EntityClass[];
   loading: boolean;
   disabledAttributes?: AttributeName[];
   disabledAllAttributes?: boolean;
@@ -124,9 +124,9 @@ const AttributesEditor: React.FC<StatementEditorAttributes> = ({
         items={partitivityDict}
       />
       <TooltipAttributeRow
-        key="operator"
-        attributeName="operator"
-        value={data.operator}
+        key="bundleOperator"
+        attributeName="bundleOperator"
+        value={data.bundleOperator}
         items={operatorDict}
       />
       <TooltipBooleanRow

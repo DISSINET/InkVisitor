@@ -1,20 +1,20 @@
 import { clean, testErroneousResponse } from "@modules/common.test";
-import { ActantDoesNotExits, BadParams } from "@shared/types/errors";
+import { EntityDoesNotExits, BadParams } from "@shared/types/errors";
 import request from "supertest";
 import { apiPath } from "@common/constants";
 import app from "../../Server";
 import { supertestConfig } from "..";
 import { Db } from "@service/RethinkDB";
-import { findActantById } from "@service/shorthands";
-import { IActant } from "@shared/types";
+import { findEntityById } from "@service/shorthands";
+import { IEntity } from "@shared/types";
 import Statement from "@models/statement/statement";
 import { successfulGenericResponse } from "@modules/common.test";
 
-describe("Actants update", function () {
+describe("Entities update", function () {
   describe("empty data", () => {
     it("should return a BadParams error wrapped in IResponseGeneric", (done) => {
       return request(app)
-        .put(`${apiPath}/actants/update/1`)
+        .put(`${apiPath}/entities/update/1`)
         .set("authorization", "Bearer " + supertestConfig.token)
         .expect("Content-Type", /json/)
         .expect(testErroneousResponse.bind(undefined, new BadParams("")))
@@ -22,14 +22,14 @@ describe("Actants update", function () {
     });
   });
   describe("faulty data ", () => {
-    it("should return an ActantDoesNotExits error wrapped in IResponseGeneric", (done) => {
+    it("should return an EntityDoesNotExits error wrapped in IResponseGeneric", (done) => {
       return request(app)
-        .put(`${apiPath}/actants/update/1`)
+        .put(`${apiPath}/entities/update/1`)
         .send({ test: "" })
         .set("authorization", "Bearer " + supertestConfig.token)
         .expect("Content-Type", /json/)
         .expect(
-          testErroneousResponse.bind(undefined, new ActantDoesNotExits("", ""))
+          testErroneousResponse.bind(undefined, new EntityDoesNotExits("", ""))
         )
         .then(() => done());
     });
@@ -50,14 +50,14 @@ describe("Actants update", function () {
       await statementData.save(db.connection);
 
       await request(app)
-        .put(`${apiPath}/actants/update/${testId}`)
+        .put(`${apiPath}/entities/update/${testId}`)
         .send({ label: changeLabelTo })
         .set("authorization", "Bearer " + supertestConfig.token)
         .expect("Content-Type", /json/)
         .expect(200)
         .expect(successfulGenericResponse)
         .expect(async () => {
-          const changedEntry = await findActantById<IActant>(db, testId);
+          const changedEntry = await findEntityById<IEntity>(db, testId);
           expect(changedEntry.label).toEqual(changeLabelTo);
         });
 

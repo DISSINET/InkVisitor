@@ -1,67 +1,85 @@
-import { IAudit } from "./audit";
-import { IResponseAudit } from "./response-audit";
 import { IAction } from "./action";
-import { IActant } from "./actant";
+import { IAudit } from "./audit";
+import { IConcept } from "./concept";
 import { IEntity } from "./entity";
+import { IEvent } from "./event";
+import { IGroup } from "./group";
 import { ILabel } from "./label";
+import { ILocation } from "./location";
+import { IObject } from "./object";
+import { IOption } from "./option";
+import { IPerson } from "./person";
 import { IProp } from "./prop";
-import {
-  IUser,
-  IBookmarkFolder,
-  IStoredTerritory,
-  IUserOptions,
-  IUserRight,
-} from "./user";
+import { RequestPermissionUpdate } from "./request-permission";
+import { RequestSearch } from "./request-search";
 import { IResource } from "./resource";
-import { IResponseDetail } from "./response-detail";
+import {
+  IResponseDetail,
+  IResponseUsedInMetaProp,
+  IResponseUsedInStatement,
+} from "./response-detail";
 import { IResponseBookmarkFolder } from "./response-bookmarks";
 import { IResponseAdministration } from "./response-administration";
-import { IResponseActant } from "./response-actant";
+import { IResponseAudit } from "./response-audit";
+import { IResponseGeneric } from "./response-generic";
+import { IResponsePermission } from "./response-permission";
+import { IResponseSearch } from "./response-search";
 import { IResponseStatement } from "./response-statement";
+import { IResponseTerritory } from "./response-territory";
 import {
   IResponseTree,
   IResponseTreeTerritoryComponent,
 } from "./response-tree";
-import { IResponsePermission } from "./response-permission";
-import { IResponseTerritory } from "./response-territory";
-import { IResponseUser, IResponseStoredTerritory } from "./response-user";
+import { IResponseStoredTerritory, IResponseUser } from "./response-user";
 import {
   IStatement,
-  IStatementData,
   IStatementActant,
   IStatementAction,
+  IStatementData,
   IStatementReference,
 } from "./statement";
 import { ITerritory } from "./territory";
-import { IOption } from "./option";
-import { IResponseGeneric } from "./response-generic";
-import { IResponseSearch } from "./response-search";
-import { RequestSearch } from "./request-search";
-import { RequestPermissionUpdate } from "./request-permission";
+import {
+  IBookmarkFolder,
+  IStoredTerritory,
+  IUser,
+  IUserOptions,
+  IUserRight,
+} from "./user";
+import { IValue } from "./value";
+import { IResponseEntity } from "./response-actant";
 
 export type {
   IAudit,
-  IAction,
-  IActant,
   IEntity,
+  IAction,
+  ITerritory,
+  IStatement,
+  IResource,
+  IPerson,
+  IGroup,
+  IObject,
+  IConcept,
+  ILocation,
+  IValue,
+  IEvent,
   ILabel,
   IOption,
   IProp,
-  IStatement,
   IStatementData,
   IStatementAction,
   IStatementActant,
   IStatementReference,
-  ITerritory,
   IUser,
   IUserOptions,
   IUserRight,
   IBookmarkFolder,
   IStoredTerritory,
-  IResource,
   IResponseAudit,
-  IResponseActant,
+  IResponseEntity,
   IResponseDetail,
+  IResponseUsedInMetaProp,
+  IResponseUsedInStatement,
   IResponseBookmarkFolder,
   IResponseAdministration,
   IResponseStatement,
@@ -74,5 +92,4 @@ export type {
   IResponseSearch,
   IResponsePermission,
 };
-
 export { RequestSearch, RequestPermissionUpdate };

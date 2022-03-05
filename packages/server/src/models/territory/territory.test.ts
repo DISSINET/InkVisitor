@@ -2,7 +2,7 @@ import "ts-jest";
 import Territory from "./territory";
 import { Db } from "@service/RethinkDB";
 import { clean, getITerritoryMock } from "@modules/common.test";
-import { findActantById, deleteActants } from "@service/shorthands";
+import { findEntityById, deleteEntities } from "@service/shorthands";
 import { ITerritory } from "@shared/types";
 
 describe("Territory constructor test", function () {
@@ -95,7 +95,7 @@ describe("Territory.delete", function () {
 
       await expect(child.delete(db.connection)).resolves.not.toBeNull();
 
-      const existingChild = await findActantById(db, child.id);
+      const existingChild = await findEntityById(db, child.id);
 
       expect(existingChild).toBeNull();
 
@@ -112,7 +112,7 @@ describe("Territory - save territory", function () {
   });
 
   beforeEach(async () => {
-    await deleteActants(db);
+    await deleteEntities(db);
   });
 
   afterAll(async () => {
@@ -125,7 +125,7 @@ describe("Territory - save territory", function () {
       territory.id = "T0";
       await territory.save(db.connection);
 
-      const createdData = await findActantById<ITerritory>(db, territory.id);
+      const createdData = await findEntityById<ITerritory>(db, territory.id);
       expect(createdData.data.parent).toEqual(false);
 
       done();
@@ -139,7 +139,7 @@ describe("Territory - save territory", function () {
       });
       await territory.save(db.connection);
 
-      const createdData = await findActantById<ITerritory>(db, territory.id);
+      const createdData = await findEntityById<ITerritory>(db, territory.id);
       expect((createdData.data.parent as any).id).toEqual(
         (territory.data.parent as any).id,
       );
@@ -161,11 +161,11 @@ describe("Territory - save territory", function () {
       });
       await territory2.save(db.connection);
 
-      const createdData1 = await findActantById<ITerritory>(db, territory1.id);
+      const createdData1 = await findEntityById<ITerritory>(db, territory1.id);
       expect(createdData1.data.parent).toEqual(territory1.data.parent);
       expect((createdData1.data.parent as any).order).toEqual(0);
 
-      const createdData2 = await findActantById<ITerritory>(db, territory2.id);
+      const createdData2 = await findEntityById<ITerritory>(db, territory2.id);
       expect(createdData2.data.parent).toEqual(territory2.data.parent);
       expect((createdData2.data.parent as any).order).toEqual(1);
 
@@ -189,17 +189,17 @@ describe("Territory - save territory", function () {
       await territory3.save(db.connection);
 
       // first territory's order is set without conflict
-      const createdData1 = await findActantById<ITerritory>(db, territory1.id);
+      const createdData1 = await findEntityById<ITerritory>(db, territory1.id);
       expect(createdData1.data.parent).toEqual(territory1.data.parent);
       expect((createdData1.data.parent as any).order).toEqual(14);
 
       // second territory's order is set without conflict
-      const createdData2 = await findActantById<ITerritory>(db, territory2.id);
+      const createdData2 = await findEntityById<ITerritory>(db, territory2.id);
       expect(createdData2.data.parent).toEqual(territory2.data.parent);
       expect((createdData2.data.parent as any).order).toEqual(0);
 
       // third territory's order is not set, is pushed to the end
-      const createdData3 = await findActantById<ITerritory>(db, territory3.id);
+      const createdData3 = await findEntityById<ITerritory>(db, territory3.id);
       expect(createdData3.data.parent).toEqual(territory3.data.parent);
       expect((createdData3.data.parent as any).order).toEqual(14 + 1);
 
@@ -216,7 +216,7 @@ describe("Territory - update territory", function () {
   });
 
   beforeEach(async () => {
-    await deleteActants(db);
+    await deleteEntities(db);
   });
 
   afterAll(async () => {
@@ -231,7 +231,7 @@ describe("Territory - update territory", function () {
 
       await territory.update(db.connection, { label: "new label" });
 
-      const createdData = await findActantById<ITerritory>(db, territory.id);
+      const createdData = await findEntityById<ITerritory>(db, territory.id);
       expect(createdData.data.parent).toEqual(false);
       expect(createdData.label).toEqual("new label");
 
@@ -248,7 +248,7 @@ describe("Territory - update territory", function () {
         data: { parent: { id: "new" } },
       });
 
-      const createdData = await findActantById<ITerritory>(db, territory.id);
+      const createdData = await findEntityById<ITerritory>(db, territory.id);
       expect(createdData.data.parent).toEqual(territory.data.parent as any);
       expect((createdData.data.parent as any).order).toEqual(0);
       expect((createdData.data.parent as any).id).toEqual("new");
@@ -266,7 +266,7 @@ describe("Territory - update territory", function () {
         data: { parent: { id: "new", order: 90 } },
       });
 
-      const createdData = await findActantById<ITerritory>(db, territory.id);
+      const createdData = await findEntityById<ITerritory>(db, territory.id);
       expect(createdData.data.parent).toEqual(territory.data.parent as any);
       expect((createdData.data.parent as any).order).toEqual(90);
       expect((createdData.data.parent as any).id).toEqual("new");

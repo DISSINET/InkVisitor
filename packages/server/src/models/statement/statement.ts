@@ -12,7 +12,7 @@ import {
   IModel,
 } from "@models/common";
 import {
-  ActantType,
+  EntityClass,
   Certainty,
   Elvl,
   Position,
@@ -26,7 +26,7 @@ import {
   UserRoleMode,
 } from "@shared/enums";
 
-import Actant from "@models/actant/actant";
+import Entity from "@models/entity/entity";
 import { r as rethink, Connection, RDatum, WriteResult } from "rethinkdb-ts";
 import { InternalServerError } from "@shared/types/errors";
 import User from "@models/user/user";
@@ -42,7 +42,7 @@ export class StatementActant implements IStatementActant, IModel {
   logic: Logic = Logic.Positive;
   virtuality: Virtuality = Virtuality.Reality;
   partitivity: Partitivity = Partitivity.Unison;
-  operator: Operator = Operator.And;
+  bundleOperator: Operator = Operator.And;
   bundleStart: boolean = false;
   bundleEnd: boolean = false;
   props: Prop[] = [];
@@ -51,6 +51,8 @@ export class StatementActant implements IStatementActant, IModel {
     if (!data) {
       return;
     }
+
+    // TODO: If admin ? model.status = EntityStatus.Approved : model.status = EntityStatus.Pending
 
     fillFlatObject(this, data);
     fillArray<Prop>(this.props, Prop, data.props);
@@ -105,7 +107,7 @@ export class StatementTerritory {
    */
   isValid(): boolean {
     // order is optional, it will be fixed in underlaying call to
-    // Actant.determineOrder
+    // Entity.determineOrder
     if (this.id === "") {
       return false;
     }
@@ -122,7 +124,7 @@ export class StatementAction implements IStatementAction {
   logic: Logic = Logic.Positive;
   mood: Mood[] = [Mood.Indication];
   moodvariant: MoodVariant = MoodVariant.Realis;
-  operator: Operator = Operator.And;
+  bundleOperator: Operator = Operator.And;
   bundleStart: boolean = false;
   bundleEnd: boolean = false;
   props: Prop[] = [];
@@ -204,11 +206,10 @@ export class StatementData implements IModel, IStatementData {
   }
 }
 
-class Statement extends Actant implements IStatement {
-  static table = "actants";
-  static publicFields = Actant.publicFields;
+class Statement extends Entity implements IStatement {
+  static publicFields = Entity.publicFields;
 
-  class: ActantType.Statement = ActantType.Statement;
+  class: EntityClass.Statement = EntityClass.Statement;
   data: StatementData;
 
   constructor(data: UnknownObject) {
@@ -226,7 +227,7 @@ class Statement extends Actant implements IStatement {
    * @returns boolean result
    */
   isValid(): boolean {
-    if (this.class != ActantType.Statement) {
+    if (this.class != EntityClass.Statement) {
       return false;
     }
 
@@ -286,7 +287,7 @@ class Statement extends Actant implements IStatement {
    */
   async save(db: Connection | undefined): Promise<WriteResult> {
     const siblings = await this.findTerritorySiblings(db);
-    this.data.territory.order = Actant.determineOrder(
+    this.data.territory.order = Entity.determineOrder(
       this.data.territory.order,
       siblings
     );
@@ -321,7 +322,7 @@ class Statement extends Actant implements IStatement {
       const wantedOrder = territoryData.order;
 
       const siblings = await this.findTerritorySiblings(db);
-      this.data.territory.order = Actant.determineOrder(wantedOrder, siblings);
+      this.data.territory.order = Entity.determineOrder(wantedOrder, siblings);
       territoryData.order = this.data.territory.order;
     }
 
@@ -350,9 +351,9 @@ class Statement extends Actant implements IStatement {
     db: Connection | undefined
   ): Promise<Record<number, IStatement>> {
     const list: IStatement[] = await rethink
-      .table(Actant.table)
+      .table(Entity.table)
       .filter({
-        class: ActantType.Statement,
+        class: EntityClass.Statement,
       })
       .filter((entry: RDatum) => {
         return rethink.and(
@@ -364,7 +365,9 @@ class Statement extends Actant implements IStatement {
 
     const out: Record<number, IStatement> = {};
     for (const ter of list) {
-      out[ter.data.territory.order] = ter;
+      if (ter.data.territory) {
+        out[ter.data.territory.order] = ter;
+      }
     }
 
     return out;
@@ -375,19 +378,27 @@ class Statement extends Actant implements IStatement {
    * @returns list of ids
    */
   getEntitiesIds(): string[] {
-    const actantsIds: Record<string, null> = {};
+    const entitiesIds: Record<string, null> = {};
 
     this.data.actions.forEach((a) => {
-      actantsIds[a.action] = null;
+      entitiesIds[a.action] = null;
       if (a.props) {
         a.props.forEach((prop) => {
-          actantsIds[prop.type.id] = null;
-          actantsIds[prop.value.id] = null;
+          entitiesIds[prop.type.id] = null;
+          entitiesIds[prop.value.id] = null;
 
           if (prop.children) {
             prop.children.forEach((propChild) => {
-              actantsIds[propChild.type.id] = null;
-              actantsIds[propChild.value.id] = null;
+              entitiesIds[propChild.type.id] = null;
+              entitiesIds[propChild.value.id] = null;
+
+              // 3rd level
+              if (propChild.children) {
+                propChild.children.forEach((propChild2) => {
+                  entitiesIds[propChild2.type.id] = null;
+                  entitiesIds[propChild2.value.id] = null;
+                });
+              }
             });
           }
         });
@@ -395,31 +406,39 @@ class Statement extends Actant implements IStatement {
     });
 
     this.data.actants.forEach((a) => {
-      actantsIds[a.actant] = null;
+      entitiesIds[a.actant] = null;
       if (a.props) {
         a.props.forEach((prop) => {
-          actantsIds[prop.type.id] = null;
-          actantsIds[prop.value.id] = null;
+          entitiesIds[prop.type.id] = null;
+          entitiesIds[prop.value.id] = null;
 
           if (prop.children) {
             prop.children.forEach((propChild) => {
-              actantsIds[propChild.type.id] = null;
-              actantsIds[propChild.value.id] = null;
+              entitiesIds[propChild.type.id] = null;
+              entitiesIds[propChild.value.id] = null;
+
+              // 3rd level
+              if (propChild.children) {
+                propChild.children.forEach((propChild2) => {
+                  entitiesIds[propChild2.type.id] = null;
+                  entitiesIds[propChild2.value.id] = null;
+                });
+              }
             });
           }
         });
       }
     });
 
-    actantsIds[this.data.territory.id] = null;
+    entitiesIds[this.data.territory.id] = null;
 
     this.data.references.forEach((p) => {
-      actantsIds[p.resource] = null;
+      entitiesIds[p.resource] = null;
     });
 
-    this.data.tags.forEach((t) => (actantsIds[t] = null));
+    this.data.tags.forEach((t) => (entitiesIds[t] = null));
 
-    return Object.keys(actantsIds);
+    return Object.keys(entitiesIds);
   }
 
   async unlinkActantId(
@@ -464,22 +483,22 @@ class Statement extends Actant implements IStatement {
    * @returns list of ids unique for multiple statements
    */
   static getEntitiesIdsForMany(statements: IStatement[]): string[] {
-    const actantIds: Record<string, null> = {}; // unique check
+    const entityIds: Record<string, null> = {}; // unique check
 
     const stModel = new Statement(undefined);
     for (const statement of statements) {
       stModel.getEntitiesIds
         .call(statement)
-        .forEach((id) => (actantIds[id] = null));
+        .forEach((id) => (entityIds[id] = null));
     }
 
-    return Object.keys(actantIds);
+    return Object.keys(entityIds);
   }
 
   /**
    * finds statements which are under specific territory
    * @param db db connection
-   * @param territoryId id of the actant
+   * @param territoryId id of the territory
    * @returns list of statements data
    */
   static async findStatementsInTerritory(
@@ -487,9 +506,9 @@ class Statement extends Actant implements IStatement {
     territoryId: string
   ): Promise<IStatement[]> {
     const statements = await rethink
-      .table("actants")
+      .table(Entity.table)
       .filter({
-        class: ActantType.Statement,
+        class: EntityClass.Statement,
       })
       .filter((row: RDatum) => {
         return row("data")("territory")("id").eq(territoryId);
@@ -502,42 +521,109 @@ class Statement extends Actant implements IStatement {
   }
 
   /**
-   * finds statements which are linked to different actant
-   * in other words, find statements which store passed actant id in on of their possible fields
+   * finds statements which are linked to different entity
+   * in other words, find statements which store passed entity id in on of their possible fields
    * @param db db connection
-   * @param territoryId id of the actant
+   * @param entityId id of the entity
    * @returns list of statements data
    */
-  static async findDependentStatements(
+  static async findUsedInDataEntities(
     db: Connection | undefined,
-    actantId: string
+    entityId: string
   ): Promise<IStatement[]> {
     const statements = await rethink
-      .table("actants")
+      .table(Entity.table)
       .filter({
-        class: ActantType.Statement,
+        class: EntityClass.Statement,
       })
       .filter((row: RDatum) => {
         return rethink.or(
-          row("data")("territory")("id").eq(actantId),
           row("data")("actions").contains((entry: RDatum) =>
-            entry("action").eq(actantId)
+            entry("action").eq(entityId)
           ),
           row("data")("actants").contains((entry: RDatum) =>
-            entry("actant").eq(actantId)
+            entry("actant").eq(entityId)
           ),
-          row("data")("tags").contains(actantId),
-          row("data")("props").contains((entry: RDatum) =>
-            entry("value")("id").eq(actantId)
+          row("data")("tags").contains(entityId)
+        );
+      })
+      .run(db);
+
+    return statements.sort((a, b) => {
+      return a.data.territory.order - b.data.territory.order;
+    });
+  }
+
+  /**
+   * finds statements which are linked to different entity
+   * using statement.data.actions[].props or statement.data.actants[].props
+   * searches also in props.children to lvl3
+   * @param db db connection
+   * @param entityId id of the entity
+   * @returns list of statements data
+   */
+  static async findUsedInDataProps(
+    db: Connection | undefined,
+    entityId: string
+  ): Promise<IStatement[]> {
+    const statements = await rethink
+      .table(Entity.table)
+      .filter({
+        class: EntityClass.Statement,
+      })
+      .filter((row: RDatum) => {
+        return rethink.or(
+          row("data")("actions").contains((action: RDatum) =>
+            action("props").contains((entry: RDatum) =>
+              rethink.or(
+                entry("value")("id").eq(entityId),
+                entry("type")("id").eq(entityId),
+                entry("children").contains((ch1: RDatum) =>
+                  rethink.or(
+                    ch1("value")("id").eq(entityId),
+                    ch1("type")("id").eq(entityId),
+                    ch1("children").contains((ch2: RDatum) =>
+                      rethink.or(
+                        ch2("value")("id").eq(entityId),
+                        ch2("type")("id").eq(entityId),
+                        ch2("children").contains((ch3: RDatum) =>
+                          rethink.or(
+                            ch3("value")("id").eq(entityId),
+                            ch3("type")("id").eq(entityId)
+                          )
+                        )
+                      )
+                    )
+                  )
+                )
+              )
+            )
           ),
-          row("data")("props").contains((entry: RDatum) =>
-            entry("type")("id").eq(actantId)
-          ),
-          row("data")("props").contains((entry: RDatum) =>
-            entry("origin").eq(actantId)
-          ),
-          row("data")("references").contains((entry: RDatum) =>
-            entry("resource").eq(actantId)
+          row("data")("actants").contains((actant: RDatum) =>
+            actant("props").contains((prop: RDatum) =>
+              rethink.or(
+                prop("value")("id").eq(entityId),
+                prop("type")("id").eq(entityId),
+                prop("children").contains((ch1: RDatum) =>
+                  rethink.or(
+                    ch1("value")("id").eq(entityId),
+                    ch1("type")("id").eq(entityId),
+                    ch1("children").contains((ch2: RDatum) =>
+                      rethink.or(
+                        ch2("value")("id").eq(entityId),
+                        ch2("type")("id").eq(entityId),
+                        ch2("children").contains((ch3: RDatum) =>
+                          rethink.or(
+                            ch3("value")("id").eq(entityId),
+                            ch3("type")("id").eq(entityId)
+                          )
+                        )
+                      )
+                    )
+                  )
+                )
+              )
+            )
           )
         );
       })
@@ -560,9 +646,9 @@ class Statement extends Actant implements IStatement {
     actantId: string
   ): Promise<Statement[]> {
     const statements = await rethink
-      .table("actants")
+      .table(Entity.table)
       .filter({
-        class: ActantType.Statement,
+        class: EntityClass.Statement,
       })
       .filter((row: RDatum) => {
         return rethink.and(
@@ -582,13 +668,13 @@ class Statement extends Actant implements IStatement {
   }
 
   static events: EventMapSingle = {
-    [EventTypes.BEFORE_ACTANT_DELETE]: async (
+    [EventTypes.BEFORE_ENTITY_DELETE]: async (
       db: Connection,
       actantId: string
     ): Promise<void> => {
       const linkedToActant = await rethink
-        .table(Actant.table)
-        .filter({ class: ActantType.Statement })
+        .table(Entity.table)
+        .filter({ class: EntityClass.Statement })
         .filter((row: any) => {
           return row("data")("actants").contains((actantElement: any) =>
             actantElement("actant").eq(actantId)
@@ -602,8 +688,8 @@ class Statement extends Actant implements IStatement {
       }
 
       const linkedToProps = await rethink
-        .table(Actant.table)
-        .filter({ class: ActantType.Statement })
+        .table(Entity.table)
+        .filter({ class: EntityClass.Statement })
         .filter((row: any) => {
           return row("data")("props").contains((actantElement: any) =>
             actantElement("origin").eq(actantId)
@@ -612,8 +698,8 @@ class Statement extends Actant implements IStatement {
         .run(db);
 
       const linkedToActions = await rethink
-        .table(Actant.table)
-        .filter({ class: ActantType.Statement })
+        .table(Entity.table)
+        .filter({ class: EntityClass.Statement })
         .filter((row: any) => {
           return row("data")("actions").contains((actantElement: any) =>
             actantElement("action").eq(actantId)

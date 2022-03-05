@@ -99,28 +99,15 @@ class UserNotActiveError extends CustomError {
 }
 
 /**
- * ActantDoesNotExits will be thrown when attempting to remove/update the actant entry, which does not exist
+ * EntityDoesNotExits will be thrown when attempting to remove/update the entity entry, which does not exist
  */
-class ActantDoesNotExits extends CustomError {
+class EntityDoesNotExits extends CustomError {
   public static code = 400;
-  message = "Actant $1 does not exist";
+  message = "Entity $1 does not exist";
 
-  constructor(m: string, actantId: string) {
+  constructor(m: string, entityId: string) {
     super(m);
-    this.message = this.message.replace("$1", actantId);
-  }
-}
-
-/**
- * ActionDoesNotExits will be thrown when attempting to remove/update the action entry, which does not exist
- */
-class ActionDoesNotExits extends CustomError {
-  public static code = 400;
-  message = "Action $1 does not exist";
-
-  constructor(m: string, actionId: string) {
-    super(m);
-    this.message = this.message.replace("$1", actionId);
+    this.message = this.message.replace("$1", entityId);
   }
 }
 
@@ -231,8 +218,7 @@ const allErrors: Record<string, any> = {
   BadParams,
   UserDoesNotExits,
   UserNotActiveError,
-  ActantDoesNotExits,
-  ActionDoesNotExits,
+  EntityDoesNotExits,
   StatementDoesNotExits,
   PermissionDoesNotExits,
   TerritoriesBrokenError,
@@ -256,8 +242,7 @@ export {
   BadParams,
   UserDoesNotExits,
   UserNotActiveError,
-  ActantDoesNotExits,
-  ActionDoesNotExits,
+  EntityDoesNotExits,
   StatementDoesNotExits,
   PermissionDoesNotExits,
   TerritoriesBrokenError,

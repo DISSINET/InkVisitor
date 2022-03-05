@@ -1,4 +1,4 @@
-import { Request } from "express";
+import { findEntityById, findEntitiesById } from "@service/shorthands";
 import { UserRole } from "@shared/enums";
 import {
   IBookmarkFolder,
@@ -10,7 +10,7 @@ import {
   IUserOptions,
   IUserRight,
 } from "@shared/types";
-import { findActantById, findActantsById } from "@service/shorthands";
+import { Request } from "express";
 
 export class ResponseUser implements IResponseUser {
   id: string;
@@ -52,15 +52,15 @@ export class ResponseUser implements IResponseUser {
       const bookmarkResponse: IResponseBookmarkFolder = {
         id: bookmark.id,
         name: bookmark.name,
-        actants: [],
+        entities: [],
       };
-      if (bookmark.actantIds && bookmark.actantIds.length) {
-        for (const actant of await findActantsById(
+      if (bookmark.entityIds && bookmark.entityIds.length) {
+        for (const entity of await findEntitiesById(
           req.db,
-          bookmark.actantIds
+          bookmark.entityIds
         )) {
-          bookmarkResponse.actants.push({
-            ...actant,
+          bookmarkResponse.entities.push({
+            ...entity,
           });
         }
       }
@@ -72,7 +72,7 @@ export class ResponseUser implements IResponseUser {
     for (const territory of this._userStoredTerritories) {
       const territoryResponse: IResponseStoredTerritory = {
         territory: {
-          ...(await findActantById(req.db, territory.territoryId)),
+          ...(await findEntityById(req.db, territory.territoryId)),
         },
       };
       this.storedTerritories.push(territoryResponse);
@@ -83,7 +83,7 @@ export class ResponseUser implements IResponseUser {
     for (const right of this.rights) {
       const territoryFromRights: IResponseStoredTerritory = {
         territory: {
-          ...(await findActantById(req.db, right.territory)),
+          ...(await findEntityById(req.db, right.territory)),
         },
       };
       this.territoryRights.push(territoryFromRights);
