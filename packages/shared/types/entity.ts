@@ -3,6 +3,7 @@ import { EntityClass, Language } from "../enums";
 
 export interface IEntity {
   id: string;
+  _legacyId?: string;
   class: EntityClass;
   data: any;
   label: string;
