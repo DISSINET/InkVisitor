@@ -79,7 +79,7 @@ To administrate the users rights, admin roles may acces the **administration win
   - `cd ./packages/database`
   - (`npm install`)
   - `npm run import-local` to import datasets to the local database (`.env.devel`)
-  - `npm run import-remote` to import datasets to the remote database (`.env.prod`) (`import-remote-sandbox` and `import-remote-stage`, and `import-remote-importdata` for specific deploys)
+  - `npm run import-remote` to import datasets to the remote database (`.env.prod`) (`import-remote-sandbox` and `import-remote-staging`, and `import-remote-importdata` for specific deploys)
 
 ### Client
 
