@@ -1,5 +1,9 @@
 import "ts-jest";
-import Statement, { StatementActant, StatementReference } from "./statement";
+import Statement, {
+  StatementActant,
+  StatementAction,
+  StatementReference,
+} from "./statement";
 import { Db } from "@service/RethinkDB";
 import { deleteEntities, findEntityById } from "@service/shorthands";
 import Territory from "@models/territory/territory";
@@ -9,6 +13,46 @@ import {
   getIStatementMock,
 } from "@modules/common.test";
 import Prop, { PropSpec } from "@models/prop/prop";
+
+const fillStatementProps = function (
+  container: StatementActant | StatementAction
+): void {
+  // children lvl 1
+  container.props[0].children.push(new Prop({}));
+  container.props[0].children[0].type = new PropSpec({});
+  container.props[0].children[0].value = new PropSpec({});
+
+  // children lvl 2
+  container.props[0].children[0].children.push(new Prop({}));
+  container.props[0].children[0].children[0].type = new PropSpec({});
+  container.props[0].children[0].children[0].value = new PropSpec({});
+  // children lvl 3
+  container.props[0].children[0].children[0].children.push(new Prop({}));
+  container.props[0].children[0].children[0].children[0].type = new PropSpec(
+    {}
+  );
+  container.props[0].children[0].children[0].children[0].value = new PropSpec(
+    {}
+  );
+};
+export const prepareStatement = (): [string, Statement] => {
+  const detailId = Math.random().toFixed();
+
+  const st1 = new Statement({});
+  st1.data.actants.push(new StatementActant({}));
+  st1.data.actants[0].props.push(new Prop({}));
+  st1.data.actants[0].props.push(new Prop({}));
+
+  fillStatementProps(st1.data.actants[0]);
+
+  st1.data.actions.push(new StatementAction({}));
+  st1.data.actions[0].props.push(new Prop({}));
+  st1.data.actions[0].props.push(new Prop({}));
+
+  fillStatementProps(st1.data.actions[0]);
+
+  return [detailId, st1];
+};
 
 describe("Statement constructor test", function () {
   describe("empty data", () => {
@@ -603,39 +647,6 @@ describe("test Statement.toJSON", function () {
 
 describe("test Statement.findUsedInDataProps", function () {
   let db: Db;
-
-  const prepareStatement = (): [string, Statement] => {
-    const detailId = Math.random().toFixed();
-
-    const st1 = new Statement({});
-    st1.data.actants.push(new StatementActant({}));
-    st1.data.actants[0].props.push(new Prop({}));
-    st1.data.actants[0].props.push(new Prop({}));
-
-    // children lvl 1
-    st1.data.actants[0].props[0].children.push(new Prop({}));
-    st1.data.actants[0].props[0].children[0].type = new PropSpec({});
-    st1.data.actants[0].props[0].children[0].value = new PropSpec({});
-
-    // children lvl 2
-    st1.data.actants[0].props[0].children[0].children.push(new Prop({}));
-    st1.data.actants[0].props[0].children[0].children[0].type = new PropSpec(
-      {}
-    );
-    st1.data.actants[0].props[0].children[0].children[0].value = new PropSpec(
-      {}
-    );
-    // children lvl 3
-    st1.data.actants[0].props[0].children[0].children[0].children.push(
-      new Prop({})
-    );
-    st1.data.actants[0].props[0].children[0].children[0].children[0].type =
-      new PropSpec({});
-    st1.data.actants[0].props[0].children[0].children[0].children[0].value =
-      new PropSpec({});
-
-    return [detailId, st1];
-  };
 
   beforeAll(async () => {
     db = new Db();

@@ -193,7 +193,11 @@ export class ResponseEntityDetail
       }
 
       if (prop.children.length) {
-        this.walkStatementDataRecursiveProps(statement, origin, prop.children);
+        this.walkStatementDataRecursiveProps(
+          statement,
+          originId,
+          prop.children
+        );
       }
     }
   }
