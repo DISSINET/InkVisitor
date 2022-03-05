@@ -1,9 +1,13 @@
-import { IActant } from "./";
-import { EntityActantType, EntityLogicalType } from "../enums";
+import { IProp } from ".";
+import { EntityClass, Language } from "../enums";
 
-export interface IEntity extends IActant {
-  class: EntityActantType;
-  data: {
-    logicalType: EntityLogicalType;
-  };
+export interface IEntity {
+  id: string;
+  class: EntityClass;
+  data: any;
+  label: string;
+  detail: string;
+  language: Language;
+  notes: string[];
+  props: IProp[];
 }

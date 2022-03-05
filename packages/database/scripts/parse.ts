@@ -3,10 +3,8 @@ var { v4 } = require("uuid");
 var fs = require("fs");
 
 import {
-  ActantType,
-  ActantStatus,
-  EntityActantType,
-  AllActantType,
+  EntityClass,
+  EntityStatus,
   Certainty,
   Elvl,
   Position,
@@ -21,7 +19,6 @@ import {
 } from "../../shared/enums";
 import {
   IAction,
-  IActant,
   IEntity,
   IStatement,
   ITerritory,
@@ -29,12 +26,12 @@ import {
   IStatementActant,
 } from "../../shared/types";
 
-import { actantStatusDict } from "../../shared/dictionaries";
+import { entityStatusDict } from "../../shared/dictionaries";
 
 /**
  * waterfall processing
  */
-var actants: IActant[] = [];
+var entities: IEntity[] = [];
 
 type IConceptProp = {
   type: "value" | "concept";
@@ -57,7 +54,7 @@ const loadStatementsTables = async (next: Function) => {
    */
   tableActions.forEach((action: any) => {
     if (action.label) {
-      const statusOption = actantStatusDict.find(
+      const statusOption = entityStatusDict.find(
         (o) => o.label === action.status
       );
 
@@ -72,7 +69,7 @@ const loadStatementsTables = async (next: Function) => {
             if (part === "NULL") {
               out.push("NULL");
             } else {
-              Object.values(ActantType).forEach((type) => {
+              Object.values(EntityClass).forEach((type) => {
                 if (part.includes(type)) {
                   out.push(type);
                 }
@@ -86,7 +83,7 @@ const loadStatementsTables = async (next: Function) => {
 
       const newAction: IAction = {
         id: action.id,
-        class: ActantType.Action,
+        class: EntityClass.Action,
         data: {
           valencies: {
             s: action.subject_valency,
@@ -98,18 +95,18 @@ const loadStatementsTables = async (next: Function) => {
             a1: parseEntities(action.actant1_entity_type),
             a2: parseEntities(action.actant2_entity_type),
           },
+          status: statusOption
+            ? (statusOption.value as EntityStatus)
+            : EntityStatus.Pending,
         },
         language:
           action.language === "English" ? Language.English : Language.Latin,
-        status: statusOption
-          ? (statusOption.value as ActantStatus)
-          : ("0" as ActantStatus),
         notes: action.note ? [action.note] : [],
         label: action.label,
         detail: action.detail_incl_valency,
         props: [],
       };
-      actants.push(newAction);
+      entities.push(newAction);
     }
   });
 
@@ -132,7 +129,7 @@ const loadStatementsTables = async (next: Function) => {
       },
       ti: number
     ) => {
-      addTerritoryActant(
+      addTerritoryEntity(
         text.id,
         text.label,
         rootTerritory,
@@ -144,7 +141,7 @@ const loadStatementsTables = async (next: Function) => {
     }
   );
 
-  addTerritoryActant(rootTerritory, "everything", false, 0);
+  addTerritoryEntity(rootTerritory, "everything", false, 0);
 
   type IRowResources = {
     type: string;
@@ -181,7 +178,7 @@ const loadStatementsTables = async (next: Function) => {
   tableManuscripts.forEach((manuscript: { id: string; label: string }) => {
     // parse as objects #629
     //addResourceActant(manuscript.id, manuscript.label);
-    addEntityActant(manuscript.id, manuscript.label, ActantType.Object);
+    addEntity(manuscript.id, manuscript.label, EntityClass.Object);
   });
 
   const tableResources: IRowResources[] = await loadSheet({
@@ -332,10 +329,10 @@ const loadStatementsTables = async (next: Function) => {
     data
       .filter((er: any) => er.label)
       .forEach((entityRow: any, eri: number) => {
-        addEntityActant(
+        addEntity(
           entitySheet.id + "_" + entityRow.id,
           entityRow.label,
-          entitySheet.entityType as AllActantType
+          entitySheet.entityType as EntityClass
         );
 
         parseEntityPropsInRow(entityRow);
@@ -379,7 +376,7 @@ const loadStatementsTables = async (next: Function) => {
       // add sub-territories
       territoryIds.forEach((territoryId: string, ti: number) => {
         console.log(territoryId);
-        addTerritoryActant(
+        addTerritoryEntity(
           territoryId,
           territoryId,
           territoryId.includes("-")
@@ -395,7 +392,7 @@ const loadStatementsTables = async (next: Function) => {
         // parse the statement id but keep the order somehow sorted
         const mainStatement: IStatement = {
           id: v4(),
-          class: ActantType.Statement,
+          class: EntityClass.Statement,
           props: [],
           data: {
             actions: [
@@ -407,7 +404,7 @@ const loadStatementsTables = async (next: Function) => {
                 logic: Logic.Positive,
                 mood: [Mood.Indication],
                 moodvariant: MoodVariant.Realis,
-                operator: Operator.And,
+                bundleOperator: Operator.And,
                 bundleStart: false,
                 bundleEnd: false,
                 props: [],
@@ -439,7 +436,6 @@ const loadStatementsTables = async (next: Function) => {
           label: statement.id,
           detail: "",
           language: Language.Latin,
-          status: ActantStatus.Approved,
         };
 
         statement.note && mainStatement.notes.push(statement.note);
@@ -519,7 +515,7 @@ const loadStatementsTables = async (next: Function) => {
             logic: Logic.Positive,
             mood: [Mood.Indication],
             moodvariant: MoodVariant.Realis,
-            operator: Operator.And,
+            bundleOperator: Operator.And,
             bundleStart: false,
             bundleEnd: false,
 
@@ -547,7 +543,7 @@ const loadStatementsTables = async (next: Function) => {
          * Location
          */
 
-        actants.push(mainStatement);
+        entities.push(mainStatement);
       });
     }
   }
@@ -575,28 +571,29 @@ const checkValidId = (idValue: string) => {
 /***
  * TODO: logical type
  */
-const addEntityActant = (id: string, label: string, type: AllActantType) => {
-  const newEntityActant: IEntity | IActant = {
+const addEntity = (id: string, label: string, type: EntityClass) => {
+  const newEntity: IEntity | IEntity = {
     id,
     class: type,
     data:
-      type === ActantType.Concept
-        ? {}
+      type === EntityClass.Concept
+        ? {
+            status: EntityStatus.Approved,
+          }
         : {
             logicalType: EntityLogicalType.Definite,
           },
     label: label,
     detail: "",
-    status: ActantStatus.Approved,
     language: Language.Latin,
     notes: [],
     props: [],
   };
   if (id) {
-    actants.push(newEntityActant);
+    entities.push(newEntity);
   }
 };
-const addTerritoryActant = (
+const addTerritoryEntity = (
   id: string,
   label: string,
   parentId: string | false,
@@ -606,10 +603,10 @@ const addTerritoryActant = (
   notes: string[] = []
 ) => {
   if (id) {
-    if (!actants.some((a) => a.id == id)) {
+    if (!entities.some((a) => a.id == id)) {
       const newTerritory: ITerritory = {
         id,
-        class: ActantType.Territory,
+        class: EntityClass.Territory,
         data: {
           parent: parentId
             ? {
@@ -620,14 +617,13 @@ const addTerritoryActant = (
         },
         label: label.trim(),
         detail: detail,
-        status: ActantStatus.Approved,
         // @ts-ignore
         language: Language[language] as Language,
         notes: notes,
         props: [],
       };
 
-      actants.push(newTerritory);
+      entities.push(newTerritory);
     }
   }
 };
@@ -635,18 +631,17 @@ const addResourceActant = (id: string, label: string) => {
   if (id) {
     const newResource: IResource = {
       id,
-      class: ActantType.Resource,
+      class: EntityClass.Resource,
       data: {
         link: "",
       },
       label: label.trim(),
       detail: "",
-      status: ActantStatus.Approved,
       language: Language.Latin,
       notes: [],
       props: [],
     };
-    actants.push(newResource);
+    entities.push(newResource);
   }
 };
 
@@ -680,7 +675,7 @@ const parseEntityPropsInRow = (row: any) => {
           const valueId = v4();
 
           // add actant
-          addEntityActant(valueId, value, ActantType.Value);
+          addEntity(valueId, value, EntityClass.Value);
 
           // add statement
           // createEmptyPropStatement(
@@ -709,7 +704,7 @@ const createEmptyPropStatement = (
   if (idSubject && idActant1 && idActant2) {
     const newEmptyStatement: IStatement = {
       id: v4(),
-      class: ActantType.Statement,
+      class: EntityClass.Statement,
       props: [],
       label: "",
       data: {
@@ -722,7 +717,7 @@ const createEmptyPropStatement = (
             logic: Logic.Positive,
             mood: [Mood.Indication],
             moodvariant: MoodVariant.Realis,
-            operator: Operator.And,
+            bundleOperator: Operator.And,
             bundleStart: false,
             bundleEnd: false,
             props: [],
@@ -744,7 +739,7 @@ const createEmptyPropStatement = (
             logic: Logic.Positive,
             virtuality: Virtuality.Reality,
             partitivity: Partitivity.Unison,
-            operator: Operator.And,
+            bundleOperator: Operator.And,
             bundleStart: false,
             bundleEnd: false,
             props: [],
@@ -757,7 +752,7 @@ const createEmptyPropStatement = (
             logic: Logic.Positive,
             virtuality: Virtuality.Reality,
             partitivity: Partitivity.Unison,
-            operator: Operator.And,
+            bundleOperator: Operator.And,
             bundleStart: false,
             bundleEnd: false,
             props: [],
@@ -770,7 +765,7 @@ const createEmptyPropStatement = (
             logic: Logic.Positive,
             virtuality: Virtuality.Reality,
             partitivity: Partitivity.Unison,
-            operator: Operator.And,
+            bundleOperator: Operator.And,
             bundleStart: false,
             bundleEnd: false,
             props: [],
@@ -778,11 +773,10 @@ const createEmptyPropStatement = (
         ],
       },
       detail: "",
-      status: ActantStatus.Approved,
       language: Language.Latin,
       notes: [],
     };
-    actants.push(newEmptyStatement);
+    entities.push(newEmptyStatement);
   }
 };
 
@@ -843,7 +837,7 @@ const processLocation = (
             logic: Logic.Positive,
             mood: [Mood.Indication],
             moodvariant: MoodVariant.Realis,
-            operator: Operator.And,
+            bundleOperator: Operator.And,
             bundleStart: false,
             bundleEnd: false,
 
@@ -872,7 +866,7 @@ const processLocation = (
             logic: Logic.Positive,
             mood: [Mood.Indication],
             moodvariant: MoodVariant.Realis,
-            operator: Operator.And,
+            bundleOperator: Operator.And,
             bundleStart: false,
             bundleEnd: false,
 
@@ -934,7 +928,7 @@ const processActant = (
         logic: Logic.Positive,
         virtuality: Virtuality.Reality,
         partitivity: Partitivity.Unison,
-        operator: Operator.And,
+        bundleOperator: Operator.And,
         bundleStart: false,
         bundleEnd: false,
         props: [],
@@ -962,7 +956,7 @@ const processActant = (
           logic: Logic.Positive,
           mood: [Mood.Indication],
           moodvariant: MoodVariant.Realis,
-          operator: Operator.And,
+          bundleOperator: Operator.And,
           bundleStart: false,
           bundleEnd: false,
 
@@ -998,11 +992,7 @@ const createNewActantIfNeeded = (actantValue: string) => {
     const newActantLabel: string = actantValue.split("~")[2];
 
     if (["P", "G", "O", "C", "L", "V", "E"].indexOf(newActantType) > -1)
-      addEntityActant(
-        newActantId,
-        newActantLabel,
-        newActantType as AllActantType
-      );
+      addEntity(newActantId, newActantLabel, newActantType as EntityClass);
 
     return newActantId;
   } else {
@@ -1011,6 +1001,6 @@ const createNewActantIfNeeded = (actantValue: string) => {
 };
 
 loadStatementsTables(() => {
-  console.log(actants.length);
-  fs.writeFileSync("datasets/all/actants.json", JSON.stringify(actants));
+  console.log(entities.length);
+  fs.writeFileSync("datasets/all/entities.json", JSON.stringify(entities));
 });

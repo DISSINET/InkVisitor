@@ -1,15 +1,13 @@
-import React from "react";
-
 import {
   Button,
-  Modal,
-  ModalHeader,
-  ModalContent,
-  ModalFooter,
-  ModalCard,
   ButtonGroup,
   Loader,
+  Modal,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
 } from "components";
+import React from "react";
 
 interface Submit {
   title?: string;

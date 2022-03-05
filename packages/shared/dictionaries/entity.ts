@@ -1,65 +1,65 @@
-import { DropdownItem } from "@shared/packages/client/src/types";
-import { ActantType } from "../enums";
+import { EntityClass, EntityExtension } from "../enums";
+export type DropdownItem = { value: string; label: string; info?: string };
 
 export const allEntities: DropdownItem = {
-  value: ActantType.Any,
+  value: EntityExtension.Any,
   label: "Any",
   info: "",
 };
 
 export const entitiesDict: DropdownItem[] = [
   {
-    value: ActantType.Action,
+    value: EntityClass.Action,
     label: "Action",
     info: "",
   },
   {
-    value: ActantType.Territory,
+    value: EntityClass.Territory,
     label: "Territory",
     info: "",
   },
   {
-    value: ActantType.Statement,
+    value: EntityClass.Statement,
     label: "Statement",
     info: "",
   },
   {
-    value: ActantType.Resource,
+    value: EntityClass.Resource,
     label: "Resource",
     info: "",
   },
   {
-    value: ActantType.Person,
+    value: EntityClass.Person,
     label: "Person",
     info: "",
   },
   {
-    value: ActantType.Group,
+    value: EntityClass.Group,
     label: "Group",
     info: "",
   },
   {
-    value: ActantType.Object,
+    value: EntityClass.Object,
     label: "Object",
     info: "",
   },
   {
-    value: ActantType.Concept,
+    value: EntityClass.Concept,
     label: "Concept",
     info: "",
   },
   {
-    value: ActantType.Location,
+    value: EntityClass.Location,
     label: "Location",
     info: "",
   },
   {
-    value: ActantType.Value,
+    value: EntityClass.Value,
     label: "Value",
     info: "",
   },
   {
-    value: ActantType.Event,
+    value: EntityClass.Event,
     label: "Event",
     info: "",
   },

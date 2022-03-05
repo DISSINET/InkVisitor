@@ -1,12 +1,14 @@
 import { Connection, r as rethink, RDatum, WriteResult } from "rethinkdb-ts";
 import { IUser } from "@shared/types/user";
-import { IActant } from "@shared/types/actant";
+import { IEntity } from "@shared/types";
 import { Db } from "./RethinkDB";
 import { IAction, IStatement, ITerritory } from "@shared/types";
 import { IDbModel } from "@models/common";
 import { ModelNotValidError } from "@shared/types/errors";
-import { ActantType } from "@shared/enums";
+import { EntityClass } from "@shared/enums";
 import { regExpEscape } from "@common/functions";
+import Entity from "@models/entity/entity";
+import User from "@models/user/user";
 
 export async function createUser(db: Db, data: IUser): Promise<WriteResult> {
   return rethink.table("users").insert(data).run(db.connection);
@@ -19,22 +21,26 @@ export async function updateUser(
 ): Promise<WriteResult> {
   const safeData: any = { ...data };
   delete safeData.id;
-  return rethink.table("users").get(userId).update(safeData).run(db.connection);
+  return rethink
+    .table(User.table)
+    .get(userId)
+    .update(safeData)
+    .run(db.connection);
 }
 
 export async function deleteUser(db: Db, userId: string): Promise<WriteResult> {
-  return rethink.table("users").get(userId).delete().run(db.connection);
+  return rethink.table(User.table).get(userId).delete().run(db.connection);
 }
 
-// ACTANT
+// ENTITY
 export async function getStatementsForTerritory(
   db: Db,
   terId: string
 ): Promise<IStatement[]> {
   return rethink
-    .table("actants")
+    .table(Entity.table)
     .filter({
-      class: "S",
+      class: EntityClass.Statement,
     })
     .filter(function (territory: any) {
       return rethink.and(
@@ -45,11 +51,10 @@ export async function getStatementsForTerritory(
     .run(db.connection);
 }
 
-export async function getActants<T = IAction | IStatement | ITerritory>(
-  db: Db,
-  filter: object = {}
-): Promise<T[]> {
-  return rethink.table("actants").filter(filter).run(db.connection);
+export async function getEntities<
+  T = IAction | IStatement | ITerritory | IEntity
+>(db: Db, filter: object = {}): Promise<T[]> {
+  return rethink.table(Entity.table).filter(filter).run(db.connection);
 }
 
 export async function getTerritoryChilds(
@@ -57,7 +62,7 @@ export async function getTerritoryChilds(
   parentId: string
 ): Promise<ITerritory[]> {
   return rethink
-    .table("actants")
+    .table(Entity.table)
     .filter(function (territory: any) {
       return rethink.and(
         territory("data")("parent").typeOf().eq("OBJECT"),
@@ -67,13 +72,13 @@ export async function getTerritoryChilds(
     .run(db.connection);
 }
 
-export async function findActantById<T extends IActant>(
+export async function findEntityById<T extends IEntity>(
   db: Db,
   id: string,
   additionalFilter: Record<string, unknown> = {}
 ): Promise<T> {
   const data = await rethink
-    .table("actants")
+    .table(Entity.table)
     .filter({
       ...additionalFilter,
       id,
@@ -84,11 +89,11 @@ export async function findActantById<T extends IActant>(
   return data.length == 0 ? null : data[0];
 }
 
-export async function findActantsByIds<T extends IActant>(
+export async function findEntitiesByIds<T extends IEntity>(
   db: Db | Connection,
   ids: string[]
 ): Promise<T[]> {
-  const query = rethink.table("actants").getAll(rethink.args(ids));
+  const query = rethink.table(Entity.table).getAll(rethink.args(ids));
 
   if ((db as Db).connection) {
     return query.run((db as Db).connection);
@@ -97,21 +102,21 @@ export async function findActantsByIds<T extends IActant>(
   }
 }
 
-export async function findActants<T extends IActant>(
+export async function findEntities<T extends IEntity>(
   db: Db,
   additionalFilter: Record<string, unknown> = {}
 ): Promise<T[]> {
   return await rethink
-    .table("actants")
+    .table(Entity.table)
     .filter(additionalFilter)
     .run(db.connection);
 }
 
-export async function getActantUsage(db: Db, id: string): Promise<number> {
+export async function getEntityUsage(db: Db, id: string): Promise<number> {
   return await rethink
-    .table("actants")
+    .table(Entity.table)
     .filter({
-      class: "S",
+      class: EntityClass.Statement,
     })
     .filter(function (user: any) {
       return user("data")("actants").contains((labelObj: any) =>
@@ -122,18 +127,18 @@ export async function getActantUsage(db: Db, id: string): Promise<number> {
     .run(db.connection);
 }
 
-export async function findActantsById(
+export async function findEntitiesById(
   db: Db,
   ids: string[]
-): Promise<IActant[]> {
+): Promise<IEntity[]> {
   const data = await rethink
-    .table("actants")
+    .table(Entity.table)
     .getAll(...ids)
     .run(db.connection);
   return data;
 }
 
-export async function createActant(
+export async function createEntity(
   db: Db,
   data: IDbModel
 ): Promise<WriteResult> {
@@ -143,68 +148,68 @@ export async function createActant(
   return data.save(db.connection);
 }
 
-export async function deleteActant(
+export async function deleteEntity(
   db: Db,
-  actantId: string
+  entityId: string
 ): Promise<WriteResult> {
-  return rethink.table("actants").get(actantId).delete().run(db.connection);
+  return rethink.table(Entity.table).get(entityId).delete().run(db.connection);
 }
 
-export async function findAssociatedActantIds(
+export async function findAssociatedEntityIds(
   db: Db,
-  actantId: string
+  entityId: string
 ): Promise<string[]> {
   const statements = await rethink
-    .table("actants")
+    .table(Entity.table)
     .filter({
-      class: ActantType.Statement,
+      class: EntityClass.Statement,
     })
     .filter(function (row: RDatum) {
       return rethink.or(
         row("data")("actants").contains((actantObj: RDatum) =>
-          actantObj("actant").eq(actantId)
+          actantObj("actant").eq(entityId)
         ),
         row("data")("actions").contains((actionObj: RDatum) =>
-          actionObj("action").eq(actantId)
+          actionObj("action").eq(entityId)
         )
       );
     })
     .run(db.connection);
 
-  const actantIds: string[] = [];
+  const entityIds: string[] = [];
 
   (statements as IStatement[]).forEach((s) => {
     const ids = s.data.actants.map((a) => a.actant);
-    actantIds.push(...ids);
+    entityIds.push(...ids);
   });
 
-  return actantIds;
+  return entityIds;
 }
 
-export async function filterActantsByWildcard(
+export async function filterEntitiesByWildcard(
   db: Db,
-  actantClass: ActantType | false,
-  actantClassExcluded: ActantType[] | undefined,
-  actantLabel: string | false,
-  actantIds?: string[]
-): Promise<IActant[]> {
-  let query = rethink.table("actants");
+  entityClass: EntityClass | false,
+  entityClassExcluded: EntityClass[] | undefined,
+  entityLabel: string | false,
+  entityIds?: string[]
+): Promise<IEntity[]> {
+  let query = rethink.table(Entity.table);
 
-  if (actantIds && actantIds.length) {
-    query = query.getAll(rethink.args(actantIds)) as any;
+  if (entityIds && entityIds.length) {
+    query = query.getAll(rethink.args(entityIds)) as any;
   }
 
-  if (actantClass) {
+  if (entityClass) {
     query = query.filter({
-      class: actantClass,
+      class: entityClass,
     });
   }
 
-  if (actantClassExcluded) {
+  if (entityClassExcluded) {
     query = query.filter(function (row: RDatum) {
       return rethink.and.apply(
         rethink,
-        actantClassExcluded.map((c) => row("class").ne(c)) as [
+        entityClassExcluded.map((c) => row("class").ne(c)) as [
           RDatum<boolean>,
           ...RDatum<boolean>[]
         ]
@@ -212,85 +217,17 @@ export async function filterActantsByWildcard(
     });
   }
 
-  if (actantLabel) {
+  if (entityLabel) {
     query = query.filter(function (row: RDatum) {
       return row("label")
         .downcase()
-        .match(`${regExpEscape(actantLabel.toLowerCase())}`);
+        .match(`${regExpEscape(entityLabel.toLowerCase())}`);
     });
   }
 
   return query.run(db.connection);
 }
 
-// ACTIONS
-export async function findAllActions(db: Db): Promise<IAction[]> {
-  return await rethink.table("actions").run(db.connection);
-}
-
-export async function findActionById(db: Db, id: string): Promise<IAction> {
-  const data = await rethink
-    .table("actions")
-    .filter({
-      id,
-    })
-    .limit(1)
-    .run(db.connection);
-  return data.length == 0 ? null : data[0];
-}
-
-export async function findActionsByLabel(
-  db: Db,
-  label: string
-): Promise<IAction[]> {
-  const data = await rethink
-    .table("actions")
-    .filter(function (user: any) {
-      return rethink
-        .row("labels")
-        .contains<IAction>((labelObj) => labelObj("value").eq(label));
-    })
-    .run(db.connection);
-  return data;
-}
-
-export async function createAction(
-  db: Db,
-  data: IAction,
-  keepId?: boolean
-): Promise<WriteResult> {
-  const safeData: any = { ...data };
-  if (!keepId) {
-    delete safeData.id;
-  }
-  return rethink.table("actions").insert(safeData).run(db.connection);
-}
-
-export async function updateAction(
-  db: Db,
-  actionId: string,
-  data: IAction
-): Promise<WriteResult> {
-  const safeData: any = { ...data };
-  delete safeData.id;
-  return rethink
-    .table("actions")
-    .get(actionId)
-    .update(safeData)
-    .run(db.connection);
-}
-
-export async function deleteAction(
-  db: Db,
-  actionId: string
-): Promise<WriteResult> {
-  return rethink.table("actions").get(actionId).delete().run(db.connection);
-}
-
-export async function deleteActants(db: Db): Promise<WriteResult> {
-  return rethink.table("actants").delete().run(db.connection);
-}
-
-export async function deleteActions(db: Db): Promise<WriteResult> {
-  return rethink.table("actions").delete().run(db.connection);
+export async function deleteEntities(db: Db): Promise<WriteResult> {
+  return rethink.table(Entity.table).delete().run(db.connection);
 }

@@ -1,26 +1,25 @@
-import "ts-jest";
-import { IResponseGeneric, IStatement, IStatementAction } from "@shared/types";
-import { ITerritory } from "@shared/types/index";
-import { Db } from "@service/RethinkDB";
-import { createActant, deleteActants } from "@service/shorthands";
+import Audit from "@models/audit/audit";
+import "@models/events/register";
 import Statement from "@models/statement/statement";
 import Territory from "@models/territory/territory";
-import { CustomError } from "@shared/types/errors";
-import { errorTypes } from "@shared/types/response-generic";
-import "@models/events/register";
-import { r as rethink } from "rethinkdb-ts";
-import Audit from "@models/audit/audit";
+import { Db } from "@service/RethinkDB";
+import { createEntity, deleteEntities } from "@service/shorthands";
 import {
-  ActantStatus,
-  ActantType,
   Certainty,
   Elvl,
+  EntityClass,
   Language,
   Logic,
   Mood,
   MoodVariant,
   Operator,
 } from "@shared/enums";
+import { IResponseGeneric, IStatement, IStatementAction } from "@shared/types";
+import { CustomError } from "@shared/types/errors";
+import { ITerritory } from "@shared/types/index";
+import { errorTypes } from "@shared/types/response-generic";
+import { r as rethink } from "rethinkdb-ts";
+import "ts-jest";
 
 describe("common", function () {
   it("should work", () => undefined);
@@ -55,13 +54,12 @@ export function getITerritoryMock(): ITerritory {
     detail: "detail",
     language: Language.Latin,
     notes: [],
-    status: ActantStatus.Pending,
     label: "label",
     data: {
       parent: false,
     },
     props: [],
-    class: ActantType.Territory,
+    class: EntityClass.Territory,
   };
 
   return fullData;
@@ -78,14 +76,14 @@ export function getIStatementActionMock(): IStatementAction {
     logic: Logic.Positive,
     mood: [Mood.Ability],
     moodvariant: MoodVariant.Irrealis,
-    operator: Operator.And,
+    bundleOperator: Operator.And,
   } as IStatementAction;
 }
 
 export function getIStatementMock(): IStatement {
   const fullData: IStatement = {
     id: "id",
-    class: ActantType.Statement,
+    class: EntityClass.Statement,
     label: "label",
     data: {
       actions: [],
@@ -102,7 +100,6 @@ export function getIStatementMock(): IStatement {
     detail: "",
     language: Language.Czech,
     notes: [],
-    status: ActantStatus.Pending,
   };
   return fullData;
 }
@@ -111,7 +108,7 @@ export async function createMockTree(
   db: Db,
   randSuffix: string
 ): Promise<ITerritory[]> {
-  await deleteActants(db);
+  await deleteEntities(db);
   const out: Territory[] = [
     new Territory({
       id: `root-${randSuffix}`,
@@ -137,7 +134,7 @@ export async function createMockTree(
   ];
 
   for (const ter of out) {
-    await createActant(db, ter);
+    await createEntity(db, ter);
   }
   return out;
 }
@@ -167,13 +164,13 @@ export async function createMockStatements(
   }
 
   for (const ter of out) {
-    await createActant(db, ter);
+    await createEntity(db, ter);
   }
   return out;
 }
 
 export async function clean(db: Db): Promise<void> {
-  await deleteActants(db);
+  await deleteEntities(db);
 
   await db.close();
 }

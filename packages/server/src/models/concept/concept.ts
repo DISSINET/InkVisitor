@@ -1,13 +1,16 @@
 import { UnknownObject, IModel } from "@models/common";
-import { ActantType } from "@shared/enums";
-import Actant from "@models/actant/actant";
-import { IActant } from "@shared/types";
+import { EntityClass, EntityStatus } from "@shared/enums";
+import Entity from "@models/entity/entity";
+import { IConcept, IEntity } from "@shared/types";
 
 class ConceptData implements IModel {
+  status: EntityStatus = EntityStatus.Pending;
   constructor(data: UnknownObject) {
     if (!data) {
       return;
     }
+
+    // TODO: If admin ? model.status = EntityStatus.Approved : model.status = EntityStatus.Pending
   }
 
   isValid(): boolean {
@@ -15,11 +18,10 @@ class ConceptData implements IModel {
   }
 }
 
-class Concept extends Actant implements IActant {
-  static table = "actants";
-  static publicFields = Actant.publicFields;
+class Concept extends Entity implements IConcept {
+  static publicFields = Entity.publicFields;
 
-  class: ActantType.Concept = ActantType.Concept; // just default
+  class: EntityClass.Concept = EntityClass.Concept; // just default
   data: ConceptData;
 
   constructor(data: UnknownObject) {
@@ -33,9 +35,8 @@ class Concept extends Actant implements IActant {
   }
 
   isValid(): boolean {
-    const alloweedClasses = [ActantType.Concept];
+    const alloweedClasses = [EntityClass.Concept];
 
-    console.log();
     if (alloweedClasses.indexOf(this.class) === -1) {
       return false;
     }

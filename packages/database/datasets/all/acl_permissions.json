@@ -28,7 +28,7 @@
   },
   {
     "controller": "territories",
-    "method": "getActantIds",
+    "method": "getEntityIds",
     "roles": ["*"]
   },
   {
@@ -67,32 +67,37 @@
     "roles": ["*"]
   },
   {
-    "controller": "actants",
+    "controller": "entities",
     "method": "create",
     "roles": ["*"]
   },
   {
-    "controller": "actants",
+    "controller": "entities",
     "method": "update",
     "roles": ["*"]
   },
   {
-    "controller": "actants",
+    "controller": "entities",
+    "method": "delete",
+    "roles": ["*"]
+  },
+  {
+    "controller": "entities",
     "method": "detail",
     "roles": ["*"]
   },
   {
-    "controller": "actants",
+    "controller": "entities",
     "method": "search",
     "roles": ["*"]
   },
   {
-    "controller": "actants",
+    "controller": "entities",
     "method": "get",
     "roles": ["*"]
   },
   {
-    "controller": "actants",
+    "controller": "entities",
     "method": "getMore",
     "roles": ["*"]
   },

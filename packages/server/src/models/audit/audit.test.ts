@@ -14,7 +14,7 @@ describe("test Audit.save", function () {
       await db.initDb();
 
       const audit = new Audit({
-        actantId: `audit-${rand}`,
+        entityId: `audit-${rand}`,
         changes: [],
         date: new Date(),
         id: "",
@@ -30,10 +30,10 @@ describe("test Audit.save", function () {
   });
 });
 
-describe("test Audit.getFirstForActant", function () {
+describe("test Audit.getFirstForEntity", function () {
   const db = new Db();
   const rand = Math.random().toString();
-  const actantId = `actant-${rand}`;
+  const entityId = `entity-${rand}`;
 
   const a1Date = new Date();
   const a2Date = new Date();
@@ -41,14 +41,14 @@ describe("test Audit.getFirstForActant", function () {
 
   const auditData: IAudit[] = [
     {
-      actantId: actantId,
+      entityId: entityId,
       changes: {},
       id: "",
       date: a1Date,
       user: "1",
     },
     {
-      actantId: actantId,
+      entityId: entityId,
       changes: {},
       id: "",
       date: a2Date,
@@ -68,8 +68,8 @@ describe("test Audit.getFirstForActant", function () {
   afterAll(async () => await clearAudits(db));
 
   it("should return exactly the first audit entry", async () => {
-    const response = new ResponseAudit(actantId);
-    await response.getFirstForActant(db.connection);
+    const response = new ResponseAudit(entityId);
+    await response.getFirstForEntity(db.connection);
     expect(response.first).not.toBe(null);
     if (response.first) {
       expect(response.first.id).not.toBe("");
@@ -77,10 +77,10 @@ describe("test Audit.getFirstForActant", function () {
   });
 });
 
-describe("test Audit.getLastNForActant", function () {
+describe("test Audit.getLastNForEntity", function () {
   const db = new Db();
   const rand = Math.random().toString();
-  const actantId = `actant-${rand}`;
+  const entityId = `entity-${rand}`;
 
   const a1Date = new Date();
   const a2Date = new Date();
@@ -88,14 +88,14 @@ describe("test Audit.getLastNForActant", function () {
 
   const auditData: IAudit[] = [
     {
-      actantId: actantId,
+      entityId: entityId,
       changes: { a1Date },
       id: "",
       date: a1Date,
       user: "1",
     },
     {
-      actantId: actantId,
+      entityId: entityId,
       changes: { a2Date },
       id: "",
       date: a2Date,
@@ -115,16 +115,16 @@ describe("test Audit.getLastNForActant", function () {
   afterAll(async () => await clearAudits(db));
 
   it("should return both entries", async () => {
-    const response = new ResponseAudit(actantId);
-    await response.getLastNForActant(db.connection, 2);
+    const response = new ResponseAudit(entityId);
+    await response.getLastNForEntity(db.connection, 2);
     expect(response.last).toHaveLength(2);
     expect(response.last[0].date).toEqual(auditData[1].date);
     expect(response.last[1].date).toEqual(auditData[0].date);
   });
 
   it("should return one last entry", async () => {
-    const response = new ResponseAudit(actantId);
-    await response.getLastNForActant(db.connection, 1);
+    const response = new ResponseAudit(entityId);
+    await response.getLastNForEntity(db.connection, 1);
     expect(response.last).toHaveLength(1);
     expect(response.last[0].date).toEqual(auditData[1].date);
   });

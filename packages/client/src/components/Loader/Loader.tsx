@@ -1,6 +1,5 @@
 import React from "react";
 import { DotLoader } from "react-spinners";
-
 import theme from "Theme/theme";
 import { StyledLoaderWrap } from "./LoaderStyles";
 

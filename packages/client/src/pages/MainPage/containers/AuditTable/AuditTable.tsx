@@ -1,17 +1,16 @@
-import React, { useState, useMemo, useEffect } from "react";
-import { useQuery, useMutation, useQueryClient } from "react-query";
-import api from "api";
 import { IAudit, IResponseAudit } from "@shared/types";
+import api from "api";
+import React from "react";
 import { FaExchangeAlt, FaRegCalendarAlt, FaUser } from "react-icons/fa";
+import { MdAddCircleOutline } from "react-icons/md";
+import { RiTimeLine } from "react-icons/ri";
+import { useQuery } from "react-query";
 import {
   StyledAuditColumn,
   StyledAuditEllipsis,
   StyledAuditRow,
   StyledAuditTable,
 } from "./AuditTableStyles";
-import { RiTimeLine } from "react-icons/ri";
-import { MdAddCircleOutline } from "react-icons/md";
-import { Extend } from "webpack/node_modules/schema-utils/declarations/validate";
 
 export const AuditTable: React.FC<IResponseAudit> = ({
   actant,

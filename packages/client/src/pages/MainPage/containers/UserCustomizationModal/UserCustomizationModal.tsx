@@ -1,5 +1,5 @@
 import { languageDict, userRoleDict } from "@shared/dictionaries";
-import { ActantType, Language, UserRole, UserRoleMode } from "@shared/enums";
+import { EntityClass, Language, UserRole, UserRoleMode } from "@shared/enums";
 import { IResponseUser } from "@shared/types";
 import api from "api";
 import {
@@ -16,10 +16,10 @@ import {
   ModalInputWrap,
   Tag,
 } from "components";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import { FaUnlink } from "react-icons/fa";
 import { useMutation, useQuery, useQueryClient } from "react-query";
-import { ValueType, OptionTypeBase } from "react-select";
+import { OptionTypeBase, ValueType } from "react-select";
 import { toast } from "react-toastify";
 import { EntitySuggester } from "..";
 import { AttributeButtonGroup } from "../AttributeButtonGroup/AttributeButtonGroup";
@@ -222,7 +222,7 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
               ) : (
                 <div>
                   <EntitySuggester
-                    categoryTypes={[ActantType.Territory]}
+                    categoryTypes={[EntityClass.Territory]}
                     onSelected={(selected: any) =>
                       handleChange("defaultTerritory", selected)
                     }
