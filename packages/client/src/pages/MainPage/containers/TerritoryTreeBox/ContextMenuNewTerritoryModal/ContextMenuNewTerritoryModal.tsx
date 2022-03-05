@@ -1,7 +1,6 @@
-import React, { useEffect, useState } from "react";
-import { toast } from "react-toastify";
-import { useMutation, useQueryClient } from "react-query";
-
+import { UserRole } from "@shared/enums";
+import { ITerritory } from "@shared/types";
+import api from "api";
 import {
   Button,
   ButtonGroup,
@@ -12,13 +11,13 @@ import {
   ModalFooter,
   ModalHeader,
 } from "components";
-import { ITerritory } from "@shared/types";
 import { CTerritoryActant } from "constructors";
-import api from "api";
+import { useSearchParams } from "hooks";
+import React, { useEffect, useState } from "react";
+import { useMutation, useQueryClient } from "react-query";
+import { toast } from "react-toastify";
 import { setTreeInitialized } from "redux/features/territoryTree/treeInitializeSlice";
 import { useAppDispatch } from "redux/hooks";
-import { useSearchParams } from "hooks";
-import { UserRole } from "@shared/enums";
 
 interface ContextMenuNewTerritoryModal {
   territoryActantId: string;
@@ -39,7 +38,7 @@ export const ContextMenuNewTerritoryModal: React.FC<
   const dispatch = useAppDispatch();
 
   const createTerritoryMutation = useMutation(
-    async (newTerritory: ITerritory) => await api.actantsCreate(newTerritory),
+    async (newTerritory: ITerritory) => await api.entityCreate(newTerritory),
     {
       onSuccess: (data, variables) => {
         onClose();

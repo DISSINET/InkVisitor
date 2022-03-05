@@ -1,12 +1,13 @@
-import { ActantType } from "../enums";
-import { IActant } from "./";
+import { EntityClass, EntityStatus } from "../enums";
+import { IEntity } from "./entity";
 
 // TODO
-export interface IAction extends IActant {
-  class: ActantType.Action;
+export interface IAction extends IEntity {
+  class: EntityClass.Action;
   data: {
     valencies: ActionValency;
     entities: ActionEntity;
+    status: EntityStatus;
   };
 }
 

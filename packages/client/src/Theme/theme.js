@@ -48,7 +48,10 @@ export default {
     plain: "#4a5568", // gray 700
     primaryTransparent: "rgba(9,16,52,0.2)",
     modalBg: "rgba(9,16,52,0.3)",
+
     staging: "#911111",
+    "data-import": "#99004C",
+    development: "#00994C",
     sandbox: "#CB6E17",
 
     entityC: "#83BCB6",

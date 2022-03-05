@@ -1,23 +1,23 @@
+import Statement from "@models/statement/statement";
+import { ResponseTerritory } from "@models/territory/response";
+import Territory from "@models/territory/territory";
+import { findEntityById, findEntities } from "@service/shorthands";
+import { EntityClass } from "@shared/enums";
 import {
-  BadParams,
-  StatementDoesNotExits,
-  TerritoryDoesNotExits,
-  StatementInvalidMove,
-  PermissionDeniedError,
-} from "@shared/types/errors";
-import { Router, Request } from "express";
-import { asyncRouteHandler } from "..";
-import { findActantById, findActants } from "@service/shorthands";
-import {
-  ITerritory,
+  IResponseGeneric,
   IResponseTerritory,
   IStatement,
-  IResponseGeneric,
+  ITerritory,
 } from "@shared/types";
-import Statement from "@models/statement/statement";
-import { ActantType } from "@shared/enums";
-import Territory from "@models/territory/territory";
-import { ResponseTerritory } from "@models/territory/response";
+import {
+  BadParams,
+  PermissionDeniedError,
+  StatementDoesNotExits,
+  StatementInvalidMove,
+  TerritoryDoesNotExits,
+} from "@shared/types/errors";
+import { Request, Router } from "express";
+import { asyncRouteHandler } from "..";
 
 function insertIStatementToChilds(
   array: IStatement[],
@@ -27,8 +27,13 @@ function insertIStatementToChilds(
   return [...array.slice(0, onIndex), item, ...array.slice(onIndex)];
 }
 
-const sortStatements = (terA: IStatement, terB: IStatement): number =>
-  terA.data.territory.order - terB.data.territory.order;
+const sortStatements = (terA: IStatement, terB: IStatement): number => {
+  if (terA.data.territory && terB.data.territory) {
+    return terA.data.territory.order - terB.data.territory.order;
+  } else {
+    return 0;
+  }
+};
 
 export default Router()
   .get(
@@ -39,11 +44,11 @@ export default Router()
         throw new BadParams("territoryId has to be set");
       }
 
-      const territory = await findActantById<ITerritory>(
+      const territory = await findEntityById<ITerritory>(
         request.db,
         territoryId,
         {
-          class: ActantType.Territory,
+          class: EntityClass.Territory,
         }
       );
       if (!territory) {
@@ -58,7 +63,7 @@ export default Router()
           request.getUserOrFail()
         )
       ) {
-        throw new PermissionDeniedError(`cannot view actant ${territoryId}`);
+        throw new PermissionDeniedError(`cannot view entity ${territoryId}`);
       }
 
       const response = new ResponseTerritory(territory);
@@ -68,18 +73,18 @@ export default Router()
     })
   )
   .get(
-    "/getActantIds/:territoryId?",
+    "/getEntityIds/:territoryId?",
     asyncRouteHandler<string[]>(async (request: Request) => {
       const territoryId = request.params.territoryId;
       if (!territoryId) {
         throw new BadParams("territoryId has to be set");
       }
 
-      const territory = await findActantById<ITerritory>(
+      const territory = await findEntityById<ITerritory>(
         request.db,
         territoryId,
         {
-          class: ActantType.Territory,
+          class: EntityClass.Territory,
         }
       );
       if (!territory) {
@@ -100,6 +105,8 @@ export default Router()
   )
   .post(
     "/moveStatement",
+
+    //@ts-ignore
     asyncRouteHandler<IResponseGeneric>(async (request: Request) => {
       const moveId = request.body.moveId;
       const newIndex = request.body.newIndex;
@@ -108,10 +115,18 @@ export default Router()
         throw new BadParams("moveId/newIndex has be set");
       }
 
-      const statement: IStatement = await findActantById<IStatement>(
+      const statement: IStatement = await findEntityById<IStatement>(
         request.db,
         moveId
       );
+
+      if (!statement.data.territory) {
+        throw new StatementDoesNotExits(
+          `statement ${moveId} has no territory`,
+          moveId
+        );
+      }
+
       if (!statement) {
         throw new StatementDoesNotExits(
           `statement ${moveId} does not exist`,
@@ -119,7 +134,7 @@ export default Router()
         );
       }
 
-      const territory: ITerritory = await findActantById<ITerritory>(
+      const territory: ITerritory = await findEntityById<ITerritory>(
         request.db,
         statement.data.territory.id
       );
@@ -135,11 +150,11 @@ export default Router()
       };
 
       let statementsForTerritory = (
-        await findActants<IStatement>(request.db, {
-          class: ActantType.Statement,
+        await findEntities<IStatement>(request.db, {
+          class: EntityClass.Statement,
         })
       )
-        .filter((s) => s.data.territory.id === territory.id)
+        .filter((s) => s.data.territory && s.data.territory.id === territory.id)
         .sort(sortStatements);
       if (newIndex < 0 || newIndex > statementsForTerritory.length) {
         throw new StatementInvalidMove(
@@ -168,9 +183,10 @@ export default Router()
       for (let i = 0; i < statementsForTerritory.length; i++) {
         const statement = new Statement({ ...statementsForTerritory[i] });
         statement.data.territory.order = i + 1;
-        await statement.update(request.db.connection, { data: statement.data });
+        await statement.update(request.db.connection, {
+          data: statement.data,
+        });
+        return out;
       }
-
-      return out;
     })
   );

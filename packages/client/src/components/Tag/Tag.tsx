@@ -1,3 +1,5 @@
+import { Tooltip } from "components";
+import { useSearchParams } from "hooks";
 import React, { ReactNode, useEffect, useRef } from "react";
 import {
   DragSourceMonitor,
@@ -6,21 +8,18 @@ import {
   useDrop,
   XYCoord,
 } from "react-dnd";
-
-import { DragItem, ItemTypes, Entities } from "types";
-import {
-  StyledTagWrapper,
-  StyledEntityTag,
-  StyledLabel,
-  ButtonWrapper,
-  StyledTooltipSeparator,
-  StyledItalic,
-} from "./TagStyles";
-import { useAppDispatch } from "redux/hooks";
-import { setDraggedTerritory } from "redux/features/territoryTree/draggedTerritorySlice";
-import { useSearchParams } from "hooks";
 import { PopupPosition } from "reactjs-popup/dist/types";
-import { Tooltip } from "components";
+import { setDraggedTerritory } from "redux/features/territoryTree/draggedTerritorySlice";
+import { useAppDispatch } from "redux/hooks";
+import { DragItem, Entities, ItemTypes } from "types";
+import {
+  ButtonWrapper,
+  StyledEntityTag,
+  StyledItalic,
+  StyledLabel,
+  StyledTagWrapper,
+  StyledTooltipSeparator,
+} from "./TagStyles";
 
 interface TagProps {
   propId: string;
@@ -72,7 +71,7 @@ export const Tag: React.FC<TagProps> = ({
   isFavorited = false,
   lvl,
 }) => {
-  const { setActantId } = useSearchParams();
+  const { setDetailId } = useSearchParams();
   const dispatch = useAppDispatch();
 
   const ref = useRef<HTMLDivElement>(null);
@@ -142,7 +141,7 @@ export const Tag: React.FC<TagProps> = ({
     e.stopPropagation();
     e.nativeEvent.stopImmediatePropagation();
 
-    setActantId(propId);
+    setDetailId(propId);
   };
 
   const getShortTag = () => {

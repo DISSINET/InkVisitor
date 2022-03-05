@@ -7,7 +7,7 @@ import { actantPositionDict } from "./actantposition";
 import { referenceTypeDict } from "./referencetype";
 import { userRoleDict } from "./userroles";
 import { territoryTypeDict } from "./territorytype";
-import { actantStatusDict } from "./status";
+import { entityStatusDict } from "./status";
 import { logicDict } from "./logic";
 import { moodDict } from "./mood";
 import { moodVariantsDict } from "./moodvariants";
@@ -25,7 +25,7 @@ export {
   referenceTypeDict,
   territoryTypeDict,
   userRoleDict,
-  actantStatusDict,
+  entityStatusDict,
   logicDict,
   moodDict,
   moodVariantsDict,

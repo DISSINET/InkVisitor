@@ -8,7 +8,7 @@ export default class Audit implements IAudit, IDbModel {
   static table = "audits";
 
   id: string = "";
-  actantId: string = "";
+  entityId: string = "";
   user: string = "";
   date: Date = new Date();
   changes: object = {};
@@ -53,11 +53,11 @@ export default class Audit implements IAudit, IDbModel {
   static async createNew(
     db: Connection | undefined,
     user: User,
-    actantId: string,
+    entityId: string,
     updateData: object
   ): Promise<WriteResult> {
     const entry = new Audit({
-      actantId,
+      entityId,
       user: user.id,
       changes: updateData,
     });

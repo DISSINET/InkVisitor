@@ -5,11 +5,11 @@ import { apiPath } from "@common/constants";
 import app from "../../Server";
 import { IStatement } from "@shared/types";
 import { Db } from "@service/RethinkDB";
-import { deleteActants } from "@service/shorthands";
+import { deleteEntities } from "@service/shorthands";
 import Territory from "@models/territory/territory";
 import Statement from "@models/statement/statement";
 
-describe("Territories getActantIds", () => {
+describe("Territories getEntityIds", () => {
   let db: Db;
   const baseStatementData = new Statement({});
   beforeAll(async () => {
@@ -18,14 +18,13 @@ describe("Territories getActantIds", () => {
   });
 
   beforeEach(async () => {
-    await deleteActants(db);
+    await deleteEntities(db);
   });
 
   afterAll(async () => {
     await db.close();
   });
 
-  // TODO THERE WAS MORE TESTS LIKE THIS>>>WHERE ARE THEY
   describe("one territory, two linked statement via references.resource and tags at once", () => {
     it("should return empty array", async (done) => {
       const territory = new Territory(undefined);
@@ -35,7 +34,7 @@ describe("Territories getActantIds", () => {
       const statementData1: IStatement = JSON.parse(
         JSON.stringify(baseStatementData)
       );
-      statementData1.data.territory.id = territory.id;
+      statementData1.data.territory = { id: territory.id, order: 0 };
       statementData1.data.tags = ["tagid"];
       statementData1.data.references = [
         {
@@ -56,7 +55,7 @@ describe("Territories getActantIds", () => {
       await statement2.save(db.connection);
 
       await request(app)
-        .get(`${apiPath}/territories/getActantIds/${territory.id}`)
+        .get(`${apiPath}/territories/getEntityIds/${territory.id}`)
         .set("authorization", "Bearer " + supertestConfig.token)
         .expect(200)
         .expect((res: Request) => {

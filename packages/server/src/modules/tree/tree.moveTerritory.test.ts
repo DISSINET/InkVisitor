@@ -5,7 +5,7 @@ import { apiPath } from "@common/constants";
 import app from "../../Server";
 import { ITerritory } from "@shared/types";
 import { Db } from "@service/RethinkDB";
-import { findActantById } from "@service/shorthands";
+import { findEntityById } from "@service/shorthands";
 
 describe("Tree moveTerritory", function () {
   describe("Move lvl1-2 before lvl1-1", () => {
@@ -15,8 +15,8 @@ describe("Tree moveTerritory", function () {
       const randSuffix = "tree-moveTerritory-" + Math.random().toString();
       await createMockTree(db, randSuffix);
 
-      let lvl11 = await findActantById<ITerritory>(db, `lvl1-1-${randSuffix}`);
-      let lvl12 = await findActantById<ITerritory>(db, `lvl1-2-${randSuffix}`);
+      let lvl11 = await findEntityById<ITerritory>(db, `lvl1-1-${randSuffix}`);
+      let lvl12 = await findEntityById<ITerritory>(db, `lvl1-2-${randSuffix}`);
       expect(lvl11.data.parent ? lvl11.data.parent.id : "").toEqual(
         `root-${randSuffix}`
       );
@@ -37,8 +37,8 @@ describe("Tree moveTerritory", function () {
         .expect(200)
         .expect({ result: true });
 
-      lvl11 = await findActantById<ITerritory>(db, `lvl1-1-${randSuffix}`);
-      lvl12 = await findActantById<ITerritory>(db, `lvl1-2-${randSuffix}`);
+      lvl11 = await findEntityById<ITerritory>(db, `lvl1-1-${randSuffix}`);
+      lvl12 = await findEntityById<ITerritory>(db, `lvl1-2-${randSuffix}`);
       expect(lvl11.data.parent ? lvl11.data.parent.id : "").toEqual(
         `root-${randSuffix}`
       );

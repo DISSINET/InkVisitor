@@ -1,37 +1,37 @@
-import React from "react";
-import axios, { AxiosError, AxiosInstance, AxiosResponse } from "axios";
+import { EntityClass } from "@shared/enums";
 import {
-  IResponseUser,
-  IResponseActant,
-  IResponseTree,
-  IResponseTerritory,
-  IActant,
-  IResponseDetail,
-  IResponseStatement,
-  IResponseGeneric,
+  IEntity,
+  IResponseEntity,
   IResponseAdministration,
-  IResponseBookmarkFolder,
-  IResponseSearch,
-  IResponsePermission,
-  RequestPermissionUpdate,
   IResponseAudit,
+  IResponseBookmarkFolder,
+  IResponseDetail,
+  IResponseGeneric,
+  IResponsePermission,
+  IResponseSearch,
+  IResponseStatement,
+  IResponseTerritory,
+  IResponseTree,
+  IResponseUser,
+  RequestPermissionUpdate,
 } from "@shared/types";
 import * as errors from "@shared/types/errors";
+import axios, { AxiosError, AxiosInstance, AxiosResponse } from "axios";
+import React from "react";
 import { toast } from "react-toastify";
 import {
   IRequestSearch,
   IRequestSearchEntity,
   IRequestSearchStatement,
 } from "types";
-import { ActantType } from "@shared/enums";
 
-type FilterActantsI = {
+type IFilterEntities = {
   label?: string;
   class?: string | false;
-  excluded?: ActantType[];
+  excluded?: EntityClass[];
 };
 
-type FilterUsersI = {
+type IFilterUsers = {
   label?: string;
 };
 
@@ -207,7 +207,7 @@ class Api {
   }
 
   async usersGetMore(
-    filters: FilterUsersI
+    filters: IFilterUsers
   ): Promise<AxiosResponse<IResponseUser[]>> {
     try {
       const response = await this.connection.post(`/users/getMore`, filters);
@@ -300,39 +300,39 @@ class Api {
   }
 
   /**
-   * Actants
+   * Entities
    * Suggester container
    */
-  async actantsGet(actantId: string): Promise<AxiosResponse<IResponseActant>> {
+  async entitiesGet(entityId: string): Promise<AxiosResponse<IResponseEntity>> {
     try {
-      const response = await this.connection.get(`/actants/get/${actantId}`);
+      const response = await this.connection.get(`/entities/get/${entityId}`);
       return response;
     } catch (err: any | AxiosError) {
       throw { ...err.response.data };
     }
   }
 
-  async actantsGetMore(
-    filter: FilterActantsI
-  ): Promise<AxiosResponse<IResponseActant[]>> {
+  async entitiesGetMore(
+    filter: IFilterEntities
+  ): Promise<AxiosResponse<IResponseEntity[]>> {
     try {
       if (filter.class === false) {
         delete filter.class;
       }
-      const response = await this.connection.post(`/actants/getMore`, filter);
+      const response = await this.connection.post(`/entities/getMore`, filter);
       return response;
     } catch (err: any | AxiosError) {
       throw { ...err.response.data };
     }
   }
 
-  async actantsCreate(
-    newActantData: IActant
+  async entityCreate(
+    newEntityData: IEntity
   ): Promise<AxiosResponse<IResponseGeneric>> {
     try {
       const response = await this.connection.post(
-        `/actants/create`,
-        newActantData
+        `/entities/create`,
+        newEntityData
       );
       return response;
     } catch (err: any | AxiosError) {
@@ -341,13 +341,13 @@ class Api {
     }
   }
 
-  async actantsUpdate(
-    actantId: string,
+  async entityUpdate(
+    entityId: string,
     changes: object
   ): Promise<AxiosResponse<IResponseGeneric>> {
     try {
       const response = await this.connection.put(
-        `/actants/update/${actantId}`,
+        `/entities/update/${entityId}`,
         changes
       );
       return response;
@@ -356,12 +356,12 @@ class Api {
     }
   }
 
-  async actantsDelete(
-    actantId: string
+  async entityDelete(
+    entityId: string
   ): Promise<AxiosResponse<IResponseGeneric>> {
     try {
       const response = await this.connection.delete(
-        `/actants/delete/${actantId}`
+        `/entities/delete/${entityId}`
       );
       return response;
     } catch (err: any | AxiosError) {
@@ -373,12 +373,12 @@ class Api {
    */
 
   // deprecated method
-  async actantsSearch(
+  async entitiesSearch(
     searchData: IRequestSearch
   ): Promise<AxiosResponse<IResponseSearch[]>> {
     try {
       const response = await this.connection.post(
-        `/actants/search`,
+        `/entities/search`,
         searchData
       );
       return response;
@@ -390,10 +390,10 @@ class Api {
   // searching entity
   async entitySearch(
     searchData: IRequestSearchEntity
-  ): Promise<AxiosResponse<IResponseActant[]>> {
+  ): Promise<AxiosResponse<IResponseEntity[]>> {
     try {
       const response = await this.connection.post(
-        `/actants/search-entity`,
+        `/entities/search-entity`,
         searchData
       );
       return response;
@@ -408,7 +408,7 @@ class Api {
   ): Promise<AxiosResponse<IResponseStatement[]>> {
     try {
       const response = await this.connection.post(
-        `/actants/search-statement`,
+        `/entities/search-statement`,
         searchData
       );
       return response;
@@ -421,9 +421,11 @@ class Api {
    * Detail
    * Detail container
    */
-  async detailGet(actantId: string): Promise<AxiosResponse<IResponseDetail>> {
+  async detailGet(entityId: string): Promise<AxiosResponse<IResponseDetail>> {
     try {
-      const response = await this.connection.get(`/actants/detail/${actantId}`);
+      const response = await this.connection.get(
+        `/entities/detail/${entityId}`
+      );
       return response;
     } catch (err: any | AxiosError) {
       throw { ...err.response.data };
@@ -479,15 +481,15 @@ class Api {
   }
 
   /**
-   * actantIdsInStatementGet retieves ids of statements that are used on the territory
+   * entityIdsInTerritory retieves ids of statements that are used on the territory
    * @see Statement.findDependentStatementIds
    */
-  async actantIdsInTerritory(
+  async entityIdsInTerritory(
     territoryId: string
   ): Promise<AxiosResponse<string[]>> {
     try {
       const response = await this.connection.get(
-        `/territories/getActantIds/${territoryId}`
+        `/territories/getEntityIds/${territoryId}`
       );
       return response;
     } catch (err: any | AxiosError) {
@@ -516,9 +518,9 @@ class Api {
   /**
    * Audit
    */
-  async auditGet(actantId: string): Promise<AxiosResponse<IResponseAudit>> {
+  async auditGet(entityId: string): Promise<AxiosResponse<IResponseAudit>> {
     try {
-      const response = await this.connection.get(`/audits/get/${actantId}`);
+      const response = await this.connection.get(`/audits/get/${entityId}`);
       return response;
     } catch (err: any | AxiosError) {
       throw { ...err.response.data };

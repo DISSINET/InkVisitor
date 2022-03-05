@@ -1,13 +1,5 @@
-import React, { useState } from "react";
-import { DndProvider } from "react-dnd";
-import { HTML5Backend } from "react-dnd-html5-backend";
-import { toast } from "react-toastify";
-import { useQueryClient, useQuery, useMutation } from "react-query";
-import { RiMenuFoldFill, RiMenuUnfoldFill } from "react-icons/ri";
-import { IoMdClose } from "react-icons/io";
-
-import packageJson from "../../../package.json";
-
+import api from "api";
+import LogoInkvisitor from "assets/logos/inkvisitor-full.svg";
 import {
   Box,
   Button,
@@ -18,47 +10,49 @@ import {
   PanelSeparator,
   Toast,
 } from "components";
-
-import {
-  ActantSearchBox,
-  EntityDetailBox,
-  ActantBookmarkBox,
-  StatementEditorBox,
-  StatementListBox,
-  TerritoryTreeBox,
-  UserOptionsModal,
-  UserListModal,
-  LoginModal,
-} from "./containers";
-
-import api from "api";
-import { useAppDispatch, useAppSelector } from "redux/hooks";
+import { useSearchParams } from "hooks";
+import ScrollHandler from "hooks/ScrollHandler";
+import React, { useState } from "react";
+import { DndProvider } from "react-dnd";
+import { HTML5Backend } from "react-dnd-html5-backend";
+import { IoMdClose } from "react-icons/io";
+import { RiMenuFoldFill, RiMenuUnfoldFill } from "react-icons/ri";
+import { useQuery, useQueryClient } from "react-query";
+import { toast } from "react-toastify";
 import { setAuthToken } from "redux/features/authTokenSlice";
+import { setFirstPanelExpanded } from "redux/features/layout/firstPanelExpandedSlice";
+import { setFourthPanelExpanded } from "redux/features/layout/fourthPanelExpandedSlice";
 import { setUsername } from "redux/features/usernameSlice";
-import {
-  StyledHeader,
-  StyledHeaderLogo,
-  StyledHeaderTag,
-  StyledUserBox,
-  StyledPanelWrap,
-  StyledUser,
-  StyledFaUserAlt,
-  StyledText,
-  StyledUsername,
-  StyledPage,
-} from "./MainPageStyles";
+import { useAppDispatch, useAppSelector } from "redux/hooks";
 import {
   collapsedPanelWidth,
   heightFooter,
   heightHeader,
 } from "Theme/constants";
-import { setFirstPanelExpanded } from "redux/features/layout/firstPanelExpandedSlice";
-import { setFourthPanelExpanded } from "redux/features/layout/fourthPanelExpandedSlice";
-import { useSearchParams } from "hooks";
-import ScrollHandler from "hooks/ScrollHandler";
-
-import LogoInkvisitor from "assets/logos/inkvisitor-full.svg";
+import packageJson from "../../../package.json";
+import {
+  ActantBookmarkBox,
+  ActantSearchBox,
+  EntityDetailBox,
+  LoginModal,
+  StatementEditorBox,
+  StatementListBox,
+  TerritoryTreeBox,
+  UserListModal,
+} from "./containers";
 import { UserCustomizationModal } from "./containers/UserCustomizationModal/UserCustomizationModal";
+import {
+  StyledFaUserAlt,
+  StyledHeader,
+  StyledHeaderLogo,
+  StyledHeaderTag,
+  StyledPage,
+  StyledPanelWrap,
+  StyledText,
+  StyledUser,
+  StyledUserBox,
+  StyledUsername,
+} from "./MainPageStyles";
 
 interface MainPage {
   size: number[];
@@ -66,8 +60,8 @@ interface MainPage {
 
 const MainPage: React.FC<MainPage> = ({ size }) => {
   const {
-    actantId,
-    setActantId,
+    detailId,
+    setDetailId,
     statementId,
     setStatementId,
     territoryId,
@@ -126,7 +120,7 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
     dispatch(setAuthToken(""));
     toast.success("You've been successfully logged out!");
     queryClient.removeQueries();
-    setActantId("");
+    setDetailId("");
     setStatementId("");
     setTerritoryId("");
   };
@@ -139,12 +133,10 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
     setUserAdministrationModalOpen(false);
   };
 
-  const rootUrl = process.env.ROOT_URL ?? "";
-  const environment = rootUrl.includes("staging")
-    ? "staging"
-    : rootUrl.includes("sandbox")
-    ? "sandbox"
-    : "";
+  const environmentName = (process.env.ROOT_URL || "").replace(
+    /apps\/inkvisitor[-]?/,
+    ""
+  );
 
   const heightContent = height - heightHeader - heightFooter;
 
@@ -188,7 +180,11 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
           height={heightHeader}
           paddingY={0}
           paddingX={10}
-          color={environment == "" ? "primary" : environment}
+          color={
+            ["production", ""].indexOf(environmentName) === -1
+              ? environmentName
+              : "primary"
+          }
           left={
             <StyledHeader>
               <StyledHeaderLogo
@@ -197,7 +193,10 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
                 alt="React Logo"
               />
               <StyledHeaderTag>
-                v. {packageJson.version} {environment}
+                v. {packageJson.version}{" "}
+                {["production", ""].indexOf(environmentName) === -1
+                  ? `| ${environmentName}`
+                  : ""}
               </StyledHeaderTag>
             </StyledHeader>
           }
@@ -262,23 +261,23 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
               }
             >
               <Box
-                height={actantId ? heightContent / 2 : heightContent}
+                height={detailId ? heightContent / 2 : heightContent}
                 label="Statements"
               >
                 <ScrollHandler />
                 <StatementListBox />
               </Box>
-              {actantId && (
+              {detailId && (
                 <Box
                   height={heightContent / 2}
                   label="Detail"
                   button={
-                    actantId && (
+                    detailId && (
                       <Button
                         inverted
                         icon={<IoMdClose />}
                         onClick={() => {
-                          setActantId("");
+                          setDetailId("");
                         }}
                       />
                     )

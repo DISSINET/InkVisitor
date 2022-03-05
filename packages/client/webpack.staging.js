@@ -9,7 +9,7 @@ module.exports = merge(common, {
 
   plugins: [
     new Dotenv({
-      path: "./env/.env.stage",
+      path: "./env/.env.staging",
       systemvars: true,
     }),
   ],

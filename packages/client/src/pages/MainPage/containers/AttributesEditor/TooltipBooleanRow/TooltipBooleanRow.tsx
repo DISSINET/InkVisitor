@@ -1,5 +1,5 @@
-import React from "react";
 import { AttributeIcon } from "components";
+import React from "react";
 import { StyledIconWrap, StyledRow } from "./TooltipBooleanRowStyles";
 
 interface TooltipBooleanRow {

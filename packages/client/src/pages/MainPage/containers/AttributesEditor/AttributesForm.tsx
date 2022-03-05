@@ -72,8 +72,8 @@ export const AttributesForm: React.FC<AttributesForm> = ({
       case "partitivity":
         newModalData["partitivity"] = newValue as Partitivity;
         break;
-      case "operator":
-        newModalData["operator"] = newValue as Operator;
+      case "bundleOperator":
+        newModalData["bundleOperator"] = newValue as Operator;
         break;
       case "bundleStart":
         newModalData["bundleStart"] = newValue as boolean;
@@ -179,22 +179,23 @@ export const AttributesForm: React.FC<AttributesForm> = ({
           }}
         />
       )}
-      {modalData.operator && (
+      {modalData.bundleOperator && (
         <AttributeRow
           disabled={
-            disabledAllAttributes || disabledAttributes.includes("operator")
+            disabledAllAttributes ||
+            disabledAttributes.includes("bundleOperator")
           }
-          value={modalData.operator}
+          value={modalData.bundleOperator}
           multi={false}
           items={operatorDict}
           label="Logical Operator"
-          attributeName="operator"
+          attributeName="bundleOperator"
           onChangeFn={(newValue: string | string[]) => {
-            handleDataChange("operator", newValue as Operator, groupName);
+            handleDataChange("bundleOperator", newValue as Operator, groupName);
           }}
         />
       )}
-      {modalData.operator && (
+      {modalData.bundleStart && (
         <CheckboxRow
           disabled={
             disabledAllAttributes || disabledAttributes.includes("bundleStart")
@@ -207,7 +208,7 @@ export const AttributesForm: React.FC<AttributesForm> = ({
           }}
         />
       )}
-      {modalData.operator && (
+      {modalData.bundleEnd && (
         <CheckboxRow
           disabled={
             disabledAllAttributes || disabledAttributes.includes("bundleEnd")

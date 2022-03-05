@@ -1,6 +1,6 @@
 import { Request } from "express";
 import { Router } from "express";
-import { findActantById } from "@service/shorthands";
+import { findEntityById } from "@service/shorthands";
 import {
   BadParams,
   PermissionDeniedError,
@@ -20,7 +20,7 @@ export default Router().get(
       throw new BadParams("statement id has to be set");
     }
 
-    const statementData = await findActantById<IStatement>(
+    const statementData = await findEntityById<IStatement>(
       request.db,
       statementId
     );

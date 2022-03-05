@@ -1,4 +1,3 @@
-import { ActantType } from "@shared/enums";
 import api from "api";
 import React from "react";
 import { useQuery } from "react-query";

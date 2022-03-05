@@ -1,13 +1,25 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { UserRoleMode } from "@shared/enums";
+import { IEntity, ITerritory } from "@shared/types";
+import { IParentTerritory } from "@shared/types/territory";
+import api from "api";
+import { useSearchParams } from "hooks";
 import update from "immutability-helper";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
-  BsCaretRightFill,
+  BsCaretDown,
   BsCaretDownFill,
   BsCaretRight,
-  BsCaretDown,
+  BsCaretRightFill,
 } from "react-icons/bs";
-
-import { IActant, IResponseStoredTerritory, ITerritory } from "@shared/types";
+import { useMutation, UseMutationResult, useQueryClient } from "react-query";
+import { animated, config, useSpring } from "react-spring";
+import { setTreeInitialized } from "redux/features/territoryTree/treeInitializeSlice";
+import { useAppDispatch, useAppSelector } from "redux/hooks";
+import { rootTerritoryId } from "Theme/constants";
+import theme from "Theme/theme";
+import { DraggedTerritoryItem, DragItem } from "types";
+import { EntityTag } from "../..";
+import { ContextMenu } from "../ContextMenu/ContextMenu";
 import {
   StyledChildrenWrap,
   StyledDisabledTag,
@@ -16,19 +28,6 @@ import {
   StyledIconWrap,
   StyledTerritoryTagWrap,
 } from "./TerritoryTreeNodeStyles";
-import { ContextMenu } from "../ContextMenu/ContextMenu";
-import { EntityTag } from "../..";
-import { useAppDispatch, useAppSelector } from "redux/hooks";
-import { setTreeInitialized } from "redux/features/territoryTree/treeInitializeSlice";
-import theme from "Theme/theme";
-import { rootTerritoryId } from "Theme/constants";
-import { animated, config, useSpring } from "react-spring";
-import api from "api";
-import { IParentTerritory } from "@shared/types/territory";
-import { useMutation, UseMutationResult, useQueryClient } from "react-query";
-import { DraggedTerritoryItem, DragItem } from "types";
-import { useSearchParams } from "hooks";
-import { UserRoleMode } from "@shared/enums";
 
 interface TerritoryTreeNode {
   territory: ITerritory;
@@ -232,7 +231,7 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
   }, [draggedTerritory]);
 
   const renderTerritoryTag = (
-    territoryActant: IActant,
+    territoryActant: IEntity,
     id: string,
     hasChildren: boolean
   ) => {

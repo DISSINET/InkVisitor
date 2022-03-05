@@ -8,8 +8,8 @@ import {
   ITerritory,
 } from "../../shared/types";
 import {
-  ActantStatus,
-  ActantType,
+  EntityStatus,
+  EntityClass,
   Certainty,
   Elvl,
   Language,
@@ -36,8 +36,8 @@ function doIndex(statement: any, connection: any): Promise<any> {
 // Main
 //-----------------------------------------------------------------------------
 
-const indexedTable = "actants";
-const unindexedTable = "actants_raw";
+const indexedTable = "entities";
+const unindexedTable = "entities_raw";
 
 let conn: any;
 
@@ -104,13 +104,13 @@ const importData = async () => {
 
       for (let i = 0; i < 100; i++) {
         const entry: IStatement = {
-          class: ActantType.Statement,
+          class: EntityClass.Statement,
           detail: "",
           id: i.toString(),
           label: "",
           language: Language.Latin,
           notes: [],
-          status: ActantStatus.Pending,
+          props: [],
           data: {
             actants: [
               {
@@ -124,6 +124,7 @@ const importData = async () => {
                 partitivity: Partitivity.DiscreteParts,
                 position: Position.Actant1,
                 virtuality: Virtuality.Allegation,
+                props: [],
               },
             ],
             actions: [
@@ -138,9 +139,9 @@ const importData = async () => {
                 mood: [Mood.Indication],
                 moodvariant: MoodVariant.Irrealis,
                 operator: Operator.And,
+                props: [],
               },
             ],
-            props: [],
             references: [],
             tags: [`tag${i}`],
             territory: {
@@ -155,13 +156,13 @@ const importData = async () => {
 
       for (let i = 5000; i < 5100; i++) {
         const entry: ITerritory = {
-          class: ActantType.Territory,
+          class: EntityClass.Territory,
           detail: "",
           id: i.toString(),
           label: "",
           language: Language.Latin,
           notes: [],
-          status: ActantStatus.Pending,
+          props: [],
           data: {
             parent: {
               id: "parent" + i.toString(),
@@ -173,13 +174,13 @@ const importData = async () => {
 
         // parentless
         const entry2: ITerritory = {
-          class: ActantType.Territory,
+          class: EntityClass.Territory,
           detail: "",
           id: i.toString(),
           label: "",
           language: Language.Latin,
           notes: [],
-          status: ActantStatus.Pending,
+          props: [],
           data: {
             parent: false,
           },
@@ -189,7 +190,8 @@ const importData = async () => {
 
       for (let i = 20000; i < 20010; i++) {
         const entry: IResource = {
-          class: ActantType.Resource,
+          class: EntityClass.Resource,
+          props: [],
           data: {
             link: "wdew",
           },
@@ -198,7 +200,6 @@ const importData = async () => {
           label: "",
           language: Language.Latin,
           notes: [],
-          status: ActantStatus.Pending,
         };
         await r.table(tableName).insert(entry).run(conn);
       }
@@ -214,7 +215,7 @@ const testClass = async () => {
   let start = performance.now();
   let items = await r
     .table(indexedTable)
-    .getAll(ActantType.Resource, { index: "class" })
+    .getAll(EntityClass.Resource, { index: "class" })
     .run(conn);
   let end = performance.now();
   console.log(`testClass(${indexedTable}) took ${end - start} milliseconds.`);
@@ -223,7 +224,7 @@ const testClass = async () => {
   await r
     .table(unindexedTable)
     .filter({
-      class: ActantType.Resource,
+      class: EntityClass.Resource,
     })
     .run(conn);
   end = performance.now();

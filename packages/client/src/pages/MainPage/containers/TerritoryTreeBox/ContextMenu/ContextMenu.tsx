@@ -1,10 +1,9 @@
 import { UserRoleMode } from "@shared/enums";
-import { IActant, IResponseGeneric } from "@shared/types";
-import api from "api";
+import { IEntity } from "@shared/types";
 import { Button } from "components";
 import React, { useRef, useState } from "react";
 import { FaPlus, FaStar, FaTrashAlt } from "react-icons/fa";
-import { useMutation, UseMutationResult, useQueryClient } from "react-query";
+import { UseMutationResult } from "react-query";
 import { useSpring } from "react-spring";
 import { config } from "react-spring/renderprops";
 import { ContextMenuNewTerritoryModal } from "../ContextMenuNewTerritoryModal/ContextMenuNewTerritoryModal";
@@ -16,7 +15,7 @@ import {
 } from "./ContextMenuStyles";
 
 interface ContextMenu {
-  territoryActant: IActant;
+  territoryActant: IEntity;
   right: UserRoleMode;
   empty: boolean;
   onMenuOpen: () => void;
