@@ -133,12 +133,10 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
     setUserAdministrationModalOpen(false);
   };
 
-  const rootUrl = process.env.ROOT_URL ?? "";
-  const environment = rootUrl.includes("staging")
-    ? "staging"
-    : rootUrl.includes("sandbox")
-    ? "sandbox"
-    : "";
+  const environmentName = (process.env.ROOT_URL || "").replace(
+    /apps\/inkvisitor[-]?/,
+    ""
+  );
 
   const heightContent = height - heightHeader - heightFooter;
 
@@ -182,7 +180,11 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
           height={heightHeader}
           paddingY={0}
           paddingX={10}
-          color={environment == "" ? "primary" : environment}
+          color={
+            ["production", ""].indexOf(environmentName) === -1
+              ? environmentName
+              : "primary"
+          }
           left={
             <StyledHeader>
               <StyledHeaderLogo
@@ -191,7 +193,10 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
                 alt="React Logo"
               />
               <StyledHeaderTag>
-                v. {packageJson.version} {environment}
+                v. {packageJson.version}{" "}
+                {["production", ""].indexOf(environmentName) === -1
+                  ? `| ${environmentName}`
+                  : ""}
               </StyledHeaderTag>
             </StyledHeader>
           }
