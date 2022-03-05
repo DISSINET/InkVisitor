@@ -8,7 +8,7 @@ import {
   getIStatementActionMock,
   getIStatementMock,
 } from "@modules/common.test";
-import Prop from "@models/prop/prop";
+import Prop, { PropSpec } from "@models/prop/prop";
 
 describe("Statement constructor test", function () {
   describe("empty data", () => {
@@ -82,7 +82,10 @@ describe("findDependentStatementIds", function () {
 
   describe("empty db", () => {
     it("should return empty array", async (done) => {
-      const statements = await Statement.findUsed(db.connection, "");
+      const statements = await Statement.findUsedInDataEntities(
+        db.connection,
+        ""
+      );
       expect(statements).toHaveLength(0);
       done();
     });
@@ -93,7 +96,10 @@ describe("findDependentStatementIds", function () {
       const territory = new Territory(undefined);
       await territory.save(db.connection);
 
-      const statements = await Statement.findUsed(db.connection, territory.id);
+      const statements = await Statement.findUsedInDataEntities(
+        db.connection,
+        territory.id
+      );
       expect(statements).toHaveLength(0);
     });
   });
@@ -108,7 +114,10 @@ describe("findDependentStatementIds", function () {
       });
       await statement.save(db.connection);
 
-      const statements = await Statement.findUsed(db.connection, territory.id);
+      const statements = await Statement.findUsedInDataEntities(
+        db.connection,
+        territory.id
+      );
       expect(statements).toHaveLength(0);
     });
   });
@@ -128,7 +137,10 @@ describe("findDependentStatementIds", function () {
       ];
       await statement.save(db.connection);
 
-      const statements = await Statement.findUsed(db.connection, territory.id);
+      const statements = await Statement.findUsedInDataEntities(
+        db.connection,
+        territory.id
+      );
       expect(statements).toHaveLength(1);
     });
   });
@@ -144,7 +156,10 @@ describe("findDependentStatementIds", function () {
       statement.data.tags = [territory.id];
       await statement.save(db.connection);
 
-      const statements = await Statement.findUsed(db.connection, territory.id);
+      const statements = await Statement.findUsedInDataEntities(
+        db.connection,
+        territory.id
+      );
       expect(statements).toHaveLength(1);
     });
   });
@@ -160,7 +175,10 @@ describe("findDependentStatementIds", function () {
       statement.props = [new Prop({ origin: territory.id })];
       await statement.save(db.connection);
 
-      const statements = await Statement.findUsed(db.connection, territory.id);
+      const statements = await Statement.findUsedInDataEntities(
+        db.connection,
+        territory.id
+      );
       expect(statements).toHaveLength(1);
     });
   });
@@ -176,7 +194,10 @@ describe("findDependentStatementIds", function () {
       statement.props = [new Prop({ type: { id: territory.id } })];
       await statement.save(db.connection);
 
-      const statements = await Statement.findUsed(db.connection, territory.id);
+      const statements = await Statement.findUsedInDataEntities(
+        db.connection,
+        territory.id
+      );
       expect(statements).toHaveLength(1);
     });
   });
@@ -192,7 +213,10 @@ describe("findDependentStatementIds", function () {
       statement.props = [new Prop({ value: { id: territory.id } })];
       await statement.save(db.connection);
 
-      const statements = await Statement.findUsed(db.connection, territory.id);
+      const statements = await Statement.findUsedInDataEntities(
+        db.connection,
+        territory.id
+      );
       expect(statements).toHaveLength(1);
     });
   });
@@ -210,7 +234,10 @@ describe("findDependentStatementIds", function () {
       ];
       await statement.save(db.connection);
 
-      const statements = await Statement.findUsed(db.connection, territory.id);
+      const statements = await Statement.findUsedInDataEntities(
+        db.connection,
+        territory.id
+      );
       expect(statements).toHaveLength(1);
     });
   });
@@ -226,7 +253,10 @@ describe("findDependentStatementIds", function () {
       statement.data.territory.id = territory.id;
       await statement.save(db.connection);
 
-      const statements = await Statement.findUsed(db.connection, territory.id);
+      const statements = await Statement.findUsedInDataEntities(
+        db.connection,
+        territory.id
+      );
       expect(statements).toHaveLength(1);
     });
   });
@@ -252,7 +282,10 @@ describe("findDependentStatementIds", function () {
       statement2.data.tags = [territory.id];
       await statement2.save(db.connection);
 
-      const statements = await Statement.findUsed(db.connection, territory.id);
+      const statements = await Statement.findUsedInDataEntities(
+        db.connection,
+        territory.id
+      );
       expect(statements).toHaveLength(2);
     });
   });
@@ -277,7 +310,10 @@ describe("findDependentStatementIds", function () {
       await statement1.save(db.connection);
       await statement2.save(db.connection);
 
-      const statements = await Statement.findUsed(db.connection, territory.id);
+      const statements = await Statement.findUsedInDataEntities(
+        db.connection,
+        territory.id
+      );
       expect(statements).toHaveLength(2);
     });
   });
@@ -304,10 +340,10 @@ describe("Statement - save territory order", function () {
       await statement.save(db.connection);
 
       const createdData = await findEntityById<IStatement>(db, statement.id);
-      expect(createdData.data.territory.id).toEqual(
+      expect(createdData.data.territory?.id).toEqual(
         statement.data.territory.id
       );
-      expect(createdData.data.territory.order).toEqual(0);
+      expect(createdData.data.territory?.order).toEqual(0);
 
       done();
     });
@@ -321,10 +357,10 @@ describe("Statement - save territory order", function () {
       await statement.save(db.connection);
 
       const createdData = await findEntityById<IStatement>(db, statement.id);
-      expect(createdData.data.territory.id).toEqual(
+      expect(createdData.data.territory?.id).toEqual(
         statement.data.territory.id
       );
-      expect(createdData.data.territory.order).toEqual(
+      expect(createdData.data.territory?.order).toEqual(
         statement.data.territory.order
       );
 
@@ -346,18 +382,18 @@ describe("Statement - save territory order", function () {
       // first statement provides order = -1, which should result in save '0'
       // value
       const createdData1 = await findEntityById<IStatement>(db, statement1.id);
-      expect(createdData1.data.territory.id).toEqual(
-        createdData1.data.territory.id
+      expect(createdData1.data.territory?.id).toEqual(
+        createdData1.data.territory?.id
       );
-      expect(createdData1.data.territory.order).toEqual(0);
+      expect(createdData1.data.territory?.order).toEqual(0);
 
       // second statement provides order = -1, which should result in save '1'
       // value
       const createdData2 = await findEntityById<IStatement>(db, statement2.id);
-      expect(createdData2.data.territory.id).toEqual(
-        createdData2.data.territory.id
+      expect(createdData2.data.territory?.id).toEqual(
+        createdData2.data.territory?.id
       );
-      expect(createdData2.data.territory.order).toEqual(1);
+      expect(createdData2.data.territory?.order).toEqual(1);
       done();
     });
   });
@@ -387,7 +423,7 @@ describe("Statement - update territory order", function () {
         data: { territory: { order: wantedNewOrder } },
       });
       const createdData = await findEntityById<IStatement>(db, statement.id);
-      expect(createdData.data.territory.order).toEqual(wantedNewOrder);
+      expect(createdData.data.territory?.order).toEqual(wantedNewOrder);
 
       done();
     });
@@ -407,7 +443,7 @@ describe("Statement - update territory order", function () {
       });
 
       const createdData = await findEntityById<IStatement>(db, statement2.id);
-      expect(createdData.data.territory.order).toEqual(wantedNewOrder);
+      expect(createdData.data.territory?.order).toEqual(wantedNewOrder);
 
       done();
     });
@@ -427,11 +463,11 @@ describe("Statement - update territory order", function () {
 
       // second statement's order is still 1... 0 is taken
       const createdData2 = await findEntityById<IStatement>(db, statement2.id);
-      expect(createdData2.data.territory.order).toEqual(1);
+      expect(createdData2.data.territory?.order).toEqual(1);
 
       // first statement's order remains 0
       const createdData1 = await findEntityById<IStatement>(db, statement1.id);
-      expect(createdData1.data.territory.order).toEqual(0);
+      expect(createdData1.data.territory?.order).toEqual(0);
 
       done();
     });
@@ -455,19 +491,19 @@ describe("Statement - update territory order", function () {
 
       // first statement should retain its order
       const createdData1 = await findEntityById<IStatement>(db, statement1.id);
-      expect(createdData1.data.territory.order).toEqual(
+      expect(createdData1.data.territory?.order).toEqual(
         statement1.data.territory.order
       );
 
       // second statement should retain its order
       const createdData2 = await findEntityById<IStatement>(db, statement2.id);
-      expect(createdData2.data.territory.order).toEqual(
+      expect(createdData2.data.territory?.order).toEqual(
         statement2.data.territory.order
       );
 
       // thirs statement should be before the 1 and 2
       const createdData3 = await findEntityById<IStatement>(db, statement3.id);
-      expect(createdData3.data.territory.order).toEqual(0.5);
+      expect(createdData3.data.territory?.order).toEqual(0.5);
 
       done();
     });
@@ -562,5 +598,174 @@ describe("test Statement.toJSON", function () {
     expect(newValues).toEqual(
       Statement.publicFields.map((fieldName) => (instance as any)[fieldName])
     );
+  });
+});
+
+describe("test Statement.findUsedInDataProps", function () {
+  let db: Db;
+
+  const prepareStatement = (): [string, Statement] => {
+    const detailId = Math.random().toFixed();
+
+    const st1 = new Statement({});
+    st1.data.actants.push(new StatementActant({}));
+    st1.data.actants[0].props.push(new Prop({}));
+    st1.data.actants[0].props.push(new Prop({}));
+
+    // children lvl 1
+    st1.data.actants[0].props[0].children.push(new Prop({}));
+    st1.data.actants[0].props[0].children[0].type = new PropSpec({});
+    st1.data.actants[0].props[0].children[0].value = new PropSpec({});
+
+    // children lvl 2
+    st1.data.actants[0].props[0].children[0].children.push(new Prop({}));
+    st1.data.actants[0].props[0].children[0].children[0].type = new PropSpec(
+      {}
+    );
+    st1.data.actants[0].props[0].children[0].children[0].value = new PropSpec(
+      {}
+    );
+    // children lvl 3
+    st1.data.actants[0].props[0].children[0].children[0].children.push(
+      new Prop({})
+    );
+    st1.data.actants[0].props[0].children[0].children[0].children[0].type =
+      new PropSpec({});
+    st1.data.actants[0].props[0].children[0].children[0].children[0].value =
+      new PropSpec({});
+
+    return [detailId, st1];
+  };
+
+  beforeAll(async () => {
+    db = new Db();
+    await db.initDb();
+  });
+
+  beforeEach(async () => {
+    await deleteEntities(db);
+  });
+
+  afterAll(async () => {
+    await db.close();
+  });
+
+  describe("detail id in actants[0].props[0].type.id", () => {
+    const [detailId, st] = prepareStatement();
+    st.data.actants[0].props[0].type.id = detailId;
+
+    it("should find the statement successfully", async () => {
+      await st.save(db.connection);
+
+      const foundStatements = await Statement.findUsedInDataProps(
+        db.connection,
+        detailId
+      );
+      expect(foundStatements).toHaveLength(1);
+      expect(foundStatements[0].id).toEqual(st.id);
+    });
+  });
+
+  describe("detail id in actants[0].props[0].value.id", () => {
+    const [detailId, st] = prepareStatement();
+    st.data.actants[0].props[0].value.id = detailId;
+
+    it("should find the statement successfully", async () => {
+      await st.save(db.connection);
+
+      const foundStatements = await Statement.findUsedInDataProps(
+        db.connection,
+        detailId
+      );
+      expect(foundStatements).toHaveLength(1);
+      expect(foundStatements[0].id).toEqual(st.id);
+    });
+  });
+
+  describe("detail id in actants[0].props[0].children[0].type.id", () => {
+    const [detailId, st] = prepareStatement();
+    st.data.actants[0].props[0].children[0].value.id = detailId;
+
+    it("should find the statement successfully", async () => {
+      await st.save(db.connection);
+
+      const foundStatements = await Statement.findUsedInDataProps(
+        db.connection,
+        detailId
+      );
+      expect(foundStatements).toHaveLength(1);
+      expect(foundStatements[0].id).toEqual(st.id);
+    });
+  });
+
+  describe("detail id in actants[0].props[0].children[0].type.id", () => {
+    const [detailId, st] = prepareStatement();
+    st.data.actants[0].props[0].children[0].children[0].value.id = detailId;
+
+    it("should find the statement successfully", async () => {
+      await st.save(db.connection);
+
+      const foundStatements = await Statement.findUsedInDataProps(
+        db.connection,
+        detailId
+      );
+      expect(foundStatements).toHaveLength(1);
+      expect(foundStatements[0].id).toEqual(st.id);
+    });
+  });
+
+  describe("detail id in actants[0].props[0].children[0].children[0].type.id", () => {
+    const [detailId, st] = prepareStatement();
+    st.data.actants[0].props[0].children[0].children[0].children[0].value.id =
+      detailId;
+
+    it("should find the statement successfully", async () => {
+      await st.save(db.connection);
+
+      const foundStatements = await Statement.findUsedInDataProps(
+        db.connection,
+        detailId
+      );
+      expect(foundStatements).toHaveLength(1);
+      expect(foundStatements[0].id).toEqual(st.id);
+    });
+  });
+
+  describe("multiple same-id occurences in one statement", () => {
+    const [detailId, st] = prepareStatement();
+    st.data.actants[0].props[0].type.id = detailId;
+    st.data.actants[0].props[1].type.id = detailId;
+
+    it("should find one statement", async () => {
+      await st.save(db.connection);
+
+      const foundStatements = await Statement.findUsedInDataProps(
+        db.connection,
+        detailId
+      );
+      expect(foundStatements).toHaveLength(1);
+      expect(foundStatements[0].id).toEqual(st.id);
+    });
+  });
+
+  describe("two statements linked to the same detail", () => {
+    const [detailId, st1] = prepareStatement();
+    const [, st2] = prepareStatement();
+
+    st1.data.actants[0].props[0].type.id = detailId;
+    st2.data.actants[0].props[0].type.id = detailId;
+
+    it("should find both statements", async () => {
+      await st1.save(db.connection);
+      await st2.save(db.connection);
+
+      const foundStatements = await Statement.findUsedInDataProps(
+        db.connection,
+        detailId
+      );
+      expect(foundStatements).toHaveLength(2);
+      expect(foundStatements.find((st) => st.id === st1.id)).not.toBeNull();
+      expect(foundStatements.find((st) => st.id === st2.id)).not.toBeNull();
+    });
   });
 });

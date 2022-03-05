@@ -109,7 +109,7 @@ describe("Tree get", function () {
     const randSuffix = "tree-get" + Math.random().toString();
     const territories = await createMockTree(db, randSuffix);
     const statements = await createMockStatements(db, territories);
-    const statementsTerritoryId = statements[0].data.territory.id;
+    const statementsTerritoryId = statements[0].data.territory?.id || "";
     const additionalEmptyTerritory = new Territory({
       id: `empty-ter--${randSuffix}`,
       data: {
