@@ -1,5 +1,5 @@
 # CI stages to execute against master branch on PR merge
-name: deploy stage
+name: deploy staging
 
 on:
   push:
@@ -7,8 +7,8 @@ on:
       - dev
 
 jobs:
-  stagedeploy:
-    name: Deploy to stage environment
+  stagingdeploy:
+    name: Deploy to staging environment
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -18,20 +18,20 @@ jobs:
       - name: Install SSH Key
         uses: shimataro/ssh-key-action@v2
         with:
-          key: ${{ secrets.SSH_PRIVATE_KEY }} 
-          known_hosts: ${{ secrets.KNOWN_HOSTS }} 
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          known_hosts: ${{ secrets.KNOWN_HOSTS }}
 
       - name: Create env file for server
         run: |
-          touch packages/server/env/.env.stage
-          echo "$SERVER_ENV" >> packages/server/env/.env.stage
+          touch packages/server/env/.env.staging
+          echo "$SERVER_ENV" >> packages/server/env/.env.staging
         env:
           SERVER_ENV: ${{secrets.SERVER_ENV}}
 
       - name: Create env file for client
         run: |
-          touch packages/client/env/.env.stage
-          echo "$CLIENT_ENV" >> packages/client/env/.env.stage
+          touch packages/client/env/.env.staging
+          echo "$CLIENT_ENV" >> packages/client/env/.env.staging
         env:
           CLIENT_ENV: ${{secrets.CLIENT_ENV}}
 
@@ -39,7 +39,7 @@ jobs:
         run: |
           cd packages/client
           npm install
-          npm run build-stage
+          npm run build-staging
 
       - name: Install OpenVPN
         run: |
@@ -61,7 +61,7 @@ jobs:
           sleep 20s
 
       - name: Deploy backend
-        run: ./deploy-backend-stage.sh ${{ secrets.SSH_USER }} ${{ secrets.SSH_HOST }}
+        run: ./deploy-backend-staging.sh ${{ secrets.SSH_USER }} ${{ secrets.SSH_HOST }}
 
       - name: Deploy frontend
-        run: ./deploy-frontend-stage.sh ${{ secrets.SSH_USER }} ${{ secrets.SSH_HOST }}
+        run: ./deploy-frontend-staging.sh ${{ secrets.SSH_USER }} ${{ secrets.SSH_HOST }}
