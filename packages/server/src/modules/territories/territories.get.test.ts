@@ -1,7 +1,7 @@
 import { clean, testErroneousResponse } from "@modules/common.test";
 import { BadParams, TerritoryDoesNotExits } from "@shared/types/errors";
 import { Db } from "@service/RethinkDB";
-import { createActant, deleteActants } from "@service/shorthands";
+import { createEntity, deleteEntities } from "@service/shorthands";
 import Territory from "@models/territory/territory";
 import request from "supertest";
 import { apiPath } from "@common/constants";
@@ -34,14 +34,14 @@ describe("Territories get query", function () {
     it("should return a 200 code with IResponseTerritory response", async (done) => {
       const db = new Db();
       await db.initDb();
-      await deleteActants(db);
+      await deleteEntities(db);
       const testTerritoryId = Math.random().toString();
       const linkedStatementId = Math.random().toString();
 
       const territory: Territory = new Territory({
         id: testTerritoryId,
       });
-      await createActant(db, territory);
+      await createEntity(db, territory);
 
       const statement1 = new Statement({
         id: linkedStatementId,
@@ -52,7 +52,7 @@ describe("Territories get query", function () {
           },
         },
       });
-      await createActant(db, statement1);
+      await createEntity(db, statement1);
 
       const statement2 = new Statement({
         data: {
@@ -63,7 +63,7 @@ describe("Territories get query", function () {
           },
         },
       });
-      await createActant(db, statement2);
+      await createEntity(db, statement2);
 
       await request(app)
         .get(`${apiPath}/territories/get/${testTerritoryId}`)

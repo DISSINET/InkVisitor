@@ -1,4 +1,4 @@
-import { ActantStatus, ActantType } from "@shared/enums";
+import { EntityStatus, EntityClass } from "@shared/enums";
 import { IOption } from "@shared/types";
 import { Button, Dropdown, Input, Loader, Tag } from "components";
 import useKeypress from "hooks/useKeyPress";
@@ -33,7 +33,7 @@ export interface EntitySuggestionI {
   label: string;
   detail: string;
   ltype: string;
-  status: ActantStatus;
+  status: EntityStatus;
   category: string;
   color: string;
   icons?: React.ReactNode[];
@@ -132,8 +132,8 @@ export const Suggester: React.FC<SuggesterProps> = ({
     if (selected === -1 && typed.length > 0) {
       if (
         category.value === DropdownAny ||
-        category.value === ActantType.Statement ||
-        category.value === ActantType.Territory
+        category.value === EntityClass.Statement ||
+        category.value === EntityClass.Territory
       ) {
         setShowModal(true);
       } else {
@@ -151,8 +151,8 @@ export const Suggester: React.FC<SuggesterProps> = ({
     if (typed.length > 0) {
       if (
         category.value === DropdownAny ||
-        category.value === ActantType.Statement ||
-        category.value === ActantType.Territory
+        category.value === EntityClass.Statement ||
+        category.value === EntityClass.Territory
       ) {
         setShowModal(true);
       } else {
@@ -172,7 +172,7 @@ export const Suggester: React.FC<SuggesterProps> = ({
           .map((suggestion, si) => (
             <React.Fragment key={si}>
               <StyledSuggestionLineActions isSelected={selected === si}>
-                {suggestion.status !== ActantStatus.Discouraged && (
+                {suggestion.status !== EntityStatus.Discouraged && (
                   <FaPlayCircle
                     color={theme.color["black"]}
                     onClick={() => {

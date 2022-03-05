@@ -1,5 +1,5 @@
 import { languageDict, userRoleDict } from "@shared/dictionaries";
-import { ActantType, Language, UserRole, UserRoleMode } from "@shared/enums";
+import { EntityClass, Language, UserRole, UserRoleMode } from "@shared/enums";
 import { IResponseUser } from "@shared/types";
 import api from "api";
 import {
@@ -222,7 +222,7 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
               ) : (
                 <div>
                   <EntitySuggester
-                    categoryTypes={[ActantType.Territory]}
+                    categoryTypes={[EntityClass.Territory]}
                     onSelected={(selected: any) =>
                       handleChange("defaultTerritory", selected)
                     }

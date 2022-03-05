@@ -1,14 +1,9 @@
-import {
-  ActantType,
-  UserRole,
-  UserRoleMode,
-} from "@shared/enums";
+import { EntityClass, UserRole, UserRoleMode } from "@shared/enums";
 import { ITerritory, IParentTerritory } from "@shared/types/territory";
 import { r as rethink, Connection, WriteResult, RDatum } from "rethinkdb-ts";
 import { fillFlatObject, UnknownObject, IModel } from "@models/common";
-import Actant from "@models/actant/actant";
+import Entity from "@models/entity/entity";
 import { InternalServerError, InvalidDeleteError } from "@shared/types/errors";
-import { IUser } from "@shared/types";
 import User from "@models/user/user";
 import treeCache from "@service/treeCache";
 
@@ -57,11 +52,10 @@ export class TerritoryData implements IModel {
   }
 }
 
-class Territory extends Actant implements ITerritory {
-  static table = "actants";
-  static publicFields = Actant.publicFields;
+class Territory extends Entity implements ITerritory {
+  static publicFields = Entity.publicFields;
 
-  class: ActantType.Territory = ActantType.Territory;
+  class: EntityClass.Territory = EntityClass.Territory;
   data: TerritoryData;
 
   _siblings: Record<number, ITerritory> = {};
@@ -77,7 +71,7 @@ class Territory extends Actant implements ITerritory {
   }
 
   isValid(): boolean {
-    if (this.class !== ActantType.Territory) {
+    if (this.class !== EntityClass.Territory) {
       return false;
     }
 
@@ -94,11 +88,11 @@ class Territory extends Actant implements ITerritory {
       // position
       const childs = await this.findChilds.call(
         new Territory({ id: this.data.parent.id }),
-        db,
+        db
       );
 
       const wantedOrder = this.data.parent.order;
-      this.data.parent.order = Actant.determineOrder(wantedOrder, childs);
+      this.data.parent.order = Entity.determineOrder(wantedOrder, childs);
     } else if (this.id !== "T0") {
       return {
         deleted: 0,
@@ -120,7 +114,7 @@ class Territory extends Actant implements ITerritory {
 
   async update(
     db: Connection | undefined,
-    updateData: Record<string, unknown>,
+    updateData: Record<string, unknown>
   ): Promise<WriteResult> {
     if (updateData["data"] && (updateData["data"] as any)["parent"]) {
       const parentData = (updateData["data"] as any)["parent"];
@@ -135,15 +129,16 @@ class Territory extends Actant implements ITerritory {
 
       this.data.parent = new TerritoryParent({
         id: parentId,
-        order: Actant.determineOrder(parentData.order, this._siblings),
+        order: Entity.determineOrder(parentData.order, this._siblings),
       });
       parentData.order = this.data.parent.order;
     }
 
-    const result = await rethink.table(Actant.table).
-      get(this.id).
-      update(updateData).
-      run(db);
+    const result = await rethink
+      .table(Entity.table)
+      .get(this.id)
+      .update(updateData)
+      .run(db);
 
     await treeCache.initialize();
 
@@ -153,7 +148,7 @@ class Territory extends Actant implements ITerritory {
   async delete(db: Connection | undefined): Promise<WriteResult> {
     if (!this.id) {
       throw new InvalidDeleteError(
-        "delete called on territory with undefined id",
+        "delete called on territory with undefined id"
       );
     }
 
@@ -170,16 +165,20 @@ class Territory extends Actant implements ITerritory {
   }
 
   async findChilds(
-    db: Connection | undefined,
+    db: Connection | undefined
   ): Promise<Record<number, ITerritory>> {
-    const list: ITerritory[] = await rethink.table(Territory.table).filter({
-      class: ActantType.Territory,
-    }).filter((territory: RDatum) => {
-      return rethink.and(
-        territory("data")("parent").typeOf().eq("OBJECT"),
-        territory("data")("parent")("id").eq(this.id),
-      );
-    }).run(db);
+    const list: ITerritory[] = await rethink
+      .table(Territory.table)
+      .filter({
+        class: EntityClass.Territory,
+      })
+      .filter((territory: RDatum) => {
+        return rethink.and(
+          territory("data")("parent").typeOf().eq("OBJECT"),
+          territory("data")("parent")("id").eq(this.id)
+        );
+      })
+      .run(db);
 
     const out: Record<number, ITerritory> = {};
     for (const ter of list) {
@@ -235,7 +234,7 @@ class Territory extends Actant implements ITerritory {
 
     const closestRight = treeCache.getRightForTerritory(
       this.data.parent.id,
-      user.rights,
+      user.rights
     );
 
     if (!closestRight) {

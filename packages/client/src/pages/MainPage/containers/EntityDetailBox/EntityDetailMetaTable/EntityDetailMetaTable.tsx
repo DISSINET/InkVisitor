@@ -1,7 +1,7 @@
-import { ActantType } from "@shared/enums";
+import { EntityClass, Position } from "@shared/enums";
 import { IProp, IResponseDetail, IResponseStatement } from "@shared/types";
 import { Button, ButtonGroup } from "components";
-import React, { useCallback, useMemo } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import { FaTrashAlt, FaUnlink } from "react-icons/fa";
 import { Cell, Column, Row, useTable } from "react-table";
 import { EntitySuggester, EntityTag } from "../..";
@@ -29,7 +29,7 @@ export const EntityDetailMetaTable: React.FC<EntityDetailMetaTable> = ({
   updateMetaStatement,
   removeMetaStatement,
 }) => {
-  // const [statements, setStatements] = useState(metaProps);
+  const [statements, setStatements] = useState(metaProps);
 
   // useEffect(() => {
   //   setStatements(metaStatements);
@@ -48,7 +48,9 @@ export const EntityDetailMetaTable: React.FC<EntityDetailMetaTable> = ({
         Cell: ({ row }: Cell) => {
           const { id: statementId, data } = row.original as IResponseStatement;
 
-          const typeSActant = data.actants.find((a) => a.position == "a1");
+          const typeSActant = data.actants.find(
+            (a) => a.position == Position.Actant1
+          );
           const typeActant = typeSActant
             ? entity.entities[typeSActant.actant]
             : false;
@@ -68,7 +70,7 @@ export const EntityDetailMetaTable: React.FC<EntityDetailMetaTable> = ({
                       const metaStatementData = { ...data };
                       const updatedStatementActants =
                         metaStatementData.actants.map((actant) =>
-                          actant.position === "a1"
+                          actant.position === Position.Actant1
                             ? { ...actant, ...{ actant: "" } }
                             : actant
                         );
@@ -91,7 +93,7 @@ export const EntityDetailMetaTable: React.FC<EntityDetailMetaTable> = ({
                   const metaStatementData = { ...data };
                   const updatedStatementActants = metaStatementData.actants.map(
                     (actant) =>
-                      actant.position === "a1"
+                      actant.position === Position.Actant1
                         ? { ...actant, ...{ actant: newSelectedId } }
                         : actant
                   );
@@ -103,7 +105,7 @@ export const EntityDetailMetaTable: React.FC<EntityDetailMetaTable> = ({
                     },
                   });
                 }}
-                categoryTypes={[ActantType.Concept]}
+                categoryTypes={[EntityClass.Concept]}
               />
             )
           );
@@ -118,12 +120,14 @@ export const EntityDetailMetaTable: React.FC<EntityDetailMetaTable> = ({
           const {
             id: statementId,
             data,
-            actants,
+            entities,
           } = row.original as IResponseStatement;
 
-          const typeSActant = data.actants.find((a) => a.position == "a1");
+          const typeSActant = data.actants.find(
+            (a) => a.position == Position.Actant1
+          );
           const typeActant = typeSActant
-            ? actants.find((a) => a.id === typeSActant.actant)
+            ? entities[typeSActant.actant]
             : undefined;
 
           return typeSActant ? (
@@ -144,7 +148,7 @@ export const EntityDetailMetaTable: React.FC<EntityDetailMetaTable> = ({
                 const metaStatementData = { ...data };
                 const updatedStatementActants = metaStatementData.actants.map(
                   (actant) =>
-                    actant.position === "a1"
+                    actant.position === Position.Actant1
                       ? { ...actant, ...newData }
                       : actant
                 );
@@ -180,12 +184,14 @@ export const EntityDetailMetaTable: React.FC<EntityDetailMetaTable> = ({
           const {
             id: statementId,
             data,
-            actants,
+            entities,
           } = row.original as IResponseStatement;
 
-          const valueSActant = data.actants.find((a) => a.position == "a2");
+          const valueSActant = data.actants.find(
+            (a) => a.position == Position.Actant2
+          );
           const valueActant = valueSActant
-            ? actants.find((a) => a.id === valueSActant.actant)
+            ? entities[valueSActant.actant]
             : false;
 
           return valueSActant && valueActant ? (
@@ -203,7 +209,7 @@ export const EntityDetailMetaTable: React.FC<EntityDetailMetaTable> = ({
                       const metaStatementData = { ...data };
                       const updatedStatementActants =
                         metaStatementData.actants.map((actant) =>
-                          actant.position === "a2"
+                          actant.position === Position.Actant2
                             ? { ...actant, ...{ actant: "" } }
                             : actant
                         );
@@ -226,7 +232,7 @@ export const EntityDetailMetaTable: React.FC<EntityDetailMetaTable> = ({
                   const metaStatementData = { ...data };
                   const updatedStatementActants = metaStatementData.actants.map(
                     (actant) =>
-                      actant.position === "a2"
+                      actant.position === Position.Actant2
                         ? { ...actant, ...{ actant: newSelectedId } }
                         : actant
                   );
@@ -239,17 +245,17 @@ export const EntityDetailMetaTable: React.FC<EntityDetailMetaTable> = ({
                   });
                 }}
                 categoryTypes={[
-                  ActantType.Action,
-                  ActantType.Person,
-                  ActantType.Group,
-                  ActantType.Object,
-                  ActantType.Concept,
-                  ActantType.Location,
-                  ActantType.Value,
-                  ActantType.Event,
-                  ActantType.Statement,
-                  ActantType.Territory,
-                  ActantType.Resource,
+                  EntityClass.Action,
+                  EntityClass.Person,
+                  EntityClass.Group,
+                  EntityClass.Object,
+                  EntityClass.Concept,
+                  EntityClass.Location,
+                  EntityClass.Value,
+                  EntityClass.Event,
+                  EntityClass.Statement,
+                  EntityClass.Territory,
+                  EntityClass.Resource,
                 ]}
               />
             )
@@ -265,12 +271,14 @@ export const EntityDetailMetaTable: React.FC<EntityDetailMetaTable> = ({
           const {
             id: statementId,
             data,
-            actants,
+            entities,
           } = row.original as IResponseStatement;
 
-          const valueSActant = data.actants.find((a) => a.position == "a2");
+          const valueSActant = data.actants.find(
+            (a) => a.position == Position.Actant2
+          );
           const valueActant = valueSActant
-            ? actants.find((a) => a.id === valueSActant.actant)
+            ? entities[valueSActant.actant]
             : undefined;
 
           return valueSActant ? (
@@ -291,7 +299,7 @@ export const EntityDetailMetaTable: React.FC<EntityDetailMetaTable> = ({
                 const metaStatementData = { ...data };
                 const updatedStatementActants = metaStatementData.actants.map(
                   (actant) =>
-                    actant.position === "a2"
+                    actant.position === Position.Actant2
                       ? { ...actant, ...newData }
                       : actant
                 );
@@ -327,20 +335,22 @@ export const EntityDetailMetaTable: React.FC<EntityDetailMetaTable> = ({
             id: statementId,
             class: statementClass,
             data: data,
-            actants,
+            entities,
           } = row.original as IResponseStatement;
 
           const action = data?.actions[0];
 
-          const valueSActant = data.actants.find((a) => a.position == "a2");
+          const valueSActant = data.actants.find(
+            (a) => a.position == Position.Actant2
+          );
           const valueActant = valueSActant
-            ? actants.find((a) => a.id === valueSActant.actant)
+            ? entities[valueSActant.actant]
             : false;
 
-          const typeSActant = data.actants.find((a) => a.position == "a1");
-          const typeActant = typeSActant
-            ? actants.find((a) => a.id === typeSActant.actant)
-            : false;
+          const typeSActant = data.actants.find(
+            (a) => a.position == Position.Actant2
+          );
+          const typeActant = typeSActant ? entities[typeSActant.actant] : false;
 
           const typeLabel = typeActant ? typeActant.label : "undefined";
           const valueLabel = valueActant ? valueActant.label : "undefined";
@@ -357,7 +367,7 @@ export const EntityDetailMetaTable: React.FC<EntityDetailMetaTable> = ({
                     logic: action.logic,
                     mood: action.mood,
                     moodvariant: action.moodvariant,
-                    operator: action.operator,
+                    bundleOperator: action.bundleOperator,
                     bundleStart: action.bundleStart,
                     bundleEnd: action.bundleEnd,
                   }}

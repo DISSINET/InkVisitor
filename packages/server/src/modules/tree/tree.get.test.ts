@@ -3,7 +3,7 @@ import {
   createMockStatements,
   clean,
 } from "@modules/common.test";
-import { createActant } from "@service/shorthands";
+import { createEntity } from "@service/shorthands";
 import request from "supertest";
 import { supertestConfig } from "..";
 import { apiPath } from "@common/constants";
@@ -109,7 +109,7 @@ describe("Tree get", function () {
     const randSuffix = "tree-get" + Math.random().toString();
     const territories = await createMockTree(db, randSuffix);
     const statements = await createMockStatements(db, territories);
-    const statementsTerritoryId = statements[0].data.territory.id;
+    const statementsTerritoryId = statements[0].data.territory?.id || "";
     const additionalEmptyTerritory = new Territory({
       id: `empty-ter--${randSuffix}`,
       data: {
@@ -119,7 +119,7 @@ describe("Tree get", function () {
         },
       },
     });
-    await createActant(db, additionalEmptyTerritory);
+    await createEntity(db, additionalEmptyTerritory);
 
     await request(app)
       .get(`${apiPath}/tree/get`)

@@ -2,10 +2,10 @@
  * type of the /user endpoint response
  */
 
-import { IActant, IStatement } from ".";
+import { IEntity, IStatement } from ".";
 import { UserRoleMode } from "../enums";
 
-export interface IResponseActant extends IActant {
+export interface IResponseEntity extends IEntity {
   // usedCount?: number;
   // usedIn?: IStatement[];
   right?: UserRoleMode;

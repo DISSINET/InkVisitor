@@ -15,16 +15,16 @@ const INITIAL_CONTEXT = {
   setTerritoryId: UNINITIALISED,
   statementId: "",
   setStatementId: UNINITIALISED,
-  actantId: "",
-  setActantId: UNINITIALISED,
+  detailId: "",
+  setDetailId: UNINITIALISED,
 };
 interface SearchParamsContext {
   territoryId: string;
   setTerritoryId: (territory: string) => void;
   statementId: string;
   setStatementId: (statement: string) => void;
-  actantId: string;
-  setActantId: (actant: string) => void;
+  detailId: string;
+  setDetailId: (detail: string) => void;
 }
 const SearchParamsContext = createContext<SearchParamsContext>(INITIAL_CONTEXT);
 
@@ -46,7 +46,7 @@ export const SearchParamsProvider = ({
   const [statementId, setStatementId] = useState<string>(
     typeof parsedParams.statement === "string" ? parsedParams.statement : ""
   );
-  const [actantId, setActantId] = useState<string>(
+  const [detailId, setDetailId] = useState<string>(
     typeof parsedParams.detail === "string" ? parsedParams.detail : ""
   );
 
@@ -57,11 +57,11 @@ export const SearchParamsProvider = ({
     statementId
       ? params.set("statement", statementId)
       : params.delete("statement");
-    actantId ? params.set("detail", actantId) : params.delete("detail");
+    detailId ? params.set("detail", detailId) : params.delete("detail");
     history.push({
       hash: `${params}`,
     });
-  }, [territoryId, statementId, actantId]);
+  }, [territoryId, statementId, detailId]);
 
   return (
     <SearchParamsContext.Provider
@@ -70,8 +70,8 @@ export const SearchParamsProvider = ({
         setTerritoryId,
         statementId,
         setStatementId,
-        actantId,
-        setActantId,
+        detailId: detailId,
+        setDetailId: setDetailId,
       }}
     >
       {children}

@@ -1,41 +1,40 @@
 /**
- * type of the /user endpoint response
+ * Deprecated
  */
 
-import { ActantType, isValidActantType } from "../enums";
+import { EntityClass, isValidEntityClass } from "../enums";
 import { BadParams } from "./errors";
 
 export interface IResponseSearch {
-  class: ActantType | false;
+  class: EntityClass | false;
   label: string | false;
-  actantId: string | false;
+  entityId: string | false;
 }
 
 export class RequestSearch implements IResponseSearch {
-  class: ActantType | false;
+  class: EntityClass | false;
   label: string | false;
-  actantId: string | false;
-  excluded?: ActantType[];
+  entityId: string | false;
+  excluded?: EntityClass[];
 
-  constructor(requestData: IResponseSearch & { excluded?: ActantType[] }) {
+  constructor(requestData: IResponseSearch & { excluded?: EntityClass[] }) {
     this.class = requestData.class || false;
     this.label = requestData.label || false;
-    this.actantId = requestData.actantId || false;
+    this.entityId = requestData.entityId || false;
     if (requestData.excluded) {
       if (requestData.excluded.constructor.name === "String") {
         requestData.excluded = [requestData.excluded as any];
       }
       this.excluded = requestData.excluded;
     }
-
   }
 
   validate(): Error | void {
-    if (this.class !== false && !isValidActantType(this.class)) {
+    if (this.class !== false && !isValidEntityClass(this.class)) {
       return new BadParams("invalid 'class' value");
     }
 
-    if (!this.label && !this.actantId) {
+    if (!this.label && !this.entityId) {
       return new BadParams("at least some search field has to be set");
     }
 

@@ -1,6 +1,6 @@
 import styled from "styled-components";
 
-export const StyledGrid = styled.div`
+export const StyledGridOld = styled.div`
   display: grid;
 
   align-items: center;
@@ -10,6 +10,19 @@ export const StyledGrid = styled.div`
   grid-template-rows: auto;
   grid-auto-flow: row;
   padding-bottom: ${({ theme }) => theme.space[6]};
+`;
+
+export const StyledGrid = styled.div`
+  display: grid;
+
+  align-items: center;
+  padding-left: ${({ theme }) => theme.space[10]};
+  grid-template-columns: 1fr 1fr 11rem;
+  width: fit-content;
+  grid-template-rows: auto;
+  grid-auto-flow: row;
+  padding-bottom: ${({ theme }) => theme.space[1]};
+  width: 100%;
 `;
 
 export const StyledGridCell = styled.div`
@@ -28,21 +41,26 @@ export const StyledListHeaderColumn = styled.div<StyledListHeaderColumn>`
 `;
 
 interface StyledPropLineColumn {
-  padded?: boolean;
-  lastSecondLevel?: boolean;
+  level?: "1" | "2" | "3";
   isTag?: boolean;
 }
 export const StyledPropLineColumn = styled(
   StyledGridCell
 )<StyledPropLineColumn>`
   display: inline-flex;
-  margin-bottom: ${({ theme, lastSecondLevel }) =>
-    lastSecondLevel ? theme.space[4] : theme.space[0]};
   align-items: center;
-  padding-left: ${({ theme, padded }) =>
-    padded ? theme.space[8] : theme.space[0]};
+  padding-left: ${({ theme, level = "1" }) => {
+    if (level === "1") {
+      return theme.space[0];
+    } else if (level === "2") {
+      return theme.space[6];
+    } else if (level === "3") {
+      return theme.space[12];
+    }
+  }};
   padding-right: 5px;
   overflow: ${({ isTag }) => (isTag ? "hidden" : "visible")};
+  // border: 1px dashed hotpink;
 `;
 
 interface StyledPropButtonGroup {

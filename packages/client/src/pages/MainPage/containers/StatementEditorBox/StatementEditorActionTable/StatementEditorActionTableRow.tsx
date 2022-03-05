@@ -1,4 +1,4 @@
-import { ActantType } from "@shared/enums";
+import { EntityClass } from "@shared/enums";
 import { IResponseStatement } from "@shared/types";
 import { AttributeIcon, Button, ButtonGroup } from "components";
 import { useSearchParams } from "hooks";
@@ -144,7 +144,7 @@ export const StatementEditorActionTableRow: React.FC<
               action: newSelectedId,
             });
           }}
-          categoryTypes={[ActantType.Action]}
+          categoryTypes={[EntityClass.Action]}
           excludedEntities={excludedSuggesterEntities}
           placeholder={"add new action"}
         />
@@ -169,7 +169,7 @@ export const StatementEditorActionTableRow: React.FC<
               logic: sAction.logic,
               mood: sAction.mood,
               moodvariant: sAction.moodvariant,
-              operator: sAction.operator,
+              bundleOperator: sAction.bundleOperator,
               bundleStart: sAction.bundleStart,
               bundleEnd: sAction.bundleEnd,
             }}
@@ -180,7 +180,7 @@ export const StatementEditorActionTableRow: React.FC<
               updateAction(sAction.id, { action: newId });
             }}
             userCanEdit={userCanEdit}
-            classEntitiesActant={[ActantType.Action]}
+            classEntitiesActant={[EntityClass.Action]}
             loading={updateActionsMutation.isLoading}
           />
         )}
@@ -218,14 +218,14 @@ export const StatementEditorActionTableRow: React.FC<
             icon={<AttributeIcon attributeName={"negation"} />}
           />
         )}
-        {sAction.operator && (
+        {sAction.bundleOperator && (
           <Button
             key="oper"
             tooltip="Logical operator type"
             color="success"
             inverted={true}
             noBorder
-            icon={sAction.operator}
+            icon={sAction.bundleOperator}
           />
         )}
       </ButtonGroup>
