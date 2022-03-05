@@ -21,6 +21,7 @@ import {
   UserRole,
   Language,
   EntityClass,
+  ReferenceType,
 } from "@shared/enums";
 import { v4 as uuidv4 } from "uuid";
 
@@ -175,5 +176,5 @@ export const CReference = (resourceId: string): IStatementReference => ({
   id: uuidv4(),
   resource: resourceId,
   part: "",
-  type: "",
+  type: ReferenceType.Primary,
 });
