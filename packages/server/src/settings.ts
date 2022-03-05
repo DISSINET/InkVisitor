@@ -6,7 +6,7 @@ const options = commandLineArgs([
   {
     name: "env",
     alias: "e",
-    defaultValue: "devel",
+    defaultValue: "development",
     type: String,
   },
 ]);
