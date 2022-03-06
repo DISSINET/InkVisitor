@@ -13,12 +13,14 @@ interface EntityReferenceInput {
   values: IEntityReference[];
   onChange: Function;
   disabled?: boolean;
+  sources: IOption[];
 }
 
 export const EntityReferenceInput: React.FC<EntityReferenceInput> = ({
   values,
   onChange,
   disabled = true,
+  sources,
 }) => {
   const [displayValues, setDisplayValues] = useState(values);
   useEffect(() => {
@@ -75,10 +77,8 @@ export const EntityReferenceInput: React.FC<EntityReferenceInput> = ({
                   handleChangeSource(key, newSource);
                 }
               }}
-              options={entityReferenceSourceDict}
-              value={entityReferenceSourceDict.find(
-                (ers: IOption) => ers.value === value.source
-              )}
+              options={sources}
+              value={sources.find((ers: IOption) => ers.value === value.source)}
             />
             <Input
               key={key}

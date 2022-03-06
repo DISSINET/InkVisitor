@@ -3,6 +3,7 @@ import {
   entityStatusDict,
   entitiesDict,
   languageDict,
+  entityReferenceSourceDict,
 } from "@shared/dictionaries";
 import { allEntities } from "@shared/dictionaries/entity";
 import { EntityClass, Language, UserRoleMode } from "@shared/enums";
@@ -928,6 +929,9 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                     <EntityReferenceInput
                       disabled={!userCanEdit}
                       values={entity.references}
+                      sources={entityReferenceSourceDict.filter((ers) =>
+                        ers.entityClasses.includes(entity.class)
+                      )}
                       onChange={(newValues: IEntityReference[]) => {
                         updateEntityMutation.mutate({ references: newValues });
                       }}
