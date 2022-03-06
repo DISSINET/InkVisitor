@@ -455,6 +455,20 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                     </StyledDetailContentRowValueID>
                   </StyledDetailContentRowValue>
                 </StyledDetailContentRow>
+
+                {entity._legacyId && (
+                  <StyledDetailContentRow>
+                    <StyledDetailContentRowLabel>
+                      Legacy ID
+                    </StyledDetailContentRowLabel>
+                    <StyledDetailContentRowValue>
+                      <StyledDetailContentRowValueID>
+                        {entity._legacyId}
+                      </StyledDetailContentRowValueID>
+                    </StyledDetailContentRowValue>
+                  </StyledDetailContentRow>
+                )}
+
                 <StyledDetailContentRow>
                   <StyledDetailContentRowLabel>
                     Label
@@ -506,7 +520,7 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                             });
                           },
                           selected:
-                            entityStatusDict[0]["value"] === entity.data.status,
+                            entityStatusDict[0]["value"] === entity.status,
                         },
                         {
                           longValue: entityStatusDict[1]["label"],
@@ -517,7 +531,7 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                             });
                           },
                           selected:
-                            entityStatusDict[1]["value"] === entity.data.status,
+                            entityStatusDict[1]["value"] === entity.status,
                         },
                         {
                           longValue: entityStatusDict[2]["label"],
@@ -528,7 +542,7 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                             });
                           },
                           selected:
-                            entityStatusDict[2]["value"] === entity.data.status,
+                            entityStatusDict[2]["value"] === entity.status,
                         },
                         {
                           longValue: entityStatusDict[3]["label"],
@@ -539,7 +553,7 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                             });
                           },
                           selected:
-                            entityStatusDict[3]["value"] === entity.data.status,
+                            entityStatusDict[3]["value"] === entity.status,
                         },
                       ]}
                     />

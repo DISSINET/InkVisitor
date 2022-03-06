@@ -73,10 +73,10 @@ export const EntitySuggester: React.FC<EntitySuggesterI> = ({
         excluded: excludedEntities.length ? excludedEntities : undefined,
       });
 
-      // TODO: status -> data.status
+      // TODO: status -> entity.status
       const suggestions = resSuggestions.data;
       suggestions.sort((a, b) => {
-        if (a.data.status == EntityStatus.Discouraged) {
+        if (a.status == EntityStatus.Discouraged) {
           return 1;
         } else {
           return -1;
@@ -107,7 +107,7 @@ export const EntitySuggester: React.FC<EntitySuggesterI> = ({
               category: s.class,
               label: s.label,
               detail: s.detail,
-              status: s.data.status,
+              status: s.status,
               ltype: s.data.logicalType,
               id: s.id,
               icons: icons,
