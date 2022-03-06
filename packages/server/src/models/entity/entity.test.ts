@@ -5,6 +5,7 @@ import Statement from "@models/statement/statement";
 import { clean } from "@modules/common.test";
 import { findEntityById } from "@service/shorthands";
 import { IStatement } from "@shared/types";
+import { Order } from "@shared/enums";
 
 describe("test Entity.delete", function () {
   describe("one existing linked statement", () => {
@@ -170,5 +171,54 @@ describe("test Entity.toJSON", function () {
     expect(newValues).toEqual(
       Entity.publicFields.map((fieldName) => (instance as any)[fieldName])
     );
+  });
+});
+
+describe("test Entity.determineOrder", function () {
+  describe("when wanting already used order value", () => {
+    const takenIndex = -2;
+    const siblings: Record<number, unknown> = { [takenIndex]: true };
+
+    it("should choose slightly bigger real number", () => {
+      expect(Entity.determineOrder(takenIndex, siblings)).toBe(takenIndex + 1);
+    });
+  });
+
+  describe("when wanting already used order value with already used following indexes (+1, +2, +3...)", () => {
+    const takenIndex = -2;
+    const siblings: Record<number, unknown> = {};
+    for (let i = takenIndex; i < 5; i++) {
+      siblings[i] = true;
+    }
+
+    it("should choose slightly bigger decimal number than originally wanted idnex", () => {
+      expect(Entity.determineOrder(takenIndex, siblings)).toBe(
+        takenIndex + 0.5
+      );
+    });
+  });
+
+  describe("when wanting unused value", () => {
+    const takenIndex = 1;
+    const wantedIndex = 2;
+    const siblings: Record<number, unknown> = { [takenIndex]: true };
+
+    it("should allow such value", () => {
+      expect(Entity.determineOrder(wantedIndex, siblings)).toBe(wantedIndex);
+    });
+  });
+
+  describe("when wanting last position", () => {
+    const wantedIndex = Order.Last;
+    const siblings: Record<number, unknown> = { [-1]: true, 0: true, 1: true };
+    const values = Object.keys(siblings)
+      .map((v) => parseInt(v))
+      .sort();
+
+    it("should get originally first index - 1 value", () => {
+      expect(Entity.determineOrder(wantedIndex, siblings)).toBe(
+        values[values.length - 1] + 1
+      );
+    });
   });
 });
