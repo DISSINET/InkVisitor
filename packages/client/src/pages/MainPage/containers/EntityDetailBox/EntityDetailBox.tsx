@@ -3,10 +3,11 @@ import {
   entityStatusDict,
   entitiesDict,
   languageDict,
+  entityReferenceSourceDict,
 } from "@shared/dictionaries";
 import { allEntities } from "@shared/dictionaries/entity";
 import { EntityClass, Language, UserRoleMode } from "@shared/enums";
-import { IAction, IStatement } from "@shared/types";
+import { IAction, IEntityReference, IStatement } from "@shared/types";
 import api from "api";
 import {
   Button,
@@ -35,6 +36,7 @@ import { findPositionInStatement } from "utils";
 import { EntityTag } from "..";
 import { AttributeButtonGroup } from "../AttributeButtonGroup/AttributeButtonGroup";
 import { AuditTable } from "../AuditTable/AuditTable";
+import { EntityReferenceInput } from "../EntityReferenceInput/EntityReferenceInput";
 import { JSONExplorer } from "../JSONExplorer/JSONExplorer";
 import { PropGroup } from "../PropGroup/PropGroup";
 import {
@@ -455,6 +457,20 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                     </StyledDetailContentRowValueID>
                   </StyledDetailContentRowValue>
                 </StyledDetailContentRow>
+
+                {entity._legacyId && (
+                  <StyledDetailContentRow>
+                    <StyledDetailContentRowLabel>
+                      Legacy ID
+                    </StyledDetailContentRowLabel>
+                    <StyledDetailContentRowValue>
+                      <StyledDetailContentRowValueID>
+                        {entity._legacyId}
+                      </StyledDetailContentRowValueID>
+                    </StyledDetailContentRowValue>
+                  </StyledDetailContentRow>
+                )}
+
                 <StyledDetailContentRow>
                   <StyledDetailContentRowLabel>
                     Label
@@ -506,7 +522,7 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                             });
                           },
                           selected:
-                            entityStatusDict[0]["value"] === entity.data.status,
+                            entityStatusDict[0]["value"] === entity.status,
                         },
                         {
                           longValue: entityStatusDict[1]["label"],
@@ -517,7 +533,7 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                             });
                           },
                           selected:
-                            entityStatusDict[1]["value"] === entity.data.status,
+                            entityStatusDict[1]["value"] === entity.status,
                         },
                         {
                           longValue: entityStatusDict[2]["label"],
@@ -528,7 +544,7 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                             });
                           },
                           selected:
-                            entityStatusDict[2]["value"] === entity.data.status,
+                            entityStatusDict[2]["value"] === entity.status,
                         },
                         {
                           longValue: entityStatusDict[3]["label"],
@@ -539,7 +555,7 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                             });
                           },
                           selected:
-                            entityStatusDict[3]["value"] === entity.data.status,
+                            entityStatusDict[3]["value"] === entity.status,
                         },
                       ]}
                     />
@@ -900,6 +916,24 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                       width="full"
                       onChange={(newValues: string[]) => {
                         updateEntityMutation.mutate({ notes: newValues });
+                      }}
+                    />
+                  </StyledDetailContentRowValue>
+                </StyledDetailContentRow>
+
+                <StyledDetailContentRow>
+                  <StyledDetailContentRowLabel>
+                    References
+                  </StyledDetailContentRowLabel>
+                  <StyledDetailContentRowValue>
+                    <EntityReferenceInput
+                      disabled={!userCanEdit}
+                      values={entity.references}
+                      sources={entityReferenceSourceDict.filter((ers) =>
+                        ers.entityClasses.includes(entity.class)
+                      )}
+                      onChange={(newValues: IEntityReference[]) => {
+                        updateEntityMutation.mutate({ references: newValues });
                       }}
                     />
                   </StyledDetailContentRowValue>
