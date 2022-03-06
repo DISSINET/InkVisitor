@@ -12,7 +12,13 @@ import {
   IProp,
   IEntityReference,
 } from "@shared/types";
-import { EntityClass, Language, UserRole, UserRoleMode } from "@shared/enums";
+import {
+  EntityClass,
+  EntityStatus,
+  Language,
+  UserRole,
+  UserRoleMode,
+} from "@shared/enums";
 import { InternalServerError } from "@shared/types/errors";
 import User from "@models/user/user";
 import emitter from "@models/events/emitter";
@@ -26,6 +32,7 @@ export default class Entity extends Base implements IEntity, IDbModel {
     "id",
     "_legacyId",
     "class",
+    "status",
     "data",
     "label",
     "detail",
@@ -42,6 +49,7 @@ export default class Entity extends Base implements IEntity, IDbModel {
   id: string = "";
   _legacyId: string = "";
   class: EntityClass = EntityClass.Person;
+  status: EntityStatus = EntityStatus.Approved;
   data: any = {};
   label: string = "";
   detail: string = "";

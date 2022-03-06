@@ -95,10 +95,10 @@ const loadStatementsTables = async (next: Function) => {
             a1: parseEntities(action.actant1_entity_type),
             a2: parseEntities(action.actant2_entity_type),
           },
-          status: statusOption
-            ? (statusOption.value as EntityStatus)
-            : EntityStatus.Pending,
         },
+        status: statusOption
+          ? (statusOption.value as EntityStatus)
+          : EntityStatus.Pending,
         language:
           action.language === "English" ? Language.English : Language.Latin,
         notes: action.note ? [action.note] : [],
@@ -438,6 +438,7 @@ const loadStatementsTables = async (next: Function) => {
           label: statement.id,
           detail: "",
           language: Language.Latin,
+          status: EntityStatus.Approved,
           references: [],
           isTemplate: false,
         };
@@ -593,6 +594,7 @@ const addEntity = (id: string, label: string, type: EntityClass) => {
     notes: [],
     props: [],
     references: [],
+    status: EntityStatus.Approved,
     isTemplate: false,
   };
   if (id) {
@@ -623,6 +625,7 @@ const addTerritoryEntity = (
         },
         label: label.trim(),
         detail: detail,
+        status: EntityStatus.Approved,
         // @ts-ignore
         language: Language[language] as Language,
         notes: notes,
@@ -648,6 +651,7 @@ const addResourceActant = (id: string, label: string) => {
       language: Language.Latin,
       notes: [],
       props: [],
+      status: EntityStatus.Approved,
       references: [],
       isTemplate: false,
     };
@@ -785,6 +789,7 @@ const createEmptyPropStatement = (
       detail: "",
       language: Language.Latin,
       notes: [],
+      status: EntityStatus.Approved,
       references: [],
       isTemplate: false,
     };
