@@ -49,6 +49,11 @@ export type IEntityClass =
   | EntityClass.Value
   | EntityClass.Event;
 
+export enum EntityReferenceSource {
+  WordNet = "wordnet",
+  GeoNames = "geonames",
+}
+
 export enum EntityLogicalType {
   Definite = "1",
   Indefinite = "2",

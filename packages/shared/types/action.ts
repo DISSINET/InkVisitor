@@ -7,7 +7,6 @@ export interface IAction extends IEntity {
   data: {
     valencies: ActionValency;
     entities: ActionEntity;
-    status: EntityStatus;
   };
 }
 

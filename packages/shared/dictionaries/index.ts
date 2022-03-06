@@ -2,6 +2,7 @@ import { certaintyDict } from "./certainty";
 import { elvlDict } from "./elvl";
 import { languageDict } from "./language";
 import { entitiesDict } from "./entity";
+import { entityReferenceSourceDict } from "./entityreferencesources";
 import { actantLogicalTypeDict } from "./logicaltype";
 import { actantPositionDict } from "./actantposition";
 import { referenceTypeDict } from "./referencetype";
@@ -20,6 +21,7 @@ export {
   elvlDict,
   languageDict,
   entitiesDict,
+  entityReferenceSourceDict,
   actantLogicalTypeDict,
   actantPositionDict,
   referenceTypeDict,

@@ -1,7 +1,7 @@
 import { IAction } from "./action";
 import { IAudit } from "./audit";
 import { IConcept } from "./concept";
-import { IEntity } from "./entity";
+import { IEntity, IEntityReference } from "./entity";
 import { IEvent } from "./event";
 import { IGroup } from "./group";
 import { ILabel } from "./label";
@@ -52,6 +52,7 @@ import { IResponseEntity } from "./response-actant";
 export type {
   IAudit,
   IEntity,
+  IEntityReference,
   IAction,
   ITerritory,
   IStatement,
