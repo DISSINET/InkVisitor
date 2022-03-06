@@ -918,6 +918,22 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                     />
                   </StyledDetailContentRowValue>
                 </StyledDetailContentRow>
+
+                <StyledDetailContentRow>
+                  <StyledDetailContentRowLabel>
+                    References
+                  </StyledDetailContentRowLabel>
+                  <StyledDetailContentRowValue>
+                    <MultiInput
+                      disabled={!userCanEdit}
+                      values={entity.notes}
+                      width="full"
+                      onChange={(newValues: string[]) => {
+                        updateEntityMutation.mutate({ notes: newValues });
+                      }}
+                    />
+                  </StyledDetailContentRowValue>
+                </StyledDetailContentRow>
               </StyledDetailForm>
             </StyledDetailSectionContent>
           </StyledDetailSection>
