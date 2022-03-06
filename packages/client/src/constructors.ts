@@ -7,6 +7,7 @@ import {
   IStatement,
   IBookmarkFolder,
   IStatementReference,
+  IEntityReference,
 } from "@shared/types";
 import {
   Certainty,
@@ -21,6 +22,9 @@ import {
   UserRole,
   Language,
   EntityClass,
+  ReferenceType,
+  EntityStatus,
+  EntityReferenceSource,
 } from "@shared/enums";
 import { v4 as uuidv4 } from "uuid";
 
@@ -68,8 +72,6 @@ export const CStatement = (
   class: EntityClass.Statement,
   label: label ? label : "",
   detail: detail ? detail : "",
-  //status:
-  //  userRole === UserRole.Admin ? EntityStatus.Approved : EntityStatus.Pending,
   language: Language.Latin,
   notes: [],
   data: {
@@ -84,6 +86,10 @@ export const CStatement = (
     tags: [],
   },
   props: [],
+  status:
+    userRole === UserRole.Admin ? EntityStatus.Approved : EntityStatus.Pending,
+  references: [],
+  isTemplate: false,
 });
 
 // duplicate statement
@@ -141,14 +147,17 @@ export const CTerritoryActant = (
   class: EntityClass.Territory,
   label: label,
   detail: detail ? detail : "",
-  // status:
-  //   userRole === UserRole.Admin ? EntityStatus.Approved : EntityStatus.Pending,
   language: Language.Latin,
   notes: [],
   data: {
     parent: { id: parentId, order: parentOrder },
   },
+  status:
+    userRole === UserRole.Admin ? EntityStatus.Approved : EntityStatus.Pending,
+
   props: [],
+  references: [],
+  isTemplate: false,
 });
 
 export const CEntity = (
@@ -163,11 +172,15 @@ export const CEntity = (
     label: label,
     detail: detail ? detail : "",
     data: {},
-    //status:
-    //   userRole === UserRole.Admin ? EntityStatus.Approved : EntityStatus.Pending,
+    status:
+      userRole === UserRole.Admin
+        ? EntityStatus.Approved
+        : EntityStatus.Pending,
     language: Language.Latin,
     notes: [],
     props: [],
+    references: [],
+    isTemplate: false,
   };
 };
 
@@ -175,5 +188,14 @@ export const CReference = (resourceId: string): IStatementReference => ({
   id: uuidv4(),
   resource: resourceId,
   part: "",
-  type: "",
+  type: ReferenceType.Primary,
+});
+
+export const CEntityReference = (
+  source: EntityReferenceSource = EntityReferenceSource.WordNet,
+  value: string = ""
+): IEntityReference => ({
+  id: uuidv4(),
+  source: source,
+  value: value,
 });
