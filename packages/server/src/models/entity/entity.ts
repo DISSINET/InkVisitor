@@ -5,8 +5,20 @@ import {
   fillArray,
 } from "@models/common";
 import { r as rethink, Connection, WriteResult, RDatum } from "rethinkdb-ts";
-import { IStatement, IEntity, IResponseEntity, IProp } from "@shared/types";
-import { EntityClass, Language, UserRole, UserRoleMode } from "@shared/enums";
+import {
+  IStatement,
+  IEntity,
+  IResponseEntity,
+  IProp,
+  IEntityReference,
+} from "@shared/types";
+import {
+  EntityClass,
+  EntityStatus,
+  Language,
+  UserRole,
+  UserRoleMode,
+} from "@shared/enums";
 import { InternalServerError } from "@shared/types/errors";
 import User from "@models/user/user";
 import emitter from "@models/events/emitter";
@@ -18,7 +30,9 @@ export default class Entity extends Base implements IEntity, IDbModel {
   static table = "entities";
   static publicFields: string[] = [
     "id",
+    "legacyId",
     "class",
+    "status",
     "data",
     "label",
     "detail",
@@ -26,16 +40,27 @@ export default class Entity extends Base implements IEntity, IDbModel {
     "language",
     "notes",
     "props",
+    "references",
+    "isTemplate",
+    "usedTemplate",
+    "templateData",
   ];
 
   id: string = "";
+  legacyId: string = "";
   class: EntityClass = EntityClass.Person;
+  status: EntityStatus = EntityStatus.Approved;
   data: any = {};
   label: string = "";
   detail: string = "";
   language: Language = Language.Latin;
   notes: string[] = [];
   props: IProp[] = [];
+  references: IEntityReference[] = [];
+
+  isTemplate: boolean = false;
+  usedTemplate: boolean = false;
+  templateData: object = {};
 
   usedIn: IStatement[] = [];
   right: UserRoleMode = UserRoleMode.Read;
@@ -48,6 +73,7 @@ export default class Entity extends Base implements IEntity, IDbModel {
     }
 
     fillFlatObject(this, { ...data, data: undefined });
+    fillArray(this.references, Object, data.references);
     fillArray(this.notes, String, data.notes);
     fillArray(this.props, Object, data.props);
   }
