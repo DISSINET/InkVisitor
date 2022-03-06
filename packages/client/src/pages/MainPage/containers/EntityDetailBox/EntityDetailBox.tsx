@@ -456,14 +456,14 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                   </StyledDetailContentRowValue>
                 </StyledDetailContentRow>
 
-                {entity._legacyId && (
+                {entity.legacyId && (
                   <StyledDetailContentRow>
                     <StyledDetailContentRowLabel>
                       Legacy ID
                     </StyledDetailContentRowLabel>
                     <StyledDetailContentRowValue>
                       <StyledDetailContentRowValueID>
-                        {entity._legacyId}
+                        {entity.legacyId}
                       </StyledDetailContentRowValueID>
                     </StyledDetailContentRowValue>
                   </StyledDetailContentRow>
