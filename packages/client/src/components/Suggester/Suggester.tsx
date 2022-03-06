@@ -253,7 +253,7 @@ export const Suggester: React.FC<SuggesterProps> = ({
             entityDropdown
             onFocus={() => {
               setSelected(-1);
-              setIsFocused(true);
+              // setIsFocused(true);
             }}
             onBlur={() => setIsFocused(false)}
             disableTyping
