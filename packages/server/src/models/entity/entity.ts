@@ -30,7 +30,7 @@ export default class Entity extends Base implements IEntity, IDbModel {
   static table = "entities";
   static publicFields: string[] = [
     "id",
-    "_legacyId",
+    "legacyId",
     "class",
     "status",
     "data",
@@ -47,7 +47,7 @@ export default class Entity extends Base implements IEntity, IDbModel {
   ];
 
   id: string = "";
-  _legacyId: string = "";
+  legacyId: string = "";
   class: EntityClass = EntityClass.Person;
   status: EntityStatus = EntityStatus.Approved;
   data: any = {};

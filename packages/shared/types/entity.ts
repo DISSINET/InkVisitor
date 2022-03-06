@@ -8,7 +8,7 @@ import {
 
 export interface IEntity {
   id: string;
-  _legacyId?: string;
+  legacyId?: string;
   class: EntityClass;
   status: EntityStatus;
   data: any;
