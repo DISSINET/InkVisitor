@@ -4,6 +4,7 @@ import {
   IAction,
   IResponseStatement,
   IStatement,
+  IStatementData,
 } from "@shared/types";
 import api from "api";
 import {
@@ -170,65 +171,90 @@ export const StatementListBox: React.FC = () => {
   );
 
   const addStatementAtCertainIndex = async (index: number) => {
-    const newOrder =
-      index + 1 > statements.length
-        ? statements.length
-        : index < 1
-        ? statements[0].data.territory.order - 1
-        : (statements[index - 1].data.territory.order +
-            statements[index].data.territory.order) /
+    let newOrder: number | false = false;
+
+    if (index + 1 > statements.length) {
+      // last one
+      newOrder = statements.length;
+    } else {
+      if (index < 1 && statements[0].data.territory) {
+        // first one
+        newOrder = statements[0].data.territory.order - 1;
+      } else if (
+        statements[index - 1].data.territory &&
+        statements[index].data.territory
+      ) {
+        // somewhere between
+        newOrder =
+          ((
+            statements[index - 1].data.territory as {
+              order: number;
+              id: string;
+            }
+          ).order +
+            (statements[index].data.territory as { order: number; id: string })
+              .order) /
           2;
+      }
+    }
 
-    const newStatement: IStatement = CStatement(
-      territoryId,
-      localStorage.getItem("userrole") as UserRole
-    );
-    newStatement.data.territory.order = newOrder;
+    if (newOrder) {
+      const newStatement: IStatement = CStatement(
+        territoryId,
+        localStorage.getItem("userrole") as UserRole
+      );
+      (newStatement.data.territory as { order: number; id: string }).order =
+        newOrder;
 
-    actantsCreateMutation.mutate(newStatement);
+      actantsCreateMutation.mutate(newStatement);
+    }
   };
 
   const { statements, entities } = data || initialData;
 
   const moveEndRow = async (statementToMove: IStatement, index: number) => {
     // return if order don't change
-    if (
-      statementToMove.data.territory.order ===
-      statements[index].data.territory.order
-    ) {
-      return;
+
+    if (statementToMove.data.territory && statements[index].data.territory) {
+      if (
+        statementToMove.data.territory.order !==
+        statements[index].data.territory?.order
+      ) {
+        // whether row is moving top-bottom direction
+        const topDown =
+          statementToMove.data.territory.order <
+          (statements[index].data.territory as { id: string; order: number })
+            .order;
+
+        const thisOrder = statementToMove.data.territory.order;
+        let allOrders: number[] = statements.map((s) =>
+          s.data.territory ? s.data.territory.order : 0
+        );
+        allOrders.sort((a, b) => (a && b ? (a > b ? 1 : -1) : 0));
+        const thisIndex = allOrders.indexOf(thisOrder);
+
+        allOrders = allOrders.filter((o) => o !== thisOrder);
+        allOrders.splice(index, 0, thisOrder);
+
+        if (index === 0) {
+          allOrders[index] = allOrders[1] - 1;
+        } else if (index === allOrders.length - 1) {
+          allOrders[index] = allOrders[index - 1] + 1;
+        } else {
+          allOrders[index] = (allOrders[index - 1] + allOrders[index + 1]) / 2;
+        }
+
+        const res = await api.entityUpdate(statementToMove.id, {
+          data: {
+            territory: {
+              id: statementToMove.data.territory.id,
+              order: allOrders[index],
+            },
+          },
+        });
+        queryClient.invalidateQueries("territory");
+      }
     }
-
-    // whether row is moving top-bottom direction
-    const topDown =
-      statementToMove.data.territory.order <
-      statements[index].data.territory.order;
-
-    const thisOrder = statementToMove.data.territory.order;
-    let allOrders = statements.map((s) => s.data.territory.order);
-    allOrders.sort((a, b) => (a > b ? 1 : -1));
-    const thisIndex = allOrders.indexOf(thisOrder);
-
-    allOrders = allOrders.filter((o) => o !== thisOrder);
-    allOrders.splice(index, 0, thisOrder);
-
-    if (index === 0) {
-      allOrders[index] = allOrders[1] - 1;
-    } else if (index === allOrders.length - 1) {
-      allOrders[index] = allOrders[index - 1] + 1;
-    } else {
-      allOrders[index] = (allOrders[index - 1] + allOrders[index + 1]) / 2;
-    }
-
-    const res = await api.entityUpdate(statementToMove.id, {
-      data: {
-        territory: {
-          id: statementToMove.data.territory.id,
-          order: allOrders[index],
-        },
-      },
-    });
-    queryClient.invalidateQueries("territory");
   };
 
   const renderListActant = (actantObject: IEntity, key: number) => {
@@ -642,7 +668,11 @@ export const StatementListBox: React.FC = () => {
   }, [data, statementId]);
 
   statements.sort((a, b) =>
-    a.data.territory.order > b.data.territory.order ? 1 : -1
+    a.data.territory && b.data.territory
+      ? a.data.territory.order > b.data.territory.order
+        ? 1
+        : -1
+      : 0
   );
 
   const moveTerritoryMutation = useMutation(
