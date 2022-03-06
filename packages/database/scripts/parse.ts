@@ -95,16 +95,18 @@ const loadStatementsTables = async (next: Function) => {
             a1: parseEntities(action.actant1_entity_type),
             a2: parseEntities(action.actant2_entity_type),
           },
-          status: statusOption
-            ? (statusOption.value as EntityStatus)
-            : EntityStatus.Pending,
         },
+        status: statusOption
+          ? (statusOption.value as EntityStatus)
+          : EntityStatus.Pending,
         language:
           action.language === "English" ? Language.English : Language.Latin,
         notes: action.note ? [action.note] : [],
         label: action.label,
         detail: action.detail_incl_valency,
         props: [],
+        references: [],
+        isTemplate: false,
       };
       entities.push(newAction);
     }
@@ -436,6 +438,9 @@ const loadStatementsTables = async (next: Function) => {
           label: statement.id,
           detail: "",
           language: Language.Latin,
+          status: EntityStatus.Approved,
+          references: [],
+          isTemplate: false,
         };
 
         statement.note && mainStatement.notes.push(statement.note);
@@ -588,6 +593,9 @@ const addEntity = (id: string, label: string, type: EntityClass) => {
     language: Language.Latin,
     notes: [],
     props: [],
+    references: [],
+    status: EntityStatus.Approved,
+    isTemplate: false,
   };
   if (id) {
     entities.push(newEntity);
@@ -617,10 +625,13 @@ const addTerritoryEntity = (
         },
         label: label.trim(),
         detail: detail,
+        status: EntityStatus.Approved,
         // @ts-ignore
         language: Language[language] as Language,
         notes: notes,
         props: [],
+        references: [],
+        isTemplate: false,
       };
 
       entities.push(newTerritory);
@@ -640,6 +651,9 @@ const addResourceActant = (id: string, label: string) => {
       language: Language.Latin,
       notes: [],
       props: [],
+      status: EntityStatus.Approved,
+      references: [],
+      isTemplate: false,
     };
     entities.push(newResource);
   }
@@ -775,6 +789,9 @@ const createEmptyPropStatement = (
       detail: "",
       language: Language.Latin,
       notes: [],
+      status: EntityStatus.Approved,
+      references: [],
+      isTemplate: false,
     };
     entities.push(newEmptyStatement);
   }

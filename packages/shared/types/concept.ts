@@ -3,7 +3,5 @@ import { IEntity } from "./entity";
 
 export interface IConcept extends IEntity {
   class: EntityClass.Concept;
-  data: {
-    status: EntityStatus;
-  };
+  data: {};
 }
