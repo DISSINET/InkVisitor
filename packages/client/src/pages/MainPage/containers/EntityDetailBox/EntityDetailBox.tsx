@@ -6,7 +6,7 @@ import {
 } from "@shared/dictionaries";
 import { allEntities } from "@shared/dictionaries/entity";
 import { EntityClass, Language, UserRoleMode } from "@shared/enums";
-import { IAction, IStatement } from "@shared/types";
+import { IAction, IEntityReference, IStatement } from "@shared/types";
 import api from "api";
 import {
   Button,
@@ -35,6 +35,7 @@ import { findPositionInStatement } from "utils";
 import { EntityTag } from "..";
 import { AttributeButtonGroup } from "../AttributeButtonGroup/AttributeButtonGroup";
 import { AuditTable } from "../AuditTable/AuditTable";
+import { EntityReferenceInput } from "../EntityReferenceInput/EntityReferenceInput";
 import { JSONExplorer } from "../JSONExplorer/JSONExplorer";
 import { PropGroup } from "../PropGroup/PropGroup";
 import {
@@ -924,12 +925,11 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                     References
                   </StyledDetailContentRowLabel>
                   <StyledDetailContentRowValue>
-                    <MultiInput
+                    <EntityReferenceInput
                       disabled={!userCanEdit}
-                      values={entity.notes}
-                      width="full"
-                      onChange={(newValues: string[]) => {
-                        updateEntityMutation.mutate({ notes: newValues });
+                      values={entity.references}
+                      onChange={(newValues: IEntityReference[]) => {
+                        updateEntityMutation.mutate({ references: newValues });
                       }}
                     />
                   </StyledDetailContentRowValue>
