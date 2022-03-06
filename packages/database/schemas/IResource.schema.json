@@ -1,0 +1,252 @@
+{
+    "$id": "IResource",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "additionalProperties": false,
+    "defaultProperties": [],
+    "definitions": {
+        "Certainty": {
+            "enum": [
+                "0",
+                "1",
+                "2",
+                "3",
+                "4",
+                "5",
+                "6"
+            ],
+            "type": "string"
+        },
+        "Elvl": {
+            "enum": [
+                "1",
+                "2",
+                "3"
+            ],
+            "type": "string"
+        },
+        "IProp": {
+            "additionalProperties": false,
+            "defaultProperties": [],
+            "properties": {
+                "bundleEnd": {
+                    "type": "boolean"
+                },
+                "bundleOperator": {
+                    "$ref": "IResource#/definitions/Operator"
+                },
+                "bundleStart": {
+                    "type": "boolean"
+                },
+                "certainty": {
+                    "$ref": "IResource#/definitions/Certainty"
+                },
+                "children": {
+                    "items": {
+                        "$ref": "IResource#/definitions/IProp"
+                    },
+                    "type": "array"
+                },
+                "elvl": {
+                    "$ref": "IResource#/definitions/Elvl"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "logic": {
+                    "$ref": "IResource#/definitions/Logic"
+                },
+                "mood": {
+                    "items": {
+                        "enum": [
+                            "1",
+                            "10",
+                            "11",
+                            "12",
+                            "13",
+                            "2",
+                            "3",
+                            "4",
+                            "5",
+                            "6",
+                            "7",
+                            "8",
+                            "9"
+                        ],
+                        "type": "string"
+                    },
+                    "type": "array"
+                },
+                "moodvariant": {
+                    "$ref": "IResource#/definitions/MoodVariant"
+                },
+                "type": {
+                    "$ref": "IResource#/definitions/IPropSpec"
+                },
+                "value": {
+                    "$ref": "IResource#/definitions/IPropSpec"
+                }
+            },
+            "required": [
+                "bundleEnd",
+                "bundleOperator",
+                "bundleStart",
+                "certainty",
+                "children",
+                "elvl",
+                "id",
+                "logic",
+                "mood",
+                "moodvariant",
+                "type",
+                "value"
+            ],
+            "type": "object"
+        },
+        "IPropSpec": {
+            "additionalProperties": false,
+            "defaultProperties": [],
+            "properties": {
+                "elvl": {
+                    "$ref": "IResource#/definitions/Elvl"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "logic": {
+                    "$ref": "IResource#/definitions/Logic"
+                },
+                "partitivity": {
+                    "$ref": "IResource#/definitions/Partitivity"
+                },
+                "virtuality": {
+                    "$ref": "IResource#/definitions/Virtuality"
+                }
+            },
+            "required": [
+                "elvl",
+                "id",
+                "logic",
+                "partitivity",
+                "virtuality"
+            ],
+            "type": "object"
+        },
+        "Language": {
+            "enum": [
+                "",
+                "ces",
+                "eng",
+                "enm",
+                "lat",
+                "oci"
+            ],
+            "type": "string"
+        },
+        "Logic": {
+            "enum": [
+                "1",
+                "2"
+            ],
+            "type": "string"
+        },
+        "MoodVariant": {
+            "enum": [
+                "1",
+                "2",
+                "3"
+            ],
+            "type": "string"
+        },
+        "Operator": {
+            "enum": [
+                "<",
+                "<=",
+                "=",
+                ">",
+                ">=",
+                "a",
+                "o",
+                "x"
+            ],
+            "type": "string"
+        },
+        "Partitivity": {
+            "enum": [
+                "1",
+                "2",
+                "3",
+                "4",
+                "5"
+            ],
+            "type": "string"
+        },
+        "Virtuality": {
+            "enum": [
+                "1",
+                "2",
+                "3",
+                "4",
+                "5",
+                "6"
+            ],
+            "type": "string"
+        }
+    },
+    "properties": {
+        "class": {
+            "enum": [
+                "R"
+            ],
+            "type": "string"
+        },
+        "data": {
+            "additionalProperties": false,
+            "defaultProperties": [],
+            "properties": {
+                "link": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "link"
+            ],
+            "type": "object"
+        },
+        "detail": {
+            "type": "string"
+        },
+        "id": {
+            "type": "string"
+        },
+        "label": {
+            "type": "string"
+        },
+        "language": {
+            "$ref": "IResource#/definitions/Language"
+        },
+        "notes": {
+            "items": {
+                "type": "string"
+            },
+            "type": "array"
+        },
+        "props": {
+            "items": {
+                "$ref": "IResource#/definitions/IProp"
+            },
+            "type": "array"
+        }
+    },
+    "required": [
+        "class",
+        "data",
+        "detail",
+        "id",
+        "label",
+        "language",
+        "notes",
+        "props"
+    ],
+    "type": "object"
+}
+

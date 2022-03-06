@@ -1,0 +1,279 @@
+{
+    "$id": "ITerritory",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "additionalProperties": false,
+    "defaultProperties": [],
+    "definitions": {
+        "Certainty": {
+            "enum": [
+                "0",
+                "1",
+                "2",
+                "3",
+                "4",
+                "5",
+                "6"
+            ],
+            "type": "string"
+        },
+        "Elvl": {
+            "enum": [
+                "1",
+                "2",
+                "3"
+            ],
+            "type": "string"
+        },
+        "IParentTerritory": {
+            "additionalProperties": false,
+            "defaultProperties": [],
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "order": {
+                    "type": "number"
+                }
+            },
+            "required": [
+                "id",
+                "order"
+            ],
+            "type": "object"
+        },
+        "IProp": {
+            "additionalProperties": false,
+            "defaultProperties": [],
+            "properties": {
+                "bundleEnd": {
+                    "type": "boolean"
+                },
+                "bundleOperator": {
+                    "$ref": "ITerritory#/definitions/Operator"
+                },
+                "bundleStart": {
+                    "type": "boolean"
+                },
+                "certainty": {
+                    "$ref": "ITerritory#/definitions/Certainty"
+                },
+                "children": {
+                    "items": {
+                        "$ref": "ITerritory#/definitions/IProp"
+                    },
+                    "type": "array"
+                },
+                "elvl": {
+                    "$ref": "ITerritory#/definitions/Elvl"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "logic": {
+                    "$ref": "ITerritory#/definitions/Logic"
+                },
+                "mood": {
+                    "items": {
+                        "enum": [
+                            "1",
+                            "10",
+                            "11",
+                            "12",
+                            "13",
+                            "2",
+                            "3",
+                            "4",
+                            "5",
+                            "6",
+                            "7",
+                            "8",
+                            "9"
+                        ],
+                        "type": "string"
+                    },
+                    "type": "array"
+                },
+                "moodvariant": {
+                    "$ref": "ITerritory#/definitions/MoodVariant"
+                },
+                "type": {
+                    "$ref": "ITerritory#/definitions/IPropSpec"
+                },
+                "value": {
+                    "$ref": "ITerritory#/definitions/IPropSpec"
+                }
+            },
+            "required": [
+                "bundleEnd",
+                "bundleOperator",
+                "bundleStart",
+                "certainty",
+                "children",
+                "elvl",
+                "id",
+                "logic",
+                "mood",
+                "moodvariant",
+                "type",
+                "value"
+            ],
+            "type": "object"
+        },
+        "IPropSpec": {
+            "additionalProperties": false,
+            "defaultProperties": [],
+            "properties": {
+                "elvl": {
+                    "$ref": "ITerritory#/definitions/Elvl"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "logic": {
+                    "$ref": "ITerritory#/definitions/Logic"
+                },
+                "partitivity": {
+                    "$ref": "ITerritory#/definitions/Partitivity"
+                },
+                "virtuality": {
+                    "$ref": "ITerritory#/definitions/Virtuality"
+                }
+            },
+            "required": [
+                "elvl",
+                "id",
+                "logic",
+                "partitivity",
+                "virtuality"
+            ],
+            "type": "object"
+        },
+        "Language": {
+            "enum": [
+                "",
+                "ces",
+                "eng",
+                "enm",
+                "lat",
+                "oci"
+            ],
+            "type": "string"
+        },
+        "Logic": {
+            "enum": [
+                "1",
+                "2"
+            ],
+            "type": "string"
+        },
+        "MoodVariant": {
+            "enum": [
+                "1",
+                "2",
+                "3"
+            ],
+            "type": "string"
+        },
+        "Operator": {
+            "enum": [
+                "<",
+                "<=",
+                "=",
+                ">",
+                ">=",
+                "a",
+                "o",
+                "x"
+            ],
+            "type": "string"
+        },
+        "Partitivity": {
+            "enum": [
+                "1",
+                "2",
+                "3",
+                "4",
+                "5"
+            ],
+            "type": "string"
+        },
+        "Virtuality": {
+            "enum": [
+                "1",
+                "2",
+                "3",
+                "4",
+                "5",
+                "6"
+            ],
+            "type": "string"
+        }
+    },
+    "properties": {
+        "class": {
+            "enum": [
+                "T"
+            ],
+            "type": "string"
+        },
+        "data": {
+            "additionalProperties": false,
+            "defaultProperties": [],
+            "properties": {
+                "parent": {
+                    "anyOf": [
+                        {
+                            "$ref": "ITerritory#/definitions/IParentTerritory"
+                        },
+                        {
+                            "enum": [
+                                false
+                            ],
+                            "type": "boolean"
+                        }
+                    ]
+                }
+            },
+            "required": [
+                "parent"
+            ],
+            "type": "object"
+        },
+        "detail": {
+            "type": "string"
+        },
+        "id": {
+            "type": "string"
+        },
+        "label": {
+            "type": "string"
+        },
+        "language": {
+            "$ref": "ITerritory#/definitions/Language"
+        },
+        "notes": {
+            "items": {
+                "type": "string"
+            },
+            "type": "array"
+        },
+        "props": {
+            "items": {
+                "$ref": "ITerritory#/definitions/IProp"
+            },
+            "type": "array"
+        }
+    },
+    "required": [
+        "class",
+        "data",
+        "detail",
+        "id",
+        "label",
+        "language",
+        "notes",
+        "props"
+    ],
+    "type": "object"
+}
+
