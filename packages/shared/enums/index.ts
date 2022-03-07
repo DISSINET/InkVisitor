@@ -189,3 +189,8 @@ export enum UserRoleMode {
   Read = "read",
   Admin = "admin",
 }
+
+export enum Order {
+  First = -9999,
+  Last = 9999,
+}
