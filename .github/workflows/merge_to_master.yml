@@ -60,11 +60,8 @@ jobs:
           sudo openvpn --config muni-linux.ovpn --auth-user-pass pass.txt --daemon
           sleep 20s
 
-      - name: ping host
-        run: ping -c 5 ${{ secrets.SSH_HOST }}
+      - name: Deploy backend
+        run: ./deploy-backend-staging.sh ${{ secrets.SSH_USER }} ${{ secrets.SSH_HOST }}
 
       - name: Deploy frontend
         run: ./deploy-frontend-staging.sh ${{ secrets.SSH_USER }} ${{ secrets.SSH_HOST }}
-
-      - name: Deploy backend
-        run: ./deploy-backend-staging.sh ${{ secrets.SSH_USER }} ${{ secrets.SSH_HOST }}
