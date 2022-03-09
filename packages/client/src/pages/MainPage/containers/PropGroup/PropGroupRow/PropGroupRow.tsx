@@ -6,7 +6,6 @@ import {
   DropTargetMonitor,
   useDrag,
   useDrop,
-  XYCoord,
 } from "react-dnd";
 import { FaPlus, FaTrashAlt, FaUnlink } from "react-icons/fa";
 import { setDraggedPropRow } from "redux/features/rowDnd/draggedPropRowSlice";
@@ -21,6 +20,7 @@ import {
   DragItem,
   ItemTypes,
 } from "types";
+import { dndHoverFn } from "utils";
 import { EntitySuggester, EntityTag } from "../..";
 import { AttributesGroupEditor } from "../../AttributesEditor/AttributesGroupEditor";
 import {
@@ -104,33 +104,7 @@ export const PropGroupRow: React.FC<IPropGroupRow> = ({
       if (tempDisabled) {
         return;
       }
-      if (!ref.current) {
-        return;
-      }
-      const dragIndex: number = item.index;
-      const hoverIndex: number | undefined = index;
-
-      if (dragIndex === hoverIndex) {
-        return;
-      }
-
-      const hoverBoundingRect = ref.current?.getBoundingClientRect();
-      const hoverMiddleY =
-        (hoverBoundingRect.bottom - hoverBoundingRect.top) / 2;
-      const clientOffset = monitor.getClientOffset();
-      const hoverClientY = (clientOffset as XYCoord).y - hoverBoundingRect.top;
-      if (hoverIndex === undefined) {
-        return;
-      }
-      if (dragIndex < hoverIndex && hoverClientY < hoverMiddleY) {
-        return;
-      }
-
-      if (dragIndex > hoverIndex && hoverClientY > hoverMiddleY) {
-        return;
-      }
-      moveProp(dragIndex, hoverIndex);
-      item.index = hoverIndex;
+      dndHoverFn(item, index, monitor, ref, moveProp);
     },
   });
 

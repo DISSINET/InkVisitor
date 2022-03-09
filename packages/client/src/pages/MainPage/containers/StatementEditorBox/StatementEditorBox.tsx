@@ -341,10 +341,10 @@ export const StatementEditorBox: React.FC = () => {
     oldIndex: number,
     newIndex: number
   ) => {
-    for (let action of actants) {
-      for (let prop of action.props) {
+    for (let actant of actants) {
+      for (let prop of actant.props) {
         if (prop.id === propId) {
-          action.props.splice(newIndex, 0, action.props.splice(oldIndex, 1)[0]);
+          actant.props.splice(newIndex, 0, actant.props.splice(oldIndex, 1)[0]);
           return actants;
         }
         for (let prop1 of prop.children) {
@@ -379,12 +379,12 @@ export const StatementEditorBox: React.FC = () => {
   ) => {
     if (statement) {
       const { actions, actants, ...dataWithoutActants } = statement.data;
-      const actionsNew = changeOrder(propId, actions, oldIndex, newIndex);
-      const actantsNew = changeOrder(propId, actants, oldIndex, newIndex);
+      changeOrder(propId, actions, oldIndex, newIndex);
+      changeOrder(propId, actants, oldIndex, newIndex);
 
       const newStatementData = {
-        actionsNew,
-        actantsNew,
+        actions,
+        actants,
         ...dataWithoutActants,
       };
 

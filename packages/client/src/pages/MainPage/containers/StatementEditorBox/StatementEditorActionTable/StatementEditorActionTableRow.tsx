@@ -8,7 +8,6 @@ import {
   DropTargetMonitor,
   useDrag,
   useDrop,
-  XYCoord,
 } from "react-dnd";
 import { FaGripVertical, FaPlus, FaTrashAlt, FaUnlink } from "react-icons/fa";
 import { UseMutationResult } from "react-query";
@@ -22,6 +21,7 @@ import {
   DragItem,
   ItemTypes,
 } from "types";
+import { dndHoverFn } from "utils";
 import { EntitySuggester, EntityTag } from "../..";
 import AttributesEditor from "../../AttributesEditor/AttributesEditor";
 import { StyledTd, StyledTr } from "./StatementEditorActionTableStyles";
@@ -29,7 +29,7 @@ import { StyledTd, StyledTr } from "./StatementEditorActionTableStyles";
 interface StatementEditorActionTableRow {
   row: any;
   index: number;
-  moveRow: any;
+  moveRow: (dragIndex: number, hoverIndex: number) => void;
   statement: IResponseStatement;
   userCanEdit?: boolean;
   updateOrderFn: () => void;
@@ -82,27 +82,7 @@ export const StatementEditorActionTableRow: React.FC<
   const [, drop] = useDrop({
     accept: ItemTypes.ACTION_ROW,
     hover(item: DragItem, monitor: DropTargetMonitor) {
-      if (!dropRef.current) {
-        return;
-      }
-      const dragIndex = item.index;
-      const hoverIndex = index;
-      if (dragIndex === hoverIndex) {
-        return;
-      }
-      const hoverBoundingRect = dropRef.current?.getBoundingClientRect();
-      const hoverMiddleY =
-        (hoverBoundingRect.bottom - hoverBoundingRect.top) / 2;
-      const clientOffset = monitor.getClientOffset();
-      const hoverClientY = (clientOffset as XYCoord).y - hoverBoundingRect.top;
-      if (dragIndex < hoverIndex && hoverClientY < hoverMiddleY) {
-        return;
-      }
-      if (dragIndex > hoverIndex && hoverClientY > hoverMiddleY) {
-        return;
-      }
-      moveRow(dragIndex, hoverIndex);
-      item.index = hoverIndex;
+      dndHoverFn(item, index, monitor, dropRef, moveRow);
     },
   });
 

@@ -1,13 +1,13 @@
 import {
   actantLogicalTypeDict,
-  entityStatusDict,
   entitiesDict,
-  languageDict,
   entityReferenceSourceDict,
+  entityStatusDict,
+  languageDict,
 } from "@shared/dictionaries";
 import { allEntities } from "@shared/dictionaries/entity";
 import { EntityClass, Language, UserRoleMode } from "@shared/enums";
-import { IAction, IEntityReference, IStatement } from "@shared/types";
+import { IAction, IEntityReference, IProp } from "@shared/types";
 import api from "api";
 import {
   Button,
@@ -33,7 +33,6 @@ import {
 import { useMutation, useQuery, useQueryClient } from "react-query";
 import { toast } from "react-toastify";
 import { DraggedPropRowCategory } from "types";
-import { findPositionInStatement } from "utils";
 import { EntityTag } from "..";
 import { AttributeButtonGroup } from "../AttributeButtonGroup/AttributeButtonGroup";
 import { AuditTable } from "../AuditTable/AuditTable";
@@ -291,6 +290,54 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
           }
         });
       });
+
+      updateEntityMutation.mutate({ props: newProps });
+    }
+  };
+
+  const changeOrder = (
+    propId: string,
+    props: IProp[],
+    oldIndex: number,
+    newIndex: number
+  ) => {
+    for (let prop of props) {
+      if (prop.id === propId) {
+        props.splice(newIndex, 0, props.splice(oldIndex, 1)[0]);
+        return props;
+      }
+      for (let prop1 of prop.children) {
+        if (prop1.id === propId) {
+          prop.children.splice(
+            newIndex,
+            0,
+            prop.children.splice(oldIndex, 1)[0]
+          );
+          return props;
+        }
+        for (let prop2 of prop1.children) {
+          if (prop2.id === propId) {
+            prop1.children.splice(
+              newIndex,
+              0,
+              prop1.children.splice(oldIndex, 1)[0]
+            );
+            return props;
+          }
+        }
+      }
+    }
+    return props;
+  };
+
+  const movePropToIndex = (
+    propId: string,
+    oldIndex: number,
+    newIndex: number
+  ) => {
+    if (entity) {
+      const newProps = [...entity.props];
+      changeOrder(propId, newProps, oldIndex, newIndex);
 
       updateEntityMutation.mutate({ props: newProps });
     }
@@ -967,8 +1014,7 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                     userCanEdit={userCanEdit}
                     openDetailOnCreate={false}
                     movePropToIndex={(propId, oldIndex, newIndex) => {
-                      console.log("oldIndex", oldIndex);
-                      console.log("newIndex", newIndex);
+                      movePropToIndex(propId, oldIndex, newIndex);
                     }}
                     category={DraggedPropRowCategory.META_PROP}
                   />
