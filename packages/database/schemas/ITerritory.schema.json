@@ -24,6 +24,43 @@
             ],
             "type": "string"
         },
+        "EntityReferenceSource": {
+            "enum": [
+                "geonames",
+                "wordnet"
+            ],
+            "type": "string"
+        },
+        "EntityStatus": {
+            "enum": [
+                "0",
+                "1",
+                "2",
+                "3"
+            ],
+            "type": "string"
+        },
+        "IEntityReference": {
+            "additionalProperties": false,
+            "defaultProperties": [],
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "source": {
+                    "$ref": "ITerritory#/definitions/EntityReferenceSource"
+                },
+                "value": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "id",
+                "source",
+                "value"
+            ],
+            "type": "object"
+        },
         "IParentTerritory": {
             "additionalProperties": false,
             "defaultProperties": [],
@@ -245,11 +282,17 @@
         "id": {
             "type": "string"
         },
+        "isTemplate": {
+            "type": "boolean"
+        },
         "label": {
             "type": "string"
         },
         "language": {
             "$ref": "ITerritory#/definitions/Language"
+        },
+        "legacyId": {
+            "type": "string"
         },
         "notes": {
             "items": {
@@ -262,6 +305,23 @@
                 "$ref": "ITerritory#/definitions/IProp"
             },
             "type": "array"
+        },
+        "references": {
+            "items": {
+                "$ref": "ITerritory#/definitions/IEntityReference"
+            },
+            "type": "array"
+        },
+        "status": {
+            "$ref": "ITerritory#/definitions/EntityStatus"
+        },
+        "templateData": {
+            "additionalProperties": true,
+            "properties": {},
+            "type": "object"
+        },
+        "usedTemplate": {
+            "type": "boolean"
         }
     },
     "required": [
@@ -272,7 +332,9 @@
         "label",
         "language",
         "notes",
-        "props"
+        "props",
+        "references",
+        "status"
     ],
     "type": "object"
 }

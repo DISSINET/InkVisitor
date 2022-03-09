@@ -75,6 +75,13 @@
             ],
             "type": "string"
         },
+        "EntityReferenceSource": {
+            "enum": [
+                "geonames",
+                "wordnet"
+            ],
+            "type": "string"
+        },
         "EntityStatus": {
             "enum": [
                 "0",
@@ -83,6 +90,27 @@
                 "3"
             ],
             "type": "string"
+        },
+        "IEntityReference": {
+            "additionalProperties": false,
+            "defaultProperties": [],
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "source": {
+                    "$ref": "IAction#/definitions/EntityReferenceSource"
+                },
+                "value": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "id",
+                "source",
+                "value"
+            ],
+            "type": "object"
         },
         "IProp": {
             "additionalProperties": false,
@@ -266,16 +294,12 @@
                 "entities": {
                     "$ref": "IAction#/definitions/ActionEntity"
                 },
-                "status": {
-                    "$ref": "IAction#/definitions/EntityStatus"
-                },
                 "valencies": {
                     "$ref": "IAction#/definitions/ActionValency"
                 }
             },
             "required": [
                 "entities",
-                "status",
                 "valencies"
             ],
             "type": "object"
@@ -286,11 +310,17 @@
         "id": {
             "type": "string"
         },
+        "isTemplate": {
+            "type": "boolean"
+        },
         "label": {
             "type": "string"
         },
         "language": {
             "$ref": "IAction#/definitions/Language"
+        },
+        "legacyId": {
+            "type": "string"
         },
         "notes": {
             "items": {
@@ -303,6 +333,23 @@
                 "$ref": "IAction#/definitions/IProp"
             },
             "type": "array"
+        },
+        "references": {
+            "items": {
+                "$ref": "IAction#/definitions/IEntityReference"
+            },
+            "type": "array"
+        },
+        "status": {
+            "$ref": "IAction#/definitions/EntityStatus"
+        },
+        "templateData": {
+            "additionalProperties": true,
+            "properties": {},
+            "type": "object"
+        },
+        "usedTemplate": {
+            "type": "boolean"
         }
     },
     "required": [
@@ -313,7 +360,9 @@
         "label",
         "language",
         "notes",
-        "props"
+        "props",
+        "references",
+        "status"
     ],
     "type": "object"
 }
