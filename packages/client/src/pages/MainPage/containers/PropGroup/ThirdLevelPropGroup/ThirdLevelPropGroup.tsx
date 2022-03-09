@@ -5,24 +5,18 @@ import { useAppSelector } from "redux/hooks";
 import { DraggedPropRowCategory, DraggedPropRowItem } from "types";
 
 interface ThirdLevelPropGroup {
-  prop1: IProp;
   prop2: IProp;
-  pi2: number;
   renderThirdLevelPropRow: (
     prop3: IProp,
     pi3: number,
-    prop1: IProp,
     prop2: IProp,
-    pi2: number,
     moveProp: (dragIndex: number, hoverIndex: number) => void
   ) => JSX.Element;
   thirdLevelProps: IProp[];
   category: DraggedPropRowCategory;
 }
 export const ThirdLevelPropGroup: React.FC<ThirdLevelPropGroup> = ({
-  prop1,
   prop2,
-  pi2,
   renderThirdLevelPropRow,
   thirdLevelProps,
   category,
@@ -67,7 +61,7 @@ export const ThirdLevelPropGroup: React.FC<ThirdLevelPropGroup> = ({
     <>
       {!hideChildren &&
         props.map((prop3: IProp, pi3: number) =>
-          renderThirdLevelPropRow(prop3, pi3, prop1, prop2, pi2, moveProp)
+          renderThirdLevelPropRow(prop3, pi3, prop2, moveProp)
         )}
     </>
   );

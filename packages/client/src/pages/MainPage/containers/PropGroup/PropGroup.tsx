@@ -130,8 +130,6 @@ export const PropGroup: React.FC<IPropGroup> = ({
           />
           {/* 3rd level */}
           <ThirdLevelPropGroup
-            prop1={prop1}
-            pi2={pi2}
             prop2={prop2}
             renderThirdLevelPropRow={renderThirdLevelPropRow}
             thirdLevelProps={prop2.children}
@@ -147,9 +145,7 @@ export const PropGroup: React.FC<IPropGroup> = ({
     (
       prop3: IProp,
       pi3: number,
-      prop1: IProp,
       prop2: IProp,
-      pi2: number,
       moveProp: (dragIndex: number, hoverIndex: number) => void
     ) => {
       return (

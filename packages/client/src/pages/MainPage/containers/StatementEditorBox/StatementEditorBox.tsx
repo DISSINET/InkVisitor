@@ -292,8 +292,6 @@ export const StatementEditorBox: React.FC = () => {
                     ...actant.props[pi1].children[pi2].children[pi3],
                     ...changes,
                   };
-                  console.log(changes);
-                  console.log(actant.props[pi1].children[pi2].children[pi3]);
                 }
               });
             });
@@ -379,8 +377,6 @@ export const StatementEditorBox: React.FC = () => {
     oldIndex: number,
     newIndex: number
   ) => {
-    console.log("old: ", oldIndex);
-    console.log("new: ", newIndex);
     if (statement) {
       const { actions, actants, ...dataWithoutActants } = statement.data;
       const actionsNew = changeOrder(propId, actions, oldIndex, newIndex);
