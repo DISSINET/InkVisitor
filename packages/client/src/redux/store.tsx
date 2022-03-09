@@ -10,6 +10,8 @@ import layoutWidthSlice from "./features/layout/layoutWidthSlice";
 import panelWidthsSlice from "./features/layout/panelWidthsSlice";
 import separatorXPositionSlice from "./features/layout/separatorXPositionSlice";
 import draggedTerritorySlice from "./features/territoryTree/draggedTerritorySlice";
+import draggedPropRowSlice from "./features/rowDnd/draggedPropRowSlice";
+import draggedActantRowSlice from "./features/rowDnd/draggedActantRowSlice";
 
 const store: Store = configureStore({
   reducer: {
@@ -18,6 +20,10 @@ const store: Store = configureStore({
       selectedTerritoryPath: selectedTerritoryPathSlice,
       treeInitialized: treeInitializeSlice,
       draggedTerritory: draggedTerritorySlice,
+    }),
+    rowDnd: combineReducers({
+      draggedPropRow: draggedPropRowSlice,
+      draggedActantRow: draggedActantRowSlice,
     }),
     layout: combineReducers({
       layoutWidth: layoutWidthSlice,

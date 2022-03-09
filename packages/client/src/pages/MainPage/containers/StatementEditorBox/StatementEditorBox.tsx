@@ -43,6 +43,7 @@ import {
   StyledTagsListItem,
   StyledTagWrapper,
 } from "./StatementEditorBoxStyles";
+import { DraggedPropRowCategory } from "types";
 
 const classesActants = [
   EntityClass.Statement,
@@ -287,13 +288,10 @@ export const StatementEditorBox: React.FC = () => {
               // 3rd level
               actant.props[pi1].children[pi2].children.forEach((prop3, pi3) => {
                 if (prop3.id === propId) {
-                  console.log("here we are");
                   actant.props[pi1].children[pi2].children[pi3] = {
                     ...actant.props[pi1].children[pi2].children[pi3],
                     ...changes,
                   };
-                  console.log(changes);
-                  console.log(actant.props[pi1].children[pi2].children[pi3]);
                 }
               });
             });
@@ -337,58 +335,58 @@ export const StatementEditorBox: React.FC = () => {
     }
   };
 
-  //actant.props = actant.props.splice(index + 1, 0, actant.props.splice(index, 1)[0]);
-  const movePropUp = (propId: string) => {
-    if (statement) {
-      const newStatementData = { ...statement.data };
-
-      [...newStatementData.actants, ...newStatementData.actions].forEach(
-        (actant: IStatementActant | IStatementAction) => {
-          actant.props.forEach((actantProp, pi) => {
-            if (actantProp.id === propId) {
-              actant.props.splice(pi - 1, 0, actant.props.splice(pi, 1)[0]);
-            }
-
-            actant.props[pi].children.forEach((actantPropProp, pii) => {
-              if (actantPropProp.id === propId) {
-                actant.props[pi].children.splice(
-                  pii - 1,
-                  0,
-                  actant.props[pi].children.splice(pii, 1)[0]
-                );
-              }
-            });
-          });
+  const changeOrder = (
+    propId: string,
+    actants: IStatementActant[] | IStatementAction[],
+    oldIndex: number,
+    newIndex: number
+  ) => {
+    for (let actant of actants) {
+      for (let prop of actant.props) {
+        if (prop.id === propId) {
+          actant.props.splice(newIndex, 0, actant.props.splice(oldIndex, 1)[0]);
+          return actants;
         }
-      );
-
-      updateStatementDataMutation.mutate(newStatementData);
+        for (let prop1 of prop.children) {
+          if (prop1.id === propId) {
+            prop.children.splice(
+              newIndex,
+              0,
+              prop.children.splice(oldIndex, 1)[0]
+            );
+            return actants;
+          }
+          for (let prop2 of prop1.children) {
+            if (prop2.id === propId) {
+              prop1.children.splice(
+                newIndex,
+                0,
+                prop1.children.splice(oldIndex, 1)[0]
+              );
+              return actants;
+            }
+          }
+        }
+      }
     }
+    return actants;
   };
 
-  const movePropDown = (propId: string) => {
+  const movePropToIndex = (
+    propId: string,
+    oldIndex: number,
+    newIndex: number
+  ) => {
     if (statement) {
-      const newStatementData = { ...statement.data };
+      const { actions, actants, ...dataWithoutActants } = statement.data;
+      changeOrder(propId, actions, oldIndex, newIndex);
+      changeOrder(propId, actants, oldIndex, newIndex);
 
-      [...newStatementData.actants, ...newStatementData.actions].forEach(
-        (actant: IStatementActant | IStatementAction) => {
-          actant.props.forEach((actantProp, pi) => {
-            if (actantProp.id === propId) {
-              actant.props.splice(pi + 1, 0, actant.props.splice(pi, 1)[0]);
-            }
-
-            actant.props[pi].children.forEach((actantPropProp, pii) => {
-              if (actantPropProp.id === propId) {
-                actant.props[pi].children.splice(
-                  pii + 1,
-                  0,
-                  actant.props[pi].children.splice(pii, 1)[0]
-                );
-              }
-            });
-          });
-        }
-      );
+      const newStatementData = {
+        actions,
+        actants,
+        ...dataWithoutActants,
+      };
 
       updateStatementDataMutation.mutate(newStatementData);
     }
@@ -493,7 +491,8 @@ export const StatementEditorBox: React.FC = () => {
   const renderPropGroup = (
     originId: string,
     props: IProp[],
-    statement: IResponseStatement
+    statement: IResponseStatement,
+    category: DraggedPropRowCategory
   ) => {
     const originActant = statement.entities[originId];
 
@@ -507,10 +506,10 @@ export const StatementEditorBox: React.FC = () => {
           updateProp={updateProp}
           removeProp={removeProp}
           addProp={addProp}
-          movePropDown={movePropDown}
-          movePropUp={movePropUp}
+          movePropToIndex={movePropToIndex}
           userCanEdit={userCanEdit}
           openDetailOnCreate={false}
+          category={category}
         />
       );
     }
