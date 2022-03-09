@@ -1,0 +1,156 @@
+{
+    "$id": "IUser",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "additionalProperties": false,
+    "defaultProperties": [],
+    "definitions": {
+        "IBookmarkFolder": {
+            "additionalProperties": false,
+            "defaultProperties": [],
+            "properties": {
+                "entityIds": {
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "entityIds",
+                "id",
+                "name"
+            ],
+            "type": "object"
+        },
+        "IStoredTerritory": {
+            "additionalProperties": false,
+            "defaultProperties": [],
+            "properties": {
+                "territoryId": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "territoryId"
+            ],
+            "type": "object"
+        },
+        "IUserOptions": {
+            "additionalProperties": false,
+            "defaultProperties": [],
+            "properties": {
+                "defaultLanguage": {
+                    "type": "string"
+                },
+                "defaultTerritory": {
+                    "type": "string"
+                },
+                "searchLanguages": {
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
+                }
+            },
+            "required": [
+                "defaultLanguage",
+                "defaultTerritory",
+                "searchLanguages"
+            ],
+            "type": "object"
+        },
+        "IUserRight": {
+            "additionalProperties": false,
+            "defaultProperties": [],
+            "properties": {
+                "mode": {
+                    "$ref": "IUser#/definitions/UserRoleMode"
+                },
+                "territory": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "mode",
+                "territory"
+            ],
+            "type": "object"
+        },
+        "UserRole": {
+            "enum": [
+                "admin",
+                "editor",
+                "viewer"
+            ],
+            "type": "string"
+        },
+        "UserRoleMode": {
+            "enum": [
+                "admin",
+                "read",
+                "write"
+            ],
+            "type": "string"
+        }
+    },
+    "properties": {
+        "active": {
+            "type": "boolean"
+        },
+        "bookmarks": {
+            "items": {
+                "$ref": "IUser#/definitions/IBookmarkFolder"
+            },
+            "type": "array"
+        },
+        "email": {
+            "type": "string"
+        },
+        "id": {
+            "type": "string"
+        },
+        "name": {
+            "type": "string"
+        },
+        "options": {
+            "$ref": "IUser#/definitions/IUserOptions"
+        },
+        "password": {
+            "type": "string"
+        },
+        "rights": {
+            "items": {
+                "$ref": "IUser#/definitions/IUserRight"
+            },
+            "type": "array"
+        },
+        "role": {
+            "$ref": "IUser#/definitions/UserRole"
+        },
+        "storedTerritories": {
+            "items": {
+                "$ref": "IUser#/definitions/IStoredTerritory"
+            },
+            "type": "array"
+        }
+    },
+    "required": [
+        "active",
+        "bookmarks",
+        "email",
+        "id",
+        "name",
+        "options",
+        "rights",
+        "role",
+        "storedTerritories"
+    ],
+    "type": "object"
+}
+

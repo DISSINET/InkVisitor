@@ -15,6 +15,7 @@ export class CustomError extends Error {
   constructor(m: string) {
     super(m);
     this.log = m;
+    //@ts-ignore
     this.name = this.constructor.name; // so the value would be taken from the constructor - not the default Error
   }
 
