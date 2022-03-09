@@ -73,7 +73,7 @@ export const PropGroupRow: React.FC<IPropGroupRow> = ({
   const propTypeEntity: IEntity = entities[prop.type.id];
   const propValueEntity = entities[prop.value.id];
 
-  const draggePropRow: DraggedPropRowItem = useAppSelector(
+  const draggedPropRow: DraggedPropRowItem = useAppSelector(
     (state) => state.rowDnd.draggedPropRow
   );
 
@@ -81,14 +81,14 @@ export const PropGroupRow: React.FC<IPropGroupRow> = ({
 
   useEffect(() => {
     if (
-      (draggePropRow.parentId && draggePropRow.parentId !== parentId) ||
-      (draggePropRow.category && draggePropRow.category !== category)
+      (draggedPropRow.parentId && draggedPropRow.parentId !== parentId) ||
+      (draggedPropRow.category && draggedPropRow.category !== category)
     ) {
       setTempDisabled(true);
     } else {
       setTempDisabled(false);
     }
-  }, [draggePropRow]);
+  }, [draggedPropRow]);
 
   const dispatch = useAppDispatch();
   const ref = useRef<HTMLDivElement>(null);
@@ -116,10 +116,10 @@ export const PropGroupRow: React.FC<IPropGroupRow> = ({
     end: (item: DragItem | undefined, monitor: DragSourceMonitor) => {
       if (
         item &&
-        draggePropRow.index !== undefined &&
-        item.index !== draggePropRow.index
+        draggedPropRow.index !== undefined &&
+        item.index !== draggedPropRow.index
       )
-        movePropToIndex(id, draggePropRow.index, item.index);
+        movePropToIndex(id, draggedPropRow.index, item.index);
     },
   });
 
@@ -139,7 +139,7 @@ export const PropGroupRow: React.FC<IPropGroupRow> = ({
     return (
       <StyledGrid
         key={level + "|" + index + "|" + id}
-        tempDisabled={tempDisabled}
+        tempDisabled={tempDisabled && category === draggedPropRow.category}
       >
         <StyledPropLineColumn
           level={level}

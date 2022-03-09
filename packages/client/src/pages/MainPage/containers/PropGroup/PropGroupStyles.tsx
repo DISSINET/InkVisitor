@@ -16,8 +16,7 @@ export const StyledGrid = styled.div<StyledGrid>`
   padding-bottom: ${({ theme }) => theme.space[1]};
   width: 100%;
 
-  background-color: ${({ tempDisabled }) =>
-    tempDisabled ? "hotpink" : "transparent"};
+  opacity: ${({ tempDisabled }) => (tempDisabled ? 0.2 : 1)};
 `;
 
 export const StyledGridCell = styled.div`
@@ -25,10 +24,13 @@ export const StyledGridCell = styled.div`
   display: grid;
 `;
 
-interface StyledListHeaderColumn {}
+interface StyledListHeaderColumn {
+  leftMargin?: boolean;
+}
 export const StyledListHeaderColumn = styled.div<StyledListHeaderColumn>`
   font-weight: ${({ theme }) => theme.fontWeight.light};
-  margin-left: ${({ theme }) => theme.space[1]};
+  margin-left: ${({ theme, leftMargin }) =>
+    leftMargin ? theme.space[8] : theme.space[1]};
   font-size: ${({ theme }) => theme.fontSize["sm"]};
   color: ${({ theme }) => theme.color["info"]};
   text-align: left;

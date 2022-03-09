@@ -180,7 +180,7 @@ export const PropGroup: React.FC<IPropGroup> = ({
         <React.Fragment key={originId}>
           <StyledGrid>
             {/* Header */}
-            <StyledListHeaderColumn>Type</StyledListHeaderColumn>
+            <StyledListHeaderColumn leftMargin>Type</StyledListHeaderColumn>
             <StyledListHeaderColumn>Value</StyledListHeaderColumn>
             <StyledListHeaderColumn></StyledListHeaderColumn>
           </StyledGrid>
