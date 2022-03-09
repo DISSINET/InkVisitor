@@ -1,73 +1,151 @@
 import { IEntity, IProp } from "@shared/types";
-import { Button, AttributeIcon } from "components";
-import React from "react";
+import { AttributeIcon, Button } from "components";
+import React, { useEffect, useRef, useState } from "react";
 import {
-  FaUnlink,
-  FaPlus,
-  FaTrashAlt,
-  FaCaretUp,
-  FaCaretDown,
-} from "react-icons/fa";
+  DragSourceMonitor,
+  DropTargetMonitor,
+  useDrag,
+  useDrop,
+} from "react-dnd";
+import { FaPlus, FaTrashAlt, FaUnlink } from "react-icons/fa";
+import { setDraggedPropRow } from "redux/features/rowDnd/draggedPropRowSlice";
+import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { excludedSuggesterEntities } from "Theme/constants";
 import {
+  AttributeGroupDataObject,
   classesPropType,
   classesPropValue,
-  AttributeGroupDataObject,
+  DraggedPropRowCategory,
+  DraggedPropRowItem,
+  DragItem,
+  ItemTypes,
 } from "types";
-import { EntityTag, EntitySuggester } from "../..";
+import { dndHoverFn } from "utils";
+import { EntitySuggester, EntityTag } from "../..";
 import { AttributesGroupEditor } from "../../AttributesEditor/AttributesGroupEditor";
 import {
+  StyledFaGripVertical,
   StyledGrid,
-  StyledPropLineColumn,
   StyledPropButtonGroup,
+  StyledPropLineColumn,
 } from "../PropGroupStyles";
 
 interface IPropGroupRow {
   prop: IProp;
   entities: { [key: string]: IEntity };
-  level: "1" | "2" | "3";
-  order: number;
-  firstRowinGroup?: boolean;
-  lastRowinGroup?: boolean;
-  lastInGroup?: boolean;
+  level: 1 | 2 | 3;
 
   updateProp: (propId: string, changes: any) => void;
   removeProp: (propId: string) => void;
   addProp: (originId: string) => void;
-  movePropDown: (propId: string) => void;
-  movePropUp: (propId: string) => void;
+  moveProp: (dragIndex: number, hoverIndex: number) => void;
+  movePropToIndex: (propId: string, oldIndex: number, newIndex: number) => void;
 
   userCanEdit: boolean;
   territoryActants: string[];
   openDetailOnCreate: boolean;
+
+  parentId: string;
+  id: string;
+  index: number;
+  itemType?: ItemTypes;
+  category: DraggedPropRowCategory;
 }
 
 export const PropGroupRow: React.FC<IPropGroupRow> = ({
   prop,
   entities,
   level,
-  order,
-  firstRowinGroup = false,
-  lastRowinGroup = false,
   updateProp,
   removeProp,
   addProp,
-  movePropDown,
-  movePropUp,
+  moveProp,
+  movePropToIndex,
   userCanEdit,
   territoryActants = [],
   openDetailOnCreate = false,
+  parentId,
+  id,
+  index,
+  itemType,
+  category,
 }) => {
   const propTypeEntity: IEntity = entities[prop.type.id];
   const propValueEntity = entities[prop.value.id];
 
-  return (
-    <React.Fragment key={level + "|" + order}>
-      <StyledGrid>
+  const draggedPropRow: DraggedPropRowItem = useAppSelector(
+    (state) => state.rowDnd.draggedPropRow
+  );
+
+  const [tempDisabled, setTempDisabled] = useState(false);
+
+  useEffect(() => {
+    if (
+      (draggedPropRow.parentId && draggedPropRow.parentId !== parentId) ||
+      (draggedPropRow.category && draggedPropRow.category !== category)
+    ) {
+      setTempDisabled(true);
+    } else {
+      setTempDisabled(false);
+    }
+  }, [draggedPropRow]);
+
+  const dispatch = useAppDispatch();
+  const ref = useRef<HTMLDivElement>(null);
+
+  const [{ handlerId }, drop] = useDrop({
+    accept: itemType ? itemType : ItemTypes.PROP_ROW,
+    collect(monitor) {
+      return {
+        handlerId: monitor.getHandlerId(),
+      };
+    },
+    hover(item: DragItem, monitor: DropTargetMonitor) {
+      if (tempDisabled) {
+        return;
+      }
+      dndHoverFn(item, index, monitor, ref, moveProp);
+    },
+  });
+
+  const [{ isDragging }, drag] = useDrag({
+    item: { type: itemType ? itemType : ItemTypes.PROP_ROW, id, index },
+    collect: (monitor: DragSourceMonitor) => ({
+      isDragging: monitor.isDragging(),
+    }),
+    end: (item: DragItem | undefined, monitor: DragSourceMonitor) => {
+      if (
+        item &&
+        draggedPropRow.index !== undefined &&
+        item.index !== draggedPropRow.index
+      )
+        movePropToIndex(id, draggedPropRow.index, item.index);
+    },
+  });
+
+  drag(drop(ref));
+
+  useEffect(() => {
+    if (isDragging) {
+      dispatch(
+        setDraggedPropRow({ id, index, lvl: level, parentId, category })
+      );
+    } else {
+      dispatch(setDraggedPropRow({}));
+    }
+  }, [isDragging]);
+
+  const renderPropRow = () => {
+    return (
+      <StyledGrid
+        key={level + "|" + index + "|" + id}
+        tempDisabled={tempDisabled && category === draggedPropRow.category}
+      >
         <StyledPropLineColumn
           level={level}
           isTag={propTypeEntity ? true : false}
         >
+          <StyledFaGripVertical />
           {propTypeEntity ? (
             <EntityTag
               actant={propTypeEntity}
@@ -225,7 +303,7 @@ export const PropGroupRow: React.FC<IPropGroupRow> = ({
               userCanEdit={userCanEdit}
             />
 
-            {(level === "1" || level === "2") && (
+            {(level === 1 || level === 2) && (
               <Button
                 key="add"
                 icon={<FaPlus />}
@@ -245,28 +323,6 @@ export const PropGroupRow: React.FC<IPropGroupRow> = ({
               inverted={true}
               onClick={() => {
                 removeProp(prop.id);
-              }}
-            />
-            <Button
-              key="up"
-              inverted
-              disabled={firstRowinGroup}
-              icon={<FaCaretUp />}
-              tooltip="move prop up"
-              color="plain"
-              onClick={() => {
-                movePropUp(prop.id);
-              }}
-            />
-            <Button
-              key="down"
-              inverted
-              disabled={lastRowinGroup}
-              icon={<FaCaretDown />}
-              tooltip="move prop down"
-              color="plain"
-              onClick={() => {
-                movePropDown(prop.id);
               }}
             />
             {prop.logic == "2" ? (
@@ -296,6 +352,16 @@ export const PropGroupRow: React.FC<IPropGroupRow> = ({
           </StyledPropButtonGroup>
         </StyledPropLineColumn>
       </StyledGrid>
-    </React.Fragment>
+    );
+  };
+
+  const opacity = isDragging ? 0.5 : 1;
+
+  return (
+    <>
+      <div ref={ref} data-handler-id={handlerId} style={{ opacity: opacity }}>
+        {renderPropRow()}
+      </div>
+    </>
   );
 };
