@@ -288,7 +288,6 @@ export const StatementEditorBox: React.FC = () => {
               // 3rd level
               actant.props[pi1].children[pi2].children.forEach((prop3, pi3) => {
                 if (prop3.id === propId) {
-                  console.log("here we are");
                   actant.props[pi1].children[pi2].children[pi3] = {
                     ...actant.props[pi1].children[pi2].children[pi3],
                     ...changes,
@@ -338,64 +337,6 @@ export const StatementEditorBox: React.FC = () => {
     }
   };
 
-  //actant.props = actant.props.splice(index + 1, 0, actant.props.splice(index, 1)[0]);
-  const movePropUp = (propId: string) => {
-    if (statement) {
-      const newStatementData = { ...statement.data };
-
-      [...newStatementData.actants, ...newStatementData.actions].forEach(
-        (actant: IStatementActant | IStatementAction) => {
-          actant.props.forEach((actantProp, pi) => {
-            if (actantProp.id === propId) {
-              actant.props.splice(pi - 1, 0, actant.props.splice(pi, 1)[0]);
-            }
-
-            actant.props[pi].children.forEach((actantPropProp, pii) => {
-              if (actantPropProp.id === propId) {
-                actant.props[pi].children.splice(
-                  pii - 1,
-                  0,
-                  actant.props[pi].children.splice(pii, 1)[0]
-                );
-              }
-            });
-          });
-        }
-      );
-      console.log(newStatementData);
-
-      updateStatementDataMutation.mutate(newStatementData);
-    }
-  };
-
-  const movePropDown = (propId: string) => {
-    if (statement) {
-      const newStatementData = { ...statement.data };
-
-      [...newStatementData.actants, ...newStatementData.actions].forEach(
-        (actant: IStatementActant | IStatementAction) => {
-          actant.props.forEach((actantProp, pi) => {
-            if (actantProp.id === propId) {
-              actant.props.splice(pi + 1, 0, actant.props.splice(pi, 1)[0]);
-            }
-
-            actant.props[pi].children.forEach((actantPropProp, pii) => {
-              if (actantPropProp.id === propId) {
-                actant.props[pi].children.splice(
-                  pii + 1,
-                  0,
-                  actant.props[pi].children.splice(pii, 1)[0]
-                );
-              }
-            });
-          });
-        }
-      );
-
-      updateStatementDataMutation.mutate(newStatementData);
-    }
-  };
-
   const changeOrder = (
     propId: string,
     actants: IStatementActant[] | IStatementAction[],
@@ -406,7 +347,7 @@ export const StatementEditorBox: React.FC = () => {
       for (let prop of action.props) {
         if (prop.id === propId) {
           action.props.splice(newIndex, 0, action.props.splice(oldIndex, 1)[0]);
-          return;
+          return actants;
         }
         for (let prop1 of prop.children) {
           if (prop1.id === propId) {
@@ -415,7 +356,7 @@ export const StatementEditorBox: React.FC = () => {
               0,
               prop.children.splice(oldIndex, 1)[0]
             );
-            return;
+            return actants;
           }
           for (let prop2 of prop1.children) {
             if (prop2.id === propId) {
@@ -424,12 +365,13 @@ export const StatementEditorBox: React.FC = () => {
                 0,
                 prop1.children.splice(oldIndex, 1)[0]
               );
-              return;
+              return actants;
             }
           }
         }
       }
     }
+    return actants;
   };
 
   const movePropToIndex = (
@@ -441,10 +383,14 @@ export const StatementEditorBox: React.FC = () => {
     console.log("new: ", newIndex);
     if (statement) {
       const { actions, actants, ...dataWithoutActants } = statement.data;
-      changeOrder(propId, actions, oldIndex, newIndex);
-      changeOrder(propId, actants, oldIndex, newIndex);
+      const actionsNew = changeOrder(propId, actions, oldIndex, newIndex);
+      const actantsNew = changeOrder(propId, actants, oldIndex, newIndex);
 
-      const newStatementData = { actions, actants, ...dataWithoutActants };
+      const newStatementData = {
+        actionsNew,
+        actantsNew,
+        ...dataWithoutActants,
+      };
 
       updateStatementDataMutation.mutate(newStatementData);
     }

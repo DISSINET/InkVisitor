@@ -136,9 +136,11 @@ export const PropGroupRow: React.FC<IPropGroupRow> = ({
 
   const [{ isDragging }, drag] = useDrag({
     item: { type: itemType ? itemType : ItemTypes.PROP_ROW, id, index },
-    collect: (monitor) => ({
-      isDragging: monitor.isDragging(),
-    }),
+    collect: (monitor: DragSourceMonitor) => {
+      return {
+        isDragging: monitor.isDragging(),
+      };
+    },
     end: (item: DragItem | undefined, monitor: DragSourceMonitor) => {
       if (
         item &&

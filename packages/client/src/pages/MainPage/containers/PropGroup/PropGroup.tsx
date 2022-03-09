@@ -153,25 +153,26 @@ export const PropGroup: React.FC<IPropGroup> = ({
       moveProp: (dragIndex: number, hoverIndex: number) => void
     ) => {
       return (
-        <PropGroupRow
-          key={prop3.id + "|" + pi3}
-          id={prop3.id}
-          index={pi3}
-          itemType={ItemTypes.PROP_ROW3}
-          parentId={prop2.id}
-          prop={prop3}
-          entities={entities}
-          level={3}
-          updateProp={updateProp}
-          removeProp={removeProp}
-          addProp={addProp}
-          userCanEdit={userCanEdit}
-          territoryActants={territoryActants || []}
-          openDetailOnCreate={openDetailOnCreate}
-          moveProp={moveProp}
-          movePropToIndex={movePropToIndex}
-          category={category}
-        />
+        <React.Fragment key={prop3.id}>
+          <PropGroupRow
+            id={prop3.id}
+            index={pi3}
+            itemType={ItemTypes.PROP_ROW3}
+            parentId={prop2.id}
+            prop={prop3}
+            entities={entities}
+            level={3}
+            updateProp={updateProp}
+            removeProp={removeProp}
+            addProp={addProp}
+            userCanEdit={userCanEdit}
+            territoryActants={territoryActants || []}
+            openDetailOnCreate={openDetailOnCreate}
+            moveProp={moveProp}
+            movePropToIndex={movePropToIndex}
+            category={category}
+          />
+        </React.Fragment>
       );
     },
     [entities]
