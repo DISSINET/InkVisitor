@@ -2,19 +2,26 @@ import { EntityClass } from "@shared/enums";
 import { IEntity, IResponseStatement, IStatementActant } from "@shared/types";
 import { AttributeIcon, Button, ButtonGroup } from "components";
 import { useSearchParams } from "hooks";
-import React, { useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import {
   DragSourceMonitor,
   DropTargetMonitor,
   useDrag,
   useDrop,
-  XYCoord,
 } from "react-dnd";
 import { FaGripVertical, FaPlus, FaTrashAlt, FaUnlink } from "react-icons/fa";
 import { UseMutationResult } from "react-query";
 import { ColumnInstance } from "react-table";
+import { setDraggedActantRow } from "redux/features/rowDnd/draggedActantRowSlice";
+import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { excludedSuggesterEntities } from "Theme/constants";
-import { DragItem, ItemTypes } from "types";
+import {
+  DraggedActantRowItem,
+  DraggedPropRowCategory,
+  DragItem,
+  ItemTypes,
+} from "types";
+import { dndHoverFn } from "utils";
 import { EntitySuggester, EntityTag } from "../..";
 import { AttributeButtonGroup } from "../../AttributeButtonGroup/AttributeButtonGroup";
 import AttributesEditor from "../../AttributesEditor/AttributesEditor";
@@ -27,7 +34,7 @@ import {
 interface StatementEditorActantTableRow {
   row: any;
   index: number;
-  moveRow: any;
+  moveRow: (dragIndex: number, hoverIndex: number) => void;
   userCanEdit?: boolean;
   updateOrderFn: () => void;
   addProp: (originId: string) => void;
@@ -63,27 +70,7 @@ export const StatementEditorActantTableRow: React.FC<
   const [, drop] = useDrop({
     accept: ItemTypes.ACTANT_ROW,
     hover(item: DragItem, monitor: DropTargetMonitor) {
-      if (!dropRef.current) {
-        return;
-      }
-      const dragIndex = item.index;
-      const hoverIndex = index;
-      if (dragIndex === hoverIndex) {
-        return;
-      }
-      const hoverBoundingRect = dropRef.current?.getBoundingClientRect();
-      const hoverMiddleY =
-        (hoverBoundingRect.bottom - hoverBoundingRect.top) / 2;
-      const clientOffset = monitor.getClientOffset();
-      const hoverClientY = (clientOffset as XYCoord).y - hoverBoundingRect.top;
-      if (dragIndex < hoverIndex && hoverClientY < hoverMiddleY) {
-        return;
-      }
-      if (dragIndex > hoverIndex && hoverClientY > hoverMiddleY) {
-        return;
-      }
-      moveRow(dragIndex, hoverIndex);
-      item.index = hoverIndex;
+      dndHoverFn(item, index, monitor, dropRef, moveRow);
     },
   });
 
@@ -301,6 +288,21 @@ export const StatementEditorActantTableRow: React.FC<
     );
   };
 
+  const dispatch = useAppDispatch();
+  const draggedActantRow: DraggedActantRowItem = useAppSelector(
+    (state) => state.rowDnd.draggedActantRow
+  );
+
+  useEffect(() => {
+    if (isDragging) {
+      dispatch(
+        setDraggedActantRow({ category: DraggedPropRowCategory.ACTANT })
+      );
+    } else {
+      dispatch(setDraggedActantRow({}));
+    }
+  }, [isDragging]);
+
   return (
     <React.Fragment key={index}>
       <StyledTr
@@ -322,11 +324,16 @@ export const StatementEditorActantTableRow: React.FC<
         <StyledTd>{renderAttributesCell()}</StyledTd>
       </StyledTr>
 
-      {renderPropGroup(
-        row.values.data.sActant.actant,
-        row.values.data.sActant.props,
-        statement
-      )}
+      {!(
+        draggedActantRow.category &&
+        draggedActantRow.category === DraggedPropRowCategory.ACTANT
+      ) &&
+        renderPropGroup(
+          row.values.data.sActant.actant,
+          row.values.data.sActant.props,
+          statement,
+          DraggedPropRowCategory.ACTANT
+        )}
     </React.Fragment>
   );
 };
