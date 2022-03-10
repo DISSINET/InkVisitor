@@ -122,9 +122,9 @@ class Api {
 
     toast.error(
       <div>
-        {hydratedError.message}
-        {err.response.data.message ? (
-          <p style={{ fontSize: "1rem" }}>{err.response.data.message}</p>
+        {hydratedError.title}
+        {hydratedError.message ? (
+          <p style={{ fontSize: "1rem" }}>{hydratedError.message}</p>
         ) : null}
       </div>
     );

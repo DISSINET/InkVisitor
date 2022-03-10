@@ -104,9 +104,9 @@ class UserNotActiveError extends CustomError {
   public static title = "Inactive user";
   public static message = "User $1 is not active";
 
-  constructor(m: string, statementId: string) {
+  constructor(m: string, userId: string) {
     super(m);
-    this.message = this.message.replace("$1", statementId);
+    this.message = this.message.replace("$1", userId);
   }
 }
 
@@ -258,7 +258,7 @@ export interface IErrorSignature {
 
 export function getErrorByCode(errSig: IErrorSignature): CustomError {
   return allErrors[errSig.error]
-    ? new allErrors[errSig.error]()
+    ? new allErrors[errSig.error](errSig.message)
     : new UnknownError(errSig.message || "Something bad happened");
 }
 
