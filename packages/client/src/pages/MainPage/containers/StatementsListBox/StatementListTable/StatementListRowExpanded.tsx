@@ -1,4 +1,4 @@
-import { IEntity } from "@shared/types";
+import { IEntity, IStatementActant } from "@shared/types";
 import { useSearchParams } from "hooks";
 import React from "react";
 import { ColumnInstance, Row } from "react-table";
@@ -46,7 +46,20 @@ export const StatementListRowExpanded: React.FC<StatementListRowExpanded> = ({
   // } = row.values.data;
 
   const renderRowSubComponent = React.useCallback(({ row }) => {
-    const { actions, actants, text, references, tags } = row.values.data;
+    const {
+      actions,
+      actants,
+      text,
+      references,
+      tags,
+    }: {
+      actions: any;
+      actants?: any;
+      text: string;
+      references: any;
+      tags: any;
+    } = row.values.data;
+
     const { notes }: { notes: string[] } = row.original;
 
     // ACTIONS
@@ -55,8 +68,18 @@ export const StatementListRowExpanded: React.FC<StatementListRowExpanded> = ({
       entities.find((e) => e && e.id === actionId)
     );
 
+    // SUBJECTS
+    const subjectIds = actants
+      .filter((a: IStatementActant) => a.position === "s")
+      .map((a: IStatementActant) => a.actant);
+    const subjectObjects: IEntity[] = subjectIds.map((subjectId: string) =>
+      entities.find((e) => e && e.id === subjectId)
+    );
+
     // ACTANTS
-    const actantIds = actants.map((a: any) => a.actant);
+    const actantIds = actants
+      .filter((a: IStatementActant) => a.position !== "s")
+      .map((a: any) => a.actant);
     const actantObjects: IEntity[] = actantIds.map((actantId: string) =>
       entities.find((e) => e && e.id === actantId)
     );
@@ -70,28 +93,30 @@ export const StatementListRowExpanded: React.FC<StatementListRowExpanded> = ({
       entities.find((e) => e && e.id === tagId)
     );
 
-    console.log(tagObjects);
-
     return (
       <>
         <StyledSubRow id={`statement${row.values.id}`}>
-          text {text}
+          <b>text</b>
+          {text}
           <br />
-          actions
+          <b>actions</b>
           {actionObjects.map((action, key) => renderListActant(action, key))}
           <br />
-          actants
+          <b>subjects</b>
+          {subjectObjects.map((actant, key) => renderListActant(actant, key))}
+          <br />
+          <b>actants</b>
           {actantObjects.map((actant, key) => renderListActant(actant, key))}
           <br />
-          references
+          <b>references</b>
           {referenceObjects.map((reference, key) =>
             renderListActant(reference, key)
           )}
           <br />
-          tags
+          <b>tags</b>
           {tagObjects.map((reference, key) => renderListActant(reference, key))}
           <br />
-          notes
+          <b>notes</b>
           <br />
           {notes.map((note: string, key: number) => {
             return (
