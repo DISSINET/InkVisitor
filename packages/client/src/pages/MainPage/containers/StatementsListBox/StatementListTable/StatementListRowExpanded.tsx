@@ -8,6 +8,7 @@ import { useSearchParams } from "hooks";
 import React from "react";
 import { ColumnInstance, Row } from "react-table";
 import { EntityTag } from "../../EntityTag/EntityTag";
+import { StatementListTablePropRow } from "./StatementListTablePropRow";
 import { StyledSubRow } from "./StatementListTableStyles";
 
 interface StatementListRowExpanded {
@@ -20,20 +21,29 @@ export const StatementListRowExpanded: React.FC<StatementListRowExpanded> = ({
   visibleColumns,
   entities,
 }) => {
-  const renderListActant = (actantObject: IEntity | undefined, key: number) => {
-    return (
-      actantObject && (
-        <EntityTag
-          key={key}
-          actant={actantObject}
-          tooltipPosition="bottom center"
-        />
-      )
-    );
-  };
-
   const { detailId, setDetailId, setStatementId, setTerritoryId } =
     useSearchParams();
+
+  // TODO methods to map children children..
+  const renderListActant = (actant: IEntity | undefined, key: number) => {
+    return (
+      <>
+        {actant && (
+          <React.Fragment key={key}>
+            <EntityTag
+              key={key}
+              actant={actant}
+              tooltipPosition="bottom center"
+            />
+            {/* <StatementListTablePropRow
+              entities={entities}
+              props={actant?.props}
+            /> */}
+          </React.Fragment>
+        )}
+      </>
+    );
+  };
 
   const getObjects = (ids: string[]) =>
     ids.map((id: string) => entities.find((e) => e && e.id === id));

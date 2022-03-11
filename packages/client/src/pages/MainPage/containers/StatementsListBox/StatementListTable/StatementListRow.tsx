@@ -10,7 +10,7 @@ import {
 } from "react-dnd";
 import { FaGripVertical } from "react-icons/fa";
 import { useQuery } from "react-query";
-import { Cell, ColumnInstance, Row } from "react-table";
+import { Cell, ColumnInstance } from "react-table";
 import { DragItem, ItemTypes } from "types";
 import { dndHoverFn } from "utils";
 import { StatementListRowExpanded } from "./StatementListRowExpanded";
