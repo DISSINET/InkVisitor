@@ -1,3 +1,4 @@
+import { IEntity } from "@shared/types";
 import api from "api";
 import { useSearchParams } from "hooks";
 import React, { useMemo, useRef } from "react";
@@ -9,7 +10,7 @@ import {
 } from "react-dnd";
 import { FaGripVertical } from "react-icons/fa";
 import { useQuery } from "react-query";
-import { Cell, ColumnInstance } from "react-table";
+import { Cell, ColumnInstance, Row } from "react-table";
 import { DragItem, ItemTypes } from "types";
 import { dndHoverFn } from "utils";
 import { StatementListRowExpanded } from "./StatementListRowExpanded";
@@ -26,6 +27,7 @@ interface StatementListRow {
   moveEndRow: Function;
   handleClick: Function;
   visibleColumns: ColumnInstance<{}>[];
+  entities: IEntity[];
 }
 
 export const StatementListRow: React.FC<StatementListRow> = ({
@@ -35,6 +37,7 @@ export const StatementListRow: React.FC<StatementListRow> = ({
   moveEndRow,
   handleClick = () => {},
   visibleColumns,
+  entities,
 }) => {
   const { statementId } = useSearchParams();
 
@@ -147,8 +150,12 @@ export const StatementListRow: React.FC<StatementListRow> = ({
           }
         })}
       </StyledTr>
-      {row.isExpanded ? (
-        <StatementListRowExpanded row={row} visibleColumns={visibleColumns} />
+      {row.isExpanded || row.index === 0 ? (
+        <StatementListRowExpanded
+          row={row}
+          visibleColumns={visibleColumns}
+          entities={entities}
+        />
       ) : null}
     </React.Fragment>
   );
