@@ -1,22 +1,29 @@
 /**
- * CustomError is wrapper around generic Error object, so we can implement our own logic and still use classic Error interface
+ * CustomError is wrapper around generic Error object/interface, so we can implement our own logic and still use classic Error approach.
  * The changes are:
- *   - name attribute is set explicitly in the constructor, so its value refers to the customized error class (ie. "BadCredentialsError")
  *   - statusCode method returns static 'code' attribute from constructed class
+ *   - loggable/shouldLog predicate tells the middleware if this error is significant and should be logged
+ *   - title attribute is derived from the constructor attribute (static prop). Provides basic title in readable form
  */
 export class CustomError extends Error {
   public static code: number = 400; // html code
   public loggable: boolean = false; // errors could be logged into console as warn messages
   public log: string = ""; // same as first constructor argument - wont be thrown in realtime, but it will be printed as warning
+  public title: string = "";
 
   // the following is commented, it should be inherited from base Error
+  //public name: string = ""; // Stands for class name, replaces default 'Error' string from parent constructor
   //public message: string = ""; // this is what will be printed in output - public text, some error classes have overriden message attr
 
-  constructor(m: string) {
-    super(m);
-    this.log = m;
-    //@ts-ignore
+
+  constructor(message?: string) {
+    super(message);
+    this.log = message || "";
     this.name = this.constructor.name; // so the value would be taken from the constructor - not the default Error
+    this.title = (this.constructor as any).title;
+    if (!message) {
+      this.message = (this.constructor as any).message;
+    }
   }
 
   statusCode(): number {
@@ -33,7 +40,8 @@ export class CustomError extends Error {
  */
 class BadCredentialsError extends CustomError {
   public static code = 401;
-  message = "Bad credentials";
+  public static title = "Bad credentials";
+  public static message = "";
 }
 
 /**
@@ -41,10 +49,8 @@ class BadCredentialsError extends CustomError {
  */
 class PermissionDeniedError extends CustomError {
   public static code = 403;
-
-  constructor(message: string) {
-    super(message);
-  }
+  public static title = "Permission denied";
+  public static message = "You don't have required permissions";
 }
 
 /**
@@ -54,7 +60,8 @@ class PermissionDeniedError extends CustomError {
  */
 class ModelNotValidError extends CustomError {
   public static code = 400;
-  message = "Model not valid";
+  public static title = "Model not valid";
+  public static message = "Invalid request data";
   loggable = true;
 }
 
@@ -63,7 +70,8 @@ class ModelNotValidError extends CustomError {
  */
 class NotFound extends CustomError {
   public static code = 404;
-  message = "Not found";
+  public static title = "Not found";
+  public static message = "Endpoint not implemented";
 }
 
 /**
@@ -71,7 +79,8 @@ class NotFound extends CustomError {
  */
 class BadParams extends CustomError {
   public static code = 400;
-  message = "Bad parameters";
+  public static title = "Bad parameters";
+  public static message = "Invalid request data";
 }
 
 /**
@@ -79,7 +88,8 @@ class BadParams extends CustomError {
  */
 class UserDoesNotExits extends CustomError {
   public static code = 400;
-  message = "User $1 does not exist";
+  public static title = "Missing user";
+  public static message = "User $1 does not exist";
 
   constructor(m: string, userId: string) {
     super(m);
@@ -92,10 +102,12 @@ class UserDoesNotExits extends CustomError {
  */
 class UserNotActiveError extends CustomError {
   public static code = 405;
+  public static title = "Inactive user";
   public static message = "User $1 is not active";
 
-  constructor(userId: string) {
-    super(UserNotActiveError.message.replace("$1", userId));
+  constructor(m: string, userId: string) {
+    super(m);
+    this.message = this.message.replace("$1", userId);
   }
 }
 
@@ -104,7 +116,8 @@ class UserNotActiveError extends CustomError {
  */
 class EntityDoesNotExits extends CustomError {
   public static code = 400;
-  message = "Entity $1 does not exist";
+  public static title = "Missing entity";
+  public static message = "Entity $1 does not exist";
 
   constructor(m: string, entityId: string) {
     super(m);
@@ -117,7 +130,8 @@ class EntityDoesNotExits extends CustomError {
  */
 class StatementDoesNotExits extends CustomError {
   public static code = 400;
-  message = "Statement $1 does not exist";
+  public static title = "Missing statement";
+  public static message = "Statement $1 does not exist";
 
   constructor(m: string, statementId: string) {
     super(m);
@@ -130,7 +144,8 @@ class StatementDoesNotExits extends CustomError {
  */
 class TerritoryDoesNotExits extends CustomError {
   public static code = 400;
-  message = "Territory $1 does not exist";
+  public static title = "Missing territory";
+  public static message = "Territory $1 does not exist";
 
   constructor(m: string, territoryId: string) {
     super(m);
@@ -143,7 +158,8 @@ class TerritoryDoesNotExits extends CustomError {
  */
 class PermissionDoesNotExits extends CustomError {
   public static code = 400;
-  message = "Permission $1 does not exist";
+  public static title = "Permission does not exist";
+  public static message = "Permission $1 does not exist";
 
   constructor(m: string, permissionId: string) {
     super(m);
@@ -156,7 +172,8 @@ class PermissionDoesNotExits extends CustomError {
  */
 class TerritoriesBrokenError extends CustomError {
   public static code = 500;
-  message = "Territories are broken";
+  public static title = "Territories broken";
+  public static message = "Territories are broken";
 }
 
 /**
@@ -164,7 +181,8 @@ class TerritoriesBrokenError extends CustomError {
  */
 class TerrytoryInvalidMove extends CustomError {
   public static code = 500;
-  message = "Invalid move";
+  public static title = "Territory invalid move";
+  public static message = "Move action cannot be completed";
 }
 
 /**
@@ -172,7 +190,8 @@ class TerrytoryInvalidMove extends CustomError {
  */
 class StatementInvalidMove extends CustomError {
   public static code = 500;
-  message = "Invalid move";
+  public static title = "Statement invalid move";
+  public static message = "Move action cannot be completed";
 }
 
 /**
@@ -180,7 +199,8 @@ class StatementInvalidMove extends CustomError {
  */
 class InternalServerError extends CustomError {
   public static code = 500;
-  message = "Internal server error";
+  public static title = "Internal server error";
+  public static message = "An unknown error occured";
   loggable = true;
 }
 
@@ -189,7 +209,8 @@ class InternalServerError extends CustomError {
  */
 class UnauthorizedError extends CustomError {
   public static code = 401;
-  message = "Unauthorized request";
+  public static title = "Unauthorized";
+  public static message = "Unauthorized request";
 }
 
 /**
@@ -197,7 +218,9 @@ class UnauthorizedError extends CustomError {
  */
 class InvalidDeleteError extends CustomError {
   public static code = 400;
-  message = "Invalid delete request";
+  public static title = "Invalid delete";
+  public static message = "Model cannot be deleted";
+  loggable = true;
 }
 
 /**
@@ -205,7 +228,8 @@ class InvalidDeleteError extends CustomError {
  */
 class UnknownError extends CustomError {
   public static code = 500;
-  message = "Unknown error";
+  public static title = "Unknown error";
+  public static message = "Mysterious";
 }
 
 const allErrors: Record<string, any> = {
@@ -228,8 +252,15 @@ const allErrors: Record<string, any> = {
   StatementInvalidMove,
 };
 
-export function getErrorByCode(name: string): CustomError {
-  return allErrors[name] ? new allErrors[name]() : new UnknownError("");
+export interface IErrorSignature {
+  error: string; // unique error code - error's constructor
+  message: string; // additional message in readable form
+}
+
+export function getErrorByCode(errSig: IErrorSignature): CustomError {
+  return allErrors[errSig.error]
+    ? new allErrors[errSig.error](errSig.message)
+    : new UnknownError(errSig.message || "Something bad happened");
 }
 
 export {
