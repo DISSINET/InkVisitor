@@ -101,16 +101,30 @@ class Api {
     this.checkLogin();
   }
 
+  responseToError(responseData: unknown): errors.IErrorSignature {
+    const out = {
+      error: "",
+      message: "",
+    };
+
+    if (responseData && typeof responseData === "object") {
+      out.error = (responseData as Record<string, string>).error;
+      out.message = (responseData as Record<string, string>).message;
+    }
+
+    return out;
+  }
+
   showErrorToast(err: any) {
     const hydratedError = errors.getErrorByCode(
-      err.response.data ? err.response.data.error : ""
+      this.responseToError(err.response.data)
     );
 
     toast.error(
       <div>
-        {hydratedError.message}
-        {err.response.data.message ? (
-          <p style={{ fontSize: "1rem" }}>{err.response.data.message}</p>
+        {hydratedError.title}
+        {hydratedError.message ? (
+          <p style={{ fontSize: "1rem" }}>{hydratedError.message}</p>
         ) : null}
       </div>
     );
