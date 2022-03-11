@@ -1,0 +1,305 @@
+{
+    "$id": "IConcept",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "additionalProperties": false,
+    "defaultProperties": [],
+    "definitions": {
+        "Certainty": {
+            "enum": [
+                "0",
+                "1",
+                "2",
+                "3",
+                "4",
+                "5",
+                "6"
+            ],
+            "type": "string"
+        },
+        "Elvl": {
+            "enum": [
+                "1",
+                "2",
+                "3"
+            ],
+            "type": "string"
+        },
+        "EntityReferenceSource": {
+            "enum": [
+                "geonames",
+                "wordnet"
+            ],
+            "type": "string"
+        },
+        "EntityStatus": {
+            "enum": [
+                "0",
+                "1",
+                "2",
+                "3"
+            ],
+            "type": "string"
+        },
+        "IEntityReference": {
+            "additionalProperties": false,
+            "defaultProperties": [],
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "source": {
+                    "$ref": "IConcept#/definitions/EntityReferenceSource"
+                },
+                "value": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "id",
+                "source",
+                "value"
+            ],
+            "type": "object"
+        },
+        "IProp": {
+            "additionalProperties": false,
+            "defaultProperties": [],
+            "properties": {
+                "bundleEnd": {
+                    "type": "boolean"
+                },
+                "bundleOperator": {
+                    "$ref": "IConcept#/definitions/Operator"
+                },
+                "bundleStart": {
+                    "type": "boolean"
+                },
+                "certainty": {
+                    "$ref": "IConcept#/definitions/Certainty"
+                },
+                "children": {
+                    "items": {
+                        "$ref": "IConcept#/definitions/IProp"
+                    },
+                    "type": "array"
+                },
+                "elvl": {
+                    "$ref": "IConcept#/definitions/Elvl"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "logic": {
+                    "$ref": "IConcept#/definitions/Logic"
+                },
+                "mood": {
+                    "items": {
+                        "enum": [
+                            "1",
+                            "10",
+                            "11",
+                            "12",
+                            "13",
+                            "2",
+                            "3",
+                            "4",
+                            "5",
+                            "6",
+                            "7",
+                            "8",
+                            "9"
+                        ],
+                        "type": "string"
+                    },
+                    "type": "array"
+                },
+                "moodvariant": {
+                    "$ref": "IConcept#/definitions/MoodVariant"
+                },
+                "type": {
+                    "$ref": "IConcept#/definitions/IPropSpec"
+                },
+                "value": {
+                    "$ref": "IConcept#/definitions/IPropSpec"
+                }
+            },
+            "required": [
+                "bundleEnd",
+                "bundleOperator",
+                "bundleStart",
+                "certainty",
+                "children",
+                "elvl",
+                "id",
+                "logic",
+                "mood",
+                "moodvariant",
+                "type",
+                "value"
+            ],
+            "type": "object"
+        },
+        "IPropSpec": {
+            "additionalProperties": false,
+            "defaultProperties": [],
+            "properties": {
+                "elvl": {
+                    "$ref": "IConcept#/definitions/Elvl"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "logic": {
+                    "$ref": "IConcept#/definitions/Logic"
+                },
+                "partitivity": {
+                    "$ref": "IConcept#/definitions/Partitivity"
+                },
+                "virtuality": {
+                    "$ref": "IConcept#/definitions/Virtuality"
+                }
+            },
+            "required": [
+                "elvl",
+                "id",
+                "logic",
+                "partitivity",
+                "virtuality"
+            ],
+            "type": "object"
+        },
+        "Language": {
+            "enum": [
+                "",
+                "ces",
+                "eng",
+                "enm",
+                "lat",
+                "oci"
+            ],
+            "type": "string"
+        },
+        "Logic": {
+            "enum": [
+                "1",
+                "2"
+            ],
+            "type": "string"
+        },
+        "MoodVariant": {
+            "enum": [
+                "1",
+                "2",
+                "3"
+            ],
+            "type": "string"
+        },
+        "Operator": {
+            "enum": [
+                "<",
+                "<=",
+                "=",
+                ">",
+                ">=",
+                "a",
+                "o",
+                "x"
+            ],
+            "type": "string"
+        },
+        "Partitivity": {
+            "enum": [
+                "1",
+                "2",
+                "3",
+                "4",
+                "5"
+            ],
+            "type": "string"
+        },
+        "Virtuality": {
+            "enum": [
+                "1",
+                "2",
+                "3",
+                "4",
+                "5",
+                "6"
+            ],
+            "type": "string"
+        }
+    },
+    "properties": {
+        "class": {
+            "enum": [
+                "C"
+            ],
+            "type": "string"
+        },
+        "data": {
+            "properties": {},
+            "type": "object"
+        },
+        "detail": {
+            "type": "string"
+        },
+        "id": {
+            "type": "string"
+        },
+        "isTemplate": {
+            "type": "boolean"
+        },
+        "label": {
+            "type": "string"
+        },
+        "language": {
+            "$ref": "IConcept#/definitions/Language"
+        },
+        "legacyId": {
+            "type": "string"
+        },
+        "notes": {
+            "items": {
+                "type": "string"
+            },
+            "type": "array"
+        },
+        "props": {
+            "items": {
+                "$ref": "IConcept#/definitions/IProp"
+            },
+            "type": "array"
+        },
+        "references": {
+            "items": {
+                "$ref": "IConcept#/definitions/IEntityReference"
+            },
+            "type": "array"
+        },
+        "status": {
+            "$ref": "IConcept#/definitions/EntityStatus"
+        },
+        "templateData": {
+            "additionalProperties": true,
+            "properties": {},
+            "type": "object"
+        },
+        "usedTemplate": {
+            "type": "boolean"
+        }
+    },
+    "required": [
+        "class",
+        "data",
+        "detail",
+        "id",
+        "label",
+        "language",
+        "notes",
+        "props",
+        "references",
+        "status"
+    ],
+    "type": "object"
+}
+
