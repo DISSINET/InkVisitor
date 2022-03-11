@@ -1,4 +1,9 @@
-import { IEntity, IStatementActant } from "@shared/types";
+import {
+  IEntity,
+  IStatementActant,
+  IStatementAction,
+  IStatementReference,
+} from "@shared/types";
 import { useSearchParams } from "hooks";
 import React from "react";
 import { ColumnInstance, Row } from "react-table";
@@ -15,13 +20,12 @@ export const StatementListRowExpanded: React.FC<StatementListRowExpanded> = ({
   visibleColumns,
   entities,
 }) => {
-  const renderListActant = (actantObject: IEntity, key: number) => {
+  const renderListActant = (actantObject: IEntity | undefined, key: number) => {
     return (
       actantObject && (
         <EntityTag
           key={key}
           actant={actantObject}
-          // showOnly="entity"
           tooltipPosition="bottom center"
         />
       )
@@ -31,20 +35,6 @@ export const StatementListRowExpanded: React.FC<StatementListRowExpanded> = ({
   const { detailId, setDetailId, setStatementId, setTerritoryId } =
     useSearchParams();
 
-  // const {
-  //   actions,
-  //   actants,
-  //   text,
-  //   references,
-  //   tags,
-  // }: {
-  //   actions: IEntity[];
-  //   actants: IEntity[];
-  //   text: string;
-  //   references: IEntity[];
-  //   tags: IEntity[];
-  // } = row.values.data;
-
   const renderRowSubComponent = React.useCallback(({ row }) => {
     const {
       actions,
@@ -53,43 +43,43 @@ export const StatementListRowExpanded: React.FC<StatementListRowExpanded> = ({
       references,
       tags,
     }: {
-      actions: any;
-      actants?: any;
+      actions: IStatementAction[];
+      actants: IStatementActant[];
       text: string;
-      references: any;
-      tags: any;
+      references: IStatementReference[];
+      tags: string[];
     } = row.values.data;
 
     const { notes }: { notes: string[] } = row.original;
 
     // ACTIONS
     const actionIds = actions.map((a: any) => a.action);
-    const actionObjects: IEntity[] = actionIds.map((actionId: string) =>
-      entities.find((e) => e && e.id === actionId)
+    const actionObjects: (IEntity | undefined)[] = actionIds.map(
+      (actionId: string) => entities.find((e) => e && e.id === actionId)
     );
 
     // SUBJECTS
     const subjectIds = actants
       .filter((a: IStatementActant) => a.position === "s")
       .map((a: IStatementActant) => a.actant);
-    const subjectObjects: IEntity[] = subjectIds.map((subjectId: string) =>
-      entities.find((e) => e && e.id === subjectId)
+    const subjectObjects: (IEntity | undefined)[] = subjectIds.map(
+      (subjectId: string) => entities.find((e) => e && e.id === subjectId)
     );
 
     // ACTANTS
     const actantIds = actants
       .filter((a: IStatementActant) => a.position !== "s")
       .map((a: any) => a.actant);
-    const actantObjects: IEntity[] = actantIds.map((actantId: string) =>
-      entities.find((e) => e && e.id === actantId)
+    const actantObjects: (IEntity | undefined)[] = actantIds.map(
+      (actantId: string) => entities.find((e) => e && e.id === actantId)
     );
 
     const referenceIds = references.map((r: any) => r.resource);
-    const referenceObjects: IEntity[] = referenceIds.map((reference: string) =>
-      entities.find((e) => e && e.id === reference)
+    const referenceObjects: (IEntity | undefined)[] = referenceIds.map(
+      (reference: string) => entities.find((e) => e && e.id === reference)
     );
 
-    const tagObjects: IEntity[] = tags.map((tagId: string) =>
+    const tagObjects: (IEntity | undefined)[] = tags.map((tagId: string) =>
       entities.find((e) => e && e.id === tagId)
     );
 
