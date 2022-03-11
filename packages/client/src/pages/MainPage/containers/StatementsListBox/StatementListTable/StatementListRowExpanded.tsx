@@ -35,13 +35,16 @@ export const StatementListRowExpanded: React.FC<StatementListRowExpanded> = ({
   const { detailId, setDetailId, setStatementId, setTerritoryId } =
     useSearchParams();
 
+  const getObjects = (ids: string[]) =>
+    ids.map((id: string) => entities.find((e) => e && e.id === id));
+
   const renderRowSubComponent = React.useCallback(({ row }) => {
     const {
       actions,
       actants,
       text,
       references,
-      tags,
+      tags: tagIds,
     }: {
       actions: IStatementAction[];
       actants: IStatementActant[];
@@ -54,34 +57,27 @@ export const StatementListRowExpanded: React.FC<StatementListRowExpanded> = ({
 
     // ACTIONS
     const actionIds = actions.map((a: any) => a.action);
-    const actionObjects: (IEntity | undefined)[] = actionIds.map(
-      (actionId: string) => entities.find((e) => e && e.id === actionId)
-    );
+    const actionObjects: (IEntity | undefined)[] = getObjects(actionIds);
+    console.log(actionObjects);
 
     // SUBJECTS
     const subjectIds = actants
       .filter((a: IStatementActant) => a.position === "s")
       .map((a: IStatementActant) => a.actant);
-    const subjectObjects: (IEntity | undefined)[] = subjectIds.map(
-      (subjectId: string) => entities.find((e) => e && e.id === subjectId)
-    );
+    const subjectObjects: (IEntity | undefined)[] = getObjects(subjectIds);
 
     // ACTANTS
     const actantIds = actants
       .filter((a: IStatementActant) => a.position !== "s")
       .map((a: any) => a.actant);
-    const actantObjects: (IEntity | undefined)[] = actantIds.map(
-      (actantId: string) => entities.find((e) => e && e.id === actantId)
-    );
+    const actantObjects: (IEntity | undefined)[] = getObjects(actantIds);
 
+    // REFERENCES
     const referenceIds = references.map((r: any) => r.resource);
-    const referenceObjects: (IEntity | undefined)[] = referenceIds.map(
-      (reference: string) => entities.find((e) => e && e.id === reference)
-    );
+    const referenceObjects: (IEntity | undefined)[] = getObjects(referenceIds);
 
-    const tagObjects: (IEntity | undefined)[] = tags.map((tagId: string) =>
-      entities.find((e) => e && e.id === tagId)
-    );
+    // TAGS
+    const tagObjects: (IEntity | undefined)[] = getObjects(tagIds);
 
     return (
       <>
