@@ -15,6 +15,7 @@ export class CustomError extends Error {
   //public name: string = ""; // Stands for class name, replaces default 'Error' string from parent constructor
   //public message: string = ""; // this is what will be printed in output - public text, some error classes have overriden message attr
 
+
   constructor(message?: string) {
     super(message);
     this.log = message || "";

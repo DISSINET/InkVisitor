@@ -22,6 +22,7 @@ export class RequestSearch implements IResponseSearch {
     this.label = requestData.label || false;
     this.entityId = requestData.entityId || false;
     if (requestData.excluded) {
+      //@ts-ignore
       if (requestData.excluded.constructor.name === "String") {
         requestData.excluded = [requestData.excluded as any];
       }
