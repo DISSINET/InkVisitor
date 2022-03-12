@@ -161,6 +161,9 @@ export enum Language {
   MiddleEnglish = "enm",
   Occitan = "oci",
   Czech = "ces",
+  Italian = "ita",
+  French = "fra",
+  German = "ger"
 }
 
 export enum ReferenceType {
