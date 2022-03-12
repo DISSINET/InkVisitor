@@ -12,6 +12,7 @@ import { PopupPosition } from "reactjs-popup/dist/types";
 import { setDraggedTerritory } from "redux/features/territoryTree/draggedTerritorySlice";
 import { useAppDispatch } from "redux/hooks";
 import { DragItem, Entities, ItemTypes } from "types";
+import { dndHoverFn } from "utils";
 import {
   ButtonWrapper,
   StyledEntityTag,
@@ -79,32 +80,9 @@ export const Tag: React.FC<TagProps> = ({
   const [, drop] = useDrop({
     accept: ItemTypes.TAG,
     hover(item: DragItem, monitor: DropTargetMonitor) {
-      if (!ref.current) {
-        return;
+      if (moveFn) {
+        dndHoverFn(item, index, monitor, ref, moveFn);
       }
-      const dragIndex: number = item.index;
-      const hoverIndex: number | undefined = index;
-
-      if (dragIndex === hoverIndex) {
-        return;
-      }
-      const hoverBoundingRect = ref.current?.getBoundingClientRect();
-      const hoverMiddleY =
-        (hoverBoundingRect.bottom - hoverBoundingRect.top) / 2;
-      const clientOffset = monitor.getClientOffset();
-      const hoverClientY = (clientOffset as XYCoord).y - hoverBoundingRect.top;
-      if (hoverIndex === undefined) {
-        return;
-      }
-      if (dragIndex < hoverIndex && hoverClientY < hoverMiddleY) {
-        return;
-      }
-      if (dragIndex > hoverIndex && hoverClientY > hoverMiddleY) {
-        return;
-      }
-
-      moveFn && moveFn(dragIndex, hoverIndex);
-      item.index = hoverIndex;
     },
   });
 

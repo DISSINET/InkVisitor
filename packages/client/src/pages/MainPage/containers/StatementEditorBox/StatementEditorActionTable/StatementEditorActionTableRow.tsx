@@ -2,19 +2,26 @@ import { EntityClass } from "@shared/enums";
 import { IResponseStatement } from "@shared/types";
 import { AttributeIcon, Button, ButtonGroup } from "components";
 import { useSearchParams } from "hooks";
-import React, { useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import {
   DragSourceMonitor,
   DropTargetMonitor,
   useDrag,
   useDrop,
-  XYCoord,
 } from "react-dnd";
 import { FaGripVertical, FaPlus, FaTrashAlt, FaUnlink } from "react-icons/fa";
 import { UseMutationResult } from "react-query";
 import { ColumnInstance } from "react-table";
+import { setDraggedActantRow } from "redux/features/rowDnd/draggedActantRowSlice";
+import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { excludedSuggesterEntities } from "Theme/constants";
-import { DragItem, ItemTypes } from "types";
+import {
+  DraggedActantRowItem,
+  DraggedPropRowCategory,
+  DragItem,
+  ItemTypes,
+} from "types";
+import { dndHoverFn } from "utils";
 import { EntitySuggester, EntityTag } from "../..";
 import AttributesEditor from "../../AttributesEditor/AttributesEditor";
 import { StyledTd, StyledTr } from "./StatementEditorActionTableStyles";
@@ -22,7 +29,7 @@ import { StyledTd, StyledTr } from "./StatementEditorActionTableStyles";
 interface StatementEditorActionTableRow {
   row: any;
   index: number;
-  moveRow: any;
+  moveRow: (dragIndex: number, hoverIndex: number) => void;
   statement: IResponseStatement;
   userCanEdit?: boolean;
   updateOrderFn: () => void;
@@ -73,34 +80,14 @@ export const StatementEditorActionTableRow: React.FC<
   };
 
   const [, drop] = useDrop({
-    accept: ItemTypes.ACTANT_ROW,
+    accept: ItemTypes.ACTION_ROW,
     hover(item: DragItem, monitor: DropTargetMonitor) {
-      if (!dropRef.current) {
-        return;
-      }
-      const dragIndex = item.index;
-      const hoverIndex = index;
-      if (dragIndex === hoverIndex) {
-        return;
-      }
-      const hoverBoundingRect = dropRef.current?.getBoundingClientRect();
-      const hoverMiddleY =
-        (hoverBoundingRect.bottom - hoverBoundingRect.top) / 2;
-      const clientOffset = monitor.getClientOffset();
-      const hoverClientY = (clientOffset as XYCoord).y - hoverBoundingRect.top;
-      if (dragIndex < hoverIndex && hoverClientY < hoverMiddleY) {
-        return;
-      }
-      if (dragIndex > hoverIndex && hoverClientY > hoverMiddleY) {
-        return;
-      }
-      moveRow(dragIndex, hoverIndex);
-      item.index = hoverIndex;
+      dndHoverFn(item, index, monitor, dropRef, moveRow);
     },
   });
 
   const [{ isDragging }, drag, preview] = useDrag({
-    item: { type: ItemTypes.ACTANT_ROW, index, id: row.values.id },
+    item: { type: ItemTypes.ACTION_ROW, index, id: row.values.id },
     collect: (monitor: DragSourceMonitor) => ({
       isDragging: monitor.isDragging(),
     }),
@@ -232,6 +219,21 @@ export const StatementEditorActionTableRow: React.FC<
     );
   };
 
+  const dispatch = useAppDispatch();
+  const draggedActantRow: DraggedActantRowItem = useAppSelector(
+    (state) => state.rowDnd.draggedActantRow
+  );
+
+  useEffect(() => {
+    if (isDragging) {
+      dispatch(
+        setDraggedActantRow({ category: DraggedPropRowCategory.ACTION })
+      );
+    } else {
+      dispatch(setDraggedActantRow({}));
+    }
+  }, [isDragging]);
+
   return (
     <React.Fragment key={index}>
       <StyledTr
@@ -252,11 +254,16 @@ export const StatementEditorActionTableRow: React.FC<
         <StyledTd>{renderButtonsCell()}</StyledTd>
       </StyledTr>
 
-      {renderPropGroup(
-        row.values.data.sAction.action,
-        row.values.data.sAction.props,
-        statement
-      )}
+      {!(
+        draggedActantRow.category &&
+        draggedActantRow.category === DraggedPropRowCategory.ACTION
+      ) &&
+        renderPropGroup(
+          row.values.data.sAction.action,
+          row.values.data.sAction.props,
+          statement,
+          DraggedPropRowCategory.ACTION
+        )}
     </React.Fragment>
   );
 };
