@@ -9,6 +9,7 @@ export const Toast: React.FC<Toast> = () => {
       hideProgressBar
       closeButton={false}
       position={"top-right"}
+      autoClose={2500}
     />
   );
 };

@@ -1,28 +1,22 @@
+import { FaGripVertical } from "react-icons/fa";
 import styled from "styled-components";
 
-export const StyledGridOld = styled.div`
+interface StyledGrid {
+  tempDisabled?: boolean;
+}
+export const StyledGrid = styled.div<StyledGrid>`
   display: grid;
 
   align-items: center;
   padding-left: ${({ theme }) => theme.space[10]};
-  grid-template-columns: auto auto auto;
-  width: fit-content;
-  grid-template-rows: auto;
-  grid-auto-flow: row;
-  padding-bottom: ${({ theme }) => theme.space[6]};
-`;
-
-export const StyledGrid = styled.div`
-  display: grid;
-
-  align-items: center;
-  padding-left: ${({ theme }) => theme.space[10]};
-  grid-template-columns: 1fr 1fr 11rem;
+  grid-template-columns: 1fr 1fr 7rem;
   width: fit-content;
   grid-template-rows: auto;
   grid-auto-flow: row;
   padding-bottom: ${({ theme }) => theme.space[1]};
   width: 100%;
+
+  opacity: ${({ tempDisabled }) => (tempDisabled ? 0.2 : 1)};
 `;
 
 export const StyledGridCell = styled.div`
@@ -30,10 +24,13 @@ export const StyledGridCell = styled.div`
   display: grid;
 `;
 
-interface StyledListHeaderColumn {}
+interface StyledListHeaderColumn {
+  leftMargin?: boolean;
+}
 export const StyledListHeaderColumn = styled.div<StyledListHeaderColumn>`
   font-weight: ${({ theme }) => theme.fontWeight.light};
-  margin-left: ${({ theme }) => theme.space[1]};
+  margin-left: ${({ theme, leftMargin }) =>
+    leftMargin ? theme.space[8] : theme.space[1]};
   font-size: ${({ theme }) => theme.fontSize["sm"]};
   color: ${({ theme }) => theme.color["info"]};
   text-align: left;
@@ -41,7 +38,7 @@ export const StyledListHeaderColumn = styled.div<StyledListHeaderColumn>`
 `;
 
 interface StyledPropLineColumn {
-  level?: "1" | "2" | "3";
+  level?: 1 | 2 | 3;
   isTag?: boolean;
 }
 export const StyledPropLineColumn = styled(
@@ -49,12 +46,12 @@ export const StyledPropLineColumn = styled(
 )<StyledPropLineColumn>`
   display: inline-flex;
   align-items: center;
-  padding-left: ${({ theme, level = "1" }) => {
-    if (level === "1") {
+  margin-left: ${({ theme, level = 1 }) => {
+    if (level === 1) {
       return theme.space[0];
-    } else if (level === "2") {
+    } else if (level === 2) {
       return theme.space[6];
-    } else if (level === "3") {
+    } else if (level === 3) {
       return theme.space[12];
     }
   }};
@@ -84,4 +81,8 @@ export const StyledPropButtonGroup = styled.div<StyledPropButtonGroup>`
   button[disabled] {
     //background-color: ${({ theme }) => theme.color["gray"][1000]};
   }
+`;
+export const StyledFaGripVertical = styled(FaGripVertical)`
+  margin-right: ${({ theme }) => theme.space[2]};
+  cursor: move;
 `;

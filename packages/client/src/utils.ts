@@ -1,4 +1,13 @@
-import { IEntity, IResponseTree, IStatement } from "@shared/types";
+import {
+  IEntity,
+  IProp,
+  IResponseTree,
+  IStatement,
+  IStatementActant,
+  IStatementAction,
+} from "@shared/types";
+import { DropTargetMonitor, XYCoord } from "react-dnd";
+import { DragItem } from "types";
 
 export const findPositionInStatement = (
   statement: IStatement,
@@ -30,7 +39,7 @@ export const findPositionInStatement = (
     return "pseudo-actant";
   } else if (statement.data.tags.find((t) => t === actant.id)) {
     return "tag";
-  } else if (statement.data.territory.id === actant.id) {
+  } else if (statement.data.territory?.id === actant.id) {
     return "territory";
   } else if (
     statement.data.actants.find((act) =>
@@ -93,4 +102,39 @@ export const collectTerritoryChildren = (
     return childArray;
   }
   return childArray;
+};
+
+export const dndHoverFn = (
+  item: DragItem,
+  index: number,
+  monitor: DropTargetMonitor,
+  ref: React.RefObject<HTMLDivElement>,
+  moveProp: (dragIndex: number, hoverIndex: number) => void
+) => {
+  if (!ref.current) {
+    return;
+  }
+  const dragIndex: number = item.index;
+  const hoverIndex: number | undefined = index;
+
+  if (dragIndex === hoverIndex) {
+    return;
+  }
+
+  const hoverBoundingRect = ref.current?.getBoundingClientRect();
+  const hoverMiddleY = (hoverBoundingRect.bottom - hoverBoundingRect.top) / 2;
+  const clientOffset = monitor.getClientOffset();
+  const hoverClientY = (clientOffset as XYCoord).y - hoverBoundingRect.top;
+  if (hoverIndex === undefined) {
+    return;
+  }
+  if (dragIndex < hoverIndex && hoverClientY < hoverMiddleY) {
+    return;
+  }
+
+  if (dragIndex > hoverIndex && hoverClientY > hoverMiddleY) {
+    return;
+  }
+  moveProp(dragIndex, hoverIndex);
+  item.index = hoverIndex;
 };
