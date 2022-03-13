@@ -7,7 +7,7 @@ import { findEntitiesById, findEntitiesByIds } from "@service/shorthands";
 
 export class ResponseTerritory extends Territory implements IResponseTerritory {
   statements: IResponseStatement[];
-  entities: IEntity[];
+  entities: { [key: string]: IEntity };
   right: UserRoleMode = UserRoleMode.Read;
 
   constructor(entity: IEntity) {
@@ -17,7 +17,7 @@ export class ResponseTerritory extends Territory implements IResponseTerritory {
     }
 
     this.statements = [];
-    this.entities = [];
+    this.entities = {};
   }
 
   async prepare(req: Request): Promise<void> {
@@ -28,8 +28,17 @@ export class ResponseTerritory extends Territory implements IResponseTerritory {
       this.id
     );
 
-    const entityIds = Statement.getEntitiesIdsForMany(statements);
-    this.entities = await findEntitiesById(req.db, entityIds);
+    const entitiesList = await findEntitiesById(
+      req.db,
+      Statement.getEntitiesIdsForMany(statements)
+    );
+    this.entities = entitiesList.reduce<{ [key: string]: IEntity }>(
+      (acc, entity) => {
+        acc[entity.id] = entity;
+        return acc;
+      },
+      {}
+    );
 
     for (const statement of statements) {
       const entities = await findEntitiesByIds(
