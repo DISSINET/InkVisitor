@@ -380,54 +380,27 @@ class Statement extends Entity implements IStatement {
   getEntitiesIds(): string[] {
     const entitiesIds: Record<string, null> = {};
 
+    // get ids from Entity.props ( + childs)
+    new Entity({}).getEntitiesIds.call(this).forEach((element) => {
+      entitiesIds[element] = null;
+    });
+
+    //  get ids from Statement.data.actions, Statement.data.actions.props ( + childs)
     this.data.actions.forEach((a) => {
       entitiesIds[a.action] = null;
       if (a.props) {
-        a.props.forEach((prop) => {
-          entitiesIds[prop.type.id] = null;
-          entitiesIds[prop.value.id] = null;
-
-          if (prop.children) {
-            prop.children.forEach((propChild) => {
-              entitiesIds[propChild.type.id] = null;
-              entitiesIds[propChild.value.id] = null;
-
-              // 3rd level
-              if (propChild.children) {
-                propChild.children.forEach((propChild2) => {
-                  entitiesIds[propChild2.type.id] = null;
-                  entitiesIds[propChild2.value.id] = null;
-                });
-              }
-            });
-          }
+        Entity.extractIdsFromProps(a.props).forEach((element) => {
+          entitiesIds[element] = null;
         });
       }
     });
 
+    // get ids from Statement.data.actants, Statement.data.actants.props ( + childs)
     this.data.actants.forEach((a) => {
       entitiesIds[a.actant] = null;
-      if (a.props) {
-        a.props.forEach((prop) => {
-          entitiesIds[prop.type.id] = null;
-          entitiesIds[prop.value.id] = null;
-
-          if (prop.children) {
-            prop.children.forEach((propChild) => {
-              entitiesIds[propChild.type.id] = null;
-              entitiesIds[propChild.value.id] = null;
-
-              // 3rd level
-              if (propChild.children) {
-                propChild.children.forEach((propChild2) => {
-                  entitiesIds[propChild2.type.id] = null;
-                  entitiesIds[propChild2.value.id] = null;
-                });
-              }
-            });
-          }
-        });
-      }
+      Entity.extractIdsFromProps(a.props).forEach((element) => {
+        entitiesIds[element] = null;
+      });
     });
 
     entitiesIds[this.data.territory.id] = null;
