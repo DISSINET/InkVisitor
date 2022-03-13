@@ -5,7 +5,21 @@ import Statement from "@models/statement/statement";
 import { clean } from "@modules/common.test";
 import { findEntityById } from "@service/shorthands";
 import { IStatement } from "@shared/types";
+import Prop from "@models/prop/prop";
 import { Order } from "@shared/enums";
+
+export const prepareEntity = (): [string, Entity] => {
+  const entityId = Math.random().toFixed();
+
+  const ent = new Entity({});
+  ent.props.push(new Prop({}));
+
+  ent.props[0].children.push(new Prop({}));
+  ent.props[0].children[0].children.push(new Prop({}));
+  ent.props[0].children[0].children[0].children.push(new Prop({}));
+
+  return [entityId, ent];
+};
 
 describe("test Entity.delete", function () {
   describe("one existing linked statement", () => {
@@ -137,6 +151,7 @@ describe("test Entity.update", function () {
         db,
         entity.id
       );
+
       // new value
       expect(existingEntityData.data.text).toEqual(newTextValue);
       //  territory data from the save call
@@ -219,6 +234,38 @@ describe("test Entity.determineOrder", function () {
       expect(Entity.determineOrder(wantedIndex, siblings)).toBe(
         values[values.length - 1] + 1
       );
+    });
+  });
+});
+
+describe("test Entity.getEntitiesIds", function () {
+  describe("one id used repeatedly", function () {
+    const [id, instance] = prepareEntity();
+    instance.props[0].value.id = id;
+    instance.props[0].type.id = id;
+    instance.props[0].children[0].value.id = id;
+    instance.props[0].children[0].children[0].type.id = id;
+    instance.props[0].children[0].children[0].children[0].value.id = id;
+
+    const idList = instance.getEntitiesIds();
+    it("should return only one element", () => {
+      expect(idList).toEqual([id]);
+    });
+  });
+
+  describe("two ids used", function () {
+    const [id, instance] = prepareEntity();
+    const id2 = id + "2";
+
+    instance.props[0].value.id = id;
+    instance.props[0].type.id = id2;
+    instance.props[0].children[0].value.id = id;
+    instance.props[0].children[0].children[0].type.id = id2;
+    instance.props[0].children[0].children[0].children[0].value.id = id2;
+
+    const idList = instance.getEntitiesIds();
+    it("should return both elements", () => {
+      expect(idList.sort()).toEqual([id, id2].sort());
     });
   });
 });

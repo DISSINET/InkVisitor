@@ -279,17 +279,25 @@ export default class Entity extends Base implements IEntity, IDbModel {
   getEntitiesIds(): string[] {
     const entityIds: Record<string, null> = {};
 
-    this.props.forEach((p) => {
-      entityIds[p.type.id] = null;
-      entityIds[p.value.id] = null;
-
-      p.children.forEach((p2) => {
-        entityIds[p2.type.id] = null;
-        entityIds[p2.value.id] = null;
-      });
+    Entity.extractIdsFromProps(this.props).forEach((element) => {
+      if (element) {
+        entityIds[element] = null;
+      }
     });
 
     return Object.keys(entityIds);
+  }
+
+  static extractIdsFromProps(props: IProp[]): string[] {
+    let out: string[] = [];
+    for (const prop of props) {
+      out.push(prop.type.id);
+      out.push(prop.value.id);
+
+      out = out.concat(Entity.extractIdsFromProps(prop.children));
+    }
+
+    return out;
   }
 
   async getEntities(db: Connection): Promise<IEntity[]> {
