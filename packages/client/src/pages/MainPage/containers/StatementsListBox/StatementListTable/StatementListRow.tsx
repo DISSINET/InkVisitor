@@ -27,7 +27,7 @@ interface StatementListRow {
   moveEndRow: Function;
   handleClick: Function;
   visibleColumns: ColumnInstance<{}>[];
-  entities: IEntity[];
+  entities: { [key: string]: IEntity };
 }
 
 export const StatementListRow: React.FC<StatementListRow> = ({

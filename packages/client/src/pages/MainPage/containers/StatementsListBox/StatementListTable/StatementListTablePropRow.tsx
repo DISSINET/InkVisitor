@@ -5,12 +5,12 @@ import { EntityTag } from "../../EntityTag/EntityTag";
 interface StatementListTablePropRow {
   props: IProp[];
   entities: { [key: string]: IEntity };
-  children: React.ReactElement;
+  renderChildrenPropRow?: (props: IProp[]) => React.ReactElement;
 }
 export const StatementListTablePropRow: React.FC<StatementListTablePropRow> = ({
   props,
   entities,
-  children,
+  renderChildrenPropRow,
 }) => {
   return (
     <div>
@@ -33,6 +33,7 @@ export const StatementListTablePropRow: React.FC<StatementListTablePropRow> = ({
                 tooltipPosition="bottom center"
               />
             )}
+            {renderChildrenPropRow && renderChildrenPropRow(prop.children)}
           </div>
         );
       })}

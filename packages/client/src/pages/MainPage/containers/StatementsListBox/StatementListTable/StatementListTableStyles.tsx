@@ -54,6 +54,7 @@ export const StyledTd = styled.td`
 export const StyledTdLastEdit = styled(StyledTd)`
   font-size: ${({ theme }) => theme.fontSize["xxs"]};
 `;
+// ROW EXPANDED
 export const StyledSubRow = styled.div`
   width: 100%;
   padding: ${({ theme }) => theme.space[2]};
@@ -68,4 +69,8 @@ export const StyledSubRowTd = styled.div`
   padding-bottom: ${({ theme }) => `${theme.space[1]}`};
   padding-left: 0;
   font-size: ${({ theme }) => theme.fontSize["sm"]};
+`;
+export const StyledActantGroup = styled.div`
+  display: flex;
+  flex-direction: column;
 `;

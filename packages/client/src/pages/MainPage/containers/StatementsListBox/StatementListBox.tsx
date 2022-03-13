@@ -41,11 +41,11 @@ import {
 
 const initialData: {
   statements: IStatement[];
-  entities: IEntity[];
+  entities: { [key: string]: IEntity };
   right: UserRoleMode;
 } = {
   statements: [],
-  entities: [],
+  entities: {},
   right: UserRoleMode.Read,
 };
 
@@ -325,10 +325,9 @@ export const StatementListBox: React.FC = () => {
             : [];
 
           const subjectObjects = subjectIds.map((actantId: string) => {
-            const subjectObject =
-              entities && entities.find((e) => e.id === actantId);
-
-            return subjectObject;
+            // const subjectObject =
+            //   entities && entities.find((e) => e.id === actantId);
+            return entities[actantId];
           });
 
           const isOversized = subjectIds.length > 2;
@@ -371,9 +370,9 @@ export const StatementListBox: React.FC = () => {
             : [];
 
           const actionObjects = actionIds.map((actionId: string) => {
-            const actantObject =
-              entities && entities.find((e) => e && e.id === actionId);
-            return actantObject && actantObject;
+            // const actantObject =
+            //   entities && entities.find((e) => e && e.id === actionId);
+            return entities[actionId];
           });
 
           if (actionObjects) {
@@ -422,9 +421,9 @@ export const StatementListBox: React.FC = () => {
           const isOversized = actantIds.length > 4;
 
           const actantObjects = actantIds.map((actantId: string) => {
-            const actantObject =
-              entities && entities.find((e) => e && e.id === actantId);
-            return actantObject && actantObject;
+            // const actantObject =
+            //   entities && entities.find((e) => e && e.id === actantId);
+            return entities[actantId];
           });
           return (
             <TagGroup>

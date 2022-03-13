@@ -10,7 +10,7 @@ interface StatementListTable {
   columns: Column<{}>[];
   handleRowClick?: Function;
   moveEndRow: Function;
-  entities: IEntity[];
+  entities: { [key: string]: IEntity };
 }
 export const StatementListTable: React.FC<StatementListTable> = ({
   data,
