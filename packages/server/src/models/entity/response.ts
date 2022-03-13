@@ -71,6 +71,11 @@ export class ResponseEntityDetail
     this.walkStatementsDataProps(
       await Statement.findUsedInDataProps(req.db.connection, this.id)
     );
+
+    const dependentEntities = await this.getEntities(req.db.connection);
+    for (const key in dependentEntities) {
+      this.entities[key] = dependentEntities[key];
+    }
   }
 
   /**
