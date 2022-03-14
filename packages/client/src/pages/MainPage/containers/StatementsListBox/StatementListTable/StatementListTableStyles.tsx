@@ -1,4 +1,5 @@
 import styled from "styled-components";
+import theme from "Theme/theme";
 
 export const StyledTable = styled.table`
   width: 100%;
@@ -53,19 +54,4 @@ export const StyledTd = styled.td`
 `;
 export const StyledTdLastEdit = styled(StyledTd)`
   font-size: ${({ theme }) => theme.fontSize["xxs"]};
-`;
-export const StyledSubRow = styled.div`
-  width: 100%;
-  padding: ${({ theme }) => theme.space[2]};
-  background-color: ${({ theme }) => theme.color["gray"][200]};
-  font-size: ${({ theme }) => theme.fontSize["xs"]};
-  color: ${({ theme }) => theme.color["black"]};
-`;
-export const StyledSubRowTd = styled.div`
-  display: table-cell;
-  padding-top: ${({ theme }) => `${theme.space[1]}`};
-  padding-right: ${({ theme }) => `${theme.space[2]}`};
-  padding-bottom: ${({ theme }) => `${theme.space[1]}`};
-  padding-left: 0;
-  font-size: ${({ theme }) => theme.fontSize["sm"]};
 `;
