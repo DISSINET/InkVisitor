@@ -1,4 +1,5 @@
 import styled from "styled-components";
+import theme from "Theme/theme";
 
 export const StyledTable = styled.table`
   width: 100%;
@@ -54,6 +55,7 @@ export const StyledTd = styled.td`
 export const StyledTdLastEdit = styled(StyledTd)`
   font-size: ${({ theme }) => theme.fontSize["xxs"]};
 `;
+
 // ROW EXPANDED
 export const StyledSubRow = styled.div`
   width: 100%;
@@ -73,4 +75,43 @@ export const StyledSubRowTd = styled.div`
 export const StyledActantGroup = styled.div`
   display: flex;
   flex-direction: column;
+`;
+interface StyledPropRow {
+  level: 1 | 2 | 3;
+}
+
+const getIndentation = (level: 1 | 2 | 3) => {
+  switch (level) {
+    case 1:
+      return theme.space[2];
+    case 2:
+      return theme.space[8];
+    case 3:
+      return theme.space[14];
+  }
+};
+
+const getColor = (level: 1 | 2 | 3) => {
+  switch (level) {
+    case 1:
+      return "hotpink";
+    case 2:
+      return "blue";
+    case 3:
+      return "green";
+  }
+};
+export const StyledPropRow = styled.div<StyledPropRow>`
+  margin-left: ${({ level }) => getIndentation(level)};
+  margin-bottom: ${({ theme }) => theme.space[2]};
+  display: flex;
+  background-color: ${({ level }) => getColor(level)};
+  height: 3rem;
+  border: 1px dashed black;
+  width: 100%;
+`;
+export const StyledPropGroup = styled.div`
+  display: flex;
+  flex-direction: column;
+  width: 100%;
 `;

@@ -12,6 +12,14 @@ import { EntityTag } from "../../EntityTag/EntityTag";
 import { StatementListTablePropRow } from "./StatementListTablePropRow";
 import { StyledActantGroup, StyledSubRow } from "./StatementListTableStyles";
 
+interface ActantObject {
+  key: number;
+  data: { action: IEntity | undefined; sAction: IStatementActant };
+}
+interface ActionObject {
+  key: number;
+  data: { action: IEntity | undefined; sAction: IStatementAction };
+}
 interface StatementListRowExpanded {
   row: Row;
   visibleColumns: ColumnInstance<{}>[];
@@ -25,12 +33,15 @@ export const StatementListRowExpanded: React.FC<StatementListRowExpanded> = ({
   const { detailId, setDetailId, setStatementId, setTerritoryId } =
     useSearchParams();
 
-  const renderListActant = (actant: IEntity | undefined, key: number) => {
+  const renderListActant = (sActantId: string, key: number) => {
     return (
       <React.Fragment key={key}>
-        {actant && (
+        {sActantId && (
           <div key={key}>
-            <EntityTag actant={actant} tooltipPosition="bottom center" />
+            <EntityTag
+              actant={entities[sActantId]}
+              tooltipPosition="bottom center"
+            />
           </div>
         )}
       </React.Fragment>
@@ -38,39 +49,44 @@ export const StatementListRowExpanded: React.FC<StatementListRowExpanded> = ({
   };
 
   const renderListActantWithProps = (
-    actant: IEntity | undefined,
+    actant: IEntity,
+    sActant: IStatementAction | IStatementActant,
     key: number
   ) => {
     return (
-      <React.Fragment key={key}>
-        {renderListActant(actant, key)}
-        {actant && <>{renderFirstLevelProps(actant.props)}</>}
-      </React.Fragment>
+      <div key={key} style={{ marginBottom: ".5rem" }}>
+        {renderListActant(actant.id, key)}
+        {renderFirstLevelProps(sActant.props)}
+      </div>
     );
   };
 
   const renderFirstLevelProps = (props: IProp[]) => {
     return (
       <StatementListTablePropRow
+        level={1}
         props={props}
         entities={entities}
-        renderChildrenPropRow={renderSecondLevelProps}
+        // renderChildrenPropRow={renderSecondLevelProps}
       />
     );
   };
 
-  const renderSecondLevelProps = (props: IProp[]) => {
-    return (
-      <StatementListTablePropRow
-        props={props}
-        entities={entities}
-        renderChildrenPropRow={renderThirdLevelProps}
-      />
-    );
-  };
-  const renderThirdLevelProps = (props: IProp[]) => {
-    return <StatementListTablePropRow props={props} entities={entities} />;
-  };
+  // const renderSecondLevelProps = (props: IProp[]) => {
+  //   return (
+  //     <StatementListTablePropRow
+  //       level={2}
+  //       props={props}
+  //       entities={entities}
+  //       renderChildrenPropRow={renderThirdLevelProps}
+  //     />
+  //   );
+  // };
+  // const renderThirdLevelProps = (props: IProp[]) => {
+  //   return (
+  //     <StatementListTablePropRow level={3} props={props} entities={entities} />
+  //   );
+  // };
 
   const renderRowSubComponent = React.useCallback(({ row }) => {
     const {
@@ -85,24 +101,39 @@ export const StatementListRowExpanded: React.FC<StatementListRowExpanded> = ({
       text: string;
       references: IStatementReference[];
       tags: string[];
-    } = row.values.data;
+    } = row.original.data;
 
     const { notes }: { notes: string[] } = row.original;
 
     // ACTIONS
     const actionObjects = actions.map(
-      (a: IStatementAction) => entities[a.action]
+      (sAction: IStatementAction, key: number) => {
+        const action = entities[sAction.action];
+        return { key, data: { sAction, action } };
+      }
     );
 
     // SUBJECTS
-    const subjectObjects: IEntity[] = actants
+    const subjectObjects = actants
       .filter((a: IStatementActant) => a.position === "s")
-      .map((a: IStatementActant) => entities[a.actant]);
+      .map((sSubject: IStatementActant, key) => {
+        const subject = entities[sSubject.actant];
+        return { key, data: { sSubject, subject } };
+      });
 
     // ACTANTS
-    const actantObjects: IEntity[] = actants
+    const actantObjects = actants
       .filter((a: IStatementActant) => a.position !== "s")
-      .map((a: any) => entities[a.actant]);
+      .map((sActant: IStatementActant, key: number) => {
+        const actant = entities[sActant.actant];
+        return {
+          key,
+          data: {
+            sActant,
+            actant,
+          },
+        };
+      });
 
     // REFERENCES
     const referenceObjects: IEntity[] = references.map(
@@ -121,31 +152,43 @@ export const StatementListRowExpanded: React.FC<StatementListRowExpanded> = ({
           <b>actions</b>
           <StyledActantGroup>
             {actionObjects.map((action, key) =>
-              renderListActantWithProps(action, key)
+              renderListActantWithProps(
+                action.data.action,
+                action.data.sAction,
+                key
+              )
             )}
           </StyledActantGroup>
           <br />
           <b>subjects</b>
           <StyledActantGroup>
             {subjectObjects.map((actant, key) =>
-              renderListActantWithProps(actant, key)
+              renderListActantWithProps(
+                actant.data.subject,
+                actant.data.sSubject,
+                key
+              )
             )}
           </StyledActantGroup>
           <br />
           <b>actants</b>
           <StyledActantGroup>
             {actantObjects.map((actant, key) =>
-              renderListActantWithProps(actant, key)
+              renderListActantWithProps(
+                actant.data.actant,
+                actant.data.sActant,
+                key
+              )
             )}
           </StyledActantGroup>
           <br />
           <b>references</b>
           {referenceObjects.map((reference, key) =>
-            renderListActant(reference, key)
+            renderListActant(reference.id, key)
           )}
           <br />
           <b>tags</b>
-          {tagObjects.map((reference, key) => renderListActant(reference, key))}
+          {tagObjects.map((tag, key) => renderListActant(tag.id, key))}
           <br />
           <b>notes</b>
           <br />

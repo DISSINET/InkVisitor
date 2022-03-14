@@ -1,40 +1,47 @@
 import { IEntity, IProp } from "@shared/types";
 import React from "react";
 import { EntityTag } from "../../EntityTag/EntityTag";
+import { StyledPropGroup, StyledPropRow } from "./StatementListTableStyles";
 
 interface StatementListTablePropRow {
+  level: 1 | 2 | 3;
   props: IProp[];
   entities: { [key: string]: IEntity };
   renderChildrenPropRow?: (props: IProp[]) => React.ReactElement;
 }
 export const StatementListTablePropRow: React.FC<StatementListTablePropRow> = ({
+  level,
   props,
   entities,
   renderChildrenPropRow,
 }) => {
   return (
-    <div>
+    <StyledPropGroup>
       {props.map((prop, key) => {
         const propTypeEntity: IEntity = entities[prop.type.id];
         const propValueEntity: IEntity = entities[prop.value.id];
         return (
-          <div key={key}>
-            {propTypeEntity && (
+          <StyledPropRow key={key} level={level}>
+            {propTypeEntity ? (
               <EntityTag
                 actant={propTypeEntity}
                 tooltipPosition="bottom center"
               />
+            ) : (
+              "type"
             )}
-            {propValueEntity && (
+            {propValueEntity ? (
               <EntityTag
                 actant={propValueEntity}
                 tooltipPosition="bottom center"
               />
+            ) : (
+              "value"
             )}
             {renderChildrenPropRow && renderChildrenPropRow(prop.children)}
-          </div>
+          </StyledPropRow>
         );
       })}
-    </div>
+    </StyledPropGroup>
   );
 };
