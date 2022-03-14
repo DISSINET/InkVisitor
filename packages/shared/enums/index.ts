@@ -163,7 +163,7 @@ export enum Language {
   Czech = "ces",
   Italian = "ita",
   French = "fra",
-  German = "ger"
+  German = "deu"
 }
 
 export enum ReferenceType {
