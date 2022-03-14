@@ -1,10 +1,9 @@
 import { UserRole, UserRoleMode } from "@shared/enums";
 import {
-  IEntity,
   IAction,
+  IEntity,
   IResponseStatement,
   IStatement,
-  IStatementData,
 } from "@shared/types";
 import api from "api";
 import {

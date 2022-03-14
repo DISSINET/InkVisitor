@@ -13,7 +13,8 @@ import { useQuery } from "react-query";
 import { Cell, ColumnInstance } from "react-table";
 import { DragItem, ItemTypes } from "types";
 import { dndHoverFn } from "utils";
-import { StatementListRowExpanded } from "./StatementListRowExpanded";
+import { StatementListRowExpanded } from "./StatementListRowExpanded/StatementListRowExpanded";
+
 import {
   StyledTd,
   StyledTdLastEdit,
@@ -150,7 +151,7 @@ export const StatementListRow: React.FC<StatementListRow> = ({
           }
         })}
       </StyledTr>
-      {row.isExpanded || row.index === 0 ? (
+      {row.isExpanded ? (
         <StatementListRowExpanded
           row={row}
           visibleColumns={visibleColumns}

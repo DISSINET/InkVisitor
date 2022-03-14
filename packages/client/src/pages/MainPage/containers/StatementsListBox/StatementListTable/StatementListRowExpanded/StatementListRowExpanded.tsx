@@ -5,21 +5,16 @@ import {
   IStatementAction,
   IStatementReference,
 } from "@shared/types";
-import { useSearchParams } from "hooks";
 import React from "react";
 import { ColumnInstance, Row } from "react-table";
-import { EntityTag } from "../../EntityTag/EntityTag";
-import { StatementListTablePropRow } from "./StatementListTablePropRow";
-import { StyledActantGroup, StyledSubRow } from "./StatementListTableStyles";
+import { EntityTag } from "../../../EntityTag/EntityTag";
+import { StatementListRowExpandedPropGroup } from "./StatementListRowExpandedPropGroup";
+import {
+  StyledActantGroup,
+  StyledActantWrap,
+  StyledSubRow,
+} from "./StatementListRowExpandedStyles";
 
-interface ActantObject {
-  key: number;
-  data: { action: IEntity | undefined; sAction: IStatementActant };
-}
-interface ActionObject {
-  key: number;
-  data: { action: IEntity | undefined; sAction: IStatementAction };
-}
 interface StatementListRowExpanded {
   row: Row;
   visibleColumns: ColumnInstance<{}>[];
@@ -30,19 +25,16 @@ export const StatementListRowExpanded: React.FC<StatementListRowExpanded> = ({
   visibleColumns,
   entities,
 }) => {
-  const { detailId, setDetailId, setStatementId, setTerritoryId } =
-    useSearchParams();
-
   const renderListActant = (sActantId: string, key: number) => {
     return (
       <React.Fragment key={key}>
         {sActantId && (
-          <div key={key}>
+          <StyledActantWrap key={key}>
             <EntityTag
               actant={entities[sActantId]}
               tooltipPosition="bottom center"
             />
-          </div>
+          </StyledActantWrap>
         )}
       </React.Fragment>
     );
@@ -54,39 +46,44 @@ export const StatementListRowExpanded: React.FC<StatementListRowExpanded> = ({
     key: number
   ) => {
     return (
-      <div key={key} style={{ marginBottom: ".5rem" }}>
+      <StyledActantWrap key={key}>
         {renderListActant(actant.id, key)}
         {renderFirstLevelProps(sActant.props)}
-      </div>
+      </StyledActantWrap>
     );
   };
 
   const renderFirstLevelProps = (props: IProp[]) => {
     return (
-      <StatementListTablePropRow
+      <StatementListRowExpandedPropGroup
         level={1}
         props={props}
         entities={entities}
-        // renderChildrenPropRow={renderSecondLevelProps}
+        renderChildrenPropRow={renderSecondLevelProps}
       />
     );
   };
 
-  // const renderSecondLevelProps = (props: IProp[]) => {
-  //   return (
-  //     <StatementListTablePropRow
-  //       level={2}
-  //       props={props}
-  //       entities={entities}
-  //       renderChildrenPropRow={renderThirdLevelProps}
-  //     />
-  //   );
-  // };
-  // const renderThirdLevelProps = (props: IProp[]) => {
-  //   return (
-  //     <StatementListTablePropRow level={3} props={props} entities={entities} />
-  //   );
-  // };
+  const renderSecondLevelProps = (props: IProp[]) => {
+    return (
+      <StatementListRowExpandedPropGroup
+        level={2}
+        props={props}
+        entities={entities}
+        renderChildrenPropRow={renderThirdLevelProps}
+      />
+    );
+  };
+
+  const renderThirdLevelProps = (props: IProp[]) => {
+    return (
+      <StatementListRowExpandedPropGroup
+        level={3}
+        props={props}
+        entities={entities}
+      />
+    );
+  };
 
   const renderRowSubComponent = React.useCallback(({ row }) => {
     const {
