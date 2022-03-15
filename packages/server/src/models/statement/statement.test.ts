@@ -35,6 +35,7 @@ const fillStatementProps = function (
     {}
   );
 };
+
 export const prepareStatement = (): [string, Statement] => {
   const detailId = Math.random().toFixed();
 
