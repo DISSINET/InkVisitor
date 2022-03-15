@@ -1,3 +1,4 @@
+import { IRequestContext } from "@models/common";
 import { findEntityById, findEntitiesById } from "@service/shorthands";
 import { UserRole } from "@shared/enums";
 import {
@@ -10,7 +11,6 @@ import {
   IUserOptions,
   IUserRight,
 } from "@shared/types";
-import { Request } from "express";
 
 export class ResponseUser implements IResponseUser {
   id: string;
@@ -47,7 +47,7 @@ export class ResponseUser implements IResponseUser {
     this.territoryRights = [];
   }
 
-  async unwindBookmarks(req: Request): Promise<void> {
+  async unwindBookmarks(req: IRequestContext): Promise<void> {
     for (const bookmark of this._userBookmarks) {
       const bookmarkResponse: IResponseBookmarkFolder = {
         id: bookmark.id,
@@ -68,7 +68,7 @@ export class ResponseUser implements IResponseUser {
     }
   }
 
-  async unwindTerritories(req: Request): Promise<void> {
+  async unwindTerritories(req: IRequestContext): Promise<void> {
     for (const territory of this._userStoredTerritories) {
       const territoryResponse: IResponseStoredTerritory = {
         territory: {
@@ -79,7 +79,7 @@ export class ResponseUser implements IResponseUser {
     }
   }
 
-  async unwindRights(req: Request): Promise<void> {
+  async unwindRights(req: IRequestContext): Promise<void> {
     for (const right of this.rights) {
       const territoryFromRights: IResponseStoredTerritory = {
         territory: {
@@ -90,7 +90,7 @@ export class ResponseUser implements IResponseUser {
     }
   }
 
-  async unwindAll(req: Request) {
+  async unwindAll(req: IRequestContext) {
     await this.unwindBookmarks(req);
     await this.unwindTerritories(req);
     await this.unwindRights(req);

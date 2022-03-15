@@ -5,6 +5,7 @@ import Territory from "./territory";
 import Statement from "@models/statement/statement";
 import { findEntitiesById } from "@service/shorthands";
 import { ResponseStatement } from "@models/statement/response";
+import { IRequestContext } from "@models/common";
 
 export class ResponseTerritory extends Territory implements IResponseTerritory {
   statements: IResponseStatement[];
@@ -21,7 +22,7 @@ export class ResponseTerritory extends Territory implements IResponseTerritory {
     this.entities = {};
   }
 
-  async prepare(req: Request): Promise<void> {
+  async prepare(req: IRequestContext): Promise<void> {
     this.right = this.getUserRoleMode(req.getUserOrFail());
 
     const statements = await Statement.findStatementsInTerritory(

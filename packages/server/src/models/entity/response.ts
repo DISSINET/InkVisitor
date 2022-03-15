@@ -1,4 +1,3 @@
-import { Request } from "express";
 import { UsedInPosition, UserRoleMode } from "@shared/enums";
 import {
   IEntity,
@@ -11,6 +10,7 @@ import {
 } from "@shared/types";
 import Entity from "./entity";
 import Statement from "@models/statement/statement";
+import { IRequestContext } from "@models/common";
 
 export class ResponseEntity extends Entity implements IResponseEntity {
   right: UserRoleMode = UserRoleMode.Read;
@@ -26,7 +26,7 @@ export class ResponseEntity extends Entity implements IResponseEntity {
    * Loads additional fields to satisfy the IResponseDetail interface
    * @param req
    */
-  async prepare(request: Request) {
+  async prepare(request: IRequestContext) {
     this.right = this.getUserRoleMode(request.getUserOrFail());
   }
 }
@@ -52,7 +52,7 @@ export class ResponseEntityDetail
    * Loads additional fields to satisfy the IResponseDetail interface
    * @param req
    */
-  async prepare(req: Request): Promise<void> {
+  async prepare(req: IRequestContext): Promise<void> {
     super.prepare(req);
 
     const usedInEntityProps = await Entity.findUsedInProps(

@@ -1,5 +1,11 @@
 import { Db } from "@service/RethinkDB";
 import { Connection, WriteResult } from "rethinkdb-ts";
+import User from "./user/user";
+
+export interface IRequestContext {
+  db: Db;
+  getUserOrFail(): User;
+}
 
 type GenericObject = { [key: string]: any };
 export type UnknownObject = GenericObject | undefined;
