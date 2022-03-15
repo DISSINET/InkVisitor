@@ -7,6 +7,7 @@ import {
 } from "@shared/types";
 import React from "react";
 import { ColumnInstance, Row } from "react-table";
+import { BsArrowReturnRight } from "react-icons/bs";
 import { EntityTag } from "../../../EntityTag/EntityTag";
 import { StatementListRowExpandedPropGroup } from "./StatementListRowExpandedPropGroup";
 import {
@@ -14,6 +15,7 @@ import {
   StyledActantWrap,
   StyledSubRow,
 } from "./StatementListRowExpandedStyles";
+import { StyledPropRow } from "./StatementListRowExpandedStyles";
 
 interface StatementListRowExpanded {
   row: Row;
@@ -143,58 +145,70 @@ export const StatementListRowExpanded: React.FC<StatementListRowExpanded> = ({
     return (
       <>
         <StyledSubRow id={`statement${row.values.id}`}>
-          <b>text</b>
-          {text}
           <br />
-          <b>actions</b>
           <StyledActantGroup>
-            {actionObjects.map((action, key) =>
-              renderListActantWithProps(
-                action.data.action,
-                action.data.sAction,
-                key
-              )
-            )}
+            {actionObjects.map((action, key) => (
+              <StyledPropRow level={1}>
+                <BsArrowReturnRight size="20" />
+                <span>&nbsp;&nbsp;(action)&nbsp;&nbsp;</span>
+                {renderListActantWithProps(
+                  action.data.action,
+                  action.data.sAction,
+                  key
+                )}
+              </StyledPropRow>
+            ))}
           </StyledActantGroup>
-          <br />
-          <b>subjects</b>
           <StyledActantGroup>
-            {subjectObjects.map((actant, key) =>
-              renderListActantWithProps(
-                actant.data.subject,
-                actant.data.sSubject,
-                key
-              )
-            )}
+            {subjectObjects.map((actant, key) => (
+              <StyledPropRow level={1}>
+                <BsArrowReturnRight size="20" />
+                <span>&nbsp;&nbsp;(subject)&nbsp;&nbsp;</span>
+                {renderListActantWithProps(
+                  actant.data.subject,
+                  actant.data.sSubject,
+                  key
+                )}
+              </StyledPropRow>
+            ))}
           </StyledActantGroup>
-          <br />
-          <b>actants</b>
           <StyledActantGroup>
-            {actantObjects.map((actant, key) =>
-              renderListActantWithProps(
-                actant.data.actant,
-                actant.data.sActant,
-                key
-              )
-            )}
+            {actantObjects.map((actant, key) => (
+              <StyledPropRow level={1}>
+                <BsArrowReturnRight size="20" />
+                <span>&nbsp;&nbsp;(actant)&nbsp;&nbsp;</span>
+                {renderListActantWithProps(
+                  actant.data.actant,
+                  actant.data.sActant,
+                  key
+                )}
+              </StyledPropRow>
+            ))}
           </StyledActantGroup>
-          <br />
-          <b>references</b>
-          {referenceObjects.map((reference, key) =>
-            renderListActant(reference.id, key)
-          )}
-          <br />
-          <b>tags</b>
-          {tagObjects.map((tag, key) => renderListActant(tag.id, key))}
-          <br />
-          <b>notes</b>
+          {referenceObjects.map((reference, key) => (
+            <StyledPropRow level={1}>
+              <BsArrowReturnRight size="20" />
+              <span>&nbsp;&nbsp;(reference)&nbsp;&nbsp;</span>
+              {renderListActant(reference.id, key)}
+            </StyledPropRow>
+          ))}
+          {tagObjects.map((tag, key) => (
+            <StyledPropRow level={1}>
+              <BsArrowReturnRight size="20" />
+              <span>&nbsp;&nbsp;(tag)&nbsp;&nbsp;</span>
+              {renderListActant(tag.id, key)}
+            </StyledPropRow>
+          ))}
           <br />
           {notes.map((note: string, key: number) => {
             return (
-              <p key={key}>
-                {note}
-                <br />
-              </p>
+              <>
+                <span>(note)</span>
+                <p key={key}>
+                  {note}
+                  <br />
+                </p>
+              </>
             );
           })}
         </StyledSubRow>
