@@ -3,7 +3,8 @@ import { UserRoleMode } from "@shared/enums";
 import { IEntity, IResponseStatement, IResponseTerritory } from "@shared/types";
 import Territory from "./territory";
 import Statement from "@models/statement/statement";
-import { findEntitiesById, findEntitiesByIds } from "@service/shorthands";
+import { findEntitiesById } from "@service/shorthands";
+import { ResponseStatement } from "@models/statement/response";
 
 export class ResponseTerritory extends Territory implements IResponseTerritory {
   statements: IResponseStatement[];
@@ -41,15 +42,9 @@ export class ResponseTerritory extends Territory implements IResponseTerritory {
     );
 
     for (const statement of statements) {
-      const entities = await findEntitiesByIds(
-        req.db,
-        statement.data.actions.map((a) => a.action)
-      );
-
-      this.statements.push({
-        ...statement,
-        entities: Object.assign({}, ...entities.map((x) => ({ [x.id]: x }))),
-      });
+      const responseStatement = new ResponseStatement(new Statement(statement));
+      await responseStatement.prepare(req);
+      this.statements.push(responseStatement);
     }
   }
 }
