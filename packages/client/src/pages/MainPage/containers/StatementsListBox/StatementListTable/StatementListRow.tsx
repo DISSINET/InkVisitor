@@ -1,3 +1,4 @@
+import { IEntity } from "@shared/types";
 import api from "api";
 import { useSearchParams } from "hooks";
 import React, { useMemo, useRef } from "react";
@@ -12,7 +13,8 @@ import { useQuery } from "react-query";
 import { Cell, ColumnInstance } from "react-table";
 import { DragItem, ItemTypes } from "types";
 import { dndHoverFn } from "utils";
-import { StatementListRowExpanded } from "./StatementListRowExpanded";
+import { StatementListRowExpanded } from "./StatementListRowExpanded/StatementListRowExpanded";
+
 import {
   StyledTd,
   StyledTdLastEdit,
@@ -26,6 +28,7 @@ interface StatementListRow {
   moveEndRow: Function;
   handleClick: Function;
   visibleColumns: ColumnInstance<{}>[];
+  entities: { [key: string]: IEntity };
 }
 
 export const StatementListRow: React.FC<StatementListRow> = ({
@@ -35,6 +38,7 @@ export const StatementListRow: React.FC<StatementListRow> = ({
   moveEndRow,
   handleClick = () => {},
   visibleColumns,
+  entities,
 }) => {
   const { statementId } = useSearchParams();
 
@@ -148,7 +152,11 @@ export const StatementListRow: React.FC<StatementListRow> = ({
         })}
       </StyledTr>
       {row.isExpanded ? (
-        <StatementListRowExpanded row={row} visibleColumns={visibleColumns} />
+        <StatementListRowExpanded
+          row={row}
+          visibleColumns={visibleColumns}
+          entities={entities}
+        />
       ) : null}
     </React.Fragment>
   );
