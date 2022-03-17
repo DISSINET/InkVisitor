@@ -1,4 +1,4 @@
-import { IStatement } from "@shared/types";
+import { IEntity, IResponseStatement, IStatement } from "@shared/types";
 import update from "immutability-helper";
 import React, { useCallback, useEffect, useState } from "react";
 import { Column, Row, useExpanded, useTable } from "react-table";
@@ -6,20 +6,23 @@ import { StatementListRow } from "./StatementListRow";
 import { StyledTable, StyledTh, StyledTHead } from "./StatementListTableStyles";
 
 interface StatementListTable {
-  data: IStatement[];
+  data: IResponseStatement[];
   columns: Column<{}>[];
   handleRowClick?: Function;
   moveEndRow: Function;
+  entities: { [key: string]: IEntity };
 }
 export const StatementListTable: React.FC<StatementListTable> = ({
   data,
   columns,
   handleRowClick = () => {},
   moveEndRow,
+  entities,
 }) => {
-  const [records, setRecords] = useState<IStatement[]>([]);
+  const [statements, setStatements] = useState<IStatement[]>([]);
+
   useEffect(() => {
-    setRecords(data);
+    setStatements(data);
   }, [data]);
 
   const getRowId = useCallback((row) => {
@@ -35,7 +38,7 @@ export const StatementListTable: React.FC<StatementListTable> = ({
   } = useTable(
     {
       columns,
-      data: records,
+      data: statements,
       getRowId,
       initialState: {
         hiddenColumns: ["id"],
@@ -46,9 +49,9 @@ export const StatementListTable: React.FC<StatementListTable> = ({
 
   const moveRow = useCallback(
     (dragIndex: number, hoverIndex: number) => {
-      const dragRecord = records[dragIndex];
-      setRecords(
-        update(records, {
+      const dragRecord = statements[dragIndex];
+      setStatements(
+        update(statements, {
           $splice: [
             [dragIndex, 1],
             [hoverIndex, 0, dragRecord],
@@ -56,7 +59,7 @@ export const StatementListTable: React.FC<StatementListTable> = ({
         })
       );
     },
-    [records]
+    [statements]
   );
 
   return (
@@ -89,6 +92,7 @@ export const StatementListTable: React.FC<StatementListTable> = ({
               moveEndRow={moveEndRow}
               {...row.getRowProps()}
               visibleColumns={visibleColumns}
+              entities={entities}
             />
           );
         })}
