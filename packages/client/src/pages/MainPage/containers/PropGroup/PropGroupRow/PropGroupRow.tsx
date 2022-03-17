@@ -71,7 +71,7 @@ export const PropGroupRow: React.FC<IPropGroupRow> = ({
   category,
 }) => {
   const propTypeEntity: IEntity = entities[prop.type.id];
-  const propValueEntity = entities[prop.value.id];
+  const propValueEntity: IEntity = entities[prop.value.id];
 
   const draggedPropRow: DraggedPropRowItem = useAppSelector(
     (state) => state.rowDnd.draggedPropRow

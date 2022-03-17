@@ -1,10 +1,9 @@
 import { UserRole, UserRoleMode } from "@shared/enums";
 import {
-  IEntity,
   IAction,
+  IEntity,
   IResponseStatement,
   IStatement,
-  IStatementData,
 } from "@shared/types";
 import api from "api";
 import {
@@ -40,12 +39,12 @@ import {
 } from "./StatementLitBoxStyles";
 
 const initialData: {
-  statements: IStatement[];
-  entities: IEntity[];
+  statements: IResponseStatement[];
+  entities: { [key: string]: IEntity };
   right: UserRoleMode;
 } = {
   statements: [],
-  entities: [],
+  entities: {},
   right: UserRoleMode.Read,
 };
 
@@ -325,10 +324,9 @@ export const StatementListBox: React.FC = () => {
             : [];
 
           const subjectObjects = subjectIds.map((actantId: string) => {
-            const subjectObject =
-              entities && entities.find((e) => e.id === actantId);
-
-            return subjectObject;
+            // const subjectObject =
+            //   entities && entities.find((e) => e.id === actantId);
+            return entities[actantId];
           });
 
           const isOversized = subjectIds.length > 2;
@@ -371,9 +369,9 @@ export const StatementListBox: React.FC = () => {
             : [];
 
           const actionObjects = actionIds.map((actionId: string) => {
-            const actantObject =
-              entities && entities.find((e) => e && e.id === actionId);
-            return actantObject && actantObject;
+            // const actantObject =
+            //   entities && entities.find((e) => e && e.id === actionId);
+            return entities[actionId];
           });
 
           if (actionObjects) {
@@ -422,9 +420,9 @@ export const StatementListBox: React.FC = () => {
           const isOversized = actantIds.length > 4;
 
           const actantObjects = actantIds.map((actantId: string) => {
-            const actantObject =
-              entities && entities.find((e) => e && e.id === actantId);
-            return actantObject && actantObject;
+            // const actantObject =
+            //   entities && entities.find((e) => e && e.id === actantId);
+            return entities[actantId];
           });
           return (
             <TagGroup>
@@ -561,109 +559,6 @@ export const StatementListBox: React.FC = () => {
           );
         },
       },
-      {
-        Header: "",
-        id: "exp-actions",
-        Cell: ({ row }: Cell) => {
-          const { actions }: { actions?: IAction[] } = row.original;
-          const statement = row.original as IResponseStatement;
-          if (actions) {
-            return (
-              <>
-                <div>{actions.length > 0 ? <i>Actions</i> : ""}</div>
-                <TagGroup>
-                  <div style={{ display: "block" }}>
-                    {actions.map((action: IAction, key: number) =>
-                      renderListActantLong(action, key, true, statement)
-                    )}
-                  </div>
-                </TagGroup>
-              </>
-            );
-          } else {
-            return <div />;
-          }
-        },
-      },
-      {
-        Header: false,
-        id: "exp-actants",
-        Cell: ({ row }: Cell) => {
-          const actantIds = row.values.data?.actants
-            ? row.values.data.actants.map((a: any) => a.actant)
-            : [];
-          const statement = row.original as IResponseStatement;
-          const actantObjects = actantIds.map((actantId: string) => {
-            const actantObject =
-              entities && entities.find((e) => e && e.id === actantId);
-            return actantObject && actantObject;
-          });
-
-          return (
-            <>
-              <div>{actantObjects.length > 0 ? <i>Actants</i> : ""}</div>
-              <TagGroup>
-                <div style={{ display: "block" }}>
-                  {actantObjects.map((actantObject: IEntity, key: number) =>
-                    renderListActantLong(actantObject, key, true, statement)
-                  )}
-                </div>
-              </TagGroup>
-            </>
-          );
-        },
-      },
-      {
-        Header: "",
-        id: "exp-references",
-        Cell: ({ row }: Cell) => {
-          const refs = row.values.data?.references
-            ? row.values.data.references.map((a: any) => a.resource)
-            : [];
-
-          const actantObjects = refs.map((actantId: string) => {
-            const actantObject =
-              entities && entities.find((e) => e && e.id === actantId);
-            return actantObject && actantObject;
-          });
-          return (
-            <>
-              <div>{actantObjects.length > 0 ? <i>References</i> : ""}</div>
-              <TagGroup>
-                <div style={{ display: "block" }}>
-                  {actantObjects.map((actantObject: IEntity, key: number) =>
-                    renderListActantLong(actantObject, key)
-                  )}
-                </div>
-              </TagGroup>
-            </>
-          );
-        },
-      },
-      {
-        Header: "",
-        id: "exp-tags",
-        Cell: ({ row }: Cell) => {
-          const actantIds = row.values.data?.tags ? row.values.data.tags : [];
-          const actantObjects = actantIds.map((actantId: string) => {
-            const actantObject =
-              entities && entities.find((e) => e && e.id === actantId);
-            return actantObject && actantObject;
-          });
-          return (
-            <>
-              <div>{actantObjects.length > 0 ? <i>Tags</i> : ""}</div>
-              <TagGroup>
-                <div style={{ display: "block" }}>
-                  {actantObjects.map((actantObject: IEntity, key: number) =>
-                    renderListActantLong(actantObject, key)
-                  )}
-                </div>
-              </TagGroup>
-            </>
-          );
-        },
-      },
     ];
   }, [data, statementId]);
 
@@ -706,6 +601,7 @@ export const StatementListBox: React.FC = () => {
             handleRowClick={(rowId: string) => {
               setStatementId(rowId);
             }}
+            entities={entities}
           />
         </StyledTableWrapper>
       )}
