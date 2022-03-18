@@ -86,6 +86,8 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
     { enabled: !!detailId && api.isLoggedIn(), retry: 2 }
   );
 
+  console.log(entity);
+
   // Audit query
   const {
     status: statusAudit,
@@ -551,6 +553,33 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                     />
                   </StyledDetailContentRowValue>
                 </StyledDetailContentRow>
+
+                {/* territory parent */}
+                {entity.class === EntityClass.Territory && entity.data.parent && (
+                  <StyledDetailContentRow>
+                    <StyledDetailContentRowLabel>
+                      Parent Territory
+                    </StyledDetailContentRowLabel>
+                    <StyledDetailContentRowValue>
+                      {/* here should come the tag */}
+                      {entity.data.parent.id}
+                    </StyledDetailContentRowValue>
+                  </StyledDetailContentRow>
+                )}
+
+                {/* statement  terriroty */}
+                {entity.class === EntityClass.Statement &&
+                  entity.data.territory && (
+                    <StyledDetailContentRow>
+                      <StyledDetailContentRowLabel>
+                        Territory
+                      </StyledDetailContentRowLabel>
+                      <StyledDetailContentRowValue>
+                        {/* here should come the tag */}
+                        {entity.data.territory.id}
+                      </StyledDetailContentRowValue>
+                    </StyledDetailContentRow>
+                  )}
                 <StyledDetailContentRow>
                   <StyledDetailContentRowLabel>
                     Status
