@@ -13,27 +13,23 @@ import {
   getIStatementMock,
 } from "@modules/common.test";
 import Prop, { PropSpec } from "@models/prop/prop";
+import { fillArray } from "@models/common";
+import { IProp } from "@shared/types";
 
-const fillStatementProps = function (
-  container: StatementActant | StatementAction
-): void {
+const fillStatementProps = function (container: IProp[]): void {
   // children lvl 1
-  container.props[0].children.push(new Prop({}));
-  container.props[0].children[0].type = new PropSpec({});
-  container.props[0].children[0].value = new PropSpec({});
+  container[0].children.push(new Prop({}));
+  container[0].children[0].type = new PropSpec({});
+  container[0].children[0].value = new PropSpec({});
 
   // children lvl 2
-  container.props[0].children[0].children.push(new Prop({}));
-  container.props[0].children[0].children[0].type = new PropSpec({});
-  container.props[0].children[0].children[0].value = new PropSpec({});
+  container[0].children[0].children.push(new Prop({}));
+  container[0].children[0].children[0].type = new PropSpec({});
+  container[0].children[0].children[0].value = new PropSpec({});
   // children lvl 3
-  container.props[0].children[0].children[0].children.push(new Prop({}));
-  container.props[0].children[0].children[0].children[0].type = new PropSpec(
-    {}
-  );
-  container.props[0].children[0].children[0].children[0].value = new PropSpec(
-    {}
-  );
+  container[0].children[0].children[0].children.push(new Prop({}));
+  container[0].children[0].children[0].children[0].type = new PropSpec({});
+  container[0].children[0].children[0].children[0].value = new PropSpec({});
 };
 
 export const prepareStatement = (): [string, Statement] => {
@@ -42,15 +38,15 @@ export const prepareStatement = (): [string, Statement] => {
   const st1 = new Statement({});
   st1.data.actants.push(new StatementActant({}));
   st1.data.actants[0].props.push(new Prop({}));
-  st1.data.actants[0].props.push(new Prop({}));
 
-  fillStatementProps(st1.data.actants[0]);
+  fillStatementProps(st1.data.actants[0].props);
 
   st1.data.actions.push(new StatementAction({}));
   st1.data.actions[0].props.push(new Prop({}));
-  st1.data.actions[0].props.push(new Prop({}));
+  fillStatementProps(st1.data.actions[0].props);
 
-  fillStatementProps(st1.data.actions[0]);
+  st1.props.push(new Prop({}));
+  fillStatementProps(st1.props);
 
   return [detailId, st1];
 };
