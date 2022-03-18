@@ -13,6 +13,7 @@ import Entity from "./entity";
 import Statement from "@models/statement/statement";
 
 export class ResponseEntity extends Entity implements IResponseEntity {
+  originalEntity: Entity;
   right: UserRoleMode = UserRoleMode.Read;
 
   constructor(entity: IEntity) {
@@ -20,6 +21,7 @@ export class ResponseEntity extends Entity implements IResponseEntity {
     for (const key of Object.keys(entity)) {
       (this as any)[key] = (entity as any)[key];
     }
+    this.originalEntity = entity as Entity;
   }
 
   /**
@@ -72,7 +74,9 @@ export class ResponseEntityDetail
       await Statement.findUsedInDataProps(req.db.connection, this.id)
     );
 
-    const dependentEntities = await this.getEntities(req.db.connection);
+    const dependentEntities = await this.originalEntity.getEntities(
+      req.db.connection
+    );
     for (const key in dependentEntities) {
       this.entities[key] = dependentEntities[key];
     }
