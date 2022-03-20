@@ -21,7 +21,7 @@ export const StatementListRowExpandedPropGroup: React.FC<
         const propTypeEntity: IEntity = entities[prop.type.id];
         const propValueEntity: IEntity = entities[prop.value.id];
         return (
-          <>
+          <React.Fragment key={key}>
             <StyledPropRow key={`${key}-`} level={level}>
               {propTypeEntity ? (
                 <>
@@ -46,7 +46,7 @@ export const StatementListRowExpandedPropGroup: React.FC<
             <div key={`children-${key}`}>
               {renderChildrenPropRow && renderChildrenPropRow(prop.children)}
             </div>
-          </>
+          </React.Fragment>
         );
       })}
     </StyledPropGroup>

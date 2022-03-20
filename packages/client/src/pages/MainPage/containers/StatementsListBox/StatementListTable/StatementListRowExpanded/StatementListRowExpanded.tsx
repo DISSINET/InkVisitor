@@ -187,8 +187,6 @@ export const StatementListRowExpanded: React.FC<StatementListRowExpanded> = ({
           </StyledActantGroup>
           {referenceObjects.map((reference, key) => (
             <StyledPropRow level={1} key={key}>
-              {" "}
-              key={key}
               <BsArrowReturnRight size="20" />
               <span>&nbsp;&nbsp;(reference)&nbsp;&nbsp;</span>
               {renderListActant(reference.id, key)}
@@ -204,13 +202,13 @@ export const StatementListRowExpanded: React.FC<StatementListRowExpanded> = ({
           <br />
           {notes.map((note: string, key: number) => {
             return (
-              <>
+              <React.Fragment key={key}>
                 <span>(note)</span>
                 <p key={key}>
                   {note}
                   <br />
                 </p>
-              </>
+              </React.Fragment>
             );
           })}
         </StyledSubRow>
