@@ -207,8 +207,6 @@ export class StatementData implements IModel, IStatementData {
 }
 
 class Statement extends Entity implements IStatement {
-  static publicFields = Entity.publicFields;
-
   class: EntityClass.Statement = EntityClass.Statement;
   data: StatementData;
 

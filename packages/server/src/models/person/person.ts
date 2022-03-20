@@ -20,8 +20,6 @@ class PersonData implements IModel {
 }
 
 class Person extends Entity implements IPerson {
-  static publicFields = Entity.publicFields;
-
   class: EntityClass.Person = EntityClass.Person; // just default
   data: PersonData;
 

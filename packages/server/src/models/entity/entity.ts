@@ -25,27 +25,9 @@ import User from "@models/user/user";
 import emitter from "@models/events/emitter";
 import { EventTypes } from "@models/events/types";
 import { findEntitiesByIds } from "@service/shorthands";
-import Base from "../base";
 
-export default class Entity extends Base implements IEntity, IDbModel {
+export default class Entity implements IEntity, IDbModel {
   static table = "entities";
-  static publicFields: string[] = [
-    "id",
-    "legacyId",
-    "class",
-    "status",
-    "data",
-    "label",
-    "detail",
-    "status",
-    "language",
-    "notes",
-    "props",
-    "references",
-    "isTemplate",
-    "usedTemplate",
-    "templateData",
-  ];
 
   id: string = "";
   legacyId: string = "";
@@ -67,8 +49,6 @@ export default class Entity extends Base implements IEntity, IDbModel {
   right: UserRoleMode = UserRoleMode.Read;
 
   constructor(data: UnknownObject) {
-    super();
-
     if (!data) {
       return;
     }
@@ -349,26 +329,7 @@ export default class Entity extends Base implements IEntity, IDbModel {
       return a.data.territory.order - b.data.territory.order;
     });
   }
-
-  async prepareResponseFields(user: User, db: Connection | undefined) {
-    this.usedIn = await this.findDependentStatements(db);
-    this.right = this.getUserRoleMode(user);
-  }
-
-  static getPublicFields(a: Entity): string[] {
-    return Object.keys(a).filter((k) => k.indexOf("_") !== 0);
-  }
-
-  toJSON(): IResponseEntity {
-    const entity = this;
-    const strippedObject: IEntity = Entity.getPublicFields(this).reduce(
-      (acc, curr) => {
-        acc[curr] = (entity as Record<string, unknown>)[curr];
-        return acc;
-      },
-      {} as any
-    );
-
-    return strippedObject;
-  }
 }
+
+const e = new Entity({});
+console.log(JSON.stringify(e));
