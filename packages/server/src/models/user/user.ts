@@ -15,8 +15,8 @@ import {
 import { UserRole, UserRoleMode } from "@shared/enums";
 import { ModelNotValidError } from "@shared/types/errors";
 import { generateRandomString, hashPassword } from "@common/auth";
-import Base from "../base";
 import { regExpEscape } from "@common/functions";
+import { nonenumerable } from "@common/decorators";
 
 export class UserRight implements IUserRight {
   territory = "";
@@ -102,10 +102,13 @@ export class StoredTerritory implements IStoredTerritory {
   }
 }
 
-export default class User extends Base implements IDbModel, IUser {
+export default class User implements IDbModel, IUser {
   id: string = "";
   email: string = "";
+
+  @nonenumerable
   password: string = "";
+
   name: string = "";
   role: UserRole = UserRole.Viewer;
   active: boolean = false;
@@ -115,21 +118,8 @@ export default class User extends Base implements IDbModel, IUser {
   rights: UserRight[] = [];
 
   static table = "users";
-  static publicFields: string[] = [
-    "id",
-    "email",
-    "name",
-    "role",
-    "active",
-    "options",
-    "bookmarks",
-    "storedTerritories",
-    "rights",
-  ];
 
   constructor(data: Record<string, any>) {
-    super();
-
     if (!data) {
       return;
     }
