@@ -19,12 +19,12 @@ export class ResponseEntity extends Entity implements IResponseEntity {
 
   right: UserRoleMode = UserRoleMode.Read;
 
-  constructor(entity: IEntity) {
+  constructor(entity: Entity) {
     super({});
     for (const key of Object.keys(entity)) {
       (this as any)[key] = (entity as any)[key];
     }
-    this.originalEntity = entity as Entity;
+    this.originalEntity = entity;
   }
 
   /**
@@ -45,7 +45,7 @@ export class ResponseEntityDetail
   usedInStatementProps: IResponseUsedInStatement<UsedInPosition>[];
   usedInMetaProps: IResponseUsedInMetaProp<UsedInPosition>[];
 
-  constructor(entity: IEntity) {
+  constructor(entity: Entity) {
     super(entity);
     this.entities = {};
     this.usedInStatement = [];
