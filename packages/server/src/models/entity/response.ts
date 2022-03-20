@@ -11,8 +11,12 @@ import {
 } from "@shared/types";
 import Entity from "./entity";
 import Statement from "@models/statement/statement";
+import { nonenumerable } from "@common/decorators";
 
 export class ResponseEntity extends Entity implements IResponseEntity {
+  @nonenumerable
+  originalEntity: IEntity;
+
   right: UserRoleMode = UserRoleMode.Read;
 
   constructor(entity: IEntity) {
@@ -20,6 +24,7 @@ export class ResponseEntity extends Entity implements IResponseEntity {
     for (const key of Object.keys(entity)) {
       (this as any)[key] = (entity as any)[key];
     }
+    this.originalEntity = entity;
   }
 
   /**

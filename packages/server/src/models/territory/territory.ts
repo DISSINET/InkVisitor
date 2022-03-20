@@ -6,6 +6,7 @@ import Entity from "@models/entity/entity";
 import { InternalServerError, InvalidDeleteError } from "@shared/types/errors";
 import User from "@models/user/user";
 import treeCache from "@service/treeCache";
+import { nonenumerable } from "@common/decorators";
 
 export class TerritoryParent implements IParentTerritory, IModel {
   id = "";
@@ -53,11 +54,10 @@ export class TerritoryData implements IModel {
 }
 
 class Territory extends Entity implements ITerritory {
-  static publicFields = Entity.publicFields;
-
   class: EntityClass.Territory = EntityClass.Territory;
   data: TerritoryData;
 
+  @nonenumerable
   _siblings: Record<number, ITerritory> = {};
 
   constructor(data: UnknownObject) {
