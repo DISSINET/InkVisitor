@@ -268,7 +268,7 @@ class Territory extends Entity implements ITerritory {
       entityIds.push(this.data.parent.id);
     }
 
-    return Object.keys(entityIds);
+    return entityIds;
   }
 }
 
