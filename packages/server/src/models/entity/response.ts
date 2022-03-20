@@ -80,8 +80,8 @@ export class ResponseEntityDetail
     const dependentEntities = await this.originalEntity.getEntities(
       req.db.connection
     );
-    for (const key in dependentEntities) {
-      this.entities[key] = dependentEntities[key];
+    for (const entity of dependentEntities) {
+      this.entities[entity.id] = entity;
     }
   }
 
