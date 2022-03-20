@@ -555,28 +555,37 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                 </StyledDetailContentRow>
 
                 {/* territory parent */}
-                {entity.class === EntityClass.Territory && entity.data.parent && (
-                  <StyledDetailContentRow>
-                    <StyledDetailContentRowLabel>
-                      Parent Territory
-                    </StyledDetailContentRowLabel>
-                    <StyledDetailContentRowValue>
-                      {/* here should come the tag */}
-                      {entity.data.parent.id}
-                    </StyledDetailContentRowValue>
-                  </StyledDetailContentRow>
-                )}
+                {entity.class === EntityClass.Territory &&
+                  entity.data.parent &&
+                  Object.keys(entity.entities).includes(
+                    entity.data.parent.id
+                  ) && (
+                    <StyledDetailContentRow>
+                      <StyledDetailContentRowLabel>
+                        Parent Territory
+                      </StyledDetailContentRowLabel>
+                      <StyledDetailContentRowValue>
+                        <EntityTag
+                          actant={entity.entities[entity.data.parent.id]}
+                        />
+                      </StyledDetailContentRowValue>
+                    </StyledDetailContentRow>
+                  )}
 
                 {/* statement  terriroty */}
                 {entity.class === EntityClass.Statement &&
-                  entity.data.territory && (
+                  entity.data.territory &&
+                  Object.keys(entity.entities).includes(
+                    entity.data.territory.id
+                  ) && (
                     <StyledDetailContentRow>
                       <StyledDetailContentRowLabel>
                         Territory
                       </StyledDetailContentRowLabel>
                       <StyledDetailContentRowValue>
-                        {/* here should come the tag */}
-                        {entity.data.territory.id}
+                        <EntityTag
+                          actant={entity.entities[entity.data.territory.id]}
+                        />
                       </StyledDetailContentRowValue>
                     </StyledDetailContentRow>
                   )}
@@ -1066,10 +1075,10 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
             </StyledDetailSectionContent>
           </StyledDetailSection>
 
-          {/* usedId section */}
-          <StyledDetailSection lastSection>
+          {/* usedId statements */}
+          <StyledDetailSection>
             <StyledDetailSectionHeader>
-              Used in statements:
+              Used in Statements:
             </StyledDetailSectionHeader>
             <StyledDetailSectionContentUsedIn>
               <StyledDetailSectionUsedPageManager>
@@ -1107,6 +1116,92 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                 <StyledDetailHeaderColumn>Position</StyledDetailHeaderColumn>
                 <StyledDetailHeaderColumn></StyledDetailHeaderColumn>
                 {entity.usedInStatement.map((usedInStatement) => {
+                  const { statement, position, originId } = usedInStatement;
+                  return (
+                    <React.Fragment key={statement.id}>
+                      <StyledDetailSectionUsedTableCell>
+                        <EntityTag
+                          key={statement.id}
+                          actant={statement}
+                          showOnly="entity"
+                          tooltipText={statement.data.text}
+                        />
+                      </StyledDetailSectionUsedTableCell>
+                      <StyledDetailSectionUsedTableCell>
+                        <StyledDetailSectionUsedText>
+                          {statement.data.text}
+                        </StyledDetailSectionUsedText>
+                      </StyledDetailSectionUsedTableCell>
+                      <StyledDetailSectionUsedTableCell>
+                        <StyledDetailSectionUsedText>
+                          {position}
+                        </StyledDetailSectionUsedText>
+                      </StyledDetailSectionUsedTableCell>
+                      <StyledDetailSectionMetaTableCell borderless>
+                        <StyledDetailSectionMetaTableButtonGroup>
+                          {statement.data.territory?.id && (
+                            <Button
+                              key="e"
+                              icon={<FaEdit size={14} />}
+                              color="plain"
+                              tooltip="edit statement"
+                              onClick={async () => {
+                                if (statement.data.territory) {
+                                  setStatementId(statement.id);
+                                  setTerritoryId(statement.data.territory.id);
+                                }
+                              }}
+                            />
+                          )}
+                        </StyledDetailSectionMetaTableButtonGroup>
+                      </StyledDetailSectionMetaTableCell>
+                    </React.Fragment>
+                  );
+                })}
+              </StyledDetailSectionUsedTable>
+            </StyledDetailSectionContentUsedIn>
+          </StyledDetailSection>
+
+          <StyledDetailSection lastSection>
+            <StyledDetailSectionHeader>
+              Used in Statement props:
+            </StyledDetailSectionHeader>
+            <StyledDetailSectionContentUsedIn>
+              <StyledDetailSectionUsedPageManager>
+                <StyledDetailSectionUsedTable>
+                  {`Page ${usedInPage + 1} / ${usedInPages}`}
+                  <Button
+                    key="previous"
+                    disabled={usedInPage === 0}
+                    icon={<FaStepBackward size={14} />}
+                    color="primary"
+                    tooltip="previous page"
+                    onClick={() => {
+                      if (usedInPage !== 0) {
+                        setUsedInPage(usedInPage - 1);
+                      }
+                    }}
+                  />
+                  <Button
+                    key="next"
+                    disabled={usedInPage === usedInPages - 1}
+                    icon={<FaStepForward size={14} />}
+                    color="primary"
+                    tooltip="next page"
+                    onClick={() => {
+                      if (usedInPage !== usedInPages - 1) {
+                        setUsedInPage(usedInPage + 1);
+                      }
+                    }}
+                  />
+                </StyledDetailSectionUsedTable>
+              </StyledDetailSectionUsedPageManager>
+              <StyledDetailSectionUsedTable>
+                <StyledDetailHeaderColumn></StyledDetailHeaderColumn>
+                <StyledDetailHeaderColumn>Text</StyledDetailHeaderColumn>
+                <StyledDetailHeaderColumn>Position</StyledDetailHeaderColumn>
+                <StyledDetailHeaderColumn></StyledDetailHeaderColumn>
+                {entity.usedInStatementProps.map((usedInStatement) => {
                   const { statement, position, originId } = usedInStatement;
                   return (
                     <React.Fragment key={statement.id}>
