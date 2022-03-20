@@ -15,7 +15,7 @@ import { nonenumerable } from "@common/decorators";
 
 export class ResponseEntity extends Entity implements IResponseEntity {
   @nonenumerable
-  originalEntity: IEntity;
+  originalEntity: Entity;
 
   right: UserRoleMode = UserRoleMode.Read;
 
@@ -24,7 +24,7 @@ export class ResponseEntity extends Entity implements IResponseEntity {
     for (const key of Object.keys(entity)) {
       (this as any)[key] = (entity as any)[key];
     }
-    this.originalEntity = entity;
+    this.originalEntity = entity as Entity;
   }
 
   /**
@@ -32,7 +32,7 @@ export class ResponseEntity extends Entity implements IResponseEntity {
    * @param req
    */
   async prepare(request: Request) {
-    this.right = this.getUserRoleMode(request.getUserOrFail());
+    this.right = this.originalEntity.getUserRoleMode(request.getUserOrFail());
   }
 }
 
@@ -77,9 +77,11 @@ export class ResponseEntityDetail
       await Statement.findUsedInDataProps(req.db.connection, this.id)
     );
 
-    const dependentEntities = await this.getEntities(req.db.connection);
-    for (const key in dependentEntities) {
-      this.entities[key] = dependentEntities[key];
+    const dependentEntities = await this.originalEntity.getEntities(
+      req.db.connection
+    );
+    for (const entity of dependentEntities) {
+      this.entities[entity.id] = entity;
     }
   }
 
