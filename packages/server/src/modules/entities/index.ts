@@ -82,8 +82,8 @@ export default Router()
       );
 
       const responses: IResponseEntity[] = [];
-      for (const entity of entities) {
-        const response = new ResponseEntity(entity);
+      for (const entityData of entities) {
+        const response = new ResponseEntity(getEntityClass(entityData));
         await response.prepare(request);
         responses.push(response);
       }
