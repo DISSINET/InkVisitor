@@ -20,8 +20,6 @@ class ObjectData implements IModel {
 }
 
 class ObjectEntity extends Entity implements IObject {
-  static publicFields = Entity.publicFields;
-
   class: EntityClass.Object = EntityClass.Object; // just default
   data: ObjectData;
 

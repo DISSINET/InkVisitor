@@ -172,8 +172,11 @@
             "enum": [
                 "",
                 "ces",
+                "deu",
                 "eng",
                 "enm",
+                "fra",
+                "ita",
                 "lat",
                 "oci"
             ],

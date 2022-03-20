@@ -11,9 +11,12 @@ import {
 } from "@shared/types";
 import Entity from "./entity";
 import Statement from "@models/statement/statement";
+import { nonenumerable } from "@common/decorators";
 
 export class ResponseEntity extends Entity implements IResponseEntity {
+  @nonenumerable
   originalEntity: Entity;
+
   right: UserRoleMode = UserRoleMode.Read;
 
   constructor(entity: IEntity) {
@@ -29,7 +32,7 @@ export class ResponseEntity extends Entity implements IResponseEntity {
    * @param req
    */
   async prepare(request: Request) {
-    this.right = this.getUserRoleMode(request.getUserOrFail());
+    this.right = this.originalEntity.getUserRoleMode(request.getUserOrFail());
   }
 }
 
