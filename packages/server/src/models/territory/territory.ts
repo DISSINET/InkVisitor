@@ -255,6 +255,21 @@ class Territory extends Entity implements ITerritory {
 
     return false;
   }
+
+  /**
+   * Returns entity ids discovered in parent Entity.getEntitiesIds + this Territory.data.parent.id
+   * @returns list of ids
+   */
+  getEntitiesIds(): string[] {
+    const entity = new Entity({});
+    const entityIds = entity.getEntitiesIds.call(this);
+
+    if (this.data.parent) {
+      entityIds.push(this.data.parent.id);
+    }
+
+    return entityIds;
+  }
 }
 
 export default Territory;
