@@ -5,23 +5,23 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { FaUnlink } from "react-icons/fa";
 import { Cell, Column, Row, useTable } from "react-table";
 import { EntityTag } from "../..";
-import { ActantBookmarkFolderTableRow } from "./ActantBookmarkFolderTableRow";
-import { StyledTable } from "./ActantBookmarkFolderTableStyles";
+import { EntityBookmarkFolderTableRow } from "./EntityBookmarkFolderTableRow";
+import { StyledTable } from "./EntityBookmarkFolderTableStyles";
 
-interface ActantBookmarkFolderTable {
+interface EntityBookmarkFolderTable {
   folder: IResponseBookmarkFolder;
-  updateFolderActants: any;
+  updateFolderEntitys: any;
   removeBookmark: Function;
 }
-export const ActantBookmarkFolderTable: React.FC<ActantBookmarkFolderTable> = ({
+export const EntityBookmarkFolderTable: React.FC<EntityBookmarkFolderTable> = ({
   folder,
-  updateFolderActants,
+  updateFolderEntitys,
   removeBookmark,
 }) => {
-  const [folderActants, setFolderActants] = useState(folder.actants);
+  const [folderEntitys, setFolderEntitys] = useState(folder.entities);
 
   useEffect(() => {
-    setFolderActants(folder.actants);
+    setFolderEntitys(folder.entities);
   }, [folder]);
 
   const columns: Column<{}>[] = useMemo(() => {
@@ -34,20 +34,20 @@ export const ActantBookmarkFolderTable: React.FC<ActantBookmarkFolderTable> = ({
         id: "Action",
         accessor: "data",
         Cell: ({ row }: Cell) => {
-          const actant = row.original as IEntity;
+          const entity = row.original as IEntity;
 
           return (
             <EntityTag
-              actant={actant as IEntity}
+              actant={entity as IEntity}
               button={
                 <Button
                   key="d"
                   icon={<FaUnlink />}
                   color="plain"
                   inverted
-                  tooltip="unlink actant"
+                  tooltip="unlink Entity"
                   onClick={() => {
-                    removeBookmark(folder.id, actant.id);
+                    removeBookmark(folder.id, entity.id);
                   }}
                 />
               }
@@ -71,7 +71,7 @@ export const ActantBookmarkFolderTable: React.FC<ActantBookmarkFolderTable> = ({
     visibleColumns,
   } = useTable({
     columns,
-    data: folderActants || [],
+    data: folderEntitys || [],
     getRowId,
     initialState: {
       hiddenColumns: ["id"],
@@ -79,25 +79,25 @@ export const ActantBookmarkFolderTable: React.FC<ActantBookmarkFolderTable> = ({
   });
 
   const updateFolderItemOrder = () => {
-    updateFolderActants(
-      folderActants.map((a) => a.id),
+    updateFolderEntitys(
+      folderEntitys.map((a) => a.id),
       folder.id
     );
   };
 
   const moveRow = useCallback(
     (dragIndex: number, hoverIndex: number) => {
-      const dragRecord = folderActants[dragIndex];
-      const newlySortedActants = update(folderActants, {
+      const dragRecord = folderEntitys[dragIndex];
+      const newlySortedEntitys = update(folderEntitys, {
         $splice: [
           [dragIndex, 1],
           [hoverIndex, 0, dragRecord],
         ],
       });
 
-      setFolderActants(newlySortedActants);
+      setFolderEntitys(newlySortedEntitys);
     },
-    [folderActants]
+    [folderEntitys]
   );
 
   return (
@@ -106,7 +106,7 @@ export const ActantBookmarkFolderTable: React.FC<ActantBookmarkFolderTable> = ({
         {rows.map((row: Row, i: number) => {
           prepareRow(row);
           return (
-            <ActantBookmarkFolderTableRow
+            <EntityBookmarkFolderTableRow
               index={i}
               row={row}
               folder={folder}
