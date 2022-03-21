@@ -110,7 +110,10 @@ export interface Node {
 export enum ItemTypes {
   TAG = "TAG",
   STATEMENT_ROW = "STATEMENT_ROW",
+
+  // should be removed
   ACTANT_ROW = "ACTANT_ROW",
+  ENTITY_ROW = "ENTITY_ROW",
   ACTION_ROW = "ACTION_ROW",
   PROP_ROW = "PROP_ROW",
   PROP_ROW1 = "PROP_ROW1",

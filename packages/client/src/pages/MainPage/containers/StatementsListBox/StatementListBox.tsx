@@ -324,8 +324,6 @@ export const StatementListBox: React.FC = () => {
             : [];
 
           const subjectObjects = subjectIds.map((actantId: string) => {
-            // const subjectObject =
-            //   entities && entities.find((e) => e.id === actantId);
             return entities[actantId];
           });
 
@@ -369,8 +367,6 @@ export const StatementListBox: React.FC = () => {
             : [];
 
           const actionObjects = actionIds.map((actionId: string) => {
-            // const actantObject =
-            //   entities && entities.find((e) => e && e.id === actionId);
             return entities[actionId];
           });
 
@@ -420,8 +416,6 @@ export const StatementListBox: React.FC = () => {
           const isOversized = actantIds.length > 4;
 
           const actantObjects = actantIds.map((actantId: string) => {
-            // const actantObject =
-            //   entities && entities.find((e) => e && e.id === actantId);
             return entities[actantId];
           });
           return (
