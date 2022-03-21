@@ -26,8 +26,6 @@ import {
   FaPlus,
   FaRecycle,
   FaRegCopy,
-  FaStepBackward,
-  FaStepForward,
   FaTrashAlt,
 } from "react-icons/fa";
 import { useMutation, useQuery, useQueryClient } from "react-query";
@@ -46,20 +44,13 @@ import {
   StyledDetailContentRowValue,
   StyledDetailContentRowValueID,
   StyledDetailForm,
-  StyledDetailHeaderColumn,
   StyledDetailSection,
   StyledDetailSectionContent,
-  StyledDetailSectionContentUsedIn,
   StyledDetailSectionHeader,
-  StyledDetailSectionMetaTableButtonGroup,
-  StyledDetailSectionMetaTableCell,
-  StyledDetailSectionUsedPageManager,
-  StyledDetailSectionUsedTable,
-  StyledDetailSectionUsedTableCell,
-  StyledDetailSectionUsedText,
   StyledDetailWrapper,
   StyledTagWrap,
 } from "./EntityDetailBoxStyles";
+import { EntityDetailBoxTable } from "./EntityDetailBoxTable";
 
 interface EntityDetailBox {}
 export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
@@ -1075,178 +1066,32 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
             </StyledDetailSectionContent>
           </StyledDetailSection>
 
-          {/* usedId statements */}
-          <StyledDetailSection>
-            <StyledDetailSectionHeader>
-              Used in Statements:
-            </StyledDetailSectionHeader>
-            <StyledDetailSectionContentUsedIn>
-              <StyledDetailSectionUsedPageManager>
-                <StyledDetailSectionUsedTable>
-                  {`Page ${usedInPage + 1} / ${usedInPages}`}
-                  <Button
-                    key="previous"
-                    disabled={usedInPage === 0}
-                    icon={<FaStepBackward size={14} />}
-                    color="primary"
-                    tooltip="previous page"
-                    onClick={() => {
-                      if (usedInPage !== 0) {
-                        setUsedInPage(usedInPage - 1);
-                      }
-                    }}
-                  />
-                  <Button
-                    key="next"
-                    disabled={usedInPage === usedInPages - 1}
-                    icon={<FaStepForward size={14} />}
-                    color="primary"
-                    tooltip="next page"
-                    onClick={() => {
-                      if (usedInPage !== usedInPages - 1) {
-                        setUsedInPage(usedInPage + 1);
-                      }
-                    }}
-                  />
-                </StyledDetailSectionUsedTable>
-              </StyledDetailSectionUsedPageManager>
-              <StyledDetailSectionUsedTable>
-                <StyledDetailHeaderColumn></StyledDetailHeaderColumn>
-                <StyledDetailHeaderColumn>Text</StyledDetailHeaderColumn>
-                <StyledDetailHeaderColumn>Position</StyledDetailHeaderColumn>
-                <StyledDetailHeaderColumn></StyledDetailHeaderColumn>
-                {entity.usedInStatement.map((usedInStatement) => {
-                  const { statement, position, originId } = usedInStatement;
-                  return (
-                    <React.Fragment key={statement.id}>
-                      <StyledDetailSectionUsedTableCell>
-                        <EntityTag
-                          key={statement.id}
-                          actant={statement}
-                          showOnly="entity"
-                          tooltipText={statement.data.text}
-                        />
-                      </StyledDetailSectionUsedTableCell>
-                      <StyledDetailSectionUsedTableCell>
-                        <StyledDetailSectionUsedText>
-                          {statement.data.text}
-                        </StyledDetailSectionUsedText>
-                      </StyledDetailSectionUsedTableCell>
-                      <StyledDetailSectionUsedTableCell>
-                        <StyledDetailSectionUsedText>
-                          {position}
-                        </StyledDetailSectionUsedText>
-                      </StyledDetailSectionUsedTableCell>
-                      <StyledDetailSectionMetaTableCell borderless>
-                        <StyledDetailSectionMetaTableButtonGroup>
-                          {statement.data.territory?.id && (
-                            <Button
-                              key="e"
-                              icon={<FaEdit size={14} />}
-                              color="plain"
-                              tooltip="edit statement"
-                              onClick={async () => {
-                                if (statement.data.territory) {
-                                  setStatementId(statement.id);
-                                  setTerritoryId(statement.data.territory.id);
-                                }
-                              }}
-                            />
-                          )}
-                        </StyledDetailSectionMetaTableButtonGroup>
-                      </StyledDetailSectionMetaTableCell>
-                    </React.Fragment>
-                  );
-                })}
-              </StyledDetailSectionUsedTable>
-            </StyledDetailSectionContentUsedIn>
-          </StyledDetailSection>
+          {/* usedId props */}
+          <EntityDetailBoxTable
+            title="Used in Meta Props"
+            entities={entity.entities}
+            useCases={entity.usedInMetaProps}
+            mode="Prop"
+            key="Prop"
+          />
 
-          <StyledDetailSection lastSection>
-            <StyledDetailSectionHeader>
-              Used in Statement props:
-            </StyledDetailSectionHeader>
-            <StyledDetailSectionContentUsedIn>
-              <StyledDetailSectionUsedPageManager>
-                <StyledDetailSectionUsedTable>
-                  {`Page ${usedInPage + 1} / ${usedInPages}`}
-                  <Button
-                    key="previous"
-                    disabled={usedInPage === 0}
-                    icon={<FaStepBackward size={14} />}
-                    color="primary"
-                    tooltip="previous page"
-                    onClick={() => {
-                      if (usedInPage !== 0) {
-                        setUsedInPage(usedInPage - 1);
-                      }
-                    }}
-                  />
-                  <Button
-                    key="next"
-                    disabled={usedInPage === usedInPages - 1}
-                    icon={<FaStepForward size={14} />}
-                    color="primary"
-                    tooltip="next page"
-                    onClick={() => {
-                      if (usedInPage !== usedInPages - 1) {
-                        setUsedInPage(usedInPage + 1);
-                      }
-                    }}
-                  />
-                </StyledDetailSectionUsedTable>
-              </StyledDetailSectionUsedPageManager>
-              <StyledDetailSectionUsedTable>
-                <StyledDetailHeaderColumn></StyledDetailHeaderColumn>
-                <StyledDetailHeaderColumn>Text</StyledDetailHeaderColumn>
-                <StyledDetailHeaderColumn>Position</StyledDetailHeaderColumn>
-                <StyledDetailHeaderColumn></StyledDetailHeaderColumn>
-                {entity.usedInStatementProps.map((usedInStatement) => {
-                  const { statement, position, originId } = usedInStatement;
-                  return (
-                    <React.Fragment key={statement.id}>
-                      <StyledDetailSectionUsedTableCell>
-                        <EntityTag
-                          key={statement.id}
-                          actant={statement}
-                          showOnly="entity"
-                          tooltipText={statement.data.text}
-                        />
-                      </StyledDetailSectionUsedTableCell>
-                      <StyledDetailSectionUsedTableCell>
-                        <StyledDetailSectionUsedText>
-                          {statement.data.text}
-                        </StyledDetailSectionUsedText>
-                      </StyledDetailSectionUsedTableCell>
-                      <StyledDetailSectionUsedTableCell>
-                        <StyledDetailSectionUsedText>
-                          {position}
-                        </StyledDetailSectionUsedText>
-                      </StyledDetailSectionUsedTableCell>
-                      <StyledDetailSectionMetaTableCell borderless>
-                        <StyledDetailSectionMetaTableButtonGroup>
-                          {statement.data.territory?.id && (
-                            <Button
-                              key="e"
-                              icon={<FaEdit size={14} />}
-                              color="plain"
-                              tooltip="edit statement"
-                              onClick={async () => {
-                                if (statement.data.territory) {
-                                  setStatementId(statement.id);
-                                  setTerritoryId(statement.data.territory.id);
-                                }
-                              }}
-                            />
-                          )}
-                        </StyledDetailSectionMetaTableButtonGroup>
-                      </StyledDetailSectionMetaTableCell>
-                    </React.Fragment>
-                  );
-                })}
-              </StyledDetailSectionUsedTable>
-            </StyledDetailSectionContentUsedIn>
-          </StyledDetailSection>
+          {/* usedId statements */}
+          <EntityDetailBoxTable
+            title="Used in Statement"
+            entities={entity.entities}
+            useCases={entity.usedInStatement}
+            mode="Statement"
+            key="Statement"
+          />
+
+          {/* usedId statement props */}
+          <EntityDetailBoxTable
+            title="Used in Statement Props"
+            entities={entity.entities}
+            useCases={entity.usedInStatementProps}
+            mode="StatementProp"
+            key="StatementProp"
+          />
 
           {/* Audits */}
           <StyledDetailSection key="editor-section-audits">
