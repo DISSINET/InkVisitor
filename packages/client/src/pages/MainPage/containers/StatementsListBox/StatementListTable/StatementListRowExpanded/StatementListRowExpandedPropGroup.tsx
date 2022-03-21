@@ -4,6 +4,7 @@ import { EntityTag } from "../../../EntityTag/EntityTag";
 import {
   StyledPropGroup,
   StyledPropRow,
+  StyledGridCell,
 } from "./StatementListRowExpandedStyles";
 
 interface StatementListRowExpandedPropGroup {
@@ -23,32 +24,27 @@ export const StatementListRowExpandedPropGroup: React.FC<StatementListRowExpande
             <React.Fragment key={key}>
               <StyledPropRow key={key} level={level}>
                 {propTypeEntity ? (
-                  <>
+                  <StyledGridCell>
                     <EntityTag
+                      fullWidth
                       actant={propTypeEntity}
                       tooltipPosition="bottom center"
                     />
                     <span>&nbsp;</span>
-                  </>
+                  </StyledGridCell>
                 ) : (
-                  <>
-                    <EntityTag
-                      actant={{ label: "type" }}
-                      tooltipPosition="bottom center"
-                    />
-                    <span>&nbsp;</span>
-                  </>
+                  <span>[type]&nbsp;</span>
                 )}
                 {propValueEntity ? (
-                  <EntityTag
-                    actant={propValueEntity}
-                    tooltipPosition="bottom center"
-                  />
+                  <StyledGridCell>
+                    <EntityTag
+                      fullWidth
+                      actant={propValueEntity}
+                      tooltipPosition="bottom center"
+                    />
+                  </StyledGridCell>
                 ) : (
-                  <EntityTag
-                    actant={{ label: "value" }}
-                    tooltipPosition="bottom center"
-                  />
+                  "[value]"
                 )}
               </StyledPropRow>
 

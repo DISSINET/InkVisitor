@@ -8,9 +8,11 @@ export const StyledSubRow = styled.div`
   background-color: ${({ theme }) => theme.color["gray"][200]};
   font-size: ${({ theme }) => theme.fontSize["xs"]};
   color: ${({ theme }) => theme.color["black"]};
+  max-width: 550px;
 `;
 export const StyledActantGroup = styled.div`
   display: flex;
+  overflow: hidden;
   flex-direction: column;
 `;
 interface StyledPropRow {
@@ -31,14 +33,21 @@ const getIndentation = (level: 1 | 2 | 3) => {
 export const StyledPropRow = styled.div<StyledPropRow>`
   margin-left: ${({ level }) => getIndentation(level)};
   margin-bottom: ${({ theme }) => theme.space[2]};
-  display: flex;
-  align-items: center;
+  display: inline-flex;
+  overflow: hidden;
+`;
+export const StyledGridCell = styled.div`
+  display: inline-flex;
+  overflow: hidden;
+  max-width: 250px;
 `;
 export const StyledPropGroup = styled.div`
   display: flex;
+  overflow: hidden;
   flex-direction: column;
 `;
 export const StyledActantWrap = styled.div`
+  overflow: hidden;
   margin-bottom: ${({ theme }) => theme.space[1]};
 `;
 

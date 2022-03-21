@@ -60,7 +60,7 @@ export const StatementListRowExpanded: React.FC<StatementListRowExpanded> = ({
             <EntityTag
               actant={entities[actantId]}
               tooltipPosition="bottom center"
-              // fullWidth
+              fullWidth
             />
           </StyledActantWrap>
         )}
@@ -83,33 +83,39 @@ export const StatementListRowExpanded: React.FC<StatementListRowExpanded> = ({
 
   const renderFirstLevelProps = (props: IProp[]) => {
     return (
-      <StatementListRowExpandedPropGroup
-        level={1}
-        props={props}
-        entities={entities}
-        renderChildrenPropRow={renderSecondLevelProps}
-      />
+      <div style={{ display: "grid" }}>
+        <StatementListRowExpandedPropGroup
+          level={1}
+          props={props}
+          entities={entities}
+          renderChildrenPropRow={renderSecondLevelProps}
+        />
+      </div>
     );
   };
 
   const renderSecondLevelProps = (props: IProp[]) => {
     return (
-      <StatementListRowExpandedPropGroup
-        level={2}
-        props={props}
-        entities={entities}
-        renderChildrenPropRow={renderThirdLevelProps}
-      />
+      <div style={{ display: "grid" }}>
+        <StatementListRowExpandedPropGroup
+          level={2}
+          props={props}
+          entities={entities}
+          renderChildrenPropRow={renderThirdLevelProps}
+        />
+      </div>
     );
   };
 
   const renderThirdLevelProps = (props: IProp[]) => {
     return (
-      <StatementListRowExpandedPropGroup
-        level={3}
-        props={props}
-        entities={entities}
-      />
+      <div style={{ display: "grid" }}>
+        <StatementListRowExpandedPropGroup
+          level={3}
+          props={props}
+          entities={entities}
+        />
+      </div>
     );
   };
 
@@ -214,35 +220,34 @@ export const StatementListRowExpanded: React.FC<StatementListRowExpanded> = ({
               {renderReference(reference.resource, reference.value, key)}
             </StyledPropRow>
           ))}
-          {tagObjects.map((tag, key) => (
-            <StyledPropRow level={1} key={key}>
-              <BsArrowReturnRight size="20" />
-              <span>&nbsp;&nbsp;(tag)&nbsp;&nbsp;</span>
-              {renderListActant(tag.id, key)}
-            </StyledPropRow>
-          ))}
-          <br />
-          {notes.map((note: string, key: number) => {
-            return (
-              <React.Fragment key={key}>
-                <span>(note)</span>
-                <p key={key}>
-                  {note}
-                  <br />
-                </p>
-              </React.Fragment>
-            );
-          })}
-        </StyledSubRow>
+
+        {tagObjects.map((tag, key) => (
+          <StyledPropRow level={1} key={key}>
+            <BsArrowReturnRight size="20" />
+            <span>&nbsp;&nbsp;(tag)&nbsp;&nbsp;</span>
+            {renderListActant(tag.id, key)}
+          </StyledPropRow>
+        ))}
+        <br />
+        {notes.map((note: string, key: number) => {
+          return (
+            <React.Fragment key={key}>
+              <span>(note)</span>
+              <p key={key}>
+                {note}
+                <br />
+              </p>
+            </React.Fragment>
+          );
+        })}
+      </StyledSubRow>
       </>
     );
   }, []);
 
   return (
     <tr>
-      <td colSpan={visibleColumns.length + 1}>
-        {renderRowSubComponent({ row })}
-      </td>
+      <td colSpan={visibleColumns.length}>{renderRowSubComponent({ row })}</td>
     </tr>
   );
 };
