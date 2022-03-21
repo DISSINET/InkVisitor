@@ -3,7 +3,7 @@ import { EntityDetailBox } from "./EntityDetailBox/EntityDetailBox";
 import { EntityTag } from "./EntityTag/EntityTag";
 import { EntitySuggester } from "./EntitySuggester/EntitySuggester";
 import { ActionModal } from "./ActionModal/ActionModal";
-import { ActantBookmarkBox } from "./ActantBookmarkBox/ActantBookmarkBox";
+import { EntityBookmarkBox } from "./EntityBookmarkBox/EntityBookmarkBox";
 import { StatementEditorBox } from "./StatementEditorBox/StatementEditorBox";
 import { StatementListBox } from "./StatementsListBox/StatementListBox";
 import { TerritoryTreeBox } from "./TerritoryTreeBox/TerritoryTreeBox";
@@ -19,7 +19,7 @@ export {
   EntitySuggester,
   EntityTag,
   ActionModal,
-  ActantBookmarkBox,
+  EntityBookmarkBox,
   StatementEditorBox,
   StatementListBox,
   TerritoryTreeBox,
