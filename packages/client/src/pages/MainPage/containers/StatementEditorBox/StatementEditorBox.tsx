@@ -102,6 +102,7 @@ export const StatementEditorBox: React.FC = () => {
     ["statement", statementId],
     async () => {
       const res = await api.statementGet(statementId);
+
       return res.data;
     },
     { enabled: !!statementId && api.isLoggedIn(), retry: 2 }
@@ -469,7 +470,10 @@ export const StatementEditorBox: React.FC = () => {
     async (changes: object) => await api.entityUpdate(statementId, changes),
     {
       onSuccess: () => {
-        queryClient.invalidateQueries(["statement"]);
+        queryClient.invalidateQueries("statement");
+      },
+      onError: () => {
+        console.log("error mutation");
       },
     }
   );
@@ -481,7 +485,7 @@ export const StatementEditorBox: React.FC = () => {
       }),
     {
       onSuccess: (data, variables) => {
-        queryClient.invalidateQueries("statement");
+        queryClient.invalidateQueries(["statement", statementId]);
         queryClient.invalidateQueries("territory");
         queryClient.invalidateQueries("entity");
       },
@@ -496,10 +500,11 @@ export const StatementEditorBox: React.FC = () => {
   ) => {
     const originActant = statement.entities[originId];
 
-    if (originActant && props.length > 0) {
+    if (props.length > 0) {
       return (
         <PropGroup
-          originId={originActant.id}
+          key={JSON.stringify(statement)}
+          originId={originActant ? originActant.id : ""}
           entities={statement.entities}
           props={props}
           territoryId={territoryId}

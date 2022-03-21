@@ -11,9 +11,9 @@ import { FaGripVertical } from "react-icons/fa";
 import { Cell, ColumnInstance } from "react-table";
 import { DragItem, ItemTypes } from "types";
 import { dndHoverFn } from "utils";
-import { StyledTd, StyledTr } from "./ActantBookmarkFolderTableStyles";
+import { StyledTd, StyledTr } from "./EntityBookmarkFolderTableStyles";
 
-interface ActantBookmarkFolderTableRow {
+interface EntityBookmarkFolderTableRow {
   row: any;
   index: number;
   moveRow: (dragIndex: number, hoverIndex: number) => void;
@@ -22,21 +22,21 @@ interface ActantBookmarkFolderTableRow {
   visibleColumns: ColumnInstance<{}>[];
 }
 
-export const ActantBookmarkFolderTableRow: React.FC<
-  ActantBookmarkFolderTableRow
+export const EntityBookmarkFolderTableRow: React.FC<
+  EntityBookmarkFolderTableRow
 > = ({ row, index, moveRow, folder, updateOrderFn, visibleColumns }) => {
   const dropRef = useRef<HTMLTableRowElement>(null);
   const dragRef = useRef<HTMLTableDataCellElement>(null);
 
   const [, drop] = useDrop({
-    accept: ItemTypes.ACTANT_ROW,
+    accept: ItemTypes.ENTITY_ROW,
     hover(item: DragItem, monitor: DropTargetMonitor) {
       dndHoverFn(item, index, monitor, dropRef, moveRow);
     },
   });
 
   const [{ isDragging }, drag, preview] = useDrag({
-    item: { type: ItemTypes.ACTANT_ROW, index, id: row.values.id },
+    item: { type: ItemTypes.ENTITY_ROW, index, id: row.values.id },
     collect: (monitor: DragSourceMonitor) => ({
       isDragging: monitor.isDragging(),
     }),

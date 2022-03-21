@@ -42,8 +42,8 @@ import {
   StyledFolderWrapper,
   StyledFolderWrapperOpenArea,
   StyledHeader,
-} from "./ActantBookmarkBoxStyles";
-import { ActantBookmarkFolderTable } from "./ActantBookmarkFolderTable/ActantBookmarkFolderTable";
+} from "./EntityBookmarkBoxStyles";
+import { EntityBookmarkFolderTable } from "./EntityBookmarkFolderTable/EntityBookmarkFolderTable";
 
 const bookmarkEntities = [
   EntityClass.Action,
@@ -59,7 +59,7 @@ const bookmarkEntities = [
   EntityClass.Resource,
 ];
 
-export const ActantBookmarkBox: React.FC = () => {
+export const EntityBookmarkBox: React.FC = () => {
   const queryClient = useQueryClient();
 
   const [editingFolder, setEditingFolder] = useState<string | false>(false);
@@ -262,12 +262,12 @@ export const ActantBookmarkBox: React.FC = () => {
     }
   );
 
-  const updateFolderActants = (newActantIds: string[], folderId: string) => {
+  const updateFolderEntitys = (newEntityIds: string[], folderId: string) => {
     const newBookmarks: IBookmarkFolder[] | false = getBookmarksCopy();
     if (newBookmarks) {
       const folder = newBookmarks.find((b) => b.id === folderId);
       if (folder) {
-        folder.entityIds = newActantIds;
+        folder.entityIds = newEntityIds;
         changeBookmarksMutation.mutate(newBookmarks);
       }
     }
@@ -344,11 +344,11 @@ export const ActantBookmarkBox: React.FC = () => {
                 {open && (
                   <StyledFolderContent>
                     <StyledFolderContentTags>
-                      <ActantBookmarkFolderTable
+                      <EntityBookmarkFolderTable
                         folder={bookmarkFolder}
-                        updateFolderActants={updateFolderActants}
+                        updateFolderEntitys={updateFolderEntitys}
                         removeBookmark={removeBookmark}
-                      ></ActantBookmarkFolderTable>
+                      ></EntityBookmarkFolderTable>
                     </StyledFolderContentTags>
                     <StyledFolderSuggester>
                       <EntitySuggester
