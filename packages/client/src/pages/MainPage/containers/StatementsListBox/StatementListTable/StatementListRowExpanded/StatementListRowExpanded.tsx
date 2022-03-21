@@ -35,6 +35,7 @@ export const StatementListRowExpanded: React.FC<StatementListRowExpanded> = ({
             <EntityTag
               actant={entities[sActantId]}
               tooltipPosition="bottom center"
+              // fullWidth
             />
           </StyledActantWrap>
         )}
