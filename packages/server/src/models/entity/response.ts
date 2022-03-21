@@ -11,15 +11,20 @@ import {
 } from "@shared/types";
 import Entity from "./entity";
 import Statement from "@models/statement/statement";
+import { nonenumerable } from "@common/decorators";
 
 export class ResponseEntity extends Entity implements IResponseEntity {
+  @nonenumerable
+  originalEntity: Entity;
+
   right: UserRoleMode = UserRoleMode.Read;
 
-  constructor(entity: IEntity) {
+  constructor(entity: Entity) {
     super({});
     for (const key of Object.keys(entity)) {
       (this as any)[key] = (entity as any)[key];
     }
+    this.originalEntity = entity;
   }
 
   /**
@@ -27,7 +32,7 @@ export class ResponseEntity extends Entity implements IResponseEntity {
    * @param req
    */
   async prepare(request: Request) {
-    this.right = this.getUserRoleMode(request.getUserOrFail());
+    this.right = this.originalEntity.getUserRoleMode(request.getUserOrFail());
   }
 }
 
@@ -40,7 +45,7 @@ export class ResponseEntityDetail
   usedInStatementProps: IResponseUsedInStatement<UsedInPosition>[];
   usedInMetaProps: IResponseUsedInMetaProp<UsedInPosition>[];
 
-  constructor(entity: IEntity) {
+  constructor(entity: Entity) {
     super(entity);
     this.entities = {};
     this.usedInStatement = [];
@@ -72,9 +77,11 @@ export class ResponseEntityDetail
       await Statement.findUsedInDataProps(req.db.connection, this.id)
     );
 
-    const dependentEntities = await this.getEntities(req.db.connection);
-    for (const key in dependentEntities) {
-      this.entities[key] = dependentEntities[key];
+    const dependentEntities = await this.originalEntity.getEntities(
+      req.db.connection
+    );
+    for (const entity of dependentEntities) {
+      this.entities[entity.id] = entity;
     }
   }
 
