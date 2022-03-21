@@ -31,7 +31,7 @@ import {
 } from "Theme/constants";
 import packageJson from "../../../package.json";
 import {
-  ActantBookmarkBox,
+  EntityBookmarkBox,
   ActantSearchBox,
   EntityDetailBox,
   LoginModal,
@@ -319,7 +319,7 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
                 isExpanded={fourthPanelExpanded}
                 button={fourthPanelButton()}
               >
-                <ActantBookmarkBox />
+                <EntityBookmarkBox />
               </Box>
             </Panel>
           </StyledPanelWrap>
