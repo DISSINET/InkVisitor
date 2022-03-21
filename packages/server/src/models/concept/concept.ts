@@ -19,8 +19,6 @@ class ConceptData implements IModel {
 }
 
 class Concept extends Entity implements IConcept {
-  static publicFields = Entity.publicFields;
-
   class: EntityClass.Concept = EntityClass.Concept; // just default
   data: ConceptData;
 

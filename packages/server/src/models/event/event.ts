@@ -20,8 +20,6 @@ class EventData implements IModel {
 }
 
 class Event extends Entity implements IEvent {
-  static publicFields = Entity.publicFields;
-
   class: EntityClass.Event = EntityClass.Event; // just default
   data: EventData;
 
