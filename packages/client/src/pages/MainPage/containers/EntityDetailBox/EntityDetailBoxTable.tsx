@@ -115,18 +115,20 @@ export const EntityDetailBoxTable: React.FC<EntityDetailBoxTable> = ({
                 <StyledDetailSectionMetaTableCell borderless>
                   <StyledDetailSectionMetaTableButtonGroup>
                     {entity.data.territory?.id && (
-                      <Button
-                        key="e"
-                        icon={<FaEdit size={14} />}
-                        color="plain"
-                        tooltip="edit statement"
-                        onClick={async () => {
-                          if (entity.data.territory) {
-                            setStatementId(entity.id);
-                            setTerritoryId(entity.data.territory.id);
-                          }
-                        }}
-                      />
+                      <React.Fragment>
+                        <Button
+                          key="e"
+                          icon={<FaEdit size={14} />}
+                          color="plain"
+                          tooltip="edit statement"
+                          onClick={async () => {
+                            if (entity.data.territory) {
+                              setStatementId(entity.id);
+                              setTerritoryId(entity.data.territory.id);
+                            }
+                          }}
+                        />
+                      </React.Fragment>
                     )}
                   </StyledDetailSectionMetaTableButtonGroup>
                 </StyledDetailSectionMetaTableCell>
