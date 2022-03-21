@@ -496,10 +496,10 @@ export const StatementEditorBox: React.FC = () => {
   ) => {
     const originActant = statement.entities[originId];
 
-    if (originActant && props.length > 0) {
+    if (props.length > 0) {
       return (
         <PropGroup
-          originId={originActant.id}
+          originId={originActant ? originActant.id : ""}
           entities={statement.entities}
           props={props}
           territoryId={territoryId}

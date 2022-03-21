@@ -52,6 +52,9 @@ export type IEntityClass =
 export enum EntityReferenceSource {
   WordNet = "wordnet",
   GeoNames = "geonames",
+  VIAF = "viaf",
+  ISBN = "isbn",
+  DOI = "doi",
 }
 
 export enum EntityLogicalType {
