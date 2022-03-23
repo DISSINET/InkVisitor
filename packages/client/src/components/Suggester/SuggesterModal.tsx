@@ -98,7 +98,7 @@ export const SuggesterModal: React.FC<SuggesterModal> = ({
       }}
       onClose={() => closeModal()}
     >
-      <ModalHeader title="Create actant" />
+      <ModalHeader title="Create entity" />
       <ModalContent>
         <StyledContent>
           <ModalInputForm>
