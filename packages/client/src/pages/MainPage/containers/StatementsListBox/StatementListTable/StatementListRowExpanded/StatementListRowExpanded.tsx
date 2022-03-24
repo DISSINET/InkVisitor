@@ -27,13 +27,13 @@ export const StatementListRowExpanded: React.FC<StatementListRowExpanded> = ({
   visibleColumns,
   entities,
 }) => {
-  const renderListActant = (sActantId: string, key: number) => {
+  const renderListActant = (actantId: string, key: number) => {
     return (
       <React.Fragment key={key}>
-        {sActantId && (
+        {actantId && (
           <StyledActantWrap key={key}>
             <EntityTag
-              actant={entities[sActantId]}
+              actant={entities[actantId]}
               tooltipPosition="bottom center"
               // fullWidth
             />
@@ -50,7 +50,7 @@ export const StatementListRowExpanded: React.FC<StatementListRowExpanded> = ({
   ) => {
     return (
       <StyledActantWrap key={key}>
-        {renderListActant(actant.id, key)}
+        {renderListActant(actant?.id, key)}
         {renderFirstLevelProps(sActant.props)}
       </StyledActantWrap>
     );
