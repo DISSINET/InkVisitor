@@ -98,6 +98,11 @@ export const Entities: { [key: string]: IEntity } = {
     label: "Value",
     color: "entityV",
   },
+  X: {
+    id: "X",
+    label: "unset",
+    color: "white",
+  },
 };
 
 export type EntityKeys = keyof typeof Entities;
