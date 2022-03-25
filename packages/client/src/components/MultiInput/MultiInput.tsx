@@ -65,6 +65,7 @@ export const MultiInput: React.FC<MultiInput> = ({
               {!disabled && (
                 <Button
                   color="danger"
+                  inverted
                   icon={<FaTrashAlt />}
                   onClick={() => handleDelete(key)}
                 />

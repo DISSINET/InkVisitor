@@ -40,15 +40,21 @@ export const StyledInput = styled.input<IValueStyle>`
   border-color: ${({ suggester, theme }) =>
     suggester ? theme.color["primary"] : theme.color["gray"]["400"]};
   font-size: ${({ theme }) => theme.fontSize["xs"]};
-  padding: ${space1};
+  padding-left: ${({ theme }) => theme.space[2]};
   width: ${({ width }) => getWidth(width)};
   min-width: 6rem;
   background: ${({ disabled, theme }) =>
     disabled ? theme.background["stripes"] : ""};
   cursor: ${({ disabled }) => (disabled ? "not-allowed" : "default")};
   resize: none;
+  :hover {
+    border-color: ${({ theme }) => theme.color["info"]};
+    border-width: 1.5px;
+  }
   :focus {
     outline: 0;
+    border-color: ${({ theme }) => theme.color["info"]};
+    border-width: 1.5px;
   }
 `;
 export const StyledSelect = styled.select<IValueStyle>`
@@ -58,11 +64,11 @@ export const StyledSelect = styled.select<IValueStyle>`
     inverted ? theme.color["gray"][200] : theme.color["white"]};
   border-width: ${({ theme }) => theme.borderWidth[1]};
   border-color: ${({ suggester, theme }) =>
-    suggester ? theme.color["primary"] : theme.color["gray"][400]};
+    suggester ? theme.color["primary"] : theme.color["gray"][500]};
   font-size: ${({ theme }) => theme.fontSize["xs"]};
   font-weight: bold;
   width: ${({ width }) => getWidth(width)};
-  padding: ${space1};
+  padding-left: ${({ theme }) => theme.space[3]};
   background: ${({ disabled, theme }) =>
     disabled ? theme.background["stripes"] : ""};
   cursor: ${({ disabled }) => (disabled ? "not-allowed" : "default")};

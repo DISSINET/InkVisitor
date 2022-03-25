@@ -448,6 +448,7 @@ export const StatementEditorBox: React.FC = () => {
     {
       onSuccess: (data, variables) => {
         queryClient.invalidateQueries(["statement"]);
+        queryClient.invalidateQueries(["territory"]);
       },
     }
   );
@@ -471,6 +472,7 @@ export const StatementEditorBox: React.FC = () => {
     {
       onSuccess: () => {
         queryClient.invalidateQueries("statement");
+        queryClient.invalidateQueries("territory");
       },
       onError: () => {
         console.log("error mutation");

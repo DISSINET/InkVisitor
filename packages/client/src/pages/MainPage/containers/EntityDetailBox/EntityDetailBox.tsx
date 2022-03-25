@@ -979,6 +979,9 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                 )}
 
                 <StyledDetailContentRow>
+                  <br />
+                </StyledDetailContentRow>
+                <StyledDetailContentRow>
                   <StyledDetailContentRowLabel>
                     Notes
                   </StyledDetailContentRowLabel>

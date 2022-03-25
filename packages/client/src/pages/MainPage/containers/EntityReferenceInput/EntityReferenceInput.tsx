@@ -93,6 +93,7 @@ export const EntityReferenceInput: React.FC<EntityReferenceInput> = ({
               {!disabled && (
                 <Button
                   color="danger"
+                  inverted
                   icon={<FaTrashAlt />}
                   onClick={() => handleDelete(key)}
                 />
