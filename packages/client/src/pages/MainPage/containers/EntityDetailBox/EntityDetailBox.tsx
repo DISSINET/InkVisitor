@@ -1067,32 +1067,35 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
             </StyledDetailSectionContent>
           </StyledDetailSection>
 
-          {/* usedId props */}
-          <EntityDetailBoxTable
-            title="Used in Meta Props"
-            entities={entity.entities}
-            useCases={entity.usedInMetaProps}
-            mode="Prop"
-            key="Prop"
-          />
+          <StyledDetailSection>
+            <StyledDetailSectionHeader>Used in:</StyledDetailSectionHeader>
+            {/* usedId props */}
+            <EntityDetailBoxTable
+              title="Meta Prop"
+              entities={entity.entities}
+              useCases={entity.usedInMetaProps}
+              mode="Prop"
+              key="Prop"
+            />
 
-          {/* usedId statements */}
-          <EntityDetailBoxTable
-            title="Used in Statement"
-            entities={entity.entities}
-            useCases={entity.usedInStatement}
-            mode="Statement"
-            key="Statement"
-          />
+            {/* usedId statements */}
+            <EntityDetailBoxTable
+              title="Statement"
+              entities={entity.entities}
+              useCases={entity.usedInStatement}
+              mode="Statement"
+              key="Statement"
+            />
 
-          {/* usedId statement props */}
-          <EntityDetailBoxTable
-            title="Used in Statement Props"
-            entities={entity.entities}
-            useCases={entity.usedInStatementProps}
-            mode="StatementProp"
-            key="StatementProp"
-          />
+            {/* usedId statement props */}
+            <EntityDetailBoxTable
+              title="Statement Prop"
+              entities={entity.entities}
+              useCases={entity.usedInStatementProps}
+              mode="StatementProp"
+              key="StatementProp"
+            />
+          </StyledDetailSection>
 
           {/* Audits */}
           <StyledDetailSection key="editor-section-audits">

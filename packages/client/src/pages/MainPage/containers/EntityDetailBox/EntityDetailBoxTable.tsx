@@ -1,20 +1,19 @@
 import { EntityClass } from "@shared/enums";
 import { IEntity } from "@shared/types";
-import { Button } from "components";
+import { Button, Tooltip } from "components";
 import { useSearchParams } from "hooks";
 import React, { useMemo, useState } from "react";
 import { FaEdit, FaStepBackward, FaStepForward } from "react-icons/fa";
 import { EntityTag } from "..";
 import {
-  StyledDetailHeaderColumn,
-  StyledDetailSection,
   StyledDetailSectionContentUsedIn,
-  StyledDetailSectionHeader,
+  StyledDetailSectionContentUsedInTitle,
   StyledDetailSectionMetaTableButtonGroup,
   StyledDetailSectionMetaTableCell,
   StyledDetailSectionUsedPageManager,
   StyledDetailSectionUsedTable,
   StyledDetailSectionUsedTableCell,
+  StyledDetailSectionUsedTableRow,
   StyledDetailSectionUsedText,
 } from "./EntityDetailBoxStyles";
 
@@ -42,20 +41,86 @@ export const EntityDetailBoxTable: React.FC<EntityDetailBoxTable> = ({
     useSearchParams();
 
   return (
-    <StyledDetailSection key={title}>
-      <StyledDetailSectionHeader>{title}:</StyledDetailSectionHeader>
+    <>
       <StyledDetailSectionContentUsedIn>
-        {`number of occurences ${useCases.length}`}
+        <StyledDetailSectionContentUsedInTitle>
+          <b>{`${useCases.length} `}</b>{" "}
+          {`${title}${useCases.length === 1 ? "" : "s"}`}
+        </StyledDetailSectionContentUsedInTitle>
       </StyledDetailSectionContentUsedIn>
       <StyledDetailSectionContentUsedIn>
-        <StyledDetailSectionUsedPageManager>
-          <StyledDetailSectionUsedTable>
+        <StyledDetailSectionUsedTable>
+          {useCases.map((useCase, ui) => {
+            const position = useCase.position;
+            const entityId =
+              mode === "Prop" ? useCase.entityId : useCase.statement?.id;
+            const entity = entityId ? entities[entityId] : false;
+
+            return entity ? (
+              <React.Fragment key={ui}>
+                <StyledDetailSectionUsedTableRow>
+                  <StyledDetailSectionUsedTableCell>
+                    <EntityTag
+                      key={entity.id}
+                      actant={entity}
+                      showOnly="entity"
+                      tooltipText={entity.label}
+                    />
+                  </StyledDetailSectionUsedTableCell>
+                  <StyledDetailSectionUsedTableCell>
+                    <StyledDetailSectionUsedText>
+                      {entity.class === EntityClass.Statement
+                        ? entity.data.text
+                        : ""}
+                    </StyledDetailSectionUsedText>
+                  </StyledDetailSectionUsedTableCell>
+                  <StyledDetailSectionUsedTableCell>
+                    <Tooltip label="position">
+                      <StyledDetailSectionUsedText
+                        style={{ cursor: "pointer" }}
+                      >
+                        {position}
+                      </StyledDetailSectionUsedText>
+                    </Tooltip>
+                  </StyledDetailSectionUsedTableCell>
+                  <StyledDetailSectionMetaTableCell borderless>
+                    <StyledDetailSectionMetaTableButtonGroup>
+                      {entity.data.territory?.id && (
+                        <React.Fragment>
+                          <Button
+                            key="e"
+                            icon={<FaEdit size={14} />}
+                            color="primary"
+                            inverted
+                            noBorder
+                            tooltip="edit statement"
+                            onClick={async () => {
+                              if (entity.data.territory) {
+                                setStatementId(entity.id);
+                                setTerritoryId(entity.data.territory.id);
+                              }
+                            }}
+                          />
+                        </React.Fragment>
+                      )}
+                    </StyledDetailSectionMetaTableButtonGroup>
+                  </StyledDetailSectionMetaTableCell>
+                </StyledDetailSectionUsedTableRow>
+              </React.Fragment>
+            ) : (
+              <div key={ui} />
+            );
+          })}
+        </StyledDetailSectionUsedTable>
+        {useCases.length > perPage && (
+          <StyledDetailSectionUsedPageManager>
             {`Page ${usedInPage + 1} / ${noPages}`}
             <Button
               key="previous"
               disabled={usedInPage === 0}
-              icon={<FaStepBackward size={14} />}
-              color="primary"
+              icon={<FaStepBackward size={12} />}
+              color="plain"
+              inverted
               tooltip="previous page"
               onClick={() => {
                 if (usedInPage !== 0) {
@@ -66,8 +131,9 @@ export const EntityDetailBoxTable: React.FC<EntityDetailBoxTable> = ({
             <Button
               key="next"
               disabled={usedInPage === noPages - 1}
-              icon={<FaStepForward size={14} />}
-              color="primary"
+              icon={<FaStepForward size={12} />}
+              color="plain"
+              inverted
               tooltip="next page"
               onClick={() => {
                 if (usedInPage !== noPages - 1) {
@@ -75,70 +141,9 @@ export const EntityDetailBoxTable: React.FC<EntityDetailBoxTable> = ({
                 }
               }}
             />
-          </StyledDetailSectionUsedTable>
-        </StyledDetailSectionUsedPageManager>
-        <StyledDetailSectionUsedTable>
-          <StyledDetailHeaderColumn></StyledDetailHeaderColumn>
-          <StyledDetailHeaderColumn>
-            {mode !== "Prop" ? "Text" : ""}
-          </StyledDetailHeaderColumn>
-          <StyledDetailHeaderColumn>Position</StyledDetailHeaderColumn>
-          <StyledDetailHeaderColumn></StyledDetailHeaderColumn>
-          {useCases.map((useCase, ui) => {
-            const position = useCase.position;
-            const entityId =
-              mode === "Prop" ? useCase.entityId : useCase.statement?.id;
-            const entity = entityId ? entities[entityId] : false;
-
-            return entity ? (
-              <React.Fragment key={ui}>
-                <StyledDetailSectionUsedTableCell>
-                  <EntityTag
-                    key={entity.id}
-                    actant={entity}
-                    showOnly="entity"
-                    tooltipText={entity.label}
-                  />
-                </StyledDetailSectionUsedTableCell>
-                <StyledDetailSectionUsedTableCell>
-                  <StyledDetailSectionUsedText>
-                    {entity.class === EntityClass.Statement
-                      ? entity.data.text
-                      : ""}
-                  </StyledDetailSectionUsedText>
-                </StyledDetailSectionUsedTableCell>
-                <StyledDetailSectionUsedTableCell>
-                  <StyledDetailSectionUsedText>
-                    {position}
-                  </StyledDetailSectionUsedText>
-                </StyledDetailSectionUsedTableCell>
-                <StyledDetailSectionMetaTableCell borderless>
-                  <StyledDetailSectionMetaTableButtonGroup>
-                    {entity.data.territory?.id && (
-                      <React.Fragment>
-                        <Button
-                          key="e"
-                          icon={<FaEdit size={14} />}
-                          color="plain"
-                          tooltip="edit statement"
-                          onClick={async () => {
-                            if (entity.data.territory) {
-                              setStatementId(entity.id);
-                              setTerritoryId(entity.data.territory.id);
-                            }
-                          }}
-                        />
-                      </React.Fragment>
-                    )}
-                  </StyledDetailSectionMetaTableButtonGroup>
-                </StyledDetailSectionMetaTableCell>
-              </React.Fragment>
-            ) : (
-              <div key={ui} />
-            );
-          })}
-        </StyledDetailSectionUsedTable>
+          </StyledDetailSectionUsedPageManager>
+        )}
       </StyledDetailSectionContentUsedIn>
-    </StyledDetailSection>
+    </>
   );
 };
