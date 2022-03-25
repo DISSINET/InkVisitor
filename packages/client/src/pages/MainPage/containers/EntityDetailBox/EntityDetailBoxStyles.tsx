@@ -29,7 +29,7 @@ export const StyledDetailSection = styled.div<StyledDetailSection>`
 
 export const StyledActantPreviewRow = styled.div`
   display: flex;
-  justify-content: center;
+  justify-content: left;
   align-items: center;
   margin-bottom: ${({ theme }) => theme.space[4]};
 `;
@@ -41,7 +41,7 @@ export const StyledTagWrap = styled.div`
 `;
 
 export const StyledDetailSectionHeader = styled.div`
-  font-weight: ${({ theme }) => theme.fontWeight.regular};
+  font-weight: bold;
   font-size: ${({ theme }) => theme.fontSize.lg};
   margin-bottom: ${({ theme }) => theme.space["4"]};
   color: ${({ theme }) => theme.color["primary"]};
@@ -53,7 +53,8 @@ export const StyledDetailContentRow = styled.div`
 `;
 export const StyledDetailContentRowLabel = styled.div`
   float: left;
-  font-size: ${({ theme }) => theme.fontSize["sm"]};
+  color: ${({ theme }) => theme.color["info"]};
+  font-size: ${({ theme }) => theme.fontSize["xs"]};
 `;
 export const StyledDetailContentRowValue = styled.div`
   float: right;
@@ -80,7 +81,7 @@ export const StyledDetailForm = styled.div`
       width: 1%;
       white-space: nowrap;
       display: table-cell;
-      padding: ${({ theme }) => theme.space[2]};
+      padding: ${({ theme }) => theme.space[3]};
       vertical-align: top;
       text-align: right;
       float: initial;
@@ -88,7 +89,7 @@ export const StyledDetailForm = styled.div`
     ${StyledDetailContentRowValue} {
       display: table-cell;
       width: 100%;
-      padding: ${({ theme }) => theme.space[1]};
+      padding: ${({ theme }) => theme.space[2]};
     }
   }
 `;
