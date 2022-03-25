@@ -41,7 +41,6 @@ export const StyledTagWrap = styled.div`
 `;
 
 export const StyledDetailSectionHeader = styled.div`
-  font-weight: bold;
   font-size: ${({ theme }) => theme.fontSize.lg};
   margin-bottom: ${({ theme }) => theme.space["4"]};
   color: ${({ theme }) => theme.color["primary"]};
@@ -94,16 +93,29 @@ export const StyledDetailForm = styled.div`
   }
 `;
 
+export const StyledDetailSectionContentUsedInTitle = styled.div`
+  margin-top: ${({ theme }) => theme.space[2]};
+  color: ${({ theme }) => theme.color["info"]};
+`;
+
 export const StyledDetailSectionUsedTable = styled.div`
   display: grid;
   align-items: center;
   padding-left: ${({ theme }) => theme.space[0]};
-  grid-template-columns: auto auto auto auto;
-  width: fit-content;
+  width: 100%;
   grid-template-rows: auto;
   grid-auto-flow: row;
-  padding-top: ${({ theme }) => theme.space[6]};
-  padding-bottom: ${({ theme }) => theme.space[6]};
+  padding-top: ${({ theme }) => theme.space[2]};
+  padding-bottom: ${({ theme }) => theme.space[1]};
+`;
+
+export const StyledDetailSectionUsedTableRow = styled.div`
+  display: grid;
+  grid-template-columns: 10% auto 10% 8%;
+  width: 100%;
+  border-bottom: 1px solid ${({ theme }) => theme.color["gray"][400]};
+  padding-top: ${({ theme }) => theme.space[2]};
+  background: white;
 `;
 
 interface StyledDetailHeaderColumn {}
@@ -117,7 +129,7 @@ export const StyledDetailHeaderColumn = styled.div<StyledDetailHeaderColumn>`
 
 export const StyledDetailSectionUsedText = styled.div`
   font-size: ${({ theme }) => theme.fontSize["xs"]};
-  max-width: 20em;
+  max-width: 30em;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -130,6 +142,7 @@ interface StyledDetailSectionContent {}
 export const StyledDetailSectionContent = styled.div<StyledDetailSectionContent>`
   padding-left: ${({ theme, firstSection = false }) =>
     firstSection ? "" : theme.space[4]};
+  padding-top: ${({ theme }) => theme.space[4]};
 `;
 
 // usedIn section
@@ -141,8 +154,9 @@ export const StyledDetailSectionUsedPageManager = styled.div`
   font-size: ${({ theme }) => theme.fontSize["xs"]};
   display: inline-flex;
   align-items: center;
+  padding-bottom: ${({ theme }) => theme.space[3]};
   button {
-    margin: 0 ${({ theme }) => theme.space[2]};
+    margin: 0 ${({ theme }) => theme.space[1]};
   }
 `;
 
@@ -152,8 +166,6 @@ export const StyledDetailSectionUsedTableCell = styled.div<StyledDetailSectionMe
     lastSecondLevel ? theme.space[2] : theme.space[2]};
   align-items: center;
   padding: 0 5px;
-  border-right: ${({ theme, borderless }) =>
-    borderless ? "none" : "1px dashed black"};
 `;
 
 export const StyledDetailSectionMetaTable = styled.div`
@@ -189,6 +201,4 @@ export const StyledDetailSectionMetaTableCell = styled.div<StyledDetailSectionMe
     lastSecondLevel ? theme.space[2] : theme.space[2]};
   align-items: center;
   padding: 0 5px;
-  border-right: ${({ theme, borderless }) =>
-    borderless ? "none" : "1px dashed black"};
 `;
