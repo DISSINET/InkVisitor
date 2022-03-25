@@ -54,7 +54,7 @@ export const Tag: React.FC<TagProps> = ({
   label = "",
   tooltipDetail,
   tooltipText,
-  category = "T",
+  category = "X",
   status = "1",
   ltype = "1",
   mode = false,
@@ -197,7 +197,13 @@ export const Tag: React.FC<TagProps> = ({
                   fullWidth={fullWidth}
                   isFavorited={isFavorited}
                 >
-                  {label ? label : <StyledItalic>{"no label"}</StyledItalic>}
+                  {!label ? (
+                    <StyledItalic>{"no label"}</StyledItalic>
+                  ) : category === "X" ? (
+                    <StyledItalic>{label}</StyledItalic>
+                  ) : (
+                    label
+                  )}
                 </StyledLabel>
 
                 {button && renderButton()}
