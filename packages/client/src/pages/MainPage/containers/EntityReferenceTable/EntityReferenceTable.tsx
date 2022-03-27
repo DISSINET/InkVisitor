@@ -1,5 +1,6 @@
 import { IEntity, IReference } from "@shared/types";
 import { Button } from "components";
+import { CReference } from "constructors";
 import React from "react";
 import { FaPlus } from "react-icons/fa";
 import {
@@ -11,9 +12,8 @@ import { EntityReferenceTableRow } from "./EntityReferenceTableRow";
 interface EntityReferenceTable {
   entities: { [key: string]: IEntity };
   references: IReference[];
-  onChange: Function;
+  onChange: (newRefefences: IReference[]) => void;
   disabled: boolean;
-  removeReference: Function;
 }
 
 export const EntityReferenceTable: React.FC<EntityReferenceTable> = ({
@@ -21,41 +21,45 @@ export const EntityReferenceTable: React.FC<EntityReferenceTable> = ({
   references,
   onChange,
   disabled = true,
-  removeReference,
 }) => {
-  // const sendChanges = (newValues: IReference[]) => {
-  //   // if (JSON.stringify(newValues) !== JSON.stringify(displayValues)) {
-  //   onChange(newValues);
-  //   // }
-  // };
+  const sendChanges = (newValues: IReference[]) => {
+    // if (JSON.stringify(newValues) !== JSON.stringify(displayValues)) {
+    onChange(newValues);
+    // }
+  };
 
-  // const handleChangeSource = (key: number, newSource: OptionTypeBase) => {
-  //   if (newSource) {
-  //     const newValues = [...displayValues];
-  //     newValues[key].source = newSource.value;
-  //     sendChanges(newValues);
-  //   }
-  // };
+  const handleChangeResource = (refId: string, newReSourceId: string) => {
+    const newReferences = [...references];
+    newReferences.forEach((ref: IReference) => {
+      if (ref.id === refId) {
+        ref.resource = newReSourceId;
+      }
+    });
+    sendChanges(newReferences);
+  };
 
-  // const handleChangeValue = (key: number, newValue: string) => {
-  //   const newValues = [...displayValues];
-  //   newValues[key].value = newValue;
-  //   sendChanges(newValues);
-  // };
+  const handleChangeValue = (refId: string, newValueId: string) => {
+    const newReferences = [...references];
+    newReferences.forEach((ref: IReference) => {
+      if (ref.id === refId) {
+        ref.value = newValueId;
+      }
+    });
+    sendChanges(newReferences);
+  };
 
-  // const handleDelete = (key: number) => {
-  //   const newValues = [...displayValues];
-  //   newValues.splice(key, 1);
-  //   setDisplayValues(newValues);
-  //   sendChanges(newValues);
-  // };
+  const handleRemove = (refId: string) => {
+    const newReferences = [...references].filter(
+      (ref: IReference) => ref.id !== refId
+    );
+    sendChanges(newReferences);
+  };
 
-  // const handleAdd = () => {
-  //   const newValues = [...displayValues];
-  //   newValues.push(CEntityReference());
-  //   setDisplayValues(newValues);
-  //   sendChanges(newValues);
-  // };
+  const handleAdd = () => {
+    const newReferences = [...references];
+    newReferences.push(CReference());
+    sendChanges(newReferences);
+  };
 
   return (
     <React.Fragment>
@@ -79,7 +83,9 @@ export const EntityReferenceTable: React.FC<EntityReferenceTable> = ({
               value={valueEntity}
               onChange={() => {}}
               disabled={disabled}
-              removeReference={removeReference}
+              handleRemove={handleRemove}
+              handleChangeResource={handleChangeResource}
+              handleChangeValue={handleChangeValue}
             />
           );
         })}
@@ -88,7 +94,7 @@ export const EntityReferenceTable: React.FC<EntityReferenceTable> = ({
         <Button
           icon={<FaPlus />}
           label={"new reference"}
-          //onClick={() => handleAdd()}
+          onClick={() => handleAdd()}
         />
       )}
     </React.Fragment>

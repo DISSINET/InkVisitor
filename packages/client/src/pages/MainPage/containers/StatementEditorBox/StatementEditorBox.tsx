@@ -392,36 +392,6 @@ export const StatementEditorBox: React.FC = () => {
     }
   };
 
-  //references
-  const addReference = (resourceId: string) => {
-    if (statement && resourceId) {
-      const newReference: IReference = CReference(resourceId);
-      const newData = {
-        references: [...statement.references, newReference],
-      };
-      updateStatementDataMutation.mutate(newData);
-    }
-  };
-  const updateReference = (referenceId: string, changes: any) => {
-    if (statement && referenceId) {
-      const updatedReferences = statement.references.map((r) =>
-        r.id === referenceId ? { ...r, ...changes } : r
-      );
-      const newData = {
-        references: updatedReferences,
-      };
-      updateStatementDataMutation.mutate(newData);
-    }
-  };
-  const removeReference = (referenceId: string) => {
-    if (statement && referenceId) {
-      const newReferences = {
-        references: statement.references.filter((p) => p.id !== referenceId),
-      };
-      updateStatementMutation.mutate(newReferences);
-    }
-  };
-
   //tags
   const addTag = (tagId: string) => {
     if (statement && tagId) {
@@ -443,7 +413,6 @@ export const StatementEditorBox: React.FC = () => {
     {
       onSuccess: (data, variables) => {
         queryClient.invalidateQueries(["statement"]);
-        queryClient.invalidateQueries(["territory"]);
       },
     }
   );
@@ -670,9 +639,10 @@ export const StatementEditorBox: React.FC = () => {
               <EntityReferenceTable
                 entities={statement.entities}
                 references={statement.references}
-                onChange={() => {}}
+                onChange={(newReferences: IReference[]) => {
+                  updateStatementMutation.mutate({ references: newReferences });
+                }}
                 disabled={!userCanEdit}
-                removeReference={removeReference}
               />
             </StyledEditorSectionContent>
           </StyledEditorSection>

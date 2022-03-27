@@ -2,7 +2,6 @@ import { entityReferenceSourceDict } from "@shared/dictionaries";
 import { EntityClass, EntityReferenceSource } from "@shared/enums";
 import { IEntity, IReference, IOption, IResource, IValue } from "@shared/types";
 import { Button, Dropdown, Input } from "components";
-import { CEntityReference } from "constructors";
 import React, { useEffect, useState } from "react";
 import { FaPlus, FaTrashAlt, FaUnlink } from "react-icons/fa";
 import { OptionTypeBase } from "react-select";
@@ -21,7 +20,9 @@ interface EntityReferenceTableRow {
   value: IEntity | undefined;
   onChange: Function;
   disabled?: boolean;
-  removeReference: Function;
+  handleRemove: (refId: string) => void;
+  handleChangeResource: (refId: string, newResource: string) => void;
+  handleChangeValue: (refId: string, newValue: string) => void;
 }
 
 export const EntityReferenceTableRow: React.FC<EntityReferenceTableRow> = ({
@@ -30,7 +31,9 @@ export const EntityReferenceTableRow: React.FC<EntityReferenceTableRow> = ({
   value,
   onChange,
   disabled = true,
-  removeReference,
+  handleRemove,
+  handleChangeResource,
+  handleChangeValue,
 }) => {
   const sendChanges = (newValues: IReference[]) => {
     // if (JSON.stringify(newValues) !== JSON.stringify(displayValues)) {
@@ -56,9 +59,7 @@ export const EntityReferenceTableRow: React.FC<EntityReferenceTableRow> = ({
                     inverted={true}
                     color="plain"
                     onClick={() => {
-                      // updateReference(reference.id, {
-                      //   resource: "",
-                      // });
+                      handleChangeResource(reference.id, "");
                     }}
                   />
                 )
@@ -71,9 +72,7 @@ export const EntityReferenceTableRow: React.FC<EntityReferenceTableRow> = ({
               territoryActants={[]}
               openDetailOnCreate
               onSelected={(newSelectedId: string) => {
-                // updateReference(reference.id, {
-                //   resource: newSelectedId,
-                // });
+                handleChangeResource(reference.id, newSelectedId);
               }}
               categoryTypes={[EntityClass.Resource]}
             />
@@ -97,9 +96,7 @@ export const EntityReferenceTableRow: React.FC<EntityReferenceTableRow> = ({
                     inverted={true}
                     color="plain"
                     onClick={() => {
-                      // updateReference(reference.id, {
-                      //   resource: "",
-                      // });
+                      handleChangeValue(reference.id, "");
                     }}
                   />
                 )
@@ -110,11 +107,8 @@ export const EntityReferenceTableRow: React.FC<EntityReferenceTableRow> = ({
           !disabled && (
             <EntitySuggester
               territoryActants={[]}
-              openDetailOnCreate
               onSelected={(newSelectedId: string) => {
-                // updateReference(reference.id, {
-                //   resource: newSelectedId,
-                // });
+                handleChangeValue(reference.id, newSelectedId);
               }}
               categoryTypes={[EntityClass.Value]}
             />
@@ -131,7 +125,7 @@ export const EntityReferenceTableRow: React.FC<EntityReferenceTableRow> = ({
             icon={<FaTrashAlt />}
             color="plain"
             onClick={() => {
-              removeReference(reference.id);
+              handleRemove(reference.id);
             }}
           />
         )}

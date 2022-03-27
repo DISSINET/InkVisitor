@@ -180,17 +180,11 @@ export const CEntity = (
   };
 };
 
-export const CReference = (resourceId: string): IReference => ({
-  id: uuidv4(),
-  resource: resourceId,
-  value: "",
-});
-
-export const CEntityReference = (
-  resource: string = "",
-  value: string = ""
+export const CReference = (
+  resourceId: string = "",
+  valueId: string = ""
 ): IReference => ({
   id: uuidv4(),
-  resource: resource,
-  value: value,
+  resource: resourceId,
+  value: valueId,
 });
