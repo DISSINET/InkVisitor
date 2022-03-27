@@ -1,10 +1,10 @@
 import { EntityClass, UserRoleMode } from "@shared/enums";
 import {
   IProp,
+  IReference,
   IResponseStatement,
   IStatementActant,
   IStatementAction,
-  IStatementReference,
 } from "@shared/types";
 import api from "api";
 import { Button, Input, Loader, MultiInput } from "components";
@@ -36,14 +36,13 @@ import {
   StyledEditorSection,
   StyledEditorSectionContent,
   StyledEditorSectionHeader,
-  StyledListHeaderColumn,
-  StyledReferencesList,
-  StyledReferencesListColumn,
   StyledTagsList,
   StyledTagsListItem,
   StyledTagWrapper,
 } from "./StatementEditorBoxStyles";
 import { DraggedPropRowCategory } from "types";
+import { EntityReferenceTable } from "../EntityReferenceTable/EntityReferenceTable";
+import { entityReferenceSourceDict } from "@shared/dictionaries";
 
 const classesActants = [
   EntityClass.Statement,
@@ -394,36 +393,36 @@ export const StatementEditorBox: React.FC = () => {
   };
 
   // references
-  const addReference = (resourceId: string) => {
-    if (statement && resourceId) {
-      const newReference: IStatementReference = CReference(resourceId);
-      const newData = {
-        references: [...statement.data.references, newReference],
-      };
-      updateStatementDataMutation.mutate(newData);
-    }
-  };
-  const updateReference = (referenceId: string, changes: any) => {
-    if (statement && referenceId) {
-      const updatedReferences = statement.data.references.map((r) =>
-        r.id === referenceId ? { ...r, ...changes } : r
-      );
-      const newData = {
-        references: updatedReferences,
-      };
-      updateStatementDataMutation.mutate(newData);
-    }
-  };
-  const removeReference = (referenceId: string) => {
-    if (statement && referenceId) {
-      const newData = {
-        references: statement.data.references.filter(
-          (p) => p.id !== referenceId
-        ),
-      };
-      updateStatementDataMutation.mutate(newData);
-    }
-  };
+  // const addReference = (resourceId: string) => {
+  //   if (statement && resourceId) {
+  //     const newReference: IReference = CReference(resourceId);
+  //     const newData = {
+  //       references: [...statement.data.references, newReference],
+  //     };
+  //     updateStatementDataMutation.mutate(newData);
+  //   }
+  // };
+  // const updateReference = (referenceId: string, changes: any) => {
+  //   if (statement && referenceId) {
+  //     const updatedReferences = statement.data.references.map((r) =>
+  //       r.id === referenceId ? { ...r, ...changes } : r
+  //     );
+  //     const newData = {
+  //       references: updatedReferences,
+  //     };
+  //     updateStatementDataMutation.mutate(newData);
+  //   }
+  // };
+  // const removeReference = (referenceId: string) => {
+  //   if (statement && referenceId) {
+  //     const newData = {
+  //       references: statement.data.references.filter(
+  //         (p) => p.id !== referenceId
+  //       ),
+  //     };
+  //     updateStatementDataMutation.mutate(newData);
+  //   }
+  // };
 
   //tags
   const addTag = (tagId: string) => {
@@ -659,136 +658,12 @@ export const StatementEditorBox: React.FC = () => {
           <StyledEditorSection key="editor-section-refs">
             <StyledEditorSectionHeader>References</StyledEditorSectionHeader>
             <StyledEditorSectionContent>
-              <StyledReferencesList>
-                {statement.data.references.length > 0 && (
-                  <React.Fragment>
-                    <StyledListHeaderColumn>Resource</StyledListHeaderColumn>
-                    <StyledListHeaderColumn>Part</StyledListHeaderColumn>
-                    <StyledListHeaderColumn>Type</StyledListHeaderColumn>
-                    <StyledListHeaderColumn></StyledListHeaderColumn>
-                  </React.Fragment>
-                )}
-                {statement.data.references.map(
-                  (reference: IStatementReference, ri) => {
-                    const referenceActant =
-                      statement?.entities[reference.resource];
-
-                    return (
-                      <React.Fragment key={ri}>
-                        <StyledReferencesListColumn>
-                          {referenceActant ? (
-                            <StyledTagWrapper>
-                              <EntityTag
-                                actant={referenceActant}
-                                fullWidth
-                                button={
-                                  userCanEdit && (
-                                    <Button
-                                      key="d"
-                                      tooltip="unlink actant"
-                                      icon={<FaUnlink />}
-                                      inverted={true}
-                                      color="plain"
-                                      onClick={() => {
-                                        updateReference(reference.id, {
-                                          resource: "",
-                                        });
-                                      }}
-                                    />
-                                  )
-                                }
-                              />
-                            </StyledTagWrapper>
-                          ) : (
-                            userCanEdit && (
-                              <EntitySuggester
-                                territoryActants={territoryActants}
-                                openDetailOnCreate
-                                onSelected={(newSelectedId: string) => {
-                                  updateReference(reference.id, {
-                                    resource: newSelectedId,
-                                  });
-                                }}
-                                categoryTypes={classesResources}
-                              />
-                            )
-                          )}
-                        </StyledReferencesListColumn>
-                        <StyledReferencesListColumn>
-                          <Input
-                            type="text"
-                            disabled={!userCanEdit}
-                            value={reference.part}
-                            onChangeFn={(newPart: string) => {
-                              updateReference(reference.id, {
-                                part: newPart,
-                              });
-                            }}
-                          ></Input>
-                        </StyledReferencesListColumn>
-                        <StyledReferencesListColumn>
-                          <div>
-                            <AttributeButtonGroup
-                              disabled={!userCanEdit}
-                              options={[
-                                {
-                                  longValue: "primary",
-                                  shortValue: "prim",
-                                  onClick: () => {
-                                    if (reference.type !== "P") {
-                                      updateReference(reference.id, {
-                                        type: "P",
-                                      });
-                                    }
-                                  },
-                                  selected: reference.type === "P",
-                                },
-                                {
-                                  longValue: "secondary",
-                                  shortValue: "sec",
-                                  onClick: () => {
-                                    if (reference.type !== "S") {
-                                      updateReference(reference.id, {
-                                        type: "S",
-                                      });
-                                    }
-                                  },
-                                  selected: reference.type === "S",
-                                },
-                              ]}
-                            />
-                          </div>
-                        </StyledReferencesListColumn>
-                        <StyledReferencesListColumn>
-                          {userCanEdit && (
-                            <Button
-                              key="delete"
-                              tooltip="remove reference row"
-                              inverted={true}
-                              icon={<FaTrashAlt />}
-                              color="plain"
-                              onClick={() => {
-                                removeReference(reference.id);
-                              }}
-                            />
-                          )}
-                        </StyledReferencesListColumn>
-                      </React.Fragment>
-                    );
-                  }
-                )}
-              </StyledReferencesList>
-              {userCanEdit && (
-                <EntitySuggester
-                  territoryActants={territoryActants}
-                  openDetailOnCreate
-                  onSelected={(newSelectedId: string) => {
-                    addReference(newSelectedId);
-                  }}
-                  categoryTypes={classesResources}
-                  placeholder={"add new reference"}
-                />
-              )}
+              <EntityReferenceTable
+                entities={statement.entities}
+                references={statement.references}
+                onChange={() => {}}
+                disabled={!userCanEdit}
+              />
             </StyledEditorSectionContent>
           </StyledEditorSection>
 
