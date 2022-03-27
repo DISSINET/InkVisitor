@@ -32,6 +32,7 @@ export const StyledPropRow = styled.div<StyledPropRow>`
   margin-left: ${({ level }) => getIndentation(level)};
   margin-bottom: ${({ theme }) => theme.space[2]};
   display: flex;
+  align-items: center;
 `;
 export const StyledPropGroup = styled.div`
   display: flex;
@@ -39,4 +40,11 @@ export const StyledPropGroup = styled.div`
 `;
 export const StyledActantWrap = styled.div`
   margin-bottom: ${({ theme }) => theme.space[1]};
+`;
+
+export const StyledReferenceWrap = styled.div`
+  margin-bottom: ${({ theme }) => theme.space[1]};
+  div {
+    padding-right: ${({ theme }) => theme.space[1]};
+  }
 `;

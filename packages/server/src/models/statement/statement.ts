@@ -2,8 +2,8 @@ import {
   IStatement,
   IStatementData,
   IStatementActant,
-  IStatementReference,
   IStatementAction,
+  IReference,
 } from "@shared/types";
 import {
   fillFlatObject,
@@ -56,29 +56,6 @@ export class StatementActant implements IStatementActant, IModel {
 
     fillFlatObject(this, data);
     fillArray<Prop>(this.props, Prop, data.props);
-  }
-
-  /**
-   * predicate for valid data content
-   * @returns boolean result
-   */
-  isValid(): boolean {
-    return true;
-  }
-}
-
-export class StatementReference implements IStatementReference, IModel {
-  id = "";
-  resource = "";
-  part = "";
-  type = "";
-
-  constructor(data: UnknownObject) {
-    if (!data) {
-      return;
-    }
-
-    fillFlatObject(this, data);
   }
 
   /**
@@ -157,7 +134,6 @@ export class StatementData implements IModel, IStatementData {
   territory = new StatementTerritory({});
   actions: StatementAction[] = [];
   actants: StatementActant[] = [];
-  references: StatementReference[] = [];
   tags: string[] = [];
 
   constructor(data: UnknownObject) {
@@ -169,11 +145,6 @@ export class StatementData implements IModel, IStatementData {
     this.territory = new StatementTerritory(data.territory as UnknownObject);
     fillArray<StatementAction>(this.actions, StatementAction, data.actions);
     fillArray<StatementActant>(this.actants, StatementActant, data.actants);
-    fillArray<StatementReference>(
-      this.references,
-      StatementReference,
-      data.references
-    );
 
     // fill array uses constructors - which string[] cannot use (will create an
     // object instead of string type)
@@ -196,9 +167,6 @@ export class StatementData implements IModel, IStatementData {
       return false;
     }
     if (this.actants.find((a) => !a.isValid())) {
-      return false;
-    }
-    if (this.references.find((r) => !r.isValid())) {
       return false;
     }
 
@@ -403,8 +371,10 @@ class Statement extends Entity implements IStatement {
 
     entitiesIds[this.data.territory.id] = null;
 
-    this.data.references.forEach((p) => {
-      entitiesIds[p.resource] = null;
+    Entity.extractIdsFromReferences(this.references).forEach((element) => {
+      if (element) {
+        entitiesIds[element] = null;
+      }
     });
 
     this.data.tags.forEach((t) => (entitiesIds[t] = null));
@@ -446,6 +416,16 @@ class Statement extends Entity implements IStatement {
       data: { actions: this.data.actions },
     });
     return !!result.replaced;
+  }
+
+  static extractIdsFromReference(references: IReference[]): string[] {
+    let out: string[] = [];
+    for (const reference of references) {
+      out.push(reference.resource);
+      out.push(reference.value);
+    }
+
+    return out;
   }
 
   /**

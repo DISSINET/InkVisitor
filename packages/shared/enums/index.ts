@@ -49,14 +49,6 @@ export type IEntityClass =
   | EntityClass.Value
   | EntityClass.Event;
 
-export enum EntityReferenceSource {
-  WordNet = "wordnet",
-  GeoNames = "geonames",
-  VIAF = "viaf",
-  ISBN = "isbn",
-  DOI = "doi",
-}
-
 export enum EntityLogicalType {
   Definite = "1",
   Indefinite = "2",
@@ -166,12 +158,7 @@ export enum Language {
   Czech = "ces",
   Italian = "ita",
   French = "fra",
-  German = "deu"
-}
-
-export enum ReferenceType {
-  Primary = "1",
-  Secondary = "2",
+  German = "deu",
 }
 
 export enum ResourceType {

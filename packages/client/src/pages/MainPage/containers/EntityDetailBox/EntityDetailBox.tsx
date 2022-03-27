@@ -1,13 +1,12 @@
 import {
   actantLogicalTypeDict,
   entitiesDict,
-  entityReferenceSourceDict,
   entityStatusDict,
   languageDict,
 } from "@shared/dictionaries";
 import { allEntities } from "@shared/dictionaries/entity";
 import { EntityClass, Language, UserRoleMode } from "@shared/enums";
-import { IAction, IEntityReference, IProp } from "@shared/types";
+import { IAction, IProp, IReference } from "@shared/types";
 import api from "api";
 import {
   Button,
@@ -34,7 +33,7 @@ import { DraggedPropRowCategory } from "types";
 import { EntityTag } from "..";
 import { AttributeButtonGroup } from "../AttributeButtonGroup/AttributeButtonGroup";
 import { AuditTable } from "../AuditTable/AuditTable";
-import { EntityReferenceInput } from "../EntityReferenceInput/EntityReferenceInput";
+import { EntityReferenceTable } from "../EntityReferenceTable/EntityReferenceTable";
 import { JSONExplorer } from "../JSONExplorer/JSONExplorer";
 import { PropGroup } from "../PropGroup/PropGroup";
 import {
@@ -54,8 +53,14 @@ import { EntityDetailBoxTable } from "./EntityDetailBoxTable";
 
 interface EntityDetailBox {}
 export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
-  const { detailId, setDetailId, setStatementId, territoryId, setTerritoryId } =
-    useSearchParams();
+  const {
+    detailId,
+    setDetailId,
+    statementId,
+    setStatementId,
+    territoryId,
+    setTerritoryId,
+  } = useSearchParams();
 
   const [showRemoveSubmit, setShowRemoveSubmit] = useState(false);
   const [usedInPage, setUsedInPage] = useState<number>(0);
@@ -124,6 +129,9 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
       onSuccess: (data, variables) => {
         queryClient.invalidateQueries(["entity"]);
 
+        if (statementId === detailId) {
+          queryClient.invalidateQueries("statement");
+        }
         if (
           variables.detail ||
           variables.label ||
@@ -233,52 +241,6 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
           newProps[pi1].children[pi2].children = newProps[pi1].children[
             pi2
           ].children.filter((child) => child.id !== propId);
-        });
-      });
-
-      updateEntityMutation.mutate({ props: newProps });
-    }
-  };
-
-  const movePropUp = (propId: string) => {
-    if (entity) {
-      const newProps = [...entity.props];
-
-      newProps.forEach((prop1, pi1) => {
-        if (prop1.id === propId) {
-          newProps.splice(pi1 - 1, 0, newProps.splice(pi1, 1)[0]);
-        }
-        prop1.children.forEach((prop2, pi2) => {
-          if (prop2.id === propId) {
-            newProps[pi1].children.splice(
-              pi2 - 1,
-              0,
-              newProps[pi1].children.splice(pi2, 1)[0]
-            );
-          }
-        });
-      });
-
-      updateEntityMutation.mutate({ props: newProps });
-    }
-  };
-
-  const movePropDown = (propId: string) => {
-    if (entity) {
-      const newProps = [...entity.props];
-
-      newProps.forEach((prop1, pi1) => {
-        if (prop1.id === propId) {
-          newProps.splice(pi1 + 1, 0, newProps.splice(pi1, 1)[0]);
-        }
-        prop1.children.forEach((prop2, pi2) => {
-          if (prop2.id === propId) {
-            newProps[pi1].children.splice(
-              pi2 + 1,
-              0,
-              newProps[pi1].children.splice(pi2, 1)[0]
-            );
-          }
         });
       });
 
@@ -953,29 +915,55 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                 )}
 
                 {actantMode === "resource" && (
-                  <StyledDetailContentRow>
-                    <StyledDetailContentRowLabel>
-                      URL
-                    </StyledDetailContentRowLabel>
-                    <StyledDetailContentRowValue>
-                      <Input
-                        disabled={!userCanEdit}
-                        value={entity.data.url}
-                        width="full"
-                        onChangeFn={async (newValue: string) => {
-                          const oldData = { ...entity.data };
-                          updateEntityMutation.mutate({
-                            data: {
-                              ...oldData,
-                              ...{
-                                link: newValue,
+                  <React.Fragment>
+                    <StyledDetailContentRow>
+                      <StyledDetailContentRowLabel>
+                        URL
+                      </StyledDetailContentRowLabel>
+                      <StyledDetailContentRowValue>
+                        <Input
+                          disabled={!userCanEdit}
+                          value={entity.data.url}
+                          width="full"
+                          onChangeFn={async (newValue: string) => {
+                            const oldData = { ...entity.data };
+                            updateEntityMutation.mutate({
+                              data: {
+                                ...oldData,
+                                ...{
+                                  url: newValue,
+                                },
                               },
-                            },
-                          });
-                        }}
-                      />
-                    </StyledDetailContentRowValue>
-                  </StyledDetailContentRow>
+                            });
+                          }}
+                        />
+                      </StyledDetailContentRowValue>
+                    </StyledDetailContentRow>
+
+                    <StyledDetailContentRow>
+                      <StyledDetailContentRowLabel>
+                        Part Label
+                      </StyledDetailContentRowLabel>
+                      <StyledDetailContentRowValue>
+                        <Input
+                          disabled={!userCanEdit}
+                          value={entity.data.partValueLabel}
+                          width="full"
+                          onChangeFn={async (newValue: string) => {
+                            const oldData = { ...entity.data };
+                            updateEntityMutation.mutate({
+                              data: {
+                                ...oldData,
+                                ...{
+                                  partValueLabel: newValue,
+                                },
+                              },
+                            });
+                          }}
+                        />
+                      </StyledDetailContentRowValue>
+                    </StyledDetailContentRow>
+                  </React.Fragment>
                 )}
 
                 <StyledDetailContentRow>
@@ -996,25 +984,22 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                     />
                   </StyledDetailContentRowValue>
                 </StyledDetailContentRow>
-
-                <StyledDetailContentRow>
-                  <StyledDetailContentRowLabel>
-                    References
-                  </StyledDetailContentRowLabel>
-                  <StyledDetailContentRowValue>
-                    <EntityReferenceInput
-                      disabled={!userCanEdit}
-                      values={entity.references || []}
-                      sources={entityReferenceSourceDict.filter((ers) =>
-                        ers.entityClasses.includes(entity.class)
-                      )}
-                      onChange={(newValues: IEntityReference[]) => {
-                        updateEntityMutation.mutate({ references: newValues });
-                      }}
-                    />
-                  </StyledDetailContentRowValue>
-                </StyledDetailContentRow>
               </StyledDetailForm>
+            </StyledDetailSectionContent>
+          </StyledDetailSection>
+
+          {/* reference section */}
+          <StyledDetailSection>
+            <StyledDetailSectionHeader>References</StyledDetailSectionHeader>
+            <StyledDetailSectionContent>
+              <EntityReferenceTable
+                disabled={!userCanEdit}
+                references={entity.references || []}
+                entities={entity.entities}
+                onChange={(newValues: IReference[]) => {
+                  updateEntityMutation.mutate({ references: newValues });
+                }}
+              />
             </StyledDetailSectionContent>
           </StyledDetailSection>
 
@@ -1024,13 +1009,6 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
               Meta properties
             </StyledDetailSectionHeader>
             <StyledDetailSectionContent>
-              {/* <EntityDetailMetaTable
-                entity={actant}
-                userCanEdit={userCanEdit}
-                metaProps={metaStatements}
-                updateMetaStatement={updateMetaStatementMutation}
-                removeMetaStatement={actantsDeleteMutation}
-              /> */}
               <table>
                 <tbody>
                   <PropGroup
