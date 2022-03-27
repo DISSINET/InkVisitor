@@ -10,7 +10,7 @@ import {
   IEntity,
   IResponseEntity,
   IProp,
-  IEntityReference,
+  IReference,
 } from "@shared/types";
 import {
   EntityClass,
@@ -39,7 +39,7 @@ export default class Entity implements IEntity, IDbModel {
   language: Language = Language.Latin;
   notes: string[] = [];
   props: IProp[] = [];
-  references: IEntityReference[] = [];
+  references: IReference[] = [];
 
   isTemplate: boolean = false;
   usedTemplate: boolean = false;
@@ -265,7 +265,23 @@ export default class Entity implements IEntity, IDbModel {
       }
     });
 
+    Entity.extractIdsFromReferences(this.references).forEach((element) => {
+      if (element) {
+        entityIds[element] = null;
+      }
+    });
+
     return Object.keys(entityIds);
+  }
+
+  static extractIdsFromReferences(references: IReference[]): string[] {
+    let out: string[] = [];
+    for (const reference of references) {
+      out.push(reference.resource);
+      out.push(reference.value);
+    }
+
+    return out;
   }
 
   static extractIdsFromProps(props: IProp[]): string[] {
@@ -317,9 +333,6 @@ export default class Entity implements IEntity, IDbModel {
           ),
           row("data")("props").contains((entry: RDatum) =>
             entry("origin").eq(this.id)
-          ),
-          row("data")("references").contains((entry: RDatum) =>
-            entry("resource").eq(this.id)
           )
         );
       })
