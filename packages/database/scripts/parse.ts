@@ -655,7 +655,8 @@ const addResourceActant = (id: string, label: string) => {
       id,
       class: EntityClass.Resource,
       data: {
-        link: "",
+        url: "",
+        partValueLabel: "",
       },
       label: label.trim(),
       detail: "",
