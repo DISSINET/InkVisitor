@@ -392,37 +392,35 @@ export const StatementEditorBox: React.FC = () => {
     }
   };
 
-  // references
-  // const addReference = (resourceId: string) => {
-  //   if (statement && resourceId) {
-  //     const newReference: IReference = CReference(resourceId);
-  //     const newData = {
-  //       references: [...statement.data.references, newReference],
-  //     };
-  //     updateStatementDataMutation.mutate(newData);
-  //   }
-  // };
-  // const updateReference = (referenceId: string, changes: any) => {
-  //   if (statement && referenceId) {
-  //     const updatedReferences = statement.data.references.map((r) =>
-  //       r.id === referenceId ? { ...r, ...changes } : r
-  //     );
-  //     const newData = {
-  //       references: updatedReferences,
-  //     };
-  //     updateStatementDataMutation.mutate(newData);
-  //   }
-  // };
-  // const removeReference = (referenceId: string) => {
-  //   if (statement && referenceId) {
-  //     const newData = {
-  //       references: statement.data.references.filter(
-  //         (p) => p.id !== referenceId
-  //       ),
-  //     };
-  //     updateStatementDataMutation.mutate(newData);
-  //   }
-  // };
+  //references
+  const addReference = (resourceId: string) => {
+    if (statement && resourceId) {
+      const newReference: IReference = CReference(resourceId);
+      const newData = {
+        references: [...statement.references, newReference],
+      };
+      updateStatementDataMutation.mutate(newData);
+    }
+  };
+  const updateReference = (referenceId: string, changes: any) => {
+    if (statement && referenceId) {
+      const updatedReferences = statement.references.map((r) =>
+        r.id === referenceId ? { ...r, ...changes } : r
+      );
+      const newData = {
+        references: updatedReferences,
+      };
+      updateStatementDataMutation.mutate(newData);
+    }
+  };
+  const removeReference = (referenceId: string) => {
+    if (statement && referenceId) {
+      const newReferences = {
+        references: statement.references.filter((p) => p.id !== referenceId),
+      };
+      updateStatementMutation.mutate(newReferences);
+    }
+  };
 
   //tags
   const addTag = (tagId: string) => {
@@ -438,6 +436,17 @@ export const StatementEditorBox: React.FC = () => {
     }
   };
 
+  const updateStatementMutation = useMutation(
+    async (changes: object) => {
+      await api.entityUpdate(statementId, changes);
+    },
+    {
+      onSuccess: (data, variables) => {
+        queryClient.invalidateQueries(["statement"]);
+        queryClient.invalidateQueries(["territory"]);
+      },
+    }
+  );
   const updateStatementDataMutation = useMutation(
     async (changes: object) => {
       await api.entityUpdate(statementId, {
@@ -663,6 +672,7 @@ export const StatementEditorBox: React.FC = () => {
                 references={statement.references}
                 onChange={() => {}}
                 disabled={!userCanEdit}
+                removeReference={removeReference}
               />
             </StyledEditorSectionContent>
           </StyledEditorSection>

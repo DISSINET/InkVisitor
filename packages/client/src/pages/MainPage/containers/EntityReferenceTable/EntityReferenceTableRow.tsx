@@ -21,6 +21,7 @@ interface EntityReferenceTableRow {
   value: IEntity | undefined;
   onChange: Function;
   disabled?: boolean;
+  removeReference: Function;
 }
 
 export const EntityReferenceTableRow: React.FC<EntityReferenceTableRow> = ({
@@ -29,6 +30,7 @@ export const EntityReferenceTableRow: React.FC<EntityReferenceTableRow> = ({
   value,
   onChange,
   disabled = true,
+  removeReference,
 }) => {
   const sendChanges = (newValues: IReference[]) => {
     // if (JSON.stringify(newValues) !== JSON.stringify(displayValues)) {
@@ -129,7 +131,7 @@ export const EntityReferenceTableRow: React.FC<EntityReferenceTableRow> = ({
             icon={<FaTrashAlt />}
             color="plain"
             onClick={() => {
-              //removeReference(reference.id);
+              removeReference(reference.id);
             }}
           />
         )}
