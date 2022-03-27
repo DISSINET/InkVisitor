@@ -9,7 +9,7 @@
     "create-audits": "ts-node scripts/create-audits.ts",
     "fix-t-orders": "npx ts-node scripts/fix-t-order.ts",
     "benchmark": "npx ts-node scripts/index-benchmark.ts",
-    "import-remote": "npx ts-node scripts/import.ts all prod",
+    "import-remote": "npx ts-node scripts/import.ts all production",
     "import-remote-sandbox": "npx ts-node scripts/import.ts all sandbox",
     "import-remote-staging": "npx ts-node scripts/import.ts all staging",
     "import-remote-data-import": "npx ts-node scripts/import.ts all data-import",
@@ -31,6 +31,7 @@
   },
   "devDependencies": {
     "@types/node": "^16.7.10",
+    "@types/tunnel-ssh": "^4.1.1",
     "install": "^0.13.0",
     "npm": "^7.21.1",
     "tslib": "^2.3.1"
