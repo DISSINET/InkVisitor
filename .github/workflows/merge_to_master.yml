@@ -86,15 +86,15 @@ jobs:
 
       - name: Create env file for server
         run: |
-          touch packages/server/env/.env.dataimport
-          echo "$SERVER_ENV" >> packages/server/env/.env.dataimport
+          touch packages/server/env/.env.data-import
+          echo "$SERVER_ENV" >> packages/server/env/.env.data-import
         env:
           SERVER_ENV: ${{secrets.SERVER_ENV}}
 
       - name: Create env file for client
         run: |
-          touch packages/client/env/.env.dataimport
-          echo "$CLIENT_ENV" >> packages/client/env/.env.dataimport
+          touch packages/client/env/.env.data-import
+          echo "$CLIENT_ENV" >> packages/client/env/.env.data-import
         env:
           CLIENT_ENV: ${{secrets.CLIENT_ENV}}
 
