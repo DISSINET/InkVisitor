@@ -89,14 +89,14 @@ jobs:
           touch packages/server/env/.env.data-import
           echo "$SERVER_ENV" >> packages/server/env/.env.data-import
         env:
-          SERVER_ENV: ${{secrets.SERVER_ENV}}
+          SERVER_ENV: ${{secrets.SERVER_ENV_DATAIMPORT}}
 
       - name: Create env file for client
         run: |
           touch packages/client/env/.env.data-import
           echo "$CLIENT_ENV" >> packages/client/env/.env.data-import
         env:
-          CLIENT_ENV: ${{secrets.CLIENT_ENV}}
+          CLIENT_ENV: ${{secrets.CLIENT_ENV_DATAIMPORT}}
 
       - name: Build client
         run: |
