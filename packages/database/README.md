@@ -25,3 +25,8 @@ Cron can be setup like:
 
 - `crontab -e`
 - add line `0 0 * * * <path to sh script> >> <path to logfile> 2>&1`
+
+## Gcloud
+
+For copying to gcloud, we are using [rclone](https://rclone.org/).
+Sync it like `rclone sync archives remote:inkvisitor-backup`
