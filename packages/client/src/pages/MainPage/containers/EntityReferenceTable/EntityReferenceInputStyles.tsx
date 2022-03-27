@@ -13,7 +13,7 @@ export const StyledGrid = styled.div`
 
 export const StyledGridCell = styled.div`
   margin: ${({ theme }) => theme.space[1]};
-  display: grid;
+  display: block;
 `;
 
 // references
@@ -41,4 +41,10 @@ export const StyledReferencesListColumn = styled(
 export const StyledTagWrapper = styled.div`
   display: inline-flex;
   overflow: hidden;
+`;
+export const StyledReferenceValuePartLabel = styled.div`
+  font-style: italic;
+  display: inline;
+  font-size: ${({ theme }) => theme.fontSize["sm"]};
+  margin-right: ${({ theme }) => theme.space[4]}; ;
 `;
