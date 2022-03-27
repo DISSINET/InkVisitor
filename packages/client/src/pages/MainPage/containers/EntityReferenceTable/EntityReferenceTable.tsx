@@ -64,7 +64,7 @@ export const EntityReferenceTable: React.FC<EntityReferenceTable> = ({
   return (
     <React.Fragment>
       <StyledReferencesList>
-        {references.length > 0 && (
+        {references && references.length > 0 && (
           <React.Fragment>
             <StyledListHeaderColumn>Resource</StyledListHeaderColumn>
             <StyledListHeaderColumn>Part</StyledListHeaderColumn>
@@ -72,23 +72,24 @@ export const EntityReferenceTable: React.FC<EntityReferenceTable> = ({
           </React.Fragment>
         )}
 
-        {references.map((reference: IReference, ri: number) => {
-          const resourceEntity = entities[reference.resource];
-          const valueEntity = entities[reference.value];
-          return (
-            <EntityReferenceTableRow
-              key={ri}
-              reference={reference}
-              resource={resourceEntity}
-              value={valueEntity}
-              onChange={() => {}}
-              disabled={disabled}
-              handleRemove={handleRemove}
-              handleChangeResource={handleChangeResource}
-              handleChangeValue={handleChangeValue}
-            />
-          );
-        })}
+        {references &&
+          references.map((reference: IReference, ri: number) => {
+            const resourceEntity = entities[reference.resource];
+            const valueEntity = entities[reference.value];
+            return (
+              <EntityReferenceTableRow
+                key={ri}
+                reference={reference}
+                resource={resourceEntity}
+                value={valueEntity}
+                onChange={() => {}}
+                disabled={disabled}
+                handleRemove={handleRemove}
+                handleChangeResource={handleChangeResource}
+                handleChangeValue={handleChangeValue}
+              />
+            );
+          })}
       </StyledReferencesList>
       {!disabled && (
         <Button
