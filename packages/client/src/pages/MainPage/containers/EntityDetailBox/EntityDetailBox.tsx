@@ -1,7 +1,6 @@
 import {
   actantLogicalTypeDict,
   entitiesDict,
-  entityReferenceSourceDict,
   entityStatusDict,
   languageDict,
 } from "@shared/dictionaries";
@@ -54,8 +53,14 @@ import { EntityDetailBoxTable } from "./EntityDetailBoxTable";
 
 interface EntityDetailBox {}
 export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
-  const { detailId, setDetailId, setStatementId, territoryId, setTerritoryId } =
-    useSearchParams();
+  const {
+    detailId,
+    setDetailId,
+    statementId,
+    setStatementId,
+    territoryId,
+    setTerritoryId,
+  } = useSearchParams();
 
   const [showRemoveSubmit, setShowRemoveSubmit] = useState(false);
   const [usedInPage, setUsedInPage] = useState<number>(0);
@@ -124,6 +129,9 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
       onSuccess: (data, variables) => {
         queryClient.invalidateQueries(["entity"]);
 
+        if (statementId === detailId) {
+          queryClient.invalidateQueries("statement");
+        }
         if (
           variables.detail ||
           variables.label ||
@@ -233,52 +241,6 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
           newProps[pi1].children[pi2].children = newProps[pi1].children[
             pi2
           ].children.filter((child) => child.id !== propId);
-        });
-      });
-
-      updateEntityMutation.mutate({ props: newProps });
-    }
-  };
-
-  const movePropUp = (propId: string) => {
-    if (entity) {
-      const newProps = [...entity.props];
-
-      newProps.forEach((prop1, pi1) => {
-        if (prop1.id === propId) {
-          newProps.splice(pi1 - 1, 0, newProps.splice(pi1, 1)[0]);
-        }
-        prop1.children.forEach((prop2, pi2) => {
-          if (prop2.id === propId) {
-            newProps[pi1].children.splice(
-              pi2 - 1,
-              0,
-              newProps[pi1].children.splice(pi2, 1)[0]
-            );
-          }
-        });
-      });
-
-      updateEntityMutation.mutate({ props: newProps });
-    }
-  };
-
-  const movePropDown = (propId: string) => {
-    if (entity) {
-      const newProps = [...entity.props];
-
-      newProps.forEach((prop1, pi1) => {
-        if (prop1.id === propId) {
-          newProps.splice(pi1 + 1, 0, newProps.splice(pi1, 1)[0]);
-        }
-        prop1.children.forEach((prop2, pi2) => {
-          if (prop2.id === propId) {
-            newProps[pi1].children.splice(
-              pi2 + 1,
-              0,
-              newProps[pi1].children.splice(pi2, 1)[0]
-            );
-          }
         });
       });
 
@@ -1021,13 +983,6 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
               Meta properties
             </StyledDetailSectionHeader>
             <StyledDetailSectionContent>
-              {/* <EntityDetailMetaTable
-                entity={actant}
-                userCanEdit={userCanEdit}
-                metaProps={metaStatements}
-                updateMetaStatement={updateMetaStatementMutation}
-                removeMetaStatement={actantsDeleteMutation}
-              /> */}
               <table>
                 <tbody>
                   <PropGroup
