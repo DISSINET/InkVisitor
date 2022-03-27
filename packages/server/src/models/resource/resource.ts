@@ -6,6 +6,7 @@ import Entity from "@models/entity/entity";
 class ResourceData implements IModel {
   url: string = "";
   partValueLabel: string = "";
+  partValueBaseURL: string = "";
 
   constructor(data: UnknownObject) {
     if (!data) {
