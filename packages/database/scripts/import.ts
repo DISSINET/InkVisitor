@@ -2,7 +2,7 @@ import { IUser } from "../../shared/types/user";
 import { hashPassword } from "../../server/src/common/auth";
 import { IAudit } from "../../shared/types";
 const fs = require("fs");
-const r = require("rethinkdb");
+import { Connection, r } from "rethinkdb-ts";
 var tunnel = require("tunnel-ssh");
 
 const entitiesTable = "entities";
@@ -101,103 +101,100 @@ const importData = async () => {
     tables: tablesToImport,
   };
 
-  let conn: any = null;
+  let conn: Connection;
 
   try {
     conn = await r.connect(config);
+  } catch (e) {
+    throw new Error(`Cannot connect to the db: ${e}`);
+  }
 
-    console.log(config);
+  console.log(config);
 
-    // Drop the database.
-    try {
-      await r.dbDrop(config.db).run(conn);
-      console.log("database dropped");
-    } catch (e) {
-      console.log("database not dropped");
+  // Drop the database.
+  try {
+    await r.dbDrop(config.db).run(conn);
+    console.log("Database dropped");
+  } catch (e) {
+    throw new Error(`Database not dropped: ${e}`);
+  }
+
+  // Recreate the database
+  try {
+    await r.dbCreate(config.db).run(conn);
+    console.log("Database created");
+  } catch (e) {
+    throw new Error(`Database not created: ${e}`);
+  }
+
+  // set default database
+  conn.use(config.db);
+
+  // Insert data to tables.
+  for (let i = 0; i < config.tables.length; ++i) {
+    const table = config.tables[i];
+
+    await r.tableCreate(table.name).run(conn);
+    if (table.indexes) {
+      for (const index of table.indexes) {
+        //await doIndex(index, conn);
+      }
     }
 
-    // Recreate the database
-    try {
-      await r.dbCreate(config.db).run(conn);
-      console.log("database created");
-    } catch (e) {
-      console.log("database not created");
-    }
+    console.log(`Table ${table.name} created`);
 
-    // set default database
-    conn.use(config.db);
-
-    // Insert data to tables.
-    for (let i = 0; i < config.tables.length; ++i) {
-      const table = config.tables[i];
-
-      r.tableCreate(table.name).run(conn, async () => {
-        if (table.indexes) {
-          for (const index of table.indexes) {
-            //await doIndex(index, conn);
-          }
-        }
-
-        console.log(`table ${table.name} created`);
-
-        let data = JSON.parse(fs.readFileSync(table.data));
-        if (table.name === "users") {
-          data = data.map((user: IUser) => {
-            user.password = hashPassword(user.password ? user.password : "");
-            return user;
-          });
-        }
-
-        if (table.name === "audits") {
-          data = data.map((audit: IAudit) => {
-            audit.date = new Date(audit.date);
-            return audit;
-          });
-        }
-
-        r.table(table.name)
-          .insert(data)
-          .run(conn, () => {
-            if (table.name === "entities") {
-              r.table("entities").run(conn, (err: any, cursor: any) => {
-                cursor.toArray().then((results: any) => {
-                  console.log(`number of entities imported ${results.length}`);
-                });
-
-                //console.log(`data into the table ${table.name} inserted`);
-              });
-            }
-          });
+    let data = JSON.parse(fs.readFileSync(table.data));
+    if (table.name === "users") {
+      data = data.map((user: IUser) => {
+        user.password = hashPassword(user.password ? user.password : "");
+        return user;
       });
     }
-  } catch (error) {
-    console.log(error);
-  } finally {
-    console.log("closing connection");
-    if (conn) {
-      // TODO  this is bad
-      setTimeout(() => {
-        conn.close();
-      }, 5000);
+
+    if (table.name === "audits") {
+      data = data.map((audit: IAudit) => {
+        audit.date = new Date(audit.date);
+        return audit;
+      });
+    }
+
+    await r.table(table.name).insert(data).run(conn);
+
+    if (table.name === "entities") {
+      const entitiesImported = await r.table("entities").count().run(conn);
+      console.log(`Imported ${entitiesImported} entities`);
     }
   }
+
+  console.log("Closing connection");
+  await conn.close({ noreplyWait: true });
 };
 
-if (dbMode == "prod") {
-  const tnl = tunnel(
-    {
-      host: envData.SSH_IP,
-      port: 28015,
-      dstPort: 28017,
-      username: envData.SSH_USERNAME,
-      password: envData.SSH_PASSWORD,
-    },
-    function (error: any, tnl: any) {
-      console.log("in the tunnel");
-      importData();
-      tnl.close();
+(async () => {
+  if (dbMode == "prod") {
+    const tnl = tunnel(
+      {
+        host: envData.SSH_IP,
+        port: 28015,
+        dstPort: 28017,
+        username: envData.SSH_USERNAME,
+        password: envData.SSH_PASSWORD,
+      },
+      async (error: any, tnl: any) => {
+        console.log("In the tunnel");
+        try {
+          await importData();
+          await tnl.close();
+        } catch (e) {
+          console.warn(e);
+        }
+      }
+    );
+  } else {
+    try {
+      await importData();
+    } catch (e) {
+      console.warn(e);
     }
-  );
-} else {
-  importData();
-}
+  }
+})();

@@ -1004,7 +1004,7 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                   <StyledDetailContentRowValue>
                     <EntityReferenceInput
                       disabled={!userCanEdit}
-                      values={entity.references}
+                      values={entity.references || []}
                       sources={entityReferenceSourceDict.filter((ers) =>
                         ers.entityClasses.includes(entity.class)
                       )}
