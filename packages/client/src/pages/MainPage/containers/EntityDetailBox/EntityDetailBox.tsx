@@ -7,7 +7,7 @@ import {
 } from "@shared/dictionaries";
 import { allEntities } from "@shared/dictionaries/entity";
 import { EntityClass, Language, UserRoleMode } from "@shared/enums";
-import { IAction, IEntityReference, IProp } from "@shared/types";
+import { IAction, IProp, IReference } from "@shared/types";
 import api from "api";
 import {
   Button,
@@ -34,7 +34,7 @@ import { DraggedPropRowCategory } from "types";
 import { EntityTag } from "..";
 import { AttributeButtonGroup } from "../AttributeButtonGroup/AttributeButtonGroup";
 import { AuditTable } from "../AuditTable/AuditTable";
-import { EntityReferenceInput } from "../EntityReferenceInput/EntityReferenceInput";
+import { EntityReferenceTable } from "../EntityReferenceTable/EntityReferenceTable";
 import { JSONExplorer } from "../JSONExplorer/JSONExplorer";
 import { PropGroup } from "../PropGroup/PropGroup";
 import {
@@ -1002,13 +1002,11 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                     References
                   </StyledDetailContentRowLabel>
                   <StyledDetailContentRowValue>
-                    <EntityReferenceInput
+                    <EntityReferenceTable
                       disabled={!userCanEdit}
-                      values={entity.references || []}
-                      sources={entityReferenceSourceDict.filter((ers) =>
-                        ers.entityClasses.includes(entity.class)
-                      )}
-                      onChange={(newValues: IEntityReference[]) => {
+                      references={entity.references || []}
+                      entities={entity.entities}
+                      onChange={(newValues: IReference[]) => {
                         updateEntityMutation.mutate({ references: newValues });
                       }}
                     />
