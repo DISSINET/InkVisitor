@@ -6,5 +6,6 @@ export interface IResource extends IEntity {
   data: {
     url: string;
     partValueLabel: string;
+    partValueBaseURL: string;
   };
 }

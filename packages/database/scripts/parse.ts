@@ -657,6 +657,7 @@ const addResourceActant = (id: string, label: string) => {
       data: {
         url: "",
         partValueLabel: "",
+        partValueBaseURL: "",
       },
       label: label.trim(),
       detail: "",

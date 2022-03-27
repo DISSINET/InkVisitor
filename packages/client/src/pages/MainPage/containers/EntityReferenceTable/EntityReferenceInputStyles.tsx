@@ -13,7 +13,8 @@ export const StyledGrid = styled.div`
 
 export const StyledGridCell = styled.div`
   margin: ${({ theme }) => theme.space[1]};
-  display: block;
+  display: inline-flex;
+  align-items: center;
 `;
 
 // references
@@ -37,6 +38,13 @@ interface StyledReferencesListColumn {}
 export const StyledReferencesListColumn = styled(
   StyledGridCell
 )<StyledReferencesListColumn>``;
+
+export const StyledReferencesListButtons = styled.div`
+  button {
+    display: inline-flex;
+    margin-right: ${({ theme }) => theme.space[2]};
+  }
+`;
 
 export const StyledTagWrapper = styled.div`
   display: inline-flex;

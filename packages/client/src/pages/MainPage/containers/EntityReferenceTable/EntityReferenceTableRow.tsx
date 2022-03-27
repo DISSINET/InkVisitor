@@ -2,10 +2,11 @@ import { EntityClass } from "@shared/enums";
 import { IEntity, IReference } from "@shared/types";
 import { Button } from "components";
 import React from "react";
-import { FaTrashAlt, FaUnlink } from "react-icons/fa";
+import { FaExternalLinkAlt, FaTrashAlt, FaUnlink } from "react-icons/fa";
 import { EntitySuggester } from "../EntitySuggester/EntitySuggester";
 import { EntityTag } from "../EntityTag/EntityTag";
 import {
+  StyledReferencesListButtons,
   StyledReferencesListColumn,
   StyledReferenceValuePartLabel,
   StyledTagWrapper,
@@ -32,12 +33,6 @@ export const EntityReferenceTableRow: React.FC<EntityReferenceTableRow> = ({
   handleChangeResource,
   handleChangeValue,
 }) => {
-  const sendChanges = (newValues: IReference[]) => {
-    // if (JSON.stringify(newValues) !== JSON.stringify(displayValues)) {
-    onChange(newValues);
-    // }
-  };
-
   return (
     <React.Fragment>
       {/* resource */}
@@ -119,18 +114,35 @@ export const EntityReferenceTableRow: React.FC<EntityReferenceTableRow> = ({
       </StyledReferencesListColumn>
 
       <StyledReferencesListColumn>
-        {!disabled && (
-          <Button
-            key="delete"
-            tooltip="remove reference row"
-            inverted={true}
-            icon={<FaTrashAlt />}
-            color="plain"
-            onClick={() => {
-              handleRemove(reference.id);
-            }}
-          />
-        )}
+        <StyledReferencesListButtons>
+          {resource && value && resource.data.partValueBaseURL && (
+            <Button
+              key="url"
+              tooltip={""}
+              inverted={true}
+              icon={<FaExternalLinkAlt />}
+              color="plain"
+              onClick={() => {
+                const url = resource.data.partValueBaseURL.includes("http")
+                  ? resource.data.partValueBaseURL + value.label
+                  : "//" + resource.data.partValueBaseURL + value.label;
+                window.open(url, "_blank");
+              }}
+            />
+          )}
+          {!disabled && (
+            <Button
+              key="delete"
+              tooltip="remove reference row"
+              inverted={true}
+              icon={<FaTrashAlt />}
+              color="plain"
+              onClick={() => {
+                handleRemove(reference.id);
+              }}
+            />
+          )}
+        </StyledReferencesListButtons>
       </StyledReferencesListColumn>
     </React.Fragment>
   );
