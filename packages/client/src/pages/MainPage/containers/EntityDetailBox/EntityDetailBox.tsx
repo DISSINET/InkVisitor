@@ -915,29 +915,55 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                 )}
 
                 {actantMode === "resource" && (
-                  <StyledDetailContentRow>
-                    <StyledDetailContentRowLabel>
-                      URL
-                    </StyledDetailContentRowLabel>
-                    <StyledDetailContentRowValue>
-                      <Input
-                        disabled={!userCanEdit}
-                        value={entity.data.url}
-                        width="full"
-                        onChangeFn={async (newValue: string) => {
-                          const oldData = { ...entity.data };
-                          updateEntityMutation.mutate({
-                            data: {
-                              ...oldData,
-                              ...{
-                                link: newValue,
+                  <React.Fragment>
+                    <StyledDetailContentRow>
+                      <StyledDetailContentRowLabel>
+                        URL
+                      </StyledDetailContentRowLabel>
+                      <StyledDetailContentRowValue>
+                        <Input
+                          disabled={!userCanEdit}
+                          value={entity.data.url}
+                          width="full"
+                          onChangeFn={async (newValue: string) => {
+                            const oldData = { ...entity.data };
+                            updateEntityMutation.mutate({
+                              data: {
+                                ...oldData,
+                                ...{
+                                  url: newValue,
+                                },
                               },
-                            },
-                          });
-                        }}
-                      />
-                    </StyledDetailContentRowValue>
-                  </StyledDetailContentRow>
+                            });
+                          }}
+                        />
+                      </StyledDetailContentRowValue>
+                    </StyledDetailContentRow>
+
+                    <StyledDetailContentRow>
+                      <StyledDetailContentRowLabel>
+                        Part Label
+                      </StyledDetailContentRowLabel>
+                      <StyledDetailContentRowValue>
+                        <Input
+                          disabled={!userCanEdit}
+                          value={entity.data.partValueLabel}
+                          width="full"
+                          onChangeFn={async (newValue: string) => {
+                            const oldData = { ...entity.data };
+                            updateEntityMutation.mutate({
+                              data: {
+                                ...oldData,
+                                ...{
+                                  partValueLabel: newValue,
+                                },
+                              },
+                            });
+                          }}
+                        />
+                      </StyledDetailContentRowValue>
+                    </StyledDetailContentRow>
+                  </React.Fragment>
                 )}
 
                 <StyledDetailContentRow>
