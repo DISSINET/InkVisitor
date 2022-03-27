@@ -1,5 +1,9 @@
 # InkVisitor
 
+## Deployment 
+
+[![deploy staging](https://github.com/DISSINET/InkVisitor/actions/workflows/merge_to_master.yml/badge.svg?branch=dev)](https://github.com/DISSINET/InkVisitor/actions/workflows/merge_to_master.yml)
+
 ## Description
 
 InkVisitor is an open-source browser-based application for the manual entry of complex structured data from textual resources in the humanities and the social sciences. The data are entered in the form of statements, which interconnect entities of various different classes into semantic quadruples (subject, verb, object 1, object 2) following the syntactic structure of texts. InkVisitor serves as a data-entry front-end for [RethinkDB](https://rethinkdb.com/) research databases which then allow for various kinds of quantitative and computational analyses of the data to be performed.
