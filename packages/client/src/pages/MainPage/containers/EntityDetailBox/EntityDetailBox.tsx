@@ -127,12 +127,16 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
     async (changes: any) => await api.entityUpdate(detailId, changes),
     {
       onSuccess: (data, variables) => {
+        // TODO - check this
         queryClient.invalidateQueries(["entity"]);
+        queryClient.invalidateQueries("statement");
 
+        console.log(variables);
         if (statementId === detailId) {
           queryClient.invalidateQueries("statement");
         }
         if (
+          variables.references ||
           variables.detail ||
           variables.label ||
           variables.status ||
@@ -142,7 +146,6 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
             queryClient.invalidateQueries("tree");
           }
           queryClient.invalidateQueries("territory");
-          queryClient.invalidateQueries("statement");
           queryClient.invalidateQueries("bookmarks");
         }
       },
@@ -932,6 +935,30 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                                 ...oldData,
                                 ...{
                                   url: newValue,
+                                },
+                              },
+                            });
+                          }}
+                        />
+                      </StyledDetailContentRowValue>
+                    </StyledDetailContentRow>
+
+                    <StyledDetailContentRow>
+                      <StyledDetailContentRowLabel>
+                        Base URL
+                      </StyledDetailContentRowLabel>
+                      <StyledDetailContentRowValue>
+                        <Input
+                          disabled={!userCanEdit}
+                          value={entity.data.partValueBaseURL}
+                          width="full"
+                          onChangeFn={async (newValue: string) => {
+                            const oldData = { ...entity.data };
+                            updateEntityMutation.mutate({
+                              data: {
+                                ...oldData,
+                                ...{
+                                  partValueBaseURL: newValue,
                                 },
                               },
                             });
