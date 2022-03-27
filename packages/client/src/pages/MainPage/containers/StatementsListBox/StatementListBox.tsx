@@ -109,10 +109,9 @@ export const StatementListBox: React.FC = () => {
     {
       onSuccess: () => {
         toast.info(`Statement removed!`);
-        setStatementId("");
-        queryClient.invalidateQueries("territory");
-        queryClient.invalidateQueries("tree");
-        queryClient.invalidateQueries("entity");
+        queryClient.invalidateQueries("territory").then(() => {
+          setStatementId("");
+        });
       },
     }
   );
