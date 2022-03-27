@@ -93,8 +93,8 @@ jobs:
 
       - name: Create env file for client
         run: |
-          touch packages/client/env/.env.staging
-          echo "$CLIENT_ENV" >> packages/client/env/.env.staging
+          touch packages/client/env/.env.dataimport
+          echo "$CLIENT_ENV" >> packages/client/env/.env.dataimport
         env:
           CLIENT_ENV: ${{secrets.CLIENT_ENV}}
 
@@ -102,7 +102,7 @@ jobs:
         run: |
           cd packages/client
           npm install
-          npm run build-staging
+          npm run build-data-import
 
       - name: Update packages
         run: |
