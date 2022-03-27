@@ -7,6 +7,7 @@ import { EntitySuggester } from "../EntitySuggester/EntitySuggester";
 import { EntityTag } from "../EntityTag/EntityTag";
 import {
   StyledReferencesListColumn,
+  StyledReferenceValuePartLabel,
   StyledTagWrapper,
 } from "./EntityReferenceInputStyles";
 
@@ -78,6 +79,11 @@ export const EntityReferenceTableRow: React.FC<EntityReferenceTableRow> = ({
 
       {/* value */}
       <StyledReferencesListColumn>
+        {resource && resource.data.partValueLabel && (
+          <StyledReferenceValuePartLabel>
+            ({resource.data.partValueLabel})
+          </StyledReferenceValuePartLabel>
+        )}
         {value ? (
           <StyledTagWrapper>
             <EntityTag
