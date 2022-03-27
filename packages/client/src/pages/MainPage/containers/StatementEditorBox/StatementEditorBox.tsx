@@ -8,19 +8,15 @@ import {
 } from "@shared/types";
 import api from "api";
 import { Button, Input, Loader, MultiInput } from "components";
-import {
-  CProp,
-  CReference,
-  CStatementActant,
-  CStatementAction,
-} from "constructors";
+import { CProp, CStatementActant, CStatementAction } from "constructors";
 import { useSearchParams } from "hooks";
 import React, { useEffect, useMemo } from "react";
-import { FaTrashAlt, FaUnlink } from "react-icons/fa";
 import { BsInfoCircle } from "react-icons/bs";
+import { FaUnlink } from "react-icons/fa";
 import { useMutation, useQuery, useQueryClient } from "react-query";
 import { excludedSuggesterEntities } from "Theme/constants";
-import { AttributeButtonGroup } from "../AttributeButtonGroup/AttributeButtonGroup";
+import { DraggedPropRowCategory } from "types";
+import { EntityReferenceTable } from "../EntityReferenceTable/EntityReferenceTable";
 import { JSONExplorer } from "../JSONExplorer/JSONExplorer";
 import { PropGroup } from "../PropGroup/PropGroup";
 import { StatementListBreadcrumbItem } from "../StatementsListBox/StatementListHeader/StatementListBreadcrumbItem/StatementListBreadcrumbItem";
@@ -31,18 +27,14 @@ import { StatementEditorActionTable } from "./StatementEditorActionTable/Stateme
 import {
   StyledBreadcrumbWrap,
   StyledEditorActantTableWrapper,
-  StyledEditorPreSection,
   StyledEditorEmptyState,
+  StyledEditorPreSection,
   StyledEditorSection,
   StyledEditorSectionContent,
   StyledEditorSectionHeader,
   StyledTagsList,
   StyledTagsListItem,
-  StyledTagWrapper,
 } from "./StatementEditorBoxStyles";
-import { DraggedPropRowCategory } from "types";
-import { EntityReferenceTable } from "../EntityReferenceTable/EntityReferenceTable";
-import { entityReferenceSourceDict } from "@shared/dictionaries";
 
 const classesActants = [
   EntityClass.Statement,
@@ -86,7 +78,7 @@ const classesTags = [
 ];
 
 export const StatementEditorBox: React.FC = () => {
-  const { statementId, setStatementId, territoryId, setTerritoryId } =
+  const { statementId, setStatementId, detailId, territoryId, setTerritoryId } =
     useSearchParams();
 
   const queryClient = useQueryClient();
@@ -406,12 +398,16 @@ export const StatementEditorBox: React.FC = () => {
     }
   };
 
+  // MUTATIONS
   const updateStatementMutation = useMutation(
     async (changes: object) => {
       await api.entityUpdate(statementId, changes);
     },
     {
       onSuccess: (data, variables) => {
+        if (detailId === statementId) {
+          queryClient.invalidateQueries(["entity"]);
+        }
         queryClient.invalidateQueries(["statement"]);
       },
     }

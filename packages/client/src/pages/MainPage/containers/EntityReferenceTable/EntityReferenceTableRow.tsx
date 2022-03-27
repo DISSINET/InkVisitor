@@ -1,12 +1,8 @@
-import { entityReferenceSourceDict } from "@shared/dictionaries";
-import { EntityClass, EntityReferenceSource } from "@shared/enums";
-import { IEntity, IReference, IOption, IResource, IValue } from "@shared/types";
-import { Button, Dropdown, Input } from "components";
-import React, { useEffect, useState } from "react";
-import { FaPlus, FaTrashAlt, FaUnlink } from "react-icons/fa";
-import { OptionTypeBase } from "react-select";
-import { sources } from "webpack";
-import { StyledRow } from "../ActantSearchBox/ActantSearchBoxStyles";
+import { EntityClass } from "@shared/enums";
+import { IEntity, IReference } from "@shared/types";
+import { Button } from "components";
+import React from "react";
+import { FaTrashAlt, FaUnlink } from "react-icons/fa";
 import { EntitySuggester } from "../EntitySuggester/EntitySuggester";
 import { EntityTag } from "../EntityTag/EntityTag";
 import {
