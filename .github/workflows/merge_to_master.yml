@@ -40,6 +40,10 @@ jobs:
           cd packages/client
           npm install
           npm run build-staging
+          
+      - name: Update packages
+        run: |
+          sudo apt-get update
 
       - name: Install OpenVPN
         run: |
