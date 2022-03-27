@@ -996,23 +996,22 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                     />
                   </StyledDetailContentRowValue>
                 </StyledDetailContentRow>
-
-                <StyledDetailContentRow>
-                  <StyledDetailContentRowLabel>
-                    References
-                  </StyledDetailContentRowLabel>
-                  <StyledDetailContentRowValue>
-                    <EntityReferenceTable
-                      disabled={!userCanEdit}
-                      references={entity.references || []}
-                      entities={entity.entities}
-                      onChange={(newValues: IReference[]) => {
-                        updateEntityMutation.mutate({ references: newValues });
-                      }}
-                    />
-                  </StyledDetailContentRowValue>
-                </StyledDetailContentRow>
               </StyledDetailForm>
+            </StyledDetailSectionContent>
+          </StyledDetailSection>
+
+          {/* reference section */}
+          <StyledDetailSection>
+            <StyledDetailSectionHeader>References</StyledDetailSectionHeader>
+            <StyledDetailSectionContent>
+              <EntityReferenceTable
+                disabled={!userCanEdit}
+                references={entity.references || []}
+                entities={entity.entities}
+                onChange={(newValues: IReference[]) => {
+                  updateEntityMutation.mutate({ references: newValues });
+                }}
+              />
             </StyledDetailSectionContent>
           </StyledDetailSection>
 
