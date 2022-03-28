@@ -41,8 +41,8 @@ export const StyledFolderHeaderText = styled.div`
   vertical-align: text-bottom;
   font-weight: ${({ theme }) => theme.fontWeight["medium"]};
   margin-left: ${({ theme }) => theme.space[2]};
-  /* max-width: calc(100% - 5rem); */
-  max-width: 100%;
+  margin-right: ${({ theme }) => theme.space[1]};
+  width: 100%;
 
   overflow: hidden;
   white-space: nowrap;
@@ -51,14 +51,12 @@ export const StyledFolderHeaderText = styled.div`
 export const StyledFolderWrapperOpenArea = styled.div`
   cursor: pointer;
   display: inline-flex;
-  /* flex-shrink: 0; */
   overflow: hidden;
+  width: 100%;
 `;
 export const StyledFolderHeaderButtons = styled.div`
-  display: inline-flex;
-  float: right;
+  display: flex;
   align-items: start;
-  align-self: flex-end;
 `;
 export const StyledFolderContent = styled.div`
   padding: ${({ theme }) => theme.space[3]};
@@ -74,3 +72,6 @@ export const StyledFolderContentTag = styled.div`
   display: inline-block;
 `;
 export const StyledFolderSuggester = styled.div``;
+export const StyledIconWrap = styled.div`
+  width: ${({ theme }) => theme.space[7]};
+`;
