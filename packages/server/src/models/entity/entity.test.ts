@@ -169,26 +169,6 @@ describe("test Entity.update", function () {
   });
 });
 
-describe("test Entity.toJSON", function () {
-  const instance = new Entity({});
-  for (const fieldName of Entity.publicFields) {
-    (instance as any)[fieldName] = `value for ${fieldName}`;
-  }
-  const jsoned = JSON.parse(JSON.stringify(instance));
-  const newKeys = Object.keys(jsoned);
-  const newValues = Object.values(jsoned);
-
-  it("should correctly map to pub lic fields", () => {
-    expect(newKeys).toEqual(Entity.publicFields);
-  });
-
-  it("should correctly assign values", () => {
-    expect(newValues).toEqual(
-      Entity.publicFields.map((fieldName) => (instance as any)[fieldName])
-    );
-  });
-});
-
 describe("test Entity.determineOrder", function () {
   describe("when wanting already used order value", () => {
     const takenIndex = -2;
