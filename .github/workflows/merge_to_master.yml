@@ -41,6 +41,10 @@ jobs:
           npm install
           npm run build-staging
 
+      - name: Update packages
+        run: |
+          sudo apt-get update
+
       - name: Install OpenVPN
         run: |
           sudo apt install -y openvpn openvpn-systemd-resolved
@@ -65,3 +69,66 @@ jobs:
 
       - name: Deploy frontend
         run: ./deploy-frontend-staging.sh ${{ secrets.SSH_USER }} ${{ secrets.SSH_HOST }}
+
+  dataimportdeploy:
+    name: Deploy to data-import environment
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout InkVisitor
+        uses: actions/checkout@v2
+
+      - name: Install SSH Key
+        uses: shimataro/ssh-key-action@v2
+        with:
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          known_hosts: ${{ secrets.KNOWN_HOSTS }}
+
+      - name: Create env file for server
+        run: |
+          touch packages/server/env/.env.data-import
+          echo "$SERVER_ENV" >> packages/server/env/.env.data-import
+        env:
+          SERVER_ENV: ${{secrets.SERVER_ENV_DATAIMPORT}}
+
+      - name: Create env file for client
+        run: |
+          touch packages/client/env/.env.data-import
+          echo "$CLIENT_ENV" >> packages/client/env/.env.data-import
+        env:
+          CLIENT_ENV: ${{secrets.CLIENT_ENV_DATAIMPORT}}
+
+      - name: Build client
+        run: |
+          cd packages/client
+          npm install
+          npm run build-data-import
+
+      - name: Update packages
+        run: |
+          sudo apt-get update
+
+      - name: Install OpenVPN
+        run: |
+          sudo apt install -y openvpn openvpn-systemd-resolved
+
+      - name: Prepare OpenVPN creds file
+        run: |
+          touch pass.txt
+          echo ${{ secrets.VPN_USER }} >> pass.txt
+          echo ${{ secrets.VPN_PASS }} >> pass.txt
+
+      - name: Pull OpenVPN Config
+        run: |
+          curl https://it.muni.cz/media/3240842/muni-linux.ovpn -o muni-linux.ovpn
+
+      - name: Connect to VPN and deploy
+        run: |
+          sudo openvpn --config muni-linux.ovpn --auth-user-pass pass.txt --daemon
+          sleep 20s
+
+      - name: Deploy backend
+        run: ./deploy-backend-data-import.sh ${{ secrets.SSH_USER }} ${{ secrets.SSH_HOST }}
+
+      - name: Deploy frontend
+        run: ./deploy-frontend-data-import.sh ${{ secrets.SSH_USER }} ${{ secrets.SSH_HOST }}

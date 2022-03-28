@@ -3,7 +3,7 @@ import {
   IProp,
   IStatementActant,
   IStatementAction,
-  IStatementReference,
+  IReference,
 } from "@shared/types";
 import React from "react";
 import { ColumnInstance, Row } from "react-table";
@@ -13,6 +13,7 @@ import { StatementListRowExpandedPropGroup } from "./StatementListRowExpandedPro
 import {
   StyledActantGroup,
   StyledActantWrap,
+  StyledReferenceWrap,
   StyledSubRow,
 } from "./StatementListRowExpandedStyles";
 import { StyledPropRow } from "./StatementListRowExpandedStyles";
@@ -27,6 +28,30 @@ export const StatementListRowExpanded: React.FC<StatementListRowExpanded> = ({
   visibleColumns,
   entities,
 }) => {
+  const renderReference = (
+    referenceId: string,
+    valueId: string,
+    key: number
+  ) => {
+    return (
+      <React.Fragment key={key}>
+        {referenceId && (
+          <StyledReferenceWrap key={key}>
+            <EntityTag
+              actant={entities[referenceId]}
+              tooltipPosition="bottom center"
+              // fullWidth
+            />
+            <EntityTag
+              actant={entities[valueId]}
+              tooltipPosition="bottom center"
+              // fullWidth
+            />
+          </StyledReferenceWrap>
+        )}
+      </React.Fragment>
+    );
+  };
   const renderListActant = (actantId: string, key: number) => {
     return (
       <React.Fragment key={key}>
@@ -93,13 +118,11 @@ export const StatementListRowExpanded: React.FC<StatementListRowExpanded> = ({
       actions,
       actants,
       text,
-      references,
       tags: tagIds,
     }: {
       actions: IStatementAction[];
       actants: IStatementActant[];
       text: string;
-      references: IStatementReference[];
       tags: string[];
     } = row.original.data;
 
@@ -136,9 +159,7 @@ export const StatementListRowExpanded: React.FC<StatementListRowExpanded> = ({
       });
 
     // REFERENCES
-    const referenceObjects: IEntity[] = references.map(
-      (r: any) => entities[r.resource]
-    );
+    const references: IReference[] = row.original.references;
 
     // TAGS
     const tagObjects: IEntity[] = tagIds.map((t) => entities[t]);
@@ -186,11 +207,11 @@ export const StatementListRowExpanded: React.FC<StatementListRowExpanded> = ({
               </StyledPropRow>
             ))}
           </StyledActantGroup>
-          {referenceObjects.map((reference, key) => (
+          {references.map((reference, key) => (
             <StyledPropRow level={1} key={key}>
               <BsArrowReturnRight size="20" />
               <span>&nbsp;&nbsp;(reference)&nbsp;&nbsp;</span>
-              {renderListActant(reference.id, key)}
+              {renderReference(reference.resource, reference.value, key)}
             </StyledPropRow>
           ))}
           {tagObjects.map((tag, key) => (

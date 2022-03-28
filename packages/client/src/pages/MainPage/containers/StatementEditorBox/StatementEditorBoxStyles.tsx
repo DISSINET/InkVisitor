@@ -141,18 +141,6 @@ export const StyledPropLineColumn = styled(
   overflow: ${({ isTag }) => (isTag ? "hidden" : "visible")};
 `;
 
-// references
-interface StyledReferencesList {}
-export const StyledReferencesList = styled(StyledGrid)<StyledReferencesList>`
-  grid-template-columns: auto auto auto auto;
-  /* width: 50rem; */
-`;
-
-interface StyledReferencesListColumn {}
-export const StyledReferencesListColumn = styled(
-  StyledGridCell
-)<StyledReferencesListColumn>``;
-
 // tags
 interface StyledTagsList {}
 export const StyledTagsList = styled.div<StyledTagsList>`

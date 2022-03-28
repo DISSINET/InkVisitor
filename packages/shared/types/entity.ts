@@ -5,6 +5,7 @@ import {
   EntityStatus,
   Language,
 } from "../enums";
+import { IReference } from "./reference";
 
 export interface IEntity {
   id: string;
@@ -17,14 +18,8 @@ export interface IEntity {
   language: Language;
   notes: string[];
   props: IProp[];
-  references: IEntityReference[];
+  references: IReference[];
   isTemplate?: boolean;
   usedTemplate?: boolean;
   templateData?: object;
-}
-
-export interface IEntityReference {
-  id: string;
-  source: EntityReferenceSource;
-  value: string;
 }

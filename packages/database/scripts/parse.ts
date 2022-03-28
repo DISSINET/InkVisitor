@@ -391,6 +391,20 @@ const loadStatementsTables = async (next: Function) => {
       data.forEach((statement: any, si: number) => {
         // the main statement
 
+        // create reference value entities
+        const value1Id = v4();
+        const value2Id = v4();
+        addEntity(
+          value1Id,
+          statement.primary_reference_part,
+          EntityClass.Value
+        );
+        addEntity(
+          value2Id,
+          statement.secondary_reference_part,
+          EntityClass.Value
+        );
+
         // parse the statement id but keep the order somehow sorted
         const mainStatement: IStatement = {
           id: v4(),
@@ -416,30 +430,27 @@ const loadStatementsTables = async (next: Function) => {
               id: statement.text_part_id,
               order: si,
             },
-            references: [
-              {
-                id: v4(),
-                resource: statement.primary_reference_id,
-                part: statement.primary_reference_part,
-                type: "P",
-              },
-              {
-                id: v4(),
-                resource: statement.secondary_reference_id,
-                part: statement.secondary_reference_part,
-                type: "S",
-              },
-            ],
             tags: statement.tags_id.split(" #").filter((t: string) => t),
             text: statement.text,
             actants: [],
           },
+          references: [
+            {
+              id: v4(),
+              resource: statement.primary_reference_id,
+              value: value1Id,
+            },
+            {
+              id: v4(),
+              resource: statement.secondary_reference_id,
+              value: value2Id,
+            },
+          ],
           notes: [],
           label: statement.id,
           detail: "",
           language: Language.Latin,
           status: EntityStatus.Approved,
-          references: [],
           isTemplate: false,
         };
 
@@ -644,7 +655,9 @@ const addResourceActant = (id: string, label: string) => {
       id,
       class: EntityClass.Resource,
       data: {
-        link: "",
+        url: "",
+        partValueLabel: "",
+        partValueBaseURL: "",
       },
       label: label.trim(),
       detail: "",
@@ -741,7 +754,6 @@ const createEmptyPropStatement = (
           id: territory,
           order: order,
         },
-        references: [],
         tags: [],
         text: "",
         actants: [

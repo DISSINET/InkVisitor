@@ -4,6 +4,8 @@ import { IEntity } from "./entity";
 export interface IResource extends IEntity {
   class: EntityClass.Resource;
   data: {
-    link: string;
+    url: string;
+    partValueLabel: string;
+    partValueBaseURL: string;
   };
 }

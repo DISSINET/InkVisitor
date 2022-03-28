@@ -1,9 +1,6 @@
 #!/bin/bash
-echo -n "Enter your name and press [ENTER]: "
-read username
-
-echo -n "Enter host [ENTER]: "
-read host
+username=$1
+host=$2
 
 # use rsync
 scp -r packages/client/dist/* ${username}@${host}:/var/www/html/apps/inkvisitor-data-import
