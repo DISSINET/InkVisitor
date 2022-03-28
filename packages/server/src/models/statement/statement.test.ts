@@ -1,9 +1,5 @@
 import "ts-jest";
-import Statement, {
-  StatementActant,
-  StatementAction,
-  StatementReference,
-} from "./statement";
+import Statement, { StatementActant, StatementAction } from "./statement";
 import { Db } from "@service/RethinkDB";
 import { deleteEntities, findEntityById } from "@service/shorthands";
 import Territory from "@models/territory/territory";
@@ -265,27 +261,6 @@ describe("findDependentStatementIds", function () {
     });
   });
 
-  describe("one territory, one linked statement via references.resource field", () => {
-    it("should return empty array", async () => {
-      const territory = new Territory(undefined);
-      await territory.save(db.connection);
-
-      const statement = new Statement(
-        JSON.parse(JSON.stringify(baseStatementData))
-      );
-      statement.data.references = [
-        new StatementReference({ resource: territory.id }),
-      ];
-      await statement.save(db.connection);
-
-      const statements = await Statement.findUsedInDataEntities(
-        db.connection,
-        territory.id
-      );
-      expect(statements).toHaveLength(1);
-    });
-  });
-
   describe("one territory, one linked statement via territory.id field", () => {
     it("should return empty array", async () => {
       const territory = new Territory(undefined);
@@ -305,7 +280,7 @@ describe("findDependentStatementIds", function () {
     });
   });
 
-  describe("one territory, two linked statement via references.resource and tags respectively", () => {
+  describe("one territory, two linked statement via territory.id and tags respectively", () => {
     it("should return empty array", async () => {
       const territory = new Territory(undefined);
       await territory.save(db.connection);
@@ -314,9 +289,7 @@ describe("findDependentStatementIds", function () {
       const statement1 = new Statement(
         JSON.parse(JSON.stringify(baseStatementData))
       );
-      statement1.data.references = [
-        new StatementReference({ resource: territory.id }),
-      ];
+      statement1.data.territory.id = territory.id;
       await statement1.save(db.connection);
 
       // second statement linked via tags array
@@ -344,9 +317,7 @@ describe("findDependentStatementIds", function () {
         JSON.parse(JSON.stringify(baseStatementData))
       );
       statement1.data.tags = [territory.id];
-      statement1.data.references = [
-        new StatementReference({ resource: territory.id }),
-      ];
+      statement1.data.territory.id = territory.id;
 
       // second statement is the same
       const statement2 = new Statement(JSON.parse(JSON.stringify(statement1)));
@@ -622,26 +593,6 @@ describe("Statement - findMetaStatements", function () {
 
       done();
     });
-  });
-});
-
-describe("test Statement.toJSON", function () {
-  const instance = new Statement({});
-  for (const fieldName of Statement.publicFields) {
-    (instance as any)[fieldName] = `value for ${fieldName}`;
-  }
-  const jsoned = JSON.parse(JSON.stringify(instance));
-  const newKeys = Object.keys(jsoned);
-  const newValues = Object.values(jsoned);
-
-  it("should correctly map to public fields", () => {
-    expect(newKeys).toEqual(Statement.publicFields);
-  });
-
-  it("should correctly assign values", () => {
-    expect(newValues).toEqual(
-      Statement.publicFields.map((fieldName) => (instance as any)[fieldName])
-    );
   });
 });
 
