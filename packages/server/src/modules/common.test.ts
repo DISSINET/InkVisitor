@@ -8,6 +8,7 @@ import {
   Certainty,
   Elvl,
   EntityClass,
+  EntityStatus,
   Language,
   Logic,
   Mood,
@@ -50,6 +51,7 @@ function getRandomFromArray<T>(input: T[]): T {
 
 export function getITerritoryMock(): ITerritory {
   const fullData: ITerritory = {
+    status: EntityStatus.Approved,
     id: "id",
     detail: "detail",
     language: Language.Latin,
@@ -60,6 +62,7 @@ export function getITerritoryMock(): ITerritory {
     },
     props: [],
     class: EntityClass.Territory,
+    references: [],
   };
 
   return fullData;
@@ -88,7 +91,6 @@ export function getIStatementMock(): IStatement {
     data: {
       actions: [],
       actants: [],
-      references: [],
       tags: [],
       territory: {
         id: "id",
@@ -100,6 +102,8 @@ export function getIStatementMock(): IStatement {
     detail: "",
     language: Language.Czech,
     notes: [],
+    status: EntityStatus.Approved,
+    references: [],
   };
   return fullData;
 }

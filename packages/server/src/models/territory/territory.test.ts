@@ -141,10 +141,10 @@ describe("Territory - save territory", function () {
 
       const createdData = await findEntityById<ITerritory>(db, territory.id);
       expect((createdData.data.parent as any).id).toEqual(
-        (territory.data.parent as any).id,
+        (territory.data.parent as any).id
       );
       expect((createdData.data.parent as any).order).toEqual(
-        (territory.data.parent as any).order,
+        (territory.data.parent as any).order
       );
       done();
     });
@@ -323,23 +323,3 @@ describe("Territory - test getClosestRight", function () {
   });
 });
 */
-
-describe("test Territory.toJSON", function () {
-  const instance = new Territory({});
-  for (const fieldName of Territory.publicFields) {
-    (instance as any)[fieldName] = `value for ${fieldName}`;
-  }
-  const jsoned = JSON.parse(JSON.stringify(instance));
-  const newKeys = Object.keys(jsoned);
-  const newValues = Object.values(jsoned);
-
-  it("should correctly map to public fields", () => {
-    expect(newKeys).toEqual(Territory.publicFields);
-  });
-
-  it("should correctly assign values", () => {
-    expect(newValues).toEqual(
-      Territory.publicFields.map((fieldName) => (instance as any)[fieldName])
-    );
-  });
-});

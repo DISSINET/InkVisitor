@@ -1,10 +1,5 @@
 import { IProp } from ".";
-import {
-  EntityClass,
-  EntityReferenceSource,
-  EntityStatus,
-  Language,
-} from "../enums";
+import { EntityClass, EntityStatus, Language } from "../enums";
 import { IReference } from "./reference";
 
 export interface IEntity {
