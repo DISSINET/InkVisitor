@@ -195,7 +195,7 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
               <StyledHeaderTag>
                 v. {packageJson.version}{" "}
                 {["production", ""].indexOf(environmentName) === -1
-                  ? `| ${environmentName}`
+                  ? `| ${environmentName} | built: ${process.env.BUILD_TIMESTAMP}`
                   : ""}
               </StyledHeaderTag>
             </StyledHeader>
