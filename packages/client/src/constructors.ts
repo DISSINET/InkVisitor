@@ -1,31 +1,28 @@
 import {
-  IProp,
-  IStatementActant,
-  IStatementAction,
-  IEntity,
-  ITerritory,
-  IStatement,
-  IBookmarkFolder,
-  IStatementReference,
-  IEntityReference,
-} from "@shared/types";
-import {
   Certainty,
   Elvl,
+  EntityClass,
+  EntityStatus,
+  Language,
+  Logic,
   Mood,
   MoodVariant,
   Operator,
-  Logic,
-  Virtuality,
   Partitivity,
   Position,
   UserRole,
-  Language,
-  EntityClass,
-  ReferenceType,
-  EntityStatus,
-  EntityReferenceSource,
+  Virtuality,
 } from "@shared/enums";
+import {
+  IBookmarkFolder,
+  IEntity,
+  IProp,
+  IReference,
+  IStatement,
+  IStatementActant,
+  IStatementAction,
+  ITerritory,
+} from "@shared/types";
 import { v4 as uuidv4 } from "uuid";
 
 export const CBookmarkFolder = (bookmarkName: string): IBookmarkFolder => ({
@@ -82,7 +79,6 @@ export const CStatement = (
       order: -1,
     },
     actants: [],
-    references: [],
     tags: [],
   },
   props: [],
@@ -99,7 +95,7 @@ export const DStatement = (statement: IStatement): IStatement => {
 
   duplicatedStatement.data.actants.map((a) => (a.id = uuidv4()));
   duplicatedStatement.props.map((p) => (p.id = uuidv4()));
-  duplicatedStatement.data.references.map((r) => (r.id = uuidv4()));
+  duplicatedStatement.references.map((r) => (r.id = uuidv4()));
 
   if (duplicatedStatement.data.territory) {
     duplicatedStatement.data.territory.order += 0.00001;
@@ -184,18 +180,11 @@ export const CEntity = (
   };
 };
 
-export const CReference = (resourceId: string): IStatementReference => ({
+export const CReference = (
+  resourceId: string = "",
+  valueId: string = ""
+): IReference => ({
   id: uuidv4(),
   resource: resourceId,
-  part: "",
-  type: ReferenceType.Primary,
-});
-
-export const CEntityReference = (
-  source: EntityReferenceSource = EntityReferenceSource.WordNet,
-  value: string = ""
-): IEntityReference => ({
-  id: uuidv4(),
-  source: source,
-  value: value,
+  value: valueId,
 });

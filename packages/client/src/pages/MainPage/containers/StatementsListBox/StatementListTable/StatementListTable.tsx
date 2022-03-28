@@ -28,6 +28,7 @@ export const StatementListTable: React.FC<StatementListTable> = ({
   const getRowId = useCallback((row) => {
     return row.id;
   }, []);
+
   const {
     getTableProps,
     getTableBodyProps,
