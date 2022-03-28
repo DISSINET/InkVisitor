@@ -32,27 +32,33 @@ export const StyledFolderWrapper = styled.div`
 export const StyledFolderHeader = styled.div`
   width: 100%;
   height: ${({ theme }) => theme.space[14]};
-  display: inline-block;
+  display: inline-flex;
+  overflow: hidden;
   color: ${({ theme }) => theme.color["gray"][700]};
   padding: ${({ theme }) => theme.space[3]};
 `;
-export const StyledFolderHeaderText = styled.span`
+export const StyledFolderHeaderText = styled.div`
   vertical-align: text-bottom;
   font-weight: ${({ theme }) => theme.fontWeight["medium"]};
   margin-left: ${({ theme }) => theme.space[2]};
-  max-width: calc(100% - 5em);
+  /* max-width: calc(100% - 5rem); */
+  max-width: 100%;
+
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
 `;
-export const StyledFolderWrapperOpenArea = styled.span`
+export const StyledFolderWrapperOpenArea = styled.div`
   cursor: pointer;
-  display: inline-block;
+  display: inline-flex;
+  /* flex-shrink: 0; */
+  overflow: hidden;
 `;
 export const StyledFolderHeaderButtons = styled.div`
-  display: inline-block;
+  display: inline-flex;
   float: right;
   align-items: start;
+  align-self: flex-end;
 `;
 export const StyledFolderContent = styled.div`
   padding: ${({ theme }) => theme.space[3]};
