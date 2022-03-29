@@ -42,6 +42,7 @@ import {
   StyledFolderWrapper,
   StyledFolderWrapperOpenArea,
   StyledHeader,
+  StyledIconWrap,
 } from "./EntityBookmarkBoxStyles";
 import { EntityBookmarkFolderTable } from "./EntityBookmarkFolderTable/EntityBookmarkFolderTable";
 
@@ -297,21 +298,23 @@ export const EntityBookmarkBox: React.FC = () => {
                   }}
                 >
                   <StyledFolderWrapperOpenArea>
-                    {(() => {
-                      if (open) {
-                        if (empty) {
-                          return <FaRegFolderOpen />;
+                    <StyledIconWrap>
+                      {(() => {
+                        if (open) {
+                          if (empty) {
+                            return <FaRegFolderOpen />;
+                          } else {
+                            return <FaFolderOpen />;
+                          }
                         } else {
-                          return <FaFolderOpen />;
+                          if (empty) {
+                            return <FaRegFolder />;
+                          } else {
+                            return <FaFolder />;
+                          }
                         }
-                      } else {
-                        if (empty) {
-                          return <FaRegFolder />;
-                        } else {
-                          return <FaFolder />;
-                        }
-                      }
-                    })()}
+                      })()}
+                    </StyledIconWrap>
                     <StyledFolderHeaderText>
                       {bookmarkFolder.name}
                     </StyledFolderHeaderText>

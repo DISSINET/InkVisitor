@@ -35,6 +35,11 @@ jobs:
         env:
           CLIENT_ENV: ${{secrets.CLIENT_ENV}}
 
+      - name: Add timestamp for the client
+        run: |
+          TZ=":Europe/Prague"
+          echo "BUILD_TIMESTAMP=$(date +'%a %d.%m.%Y %H:%M')" >> packages/client/env/.env.staging
+
       - name: Build client
         run: |
           cd packages/client
@@ -97,6 +102,11 @@ jobs:
           echo "$CLIENT_ENV" >> packages/client/env/.env.data-import
         env:
           CLIENT_ENV: ${{secrets.CLIENT_ENV_DATAIMPORT}}
+
+      - name: Add timestamp for the client
+        run: |
+          TZ=":Europe/Prague"
+          echo "BUILD_TIMESTAMP=$(date +'%a %d.%m.%Y %H:%M')" >> packages/client/env/.env.data-import
 
       - name: Build client
         run: |
