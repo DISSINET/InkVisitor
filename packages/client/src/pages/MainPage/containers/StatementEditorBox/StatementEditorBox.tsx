@@ -26,7 +26,7 @@ import {
 } from "components";
 import { CProp, CStatementActant, CStatementAction } from "constructors";
 import { useSearchParams } from "hooks";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { BsInfoCircle } from "react-icons/bs";
 import { FaUnlink } from "react-icons/fa";
 import { useMutation, useQuery, useQueryClient } from "react-query";
@@ -471,25 +471,26 @@ export const StatementEditorBox: React.FC = () => {
     return actants;
   };
 
-  const movePropToIndex = (
-    propId: string,
-    oldIndex: number,
-    newIndex: number
-  ) => {
-    if (statement) {
-      const { actions, actants, ...dataWithoutActants } = statement.data;
-      changeOrder(propId, actions, oldIndex, newIndex);
-      changeOrder(propId, actants, oldIndex, newIndex);
+  const movePropToIndex = useCallback(
+    (propId: string, oldIndex: number, newIndex: number) => {
+      console.log("here");
+      if (statement) {
+        console.log("inside");
+        const { actions, actants, ...dataWithoutActants } = statement.data;
+        changeOrder(propId, actions, oldIndex, newIndex);
+        changeOrder(propId, actants, oldIndex, newIndex);
 
-      const newStatementData = {
-        actions,
-        actants,
-        ...dataWithoutActants,
-      };
+        const newStatementData = {
+          actions,
+          actants,
+          ...dataWithoutActants,
+        };
 
-      updateStatementDataMutation.mutate(newStatementData);
-    }
-  };
+        updateStatementDataMutation.mutate(newStatementData);
+      }
+    },
+    [statement]
+  );
 
   //tags
   const addTag = (tagId: string) => {
@@ -575,33 +576,36 @@ export const StatementEditorBox: React.FC = () => {
     }
   );
 
-  const renderPropGroup = (
-    originId: string,
-    props: IProp[],
-    statement: IResponseStatement,
-    category: DraggedPropRowCategory
-  ) => {
-    const originActant = statement.entities[originId];
+  const renderPropGroup = useCallback(
+    (
+      originId: string,
+      props: IProp[],
+      statement: IResponseStatement,
+      category: DraggedPropRowCategory
+    ) => {
+      const originActant = statement.entities[originId];
 
-    if (props.length > 0) {
-      return (
-        <PropGroup
-          key={JSON.stringify(statement)}
-          originId={originActant ? originActant.id : ""}
-          entities={statement.entities}
-          props={props}
-          territoryId={territoryId}
-          updateProp={updateProp}
-          removeProp={removeProp}
-          addProp={addProp}
-          movePropToIndex={movePropToIndex}
-          userCanEdit={userCanEdit}
-          openDetailOnCreate={false}
-          category={category}
-        />
-      );
-    }
-  };
+      if (props.length > 0) {
+        return (
+          <PropGroup
+            // key={JSON.stringify(statement)}
+            originId={originActant ? originActant.id : ""}
+            entities={statement.entities}
+            props={props}
+            territoryId={territoryId}
+            updateProp={updateProp}
+            removeProp={removeProp}
+            addProp={addProp}
+            movePropToIndex={movePropToIndex}
+            userCanEdit={userCanEdit}
+            openDetailOnCreate={false}
+            category={category}
+          />
+        );
+      }
+    },
+    [statement]
+  );
 
   const moveStatementMutation = useMutation(
     async (newTerritoryId: string) => {
