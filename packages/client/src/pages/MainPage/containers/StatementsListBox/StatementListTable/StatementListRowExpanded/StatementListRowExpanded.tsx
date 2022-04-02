@@ -70,7 +70,7 @@ export const StatementListRowExpanded: React.FC<StatementListRowExpanded> = ({
             <EntityTag
               actant={entities[actantId]}
               tooltipPosition="bottom center"
-              // fullWidth
+              fullWidth
             />
           </StyledActantWrap>
         )}
@@ -93,33 +93,39 @@ export const StatementListRowExpanded: React.FC<StatementListRowExpanded> = ({
 
   const renderFirstLevelProps = (props: IProp[]) => {
     return (
-      <StatementListRowExpandedPropGroup
-        level={1}
-        props={props}
-        entities={entities}
-        renderChildrenPropRow={renderSecondLevelProps}
-      />
+      <div style={{ display: "grid" }}>
+        <StatementListRowExpandedPropGroup
+          level={1}
+          props={props}
+          entities={entities}
+          renderChildrenPropRow={renderSecondLevelProps}
+        />
+      </div>
     );
   };
 
   const renderSecondLevelProps = (props: IProp[]) => {
     return (
-      <StatementListRowExpandedPropGroup
-        level={2}
-        props={props}
-        entities={entities}
-        renderChildrenPropRow={renderThirdLevelProps}
-      />
+      <div style={{ display: "grid" }}>
+        <StatementListRowExpandedPropGroup
+          level={2}
+          props={props}
+          entities={entities}
+          renderChildrenPropRow={renderThirdLevelProps}
+        />
+      </div>
     );
   };
 
   const renderThirdLevelProps = (props: IProp[]) => {
     return (
-      <StatementListRowExpandedPropGroup
-        level={3}
-        props={props}
-        entities={entities}
-      />
+      <div style={{ display: "grid" }}>
+        <StatementListRowExpandedPropGroup
+          level={3}
+          props={props}
+          entities={entities}
+        />
+      </div>
     );
   };
 
@@ -257,9 +263,7 @@ export const StatementListRowExpanded: React.FC<StatementListRowExpanded> = ({
 
   return (
     <tr>
-      <td colSpan={visibleColumns.length + 1}>
-        {renderRowSubComponent({ row })}
-      </td>
+      <td colSpan={visibleColumns.length}>{renderRowSubComponent({ row })}</td>
     </tr>
   );
 };
