@@ -17,6 +17,7 @@ import {
   StyledSubRow,
 } from "./StatementListRowExpandedStyles";
 import { StyledPropRow } from "./StatementListRowExpandedStyles";
+import { EmptyTag } from "pages/MainPage/containers";
 
 interface StatementListRowExpanded {
   row: Row;
@@ -29,26 +30,30 @@ export const StatementListRowExpanded: React.FC<StatementListRowExpanded> = ({
   entities,
 }) => {
   const renderReference = (
-    referenceId: string,
+    resourceId: string,
     valueId: string,
     key: number
   ) => {
     return (
       <React.Fragment key={key}>
         <StyledReferenceWrap key={key}>
-          {referenceId && (
+          {resourceId ? (
             <EntityTag
-              actant={entities[referenceId]}
+              actant={entities[resourceId]}
               tooltipPosition="bottom center"
               // fullWidth
             />
+          ) : (
+            <EmptyTag label="resource" />
           )}
-          {valueId && (
+          {valueId ? (
             <EntityTag
               actant={entities[valueId]}
               tooltipPosition="bottom center"
               // fullWidth
             />
+          ) : (
+            <EmptyTag label="value" />
           )}
         </StyledReferenceWrap>
       </React.Fragment>
