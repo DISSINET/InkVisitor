@@ -35,20 +35,22 @@ export const StatementListRowExpanded: React.FC<StatementListRowExpanded> = ({
   ) => {
     return (
       <React.Fragment key={key}>
-        {referenceId && (
-          <StyledReferenceWrap key={key}>
+        <StyledReferenceWrap key={key}>
+          {referenceId && (
             <EntityTag
               actant={entities[referenceId]}
               tooltipPosition="bottom center"
               // fullWidth
             />
+          )}
+          {valueId && (
             <EntityTag
               actant={entities[valueId]}
               tooltipPosition="bottom center"
               // fullWidth
             />
-          </StyledReferenceWrap>
-        )}
+          )}
+        </StyledReferenceWrap>
       </React.Fragment>
     );
   };
