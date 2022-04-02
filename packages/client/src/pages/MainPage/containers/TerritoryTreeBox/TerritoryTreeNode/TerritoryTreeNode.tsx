@@ -278,7 +278,6 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
                     propId={propId}
                     index={index}
                     fullWidth
-                    enableTooltip
                     moveFn={moveFn}
                     updateOrderFn={moveTerritoryMutation.mutate}
                     statementsCount={statementsCount}
