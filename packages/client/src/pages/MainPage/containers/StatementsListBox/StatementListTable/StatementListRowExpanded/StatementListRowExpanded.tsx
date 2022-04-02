@@ -210,11 +210,15 @@ export const StatementListRowExpanded: React.FC<StatementListRowExpanded> = ({
             ))}
           </StyledActantGroup>
           {references.map((reference, key) => (
-            <StyledPropRow level={1} key={key}>
-              <BsArrowReturnRight size="20" />
-              <span>&nbsp;&nbsp;(reference)&nbsp;&nbsp;</span>
-              {renderReference(reference.resource, reference.value, key)}
-            </StyledPropRow>
+            <React.Fragment key={key}>
+              {(reference.value || reference.resource) && (
+                <StyledPropRow level={1}>
+                  <BsArrowReturnRight size="20" />
+                  <span>&nbsp;&nbsp;(reference)&nbsp;&nbsp;</span>
+                  {renderReference(reference.resource, reference.value, key)}
+                </StyledPropRow>
+              )}
+            </React.Fragment>
           ))}
           {tagObjects.map((tag, key) => (
             <StyledPropRow level={1} key={key}>
