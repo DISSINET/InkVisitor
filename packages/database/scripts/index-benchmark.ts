@@ -48,169 +48,6 @@ const config = {
   password: process.env.DB_AUTH,
 };
 
-const importData = async () => {
-  try {
-    // Drop the database.
-    try {
-      await r.dbDrop(config.db).run(conn);
-      console.log("database dropped");
-    } catch (e) {
-      console.log("database not dropped");
-    }
-
-    // Recreate the database
-    try {
-      await r.dbCreate(config.db).run(conn);
-      console.log("database created");
-    } catch (e) {
-      console.log("database not created");
-    }
-
-    for (const tableName of [indexedTable, unindexedTable]) {
-      await r.tableCreate(tableName).run(conn);
-
-      if (tableName == indexedTable) {
-        await r.table(indexedTable).indexCreate("class").run(conn);
-        await r.table(indexedTable).indexCreate("label").run(conn);
-        await r
-          .table(indexedTable)
-          .indexCreate("data.actants.actant", function (actant: any) {
-            return actant("data")("actants").map(function (a: any) {
-              return a("actant");
-            });
-          })
-          .run(conn);
-        await r
-          .table(indexedTable)
-          .indexCreate("data.parent.id", function (actant: any) {
-            return actant("data")("parent")("id");
-          })
-          .run(conn);
-        await r
-          .table(indexedTable)
-          .indexCreate(
-            "actantOrActionStatement",
-            function (row: any) {
-              return row("data")("actants").map(function (actant: any) {
-                return row("data")("actions").map(function (action: any) {
-                  return [actant("actant"), action("action")];
-                });
-              });
-            },
-            { multi: true }
-          )
-          .run(conn);
-      }
-
-      for (let i = 0; i < 100; i++) {
-        const entry: IStatement = {
-          class: EntityClass.Statement,
-          detail: "",
-          id: i.toString(),
-          label: "",
-          language: Language.Latin,
-          notes: [],
-          props: [],
-          data: {
-            actants: [
-              {
-                actant: "actant" + i.toString(),
-                bundleEnd: false,
-                bundleStart: false,
-                elvl: Elvl.Inferential,
-                id: i.toString(),
-                logic: Logic.Negative,
-                operator: Operator.And,
-                partitivity: Partitivity.DiscreteParts,
-                position: Position.Actant1,
-                virtuality: Virtuality.Allegation,
-                props: [],
-              },
-            ],
-            actions: [
-              {
-                action: "action" + i.toString(),
-                bundleEnd: false,
-                bundleStart: false,
-                certainty: Certainty.AlmostCertain,
-                elvl: Elvl.Inferential,
-                id: i.toString(),
-                logic: Logic.Negative,
-                mood: [Mood.Indication],
-                moodvariant: MoodVariant.Irrealis,
-                operator: Operator.And,
-                props: [],
-              },
-            ],
-            references: [],
-            tags: [`tag${i}`],
-            territory: {
-              id: "ha",
-              order: 0,
-            },
-            text: "text",
-          },
-        };
-        await r.table(tableName).insert(entry).run(conn);
-      }
-
-      for (let i = 5000; i < 5100; i++) {
-        const entry: ITerritory = {
-          class: EntityClass.Territory,
-          detail: "",
-          id: i.toString(),
-          label: "",
-          language: Language.Latin,
-          notes: [],
-          props: [],
-          data: {
-            parent: {
-              id: "parent" + i.toString(),
-              order: 0,
-            },
-          },
-        };
-        await r.table(tableName).insert(entry).run(conn);
-
-        // parentless
-        const entry2: ITerritory = {
-          class: EntityClass.Territory,
-          detail: "",
-          id: i.toString(),
-          label: "",
-          language: Language.Latin,
-          notes: [],
-          props: [],
-          data: {
-            parent: false,
-          },
-        };
-        await r.table(tableName).insert(entry2).run(conn);
-      }
-
-      for (let i = 20000; i < 20010; i++) {
-        const entry: IResource = {
-          class: EntityClass.Resource,
-          props: [],
-          data: {
-            link: "wdew",
-          },
-          detail: "",
-          id: i.toString(),
-          label: "",
-          language: Language.Latin,
-          notes: [],
-        };
-        await r.table(tableName).insert(entry).run(conn);
-      }
-    }
-  } catch (error) {
-    console.log(error);
-  } finally {
-    console.log("closing connection");
-  }
-};
-
 const testClass = async () => {
   let start = performance.now();
   let items = await r
@@ -234,27 +71,41 @@ const testClass = async () => {
 const testActantsActant = async () => {
   let start = performance.now();
 
-  await r.table(indexedTable).getAll("100", "data.actants.actant").run(conn);
+  const example = await r
+    .table(indexedTable)
+    .filter({ class: EntityClass.Statement })
+    .run(conn);
+
+  const exampleActantsActant = (example as any)[0].data.actants[0].actant;
+
+  const foundInIndex = await r
+    .table(indexedTable)
+    .getAll(exampleActantsActant, { index: "data.actants.actant" })
+    .run(conn);
 
   let end = performance.now();
   console.log(
-    `testActantsActant(${indexedTable}) took ${end - start} milliseconds.`
+    `Indexed took ${end - start} milliseconds. Found ${
+      foundInIndex ? (foundInIndex as any[]).length : 0
+    } items`
   );
 
   start = performance.now();
 
-  await r
-    .table(unindexedTable)
+  const foundInNotIndex = await r
+    .table(indexedTable)
     .filter(function (user: any) {
       return user("data")("actants").contains((labelObj: any) =>
-        labelObj("actant").eq("100")
+        labelObj("actant").eq(exampleActantsActant)
       );
     })
     .run(conn);
 
   end = performance.now();
   console.log(
-    `testActantsActant(${unindexedTable}) took ${end - start} milliseconds.`
+    `Unindexed took ${end - start} milliseconds. Found ${
+      foundInNotIndex ? (foundInNotIndex as any[]).length : 0
+    } items`
   );
 };
 
@@ -340,10 +191,9 @@ const testActantOrActionStatement = async () => {
   // set default database
   conn.use(config.db);
 
-  await importData();
-  await testClass();
+  //await testClass();
   await testActantsActant();
-  await testActantOrActionStatement();
-  await testParentId();
+  //await testActantOrActionStatement();
+  //await testParentId();
   await conn.close();
 })();

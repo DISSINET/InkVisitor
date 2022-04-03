@@ -8,7 +8,6 @@ import { r as rethink, Connection, WriteResult, RDatum } from "rethinkdb-ts";
 import {
   IStatement,
   IEntity,
-  IResponseEntity,
   IProp,
   IReference,
 } from "@shared/types";
