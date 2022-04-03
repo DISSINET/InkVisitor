@@ -28,7 +28,9 @@ import {
 type IFilterEntities = {
   label?: string;
   class?: string | false;
+
   excluded?: EntityClass[];
+  onlyTemplates?: boolean;
 };
 
 type IFilterUsers = {

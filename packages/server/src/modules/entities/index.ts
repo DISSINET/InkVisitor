@@ -62,6 +62,7 @@ export default Router()
       const label = request.body.label;
       const classParam = request.body.class;
       const excluded: EntityClass[] = request.body.excluded;
+      const onlyTemplates: undefined | boolean = request.body.onlyTemplates;
 
       if (!label && !classParam) {
         throw new BadParams("label or class has to be set");
@@ -78,7 +79,9 @@ export default Router()
         request.db,
         classParam,
         excluded,
-        label
+        label,
+        undefined,
+        onlyTemplates
       );
 
       const responses: IResponseEntity[] = [];
