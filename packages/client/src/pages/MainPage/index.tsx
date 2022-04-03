@@ -39,6 +39,7 @@ import {
   StatementListBox,
   TerritoryTreeBox,
   UserListModal,
+  TemplateListBox,
 } from "./containers";
 import { UserCustomizationModal } from "./containers/UserCustomizationModal/UserCustomizationModal";
 import {
@@ -304,7 +305,7 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
               width={fourthPanelExpanded ? panelWidths[3] : collapsedPanelWidth}
             >
               <Box
-                height={heightContent / 2}
+                height={heightContent / 3}
                 label="Search"
                 color="white"
                 isExpanded={fourthPanelExpanded}
@@ -313,13 +314,22 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
                 <ActantSearchBox />
               </Box>
               <Box
-                height={heightContent / 2}
+                height={heightContent / 3}
                 label="Bookmarks"
                 color="white"
                 isExpanded={fourthPanelExpanded}
                 button={fourthPanelButton()}
               >
                 <EntityBookmarkBox />
+              </Box>
+              <Box
+                height={heightContent / 3}
+                label="Templates"
+                color="white"
+                isExpanded={fourthPanelExpanded}
+                button={fourthPanelButton()}
+              >
+                <TemplateListBox />
               </Box>
             </Panel>
           </StyledPanelWrap>
