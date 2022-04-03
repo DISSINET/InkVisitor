@@ -24,13 +24,6 @@
             ],
             "type": "string"
         },
-        "EntityReferenceSource": {
-            "enum": [
-                "geonames",
-                "wordnet"
-            ],
-            "type": "string"
-        },
         "EntityStatus": {
             "enum": [
                 "0",
@@ -39,27 +32,6 @@
                 "3"
             ],
             "type": "string"
-        },
-        "IEntityReference": {
-            "additionalProperties": false,
-            "defaultProperties": [],
-            "properties": {
-                "id": {
-                    "type": "string"
-                },
-                "source": {
-                    "$ref": "ITerritory#/definitions/EntityReferenceSource"
-                },
-                "value": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "id",
-                "source",
-                "value"
-            ],
-            "type": "object"
         },
         "IParentTerritory": {
             "additionalProperties": false,
@@ -182,6 +154,27 @@
                 "logic",
                 "partitivity",
                 "virtuality"
+            ],
+            "type": "object"
+        },
+        "IReference": {
+            "additionalProperties": false,
+            "defaultProperties": [],
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "resource": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "id",
+                "resource",
+                "value"
             ],
             "type": "object"
         },
@@ -311,7 +304,7 @@
         },
         "references": {
             "items": {
-                "$ref": "ITerritory#/definitions/IEntityReference"
+                "$ref": "ITerritory#/definitions/IReference"
             },
             "type": "array"
         },
