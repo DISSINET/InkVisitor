@@ -94,6 +94,7 @@ export const Tag: React.FC<TagProps> = ({
     end: (item: DragItem | undefined, monitor: DragSourceMonitor) => {
       if (item && item.index !== index) updateOrderFn(item);
     },
+    canDrag: category !== "X",
   });
 
   useEffect(() => {
@@ -135,6 +136,7 @@ export const Tag: React.FC<TagProps> = ({
         <StyledTooltipSeparator>
           <StyledTagWrapper
             ref={ref}
+            isEmpty={category === "X"}
             status={status}
             ltype={ltype}
             borderStyle={borderStyle}
@@ -182,6 +184,7 @@ export const Tag: React.FC<TagProps> = ({
             <StyledTooltipSeparator>
               <StyledTagWrapper
                 ref={ref}
+                isEmpty={category === "X"}
                 borderStyle={borderStyle}
                 status={status}
                 ltype={ltype}
