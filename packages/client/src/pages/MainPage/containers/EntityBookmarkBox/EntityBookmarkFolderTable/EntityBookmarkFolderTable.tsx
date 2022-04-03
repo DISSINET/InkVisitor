@@ -39,6 +39,7 @@ export const EntityBookmarkFolderTable: React.FC<EntityBookmarkFolderTable> = ({
           return (
             <EntityTag
               actant={entity as IEntity}
+              tooltipPosition="left center"
               button={
                 <Button
                   key="d"

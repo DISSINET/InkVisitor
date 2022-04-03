@@ -62,8 +62,6 @@ export const PropGroup: React.FC<IPropGroup> = ({
     }
   );
 
-  console.log();
-
   const renderFirsLevelPropRow = useCallback(
     (
       prop1: IProp,

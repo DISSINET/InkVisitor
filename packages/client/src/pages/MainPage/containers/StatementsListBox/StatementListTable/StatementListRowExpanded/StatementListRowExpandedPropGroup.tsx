@@ -1,4 +1,5 @@
 import { IEntity, IProp } from "@shared/types";
+import { EmptyTag } from "pages/MainPage/containers";
 import React from "react";
 import { EntityTag } from "../../../EntityTag/EntityTag";
 import {
@@ -12,52 +13,47 @@ interface StatementListRowExpandedPropGroup {
   entities: { [key: string]: IEntity };
   renderChildrenPropRow?: (props: IProp[]) => React.ReactElement;
 }
-export const StatementListRowExpandedPropGroup: React.FC<StatementListRowExpandedPropGroup> =
-  ({ level, props, entities, renderChildrenPropRow }) => {
-    return (
-      <StyledPropGroup>
-        {props.map((prop, key) => {
-          const propTypeEntity: IEntity = entities[prop.type.id];
-          const propValueEntity: IEntity = entities[prop.value.id];
-          return (
-            <React.Fragment key={key}>
-              <StyledPropRow key={key} level={level}>
-                {propTypeEntity ? (
-                  <>
-                    <EntityTag
-                      actant={propTypeEntity}
-                      tooltipPosition="bottom center"
-                    />
-                    <span>&nbsp;</span>
-                  </>
-                ) : (
-                  <>
-                    <EntityTag
-                      actant={{ label: "type" }}
-                      tooltipPosition="bottom center"
-                    />
-                    <span>&nbsp;</span>
-                  </>
-                )}
-                {propValueEntity ? (
+export const StatementListRowExpandedPropGroup: React.FC<
+  StatementListRowExpandedPropGroup
+> = ({ level, props, entities, renderChildrenPropRow }) => {
+  return (
+    <StyledPropGroup>
+      {props.map((prop, key) => {
+        const propTypeEntity: IEntity = entities[prop.type.id];
+        const propValueEntity: IEntity = entities[prop.value.id];
+        return (
+          <React.Fragment key={key}>
+            <StyledPropRow key={key} level={level}>
+              {propTypeEntity ? (
+                <>
                   <EntityTag
-                    actant={propValueEntity}
+                    actant={propTypeEntity}
                     tooltipPosition="bottom center"
                   />
-                ) : (
-                  <EntityTag
-                    actant={{ label: "value" }}
-                    tooltipPosition="bottom center"
-                  />
-                )}
-              </StyledPropRow>
+                  <span>&nbsp;</span>
+                </>
+              ) : (
+                <>
+                  <EmptyTag label={"type"} />
+                  <span>&nbsp;</span>
+                </>
+              )}
+              {propValueEntity ? (
+                <EntityTag
+                  actant={propValueEntity}
+                  tooltipPosition="bottom center"
+                />
+              ) : (
+                <EmptyTag label={"value"} />
+              )}
+            </StyledPropRow>
 
-              <div key={`children-${key}`}>
-                {renderChildrenPropRow && renderChildrenPropRow(prop.children)}
-              </div>
-            </React.Fragment>
-          );
-        })}
-      </StyledPropGroup>
-    );
-  };
+            <div key={`children-${key}`}>
+              {renderChildrenPropRow && renderChildrenPropRow(prop.children)}
+            </div>
+          </React.Fragment>
+        );
+      })}
+    </StyledPropGroup>
+  );
+};
