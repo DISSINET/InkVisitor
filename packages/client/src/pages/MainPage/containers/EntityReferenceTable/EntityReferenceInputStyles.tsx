@@ -14,14 +14,15 @@ export const StyledGrid = styled.div`
 export const StyledGridCell = styled.div`
   margin: ${({ theme }) => theme.space[1]};
   display: inline-flex;
+  overflow: hidden;
   align-items: center;
 `;
 
 // references
 interface StyledReferencesList {}
 export const StyledReferencesList = styled(StyledGrid)<StyledReferencesList>`
-  grid-template-columns: auto auto auto;
-  /* width: 50rem; */
+  max-width: 100%;
+  overflow: hidden;
 `;
 
 interface StyledListHeaderColumn {}
