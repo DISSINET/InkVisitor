@@ -27,7 +27,8 @@ const datasets: Record<string, TableSchema[]> = {
         (table: RTable) =>
           table.indexCreate(
             "data.actants.actant",
-            r.row("data")("actants")("actant")
+            r.row("data")("actants")("actant"),
+            { multi: true }
           ),
         (table: RTable) =>
           table.indexCreate(
