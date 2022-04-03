@@ -220,7 +220,7 @@ conn = None
 
 try:
 
-  conn = r.connect(config["host"], config["port"])
+  conn = r.connect(config["host"], config["port"], config["db"], config["password"])
   # set default database
   conn.use(config["db"])
 
