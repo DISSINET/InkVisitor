@@ -145,7 +145,9 @@ export const PropGroupRow: React.FC<IPropGroupRow> = ({
           level={level}
           isTag={propTypeEntity ? true : false}
         >
-          <StyledFaGripVertical />
+          <div>
+            <StyledFaGripVertical />
+          </div>
           {propTypeEntity ? (
             <EntityTag
               actant={propTypeEntity}

@@ -131,7 +131,6 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
         queryClient.invalidateQueries(["entity"]);
         queryClient.invalidateQueries("statement");
 
-        console.log(variables);
         if (statementId === detailId) {
           queryClient.invalidateQueries("statement");
         }

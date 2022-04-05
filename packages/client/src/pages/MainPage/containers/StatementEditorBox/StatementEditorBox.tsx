@@ -409,6 +409,7 @@ export const StatementEditorBox: React.FC = () => {
           queryClient.invalidateQueries(["entity"]);
         }
         queryClient.invalidateQueries(["statement"]);
+        queryClient.invalidateQueries(["territory"]);
       },
     }
   );
