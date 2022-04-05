@@ -21,6 +21,8 @@ files_and_classes = [
     {'file': input_path + 'types/value.ts', 'class': 'IValue'},
     {'file': input_path + 'types/action.ts', 'class': 'IAction'},
     {'file': input_path + 'types/user.ts', 'class': 'IUser'},
+    {'file': input_path + 'types/audit.ts', 'class': 'IAudit'},
+
 ]
 
 for case in files_and_classes:
