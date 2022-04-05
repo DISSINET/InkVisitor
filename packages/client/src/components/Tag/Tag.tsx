@@ -28,7 +28,7 @@ interface TagProps {
   label?: string;
   tooltipDetail?: string;
   tooltipText?: string;
-  category: string;
+  category?: string;
   status?: string;
   ltype?: string;
   mode?: "selected" | "disabled" | "invalid" | false;
@@ -39,7 +39,7 @@ interface TagProps {
   fullWidth?: boolean;
   index?: number;
   moveFn?: (dragIndex: number, hoverIndex: number) => void;
-  enableTooltip?: boolean;
+  disableTooltip?: boolean;
   tooltipPosition?: PopupPosition | PopupPosition[];
   updateOrderFn?: (item: DragItem) => void;
   lvl?: number;
@@ -66,7 +66,7 @@ export const Tag: React.FC<TagProps> = ({
   index = -1,
   moveFn,
   tooltipPosition = "right top",
-  enableTooltip = true,
+  disableTooltip = false,
   updateOrderFn = () => {},
   statementsCount,
   isFavorited = false,
@@ -94,6 +94,7 @@ export const Tag: React.FC<TagProps> = ({
     end: (item: DragItem | undefined, monitor: DragSourceMonitor) => {
       if (item && item.index !== index) updateOrderFn(item);
     },
+    canDrag: category !== "X",
   });
 
   useEffect(() => {
@@ -135,6 +136,7 @@ export const Tag: React.FC<TagProps> = ({
         <StyledTooltipSeparator>
           <StyledTagWrapper
             ref={ref}
+            isEmpty={category === "X"}
             status={status}
             ltype={ltype}
             borderStyle={borderStyle}
@@ -174,7 +176,7 @@ export const Tag: React.FC<TagProps> = ({
             label={label}
             detail={tooltipDetail}
             text={tooltipText}
-            disabled={!enableTooltip}
+            disabled={disableTooltip}
             position={tooltipPosition}
             tagTooltip
             itemsCount={statementsCount}
@@ -182,6 +184,7 @@ export const Tag: React.FC<TagProps> = ({
             <StyledTooltipSeparator>
               <StyledTagWrapper
                 ref={ref}
+                isEmpty={category === "X"}
                 borderStyle={borderStyle}
                 status={status}
                 ltype={ltype}

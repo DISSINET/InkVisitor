@@ -1,4 +1,3 @@
-import { animated } from "react-spring";
 import styled from "styled-components";
 
 interface StyledTagWrapper {
@@ -6,6 +5,7 @@ interface StyledTagWrapper {
   borderStyle: "solid" | "dashed" | "dotted";
   status: string;
   ltype: string;
+  isEmpty?: boolean;
 }
 export const StyledTagWrapper = styled.div<StyledTagWrapper>`
   display: inline-flex;
@@ -16,7 +16,7 @@ export const StyledTagWrapper = styled.div<StyledTagWrapper>`
   border-radius: ${({ theme }) => theme.borderRadius["sm"]};
   margin-right: ${({ theme, hasMarginRight }) =>
     hasMarginRight && theme.space[1]};
-  cursor: move;
+  cursor: ${({ isEmpty }) => (isEmpty ? "default" : "move")};
   border-style: ${({ theme, ltype }) =>
     "solid solid solid " + theme.borderStyle[ltype]};
   color: ${({ theme }) => theme.color["black"]};
