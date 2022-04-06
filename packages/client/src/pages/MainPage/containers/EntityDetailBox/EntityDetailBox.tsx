@@ -386,38 +386,38 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
 
   const updatePropIds = (props: IProp[]) => {
     for (let prop of props) {
-      prop.id = uuidv4();
       for (let prop1 of prop.children) {
-        prop1.id = uuidv4();
         for (let prop2 of prop1.children) {
           prop2.id = uuidv4();
         }
+        prop1.id = uuidv4();
       }
+      prop.id = uuidv4();
     }
     return props;
   };
 
-  const duplicateEntityMutation = useMutation(
-    async (entityToDuplicate: IEntity) => {
-      const newEntity = { ...entityToDuplicate };
-      console.log(entityToDuplicate.props);
-      newEntity.id = "";
-      newEntity.references = newEntity.references.map((r) => {
-        return {
-          ...r,
-          id: uuidv4(),
-        };
-      });
-      newEntity.props = updatePropIds(newEntity.props);
-      console.log(newEntity.props);
+  const duplicateEntity = (entityToDuplicate: IEntity) => {
+    const newEntity = { ...entityToDuplicate };
+    newEntity.id = uuidv4();
+    newEntity.references = newEntity.references.map((r) => {
+      return {
+        ...r,
+        id: uuidv4(),
+      };
+    });
+    newEntity.props = updatePropIds([...newEntity.props]);
+    duplicateEntityMutation.mutate(newEntity);
+  };
 
-      // await api.entityCreate(newEntity);
+  const duplicateEntityMutation = useMutation(
+    async (newEntity: IEntity) => {
+      await api.entityCreate(newEntity);
     },
     {
       onSuccess: (data, variables) => {
         setDetailId(variables.id);
         toast.info(`Entity duplicated!`);
-        queryClient.invalidateQueries("entity");
       },
       onError: () => {
         toast.error(`Error: Entity not duplicated!`);
@@ -450,7 +450,7 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                       tooltip="duplicate entity"
                       inverted
                       onClick={() => {
-                        duplicateEntityMutation.mutate(entity);
+                        duplicateEntity(entity);
                       }}
                     />
                   )}
