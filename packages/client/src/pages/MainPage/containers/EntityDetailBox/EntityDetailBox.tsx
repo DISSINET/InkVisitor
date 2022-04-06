@@ -441,7 +441,7 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                     fullWidth
                   />
                 </StyledTagWrap>
-                <ButtonGroup>
+                <ButtonGroup style={{ marginBottom: "1rem" }}>
                   {entity.class !== EntityClass.Statement && (
                     <Button
                       icon={<FaClone size={14} />}
