@@ -12,9 +12,9 @@ import {
   StyledCgMenuBoxed,
   StyledContextButtonGroup,
   StyledWrapper,
-} from "./ContextMenuStyles";
+} from "./TerritoryTreeContextMenuStyles";
 
-interface ContextMenu {
+interface TerritoryTreeContextMenu {
   territoryActant: IEntity;
   right: UserRoleMode;
   empty: boolean;
@@ -24,7 +24,7 @@ interface ContextMenu {
   updateUserMutation: UseMutationResult<void, unknown, object, unknown>;
   isFavorited?: boolean;
 }
-export const ContextMenu: React.FC<ContextMenu> = ({
+export const TerritoryTreeContextMenu: React.FC<TerritoryTreeContextMenu> = ({
   territoryActant,
   onMenuOpen,
   onMenuClose,
