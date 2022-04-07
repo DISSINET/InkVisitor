@@ -12,7 +12,7 @@ interface AttributeRow {
   items: { value: string; label: string }[];
   label: string;
   attributeName: string;
-  multi: boolean;
+  multi?: boolean;
   onChangeFn: (value: string | string[]) => void;
   disabled?: boolean;
 }
@@ -21,7 +21,7 @@ export const AttributeRow: React.FC<AttributeRow> = ({
   items,
   label,
   attributeName,
-  multi,
+  multi = false,
   onChangeFn,
   disabled = false,
 }) => {
