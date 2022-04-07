@@ -1,3 +1,4 @@
+import { allEntities } from "@shared/dictionaries/entity";
 import { AttributeIcon, Dropdown } from "components";
 import React, { useMemo } from "react";
 import {
@@ -27,7 +28,7 @@ export const AttributeRow: React.FC<AttributeRow> = ({
 }) => {
   const selectedItem = useMemo(() => {
     return multi
-      ? items.filter((i: any) => value.includes(i.value))
+      ? [allEntities].concat(items).filter((i: any) => value.includes(i.value))
       : items.find((i: any) => i.value === value);
   }, [value]);
 
