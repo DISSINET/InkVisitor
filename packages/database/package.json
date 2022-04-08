@@ -13,7 +13,8 @@
     "import-remote-sandbox": "npx ts-node scripts/import.ts all sandbox",
     "import-remote-staging": "npx ts-node scripts/import.ts all staging",
     "import-remote-data-import": "npx ts-node scripts/import.ts all data-import",
-    "import-local": "npx ts-node scripts/import.ts all local"
+    "import-local": "npx ts-node scripts/import.ts all local",
+    "import-local-empty": "npx ts-node scripts/import-empty.ts all local"
   },
   "author": "",
   "license": "ISC",
