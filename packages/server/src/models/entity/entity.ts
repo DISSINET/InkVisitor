@@ -5,12 +5,7 @@ import {
   fillArray,
 } from "@models/common";
 import { r as rethink, Connection, WriteResult, RDatum } from "rethinkdb-ts";
-import {
-  IStatement,
-  IEntity,
-  IProp,
-  IReference,
-} from "@shared/types";
+import { IStatement, IEntity, IProp, IReference } from "@shared/types";
 import {
   EntityClass,
   EntityStatus,
@@ -325,6 +320,3 @@ export default class Entity implements IEntity, IDbModel {
     });
   }
 }
-
-const e = new Entity({});
-console.log(JSON.stringify(e));

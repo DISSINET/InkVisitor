@@ -61,36 +61,12 @@ export async function getEntitiesDataByClass<T>(
     .run(db.connection);
 }
 
-export async function getTerritoryChilds(
-  db: Db,
-  parentId: string
-): Promise<ITerritory[]> {
-  return rethink
-    .table(Entity.table)
-    .filter(function (territory: any) {
-      return rethink.and(
-        territory("data")("parent").typeOf().eq("OBJECT"),
-        territory("data")("parent")("id").eq(parentId)
-      );
-    })
-    .run(db.connection);
-}
-
 export async function findEntityById<T extends IEntity>(
   db: Db,
-  id: string,
-  additionalFilter: Record<string, unknown> = {}
+  id: string
 ): Promise<T> {
-  const data = await rethink
-    .table(Entity.table)
-    .filter({
-      ...additionalFilter,
-      id,
-    })
-    .limit(1)
-    .run(db.connection);
-
-  return data.length == 0 ? null : data[0];
+  const data = await rethink.table(Entity.table).get(id).run(db.connection);
+  return data || null;
 }
 
 export async function findEntitiesByIds<T extends IEntity>(
