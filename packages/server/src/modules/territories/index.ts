@@ -1,7 +1,7 @@
 import Statement from "@models/statement/statement";
 import { ResponseTerritory } from "@models/territory/response";
 import Territory from "@models/territory/territory";
-import { findEntityById, findEntities } from "@service/shorthands";
+import { findEntityById, getEntitiesDataByClass } from "@service/shorthands";
 import { EntityClass } from "@shared/enums";
 import {
   IResponseGeneric,
@@ -144,9 +144,10 @@ export default Router()
       };
 
       let statementsForTerritory = (
-        await findEntities<IStatement>(request.db, {
-          class: EntityClass.Statement,
-        })
+        await getEntitiesDataByClass<IStatement>(
+          request.db,
+          EntityClass.Statement
+        )
       )
         .filter((s) => s.data.territory && s.data.territory.id === territory.id)
         .sort(sortStatements);
