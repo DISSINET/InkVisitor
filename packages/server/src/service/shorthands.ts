@@ -1,4 +1,4 @@
-import { Connection, r as rethink, RDatum, WriteResult } from "rethinkdb-ts";
+import { r as rethink, RDatum, WriteResult } from "rethinkdb-ts";
 import { IUser } from "@shared/types/user";
 import { IEntity } from "@shared/types";
 import { Db } from "./RethinkDB";
@@ -9,24 +9,6 @@ import { DbIndex, EntityClass } from "@shared/enums";
 import { regExpEscape } from "@common/functions";
 import Entity from "@models/entity/entity";
 import User from "@models/user/user";
-
-export async function createUser(db: Db, data: IUser): Promise<WriteResult> {
-  return rethink.table("users").insert(data).run(db.connection);
-}
-
-export async function updateUser(
-  db: Db,
-  userId: string,
-  data: IUser
-): Promise<WriteResult> {
-  const safeData: any = { ...data };
-  delete safeData.id;
-  return rethink
-    .table(User.table)
-    .get(userId)
-    .update(safeData)
-    .run(db.connection);
-}
 
 export async function deleteUser(db: Db, userId: string): Promise<WriteResult> {
   return rethink.table(User.table).get(userId).delete().run(db.connection);
