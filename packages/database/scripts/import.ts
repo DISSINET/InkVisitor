@@ -13,6 +13,7 @@ import tunnel from "tunnel-ssh";
 import { Server } from "net";
 import readline from "readline";
 import { parseArgs, prepareDbConnection, TableSchema } from "./import-utils";
+import { DbIndex } from "@shared/enums";
 
 const [datasetId, env] = parseArgs();
 const envData = require("dotenv").config({ path: `env/.env.${env}` }).parsed;
@@ -60,7 +61,7 @@ const datasets: Record<string, TableSchema[]> = {
               .distinct(),
             { multi: true }
           ),
-        (table: RTable) => table.indexCreate("class"),
+        (table: RTable) => table.indexCreate(DbIndex.Class),
         (table: RTable) => table.indexCreate("label"),
         (table: RTable) =>
           table.indexCreate(

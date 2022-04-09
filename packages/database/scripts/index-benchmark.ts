@@ -20,6 +20,7 @@ import {
   Partitivity,
   Position,
   Virtuality,
+  DbIndex,
 } from "../../shared/enums";
 const fs = require("fs");
 import { Connection, r, RDatum, WriteResult } from "rethinkdb-ts";
@@ -37,7 +38,6 @@ function doIndex(statement: any, connection: any): Promise<any> {
 //-----------------------------------------------------------------------------
 
 const indexedTable = "entities";
-const unindexedTable = "entities_raw";
 
 let conn: any;
 
@@ -52,20 +52,28 @@ const testClass = async () => {
   let start = performance.now();
   let items = await r
     .table(indexedTable)
-    .getAll(EntityClass.Resource, { index: "class" })
+    .getAll(EntityClass.Resource, { index: DbIndex.Class })
     .run(conn);
   let end = performance.now();
-  console.log(`testClass(${indexedTable}) took ${end - start} milliseconds.`);
+  console.log(
+    `testClass(${indexedTable}) took ${end - start} milliseconds. Found ${
+      (items as any).length
+    } items.`
+  );
 
   start = performance.now();
-  await r
-    .table(unindexedTable)
+  items = await r
+    .table(indexedTable)
     .filter({
       class: EntityClass.Resource,
     })
     .run(conn);
   end = performance.now();
-  console.log(`testClass(${unindexedTable}) took ${end - start} milliseconds.`);
+  console.log(
+    `testClass(${indexedTable}) took ${end - start} milliseconds. Found ${
+      (items as any).length
+    } items.`
+  );
 };
 
 const testActantsActant = async () => {
@@ -201,7 +209,7 @@ const testParentId = async () => {
   start = performance.now();
 
   await r
-    .table(unindexedTable)
+    .table(indexedTable)
     .filter(function (territory: any) {
       return r.and(
         territory("data")("parent").typeOf().eq("OBJECT"),
@@ -212,7 +220,7 @@ const testParentId = async () => {
 
   end = performance.now();
   console.log(
-    `testParentId(${unindexedTable}) took ${end - start} milliseconds.`
+    `testParentId(${indexedTable}) took ${end - start} milliseconds.`
   );
 };
 
@@ -236,7 +244,7 @@ const testActantOrActionStatement = async () => {
   start = performance.now();
 
   await r
-    .table(unindexedTable)
+    .table(indexedTable)
     .filter(function (row: RDatum) {
       const tests = [];
       tests.push(
@@ -256,7 +264,7 @@ const testActantOrActionStatement = async () => {
 
   end = performance.now();
   console.log(
-    `testActantOrActionStatement(${unindexedTable}) took ${
+    `testActantOrActionStatement(${indexedTable}) took ${
       end - start
     } milliseconds.`
   );
@@ -267,8 +275,8 @@ const testActantOrActionStatement = async () => {
   // set default database
   conn.use(config.db);
 
-  //await testClass();
-  await testPropsRecursive();
+  await testClass();
+  //await testPropsRecursive();
   //await testActantsActant();
   //await testActantOrActionStatement();
   //await testParentId();

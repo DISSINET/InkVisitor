@@ -141,23 +141,6 @@ export default class Entity implements IEntity, IDbModel {
     return UserRoleMode.Read;
   }
 
-  getDependentStatements(db: Connection | undefined): Promise<IStatement[]> {
-    return rethink
-      .table(Entity.table)
-      .filter({ class: EntityClass.Statement })
-      .filter((row: any) => {
-        return rethink.or(
-          row("data")("actants").contains((actantElement: any) =>
-            actantElement("actant").eq(this.id)
-          ),
-          row("data")("props").contains((propElement: any) =>
-            propElement("origin").eq(this.id)
-          )
-        );
-      })
-      .run(db);
-  }
-
   static async findUsedInProps(
     db: Connection | undefined,
     entityId: string
