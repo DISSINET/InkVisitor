@@ -62,47 +62,28 @@ const datasets: Record<string, TableSchema[]> = {
             { multi: true }
           ),
         (table: RTable) => table.indexCreate(DbIndex.Class),
-        (table: RTable) => table.indexCreate("label"),
         (table: RTable) =>
           table.indexCreate(
-            "data.actants.actant",
-            r.row("data")("actants")("actant"),
-            { multi: true }
-          ),
-        (table: RTable) =>
-          table.indexCreate(
-            "data.actions.action",
-            r.row("data")("actions")("action")
-          ),
-        (table: RTable) =>
-          table.indexCreate("data.tags", r.row("data")("tags")),
-        (table: RTable) =>
-          table.indexCreate(
-            "data.props.type.id",
-            r.row("data")("props")("type")("id")
-          ),
-        (table: RTable) =>
-          table.indexCreate(
-            "data.props.value.id",
-            r.row("data")("props")("value")("id")
-          ),
-        (table: RTable) =>
-          table.indexCreate(
-            "data.references.resource",
-            r.row("data")("references")("resource")
-          ),
-        (table: RTable) =>
-          table.indexCreate(
-            "data.props.origin",
-            r.row("data")("props")("origin")
-          ),
-        (table: RTable) =>
-          table.indexCreate(
-            "data.territory.id",
+            DbIndex.StatementTerritory,
             r.row("data")("territory")("id")
           ),
-        (table: RTable) =>
-          table.indexCreate("data.parent.id", r.row("data")("parent")("id")),
+        /*   (table: RTable) =>
+          table.indexCreate(
+            DbIndex.DependentStatements,
+            r.expr([r.row("data")("territory")("id")]).add(
+              r
+                .row("data")("actions")
+                .concatMap((a: RDatum) => a("action")) as RValue,
+
+              r
+                .row("data")("actants")
+                .concatMap((a: RDatum) => a("actant")) as RValue,
+              r.row("data")("tags")
+            ),
+            {
+              multi: true,
+            }
+          ),*/
       ],
     },
     {
