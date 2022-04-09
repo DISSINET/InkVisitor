@@ -67,23 +67,27 @@ const datasets: Record<string, TableSchema[]> = {
             DbIndex.StatementTerritory,
             r.row("data")("territory")("id")
           ),
-        /*   (table: RTable) =>
+        (table: RTable) =>
           table.indexCreate(
-            DbIndex.DependentStatements,
-            r.expr([r.row("data")("territory")("id")]).add(
-              r
-                .row("data")("actions")
-                .concatMap((a: RDatum) => a("action")) as RValue,
-
-              r
-                .row("data")("actants")
-                .concatMap((a: RDatum) => a("actant")) as RValue,
-              r.row("data")("tags")
-            ),
+            DbIndex.StatementEntities,
+            function (row: RDatum) {
+              return row("data")("actions")
+                .map(function (a: RDatum) {
+                  return a("action");
+                })
+                .add(
+                  row("data")("actants").map(function (a: RDatum) {
+                    return a("actant");
+                  }) as any,
+                  row("data")("tags").map(function (t: RDatum) {
+                    return t;
+                  }) as any
+                );
+            },
             {
               multi: true,
             }
-          ),*/
+          ),
       ],
     },
     {

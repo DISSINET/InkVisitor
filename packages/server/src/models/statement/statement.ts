@@ -481,20 +481,7 @@ class Statement extends Entity implements IStatement {
   ): Promise<IStatement[]> {
     const statements = await rethink
       .table(Entity.table)
-      .filter({
-        class: EntityClass.Statement,
-      })
-      .filter((row: RDatum) => {
-        return rethink.or(
-          row("data")("actions").contains((entry: RDatum) =>
-            entry("action").eq(entityId)
-          ),
-          row("data")("actants").contains((entry: RDatum) =>
-            entry("actant").eq(entityId)
-          ),
-          row("data")("tags").contains(entityId)
-        );
-      })
+      .getAll(entityId, { index: DbIndex.StatementEntities })
       .run(db);
 
     return statements.sort((a, b) => {
