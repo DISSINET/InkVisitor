@@ -505,6 +505,22 @@ class Statement extends Entity implements IStatement {
     });
   }
 
+  static async findUsedInDataEntitiesIds(
+    db: Connection | undefined,
+    entityId: string
+  ): Promise<string[]> {
+    const statements = await Statement.findUsedInDataEntities(db, entityId);
+
+    const entityIds: string[] = [];
+
+    (statements as IStatement[]).forEach((s) => {
+      const ids = s.data.actants.map((a) => a.actant);
+      entityIds.push(...ids);
+    });
+
+    return entityIds;
+  }
+
   /**
    * finds statements which are linked to different entity
    * using statement.data.actions[].props or statement.data.actants[].props
