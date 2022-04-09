@@ -287,46 +287,4 @@ export default class Entity implements IEntity, IDbModel {
     const entities = Entity.findEntitiesByIds(db, this.getEntitiesIds());
     return entities;
   }
-
-  /*
-   * finds statements which are linked to current entity
-   * @param db db connection
-   * @param territoryId id of the entity
-   * @returns list of statements data
-   */
-  async findDependentStatements(
-    db: Connection | undefined
-  ): Promise<IStatement[]> {
-    const statements = await rethink
-      .table(Entity.table)
-      .filter({
-        class: EntityClass.Statement,
-      })
-      .filter((row: RDatum) => {
-        return rethink.or(
-          row("data")("territory")("id").eq(this.id),
-          row("data")("actions").contains((entry: RDatum) =>
-            entry("action").eq(this.id)
-          ),
-          row("data")("actants").contains((entry: RDatum) =>
-            entry("actant").eq(this.id)
-          ),
-          row("data")("tags").contains(this.id),
-          row("data")("props").contains((entry: RDatum) =>
-            entry("value")("id").eq(this.id)
-          ),
-          row("data")("props").contains((entry: RDatum) =>
-            entry("type")("id").eq(this.id)
-          ),
-          row("data")("props").contains((entry: RDatum) =>
-            entry("origin").eq(this.id)
-          )
-        );
-      })
-      .run(db);
-
-    return statements.sort((a, b) => {
-      return a.data.territory.order - b.data.territory.order;
-    });
-  }
 }
