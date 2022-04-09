@@ -24,6 +24,7 @@ import {
   Operator,
   UserRole,
   UserRoleMode,
+  DbIndex,
 } from "@shared/enums";
 
 import Entity from "@models/entity/entity";
@@ -318,19 +319,15 @@ class Statement extends Entity implements IStatement {
   ): Promise<Record<number, IStatement>> {
     const list: IStatement[] = await rethink
       .table(Entity.table)
-      .filter({
-        class: EntityClass.Statement,
-      })
-      .filter((entry: RDatum) => {
-        return rethink.and(
-          entry("data")("territory")("id").eq(this.data.territory.id),
-          entry("id").ne(this.id)
-        );
-      })
+      .getAll(this.data.territory.id, { index: DbIndex.StatementTerritory })
       .run(db);
 
     const out: Record<number, IStatement> = {};
+
     for (const ter of list) {
+      if (ter.id === this.id) {
+        continue;
+      }
       if (ter.data.territory) {
         out[ter.data.territory.order] = ter;
       }

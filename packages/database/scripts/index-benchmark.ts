@@ -52,7 +52,7 @@ const testClass = async () => {
   let start = performance.now();
   let items = await r
     .table(indexedTable)
-    .getAll(EntityClass.Resource, { index: DbIndex.Class })
+    .getAll(EntityClass.Territory, { index: DbIndex.Class })
     .run(conn);
   let end = performance.now();
   console.log(
@@ -65,7 +65,7 @@ const testClass = async () => {
   items = await r
     .table(indexedTable)
     .filter({
-      class: EntityClass.Resource,
+      class: EntityClass.Territory,
     })
     .run(conn);
   end = performance.now();
@@ -155,8 +155,6 @@ const findUsedInProps = async (
 };
 
 const testPropsRecursive = async () => {
-  let start = performance.now();
-
   const example = await r
     .table(indexedTable)
     .filter({ class: EntityClass.Statement })
@@ -168,6 +166,8 @@ const testPropsRecursive = async () => {
 
   const exampleId = exampleObject.props[0].children[0].type.id;
   console.log(exampleId);
+
+  let start = performance.now();
 
   const foundInIndex = await r
     .table(indexedTable)
@@ -296,13 +296,60 @@ const testPrimaryKey = async () => {
   );
 };
 
+const testTerritoryId = async () => {
+  const example = await r
+    .table(indexedTable)
+    .filter({ class: EntityClass.Statement })
+    .run(conn);
+
+  const exampleObject = (example as any).find(
+    (e: any) => !!e.data.territory.id
+  );
+
+  const exampleId = exampleObject.data.territory.id;
+
+  let start = performance.now();
+
+  let found = await r
+    .table(indexedTable)
+    .getAll(exampleId, { index: DbIndex.StatementTerritory })
+    .run(conn);
+
+  let end = performance.now();
+  console.log(
+    `testTerritoryId(${indexedTable}) took ${end - start} milliseconds. Found ${
+      (found as any).length
+    } items.`
+  );
+
+  (found as any).forEach((element: any) => console.log(element.class));
+
+  start = performance.now();
+
+  found = await r
+    .table(indexedTable)
+    .filter((entry: RDatum) => {
+      return entry("data")("territory")("id").eq(exampleId);
+    })
+    .run(conn);
+
+  end = performance.now();
+  console.log(
+    `testTerritoryId(${indexedTable}) took ${end - start} milliseconds. Found ${
+      (found as any).length
+    } items.`
+  );
+};
+
 (async () => {
   conn = await r.connect(config);
   // set default database
   conn.use(config.db);
 
-  await testPrimaryKey();
+  // await testPrimaryKey();
   //await testClass();
+  await testTerritoryId();
+
   //await testPropsRecursive();
   //await testActantsActant();
   //await testActantOrActionStatement();
