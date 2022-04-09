@@ -46,12 +46,9 @@ export default Router()
 
       const territory = await findEntityById<ITerritory>(
         request.db,
-        territoryId,
-        {
-          class: EntityClass.Territory,
-        }
+        territoryId
       );
-      if (!territory) {
+      if (!territory || territory.class !== EntityClass.Territory) {
         throw new TerritoryDoesNotExits(
           `territory ${territoryId} was not found`,
           territoryId
@@ -82,12 +79,9 @@ export default Router()
 
       const territory = await findEntityById<ITerritory>(
         request.db,
-        territoryId,
-        {
-          class: EntityClass.Territory,
-        }
+        territoryId
       );
-      if (!territory) {
+      if (!territory || territory.class !== EntityClass.Territory) {
         throw new TerritoryDoesNotExits(
           `territory ${territoryId} was not found`,
           territoryId

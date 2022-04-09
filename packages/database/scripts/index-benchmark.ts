@@ -270,12 +270,39 @@ const testActantOrActionStatement = async () => {
   );
 };
 
+const testPrimaryKey = async () => {
+  let start = performance.now();
+
+  const id = "A0192";
+
+  let found = await r.table(indexedTable).get(id).run(conn);
+
+  let end = performance.now();
+  console.log(
+    `testPrimaryKey(${indexedTable}) took ${end - start} milliseconds. Found ${
+      found ? 1 : 0
+    } items.`
+  );
+
+  start = performance.now();
+
+  found = await r.table(indexedTable).filter({ id }).run(conn);
+
+  end = performance.now();
+  console.log(
+    `testPrimaryKey(${indexedTable}) took ${end - start} milliseconds. Found ${
+      (found as any).length
+    } items.`
+  );
+};
+
 (async () => {
   conn = await r.connect(config);
   // set default database
   conn.use(config.db);
 
-  await testClass();
+  await testPrimaryKey();
+  //await testClass();
   //await testPropsRecursive();
   //await testActantsActant();
   //await testActantOrActionStatement();
