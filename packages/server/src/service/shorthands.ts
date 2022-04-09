@@ -5,7 +5,7 @@ import { Db } from "./RethinkDB";
 import { IAction, IStatement, ITerritory } from "@shared/types";
 import { IDbModel } from "@models/common";
 import { ModelNotValidError } from "@shared/types/errors";
-import { EntityClass } from "@shared/enums";
+import { DbIndex, EntityClass } from "@shared/enums";
 import { regExpEscape } from "@common/functions";
 import Entity from "@models/entity/entity";
 import User from "@models/user/user";
@@ -51,10 +51,14 @@ export async function getStatementsForTerritory(
     .run(db.connection);
 }
 
-export async function getEntities<
-  T = IAction | IStatement | ITerritory | IEntity
->(db: Db, filter: object = {}): Promise<T[]> {
-  return rethink.table(Entity.table).filter(filter).run(db.connection);
+export async function getEntitiesDataByClass<T>(
+  db: Db,
+  entityClass: EntityClass
+): Promise<T[]> {
+  return rethink
+    .table(Entity.table)
+    .getAll(entityClass, { index: DbIndex.Class })
+    .run(db.connection);
 }
 
 export async function getTerritoryChilds(
