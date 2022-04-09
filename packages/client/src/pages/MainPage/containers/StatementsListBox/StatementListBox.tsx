@@ -116,11 +116,15 @@ export const StatementListBox: React.FC = () => {
     }
   );
 
-  const duplicateStatementMutation = useMutation(
-    async (statementToDuplicate: IResponseStatement) => {
-      const { ...newStatementObject } = statementToDuplicate;
+  const duplicateStatement = (statementToDuplicate: IResponseStatement) => {
+    const { ...newStatementObject } = statementToDuplicate;
 
-      const duplicatedStatement = DStatement(newStatementObject as IStatement);
+    const duplicatedStatement = DStatement(newStatementObject as IStatement);
+    duplicateStatementMutation.mutate(duplicatedStatement);
+  };
+
+  const duplicateStatementMutation = useMutation(
+    async (duplicatedStatement: IStatement) => {
       await api.entityCreate(duplicatedStatement);
     },
     {
@@ -494,9 +498,7 @@ export const StatementListBox: React.FC = () => {
                       color="warning"
                       tooltip="duplicate"
                       onClick={() => {
-                        duplicateStatementMutation.mutate(
-                          row.original as IResponseStatement
-                        );
+                        duplicateStatement(row.original as IResponseStatement);
                       }}
                     />,
                     <Button

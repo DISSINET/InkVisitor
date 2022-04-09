@@ -5,15 +5,16 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "parse": "ts-node -r tsconfig-paths/register scripts/parse.ts",
-    "create-audits": "ts-node -r tsconfig-paths/register scripts/create-audits.ts",
-    "fix-t-orders": "npx ts-node -r tsconfig-paths/register scripts/fix-t-order.ts",
+    "parse": "ts-node scripts/parse.ts",
+    "create-audits": "ts-node scripts/create-audits.ts",
+    "fix-t-orders": "npx ts-node scripts/fix-t-order.ts",
     "benchmark": "npx ts-node -r tsconfig-paths/register scripts/index-benchmark.ts",
     "import-remote": "npx ts-node -r tsconfig-paths/register scripts/import.ts all production",
     "import-remote-sandbox": "npx ts-node -r tsconfig-paths/register scripts/import.ts all sandbox",
     "import-remote-staging": "npx ts-node -r tsconfig-paths/register scripts/import.ts all staging",
     "import-remote-data-import": "npx ts-node -r tsconfig-paths/register scripts/import.ts all data-import",
-    "import-local": "npx ts-node -r tsconfig-paths/register scripts/import.ts all local"
+    "import-local": "npx ts-node -r tsconfig-paths/register scripts/import.ts all local",
+    "import-local-empty": "npx ts-node -r tsconfig-paths/register scripts/import-empty.ts all local"
   },
   "author": "",
   "license": "ISC",

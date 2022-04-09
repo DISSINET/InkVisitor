@@ -6,7 +6,7 @@ import {
 } from "@shared/dictionaries";
 import { allEntities } from "@shared/dictionaries/entity";
 import { EntityClass, Language, UserRoleMode } from "@shared/enums";
-import { IAction, IProp, IReference } from "@shared/types";
+import { IAction, IEntity, IProp, IReference } from "@shared/types";
 import api from "api";
 import {
   Button,
@@ -21,6 +21,7 @@ import { CProp } from "constructors";
 import { useSearchParams } from "hooks";
 import React, { useEffect, useMemo, useState } from "react";
 import {
+  FaClone,
   FaEdit,
   FaPlus,
   FaRecycle,
@@ -30,6 +31,7 @@ import {
 import { useMutation, useQuery, useQueryClient } from "react-query";
 import { toast } from "react-toastify";
 import { DraggedPropRowCategory } from "types";
+import { v4 as uuidv4 } from "uuid";
 import { EntityTag } from "..";
 import { AttributeButtonGroup } from "../AttributeButtonGroup/AttributeButtonGroup";
 import { AuditTable } from "../AuditTable/AuditTable";
@@ -382,6 +384,47 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
     }
   }, [entity]);
 
+  const updatePropIds = (props: IProp[]) => {
+    for (let prop of props) {
+      for (let prop1 of prop.children) {
+        for (let prop2 of prop1.children) {
+          prop2.id = uuidv4();
+        }
+        prop1.id = uuidv4();
+      }
+      prop.id = uuidv4();
+    }
+    return props;
+  };
+
+  const duplicateEntity = (entityToDuplicate: IEntity) => {
+    const newEntity = { ...entityToDuplicate };
+    newEntity.id = uuidv4();
+    newEntity.references = newEntity.references.map((r) => {
+      return {
+        ...r,
+        id: uuidv4(),
+      };
+    });
+    newEntity.props = updatePropIds([...newEntity.props]);
+    duplicateEntityMutation.mutate(newEntity);
+  };
+
+  const duplicateEntityMutation = useMutation(
+    async (newEntity: IEntity) => {
+      await api.entityCreate(newEntity);
+    },
+    {
+      onSuccess: (data, variables) => {
+        setDetailId(variables.id);
+        toast.info(`Entity duplicated!`);
+      },
+      onError: () => {
+        toast.error(`Error: Entity not duplicated!`);
+      },
+    }
+  );
+
   return (
     <>
       {entity && (
@@ -398,13 +441,26 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                     fullWidth
                   />
                 </StyledTagWrap>
-                <ButtonGroup>
+                <ButtonGroup style={{ marginBottom: "1rem" }}>
+                  {entity.class !== EntityClass.Statement && (
+                    <Button
+                      icon={<FaClone size={14} />}
+                      color="primary"
+                      label="duplicate"
+                      tooltip="duplicate entity"
+                      inverted
+                      onClick={() => {
+                        duplicateEntity(entity);
+                      }}
+                    />
+                  )}
                   {mayBeRemoved && (
                     <Button
                       color="primary"
                       icon={<FaTrashAlt />}
-                      label="remove entity"
-                      inverted={true}
+                      label="remove"
+                      tooltip="remove entity"
+                      inverted
                       onClick={() => {
                         setShowRemoveSubmit(true);
                       }}
@@ -414,7 +470,7 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                     key="refresh"
                     icon={<FaRecycle size={14} />}
                     tooltip="refresh data"
-                    inverted={true}
+                    inverted
                     color="primary"
                     label="refresh"
                     onClick={() => {
@@ -428,7 +484,7 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                       tooltip="open statement in editor"
                       inverted={true}
                       color="primary"
-                      label="open statement"
+                      label="open"
                       onClick={() => {
                         setStatementId(entity.id);
                         setTerritoryId(entity.data.territory.id);

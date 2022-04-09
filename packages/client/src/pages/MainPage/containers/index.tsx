@@ -1,4 +1,4 @@
-import { ActantSearchBox } from "./ActantSearchBox/ActantSearchBox";
+import { EntitySearchBox } from "./EntitySearchBox/EntitySearchBox";
 import { ActionModal } from "./ActionModal/ActionModal";
 import { EmptyTag } from "./EmptyTag/EmptyTag";
 import { EntityBookmarkBox } from "./EntityBookmarkBox/EntityBookmarkBox";
@@ -15,7 +15,7 @@ import { UserListModal } from "./UserListModal/UserListModal";
 import { UserOptionsModal } from "./UserOptionsModal/UserOptionsModal";
 
 export {
-  ActantSearchBox,
+  EntitySearchBox,
   EntityDetailBox,
   EntitySuggester,
   EntityTag,
