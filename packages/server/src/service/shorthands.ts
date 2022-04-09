@@ -32,25 +32,6 @@ export async function deleteUser(db: Db, userId: string): Promise<WriteResult> {
   return rethink.table(User.table).get(userId).delete().run(db.connection);
 }
 
-// ENTITY
-export async function getStatementsForTerritory(
-  db: Db,
-  terId: string
-): Promise<IStatement[]> {
-  return rethink
-    .table(Entity.table)
-    .filter({
-      class: EntityClass.Statement,
-    })
-    .filter(function (territory: any) {
-      return rethink.and(
-        territory("data")("territory").typeOf().eq("OBJECT"),
-        territory("data")("territory")("id").eq(terId)
-      );
-    })
-    .run(db.connection);
-}
-
 export async function getEntitiesDataByClass<T>(
   db: Db,
   entityClass: EntityClass
@@ -80,16 +61,6 @@ export async function findEntitiesByIds<T extends IEntity>(
   } else {
     return query.run(db as Connection);
   }
-}
-
-export async function findEntities<T extends IEntity>(
-  db: Db,
-  additionalFilter: Record<string, unknown> = {}
-): Promise<T[]> {
-  return await rethink
-    .table(Entity.table)
-    .filter(additionalFilter)
-    .run(db.connection);
 }
 
 export async function getEntityUsage(db: Db, id: string): Promise<number> {
