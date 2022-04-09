@@ -341,6 +341,66 @@ const testTerritoryId = async () => {
   );
 };
 
+const findUsedInDataEntities = async (
+  db: Connection,
+  entityId: string
+): Promise<any[]> => {
+  const statements = await r
+    .table(indexedTable)
+    .filter((row: RDatum) => {
+      return r.or(
+        row("data")("actions").contains((entry: RDatum) =>
+          entry("action").eq(entityId)
+        ),
+        row("data")("actants").contains((entry: RDatum) =>
+          entry("actant").eq(entityId)
+        ),
+        row("data")("tags").contains(entityId)
+      );
+    })
+    .run(db);
+
+  return statements;
+};
+
+const testStatementEntities = async () => {
+  const example = await r
+    .table(indexedTable)
+    .filter({ class: EntityClass.Statement })
+    .run(conn);
+
+  const exampleObject = (example as any).find(
+    (e: any) => e.data.actants.length > 0
+  );
+
+  const exampleId = exampleObject.data.actants[0].actant;
+
+  let start = performance.now();
+
+  let found = await r
+    .table(indexedTable)
+    .getAll(exampleId, { index: DbIndex.StatementEntities })
+    .run(conn);
+
+  let end = performance.now();
+  console.log(
+    `testStatementEntities(${indexedTable}) took ${
+      end - start
+    } milliseconds. Found ${(found as any).length} items.`
+  );
+
+  start = performance.now();
+
+  const foundInNotIndex = await findUsedInDataEntities(conn, exampleId);
+
+  end = performance.now();
+  console.log(
+    `testStatementEntities(${indexedTable}) took ${
+      end - start
+    } milliseconds. Found ${(foundInNotIndex as any).length} items.`
+  );
+};
+
 (async () => {
   conn = await r.connect(config);
   // set default database
@@ -348,8 +408,8 @@ const testTerritoryId = async () => {
 
   // await testPrimaryKey();
   //await testClass();
-  await testTerritoryId();
-
+  //await testTerritoryId();
+  await testStatementEntities();
   //await testPropsRecursive();
   //await testActantsActant();
   //await testActantOrActionStatement();
