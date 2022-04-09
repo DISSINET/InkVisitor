@@ -50,45 +50,6 @@ export async function findEntityById<T extends IEntity>(
   return data || null;
 }
 
-export async function findEntitiesByIds<T extends IEntity>(
-  db: Db | Connection,
-  ids: string[]
-): Promise<T[]> {
-  const query = rethink.table(Entity.table).getAll(rethink.args(ids));
-
-  if ((db as Db).connection) {
-    return query.run((db as Db).connection);
-  } else {
-    return query.run(db as Connection);
-  }
-}
-
-export async function getEntityUsage(db: Db, id: string): Promise<number> {
-  return await rethink
-    .table(Entity.table)
-    .filter({
-      class: EntityClass.Statement,
-    })
-    .filter(function (user: any) {
-      return user("data")("actants").contains((labelObj: any) =>
-        labelObj("actant").eq(id)
-      );
-    })
-    .count()
-    .run(db.connection);
-}
-
-export async function findEntitiesById(
-  db: Db,
-  ids: string[]
-): Promise<IEntity[]> {
-  const data = await rethink
-    .table(Entity.table)
-    .getAll(...ids)
-    .run(db.connection);
-  return data;
-}
-
 export async function createEntity(
   db: Db,
   data: IDbModel

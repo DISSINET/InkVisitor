@@ -18,7 +18,6 @@ import { InternalServerError } from "@shared/types/errors";
 import User from "@models/user/user";
 import emitter from "@models/events/emitter";
 import { EventTypes } from "@models/events/types";
-import { findEntitiesByIds } from "@service/shorthands";
 
 export default class Entity implements IEntity, IDbModel {
   static table = "entities";
@@ -273,8 +272,19 @@ export default class Entity implements IEntity, IDbModel {
     return out;
   }
 
+  static async findEntitiesByIds(
+    con: Connection,
+    ids: string[]
+  ): Promise<IEntity[]> {
+    const data = await rethink
+      .table(Entity.table)
+      .getAll(rethink.args(ids))
+      .run(con);
+    return data;
+  }
+
   async getEntities(db: Connection): Promise<IEntity[]> {
-    const entities = findEntitiesByIds<IEntity>(db, this.getEntitiesIds());
+    const entities = Entity.findEntitiesByIds(db, this.getEntitiesIds());
     return entities;
   }
 
