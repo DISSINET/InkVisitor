@@ -60,44 +60,6 @@ export async function createEntity(
   return data.save(db.connection);
 }
 
-export async function deleteEntity(
-  db: Db,
-  entityId: string
-): Promise<WriteResult> {
-  return rethink.table(Entity.table).get(entityId).delete().run(db.connection);
-}
-
-export async function findAssociatedEntityIds(
-  db: Db,
-  entityId: string
-): Promise<string[]> {
-  const statements = await rethink
-    .table(Entity.table)
-    .filter({
-      class: EntityClass.Statement,
-    })
-    .filter(function (row: RDatum) {
-      return rethink.or(
-        row("data")("actants").contains((actantObj: RDatum) =>
-          actantObj("actant").eq(entityId)
-        ),
-        row("data")("actions").contains((actionObj: RDatum) =>
-          actionObj("action").eq(entityId)
-        )
-      );
-    })
-    .run(db.connection);
-
-  const entityIds: string[] = [];
-
-  (statements as IStatement[]).forEach((s) => {
-    const ids = s.data.actants.map((a) => a.actant);
-    entityIds.push(...ids);
-  });
-
-  return entityIds;
-}
-
 export async function filterEntitiesByWildcard(
   db: Db,
   entityClass: EntityClass | false,

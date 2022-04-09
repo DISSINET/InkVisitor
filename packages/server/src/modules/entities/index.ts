@@ -2,11 +2,7 @@ import { mergeDeep } from "@common/functions";
 import { ResponseEntity, ResponseEntityDetail } from "@models/entity/response";
 import Audit from "@models/audit/audit";
 import { getEntityClass } from "@models/factory";
-import {
-  filterEntitiesByWildcard,
-  findEntityById,
-  findAssociatedEntityIds,
-} from "@service/shorthands";
+import { filterEntitiesByWildcard, findEntityById } from "@service/shorthands";
 import { EntityClass } from "@shared/enums";
 import {
   IEntity,
@@ -25,6 +21,7 @@ import {
 } from "@shared/types/errors";
 import { Request, Router } from "express";
 import { asyncRouteHandler } from "../index";
+import Statement from "@models/statement/statement";
 
 export default Router()
   .get(
@@ -271,8 +268,8 @@ export default Router()
 
       let associatedEntityIds: string[] | undefined = undefined;
       if (req.entityId) {
-        associatedEntityIds = await findAssociatedEntityIds(
-          httpRequest.db,
+        associatedEntityIds = await Statement.findUsedInDataEntitiesIds(
+          httpRequest.db.connection,
           req.entityId
         );
 
