@@ -1,7 +1,14 @@
 import { IUser } from "../../shared/types/user";
 import { hashPassword } from "../../server/src/common/auth";
 import { IAudit } from "../../shared/types";
-import { r, RConnectionOptions, RTable, Connection } from "rethinkdb-ts";
+import {
+  r,
+  RConnectionOptions,
+  RTable,
+  Connection,
+  RDatum,
+  RValue,
+} from "rethinkdb-ts";
 import tunnel from "tunnel-ssh";
 import { Server } from "net";
 import readline from "readline";
@@ -22,6 +29,37 @@ const datasets: Record<string, TableSchema[]> = {
       data: require("../datasets/all/entities.json"),
       transform: function () {},
       indexes: [
+        // if the prop object is missing value/type/children attrs, this wont work! model should handle this
+        (table: RTable) =>
+          table.indexCreate(
+            "props.recursive",
+            r
+              .row("props")
+              .concatMap((prop: RDatum) =>
+                r
+                  .expr([prop("value")("id"), prop("type")("id")])
+                  .add(
+                    prop("children").concatMap((ch1: RDatum) =>
+                      r
+                        .expr([ch1("value")("id"), ch1("type")("id")])
+                        .add(
+                          ch1("children").concatMap((ch2: RDatum) =>
+                            r
+                              .expr([ch2("value")("id"), ch2("type")("id")])
+                              .add(
+                                ch2("children").concatMap((ch3: RDatum) => [
+                                  ch3("value")("id"),
+                                  ch3("type")("id"),
+                                ]) as RValue
+                              )
+                          ) as RValue
+                        )
+                    ) as RValue
+                  )
+              )
+              .distinct(),
+            { multi: true }
+          ),
         (table: RTable) => table.indexCreate("class"),
         (table: RTable) => table.indexCreate("label"),
         (table: RTable) =>

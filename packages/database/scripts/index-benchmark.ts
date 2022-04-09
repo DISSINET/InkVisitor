@@ -22,7 +22,7 @@ import {
   Virtuality,
 } from "../../shared/enums";
 const fs = require("fs");
-import { r, RDatum, WriteResult } from "rethinkdb-ts";
+import { Connection, r, RDatum, WriteResult } from "rethinkdb-ts";
 
 const envData = require("dotenv").config({ path: `env/.env.local` }).parsed;
 
@@ -100,6 +100,82 @@ const testActantsActant = async () => {
       );
     })
     .run(conn);
+
+  end = performance.now();
+  console.log(
+    `Unindexed took ${end - start} milliseconds. Found ${
+      foundInNotIndex ? (foundInNotIndex as any[]).length : 0
+    } items`
+  );
+};
+
+const findUsedInProps = async (
+  db: Connection,
+  entityId: string
+): Promise<IEntity[]> => {
+  const entries = await r
+    .table(indexedTable)
+    .filter((row: RDatum) => {
+      return row("props").contains((entry: RDatum) =>
+        r.or(
+          entry("value")("id").eq(entityId),
+          entry("type")("id").eq(entityId),
+          entry("children").contains((ch1: RDatum) =>
+            r.or(
+              ch1("value")("id").eq(entityId),
+              ch1("type")("id").eq(entityId),
+              ch1("children").contains((ch2: RDatum) =>
+                r.or(
+                  ch2("value")("id").eq(entityId),
+                  ch2("type")("id").eq(entityId),
+                  ch2("children").contains((ch3: RDatum) =>
+                    r.or(
+                      ch3("value")("id").eq(entityId),
+                      ch3("type")("id").eq(entityId)
+                    )
+                  )
+                )
+              )
+            )
+          )
+        )
+      );
+    })
+    .run(db);
+
+  return entries;
+};
+
+const testPropsRecursive = async () => {
+  let start = performance.now();
+
+  const example = await r
+    .table(indexedTable)
+    .filter({ class: EntityClass.Statement })
+    .run(conn);
+
+  const exampleObject = (example as any).find(
+    (e: any) => !!e.props.length && !!e.props[0].children.length
+  );
+
+  const exampleId = exampleObject.props[0].children[0].type.id;
+  console.log(exampleId);
+
+  const foundInIndex = await r
+    .table(indexedTable)
+    .getAll(exampleId, { index: "props.recursive" })
+    .run(conn);
+
+  let end = performance.now();
+  console.log(
+    `Indexed took ${end - start} milliseconds. Found ${
+      foundInIndex ? (foundInIndex as any[]).length : 0
+    } items`
+  );
+
+  start = performance.now();
+
+  const foundInNotIndex = await findUsedInProps(conn, exampleId);
 
   end = performance.now();
   console.log(
@@ -192,7 +268,8 @@ const testActantOrActionStatement = async () => {
   conn.use(config.db);
 
   //await testClass();
-  await testActantsActant();
+  await testPropsRecursive();
+  //await testActantsActant();
   //await testActantOrActionStatement();
   //await testParentId();
   await conn.close();
