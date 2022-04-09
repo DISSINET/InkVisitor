@@ -62,7 +62,6 @@ export const EntityReferenceTableRow: React.FC<EntityReferenceTableRow> = ({
           !disabled && (
             <EntitySuggester
               territoryActants={[]}
-              openDetailOnCreate
               onSelected={(newSelectedId: string) => {
                 handleChangeResource(reference.id, newSelectedId);
               }}

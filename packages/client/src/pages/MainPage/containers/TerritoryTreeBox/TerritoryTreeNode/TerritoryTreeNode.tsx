@@ -19,7 +19,7 @@ import { rootTerritoryId } from "Theme/constants";
 import theme from "Theme/theme";
 import { DraggedTerritoryItem, DragItem } from "types";
 import { EntityTag } from "../..";
-import { ContextMenu } from "../ContextMenu/ContextMenu";
+import { TerritoryTreeContextMenu } from "../TerritoryTreeContextMenu/TerritoryTreeContextMenu";
 import {
   StyledChildrenWrap,
   StyledDisabledTag,
@@ -285,7 +285,7 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
                     showOnly="label"
                   />
                 </animated.div>
-                <ContextMenu
+                <TerritoryTreeContextMenu
                   territoryActant={territoryActant}
                   onMenuOpen={() => setContextMenuOpen(true)}
                   onMenuClose={() => setContextMenuOpen(false)}
