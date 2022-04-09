@@ -14,15 +14,7 @@
     "moduleResolution": "node",
     "resolveJsonModule": true,
     "paths": {
-      "@daos/*": ["src/mocks/*"],
-      "@entities/*": ["src/domain/*"],
-      "@common/*": ["src/common/*"],
-      "@shared/*": ["./../shared/*"],
-      "@server/*": ["src/server"],
-      "@modules/*": ["src/modules/*"],
-      "@service/*": ["src/service/*"],
-      "@models/*": ["src/models/*"],
-      "@middlewares/*": ["src/middlewares/*"]
+      "@shared/*": ["./../shared/*"]
     },
     "types": ["node"],
     "typeRoots": ["node_modules/@types"]

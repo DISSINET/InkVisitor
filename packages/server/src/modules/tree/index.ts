@@ -34,12 +34,9 @@ export default Router()
       // check child territory
       const territoryData = await findEntityById<ITerritory>(
         request.db,
-        moveId,
-        {
-          class: EntityClass.Territory,
-        }
+        moveId
       );
-      if (!territoryData) {
+      if (!territoryData || territoryData.class !== EntityClass.Territory) {
         throw new TerritoryDoesNotExits(
           `territory ${moveId} does not exist`,
           moveId
@@ -54,10 +51,8 @@ export default Router()
       }
 
       // check parent territory
-      const parent = await findEntityById<ITerritory>(request.db, parentId, {
-        class: EntityClass.Territory,
-      });
-      if (!parent) {
+      const parent = await findEntityById<ITerritory>(request.db, parentId);
+      if (!parent || parent.class !== EntityClass.Territory) {
         throw new TerritoryDoesNotExits(
           `parent territory ${parentId} does not exist`,
           parentId

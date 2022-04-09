@@ -1,9 +1,9 @@
 import Territory from "@models/territory/territory";
 import User, { UserRight } from "@models/user/user";
 import { Db } from "@service/RethinkDB";
-import { getEntities } from "@service/shorthands";
+import { getEntitiesDataByClass } from "@service/shorthands";
 import { EntityClass, UserRoleMode } from "@shared/enums";
-import { IEntity, IResponseTree, IStatement, ITerritory } from "@shared/types";
+import { IResponseTree, IStatement, ITerritory } from "@shared/types";
 import { TerritoriesBrokenError } from "@shared/types/errors";
 
 export class TreeCreator {
@@ -124,7 +124,7 @@ export class TreeCreator {
 
   static async countStatements(db: Db): Promise<Record<string, number>> {
     const statements = (
-      await getEntities<IStatement>(db, { class: "S" })
+      await getEntitiesDataByClass<IStatement>(db, EntityClass.Statement)
     ).filter((s) => s.data.territory && s.data.territory.id);
     const statementsCountMap: Record<string, number> = {}; // key is territoryid
     for (const statement of statements) {
@@ -158,13 +158,9 @@ class TreeCache {
     await db.initDb();
 
     const [territoriesData, statementsCountMap] = await Promise.all([
-      getEntities<ITerritory>(db, {
-        class: EntityClass.Territory,
-      }),
+      getEntitiesDataByClass<ITerritory>(db, EntityClass.Territory),
       TreeCreator.countStatements(db),
     ]);
-
-    const evr = getEntities<IEntity>(db, {});
 
     newTree.createParentMap(
       territoriesData
