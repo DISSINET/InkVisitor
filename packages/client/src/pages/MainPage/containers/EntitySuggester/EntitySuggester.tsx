@@ -157,16 +157,6 @@ export const EntitySuggester: React.FC<EntitySuggesterI> = ({
       onSuccess: (data, variables) => {
         onSelected(variables.id);
         handleClean();
-        if (variables.class === "T") {
-          queryClient.invalidateQueries("tree");
-          toast.info(`Terrritory [${variables.label}] created!`);
-        } else if (variables.class === "S") {
-          toast.info(`Statement [${variables.label}] created!`);
-        } else if (variables.class === "A") {
-          toast.info(`Action [${variables.label}] created!`);
-        } else {
-          toast.info(`Actant [${variables.label}] created!`);
-        }
         if (openDetailOnCreate) {
           setDetailId(variables.id);
         }
