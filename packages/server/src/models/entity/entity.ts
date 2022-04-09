@@ -5,13 +5,7 @@ import {
   fillArray,
 } from "@models/common";
 import { r as rethink, Connection, WriteResult, RDatum } from "rethinkdb-ts";
-import {
-  IStatement,
-  IEntity,
-  IResponseEntity,
-  IProp,
-  IReference,
-} from "@shared/types";
+import { IStatement, IEntity, IProp, IReference } from "@shared/types";
 import {
   EntityClass,
   EntityStatus,
@@ -24,7 +18,6 @@ import { InternalServerError } from "@shared/types/errors";
 import User from "@models/user/user";
 import emitter from "@models/events/emitter";
 import { EventTypes } from "@models/events/types";
-import { findEntitiesByIds } from "@service/shorthands";
 
 export default class Entity implements IEntity, IDbModel {
   static table = "entities";
@@ -140,23 +133,6 @@ export default class Entity implements IEntity, IDbModel {
     }
 
     return UserRoleMode.Read;
-  }
-
-  getDependentStatements(db: Connection | undefined): Promise<IStatement[]> {
-    return rethink
-      .table(Entity.table)
-      .filter({ class: EntityClass.Statement })
-      .filter((row: any) => {
-        return rethink.or(
-          row("data")("actants").contains((actantElement: any) =>
-            actantElement("actant").eq(this.id)
-          ),
-          row("data")("props").contains((propElement: any) =>
-            propElement("origin").eq(this.id)
-          )
-        );
-      })
-      .run(db);
   }
 
   static async findUsedInProps(
@@ -296,53 +272,19 @@ export default class Entity implements IEntity, IDbModel {
     return out;
   }
 
+  static async findEntitiesByIds(
+    con: Connection,
+    ids: string[]
+  ): Promise<IEntity[]> {
+    const data = await rethink
+      .table(Entity.table)
+      .getAll(rethink.args(ids))
+      .run(con);
+    return data;
+  }
+
   async getEntities(db: Connection): Promise<IEntity[]> {
-    const entities = findEntitiesByIds<IEntity>(db, this.getEntitiesIds());
+    const entities = Entity.findEntitiesByIds(db, this.getEntitiesIds());
     return entities;
   }
-
-  /*
-   * finds statements which are linked to current entity
-   * @param db db connection
-   * @param territoryId id of the entity
-   * @returns list of statements data
-   */
-  async findDependentStatements(
-    db: Connection | undefined
-  ): Promise<IStatement[]> {
-    const statements = await rethink
-      .table(Entity.table)
-      .filter({
-        class: EntityClass.Statement,
-      })
-      .filter((row: RDatum) => {
-        return rethink.or(
-          row("data")("territory")("id").eq(this.id),
-          row("data")("actions").contains((entry: RDatum) =>
-            entry("action").eq(this.id)
-          ),
-          row("data")("actants").contains((entry: RDatum) =>
-            entry("actant").eq(this.id)
-          ),
-          row("data")("tags").contains(this.id),
-          row("data")("props").contains((entry: RDatum) =>
-            entry("value")("id").eq(this.id)
-          ),
-          row("data")("props").contains((entry: RDatum) =>
-            entry("type")("id").eq(this.id)
-          ),
-          row("data")("props").contains((entry: RDatum) =>
-            entry("origin").eq(this.id)
-          )
-        );
-      })
-      .run(db);
-
-    return statements.sort((a, b) => {
-      return a.data.territory.order - b.data.territory.order;
-    });
-  }
 }
-
-const e = new Entity({});
-console.log(JSON.stringify(e));
