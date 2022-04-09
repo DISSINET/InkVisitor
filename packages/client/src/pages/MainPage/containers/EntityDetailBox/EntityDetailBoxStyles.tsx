@@ -29,13 +29,14 @@ export const StyledDetailSection = styled.div<StyledDetailSection>`
 
 export const StyledActantPreviewRow = styled.div`
   display: flex;
+  flex-wrap: wrap;
   justify-content: left;
   align-items: center;
-  margin-bottom: ${({ theme }) => theme.space[4]};
 `;
 
 export const StyledTagWrap = styled.div`
   margin-right: ${({ theme }) => theme.space[2]};
+  margin-bottom: ${({ theme }) => theme.space[4]};
   display: inline-flex;
   overflow: hidden;
 `;
