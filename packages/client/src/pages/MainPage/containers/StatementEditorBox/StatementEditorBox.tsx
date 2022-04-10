@@ -634,6 +634,7 @@ export const StatementEditorBox: React.FC = () => {
             <StyledEditorSectionHeader>References</StyledEditorSectionHeader>
             <StyledEditorSectionContent>
               <EntityReferenceTable
+                openDetailOnCreate
                 entities={statement.entities}
                 references={statement.references}
                 onChange={(newReferences: IReference[]) => {
