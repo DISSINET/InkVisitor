@@ -508,7 +508,7 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                         icon={<FaRegCopy />}
                         onClick={async () => {
                           await navigator.clipboard.writeText(entity.id);
-                          toast.info("ID copied to clipboard!");
+                          toast.info("ID copied to clipboard");
                         }}
                       />
                     </StyledDetailContentRowValueID>
