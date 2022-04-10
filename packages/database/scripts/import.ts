@@ -22,7 +22,7 @@ const datasets: Record<string, TableSchema[]> = {
   all: [
     {
       name: "acl_permissions",
-      data: require("../datasets/all/acl_permissions.json"),
+      data: require("../datasets/default/acl_permissions.json"),
       transform: function () {},
     },
     {
@@ -92,7 +92,7 @@ const datasets: Record<string, TableSchema[]> = {
     },
     {
       name: "users",
-      data: require("../datasets/all/users.json"),
+      data: require("../datasets/default/users.json"),
       transform: function () {
         this.data = this.data.map((user: IUser) => {
           user.password = hashPassword(user.password ? user.password : "");
@@ -103,6 +103,98 @@ const datasets: Record<string, TableSchema[]> = {
     {
       name: "audits",
       data: require("../datasets/all/audits.json"),
+      transform: function () {
+        this.data = this.data.map((audit: IAudit) => {
+          audit.date = new Date(audit.date);
+          return audit;
+        });
+      },
+    },
+  ],
+  empty: [
+    {
+      name: "acl_permissions",
+      data: require("../datasets/default/acl_permissions.json"),
+      transform: function () {},
+    },
+    {
+      name: "entities",
+      data: require("../datasets/empty/entities.json"),
+      transform: function () {},
+      indexes: [
+        // if the prop object is missing value/type/children attrs, this wont work! model should handle this
+        (table: RTable) =>
+          table.indexCreate(
+            "props.recursive",
+            r
+              .row("props")
+              .concatMap((prop: RDatum) =>
+                r
+                  .expr([prop("value")("id"), prop("type")("id")])
+                  .add(
+                    prop("children").concatMap((ch1: RDatum) =>
+                      r
+                        .expr([ch1("value")("id"), ch1("type")("id")])
+                        .add(
+                          ch1("children").concatMap((ch2: RDatum) =>
+                            r
+                              .expr([ch2("value")("id"), ch2("type")("id")])
+                              .add(
+                                ch2("children").concatMap((ch3: RDatum) => [
+                                  ch3("value")("id"),
+                                  ch3("type")("id"),
+                                ]) as RValue
+                              )
+                          ) as RValue
+                        )
+                    ) as RValue
+                  )
+              )
+              .distinct(),
+            { multi: true }
+          ),
+        (table: RTable) => table.indexCreate(DbIndex.Class),
+        (table: RTable) =>
+          table.indexCreate(
+            DbIndex.StatementTerritory,
+            r.row("data")("territory")("id")
+          ),
+        (table: RTable) =>
+          table.indexCreate(
+            DbIndex.StatementEntities,
+            function (row: RDatum) {
+              return row("data")("actions")
+                .map(function (a: RDatum) {
+                  return a("action");
+                })
+                .add(
+                  row("data")("actants").map(function (a: RDatum) {
+                    return a("actant");
+                  }) as any,
+                  row("data")("tags").map(function (t: RDatum) {
+                    return t;
+                  }) as any
+                );
+            },
+            {
+              multi: true,
+            }
+          ),
+      ],
+    },
+    {
+      name: "users",
+      data: require("../datasets/default/users.json"),
+      transform: function () {
+        this.data = this.data.map((user: IUser) => {
+          user.password = hashPassword(user.password ? user.password : "");
+          return user;
+        });
+      },
+    },
+    {
+      name: "audits",
+      data: require("../datasets/empty/audits.json"),
       transform: function () {
         this.data = this.data.map((audit: IAudit) => {
           audit.date = new Date(audit.date);
