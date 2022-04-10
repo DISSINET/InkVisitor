@@ -187,3 +187,9 @@ export enum Order {
   First = -9999,
   Last = 9999,
 }
+
+export enum DbIndex {
+  Class = "class",
+  StatementTerritory = "statement_territory",
+  StatementEntities = "statement_entities",
+}

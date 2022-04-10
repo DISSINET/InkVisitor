@@ -12,11 +12,12 @@ import Statement from "@models/statement/statement";
 import {
   deleteEntities,
   findEntityById,
-  findEntities,
+  getEntitiesDataByClass,
 } from "@service/shorthands";
 import { Db } from "@service/RethinkDB";
 import Territory from "@models/territory/territory";
 import "ts-jest";
+import { ITerritory } from "@shared/types";
 
 describe("Entities create", function () {
   describe("empty data", () => {
@@ -103,20 +104,20 @@ describe("Entities create", function () {
       await db.initDb();
       await deleteEntities(db);
 
-      const territoryData = new Territory({ label: "22323" });
+      const ent = new Territory({ label: "22323" });
 
       await request(app)
         .post(`${apiPath}/entities/create`)
-        .send(territoryData)
+        .send(ent)
         .set("authorization", "Bearer " + supertestConfig.token)
         .expect(200)
         .expect("Content-Type", /json/)
         .expect(successfulGenericResponse);
 
-      const allEntities = await findEntities(db);
-      expect(allEntities).toHaveLength(1);
-      expect(allEntities[0].id).not.toBe("");
-      expect(allEntities[0].label).toBe(territoryData.label);
+      const allEnt = await getEntitiesDataByClass<ITerritory>(db, ent.class);
+      expect(allEnt).toHaveLength(1);
+      expect(allEnt[0].id).not.toBe("");
+      expect(allEnt[0].label).toBe(ent.label);
 
       await clean(db);
       done();
