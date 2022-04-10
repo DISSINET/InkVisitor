@@ -227,6 +227,8 @@ const importTable = async (
 
   console.log(`Table ${table.name} created`);
 
+  table.transform();
+
   await r.table(table.name).insert(table.data).run(conn);
 
   const itemsImported = await r.table(table.name).count().run(conn);
