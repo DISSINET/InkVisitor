@@ -18,7 +18,7 @@ import {
 } from "./EntityDetailBoxStyles";
 
 interface EntityDetailBoxTable {
-  title: string;
+  title: { singular: string; plural: string };
   entities: { [key: string]: IEntity };
   useCases: any[];
   mode: "Prop" | "Statement" | "StatementProp";
@@ -45,7 +45,7 @@ export const EntityDetailBoxTable: React.FC<EntityDetailBoxTable> = ({
       <StyledDetailSectionContentUsedIn>
         <StyledDetailSectionContentUsedInTitle>
           <b>{`${useCases.length} `}</b>{" "}
-          {`${title}${useCases.length === 1 ? "" : "s"}`}
+          {`${useCases.length === 1 ? title.singular : title.plural}`}
         </StyledDetailSectionContentUsedInTitle>
       </StyledDetailSectionContentUsedIn>
       <StyledDetailSectionContentUsedIn>
