@@ -12,8 +12,10 @@
     "import-remote": "npx ts-node -r tsconfig-paths/register scripts/import.ts all production",
     "import-remote-sandbox": "npx ts-node -r tsconfig-paths/register scripts/import.ts all sandbox",
     "import-remote-staging": "npx ts-node -r tsconfig-paths/register scripts/import.ts all staging",
-    "import-remote-data-import": "npx ts-node -r tsconfig-paths/register scripts/import.ts all data-import",
+    "import-remote-data-import": "npx ts-node -r tsconfig-paths/register scripts/import.ts all importdata",
     "import-local": "npx ts-node -r tsconfig-paths/register scripts/import.ts all local",
+    "import-local-parsed": "npx ts-node -r tsconfig-paths/register scripts/import.ts allparsed local",
+    "import-remote-data-import-parsed": "npx ts-node -r tsconfig-paths/register scripts/import.ts allparsed importdata",
     "import-local-empty": "npx ts-node -r tsconfig-paths/register scripts/import-empty.ts all local"
   },
   "author": "",
