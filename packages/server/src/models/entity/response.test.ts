@@ -55,22 +55,9 @@ describe("test ResponseEntityDetail.walkEntityProps", function () {
       expect(!!response.entities[linkedEntity.id]).toBeTruthy();
     });
 
-    it("should add to usedInStatementProps from prop.type", () => {
-      const foundInType = response.usedInStatementProps.find(
-        (u: any) =>
-          u.statement.id === linkedEntity.id &&
-          u.position === UsedInPosition.Type
-      );
-      expect(!!foundInType).toBeTruthy();
-    });
-
-    it("should add to usedInStatementProps from prop.value", () => {
-      const foundInValue = response.usedInStatementProps.find(
-        (u) =>
-          u.statement.id === linkedEntity.id &&
-          u.position === UsedInPosition.Value
-      );
-      expect(!!foundInValue).toBeTruthy();
+    it("should add to postponedEntities map", () => {
+      const keys = Object.keys(response.postponedEntities);
+      expect(keys).toEqual([prop.type.id]);
     });
   });
 
