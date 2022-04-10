@@ -12,6 +12,7 @@ import {
 import Entity from "./entity";
 import Statement from "@models/statement/statement";
 import { nonenumerable } from "@common/decorators";
+import { Connection } from "rethinkdb-ts";
 
 export class ResponseEntity extends Entity implements IResponseEntity {
   @nonenumerable
@@ -45,12 +46,21 @@ export class ResponseEntityDetail
   usedInStatementProps: IResponseUsedInStatement<UsedInPosition>[];
   usedInMetaProps: IResponseUsedInMetaProp<UsedInPosition>[];
 
+  // map of entity ids that should be populated in subsequent methods and used in fetching
+  // real entities in populateEntitiesMap method
+  @nonenumerable
+  postponedEntities: Record<string, undefined> = {};
+
   constructor(entity: Entity) {
     super(entity);
     this.entities = {};
     this.usedInStatement = [];
     this.usedInStatementProps = [];
     this.usedInMetaProps = [];
+
+    for (const key of this.originalEntity.getEntitiesIds()) {
+      this.postponedEntities[key] = undefined;
+    }
   }
 
   /**
@@ -60,6 +70,7 @@ export class ResponseEntityDetail
   async prepare(req: Request): Promise<void> {
     super.prepare(req);
 
+    // find entities in which at least one props reference equals this.id
     const usedInEntityProps = await Entity.findUsedInProps(
       req.db.connection,
       this.id
@@ -77,10 +88,19 @@ export class ResponseEntityDetail
       await Statement.findUsedInDataProps(req.db.connection, this.id)
     );
 
-    const dependentEntities = await this.originalEntity.getEntities(
-      req.db.connection
+    await this.populateEntitiesMap(req.db.connection);
+  }
+
+  /**
+   * gathered ids from previous calls should be used to populate entities map
+   * @param conn
+   */
+  async populateEntitiesMap(conn: Connection): Promise<void> {
+    const additionalEntities = await Entity.findEntitiesByIds(
+      conn,
+      Object.keys(this.postponedEntities)
     );
-    for (const entity of dependentEntities) {
+    for (const entity of additionalEntities) {
       this.entities[entity.id] = entity;
     }
   }
@@ -91,33 +111,43 @@ export class ResponseEntityDetail
    * @param props
    */
   walkEntityProps(actant: IEntity, props: IProp[]) {
+    // if actant is linked to this detail entity - should be pushed to entities map
+    let actantValid = false;
+
     for (const prop of props) {
       if (prop.type.id === this.id) {
-        this.addUsedInMetaProp(actant, UsedInPosition.Type);
+        this.addUsedInMetaProp(actant, UsedInPosition.Type, prop);
+        this.postponedEntities[prop.value.id] = undefined;
+        actantValid = true;
       }
 
       if (prop.value.id === this.id) {
-        this.addUsedInMetaProp(actant, UsedInPosition.Value);
+        this.addUsedInMetaProp(actant, UsedInPosition.Value, prop);
+        this.postponedEntities[prop.type.id] = undefined;
+        actantValid = true;
       }
 
       if (prop.children.length) {
         this.walkEntityProps(actant, prop.children);
       }
     }
+
+    if (actantValid) {
+      this.entities[actant.id] = actant;
+    }
   }
 
   /**
-   * add entry to usedInMetaProps and entities fields
-   * @param actant
+   * add entry to usedInMetaProps
+   * @param entity
    * @param position
    */
-  addUsedInMetaProp(actant: IEntity, position: UsedInPosition) {
+  addUsedInMetaProp(entity: IEntity, position: UsedInPosition, prop: IProp) {
     this.usedInMetaProps.push({
-      entityId: actant.id,
+      entityId: entity.id,
       position,
+      prop,
     });
-
-    this.entities[actant.id] = actant;
   }
 
   /**
