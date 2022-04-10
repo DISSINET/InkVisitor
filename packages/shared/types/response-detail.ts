@@ -2,7 +2,7 @@
  * Very extensive object showing all the details about one actant
  */
 
-import { IEntity, IResponseEntity, IStatement } from ".";
+import { IEntity, IProp, IResponseEntity, IStatement } from ".";
 import { UsedInPosition } from "../enums";
 
 export interface IResponseDetail extends IResponseEntity {
@@ -21,4 +21,5 @@ export interface IResponseUsedInStatement<PositionEnum> {
 export interface IResponseUsedInMetaProp<PositionEnum> {
   entityId: string; // IEntity will be placed in IResponseDetail.entities to avoid making duplications
   position: PositionEnum; // type | value
+  prop: IProp;
 }
