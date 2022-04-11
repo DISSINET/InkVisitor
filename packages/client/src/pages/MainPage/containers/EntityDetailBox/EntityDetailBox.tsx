@@ -555,6 +555,8 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                     <Input
                       disabled={!userCanEdit}
                       width="full"
+                      type="textarea"
+                      rows={2}
                       value={entity.detail}
                       onChangeFn={async (newValue: string) => {
                         updateEntityMutation.mutate({ detail: newValue });
