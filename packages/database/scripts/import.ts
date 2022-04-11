@@ -262,6 +262,8 @@ const importData = async () => {
         process.exit(0);
       }
 
+      rl.close();
+
       const tnl = tunnel(
         {
           host: envData.SSH_IP,
