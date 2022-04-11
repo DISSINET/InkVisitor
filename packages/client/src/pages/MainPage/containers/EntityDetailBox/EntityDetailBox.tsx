@@ -1090,7 +1090,7 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
             <StyledDetailSectionHeader>
               Meta properties
             </StyledDetailSectionHeader>
-            <StyledDetailSectionContent>
+            <StyledDetailSectionContent firstSection>
               <table>
                 <tbody>
                   <PropGroup
