@@ -50,7 +50,7 @@ export const Entities: { [key: string]: IEntity } = {
   },
   R: {
     id: "R",
-    label: "Territory",
+    label: "Resource",
     color: "entityR",
   },
   A: {
