@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { SetStateAction, useMemo, useState } from "react";
 
 import { MdSettings } from "react-icons/md";
 import { EntityClass } from "@shared/enums";
@@ -51,6 +51,8 @@ import { FaUnlink } from "react-icons/fa";
 
 interface AttributesGroupEditor {
   modalTitle: string;
+  modalOpen: boolean;
+  setModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
   statementId: string;
   propTypeActant?: IEntity;
   classesPropType: EntityClass[];
@@ -69,6 +71,8 @@ interface AttributesGroupEditor {
 
 export const AttributesGroupEditor: React.FC<AttributesGroupEditor> = ({
   modalTitle,
+  modalOpen,
+  setModalOpen,
   propTypeActant,
   classesPropType,
   propValueActant,
@@ -84,7 +88,6 @@ export const AttributesGroupEditor: React.FC<AttributesGroupEditor> = ({
   statementId,
   userCanEdit,
 }) => {
-  const [modalOpen, setModalOpen] = useState<boolean>(false);
   const [modalData, setModalData] = useState<AttributeGroupDataObject>(data);
 
   const somethingWasUpdated = useMemo(() => {
