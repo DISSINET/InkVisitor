@@ -1088,7 +1088,7 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
           </StyledDetailSection>
 
           {/* meta props section */}
-          <StyledDetailSection>
+          <StyledDetailSection metaSection>
             <StyledDetailSectionHeader>
               Meta properties
             </StyledDetailSectionHeader>
