@@ -10,7 +10,7 @@ export const StyledGrid = styled.div<StyledGrid>`
 
   align-items: center;
   padding-left: ${({ theme }) => theme.space[0]};
-  grid-template-columns: 1fr 1fr 8rem;
+  grid-template-columns: 1fr 1fr 10rem;
   width: fit-content;
   grid-template-rows: auto;
   grid-auto-flow: row;
@@ -26,7 +26,7 @@ interface StyledListHeaderColumn {
 export const StyledListHeaderColumn = styled.div<StyledListHeaderColumn>`
   font-weight: ${({ theme }) => theme.fontWeight.light};
   margin-left: ${({ theme, leftMargin }) =>
-    leftMargin ? theme.space[14] : theme.space[1]};
+    leftMargin ? theme.space[16] : theme.space[1]};
   font-size: ${({ theme }) => theme.fontSize["sm"]};
   color: ${({ theme }) => theme.color["info"]};
   text-align: left;
@@ -56,7 +56,7 @@ export const StyledPropLineColumn = styled.div<StyledPropLineColumn>`
   margin-left: ${({ level = 0 }) => getIndentation(level)};
   padding-right: 3px;
   overflow: ${({ isTag }) => (isTag ? "hidden" : "visible")};
-  border: 1px dashed hotpink;
+  /* border: 1px dashed hotpink; */
 `;
 
 interface StyledPropButtonGroup {
