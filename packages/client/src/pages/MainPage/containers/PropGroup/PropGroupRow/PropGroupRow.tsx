@@ -259,7 +259,7 @@ export const PropGroupRow: React.FC<IPropGroupRow> = ({
         </StyledPropLineColumn>
 
         <StyledPropLineColumn>
-          <StyledPropButtonGroup leftMargin rightMargin>
+          <StyledPropButtonGroup>
             <AttributesGroupEditor
               modalTitle={`Property attributes`}
               disabledAllAttributes={!userCanEdit}
