@@ -260,11 +260,15 @@ export default class Entity implements IEntity, IDbModel {
     return out;
   }
 
-  static extractIdsFromProps(props: IProp[]): string[] {
+  static extractIdsFromProps(props: IProp[] = []): string[] {
     let out: string[] = [];
     for (const prop of props) {
-      out.push(prop.type.id);
-      out.push(prop.value.id);
+      if (prop.type) {
+        out.push(prop.type.id);
+      }
+      if (prop.value) {
+        out.push(prop.value.id);
+      }
 
       out = out.concat(Entity.extractIdsFromProps(prop.children));
     }

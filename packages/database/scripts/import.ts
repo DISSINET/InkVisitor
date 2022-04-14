@@ -22,7 +22,7 @@ const datasets: Record<string, TableSchema[]> = {
   all: [
     {
       name: "acl_permissions",
-      data: require("../datasets/all/acl_permissions.json"),
+      data: require("../datasets/default/acl_permissions.json"),
       transform: function () {},
     },
     {
@@ -92,7 +92,7 @@ const datasets: Record<string, TableSchema[]> = {
     },
     {
       name: "users",
-      data: require("../datasets/all/users.json"),
+      data: require("../datasets/default/users.json"),
       transform: function () {
         this.data = this.data.map((user: IUser) => {
           user.password = hashPassword(user.password ? user.password : "");
@@ -111,15 +111,15 @@ const datasets: Record<string, TableSchema[]> = {
       },
     },
   ],
-  allparsed: [
+  empty: [
     {
       name: "acl_permissions",
-      data: require("../datasets/all-parsed/acl_permissions.json"),
+      data: require("../datasets/default/acl_permissions.json"),
       transform: function () {},
     },
     {
       name: "entities",
-      data: require("../datasets/all-parsed/entities.json"),
+      data: require("../datasets/empty/entities.json"),
       transform: function () {},
       indexes: [
         // if the prop object is missing value/type/children attrs, this wont work! model should handle this
@@ -184,7 +184,7 @@ const datasets: Record<string, TableSchema[]> = {
     },
     {
       name: "users",
-      data: require("../datasets/all-parsed/users.json"),
+      data: require("../datasets/default/users.json"),
       transform: function () {
         this.data = this.data.map((user: IUser) => {
           user.password = hashPassword(user.password ? user.password : "");
@@ -194,7 +194,7 @@ const datasets: Record<string, TableSchema[]> = {
     },
     {
       name: "audits",
-      data: require("../datasets/all-parsed/audits.json"),
+      data: require("../datasets/empty/audits.json"),
       transform: function () {
         this.data = this.data.map((audit: IAudit) => {
           audit.date = new Date(audit.date);
@@ -202,7 +202,7 @@ const datasets: Record<string, TableSchema[]> = {
         });
       },
     },
-  ]
+  ],
 };
 
 const config: RConnectionOptions & { tables: TableSchema[] } = {
@@ -226,6 +226,8 @@ const importTable = async (
   }
 
   console.log(`Table ${table.name} created`);
+
+  table.transform();
 
   await r.table(table.name).insert(table.data).run(conn);
 
@@ -259,6 +261,8 @@ const importData = async () => {
       if (result.toLowerCase() !== "y") {
         process.exit(0);
       }
+
+      rl.close();
 
       const tnl = tunnel(
         {
