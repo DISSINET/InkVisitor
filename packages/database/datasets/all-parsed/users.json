@@ -112,5 +112,77 @@
     "bookmarks": null,
     "role": "viewer",
     "rights": []
+  },
+   {
+    "id": "100",
+    "name": "David",
+    "email": "david.zbiral@phil.muni.cz",
+    "password": "test123",
+    "active": true,
+    "options": {
+      "defaultTerritory": "",
+      "defaultLanguage": "",
+      "searchLanguages": []
+    },
+    "bookmarks": null,
+    "role": "admin",
+    "rights":  [{
+        "territory": "T0",
+        "mode": "admin"
+      }]
+  },
+  {
+    "id": "101",
+    "name": "Robert",
+    "email": "robert.shaw@phil.muni.cz",
+    "password": "test123",
+    "active": true,
+    "options": {
+      "defaultTerritory": "",
+      "defaultLanguage": "",
+      "searchLanguages": []
+    },
+    "bookmarks": null,
+    "role": "admin",
+    "rights": [ {
+        "territory": "T0",
+        "mode": "admin"
+      }]
+  },
+  {
+    "id": "102",
+    "name": "Davor",
+    "email": "davor.salihovic@phil.muni.cz",
+    "password": "test123",
+    "active": true,
+    "options": {
+      "defaultTerritory": "",
+      "defaultLanguage": "",
+      "searchLanguages": []
+    },
+    "bookmarks": null,
+    "role": "admin",
+    "rights": [ {
+        "territory": "T0",
+        "mode": "admin"
+      }]
+  },
+  {
+    "id": "103",
+    "name": "Katia",
+    "email": "katia.riccardo@phil.muni.cz",
+    "password": "test123",
+    "active": true,
+    "options": {
+      "defaultTerritory": "",
+      "defaultLanguage": "",
+      "searchLanguages": []
+    },
+    "bookmarks": null,
+    "role": "admin",
+    "rights": [ {
+        "territory": "T0",
+        "mode": "admin"
+      }]
   }
 ]
