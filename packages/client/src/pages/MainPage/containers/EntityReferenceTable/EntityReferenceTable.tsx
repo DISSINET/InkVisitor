@@ -14,6 +14,7 @@ interface EntityReferenceTable {
   references: IReference[];
   onChange: (newRefefences: IReference[]) => void;
   disabled: boolean;
+  openDetailOnCreate?: boolean;
 }
 
 export const EntityReferenceTable: React.FC<EntityReferenceTable> = ({
@@ -21,6 +22,7 @@ export const EntityReferenceTable: React.FC<EntityReferenceTable> = ({
   references,
   onChange,
   disabled = true,
+  openDetailOnCreate,
 }) => {
   const sendChanges = (newValues: IReference[]) => {
     // if (JSON.stringify(newValues) !== JSON.stringify(displayValues)) {
@@ -87,6 +89,7 @@ export const EntityReferenceTable: React.FC<EntityReferenceTable> = ({
                 handleRemove={handleRemove}
                 handleChangeResource={handleChangeResource}
                 handleChangeValue={handleChangeValue}
+                openDetailOnCreate={openDetailOnCreate}
               />
             );
           })}

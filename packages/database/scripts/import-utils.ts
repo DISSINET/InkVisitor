@@ -38,7 +38,7 @@ export const prepareDbConnection = async (
     await r.dbDrop(config.db as RValue<string>).run(conn);
     console.log("Database dropped");
   } catch (e) {
-    throw new Error(`Database not dropped: ${e}`);
+    console.log(`Database not dropped ('${config.db}'). Does not exist?`);
   }
 
   // Recreate the database

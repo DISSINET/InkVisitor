@@ -508,7 +508,7 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                         icon={<FaRegCopy />}
                         onClick={async () => {
                           await navigator.clipboard.writeText(entity.id);
-                          toast.info("ID copied to clipboard!");
+                          toast.info("ID copied to clipboard");
                         }}
                       />
                     </StyledDetailContentRowValueID>
@@ -555,6 +555,8 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                     <Input
                       disabled={!userCanEdit}
                       width="full"
+                      type="textarea"
+                      rows={2}
                       value={entity.detail}
                       onChangeFn={async (newValue: string) => {
                         updateEntityMutation.mutate({ detail: newValue });
@@ -1090,7 +1092,7 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
             <StyledDetailSectionHeader>
               Meta properties
             </StyledDetailSectionHeader>
-            <StyledDetailSectionContent>
+            <StyledDetailSectionContent firstSection>
               <table>
                 <tbody>
                   <PropGroup
@@ -1131,7 +1133,7 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
             <StyledDetailSectionHeader>Used in:</StyledDetailSectionHeader>
             {/* usedId props */}
             <EntityDetailBoxTable
-              title="Meta Prop"
+              title={{ singular: "Meta Property", plural: "Meta Properties" }}
               entities={entity.entities}
               useCases={entity.usedInMetaProps}
               mode="Prop"
@@ -1140,7 +1142,7 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
 
             {/* usedId statements */}
             <EntityDetailBoxTable
-              title="Statement"
+              title={{ singular: "Statement", plural: "Statements" }}
               entities={entity.entities}
               useCases={entity.usedInStatement}
               mode="Statement"
@@ -1149,7 +1151,10 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
 
             {/* usedId statement props */}
             <EntityDetailBoxTable
-              title="Statement Prop"
+              title={{
+                singular: "Statement Property",
+                plural: "Statement Properties",
+              }}
               entities={entity.entities}
               useCases={entity.usedInStatementProps}
               mode="StatementProp"

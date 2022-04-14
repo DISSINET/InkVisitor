@@ -16,7 +16,7 @@
     "import-local": "npx ts-node -r tsconfig-paths/register scripts/import.ts all local",
     "import-local-parsed": "npx ts-node -r tsconfig-paths/register scripts/import.ts allparsed local",
     "import-remote-data-import-parsed": "npx ts-node -r tsconfig-paths/register scripts/import.ts allparsed importdata",
-    "import-local-empty": "npx ts-node -r tsconfig-paths/register scripts/import-empty.ts all local"
+    "import-local-empty": "npx ts-node -r tsconfig-paths/register scripts/import-empty.ts empty local"
   },
   "author": "",
   "license": "ISC",

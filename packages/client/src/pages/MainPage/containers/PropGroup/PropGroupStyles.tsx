@@ -8,8 +8,8 @@ export const StyledGrid = styled.div<StyledGrid>`
   display: grid;
 
   align-items: center;
-  padding-left: ${({ theme }) => theme.space[10]};
-  grid-template-columns: 1fr 1fr 7rem;
+  padding-left: ${({ theme }) => theme.space[0]};
+  grid-template-columns: 1fr 1fr 8rem;
   width: fit-content;
   grid-template-rows: auto;
   grid-auto-flow: row;
@@ -48,14 +48,14 @@ export const StyledPropLineColumn = styled(
   align-items: center;
   margin-left: ${({ theme, level = 1 }) => {
     if (level === 1) {
-      return theme.space[0];
-    } else if (level === 2) {
       return theme.space[6];
+    } else if (level === 2) {
+      return theme.space[10];
     } else if (level === 3) {
-      return theme.space[12];
+      return theme.space[14];
     }
   }};
-  padding-right: 5px;
+  padding-right: 3px;
   overflow: ${({ isTag }) => (isTag ? "hidden" : "visible")};
   // border: 1px dashed hotpink;
 `;

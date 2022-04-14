@@ -1,9 +1,9 @@
 import {
-  EntityStatus,
   EntityClass,
+  EntityExtension,
+  EntityStatus,
   UserRole,
   UserRoleMode,
-  EntityExtension,
 } from "@shared/enums";
 import { IEntity, IOption } from "@shared/types";
 import api from "api";
@@ -15,7 +15,6 @@ import { DragObjectWithType } from "react-dnd";
 import { FaHome } from "react-icons/fa";
 import { useMutation, useQuery, useQueryClient } from "react-query";
 import { OptionTypeBase, ValueType } from "react-select";
-import { toast } from "react-toastify";
 import { DropdownAny, rootTerritoryId } from "Theme/constants";
 import { Entities } from "types";
 
@@ -95,7 +94,6 @@ export const EntitySuggester: React.FC<EntitySuggesterI> = ({
           )
           .map((s: IEntity) => {
             const entity = Entities[s.class];
-
             const icons: React.ReactNode[] = [];
 
             if (territoryActants?.includes(s.id)) {
@@ -157,16 +155,6 @@ export const EntitySuggester: React.FC<EntitySuggesterI> = ({
       onSuccess: (data, variables) => {
         onSelected(variables.id);
         handleClean();
-        if (variables.class === "T") {
-          queryClient.invalidateQueries("tree");
-          toast.info(`Terrritory [${variables.label}] created!`);
-        } else if (variables.class === "S") {
-          toast.info(`Statement [${variables.label}] created!`);
-        } else if (variables.class === "A") {
-          toast.info(`Action [${variables.label}] created!`);
-        } else {
-          toast.info(`Actant [${variables.label}] created!`);
-        }
         if (openDetailOnCreate) {
           setDetailId(variables.id);
         }
