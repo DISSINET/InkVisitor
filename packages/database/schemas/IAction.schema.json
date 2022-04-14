@@ -75,13 +75,6 @@
             ],
             "type": "string"
         },
-        "EntityReferenceSource": {
-            "enum": [
-                "geonames",
-                "wordnet"
-            ],
-            "type": "string"
-        },
         "EntityStatus": {
             "enum": [
                 "0",
@@ -90,27 +83,6 @@
                 "3"
             ],
             "type": "string"
-        },
-        "IEntityReference": {
-            "additionalProperties": false,
-            "defaultProperties": [],
-            "properties": {
-                "id": {
-                    "type": "string"
-                },
-                "source": {
-                    "$ref": "IAction#/definitions/EntityReferenceSource"
-                },
-                "value": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "id",
-                "source",
-                "value"
-            ],
-            "type": "object"
         },
         "IProp": {
             "additionalProperties": false,
@@ -216,6 +188,27 @@
                 "logic",
                 "partitivity",
                 "virtuality"
+            ],
+            "type": "object"
+        },
+        "IReference": {
+            "additionalProperties": false,
+            "defaultProperties": [],
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "resource": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "id",
+                "resource",
+                "value"
             ],
             "type": "object"
         },
@@ -339,7 +332,7 @@
         },
         "references": {
             "items": {
-                "$ref": "IAction#/definitions/IEntityReference"
+                "$ref": "IAction#/definitions/IReference"
             },
             "type": "array"
         },

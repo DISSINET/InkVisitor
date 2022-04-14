@@ -2,6 +2,11 @@
 # purpose: to test import to rethinkDB because of import.ts problems on windows platforms
 ##########################################################################################
 
+# this script is obsolete, it does not correspond to latest db development, use import.ts
+print("This script is obsolete, it does not correspond to latest db development, use import.ts")
+exit(-1)
+
+
 import sys, bcrypt, json
 from rethinkdb import RethinkDB
 from dotenv import dotenv_values
@@ -220,7 +225,7 @@ conn = None
 
 try:
 
-  conn = r.connect(config["host"], config["port"])
+  conn = r.connect(config["host"], config["port"], config["db"], config["password"])
   # set default database
   conn.use(config["db"])
 

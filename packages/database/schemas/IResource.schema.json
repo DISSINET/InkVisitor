@@ -24,13 +24,6 @@
             ],
             "type": "string"
         },
-        "EntityReferenceSource": {
-            "enum": [
-                "geonames",
-                "wordnet"
-            ],
-            "type": "string"
-        },
         "EntityStatus": {
             "enum": [
                 "0",
@@ -39,27 +32,6 @@
                 "3"
             ],
             "type": "string"
-        },
-        "IEntityReference": {
-            "additionalProperties": false,
-            "defaultProperties": [],
-            "properties": {
-                "id": {
-                    "type": "string"
-                },
-                "source": {
-                    "$ref": "IResource#/definitions/EntityReferenceSource"
-                },
-                "value": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "id",
-                "source",
-                "value"
-            ],
-            "type": "object"
         },
         "IProp": {
             "additionalProperties": false,
@@ -168,6 +140,27 @@
             ],
             "type": "object"
         },
+        "IReference": {
+            "additionalProperties": false,
+            "defaultProperties": [],
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "resource": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "id",
+                "resource",
+                "value"
+            ],
+            "type": "object"
+        },
         "Language": {
             "enum": [
                 "",
@@ -243,12 +236,20 @@
             "additionalProperties": false,
             "defaultProperties": [],
             "properties": {
-                "link": {
+                "partValueBaseURL": {
+                    "type": "string"
+                },
+                "partValueLabel": {
+                    "type": "string"
+                },
+                "url": {
                     "type": "string"
                 }
             },
             "required": [
-                "link"
+                "partValueBaseURL",
+                "partValueLabel",
+                "url"
             ],
             "type": "object"
         },
@@ -284,7 +285,7 @@
         },
         "references": {
             "items": {
-                "$ref": "IResource#/definitions/IEntityReference"
+                "$ref": "IResource#/definitions/IReference"
             },
             "type": "array"
         },

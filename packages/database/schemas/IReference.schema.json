@@ -1,0 +1,24 @@
+{
+    "$id": "IReference",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "additionalProperties": false,
+    "defaultProperties": [],
+    "properties": {
+        "id": {
+            "type": "string"
+        },
+        "resource": {
+            "type": "string"
+        },
+        "value": {
+            "type": "string"
+        }
+    },
+    "required": [
+        "id",
+        "resource",
+        "value"
+    ],
+    "type": "object"
+}
+
