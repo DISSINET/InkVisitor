@@ -570,7 +570,7 @@ export const StatementEditorBox: React.FC = () => {
           </StyledEditorSection>
 
           {/* Actions */}
-          <StyledEditorSection key="editor-section-actions">
+          <StyledEditorSection metaSection key="editor-section-actions">
             <StyledEditorSectionHeader>Actions</StyledEditorSectionHeader>
             <StyledEditorSectionContent>
               <StyledEditorActantTableWrapper>
@@ -600,7 +600,7 @@ export const StatementEditorBox: React.FC = () => {
           </StyledEditorSection>
 
           {/* Actants */}
-          <StyledEditorSection key="editor-section-actants">
+          <StyledEditorSection metaSection key="editor-section-actants">
             <StyledEditorSectionHeader>Actants</StyledEditorSectionHeader>
             <StyledEditorSectionContent>
               <StyledEditorActantTableWrapper>
