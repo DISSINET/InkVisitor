@@ -135,6 +135,8 @@ export const PropGroupRow: React.FC<IPropGroupRow> = ({
     }
   }, [isDragging]);
 
+  const [modalOpen, setModalOpen] = useState<boolean>(false);
+
   const renderPropRow = () => {
     return (
       <StyledGrid
@@ -195,6 +197,7 @@ export const PropGroupRow: React.FC<IPropGroupRow> = ({
                 color="success"
                 inverted
                 noBorder
+                onClick={() => setModalOpen(true)}
                 icon={<AttributeIcon attributeName={"negation"} />}
               />
             ) : (
@@ -250,6 +253,7 @@ export const PropGroupRow: React.FC<IPropGroupRow> = ({
                 color="success"
                 inverted
                 noBorder
+                onClick={() => setModalOpen(true)}
                 icon={<AttributeIcon attributeName={"negation"} />}
               />
             ) : (
@@ -262,6 +266,8 @@ export const PropGroupRow: React.FC<IPropGroupRow> = ({
           <StyledPropButtonGroup>
             <AttributesGroupEditor
               modalTitle={`Property attributes`}
+              modalOpen={modalOpen}
+              setModalOpen={setModalOpen}
               disabledAllAttributes={!userCanEdit}
               propTypeActant={propTypeEntity}
               propValueActant={propValueEntity}
@@ -334,6 +340,7 @@ export const PropGroupRow: React.FC<IPropGroupRow> = ({
                 color="success"
                 inverted
                 noBorder
+                onClick={() => setModalOpen(true)}
                 icon={<AttributeIcon attributeName={"negation"} />}
               />
             ) : (
@@ -346,6 +353,7 @@ export const PropGroupRow: React.FC<IPropGroupRow> = ({
                 color="success"
                 inverted
                 noBorder
+                onClick={() => setModalOpen(true)}
                 icon={prop.bundleOperator}
               />
             ) : (
