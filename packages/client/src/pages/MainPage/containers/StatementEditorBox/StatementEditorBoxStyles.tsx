@@ -35,10 +35,12 @@ export const StyledEditorPreSection = styled.div<StyledEditorPreSection>`
 interface StyledEditorSection {
   firstSection?: boolean;
   lastSection?: boolean;
+  metaSection?: boolean;
 }
 export const StyledEditorSection = styled.div<StyledEditorSection>`
   position: relative;
   padding: ${({ theme }) => theme.space[6]};
+  padding-right: ${({ metaSection }) => (metaSection ? 0 : "")};
   border-bottom-width: ${({ theme }) => theme.borderWidth[1]};
   border-bottom-color: ${({ theme }) => theme.color["gray"][500]};
   background-color: ${({ theme }) => theme.color["white"]};

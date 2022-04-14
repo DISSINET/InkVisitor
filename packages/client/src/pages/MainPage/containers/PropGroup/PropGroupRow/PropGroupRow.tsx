@@ -135,6 +135,8 @@ export const PropGroupRow: React.FC<IPropGroupRow> = ({
     }
   }, [isDragging]);
 
+  const [modalOpen, setModalOpen] = useState<boolean>(false);
+
   const renderPropRow = () => {
     return (
       <StyledGrid
@@ -152,12 +154,13 @@ export const PropGroupRow: React.FC<IPropGroupRow> = ({
             <EntityTag
               actant={propTypeEntity}
               fullWidth
+              tooltipPosition="right center"
               button={
                 <Button
                   key="d"
                   icon={<FaUnlink />}
                   color="plain"
-                  inverted={true}
+                  inverted
                   tooltip="unlink actant"
                   onClick={() => {
                     updateProp(prop.id, {
@@ -193,8 +196,9 @@ export const PropGroupRow: React.FC<IPropGroupRow> = ({
                 key="neg"
                 tooltip="Negative logic"
                 color="success"
-                inverted={true}
+                inverted
                 noBorder
+                onClick={() => setModalOpen(true)}
                 icon={<AttributeIcon attributeName={"negation"} />}
               />
             ) : (
@@ -207,13 +211,14 @@ export const PropGroupRow: React.FC<IPropGroupRow> = ({
             <EntityTag
               actant={propValueEntity}
               fullWidth
+              tooltipPosition="right center"
               button={
                 <Button
                   key="d"
                   icon={<FaUnlink />}
                   tooltip="unlink actant"
                   color="plain"
-                  inverted={true}
+                  inverted
                   onClick={() => {
                     updateProp(prop.id, {
                       value: {
@@ -248,8 +253,9 @@ export const PropGroupRow: React.FC<IPropGroupRow> = ({
                 key="neg"
                 tooltip="Negative logic"
                 color="success"
-                inverted={true}
+                inverted
                 noBorder
+                onClick={() => setModalOpen(true)}
                 icon={<AttributeIcon attributeName={"negation"} />}
               />
             ) : (
@@ -262,6 +268,8 @@ export const PropGroupRow: React.FC<IPropGroupRow> = ({
           <StyledPropButtonGroup>
             <AttributesGroupEditor
               modalTitle={`Property attributes`}
+              modalOpen={modalOpen}
+              setModalOpen={setModalOpen}
               disabledAllAttributes={!userCanEdit}
               propTypeActant={propTypeEntity}
               propValueActant={propValueEntity}
@@ -311,7 +319,7 @@ export const PropGroupRow: React.FC<IPropGroupRow> = ({
                 icon={<FaPlus />}
                 tooltip="add child prop"
                 color="plain"
-                inverted={true}
+                inverted
                 onClick={() => {
                   addProp(prop.id);
                 }}
@@ -322,7 +330,7 @@ export const PropGroupRow: React.FC<IPropGroupRow> = ({
               icon={<FaTrashAlt />}
               tooltip="remove prop row"
               color="plain"
-              inverted={true}
+              inverted
               onClick={() => {
                 removeProp(prop.id);
               }}
@@ -332,8 +340,9 @@ export const PropGroupRow: React.FC<IPropGroupRow> = ({
                 key="neg"
                 tooltip="Negative logic"
                 color="success"
-                inverted={true}
+                inverted
                 noBorder
+                onClick={() => setModalOpen(true)}
                 icon={<AttributeIcon attributeName={"negation"} />}
               />
             ) : (
@@ -344,8 +353,9 @@ export const PropGroupRow: React.FC<IPropGroupRow> = ({
                 key="oper"
                 tooltip="Logical operator type"
                 color="success"
-                inverted={true}
+                inverted
                 noBorder
+                onClick={() => setModalOpen(true)}
                 icon={prop.bundleOperator}
               />
             ) : (

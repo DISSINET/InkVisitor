@@ -15,10 +15,12 @@ export const StyledDetailWrapper = styled.div<StyledDetailWrapper>`
 interface StyledDetailSection {
   firstSection?: boolean;
   lastSection?: boolean;
+  metaSection?: boolean;
 }
 
 export const StyledDetailSection = styled.div<StyledDetailSection>`
   padding: ${({ theme }) => theme.space[6]};
+  padding-right: ${({ metaSection }) => (metaSection ? 0 : "")};
   border-bottom-width: ${({ theme, lastSection = false }) =>
     lastSection ? theme.borderWidth[0] : theme.borderWidth[1]};
   border-bottom-color: ${({ theme }) => theme.color["gray"][500]};
