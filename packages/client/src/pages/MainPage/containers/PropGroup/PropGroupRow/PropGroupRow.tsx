@@ -157,7 +157,7 @@ export const PropGroupRow: React.FC<IPropGroupRow> = ({
                   key="d"
                   icon={<FaUnlink />}
                   color="plain"
-                  inverted={true}
+                  inverted
                   tooltip="unlink actant"
                   onClick={() => {
                     updateProp(prop.id, {
@@ -193,7 +193,7 @@ export const PropGroupRow: React.FC<IPropGroupRow> = ({
                 key="neg"
                 tooltip="Negative logic"
                 color="success"
-                inverted={true}
+                inverted
                 noBorder
                 icon={<AttributeIcon attributeName={"negation"} />}
               />
@@ -213,7 +213,7 @@ export const PropGroupRow: React.FC<IPropGroupRow> = ({
                   icon={<FaUnlink />}
                   tooltip="unlink actant"
                   color="plain"
-                  inverted={true}
+                  inverted
                   onClick={() => {
                     updateProp(prop.id, {
                       value: {
@@ -248,7 +248,7 @@ export const PropGroupRow: React.FC<IPropGroupRow> = ({
                 key="neg"
                 tooltip="Negative logic"
                 color="success"
-                inverted={true}
+                inverted
                 noBorder
                 icon={<AttributeIcon attributeName={"negation"} />}
               />
@@ -259,7 +259,7 @@ export const PropGroupRow: React.FC<IPropGroupRow> = ({
         </StyledPropLineColumn>
 
         <StyledPropLineColumn>
-          <StyledPropButtonGroup>
+          <StyledPropButtonGroup leftMargin rightMargin>
             <AttributesGroupEditor
               modalTitle={`Property attributes`}
               disabledAllAttributes={!userCanEdit}
@@ -311,7 +311,7 @@ export const PropGroupRow: React.FC<IPropGroupRow> = ({
                 icon={<FaPlus />}
                 tooltip="add child prop"
                 color="plain"
-                inverted={true}
+                inverted
                 onClick={() => {
                   addProp(prop.id);
                 }}
@@ -322,7 +322,7 @@ export const PropGroupRow: React.FC<IPropGroupRow> = ({
               icon={<FaTrashAlt />}
               tooltip="remove prop row"
               color="plain"
-              inverted={true}
+              inverted
               onClick={() => {
                 removeProp(prop.id);
               }}
@@ -332,7 +332,7 @@ export const PropGroupRow: React.FC<IPropGroupRow> = ({
                 key="neg"
                 tooltip="Negative logic"
                 color="success"
-                inverted={true}
+                inverted
                 noBorder
                 icon={<AttributeIcon attributeName={"negation"} />}
               />
@@ -344,7 +344,7 @@ export const PropGroupRow: React.FC<IPropGroupRow> = ({
                 key="oper"
                 tooltip="Logical operator type"
                 color="success"
-                inverted={true}
+                inverted
                 noBorder
                 icon={prop.bundleOperator}
               />
