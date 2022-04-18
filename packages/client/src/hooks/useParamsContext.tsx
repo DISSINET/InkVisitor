@@ -64,6 +64,20 @@ export const SearchParamsProvider = ({
     });
   }, [territoryId, statementId, detailId]);
 
+  const handleHistoryChange = (history: any) => {
+    const params = new URLSearchParams(history.location.hash.substring(1));
+    const parsedParams = Object.fromEntries(params);
+    if (parsedParams.territory) {
+      setTerritoryId(parsedParams.territory);
+    }
+    if (parsedParams.statement) {
+      setStatementId(parsedParams.statement);
+    }
+    if (parsedParams.detail) {
+      setDetailId(parsedParams.detail);
+    }
+  };
+
   const [locationKeys, setLocationKeys] = useState<any>([]);
 
   useEffect(() => {
@@ -75,20 +89,12 @@ export const SearchParamsProvider = ({
       if (history.action === "POP") {
         if (locationKeys[1] === location.key) {
           setLocationKeys(([_, ...keys]: any) => keys);
-          const params = new URLSearchParams(
-            history.location.hash.substring(1)
-          );
-          const parsedParams = Object.fromEntries(params);
-          console.log(parsedParams.territory);
           // Handle forward event
+          handleHistoryChange(history);
         } else {
           setLocationKeys((keys: any) => [location.key, ...keys]);
-          const params = new URLSearchParams(
-            history.location.hash.substring(1)
-          );
-          const parsedParams = Object.fromEntries(params);
-          console.log(parsedParams.territory);
           // Handle back event
+          handleHistoryChange(history);
         }
       }
     });
