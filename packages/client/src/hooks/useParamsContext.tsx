@@ -67,7 +67,6 @@ export const SearchParamsProvider = ({
   const [locationKeys, setLocationKeys] = useState<any>([]);
 
   useEffect(() => {
-    console.log(locationKeys);
     return history.listen((location: any) => {
       if (history.action === "PUSH") {
         setLocationKeys([location.key]);
@@ -75,12 +74,20 @@ export const SearchParamsProvider = ({
 
       if (history.action === "POP") {
         if (locationKeys[1] === location.key) {
-          setLocationKeys(([_, ...keys]) => keys);
-
+          setLocationKeys(([_, ...keys]: any) => keys);
+          const params = new URLSearchParams(
+            history.location.hash.substring(1)
+          );
+          const parsedParams = Object.fromEntries(params);
+          console.log(parsedParams.territory);
           // Handle forward event
         } else {
-          setLocationKeys((keys) => [location.key, ...keys]);
-
+          setLocationKeys((keys: any) => [location.key, ...keys]);
+          const params = new URLSearchParams(
+            history.location.hash.substring(1)
+          );
+          const parsedParams = Object.fromEntries(params);
+          console.log(parsedParams.territory);
           // Handle back event
         }
       }
