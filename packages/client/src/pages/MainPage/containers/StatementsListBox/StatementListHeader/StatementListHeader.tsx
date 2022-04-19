@@ -98,10 +98,12 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
       localStorage.getItem("userrole") as UserRole
     );
     const { statements } = data;
-    newStatement.data.territory.order = statements.length
-      ? statements[statements.length - 1].data.territory.order + 1
-      : 1;
-    addStatementAtTheEndMutation.mutate(newStatement);
+    if (newStatement?.data?.territory) {
+      newStatement.data.territory.order = statements.length
+        ? statements[statements.length - 1].data.territory.order + 1
+        : 1;
+      addStatementAtTheEndMutation.mutate(newStatement);
+    }
   };
 
   const trimTerritoryLabel = (label: string) => {
@@ -135,7 +137,7 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
         </StyledHeading>
         {territoryId && (
           <StyledButtons>
-            <ButtonGroup>
+            <ButtonGroup marginBottom>
               {data.right !== UserRoleMode.Read && (
                 <Button
                   key="add"

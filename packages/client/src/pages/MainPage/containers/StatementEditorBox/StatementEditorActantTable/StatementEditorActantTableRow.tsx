@@ -213,7 +213,7 @@ export const StatementEditorActantTableRow: React.FC<
 
     const propOriginId = row.values.data.sActant.actant;
     return (
-      <ButtonGroup noMargin>
+      <ButtonGroup noMarginRight>
         {sActant && (
           <AttributesEditor
             modalTitle={`Actant involvement`}

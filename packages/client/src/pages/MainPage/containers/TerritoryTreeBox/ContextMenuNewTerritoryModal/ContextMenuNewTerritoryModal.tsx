@@ -42,7 +42,6 @@ export const ContextMenuNewTerritoryModal: React.FC<
     {
       onSuccess: (data, variables) => {
         onClose();
-        toast.info(`Territory [${variables.label}] created!`);
         queryClient.invalidateQueries("tree");
 
         dispatch(setTreeInitialized(false));
