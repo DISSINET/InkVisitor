@@ -144,7 +144,7 @@ export const StatementEditorActionTableRow: React.FC<
     const propOriginId = row.values.data.sAction.action;
 
     return (
-      <ButtonGroup noMargin>
+      <ButtonGroup noMarginRight>
         {sAction && (
           <AttributesEditor
             modalTitle={`Action attribute`}
