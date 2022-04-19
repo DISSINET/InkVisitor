@@ -1,4 +1,3 @@
-import { Listener } from "@storybook/addons";
 import React, {
   createContext,
   ReactElement,
@@ -6,7 +5,7 @@ import React, {
   useEffect,
   useState,
 } from "react";
-import { RouteComponentProps, useHistory, useLocation } from "react-router-dom";
+import { useHistory, useLocation } from "react-router-dom";
 
 const UNINITIALISED = (): void => {
   throw `function uninitialised`;
@@ -90,45 +89,6 @@ export const SearchParamsProvider = ({
       setDisablePush(false);
     });
   }, [history]);
-
-  // const handleHistoryChange = (history: any) => {
-  //   const paramsTemp = new URLSearchParams(history.location.hash.substring(1));
-  //   const parsedParamsTemp = Object.fromEntries(paramsTemp);
-  //   if (parsedParamsTemp.territory) {
-  //     setTerritoryId(parsedParamsTemp.territory);
-  //   }
-  //   if (parsedParamsTemp.statement) {
-  //     setStatementId(parsedParamsTemp.statement);
-  //   }
-  //   if (parsedParamsTemp.detail) {
-  //     setDetailId(parsedParamsTemp.detail);
-  //   }
-  // };
-
-  // const [locationKeys, setLocationKeys] = useState<any>([]);
-
-  // useEffect(() => {
-  //   console.log(locationKeys);
-  //   return history.listen((location: any) => {
-  //     if (history.action === "PUSH") {
-  //       console.log("PUSH action");
-  //       setLocationKeys([location.key]);
-  //     }
-
-  //     if (history.action === "POP") {
-  //       console.log("POP action");
-  //       if (locationKeys[1] === location.key) {
-  //         console.log("forward event");
-  //         setLocationKeys(([_, ...keys]: any) => keys);
-  //         handleHistoryChange(history);
-  //       } else {
-  //         console.log("back event");
-  //         setLocationKeys((keys: any) => [location.key, ...keys]);
-  //         handleHistoryChange(history);
-  //       }
-  //     }
-  //   });
-  // }, [locationKeys]);
 
   return (
     <SearchParamsContext.Provider
