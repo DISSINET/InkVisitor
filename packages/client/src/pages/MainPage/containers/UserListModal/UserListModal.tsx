@@ -425,7 +425,7 @@ export const UserListModal: React.FC<UserListModal> = ({
             territoryRights: territoryActants,
           } = row.original as any;
           return (
-            <ButtonGroup noMargin>
+            <ButtonGroup noMarginRight>
               {userId !== localStorage.getItem("userid") && (
                 <Button
                   key="r"
