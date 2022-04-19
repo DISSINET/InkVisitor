@@ -51,6 +51,8 @@ export const SearchParamsProvider = ({
     typeof parsedParams.detail === "string" ? parsedParams.detail : ""
   );
 
+  const [disablePush, setDisablePush] = useState(false);
+
   useEffect(() => {
     territoryId
       ? params.set("territory", territoryId)
@@ -59,46 +61,74 @@ export const SearchParamsProvider = ({
       ? params.set("statement", statementId)
       : params.delete("statement");
     detailId ? params.set("detail", detailId) : params.delete("detail");
-    history.push({
-      hash: `${params}`,
-    });
+
+    if (!disablePush) {
+      history.push({
+        hash: `${params}`,
+      });
+    }
   }, [territoryId, statementId, detailId]);
 
-  const handleHistoryChange = (history: any) => {
-    const params = new URLSearchParams(history.location.hash.substring(1));
-    const parsedParams = Object.fromEntries(params);
-    if (parsedParams.territory) {
-      setTerritoryId(parsedParams.territory);
+  const handleLocationChange = (location: any) => {
+    const paramsTemp = new URLSearchParams(location.hash.substring(1));
+    const parsedParamsTemp = Object.fromEntries(paramsTemp);
+    if (parsedParamsTemp.territory) {
+      setTerritoryId(parsedParamsTemp.territory);
     }
-    if (parsedParams.statement) {
-      setStatementId(parsedParams.statement);
+    if (parsedParamsTemp.statement) {
+      setStatementId(parsedParamsTemp.statement);
     }
-    if (parsedParams.detail) {
-      setDetailId(parsedParams.detail);
+    if (parsedParamsTemp.detail) {
+      setDetailId(parsedParamsTemp.detail);
     }
   };
 
-  const [locationKeys, setLocationKeys] = useState<any>([]);
-
   useEffect(() => {
     return history.listen((location: any) => {
-      if (history.action === "PUSH") {
-        setLocationKeys([location.key]);
-      }
-
-      if (history.action === "POP") {
-        if (locationKeys[1] === location.key) {
-          setLocationKeys(([_, ...keys]: any) => keys);
-          // Handle forward event
-          handleHistoryChange(history);
-        } else {
-          setLocationKeys((keys: any) => [location.key, ...keys]);
-          // Handle back event
-          handleHistoryChange(history);
-        }
-      }
+      setDisablePush(true);
+      handleLocationChange(location);
+      setDisablePush(false);
     });
-  }, [locationKeys]);
+  }, [history]);
+
+  // const handleHistoryChange = (history: any) => {
+  //   const paramsTemp = new URLSearchParams(history.location.hash.substring(1));
+  //   const parsedParamsTemp = Object.fromEntries(paramsTemp);
+  //   if (parsedParamsTemp.territory) {
+  //     setTerritoryId(parsedParamsTemp.territory);
+  //   }
+  //   if (parsedParamsTemp.statement) {
+  //     setStatementId(parsedParamsTemp.statement);
+  //   }
+  //   if (parsedParamsTemp.detail) {
+  //     setDetailId(parsedParamsTemp.detail);
+  //   }
+  // };
+
+  // const [locationKeys, setLocationKeys] = useState<any>([]);
+
+  // useEffect(() => {
+  //   console.log(locationKeys);
+  //   return history.listen((location: any) => {
+  //     if (history.action === "PUSH") {
+  //       console.log("PUSH action");
+  //       setLocationKeys([location.key]);
+  //     }
+
+  //     if (history.action === "POP") {
+  //       console.log("POP action");
+  //       if (locationKeys[1] === location.key) {
+  //         console.log("forward event");
+  //         setLocationKeys(([_, ...keys]: any) => keys);
+  //         handleHistoryChange(history);
+  //       } else {
+  //         console.log("back event");
+  //         setLocationKeys((keys: any) => [location.key, ...keys]);
+  //         handleHistoryChange(history);
+  //       }
+  //     }
+  //   });
+  // }, [locationKeys]);
 
   return (
     <SearchParamsContext.Provider
