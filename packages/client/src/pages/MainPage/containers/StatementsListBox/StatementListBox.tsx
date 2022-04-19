@@ -512,7 +512,7 @@ export const StatementListBox: React.FC = () => {
                       tooltip="add new statement before"
                       color="info"
                       onClick={() => {
-                        addStatementAtCertainIndex(row.index - 1);
+                        addStatementAtCertainIndex(row.index);
                       }}
                     />,
                     <Button
