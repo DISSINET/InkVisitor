@@ -75,7 +75,7 @@ export const EntitySearchBox: React.FC = () => {
       label: string;
     }[] = Object.entries(Entities)
       .filter((c: any) => {
-        if (c[1].id !== "A" && c[1].id !== "R") {
+        if (c[1].id !== "A" && c[1].id !== "R" && c[1].id !== "X") {
           return c;
         }
       })
