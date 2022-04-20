@@ -50,18 +50,50 @@ export const SearchParamsProvider = ({
     typeof parsedParams.detail === "string" ? parsedParams.detail : ""
   );
 
+  const [disablePush, setDisablePush] = useState(false);
+
   useEffect(() => {
     territoryId
       ? params.set("territory", territoryId)
       : params.delete("territory");
+
     statementId
       ? params.set("statement", statementId)
       : params.delete("statement");
+
     detailId ? params.set("detail", detailId) : params.delete("detail");
-    history.push({
-      hash: `${params}`,
-    });
+
+    if (!disablePush) {
+      history.push({
+        hash: `${params}`,
+      });
+    }
   }, [territoryId, statementId, detailId]);
+
+  const handleLocationChange = (location: any) => {
+    const paramsTemp = new URLSearchParams(location.hash.substring(1));
+    const parsedParamsTemp = Object.fromEntries(paramsTemp);
+
+    parsedParamsTemp.territory
+      ? setTerritoryId(parsedParamsTemp.territory)
+      : setTerritoryId("");
+
+    parsedParamsTemp.statement
+      ? setStatementId(parsedParamsTemp.statement)
+      : setStatementId("");
+
+    parsedParamsTemp.detail
+      ? setDetailId(parsedParamsTemp.detail)
+      : setDetailId("");
+  };
+
+  useEffect(() => {
+    return history.listen((location: any) => {
+      setDisablePush(true);
+      handleLocationChange(location);
+      setDisablePush(false);
+    });
+  }, [history]);
 
   return (
     <SearchParamsContext.Provider

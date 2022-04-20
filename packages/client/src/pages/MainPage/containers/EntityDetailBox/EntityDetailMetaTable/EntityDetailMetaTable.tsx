@@ -356,7 +356,7 @@ export const EntityDetailMetaTable: React.FC<EntityDetailMetaTable> = ({
           const valueLabel = valueActant ? valueActant.label : "undefined";
 
           return (
-            <ButtonGroup noMargin>
+            <ButtonGroup noMarginRight>
               {data && action && (
                 <AttributesEditor
                   disabledAllAttributes={!userCanEdit}

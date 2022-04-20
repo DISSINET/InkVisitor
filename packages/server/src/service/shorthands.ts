@@ -74,10 +74,25 @@ export async function filterEntitiesByWildcard(
   }
 
   if (entityLabel) {
+    let leftWildcard: string = "^",
+      rightWildcard: string = "$";
+
+    if (entityLabel[0] === "*") {
+      leftWildcard = "";
+      entityLabel = entityLabel.slice(1);
+    }
+
+    if (entityLabel[entityLabel.length - 1] === "*") {
+      rightWildcard = "";
+      entityLabel = entityLabel.slice(0, -1);
+    }
+
+    entityLabel = regExpEscape(entityLabel.toLowerCase());
+
     query = query.filter(function (row: RDatum) {
       return row("label")
         .downcase()
-        .match(`${regExpEscape(entityLabel.toLowerCase())}`);
+        .match(`${leftWildcard}${entityLabel}${rightWildcard}`);
     });
   }
 
