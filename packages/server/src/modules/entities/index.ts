@@ -64,6 +64,10 @@ export default Router()
         throw new BadParams("label or class has to be set");
       }
 
+      if (label && label.length < 2) {
+        return [];
+      }
+
       if (
         typeof excluded !== "undefined" &&
         excluded.constructor.name !== "Array"
@@ -257,7 +261,7 @@ export default Router()
     "/search",
     asyncRouteHandler<IResponseSearch[]>(async (httpRequest: Request) => {
       const req = new RequestSearch(httpRequest.body);
-      if (req.label && req.label.length < 4) {
+      if (req.label && req.label.length < 2) {
         return [];
       }
 

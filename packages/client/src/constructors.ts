@@ -97,10 +97,6 @@ export const DStatement = (statement: IStatement): IStatement => {
   duplicatedStatement.props.map((p) => (p.id = uuidv4()));
   duplicatedStatement.references.map((r) => (r.id = uuidv4()));
 
-  if (duplicatedStatement.data.territory) {
-    duplicatedStatement.data.territory.order += 0.00001;
-  }
-
   return duplicatedStatement;
 };
 
