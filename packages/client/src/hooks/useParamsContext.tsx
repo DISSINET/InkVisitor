@@ -56,9 +56,11 @@ export const SearchParamsProvider = ({
     territoryId
       ? params.set("territory", territoryId)
       : params.delete("territory");
+
     statementId
       ? params.set("statement", statementId)
       : params.delete("statement");
+
     detailId ? params.set("detail", detailId) : params.delete("detail");
 
     if (!disablePush) {
@@ -71,15 +73,18 @@ export const SearchParamsProvider = ({
   const handleLocationChange = (location: any) => {
     const paramsTemp = new URLSearchParams(location.hash.substring(1));
     const parsedParamsTemp = Object.fromEntries(paramsTemp);
-    if (parsedParamsTemp.territory) {
-      setTerritoryId(parsedParamsTemp.territory);
-    }
-    if (parsedParamsTemp.statement) {
-      setStatementId(parsedParamsTemp.statement);
-    }
-    if (parsedParamsTemp.detail) {
-      setDetailId(parsedParamsTemp.detail);
-    }
+
+    parsedParamsTemp.territory
+      ? setTerritoryId(parsedParamsTemp.territory)
+      : setTerritoryId("");
+
+    parsedParamsTemp.statement
+      ? setStatementId(parsedParamsTemp.statement)
+      : setStatementId("");
+
+    parsedParamsTemp.detail
+      ? setDetailId(parsedParamsTemp.detail)
+      : setDetailId("");
   };
 
   useEffect(() => {
