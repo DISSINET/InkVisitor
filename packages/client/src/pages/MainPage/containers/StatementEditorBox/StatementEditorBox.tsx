@@ -1,4 +1,4 @@
-import { EntityClass, UserRoleMode } from "@shared/enums";
+import { EntityClass, Order, UserRoleMode } from "@shared/enums";
 import {
   IProp,
   IReference,
@@ -499,7 +499,7 @@ export const StatementEditorBox: React.FC = () => {
   const moveStatementMutation = useMutation(
     async (newTerritoryId: string) => {
       await api.entityUpdate(statementId, {
-        data: { territory: { id: newTerritoryId, order: -1 } },
+        data: { territory: { id: newTerritoryId, order: Order.First } },
       });
     },
     {
