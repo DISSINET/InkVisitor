@@ -29,7 +29,7 @@ const GlobalStyle = createGlobalStyle`
     -moz-osx-font-smoothing: grayscale;
   }
   *:not(input,textarea) {
-    -moz-user-select: none;
+    user-select: none;
   }
   h1 {
     font-size: ${({ theme }) => theme.fontSize["4xl"]};
