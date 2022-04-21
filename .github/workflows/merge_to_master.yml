@@ -130,7 +130,7 @@ jobs:
 
       - name: Pull OpenVPN Config
         run: |
-          curl https://it.muni.cz/media/3240842/muni-linux.ovpn -o muni-linux.ovpn
+          curl https://it.muni.cz/media/3404274/muni-main-linux.ovpn -o muni-linux.ovpn
 
       - name: Connect to VPN and deploy
         run: |
