@@ -27,6 +27,7 @@ const GlobalStyle = createGlobalStyle`
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    -moz-user-select: none;
   }
   h1 {
     font-size: ${({ theme }) => theme.fontSize["4xl"]};
