@@ -30,6 +30,9 @@ export const StyledDetailSection = styled.div<StyledDetailSection>`
 `;
 
 export const StyledActantPreviewRow = styled.div`
+  position: absolute;
+  top: 3rem;
+  background-color: ${({ theme }) => theme.color["gray"]["200"]};
   display: flex;
   flex-wrap: wrap;
   justify-content: left;
