@@ -24,6 +24,7 @@ import {
   Operator,
   UserRole,
   UserRoleMode,
+  DbIndex,
 } from "@shared/enums";
 
 import Entity from "@models/entity/entity";
@@ -318,19 +319,15 @@ class Statement extends Entity implements IStatement {
   ): Promise<Record<number, IStatement>> {
     const list: IStatement[] = await rethink
       .table(Entity.table)
-      .filter({
-        class: EntityClass.Statement,
-      })
-      .filter((entry: RDatum) => {
-        return rethink.and(
-          entry("data")("territory")("id").eq(this.data.territory.id),
-          entry("id").ne(this.id)
-        );
-      })
+      .getAll(this.data.territory.id, { index: DbIndex.StatementTerritory })
       .run(db);
 
     const out: Record<number, IStatement> = {};
+
     for (const ter of list) {
+      if (ter.id === this.id) {
+        continue;
+      }
       if (ter.data.territory) {
         out[ter.data.territory.order] = ter;
       }
@@ -484,25 +481,28 @@ class Statement extends Entity implements IStatement {
   ): Promise<IStatement[]> {
     const statements = await rethink
       .table(Entity.table)
-      .filter({
-        class: EntityClass.Statement,
-      })
-      .filter((row: RDatum) => {
-        return rethink.or(
-          row("data")("actions").contains((entry: RDatum) =>
-            entry("action").eq(entityId)
-          ),
-          row("data")("actants").contains((entry: RDatum) =>
-            entry("actant").eq(entityId)
-          ),
-          row("data")("tags").contains(entityId)
-        );
-      })
+      .getAll(entityId, { index: DbIndex.StatementEntities })
       .run(db);
 
     return statements.sort((a, b) => {
       return a.data.territory.order - b.data.territory.order;
     });
+  }
+
+  static async findUsedInDataEntitiesIds(
+    db: Connection | undefined,
+    entityId: string
+  ): Promise<string[]> {
+    const statements = await Statement.findUsedInDataEntities(db, entityId);
+
+    const entityIds: string[] = [];
+
+    (statements as IStatement[]).forEach((s) => {
+      const ids = s.data.actants.map((a) => a.actant);
+      entityIds.push(...ids);
+    });
+
+    return entityIds;
   }
 
   /**

@@ -1,3 +1,4 @@
+import { allEntities } from "@shared/dictionaries/entity";
 import { AttributeIcon, Dropdown } from "components";
 import React, { useMemo } from "react";
 import {
@@ -12,7 +13,7 @@ interface AttributeRow {
   items: { value: string; label: string }[];
   label: string;
   attributeName: string;
-  multi: boolean;
+  multi?: boolean;
   onChangeFn: (value: string | string[]) => void;
   disabled?: boolean;
 }
@@ -21,13 +22,13 @@ export const AttributeRow: React.FC<AttributeRow> = ({
   items,
   label,
   attributeName,
-  multi,
+  multi = false,
   onChangeFn,
   disabled = false,
 }) => {
   const selectedItem = useMemo(() => {
     return multi
-      ? items.filter((i: any) => value.includes(i.value))
+      ? [allEntities].concat(items).filter((i: any) => value.includes(i.value))
       : items.find((i: any) => i.value === value);
   }, [value]);
 

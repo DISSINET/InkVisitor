@@ -21,6 +21,7 @@ interface EntityReferenceTableRow {
   handleRemove: (refId: string) => void;
   handleChangeResource: (refId: string, newResource: string) => void;
   handleChangeValue: (refId: string, newValue: string) => void;
+  openDetailOnCreate?: boolean;
 }
 
 export const EntityReferenceTableRow: React.FC<EntityReferenceTableRow> = ({
@@ -32,6 +33,7 @@ export const EntityReferenceTableRow: React.FC<EntityReferenceTableRow> = ({
   handleRemove,
   handleChangeResource,
   handleChangeValue,
+  openDetailOnCreate = false,
 }) => {
   return (
     <React.Fragment>
@@ -61,8 +63,8 @@ export const EntityReferenceTableRow: React.FC<EntityReferenceTableRow> = ({
         ) : (
           !disabled && (
             <EntitySuggester
+              openDetailOnCreate={openDetailOnCreate}
               territoryActants={[]}
-              openDetailOnCreate
               onSelected={(newSelectedId: string) => {
                 handleChangeResource(reference.id, newSelectedId);
               }}
@@ -103,6 +105,7 @@ export const EntityReferenceTableRow: React.FC<EntityReferenceTableRow> = ({
         ) : (
           !disabled && (
             <EntitySuggester
+              openDetailOnCreate={openDetailOnCreate}
               territoryActants={[]}
               onSelected={(newSelectedId: string) => {
                 handleChangeValue(reference.id, newSelectedId);

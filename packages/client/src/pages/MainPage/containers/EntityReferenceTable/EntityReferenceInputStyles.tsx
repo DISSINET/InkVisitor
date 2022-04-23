@@ -1,27 +1,17 @@
 import styled from "styled-components";
 
-export const StyledGrid = styled.div`
+// references
+interface StyledReferencesList {}
+export const StyledReferencesList = styled.div<StyledReferencesList>`
   display: grid;
   align-items: center;
   padding-left: ${({ theme }) => theme.space[0]};
-  grid-template-columns: auto auto auto;
+  grid-template-columns: 1fr 1fr 2rem;
   width: fit-content;
   grid-template-rows: auto;
   grid-auto-flow: row;
   padding-bottom: ${({ theme }) => theme.space[6]};
-`;
-
-export const StyledGridCell = styled.div`
-  margin: ${({ theme }) => theme.space[1]};
-  display: inline-flex;
-  align-items: center;
-`;
-
-// references
-interface StyledReferencesList {}
-export const StyledReferencesList = styled(StyledGrid)<StyledReferencesList>`
-  grid-template-columns: auto auto auto;
-  /* width: 50rem; */
+  max-width: 100%;
 `;
 
 interface StyledListHeaderColumn {}
@@ -35,9 +25,11 @@ export const StyledListHeaderColumn = styled.div<StyledListHeaderColumn>`
 `;
 
 interface StyledReferencesListColumn {}
-export const StyledReferencesListColumn = styled(
-  StyledGridCell
-)<StyledReferencesListColumn>``;
+export const StyledReferencesListColumn = styled.div<StyledReferencesListColumn>`
+  margin: ${({ theme }) => theme.space[1]};
+  display: grid;
+  align-items: center;
+`;
 
 export const StyledReferencesListButtons = styled.div`
   button {

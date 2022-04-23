@@ -1,4 +1,4 @@
-import { EntityClass, UserRoleMode } from "@shared/enums";
+import { EntityClass, Order, UserRoleMode } from "@shared/enums";
 import {
   IProp,
   IReference,
@@ -409,6 +409,7 @@ export const StatementEditorBox: React.FC = () => {
           queryClient.invalidateQueries(["entity"]);
         }
         queryClient.invalidateQueries(["statement"]);
+        queryClient.invalidateQueries(["territory"]);
       },
     }
   );
@@ -498,7 +499,7 @@ export const StatementEditorBox: React.FC = () => {
   const moveStatementMutation = useMutation(
     async (newTerritoryId: string) => {
       await api.entityUpdate(statementId, {
-        data: { territory: { id: newTerritoryId, order: -1 } },
+        data: { territory: { id: newTerritoryId, order: Order.First } },
       });
     },
     {
@@ -569,7 +570,7 @@ export const StatementEditorBox: React.FC = () => {
           </StyledEditorSection>
 
           {/* Actions */}
-          <StyledEditorSection key="editor-section-actions">
+          <StyledEditorSection metaSection key="editor-section-actions">
             <StyledEditorSectionHeader>Actions</StyledEditorSectionHeader>
             <StyledEditorSectionContent>
               <StyledEditorActantTableWrapper>
@@ -599,7 +600,7 @@ export const StatementEditorBox: React.FC = () => {
           </StyledEditorSection>
 
           {/* Actants */}
-          <StyledEditorSection key="editor-section-actants">
+          <StyledEditorSection metaSection key="editor-section-actants">
             <StyledEditorSectionHeader>Actants</StyledEditorSectionHeader>
             <StyledEditorSectionContent>
               <StyledEditorActantTableWrapper>
@@ -633,6 +634,7 @@ export const StatementEditorBox: React.FC = () => {
             <StyledEditorSectionHeader>References</StyledEditorSectionHeader>
             <StyledEditorSectionContent>
               <EntityReferenceTable
+                openDetailOnCreate
                 entities={statement.entities}
                 references={statement.references}
                 onChange={(newReferences: IReference[]) => {

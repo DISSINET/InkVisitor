@@ -17,6 +17,7 @@ import {
   StyledSubRow,
 } from "./StatementListRowExpandedStyles";
 import { StyledPropRow } from "./StatementListRowExpandedStyles";
+import { EmptyTag } from "pages/MainPage/containers";
 
 interface StatementListRowExpanded {
   row: Row;
@@ -29,26 +30,35 @@ export const StatementListRowExpanded: React.FC<StatementListRowExpanded> = ({
   entities,
 }) => {
   const renderReference = (
-    referenceId: string,
+    resourceId: string,
     valueId: string,
     key: number
   ) => {
+    const resourceEntity: IEntity = entities[resourceId];
+    const valueEntity: IEntity = entities[valueId];
+
     return (
       <React.Fragment key={key}>
-        {referenceId && (
-          <StyledReferenceWrap key={key}>
+        <StyledReferenceWrap key={key}>
+          {resourceEntity ? (
             <EntityTag
-              actant={entities[referenceId]}
+              actant={resourceEntity}
               tooltipPosition="bottom center"
               // fullWidth
             />
+          ) : (
+            <EmptyTag label="resource" />
+          )}
+          {valueEntity ? (
             <EntityTag
-              actant={entities[valueId]}
+              actant={valueEntity}
               tooltipPosition="bottom center"
               // fullWidth
             />
-          </StyledReferenceWrap>
-        )}
+          ) : (
+            <EmptyTag label="value" />
+          )}
+        </StyledReferenceWrap>
       </React.Fragment>
     );
   };
@@ -208,11 +218,15 @@ export const StatementListRowExpanded: React.FC<StatementListRowExpanded> = ({
             ))}
           </StyledActantGroup>
           {references.map((reference, key) => (
-            <StyledPropRow level={1} key={key}>
-              <BsArrowReturnRight size="20" />
-              <span>&nbsp;&nbsp;(reference)&nbsp;&nbsp;</span>
-              {renderReference(reference.resource, reference.value, key)}
-            </StyledPropRow>
+            <React.Fragment key={key}>
+              {(reference.value || reference.resource) && (
+                <StyledPropRow level={1}>
+                  <BsArrowReturnRight size="20" />
+                  <span>&nbsp;&nbsp;(reference)&nbsp;&nbsp;</span>
+                  {renderReference(reference.resource, reference.value, key)}
+                </StyledPropRow>
+              )}
+            </React.Fragment>
           ))}
           {tagObjects.map((tag, key) => (
             <StyledPropRow level={1} key={key}>

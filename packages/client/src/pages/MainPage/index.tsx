@@ -32,7 +32,7 @@ import {
 import packageJson from "../../../package.json";
 import {
   EntityBookmarkBox,
-  ActantSearchBox,
+  EntitySearchBox,
   EntityDetailBox,
   LoginModal,
   StatementEditorBox,
@@ -311,7 +311,7 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
                 isExpanded={fourthPanelExpanded}
                 button={fourthPanelButton()}
               >
-                <ActantSearchBox />
+                <EntitySearchBox />
               </Box>
               <Box
                 height={heightContent / 3}

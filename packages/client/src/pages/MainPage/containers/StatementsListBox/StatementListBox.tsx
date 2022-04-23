@@ -1,4 +1,4 @@
-import { UserRole, UserRoleMode } from "@shared/enums";
+import { Order, UserRole, UserRoleMode } from "@shared/enums";
 import {
   IAction,
   IEntity,
@@ -116,11 +116,15 @@ export const StatementListBox: React.FC = () => {
     }
   );
 
-  const duplicateStatementMutation = useMutation(
-    async (statementToDuplicate: IResponseStatement) => {
-      const { ...newStatementObject } = statementToDuplicate;
+  const duplicateStatement = (statementToDuplicate: IResponseStatement) => {
+    const { ...newStatementObject } = statementToDuplicate;
 
-      const duplicatedStatement = DStatement(newStatementObject as IStatement);
+    const duplicatedStatement = DStatement(newStatementObject as IStatement);
+    duplicateStatementMutation.mutate(duplicatedStatement);
+  };
+
+  const duplicateStatementMutation = useMutation(
+    async (duplicatedStatement: IStatement) => {
       await api.entityCreate(duplicatedStatement);
     },
     {
@@ -173,11 +177,11 @@ export const StatementListBox: React.FC = () => {
 
     if (index + 1 > statements.length) {
       // last one
-      newOrder = statements.length;
+      newOrder = Order.Last;
     } else {
       if (index < 1 && statements[0].data.territory) {
         // first one
-        newOrder = statements[0].data.territory.order - 1;
+        newOrder = Order.First;
       } else if (
         statements[index - 1].data.territory &&
         statements[index].data.territory
@@ -494,9 +498,7 @@ export const StatementListBox: React.FC = () => {
                       color="warning"
                       tooltip="duplicate"
                       onClick={() => {
-                        duplicateStatementMutation.mutate(
-                          row.original as IResponseStatement
-                        );
+                        duplicateStatement(row.original as IResponseStatement);
                       }}
                     />,
                     <Button
@@ -510,7 +512,7 @@ export const StatementListBox: React.FC = () => {
                       tooltip="add new statement before"
                       color="info"
                       onClick={() => {
-                        addStatementAtCertainIndex(row.index - 1);
+                        addStatementAtCertainIndex(row.index);
                       }}
                     />,
                     <Button

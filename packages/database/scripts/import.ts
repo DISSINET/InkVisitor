@@ -1,166 +1,341 @@
 import { IUser } from "../../shared/types/user";
 import { hashPassword } from "../../server/src/common/auth";
 import { IAudit } from "../../shared/types";
-import * as fs from "fs";
-import { Connection, r, RConnectionOptions, RValue } from "rethinkdb-ts";
+import {
+  r,
+  RConnectionOptions,
+  RTable,
+  Connection,
+  RDatum,
+  RValue,
+} from "rethinkdb-ts";
 import tunnel from "tunnel-ssh";
 import { Server } from "net";
 import readline from "readline";
+import { parseArgs, prepareDbConnection, TableSchema } from "./import-utils";
+import { DbIndex } from "@shared/enums";
 
-const entitiesTable = "entities";
+const [datasetId, env] = parseArgs();
+const envData = require("dotenv").config({ path: `env/.env.${env}` }).parsed;
 
-const datasets: Record<string, any> = {
+const datasets: Record<string, TableSchema[]> = {
   all: [
     {
       name: "acl_permissions",
-      data: "datasets/all/acl_permissions.json",
+      data: require("../datasets/default/acl_permissions.json"),
+      transform: function () {},
     },
     {
       name: "entities",
-      data: "datasets/all/entities.json",
+      data: require("../datasets/all/entities.json"),
+      transform: function () {},
       indexes: [
-        r.table(entitiesTable).indexCreate("class"),
-        r.table(entitiesTable).indexCreate("label"),
-        r
-          .table(entitiesTable)
-          .indexCreate(
-            "data.actants.actant",
-            r.row("data")("actants")("actant")
+        // if the prop object is missing value/type/children attrs, this wont work! model should handle this
+        (table: RTable) =>
+          table.indexCreate(
+            "props.recursive",
+            r
+              .row("props")
+              .concatMap((prop: RDatum) =>
+                r
+                  .expr([prop("value")("id"), prop("type")("id")])
+                  .add(
+                    prop("children").concatMap((ch1: RDatum) =>
+                      r
+                        .expr([ch1("value")("id"), ch1("type")("id")])
+                        .add(
+                          ch1("children").concatMap((ch2: RDatum) =>
+                            r
+                              .expr([ch2("value")("id"), ch2("type")("id")])
+                              .add(
+                                ch2("children").concatMap((ch3: RDatum) => [
+                                  ch3("value")("id"),
+                                  ch3("type")("id"),
+                                ]) as RValue
+                              )
+                          ) as RValue
+                        )
+                    ) as RValue
+                  )
+              )
+              .distinct(),
+            { multi: true }
           ),
-        r
-          .table(entitiesTable)
-          .indexCreate(
-            "data.actions.action",
-            r.row("data")("actions")("action")
+        (table: RTable) => table.indexCreate(DbIndex.Class),
+        (table: RTable) =>
+          table.indexCreate(
+            DbIndex.StatementTerritory,
+            r.row("data")("territory")("id")
           ),
-        r.table(entitiesTable).indexCreate("data.tags", r.row("data")("tags")),
-        r
-          .table(entitiesTable)
-          .indexCreate(
-            "data.props.type.id",
-            r.row("data")("props")("type")("id")
+        (table: RTable) =>
+          table.indexCreate(
+            DbIndex.StatementEntities,
+            function (row: RDatum) {
+              return row("data")("actions")
+                .map(function (a: RDatum) {
+                  return a("action");
+                })
+                .add(
+                  row("data")("actants").map(function (a: RDatum) {
+                    return a("actant");
+                  }) as any,
+                  row("data")("tags").map(function (t: RDatum) {
+                    return t;
+                  }) as any
+                );
+            },
+            {
+              multi: true,
+            }
           ),
-        r
-          .table(entitiesTable)
-          .indexCreate(
-            "data.props.value.id",
-            r.row("data")("props")("value")("id")
-          ),
-        r
-          .table(entitiesTable)
-          .indexCreate(
-            "data.references.resource",
-            r.row("data")("references")("resource")
-          ),
-        r
-          .table(entitiesTable)
-          .indexCreate("data.props.origin", r.row("data")("props")("origin")),
-        r
-          .table(entitiesTable)
-          .indexCreate("data.territory.id", r.row("data")("territory")("id")),
-        r
-          .table(entitiesTable)
-          .indexCreate("data.parent.id", r.row("data")("parent")("id")),
       ],
     },
     {
       name: "users",
-      data: "datasets/all/users.json",
+      data: require("../datasets/default/users.json"),
+      transform: function () {
+        this.data = this.data.map((user: IUser) => {
+          user.password = hashPassword(user.password ? user.password : "");
+          return user;
+        });
+      },
     },
     {
       name: "audits",
-      data: "datasets/all/audits.json",
+      data: require("../datasets/all/audits.json"),
+      transform: function () {
+        this.data = this.data.map((audit: IAudit) => {
+          audit.date = new Date(audit.date);
+          return audit;
+        });
+      },
+    },
+  ],
+  empty: [
+    {
+      name: "acl_permissions",
+      data: require("../datasets/default/acl_permissions.json"),
+      transform: function () {},
+    },
+    {
+      name: "entities",
+      data: require("../datasets/empty/entities.json"),
+      transform: function () {},
+      indexes: [
+        // if the prop object is missing value/type/children attrs, this wont work! model should handle this
+        (table: RTable) =>
+          table.indexCreate(
+            "props.recursive",
+            r
+              .row("props")
+              .concatMap((prop: RDatum) =>
+                r
+                  .expr([prop("value")("id"), prop("type")("id")])
+                  .add(
+                    prop("children").concatMap((ch1: RDatum) =>
+                      r
+                        .expr([ch1("value")("id"), ch1("type")("id")])
+                        .add(
+                          ch1("children").concatMap((ch2: RDatum) =>
+                            r
+                              .expr([ch2("value")("id"), ch2("type")("id")])
+                              .add(
+                                ch2("children").concatMap((ch3: RDatum) => [
+                                  ch3("value")("id"),
+                                  ch3("type")("id"),
+                                ]) as RValue
+                              )
+                          ) as RValue
+                        )
+                    ) as RValue
+                  )
+              )
+              .distinct(),
+            { multi: true }
+          ),
+        (table: RTable) => table.indexCreate(DbIndex.Class),
+        (table: RTable) =>
+          table.indexCreate(
+            DbIndex.StatementTerritory,
+            r.row("data")("territory")("id")
+          ),
+        (table: RTable) =>
+          table.indexCreate(
+            DbIndex.StatementEntities,
+            function (row: RDatum) {
+              return row("data")("actions")
+                .map(function (a: RDatum) {
+                  return a("action");
+                })
+                .add(
+                  row("data")("actants").map(function (a: RDatum) {
+                    return a("actant");
+                  }) as any,
+                  row("data")("tags").map(function (t: RDatum) {
+                    return t;
+                  }) as any
+                );
+            },
+            {
+              multi: true,
+            }
+          ),
+      ],
+    },
+    {
+      name: "users",
+      data: require("../datasets/default/users.json"),
+      transform: function () {
+        this.data = this.data.map((user: IUser) => {
+          user.password = hashPassword(user.password ? user.password : "");
+          return user;
+        });
+      },
+    },
+    {
+      name: "audits",
+      data: require("../datasets/empty/audits.json"),
+      transform: function () {
+        this.data = this.data.map((audit: IAudit) => {
+          audit.date = new Date(audit.date);
+          return audit;
+        });
+      },
+    },
+  ],
+  allparsed: [
+    {
+      name: "acl_permissions",
+      data: require("../datasets/all-parsed/acl_permissions.json"),
+      transform: function () {},
+    },
+    {
+      name: "entities",
+      data: require("../datasets/all-parsed/entities.json"),
+      transform: function () {},
+      indexes: [
+        // if the prop object is missing value/type/children attrs, this wont work! model should handle this
+        (table: RTable) =>
+          table.indexCreate(
+            "props.recursive",
+            r
+              .row("props")
+              .concatMap((prop: RDatum) =>
+                r
+                  .expr([prop("value")("id"), prop("type")("id")])
+                  .add(
+                    prop("children").concatMap((ch1: RDatum) =>
+                      r
+                        .expr([ch1("value")("id"), ch1("type")("id")])
+                        .add(
+                          ch1("children").concatMap((ch2: RDatum) =>
+                            r
+                              .expr([ch2("value")("id"), ch2("type")("id")])
+                              .add(
+                                ch2("children").concatMap((ch3: RDatum) => [
+                                  ch3("value")("id"),
+                                  ch3("type")("id"),
+                                ]) as RValue
+                              )
+                          ) as RValue
+                        )
+                    ) as RValue
+                  )
+              )
+              .distinct(),
+            { multi: true }
+          ),
+        (table: RTable) => table.indexCreate(DbIndex.Class),
+        (table: RTable) =>
+          table.indexCreate(
+            DbIndex.StatementTerritory,
+            r.row("data")("territory")("id")
+          ),
+        (table: RTable) =>
+          table.indexCreate(
+            DbIndex.StatementEntities,
+            function (row: RDatum) {
+              return row("data")("actions")
+                .map(function (a: RDatum) {
+                  return a("action");
+                })
+                .add(
+                  row("data")("actants").map(function (a: RDatum) {
+                    return a("actant");
+                  }) as any,
+                  row("data")("tags").map(function (t: RDatum) {
+                    return t;
+                  }) as any
+                );
+            },
+            {
+              multi: true,
+            }
+          ),
+      ],
+    },
+    {
+      name: "users",
+      data: require("../datasets/all-parsed/users.json"),
+      transform: function () {
+        this.data = this.data.map((user: IUser) => {
+          user.password = hashPassword(user.password ? user.password : "");
+          return user;
+        });
+      },
+    },
+    {
+      name: "audits",
+      data: require("../datasets/all-parsed/audits.json"),
+      transform: function () {
+        this.data = this.data.map((audit: IAudit) => {
+          audit.date = new Date(audit.date);
+          return audit;
+        });
+      },
     },
   ],
 };
 
-const datasetId: string = process.argv[2];
-const env = process.argv[3];
+const config: RConnectionOptions & { tables: TableSchema[] } = {
+  timeout: 5,
+  db: envData.DB_NAME,
+  host: envData.DB_HOST,
+  port: envData.DB_PORT,
+  password: process.env.DB_AUTH,
+  tables: datasets[datasetId],
+};
 
-const envData = require("dotenv").config({ path: `env/.env.${env}` }).parsed;
+const importTable = async (
+  table: TableSchema,
+  conn: Connection
+): Promise<void> => {
+  await r.tableCreate(table.name).run(conn);
+  if (table.indexes) {
+    for (const i in table.indexes) {
+      await table.indexes[i](r.table(table.name)).run(conn);
+    }
+  }
 
-const tablesToImport = datasets[datasetId];
+  console.log(`Table ${table.name} created`);
 
-console.log(`***importing dataset ${datasetId}***\n`);
+  table.transform();
 
-function doIndex(statement: any, connection: any): Promise<any> {
-  return new Promise((resolve) => {
-    statement.run(connection, resolve);
-  });
-}
+  await r.table(table.name).insert(table.data).run(conn);
+
+  const itemsImported = await r.table(table.name).count().run(conn);
+  console.log(`Imported ${itemsImported} entries to table ${table.name}`);
+
+  return;
+};
 
 const importData = async () => {
-  const config: RConnectionOptions = {
-    timeout: 5,
-    db: envData.DB_NAME,
-    host: envData.DB_HOST,
-    port: envData.DB_PORT,
-    password: process.env.DB_AUTH,
-    tables: tablesToImport,
-  };
+  const conn = await prepareDbConnection(config);
 
-  let conn: Connection;
-  console.log(config);
+  console.log(`***importing dataset ${datasetId}***\n`);
 
-  try {
-    conn = await r.connect(config);
-  } catch (e) {
-    throw new Error(`Cannot connect to the db: ${e}`);
-  }
-
-  // Drop the database.
-  try {
-    await r.dbDrop(config.db as RValue<string>).run(conn);
-    console.log("Database dropped");
-  } catch (e) {
-    throw new Error(`Database not dropped: ${e}`);
-  }
-
-  // Recreate the database
-  try {
-    await r.dbCreate(config.db as RValue<string>).run(conn);
-    console.log("Database created");
-  } catch (e) {
-    throw new Error(`Database not created: ${e}`);
-  }
-
-  // set default database
-  conn.use(config.db as string);
-
-  // Insert data to tables.
-  for (let i = 0; i < config.tables.length; ++i) {
-    const table = config.tables[i];
-
-    await r.tableCreate(table.name).run(conn);
-    if (table.indexes) {
-      for (const index of table.indexes) {
-        //await doIndex(index, conn);
-      }
-    }
-
-    console.log(`Table ${table.name} created`);
-
-    let data = JSON.parse(fs.readFileSync(table.data).toString());
-    if (table.name === "users") {
-      data = data.map((user: IUser) => {
-        user.password = hashPassword(user.password ? user.password : "");
-        return user;
-      });
-    }
-
-    if (table.name === "audits") {
-      data = data.map((audit: IAudit) => {
-        audit.date = new Date(audit.date);
-        return audit;
-      });
-    }
-
-    await r.table(table.name).insert(data).run(conn);
-
-    if (table.name === "entities") {
-      const entitiesImported = await r.table("entities").count().run(conn);
-      console.log(`Imported ${entitiesImported} entities`);
-    }
+  for (const table of config.tables) {
+    await importTable(table, conn);
   }
 
   console.log("Closing connection");
@@ -178,6 +353,8 @@ const importData = async () => {
       if (result.toLowerCase() !== "y") {
         process.exit(0);
       }
+
+      rl.close();
 
       const tnl = tunnel(
         {

@@ -36,7 +36,7 @@ export class RequestSearch implements IResponseSearch {
     }
 
     if (!this.label && !this.entityId) {
-      return new BadParams("at least some search field has to be set");
+      return new BadParams("at least one search field has to be set");
     }
 
     return;

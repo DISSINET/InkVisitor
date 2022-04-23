@@ -18,7 +18,7 @@ import {
   StyledRow,
   StyledRowHeader,
   StyledTagLoaderWrap,
-} from "./ActantSearchBoxStyles";
+} from "./EntitySearchBoxStyles";
 
 const classesActants = [
   EntityClass.Action,
@@ -38,7 +38,7 @@ const initValues: IRequestSearch = {
   label: "",
 };
 
-export const ActantSearchBox: React.FC = () => {
+export const EntitySearchBox: React.FC = () => {
   const [options, setOptions] = useState<OptionsType<OptionTypeBase>>();
   const [classOption, setClassOption] = useState<
     ValueType<OptionTypeBase, any>
@@ -75,7 +75,7 @@ export const ActantSearchBox: React.FC = () => {
       label: string;
     }[] = Object.entries(Entities)
       .filter((c: any) => {
-        if (c[1].id !== "A" && c[1].id !== "R") {
+        if (c[1].id !== "A" && c[1].id !== "R" && c[1].id !== "X") {
           return c;
         }
       })
@@ -97,7 +97,7 @@ export const ActantSearchBox: React.FC = () => {
   };
 
   useEffect(() => {
-    if (debouncedValues.entityId || debouncedValues.label.length > 3) {
+    if (debouncedValues.entityId || debouncedValues.label.length > 1) {
       searchActantsMutation.mutate(debouncedValues);
     } else {
       setResults([]);
@@ -116,7 +116,7 @@ export const ActantSearchBox: React.FC = () => {
   return (
     <StyledBoxContent>
       <StyledRow>
-        <StyledRowHeader>Label (at least 4 characters)</StyledRowHeader>
+        <StyledRowHeader>Label (at least 2 characters)</StyledRowHeader>
         <Input
           width={150}
           placeholder="search"
