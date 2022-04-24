@@ -32,6 +32,8 @@ import {
   StyledEditorSection,
   StyledEditorSectionContent,
   StyledEditorSectionHeader,
+  StyledEditorStatementInfo,
+  StyledEditorStatementInfoLabel,
   StyledTagsList,
   StyledTagsListItem,
 } from "./StatementEditorBoxStyles";
@@ -515,6 +517,19 @@ export const StatementEditorBox: React.FC = () => {
       {statement ? (
         <div style={{ marginBottom: "4rem" }} key={statement.id}>
           <StyledEditorPreSection>
+            <StyledEditorStatementInfo>
+              <EntityTag actant={statement} fullWidth />
+              <StyledEditorStatementInfoLabel>
+                change statement label:{" "}
+              </StyledEditorStatementInfoLabel>
+              <Input
+                type="text"
+                value={statement.label}
+                onChangeFn={(newValue: string) => {
+                  updateStatementMutation.mutate({ label: newValue });
+                }}
+              />
+            </StyledEditorStatementInfo>
             <StyledBreadcrumbWrap>
               {territoryPath &&
                 territoryPath.map((territory: string, key: number) => {

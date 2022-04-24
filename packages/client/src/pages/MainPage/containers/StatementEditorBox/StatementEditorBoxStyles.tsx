@@ -183,3 +183,13 @@ export const StyledSubRow = styled.div`
   margin-left: ${({ theme }) => `${theme.space[10]}`};
   margin-bottom: ${({ theme }) => `${theme.space[2]}`};
 `;
+
+export const StyledEditorStatementInfo = styled.div`
+  display: inline-flex;
+  align-items: center;
+  margin-bottom: ${({ theme }) => theme.space[4]};
+`;
+export const StyledEditorStatementInfoLabel = styled.div`
+  margin-left: ${({ theme }) => theme.space[4]};
+  margin-right: ${({ theme }) => theme.space[1]};
+`;
