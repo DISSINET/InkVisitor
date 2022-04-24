@@ -107,7 +107,7 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
           notes: templateToApply.notes,
           props: templateToApply.props,
           references: templateToApply.references,
-          usedTemplate: true,
+          usedTemplate: templateToApply.id,
         },
       };
 
@@ -580,7 +580,9 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                       label="open"
                       onClick={() => {
                         setStatementId(entity.id);
-                        setTerritoryId(entity.data.territory.id);
+                        if (entity.data.territory) {
+                          setTerritoryId(entity.data.territory.id);
+                        }
                       }}
                     />
                   )}

@@ -193,7 +193,7 @@ export const StatementEditorBox: React.FC = () => {
           notes: templateToApply.notes,
           props: templateToApply.props,
           references: templateToApply.references,
-          usedTemplate: true,
+          usedTemplate: templateToApply.id,
         },
       };
 
