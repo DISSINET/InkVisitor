@@ -52,7 +52,6 @@ export async function filterEntitiesByWildcard(
 ): Promise<IEntity[]> {
   let query = rethink.table(Entity.table);
 
-  console.log("onlyTemplates", onlyTemplates);
   if (entityIds && entityIds.length) {
     query = query.getAll(rethink.args(entityIds)) as any;
   }
