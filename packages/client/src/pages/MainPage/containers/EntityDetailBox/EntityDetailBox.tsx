@@ -156,12 +156,15 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
   const deleteEntityMutation = useMutation(
     async (entityId: string) => await api.entityDelete(entityId),
     {
-      onSuccess: (data, entityId) => {
+      onSuccess: async (data, entityId) => {
         toast.info(`Entity deleted!`);
-        queryClient.invalidateQueries("statement");
-        queryClient.invalidateQueries("territory");
-        queryClient.invalidateQueries("tree");
+
+        setTerritoryId("");
         setDetailId("");
+
+        queryClient.invalidateQueries("statement");
+        queryClient.invalidateQueries("tree");
+        queryClient.invalidateQueries("territory");
       },
     }
   );
