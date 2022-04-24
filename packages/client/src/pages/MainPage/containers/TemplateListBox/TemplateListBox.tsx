@@ -171,7 +171,7 @@ export const TemplateListBox: React.FC<TemplateListBox> = ({}) => {
         <StyledTemplateFilter>
           <StyledTemplateFilterInputRow>
             <StyledTemplateFilterInputLabel>
-              {"Entity type: "}
+              {"Entity class: "}
             </StyledTemplateFilterInputLabel>
             <StyledTemplateFilterInputValue>
               <Dropdown

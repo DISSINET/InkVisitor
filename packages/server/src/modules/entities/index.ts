@@ -61,8 +61,9 @@ export default Router()
       const classParam = request.body.class;
       const excluded: EntityClass[] = request.body.excluded;
       const onlyTemplates: undefined | boolean = request.body.onlyTemplates;
+      const usedTemplate: undefined | string = request.body.usedTemplate;
 
-      if (!label && !classParam && !onlyTemplates) {
+      if (!label && !classParam && !onlyTemplates && !usedTemplate) {
         throw new BadParams("label or class has to be set");
       }
 
@@ -83,10 +84,9 @@ export default Router()
         excluded,
         label,
         undefined,
-        onlyTemplates
+        onlyTemplates,
+        usedTemplate
       );
-
-      console.log(entities);
 
       const responses: IResponseEntity[] = [];
       for (const entityData of entities) {

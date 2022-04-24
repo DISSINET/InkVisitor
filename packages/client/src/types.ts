@@ -157,11 +157,6 @@ export interface DraggedPropRowItem {
 export interface DraggedActantRowItem {
   category?: DraggedPropRowCategory;
 }
-export interface IRequestSearch {
-  class?: EntityClass;
-  label: string;
-  entityId: string;
-}
 
 export type ISearchPositionInStatement =
   | "any"
