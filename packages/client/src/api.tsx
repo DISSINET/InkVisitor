@@ -25,7 +25,7 @@ import {
   IRequestSearchStatement,
 } from "types";
 
-type IFilterEntities = {
+export type IFilterEntities = {
   label?: string;
   class?: string | false;
 

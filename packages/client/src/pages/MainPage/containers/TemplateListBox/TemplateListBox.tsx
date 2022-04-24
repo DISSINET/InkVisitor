@@ -1,7 +1,8 @@
 import { entitiesDict } from "@shared/dictionaries";
+import { allEntities } from "@shared/dictionaries/entity";
 import { EntityClass, UserRole } from "@shared/enums";
 import { IEntity } from "@shared/types";
-import api from "api";
+import api, { IFilterEntities } from "api";
 import {
   Button,
   ButtonGroup,
@@ -28,6 +29,10 @@ import { EntityTag } from "..";
 import { StyledContent } from "../EntityBookmarkBox/EntityBookmarkBoxStyles";
 import {
   StyledBoxContent,
+  StyledTemplateFilter,
+  StyledTemplateFilterInputLabel,
+  StyledTemplateFilterInputRow,
+  StyledTemplateFilterInputValue,
   StyledTemplateSection,
   StyledTemplateSectionHeader,
   StyledTemplateSectionList,
@@ -42,6 +47,15 @@ export const TemplateListBox: React.FC<TemplateListBox> = ({}) => {
     useState<string>("");
   const [createModalEntityDetail, setCreateModalEntityDetail] =
     useState<string>("");
+
+  // FILTER;
+
+  const allEntityOption = { value: "all", label: "all" };
+  const allEntityOptions = [allEntityOption, ...entitiesDict] as any;
+
+  const [filterByClass, setFilterByClass] =
+    useState<DropdownItem>(allEntityOption);
+  const [filterByLabel, setFilterByLabel] = useState<string>("");
 
   const handleCloseCreateModal = () => {
     setCreateModal(false);
@@ -60,15 +74,27 @@ export const TemplateListBox: React.FC<TemplateListBox> = ({}) => {
     status,
     data: templatesData,
     error,
-    isFetching,
+    isFetching: isFetchingTemplates,
   } = useQuery(
-    ["templates"],
+    ["templates", filterByClass, filterByLabel],
     async () => {
-      const res = await api.entitiesGetMore({
-        class: false,
+      const filters: IFilterEntities = {
         onlyTemplates: true,
-      });
-      return res.data;
+      };
+      if (filterByClass.value !== "all") {
+        filters["class"] = filterByClass.value;
+      }
+      if (filterByLabel) {
+        filters["label"] = "*" + filterByLabel + "*";
+      }
+
+      const res = await api.entitiesGetMore(filters);
+
+      const templates = res.data;
+      templates.sort((a: IEntity, b: IEntity) =>
+        a.label.toLocaleLowerCase() > b.label.toLocaleLowerCase() ? 1 : -1
+      );
+      return templates;
     },
     {
       enabled: api.isLoggedIn(),
@@ -141,11 +167,51 @@ export const TemplateListBox: React.FC<TemplateListBox> = ({}) => {
             }}
           />
         </StyledTemplateSectionHeader>
+
+        <StyledTemplateFilter>
+          <StyledTemplateFilterInputRow>
+            <StyledTemplateFilterInputLabel>
+              {"Entity type: "}
+            </StyledTemplateFilterInputLabel>
+            <StyledTemplateFilterInputValue>
+              <Dropdown
+                value={{
+                  label: filterByClass.label,
+                  value: filterByClass.value,
+                }}
+                options={allEntityOptions}
+                onChange={(option: ValueType<OptionTypeBase, any>) => {
+                  setFilterByClass(option as DropdownItem);
+                }}
+                width={80}
+                entityDropdown
+                disableTyping
+                oneLetter
+              />
+              <StyledTypeBar
+                entity={`entity${createModalEntityClass.value}`}
+              ></StyledTypeBar>
+            </StyledTemplateFilterInputValue>
+          </StyledTemplateFilterInputRow>
+          <StyledTemplateFilterInputRow>
+            <StyledTemplateFilterInputLabel>
+              {"Label: "}
+            </StyledTemplateFilterInputLabel>
+            <StyledTemplateFilterInputValue>
+              <Input
+                value={filterByLabel}
+                onChangeFn={(newType: string) => setFilterByLabel(newType)}
+                changeOnType
+                autoFocus
+              />
+            </StyledTemplateFilterInputValue>
+          </StyledTemplateFilterInputRow>
+        </StyledTemplateFilter>
         <StyledTemplateSectionList>
           {templatesData &&
-            templatesData.map((templateEntity) => {
+            templatesData.map((templateEntity, ti) => {
               return (
-                <React.Fragment key={templateEntity.id}>
+                <React.Fragment key={templateEntity.id + ti}>
                   <EntityTag
                     actant={templateEntity}
                     propId={templateEntity.id}
@@ -182,7 +248,7 @@ export const TemplateListBox: React.FC<TemplateListBox> = ({}) => {
                   onChange={(option: ValueType<OptionTypeBase, any>) => {
                     setCreateModalEntityClass(option as DropdownItem);
                   }}
-                  width={40}
+                  width={80}
                   entityDropdown
                   disableTyping
                   oneLetter

@@ -84,8 +84,6 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
     { enabled: !!detailId && api.isLoggedIn(), retry: 2 }
   );
 
-  console.log(entity);
-
   // Audit query
   const {
     status: statusAudit,
@@ -119,13 +117,13 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
   }, [entity]);
 
   // mutations
-  const allEntitiesOption = {
-    value: "*",
-    label: "*",
-    info: "",
-  };
-  const entityOptions = [...entitiesDict] as any;
-  entityOptions.push(allEntitiesOption);
+  // const allEntitiesOption = {
+  //   value: "*",
+  //   label: "*",
+  //   info: "",
+  // };
+  // const entityOptions = [...entitiesDict] as any;
+  // entityOptions.push(allEntitiesOption);
 
   const updateEntityMutation = useMutation(
     async (changes: any) => await api.entityUpdate(detailId, changes),

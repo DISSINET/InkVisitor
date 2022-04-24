@@ -29,4 +29,34 @@ export const StyledTemplateSectionHeader = styled.div`
   }
 `;
 
-export const StyledTemplateSectionList = styled.div``;
+export const StyledTemplateSectionList = styled.div`
+  > div {
+    padding: ${({ theme }) => theme.space["1"]};
+  }
+`;
+
+export const StyledTemplateFilterInputRow = styled.div``;
+export const StyledTemplateFilterInputLabel = styled.div``;
+export const StyledTemplateFilterInputValue = styled.div``;
+
+export const StyledTemplateFilter = styled.div`
+  display: table;
+  ${StyledTemplateFilterInputRow} {
+    display: table-row;
+    width: 100%;
+  }
+  ${StyledTemplateFilterInputLabel} {
+    width: 1%;
+    white-space: nowrap;
+    display: table-cell;
+    padding: ${({ theme }) => theme.space[3]};
+    vertical-align: top;
+    text-align: right;
+    float: initial;
+  }
+  ${StyledTemplateFilterInputValue} {
+    display: table-cell;
+    width: 100%;
+    padding: ${({ theme }) => theme.space[2]};
+  }
+`;
