@@ -26,7 +26,9 @@ export default Router().get(
 
     const response = new ResponseAudit(entityId);
     await response.getLastNForEntity(request.db.connection);
-    await response.getFirstForEntity(request.db.connection);
+    if (response.last.length) {
+      await response.getFirstForEntity(request.db.connection);
+    }
 
     return response;
   })
