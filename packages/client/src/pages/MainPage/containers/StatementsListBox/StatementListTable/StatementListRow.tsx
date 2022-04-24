@@ -1,5 +1,4 @@
 import { IEntity } from "@shared/types";
-import api from "api";
 import { useSearchParams } from "hooks";
 import React, { useMemo, useRef } from "react";
 import {
@@ -9,7 +8,6 @@ import {
   useDrop,
 } from "react-dnd";
 import { FaGripVertical } from "react-icons/fa";
-import { useQuery } from "react-query";
 import { Cell, ColumnInstance } from "react-table";
 import { DragItem, ItemTypes } from "types";
 import { dndHoverFn } from "utils";
@@ -41,20 +39,7 @@ export const StatementListRow: React.FC<StatementListRow> = ({
   entities,
 }) => {
   const { statementId } = useSearchParams();
-
-  const {
-    status: statusAudit,
-    data: audit,
-    error: auditError,
-    isFetching: isFetchingAudit,
-  } = useQuery(
-    ["audit", row.values.id],
-    async () => {
-      const res = await api.auditGet(row.values.id);
-      return res.data;
-    },
-    { enabled: row && !!row.values.id, retry: 2 }
-  );
+  const audit = row.original.audit;
 
   const lastEditdateText = useMemo(() => {
     if (audit && audit.last && audit.last[0] && audit.last[0].date) {
