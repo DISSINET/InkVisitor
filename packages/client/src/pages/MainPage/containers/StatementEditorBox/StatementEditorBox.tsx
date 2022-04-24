@@ -1,21 +1,39 @@
+import { DropdownItem } from "@shared/dictionaries/entity";
 import { EntityClass, Order, UserRoleMode } from "@shared/enums";
 import {
+  IEntity,
+  IOption,
   IProp,
   IReference,
   IResponseStatement,
+  IStatement,
   IStatementActant,
   IStatementAction,
 } from "@shared/types";
 import api from "api";
-import { Button, Input, Loader, MultiInput } from "components";
+import {
+  Button,
+  ButtonGroup,
+  Dropdown,
+  Input,
+  Loader,
+  Modal,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+  ModalInputForm,
+  MultiInput,
+} from "components";
 import { CProp, CStatementActant, CStatementAction } from "constructors";
 import { useSearchParams } from "hooks";
-import React, { useEffect, useMemo } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { BsInfoCircle } from "react-icons/bs";
 import { FaUnlink } from "react-icons/fa";
 import { useMutation, useQuery, useQueryClient } from "react-query";
+import { toast } from "react-toastify";
 import { excludedSuggesterEntities } from "Theme/constants";
 import { DraggedPropRowCategory } from "types";
+import { StyledContent } from "../EntityBookmarkBox/EntityBookmarkBoxStyles";
 import { EntityReferenceTable } from "../EntityReferenceTable/EntityReferenceTable";
 import { JSONExplorer } from "../JSONExplorer/JSONExplorer";
 import { PropGroup } from "../PropGroup/PropGroup";
@@ -27,6 +45,9 @@ import { StatementEditorActionTable } from "./StatementEditorActionTable/Stateme
 import {
   StyledBreadcrumbWrap,
   StyledEditorActantTableWrapper,
+  StyledEditorContentRow,
+  StyledEditorContentRowLabel,
+  StyledEditorContentRowValue,
   StyledEditorEmptyState,
   StyledEditorPreSection,
   StyledEditorSection,
@@ -34,6 +55,7 @@ import {
   StyledEditorSectionHeader,
   StyledEditorStatementInfo,
   StyledEditorStatementInfoLabel,
+  StyledEditorTemplateSection,
   StyledTagsList,
   StyledTagsListItem,
 } from "./StatementEditorBoxStyles";
@@ -140,6 +162,89 @@ export const StatementEditorBox: React.FC = () => {
       enabled: !!statement?.data?.territory?.id && api.isLoggedIn(),
     }
   );
+
+  // TEMPLATES
+  const [applyTemplateModal, setApplyTemplateModal] = useState<boolean>(false);
+  const [templateToApply, setTemplateToApply] = useState<IEntity | false>(
+    false
+  );
+
+  const handleAskForTemplateApply = (templateOptionToApply: IOption) => {
+    console.log(templateToApply, templates);
+
+    if (templates) {
+      const templateThatIsGoingToBeApplied = templates.find(
+        (template: IEntity) => template.id === templateOptionToApply.value
+      );
+
+      if (templateThatIsGoingToBeApplied) {
+        setTemplateToApply(templateThatIsGoingToBeApplied);
+        setApplyTemplateModal(true);
+      }
+    }
+  };
+
+  const handleApplyTemplate = () => {
+    if (templateToApply && statement) {
+      // TODO #952 handle conflicts in Templates application
+      const entityAfterTemplateApplied = {
+        ...{
+          data: templateToApply.data,
+          notes: templateToApply.notes,
+          props: templateToApply.props,
+          references: templateToApply.references,
+          usedTemplate: true,
+        },
+      };
+
+      toast.info(
+        `Template ${templateToApply.label} applied to Statement ${statement.label}`
+      );
+      updateActantMutation.mutate(entityAfterTemplateApplied);
+    }
+    setTemplateToApply(false);
+  };
+
+  const {
+    status: templateStatus,
+    data: templates,
+    error: templateError,
+    isFetching: isFetchingTemplates,
+  } = useQuery(
+    ["statement-templates"],
+    async () => {
+      const res = await api.entitiesGetMore({
+        onlyTemplates: true,
+        class: EntityClass.Statement,
+      });
+
+      const templates = res.data;
+      templates.sort((a: IEntity, b: IEntity) =>
+        a.label.toLocaleLowerCase() > b.label.toLocaleLowerCase() ? 1 : -1
+      );
+      return templates;
+    },
+    { enabled: !!statement && api.isLoggedIn(), retry: 2 }
+  );
+
+  const templateOptions: DropdownItem[] = useMemo(() => {
+    const options = [
+      {
+        value: "",
+        label: "select template",
+      },
+    ];
+
+    if (templates) {
+      templates.forEach((template) => {
+        options.push({
+          value: template.id,
+          label: template.label,
+        });
+      });
+    }
+    return options;
+  }, [templates]);
 
   // refetch audit when statement changes
   useEffect(() => {
@@ -559,6 +664,27 @@ export const StatementEditorBox: React.FC = () => {
               />
             </StyledEditorPreSection>
           )}
+          {userCanEdit && (
+            <StyledEditorTemplateSection>
+              <StyledEditorContentRow>
+                <StyledEditorContentRowLabel>
+                  Apply Template
+                </StyledEditorContentRowLabel>
+                <StyledEditorContentRowValue>
+                  <Dropdown
+                    disabled={!userCanEdit}
+                    isMulti={false}
+                    width="full"
+                    options={templateOptions}
+                    value={templateOptions[0]}
+                    onChange={(templateToApply: any) => {
+                      handleAskForTemplateApply(templateToApply);
+                    }}
+                  />
+                </StyledEditorContentRowValue>
+              </StyledEditorContentRow>
+            </StyledEditorTemplateSection>
+          )}
           <StyledEditorSection firstSection key="editor-section-summary">
             <StyledEditorSectionContent firstSection>
               <div>
@@ -747,6 +873,50 @@ export const StatementEditorBox: React.FC = () => {
           </StyledEditorEmptyState>
         </>
       )}
+      <Modal
+        showModal={applyTemplateModal}
+        width="thin"
+        onEnterPress={() => {
+          setApplyTemplateModal(false);
+          handleApplyTemplate();
+        }}
+        onClose={() => {
+          setApplyTemplateModal(false);
+        }}
+      >
+        <ModalHeader title="Create Template" />
+        <ModalContent>
+          <StyledContent>
+            <ModalInputForm>{`Apply template?`}</ModalInputForm>
+            <div>
+              {templateToApply && <EntityTag actant={templateToApply} />}
+            </div>
+            {/* here goes the info about template #951 */}
+          </StyledContent>
+        </ModalContent>
+        <ModalFooter>
+          <ButtonGroup>
+            <Button
+              key="cancel"
+              label="Cancel"
+              color="greyer"
+              inverted
+              onClick={() => {
+                setApplyTemplateModal(false);
+              }}
+            />
+            <Button
+              key="submit"
+              label="Apply"
+              color="info"
+              onClick={() => {
+                setApplyTemplateModal(false);
+                handleApplyTemplate();
+              }}
+            />
+          </ButtonGroup>
+        </ModalFooter>
+      </Modal>
       <Loader
         show={
           isFetchingStatement ||

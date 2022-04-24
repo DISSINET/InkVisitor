@@ -193,3 +193,50 @@ export const StyledEditorStatementInfoLabel = styled.div`
   margin-left: ${({ theme }) => theme.space[4]};
   margin-right: ${({ theme }) => theme.space[1]};
 `;
+
+export const StyledEditorContentRow = styled.div`
+  /* class: row; */
+  /* display: flex; */
+`;
+export const StyledEditorContentRowLabel = styled.div`
+  float: left;
+  color: ${({ theme }) => theme.color["info"]};
+  font-size: ${({ theme }) => theme.fontSize["xs"]};
+`;
+export const StyledEditorContentRowValue = styled.div`
+  float: right;
+`;
+export const StyledEditorContentRowValueID = styled.div`
+  display: inline-flex;
+  font-style: italic;
+  font-size: ${({ theme }) => theme.fontSize["xs"]};
+  align-items: baseline;
+
+  button {
+    margin-left: ${({ theme }) => theme.space["2"]};
+  }
+`;
+
+export const StyledEditorTemplateSection = styled.div`
+  display: table;
+  width: 100%;
+  padding-right: ${({ theme }) => theme.space[6]};
+  ${StyledEditorContentRow} {
+    display: table-row;
+    width: 100%;
+    ${StyledEditorContentRowLabel} {
+      width: 1%;
+      white-space: nowrap;
+      display: table-cell;
+      padding: ${({ theme }) => theme.space[3]};
+      vertical-align: top;
+      text-align: right;
+      float: initial;
+    }
+    ${StyledEditorContentRowValue} {
+      display: table-cell;
+      width: 100%;
+      padding: ${({ theme }) => theme.space[2]};
+    }
+  }
+`;

@@ -99,7 +99,7 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
   };
 
   const handleApplyTemplate = () => {
-    if (templateToApply) {
+    if (templateToApply && entity) {
       // TODO #952 handle conflicts in Templates application
       const entityAfterTemplateApplied = {
         ...{
@@ -107,10 +107,14 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
           notes: templateToApply.notes,
           props: templateToApply.props,
           references: templateToApply.references,
+          usedTemplate: true,
         },
       };
 
-      console.log(templateToApply, entityAfterTemplateApplied);
+      toast.info(
+        `Template ${templateToApply.label} applied to Statement ${entity.label}`
+      );
+
       updateEntityMutation.mutate(entityAfterTemplateApplied);
     }
     setTemplateToApply(false);
@@ -172,8 +176,6 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
     }
     return options;
   }, [templates]);
-
-  console.log(templates);
 
   // Audit query
   const {
@@ -1308,7 +1310,8 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
         showModal={applyTemplateModal}
         width="thin"
         onEnterPress={() => {
-          //setApplyTemplateModal(false);
+          setApplyTemplateModal(false);
+          handleApplyTemplate();
         }}
         onClose={() => {
           setApplyTemplateModal(false);
