@@ -34,6 +34,7 @@ import User from "@models/user/user";
 import { EventMapSingle, EventTypes } from "@models/events/types";
 import treeCache from "@service/treeCache";
 import Prop from "@models/prop/prop";
+import e from "express";
 
 export class StatementActant implements IStatementActant, IModel {
   id = "";
@@ -132,7 +133,7 @@ export class StatementAction implements IStatementAction {
 
 export class StatementData implements IModel, IStatementData {
   text = "";
-  territory = new StatementTerritory({});
+  territory? = new StatementTerritory({});
   actions: StatementAction[] = [];
   actants: StatementActant[] = [];
   tags: string[] = [];
@@ -143,10 +144,16 @@ export class StatementData implements IModel, IStatementData {
     }
 
     fillFlatObject(this, data);
-    this.territory = new StatementTerritory(data.territory as UnknownObject);
+    if (data.territory) {
+      this.territory = new StatementTerritory(data.territory as UnknownObject);
+    } else {
+      delete this.territory;
+    }
     fillArray<StatementAction>(this.actions, StatementAction, data.actions);
     fillArray<StatementActant>(this.actants, StatementActant, data.actants);
 
+    if (data.territory) {
+    }
     // fill array uses constructors - which string[] cannot use (will create an
     // object instead of string type)
     if (data.tags) {
@@ -161,7 +168,7 @@ export class StatementData implements IModel, IStatementData {
    * @returns boolean result
    */
   isValid(): boolean {
-    if (!this.territory.isValid()) {
+    if ("territory" in this && !this.territory?.isValid()) {
       return false;
     }
     if (this.actions.find((a) => !a.isValid())) {
@@ -208,22 +215,28 @@ class Statement extends Entity implements IStatement {
     }
 
     // editors should be able to access META statements
-    if (user.role === UserRole.Editor && this.data.territory.id === "T0") {
+    if (
+      user.role === UserRole.Editor &&
+      this.data.territory &&
+      this.data.territory.id === "T0"
+    ) {
       return true;
     }
 
-    const closestRight = treeCache.getRightForTerritory(
-      this.data.territory.id,
-      user.rights
-    );
-    if (!closestRight) {
-      return false;
+    if (this.data.territory) {
+      const closestRight = treeCache.getRightForTerritory(
+        this.data.territory.id,
+        user.rights
+      );
+      if (!closestRight) {
+        return false;
+      }
+      return (
+        closestRight.mode === UserRoleMode.Admin ||
+        closestRight.mode === UserRoleMode.Write
+      );
     }
-
-    return (
-      closestRight.mode === UserRoleMode.Admin ||
-      closestRight.mode === UserRoleMode.Write
-    );
+    return true;
   }
 
   canBeViewedByUser(user: User): boolean {
@@ -232,10 +245,14 @@ class Statement extends Entity implements IStatement {
       return true;
     }
 
-    return !!treeCache.getRightForTerritory(
-      this.data.territory.id,
-      user.rights
-    );
+    if (this.data.territory) {
+      return !!treeCache.getRightForTerritory(
+        this.data.territory.id,
+        user.rights
+      );
+    } else {
+      return true;
+    }
   }
 
   canBeDeletedByUser(user: User): boolean {
@@ -254,10 +271,12 @@ class Statement extends Entity implements IStatement {
    */
   async save(db: Connection | undefined): Promise<WriteResult> {
     const siblings = await this.findTerritorySiblings(db);
-    this.data.territory.order = Entity.determineOrder(
-      this.data.territory.order,
-      siblings
-    );
+    if (this.data.territory) {
+      this.data.territory.order = Entity.determineOrder(
+        this.data.territory.order,
+        siblings
+      );
+    }
 
     const res = await super.save(db);
 
@@ -277,7 +296,11 @@ class Statement extends Entity implements IStatement {
     db: Connection | undefined,
     updateData: Record<string, unknown>
   ): Promise<WriteResult> {
-    if (updateData["data"] && (updateData["data"] as any).territory) {
+    if (
+      updateData["data"] &&
+      (updateData["data"] as any).territory &&
+      this.data.territory
+    ) {
       const territoryData = (updateData["data"] as any).territory;
       if (territoryData.id) {
         this.data.territory.id = territoryData.id;
@@ -317,23 +340,27 @@ class Statement extends Entity implements IStatement {
   async findTerritorySiblings(
     db: Connection | undefined
   ): Promise<Record<number, IStatement>> {
-    const list: IStatement[] = await rethink
-      .table(Entity.table)
-      .getAll(this.data.territory.id, { index: DbIndex.StatementTerritory })
-      .run(db);
+    if (this.data.territory) {
+      const list: IStatement[] = await rethink
+        .table(Entity.table)
+        .getAll(this.data.territory.id, { index: DbIndex.StatementTerritory })
+        .run(db);
 
-    const out: Record<number, IStatement> = {};
+      const out: Record<number, IStatement> = {};
 
-    for (const ter of list) {
-      if (ter.id === this.id) {
-        continue;
+      for (const ter of list) {
+        if (ter.id === this.id) {
+          continue;
+        }
+        if (ter.data.territory) {
+          out[ter.data.territory.order] = ter;
+        }
       }
-      if (ter.data.territory) {
-        out[ter.data.territory.order] = ter;
-      }
+
+      return out;
+    } else {
+      return [];
     }
-
-    return out;
   }
 
   /**
@@ -366,7 +393,9 @@ class Statement extends Entity implements IStatement {
       });
     });
 
-    entitiesIds[this.data.territory.id] = null;
+    if (this.data.territory) {
+      entitiesIds[this.data.territory.id] = null;
+    }
 
     Entity.extractIdsFromReferences(this.references).forEach((element) => {
       if (element) {

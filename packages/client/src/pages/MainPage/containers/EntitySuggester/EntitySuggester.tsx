@@ -173,8 +173,8 @@ export const EntitySuggester: React.FC<EntitySuggesterI> = ({
       newCreated.territoryId
     ) {
       const newStatement = CStatement(
-        newCreated.territoryId,
         localStorage.getItem("userrole") as UserRole,
+        newCreated.territoryId,
         newCreated.label,
         newCreated.detail
       );

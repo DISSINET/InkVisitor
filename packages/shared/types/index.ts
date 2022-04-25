@@ -47,7 +47,7 @@ import {
   IUserRight,
 } from "./user";
 import { IValue } from "./value";
-import { IResponseEntity } from "./response-actant";
+import { IResponseEntity } from "./response-entity";
 
 export type {
   IAudit,

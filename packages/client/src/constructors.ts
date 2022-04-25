@@ -60,33 +60,43 @@ export const CProp = (): IProp => ({
 });
 
 export const CStatement = (
-  territoryId: string,
   userRole: UserRole,
+  territoryId?: string,
   label?: string,
   detail?: string
-): IStatement => ({
-  id: uuidv4(),
-  class: EntityClass.Statement,
-  label: label ? label : "",
-  detail: detail ? detail : "",
-  language: Language.Latin,
-  notes: [],
-  data: {
-    actions: [],
-    text: "",
-    territory: {
-      id: territoryId,
-      order: -1,
+): IStatement => {
+  const newStatement: IStatement = {
+    id: uuidv4(),
+    class: EntityClass.Statement,
+    label: label ? label : "",
+    detail: detail ? detail : "",
+    language: Language.Latin,
+    notes: [],
+    data: {
+      actions: [],
+      text: "",
+      actants: [],
+      tags: [],
     },
-    actants: [],
-    tags: [],
-  },
-  props: [],
-  status:
-    userRole === UserRole.Admin ? EntityStatus.Approved : EntityStatus.Pending,
-  references: [],
-  isTemplate: false,
-});
+    props: [],
+    status:
+      userRole === UserRole.Admin
+        ? EntityStatus.Approved
+        : EntityStatus.Pending,
+    references: [],
+    isTemplate: false,
+  };
+  if (territoryId) {
+    newStatement.data = {
+      ...newStatement.data,
+      territory: {
+        id: territoryId,
+        order: -1,
+      },
+    };
+  }
+  return newStatement;
+};
 
 // duplicate statement
 export const DStatement = (statement: IStatement): IStatement => {

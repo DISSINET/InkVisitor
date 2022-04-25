@@ -94,13 +94,15 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
 
   const handleCreateStatement = () => {
     const newStatement: IStatement = CStatement(
-      territoryId,
-      localStorage.getItem("userrole") as UserRole
+      localStorage.getItem("userrole") as UserRole,
+      territoryId
     );
     const { statements } = data;
-    if (newStatement?.data?.territory) {
+
+    const lastStatement = statements[statements.length - 1];
+    if (newStatement?.data?.territory && lastStatement?.data?.territory) {
       newStatement.data.territory.order = statements.length
-        ? statements[statements.length - 1].data.territory.order + 1
+        ? lastStatement.data.territory.order + 1
         : 1;
       addStatementAtTheEndMutation.mutate(newStatement);
     }
