@@ -542,6 +542,22 @@ class Api {
   }
 
   /**
+   * Audits for statements in territory
+   */
+  async auditsForStatements(
+    territoryId: string
+  ): Promise<AxiosResponse<IResponseAudit[]>> {
+    try {
+      const response = await this.connection.get(
+        `/audits?forTerritory=${territoryId}`
+      );
+      return response;
+    } catch (err: any | AxiosError) {
+      throw { ...err.response.data };
+    }
+  }
+
+  /**
    * Statement
    * Editor container
    */
