@@ -514,6 +514,7 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
       onSuccess: (data, variables) => {
         setDetailId(variables.id);
         toast.info(`Entity duplicated!`);
+        queryClient.invalidateQueries("templates");
       },
       onError: () => {
         toast.error(`Error: Entity not duplicated!`);
