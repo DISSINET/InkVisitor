@@ -1,6 +1,7 @@
 import { r as rethink, Connection } from "rethinkdb-ts";
 import { IAudit, IResponseAudit } from "@shared/types";
 import Audit from "./audit";
+import { DbIndex } from "@shared/enums";
 
 export class ResponseAudit implements IResponseAudit {
   entity: string;
@@ -15,7 +16,7 @@ export class ResponseAudit implements IResponseAudit {
   async getLastNForEntity(dbConn: Connection, n: number = 5): Promise<void> {
     const result = await rethink
       .table(Audit.table)
-      .filter({ entityId: this.entity })
+      .getAll(this.entity, { index: DbIndex.AuditEntityId })
       .orderBy(rethink.desc("date"))
       .limit(n)
       .run(dbConn);
@@ -31,7 +32,7 @@ export class ResponseAudit implements IResponseAudit {
   async getFirstForEntity(db: Connection): Promise<void> {
     const result = await rethink
       .table(Audit.table)
-      .filter({ entityId: this.entity })
+      .getAll(this.entity, { index: DbIndex.AuditEntityId })
       .orderBy(rethink.asc("date"))
       .limit(1)
       .run(db);

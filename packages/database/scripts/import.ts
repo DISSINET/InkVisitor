@@ -109,6 +109,7 @@ const datasets: Record<string, TableSchema[]> = {
           return audit;
         });
       },
+      indexes: [(table: RTable) => table.indexCreate(DbIndex.AuditEntityId)],
     },
   ],
   empty: [
@@ -201,6 +202,7 @@ const datasets: Record<string, TableSchema[]> = {
           return audit;
         });
       },
+      indexes: [(table: RTable) => table.indexCreate(DbIndex.AuditEntityId)],
     },
   ],
   allparsed: [
@@ -293,6 +295,7 @@ const datasets: Record<string, TableSchema[]> = {
           return audit;
         });
       },
+      indexes: [(table: RTable) => table.indexCreate(DbIndex.AuditEntityId)],
     },
   ],
 };
