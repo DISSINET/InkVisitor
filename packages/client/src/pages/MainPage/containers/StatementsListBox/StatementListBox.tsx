@@ -215,8 +215,8 @@ export const StatementListBox: React.FC = () => {
 
     if (newOrder) {
       const newStatement: IStatement = CStatement(
-        territoryId,
-        localStorage.getItem("userrole") as UserRole
+        localStorage.getItem("userrole") as UserRole,
+        territoryId
       );
       (newStatement.data.territory as { order: number; id: string }).order =
         newOrder;

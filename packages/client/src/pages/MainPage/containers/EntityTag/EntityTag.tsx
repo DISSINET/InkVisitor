@@ -51,6 +51,7 @@ export const EntityTag: React.FC<IEntityTag> = ({
       status={actant.status}
       ltype={actant?.data?.logicalType ?? "1"}
       tooltipDetail={actant.detail}
+      isTemplate={actant.isTemplate}
       tooltipText={tooltipText}
       showOnly={showOnly}
       button={button}
