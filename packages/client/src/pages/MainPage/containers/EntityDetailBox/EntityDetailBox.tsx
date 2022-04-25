@@ -25,7 +25,7 @@ import {
   Submit,
 } from "components";
 import { StyledTypeBar } from "components/Suggester/SuggesterStyles";
-import { CProp } from "constructors";
+import { CProp, DEntity } from "constructors";
 import { useSearchParams } from "hooks";
 import React, { useEffect, useMemo, useState } from "react";
 import {
@@ -439,50 +439,6 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
     return "entity";
   }, [entity]);
 
-  // sort meta statements by type label
-  const metaStatements = useMemo(() => {
-    if (entity && entity.props) {
-      const sorteMetaProps = [...entity.props];
-      // sorteMetaStatements.sort(
-      //   (s1: IProp, s2: IProp) => {
-      //     const typeSActant1 = s1.data.actants.find(
-      //       (a) => a.position == Position.Actant1
-      //     );
-      //     const typeSActant2 = s2.data.actants.find(
-      //       (a) => a.position == Position.Actant1
-      //     );
-
-      //     const typeActant1 = typeSActant1
-      //       ? s1.actants?.find((a) => a.id === typeSActant1.actant)
-      //       : false;
-
-      //     const typeActant2 = typeSActant2
-      //       ? s2.actants?.find((a) => a.id === typeSActant2.actant)
-      //       : false;
-
-      //     if (
-      //       typeActant1 === false ||
-      //       typeSActant1?.actant === "" ||
-      //       !typeActant1
-      //     ) {
-      //       return 1;
-      //     } else if (
-      //       typeActant2 === false ||
-      //       typeSActant2?.actant === "" ||
-      //       !typeActant2
-      //     ) {
-      //       return -1;
-      //     } else {
-      //       return typeActant1.label > typeActant2.label ? 1 : -1;
-      //     }
-      //   }
-      // );
-      return sorteMetaProps;
-    } else {
-      return [];
-    }
-  }, [entity]);
-
   const updatePropIds = (props: IProp[]) => {
     for (let prop of props) {
       for (let prop1 of prop.children) {
@@ -497,15 +453,7 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
   };
 
   const duplicateEntity = (entityToDuplicate: IEntity) => {
-    const newEntity = { ...entityToDuplicate };
-    newEntity.id = uuidv4();
-    newEntity.references = newEntity.references.map((r) => {
-      return {
-        ...r,
-        id: uuidv4(),
-      };
-    });
-    newEntity.props = updatePropIds([...newEntity.props]);
+    const newEntity = DEntity(entityToDuplicate);
     duplicateEntityMutation.mutate(newEntity);
   };
 
