@@ -1,5 +1,4 @@
 import { entitiesDict } from "@shared/dictionaries";
-import { allEntities } from "@shared/dictionaries/entity";
 import { EntityClass, UserRole } from "@shared/enums";
 import { IEntity } from "@shared/types";
 import api, { IFilterEntities } from "api";
@@ -19,10 +18,10 @@ import {
 import { StyledTypeBar } from "components/Suggester/SuggesterStyles";
 import { CEntity, CStatement } from "constructors";
 import { useSearchParams } from "hooks";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useState } from "react";
 import { FaPlus } from "react-icons/fa";
 import { useMutation, useQuery, useQueryClient } from "react-query";
-import { ValueType, OptionTypeBase } from "react-select";
+import { OptionTypeBase, ValueType } from "react-select";
 import { toast } from "react-toastify";
 import { DropdownItem } from "types";
 import { EntityTag } from "..";
@@ -188,9 +187,6 @@ export const TemplateListBox: React.FC<TemplateListBox> = ({}) => {
                 disableTyping
                 oneLetter
               />
-              <StyledTypeBar
-                entity={`entity${createModalEntityClass.value}`}
-              ></StyledTypeBar>
             </StyledTemplateFilterInputValue>
           </StyledTemplateFilterInputRow>
           <StyledTemplateFilterInputRow>
@@ -227,7 +223,7 @@ export const TemplateListBox: React.FC<TemplateListBox> = ({}) => {
         showModal={createModal}
         width="thin"
         onEnterPress={() => {
-          handleCreateTemplate();
+          //handleCreateTemplate();
         }}
         onClose={() => {
           handleCloseCreateModal();

@@ -242,6 +242,9 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
           queryClient.invalidateQueries("territory");
           queryClient.invalidateQueries("bookmarks");
         }
+        if (entity?.isTemplate) {
+          queryClient.invalidateQueries("templates");
+        }
       },
     }
   );

@@ -118,7 +118,6 @@ export const EntitySearchBox: React.FC = () => {
   } = useQuery(
     ["statement-templates", searchData, classOption],
     async () => {
-      console.log("searching templates", searchData);
       const res = await api.entitiesGetMore({
         onlyTemplates: true,
         class: searchData.class,
@@ -126,7 +125,6 @@ export const EntitySearchBox: React.FC = () => {
 
       const templates = res.data;
 
-      console.log(templates);
       templates.sort((a: IEntity, b: IEntity) =>
         a.label.toLocaleLowerCase() > b.label.toLocaleLowerCase() ? 1 : -1
       );
