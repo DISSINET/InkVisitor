@@ -1,25 +1,25 @@
 import {
+  certaintyDict,
   elvlDict,
   logicDict,
   moodDict,
   moodVariantsDict,
-  virtualityDict,
-  partitivityDict,
   operatorDict,
-  certaintyDict,
+  partitivityDict,
+  virtualityDict,
 } from "@shared/dictionaries";
 import {
+  Certainty,
   Elvl,
   Logic,
   Mood,
   MoodVariant,
-  Virtuality,
-  Partitivity,
   Operator,
-  Certainty,
+  Partitivity,
+  Virtuality,
 } from "@shared/enums";
 import React from "react";
-import { GroupName, AttributeData, AttributeName } from "types";
+import { AttributeData, AttributeName, GroupName } from "types";
 import { AttributeRow } from "./AttributeRow/AttributeRow";
 import { CheckboxRow } from "./CheckboxRow/CheckboxRow";
 
@@ -87,6 +87,7 @@ export const AttributesForm: React.FC<AttributesForm> = ({
     }
     setNewModalData(newModalData, groupName);
   };
+
   return (
     <div>
       {modalData.elvl && (

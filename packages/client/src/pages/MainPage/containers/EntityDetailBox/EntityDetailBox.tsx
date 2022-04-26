@@ -628,7 +628,9 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                       rows={2}
                       value={entity.detail}
                       onChangeFn={async (newValue: string) => {
-                        updateEntityMutation.mutate({ detail: newValue });
+                        if (newValue !== entity.detail) {
+                          updateEntityMutation.mutate({ detail: newValue });
+                        }
                       }}
                     />
                   </StyledDetailContentRowValue>
