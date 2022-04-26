@@ -92,9 +92,11 @@ export const AttributesForm: React.FC<AttributesForm> = ({
       {modalData.elvl && (
         <AttributeRow
           disabled={
-            disabledAllAttributes || disabledAttributes.includes("elvl")
+            disabledAllAttributes ||
+            disabledAttributes.includes("elvl") ||
+            groupName === "type"
           }
-          value={modalData.elvl}
+          value={groupName !== "type" ? modalData.elvl : "3"}
           items={elvlDict}
           label="Epistemic level"
           onChangeFn={(newValue: string | string[]) => {
