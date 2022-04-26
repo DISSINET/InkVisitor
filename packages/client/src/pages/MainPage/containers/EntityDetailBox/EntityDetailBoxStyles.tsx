@@ -32,11 +32,15 @@ export const StyledDetailSection = styled.div<StyledDetailSection>`
 export const StyledActantPreviewRow = styled.div`
   position: absolute;
   top: 3rem;
+  left: 0;
+  right: 0;
   background-color: ${({ theme }) => theme.color["gray"]["200"]};
-  display: flex;
+  display: inline-flex;
+  overflow: hidden;
   flex-wrap: wrap;
   justify-content: left;
   align-items: center;
+  max-width: 100%;
 `;
 
 export const StyledTagWrap = styled.div`
@@ -44,6 +48,7 @@ export const StyledTagWrap = styled.div`
   margin-bottom: ${({ theme }) => theme.space[4]};
   display: inline-flex;
   overflow: hidden;
+  max-width: 100%;
 `;
 
 export const StyledDetailSectionHeader = styled.div`

@@ -480,69 +480,67 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
           {/* form section */}
           <StyledDetailSection firstSection>
             <StyledDetailSectionContent>
-              <StyledActantPreviewRow>
-                <StyledTagWrap>
-                  <EntityTag
-                    actant={entity}
-                    propId={entity.id}
-                    tooltipText={entity.data.text}
-                    fullWidth
-                  />
-                </StyledTagWrap>
-                <ButtonGroup style={{ marginBottom: "1rem" }}>
-                  {entity.class !== EntityClass.Statement && (
-                    <Button
-                      icon={<FaClone size={14} />}
-                      color="primary"
-                      label="duplicate"
-                      tooltip="duplicate entity"
-                      inverted
-                      onClick={() => {
-                        duplicateEntity(entity);
-                      }}
-                    />
-                  )}
-                  {mayBeRemoved && (
-                    <Button
-                      color="primary"
-                      icon={<FaTrashAlt />}
-                      label="remove"
-                      tooltip="remove entity"
-                      inverted
-                      onClick={() => {
-                        setShowRemoveSubmit(true);
-                      }}
-                    />
-                  )}
+              {/* <StyledActantPreviewRow> */}
+              <StyledTagWrap>
+                <EntityTag
+                  actant={entity}
+                  propId={entity.id}
+                  tooltipText={entity.data.text}
+                  fullWidth
+                />
+              </StyledTagWrap>
+              <ButtonGroup style={{ marginBottom: "1rem" }}>
+                {entity.class !== EntityClass.Statement && (
                   <Button
-                    key="refresh"
-                    icon={<FaRecycle size={14} />}
-                    tooltip="refresh data"
-                    inverted
+                    icon={<FaClone size={14} />}
                     color="primary"
-                    label="refresh"
+                    label="duplicate"
+                    tooltip="duplicate entity"
+                    inverted
                     onClick={() => {
-                      queryClient.invalidateQueries(["entity"]);
+                      duplicateEntity(entity);
                     }}
                   />
-                  {entity.class === EntityClass.Statement && (
-                    <Button
-                      key="edit"
-                      icon={<FaEdit size={14} />}
-                      tooltip="open statement in editor"
-                      inverted={true}
-                      color="primary"
-                      label="open"
-                      onClick={() => {
-                        setStatementId(entity.id);
-                        if (entity.data.territory) {
-                          setTerritoryId(entity.data.territory.id);
-                        }
-                      }}
-                    />
-                  )}
-                </ButtonGroup>
-              </StyledActantPreviewRow>
+                )}
+                {mayBeRemoved && (
+                  <Button
+                    color="primary"
+                    icon={<FaTrashAlt />}
+                    label="remove"
+                    tooltip="remove entity"
+                    inverted
+                    onClick={() => {
+                      setShowRemoveSubmit(true);
+                    }}
+                  />
+                )}
+                <Button
+                  key="refresh"
+                  icon={<FaRecycle size={14} />}
+                  tooltip="refresh data"
+                  inverted
+                  color="primary"
+                  label="refresh"
+                  onClick={() => {
+                    queryClient.invalidateQueries(["entity"]);
+                  }}
+                />
+                {entity.class === EntityClass.Statement && (
+                  <Button
+                    key="edit"
+                    icon={<FaEdit size={14} />}
+                    tooltip="open statement in editor"
+                    inverted={true}
+                    color="primary"
+                    label="open"
+                    onClick={() => {
+                      setStatementId(entity.id);
+                      setTerritoryId(entity.data.territory.id);
+                    }}
+                  />
+                )}
+              </ButtonGroup>
+              {/* </StyledActantPreviewRow> */}
 
               <StyledDetailForm>
                 <StyledDetailContentRow>
