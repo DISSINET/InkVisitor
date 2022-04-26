@@ -45,7 +45,7 @@ export const CProp = (): IProp => ({
 
   type: {
     id: "",
-    elvl: Elvl.Textual,
+    elvl: Elvl.Inferential,
     logic: Logic.Positive,
     virtuality: Virtuality.Reality,
     partitivity: Partitivity.Unison,

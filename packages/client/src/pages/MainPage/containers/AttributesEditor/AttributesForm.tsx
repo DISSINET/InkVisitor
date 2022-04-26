@@ -18,7 +18,8 @@ import {
   Operator,
   Certainty,
 } from "@shared/enums";
-import React from "react";
+import React, { useEffect } from "react";
+import { toast } from "react-toastify";
 import { GroupName, AttributeData, AttributeName } from "types";
 import { AttributeRow } from "./AttributeRow/AttributeRow";
 import { CheckboxRow } from "./CheckboxRow/CheckboxRow";
@@ -87,6 +88,16 @@ export const AttributesForm: React.FC<AttributesForm> = ({
     }
     setNewModalData(newModalData, groupName);
   };
+
+  useEffect(() => {
+    if (groupName === "type" && modalData.elvl !== Elvl.Inferential) {
+      handleDataChange("elvl", Elvl.Inferential as Elvl, groupName);
+      toast.info(
+        "Type elvl changed to Inferential, press Apply changes to save the data"
+      );
+    }
+  }, []);
+
   return (
     <div>
       {modalData.elvl && (
@@ -96,7 +107,7 @@ export const AttributesForm: React.FC<AttributesForm> = ({
             disabledAttributes.includes("elvl") ||
             groupName === "type"
           }
-          value={groupName !== "type" ? modalData.elvl : "3"}
+          value={modalData.elvl}
           items={elvlDict}
           label="Epistemic level"
           onChangeFn={(newValue: string | string[]) => {
