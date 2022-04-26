@@ -4,9 +4,9 @@ import {
   entityStatusDict,
   languageDict,
 } from "@shared/dictionaries";
-import { allEntities } from "@shared/dictionaries/entity";
+import { allEntities, DropdownItem } from "@shared/dictionaries/entity";
 import { EntityClass, Language, UserRoleMode } from "@shared/enums";
-import { IAction, IEntity, IProp, IReference } from "@shared/types";
+import { IAction, IEntity, IOption, IProp, IReference } from "@shared/types";
 import api from "api";
 import {
   Button,
@@ -14,10 +14,18 @@ import {
   Dropdown,
   Input,
   Loader,
+  Modal,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+  ModalInputForm,
+  ModalInputLabel,
+  ModalInputWrap,
   MultiInput,
   Submit,
 } from "components";
-import { CProp } from "constructors";
+import { StyledTypeBar } from "components/Suggester/SuggesterStyles";
+import { CProp, DEntity } from "constructors";
 import { useSearchParams } from "hooks";
 import React, { useEffect, useMemo, useState } from "react";
 import {
@@ -29,12 +37,14 @@ import {
   FaTrashAlt,
 } from "react-icons/fa";
 import { useMutation, useQuery, useQueryClient } from "react-query";
+import { ValueType, OptionTypeBase } from "react-select";
 import { toast } from "react-toastify";
 import { DraggedPropRowCategory } from "types";
 import { v4 as uuidv4 } from "uuid";
 import { EntityTag } from "..";
 import { AttributeButtonGroup } from "../AttributeButtonGroup/AttributeButtonGroup";
 import { AuditTable } from "../AuditTable/AuditTable";
+import { StyledContent } from "../EntityBookmarkBox/EntityBookmarkBoxStyles";
 import { EntityReferenceTable } from "../EntityReferenceTable/EntityReferenceTable";
 import { JSONExplorer } from "../JSONExplorer/JSONExplorer";
 import { PropGroup } from "../PropGroup/PropGroup";
@@ -68,6 +78,48 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
   const [usedInPage, setUsedInPage] = useState<number>(0);
   const statementsPerPage = 20;
 
+  const [applyTemplateModal, setApplyTemplateModal] = useState<boolean>(false);
+  const [templateToApply, setTemplateToApply] = useState<IEntity | false>(
+    false
+  );
+
+  const handleAskForTemplateApply = (templateOptionToApply: IOption) => {
+    console.log(templateToApply, templates);
+
+    if (templates) {
+      const templateThatIsGoingToBeApplied = templates.find(
+        (template: IEntity) => template.id === templateOptionToApply.value
+      );
+
+      if (templateThatIsGoingToBeApplied) {
+        setTemplateToApply(templateThatIsGoingToBeApplied);
+        setApplyTemplateModal(true);
+      }
+    }
+  };
+
+  const handleApplyTemplate = () => {
+    if (templateToApply && entity) {
+      // TODO #952 handle conflicts in Templates application
+      const entityAfterTemplateApplied = {
+        ...{
+          data: templateToApply.data,
+          notes: templateToApply.notes,
+          props: templateToApply.props,
+          references: templateToApply.references,
+          usedTemplate: templateToApply.id,
+        },
+      };
+
+      toast.info(
+        `Template ${templateToApply.label} applied to Statement ${entity.label}`
+      );
+
+      updateEntityMutation.mutate(entityAfterTemplateApplied);
+    }
+    setTemplateToApply(false);
+  };
+
   const queryClient = useQueryClient();
 
   const {
@@ -83,6 +135,47 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
     },
     { enabled: !!detailId && api.isLoggedIn(), retry: 2 }
   );
+
+  const {
+    status: templateStatus,
+    data: templates,
+    error: templateError,
+    isFetching: isFetchingTemplates,
+  } = useQuery(
+    ["entity-templates", entity],
+    async () => {
+      const res = await api.entitiesGetMore({
+        onlyTemplates: true,
+        class: entity?.class,
+      });
+
+      const templates = res.data;
+      templates.sort((a: IEntity, b: IEntity) =>
+        a.label.toLocaleLowerCase() > b.label.toLocaleLowerCase() ? 1 : -1
+      );
+      return templates;
+    },
+    { enabled: !!entity && api.isLoggedIn(), retry: 2 }
+  );
+
+  const templateOptions: DropdownItem[] = useMemo(() => {
+    const options = [
+      {
+        value: "",
+        label: "select template",
+      },
+    ];
+
+    if (templates) {
+      templates.forEach((template) => {
+        options.push({
+          value: template.id,
+          label: template.label,
+        });
+      });
+    }
+    return options;
+  }, [templates]);
 
   // Audit query
   const {
@@ -117,13 +210,13 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
   }, [entity]);
 
   // mutations
-  const allEntitiesOption = {
-    value: "*",
-    label: "*",
-    info: "",
-  };
-  const entityOptions = [...entitiesDict] as any;
-  entityOptions.push(allEntitiesOption);
+  // const allEntitiesOption = {
+  //   value: "*",
+  //   label: "*",
+  //   info: "",
+  // };
+  // const entityOptions = [...entitiesDict] as any;
+  // entityOptions.push(allEntitiesOption);
 
   const updateEntityMutation = useMutation(
     async (changes: any) => await api.entityUpdate(detailId, changes),
@@ -149,6 +242,9 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
           queryClient.invalidateQueries("territory");
           queryClient.invalidateQueries("bookmarks");
         }
+        if (entity?.isTemplate) {
+          queryClient.invalidateQueries("templates");
+        }
       },
     }
   );
@@ -156,12 +252,15 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
   const deleteEntityMutation = useMutation(
     async (entityId: string) => await api.entityDelete(entityId),
     {
-      onSuccess: (data, entityId) => {
+      onSuccess: async (data, entityId) => {
         toast.info(`Entity deleted!`);
-        queryClient.invalidateQueries("statement");
-        queryClient.invalidateQueries("territory");
-        queryClient.invalidateQueries("tree");
+
+        setTerritoryId("");
         setDetailId("");
+
+        queryClient.invalidateQueries("statement");
+        queryClient.invalidateQueries("tree");
+        queryClient.invalidateQueries("territory");
       },
     }
   );
@@ -340,50 +439,6 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
     return "entity";
   }, [entity]);
 
-  // sort meta statements by type label
-  const metaStatements = useMemo(() => {
-    if (entity && entity.props) {
-      const sorteMetaProps = [...entity.props];
-      // sorteMetaStatements.sort(
-      //   (s1: IProp, s2: IProp) => {
-      //     const typeSActant1 = s1.data.actants.find(
-      //       (a) => a.position == Position.Actant1
-      //     );
-      //     const typeSActant2 = s2.data.actants.find(
-      //       (a) => a.position == Position.Actant1
-      //     );
-
-      //     const typeActant1 = typeSActant1
-      //       ? s1.actants?.find((a) => a.id === typeSActant1.actant)
-      //       : false;
-
-      //     const typeActant2 = typeSActant2
-      //       ? s2.actants?.find((a) => a.id === typeSActant2.actant)
-      //       : false;
-
-      //     if (
-      //       typeActant1 === false ||
-      //       typeSActant1?.actant === "" ||
-      //       !typeActant1
-      //     ) {
-      //       return 1;
-      //     } else if (
-      //       typeActant2 === false ||
-      //       typeSActant2?.actant === "" ||
-      //       !typeActant2
-      //     ) {
-      //       return -1;
-      //     } else {
-      //       return typeActant1.label > typeActant2.label ? 1 : -1;
-      //     }
-      //   }
-      // );
-      return sorteMetaProps;
-    } else {
-      return [];
-    }
-  }, [entity]);
-
   const updatePropIds = (props: IProp[]) => {
     for (let prop of props) {
       for (let prop1 of prop.children) {
@@ -398,15 +453,7 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
   };
 
   const duplicateEntity = (entityToDuplicate: IEntity) => {
-    const newEntity = { ...entityToDuplicate };
-    newEntity.id = uuidv4();
-    newEntity.references = newEntity.references.map((r) => {
-      return {
-        ...r,
-        id: uuidv4(),
-      };
-    });
-    newEntity.props = updatePropIds([...newEntity.props]);
+    const newEntity = DEntity(entityToDuplicate);
     duplicateEntityMutation.mutate(newEntity);
   };
 
@@ -418,6 +465,7 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
       onSuccess: (data, variables) => {
         setDetailId(variables.id);
         toast.info(`Entity duplicated!`);
+        queryClient.invalidateQueries("templates");
       },
       onError: () => {
         toast.error(`Error: Entity not duplicated!`);
@@ -487,7 +535,9 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                       label="open"
                       onClick={() => {
                         setStatementId(entity.id);
-                        setTerritoryId(entity.data.territory.id);
+                        if (entity.data.territory) {
+                          setTerritoryId(entity.data.territory.id);
+                        }
                       }}
                     />
                   )}
@@ -512,6 +562,25 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                         }}
                       />
                     </StyledDetailContentRowValueID>
+                  </StyledDetailContentRowValue>
+                </StyledDetailContentRow>
+
+                {/* templates */}
+                <StyledDetailContentRow>
+                  <StyledDetailContentRowLabel>
+                    Apply Template
+                  </StyledDetailContentRowLabel>
+                  <StyledDetailContentRowValue>
+                    <Dropdown
+                      disabled={!userCanEdit}
+                      isMulti={false}
+                      width="full"
+                      options={templateOptions}
+                      value={templateOptions[0]}
+                      onChange={(templateToApply: any) => {
+                        handleAskForTemplateApply(templateToApply);
+                      }}
+                    />
                   </StyledDetailContentRowValue>
                 </StyledDetailContentRow>
 
@@ -1194,6 +1263,50 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
           deleteEntityMutation.isLoading
         }
       />
+      <Modal
+        showModal={applyTemplateModal}
+        width="thin"
+        onEnterPress={() => {
+          setApplyTemplateModal(false);
+          handleApplyTemplate();
+        }}
+        onClose={() => {
+          setApplyTemplateModal(false);
+        }}
+      >
+        <ModalHeader title="Create Template" />
+        <ModalContent>
+          <StyledContent>
+            <ModalInputForm>{`Apply template?`}</ModalInputForm>
+            <div>
+              {templateToApply && <EntityTag actant={templateToApply} />}
+            </div>
+            {/* here goes the info about template #951 */}
+          </StyledContent>
+        </ModalContent>
+        <ModalFooter>
+          <ButtonGroup>
+            <Button
+              key="cancel"
+              label="Cancel"
+              color="greyer"
+              inverted
+              onClick={() => {
+                setApplyTemplateModal(false);
+              }}
+            />
+            <Button
+              key="submit"
+              label="Apply"
+              color="info"
+              onClick={() => {
+                setApplyTemplateModal(false);
+                handleApplyTemplate();
+              }}
+            />
+          </ButtonGroup>
+        </ModalFooter>
+      </Modal>
     </>
   );
 };

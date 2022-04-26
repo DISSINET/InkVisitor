@@ -60,44 +60,118 @@ export const CProp = (): IProp => ({
 });
 
 export const CStatement = (
-  territoryId: string,
   userRole: UserRole,
+  territoryId?: string,
   label?: string,
   detail?: string
-): IStatement => ({
-  id: uuidv4(),
-  class: EntityClass.Statement,
-  label: label ? label : "",
-  detail: detail ? detail : "",
-  language: Language.Latin,
-  notes: [],
-  data: {
-    actions: [],
-    text: "",
-    territory: {
-      id: territoryId,
-      order: -1,
+): IStatement => {
+  const newStatement: IStatement = {
+    id: uuidv4(),
+    class: EntityClass.Statement,
+    label: label ? label : "",
+    detail: detail ? detail : "",
+    language: Language.Latin,
+    notes: [],
+    data: {
+      actions: [],
+      text: "",
+      actants: [],
+      tags: [],
     },
-    actants: [],
-    tags: [],
-  },
-  props: [],
-  status:
-    userRole === UserRole.Admin ? EntityStatus.Approved : EntityStatus.Pending,
-  references: [],
-  isTemplate: false,
-});
+    props: [],
+    status:
+      userRole === UserRole.Admin
+        ? EntityStatus.Approved
+        : EntityStatus.Pending,
+    references: [],
+    isTemplate: false,
+  };
+  if (territoryId) {
+    newStatement.data = {
+      ...newStatement.data,
+      territory: {
+        id: territoryId,
+        order: -1,
+      },
+    };
+  }
+  return newStatement;
+};
 
 // duplicate statement
 export const DStatement = (statement: IStatement): IStatement => {
-  const duplicatedStatement = { ...statement };
-  duplicatedStatement.id = uuidv4();
+  const duplicatedStatement: IStatement = {
+    id: uuidv4(),
+    class: EntityClass.Statement,
+    status: statement.status,
+    data: { ...statement.data },
+    label: statement.label,
+    detail: statement.detail,
+    language: statement.language,
+    notes: statement.notes,
+    props: DProps(statement.props),
+    references: statement.references,
+  };
 
-  duplicatedStatement.data.actants.map((a) => (a.id = uuidv4()));
-  duplicatedStatement.props.map((p) => (p.id = uuidv4()));
-  duplicatedStatement.references.map((r) => (r.id = uuidv4()));
+  if (statement.isTemplate) {
+    duplicatedStatement.isTemplate = statement.isTemplate;
+  }
+  if (statement.usedTemplate) {
+    duplicatedStatement.usedTemplate = statement.usedTemplate;
+  }
+
+  duplicatedStatement.data.actants.forEach((a) => {
+    a.id = uuidv4();
+    a.props = DProps(a.props);
+  });
+  duplicatedStatement.data.actions.forEach((a) => {
+    a.id = uuidv4();
+    a.props = DProps(a.props);
+  });
+
+  duplicatedStatement.references.forEach((r) => (r.id = uuidv4()));
 
   return duplicatedStatement;
+};
+
+// duplicate entity
+export const DEntity = (entity: IEntity): IEntity => {
+  const duplicatedEntity: IEntity = {
+    id: uuidv4(),
+    class: entity.class,
+    status: entity.status,
+    data: entity.data,
+    label: entity.label,
+    detail: entity.detail,
+    language: entity.language,
+    notes: entity.notes,
+    props: DProps(entity.props),
+    references: entity.references,
+  };
+
+  if (entity.isTemplate) {
+    duplicatedEntity.isTemplate = entity.isTemplate;
+  }
+  if (entity.usedTemplate) {
+    duplicatedEntity.usedTemplate = entity.usedTemplate;
+  }
+  duplicatedEntity.references.forEach((r) => (r.id = uuidv4()));
+
+  return duplicatedEntity;
+};
+
+export const DProps = (oldProps: IProp[]): IProp[] => {
+  const newProps = [...oldProps];
+  newProps.forEach((p, pi) => {
+    newProps[pi].id = uuidv4();
+    newProps[pi].children.forEach((pp, pii) => {
+      newProps[pi].children[pii].id = uuidv4();
+      newProps[pi].children[pii].children.forEach((ppp, piii) => {
+        newProps[pi].children[pii].children[piii].id = uuidv4();
+      });
+    });
+  });
+  return newProps;
 };
 
 export const CStatementActant = (): IStatementActant => ({
