@@ -22,6 +22,7 @@ import {
 import { Request, Router } from "express";
 import { asyncRouteHandler } from "../index";
 import Statement from "@models/statement/statement";
+import { isConstructorDeclaration } from "typescript";
 
 export default Router()
   .get(
@@ -59,8 +60,10 @@ export default Router()
       const label = request.body.label;
       const classParam = request.body.class;
       const excluded: EntityClass[] = request.body.excluded;
+      const onlyTemplates: undefined | boolean = request.body.onlyTemplates;
+      const usedTemplate: undefined | string = request.body.usedTemplate;
 
-      if (!label && !classParam) {
+      if (!label && !classParam && !onlyTemplates && !usedTemplate) {
         throw new BadParams("label or class has to be set");
       }
 
@@ -79,7 +82,10 @@ export default Router()
         request.db,
         classParam,
         excluded,
-        label
+        label,
+        undefined,
+        onlyTemplates,
+        usedTemplate
       );
 
       const responses: IResponseEntity[] = [];

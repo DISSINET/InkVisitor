@@ -2,6 +2,7 @@ import { Order, UserRole, UserRoleMode } from "@shared/enums";
 import {
   IAction,
   IEntity,
+  IResponseAudit,
   IResponseStatement,
   IStatement,
 } from "@shared/types";
@@ -39,7 +40,7 @@ import {
 } from "./StatementLitBoxStyles";
 
 const initialData: {
-  statements: IResponseStatement[];
+  statements: (IResponseStatement & { audit?: IResponseAudit })[];
   entities: { [key: string]: IEntity };
   right: UserRoleMode;
 } = {
@@ -61,6 +62,18 @@ export const StatementListBox: React.FC = () => {
     ["territory", "statement-list", territoryId],
     async () => {
       const res = await api.territoryGet(territoryId);
+      return res.data;
+    },
+    {
+      enabled: !!territoryId && api.isLoggedIn(),
+      retry: 2,
+    }
+  );
+
+  const { data: audits, isFetching: isFetchingAudits } = useQuery(
+    ["territory", "statement-list", "audits", territoryId],
+    async () => {
+      const res = await api.auditsForStatements(territoryId);
       return res.data;
     },
     {
@@ -202,8 +215,8 @@ export const StatementListBox: React.FC = () => {
 
     if (newOrder) {
       const newStatement: IStatement = CStatement(
-        territoryId,
-        localStorage.getItem("userrole") as UserRole
+        localStorage.getItem("userrole") as UserRole,
+        territoryId
       );
       (newStatement.data.territory as { order: number; id: string }).order =
         newOrder;
@@ -587,11 +600,14 @@ export const StatementListBox: React.FC = () => {
         />
       )}
 
-      {statements && (
+      {statements && audits && (
         <StyledTableWrapper id="Statements-box-table">
           <StatementListTable
             moveEndRow={moveEndRow}
-            data={statements}
+            data={statements.map((st) => ({
+              ...st,
+              audit: audits.find((a) => a.entity === st.id),
+            }))}
             columns={columns}
             handleRowClick={(rowId: string) => {
               setStatementId(rowId);
@@ -625,6 +641,7 @@ export const StatementListBox: React.FC = () => {
       <Loader
         show={
           isFetching ||
+          isFetchingAudits ||
           removeStatementMutation.isLoading ||
           duplicateStatementMutation.isLoading ||
           addStatementAtTheEndMutation.isLoading ||

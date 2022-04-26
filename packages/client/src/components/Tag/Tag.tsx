@@ -45,6 +45,7 @@ interface TagProps {
   lvl?: number;
   statementsCount?: number;
   isFavorited?: boolean;
+  isTemplate?: boolean;
   disabled?: boolean;
 }
 
@@ -70,6 +71,7 @@ export const Tag: React.FC<TagProps> = ({
   updateOrderFn = () => {},
   statementsCount,
   isFavorited = false,
+  isTemplate = false,
   lvl,
 }) => {
   const { setDetailId } = useSearchParams();
@@ -108,7 +110,7 @@ export const Tag: React.FC<TagProps> = ({
   drag(drop(ref));
 
   const renderEntityTag = () => (
-    <StyledEntityTag color={Entities[category].color}>
+    <StyledEntityTag color={Entities[category].color} isTemplate={isTemplate}>
       {category}
     </StyledEntityTag>
   );

@@ -177,7 +177,9 @@ export default Router()
 
       for (let i = 0; i < statementsForTerritory.length; i++) {
         const statement = new Statement({ ...statementsForTerritory[i] });
-        statement.data.territory.order = i + 1;
+        if (statement.data.territory) {
+          statement.data.territory.order = i + 1;
+        }
         await statement.update(request.db.connection, {
           data: statement.data,
         });

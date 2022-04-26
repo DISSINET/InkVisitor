@@ -15,6 +15,6 @@ export interface IEntity {
   props: IProp[];
   references: IReference[];
   isTemplate?: boolean;
-  usedTemplate?: boolean;
+  usedTemplate?: string;
   templateData?: object;
 }

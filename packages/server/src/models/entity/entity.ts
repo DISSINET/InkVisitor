@@ -35,7 +35,7 @@ export default class Entity implements IEntity, IDbModel {
   references: IReference[] = [];
 
   isTemplate: boolean = false;
-  usedTemplate: boolean = false;
+  usedTemplate: string = "";
   templateData: object = {};
 
   usedIn: IStatement[] = [];

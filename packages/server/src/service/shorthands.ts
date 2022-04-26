@@ -47,7 +47,9 @@ export async function filterEntitiesByWildcard(
   entityClass: EntityClass | false,
   entityClassExcluded: EntityClass[] | undefined,
   entityLabel: string | false,
-  entityIds?: string[]
+  entityIds?: string[],
+  onlyTemplates?: boolean,
+  usedTemplate?: string
 ): Promise<IEntity[]> {
   let query = rethink.table(Entity.table);
 
@@ -58,6 +60,18 @@ export async function filterEntitiesByWildcard(
   if (entityClass) {
     query = query.filter({
       class: entityClass,
+    });
+  }
+
+  if (usedTemplate) {
+    query = query.filter({
+      usedTemplate: usedTemplate,
+    });
+  }
+
+  if (onlyTemplates) {
+    query = query.filter({
+      isTemplate: true,
     });
   }
 
