@@ -29,18 +29,15 @@ export const StyledDetailSection = styled.div<StyledDetailSection>`
   width: 100%;
 `;
 
-export const StyledActantPreviewRow = styled.div`
-  position: absolute;
-  top: 3rem;
-  left: 0;
-  right: 0;
+export const StyledActantHeaderRow = styled.div`
   background-color: ${({ theme }) => theme.color["gray"]["200"]};
-  display: inline-flex;
+  display: flex;
   overflow: hidden;
   flex-wrap: wrap;
   justify-content: left;
   align-items: center;
   max-width: 100%;
+  height: 10rem;
 `;
 
 export const StyledTagWrap = styled.div`
@@ -80,9 +77,17 @@ export const StyledDetailContentRowValueID = styled.div`
   }
 `;
 
+export const StyledFormWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  overflow-x: auto;
+`;
+
 export const StyledDetailForm = styled.div`
   display: table;
   width: 100%;
+  overflow-y: auto;
   padding-right: ${({ theme }) => theme.space[6]};
   ${StyledDetailContentRow} {
     display: table-row;
