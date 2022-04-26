@@ -272,6 +272,7 @@ export const AttributesGroupEditor: React.FC<AttributesGroupEditor> = ({
 
               <AttributesForm
                 groupName="statement"
+                disabledAttributes={["elvl"]}
                 modalData={modalData.statement}
                 setNewModalData={handleSetModalData}
               />
@@ -287,6 +288,7 @@ export const AttributesGroupEditor: React.FC<AttributesGroupEditor> = ({
 
               <AttributesForm
                 groupName="type"
+                disabledAttributes={["elvl"]}
                 modalData={modalData.type}
                 setNewModalData={handleSetModalData}
               />
@@ -345,6 +347,7 @@ export const AttributesGroupEditor: React.FC<AttributesGroupEditor> = ({
               <StyledColumnHeading>Value</StyledColumnHeading>
               <AttributesForm
                 groupName="value"
+                disabledAttributes={["elvl"]}
                 modalData={modalData.value}
                 setNewModalData={handleSetModalData}
               />

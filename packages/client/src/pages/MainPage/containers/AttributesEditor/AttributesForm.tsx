@@ -1,26 +1,25 @@
 import {
+  certaintyDict,
   elvlDict,
   logicDict,
   moodDict,
   moodVariantsDict,
-  virtualityDict,
-  partitivityDict,
   operatorDict,
-  certaintyDict,
+  partitivityDict,
+  virtualityDict,
 } from "@shared/dictionaries";
 import {
+  Certainty,
   Elvl,
   Logic,
   Mood,
   MoodVariant,
-  Virtuality,
-  Partitivity,
   Operator,
-  Certainty,
+  Partitivity,
+  Virtuality,
 } from "@shared/enums";
-import React, { useEffect } from "react";
-import { toast } from "react-toastify";
-import { GroupName, AttributeData, AttributeName } from "types";
+import React from "react";
+import { AttributeData, AttributeName, GroupName } from "types";
 import { AttributeRow } from "./AttributeRow/AttributeRow";
 import { CheckboxRow } from "./CheckboxRow/CheckboxRow";
 
@@ -89,23 +88,12 @@ export const AttributesForm: React.FC<AttributesForm> = ({
     setNewModalData(newModalData, groupName);
   };
 
-  useEffect(() => {
-    if (groupName === "type" && modalData.elvl !== Elvl.Inferential) {
-      handleDataChange("elvl", Elvl.Inferential as Elvl, groupName);
-      toast.info(
-        "Type elvl changed to Inferential, press Apply changes to save the data"
-      );
-    }
-  }, []);
-
   return (
     <div>
       {modalData.elvl && (
         <AttributeRow
           disabled={
-            disabledAllAttributes ||
-            disabledAttributes.includes("elvl") ||
-            groupName === "type"
+            disabledAllAttributes || disabledAttributes.includes("elvl")
           }
           value={modalData.elvl}
           items={elvlDict}

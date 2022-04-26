@@ -33,7 +33,7 @@ export const CBookmarkFolder = (bookmarkName: string): IBookmarkFolder => ({
 
 export const CProp = (): IProp => ({
   id: uuidv4(),
-  elvl: Elvl.Textual,
+  elvl: Elvl.Inferential,
   certainty: Certainty.Empty,
   logic: Logic.Positive,
   mood: [Mood.Indication],
@@ -52,7 +52,7 @@ export const CProp = (): IProp => ({
   },
   value: {
     id: "",
-    elvl: Elvl.Textual,
+    elvl: Elvl.Inferential,
     logic: Logic.Positive,
     virtuality: Virtuality.Reality,
     partitivity: Partitivity.Unison,
