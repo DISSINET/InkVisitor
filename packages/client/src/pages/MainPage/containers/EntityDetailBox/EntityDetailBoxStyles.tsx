@@ -7,7 +7,9 @@ export const StyledActantHeaderRow = styled.div<StyledActantHeaderRow>`
   display: flex;
   flex-wrap: wrap;
   width: 100%;
-  padding: ${({ theme }) => theme.space[3]};
+  padding-bottom: ${({ theme }) => theme.space[4]};
+  padding-right: ${({ theme }) => theme.space[8]};
+  padding-left: ${({ theme }) => theme.space[8]};
   background: ${({ theme }) => theme.color["gray"][200]};
   border-left: 3px solid;
   border-left-color: ${({ theme, type }) => theme.color["entity" + type]};
