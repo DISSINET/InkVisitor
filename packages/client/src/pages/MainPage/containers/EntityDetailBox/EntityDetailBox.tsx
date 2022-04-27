@@ -53,7 +53,11 @@ import {
   StyledDetailForm,
   StyledDetailSection,
   StyledDetailSectionContent,
+  StyledDetailSectionContentUsedIn,
+  StyledDetailSectionContentUsedInTitle,
+  StyledDetailSectionEntityList,
   StyledDetailSectionHeader,
+  StyledDetailSectionUsedTableRow,
   StyledDetailWrapper,
   StyledFormWrapper,
   StyledTagWrap,
@@ -81,8 +85,6 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
   );
 
   const handleAskForTemplateApply = (templateOptionToApply: IOption) => {
-    console.log(templateToApply, templates);
-
     if (templates) {
       const templateThatIsGoingToBeApplied = templates.find(
         (template: IEntity) => template.id === templateOptionToApply.value
@@ -163,13 +165,15 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
       },
     ];
 
-    if (templates) {
-      templates.forEach((template) => {
-        options.push({
-          value: template.id,
-          label: template.label,
+    if (entity && templates) {
+      templates
+        .filter((template) => template.id !== entity.id)
+        .forEach((template) => {
+          options.push({
+            value: template.id,
+            label: template.label,
+          });
         });
-      });
     }
     return options;
   }, [templates]);
@@ -1118,6 +1122,20 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                       </React.Fragment>
                     )}
 
+                    {/* templates */}
+                    {entity.usedTemplate && (
+                      <StyledDetailContentRow>
+                        <StyledDetailContentRowLabel>
+                          Applied Template
+                        </StyledDetailContentRowLabel>
+                        <StyledDetailContentRowValue>
+                          <EntityTag
+                            actant={entity.entities[entity.usedTemplate]}
+                          />
+                        </StyledDetailContentRowValue>
+                      </StyledDetailContentRow>
+                    )}
+
                     <StyledDetailContentRow>
                       <br />
                     </StyledDetailContentRow>
@@ -1200,6 +1218,23 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
 
             <StyledDetailSection>
               <StyledDetailSectionHeader>Used in:</StyledDetailSectionHeader>
+
+              {/* used as template */}
+              {entity.isTemplate && entity.usedAsTemplate && (
+                <StyledDetailSectionContentUsedIn key="as template">
+                  <StyledDetailSectionContentUsedInTitle>
+                    <b>{entity.usedAsTemplate.length}</b> As a template
+                    <StyledDetailSectionEntityList>
+                      {entity.usedAsTemplate.map((entityId) => (
+                        <React.Fragment key={entityId}>
+                          <EntityTag actant={entity.entities[entityId]} />
+                        </React.Fragment>
+                      ))}
+                    </StyledDetailSectionEntityList>
+                  </StyledDetailSectionContentUsedInTitle>
+                </StyledDetailSectionContentUsedIn>
+              )}
+
               {/* usedId props */}
               <EntityDetailBoxTable
                 title={{ singular: "Meta Property", plural: "Meta Properties" }}
