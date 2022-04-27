@@ -30,14 +30,11 @@ export const StyledDetailSection = styled.div<StyledDetailSection>`
 `;
 
 export const StyledActantHeaderRow = styled.div`
-  background-color: ${({ theme }) => theme.color["gray"]["200"]};
   display: flex;
-  overflow: hidden;
   flex-wrap: wrap;
-  justify-content: left;
-  align-items: center;
-  max-width: 100%;
-  height: 10rem;
+  width: 100%;
+  padding: ${({ theme }) => theme.space[3]};
+  background: ${({ theme }) => theme.color["gray"][200]};
 `;
 
 export const StyledTagWrap = styled.div`

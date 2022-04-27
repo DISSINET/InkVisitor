@@ -237,6 +237,7 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
           }
         />
         <DndProvider backend={HTML5Backend}>
+          <ScrollHandler />
           <StyledPanelWrap>
             {separatorXPosition > 0 && <PanelSeparator />}
             {/* FIRST PANEL */}
@@ -262,15 +263,14 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
               }
             >
               <Box
-                height={detailId ? heightContent / 2 : heightContent}
+                height={detailId ? heightContent / 2 - 100 : heightContent}
                 label="Statements"
               >
-                <ScrollHandler />
                 <StatementListBox />
               </Box>
               {detailId && (
                 <Box
-                  height={heightContent / 2}
+                  height={heightContent / 2 + 100}
                   label="Detail"
                   button={
                     detailId && (

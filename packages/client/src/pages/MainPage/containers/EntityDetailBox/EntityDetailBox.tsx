@@ -473,7 +473,7 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
   return (
     <>
       {entity && (
-        <div style={{ display: "flex", flexDirection: "column" }}>
+        <>
           <StyledActantHeaderRow>
             <StyledTagWrap>
               <EntityTag
@@ -1247,8 +1247,9 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
               </StyledDetailSectionContent>
             </StyledDetailSection>
           </StyledDetailWrapper>
-        </div>
+        </>
       )}
+
       <Submit
         title="Remove entity"
         text="Do you really want to delete the entity?"
