@@ -10,6 +10,7 @@ export interface IResponseDetail extends IResponseEntity {
   usedInStatement: IResponseUsedInStatement<UsedInPosition>[]; // all statements, where the detail id is used as an actant, action, or tag
   usedInStatementProps: IResponseUsedInStatement<UsedInPosition>[]; // all statements, where the detail id is used in props
   usedInMetaProps: IResponseUsedInMetaProp<UsedInPosition>[]; // all entities, where the detail id is used in props (entity.props[])
+  usedAsTemplate?: string[];
 }
 
 export interface IResponseUsedInStatement<PositionEnum> {
