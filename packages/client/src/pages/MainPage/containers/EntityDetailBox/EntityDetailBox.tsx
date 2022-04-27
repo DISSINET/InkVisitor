@@ -53,7 +53,11 @@ import {
   StyledDetailForm,
   StyledDetailSection,
   StyledDetailSectionContent,
+  StyledDetailSectionContentUsedIn,
+  StyledDetailSectionContentUsedInTitle,
+  StyledDetailSectionEntityList,
   StyledDetailSectionHeader,
+  StyledDetailSectionUsedTableRow,
   StyledDetailWrapper,
   StyledFormWrapper,
   StyledTagWrap,
@@ -81,8 +85,6 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
   );
 
   const handleAskForTemplateApply = (templateOptionToApply: IOption) => {
-    console.log(templateToApply, templates);
-
     if (templates) {
       const templateThatIsGoingToBeApplied = templates.find(
         (template: IEntity) => template.id === templateOptionToApply.value
@@ -132,8 +134,6 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
     },
     { enabled: !!detailId && api.isLoggedIn(), retry: 2 }
   );
-
-  console.log(entity);
 
   const {
     status: templateStatus,
@@ -1218,6 +1218,23 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
 
             <StyledDetailSection>
               <StyledDetailSectionHeader>Used in:</StyledDetailSectionHeader>
+
+              {/* used as template */}
+              {entity.isTemplate && entity.usedAsTemplate && (
+                <StyledDetailSectionContentUsedIn key="as template">
+                  <StyledDetailSectionContentUsedInTitle>
+                    <b>{entity.usedAsTemplate.length}</b> As a template
+                    <StyledDetailSectionEntityList>
+                      {entity.usedAsTemplate.map((entityId) => (
+                        <React.Fragment key={entityId}>
+                          <EntityTag actant={entity.entities[entityId]} />
+                        </React.Fragment>
+                      ))}
+                    </StyledDetailSectionEntityList>
+                  </StyledDetailSectionContentUsedInTitle>
+                </StyledDetailSectionContentUsedIn>
+              )}
+
               {/* usedId props */}
               <EntityDetailBoxTable
                 title={{ singular: "Meta Property", plural: "Meta Properties" }}

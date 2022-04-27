@@ -222,3 +222,9 @@ export const StyledDetailSectionMetaTableCell = styled.div<StyledDetailSectionMe
   align-items: center;
   padding: 0 5px;
 `;
+
+export const StyledDetailSectionEntityList = styled.div`
+  > div {
+    padding: 0.25rem;
+  }
+`;
