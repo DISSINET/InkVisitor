@@ -1,5 +1,18 @@
 import styled from "styled-components";
 
+interface StyledActantHeaderRow {
+  type: string;
+}
+export const StyledActantHeaderRow = styled.div<StyledActantHeaderRow>`
+  display: flex;
+  flex-wrap: wrap;
+  width: 100%;
+  padding: ${({ theme }) => theme.space[3]};
+  background: ${({ theme }) => theme.color["gray"][200]};
+  border-left: 3px solid;
+  border-left-color: ${({ theme, type }) => theme.color["entity" + type]};
+`;
+
 interface StyledDetailWrapper {
   type: string;
 }
@@ -17,10 +30,10 @@ interface StyledDetailSection {
   lastSection?: boolean;
   metaSection?: boolean;
 }
-
 export const StyledDetailSection = styled.div<StyledDetailSection>`
   padding: ${({ theme }) => theme.space[6]};
   padding-right: ${({ metaSection }) => (metaSection ? 0 : "")};
+  padding-top: ${({ firstSection }) => (firstSection ? 0 : "")};
   border-bottom-width: ${({ theme, lastSection = false }) =>
     lastSection ? theme.borderWidth[0] : theme.borderWidth[1]};
   border-bottom-color: ${({ theme }) => theme.color["gray"][500]};
@@ -29,17 +42,9 @@ export const StyledDetailSection = styled.div<StyledDetailSection>`
   width: 100%;
 `;
 
-export const StyledActantHeaderRow = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  width: 100%;
-  padding: ${({ theme }) => theme.space[3]};
-  background: ${({ theme }) => theme.color["gray"][200]};
-`;
-
 export const StyledTagWrap = styled.div`
   margin-right: ${({ theme }) => theme.space[2]};
-  margin-bottom: ${({ theme }) => theme.space[4]};
+  margin-top: ${({ theme }) => theme.space[4]};
   display: inline-flex;
   overflow: hidden;
   max-width: 100%;
@@ -51,10 +56,8 @@ export const StyledDetailSectionHeader = styled.div`
   color: ${({ theme }) => theme.color["primary"]};
 `;
 
-export const StyledDetailContentRow = styled.div`
-  /* class: row; */
-  /* display: flex; */
-`;
+export const StyledDetailContentRow = styled.div``;
+
 export const StyledDetailContentRowLabel = styled.div`
   float: left;
   color: ${({ theme }) => theme.color["info"]};
@@ -150,11 +153,14 @@ export const StyledDetailSectionUsedText = styled.div`
 interface StyledDetailSectionContent {
   firstSection?: boolean;
 }
-interface StyledDetailSectionContent {}
+interface StyledDetailSectionContent {
+  firstSection?: boolean;
+}
 export const StyledDetailSectionContent = styled.div<StyledDetailSectionContent>`
   padding-left: ${({ theme, firstSection = false }) =>
     firstSection ? "" : theme.space[4]};
-  padding-top: ${({ theme }) => theme.space[4]};
+  padding-top: ${({ theme, firstSection }) =>
+    firstSection ? 0 : theme.space[4]};
 `;
 
 // usedIn section

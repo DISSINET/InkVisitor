@@ -474,7 +474,7 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
     <>
       {entity && (
         <>
-          <StyledActantHeaderRow>
+          <StyledActantHeaderRow type={entity.class}>
             <StyledTagWrap>
               <EntityTag
                 actant={entity}
@@ -483,7 +483,7 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                 fullWidth
               />
             </StyledTagWrap>
-            <ButtonGroup style={{ marginBottom: "1rem" }}>
+            <ButtonGroup style={{ marginTop: "1rem" }}>
               {entity.class !== EntityClass.Statement && (
                 <Button
                   icon={<FaClone size={14} />}
@@ -539,7 +539,7 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
           <StyledDetailWrapper type={entity.class}>
             {/* form section */}
             <StyledDetailSection firstSection>
-              <StyledDetailSectionContent>
+              <StyledDetailSectionContent firstSection>
                 <StyledFormWrapper>
                   <StyledDetailForm>
                     <StyledDetailContentRow>

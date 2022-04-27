@@ -263,14 +263,14 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
               }
             >
               <Box
-                height={detailId ? heightContent / 2 - 100 : heightContent}
+                height={detailId ? heightContent / 2 - 50 : heightContent}
                 label="Statements"
               >
                 <StatementListBox />
               </Box>
               {detailId && (
                 <Box
-                  height={heightContent / 2 + 100}
+                  height={heightContent / 2 + 50}
                   label="Detail"
                   button={
                     detailId && (
