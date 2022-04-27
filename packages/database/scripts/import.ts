@@ -1,19 +1,12 @@
 import { IUser } from "../../shared/types/user";
 import { hashPassword } from "../../server/src/common/auth";
 import { IAudit } from "../../shared/types";
-import {
-  r,
-  RConnectionOptions,
-  RTable,
-  Connection,
-  RDatum,
-  RValue,
-} from "rethinkdb-ts";
+import { r, RConnectionOptions, Connection } from "rethinkdb-ts";
 import tunnel from "tunnel-ssh";
 import { Server } from "net";
 import readline from "readline";
 import { parseArgs, prepareDbConnection, TableSchema } from "./import-utils";
-import { DbIndex } from "@shared/enums";
+import { auditsIndexes, entitiesIndexes } from "./indexes";
 
 const [datasetId, env] = parseArgs();
 const envData = require("dotenv").config({ path: `env/.env.${env}` }).parsed;
@@ -29,66 +22,7 @@ const datasets: Record<string, TableSchema[]> = {
       name: "entities",
       data: require("../datasets/all/entities.json"),
       transform: function () {},
-      indexes: [
-        // if the prop object is missing value/type/children attrs, this wont work! model should handle this
-        (table: RTable) =>
-          table.indexCreate(
-            "props.recursive",
-            r
-              .row("props")
-              .concatMap((prop: RDatum) =>
-                r
-                  .expr([prop("value")("id"), prop("type")("id")])
-                  .add(
-                    prop("children").concatMap((ch1: RDatum) =>
-                      r
-                        .expr([ch1("value")("id"), ch1("type")("id")])
-                        .add(
-                          ch1("children").concatMap((ch2: RDatum) =>
-                            r
-                              .expr([ch2("value")("id"), ch2("type")("id")])
-                              .add(
-                                ch2("children").concatMap((ch3: RDatum) => [
-                                  ch3("value")("id"),
-                                  ch3("type")("id"),
-                                ]) as RValue
-                              )
-                          ) as RValue
-                        )
-                    ) as RValue
-                  )
-              )
-              .distinct(),
-            { multi: true }
-          ),
-        (table: RTable) => table.indexCreate(DbIndex.Class),
-        (table: RTable) =>
-          table.indexCreate(
-            DbIndex.StatementTerritory,
-            r.row("data")("territory")("id")
-          ),
-        (table: RTable) =>
-          table.indexCreate(
-            DbIndex.StatementEntities,
-            function (row: RDatum) {
-              return row("data")("actions")
-                .map(function (a: RDatum) {
-                  return a("action");
-                })
-                .add(
-                  row("data")("actants").map(function (a: RDatum) {
-                    return a("actant");
-                  }) as any,
-                  row("data")("tags").map(function (t: RDatum) {
-                    return t;
-                  }) as any
-                );
-            },
-            {
-              multi: true,
-            }
-          ),
-      ],
+      indexes: entitiesIndexes,
     },
     {
       name: "users",
@@ -109,7 +43,7 @@ const datasets: Record<string, TableSchema[]> = {
           return audit;
         });
       },
-      indexes: [(table: RTable) => table.indexCreate(DbIndex.AuditEntityId)],
+      indexes: auditsIndexes,
     },
   ],
   empty: [
@@ -122,66 +56,7 @@ const datasets: Record<string, TableSchema[]> = {
       name: "entities",
       data: require("../datasets/empty/entities.json"),
       transform: function () {},
-      indexes: [
-        // if the prop object is missing value/type/children attrs, this wont work! model should handle this
-        (table: RTable) =>
-          table.indexCreate(
-            "props.recursive",
-            r
-              .row("props")
-              .concatMap((prop: RDatum) =>
-                r
-                  .expr([prop("value")("id"), prop("type")("id")])
-                  .add(
-                    prop("children").concatMap((ch1: RDatum) =>
-                      r
-                        .expr([ch1("value")("id"), ch1("type")("id")])
-                        .add(
-                          ch1("children").concatMap((ch2: RDatum) =>
-                            r
-                              .expr([ch2("value")("id"), ch2("type")("id")])
-                              .add(
-                                ch2("children").concatMap((ch3: RDatum) => [
-                                  ch3("value")("id"),
-                                  ch3("type")("id"),
-                                ]) as RValue
-                              )
-                          ) as RValue
-                        )
-                    ) as RValue
-                  )
-              )
-              .distinct(),
-            { multi: true }
-          ),
-        (table: RTable) => table.indexCreate(DbIndex.Class),
-        (table: RTable) =>
-          table.indexCreate(
-            DbIndex.StatementTerritory,
-            r.row("data")("territory")("id")
-          ),
-        (table: RTable) =>
-          table.indexCreate(
-            DbIndex.StatementEntities,
-            function (row: RDatum) {
-              return row("data")("actions")
-                .map(function (a: RDatum) {
-                  return a("action");
-                })
-                .add(
-                  row("data")("actants").map(function (a: RDatum) {
-                    return a("actant");
-                  }) as any,
-                  row("data")("tags").map(function (t: RDatum) {
-                    return t;
-                  }) as any
-                );
-            },
-            {
-              multi: true,
-            }
-          ),
-      ],
+      indexes: entitiesIndexes,
     },
     {
       name: "users",
@@ -202,7 +77,7 @@ const datasets: Record<string, TableSchema[]> = {
           return audit;
         });
       },
-      indexes: [(table: RTable) => table.indexCreate(DbIndex.AuditEntityId)],
+      indexes: auditsIndexes,
     },
   ],
   allparsed: [
@@ -215,66 +90,7 @@ const datasets: Record<string, TableSchema[]> = {
       name: "entities",
       data: require("../datasets/all-parsed/entities.json"),
       transform: function () {},
-      indexes: [
-        // if the prop object is missing value/type/children attrs, this wont work! model should handle this
-        (table: RTable) =>
-          table.indexCreate(
-            "props.recursive",
-            r
-              .row("props")
-              .concatMap((prop: RDatum) =>
-                r
-                  .expr([prop("value")("id"), prop("type")("id")])
-                  .add(
-                    prop("children").concatMap((ch1: RDatum) =>
-                      r
-                        .expr([ch1("value")("id"), ch1("type")("id")])
-                        .add(
-                          ch1("children").concatMap((ch2: RDatum) =>
-                            r
-                              .expr([ch2("value")("id"), ch2("type")("id")])
-                              .add(
-                                ch2("children").concatMap((ch3: RDatum) => [
-                                  ch3("value")("id"),
-                                  ch3("type")("id"),
-                                ]) as RValue
-                              )
-                          ) as RValue
-                        )
-                    ) as RValue
-                  )
-              )
-              .distinct(),
-            { multi: true }
-          ),
-        (table: RTable) => table.indexCreate(DbIndex.Class),
-        (table: RTable) =>
-          table.indexCreate(
-            DbIndex.StatementTerritory,
-            r.row("data")("territory")("id")
-          ),
-        (table: RTable) =>
-          table.indexCreate(
-            DbIndex.StatementEntities,
-            function (row: RDatum) {
-              return row("data")("actions")
-                .map(function (a: RDatum) {
-                  return a("action");
-                })
-                .add(
-                  row("data")("actants").map(function (a: RDatum) {
-                    return a("actant");
-                  }) as any,
-                  row("data")("tags").map(function (t: RDatum) {
-                    return t;
-                  }) as any
-                );
-            },
-            {
-              multi: true,
-            }
-          ),
-      ],
+      indexes: entitiesIndexes,
     },
     {
       name: "users",
@@ -295,7 +111,7 @@ const datasets: Record<string, TableSchema[]> = {
           return audit;
         });
       },
-      indexes: [(table: RTable) => table.indexCreate(DbIndex.AuditEntityId)],
+      indexes: auditsIndexes,
     },
   ],
 };
