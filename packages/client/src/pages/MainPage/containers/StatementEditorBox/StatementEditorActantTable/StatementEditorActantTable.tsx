@@ -19,10 +19,12 @@ interface StatementEditorActantTable {
   statementId: string;
   userCanEdit?: boolean;
   handleRowClick?: Function;
-  renderPropGroup: Function;
   classEntitiesActant: EntityClass[];
   updateActantsMutation: UseMutationResult<any, unknown, object, unknown>;
   addProp: (originId: string) => void;
+  updateProp: (propId: string, changes: any) => void;
+  removeProp: (propId: string) => void;
+  movePropToIndex: (propId: string, oldIndex: number, newIndex: number) => void;
 }
 export const StatementEditorActantTable: React.FC<
   StatementEditorActantTable
@@ -32,9 +34,11 @@ export const StatementEditorActantTable: React.FC<
   userCanEdit = false,
   handleRowClick = () => {},
   classEntitiesActant,
-  renderPropGroup,
   updateActantsMutation,
   addProp,
+  updateProp,
+  removeProp,
+  movePropToIndex,
 }) => {
   const [filteredActants, setFilteredActants] = useState<
     FilteredActantObject[]
@@ -137,7 +141,6 @@ export const StatementEditorActantTable: React.FC<
               prepareRow(row);
               return (
                 <StatementEditorActantTableRow
-                  renderPropGroup={renderPropGroup}
                   handleClick={handleRowClick}
                   index={i}
                   row={row}
@@ -149,6 +152,9 @@ export const StatementEditorActantTable: React.FC<
                   classEntitiesActant={classEntitiesActant}
                   updateActantsMutation={updateActantsMutation}
                   addProp={addProp}
+                  updateProp={updateProp}
+                  removeProp={removeProp}
+                  movePropToIndex={movePropToIndex}
                   {...row.getRowProps()}
                 />
               );

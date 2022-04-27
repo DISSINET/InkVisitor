@@ -1,8 +1,13 @@
 import { EntityClass } from "@shared/enums";
-import { IEntity, IResponseStatement, IStatementActant } from "@shared/types";
+import {
+  IEntity,
+  IProp,
+  IResponseStatement,
+  IStatementActant,
+} from "@shared/types";
 import { AttributeIcon, Button, ButtonGroup } from "components";
 import { useSearchParams } from "hooks";
-import React, { useEffect, useRef } from "react";
+import React, { useCallback, useEffect, useRef } from "react";
 import {
   DragSourceMonitor,
   DropTargetMonitor,
@@ -25,6 +30,7 @@ import { dndHoverFn } from "utils";
 import { EntitySuggester, EntityTag } from "../..";
 import { AttributeButtonGroup } from "../../AttributeButtonGroup/AttributeButtonGroup";
 import AttributesEditor from "../../AttributesEditor/AttributesEditor";
+import { PropGroup } from "../../PropGroup/PropGroup";
 import {
   StyledTagWrapper,
   StyledTd,
@@ -38,8 +44,10 @@ interface StatementEditorActantTableRow {
   userCanEdit?: boolean;
   updateOrderFn: () => void;
   addProp: (originId: string) => void;
+  updateProp: (propId: string, changes: any) => void;
+  removeProp: (propId: string) => void;
+  movePropToIndex: (propId: string, oldIndex: number, newIndex: number) => void;
   handleClick: Function;
-  renderPropGroup: Function;
   visibleColumns: ColumnInstance<{}>[];
   statement: IResponseStatement;
   classEntitiesActant: EntityClass[];
@@ -56,13 +64,15 @@ export const StatementEditorActantTableRow: React.FC<
   userCanEdit = false,
   updateOrderFn,
   handleClick = () => {},
-  renderPropGroup,
   visibleColumns,
   classEntitiesActant,
   updateActantsMutation,
   addProp,
+  updateProp,
+  removeProp,
+  movePropToIndex,
 }) => {
-  const { statementId } = useSearchParams();
+  const { statementId, territoryId } = useSearchParams();
 
   const dropRef = useRef<HTMLTableRowElement>(null);
   const dragRef = useRef<HTMLTableDataCellElement>(null);
@@ -302,6 +312,36 @@ export const StatementEditorActantTableRow: React.FC<
       dispatch(setDraggedActantRow({}));
     }
   }, [isDragging]);
+
+  const renderPropGroup = useCallback(
+    (
+      originId: string,
+      props: IProp[],
+      statement: IResponseStatement,
+      category: DraggedPropRowCategory
+    ) => {
+      const originActant = statement.entities[originId];
+
+      if (props.length > 0) {
+        return (
+          <PropGroup
+            originId={originActant ? originActant.id : ""}
+            entities={statement.entities}
+            props={props}
+            territoryId={territoryId}
+            updateProp={updateProp}
+            removeProp={removeProp}
+            addProp={addProp}
+            movePropToIndex={movePropToIndex}
+            userCanEdit={userCanEdit}
+            openDetailOnCreate={false}
+            category={category}
+          />
+        );
+      }
+    },
+    [statement]
+  );
 
   return (
     <React.Fragment key={index}>

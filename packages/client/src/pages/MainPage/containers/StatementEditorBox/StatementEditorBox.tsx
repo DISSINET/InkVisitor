@@ -576,37 +576,6 @@ export const StatementEditorBox: React.FC = () => {
     }
   );
 
-  const renderPropGroup = useCallback(
-    (
-      originId: string,
-      props: IProp[],
-      statement: IResponseStatement,
-      category: DraggedPropRowCategory
-    ) => {
-      const originActant = statement.entities[originId];
-
-      if (props.length > 0) {
-        return (
-          <PropGroup
-            // key={JSON.stringify(statement)}
-            originId={originActant ? originActant.id : ""}
-            entities={statement.entities}
-            props={props}
-            territoryId={territoryId}
-            updateProp={updateProp}
-            removeProp={removeProp}
-            addProp={addProp}
-            movePropToIndex={movePropToIndex}
-            userCanEdit={userCanEdit}
-            openDetailOnCreate={false}
-            category={category}
-          />
-        );
-      }
-    },
-    [statement]
-  );
-
   const moveStatementMutation = useMutation(
     async (newTerritoryId: string) => {
       await api.entityUpdate(statementId, {
@@ -724,8 +693,10 @@ export const StatementEditorBox: React.FC = () => {
                   statement={statement}
                   statementId={statementId}
                   updateActionsMutation={updateActionsRefreshListMutation}
-                  renderPropGroup={renderPropGroup}
                   addProp={addProp}
+                  updateProp={updateProp}
+                  removeProp={removeProp}
+                  movePropToIndex={movePropToIndex}
                 />
               </StyledEditorActantTableWrapper>
 
@@ -755,8 +726,10 @@ export const StatementEditorBox: React.FC = () => {
                   statementId={statementId}
                   classEntitiesActant={classesActants}
                   updateActantsMutation={updateActantsRefreshListMutation}
-                  renderPropGroup={renderPropGroup}
                   addProp={addProp}
+                  updateProp={updateProp}
+                  removeProp={removeProp}
+                  movePropToIndex={movePropToIndex}
                 />
               </StyledEditorActantTableWrapper>
               {userCanEdit && (
