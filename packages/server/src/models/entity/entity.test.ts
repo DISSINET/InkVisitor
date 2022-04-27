@@ -156,7 +156,7 @@ describe("test Entity.update", function () {
       expect(existingEntityData.data.text).toEqual(newTextValue);
       //  territory data from the save call
       expect(existingEntityData.data.territory?.id).toEqual(
-        entity.data.territory.id
+        entity.data.territory?.id
       );
       // actants field should be replaced
       expect(existingEntityData.data.actants).toHaveLength(1);
