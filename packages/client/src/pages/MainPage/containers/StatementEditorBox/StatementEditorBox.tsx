@@ -3,10 +3,7 @@ import { EntityClass, Order, UserRoleMode } from "@shared/enums";
 import {
   IEntity,
   IOption,
-  IProp,
   IReference,
-  IResponseStatement,
-  IStatement,
   IStatementActant,
   IStatementAction,
 } from "@shared/types";
@@ -32,11 +29,9 @@ import { FaUnlink } from "react-icons/fa";
 import { useMutation, useQuery, useQueryClient } from "react-query";
 import { toast } from "react-toastify";
 import { excludedSuggesterEntities } from "Theme/constants";
-import { DraggedPropRowCategory } from "types";
 import { StyledContent } from "../EntityBookmarkBox/EntityBookmarkBoxStyles";
 import { EntityReferenceTable } from "../EntityReferenceTable/EntityReferenceTable";
 import { JSONExplorer } from "../JSONExplorer/JSONExplorer";
-import { PropGroup } from "../PropGroup/PropGroup";
 import { StatementListBreadcrumbItem } from "../StatementsListBox/StatementListHeader/StatementListBreadcrumbItem/StatementListBreadcrumbItem";
 import { EntitySuggester, EntityTag } from "./../";
 import { AuditTable } from "./../AuditTable/AuditTable";
@@ -123,6 +118,10 @@ export const StatementEditorBox: React.FC = () => {
     { enabled: !!statementId && api.isLoggedIn(), retry: 2 }
   );
 
+  useEffect(() => {
+    console.log("statement fetched");
+  }, [statement]);
+
   //console.log(statement);
   // Audit query
   const {
@@ -200,7 +199,7 @@ export const StatementEditorBox: React.FC = () => {
       toast.info(
         `Template ${templateToApply.label} applied to Statement ${statement.label}`
       );
-      updateActantMutation.mutate(entityAfterTemplateApplied);
+      updateStatementMutation.mutate(entityAfterTemplateApplied);
     }
     setTemplateToApply(false);
   };
@@ -308,7 +307,7 @@ export const StatementEditorBox: React.FC = () => {
       const newData = {
         actions: [...statement.data.actions, newStatementAction],
       };
-      updateActionsRefreshListMutation.mutate(newData);
+      updateStatementDataMutation.mutate(newData);
     }
   };
 
@@ -319,7 +318,7 @@ export const StatementEditorBox: React.FC = () => {
       const newData = {
         actants: [...statement.data.actants, newStatementActant],
       };
-      updateActantsRefreshListMutation.mutate(newData);
+      updateStatementDataMutation.mutate(newData);
     }
   };
 
@@ -529,49 +528,11 @@ export const StatementEditorBox: React.FC = () => {
     },
     {
       onSuccess: (data, variables) => {
+        if (detailId === statementId) {
+          queryClient.invalidateQueries(["entity"]);
+        }
         queryClient.invalidateQueries(["statement"]);
         queryClient.invalidateQueries(["territory"]);
-      },
-    }
-  );
-
-  const updateActionsRefreshListMutation = useMutation(
-    async (changes: object) => {
-      await api.entityUpdate(statementId, {
-        data: changes,
-      });
-    },
-    {
-      onSuccess: () => {
-        queryClient.invalidateQueries("statement");
-        queryClient.invalidateQueries("territory");
-      },
-    }
-  );
-
-  const updateActantMutation = useMutation(
-    async (changes: object) => await api.entityUpdate(statementId, changes),
-    {
-      onSuccess: () => {
-        queryClient.invalidateQueries("statement");
-        queryClient.invalidateQueries("territory");
-      },
-      onError: () => {
-        console.log("error mutation");
-      },
-    }
-  );
-
-  const updateActantsRefreshListMutation = useMutation(
-    async (changes: object) =>
-      await api.entityUpdate(statementId, {
-        data: changes,
-      }),
-    {
-      onSuccess: (data, variables) => {
-        queryClient.invalidateQueries(["statement", statementId]);
-        queryClient.invalidateQueries("territory");
-        queryClient.invalidateQueries("entity");
       },
     }
   );
@@ -673,7 +634,7 @@ export const StatementEditorBox: React.FC = () => {
                         const newData = {
                           text: newValue,
                         };
-                        updateActantsRefreshListMutation.mutate(newData);
+                        updateStatementDataMutation.mutate(newData);
                       }
                     }}
                     value={statement.data.text}
@@ -692,7 +653,7 @@ export const StatementEditorBox: React.FC = () => {
                   userCanEdit={userCanEdit}
                   statement={statement}
                   statementId={statementId}
-                  updateActionsMutation={updateActionsRefreshListMutation}
+                  updateActionsMutation={updateStatementDataMutation}
                   addProp={addProp}
                   updateProp={updateProp}
                   removeProp={removeProp}
@@ -725,7 +686,7 @@ export const StatementEditorBox: React.FC = () => {
                   userCanEdit={userCanEdit}
                   statementId={statementId}
                   classEntitiesActant={classesActants}
-                  updateActantsMutation={updateActantsRefreshListMutation}
+                  updateStatementDataMutation={updateStatementDataMutation}
                   addProp={addProp}
                   updateProp={updateProp}
                   removeProp={removeProp}
@@ -818,7 +779,7 @@ export const StatementEditorBox: React.FC = () => {
                 disabled={!userCanEdit}
                 values={statement.notes}
                 onChange={(newValues: string[]) => {
-                  updateActantMutation.mutate({ notes: newValues });
+                  updateStatementMutation.mutate({ notes: newValues });
                 }}
               />
             </StyledEditorSectionContent>
@@ -897,8 +858,7 @@ export const StatementEditorBox: React.FC = () => {
       <Loader
         show={
           isFetchingStatement ||
-          updateActionsRefreshListMutation.isLoading ||
-          updateActantsRefreshListMutation.isLoading ||
+          updateStatementMutation.isLoading ||
           updateStatementDataMutation.isLoading
         }
       />

@@ -51,7 +51,7 @@ interface StatementEditorActantTableRow {
   visibleColumns: ColumnInstance<{}>[];
   statement: IResponseStatement;
   classEntitiesActant: EntityClass[];
-  updateActantsMutation: UseMutationResult<any, unknown, object, unknown>;
+  updateStatementDataMutation: UseMutationResult<any, unknown, object, unknown>;
 }
 
 export const StatementEditorActantTableRow: React.FC<
@@ -66,7 +66,7 @@ export const StatementEditorActantTableRow: React.FC<
   handleClick = () => {},
   visibleColumns,
   classEntitiesActant,
-  updateActantsMutation,
+  updateStatementDataMutation,
   addProp,
   updateProp,
   removeProp,
@@ -105,7 +105,7 @@ export const StatementEditorActantTableRow: React.FC<
         a.id === statementActantId ? { ...a, ...changes } : a
       );
       const newData = { actants: updatedActants };
-      updateActantsMutation.mutate(newData);
+      updateStatementDataMutation.mutate(newData);
     }
   };
 
@@ -115,7 +115,7 @@ export const StatementEditorActantTableRow: React.FC<
         (a) => a.id !== statementActantId
       );
       const newData = { actants: updatedActants };
-      updateActantsMutation.mutate(newData);
+      updateStatementDataMutation.mutate(newData);
     }
   };
 
@@ -247,7 +247,7 @@ export const StatementEditorActantTableRow: React.FC<
               updateActant(sActant.id, { actant: newId });
             }}
             classEntitiesActant={classEntitiesActant}
-            loading={updateActantsMutation.isLoading}
+            loading={updateStatementDataMutation.isLoading}
           />
         )}
         {userCanEdit && (
