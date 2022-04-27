@@ -165,13 +165,15 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
       },
     ];
 
-    if (templates) {
-      templates.forEach((template) => {
-        options.push({
-          value: template.id,
-          label: template.label,
+    if (entity && templates) {
+      templates
+        .filter((template) => template.id !== entity.id)
+        .forEach((template) => {
+          options.push({
+            value: template.id,
+            label: template.label,
+          });
         });
-      });
     }
     return options;
   }, [templates]);
