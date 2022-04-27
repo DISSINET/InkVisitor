@@ -6,7 +6,7 @@ import {
   IStatementAction,
 } from "@shared/types";
 import update from "immutability-helper";
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { UseMutationResult } from "react-query";
 import { Column, Row, useExpanded, useTable } from "react-table";
 import { StatementEditorActantTableRow } from "./StatementEditorActantTableRow";
@@ -49,6 +49,10 @@ export const StatementEditorActantTable: React.FC<
     FilteredActantObject[]
   >([]);
 
+  useEffect(() => {
+    console.log("STATEMENT IN TABLE", statement);
+  }, [statement]);
+
   useMemo(() => {
     const filteredActants = statement.data.actants.map((sActant, key) => {
       const actant = statement.entities[sActant.actant];
@@ -79,8 +83,8 @@ export const StatementEditorActantTable: React.FC<
         accessor: "data",
       },
       {
-        id: "position",
         Header: "",
+        id: "position",
       },
       {
         id: "Attributes",
@@ -125,46 +129,6 @@ export const StatementEditorActantTable: React.FC<
     [filteredActants]
   );
 
-  const updatePropNew = (propId: string, changes: any) => {
-    if (statement && propId) {
-      const newStatementData = { ...statement.data };
-
-      // this is probably an overkill
-      [...newStatementData.actants, ...newStatementData.actions].forEach(
-        (actant: IStatementActant | IStatementAction) => {
-          actant.props.forEach((prop1, pi1) => {
-            // 1st level
-            if (prop1.id === propId) {
-              actant.props[pi1] = { ...actant.props[pi1], ...changes };
-            }
-
-            // 2nd level
-            actant.props[pi1].children.forEach((prop2, pi2) => {
-              if (prop2.id === propId) {
-                actant.props[pi1].children[pi2] = {
-                  ...actant.props[pi1].children[pi2],
-                  ...changes,
-                };
-              }
-
-              // 3rd level
-              actant.props[pi1].children[pi2].children.forEach((prop3, pi3) => {
-                if (prop3.id === propId) {
-                  actant.props[pi1].children[pi2].children[pi3] = {
-                    ...actant.props[pi1].children[pi2].children[pi3],
-                    ...changes,
-                  };
-                }
-              });
-            });
-          });
-        }
-      );
-
-      updateStatementDataMutation.mutate(newStatementData);
-    }
-  };
-
   return (
     <>
       {rows.length > 0 && (
@@ -197,7 +161,7 @@ export const StatementEditorActantTable: React.FC<
                   classEntitiesActant={classEntitiesActant}
                   updateStatementDataMutation={updateStatementDataMutation}
                   addProp={addProp}
-                  updateProp={updatePropNew}
+                  // updateProp={updatePropNew}
                   removeProp={removeProp}
                   movePropToIndex={movePropToIndex}
                   {...row.getRowProps()}

@@ -119,7 +119,7 @@ export const StatementEditorBox: React.FC = () => {
   );
 
   useEffect(() => {
-    console.log("statement fetched");
+    console.log("statement fetched", statement);
   }, [statement]);
 
   //console.log(statement);
