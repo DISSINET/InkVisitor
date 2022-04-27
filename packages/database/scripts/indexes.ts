@@ -60,6 +60,7 @@ const entitiesIndexes: ((table: RTable) => any)[] = [
         multi: true,
       }
     ),
+  (table: RTable) => table.indexCreate(DbIndex.EntityUsedTemplate),
 ];
 
 const auditsIndexes: ((table: RTable) => any)[] = [
