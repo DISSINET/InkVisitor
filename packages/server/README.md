@@ -1,7 +1,24 @@
-# Description
+# Server package
 
 The application located in /packages/server is the api for inkVisitor project.
-It uses express + express router as base.
+It uses express + express router as a base.
+
+## TBD
+
+Current development will target (next to new features) the following:
+
+- adhere to REST conventions
+- increase test coverage
+- add swagger api doc
+- switch to cookie based authentication, keep jwt for api access
+
+## Postman
+
+Please refer to exported [postman collection](./postman/inkvisitor_api.postman_collection.json) file to explore the api and available endpoints.
+
+## Security
+
+Api uses JWT tokens to authenticate the user. With this the session is controlled by token which makes the development faster, makes api easier for testing but exposes several problems, mainly token expiration question and/or session invalidation. As mentioned avove, the jwt should be replaced by cookie session in the future. Token based authorization, hovewer, should still be available.
 
 ## Errors
 
@@ -24,14 +41,14 @@ The output above is generated from thrown error like:
 throw new ActionDoesNotExits(`action with id ${actionId} does not exist)
 ```
 
-What happens in the error handler is that the error is transformed to `IResponseGeneric` by taking vales
+What happens in the error handler (middleware) is that the error is transformed to `IResponseGeneric` by taking values
 
 ```
 error <= thrownError.constructor.name
 message <= thrownError.message
 ```
 
-CustomError respects the generic Error class logic for constructor parameter (message) and using the custom error's name as `name` property
+`CustomError` respects the generic Error class logic for constructor parameter (message) and using the custom error's name as `name` property
 and new static property `code`, which will be used as http status code in the api response.
 
 ```
