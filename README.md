@@ -1,6 +1,6 @@
 # InkVisitor
 
-## Deployment 
+## Deployment
 
 [![deploy staging](https://github.com/DISSINET/InkVisitor/actions/workflows/merge_to_master.yml/badge.svg?branch=dev)](https://github.com/DISSINET/InkVisitor/actions/workflows/merge_to_master.yml)
 
@@ -72,18 +72,39 @@ To administrate the users rights, admin roles may acces the **administration win
 
 ### Server
 
-- `cd ./packages/server`
-- `npm install`
-- `npm run start:dev`
+For more information see [server package](./packages/server)
 
 ### Database
 
-- run docker -`docker-compose up` | `-docker-compose down` | `docker-compose up -d` ...
-- import data
-  - `cd ./packages/database`
-  - (`npm install`)
-  - `npm run import-local` to import datasets to the local database (`.env.devel`)
-  - `npm run import-remote` to import datasets to the remote database (`.env.prod`) (`import-remote-sandbox` and `import-remote-staging`, and `import-remote-importdata` for specific deploys)
+App uses [rethinkdb](https://rethinkdb.com/) database to store data. Given the nature of models in the project (mostly json-based, schemaless structure with set of conditions), a nosql database provides more pros thans cons. Currently the app uses following tables:
+
+- users
+  - user data: login, password, starred territories
+- acl_permissions
+  - consists of rules for accessing resources (endpoints) by different requestors (groups)
+  - more fine grained permissions (ownerships) over entities are defined in respective user entries
+- entities
+  - holds data mentioned in [section](### Entity types).
+- audits
+  - log entries for changes made to entities table
+  - each entity entry has 0-n audit entries
+
+#### Run in docker
+
+Rethinkdb can be run as containerized instance. Installed [docker](https://docs.docker.com/get-docker/) + [docker compose](https://docs.docker.com/compose/install/) are prerequirements.
+Run in by `docker-compose up -d inkvisitor-database`.
+
+#### Install
+
+Follow tutorials on [official page](https://rethinkdb.com/docs/install/)
+
+#### Import data
+
+For more information see [database package](./packages/database)
+
+#### Backup
+
+For more information see [database package](./packages/database)
 
 ### Client
 
