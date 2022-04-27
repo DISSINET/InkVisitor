@@ -1,5 +1,4 @@
 import styled from "styled-components";
-import { EntityTag } from "..";
 
 interface StyledDetailWrapper {
   type: string;
@@ -7,6 +6,7 @@ interface StyledDetailWrapper {
 export const StyledDetailWrapper = styled.div<StyledDetailWrapper>`
   display: flex;
   flex-direction: column;
+  overflow: auto;
   align-items: start;
   border-left: 3px solid;
   border-left-color: ${({ theme, type }) => theme.color["entity" + type]};
@@ -77,8 +77,7 @@ export const StyledDetailContentRowValueID = styled.div`
 export const StyledFormWrapper = styled.div`
   display: flex;
   flex-direction: column;
-  overflow-y: auto;
-  overflow-x: auto;
+  overflow: auto;
 `;
 
 export const StyledDetailForm = styled.div`

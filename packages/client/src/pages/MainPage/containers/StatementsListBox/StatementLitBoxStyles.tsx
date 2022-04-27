@@ -32,6 +32,5 @@ export const StyledText = styled.p`
 export const StyledTableWrapper = styled.div`
   display: flex;
   flex-direction: column;
-  overflow-y: auto;
-  overflow-x: auto;
+  overflow: auto;
 `;
