@@ -314,45 +314,51 @@ export const StatementEditorActantTableRow: React.FC<
     }
   }, [isDragging]);
 
-  const updatePropNew = (propId: string, changes: any) => {
-    if (statement && propId) {
-      const newStatementData = { ...statement.data };
+  const updatePropNew = useCallback(
+    (propId: string, changes: any) => {
+      console.log(statement.data.actants[0].position);
+      if (statement && propId) {
+        const newStatementData = { ...statement.data };
 
-      // this is probably an overkill
-      [...newStatementData.actants, ...newStatementData.actions].forEach(
-        (actant: IStatementActant | IStatementAction) => {
-          actant.props.forEach((prop1, pi1) => {
-            // 1st level
-            if (prop1.id === propId) {
-              actant.props[pi1] = { ...actant.props[pi1], ...changes };
-            }
-
-            // 2nd level
-            actant.props[pi1].children.forEach((prop2, pi2) => {
-              if (prop2.id === propId) {
-                actant.props[pi1].children[pi2] = {
-                  ...actant.props[pi1].children[pi2],
-                  ...changes,
-                };
+        // this is probably an overkill
+        [...newStatementData.actants, ...newStatementData.actions].forEach(
+          (actant: IStatementActant | IStatementAction) => {
+            actant.props.forEach((prop1, pi1) => {
+              // 1st level
+              if (prop1.id === propId) {
+                actant.props[pi1] = { ...actant.props[pi1], ...changes };
               }
 
-              // 3rd level
-              actant.props[pi1].children[pi2].children.forEach((prop3, pi3) => {
-                if (prop3.id === propId) {
-                  actant.props[pi1].children[pi2].children[pi3] = {
-                    ...actant.props[pi1].children[pi2].children[pi3],
+              // 2nd level
+              actant.props[pi1].children.forEach((prop2, pi2) => {
+                if (prop2.id === propId) {
+                  actant.props[pi1].children[pi2] = {
+                    ...actant.props[pi1].children[pi2],
                     ...changes,
                   };
                 }
+
+                // 3rd level
+                actant.props[pi1].children[pi2].children.forEach(
+                  (prop3, pi3) => {
+                    if (prop3.id === propId) {
+                      actant.props[pi1].children[pi2].children[pi3] = {
+                        ...actant.props[pi1].children[pi2].children[pi3],
+                        ...changes,
+                      };
+                    }
+                  }
+                );
               });
             });
-          });
-        }
-      );
+          }
+        );
 
-      updateStatementDataMutation.mutate(newStatementData);
-    }
-  };
+        updateStatementDataMutation.mutate(newStatementData);
+      }
+    },
+    [JSON.stringify(statement)]
+  );
 
   const renderPropGroup = useCallback(
     (

@@ -1,4 +1,4 @@
-import { IEntity, IProp } from "@shared/types";
+import { IEntity, IProp, IResponseStatement } from "@shared/types";
 import api from "api";
 import React, { useCallback } from "react";
 import { useQuery } from "react-query";

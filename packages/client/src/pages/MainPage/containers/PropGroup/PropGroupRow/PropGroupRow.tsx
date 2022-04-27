@@ -1,4 +1,4 @@
-import { IEntity, IProp } from "@shared/types";
+import { IEntity, IProp, IResponseStatement } from "@shared/types";
 import { AttributeIcon, Button } from "components";
 import React, { useEffect, useRef, useState } from "react";
 import {
@@ -266,7 +266,8 @@ export const PropGroupRow: React.FC<IPropGroupRow> = ({
 
         <StyledPropLineColumn>
           <StyledPropButtonGroup>
-            <AttributesGroupEditor
+            {/* TODO: Solve and switch on */}
+            {/* <AttributesGroupEditor
               modalTitle={`Property attributes`}
               modalOpen={modalOpen}
               setModalOpen={setModalOpen}
@@ -308,10 +309,10 @@ export const PropGroupRow: React.FC<IPropGroupRow> = ({
                   ...newData,
                 };
                 const { statement, ...statementPropObject } = newDataObject;
-                updateProp(prop.id, statementPropObject);
+                updateProp(statement, prop.id, statementPropObject);
               }}
               userCanEdit={userCanEdit}
-            />
+            /> */}
 
             {(level === 1 || level === 2) && (
               <Button
