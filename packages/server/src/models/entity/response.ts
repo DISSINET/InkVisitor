@@ -91,12 +91,17 @@ export class ResponseEntityDetail
 
     await this.populateEntitiesMap(req.db.connection);
 
-    await this.fillUsedAsTemplate(req.db.connection);
+    await this.processTemplateData(req.db.connection);
   }
 
-  async fillUsedAsTemplate(conn: Connection): Promise<void> {
+  /**
+   * loads casts for this entity (template) and fills usedAsTemplate array & entities map with retrieved data
+   * @param conn
+   */
+  async processTemplateData(conn: Connection): Promise<void> {
     const casts = await this.findFromTemplate(conn);
     this.usedAsTemplate = casts.map((c) => c.id);
+    casts.forEach((c) => (this.entities[c.id] = c));
   }
 
   /**
