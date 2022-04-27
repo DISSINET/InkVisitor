@@ -133,6 +133,8 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
     { enabled: !!detailId && api.isLoggedIn(), retry: 2 }
   );
 
+  console.log(entity);
+
   const {
     status: templateStatus,
     data: templates,
@@ -1116,6 +1118,20 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                           </StyledDetailContentRowValue>
                         </StyledDetailContentRow>
                       </React.Fragment>
+                    )}
+
+                    {/* templates */}
+                    {entity.usedTemplate && (
+                      <StyledDetailContentRow>
+                        <StyledDetailContentRowLabel>
+                          Applied Template
+                        </StyledDetailContentRowLabel>
+                        <StyledDetailContentRowValue>
+                          <EntityTag
+                            actant={entity.entities[entity.usedTemplate]}
+                          />
+                        </StyledDetailContentRowValue>
+                      </StyledDetailContentRow>
                     )}
 
                     <StyledDetailContentRow>
