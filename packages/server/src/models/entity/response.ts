@@ -89,6 +89,10 @@ export class ResponseEntityDetail
       await Statement.findUsedInDataProps(req.db.connection, this.id)
     );
 
+    if (this.usedTemplate) {
+      this.postponedEntities[this.usedTemplate] = undefined;
+    }
+
     await this.populateEntitiesMap(req.db.connection);
 
     await this.processTemplateData(req.db.connection);
@@ -101,6 +105,8 @@ export class ResponseEntityDetail
   async processTemplateData(conn: Connection): Promise<void> {
     const casts = await this.findFromTemplate(conn);
     this.usedAsTemplate = casts.map((c) => c.id);
+
+    console.log(this.usedAsTemplate);
     casts.forEach((c) => (this.entities[c.id] = c));
   }
 
