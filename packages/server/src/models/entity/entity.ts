@@ -7,6 +7,7 @@ import {
 import { r as rethink, Connection, WriteResult, RDatum } from "rethinkdb-ts";
 import { IStatement, IEntity, IProp, IReference } from "@shared/types";
 import {
+  DbIndex,
   EntityClass,
   EntityStatus,
   Language,
@@ -290,5 +291,19 @@ export default class Entity implements IEntity, IDbModel {
   async getEntities(db: Connection): Promise<IEntity[]> {
     const entities = Entity.findEntitiesByIds(db, this.getEntitiesIds());
     return entities;
+  }
+
+  /**
+   * Finds entities which uses this entity as a template
+   * @param db
+   * @returns
+   */
+  async findFromTemplate(db: Connection): Promise<IEntity[]> {
+    const data = await rethink
+      .table(Entity.table)
+      .getAll(this.id, { index: DbIndex.EntityUsedTemplate })
+      .run(db);
+
+    return data;
   }
 }

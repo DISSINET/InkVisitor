@@ -249,3 +249,29 @@ describe("test Entity.getEntitiesIds", function () {
     });
   });
 });
+
+describe("test Entity.findFromTemplate", function () {
+  const db = new Db();
+
+  beforeAll(async () => {
+    await db.initDb();
+  });
+  afterAll(async () => await clean(db));
+
+  describe("one cast for template", function () {
+    const [templateId, template] = prepareEntity();
+
+    const [cast1Id, cast1] = prepareEntity();
+    cast1.usedTemplate = templateId;
+
+    it("should return only one element", async () => {
+      await template.save(db.connection);
+      await cast1.save(db.connection);
+
+      const foundCasts = await template.findFromTemplate(db.connection);
+
+      expect(foundCasts.length).toEqual(1);
+      expect(foundCasts[0].id).toEqual(cast1Id);
+    });
+  });
+});
