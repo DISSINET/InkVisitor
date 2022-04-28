@@ -4,7 +4,6 @@ import {
   IProp,
   IResponseStatement,
   IStatementActant,
-  IStatementAction,
 } from "@shared/types";
 import { AttributeIcon, Button, ButtonGroup } from "components";
 import { useSearchParams } from "hooks";

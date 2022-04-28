@@ -57,7 +57,6 @@ import {
   StyledDetailSectionContentUsedInTitle,
   StyledDetailSectionEntityList,
   StyledDetailSectionHeader,
-  StyledDetailSectionUsedTableRow,
   StyledDetailWrapper,
   StyledFormWrapper,
   StyledTagWrap,

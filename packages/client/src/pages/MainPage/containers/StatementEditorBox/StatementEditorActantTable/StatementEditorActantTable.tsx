@@ -1,10 +1,5 @@
 import { EntityClass } from "@shared/enums";
-import {
-  IEntity,
-  IResponseStatement,
-  IStatementActant,
-  IStatementAction,
-} from "@shared/types";
+import { IEntity, IResponseStatement, IStatementActant } from "@shared/types";
 import update from "immutability-helper";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { UseMutationResult } from "react-query";

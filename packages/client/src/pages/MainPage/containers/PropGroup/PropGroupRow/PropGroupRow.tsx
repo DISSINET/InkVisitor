@@ -1,4 +1,4 @@
-import { IEntity, IProp, IResponseStatement } from "@shared/types";
+import { IEntity, IProp } from "@shared/types";
 import { AttributeIcon, Button } from "components";
 import React, { useEffect, useRef, useState } from "react";
 import {
