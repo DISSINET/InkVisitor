@@ -1,4 +1,9 @@
-import { IEntity, IProp } from "@shared/types";
+import {
+  IEntity,
+  IProp,
+  IResponseDetail,
+  IResponseStatement,
+} from "@shared/types";
 import api from "api";
 import React, { useCallback } from "react";
 import { useQuery } from "react-query";
@@ -14,6 +19,7 @@ interface IPropGroup {
   entities: { [key: string]: IEntity };
   props: IProp[];
   territoryId: string;
+  boxEntity: IResponseStatement | IResponseDetail;
 
   updateProp: (propId: string, changes: any) => void;
   removeProp: (propId: string) => void;
@@ -30,6 +36,7 @@ export const PropGroup: React.FC<IPropGroup> = ({
   entities,
   props,
   territoryId,
+  boxEntity,
 
   updateProp,
   removeProp,
@@ -98,7 +105,7 @@ export const PropGroup: React.FC<IPropGroup> = ({
         </React.Fragment>
       );
     },
-    [entities]
+    [entities, boxEntity]
   );
 
   const renderSecondLevelPropRow = useCallback(
@@ -138,7 +145,7 @@ export const PropGroup: React.FC<IPropGroup> = ({
         </React.Fragment>
       );
     },
-    [entities]
+    [entities, boxEntity]
   );
 
   const renderThirdLevelPropRow = useCallback(
@@ -171,7 +178,7 @@ export const PropGroup: React.FC<IPropGroup> = ({
         </React.Fragment>
       );
     },
-    [entities]
+    [entities, boxEntity]
   );
 
   return props.length > 0 ? (
