@@ -161,7 +161,7 @@ export const StatementEditorActantTable: React.FC<
                   classEntitiesActant={classEntitiesActant}
                   updateStatementDataMutation={updateStatementDataMutation}
                   addProp={addProp}
-                  // updateProp={updatePropNew}
+                  updateProp={updateProp}
                   removeProp={removeProp}
                   movePropToIndex={movePropToIndex}
                   {...row.getRowProps()}

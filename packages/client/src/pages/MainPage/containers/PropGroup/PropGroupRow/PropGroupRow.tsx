@@ -266,8 +266,7 @@ export const PropGroupRow: React.FC<IPropGroupRow> = ({
 
         <StyledPropLineColumn>
           <StyledPropButtonGroup>
-            {/* TODO: Solve and switch on */}
-            {/* <AttributesGroupEditor
+            <AttributesGroupEditor
               modalTitle={`Property attributes`}
               modalOpen={modalOpen}
               setModalOpen={setModalOpen}
@@ -309,10 +308,10 @@ export const PropGroupRow: React.FC<IPropGroupRow> = ({
                   ...newData,
                 };
                 const { statement, ...statementPropObject } = newDataObject;
-                updateProp(statement, prop.id, statementPropObject);
+                updateProp(prop.id, statementPropObject);
               }}
               userCanEdit={userCanEdit}
-            /> */}
+            />
 
             {(level === 1 || level === 2) && (
               <Button

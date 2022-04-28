@@ -45,7 +45,7 @@ interface StatementEditorActantTableRow {
   userCanEdit?: boolean;
   updateOrderFn: () => void;
   addProp: (originId: string) => void;
-  // updateProp: (propId: string, changes: any) => void;
+  updateProp: (propId: string, changes: any) => void;
   removeProp: (propId: string) => void;
   movePropToIndex: (propId: string, oldIndex: number, newIndex: number) => void;
   handleClick: Function;
@@ -69,7 +69,7 @@ export const StatementEditorActantTableRow: React.FC<
   classEntitiesActant,
   updateStatementDataMutation,
   addProp,
-  // updateProp,
+  updateProp,
   removeProp,
   movePropToIndex,
 }) => {
@@ -314,69 +314,19 @@ export const StatementEditorActantTableRow: React.FC<
     }
   }, [isDragging]);
 
-  const updatePropNew = useCallback(
-    (propId: string, changes: any) => {
-      console.log(statement.data.actants[0].position);
-      if (statement && propId) {
-        const newStatementData = { ...statement.data };
-
-        // this is probably an overkill
-        [...newStatementData.actants, ...newStatementData.actions].forEach(
-          (actant: IStatementActant | IStatementAction) => {
-            actant.props.forEach((prop1, pi1) => {
-              // 1st level
-              if (prop1.id === propId) {
-                actant.props[pi1] = { ...actant.props[pi1], ...changes };
-              }
-
-              // 2nd level
-              actant.props[pi1].children.forEach((prop2, pi2) => {
-                if (prop2.id === propId) {
-                  actant.props[pi1].children[pi2] = {
-                    ...actant.props[pi1].children[pi2],
-                    ...changes,
-                  };
-                }
-
-                // 3rd level
-                actant.props[pi1].children[pi2].children.forEach(
-                  (prop3, pi3) => {
-                    if (prop3.id === propId) {
-                      actant.props[pi1].children[pi2].children[pi3] = {
-                        ...actant.props[pi1].children[pi2].children[pi3],
-                        ...changes,
-                      };
-                    }
-                  }
-                );
-              });
-            });
-          }
-        );
-
-        updateStatementDataMutation.mutate(newStatementData);
-      }
-    },
-    [JSON.stringify(statement)]
-  );
-
   const renderPropGroup = useCallback(
-    (
-      originId: string,
-      props: IProp[],
-      statement: IResponseStatement,
-      category: DraggedPropRowCategory
-    ) => {
+    (originId: string, props: IProp[], category: DraggedPropRowCategory) => {
       const originActant = statement.entities[originId];
 
       if (props.length > 0) {
         return (
           <PropGroup
+            statement={statement}
             originId={originActant ? originActant.id : ""}
             entities={statement.entities}
             props={props}
             territoryId={territoryId}
-            updateProp={updatePropNew}
+            updateProp={updateProp}
             removeProp={removeProp}
             addProp={addProp}
             movePropToIndex={movePropToIndex}
@@ -418,7 +368,6 @@ export const StatementEditorActantTableRow: React.FC<
         renderPropGroup(
           row.values.data.sActant.actant,
           row.values.data.sActant.props,
-          statement,
           DraggedPropRowCategory.ACTANT
         )}
     </React.Fragment>

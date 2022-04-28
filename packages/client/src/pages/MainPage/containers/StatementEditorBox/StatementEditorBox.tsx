@@ -472,9 +472,7 @@ export const StatementEditorBox: React.FC = () => {
 
   const movePropToIndex = useCallback(
     (propId: string, oldIndex: number, newIndex: number) => {
-      console.log("here");
       if (statement) {
-        console.log("inside");
         const { actions, actants, ...dataWithoutActants } = statement.data;
         changeOrder(propId, actions, oldIndex, newIndex);
         changeOrder(propId, actants, oldIndex, newIndex);

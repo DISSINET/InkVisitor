@@ -14,6 +14,7 @@ interface IPropGroup {
   entities: { [key: string]: IEntity };
   props: IProp[];
   territoryId: string;
+  statement: IResponseStatement;
 
   updateProp: (propId: string, changes: any) => void;
   removeProp: (propId: string) => void;
@@ -30,6 +31,7 @@ export const PropGroup: React.FC<IPropGroup> = ({
   entities,
   props,
   territoryId,
+  statement,
 
   updateProp,
   removeProp,
@@ -98,7 +100,7 @@ export const PropGroup: React.FC<IPropGroup> = ({
         </React.Fragment>
       );
     },
-    [entities]
+    [entities, statement]
   );
 
   const renderSecondLevelPropRow = useCallback(
@@ -138,7 +140,7 @@ export const PropGroup: React.FC<IPropGroup> = ({
         </React.Fragment>
       );
     },
-    [entities]
+    [entities, statement]
   );
 
   const renderThirdLevelPropRow = useCallback(
@@ -171,7 +173,7 @@ export const PropGroup: React.FC<IPropGroup> = ({
         </React.Fragment>
       );
     },
-    [entities]
+    [entities, statement]
   );
 
   return props.length > 0 ? (
