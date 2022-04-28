@@ -241,17 +241,13 @@ export const StatementEditorActionTableRow: React.FC<
   }, [isDragging]);
 
   const renderPropGroup = useCallback(
-    (
-      originId: string,
-      props: IProp[],
-      statement: IResponseStatement,
-      category: DraggedPropRowCategory
-    ) => {
+    (originId: string, props: IProp[], category: DraggedPropRowCategory) => {
       const originActant = statement.entities[originId];
 
       if (props.length > 0) {
         return (
           <PropGroup
+            statement={statement}
             originId={originActant ? originActant.id : ""}
             entities={statement.entities}
             props={props}
@@ -297,7 +293,6 @@ export const StatementEditorActionTableRow: React.FC<
         renderPropGroup(
           row.values.data.sAction.action,
           row.values.data.sAction.props,
-          statement,
           DraggedPropRowCategory.ACTION
         )}
     </React.Fragment>
