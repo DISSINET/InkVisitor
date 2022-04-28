@@ -541,6 +541,7 @@ export const StatementEditorBox: React.FC = () => {
       onSuccess: (data, variables) => {
         setTerritoryId(variables);
         queryClient.invalidateQueries("tree");
+        queryClient.invalidateQueries("territory");
       },
     }
   );
