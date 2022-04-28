@@ -3,10 +3,7 @@ import { EntityClass, Order, UserRoleMode } from "@shared/enums";
 import {
   IEntity,
   IOption,
-  IProp,
   IReference,
-  IResponseStatement,
-  IStatement,
   IStatementActant,
   IStatementAction,
 } from "@shared/types";
@@ -26,17 +23,15 @@ import {
 } from "components";
 import { CProp, CStatementActant, CStatementAction } from "constructors";
 import { useSearchParams } from "hooks";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { BsInfoCircle } from "react-icons/bs";
 import { FaUnlink } from "react-icons/fa";
 import { useMutation, useQuery, useQueryClient } from "react-query";
 import { toast } from "react-toastify";
 import { excludedSuggesterEntities } from "Theme/constants";
-import { DraggedPropRowCategory } from "types";
 import { StyledContent } from "../EntityBookmarkBox/EntityBookmarkBoxStyles";
 import { EntityReferenceTable } from "../EntityReferenceTable/EntityReferenceTable";
 import { JSONExplorer } from "../JSONExplorer/JSONExplorer";
-import { PropGroup } from "../PropGroup/PropGroup";
 import { StatementListBreadcrumbItem } from "../StatementsListBox/StatementListHeader/StatementListBreadcrumbItem/StatementListBreadcrumbItem";
 import { EntitySuggester, EntityTag } from "./../";
 import { AuditTable } from "./../AuditTable/AuditTable";
@@ -123,6 +118,10 @@ export const StatementEditorBox: React.FC = () => {
     { enabled: !!statementId && api.isLoggedIn(), retry: 2 }
   );
 
+  useEffect(() => {
+    console.log("statement fetched", statement);
+  }, [statement]);
+
   //console.log(statement);
   // Audit query
   const {
@@ -200,7 +199,7 @@ export const StatementEditorBox: React.FC = () => {
       toast.info(
         `Template ${templateToApply.label} applied to Statement ${statement.label}`
       );
-      updateActantMutation.mutate(entityAfterTemplateApplied);
+      updateStatementMutation.mutate(entityAfterTemplateApplied);
     }
     setTemplateToApply(false);
   };
@@ -308,7 +307,7 @@ export const StatementEditorBox: React.FC = () => {
       const newData = {
         actions: [...statement.data.actions, newStatementAction],
       };
-      updateActionsRefreshListMutation.mutate(newData);
+      updateStatementDataMutation.mutate(newData);
     }
   };
 
@@ -319,7 +318,7 @@ export const StatementEditorBox: React.FC = () => {
       const newData = {
         actants: [...statement.data.actants, newStatementActant],
       };
-      updateActantsRefreshListMutation.mutate(newData);
+      updateStatementDataMutation.mutate(newData);
     }
   };
 
@@ -528,80 +527,14 @@ export const StatementEditorBox: React.FC = () => {
     },
     {
       onSuccess: (data, variables) => {
+        if (detailId === statementId) {
+          queryClient.invalidateQueries(["entity"]);
+        }
         queryClient.invalidateQueries(["statement"]);
         queryClient.invalidateQueries(["territory"]);
       },
     }
   );
-
-  const updateActionsRefreshListMutation = useMutation(
-    async (changes: object) => {
-      await api.entityUpdate(statementId, {
-        data: changes,
-      });
-    },
-    {
-      onSuccess: () => {
-        queryClient.invalidateQueries("statement");
-        queryClient.invalidateQueries("territory");
-      },
-    }
-  );
-
-  const updateActantMutation = useMutation(
-    async (changes: object) => await api.entityUpdate(statementId, changes),
-    {
-      onSuccess: () => {
-        queryClient.invalidateQueries("statement");
-        queryClient.invalidateQueries("territory");
-      },
-      onError: () => {
-        console.log("error mutation");
-      },
-    }
-  );
-
-  const updateActantsRefreshListMutation = useMutation(
-    async (changes: object) =>
-      await api.entityUpdate(statementId, {
-        data: changes,
-      }),
-    {
-      onSuccess: (data, variables) => {
-        queryClient.invalidateQueries(["statement", statementId]);
-        queryClient.invalidateQueries("territory");
-        queryClient.invalidateQueries("entity");
-      },
-    }
-  );
-
-  const renderPropGroup = (
-    originId: string,
-    props: IProp[],
-    statement: IResponseStatement,
-    category: DraggedPropRowCategory
-  ) => {
-    const originActant = statement.entities[originId];
-
-    if (props.length > 0) {
-      return (
-        <PropGroup
-          key={JSON.stringify(statement)}
-          originId={originActant ? originActant.id : ""}
-          entities={statement.entities}
-          props={props}
-          territoryId={territoryId}
-          updateProp={updateProp}
-          removeProp={removeProp}
-          addProp={addProp}
-          movePropToIndex={movePropToIndex}
-          userCanEdit={userCanEdit}
-          openDetailOnCreate={false}
-          category={category}
-        />
-      );
-    }
-  };
 
   const moveStatementMutation = useMutation(
     async (newTerritoryId: string) => {
@@ -700,7 +633,7 @@ export const StatementEditorBox: React.FC = () => {
                         const newData = {
                           text: newValue,
                         };
-                        updateActantsRefreshListMutation.mutate(newData);
+                        updateStatementDataMutation.mutate(newData);
                       }
                     }}
                     value={statement.data.text}
@@ -719,9 +652,11 @@ export const StatementEditorBox: React.FC = () => {
                   userCanEdit={userCanEdit}
                   statement={statement}
                   statementId={statementId}
-                  updateActionsMutation={updateActionsRefreshListMutation}
-                  renderPropGroup={renderPropGroup}
+                  updateActionsMutation={updateStatementDataMutation}
                   addProp={addProp}
+                  updateProp={updateProp}
+                  removeProp={removeProp}
+                  movePropToIndex={movePropToIndex}
                 />
               </StyledEditorActantTableWrapper>
 
@@ -750,9 +685,11 @@ export const StatementEditorBox: React.FC = () => {
                   userCanEdit={userCanEdit}
                   statementId={statementId}
                   classEntitiesActant={classesActants}
-                  updateActantsMutation={updateActantsRefreshListMutation}
-                  renderPropGroup={renderPropGroup}
+                  updateStatementDataMutation={updateStatementDataMutation}
                   addProp={addProp}
+                  updateProp={updateProp}
+                  removeProp={removeProp}
+                  movePropToIndex={movePropToIndex}
                 />
               </StyledEditorActantTableWrapper>
               {userCanEdit && (
@@ -841,7 +778,7 @@ export const StatementEditorBox: React.FC = () => {
                 disabled={!userCanEdit}
                 values={statement.notes}
                 onChange={(newValues: string[]) => {
-                  updateActantMutation.mutate({ notes: newValues });
+                  updateStatementMutation.mutate({ notes: newValues });
                 }}
               />
             </StyledEditorSectionContent>
@@ -920,8 +857,7 @@ export const StatementEditorBox: React.FC = () => {
       <Loader
         show={
           isFetchingStatement ||
-          updateActionsRefreshListMutation.isLoading ||
-          updateActantsRefreshListMutation.isLoading ||
+          updateStatementMutation.isLoading ||
           updateStatementDataMutation.isLoading
         }
       />

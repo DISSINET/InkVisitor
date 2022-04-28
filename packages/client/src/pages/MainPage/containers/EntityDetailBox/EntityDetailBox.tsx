@@ -57,7 +57,6 @@ import {
   StyledDetailSectionContentUsedInTitle,
   StyledDetailSectionEntityList,
   StyledDetailSectionHeader,
-  StyledDetailSectionUsedTableRow,
   StyledDetailWrapper,
   StyledFormWrapper,
   StyledTagWrap,
@@ -1183,6 +1182,7 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                 <table>
                   <tbody>
                     <PropGroup
+                      boxEntity={entity}
                       originId={entity.id}
                       entities={entity.entities}
                       props={entity.props}
