@@ -470,24 +470,25 @@ export const StatementEditorBox: React.FC = () => {
     return actants;
   };
 
-  const movePropToIndex = useCallback(
-    (propId: string, oldIndex: number, newIndex: number) => {
-      if (statement) {
-        const { actions, actants, ...dataWithoutActants } = statement.data;
-        changeOrder(propId, actions, oldIndex, newIndex);
-        changeOrder(propId, actants, oldIndex, newIndex);
+  const movePropToIndex = (
+    propId: string,
+    oldIndex: number,
+    newIndex: number
+  ) => {
+    if (statement) {
+      const { actions, actants, ...dataWithoutActants } = statement.data;
+      changeOrder(propId, actions, oldIndex, newIndex);
+      changeOrder(propId, actants, oldIndex, newIndex);
 
-        const newStatementData = {
-          actions,
-          actants,
-          ...dataWithoutActants,
-        };
+      const newStatementData = {
+        actions,
+        actants,
+        ...dataWithoutActants,
+      };
 
-        updateStatementDataMutation.mutate(newStatementData);
-      }
-    },
-    [statement]
-  );
+      updateStatementDataMutation.mutate(newStatementData);
+    }
+  };
 
   //tags
   const addTag = (tagId: string) => {

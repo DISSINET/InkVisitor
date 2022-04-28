@@ -59,8 +59,6 @@ export const findPositionInStatement = (
     )
   ) {
     return "action property type";
-  } else if (statement.data.references.find((r) => r.resource === actant.id)) {
-    return "reference";
   }
 };
 
