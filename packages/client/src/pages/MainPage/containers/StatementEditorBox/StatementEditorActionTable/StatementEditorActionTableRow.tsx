@@ -247,7 +247,7 @@ export const StatementEditorActionTableRow: React.FC<
       if (props.length > 0) {
         return (
           <PropGroup
-            statement={statement}
+            boxEntity={statement}
             originId={originActant ? originActant.id : ""}
             entities={statement.entities}
             props={props}

@@ -1183,6 +1183,7 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                 <table>
                   <tbody>
                     <PropGroup
+                      boxEntity={entity}
                       originId={entity.id}
                       entities={entity.entities}
                       props={entity.props}
