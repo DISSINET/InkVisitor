@@ -9,6 +9,8 @@ import {
 } from "react-dnd";
 import { FaGripVertical } from "react-icons/fa";
 import { Cell, ColumnInstance } from "react-table";
+import { useAppSelector } from "redux/hooks";
+import { RootState } from "redux/store";
 import { DragItem, ItemTypes } from "types";
 import { dndHoverFn } from "utils";
 import { StatementListRowExpanded } from "./StatementListRowExpanded/StatementListRowExpanded";
@@ -38,6 +40,9 @@ export const StatementListRow: React.FC<StatementListRow> = ({
   visibleColumns,
   entities,
 }) => {
+  const rowsExpanded: boolean[] = useAppSelector(
+    (state) => state.statementList.rowsExpanded
+  );
   const { statementId } = useSearchParams();
   const audit = row.original.audit;
 
@@ -136,7 +141,7 @@ export const StatementListRow: React.FC<StatementListRow> = ({
           }
         })}
       </StyledTr>
-      {row.isExpanded ? (
+      {rowsExpanded[row.index] ? (
         <StatementListRowExpanded
           row={row}
           visibleColumns={visibleColumns}

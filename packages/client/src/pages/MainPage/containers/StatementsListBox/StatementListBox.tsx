@@ -29,6 +29,9 @@ import {
 import { useMutation, useQuery, useQueryClient } from "react-query";
 import { Cell, Column } from "react-table";
 import { toast } from "react-toastify";
+import { setRowsExpanded } from "redux/features/statementList/rowsExpandedSlice";
+import { useAppDispatch, useAppSelector } from "redux/hooks";
+import { RootState } from "redux/store";
 import { EntityTag } from "./../";
 import { StatementListContextMenu } from "./StatementListContextMenu/StatementListContextMenu";
 import { StatementListHeader } from "./StatementListHeader/StatementListHeader";
@@ -52,6 +55,11 @@ const initialData: {
 export const StatementListBox: React.FC = () => {
   const queryClient = useQueryClient();
 
+  const dispatch = useAppDispatch();
+  const rowsExpanded: boolean[] = useAppSelector(
+    (state) => state.statementList.rowsExpanded
+  );
+
   const { territoryId, setTerritoryId, statementId, setStatementId } =
     useSearchParams();
 
@@ -70,6 +78,8 @@ export const StatementListBox: React.FC = () => {
     }
   );
 
+  const { statements, entities } = data || initialData;
+
   const { data: audits, isFetching: isFetchingAudits } = useQuery(
     ["territory", "statement-list", "audits", territoryId],
     async () => {
@@ -81,6 +91,12 @@ export const StatementListBox: React.FC = () => {
       retry: 2,
     }
   );
+
+  useEffect(() => {
+    if (statements.length !== rowsExpanded.length) {
+      dispatch(setRowsExpanded(new Array(statements.length).fill(false)));
+    }
+  }, [statements, rowsExpanded]);
 
   const userId = localStorage.getItem("userid");
   const {
@@ -224,8 +240,6 @@ export const StatementListBox: React.FC = () => {
       actantsCreateMutation.mutate(newStatement);
     }
   };
-
-  const { statements, entities } = data || initialData;
 
   const moveEndRow = async (statementToMove: IStatement, index: number) => {
     // return if order don't change
@@ -555,10 +569,13 @@ export const StatementListBox: React.FC = () => {
                 onClick={(e: React.MouseEvent) => {
                   e.stopPropagation();
                   row.toggleRowExpanded();
-                  console.log(row);
+                  const newArray = rowsExpanded.map((r: boolean, key: number) =>
+                    key === row.index ? !r : r
+                  );
+                  dispatch(setRowsExpanded(newArray));
                 }}
               >
-                {row.isExpanded ? (
+                {rowsExpanded[row.index] ? (
                   <FaChevronCircleUp />
                 ) : (
                   <FaChevronCircleDown />
@@ -569,7 +586,7 @@ export const StatementListBox: React.FC = () => {
         },
       },
     ];
-  }, [data, statementId]);
+  }, [data, statementId, rowsExpanded]);
 
   statements.sort((a, b) =>
     a.data.territory && b.data.territory

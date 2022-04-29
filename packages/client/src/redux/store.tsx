@@ -22,7 +22,9 @@ const store: Store = configureStore({
       treeInitialized: treeInitializeSlice,
       draggedTerritory: draggedTerritorySlice,
     }),
-    statementList: rowsExpandedSlice,
+    statementList: combineReducers({
+      rowsExpanded: rowsExpandedSlice,
+    }),
     rowDnd: combineReducers({
       draggedPropRow: draggedPropRowSlice,
       draggedActantRow: draggedActantRowSlice,
