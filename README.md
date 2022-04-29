@@ -70,6 +70,10 @@ To administrate the users rights, admin roles may acces the **administration win
 
 ## Packages
 
+#### Database
+
+For more information see [client package](./packages/client)
+
 ### Server
 
 For more information see [server package](./packages/server)
@@ -77,33 +81,6 @@ For more information see [server package](./packages/server)
 #### Database
 
 For more information see [database package](./packages/database)
-
-### Client
-
-- `cd packages/client`
-- (`npm install`)
-- `npm start`
-
-#### Storybook
-
-- `cd packages/client`
-- (`npm install`)
-- `npm run storybook`
-
-## Deploy
-
-- `npm run build` - builds and deploys the server
-- go to ssh and `cd var/www/html/inkvisitor/server`
-- `npm install`
-- `npm run start:prod`
-- `npm run stop:prod` to stop the process
-- #`npm start` to test
-- #`podman build --no-cache -t inkvisitor-server .`
-- #(`podman run -p 3000:3000 --network="host" inkvisitor-server`)
-- #`rm -rf inkvisitor-server.tar`
-- #`podman save -o inkvisitor-server.tar --format oci-archive inkvisitor-server`
-- copy to server
-- #`podman load -i inkvisitor-server.tar`
 
 ## Authentication Example
 
