@@ -23,7 +23,7 @@ import {
 } from "components";
 import { CProp, CStatementActant, CStatementAction } from "constructors";
 import { useSearchParams } from "hooks";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { BsInfoCircle } from "react-icons/bs";
 import { FaUnlink } from "react-icons/fa";
 import { useMutation, useQuery, useQueryClient } from "react-query";

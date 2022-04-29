@@ -570,7 +570,6 @@ export const StatementListBox: React.FC = () => {
                 }}
                 onClick={(e: React.MouseEvent) => {
                   e.stopPropagation();
-                  // row.toggleRowExpanded();
                   const newObject = {
                     ...rowsExpanded,
                     [row.values.id]: !rowsExpanded[row.values.id],

@@ -58,7 +58,6 @@ export const StatementEditorActionTableRow: React.FC<
   movePropToIndex,
   updateActionsMutation,
   handleClick = () => {},
-  // renderPropGroup,
   visibleColumns,
 }) => {
   const { statementId, territoryId } = useSearchParams();
