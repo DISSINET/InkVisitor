@@ -2,8 +2,6 @@ import { IEntity, IResponseStatement, IStatement } from "@shared/types";
 import update from "immutability-helper";
 import React, { useCallback, useEffect, useState } from "react";
 import { Column, Row, useExpanded, useTable } from "react-table";
-import { useAppSelector } from "redux/hooks";
-import { RootState } from "redux/store";
 import { StatementListRow } from "./StatementListRow";
 import { StyledTable, StyledTh, StyledTHead } from "./StatementListTableStyles";
 

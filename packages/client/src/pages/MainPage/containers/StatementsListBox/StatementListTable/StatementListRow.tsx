@@ -1,6 +1,6 @@
 import { IEntity } from "@shared/types";
 import { useSearchParams } from "hooks";
-import React, { useMemo, useRef } from "react";
+import React, { useEffect, useMemo, useRef } from "react";
 import {
   DragSourceMonitor,
   DropTargetMonitor,
@@ -9,7 +9,8 @@ import {
 } from "react-dnd";
 import { FaGripVertical } from "react-icons/fa";
 import { Cell, ColumnInstance } from "react-table";
-import { useAppSelector } from "redux/hooks";
+import { setDraggedRowId } from "redux/features/statementList/draggedRowIdSlice";
+import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { DragItem, ItemTypes } from "types";
 import { dndHoverFn } from "utils";
 import { StatementListRowExpanded } from "./StatementListRowExpanded/StatementListRowExpanded";
@@ -38,8 +39,13 @@ export const StatementListRow: React.FC<StatementListRow> = ({
   visibleColumns,
   entities,
 }) => {
+  const dispatch = useAppDispatch();
+
   const rowsExpanded: boolean[] = useAppSelector(
     (state) => state.statementList.rowsExpanded
+  );
+  const draggedRowId: string = useAppSelector(
+    (state) => state.statementList.draggedRowId
   );
   const { statementId } = useSearchParams();
   const audit = row.original.audit;
@@ -90,6 +96,12 @@ export const StatementListRow: React.FC<StatementListRow> = ({
 
   const opacity = isDragging ? 0.2 : 1;
 
+  useEffect(() => {
+    isDragging
+      ? dispatch(setDraggedRowId(row.values.id))
+      : dispatch(setDraggedRowId(""));
+  }, [isDragging]);
+
   preview(drop(dropRef));
   drag(dragRef);
 
@@ -139,7 +151,7 @@ export const StatementListRow: React.FC<StatementListRow> = ({
           }
         })}
       </StyledTr>
-      {rowsExpanded[row.values.id] ? (
+      {rowsExpanded[row.values.id] && !draggedRowId ? (
         <StatementListRowExpanded
           row={row}
           visibleColumns={visibleColumns}
