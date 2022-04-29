@@ -105,5 +105,10 @@
     "controller": "audits",
     "method": "get",
     "roles": ["*"]
+  },
+  {
+    "controller": "audits",
+    "method": "",
+    "roles": ["*"]
   }
 ]

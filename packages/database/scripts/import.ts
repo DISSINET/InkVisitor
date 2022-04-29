@@ -11,6 +11,10 @@ import { auditsIndexes, entitiesIndexes } from "./indexes";
 const [datasetId, env] = parseArgs();
 const envData = require("dotenv").config({ path: `env/.env.${env}` }).parsed;
 
+if (!envData) {
+  throw new Error(`Cannot load env file env/.env.${env}`);
+}
+
 const datasets: Record<string, TableSchema[]> = {
   all: [
     {
