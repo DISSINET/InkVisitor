@@ -118,11 +118,6 @@ export const StatementEditorBox: React.FC = () => {
     { enabled: !!statementId && api.isLoggedIn(), retry: 2 }
   );
 
-  useEffect(() => {
-    console.log("statement fetched", statement);
-  }, [statement]);
-
-  //console.log(statement);
   // Audit query
   const {
     status: statusAudit,

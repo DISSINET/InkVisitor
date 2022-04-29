@@ -2,7 +2,6 @@ import api from "api";
 import { Button, Input, Modal } from "components";
 import React, { useState } from "react";
 import { toast } from "react-toastify";
-import { setAuthToken } from "redux/features/authTokenSlice";
 import { setUsername } from "redux/features/usernameSlice";
 import { useAppDispatch } from "redux/hooks";
 import {
@@ -31,8 +30,6 @@ export const LoginModal: React.FC = () => {
     const res = await api.signIn(usernameLocal, password);
     if (res.token) {
       dispatch(setUsername(usernameLocal));
-
-      dispatch(setAuthToken(res.token));
     } else {
       toast.error("Wrong attempt!");
     }
