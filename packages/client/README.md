@@ -1,7 +1,7 @@
 # Client
 
 Package uses different environments - each of them has dedicated `.env.<env>` and `webpack.<env>.js` file coupled with `npm run build-<env>` task.
-Development environment has also `npm run start` task.
+Development environment has also `npm run start` script.
 
 Example - to build staging build:
 

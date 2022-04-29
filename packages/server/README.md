@@ -3,6 +3,34 @@
 The application located in /packages/server is the api for inkVisitor project.
 It uses express + express router as a base.
 
+Server supports different enviroments - supported by `.env-<env>` files and appropriade `npm` scripts.
+
+## Development
+
+You should normally use `development` environment.
+
+- (`npm install`)
+- `npm run start:<env>`
+
+## Test
+
+- `npm run test` will use `jest` framework to test everything, or
+- `npm run test <regexp>` to test only selected functions (regexp should match `describe` or `it` statements)
+
+## Build & run
+
+Build transpiles typescript files to javascript.
+
+- `npm run build`
+- `npm run pm2:<env>` to run the built application.
+
+Make sure to have appropriate `.env.<env>` file accessible.
+
+## Deploy
+
+1. Build the server app.
+2. Use provided script in root directory `./deploy-backend-<env>.sh`. This script will copy the `dist` directory to target, run `npm install` and start the app with `pm2` library.
+
 ## TBD
 
 Current development will target (next to new features) the following:
