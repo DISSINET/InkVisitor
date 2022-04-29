@@ -56,7 +56,7 @@ export const StatementListBox: React.FC = () => {
   const queryClient = useQueryClient();
 
   const dispatch = useAppDispatch();
-  const rowsExpanded: boolean[] = useAppSelector(
+  const rowsExpanded: { [key: string]: boolean } = useAppSelector(
     (state) => state.statementList.rowsExpanded
   );
 
@@ -93,8 +93,10 @@ export const StatementListBox: React.FC = () => {
   );
 
   useEffect(() => {
-    if (statements.length !== rowsExpanded.length) {
-      dispatch(setRowsExpanded(new Array(statements.length).fill(false)));
+    if (statements.length !== Object.keys(rowsExpanded).length) {
+      const arrayWithIds = statements.map((s, key) => [s.id, false]);
+      const arrayWithKeys = Object.fromEntries(arrayWithIds);
+      dispatch(setRowsExpanded(arrayWithKeys));
     }
   }, [statements, rowsExpanded]);
 
@@ -569,10 +571,11 @@ export const StatementListBox: React.FC = () => {
                 onClick={(e: React.MouseEvent) => {
                   e.stopPropagation();
                   row.toggleRowExpanded();
-                  const newArray = rowsExpanded.map((r: boolean, key: number) =>
-                    key === row.index ? !r : r
-                  );
-                  dispatch(setRowsExpanded(newArray));
+                  // TODO: transform
+                  // const newObject = rowsExpanded.map((r: any, key: number) =>
+                  //   key === row.index ? !r : r
+                  // );
+                  // dispatch(setRowsExpanded(newObject));
                 }}
               >
                 {rowsExpanded[row.index] ? (

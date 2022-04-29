@@ -1,13 +1,15 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
-const initialState: boolean[] = [];
+const initialState: { [key: string]: boolean } = {};
 
 const rowsExpandedSlice = createSlice({
   name: "rowsExpanded",
   initialState: initialState,
   reducers: {
-    setRowsExpanded: (state: boolean[], action: PayloadAction<boolean[]>) =>
-      (state = action.payload),
+    setRowsExpanded: (
+      state: { [key: string]: boolean },
+      action: PayloadAction<{ [key: string]: boolean }>
+    ) => (state = action.payload),
   },
 });
 
