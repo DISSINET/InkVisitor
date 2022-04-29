@@ -82,6 +82,10 @@ For more information see [server package](./packages/server)
 
 For more information see [database package](./packages/database)
 
+#### Shared
+
+Package containing typescript definitions, types and enums, that should be available to both client & server.
+
 ## Authentication Example
 
 ```shell
