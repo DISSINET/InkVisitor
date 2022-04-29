@@ -139,7 +139,7 @@ export const StatementListRow: React.FC<StatementListRow> = ({
           }
         })}
       </StyledTr>
-      {rowsExpanded[row.index] ? (
+      {rowsExpanded[row.values.id] ? (
         <StatementListRowExpanded
           row={row}
           visibleColumns={visibleColumns}

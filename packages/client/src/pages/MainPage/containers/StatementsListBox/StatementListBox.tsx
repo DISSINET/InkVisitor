@@ -570,15 +570,15 @@ export const StatementListBox: React.FC = () => {
                 }}
                 onClick={(e: React.MouseEvent) => {
                   e.stopPropagation();
-                  row.toggleRowExpanded();
-                  // TODO: transform
-                  // const newObject = rowsExpanded.map((r: any, key: number) =>
-                  //   key === row.index ? !r : r
-                  // );
-                  // dispatch(setRowsExpanded(newObject));
+                  // row.toggleRowExpanded();
+                  const newObject = {
+                    ...rowsExpanded,
+                    [row.values.id]: !rowsExpanded[row.values.id],
+                  };
+                  dispatch(setRowsExpanded(newObject));
                 }}
               >
-                {rowsExpanded[row.index] ? (
+                {rowsExpanded[row.values.id] ? (
                   <FaChevronCircleUp />
                 ) : (
                   <FaChevronCircleDown />
