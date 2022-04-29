@@ -10,11 +10,9 @@ import {
 import { FaGripVertical } from "react-icons/fa";
 import { Cell, ColumnInstance } from "react-table";
 import { useAppSelector } from "redux/hooks";
-import { RootState } from "redux/store";
 import { DragItem, ItemTypes } from "types";
 import { dndHoverFn } from "utils";
 import { StatementListRowExpanded } from "./StatementListRowExpanded/StatementListRowExpanded";
-
 import {
   StyledTd,
   StyledTdLastEdit,
