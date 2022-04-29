@@ -44,10 +44,6 @@ export const StatementEditorActantTable: React.FC<
     FilteredActantObject[]
   >([]);
 
-  useEffect(() => {
-    console.log("STATEMENT IN TABLE", statement);
-  }, [statement]);
-
   useMemo(() => {
     const filteredActants = statement.data.actants.map((sActant, key) => {
       const actant = statement.entities[sActant.actant];
