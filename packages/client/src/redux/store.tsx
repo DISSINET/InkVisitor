@@ -12,6 +12,7 @@ import separatorXPositionSlice from "./features/layout/separatorXPositionSlice";
 import draggedTerritorySlice from "./features/territoryTree/draggedTerritorySlice";
 import draggedPropRowSlice from "./features/rowDnd/draggedPropRowSlice";
 import draggedActantRowSlice from "./features/rowDnd/draggedActantRowSlice";
+import rowsExpandedSlice from "./features/statementList/rowsExpandedSlice";
 
 const store: Store = configureStore({
   reducer: {
@@ -21,6 +22,7 @@ const store: Store = configureStore({
       treeInitialized: treeInitializeSlice,
       draggedTerritory: draggedTerritorySlice,
     }),
+    statementList: rowsExpandedSlice,
     rowDnd: combineReducers({
       draggedPropRow: draggedPropRowSlice,
       draggedActantRow: draggedActantRowSlice,

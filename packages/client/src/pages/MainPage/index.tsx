@@ -19,7 +19,6 @@ import { IoMdClose } from "react-icons/io";
 import { RiMenuFoldFill, RiMenuUnfoldFill } from "react-icons/ri";
 import { useQuery, useQueryClient } from "react-query";
 import { toast } from "react-toastify";
-import { setAuthToken } from "redux/features/authTokenSlice";
 import { setFirstPanelExpanded } from "redux/features/layout/firstPanelExpandedSlice";
 import { setFourthPanelExpanded } from "redux/features/layout/fourthPanelExpandedSlice";
 import { setUsername } from "redux/features/usernameSlice";
@@ -114,11 +113,9 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
 
   const [userAdministrationModalOpen, setUserAdministrationModalOpen] =
     useState<boolean>(false);
-
   const handleLogOut = () => {
     api.signOut();
     dispatch(setUsername(""));
-    dispatch(setAuthToken(""));
     toast.success("You've been successfully logged out!");
     queryClient.removeQueries();
     setDetailId("");
