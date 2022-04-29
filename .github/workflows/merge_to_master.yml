@@ -46,6 +46,12 @@ jobs:
           npm install
           npm run build-staging
 
+      - name: Build server
+        run: |
+          cd packages/server
+          npm install
+          npm run build
+
       - name: Update packages
         run: |
           sudo apt-get update
@@ -113,6 +119,12 @@ jobs:
           cd packages/client
           npm install
           npm run build-data-import
+
+      - name: Build server
+        run: |
+          cd packages/server
+          npm install
+          npm run build
 
       - name: Update packages
         run: |
