@@ -1196,6 +1196,7 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                         movePropToIndex(propId, oldIndex, newIndex);
                       }}
                       category={DraggedPropRowCategory.META_PROP}
+                      disabledAttributes={["elvl"]}
                     />
                   </tbody>
                 </table>
