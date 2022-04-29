@@ -1,8 +1,28 @@
 # Database
 
-Inkvisitor project uses several environments and each of them has dedicated database namespace.
+App uses [rethinkdb](https://rethinkdb.com/) database to store data. Given the nature of models in the project (mostly json-based, schemaless structure with set of conditions), a nosql database provides more pros thans cons. Currently the app uses following tables:
 
-For this we are using nosql db - [rethinkdb](https://rethinkdb.com/) instance.
+- users
+  - user data: login, password, starred territories
+- acl_permissions
+  - consists of rules for accessing resources (endpoints) by different requestors (groups)
+  - more fine grained permissions (ownerships) over entities are defined in respective user entries
+- entities
+  - holds data mentioned in [section](### Entity types).
+- audits
+  - log entries for changes made to entities table
+  - each entity entry has 0-n audit entries
+
+Project uses several environments and each of them has dedicated database namespace.
+
+## Run in docker (recommended)
+
+Rethinkdb can be run as containerized instance. Installed [docker](https://docs.docker.com/get-docker/) + [docker compose](https://docs.docker.com/compose/install/) are prerequirements.
+Run in by `docker-compose up -d inkvisitor-database`.
+
+## Install & run on machine
+
+Follow tutorials on [official page](https://rethinkdb.com/docs/install/)
 
 ## Initialization
 
