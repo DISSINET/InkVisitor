@@ -68,41 +68,13 @@ Only admin and editor with edit rights in the parent **Territory** (T) may edit,
 
 To administrate the users rights, admin roles may acces the **administration window**, where they can append new territories to editors and viewers. They can also create new users, change roles, see passwords or delete users. Admin role is not possible to be assigned or deleted through this environment.
 
-## Development
+## Packages
 
 ### Server
 
 For more information see [server package](./packages/server)
 
-### Database
-
-App uses [rethinkdb](https://rethinkdb.com/) database to store data. Given the nature of models in the project (mostly json-based, schemaless structure with set of conditions), a nosql database provides more pros thans cons. Currently the app uses following tables:
-
-- users
-  - user data: login, password, starred territories
-- acl_permissions
-  - consists of rules for accessing resources (endpoints) by different requestors (groups)
-  - more fine grained permissions (ownerships) over entities are defined in respective user entries
-- entities
-  - holds data mentioned in [section](### Entity types).
-- audits
-  - log entries for changes made to entities table
-  - each entity entry has 0-n audit entries
-
-#### Run in docker
-
-Rethinkdb can be run as containerized instance. Installed [docker](https://docs.docker.com/get-docker/) + [docker compose](https://docs.docker.com/compose/install/) are prerequirements.
-Run in by `docker-compose up -d inkvisitor-database`.
-
-#### Install
-
-Follow tutorials on [official page](https://rethinkdb.com/docs/install/)
-
-#### Import data
-
-For more information see [database package](./packages/database)
-
-#### Backup
+#### Database
 
 For more information see [database package](./packages/database)
 
