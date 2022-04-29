@@ -18,7 +18,7 @@ Project uses several environments and each of them has dedicated database namesp
 ## Run in docker (recommended)
 
 Rethinkdb can be run as containerized instance. Installed [docker](https://docs.docker.com/get-docker/) + [docker compose](https://docs.docker.com/compose/install/) are prerequirements.
-Run in by `docker-compose up -d inkvisitor-database`.
+Run in by `docker-compose up -d inkvisitor-database` from the root directory.
 
 ## Install & run on machine
 
