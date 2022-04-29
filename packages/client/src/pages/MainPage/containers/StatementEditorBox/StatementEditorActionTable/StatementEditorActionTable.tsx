@@ -120,7 +120,6 @@ export const StatementEditorActionTable: React.FC<
             prepareRow(row);
             return (
               <StatementEditorActionTableRow
-                // renderPropGroup={renderPropGroup}
                 handleClick={handleRowClick}
                 index={i}
                 row={row}

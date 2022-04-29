@@ -7,7 +7,7 @@ import {
 import api from "api";
 import React, { useCallback } from "react";
 import { useQuery } from "react-query";
-import { DraggedPropRowCategory, ItemTypes } from "types";
+import { AttributeName, DraggedPropRowCategory, ItemTypes } from "types";
 import { FirstLevelPropGroup } from "./FirstLevelPropGroup/FirstLevelPropGroup";
 import { PropGroupRow } from "./PropGroupRow/PropGroupRow";
 import { StyledGrid, StyledListHeaderColumn } from "./PropGroupStyles";
@@ -29,6 +29,7 @@ interface IPropGroup {
   userCanEdit: boolean;
   openDetailOnCreate: boolean;
   category: DraggedPropRowCategory;
+  disabledAttributes?: AttributeName[];
 }
 
 export const PropGroup: React.FC<IPropGroup> = ({
@@ -46,6 +47,7 @@ export const PropGroup: React.FC<IPropGroup> = ({
   userCanEdit,
   openDetailOnCreate = false,
   category,
+  disabledAttributes = [],
 }) => {
   // territory query
   const {
@@ -94,6 +96,7 @@ export const PropGroup: React.FC<IPropGroup> = ({
             moveProp={moveProp}
             movePropToIndex={movePropToIndex}
             category={category}
+            disabledAttributes={disabledAttributes}
           />
           {/* 2nd level */}
           <SecondLevelPropGroup
@@ -134,6 +137,7 @@ export const PropGroup: React.FC<IPropGroup> = ({
             moveProp={moveProp}
             movePropToIndex={movePropToIndex}
             category={category}
+            disabledAttributes={disabledAttributes}
           />
           {/* 3rd level */}
           <ThirdLevelPropGroup
@@ -174,6 +178,7 @@ export const PropGroup: React.FC<IPropGroup> = ({
             moveProp={moveProp}
             movePropToIndex={movePropToIndex}
             category={category}
+            disabledAttributes={disabledAttributes}
           />
         </React.Fragment>
       );

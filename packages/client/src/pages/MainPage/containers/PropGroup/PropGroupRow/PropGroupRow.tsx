@@ -13,6 +13,7 @@ import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { excludedSuggesterEntities } from "Theme/constants";
 import {
   AttributeGroupDataObject,
+  AttributeName,
   classesPropType,
   classesPropValue,
   DraggedPropRowCategory,
@@ -50,6 +51,8 @@ interface IPropGroupRow {
   index: number;
   itemType?: ItemTypes;
   category: DraggedPropRowCategory;
+
+  disabledAttributes?: AttributeName[];
 }
 
 export const PropGroupRow: React.FC<IPropGroupRow> = ({
@@ -69,6 +72,7 @@ export const PropGroupRow: React.FC<IPropGroupRow> = ({
   index,
   itemType,
   category,
+  disabledAttributes = [],
 }) => {
   const propTypeEntity: IEntity = entities[prop.type.id];
   const propValueEntity: IEntity = entities[prop.value.id];
@@ -271,6 +275,7 @@ export const PropGroupRow: React.FC<IPropGroupRow> = ({
               modalOpen={modalOpen}
               setModalOpen={setModalOpen}
               disabledAllAttributes={!userCanEdit}
+              disabledAttributes={disabledAttributes}
               propTypeActant={propTypeEntity}
               propValueActant={propValueEntity}
               excludedSuggesterEntities={excludedSuggesterEntities}
