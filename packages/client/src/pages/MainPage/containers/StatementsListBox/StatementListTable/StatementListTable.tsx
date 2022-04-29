@@ -2,6 +2,8 @@ import { IEntity, IResponseStatement, IStatement } from "@shared/types";
 import update from "immutability-helper";
 import React, { useCallback, useEffect, useState } from "react";
 import { Column, Row, useExpanded, useTable } from "react-table";
+import { setRowsExpanded } from "redux/features/statementList/rowsExpandedSlice";
+import { useAppDispatch } from "redux/hooks";
 import { StatementListRow } from "./StatementListRow";
 import { StyledTable, StyledTh, StyledTHead } from "./StatementListTableStyles";
 
@@ -19,10 +21,13 @@ export const StatementListTable: React.FC<StatementListTable> = ({
   moveEndRow,
   entities,
 }) => {
+  const dispatch = useAppDispatch();
+
   const [statements, setStatements] = useState<IStatement[]>([]);
 
   useEffect(() => {
     setStatements(data);
+    dispatch(setRowsExpanded(new Array(data.length).fill(false)));
   }, [data]);
 
   const getRowId = useCallback((row) => {

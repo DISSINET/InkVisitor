@@ -555,6 +555,7 @@ export const StatementListBox: React.FC = () => {
                 onClick={(e: React.MouseEvent) => {
                   e.stopPropagation();
                   row.toggleRowExpanded();
+                  console.log(row);
                 }}
               >
                 {row.isExpanded ? (
