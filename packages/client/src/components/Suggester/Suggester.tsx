@@ -8,7 +8,7 @@ import { FaPlayCircle, FaPlus } from "react-icons/fa";
 import { MdCancel } from "react-icons/md";
 import { OptionTypeBase, ValueType } from "react-select";
 import { toast } from "react-toastify";
-import { DropdownAny } from "Theme/constants";
+import { DropdownAny, wildCardChar } from "Theme/constants";
 import theme from "Theme/theme";
 import { ItemTypes } from "types";
 import { SuggesterKeyPress } from "./SuggesterKeyPress";
@@ -125,7 +125,7 @@ export const Suggester: React.FC<SuggesterProps> = ({
 
   const onTypeFn = (newType: string) => {
     setSelected(-1);
-    onType(newType);
+    onType(newType + wildCardChar);
   };
 
   const handleEnterPress = () => {
