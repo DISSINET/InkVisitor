@@ -125,7 +125,7 @@ export const Suggester: React.FC<SuggesterProps> = ({
 
   const onTypeFn = (newType: string) => {
     setSelected(-1);
-    onType(newType + wildCardChar);
+    onType(newType);
   };
 
   const handleEnterPress = () => {
