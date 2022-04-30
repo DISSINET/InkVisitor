@@ -2,6 +2,7 @@ import { EntityClass } from "@shared/enums";
 import theme from "./theme";
 
 export const DropdownAny = "any";
+export const wildCardChar = "*";
 
 export const rootTerritoryId = "T0";
 export const excludedSuggesterEntities = [EntityClass.Value];
