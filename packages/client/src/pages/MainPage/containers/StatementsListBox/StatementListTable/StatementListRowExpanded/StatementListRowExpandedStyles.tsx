@@ -5,7 +5,7 @@ export const StyledSubRow = styled.div`
   width: 100%;
   padding: ${({ theme }) => theme.space[2]};
   margin-left: ${({ theme }) => `${theme.space[6]}`};
-  background-color: ${({ theme }) => theme.color["gray"][200]};
+  /* background-color: ${({ theme }) => theme.color["gray"][200]}; */
   font-size: ${({ theme }) => theme.fontSize["xs"]};
   color: ${({ theme }) => theme.color["black"]};
   max-width: 550px;
@@ -56,4 +56,12 @@ export const StyledReferenceWrap = styled.div`
   div {
     padding-right: ${({ theme }) => theme.space[1]};
   }
+`;
+
+export const StyledExpandedRowTd = styled.td`
+  background-color: pink;
+`;
+export const StyledExpandedRowTr = styled.tr`
+  width: 100%;
+  background-color: hotpink;
 `;

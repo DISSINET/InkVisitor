@@ -13,6 +13,8 @@ import { StatementListRowExpandedPropGroup } from "./StatementListRowExpandedPro
 import {
   StyledActantGroup,
   StyledActantWrap,
+  StyledExpandedRowTd,
+  StyledExpandedRowTr,
   StyledReferenceWrap,
   StyledSubRow,
 } from "./StatementListRowExpandedStyles";
@@ -70,7 +72,7 @@ export const StatementListRowExpanded: React.FC<StatementListRowExpanded> = ({
             <EntityTag
               actant={entities[actantId]}
               tooltipPosition="bottom center"
-              fullWidth
+              // fullWidth
             />
           </StyledActantWrap>
         )}
@@ -262,8 +264,10 @@ export const StatementListRowExpanded: React.FC<StatementListRowExpanded> = ({
   );
 
   return (
-    <tr>
-      <td colSpan={visibleColumns.length}>{renderRowSubComponent({ row })}</td>
-    </tr>
+    <StyledExpandedRowTr>
+      <StyledExpandedRowTd colSpan={visibleColumns.length + 1}>
+        {renderRowSubComponent({ row })}
+      </StyledExpandedRowTd>
+    </StyledExpandedRowTr>
   );
 };
