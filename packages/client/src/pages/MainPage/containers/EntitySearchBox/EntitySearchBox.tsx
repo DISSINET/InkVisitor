@@ -156,9 +156,7 @@ export const EntitySearchBox: React.FC = () => {
           width={150}
           placeholder="search"
           changeOnType
-          onChangeFn={(value: string) =>
-            handleChange({ label: value + wildCardChar })
-          }
+          onChangeFn={(value: string) => handleChange({ label: value })}
         />
       </StyledRow>
       <StyledRow>
