@@ -15,7 +15,7 @@ import { DragObjectWithType } from "react-dnd";
 import { FaHome } from "react-icons/fa";
 import { useMutation, useQuery, useQueryClient } from "react-query";
 import { OptionTypeBase, ValueType } from "react-select";
-import { DropdownAny, rootTerritoryId } from "Theme/constants";
+import { DropdownAny, rootTerritoryId, wildCardChar } from "Theme/constants";
 import { Entities } from "types";
 
 interface EntitySuggesterI {
@@ -64,7 +64,7 @@ export const EntitySuggester: React.FC<EntitySuggesterI> = ({
     ["suggestion", debouncedTyped, selectedCategory],
     async () => {
       const resSuggestions = await api.entitiesGetMore({
-        label: debouncedTyped,
+        label: debouncedTyped + wildCardChar,
         class:
           selectedCategory?.value === DropdownAny
             ? false
