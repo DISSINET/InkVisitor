@@ -7,6 +7,7 @@ import { useDebounce } from "hooks";
 import React, { useEffect, useMemo, useState } from "react";
 import { useQuery } from "react-query";
 import { OptionsType, OptionTypeBase, ValueType } from "react-select";
+import { wildCardChar } from "Theme/constants";
 import { Entities } from "types";
 import { EntityTag } from "..";
 import {
@@ -155,7 +156,9 @@ export const EntitySearchBox: React.FC = () => {
           width={150}
           placeholder="search"
           changeOnType
-          onChangeFn={(value: string) => handleChange({ label: value })}
+          onChangeFn={(value: string) =>
+            handleChange({ label: value + wildCardChar })
+          }
         />
       </StyledRow>
       <StyledRow>
@@ -203,11 +206,11 @@ export const EntitySearchBox: React.FC = () => {
           inputWidth={114}
         />
       </StyledRow> */}
-      <StyledRow>
+      {/* <StyledRow>
         <StyledTagLoaderWrap>
           <Loader size={26} show={isFetching} />
         </StyledTagLoaderWrap>
-        {/* {entity && (
+        {entity && (
           <Tag
             propId={entity.id}
             label={entity.label}
@@ -226,8 +229,8 @@ export const EntitySearchBox: React.FC = () => {
               />
             }
           />
-        )} */}
-      </StyledRow>
+        )}
+      </StyledRow> */}
 
       {results.length > 0 && (
         <StyledRow>

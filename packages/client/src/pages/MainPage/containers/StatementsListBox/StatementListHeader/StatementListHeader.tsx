@@ -100,7 +100,12 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
     const { statements } = data;
 
     const lastStatement = statements[statements.length - 1];
-    if (newStatement?.data?.territory && lastStatement?.data?.territory) {
+    if (!statements.length) {
+      addStatementAtTheEndMutation.mutate(newStatement);
+    } else if (
+      newStatement?.data?.territory &&
+      lastStatement?.data?.territory
+    ) {
       newStatement.data.territory.order = statements.length
         ? lastStatement.data.territory.order + 1
         : 1;

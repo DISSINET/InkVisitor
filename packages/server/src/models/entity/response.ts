@@ -45,6 +45,7 @@ export class ResponseEntityDetail
   usedInStatement: IResponseUsedInStatement<UsedInPosition>[];
   usedInStatementProps: IResponseUsedInStatement<UsedInPosition>[];
   usedInMetaProps: IResponseUsedInMetaProp<UsedInPosition>[];
+  usedAsTemplate?: string[] | undefined;
 
   // map of entity ids that should be populated in subsequent methods and used in fetching
   // real entities in populateEntitiesMap method
@@ -88,7 +89,25 @@ export class ResponseEntityDetail
       await Statement.findUsedInDataProps(req.db.connection, this.id)
     );
 
+    if (this.usedTemplate) {
+      this.postponedEntities[this.usedTemplate] = undefined;
+    }
+
     await this.populateEntitiesMap(req.db.connection);
+
+    await this.processTemplateData(req.db.connection);
+  }
+
+  /**
+   * loads casts for this entity (template) and fills usedAsTemplate array & entities map with retrieved data
+   * @param conn
+   */
+  async processTemplateData(conn: Connection): Promise<void> {
+    const casts = await this.findFromTemplate(conn);
+    this.usedAsTemplate = casts.map((c) => c.id);
+
+    console.log(this.usedAsTemplate);
+    casts.forEach((c) => (this.entities[c.id] = c));
   }
 
   /**

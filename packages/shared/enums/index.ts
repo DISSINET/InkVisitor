@@ -193,4 +193,5 @@ export enum DbIndex {
   StatementTerritory = "statement_territory",
   StatementEntities = "statement_entities",
   AuditEntityId = "entityId",
+  EntityUsedTemplate = "usedTemplate",
 }

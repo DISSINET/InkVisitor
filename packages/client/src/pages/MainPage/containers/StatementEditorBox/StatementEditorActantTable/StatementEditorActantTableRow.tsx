@@ -1,8 +1,13 @@
 import { EntityClass } from "@shared/enums";
-import { IEntity, IResponseStatement, IStatementActant } from "@shared/types";
+import {
+  IEntity,
+  IProp,
+  IResponseStatement,
+  IStatementActant,
+} from "@shared/types";
 import { AttributeIcon, Button, ButtonGroup } from "components";
 import { useSearchParams } from "hooks";
-import React, { useEffect, useRef } from "react";
+import React, { useCallback, useEffect, useRef } from "react";
 import {
   DragSourceMonitor,
   DropTargetMonitor,
@@ -25,6 +30,7 @@ import { dndHoverFn } from "utils";
 import { EntitySuggester, EntityTag } from "../..";
 import { AttributeButtonGroup } from "../../AttributeButtonGroup/AttributeButtonGroup";
 import AttributesEditor from "../../AttributesEditor/AttributesEditor";
+import { PropGroup } from "../../PropGroup/PropGroup";
 import {
   StyledTagWrapper,
   StyledTd,
@@ -38,12 +44,14 @@ interface StatementEditorActantTableRow {
   userCanEdit?: boolean;
   updateOrderFn: () => void;
   addProp: (originId: string) => void;
+  updateProp: (propId: string, changes: any) => void;
+  removeProp: (propId: string) => void;
+  movePropToIndex: (propId: string, oldIndex: number, newIndex: number) => void;
   handleClick: Function;
-  renderPropGroup: Function;
   visibleColumns: ColumnInstance<{}>[];
   statement: IResponseStatement;
   classEntitiesActant: EntityClass[];
-  updateActantsMutation: UseMutationResult<any, unknown, object, unknown>;
+  updateStatementDataMutation: UseMutationResult<any, unknown, object, unknown>;
 }
 
 export const StatementEditorActantTableRow: React.FC<
@@ -56,13 +64,15 @@ export const StatementEditorActantTableRow: React.FC<
   userCanEdit = false,
   updateOrderFn,
   handleClick = () => {},
-  renderPropGroup,
   visibleColumns,
   classEntitiesActant,
-  updateActantsMutation,
+  updateStatementDataMutation,
   addProp,
+  updateProp,
+  removeProp,
+  movePropToIndex,
 }) => {
-  const { statementId } = useSearchParams();
+  const { statementId, territoryId } = useSearchParams();
 
   const dropRef = useRef<HTMLTableRowElement>(null);
   const dragRef = useRef<HTMLTableDataCellElement>(null);
@@ -95,7 +105,7 @@ export const StatementEditorActantTableRow: React.FC<
         a.id === statementActantId ? { ...a, ...changes } : a
       );
       const newData = { actants: updatedActants };
-      updateActantsMutation.mutate(newData);
+      updateStatementDataMutation.mutate(newData);
     }
   };
 
@@ -105,7 +115,7 @@ export const StatementEditorActantTableRow: React.FC<
         (a) => a.id !== statementActantId
       );
       const newData = { actants: updatedActants };
-      updateActantsMutation.mutate(newData);
+      updateStatementDataMutation.mutate(newData);
     }
   };
 
@@ -237,7 +247,7 @@ export const StatementEditorActantTableRow: React.FC<
               updateActant(sActant.id, { actant: newId });
             }}
             classEntitiesActant={classEntitiesActant}
-            loading={updateActantsMutation.isLoading}
+            loading={updateStatementDataMutation.isLoading}
           />
         )}
         {userCanEdit && (
@@ -303,6 +313,32 @@ export const StatementEditorActantTableRow: React.FC<
     }
   }, [isDragging]);
 
+  const renderPropGroup = useCallback(
+    (originId: string, props: IProp[], category: DraggedPropRowCategory) => {
+      const originActant = statement.entities[originId];
+
+      if (props.length > 0) {
+        return (
+          <PropGroup
+            boxEntity={statement}
+            originId={originActant ? originActant.id : ""}
+            entities={statement.entities}
+            props={props}
+            territoryId={territoryId}
+            updateProp={updateProp}
+            removeProp={removeProp}
+            addProp={addProp}
+            movePropToIndex={movePropToIndex}
+            userCanEdit={userCanEdit}
+            openDetailOnCreate={false}
+            category={category}
+          />
+        );
+      }
+    },
+    [statement]
+  );
+
   return (
     <React.Fragment key={index}>
       <StyledTr
@@ -331,7 +367,6 @@ export const StatementEditorActantTableRow: React.FC<
         renderPropGroup(
           row.values.data.sActant.actant,
           row.values.data.sActant.props,
-          statement,
           DraggedPropRowCategory.ACTANT
         )}
     </React.Fragment>
