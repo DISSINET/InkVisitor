@@ -9,9 +9,9 @@ import Prop from "@models/prop/prop";
 import { Order } from "@shared/enums";
 
 export const prepareEntity = (): [string, Entity] => {
-  const entityId = Math.random().toFixed();
+  const entityId = Math.random().toString();
 
-  const ent = new Entity({});
+  const ent = new Entity({ id: entityId });
   ent.props.push(new Prop({}));
 
   ent.props[0].children.push(new Prop({}));
