@@ -103,8 +103,8 @@ export const StyledTextArea = styled.textarea<IValueStyle>`
   background-color: ${({ inverted, theme }) =>
     inverted ? theme.color["primary"] : theme.color["white"]};
   border-color: ${({ theme }) => theme.color["gray"]["400"]};
-  border-width: ${({ theme, inverted }) =>
-    inverted ? 0 : theme.borderWidth[1]};
+  border-width: ${({ theme, inverted, noBorder }) =>
+    inverted || noBorder ? 0 : theme.borderWidth[1]};
   font-size: ${({ theme }) => theme.fontSize["xs"]};
   width: ${({ width }) => getWidth(width)};
   padding: ${space1};

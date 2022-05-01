@@ -1,8 +1,8 @@
 import { EntityClass } from "@shared/enums";
-import { IResponseStatement } from "@shared/types";
+import { IProp, IResponseStatement } from "@shared/types";
 import { AttributeIcon, Button, ButtonGroup } from "components";
 import { useSearchParams } from "hooks";
-import React, { useEffect, useRef } from "react";
+import React, { useCallback, useEffect, useRef } from "react";
 import {
   DragSourceMonitor,
   DropTargetMonitor,
@@ -24,6 +24,7 @@ import {
 import { dndHoverFn } from "utils";
 import { EntitySuggester, EntityTag } from "../..";
 import AttributesEditor from "../../AttributesEditor/AttributesEditor";
+import { PropGroup } from "../../PropGroup/PropGroup";
 import { StyledTd, StyledTr } from "./StatementEditorActionTableStyles";
 
 interface StatementEditorActionTableRow {
@@ -34,8 +35,10 @@ interface StatementEditorActionTableRow {
   userCanEdit?: boolean;
   updateOrderFn: () => void;
   addProp: (originId: string) => void;
+  updateProp: (propId: string, changes: any) => void;
+  removeProp: (propId: string) => void;
+  movePropToIndex: (propId: string, oldIndex: number, newIndex: number) => void;
   handleClick: Function;
-  renderPropGroup: Function;
   visibleColumns: ColumnInstance<{}>[];
   updateActionsMutation: UseMutationResult<any, unknown, object, unknown>;
 }
@@ -50,12 +53,14 @@ export const StatementEditorActionTableRow: React.FC<
   userCanEdit = false,
   updateOrderFn,
   addProp,
+  updateProp,
+  removeProp,
+  movePropToIndex,
   updateActionsMutation,
   handleClick = () => {},
-  renderPropGroup,
   visibleColumns,
 }) => {
-  const { statementId } = useSearchParams();
+  const { statementId, territoryId } = useSearchParams();
 
   const dropRef = useRef<HTMLTableRowElement>(null);
   const dragRef = useRef<HTMLTableDataCellElement>(null);
@@ -234,6 +239,32 @@ export const StatementEditorActionTableRow: React.FC<
     }
   }, [isDragging]);
 
+  const renderPropGroup = useCallback(
+    (originId: string, props: IProp[], category: DraggedPropRowCategory) => {
+      const originActant = statement.entities[originId];
+
+      if (props.length > 0) {
+        return (
+          <PropGroup
+            boxEntity={statement}
+            originId={originActant ? originActant.id : ""}
+            entities={statement.entities}
+            props={props}
+            territoryId={territoryId}
+            updateProp={updateProp}
+            removeProp={removeProp}
+            addProp={addProp}
+            movePropToIndex={movePropToIndex}
+            userCanEdit={userCanEdit}
+            openDetailOnCreate={false}
+            category={category}
+          />
+        );
+      }
+    },
+    [statement]
+  );
+
   return (
     <React.Fragment key={index}>
       <StyledTr
@@ -261,7 +292,6 @@ export const StatementEditorActionTableRow: React.FC<
         renderPropGroup(
           row.values.data.sAction.action,
           row.values.data.sAction.props,
-          statement,
           DraggedPropRowCategory.ACTION
         )}
     </React.Fragment>

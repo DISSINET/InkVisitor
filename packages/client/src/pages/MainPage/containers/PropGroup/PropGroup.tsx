@@ -1,8 +1,13 @@
-import { IEntity, IProp } from "@shared/types";
+import {
+  IEntity,
+  IProp,
+  IResponseDetail,
+  IResponseStatement,
+} from "@shared/types";
 import api from "api";
 import React, { useCallback } from "react";
 import { useQuery } from "react-query";
-import { DraggedPropRowCategory, ItemTypes } from "types";
+import { AttributeName, DraggedPropRowCategory, ItemTypes } from "types";
 import { FirstLevelPropGroup } from "./FirstLevelPropGroup/FirstLevelPropGroup";
 import { PropGroupRow } from "./PropGroupRow/PropGroupRow";
 import { StyledGrid, StyledListHeaderColumn } from "./PropGroupStyles";
@@ -14,6 +19,7 @@ interface IPropGroup {
   entities: { [key: string]: IEntity };
   props: IProp[];
   territoryId: string;
+  boxEntity: IResponseStatement | IResponseDetail;
 
   updateProp: (propId: string, changes: any) => void;
   removeProp: (propId: string) => void;
@@ -23,6 +29,7 @@ interface IPropGroup {
   userCanEdit: boolean;
   openDetailOnCreate: boolean;
   category: DraggedPropRowCategory;
+  disabledAttributes?: AttributeName[];
 }
 
 export const PropGroup: React.FC<IPropGroup> = ({
@@ -30,6 +37,7 @@ export const PropGroup: React.FC<IPropGroup> = ({
   entities,
   props,
   territoryId,
+  boxEntity,
 
   updateProp,
   removeProp,
@@ -39,6 +47,7 @@ export const PropGroup: React.FC<IPropGroup> = ({
   userCanEdit,
   openDetailOnCreate = false,
   category,
+  disabledAttributes = [],
 }) => {
   // territory query
   const {
@@ -87,6 +96,7 @@ export const PropGroup: React.FC<IPropGroup> = ({
             moveProp={moveProp}
             movePropToIndex={movePropToIndex}
             category={category}
+            disabledAttributes={disabledAttributes}
           />
           {/* 2nd level */}
           <SecondLevelPropGroup
@@ -98,7 +108,7 @@ export const PropGroup: React.FC<IPropGroup> = ({
         </React.Fragment>
       );
     },
-    [entities]
+    [entities, boxEntity]
   );
 
   const renderSecondLevelPropRow = useCallback(
@@ -127,6 +137,7 @@ export const PropGroup: React.FC<IPropGroup> = ({
             moveProp={moveProp}
             movePropToIndex={movePropToIndex}
             category={category}
+            disabledAttributes={disabledAttributes}
           />
           {/* 3rd level */}
           <ThirdLevelPropGroup
@@ -138,7 +149,7 @@ export const PropGroup: React.FC<IPropGroup> = ({
         </React.Fragment>
       );
     },
-    [entities]
+    [entities, boxEntity]
   );
 
   const renderThirdLevelPropRow = useCallback(
@@ -167,11 +178,12 @@ export const PropGroup: React.FC<IPropGroup> = ({
             moveProp={moveProp}
             movePropToIndex={movePropToIndex}
             category={category}
+            disabledAttributes={disabledAttributes}
           />
         </React.Fragment>
       );
     },
-    [entities]
+    [entities, boxEntity]
   );
 
   return props.length > 0 ? (

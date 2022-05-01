@@ -1,14 +1,8 @@
-import {
-  IEntity,
-  IProp,
-  IResponseTree,
-  IStatement,
-  IStatementActant,
-  IStatementAction,
-} from "@shared/types";
+import { IEntity, IResponseTree, IStatement } from "@shared/types";
 import { DropTargetMonitor, XYCoord } from "react-dnd";
 import { DragItem } from "types";
 
+// TODO: not used, references not in statement data interface
 export const findPositionInStatement = (
   statement: IStatement,
   actant: IEntity
@@ -65,8 +59,6 @@ export const findPositionInStatement = (
     )
   ) {
     return "action property type";
-  } else if (statement.data.references.find((r) => r.resource === actant.id)) {
-    return "reference";
   }
 };
 
