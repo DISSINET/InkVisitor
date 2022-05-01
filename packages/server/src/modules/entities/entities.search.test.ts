@@ -1,34 +1,18 @@
 import { apiPath } from "@common/constants";
-import Action from "@models/action/action";
-import Entity from "@models/entity/entity";
-import { getEntityClass } from "@models/factory";
-import Statement, {
-  StatementActant,
-  StatementAction,
-} from "@models/statement/statement";
+import { StatementActant, StatementAction } from "@models/statement/statement";
 import { testErroneousResponse } from "@modules/common.test";
 import { Db } from "@service/RethinkDB";
 import { deleteEntities } from "@service/shorthands";
-import {
-  Certainty,
-  Elvl,
-  EntityClass,
-  Logic,
-  Mood,
-  MoodVariant,
-  Operator,
-  Partitivity,
-  Position,
-  Virtuality,
-} from "@shared/enums";
-import { IStatementActant, IStatementAction } from "@shared/types";
+import { EntityClass } from "@shared/enums";
 import { BadParams } from "@shared/types/errors";
+import { prepareEntity } from "@models/entity/entity.test";
 import request, { Response } from "supertest";
 import "ts-jest";
 import { supertestConfig } from "..";
 import app from "../../Server";
+import { prepareStatement } from "@models/statement/statement.test";
 
-describe("Entities search", function () {
+describe("Entities search (requests)", function () {
   describe("empty data", () => {
     it("should return a BadParams error wrapped in IResponseGeneric", (done) => {
       return request(app)
@@ -61,97 +45,47 @@ describe("Entities search", function () {
         .then(() => done());
     });
   });
+});
 
-  describe("ssearch by params", () => {
+describe("Entities search (params)", function () {
+  describe("search by params", () => {
     let db: Db;
     const rand = Math.random().toString();
 
-    const entityData = new Entity({
-      id: `testentity-${rand}`,
-      label: "entity",
-      class: EntityClass.Person,
-    });
+    const [, entity] = prepareEntity();
+    entity.label = "entity";
+    entity.id = `${entity.label}-${entity.id}`;
+    entity.class = EntityClass.Person;
 
-    const linkedEntityData = new Entity({
-      id: `linkedaction-${rand}`,
-      label: "linked-entity",
-      class: EntityClass.Concept,
-    });
+    const [, linkedEntity] = prepareEntity();
+    linkedEntity.label = "linked-entity";
+    linkedEntity.id = `${linkedEntity.label}-${linkedEntity.id}`;
+    linkedEntity.class = EntityClass.Concept;
 
-    const actionData = new Action({
-      id: `testaction-${rand}`,
-      label: "action",
-    });
+    const [, action] = prepareEntity();
+    action.label = "action";
+    action.id = `${action.label}-${action.id}`;
 
-    const statement = new Statement({
-      id: `teststatement-${rand}`,
-      label: "statement",
-    });
+    const [statementId, statement] = prepareStatement();
+    statement.label = "statement";
+    statement.id = `${statement.label}-${statement.id}`;
 
     statement.data.actants = [
-      new StatementActant({
-        ...({
-          id: entityData.id,
-          actant: entityData.id,
-          bundleEnd: false,
-          bundleStart: false,
-          elvl: Elvl.Inferential,
-          logic: Logic.Positive,
-          bundleOperator: Operator.And,
-          partitivity: Partitivity.DiscreteParts,
-          position: Position.Actant1,
-          virtuality: Virtuality.Allegation,
-        } as IStatementActant),
-      }),
-      new StatementActant({
-        ...({
-          id: linkedEntityData.id,
-          actant: linkedEntityData.id,
-          bundleEnd: false,
-          bundleStart: false,
-          elvl: Elvl.Inferential,
-          logic: Logic.Positive,
-          bundleOperator: Operator.And,
-          partitivity: Partitivity.DiscreteParts,
-          position: Position.Actant1,
-          virtuality: Virtuality.Allegation,
-        } as IStatementActant),
-      }),
+      new StatementActant({ id: entity.id, actant: entity.id }),
+      new StatementActant({ id: linkedEntity.id, actant: linkedEntity.id }),
     ];
     statement.data.actions = [
-      new StatementAction({
-        ...({
-          id: actionData.id,
-          action: actionData.id,
-          certainty: Certainty.Empty,
-          elvl: Elvl.Inferential,
-          logic: Logic.Negative,
-          mood: [Mood.Allegation],
-          moodvariant: MoodVariant.Irrealis,
-          bundleOperator: Operator.And,
-        } as IStatementAction),
-      }),
+      new StatementAction({ id: action.id, action: action.id }),
     ];
 
     beforeAll(async () => {
       db = new Db();
       await db.initDb();
 
-      const entityA = getEntityClass(actionData as any);
-      if (entityA) {
-        await entityA.save(db.connection);
-      }
+      await action.save(db.connection);
 
-      const entityP = getEntityClass(entityData as any);
-      if (entityP) {
-        await entityP.save(db.connection);
-      }
-
-      const linkedEntity = getEntityClass(linkedEntityData as any);
-      if (linkedEntity) {
-        await linkedEntity.save(db.connection);
-      }
-
+      await entity.save(db.connection);
+      await linkedEntity.save(db.connection);
       await statement.save(db.connection);
     });
 
@@ -164,12 +98,12 @@ describe("Entities search", function () {
       it("should return a 200 code with successful response", async (done) => {
         await request(app)
           .post(`${apiPath}/entities/search`)
-          .send({ class: entityData.class, label: entityData.label })
+          .send({ class: entity.class, label: entity.label })
           .set("authorization", "Bearer " + supertestConfig.token)
           .expect("Content-Type", /json/)
           .expect(200)
           .expect((res: Response) => {
-            expect(res.body[0].entityId).toEqual(entityData.id);
+            expect(res.body[0].entityId).toEqual(entity.id);
           });
 
         done();
@@ -180,7 +114,7 @@ describe("Entities search", function () {
       it("should return a 400 code with successful response for invalid label", async (done) => {
         await request(app)
           .post(`${apiPath}/entities/search`)
-          .send({ label: entityData.label + "xxxx" })
+          .send({ label: entity.label + "xxxx" })
           .set("authorization", "Bearer " + supertestConfig.token)
           .expect("Content-Type", /json/)
           .expect(200)
@@ -197,15 +131,15 @@ describe("Entities search", function () {
         await request(app)
           .post(`${apiPath}/entities/search`)
           .send({
-            class: linkedEntityData.class,
-            entityId: entityData.id,
+            class: linkedEntity.class,
+            entityId: entity.id,
           })
           .set("authorization", "Bearer " + supertestConfig.token)
           .expect("Content-Type", /json/)
           .expect(200)
           .expect((res: Response) => {
             expect(res.body).toHaveLength(1);
-            expect(res.body[0].entityId).toEqual(linkedEntityData.id);
+            expect(res.body[0].entityId).toEqual(linkedEntity.id);
           });
 
         done();
@@ -217,7 +151,7 @@ describe("Entities search", function () {
         await request(app)
           .post(`${apiPath}/entities/search`)
           .send({
-            entityId: entityData.id + "xxx", // does not exist
+            entityId: entity.id + "xxx", // does not exist
           })
           .set("authorization", "Bearer " + supertestConfig.token)
           .expect("Content-Type", /json/)
@@ -235,15 +169,15 @@ describe("Entities search", function () {
         await request(app)
           .post(`${apiPath}/entities/search`)
           .send({
-            class: linkedEntityData.class,
-            entityId: actionData.id,
+            class: linkedEntity.class,
+            entityId: action.id,
           })
           .set("authorization", "Bearer " + supertestConfig.token)
           .expect("Content-Type", /json/)
           .expect(200)
           .expect((res: Response) => {
             expect(res.body).toHaveLength(1);
-            expect(res.body[0].entityId).toEqual(linkedEntityData.id);
+            expect(res.body[0].entityId).toEqual(linkedEntity.id);
           });
 
         done();
@@ -255,7 +189,7 @@ describe("Entities search", function () {
         await request(app)
           .post(`${apiPath}/entities/search`)
           .send({
-            entityId: actionData.id + "xxx", // does not exist
+            entityId: action.id + "xxx", // does not exist
           })
           .set("authorization", "Bearer " + supertestConfig.token)
           .expect("Content-Type", /json/)
@@ -274,15 +208,15 @@ describe("Entities search", function () {
           await request(app)
             .post(`${apiPath}/entities/search`)
             .send({
-              class: linkedEntityData.class,
-              entityId: entityData.id,
-              label: linkedEntityData.label,
+              class: linkedEntity.class,
+              entityId: entity.id,
+              label: linkedEntity.label,
             })
             .set("authorization", "Bearer " + supertestConfig.token)
             .expect("Content-Type", /json/)
             .expect(200)
             .expect((res: Response) => {
-              expect(res.body[0].entityId).toEqual(linkedEntityData.id);
+              expect(res.body[0].entityId).toEqual(linkedEntity.id);
             });
 
           done();
@@ -294,15 +228,15 @@ describe("Entities search", function () {
           await request(app)
             .post(`${apiPath}/entities/search`)
             .send({
-              class: linkedEntityData.class,
-              entityId: actionData.id,
-              label: linkedEntityData.label,
+              class: linkedEntity.class,
+              entityId: action.id,
+              label: linkedEntity.label,
             })
             .set("authorization", "Bearer " + supertestConfig.token)
             .expect("Content-Type", /json/)
             .expect(200)
             .expect((res: Response) => {
-              expect(res.body[0].entityId).toEqual(linkedEntityData.id);
+              expect(res.body[0].entityId).toEqual(linkedEntity.id);
             });
 
           done();
@@ -316,9 +250,9 @@ describe("Entities search", function () {
           await request(app)
             .post(`${apiPath}/entities/search`)
             .send({
-              class: linkedEntityData.class,
-              entityId: entityData.id,
-              label: linkedEntityData.label + "xxxx",
+              class: linkedEntity.class,
+              entityId: action.id,
+              label: linkedEntity.label + "xxxx",
             })
             .set("authorization", "Bearer " + supertestConfig.token)
             .expect("Content-Type", /json/)
@@ -336,9 +270,9 @@ describe("Entities search", function () {
           await request(app)
             .post(`${apiPath}/entities/search`)
             .send({
-              class: linkedEntityData.class,
-              entityId: actionData.id,
-              label: linkedEntityData.label + "xxxx", // does not exist
+              class: linkedEntity.class,
+              entityId: action.id,
+              label: linkedEntity.label + "xxxx", // does not exist
             })
             .set("authorization", "Bearer " + supertestConfig.token)
             .expect("Content-Type", /json/)
