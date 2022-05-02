@@ -5,7 +5,6 @@ import { EntityTag } from "../../../EntityTag/EntityTag";
 import {
   StyledPropGroup,
   StyledPropRow,
-  StyledGridCell,
 } from "./StatementListRowExpandedStyles";
 
 interface StatementListRowExpandedPropGroup {

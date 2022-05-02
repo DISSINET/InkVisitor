@@ -44,26 +44,32 @@ export const StatementListRowExpanded: React.FC<StatementListRowExpanded> = ({
 
     return (
       <React.Fragment key={key}>
-        <StyledReferenceWrap key={key}>
-          {resourceEntity ? (
+        {/* <StyledReferenceWrap key={key}> */}
+        {resourceEntity ? (
+          <>
             <EntityTag
               actant={resourceEntity}
               tooltipPosition="bottom center"
               // fullWidth
             />
-          ) : (
+            <span>&nbsp;</span>
+          </>
+        ) : (
+          <>
             <EmptyTag label="resource" />
-          )}
-          {valueEntity ? (
-            <EntityTag
-              actant={valueEntity}
-              tooltipPosition="bottom center"
-              // fullWidth
-            />
-          ) : (
-            <EmptyTag label="value" />
-          )}
-        </StyledReferenceWrap>
+            <span>&nbsp;</span>
+          </>
+        )}
+        {valueEntity ? (
+          <EntityTag
+            actant={valueEntity}
+            tooltipPosition="bottom center"
+            // fullWidth
+          />
+        ) : (
+          <EmptyTag label="value" />
+        )}
+        {/* </StyledReferenceWrap> */}
       </React.Fragment>
     );
   };
