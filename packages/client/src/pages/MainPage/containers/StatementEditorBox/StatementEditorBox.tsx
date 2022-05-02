@@ -541,6 +541,7 @@ export const StatementEditorBox: React.FC = () => {
       onSuccess: (data, variables) => {
         setTerritoryId(variables);
         queryClient.invalidateQueries("tree");
+        queryClient.invalidateQueries("territory");
       },
     }
   );
@@ -770,6 +771,7 @@ export const StatementEditorBox: React.FC = () => {
             <StyledEditorSectionHeader>Notes</StyledEditorSectionHeader>
             <StyledEditorSectionContent>
               <MultiInput
+                width="full"
                 disabled={!userCanEdit}
                 values={statement.notes}
                 onChange={(newValues: string[]) => {
