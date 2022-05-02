@@ -9,7 +9,6 @@ export const StyledSubRow = styled.div`
   margin-left: ${({ theme }) => `${theme.space[6]}`};
   font-size: ${({ theme }) => theme.fontSize["xs"]};
   color: ${({ theme }) => theme.color["black"]};
-  /* max-width: 550px; */
 `;
 export const StyledActantGroup = styled.div`
   display: flex;
@@ -37,11 +36,10 @@ export const StyledPropRow = styled.div<StyledPropRow>`
   display: inline-flex;
   overflow: hidden;
 `;
-export const StyledGridCell = styled.div`
-  display: inline-flex;
-  overflow: hidden;
-  /* max-width: 250px; */
-`;
+// export const StyledGridCell = styled.div`
+//   display: inline-flex;
+//   overflow: hidden;
+// `;
 export const StyledPropGroup = styled.div`
   display: flex;
   overflow: hidden;
@@ -52,18 +50,11 @@ export const StyledActantWrap = styled.div`
   margin-bottom: ${({ theme }) => theme.space[1]};
 `;
 
-export const StyledReferenceWrap = styled.div`
-  /* display: inline-flex; */
-  /* overflow: hidden; */
-  margin-bottom: ${({ theme }) => theme.space[1]};
-`;
-
 export const StyledExpandedRowTd = styled.td`
-  background-color: pink;
+  /* background-color: pink; */
 `;
 export const StyledExpandedRowTr = styled.tr`
   width: 100%;
-  background-color: hotpink;
 `;
 export const StyledSpan = styled.span`
   margin-top: 2px;

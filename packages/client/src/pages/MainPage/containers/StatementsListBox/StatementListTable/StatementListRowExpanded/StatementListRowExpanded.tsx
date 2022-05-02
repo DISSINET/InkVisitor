@@ -1,13 +1,13 @@
 import {
   IEntity,
   IProp,
+  IReference,
   IStatementActant,
   IStatementAction,
-  IReference,
 } from "@shared/types";
+import { EmptyTag } from "pages/MainPage/containers";
 import React from "react";
 import { ColumnInstance, Row } from "react-table";
-import { BsArrowReturnRight } from "react-icons/bs";
 import { EntityTag } from "../../../EntityTag/EntityTag";
 import { StatementListRowExpandedPropGroup } from "./StatementListRowExpandedPropGroup";
 import {
@@ -17,12 +17,10 @@ import {
   StyledExpandedRowTd,
   StyledExpandedRowTr,
   StyledNoteWrapper,
-  StyledReferenceWrap,
+  StyledPropRow,
   StyledSpan,
   StyledSubRow,
 } from "./StatementListRowExpandedStyles";
-import { StyledPropRow } from "./StatementListRowExpandedStyles";
-import { EmptyTag } from "pages/MainPage/containers";
 
 interface StatementListRowExpanded {
   row: Row;
@@ -44,32 +42,30 @@ export const StatementListRowExpanded: React.FC<StatementListRowExpanded> = ({
 
     return (
       <React.Fragment key={key}>
-        <StyledReferenceWrap key={key}>
-          {resourceEntity ? (
-            <>
-              <EntityTag
-                actant={resourceEntity}
-                tooltipPosition="bottom center"
-                // fullWidth
-              />
-              <span>&nbsp;</span>
-            </>
-          ) : (
-            <>
-              <EmptyTag label="resource" />
-              <span>&nbsp;</span>
-            </>
-          )}
-          {valueEntity ? (
+        {resourceEntity ? (
+          <>
             <EntityTag
-              actant={valueEntity}
+              actant={resourceEntity}
               tooltipPosition="bottom center"
               // fullWidth
             />
-          ) : (
-            <EmptyTag label="value" />
-          )}
-        </StyledReferenceWrap>
+            <span>&nbsp;</span>
+          </>
+        ) : (
+          <>
+            <EmptyTag label="resource" />
+            <span>&nbsp;</span>
+          </>
+        )}
+        {valueEntity ? (
+          <EntityTag
+            actant={valueEntity}
+            tooltipPosition="bottom center"
+            // fullWidth
+          />
+        ) : (
+          <EmptyTag label="value" />
+        )}
       </React.Fragment>
     );
   };
@@ -235,21 +231,15 @@ export const StatementListRowExpanded: React.FC<StatementListRowExpanded> = ({
                 </StyledPropRow>
               ))}
             </StyledActantGroup>
-            <StyledActantGroup>
-              {references.map((reference, key) => (
-                <React.Fragment key={key}>
-                  <StyledPropRow level={1}>
-                    <StyledBsArrowReturnRight size="20" />
-                    <StyledSpan>&nbsp;&nbsp;(reference)&nbsp;&nbsp;</StyledSpan>
-                    {renderReferenceRow(
-                      reference.resource,
-                      reference.value,
-                      key
-                    )}
-                  </StyledPropRow>
-                </React.Fragment>
-              ))}
-            </StyledActantGroup>
+            {references.map((reference, key) => (
+              <div style={{ display: "grid" }}>
+                <StyledPropRow level={1} key={key}>
+                  <StyledBsArrowReturnRight size="20" />
+                  <StyledSpan>&nbsp;&nbsp;(reference)&nbsp;&nbsp;</StyledSpan>
+                  {renderReferenceRow(reference.resource, reference.value, key)}
+                </StyledPropRow>
+              </div>
+            ))}
             <StyledActantGroup>
               {tagObjects.map((tag, key) => (
                 <StyledPropRow level={1} key={key}>
