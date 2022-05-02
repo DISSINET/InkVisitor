@@ -65,3 +65,6 @@ export const StyledExpandedRowTr = styled.tr`
   width: 100%;
   background-color: hotpink;
 `;
+export const StyledSpan = styled.span`
+margin-top: ${({ theme }) => theme.space[1]};
+`;
