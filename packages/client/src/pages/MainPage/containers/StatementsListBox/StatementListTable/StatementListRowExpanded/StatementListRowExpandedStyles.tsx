@@ -5,8 +5,8 @@ import theme from "Theme/theme";
 export const StyledSubRow = styled.div`
   width: 100%;
   padding: ${({ theme }) => theme.space[2]};
+  padding-right: ${({ theme }) => theme.space[12]};
   margin-left: ${({ theme }) => `${theme.space[6]}`};
-  /* background-color: ${({ theme }) => theme.color["gray"][200]}; */
   font-size: ${({ theme }) => theme.fontSize["xs"]};
   color: ${({ theme }) => theme.color["black"]};
   max-width: 550px;
