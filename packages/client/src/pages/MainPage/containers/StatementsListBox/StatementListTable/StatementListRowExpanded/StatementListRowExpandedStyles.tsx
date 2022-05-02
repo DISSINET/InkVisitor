@@ -54,11 +54,8 @@ export const StyledActantWrap = styled.div`
 
 export const StyledReferenceWrap = styled.div`
   /* display: inline-flex; */
-  /* max-width: 100%; */
+  /* overflow: hidden; */
   margin-bottom: ${({ theme }) => theme.space[1]};
-  div {
-    /* padding-right: ${({ theme }) => theme.space[1]}; */
-  }
 `;
 
 export const StyledExpandedRowTd = styled.td`

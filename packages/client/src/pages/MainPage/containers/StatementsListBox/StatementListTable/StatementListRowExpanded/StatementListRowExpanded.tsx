@@ -34,7 +34,7 @@ export const StatementListRowExpanded: React.FC<StatementListRowExpanded> = ({
   visibleColumns,
   entities,
 }) => {
-  const renderReference = (
+  const renderReferenceRow = (
     resourceId: string,
     valueId: string,
     key: number
@@ -235,22 +235,30 @@ export const StatementListRowExpanded: React.FC<StatementListRowExpanded> = ({
                 </StyledPropRow>
               ))}
             </StyledActantGroup>
-            {references.map((reference, key) => (
-              <React.Fragment key={key}>
-                <StyledPropRow level={1}>
+            <StyledActantGroup>
+              {references.map((reference, key) => (
+                <React.Fragment key={key}>
+                  <StyledPropRow level={1}>
+                    <StyledBsArrowReturnRight size="20" />
+                    <StyledSpan>&nbsp;&nbsp;(reference)&nbsp;&nbsp;</StyledSpan>
+                    {renderReferenceRow(
+                      reference.resource,
+                      reference.value,
+                      key
+                    )}
+                  </StyledPropRow>
+                </React.Fragment>
+              ))}
+            </StyledActantGroup>
+            <StyledActantGroup>
+              {tagObjects.map((tag, key) => (
+                <StyledPropRow level={1} key={key}>
                   <StyledBsArrowReturnRight size="20" />
-                  <StyledSpan>&nbsp;&nbsp;(reference)&nbsp;&nbsp;</StyledSpan>
-                  {renderReference(reference.resource, reference.value, key)}
+                  <StyledSpan>&nbsp;&nbsp;(tag)&nbsp;&nbsp;</StyledSpan>
+                  {renderListActant(tag.id, key)}
                 </StyledPropRow>
-              </React.Fragment>
-            ))}
-            {tagObjects.map((tag, key) => (
-              <StyledPropRow level={1} key={key}>
-                <StyledBsArrowReturnRight size="20" />
-                <StyledSpan>&nbsp;&nbsp;(tag)&nbsp;&nbsp;</StyledSpan>
-                {renderListActant(tag.id, key)}
-              </StyledPropRow>
-            ))}
+              ))}
+            </StyledActantGroup>
             <br />
             {notes.map((note: string, key: number) => {
               return (
