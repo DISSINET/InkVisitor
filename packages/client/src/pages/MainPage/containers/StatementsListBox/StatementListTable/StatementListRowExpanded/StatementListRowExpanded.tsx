@@ -13,8 +13,10 @@ import { StatementListRowExpandedPropGroup } from "./StatementListRowExpandedPro
 import {
   StyledActantGroup,
   StyledActantWrap,
+  StyledBsArrowReturnRight,
   StyledExpandedRowTd,
   StyledExpandedRowTr,
+  StyledNoteWrapper,
   StyledReferenceWrap,
   StyledSpan,
   StyledSubRow,
@@ -191,7 +193,7 @@ export const StatementListRowExpanded: React.FC<StatementListRowExpanded> = ({
             <StyledActantGroup>
               {actionObjects.map((action, key) => (
                 <StyledPropRow level={1} key={key}>
-                  <BsArrowReturnRight size="20" />
+                  <StyledBsArrowReturnRight size="20" />
                   <StyledSpan>&nbsp;&nbsp;(action)&nbsp;&nbsp;</StyledSpan>
                   {renderListActantWithProps(
                     action.data.action,
@@ -204,7 +206,7 @@ export const StatementListRowExpanded: React.FC<StatementListRowExpanded> = ({
             <StyledActantGroup>
               {subjectObjects.map((actant, key) => (
                 <StyledPropRow level={1} key={key}>
-                  <BsArrowReturnRight size="20" />
+                  <StyledBsArrowReturnRight size="20" />
                   <StyledSpan>&nbsp;&nbsp;(subject)&nbsp;&nbsp;</StyledSpan>
                   {renderListActantWithProps(
                     actant.data.subject,
@@ -217,7 +219,7 @@ export const StatementListRowExpanded: React.FC<StatementListRowExpanded> = ({
             <StyledActantGroup>
               {actantObjects.map((actant, key) => (
                 <StyledPropRow level={1} key={key}>
-                  <BsArrowReturnRight size="20" />
+                  <StyledBsArrowReturnRight size="20" />
                   <StyledSpan>&nbsp;&nbsp;(actant)&nbsp;&nbsp;</StyledSpan>
                   {renderListActantWithProps(
                     actant.data.actant,
@@ -229,18 +231,16 @@ export const StatementListRowExpanded: React.FC<StatementListRowExpanded> = ({
             </StyledActantGroup>
             {references.map((reference, key) => (
               <React.Fragment key={key}>
-                {(reference.value || reference.resource) && (
-                  <StyledPropRow level={1}>
-                    <BsArrowReturnRight size="20" />
-                    <StyledSpan>&nbsp;&nbsp;(reference)&nbsp;&nbsp;</StyledSpan>
-                    {renderReference(reference.resource, reference.value, key)}
-                  </StyledPropRow>
-                )}
+                <StyledPropRow level={1}>
+                  <StyledBsArrowReturnRight size="20" />
+                  <StyledSpan>&nbsp;&nbsp;(reference)&nbsp;&nbsp;</StyledSpan>
+                  {renderReference(reference.resource, reference.value, key)}
+                </StyledPropRow>
               </React.Fragment>
             ))}
             {tagObjects.map((tag, key) => (
               <StyledPropRow level={1} key={key}>
-                <BsArrowReturnRight size="20" />
+                <StyledBsArrowReturnRight size="20" />
                 <StyledSpan>&nbsp;&nbsp;(tag)&nbsp;&nbsp;</StyledSpan>
                 {renderListActant(tag.id, key)}
               </StyledPropRow>
@@ -248,13 +248,13 @@ export const StatementListRowExpanded: React.FC<StatementListRowExpanded> = ({
             <br />
             {notes.map((note: string, key: number) => {
               return (
-                <React.Fragment key={key}>
+                <StyledNoteWrapper key={key}>
                   <StyledSpan>(note)</StyledSpan>
                   <p key={key}>
                     {note}
                     <br />
                   </p>
-                </React.Fragment>
+                </StyledNoteWrapper>
               );
             })}
           </StyledSubRow>

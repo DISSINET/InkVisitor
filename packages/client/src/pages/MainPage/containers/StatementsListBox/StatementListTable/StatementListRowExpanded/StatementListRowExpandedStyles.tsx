@@ -1,3 +1,4 @@
+import { BsArrowReturnRight } from "react-icons/bs";
 import styled from "styled-components";
 import theme from "Theme/theme";
 
@@ -66,5 +67,11 @@ export const StyledExpandedRowTr = styled.tr`
   background-color: hotpink;
 `;
 export const StyledSpan = styled.span`
-margin-top: ${({ theme }) => theme.space[1]};
+  margin-top: 2px;
+`;
+export const StyledBsArrowReturnRight = styled(BsArrowReturnRight)`
+  margin-top: -2px;
+`;
+export const StyledNoteWrapper = styled.div`
+  margin-bottom: ${({ theme }) => theme.space[2]};
 `;
