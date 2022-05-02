@@ -34,7 +34,7 @@ const getIndentation = (level: 1 | 2 | 3) => {
 export const StyledPropRow = styled.div<StyledPropRow>`
   margin-left: ${({ level }) => getIndentation(level)};
   margin-bottom: ${({ theme }) => theme.space[2]};
-  display: flex;
+  display: inline-flex;
   overflow: hidden;
 `;
 export const StyledGridCell = styled.div`
@@ -53,9 +53,11 @@ export const StyledActantWrap = styled.div`
 `;
 
 export const StyledReferenceWrap = styled.div`
+  /* display: inline-flex; */
+  /* max-width: 100%; */
   margin-bottom: ${({ theme }) => theme.space[1]};
   div {
-    padding-right: ${({ theme }) => theme.space[1]};
+    /* padding-right: ${({ theme }) => theme.space[1]}; */
   }
 `;
 
