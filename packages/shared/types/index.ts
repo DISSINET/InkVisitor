@@ -48,6 +48,7 @@ import {
 } from "./user";
 import { IValue } from "./value";
 import { IResponseEntity } from "./response-entity";
+import { IResponseStats } from "./response-stats";
 
 export type {
   IAudit,
@@ -91,5 +92,6 @@ export type {
   IResponseGeneric,
   IResponseSearch,
   IResponsePermission,
+  IResponseStats,
 };
 export { RequestSearch, RequestPermissionUpdate };
