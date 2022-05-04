@@ -3,7 +3,7 @@
     "id": "T0",
     "class": "T",
     "data": { "parent": false },
-    "label": "everything",
+    "label": "root",
     "detail": "",
     "status": "1",
     "language": ["eng"],
