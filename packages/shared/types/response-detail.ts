@@ -19,14 +19,14 @@ export interface IResponseUsedInStatement<PositionEnum> {
 }
 
 export interface IResponseUsedInStatementProps {
-  statement: IStatement;
-  type: string;
-  value: string;
+  statementId: string;
+  typeId: string;
+  valueId: string;
   originId: string; // what entity is the detail id used for
 }
 
 export interface IResponseUsedInMetaProp<PositionEnum> {
-  entityId: string; // IEntity will be placed in IResponseDetail.entities to avoid making duplications
-  position: PositionEnum; // type | value
-  prop: IProp;
+  typeId: string;
+  valueId: string;
+  originId: string; // what entity is the detail id used for
 }

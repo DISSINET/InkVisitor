@@ -135,15 +135,8 @@ export class ResponseEntityDetail
     let actantValid = false;
 
     for (const prop of props) {
-      if (prop.type.id === this.id) {
-        this.addUsedInMetaProp(actant, UsedInPosition.Type, prop);
-        this.postponedEntities[prop.value.id] = undefined;
-        actantValid = true;
-      }
-
-      if (prop.value.id === this.id) {
-        this.addUsedInMetaProp(actant, UsedInPosition.Value, prop);
-        this.postponedEntities[prop.type.id] = undefined;
+      if (prop.type.id === this.id || prop.value.id === this.id) {
+        this.addUsedInMetaProp(actant.id, prop.value.id, prop.type.id);
         actantValid = true;
       }
 
@@ -159,15 +152,19 @@ export class ResponseEntityDetail
 
   /**
    * add entry to usedInMetaProps
-   * @param entity
-   * @param position
+   * @param originId
+   * @param valueId
+   * @param typeId
    */
-  addUsedInMetaProp(entity: IEntity, position: UsedInPosition, prop: IProp) {
+  addUsedInMetaProp(originId: string, valueId: string, typeId: string) {
     this.usedInMetaProps.push({
-      entityId: entity.id,
-      position,
-      prop,
+      originId,
+      valueId,
+      typeId,
     });
+    this.postponedEntities[originId] = undefined;
+    this.postponedEntities[valueId] = undefined;
+    this.postponedEntities[typeId] = undefined;
   }
 
   /**
@@ -247,7 +244,7 @@ export class ResponseEntityDetail
     for (const prop of props) {
       if (prop.type.id === this.id || prop.value.id === this.id) {
         this.addUsedInStatementProp(
-          statement,
+          statement.id,
           originId,
           prop.type.id,
           prop.value.id
@@ -266,27 +263,27 @@ export class ResponseEntityDetail
 
   /**
    * add entry to usedInStatementProps and entities fields
-   * @param statement
+   * @param statementId
    * @param originId
-   * @param value
-   * @param type
+   * @param valueId
+   * @param typeId
    */
   addUsedInStatementProp(
-    statement: IStatement,
+    statementId: string,
     originId: string,
-    value: string,
-    type: string
+    valueId: string,
+    typeId: string
   ) {
     this.usedInStatementProps.push({
-      statement,
+      statementId,
       originId,
-      value,
-      type,
+      valueId,
+      typeId,
     });
 
-    this.entities[statement.id] = statement;
+    this.postponedEntities[statementId] = undefined;
     this.postponedEntities[originId] = undefined;
-    this.postponedEntities[value] = undefined;
-    this.postponedEntities[type] = undefined;
+    this.postponedEntities[valueId] = undefined;
+    this.postponedEntities[typeId] = undefined;
   }
 }
