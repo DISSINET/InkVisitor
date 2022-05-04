@@ -13,6 +13,7 @@ import Entity from "./entity";
 import Statement from "@models/statement/statement";
 import { nonenumerable } from "@common/decorators";
 import { Connection } from "rethinkdb-ts";
+import { IResponseUsedInStatementProps } from "@shared/types/response-detail";
 
 export class ResponseEntity extends Entity implements IResponseEntity {
   @nonenumerable
@@ -43,7 +44,7 @@ export class ResponseEntityDetail
 {
   entities: { [key: string]: IEntity };
   usedInStatement: IResponseUsedInStatement<UsedInPosition>[];
-  usedInStatementProps: IResponseUsedInStatement<UsedInPosition>[];
+  usedInStatementProps: IResponseUsedInStatementProps[];
   usedInMetaProps: IResponseUsedInMetaProp<UsedInPosition>[];
   usedAsTemplate?: string[] | undefined;
 
@@ -205,7 +206,6 @@ export class ResponseEntityDetail
       statement,
       position,
     });
-
     this.entities[statement.id] = statement;
   }
 
@@ -245,12 +245,13 @@ export class ResponseEntityDetail
     props: IProp[]
   ) {
     for (const prop of props) {
-      if (prop.type.id === this.id) {
-        this.addUsedInStatementProp(statement, UsedInPosition.Type, originId);
-      }
-
-      if (prop.value.id === this.id) {
-        this.addUsedInStatementProp(statement, UsedInPosition.Value, originId);
+      if (prop.type.id === this.id || prop.value.id === this.id) {
+        this.addUsedInStatementProp(
+          statement,
+          originId,
+          prop.type.id,
+          prop.value.id
+        );
       }
 
       if (prop.children.length) {
@@ -266,20 +267,26 @@ export class ResponseEntityDetail
   /**
    * add entry to usedInStatementProps and entities fields
    * @param statement
-   * @param position
    * @param originId
+   * @param value
+   * @param type
    */
   addUsedInStatementProp(
     statement: IStatement,
-    position: UsedInPosition,
-    originId: string
+    originId: string,
+    value: string,
+    type: string
   ) {
     this.usedInStatementProps.push({
       statement,
-      position,
       originId,
+      value,
+      type,
     });
 
     this.entities[statement.id] = statement;
+    this.postponedEntities[originId] = undefined;
+    this.postponedEntities[value] = undefined;
+    this.postponedEntities[type] = undefined;
   }
 }
