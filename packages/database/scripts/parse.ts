@@ -143,7 +143,7 @@ const loadStatementsTables = async (next: Function) => {
     }
   );
 
-  addTerritoryEntity(rootTerritory, "everything", false, 0);
+  addTerritoryEntity(rootTerritory, "root", false, 0);
 
   type IRowResources = {
     type: string;
