@@ -43,6 +43,7 @@ export const StyledPropGroup = styled.div`
   flex-direction: column;
 `;
 export const StyledActantWrap = styled.div`
+  display: inline-flex;
   overflow: hidden;
   margin-bottom: ${({ theme }) => theme.space[1]};
 `;

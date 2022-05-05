@@ -83,7 +83,7 @@ export const StatementListRowExpanded: React.FC<StatementListRowExpanded> = ({
             <EntityTag
               actant={entities[actantId]}
               tooltipPosition="bottom center"
-              // fullWidth
+              fullWidth
             />
           </StyledActantWrap>
         )}
@@ -252,15 +252,17 @@ export const StatementListRowExpanded: React.FC<StatementListRowExpanded> = ({
                 </div>
               ))}
             </StyledReferenceSection>
-            <StyledActantGroup>
-              {tagObjects.map((tag, key) => (
-                <StyledPropRow level={1} key={key}>
-                  <StyledBsArrowReturnRight size="20" />
-                  <StyledSpan>&nbsp;&nbsp;(tag)&nbsp;&nbsp;</StyledSpan>
-                  {renderListActant(tag.id, key)}
-                </StyledPropRow>
-              ))}
-            </StyledActantGroup>
+            <div style={{ display: "grid", maxWidth: "100%" }}>
+              <StyledActantGroup>
+                {tagObjects.map((tag, key) => (
+                  <StyledPropRow level={1} key={key}>
+                    <StyledBsArrowReturnRight size="20" />
+                    <StyledSpan>&nbsp;&nbsp;(tag)&nbsp;&nbsp;</StyledSpan>
+                    {renderListActant(tag.id, key)}
+                  </StyledPropRow>
+                ))}
+              </StyledActantGroup>
+            </div>
             <br />
             <StyledNotesSection>
               {notes.map((note: string, key: number) => {
