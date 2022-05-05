@@ -36,10 +36,7 @@ export const StyledPropRow = styled.div<StyledPropRow>`
   display: inline-flex;
   overflow: hidden;
 `;
-// export const StyledGridCell = styled.div`
-//   display: inline-flex;
-//   overflow: hidden;
-// `;
+
 export const StyledPropGroup = styled.div`
   display: flex;
   overflow: hidden;
@@ -50,9 +47,7 @@ export const StyledActantWrap = styled.div`
   margin-bottom: ${({ theme }) => theme.space[1]};
 `;
 
-export const StyledExpandedRowTd = styled.td`
-  /* background-color: pink; */
-`;
+export const StyledExpandedRowTd = styled.td``;
 export const StyledExpandedRowTr = styled.tr`
   width: 100%;
 `;
@@ -62,6 +57,20 @@ export const StyledSpan = styled.span`
 export const StyledBsArrowReturnRight = styled(BsArrowReturnRight)`
   margin-top: -2px;
 `;
+export const StyledReferenceSection = styled.div`
+  margin-bottom: ${({ theme }) => theme.space[4]};
+`;
 export const StyledNoteWrapper = styled.div`
   margin-bottom: ${({ theme }) => theme.space[2]};
+`;
+export const StyledNotesSection = styled.div`
+  margin-bottom: ${({ theme }) => theme.space[4]};
+`;
+export const StyledReferenceRow = styled.div`
+  max-width: 100%;
+  display: grid;
+  grid-template-columns: auto auto;
+`;
+export const StyledReferenceColumn = styled.div`
+  display: grid;
 `;

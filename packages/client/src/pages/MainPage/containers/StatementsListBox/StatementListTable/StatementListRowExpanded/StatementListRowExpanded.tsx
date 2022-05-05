@@ -16,8 +16,12 @@ import {
   StyledBsArrowReturnRight,
   StyledExpandedRowTd,
   StyledExpandedRowTr,
+  StyledNotesSection,
   StyledNoteWrapper,
   StyledPropRow,
+  StyledReferenceColumn,
+  StyledReferenceRow,
+  StyledReferenceSection,
   StyledSpan,
   StyledSubRow,
 } from "./StatementListRowExpandedStyles";
@@ -41,32 +45,34 @@ export const StatementListRowExpanded: React.FC<StatementListRowExpanded> = ({
     const valueEntity: IEntity = entities[valueId];
 
     return (
-      <React.Fragment key={key}>
+      <StyledReferenceRow key={key}>
         {resourceEntity ? (
-          <>
+          <StyledReferenceColumn style={{ marginRight: "3px" }}>
             <EntityTag
               actant={resourceEntity}
               tooltipPosition="bottom center"
-              // fullWidth
+              fullWidth
             />
-            <span>&nbsp;</span>
-          </>
+          </StyledReferenceColumn>
         ) : (
-          <>
+          <StyledReferenceColumn style={{ marginRight: "3px" }}>
             <EmptyTag label="resource" />
-            <span>&nbsp;</span>
-          </>
+          </StyledReferenceColumn>
         )}
         {valueEntity ? (
-          <EntityTag
-            actant={valueEntity}
-            tooltipPosition="bottom center"
-            // fullWidth
-          />
+          <StyledReferenceColumn>
+            <EntityTag
+              actant={valueEntity}
+              tooltipPosition="bottom center"
+              fullWidth
+            />
+          </StyledReferenceColumn>
         ) : (
-          <EmptyTag label="value" />
+          <StyledReferenceColumn>
+            <EmptyTag label="value" />
+          </StyledReferenceColumn>
         )}
-      </React.Fragment>
+      </StyledReferenceRow>
     );
   };
   const renderListActant = (actantId: string, key: number) => {
@@ -231,15 +237,21 @@ export const StatementListRowExpanded: React.FC<StatementListRowExpanded> = ({
                 </StyledPropRow>
               ))}
             </StyledActantGroup>
-            {references.map((reference, key) => (
-              <div style={{ display: "grid" }}>
-                <StyledPropRow level={1} key={key}>
-                  <StyledBsArrowReturnRight size="20" />
-                  <StyledSpan>&nbsp;&nbsp;(reference)&nbsp;&nbsp;</StyledSpan>
-                  {renderReferenceRow(reference.resource, reference.value, key)}
-                </StyledPropRow>
-              </div>
-            ))}
+            <StyledReferenceSection>
+              {references.map((reference, key) => (
+                <div style={{ display: "grid" }}>
+                  <StyledPropRow level={1} key={key}>
+                    <StyledBsArrowReturnRight size="20" />
+                    <StyledSpan>&nbsp;&nbsp;(reference)&nbsp;&nbsp;</StyledSpan>
+                    {renderReferenceRow(
+                      reference.resource,
+                      reference.value,
+                      key
+                    )}
+                  </StyledPropRow>
+                </div>
+              ))}
+            </StyledReferenceSection>
             <StyledActantGroup>
               {tagObjects.map((tag, key) => (
                 <StyledPropRow level={1} key={key}>
@@ -250,17 +262,19 @@ export const StatementListRowExpanded: React.FC<StatementListRowExpanded> = ({
               ))}
             </StyledActantGroup>
             <br />
-            {notes.map((note: string, key: number) => {
-              return (
-                <StyledNoteWrapper key={key}>
-                  <StyledSpan>(note)</StyledSpan>
-                  <p key={key}>
-                    {note}
-                    <br />
-                  </p>
-                </StyledNoteWrapper>
-              );
-            })}
+            <StyledNotesSection>
+              {notes.map((note: string, key: number) => {
+                return (
+                  <StyledNoteWrapper key={key}>
+                    <StyledSpan>(note)</StyledSpan>
+                    <p key={key}>
+                      {note}
+                      <br />
+                    </p>
+                  </StyledNoteWrapper>
+                );
+              })}
+            </StyledNotesSection>
           </StyledSubRow>
         </>
       );
