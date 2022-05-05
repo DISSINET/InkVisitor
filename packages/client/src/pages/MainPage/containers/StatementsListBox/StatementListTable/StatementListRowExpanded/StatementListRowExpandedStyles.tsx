@@ -56,6 +56,7 @@ export const StyledSpan = styled.span`
 `;
 export const StyledBsArrowReturnRight = styled(BsArrowReturnRight)`
   margin-top: -2px;
+  flex-shrink: 0;
 `;
 export const StyledReferenceSection = styled.div`
   margin-bottom: ${({ theme }) => theme.space[4]};
