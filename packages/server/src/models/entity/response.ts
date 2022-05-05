@@ -203,7 +203,14 @@ export class ResponseEntityDetail
       statement,
       position,
     });
+
     this.entities[statement.id] = statement;
+    statement.data.actants.forEach((actant) => {
+      this.postponedEntities[actant.actant] = undefined;
+    });
+    statement.data.actions.forEach((action) => {
+      this.postponedEntities[action.action] = undefined;
+    });
   }
 
   /**
