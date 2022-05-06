@@ -25,7 +25,11 @@ import { dndHoverFn } from "utils";
 import { EntitySuggester, EntityTag } from "../..";
 import AttributesEditor from "../../AttributesEditor/AttributesEditor";
 import { PropGroup } from "../../PropGroup/PropGroup";
-import { StyledTd, StyledTr } from "./StatementEditorActionTableStyles";
+import {
+  StyledActionRow,
+  StyledTd,
+  StyledTr,
+} from "./StatementEditorActionTableStyles";
 
 interface StatementEditorActionTableRow {
   row: any;
@@ -110,6 +114,7 @@ export const StatementEditorActionTableRow: React.FC<
     const { action, sAction } = row.values.data;
     return action ? (
       <EntityTag
+        fullWidth
         actant={action}
         button={
           userCanEdit && (
@@ -281,8 +286,12 @@ export const StatementEditorActionTableRow: React.FC<
             <FaGripVertical />
           </td>
         )}
-        <StyledTd>{renderActionCell()}</StyledTd>
+        <StyledTd>
+          {/* <StyledActionRow style={{ backgroundColor: "hotpink" }}> */}
+          {renderActionCell()}
+        </StyledTd>
         <StyledTd>{renderButtonsCell()}</StyledTd>
+        {/* </StyledActionRow> */}
       </StyledTr>
 
       {!(

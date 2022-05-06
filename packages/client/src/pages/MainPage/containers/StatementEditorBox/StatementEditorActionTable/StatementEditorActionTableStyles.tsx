@@ -38,11 +38,7 @@ export const StyledTd = styled.td`
   font-size: ${({ theme }) => theme.fontSize["sm"]};
 `;
 
-export const StyledSubRow = styled.div`
-  display: table-row;
-  width: 100%;
-  padding: ${({ theme }) => theme.space[2]};
-  border-left-color: ${({ theme }) => theme.color["gray"][800]};
-  margin-left: ${({ theme }) => `${theme.space[10]}`};
-  margin-bottom: ${({ theme }) => `${theme.space[2]}`};
+export const StyledActionRow = styled.div`
+  display: grid;
+  grid-template-columns: minmax(min-content, auto) 8rem;
 `;

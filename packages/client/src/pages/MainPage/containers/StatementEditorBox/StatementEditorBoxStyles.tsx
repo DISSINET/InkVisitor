@@ -175,15 +175,6 @@ export const StyledBreadcrumbWrap = styled.div`
   position: relative;
 `;
 
-export const StyledSubRow = styled.div`
-  display: table-row;
-  width: 100%;
-  padding: ${({ theme }) => theme.space[2]};
-  border-left-color: ${({ theme }) => theme.color["gray"][800]};
-  margin-left: ${({ theme }) => `${theme.space[10]}`};
-  margin-bottom: ${({ theme }) => `${theme.space[2]}`};
-`;
-
 export const StyledEditorStatementInfo = styled.div`
   display: inline-flex;
   flex-wrap: wrap;
