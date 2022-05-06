@@ -5,15 +5,14 @@ import theme from "Theme/theme";
 export const StyledSubRow = styled.div`
   width: 100%;
   padding: ${({ theme }) => theme.space[2]};
-  padding-right: ${({ theme }) => theme.space[12]};
+  padding-right: ${({ theme }) => theme.space[8]};
   padding-left: ${({ theme }) => `${theme.space[6]}`};
   font-size: ${({ theme }) => theme.fontSize["xs"]};
   color: ${({ theme }) => theme.color["black"]};
 `;
 export const StyledActantGroup = styled.div`
-  display: flex;
+  display: grid;
   overflow: hidden;
-  flex-direction: column;
 `;
 
 const getIndentation = (level: 1 | 2 | 3) => {
