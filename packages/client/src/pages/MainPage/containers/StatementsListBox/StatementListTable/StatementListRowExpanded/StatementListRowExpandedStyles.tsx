@@ -34,6 +34,7 @@ export const StyledPropRow = styled.div<StyledPropRow>`
   margin-bottom: ${({ theme, disableBottomMargin }) =>
     disableBottomMargin ? 0 : theme.space[1]};
   display: inline-flex;
+  /* dislay: grid; */
   overflow: hidden;
 `;
 
@@ -81,5 +82,8 @@ export const StyledReferenceRow = styled.div`
   grid-template-columns: auto auto;
 `;
 export const StyledReferenceColumn = styled.div`
+  display: grid;
+`;
+export const StyledPropGroupCell = styled.div`
   display: grid;
 `;
