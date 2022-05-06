@@ -92,14 +92,25 @@ export const StatementListRowExpanded: React.FC<StatementListRowExpanded> = ({
     );
   };
 
+  const renderEmptyActant = (label: string, key: number) => {
+    return (
+      <StyledActantWrap key={key}>
+        <EmptyTag label={label} />
+      </StyledActantWrap>
+    );
+  };
+
   const renderListActantWithProps = (
     actant: IEntity,
     sActant: IStatementAction | IStatementActant,
-    key: number
+    key: number,
+    emptyLabel: string
   ) => {
     return (
       <StyledActantWithPropsWrap key={key}>
-        {renderListActant(actant?.id, key)}
+        {actant?.id
+          ? renderListActant(actant.id, key)
+          : renderEmptyActant(emptyLabel, key)}
         {renderFirstLevelProps(sActant.props)}
       </StyledActantWithPropsWrap>
     );
@@ -207,7 +218,8 @@ export const StatementListRowExpanded: React.FC<StatementListRowExpanded> = ({
                   {renderListActantWithProps(
                     action.data.action,
                     action.data.sAction,
-                    key
+                    key,
+                    "action"
                   )}
                 </StyledPropRow>
               ))}
@@ -220,7 +232,8 @@ export const StatementListRowExpanded: React.FC<StatementListRowExpanded> = ({
                   {renderListActantWithProps(
                     actant.data.subject,
                     actant.data.sSubject,
-                    key
+                    key,
+                    "s"
                   )}
                 </StyledPropRow>
               ))}
@@ -233,14 +246,15 @@ export const StatementListRowExpanded: React.FC<StatementListRowExpanded> = ({
                   {renderListActantWithProps(
                     actant.data.actant,
                     actant.data.sActant,
-                    key
+                    key,
+                    actant.data.sActant.position
                   )}
                 </StyledPropRow>
               ))}
             </StyledActantGroup>
             <StyledReferenceSection>
               {references.map((reference, key) => (
-                <div style={{ display: "grid" }}>
+                <div style={{ display: "grid" }} key={key}>
                   <StyledPropRow level={1} key={key}>
                     <StyledBsArrowReturnRight size="20" />
                     <StyledSpan>&nbsp;&nbsp;(reference)&nbsp;&nbsp;</StyledSpan>

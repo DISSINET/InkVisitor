@@ -37,8 +37,3 @@ export const StyledTd = styled.td`
   padding-left: 0;
   font-size: ${({ theme }) => theme.fontSize["sm"]};
 `;
-
-export const StyledActionRow = styled.div`
-  display: grid;
-  grid-template-columns: minmax(min-content, auto) 8rem;
-`;
