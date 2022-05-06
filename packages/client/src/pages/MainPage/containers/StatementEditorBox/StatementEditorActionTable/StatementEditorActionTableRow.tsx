@@ -110,6 +110,7 @@ export const StatementEditorActionTableRow: React.FC<
     const { action, sAction } = row.values.data;
     return action ? (
       <EntityTag
+        // fullWidth
         actant={action}
         button={
           userCanEdit && (

@@ -12,12 +12,17 @@ import { EntityTag } from "../../../EntityTag/EntityTag";
 import { StatementListRowExpandedPropGroup } from "./StatementListRowExpandedPropGroup";
 import {
   StyledActantGroup,
+  StyledActantWithPropsWrap,
   StyledActantWrap,
   StyledBsArrowReturnRight,
   StyledExpandedRowTd,
   StyledExpandedRowTr,
+  StyledNotesSection,
   StyledNoteWrapper,
   StyledPropRow,
+  StyledReferenceColumn,
+  StyledReferenceRow,
+  StyledReferenceSection,
   StyledSpan,
   StyledSubRow,
 } from "./StatementListRowExpandedStyles";
@@ -41,32 +46,34 @@ export const StatementListRowExpanded: React.FC<StatementListRowExpanded> = ({
     const valueEntity: IEntity = entities[valueId];
 
     return (
-      <React.Fragment key={key}>
+      <StyledReferenceRow key={key}>
         {resourceEntity ? (
-          <>
+          <StyledReferenceColumn style={{ marginRight: "3px" }}>
             <EntityTag
               actant={resourceEntity}
               tooltipPosition="bottom center"
-              // fullWidth
+              fullWidth
             />
-            <span>&nbsp;</span>
-          </>
+          </StyledReferenceColumn>
         ) : (
-          <>
+          <StyledReferenceColumn style={{ marginRight: "3px" }}>
             <EmptyTag label="resource" />
-            <span>&nbsp;</span>
-          </>
+          </StyledReferenceColumn>
         )}
         {valueEntity ? (
-          <EntityTag
-            actant={valueEntity}
-            tooltipPosition="bottom center"
-            // fullWidth
-          />
+          <StyledReferenceColumn>
+            <EntityTag
+              actant={valueEntity}
+              tooltipPosition="bottom center"
+              fullWidth
+            />
+          </StyledReferenceColumn>
         ) : (
-          <EmptyTag label="value" />
+          <StyledReferenceColumn>
+            <EmptyTag label="value" />
+          </StyledReferenceColumn>
         )}
-      </React.Fragment>
+      </StyledReferenceRow>
     );
   };
   const renderListActant = (actantId: string, key: number) => {
@@ -77,7 +84,7 @@ export const StatementListRowExpanded: React.FC<StatementListRowExpanded> = ({
             <EntityTag
               actant={entities[actantId]}
               tooltipPosition="bottom center"
-              // fullWidth
+              fullWidth
             />
           </StyledActantWrap>
         )}
@@ -85,16 +92,27 @@ export const StatementListRowExpanded: React.FC<StatementListRowExpanded> = ({
     );
   };
 
+  const renderEmptyActant = (label: string, key: number) => {
+    return (
+      <StyledActantWrap key={key}>
+        <EmptyTag label={label} />
+      </StyledActantWrap>
+    );
+  };
+
   const renderListActantWithProps = (
     actant: IEntity,
     sActant: IStatementAction | IStatementActant,
-    key: number
+    key: number,
+    emptyLabel: string
   ) => {
     return (
-      <StyledActantWrap key={key}>
-        {renderListActant(actant?.id, key)}
+      <StyledActantWithPropsWrap key={key}>
+        {actant?.id
+          ? renderListActant(actant.id, key)
+          : renderEmptyActant(emptyLabel, key)}
         {renderFirstLevelProps(sActant.props)}
-      </StyledActantWrap>
+      </StyledActantWithPropsWrap>
     );
   };
 
@@ -200,7 +218,8 @@ export const StatementListRowExpanded: React.FC<StatementListRowExpanded> = ({
                   {renderListActantWithProps(
                     action.data.action,
                     action.data.sAction,
-                    key
+                    key,
+                    "action"
                   )}
                 </StyledPropRow>
               ))}
@@ -213,7 +232,8 @@ export const StatementListRowExpanded: React.FC<StatementListRowExpanded> = ({
                   {renderListActantWithProps(
                     actant.data.subject,
                     actant.data.sSubject,
-                    key
+                    key,
+                    "s"
                   )}
                 </StyledPropRow>
               ))}
@@ -226,41 +246,52 @@ export const StatementListRowExpanded: React.FC<StatementListRowExpanded> = ({
                   {renderListActantWithProps(
                     actant.data.actant,
                     actant.data.sActant,
-                    key
+                    key,
+                    actant.data.sActant.position
                   )}
                 </StyledPropRow>
               ))}
             </StyledActantGroup>
-            {references.map((reference, key) => (
-              <div style={{ display: "grid" }}>
-                <StyledPropRow level={1} key={key}>
-                  <StyledBsArrowReturnRight size="20" />
-                  <StyledSpan>&nbsp;&nbsp;(reference)&nbsp;&nbsp;</StyledSpan>
-                  {renderReferenceRow(reference.resource, reference.value, key)}
-                </StyledPropRow>
-              </div>
-            ))}
-            <StyledActantGroup>
-              {tagObjects.map((tag, key) => (
-                <StyledPropRow level={1} key={key}>
-                  <StyledBsArrowReturnRight size="20" />
-                  <StyledSpan>&nbsp;&nbsp;(tag)&nbsp;&nbsp;</StyledSpan>
-                  {renderListActant(tag.id, key)}
-                </StyledPropRow>
+            <StyledReferenceSection>
+              {references.map((reference, key) => (
+                <div style={{ display: "grid" }} key={key}>
+                  <StyledPropRow level={1} key={key}>
+                    <StyledBsArrowReturnRight size="20" />
+                    <StyledSpan>&nbsp;&nbsp;(reference)&nbsp;&nbsp;</StyledSpan>
+                    {renderReferenceRow(
+                      reference.resource,
+                      reference.value,
+                      key
+                    )}
+                  </StyledPropRow>
+                </div>
               ))}
-            </StyledActantGroup>
+            </StyledReferenceSection>
+            <div style={{ display: "grid", maxWidth: "100%" }}>
+              <StyledActantGroup>
+                {tagObjects.map((tag, key) => (
+                  <StyledPropRow level={1} key={key} disableBottomMargin>
+                    <StyledBsArrowReturnRight size="20" />
+                    <StyledSpan>&nbsp;&nbsp;(tag)&nbsp;&nbsp;</StyledSpan>
+                    {renderListActant(tag.id, key)}
+                  </StyledPropRow>
+                ))}
+              </StyledActantGroup>
+            </div>
             <br />
-            {notes.map((note: string, key: number) => {
-              return (
-                <StyledNoteWrapper key={key}>
-                  <StyledSpan>(note)</StyledSpan>
-                  <p key={key}>
-                    {note}
-                    <br />
-                  </p>
-                </StyledNoteWrapper>
-              );
-            })}
+            <StyledNotesSection>
+              {notes.map((note: string, key: number) => {
+                return (
+                  <StyledNoteWrapper key={key}>
+                    <StyledSpan>(note)</StyledSpan>
+                    <p key={key}>
+                      {note}
+                      <br />
+                    </p>
+                  </StyledNoteWrapper>
+                );
+              })}
+            </StyledNotesSection>
           </StyledSubRow>
         </>
       );
