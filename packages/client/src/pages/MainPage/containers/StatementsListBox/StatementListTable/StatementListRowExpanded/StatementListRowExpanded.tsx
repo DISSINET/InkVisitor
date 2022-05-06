@@ -256,7 +256,7 @@ export const StatementListRowExpanded: React.FC<StatementListRowExpanded> = ({
             <div style={{ display: "grid", maxWidth: "100%" }}>
               <StyledActantGroup>
                 {tagObjects.map((tag, key) => (
-                  <StyledPropRow level={1} key={key}>
+                  <StyledPropRow level={1} key={key} disableBottomMargin>
                     <StyledBsArrowReturnRight size="20" />
                     <StyledSpan>&nbsp;&nbsp;(tag)&nbsp;&nbsp;</StyledSpan>
                     {renderListActant(tag.id, key)}

@@ -15,9 +15,6 @@ export const StyledActantGroup = styled.div`
   overflow: hidden;
   flex-direction: column;
 `;
-interface StyledPropRow {
-  level: 1 | 2 | 3;
-}
 
 const getIndentation = (level: 1 | 2 | 3) => {
   switch (level) {
@@ -29,10 +26,14 @@ const getIndentation = (level: 1 | 2 | 3) => {
       return theme.space[16];
   }
 };
-
+interface StyledPropRow {
+  level: 1 | 2 | 3;
+  disableBottomMargin?: boolean;
+}
 export const StyledPropRow = styled.div<StyledPropRow>`
   margin-left: ${({ level }) => getIndentation(level)};
-  margin-bottom: ${({ theme }) => theme.space[1]};
+  margin-bottom: ${({ theme, disableBottomMargin }) =>
+    disableBottomMargin ? 0 : theme.space[1]};
   display: inline-flex;
   overflow: hidden;
 `;
@@ -46,16 +47,14 @@ export const StyledActantWrap = styled.div`
   width: 100%;
   display: inline-flex;
   overflow: hidden;
-  /* background-color: pink; */
   margin-bottom: ${({ theme }) => theme.space[1]};
 `;
 export const StyledActantWithPropsWrap = styled.div`
-  /* width: 100%; */
+  max-width: 100%;
   display: inline-flex;
   flex-direction: column;
   overflow: hidden;
-  /* background-color: hotpink; */
-  /* margin-bottom: ${({ theme }) => theme.space[1]}; */
+  margin-bottom: ${({ theme }) => theme.space[1]};
 `;
 export const StyledExpandedRowTd = styled.td``;
 export const StyledExpandedRowTr = styled.tr`
@@ -69,7 +68,7 @@ export const StyledBsArrowReturnRight = styled(BsArrowReturnRight)`
   flex-shrink: 0;
 `;
 export const StyledReferenceSection = styled.div`
-  margin-bottom: ${({ theme }) => theme.space[4]};
+  margin-bottom: ${({ theme }) => theme.space[2]};
 `;
 export const StyledNoteWrapper = styled.div`
   margin-bottom: ${({ theme }) => theme.space[2]};
