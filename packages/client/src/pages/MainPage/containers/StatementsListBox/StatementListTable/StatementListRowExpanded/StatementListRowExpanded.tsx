@@ -1,3 +1,5 @@
+import { actantPositionDict } from "@shared/dictionaries";
+import { Position } from "@shared/enums";
 import {
   IEntity,
   IProp,
@@ -233,7 +235,7 @@ export const StatementListRowExpanded: React.FC<StatementListRowExpanded> = ({
                     actant.data.subject,
                     actant.data.sSubject,
                     key,
-                    "s"
+                    actantPositionDict[Position.Subject].label
                   )}
                 </StyledPropRow>
               ))}
@@ -247,7 +249,7 @@ export const StatementListRowExpanded: React.FC<StatementListRowExpanded> = ({
                     actant.data.actant,
                     actant.data.sActant,
                     key,
-                    actant.data.sActant.position
+                    actantPositionDict[actant.data.sActant.position]?.label
                   )}
                 </StyledPropRow>
               ))}
