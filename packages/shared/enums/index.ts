@@ -83,7 +83,7 @@ export enum Position {
   Subject = "s",
   Actant1 = "a1",
   Actant2 = "a2",
-  PseudoActant = "p",
+  PseudoActant = "pa",
 }
 
 export enum UsedInPosition {
