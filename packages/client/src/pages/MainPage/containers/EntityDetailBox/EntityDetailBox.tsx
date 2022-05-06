@@ -33,6 +33,7 @@ import {
   FaRegCopy,
   FaTrashAlt,
 } from "react-icons/fa";
+import { GrClone } from "react-icons/gr";
 import { useMutation, useQuery, useQueryClient } from "react-query";
 import { toast } from "react-toastify";
 import { DraggedPropRowCategory } from "types";
@@ -74,6 +75,9 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
     setTerritoryId,
   } = useSearchParams();
 
+  const [createTemplateModal, setCreateTemplateModal] =
+    useState<boolean>(false);
+  const [createTemplateLabel, setCreateTemplateLabel] = useState<string>("");
   const [showRemoveSubmit, setShowRemoveSubmit] = useState(false);
   const [usedInPage, setUsedInPage] = useState<number>(0);
   const statementsPerPage = 20;
@@ -82,6 +86,27 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
   const [templateToApply, setTemplateToApply] = useState<IEntity | false>(
     false
   );
+
+  const handleCreateTemplate = () => {
+    // create template as a copy of the entity
+    if (entity) {
+      const templateEntity = DEntity(entity);
+      templateEntity.isTemplate = true;
+      templateEntity.usedTemplate = "";
+      templateEntity.label = createTemplateLabel;
+      api.entityCreate(templateEntity);
+      queryClient.invalidateQueries(["templates"]);
+      updateEntityMutation.mutate({ usedTemplate: templateEntity.id });
+
+      setCreateTemplateModal(false);
+      setCreateTemplateLabel("");
+    }
+  };
+
+  const handleCancelCreateTemplate = () => {
+    setCreateTemplateModal(false);
+    setCreateTemplateLabel("");
+  };
 
   const handleAskForTemplateApply = (templateOptionToApply: IOption) => {
     if (templates) {
@@ -520,6 +545,17 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                 label="refresh"
                 onClick={() => {
                   queryClient.invalidateQueries(["entity"]);
+                }}
+              />
+              <Button
+                key="template"
+                icon={<GrClone size={14} />}
+                tooltip="create template from entity"
+                inverted
+                color="primary"
+                label="Create template"
+                onClick={() => {
+                  setCreateTemplateModal(true);
                 }}
               />
               {entity.class === EntityClass.Statement && (
@@ -1122,18 +1158,19 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                     )}
 
                     {/* templates */}
-                    {entity.usedTemplate && (
-                      <StyledDetailContentRow>
-                        <StyledDetailContentRowLabel>
-                          Applied Template
-                        </StyledDetailContentRowLabel>
-                        <StyledDetailContentRowValue>
-                          <EntityTag
-                            actant={entity.entities[entity.usedTemplate]}
-                          />
-                        </StyledDetailContentRowValue>
-                      </StyledDetailContentRow>
-                    )}
+                    {entity.usedTemplate &&
+                      entity.usedTemplate in entity.entities && (
+                        <StyledDetailContentRow>
+                          <StyledDetailContentRowLabel>
+                            Applied Template
+                          </StyledDetailContentRowLabel>
+                          <StyledDetailContentRowValue>
+                            <EntityTag
+                              actant={entity.entities[entity.usedTemplate]}
+                            />
+                          </StyledDetailContentRowValue>
+                        </StyledDetailContentRow>
+                      )}
 
                     <StyledDetailContentRow>
                       <br />
@@ -1340,6 +1377,62 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
               onClick={() => {
                 setApplyTemplateModal(false);
                 handleApplyTemplate();
+              }}
+            />
+          </ButtonGroup>
+        </ModalFooter>
+      </Modal>
+      <Modal
+        showModal={createTemplateModal}
+        width="thin"
+        onEnterPress={() => {
+          handleCreateTemplate();
+        }}
+        onClose={() => {
+          handleCancelCreateTemplate();
+        }}
+      >
+        <ModalHeader title="Create Template" />
+        <ModalContent>
+          <StyledContent>
+            <ModalInputForm>
+              <StyledDetailForm>
+                <StyledDetailContentRow>
+                  <StyledDetailContentRowLabel>
+                    Label
+                  </StyledDetailContentRowLabel>
+                  <StyledDetailContentRowValue>
+                    <Input
+                      disabled={!userCanEdit}
+                      width="full"
+                      value={createTemplateLabel}
+                      onChangeFn={async (newLabel: string) => {
+                        setCreateTemplateLabel(newLabel);
+                      }}
+                    />
+                  </StyledDetailContentRowValue>
+                </StyledDetailContentRow>
+              </StyledDetailForm>
+            </ModalInputForm>
+          </StyledContent>
+        </ModalContent>
+        <ModalFooter>
+          <ButtonGroup>
+            <Button
+              key="cancel"
+              label="Cancel"
+              color="greyer"
+              inverted
+              onClick={() => {
+                handleCancelCreateTemplate();
+              }}
+            />
+            <Button
+              key="submit"
+              label="Create"
+              color="info"
+              onClick={() => {
+                handleCreateTemplate();
               }}
             />
           </ButtonGroup>
