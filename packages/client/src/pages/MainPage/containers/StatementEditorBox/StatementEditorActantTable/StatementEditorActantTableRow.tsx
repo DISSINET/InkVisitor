@@ -173,40 +173,45 @@ export const StatementEditorActantTableRow: React.FC<
         disabled={!userCanEdit}
         options={[
           {
-            longValue: actantPositionDict[0].label,
-            shortValue: actantPositionDict[0].value,
+            longValue: actantPositionDict[Position.Subject].label,
+            shortValue: actantPositionDict[Position.Subject].value,
             onClick: () =>
               updateActant(sActant.id, {
-                position: actantPositionDict[0].value,
+                position: actantPositionDict[Position.Subject].value,
               }),
-            selected: sActant.position == actantPositionDict[0].value,
+            selected:
+              sActant.position == actantPositionDict[Position.Subject].value,
           },
           {
-            longValue: actantPositionDict[1].label,
-            shortValue: actantPositionDict[1].value,
+            longValue: actantPositionDict[Position.Actant1].label,
+            shortValue: actantPositionDict[Position.Actant1].value,
             onClick: () =>
               updateActant(sActant.id, {
-                position: actantPositionDict[1].value,
+                position: actantPositionDict[Position.Actant1].value,
               }),
-            selected: sActant.position == actantPositionDict[1].value,
+            selected:
+              sActant.position == actantPositionDict[Position.Actant1].value,
           },
           {
-            longValue: actantPositionDict[2].label,
-            shortValue: actantPositionDict[2].value,
+            longValue: actantPositionDict[Position.Actant2].label,
+            shortValue: actantPositionDict[Position.Actant2].value,
             onClick: () =>
               updateActant(sActant.id, {
-                position: actantPositionDict[2].value,
+                position: actantPositionDict[Position.Actant2].value,
               }),
-            selected: sActant.position == actantPositionDict[2].value,
+            selected:
+              sActant.position == actantPositionDict[Position.Actant2].value,
           },
           {
-            longValue: actantPositionDict[3].label,
-            shortValue: actantPositionDict[3].value,
+            longValue: actantPositionDict[Position.PseudoActant].label,
+            shortValue: actantPositionDict[Position.PseudoActant].value,
             onClick: () =>
               updateActant(sActant.id, {
-                position: actantPositionDict[3].value,
+                position: actantPositionDict[Position.PseudoActant].value,
               }),
-            selected: sActant.position == actantPositionDict[3].value,
+            selected:
+              sActant.position ==
+              actantPositionDict[Position.PseudoActant].value,
           },
         ]}
       />
