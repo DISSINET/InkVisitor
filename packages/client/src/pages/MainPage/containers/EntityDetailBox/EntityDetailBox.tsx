@@ -119,6 +119,10 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
 
       setCreateTemplateModal(false);
       setCreateTemplateLabel("");
+
+      toast.info(
+        `Template "${templateEntity.label}" created from entity "${entity.label}"`
+      );
     }
   };
 
@@ -154,7 +158,7 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
       };
 
       toast.info(
-        `Template ${templateToApply.label} applied to Statement ${entity.label}`
+        `Template "${templateToApply.label}" applied to Statement "${entity.label}"`
       );
 
       updateEntityMutation.mutate(entityAfterTemplateApplied);
