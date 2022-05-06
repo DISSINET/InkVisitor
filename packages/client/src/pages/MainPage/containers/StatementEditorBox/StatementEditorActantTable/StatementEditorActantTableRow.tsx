@@ -1,4 +1,5 @@
-import { EntityClass } from "@shared/enums";
+import { actantPositionDict } from "@shared/dictionaries";
+import { EntityClass, Position } from "@shared/enums";
 import {
   IEntity,
   IProp,
@@ -172,40 +173,40 @@ export const StatementEditorActantTableRow: React.FC<
         disabled={!userCanEdit}
         options={[
           {
-            longValue: "subject",
-            shortValue: "s",
+            longValue: actantPositionDict[0].label,
+            shortValue: actantPositionDict[0].value,
             onClick: () =>
               updateActant(sActant.id, {
-                position: "s",
+                position: actantPositionDict[0].value,
               }),
-            selected: sActant.position == "s",
+            selected: sActant.position == actantPositionDict[0].value,
           },
           {
-            longValue: "actant1",
-            shortValue: "a1",
+            longValue: actantPositionDict[1].label,
+            shortValue: actantPositionDict[1].value,
             onClick: () =>
               updateActant(sActant.id, {
-                position: "a1",
+                position: actantPositionDict[1].value,
               }),
-            selected: sActant.position == "a1",
+            selected: sActant.position == actantPositionDict[1].value,
           },
           {
-            longValue: "actant2",
-            shortValue: "a2",
+            longValue: actantPositionDict[2].label,
+            shortValue: actantPositionDict[2].value,
             onClick: () =>
               updateActant(sActant.id, {
-                position: "a2",
+                position: actantPositionDict[2].value,
               }),
-            selected: sActant.position == "a2",
+            selected: sActant.position == actantPositionDict[2].value,
           },
           {
-            longValue: "pseudo-actant",
-            shortValue: "pa",
+            longValue: actantPositionDict[3].label,
+            shortValue: actantPositionDict[3].value,
             onClick: () =>
               updateActant(sActant.id, {
-                position: "p",
+                position: actantPositionDict[3].value,
               }),
-            selected: sActant.position == "p",
+            selected: sActant.position == actantPositionDict[3].value,
           },
         ]}
       />
