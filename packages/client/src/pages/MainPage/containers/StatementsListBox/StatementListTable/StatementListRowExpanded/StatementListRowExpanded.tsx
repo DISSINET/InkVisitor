@@ -12,6 +12,7 @@ import { EntityTag } from "../../../EntityTag/EntityTag";
 import { StatementListRowExpandedPropGroup } from "./StatementListRowExpandedPropGroup";
 import {
   StyledActantGroup,
+  StyledActantWithPropsWrap,
   StyledActantWrap,
   StyledBsArrowReturnRight,
   StyledExpandedRowTd,
@@ -97,10 +98,10 @@ export const StatementListRowExpanded: React.FC<StatementListRowExpanded> = ({
     key: number
   ) => {
     return (
-      <StyledActantWrap key={key}>
+      <StyledActantWithPropsWrap key={key}>
         {renderListActant(actant?.id, key)}
         {renderFirstLevelProps(sActant.props)}
-      </StyledActantWrap>
+      </StyledActantWithPropsWrap>
     );
   };
 

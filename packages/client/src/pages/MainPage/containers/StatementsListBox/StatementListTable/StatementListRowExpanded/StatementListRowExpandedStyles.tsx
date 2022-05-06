@@ -6,7 +6,7 @@ export const StyledSubRow = styled.div`
   width: 100%;
   padding: ${({ theme }) => theme.space[2]};
   padding-right: ${({ theme }) => theme.space[12]};
-  margin-left: ${({ theme }) => `${theme.space[6]}`};
+  padding-left: ${({ theme }) => `${theme.space[6]}`};
   font-size: ${({ theme }) => theme.fontSize["xs"]};
   color: ${({ theme }) => theme.color["black"]};
 `;
@@ -32,7 +32,7 @@ const getIndentation = (level: 1 | 2 | 3) => {
 
 export const StyledPropRow = styled.div<StyledPropRow>`
   margin-left: ${({ level }) => getIndentation(level)};
-  margin-bottom: ${({ theme }) => theme.space[2]};
+  margin-bottom: ${({ theme }) => theme.space[1]};
   display: inline-flex;
   overflow: hidden;
 `;
@@ -43,11 +43,20 @@ export const StyledPropGroup = styled.div`
   flex-direction: column;
 `;
 export const StyledActantWrap = styled.div`
+  width: 100%;
   display: inline-flex;
   overflow: hidden;
+  /* background-color: pink; */
   margin-bottom: ${({ theme }) => theme.space[1]};
 `;
-
+export const StyledActantWithPropsWrap = styled.div`
+  /* width: 100%; */
+  display: inline-flex;
+  flex-direction: column;
+  overflow: hidden;
+  /* background-color: hotpink; */
+  /* margin-bottom: ${({ theme }) => theme.space[1]}; */
+`;
 export const StyledExpandedRowTd = styled.td``;
 export const StyledExpandedRowTr = styled.tr`
   width: 100%;
