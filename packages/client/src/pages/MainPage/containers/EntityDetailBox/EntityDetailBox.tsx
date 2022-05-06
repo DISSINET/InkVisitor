@@ -6,7 +6,14 @@ import {
 } from "@shared/dictionaries";
 import { allEntities, DropdownItem } from "@shared/dictionaries/entity";
 import { EntityClass, Language, UserRoleMode } from "@shared/enums";
-import { IAction, IEntity, IOption, IProp, IReference } from "@shared/types";
+import {
+  IAction,
+  IEntity,
+  IOption,
+  IProp,
+  IReference,
+  IStatement,
+} from "@shared/types";
 import api from "api";
 import {
   Button,
@@ -22,9 +29,10 @@ import {
   MultiInput,
   Submit,
 } from "components";
-import { CProp, DEntity } from "constructors";
+import { CProp, DEntity, DStatement } from "constructors";
 import { useSearchParams } from "hooks";
 import React, { useEffect, useMemo, useState } from "react";
+import { CgInbox } from "react-icons/cg";
 import {
   FaClone,
   FaEdit,
@@ -45,6 +53,7 @@ import { StyledContent } from "../EntityBookmarkBox/EntityBookmarkBoxStyles";
 import { EntityReferenceTable } from "../EntityReferenceTable/EntityReferenceTable";
 import { JSONExplorer } from "../JSONExplorer/JSONExplorer";
 import { PropGroup } from "../PropGroup/PropGroup";
+import { ContextMenuSubmitDelete } from "../TerritoryTreeBox/ContextMenuSubmitDelete/ContextMenuSubmitDelete";
 import {
   StyledActantHeaderRow,
   StyledDetailContentRow,
@@ -90,12 +99,22 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
   const handleCreateTemplate = () => {
     // create template as a copy of the entity
     if (entity) {
-      const templateEntity = DEntity(entity);
+      const templateEntity =
+        entity.class === EntityClass.Statement
+          ? DStatement(entity as IStatement)
+          : DEntity(entity as IEntity);
+
+      if (entity.class === EntityClass.Statement) {
+        delete templateEntity.data["territory"];
+      }
       templateEntity.isTemplate = true;
       templateEntity.usedTemplate = "";
       templateEntity.label = createTemplateLabel;
       api.entityCreate(templateEntity);
-      queryClient.invalidateQueries(["templates"]);
+
+      setTimeout(() => {
+        queryClient.invalidateQueries(["templates"]);
+      }, 1000);
       updateEntityMutation.mutate({ usedTemplate: templateEntity.id });
 
       setCreateTemplateModal(false);
@@ -1409,6 +1428,7 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                       onChangeFn={async (newLabel: string) => {
                         setCreateTemplateLabel(newLabel);
                       }}
+                      changeOnType
                     />
                   </StyledDetailContentRowValue>
                 </StyledDetailContentRow>
