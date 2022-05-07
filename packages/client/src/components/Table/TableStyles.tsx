@@ -25,8 +25,10 @@ export const StyledTh = styled.th`
 `;
 
 export const StyledTableHeader = styled.div`
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
   margin-bottom: 0.5rem;
-  align-items: flex-end;
 `;
 
 interface StyledTr {
@@ -45,4 +47,17 @@ export const StyledTd = styled.td`
   padding: ${({ theme }) => theme.space[2]};
   padding-left: ${({ theme }) => theme.space[4]};
   font-size: ${({ theme }) => theme.fontSize["xs"]};
+`;
+export const StyledPagination = styled.div`
+  display: flex;
+`;
+export const StyledTableRecords = styled.div`
+  font-size: ${({ theme }) => theme.fontSize["xs"]};
+  margin-left: ${({ theme }) => theme.space[2]};
+`;
+export const StyledPageNumber = styled.div`
+  font-size: ${({ theme }) => theme.fontSize["sm"]};
+  margin: ${({ theme }) => `0 ${theme.space[1]}`};
+  display: flex;
+  align-items: center;
 `;

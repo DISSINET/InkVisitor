@@ -1,9 +1,12 @@
-import { Loader } from "components";
+import { Button, Loader } from "components";
 import React, { ReactNode } from "react";
 import { Column, usePagination, useSortBy, useTable } from "react-table";
 import {
+  StyledPageNumber,
+  StyledPagination,
   StyledTable,
   StyledTableHeader,
+  StyledTableRecords,
   StyledTd,
   StyledTh,
   StyledTHead,
@@ -46,7 +49,7 @@ export const Table: React.FC<Table> = ({
       data,
       initialState: {
         pageIndex: 0,
-        pageSize: 20,
+        pageSize: 5,
         hiddenColumns: [],
       },
     },
@@ -55,79 +58,50 @@ export const Table: React.FC<Table> = ({
   );
 
   const getTableHeader = (): ReactNode => (
-    <StyledTableHeader className="table-header level">
-      <div className="level-left">{headerButtons}</div>
-      <div className="level-right">
-        <div className="pagination" style={{ marginBottom: 0 }}>
-          <input
-            className="page-input"
-            type="number"
-            min="1"
-            max={pageOptions.length}
-            defaultValue={pageIndex + 1}
-            onChange={(e): void => {
-              const page = e.target.value ? Number(e.target.value) - 1 : 0;
-              gotoPage(page);
-            }}
-          />
-          <button
-            className="page-button"
-            type="button"
-            onClick={(): void => gotoPage(0)}
-            disabled={!canPreviousPage}
-          >
-            {"<<"}
-          </button>
-          <button
-            className="page-button"
-            type="button"
-            onClick={(): void => previousPage()}
-            disabled={!canPreviousPage}
-          >
-            {"<"}
-          </button>
+    <StyledTableHeader>
+      <StyledPagination>
+        <Button
+          onClick={(): void => gotoPage(0)}
+          disabled={!canPreviousPage}
+          label={"<<"}
+          inverted
+          color="success"
+        />
 
-          <div className="page-number">
-            <strong>
-              {pageIndex + 1} / {pageOptions.length}
-            </strong>
-          </div>
+        <Button
+          onClick={(): void => previousPage()}
+          disabled={!canPreviousPage}
+          label={"<"}
+          inverted
+          color="success"
+        />
 
-          <button
-            className="page-button"
-            type="button"
-            onClick={(): void => nextPage()}
-            disabled={!canNextPage}
-          >
-            {">"}
-          </button>
-          <button
-            className="page-button"
-            type="button"
-            onClick={(): void => gotoPage(pageCount - 1)}
-            disabled={!canNextPage}
-          >
-            {">>"}
-          </button>
-          <select
-            className="page-select"
-            value={pageSize}
-            onChange={(e): void => {
-              setPageSize(Number(e.target.value));
-            }}
-          >
-            {[5, 10, 20, 50, 100].map((pageSize) => (
-              <option key={pageSize} value={pageSize}>
-                Show {pageSize}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div className="table-records">
-          {"records found: "}
-          <b>{data.length}</b>
-        </div>
-      </div>
+        <StyledPageNumber>
+          <strong>
+            {pageIndex + 1} / {pageOptions.length}
+          </strong>
+        </StyledPageNumber>
+
+        <Button
+          onClick={(): void => nextPage()}
+          disabled={!canNextPage}
+          label={">"}
+          inverted
+          color="success"
+        />
+
+        <Button
+          onClick={(): void => gotoPage(pageCount - 1)}
+          disabled={!canNextPage}
+          label={">>"}
+          inverted
+          color="success"
+        />
+      </StyledPagination>
+      <StyledTableRecords>
+        {"records: "}
+        <b>{data.length}</b>
+      </StyledTableRecords>
     </StyledTableHeader>
   );
 

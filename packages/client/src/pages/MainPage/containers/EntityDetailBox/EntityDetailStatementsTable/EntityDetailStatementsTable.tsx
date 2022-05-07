@@ -29,7 +29,7 @@ export const EntityDetailStatementsTable: React.FC<
   const columns = React.useMemo(
     () => [
       {
-        Header: "S",
+        Header: "",
         accessor: "data",
         Cell: ({ row }: Cell) => {
           const useCase =
@@ -81,7 +81,7 @@ export const EntityDetailStatementsTable: React.FC<
         },
       },
       {
-        Header: "edit",
+        Header: "",
         Cell: ({ row }: Cell) => {
           const useCase =
             row.original as IResponseUsedInStatement<UsedInPosition>;
