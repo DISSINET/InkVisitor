@@ -113,6 +113,7 @@ export const StatementEditorBox: React.FC = () => {
   } = useQuery(
     ["statement", statementId],
     async () => {
+      console.log("fetching statement", statementId);
       const res = await api.statementGet(statementId);
 
       return res.data;
