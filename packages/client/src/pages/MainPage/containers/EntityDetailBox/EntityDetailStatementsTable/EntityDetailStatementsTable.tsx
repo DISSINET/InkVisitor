@@ -6,6 +6,10 @@ import React, { useMemo } from "react";
 import { FaEdit } from "react-icons/fa";
 import { Cell } from "react-table";
 import { EntityTag } from "../../EntityTag/EntityTag";
+import {
+  StyledShortenedText,
+  StyledTableTextGridCell,
+} from "./EntityDetailStatementsTableStyles";
 
 interface EntityDetailStatementsTable {
   title: { singular: string; plural: string };
@@ -56,9 +60,13 @@ export const EntityDetailStatementsTable: React.FC<
 
           return (
             <>
-              {entity && entity.class === EntityClass.Statement
-                ? entity.data.text
-                : ""}
+              {entity && entity.class === EntityClass.Statement ? (
+                <StyledTableTextGridCell>
+                  <StyledShortenedText>{entity.data.text}</StyledShortenedText>
+                </StyledTableTextGridCell>
+              ) : (
+                ""
+              )}
             </>
           );
         },
