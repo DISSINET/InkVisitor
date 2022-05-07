@@ -298,28 +298,37 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
   );
 
   const deleteEntityMutation = useMutation(
-    async (entityId: string) => await api.entityDelete(entityId),
+    (entityId: string) => api.entityDelete(entityId),
     {
       onSuccess: async (data, entityId) => {
-        toast.info(`Entity deleted!`);
-
         setShowRemoveSubmit(false);
 
+        toast.info(`Entity deleted!`);
+
         // hide selected territory if T removed
+
+        if (
+          entity &&
+          entity.class == EntityClass.Territory &&
+          entity.id === territoryId
+        ) {
+          setTerritoryId("");
+        } else {
+          queryClient.invalidateQueries("territory");
+        }
+
+        // hide editor box if the deleted entity was also opened in the editor
         if (
           entity &&
           entity.class == EntityClass.Statement &&
-          entity.data.territory.id === territoryId
+          entity.id === statementId
         ) {
-          setTerritoryId("");
+          setStatementId("");
+        } else {
+          queryClient.invalidateQueries("statement");
         }
 
-        setDetailId("");
-
-        queryClient.invalidateQueries("entity");
-        queryClient.invalidateQueries("statement");
         queryClient.invalidateQueries("tree");
-        queryClient.invalidateQueries("territory");
       },
     }
   );
@@ -1360,7 +1369,10 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
       <Submit
         title="Remove entity"
         text="Do you really want to delete the entity?"
-        onSubmit={() => deleteEntityMutation.mutate(detailId)}
+        onSubmit={() => {
+          deleteEntityMutation.mutate(detailId);
+          setDetailId("");
+        }}
         onCancel={() => setShowRemoveSubmit(false)}
         show={showRemoveSubmit}
         loading={deleteEntityMutation.isLoading}
