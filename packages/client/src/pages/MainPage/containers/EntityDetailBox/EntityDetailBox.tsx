@@ -303,9 +303,20 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
       onSuccess: async (data, entityId) => {
         toast.info(`Entity deleted!`);
 
-        setTerritoryId("");
+        setShowRemoveSubmit(false);
+
+        // hide selected territory if T removed
+        if (
+          entity &&
+          entity.class == EntityClass.Statement &&
+          entity.data.territory.id === territoryId
+        ) {
+          setTerritoryId("");
+        }
+
         setDetailId("");
 
+        queryClient.invalidateQueries("entity");
         queryClient.invalidateQueries("statement");
         queryClient.invalidateQueries("tree");
         queryClient.invalidateQueries("territory");
