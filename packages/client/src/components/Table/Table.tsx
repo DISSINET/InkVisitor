@@ -1,7 +1,14 @@
 import { Loader } from "components";
 import React, { ReactNode } from "react";
 import { Column, usePagination, useSortBy, useTable } from "react-table";
-import { StyledTableHeader } from "./TableStyles";
+import {
+  StyledTable,
+  StyledTableHeader,
+  StyledTd,
+  StyledTh,
+  StyledTHead,
+  StyledTr,
+} from "./TableStyles";
 
 interface Table {
   data: any[];
@@ -128,15 +135,15 @@ export const Table: React.FC<Table> = ({
     <>
       {!disablePaging && getTableHeader()}
       <div className="table-container">
-        <table
+        <StyledTable
           {...getTableProps()}
           className="table table-rounded is-striped is-hoverable is-fullwidth"
         >
-          <thead>
+          <StyledTHead>
             {headerGroups.map((headerGroup, key) => (
               <tr {...headerGroup.getHeaderGroupProps()} key={key}>
                 {headerGroup.headers.map((column, key) => (
-                  <th
+                  <StyledTh
                     {...column.getHeaderProps(column.getSortByToggleProps())}
                     key={key}
                   >
@@ -149,29 +156,29 @@ export const Table: React.FC<Table> = ({
                           : " ↓"
                         : ""}
                     </span>
-                  </th>
+                  </StyledTh>
                 ))}
               </tr>
             ))}
-          </thead>
+          </StyledTHead>
           <tbody {...getTableBodyProps()}>
             {page.map((row, key) => {
               prepareRow(row);
               return (
-                <tr {...row.getRowProps()} key={key}>
+                <StyledTr {...row.getRowProps()} key={key}>
                   {row.cells.map((cell, key) => {
                     return (
-                      <td {...cell.getCellProps()} key={key}>
+                      <StyledTd {...cell.getCellProps()} key={key}>
                         {cell.render("Cell")}
-                      </td>
+                      </StyledTd>
                     );
                   })}
-                </tr>
+                </StyledTr>
               );
             })}
           </tbody>
           <tfoot></tfoot>
-        </table>
+        </StyledTable>
         {data.length < 1 && !isLoading && "No records found"}
         {/* {"Server error"} */}
         <Loader show={isLoading} />
