@@ -166,8 +166,6 @@ export const StatementEditorBox: React.FC = () => {
   );
 
   const handleAskForTemplateApply = (templateOptionToApply: IOption) => {
-    console.log(templateToApply, templates);
-
     if (templates) {
       const templateThatIsGoingToBeApplied = templates.find(
         (template: IEntity) => template.id === templateOptionToApply.value
@@ -523,10 +521,8 @@ export const StatementEditorBox: React.FC = () => {
       });
     },
     {
-      onSuccess: (data, variables) => {
-        if (detailId === statementId) {
-          queryClient.invalidateQueries(["entity"]);
-        }
+      onSuccess: (data, variables: any) => {
+        queryClient.invalidateQueries(["entity"]);
         queryClient.invalidateQueries(["statement"]);
         queryClient.invalidateQueries(["territory"]);
       },

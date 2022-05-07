@@ -137,6 +137,7 @@ export const StatementEditorActionTableRow: React.FC<
               action: newSelectedId,
             });
           }}
+          openDetailOnCreate
           categoryTypes={[EntityClass.Action]}
           excludedEntities={excludedSuggesterEntities}
           placeholder={"add new action"}

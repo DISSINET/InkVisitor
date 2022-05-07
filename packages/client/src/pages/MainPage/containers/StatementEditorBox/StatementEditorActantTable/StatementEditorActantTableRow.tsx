@@ -160,6 +160,7 @@ export const StatementEditorActantTableRow: React.FC<
             });
           }}
           categoryTypes={classEntitiesActant}
+          openDetailOnCreate
           excludedEntities={excludedSuggesterEntities}
         />
       )
