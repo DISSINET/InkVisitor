@@ -57,8 +57,8 @@ export const Table: React.FC<Table> = ({
     usePagination
   );
 
-  const getTableHeader = (): ReactNode => (
-    <StyledTableHeader>
+  const getPagination = (position: "top" | "bottom"): ReactNode => (
+    <StyledTableHeader position={position}>
       <StyledPagination>
         <Button
           onClick={(): void => gotoPage(0)}
@@ -107,7 +107,7 @@ export const Table: React.FC<Table> = ({
 
   return (
     <>
-      {!disablePaging && getTableHeader()}
+      {!disablePaging && getPagination("top")}
       <div className="table-container">
         <StyledTable
           {...getTableProps()}
@@ -156,7 +156,7 @@ export const Table: React.FC<Table> = ({
         {data.length < 1 && !isLoading && "No records found"}
         {/* {"Server error"} */}
         <Loader show={isLoading} />
-        {!disablePaging && getTableHeader()}
+        {!disablePaging && getPagination("bottom")}
       </div>
     </>
   );

@@ -1336,11 +1336,10 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
               /> */}
 
               <EntityDetailStatementsTable
+                key="Statement"
                 title={{ singular: "Statement", plural: "Statements" }}
                 entities={entity.entities}
                 useCases={entity.usedInStatement}
-                mode="Statement"
-                key="Statement"
               />
 
               {/* usedId statement props */}

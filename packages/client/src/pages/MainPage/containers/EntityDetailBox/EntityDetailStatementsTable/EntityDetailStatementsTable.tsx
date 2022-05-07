@@ -9,18 +9,18 @@ import { EntityTag } from "../../EntityTag/EntityTag";
 import {
   StyledShortenedText,
   StyledTableTextGridCell,
+  StyledUsedInTitle,
 } from "./EntityDetailStatementsTableStyles";
 
 interface EntityDetailStatementsTable {
   title: { singular: string; plural: string };
   entities: { [key: string]: IEntity };
   useCases: IResponseUsedInStatement<UsedInPosition>[];
-  mode: "Prop" | "Statement" | "StatementProp";
   perPage?: number;
 }
 export const EntityDetailStatementsTable: React.FC<
   EntityDetailStatementsTable
-> = ({ title, entities, useCases, mode, perPage = 20 }) => {
+> = ({ title, entities, useCases, perPage = 20 }) => {
   const { detailId, setDetailId, setStatementId, territoryId, setTerritoryId } =
     useSearchParams();
 
@@ -81,7 +81,7 @@ export const EntityDetailStatementsTable: React.FC<
         },
       },
       {
-        Header: "",
+        id: "edit",
         Cell: ({ row }: Cell) => {
           const useCase =
             row.original as IResponseUsedInStatement<UsedInPosition>;
@@ -114,8 +114,12 @@ export const EntityDetailStatementsTable: React.FC<
   );
 
   return (
-    <>
+    <div>
+      <StyledUsedInTitle>
+        <b>{`${useCases.length} `}</b>{" "}
+        {`${useCases.length === 1 ? title.singular : title.plural}`}
+      </StyledUsedInTitle>
       <Table columns={columns} data={data} />
-    </>
+    </div>
   );
 };

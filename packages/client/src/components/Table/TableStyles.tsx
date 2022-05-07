@@ -24,11 +24,15 @@ export const StyledTh = styled.th`
   font-weight: normal;
 `;
 
-export const StyledTableHeader = styled.div`
+interface StyledTableHeader {
+  position: "top" | "bottom";
+}
+export const StyledTableHeader = styled.div<StyledTableHeader>`
   display: flex;
   justify-content: flex-end;
   align-items: center;
-  margin-bottom: 0.5rem;
+  margin-bottom: ${({ position }) => (position === "top" ? "0.5rem" : "")};
+  margin-top: ${({ position }) => (position === "bottom" ? "0.5rem" : "")};
 `;
 
 interface StyledTr {
