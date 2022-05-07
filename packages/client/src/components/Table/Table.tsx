@@ -109,7 +109,7 @@ export const Table: React.FC<Table> = ({
               setPageSize(Number(e.target.value));
             }}
           >
-            {[5, 10, 50, 100, 500].map((pageSize) => (
+            {[5, 10, 20, 50, 100].map((pageSize) => (
               <option key={pageSize} value={pageSize}>
                 Show {pageSize}
               </option>
