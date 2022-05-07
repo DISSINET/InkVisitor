@@ -1,16 +1,16 @@
-import { EntityClass } from "@shared/enums";
-import { IEntity } from "@shared/types";
+import { EntityClass, UsedInPosition } from "@shared/enums";
+import { IEntity, IResponseUsedInStatement } from "@shared/types";
 import { Button, Table } from "components";
 import { useSearchParams } from "hooks";
 import React, { useMemo } from "react";
 import { FaEdit } from "react-icons/fa";
-import { Cell, useRowState } from "react-table";
+import { Cell } from "react-table";
 import { EntityTag } from "../../EntityTag/EntityTag";
 
 interface EntityDetailStatementsTable {
   title: { singular: string; plural: string };
   entities: { [key: string]: IEntity };
-  useCases: any[];
+  useCases: IResponseUsedInStatement<UsedInPosition>[];
   mode: "Prop" | "Statement" | "StatementProp";
   perPage?: number;
 }
@@ -28,8 +28,9 @@ export const EntityDetailStatementsTable: React.FC<
         Header: "S",
         accessor: "data",
         Cell: ({ row }: Cell) => {
-          const entityId =
-            mode === "Prop" ? row.values.entityId : row.values.statement?.id;
+          const useCase =
+            row.original as IResponseUsedInStatement<UsedInPosition>;
+          const entityId = useCase.statement?.id;
           const entity = entityId ? entities[entityId] : false;
           return (
             <>
@@ -48,8 +49,9 @@ export const EntityDetailStatementsTable: React.FC<
       {
         Header: "text",
         Cell: ({ row }: Cell) => {
-          const entityId =
-            mode === "Prop" ? row.values.entityId : row.values.statement?.id;
+          const useCase =
+            row.original as IResponseUsedInStatement<UsedInPosition>;
+          const entityId = useCase.statement?.id;
           const entity = entityId ? entities[entityId] : false;
 
           return (
@@ -73,8 +75,9 @@ export const EntityDetailStatementsTable: React.FC<
       {
         Header: "edit",
         Cell: ({ row }: Cell) => {
-          const entityId =
-            mode === "Prop" ? row.values.entityId : row.values.statement?.id;
+          const useCase =
+            row.original as IResponseUsedInStatement<UsedInPosition>;
+          const entityId = useCase.statement?.id;
           const entity = entityId ? entities[entityId] : false;
 
           return (

@@ -72,6 +72,7 @@ import {
   StyledTagWrap,
 } from "./EntityDetailBoxStyles";
 import { EntityDetailBoxTable } from "./EntityDetailBoxTable";
+import { EntityDetailStatementsTable } from "./EntityDetailStatementsTable/EntityDetailStatementsTable";
 
 interface EntityDetailBox {}
 export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
@@ -188,7 +189,7 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
     error: templateError,
     isFetching: isFetchingTemplates,
   } = useQuery(
-    ["entity-templates", entity],
+    ["entity-templates", entity?.class],
     async () => {
       const res = await api.entitiesGetMore({
         onlyTemplates: true,
@@ -1326,7 +1327,15 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
               />
 
               {/* usedId statements */}
-              <EntityDetailBoxTable
+              {/* <EntityDetailBoxTable
+                title={{ singular: "Statement", plural: "Statements" }}
+                entities={entity.entities}
+                useCases={entity.usedInStatement}
+                mode="Statement"
+                key="Statement"
+              /> */}
+
+              <EntityDetailStatementsTable
                 title={{ singular: "Statement", plural: "Statements" }}
                 entities={entity.entities}
                 useCases={entity.usedInStatement}
