@@ -2,7 +2,7 @@ import { mergeDeep } from "@common/functions";
 import { ResponseEntity, ResponseEntityDetail } from "@models/entity/response";
 import Audit from "@models/audit/audit";
 import { getEntityClass } from "@models/factory";
-import { filterEntitiesByWildcard, findEntityById } from "@service/shorthands";
+import { findEntityById } from "@service/shorthands";
 import { EntityClass } from "@shared/enums";
 import {
   IEntity,
@@ -22,8 +22,11 @@ import {
 import { Request, Router } from "express";
 import { asyncRouteHandler } from "../index";
 import Statement from "@models/statement/statement";
-import { isConstructorDeclaration } from "typescript";
 import { IResponseSearchOld } from "@shared/types/response-search";
+import {
+  filterEntitiesByWildcard,
+  ResponseSearch,
+} from "@models/entity/response_search";
 
 export default Router()
   .get(
@@ -81,7 +84,7 @@ export default Router()
       }
 
       const entities = await filterEntitiesByWildcard(
-        request.db,
+        request.db.connection,
         classParam,
         excluded,
         label,
@@ -113,40 +116,9 @@ export default Router()
         throw err;
       }
 
-      let associatedEntityIds: string[] | undefined = undefined;
-      if (req.entityId) {
-        associatedEntityIds = await Statement.findIdsByDataEntityId(
-          httpRequest.db.connection,
-          req.entityId
-        );
-
-        // entity id provided, but not found within statements - end now
-        if (!associatedEntityIds.length) {
-          return [];
-        }
-      }
-
-      // filter out duplicates
-      associatedEntityIds = [...new Set(associatedEntityIds)];
-
-      const entities = await filterEntitiesByWildcard(
-        httpRequest.db,
-        req.class,
-        req.excluded,
-        req.label,
-        associatedEntityIds,
-        req.onlyTemplates,
-        req.usedTemplate
-      );
-
-      const responses: IResponseSearch[] = [];
-      for (const entityData of entities) {
-        const response = new ResponseEntity(getEntityClass(entityData));
-        await response.prepare(httpRequest);
-        responses.push(response);
-      }
-
-      return responses;
+      const response = new ResponseSearch(req);
+      await response.prepare(httpRequest);
+      return response.getResults();
     })
   )
   .post(
@@ -345,7 +317,7 @@ export default Router()
       associatedEntityIds = [...new Set(associatedEntityIds)];
 
       const entities = await filterEntitiesByWildcard(
-        httpRequest.db,
+        httpRequest.db.connection,
         req.class,
         req.excluded,
         req.label,
