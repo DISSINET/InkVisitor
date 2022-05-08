@@ -26,8 +26,7 @@ interface EntityDetailStatementsTable {
 export const EntityDetailStatementsTable: React.FC<
   EntityDetailStatementsTable
 > = ({ title, entities, useCases, perPage = 5 }) => {
-  const { detailId, setDetailId, setStatementId, territoryId, setTerritoryId } =
-    useSearchParams();
+  const { setStatementId, setTerritoryId } = useSearchParams();
 
   const data = useMemo(() => (useCases ? useCases : []), [useCases]);
 
@@ -204,7 +203,7 @@ export const EntityDetailStatementsTable: React.FC<
         },
       },
       {
-        Header: "text",
+        Header: "Text",
         Cell: ({ row }: Cell) => {
           const useCase =
             row.original as IResponseUsedInStatement<UsedInPosition>;
@@ -225,13 +224,8 @@ export const EntityDetailStatementsTable: React.FC<
         },
       },
       {
-        Header: "position",
+        Header: "Position",
         accessor: "position",
-        Cell: ({ row }: Cell) => {
-          // TODO: tooltip?
-          const { position } = row.values;
-          return <>{position}</>;
-        },
       },
       {
         id: "edit",

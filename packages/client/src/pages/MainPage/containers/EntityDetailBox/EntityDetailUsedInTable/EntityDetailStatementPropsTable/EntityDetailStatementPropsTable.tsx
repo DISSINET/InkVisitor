@@ -1,8 +1,10 @@
 import { IEntity } from "@shared/types";
 import { IResponseUsedInStatementProps } from "@shared/types/response-detail";
-import { Table } from "components";
+import { Button, Table } from "components";
+import { useSearchParams } from "hooks";
 import { EntityTag } from "pages/MainPage/containers/EntityTag/EntityTag";
 import React, { useMemo } from "react";
+import { FaEdit } from "react-icons/fa";
 import { Cell, Column } from "react-table";
 import {
   StyledTableTextGridCell,
@@ -18,6 +20,8 @@ interface EntityDetailStatementPropsTable {
 export const EntityDetailStatementPropsTable: React.FC<
   EntityDetailStatementPropsTable
 > = ({ title, entities, useCases, perPage = 5 }) => {
+  const { setStatementId, setTerritoryId } = useSearchParams();
+
   const data = useMemo(() => (useCases ? useCases : []), [useCases]);
 
   const renderEntityTag = (entity: IEntity) => {
@@ -31,6 +35,27 @@ export const EntityDetailStatementPropsTable: React.FC<
   };
   const columns: Column<{}>[] = React.useMemo(
     () => [
+      {
+        Header: "",
+        accessor: "data",
+        Cell: ({ row }: Cell) => {
+          const useCase = row.original as IResponseUsedInStatementProps;
+          const entityId = useCase.statementId;
+          const entity = entityId ? entities[entityId] : false;
+          return (
+            <>
+              {entity && (
+                <EntityTag
+                  key={entity.id}
+                  actant={entity}
+                  showOnly="entity"
+                  tooltipText={entity.label}
+                />
+              )}
+            </>
+          );
+        },
+      },
       {
         Header: "Origin",
         accesor: "data",
@@ -57,6 +82,34 @@ export const EntityDetailStatementPropsTable: React.FC<
           const entityId = useCase.valueId;
           const entity = entityId ? entities[entityId] : false;
           return <>{entity && renderEntityTag(entity)}</>;
+        },
+      },
+      {
+        id: "edit",
+        Cell: ({ row }: Cell) => {
+          const useCase = row.original as IResponseUsedInStatementProps;
+          const entityId = useCase.statementId;
+          const entity = entityId ? entities[entityId] : false;
+
+          return (
+            <>
+              {entity && (
+                <Button
+                  icon={<FaEdit size={14} />}
+                  color="primary"
+                  inverted
+                  noBorder
+                  tooltip="edit statement"
+                  onClick={async () => {
+                    if (entity.data.territory) {
+                      setStatementId(entity.id);
+                      setTerritoryId(entity.data.territory.id);
+                    }
+                  }}
+                />
+              )}
+            </>
+          );
         },
       },
     ],

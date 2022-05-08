@@ -24,7 +24,7 @@ export interface IResponseUsedInStatementProps {
   valueId: string;
   originId: string; // what entity is the detail id used for
 }
-
+// TODO: clear position
 export interface IResponseUsedInMetaProp<PositionEnum> {
   typeId: string;
   valueId: string;
