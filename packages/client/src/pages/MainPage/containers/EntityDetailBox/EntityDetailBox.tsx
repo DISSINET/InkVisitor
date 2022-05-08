@@ -69,7 +69,6 @@ import {
   StyledFormWrapper,
   StyledTagWrap,
 } from "./EntityDetailBoxStyles";
-import { EntityDetailBoxTable } from "./EntityDetailBoxTable";
 import { EntityDetailMetaPropsTable } from "./EntityDetailUsedInTable/EntityDetailMetaPropsTable/EntityDetailMetaPropsTable";
 import { EntityDetailStatementPropsTable } from "./EntityDetailUsedInTable/EntityDetailStatementPropsTable/EntityDetailStatementPropsTable";
 import { EntityDetailStatementsTable } from "./EntityDetailUsedInTable/EntityDetailStatementsTable/EntityDetailStatementsTable";
