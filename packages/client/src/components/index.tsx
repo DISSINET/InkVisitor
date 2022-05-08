@@ -27,6 +27,7 @@ import { Tooltip } from "components/Tooltip/Tooltip";
 import { AttributeIcon } from "./AttributeIcon/AttributeIcon";
 import { Checkbox } from "./Checkbox/Checkbox";
 import { PanelSeparator } from "./PanelSeparator/PanelSeparator";
+import { Table } from "./Table/Table";
 
 export {
   AttributeIcon,
@@ -41,6 +42,7 @@ export {
   Loader,
   Panel,
   Tag,
+  Table,
   TagGroup,
   Suggester,
   Dropdown,

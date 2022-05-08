@@ -32,7 +32,6 @@ import {
 import { CProp, DEntity, DStatement } from "constructors";
 import { useSearchParams } from "hooks";
 import React, { useEffect, useMemo, useState } from "react";
-import { CgInbox } from "react-icons/cg";
 import {
   FaClone,
   FaEdit,
@@ -53,7 +52,6 @@ import { StyledContent } from "../EntityBookmarkBox/EntityBookmarkBoxStyles";
 import { EntityReferenceTable } from "../EntityReferenceTable/EntityReferenceTable";
 import { JSONExplorer } from "../JSONExplorer/JSONExplorer";
 import { PropGroup } from "../PropGroup/PropGroup";
-import { ContextMenuSubmitDelete } from "../TerritoryTreeBox/ContextMenuSubmitDelete/ContextMenuSubmitDelete";
 import {
   StyledActantHeaderRow,
   StyledDetailContentRow,
@@ -71,7 +69,9 @@ import {
   StyledFormWrapper,
   StyledTagWrap,
 } from "./EntityDetailBoxStyles";
-import { EntityDetailBoxTable } from "./EntityDetailBoxTable";
+import { EntityDetailMetaPropsTable } from "./EntityDetailUsedInTable/EntityDetailMetaPropsTable/EntityDetailMetaPropsTable";
+import { EntityDetailStatementPropsTable } from "./EntityDetailUsedInTable/EntityDetailStatementPropsTable/EntityDetailStatementPropsTable";
+import { EntityDetailStatementsTable } from "./EntityDetailUsedInTable/EntityDetailStatementsTable/EntityDetailStatementsTable";
 
 interface EntityDetailBox {}
 export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
@@ -188,7 +188,7 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
     error: templateError,
     isFetching: isFetchingTemplates,
   } = useQuery(
-    ["entity-templates", entity],
+    ["entity-templates", entity?.class],
     async () => {
       const res = await api.entitiesGetMore({
         onlyTemplates: true,
@@ -1317,32 +1317,37 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
               )}
 
               {/* usedId props */}
-              <EntityDetailBoxTable
+              {/* <EntityDetailBoxTable
                 title={{ singular: "Meta Property", plural: "Meta Properties" }}
                 entities={entity.entities}
                 useCases={entity.usedInMetaProps}
-                mode="Prop"
-                key="Prop"
+                mode="MetaProp"
+                key="MetaProp"
+              /> */}
+
+              <EntityDetailMetaPropsTable
+                title={{ singular: "Meta Property", plural: "Meta Properties" }}
+                entities={entity.entities}
+                useCases={entity.usedInMetaProps}
+                key="MetaProp"
               />
 
               {/* usedId statements */}
-              <EntityDetailBoxTable
+              <EntityDetailStatementsTable
                 title={{ singular: "Statement", plural: "Statements" }}
                 entities={entity.entities}
                 useCases={entity.usedInStatement}
-                mode="Statement"
                 key="Statement"
               />
 
               {/* usedId statement props */}
-              <EntityDetailBoxTable
+              <EntityDetailStatementPropsTable
                 title={{
                   singular: "Statement Property",
                   plural: "Statement Properties",
                 }}
                 entities={entity.entities}
                 useCases={entity.usedInStatementProps}
-                mode="StatementProp"
                 key="StatementProp"
               />
             </StyledDetailSection>
