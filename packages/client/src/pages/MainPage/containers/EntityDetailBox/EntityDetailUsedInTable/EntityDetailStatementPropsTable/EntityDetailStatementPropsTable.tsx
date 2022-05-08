@@ -5,6 +5,10 @@ import { useSearchParams } from "hooks";
 import { EntityTag } from "pages/MainPage/containers/EntityTag/EntityTag";
 import React, { useMemo } from "react";
 import { Cell, Column } from "react-table";
+import {
+  StyledShortenedText,
+  StyledTableTextGridCell,
+} from "../EntityDetailUsedInTableStyles";
 
 interface EntityDetailStatementPropsTable {
   title: { singular: string; plural: string };
@@ -15,11 +19,15 @@ interface EntityDetailStatementPropsTable {
 export const EntityDetailStatementPropsTable: React.FC<
   EntityDetailStatementPropsTable
 > = ({ title, entities, useCases, perPage = 5 }) => {
-  const { detailId, setDetailId, setStatementId, territoryId, setTerritoryId } =
-    useSearchParams();
-
   const data = useMemo(() => (useCases ? useCases : []), [useCases]);
 
+  const renderEntityTag = (entity: IEntity) => {
+    return (
+      <StyledTableTextGridCell>
+        <EntityTag fullWidth actant={entity} />
+      </StyledTableTextGridCell>
+    );
+  };
   const columns: Column<{}>[] = React.useMemo(
     () => [
       {
@@ -29,7 +37,7 @@ export const EntityDetailStatementPropsTable: React.FC<
           const useCase = row.original as IResponseUsedInStatementProps;
           const entityId = useCase.originId;
           const entity = entityId ? entities[entityId] : false;
-          return <>{entity && <EntityTag actant={entity} />}</>;
+          return <>{entity && renderEntityTag(entity)}</>;
         },
       },
       {
@@ -38,7 +46,7 @@ export const EntityDetailStatementPropsTable: React.FC<
           const useCase = row.original as IResponseUsedInStatementProps;
           const entityId = useCase.typeId;
           const entity = entityId ? entities[entityId] : false;
-          return <>{entity && <EntityTag actant={entity} />}</>;
+          return <>{entity && renderEntityTag(entity)}</>;
         },
       },
       {
@@ -47,7 +55,7 @@ export const EntityDetailStatementPropsTable: React.FC<
           const useCase = row.original as IResponseUsedInStatementProps;
           const entityId = useCase.valueId;
           const entity = entityId ? entities[entityId] : false;
-          return <>{entity && <EntityTag actant={entity} />}</>;
+          return <>{entity && renderEntityTag(entity)}</>;
         },
       },
     ],

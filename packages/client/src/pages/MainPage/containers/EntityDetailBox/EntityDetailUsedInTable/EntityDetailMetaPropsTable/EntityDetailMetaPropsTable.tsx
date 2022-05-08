@@ -5,6 +5,7 @@ import { useSearchParams } from "hooks";
 import React, { useMemo } from "react";
 import { Cell, Column } from "react-table";
 import { EntityTag } from "../../../EntityTag/EntityTag";
+import { StyledTableTextGridCell } from "../EntityDetailUsedInTableStyles";
 
 interface EntityDetailMetaPropsTable {
   title: { singular: string; plural: string };
@@ -15,10 +16,15 @@ interface EntityDetailMetaPropsTable {
 export const EntityDetailMetaPropsTable: React.FC<
   EntityDetailMetaPropsTable
 > = ({ title, entities, useCases, perPage = 5 }) => {
-  const { detailId, setDetailId, setStatementId, territoryId, setTerritoryId } =
-    useSearchParams();
-
   const data = useMemo(() => (useCases ? useCases : []), [useCases]);
+
+  const renderEntityTag = (entity: IEntity) => {
+    return (
+      <StyledTableTextGridCell>
+        <EntityTag fullWidth actant={entity} />
+      </StyledTableTextGridCell>
+    );
+  };
 
   const columns: Column<{}>[] = React.useMemo(
     () => [
@@ -30,7 +36,7 @@ export const EntityDetailMetaPropsTable: React.FC<
             row.original as IResponseUsedInMetaProp<UsedInPosition>;
           const entityId = useCase.originId;
           const entity = entityId ? entities[entityId] : false;
-          return <>{entity && <EntityTag actant={entity} />}</>;
+          return <>{entity && renderEntityTag(entity)}</>;
         },
       },
       {
@@ -40,7 +46,7 @@ export const EntityDetailMetaPropsTable: React.FC<
             row.original as IResponseUsedInMetaProp<UsedInPosition>;
           const entityId = useCase.typeId;
           const entity = entityId ? entities[entityId] : false;
-          return <>{entity && <EntityTag actant={entity} />}</>;
+          return <>{entity && renderEntityTag(entity)}</>;
         },
       },
       {
@@ -50,7 +56,7 @@ export const EntityDetailMetaPropsTable: React.FC<
             row.original as IResponseUsedInMetaProp<UsedInPosition>;
           const entityId = useCase.valueId;
           const entity = entityId ? entities[entityId] : false;
-          return <>{entity && <EntityTag actant={entity} />}</>;
+          return <>{entity && renderEntityTag(entity)}</>;
         },
       },
     ],
