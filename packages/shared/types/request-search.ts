@@ -13,7 +13,7 @@ export interface IResponseSearch {
   usedTemplate?: string;
 }
 
-export class RequestSearch implements IResponseSearch {
+export class RequestSearch {
   class: EntityClass | false;
   label: string | false;
   entityId: string | false;
