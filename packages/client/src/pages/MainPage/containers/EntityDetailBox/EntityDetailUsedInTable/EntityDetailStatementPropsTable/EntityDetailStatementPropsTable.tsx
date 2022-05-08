@@ -36,7 +36,7 @@ export const EntityDetailStatementPropsTable: React.FC<
   const columns: Column<{}>[] = React.useMemo(
     () => [
       {
-        Header: "",
+        Header: "Statement",
         accessor: "data",
         Cell: ({ row }: Cell) => {
           const useCase = row.original as IResponseUsedInStatementProps;
@@ -48,7 +48,6 @@ export const EntityDetailStatementPropsTable: React.FC<
                 <EntityTag
                   key={entity.id}
                   actant={entity}
-                  showOnly="entity"
                   tooltipText={entity.label}
                 />
               )}
