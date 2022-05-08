@@ -84,7 +84,7 @@ export const Table: React.FC<Table> = ({
             disabled={!canPreviousPage}
             label={"<<"}
             inverted
-            color="success"
+            color="greyer"
           />
 
           <Button
@@ -92,13 +92,11 @@ export const Table: React.FC<Table> = ({
             disabled={!canPreviousPage}
             label={"<"}
             inverted
-            color="success"
+            color="greyer"
           />
 
           <StyledPageNumber>
-            <strong>
-              {pageIndex + 1} / {pageOptions.length}
-            </strong>
+            {pageIndex + 1}/{pageOptions.length}
           </StyledPageNumber>
 
           <Button
@@ -106,7 +104,7 @@ export const Table: React.FC<Table> = ({
             disabled={!canNextPage}
             label={">"}
             inverted
-            color="success"
+            color="greyer"
           />
 
           <Button
@@ -114,7 +112,7 @@ export const Table: React.FC<Table> = ({
             disabled={!canNextPage}
             label={">>"}
             inverted
-            color="success"
+            color="greyer"
           />
         </StyledPagination>
       )}

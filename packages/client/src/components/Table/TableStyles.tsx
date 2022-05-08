@@ -66,9 +66,11 @@ export const StyledPagination = styled.div`
 `;
 export const StyledPageNumber = styled.div`
   font-size: ${({ theme }) => theme.fontSize["sm"]};
-  margin: ${({ theme }) => `0 ${theme.space[1]}`};
+  margin: ${({ theme }) => `0 ${theme.space[2]}`};
   display: flex;
   align-items: center;
+  color: ${({ theme }) => theme.color["info"]};
+  /* font-weight: ${({ theme }) => theme.fontWeight["bold"]}; */
 `;
 export const StyledUsedInTitle = styled.div`
   padding-left: ${({ theme }) => theme.space[4]};
