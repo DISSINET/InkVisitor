@@ -1,3 +1,4 @@
+import { UsedInPosition } from "@shared/enums";
 import { IEntity, IResponseUsedInMetaProp } from "@shared/types";
 import { Table } from "components";
 import { useSearchParams } from "hooks";
@@ -8,7 +9,7 @@ import { EntityTag } from "../../../EntityTag/EntityTag";
 interface EntityDetailMetaPropsTable {
   title: { singular: string; plural: string };
   entities: { [key: string]: IEntity };
-  useCases: IResponseUsedInMetaProp[];
+  useCases: IResponseUsedInMetaProp<UsedInPosition>[];
   perPage?: number;
 }
 export const EntityDetailMetaPropsTable: React.FC<
@@ -25,7 +26,8 @@ export const EntityDetailMetaPropsTable: React.FC<
         Header: "Origin",
         accesor: "data",
         Cell: ({ row }: Cell) => {
-          const useCase = row.original as IResponseUsedInMetaProp;
+          const useCase =
+            row.original as IResponseUsedInMetaProp<UsedInPosition>;
           const entityId = useCase.originId;
           const entity = entityId ? entities[entityId] : false;
           return <>{entity && <EntityTag actant={entity} />}</>;
@@ -34,7 +36,8 @@ export const EntityDetailMetaPropsTable: React.FC<
       {
         Header: "Type",
         Cell: ({ row }: Cell) => {
-          const useCase = row.original as IResponseUsedInMetaProp;
+          const useCase =
+            row.original as IResponseUsedInMetaProp<UsedInPosition>;
           const entityId = useCase.typeId;
           const entity = entityId ? entities[entityId] : false;
           return <>{entity && <EntityTag actant={entity} />}</>;
@@ -43,7 +46,8 @@ export const EntityDetailMetaPropsTable: React.FC<
       {
         Header: "Value",
         Cell: ({ row }: Cell) => {
-          const useCase = row.original as IResponseUsedInMetaProp;
+          const useCase =
+            row.original as IResponseUsedInMetaProp<UsedInPosition>;
           const entityId = useCase.valueId;
           const entity = entityId ? entities[entityId] : false;
           return <>{entity && <EntityTag actant={entity} />}</>;
