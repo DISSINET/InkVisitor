@@ -1,6 +1,5 @@
 import { EntityClass, UsedInPosition } from "@shared/enums";
 import {
-  IAction,
   IEntity,
   IResponseUsedInStatement,
   IStatementActant,
@@ -8,15 +7,15 @@ import {
 } from "@shared/types";
 import { Button, Table, TagGroup, Tooltip } from "components";
 import { useSearchParams } from "hooks";
+import { EntityTag } from "pages/MainPage/containers/EntityTag/EntityTag";
 import React, { useMemo } from "react";
 import { FaEdit } from "react-icons/fa";
 import { Cell, Column } from "react-table";
-import { EntityTag } from "../../EntityTag/EntityTag";
-import { StyledDots } from "../../StatementsListBox/StatementLitBoxStyles";
 import {
+  StyledDots,
   StyledShortenedText,
   StyledTableTextGridCell,
-} from "./EntityDetailStatementsTableStyles";
+} from "../EntityDetailUsedInTableStyles";
 
 interface EntityDetailStatementsTable {
   title: { singular: string; plural: string };

@@ -70,9 +70,9 @@ import {
   StyledTagWrap,
 } from "./EntityDetailBoxStyles";
 import { EntityDetailBoxTable } from "./EntityDetailBoxTable";
-import { EntityDetailMetaPropsTable } from "./EntityDetailMetaPropsTable/EntityDetailMetaPropsTable";
-import { EntityDetailStatementPropsTable } from "./EntityDetailStatementPropsTable/EntityDetailStatementPropsTable";
-import { EntityDetailStatementsTable } from "./EntityDetailStatementsTable/EntityDetailStatementsTable";
+import { EntityDetailMetaPropsTable } from "./EntityDetailUsedInTable/EntityDetailMetaPropsTable/EntityDetailMetaPropsTable";
+import { EntityDetailStatementPropsTable } from "./EntityDetailUsedInTable/EntityDetailStatementPropsTable/EntityDetailStatementPropsTable";
+import { EntityDetailStatementsTable } from "./EntityDetailUsedInTable/EntityDetailStatementsTable/EntityDetailStatementsTable";
 
 interface EntityDetailBox {}
 export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
@@ -1351,16 +1351,6 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                 useCases={entity.usedInStatementProps}
                 key="StatementProp"
               />
-              {/* <EntityDetailBoxTable
-                title={{
-                  singular: "Statement Property",
-                  plural: "Statement Properties",
-                }}
-                entities={entity.entities}
-                useCases={entity.usedInStatementProps}
-                key="StatementProp"
-                mode="StatementProp"
-              /> */}
             </StyledDetailSection>
 
             {/* Audits */}

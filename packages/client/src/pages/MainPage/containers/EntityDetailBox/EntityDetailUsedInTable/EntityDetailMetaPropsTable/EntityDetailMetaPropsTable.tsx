@@ -3,7 +3,7 @@ import { Table } from "components";
 import { useSearchParams } from "hooks";
 import React, { useMemo } from "react";
 import { Cell, Column } from "react-table";
-import { EntityTag } from "../../EntityTag/EntityTag";
+import { EntityTag } from "../../../EntityTag/EntityTag";
 
 interface EntityDetailMetaPropsTable {
   title: { singular: string; plural: string };

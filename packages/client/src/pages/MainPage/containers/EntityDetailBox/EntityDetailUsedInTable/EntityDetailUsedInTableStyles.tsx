@@ -2,7 +2,6 @@ import styled from "styled-components";
 
 export const StyledTableTextGridCell = styled.div`
   display: grid;
-  max-width: 100%;
   overflow: hidden;
   font-size: inherit;
 `;
@@ -14,4 +13,10 @@ export const StyledShortenedText = styled.div`
   overflow: hidden;
   text-overflow: ellipsis;
   font-size: inherit;
+`;
+
+export const StyledDots = styled.div`
+  display: flex;
+  align-items: flex-end;
+  cursor: default;
 `;

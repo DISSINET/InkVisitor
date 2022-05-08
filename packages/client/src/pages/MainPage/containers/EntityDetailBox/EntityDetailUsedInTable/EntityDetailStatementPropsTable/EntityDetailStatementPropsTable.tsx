@@ -2,9 +2,9 @@ import { IEntity } from "@shared/types";
 import { IResponseUsedInStatementProps } from "@shared/types/response-detail";
 import { Table } from "components";
 import { useSearchParams } from "hooks";
+import { EntityTag } from "pages/MainPage/containers/EntityTag/EntityTag";
 import React, { useMemo } from "react";
 import { Cell, Column } from "react-table";
-import { EntityTag } from "../../EntityTag/EntityTag";
 
 interface EntityDetailStatementPropsTable {
   title: { singular: string; plural: string };
