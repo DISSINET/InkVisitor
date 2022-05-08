@@ -1,11 +1,18 @@
 import { EntityClass, UsedInPosition } from "@shared/enums";
-import { IEntity, IResponseUsedInStatement } from "@shared/types";
-import { Button, Table } from "components";
+import {
+  IAction,
+  IEntity,
+  IResponseUsedInStatement,
+  IStatementActant,
+  IStatementAction,
+} from "@shared/types";
+import { Button, Table, TagGroup, Tooltip } from "components";
 import { useSearchParams } from "hooks";
 import React, { useMemo } from "react";
 import { FaEdit } from "react-icons/fa";
 import { Cell, Column } from "react-table";
 import { EntityTag } from "../../EntityTag/EntityTag";
+import { StyledDots } from "../../StatementsListBox/StatementLitBoxStyles";
 import {
   StyledShortenedText,
   StyledTableTextGridCell,
@@ -24,6 +31,19 @@ export const EntityDetailStatementsTable: React.FC<
     useSearchParams();
 
   const data = useMemo(() => (useCases ? useCases : []), [useCases]);
+
+  const renderListActant = (actantObject: IEntity, key: number) => {
+    return (
+      actantObject && (
+        <EntityTag
+          key={key}
+          actant={actantObject}
+          showOnly="entity"
+          tooltipPosition="right center"
+        />
+      )
+    );
+  };
 
   const columns: Column<{}>[] = React.useMemo(
     () => [
@@ -52,19 +72,136 @@ export const EntityDetailStatementsTable: React.FC<
       {
         Header: "Subj",
         Cell: ({ row }: Cell) => {
-          return "subj.";
+          const useCase =
+            row.original as IResponseUsedInStatement<UsedInPosition>;
+          const subjectIds = useCase.statement.data.actants
+            .filter((a: IStatementActant) => a.position === "s")
+            .map((a: IStatementActant) => a.actant);
+
+          const subjectObjects = subjectIds.map((actantId: string) => {
+            return entities[actantId];
+          });
+
+          const isOversized = subjectIds.length > 2;
+
+          return (
+            <TagGroup>
+              {subjectObjects
+                .slice(0, 2)
+                .map((subjectObject: IEntity, key: number) =>
+                  renderListActant(subjectObject, key)
+                )}
+              {isOversized && (
+                <Tooltip
+                  offsetX={-14}
+                  position="right center"
+                  color="success"
+                  noArrow
+                  items={
+                    <TagGroup>
+                      {subjectObjects
+                        .slice(2)
+                        .map((subjectObject: IEntity, key: number) =>
+                          renderListActant(subjectObject, key)
+                        )}
+                    </TagGroup>
+                  }
+                >
+                  <StyledDots>{"..."}</StyledDots>
+                </Tooltip>
+              )}
+            </TagGroup>
+          );
         },
       },
       {
         Header: "Actions",
         Cell: ({ row }: Cell) => {
-          return "Actions";
+          const useCase =
+            row.original as IResponseUsedInStatement<UsedInPosition>;
+          const { actions } = useCase.statement.data;
+          const actionIds = actions.map((a: IStatementAction) => a.action);
+          const actionObjects = actionIds.map((actionId: string) => {
+            return entities[actionId];
+          });
+
+          if (actionObjects) {
+            const isOversized = actionIds.length > 2;
+            return (
+              <TagGroup>
+                {actionObjects
+                  .slice(0, 2)
+                  .map((action: IEntity, key: number) =>
+                    renderListActant(action, key)
+                  )}
+                {isOversized && (
+                  <Tooltip
+                    offsetX={-14}
+                    position="right center"
+                    color="success"
+                    noArrow
+                    items={
+                      <TagGroup>
+                        {actionObjects
+                          .slice(2)
+                          .map((action: IEntity, key: number) =>
+                            renderListActant(action, key)
+                          )}
+                      </TagGroup>
+                    }
+                  >
+                    <StyledDots>{"..."}</StyledDots>
+                  </Tooltip>
+                )}
+              </TagGroup>
+            );
+          } else {
+            return <div />;
+          }
         },
       },
       {
         Header: "Objects",
         Cell: ({ row }: Cell) => {
-          return "Objects";
+          const useCase =
+            row.original as IResponseUsedInStatement<UsedInPosition>;
+
+          const actantIds = useCase.statement.data.actants
+            .filter((a: IStatementActant) => a.position !== "s")
+            .map((a: IStatementActant) => a.actant);
+          const isOversized = actantIds.length > 4;
+
+          const actantObjects = actantIds.map((actantId: string) => {
+            return entities[actantId];
+          });
+          return (
+            <TagGroup>
+              {actantObjects
+                .slice(0, 4)
+                .map((actantObject: IEntity, key: number) =>
+                  renderListActant(actantObject, key)
+                )}
+              {isOversized && (
+                <Tooltip
+                  offsetX={-14}
+                  position="right center"
+                  color="success"
+                  noArrow
+                  items={
+                    <TagGroup>
+                      {actantObjects
+                        .slice(4)
+                        .map((actantObject: IEntity, key: number) =>
+                          renderListActant(actantObject, key)
+                        )}
+                    </TagGroup>
+                  }
+                >
+                  <StyledDots>{"..."}</StyledDots>
+                </Tooltip>
+              )}
+            </TagGroup>
+          );
         },
       },
       {

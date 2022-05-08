@@ -393,7 +393,7 @@ export const StatementListBox: React.FC = () => {
       {
         Header: "Actions",
         Cell: ({ row }: Cell) => {
-          const actionIds = row.values.data?.actants
+          const actionIds = row.values.data?.actions
             ? row.values.data.actions.map((a: any) => a.action)
             : [];
 
