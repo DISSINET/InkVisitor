@@ -29,6 +29,7 @@ import {
   MultiInput,
   Submit,
 } from "components";
+import { StyledHeading, StyledUsedInTitle } from "components/Table/TableStyles";
 import { CProp, DEntity, DStatement } from "constructors";
 import { useSearchParams } from "hooks";
 import React, { useEffect, useMemo, useState } from "react";
@@ -1303,53 +1304,57 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
               {/* used as template */}
               {entity.isTemplate && entity.usedAsTemplate && (
                 <StyledDetailSectionContentUsedIn key="as template">
-                  <StyledDetailSectionContentUsedInTitle>
-                    <b>{entity.usedAsTemplate.length}</b> As a template
-                    <StyledDetailSectionEntityList>
-                      {entity.usedAsTemplate.map((entityId) => (
-                        <React.Fragment key={entityId}>
-                          <EntityTag actant={entity.entities[entityId]} />
-                        </React.Fragment>
-                      ))}
-                    </StyledDetailSectionEntityList>
-                  </StyledDetailSectionContentUsedInTitle>
+                  <StyledHeading>
+                    <StyledUsedInTitle>
+                      <b>{entity.usedAsTemplate.length}</b> As a template
+                    </StyledUsedInTitle>
+                  </StyledHeading>
+                  <StyledDetailSectionEntityList>
+                    {entity.usedAsTemplate.map((entityId) => (
+                      <React.Fragment key={entityId}>
+                        <EntityTag actant={entity.entities[entityId]} />
+                      </React.Fragment>
+                    ))}
+                  </StyledDetailSectionEntityList>
                 </StyledDetailSectionContentUsedIn>
               )}
 
               {/* usedId props */}
-              {/* <EntityDetailBoxTable
-                title={{ singular: "Meta Property", plural: "Meta Properties" }}
-                entities={entity.entities}
-                useCases={entity.usedInMetaProps}
-                mode="MetaProp"
-                key="MetaProp"
-              /> */}
 
-              <EntityDetailMetaPropsTable
-                title={{ singular: "Meta Property", plural: "Meta Properties" }}
-                entities={entity.entities}
-                useCases={entity.usedInMetaProps}
-                key="MetaProp"
-              />
+              {!entity.isTemplate && (
+                <EntityDetailMetaPropsTable
+                  title={{
+                    singular: "Meta Property",
+                    plural: "Meta Properties",
+                  }}
+                  entities={entity.entities}
+                  useCases={entity.usedInMetaProps}
+                  key="MetaProp"
+                />
+              )}
 
               {/* usedId statements */}
-              <EntityDetailStatementsTable
-                title={{ singular: "Statement", plural: "Statements" }}
-                entities={entity.entities}
-                useCases={entity.usedInStatement}
-                key="Statement"
-              />
+              {!entity.isTemplate && (
+                <EntityDetailStatementsTable
+                  title={{ singular: "Statement", plural: "Statements" }}
+                  entities={entity.entities}
+                  useCases={entity.usedInStatement}
+                  key="Statement"
+                />
+              )}
 
               {/* usedId statement props */}
-              <EntityDetailStatementPropsTable
-                title={{
-                  singular: "Statement Property",
-                  plural: "Statement Properties",
-                }}
-                entities={entity.entities}
-                useCases={entity.usedInStatementProps}
-                key="StatementProp"
-              />
+              {!entity.isTemplate && (
+                <EntityDetailStatementPropsTable
+                  title={{
+                    singular: "Statement Property",
+                    plural: "Statement Properties",
+                  }}
+                  entities={entity.entities}
+                  useCases={entity.usedInStatementProps}
+                  key="StatementProp"
+                />
+              )}
             </StyledDetailSection>
 
             {/* Audits */}
