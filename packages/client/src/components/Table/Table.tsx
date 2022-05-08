@@ -2,22 +2,24 @@ import { Button, Loader } from "components";
 import React, { ReactNode } from "react";
 import { Column, usePagination, useSortBy, useTable } from "react-table";
 import {
+  StyledHeading,
   StyledPageNumber,
   StyledPagination,
   StyledTable,
+  StyledTableContainer,
   StyledTableHeader,
-  StyledTableRecords,
   StyledTd,
   StyledTh,
   StyledTHead,
   StyledTr,
+  StyledUsedInTitle,
 } from "./TableStyles";
 
 interface Table {
   data: any[];
   columns: Column<any>[];
   isLoading?: boolean;
-  headerButtons?: ReactNode;
+  entityTitle?: { singular: string; plural: string };
   disablePaging?: boolean;
 }
 
@@ -25,7 +27,7 @@ export const Table: React.FC<Table> = ({
   data,
   columns,
   isLoading,
-  headerButtons,
+  entityTitle = { singular: "Record", plural: "Records" },
   disablePaging,
 }) => {
   const {
@@ -58,57 +60,70 @@ export const Table: React.FC<Table> = ({
   );
 
   const getPagination = (position: "top" | "bottom"): ReactNode => (
-    <StyledTableHeader position={position}>
-      <StyledPagination>
-        <Button
-          onClick={(): void => gotoPage(0)}
-          disabled={!canPreviousPage}
-          label={"<<"}
-          inverted
-          color="success"
-        />
+    <StyledTableHeader
+      position={position}
+      pagingUseless={pageSize > data.length}
+    >
+      {position === "top" && (
+        <StyledHeading>
+          {
+            <StyledUsedInTitle>
+              <b>{`${data.length} `}</b>{" "}
+              {`${
+                data.length === 1 ? entityTitle.singular : entityTitle.plural
+              }`}
+            </StyledUsedInTitle>
+          }
+        </StyledHeading>
+      )}
+      {pageSize < data.length && (
+        <StyledPagination>
+          <Button
+            onClick={(): void => gotoPage(0)}
+            disabled={!canPreviousPage}
+            label={"<<"}
+            inverted
+            color="success"
+          />
 
-        <Button
-          onClick={(): void => previousPage()}
-          disabled={!canPreviousPage}
-          label={"<"}
-          inverted
-          color="success"
-        />
+          <Button
+            onClick={(): void => previousPage()}
+            disabled={!canPreviousPage}
+            label={"<"}
+            inverted
+            color="success"
+          />
 
-        <StyledPageNumber>
-          <strong>
-            {pageIndex + 1} / {pageOptions.length}
-          </strong>
-        </StyledPageNumber>
+          <StyledPageNumber>
+            <strong>
+              {pageIndex + 1} / {pageOptions.length}
+            </strong>
+          </StyledPageNumber>
 
-        <Button
-          onClick={(): void => nextPage()}
-          disabled={!canNextPage}
-          label={">"}
-          inverted
-          color="success"
-        />
+          <Button
+            onClick={(): void => nextPage()}
+            disabled={!canNextPage}
+            label={">"}
+            inverted
+            color="success"
+          />
 
-        <Button
-          onClick={(): void => gotoPage(pageCount - 1)}
-          disabled={!canNextPage}
-          label={">>"}
-          inverted
-          color="success"
-        />
-      </StyledPagination>
-      <StyledTableRecords>
-        {"records: "}
-        <b>{data.length}</b>
-      </StyledTableRecords>
+          <Button
+            onClick={(): void => gotoPage(pageCount - 1)}
+            disabled={!canNextPage}
+            label={">>"}
+            inverted
+            color="success"
+          />
+        </StyledPagination>
+      )}
     </StyledTableHeader>
   );
 
   return (
     <>
       {!disablePaging && getPagination("top")}
-      <div className="table-container">
+      <StyledTableContainer>
         <StyledTable
           {...getTableProps()}
           className="table table-rounded is-striped is-hoverable is-fullwidth"
@@ -157,7 +172,7 @@ export const Table: React.FC<Table> = ({
         {/* {"Server error"} */}
         <Loader show={isLoading} />
         {!disablePaging && getPagination("bottom")}
-      </div>
+      </StyledTableContainer>
     </>
   );
 };

@@ -15,9 +15,3 @@ export const StyledShortenedText = styled.div`
   text-overflow: ellipsis;
   font-size: inherit;
 `;
-
-export const StyledUsedInTitle = styled.div`
-  padding-left: ${({ theme }) => theme.space[4]};
-  margin-top: ${({ theme }) => theme.space[2]};
-  color: ${({ theme }) => theme.color["info"]};
-`;

@@ -1,6 +1,7 @@
 import styled from "styled-components";
 
-export const StyledTable = styled.table`
+interface StyledTable {}
+export const StyledTable = styled.table<StyledTable>`
   width: 100%;
   border-spacing: 0;
   border-collapse: collapse;
@@ -26,12 +27,12 @@ export const StyledTh = styled.th`
 
 interface StyledTableHeader {
   position: "top" | "bottom";
+  pagingUseless?: boolean;
 }
 export const StyledTableHeader = styled.div<StyledTableHeader>`
   display: flex;
-  justify-content: flex-end;
   align-items: center;
-  margin-bottom: ${({ position }) => (position === "top" ? "0.5rem" : "")};
+  margin-bottom: ${({ position }) => (position === "top" ? "0.3rem" : "")};
   margin-top: ${({ position }) => (position === "bottom" ? "0.5rem" : "")};
 `;
 
@@ -52,12 +53,13 @@ export const StyledTd = styled.td`
   padding-left: ${({ theme }) => theme.space[4]};
   font-size: ${({ theme }) => theme.fontSize["xs"]};
 `;
+export const StyledHeading = styled.div`
+  display: flex;
+  margin-right: auto;
+`;
 export const StyledPagination = styled.div`
   display: flex;
-`;
-export const StyledTableRecords = styled.div`
-  font-size: ${({ theme }) => theme.fontSize["xs"]};
-  margin-left: ${({ theme }) => theme.space[2]};
+  margin-left: auto;
 `;
 export const StyledPageNumber = styled.div`
   font-size: ${({ theme }) => theme.fontSize["sm"]};
@@ -65,3 +67,9 @@ export const StyledPageNumber = styled.div`
   display: flex;
   align-items: center;
 `;
+export const StyledUsedInTitle = styled.div`
+  padding-left: ${({ theme }) => theme.space[4]};
+  margin-bottom: ${({ theme }) => theme.space[1]};
+  color: ${({ theme }) => theme.color["info"]};
+`;
+export const StyledTableContainer = styled.div``;

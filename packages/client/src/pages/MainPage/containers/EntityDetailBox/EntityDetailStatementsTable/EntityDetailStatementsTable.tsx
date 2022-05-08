@@ -9,7 +9,6 @@ import { EntityTag } from "../../EntityTag/EntityTag";
 import {
   StyledShortenedText,
   StyledTableTextGridCell,
-  StyledUsedInTitle,
 } from "./EntityDetailStatementsTableStyles";
 
 interface EntityDetailStatementsTable {
@@ -114,12 +113,8 @@ export const EntityDetailStatementsTable: React.FC<
   );
 
   return (
-    <div>
-      <StyledUsedInTitle>
-        <b>{`${useCases.length} `}</b>{" "}
-        {`${useCases.length === 1 ? title.singular : title.plural}`}
-      </StyledUsedInTitle>
-      <Table columns={columns} data={data} />
-    </div>
+    <>
+      <Table columns={columns} data={data} entityTitle={title} />
+    </>
   );
 };
