@@ -71,6 +71,7 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
   >([territoryId]);
 
   useEffect(() => {
+    //const toExclude = [territoryId];
     const toExclude = [territoryId];
     if (treeData) {
       const currentTerritory = searchTree(treeData, territoryId);
@@ -132,6 +133,9 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
               </React.Fragment>
             );
           })}
+        <React.Fragment key="this-territory">
+          <StatementListBreadcrumbItem territoryId={territoryId} />
+        </React.Fragment>
       </StyledHeaderBreadcrumbRow>
       <StyledHeaderRow>
         {isFavorited && (
