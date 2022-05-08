@@ -50,6 +50,24 @@ export const EntityDetailStatementsTable: React.FC<
         },
       },
       {
+        Header: "Subj",
+        Cell: ({ row }: Cell) => {
+          return "subj.";
+        },
+      },
+      {
+        Header: "Actions",
+        Cell: ({ row }: Cell) => {
+          return "Actions";
+        },
+      },
+      {
+        Header: "Objects",
+        Cell: ({ row }: Cell) => {
+          return "Objects";
+        },
+      },
+      {
         Header: "text",
         Cell: ({ row }: Cell) => {
           const useCase =
@@ -119,6 +137,7 @@ export const EntityDetailStatementsTable: React.FC<
         data={data}
         entityTitle={title}
         perPage={perPage}
+        fullWidthColumn={5}
       />
     </>
   );

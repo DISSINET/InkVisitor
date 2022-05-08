@@ -38,6 +38,7 @@ export const StyledTableHeader = styled.div<StyledTableHeader>`
 
 interface StyledTr {
   opacity?: number;
+  fullWidthColumn: number;
 }
 export const StyledTr = styled.tr<StyledTr>`
   background-color: ${({ theme }) => theme.color["white"]};
@@ -48,9 +49,12 @@ export const StyledTr = styled.tr<StyledTr>`
     background-color: ${({ theme }) => theme.color["gray"][100]};
   }
   /* Preparation for one fullWidth column */
-  /* td:not(:nth-child(2)) {
+  /* td:not(:nth-child(5)) {
     width: 1%;
   } */
+  td:not(:nth-child(${({ fullWidthColumn }) => fullWidthColumn})) {
+    width: 1%;
+  }
 `;
 export const StyledTd = styled.td`
   padding: ${({ theme }) => theme.space[2]};

@@ -23,6 +23,7 @@ interface Table {
   perPage?: number;
   disablePaging?: boolean;
   disableHeading?: boolean;
+  fullWidthColumn?: number;
 }
 
 export const Table: React.FC<Table> = ({
@@ -33,6 +34,7 @@ export const Table: React.FC<Table> = ({
   perPage = 5,
   disablePaging,
   disableHeading = false,
+  fullWidthColumn = 0,
 }) => {
   const {
     getTableProps,
@@ -157,7 +159,11 @@ export const Table: React.FC<Table> = ({
             {page.map((row, key) => {
               prepareRow(row);
               return (
-                <StyledTr {...row.getRowProps()} key={key}>
+                <StyledTr
+                  {...row.getRowProps()}
+                  key={key}
+                  fullWidthColumn={fullWidthColumn}
+                >
                   {row.cells.map((cell, key) => {
                     return (
                       <StyledTd {...cell.getCellProps()} key={key}>
