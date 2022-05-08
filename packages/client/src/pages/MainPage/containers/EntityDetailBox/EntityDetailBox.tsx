@@ -69,8 +69,7 @@ import {
   StyledFormWrapper,
   StyledTagWrap,
 } from "./EntityDetailBoxStyles";
-import { EntityDetailBoxTable } from "./EntityDetailBoxTable";
-import { EntityDetailTable } from "./EntityDetailTable/EntityDetailTable";
+import { EntityDetailStatementsTable } from "./EntityDetailStatementsTable/EntityDetailStatementsTable";
 
 interface EntityDetailBox {}
 export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
@@ -1323,34 +1322,16 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                 mode="MetaProp"
                 key="MetaProp"
               /> */}
-              <EntityDetailTable
-                title={{ singular: "Meta Property", plural: "Meta Properties" }}
-                entities={entity.entities}
-                useCases={entity.usedInMetaProps}
-                mode="MetaProp"
-                key="MetaProp"
-              />
 
               {/* usedId statements */}
-              <EntityDetailTable
+              <EntityDetailStatementsTable
                 title={{ singular: "Statement", plural: "Statements" }}
                 entities={entity.entities}
                 useCases={entity.usedInStatement}
-                mode="Statement"
                 key="Statement"
               />
 
               {/* usedId statement props */}
-              <EntityDetailTable
-                title={{
-                  singular: "Statement Property",
-                  plural: "Statement Properties",
-                }}
-                entities={entity.entities}
-                useCases={entity.usedInStatementProps}
-                mode="StatementProp"
-                key="StatementProp"
-              />
 
               {/* <EntityDetailBoxTable
                 title={{
