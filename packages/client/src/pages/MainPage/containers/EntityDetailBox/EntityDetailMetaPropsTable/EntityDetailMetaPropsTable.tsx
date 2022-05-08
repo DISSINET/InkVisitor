@@ -4,11 +4,12 @@ import { Table } from "components";
 import { useSearchParams } from "hooks";
 import React, { useMemo } from "react";
 import { Cell, Column } from "react-table";
+import { EntityTag } from "../../EntityTag/EntityTag";
 
 interface EntityDetailMetaPropsTable {
   title: { singular: string; plural: string };
   entities: { [key: string]: IEntity };
-  useCases: IResponseUsedInMetaProp<UsedInPosition>[];
+  useCases: IResponseUsedInMetaProp[];
   perPage?: number;
 }
 export const EntityDetailMetaPropsTable: React.FC<
@@ -25,19 +26,28 @@ export const EntityDetailMetaPropsTable: React.FC<
         Header: "Origin",
         accesor: "data",
         Cell: ({ row }: Cell) => {
-          return "ahoj";
+          const useCase = row.original as IResponseUsedInMetaProp;
+          const entityId = useCase.originId;
+          const entity = entityId ? entities[entityId] : false;
+          return <>{entity && <EntityTag actant={entity} />}</>;
         },
       },
       {
         Header: "Type",
         Cell: ({ row }: Cell) => {
-          return "ahoj";
+          const useCase = row.original as IResponseUsedInMetaProp;
+          const entityId = useCase.typeId;
+          const entity = entityId ? entities[entityId] : false;
+          return <>{entity && <EntityTag actant={entity} />}</>;
         },
       },
       {
         Header: "Value",
         Cell: ({ row }: Cell) => {
-          return "ahoj";
+          const useCase = row.original as IResponseUsedInMetaProp;
+          const entityId = useCase.valueId;
+          const entity = entityId ? entities[entityId] : false;
+          return <>{entity && <EntityTag actant={entity} />}</>;
         },
       },
     ],
