@@ -8,13 +8,13 @@ import {
   IResponseDetail,
   IResponseGeneric,
   IResponsePermission,
-  IResponseSearch,
   IResponseStatement,
   IResponseTerritory,
   IResponseTree,
   IResponseUser,
   RequestPermissionUpdate,
 } from "@shared/types";
+import { IResponseSearchOld } from "@shared/types/response-search"
 import * as errors from "@shared/types/errors";
 import axios, { AxiosError, AxiosInstance, AxiosResponse } from "axios";
 import React from "react";
@@ -388,7 +388,7 @@ class Api {
   // deprecated method
   async entitiesSearch(
     searchData: any //IRequestSearch
-  ): Promise<AxiosResponse<IResponseSearch[]>> {
+  ): Promise<AxiosResponse<IResponseSearchOld[]>> {
     try {
       const response = await this.connection.post(
         `/entities/search`,
