@@ -2,7 +2,7 @@ import { apiPath } from "@common/constants";
 import { StatementActant, StatementAction } from "@models/statement/statement";
 import { testErroneousResponse } from "@modules/common.test";
 import { Db } from "@service/RethinkDB";
-import { deleteEntities, filterEntitiesByWildcard } from "@service/shorthands";
+import { deleteEntities } from "@service/shorthands";
 import { EntityClass } from "@shared/enums";
 import { BadParams } from "@shared/types/errors";
 import { prepareEntity } from "@models/entity/entity.test";
@@ -11,6 +11,7 @@ import "ts-jest";
 import { supertestConfig } from "..";
 import app from "../../Server";
 import { prepareStatement } from "@models/statement/statement.test";
+import { filterEntitiesByWildcard } from "@models/entity/response_search";
 
 describe("Entities search (requests)", function () {
   describe("empty data", () => {
@@ -323,7 +324,7 @@ describe("Entities search - advanced label search", function () {
         .map((w) => w.trim());
       for (const word of words) {
         const entities = await filterEntitiesByWildcard(
-          db,
+          db.connection,
           false,
           undefined,
           `*${word}*`,
@@ -349,7 +350,7 @@ describe("Entities search - advanced label search", function () {
       ];
       for (const part of parts) {
         const entities = await filterEntitiesByWildcard(
-          db,
+          db.connection,
           false,
           undefined,
           part,
