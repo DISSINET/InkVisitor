@@ -1,14 +1,15 @@
-import { UsedInPosition } from "@shared/enums";
-import { IEntity, IResponseUsedInMetaProp } from "@shared/types";
+import { IEntity } from "@shared/types";
+import { IResponseUsedInStatementProps } from "@shared/types/response-detail";
 import { Table } from "components";
 import { useSearchParams } from "hooks";
 import React, { useMemo } from "react";
 import { Cell, Column } from "react-table";
+import { EntityTag } from "../../EntityTag/EntityTag";
 
 interface EntityDetailStatementPropsTable {
   title: { singular: string; plural: string };
   entities: { [key: string]: IEntity };
-  useCases: IResponseUsedInMetaProp<UsedInPosition>[];
+  useCases: IResponseUsedInStatementProps[];
   perPage?: number;
 }
 export const EntityDetailStatementPropsTable: React.FC<
@@ -25,19 +26,28 @@ export const EntityDetailStatementPropsTable: React.FC<
         Header: "Origin",
         accesor: "data",
         Cell: ({ row }: Cell) => {
-          return "ahoj";
+          const useCase = row.original as IResponseUsedInStatementProps;
+          const entityId = useCase.originId;
+          const entity = entityId ? entities[entityId] : false;
+          return <>{entity && <EntityTag actant={entity} />}</>;
         },
       },
       {
         Header: "Type",
         Cell: ({ row }: Cell) => {
-          return "ahoj";
+          const useCase = row.original as IResponseUsedInStatementProps;
+          const entityId = useCase.typeId;
+          const entity = entityId ? entities[entityId] : false;
+          return <>{entity && <EntityTag actant={entity} />}</>;
         },
       },
       {
         Header: "Value",
         Cell: ({ row }: Cell) => {
-          return "ahoj";
+          const useCase = row.original as IResponseUsedInStatementProps;
+          const entityId = useCase.valueId;
+          const entity = entityId ? entities[entityId] : false;
+          return <>{entity && <EntityTag actant={entity} />}</>;
         },
       },
     ],
