@@ -115,7 +115,7 @@ export default Router()
 
       let associatedEntityIds: string[] | undefined = undefined;
       if (req.entityId) {
-        associatedEntityIds = await Statement.findUsedInDataEntitiesIds(
+        associatedEntityIds = await Statement.findIdsByDataEntityId(
           httpRequest.db.connection,
           req.entityId
         );
@@ -330,7 +330,7 @@ export default Router()
 
       let associatedEntityIds: string[] | undefined = undefined;
       if (req.entityId) {
-        associatedEntityIds = await Statement.findUsedInDataEntitiesIds(
+        associatedEntityIds = await Statement.findIdsByDataEntityId(
           httpRequest.db.connection,
           req.entityId
         );
