@@ -26,13 +26,14 @@ import { IResponseSearchOld } from "@shared/types/response-search";
 import { ResponseSearch } from "@models/entity/response-search";
 import { Connection, r, RDatum } from "rethinkdb-ts";
 import Entity from "@models/entity/entity";
+import { IRequestSearch } from "@shared/types/request-search";
 
 // DEPRECATED
 export async function filterEntitiesByWildcard(
   connection: Connection,
-  entityClass: EntityClass | false,
+  entityClass: EntityClass | undefined,
   entityClassExcluded: EntityClass[] | undefined,
-  entityLabel: string | false,
+  entityLabel: string | undefined,
   entityIds?: string[],
   onlyTemplates?: boolean,
   usedTemplate?: string
@@ -177,7 +178,7 @@ export default Router()
   .get(
     "/",
     asyncRouteHandler<IResponseSearch[]>(async (httpRequest: Request) => {
-      const req = new RequestSearch(httpRequest.body);
+      const req = new RequestSearch(httpRequest.query as IRequestSearch);
       if (req.label && req.label.length < 2) {
         return [];
       }
