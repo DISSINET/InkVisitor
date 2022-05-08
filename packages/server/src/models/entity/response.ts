@@ -222,7 +222,7 @@ export class ResponseEntityDetail
       for (const action of statement.data.actions) {
         this.walkStatementDataRecursiveProps(
           statement,
-          action.id,
+          action.action,
           action.props
         );
       }
@@ -230,7 +230,7 @@ export class ResponseEntityDetail
       for (const actant of statement.data.actants) {
         this.walkStatementDataRecursiveProps(
           statement,
-          actant.id,
+          actant.actant,
           actant.props
         );
       }
@@ -278,14 +278,14 @@ export class ResponseEntityDetail
   addUsedInStatementProp(
     statementId: string,
     originId: string,
-    valueId: string,
-    typeId: string
+    typeId: string,
+    valueId: string
   ) {
     this.usedInStatementProps.push({
       statementId,
       originId,
-      valueId,
       typeId,
+      valueId,
     });
 
     this.postponedEntities[statementId] = undefined;
