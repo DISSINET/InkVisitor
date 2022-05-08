@@ -1,5 +1,9 @@
 import { EntityClass, UsedInPosition } from "@shared/enums";
-import { IEntity, IResponseUsedInStatement } from "@shared/types";
+import {
+  IEntity,
+  IResponseUsedInMetaProp,
+  IResponseUsedInStatement,
+} from "@shared/types";
 import { Button, Table } from "components";
 import { useSearchParams } from "hooks";
 import React, { useMemo } from "react";
@@ -9,17 +13,23 @@ import { EntityTag } from "../../EntityTag/EntityTag";
 import {
   StyledShortenedText,
   StyledTableTextGridCell,
-} from "./EntityDetailStatementsTableStyles";
+} from "./EntityDetailTableStyles";
 
-interface EntityDetailStatementsTable {
+interface EntityDetailTable {
   title: { singular: string; plural: string };
   entities: { [key: string]: IEntity };
-  useCases: IResponseUsedInStatement<UsedInPosition>[];
+  useCases:
+    | IResponseUsedInMetaProp<UsedInPosition>[]
+    | IResponseUsedInStatement<UsedInPosition>[];
   perPage?: number;
+  mode: "Prop" | "Statement" | "StatementProp";
 }
-export const EntityDetailStatementsTable: React.FC<
-  EntityDetailStatementsTable
-> = ({ title, entities, useCases, perPage = 20 }) => {
+export const EntityDetailTable: React.FC<EntityDetailTable> = ({
+  title,
+  entities,
+  useCases,
+  perPage = 20,
+}) => {
   const { detailId, setDetailId, setStatementId, territoryId, setTerritoryId } =
     useSearchParams();
 
@@ -74,7 +84,7 @@ export const EntityDetailStatementsTable: React.FC<
         Header: "position",
         accessor: "position",
         Cell: ({ row }: Cell) => {
-          // TODO: tooltip
+          // TODO: tooltip?
           const { position } = row.values;
           return <>{position}</>;
         },

@@ -32,7 +32,6 @@ import {
 import { CProp, DEntity, DStatement } from "constructors";
 import { useSearchParams } from "hooks";
 import React, { useEffect, useMemo, useState } from "react";
-import { CgInbox } from "react-icons/cg";
 import {
   FaClone,
   FaEdit,
@@ -53,7 +52,6 @@ import { StyledContent } from "../EntityBookmarkBox/EntityBookmarkBoxStyles";
 import { EntityReferenceTable } from "../EntityReferenceTable/EntityReferenceTable";
 import { JSONExplorer } from "../JSONExplorer/JSONExplorer";
 import { PropGroup } from "../PropGroup/PropGroup";
-import { ContextMenuSubmitDelete } from "../TerritoryTreeBox/ContextMenuSubmitDelete/ContextMenuSubmitDelete";
 import {
   StyledActantHeaderRow,
   StyledDetailContentRow,
@@ -72,7 +70,7 @@ import {
   StyledTagWrap,
 } from "./EntityDetailBoxStyles";
 import { EntityDetailBoxTable } from "./EntityDetailBoxTable";
-import { EntityDetailStatementsTable } from "./EntityDetailStatementsTable/EntityDetailStatementsTable";
+import { EntityDetailTable } from "./EntityDetailTable/EntityDetailTable";
 
 interface EntityDetailBox {}
 export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
@@ -1335,8 +1333,9 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                 key="Statement"
               /> */}
 
-              <EntityDetailStatementsTable
+              <EntityDetailTable
                 key="Statement"
+                mode="Statement"
                 title={{ singular: "Statement", plural: "Statements" }}
                 entities={entity.entities}
                 useCases={entity.usedInStatement}
