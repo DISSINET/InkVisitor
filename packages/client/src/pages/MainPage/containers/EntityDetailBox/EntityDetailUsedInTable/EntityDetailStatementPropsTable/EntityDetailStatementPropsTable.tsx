@@ -1,13 +1,12 @@
 import { IEntity } from "@shared/types";
 import { IResponseUsedInStatementProps } from "@shared/types/response-detail";
 import { Table } from "components";
-import { useSearchParams } from "hooks";
 import { EntityTag } from "pages/MainPage/containers/EntityTag/EntityTag";
 import React, { useMemo } from "react";
 import { Cell, Column } from "react-table";
 import {
-  StyledShortenedText,
   StyledTableTextGridCell,
+  StyledTagWrap,
 } from "../EntityDetailUsedInTableStyles";
 
 interface EntityDetailStatementPropsTable {
@@ -24,7 +23,9 @@ export const EntityDetailStatementPropsTable: React.FC<
   const renderEntityTag = (entity: IEntity) => {
     return (
       <StyledTableTextGridCell>
-        <EntityTag fullWidth actant={entity} />
+        <StyledTagWrap>
+          <EntityTag fullWidth actant={entity} />
+        </StyledTagWrap>
       </StyledTableTextGridCell>
     );
   };

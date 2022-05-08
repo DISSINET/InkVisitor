@@ -1,11 +1,13 @@
 import { UsedInPosition } from "@shared/enums";
 import { IEntity, IResponseUsedInMetaProp } from "@shared/types";
 import { Table } from "components";
-import { useSearchParams } from "hooks";
 import React, { useMemo } from "react";
 import { Cell, Column } from "react-table";
 import { EntityTag } from "../../../EntityTag/EntityTag";
-import { StyledTableTextGridCell } from "../EntityDetailUsedInTableStyles";
+import {
+  StyledTableTextGridCell,
+  StyledTagWrap,
+} from "../EntityDetailUsedInTableStyles";
 
 interface EntityDetailMetaPropsTable {
   title: { singular: string; plural: string };
@@ -21,7 +23,9 @@ export const EntityDetailMetaPropsTable: React.FC<
   const renderEntityTag = (entity: IEntity) => {
     return (
       <StyledTableTextGridCell>
-        <EntityTag fullWidth actant={entity} />
+        <StyledTagWrap>
+          <EntityTag fullWidth actant={entity} />
+        </StyledTagWrap>
       </StyledTableTextGridCell>
     );
   };
