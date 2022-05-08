@@ -23,6 +23,7 @@ import { Request, Router } from "express";
 import { asyncRouteHandler } from "../index";
 import Statement from "@models/statement/statement";
 import { isConstructorDeclaration } from "typescript";
+import { IResponseSearchOld } from "@shared/types/response-search";
 
 export default Router()
   .get(
@@ -311,5 +312,58 @@ export default Router()
       await response.prepare(request);
 
       return response;
+    })
+  )
+  // DEPRECATED
+  .post(
+    "/search",
+    asyncRouteHandler<IResponseSearchOld[]>(async (httpRequest: Request) => {
+      const req = new RequestSearch(httpRequest.body);
+      if (req.label && req.label.length < 2) {
+        return [];
+      }
+
+      const err = req.validate();
+      if (err) {
+        throw err;
+      }
+
+      let associatedEntityIds: string[] | undefined = undefined;
+      if (req.entityId) {
+        associatedEntityIds = await Statement.findUsedInDataEntitiesIds(
+          httpRequest.db.connection,
+          req.entityId
+        );
+
+        // entity id provided, but not found within statements - end now
+        if (!associatedEntityIds.length) {
+          return [];
+        }
+      }
+
+      // filter out duplicates
+      associatedEntityIds = [...new Set(associatedEntityIds)];
+
+      const entities = await filterEntitiesByWildcard(
+        httpRequest.db,
+        req.class,
+        req.excluded,
+        req.label,
+        associatedEntityIds
+      );
+
+      return entities.map((a: IEntity) => {
+        const out: IResponseSearchOld = {
+          entityId: a.id,
+          entityLabel: a.label,
+          class: a.class,
+        };
+
+        // only for Entity (grouped entity of EntityClass)
+        if (a.data.logicalType) {
+          out.logicalType = (a as IEntity).data.logicalType;
+        }
+        return out;
+      });
     })
   );
