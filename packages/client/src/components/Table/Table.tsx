@@ -18,7 +18,6 @@ import {
 interface Table {
   data: any[];
   columns: Column<{}>[];
-  fullWidthColumns?: number;
   isLoading?: boolean;
   entityTitle?: { singular: string; plural: string };
   perPage?: number;
@@ -28,7 +27,6 @@ interface Table {
 export const Table: React.FC<Table> = ({
   data,
   columns,
-  fullWidthColumns = 0,
   isLoading,
   entityTitle = { singular: "Record", plural: "Records" },
   perPage = 5,
@@ -155,11 +153,7 @@ export const Table: React.FC<Table> = ({
             {page.map((row, key) => {
               prepareRow(row);
               return (
-                <StyledTr
-                  {...row.getRowProps()}
-                  key={key}
-                  fullWidthColumns={fullWidthColumns}
-                >
+                <StyledTr {...row.getRowProps()} key={key}>
                   {row.cells.map((cell, key) => {
                     return (
                       <StyledTd {...cell.getCellProps()} key={key}>

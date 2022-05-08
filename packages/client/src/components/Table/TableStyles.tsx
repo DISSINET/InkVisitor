@@ -38,7 +38,6 @@ export const StyledTableHeader = styled.div<StyledTableHeader>`
 
 interface StyledTr {
   opacity?: number;
-  fullWidthColumns: number;
 }
 export const StyledTr = styled.tr<StyledTr>`
   background-color: ${({ theme }) => theme.color["white"]};
@@ -74,8 +73,11 @@ export const StyledPageNumber = styled.div`
   color: ${({ theme }) => theme.color["info"]};
 `;
 export const StyledUsedInTitle = styled.div`
-  padding-left: ${({ theme }) => theme.space[4]};
+  padding-left: ${({ theme }) => theme.space[2]};
   margin-bottom: ${({ theme }) => theme.space[1]};
   color: ${({ theme }) => theme.color["info"]};
 `;
-export const StyledTableContainer = styled.div``;
+export const StyledTableContainer = styled.div`
+  position: relative;
+  margin-bottom: ${({ theme }) => theme.space[4]};
+`;

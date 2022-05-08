@@ -119,7 +119,6 @@ export const EntityDetailStatementsTable: React.FC<
         data={data}
         entityTitle={title}
         perPage={perPage}
-        fullWidthColumns={2}
       />
     </>
   );
