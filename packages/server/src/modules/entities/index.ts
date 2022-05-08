@@ -1,4 +1,4 @@
-import { mergeDeep } from "@common/functions";
+import { mergeDeep, regExpEscape } from "@common/functions";
 import { ResponseEntity, ResponseEntityDetail } from "@models/entity/response";
 import Audit from "@models/audit/audit";
 import { getEntityClass } from "@models/factory";
@@ -23,10 +23,81 @@ import { Request, Router } from "express";
 import { asyncRouteHandler } from "../index";
 import Statement from "@models/statement/statement";
 import { IResponseSearchOld } from "@shared/types/response-search";
-import {
-  filterEntitiesByWildcard,
-  ResponseSearch,
-} from "@models/entity/response_search";
+import { ResponseSearch } from "@models/entity/response-search";
+import { Connection, r, RDatum } from "rethinkdb-ts";
+import Entity from "@models/entity/entity";
+
+// DEPRECATED
+export async function filterEntitiesByWildcard(
+  connection: Connection,
+  entityClass: EntityClass | false,
+  entityClassExcluded: EntityClass[] | undefined,
+  entityLabel: string | false,
+  entityIds?: string[],
+  onlyTemplates?: boolean,
+  usedTemplate?: string
+): Promise<IEntity[]> {
+  let query = r.table(Entity.table);
+
+  if (entityIds && entityIds.length) {
+    query = query.getAll(r.args(entityIds)) as any;
+  }
+
+  if (entityClass) {
+    query = query.filter({
+      class: entityClass,
+    });
+  }
+
+  if (usedTemplate) {
+    query = query.filter({
+      usedTemplate: usedTemplate,
+    });
+  }
+
+  if (onlyTemplates) {
+    query = query.filter({
+      isTemplate: true,
+    });
+  }
+
+  if (entityClassExcluded) {
+    query = query.filter(function (row: RDatum) {
+      return r.and.apply(
+        r,
+        entityClassExcluded.map((c) => row("class").ne(c)) as [
+          RDatum<boolean>,
+          ...RDatum<boolean>[]
+        ]
+      );
+    });
+  }
+
+  if (entityLabel) {
+    let leftWildcard: string = "^",
+      rightWildcard: string = "$";
+
+    if (entityLabel[0] === "*") {
+      leftWildcard = "";
+      entityLabel = entityLabel.slice(1);
+    }
+
+    if (entityLabel[entityLabel.length - 1] === "*") {
+      rightWildcard = "";
+      entityLabel = entityLabel.slice(0, -1);
+    }
+
+    entityLabel = regExpEscape(entityLabel.toLowerCase());
+
+    query = query.filter(function (row: RDatum) {
+      return row("label")
+        .downcase()
+        .match(`${leftWildcard}${entityLabel}${rightWildcard}`);
+    });
+  }
+
+  return query.run(connection);
+}
 
 export default Router()
   .get(
