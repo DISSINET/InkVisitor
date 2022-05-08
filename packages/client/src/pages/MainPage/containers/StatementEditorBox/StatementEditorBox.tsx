@@ -538,6 +538,7 @@ export const StatementEditorBox: React.FC = () => {
     {
       onSuccess: (data, variables) => {
         setTerritoryId(variables);
+        queryClient.invalidateQueries("statement");
         queryClient.invalidateQueries("tree");
         queryClient.invalidateQueries("territory");
       },
@@ -578,7 +579,9 @@ export const StatementEditorBox: React.FC = () => {
                   );
                 })}
               {territoryData && (
-                <StatementListBreadcrumbItem territoryId={territoryData.id} />
+                <React.Fragment key={territoryData.id}>
+                  <StatementListBreadcrumbItem territoryId={territoryData.id} />
+                </React.Fragment>
               )}
               <Loader size={20} show={isFetchingTerritory} />
             </StyledBreadcrumbWrap>
