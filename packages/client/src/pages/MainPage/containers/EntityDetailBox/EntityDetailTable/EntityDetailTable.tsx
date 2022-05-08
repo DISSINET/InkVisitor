@@ -22,13 +22,14 @@ interface EntityDetailTable {
     | IResponseUsedInMetaProp<UsedInPosition>[]
     | IResponseUsedInStatement<UsedInPosition>[];
   perPage?: number;
-  mode: "Prop" | "Statement" | "StatementProp";
+  mode: "MetaProp" | "Statement" | "StatementProp";
 }
 export const EntityDetailTable: React.FC<EntityDetailTable> = ({
   title,
   entities,
   useCases,
   perPage = 20,
+  mode,
 }) => {
   const { detailId, setDetailId, setStatementId, territoryId, setTerritoryId } =
     useSearchParams();
@@ -41,9 +42,14 @@ export const EntityDetailTable: React.FC<EntityDetailTable> = ({
         Header: "",
         accessor: "data",
         Cell: ({ row }: Cell) => {
-          const useCase =
-            row.original as IResponseUsedInStatement<UsedInPosition>;
-          const entityId = useCase.statement?.id;
+          const useCase = row.original;
+
+          const entityId =
+            mode === "MetaProp"
+              ? (useCase as IResponseUsedInMetaProp<UsedInPosition>).entityId
+              : (useCase as IResponseUsedInStatement<UsedInPosition>).statement
+                  ?.id;
+
           const entity = entityId ? entities[entityId] : false;
           return (
             <>
@@ -62,9 +68,12 @@ export const EntityDetailTable: React.FC<EntityDetailTable> = ({
       {
         Header: "text",
         Cell: ({ row }: Cell) => {
-          const useCase =
-            row.original as IResponseUsedInStatement<UsedInPosition>;
-          const entityId = useCase.statement?.id;
+          const useCase = row.original;
+          const entityId =
+            mode === "MetaProp"
+              ? (useCase as IResponseUsedInMetaProp<UsedInPosition>).entityId
+              : (useCase as IResponseUsedInStatement<UsedInPosition>).statement
+                  ?.id;
           const entity = entityId ? entities[entityId] : false;
 
           return (
@@ -92,9 +101,12 @@ export const EntityDetailTable: React.FC<EntityDetailTable> = ({
       {
         id: "edit",
         Cell: ({ row }: Cell) => {
-          const useCase =
-            row.original as IResponseUsedInStatement<UsedInPosition>;
-          const entityId = useCase.statement?.id;
+          const useCase = row.original;
+          const entityId =
+            mode === "MetaProp"
+              ? (useCase as IResponseUsedInMetaProp<UsedInPosition>).entityId
+              : (useCase as IResponseUsedInStatement<UsedInPosition>).statement
+                  ?.id;
           const entity = entityId ? entities[entityId] : false;
 
           return (

@@ -1316,33 +1316,32 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
               )}
 
               {/* usedId props */}
-              <EntityDetailBoxTable
+              {/* <EntityDetailBoxTable
                 title={{ singular: "Meta Property", plural: "Meta Properties" }}
                 entities={entity.entities}
                 useCases={entity.usedInMetaProps}
-                mode="Prop"
-                key="Prop"
+                mode="MetaProp"
+                key="MetaProp"
+              /> */}
+              <EntityDetailTable
+                title={{ singular: "Meta Property", plural: "Meta Properties" }}
+                entities={entity.entities}
+                useCases={entity.usedInMetaProps}
+                mode="MetaProp"
+                key="MetaProp"
               />
 
               {/* usedId statements */}
-              {/* <EntityDetailBoxTable
-                title={{ singular: "Statement", plural: "Statements" }}
-                entities={entity.entities}
-                useCases={entity.usedInStatement}
-                mode="Statement"
-                key="Statement"
-              /> */}
-
               <EntityDetailTable
-                key="Statement"
-                mode="Statement"
                 title={{ singular: "Statement", plural: "Statements" }}
                 entities={entity.entities}
                 useCases={entity.usedInStatement}
+                mode="Statement"
+                key="Statement"
               />
 
               {/* usedId statement props */}
-              <EntityDetailBoxTable
+              <EntityDetailTable
                 title={{
                   singular: "Statement Property",
                   plural: "Statement Properties",
@@ -1352,6 +1351,17 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                 mode="StatementProp"
                 key="StatementProp"
               />
+
+              {/* <EntityDetailBoxTable
+                title={{
+                  singular: "Statement Property",
+                  plural: "Statement Properties",
+                }}
+                entities={entity.entities}
+                useCases={entity.usedInStatementProps}
+                mode="StatementProp"
+                key="StatementProp"
+              /> */}
             </StyledDetailSection>
 
             {/* Audits */}

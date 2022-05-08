@@ -21,7 +21,7 @@ interface EntityDetailBoxTable {
   title: { singular: string; plural: string };
   entities: { [key: string]: IEntity };
   useCases: any[];
-  mode: "Prop" | "Statement" | "StatementProp";
+  mode: "MetaProp" | "Statement" | "StatementProp";
   perPage?: number;
 }
 export const EntityDetailBoxTable: React.FC<EntityDetailBoxTable> = ({
@@ -53,7 +53,7 @@ export const EntityDetailBoxTable: React.FC<EntityDetailBoxTable> = ({
           {useCases.map((useCase, ui) => {
             const position = useCase.position;
             const entityId =
-              mode === "Prop" ? useCase.entityId : useCase.statement?.id;
+              mode === "MetaProp" ? useCase.entityId : useCase.statement?.id;
             const entity = entityId ? entities[entityId] : false;
 
             return entity ? (
