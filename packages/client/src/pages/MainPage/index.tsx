@@ -171,6 +171,13 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
 
   const [userCustomizationOpen, setUserCustomizationOpen] = useState(false);
 
+  const versionText = `v. ${packageJson.version} 
+  ${
+    ["production", ""].indexOf(environmentName) === -1
+      ? `| ${environmentName} | built: ${process.env.BUILD_TIMESTAMP}`
+      : ""
+  }`;
+
   return (
     <>
       <StyledPage layoutWidth={layoutWidth}>
@@ -190,11 +197,13 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
                 src={LogoInkvisitor}
                 alt="React Logo"
               />
-              <StyledHeaderTag>
-                v. {packageJson.version}{" "}
-                {["production", ""].indexOf(environmentName) === -1
-                  ? `| ${environmentName} | built: ${process.env.BUILD_TIMESTAMP}`
-                  : ""}
+              <StyledHeaderTag
+                onClick={async () => {
+                  await navigator.clipboard.writeText(versionText);
+                  toast.info("Inkvisitor version copied to clipboard");
+                }}
+              >
+                {versionText}
               </StyledHeaderTag>
             </StyledHeader>
           }
