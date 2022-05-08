@@ -20,6 +20,7 @@ interface Table {
   columns: Column<any>[];
   isLoading?: boolean;
   entityTitle?: { singular: string; plural: string };
+  perPage?: number;
   disablePaging?: boolean;
 }
 
@@ -28,6 +29,7 @@ export const Table: React.FC<Table> = ({
   columns,
   isLoading,
   entityTitle = { singular: "Record", plural: "Records" },
+  perPage = 5,
   disablePaging,
 }) => {
   const {
@@ -43,7 +45,6 @@ export const Table: React.FC<Table> = ({
     gotoPage,
     nextPage,
     previousPage,
-    setPageSize,
     state: { pageIndex, pageSize },
   } = useTable(
     {
@@ -51,7 +52,7 @@ export const Table: React.FC<Table> = ({
       data,
       initialState: {
         pageIndex: 0,
-        pageSize: 5,
+        pageSize: perPage,
         hiddenColumns: [],
       },
     },

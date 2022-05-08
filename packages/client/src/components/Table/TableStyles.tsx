@@ -47,6 +47,9 @@ export const StyledTr = styled.tr<StyledTr>`
   :hover {
     background-color: ${({ theme }) => theme.color["gray"][100]};
   }
+  td:not(:nth-child(2)) {
+    width: 1%;
+  }
 `;
 export const StyledTd = styled.td`
   padding: ${({ theme }) => theme.space[2]};
