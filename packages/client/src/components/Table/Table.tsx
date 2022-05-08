@@ -22,6 +22,7 @@ interface Table {
   entityTitle?: { singular: string; plural: string };
   perPage?: number;
   disablePaging?: boolean;
+  disableHeading?: boolean;
 }
 
 export const Table: React.FC<Table> = ({
@@ -31,6 +32,7 @@ export const Table: React.FC<Table> = ({
   entityTitle = { singular: "Record", plural: "Records" },
   perPage = 5,
   disablePaging,
+  disableHeading = false,
 }) => {
   const {
     getTableProps,
@@ -65,7 +67,7 @@ export const Table: React.FC<Table> = ({
       position={position}
       pagingUseless={pageSize > data.length}
     >
-      {position === "top" && (
+      {!disableHeading && position === "top" && (
         <StyledHeading>
           {
             <StyledUsedInTitle>
@@ -127,28 +129,30 @@ export const Table: React.FC<Table> = ({
           {...getTableProps()}
           className="table table-rounded is-striped is-hoverable is-fullwidth"
         >
-          <StyledTHead>
-            {headerGroups.map((headerGroup, key) => (
-              <tr {...headerGroup.getHeaderGroupProps()} key={key}>
-                {headerGroup.headers.map((column, key) => (
-                  <StyledTh
-                    {...column.getHeaderProps(column.getSortByToggleProps())}
-                    key={key}
-                  >
-                    {column.render("Header")}
-                    {/* Add a sort direction indicator */}
-                    <span>
-                      {column.isSorted
-                        ? column.isSortedDesc
-                          ? " ↑"
-                          : " ↓"
-                        : ""}
-                    </span>
-                  </StyledTh>
-                ))}
-              </tr>
-            ))}
-          </StyledTHead>
+          {data.length > 0 && (
+            <StyledTHead>
+              {headerGroups.map((headerGroup, key) => (
+                <tr {...headerGroup.getHeaderGroupProps()} key={key}>
+                  {headerGroup.headers.map((column, key) => (
+                    <StyledTh
+                      {...column.getHeaderProps(column.getSortByToggleProps())}
+                      key={key}
+                    >
+                      {column.render("Header")}
+                      {/* Add a sort direction indicator */}
+                      <span>
+                        {column.isSorted
+                          ? column.isSortedDesc
+                            ? " ↑"
+                            : " ↓"
+                          : ""}
+                      </span>
+                    </StyledTh>
+                  ))}
+                </tr>
+              ))}
+            </StyledTHead>
+          )}
           <tbody {...getTableBodyProps()}>
             {page.map((row, key) => {
               prepareRow(row);
@@ -167,7 +171,6 @@ export const Table: React.FC<Table> = ({
           </tbody>
           <tfoot></tfoot>
         </StyledTable>
-        {data.length < 1 && !isLoading && "No records found"}
         {/* {"Server error"} */}
         <Loader show={isLoading} />
         {!disablePaging && getPagination("bottom")}

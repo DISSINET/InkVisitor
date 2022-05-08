@@ -2,7 +2,7 @@
  * Very extensive object showing all the details about one actant
  */
 
-import { IEntity, IProp, IResponseEntity, IStatement } from ".";
+import { IEntity, IResponseEntity, IStatement } from ".";
 import { UsedInPosition } from "../enums";
 
 export interface IResponseDetail extends IResponseEntity {

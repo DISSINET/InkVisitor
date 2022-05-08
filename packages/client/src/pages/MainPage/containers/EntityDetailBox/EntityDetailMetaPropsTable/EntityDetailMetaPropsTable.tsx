@@ -1,4 +1,3 @@
-import { UsedInPosition } from "@shared/enums";
 import { IEntity, IResponseUsedInMetaProp } from "@shared/types";
 import { Table } from "components";
 import { useSearchParams } from "hooks";
