@@ -82,7 +82,7 @@ export const StyledDetailContentRowValueID = styled.div`
 export const StyledFormWrapper = styled.div`
   display: flex;
   flex-direction: column;
-  overflow: auto;
+  overflow: visible;
 `;
 
 export const StyledDetailForm = styled.div`
