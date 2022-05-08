@@ -70,6 +70,8 @@ import {
   StyledTagWrap,
 } from "./EntityDetailBoxStyles";
 import { EntityDetailBoxTable } from "./EntityDetailBoxTable";
+import { EntityDetailMetaPropsTable } from "./EntityDetailMetaPropsTable/EntityDetailMetaPropsTable";
+import { EntityDetailStatementPropsTable } from "./EntityDetailStatementPropsTable/EntityDetailStatementPropsTable";
 import { EntityDetailStatementsTable } from "./EntityDetailStatementsTable/EntityDetailStatementsTable";
 
 interface EntityDetailBox {}
@@ -1316,11 +1318,18 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
               )}
 
               {/* usedId props */}
-              <EntityDetailBoxTable
+              {/* <EntityDetailBoxTable
                 title={{ singular: "Meta Property", plural: "Meta Properties" }}
                 entities={entity.entities}
                 useCases={entity.usedInMetaProps}
                 mode="MetaProp"
+                key="MetaProp"
+              /> */}
+
+              <EntityDetailMetaPropsTable
+                title={{ singular: "Meta Property", plural: "Meta Properties" }}
+                entities={entity.entities}
+                useCases={entity.usedInMetaProps}
                 key="MetaProp"
               />
 
@@ -1333,16 +1342,25 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
               />
 
               {/* usedId statement props */}
-              <EntityDetailBoxTable
+              <EntityDetailStatementPropsTable
                 title={{
                   singular: "Statement Property",
                   plural: "Statement Properties",
                 }}
                 entities={entity.entities}
                 useCases={entity.usedInStatementProps}
-                mode="StatementProp"
                 key="StatementProp"
               />
+              {/* <EntityDetailBoxTable
+                title={{
+                  singular: "Statement Property",
+                  plural: "Statement Properties",
+                }}
+                entities={entity.entities}
+                useCases={entity.usedInStatementProps}
+                key="StatementProp"
+                mode="StatementProp"
+              /> */}
             </StyledDetailSection>
 
             {/* Audits */}
