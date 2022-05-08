@@ -123,6 +123,8 @@ export const EntityDetailStatementPropsTable: React.FC<
         data={data}
         entityTitle={title}
         perPage={perPage}
+        firstColumnMinWidth
+        lastColumnMinWidth
       />
     </>
   );

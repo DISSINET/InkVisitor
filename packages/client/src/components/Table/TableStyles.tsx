@@ -39,6 +39,8 @@ export const StyledTableHeader = styled.div<StyledTableHeader>`
 interface StyledTr {
   opacity?: number;
   fullWidthColumn: number;
+  firstColumnMinWidth: boolean;
+  lastColumnMinWidth: boolean;
 }
 export const StyledTr = styled.tr<StyledTr>`
   background-color: ${({ theme }) => theme.color["white"]};
@@ -48,12 +50,14 @@ export const StyledTr = styled.tr<StyledTr>`
   :hover {
     background-color: ${({ theme }) => theme.color["gray"][100]};
   }
-  /* Preparation for one fullWidth column */
-  /* td:not(:nth-child(5)) {
-    width: 1%;
-  } */
   td:not(:nth-child(${({ fullWidthColumn }) => fullWidthColumn})) {
-    width: 1%;
+    width: ${({ fullWidthColumn }) => (fullWidthColumn > 0 ? "1%" : "")};
+  }
+  td:first-child {
+    width: ${({ firstColumnMinWidth }) => (firstColumnMinWidth ? "1%" : "")};
+  }
+  td:last-child {
+    width: ${({ lastColumnMinWidth }) => (lastColumnMinWidth ? "1%" : "")};
   }
 `;
 export const StyledTd = styled.td`

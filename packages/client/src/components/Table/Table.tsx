@@ -24,6 +24,9 @@ interface Table {
   disablePaging?: boolean;
   disableHeading?: boolean;
   fullWidthColumn?: number;
+  // Don't combine with fullWidthColumn (see CSS)
+  firstColumnMinWidth?: boolean;
+  lastColumnMinWidth?: boolean;
 }
 
 export const Table: React.FC<Table> = ({
@@ -35,6 +38,8 @@ export const Table: React.FC<Table> = ({
   disablePaging,
   disableHeading = false,
   fullWidthColumn = 0,
+  firstColumnMinWidth = false,
+  lastColumnMinWidth = false,
 }) => {
   const {
     getTableProps,
@@ -163,6 +168,8 @@ export const Table: React.FC<Table> = ({
                   {...row.getRowProps()}
                   key={key}
                   fullWidthColumn={fullWidthColumn}
+                  firstColumnMinWidth={firstColumnMinWidth}
+                  lastColumnMinWidth={lastColumnMinWidth}
                 >
                   {row.cells.map((cell, key) => {
                     return (
