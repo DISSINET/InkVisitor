@@ -40,6 +40,7 @@ import {
   UserListModal,
   TemplateListBox,
 } from "./containers";
+import { AboutModal } from "./containers/AboutModal/AboutModal";
 import { UserCustomizationModal } from "./containers/UserCustomizationModal/UserCustomizationModal";
 import {
   StyledFaUserAlt,
@@ -75,6 +76,8 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
   const username = useAppSelector((state) => state.username);
   const userId = localStorage.getItem("userid");
   const userRole = localStorage.getItem("userrole");
+
+  const [aboutOpen, setAboutOpen] = useState<boolean>(false);
 
   const firstPanelExpanded: boolean = useAppSelector(
     (state) => state.layout.firstPanelExpanded
@@ -121,6 +124,13 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
     setDetailId("");
     setStatementId("");
     setTerritoryId("");
+  };
+
+  const handleOpenAbout = () => {
+    setAboutOpen(true);
+  };
+  const handleCloseAbout = () => {
+    setAboutOpen(false);
   };
 
   const handleUsersModalClick = () => {
@@ -232,10 +242,17 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
                       />
                     )}
                     <Button
-                      label="Log Out"
-                      color="danger"
-                      onClick={() => handleLogOut()}
+                      label="About"
+                      color="info"
+                      onClick={() => handleOpenAbout()}
                     />
+                    {isLoggedIn && (
+                      <Button
+                        label="Log Out"
+                        color="danger"
+                        onClick={() => handleLogOut()}
+                      />
+                    )}
                   </ButtonGroup>
                 </StyledUserBox>
               )}
@@ -343,6 +360,7 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
             isOpen={userAdministrationModalOpen}
             onCloseFn={handleUsersModalCancelClick}
           />
+          <AboutModal isOpen={aboutOpen} onCloseFn={handleCloseAbout} />
           {user && userCustomizationOpen && (
             <UserCustomizationModal
               user={user}
