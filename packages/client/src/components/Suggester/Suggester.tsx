@@ -242,7 +242,7 @@ export const Suggester: React.FC<SuggesterProps> = ({
       <StyledSuggester marginTop={marginTop}>
         <StyledInputWrapper
           ref={dropRef}
-          hasButton={disableCreate}
+          hasButton={!disableCreate}
           isOver={isOver}
         >
           <Dropdown
@@ -279,7 +279,7 @@ export const Suggester: React.FC<SuggesterProps> = ({
             }}
           />
           {typed.length > 0 && (
-            <StyledSuggestionCancelButton hasButton={disableCreate}>
+            <StyledSuggestionCancelButton hasButton={!disableCreate}>
               <MdCancel onClick={() => onCancel()} />
             </StyledSuggestionCancelButton>
           )}

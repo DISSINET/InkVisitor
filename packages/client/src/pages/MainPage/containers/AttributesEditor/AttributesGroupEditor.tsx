@@ -320,6 +320,7 @@ export const AttributesGroupEditor: React.FC<AttributesGroupEditor> = ({
                 userCanEdit && (
                   <StyledSuggesterWrap>
                     <EntitySuggester
+                      disableCreate
                       openDetailOnCreate
                       onSelected={(newSelectedId: string) => {
                         updateProp(statementId, {
@@ -380,6 +381,7 @@ export const AttributesGroupEditor: React.FC<AttributesGroupEditor> = ({
                 userCanEdit && (
                   <StyledSuggesterWrap>
                     <EntitySuggester
+                      disableCreate
                       openDetailOnCreate
                       onSelected={(newSelectedId: string) => {
                         updateProp(statementId, {
