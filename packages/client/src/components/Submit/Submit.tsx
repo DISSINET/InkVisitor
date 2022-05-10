@@ -16,6 +16,7 @@ interface Submit {
   onSubmit: () => void;
   onCancel: () => void;
   loading?: boolean;
+  submitLabel?: string;
 }
 export const Submit: React.FC<Submit> = ({
   title,
@@ -24,6 +25,7 @@ export const Submit: React.FC<Submit> = ({
   onSubmit,
   onCancel,
   loading = false,
+  submitLabel = "Submit",
 }) => {
   return (
     <>
@@ -40,7 +42,7 @@ export const Submit: React.FC<Submit> = ({
         <ModalFooter>
           <ButtonGroup>
             <Button label="Cancel" color="info" onClick={onCancel} />
-            <Button label="Submit" color="danger" onClick={onSubmit} />
+            <Button label={submitLabel} color="danger" onClick={onSubmit} />
           </ButtonGroup>
         </ModalFooter>
         <Loader show={loading} />
