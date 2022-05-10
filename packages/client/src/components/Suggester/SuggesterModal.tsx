@@ -172,7 +172,7 @@ export const SuggesterModal: React.FC<SuggesterModal> = ({
                     <EntitySuggester
                       filterEditorRights
                       inputWidth={96}
-                      allowCreate={false}
+                      disableCreate
                       categoryTypes={[EntityClass.Territory]}
                       onSelected={(newSelectedId: string) => {
                         setTerritoryId(newSelectedId);
