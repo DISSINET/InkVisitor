@@ -35,9 +35,9 @@ export const StyledBackground = styled(animated.div)`
 `;
 
 interface Card {
-  width: "full" | "normal" | "thin" | number;
+  width: "full" | "fat" | "normal" | "thin" | number;
 }
-const getWidth = (width: "full" | "normal" | "thin" | number) => {
+const getWidth = (width: "full" | "fat" | "normal" | "thin" | number) => {
   if (typeof width === "number") {
     return `${width / 10}rem`;
   } else {
@@ -46,6 +46,8 @@ const getWidth = (width: "full" | "normal" | "thin" | number) => {
         return "calc(100vw - 40px)";
       case "normal":
         return "50rem";
+      case "fat":
+        return "100rem";
       case "thin":
         return "auto";
     }

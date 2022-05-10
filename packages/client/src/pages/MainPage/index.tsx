@@ -77,7 +77,7 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
   const userId = localStorage.getItem("userid");
   const userRole = localStorage.getItem("userrole");
 
-  const [aboutOpen, setAboutOpen] = useState<boolean>(false);
+  const [aboutOpen, setAboutOpen] = useState<boolean>(true);
 
   const firstPanelExpanded: boolean = useAppSelector(
     (state) => state.layout.firstPanelExpanded
