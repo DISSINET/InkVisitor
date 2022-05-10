@@ -183,7 +183,7 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
           <EntitySuggester
             filterEditorRights
             inputWidth={96}
-            allowCreate={false}
+            disableCreate
             categoryTypes={[EntityClass.Territory]}
             onSelected={(newSelectedId: string) => {
               moveTerritoryMutation.mutate(newSelectedId);
