@@ -592,7 +592,7 @@ export const StatementEditorBox: React.FC = () => {
               <EntitySuggester
                 filterEditorRights
                 inputWidth={96}
-                allowCreate={false}
+                disableCreate
                 categoryTypes={[EntityClass.Territory]}
                 onSelected={(newSelectedId: string) => {
                   moveStatementMutation.mutate(newSelectedId);

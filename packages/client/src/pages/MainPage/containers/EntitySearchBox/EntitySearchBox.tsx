@@ -202,7 +202,7 @@ export const EntitySearchBox: React.FC = () => {
             handleChange("entityId", newSelectedId);
           }}
           placeholder={"entity"}
-          allowCreate={false}z
+          disableCreate
           inputWidth={114}
         />
       </StyledRow> */}

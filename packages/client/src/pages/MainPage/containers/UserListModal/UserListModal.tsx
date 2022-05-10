@@ -277,7 +277,7 @@ export const UserListModal: React.FC<UserListModal> = ({
               {userRole !== UserRole.Admin ? (
                 <React.Fragment>
                   <EntitySuggester
-                    allowCreate={false}
+                    disableCreate
                     onSelected={(newSelectedId: string) => {
                       addRightToUser(userId, newSelectedId, "read");
                     }}
@@ -353,7 +353,7 @@ export const UserListModal: React.FC<UserListModal> = ({
                 userRole === UserRole.Editor ? (
                   <React.Fragment>
                     <EntitySuggester
-                      allowCreate={false}
+                      disableCreate
                       onSelected={(newSelectedId: string) => {
                         addRightToUser(userId, newSelectedId, "write");
                       }}
