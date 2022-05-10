@@ -1319,8 +1319,7 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                 </StyledDetailSectionContentUsedIn>
               )}
 
-              {/* usedId props */}
-
+              {/* usedIn props */}
               {!entity.isTemplate && (
                 <EntityDetailMetaPropsTable
                   title={{
@@ -1333,7 +1332,7 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                 />
               )}
 
-              {/* usedId statements */}
+              {/* usedIn statements */}
               {!entity.isTemplate && (
                 <EntityDetailStatementsTable
                   title={{ singular: "Statement", plural: "Statements" }}
@@ -1343,7 +1342,7 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                 />
               )}
 
-              {/* usedId statement props */}
+              {/* usedIn statement props */}
               {!entity.isTemplate && (
                 <EntityDetailStatementPropsTable
                   title={{
@@ -1378,7 +1377,8 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
 
       <Submit
         title="Remove entity"
-        text="Do you really want to delete the entity?"
+        text="Do you really want to remove this entity?"
+        submitLabel="Remove"
         onSubmit={() => {
           deleteEntityMutation.mutate(detailId);
           setDetailId("");
