@@ -304,7 +304,7 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
       onSuccess: async (data, entityId) => {
         setShowRemoveSubmit(false);
 
-        toast.info(`Entity deleted!`);
+        toast.info(`Entity removed!`);
 
         // hide selected territory if T removed
 
@@ -318,7 +318,7 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
           queryClient.invalidateQueries("territory");
         }
 
-        // hide editor box if the deleted entity was also opened in the editor
+        // hide editor box if the removed entity was also opened in the editor
         if (
           entity &&
           entity.class == EntityClass.Statement &&
