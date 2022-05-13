@@ -214,7 +214,7 @@ export const StatementListRowExpanded: React.FC<StatementListRowExpanded> = ({
             <br />
             <StyledActantGroup>
               {actionObjects.map((action, key) => (
-                <StyledPropRow level={1} key={key}>
+                <StyledPropRow key={key}>
                   <StyledBsArrowReturnRight size="20" />
                   <StyledSpan>&nbsp;&nbsp;(action)&nbsp;&nbsp;</StyledSpan>
                   {renderListActantWithProps(
@@ -228,7 +228,7 @@ export const StatementListRowExpanded: React.FC<StatementListRowExpanded> = ({
             </StyledActantGroup>
             <StyledActantGroup>
               {subjectObjects.map((actant, key) => (
-                <StyledPropRow level={1} key={key}>
+                <StyledPropRow key={key}>
                   <StyledBsArrowReturnRight size="20" />
                   <StyledSpan>&nbsp;&nbsp;(subject)&nbsp;&nbsp;</StyledSpan>
                   {renderListActantWithProps(
@@ -242,7 +242,7 @@ export const StatementListRowExpanded: React.FC<StatementListRowExpanded> = ({
             </StyledActantGroup>
             <StyledActantGroup>
               {actantObjects.map((actant, key) => (
-                <StyledPropRow level={1} key={key}>
+                <StyledPropRow key={key}>
                   <StyledBsArrowReturnRight size="20" />
                   <StyledSpan>&nbsp;&nbsp;(actant)&nbsp;&nbsp;</StyledSpan>
                   {renderListActantWithProps(
@@ -254,25 +254,34 @@ export const StatementListRowExpanded: React.FC<StatementListRowExpanded> = ({
                 </StyledPropRow>
               ))}
             </StyledActantGroup>
-            <StyledReferenceSection>
-              {references.map((reference, key) => (
-                <div style={{ display: "grid" }} key={key}>
-                  <StyledPropRow level={1} key={key}>
-                    <StyledBsArrowReturnRight size="20" />
-                    <StyledSpan>&nbsp;&nbsp;(reference)&nbsp;&nbsp;</StyledSpan>
-                    {renderReferenceRow(
-                      reference.resource,
-                      reference.value,
-                      key
-                    )}
-                  </StyledPropRow>
-                </div>
-              ))}
-            </StyledReferenceSection>
-            <div style={{ display: "grid", maxWidth: "100%" }}>
+            <div>
+              <StyledReferenceSection>
+                {references.map((reference, key) => (
+                  <div
+                    style={{
+                      display: "grid",
+                    }}
+                    key={key}
+                  >
+                    <StyledPropRow key={key}>
+                      <StyledBsArrowReturnRight size="20" />
+                      <StyledSpan>
+                        &nbsp;&nbsp;(reference)&nbsp;&nbsp;
+                      </StyledSpan>
+                      {renderReferenceRow(
+                        reference.resource,
+                        reference.value,
+                        key
+                      )}
+                    </StyledPropRow>
+                  </div>
+                ))}
+              </StyledReferenceSection>
+            </div>
+            <div style={{ display: "grid" }}>
               <StyledActantGroup>
                 {tagObjects.map((tag, key) => (
-                  <StyledPropRow level={1} key={key} disableBottomMargin>
+                  <StyledPropRow key={key} disableBottomMargin>
                     <StyledBsArrowReturnRight size="20" />
                     <StyledSpan>&nbsp;&nbsp;(tag)&nbsp;&nbsp;</StyledSpan>
                     {renderListActant(tag.id, key)}

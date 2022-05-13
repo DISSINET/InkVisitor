@@ -3,9 +3,8 @@ import { EmptyTag } from "pages/MainPage/containers";
 import React from "react";
 import { EntityTag } from "../../../EntityTag/EntityTag";
 import {
-  StyledPropGroupCell,
+  StyledPropGridRow,
   StyledPropGroup,
-  StyledPropRow,
 } from "./StatementListRowExpandedStyles";
 
 interface StatementListRowExpandedPropGroup {
@@ -24,11 +23,11 @@ export const StatementListRowExpandedPropGroup: React.FC<
         const propValueEntity: IEntity = entities[prop.value.id];
         return (
           <React.Fragment key={key}>
-            <StyledPropRow level={level}>
+            <StyledPropGridRow level={level}>
               {propTypeEntity ? (
                 <>
                   <EntityTag
-                    // fullWidth
+                    fullWidth
                     actant={propTypeEntity}
                     tooltipPosition="bottom center"
                   />
@@ -43,7 +42,7 @@ export const StatementListRowExpandedPropGroup: React.FC<
               {propValueEntity ? (
                 <>
                   <EntityTag
-                    // fullWidth
+                    fullWidth
                     actant={propValueEntity}
                     tooltipPosition="bottom center"
                   />
@@ -53,11 +52,11 @@ export const StatementListRowExpandedPropGroup: React.FC<
                   <EmptyTag label={"value"} />
                 </>
               )}
-            </StyledPropRow>
+            </StyledPropGridRow>
 
-            <div key={`children-${key}`}>
-              {renderChildrenPropRow && renderChildrenPropRow(prop.children)}
-            </div>
+            {/* <div key={`children-${key}`}> */}
+            {renderChildrenPropRow && renderChildrenPropRow(prop.children)}
+            {/* </div> */}
           </React.Fragment>
         );
       })}

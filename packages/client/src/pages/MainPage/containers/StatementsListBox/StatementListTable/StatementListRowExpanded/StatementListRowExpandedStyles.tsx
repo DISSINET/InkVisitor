@@ -25,16 +25,26 @@ const getIndentation = (level: 1 | 2 | 3) => {
       return theme.space[16];
   }
 };
-interface StyledPropRow {
+interface StyledPropGridRow {
   level: 1 | 2 | 3;
   disableBottomMargin?: boolean;
 }
-export const StyledPropRow = styled.div<StyledPropRow>`
+export const StyledPropGridRow = styled.div<StyledPropGridRow>`
   margin-left: ${({ level }) => getIndentation(level)};
   margin-bottom: ${({ theme, disableBottomMargin }) =>
     disableBottomMargin ? 0 : theme.space[1]};
+  display: grid;
+  grid-template-columns: auto auto auto;
+  overflow: hidden;
+`;
+interface StyledPropRow {
+  disableBottomMargin?: boolean;
+}
+export const StyledPropRow = styled.div<StyledPropRow>`
+  margin-left: ${({ theme }) => theme.space[5]};
+  margin-bottom: ${({ theme, disableBottomMargin }) =>
+    disableBottomMargin ? 0 : theme.space[1]};
   display: inline-flex;
-  /* dislay: grid; */
   overflow: hidden;
 `;
 
@@ -56,6 +66,7 @@ export const StyledActantWithPropsWrap = styled.div`
   overflow: hidden;
   margin-bottom: ${({ theme }) => theme.space[1]};
 `;
+
 export const StyledExpandedRowTd = styled.td``;
 export const StyledExpandedRowTr = styled.tr`
   width: 100%;
