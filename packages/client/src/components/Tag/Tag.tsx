@@ -10,8 +10,8 @@ import {
 } from "react-dnd";
 import { PopupPosition } from "reactjs-popup/dist/types";
 import { setDraggedTerritory } from "redux/features/territoryTree/draggedTerritorySlice";
-import { useAppDispatch } from "redux/hooks";
-import { DragItem, Entities, ItemTypes } from "types";
+import { useAppDispatch, useAppSelector } from "redux/hooks";
+import { DraggedTerritoryItem, DragItem, Entities, ItemTypes } from "types";
 import { dndHoverFn } from "utils";
 import {
   ButtonWrapper,
@@ -76,13 +76,16 @@ export const Tag: React.FC<TagProps> = ({
 }) => {
   const { setDetailId } = useSearchParams();
   const dispatch = useAppDispatch();
+  const draggedTerritory: DraggedTerritoryItem = useAppSelector(
+    (state) => state.territoryTree.draggedTerritory
+  );
 
   const ref = useRef<HTMLDivElement>(null);
 
   const [, drop] = useDrop({
     accept: ItemTypes.TAG,
     hover(item: DragItem, monitor: DropTargetMonitor) {
-      if (moveFn) {
+      if (moveFn && draggedTerritory && draggedTerritory.lvl === lvl) {
         dndHoverFn(item, index, monitor, ref, moveFn);
       }
     },
