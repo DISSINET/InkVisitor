@@ -562,7 +562,7 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
               />
             </StyledTagWrap>
             <ButtonGroup style={{ marginTop: "1rem" }}>
-              {entity.class !== EntityClass.Statement && (
+              {entity.class !== EntityClass.Statement && userCanEdit && (
                 <Button
                   icon={<FaClone size={14} />}
                   color="primary"
@@ -574,7 +574,7 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                   }}
                 />
               )}
-              {mayBeRemoved && (
+              {mayBeRemoved && userCanEdit && (
                 <Button
                   color="primary"
                   icon={<FaTrashAlt />}
@@ -583,6 +583,19 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                   inverted
                   onClick={() => {
                     setShowRemoveSubmit(true);
+                  }}
+                />
+              )}
+              {userCanEdit && (
+                <Button
+                  key="template"
+                  icon={<GrClone size={14} />}
+                  tooltip="create template from entity"
+                  inverted
+                  color="primary"
+                  label="Create template"
+                  onClick={() => {
+                    setCreateTemplateModal(true);
                   }}
                 />
               )}
@@ -595,17 +608,6 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                 label="refresh"
                 onClick={() => {
                   queryClient.invalidateQueries(["entity"]);
-                }}
-              />
-              <Button
-                key="template"
-                icon={<GrClone size={14} />}
-                tooltip="create template from entity"
-                inverted
-                color="primary"
-                label="Create template"
-                onClick={() => {
-                  setCreateTemplateModal(true);
                 }}
               />
               {entity.class === EntityClass.Statement && (
