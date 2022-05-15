@@ -42,7 +42,7 @@ describe("test ResponseEntityDetail.walkEntityProps", function () {
 
     it("should add to postponedEntities map", () => {
       const keys = Object.keys(response.postponedEntities);
-      expect(keys).toEqual([prop.type.id]);
+      expect(keys).toEqual([linkedEntity.props[0].type.id]);
     });
   });
 
@@ -260,9 +260,7 @@ describe("test ResponseEntityDetail.prepare", function () {
 
     it("should add entry to usedInStatementProps under Value position", () => {
       const foundEntry = response.usedInStatementProps.find(
-        (u) =>
-          u.statement.id === statement1.id &&
-          u.position === UsedInPosition.Value
+        (u) => u.statementId === statement1.id
       );
       expect(!!foundEntry).toBeTruthy();
     });
@@ -281,8 +279,7 @@ describe("test ResponseEntityDetail.prepare", function () {
 
     it("should add entry to usedInStatementProps under Type position", () => {
       const foundEntry = response.usedInStatementProps.find(
-        (u) =>
-          u.statement.id === statement1.id && u.position === UsedInPosition.Type
+        (u) => u.statementId === statement1.id
       );
       expect(!!foundEntry).toBeTruthy();
     });
@@ -301,8 +298,7 @@ describe("test ResponseEntityDetail.prepare", function () {
 
     it("should add entry to usedInStatementProps under Type position", () => {
       const foundEntry = response.usedInStatementProps.find(
-        (u) =>
-          u.statement.id === statement1.id && u.position === UsedInPosition.Type
+        (u) => u.statementId === statement1.id
       );
       expect(!!foundEntry).toBeTruthy();
     });
@@ -322,8 +318,7 @@ describe("test ResponseEntityDetail.prepare", function () {
 
     it("should add entry to usedInStatementProps under Type position", () => {
       const foundEntry = response.usedInStatementProps.find(
-        (u) =>
-          u.statement.id === statement1.id && u.position === UsedInPosition.Type
+        (u) => u.statementId === statement1.id
       );
       expect(!!foundEntry).toBeTruthy();
     });
@@ -346,17 +341,14 @@ describe("test ResponseEntityDetail.prepare", function () {
 
     it("should add first entry to usedInStatementProps under Type position", () => {
       const foundEntry = response.usedInStatementProps.find(
-        (u) =>
-          u.statement.id === statement1.id && u.position === UsedInPosition.Type
+        (u) => u.statementId === statement1.id
       );
       expect(!!foundEntry).toBeTruthy();
     });
 
     it("should add second entry to usedInStatementProps under Value position", () => {
       const foundEntry = response.usedInStatementProps.find(
-        (u) =>
-          u.statement.id === statement2.id &&
-          u.position === UsedInPosition.Value
+        (u) => u.statementId === statement2.id
       );
       expect(!!foundEntry).toBeTruthy();
     });

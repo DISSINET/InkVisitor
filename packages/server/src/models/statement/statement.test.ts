@@ -13,7 +13,6 @@ import {
   getIStatementMock,
 } from "@modules/common.test";
 import Prop, { PropSpec } from "@models/prop/prop";
-import { fillArray } from "@models/common";
 import { IProp } from "@shared/types";
 
 const fillStatementProps = function (container: IProp[]): void {
