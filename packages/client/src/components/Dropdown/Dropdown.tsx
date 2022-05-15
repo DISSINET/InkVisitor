@@ -43,7 +43,6 @@ interface Dropdown {
   onBlur?: () => void;
   disableTyping?: boolean;
   suggester?: boolean;
-  oneLetter?: boolean;
   allowAny?: boolean;
 }
 export const Dropdown: React.FC<Dropdown> = ({
