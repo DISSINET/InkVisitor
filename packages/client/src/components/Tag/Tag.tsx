@@ -6,7 +6,6 @@ import {
   DropTargetMonitor,
   useDrag,
   useDrop,
-  XYCoord,
 } from "react-dnd";
 import { PopupPosition } from "reactjs-popup/dist/types";
 import { setDraggedTerritory } from "redux/features/territoryTree/draggedTerritorySlice";
@@ -40,6 +39,7 @@ interface TagProps {
   index?: number;
   moveFn?: (dragIndex: number, hoverIndex: number) => void;
   disableTooltip?: boolean;
+  disableDoubleClick?: boolean;
   tooltipPosition?: PopupPosition | PopupPosition[];
   updateOrderFn?: (item: DragItem) => void;
   lvl?: number;
@@ -68,6 +68,7 @@ export const Tag: React.FC<TagProps> = ({
   moveFn,
   tooltipPosition = "right top",
   disableTooltip = false,
+  disableDoubleClick = false,
   updateOrderFn = () => {},
   statementsCount,
   isFavorited = false,
@@ -125,7 +126,7 @@ export const Tag: React.FC<TagProps> = ({
     e.stopPropagation();
     e.nativeEvent.stopImmediatePropagation();
 
-    setDetailId(propId);
+    !disableDoubleClick && setDetailId(propId);
   };
 
   const getShortTag = () => {
