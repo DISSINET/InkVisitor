@@ -34,7 +34,7 @@ export const StyledPropGridRow = styled.div<StyledPropGridRow>`
   margin-bottom: ${({ theme, disableBottomMargin }) =>
     disableBottomMargin ? 0 : theme.space[1]};
   display: grid;
-  grid-template-columns: auto auto auto;
+  grid-template-columns: auto auto;
   overflow: hidden;
 `;
 interface StyledPropRow {
@@ -97,4 +97,13 @@ export const StyledReferenceColumn = styled.div`
 `;
 export const StyledPropGroupCell = styled.div`
   display: grid;
+`;
+interface StyledTagWrap {
+  marginRight?: boolean;
+}
+export const StyledTagWrap = styled.div<StyledTagWrap>`
+  display: inline-flex;
+  overflow: hidden;
+  margin-right: ${({ theme, marginRight }) =>
+    marginRight ? theme.space[1] : ""};
 `;
