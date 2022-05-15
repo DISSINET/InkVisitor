@@ -680,7 +680,7 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                       </StyledDetailContentRow>
                     )}
 
-                    <StyledDetailContentRow>
+                    {/* <StyledDetailContentRow>
                       <StyledDetailContentRowLabel>
                         Entity Type
                       </StyledDetailContentRowLabel>
@@ -708,7 +708,7 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                           ></StyledTypeBar>
                         </div>
                       </StyledDetailContentRowValue>
-                    </StyledDetailContentRow>
+                    </StyledDetailContentRow> */}
 
                     <StyledDetailContentRow>
                       <StyledDetailContentRowLabel>
