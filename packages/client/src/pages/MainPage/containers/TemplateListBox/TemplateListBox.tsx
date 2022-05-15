@@ -222,20 +222,25 @@ export const TemplateListBox: React.FC<TemplateListBox> = ({}) => {
               {"Entity class: "}
             </StyledTemplateFilterInputLabel>
             <StyledTemplateFilterInputValue>
-              <Dropdown
-                value={{
-                  label: filterByClass.label,
-                  value: filterByClass.value,
-                }}
-                options={allEntityOptions}
-                onChange={(option: ValueType<OptionTypeBase, any>) => {
-                  setFilterByClass(option as DropdownItem);
-                }}
-                width={80}
-                entityDropdown
-                disableTyping
-                oneLetter
-              />
+              <div style={{ position: "relative" }}>
+                <Dropdown
+                  value={{
+                    label: filterByClass.label,
+                    value: filterByClass.value,
+                  }}
+                  options={allEntityOptions}
+                  onChange={(option: ValueType<OptionTypeBase, any>) => {
+                    setFilterByClass(option as DropdownItem);
+                  }}
+                  width={80}
+                  entityDropdown
+                  disableTyping
+                  oneLetter
+                />
+                <StyledTypeBar
+                  entity={`entity${filterByClass.value}`}
+                ></StyledTypeBar>
+              </div>
             </StyledTemplateFilterInputValue>
           </StyledTemplateFilterInputRow>
           <StyledTemplateFilterInputRow>

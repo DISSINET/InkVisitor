@@ -681,6 +681,30 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
 
                     <StyledDetailContentRow>
                       <StyledDetailContentRowLabel>
+                        Entity Type
+                      </StyledDetailContentRowLabel>
+                      <StyledDetailContentRowValue>
+                        {/* <Dropdown
+                          value={{
+                            label: selectedCategory.label,
+                            value: selectedCategory.value,
+                          }}
+                          options={categories}
+                          onChange={(
+                            option: ValueType<OptionTypeBase, any>
+                          ) => {
+                            setSelectedCategory(option);
+                          }}
+                          width={40}
+                          entityDropdown
+                          disableTyping
+                          oneLetter
+                        /> */}
+                      </StyledDetailContentRowValue>
+                    </StyledDetailContentRow>
+
+                    <StyledDetailContentRow>
+                      <StyledDetailContentRowLabel>
                         Label
                       </StyledDetailContentRowLabel>
                       <StyledDetailContentRowValue>
