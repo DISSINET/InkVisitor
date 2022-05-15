@@ -107,7 +107,6 @@ export class ResponseEntityDetail
     const casts = await this.findFromTemplate(conn);
     this.usedAsTemplate = casts.map((c) => c.id);
 
-    console.log(this.usedAsTemplate);
     casts.forEach((c) => (this.entities[c.id] = c));
   }
 
