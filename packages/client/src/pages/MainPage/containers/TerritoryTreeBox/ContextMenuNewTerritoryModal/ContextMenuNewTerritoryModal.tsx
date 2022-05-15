@@ -1,4 +1,4 @@
-import { UserRole } from "@shared/enums";
+import { Order, UserRole } from "@shared/enums";
 import { ITerritory } from "@shared/types";
 import api from "api";
 import {
@@ -42,7 +42,6 @@ export const ContextMenuNewTerritoryModal: React.FC<
     {
       onSuccess: (data, variables) => {
         onClose();
-        toast.info(`Territory [${variables.label}] created!`);
         queryClient.invalidateQueries("tree");
 
         dispatch(setTreeInitialized(false));
@@ -59,7 +58,7 @@ export const ContextMenuNewTerritoryModal: React.FC<
       const newTerritory: ITerritory = CTerritoryActant(
         territoryName,
         territoryActantId,
-        -1,
+        Order.Last,
         localStorage.getItem("userrole") as UserRole
       );
       createTerritoryMutation.mutate(newTerritory);

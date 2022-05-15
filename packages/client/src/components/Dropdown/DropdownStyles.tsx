@@ -27,7 +27,6 @@ interface StyledSelect {
   entityDropdown?: boolean;
 }
 export const StyledSelect = styled(Select)`
-  font-weight: bold;
   display: inline-flex;
   min-height: ${({ theme }) => theme.space[10]};
   vertical-align: bottom;
@@ -48,7 +47,13 @@ export const StyledSelect = styled(Select)`
     background-color: ${({ theme, entityDropdown }) =>
       entityDropdown ? theme.color["gray"][200] : ""};
     :hover {
-      border-color: black;
+      border-color: ${({ theme }) => theme.color["info"]};
+      border-width: 1.5px;
+    }
+    :focus {
+      outline: 0
+      border-color: ${({ theme }) => theme.color["info"]};
+      border-width: 1.5px;
     }
   }
   .react-select__control--is-disabled {
@@ -74,20 +79,22 @@ export const StyledSelect = styled(Select)`
     width: ${({ width }) => getWidth(width)};
   }
   .react-select__single-value {
-    font-size: ${({ theme, entityDropdown }) =>
-      entityDropdown ? theme.fontSize["xs"] : theme.fontSize["sm"]};
-    font-weight: ${({ theme, entityDropdown }) =>
-      entityDropdown ? theme.fontWeight["bold"] : theme.fontWeight["normal"]};
+    font-size: ${({ theme }) => theme.fontSize["xs"]};
     top: 50%;
     margin-left: ${({ theme, entityDropdown }) =>
       entityDropdown ? theme.space[3] : theme.space[2]};
     margin-top: ${({ entityDropdown }) => (entityDropdown ? "1px" : 0)};
 
-    color: black;
+    color: ${({ theme }) => theme.color["primary"]};
     vertical-align: middle;
   }
+  .react-select__multi-value {
+    background-color: ${({ theme }) => theme.color["invertedBg"]["primary"]};
+    color: ${({ theme }) => theme.color["gray"][700]};
+    border: 1px solid ${({ theme }) => theme.color["blue"][300]};
+  }
   .react-select__indicator {
-    color: black;
+    color: ${({ theme }) => theme.color["primary"]};
     svg {
       height: 18;
     }
@@ -111,14 +118,15 @@ export const StyledSelect = styled(Select)`
     }
   }
   .react-select__option--is-selected {
-    background-color: ${({ theme }) => theme.color["primary"]};
-    color: white;
+    font-weight: bold;
+    color: ${({ theme }) => theme.color["primary"]};
+    background-color: white;
     :hover {
-      background-color: ${({ theme }) => theme.color["blue"][200]};
+      background-color: ${({ theme }) => theme.color["invertedBg"]["primary"]};
     }
   }
   .react-select__option--is-focused {
-    background-color: ${({ theme }) => theme.color["blue"][200]};
+    background-color: ${({ theme }) => theme.color["invertedBg"]["primary"]};
   }
 `;
 interface StyledEntityValue {

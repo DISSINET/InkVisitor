@@ -8,12 +8,15 @@
     "parse": "ts-node scripts/parse.ts",
     "create-audits": "ts-node scripts/create-audits.ts",
     "fix-t-orders": "npx ts-node scripts/fix-t-order.ts",
-    "benchmark": "npx ts-node scripts/index-benchmark.ts",
-    "import-remote": "npx ts-node scripts/import.ts all prod",
-    "import-remote-sandbox": "npx ts-node scripts/import.ts all sandbox",
-    "import-remote-staging": "npx ts-node scripts/import.ts all staging",
-    "import-remote-data-import": "npx ts-node scripts/import.ts all data-import",
-    "import-local": "npx ts-node scripts/import.ts all local"
+    "benchmark": "npx ts-node -r tsconfig-paths/register scripts/index-benchmark.ts",
+    "import-remote": "npx ts-node -r tsconfig-paths/register scripts/import.ts all production",
+    "import-remote-sandbox": "npx ts-node -r tsconfig-paths/register scripts/import.ts all sandbox",
+    "import-remote-staging": "npx ts-node -r tsconfig-paths/register scripts/import.ts all staging",
+    "import-remote-data-import": "npx ts-node -r tsconfig-paths/register scripts/import.ts all importdata",
+    "import-local": "npx ts-node -r tsconfig-paths/register scripts/import.ts all local",
+    "import-local-parsed": "npx ts-node -r tsconfig-paths/register scripts/import.ts allparsed local",
+    "import-remote-data-import-parsed": "npx ts-node -r tsconfig-paths/register scripts/import.ts allparsed importdata",
+    "import-local-empty": "npx ts-node -r tsconfig-paths/register scripts/import.ts empty local"
   },
   "author": "",
   "license": "ISC",
@@ -31,8 +34,10 @@
   },
   "devDependencies": {
     "@types/node": "^16.7.10",
+    "@types/tunnel-ssh": "^4.1.1",
     "install": "^0.13.0",
     "npm": "^7.21.1",
+    "tsconfig-paths": "^3.14.1",
     "tslib": "^2.3.1"
   }
 }

@@ -35,10 +35,12 @@ export const StyledEditorPreSection = styled.div<StyledEditorPreSection>`
 interface StyledEditorSection {
   firstSection?: boolean;
   lastSection?: boolean;
+  metaSection?: boolean;
 }
 export const StyledEditorSection = styled.div<StyledEditorSection>`
   position: relative;
   padding: ${({ theme }) => theme.space[6]};
+  padding-right: ${({ metaSection }) => (metaSection ? 0 : "")};
   border-bottom-width: ${({ theme }) => theme.borderWidth[1]};
   border-bottom-color: ${({ theme }) => theme.color["gray"][500]};
   background-color: ${({ theme }) => theme.color["white"]};
@@ -141,18 +143,6 @@ export const StyledPropLineColumn = styled(
   overflow: ${({ isTag }) => (isTag ? "hidden" : "visible")};
 `;
 
-// references
-interface StyledReferencesList {}
-export const StyledReferencesList = styled(StyledGrid)<StyledReferencesList>`
-  grid-template-columns: auto auto auto auto;
-  /* width: 50rem; */
-`;
-
-interface StyledReferencesListColumn {}
-export const StyledReferencesListColumn = styled(
-  StyledGridCell
-)<StyledReferencesListColumn>``;
-
 // tags
 interface StyledTagsList {}
 export const StyledTagsList = styled.div<StyledTagsList>`
@@ -185,11 +175,70 @@ export const StyledBreadcrumbWrap = styled.div`
   position: relative;
 `;
 
-export const StyledSubRow = styled.div`
-  display: table-row;
+export const StyledEditorStatementInfo = styled.div`
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  overflow: hidden;
+  max-width: 100%;
+  margin-bottom: ${({ theme }) => theme.space[2]};
+`;
+export const StyledEditorStatementInfoLabel = styled.div`
+  display: flex;
+  align-items: center;
+  margin-right: ${({ theme }) => theme.space[1]};
+  margin-bottom: ${({ theme }) => theme.space[2]};
+`;
+
+export const StyledEditorContentRow = styled.div``;
+export const StyledEditorContentRowLabel = styled.div`
+  float: left;
+  color: ${({ theme }) => theme.color["info"]};
+  font-size: ${({ theme }) => theme.fontSize["xs"]};
+`;
+export const StyledEditorContentRowValue = styled.div`
+  float: right;
+`;
+export const StyledEditorContentRowValueID = styled.div`
+  display: inline-flex;
+  font-style: italic;
+  font-size: ${({ theme }) => theme.fontSize["xs"]};
+  align-items: baseline;
+
+  button {
+    margin-left: ${({ theme }) => theme.space["2"]};
+  }
+`;
+
+export const StyledEditorTemplateSection = styled.div`
+  display: table;
   width: 100%;
-  padding: ${({ theme }) => theme.space[2]};
-  border-left-color: ${({ theme }) => theme.color["gray"][800]};
-  margin-left: ${({ theme }) => `${theme.space[10]}`};
-  margin-bottom: ${({ theme }) => `${theme.space[2]}`};
+  padding-right: ${({ theme }) => theme.space[6]};
+  ${StyledEditorContentRow} {
+    display: table-row;
+    width: 100%;
+    ${StyledEditorContentRowLabel} {
+      width: 1%;
+      white-space: nowrap;
+      display: table-cell;
+      padding: ${({ theme }) => theme.space[3]};
+      vertical-align: top;
+      text-align: right;
+      float: initial;
+    }
+    ${StyledEditorContentRowValue} {
+      display: table-cell;
+      width: 100%;
+      padding: ${({ theme }) => theme.space[2]};
+    }
+  }
+`;
+export const StyledHeaderTagWrap = styled.div`
+  display: inline-flex;
+  overflow: hidden;
+  margin-bottom: ${({ theme }) => theme.space[2]};
+  margin-right: ${({ theme }) => theme.space[3]};
+`;
+export const StyledEditorHeaderInputWrap = styled.div`
+  margin-bottom: ${({ theme }) => theme.space[2]};
 `;

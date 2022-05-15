@@ -1,9 +1,11 @@
 import { IEntity, IProp } from "@shared/types";
+import { EmptyTag } from "pages/MainPage/containers";
 import React from "react";
 import { EntityTag } from "../../../EntityTag/EntityTag";
 import {
+  StyledPropGridRow,
   StyledPropGroup,
-  StyledPropRow,
+  StyledTagWrap,
 } from "./StatementListRowExpandedStyles";
 
 interface StatementListRowExpandedPropGroup {
@@ -21,29 +23,38 @@ export const StatementListRowExpandedPropGroup: React.FC<
         const propTypeEntity: IEntity = entities[prop.type.id];
         const propValueEntity: IEntity = entities[prop.value.id];
         return (
-          <>
-            <StyledPropRow key={key} level={level}>
+          <React.Fragment key={key}>
+            <StyledPropGridRow level={level}>
               {propTypeEntity ? (
-                <EntityTag
-                  actant={propTypeEntity}
-                  tooltipPosition="bottom center"
-                />
+                <StyledTagWrap marginRight>
+                  <EntityTag
+                    fullWidth
+                    actant={propTypeEntity}
+                    tooltipPosition="bottom center"
+                  />
+                </StyledTagWrap>
               ) : (
-                "type"
+                <StyledTagWrap marginRight>
+                  <EmptyTag label={"type"} />
+                </StyledTagWrap>
               )}
               {propValueEntity ? (
-                <EntityTag
-                  actant={propValueEntity}
-                  tooltipPosition="bottom center"
-                />
+                <StyledTagWrap>
+                  <EntityTag
+                    fullWidth
+                    actant={propValueEntity}
+                    tooltipPosition="bottom center"
+                  />
+                </StyledTagWrap>
               ) : (
-                "value"
+                <StyledTagWrap>
+                  <EmptyTag label={"value"} />
+                </StyledTagWrap>
               )}
-            </StyledPropRow>
-            <div>
-              {renderChildrenPropRow && renderChildrenPropRow(prop.children)}
-            </div>
-          </>
+            </StyledPropGridRow>
+
+            {renderChildrenPropRow && renderChildrenPropRow(prop.children)}
+          </React.Fragment>
         );
       })}
     </StyledPropGroup>

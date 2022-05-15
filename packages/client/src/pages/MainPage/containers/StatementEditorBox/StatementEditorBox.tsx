@@ -1,28 +1,37 @@
-import { EntityClass, UserRoleMode } from "@shared/enums";
+import { DropdownItem } from "@shared/dictionaries/entity";
+import { EntityClass, Order, UserRoleMode } from "@shared/enums";
 import {
-  IProp,
-  IResponseStatement,
+  IEntity,
+  IOption,
+  IReference,
   IStatementActant,
   IStatementAction,
-  IStatementReference,
 } from "@shared/types";
 import api from "api";
-import { Button, Input, Loader, MultiInput } from "components";
 import {
-  CProp,
-  CReference,
-  CStatementActant,
-  CStatementAction,
-} from "constructors";
+  Button,
+  ButtonGroup,
+  Dropdown,
+  Input,
+  Loader,
+  Modal,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+  ModalInputForm,
+  MultiInput,
+} from "components";
+import { CProp, CStatementActant, CStatementAction } from "constructors";
 import { useSearchParams } from "hooks";
-import React, { useEffect, useMemo } from "react";
-import { FaTrashAlt, FaUnlink } from "react-icons/fa";
+import React, { useEffect, useMemo, useState } from "react";
 import { BsInfoCircle } from "react-icons/bs";
+import { FaUnlink } from "react-icons/fa";
 import { useMutation, useQuery, useQueryClient } from "react-query";
+import { toast } from "react-toastify";
 import { excludedSuggesterEntities } from "Theme/constants";
-import { AttributeButtonGroup } from "../AttributeButtonGroup/AttributeButtonGroup";
+import { StyledContent } from "../EntityBookmarkBox/EntityBookmarkBoxStyles";
+import { EntityReferenceTable } from "../EntityReferenceTable/EntityReferenceTable";
 import { JSONExplorer } from "../JSONExplorer/JSONExplorer";
-import { PropGroup } from "../PropGroup/PropGroup";
 import { StatementListBreadcrumbItem } from "../StatementsListBox/StatementListHeader/StatementListBreadcrumbItem/StatementListBreadcrumbItem";
 import { EntitySuggester, EntityTag } from "./../";
 import { AuditTable } from "./../AuditTable/AuditTable";
@@ -31,19 +40,22 @@ import { StatementEditorActionTable } from "./StatementEditorActionTable/Stateme
 import {
   StyledBreadcrumbWrap,
   StyledEditorActantTableWrapper,
-  StyledEditorPreSection,
+  StyledEditorContentRow,
+  StyledEditorContentRowLabel,
+  StyledEditorContentRowValue,
   StyledEditorEmptyState,
+  StyledEditorHeaderInputWrap,
+  StyledEditorPreSection,
   StyledEditorSection,
   StyledEditorSectionContent,
   StyledEditorSectionHeader,
-  StyledListHeaderColumn,
-  StyledReferencesList,
-  StyledReferencesListColumn,
+  StyledEditorStatementInfo,
+  StyledEditorStatementInfoLabel,
+  StyledEditorTemplateSection,
+  StyledHeaderTagWrap,
   StyledTagsList,
   StyledTagsListItem,
-  StyledTagWrapper,
 } from "./StatementEditorBoxStyles";
-import { DraggedPropRowCategory } from "types";
 
 const classesActants = [
   EntityClass.Statement,
@@ -87,7 +99,7 @@ const classesTags = [
 ];
 
 export const StatementEditorBox: React.FC = () => {
-  const { statementId, setStatementId, territoryId, setTerritoryId } =
+  const { statementId, setStatementId, detailId, territoryId, setTerritoryId } =
     useSearchParams();
 
   const queryClient = useQueryClient();
@@ -102,12 +114,12 @@ export const StatementEditorBox: React.FC = () => {
     ["statement", statementId],
     async () => {
       const res = await api.statementGet(statementId);
+
       return res.data;
     },
     { enabled: !!statementId && api.isLoggedIn(), retry: 2 }
   );
 
-  //console.log(statement);
   // Audit query
   const {
     status: statusAudit,
@@ -146,6 +158,87 @@ export const StatementEditorBox: React.FC = () => {
       enabled: !!statement?.data?.territory?.id && api.isLoggedIn(),
     }
   );
+
+  // TEMPLATES
+  const [applyTemplateModal, setApplyTemplateModal] = useState<boolean>(false);
+  const [templateToApply, setTemplateToApply] = useState<IEntity | false>(
+    false
+  );
+
+  const handleAskForTemplateApply = (templateOptionToApply: IOption) => {
+    if (templates) {
+      const templateThatIsGoingToBeApplied = templates.find(
+        (template: IEntity) => template.id === templateOptionToApply.value
+      );
+
+      if (templateThatIsGoingToBeApplied) {
+        setTemplateToApply(templateThatIsGoingToBeApplied);
+        setApplyTemplateModal(true);
+      }
+    }
+  };
+
+  const handleApplyTemplate = () => {
+    if (templateToApply && statement) {
+      // TODO #952 handle conflicts in Templates application
+      const entityAfterTemplateApplied = {
+        ...{
+          data: templateToApply.data,
+          notes: templateToApply.notes,
+          props: templateToApply.props,
+          references: templateToApply.references,
+          usedTemplate: templateToApply.id,
+        },
+      };
+
+      toast.info(
+        `Template ${templateToApply.label} applied to Statement ${statement.label}`
+      );
+      updateStatementMutation.mutate(entityAfterTemplateApplied);
+    }
+    setTemplateToApply(false);
+  };
+
+  const {
+    status: templateStatus,
+    data: templates,
+    error: templateError,
+    isFetching: isFetchingTemplates,
+  } = useQuery(
+    ["statement-templates"],
+    async () => {
+      const res = await api.entitiesGetMore({
+        onlyTemplates: true,
+        class: EntityClass.Statement,
+      });
+
+      const templates = res.data;
+      templates.sort((a: IEntity, b: IEntity) =>
+        a.label.toLocaleLowerCase() > b.label.toLocaleLowerCase() ? 1 : -1
+      );
+      return templates;
+    },
+    { enabled: !!statement && api.isLoggedIn(), retry: 2 }
+  );
+
+  const templateOptions: DropdownItem[] = useMemo(() => {
+    const options = [
+      {
+        value: "",
+        label: "select template",
+      },
+    ];
+
+    if (templates) {
+      templates.forEach((template) => {
+        options.push({
+          value: template.id,
+          label: template.label,
+        });
+      });
+    }
+    return options;
+  }, [templates]);
 
   // refetch audit when statement changes
   useEffect(() => {
@@ -209,7 +302,7 @@ export const StatementEditorBox: React.FC = () => {
       const newData = {
         actions: [...statement.data.actions, newStatementAction],
       };
-      updateActionsRefreshListMutation.mutate(newData);
+      updateStatementDataMutation.mutate(newData);
     }
   };
 
@@ -220,7 +313,7 @@ export const StatementEditorBox: React.FC = () => {
       const newData = {
         actants: [...statement.data.actants, newStatementActant],
       };
-      updateActantsRefreshListMutation.mutate(newData);
+      updateStatementDataMutation.mutate(newData);
     }
   };
 
@@ -392,38 +485,6 @@ export const StatementEditorBox: React.FC = () => {
     }
   };
 
-  // references
-  const addReference = (resourceId: string) => {
-    if (statement && resourceId) {
-      const newReference: IStatementReference = CReference(resourceId);
-      const newData = {
-        references: [...statement.data.references, newReference],
-      };
-      updateStatementDataMutation.mutate(newData);
-    }
-  };
-  const updateReference = (referenceId: string, changes: any) => {
-    if (statement && referenceId) {
-      const updatedReferences = statement.data.references.map((r) =>
-        r.id === referenceId ? { ...r, ...changes } : r
-      );
-      const newData = {
-        references: updatedReferences,
-      };
-      updateStatementDataMutation.mutate(newData);
-    }
-  };
-  const removeReference = (referenceId: string) => {
-    if (statement && referenceId) {
-      const newData = {
-        references: statement.data.references.filter(
-          (p) => p.id !== referenceId
-        ),
-      };
-      updateStatementDataMutation.mutate(newData);
-    }
-  };
-
   //tags
   const addTag = (tagId: string) => {
     if (statement && tagId) {
@@ -438,6 +499,21 @@ export const StatementEditorBox: React.FC = () => {
     }
   };
 
+  // MUTATIONS
+  const updateStatementMutation = useMutation(
+    async (changes: object) => {
+      await api.entityUpdate(statementId, changes);
+    },
+    {
+      onSuccess: (data, variables) => {
+        if (detailId === statementId) {
+          queryClient.invalidateQueries(["entity"]);
+        }
+        queryClient.invalidateQueries(["statement"]);
+        queryClient.invalidateQueries(["territory"]);
+      },
+    }
+  );
   const updateStatementDataMutation = useMutation(
     async (changes: object) => {
       await api.entityUpdate(statementId, {
@@ -445,86 +521,26 @@ export const StatementEditorBox: React.FC = () => {
       });
     },
     {
-      onSuccess: (data, variables) => {
+      onSuccess: (data, variables: any) => {
+        queryClient.invalidateQueries(["entity"]);
         queryClient.invalidateQueries(["statement"]);
+        queryClient.invalidateQueries(["territory"]);
       },
     }
   );
-
-  const updateActionsRefreshListMutation = useMutation(
-    async (changes: object) => {
-      await api.entityUpdate(statementId, {
-        data: changes,
-      });
-    },
-    {
-      onSuccess: () => {
-        queryClient.invalidateQueries("statement");
-        queryClient.invalidateQueries("territory");
-      },
-    }
-  );
-
-  const updateActantMutation = useMutation(
-    async (changes: object) => await api.entityUpdate(statementId, changes),
-    {
-      onSuccess: () => {
-        queryClient.invalidateQueries(["statement"]);
-      },
-    }
-  );
-
-  const updateActantsRefreshListMutation = useMutation(
-    async (changes: object) =>
-      await api.entityUpdate(statementId, {
-        data: changes,
-      }),
-    {
-      onSuccess: (data, variables) => {
-        queryClient.invalidateQueries("statement");
-        queryClient.invalidateQueries("territory");
-        queryClient.invalidateQueries("entity");
-      },
-    }
-  );
-
-  const renderPropGroup = (
-    originId: string,
-    props: IProp[],
-    statement: IResponseStatement,
-    category: DraggedPropRowCategory
-  ) => {
-    const originActant = statement.entities[originId];
-
-    if (originActant && props.length > 0) {
-      return (
-        <PropGroup
-          originId={originActant.id}
-          entities={statement.entities}
-          props={props}
-          territoryId={territoryId}
-          updateProp={updateProp}
-          removeProp={removeProp}
-          addProp={addProp}
-          movePropToIndex={movePropToIndex}
-          userCanEdit={userCanEdit}
-          openDetailOnCreate={false}
-          category={category}
-        />
-      );
-    }
-  };
 
   const moveStatementMutation = useMutation(
     async (newTerritoryId: string) => {
       await api.entityUpdate(statementId, {
-        data: { territory: { id: newTerritoryId, order: -1 } },
+        data: { territory: { id: newTerritoryId, order: Order.First } },
       });
     },
     {
       onSuccess: (data, variables) => {
         setTerritoryId(variables);
+        queryClient.invalidateQueries("statement");
         queryClient.invalidateQueries("tree");
+        queryClient.invalidateQueries("territory");
       },
     }
   );
@@ -534,6 +550,25 @@ export const StatementEditorBox: React.FC = () => {
       {statement ? (
         <div style={{ marginBottom: "4rem" }} key={statement.id}>
           <StyledEditorPreSection>
+            <StyledEditorStatementInfo>
+              <StyledHeaderTagWrap>
+                <EntityTag actant={statement} fullWidth />
+              </StyledHeaderTagWrap>
+              <div style={{ display: "flex" }}>
+                <StyledEditorStatementInfoLabel>
+                  change statement label:
+                </StyledEditorStatementInfoLabel>
+                <StyledEditorHeaderInputWrap>
+                  <Input
+                    type="text"
+                    value={statement.label}
+                    onChangeFn={(newValue: string) => {
+                      updateStatementMutation.mutate({ label: newValue });
+                    }}
+                  />
+                </StyledEditorHeaderInputWrap>
+              </div>
+            </StyledEditorStatementInfo>
             <StyledBreadcrumbWrap>
               {territoryPath &&
                 territoryPath.map((territory: string, key: number) => {
@@ -544,7 +579,9 @@ export const StatementEditorBox: React.FC = () => {
                   );
                 })}
               {territoryData && (
-                <StatementListBreadcrumbItem territoryId={territoryData.id} />
+                <React.Fragment key={territoryData.id}>
+                  <StatementListBreadcrumbItem territoryId={territoryData.id} />
+                </React.Fragment>
               )}
               <Loader size={20} show={isFetchingTerritory} />
             </StyledBreadcrumbWrap>
@@ -555,13 +592,34 @@ export const StatementEditorBox: React.FC = () => {
               <EntitySuggester
                 filterEditorRights
                 inputWidth={96}
-                allowCreate={false}
+                disableCreate
                 categoryTypes={[EntityClass.Territory]}
                 onSelected={(newSelectedId: string) => {
                   moveStatementMutation.mutate(newSelectedId);
                 }}
               />
             </StyledEditorPreSection>
+          )}
+          {userCanEdit && (
+            <StyledEditorTemplateSection>
+              <StyledEditorContentRow>
+                <StyledEditorContentRowLabel>
+                  Apply Template
+                </StyledEditorContentRowLabel>
+                <StyledEditorContentRowValue>
+                  <Dropdown
+                    disabled={!userCanEdit}
+                    isMulti={false}
+                    width="full"
+                    options={templateOptions}
+                    value={templateOptions[0]}
+                    onChange={(templateToApply: any) => {
+                      handleAskForTemplateApply(templateToApply);
+                    }}
+                  />
+                </StyledEditorContentRowValue>
+              </StyledEditorContentRow>
+            </StyledEditorTemplateSection>
           )}
           <StyledEditorSection firstSection key="editor-section-summary">
             <StyledEditorSectionContent firstSection>
@@ -578,7 +636,7 @@ export const StatementEditorBox: React.FC = () => {
                         const newData = {
                           text: newValue,
                         };
-                        updateActantsRefreshListMutation.mutate(newData);
+                        updateStatementDataMutation.mutate(newData);
                       }
                     }}
                     value={statement.data.text}
@@ -589,7 +647,7 @@ export const StatementEditorBox: React.FC = () => {
           </StyledEditorSection>
 
           {/* Actions */}
-          <StyledEditorSection key="editor-section-actions">
+          <StyledEditorSection metaSection key="editor-section-actions">
             <StyledEditorSectionHeader>Actions</StyledEditorSectionHeader>
             <StyledEditorSectionContent>
               <StyledEditorActantTableWrapper>
@@ -597,9 +655,11 @@ export const StatementEditorBox: React.FC = () => {
                   userCanEdit={userCanEdit}
                   statement={statement}
                   statementId={statementId}
-                  updateActionsMutation={updateActionsRefreshListMutation}
-                  renderPropGroup={renderPropGroup}
+                  updateActionsMutation={updateStatementDataMutation}
                   addProp={addProp}
+                  updateProp={updateProp}
+                  removeProp={removeProp}
+                  movePropToIndex={movePropToIndex}
                 />
               </StyledEditorActantTableWrapper>
 
@@ -619,7 +679,7 @@ export const StatementEditorBox: React.FC = () => {
           </StyledEditorSection>
 
           {/* Actants */}
-          <StyledEditorSection key="editor-section-actants">
+          <StyledEditorSection metaSection key="editor-section-actants">
             <StyledEditorSectionHeader>Actants</StyledEditorSectionHeader>
             <StyledEditorSectionContent>
               <StyledEditorActantTableWrapper>
@@ -628,9 +688,11 @@ export const StatementEditorBox: React.FC = () => {
                   userCanEdit={userCanEdit}
                   statementId={statementId}
                   classEntitiesActant={classesActants}
-                  updateActantsMutation={updateActantsRefreshListMutation}
-                  renderPropGroup={renderPropGroup}
+                  updateStatementDataMutation={updateStatementDataMutation}
                   addProp={addProp}
+                  updateProp={updateProp}
+                  removeProp={removeProp}
+                  movePropToIndex={movePropToIndex}
                 />
               </StyledEditorActantTableWrapper>
               {userCanEdit && (
@@ -652,136 +714,15 @@ export const StatementEditorBox: React.FC = () => {
           <StyledEditorSection key="editor-section-refs">
             <StyledEditorSectionHeader>References</StyledEditorSectionHeader>
             <StyledEditorSectionContent>
-              <StyledReferencesList>
-                {statement.data.references.length > 0 && (
-                  <React.Fragment>
-                    <StyledListHeaderColumn>Resource</StyledListHeaderColumn>
-                    <StyledListHeaderColumn>Part</StyledListHeaderColumn>
-                    <StyledListHeaderColumn>Type</StyledListHeaderColumn>
-                    <StyledListHeaderColumn></StyledListHeaderColumn>
-                  </React.Fragment>
-                )}
-                {statement.data.references.map(
-                  (reference: IStatementReference, ri) => {
-                    const referenceActant =
-                      statement?.entities[reference.resource];
-
-                    return (
-                      <React.Fragment key={ri}>
-                        <StyledReferencesListColumn>
-                          {referenceActant ? (
-                            <StyledTagWrapper>
-                              <EntityTag
-                                actant={referenceActant}
-                                fullWidth
-                                button={
-                                  userCanEdit && (
-                                    <Button
-                                      key="d"
-                                      tooltip="unlink actant"
-                                      icon={<FaUnlink />}
-                                      inverted={true}
-                                      color="plain"
-                                      onClick={() => {
-                                        updateReference(reference.id, {
-                                          resource: "",
-                                        });
-                                      }}
-                                    />
-                                  )
-                                }
-                              />
-                            </StyledTagWrapper>
-                          ) : (
-                            userCanEdit && (
-                              <EntitySuggester
-                                territoryActants={territoryActants}
-                                openDetailOnCreate
-                                onSelected={(newSelectedId: string) => {
-                                  updateReference(reference.id, {
-                                    resource: newSelectedId,
-                                  });
-                                }}
-                                categoryTypes={classesResources}
-                              />
-                            )
-                          )}
-                        </StyledReferencesListColumn>
-                        <StyledReferencesListColumn>
-                          <Input
-                            type="text"
-                            disabled={!userCanEdit}
-                            value={reference.part}
-                            onChangeFn={(newPart: string) => {
-                              updateReference(reference.id, {
-                                part: newPart,
-                              });
-                            }}
-                          ></Input>
-                        </StyledReferencesListColumn>
-                        <StyledReferencesListColumn>
-                          <div>
-                            <AttributeButtonGroup
-                              disabled={!userCanEdit}
-                              options={[
-                                {
-                                  longValue: "primary",
-                                  shortValue: "prim",
-                                  onClick: () => {
-                                    if (reference.type !== "P") {
-                                      updateReference(reference.id, {
-                                        type: "P",
-                                      });
-                                    }
-                                  },
-                                  selected: reference.type === "P",
-                                },
-                                {
-                                  longValue: "secondary",
-                                  shortValue: "sec",
-                                  onClick: () => {
-                                    if (reference.type !== "S") {
-                                      updateReference(reference.id, {
-                                        type: "S",
-                                      });
-                                    }
-                                  },
-                                  selected: reference.type === "S",
-                                },
-                              ]}
-                            />
-                          </div>
-                        </StyledReferencesListColumn>
-                        <StyledReferencesListColumn>
-                          {userCanEdit && (
-                            <Button
-                              key="delete"
-                              tooltip="remove reference row"
-                              inverted={true}
-                              icon={<FaTrashAlt />}
-                              color="plain"
-                              onClick={() => {
-                                removeReference(reference.id);
-                              }}
-                            />
-                          )}
-                        </StyledReferencesListColumn>
-                      </React.Fragment>
-                    );
-                  }
-                )}
-              </StyledReferencesList>
-              {userCanEdit && (
-                <EntitySuggester
-                  territoryActants={territoryActants}
-                  openDetailOnCreate
-                  onSelected={(newSelectedId: string) => {
-                    addReference(newSelectedId);
-                  }}
-                  categoryTypes={classesResources}
-                  placeholder={"add new reference"}
-                />
-              )}
+              <EntityReferenceTable
+                openDetailOnCreate
+                entities={statement.entities}
+                references={statement.references}
+                onChange={(newReferences: IReference[]) => {
+                  updateStatementMutation.mutate({ references: newReferences });
+                }}
+                disabled={!userCanEdit}
+              />
             </StyledEditorSectionContent>
           </StyledEditorSection>
 
@@ -837,10 +778,11 @@ export const StatementEditorBox: React.FC = () => {
             <StyledEditorSectionHeader>Notes</StyledEditorSectionHeader>
             <StyledEditorSectionContent>
               <MultiInput
+                width="full"
                 disabled={!userCanEdit}
                 values={statement.notes}
                 onChange={(newValues: string[]) => {
-                  updateActantMutation.mutate({ notes: newValues });
+                  updateStatementMutation.mutate({ notes: newValues });
                 }}
               />
             </StyledEditorSectionContent>
@@ -872,11 +814,54 @@ export const StatementEditorBox: React.FC = () => {
           </StyledEditorEmptyState>
         </>
       )}
+      <Modal
+        showModal={applyTemplateModal}
+        width="thin"
+        onEnterPress={() => {
+          setApplyTemplateModal(false);
+          handleApplyTemplate();
+        }}
+        onClose={() => {
+          setApplyTemplateModal(false);
+        }}
+      >
+        <ModalHeader title="Create Template" />
+        <ModalContent>
+          <StyledContent>
+            <ModalInputForm>{`Apply template?`}</ModalInputForm>
+            <div>
+              {templateToApply && <EntityTag actant={templateToApply} />}
+            </div>
+            {/* here goes the info about template #951 */}
+          </StyledContent>
+        </ModalContent>
+        <ModalFooter>
+          <ButtonGroup>
+            <Button
+              key="cancel"
+              label="Cancel"
+              color="greyer"
+              inverted
+              onClick={() => {
+                setApplyTemplateModal(false);
+              }}
+            />
+            <Button
+              key="submit"
+              label="Apply"
+              color="info"
+              onClick={() => {
+                setApplyTemplateModal(false);
+                handleApplyTemplate();
+              }}
+            />
+          </ButtonGroup>
+        </ModalFooter>
+      </Modal>
       <Loader
         show={
           isFetchingStatement ||
-          updateActionsRefreshListMutation.isLoading ||
-          updateActantsRefreshListMutation.isLoading ||
+          updateStatementMutation.isLoading ||
           updateStatementDataMutation.isLoading
         }
       />

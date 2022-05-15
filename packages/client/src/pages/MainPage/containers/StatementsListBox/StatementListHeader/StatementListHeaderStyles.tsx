@@ -1,4 +1,4 @@
-import { FaRegStar, FaStar } from "react-icons/fa";
+import { FaStar } from "react-icons/fa";
 import styled from "styled-components";
 
 export const StyledHeader = styled.div`

@@ -49,11 +49,6 @@ export type IEntityClass =
   | EntityClass.Value
   | EntityClass.Event;
 
-export enum EntityReferenceSource {
-  WordNet = "wordnet",
-  GeoNames = "geonames",
-}
-
 export enum EntityLogicalType {
   Definite = "1",
   Indefinite = "2",
@@ -88,7 +83,7 @@ export enum Position {
   Subject = "s",
   Actant1 = "a1",
   Actant2 = "a2",
-  PseudoActant = "p",
+  PseudoActant = "pa",
 }
 
 export enum UsedInPosition {
@@ -161,11 +156,9 @@ export enum Language {
   MiddleEnglish = "enm",
   Occitan = "oci",
   Czech = "ces",
-}
-
-export enum ReferenceType {
-  Primary = "1",
-  Secondary = "2",
+  Italian = "ita",
+  French = "fra",
+  German = "deu",
 }
 
 export enum ResourceType {
@@ -193,4 +186,12 @@ export enum UserRoleMode {
 export enum Order {
   First = -9999,
   Last = 9999,
+}
+
+export enum DbIndex {
+  Class = "class",
+  StatementTerritory = "statement_territory",
+  StatementEntities = "statement_entities",
+  AuditEntityId = "entityId",
+  EntityUsedTemplate = "usedTemplate",
 }

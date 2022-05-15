@@ -50,7 +50,7 @@ export const Entities: { [key: string]: IEntity } = {
   },
   R: {
     id: "R",
-    label: "Territory",
+    label: "Resource",
     color: "entityR",
   },
   A: {
@@ -98,6 +98,16 @@ export const Entities: { [key: string]: IEntity } = {
     label: "Value",
     color: "entityV",
   },
+  X: {
+    id: "X",
+    label: "unset",
+    color: "white",
+  },
+  all: {
+    id: "all",
+    label: "*",
+    color: "white",
+  },
 };
 
 export type EntityKeys = keyof typeof Entities;
@@ -110,7 +120,10 @@ export interface Node {
 export enum ItemTypes {
   TAG = "TAG",
   STATEMENT_ROW = "STATEMENT_ROW",
+
+  // should be removed
   ACTANT_ROW = "ACTANT_ROW",
+  ENTITY_ROW = "ENTITY_ROW",
   ACTION_ROW = "ACTION_ROW",
   PROP_ROW = "PROP_ROW",
   PROP_ROW1 = "PROP_ROW1",
@@ -143,11 +156,6 @@ export interface DraggedPropRowItem {
 }
 export interface DraggedActantRowItem {
   category?: DraggedPropRowCategory;
-}
-export interface IRequestSearch {
-  class?: EntityClass;
-  label: string;
-  entityId: string;
 }
 
 export type ISearchPositionInStatement =

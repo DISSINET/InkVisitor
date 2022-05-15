@@ -4,20 +4,10 @@ x-service: &service
   restart: always
 
 services:
-  server:
-    <<: *service
-    image: node:14-buster-slim
-    depends_on:
-      - inkvisitor-database
-    ports:
-      - 3001:3000
-
   inkvisitor-database:
     <<: *service
     image: rethinkdb
     container_name: "inkvisitor-database"
-    volumes:
-      - ./data:/data
     ports:
       - "8080:8080"
       - "28015:28015"

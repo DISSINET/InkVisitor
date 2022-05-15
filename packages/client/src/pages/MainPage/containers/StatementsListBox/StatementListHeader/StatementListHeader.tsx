@@ -71,6 +71,7 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
   >([territoryId]);
 
   useEffect(() => {
+    //const toExclude = [territoryId];
     const toExclude = [territoryId];
     if (treeData) {
       const currentTerritory = searchTree(treeData, territoryId);
@@ -94,14 +95,23 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
 
   const handleCreateStatement = () => {
     const newStatement: IStatement = CStatement(
-      territoryId,
-      localStorage.getItem("userrole") as UserRole
+      localStorage.getItem("userrole") as UserRole,
+      territoryId
     );
     const { statements } = data;
-    newStatement.data.territory.order = statements.length
-      ? statements[statements.length - 1].data.territory.order + 1
-      : 1;
-    addStatementAtTheEndMutation.mutate(newStatement);
+
+    const lastStatement = statements[statements.length - 1];
+    if (!statements.length) {
+      addStatementAtTheEndMutation.mutate(newStatement);
+    } else if (
+      newStatement?.data?.territory &&
+      lastStatement?.data?.territory
+    ) {
+      newStatement.data.territory.order = statements.length
+        ? lastStatement.data.territory.order + 1
+        : 1;
+      addStatementAtTheEndMutation.mutate(newStatement);
+    }
   };
 
   const trimTerritoryLabel = (label: string) => {
@@ -123,6 +133,9 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
               </React.Fragment>
             );
           })}
+        <React.Fragment key="this-territory">
+          <StatementListBreadcrumbItem territoryId={territoryId} />
+        </React.Fragment>
       </StyledHeaderBreadcrumbRow>
       <StyledHeaderRow>
         {isFavorited && (
@@ -135,7 +148,7 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
         </StyledHeading>
         {territoryId && (
           <StyledButtons>
-            <ButtonGroup>
+            <ButtonGroup marginBottom>
               {data.right !== UserRoleMode.Read && (
                 <Button
                   key="add"
@@ -170,7 +183,7 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
           <EntitySuggester
             filterEditorRights
             inputWidth={96}
-            allowCreate={false}
+            disableCreate
             categoryTypes={[EntityClass.Territory]}
             onSelected={(newSelectedId: string) => {
               moveTerritoryMutation.mutate(newSelectedId);

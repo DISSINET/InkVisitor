@@ -19,7 +19,7 @@ import { rootTerritoryId } from "Theme/constants";
 import theme from "Theme/theme";
 import { DraggedTerritoryItem, DragItem } from "types";
 import { EntityTag } from "../..";
-import { ContextMenu } from "../ContextMenu/ContextMenu";
+import { TerritoryTreeContextMenu } from "../TerritoryTreeContextMenu/TerritoryTreeContextMenu";
 import {
   StyledChildrenWrap,
   StyledDisabledTag,
@@ -230,6 +230,7 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
     }
   }, [draggedTerritory]);
 
+  // TODO: move to useCallback with all dependencies!
   const renderTerritoryTag = (
     territoryActant: IEntity,
     id: string,
@@ -278,7 +279,6 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
                     propId={propId}
                     index={index}
                     fullWidth
-                    enableTooltip
                     moveFn={moveFn}
                     updateOrderFn={moveTerritoryMutation.mutate}
                     statementsCount={statementsCount}
@@ -286,7 +286,7 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
                     showOnly="label"
                   />
                 </animated.div>
-                <ContextMenu
+                <TerritoryTreeContextMenu
                   territoryActant={territoryActant}
                   onMenuOpen={() => setContextMenuOpen(true)}
                   onMenuClose={() => setContextMenuOpen(false)}

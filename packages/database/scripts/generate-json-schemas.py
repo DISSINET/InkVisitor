@@ -9,15 +9,20 @@ files_and_classes = [
     {'file': input_path + 'types/actant.ts', 'class': 'IActant'},
     {'file': input_path + 'types/concept.ts', 'class': 'IConcept'},
     {'file': input_path + 'types/object.ts', 'class': 'IObject'},
+    {'file': input_path + 'types/event.ts', 'class': 'IEvent'},
     {'file': input_path + 'types/entity.ts', 'class': 'IEntity'},
     {'file': input_path + 'types/label.ts', 'class': 'ILabel'},
+    {'file': input_path + 'types/location.ts', 'class': 'ILocation'},
     {'file': input_path + 'types/statement.ts', 'class': 'IStatement'},
     {'file': input_path + 'types/territory.ts', 'class': 'ITerritory'},
     {'file': input_path + 'types/resource.ts', 'class': 'IResource'},
+    {'file': input_path + 'types/reference.ts', 'class': 'IReference'},
     {'file': input_path + 'types/prop.ts', 'class': 'IProp'},
     {'file': input_path + 'types/value.ts', 'class': 'IValue'},
     {'file': input_path + 'types/action.ts', 'class': 'IAction'},
     {'file': input_path + 'types/user.ts', 'class': 'IUser'},
+    {'file': input_path + 'types/audit.ts', 'class': 'IAudit'},
+
 ]
 
 for case in files_and_classes:

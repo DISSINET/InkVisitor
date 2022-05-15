@@ -19,7 +19,6 @@ import { IoMdClose } from "react-icons/io";
 import { RiMenuFoldFill, RiMenuUnfoldFill } from "react-icons/ri";
 import { useQuery, useQueryClient } from "react-query";
 import { toast } from "react-toastify";
-import { setAuthToken } from "redux/features/authTokenSlice";
 import { setFirstPanelExpanded } from "redux/features/layout/firstPanelExpandedSlice";
 import { setFourthPanelExpanded } from "redux/features/layout/fourthPanelExpandedSlice";
 import { setUsername } from "redux/features/usernameSlice";
@@ -31,14 +30,15 @@ import {
 } from "Theme/constants";
 import packageJson from "../../../package.json";
 import {
-  ActantBookmarkBox,
-  ActantSearchBox,
+  EntityBookmarkBox,
+  EntitySearchBox,
   EntityDetailBox,
   LoginModal,
   StatementEditorBox,
   StatementListBox,
   TerritoryTreeBox,
   UserListModal,
+  TemplateListBox,
 } from "./containers";
 import { UserCustomizationModal } from "./containers/UserCustomizationModal/UserCustomizationModal";
 import {
@@ -113,11 +113,9 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
 
   const [userAdministrationModalOpen, setUserAdministrationModalOpen] =
     useState<boolean>(false);
-
   const handleLogOut = () => {
     api.signOut();
     dispatch(setUsername(""));
-    dispatch(setAuthToken(""));
     toast.success("You've been successfully logged out!");
     queryClient.removeQueries();
     setDetailId("");
@@ -173,6 +171,13 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
 
   const [userCustomizationOpen, setUserCustomizationOpen] = useState(false);
 
+  const versionText = `v. ${packageJson.version} 
+  ${
+    ["production", ""].indexOf(environmentName) === -1
+      ? `| ${environmentName} | built: ${process.env.BUILD_TIMESTAMP}`
+      : ""
+  }`;
+
   return (
     <>
       <StyledPage layoutWidth={layoutWidth}>
@@ -192,11 +197,13 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
                 src={LogoInkvisitor}
                 alt="React Logo"
               />
-              <StyledHeaderTag>
-                v. {packageJson.version}{" "}
-                {["production", ""].indexOf(environmentName) === -1
-                  ? `| ${environmentName}`
-                  : ""}
+              <StyledHeaderTag
+                onClick={async () => {
+                  await navigator.clipboard.writeText(versionText);
+                  toast.info("Inkvisitor version copied to clipboard");
+                }}
+              >
+                {versionText}
               </StyledHeaderTag>
             </StyledHeader>
           }
@@ -236,6 +243,7 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
           }
         />
         <DndProvider backend={HTML5Backend}>
+          <ScrollHandler />
           <StyledPanelWrap>
             {separatorXPosition > 0 && <PanelSeparator />}
             {/* FIRST PANEL */}
@@ -261,15 +269,14 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
               }
             >
               <Box
-                height={detailId ? heightContent / 2 : heightContent}
+                height={detailId ? heightContent / 2 - 20 : heightContent}
                 label="Statements"
               >
-                <ScrollHandler />
                 <StatementListBox />
               </Box>
               {detailId && (
                 <Box
-                  height={heightContent / 2}
+                  height={heightContent / 2 + 20}
                   label="Detail"
                   button={
                     detailId && (
@@ -304,22 +311,31 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
               width={fourthPanelExpanded ? panelWidths[3] : collapsedPanelWidth}
             >
               <Box
-                height={heightContent / 2}
+                height={heightContent / 3}
                 label="Search"
                 color="white"
                 isExpanded={fourthPanelExpanded}
                 button={fourthPanelButton()}
               >
-                <ActantSearchBox />
+                <EntitySearchBox />
               </Box>
               <Box
-                height={heightContent / 2}
+                height={heightContent / 3}
                 label="Bookmarks"
                 color="white"
                 isExpanded={fourthPanelExpanded}
                 button={fourthPanelButton()}
               >
-                <ActantBookmarkBox />
+                <EntityBookmarkBox />
+              </Box>
+              <Box
+                height={heightContent / 3}
+                label="Templates"
+                color="white"
+                isExpanded={fourthPanelExpanded}
+                button={fourthPanelButton()}
+              >
+                <TemplateListBox />
               </Box>
             </Panel>
           </StyledPanelWrap>

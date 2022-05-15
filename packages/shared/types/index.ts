@@ -1,7 +1,7 @@
 import { IAction } from "./action";
 import { IAudit } from "./audit";
 import { IConcept } from "./concept";
-import { IEntity, IEntityReference } from "./entity";
+import { IEntity } from "./entity";
 import { IEvent } from "./event";
 import { IGroup } from "./group";
 import { ILabel } from "./label";
@@ -36,9 +36,9 @@ import {
   IStatementActant,
   IStatementAction,
   IStatementData,
-  IStatementReference,
 } from "./statement";
 import { ITerritory } from "./territory";
+import { IReference } from "./reference";
 import {
   IBookmarkFolder,
   IStoredTerritory,
@@ -47,12 +47,12 @@ import {
   IUserRight,
 } from "./user";
 import { IValue } from "./value";
-import { IResponseEntity } from "./response-actant";
+import { IResponseEntity } from "./response-entity";
+import { IResponseStats } from "./response-stats";
 
 export type {
   IAudit,
   IEntity,
-  IEntityReference,
   IAction,
   ITerritory,
   IStatement,
@@ -70,7 +70,7 @@ export type {
   IStatementData,
   IStatementAction,
   IStatementActant,
-  IStatementReference,
+  IReference,
   IUser,
   IUserOptions,
   IUserRight,
@@ -92,5 +92,6 @@ export type {
   IResponseGeneric,
   IResponseSearch,
   IResponsePermission,
+  IResponseStats,
 };
 export { RequestSearch, RequestPermissionUpdate };

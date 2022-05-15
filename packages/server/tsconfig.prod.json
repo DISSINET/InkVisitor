@@ -3,7 +3,8 @@
   "compilerOptions": {
     "sourceMap": false,
     "outDir": "dist",
-    "baseUrl": "./"
+    "baseUrl": "./",
+    "experimentalDecorators": true
   },
   "ts-node": {
     "files": true

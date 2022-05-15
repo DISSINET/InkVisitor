@@ -1,5 +1,6 @@
+import Entity from "@models/entity/entity";
 import { IRequestContext } from "@models/common";
-import { findEntityById, findEntitiesById } from "@service/shorthands";
+import { findEntityById } from "@service/shorthands";
 import { UserRole } from "@shared/enums";
 import {
   IBookmarkFolder,
@@ -55,8 +56,8 @@ export class ResponseUser implements IResponseUser {
         entities: [],
       };
       if (bookmark.entityIds && bookmark.entityIds.length) {
-        for (const entity of await findEntitiesById(
-          req.db,
+        for (const entity of await Entity.findEntitiesByIds(
+          req.db.connection,
           bookmark.entityIds
         )) {
           bookmarkResponse.entities.push({

@@ -24,7 +24,7 @@ export default {
     invertedLabel: false,
     short: false,
     fullWidth: false,
-    enableTooltip: false,
+    disableTooltip: true,
   },
   argTypes: {
     category: { options: entityIds, control: { type: "select" } },
@@ -66,5 +66,5 @@ export const TagWithVeryLongLabel = ({ ...args }) => {
 TagWithVeryLongLabel.args = {
   category: Entities["P"].id,
   label: "entity label entity label entity label",
-  enableTooltip: true,
+  disableTooltip: false,
 };

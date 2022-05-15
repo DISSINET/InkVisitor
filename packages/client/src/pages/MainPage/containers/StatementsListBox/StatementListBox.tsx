@@ -1,7 +1,8 @@
-import { UserRole, UserRoleMode } from "@shared/enums";
+import { Order, UserRole, UserRoleMode } from "@shared/enums";
 import {
   IAction,
   IEntity,
+  IResponseAudit,
   IResponseStatement,
   IStatement,
 } from "@shared/types";
@@ -28,6 +29,8 @@ import {
 import { useMutation, useQuery, useQueryClient } from "react-query";
 import { Cell, Column } from "react-table";
 import { toast } from "react-toastify";
+import { setRowsExpanded } from "redux/features/statementList/rowsExpandedSlice";
+import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { EntityTag } from "./../";
 import { StatementListContextMenu } from "./StatementListContextMenu/StatementListContextMenu";
 import { StatementListHeader } from "./StatementListHeader/StatementListHeader";
@@ -39,7 +42,7 @@ import {
 } from "./StatementLitBoxStyles";
 
 const initialData: {
-  statements: IResponseStatement[];
+  statements: (IResponseStatement & { audit?: IResponseAudit })[];
   entities: { [key: string]: IEntity };
   right: UserRoleMode;
 } = {
@@ -50,6 +53,11 @@ const initialData: {
 
 export const StatementListBox: React.FC = () => {
   const queryClient = useQueryClient();
+
+  const dispatch = useAppDispatch();
+  const rowsExpanded: { [key: string]: boolean } = useAppSelector(
+    (state) => state.statementList.rowsExpanded
+  );
 
   const { territoryId, setTerritoryId, statementId, setStatementId } =
     useSearchParams();
@@ -68,6 +76,28 @@ export const StatementListBox: React.FC = () => {
       retry: 2,
     }
   );
+
+  const { statements, entities } = data || initialData;
+
+  const { data: audits, isFetching: isFetchingAudits } = useQuery(
+    ["territory", "statement-list", "audits", territoryId],
+    async () => {
+      const res = await api.auditsForStatements(territoryId);
+      return res.data;
+    },
+    {
+      enabled: !!territoryId && api.isLoggedIn(),
+      retry: 2,
+    }
+  );
+
+  useEffect(() => {
+    if (statements.length !== Object.keys(rowsExpanded).length) {
+      const arrayWithIds = statements.map((s, key) => [s.id, false]);
+      const arrayWithKeys = Object.fromEntries(arrayWithIds);
+      dispatch(setRowsExpanded(arrayWithKeys));
+    }
+  }, [statements, rowsExpanded]);
 
   const userId = localStorage.getItem("userid");
   const {
@@ -109,19 +139,22 @@ export const StatementListBox: React.FC = () => {
     {
       onSuccess: () => {
         toast.info(`Statement removed!`);
-        setStatementId("");
-        queryClient.invalidateQueries("territory");
-        queryClient.invalidateQueries("tree");
-        queryClient.invalidateQueries("entity");
+        queryClient.invalidateQueries("territory").then(() => {
+          setStatementId("");
+        });
       },
     }
   );
 
-  const duplicateStatementMutation = useMutation(
-    async (statementToDuplicate: IResponseStatement) => {
-      const { ...newStatementObject } = statementToDuplicate;
+  const duplicateStatement = (statementToDuplicate: IResponseStatement) => {
+    const { ...newStatementObject } = statementToDuplicate;
 
-      const duplicatedStatement = DStatement(newStatementObject as IStatement);
+    const duplicatedStatement = DStatement(newStatementObject as IStatement);
+    duplicateStatementMutation.mutate(duplicatedStatement);
+  };
+
+  const duplicateStatementMutation = useMutation(
+    async (duplicatedStatement: IStatement) => {
       await api.entityCreate(duplicatedStatement);
     },
     {
@@ -174,11 +207,11 @@ export const StatementListBox: React.FC = () => {
 
     if (index + 1 > statements.length) {
       // last one
-      newOrder = statements.length;
+      newOrder = Order.Last;
     } else {
       if (index < 1 && statements[0].data.territory) {
         // first one
-        newOrder = statements[0].data.territory.order - 1;
+        newOrder = Order.First;
       } else if (
         statements[index - 1].data.territory &&
         statements[index].data.territory
@@ -199,8 +232,8 @@ export const StatementListBox: React.FC = () => {
 
     if (newOrder) {
       const newStatement: IStatement = CStatement(
-        territoryId,
-        localStorage.getItem("userrole") as UserRole
+        localStorage.getItem("userrole") as UserRole,
+        territoryId
       );
       (newStatement.data.territory as { order: number; id: string }).order =
         newOrder;
@@ -208,8 +241,6 @@ export const StatementListBox: React.FC = () => {
       actantsCreateMutation.mutate(newStatement);
     }
   };
-
-  const { statements, entities } = data || initialData;
 
   const moveEndRow = async (statementToMove: IStatement, index: number) => {
     // return if order don't change
@@ -324,8 +355,6 @@ export const StatementListBox: React.FC = () => {
             : [];
 
           const subjectObjects = subjectIds.map((actantId: string) => {
-            // const subjectObject =
-            //   entities && entities.find((e) => e.id === actantId);
             return entities[actantId];
           });
 
@@ -364,13 +393,11 @@ export const StatementListBox: React.FC = () => {
       {
         Header: "Actions",
         Cell: ({ row }: Cell) => {
-          const actionIds = row.values.data?.actants
+          const actionIds = row.values.data?.actions
             ? row.values.data.actions.map((a: any) => a.action)
             : [];
 
           const actionObjects = actionIds.map((actionId: string) => {
-            // const actantObject =
-            //   entities && entities.find((e) => e && e.id === actionId);
             return entities[actionId];
           });
 
@@ -420,8 +447,6 @@ export const StatementListBox: React.FC = () => {
           const isOversized = actantIds.length > 4;
 
           const actantObjects = actantIds.map((actantId: string) => {
-            // const actantObject =
-            //   entities && entities.find((e) => e && e.id === actantId);
             return entities[actantId];
           });
           return (
@@ -501,9 +526,7 @@ export const StatementListBox: React.FC = () => {
                       color="warning"
                       tooltip="duplicate"
                       onClick={() => {
-                        duplicateStatementMutation.mutate(
-                          row.original as IResponseStatement
-                        );
+                        duplicateStatement(row.original as IResponseStatement);
                       }}
                     />,
                     <Button
@@ -517,7 +540,7 @@ export const StatementListBox: React.FC = () => {
                       tooltip="add new statement before"
                       color="info"
                       onClick={() => {
-                        addStatementAtCertainIndex(row.index - 1);
+                        addStatementAtCertainIndex(row.index);
                       }}
                     />,
                     <Button
@@ -546,10 +569,14 @@ export const StatementListBox: React.FC = () => {
                 }}
                 onClick={(e: React.MouseEvent) => {
                   e.stopPropagation();
-                  row.toggleRowExpanded();
+                  const newObject = {
+                    ...rowsExpanded,
+                    [row.values.id]: !rowsExpanded[row.values.id],
+                  };
+                  dispatch(setRowsExpanded(newObject));
                 }}
               >
-                {row.isExpanded ? (
+                {rowsExpanded[row.values.id] ? (
                   <FaChevronCircleUp />
                 ) : (
                   <FaChevronCircleDown />
@@ -560,7 +587,7 @@ export const StatementListBox: React.FC = () => {
         },
       },
     ];
-  }, [data, statementId]);
+  }, [data, statementId, rowsExpanded]);
 
   statements.sort((a, b) =>
     a.data.territory && b.data.territory
@@ -592,11 +619,14 @@ export const StatementListBox: React.FC = () => {
         />
       )}
 
-      {statements && (
+      {statements && audits && (
         <StyledTableWrapper id="Statements-box-table">
           <StatementListTable
             moveEndRow={moveEndRow}
-            data={statements}
+            data={statements.map((st) => ({
+              ...st,
+              audit: audits.find((a) => a.entity === st.id),
+            }))}
             columns={columns}
             handleRowClick={(rowId: string) => {
               setStatementId(rowId);
@@ -630,6 +660,7 @@ export const StatementListBox: React.FC = () => {
       <Loader
         show={
           isFetching ||
+          isFetchingAudits ||
           removeStatementMutation.isLoading ||
           duplicateStatementMutation.isLoading ||
           addStatementAtTheEndMutation.isLoading ||

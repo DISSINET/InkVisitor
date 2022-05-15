@@ -4,7 +4,9 @@ import { IResource } from "@shared/types/resource";
 import Entity from "@models/entity/entity";
 
 class ResourceData implements IModel {
-  link: string = "";
+  url: string = "";
+  partValueLabel: string = "";
+  partValueBaseURL: string = "";
 
   constructor(data: UnknownObject) {
     if (!data) {
@@ -20,8 +22,6 @@ class ResourceData implements IModel {
 }
 
 class Resource extends Entity implements IResource {
-  static publicFields = Entity.publicFields;
-
   class: EntityClass.Resource = EntityClass.Resource;
   data: ResourceData;
 

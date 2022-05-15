@@ -1,10 +1,7 @@
 #!/bin/bash
 
-echo -n "Enter your name and press [ENTER]: "
-read username
-
-echo -n "Enter host [ENTER]: "
-read host
+username=$1
+host=$2
 
 rsync -a ./packages/server/package* ./packages/server/env ./packages/server/secret ./packages/server/dist ${username}@${host}:/var/www/html/apps/inkvisitor-data-import/server 
 rsync -a ./packages/server/src/service/emails ${username}@${host}:/var/www/html/apps/inkvisitor-data-import/server/dist/server/src/service

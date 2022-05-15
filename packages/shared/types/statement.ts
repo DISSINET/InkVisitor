@@ -12,6 +12,7 @@ import {
   Operator,
   Language,
 } from "../enums";
+import { IReference } from "./reference";
 
 export interface IStatement extends IEntity {
   id: string;
@@ -32,7 +33,6 @@ export interface IStatementData {
   };
   actions: IStatementAction[];
   actants: IStatementActant[];
-  references: IStatementReference[];
   tags: string[]; // ids of IEntity;
 }
 
@@ -62,11 +62,4 @@ export interface IStatementActant {
   bundleStart: boolean;
   bundleEnd: boolean;
   props: IProp[];
-}
-
-export interface IStatementReference {
-  id: string;
-  resource: string;
-  part: string;
-  type: string;
 }
