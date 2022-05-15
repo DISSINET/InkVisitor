@@ -235,7 +235,6 @@ export const TemplateListBox: React.FC<TemplateListBox> = ({}) => {
                   width={80}
                   entityDropdown
                   disableTyping
-                  oneLetter
                 />
                 <StyledTypeBar
                   entity={`entity${filterByClass.value}`}
@@ -313,7 +312,6 @@ export const TemplateListBox: React.FC<TemplateListBox> = ({}) => {
                   width={80}
                   entityDropdown
                   disableTyping
-                  oneLetter
                 />
                 <StyledTypeBar
                   entity={`entity${createModalEntityClass.value}`}

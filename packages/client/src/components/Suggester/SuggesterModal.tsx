@@ -116,7 +116,6 @@ export const SuggesterModal: React.FC<SuggesterModal> = ({
                 width={40}
                 entityDropdown
                 disableTyping
-                oneLetter
               />
               <StyledTypeBar
                 entity={`entity${selectedCategory.value}`}

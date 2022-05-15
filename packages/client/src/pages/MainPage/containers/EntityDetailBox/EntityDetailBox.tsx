@@ -29,6 +29,7 @@ import {
   MultiInput,
   Submit,
 } from "components";
+import { StyledTypeBar } from "components/Suggester/SuggesterStyles";
 import { StyledHeading, StyledUsedInTitle } from "components/Table/TableStyles";
 import { CProp, DEntity, DStatement } from "constructors";
 import { useSearchParams } from "hooks";
@@ -43,6 +44,7 @@ import {
 } from "react-icons/fa";
 import { GrClone } from "react-icons/gr";
 import { useMutation, useQuery, useQueryClient } from "react-query";
+import { OptionTypeBase, ValueType } from "react-select";
 import { toast } from "react-toastify";
 import { DraggedPropRowCategory } from "types";
 import { v4 as uuidv4 } from "uuid";
@@ -63,7 +65,6 @@ import {
   StyledDetailSection,
   StyledDetailSectionContent,
   StyledDetailSectionContentUsedIn,
-  StyledDetailSectionContentUsedInTitle,
   StyledDetailSectionEntityList,
   StyledDetailSectionHeader,
   StyledDetailWrapper,
@@ -684,22 +685,28 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                         Entity Type
                       </StyledDetailContentRowLabel>
                       <StyledDetailContentRowValue>
-                        {/* <Dropdown
-                          value={{
-                            label: selectedCategory.label,
-                            value: selectedCategory.value,
-                          }}
-                          options={categories}
-                          onChange={(
-                            option: ValueType<OptionTypeBase, any>
-                          ) => {
-                            setSelectedCategory(option);
-                          }}
-                          width={40}
-                          entityDropdown
-                          disableTyping
-                          oneLetter
-                        /> */}
+                        <div style={{ position: "relative" }}>
+                          <Dropdown
+                            value={{
+                              label: entity.class,
+                              value: entity.class,
+                            }}
+                            options={entitiesDict}
+                            onChange={(
+                              option: ValueType<OptionTypeBase, any>
+                            ) => {
+                              // setSelectedCategory(option);
+                              // TODO: submit modal => change category mutation
+                              console.log(option);
+                            }}
+                            width={40}
+                            entityDropdown
+                            disableTyping
+                          />
+                          <StyledTypeBar
+                            entity={`entity${entity.class}`}
+                          ></StyledTypeBar>
+                        </div>
                       </StyledDetailContentRowValue>
                     </StyledDetailContentRow>
 
