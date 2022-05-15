@@ -549,22 +549,28 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                         Entity Type
                       </StyledDetailContentRowLabel>
                       <StyledDetailContentRowValue>
-                        {/* <Dropdown
-                          value={{
-                            label: selectedCategory.label,
-                            value: selectedCategory.value,
-                          }}
-                          options={categories}
-                          onChange={(
-                            option: ValueType<OptionTypeBase, any>
-                          ) => {
-                            setSelectedCategory(option);
-                          }}
-                          width={40}
-                          entityDropdown
-                          disableTyping
-                          oneLetter
-                        /> */}
+                        <div style={{ position: "relative" }}>
+                          <Dropdown
+                            value={{
+                              label: entity.class,
+                              value: entity.class,
+                            }}
+                            options={entitiesDict}
+                            onChange={(
+                              option: ValueType<OptionTypeBase, any>
+                            ) => {
+                              // setSelectedCategory(option);
+                              // TODO: submit modal => change category mutation
+                              console.log(option);
+                            }}
+                            width={40}
+                            entityDropdown
+                            disableTyping
+                          />
+                          <StyledTypeBar
+                            entity={`entity${entity.class}`}
+                          ></StyledTypeBar>
+                        </div>
                       </StyledDetailContentRowValue>
                     </StyledDetailContentRow>
 
