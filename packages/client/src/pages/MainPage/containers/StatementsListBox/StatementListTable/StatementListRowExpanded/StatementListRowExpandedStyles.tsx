@@ -10,10 +10,6 @@ export const StyledSubRow = styled.div`
   font-size: ${({ theme }) => theme.fontSize["xs"]};
   color: ${({ theme }) => theme.color["black"]};
 `;
-export const StyledActantGroup = styled.div`
-  display: grid;
-  overflow: hidden;
-`;
 
 const getIndentation = (level: 1 | 2 | 3) => {
   switch (level) {

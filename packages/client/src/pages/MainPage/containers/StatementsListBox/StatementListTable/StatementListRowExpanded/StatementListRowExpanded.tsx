@@ -13,7 +13,6 @@ import { ColumnInstance, Row } from "react-table";
 import { EntityTag } from "../../../EntityTag/EntityTag";
 import { StatementListRowExpandedPropGroup } from "./StatementListRowExpandedPropGroup";
 import {
-  StyledActantGroup,
   StyledActantWithPropsWrap,
   StyledActantWrap,
   StyledBsArrowReturnRight,
@@ -213,7 +212,7 @@ export const StatementListRowExpanded: React.FC<StatementListRowExpanded> = ({
         <>
           <StyledSubRow id={`statement${row.values.id}`}>
             <br />
-            <StyledActantGroup>
+            <StyledGrid>
               {actionObjects.map((action, key) => (
                 <StyledPropRow key={key}>
                   <StyledBsArrowReturnRight size="20" />
@@ -226,8 +225,8 @@ export const StatementListRowExpanded: React.FC<StatementListRowExpanded> = ({
                   )}
                 </StyledPropRow>
               ))}
-            </StyledActantGroup>
-            <StyledActantGroup>
+            </StyledGrid>
+            <StyledGrid>
               {subjectObjects.map((actant, key) => (
                 <StyledPropRow key={key}>
                   <StyledBsArrowReturnRight size="20" />
@@ -240,8 +239,8 @@ export const StatementListRowExpanded: React.FC<StatementListRowExpanded> = ({
                   )}
                 </StyledPropRow>
               ))}
-            </StyledActantGroup>
-            <StyledActantGroup>
+            </StyledGrid>
+            <StyledGrid>
               {actantObjects.map((actant, key) => (
                 <StyledPropRow key={key}>
                   <StyledBsArrowReturnRight size="20" />
@@ -254,47 +253,37 @@ export const StatementListRowExpanded: React.FC<StatementListRowExpanded> = ({
                   )}
                 </StyledPropRow>
               ))}
-            </StyledActantGroup>
-            <div>
-              <StyledReferenceSection>
-                {references.map((reference, key) => (
-                  <StyledGrid key={key}>
-                    <StyledPropRow key={key}>
-                      <StyledBsArrowReturnRight size="20" />
-                      <StyledSpan>
-                        &nbsp;&nbsp;(reference)&nbsp;&nbsp;
-                      </StyledSpan>
-                      {renderReferenceRow(
-                        reference.resource,
-                        reference.value,
-                        key
-                      )}
-                    </StyledPropRow>
-                  </StyledGrid>
-                ))}
-              </StyledReferenceSection>
-            </div>
-            <StyledGrid>
-              <StyledActantGroup>
-                {tagObjects.map((tag, key) => (
-                  <StyledPropRow key={key} disableBottomMargin>
-                    <StyledBsArrowReturnRight size="20" />
-                    <StyledSpan>&nbsp;&nbsp;(tag)&nbsp;&nbsp;</StyledSpan>
-                    {renderListActant(tag.id, key)}
-                  </StyledPropRow>
-                ))}
-              </StyledActantGroup>
             </StyledGrid>
-            <br />
+            <StyledReferenceSection>
+              {references.map((reference, key) => (
+                <StyledGrid key={key}>
+                  <StyledPropRow key={key}>
+                    <StyledBsArrowReturnRight size="20" />
+                    <StyledSpan>&nbsp;&nbsp;(reference)&nbsp;&nbsp;</StyledSpan>
+                    {renderReferenceRow(
+                      reference.resource,
+                      reference.value,
+                      key
+                    )}
+                  </StyledPropRow>
+                </StyledGrid>
+              ))}
+            </StyledReferenceSection>
+            <StyledGrid>
+              {tagObjects.map((tag, key) => (
+                <StyledPropRow key={key} disableBottomMargin>
+                  <StyledBsArrowReturnRight size="20" />
+                  <StyledSpan>&nbsp;&nbsp;(tag)&nbsp;&nbsp;</StyledSpan>
+                  {renderListActant(tag.id, key)}
+                </StyledPropRow>
+              ))}
+            </StyledGrid>
             <StyledNotesSection>
               {notes.map((note: string, key: number) => {
                 return (
                   <StyledNoteWrapper key={key}>
                     <StyledSpan>(note)</StyledSpan>
-                    <p key={key}>
-                      {note}
-                      <br />
-                    </p>
+                    <p key={key}>{note}</p>
                   </StyledNoteWrapper>
                 );
               })}
