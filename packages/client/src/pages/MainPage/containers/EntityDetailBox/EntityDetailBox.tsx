@@ -5,7 +5,7 @@ import {
   languageDict,
 } from "@shared/dictionaries";
 import { allEntities, DropdownItem } from "@shared/dictionaries/entity";
-import { EntityClass, Language, UserRoleMode } from "@shared/enums";
+import { EntityClass, Language, UserRole, UserRoleMode } from "@shared/enums";
 import {
   IAction,
   IEntity,
@@ -101,10 +101,11 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
   const handleCreateTemplate = () => {
     // create template as a copy of the entity
     if (entity) {
+      const userRole = localStorage.getItem("userrole") as UserRole;
       const templateEntity =
         entity.class === EntityClass.Statement
-          ? DStatement(entity as IStatement)
-          : DEntity(entity as IEntity);
+          ? DStatement(entity as IStatement, userRole)
+          : DEntity(entity as IEntity, userRole);
 
       if (entity.class === EntityClass.Statement) {
         delete templateEntity.data["territory"];
@@ -524,7 +525,10 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
   };
 
   const duplicateEntity = (entityToDuplicate: IEntity) => {
-    const newEntity = DEntity(entityToDuplicate);
+    const newEntity = DEntity(
+      entityToDuplicate,
+      localStorage.getItem("userrole") as UserRole
+    );
     duplicateEntityMutation.mutate(newEntity);
   };
 
