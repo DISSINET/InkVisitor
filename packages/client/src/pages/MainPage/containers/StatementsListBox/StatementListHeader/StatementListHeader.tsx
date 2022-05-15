@@ -170,6 +170,7 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
                 label="refresh"
                 onClick={() => {
                   queryClient.invalidateQueries(["territory"]);
+                  queryClient.invalidateQueries(["statement"]);
                 }}
               />
             </ButtonGroup>

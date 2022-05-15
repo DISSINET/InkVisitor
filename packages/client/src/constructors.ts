@@ -99,18 +99,24 @@ export const CStatement = (
 };
 
 // duplicate statement
-export const DStatement = (statement: IStatement): IStatement => {
+export const DStatement = (
+  statement: IStatement,
+  userRole: UserRole
+): IStatement => {
   const duplicatedStatement: IStatement = {
     id: uuidv4(),
     class: EntityClass.Statement,
-    status: statement.status,
     data: { ...statement.data },
-    label: statement.label,
+    label: statement.label + " [COPY OF]",
     detail: statement.detail,
     language: statement.language,
     notes: statement.notes,
     props: DProps(statement.props),
     references: statement.references,
+    status:
+      userRole === UserRole.Admin
+        ? EntityStatus.Approved
+        : EntityStatus.Pending,
   };
 
   if (statement.isTemplate) {
@@ -135,18 +141,21 @@ export const DStatement = (statement: IStatement): IStatement => {
 };
 
 // duplicate entity
-export const DEntity = (entity: IEntity): IEntity => {
+export const DEntity = (entity: IEntity, userRole: UserRole): IEntity => {
   const duplicatedEntity: IEntity = {
     id: uuidv4(),
     class: entity.class,
-    status: entity.status,
     data: entity.data,
-    label: entity.label,
+    label: entity.label + " [COPY OF]",
     detail: entity.detail,
     language: entity.language,
     notes: entity.notes,
     props: DProps(entity.props),
     references: entity.references,
+    status:
+      userRole === UserRole.Admin
+        ? EntityStatus.Approved
+        : EntityStatus.Pending,
   };
 
   if (entity.isTemplate) {
