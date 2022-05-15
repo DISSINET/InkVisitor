@@ -117,15 +117,53 @@ export class SearchQuery {
       label = label.slice(0, -1);
     }
 
-    label = regExpEscape(label.toLowerCase());
-
     this.query = this.query.filter(function (row: RDatum) {
-      return row("label")
-        .downcase()
-        .match(`${leftWildcard}${label}${rightWildcard}`);
+      return r.or(
+        SearchQuery.searchWordByWord(row, label)
+        // SearchQuery.searchByString(row, label, leftWildcard, rightWildcard)
+      );
     });
 
     return this;
+  }
+
+  public static searchByString(
+    row: RDatum,
+    label: string,
+    right: string,
+    left: string
+  ): RDatum {
+    // escape problematic chars - messes with regexp search
+    label = regExpEscape(label.toLowerCase());
+
+    return row("label").downcase().match(`${left}${label}${right}`);
+  }
+
+  public static searchWordByWord(row: RDatum, label: string): RDatum {
+    // words have to be splitted and joined with regexps to provide variable glue
+    label = label.toLowerCase().split(" ").join("[ .,_:]");
+    const regexp = `(^|\W )${label}($|\W)`;
+    console.log(regexp);
+    return row("label").downcase().match(regexp);
+  }
+
+  public static searchByWords(row: RDatum, label: string): RDatum {
+    // word search require regexp like '(word1)|(word2)|(word3)'
+    const labelWords = label
+      .split(" ")
+      .map((word) => `(${word})`)
+      .join("&");
+    // full regexp needs to encompass also cases like `[woman`, or `Arnalda,`
+    // which are common return values from split call
+    const regexp = `^([\[ ,])?${labelWords}([\] ,])?$`;
+
+    console.log(labelWords);
+    return row("label")
+      .downcase()
+      .split()
+      .contains(function (split) {
+        return split.match(regexp);
+      });
   }
 
   /**
