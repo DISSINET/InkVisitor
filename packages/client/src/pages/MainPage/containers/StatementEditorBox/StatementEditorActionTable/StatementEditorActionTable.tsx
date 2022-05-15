@@ -14,9 +14,11 @@ interface StatementEditorActionTable {
   statementId: string;
   userCanEdit?: boolean;
   handleRowClick?: Function;
-  renderPropGroup: Function;
   updateActionsMutation: UseMutationResult<any, unknown, object, unknown>;
   addProp: (originId: string) => void;
+  updateProp: (propId: string, changes: any) => void;
+  removeProp: (propId: string) => void;
+  movePropToIndex: (propId: string, oldIndex: number, newIndex: number) => void;
 }
 export const StatementEditorActionTable: React.FC<
   StatementEditorActionTable
@@ -25,9 +27,11 @@ export const StatementEditorActionTable: React.FC<
   statementId,
   userCanEdit = false,
   handleRowClick = () => {},
-  renderPropGroup,
   updateActionsMutation,
   addProp,
+  updateProp,
+  removeProp,
+  movePropToIndex,
 }) => {
   const [filteredActions, setFilteredActions] = useState<
     FilteredActionObject[]
@@ -116,7 +120,6 @@ export const StatementEditorActionTable: React.FC<
             prepareRow(row);
             return (
               <StatementEditorActionTableRow
-                renderPropGroup={renderPropGroup}
                 handleClick={handleRowClick}
                 index={i}
                 row={row}
@@ -127,6 +130,9 @@ export const StatementEditorActionTable: React.FC<
                 visibleColumns={visibleColumns}
                 updateActionsMutation={updateActionsMutation}
                 addProp={addProp}
+                updateProp={updateProp}
+                removeProp={removeProp}
+                movePropToIndex={movePropToIndex}
                 {...row.getRowProps()}
               />
             );

@@ -5,14 +5,9 @@ import {
   fillArray,
 } from "@models/common";
 import { r as rethink, Connection, WriteResult, RDatum } from "rethinkdb-ts";
+import { IStatement, IEntity, IProp, IReference } from "@shared/types";
 import {
-  IStatement,
-  IEntity,
-  IResponseEntity,
-  IProp,
-  IEntityReference,
-} from "@shared/types";
-import {
+  DbIndex,
   EntityClass,
   EntityStatus,
   Language,
@@ -24,28 +19,9 @@ import { InternalServerError } from "@shared/types/errors";
 import User from "@models/user/user";
 import emitter from "@models/events/emitter";
 import { EventTypes } from "@models/events/types";
-import { findEntitiesByIds } from "@service/shorthands";
-import Base from "../base";
 
-export default class Entity extends Base implements IEntity, IDbModel {
+export default class Entity implements IEntity, IDbModel {
   static table = "entities";
-  static publicFields: string[] = [
-    "id",
-    "legacyId",
-    "class",
-    "status",
-    "data",
-    "label",
-    "detail",
-    "status",
-    "language",
-    "notes",
-    "props",
-    "references",
-    "isTemplate",
-    "usedTemplate",
-    "templateData",
-  ];
 
   id: string = "";
   legacyId: string = "";
@@ -57,18 +33,16 @@ export default class Entity extends Base implements IEntity, IDbModel {
   language: Language = Language.Latin;
   notes: string[] = [];
   props: IProp[] = [];
-  references: IEntityReference[] = [];
+  references: IReference[] = [];
 
   isTemplate: boolean = false;
-  usedTemplate: boolean = false;
+  usedTemplate: string = "";
   templateData: object = {};
 
   usedIn: IStatement[] = [];
   right: UserRoleMode = UserRoleMode.Read;
 
   constructor(data: UnknownObject) {
-    super();
-
     if (!data) {
       return;
     }
@@ -160,23 +134,6 @@ export default class Entity extends Base implements IEntity, IDbModel {
     }
 
     return UserRoleMode.Read;
-  }
-
-  getDependentStatements(db: Connection | undefined): Promise<IStatement[]> {
-    return rethink
-      .table(Entity.table)
-      .filter({ class: EntityClass.Statement })
-      .filter((row: any) => {
-        return rethink.or(
-          row("data")("actants").contains((actantElement: any) =>
-            actantElement("actant").eq(this.id)
-          ),
-          row("data")("props").contains((propElement: any) =>
-            propElement("origin").eq(this.id)
-          )
-        );
-      })
-      .run(db);
   }
 
   static async findUsedInProps(
@@ -285,14 +242,34 @@ export default class Entity extends Base implements IEntity, IDbModel {
       }
     });
 
+    Entity.extractIdsFromReferences(this.references).forEach((element) => {
+      if (element) {
+        entityIds[element] = null;
+      }
+    });
+
     return Object.keys(entityIds);
   }
 
-  static extractIdsFromProps(props: IProp[]): string[] {
+  static extractIdsFromReferences(references: IReference[]): string[] {
+    let out: string[] = [];
+    for (const reference of references) {
+      out.push(reference.resource);
+      out.push(reference.value);
+    }
+
+    return out;
+  }
+
+  static extractIdsFromProps(props: IProp[] = []): string[] {
     let out: string[] = [];
     for (const prop of props) {
-      out.push(prop.type.id);
-      out.push(prop.value.id);
+      if (prop.type) {
+        out.push(prop.type.id);
+      }
+      if (prop.value) {
+        out.push(prop.value.id);
+      }
 
       out = out.concat(Entity.extractIdsFromProps(prop.children));
     }
@@ -300,75 +277,33 @@ export default class Entity extends Base implements IEntity, IDbModel {
     return out;
   }
 
+  static async findEntitiesByIds(
+    con: Connection,
+    ids: string[]
+  ): Promise<IEntity[]> {
+    const data = await rethink
+      .table(Entity.table)
+      .getAll(rethink.args(ids))
+      .run(con);
+    return data;
+  }
+
   async getEntities(db: Connection): Promise<IEntity[]> {
-    const entities = findEntitiesByIds<IEntity>(db, this.getEntitiesIds());
+    const entities = Entity.findEntitiesByIds(db, this.getEntitiesIds());
     return entities;
   }
 
-  /*
-   * finds statements which are linked to current entity
-   * @param db db connection
-   * @param territoryId id of the entity
-   * @returns list of statements data
+  /**
+   * Finds entities which uses this entity as a template
+   * @param db
+   * @returns
    */
-  async findDependentStatements(
-    db: Connection | undefined
-  ): Promise<IStatement[]> {
-    const statements = await rethink
+  async findFromTemplate(db: Connection): Promise<IEntity[]> {
+    const data = await rethink
       .table(Entity.table)
-      .filter({
-        class: EntityClass.Statement,
-      })
-      .filter((row: RDatum) => {
-        return rethink.or(
-          row("data")("territory")("id").eq(this.id),
-          row("data")("actions").contains((entry: RDatum) =>
-            entry("action").eq(this.id)
-          ),
-          row("data")("actants").contains((entry: RDatum) =>
-            entry("actant").eq(this.id)
-          ),
-          row("data")("tags").contains(this.id),
-          row("data")("props").contains((entry: RDatum) =>
-            entry("value")("id").eq(this.id)
-          ),
-          row("data")("props").contains((entry: RDatum) =>
-            entry("type")("id").eq(this.id)
-          ),
-          row("data")("props").contains((entry: RDatum) =>
-            entry("origin").eq(this.id)
-          ),
-          row("data")("references").contains((entry: RDatum) =>
-            entry("resource").eq(this.id)
-          )
-        );
-      })
+      .getAll(this.id, { index: DbIndex.EntityUsedTemplate })
       .run(db);
 
-    return statements.sort((a, b) => {
-      return a.data.territory.order - b.data.territory.order;
-    });
-  }
-
-  async prepareResponseFields(user: User, db: Connection | undefined) {
-    this.usedIn = await this.findDependentStatements(db);
-    this.right = this.getUserRoleMode(user);
-  }
-
-  static getPublicFields(a: Entity): string[] {
-    return Object.keys(a).filter((k) => k.indexOf("_") !== 0);
-  }
-
-  toJSON(): IResponseEntity {
-    const entity = this;
-    const strippedObject: IEntity = Entity.getPublicFields(this).reduce(
-      (acc, curr) => {
-        acc[curr] = (entity as Record<string, unknown>)[curr];
-        return acc;
-      },
-      {} as any
-    );
-
-    return strippedObject;
+    return data;
   }
 }

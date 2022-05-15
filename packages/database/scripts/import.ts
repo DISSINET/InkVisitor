@@ -1,203 +1,212 @@
 import { IUser } from "../../shared/types/user";
 import { hashPassword } from "../../server/src/common/auth";
 import { IAudit } from "../../shared/types";
-const fs = require("fs");
-const r = require("rethinkdb");
-var tunnel = require("tunnel-ssh");
+import { r, RConnectionOptions, Connection } from "rethinkdb-ts";
+import tunnel from "tunnel-ssh";
+import { Server } from "net";
+import readline from "readline";
+import { parseArgs, prepareDbConnection, TableSchema } from "./import-utils";
+import { auditsIndexes, entitiesIndexes } from "./indexes";
 
-const entitiesTable = "entities";
+const [datasetId, env] = parseArgs();
+const envData = require("dotenv").config({ path: `env/.env.${env}` }).parsed;
 
-const datasets: Record<string, any> = {
+if (!envData) {
+  throw new Error(`Cannot load env file env/.env.${env}`);
+}
+
+const datasets: Record<string, TableSchema[]> = {
   all: [
     {
       name: "acl_permissions",
-      data: "datasets/all/acl_permissions.json",
+      data: require("../datasets/default/acl_permissions.json"),
+      transform: function () {},
     },
     {
       name: "entities",
-      data: "datasets/all/entities.json",
-      indexes: [
-        r.table(entitiesTable).indexCreate("class"),
-        r.table(entitiesTable).indexCreate("label"),
-        r
-          .table(entitiesTable)
-          .indexCreate(
-            "data.actants.actant",
-            r.row("data")("actants")("actant")
-          ),
-        r
-          .table(entitiesTable)
-          .indexCreate(
-            "data.actions.action",
-            r.row("data")("actions")("action")
-          ),
-        r.table(entitiesTable).indexCreate("data.tags", r.row("data")("tags")),
-        r
-          .table(entitiesTable)
-          .indexCreate(
-            "data.props.type.id",
-            r.row("data")("props")("type")("id")
-          ),
-        r
-          .table(entitiesTable)
-          .indexCreate(
-            "data.props.value.id",
-            r.row("data")("props")("value")("id")
-          ),
-        r
-          .table(entitiesTable)
-          .indexCreate(
-            "data.references.resource",
-            r.row("data")("references")("resource")
-          ),
-        r
-          .table(entitiesTable)
-          .indexCreate("data.props.origin", r.row("data")("props")("origin")),
-        r
-          .table(entitiesTable)
-          .indexCreate("data.territory.id", r.row("data")("territory")("id")),
-        r
-          .table(entitiesTable)
-          .indexCreate("data.parent.id", r.row("data")("parent")("id")),
-      ],
+      data: require("../datasets/all/entities.json"),
+      transform: function () {},
+      indexes: entitiesIndexes,
     },
     {
       name: "users",
-      data: "datasets/all/users.json",
+      data: require("../datasets/default/users.json"),
+      transform: function () {
+        this.data = this.data.map((user: IUser) => {
+          user.password = hashPassword(user.password ? user.password : "");
+          return user;
+        });
+      },
     },
     {
       name: "audits",
-      data: "datasets/all/audits.json",
+      data: require("../datasets/all/audits.json"),
+      transform: function () {
+        this.data = this.data.map((audit: IAudit) => {
+          audit.date = new Date(audit.date);
+          return audit;
+        });
+      },
+      indexes: auditsIndexes,
+    },
+  ],
+  empty: [
+    {
+      name: "acl_permissions",
+      data: require("../datasets/default/acl_permissions.json"),
+      transform: function () {},
+    },
+    {
+      name: "entities",
+      data: require("../datasets/empty/entities.json"),
+      transform: function () {},
+      indexes: entitiesIndexes,
+    },
+    {
+      name: "users",
+      data: require("../datasets/default/users.json"),
+      transform: function () {
+        this.data = this.data.map((user: IUser) => {
+          user.password = hashPassword(user.password ? user.password : "");
+          return user;
+        });
+      },
+    },
+    {
+      name: "audits",
+      data: require("../datasets/empty/audits.json"),
+      transform: function () {
+        this.data = this.data.map((audit: IAudit) => {
+          audit.date = new Date(audit.date);
+          return audit;
+        });
+      },
+      indexes: auditsIndexes,
+    },
+  ],
+  allparsed: [
+    {
+      name: "acl_permissions",
+      data: require("../datasets/all-parsed/acl_permissions.json"),
+      transform: function () {},
+    },
+    {
+      name: "entities",
+      data: require("../datasets/all-parsed/entities.json"),
+      transform: function () {},
+      indexes: entitiesIndexes,
+    },
+    {
+      name: "users",
+      data: require("../datasets/all-parsed/users.json"),
+      transform: function () {
+        this.data = this.data.map((user: IUser) => {
+          user.password = hashPassword(user.password ? user.password : "");
+          return user;
+        });
+      },
+    },
+    {
+      name: "audits",
+      data: require("../datasets/all-parsed/audits.json"),
+      transform: function () {
+        this.data = this.data.map((audit: IAudit) => {
+          audit.date = new Date(audit.date);
+          return audit;
+        });
+      },
+      indexes: auditsIndexes,
     },
   ],
 };
 
-const datasetId: string = process.argv[2];
-const dbMode = process.argv[3];
-
-const envData = require("dotenv").config({ path: `env/.env.${dbMode}` }).parsed;
-
-const tablesToImport = datasets[datasetId];
-
-console.log(`***importing dataset ${datasetId}***`);
-console.log("");
-
-function doIndex(statement: any, connection: any): Promise<any> {
-  return new Promise((resolve) => {
-    statement.run(connection, resolve);
-  });
-}
-
-//-----------------------------------------------------------------------------
-// Main
-//-----------------------------------------------------------------------------
-
-const importData = async () => {
-  const config = {
-    db: envData.DB_NAME,
-    host: envData.DB_HOST,
-    port: envData.DB_PORT,
-    password: process.env.DB_AUTH,
-    tables: tablesToImport,
-  };
-
-  let conn: any = null;
-
-  try {
-    conn = await r.connect(config);
-
-    console.log(config);
-
-    // Drop the database.
-    try {
-      await r.dbDrop(config.db).run(conn);
-      console.log("database dropped");
-    } catch (e) {
-      console.log("database not dropped");
-    }
-
-    // Recreate the database
-    try {
-      await r.dbCreate(config.db).run(conn);
-      console.log("database created");
-    } catch (e) {
-      console.log("database not created");
-    }
-
-    // set default database
-    conn.use(config.db);
-
-    // Insert data to tables.
-    for (let i = 0; i < config.tables.length; ++i) {
-      const table = config.tables[i];
-
-      r.tableCreate(table.name).run(conn, async () => {
-        if (table.indexes) {
-          for (const index of table.indexes) {
-            //await doIndex(index, conn);
-          }
-        }
-
-        console.log(`table ${table.name} created`);
-
-        let data = JSON.parse(fs.readFileSync(table.data));
-        if (table.name === "users") {
-          data = data.map((user: IUser) => {
-            user.password = hashPassword(user.password ? user.password : "");
-            return user;
-          });
-        }
-
-        if (table.name === "audits") {
-          data = data.map((audit: IAudit) => {
-            audit.date = new Date(audit.date);
-            return audit;
-          });
-        }
-
-        r.table(table.name)
-          .insert(data)
-          .run(conn, () => {
-            if (table.name === "entities") {
-              r.table("entities").run(conn, (err: any, cursor: any) => {
-                cursor.toArray().then((results: any) => {
-                  console.log(`number of entities imported ${results.length}`);
-                });
-
-                //console.log(`data into the table ${table.name} inserted`);
-              });
-            }
-          });
-      });
-    }
-  } catch (error) {
-    console.log(error);
-  } finally {
-    console.log("closing connection");
-    if (conn) {
-      // TODO  this is bad
-      setTimeout(() => {
-        conn.close();
-      }, 5000);
-    }
-  }
+const config: RConnectionOptions & { tables: TableSchema[] } = {
+  timeout: 5,
+  db: envData.DB_NAME,
+  host: envData.DB_HOST,
+  port: envData.DB_PORT,
+  password: process.env.DB_AUTH,
+  tables: datasets[datasetId],
 };
 
-if (dbMode == "prod") {
-  const tnl = tunnel(
-    {
-      host: envData.SSH_IP,
-      port: 28015,
-      dstPort: 28017,
-      username: envData.SSH_USERNAME,
-      password: envData.SSH_PASSWORD,
-    },
-    function (error: any, tnl: any) {
-      console.log("in the tunnel");
-      importData();
-      tnl.close();
+const importTable = async (
+  table: TableSchema,
+  conn: Connection
+): Promise<void> => {
+  await r.tableCreate(table.name).run(conn);
+  if (table.indexes) {
+    for (const i in table.indexes) {
+      await table.indexes[i](r.table(table.name)).run(conn);
     }
-  );
-} else {
-  importData();
-}
+  }
+
+  console.log(`Table ${table.name} created`);
+
+  table.transform();
+
+  await r.table(table.name).insert(table.data).run(conn);
+
+  const itemsImported = await r.table(table.name).count().run(conn);
+  console.log(`Imported ${itemsImported} entries to table ${table.name}`);
+
+  return;
+};
+
+const importData = async () => {
+  const conn = await prepareDbConnection(config);
+
+  console.log(`***importing dataset ${datasetId}***\n`);
+
+  for (const table of config.tables) {
+    await importTable(table, conn);
+  }
+
+  console.log("Closing connection");
+  await conn.close({ noreplyWait: true });
+};
+
+(async () => {
+  if (envData.SSH_USERNAME) {
+    const rl = readline.createInterface({
+      input: process.stdin,
+      output: process.stdout,
+    });
+
+    rl.question("Using the tunnel. Continue? y/n\n", function (result) {
+      if (result.toLowerCase() !== "y") {
+        process.exit(0);
+      }
+
+      rl.close();
+
+      const tnl = tunnel(
+        {
+          host: envData.SSH_IP,
+          dstPort: 28015,
+          localPort: envData.DB_PORT,
+          username: envData.SSH_USERNAME,
+          password: envData.SSH_PASSWORD,
+        },
+        async (error: Error, srv: Server) => {
+          try {
+            await importData();
+          } catch (e) {
+            console.warn(e);
+          } finally {
+            await srv.close();
+          }
+        }
+      );
+
+      tnl.on("error", function (err) {
+        console.error("SSH connection error:", err);
+      });
+    });
+  } else {
+    try {
+      await importData();
+    } catch (e) {
+      console.warn(e);
+    }
+  }
+})();

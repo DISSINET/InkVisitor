@@ -98,11 +98,11 @@ export const SuggesterModal: React.FC<SuggesterModal> = ({
       }}
       onClose={() => closeModal()}
     >
-      <ModalHeader title="Create actant" />
+      <ModalHeader title="Create entity" />
       <ModalContent>
         <StyledContent>
           <ModalInputForm>
-            <ModalInputLabel>{"Category: "}</ModalInputLabel>
+            <ModalInputLabel>{"Entity type: "}</ModalInputLabel>
             <ModalInputWrap>
               <Dropdown
                 value={{
@@ -172,7 +172,7 @@ export const SuggesterModal: React.FC<SuggesterModal> = ({
                     <EntitySuggester
                       filterEditorRights
                       inputWidth={96}
-                      allowCreate={false}
+                      disableCreate
                       categoryTypes={[EntityClass.Territory]}
                       onSelected={(newSelectedId: string) => {
                         setTerritoryId(newSelectedId);
@@ -203,7 +203,8 @@ export const SuggesterModal: React.FC<SuggesterModal> = ({
           <Button
             key="cancel"
             label="Cancel"
-            color="warning"
+            color="greyer"
+            inverted
             onClick={() => {
               setTerritoryId("");
               closeModal();
@@ -211,8 +212,8 @@ export const SuggesterModal: React.FC<SuggesterModal> = ({
           />
           <Button
             key="submit"
-            label="Submit"
-            color="primary"
+            label="Create"
+            color="info"
             onClick={() => {
               if (selectedCategory.value === "S" && !territoryId) {
                 toast.warning("Territory is required!");

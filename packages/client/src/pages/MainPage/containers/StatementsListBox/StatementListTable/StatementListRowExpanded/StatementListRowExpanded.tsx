@@ -1,17 +1,31 @@
+import { actantPositionDict } from "@shared/dictionaries";
+import { Position } from "@shared/enums";
 import {
   IEntity,
   IProp,
+  IReference,
   IStatementActant,
   IStatementAction,
-  IStatementReference,
 } from "@shared/types";
+import { EmptyTag } from "pages/MainPage/containers";
 import React from "react";
 import { ColumnInstance, Row } from "react-table";
 import { EntityTag } from "../../../EntityTag/EntityTag";
 import { StatementListRowExpandedPropGroup } from "./StatementListRowExpandedPropGroup";
 import {
-  StyledActantGroup,
+  StyledActantWithPropsWrap,
   StyledActantWrap,
+  StyledBsArrowReturnRight,
+  StyledExpandedRowTd,
+  StyledExpandedRowTr,
+  StyledGrid,
+  StyledNotesSection,
+  StyledNoteWrapper,
+  StyledPropRow,
+  StyledReferenceColumn,
+  StyledReferenceRow,
+  StyledReferenceSection,
+  StyledSpan,
   StyledSubRow,
 } from "./StatementListRowExpandedStyles";
 
@@ -25,14 +39,54 @@ export const StatementListRowExpanded: React.FC<StatementListRowExpanded> = ({
   visibleColumns,
   entities,
 }) => {
-  const renderListActant = (sActantId: string, key: number) => {
+  const renderReferenceRow = (
+    resourceId: string,
+    valueId: string,
+    key: number
+  ) => {
+    const resourceEntity: IEntity = entities[resourceId];
+    const valueEntity: IEntity = entities[valueId];
+
+    return (
+      <StyledReferenceRow key={key}>
+        {resourceEntity ? (
+          <StyledReferenceColumn marginRight>
+            <EntityTag
+              actant={resourceEntity}
+              tooltipPosition="bottom center"
+              fullWidth
+            />
+          </StyledReferenceColumn>
+        ) : (
+          <StyledReferenceColumn marginRight>
+            <EmptyTag label="resource" />
+          </StyledReferenceColumn>
+        )}
+        {valueEntity ? (
+          <StyledReferenceColumn>
+            <EntityTag
+              actant={valueEntity}
+              tooltipPosition="bottom center"
+              fullWidth
+            />
+          </StyledReferenceColumn>
+        ) : (
+          <StyledReferenceColumn>
+            <EmptyTag label="value" />
+          </StyledReferenceColumn>
+        )}
+      </StyledReferenceRow>
+    );
+  };
+  const renderListActant = (actantId: string, key: number) => {
     return (
       <React.Fragment key={key}>
-        {sActantId && (
+        {actantId && (
           <StyledActantWrap key={key}>
             <EntityTag
-              actant={entities[sActantId]}
+              actant={entities[actantId]}
               tooltipPosition="bottom center"
+              fullWidth
             />
           </StyledActantWrap>
         )}
@@ -40,173 +94,212 @@ export const StatementListRowExpanded: React.FC<StatementListRowExpanded> = ({
     );
   };
 
+  const renderEmptyActant = (label: string, key: number) => {
+    return (
+      <StyledActantWrap key={key}>
+        <EmptyTag label={label} />
+      </StyledActantWrap>
+    );
+  };
+
   const renderListActantWithProps = (
     actant: IEntity,
     sActant: IStatementAction | IStatementActant,
-    key: number
+    key: number,
+    emptyLabel: string
   ) => {
     return (
-      <StyledActantWrap key={key}>
-        {renderListActant(actant.id, key)}
+      <StyledActantWithPropsWrap key={key}>
+        {actant?.id
+          ? renderListActant(actant.id, key)
+          : renderEmptyActant(emptyLabel, key)}
         {renderFirstLevelProps(sActant.props)}
-      </StyledActantWrap>
+      </StyledActantWithPropsWrap>
     );
   };
 
   const renderFirstLevelProps = (props: IProp[]) => {
     return (
-      <StatementListRowExpandedPropGroup
-        level={1}
-        props={props}
-        entities={entities}
-        renderChildrenPropRow={renderSecondLevelProps}
-      />
+      <StyledGrid>
+        <StatementListRowExpandedPropGroup
+          level={1}
+          props={props}
+          entities={entities}
+          renderChildrenPropRow={renderSecondLevelProps}
+        />
+      </StyledGrid>
     );
   };
 
   const renderSecondLevelProps = (props: IProp[]) => {
     return (
-      <StatementListRowExpandedPropGroup
-        level={2}
-        props={props}
-        entities={entities}
-        renderChildrenPropRow={renderThirdLevelProps}
-      />
+      <StyledGrid>
+        <StatementListRowExpandedPropGroup
+          level={2}
+          props={props}
+          entities={entities}
+          renderChildrenPropRow={renderThirdLevelProps}
+        />
+      </StyledGrid>
     );
   };
 
   const renderThirdLevelProps = (props: IProp[]) => {
     return (
-      <StatementListRowExpandedPropGroup
-        level={3}
-        props={props}
-        entities={entities}
-      />
+      <StyledGrid>
+        <StatementListRowExpandedPropGroup
+          level={3}
+          props={props}
+          entities={entities}
+        />
+      </StyledGrid>
     );
   };
 
-  const renderRowSubComponent = React.useCallback(({ row }) => {
-    const {
-      actions,
-      actants,
-      text,
-      references,
-      tags: tagIds,
-    }: {
-      actions: IStatementAction[];
-      actants: IStatementActant[];
-      text: string;
-      references: IStatementReference[];
-      tags: string[];
-    } = row.original.data;
+  const renderRowSubComponent = React.useCallback(
+    ({ row }) => {
+      const {
+        actions,
+        actants,
+        text,
+        tags: tagIds,
+      }: {
+        actions: IStatementAction[];
+        actants: IStatementActant[];
+        text: string;
+        tags: string[];
+      } = row.original.data;
 
-    const { notes }: { notes: string[] } = row.original;
+      const { notes }: { notes: string[] } = row.original;
 
-    // ACTIONS
-    const actionObjects = actions.map(
-      (sAction: IStatementAction, key: number) => {
-        const action = entities[sAction.action];
-        return { key, data: { sAction, action } };
-      }
-    );
+      // ACTIONS
+      const actionObjects = actions.map(
+        (sAction: IStatementAction, key: number) => {
+          const action = entities[sAction.action];
+          return { key, data: { sAction, action } };
+        }
+      );
 
-    // SUBJECTS
-    const subjectObjects = actants
-      .filter((a: IStatementActant) => a.position === "s")
-      .map((sSubject: IStatementActant, key) => {
-        const subject = entities[sSubject.actant];
-        return { key, data: { sSubject, subject } };
-      });
+      // SUBJECTS
+      const subjectObjects = actants
+        .filter((a: IStatementActant) => a.position === "s")
+        .map((sSubject: IStatementActant, key) => {
+          const subject = entities[sSubject.actant];
+          return { key, data: { sSubject, subject } };
+        });
 
-    // ACTANTS
-    const actantObjects = actants
-      .filter((a: IStatementActant) => a.position !== "s")
-      .map((sActant: IStatementActant, key: number) => {
-        const actant = entities[sActant.actant];
-        return {
-          key,
-          data: {
-            sActant,
-            actant,
-          },
-        };
-      });
+      // ACTANTS
+      const actantObjects = actants
+        .filter((a: IStatementActant) => a.position !== "s")
+        .map((sActant: IStatementActant, key: number) => {
+          const actant = entities[sActant.actant];
+          return {
+            key,
+            data: {
+              sActant,
+              actant,
+            },
+          };
+        });
 
-    // REFERENCES
-    const referenceObjects: IEntity[] = references.map(
-      (r: any) => entities[r.resource]
-    );
+      // REFERENCES
+      const references: IReference[] = row.original.references;
 
-    // TAGS
-    const tagObjects: IEntity[] = tagIds.map((t) => entities[t]);
+      // TAGS
+      const tagObjects: IEntity[] = tagIds.map((t) => entities[t]);
 
-    return (
-      <>
-        <StyledSubRow id={`statement${row.values.id}`}>
-          <b>text</b>
-          {text}
-          <br />
-          <b>actions</b>
-          <StyledActantGroup>
-            {actionObjects.map((action, key) =>
-              renderListActantWithProps(
-                action.data.action,
-                action.data.sAction,
-                key
-              )
-            )}
-          </StyledActantGroup>
-          <br />
-          <b>subjects</b>
-          <StyledActantGroup>
-            {subjectObjects.map((actant, key) =>
-              renderListActantWithProps(
-                actant.data.subject,
-                actant.data.sSubject,
-                key
-              )
-            )}
-          </StyledActantGroup>
-          <br />
-          <b>actants</b>
-          <StyledActantGroup>
-            {actantObjects.map((actant, key) =>
-              renderListActantWithProps(
-                actant.data.actant,
-                actant.data.sActant,
-                key
-              )
-            )}
-          </StyledActantGroup>
-          <br />
-          <b>references</b>
-          {referenceObjects.map((reference, key) =>
-            renderListActant(reference.id, key)
-          )}
-          <br />
-          <b>tags</b>
-          {tagObjects.map((tag, key) => renderListActant(tag.id, key))}
-          <br />
-          <b>notes</b>
-          <br />
-          {notes.map((note: string, key: number) => {
-            return (
-              <p key={key}>
-                {note}
-                <br />
-              </p>
-            );
-          })}
-        </StyledSubRow>
-      </>
-    );
-  }, []);
+      return (
+        <>
+          <StyledSubRow id={`statement${row.values.id}`}>
+            <br />
+            <StyledGrid>
+              {actionObjects.map((action, key) => (
+                <StyledPropRow key={key}>
+                  <StyledBsArrowReturnRight size="20" />
+                  <StyledSpan>&nbsp;&nbsp;(action)&nbsp;&nbsp;</StyledSpan>
+                  {renderListActantWithProps(
+                    action.data.action,
+                    action.data.sAction,
+                    key,
+                    "action"
+                  )}
+                </StyledPropRow>
+              ))}
+            </StyledGrid>
+            <StyledGrid>
+              {subjectObjects.map((actant, key) => (
+                <StyledPropRow key={key}>
+                  <StyledBsArrowReturnRight size="20" />
+                  <StyledSpan>&nbsp;&nbsp;(subject)&nbsp;&nbsp;</StyledSpan>
+                  {renderListActantWithProps(
+                    actant.data.subject,
+                    actant.data.sSubject,
+                    key,
+                    actantPositionDict[Position.Subject].label
+                  )}
+                </StyledPropRow>
+              ))}
+            </StyledGrid>
+            <StyledGrid>
+              {actantObjects.map((actant, key) => (
+                <StyledPropRow key={key}>
+                  <StyledBsArrowReturnRight size="20" />
+                  <StyledSpan>&nbsp;&nbsp;(actant)&nbsp;&nbsp;</StyledSpan>
+                  {renderListActantWithProps(
+                    actant.data.actant,
+                    actant.data.sActant,
+                    key,
+                    actantPositionDict[actant.data.sActant.position]?.label
+                  )}
+                </StyledPropRow>
+              ))}
+            </StyledGrid>
+            <StyledReferenceSection>
+              {references.map((reference, key) => (
+                <StyledGrid key={key}>
+                  <StyledPropRow key={key}>
+                    <StyledBsArrowReturnRight size="20" />
+                    <StyledSpan>&nbsp;&nbsp;(reference)&nbsp;&nbsp;</StyledSpan>
+                    {renderReferenceRow(
+                      reference.resource,
+                      reference.value,
+                      key
+                    )}
+                  </StyledPropRow>
+                </StyledGrid>
+              ))}
+            </StyledReferenceSection>
+            <StyledGrid>
+              {tagObjects.map((tag, key) => (
+                <StyledPropRow key={key} disableBottomMargin>
+                  <StyledBsArrowReturnRight size="20" />
+                  <StyledSpan>&nbsp;&nbsp;(tag)&nbsp;&nbsp;</StyledSpan>
+                  {renderListActant(tag.id, key)}
+                </StyledPropRow>
+              ))}
+            </StyledGrid>
+            <StyledNotesSection>
+              {notes.map((note: string, key: number) => {
+                return (
+                  <StyledNoteWrapper key={key}>
+                    <StyledSpan>(note)</StyledSpan>
+                    <p key={key}>{note}</p>
+                  </StyledNoteWrapper>
+                );
+              })}
+            </StyledNotesSection>
+          </StyledSubRow>
+        </>
+      );
+    },
+    [row]
+  );
 
   return (
-    <tr>
-      <td colSpan={visibleColumns.length + 1}>
+    <StyledExpandedRowTr>
+      <StyledExpandedRowTd colSpan={visibleColumns.length + 1}>
         {renderRowSubComponent({ row })}
-      </td>
-    </tr>
+      </StyledExpandedRowTd>
+    </StyledExpandedRowTr>
   );
 };

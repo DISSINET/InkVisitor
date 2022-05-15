@@ -33,13 +33,6 @@
             ],
             "type": "string"
         },
-        "EntityReferenceSource": {
-            "enum": [
-                "geonames",
-                "wordnet"
-            ],
-            "type": "string"
-        },
         "EntityStatus": {
             "enum": [
                 "0",
@@ -48,27 +41,6 @@
                 "3"
             ],
             "type": "string"
-        },
-        "IEntityReference": {
-            "additionalProperties": false,
-            "defaultProperties": [],
-            "properties": {
-                "id": {
-                    "type": "string"
-                },
-                "source": {
-                    "$ref": "IValue#/definitions/EntityReferenceSource"
-                },
-                "value": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "id",
-                "source",
-                "value"
-            ],
-            "type": "object"
         },
         "IProp": {
             "additionalProperties": false,
@@ -177,12 +149,36 @@
             ],
             "type": "object"
         },
+        "IReference": {
+            "additionalProperties": false,
+            "defaultProperties": [],
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "resource": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "id",
+                "resource",
+                "value"
+            ],
+            "type": "object"
+        },
         "Language": {
             "enum": [
                 "",
                 "ces",
+                "deu",
                 "eng",
                 "enm",
+                "fra",
+                "ita",
                 "lat",
                 "oci"
             ],
@@ -290,7 +286,7 @@
         },
         "references": {
             "items": {
-                "$ref": "IValue#/definitions/IEntityReference"
+                "$ref": "IValue#/definitions/IReference"
             },
             "type": "array"
         },

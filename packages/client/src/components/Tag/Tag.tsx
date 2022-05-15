@@ -6,12 +6,11 @@ import {
   DropTargetMonitor,
   useDrag,
   useDrop,
-  XYCoord,
 } from "react-dnd";
 import { PopupPosition } from "reactjs-popup/dist/types";
 import { setDraggedTerritory } from "redux/features/territoryTree/draggedTerritorySlice";
-import { useAppDispatch } from "redux/hooks";
-import { DragItem, Entities, ItemTypes } from "types";
+import { useAppDispatch, useAppSelector } from "redux/hooks";
+import { DraggedTerritoryItem, DragItem, Entities, ItemTypes } from "types";
 import { dndHoverFn } from "utils";
 import {
   ButtonWrapper,
@@ -28,7 +27,7 @@ interface TagProps {
   label?: string;
   tooltipDetail?: string;
   tooltipText?: string;
-  category: string;
+  category?: string;
   status?: string;
   ltype?: string;
   mode?: "selected" | "disabled" | "invalid" | false;
@@ -39,12 +38,14 @@ interface TagProps {
   fullWidth?: boolean;
   index?: number;
   moveFn?: (dragIndex: number, hoverIndex: number) => void;
-  enableTooltip?: boolean;
+  disableTooltip?: boolean;
+  disableDoubleClick?: boolean;
   tooltipPosition?: PopupPosition | PopupPosition[];
   updateOrderFn?: (item: DragItem) => void;
   lvl?: number;
   statementsCount?: number;
   isFavorited?: boolean;
+  isTemplate?: boolean;
   disabled?: boolean;
 }
 
@@ -54,7 +55,7 @@ export const Tag: React.FC<TagProps> = ({
   label = "",
   tooltipDetail,
   tooltipText,
-  category = "T",
+  category = "X",
   status = "1",
   ltype = "1",
   mode = false,
@@ -66,21 +67,26 @@ export const Tag: React.FC<TagProps> = ({
   index = -1,
   moveFn,
   tooltipPosition = "right top",
-  enableTooltip = true,
+  disableTooltip = false,
+  disableDoubleClick = false,
   updateOrderFn = () => {},
   statementsCount,
   isFavorited = false,
+  isTemplate = false,
   lvl,
 }) => {
   const { setDetailId } = useSearchParams();
   const dispatch = useAppDispatch();
+  const draggedTerritory: DraggedTerritoryItem = useAppSelector(
+    (state) => state.territoryTree.draggedTerritory
+  );
 
   const ref = useRef<HTMLDivElement>(null);
 
   const [, drop] = useDrop({
     accept: ItemTypes.TAG,
     hover(item: DragItem, monitor: DropTargetMonitor) {
-      if (moveFn) {
+      if (moveFn && draggedTerritory && draggedTerritory.lvl === lvl) {
         dndHoverFn(item, index, monitor, ref, moveFn);
       }
     },
@@ -94,6 +100,7 @@ export const Tag: React.FC<TagProps> = ({
     end: (item: DragItem | undefined, monitor: DragSourceMonitor) => {
       if (item && item.index !== index) updateOrderFn(item);
     },
+    canDrag: category !== "X",
   });
 
   useEffect(() => {
@@ -107,7 +114,7 @@ export const Tag: React.FC<TagProps> = ({
   drag(drop(ref));
 
   const renderEntityTag = () => (
-    <StyledEntityTag color={Entities[category].color}>
+    <StyledEntityTag color={Entities[category].color} isTemplate={isTemplate}>
       {category}
     </StyledEntityTag>
   );
@@ -119,7 +126,7 @@ export const Tag: React.FC<TagProps> = ({
     e.stopPropagation();
     e.nativeEvent.stopImmediatePropagation();
 
-    setDetailId(propId);
+    !disableDoubleClick && setDetailId(propId);
   };
 
   const getShortTag = () => {
@@ -135,6 +142,7 @@ export const Tag: React.FC<TagProps> = ({
         <StyledTooltipSeparator>
           <StyledTagWrapper
             ref={ref}
+            isEmpty={category === "X"}
             status={status}
             ltype={ltype}
             borderStyle={borderStyle}
@@ -174,7 +182,7 @@ export const Tag: React.FC<TagProps> = ({
             label={label}
             detail={tooltipDetail}
             text={tooltipText}
-            disabled={!enableTooltip}
+            disabled={disableTooltip}
             position={tooltipPosition}
             tagTooltip
             itemsCount={statementsCount}
@@ -182,6 +190,7 @@ export const Tag: React.FC<TagProps> = ({
             <StyledTooltipSeparator>
               <StyledTagWrapper
                 ref={ref}
+                isEmpty={category === "X"}
                 borderStyle={borderStyle}
                 status={status}
                 ltype={ltype}
@@ -197,7 +206,13 @@ export const Tag: React.FC<TagProps> = ({
                   fullWidth={fullWidth}
                   isFavorited={isFavorited}
                 >
-                  {label ? label : <StyledItalic>{"no label"}</StyledItalic>}
+                  {!label ? (
+                    <StyledItalic>{"no label"}</StyledItalic>
+                  ) : category === "X" ? (
+                    <StyledItalic>{label}</StyledItalic>
+                  ) : (
+                    label
+                  )}
                 </StyledLabel>
 
                 {button && renderButton()}

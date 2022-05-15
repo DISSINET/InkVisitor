@@ -2,6 +2,11 @@
 # purpose: to test import to rethinkDB because of import.ts problems on windows platforms
 ##########################################################################################
 
+# this script is obsolete, it does not correspond to latest db development, use import.ts
+print("This script is obsolete, it does not correspond to latest db development, use import.ts")
+exit(-1)
+
+
 import sys, bcrypt, json
 from rethinkdb import RethinkDB
 from dotenv import dotenv_values
@@ -132,6 +137,67 @@ datasets = {"all": [
     "name": "audits",
     "datafile": "datasets/all-test/audits.json",
   },
+],"all-parsed":[
+  {
+    "name": "acl_permissions",
+    "datafile": "datasets/all-parsed/acl_permissions.json",
+  },
+  {
+    "name": "entities",
+    "datafile": "datasets/all-parsed/entities.json",
+    "indexes": [
+      r.table("entities").index_create("class"),
+      r.table("entities").index_create("label"),
+      r
+        .table("entities")
+        .index_create(
+        "data.actants.actant",
+        r.row["data"]["actants"]["actant"]
+      ),
+      r
+        .table("entities")
+        .index_create(
+        "data.actions.action",
+        r.row["data"]["actions"]["action"]
+      ),
+      r.table("actants").index_create("data.tags", r.row["data"]["tags"]),
+      r
+        .table("entities")
+        .index_create(
+        "data.props.type.id",
+        r.row["data"]["props"]["type"]["id"]
+      ),
+      r
+        .table("entities")
+        .index_create(
+        "data.props.value.id",
+        r.row["data"]["props"]["value"]["id"]
+      ),
+      r
+        .table("entities")
+        .index_create(
+        "data.references.resource",
+        r.row["data"]["references"]["resource"]
+      ),
+      r
+        .table("entities")
+        .index_create("data.props.origin", r.row["data"]["props"]["origin"]),
+      r
+        .table("entities")
+        .index_create("data.territory.id", r.row["data"]["territory"]["id"]),
+      r
+        .table("entities")
+        .index_create("data.parent.id", r.row["data"]["parent"]["id"]),
+    ],
+  },
+  {
+    "name": "users",
+    "datafile": "datasets/all-parsed/users.json",
+  },
+  {
+    "name": "audits",
+    "datafile": "datasets/all-parsed/audits.json",
+  },
 ]
 }
 
@@ -159,7 +225,7 @@ conn = None
 
 try:
 
-  conn = r.connect(config["host"], config["port"])
+  conn = r.connect(config["host"], config["port"], config["db"], config["password"])
   # set default database
   conn.use(config["db"])
 

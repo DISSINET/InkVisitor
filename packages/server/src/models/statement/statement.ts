@@ -2,8 +2,8 @@ import {
   IStatement,
   IStatementData,
   IStatementActant,
-  IStatementReference,
   IStatementAction,
+  IReference,
 } from "@shared/types";
 import {
   fillFlatObject,
@@ -24,6 +24,7 @@ import {
   Operator,
   UserRole,
   UserRoleMode,
+  DbIndex,
 } from "@shared/enums";
 
 import Entity from "@models/entity/entity";
@@ -33,6 +34,7 @@ import User from "@models/user/user";
 import { EventMapSingle, EventTypes } from "@models/events/types";
 import treeCache from "@service/treeCache";
 import Prop from "@models/prop/prop";
+import e from "express";
 
 export class StatementActant implements IStatementActant, IModel {
   id = "";
@@ -56,29 +58,6 @@ export class StatementActant implements IStatementActant, IModel {
 
     fillFlatObject(this, data);
     fillArray<Prop>(this.props, Prop, data.props);
-  }
-
-  /**
-   * predicate for valid data content
-   * @returns boolean result
-   */
-  isValid(): boolean {
-    return true;
-  }
-}
-
-export class StatementReference implements IStatementReference, IModel {
-  id = "";
-  resource = "";
-  part = "";
-  type = "";
-
-  constructor(data: UnknownObject) {
-    if (!data) {
-      return;
-    }
-
-    fillFlatObject(this, data);
   }
 
   /**
@@ -154,10 +133,9 @@ export class StatementAction implements IStatementAction {
 
 export class StatementData implements IModel, IStatementData {
   text = "";
-  territory = new StatementTerritory({});
+  territory? = new StatementTerritory({});
   actions: StatementAction[] = [];
   actants: StatementActant[] = [];
-  references: StatementReference[] = [];
   tags: string[] = [];
 
   constructor(data: UnknownObject) {
@@ -166,15 +144,16 @@ export class StatementData implements IModel, IStatementData {
     }
 
     fillFlatObject(this, data);
-    this.territory = new StatementTerritory(data.territory as UnknownObject);
+    if (data.territory) {
+      this.territory = new StatementTerritory(data.territory as UnknownObject);
+    } else {
+      delete this.territory;
+    }
     fillArray<StatementAction>(this.actions, StatementAction, data.actions);
     fillArray<StatementActant>(this.actants, StatementActant, data.actants);
-    fillArray<StatementReference>(
-      this.references,
-      StatementReference,
-      data.references
-    );
 
+    if (data.territory) {
+    }
     // fill array uses constructors - which string[] cannot use (will create an
     // object instead of string type)
     if (data.tags) {
@@ -189,7 +168,7 @@ export class StatementData implements IModel, IStatementData {
    * @returns boolean result
    */
   isValid(): boolean {
-    if (!this.territory.isValid()) {
+    if ("territory" in this && !this.territory?.isValid()) {
       return false;
     }
     if (this.actions.find((a) => !a.isValid())) {
@@ -198,17 +177,12 @@ export class StatementData implements IModel, IStatementData {
     if (this.actants.find((a) => !a.isValid())) {
       return false;
     }
-    if (this.references.find((r) => !r.isValid())) {
-      return false;
-    }
 
     return true;
   }
 }
 
 class Statement extends Entity implements IStatement {
-  static publicFields = Entity.publicFields;
-
   class: EntityClass.Statement = EntityClass.Statement;
   data: StatementData;
 
@@ -241,22 +215,28 @@ class Statement extends Entity implements IStatement {
     }
 
     // editors should be able to access META statements
-    if (user.role === UserRole.Editor && this.data.territory.id === "T0") {
+    if (
+      user.role === UserRole.Editor &&
+      this.data.territory &&
+      this.data.territory.id === "T0"
+    ) {
       return true;
     }
 
-    const closestRight = treeCache.getRightForTerritory(
-      this.data.territory.id,
-      user.rights
-    );
-    if (!closestRight) {
-      return false;
+    if (this.data.territory) {
+      const closestRight = treeCache.getRightForTerritory(
+        this.data.territory.id,
+        user.rights
+      );
+      if (!closestRight) {
+        return false;
+      }
+      return (
+        closestRight.mode === UserRoleMode.Admin ||
+        closestRight.mode === UserRoleMode.Write
+      );
     }
-
-    return (
-      closestRight.mode === UserRoleMode.Admin ||
-      closestRight.mode === UserRoleMode.Write
-    );
+    return true;
   }
 
   canBeViewedByUser(user: User): boolean {
@@ -265,10 +245,14 @@ class Statement extends Entity implements IStatement {
       return true;
     }
 
-    return !!treeCache.getRightForTerritory(
-      this.data.territory.id,
-      user.rights
-    );
+    if (this.data.territory) {
+      return !!treeCache.getRightForTerritory(
+        this.data.territory.id,
+        user.rights
+      );
+    } else {
+      return true;
+    }
   }
 
   canBeDeletedByUser(user: User): boolean {
@@ -287,10 +271,12 @@ class Statement extends Entity implements IStatement {
    */
   async save(db: Connection | undefined): Promise<WriteResult> {
     const siblings = await this.findTerritorySiblings(db);
-    this.data.territory.order = Entity.determineOrder(
-      this.data.territory.order,
-      siblings
-    );
+    if (this.data.territory) {
+      this.data.territory.order = Entity.determineOrder(
+        this.data.territory.order,
+        siblings
+      );
+    }
 
     const res = await super.save(db);
 
@@ -310,7 +296,11 @@ class Statement extends Entity implements IStatement {
     db: Connection | undefined,
     updateData: Record<string, unknown>
   ): Promise<WriteResult> {
-    if (updateData["data"] && (updateData["data"] as any).territory) {
+    if (
+      updateData["data"] &&
+      (updateData["data"] as any).territory &&
+      this.data.territory
+    ) {
       const territoryData = (updateData["data"] as any).territory;
       if (territoryData.id) {
         this.data.territory.id = territoryData.id;
@@ -350,27 +340,27 @@ class Statement extends Entity implements IStatement {
   async findTerritorySiblings(
     db: Connection | undefined
   ): Promise<Record<number, IStatement>> {
-    const list: IStatement[] = await rethink
-      .table(Entity.table)
-      .filter({
-        class: EntityClass.Statement,
-      })
-      .filter((entry: RDatum) => {
-        return rethink.and(
-          entry("data")("territory")("id").eq(this.data.territory.id),
-          entry("id").ne(this.id)
-        );
-      })
-      .run(db);
+    if (this.data.territory) {
+      const list: IStatement[] = await rethink
+        .table(Entity.table)
+        .getAll(this.data.territory.id, { index: DbIndex.StatementTerritory })
+        .run(db);
 
-    const out: Record<number, IStatement> = {};
-    for (const ter of list) {
-      if (ter.data.territory) {
-        out[ter.data.territory.order] = ter;
+      const out: Record<number, IStatement> = {};
+
+      for (const ter of list) {
+        if (ter.id === this.id) {
+          continue;
+        }
+        if (ter.data.territory) {
+          out[ter.data.territory.order] = ter;
+        }
       }
-    }
 
-    return out;
+      return out;
+    } else {
+      return [];
+    }
   }
 
   /**
@@ -403,10 +393,14 @@ class Statement extends Entity implements IStatement {
       });
     });
 
-    entitiesIds[this.data.territory.id] = null;
+    if (this.data.territory) {
+      entitiesIds[this.data.territory.id] = null;
+    }
 
-    this.data.references.forEach((p) => {
-      entitiesIds[p.resource] = null;
+    Entity.extractIdsFromReferences(this.references).forEach((element) => {
+      if (element) {
+        entitiesIds[element] = null;
+      }
     });
 
     this.data.tags.forEach((t) => (entitiesIds[t] = null));
@@ -448,6 +442,16 @@ class Statement extends Entity implements IStatement {
       data: { actions: this.data.actions },
     });
     return !!result.replaced;
+  }
+
+  static extractIdsFromReference(references: IReference[]): string[] {
+    let out: string[] = [];
+    for (const reference of references) {
+      out.push(reference.resource);
+      out.push(reference.value);
+    }
+
+    return out;
   }
 
   /**
@@ -506,25 +510,28 @@ class Statement extends Entity implements IStatement {
   ): Promise<IStatement[]> {
     const statements = await rethink
       .table(Entity.table)
-      .filter({
-        class: EntityClass.Statement,
-      })
-      .filter((row: RDatum) => {
-        return rethink.or(
-          row("data")("actions").contains((entry: RDatum) =>
-            entry("action").eq(entityId)
-          ),
-          row("data")("actants").contains((entry: RDatum) =>
-            entry("actant").eq(entityId)
-          ),
-          row("data")("tags").contains(entityId)
-        );
-      })
+      .getAll(entityId, { index: DbIndex.StatementEntities })
       .run(db);
 
     return statements.sort((a, b) => {
       return a.data.territory.order - b.data.territory.order;
     });
+  }
+
+  static async findUsedInDataEntitiesIds(
+    db: Connection | undefined,
+    entityId: string
+  ): Promise<string[]> {
+    const statements = await Statement.findUsedInDataEntities(db, entityId);
+
+    const entityIds: string[] = [];
+
+    (statements as IStatement[]).forEach((s) => {
+      const ids = s.data.actants.map((a) => a.actant);
+      entityIds.push(...ids);
+    });
+
+    return entityIds;
   }
 
   /**

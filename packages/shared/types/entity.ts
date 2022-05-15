@@ -1,10 +1,6 @@
 import { IProp } from ".";
-import {
-  EntityClass,
-  EntityReferenceSource,
-  EntityStatus,
-  Language,
-} from "../enums";
+import { EntityClass, EntityStatus, Language } from "../enums";
+import { IReference } from "./reference";
 
 export interface IEntity {
   id: string;
@@ -17,14 +13,8 @@ export interface IEntity {
   language: Language;
   notes: string[];
   props: IProp[];
-  references: IEntityReference[];
+  references: IReference[];
   isTemplate?: boolean;
-  usedTemplate?: boolean;
+  usedTemplate?: string;
   templateData?: object;
-}
-
-export interface IEntityReference {
-  id: string;
-  source: EntityReferenceSource;
-  value: string;
 }

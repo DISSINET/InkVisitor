@@ -28,6 +28,9 @@ const GlobalStyle = createGlobalStyle`
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
+  *:not(input,textarea) {
+    user-select: none;
+  }
   h1 {
     font-size: ${({ theme }) => theme.fontSize["4xl"]};
     line-height: 1.3;

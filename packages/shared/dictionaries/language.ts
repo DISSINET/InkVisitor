@@ -7,4 +7,7 @@ export const languageDict = [
   { label: "Middle English", value: Language.MiddleEnglish },
   { label: "Occitan", value: Language.Occitan },
   { label: "Czech", value: Language.Czech },
+  { label: "Italian", value: Language.Italian },
+  { label: "French", value: Language.French },
+  { label: "German", value: Language.German },
 ];

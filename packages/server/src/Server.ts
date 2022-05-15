@@ -10,6 +10,7 @@ import UsersRouter from "@modules/users";
 import AclRouter from "@modules/acl";
 import StatementsRouter from "@modules/statements";
 import TreeRouter from "@modules/tree";
+import StatsRouter from "@modules/stats";
 import Acl from "@middlewares/acl";
 import customizeRequest from "@middlewares/request";
 import dbMiddleware from "@middlewares/db";
@@ -72,6 +73,7 @@ routerV1.use("/audits", AuditsRouter);
 routerV1.use("/territories", TerritoriesRouter);
 routerV1.use("/statements", StatementsRouter);
 routerV1.use("/tree", TreeRouter);
+routerV1.use("/stats", StatsRouter);
 
 // unknown paths (after jwt check) should return 404
 server.all("*", catchAll);

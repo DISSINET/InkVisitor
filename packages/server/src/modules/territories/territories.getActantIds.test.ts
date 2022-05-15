@@ -25,7 +25,7 @@ describe("Territories getEntityIds", () => {
     await db.close();
   });
 
-  describe("one territory, two linked statement via references.resource and tags at once", () => {
+  describe("one territory, two linked statement via territory.id and tags at once", () => {
     it("should return empty array", async (done) => {
       const territory = new Territory(undefined);
       await territory.save(db.connection);
@@ -36,14 +36,7 @@ describe("Territories getEntityIds", () => {
       );
       statementData1.data.territory = { id: territory.id, order: 0 };
       statementData1.data.tags = ["tagid"];
-      statementData1.data.references = [
-        {
-          id: "",
-          part: "",
-          resource: "refid",
-          type: "",
-        },
-      ];
+
       // second statement is the same - should not duplicate ids
       const statementData2: IStatement = JSON.parse(
         JSON.stringify(statementData1)

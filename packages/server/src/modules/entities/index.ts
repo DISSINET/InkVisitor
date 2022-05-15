@@ -2,11 +2,7 @@ import { mergeDeep } from "@common/functions";
 import { ResponseEntity, ResponseEntityDetail } from "@models/entity/response";
 import Audit from "@models/audit/audit";
 import { getEntityClass } from "@models/factory";
-import {
-  filterEntitiesByWildcard,
-  findEntityById,
-  findAssociatedEntityIds,
-} from "@service/shorthands";
+import { filterEntitiesByWildcard, findEntityById } from "@service/shorthands";
 import { EntityClass } from "@shared/enums";
 import {
   IEntity,
@@ -25,6 +21,8 @@ import {
 } from "@shared/types/errors";
 import { Request, Router } from "express";
 import { asyncRouteHandler } from "../index";
+import Statement from "@models/statement/statement";
+import { isConstructorDeclaration } from "typescript";
 
 export default Router()
   .get(
@@ -62,9 +60,15 @@ export default Router()
       const label = request.body.label;
       const classParam = request.body.class;
       const excluded: EntityClass[] = request.body.excluded;
+      const onlyTemplates: undefined | boolean = request.body.onlyTemplates;
+      const usedTemplate: undefined | string = request.body.usedTemplate;
 
-      if (!label && !classParam) {
+      if (!label && !classParam && !onlyTemplates && !usedTemplate) {
         throw new BadParams("label or class has to be set");
+      }
+
+      if (label && label.length < 2) {
+        return [];
       }
 
       if (
@@ -78,12 +82,15 @@ export default Router()
         request.db,
         classParam,
         excluded,
-        label
+        label,
+        undefined,
+        onlyTemplates,
+        usedTemplate
       );
 
       const responses: IResponseEntity[] = [];
-      for (const entity of entities) {
-        const response = new ResponseEntity(entity);
+      for (const entityData of entities) {
+        const response = new ResponseEntity(getEntityClass(entityData));
         await response.prepare(request);
         responses.push(response);
       }
@@ -260,7 +267,7 @@ export default Router()
     "/search",
     asyncRouteHandler<IResponseSearch[]>(async (httpRequest: Request) => {
       const req = new RequestSearch(httpRequest.body);
-      if (req.label && req.label.length < 4) {
+      if (req.label && req.label.length < 2) {
         return [];
       }
 
@@ -271,8 +278,8 @@ export default Router()
 
       let associatedEntityIds: string[] | undefined = undefined;
       if (req.entityId) {
-        associatedEntityIds = await findAssociatedEntityIds(
-          httpRequest.db,
+        associatedEntityIds = await Statement.findUsedInDataEntitiesIds(
+          httpRequest.db.connection,
           req.entityId
         );
 

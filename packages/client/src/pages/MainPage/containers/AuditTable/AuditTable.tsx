@@ -13,7 +13,7 @@ import {
 } from "./AuditTableStyles";
 
 export const AuditTable: React.FC<IResponseAudit> = ({
-  actant,
+  entity,
   last,
   first,
 }) => {
@@ -40,7 +40,7 @@ type IAuditTableRow = { mode: "edit" | "create" } & IAudit;
 
 export const AuditTableRow: React.FC<IAuditTableRow> = ({
   id,
-  actantId,
+  entityId,
   user,
   date,
   changes,
@@ -70,10 +70,18 @@ export const AuditTableRow: React.FC<IAuditTableRow> = ({
 
   const today = new Date().setHours(0, 0, 0, 0);
 
-  const prettyDate =
-    today === new Date(date).setHours(0, 0, 0, 0)
-      ? "today"
-      : new Date(date).toLocaleDateString("en-GB");
+  const getPrettyDate = () => {
+    if (today === new Date(date).setHours(0, 0, 0, 0)) {
+      return "today";
+    } else {
+      const newDate = new Date(date);
+      // TODO: use toLocaleString
+      return `${newDate.getFullYear()}-${
+        newDate.getMonth() + 1
+      }-${newDate.getDate()}`;
+    }
+  };
+
   const prettyTime = new Date(date).toLocaleTimeString("en-GB");
 
   return (
@@ -85,7 +93,7 @@ export const AuditTableRow: React.FC<IAuditTableRow> = ({
         </StyledAuditColumn>
         <StyledAuditColumn>
           <FaRegCalendarAlt />
-          {prettyDate}
+          {getPrettyDate()}
         </StyledAuditColumn>
         <StyledAuditColumn>
           <RiTimeLine />

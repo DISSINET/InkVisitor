@@ -1,25 +1,25 @@
 import {
+  certaintyDict,
   elvlDict,
   logicDict,
   moodDict,
   moodVariantsDict,
-  virtualityDict,
-  partitivityDict,
   operatorDict,
-  certaintyDict,
+  partitivityDict,
+  virtualityDict,
 } from "@shared/dictionaries";
 import {
+  Certainty,
   Elvl,
   Logic,
   Mood,
   MoodVariant,
-  Virtuality,
-  Partitivity,
   Operator,
-  Certainty,
+  Partitivity,
+  Virtuality,
 } from "@shared/enums";
 import React from "react";
-import { GroupName, AttributeData, AttributeName } from "types";
+import { AttributeData, AttributeName, GroupName } from "types";
 import { AttributeRow } from "./AttributeRow/AttributeRow";
 import { CheckboxRow } from "./CheckboxRow/CheckboxRow";
 
@@ -87,6 +87,7 @@ export const AttributesForm: React.FC<AttributesForm> = ({
     }
     setNewModalData(newModalData, groupName);
   };
+
   return (
     <div>
       {modalData.elvl && (
@@ -95,7 +96,6 @@ export const AttributesForm: React.FC<AttributesForm> = ({
             disabledAllAttributes || disabledAttributes.includes("elvl")
           }
           value={modalData.elvl}
-          multi={false}
           items={elvlDict}
           label="Epistemic level"
           onChangeFn={(newValue: string | string[]) => {
@@ -110,7 +110,6 @@ export const AttributesForm: React.FC<AttributesForm> = ({
             disabledAllAttributes || disabledAttributes.includes("logic")
           }
           value={modalData.logic}
-          multi={false}
           items={logicDict}
           label="Logic"
           attributeName="logic"
@@ -140,7 +139,6 @@ export const AttributesForm: React.FC<AttributesForm> = ({
             disabledAllAttributes || disabledAttributes.includes("moodvariant")
           }
           value={modalData.moodvariant}
-          multi={false}
           items={moodVariantsDict}
           label="Mood Variant"
           attributeName="moodvariant"
@@ -155,7 +153,6 @@ export const AttributesForm: React.FC<AttributesForm> = ({
             disabledAllAttributes || disabledAttributes.includes("virtuality")
           }
           value={modalData.virtuality}
-          multi={false}
           items={virtualityDict}
           label="Virtuality"
           attributeName="virtuality"
@@ -170,7 +167,6 @@ export const AttributesForm: React.FC<AttributesForm> = ({
             disabledAllAttributes || disabledAttributes.includes("partitivity")
           }
           value={modalData.partitivity}
-          multi={false}
           items={partitivityDict}
           label="Partitivity"
           attributeName="partitivity"
@@ -186,7 +182,6 @@ export const AttributesForm: React.FC<AttributesForm> = ({
             disabledAttributes.includes("bundleOperator")
           }
           value={modalData.bundleOperator}
-          multi={false}
           items={operatorDict}
           label="Logical Operator"
           attributeName="bundleOperator"
@@ -227,7 +222,6 @@ export const AttributesForm: React.FC<AttributesForm> = ({
             disabledAllAttributes || disabledAttributes.includes("certainty")
           }
           value={modalData.certainty}
-          multi={false}
           items={certaintyDict}
           label="Certainty"
           attributeName="certainty"

@@ -1,9 +1,9 @@
 import {
-  EntityStatus,
   EntityClass,
+  EntityExtension,
+  EntityStatus,
   UserRole,
   UserRoleMode,
-  EntityExtension,
 } from "@shared/enums";
 import { IEntity, IOption } from "@shared/types";
 import api from "api";
@@ -15,15 +15,14 @@ import { DragObjectWithType } from "react-dnd";
 import { FaHome } from "react-icons/fa";
 import { useMutation, useQuery, useQueryClient } from "react-query";
 import { OptionTypeBase, ValueType } from "react-select";
-import { toast } from "react-toastify";
-import { DropdownAny, rootTerritoryId } from "Theme/constants";
+import { DropdownAny, rootTerritoryId, wildCardChar } from "Theme/constants";
 import { Entities } from "types";
 
 interface EntitySuggesterI {
   categoryTypes: EntityClass[];
   onSelected: Function;
   placeholder?: string;
-  allowCreate?: boolean;
+  disableCreate?: boolean;
   disableWildCard?: boolean;
   inputWidth?: number | "full";
   openDetailOnCreate?: boolean;
@@ -37,7 +36,7 @@ export const EntitySuggester: React.FC<EntitySuggesterI> = ({
   categoryTypes,
   onSelected,
   placeholder = "",
-  allowCreate,
+  disableCreate,
   inputWidth,
   disableWildCard = false,
   openDetailOnCreate = false,
@@ -65,7 +64,7 @@ export const EntitySuggester: React.FC<EntitySuggesterI> = ({
     ["suggestion", debouncedTyped, selectedCategory],
     async () => {
       const resSuggestions = await api.entitiesGetMore({
-        label: debouncedTyped,
+        label: debouncedTyped + wildCardChar,
         class:
           selectedCategory?.value === DropdownAny
             ? false
@@ -95,7 +94,6 @@ export const EntitySuggester: React.FC<EntitySuggesterI> = ({
           )
           .map((s: IEntity) => {
             const entity = Entities[s.class];
-
             const icons: React.ReactNode[] = [];
 
             if (territoryActants?.includes(s.id)) {
@@ -157,16 +155,6 @@ export const EntitySuggester: React.FC<EntitySuggesterI> = ({
       onSuccess: (data, variables) => {
         onSelected(variables.id);
         handleClean();
-        if (variables.class === "T") {
-          queryClient.invalidateQueries("tree");
-          toast.info(`Terrritory [${variables.label}] created!`);
-        } else if (variables.class === "S") {
-          toast.info(`Statement [${variables.label}] created!`);
-        } else if (variables.class === "A") {
-          toast.info(`Action [${variables.label}] created!`);
-        } else {
-          toast.info(`Actant [${variables.label}] created!`);
-        }
         if (openDetailOnCreate) {
           setDetailId(variables.id);
         }
@@ -185,8 +173,8 @@ export const EntitySuggester: React.FC<EntitySuggesterI> = ({
       newCreated.territoryId
     ) {
       const newStatement = CStatement(
-        newCreated.territoryId,
         localStorage.getItem("userrole") as UserRole,
+        newCreated.territoryId,
         newCreated.label,
         newCreated.detail
       );
@@ -272,7 +260,7 @@ export const EntitySuggester: React.FC<EntitySuggesterI> = ({
         handleHoverred(newHoverred);
       }}
       isWrongDropCategory={isWrongDropCategory}
-      allowCreate={allowCreate}
+      disableCreate={disableCreate}
       inputWidth={inputWidth}
     />
   ) : (

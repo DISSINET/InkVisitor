@@ -2,7 +2,7 @@ import "ts-jest";
 import Statement, {
   StatementActant,
   StatementAction,
-  StatementReference,
+  StatementTerritory,
 } from "./statement";
 import { Db } from "@service/RethinkDB";
 import { deleteEntities, findEntityById } from "@service/shorthands";
@@ -262,27 +262,6 @@ describe("findDependentStatementIds", function () {
     });
   });
 
-  describe("one territory, one linked statement via references.resource field", () => {
-    it("should return empty array", async () => {
-      const territory = new Territory(undefined);
-      await territory.save(db.connection);
-
-      const statement = new Statement(
-        JSON.parse(JSON.stringify(baseStatementData))
-      );
-      statement.data.references = [
-        new StatementReference({ resource: territory.id }),
-      ];
-      await statement.save(db.connection);
-
-      const statements = await Statement.findUsedInDataEntities(
-        db.connection,
-        territory.id
-      );
-      expect(statements).toHaveLength(1);
-    });
-  });
-
   describe("one territory, one linked statement via territory.id field", () => {
     it("should return empty array", async () => {
       const territory = new Territory(undefined);
@@ -291,7 +270,8 @@ describe("findDependentStatementIds", function () {
       const statement = new Statement(
         JSON.parse(JSON.stringify(baseStatementData))
       );
-      statement.data.territory.id = territory.id;
+      statement.data.territory = new StatementTerritory({ id: territory.id });
+
       await statement.save(db.connection);
 
       const statements = await Statement.findUsedInDataEntities(
@@ -302,7 +282,7 @@ describe("findDependentStatementIds", function () {
     });
   });
 
-  describe("one territory, two linked statement via references.resource and tags respectively", () => {
+  describe("one territory, two linked statement via territory.id and tags respectively", () => {
     it("should return empty array", async () => {
       const territory = new Territory(undefined);
       await territory.save(db.connection);
@@ -311,9 +291,7 @@ describe("findDependentStatementIds", function () {
       const statement1 = new Statement(
         JSON.parse(JSON.stringify(baseStatementData))
       );
-      statement1.data.references = [
-        new StatementReference({ resource: territory.id }),
-      ];
+      statement1.data.territory = new StatementTerritory({ id: territory.id });
       await statement1.save(db.connection);
 
       // second statement linked via tags array
@@ -341,9 +319,7 @@ describe("findDependentStatementIds", function () {
         JSON.parse(JSON.stringify(baseStatementData))
       );
       statement1.data.tags = [territory.id];
-      statement1.data.references = [
-        new StatementReference({ resource: territory.id }),
-      ];
+      statement1.data.territory = new StatementTerritory({ id: territory.id });
 
       // second statement is the same
       const statement2 = new Statement(JSON.parse(JSON.stringify(statement1)));
@@ -382,7 +358,7 @@ describe("Statement - save territory order", function () {
 
       const createdData = await findEntityById<IStatement>(db, statement.id);
       expect(createdData.data.territory?.id).toEqual(
-        statement.data.territory.id
+        statement.data.territory?.id
       );
       expect(createdData.data.territory?.order).toEqual(0);
 
@@ -399,10 +375,10 @@ describe("Statement - save territory order", function () {
 
       const createdData = await findEntityById<IStatement>(db, statement.id);
       expect(createdData.data.territory?.id).toEqual(
-        statement.data.territory.id
+        statement.data.territory?.id
       );
       expect(createdData.data.territory?.order).toEqual(
-        statement.data.territory.order
+        statement.data.territory?.order
       );
 
       done();
@@ -499,7 +475,7 @@ describe("Statement - update territory order", function () {
       await statement2.save(db.connection);
 
       await statement2.update(db.connection, {
-        data: { territory: { order: statement1.data.territory.order } },
+        data: { territory: { order: statement1.data.territory?.order } },
       });
 
       // second statement's order is still 1... 0 is taken
@@ -527,19 +503,19 @@ describe("Statement - update territory order", function () {
 
       // third statement wants to have the same order as first statement
       await statement3.update(db.connection, {
-        data: { territory: { order: statement1.data.territory.order } },
+        data: { territory: { order: statement1.data.territory?.order } },
       });
 
       // first statement should retain its order
       const createdData1 = await findEntityById<IStatement>(db, statement1.id);
       expect(createdData1.data.territory?.order).toEqual(
-        statement1.data.territory.order
+        statement1.data.territory?.order
       );
 
       // second statement should retain its order
       const createdData2 = await findEntityById<IStatement>(db, statement2.id);
       expect(createdData2.data.territory?.order).toEqual(
-        statement2.data.territory.order
+        statement2.data.territory?.order
       );
 
       // thirs statement should be before the 1 and 2
@@ -619,26 +595,6 @@ describe("Statement - findMetaStatements", function () {
 
       done();
     });
-  });
-});
-
-describe("test Statement.toJSON", function () {
-  const instance = new Statement({});
-  for (const fieldName of Statement.publicFields) {
-    (instance as any)[fieldName] = `value for ${fieldName}`;
-  }
-  const jsoned = JSON.parse(JSON.stringify(instance));
-  const newKeys = Object.keys(jsoned);
-  const newValues = Object.values(jsoned);
-
-  it("should correctly map to public fields", () => {
-    expect(newKeys).toEqual(Statement.publicFields);
-  });
-
-  it("should correctly assign values", () => {
-    expect(newValues).toEqual(
-      Statement.publicFields.map((fieldName) => (instance as any)[fieldName])
-    );
   });
 });
 

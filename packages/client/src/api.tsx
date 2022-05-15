@@ -19,16 +19,15 @@ import * as errors from "@shared/types/errors";
 import axios, { AxiosError, AxiosInstance, AxiosResponse } from "axios";
 import React from "react";
 import { toast } from "react-toastify";
-import {
-  IRequestSearch,
-  IRequestSearchEntity,
-  IRequestSearchStatement,
-} from "types";
+import { IRequestSearchEntity, IRequestSearchStatement } from "types";
 
-type IFilterEntities = {
+export type IFilterEntities = {
   label?: string;
   class?: string | false;
+
   excluded?: EntityClass[];
+  onlyTemplates?: boolean;
+  usedTemplate?: string;
 };
 
 type IFilterUsers = {
@@ -388,41 +387,11 @@ class Api {
 
   // deprecated method
   async entitiesSearch(
-    searchData: IRequestSearch
+    searchData: any //IRequestSearch
   ): Promise<AxiosResponse<IResponseSearch[]>> {
     try {
       const response = await this.connection.post(
         `/entities/search`,
-        searchData
-      );
-      return response;
-    } catch (err: any | AxiosError) {
-      throw { ...err.response.data };
-    }
-  }
-
-  // searching entity
-  async entitySearch(
-    searchData: IRequestSearchEntity
-  ): Promise<AxiosResponse<IResponseEntity[]>> {
-    try {
-      const response = await this.connection.post(
-        `/entities/search-entity`,
-        searchData
-      );
-      return response;
-    } catch (err: any | AxiosError) {
-      throw { ...err.response.data };
-    }
-  }
-
-  // searching statement
-  async statementSearch(
-    searchData: IRequestSearchStatement
-  ): Promise<AxiosResponse<IResponseStatement[]>> {
-    try {
-      const response = await this.connection.post(
-        `/entities/search-statement`,
         searchData
       );
       return response;
@@ -535,6 +504,22 @@ class Api {
   async auditGet(entityId: string): Promise<AxiosResponse<IResponseAudit>> {
     try {
       const response = await this.connection.get(`/audits/get/${entityId}`);
+      return response;
+    } catch (err: any | AxiosError) {
+      throw { ...err.response.data };
+    }
+  }
+
+  /**
+   * Audits for statements in territory
+   */
+  async auditsForStatements(
+    territoryId: string
+  ): Promise<AxiosResponse<IResponseAudit[]>> {
+    try {
+      const response = await this.connection.get(
+        `/audits?forTerritory=${territoryId}`
+      );
       return response;
     } catch (err: any | AxiosError) {
       throw { ...err.response.data };
