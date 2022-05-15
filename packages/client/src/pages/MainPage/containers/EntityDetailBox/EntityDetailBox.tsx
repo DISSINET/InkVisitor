@@ -189,7 +189,7 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
     error: templateError,
     isFetching: isFetchingTemplates,
   } = useQuery(
-    ["entity-templates", entity?.class],
+    ["entity-templates", "templates", entity?.class, detailId],
     async () => {
       const res = await api.entitiesGetMore({
         onlyTemplates: true,
@@ -223,6 +223,7 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
           });
         });
     }
+    console.log("new templates", options);
     return options;
   }, [templates]);
 
