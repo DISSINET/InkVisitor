@@ -92,11 +92,13 @@ export const StyledReferenceRow = styled.div`
   display: grid;
   grid-template-columns: auto auto;
 `;
-export const StyledReferenceColumn = styled.div`
+interface StyledReferenceColumn {
+  marginRight?: boolean;
+}
+export const StyledReferenceColumn = styled.div<StyledReferenceColumn>`
   display: grid;
-`;
-export const StyledPropGroupCell = styled.div`
-  display: grid;
+  margin-right: ${({ theme, marginRight }) =>
+    marginRight ? theme.space[1] : ""};
 `;
 interface StyledTagWrap {
   marginRight?: boolean;
@@ -106,4 +108,7 @@ export const StyledTagWrap = styled.div<StyledTagWrap>`
   overflow: hidden;
   margin-right: ${({ theme, marginRight }) =>
     marginRight ? theme.space[1] : ""};
+`;
+export const StyledGrid = styled.div`
+  display: grid;
 `;

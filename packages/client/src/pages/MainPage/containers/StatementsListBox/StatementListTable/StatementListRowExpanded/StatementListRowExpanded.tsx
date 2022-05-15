@@ -19,6 +19,7 @@ import {
   StyledBsArrowReturnRight,
   StyledExpandedRowTd,
   StyledExpandedRowTr,
+  StyledGrid,
   StyledNotesSection,
   StyledNoteWrapper,
   StyledPropRow,
@@ -50,7 +51,7 @@ export const StatementListRowExpanded: React.FC<StatementListRowExpanded> = ({
     return (
       <StyledReferenceRow key={key}>
         {resourceEntity ? (
-          <StyledReferenceColumn style={{ marginRight: "3px" }}>
+          <StyledReferenceColumn marginRight>
             <EntityTag
               actant={resourceEntity}
               tooltipPosition="bottom center"
@@ -58,7 +59,7 @@ export const StatementListRowExpanded: React.FC<StatementListRowExpanded> = ({
             />
           </StyledReferenceColumn>
         ) : (
-          <StyledReferenceColumn style={{ marginRight: "3px" }}>
+          <StyledReferenceColumn marginRight>
             <EmptyTag label="resource" />
           </StyledReferenceColumn>
         )}
@@ -120,39 +121,39 @@ export const StatementListRowExpanded: React.FC<StatementListRowExpanded> = ({
 
   const renderFirstLevelProps = (props: IProp[]) => {
     return (
-      <div style={{ display: "grid" }}>
+      <StyledGrid>
         <StatementListRowExpandedPropGroup
           level={1}
           props={props}
           entities={entities}
           renderChildrenPropRow={renderSecondLevelProps}
         />
-      </div>
+      </StyledGrid>
     );
   };
 
   const renderSecondLevelProps = (props: IProp[]) => {
     return (
-      <div style={{ display: "grid" }}>
+      <StyledGrid>
         <StatementListRowExpandedPropGroup
           level={2}
           props={props}
           entities={entities}
           renderChildrenPropRow={renderThirdLevelProps}
         />
-      </div>
+      </StyledGrid>
     );
   };
 
   const renderThirdLevelProps = (props: IProp[]) => {
     return (
-      <div style={{ display: "grid" }}>
+      <StyledGrid>
         <StatementListRowExpandedPropGroup
           level={3}
           props={props}
           entities={entities}
         />
-      </div>
+      </StyledGrid>
     );
   };
 
@@ -257,12 +258,7 @@ export const StatementListRowExpanded: React.FC<StatementListRowExpanded> = ({
             <div>
               <StyledReferenceSection>
                 {references.map((reference, key) => (
-                  <div
-                    style={{
-                      display: "grid",
-                    }}
-                    key={key}
-                  >
+                  <StyledGrid key={key}>
                     <StyledPropRow key={key}>
                       <StyledBsArrowReturnRight size="20" />
                       <StyledSpan>
@@ -274,11 +270,11 @@ export const StatementListRowExpanded: React.FC<StatementListRowExpanded> = ({
                         key
                       )}
                     </StyledPropRow>
-                  </div>
+                  </StyledGrid>
                 ))}
               </StyledReferenceSection>
             </div>
-            <div style={{ display: "grid" }}>
+            <StyledGrid>
               <StyledActantGroup>
                 {tagObjects.map((tag, key) => (
                   <StyledPropRow key={key} disableBottomMargin>
@@ -288,7 +284,7 @@ export const StatementListRowExpanded: React.FC<StatementListRowExpanded> = ({
                   </StyledPropRow>
                 ))}
               </StyledActantGroup>
-            </div>
+            </StyledGrid>
             <br />
             <StyledNotesSection>
               {notes.map((note: string, key: number) => {
