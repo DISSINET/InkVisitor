@@ -17,11 +17,13 @@ import {
   Submit,
 } from "components";
 import { StyledHeading, StyledUsedInTitle } from "components/Table/TableStyles";
+import { StyledTypeBar } from "components/TypeBar/TypeBarStyles";
 import { CMetaProp } from "constructors";
 import { useSearchParams } from "hooks";
 import React, { useEffect, useMemo, useState } from "react";
 import { FaPlus, FaRegCopy } from "react-icons/fa";
 import { useMutation, useQuery, useQueryClient } from "react-query";
+import { ValueType, OptionTypeBase } from "react-select";
 import { toast } from "react-toastify";
 import { DraggedPropRowCategory, PropAttributeFilter } from "types";
 import { EntityTag } from "..";
@@ -514,36 +516,6 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                       </StyledDetailContentRow>
                     )}
 
-                    {/* <StyledDetailContentRow>
-                      <StyledDetailContentRowLabel>
-                        Entity Type
-                      </StyledDetailContentRowLabel>
-                      <StyledDetailContentRowValue>
-                        <div style={{ position: "relative" }}>
-                          <Dropdown
-                            value={{
-                              label: entity.class,
-                              value: entity.class,
-                            }}
-                            options={entitiesDict}
-                            onChange={(
-                              option: ValueType<OptionTypeBase, any>
-                            ) => {
-                              // setSelectedCategory(option);
-                              // TODO: submit modal => change category mutation
-                              console.log(option);
-                            }}
-                            width={40}
-                            entityDropdown
-                            disableTyping
-                          />
-                          <TypeBar
-                            entityLetter={entity.class}
-                          />
-                        </div>
-                      </StyledDetailContentRowValue>
-                    </StyledDetailContentRow> */}
-
                     <StyledDetailContentRow>
                       <StyledDetailContentRowLabel>
                         Entity Type
@@ -572,7 +544,7 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                           ></StyledTypeBar>
                         </div>
                       </StyledDetailContentRowValue>
-                    </StyledDetailContentRow> */}
+                    </StyledDetailContentRow>
 
                     <StyledDetailContentRow>
                       <StyledDetailContentRowLabel>
