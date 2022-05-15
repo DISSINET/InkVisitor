@@ -5,7 +5,7 @@ import {
   languageDict,
 } from "@shared/dictionaries";
 import { allEntities, DropdownItem } from "@shared/dictionaries/entity";
-import { EntityClass, Language, UserRoleMode } from "@shared/enums";
+import { EntityClass, Language, UserRole, UserRoleMode } from "@shared/enums";
 import {
   IAction,
   IEntity,
@@ -101,10 +101,11 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
   const handleCreateTemplate = () => {
     // create template as a copy of the entity
     if (entity) {
+      const userRole = localStorage.getItem("userrole") as UserRole;
       const templateEntity =
         entity.class === EntityClass.Statement
-          ? DStatement(entity as IStatement)
-          : DEntity(entity as IEntity);
+          ? DStatement(entity as IStatement, userRole)
+          : DEntity(entity as IEntity, userRole);
 
       if (entity.class === EntityClass.Statement) {
         delete templateEntity.data["territory"];
@@ -524,7 +525,10 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
   };
 
   const duplicateEntity = (entityToDuplicate: IEntity) => {
-    const newEntity = DEntity(entityToDuplicate);
+    const newEntity = DEntity(
+      entityToDuplicate,
+      localStorage.getItem("userrole") as UserRole
+    );
     duplicateEntityMutation.mutate(newEntity);
   };
 
@@ -558,7 +562,7 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
               />
             </StyledTagWrap>
             <ButtonGroup style={{ marginTop: "1rem" }}>
-              {entity.class !== EntityClass.Statement && (
+              {entity.class !== EntityClass.Statement && userCanEdit && (
                 <Button
                   icon={<FaClone size={14} />}
                   color="primary"
@@ -570,7 +574,7 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                   }}
                 />
               )}
-              {mayBeRemoved && (
+              {mayBeRemoved && userCanEdit && (
                 <Button
                   color="primary"
                   icon={<FaTrashAlt />}
@@ -579,6 +583,19 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                   inverted
                   onClick={() => {
                     setShowRemoveSubmit(true);
+                  }}
+                />
+              )}
+              {userCanEdit && (
+                <Button
+                  key="template"
+                  icon={<GrClone size={14} />}
+                  tooltip="create template from entity"
+                  inverted
+                  color="primary"
+                  label="Create template"
+                  onClick={() => {
+                    setCreateTemplateModal(true);
                   }}
                 />
               )}
@@ -591,17 +608,6 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                 label="refresh"
                 onClick={() => {
                   queryClient.invalidateQueries(["entity"]);
-                }}
-              />
-              <Button
-                key="template"
-                icon={<GrClone size={14} />}
-                tooltip="create template from entity"
-                inverted
-                color="primary"
-                label="Create template"
-                onClick={() => {
-                  setCreateTemplateModal(true);
                 }}
               />
               {entity.class === EntityClass.Statement && (

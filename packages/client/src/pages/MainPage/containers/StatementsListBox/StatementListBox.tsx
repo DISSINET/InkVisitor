@@ -149,7 +149,10 @@ export const StatementListBox: React.FC = () => {
   const duplicateStatement = (statementToDuplicate: IResponseStatement) => {
     const { ...newStatementObject } = statementToDuplicate;
 
-    const duplicatedStatement = DStatement(newStatementObject as IStatement);
+    const duplicatedStatement = DStatement(
+      newStatementObject as IStatement,
+      localStorage.getItem("userrole") as UserRole
+    );
     duplicateStatementMutation.mutate(duplicatedStatement);
   };
 
