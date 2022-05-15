@@ -141,7 +141,7 @@ export const DEntity = (entity: IEntity): IEntity => {
     class: entity.class,
     status: entity.status,
     data: entity.data,
-    label: entity.label,
+    label: entity.label + " [COPY OF]",
     detail: entity.detail,
     language: entity.language,
     notes: entity.notes,
