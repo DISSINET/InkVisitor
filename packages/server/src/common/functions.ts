@@ -49,5 +49,5 @@ export function timeout(mseconds: number): Promise<void> {
 }
 
 export function regExpEscape(literal: string) {
-  return literal.replace(/[-[\]{}()*+!<=:?.\/\\^$|#\s,]/g, "\\$&");
+  return literal.replace(/[-[\]{}()*+!<=:?.\/\\^$|#,]/g, "\\$&");
 }
