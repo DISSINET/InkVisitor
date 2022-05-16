@@ -22,7 +22,7 @@ interface EntitySuggesterI {
   categoryTypes: EntityClass[];
   onSelected: Function;
   placeholder?: string;
-  allowCreate?: boolean;
+  disableCreate?: boolean;
   disableWildCard?: boolean;
   inputWidth?: number | "full";
   openDetailOnCreate?: boolean;
@@ -36,7 +36,7 @@ export const EntitySuggester: React.FC<EntitySuggesterI> = ({
   categoryTypes,
   onSelected,
   placeholder = "",
-  allowCreate,
+  disableCreate,
   inputWidth,
   disableWildCard = false,
   openDetailOnCreate = false,
@@ -260,7 +260,7 @@ export const EntitySuggester: React.FC<EntitySuggesterI> = ({
         handleHoverred(newHoverred);
       }}
       isWrongDropCategory={isWrongDropCategory}
-      allowCreate={allowCreate}
+      disableCreate={disableCreate}
       inputWidth={inputWidth}
     />
   ) : (

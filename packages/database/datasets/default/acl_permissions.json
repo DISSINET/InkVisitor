@@ -110,5 +110,10 @@
     "controller": "audits",
     "method": "",
     "roles": ["*"]
+  },
+  {
+    "controller": "stats",
+    "method": "",
+    "roles": ["*"]
   }
 ]

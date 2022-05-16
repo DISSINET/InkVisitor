@@ -3,6 +3,7 @@ import { EmptyTag } from "pages/MainPage/containers";
 import React from "react";
 import { EntityTag } from "../../../EntityTag/EntityTag";
 import {
+  StyledPropGroupCell,
   StyledPropGroup,
   StyledPropRow,
 } from "./StatementListRowExpandedStyles";
@@ -23,10 +24,11 @@ export const StatementListRowExpandedPropGroup: React.FC<
         const propValueEntity: IEntity = entities[prop.value.id];
         return (
           <React.Fragment key={key}>
-            <StyledPropRow key={key} level={level}>
+            <StyledPropRow level={level}>
               {propTypeEntity ? (
                 <>
                   <EntityTag
+                    // fullWidth
                     actant={propTypeEntity}
                     tooltipPosition="bottom center"
                   />
@@ -39,12 +41,17 @@ export const StatementListRowExpandedPropGroup: React.FC<
                 </>
               )}
               {propValueEntity ? (
-                <EntityTag
-                  actant={propValueEntity}
-                  tooltipPosition="bottom center"
-                />
+                <>
+                  <EntityTag
+                    // fullWidth
+                    actant={propValueEntity}
+                    tooltipPosition="bottom center"
+                  />
+                </>
               ) : (
-                <EmptyTag label={"value"} />
+                <>
+                  <EmptyTag label={"value"} />
+                </>
               )}
             </StyledPropRow>
 

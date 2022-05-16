@@ -31,7 +31,6 @@ import { Cell, Column } from "react-table";
 import { toast } from "react-toastify";
 import { setRowsExpanded } from "redux/features/statementList/rowsExpandedSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
-import { RootState } from "redux/store";
 import { EntityTag } from "./../";
 import { StatementListContextMenu } from "./StatementListContextMenu/StatementListContextMenu";
 import { StatementListHeader } from "./StatementListHeader/StatementListHeader";
@@ -394,7 +393,7 @@ export const StatementListBox: React.FC = () => {
       {
         Header: "Actions",
         Cell: ({ row }: Cell) => {
-          const actionIds = row.values.data?.actants
+          const actionIds = row.values.data?.actions
             ? row.values.data.actions.map((a: any) => a.action)
             : [];
 
