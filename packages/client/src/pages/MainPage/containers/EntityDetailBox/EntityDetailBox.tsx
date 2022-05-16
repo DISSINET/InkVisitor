@@ -68,6 +68,8 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
     useState<boolean>(false);
 
   const [showRemoveSubmit, setShowRemoveSubmit] = useState(false);
+  const [selectedEntityType, setSelectedEntityType] = useState<string>("");
+  const [showTypeSubmit, setShowTypeSubmit] = useState(false);
   const [usedInPage, setUsedInPage] = useState<number>(0);
   const statementsPerPage = 20;
 
@@ -168,6 +170,12 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
     queryClient.invalidateQueries("audit");
   }, [entity]);
 
+  useEffect(() => {
+    if (entity) {
+      setSelectedEntityType(entity.class);
+    }
+  }, []);
+
   const userCanAdmin: boolean = useMemo(() => {
     return !!entity && entity.right === UserRoleMode.Admin;
   }, [entity]);
@@ -179,15 +187,6 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
         entity.right === UserRoleMode.Write)
     );
   }, [entity]);
-
-  // mutations
-  // const allEntitiesOption = {
-  //   value: "*",
-  //   label: "*",
-  //   info: "",
-  // };
-  // const entityOptions = [...entitiesDict] as any;
-  // entityOptions.push(allEntitiesOption);
 
   const updateEntityMutation = useMutation(
     async (changes: any) => await api.entityUpdate(detailId, changes),
@@ -213,6 +212,26 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
           queryClient.invalidateQueries("territory");
           queryClient.invalidateQueries("bookmarks");
         }
+        if (entity?.isTemplate) {
+          queryClient.invalidateQueries("templates");
+        }
+      },
+    }
+  );
+
+  const changeEntityTypeMutation = useMutation(
+    async (newClass: string) =>
+      await api.entityUpdate(detailId, { class: newClass }),
+    {
+      onSuccess: (data, variables) => {
+        setShowTypeSubmit(false);
+        queryClient.invalidateQueries(["entity"]);
+        queryClient.invalidateQueries("statement");
+        if (variables === EntityClass.Territory) {
+          queryClient.invalidateQueries("tree");
+        }
+        queryClient.invalidateQueries("territory");
+        queryClient.invalidateQueries("bookmarks");
         if (entity?.isTemplate) {
           queryClient.invalidateQueries("templates");
         }
@@ -531,9 +550,9 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                             onChange={(
                               option: ValueType<OptionTypeBase, any>
                             ) => {
-                              // setSelectedCategory(option);
+                              setSelectedEntityType((option as IOption).value);
+                              setShowTypeSubmit(true);
                               // TODO: submit modal => change category mutation
-                              console.log(option);
                             }}
                             width={40}
                             entityDropdown
@@ -1265,11 +1284,22 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
         show={showRemoveSubmit}
         loading={deleteEntityMutation.isLoading}
       />
+      <Submit
+        title="Change entity type"
+        text={`Changing entity type to: [${selectedEntityType}]. You may loose some values. Do you want to continue?`}
+        submitLabel="Continue"
+        onSubmit={() => {
+          changeEntityTypeMutation.mutate(selectedEntityType);
+        }}
+        onCancel={() => setShowTypeSubmit(false)}
+        show={showTypeSubmit}
+      />
       <Loader
         show={
           isFetching ||
           updateEntityMutation.isLoading ||
-          deleteEntityMutation.isLoading
+          deleteEntityMutation.isLoading ||
+          changeEntityTypeMutation.isLoading
         }
       />
 
