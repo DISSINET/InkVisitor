@@ -168,7 +168,6 @@ export class SearchQuery {
     // to match 'building' word only
     // otherwise with wildcard, the '*uilding' would be changed to 'uilding' without constraint
     // and will behave like wildcard on the left
-    console.log(left, right);
     if (left === "^") {
       left = `(\^|[\\W\\_])`;
     }
