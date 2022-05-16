@@ -31,7 +31,7 @@ import {
   StyledPropLineColumn,
 } from "../PropGroupStyles";
 
-interface IPropGroupRow {
+interface PropGroupRow {
   prop: IProp;
   entities: { [key: string]: IEntity };
   level: 1 | 2 | 3;
@@ -55,7 +55,7 @@ interface IPropGroupRow {
   disabledAttributes?: AttributeName[];
 }
 
-export const PropGroupRow: React.FC<IPropGroupRow> = ({
+export const PropGroupRow: React.FC<PropGroupRow> = ({
   prop,
   entities,
   level,

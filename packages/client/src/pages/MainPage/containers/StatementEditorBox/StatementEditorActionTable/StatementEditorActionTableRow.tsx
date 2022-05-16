@@ -110,6 +110,7 @@ export const StatementEditorActionTableRow: React.FC<
     const { action, sAction } = row.values.data;
     return action ? (
       <EntityTag
+        // fullWidth
         actant={action}
         button={
           userCanEdit && (
@@ -136,6 +137,7 @@ export const StatementEditorActionTableRow: React.FC<
               action: newSelectedId,
             });
           }}
+          openDetailOnCreate
           categoryTypes={[EntityClass.Action]}
           excludedEntities={excludedSuggesterEntities}
           placeholder={"add new action"}

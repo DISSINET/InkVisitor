@@ -14,7 +14,7 @@ import { StyledGrid, StyledListHeaderColumn } from "./PropGroupStyles";
 import { SecondLevelPropGroup } from "./SecondLevelPropGroup/SecondLevelPropGroup";
 import { ThirdLevelPropGroup } from "./ThirdLevelPropGroup/ThirdLevelPropGroup";
 
-interface IPropGroup {
+interface PropGroup {
   originId: string;
   entities: { [key: string]: IEntity };
   props: IProp[];
@@ -32,7 +32,7 @@ interface IPropGroup {
   disabledAttributes?: AttributeName[];
 }
 
-export const PropGroup: React.FC<IPropGroup> = ({
+export const PropGroup: React.FC<PropGroup> = ({
   originId,
   entities,
   props,

@@ -44,6 +44,7 @@ import {
   StyledEditorContentRowLabel,
   StyledEditorContentRowValue,
   StyledEditorEmptyState,
+  StyledEditorHeaderInputWrap,
   StyledEditorPreSection,
   StyledEditorSection,
   StyledEditorSectionContent,
@@ -51,6 +52,7 @@ import {
   StyledEditorStatementInfo,
   StyledEditorStatementInfoLabel,
   StyledEditorTemplateSection,
+  StyledHeaderTagWrap,
   StyledTagsList,
   StyledTagsListItem,
 } from "./StatementEditorBoxStyles";
@@ -164,8 +166,6 @@ export const StatementEditorBox: React.FC = () => {
   );
 
   const handleAskForTemplateApply = (templateOptionToApply: IOption) => {
-    console.log(templateToApply, templates);
-
     if (templates) {
       const templateThatIsGoingToBeApplied = templates.find(
         (template: IEntity) => template.id === templateOptionToApply.value
@@ -521,10 +521,8 @@ export const StatementEditorBox: React.FC = () => {
       });
     },
     {
-      onSuccess: (data, variables) => {
-        if (detailId === statementId) {
-          queryClient.invalidateQueries(["entity"]);
-        }
+      onSuccess: (data, variables: any) => {
+        queryClient.invalidateQueries(["entity"]);
         queryClient.invalidateQueries(["statement"]);
         queryClient.invalidateQueries(["territory"]);
       },
@@ -540,7 +538,9 @@ export const StatementEditorBox: React.FC = () => {
     {
       onSuccess: (data, variables) => {
         setTerritoryId(variables);
+        queryClient.invalidateQueries("statement");
         queryClient.invalidateQueries("tree");
+        queryClient.invalidateQueries("territory");
       },
     }
   );
@@ -551,17 +551,23 @@ export const StatementEditorBox: React.FC = () => {
         <div style={{ marginBottom: "4rem" }} key={statement.id}>
           <StyledEditorPreSection>
             <StyledEditorStatementInfo>
-              <EntityTag actant={statement} fullWidth />
-              <StyledEditorStatementInfoLabel>
-                change statement label:{" "}
-              </StyledEditorStatementInfoLabel>
-              <Input
-                type="text"
-                value={statement.label}
-                onChangeFn={(newValue: string) => {
-                  updateStatementMutation.mutate({ label: newValue });
-                }}
-              />
+              <StyledHeaderTagWrap>
+                <EntityTag actant={statement} fullWidth />
+              </StyledHeaderTagWrap>
+              <div style={{ display: "flex" }}>
+                <StyledEditorStatementInfoLabel>
+                  change statement label:
+                </StyledEditorStatementInfoLabel>
+                <StyledEditorHeaderInputWrap>
+                  <Input
+                    type="text"
+                    value={statement.label}
+                    onChangeFn={(newValue: string) => {
+                      updateStatementMutation.mutate({ label: newValue });
+                    }}
+                  />
+                </StyledEditorHeaderInputWrap>
+              </div>
             </StyledEditorStatementInfo>
             <StyledBreadcrumbWrap>
               {territoryPath &&
@@ -573,7 +579,9 @@ export const StatementEditorBox: React.FC = () => {
                   );
                 })}
               {territoryData && (
-                <StatementListBreadcrumbItem territoryId={territoryData.id} />
+                <React.Fragment key={territoryData.id}>
+                  <StatementListBreadcrumbItem territoryId={territoryData.id} />
+                </React.Fragment>
               )}
               <Loader size={20} show={isFetchingTerritory} />
             </StyledBreadcrumbWrap>
@@ -584,7 +592,7 @@ export const StatementEditorBox: React.FC = () => {
               <EntitySuggester
                 filterEditorRights
                 inputWidth={96}
-                allowCreate={false}
+                disableCreate
                 categoryTypes={[EntityClass.Territory]}
                 onSelected={(newSelectedId: string) => {
                   moveStatementMutation.mutate(newSelectedId);
@@ -770,6 +778,7 @@ export const StatementEditorBox: React.FC = () => {
             <StyledEditorSectionHeader>Notes</StyledEditorSectionHeader>
             <StyledEditorSectionContent>
               <MultiInput
+                width="full"
                 disabled={!userCanEdit}
                 values={statement.notes}
                 onChange={(newValues: string[]) => {

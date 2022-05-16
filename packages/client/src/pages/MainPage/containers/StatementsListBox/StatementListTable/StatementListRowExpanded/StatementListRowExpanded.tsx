@@ -1,23 +1,33 @@
+import { actantPositionDict } from "@shared/dictionaries";
+import { Position } from "@shared/enums";
 import {
   IEntity,
   IProp,
+  IReference,
   IStatementActant,
   IStatementAction,
-  IReference,
 } from "@shared/types";
+import { EmptyTag } from "pages/MainPage/containers";
 import React from "react";
 import { ColumnInstance, Row } from "react-table";
-import { BsArrowReturnRight } from "react-icons/bs";
 import { EntityTag } from "../../../EntityTag/EntityTag";
 import { StatementListRowExpandedPropGroup } from "./StatementListRowExpandedPropGroup";
 import {
   StyledActantGroup,
+  StyledActantWithPropsWrap,
   StyledActantWrap,
-  StyledReferenceWrap,
+  StyledBsArrowReturnRight,
+  StyledExpandedRowTd,
+  StyledExpandedRowTr,
+  StyledNotesSection,
+  StyledNoteWrapper,
+  StyledPropRow,
+  StyledReferenceColumn,
+  StyledReferenceRow,
+  StyledReferenceSection,
+  StyledSpan,
   StyledSubRow,
 } from "./StatementListRowExpandedStyles";
-import { StyledPropRow } from "./StatementListRowExpandedStyles";
-import { EmptyTag } from "pages/MainPage/containers";
 
 interface StatementListRowExpanded {
   row: Row;
@@ -29,7 +39,7 @@ export const StatementListRowExpanded: React.FC<StatementListRowExpanded> = ({
   visibleColumns,
   entities,
 }) => {
-  const renderReference = (
+  const renderReferenceRow = (
     resourceId: string,
     valueId: string,
     key: number
@@ -38,28 +48,34 @@ export const StatementListRowExpanded: React.FC<StatementListRowExpanded> = ({
     const valueEntity: IEntity = entities[valueId];
 
     return (
-      <React.Fragment key={key}>
-        <StyledReferenceWrap key={key}>
-          {resourceEntity ? (
+      <StyledReferenceRow key={key}>
+        {resourceEntity ? (
+          <StyledReferenceColumn style={{ marginRight: "3px" }}>
             <EntityTag
               actant={resourceEntity}
               tooltipPosition="bottom center"
-              // fullWidth
+              fullWidth
             />
-          ) : (
+          </StyledReferenceColumn>
+        ) : (
+          <StyledReferenceColumn style={{ marginRight: "3px" }}>
             <EmptyTag label="resource" />
-          )}
-          {valueEntity ? (
+          </StyledReferenceColumn>
+        )}
+        {valueEntity ? (
+          <StyledReferenceColumn>
             <EntityTag
               actant={valueEntity}
               tooltipPosition="bottom center"
-              // fullWidth
+              fullWidth
             />
-          ) : (
+          </StyledReferenceColumn>
+        ) : (
+          <StyledReferenceColumn>
             <EmptyTag label="value" />
-          )}
-        </StyledReferenceWrap>
-      </React.Fragment>
+          </StyledReferenceColumn>
+        )}
+      </StyledReferenceRow>
     );
   };
   const renderListActant = (actantId: string, key: number) => {
@@ -70,7 +86,7 @@ export const StatementListRowExpanded: React.FC<StatementListRowExpanded> = ({
             <EntityTag
               actant={entities[actantId]}
               tooltipPosition="bottom center"
-              // fullWidth
+              fullWidth
             />
           </StyledActantWrap>
         )}
@@ -78,48 +94,65 @@ export const StatementListRowExpanded: React.FC<StatementListRowExpanded> = ({
     );
   };
 
+  const renderEmptyActant = (label: string, key: number) => {
+    return (
+      <StyledActantWrap key={key}>
+        <EmptyTag label={label} />
+      </StyledActantWrap>
+    );
+  };
+
   const renderListActantWithProps = (
     actant: IEntity,
     sActant: IStatementAction | IStatementActant,
-    key: number
+    key: number,
+    emptyLabel: string
   ) => {
     return (
-      <StyledActantWrap key={key}>
-        {renderListActant(actant?.id, key)}
+      <StyledActantWithPropsWrap key={key}>
+        {actant?.id
+          ? renderListActant(actant.id, key)
+          : renderEmptyActant(emptyLabel, key)}
         {renderFirstLevelProps(sActant.props)}
-      </StyledActantWrap>
+      </StyledActantWithPropsWrap>
     );
   };
 
   const renderFirstLevelProps = (props: IProp[]) => {
     return (
-      <StatementListRowExpandedPropGroup
-        level={1}
-        props={props}
-        entities={entities}
-        renderChildrenPropRow={renderSecondLevelProps}
-      />
+      <div style={{ display: "grid" }}>
+        <StatementListRowExpandedPropGroup
+          level={1}
+          props={props}
+          entities={entities}
+          renderChildrenPropRow={renderSecondLevelProps}
+        />
+      </div>
     );
   };
 
   const renderSecondLevelProps = (props: IProp[]) => {
     return (
-      <StatementListRowExpandedPropGroup
-        level={2}
-        props={props}
-        entities={entities}
-        renderChildrenPropRow={renderThirdLevelProps}
-      />
+      <div style={{ display: "grid" }}>
+        <StatementListRowExpandedPropGroup
+          level={2}
+          props={props}
+          entities={entities}
+          renderChildrenPropRow={renderThirdLevelProps}
+        />
+      </div>
     );
   };
 
   const renderThirdLevelProps = (props: IProp[]) => {
     return (
-      <StatementListRowExpandedPropGroup
-        level={3}
-        props={props}
-        entities={entities}
-      />
+      <div style={{ display: "grid" }}>
+        <StatementListRowExpandedPropGroup
+          level={3}
+          props={props}
+          entities={entities}
+        />
+      </div>
     );
   };
 
@@ -182,12 +215,13 @@ export const StatementListRowExpanded: React.FC<StatementListRowExpanded> = ({
             <StyledActantGroup>
               {actionObjects.map((action, key) => (
                 <StyledPropRow level={1} key={key}>
-                  <BsArrowReturnRight size="20" />
-                  <span>&nbsp;&nbsp;(action)&nbsp;&nbsp;</span>
+                  <StyledBsArrowReturnRight size="20" />
+                  <StyledSpan>&nbsp;&nbsp;(action)&nbsp;&nbsp;</StyledSpan>
                   {renderListActantWithProps(
                     action.data.action,
                     action.data.sAction,
-                    key
+                    key,
+                    "action"
                   )}
                 </StyledPropRow>
               ))}
@@ -195,12 +229,13 @@ export const StatementListRowExpanded: React.FC<StatementListRowExpanded> = ({
             <StyledActantGroup>
               {subjectObjects.map((actant, key) => (
                 <StyledPropRow level={1} key={key}>
-                  <BsArrowReturnRight size="20" />
-                  <span>&nbsp;&nbsp;(subject)&nbsp;&nbsp;</span>
+                  <StyledBsArrowReturnRight size="20" />
+                  <StyledSpan>&nbsp;&nbsp;(subject)&nbsp;&nbsp;</StyledSpan>
                   {renderListActantWithProps(
                     actant.data.subject,
                     actant.data.sSubject,
-                    key
+                    key,
+                    actantPositionDict[Position.Subject].label
                   )}
                 </StyledPropRow>
               ))}
@@ -208,46 +243,57 @@ export const StatementListRowExpanded: React.FC<StatementListRowExpanded> = ({
             <StyledActantGroup>
               {actantObjects.map((actant, key) => (
                 <StyledPropRow level={1} key={key}>
-                  <BsArrowReturnRight size="20" />
-                  <span>&nbsp;&nbsp;(actant)&nbsp;&nbsp;</span>
+                  <StyledBsArrowReturnRight size="20" />
+                  <StyledSpan>&nbsp;&nbsp;(actant)&nbsp;&nbsp;</StyledSpan>
                   {renderListActantWithProps(
                     actant.data.actant,
                     actant.data.sActant,
-                    key
+                    key,
+                    actantPositionDict[actant.data.sActant.position]?.label
                   )}
                 </StyledPropRow>
               ))}
             </StyledActantGroup>
-            {references.map((reference, key) => (
-              <React.Fragment key={key}>
-                {(reference.value || reference.resource) && (
-                  <StyledPropRow level={1}>
-                    <BsArrowReturnRight size="20" />
-                    <span>&nbsp;&nbsp;(reference)&nbsp;&nbsp;</span>
-                    {renderReference(reference.resource, reference.value, key)}
+            <StyledReferenceSection>
+              {references.map((reference, key) => (
+                <div style={{ display: "grid" }} key={key}>
+                  <StyledPropRow level={1} key={key}>
+                    <StyledBsArrowReturnRight size="20" />
+                    <StyledSpan>&nbsp;&nbsp;(reference)&nbsp;&nbsp;</StyledSpan>
+                    {renderReferenceRow(
+                      reference.resource,
+                      reference.value,
+                      key
+                    )}
                   </StyledPropRow>
-                )}
-              </React.Fragment>
-            ))}
-            {tagObjects.map((tag, key) => (
-              <StyledPropRow level={1} key={key}>
-                <BsArrowReturnRight size="20" />
-                <span>&nbsp;&nbsp;(tag)&nbsp;&nbsp;</span>
-                {renderListActant(tag.id, key)}
-              </StyledPropRow>
-            ))}
+                </div>
+              ))}
+            </StyledReferenceSection>
+            <div style={{ display: "grid", maxWidth: "100%" }}>
+              <StyledActantGroup>
+                {tagObjects.map((tag, key) => (
+                  <StyledPropRow level={1} key={key} disableBottomMargin>
+                    <StyledBsArrowReturnRight size="20" />
+                    <StyledSpan>&nbsp;&nbsp;(tag)&nbsp;&nbsp;</StyledSpan>
+                    {renderListActant(tag.id, key)}
+                  </StyledPropRow>
+                ))}
+              </StyledActantGroup>
+            </div>
             <br />
-            {notes.map((note: string, key: number) => {
-              return (
-                <React.Fragment key={key}>
-                  <span>(note)</span>
-                  <p key={key}>
-                    {note}
-                    <br />
-                  </p>
-                </React.Fragment>
-              );
-            })}
+            <StyledNotesSection>
+              {notes.map((note: string, key: number) => {
+                return (
+                  <StyledNoteWrapper key={key}>
+                    <StyledSpan>(note)</StyledSpan>
+                    <p key={key}>
+                      {note}
+                      <br />
+                    </p>
+                  </StyledNoteWrapper>
+                );
+              })}
+            </StyledNotesSection>
           </StyledSubRow>
         </>
       );
@@ -256,10 +302,10 @@ export const StatementListRowExpanded: React.FC<StatementListRowExpanded> = ({
   );
 
   return (
-    <tr>
-      <td colSpan={visibleColumns.length + 1}>
+    <StyledExpandedRowTr>
+      <StyledExpandedRowTd colSpan={visibleColumns.length + 1}>
         {renderRowSubComponent({ row })}
-      </td>
-    </tr>
+      </StyledExpandedRowTd>
+    </StyledExpandedRowTr>
   );
 };
