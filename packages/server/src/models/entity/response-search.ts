@@ -117,53 +117,71 @@ export class SearchQuery {
       label = label.slice(0, -1);
     }
 
+    // escape problematic chars - messes with regexp search
+    label = regExpEscape(label.toLowerCase());
+
     this.query = this.query.filter(function (row: RDatum) {
-      return r.or(
-        SearchQuery.searchWordByWord(row, label)
-        // SearchQuery.searchByString(row, label, leftWildcard, rightWildcard)
+      return SearchQuery.searchWordByWord(
+        row,
+        label,
+        leftWildcard,
+        rightWildcard
       );
     });
 
     return this;
   }
 
+  /**
+   * Provides basic search functionality which searches for the subscring with optional wildcard support
+   * @param row - RDatum from rethink api
+   * @param label - cleaned label input (with escaped chars)
+   * @param left - optional wildcard on the left
+   * @param right - optional wildcard on the right
+   * @returns filtration statement for RDatum
+   */
   public static searchByString(
     row: RDatum,
     label: string,
-    right: string,
-    left: string
+    left: string,
+    right: string
   ): RDatum {
-    // escape problematic chars - messes with regexp search
-    label = regExpEscape(label.toLowerCase());
-
     return row("label").downcase().match(`${left}${label}${right}`);
   }
 
-  public static searchWordByWord(row: RDatum, label: string): RDatum {
+  /**
+   * provides searching which respects word boundaries and provides optional wildcard support
+   * @param row - RDatum from rethink api
+   * @param label - cleaned label input (with escaped chars)
+   * @param left - optional wildcard on the left
+   * @param right - optional wildcard on the right
+   * @returns filtration statement for RDatum
+   */
+  public static searchWordByWord(
+    row: RDatum,
+    label: string,
+    left: string,
+    right: string
+  ): RDatum {
+    // if wildcard not used, update the left/right side to limit search for word start/end
+    // ie. search for 'building' would be changed to '(\^|[\\W \\.\\,\\:\\_])building'
+    // to match 'building' word only
+    // otherwise with wildcard, the '*uilding' would be changed to 'uilding' without constraint
+    // and will behave like wildcard on the left
+    console.log(left, right);
+    if (left === "^") {
+      left = `(\^|[\\W\\_])`;
+    }
+    if (right === "$") {
+      right = `(\$|[\\W\\_])`;
+    }
+
     // words have to be splitted and joined with regexps to provide variable glue
-    label = label.toLowerCase().split(" ").join("[ .,_:]");
-    const regexp = `(^|\W )${label}($|\W)`;
-    console.log(regexp);
+    label = label.toLowerCase().split(" ").join(`[\\W]+`);
+
+    const regexp = `${left}${label}${right}`;
+
     return row("label").downcase().match(regexp);
-  }
-
-  public static searchByWords(row: RDatum, label: string): RDatum {
-    // word search require regexp like '(word1)|(word2)|(word3)'
-    const labelWords = label
-      .split(" ")
-      .map((word) => `(${word})`)
-      .join("&");
-    // full regexp needs to encompass also cases like `[woman`, or `Arnalda,`
-    // which are common return values from split call
-    const regexp = `^([\[ ,])?${labelWords}([\] ,])?$`;
-
-    console.log(labelWords);
-    return row("label")
-      .downcase()
-      .split()
-      .contains(function (split) {
-        return split.match(regexp);
-      });
   }
 
   /**
