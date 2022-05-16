@@ -61,7 +61,7 @@ describe("Response search - advanced label search", function () {
         "Jr.",
         "Temě*",
         "Evel*",
-        "Evelín Jr",
+        "Teměř Jr",
       ];
       for (const part of parts) {
         const entities = await new SearchQuery(db.connection)
