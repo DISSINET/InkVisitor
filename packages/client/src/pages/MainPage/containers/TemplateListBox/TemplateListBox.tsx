@@ -192,7 +192,7 @@ export const TemplateListBox: React.FC<TemplateListBox> = ({}) => {
   };
   const handleCreateNewEntityTemplate = () => {
     const newTemplate = CEntity(
-      EntityClass.Person,
+      createModalEntityClass.value as EntityClass,
       createModalEntityLabel,
       localStorage.getItem("userrole") as UserRole,
       createModalEntityDetail
