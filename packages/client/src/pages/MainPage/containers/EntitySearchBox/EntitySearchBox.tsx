@@ -2,14 +2,15 @@ import { DropdownItem } from "@shared/dictionaries/entity";
 import { EntityClass } from "@shared/enums";
 import { IEntity, IOption, IResponseEntity } from "@shared/types";
 import api, { IFilterEntities } from "api";
-import { Dropdown, Input, Loader } from "components";
+import { Button, Dropdown, Input, Loader } from "components";
 import { useDebounce } from "hooks";
 import React, { useEffect, useMemo, useState } from "react";
+import { FaUnlink } from "react-icons/fa";
 import { useQuery } from "react-query";
 import { OptionsType, OptionTypeBase, ValueType } from "react-select";
 import { wildCardChar } from "Theme/constants";
 import { Entities } from "types";
-import { EntityTag } from "..";
+import { EntitySuggester, EntityTag } from "..";
 import {
   StyledBoxContent,
   StyledResultHeading,
@@ -23,6 +24,7 @@ import {
 
 const initValues: IFilterEntities = {
   label: "",
+  entityId: "",
 };
 
 const defaultOption = {
@@ -48,6 +50,20 @@ export const EntitySearchBox: React.FC = () => {
       !!searchData.usedTemplate
     );
   }, [searchData]);
+
+  const { data: cooccurenceEntity } = useQuery(
+    [searchData.entityId],
+    async () => {
+      if (searchData && searchData.entityId) {
+        const res = await api.entitiesGet(searchData.entityId);
+        return res.data;
+      }
+      return "";
+    },
+    {
+      enabled: !!searchData?.entityId,
+    }
+  );
 
   const {
     status,
@@ -156,9 +172,9 @@ export const EntitySearchBox: React.FC = () => {
           width={150}
           placeholder="search"
           changeOnType
-          onChangeFn={(value: string) =>
-            handleChange({ label: value + wildCardChar })
-          }
+          onChangeFn={(value: string) => {
+            handleChange({ label: value + wildCardChar });
+          }}
         />
       </StyledRow>
       <StyledRow>
@@ -192,29 +208,37 @@ export const EntitySearchBox: React.FC = () => {
         />
       </StyledRow>
 
-      {/* <StyledRow>
-        <StyledRowHeader>
-          Limit by co-occurrence
-        </StyledRowHeader>
+      <StyledRow>
+        <StyledRowHeader>Limit by co-occurrence</StyledRowHeader>
         <EntitySuggester
-          categoryTypes={classesActants}
+          categoryTypes={[
+            EntityClass.Statement,
+            EntityClass.Action,
+            EntityClass.Territory,
+            EntityClass.Resource,
+            EntityClass.Person,
+            EntityClass.Group,
+            EntityClass.Object,
+            EntityClass.Concept,
+            EntityClass.Location,
+            EntityClass.Value,
+            EntityClass.Event,
+          ]}
           onSelected={(newSelectedId: string) => {
-            handleChange("entityId", newSelectedId);
+            handleChange({ entityId: newSelectedId });
           }}
           placeholder={"entity"}
           disableCreate
           inputWidth={114}
         />
-      </StyledRow> */}
-      {/* <StyledRow>
+      </StyledRow>
+      <StyledRow>
         <StyledTagLoaderWrap>
           <Loader size={26} show={isFetching} />
         </StyledTagLoaderWrap>
-        {entity && (
-          <Tag
-            propId={entity.id}
-            label={entity.label}
-            category={entity.class}
+        {cooccurenceEntity && (
+          <EntityTag
+            actant={cooccurenceEntity}
             tooltipPosition={"left center"}
             button={
               <Button
@@ -224,13 +248,13 @@ export const EntitySearchBox: React.FC = () => {
                 inverted={true}
                 tooltip="unlink entity"
                 onClick={() => {
-                  handleChange("entityId", "");
+                  handleChange({ entityId: "" });
                 }}
               />
             }
           />
         )}
-      </StyledRow> */}
+      </StyledRow>
 
       {results.length > 0 && (
         <StyledRow>
