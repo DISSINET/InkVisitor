@@ -116,6 +116,9 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
     { enabled: !!detailId && api.isLoggedIn(), retry: 2 }
   );
 
+  const isClassChangeable =
+    entity && allowedEntityChangeClasses.includes(entity.class);
+
   const {
     status: templateStatus,
     data: templates,
@@ -545,7 +548,7 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                     )}
 
                     {/* TODO: show only when EntityClass === V-P-E-G-L-O */}
-                    {entity.class === EntityClass.Value && (
+                    {isClassChangeable && (
                       <StyledDetailContentRow>
                         <StyledDetailContentRowLabel>
                           Entity Type
@@ -610,7 +613,8 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                           rows={2}
                           value={entity.detail}
                           onChangeFn={async (newValue: string) => {
-                            updateEntityMutation.mutate({ detail: newValue });
+                            if (newValue !== entity.detail)
+                              updateEntityMutation.mutate({ detail: newValue });
                           }}
                         />
                       </StyledDetailContentRowValue>
