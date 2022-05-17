@@ -225,7 +225,6 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
           });
         });
     }
-    console.log("new templates", options);
     return options;
   }, [templates]);
 
