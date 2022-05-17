@@ -28,6 +28,7 @@ export type IFilterEntities = {
   excluded?: EntityClass[];
   onlyTemplates?: boolean;
   usedTemplate?: string;
+  entityId?: string;
 };
 
 type IFilterUsers = {
