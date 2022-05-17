@@ -56,10 +56,6 @@ export class RequestSearch {
       );
     }
 
-    if (!this.label && !this.entityId) {
-      return new BadParams("label or entityId has to be set");
-    }
-
     if (
       this.excluded !== undefined &&
       this.excluded.constructor.name !== "Array"

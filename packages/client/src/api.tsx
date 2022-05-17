@@ -14,7 +14,7 @@ import {
   IResponseUser,
   RequestPermissionUpdate,
 } from "@shared/types";
-import { IResponseSearchOld } from "@shared/types/response-search"
+import { IResponseSearchOld } from "@shared/types/response-search";
 import * as errors from "@shared/types/errors";
 import axios, { AxiosError, AxiosInstance, AxiosResponse } from "axios";
 import React from "react";
@@ -332,7 +332,9 @@ class Api {
       if (filter.class === false) {
         delete filter.class;
       }
-      const response = await this.connection.post(`/entities/getMore`, filter);
+      const response = await this.connection.get(`/entities`, {
+        params: filter,
+      });
       return response;
     } catch (err: any | AxiosError) {
       throw { ...err.response.data };
