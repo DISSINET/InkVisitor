@@ -8,7 +8,6 @@ import {
   IResponseDetail,
   IResponseGeneric,
   IResponsePermission,
-  IResponseSearch,
   IResponseStatement,
   IResponseTerritory,
   IResponseTree,
@@ -19,7 +18,6 @@ import * as errors from "@shared/types/errors";
 import axios, { AxiosError, AxiosInstance, AxiosResponse } from "axios";
 import React from "react";
 import { toast } from "react-toastify";
-import { IRequestSearchEntity, IRequestSearchStatement } from "types";
 
 export type IFilterEntities = {
   label?: string;
@@ -28,6 +26,7 @@ export type IFilterEntities = {
   excluded?: EntityClass[];
   onlyTemplates?: boolean;
   usedTemplate?: string;
+  cooccurrenceId?: string;
 };
 
 type IFilterUsers = {
@@ -325,14 +324,16 @@ class Api {
     }
   }
 
-  async entitiesGetMore(
+  async entitiesSearch(
     filter: IFilterEntities
   ): Promise<AxiosResponse<IResponseEntity[]>> {
     try {
       if (filter.class === false) {
         delete filter.class;
       }
-      const response = await this.connection.post(`/entities/getMore`, filter);
+      const response = await this.connection.get(`/entities`, {
+        params: filter,
+      });
       return response;
     } catch (err: any | AxiosError) {
       throw { ...err.response.data };
@@ -375,24 +376,6 @@ class Api {
     try {
       const response = await this.connection.delete(
         `/entities/delete/${entityId}`
-      );
-      return response;
-    } catch (err: any | AxiosError) {
-      throw { ...err.response.data };
-    }
-  }
-  /**
-   * Search
-   */
-
-  // deprecated method
-  async entitiesSearch(
-    searchData: any //IRequestSearch
-  ): Promise<AxiosResponse<IResponseSearch[]>> {
-    try {
-      const response = await this.connection.post(
-        `/entities/search`,
-        searchData
       );
       return response;
     } catch (err: any | AxiosError) {

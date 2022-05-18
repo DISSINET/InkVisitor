@@ -63,7 +63,7 @@ export const EntitySuggester: React.FC<EntitySuggesterI> = ({
   } = useQuery(
     ["suggestion", debouncedTyped, selectedCategory],
     async () => {
-      const resSuggestions = await api.entitiesGetMore({
+      const resSuggestions = await api.entitiesSearch({
         label: debouncedTyped + wildCardChar,
         class:
           selectedCategory?.value === DropdownAny

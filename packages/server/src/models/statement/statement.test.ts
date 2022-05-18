@@ -122,10 +122,7 @@ describe("findDependentStatementIds", function () {
 
   describe("empty db", () => {
     it("should return empty array", async (done) => {
-      const statements = await Statement.findUsedInDataEntities(
-        db.connection,
-        ""
-      );
+      const statements = await Statement.findByDataEntityId(db.connection, "");
       expect(statements).toHaveLength(0);
       done();
     });
@@ -136,7 +133,7 @@ describe("findDependentStatementIds", function () {
       const territory = new Territory(undefined);
       await territory.save(db.connection);
 
-      const statements = await Statement.findUsedInDataEntities(
+      const statements = await Statement.findByDataEntityId(
         db.connection,
         territory.id
       );
@@ -154,7 +151,7 @@ describe("findDependentStatementIds", function () {
       });
       await statement.save(db.connection);
 
-      const statements = await Statement.findUsedInDataEntities(
+      const statements = await Statement.findByDataEntityId(
         db.connection,
         territory.id
       );
@@ -177,7 +174,7 @@ describe("findDependentStatementIds", function () {
       ];
       await statement.save(db.connection);
 
-      const statements = await Statement.findUsedInDataEntities(
+      const statements = await Statement.findByDataEntityId(
         db.connection,
         territory.id
       );
@@ -196,7 +193,7 @@ describe("findDependentStatementIds", function () {
       statement.data.tags = [territory.id];
       await statement.save(db.connection);
 
-      const statements = await Statement.findUsedInDataEntities(
+      const statements = await Statement.findByDataEntityId(
         db.connection,
         territory.id
       );
@@ -215,7 +212,7 @@ describe("findDependentStatementIds", function () {
       statement.props = [new Prop({ origin: territory.id })];
       await statement.save(db.connection);
 
-      const statements = await Statement.findUsedInDataEntities(
+      const statements = await Statement.findByDataEntityId(
         db.connection,
         territory.id
       );
@@ -234,7 +231,7 @@ describe("findDependentStatementIds", function () {
       statement.props = [new Prop({ type: { id: territory.id } })];
       await statement.save(db.connection);
 
-      const statements = await Statement.findUsedInDataEntities(
+      const statements = await Statement.findByDataEntityId(
         db.connection,
         territory.id
       );
@@ -253,7 +250,7 @@ describe("findDependentStatementIds", function () {
       statement.props = [new Prop({ value: { id: territory.id } })];
       await statement.save(db.connection);
 
-      const statements = await Statement.findUsedInDataEntities(
+      const statements = await Statement.findByDataEntityId(
         db.connection,
         territory.id
       );
@@ -273,7 +270,7 @@ describe("findDependentStatementIds", function () {
 
       await statement.save(db.connection);
 
-      const statements = await Statement.findUsedInDataEntities(
+      const statements = await Statement.findByDataEntityId(
         db.connection,
         territory.id
       );
@@ -300,7 +297,7 @@ describe("findDependentStatementIds", function () {
       statement2.data.tags = [territory.id];
       await statement2.save(db.connection);
 
-      const statements = await Statement.findUsedInDataEntities(
+      const statements = await Statement.findByDataEntityId(
         db.connection,
         territory.id
       );
@@ -326,7 +323,7 @@ describe("findDependentStatementIds", function () {
       await statement1.save(db.connection);
       await statement2.save(db.connection);
 
-      const statements = await Statement.findUsedInDataEntities(
+      const statements = await Statement.findByDataEntityId(
         db.connection,
         territory.id
       );
@@ -620,7 +617,7 @@ describe("test Statement.findUsedInDataProps", function () {
     it("should find the statement successfully", async () => {
       await st.save(db.connection);
 
-      const foundStatements = await Statement.findUsedInDataProps(
+      const foundStatements = await Statement.findByDataPropsId(
         db.connection,
         detailId
       );
@@ -636,7 +633,7 @@ describe("test Statement.findUsedInDataProps", function () {
     it("should find the statement successfully", async () => {
       await st.save(db.connection);
 
-      const foundStatements = await Statement.findUsedInDataProps(
+      const foundStatements = await Statement.findByDataPropsId(
         db.connection,
         detailId
       );
@@ -652,7 +649,7 @@ describe("test Statement.findUsedInDataProps", function () {
     it("should find the statement successfully", async () => {
       await st.save(db.connection);
 
-      const foundStatements = await Statement.findUsedInDataProps(
+      const foundStatements = await Statement.findByDataPropsId(
         db.connection,
         detailId
       );
@@ -668,7 +665,7 @@ describe("test Statement.findUsedInDataProps", function () {
     it("should find the statement successfully", async () => {
       await st.save(db.connection);
 
-      const foundStatements = await Statement.findUsedInDataProps(
+      const foundStatements = await Statement.findByDataPropsId(
         db.connection,
         detailId
       );
@@ -685,7 +682,7 @@ describe("test Statement.findUsedInDataProps", function () {
     it("should find the statement successfully", async () => {
       await st.save(db.connection);
 
-      const foundStatements = await Statement.findUsedInDataProps(
+      const foundStatements = await Statement.findByDataPropsId(
         db.connection,
         detailId
       );
@@ -694,7 +691,7 @@ describe("test Statement.findUsedInDataProps", function () {
     });
   });
 
-  describe("multiple same-id occurences in one statement", () => {
+  describe("multiple same-id occurrences in one statement", () => {
     const [detailId, st] = prepareStatement();
     st.data.actants[0].props[0].type.id = detailId;
     st.data.actants[0].props[1].type.id = detailId;
@@ -702,7 +699,7 @@ describe("test Statement.findUsedInDataProps", function () {
     it("should find one statement", async () => {
       await st.save(db.connection);
 
-      const foundStatements = await Statement.findUsedInDataProps(
+      const foundStatements = await Statement.findByDataPropsId(
         db.connection,
         detailId
       );
@@ -722,7 +719,7 @@ describe("test Statement.findUsedInDataProps", function () {
       await st1.save(db.connection);
       await st2.save(db.connection);
 
-      const foundStatements = await Statement.findUsedInDataProps(
+      const foundStatements = await Statement.findByDataPropsId(
         db.connection,
         detailId
       );

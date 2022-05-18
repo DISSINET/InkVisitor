@@ -83,11 +83,11 @@ export class ResponseEntityDetail
     }
 
     this.walkStatementsDataEntities(
-      await Statement.findUsedInDataEntities(req.db.connection, this.id)
+      await Statement.findByDataEntityId(req.db.connection, this.id)
     );
 
     this.walkStatementsDataProps(
-      await Statement.findUsedInDataProps(req.db.connection, this.id)
+      await Statement.findByDataPropsId(req.db.connection, this.id)
     );
 
     if (this.usedTemplate) {
