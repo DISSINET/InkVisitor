@@ -25,6 +25,7 @@ interface TagProps {
   propId: string;
   parentId?: string;
   label?: string;
+  labelItalic?: boolean;
   tooltipDetail?: string;
   tooltipText?: string;
   category?: string;
@@ -53,6 +54,7 @@ export const Tag: React.FC<TagProps> = ({
   propId,
   parentId,
   label = "",
+  labelItalic = false,
   tooltipDetail,
   tooltipText,
   category = "X",
@@ -160,8 +162,9 @@ export const Tag: React.FC<TagProps> = ({
                   fullWidth={fullWidth}
                   isFavorited={isFavorited}
                   labelOnly
+                  isItalic={labelItalic}
                 >
-                  {label ? label : <i>{"no label"}</i>}
+                  {label}
                 </StyledLabel>
               </>
             )}
@@ -205,14 +208,9 @@ export const Tag: React.FC<TagProps> = ({
                   borderStyle={borderStyle}
                   fullWidth={fullWidth}
                   isFavorited={isFavorited}
+                  isItalic={labelItalic}
                 >
-                  {!label ? (
-                    <StyledItalic>{"no label"}</StyledItalic>
-                  ) : category === "X" ? (
-                    <StyledItalic>{label}</StyledItalic>
-                  ) : (
-                    label
-                  )}
+                  {label}
                 </StyledLabel>
 
                 {button && renderButton()}
