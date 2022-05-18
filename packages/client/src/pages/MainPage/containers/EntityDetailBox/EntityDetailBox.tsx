@@ -78,7 +78,7 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
     useState<boolean>(false);
 
   const [showRemoveSubmit, setShowRemoveSubmit] = useState(false);
-  const [selectedEntityType, setSelectedEntityType] = useState<string>("");
+  const [selectedEntityType, setSelectedEntityType] = useState<EntityClass>();
   const [showTypeSubmit, setShowTypeSubmit] = useState(false);
   const [usedInPage, setUsedInPage] = useState<number>(0);
   const statementsPerPage = 20;
@@ -536,7 +536,7 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                                 option: ValueType<OptionTypeBase, any>
                               ) => {
                                 setSelectedEntityType(
-                                  (option as IOption).value
+                                  (option as IOption).value as EntityClass
                                 );
                                 setShowTypeSubmit(true);
                                 // TODO: submit modal => change category mutation
@@ -1307,10 +1307,14 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
       />
       <Submit
         title="Change entity type"
-        text={`Changing entity type to: [${selectedEntityType}]. You may loose some values. Do you want to continue?`}
+        text={`Changing entity type to: [${
+          selectedEntityType ? entitiesDictKeys[selectedEntityType].label : ""
+        }]. You may loose some values. Do you want to continue?`}
         submitLabel="Continue"
         onSubmit={() => {
-          changeEntityTypeMutation.mutate(selectedEntityType);
+          if (selectedEntityType) {
+            changeEntityTypeMutation.mutate(selectedEntityType);
+          }
         }}
         onCancel={() => setShowTypeSubmit(false)}
         show={showTypeSubmit}
