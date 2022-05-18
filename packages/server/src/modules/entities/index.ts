@@ -22,7 +22,6 @@ import {
 import { Request, Router } from "express";
 import { asyncRouteHandler } from "../index";
 import Statement from "@models/statement/statement";
-import { isConstructorDeclaration } from "typescript";
 
 export default Router()
   .get(
@@ -123,12 +122,7 @@ export default Router()
       }
 
       if (result.inserted === 1) {
-        await Audit.createNew(
-          request.db.connection,
-          user,
-          model.id,
-          request.body
-        );
+        await Audit.createNew(request, model.id, request.body);
         return {
           result: true,
         };
@@ -177,12 +171,7 @@ export default Router()
       const result = await model.update(request.db.connection, entityData);
 
       if (result.replaced || result.unchanged) {
-        await Audit.createNew(
-          request.db.connection,
-          request.getUserOrFail(),
-          entityId,
-          entityData
-        );
+        await Audit.createNew(request, entityId, entityData);
 
         return {
           result: true,
