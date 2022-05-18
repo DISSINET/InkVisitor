@@ -73,7 +73,7 @@ export const EntitySearchBox: React.FC = () => {
   } = useQuery(
     ["search", searchData],
     async () => {
-      const res = await api.entitiesGetMore(searchData);
+      const res = await api.entitiesSearch(searchData);
       return res.data;
     },
     {
@@ -135,7 +135,7 @@ export const EntitySearchBox: React.FC = () => {
   } = useQuery(
     ["statement-templates", searchData, classOption],
     async () => {
-      const res = await api.entitiesGetMore({
+      const res = await api.entitiesSearch({
         onlyTemplates: true,
         class: searchData.class,
       });

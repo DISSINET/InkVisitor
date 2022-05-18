@@ -65,7 +65,7 @@ export const TemplateListBox: React.FC<TemplateListBox> = ({}) => {
         filters["class"] = filterByClass.value;
       }
 
-      const res = await api.entitiesGetMore(filters);
+      const res = await api.entitiesSearch(filters);
 
       const templates = res.data;
       templates.sort((a: IEntity, b: IEntity) =>
