@@ -1,9 +1,8 @@
-import { mergeDeep, regExpEscape } from "@common/functions";
+import { mergeDeep } from "@common/functions";
 import { ResponseEntity, ResponseEntityDetail } from "@models/entity/response";
 import Audit from "@models/audit/audit";
 import { getEntityClass } from "@models/factory";
 import { findEntityById } from "@service/shorthands";
-import { EntityClass } from "@shared/enums";
 import {
   IEntity,
   IResponseEntity,
@@ -21,84 +20,8 @@ import {
 } from "@shared/types/errors";
 import { Request, Router } from "express";
 import { asyncRouteHandler } from "../index";
-import Statement from "@models/statement/statement";
-import { IResponseSearchOld } from "@shared/types/response-search";
 import { ResponseSearch } from "@models/entity/response-search";
-import { Connection, r, RDatum } from "rethinkdb-ts";
-import Entity from "@models/entity/entity";
 import { IRequestSearch } from "@shared/types/request-search";
-
-// DEPRECATED
-export async function filterEntitiesByWildcard(
-  connection: Connection,
-  entityClass: EntityClass | undefined,
-  entityClassExcluded: EntityClass[] | undefined,
-  entityLabel: string | undefined,
-  entityIds?: string[],
-  onlyTemplates?: boolean,
-  usedTemplate?: string
-): Promise<IEntity[]> {
-  let query = r.table(Entity.table);
-
-  if (entityIds && entityIds.length) {
-    query = query.getAll(r.args(entityIds)) as any;
-  }
-
-  if (entityClass) {
-    query = query.filter({
-      class: entityClass,
-    });
-  }
-
-  if (usedTemplate) {
-    query = query.filter({
-      usedTemplate: usedTemplate,
-    });
-  }
-
-  if (onlyTemplates) {
-    query = query.filter({
-      isTemplate: true,
-    });
-  }
-
-  if (entityClassExcluded) {
-    query = query.filter(function (row: RDatum) {
-      return r.and.apply(
-        r,
-        entityClassExcluded.map((c) => row("class").ne(c)) as [
-          RDatum<boolean>,
-          ...RDatum<boolean>[]
-        ]
-      );
-    });
-  }
-
-  if (entityLabel) {
-    let leftWildcard: string = "^",
-      rightWildcard: string = "$";
-
-    if (entityLabel[0] === "*") {
-      leftWildcard = "";
-      entityLabel = entityLabel.slice(1);
-    }
-
-    if (entityLabel[entityLabel.length - 1] === "*") {
-      rightWildcard = "";
-      entityLabel = entityLabel.slice(0, -1);
-    }
-
-    entityLabel = regExpEscape(entityLabel.toLowerCase());
-
-    query = query.filter(function (row: RDatum) {
-      return row("label")
-        .downcase()
-        .match(`${leftWildcard}${entityLabel}${rightWildcard}`);
-    });
-  }
-
-  return query.run(connection);
-}
 
 export default Router()
   .get(
@@ -128,51 +51,6 @@ export default Router()
       await response.prepare(request);
 
       return response;
-    })
-  )
-  // DEPRECATED
-  .post(
-    "/getMore",
-    asyncRouteHandler<IResponseEntity[]>(async (request: Request) => {
-      const label = request.body.label;
-      const classParam = request.body.class;
-      const excluded: EntityClass[] = request.body.excluded;
-      const onlyTemplates: undefined | boolean = request.body.onlyTemplates;
-      const usedTemplate: undefined | string = request.body.usedTemplate;
-
-      if (!label && !classParam && !onlyTemplates && !usedTemplate) {
-        throw new BadParams("label or class has to be set");
-      }
-
-      if (label && label.length < 2) {
-        return [];
-      }
-
-      if (
-        typeof excluded !== "undefined" &&
-        excluded.constructor.name !== "Array"
-      ) {
-        throw new BadParams("excluded need to be array");
-      }
-
-      const entities = await filterEntitiesByWildcard(
-        request.db.connection,
-        classParam,
-        excluded,
-        label,
-        undefined,
-        onlyTemplates,
-        usedTemplate
-      );
-
-      const responses: IResponseEntity[] = [];
-      for (const entityData of entities) {
-        const response = new ResponseEntity(getEntityClass(entityData));
-        await response.prepare(request);
-        responses.push(response);
-      }
-
-      return responses;
     })
   )
   .get(
@@ -356,58 +234,5 @@ export default Router()
       await response.prepare(request);
 
       return response;
-    })
-  )
-  // DEPRECATED
-  .post(
-    "/search",
-    asyncRouteHandler<IResponseSearchOld[]>(async (httpRequest: Request) => {
-      const req = new RequestSearch(httpRequest.body);
-      if (req.label && req.label.length < 2) {
-        return [];
-      }
-
-      const err = req.validate();
-      if (err) {
-        throw err;
-      }
-
-      let associatedEntityIds: string[] | undefined = undefined;
-      if (req.entityId) {
-        associatedEntityIds = await Statement.findIdsByDataEntityId(
-          httpRequest.db.connection,
-          req.entityId
-        );
-
-        // entity id provided, but not found within statements - end now
-        if (!associatedEntityIds.length) {
-          return [];
-        }
-      }
-
-      // filter out duplicates
-      associatedEntityIds = [...new Set(associatedEntityIds)];
-
-      const entities = await filterEntitiesByWildcard(
-        httpRequest.db.connection,
-        req.class,
-        req.excluded,
-        req.label,
-        associatedEntityIds
-      );
-
-      return entities.map((a: IEntity) => {
-        const out: IResponseSearchOld = {
-          entityId: a.id,
-          entityLabel: a.label,
-          class: a.class,
-        };
-
-        // only for Entity (grouped entity of EntityClass)
-        if (a.data.logicalType) {
-          out.logicalType = (a as IEntity).data.logicalType;
-        }
-        return out;
-      });
     })
   );
