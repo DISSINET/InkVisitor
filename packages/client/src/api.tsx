@@ -26,7 +26,7 @@ export type IFilterEntities = {
   excluded?: EntityClass[];
   onlyTemplates?: boolean;
   usedTemplate?: string;
-  entityId?: string;
+  cooccurenceId?: string;
 };
 
 type IFilterUsers = {
