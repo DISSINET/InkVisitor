@@ -190,7 +190,6 @@ export class SearchQuery {
    */
   whereEntityIds(entityIds: string[]): SearchQuery {
     this.query = this.query.getAll(r.args(entityIds)) as any;
-
     return this;
   }
 
@@ -199,6 +198,11 @@ export class SearchQuery {
    * @param req
    */
   async fromRequest(req: RequestSearch): Promise<void> {
+    if (req.entityId) {
+      const assocEntityIds = await this.getAssociatedEntityIds(req.entityId);
+      this.whereEntityIds(assocEntityIds);
+    }
+
     if (req.class) {
       this.whereClass(req.class);
     }
@@ -217,11 +221,6 @@ export class SearchQuery {
 
     if (req.label) {
       this.whereLabel(req.label);
-    }
-
-    if (req.entityId) {
-      const assocEntityIds = await this.getAssociatedEntityIds(req.entityId);
-      this.whereEntityIds(assocEntityIds);
     }
   }
 
