@@ -52,7 +52,7 @@ export const EntitySearchBox: React.FC = () => {
     );
   }, [searchData]);
 
-  const { data: cooccurenceEntity } = useQuery(
+  const { data: cooccurrenceEntity } = useQuery(
     ["co-occurrence", searchData.cooccurrenceId],
     async () => {
       if (searchData?.cooccurrenceId) {
@@ -233,14 +233,14 @@ export const EntitySearchBox: React.FC = () => {
           inputWidth={114}
         />
       </StyledRow>
-      {(cooccurenceEntity || isFetching) && (
+      {(cooccurrenceEntity || isFetching) && (
         <StyledRow>
           <StyledTagLoaderWrap>
             <Loader size={26} show={isFetching} />
           </StyledTagLoaderWrap>
-          {cooccurenceEntity && (
+          {cooccurrenceEntity && (
             <EntityTag
-              actant={cooccurenceEntity}
+              actant={cooccurrenceEntity}
               tooltipPosition={"left center"}
               button={
                 <Button

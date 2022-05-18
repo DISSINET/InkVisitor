@@ -9,7 +9,7 @@ export interface IRequestSearch {
   class?: EntityClass;
   excluded?: EntityClass[];
   label?: string;
-  cooccurenceId?: string;
+  cooccurrenceId?: string;
   onlyTemplates?: boolean;
   usedTemplate?: string;
 }
@@ -17,7 +17,7 @@ export interface IRequestSearch {
 export class RequestSearch {
   class?: EntityClass;
   label?: string;
-  cooccurenceId?: string;
+  cooccurrenceId?: string;
   excluded?: EntityClass[];
   onlyTemplates?: boolean;
   usedTemplate?: string;
@@ -25,8 +25,8 @@ export class RequestSearch {
   constructor(requestData: IRequestSearch & { excluded?: EntityClass[] }) {
     this.class = requestData.class;
     this.label = requestData.label;
-    this.cooccurenceId =
-      requestData.cooccurenceId ||
+    this.cooccurrenceId =
+      requestData.cooccurrenceId ||
       (requestData as any).relatedEntityId ||
       false;
 
