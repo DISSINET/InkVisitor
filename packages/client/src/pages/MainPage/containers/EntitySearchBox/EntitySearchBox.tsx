@@ -24,7 +24,7 @@ import {
 
 const initValues: IFilterEntities = {
   label: "",
-  entityId: "",
+  cooccurenceId: "",
 };
 
 const defaultOption = {
@@ -52,16 +52,16 @@ export const EntitySearchBox: React.FC = () => {
   }, [searchData]);
 
   const { data: cooccurenceEntity } = useQuery(
-    [searchData.entityId],
+    [searchData.cooccurenceId],
     async () => {
-      if (searchData && searchData.entityId) {
-        const res = await api.entitiesGet(searchData.entityId);
+      if (searchData && searchData.cooccurenceId) {
+        const res = await api.entitiesGet(searchData.cooccurenceId);
         return res.data;
       }
       return "";
     },
     {
-      enabled: !!searchData?.entityId,
+      enabled: !!searchData?.cooccurenceId,
     }
   );
 
