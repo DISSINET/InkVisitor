@@ -272,19 +272,6 @@ export interface PropAttributeGroupDataObject {
   value: AttributeData;
 }
 
-export const classesAll = [
-  EntityClass.Action,
-  EntityClass.Person,
-  EntityClass.Group,
-  EntityClass.Object,
-  EntityClass.Concept,
-  EntityClass.Location,
-  EntityClass.Value,
-  EntityClass.Event,
-  EntityClass.Statement,
-  EntityClass.Territory,
-  EntityClass.Resource,
-];
 export const classesPropType = [EntityClass.Concept];
 export const classesPropValue = [
   EntityClass.Action,

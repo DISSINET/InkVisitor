@@ -1,6 +1,7 @@
 import {
   actantLogicalTypeDict,
   entitiesDict,
+  entitiesDictKeys,
   entityStatusDict,
   languageDict,
 } from "@shared/dictionaries";
@@ -515,6 +516,43 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                       </StyledDetailContentRowValue>
                     </StyledDetailContentRow>
 
+                    {/* Entity type */}
+                    {isClassChangeable && (
+                      <StyledDetailContentRow>
+                        <StyledDetailContentRowLabel>
+                          Entity Type
+                        </StyledDetailContentRowLabel>
+                        <StyledDetailContentRowValue>
+                          <div style={{ position: "relative" }}>
+                            <Dropdown
+                              value={{
+                                label: entitiesDictKeys[entity.class].label,
+                                value: entitiesDictKeys[entity.class].value,
+                              }}
+                              options={allowedEntityChangeClasses.map(
+                                (c) => entitiesDictKeys[c]
+                              )}
+                              onChange={(
+                                option: ValueType<OptionTypeBase, any>
+                              ) => {
+                                setSelectedEntityType(
+                                  (option as IOption).value
+                                );
+                                setShowTypeSubmit(true);
+                                // TODO: submit modal => change category mutation
+                              }}
+                              width={76}
+                              entityDropdown
+                              disableTyping
+                            />
+                            <StyledTypeBar
+                              entity={`entity${entity.class}`}
+                            ></StyledTypeBar>
+                          </div>
+                        </StyledDetailContentRowValue>
+                      </StyledDetailContentRow>
+                    )}
+
                     {/* templates */}
                     <StyledDetailContentRow>
                       <StyledDetailContentRowLabel>
@@ -543,41 +581,6 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                           <StyledDetailContentRowValueID>
                             {entity.legacyId}
                           </StyledDetailContentRowValueID>
-                        </StyledDetailContentRowValue>
-                      </StyledDetailContentRow>
-                    )}
-
-                    {/* TODO: show only when EntityClass === V-P-E-G-L-O */}
-                    {isClassChangeable && (
-                      <StyledDetailContentRow>
-                        <StyledDetailContentRowLabel>
-                          Entity Type
-                        </StyledDetailContentRowLabel>
-                        <StyledDetailContentRowValue>
-                          <div style={{ position: "relative" }}>
-                            <Dropdown
-                              value={{
-                                label: entity.class,
-                                value: entity.class,
-                              }}
-                              options={entitiesDict}
-                              onChange={(
-                                option: ValueType<OptionTypeBase, any>
-                              ) => {
-                                setSelectedEntityType(
-                                  (option as IOption).value
-                                );
-                                setShowTypeSubmit(true);
-                                // TODO: submit modal => change category mutation
-                              }}
-                              width={40}
-                              entityDropdown
-                              disableTyping
-                            />
-                            <StyledTypeBar
-                              entity={`entity${entity.class}`}
-                            ></StyledTypeBar>
-                          </div>
                         </StyledDetailContentRowValue>
                       </StyledDetailContentRow>
                     )}
