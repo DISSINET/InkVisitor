@@ -24,7 +24,7 @@ import {
 
 const initValues: IFilterEntities = {
   label: "",
-  cooccurenceId: "",
+  cooccurrenceId: "",
 };
 
 const defaultOption = {
@@ -45,6 +45,7 @@ export const EntitySearchBox: React.FC = () => {
 
   // check whether the search should be executed
   const validSearch = useMemo(() => {
+    console.log(searchData);
     return (
       (searchData.label && searchData.label.length > 2) ||
       !!searchData.usedTemplate
@@ -52,16 +53,16 @@ export const EntitySearchBox: React.FC = () => {
   }, [searchData]);
 
   const { data: cooccurenceEntity } = useQuery(
-    [searchData.cooccurenceId],
+    ["co-occurrence", searchData.cooccurrenceId],
     async () => {
-      if (searchData && searchData.cooccurenceId) {
-        const res = await api.entitiesGet(searchData.cooccurenceId);
+      if (searchData?.cooccurrenceId) {
+        const res = await api.entitiesGet(searchData.cooccurrenceId);
         return res.data;
       }
       return "";
     },
     {
-      enabled: !!searchData?.cooccurenceId,
+      enabled: !!searchData?.cooccurrenceId,
     }
   );
 
@@ -225,36 +226,38 @@ export const EntitySearchBox: React.FC = () => {
             EntityClass.Event,
           ]}
           onSelected={(newSelectedId: string) => {
-            handleChange({ entityId: newSelectedId });
+            handleChange({ cooccurrenceId: newSelectedId });
           }}
           placeholder={"entity"}
           disableCreate
           inputWidth={114}
         />
       </StyledRow>
-      <StyledRow>
-        <StyledTagLoaderWrap>
-          <Loader size={26} show={isFetching} />
-        </StyledTagLoaderWrap>
-        {cooccurenceEntity && (
-          <EntityTag
-            actant={cooccurenceEntity}
-            tooltipPosition={"left center"}
-            button={
-              <Button
-                key="d"
-                icon={<FaUnlink />}
-                color="danger"
-                inverted={true}
-                tooltip="unlink entity"
-                onClick={() => {
-                  handleChange({ entityId: "" });
-                }}
-              />
-            }
-          />
-        )}
-      </StyledRow>
+      {(cooccurenceEntity || isFetching) && (
+        <StyledRow>
+          <StyledTagLoaderWrap>
+            <Loader size={26} show={isFetching} />
+          </StyledTagLoaderWrap>
+          {cooccurenceEntity && (
+            <EntityTag
+              actant={cooccurenceEntity}
+              tooltipPosition={"left center"}
+              button={
+                <Button
+                  key="d"
+                  icon={<FaUnlink />}
+                  color="danger"
+                  inverted={true}
+                  tooltip="unlink entity"
+                  onClick={() => {
+                    handleChange({ cooccurrenceId: "" });
+                  }}
+                />
+              }
+            />
+          )}
+        </StyledRow>
+      )}
 
       {results.length > 0 && (
         <StyledRow>
