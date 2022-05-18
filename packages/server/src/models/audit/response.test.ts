@@ -5,6 +5,15 @@ import { IAudit } from "@shared/types";
 import Audit from "./audit";
 import { ResponseAudit } from "./response";
 
+function prepareAudit(forEntityId: string, date: Date): [string, Audit] {
+  const id = Math.random().toFixed();
+  const a = new Audit({
+    entityId: forEntityId,
+    date: date,
+  });
+  return [id, a];
+}
+
 describe("test Audit.save", function () {
   const rand = Math.random().toString();
 
@@ -13,13 +22,7 @@ describe("test Audit.save", function () {
       const db = new Db();
       await db.initDb();
 
-      const audit = new Audit({
-        entityId: `audit-${rand}`,
-        changes: [],
-        date: new Date(),
-        id: "",
-        user: "1",
-      } as IAudit);
+      const [, audit] = prepareAudit(rand, new Date());
 
       await audit.save(db.connection);
 
@@ -30,7 +33,7 @@ describe("test Audit.save", function () {
   });
 });
 
-describe("test Audit.getFirstForEntity", function () {
+describe("test ResponseAudit.getFirstForEntity", function () {
   const db = new Db();
   const rand = Math.random().toString();
   const entityId = `entity-${rand}`;
@@ -39,30 +42,13 @@ describe("test Audit.getFirstForEntity", function () {
   const a2Date = new Date();
   a2Date.setSeconds(a2Date.getSeconds() + 10);
 
-  const auditData: IAudit[] = [
-    {
-      entityId: entityId,
-      changes: {},
-      id: "",
-      date: a1Date,
-      user: "1",
-    },
-    {
-      entityId: entityId,
-      changes: {},
-      id: "",
-      date: a2Date,
-      user: "1",
-    },
-  ];
+  const [, a1] = prepareAudit(entityId, a1Date);
+  const [, a2] = prepareAudit(entityId, a2Date);
 
   beforeAll(async () => {
     await db.initDb();
-
-    for (const audit of auditData) {
-      const auditModel = new Audit(audit);
-      await auditModel.save(db.connection);
-    }
+    await a1.save(db.connection);
+    await a2.save(db.connection);
   });
 
   afterAll(async () => await clearAudits(db));
@@ -77,7 +63,7 @@ describe("test Audit.getFirstForEntity", function () {
   });
 });
 
-describe("test Audit.getLastNForEntity", function () {
+describe("test ResponseAudit.getLastNForEntity", function () {
   const db = new Db();
   const rand = Math.random().toString();
   const entityId = `entity-${rand}`;
@@ -86,30 +72,13 @@ describe("test Audit.getLastNForEntity", function () {
   const a2Date = new Date();
   a2Date.setSeconds(a2Date.getSeconds() + 10);
 
-  const auditData: IAudit[] = [
-    {
-      entityId: entityId,
-      changes: { a1Date },
-      id: "",
-      date: a1Date,
-      user: "1",
-    },
-    {
-      entityId: entityId,
-      changes: { a2Date },
-      id: "",
-      date: a2Date,
-      user: "1",
-    },
-  ];
+  const [, a1] = prepareAudit(entityId, a1Date);
+  const [, a2] = prepareAudit(entityId, a2Date);
 
   beforeAll(async () => {
     await db.initDb();
-
-    for (const audit of auditData) {
-      const auditModel = new Audit(audit);
-      await auditModel.save(db.connection);
-    }
+    await a1.save(db.connection);
+    await a2.save(db.connection);
   });
 
   afterAll(async () => await clearAudits(db));
@@ -118,14 +87,14 @@ describe("test Audit.getLastNForEntity", function () {
     const response = new ResponseAudit(entityId);
     await response.getLastNForEntity(db.connection, 2);
     expect(response.last).toHaveLength(2);
-    expect(response.last[0].date).toEqual(auditData[1].date);
-    expect(response.last[1].date).toEqual(auditData[0].date);
+    expect(response.last[0].date).toEqual(a2.date);
+    expect(response.last[1].date).toEqual(a1.date);
   });
 
   it("should return one last entry", async () => {
     const response = new ResponseAudit(entityId);
     await response.getLastNForEntity(db.connection, 1);
     expect(response.last).toHaveLength(1);
-    expect(response.last[0].date).toEqual(auditData[1].date);
+    expect(response.last[0].date).toEqual(a2.date);
   });
 });

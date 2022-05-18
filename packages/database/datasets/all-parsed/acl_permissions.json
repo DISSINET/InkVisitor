@@ -105,5 +105,15 @@
     "controller": "audits",
     "method": "get",
     "roles": ["*"]
+  },
+  {
+    "controller": "audits",
+    "method": "",
+    "roles": ["*"]
+  },
+  {
+    "controller": "stats",
+    "method": "",
+    "roles": ["*"]
   }
 ]
