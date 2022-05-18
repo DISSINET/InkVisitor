@@ -23,13 +23,13 @@ export class SearchQuery {
   /**
    * searches Statements to find all associated entities
    * ids can be then used in whereEntityIds method
-   * @param entityId
+   * @param cooccurenceId
    * @returns
    */
-  async getAssociatedEntityIds(entityId: string): Promise<string[]> {
+  async getAssociatedEntityIds(cooccurenceId: string): Promise<string[]> {
     const associatedEntityIds = await Statement.findIdsByDataEntityId(
       this.connection,
-      entityId
+      cooccurenceId
     );
 
     // entity id provided, but not found within statements - end now
@@ -198,8 +198,10 @@ export class SearchQuery {
    * @param req
    */
   async fromRequest(req: RequestSearch): Promise<void> {
-    if (req.entityId) {
-      const assocEntityIds = await this.getAssociatedEntityIds(req.entityId);
+    if (req.cooccurenceId) {
+      const assocEntityIds = await this.getAssociatedEntityIds(
+        req.cooccurenceId
+      );
       this.whereEntityIds(assocEntityIds);
     }
 
