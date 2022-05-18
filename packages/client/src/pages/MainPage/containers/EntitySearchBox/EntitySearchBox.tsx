@@ -2,14 +2,15 @@ import { DropdownItem } from "@shared/dictionaries/entity";
 import { EntityClass } from "@shared/enums";
 import { IEntity, IOption, IResponseEntity } from "@shared/types";
 import api, { IFilterEntities } from "api";
-import { Dropdown, Input, Loader } from "components";
+import { Button, Dropdown, Input, Loader } from "components";
 import { useDebounce } from "hooks";
 import React, { useEffect, useMemo, useState } from "react";
+import { FaUnlink } from "react-icons/fa";
 import { useQuery } from "react-query";
 import { OptionsType, OptionTypeBase, ValueType } from "react-select";
 import { wildCardChar } from "Theme/constants";
 import { Entities } from "types";
-import { EntityTag } from "..";
+import { EntitySuggester, EntityTag } from "..";
 import {
   StyledBoxContent,
   StyledResultHeading,
@@ -23,6 +24,7 @@ import {
 
 const initValues: IFilterEntities = {
   label: "",
+  cooccurrenceId: "",
 };
 
 const defaultOption = {
@@ -43,11 +45,26 @@ export const EntitySearchBox: React.FC = () => {
 
   // check whether the search should be executed
   const validSearch = useMemo(() => {
+    console.log(searchData);
     return (
       (searchData.label && searchData.label.length > 2) ||
       !!searchData.usedTemplate
     );
   }, [searchData]);
+
+  const { data: cooccurrenceEntity } = useQuery(
+    ["co-occurrence", searchData.cooccurrenceId],
+    async () => {
+      if (searchData?.cooccurrenceId) {
+        const res = await api.entitiesGet(searchData.cooccurrenceId);
+        return res.data;
+      }
+      return "";
+    },
+    {
+      enabled: !!searchData?.cooccurrenceId,
+    }
+  );
 
   const {
     status,
@@ -57,7 +74,7 @@ export const EntitySearchBox: React.FC = () => {
   } = useQuery(
     ["search", searchData],
     async () => {
-      const res = await api.entitiesGetMore(searchData);
+      const res = await api.entitiesSearch(searchData);
       return res.data;
     },
     {
@@ -119,7 +136,7 @@ export const EntitySearchBox: React.FC = () => {
   } = useQuery(
     ["statement-templates", searchData, classOption],
     async () => {
-      const res = await api.entitiesGetMore({
+      const res = await api.entitiesSearch({
         onlyTemplates: true,
         class: searchData.class,
       });
@@ -156,9 +173,9 @@ export const EntitySearchBox: React.FC = () => {
           width={150}
           placeholder="search"
           changeOnType
-          onChangeFn={(value: string) =>
-            handleChange({ label: value + wildCardChar })
-          }
+          onChangeFn={(value: string) => {
+            handleChange({ label: value + wildCardChar });
+          }}
         />
       </StyledRow>
       <StyledRow>
@@ -192,45 +209,55 @@ export const EntitySearchBox: React.FC = () => {
         />
       </StyledRow>
 
-      {/* <StyledRow>
-        <StyledRowHeader>
-          Limit by co-occurrence
-        </StyledRowHeader>
+      <StyledRow>
+        <StyledRowHeader>Limit by co-occurrence</StyledRowHeader>
         <EntitySuggester
-          categoryTypes={classesActants}
+          categoryTypes={[
+            EntityClass.Statement,
+            EntityClass.Action,
+            EntityClass.Territory,
+            EntityClass.Resource,
+            EntityClass.Person,
+            EntityClass.Group,
+            EntityClass.Object,
+            EntityClass.Concept,
+            EntityClass.Location,
+            EntityClass.Value,
+            EntityClass.Event,
+          ]}
           onSelected={(newSelectedId: string) => {
-            handleChange("entityId", newSelectedId);
+            handleChange({ cooccurrenceId: newSelectedId });
           }}
           placeholder={"entity"}
           disableCreate
           inputWidth={114}
         />
-      </StyledRow> */}
-      {/* <StyledRow>
-        <StyledTagLoaderWrap>
-          <Loader size={26} show={isFetching} />
-        </StyledTagLoaderWrap>
-        {entity && (
-          <Tag
-            propId={entity.id}
-            label={entity.label}
-            category={entity.class}
-            tooltipPosition={"left center"}
-            button={
-              <Button
-                key="d"
-                icon={<FaUnlink />}
-                color="danger"
-                inverted={true}
-                tooltip="unlink entity"
-                onClick={() => {
-                  handleChange("entityId", "");
-                }}
-              />
-            }
-          />
-        )}
-      </StyledRow> */}
+      </StyledRow>
+      {(cooccurrenceEntity || isFetching) && (
+        <StyledRow>
+          <StyledTagLoaderWrap>
+            <Loader size={26} show={isFetching} />
+          </StyledTagLoaderWrap>
+          {cooccurrenceEntity && (
+            <EntityTag
+              actant={cooccurrenceEntity}
+              tooltipPosition={"left center"}
+              button={
+                <Button
+                  key="d"
+                  icon={<FaUnlink />}
+                  color="danger"
+                  inverted={true}
+                  tooltip="unlink entity"
+                  onClick={() => {
+                    handleChange({ cooccurrenceId: "" });
+                  }}
+                />
+              }
+            />
+          )}
+        </StyledRow>
+      )}
 
       {results.length > 0 && (
         <StyledRow>
