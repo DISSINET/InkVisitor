@@ -14,12 +14,10 @@ import {
   IResponseUser,
   RequestPermissionUpdate,
 } from "@shared/types";
-import { IResponseSearchOld } from "@shared/types/response-search";
 import * as errors from "@shared/types/errors";
 import axios, { AxiosError, AxiosInstance, AxiosResponse } from "axios";
 import React from "react";
 import { toast } from "react-toastify";
-import { IRequestSearchEntity, IRequestSearchStatement } from "types";
 
 export type IFilterEntities = {
   label?: string;
@@ -326,7 +324,7 @@ class Api {
     }
   }
 
-  async entitiesGetMore(
+  async entitiesSearch(
     filter: IFilterEntities
   ): Promise<AxiosResponse<IResponseEntity[]>> {
     try {
@@ -378,24 +376,6 @@ class Api {
     try {
       const response = await this.connection.delete(
         `/entities/delete/${entityId}`
-      );
-      return response;
-    } catch (err: any | AxiosError) {
-      throw { ...err.response.data };
-    }
-  }
-  /**
-   * Search
-   */
-
-  // deprecated method
-  async entitiesSearch(
-    searchData: any //IRequestSearch
-  ): Promise<AxiosResponse<IResponseSearchOld[]>> {
-    try {
-      const response = await this.connection.post(
-        `/entities/search`,
-        searchData
       );
       return response;
     } catch (err: any | AxiosError) {
