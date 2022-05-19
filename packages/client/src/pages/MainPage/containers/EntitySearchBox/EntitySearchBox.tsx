@@ -21,6 +21,7 @@ import {
   StyledRowHeader,
   StyledTagLoaderWrap,
 } from "./EntitySearchBoxStyles";
+import { EntitySearchResults } from "./EntitySearchResults/EntitySearchResults";
 
 const initValues: IFilterEntities = {
   label: "",
@@ -45,7 +46,6 @@ export const EntitySearchBox: React.FC = () => {
 
   // check whether the search should be executed
   const validSearch = useMemo(() => {
-    console.log(searchData);
     return (
       (searchData.label && searchData.label.length > 2) ||
       !!searchData.usedTemplate
@@ -270,11 +270,7 @@ export const EntitySearchBox: React.FC = () => {
           <>
             <StyledRow>
               <StyledResults>
-                {sortedEntities.map((entity: IResponseEntity, key: number) => (
-                  <StyledResultItem key={key}>
-                    <EntityTag actant={entity} fullWidth />
-                  </StyledResultItem>
-                ))}
+                <EntitySearchResults results={sortedEntities} />
               </StyledResults>
             </StyledRow>
           </>

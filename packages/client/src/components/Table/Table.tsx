@@ -23,6 +23,7 @@ interface Table {
   perPage?: number;
   disablePaging?: boolean;
   disableHeading?: boolean;
+  disableHeader?: boolean;
   fullWidthColumn?: number;
   // Don't combine with fullWidthColumn (see CSS)
   firstColumnMinWidth?: boolean;
@@ -37,6 +38,7 @@ export const Table: React.FC<Table> = ({
   perPage = 5,
   disablePaging,
   disableHeading = false,
+  disableHeader = false,
   fullWidthColumn = 0,
   firstColumnMinWidth = false,
   lastColumnMinWidth = false,
@@ -136,7 +138,7 @@ export const Table: React.FC<Table> = ({
           {...getTableProps()}
           className="table table-rounded is-striped is-hoverable is-fullwidth"
         >
-          {data.length > 0 && (
+          {!disableHeader && data.length > 0 && (
             <StyledTHead>
               {headerGroups.map((headerGroup, key) => (
                 <tr {...headerGroup.getHeaderGroupProps()} key={key}>
