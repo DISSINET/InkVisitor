@@ -14,8 +14,6 @@ import { EntitySuggester, EntityTag } from "..";
 import {
   StyledBoxContent,
   StyledResultHeading,
-  StyledResultItem,
-  StyledResults,
   StyledResultsWrapper,
   StyledRow,
   StyledRowHeader,
@@ -267,13 +265,9 @@ export const EntitySearchBox: React.FC = () => {
       <StyledResultsWrapper>
         {/* RESULTS */}
         {sortedEntities.length > 0 && (
-          <>
-            <StyledRow>
-              <StyledResults>
-                <EntitySearchResults results={sortedEntities} />
-              </StyledResults>
-            </StyledRow>
-          </>
+          <StyledRow>
+            <EntitySearchResults results={sortedEntities} />
+          </StyledRow>
         )}
         <Loader show={isFetching} />
       </StyledResultsWrapper>
