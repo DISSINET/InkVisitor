@@ -40,15 +40,13 @@ export const EntitySearchBox: React.FC = () => {
   const [searchData, setSearchData] = useState<IFilterEntities>(initValues);
   const debouncedValues = useDebounce<IFilterEntities>(searchData, 100);
 
-  const [results, setResults] = useState<IResponseEntity[]>([]);
-
   // check whether the search should be executed
   const validSearch = useMemo(() => {
     return (
-      (searchData.label && searchData.label.length > 2) ||
-      !!searchData.usedTemplate
+      (debouncedValues.label && debouncedValues.label.length > 2) ||
+      !!debouncedValues.usedTemplate
     );
-  }, [searchData]);
+  }, [debouncedValues]);
 
   const { data: cooccurrenceEntity } = useQuery(
     ["co-occurrence", searchData.cooccurrenceId],
@@ -70,9 +68,9 @@ export const EntitySearchBox: React.FC = () => {
     error,
     isFetching,
   } = useQuery(
-    ["search", searchData],
+    ["search", debouncedValues],
     async () => {
-      const res = await api.entitiesSearch(searchData);
+      const res = await api.entitiesSearch(debouncedValues);
       return res.data;
     },
     {
@@ -80,6 +78,7 @@ export const EntitySearchBox: React.FC = () => {
     }
   );
 
+  // TODO: make readable!!!
   useEffect(() => {
     const optionsToSet: {
       value: string | undefined;
@@ -106,14 +105,6 @@ export const EntitySearchBox: React.FC = () => {
     };
     setSearchData(newSearch);
   };
-
-  // useEffect(() => {
-  //   if (debouncedValues.entityId || debouncedValues.label.length > 1) {
-  //     searchActantsMutation.mutate(debouncedValues);
-  //   } else {
-  //     setResults([]);
-  //   }
-  // }, [debouncedValues]);
 
   const sortedEntities = useMemo(() => {
     if (entities) {
@@ -169,6 +160,7 @@ export const EntitySearchBox: React.FC = () => {
         <StyledRowHeader>Label (at least 2 characters)</StyledRowHeader>
         <Input
           width={150}
+          // placeholder="label (at least 2 characters)"
           placeholder="search"
           changeOnType
           onChangeFn={(value: string) => {
@@ -177,7 +169,7 @@ export const EntitySearchBox: React.FC = () => {
         />
       </StyledRow>
       <StyledRow>
-        <StyledRowHeader>Limit by Entity class</StyledRowHeader>
+        <StyledRowHeader>Limit by class</StyledRowHeader>
         <Dropdown
           placeholder={""}
           width={150}
@@ -257,11 +249,6 @@ export const EntitySearchBox: React.FC = () => {
         </StyledRow>
       )}
 
-      {results.length > 0 && (
-        <StyledRow>
-          <StyledResultHeading>Results:</StyledResultHeading>
-        </StyledRow>
-      )}
       <StyledResultsWrapper>
         {/* RESULTS */}
         {sortedEntities.length > 0 && (
