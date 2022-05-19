@@ -24,6 +24,7 @@ interface Table {
   disablePaging?: boolean;
   disableHeading?: boolean;
   disableHeader?: boolean;
+  disableBottomPaging?: boolean;
   fullWidthColumn?: number;
   // Don't combine with fullWidthColumn (see CSS)
   firstColumnMinWidth?: boolean;
@@ -39,6 +40,7 @@ export const Table: React.FC<Table> = ({
   disablePaging,
   disableHeading = false,
   disableHeader = false,
+  disableBottomPaging = false,
   fullWidthColumn = 0,
   firstColumnMinWidth = false,
   lastColumnMinWidth = false,
@@ -188,7 +190,7 @@ export const Table: React.FC<Table> = ({
         </StyledTable>
         {/* {"Server error"} */}
         <Loader show={isLoading} />
-        {!disablePaging && getPagination("bottom")}
+        {(!disablePaging || !disableBottomPaging) && getPagination("bottom")}
       </StyledTableContainer>
     </>
   );

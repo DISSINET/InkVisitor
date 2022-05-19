@@ -3,7 +3,7 @@ import { Table } from "components";
 import React, { useMemo } from "react";
 import { Cell, Column } from "react-table";
 import { EntityTag } from "../../EntityTag/EntityTag";
-import { StyledResultItem } from "../EntitySearchBoxStyles";
+import { StyledResultItem, StyledResults } from "../EntitySearchBoxStyles";
 
 interface EntitySearchResults {
   results?: IResponseEntity[];
@@ -38,15 +38,14 @@ export const EntitySearchResults: React.FC<EntitySearchResults> = ({
   );
 
   return (
-    <>
+    <StyledResults>
       <Table
         entityTitle={{ singular: "Result", plural: "Results" }}
         columns={columns}
         data={data}
         perPage={5}
-        disableHeading
         disableHeader
       />
-    </>
+    </StyledResults>
   );
 };
