@@ -193,7 +193,7 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
   } = useQuery(
     ["entity-templates", "templates", entity?.class, detailId],
     async () => {
-      const res = await api.entitiesGetMore({
+      const res = await api.entitiesSearch({
         onlyTemplates: true,
         class: entity?.class,
       });

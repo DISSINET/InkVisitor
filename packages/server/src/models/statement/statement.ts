@@ -504,7 +504,7 @@ class Statement extends Entity implements IStatement {
    * @param entityId id of the entity
    * @returns list of statements data
    */
-  static async findUsedInDataEntities(
+  static async findByDataEntityId(
     db: Connection | undefined,
     entityId: string
   ): Promise<IStatement[]> {
@@ -518,11 +518,17 @@ class Statement extends Entity implements IStatement {
     });
   }
 
-  static async findUsedInDataEntitiesIds(
+  /**
+   * reduces findByDataEntityId results to list of ids
+   * @param db db connection
+   * @param entityId id of the entity
+   * @returns list of statements ids
+   */
+  static async findIdsByDataEntityId(
     db: Connection | undefined,
     entityId: string
   ): Promise<string[]> {
-    const statements = await Statement.findUsedInDataEntities(db, entityId);
+    const statements = await Statement.findByDataEntityId(db, entityId);
 
     const entityIds: string[] = [];
 
@@ -535,14 +541,14 @@ class Statement extends Entity implements IStatement {
   }
 
   /**
-   * finds statements which are linked to different entity
-   * using statement.data.actions[].props or statement.data.actants[].props
+   * finds statements which are linked to entity using
+   * statement.data.actions[].props or statement.data.actants[].props
    * searches also in props.children to lvl3
    * @param db db connection
    * @param entityId id of the entity
    * @returns list of statements data
    */
-  static async findUsedInDataProps(
+  static async findByDataPropsId(
     db: Connection | undefined,
     entityId: string
   ): Promise<IStatement[]> {
