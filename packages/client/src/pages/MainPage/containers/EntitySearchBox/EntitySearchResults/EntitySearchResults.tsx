@@ -43,7 +43,7 @@ export const EntitySearchResults: React.FC<EntitySearchResults> = ({
         entityTitle={{ singular: "Result", plural: "Results" }}
         columns={columns}
         data={data}
-        perPage={5}
+        perPage={10}
         disableHeader
         noBorder
       />

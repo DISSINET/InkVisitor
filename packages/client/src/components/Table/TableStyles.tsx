@@ -76,8 +76,7 @@ interface StyledTd {
   noBorder: boolean;
 }
 export const StyledTd = styled.td<StyledTd>`
-  padding: ${({ theme, noBorder }) =>
-    noBorder ? theme.space[1] : theme.space[2]};
+  padding: ${({ theme, noBorder }) => (noBorder ? "1px" : theme.space[2])};
   padding-left: ${({ theme }) => theme.space[4]};
   font-size: ${({ theme }) => theme.fontSize["xs"]};
 `;
