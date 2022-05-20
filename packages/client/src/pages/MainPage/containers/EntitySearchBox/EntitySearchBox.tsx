@@ -1,28 +1,27 @@
-import { DropdownItem } from "@shared/dictionaries/entity";
+import { DropdownItem, entitiesDict } from "@shared/dictionaries/entity";
 import { EntityClass } from "@shared/enums";
-import { IEntity, IOption, IResponseEntity } from "@shared/types";
+import { IEntity, IOption } from "@shared/types";
 import api, { IFilterEntities } from "api";
-import { Dropdown, Input, Loader } from "components";
+import { Button, Dropdown, Input, Loader } from "components";
 import { useDebounce } from "hooks";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
+import { FaUnlink } from "react-icons/fa";
 import { useQuery } from "react-query";
 import { OptionsType, OptionTypeBase, ValueType } from "react-select";
 import { wildCardChar } from "Theme/constants";
-import { Entities } from "types";
-import { EntityTag } from "..";
+import { EntitySuggester, EntityTag } from "..";
 import {
   StyledBoxContent,
-  StyledResultHeading,
-  StyledResultItem,
-  StyledResults,
   StyledResultsWrapper,
   StyledRow,
   StyledRowHeader,
   StyledTagLoaderWrap,
 } from "./EntitySearchBoxStyles";
+import { EntitySearchResults } from "./EntitySearchResults/EntitySearchResults";
 
 const initValues: IFilterEntities = {
   label: "",
+  cooccurrenceId: "",
 };
 
 const defaultOption = {
@@ -30,24 +29,40 @@ const defaultOption = {
   value: "",
 };
 
+const debounceTime: number = 100;
+
 export const EntitySearchBox: React.FC = () => {
-  const [options, setOptions] = useState<OptionsType<OptionTypeBase>>();
   const [classOption, setClassOption] =
     useState<ValueType<OptionTypeBase, any>>(defaultOption);
   const [templateOption, setTemplateOption] =
     useState<ValueType<OptionTypeBase, any>>(defaultOption);
   const [searchData, setSearchData] = useState<IFilterEntities>(initValues);
-  const debouncedValues = useDebounce<IFilterEntities>(searchData, 100);
-
-  const [results, setResults] = useState<IResponseEntity[]>([]);
+  const debouncedValues = useDebounce<IFilterEntities>(
+    searchData,
+    debounceTime
+  );
 
   // check whether the search should be executed
   const validSearch = useMemo(() => {
     return (
-      (searchData.label && searchData.label.length > 2) ||
-      !!searchData.usedTemplate
+      (debouncedValues.label && debouncedValues.label.length > 2) ||
+      !!debouncedValues.usedTemplate
     );
-  }, [searchData]);
+  }, [debouncedValues]);
+
+  const { data: cooccurrenceEntity } = useQuery(
+    ["co-occurrence", searchData.cooccurrenceId],
+    async () => {
+      if (searchData?.cooccurrenceId) {
+        const res = await api.entitiesGet(searchData.cooccurrenceId);
+        return res.data;
+      }
+      return "";
+    },
+    {
+      enabled: !!searchData?.cooccurrenceId,
+    }
+  );
 
   const {
     status,
@@ -55,9 +70,9 @@ export const EntitySearchBox: React.FC = () => {
     error,
     isFetching,
   } = useQuery(
-    ["search", searchData],
+    ["search", debouncedValues],
     async () => {
-      const res = await api.entitiesGetMore(searchData);
+      const res = await api.entitiesSearch(debouncedValues);
       return res.data;
     },
     {
@@ -65,22 +80,9 @@ export const EntitySearchBox: React.FC = () => {
     }
   );
 
-  useEffect(() => {
-    const optionsToSet: {
-      value: string | undefined;
-      label: string;
-    }[] = Object.entries(Entities)
-      .filter((c: any) => {
-        if (c[1].id !== "A" && c[1].id !== "R" && c[1].id !== "X") {
-          return c;
-        }
-      })
-      .map((entity) => {
-        return { value: entity[1].id, label: entity[1].label };
-      });
-    optionsToSet.unshift({ value: undefined, label: "*" });
-    setOptions(optionsToSet);
-  }, []);
+  const options: OptionsType<OptionTypeBase> = entitiesDict.filter(
+    (e) => e.value !== "A" && e.value !== "R" && e.value !== "X"
+  );
 
   const handleChange = (changes: {
     [key: string]: string | false | ValueType<OptionTypeBase, any>;
@@ -91,14 +93,6 @@ export const EntitySearchBox: React.FC = () => {
     };
     setSearchData(newSearch);
   };
-
-  // useEffect(() => {
-  //   if (debouncedValues.entityId || debouncedValues.label.length > 1) {
-  //     searchActantsMutation.mutate(debouncedValues);
-  //   } else {
-  //     setResults([]);
-  //   }
-  // }, [debouncedValues]);
 
   const sortedEntities = useMemo(() => {
     if (entities) {
@@ -119,7 +113,7 @@ export const EntitySearchBox: React.FC = () => {
   } = useQuery(
     ["statement-templates", searchData, classOption],
     async () => {
-      const res = await api.entitiesGetMore({
+      const res = await api.entitiesSearch({
         onlyTemplates: true,
         class: searchData.class,
       });
@@ -154,15 +148,16 @@ export const EntitySearchBox: React.FC = () => {
         <StyledRowHeader>Label (at least 2 characters)</StyledRowHeader>
         <Input
           width={150}
+          // placeholder="label (at least 2 characters)"
           placeholder="search"
           changeOnType
-          onChangeFn={(value: string) =>
-            handleChange({ label: value + wildCardChar })
-          }
+          onChangeFn={(value: string) => {
+            handleChange({ label: value + wildCardChar });
+          }}
         />
       </StyledRow>
       <StyledRow>
-        <StyledRowHeader>Limit by Entity class</StyledRowHeader>
+        <StyledRowHeader>Limit by class</StyledRowHeader>
         <Dropdown
           placeholder={""}
           width={150}
@@ -192,65 +187,62 @@ export const EntitySearchBox: React.FC = () => {
         />
       </StyledRow>
 
-      {/* <StyledRow>
-        <StyledRowHeader>
-          Limit by co-occurrence
-        </StyledRowHeader>
+      <StyledRow>
+        <StyledRowHeader>Limit by co-occurrence</StyledRowHeader>
         <EntitySuggester
-          categoryTypes={classesActants}
+          categoryTypes={[
+            EntityClass.Statement,
+            EntityClass.Action,
+            EntityClass.Territory,
+            EntityClass.Resource,
+            EntityClass.Person,
+            EntityClass.Group,
+            EntityClass.Object,
+            EntityClass.Concept,
+            EntityClass.Location,
+            EntityClass.Value,
+            EntityClass.Event,
+          ]}
           onSelected={(newSelectedId: string) => {
-            handleChange("entityId", newSelectedId);
+            handleChange({ cooccurrenceId: newSelectedId });
           }}
           placeholder={"entity"}
           disableCreate
           inputWidth={114}
         />
-      </StyledRow> */}
-      {/* <StyledRow>
-        <StyledTagLoaderWrap>
-          <Loader size={26} show={isFetching} />
-        </StyledTagLoaderWrap>
-        {entity && (
-          <Tag
-            propId={entity.id}
-            label={entity.label}
-            category={entity.class}
-            tooltipPosition={"left center"}
-            button={
-              <Button
-                key="d"
-                icon={<FaUnlink />}
-                color="danger"
-                inverted={true}
-                tooltip="unlink entity"
-                onClick={() => {
-                  handleChange("entityId", "");
-                }}
-              />
-            }
-          />
-        )}
-      </StyledRow> */}
-
-      {results.length > 0 && (
+      </StyledRow>
+      {(cooccurrenceEntity || isFetching) && (
         <StyledRow>
-          <StyledResultHeading>Results:</StyledResultHeading>
+          <StyledTagLoaderWrap>
+            <Loader size={26} show={isFetching} />
+          </StyledTagLoaderWrap>
+          {cooccurrenceEntity && (
+            <EntityTag
+              actant={cooccurrenceEntity}
+              tooltipPosition={"left center"}
+              button={
+                <Button
+                  key="d"
+                  icon={<FaUnlink />}
+                  color="danger"
+                  inverted={true}
+                  tooltip="unlink entity"
+                  onClick={() => {
+                    handleChange({ cooccurrenceId: "" });
+                  }}
+                />
+              }
+            />
+          )}
         </StyledRow>
       )}
+
       <StyledResultsWrapper>
         {/* RESULTS */}
         {sortedEntities.length > 0 && (
-          <>
-            <StyledRow>
-              <StyledResults>
-                {sortedEntities.map((entity: IResponseEntity, key: number) => (
-                  <StyledResultItem key={key}>
-                    <EntityTag actant={entity} fullWidth />
-                  </StyledResultItem>
-                ))}
-              </StyledResults>
-            </StyledRow>
-          </>
+          <StyledRow>
+            <EntitySearchResults results={sortedEntities} />
+          </StyledRow>
         )}
         <Loader show={isFetching} />
       </StyledResultsWrapper>
