@@ -1,19 +1,17 @@
-import { DropdownItem } from "@shared/dictionaries/entity";
+import { DropdownItem, entitiesDict } from "@shared/dictionaries/entity";
 import { EntityClass } from "@shared/enums";
-import { IEntity, IOption, IResponseEntity } from "@shared/types";
+import { IEntity, IOption } from "@shared/types";
 import api, { IFilterEntities } from "api";
 import { Button, Dropdown, Input, Loader } from "components";
 import { useDebounce } from "hooks";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import { FaUnlink } from "react-icons/fa";
 import { useQuery } from "react-query";
 import { OptionsType, OptionTypeBase, ValueType } from "react-select";
 import { wildCardChar } from "Theme/constants";
-import { Entities } from "types";
 import { EntitySuggester, EntityTag } from "..";
 import {
   StyledBoxContent,
-  StyledResultHeading,
   StyledResultsWrapper,
   StyledRow,
   StyledRowHeader,
@@ -31,14 +29,18 @@ const defaultOption = {
   value: "",
 };
 
+const debounceTime: number = 100;
+
 export const EntitySearchBox: React.FC = () => {
-  const [options, setOptions] = useState<OptionsType<OptionTypeBase>>();
   const [classOption, setClassOption] =
     useState<ValueType<OptionTypeBase, any>>(defaultOption);
   const [templateOption, setTemplateOption] =
     useState<ValueType<OptionTypeBase, any>>(defaultOption);
   const [searchData, setSearchData] = useState<IFilterEntities>(initValues);
-  const debouncedValues = useDebounce<IFilterEntities>(searchData, 100);
+  const debouncedValues = useDebounce<IFilterEntities>(
+    searchData,
+    debounceTime
+  );
 
   // check whether the search should be executed
   const validSearch = useMemo(() => {
@@ -62,20 +64,6 @@ export const EntitySearchBox: React.FC = () => {
     }
   );
 
-  const { data: cooccurenceEntity } = useQuery(
-    [searchData.cooccurenceId],
-    async () => {
-      if (searchData && searchData.cooccurenceId) {
-        const res = await api.entitiesGet(searchData.cooccurenceId);
-        return res.data;
-      }
-      return "";
-    },
-    {
-      enabled: !!searchData?.cooccurenceId,
-    }
-  );
-
   const {
     status,
     data: entities,
@@ -92,23 +80,9 @@ export const EntitySearchBox: React.FC = () => {
     }
   );
 
-  // TODO: make readable!!!
-  useEffect(() => {
-    const optionsToSet: {
-      value: string | undefined;
-      label: string;
-    }[] = Object.entries(Entities)
-      .filter((c: any) => {
-        if (c[1].id !== "A" && c[1].id !== "R" && c[1].id !== "X") {
-          return c;
-        }
-      })
-      .map((entity) => {
-        return { value: entity[1].id, label: entity[1].label };
-      });
-    optionsToSet.unshift({ value: undefined, label: "*" });
-    setOptions(optionsToSet);
-  }, []);
+  const options: OptionsType<OptionTypeBase> = entitiesDict.filter(
+    (e) => e.value !== "A" && e.value !== "R" && e.value !== "X"
+  );
 
   const handleChange = (changes: {
     [key: string]: string | false | ValueType<OptionTypeBase, any>;
