@@ -14,17 +14,16 @@ import { EntitySuggester, EntityTag } from "..";
 import {
   StyledBoxContent,
   StyledResultHeading,
-  StyledResultItem,
-  StyledResults,
   StyledResultsWrapper,
   StyledRow,
   StyledRowHeader,
   StyledTagLoaderWrap,
 } from "./EntitySearchBoxStyles";
+import { EntitySearchResults } from "./EntitySearchResults/EntitySearchResults";
 
 const initValues: IFilterEntities = {
   label: "",
-  cooccurenceId: "",
+  cooccurrenceId: "",
 };
 
 const defaultOption = {
@@ -41,15 +40,27 @@ export const EntitySearchBox: React.FC = () => {
   const [searchData, setSearchData] = useState<IFilterEntities>(initValues);
   const debouncedValues = useDebounce<IFilterEntities>(searchData, 100);
 
-  const [results, setResults] = useState<IResponseEntity[]>([]);
-
   // check whether the search should be executed
   const validSearch = useMemo(() => {
     return (
-      (searchData.label && searchData.label.length > 2) ||
-      !!searchData.usedTemplate
+      (debouncedValues.label && debouncedValues.label.length > 2) ||
+      !!debouncedValues.usedTemplate
     );
-  }, [searchData]);
+  }, [debouncedValues]);
+
+  const { data: cooccurrenceEntity } = useQuery(
+    ["co-occurrence", searchData.cooccurrenceId],
+    async () => {
+      if (searchData?.cooccurrenceId) {
+        const res = await api.entitiesGet(searchData.cooccurrenceId);
+        return res.data;
+      }
+      return "";
+    },
+    {
+      enabled: !!searchData?.cooccurrenceId,
+    }
+  );
 
   const { data: cooccurenceEntity } = useQuery(
     [searchData.cooccurenceId],
@@ -71,9 +82,9 @@ export const EntitySearchBox: React.FC = () => {
     error,
     isFetching,
   } = useQuery(
-    ["search", searchData],
+    ["search", debouncedValues],
     async () => {
-      const res = await api.entitiesSearch(searchData);
+      const res = await api.entitiesSearch(debouncedValues);
       return res.data;
     },
     {
@@ -81,6 +92,7 @@ export const EntitySearchBox: React.FC = () => {
     }
   );
 
+  // TODO: make readable!!!
   useEffect(() => {
     const optionsToSet: {
       value: string | undefined;
@@ -107,14 +119,6 @@ export const EntitySearchBox: React.FC = () => {
     };
     setSearchData(newSearch);
   };
-
-  // useEffect(() => {
-  //   if (debouncedValues.entityId || debouncedValues.label.length > 1) {
-  //     searchActantsMutation.mutate(debouncedValues);
-  //   } else {
-  //     setResults([]);
-  //   }
-  // }, [debouncedValues]);
 
   const sortedEntities = useMemo(() => {
     if (entities) {
@@ -170,6 +174,7 @@ export const EntitySearchBox: React.FC = () => {
         <StyledRowHeader>Label (at least 2 characters)</StyledRowHeader>
         <Input
           width={150}
+          // placeholder="label (at least 2 characters)"
           placeholder="search"
           changeOnType
           onChangeFn={(value: string) => {
@@ -178,7 +183,7 @@ export const EntitySearchBox: React.FC = () => {
         />
       </StyledRow>
       <StyledRow>
-        <StyledRowHeader>Limit by Entity class</StyledRowHeader>
+        <StyledRowHeader>Limit by class</StyledRowHeader>
         <Dropdown
           placeholder={""}
           width={150}
@@ -225,56 +230,45 @@ export const EntitySearchBox: React.FC = () => {
             EntityClass.Event,
           ]}
           onSelected={(newSelectedId: string) => {
-            handleChange({ entityId: newSelectedId });
+            handleChange({ cooccurrenceId: newSelectedId });
           }}
           placeholder={"entity"}
           disableCreate
           inputWidth={114}
         />
       </StyledRow>
-      <StyledRow>
-        <StyledTagLoaderWrap>
-          <Loader size={26} show={isFetching} />
-        </StyledTagLoaderWrap>
-        {cooccurenceEntity && (
-          <EntityTag
-            actant={cooccurenceEntity}
-            tooltipPosition={"left center"}
-            button={
-              <Button
-                key="d"
-                icon={<FaUnlink />}
-                color="danger"
-                inverted={true}
-                tooltip="unlink entity"
-                onClick={() => {
-                  handleChange({ entityId: "" });
-                }}
-              />
-            }
-          />
-        )}
-      </StyledRow>
-
-      {results.length > 0 && (
+      {(cooccurrenceEntity || isFetching) && (
         <StyledRow>
-          <StyledResultHeading>Results:</StyledResultHeading>
+          <StyledTagLoaderWrap>
+            <Loader size={26} show={isFetching} />
+          </StyledTagLoaderWrap>
+          {cooccurrenceEntity && (
+            <EntityTag
+              actant={cooccurrenceEntity}
+              tooltipPosition={"left center"}
+              button={
+                <Button
+                  key="d"
+                  icon={<FaUnlink />}
+                  color="danger"
+                  inverted={true}
+                  tooltip="unlink entity"
+                  onClick={() => {
+                    handleChange({ cooccurrenceId: "" });
+                  }}
+                />
+              }
+            />
+          )}
         </StyledRow>
       )}
+
       <StyledResultsWrapper>
         {/* RESULTS */}
         {sortedEntities.length > 0 && (
-          <>
-            <StyledRow>
-              <StyledResults>
-                {sortedEntities.map((entity: IResponseEntity, key: number) => (
-                  <StyledResultItem key={key}>
-                    <EntityTag actant={entity} fullWidth />
-                  </StyledResultItem>
-                ))}
-              </StyledResults>
-            </StyledRow>
-          </>
+          <StyledRow>
+            <EntitySearchResults results={sortedEntities} />
+          </StyledRow>
         )}
         <Loader show={isFetching} />
       </StyledResultsWrapper>

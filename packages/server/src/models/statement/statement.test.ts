@@ -126,10 +126,7 @@ describe("findDependentStatementIds", function () {
 
   describe("empty db", () => {
     it("should return empty array", async (done) => {
-      const statements = await Statement.findByDataEntityId(
-        db.connection,
-        ""
-      );
+      const statements = await Statement.findByDataEntityId(db.connection, "");
       expect(statements).toHaveLength(0);
       done();
     });
@@ -698,7 +695,7 @@ describe("test Statement.findUsedInDataProps", function () {
     });
   });
 
-  describe("multiple same-id occurences in one statement", () => {
+  describe("multiple same-id occurrences in one statement", () => {
     const [detailId, st] = prepareStatement();
     st.data.actants[0].props[0].type.id = detailId;
     st.data.actants[0].props[1].type.id = detailId;

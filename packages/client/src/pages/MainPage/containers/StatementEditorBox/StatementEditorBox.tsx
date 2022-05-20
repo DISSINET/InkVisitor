@@ -70,21 +70,6 @@ const classesActants = [
   EntityClass.Value,
   EntityClass.Event,
 ];
-const classesPropType = [EntityClass.Concept];
-const classesPropValue = [
-  EntityClass.Action,
-  EntityClass.Person,
-  EntityClass.Group,
-  EntityClass.Object,
-  EntityClass.Concept,
-  EntityClass.Location,
-  EntityClass.Value,
-  EntityClass.Event,
-  EntityClass.Statement,
-  EntityClass.Territory,
-  EntityClass.Resource,
-];
-const classesResources = [EntityClass.Resource];
 const classesTags = [
   EntityClass.Action,
   EntityClass.Territory,
