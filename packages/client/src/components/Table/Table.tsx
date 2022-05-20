@@ -25,6 +25,7 @@ interface Table {
   disableHeading?: boolean;
   disableHeader?: boolean;
   disableBottomPaging?: boolean;
+  noBorder?: boolean;
   fullWidthColumn?: number;
   // Don't combine with fullWidthColumn (see CSS)
   firstColumnMinWidth?: boolean;
@@ -41,6 +42,7 @@ export const Table: React.FC<Table> = ({
   disableHeading = false,
   disableHeader = false,
   disableBottomPaging = false,
+  noBorder = false,
   fullWidthColumn = 0,
   firstColumnMinWidth = false,
   lastColumnMinWidth = false,
@@ -73,7 +75,7 @@ export const Table: React.FC<Table> = ({
     usePagination
   );
 
-  const getPagination = (position: "top" | "bottom"): ReactNode => (
+  const renderPagination = (position: "top" | "bottom"): ReactNode => (
     <StyledTableHeader
       position={position}
       pagingUseless={pageSize > data.length}
@@ -134,14 +136,15 @@ export const Table: React.FC<Table> = ({
 
   return (
     <>
-      {!disablePaging && getPagination("top")}
+      {!disablePaging && renderPagination("top")}
       <StyledTableContainer>
         <StyledTable
           {...getTableProps()}
           className="table table-rounded is-striped is-hoverable is-fullwidth"
+          noBorder={noBorder}
         >
           {!disableHeader && data.length > 0 && (
-            <StyledTHead>
+            <StyledTHead noBorder={noBorder}>
               {headerGroups.map((headerGroup, key) => (
                 <tr {...headerGroup.getHeaderGroupProps()} key={key}>
                   {headerGroup.headers.map((column, key) => (
@@ -171,13 +174,18 @@ export const Table: React.FC<Table> = ({
                 <StyledTr
                   {...row.getRowProps()}
                   key={key}
+                  noBorder={noBorder}
                   fullWidthColumn={fullWidthColumn}
                   firstColumnMinWidth={firstColumnMinWidth}
                   lastColumnMinWidth={lastColumnMinWidth}
                 >
                   {row.cells.map((cell, key) => {
                     return (
-                      <StyledTd {...cell.getCellProps()} key={key}>
+                      <StyledTd
+                        {...cell.getCellProps()}
+                        key={key}
+                        noBorder={noBorder}
+                      >
                         {cell.render("Cell")}
                       </StyledTd>
                     );
@@ -190,7 +198,7 @@ export const Table: React.FC<Table> = ({
         </StyledTable>
         {/* {"Server error"} */}
         <Loader show={isLoading} />
-        {(!disablePaging || !disableBottomPaging) && getPagination("bottom")}
+        {(!disablePaging || !disableBottomPaging) && renderPagination("bottom")}
       </StyledTableContainer>
     </>
   );

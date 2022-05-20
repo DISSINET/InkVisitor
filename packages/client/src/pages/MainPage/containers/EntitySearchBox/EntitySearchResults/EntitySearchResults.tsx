@@ -45,6 +45,7 @@ export const EntitySearchResults: React.FC<EntitySearchResults> = ({
         data={data}
         perPage={5}
         disableHeader
+        noBorder
       />
     </StyledResults>
   );
