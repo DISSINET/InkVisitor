@@ -5,7 +5,7 @@ import {
   languageDict,
 } from "@shared/dictionaries";
 import { allEntities, DropdownItem } from "@shared/dictionaries/entity";
-import { EntityClass, Language, UserRoleMode } from "@shared/enums";
+import { EntityClass, Language, UserRole, UserRoleMode } from "@shared/enums";
 import {
   IAction,
   IEntity,
@@ -29,6 +29,7 @@ import {
   MultiInput,
   Submit,
 } from "components";
+import { StyledTypeBar } from "components/Suggester/SuggesterStyles";
 import { StyledHeading, StyledUsedInTitle } from "components/Table/TableStyles";
 import { CProp, DEntity, DStatement } from "constructors";
 import { useSearchParams } from "hooks";
@@ -43,6 +44,7 @@ import {
 } from "react-icons/fa";
 import { GrClone } from "react-icons/gr";
 import { useMutation, useQuery, useQueryClient } from "react-query";
+import { OptionTypeBase, ValueType } from "react-select";
 import { toast } from "react-toastify";
 import { DraggedPropRowCategory } from "types";
 import { v4 as uuidv4 } from "uuid";
@@ -63,7 +65,6 @@ import {
   StyledDetailSection,
   StyledDetailSectionContent,
   StyledDetailSectionContentUsedIn,
-  StyledDetailSectionContentUsedInTitle,
   StyledDetailSectionEntityList,
   StyledDetailSectionHeader,
   StyledDetailWrapper,
@@ -100,10 +101,11 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
   const handleCreateTemplate = () => {
     // create template as a copy of the entity
     if (entity) {
+      const userRole = localStorage.getItem("userrole") as UserRole;
       const templateEntity =
         entity.class === EntityClass.Statement
-          ? DStatement(entity as IStatement)
-          : DEntity(entity as IEntity);
+          ? DStatement(entity as IStatement, userRole)
+          : DEntity(entity as IEntity, userRole);
 
       if (entity.class === EntityClass.Statement) {
         delete templateEntity.data["territory"];
@@ -189,7 +191,7 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
     error: templateError,
     isFetching: isFetchingTemplates,
   } = useQuery(
-    ["entity-templates", entity?.class],
+    ["entity-templates", "templates", entity?.class, detailId],
     async () => {
       const res = await api.entitiesSearch({
         onlyTemplates: true,
@@ -304,7 +306,7 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
       onSuccess: async (data, entityId) => {
         setShowRemoveSubmit(false);
 
-        toast.info(`Entity deleted!`);
+        toast.info(`Entity removed!`);
 
         // hide selected territory if T removed
 
@@ -318,7 +320,7 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
           queryClient.invalidateQueries("territory");
         }
 
-        // hide editor box if the deleted entity was also opened in the editor
+        // hide editor box if the removed entity was also opened in the editor
         if (
           entity &&
           entity.class == EntityClass.Statement &&
@@ -522,7 +524,10 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
   };
 
   const duplicateEntity = (entityToDuplicate: IEntity) => {
-    const newEntity = DEntity(entityToDuplicate);
+    const newEntity = DEntity(
+      entityToDuplicate,
+      localStorage.getItem("userrole") as UserRole
+    );
     duplicateEntityMutation.mutate(newEntity);
   };
 
@@ -556,7 +561,7 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
               />
             </StyledTagWrap>
             <ButtonGroup style={{ marginTop: "1rem" }}>
-              {entity.class !== EntityClass.Statement && (
+              {entity.class !== EntityClass.Statement && userCanEdit && (
                 <Button
                   icon={<FaClone size={14} />}
                   color="primary"
@@ -568,7 +573,7 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                   }}
                 />
               )}
-              {mayBeRemoved && (
+              {mayBeRemoved && userCanEdit && (
                 <Button
                   color="primary"
                   icon={<FaTrashAlt />}
@@ -577,6 +582,19 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                   inverted
                   onClick={() => {
                     setShowRemoveSubmit(true);
+                  }}
+                />
+              )}
+              {userCanEdit && (
+                <Button
+                  key="template"
+                  icon={<GrClone size={14} />}
+                  tooltip="create template from entity"
+                  inverted
+                  color="primary"
+                  label="Create template"
+                  onClick={() => {
+                    setCreateTemplateModal(true);
                   }}
                 />
               )}
@@ -589,17 +607,6 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                 label="refresh"
                 onClick={() => {
                   queryClient.invalidateQueries(["entity"]);
-                }}
-              />
-              <Button
-                key="template"
-                icon={<GrClone size={14} />}
-                tooltip="create template from entity"
-                inverted
-                color="primary"
-                label="Create template"
-                onClick={() => {
-                  setCreateTemplateModal(true);
                 }}
               />
               {entity.class === EntityClass.Statement && (
@@ -678,6 +685,36 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                         </StyledDetailContentRowValue>
                       </StyledDetailContentRow>
                     )}
+
+                    {/* <StyledDetailContentRow>
+                      <StyledDetailContentRowLabel>
+                        Entity Type
+                      </StyledDetailContentRowLabel>
+                      <StyledDetailContentRowValue>
+                        <div style={{ position: "relative" }}>
+                          <Dropdown
+                            value={{
+                              label: entity.class,
+                              value: entity.class,
+                            }}
+                            options={entitiesDict}
+                            onChange={(
+                              option: ValueType<OptionTypeBase, any>
+                            ) => {
+                              // setSelectedCategory(option);
+                              // TODO: submit modal => change category mutation
+                              console.log(option);
+                            }}
+                            width={40}
+                            entityDropdown
+                            disableTyping
+                          />
+                          <StyledTypeBar
+                            entity={`entity${entity.class}`}
+                          ></StyledTypeBar>
+                        </div>
+                      </StyledDetailContentRowValue>
+                    </StyledDetailContentRow> */}
 
                     <StyledDetailContentRow>
                       <StyledDetailContentRowLabel>
@@ -1319,8 +1356,7 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                 </StyledDetailSectionContentUsedIn>
               )}
 
-              {/* usedId props */}
-
+              {/* usedIn props */}
               {!entity.isTemplate && (
                 <EntityDetailMetaPropsTable
                   title={{
@@ -1333,7 +1369,7 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                 />
               )}
 
-              {/* usedId statements */}
+              {/* usedIn statements */}
               {!entity.isTemplate && (
                 <EntityDetailStatementsTable
                   title={{ singular: "Statement", plural: "Statements" }}
@@ -1343,7 +1379,7 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                 />
               )}
 
-              {/* usedId statement props */}
+              {/* usedIn statement props */}
               {!entity.isTemplate && (
                 <EntityDetailStatementPropsTable
                   title={{
@@ -1378,7 +1414,8 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
 
       <Submit
         title="Remove entity"
-        text="Do you really want to delete the entity?"
+        text="Do you really want to remove this entity?"
+        submitLabel="Remove"
         onSubmit={() => {
           deleteEntityMutation.mutate(detailId);
           setDetailId("");

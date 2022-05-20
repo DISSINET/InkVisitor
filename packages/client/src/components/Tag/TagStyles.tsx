@@ -48,6 +48,7 @@ interface StyledLabel {
   status: string;
   isFavorited: boolean;
   labelOnly?: boolean;
+  isItalic?: boolean;
 }
 export const StyledLabel = styled.div<StyledLabel>`
   display: inline-block;
@@ -56,6 +57,7 @@ export const StyledLabel = styled.div<StyledLabel>`
   overflow: hidden !important;
   text-overflow: ellipsis;
   padding: ${({ theme }) => `${theme.space[1]} ${theme.space[2]}`};
+  font-style: ${({ isItalic }) => `${isItalic ? "italic" : "normal"}`};
   background-color: ${({ theme, invertedLabel, isFavorited }) =>
     invertedLabel
       ? theme.color["primary"]

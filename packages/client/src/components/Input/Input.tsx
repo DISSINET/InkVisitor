@@ -59,7 +59,7 @@ export const Input: React.FC<InputProps> = ({
 
   return (
     <Wrapper>
-      {label && <Label className="label"> {label}</Label>}
+      {label && <Label className="label">{label}</Label>}
       {type === "text" && (
         <StyledInput
           disabled={disabled}

@@ -42,6 +42,7 @@ interface IEntity {
   color: typeof Colors[number];
 }
 
+// Use for colors, for dropdowns use entity.ts dictionary
 export const Entities: { [key: string]: IEntity } = {
   T: {
     id: "T",
@@ -268,6 +269,19 @@ export interface AttributeGroupDataObject {
   value: AttributeData;
 }
 
+export const classesAll = [
+  EntityClass.Action,
+  EntityClass.Person,
+  EntityClass.Group,
+  EntityClass.Object,
+  EntityClass.Concept,
+  EntityClass.Location,
+  EntityClass.Value,
+  EntityClass.Event,
+  EntityClass.Statement,
+  EntityClass.Territory,
+  EntityClass.Resource,
+];
 export const classesPropType = [EntityClass.Concept];
 export const classesPropValue = [
   EntityClass.Action,

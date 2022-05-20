@@ -4,7 +4,7 @@ import { IEntity, IResponseSearch, RequestSearch } from "@shared/types";
 import { regExpEscape } from "@common/functions";
 import Entity from "./entity";
 import Statement from "@models/statement/statement";
-import { Connection, r, RDatum, RStream, RTable } from "rethinkdb-ts";
+import { Connection, r, RDatum, RTable } from "rethinkdb-ts";
 import { ResponseEntity } from "./response";
 import { getEntityClass } from "@models/factory";
 
@@ -23,13 +23,13 @@ export class SearchQuery {
   /**
    * searches Statements to find all associated entities
    * ids can be then used in whereEntityIds method
-   * @param cooccurenceId
+   * @param cooccurrenceId
    * @returns
    */
-  async getAssociatedEntityIds(cooccurenceId: string): Promise<string[]> {
+  async getAssociatedEntityIds(cooccurrenceId: string): Promise<string[]> {
     const associatedEntityIds = await Statement.findIdsByDataEntityId(
       this.connection,
-      cooccurenceId
+      cooccurrenceId
     );
 
     // entity id provided, but not found within statements - end now
@@ -198,9 +198,9 @@ export class SearchQuery {
    * @param req
    */
   async fromRequest(req: RequestSearch): Promise<void> {
-    if (req.cooccurenceId) {
+    if (req.cooccurrenceId) {
       const assocEntityIds = await this.getAssociatedEntityIds(
-        req.cooccurenceId
+        req.cooccurrenceId
       );
       this.whereEntityIds(assocEntityIds);
     }

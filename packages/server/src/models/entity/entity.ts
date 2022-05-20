@@ -110,7 +110,7 @@ export default class Entity implements IEntity, IDbModel {
   }
 
   canBeEditedByUser(user: User): boolean {
-    return true;
+    return user.role !== UserRole.Viewer;
   }
 
   canBeDeletedByUser(user: User): boolean {
