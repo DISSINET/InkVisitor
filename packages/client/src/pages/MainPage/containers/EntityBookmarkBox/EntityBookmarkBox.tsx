@@ -413,7 +413,13 @@ export const EntityBookmarkBox: React.FC = () => {
       </Modal>
 
       {/* create modal */}
-      <Modal key="create-modal" showModal={creatingFolder == true}>
+      <Modal
+        key="create-modal"
+        showModal={creatingFolder == true}
+        onClose={() => {
+          cancelCreatingFolder();
+        }}
+      >
         <ModalHeader title="Bookmark Folder" />
         <ModalContent>
           <Input

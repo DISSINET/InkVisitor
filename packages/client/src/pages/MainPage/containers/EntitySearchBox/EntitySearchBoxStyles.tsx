@@ -44,7 +44,6 @@ export const StyledResultHeading = styled.h6`
 export const StyledResultItem = styled.div`
   display: inline-flex;
   overflow: hidden;
-  margin-bottom: ${({ theme }) => theme.space[1]};
 `;
 export const StyledTagLoaderWrap = styled.div`
   min-height: 3rem;

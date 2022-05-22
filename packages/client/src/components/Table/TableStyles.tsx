@@ -1,17 +1,25 @@
 import styled from "styled-components";
 
-interface StyledTable {}
+interface StyledTable {
+  noBorder: boolean;
+}
 export const StyledTable = styled.table<StyledTable>`
   width: 100%;
   border-spacing: 0;
   border-collapse: collapse;
-  border-width: ${({ theme }) => theme.borderWidth[1]};
+  border-width: ${({ theme, noBorder }) =>
+    noBorder ? 0 : theme.borderWidth[1]};
   border-style: solid;
   border-color: ${({ theme }) => theme.color["gray"][500]};
-  box-shadow: ${({ theme }) => theme.boxShadow["subtle"]};
+  box-shadow: ${({ theme, noBorder }) =>
+    noBorder ? "none" : theme.boxShadow["subtle"]};
 `;
-export const StyledTHead = styled.thead`
-  border-width: ${({ theme }) => theme.borderWidth[1]};
+interface StyledTHead {
+  noBorder: boolean;
+}
+export const StyledTHead = styled.thead<StyledTHead>`
+  border-width: ${({ theme, noBorder }) =>
+    noBorder ? 0 : theme.borderWidth[1]};
   border-style: solid;
   border-color: ${({ theme }) => theme.color["gray"][500]};
   background: ${({ theme }) => theme.color["gray"][100]};
@@ -38,6 +46,7 @@ export const StyledTableHeader = styled.div<StyledTableHeader>`
 
 interface StyledTr {
   opacity?: number;
+  noBorder: boolean;
   fullWidthColumn: number;
   firstColumnMinWidth: boolean;
   lastColumnMinWidth: boolean;
@@ -46,9 +55,12 @@ export const StyledTr = styled.tr<StyledTr>`
   background-color: ${({ theme }) => theme.color["white"]};
   color: ${({ theme }) => theme.color["black"]};
   opacity: ${({ opacity }) => (opacity ? opacity : 1)};
-  border-top: 1px solid ${({ theme }) => theme.color["gray"][500]};
+  border-top: ${({ theme, noBorder }) =>
+    noBorder ? "" : `1px solid ${theme.color["gray"][500]}`};
+
   :hover {
-    background-color: ${({ theme }) => theme.color["gray"][100]};
+    background-color: ${({ theme, noBorder }) =>
+      noBorder ? "" : theme.color["gray"][100]};
   }
   td:not(:nth-child(${({ fullWidthColumn }) => fullWidthColumn})) {
     width: ${({ fullWidthColumn }) => (fullWidthColumn > 0 ? "1%" : "")};
@@ -60,8 +72,11 @@ export const StyledTr = styled.tr<StyledTr>`
     width: ${({ lastColumnMinWidth }) => (lastColumnMinWidth ? "1%" : "")};
   }
 `;
-export const StyledTd = styled.td`
-  padding: ${({ theme }) => theme.space[2]};
+interface StyledTd {
+  noBorder: boolean;
+}
+export const StyledTd = styled.td<StyledTd>`
+  padding: ${({ theme, noBorder }) => (noBorder ? "1px" : theme.space[2])};
   padding-left: ${({ theme }) => theme.space[4]};
   font-size: ${({ theme }) => theme.fontSize["xs"]};
 `;
