@@ -3,7 +3,7 @@ import { Certainty } from "../enums";
 export const certaintyDict = [
   {
     value: Certainty.Empty,
-    label: "empty",
+    label: "-",
     info: "",
   },
   {
