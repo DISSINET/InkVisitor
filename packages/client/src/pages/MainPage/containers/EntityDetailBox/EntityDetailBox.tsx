@@ -31,7 +31,7 @@ import {
 } from "components";
 import { StyledTypeBar } from "components/Suggester/SuggesterStyles";
 import { StyledHeading, StyledUsedInTitle } from "components/Table/TableStyles";
-import { CProp, DEntity, DStatement } from "constructors";
+import { CMetaProp, CProp, DEntity, DStatement } from "constructors";
 import { useSearchParams } from "hooks";
 import React, { useEffect, useMemo, useState } from "react";
 import {
@@ -339,9 +339,10 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
   // Props handling
 
   // adding only second or third level
-  const addProp = (originId: string) => {
+  // function adding the first level prop is in the button
+  const addMetaProp = (originId: string) => {
     if (entity) {
-      const newProp = CProp();
+      const newProp = CMetaProp();
       const newProps = [...entity.props];
 
       newProps.forEach((prop1, pi1) => {
@@ -1307,7 +1308,7 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                       territoryId={territoryId}
                       updateProp={updateProp}
                       removeProp={removeProp}
-                      addProp={addProp}
+                      addProp={addMetaProp}
                       userCanEdit={userCanEdit}
                       openDetailOnCreate={false}
                       movePropToIndex={(propId, oldIndex, newIndex) => {
@@ -1324,7 +1325,7 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                     label="create new meta property"
                     icon={<FaPlus />}
                     onClick={async () => {
-                      const newProp = CProp();
+                      const newProp = CMetaProp();
                       const newActant = { ...entity };
                       newActant.props.push(newProp);
 
