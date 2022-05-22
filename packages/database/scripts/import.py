@@ -15,10 +15,11 @@ from dotenv import dotenv_values
 
 r = RethinkDB()
 
-datasets = {"all": [
+datasets = {
+  "all": [
   {
     "name": "acl_permissions",
-    "datafile": "datasets/all/acl_permissions.json",
+    "datafile": "datasets/default/acl_permissions.json",
   },
   {
     "name": "entities",
@@ -70,7 +71,7 @@ datasets = {"all": [
   },
   {
     "name": "users",
-    "datafile": "datasets/all/users.json",
+    "datafile": "datasets/default/users.json",
   },
   {
     "name": "audits",
@@ -79,7 +80,7 @@ datasets = {"all": [
 ],"all-test":[
   {
     "name": "acl_permissions",
-    "datafile": "datasets/all-test/acl_permissions.json",
+    "datafile": "datasets/default/acl_permissions.json",
   },
   {
     "name": "entities",
@@ -131,7 +132,7 @@ datasets = {"all": [
   },
   {
     "name": "users",
-    "datafile": "datasets/all-test/users.json",
+    "datafile": "datasets/default/users.json",
   },
   {
     "name": "audits",
@@ -140,7 +141,7 @@ datasets = {"all": [
 ],"all-parsed":[
   {
     "name": "acl_permissions",
-    "datafile": "datasets/all-parsed/acl_permissions.json",
+    "datafile": "datasets/default/acl_permissions.json",
   },
   {
     "name": "entities",
