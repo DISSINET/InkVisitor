@@ -14,6 +14,11 @@ For creating base schema, please use [import.ts](./scripts/import.ts) script. Us
 
 Warning: this script will remove all tables and recreates them with basic mock data.
 
+### Datasets
+
+In [datasets](./datasets) directory you can find different groups of import data. Respective files are referenced in scripts.
+For common data (acl entries/users), you can use files stored in [default](./datasets/default) directory.
+
 # Backup
 
 `rethinkdb` comes with `rethinkdb-dump` tool, which creates snapshot according to provided arguments. Normally you would need to call this tool periodically in `crontab`. You can use script [backup.sh](./scripts/backup.sh) for this, which do the following:
