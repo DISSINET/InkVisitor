@@ -494,6 +494,9 @@ export const StatementEditorBox: React.FC = () => {
         if (detailId === statementId) {
           queryClient.invalidateQueries(["entity"]);
         }
+        if (statement && statement.isTemplate) {
+          queryClient.invalidateQueries(["templates"]);
+        }
         queryClient.invalidateQueries(["statement"]);
         queryClient.invalidateQueries(["territory"]);
       },
