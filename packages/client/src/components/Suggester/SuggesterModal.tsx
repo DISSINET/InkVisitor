@@ -117,6 +117,7 @@ export const SuggesterModal: React.FC<SuggesterModal> = ({
                 width={40}
                 entityDropdown
                 disableTyping
+                autoFocus
               />
               <TypeBar entityLetter={selectedCategory.value} />
             </ModalInputWrap>
@@ -126,7 +127,6 @@ export const SuggesterModal: React.FC<SuggesterModal> = ({
                 value={label}
                 onChangeFn={(newType: string) => setLabel(newType)}
                 changeOnType
-                // autoFocus
               />
             </ModalInputWrap>
             <ModalInputLabel>{"Detail: "}</ModalInputLabel>
