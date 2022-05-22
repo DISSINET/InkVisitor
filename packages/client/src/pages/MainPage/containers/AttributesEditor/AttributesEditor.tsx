@@ -24,7 +24,12 @@ import React, { useMemo, useState } from "react";
 import { FaUnlink } from "react-icons/fa";
 import { MdSettings } from "react-icons/md";
 import { excludedSuggesterEntities } from "Theme/constants";
-import { AttributeData, AttributeName, Entities } from "types";
+import {
+  AttributeData,
+  PropAttributeFilter,
+  Entities,
+  PropAttributeName,
+} from "types";
 import { EntitySuggester, EntityTag } from "..";
 import {
   StyledAttributeModalHeaderIcon,
@@ -47,7 +52,7 @@ interface StatementEditorAttributes {
   updateActantId?: (newId: string) => void;
   classEntitiesActant?: EntityClass[];
   loading: boolean;
-  disabledAttributes?: AttributeName[];
+  disabledAttributes?: PropAttributeName[];
   disabledAllAttributes?: boolean;
   disabledOpenModal?: boolean;
   userCanEdit?: boolean;
@@ -61,7 +66,7 @@ const AttributesEditor: React.FC<StatementEditorAttributes> = ({
   updateActantId = () => {},
   classEntitiesActant = [],
   loading,
-  disabledAttributes = [],
+  disabledAttributes = [] as PropAttributeName[],
   disabledAllAttributes = false,
   disabledOpenModal = false,
   userCanEdit = false,

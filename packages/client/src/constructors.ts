@@ -62,7 +62,7 @@ export const CProp = (): IProp => ({
 export const CMetaProp = (): IProp => ({
   id: uuidv4(),
   elvl: Elvl.Inferential,
-  certainty: Certainty.Certain,
+  certainty: Certainty.Empty,
   logic: Logic.Positive,
   mood: [Mood.Indication],
   moodvariant: MoodVariant.Realis,
