@@ -20,10 +20,11 @@ import { TooltipAttributeRow } from "./TooltipAttributeRow/TooltipAttributeRow";
 import { TooltipBooleanRow } from "./TooltipBooleanRow/TooltipBooleanRow";
 import {
   AttributeData,
-  AttributeGroupDataObject,
+  PropAttributeFilter,
+  PropAttributeGroupDataObject,
   AttributeName,
   Entities,
-  GroupName,
+  PropAttributeGroup,
 } from "types";
 import { AttributesForm } from "./AttributesForm";
 import {
@@ -59,11 +60,11 @@ interface AttributesGroupEditor {
   propValueActant?: IEntity;
   classesPropValue: EntityClass[];
   excludedSuggesterEntities: EntityClass[];
-  data: AttributeGroupDataObject;
-  handleUpdate: (data: AttributeGroupDataObject) => void;
+  data: PropAttributeGroupDataObject;
+  handleUpdate: (data: PropAttributeGroupDataObject) => void;
   updateProp: (propId: string, changes: any) => void;
   loading?: boolean;
-  disabledAttributes?: AttributeName[];
+  disabledAttributes?: PropAttributeFilter;
   disabledAllAttributes?: boolean;
   disabledOpenModal?: boolean;
   userCanEdit?: boolean;
@@ -82,13 +83,14 @@ export const AttributesGroupEditor: React.FC<AttributesGroupEditor> = ({
   handleUpdate,
   updateProp,
   loading,
-  disabledAttributes = [],
+  disabledAttributes = {} as PropAttributeFilter,
   disabledAllAttributes = false,
   disabledOpenModal = false,
   statementId,
   userCanEdit,
 }) => {
-  const [modalData, setModalData] = useState<AttributeGroupDataObject>(data);
+  const [modalData, setModalData] =
+    useState<PropAttributeGroupDataObject>(data);
 
   const somethingWasUpdated = useMemo(() => {
     return JSON.stringify(data) !== JSON.stringify(modalData);
@@ -119,7 +121,7 @@ export const AttributesGroupEditor: React.FC<AttributesGroupEditor> = ({
 
   const handleSetModalData = (
     newModalData: AttributeData,
-    groupName?: GroupName
+    groupName?: PropAttributeGroup
   ) => {
     if (groupName) {
       setModalData({ ...modalData, [groupName]: newModalData });
@@ -213,6 +215,9 @@ export const AttributesGroupEditor: React.FC<AttributesGroupEditor> = ({
     );
   };
 
+  const dissabledStatement = disabledAttributes.statement as AttributeName[];
+  const dissabledType = disabledAttributes.type as AttributeName[];
+  const dissabledValue = disabledAttributes.value as AttributeName[];
   return (
     <div>
       <Tooltip
@@ -272,7 +277,7 @@ export const AttributesGroupEditor: React.FC<AttributesGroupEditor> = ({
 
               <AttributesForm
                 groupName="statement"
-                disabledAttributes={disabledAttributes}
+                disabledAttributes={dissabledStatement}
                 modalData={modalData.statement}
                 setNewModalData={handleSetModalData}
               />
@@ -288,7 +293,7 @@ export const AttributesGroupEditor: React.FC<AttributesGroupEditor> = ({
 
               <AttributesForm
                 groupName="type"
-                disabledAttributes={disabledAttributes}
+                disabledAttributes={dissabledType}
                 modalData={modalData.type}
                 setNewModalData={handleSetModalData}
               />
@@ -348,7 +353,7 @@ export const AttributesGroupEditor: React.FC<AttributesGroupEditor> = ({
               <StyledColumnHeading>Value</StyledColumnHeading>
               <AttributesForm
                 groupName="value"
-                disabledAttributes={disabledAttributes}
+                disabledAttributes={dissabledValue}
                 modalData={modalData.value}
                 setNewModalData={handleSetModalData}
               />

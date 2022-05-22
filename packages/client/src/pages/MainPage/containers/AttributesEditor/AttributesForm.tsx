@@ -19,16 +19,24 @@ import {
   Virtuality,
 } from "@shared/enums";
 import React from "react";
-import { AttributeData, AttributeName, GroupName } from "types";
+import {
+  AttributeData,
+  PropAttributeGroup,
+  AttributeName,
+  PropAttributeFilter,
+} from "types";
 import { AttributeRow } from "./AttributeRow/AttributeRow";
 import { CheckboxRow } from "./CheckboxRow/CheckboxRow";
 
 interface AttributesForm {
-  groupName?: GroupName;
+  groupName?: PropAttributeGroup;
   modalData: AttributeData;
   disabledAttributes?: AttributeName[];
   disabledAllAttributes?: boolean;
-  setNewModalData: (newModalData: AttributeData, groupName?: GroupName) => void;
+  setNewModalData: (
+    newModalData: AttributeData,
+    groupName?: PropAttributeGroup
+  ) => void;
 }
 export const AttributesForm: React.FC<AttributesForm> = ({
   groupName,
@@ -49,7 +57,7 @@ export const AttributesForm: React.FC<AttributesForm> = ({
       | Partitivity
       | Operator
       | boolean,
-    groupName?: GroupName
+    groupName?: PropAttributeGroup
   ) => {
     const newModalData = { ...modalData };
 

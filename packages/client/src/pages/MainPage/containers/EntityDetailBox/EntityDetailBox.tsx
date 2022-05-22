@@ -46,7 +46,7 @@ import { GrClone } from "react-icons/gr";
 import { useMutation, useQuery, useQueryClient } from "react-query";
 import { OptionTypeBase, ValueType } from "react-select";
 import { toast } from "react-toastify";
-import { DraggedPropRowCategory } from "types";
+import { PropAttributeFilter, DraggedPropRowCategory } from "types";
 import { v4 as uuidv4 } from "uuid";
 import { EntityTag } from "..";
 import { AttributeButtonGroup } from "../AttributeButtonGroup/AttributeButtonGroup";
@@ -1315,7 +1315,19 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                         movePropToIndex(propId, oldIndex, newIndex);
                       }}
                       category={DraggedPropRowCategory.META_PROP}
-                      disabledAttributes={["elvl"]}
+                      disabledAttributes={
+                        {
+                          statement: [
+                            "elvl",
+                            "moodvariant",
+                            "mood",
+                            "bundleOperator",
+                            "certainty",
+                          ],
+                          type: ["elvl"],
+                          value: ["elvl"],
+                        } as PropAttributeFilter
+                      }
                     />
                   </tbody>
                 </table>
@@ -1328,7 +1340,6 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                       const newProp = CMetaProp();
                       const newActant = { ...entity };
                       newActant.props.push(newProp);
-
                       updateEntityMutation.mutate({ props: newActant.props });
                     }}
                   />
