@@ -126,7 +126,7 @@ export const SuggesterModal: React.FC<SuggesterModal> = ({
                 value={label}
                 onChangeFn={(newType: string) => setLabel(newType)}
                 changeOnType
-                autoFocus
+                // autoFocus
               />
             </ModalInputWrap>
             <ModalInputLabel>{"Detail: "}</ModalInputLabel>
