@@ -338,8 +338,6 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
 
   // Props handling
 
-  console.log(entity);
-
   // adding only second or third level
   // function adding the first level prop is in the button
   const addMetaProp = (originId: string) => {
@@ -363,7 +361,6 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
         });
       });
 
-      console.log(newProps);
       updateEntityMutation.mutate({ props: newProps });
     }
   };
