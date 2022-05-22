@@ -22,7 +22,7 @@ import {
   AttributeData,
   PropAttributeFilter,
   PropAttributeGroupDataObject,
-  AttributeName,
+  PropAttributeName,
   Entities,
   PropAttributeGroup,
 } from "types";
@@ -215,9 +215,10 @@ export const AttributesGroupEditor: React.FC<AttributesGroupEditor> = ({
     );
   };
 
-  const dissabledStatement = disabledAttributes.statement as AttributeName[];
-  const dissabledType = disabledAttributes.type as AttributeName[];
-  const dissabledValue = disabledAttributes.value as AttributeName[];
+  const dissabledStatement =
+    disabledAttributes.statement as PropAttributeName[];
+  const dissabledType = disabledAttributes.type as PropAttributeName[];
+  const dissabledValue = disabledAttributes.value as PropAttributeName[];
   return (
     <div>
       <Tooltip

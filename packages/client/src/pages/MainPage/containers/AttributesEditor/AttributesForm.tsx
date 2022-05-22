@@ -22,7 +22,7 @@ import React from "react";
 import {
   AttributeData,
   PropAttributeGroup,
-  AttributeName,
+  PropAttributeName,
   PropAttributeFilter,
 } from "types";
 import { AttributeRow } from "./AttributeRow/AttributeRow";
@@ -31,7 +31,7 @@ import { CheckboxRow } from "./CheckboxRow/CheckboxRow";
 interface AttributesForm {
   groupName?: PropAttributeGroup;
   modalData: AttributeData;
-  disabledAttributes?: AttributeName[];
+  disabledAttributes?: PropAttributeName[];
   disabledAllAttributes?: boolean;
   setNewModalData: (
     newModalData: AttributeData,
@@ -46,7 +46,7 @@ export const AttributesForm: React.FC<AttributesForm> = ({
   setNewModalData,
 }) => {
   const handleDataChange = (
-    attributeName: AttributeName,
+    attributeName: PropAttributeName,
     newValue:
       | Certainty
       | Elvl
