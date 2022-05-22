@@ -28,6 +28,7 @@ import { AttributeIcon } from "./AttributeIcon/AttributeIcon";
 import { Checkbox } from "./Checkbox/Checkbox";
 import { PanelSeparator } from "./PanelSeparator/PanelSeparator";
 import { Table } from "./Table/Table";
+import { TypeBar } from "./TypeBar/TypeBar";
 
 export {
   AttributeIcon,
@@ -56,6 +57,7 @@ export {
   ModalInputLabel,
   ModalInputWrap,
   Submit,
+  TypeBar,
   PanelSeparator,
   Tooltip,
 };
