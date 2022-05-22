@@ -91,6 +91,7 @@ export const Dropdown: React.FC<Dropdown> = ({
         placeholder={placeholder}
         noOptionsMessage={noOptionsMessage}
         isClearable={isClearable}
+        captureMenuScroll={false}
         components={{
           components,
           Option,
