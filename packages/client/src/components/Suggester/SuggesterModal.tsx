@@ -14,6 +14,7 @@ import {
   ModalInputLabel,
   ModalInputWrap,
   Tag,
+  TypeBar,
 } from "components";
 import { EntitySuggester } from "pages/MainPage/containers";
 import React, { useState } from "react";
@@ -22,7 +23,7 @@ import { useQuery } from "react-query";
 import { OptionTypeBase, ValueType } from "react-select";
 import { toast } from "react-toastify";
 import { DropdownAny } from "Theme/constants";
-import { StyledContent, StyledNote, StyledTypeBar } from "./SuggesterStyles";
+import { StyledContent, StyledNote } from "./SuggesterStyles";
 
 interface SuggesterModal {
   show?: boolean;
@@ -117,9 +118,7 @@ export const SuggesterModal: React.FC<SuggesterModal> = ({
                 entityDropdown
                 disableTyping
               />
-              <StyledTypeBar
-                entity={`entity${selectedCategory.value}`}
-              ></StyledTypeBar>
+              <TypeBar entityLetter={selectedCategory.value} />
             </ModalInputWrap>
             <ModalInputLabel>{"Label: "}</ModalInputLabel>
             <ModalInputWrap>
