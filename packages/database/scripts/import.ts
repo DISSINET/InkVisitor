@@ -87,7 +87,7 @@ const datasets: Record<string, TableSchema[]> = {
   allparsed: [
     {
       name: "acl_permissions",
-      data: require("../datasets/all-parsed/acl_permissions.json"),
+      data: require("../datasets/default/acl_permissions.json"),
       transform: function () {},
     },
     {
