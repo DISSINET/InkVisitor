@@ -26,6 +26,7 @@ import {
   PropAttributeFilter,
 } from "types";
 import { AttributeRow } from "./AttributeRow/AttributeRow";
+import { StyledAttributeTable } from "./AttributesEditorStyles";
 import { CheckboxRow } from "./CheckboxRow/CheckboxRow";
 
 interface AttributesForm {
@@ -97,7 +98,7 @@ export const AttributesForm: React.FC<AttributesForm> = ({
   };
 
   return (
-    <div>
+    <StyledAttributeTable>
       {modalData.elvl && (
         <AttributeRow
           disabled={
@@ -238,6 +239,6 @@ export const AttributesForm: React.FC<AttributesForm> = ({
           }}
         ></AttributeRow>
       )}
-    </div>
+    </StyledAttributeTable>
   );
 };
