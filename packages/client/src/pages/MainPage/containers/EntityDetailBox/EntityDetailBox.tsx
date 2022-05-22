@@ -29,7 +29,6 @@ import {
   MultiInput,
   Submit,
 } from "components";
-import { StyledTypeBar } from "components/Suggester/SuggesterStyles";
 import { StyledHeading, StyledUsedInTitle } from "components/Table/TableStyles";
 import { CMetaProp, CProp, DEntity, DStatement } from "constructors";
 import { useSearchParams } from "hooks";
@@ -710,13 +709,13 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                             entityDropdown
                             disableTyping
                           />
-                          <StyledTypeBar
-                            entity={`entity${entity.class}`}
-                          ></StyledTypeBar>
+                          <TypeBar
+                            entityLetter={entity.class}
+                          />
                         </div>
                       </StyledDetailContentRowValue>
                     </StyledDetailContentRow> */}
-
+                         
                     <StyledDetailContentRow>
                       <StyledDetailContentRowLabel>
                         Label

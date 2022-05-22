@@ -10,17 +10,7 @@ export const StyledSuggester = styled.div<StyledSuggester>`
   display: inline-flex;
   margin-top: ${({ marginTop }) => (marginTop ? space2 : 0)};
 `;
-interface StyledTypeBar {
-  entity: string;
-}
-export const StyledTypeBar = styled.div<StyledTypeBar>`
-  position: absolute;
-  background-color: ${({ theme, entity }) => theme.color[entity]};
-  width: 3px;
-  left: 1px;
-  top: 1px;
-  bottom: 1px;
-`;
+
 interface Column {
   isSelected: boolean;
 }

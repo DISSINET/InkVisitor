@@ -14,8 +14,9 @@ import {
   ModalInputForm,
   ModalInputLabel,
   ModalInputWrap,
+  TypeBar,
 } from "components";
-import { StyledTypeBar } from "components/Suggester/SuggesterStyles";
+
 import { CEntity, CStatement } from "constructors";
 import { useSearchParams } from "hooks";
 import React, { useMemo, useState } from "react";
@@ -233,9 +234,7 @@ export const TemplateListBox: React.FC<TemplateListBox> = ({}) => {
                   entityDropdown
                   disableTyping
                 />
-                <StyledTypeBar
-                  entity={`entity${filterByClass.value}`}
-                ></StyledTypeBar>
+                <TypeBar entityLetter={filterByClass.value} />
               </div>
             </StyledTemplateFilterInputValue>
           </StyledTemplateFilterInputRow>
@@ -310,9 +309,7 @@ export const TemplateListBox: React.FC<TemplateListBox> = ({}) => {
                   entityDropdown
                   disableTyping
                 />
-                <StyledTypeBar
-                  entity={`entity${createModalEntityClass.value}`}
-                ></StyledTypeBar>
+                <TypeBar entityLetter={createModalEntityClass.value} />
               </ModalInputWrap>
               <ModalInputLabel>{"Label: "}</ModalInputLabel>
               <ModalInputWrap>
