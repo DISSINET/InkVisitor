@@ -1,119 +1,122 @@
 [
   {
     "controller": "acl",
-    "method": "index",
+    "route": "index",
     "roles": ["admin"]
   },
   {
     "controller": "acl",
-    "method": "update",
+    "route": "update",
     "roles": ["admin"]
   },
   {
     "controller": "acl",
-    "method": "delete",
+    "route": "delete",
     "roles": ["admin"]
   },
-
   {
     "controller": "statements",
-    "method": "get",
-    "roles": ["*"]
-  },
-
-  {
-    "controller": "territories",
-    "method": "get",
+    "route": "get",
     "roles": ["*"]
   },
   {
     "controller": "territories",
-    "method": "getEntityIds",
+    "route": "get",
+    "roles": ["*"]
+  },
+  {
+    "controller": "territories",
+    "route": "getEntityIds",
     "roles": ["*"]
   },
   {
     "controller": "tree",
-    "method": "get",
+    "route": "get",
     "roles": ["*"]
   },
   {
     "controller": "tree",
-    "method": "moveTerritory",
+    "route": "moveTerritory",
     "roles": ["admin", "editor"]
   },
   {
     "controller": "users",
-    "method": "signin",
+    "route": "signin",
     "roles": ["*"]
   },
   {
     "controller": "users",
-    "method": "bookmarksGet",
+    "route": "bookmarksGet",
     "roles": ["*"]
   },
   {
     "controller": "users",
-    "method": "bookmarks",
+    "route": "bookmarks",
     "roles": ["*"]
   },
   {
     "controller": "users",
-    "method": "get",
+    "route": "get",
     "roles": ["*"]
   },
   {
     "controller": "users",
-    "method": "update",
+    "route": "update",
     "roles": ["*"]
   },
   {
     "controller": "entities",
-    "method": "create",
+    "route": "create",
     "roles": ["*"]
   },
   {
     "controller": "entities",
-    "method": "update",
+    "route": "update",
     "roles": ["*"]
   },
   {
     "controller": "entities",
-    "method": "delete",
+    "route": "delete",
     "roles": ["*"]
   },
   {
     "controller": "entities",
-    "method": "detail",
+    "route": "detail",
     "roles": ["*"]
   },
   {
     "controller": "entities",
-    "method": "search",
+    "route": "search",
     "roles": ["*"]
   },
   {
     "controller": "entities",
-    "method": "get",
+    "route": "get",
     "roles": ["*"]
   },
   {
     "controller": "entities",
-    "method": "getMore",
+    "route": "getMore",
     "roles": ["*"]
   },
   {
     "controller": "audits",
-    "method": "get",
+    "route": "get",
     "roles": ["*"]
   },
   {
     "controller": "audits",
-    "method": "",
+    "route": "",
     "roles": ["*"]
   },
   {
     "controller": "stats",
-    "method": "",
+    "route": "",
+    "roles": ["*"]
+  },
+  {
+    "controller": "entities",
+    "route": "",
     "roles": ["*"]
   }
 ]

@@ -32,22 +32,22 @@ class Acl {
   private async getPermission(req: Request): Promise<AclPermission | null> {
     const ctrl = req.baseUrl.split("/").pop() || "";
     const methodParts = req.route.path.split("/");
-    const method = methodParts[0] == "" ? methodParts[1] : methodParts[0];
+    const route = methodParts[0] == "" ? methodParts[1] : methodParts[0];
 
-    const permission = await AclPermission.findByPath(
+    const permission = await AclPermission.findByRoute(
       req.db.connection,
       ctrl,
-      method
+      route
     );
 
     if (!permission) {
       const newPermission = new AclPermission({
         controller: ctrl,
-        method,
+        route: route,
         roles: [],
       });
       await newPermission.save(req.db.connection);
-      console.log(`[Acl]: creating entry for ${ctrl}-${method}`);
+      console.log(`[Acl]: creating entry for ${ctrl}/${route}`);
     }
 
     return permission;
@@ -55,7 +55,7 @@ class Acl {
 
   public async validate(req: Request): Promise<CustomError | null> {
     const permission = await this.getPermission(req);
-    if (permission?.method === "signin") {
+    if (permission?.route === "signin") {
       return null;
     }
 
