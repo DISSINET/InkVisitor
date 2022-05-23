@@ -6,14 +6,7 @@ import {
 } from "@shared/dictionaries";
 import { allEntities, DropdownItem } from "@shared/dictionaries/entity";
 import { EntityClass, Language, UserRole, UserRoleMode } from "@shared/enums";
-import {
-  IAction,
-  IEntity,
-  IOption,
-  IProp,
-  IReference,
-  IStatement,
-} from "@shared/types";
+import { IAction, IEntity, IOption, IProp, IReference } from "@shared/types";
 import api from "api";
 import {
   Button,
@@ -21,16 +14,11 @@ import {
   Dropdown,
   Input,
   Loader,
-  Modal,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
-  ModalInputForm,
   MultiInput,
   Submit,
 } from "components";
 import { StyledHeading, StyledUsedInTitle } from "components/Table/TableStyles";
-import { CMetaProp, DEntity, DStatement } from "constructors";
+import { CMetaProp, DEntity } from "constructors";
 import { useSearchParams } from "hooks";
 import React, { useEffect, useMemo, useState } from "react";
 import {
@@ -49,10 +37,10 @@ import { v4 as uuidv4 } from "uuid";
 import { EntityTag } from "..";
 import { AttributeButtonGroup } from "../AttributeButtonGroup/AttributeButtonGroup";
 import { AuditTable } from "../AuditTable/AuditTable";
-import { StyledContent } from "../EntityBookmarkBox/EntityBookmarkBoxStyles";
 import { EntityReferenceTable } from "../EntityReferenceTable/EntityReferenceTable";
 import { JSONExplorer } from "../JSONExplorer/JSONExplorer";
 import { PropGroup } from "../PropGroup/PropGroup";
+import { ApplyTemplateModal } from "./ApplyTemplateModal/ApplyTemplateModal";
 import { CreateTemplateModal } from "./CreateTemplateModal/CreateTemplateModal";
 import {
   StyledActantHeaderRow,
@@ -108,28 +96,6 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
         setApplyTemplateModal(true);
       }
     }
-  };
-
-  const handleApplyTemplate = () => {
-    if (templateToApply && entity) {
-      // TODO #952 handle conflicts in Templates application
-      const entityAfterTemplateApplied = {
-        ...{
-          data: templateToApply.data,
-          notes: templateToApply.notes,
-          props: templateToApply.props,
-          references: templateToApply.references,
-          usedTemplate: templateToApply.id,
-        },
-      };
-
-      toast.info(
-        `Template "${templateToApply.label}" applied to Statement "${entity.label}"`
-      );
-
-      updateEntityMutation.mutate(entityAfterTemplateApplied);
-    }
-    setTemplateToApply(false);
   };
 
   const queryClient = useQueryClient();
@@ -1406,50 +1372,15 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
           deleteEntityMutation.isLoading
         }
       />
-      <Modal
+
+      <ApplyTemplateModal
         showModal={applyTemplateModal}
-        width="thin"
-        onEnterPress={() => {
-          setApplyTemplateModal(false);
-          handleApplyTemplate();
-        }}
-        onClose={() => {
-          setApplyTemplateModal(false);
-        }}
-      >
-        <ModalHeader title="Create Template" />
-        <ModalContent>
-          <StyledContent>
-            <ModalInputForm>{`Apply template?`}</ModalInputForm>
-            <div>
-              {templateToApply && <EntityTag actant={templateToApply} />}
-            </div>
-            {/* here goes the info about template #951 */}
-          </StyledContent>
-        </ModalContent>
-        <ModalFooter>
-          <ButtonGroup>
-            <Button
-              key="cancel"
-              label="Cancel"
-              color="greyer"
-              inverted
-              onClick={() => {
-                setApplyTemplateModal(false);
-              }}
-            />
-            <Button
-              key="submit"
-              label="Apply"
-              color="info"
-              onClick={() => {
-                setApplyTemplateModal(false);
-                handleApplyTemplate();
-              }}
-            />
-          </ButtonGroup>
-        </ModalFooter>
-      </Modal>
+        entity={entity}
+        setApplyTemplateModal={setApplyTemplateModal}
+        updateEntityMutation={updateEntityMutation}
+        templateToApply={templateToApply}
+        setTemplateToApply={setTemplateToApply}
+      />
 
       <CreateTemplateModal
         setCreateTemplateModal={setCreateTemplateModal}

@@ -24,10 +24,10 @@ import {
 } from "../EntityDetailBoxStyles";
 
 interface CreateTemplateModal {
-  showModal?: boolean;
+  showModal: boolean;
   entity?: IEntity;
   userCanEdit: boolean;
-  setCreateTemplateModal: any;
+  setCreateTemplateModal: React.Dispatch<React.SetStateAction<boolean>>;
   updateEntityMutation: UseMutationResult<
     AxiosResponse<IResponseGeneric>,
     unknown,
