@@ -30,7 +30,7 @@ import {
   Submit,
 } from "components";
 import { StyledHeading, StyledUsedInTitle } from "components/Table/TableStyles";
-import { CMetaProp, CProp, DEntity, DStatement } from "constructors";
+import { CMetaProp, DEntity, DStatement } from "constructors";
 import { useSearchParams } from "hooks";
 import React, { useEffect, useMemo, useState } from "react";
 import {
@@ -43,9 +43,8 @@ import {
 } from "react-icons/fa";
 import { GrClone } from "react-icons/gr";
 import { useMutation, useQuery, useQueryClient } from "react-query";
-import { OptionTypeBase, ValueType } from "react-select";
 import { toast } from "react-toastify";
-import { PropAttributeFilter, DraggedPropRowCategory } from "types";
+import { DraggedPropRowCategory, PropAttributeFilter } from "types";
 import { v4 as uuidv4 } from "uuid";
 import { EntityTag } from "..";
 import { AttributeButtonGroup } from "../AttributeButtonGroup/AttributeButtonGroup";
@@ -54,6 +53,7 @@ import { StyledContent } from "../EntityBookmarkBox/EntityBookmarkBoxStyles";
 import { EntityReferenceTable } from "../EntityReferenceTable/EntityReferenceTable";
 import { JSONExplorer } from "../JSONExplorer/JSONExplorer";
 import { PropGroup } from "../PropGroup/PropGroup";
+import { CreateTemplateModal } from "./CreateTemplateModal/CreateTemplateModal";
 import {
   StyledActantHeaderRow,
   StyledDetailContentRow,
@@ -87,7 +87,7 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
 
   const [createTemplateModal, setCreateTemplateModal] =
     useState<boolean>(false);
-  const [createTemplateLabel, setCreateTemplateLabel] = useState<string>("");
+
   const [showRemoveSubmit, setShowRemoveSubmit] = useState(false);
   const [usedInPage, setUsedInPage] = useState<number>(0);
   const statementsPerPage = 20;
@@ -96,42 +96,6 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
   const [templateToApply, setTemplateToApply] = useState<IEntity | false>(
     false
   );
-
-  const handleCreateTemplate = () => {
-    // create template as a copy of the entity
-    if (entity) {
-      const userRole = localStorage.getItem("userrole") as UserRole;
-      const templateEntity =
-        entity.class === EntityClass.Statement
-          ? DStatement(entity as IStatement, userRole)
-          : DEntity(entity as IEntity, userRole);
-
-      if (entity.class === EntityClass.Statement) {
-        delete templateEntity.data["territory"];
-      }
-      templateEntity.isTemplate = true;
-      templateEntity.usedTemplate = "";
-      templateEntity.label = createTemplateLabel;
-      api.entityCreate(templateEntity);
-
-      setTimeout(() => {
-        queryClient.invalidateQueries(["templates"]);
-      }, 1000);
-      updateEntityMutation.mutate({ usedTemplate: templateEntity.id });
-
-      setCreateTemplateModal(false);
-      setCreateTemplateLabel("");
-
-      toast.info(
-        `Template "${templateEntity.label}" created from entity "${entity.label}"`
-      );
-    }
-  };
-
-  const handleCancelCreateTemplate = () => {
-    setCreateTemplateModal(false);
-    setCreateTemplateLabel("");
-  };
 
   const handleAskForTemplateApply = (templateOptionToApply: IOption) => {
     if (templates) {
@@ -715,7 +679,7 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                         </div>
                       </StyledDetailContentRowValue>
                     </StyledDetailContentRow> */}
-                         
+
                     <StyledDetailContentRow>
                       <StyledDetailContentRowLabel>
                         Label
@@ -1486,63 +1450,14 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
           </ButtonGroup>
         </ModalFooter>
       </Modal>
-      <Modal
+
+      <CreateTemplateModal
+        setCreateTemplateModal={setCreateTemplateModal}
+        entity={entity}
         showModal={createTemplateModal}
-        width="thin"
-        onEnterPress={() => {
-          handleCreateTemplate();
-        }}
-        onClose={() => {
-          handleCancelCreateTemplate();
-        }}
-      >
-        <ModalHeader title="Create Template" />
-        <ModalContent>
-          <StyledContent>
-            <ModalInputForm>
-              <StyledDetailForm>
-                <StyledDetailContentRow>
-                  <StyledDetailContentRowLabel>
-                    Label
-                  </StyledDetailContentRowLabel>
-                  <StyledDetailContentRowValue>
-                    <Input
-                      disabled={!userCanEdit}
-                      width="full"
-                      value={createTemplateLabel}
-                      onChangeFn={async (newLabel: string) => {
-                        setCreateTemplateLabel(newLabel);
-                      }}
-                      changeOnType
-                    />
-                  </StyledDetailContentRowValue>
-                </StyledDetailContentRow>
-              </StyledDetailForm>
-            </ModalInputForm>
-          </StyledContent>
-        </ModalContent>
-        <ModalFooter>
-          <ButtonGroup>
-            <Button
-              key="cancel"
-              label="Cancel"
-              color="greyer"
-              inverted
-              onClick={() => {
-                handleCancelCreateTemplate();
-              }}
-            />
-            <Button
-              key="submit"
-              label="Create"
-              color="info"
-              onClick={() => {
-                handleCreateTemplate();
-              }}
-            />
-          </ButtonGroup>
-        </ModalFooter>
-      </Modal>
+        userCanEdit={userCanEdit}
+        updateEntityMutation={updateEntityMutation}
+      />
     </>
   );
 };
