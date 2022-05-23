@@ -13,7 +13,7 @@ export default class AclPermission implements IDbModel, IResponsePermission {
   constructor(data: Record<string, any>) {
     this.id = data.id;
     this.controller = data.controller;
-    this.route = data.route;
+    this.route = data.route || data.method;
     this.roles = data.roles;
   }
 
