@@ -5,12 +5,11 @@ import {
   languageDict,
 } from "@shared/dictionaries";
 import { allEntities, DropdownItem } from "@shared/dictionaries/entity";
-import { EntityClass, Language, UserRole, UserRoleMode } from "@shared/enums";
+import { EntityClass, Language, UserRoleMode } from "@shared/enums";
 import { IAction, IEntity, IOption, IProp, IReference } from "@shared/types";
 import api from "api";
 import {
   Button,
-  ButtonGroup,
   Dropdown,
   Input,
   Loader,
@@ -18,22 +17,13 @@ import {
   Submit,
 } from "components";
 import { StyledHeading, StyledUsedInTitle } from "components/Table/TableStyles";
-import { CMetaProp, DEntity } from "constructors";
+import { CMetaProp } from "constructors";
 import { useSearchParams } from "hooks";
 import React, { useEffect, useMemo, useState } from "react";
-import {
-  FaClone,
-  FaEdit,
-  FaPlus,
-  FaRecycle,
-  FaRegCopy,
-  FaTrashAlt,
-} from "react-icons/fa";
-import { GrClone } from "react-icons/gr";
+import { FaPlus, FaRegCopy } from "react-icons/fa";
 import { useMutation, useQuery, useQueryClient } from "react-query";
 import { toast } from "react-toastify";
 import { DraggedPropRowCategory, PropAttributeFilter } from "types";
-import { v4 as uuidv4 } from "uuid";
 import { EntityTag } from "..";
 import { AttributeButtonGroup } from "../AttributeButtonGroup/AttributeButtonGroup";
 import { AuditTable } from "../AuditTable/AuditTable";
@@ -43,7 +33,6 @@ import { PropGroup } from "../PropGroup/PropGroup";
 import { ApplyTemplateModal } from "./ApplyTemplateModal/ApplyTemplateModal";
 import { CreateTemplateModal } from "./CreateTemplateModal/CreateTemplateModal";
 import {
-  StyledActantHeaderRow,
   StyledDetailContentRow,
   StyledDetailContentRowLabel,
   StyledDetailContentRowValue,
@@ -56,8 +45,8 @@ import {
   StyledDetailSectionHeader,
   StyledDetailWrapper,
   StyledFormWrapper,
-  StyledTagWrap,
 } from "./EntityDetailBoxStyles";
+import { EntityDetailHeaderRow } from "./EntityDetailHeaderRow/EntityDetailHeaderRow";
 import { EntityDetailMetaPropsTable } from "./EntityDetailUsedInTable/EntityDetailMetaPropsTable/EntityDetailMetaPropsTable";
 import { EntityDetailStatementPropsTable } from "./EntityDetailUsedInTable/EntityDetailStatementPropsTable/EntityDetailStatementPropsTable";
 import { EntityDetailStatementsTable } from "./EntityDetailUsedInTable/EntityDetailStatementsTable/EntityDetailStatementsTable";
@@ -440,121 +429,30 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
     return "entity";
   }, [entity]);
 
-  const updatePropIds = (props: IProp[]) => {
-    for (let prop of props) {
-      for (let prop1 of prop.children) {
-        for (let prop2 of prop1.children) {
-          prop2.id = uuidv4();
-        }
-        prop1.id = uuidv4();
-      }
-      prop.id = uuidv4();
-    }
-    return props;
-  };
-
-  const duplicateEntity = (entityToDuplicate: IEntity) => {
-    const newEntity = DEntity(
-      entityToDuplicate,
-      localStorage.getItem("userrole") as UserRole
-    );
-    duplicateEntityMutation.mutate(newEntity);
-  };
-
-  const duplicateEntityMutation = useMutation(
-    async (newEntity: IEntity) => {
-      await api.entityCreate(newEntity);
-    },
-    {
-      onSuccess: (data, variables) => {
-        setDetailId(variables.id);
-        toast.info(`Entity duplicated!`);
-        queryClient.invalidateQueries("templates");
-      },
-      onError: () => {
-        toast.error(`Error: Entity not duplicated!`);
-      },
-    }
-  );
+  // const updatePropIds = (props: IProp[]) => {
+  //   for (let prop of props) {
+  //     for (let prop1 of prop.children) {
+  //       for (let prop2 of prop1.children) {
+  //         prop2.id = uuidv4();
+  //       }
+  //       prop1.id = uuidv4();
+  //     }
+  //     prop.id = uuidv4();
+  //   }
+  //   return props;
+  // };
 
   return (
     <>
       {entity && (
         <>
-          <StyledActantHeaderRow type={entity.class}>
-            <StyledTagWrap>
-              <EntityTag
-                actant={entity}
-                propId={entity.id}
-                tooltipText={entity.data.text}
-                fullWidth
-              />
-            </StyledTagWrap>
-            <ButtonGroup style={{ marginTop: "1rem" }}>
-              {entity.class !== EntityClass.Statement && userCanEdit && (
-                <Button
-                  icon={<FaClone size={14} />}
-                  color="primary"
-                  label="duplicate"
-                  tooltip="duplicate entity"
-                  inverted
-                  onClick={() => {
-                    duplicateEntity(entity);
-                  }}
-                />
-              )}
-              {mayBeRemoved && userCanEdit && (
-                <Button
-                  color="primary"
-                  icon={<FaTrashAlt />}
-                  label="remove"
-                  tooltip="remove entity"
-                  inverted
-                  onClick={() => {
-                    setShowRemoveSubmit(true);
-                  }}
-                />
-              )}
-              {userCanEdit && (
-                <Button
-                  key="template"
-                  icon={<GrClone size={14} />}
-                  tooltip="create template from entity"
-                  inverted
-                  color="primary"
-                  label="Create template"
-                  onClick={() => {
-                    setCreateTemplateModal(true);
-                  }}
-                />
-              )}
-              <Button
-                key="refresh"
-                icon={<FaRecycle size={14} />}
-                tooltip="refresh data"
-                inverted
-                color="primary"
-                label="refresh"
-                onClick={() => {
-                  queryClient.invalidateQueries(["entity"]);
-                }}
-              />
-              {entity.class === EntityClass.Statement && (
-                <Button
-                  key="edit"
-                  icon={<FaEdit size={14} />}
-                  tooltip="open statement in editor"
-                  inverted={true}
-                  color="primary"
-                  label="open"
-                  onClick={() => {
-                    setStatementId(entity.id);
-                    setTerritoryId(entity.data.territory.id);
-                  }}
-                />
-              )}
-            </ButtonGroup>
-          </StyledActantHeaderRow>
+          <EntityDetailHeaderRow
+            entity={entity}
+            userCanEdit={userCanEdit}
+            mayBeRemoved={mayBeRemoved}
+            setShowRemoveSubmit={setShowRemoveSubmit}
+            setCreateTemplateModal={setCreateTemplateModal}
+          />
 
           <StyledDetailWrapper type={entity.class}>
             {/* form section */}

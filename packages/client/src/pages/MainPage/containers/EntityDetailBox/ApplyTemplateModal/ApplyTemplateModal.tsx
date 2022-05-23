@@ -1,15 +1,15 @@
 import { IEntity, IResponseGeneric } from "@shared/types";
 import { AxiosResponse } from "axios";
 import {
-  Modal,
-  ModalHeader,
-  ModalContent,
-  ModalInputForm,
-  ModalFooter,
-  ButtonGroup,
   Button,
+  ButtonGroup,
+  Modal,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+  ModalInputForm,
 } from "components";
-import React, { useState } from "react";
+import React from "react";
 import { UseMutationResult } from "react-query";
 import { toast } from "react-toastify";
 import { StyledContent } from "../../EntityBookmarkBox/EntityBookmarkBoxStyles";
