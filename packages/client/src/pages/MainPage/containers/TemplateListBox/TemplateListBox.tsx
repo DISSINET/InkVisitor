@@ -292,48 +292,48 @@ export const TemplateListBox: React.FC<TemplateListBox> = ({}) => {
       >
         <ModalHeader title="Create Template" />
         <ModalContent>
-          <StyledContent>
-            <ModalInputForm>
-              <ModalInputLabel>{"Entity type: "}</ModalInputLabel>
-              <ModalInputWrap>
-                <Dropdown
-                  value={{
-                    label: createModalEntityClass.label,
-                    value: createModalEntityClass.value,
-                  }}
-                  options={entitiesDict}
-                  onChange={(option: ValueType<OptionTypeBase, any>) => {
-                    setCreateModalEntityClass(option as DropdownItem);
-                  }}
-                  width={80}
-                  entityDropdown
-                  disableTyping
-                />
-                <TypeBar entityLetter={createModalEntityClass.value} />
-              </ModalInputWrap>
-              <ModalInputLabel>{"Label: "}</ModalInputLabel>
-              <ModalInputWrap>
-                <Input
-                  value={createModalEntityLabel}
-                  onChangeFn={(newType: string) =>
-                    setCreateModalEntityLabel(newType)
-                  }
-                  changeOnType
-                  autoFocus
-                />
-              </ModalInputWrap>
-              <ModalInputLabel>{"Detail: "}</ModalInputLabel>
-              <ModalInputWrap>
-                <Input
-                  value={createModalEntityDetail}
-                  onChangeFn={(newType: string) =>
-                    setCreateModalEntityDetail(newType)
-                  }
-                  changeOnType
-                />
-              </ModalInputWrap>
-            </ModalInputForm>
-          </StyledContent>
+          {/* <StyledContent> */}
+          <ModalInputForm>
+            <ModalInputLabel>{"Entity type: "}</ModalInputLabel>
+            <ModalInputWrap>
+              <Dropdown
+                value={{
+                  label: createModalEntityClass.label,
+                  value: createModalEntityClass.value,
+                }}
+                options={entitiesDict}
+                onChange={(option: ValueType<OptionTypeBase, any>) => {
+                  setCreateModalEntityClass(option as DropdownItem);
+                }}
+                width={80}
+                entityDropdown
+                disableTyping
+              />
+              <TypeBar entityLetter={createModalEntityClass.value} />
+            </ModalInputWrap>
+            <ModalInputLabel>{"Label: "}</ModalInputLabel>
+            <ModalInputWrap>
+              <Input
+                value={createModalEntityLabel}
+                onChangeFn={(newType: string) =>
+                  setCreateModalEntityLabel(newType)
+                }
+                changeOnType
+                autoFocus
+              />
+            </ModalInputWrap>
+            <ModalInputLabel>{"Detail: "}</ModalInputLabel>
+            <ModalInputWrap>
+              <Input
+                value={createModalEntityDetail}
+                onChangeFn={(newType: string) =>
+                  setCreateModalEntityDetail(newType)
+                }
+                changeOnType
+              />
+            </ModalInputWrap>
+          </ModalInputForm>
+          {/* </StyledContent> */}
         </ModalContent>
         <ModalFooter>
           <ButtonGroup>

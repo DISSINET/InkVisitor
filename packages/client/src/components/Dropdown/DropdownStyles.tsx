@@ -44,8 +44,8 @@ export const StyledSelect = styled(Select)`
       suggester ? theme.color["black"] : theme.color["gray"]["400"]};
     border-right: ${({ suggester }) => (suggester ? "none" : "")};
     border-radius: 0;
-    background-color: ${({ theme, entityDropdown }) =>
-      entityDropdown ? theme.color["gray"][200] : ""};
+    background-color: ${({ theme, entityDropdown, suggester }) =>
+      entityDropdown && suggester ? theme.color["gray"][200] : ""};
     :hover {
       border-color: ${({ theme }) => theme.color["info"]};
       border-width: 1.5px;
