@@ -751,11 +751,16 @@ export const StatementEditorBox: React.FC = () => {
                   territoryActants={territoryActants}
                   openDetailOnCreate
                   onSelected={(newSelectedId: string) => {
-                    addTag(newSelectedId);
+                    if (!statement.data.tags.find((t) => t === newSelectedId)) {
+                      addTag(newSelectedId);
+                    } else {
+                      toast.info("Tag already added!");
+                    }
                   }}
                   categoryTypes={classesTags}
                   placeholder={"add new tag"}
                   excludedEntities={excludedSuggesterEntities}
+                  excludedActantIds={statement.data.tags}
                 />
               )}
             </StyledEditorSectionContent>
