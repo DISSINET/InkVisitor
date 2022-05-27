@@ -13,7 +13,7 @@ import { useDebounce, useSearchParams } from "hooks";
 import React, { useEffect, useState } from "react";
 import { DragObjectWithType } from "react-dnd";
 import { FaHome } from "react-icons/fa";
-import { useMutation, useQuery, useQueryClient } from "react-query";
+import { useMutation, useQuery } from "react-query";
 import { OptionTypeBase, ValueType } from "react-select";
 import { DropdownAny, rootTerritoryId, wildCardChar } from "Theme/constants";
 import { Entities } from "types";
@@ -45,7 +45,6 @@ export const EntitySuggester: React.FC<EntitySuggesterI> = ({
   filterEditorRights = false,
   excludedActantIds = [],
 }) => {
-  const queryClient = useQueryClient();
   const [typed, setTyped] = useState<string>("");
   const debouncedTyped = useDebounce(typed, 100);
   const [selectedCategory, setSelectedCategory] = useState<any>();
