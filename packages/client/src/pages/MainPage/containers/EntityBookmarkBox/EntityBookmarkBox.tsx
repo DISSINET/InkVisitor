@@ -351,7 +351,7 @@ export const EntityBookmarkBox: React.FC = () => {
                         folder={bookmarkFolder}
                         updateFolderEntitys={updateFolderEntitys}
                         removeBookmark={removeBookmark}
-                      ></EntityBookmarkFolderTable>
+                      />
                     </StyledFolderContentTags>
                     <StyledFolderSuggester>
                       <EntitySuggester

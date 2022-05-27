@@ -6,7 +6,7 @@ import { FaUnlink } from "react-icons/fa";
 import { Cell, Column, Row, useTable } from "react-table";
 import { EntityTag } from "../..";
 import { EntityBookmarkFolderTableRow } from "./EntityBookmarkFolderTableRow";
-import { StyledTable } from "./EntityBookmarkFolderTableStyles";
+import { StyledTable, StyledTagWrap } from "./EntityBookmarkFolderTableStyles";
 
 interface EntityBookmarkFolderTable {
   folder: IResponseBookmarkFolder;
@@ -37,22 +37,25 @@ export const EntityBookmarkFolderTable: React.FC<EntityBookmarkFolderTable> = ({
           const entity = row.original as IEntity;
 
           return (
-            <EntityTag
-              actant={entity as IEntity}
-              tooltipPosition="left center"
-              button={
-                <Button
-                  key="d"
-                  icon={<FaUnlink />}
-                  color="plain"
-                  inverted
-                  tooltip="unlink Entity"
-                  onClick={() => {
-                    removeBookmark(folder.id, entity.id);
-                  }}
-                />
-              }
-            />
+            <StyledTagWrap>
+              <EntityTag
+                actant={entity as IEntity}
+                tooltipPosition="left center"
+                fullWidth
+                button={
+                  <Button
+                    key="d"
+                    icon={<FaUnlink />}
+                    color="plain"
+                    inverted
+                    tooltip="unlink Entity"
+                    onClick={() => {
+                      removeBookmark(folder.id, entity.id);
+                    }}
+                  />
+                }
+              />
+            </StyledTagWrap>
           );
         },
       },
