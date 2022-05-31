@@ -1,6 +1,7 @@
 import {
   actantLogicalTypeDict,
   entitiesDict,
+  entitiesDictKeys,
   entityStatusDict,
   languageDict,
 } from "@shared/dictionaries";
@@ -17,11 +18,13 @@ import {
   Submit,
 } from "components";
 import { StyledHeading, StyledUsedInTitle } from "components/Table/TableStyles";
+import { StyledTypeBar } from "components/TypeBar/TypeBarStyles";
 import { CMetaProp } from "constructors";
 import { useSearchParams } from "hooks";
 import React, { useEffect, useMemo, useState } from "react";
 import { FaPlus, FaRegCopy } from "react-icons/fa";
 import { useMutation, useQuery, useQueryClient } from "react-query";
+import { ValueType, OptionTypeBase } from "react-select";
 import { toast } from "react-toastify";
 import { DraggedPropRowCategory, PropAttributeFilter } from "types";
 import { EntityTag } from "..";
@@ -51,6 +54,15 @@ import { EntityDetailMetaPropsTable } from "./EntityDetailUsedInTable/EntityDeta
 import { EntityDetailStatementPropsTable } from "./EntityDetailUsedInTable/EntityDetailStatementPropsTable/EntityDetailStatementPropsTable";
 import { EntityDetailStatementsTable } from "./EntityDetailUsedInTable/EntityDetailStatementsTable/EntityDetailStatementsTable";
 
+// TODO: add to entity type dropdown options
+const allowedEntityChangeClasses = [
+  EntityClass.Value,
+  EntityClass.Person,
+  EntityClass.Event,
+  EntityClass.Group,
+  EntityClass.Location,
+  EntityClass.Object,
+];
 interface EntityDetailBox {}
 export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
   const {
@@ -66,6 +78,8 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
     useState<boolean>(false);
 
   const [showRemoveSubmit, setShowRemoveSubmit] = useState(false);
+  const [selectedEntityType, setSelectedEntityType] = useState<EntityClass>();
+  const [showTypeSubmit, setShowTypeSubmit] = useState(false);
   const [usedInPage, setUsedInPage] = useState<number>(0);
   const statementsPerPage = 20;
 
@@ -102,6 +116,9 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
     },
     { enabled: !!detailId && api.isLoggedIn(), retry: 2 }
   );
+
+  const isClassChangeable =
+    entity && allowedEntityChangeClasses.includes(entity.class);
 
   const {
     status: templateStatus,
@@ -166,6 +183,12 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
     queryClient.invalidateQueries("audit");
   }, [entity]);
 
+  useEffect(() => {
+    if (entity) {
+      setSelectedEntityType(entity.class);
+    }
+  }, []);
+
   const userCanAdmin: boolean = useMemo(() => {
     return !!entity && entity.right === UserRoleMode.Admin;
   }, [entity]);
@@ -177,15 +200,6 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
         entity.right === UserRoleMode.Write)
     );
   }, [entity]);
-
-  // mutations
-  // const allEntitiesOption = {
-  //   value: "*",
-  //   label: "*",
-  //   info: "",
-  // };
-  // const entityOptions = [...entitiesDict] as any;
-  // entityOptions.push(allEntitiesOption);
 
   const updateEntityMutation = useMutation(
     async (changes: any) => await api.entityUpdate(detailId, changes),
@@ -211,6 +225,26 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
           queryClient.invalidateQueries("territory");
           queryClient.invalidateQueries("bookmarks");
         }
+        if (entity?.isTemplate) {
+          queryClient.invalidateQueries("templates");
+        }
+      },
+    }
+  );
+
+  const changeEntityTypeMutation = useMutation(
+    async (newClass: string) =>
+      await api.entityUpdate(detailId, { class: newClass }),
+    {
+      onSuccess: (data, variables) => {
+        setShowTypeSubmit(false);
+        queryClient.invalidateQueries(["entity"]);
+        queryClient.invalidateQueries("statement");
+        if (variables === EntityClass.Territory) {
+          queryClient.invalidateQueries("tree");
+        }
+        queryClient.invalidateQueries("territory");
+        queryClient.invalidateQueries("bookmarks");
         if (entity?.isTemplate) {
           queryClient.invalidateQueries("templates");
         }
@@ -482,6 +516,43 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                       </StyledDetailContentRowValue>
                     </StyledDetailContentRow>
 
+                    {/* Entity type */}
+                    {isClassChangeable && (
+                      <StyledDetailContentRow>
+                        <StyledDetailContentRowLabel>
+                          Entity Type
+                        </StyledDetailContentRowLabel>
+                        <StyledDetailContentRowValue>
+                          <div style={{ position: "relative" }}>
+                            <Dropdown
+                              value={{
+                                label: entitiesDictKeys[entity.class].label,
+                                value: entitiesDictKeys[entity.class].value,
+                              }}
+                              options={allowedEntityChangeClasses.map(
+                                (c) => entitiesDictKeys[c]
+                              )}
+                              onChange={(
+                                option: ValueType<OptionTypeBase, any>
+                              ) => {
+                                setSelectedEntityType(
+                                  (option as IOption).value as EntityClass
+                                );
+                                setShowTypeSubmit(true);
+                                // TODO: submit modal => change category mutation
+                              }}
+                              width={76}
+                              entityDropdown
+                              disableTyping
+                            />
+                            <StyledTypeBar
+                              entity={`entity${entity.class}`}
+                            ></StyledTypeBar>
+                          </div>
+                        </StyledDetailContentRowValue>
+                      </StyledDetailContentRow>
+                    )}
+
                     {/* templates */}
                     <StyledDetailContentRow>
                       <StyledDetailContentRowLabel>
@@ -514,36 +585,6 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                       </StyledDetailContentRow>
                     )}
 
-                    {/* <StyledDetailContentRow>
-                      <StyledDetailContentRowLabel>
-                        Entity Type
-                      </StyledDetailContentRowLabel>
-                      <StyledDetailContentRowValue>
-                        <div style={{ position: "relative" }}>
-                          <Dropdown
-                            value={{
-                              label: entity.class,
-                              value: entity.class,
-                            }}
-                            options={entitiesDict}
-                            onChange={(
-                              option: ValueType<OptionTypeBase, any>
-                            ) => {
-                              // setSelectedCategory(option);
-                              // TODO: submit modal => change category mutation
-                              console.log(option);
-                            }}
-                            width={40}
-                            entityDropdown
-                            disableTyping
-                          />
-                          <TypeBar
-                            entityLetter={entity.class}
-                          />
-                        </div>
-                      </StyledDetailContentRowValue>
-                    </StyledDetailContentRow> */}
-
                     <StyledDetailContentRow>
                       <StyledDetailContentRowLabel>
                         Label
@@ -575,7 +616,8 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                           rows={2}
                           value={entity.detail}
                           onChangeFn={async (newValue: string) => {
-                            updateEntityMutation.mutate({ detail: newValue });
+                            if (newValue !== entity.detail)
+                              updateEntityMutation.mutate({ detail: newValue });
                           }}
                         />
                       </StyledDetailContentRowValue>
@@ -1263,11 +1305,26 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
         show={showRemoveSubmit}
         loading={deleteEntityMutation.isLoading}
       />
+      <Submit
+        title="Change entity type"
+        text={`Changing entity type to: [${
+          selectedEntityType ? entitiesDictKeys[selectedEntityType].label : ""
+        }]. You may loose some values. Do you want to continue?`}
+        submitLabel="Continue"
+        onSubmit={() => {
+          if (selectedEntityType) {
+            changeEntityTypeMutation.mutate(selectedEntityType);
+          }
+        }}
+        onCancel={() => setShowTypeSubmit(false)}
+        show={showTypeSubmit}
+      />
       <Loader
         show={
           isFetching ||
           updateEntityMutation.isLoading ||
-          deleteEntityMutation.isLoading
+          deleteEntityMutation.isLoading ||
+          changeEntityTypeMutation.isLoading
         }
       />
 
