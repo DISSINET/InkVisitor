@@ -674,3 +674,5 @@ export const StatementListBox: React.FC = () => {
     </>
   );
 };
+
+export const MemoizedStatementListBox = React.memo(StatementListBox);

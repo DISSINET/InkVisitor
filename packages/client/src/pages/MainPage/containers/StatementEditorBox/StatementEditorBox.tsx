@@ -861,3 +861,5 @@ export const StatementEditorBox: React.FC = () => {
     </>
   );
 };
+
+export const MemoizedStatementEditorBox = React.memo(StatementEditorBox);

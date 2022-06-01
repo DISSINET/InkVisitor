@@ -40,6 +40,9 @@ import {
   TemplateListBox,
 } from "./containers";
 import { MemoizedLoginModal } from "./containers/LoginModal/LoginModal";
+import { MemoizedStatementEditorBox } from "./containers/StatementEditorBox/StatementEditorBox";
+import { MemoizedStatementListBox } from "./containers/StatementsListBox/StatementListBox";
+import { MemoizedTerritoryTreeBox } from "./containers/TerritoryTreeBox/TerritoryTreeBox";
 import { UserCustomizationModal } from "./containers/UserCustomizationModal/UserCustomizationModal";
 import {
   StyledFaUserAlt,
@@ -280,7 +283,7 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
                 button={firstPanelButton()}
                 noPadding
               >
-                <TerritoryTreeBox />
+                <MemoizedTerritoryTreeBox />
               </Box>
             </Panel>
             {/* SECOND PANEL */}
@@ -295,7 +298,7 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
                 height={detailId ? heightContent / 2 - 20 : heightContent}
                 label="Statements"
               >
-                <StatementListBox />
+                <MemoizedStatementListBox />
               </Box>
               {detailId && (
                 <Box
@@ -326,7 +329,7 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
               }
             >
               <Box height={heightContent} label="Editor">
-                <StatementEditorBox />
+                <MemoizedStatementEditorBox />
               </Box>
             </Panel>
             {/* FOURTH PANEL */}

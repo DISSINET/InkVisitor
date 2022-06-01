@@ -121,3 +121,5 @@ export const TerritoryTreeBox: React.FC = () => {
     </>
   );
 };
+
+export const MemoizedTerritoryTreeBox = React.memo(TerritoryTreeBox);
