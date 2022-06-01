@@ -54,6 +54,75 @@ import {
   StyledUsername,
 } from "./MainPageStyles";
 
+const LeftHeader = React.memo(({}) => {
+  const env = (process.env.ROOT_URL || "").replace(/apps\/inkvisitor[-]?/, "");
+  const versionText = `v. ${packageJson.version} 
+  ${
+    ["production", ""].indexOf(env) === -1
+      ? `| ${env} | built: ${process.env.BUILD_TIMESTAMP}`
+      : ""
+  }`;
+
+  return (
+    <StyledHeader>
+      <StyledHeaderLogo
+        height={heightHeader - 10}
+        src={LogoInkvisitor}
+        alt="Inkvisitor Logo"
+      />
+      <StyledHeaderTag
+        onClick={async () => {
+          await navigator.clipboard.writeText(versionText);
+          toast.info("Inkvisitor version copied to clipboard");
+        }}
+      >
+        {versionText}
+      </StyledHeaderTag>
+    </StyledHeader>
+  );
+});
+
+interface RightHeaderProps {
+  setUserCustomizationOpen: (arg0: boolean) => void;
+  handleUsersModalClick: () => void;
+  handleLogOut: () => void;
+  userName: string;
+  userRole: string;
+}
+
+const RightHeader: React.FC<RightHeaderProps> = ({
+  setUserCustomizationOpen,
+  handleUsersModalClick,
+  handleLogOut,
+  userName,
+  userRole,
+}) => {
+  return (
+    <StyledUserBox>
+      <StyledUser>
+        <StyledText>logged as</StyledText>
+        <StyledFaUserAlt
+          size={14}
+          onClick={() => setUserCustomizationOpen(true)}
+        />
+        <StyledUsername onClick={() => setUserCustomizationOpen(true)}>
+          {userName}
+        </StyledUsername>
+      </StyledUser>
+      <ButtonGroup>
+        {userRole == "admin" && (
+          <Button
+            label="Manage Users"
+            color="info"
+            onClick={() => handleUsersModalClick()}
+          />
+        )}
+        <Button label="Log Out" color="danger" onClick={() => handleLogOut()} />
+      </ButtonGroup>
+    </StyledUserBox>
+  );
+};
+
 interface MainPage {
   size: number[];
 }
@@ -171,13 +240,6 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
 
   const [userCustomizationOpen, setUserCustomizationOpen] = useState(false);
 
-  const versionText = `v. ${packageJson.version} 
-  ${
-    ["production", ""].indexOf(environmentName) === -1
-      ? `| ${environmentName} | built: ${process.env.BUILD_TIMESTAMP}`
-      : ""
-  }`;
-
   return (
     <>
       <StyledPage layoutWidth={layoutWidth}>
@@ -190,56 +252,17 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
               ? environmentName
               : "primary"
           }
-          left={
-            <StyledHeader>
-              <StyledHeaderLogo
-                height={heightHeader - 10}
-                src={LogoInkvisitor}
-                alt="React Logo"
-              />
-              <StyledHeaderTag
-                onClick={async () => {
-                  await navigator.clipboard.writeText(versionText);
-                  toast.info("Inkvisitor version copied to clipboard");
-                }}
-              >
-                {versionText}
-              </StyledHeaderTag>
-            </StyledHeader>
-          }
+          left={<LeftHeader />}
           right={
-            <div>
-              {isLoggedIn && (
-                <StyledUserBox>
-                  <StyledUser>
-                    <StyledText>logged as</StyledText>
-                    <StyledFaUserAlt
-                      size={14}
-                      onClick={() => setUserCustomizationOpen(true)}
-                    />
-                    <StyledUsername
-                      onClick={() => setUserCustomizationOpen(true)}
-                    >
-                      {user ? user.name : ""}
-                    </StyledUsername>
-                  </StyledUser>
-                  <ButtonGroup>
-                    {userRole == "admin" && (
-                      <Button
-                        label="Manage Users"
-                        color="info"
-                        onClick={() => handleUsersModalClick()}
-                      />
-                    )}
-                    <Button
-                      label="Log Out"
-                      color="danger"
-                      onClick={() => handleLogOut()}
-                    />
-                  </ButtonGroup>
-                </StyledUserBox>
-              )}
-            </div>
+            isLoggedIn ? (
+              <RightHeader
+                setUserCustomizationOpen={setUserCustomizationOpen}
+                handleUsersModalClick={handleUsersModalClick}
+                handleLogOut={handleLogOut}
+                userName={user ? user.name : ""}
+                userRole={userRole || ""}
+              />
+            ) : undefined
           }
         />
         <DndProvider backend={HTML5Backend}>
