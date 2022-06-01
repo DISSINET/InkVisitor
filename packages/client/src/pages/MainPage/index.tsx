@@ -4,12 +4,12 @@ import {
   Box,
   Button,
   ButtonGroup,
-  Footer,
   Header,
   Panel,
   PanelSeparator,
   Toast,
 } from "components";
+import { MemoizedFooter } from "components/Footer/Footer";
 import { useSearchParams } from "hooks";
 import ScrollHandler from "hooks/ScrollHandler";
 import React, { useState } from "react";
@@ -33,13 +33,13 @@ import {
   EntityBookmarkBox,
   EntitySearchBox,
   EntityDetailBox,
-  LoginModal,
   StatementEditorBox,
   StatementListBox,
   TerritoryTreeBox,
   UserListModal,
   TemplateListBox,
 } from "./containers";
+import { MemoizedLoginModal } from "./containers/LoginModal/LoginModal";
 import { UserCustomizationModal } from "./containers/UserCustomizationModal/UserCustomizationModal";
 import {
   StyledFaUserAlt,
@@ -352,8 +352,8 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
         </DndProvider>
 
         <Toast />
-        <Footer height={heightFooter} />
-        {!isLoggedIn && <LoginModal />}
+        <MemoizedFooter height={heightFooter} />
+        {!isLoggedIn && <MemoizedLoginModal />}
       </StyledPage>
     </>
   );
