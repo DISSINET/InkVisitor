@@ -108,7 +108,7 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
         return false;
       }
     },
-    { enabled: !!userId && api.isLoggedIn(), retry: 2 }
+    { enabled: !!userId && api.isLoggedIn() }
   );
 
   const [userAdministrationModalOpen, setUserAdministrationModalOpen] =

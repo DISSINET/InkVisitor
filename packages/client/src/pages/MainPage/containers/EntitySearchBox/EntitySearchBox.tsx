@@ -128,7 +128,7 @@ export const EntitySearchBox: React.FC = () => {
       );
       return templates;
     },
-    { enabled: api.isLoggedIn(), retry: 2 }
+    { enabled: api.isLoggedIn() }
   );
 
   const templateOptions: DropdownItem[] = useMemo(() => {
