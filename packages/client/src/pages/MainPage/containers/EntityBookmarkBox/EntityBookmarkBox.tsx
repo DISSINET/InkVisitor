@@ -1,4 +1,3 @@
-import { EntityClass } from "@shared/enums";
 import {
   IBookmarkFolder,
   IEntity,
@@ -197,23 +196,26 @@ export const EntityBookmarkBox: React.FC = () => {
       </StyledHeader>
       {bookmarkFolders && (
         <StyledFolderList>
-          {bookmarkFolders.map((bookmarkFolder: IResponseBookmarkFolder) => {
-            const open = openedFolders.includes(bookmarkFolder.id);
-            const empty = bookmarkFolder.entities.length === 0;
+          {bookmarkFolders.map(
+            (bookmarkFolder: IResponseBookmarkFolder, key: number) => {
+              const open = openedFolders.includes(bookmarkFolder.id);
+              const empty = bookmarkFolder.entities.length === 0;
 
-            return (
-              <EntityBookmarkFolder
-                bookmarkFolder={bookmarkFolder}
-                open={open}
-                empty={empty}
-                getBookmarksCopy={getBookmarksCopy}
-                startEditingFolder={startEditingFolder}
-                askRemoveFolder={askRemoveFolder}
-                openedFolders={openedFolders}
-                setOpenedFolders={setOpenedFolders}
-              />
-            );
-          })}
+              return (
+                <EntityBookmarkFolder
+                  key={key}
+                  bookmarkFolder={bookmarkFolder}
+                  open={open}
+                  empty={empty}
+                  getBookmarksCopy={getBookmarksCopy}
+                  startEditingFolder={startEditingFolder}
+                  askRemoveFolder={askRemoveFolder}
+                  openedFolders={openedFolders}
+                  setOpenedFolders={setOpenedFolders}
+                />
+              );
+            }
+          )}
         </StyledFolderList>
       )}
       <Loader show={isFetching} />
