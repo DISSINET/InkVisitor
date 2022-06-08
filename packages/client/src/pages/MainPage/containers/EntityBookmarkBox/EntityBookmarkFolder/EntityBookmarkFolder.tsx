@@ -2,7 +2,7 @@ import { EntityClass } from "@shared/enums";
 import { IBookmarkFolder, IResponseBookmarkFolder } from "@shared/types";
 import api from "api";
 import { ButtonGroup, Button } from "components";
-import React from "react";
+import React, { useState } from "react";
 import { useDrop, DragObjectWithType, DropTargetMonitor } from "react-dnd";
 import {
   FaRegFolderOpen,
@@ -122,14 +122,24 @@ export const EntityBookmarkFolder: React.FC<EntityBookmarkFolder> = ({
     }
   };
 
+  const [isWrongDropCategory, setIsWrongDropCategory] = useState(false);
+
+  const handleHoverred = (newHoverred: any) => {
+    const hoverredCategory = newHoverred.category;
+    if (!bookmarkEntities.includes(hoverredCategory)) {
+      setIsWrongDropCategory(true);
+    } else {
+      setIsWrongDropCategory(false);
+    }
+  };
+
   const [{ isOver }, dropRef] = useDrop({
     accept: ItemTypes.TAG,
     drop: (item: DragObjectWithType) => {
-      // console.log(item);
       addBookmark(bookmarkFolder.id, (item as DragItem).id);
     },
     hover: (item: DragObjectWithType) => {
-      // onHover && onHover(item);
+      handleHoverred(item);
     },
     collect: (monitor: DropTargetMonitor) => ({
       isOver: !!monitor.isOver(),
@@ -137,7 +147,11 @@ export const EntityBookmarkFolder: React.FC<EntityBookmarkFolder> = ({
   });
 
   return (
-    <StyledFolderWrapper key={bookmarkFolder.id} ref={dropRef}>
+    <StyledFolderWrapper
+      key={bookmarkFolder.id}
+      ref={dropRef}
+      style={{ opacity: isOver ? 0.7 : 1 }}
+    >
       <StyledFolderHeader
         onClick={() => {
           handleClickFolder(bookmarkFolder.id);
