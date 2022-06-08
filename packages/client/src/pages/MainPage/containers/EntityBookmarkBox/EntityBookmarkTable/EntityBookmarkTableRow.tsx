@@ -11,9 +11,9 @@ import { FaGripVertical } from "react-icons/fa";
 import { Cell, ColumnInstance } from "react-table";
 import { DragItem, ItemTypes } from "types";
 import { dndHoverFn } from "utils";
-import { StyledTd, StyledTr } from "./EntityBookmarkFolderTableStyles";
+import { StyledTd, StyledTr } from "./EntityBookmarkTableStyles";
 
-interface EntityBookmarkFolderTableRow {
+interface EntityBookmarkTableRow {
   row: any;
   index: number;
   moveRow: (dragIndex: number, hoverIndex: number) => void;
@@ -22,9 +22,14 @@ interface EntityBookmarkFolderTableRow {
   visibleColumns: ColumnInstance<{}>[];
 }
 
-export const EntityBookmarkFolderTableRow: React.FC<
-  EntityBookmarkFolderTableRow
-> = ({ row, index, moveRow, folder, updateOrderFn, visibleColumns }) => {
+export const EntityBookmarkTableRow: React.FC<EntityBookmarkTableRow> = ({
+  row,
+  index,
+  moveRow,
+  folder,
+  updateOrderFn,
+  visibleColumns,
+}) => {
   const dropRef = useRef<HTMLTableRowElement>(null);
   const dragRef = useRef<HTMLTableDataCellElement>(null);
 
