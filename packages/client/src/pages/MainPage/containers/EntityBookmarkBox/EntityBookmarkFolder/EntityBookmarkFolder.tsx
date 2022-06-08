@@ -1,7 +1,7 @@
 import { EntityClass } from "@shared/enums";
 import { IBookmarkFolder, IResponseBookmarkFolder } from "@shared/types";
 import api from "api";
-import { ButtonGroup, Button } from "components";
+import { ButtonGroup, Button, Tooltip } from "components";
 import React, { useState } from "react";
 import { useDrop, DragObjectWithType, DropTargetMonitor } from "react-dnd";
 import {
@@ -152,56 +152,62 @@ export const EntityBookmarkFolder: React.FC<EntityBookmarkFolder> = ({
       ref={dropRef}
       style={{ opacity: isOver ? 0.7 : 1 }}
     >
-      <StyledFolderHeader
-        onClick={() => {
-          handleClickFolder(bookmarkFolder.id);
-        }}
-      >
-        <StyledFolderWrapperOpenArea>
-          <StyledIconWrap>
-            {(() => {
-              if (open) {
-                if (empty) {
-                  return <FaRegFolderOpen />;
+      <Tooltip label={bookmarkFolder.name} position="left center">
+        <StyledFolderHeader
+          onClick={() => {
+            handleClickFolder(bookmarkFolder.id);
+          }}
+        >
+          <StyledFolderWrapperOpenArea>
+            <StyledIconWrap>
+              {(() => {
+                if (open) {
+                  if (empty) {
+                    return <FaRegFolderOpen />;
+                  } else {
+                    return <FaFolderOpen />;
+                  }
                 } else {
-                  return <FaFolderOpen />;
+                  if (empty) {
+                    return <FaRegFolder />;
+                  } else {
+                    return <FaFolder />;
+                  }
                 }
-              } else {
-                if (empty) {
-                  return <FaRegFolder />;
-                } else {
-                  return <FaFolder />;
-                }
-              }
-            })()}
-          </StyledIconWrap>
-          <StyledFolderHeaderText>{bookmarkFolder.name}</StyledFolderHeaderText>
-        </StyledFolderWrapperOpenArea>
-        <StyledFolderHeaderButtons>
-          <ButtonGroup>
-            <Button
-              key="edit"
-              icon={<FaEdit size={12} />}
-              color="plain"
-              inverted
-              onClick={(e: React.MouseEvent) => {
-                e.stopPropagation();
-                startEditingFolder(bookmarkFolder);
-              }}
-            />
-            <Button
-              key="remove"
-              icon={<FaTrash size={12} />}
-              color="danger"
-              inverted
-              onClick={(e: React.MouseEvent) => {
-                e.stopPropagation();
-                askRemoveFolder(bookmarkFolder.id);
-              }}
-            />
-          </ButtonGroup>
-        </StyledFolderHeaderButtons>
-      </StyledFolderHeader>
+              })()}
+            </StyledIconWrap>
+            <StyledFolderHeaderText>
+              {bookmarkFolder.name}
+            </StyledFolderHeaderText>
+          </StyledFolderWrapperOpenArea>
+
+          <StyledFolderHeaderButtons>
+            <ButtonGroup>
+              <Button
+                key="edit"
+                icon={<FaEdit size={12} />}
+                color="plain"
+                inverted
+                onClick={(e: React.MouseEvent) => {
+                  e.stopPropagation();
+                  startEditingFolder(bookmarkFolder);
+                }}
+              />
+              <Button
+                key="remove"
+                icon={<FaTrash size={12} />}
+                color="danger"
+                inverted
+                onClick={(e: React.MouseEvent) => {
+                  e.stopPropagation();
+                  askRemoveFolder(bookmarkFolder.id);
+                }}
+              />
+            </ButtonGroup>
+          </StyledFolderHeaderButtons>
+        </StyledFolderHeader>
+      </Tooltip>
+
       {open && (
         <StyledFolderContent>
           <StyledFolderContentTags>
