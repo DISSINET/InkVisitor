@@ -1,7 +1,7 @@
 import { EntityClass } from "@shared/enums";
 import {
-  IEntity,
   IBookmarkFolder,
+  IEntity,
   IResponseBookmarkFolder,
 } from "@shared/types";
 import api from "api";
@@ -18,47 +18,15 @@ import {
 } from "components";
 import { CBookmarkFolder } from "constructors";
 import React, { useMemo, useState } from "react";
-import {
-  FaEdit,
-  FaFolder,
-  FaFolderOpen,
-  FaPlus,
-  FaRegFolder,
-  FaRegFolderOpen,
-  FaTrash,
-} from "react-icons/fa";
+import { FaPlus } from "react-icons/fa";
 import { useMutation, useQuery, useQueryClient } from "react-query";
 import { toast } from "react-toastify";
-import { EntitySuggester } from "..";
 import {
   StyledContent,
-  StyledFolderContent,
-  StyledFolderContentTags,
-  StyledFolderHeader,
-  StyledFolderHeaderButtons,
-  StyledFolderHeaderText,
   StyledFolderList,
-  StyledFolderSuggester,
-  StyledFolderWrapper,
-  StyledFolderWrapperOpenArea,
   StyledHeader,
-  StyledIconWrap,
 } from "./EntityBookmarkBoxStyles";
-import { EntityBookmarkFolderTable } from "./EntityBookmarkFolderTable/EntityBookmarkFolderTable";
-
-const bookmarkEntities = [
-  EntityClass.Action,
-  EntityClass.Person,
-  EntityClass.Group,
-  EntityClass.Object,
-  EntityClass.Concept,
-  EntityClass.Location,
-  EntityClass.Value,
-  EntityClass.Event,
-  EntityClass.Statement,
-  EntityClass.Territory,
-  EntityClass.Resource,
-];
+import { EntityBookmarkFolder } from "./EntityBookmarkFolder/EntityBookmarkFolder";
 
 export const EntityBookmarkBox: React.FC = () => {
   const queryClient = useQueryClient();
@@ -123,14 +91,18 @@ export const EntityBookmarkBox: React.FC = () => {
     setCreatingFolder(true);
   };
 
+  const cancelEditingFolder = () => {
+    setEditingFolderName("");
+    setEditingFolder(false);
+  };
+
   const startEditingFolder = (folder: IResponseBookmarkFolder) => {
     setEditingFolder(folder.id);
     setEditingFolderName(folder.name);
   };
 
-  const cancelEditingFolder = () => {
-    setEditingFolderName("");
-    setEditingFolder(false);
+  const askRemoveFolder = (folderId: string) => {
+    setRemovingFolder(folderId);
   };
 
   const acceptEditingFolderMutation = useMutation(
@@ -158,10 +130,6 @@ export const EntityBookmarkBox: React.FC = () => {
       },
     }
   );
-
-  const askRemoveFolder = (folderId: string) => {
-    setRemovingFolder(folderId);
-  };
 
   const acceptRemoveFolderMutation = useMutation(
     async () => {
@@ -216,63 +184,6 @@ export const EntityBookmarkBox: React.FC = () => {
     }
   );
 
-  const handleClickFolder = (folderId: string) => {
-    if (openedFolders.includes(folderId)) {
-      // close
-      setOpenedFolders(openedFolders.filter((f) => f !== folderId));
-    } else {
-      // open
-      setOpenedFolders([...openedFolders, folderId]);
-    }
-  };
-
-  const addBookmark = async (folderId: string, bookmarkId: string) => {
-    const newBookmarks: IBookmarkFolder[] | false = getBookmarksCopy();
-    if (newBookmarks) {
-      const folder = newBookmarks.find((b) => b.id === folderId);
-
-      if (folder) {
-        if (!folder.entityIds.includes(bookmarkId)) {
-          folder.entityIds.push(bookmarkId);
-          changeBookmarksMutation.mutate(newBookmarks);
-        }
-      }
-    }
-  };
-
-  const removeBookmark = async (folderId: string, bookmarkId: string) => {
-    const newBookmarks: IBookmarkFolder[] | false = getBookmarksCopy();
-    if (newBookmarks) {
-      const folder = newBookmarks.find((b) => b.id === folderId);
-      if (folder) {
-        if (folder.entityIds.includes(bookmarkId)) {
-          folder.entityIds = folder.entityIds.filter((a) => a !== bookmarkId);
-          changeBookmarksMutation.mutate(newBookmarks);
-        }
-      }
-    }
-  };
-
-  const changeBookmarksMutation = useMutation(
-    async (newBookmarks: IBookmarkFolder[]) =>
-      await api.usersUpdate(false, { bookmarks: newBookmarks }),
-    {
-      onSuccess: () => {
-        queryClient.invalidateQueries(["bookmarks"]);
-      },
-    }
-  );
-
-  const updateFolderEntitys = (newEntityIds: string[], folderId: string) => {
-    const newBookmarks: IBookmarkFolder[] | false = getBookmarksCopy();
-    if (newBookmarks) {
-      const folder = newBookmarks.find((b) => b.id === folderId);
-      if (folder) {
-        folder.entityIds = newEntityIds;
-        changeBookmarksMutation.mutate(newBookmarks);
-      }
-    }
-  };
   return (
     <StyledContent>
       <StyledHeader>
@@ -291,81 +202,16 @@ export const EntityBookmarkBox: React.FC = () => {
             const empty = bookmarkFolder.entities.length === 0;
 
             return (
-              <StyledFolderWrapper key={bookmarkFolder.id}>
-                <StyledFolderHeader
-                  onClick={() => {
-                    handleClickFolder(bookmarkFolder.id);
-                  }}
-                >
-                  <StyledFolderWrapperOpenArea>
-                    <StyledIconWrap>
-                      {(() => {
-                        if (open) {
-                          if (empty) {
-                            return <FaRegFolderOpen />;
-                          } else {
-                            return <FaFolderOpen />;
-                          }
-                        } else {
-                          if (empty) {
-                            return <FaRegFolder />;
-                          } else {
-                            return <FaFolder />;
-                          }
-                        }
-                      })()}
-                    </StyledIconWrap>
-                    <StyledFolderHeaderText>
-                      {bookmarkFolder.name}
-                    </StyledFolderHeaderText>
-                  </StyledFolderWrapperOpenArea>
-                  <StyledFolderHeaderButtons>
-                    <ButtonGroup>
-                      <Button
-                        key="edit"
-                        icon={<FaEdit size={12} />}
-                        color="plain"
-                        inverted
-                        onClick={(e: React.MouseEvent) => {
-                          e.stopPropagation();
-                          startEditingFolder(bookmarkFolder);
-                        }}
-                      />
-                      <Button
-                        key="remove"
-                        icon={<FaTrash size={12} />}
-                        color="danger"
-                        inverted
-                        onClick={(e: React.MouseEvent) => {
-                          e.stopPropagation();
-                          askRemoveFolder(bookmarkFolder.id);
-                        }}
-                      />
-                    </ButtonGroup>
-                  </StyledFolderHeaderButtons>
-                </StyledFolderHeader>
-                {open && (
-                  <StyledFolderContent>
-                    <StyledFolderContentTags>
-                      <EntityBookmarkFolderTable
-                        folder={bookmarkFolder}
-                        updateFolderEntitys={updateFolderEntitys}
-                        removeBookmark={removeBookmark}
-                      />
-                    </StyledFolderContentTags>
-                    <StyledFolderSuggester>
-                      <EntitySuggester
-                        openDetailOnCreate
-                        onSelected={(bookmarkId: string) => {
-                          addBookmark(bookmarkFolder.id, bookmarkId);
-                        }}
-                        categoryTypes={bookmarkEntities}
-                        placeholder={"add new bookmark"}
-                      />
-                    </StyledFolderSuggester>
-                  </StyledFolderContent>
-                )}
-              </StyledFolderWrapper>
+              <EntityBookmarkFolder
+                bookmarkFolder={bookmarkFolder}
+                open={open}
+                empty={empty}
+                getBookmarksCopy={getBookmarksCopy}
+                startEditingFolder={startEditingFolder}
+                askRemoveFolder={askRemoveFolder}
+                openedFolders={openedFolders}
+                setOpenedFolders={setOpenedFolders}
+              />
             );
           })}
         </StyledFolderList>
