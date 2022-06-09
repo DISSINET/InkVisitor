@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback, useEffect } from "react";
 import useKeypress from "hooks/useKeyPress";
 
 interface ModalKeyPress {
@@ -16,8 +16,10 @@ export const ModalKeyPress: React.FC<ModalKeyPress> = ({
     () => {
       onEnter();
     },
-    [dependencyArr]
+    [dependencyArr],
+    true
   );
+
   useKeypress(
     "Escape",
     () => {
