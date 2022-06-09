@@ -34,6 +34,7 @@ export const StyledSelect = styled(Select)`
 
   max-width: 100%;
   width: 100%;
+
   .react-select__control {
     width: ${({ width }) => getWidth(width)};
     max-width: 100%;
@@ -47,11 +48,6 @@ export const StyledSelect = styled(Select)`
     background-color: ${({ theme, entityDropdown, suggester }) =>
       entityDropdown && suggester ? theme.color["gray"][200] : ""};
     :hover {
-      border-color: ${({ theme }) => theme.color["info"]};
-      border-width: 1.5px;
-    }
-    :focus {
-      outline: 0
       border-color: ${({ theme }) => theme.color["info"]};
       border-width: 1.5px;
     }
@@ -71,6 +67,10 @@ export const StyledSelect = styled(Select)`
   }
   .react-select__control--is-focused {
     box-shadow: none;
+
+    outline: 0;
+    border-color: ${({ theme }) => theme.color["info"]};
+    border-width: 1.5px;
   }
   .react-select__value-container {
     height: 100%;
