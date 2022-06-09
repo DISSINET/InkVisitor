@@ -29,19 +29,14 @@ import {
   heightHeader,
 } from "Theme/constants";
 import packageJson from "../../../package.json";
-import {
-  EntityBookmarkBox,
-  EntitySearchBox,
-  EntityDetailBox,
-  StatementEditorBox,
-  StatementListBox,
-  TerritoryTreeBox,
-  UserListModal,
-  TemplateListBox,
-} from "./containers";
+import { UserListModal } from "./containers";
+import { MemoizedEntityBookmarkBox } from "./containers/EntityBookmarkBox/EntityBookmarkBox";
+import { MemoizedEntityDetailBox } from "./containers/EntityDetailBox/EntityDetailBox";
+import { MemoizedEntitySearchBox } from "./containers/EntitySearchBox/EntitySearchBox";
 import { MemoizedLoginModal } from "./containers/LoginModal/LoginModal";
 import { MemoizedStatementEditorBox } from "./containers/StatementEditorBox/StatementEditorBox";
 import { MemoizedStatementListBox } from "./containers/StatementsListBox/StatementListBox";
+import { MemoizedTemplateListBox } from "./containers/TemplateListBox/TemplateListBox";
 import { MemoizedTerritoryTreeBox } from "./containers/TerritoryTreeBox/TerritoryTreeBox";
 import { UserCustomizationModal } from "./containers/UserCustomizationModal/UserCustomizationModal";
 import {
@@ -316,7 +311,7 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
                     )
                   }
                 >
-                  <EntityDetailBox />
+                  <MemoizedEntityDetailBox />
                 </Box>
               )}
             </Panel>
@@ -343,7 +338,7 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
                 isExpanded={fourthPanelExpanded}
                 button={fourthPanelButton()}
               >
-                <EntitySearchBox />
+                <MemoizedEntitySearchBox />
               </Box>
               <Box
                 height={heightContent / 3}
@@ -352,7 +347,7 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
                 isExpanded={fourthPanelExpanded}
                 button={fourthPanelButton()}
               >
-                <EntityBookmarkBox />
+                <MemoizedEntityBookmarkBox />
               </Box>
               <Box
                 height={heightContent / 3}
@@ -361,7 +356,7 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
                 isExpanded={fourthPanelExpanded}
                 button={fourthPanelButton()}
               >
-                <TemplateListBox />
+                <MemoizedTemplateListBox />
               </Box>
             </Panel>
           </StyledPanelWrap>

@@ -256,3 +256,5 @@ export const EntitySearchBox: React.FC = () => {
     </StyledBoxContent>
   );
 };
+
+export const MemoizedEntitySearchBox = React.memo(EntitySearchBox);

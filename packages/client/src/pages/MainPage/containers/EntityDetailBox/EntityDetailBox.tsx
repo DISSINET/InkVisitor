@@ -1347,3 +1347,5 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
     </>
   );
 };
+
+export const MemoizedEntityDetailBox = React.memo(EntityDetailBox);
