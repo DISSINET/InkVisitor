@@ -53,6 +53,12 @@ export const SearchParamsProvider = ({
   const [disablePush, setDisablePush] = useState(false);
 
   useEffect(() => {
+    if (detailId) {
+      console.log(params.getAll("detail"));
+    }
+  }, [detailId]);
+
+  useEffect(() => {
     territoryId
       ? params.set("territory", territoryId)
       : params.delete("territory");
@@ -61,7 +67,10 @@ export const SearchParamsProvider = ({
       ? params.set("statement", statementId)
       : params.delete("statement");
 
-    detailId ? params.set("detail", detailId) : params.delete("detail");
+    // TODO: discover ID to delete
+    if (!params.getAll("detail").includes(detailId)) {
+      detailId ? params.append("detail", detailId) : params.delete("detail");
+    }
 
     if (!disablePush) {
       history.push({
