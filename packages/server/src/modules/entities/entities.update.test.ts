@@ -1,5 +1,5 @@
 import { clean, testErroneousResponse } from "@modules/common.test";
-import { EntityDoesNotExits, BadParams } from "@shared/types/errors";
+import { EntityDoesNotExist, BadParams } from "@shared/types/errors";
 import request from "supertest";
 import { apiPath } from "@common/constants";
 import app from "../../Server";
@@ -22,14 +22,14 @@ describe("Entities update", function () {
     });
   });
   describe("faulty data ", () => {
-    it("should return an EntityDoesNotExits error wrapped in IResponseGeneric", (done) => {
+    it("should return an EntityDoesNotExist error wrapped in IResponseGeneric", (done) => {
       return request(app)
         .put(`${apiPath}/entities/update/1`)
         .send({ test: "" })
         .set("authorization", "Bearer " + supertestConfig.token)
         .expect("Content-Type", /json/)
         .expect(
-          testErroneousResponse.bind(undefined, new EntityDoesNotExits("", ""))
+          testErroneousResponse.bind(undefined, new EntityDoesNotExist("", ""))
         )
         .then(() => done());
     });

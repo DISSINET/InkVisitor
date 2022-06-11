@@ -424,7 +424,7 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
   };
 
   useEffect(() => {
-    if (error && (error as any).error === "EntityDoesNotExits") {
+    if (error && (error as any).error === "EntityDoesNotExist") {
       setDetailId("");
     }
   }, [error]);

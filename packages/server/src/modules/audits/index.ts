@@ -1,7 +1,7 @@
 import { asyncRouteHandler } from "../index";
 import { Router, Request } from "express";
 import { findEntityById } from "@service/shorthands";
-import { BadParams, EntityDoesNotExits } from "@shared/types/errors";
+import { BadParams, AuditsDoNotExist } from "@shared/types/errors";
 import { IResponseAudit, IStatement } from "@shared/types";
 import { ResponseAudit } from "@models/audit/response";
 import Statement from "@models/statement/statement";
@@ -20,8 +20,8 @@ export default Router()
       const existingEntity = await findEntityById(request.db, entityId);
 
       if (!existingEntity) {
-        throw new EntityDoesNotExits(
-          `entity with id ${entityId} does not exist`,
+        throw new AuditsDoNotExist(
+          `cannot retrieve audits for entity ${entityId}`,
           entityId
         );
       }

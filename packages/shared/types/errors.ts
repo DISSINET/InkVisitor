@@ -15,7 +15,6 @@ export class CustomError extends Error {
   //public name: string = ""; // Stands for class name, replaces default 'Error' string from parent constructor
   //public message: string = ""; // this is what will be printed in output - public text, some error classes have overriden message attr
 
-
   constructor(message?: string) {
     super(message);
     this.log = message || "";
@@ -112,12 +111,26 @@ class UserNotActiveError extends CustomError {
 }
 
 /**
- * EntityDoesNotExits will be thrown when attempting to remove/update the entity entry, which does not exist
+ * EntityDoesNotExist will be thrown when attempting to remove/update the entity entry, which does not exist
  */
-class EntityDoesNotExits extends CustomError {
+class EntityDoesNotExist extends CustomError {
   public static code = 400;
   public static title = "Missing entity";
   public static message = "Entity $1 does not exist";
+
+  constructor(m: string, entityId: string) {
+    super(m);
+    this.message = this.message.replace("$1", entityId);
+  }
+}
+
+/**
+ * AuditsDoNotExist will be thrown when attempting to access audits entries, which do not exist
+ */
+class AuditsDoNotExist extends CustomError {
+  public static code = 400;
+  public static title = "Missing audits";
+  public static message = "Audits for entity $1 do not exist";
 
   constructor(m: string, entityId: string) {
     super(m);
@@ -243,7 +256,8 @@ const allErrors: Record<string, any> = {
   BadParams,
   UserDoesNotExits,
   UserNotActiveError,
-  EntityDoesNotExits,
+  EntityDoesNotExist,
+  AuditsDoNotExist,
   StatementDoesNotExits,
   PermissionDoesNotExits,
   TerritoriesBrokenError,
@@ -274,7 +288,8 @@ export {
   BadParams,
   UserDoesNotExits,
   UserNotActiveError,
-  EntityDoesNotExits,
+  EntityDoesNotExist,
+  AuditsDoNotExist,
   StatementDoesNotExits,
   PermissionDoesNotExits,
   TerritoriesBrokenError,
