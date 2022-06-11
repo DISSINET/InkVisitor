@@ -113,7 +113,7 @@ export default Router()
     })
   )
   .put(
-    "/update/:userId?",
+    "/:userId?",
     asyncRouteHandler<IResponseGeneric>(async (request: Request) => {
       const userId = request.params.userId || (request as any).user.user.id;
       const userData = request.body as IUser;

@@ -11,7 +11,8 @@ import {
   IUserOptions,
   IUserRight,
 } from "@shared/types";
-import { Request } from "express";
+import { nonenumerable } from "@common/decorators";
+import { IRequest } from "src/custom.request";
 
 export class ResponseUser implements IResponseUser {
   id: string;
@@ -23,7 +24,9 @@ export class ResponseUser implements IResponseUser {
   rights: IUserRight[];
   active: boolean;
 
+  @nonenumerable
   _userBookmarks: IBookmarkFolder[];
+  @nonenumerable
   _userStoredTerritories: IStoredTerritory[];
 
   bookmarks: IResponseBookmarkFolder[];
@@ -48,7 +51,7 @@ export class ResponseUser implements IResponseUser {
     this.territoryRights = [];
   }
 
-  async unwindBookmarks(req: Request): Promise<void> {
+  async unwindBookmarks(req: IRequest): Promise<void> {
     for (const bookmark of this._userBookmarks) {
       const bookmarkResponse: IResponseBookmarkFolder = {
         id: bookmark.id,
@@ -69,7 +72,7 @@ export class ResponseUser implements IResponseUser {
     }
   }
 
-  async unwindTerritories(req: Request): Promise<void> {
+  async unwindTerritories(req: IRequest): Promise<void> {
     for (const territory of this._userStoredTerritories) {
       const territoryResponse: IResponseStoredTerritory = {
         territory: {
@@ -80,7 +83,7 @@ export class ResponseUser implements IResponseUser {
     }
   }
 
-  async unwindRights(req: Request): Promise<void> {
+  async unwindRights(req: IRequest): Promise<void> {
     for (const right of this.rights) {
       const territoryFromRights: IResponseStoredTerritory = {
         territory: {
@@ -91,7 +94,7 @@ export class ResponseUser implements IResponseUser {
     }
   }
 
-  async unwindAll(req: Request) {
+  async unwindAll(req: IRequest) {
     await this.unwindBookmarks(req);
     await this.unwindTerritories(req);
     await this.unwindRights(req);
