@@ -13,6 +13,7 @@ import {
 } from "@shared/types";
 import { nonenumerable } from "@common/decorators";
 import { IRequest } from "src/custom.request";
+import { InternalServerError } from "@shared/types/errors";
 
 export class ResponseUser implements IResponseUser {
   id: string;
@@ -63,9 +64,15 @@ export class ResponseUser implements IResponseUser {
           req.db.connection,
           bookmark.entityIds
         )) {
-          bookmarkResponse.entities.push({
-            ...entity,
-          });
+          // preserve original order of entityIds
+          const index = bookmark.entityIds.findIndex((id) => id === entity.id);
+          if (index !== -1) {
+            bookmarkResponse.entities[index] = entity;
+          } else {
+            throw new InternalServerError(
+              `cannot find original position for bookmark.entityIds (bookmark=${bookmark.id}, entity=${entity.id})`
+            );
+          }
         }
       }
       this.bookmarks.push(bookmarkResponse);
