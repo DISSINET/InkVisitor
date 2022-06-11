@@ -247,7 +247,7 @@ class Api {
   ): Promise<AxiosResponse<IResponseGeneric>> {
     try {
       const response = await this.connection.put(
-        !!userId ? `/users/update/${userId}` : "/users/update/",
+        !!userId ? `/users/${userId}` : "/users/",
         changes
       );
       return response;
