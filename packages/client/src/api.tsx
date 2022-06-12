@@ -512,9 +512,7 @@ class Api {
     statementId: string
   ): Promise<AxiosResponse<IResponseStatement>> {
     try {
-      const response = await this.connection.get(
-        `/statements/get/${statementId}`
-      );
+      const response = await this.connection.get(`/statements/${statementId}`);
       return response;
     } catch (err: any | AxiosError) {
       throw { ...err.response.data };
