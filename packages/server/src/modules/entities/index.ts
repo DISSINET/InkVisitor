@@ -111,7 +111,7 @@ export default Router()
     })
   )
   .put(
-    "/:entityId?",
+    "/:entityId",
     asyncRouteHandler<IResponseGeneric>(async (request: Request) => {
       const entityId = request.params.entityId;
       const entityData = request.body as Record<string, unknown>;
@@ -166,7 +166,7 @@ export default Router()
     })
   )
   .delete(
-    "/:entityId?",
+    "/:entityId",
     asyncRouteHandler<IResponseGeneric>(async (request: Request) => {
       const entityId = request.params.entityId;
 
