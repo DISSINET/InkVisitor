@@ -12,7 +12,7 @@ import Statement from "@models/statement/statement";
 import { ResponseStatement } from "@models/statement/response";
 
 export default Router().get(
-  "/get/:statementId?",
+  "/:statementId",
   asyncRouteHandler<IResponseStatement>(async (request: Request) => {
     const statementId = request.params.statementId;
 
