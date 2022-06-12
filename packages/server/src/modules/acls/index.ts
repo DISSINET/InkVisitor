@@ -20,7 +20,7 @@ export default Router()
     })
   )
   .put(
-    "/:permissionId?",
+    "/:permissionId",
     asyncRouteHandler<IResponseGeneric>(async (request: Request) => {
       const permissionId = request.params.permissionId;
       const permissionData = request.body as Record<string, unknown>;
@@ -68,7 +68,7 @@ export default Router()
     })
   )
   .delete(
-    "/:permissionId?",
+    "/:permissionId",
     asyncRouteHandler<IResponseGeneric>(async (request: Request) => {
       const permissionId = request.params.permissionId;
 
