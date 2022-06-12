@@ -39,14 +39,14 @@ const clockPerformance = (
   startTime: any,
   commitTime: any
 ) => {
-  console.log({
-    profilerId,
-    mode,
-    actualTime,
-    baseTime,
-    startTime,
-    commitTime,
-  });
+  // console.log({
+  //   profilerId,
+  //   mode,
+  //   actualTime,
+  //   baseTime,
+  //   startTime,
+  //   commitTime,
+  // });
 };
 
 export const App: React.FC = () => {
