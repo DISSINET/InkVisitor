@@ -432,9 +432,7 @@ class Api {
     territoryId: string
   ): Promise<AxiosResponse<IResponseTerritory>> {
     try {
-      const response = await this.connection.get(
-        `/territories/get/${territoryId}`
-      );
+      const response = await this.connection.get(`/territories/${territoryId}`);
       return response;
     } catch (err: any | AxiosError) {
       throw { ...err.response.data };
@@ -450,25 +448,7 @@ class Api {
   ): Promise<AxiosResponse<string[]>> {
     try {
       const response = await this.connection.get(
-        `/territories/getEntityIds/${territoryId}`
-      );
-      return response;
-    } catch (err: any | AxiosError) {
-      throw { ...err.response.data };
-    }
-  }
-
-  async territoryMoveStatement(
-    moveId: string,
-    newIndex: number
-  ): Promise<AxiosResponse<IResponseGeneric>> {
-    try {
-      const response = await this.connection.post(
-        `/territories/moveStatement`,
-        {
-          moveId,
-          newIndex,
-        }
+        `/territories/${territoryId}/entities`
       );
       return response;
     } catch (err: any | AxiosError) {
