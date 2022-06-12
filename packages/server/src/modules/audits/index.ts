@@ -8,7 +8,7 @@ import Statement from "@models/statement/statement";
 
 export default Router()
   .get(
-    "/get/:entityId?",
+    "/:entityId",
     asyncRouteHandler<IResponseAudit>(async (request: Request) => {
       const entityId = request.params.entityId;
 

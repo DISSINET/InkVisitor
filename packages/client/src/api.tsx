@@ -486,7 +486,7 @@ class Api {
    */
   async auditGet(entityId: string): Promise<AxiosResponse<IResponseAudit>> {
     try {
-      const response = await this.connection.get(`/audits/get/${entityId}`);
+      const response = await this.connection.get(`/audits/${entityId}`);
       return response;
     } catch (err: any | AxiosError) {
       throw { ...err.response.data };
@@ -540,10 +540,7 @@ class Api {
     data: RequestPermissionUpdate
   ): Promise<AxiosResponse<IResponseGeneric>> {
     try {
-      const response = await this.connection.put(
-        `/acl/update/${permissionId}`,
-        data
-      );
+      const response = await this.connection.put(`/acls/${permissionId}`, data);
       return response;
     } catch (err: any | AxiosError) {
       throw { ...err.response.data };
