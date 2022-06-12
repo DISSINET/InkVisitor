@@ -399,7 +399,7 @@ class Api {
    */
   async treeGet(): Promise<AxiosResponse<IResponseTree>> {
     try {
-      const response = await this.connection.get(`/tree/get`);
+      const response = await this.connection.get(`/tree`);
       return response;
     } catch (err: any | AxiosError) {
       throw { ...err.response.data };
@@ -413,8 +413,7 @@ class Api {
     newIndex: number
   ): Promise<AxiosResponse<IResponseGeneric>> {
     try {
-      const response = await this.connection.post(`/tree/moveTerritory`, {
-        moveId,
+      const response = await this.connection.patch(`/tree/${moveId}/position`, {
         parentId,
         newIndex,
       });

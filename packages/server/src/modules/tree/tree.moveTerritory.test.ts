@@ -27,9 +27,8 @@ describe("Tree moveTerritory", function () {
       expect(lvl12.data.parent ? lvl12.data.parent.order : 0).toEqual(2);
 
       await request(app)
-        .post(`${apiPath}/tree/moveTerritory`)
+        .post(`${apiPath}/tree/lvl1-2-${randSuffix}/position`)
         .send({
-          moveId: `lvl1-2-${randSuffix}`,
           parentId: `root-${randSuffix}`,
           newIndex: 0,
         })
