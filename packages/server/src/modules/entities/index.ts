@@ -25,7 +25,7 @@ import { IRequestSearch } from "@shared/types/request-search";
 
 export default Router()
   .get(
-    "/get/:entityId?",
+    "/:entityId",
     asyncRouteHandler<IResponseEntity>(async (request: Request) => {
       const entityId = request.params.entityId;
 
@@ -72,7 +72,7 @@ export default Router()
     })
   )
   .post(
-    "/create",
+    "/",
     asyncRouteHandler<IResponseGeneric>(async (request: Request) => {
       const model = getEntityClass(request.body as Record<string, unknown>);
 
@@ -111,7 +111,7 @@ export default Router()
     })
   )
   .put(
-    "/update/:entityId?",
+    "/:entityId?",
     asyncRouteHandler<IResponseGeneric>(async (request: Request) => {
       const entityId = request.params.entityId;
       const entityData = request.body as Record<string, unknown>;
@@ -166,7 +166,7 @@ export default Router()
     })
   )
   .delete(
-    "/delete/:entityId?",
+    "/:entityId?",
     asyncRouteHandler<IResponseGeneric>(async (request: Request) => {
       const entityId = request.params.entityId;
 
@@ -207,7 +207,7 @@ export default Router()
     })
   )
   .get(
-    "/detail/:entityId?",
+    "/:entityId/detail",
     asyncRouteHandler<IResponseDetail>(async (request: Request) => {
       const entityId = request.params.entityId;
 

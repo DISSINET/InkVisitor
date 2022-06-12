@@ -317,7 +317,7 @@ class Api {
    */
   async entitiesGet(entityId: string): Promise<AxiosResponse<IResponseEntity>> {
     try {
-      const response = await this.connection.get(`/entities/get/${entityId}`);
+      const response = await this.connection.get(`/entities/${entityId}`);
       return response;
     } catch (err: any | AxiosError) {
       throw { ...err.response.data };
@@ -344,10 +344,7 @@ class Api {
     newEntityData: IEntity
   ): Promise<AxiosResponse<IResponseGeneric>> {
     try {
-      const response = await this.connection.post(
-        `/entities/create`,
-        newEntityData
-      );
+      const response = await this.connection.post(`/entities`, newEntityData);
       return response;
     } catch (err: any | AxiosError) {
       console.log(err);
@@ -361,7 +358,7 @@ class Api {
   ): Promise<AxiosResponse<IResponseGeneric>> {
     try {
       const response = await this.connection.put(
-        `/entities/update/${entityId}`,
+        `/entities/${entityId}`,
         changes
       );
       return response;
@@ -374,9 +371,7 @@ class Api {
     entityId: string
   ): Promise<AxiosResponse<IResponseGeneric>> {
     try {
-      const response = await this.connection.delete(
-        `/entities/delete/${entityId}`
-      );
+      const response = await this.connection.delete(`/entities/${entityId}`);
       return response;
     } catch (err: any | AxiosError) {
       throw { ...err.response.data };
@@ -390,7 +385,7 @@ class Api {
   async detailGet(entityId: string): Promise<AxiosResponse<IResponseDetail>> {
     try {
       const response = await this.connection.get(
-        `/entities/detail/${entityId}`
+        `/entities/${entityId}/detail`
       );
       return response;
     } catch (err: any | AxiosError) {
