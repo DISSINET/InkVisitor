@@ -1191,10 +1191,9 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                             "moodvariant",
                             "mood",
                             "bundleOperator",
-                            "certainty",
                           ],
-                          type: ["elvl"],
-                          value: ["elvl"],
+                          type: ["elvl", "logic", "virtuality", "partitivity"],
+                          value: ["elvl", "logic", "virtuality", "partitivity"],
                         } as PropAttributeFilter
                       }
                     />
