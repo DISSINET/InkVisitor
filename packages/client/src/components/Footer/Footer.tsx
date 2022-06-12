@@ -23,3 +23,5 @@ export const Footer: React.FC<Footer> = ({
     ></StyledFooter>
   );
 };
+
+export const MemoizedFooter = React.memo(Footer, () => true);

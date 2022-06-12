@@ -73,7 +73,6 @@ export const StatementListBox: React.FC = () => {
     },
     {
       enabled: !!territoryId && api.isLoggedIn(),
-      retry: 2,
     }
   );
 
@@ -87,7 +86,6 @@ export const StatementListBox: React.FC = () => {
     },
     {
       enabled: !!territoryId && api.isLoggedIn(),
-      retry: 2,
     }
   );
 
@@ -674,3 +672,5 @@ export const StatementListBox: React.FC = () => {
     </>
   );
 };
+
+export const MemoizedStatementListBox = React.memo(StatementListBox);

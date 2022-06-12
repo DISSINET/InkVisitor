@@ -73,3 +73,5 @@ export const LoginModal: React.FC = () => {
     </Modal>
   );
 };
+
+export const MemoizedLoginModal = React.memo(LoginModal);
