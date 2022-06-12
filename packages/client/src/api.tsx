@@ -211,7 +211,7 @@ class Api {
 
   async usersGet(userId: string): Promise<AxiosResponse<IResponseUser>> {
     try {
-      const response = await this.connection.get(`/users/get/${userId}`);
+      const response = await this.connection.get(`/users/${userId}`);
       return response;
     } catch (err: any | AxiosError) {
       throw { ...err.response.data };
@@ -222,7 +222,9 @@ class Api {
     filters: IFilterUsers
   ): Promise<AxiosResponse<IResponseUser[]>> {
     try {
-      const response = await this.connection.post(`/users/getMore`, filters);
+      const response = await this.connection.get(
+        `/users?label=${filters.label}`
+      );
       return response;
     } catch (err: any | AxiosError) {
       throw { ...err.response.data };
@@ -234,7 +236,7 @@ class Api {
     email: string;
   }): Promise<AxiosResponse<IResponseGeneric>> {
     try {
-      const response = await this.connection.post(`/users/create`, userData);
+      const response = await this.connection.post(`/users`, userData);
       return response;
     } catch (err: any | AxiosError) {
       throw { ...err.response.data };
@@ -258,7 +260,7 @@ class Api {
 
   async usersDelete(userId: string): Promise<AxiosResponse<IResponseGeneric>> {
     try {
-      const response = await this.connection.delete(`/users/delete/${userId}`);
+      const response = await this.connection.delete(`/users/${userId}`);
       return response;
     } catch (err: any | AxiosError) {
       throw { ...err.response.data };
@@ -272,9 +274,7 @@ class Api {
     userId: string
   ): Promise<AxiosResponse<IResponseGeneric>> {
     try {
-      const response = await this.connection.get(
-        `/users/reset-password/${userId}`
-      );
+      const response = await this.connection.post(`/users/${userId}/password`);
       return response;
     } catch (err: any | AxiosError) {
       throw { ...err.response.data };
@@ -302,9 +302,7 @@ class Api {
     userId: string | false
   ): Promise<AxiosResponse<IResponseBookmarkFolder[]>> {
     try {
-      const response = await this.connection.get(
-        !!userId ? `/users/bookmarks/${userId}` : "/users/bookmarks/"
-      );
+      const response = await this.connection.get(`/users/${userId}/bookmarks`);
       return response;
     } catch (err: any | AxiosError) {
       throw { ...err.response.data };

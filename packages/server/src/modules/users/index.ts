@@ -52,7 +52,7 @@ export default Router()
     })
   )
   .get(
-    "/get/:userId?",
+    "/:userId",
     asyncRouteHandler<IResponseUser>(async (request: Request) => {
       const userId = request.params.userId;
 
@@ -71,10 +71,10 @@ export default Router()
       return response;
     })
   )
-  .post(
-    "/getMore",
+  .get(
+    "/",
     asyncRouteHandler<IUser[]>(async (request: Request) => {
-      const label = request.body.label;
+      const label = (request.query.label as string) || "";
 
       if (!label) {
         return await User.findAllUsers(request.db.connection);
@@ -85,7 +85,7 @@ export default Router()
     })
   )
   .post(
-    "/create",
+    "/",
     asyncRouteHandler<IResponseGeneric>(async (request: Request) => {
       const userData = request.body as IUser;
 
@@ -113,7 +113,7 @@ export default Router()
     })
   )
   .put(
-    "/:userId?",
+    "/:userId",
     asyncRouteHandler<IResponseGeneric>(async (request: Request) => {
       const userId = request.params.userId || (request as any).user.user.id;
       const userData = request.body as IUser;
@@ -144,7 +144,7 @@ export default Router()
     })
   )
   .delete(
-    "/delete/:userId?",
+    "/:userId",
     asyncRouteHandler<IResponseGeneric>(async (request: Request) => {
       const userId = request.params.userId;
 
@@ -176,7 +176,7 @@ export default Router()
     })
   )
   .get(
-    "/bookmarks/:userId?",
+    "/:userId/bookmarks",
     asyncRouteHandler<IResponseBookmarkFolder[]>(async (request: Request) => {
       if (!(request as any).user) {
         throw new BadParams("not logged");
@@ -218,8 +218,8 @@ export default Router()
       return out;
     })
   )
-  .get(
-    "/reset-password/:userId?",
+  .post(
+    "/:userId/password",
     asyncRouteHandler<IResponseGeneric>(async (request: Request) => {
       const userId = request.params.userId;
 
