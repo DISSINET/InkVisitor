@@ -324,3 +324,5 @@ export const EntityBookmarkBox: React.FC = () => {
     </StyledContent>
   );
 };
+
+export const MemoizedEntityBookmarkBox = React.memo(EntityBookmarkBox);
