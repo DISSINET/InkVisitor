@@ -115,7 +115,10 @@ export default Router()
   .put(
     "/:userId",
     asyncRouteHandler<IResponseGeneric>(async (request: Request) => {
-      const userId = request.params.userId || (request as any).user.user.id;
+      const userId =
+        request.params.userId !== "me"
+          ? request.params.userId
+          : (request as any).user.user.id;
       const userData = request.body as IUser;
 
       if (!userId || !userData || Object.keys(userData).length === 0) {
@@ -182,7 +185,10 @@ export default Router()
         throw new BadParams("not logged");
       }
 
-      const userId = request.params.userId || (request as any).user.user.id;
+      const userId =
+        request.params.userId !== "me"
+          ? request.params.userId
+          : (request as any).user.user.id;
 
       if (!userId) {
         throw new BadParams("user id has to be set");
