@@ -48,7 +48,7 @@ describe("Territories getEntityIds", () => {
       await statement2.save(db.connection);
 
       await request(app)
-        .get(`${apiPath}/territories/getEntityIds/${territory.id}`)
+        .get(`${apiPath}/territories/${territory.id}/entities`)
         .set("authorization", "Bearer " + supertestConfig.token)
         .expect(200)
         .expect((res: Request) => {
