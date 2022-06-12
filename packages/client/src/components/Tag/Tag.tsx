@@ -77,7 +77,7 @@ export const Tag: React.FC<TagProps> = ({
   isTemplate = false,
   lvl,
 }) => {
-  const { setDetailId } = useSearchParams();
+  const { setDetailId, appendDetailId } = useSearchParams();
   const dispatch = useAppDispatch();
   const draggedTerritory: DraggedTerritoryItem = useAppSelector(
     (state) => state.territoryTree.draggedTerritory
@@ -128,7 +128,7 @@ export const Tag: React.FC<TagProps> = ({
     e.stopPropagation();
     e.nativeEvent.stopImmediatePropagation();
 
-    !disableDoubleClick && setDetailId(propId);
+    !disableDoubleClick && appendDetailId(propId);
   };
 
   const getShortTag = () => {

@@ -15,16 +15,20 @@ const INITIAL_CONTEXT = {
   setTerritoryId: UNINITIALISED,
   statementId: "",
   setStatementId: UNINITIALISED,
-  detailId: "",
+  detailId: [],
   setDetailId: UNINITIALISED,
+  appendDetailId: UNINITIALISED,
+  removeDetailId: UNINITIALISED,
 };
 interface SearchParamsContext {
   territoryId: string;
   setTerritoryId: (territory: string) => void;
   statementId: string;
   setStatementId: (statement: string) => void;
-  detailId: string;
-  setDetailId: (detail: string) => void;
+  detailId: string[];
+  setDetailId: (detail: string[]) => void;
+  appendDetailId: (id: string) => void;
+  removeDetailId: (id: string) => void;
 }
 const SearchParamsContext = createContext<SearchParamsContext>(INITIAL_CONTEXT);
 
@@ -46,17 +50,21 @@ export const SearchParamsProvider = ({
   const [statementId, setStatementId] = useState<string>(
     typeof parsedParams.statement === "string" ? parsedParams.statement : ""
   );
-  const [detailId, setDetailId] = useState<string>(
-    typeof parsedParams.detail === "string" ? parsedParams.detail : ""
-  );
+  const [detailId, setDetailId] = useState<string[]>(params.getAll("detail"));
+
+  useEffect(() => {
+    console.log(params.getAll("detail"));
+  }, []);
 
   const [disablePush, setDisablePush] = useState(false);
 
-  useEffect(() => {
-    if (detailId) {
-      console.log(params.getAll("detail"));
-    }
-  }, [detailId]);
+  const appendDetailId = (id: string) => {
+    console.log(id);
+  };
+
+  const removeDetailId = (id: string) => {
+    console.log(id);
+  };
 
   useEffect(() => {
     territoryId
@@ -68,9 +76,12 @@ export const SearchParamsProvider = ({
       : params.delete("statement");
 
     // TODO: discover ID to delete
-    if (!params.getAll("detail").includes(detailId)) {
-      detailId ? params.append("detail", detailId) : params.delete("detail");
-    }
+    // if (!params.getAll("detail").includes(detailId)) {
+    //   detailId ? params.append("detail", detailId) : params.delete("detail");
+    // } else if (params.getAll("detail").includes(detailId)) {
+    //   const allDetailIds = params.getAll("detail");
+    //   console.log(allDetailIds);
+    // }
 
     if (!disablePush) {
       history.push({
@@ -91,9 +102,9 @@ export const SearchParamsProvider = ({
       ? setStatementId(parsedParamsTemp.statement)
       : setStatementId("");
 
-    parsedParamsTemp.detail
-      ? setDetailId(parsedParamsTemp.detail)
-      : setDetailId("");
+    // parsedParamsTemp.detail
+    //   ? setDetailId(parsedParamsTemp.detail)
+    //   : setDetailId("");
   };
 
   useEffect(() => {
@@ -113,6 +124,8 @@ export const SearchParamsProvider = ({
         setStatementId,
         detailId: detailId,
         setDetailId: setDetailId,
+        appendDetailId,
+        removeDetailId,
       }}
     >
       {children}
