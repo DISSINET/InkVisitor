@@ -92,6 +92,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
     setStatementId,
     territoryId,
     setTerritoryId,
+    removeDetailId,
   } = useSearchParams();
 
   const [createTemplateModal, setCreateTemplateModal] =
@@ -431,7 +432,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
 
   useEffect(() => {
     if (error && (error as any).error === "EntityDoesNotExist") {
-      setDetailId("");
+      removeDetailId(detailId);
     }
   }, [error]);
 
@@ -479,6 +480,10 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
             mayBeRemoved={mayBeRemoved}
             setShowRemoveSubmit={setShowRemoveSubmit}
             setCreateTemplateModal={setCreateTemplateModal}
+          />
+          <Button
+            label="close detail"
+            onClick={() => removeDetailId(detailId)}
           />
 
           <StyledDetailWrapper type={entity.class}>
@@ -1291,7 +1296,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
         submitLabel="Remove"
         onSubmit={() => {
           deleteEntityMutation.mutate(detailId);
-          setDetailId("");
+          removeDetailId(detailId);
         }}
         onCancel={() => setShowRemoveSubmit(false)}
         show={showRemoveSubmit}

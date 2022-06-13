@@ -12,7 +12,9 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
   return (
     <>
       {detailId &&
-        detailId.map((entityId) => <EntityDetail detailId={entityId} />)}
+        detailId.map((entityId, key) => (
+          <EntityDetail key={key} detailId={entityId} />
+        ))}
     </>
   );
 };
