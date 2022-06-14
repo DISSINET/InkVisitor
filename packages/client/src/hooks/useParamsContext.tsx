@@ -6,6 +6,8 @@ import React, {
   useState,
 } from "react";
 import { useHistory, useLocation } from "react-router-dom";
+import { setSelectedDetailId } from "redux/features/entityDetail/selectedDetailIdSlice";
+import { useAppDispatch } from "redux/hooks";
 
 const UNINITIALISED = (): void => {
   throw `function uninitialised`;
@@ -56,10 +58,13 @@ export const SearchParamsProvider = ({
 
   const [disablePush, setDisablePush] = useState(false);
 
+  const dispatch = useAppDispatch();
+
   const appendDetailId = (id: string) => {
     if (!params.getAll("detail").includes(id)) {
       setDetailId([...detailId, id]);
     }
+    dispatch(setSelectedDetailId(id));
   };
 
   const removeDetailId = (id: string) => {

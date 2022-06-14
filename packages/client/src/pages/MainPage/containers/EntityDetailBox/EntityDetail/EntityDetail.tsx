@@ -484,10 +484,6 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
             setShowRemoveSubmit={setShowRemoveSubmit}
             setCreateTemplateModal={setCreateTemplateModal}
           />
-          <Button
-            label="close detail"
-            onClick={() => removeDetailId(detailId)}
-          />
 
           <StyledDetailWrapper type={entity.class}>
             {/* form section */}

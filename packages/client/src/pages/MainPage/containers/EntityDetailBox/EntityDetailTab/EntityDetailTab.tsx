@@ -1,25 +1,34 @@
+import api from "api";
 import { Button } from "components";
 import React, { MouseEventHandler } from "react";
-import { StyledTab } from "./EntityDetailTabStyles";
+import { useQuery } from "react-query";
+import { StyledLabel, StyledTab } from "./EntityDetailTabStyles";
 
 interface EntityDetailTab {
   entityId: string;
-  label: string;
   onClick?: MouseEventHandler<HTMLElement>;
   onClose?: () => void;
   isSelected?: boolean;
 }
 export const EntityDetailTab: React.FC<EntityDetailTab> = ({
   entityId,
-  label,
   onClick,
   onClose,
   isSelected = false,
 }) => {
+  const { status, data, error, isFetching } = useQuery(
+    ["entity", entityId],
+    async () => {
+      const res = await api.detailGet(entityId);
+      return res.data;
+    },
+    { enabled: !!entityId && api.isLoggedIn() }
+  );
+
   return (
     <StyledTab onClick={onClick} isSelected={isSelected}>
-      {label}
-      <Button label="x" onClick={onClose} />
+      <StyledLabel>{data ? data.label : entityId}</StyledLabel>
+      <Button label="x" onClick={onClose} inverted />
     </StyledTab>
   );
 };

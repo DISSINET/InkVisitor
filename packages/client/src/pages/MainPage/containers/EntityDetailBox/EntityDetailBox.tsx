@@ -21,15 +21,14 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
   }, []);
 
   const handleTabClose = (entityId: string) => {
-    if (selectedDetailId === entityId) {
-      console.log("closed is selected");
-      const index = detailId.indexOf(entityId);
-      dispatch(setSelectedDetailId(detailId[index + 1]));
-    }
+    // if (selectedDetailId === entityId) {
+    //   console.log("closed is selected");
+    //   const index = detailId.indexOf(entityId);
+    //   dispatch(setSelectedDetailId(detailId[index + 1]));
+    // }
     removeDetailId(entityId);
   };
 
-  // TODO: tabs
   return (
     <>
       <StyledTabGroup>
@@ -37,7 +36,6 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
           detailId.map((entityId, key) => (
             <EntityDetailTab
               key={key}
-              label={entityId}
               entityId={entityId}
               onClick={() => dispatch(setSelectedDetailId(entityId))}
               onClose={() => handleTabClose(entityId)}
