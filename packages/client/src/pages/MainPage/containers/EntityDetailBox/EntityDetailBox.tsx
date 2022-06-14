@@ -27,7 +27,11 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
         {detailId &&
           detailId.map((entityId, key) => (
             // <EntityDetail key={key} detailId={entityId} />
-            <Button key={key} label={entityId} />
+            <Button
+              key={key}
+              label={entityId}
+              onClick={() => dispatch(setSelectedDetailId(entityId))}
+            />
           ))}
       </StyledTabGroup>
       {selectedDetailId && <EntityDetail detailId={selectedDetailId} />}
