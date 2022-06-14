@@ -108,7 +108,7 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
     dispatch(setUsername(""));
     toast.success("You've been successfully logged out!");
     queryClient.removeQueries();
-    setDetailId("");
+    setDetailId([]);
     setStatementId("");
     setTerritoryId("");
   };
@@ -270,25 +270,25 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
               }
             >
               <Box
-                height={detailId ? heightContent / 2 - 20 : heightContent}
+                height={
+                  detailId.length ? heightContent / 2 - 20 : heightContent
+                }
                 label="Statements"
               >
                 <MemoizedStatementListBox />
               </Box>
-              {detailId && (
+              {detailId.length && (
                 <Box
                   height={heightContent / 2 + 20}
                   label="Detail"
                   button={[
-                    detailId && (
-                      <Button
-                        inverted
-                        icon={<IoMdClose />}
-                        onClick={() => {
-                          setDetailId("");
-                        }}
-                      />
-                    ),
+                    <Button
+                      inverted
+                      icon={<IoMdClose />}
+                      onClick={() => {
+                        setDetailId([]);
+                      }}
+                    />,
                   ]}
                 >
                   <MemoizedEntityDetailBox />

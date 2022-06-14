@@ -10,7 +10,10 @@ import { GrClone } from "react-icons/gr";
 import { useMutation, useQueryClient } from "react-query";
 import { toast } from "react-toastify";
 import { EntityTag } from "../../EntityTag/EntityTag";
-import { StyledActantHeaderRow, StyledTagWrap } from "../EntityDetailBoxStyles";
+import {
+  StyledActantHeaderRow,
+  StyledTagWrap,
+} from "./EntityDetailHeaderRowStyles";
 
 interface EntityDetailHeaderRow {
   entity: IEntity;
@@ -28,7 +31,8 @@ export const EntityDetailHeaderRow: React.FC<EntityDetailHeaderRow> = ({
 }) => {
   const queryClient = useQueryClient();
 
-  const { setStatementId, setTerritoryId, setDetailId } = useSearchParams();
+  const { setStatementId, setTerritoryId, setDetailId, appendDetailId } =
+    useSearchParams();
 
   const duplicateEntityMutation = useMutation(
     async (newEntity: IEntity) => {
@@ -36,7 +40,7 @@ export const EntityDetailHeaderRow: React.FC<EntityDetailHeaderRow> = ({
     },
     {
       onSuccess: (data, variables) => {
-        setDetailId(variables.id);
+        appendDetailId(variables.id);
         toast.info(`Entity duplicated!`);
         queryClient.invalidateQueries("templates");
       },

@@ -3,7 +3,7 @@ import {
   entitiesDict,
   entitiesDictKeys,
   entityStatusDict,
-  languageDict,
+  languageDict
 } from "@shared/dictionaries";
 import { allEntities } from "@shared/dictionaries/entity";
 import { EntityClass, Language, UserRoleMode } from "@shared/enums";
@@ -15,7 +15,7 @@ import {
   Input,
   Loader,
   MultiInput,
-  Submit,
+  Submit
 } from "components";
 import { StyledUsedInTitle } from "components/Table/TableStyles";
 import { StyledTypeBar } from "components/TypeBar/TypeBarStyles";
@@ -29,7 +29,7 @@ import { toast } from "react-toastify";
 import {
   DraggedPropRowCategory,
   DropdownItem,
-  PropAttributeFilter,
+  PropAttributeFilter
 } from "types";
 import { AttributeButtonGroup } from "../../AttributeButtonGroup/AttributeButtonGroup";
 import { AuditTable } from "../../AuditTable/AuditTable";
@@ -43,21 +43,22 @@ import { CreateTemplateModal } from "../CreateTemplateModal/CreateTemplateModal"
 import {
   StyledDetailContentRow,
   StyledDetailContentRowLabel,
-  StyledDetailContentRowValue,
+  StyledDetailContentRowValue, StyledDetailForm
+} from "../EntityDetailBoxStyles";
+import { EntityDetailHeaderRow } from "../EntityDetailHeaderRow/EntityDetailHeaderRow";
+import { EntityDetailMetaPropsTable } from "../EntityDetailUsedInTable/EntityDetailMetaPropsTable/EntityDetailMetaPropsTable";
+import { EntityDetailStatementPropsTable } from "../EntityDetailUsedInTable/EntityDetailStatementPropsTable/EntityDetailStatementPropsTable";
+import { EntityDetailStatementsTable } from "../EntityDetailUsedInTable/EntityDetailStatementsTable/EntityDetailStatementsTable";
+import {
   StyledDetailContentRowValueID,
-  StyledDetailForm,
   StyledDetailSection,
   StyledDetailSectionContent,
   StyledDetailSectionContentUsedIn,
   StyledDetailSectionEntityList,
   StyledDetailSectionHeader,
   StyledDetailWrapper,
-  StyledFormWrapper,
-} from "../EntityDetailBoxStyles";
-import { EntityDetailHeaderRow } from "../EntityDetailHeaderRow/EntityDetailHeaderRow";
-import { EntityDetailMetaPropsTable } from "../EntityDetailUsedInTable/EntityDetailMetaPropsTable/EntityDetailMetaPropsTable";
-import { EntityDetailStatementPropsTable } from "../EntityDetailUsedInTable/EntityDetailStatementPropsTable/EntityDetailStatementPropsTable";
-import { EntityDetailStatementsTable } from "../EntityDetailUsedInTable/EntityDetailStatementsTable/EntityDetailStatementsTable";
+  StyledFormWrapper
+} from "./EntityDetailStyles";
 
 const allowedEntityChangeClasses = [
   EntityClass.Value,

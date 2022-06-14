@@ -1,20 +1,36 @@
+import { Button } from "components";
 import { useSearchParams } from "hooks";
-import React from "react";
+import React, { useEffect } from "react";
+import { setSelectedDetailId } from "redux/features/entityDetail/selectedDetailIdSlice";
+import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { EntityDetail } from "./EntityDetail/EntityDetail";
-
-// TODO: add to entity type dropdown options
+import { StyledTabGroup } from "./EntityDetailBoxStyles";
 
 interface EntityDetailBox {}
 export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
   const { detailId } = useSearchParams();
+  const selectedDetailId = useAppSelector(
+    (state) => state.entityDetail.selectedDetailId
+  );
+  const dispatch = useAppDispatch();
 
-  // TODO: map entities to detail instances
+  useEffect(() => {
+    if (!selectedDetailId && detailId.length) {
+      dispatch(setSelectedDetailId(detailId[0]));
+    }
+  }, []);
+
+  // TODO: tabs
   return (
     <>
-      {detailId &&
-        detailId.map((entityId, key) => (
-          <EntityDetail key={key} detailId={entityId} />
-        ))}
+      <StyledTabGroup>
+        {detailId &&
+          detailId.map((entityId, key) => (
+            // <EntityDetail key={key} detailId={entityId} />
+            <Button key={key} label={entityId} />
+          ))}
+      </StyledTabGroup>
+      {selectedDetailId && <EntityDetail detailId={selectedDetailId} />}
     </>
   );
 };
