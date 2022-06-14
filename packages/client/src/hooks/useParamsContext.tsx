@@ -19,6 +19,7 @@ const INITIAL_CONTEXT = {
   setDetailId: UNINITIALISED,
   appendDetailId: UNINITIALISED,
   removeDetailId: UNINITIALISED,
+  clearAllDetailIds: UNINITIALISED,
 };
 interface SearchParamsContext {
   territoryId: string;
@@ -29,6 +30,7 @@ interface SearchParamsContext {
   setDetailId: (detail: string[]) => void;
   appendDetailId: (id: string) => void;
   removeDetailId: (id: string) => void;
+  clearAllDetailIds: () => void;
 }
 const SearchParamsContext = createContext<SearchParamsContext>(INITIAL_CONTEXT);
 
@@ -66,13 +68,11 @@ export const SearchParamsProvider = ({
     setDetailId(newIds);
   };
 
-  const clearAllDetail = () => {
+  const clearAllDetailIds = () => {
     setDetailId([]);
   };
 
   useEffect(() => {
-    console.log(detailId);
-
     params.delete("detail");
     detailId.forEach((id) => params.append("detail", id));
 
@@ -135,6 +135,7 @@ export const SearchParamsProvider = ({
         setDetailId: setDetailId,
         appendDetailId,
         removeDetailId,
+        clearAllDetailIds,
       }}
     >
       {children}

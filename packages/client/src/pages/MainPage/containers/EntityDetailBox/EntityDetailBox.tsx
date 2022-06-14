@@ -1,14 +1,14 @@
-import { Button } from "components";
 import { useSearchParams } from "hooks";
 import React, { useEffect } from "react";
 import { setSelectedDetailId } from "redux/features/entityDetail/selectedDetailIdSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { EntityDetail } from "./EntityDetail/EntityDetail";
 import { StyledTabGroup } from "./EntityDetailBoxStyles";
+import { EntityDetailTab } from "./EntityDetailTab/EntityDetailTab";
 
 interface EntityDetailBox {}
 export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
-  const { detailId } = useSearchParams();
+  const { detailId, removeDetailId } = useSearchParams();
   const selectedDetailId = useAppSelector(
     (state) => state.entityDetail.selectedDetailId
   );
@@ -20,17 +20,28 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
     }
   }, []);
 
+  const handleTabClose = (entityId: string) => {
+    if (selectedDetailId === entityId) {
+      console.log("closed is selected");
+      const index = detailId.indexOf(entityId);
+      dispatch(setSelectedDetailId(detailId[index + 1]));
+    }
+    removeDetailId(entityId);
+  };
+
   // TODO: tabs
   return (
     <>
       <StyledTabGroup>
         {detailId &&
           detailId.map((entityId, key) => (
-            // <EntityDetail key={key} detailId={entityId} />
-            <Button
+            <EntityDetailTab
               key={key}
               label={entityId}
+              entityId={entityId}
               onClick={() => dispatch(setSelectedDetailId(entityId))}
+              onClose={() => handleTabClose(entityId)}
+              isSelected={selectedDetailId === entityId}
             />
           ))}
       </StyledTabGroup>

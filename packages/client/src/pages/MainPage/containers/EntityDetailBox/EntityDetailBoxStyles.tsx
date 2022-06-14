@@ -3,7 +3,6 @@ import styled from "styled-components";
 export const StyledTabGroup = styled.div`
   display: flex;
   width: 100%;
-  background-color: pink;
 `;
 
 export const StyledDetailContentRow = styled.div``;

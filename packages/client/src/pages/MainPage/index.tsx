@@ -53,6 +53,7 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
     setStatementId,
     territoryId,
     setTerritoryId,
+    clearAllDetailIds,
   } = useSearchParams();
 
   const [width, height] = size;
@@ -108,7 +109,7 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
     dispatch(setUsername(""));
     toast.success("You've been successfully logged out!");
     queryClient.removeQueries();
-    setDetailId([]);
+    clearAllDetailIds();
     setStatementId("");
     setTerritoryId("");
   };
@@ -286,7 +287,7 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
                       inverted
                       icon={<IoMdClose />}
                       onClick={() => {
-                        setDetailId([]);
+                        clearAllDetailIds();
                       }}
                     />,
                   ]}
