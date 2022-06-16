@@ -52,6 +52,22 @@ export default Router()
     })
   )
   .get(
+    "/administration",
+    asyncRouteHandler<IResponseAdministration>(async (request: Request) => {
+      const out: IResponseAdministration = {
+        users: [],
+      };
+
+      for (const user of await User.findAllUsers(request.db.connection)) {
+        const response = new ResponseUser(user);
+        await response.unwindAll(request);
+        out.users.push(response);
+      }
+
+      return out;
+    })
+  )
+  .get(
     "/:userId",
     asyncRouteHandler<IResponseUser>(async (request: Request) => {
       const userId = request.params.userId;
@@ -206,22 +222,6 @@ export default Router()
       await response.unwindBookmarks(request);
 
       return response.bookmarks;
-    })
-  )
-  .get(
-    "/administration",
-    asyncRouteHandler<IResponseAdministration>(async (request: Request) => {
-      const out: IResponseAdministration = {
-        users: [],
-      };
-
-      for (const user of await User.findAllUsers(request.db.connection)) {
-        const response = new ResponseUser(user);
-        await response.unwindAll(request);
-        out.users.push(response);
-      }
-
-      return out;
     })
   )
   .post(
