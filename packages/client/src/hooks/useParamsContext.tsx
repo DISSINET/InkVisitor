@@ -114,7 +114,7 @@ export const SearchParamsProvider = ({
   }, [territoryId, statementId, selectedDetailId]);
 
   const handleLocationChange = (location: any) => {
-    console.log("handleLocationChange");
+    // console.log("handleLocationChange");
     const paramsTemp = new URLSearchParams(location.hash.substring(1));
     const parsedParamsTemp = Object.fromEntries(paramsTemp);
 
@@ -126,7 +126,9 @@ export const SearchParamsProvider = ({
       ? setStatementId(parsedParamsTemp.statement)
       : setStatementId("");
 
-    console.log("params context", paramsTemp.getAll("detail"));
+    parsedParamsTemp.selectedDetail
+      ? setSelectedDetailId(parsedParamsTemp.selectedDetail)
+      : setSelectedDetailId("");
 
     // setDetailId(paramsTemp.getAll("detail"));
   };

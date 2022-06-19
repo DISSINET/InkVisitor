@@ -26,8 +26,10 @@ export const EntityDetailTab: React.FC<EntityDetailTab> = ({
   );
 
   return (
-    <StyledTab onClick={onClick} isSelected={isSelected}>
-      <StyledLabel>{data ? data.label : entityId}</StyledLabel>
+    <StyledTab isSelected={isSelected}>
+      <StyledLabel onClick={onClick}>
+        {data ? data.label : entityId}
+      </StyledLabel>
       <Button label="x" onClick={onClose} inverted />
     </StyledTab>
   );

@@ -16,13 +16,20 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
   }, []);
 
   const handleTabClose = (entityId: string) => {
-    console.log(entityId);
-    console.log(detailId);
-    // if (selectedDetailId === entityId) {
-    //   console.log("closed is selected");
-    //   const index = detailId.indexOf(entityId);
-    //   dispatch(setSelectedDetailId(detailId[index + 1]));
-    // }
+    const index = detailId.indexOf(entityId);
+
+    if (selectedDetailId === entityId) {
+      if (index + 1 === detailId.length) {
+        if (detailId.length > 1) {
+          setSelectedDetailId(detailId[detailId.length - 2]);
+        } else {
+          // TODO: remove detail id in params context
+          setSelectedDetailId("");
+        }
+      } else {
+        setSelectedDetailId(detailId[index + 1]);
+      }
+    }
     removeDetailId(entityId);
   };
 
