@@ -31,8 +31,7 @@ export const EntityDetailHeaderRow: React.FC<EntityDetailHeaderRow> = ({
 }) => {
   const queryClient = useQueryClient();
 
-  const { setStatementId, setTerritoryId, setDetailId, appendDetailId } =
-    useSearchParams();
+  const { setStatementId, setTerritoryId, appendDetailId } = useSearchParams();
 
   const duplicateEntityMutation = useMutation(
     async (newEntity: IEntity) => {

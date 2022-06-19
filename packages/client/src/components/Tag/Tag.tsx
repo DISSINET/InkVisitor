@@ -15,7 +15,6 @@ import { dndHoverFn } from "utils";
 import {
   ButtonWrapper,
   StyledEntityTag,
-  StyledItalic,
   StyledLabel,
   StyledTagWrapper,
   StyledTooltipSeparator,
@@ -79,7 +78,7 @@ export const Tag: React.FC<TagProps> = ({
   isTemplate = false,
   lvl,
 }) => {
-  const { setDetailId, appendDetailId } = useSearchParams();
+  const { appendDetailId } = useSearchParams();
   const dispatch = useAppDispatch();
   const draggedTerritory: DraggedTerritoryItem = useAppSelector(
     (state) => state.territoryTree.draggedTerritory
@@ -96,7 +95,10 @@ export const Tag: React.FC<TagProps> = ({
     },
   });
 
-  const canDrag = useMemo(() => category !== "X" && !disableDrag, [category, disableDrag])
+  const canDrag = useMemo(
+    () => category !== "X" && !disableDrag,
+    [category, disableDrag]
+  );
 
   const [{ isDragging }, drag] = useDrag({
     item: { type: ItemTypes.TAG, id: propId, index, category },
@@ -106,7 +108,7 @@ export const Tag: React.FC<TagProps> = ({
     end: (item: DragItem | undefined, monitor: DragSourceMonitor) => {
       if (item && item.index !== index) updateOrderFn(item);
     },
-    canDrag: canDrag
+    canDrag: canDrag,
   });
 
   useEffect(() => {

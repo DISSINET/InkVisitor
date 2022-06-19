@@ -16,7 +16,6 @@ const INITIAL_CONTEXT = {
   statementId: "",
   setStatementId: UNINITIALISED,
   detailId: [],
-  setDetailId: UNINITIALISED,
   selectedDetailId: "",
   setSelectedDetailId: UNINITIALISED,
   appendDetailId: UNINITIALISED,
@@ -29,7 +28,6 @@ interface SearchParamsContext {
   statementId: string;
   setStatementId: (statement: string) => void;
   detailId: string[];
-  setDetailId: (detail: string[]) => void;
   selectedDetailId: string;
   setSelectedDetailId: (id: string) => void;
   appendDetailId: (id: string) => void;
@@ -73,6 +71,7 @@ export const SearchParamsProvider = ({
   };
 
   const removeDetailId = (id: string) => {
+    // TODO: handle selecting different tab here instead of EntityDetailBox!!!
     const detailIds = params.getAll("detail");
     const newIds = detailIds.filter((detailId) => detailId !== id);
     setDetailId(newIds);
@@ -155,7 +154,6 @@ export const SearchParamsProvider = ({
         statementId,
         setStatementId,
         detailId: detailId,
-        setDetailId: setDetailId,
         selectedDetailId,
         setSelectedDetailId,
         appendDetailId,

@@ -21,6 +21,7 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
   }, []);
 
   const handleTabClose = (entityId: string) => {
+    // TODO: move into params context -> TAB CAN BE CLOSED ALSO BY DELETING TAG!!!
     const index = detailId.indexOf(entityId);
 
     if (selectedDetailId === entityId) {

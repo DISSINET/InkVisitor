@@ -56,7 +56,8 @@ export const TemplateListBox: React.FC<TemplateListBox> = ({}) => {
     (state) => state.layout.fourthPanelBoxesOpened
   );
 
-  const { detailId, setDetailId, setStatementId } = useSearchParams();
+  const { detailId, removeDetailId, setStatementId, appendDetailId } =
+    useSearchParams();
   const queryClient = useQueryClient();
   const {
     status,
@@ -98,7 +99,7 @@ export const TemplateListBox: React.FC<TemplateListBox> = ({}) => {
         if (variables.class === EntityClass.Statement) {
           setStatementId(variables.id);
         } else {
-          setDetailId(variables.id);
+          appendDetailId(variables.id);
         }
       },
     }
@@ -107,8 +108,8 @@ export const TemplateListBox: React.FC<TemplateListBox> = ({}) => {
     async (entityId: string) => await api.entityDelete(entityId),
     {
       onSuccess: () => {
-        if (detailId === removeEntityId) {
-          setDetailId("");
+        if (removeEntityId && detailId.includes(removeEntityId)) {
+          removeDetailId(removeEntityId);
         }
         entityToRemove &&
           toast.warning(

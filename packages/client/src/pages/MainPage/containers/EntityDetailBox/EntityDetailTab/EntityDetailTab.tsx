@@ -1,5 +1,5 @@
 import api from "api";
-import { Button } from "components";
+import { Button, Tooltip } from "components";
 import React, { MouseEventHandler } from "react";
 import { useQuery } from "react-query";
 import { StyledLabel, StyledTab } from "./EntityDetailTabStyles";
@@ -27,9 +27,11 @@ export const EntityDetailTab: React.FC<EntityDetailTab> = ({
 
   return (
     <StyledTab isSelected={isSelected}>
-      <StyledLabel onClick={onClick}>
-        {data ? data.label : entityId}
-      </StyledLabel>
+      <Tooltip label={data && data.label}>
+        <StyledLabel onClick={onClick}>
+          {data ? data.label : entityId}
+        </StyledLabel>
+      </Tooltip>
       <Button label="x" onClick={onClose} inverted />
     </StyledTab>
   );

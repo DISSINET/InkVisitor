@@ -48,7 +48,6 @@ interface MainPage {
 const MainPage: React.FC<MainPage> = ({ size }) => {
   const {
     detailId,
-    setDetailId,
     statementId,
     setStatementId,
     territoryId,

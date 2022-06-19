@@ -90,7 +90,6 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
   );
 
   const {
-    setDetailId,
     statementId,
     setStatementId,
     territoryId,
