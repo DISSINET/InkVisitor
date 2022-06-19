@@ -516,6 +516,17 @@ export const UserListModal: React.FC<UserListModal> = ({
         <Loader show={isFetching} />
       </ModalContent>
       <ModalFooter>
+        <div>
+          <Button
+            tooltip="test email will be sent to your email"
+            color="primary"
+            label="test email"
+            onClick={() =>
+              api.testEmail().then((data) => toast.success(`Test email sent`))
+            }
+          />
+        </div>
+        <br />
         <StyledUserEditorForm>
           <Input
             width={200}
