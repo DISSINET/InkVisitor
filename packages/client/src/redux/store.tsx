@@ -29,9 +29,9 @@ const store: Store = configureStore({
       rowsExpanded: rowsExpandedSlice,
       draggedRowId: draggedRowIdSlice,
     }),
-    entityDetail: combineReducers({
-      selectedDetailId: selectedDetailIdSlice,
-    }),
+    // entityDetail: combineReducers({
+    //   selectedDetailId: selectedDetailIdSlice,
+    // }),
     rowDnd: combineReducers({
       draggedPropRow: draggedPropRowSlice,
       draggedActantRow: draggedActantRowSlice,

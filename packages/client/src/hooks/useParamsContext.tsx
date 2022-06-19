@@ -6,8 +6,6 @@ import React, {
   useState,
 } from "react";
 import { useHistory, useLocation } from "react-router-dom";
-import { setSelectedDetailId } from "redux/features/entityDetail/selectedDetailIdSlice";
-import { useAppDispatch } from "redux/hooks";
 
 const UNINITIALISED = (): void => {
   throw `function uninitialised`;
@@ -19,6 +17,8 @@ const INITIAL_CONTEXT = {
   setStatementId: UNINITIALISED,
   detailId: [],
   setDetailId: UNINITIALISED,
+  selectedDetailId: "",
+  setSelectedDetailId: UNINITIALISED,
   appendDetailId: UNINITIALISED,
   removeDetailId: UNINITIALISED,
   clearAllDetailIds: UNINITIALISED,
@@ -30,6 +30,8 @@ interface SearchParamsContext {
   setStatementId: (statement: string) => void;
   detailId: string[];
   setDetailId: (detail: string[]) => void;
+  selectedDetailId: string;
+  setSelectedDetailId: (id: string) => void;
   appendDetailId: (id: string) => void;
   removeDetailId: (id: string) => void;
   clearAllDetailIds: () => void;
@@ -54,17 +56,20 @@ export const SearchParamsProvider = ({
   const [statementId, setStatementId] = useState<string>(
     typeof parsedParams.statement === "string" ? parsedParams.statement : ""
   );
+  const [selectedDetailId, setSelectedDetailId] = useState<string>(
+    typeof parsedParams.selectedDetail === "string"
+      ? parsedParams.selectedDetail
+      : ""
+  );
   const [detailId, setDetailId] = useState<string[]>(params.getAll("detail"));
 
   const [disablePush, setDisablePush] = useState(false);
-
-  const dispatch = useAppDispatch();
 
   const appendDetailId = (id: string) => {
     if (!params.getAll("detail").includes(id)) {
       setDetailId([...detailId, id]);
     }
-    dispatch(setSelectedDetailId(id));
+    setSelectedDetailId(id);
   };
 
   const removeDetailId = (id: string) => {
@@ -101,10 +106,15 @@ export const SearchParamsProvider = ({
       ? params.set("statement", statementId)
       : params.delete("statement");
 
+    selectedDetailId
+      ? params.set("selectedDetail", selectedDetailId)
+      : params.delete("selectedDetail");
+
     handleHistoryPush();
-  }, [territoryId, statementId]);
+  }, [territoryId, statementId, selectedDetailId]);
 
   const handleLocationChange = (location: any) => {
+    console.log("handleLocationChange");
     const paramsTemp = new URLSearchParams(location.hash.substring(1));
     const parsedParamsTemp = Object.fromEntries(paramsTemp);
 
@@ -138,6 +148,8 @@ export const SearchParamsProvider = ({
         setStatementId,
         detailId: detailId,
         setDetailId: setDetailId,
+        selectedDetailId,
+        setSelectedDetailId,
         appendDetailId,
         removeDetailId,
         clearAllDetailIds,
