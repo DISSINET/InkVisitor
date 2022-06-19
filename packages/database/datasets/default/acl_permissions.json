@@ -65,6 +65,11 @@
     "roles": ["*"]
   },
   {
+    "controller": "users",
+    "route": "/me/emails/test",
+    "roles": ["admin"]
+  },
+  {
     "controller": "entities",
     "route": "create",
     "roles": ["*"]

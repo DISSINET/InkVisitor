@@ -6,6 +6,7 @@ import { deleteUser } from "@service/shorthands";
 import {
   BadCredentialsError,
   BadParams,
+  EmailError,
   InternalServerError,
   ModelNotValidError,
   UserDoesNotExits,
@@ -99,10 +100,14 @@ export default Router()
       const result = await user.save(request.db.connection);
 
       if (result.inserted === 1) {
-        mailer.sendNewUser(user.email, {
-          login: user.name,
-          password: rawpassword,
-        });
+        try {
+          await mailer.sendNewUser(user.email, {
+            login: user.name,
+            password: rawpassword,
+          });
+        } catch (e) {
+          throw new EmailError("email cannot be sent");
+        }
 
         return {
           result: true,
@@ -244,14 +249,37 @@ export default Router()
 
       console.log(`Password reset for ${user.email}: ${raw}`);
 
-      mailer.sendPasswordReset(user.email, {
-        login: user.name,
-        email: user.email,
-        password: raw,
-      });
+      try {
+        await mailer.sendPasswordReset(user.email, {
+          login: user.name,
+          email: user.email,
+          password: raw,
+        });
+      } catch (e) {
+        throw new EmailError("email cannot be sent");
+      }
 
       return {
         result: true,
+      };
+    })
+  )
+  .get(
+    "/me/emails/test",
+    asyncRouteHandler<IResponseGeneric>(async (request: Request) => {
+      const user = request.getUserOrFail();
+
+      try {
+        await mailer.sendTest(user.email, {
+          name: user.name,
+        });
+      } catch (e) {
+        throw new EmailError("email cannot be sent");
+      }
+
+      return {
+        result: true,
+        message: `Email sent to ${user.email}`,
       };
     })
   )
