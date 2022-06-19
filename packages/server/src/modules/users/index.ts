@@ -106,7 +106,10 @@ export default Router()
             password: rawpassword,
           });
         } catch (e) {
-          throw new EmailError("email cannot be sent");
+          throw new EmailError(
+            "please check the logs",
+            (e as Error).toString()
+          );
         }
 
         return {
@@ -256,7 +259,7 @@ export default Router()
           password: raw,
         });
       } catch (e) {
-        throw new EmailError("email cannot be sent");
+        throw new EmailError("please check the logs", (e as Error).toString());
       }
 
       return {
@@ -268,18 +271,23 @@ export default Router()
     "/me/emails/test",
     asyncRouteHandler<IResponseGeneric>(async (request: Request) => {
       const user = request.getUserOrFail();
+      const email = request.query.email as string;
+      if (!email) {
+        throw new BadParams("email has to be set");
+      }
 
       try {
-        await mailer.sendTest(user.email, {
+        await mailer.sendTest(email, {
           name: user.name,
+          email: user.email,
         });
       } catch (e) {
-        throw new EmailError("email cannot be sent");
+        throw new EmailError("please check the logs", (e as Error).toString());
       }
 
       return {
         result: true,
-        message: `Email sent to ${user.email}`,
+        message: `Test email sent to ${email}`,
       };
     })
   )

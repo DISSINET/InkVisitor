@@ -244,6 +244,11 @@ class EmailError extends CustomError {
   public static title = "Email cannot be sent";
   public static message = "Unknow error while sending the email";
   loggable = true;
+
+  constructor(m: string, internalMessage: string) {
+    super(m);
+    this.log = internalMessage;;
+  }
 }
 
 /**
