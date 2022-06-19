@@ -284,9 +284,11 @@ class Api {
   /*
     This request will attempt to send test email to current user's email address
   */
-  async testEmail(): Promise<AxiosResponse<IResponseGeneric>> {
+  async testEmail(testEmail: string): Promise<AxiosResponse<IResponseGeneric>> {
     try {
-      const response = await this.connection.get(`/users/me/emails/test`);
+      const response = await this.connection.get(
+        `/users/me/emails/test?email=${testEmail}`
+      );
       return response;
     } catch (err: any | AxiosError) {
       throw { ...err.response.data };

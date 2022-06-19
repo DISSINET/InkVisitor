@@ -54,6 +54,7 @@ export const UserListModal: React.FC<UserListModal> = ({
 }) => {
   const [newUserName, setNewUserName] = useState<string>("");
   const [newUserEmail, setNewUserEmail] = useState<string>("");
+  const [testEmail, setTestEmail] = useState<string>("");
 
   const [removingUserId, setRemovingUserId] = useState<false | string>("");
 
@@ -549,12 +550,23 @@ export const UserListModal: React.FC<UserListModal> = ({
           />
         </StyledUserEditorForm>
         <ButtonGroup>
+          <Input
+            width={200}
+            value={testEmail}
+            placeholder="test email"
+            changeOnType
+            onChangeFn={async (newValue: string) => {
+              setTestEmail(newValue);
+            }}
+          />
           <Button
             tooltip="Test email will be sent to your email"
             color="primary"
             label="test email"
             onClick={() =>
-              api.testEmail().then((data) => toast.success(`Test email sent`))
+              api.testEmail(testEmail).then((data) => {
+                toast.success(data.data.message);
+              })
             }
           />
           <Button
