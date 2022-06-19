@@ -6,8 +6,13 @@ import { EntityDetailTab } from "./EntityDetailTab/EntityDetailTab";
 
 interface EntityDetailBox {}
 export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
-  const { detailId, removeDetailId, selectedDetailId, setSelectedDetailId } =
-    useSearchParams();
+  const {
+    detailId,
+    removeDetailId,
+    selectedDetailId,
+    setSelectedDetailId,
+    clearAllDetailIds,
+  } = useSearchParams();
 
   useEffect(() => {
     if (!selectedDetailId && detailId.length) {
@@ -24,7 +29,7 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
           setSelectedDetailId(detailId[detailId.length - 2]);
         } else {
           // TODO: remove detail id in params context
-          setSelectedDetailId("");
+          clearAllDetailIds();
         }
       } else {
         setSelectedDetailId(detailId[index + 1]);

@@ -80,6 +80,7 @@ export const SearchParamsProvider = ({
 
   const clearAllDetailIds = () => {
     setDetailId([]);
+    setSelectedDetailId("");
   };
 
   const handleHistoryPush = () => {
@@ -98,6 +99,7 @@ export const SearchParamsProvider = ({
   }, [detailId]);
 
   useEffect(() => {
+    // Change from the inside of the app to this state
     territoryId
       ? params.set("territory", territoryId)
       : params.delete("territory");
@@ -130,10 +132,14 @@ export const SearchParamsProvider = ({
       ? setSelectedDetailId(parsedParamsTemp.selectedDetail)
       : setSelectedDetailId("");
 
-    // setDetailId(paramsTemp.getAll("detail"));
+    // TODO: follow url change!!!
+    // paramsTemp.getAll("detail").length
+    //   ? setDetailId(paramsTemp.getAll("detail"))
+    //   : setDetailId([]);
   };
 
   useEffect(() => {
+    // Should be only change from the url
     return history.listen((location: any) => {
       setDisablePush(true);
       handleLocationChange(location);
