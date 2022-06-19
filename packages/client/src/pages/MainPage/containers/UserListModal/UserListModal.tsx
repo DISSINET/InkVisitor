@@ -13,6 +13,7 @@ import {
   ModalHeader,
   Submit,
 } from "components";
+import { StyledInputWrapper } from "components/Suggester/SuggesterStyles";
 import React, { useCallback, useMemo, useState } from "react";
 import { FaKey, FaPlus, FaTrashAlt, FaUnlink } from "react-icons/fa";
 import {
@@ -548,6 +549,14 @@ export const UserListModal: React.FC<UserListModal> = ({
           />
         </StyledUserEditorForm>
         <ButtonGroup>
+          <Button
+            tooltip="Test email will be sent to your email"
+            color="primary"
+            label="test email"
+            onClick={() =>
+              api.testEmail().then((data) => toast.success(`Test email sent`))
+            }
+          />
           <Button
             key="close"
             label="Close"
