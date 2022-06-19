@@ -21,6 +21,8 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
   }, []);
 
   const handleTabClose = (entityId: string) => {
+    console.log(entityId);
+    console.log(detailId);
     // if (selectedDetailId === entityId) {
     //   console.log("closed is selected");
     //   const index = detailId.indexOf(entityId);

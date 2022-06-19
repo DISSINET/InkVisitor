@@ -77,15 +77,19 @@ export const SearchParamsProvider = ({
     setDetailId([]);
   };
 
-  useEffect(() => {
-    params.delete("detail");
-    detailId.forEach((id) => params.append("detail", id));
-
+  const handleHistoryPush = () => {
     if (!disablePush) {
       history.push({
         hash: `${params}`,
       });
     }
+  };
+
+  useEffect(() => {
+    params.delete("detail");
+    detailId.forEach((id) => params.append("detail", id));
+
+    handleHistoryPush();
   }, [detailId]);
 
   useEffect(() => {
@@ -97,12 +101,8 @@ export const SearchParamsProvider = ({
       ? params.set("statement", statementId)
       : params.delete("statement");
 
-    if (!disablePush) {
-      history.push({
-        hash: `${params}`,
-      });
-    }
-  }, [territoryId, statementId, detailId]);
+    handleHistoryPush();
+  }, [territoryId, statementId]);
 
   const handleLocationChange = (location: any) => {
     const paramsTemp = new URLSearchParams(location.hash.substring(1));
@@ -116,9 +116,9 @@ export const SearchParamsProvider = ({
       ? setStatementId(parsedParamsTemp.statement)
       : setStatementId("");
 
-    // parsedParamsTemp.detail
-    //   ? setDetailId(parsedParamsTemp.detail)
-    //   : setDetailId("");
+    console.log("params context", paramsTemp.getAll("detail"));
+
+    // setDetailId(paramsTemp.getAll("detail"));
   };
 
   useEffect(() => {

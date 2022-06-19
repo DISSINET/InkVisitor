@@ -7,7 +7,6 @@ export const StyledTab = styled.div<StyledTab>`
   display: inline-flex;
   justify-content: space-between;
   align-items: flex-end;
-  flex-grow: 1;
   cursor: pointer;
   background-color: ${({ theme, isSelected }) =>
     isSelected ? theme.color["blue"][200] : theme.color["blue"][100]};
@@ -17,7 +16,7 @@ export const StyledTab = styled.div<StyledTab>`
   border-top-left-radius: 3px;
   border-top-right-radius: 3px;
 
-  max-width: 100%;
+  width: 100%;
   overflow: hidden;
 `;
 
