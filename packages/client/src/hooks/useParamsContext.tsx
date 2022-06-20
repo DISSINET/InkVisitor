@@ -71,7 +71,20 @@ export const SearchParamsProvider = ({
   };
 
   const removeDetailId = (id: string) => {
-    // TODO: handle selecting different tab here instead of EntityDetailBox!!!
+    const index = detailId.indexOf(id);
+
+    if (selectedDetailId === id) {
+      if (index + 1 === detailId.length) {
+        if (detailId.length > 1) {
+          setSelectedDetailId(detailId[detailId.length - 2]);
+        } else {
+          // TODO: remove detail id in params context
+          clearAllDetailIds();
+        }
+      } else {
+        setSelectedDetailId(detailId[index + 1]);
+      }
+    }
     const detailIds = params.getAll("detail");
     const newIds = detailIds.filter((detailId) => detailId !== id);
     setDetailId(newIds);

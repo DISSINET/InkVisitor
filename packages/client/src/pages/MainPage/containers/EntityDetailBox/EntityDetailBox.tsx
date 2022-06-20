@@ -6,38 +6,14 @@ import { EntityDetailTab } from "./EntityDetailTab/EntityDetailTab";
 
 interface EntityDetailBox {}
 export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
-  const {
-    detailId,
-    removeDetailId,
-    selectedDetailId,
-    setSelectedDetailId,
-    clearAllDetailIds,
-  } = useSearchParams();
+  const { detailId, removeDetailId, selectedDetailId, setSelectedDetailId } =
+    useSearchParams();
 
   useEffect(() => {
     if (!selectedDetailId && detailId.length) {
       setSelectedDetailId(detailId[0]);
     }
   }, []);
-
-  const handleTabClose = (entityId: string) => {
-    // TODO: move into params context -> TAB CAN BE CLOSED ALSO BY DELETING TAG!!!
-    const index = detailId.indexOf(entityId);
-
-    if (selectedDetailId === entityId) {
-      if (index + 1 === detailId.length) {
-        if (detailId.length > 1) {
-          setSelectedDetailId(detailId[detailId.length - 2]);
-        } else {
-          // TODO: remove detail id in params context
-          clearAllDetailIds();
-        }
-      } else {
-        setSelectedDetailId(detailId[index + 1]);
-      }
-    }
-    removeDetailId(entityId);
-  };
 
   return (
     <>
@@ -48,7 +24,7 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
               key={key}
               entityId={entityId}
               onClick={() => setSelectedDetailId(entityId)}
-              onClose={() => handleTabClose(entityId)}
+              onClose={() => removeDetailId(entityId)}
               isSelected={selectedDetailId === entityId}
             />
           ))}

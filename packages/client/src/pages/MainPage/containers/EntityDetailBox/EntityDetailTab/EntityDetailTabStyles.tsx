@@ -13,8 +13,8 @@ export const StyledTab = styled.div<StyledTab>`
   margin-right: 1px;
   padding-left: ${({ theme }) => theme.space[2]};
 
-  border-top-left-radius: 3px;
-  border-top-right-radius: 3px;
+  border-top-left-radius: 5px;
+  border-top-right-radius: 5px;
 
   width: 100%;
   overflow: hidden;
@@ -29,4 +29,8 @@ export const StyledLabel = styled.div`
   white-space: nowrap;
   text-overflow: ellipsis;
   max-width: 100%;
+`;
+
+export const StyledClose = styled.span`
+  margin: 0 0.3rem;
 `;
