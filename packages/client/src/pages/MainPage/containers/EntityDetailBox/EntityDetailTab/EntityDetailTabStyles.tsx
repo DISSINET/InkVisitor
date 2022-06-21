@@ -9,18 +9,20 @@ export const StyledTab = styled.div<StyledTab>`
   align-items: flex-end;
   cursor: pointer;
   background-color: ${({ theme, isSelected }) =>
-    isSelected ? theme.color["blue"][200] : theme.color["blue"][100]};
+    isSelected ? theme.color["blue"][100] : theme.color["blue"][50]};
   margin-right: 1px;
   padding-left: ${({ theme }) => theme.space[2]};
 
   border-top-left-radius: 5px;
   border-top-right-radius: 5px;
+  border: 1px solid ${({ theme }) => theme.color["blue"][500]};
 
   width: 100%;
   overflow: hidden;
 `;
 
 export const StyledLabel = styled.div`
+  position: relative;
   font-size: ${({ theme }) => theme.fontSize["xs"]};
   padding: ${({ theme }) => theme.space[1]};
   display: inline-block;
@@ -28,9 +30,19 @@ export const StyledLabel = styled.div`
   vertical-align: middle;
   white-space: nowrap;
   text-overflow: ellipsis;
-  max-width: 100%;
+  width: 100%;
+  height: 100%;
 `;
 
 export const StyledClose = styled.span`
-  margin: 0 0.3rem;
+  display: flex;
+  align-items: center;
+  height: 100%;
+  margin: 0 0.2rem;
+`;
+
+export const StyledItalic = styled.i`
+  height: 100%;
+  display: flex;
+  align-items: center;
 `;

@@ -1,22 +1,35 @@
 import api from "api";
-import { Tooltip } from "components";
+import { Tooltip, TypeBar } from "components";
 import React, { MouseEventHandler } from "react";
+import { CgClose } from "react-icons/cg";
 import { useQuery } from "react-query";
-import { StyledClose, StyledLabel, StyledTab } from "./EntityDetailTabStyles";
+import {
+  StyledClose,
+  StyledItalic,
+  StyledLabel,
+  StyledTab,
+} from "./EntityDetailTabStyles";
 
 interface EntityDetailTab {
   entityId: string;
+
   onClick?: MouseEventHandler<HTMLElement>;
   onClose?: () => void;
   isSelected?: boolean;
 }
 export const EntityDetailTab: React.FC<EntityDetailTab> = ({
   entityId,
+
   onClick,
   onClose,
   isSelected = false,
 }) => {
-  const { status, data, error, isFetching } = useQuery(
+  const {
+    status,
+    data: entity,
+    error,
+    isFetching,
+  } = useQuery(
     ["entity", entityId],
     async () => {
       const res = await api.detailGet(entityId);
@@ -27,12 +40,23 @@ export const EntityDetailTab: React.FC<EntityDetailTab> = ({
 
   return (
     <StyledTab isSelected={isSelected}>
-      <Tooltip label={data && data.label}>
+      <Tooltip disabled={!entity?.label} label={entity?.label && entity.label}>
         <StyledLabel onClick={onClick}>
-          {data ? data.label : entityId}
+          {entity?.class && <TypeBar entityLetter={entity?.class} />}
+          {!entity ? (
+            "..."
+          ) : entity.label ? (
+            entity.label
+          ) : (
+            <StyledItalic style={{ fontSize: "1.0rem" }}>
+              {"no label"}
+            </StyledItalic>
+          )}
         </StyledLabel>
       </Tooltip>
-      <StyledClose onClick={onClose}>{"x"}</StyledClose>
+      <StyledClose onClick={onClose}>
+        <CgClose size={11} strokeWidth={0.5} />
+      </StyledClose>
     </StyledTab>
   );
 };
