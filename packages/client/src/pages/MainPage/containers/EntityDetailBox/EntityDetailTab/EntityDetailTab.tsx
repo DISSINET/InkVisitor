@@ -42,7 +42,7 @@ export const EntityDetailTab: React.FC<EntityDetailTab> = ({
     <StyledTab isSelected={isSelected}>
       <Tooltip disabled={!entity?.label} label={entity?.label && entity.label}>
         <StyledLabel onClick={onClick}>
-          {entity?.class && <TypeBar entityLetter={entity?.class} />}
+          {entity?.class && <TypeBar entityLetter={entity?.class} noMargin />}
           {!entity ? (
             "..."
           ) : entity.label ? (

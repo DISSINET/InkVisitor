@@ -16,6 +16,7 @@ import {
   Loader,
   MultiInput,
   Submit,
+  TypeBar,
 } from "components";
 import { StyledUsedInTitle } from "components/Table/TableStyles";
 import { StyledTypeBar } from "components/TypeBar/TypeBarStyles";
@@ -541,9 +542,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
                               entityDropdown
                               disableTyping
                             />
-                            <StyledTypeBar
-                              entity={`entity${entity.class}`}
-                            ></StyledTypeBar>
+                            <TypeBar entityLetter={entity.class} />
                           </div>
                         </StyledDetailContentRowValue>
                       </StyledDetailContentRow>

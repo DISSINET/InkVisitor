@@ -9,20 +9,21 @@ export const StyledTab = styled.div<StyledTab>`
   align-items: flex-end;
   cursor: pointer;
   background-color: ${({ theme, isSelected }) =>
-    isSelected ? theme.color["blue"][100] : theme.color["blue"][50]};
+    isSelected ? "transparent" : theme.color["gray"][100]};
   margin-right: 1px;
   padding-left: ${({ theme }) => theme.space[2]};
+  position: relative;
 
   border-top-left-radius: 5px;
   border-top-right-radius: 5px;
-  border: 1px solid ${({ theme }) => theme.color["blue"][500]};
+  border: 1px solid ${({ theme }) => theme.color["gray"][500]};
+  border-bottom: ${({ isSelected }) => (isSelected ? "none" : "")};
 
   width: 100%;
   overflow: hidden;
 `;
 
 export const StyledLabel = styled.div`
-  position: relative;
   font-size: ${({ theme }) => theme.fontSize["xs"]};
   padding: ${({ theme }) => theme.space[1]};
   display: inline-block;
