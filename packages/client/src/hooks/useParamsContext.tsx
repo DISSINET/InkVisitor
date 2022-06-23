@@ -71,8 +71,11 @@ export const SearchParamsProvider = ({
   };
 
   const appendDetailId = (id: string) => {
-    const newDetailIdArray = [...getDetailIdArray(), id];
-    setDetailId(newDetailIdArray.join(","));
+    const detailIdArray = getDetailIdArray();
+    if (!detailIdArray.includes(id)) {
+      const newDetailIdArray = [...detailIdArray, id];
+      setDetailId(newDetailIdArray.join(","));
+    }
     setSelectedDetailId(id);
   };
 
@@ -91,8 +94,8 @@ export const SearchParamsProvider = ({
         setSelectedDetailId(detailIdArray[index + 1]);
       }
     }
-    const detailIds = params.getAll("detail");
-    const newIds = detailIds.filter((detailId) => detailId !== id);
+
+    const newIds = detailIdArray.filter((detailId) => detailId !== id);
     setDetailId(newIds.join(","));
   };
 
