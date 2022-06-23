@@ -36,6 +36,8 @@ interface SearchParamsContext {
 }
 const SearchParamsContext = createContext<SearchParamsContext>(INITIAL_CONTEXT);
 
+const arrJoinChar = ",";
+
 export const useSearchParams = () => useContext(SearchParamsContext);
 
 export const SearchParamsProvider = ({
@@ -59,7 +61,7 @@ export const SearchParamsProvider = ({
       ? parsedParams.selectedDetail
       : ""
   );
-  // const [detailId, setDetailId] = useState<string[]>(params.getAll("detail"));
+
   const [detailId, setDetailId] = useState<string>(
     typeof parsedParams.detail === "string" ? parsedParams.detail : ""
   );
@@ -67,14 +69,14 @@ export const SearchParamsProvider = ({
   const [disablePush, setDisablePush] = useState(false);
 
   const getDetailIdArray = () => {
-    return detailId.length > 0 ? detailId.split(",") : [];
+    return detailId.length > 0 ? detailId.split(arrJoinChar) : [];
   };
 
   const appendDetailId = (id: string) => {
     const detailIdArray = getDetailIdArray();
     if (!detailIdArray.includes(id)) {
       const newDetailIdArray = [...detailIdArray, id];
-      setDetailId(newDetailIdArray.join(","));
+      setDetailId(newDetailIdArray.join(arrJoinChar));
     }
     setSelectedDetailId(id);
   };
@@ -96,7 +98,7 @@ export const SearchParamsProvider = ({
     }
 
     const newIds = detailIdArray.filter((detailId) => detailId !== id);
-    setDetailId(newIds.join(","));
+    setDetailId(newIds.join(arrJoinChar));
   };
 
   const clearAllDetailIds = () => {
