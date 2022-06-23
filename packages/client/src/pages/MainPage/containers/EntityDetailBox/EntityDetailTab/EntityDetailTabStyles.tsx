@@ -20,6 +20,7 @@ export const StyledTab = styled.div<StyledTab>`
   border-bottom: ${({ isSelected }) => (isSelected ? "none" : "")};
 
   width: 100%;
+  /* min-width: 10rem; */
   overflow: hidden;
 `;
 

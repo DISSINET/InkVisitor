@@ -47,7 +47,7 @@ interface MainPage {
 
 const MainPage: React.FC<MainPage> = ({ size }) => {
   const {
-    detailId,
+    detailIdArray,
     statementId,
     setStatementId,
     territoryId,
@@ -271,13 +271,13 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
             >
               <Box
                 height={
-                  detailId.length ? heightContent / 2 - 20 : heightContent
+                  detailIdArray.length ? heightContent / 2 - 20 : heightContent
                 }
                 label="Statements"
               >
                 <MemoizedStatementListBox />
               </Box>
-              {detailId.length && (
+              {detailIdArray.length && (
                 <Box
                   height={heightContent / 2 + 20}
                   label="Detail"

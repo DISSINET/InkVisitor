@@ -19,7 +19,6 @@ import {
   TypeBar,
 } from "components";
 import { StyledUsedInTitle } from "components/Table/TableStyles";
-import { StyledTypeBar } from "components/TypeBar/TypeBarStyles";
 import { CMetaProp } from "constructors";
 import { useSearchParams } from "hooks";
 import React, { useEffect, useMemo, useState } from "react";

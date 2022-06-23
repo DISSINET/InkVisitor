@@ -15,7 +15,7 @@ const INITIAL_CONTEXT = {
   setTerritoryId: UNINITIALISED,
   statementId: "",
   setStatementId: UNINITIALISED,
-  detailId: [],
+  detailIdArray: [],
   selectedDetailId: "",
   setSelectedDetailId: UNINITIALISED,
   appendDetailId: UNINITIALISED,
@@ -27,7 +27,7 @@ interface SearchParamsContext {
   setTerritoryId: (territory: string) => void;
   statementId: string;
   setStatementId: (statement: string) => void;
-  detailId: string[];
+  detailIdArray: string[];
   selectedDetailId: string;
   setSelectedDetailId: (id: string) => void;
   appendDetailId: (id: string) => void;
@@ -59,39 +59,45 @@ export const SearchParamsProvider = ({
       ? parsedParams.selectedDetail
       : ""
   );
-  const [detailId, setDetailId] = useState<string[]>(params.getAll("detail"));
+  // const [detailId, setDetailId] = useState<string[]>(params.getAll("detail"));
+  const [detailId, setDetailId] = useState<string>(
+    typeof parsedParams.detail === "string" ? parsedParams.detail : ""
+  );
 
   const [disablePush, setDisablePush] = useState(false);
 
+  const getDetailIdArray = () => {
+    return detailId.length > 0 ? detailId.split(",") : [];
+  };
+
   const appendDetailId = (id: string) => {
-    if (!params.getAll("detail").includes(id)) {
-      setDetailId([...detailId, id]);
-    }
+    const newDetailIdArray = [...getDetailIdArray(), id];
+    setDetailId(newDetailIdArray.join(","));
     setSelectedDetailId(id);
   };
 
   const removeDetailId = (id: string) => {
-    const index = detailId.indexOf(id);
+    const detailIdArray = getDetailIdArray();
+    const index = detailIdArray.indexOf(id);
 
     if (selectedDetailId === id) {
-      if (index + 1 === detailId.length) {
-        if (detailId.length > 1) {
-          setSelectedDetailId(detailId[detailId.length - 2]);
+      if (index + 1 === detailIdArray.length) {
+        if (detailIdArray.length > 1) {
+          setSelectedDetailId(detailIdArray[detailIdArray.length - 2]);
         } else {
-          // TODO: remove detail id in params context
           clearAllDetailIds();
         }
       } else {
-        setSelectedDetailId(detailId[index + 1]);
+        setSelectedDetailId(detailIdArray[index + 1]);
       }
     }
     const detailIds = params.getAll("detail");
     const newIds = detailIds.filter((detailId) => detailId !== id);
-    setDetailId(newIds);
+    setDetailId(newIds.join(","));
   };
 
   const clearAllDetailIds = () => {
-    setDetailId([]);
+    setDetailId("");
     setSelectedDetailId("");
   };
 
@@ -103,12 +109,14 @@ export const SearchParamsProvider = ({
     }
   };
 
-  useEffect(() => {
-    params.delete("detail");
-    detailId.forEach((id) => params.append("detail", id));
+  // useEffect(() => {
+  //   setDisableHistoryListener(true);
+  //   params.delete("detail");
+  //   detailIdArray.forEach((id) => params.append("detail", id));
 
-    handleHistoryPush();
-  }, [detailId]);
+  //   handleHistoryPush();
+  //   setDisableHistoryListener(false);
+  // }, [detailIdArray]);
 
   useEffect(() => {
     // Change from the inside of the app to this state
@@ -124,11 +132,12 @@ export const SearchParamsProvider = ({
       ? params.set("selectedDetail", selectedDetailId)
       : params.delete("selectedDetail");
 
+    detailId ? params.set("detail", detailId) : params.delete("detail");
+
     handleHistoryPush();
-  }, [territoryId, statementId, selectedDetailId]);
+  }, [territoryId, statementId, selectedDetailId, detailId]);
 
   const handleLocationChange = (location: any) => {
-    // console.log("handleLocationChange");
     const paramsTemp = new URLSearchParams(location.hash.substring(1));
     const parsedParamsTemp = Object.fromEntries(paramsTemp);
 
@@ -144,14 +153,13 @@ export const SearchParamsProvider = ({
       ? setSelectedDetailId(parsedParamsTemp.selectedDetail)
       : setSelectedDetailId("");
 
-    // TODO: follow url change!!!
-    // paramsTemp.getAll("detail").length
-    //   ? setDetailId(paramsTemp.getAll("detail"))
-    //   : setDetailId([]);
+    parsedParamsTemp.detail
+      ? setDetailId(parsedParamsTemp.detail)
+      : setDetailId("");
   };
 
   useEffect(() => {
-    // Should be only change from the url
+    // Should be only change from the url => add state to switch of listener
     return history.listen((location: any) => {
       setDisablePush(true);
       handleLocationChange(location);
@@ -166,7 +174,7 @@ export const SearchParamsProvider = ({
         setTerritoryId,
         statementId,
         setStatementId,
-        detailId: detailId,
+        detailIdArray: getDetailIdArray(),
         selectedDetailId,
         setSelectedDetailId,
         appendDetailId,

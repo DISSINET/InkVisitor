@@ -6,20 +6,24 @@ import { EntityDetailTab } from "./EntityDetailTab/EntityDetailTab";
 
 interface EntityDetailBox {}
 export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
-  const { detailId, removeDetailId, selectedDetailId, setSelectedDetailId } =
-    useSearchParams();
+  const {
+    detailIdArray,
+    removeDetailId,
+    selectedDetailId,
+    setSelectedDetailId,
+  } = useSearchParams();
 
   useEffect(() => {
-    if (!selectedDetailId && detailId.length) {
-      setSelectedDetailId(detailId[0]);
+    if (!selectedDetailId && detailIdArray.length) {
+      setSelectedDetailId(detailIdArray[0]);
     }
   }, []);
 
   return (
     <>
       <StyledTabGroup>
-        {detailId &&
-          detailId.map((entityId, key) => (
+        {detailIdArray &&
+          detailIdArray.map((entityId, key) => (
             <EntityDetailTab
               key={key}
               entityId={entityId}

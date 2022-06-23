@@ -12,14 +12,12 @@ import {
 
 interface EntityDetailTab {
   entityId: string;
-
   onClick?: MouseEventHandler<HTMLElement>;
   onClose?: () => void;
   isSelected?: boolean;
 }
 export const EntityDetailTab: React.FC<EntityDetailTab> = ({
   entityId,
-
   onClick,
   onClose,
   isSelected = false,
