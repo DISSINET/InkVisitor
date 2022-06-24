@@ -2,11 +2,10 @@ import { EntityClass } from "@shared/enums";
 import api from "api";
 import { Tooltip, TypeBar } from "components";
 import React, { MouseEventHandler } from "react";
-import { CgClose } from "react-icons/cg";
 import { useQuery } from "react-query";
 import {
+  StyledCgClose,
   StyledClose,
-  StyledItalic,
   StyledLabel,
   StyledTab,
 } from "./EntityDetailTabStyles";
@@ -52,7 +51,7 @@ export const EntityDetailTab: React.FC<EntityDetailTab> = ({
         </StyledLabel>
       </Tooltip>
       <StyledClose onClick={onClose}>
-        <CgClose size={11} strokeWidth={0.5} />
+        <StyledCgClose size={13} strokeWidth={0.5} />
       </StyledClose>
     </StyledTab>
   );

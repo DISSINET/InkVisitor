@@ -6,6 +6,8 @@ import React, {
   useState,
 } from "react";
 import { useHistory, useLocation } from "react-router-dom";
+import { toast } from "react-toastify";
+import { maxTabCount } from "Theme/constants";
 
 const UNINITIALISED = (): void => {
   throw `function uninitialised`;
@@ -75,10 +77,16 @@ export const SearchParamsProvider = ({
   const appendDetailId = (id: string) => {
     const detailIdArray = getDetailIdArray();
     if (!detailIdArray.includes(id)) {
-      const newDetailIdArray = [...detailIdArray, id];
-      setDetailId(newDetailIdArray.join(arrJoinChar));
+      if (detailIdArray.length < maxTabCount) {
+        const newDetailIdArray = [...detailIdArray, id];
+        setDetailId(newDetailIdArray.join(arrJoinChar));
+        setSelectedDetailId(id);
+      } else {
+        toast.error("Maximum tab count reached!");
+      }
+    } else {
+      setSelectedDetailId(id);
     }
-    setSelectedDetailId(id);
   };
 
   const removeDetailId = (id: string) => {

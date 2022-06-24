@@ -1,3 +1,4 @@
+import { CgClose } from "react-icons/cg";
 import styled from "styled-components";
 
 interface StyledTab {
@@ -48,7 +49,14 @@ export const StyledClose = styled.span<StyledClose>`
   align-items: center;
   height: 100%;
   margin: 0 0.2rem;
-  background-color: ${({ theme, isHovered }) => (isHovered ? "grey" : "")};
+`;
+
+export const StyledCgClose = styled(CgClose)`
+  border-radius: 5px;
+  padding: 1px;
+  :hover {
+    background-color: ${({ theme }) => theme.color["gray"][300]};
+  }
 `;
 
 export const StyledItalic = styled.i`
