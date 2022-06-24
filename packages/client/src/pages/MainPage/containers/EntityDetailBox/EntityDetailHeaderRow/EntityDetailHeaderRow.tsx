@@ -58,7 +58,7 @@ export const EntityDetailHeaderRow: React.FC<EntityDetailHeaderRow> = ({
   };
 
   return (
-    <StyledActantHeaderRow type={entity.class}>
+    <StyledActantHeaderRow>
       <StyledTagWrap>
         <EntityTag
           actant={entity}

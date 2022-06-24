@@ -21,10 +21,13 @@ export const StyledTab = styled.div<StyledTab>`
 
   width: 100%;
   /* min-width: 10rem; */
+  /* height: 100%; */
   overflow: hidden;
 `;
-
-export const StyledLabel = styled.div`
+interface StyledLabel {
+  isItalic?: boolean;
+}
+export const StyledLabel = styled.div<StyledLabel>`
   font-size: ${({ theme }) => theme.fontSize["xs"]};
   padding: ${({ theme }) => theme.space[1]};
   display: inline-block;
@@ -34,13 +37,18 @@ export const StyledLabel = styled.div`
   text-overflow: ellipsis;
   width: 100%;
   height: 100%;
+  font-style: ${({ isItalic }) => (isItalic ? "italic" : "")};
 `;
-
-export const StyledClose = styled.span`
+// TODO: hover circle
+interface StyledClose {
+  isHovered?: boolean;
+}
+export const StyledClose = styled.span<StyledClose>`
   display: flex;
   align-items: center;
   height: 100%;
   margin: 0 0.2rem;
+  background-color: ${({ theme, isHovered }) => (isHovered ? "grey" : "")};
 `;
 
 export const StyledItalic = styled.i`

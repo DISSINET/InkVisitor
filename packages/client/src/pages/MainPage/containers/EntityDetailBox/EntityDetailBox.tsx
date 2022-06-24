@@ -22,7 +22,7 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
   return (
     <>
       <StyledTabGroup>
-        {detailIdArray.length > 1 &&
+        {detailIdArray.length > 0 &&
           detailIdArray.map((entityId, key) => (
             <EntityDetailTab
               key={key}

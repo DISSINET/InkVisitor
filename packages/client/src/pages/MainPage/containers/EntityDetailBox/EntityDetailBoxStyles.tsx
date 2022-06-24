@@ -4,6 +4,8 @@ export const StyledTabGroup = styled.div`
   display: flex;
   width: 100%;
   margin-bottom: 2px;
+  /* overflow: auto; */
+  /* height: 3rem; */
 `;
 
 export const StyledDetailContentRow = styled.div``;

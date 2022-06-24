@@ -1,15 +1,11 @@
 import styled from "styled-components";
 
-interface StyledDetailWrapper {
-  type: string;
-}
+interface StyledDetailWrapper {}
 export const StyledDetailWrapper = styled.div<StyledDetailWrapper>`
   display: flex;
   flex-direction: column;
   overflow: auto;
   align-items: start;
-  border-left: 3px solid;
-  border-left-color: ${({ theme, type }) => theme.color["entity" + type]};
 `;
 
 interface StyledDetailSection {

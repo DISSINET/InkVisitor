@@ -484,7 +484,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
             setCreateTemplateModal={setCreateTemplateModal}
           />
 
-          <StyledDetailWrapper type={entity.class}>
+          <StyledDetailWrapper>
             {/* form section */}
             <StyledDetailSection firstSection>
               <StyledDetailSectionContent firstSection>

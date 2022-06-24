@@ -1,3 +1,4 @@
+import { EntityClass } from "@shared/enums";
 import api from "api";
 import { Tooltip, TypeBar } from "components";
 import React, { MouseEventHandler } from "react";
@@ -38,18 +39,16 @@ export const EntityDetailTab: React.FC<EntityDetailTab> = ({
 
   return (
     <StyledTab isSelected={isSelected}>
-      <Tooltip disabled={!entity?.label} label={entity?.label && entity.label}>
-        <StyledLabel onClick={onClick}>
+      <Tooltip
+        disabled={!entity?.label && !entity?.data.text}
+        label={entity?.label || entity?.data.text}
+      >
+        <StyledLabel
+          isItalic={entity?.class === EntityClass.Statement}
+          onClick={onClick}
+        >
           {entity?.class && <TypeBar entityLetter={entity?.class} noMargin />}
-          {!entity ? (
-            "..."
-          ) : entity.label ? (
-            entity.label
-          ) : (
-            <StyledItalic style={{ fontSize: "1.0rem" }}>
-              {"no label"}
-            </StyledItalic>
-          )}
+          {!entity ? "..." : entity.label || entity.data.text || "no label"}
         </StyledLabel>
       </Tooltip>
       <StyledClose onClick={onClose}>
