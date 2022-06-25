@@ -10,6 +10,7 @@ import {
   Operator,
   Partitivity,
   Position,
+  RelationType,
   UserRole,
   Virtuality,
 } from "@shared/enums";
@@ -18,6 +19,8 @@ import {
   IEntity,
   IProp,
   IReference,
+  IRelation,
+  IRelationIdentity,
   IStatement,
   IStatementActant,
   IStatementAction,
@@ -294,4 +297,19 @@ export const CReference = (
   id: uuidv4(),
   resource: resourceId,
   value: valueId,
+});
+
+export const CRelationIdentity = (
+  entity1: string = "",
+  entity2: string = ""
+): IRelationIdentity => ({
+  id: uuidv4(),
+  entities: [entity1, entity2],
+  type: RelationType.Identity,
+  logic: Logic.Positive,
+  mood: [Mood.Indication],
+  moodvariant: MoodVariant.Realis,
+  bundleOperator: Operator.And,
+  bundleStart: false,
+  bundleEnd: false,
 });

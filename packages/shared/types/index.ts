@@ -14,6 +14,19 @@ import { RequestPermissionUpdate } from "./request-permission";
 import { RequestSearch } from "./request-search";
 import { IResource } from "./resource";
 import {
+  IRelation,
+  IRelationActionEventEquivalent,
+  IRelationAntonym,
+  IRelationClass,
+  IRelationIdentity,
+  IRelationPropertyReciprocal,
+  IRelationRelated,
+  IRelationSubjectActantReciprocal,
+  IRelationSuperClassRelation,
+  IRelationSynonym,
+  IRelationTroponym,
+} from "./relation";
+import {
   IResponseDetail,
   IResponseUsedInMetaProp,
   IResponseUsedInStatement,
@@ -67,6 +80,17 @@ export type {
   ILabel,
   IOption,
   IProp,
+  IRelation,
+  IRelationActionEventEquivalent,
+  IRelationAntonym,
+  IRelationClass,
+  IRelationIdentity,
+  IRelationPropertyReciprocal,
+  IRelationRelated,
+  IRelationSubjectActantReciprocal,
+  IRelationSuperClassRelation,
+  IRelationSynonym,
+  IRelationTroponym,
   IStatementData,
   IStatementAction,
   IStatementActant,
