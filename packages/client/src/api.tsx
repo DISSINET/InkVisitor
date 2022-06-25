@@ -267,11 +267,11 @@ class Api {
   /*
     This request will restart the password of the user with userId and send the new password to his email address
   */
-  async restartPassword(
+  async resetPassword(
     userId: string
   ): Promise<AxiosResponse<IResponseGeneric>> {
     try {
-      const response = await this.connection.post(`/users/${userId}/password`);
+      const response = await this.connection.patch(`/users/${userId}/password`);
       return response;
     } catch (err: any | AxiosError) {
       throw { ...err.response.data };

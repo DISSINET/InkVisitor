@@ -232,7 +232,7 @@ export default Router()
       return response.bookmarks;
     })
   )
-  .post(
+  .patch(
     "/:userId/password",
     asyncRouteHandler<IResponseGeneric>(async (request: Request) => {
       const userId = request.params.userId;
