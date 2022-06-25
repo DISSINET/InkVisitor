@@ -16,6 +16,19 @@ export enum EntityExtension {
   Any = "*",
 }
 
+export enum RelationType {
+  Superclass = "SC",
+  Synonym = "S",
+  Antonym = "A",
+  Troponym = "T",
+  PropertyReciprocal = "PR",
+  SubjectActantReciprocal = "SAR",
+  ActionEventEquivalent = "AEE",
+  Related = "RE",
+  Class = "C",
+  Identity = "I",
+}
+
 export type ExtendedEntityClass = EntityClass | EntityExtension;
 
 export function isValidEntityClass(input: EntityClass): boolean {
