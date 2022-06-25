@@ -22,6 +22,7 @@ import { Request, Router } from "express";
 import { asyncRouteHandler } from "../index";
 import { ResponseSearch } from "@models/entity/response-search";
 import { IRequestSearch } from "@shared/types/request-search";
+import { getAuditByEntityId } from "@modules/audits";
 
 export default Router()
   .get(
@@ -53,6 +54,7 @@ export default Router()
       return response;
     })
   )
+  .get("/:entityId/audits", getAuditByEntityId)
   .get(
     "/",
     asyncRouteHandler<IResponseSearch[]>(async (httpRequest: Request) => {
