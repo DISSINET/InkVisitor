@@ -11,19 +11,10 @@ import User from "@models/user/user";
 import { IBookmarkFolder } from "@shared/types";
 
 describe("Users bookmarksGet", function () {
-  describe("Empty param", () => {
-    it("should return a BadParams error wrapped in IResponseGeneric", (done) => {
-      return request(app)
-        .get(`${apiPath}/users/bookmarksGet`)
-        .set("authorization", "Bearer " + supertestConfig.token)
-        .expect(testErroneousResponse.bind(undefined, new BadParams("")))
-        .then(() => done());
-    });
-  });
   describe("Wrong param", () => {
     it("should return a UserDoesNotExits error wrapped in IResponseGeneric", (done) => {
       return request(app)
-        .get(`${apiPath}/users/bookmarksGet/123`)
+        .get(`${apiPath}/users/123/bookmarks`)
         .set("authorization", "Bearer " + supertestConfig.token)
         .expect(
           testErroneousResponse.bind(undefined, new UserDoesNotExits("", ""))
@@ -40,7 +31,7 @@ describe("Users bookmarksGet", function () {
       await user.save(db.connection);
 
       request(app)
-        .get(`${apiPath}/users/bookmarksGet/${testUserId}`)
+        .get(`${apiPath}/users/${testUserId}/bookmarks`)
         .set("authorization", "Bearer " + supertestConfig.token)
         .expect((res) => {
           res.body.should.not.empty;
@@ -76,7 +67,7 @@ describe("Users bookmarksGet", function () {
       await user.save(db.connection);
 
       request(app)
-        .get(`${apiPath}/users/bookmarksGet/${testId}`)
+        .get(`${apiPath}/users/${testId}/bookmarks`)
         .set("authorization", "Bearer " + supertestConfig.token)
         .expect((res) => {
           res.body.should.not.empty;

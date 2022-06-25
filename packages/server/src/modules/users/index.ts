@@ -53,7 +53,23 @@ export default Router()
     })
   )
   .get(
-    "/get/:userId?",
+    "/administration",
+    asyncRouteHandler<IResponseAdministration>(async (request: Request) => {
+      const out: IResponseAdministration = {
+        users: [],
+      };
+
+      for (const user of await User.findAllUsers(request.db.connection)) {
+        const response = new ResponseUser(user);
+        await response.unwindAll(request);
+        out.users.push(response);
+      }
+
+      return out;
+    })
+  )
+  .get(
+    "/:userId",
     asyncRouteHandler<IResponseUser>(async (request: Request) => {
       const userId = request.params.userId;
 
@@ -72,10 +88,10 @@ export default Router()
       return response;
     })
   )
-  .post(
-    "/getMore",
+  .get(
+    "/",
     asyncRouteHandler<IUser[]>(async (request: Request) => {
-      const label = request.body.label;
+      const label = (request.query.label as string) || "";
 
       if (!label) {
         return await User.findAllUsers(request.db.connection);
@@ -86,7 +102,7 @@ export default Router()
     })
   )
   .post(
-    "/create",
+    "/",
     asyncRouteHandler<IResponseGeneric>(async (request: Request) => {
       const userData = request.body as IUser;
 
@@ -121,9 +137,12 @@ export default Router()
     })
   )
   .put(
-    "/:userId?",
+    "/:userId",
     asyncRouteHandler<IResponseGeneric>(async (request: Request) => {
-      const userId = request.params.userId || (request as any).user.user.id;
+      const userId =
+        request.params.userId !== "me"
+          ? request.params.userId
+          : (request as any).user.user.id;
       const userData = request.body as IUser;
 
       if (!userId || !userData || Object.keys(userData).length === 0) {
@@ -152,7 +171,7 @@ export default Router()
     })
   )
   .delete(
-    "/delete/:userId?",
+    "/:userId",
     asyncRouteHandler<IResponseGeneric>(async (request: Request) => {
       const userId = request.params.userId;
 
@@ -184,13 +203,16 @@ export default Router()
     })
   )
   .get(
-    "/bookmarks/:userId?",
+    "/:userId/bookmarks",
     asyncRouteHandler<IResponseBookmarkFolder[]>(async (request: Request) => {
       if (!(request as any).user) {
         throw new BadParams("not logged");
       }
 
-      const userId = request.params.userId || (request as any).user.user.id;
+      const userId =
+        request.params.userId !== "me"
+          ? request.params.userId
+          : (request as any).user.user.id;
 
       if (!userId) {
         throw new BadParams("user id has to be set");
@@ -210,24 +232,8 @@ export default Router()
       return response.bookmarks;
     })
   )
-  .get(
-    "/administration",
-    asyncRouteHandler<IResponseAdministration>(async (request: Request) => {
-      const out: IResponseAdministration = {
-        users: [],
-      };
-
-      for (const user of await User.findAllUsers(request.db.connection)) {
-        const response = new ResponseUser(user);
-        await response.unwindAll(request);
-        out.users.push(response);
-      }
-
-      return out;
-    })
-  )
-  .get(
-    "/reset-password/:userId?",
+  .patch(
+    "/:userId/password",
     asyncRouteHandler<IResponseGeneric>(async (request: Request) => {
       const userId = request.params.userId;
 

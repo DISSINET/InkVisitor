@@ -45,7 +45,7 @@ export const EntityBookmarkBox: React.FC = () => {
   } = useQuery(
     ["bookmarks"],
     async () => {
-      const res = await api.bookmarksGet(false);
+      const res = await api.bookmarksGet("me");
       res.data.sort((a, b) => (a.name > b.name ? 1 : -1));
       return res.data;
     },
@@ -115,7 +115,7 @@ export const EntityBookmarkBox: React.FC = () => {
             return b;
           }
         });
-        await api.usersUpdate(false, {
+        await api.usersUpdate("me", {
           bookmarks: newBookmarksAfterEdit,
         });
       }
@@ -137,7 +137,7 @@ export const EntityBookmarkBox: React.FC = () => {
         const newBookmarksAfterRemove = newBookmarks.filter(
           (b) => b.id !== removingFolder
         );
-        await api.usersUpdate(false, {
+        await api.usersUpdate("me", {
           bookmarks: newBookmarksAfterRemove,
         });
       }
@@ -169,7 +169,7 @@ export const EntityBookmarkBox: React.FC = () => {
         const newBookmarks: IBookmarkFolder[] | false = getBookmarksCopy();
         if (newBookmarks) {
           newBookmarks.push(newBookmarkFolder);
-          await api.usersUpdate(false, { bookmarks: newBookmarks });
+          await api.usersUpdate("me", { bookmarks: newBookmarks });
         }
       }
     },

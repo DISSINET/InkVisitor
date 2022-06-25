@@ -11,7 +11,7 @@ import AclPermission from "@models/acl/acl_permission";
 
 export default Router()
   .get(
-    "/index",
+    "/",
     asyncRouteHandler<IResponsePermission[]>(async (request: Request) => {
       const permissionsData = await AclPermission.fetchAll(
         request.db.connection
@@ -20,7 +20,7 @@ export default Router()
     })
   )
   .put(
-    "/update/:permissionId?",
+    "/:permissionId",
     asyncRouteHandler<IResponseGeneric>(async (request: Request) => {
       const permissionId = request.params.permissionId;
       const permissionData = request.body as Record<string, unknown>;
@@ -41,7 +41,8 @@ export default Router()
       );
       if (!existingPermission) {
         throw new PermissionDoesNotExits(
-          `permission with id ${permissionId} does not exist`, permissionId
+          `permission with id ${permissionId} does not exist`,
+          permissionId
         );
       }
 
@@ -67,7 +68,7 @@ export default Router()
     })
   )
   .delete(
-    "/delete/:permissionId?",
+    "/:permissionId",
     asyncRouteHandler<IResponseGeneric>(async (request: Request) => {
       const permissionId = request.params.permissionId;
 
@@ -82,7 +83,8 @@ export default Router()
       );
       if (!existingPermission) {
         throw new PermissionDoesNotExits(
-          `permission with id ${permissionId} does not exist`, permissionId
+          `permission with id ${permissionId} does not exist`,
+          permissionId
         );
       }
 

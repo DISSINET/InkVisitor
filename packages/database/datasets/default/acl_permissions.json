@@ -95,21 +95,6 @@
     "roles": ["*"]
   },
   {
-    "controller": "entities",
-    "route": "get",
-    "roles": ["*"]
-  },
-  {
-    "controller": "entities",
-    "route": "getMore",
-    "roles": ["*"]
-  },
-  {
-    "controller": "audits",
-    "route": "get",
-    "roles": ["*"]
-  },
-  {
     "controller": "audits",
     "route": "",
     "roles": ["*"]

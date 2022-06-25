@@ -9,7 +9,7 @@ describe("Users get", function () {
   describe("Empty param", () => {
     it("should return a BadParams error wrapped in IResponseGeneric", (done) => {
       return request(app)
-        .get(`${apiPath}/users/get`)
+        .get(`${apiPath}/users/`)
         .set("authorization", "Bearer " + supertestConfig.token)
         .expect(testErroneousResponse.bind(undefined, new BadParams("")))
         .then(() => done());
@@ -18,7 +18,7 @@ describe("Users get", function () {
   describe("Wrong param", () => {
     it("should return a UserDoesNotExits error wrapped in IResponseGeneric", (done) => {
       return request(app)
-        .get(`${apiPath}/users/get/123`)
+        .get(`${apiPath}/users/123`)
         .set("authorization", "Bearer " + supertestConfig.token)
         .expect(
           testErroneousResponse.bind(undefined, new UserDoesNotExits("", ""))
@@ -29,7 +29,7 @@ describe("Users get", function () {
   describe("Correct param", () => {
     it("should return a 200 code with user response", (done) => {
       return request(app)
-        .get(`${apiPath}/users/get/1`)
+        .get(`${apiPath}/users/1`)
         .set("authorization", "Bearer " + supertestConfig.token)
         .expect((res) => {
           res.body.should.not.empty;
