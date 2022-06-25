@@ -400,3 +400,5 @@ export const TemplateListBox: React.FC<TemplateListBox> = ({}) => {
     </StyledBoxContent>
   );
 };
+
+export const MemoizedTemplateListBox = React.memo(TemplateListBox);
