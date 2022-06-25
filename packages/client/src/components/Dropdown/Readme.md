@@ -6,9 +6,9 @@
 
   <Dropdown
   isMulti
-  options={entitiesDict}
+  options={classesAll.map(entitiesDict)}
   value={[allEntities]
-  .concat(entitiesDict)
+  .concat(classesAll.map(entitiesDict))
   .filter((i: any) =>
   (entity as IAction).data.entities?.a2.includes(
   i.value

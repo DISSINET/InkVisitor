@@ -102,7 +102,7 @@ export const StatementEditorBox: React.FC = () => {
 
       return res.data;
     },
-    { enabled: !!statementId && api.isLoggedIn(), retry: 2 }
+    { enabled: !!statementId && api.isLoggedIn() }
   );
 
   // Audit query
@@ -117,7 +117,7 @@ export const StatementEditorBox: React.FC = () => {
       const res = await api.auditGet(statementId);
       return res.data;
     },
-    { enabled: !!statementId && api.isLoggedIn(), retry: 2 }
+    { enabled: !!statementId && api.isLoggedIn() }
   );
 
   // territory query
@@ -203,7 +203,7 @@ export const StatementEditorBox: React.FC = () => {
       );
       return templates;
     },
-    { enabled: !!statement && api.isLoggedIn(), retry: 2 }
+    { enabled: !!statement && api.isLoggedIn() }
   );
 
   const templateOptions: DropdownItem[] = useMemo(() => {
@@ -255,7 +255,6 @@ export const StatementEditorBox: React.FC = () => {
     },
     {
       enabled: !!statementId && !!statementTerritoryId,
-      retry: 2,
     }
   );
 
@@ -493,6 +492,9 @@ export const StatementEditorBox: React.FC = () => {
       onSuccess: (data, variables) => {
         if (detailId === statementId) {
           queryClient.invalidateQueries(["entity"]);
+        }
+        if (statement && statement.isTemplate) {
+          queryClient.invalidateQueries(["templates"]);
         }
         queryClient.invalidateQueries(["statement"]);
         queryClient.invalidateQueries(["territory"]);
@@ -748,11 +750,16 @@ export const StatementEditorBox: React.FC = () => {
                   territoryActants={territoryActants}
                   openDetailOnCreate
                   onSelected={(newSelectedId: string) => {
-                    addTag(newSelectedId);
+                    if (!statement.data.tags.find((t) => t === newSelectedId)) {
+                      addTag(newSelectedId);
+                    } else {
+                      toast.info("Tag already added!");
+                    }
                   }}
                   categoryTypes={classesTags}
                   placeholder={"add new tag"}
                   excludedEntities={excludedSuggesterEntities}
+                  excludedActantIds={statement.data.tags}
                 />
               )}
             </StyledEditorSectionContent>
@@ -853,3 +860,5 @@ export const StatementEditorBox: React.FC = () => {
     </>
   );
 };
+
+export const MemoizedStatementEditorBox = React.memo(StatementEditorBox);

@@ -1,6 +1,6 @@
 import { EntityClass, EntityStatus } from "@shared/enums";
 import { IOption } from "@shared/types";
-import { Button, Dropdown, Input, Loader, Tag } from "components";
+import { Button, Dropdown, Input, Loader, Tag, TypeBar } from "components";
 import useKeypress from "hooks/useKeyPress";
 import React, { useState } from "react";
 import { DragObjectWithType, DropTargetMonitor, useDrop } from "react-dnd";
@@ -25,7 +25,6 @@ import {
   StyledSuggestionLineIcons,
   StyledSuggestionLineTag,
   StyledTagWrapper,
-  StyledTypeBar,
 } from "./SuggesterStyles";
 
 export interface EntitySuggestionI {
@@ -259,7 +258,7 @@ export const Suggester: React.FC<Suggester> = ({
             disableTyping
             suggester
           />
-          <StyledTypeBar entity={`entity${category.value}`}></StyledTypeBar>
+          <TypeBar entityLetter={category.value} />
           <Input
             type="text"
             value={typed}

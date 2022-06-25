@@ -12,8 +12,8 @@ import { setDraggedPropRow } from "redux/features/rowDnd/draggedPropRowSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { excludedSuggesterEntities } from "Theme/constants";
 import {
-  AttributeGroupDataObject,
-  AttributeName,
+  PropAttributeFilter,
+  PropAttributeGroupDataObject,
   classesPropType,
   classesPropValue,
   DraggedPropRowCategory,
@@ -52,7 +52,7 @@ interface PropGroupRow {
   itemType?: ItemTypes;
   category: DraggedPropRowCategory;
 
-  disabledAttributes?: AttributeName[];
+  disabledAttributes?: PropAttributeFilter;
 }
 
 export const PropGroupRow: React.FC<PropGroupRow> = ({
@@ -72,7 +72,7 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
   index,
   itemType,
   category,
-  disabledAttributes = [],
+  disabledAttributes = {} as PropAttributeFilter,
 }) => {
   const propTypeEntity: IEntity = entities[prop.type.id];
   const propValueEntity: IEntity = entities[prop.value.id];
@@ -307,7 +307,7 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
                   partitivity: prop.value.partitivity,
                 },
               }}
-              handleUpdate={(newData: AttributeGroupDataObject) => {
+              handleUpdate={(newData: PropAttributeGroupDataObject) => {
                 const newDataObject = {
                   ...newData.statement,
                   ...newData,
