@@ -14,7 +14,6 @@ const ScrollHandler = () => {
     },
     {
       enabled: !!territoryId && api.isLoggedIn(),
-      retry: 2,
     }
   );
   const { status: treeStatus } = useQuery(

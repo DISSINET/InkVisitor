@@ -9,12 +9,11 @@ export class CustomError extends Error {
   public static code: number = 400; // html code
   public loggable: boolean = false; // errors could be logged into console as warn messages
   public log: string = ""; // same as first constructor argument - wont be thrown in realtime, but it will be printed as warning
-  public title: string = "";
+  public title: string = ""; // represents the error class in readable form
 
   // the following is commented, it should be inherited from base Error
   //public name: string = ""; // Stands for class name, replaces default 'Error' string from parent constructor
   //public message: string = ""; // this is what will be printed in output - public text, some error classes have overriden message attr
-
 
   constructor(message?: string) {
     super(message);
@@ -112,12 +111,26 @@ class UserNotActiveError extends CustomError {
 }
 
 /**
- * EntityDoesNotExits will be thrown when attempting to remove/update the entity entry, which does not exist
+ * EntityDoesNotExist will be thrown when attempting to remove/update the entity entry, which does not exist
  */
-class EntityDoesNotExits extends CustomError {
+class EntityDoesNotExist extends CustomError {
   public static code = 400;
   public static title = "Missing entity";
   public static message = "Entity $1 does not exist";
+
+  constructor(m: string, entityId: string) {
+    super(m);
+    this.message = this.message.replace("$1", entityId);
+  }
+}
+
+/**
+ * AuditsDoNotExist will be thrown when attempting to access audits entries, which do not exist
+ */
+class AuditsDoNotExist extends CustomError {
+  public static code = 400;
+  public static title = "Missing audits";
+  public static message = "Audits for entity $1 do not exist";
 
   constructor(m: string, entityId: string) {
     super(m);
@@ -224,6 +237,21 @@ class InvalidDeleteError extends CustomError {
 }
 
 /**
+ * EmailError will be thrown in case of error occured in mail module
+ */
+class EmailError extends CustomError {
+  public static code = 500;
+  public static title = "Email cannot be sent";
+  public static message = "Unknow error while sending the email";
+  loggable = true;
+
+  constructor(m: string, internalMessage: string) {
+    super(m);
+    this.log = internalMessage;;
+  }
+}
+
+/**
  * UnknownError works as a backup
  */
 class UnknownError extends CustomError {
@@ -243,13 +271,15 @@ const allErrors: Record<string, any> = {
   BadParams,
   UserDoesNotExits,
   UserNotActiveError,
-  EntityDoesNotExits,
+  EntityDoesNotExist,
+  AuditsDoNotExist,
   StatementDoesNotExits,
   PermissionDoesNotExits,
   TerritoriesBrokenError,
   TerritoryDoesNotExits,
   TerrytoryInvalidMove,
   StatementInvalidMove,
+  EmailError,
 };
 
 export interface IErrorSignature {
@@ -274,11 +304,13 @@ export {
   BadParams,
   UserDoesNotExits,
   UserNotActiveError,
-  EntityDoesNotExits,
+  EntityDoesNotExist,
+  AuditsDoNotExist,
   StatementDoesNotExits,
   PermissionDoesNotExits,
   TerritoriesBrokenError,
   TerritoryDoesNotExits,
   TerrytoryInvalidMove,
   StatementInvalidMove,
+  EmailError,
 };

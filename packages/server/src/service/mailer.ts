@@ -3,12 +3,14 @@ import Email from "email-templates";
 import nodemailerSendgrid from "nodemailer-sendgrid";
 const path = require("path");
 
+// codenames for template-file names
 export enum EmailTpl {
   Test = "test",
   PasswordReset = "password_reset",
   AccountCreated = "new_user",
 }
 
+// codenames for email subjects
 export enum EmailSubject {
   Test = "Test mail",
   PasswordReset = "Password reset",
@@ -17,95 +19,98 @@ export enum EmailSubject {
 
 class Mailer {
   nodeTransporter: nodemailer.Transporter;
+  devMode: boolean = true;
 
   constructor() {
-    if (!process.env.NODEMAILER_API_KEY) {
-      throw new Error("NODEMAILER_API_KEY variable is required");
-    }
-
-    if (!process.env.MAILER_SENDER) {
-      throw new Error("MAILER_SENDER variable is required");
+    if (process.env.NODEMAILER_API_KEY && process.env.MAILER_SENDER) {
+      this.devMode = false;
     }
 
     this.nodeTransporter = nodemailer.createTransport(
       nodemailerSendgrid({
-        apiKey: process.env.NODEMAILER_API_KEY,
+        apiKey: process.env.NODEMAILER_API_KEY || "",
       })
     );
 
-    console.log("[Mailer]: prepared");
+    console.log(`[Mailer]: prepared${this.devMode ? " (dev mode)" : ""}`);
   }
 
-  sendTest(recipient: string, subject: EmailSubject, tpl: EmailTpl, data: any) {
-    const email = new Email({
-      message: {
-        from: "johnny.mert@gmail.com",
-      },
-      send: process.env.NODE_ENV === "production",
-      transport: this.nodeTransporter,
-    });
-
-    email
-      .send({
-        template: path.join(__dirname, "emails", tpl),
-        message: {
-          to: recipient,
-          subject: subject,
-        },
-        locals: data,
-      })
-      .catch((e) => console.log("[Mailer.test]: ", e));
-  }
-
-  sendPasswordReset(recipient: string, data: any) {
+  /**
+   * sends test template to chosen address
+   * @param recipient
+   * @param data
+   * @returns
+   */
+  sendTest(recipient: string, data: any): Promise<any> {
     const email = new Email({
       message: {
         from: process.env.MAILER_SENDER,
       },
-      send: process.env.NODE_ENV === "production",
+      send: !this.devMode,
+      preview: this.devMode,
       transport: this.nodeTransporter,
     });
 
-    console.log(
-      process.env.MAILER_SENDER,
-      recipient,
-      EmailSubject.PasswordReset,
-      data
-    );
-
-    email
-      .send({
-        template: path.join(__dirname, "emails", EmailTpl.PasswordReset),
-        message: {
-          to: recipient,
-          subject: EmailSubject.PasswordReset,
-        },
-        locals: data,
-      })
-      .catch((e) =>
-        console.log("[Mailer.sendPasswordReset]: ", JSON.stringify(e))
-      );
+    return email.send({
+      template: path.join(__dirname, "emails", EmailTpl.Test),
+      message: {
+        to: recipient,
+        subject: EmailSubject.Test,
+      },
+      locals: data,
+    });
   }
 
-  sendNewUser(recipient: string, data: any) {
+  /**
+   * sends password reset template
+   * @param recipient
+   * @param data
+   * @returns
+   */
+  sendPasswordReset(recipient: string, data: any): Promise<any> {
     const email = new Email({
       message: {
         from: process.env.MAILER_SENDER,
       },
-      send: process.env.NODE_ENV === "production",
+      send: !this.devMode,
+      preview: this.devMode,
       transport: this.nodeTransporter,
     });
 
-    email
-      .send({
-        template: path.join(__dirname, "emails", EmailTpl.AccountCreated),
-        message: {
-          to: recipient,
-          subject: EmailSubject.AccountCreated,
-        },
-        locals: data,
-      })
-      .catch((e) => console.log("[Mailer.sendNewUser]: ", JSON.stringify(e)));
+    return email.send({
+      template: path.join(__dirname, "emails", EmailTpl.PasswordReset),
+      message: {
+        to: recipient,
+        subject: EmailSubject.PasswordReset,
+      },
+      locals: data,
+    });
+  }
+
+  /**
+   * sends new-user template
+   * @param recipient
+   * @param data
+   * @returns
+   */
+  sendNewUser(recipient: string, data: any): Promise<any> {
+    const email = new Email({
+      message: {
+        from: process.env.MAILER_SENDER,
+      },
+      send: !this.devMode,
+      preview: this.devMode,
+      transport: this.nodeTransporter,
+    });
+
+    return email.send({
+      template: path.join(__dirname, "emails", EmailTpl.AccountCreated),
+      message: {
+        to: recipient,
+        subject: EmailSubject.AccountCreated,
+      },
+      locals: data,
+    });
   }
 }
 

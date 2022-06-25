@@ -1,6 +1,6 @@
 export interface IResponsePermission {
   id: string;
   controller: string;
-  method: string;
+  route: string;
   roles: string[];
 }

@@ -235,8 +235,7 @@ export type SearchParams = {
 };
 
 // Attribute Editor
-// TODO: delete what is not used
-export type AttributeName =
+export type PropAttributeName =
   | "certainty"
   | "elvl"
   | "logic"
@@ -248,7 +247,11 @@ export type AttributeName =
   | "bundleStart"
   | "bundleEnd";
 
-export type GroupName = "type" | "value" | "statement";
+export type PropAttributeGroup = "type" | "value" | "statement";
+
+export type PropAttributeFilter = {
+  [key in PropAttributeGroup]: PropAttributeName[];
+};
 
 export interface AttributeData {
   // id: string;
@@ -263,25 +266,12 @@ export interface AttributeData {
   bundleStart?: boolean;
   bundleEnd?: boolean;
 }
-export interface AttributeGroupDataObject {
+export interface PropAttributeGroupDataObject {
   statement: AttributeData;
   type: AttributeData;
   value: AttributeData;
 }
 
-export const classesAll = [
-  EntityClass.Action,
-  EntityClass.Person,
-  EntityClass.Group,
-  EntityClass.Object,
-  EntityClass.Concept,
-  EntityClass.Location,
-  EntityClass.Value,
-  EntityClass.Event,
-  EntityClass.Statement,
-  EntityClass.Territory,
-  EntityClass.Resource,
-];
 export const classesPropType = [EntityClass.Concept];
 export const classesPropValue = [
   EntityClass.Action,

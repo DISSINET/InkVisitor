@@ -1,62 +1,41 @@
 import {
   actantLogicalTypeDict,
   entitiesDict,
+  entitiesDictKeys,
   entityStatusDict,
   languageDict,
 } from "@shared/dictionaries";
 import { allEntities, DropdownItem } from "@shared/dictionaries/entity";
-import { EntityClass, Language, UserRole, UserRoleMode } from "@shared/enums";
-import {
-  IAction,
-  IEntity,
-  IOption,
-  IProp,
-  IReference,
-  IStatement,
-} from "@shared/types";
+import { EntityClass, Language, UserRoleMode } from "@shared/enums";
+import { IAction, IEntity, IOption, IProp, IReference } from "@shared/types";
 import api from "api";
 import {
   Button,
-  ButtonGroup,
   Dropdown,
   Input,
   Loader,
-  Modal,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
-  ModalInputForm,
   MultiInput,
   Submit,
 } from "components";
-import { StyledTypeBar } from "components/Suggester/SuggesterStyles";
 import { StyledHeading, StyledUsedInTitle } from "components/Table/TableStyles";
-import { CProp, DEntity, DStatement } from "constructors";
+import { StyledTypeBar } from "components/TypeBar/TypeBarStyles";
+import { CMetaProp } from "constructors";
 import { useSearchParams } from "hooks";
 import React, { useEffect, useMemo, useState } from "react";
-import {
-  FaClone,
-  FaEdit,
-  FaPlus,
-  FaRecycle,
-  FaRegCopy,
-  FaTrashAlt,
-} from "react-icons/fa";
-import { GrClone } from "react-icons/gr";
+import { FaPlus, FaRegCopy } from "react-icons/fa";
 import { useMutation, useQuery, useQueryClient } from "react-query";
-import { OptionTypeBase, ValueType } from "react-select";
+import { ValueType, OptionTypeBase } from "react-select";
 import { toast } from "react-toastify";
-import { DraggedPropRowCategory } from "types";
-import { v4 as uuidv4 } from "uuid";
+import { DraggedPropRowCategory, PropAttributeFilter } from "types";
 import { EntityTag } from "..";
 import { AttributeButtonGroup } from "../AttributeButtonGroup/AttributeButtonGroup";
 import { AuditTable } from "../AuditTable/AuditTable";
-import { StyledContent } from "../EntityBookmarkBox/EntityBookmarkBoxStyles";
 import { EntityReferenceTable } from "../EntityReferenceTable/EntityReferenceTable";
 import { JSONExplorer } from "../JSONExplorer/JSONExplorer";
 import { PropGroup } from "../PropGroup/PropGroup";
+import { ApplyTemplateModal } from "./ApplyTemplateModal/ApplyTemplateModal";
+import { CreateTemplateModal } from "./CreateTemplateModal/CreateTemplateModal";
 import {
-  StyledActantHeaderRow,
   StyledDetailContentRow,
   StyledDetailContentRowLabel,
   StyledDetailContentRowValue,
@@ -69,12 +48,21 @@ import {
   StyledDetailSectionHeader,
   StyledDetailWrapper,
   StyledFormWrapper,
-  StyledTagWrap,
 } from "./EntityDetailBoxStyles";
+import { EntityDetailHeaderRow } from "./EntityDetailHeaderRow/EntityDetailHeaderRow";
 import { EntityDetailMetaPropsTable } from "./EntityDetailUsedInTable/EntityDetailMetaPropsTable/EntityDetailMetaPropsTable";
 import { EntityDetailStatementPropsTable } from "./EntityDetailUsedInTable/EntityDetailStatementPropsTable/EntityDetailStatementPropsTable";
 import { EntityDetailStatementsTable } from "./EntityDetailUsedInTable/EntityDetailStatementsTable/EntityDetailStatementsTable";
 
+// TODO: add to entity type dropdown options
+const allowedEntityChangeClasses = [
+  EntityClass.Value,
+  EntityClass.Person,
+  EntityClass.Event,
+  EntityClass.Group,
+  EntityClass.Location,
+  EntityClass.Object,
+];
 interface EntityDetailBox {}
 export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
   const {
@@ -88,8 +76,10 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
 
   const [createTemplateModal, setCreateTemplateModal] =
     useState<boolean>(false);
-  const [createTemplateLabel, setCreateTemplateLabel] = useState<string>("");
+
   const [showRemoveSubmit, setShowRemoveSubmit] = useState(false);
+  const [selectedEntityType, setSelectedEntityType] = useState<EntityClass>();
+  const [showTypeSubmit, setShowTypeSubmit] = useState(false);
   const [usedInPage, setUsedInPage] = useState<number>(0);
   const statementsPerPage = 20;
 
@@ -97,42 +87,6 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
   const [templateToApply, setTemplateToApply] = useState<IEntity | false>(
     false
   );
-
-  const handleCreateTemplate = () => {
-    // create template as a copy of the entity
-    if (entity) {
-      const userRole = localStorage.getItem("userrole") as UserRole;
-      const templateEntity =
-        entity.class === EntityClass.Statement
-          ? DStatement(entity as IStatement, userRole)
-          : DEntity(entity as IEntity, userRole);
-
-      if (entity.class === EntityClass.Statement) {
-        delete templateEntity.data["territory"];
-      }
-      templateEntity.isTemplate = true;
-      templateEntity.usedTemplate = "";
-      templateEntity.label = createTemplateLabel;
-      api.entityCreate(templateEntity);
-
-      setTimeout(() => {
-        queryClient.invalidateQueries(["templates"]);
-      }, 1000);
-      updateEntityMutation.mutate({ usedTemplate: templateEntity.id });
-
-      setCreateTemplateModal(false);
-      setCreateTemplateLabel("");
-
-      toast.info(
-        `Template "${templateEntity.label}" created from entity "${entity.label}"`
-      );
-    }
-  };
-
-  const handleCancelCreateTemplate = () => {
-    setCreateTemplateModal(false);
-    setCreateTemplateLabel("");
-  };
 
   const handleAskForTemplateApply = (templateOptionToApply: IOption) => {
     if (templates) {
@@ -145,28 +99,6 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
         setApplyTemplateModal(true);
       }
     }
-  };
-
-  const handleApplyTemplate = () => {
-    if (templateToApply && entity) {
-      // TODO #952 handle conflicts in Templates application
-      const entityAfterTemplateApplied = {
-        ...{
-          data: templateToApply.data,
-          notes: templateToApply.notes,
-          props: templateToApply.props,
-          references: templateToApply.references,
-          usedTemplate: templateToApply.id,
-        },
-      };
-
-      toast.info(
-        `Template "${templateToApply.label}" applied to Statement "${entity.label}"`
-      );
-
-      updateEntityMutation.mutate(entityAfterTemplateApplied);
-    }
-    setTemplateToApply(false);
   };
 
   const queryClient = useQueryClient();
@@ -182,8 +114,11 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
       const res = await api.detailGet(detailId);
       return res.data;
     },
-    { enabled: !!detailId && api.isLoggedIn(), retry: 2 }
+    { enabled: !!detailId && api.isLoggedIn() }
   );
+
+  const isClassChangeable =
+    entity && allowedEntityChangeClasses.includes(entity.class);
 
   const {
     status: templateStatus,
@@ -204,7 +139,7 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
       );
       return templates;
     },
-    { enabled: !!entity && api.isLoggedIn(), retry: 2 }
+    { enabled: !!entity && api.isLoggedIn() }
   );
 
   const templateOptions: DropdownItem[] = useMemo(() => {
@@ -240,13 +175,19 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
       const res = await api.auditGet(detailId);
       return res.data;
     },
-    { enabled: !!detailId && api.isLoggedIn(), retry: 2 }
+    { enabled: !!detailId && api.isLoggedIn() }
   );
 
   // refetch audit when statement changes
   useEffect(() => {
     queryClient.invalidateQueries("audit");
   }, [entity]);
+
+  useEffect(() => {
+    if (entity) {
+      setSelectedEntityType(entity.class);
+    }
+  }, []);
 
   const userCanAdmin: boolean = useMemo(() => {
     return !!entity && entity.right === UserRoleMode.Admin;
@@ -259,15 +200,6 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
         entity.right === UserRoleMode.Write)
     );
   }, [entity]);
-
-  // mutations
-  // const allEntitiesOption = {
-  //   value: "*",
-  //   label: "*",
-  //   info: "",
-  // };
-  // const entityOptions = [...entitiesDict] as any;
-  // entityOptions.push(allEntitiesOption);
 
   const updateEntityMutation = useMutation(
     async (changes: any) => await api.entityUpdate(detailId, changes),
@@ -293,6 +225,26 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
           queryClient.invalidateQueries("territory");
           queryClient.invalidateQueries("bookmarks");
         }
+        if (entity?.isTemplate) {
+          queryClient.invalidateQueries("templates");
+        }
+      },
+    }
+  );
+
+  const changeEntityTypeMutation = useMutation(
+    async (newClass: string) =>
+      await api.entityUpdate(detailId, { class: newClass }),
+    {
+      onSuccess: (data, variables) => {
+        setShowTypeSubmit(false);
+        queryClient.invalidateQueries(["entity"]);
+        queryClient.invalidateQueries("statement");
+        if (variables === EntityClass.Territory) {
+          queryClient.invalidateQueries("tree");
+        }
+        queryClient.invalidateQueries("territory");
+        queryClient.invalidateQueries("bookmarks");
         if (entity?.isTemplate) {
           queryClient.invalidateQueries("templates");
         }
@@ -339,9 +291,10 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
   // Props handling
 
   // adding only second or third level
-  const addProp = (originId: string) => {
+  // function adding the first level prop is in the button
+  const addMetaProp = (originId: string) => {
     if (entity) {
-      const newProp = CProp();
+      const newProp = CMetaProp();
       const newProps = [...entity.props];
 
       newProps.forEach((prop1, pi1) => {
@@ -471,7 +424,7 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
   };
 
   useEffect(() => {
-    if (error && (error as any).error === "EntityDoesNotExits") {
+    if (error && (error as any).error === "EntityDoesNotExist") {
       setDetailId("");
     }
   }, [error]);
@@ -510,121 +463,30 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
     return "entity";
   }, [entity]);
 
-  const updatePropIds = (props: IProp[]) => {
-    for (let prop of props) {
-      for (let prop1 of prop.children) {
-        for (let prop2 of prop1.children) {
-          prop2.id = uuidv4();
-        }
-        prop1.id = uuidv4();
-      }
-      prop.id = uuidv4();
-    }
-    return props;
-  };
-
-  const duplicateEntity = (entityToDuplicate: IEntity) => {
-    const newEntity = DEntity(
-      entityToDuplicate,
-      localStorage.getItem("userrole") as UserRole
-    );
-    duplicateEntityMutation.mutate(newEntity);
-  };
-
-  const duplicateEntityMutation = useMutation(
-    async (newEntity: IEntity) => {
-      await api.entityCreate(newEntity);
-    },
-    {
-      onSuccess: (data, variables) => {
-        setDetailId(variables.id);
-        toast.info(`Entity duplicated!`);
-        queryClient.invalidateQueries("templates");
-      },
-      onError: () => {
-        toast.error(`Error: Entity not duplicated!`);
-      },
-    }
-  );
+  // const updatePropIds = (props: IProp[]) => {
+  //   for (let prop of props) {
+  //     for (let prop1 of prop.children) {
+  //       for (let prop2 of prop1.children) {
+  //         prop2.id = uuidv4();
+  //       }
+  //       prop1.id = uuidv4();
+  //     }
+  //     prop.id = uuidv4();
+  //   }
+  //   return props;
+  // };
 
   return (
     <>
       {entity && (
         <>
-          <StyledActantHeaderRow type={entity.class}>
-            <StyledTagWrap>
-              <EntityTag
-                actant={entity}
-                propId={entity.id}
-                tooltipText={entity.data.text}
-                fullWidth
-              />
-            </StyledTagWrap>
-            <ButtonGroup style={{ marginTop: "1rem" }}>
-              {entity.class !== EntityClass.Statement && userCanEdit && (
-                <Button
-                  icon={<FaClone size={14} />}
-                  color="primary"
-                  label="duplicate"
-                  tooltip="duplicate entity"
-                  inverted
-                  onClick={() => {
-                    duplicateEntity(entity);
-                  }}
-                />
-              )}
-              {mayBeRemoved && userCanEdit && (
-                <Button
-                  color="primary"
-                  icon={<FaTrashAlt />}
-                  label="remove"
-                  tooltip="remove entity"
-                  inverted
-                  onClick={() => {
-                    setShowRemoveSubmit(true);
-                  }}
-                />
-              )}
-              {userCanEdit && (
-                <Button
-                  key="template"
-                  icon={<GrClone size={14} />}
-                  tooltip="create template from entity"
-                  inverted
-                  color="primary"
-                  label="Create template"
-                  onClick={() => {
-                    setCreateTemplateModal(true);
-                  }}
-                />
-              )}
-              <Button
-                key="refresh"
-                icon={<FaRecycle size={14} />}
-                tooltip="refresh data"
-                inverted
-                color="primary"
-                label="refresh"
-                onClick={() => {
-                  queryClient.invalidateQueries(["entity"]);
-                }}
-              />
-              {entity.class === EntityClass.Statement && (
-                <Button
-                  key="edit"
-                  icon={<FaEdit size={14} />}
-                  tooltip="open statement in editor"
-                  inverted={true}
-                  color="primary"
-                  label="open"
-                  onClick={() => {
-                    setStatementId(entity.id);
-                    setTerritoryId(entity.data.territory.id);
-                  }}
-                />
-              )}
-            </ButtonGroup>
-          </StyledActantHeaderRow>
+          <EntityDetailHeaderRow
+            entity={entity}
+            userCanEdit={userCanEdit}
+            mayBeRemoved={mayBeRemoved}
+            setShowRemoveSubmit={setShowRemoveSubmit}
+            setCreateTemplateModal={setCreateTemplateModal}
+          />
 
           <StyledDetailWrapper type={entity.class}>
             {/* form section */}
@@ -653,6 +515,43 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                         </StyledDetailContentRowValueID>
                       </StyledDetailContentRowValue>
                     </StyledDetailContentRow>
+
+                    {/* Entity type */}
+                    {isClassChangeable && (
+                      <StyledDetailContentRow>
+                        <StyledDetailContentRowLabel>
+                          Entity Type
+                        </StyledDetailContentRowLabel>
+                        <StyledDetailContentRowValue>
+                          <div style={{ position: "relative" }}>
+                            <Dropdown
+                              value={{
+                                label: entitiesDictKeys[entity.class].label,
+                                value: entitiesDictKeys[entity.class].value,
+                              }}
+                              options={allowedEntityChangeClasses.map(
+                                (c) => entitiesDictKeys[c]
+                              )}
+                              onChange={(
+                                option: ValueType<OptionTypeBase, any>
+                              ) => {
+                                setSelectedEntityType(
+                                  (option as IOption).value as EntityClass
+                                );
+                                setShowTypeSubmit(true);
+                                // TODO: submit modal => change category mutation
+                              }}
+                              width={76}
+                              entityDropdown
+                              disableTyping
+                            />
+                            <StyledTypeBar
+                              entity={`entity${entity.class}`}
+                            ></StyledTypeBar>
+                          </div>
+                        </StyledDetailContentRowValue>
+                      </StyledDetailContentRow>
+                    )}
 
                     {/* templates */}
                     <StyledDetailContentRow>
@@ -686,36 +585,6 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                       </StyledDetailContentRow>
                     )}
 
-                    {/* <StyledDetailContentRow>
-                      <StyledDetailContentRowLabel>
-                        Entity Type
-                      </StyledDetailContentRowLabel>
-                      <StyledDetailContentRowValue>
-                        <div style={{ position: "relative" }}>
-                          <Dropdown
-                            value={{
-                              label: entity.class,
-                              value: entity.class,
-                            }}
-                            options={entitiesDict}
-                            onChange={(
-                              option: ValueType<OptionTypeBase, any>
-                            ) => {
-                              // setSelectedCategory(option);
-                              // TODO: submit modal => change category mutation
-                              console.log(option);
-                            }}
-                            width={40}
-                            entityDropdown
-                            disableTyping
-                          />
-                          <StyledTypeBar
-                            entity={`entity${entity.class}`}
-                          ></StyledTypeBar>
-                        </div>
-                      </StyledDetailContentRowValue>
-                    </StyledDetailContentRow> */}
-
                     <StyledDetailContentRow>
                       <StyledDetailContentRowLabel>
                         Label
@@ -747,7 +616,8 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                           rows={2}
                           value={entity.detail}
                           onChangeFn={async (newValue: string) => {
-                            updateEntityMutation.mutate({ detail: newValue });
+                            if (newValue !== entity.detail)
+                              updateEntityMutation.mutate({ detail: newValue });
                           }}
                         />
                       </StyledDetailContentRowValue>
@@ -1307,14 +1177,25 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                       territoryId={territoryId}
                       updateProp={updateProp}
                       removeProp={removeProp}
-                      addProp={addProp}
+                      addProp={addMetaProp}
                       userCanEdit={userCanEdit}
                       openDetailOnCreate={false}
                       movePropToIndex={(propId, oldIndex, newIndex) => {
                         movePropToIndex(propId, oldIndex, newIndex);
                       }}
                       category={DraggedPropRowCategory.META_PROP}
-                      disabledAttributes={["elvl"]}
+                      disabledAttributes={
+                        {
+                          statement: [
+                            "elvl",
+                            "moodvariant",
+                            "mood",
+                            "bundleOperator",
+                          ],
+                          type: ["elvl", "logic", "virtuality", "partitivity"],
+                          value: ["elvl", "logic", "virtuality", "partitivity"],
+                        } as PropAttributeFilter
+                      }
                     />
                   </tbody>
                 </table>
@@ -1324,10 +1205,9 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                     label="create new meta property"
                     icon={<FaPlus />}
                     onClick={async () => {
-                      const newProp = CProp();
+                      const newProp = CMetaProp();
                       const newActant = { ...entity };
                       newActant.props.push(newProp);
-
                       updateEntityMutation.mutate({ props: newActant.props });
                     }}
                   />
@@ -1424,114 +1304,47 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
         show={showRemoveSubmit}
         loading={deleteEntityMutation.isLoading}
       />
+      <Submit
+        title="Change entity type"
+        text={`Changing entity type to: [${
+          selectedEntityType ? entitiesDictKeys[selectedEntityType].label : ""
+        }]. You may loose some values. Do you want to continue?`}
+        submitLabel="Continue"
+        onSubmit={() => {
+          if (selectedEntityType) {
+            changeEntityTypeMutation.mutate(selectedEntityType);
+          }
+        }}
+        onCancel={() => setShowTypeSubmit(false)}
+        show={showTypeSubmit}
+      />
       <Loader
         show={
           isFetching ||
           updateEntityMutation.isLoading ||
-          deleteEntityMutation.isLoading
+          deleteEntityMutation.isLoading ||
+          changeEntityTypeMutation.isLoading
         }
       />
-      <Modal
+
+      <ApplyTemplateModal
         showModal={applyTemplateModal}
-        width="thin"
-        onEnterPress={() => {
-          setApplyTemplateModal(false);
-          handleApplyTemplate();
-        }}
-        onClose={() => {
-          setApplyTemplateModal(false);
-        }}
-      >
-        <ModalHeader title="Create Template" />
-        <ModalContent>
-          <StyledContent>
-            <ModalInputForm>{`Apply template?`}</ModalInputForm>
-            <div>
-              {templateToApply && <EntityTag actant={templateToApply} />}
-            </div>
-            {/* here goes the info about template #951 */}
-          </StyledContent>
-        </ModalContent>
-        <ModalFooter>
-          <ButtonGroup>
-            <Button
-              key="cancel"
-              label="Cancel"
-              color="greyer"
-              inverted
-              onClick={() => {
-                setApplyTemplateModal(false);
-              }}
-            />
-            <Button
-              key="submit"
-              label="Apply"
-              color="info"
-              onClick={() => {
-                setApplyTemplateModal(false);
-                handleApplyTemplate();
-              }}
-            />
-          </ButtonGroup>
-        </ModalFooter>
-      </Modal>
-      <Modal
+        entity={entity}
+        setApplyTemplateModal={setApplyTemplateModal}
+        updateEntityMutation={updateEntityMutation}
+        templateToApply={templateToApply}
+        setTemplateToApply={setTemplateToApply}
+      />
+
+      <CreateTemplateModal
+        setCreateTemplateModal={setCreateTemplateModal}
+        entity={entity}
         showModal={createTemplateModal}
-        width="thin"
-        onEnterPress={() => {
-          handleCreateTemplate();
-        }}
-        onClose={() => {
-          handleCancelCreateTemplate();
-        }}
-      >
-        <ModalHeader title="Create Template" />
-        <ModalContent>
-          <StyledContent>
-            <ModalInputForm>
-              <StyledDetailForm>
-                <StyledDetailContentRow>
-                  <StyledDetailContentRowLabel>
-                    Label
-                  </StyledDetailContentRowLabel>
-                  <StyledDetailContentRowValue>
-                    <Input
-                      disabled={!userCanEdit}
-                      width="full"
-                      value={createTemplateLabel}
-                      onChangeFn={async (newLabel: string) => {
-                        setCreateTemplateLabel(newLabel);
-                      }}
-                      changeOnType
-                    />
-                  </StyledDetailContentRowValue>
-                </StyledDetailContentRow>
-              </StyledDetailForm>
-            </ModalInputForm>
-          </StyledContent>
-        </ModalContent>
-        <ModalFooter>
-          <ButtonGroup>
-            <Button
-              key="cancel"
-              label="Cancel"
-              color="greyer"
-              inverted
-              onClick={() => {
-                handleCancelCreateTemplate();
-              }}
-            />
-            <Button
-              key="submit"
-              label="Create"
-              color="info"
-              onClick={() => {
-                handleCreateTemplate();
-              }}
-            />
-          </ButtonGroup>
-        </ModalFooter>
-      </Modal>
+        userCanEdit={userCanEdit}
+        updateEntityMutation={updateEntityMutation}
+      />
     </>
   );
 };
+
+export const MemoizedEntityDetailBox = React.memo(EntityDetailBox);

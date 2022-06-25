@@ -59,6 +59,34 @@ export const CProp = (): IProp => ({
   },
 });
 
+export const CMetaProp = (): IProp => ({
+  id: uuidv4(),
+  elvl: Elvl.Inferential,
+  certainty: Certainty.Empty,
+  logic: Logic.Positive,
+  mood: [Mood.Indication],
+  moodvariant: MoodVariant.Realis,
+  bundleOperator: Operator.And,
+  bundleStart: false,
+  bundleEnd: false,
+  children: [],
+
+  type: {
+    id: "",
+    elvl: Elvl.Inferential,
+    logic: Logic.Positive,
+    virtuality: Virtuality.Reality,
+    partitivity: Partitivity.Unison,
+  },
+  value: {
+    id: "",
+    elvl: Elvl.Inferential,
+    logic: Logic.Positive,
+    virtuality: Virtuality.Reality,
+    partitivity: Partitivity.Unison,
+  },
+});
+
 export const CStatement = (
   userRole: UserRole,
   territoryId?: string,

@@ -26,7 +26,7 @@ jobs:
           touch packages/server/env/.env.staging
           echo "$SERVER_ENV" >> packages/server/env/.env.staging
         env:
-          SERVER_ENV: ${{secrets.SERVER_ENV}}
+          SERVER_ENV: ${{secrets.SERVER_ENV_STAGING}}
 
       - name: Create env file for client
         run: |

@@ -1,11 +1,11 @@
 import { IResponsePermission } from "@shared/types";
-import { r as rethink, Connection, WriteResult } from "rethinkdb-ts";
+import { r as rethink, Connection, WriteResult, RDatum } from "rethinkdb-ts";
 import { IDbModel } from "@models/common";
 
 export default class AclPermission implements IDbModel, IResponsePermission {
   id: string;
   controller: string;
-  method: string;
+  route: string;
   roles: string[];
 
   static table = "acl_permissions";
@@ -13,7 +13,7 @@ export default class AclPermission implements IDbModel, IResponsePermission {
   constructor(data: Record<string, any>) {
     this.id = data.id;
     this.controller = data.controller;
-    this.method = data.method;
+    this.route = data.route || data.method;
     this.roles = data.roles;
   }
 
@@ -61,16 +61,21 @@ export default class AclPermission implements IDbModel, IResponsePermission {
     );
   }
 
-  static async findByPath(
+  static async findByRoute(
     dbInstance: Connection | undefined,
     ctrlName: string,
-    method: string
+    route: string
   ): Promise<AclPermission | null> {
     const data = await rethink
       .table(AclPermission.table)
       .filter({
         controller: ctrlName,
-        method: method,
+      })
+      .filter(function (row: RDatum) {
+        return rethink.or(
+          row.hasFields("method").and(row("method").eq(route)), // DEPRECATED
+          row.hasFields("route").and(row("route").eq(route))
+        );
       })
       .run(dbInstance);
 
