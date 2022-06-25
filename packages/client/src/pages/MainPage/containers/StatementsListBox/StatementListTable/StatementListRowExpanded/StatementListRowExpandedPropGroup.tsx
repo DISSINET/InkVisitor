@@ -3,8 +3,9 @@ import { EmptyTag } from "pages/MainPage/containers";
 import React from "react";
 import { EntityTag } from "../../../EntityTag/EntityTag";
 import {
+  StyledPropGridRow,
   StyledPropGroup,
-  StyledPropRow,
+  StyledTagWrap,
 } from "./StatementListRowExpandedStyles";
 
 interface StatementListRowExpandedPropGroup {
@@ -23,34 +24,36 @@ export const StatementListRowExpandedPropGroup: React.FC<
         const propValueEntity: IEntity = entities[prop.value.id];
         return (
           <React.Fragment key={key}>
-            <StyledPropRow key={key} level={level}>
+            <StyledPropGridRow level={level}>
               {propTypeEntity ? (
-                <>
+                <StyledTagWrap marginRight>
                   <EntityTag
+                    fullWidth
                     actant={propTypeEntity}
                     tooltipPosition="bottom center"
                   />
-                  <span>&nbsp;</span>
-                </>
+                </StyledTagWrap>
               ) : (
-                <>
+                <StyledTagWrap marginRight>
                   <EmptyTag label={"type"} />
-                  <span>&nbsp;</span>
-                </>
+                </StyledTagWrap>
               )}
               {propValueEntity ? (
-                <EntityTag
-                  actant={propValueEntity}
-                  tooltipPosition="bottom center"
-                />
+                <StyledTagWrap>
+                  <EntityTag
+                    fullWidth
+                    actant={propValueEntity}
+                    tooltipPosition="bottom center"
+                  />
+                </StyledTagWrap>
               ) : (
-                <EmptyTag label={"value"} />
+                <StyledTagWrap>
+                  <EmptyTag label={"value"} />
+                </StyledTagWrap>
               )}
-            </StyledPropRow>
+            </StyledPropGridRow>
 
-            <div key={`children-${key}`}>
-              {renderChildrenPropRow && renderChildrenPropRow(prop.children)}
-            </div>
+            {renderChildrenPropRow && renderChildrenPropRow(prop.children)}
           </React.Fragment>
         );
       })}

@@ -71,6 +71,7 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
   >([territoryId]);
 
   useEffect(() => {
+    //const toExclude = [territoryId];
     const toExclude = [territoryId];
     if (treeData) {
       const currentTerritory = searchTree(treeData, territoryId);
@@ -132,6 +133,9 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
               </React.Fragment>
             );
           })}
+        <React.Fragment key="this-territory">
+          <StatementListBreadcrumbItem territoryId={territoryId} />
+        </React.Fragment>
       </StyledHeaderBreadcrumbRow>
       <StyledHeaderRow>
         {isFavorited && (
@@ -166,6 +170,7 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
                 label="refresh"
                 onClick={() => {
                   queryClient.invalidateQueries(["territory"]);
+                  queryClient.invalidateQueries(["statement"]);
                 }}
               />
             </ButtonGroup>
@@ -179,7 +184,7 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
           <EntitySuggester
             filterEditorRights
             inputWidth={96}
-            allowCreate={false}
+            disableCreate
             categoryTypes={[EntityClass.Territory]}
             onSelected={(newSelectedId: string) => {
               moveTerritoryMutation.mutate(newSelectedId);

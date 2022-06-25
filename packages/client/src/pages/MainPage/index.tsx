@@ -4,12 +4,12 @@ import {
   Box,
   Button,
   ButtonGroup,
-  Footer,
   Header,
   Panel,
   PanelSeparator,
   Toast,
 } from "components";
+import { MemoizedFooter } from "components/Footer/Footer";
 import { useSearchParams } from "hooks";
 import ScrollHandler from "hooks/ScrollHandler";
 import React, { useState } from "react";
@@ -19,7 +19,6 @@ import { IoMdClose } from "react-icons/io";
 import { RiMenuFoldFill, RiMenuUnfoldFill } from "react-icons/ri";
 import { useQuery, useQueryClient } from "react-query";
 import { toast } from "react-toastify";
-import { setAuthToken } from "redux/features/authTokenSlice";
 import { setFirstPanelExpanded } from "redux/features/layout/firstPanelExpandedSlice";
 import { setFourthPanelExpanded } from "redux/features/layout/fourthPanelExpandedSlice";
 import { setUsername } from "redux/features/usernameSlice";
@@ -30,17 +29,15 @@ import {
   heightHeader,
 } from "Theme/constants";
 import packageJson from "../../../package.json";
-import {
-  EntityBookmarkBox,
-  EntitySearchBox,
-  EntityDetailBox,
-  LoginModal,
-  StatementEditorBox,
-  StatementListBox,
-  TerritoryTreeBox,
-  UserListModal,
-  TemplateListBox,
-} from "./containers";
+import { UserListModal } from "./containers";
+import { MemoizedEntityBookmarkBox } from "./containers/EntityBookmarkBox/EntityBookmarkBox";
+import { MemoizedEntityDetailBox } from "./containers/EntityDetailBox/EntityDetailBox";
+import { MemoizedEntitySearchBox } from "./containers/EntitySearchBox/EntitySearchBox";
+import { MemoizedLoginModal } from "./containers/LoginModal/LoginModal";
+import { MemoizedStatementEditorBox } from "./containers/StatementEditorBox/StatementEditorBox";
+import { MemoizedStatementListBox } from "./containers/StatementsListBox/StatementListBox";
+import { MemoizedTemplateListBox } from "./containers/TemplateListBox/TemplateListBox";
+import { MemoizedTerritoryTreeBox } from "./containers/TerritoryTreeBox/TerritoryTreeBox";
 import { UserCustomizationModal } from "./containers/UserCustomizationModal/UserCustomizationModal";
 import {
   StyledFaUserAlt,
@@ -54,6 +51,75 @@ import {
   StyledUserBox,
   StyledUsername,
 } from "./MainPageStyles";
+
+const LeftHeader = React.memo(({}) => {
+  const env = (process.env.ROOT_URL || "").replace(/apps\/inkvisitor[-]?/, "");
+  const versionText = `v. ${packageJson.version} 
+  ${
+    ["production", ""].indexOf(env) === -1
+      ? `| ${env} | built: ${process.env.BUILD_TIMESTAMP}`
+      : ""
+  }`;
+
+  return (
+    <StyledHeader>
+      <StyledHeaderLogo
+        height={heightHeader - 10}
+        src={LogoInkvisitor}
+        alt="Inkvisitor Logo"
+      />
+      <StyledHeaderTag
+        onClick={async () => {
+          await navigator.clipboard.writeText(versionText);
+          toast.info("Inkvisitor version copied to clipboard");
+        }}
+      >
+        {versionText}
+      </StyledHeaderTag>
+    </StyledHeader>
+  );
+});
+
+interface RightHeaderProps {
+  setUserCustomizationOpen: (arg0: boolean) => void;
+  handleUsersModalClick: () => void;
+  handleLogOut: () => void;
+  userName: string;
+  userRole: string;
+}
+
+const RightHeader: React.FC<RightHeaderProps> = ({
+  setUserCustomizationOpen,
+  handleUsersModalClick,
+  handleLogOut,
+  userName,
+  userRole,
+}) => {
+  return (
+    <StyledUserBox>
+      <StyledUser>
+        <StyledText>logged as</StyledText>
+        <StyledFaUserAlt
+          size={14}
+          onClick={() => setUserCustomizationOpen(true)}
+        />
+        <StyledUsername onClick={() => setUserCustomizationOpen(true)}>
+          {userName}
+        </StyledUsername>
+      </StyledUser>
+      <ButtonGroup>
+        {userRole == "admin" && (
+          <Button
+            label="Manage Users"
+            color="info"
+            onClick={() => handleUsersModalClick()}
+          />
+        )}
+        <Button label="Log Out" color="danger" onClick={() => handleLogOut()} />
+      </ButtonGroup>
+    </StyledUserBox>
+  );
+};
 
 interface MainPage {
   size: number[];
@@ -109,16 +175,14 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
         return false;
       }
     },
-    { enabled: !!userId && api.isLoggedIn(), retry: 2 }
+    { enabled: !!userId && api.isLoggedIn() }
   );
 
   const [userAdministrationModalOpen, setUserAdministrationModalOpen] =
     useState<boolean>(false);
-
   const handleLogOut = () => {
     api.signOut();
     dispatch(setUsername(""));
-    dispatch(setAuthToken(""));
     toast.success("You've been successfully logged out!");
     queryClient.removeQueries();
     setDetailId("");
@@ -186,54 +250,17 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
               ? environmentName
               : "primary"
           }
-          left={
-            <StyledHeader>
-              <StyledHeaderLogo
-                height={heightHeader - 10}
-                src={LogoInkvisitor}
-                alt="React Logo"
-              />
-              <StyledHeaderTag>
-                v. {packageJson.version}{" "}
-                {["production", ""].indexOf(environmentName) === -1
-                  ? `| ${environmentName} | built: ${process.env.BUILD_TIMESTAMP}`
-                  : ""}
-              </StyledHeaderTag>
-            </StyledHeader>
-          }
+          left={<LeftHeader />}
           right={
-            <div>
-              {isLoggedIn && (
-                <StyledUserBox>
-                  <StyledUser>
-                    <StyledText>logged as</StyledText>
-                    <StyledFaUserAlt
-                      size={14}
-                      onClick={() => setUserCustomizationOpen(true)}
-                    />
-                    <StyledUsername
-                      onClick={() => setUserCustomizationOpen(true)}
-                    >
-                      {user ? user.name : ""}
-                    </StyledUsername>
-                  </StyledUser>
-                  <ButtonGroup>
-                    {userRole == "admin" && (
-                      <Button
-                        label="Manage Users"
-                        color="info"
-                        onClick={() => handleUsersModalClick()}
-                      />
-                    )}
-                    <Button
-                      label="Log Out"
-                      color="danger"
-                      onClick={() => handleLogOut()}
-                    />
-                  </ButtonGroup>
-                </StyledUserBox>
-              )}
-            </div>
+            isLoggedIn ? (
+              <RightHeader
+                setUserCustomizationOpen={setUserCustomizationOpen}
+                handleUsersModalClick={handleUsersModalClick}
+                handleLogOut={handleLogOut}
+                userName={user ? user.name : ""}
+                userRole={userRole || ""}
+              />
+            ) : undefined
           }
         />
         <DndProvider backend={HTML5Backend}>
@@ -251,7 +278,7 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
                 button={firstPanelButton()}
                 noPadding
               >
-                <TerritoryTreeBox />
+                <MemoizedTerritoryTreeBox />
               </Box>
             </Panel>
             {/* SECOND PANEL */}
@@ -266,7 +293,7 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
                 height={detailId ? heightContent / 2 - 20 : heightContent}
                 label="Statements"
               >
-                <StatementListBox />
+                <MemoizedStatementListBox />
               </Box>
               {detailId && (
                 <Box
@@ -284,7 +311,7 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
                     )
                   }
                 >
-                  <EntityDetailBox />
+                  <MemoizedEntityDetailBox />
                 </Box>
               )}
             </Panel>
@@ -297,7 +324,7 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
               }
             >
               <Box height={heightContent} label="Editor">
-                <StatementEditorBox />
+                <MemoizedStatementEditorBox />
               </Box>
             </Panel>
             {/* FOURTH PANEL */}
@@ -311,7 +338,7 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
                 isExpanded={fourthPanelExpanded}
                 button={fourthPanelButton()}
               >
-                <EntitySearchBox />
+                <MemoizedEntitySearchBox />
               </Box>
               <Box
                 height={heightContent / 3}
@@ -320,7 +347,7 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
                 isExpanded={fourthPanelExpanded}
                 button={fourthPanelButton()}
               >
-                <EntityBookmarkBox />
+                <MemoizedEntityBookmarkBox />
               </Box>
               <Box
                 height={heightContent / 3}
@@ -329,7 +356,7 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
                 isExpanded={fourthPanelExpanded}
                 button={fourthPanelButton()}
               >
-                <TemplateListBox />
+                <MemoizedTemplateListBox />
               </Box>
             </Panel>
           </StyledPanelWrap>
@@ -346,8 +373,8 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
         </DndProvider>
 
         <Toast />
-        <Footer height={heightFooter} />
-        {!isLoggedIn && <LoginModal />}
+        <MemoizedFooter height={heightFooter} />
+        {!isLoggedIn && <MemoizedLoginModal />}
       </StyledPage>
     </>
   );

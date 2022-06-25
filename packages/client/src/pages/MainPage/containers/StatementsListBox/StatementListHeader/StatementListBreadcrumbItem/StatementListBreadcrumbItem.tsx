@@ -1,4 +1,5 @@
 import { EntityStatus, EntityClass, Language } from "@shared/enums";
+import { IEntity } from "@shared/types";
 import api from "api";
 import { Button, Loader } from "components";
 import { useSearchParams } from "hooks";
@@ -14,7 +15,7 @@ import { StyledItemBox } from "./StatementListBreadcrumbItemStyles";
 interface StatementListBreadcrumbItem {
   territoryId: string;
 }
-const initialData = {
+const initialData: IEntity = {
   id: "",
   class: EntityClass.Territory,
   data: {},
@@ -22,6 +23,7 @@ const initialData = {
   detail: "",
   status: EntityStatus.Approved,
   language: Language.Empty,
+  references: [],
   props: [],
   notes: [],
 };

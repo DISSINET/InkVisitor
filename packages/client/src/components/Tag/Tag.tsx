@@ -6,12 +6,11 @@ import {
   DropTargetMonitor,
   useDrag,
   useDrop,
-  XYCoord,
 } from "react-dnd";
 import { PopupPosition } from "reactjs-popup/dist/types";
 import { setDraggedTerritory } from "redux/features/territoryTree/draggedTerritorySlice";
-import { useAppDispatch } from "redux/hooks";
-import { DragItem, Entities, ItemTypes } from "types";
+import { useAppDispatch, useAppSelector } from "redux/hooks";
+import { DraggedTerritoryItem, DragItem, Entities, ItemTypes } from "types";
 import { dndHoverFn } from "utils";
 import {
   ButtonWrapper,
@@ -26,6 +25,7 @@ interface TagProps {
   propId: string;
   parentId?: string;
   label?: string;
+  labelItalic?: boolean;
   tooltipDetail?: string;
   tooltipText?: string;
   category?: string;
@@ -40,6 +40,7 @@ interface TagProps {
   index?: number;
   moveFn?: (dragIndex: number, hoverIndex: number) => void;
   disableTooltip?: boolean;
+  disableDoubleClick?: boolean;
   tooltipPosition?: PopupPosition | PopupPosition[];
   updateOrderFn?: (item: DragItem) => void;
   lvl?: number;
@@ -53,6 +54,7 @@ export const Tag: React.FC<TagProps> = ({
   propId,
   parentId,
   label = "",
+  labelItalic = false,
   tooltipDetail,
   tooltipText,
   category = "X",
@@ -68,6 +70,7 @@ export const Tag: React.FC<TagProps> = ({
   moveFn,
   tooltipPosition = "right top",
   disableTooltip = false,
+  disableDoubleClick = false,
   updateOrderFn = () => {},
   statementsCount,
   isFavorited = false,
@@ -76,13 +79,16 @@ export const Tag: React.FC<TagProps> = ({
 }) => {
   const { setDetailId } = useSearchParams();
   const dispatch = useAppDispatch();
+  const draggedTerritory: DraggedTerritoryItem = useAppSelector(
+    (state) => state.territoryTree.draggedTerritory
+  );
 
   const ref = useRef<HTMLDivElement>(null);
 
   const [, drop] = useDrop({
     accept: ItemTypes.TAG,
     hover(item: DragItem, monitor: DropTargetMonitor) {
-      if (moveFn) {
+      if (moveFn && draggedTerritory && draggedTerritory.lvl === lvl) {
         dndHoverFn(item, index, monitor, ref, moveFn);
       }
     },
@@ -122,7 +128,7 @@ export const Tag: React.FC<TagProps> = ({
     e.stopPropagation();
     e.nativeEvent.stopImmediatePropagation();
 
-    setDetailId(propId);
+    !disableDoubleClick && setDetailId(propId);
   };
 
   const getShortTag = () => {
@@ -156,8 +162,9 @@ export const Tag: React.FC<TagProps> = ({
                   fullWidth={fullWidth}
                   isFavorited={isFavorited}
                   labelOnly
+                  isItalic={labelItalic}
                 >
-                  {label ? label : <i>{"no label"}</i>}
+                  {label}
                 </StyledLabel>
               </>
             )}
@@ -201,14 +208,9 @@ export const Tag: React.FC<TagProps> = ({
                   borderStyle={borderStyle}
                   fullWidth={fullWidth}
                   isFavorited={isFavorited}
+                  isItalic={labelItalic}
                 >
-                  {!label ? (
-                    <StyledItalic>{"no label"}</StyledItalic>
-                  ) : category === "X" ? (
-                    <StyledItalic>{label}</StyledItalic>
-                  ) : (
-                    label
-                  )}
+                  {label}
                 </StyledLabel>
 
                 {button && renderButton()}

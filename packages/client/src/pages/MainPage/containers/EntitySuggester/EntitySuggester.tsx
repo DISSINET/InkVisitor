@@ -13,16 +13,16 @@ import { useDebounce, useSearchParams } from "hooks";
 import React, { useEffect, useState } from "react";
 import { DragObjectWithType } from "react-dnd";
 import { FaHome } from "react-icons/fa";
-import { useMutation, useQuery, useQueryClient } from "react-query";
+import { useMutation, useQuery } from "react-query";
 import { OptionTypeBase, ValueType } from "react-select";
-import { DropdownAny, rootTerritoryId } from "Theme/constants";
+import { DropdownAny, rootTerritoryId, wildCardChar } from "Theme/constants";
 import { Entities } from "types";
 
 interface EntitySuggesterI {
   categoryTypes: EntityClass[];
   onSelected: Function;
   placeholder?: string;
-  allowCreate?: boolean;
+  disableCreate?: boolean;
   disableWildCard?: boolean;
   inputWidth?: number | "full";
   openDetailOnCreate?: boolean;
@@ -36,7 +36,7 @@ export const EntitySuggester: React.FC<EntitySuggesterI> = ({
   categoryTypes,
   onSelected,
   placeholder = "",
-  allowCreate,
+  disableCreate,
   inputWidth,
   disableWildCard = false,
   openDetailOnCreate = false,
@@ -45,7 +45,6 @@ export const EntitySuggester: React.FC<EntitySuggesterI> = ({
   filterEditorRights = false,
   excludedActantIds = [],
 }) => {
-  const queryClient = useQueryClient();
   const [typed, setTyped] = useState<string>("");
   const debouncedTyped = useDebounce(typed, 100);
   const [selectedCategory, setSelectedCategory] = useState<any>();
@@ -63,8 +62,8 @@ export const EntitySuggester: React.FC<EntitySuggesterI> = ({
   } = useQuery(
     ["suggestion", debouncedTyped, selectedCategory],
     async () => {
-      const resSuggestions = await api.entitiesGetMore({
-        label: debouncedTyped,
+      const resSuggestions = await api.entitiesSearch({
+        label: debouncedTyped + wildCardChar,
         class:
           selectedCategory?.value === DropdownAny
             ? false
@@ -260,7 +259,7 @@ export const EntitySuggester: React.FC<EntitySuggesterI> = ({
         handleHoverred(newHoverred);
       }}
       isWrongDropCategory={isWrongDropCategory}
-      allowCreate={allowCreate}
+      disableCreate={disableCreate}
       inputWidth={inputWidth}
     />
   ) : (

@@ -47,16 +47,7 @@
     },
     "bookmarks": null,
     "role": "editor",
-    "rights": [
-      {
-        "territory": "T107-1-01",
-        "mode": "read"
-      },
-      {
-        "territory": "T107-1-02",
-        "mode": "write"
-      }
-    ]
+    "rights": []
   },
   {
     "id": "3",
@@ -71,12 +62,7 @@
     },
     "bookmarks": null,
     "role": "editor",
-    "rights": [
-      {
-        "territory": "T40-01",
-        "mode": "write"
-      }
-    ]
+    "rights": []
   },
   {
     "id": "4",
@@ -91,12 +77,7 @@
     },
     "bookmarks": null,
     "role": "viewer",
-    "rights": [
-      {
-        "territory": "T40-01",
-        "mode": "read"
-      }
-    ]
+    "rights": []
   },
   {
     "id": "5",
@@ -113,7 +94,7 @@
     "role": "viewer",
     "rights": []
   },
-   {
+  {
     "id": "100",
     "name": "David",
     "email": "david.zbiral@phil.muni.cz",
@@ -126,10 +107,12 @@
     },
     "bookmarks": null,
     "role": "admin",
-    "rights":  [{
+    "rights": [
+      {
         "territory": "T0",
         "mode": "admin"
-      }]
+      }
+    ]
   },
   {
     "id": "101",
@@ -144,10 +127,12 @@
     },
     "bookmarks": null,
     "role": "admin",
-    "rights": [ {
+    "rights": [
+      {
         "territory": "T0",
         "mode": "admin"
-      }]
+      }
+    ]
   },
   {
     "id": "102",
@@ -162,10 +147,12 @@
     },
     "bookmarks": null,
     "role": "admin",
-    "rights": [ {
+    "rights": [
+      {
         "territory": "T0",
         "mode": "admin"
-      }]
+      }
+    ]
   },
   {
     "id": "103",
@@ -180,9 +167,11 @@
     },
     "bookmarks": null,
     "role": "admin",
-    "rights": [ {
+    "rights": [
+      {
         "territory": "T0",
         "mode": "admin"
-      }]
+      }
+    ]
   }
 ]

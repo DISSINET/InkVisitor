@@ -4,7 +4,7 @@ import React, { ReactNode } from "react";
 import { PopupPosition } from "reactjs-popup/dist/types";
 import { DragItem } from "types";
 
-interface IEntityTag {
+interface EntityTag {
   actant: IEntity;
   tooltipText?: string;
   parentId?: string;
@@ -24,7 +24,7 @@ interface IEntityTag {
   isFavorited?: boolean;
 }
 
-export const EntityTag: React.FC<IEntityTag> = ({
+export const EntityTag: React.FC<EntityTag> = ({
   actant,
   tooltipText,
   parentId,
@@ -47,7 +47,8 @@ export const EntityTag: React.FC<IEntityTag> = ({
   return (
     <Tag
       propId={actant.id}
-      label={actant.label}
+      label={actant.label || actant.data.text || "no label"}
+      labelItalic={actant.label === ""}
       status={actant.status}
       ltype={actant?.data?.logicalType ?? "1"}
       tooltipDetail={actant.detail}

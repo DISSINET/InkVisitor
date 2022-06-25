@@ -2,11 +2,8 @@
  * type of the /user endpoint response
  */
 
-import { EntityClass, EntityLogicalType } from "../enums";
+import { IResponseEntity } from ".";
 
-export interface IResponseSearch {
-  class: EntityClass;
-  entityId: string;
-  entityLabel: string;
-  logicalType?: EntityLogicalType;
+export interface IResponseSearch extends IResponseEntity {
+  // tbd
 }

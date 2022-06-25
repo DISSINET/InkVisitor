@@ -19,16 +19,25 @@ import {
   Virtuality,
 } from "@shared/enums";
 import React from "react";
-import { AttributeData, AttributeName, GroupName } from "types";
+import {
+  AttributeData,
+  PropAttributeGroup,
+  PropAttributeName,
+  PropAttributeFilter,
+} from "types";
 import { AttributeRow } from "./AttributeRow/AttributeRow";
+import { StyledAttributeTable } from "./AttributesEditorStyles";
 import { CheckboxRow } from "./CheckboxRow/CheckboxRow";
 
 interface AttributesForm {
-  groupName?: GroupName;
+  groupName?: PropAttributeGroup;
   modalData: AttributeData;
-  disabledAttributes?: AttributeName[];
+  disabledAttributes?: PropAttributeName[];
   disabledAllAttributes?: boolean;
-  setNewModalData: (newModalData: AttributeData, groupName?: GroupName) => void;
+  setNewModalData: (
+    newModalData: AttributeData,
+    groupName?: PropAttributeGroup
+  ) => void;
 }
 export const AttributesForm: React.FC<AttributesForm> = ({
   groupName,
@@ -38,7 +47,7 @@ export const AttributesForm: React.FC<AttributesForm> = ({
   setNewModalData,
 }) => {
   const handleDataChange = (
-    attributeName: AttributeName,
+    attributeName: PropAttributeName,
     newValue:
       | Certainty
       | Elvl
@@ -49,7 +58,7 @@ export const AttributesForm: React.FC<AttributesForm> = ({
       | Partitivity
       | Operator
       | boolean,
-    groupName?: GroupName
+    groupName?: PropAttributeGroup
   ) => {
     const newModalData = { ...modalData };
 
@@ -89,7 +98,7 @@ export const AttributesForm: React.FC<AttributesForm> = ({
   };
 
   return (
-    <div>
+    <StyledAttributeTable>
       {modalData.elvl && (
         <AttributeRow
           disabled={
@@ -230,6 +239,6 @@ export const AttributesForm: React.FC<AttributesForm> = ({
           }}
         ></AttributeRow>
       )}
-    </div>
+    </StyledAttributeTable>
   );
 };

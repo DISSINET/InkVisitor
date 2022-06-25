@@ -12,7 +12,8 @@ import { setDraggedPropRow } from "redux/features/rowDnd/draggedPropRowSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { excludedSuggesterEntities } from "Theme/constants";
 import {
-  AttributeGroupDataObject,
+  PropAttributeFilter,
+  PropAttributeGroupDataObject,
   classesPropType,
   classesPropValue,
   DraggedPropRowCategory,
@@ -30,7 +31,7 @@ import {
   StyledPropLineColumn,
 } from "../PropGroupStyles";
 
-interface IPropGroupRow {
+interface PropGroupRow {
   prop: IProp;
   entities: { [key: string]: IEntity };
   level: 1 | 2 | 3;
@@ -50,9 +51,11 @@ interface IPropGroupRow {
   index: number;
   itemType?: ItemTypes;
   category: DraggedPropRowCategory;
+
+  disabledAttributes?: PropAttributeFilter;
 }
 
-export const PropGroupRow: React.FC<IPropGroupRow> = ({
+export const PropGroupRow: React.FC<PropGroupRow> = ({
   prop,
   entities,
   level,
@@ -69,6 +72,7 @@ export const PropGroupRow: React.FC<IPropGroupRow> = ({
   index,
   itemType,
   category,
+  disabledAttributes = {} as PropAttributeFilter,
 }) => {
   const propTypeEntity: IEntity = entities[prop.type.id];
   const propValueEntity: IEntity = entities[prop.value.id];
@@ -271,6 +275,7 @@ export const PropGroupRow: React.FC<IPropGroupRow> = ({
               modalOpen={modalOpen}
               setModalOpen={setModalOpen}
               disabledAllAttributes={!userCanEdit}
+              disabledAttributes={disabledAttributes}
               propTypeActant={propTypeEntity}
               propValueActant={propValueEntity}
               excludedSuggesterEntities={excludedSuggesterEntities}
@@ -302,7 +307,7 @@ export const PropGroupRow: React.FC<IPropGroupRow> = ({
                   partitivity: prop.value.partitivity,
                 },
               }}
-              handleUpdate={(newData: AttributeGroupDataObject) => {
+              handleUpdate={(newData: PropAttributeGroupDataObject) => {
                 const newDataObject = {
                   ...newData.statement,
                   ...newData,

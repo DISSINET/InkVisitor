@@ -1,5 +1,9 @@
+import Acl from "@middlewares/acl";
+import { Db } from "@service/RethinkDB";
+import { IUser } from "@shared/types";
 import "ts-jest";
 import { fillArray, fillFlatObject } from "./common";
+import User from "./user/user";
 
 class CustomClass {
   somevar = "initial";

@@ -41,9 +41,9 @@ interface Dropdown {
   entityDropdown?: boolean;
   onFocus?: () => void;
   onBlur?: () => void;
+  autoFocus?: boolean;
   disableTyping?: boolean;
   suggester?: boolean;
-  oneLetter?: boolean;
   allowAny?: boolean;
 }
 export const Dropdown: React.FC<Dropdown> = ({
@@ -65,6 +65,7 @@ export const Dropdown: React.FC<Dropdown> = ({
   entityDropdown = false,
   onFocus = () => {},
   onBlur = () => {},
+  autoFocus = false,
   disableTyping = false,
   suggester = false,
   allowAny = false,
@@ -82,6 +83,7 @@ export const Dropdown: React.FC<Dropdown> = ({
       <StyledSelect
         suggester={suggester}
         onFocus={onFocus}
+        autoFocus={autoFocus}
         onBlur={onBlur}
         isMulti={isMulti}
         isDisabled={disabled || isOneOptionSingleSelect}
@@ -92,6 +94,7 @@ export const Dropdown: React.FC<Dropdown> = ({
         placeholder={placeholder}
         noOptionsMessage={noOptionsMessage}
         isClearable={isClearable}
+        captureMenuScroll={false}
         components={{
           components,
           Option,

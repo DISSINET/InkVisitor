@@ -59,7 +59,6 @@ export const AuditTableRow: React.FC<IAuditTableRow> = ({
     },
     {
       enabled: !!user,
-      retry: 2,
     }
   );
 
@@ -75,6 +74,7 @@ export const AuditTableRow: React.FC<IAuditTableRow> = ({
       return "today";
     } else {
       const newDate = new Date(date);
+      // TODO: use toLocaleString
       return `${newDate.getFullYear()}-${
         newDate.getMonth() + 1
       }-${newDate.getDate()}`;

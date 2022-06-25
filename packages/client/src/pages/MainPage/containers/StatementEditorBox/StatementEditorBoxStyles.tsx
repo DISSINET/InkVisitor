@@ -175,29 +175,22 @@ export const StyledBreadcrumbWrap = styled.div`
   position: relative;
 `;
 
-export const StyledSubRow = styled.div`
-  display: table-row;
-  width: 100%;
-  padding: ${({ theme }) => theme.space[2]};
-  border-left-color: ${({ theme }) => theme.color["gray"][800]};
-  margin-left: ${({ theme }) => `${theme.space[10]}`};
-  margin-bottom: ${({ theme }) => `${theme.space[2]}`};
-`;
-
 export const StyledEditorStatementInfo = styled.div`
   display: inline-flex;
+  flex-wrap: wrap;
   align-items: center;
-  margin-bottom: ${({ theme }) => theme.space[4]};
+  overflow: hidden;
+  max-width: 100%;
+  margin-bottom: ${({ theme }) => theme.space[2]};
 `;
 export const StyledEditorStatementInfoLabel = styled.div`
-  margin-left: ${({ theme }) => theme.space[4]};
+  display: flex;
+  align-items: center;
   margin-right: ${({ theme }) => theme.space[1]};
+  margin-bottom: ${({ theme }) => theme.space[2]};
 `;
 
-export const StyledEditorContentRow = styled.div`
-  /* class: row; */
-  /* display: flex; */
-`;
+export const StyledEditorContentRow = styled.div``;
 export const StyledEditorContentRowLabel = styled.div`
   float: left;
   color: ${({ theme }) => theme.color["info"]};
@@ -239,4 +232,13 @@ export const StyledEditorTemplateSection = styled.div`
       padding: ${({ theme }) => theme.space[2]};
     }
   }
+`;
+export const StyledHeaderTagWrap = styled.div`
+  display: inline-flex;
+  overflow: hidden;
+  margin-bottom: ${({ theme }) => theme.space[2]};
+  margin-right: ${({ theme }) => theme.space[3]};
+`;
+export const StyledEditorHeaderInputWrap = styled.div`
+  margin-bottom: ${({ theme }) => theme.space[2]};
 `;

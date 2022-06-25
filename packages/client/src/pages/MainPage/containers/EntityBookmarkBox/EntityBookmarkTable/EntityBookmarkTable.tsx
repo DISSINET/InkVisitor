@@ -5,15 +5,15 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { FaUnlink } from "react-icons/fa";
 import { Cell, Column, Row, useTable } from "react-table";
 import { EntityTag } from "../..";
-import { EntityBookmarkFolderTableRow } from "./EntityBookmarkFolderTableRow";
-import { StyledTable } from "./EntityBookmarkFolderTableStyles";
+import { EntityBookmarkTableRow } from "./EntityBookmarkTableRow";
+import { StyledTable, StyledTagWrap } from "./EntityBookmarkTableStyles";
 
-interface EntityBookmarkFolderTable {
+interface EntityBookmarkTable {
   folder: IResponseBookmarkFolder;
   updateFolderEntitys: any;
   removeBookmark: Function;
 }
-export const EntityBookmarkFolderTable: React.FC<EntityBookmarkFolderTable> = ({
+export const EntityBookmarkTable: React.FC<EntityBookmarkTable> = ({
   folder,
   updateFolderEntitys,
   removeBookmark,
@@ -37,22 +37,25 @@ export const EntityBookmarkFolderTable: React.FC<EntityBookmarkFolderTable> = ({
           const entity = row.original as IEntity;
 
           return (
-            <EntityTag
-              actant={entity as IEntity}
-              tooltipPosition="left center"
-              button={
-                <Button
-                  key="d"
-                  icon={<FaUnlink />}
-                  color="plain"
-                  inverted
-                  tooltip="unlink Entity"
-                  onClick={() => {
-                    removeBookmark(folder.id, entity.id);
-                  }}
-                />
-              }
-            />
+            <StyledTagWrap>
+              <EntityTag
+                actant={entity as IEntity}
+                tooltipPosition="left center"
+                fullWidth
+                button={
+                  <Button
+                    key="d"
+                    icon={<FaUnlink />}
+                    color="plain"
+                    inverted
+                    tooltip="unlink Entity"
+                    onClick={() => {
+                      removeBookmark(folder.id, entity.id);
+                    }}
+                  />
+                }
+              />
+            </StyledTagWrap>
           );
         },
       },
@@ -107,7 +110,7 @@ export const EntityBookmarkFolderTable: React.FC<EntityBookmarkFolderTable> = ({
         {rows.map((row: Row, i: number) => {
           prepareRow(row);
           return (
-            <EntityBookmarkFolderTableRow
+            <EntityBookmarkTableRow
               index={i}
               row={row}
               folder={folder}
