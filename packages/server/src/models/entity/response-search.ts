@@ -12,6 +12,8 @@ import { getEntityClass } from "@models/factory";
  * SearchQuery is customized builder for search queries, allowing to build query by chaining prepared filters
  */
 export class SearchQuery {
+  usedLabel?: string;
+
   connection: Connection;
   query: RTable<any>;
 
@@ -116,6 +118,8 @@ export class SearchQuery {
       rightWildcard = "";
       label = label.slice(0, -1);
     }
+
+    this.usedLabel = label;
 
     // escape problematic chars - messes with regexp search
     label = regExpEscape(label.toLowerCase());
@@ -251,13 +255,48 @@ export class ResponseSearch {
   async prepare(httpRequest: Request): Promise<void> {
     const query = new SearchQuery(httpRequest.db.connection);
     await query.fromRequest(this.request);
-    const entities = await query.do();
+    const entities = this.sort(await query.do(), query.usedLabel);
 
     for (const entityData of entities) {
       const response = new ResponseEntity(getEntityClass(entityData));
       await response.prepare(httpRequest);
       this.responses.push(response);
     }
+  }
+
+  /**
+   * Sort retrieved entities by label distance or length of the entity label.
+   * In case of empty label only the latter will be used (distance will be 0).
+   * @param entities
+   * @param label
+   * @returns
+   */
+  sort(entities: IEntity[], label: string = ""): IEntity[] {
+    const indexMap: Record<number, IEntity[]> = {};
+
+    // sort by distance from the start
+    entities.forEach((e) => {
+      let index = e.label.indexOf(label);
+      if (index === -1) {
+        index = 99999;
+      }
+      if (!indexMap[index]) {
+        indexMap[index] = [];
+      }
+      indexMap[index].push(e);
+    });
+
+    let out: IEntity[] = [];
+    const sortedDistances = Object.keys(indexMap)
+      .map((d) => parseInt(d))
+      .sort((a, b) => a - b);
+
+    for (const key of sortedDistances) {
+      indexMap[key].sort((a, b) => a.label.length - b.label.length);
+      out = out.concat(indexMap[key]);
+    }
+
+    return out;
   }
 
   /**
