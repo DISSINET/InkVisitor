@@ -62,14 +62,16 @@ export const EntityReferenceTableRow: React.FC<EntityReferenceTableRow> = ({
           </StyledTagWrapper>
         ) : (
           !disabled && (
-            <EntitySuggester
-              openDetailOnCreate={openDetailOnCreate}
-              territoryActants={[]}
-              onSelected={(newSelectedId: string) => {
-                handleChangeResource(reference.id, newSelectedId);
-              }}
-              categoryTypes={[EntityClass.Resource]}
-            />
+            <div>
+              <EntitySuggester
+                openDetailOnCreate={openDetailOnCreate}
+                territoryActants={[]}
+                onSelected={(newSelectedId: string) => {
+                  handleChangeResource(reference.id, newSelectedId);
+                }}
+                categoryTypes={[EntityClass.Resource]}
+              />
+            </div>
           )
         )}
       </StyledReferencesListColumn>
@@ -104,14 +106,16 @@ export const EntityReferenceTableRow: React.FC<EntityReferenceTableRow> = ({
           </StyledTagWrapper>
         ) : (
           !disabled && (
-            <EntitySuggester
-              openDetailOnCreate={openDetailOnCreate}
-              territoryActants={[]}
-              onSelected={(newSelectedId: string) => {
-                handleChangeValue(reference.id, newSelectedId);
-              }}
-              categoryTypes={[EntityClass.Value]}
-            />
+            <div>
+              <EntitySuggester
+                openDetailOnCreate={openDetailOnCreate}
+                territoryActants={[]}
+                onSelected={(newSelectedId: string) => {
+                  handleChangeValue(reference.id, newSelectedId);
+                }}
+                categoryTypes={[EntityClass.Value]}
+              />
+            </div>
           )
         )}
       </StyledReferencesListColumn>

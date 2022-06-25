@@ -230,6 +230,7 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
     }
   }, [draggedTerritory]);
 
+  // TODO: move to useCallback with all dependencies!
   const renderTerritoryTag = (
     territoryActant: IEntity,
     id: string,

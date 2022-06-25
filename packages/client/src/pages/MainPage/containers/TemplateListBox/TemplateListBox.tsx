@@ -14,8 +14,9 @@ import {
   ModalInputForm,
   ModalInputLabel,
   ModalInputWrap,
+  TypeBar,
 } from "components";
-import { StyledTypeBar } from "components/Suggester/SuggesterStyles";
+
 import { CEntity, CStatement } from "constructors";
 import { useSearchParams } from "hooks";
 import React, { useMemo, useState } from "react";
@@ -64,11 +65,8 @@ export const TemplateListBox: React.FC<TemplateListBox> = ({}) => {
       if (filterByClass.value !== "all") {
         filters["class"] = filterByClass.value;
       }
-      if (filterByLabel) {
-        filters["label"] = "*" + filterByLabel + "*";
-      }
 
-      const res = await api.entitiesGetMore(filters);
+      const res = await api.entitiesSearch(filters);
 
       const templates = res.data;
       templates.sort((a: IEntity, b: IEntity) =>
@@ -192,7 +190,7 @@ export const TemplateListBox: React.FC<TemplateListBox> = ({}) => {
   };
   const handleCreateNewEntityTemplate = () => {
     const newTemplate = CEntity(
-      EntityClass.Person,
+      createModalEntityClass.value as EntityClass,
       createModalEntityLabel,
       localStorage.getItem("userrole") as UserRole,
       createModalEntityDetail
@@ -222,20 +220,22 @@ export const TemplateListBox: React.FC<TemplateListBox> = ({}) => {
               {"Entity class: "}
             </StyledTemplateFilterInputLabel>
             <StyledTemplateFilterInputValue>
-              <Dropdown
-                value={{
-                  label: filterByClass.label,
-                  value: filterByClass.value,
-                }}
-                options={allEntityOptions}
-                onChange={(option: ValueType<OptionTypeBase, any>) => {
-                  setFilterByClass(option as DropdownItem);
-                }}
-                width={80}
-                entityDropdown
-                disableTyping
-                oneLetter
-              />
+              <div style={{ position: "relative" }}>
+                <Dropdown
+                  value={{
+                    label: filterByClass.label,
+                    value: filterByClass.value,
+                  }}
+                  options={allEntityOptions}
+                  onChange={(option: ValueType<OptionTypeBase, any>) => {
+                    setFilterByClass(option as DropdownItem);
+                  }}
+                  width={80}
+                  entityDropdown
+                  disableTyping
+                />
+                <TypeBar entityLetter={filterByClass.value} />
+              </div>
             </StyledTemplateFilterInputValue>
           </StyledTemplateFilterInputRow>
           <StyledTemplateFilterInputRow>
@@ -292,51 +292,48 @@ export const TemplateListBox: React.FC<TemplateListBox> = ({}) => {
       >
         <ModalHeader title="Create Template" />
         <ModalContent>
-          <StyledContent>
-            <ModalInputForm>
-              <ModalInputLabel>{"Entity type: "}</ModalInputLabel>
-              <ModalInputWrap>
-                <Dropdown
-                  value={{
-                    label: createModalEntityClass.label,
-                    value: createModalEntityClass.value,
-                  }}
-                  options={entitiesDict}
-                  onChange={(option: ValueType<OptionTypeBase, any>) => {
-                    setCreateModalEntityClass(option as DropdownItem);
-                  }}
-                  width={80}
-                  entityDropdown
-                  disableTyping
-                  oneLetter
-                />
-                <StyledTypeBar
-                  entity={`entity${createModalEntityClass.value}`}
-                ></StyledTypeBar>
-              </ModalInputWrap>
-              <ModalInputLabel>{"Label: "}</ModalInputLabel>
-              <ModalInputWrap>
-                <Input
-                  value={createModalEntityLabel}
-                  onChangeFn={(newType: string) =>
-                    setCreateModalEntityLabel(newType)
-                  }
-                  changeOnType
-                  autoFocus
-                />
-              </ModalInputWrap>
-              <ModalInputLabel>{"Detail: "}</ModalInputLabel>
-              <ModalInputWrap>
-                <Input
-                  value={createModalEntityDetail}
-                  onChangeFn={(newType: string) =>
-                    setCreateModalEntityDetail(newType)
-                  }
-                  changeOnType
-                />
-              </ModalInputWrap>
-            </ModalInputForm>
-          </StyledContent>
+          {/* <StyledContent> */}
+          <ModalInputForm>
+            <ModalInputLabel>{"Entity type: "}</ModalInputLabel>
+            <ModalInputWrap>
+              <Dropdown
+                value={{
+                  label: createModalEntityClass.label,
+                  value: createModalEntityClass.value,
+                }}
+                options={entitiesDict}
+                onChange={(option: ValueType<OptionTypeBase, any>) => {
+                  setCreateModalEntityClass(option as DropdownItem);
+                }}
+                width={80}
+                entityDropdown
+                disableTyping
+              />
+              <TypeBar entityLetter={createModalEntityClass.value} />
+            </ModalInputWrap>
+            <ModalInputLabel>{"Label: "}</ModalInputLabel>
+            <ModalInputWrap>
+              <Input
+                value={createModalEntityLabel}
+                onChangeFn={(newType: string) =>
+                  setCreateModalEntityLabel(newType)
+                }
+                changeOnType
+                autoFocus
+              />
+            </ModalInputWrap>
+            <ModalInputLabel>{"Detail: "}</ModalInputLabel>
+            <ModalInputWrap>
+              <Input
+                value={createModalEntityDetail}
+                onChangeFn={(newType: string) =>
+                  setCreateModalEntityDetail(newType)
+                }
+                changeOnType
+              />
+            </ModalInputWrap>
+          </ModalInputForm>
+          {/* </StyledContent> */}
         </ModalContent>
         <ModalFooter>
           <ButtonGroup>
@@ -403,3 +400,5 @@ export const TemplateListBox: React.FC<TemplateListBox> = ({}) => {
     </StyledBoxContent>
   );
 };
+
+export const MemoizedTemplateListBox = React.memo(TemplateListBox);

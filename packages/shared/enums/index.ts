@@ -64,7 +64,7 @@ export enum EntityStatus {
 }
 
 export enum Certainty {
-  Empty = "0", // this is not used in dicts (@see ../disctionaries/certainty.ts)
+  Empty = "0",
   Certain = "1",
   AlmostCertain = "2",
   Probable = "3",
@@ -83,7 +83,7 @@ export enum Position {
   Subject = "s",
   Actant1 = "a1",
   Actant2 = "a2",
-  PseudoActant = "p",
+  PseudoActant = "pa",
 }
 
 export enum UsedInPosition {

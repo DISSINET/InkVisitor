@@ -29,6 +29,8 @@ import {
 import { useMutation, useQuery, useQueryClient } from "react-query";
 import { Cell, Column } from "react-table";
 import { toast } from "react-toastify";
+import { setRowsExpanded } from "redux/features/statementList/rowsExpandedSlice";
+import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { EntityTag } from "./../";
 import { StatementListContextMenu } from "./StatementListContextMenu/StatementListContextMenu";
 import { StatementListHeader } from "./StatementListHeader/StatementListHeader";
@@ -52,6 +54,11 @@ const initialData: {
 export const StatementListBox: React.FC = () => {
   const queryClient = useQueryClient();
 
+  const dispatch = useAppDispatch();
+  const rowsExpanded: { [key: string]: boolean } = useAppSelector(
+    (state) => state.statementList.rowsExpanded
+  );
+
   const { territoryId, setTerritoryId, statementId, setStatementId } =
     useSearchParams();
 
@@ -66,9 +73,10 @@ export const StatementListBox: React.FC = () => {
     },
     {
       enabled: !!territoryId && api.isLoggedIn(),
-      retry: 2,
     }
   );
+
+  const { statements, entities } = data || initialData;
 
   const { data: audits, isFetching: isFetchingAudits } = useQuery(
     ["territory", "statement-list", "audits", territoryId],
@@ -78,9 +86,16 @@ export const StatementListBox: React.FC = () => {
     },
     {
       enabled: !!territoryId && api.isLoggedIn(),
-      retry: 2,
     }
   );
+
+  useEffect(() => {
+    if (statements.length !== Object.keys(rowsExpanded).length) {
+      const arrayWithIds = statements.map((s, key) => [s.id, false]);
+      const arrayWithKeys = Object.fromEntries(arrayWithIds);
+      dispatch(setRowsExpanded(arrayWithKeys));
+    }
+  }, [statements, rowsExpanded]);
 
   const userId = localStorage.getItem("userid");
   const {
@@ -132,7 +147,10 @@ export const StatementListBox: React.FC = () => {
   const duplicateStatement = (statementToDuplicate: IResponseStatement) => {
     const { ...newStatementObject } = statementToDuplicate;
 
-    const duplicatedStatement = DStatement(newStatementObject as IStatement);
+    const duplicatedStatement = DStatement(
+      newStatementObject as IStatement,
+      localStorage.getItem("userrole") as UserRole
+    );
     duplicateStatementMutation.mutate(duplicatedStatement);
   };
 
@@ -224,8 +242,6 @@ export const StatementListBox: React.FC = () => {
       actantsCreateMutation.mutate(newStatement);
     }
   };
-
-  const { statements, entities } = data || initialData;
 
   const moveEndRow = async (statementToMove: IStatement, index: number) => {
     // return if order don't change
@@ -378,7 +394,7 @@ export const StatementListBox: React.FC = () => {
       {
         Header: "Actions",
         Cell: ({ row }: Cell) => {
-          const actionIds = row.values.data?.actants
+          const actionIds = row.values.data?.actions
             ? row.values.data.actions.map((a: any) => a.action)
             : [];
 
@@ -554,10 +570,14 @@ export const StatementListBox: React.FC = () => {
                 }}
                 onClick={(e: React.MouseEvent) => {
                   e.stopPropagation();
-                  row.toggleRowExpanded();
+                  const newObject = {
+                    ...rowsExpanded,
+                    [row.values.id]: !rowsExpanded[row.values.id],
+                  };
+                  dispatch(setRowsExpanded(newObject));
                 }}
               >
-                {row.isExpanded ? (
+                {rowsExpanded[row.values.id] ? (
                   <FaChevronCircleUp />
                 ) : (
                   <FaChevronCircleDown />
@@ -568,7 +588,7 @@ export const StatementListBox: React.FC = () => {
         },
       },
     ];
-  }, [data, statementId]);
+  }, [data, statementId, rowsExpanded]);
 
   statements.sort((a, b) =>
     a.data.territory && b.data.territory
@@ -652,3 +672,5 @@ export const StatementListBox: React.FC = () => {
     </>
   );
 };
+
+export const MemoizedStatementListBox = React.memo(StatementListBox);

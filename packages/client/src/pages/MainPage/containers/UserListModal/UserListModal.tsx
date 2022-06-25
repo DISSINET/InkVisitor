@@ -13,6 +13,7 @@ import {
   ModalHeader,
   Submit,
 } from "components";
+import { StyledInputWrapper } from "components/Suggester/SuggesterStyles";
 import React, { useCallback, useMemo, useState } from "react";
 import { FaKey, FaPlus, FaTrashAlt, FaUnlink } from "react-icons/fa";
 import {
@@ -53,6 +54,7 @@ export const UserListModal: React.FC<UserListModal> = ({
 }) => {
   const [newUserName, setNewUserName] = useState<string>("");
   const [newUserEmail, setNewUserEmail] = useState<string>("");
+  const [testEmail, setTestEmail] = useState<string>("");
 
   const [removingUserId, setRemovingUserId] = useState<false | string>("");
 
@@ -277,7 +279,7 @@ export const UserListModal: React.FC<UserListModal> = ({
               {userRole !== UserRole.Admin ? (
                 <React.Fragment>
                   <EntitySuggester
-                    allowCreate={false}
+                    disableCreate
                     onSelected={(newSelectedId: string) => {
                       addRightToUser(userId, newSelectedId, "read");
                     }}
@@ -353,7 +355,7 @@ export const UserListModal: React.FC<UserListModal> = ({
                 userRole === UserRole.Editor ? (
                   <React.Fragment>
                     <EntitySuggester
-                      allowCreate={false}
+                      disableCreate
                       onSelected={(newSelectedId: string) => {
                         addRightToUser(userId, newSelectedId, "write");
                       }}
@@ -548,6 +550,25 @@ export const UserListModal: React.FC<UserListModal> = ({
           />
         </StyledUserEditorForm>
         <ButtonGroup>
+          <Input
+            width={200}
+            value={testEmail}
+            placeholder="test email"
+            changeOnType
+            onChangeFn={async (newValue: string) => {
+              setTestEmail(newValue);
+            }}
+          />
+          <Button
+            tooltip="Test email will be sent to your email"
+            color="primary"
+            label="test email"
+            onClick={() =>
+              api.testEmail(testEmail).then((data) => {
+                toast.success(data.data.message);
+              })
+            }
+          />
           <Button
             key="close"
             label="Close"

@@ -5,5 +5,5 @@ interface EmptyTag {
   label: string;
 }
 export const EmptyTag: React.FC<EmptyTag> = ({ label }) => {
-  return <Tag propId={label} label={label} disableTooltip />;
+  return <Tag propId={label} label={label} disableTooltip disableDoubleClick />;
 };

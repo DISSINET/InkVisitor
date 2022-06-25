@@ -5,7 +5,6 @@ import { Box, Button, Footer, Header, Toast } from "components";
 import React, { useState } from "react";
 import { useQuery } from "react-query";
 import { toast } from "react-toastify";
-import { setAuthToken } from "redux/features/authTokenSlice";
 import { setUsername } from "redux/features/usernameSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { heightFooter, heightHeader } from "Theme/constants";
@@ -52,7 +51,6 @@ const AclPage: React.FC<AclPage> = ({ size }) => {
   const handleLogOut = () => {
     api.signOut();
     dispatch(setUsername(""));
-    dispatch(setAuthToken(""));
     toast.success("You've been successfully logged out!");
   };
 

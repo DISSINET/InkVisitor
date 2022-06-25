@@ -4,7 +4,6 @@ export const StyledTable = styled.table`
   /* width: 100%; */
   border-spacing: 0;
   border-collapse: collapse;
-  margin-bottom: ${({ theme }) => theme.space[4]};
 `;
 export const StyledTHead = styled.thead`
   font-size: ${({ theme }) => theme.fontSize["sm"]};
@@ -38,14 +37,6 @@ export const StyledTd = styled.td`
   padding-left: 0;
   font-size: ${({ theme }) => theme.fontSize["sm"]};
 `;
-
-export const StyledSubRow = styled.div`
-  width: 100%;
-  padding: ${({ theme }) => theme.space[2]};
-  background-color: ${({ theme }) => theme.color["blue"][50]};
-`;
-
-export const StyledPipe = styled.div`
-  height: ${({ theme }) => theme.space[8]};
-  border-left: 1px dashed black;
+export const StyledTagWrap = styled.div`
+  display: grid;
 `;

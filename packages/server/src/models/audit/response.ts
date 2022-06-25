@@ -13,6 +13,12 @@ export class ResponseAudit implements IResponseAudit {
     this.last = [];
   }
 
+  /**
+   * Retrieves N audits for entity, ordered by date DESC (last N items)
+   * @param dbConn rethinkdb Connection
+   * @param n limit for returned entries
+   * @returns Promise<void>
+   */
   async getLastNForEntity(dbConn: Connection, n: number = 5): Promise<void> {
     const result = await rethink
       .table(Audit.table)
@@ -29,6 +35,12 @@ export class ResponseAudit implements IResponseAudit {
     this.last = result.map((r) => new Audit(r));
   }
 
+  /**
+   * Retrieves first created audit entry for entity.
+   * First audit entry stands for created-at entry.
+   * @param db rethinkdb Connection
+   * @returns Promise<void>
+   */
   async getFirstForEntity(db: Connection): Promise<void> {
     const result = await rethink
       .table(Audit.table)

@@ -56,7 +56,6 @@ export const StyledPropLineColumn = styled.div<StyledPropLineColumn>`
   margin-left: ${({ level = 0 }) => getIndentation(level)};
   padding-right: 3px;
   overflow: ${({ isTag }) => (isTag ? "hidden" : "visible")};
-  /* border: 1px dashed hotpink; */
 `;
 
 interface StyledPropButtonGroup {
