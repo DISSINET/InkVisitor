@@ -15,7 +15,7 @@ describe("Users delete", function () {
   describe("empty data", () => {
     it("should return a BadParams error wrapped in IResponseGeneric", (done) => {
       return request(app)
-        .delete(`${apiPath}/users/delete`)
+        .delete(`${apiPath}/users`)
         .set("authorization", "Bearer " + supertestConfig.token)
         .expect("Content-Type", /json/)
         .expect(testErroneousResponse.bind(undefined, new BadParams("")))
@@ -25,7 +25,7 @@ describe("Users delete", function () {
   describe("faulty data", () => {
     it("should return a 200 code with unsuccessful message", (done) => {
       return request(app)
-        .delete(`${apiPath}/users/delete/randomid12345`)
+        .delete(`${apiPath}/users/randomid12345`)
         .set("authorization", "Bearer " + supertestConfig.token)
         .expect("Content-Type", /json/)
         .expect(
@@ -44,7 +44,7 @@ describe("Users delete", function () {
       await user.save(db.connection);
 
       request(app)
-        .delete(`${apiPath}/users/delete/${testUserId}`)
+        .delete(`${apiPath}/users/${testUserId}`)
         .set("authorization", "Bearer " + supertestConfig.token)
         .expect("Content-Type", /json/)
         .expect(successfulGenericResponse)

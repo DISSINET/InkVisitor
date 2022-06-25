@@ -7,7 +7,7 @@ import EntitiesRouter from "@modules/entities";
 import AuditsRouter from "@modules/audits";
 import TerritoriesRouter from "@modules/territories";
 import UsersRouter from "@modules/users";
-import AclRouter from "@modules/acl";
+import AclRouter from "@modules/acls";
 import StatementsRouter from "@modules/statements";
 import TreeRouter from "@modules/tree";
 import StatsRouter from "@modules/stats";

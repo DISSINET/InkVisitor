@@ -211,7 +211,7 @@ class Api {
 
   async usersGet(userId: string): Promise<AxiosResponse<IResponseUser>> {
     try {
-      const response = await this.connection.get(`/users/get/${userId}`);
+      const response = await this.connection.get(`/users/${userId}`);
       return response;
     } catch (err: any | AxiosError) {
       throw { ...err.response.data };
@@ -222,7 +222,9 @@ class Api {
     filters: IFilterUsers
   ): Promise<AxiosResponse<IResponseUser[]>> {
     try {
-      const response = await this.connection.post(`/users/getMore`, filters);
+      const response = await this.connection.get(
+        `/users?label=${filters.label}`
+      );
       return response;
     } catch (err: any | AxiosError) {
       throw { ...err.response.data };
@@ -234,7 +236,7 @@ class Api {
     email: string;
   }): Promise<AxiosResponse<IResponseGeneric>> {
     try {
-      const response = await this.connection.post(`/users/create`, userData);
+      const response = await this.connection.post(`/users`, userData);
       return response;
     } catch (err: any | AxiosError) {
       throw { ...err.response.data };
@@ -242,14 +244,11 @@ class Api {
   }
 
   async usersUpdate(
-    userId: string | false,
+    userId: string,
     changes: object
   ): Promise<AxiosResponse<IResponseGeneric>> {
     try {
-      const response = await this.connection.put(
-        !!userId ? `/users/${userId}` : "/users/",
-        changes
-      );
+      const response = await this.connection.put(`/users/${userId}`, changes);
       return response;
     } catch (err: any | AxiosError) {
       throw { ...err.response.data };
@@ -258,7 +257,7 @@ class Api {
 
   async usersDelete(userId: string): Promise<AxiosResponse<IResponseGeneric>> {
     try {
-      const response = await this.connection.delete(`/users/delete/${userId}`);
+      const response = await this.connection.delete(`/users/${userId}`);
       return response;
     } catch (err: any | AxiosError) {
       throw { ...err.response.data };
@@ -268,13 +267,11 @@ class Api {
   /*
     This request will restart the password of the user with userId and send the new password to his email address
   */
-  async restartPassword(
+  async resetPassword(
     userId: string
   ): Promise<AxiosResponse<IResponseGeneric>> {
     try {
-      const response = await this.connection.get(
-        `/users/reset-password/${userId}`
-      );
+      const response = await this.connection.patch(`/users/${userId}/password`);
       return response;
     } catch (err: any | AxiosError) {
       throw { ...err.response.data };
@@ -313,12 +310,10 @@ class Api {
    * Administration container
    */
   async bookmarksGet(
-    userId: string | false
+    userId: string
   ): Promise<AxiosResponse<IResponseBookmarkFolder[]>> {
     try {
-      const response = await this.connection.get(
-        !!userId ? `/users/bookmarks/${userId}` : "/users/bookmarks/"
-      );
+      const response = await this.connection.get(`/users/${userId}/bookmarks`);
       return response;
     } catch (err: any | AxiosError) {
       throw { ...err.response.data };
@@ -331,7 +326,7 @@ class Api {
    */
   async entitiesGet(entityId: string): Promise<AxiosResponse<IResponseEntity>> {
     try {
-      const response = await this.connection.get(`/entities/get/${entityId}`);
+      const response = await this.connection.get(`/entities/${entityId}`);
       return response;
     } catch (err: any | AxiosError) {
       throw { ...err.response.data };
@@ -358,10 +353,7 @@ class Api {
     newEntityData: IEntity
   ): Promise<AxiosResponse<IResponseGeneric>> {
     try {
-      const response = await this.connection.post(
-        `/entities/create`,
-        newEntityData
-      );
+      const response = await this.connection.post(`/entities`, newEntityData);
       return response;
     } catch (err: any | AxiosError) {
       console.log(err);
@@ -375,7 +367,7 @@ class Api {
   ): Promise<AxiosResponse<IResponseGeneric>> {
     try {
       const response = await this.connection.put(
-        `/entities/update/${entityId}`,
+        `/entities/${entityId}`,
         changes
       );
       return response;
@@ -388,9 +380,7 @@ class Api {
     entityId: string
   ): Promise<AxiosResponse<IResponseGeneric>> {
     try {
-      const response = await this.connection.delete(
-        `/entities/delete/${entityId}`
-      );
+      const response = await this.connection.delete(`/entities/${entityId}`);
       return response;
     } catch (err: any | AxiosError) {
       throw { ...err.response.data };
@@ -404,7 +394,7 @@ class Api {
   async detailGet(entityId: string): Promise<AxiosResponse<IResponseDetail>> {
     try {
       const response = await this.connection.get(
-        `/entities/detail/${entityId}`
+        `/entities/${entityId}/detail`
       );
       return response;
     } catch (err: any | AxiosError) {
@@ -418,7 +408,7 @@ class Api {
    */
   async treeGet(): Promise<AxiosResponse<IResponseTree>> {
     try {
-      const response = await this.connection.get(`/tree/get`);
+      const response = await this.connection.get(`/tree`);
       return response;
     } catch (err: any | AxiosError) {
       throw { ...err.response.data };
@@ -432,8 +422,7 @@ class Api {
     newIndex: number
   ): Promise<AxiosResponse<IResponseGeneric>> {
     try {
-      const response = await this.connection.post(`/tree/moveTerritory`, {
-        moveId,
+      const response = await this.connection.patch(`/tree/${moveId}/position`, {
         parentId,
         newIndex,
       });
@@ -451,9 +440,7 @@ class Api {
     territoryId: string
   ): Promise<AxiosResponse<IResponseTerritory>> {
     try {
-      const response = await this.connection.get(
-        `/territories/get/${territoryId}`
-      );
+      const response = await this.connection.get(`/territories/${territoryId}`);
       return response;
     } catch (err: any | AxiosError) {
       throw { ...err.response.data };
@@ -469,25 +456,7 @@ class Api {
   ): Promise<AxiosResponse<string[]>> {
     try {
       const response = await this.connection.get(
-        `/territories/getEntityIds/${territoryId}`
-      );
-      return response;
-    } catch (err: any | AxiosError) {
-      throw { ...err.response.data };
-    }
-  }
-
-  async territoryMoveStatement(
-    moveId: string,
-    newIndex: number
-  ): Promise<AxiosResponse<IResponseGeneric>> {
-    try {
-      const response = await this.connection.post(
-        `/territories/moveStatement`,
-        {
-          moveId,
-          newIndex,
-        }
+        `/territories/${territoryId}/entities`
       );
       return response;
     } catch (err: any | AxiosError) {
@@ -500,7 +469,9 @@ class Api {
    */
   async auditGet(entityId: string): Promise<AxiosResponse<IResponseAudit>> {
     try {
-      const response = await this.connection.get(`/audits/get/${entityId}`);
+      const response = await this.connection.get(
+        `/entities/${entityId}/audits`
+      );
       return response;
     } catch (err: any | AxiosError) {
       throw { ...err.response.data };
@@ -531,9 +502,7 @@ class Api {
     statementId: string
   ): Promise<AxiosResponse<IResponseStatement>> {
     try {
-      const response = await this.connection.get(
-        `/statements/get/${statementId}`
-      );
+      const response = await this.connection.get(`/statements/${statementId}`);
       return response;
     } catch (err: any | AxiosError) {
       throw { ...err.response.data };
@@ -554,10 +523,7 @@ class Api {
     data: RequestPermissionUpdate
   ): Promise<AxiosResponse<IResponseGeneric>> {
     try {
-      const response = await this.connection.put(
-        `/acl/update/${permissionId}`,
-        data
-      );
+      const response = await this.connection.put(`/acls/${permissionId}`, data);
       return response;
     } catch (err: any | AxiosError) {
       throw { ...err.response.data };
