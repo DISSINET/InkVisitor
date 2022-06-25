@@ -278,6 +278,20 @@ class Api {
     }
   }
 
+  /*
+    This request will attempt to send test email to current user's email address
+  */
+  async testEmail(testEmail: string): Promise<AxiosResponse<IResponseGeneric>> {
+    try {
+      const response = await this.connection.get(
+        `/users/me/emails/test?email=${testEmail}`
+      );
+      return response;
+    } catch (err: any | AxiosError) {
+      throw { ...err.response.data };
+    }
+  }
+
   /**
    * Administration
    * Administration container

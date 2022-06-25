@@ -1,7 +1,7 @@
 import api from "api";
 import { SearchParamsProvider } from "hooks/useParamsContext";
 import { useWindowSize } from "hooks/useWindowSize";
-import React, { useEffect } from "react";
+import React, { useEffect, Profiler } from "react";
 import { Helmet } from "react-helmet";
 import { QueryClient, QueryClientProvider } from "react-query";
 import { ReactQueryDevtools } from "react-query/devtools";
@@ -26,9 +26,28 @@ const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       refetchOnWindowFocus: false,
+      retry: false,
     },
   },
 });
+
+const clockPerformance = (
+  profilerId: any,
+  mode: any,
+  actualTime: any,
+  baseTime: any,
+  startTime: any,
+  commitTime: any
+) => {
+  // console.log({
+  //   profilerId,
+  //   mode,
+  //   actualTime,
+  //   baseTime,
+  //   startTime,
+  //   commitTime,
+  // });
+};
 
 export const App: React.FC = () => {
   const [width, height] = useWindowSize();
@@ -99,7 +118,9 @@ export const App: React.FC = () => {
                   path="/"
                   exact
                   render={(props) => (
-                    <MainPage {...props} size={[width, height]} />
+                    <Profiler id="test" onRender={clockPerformance}>
+                      <MainPage {...props} size={[width, height]} />
+                    </Profiler>
                   )}
                 />
                 {api.isLoggedIn() ? (

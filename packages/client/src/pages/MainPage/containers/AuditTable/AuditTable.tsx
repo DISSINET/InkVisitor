@@ -59,7 +59,6 @@ export const AuditTableRow: React.FC<IAuditTableRow> = ({
     },
     {
       enabled: !!user,
-      retry: 2,
     }
   );
 

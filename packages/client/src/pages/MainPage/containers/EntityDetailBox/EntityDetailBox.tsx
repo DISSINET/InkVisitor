@@ -114,7 +114,7 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
       const res = await api.detailGet(detailId);
       return res.data;
     },
-    { enabled: !!detailId && api.isLoggedIn(), retry: 2 }
+    { enabled: !!detailId && api.isLoggedIn() }
   );
 
   const isClassChangeable =
@@ -139,7 +139,7 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
       );
       return templates;
     },
-    { enabled: !!entity && api.isLoggedIn(), retry: 2 }
+    { enabled: !!entity && api.isLoggedIn() }
   );
 
   const templateOptions: DropdownItem[] = useMemo(() => {
@@ -175,7 +175,7 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
       const res = await api.auditGet(detailId);
       return res.data;
     },
-    { enabled: !!detailId && api.isLoggedIn(), retry: 2 }
+    { enabled: !!detailId && api.isLoggedIn() }
   );
 
   // refetch audit when statement changes
@@ -1191,10 +1191,9 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                             "moodvariant",
                             "mood",
                             "bundleOperator",
-                            "certainty",
                           ],
-                          type: ["elvl"],
-                          value: ["elvl"],
+                          type: ["elvl", "logic", "virtuality", "partitivity"],
+                          value: ["elvl", "logic", "virtuality", "partitivity"],
                         } as PropAttributeFilter
                       }
                     />
@@ -1347,3 +1346,5 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
     </>
   );
 };
+
+export const MemoizedEntityDetailBox = React.memo(EntityDetailBox);
