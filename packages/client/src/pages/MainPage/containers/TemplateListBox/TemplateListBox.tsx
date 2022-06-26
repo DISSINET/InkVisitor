@@ -1,7 +1,8 @@
 import { entitiesDict } from "@shared/dictionaries";
 import { EntityClass, UserRole } from "@shared/enums";
 import { IEntity } from "@shared/types";
-import api, { IFilterEntities } from "api";
+import { IRequestSearch } from "@shared/types/request-search";
+import api from "api";
 import {
   Button,
   ButtonGroup,
@@ -59,11 +60,11 @@ export const TemplateListBox: React.FC<TemplateListBox> = ({}) => {
   } = useQuery(
     ["templates", filterByClass, filterByLabel],
     async () => {
-      const filters: IFilterEntities = {
+      const filters: IRequestSearch = {
         onlyTemplates: true,
       };
       if (filterByClass.value !== "all") {
-        filters["class"] = filterByClass.value;
+        filters.class = filterByClass.value as EntityClass;
       }
 
       const res = await api.entitiesSearch(filters);
