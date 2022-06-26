@@ -255,7 +255,10 @@ export class ResponseSearch {
   async prepare(httpRequest: Request): Promise<void> {
     const query = new SearchQuery(httpRequest.db.connection);
     await query.fromRequest(this.request);
-    const entities = this.sortByLength(await query.do());
+    const entities = sortByWordMatch(
+      sortByLength(await query.do()),
+      query.usedLabel
+    );
 
     for (const entityData of entities) {
       const response = new ResponseEntity(getEntityClass(entityData));
@@ -265,54 +268,88 @@ export class ResponseSearch {
   }
 
   /**
-   * Sort retrieved entities by label distance or length of the entity label.
-   * In case of empty label only the latter will be used (distance will be 0).
-   * @param entities
-   * @param label
-   * @returns
-   */
-  sort(entities: IEntity[], label: string = ""): IEntity[] {
-    const indexMap: Record<number, IEntity[]> = {};
-
-    // sort by distance from the start
-    entities.forEach((e) => {
-      let index = e.label.indexOf(label);
-      if (index === -1) {
-        index = 99999;
-      }
-      if (!indexMap[index]) {
-        indexMap[index] = [];
-      }
-      indexMap[index].push(e);
-    });
-
-    let out: IEntity[] = [];
-    const sortedDistances = Object.keys(indexMap)
-      .map((d) => parseInt(d))
-      .sort((a, b) => a - b);
-
-    for (const key of sortedDistances) {
-      indexMap[key].sort((a, b) => a.label.length - b.label.length);
-      out = out.concat(indexMap[key]);
-    }
-
-    return out;
-  }
-
-  /**
-   * Sort entities by length
-   * @param entities
-   * @returns
-   */
-  sortByLength(entities: IEntity[]) {
-    return entities.sort((a, b) => a.label.length - b.label.length);
-  }
-
-  /**
    *
    * @returns returns prepares list of search entities
    */
   getResults(): IResponseSearch[] {
     return this.responses;
   }
+}
+
+/**
+ * DEPRECATED
+ * Sort retrieved entities by label distance or length of the entity label.
+ * In case of empty label only the latter will be used (distance will be 0).
+ * @param entities
+ * @param label
+ * @returns
+ */
+export function sort(entities: IEntity[], label: string = ""): IEntity[] {
+  const indexMap: Record<number, IEntity[]> = {};
+
+  // sort by distance from the start
+  entities.forEach((e) => {
+    let index = e.label.indexOf(label);
+    if (index === -1) {
+      index = 99999;
+    }
+    if (!indexMap[index]) {
+      indexMap[index] = [];
+    }
+    indexMap[index].push(e);
+  });
+
+  let out: IEntity[] = [];
+  const sortedDistances = Object.keys(indexMap)
+    .map((d) => parseInt(d))
+    .sort((a, b) => a - b);
+
+  for (const key of sortedDistances) {
+    indexMap[key].sort((a, b) => a.label.length - b.label.length);
+    out = out.concat(indexMap[key]);
+  }
+
+  return out;
+}
+
+/**
+ * Sort entities by length
+ * @param entities
+ * @returns
+ */
+export function sortByLength(entities: IEntity[]) {
+  return entities.sort((a, b) => a.label.length - b.label.length);
+}
+
+/**
+ * Prioritize entities with exact word-match
+ * @param entities
+ * @param usedLabel
+ * @returns
+ */
+export function sortByWordMatch(
+  entities: IEntity[],
+  usedLabel: string = ""
+): IEntity[] {
+  if (!usedLabel) {
+    return entities;
+  }
+
+  let sortedExact: IEntity[] = [];
+  let sortedSubstring: IEntity[] = [];
+
+  for (const entity of entities) {
+    if (
+      entity.label
+        .toLowerCase()
+        .match(/[\w]+/g)
+        ?.indexOf(usedLabel.toLowerCase()) !== -1
+    ) {
+      sortedExact.push(entity);
+    } else {
+      sortedSubstring.push(entity);
+    }
+  }
+
+  return sortedExact.concat(sortedSubstring);
 }
