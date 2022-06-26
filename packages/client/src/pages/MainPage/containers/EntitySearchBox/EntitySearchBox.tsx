@@ -5,7 +5,8 @@ import {
 } from "@shared/dictionaries/entity";
 import { EntityClass } from "@shared/enums";
 import { IEntity, IOption } from "@shared/types";
-import api, { IFilterEntities } from "api";
+import { IRequestSearch } from "@shared/types/request-search";
+import api from "api";
 import { Button, Dropdown, Input, Loader, TypeBar } from "components";
 import { useDebounce } from "hooks";
 import React, { useMemo, useState } from "react";
@@ -23,7 +24,7 @@ import {
 } from "./EntitySearchBoxStyles";
 import { EntitySearchResults } from "./EntitySearchResults/EntitySearchResults";
 
-const initValues: IFilterEntities = {
+const initValues: IRequestSearch = {
   label: "",
   cooccurrenceId: "",
 };
@@ -39,11 +40,8 @@ export const EntitySearchBox: React.FC = () => {
   const [classOption, setClassOption] = useState<DropdownItem>(defaultOption);
   const [templateOption, setTemplateOption] =
     useState<ValueType<OptionTypeBase, any>>(allEntities);
-  const [searchData, setSearchData] = useState<IFilterEntities>(initValues);
-  const debouncedValues = useDebounce<IFilterEntities>(
-    searchData,
-    debounceTime
-  );
+  const [searchData, setSearchData] = useState<IRequestSearch>(initValues);
+  const debouncedValues = useDebounce<IRequestSearch>(searchData, debounceTime);
 
   // check whether the search should be executed
   const validSearch = useMemo(() => {

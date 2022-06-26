@@ -15,19 +15,10 @@ import {
   RequestPermissionUpdate,
 } from "@shared/types";
 import * as errors from "@shared/types/errors";
+import { IRequestSearch } from "@shared/types/request-search";
 import axios, { AxiosError, AxiosInstance, AxiosResponse } from "axios";
 import React from "react";
 import { toast } from "react-toastify";
-
-export type IFilterEntities = {
-  label?: string;
-  class?: string | false;
-
-  excluded?: EntityClass[];
-  onlyTemplates?: boolean;
-  usedTemplate?: string;
-  cooccurrenceId?: string;
-};
 
 type IFilterUsers = {
   label?: string;
@@ -334,10 +325,10 @@ class Api {
   }
 
   async entitiesSearch(
-    filter: IFilterEntities
+    filter: IRequestSearch
   ): Promise<AxiosResponse<IResponseEntity[]>> {
     try {
-      if (filter.class === false) {
+      if (!filter.class) {
         delete filter.class;
       }
       const response = await this.connection.get(`/entities`, {
