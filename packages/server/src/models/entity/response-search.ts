@@ -255,7 +255,7 @@ export class ResponseSearch {
   async prepare(httpRequest: Request): Promise<void> {
     const query = new SearchQuery(httpRequest.db.connection);
     await query.fromRequest(this.request);
-    const entities = this.sort(await query.do(), query.usedLabel);
+    const entities = this.sortByLength(await query.do());
 
     for (const entityData of entities) {
       const response = new ResponseEntity(getEntityClass(entityData));
@@ -297,6 +297,15 @@ export class ResponseSearch {
     }
 
     return out;
+  }
+
+  /**
+   * Sort entities by length
+   * @param entities
+   * @returns
+   */
+  sortByLength(entities: IEntity[]) {
+    return entities.sort((a, b) => a.label.length - b.label.length);
   }
 
   /**
