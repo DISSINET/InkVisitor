@@ -1,6 +1,6 @@
 import { Request } from "express";
 import { EntityClass } from "@shared/enums";
-import { IEntity, IResponseSearch, RequestSearch } from "@shared/types";
+import { IEntity, RequestSearch } from "@shared/types";
 import { regExpEscape } from "@common/functions";
 import Entity from "./entity";
 import Statement from "@models/statement/statement";
@@ -241,18 +241,16 @@ export class SearchQuery {
 
 export class ResponseSearch {
   request: RequestSearch;
-  responses: IResponseSearch[];
 
   constructor(request: RequestSearch) {
     this.request = request;
-    this.responses = [];
   }
 
   /**
    * Prepares asynchronously results data
    * @param db
    */
-  async prepare(httpRequest: Request): Promise<void> {
+  async prepare(httpRequest: Request): Promise<ResponseEntity[]> {
     const query = new SearchQuery(httpRequest.db.connection);
     await query.fromRequest(this.request);
     const entities = sortByWordMatch(
@@ -260,19 +258,14 @@ export class ResponseSearch {
       query.usedLabel
     );
 
+    let out: ResponseEntity[] = [];
     for (const entityData of entities) {
       const response = new ResponseEntity(getEntityClass(entityData));
       await response.prepare(httpRequest);
-      this.responses.push(response);
+      out.push(response);
     }
-  }
 
-  /**
-   *
-   * @returns returns prepares list of search entities
-   */
-  getResults(): IResponseSearch[] {
-    return this.responses;
+    return out;
   }
 }
 

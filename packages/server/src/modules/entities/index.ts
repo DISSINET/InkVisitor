@@ -8,7 +8,6 @@ import {
   IResponseEntity,
   IResponseDetail,
   IResponseGeneric,
-  IResponseSearch,
   RequestSearch,
 } from "@shared/types";
 import {
@@ -57,7 +56,7 @@ export default Router()
   .get("/:entityId/audits", getAuditByEntityId)
   .get(
     "/",
-    asyncRouteHandler<IResponseSearch[]>(async (httpRequest: Request) => {
+    asyncRouteHandler<IResponseEntity[]>(async (httpRequest: Request) => {
       const req = new RequestSearch(httpRequest.query as IRequestSearch);
       if (req.label && req.label.length < 2) {
         return [];
@@ -69,8 +68,7 @@ export default Router()
       }
 
       const response = new ResponseSearch(req);
-      await response.prepare(httpRequest);
-      return response.getResults();
+      return await response.prepare(httpRequest);
     })
   )
   .post(

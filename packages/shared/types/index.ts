@@ -23,7 +23,6 @@ import { IResponseAdministration } from "./response-administration";
 import { IResponseAudit } from "./response-audit";
 import { IResponseGeneric } from "./response-generic";
 import { IResponsePermission } from "./response-permission";
-import { IResponseSearch } from "./response-search";
 import { IResponseStatement } from "./response-statement";
 import { IResponseTerritory } from "./response-territory";
 import {
@@ -90,7 +89,6 @@ export type {
   IResponseUser,
   IResponseStoredTerritory,
   IResponseGeneric,
-  IResponseSearch,
   IResponsePermission,
   IResponseStats,
 };
