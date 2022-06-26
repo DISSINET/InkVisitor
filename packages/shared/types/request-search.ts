@@ -9,6 +9,7 @@ export interface IRequestSearch {
   class?: EntityClass;
   excluded?: EntityClass[];
   label?: string;
+  entityIds?: string[];
   cooccurrenceId?: string;
   onlyTemplates?: boolean;
   usedTemplate?: string;
@@ -17,6 +18,7 @@ export interface IRequestSearch {
 export class RequestSearch {
   class?: EntityClass;
   label?: string;
+  entityIds?: string[];
   cooccurrenceId?: string;
   excluded?: EntityClass[];
   onlyTemplates?: boolean;
@@ -29,6 +31,8 @@ export class RequestSearch {
       requestData.cooccurrenceId ||
       (requestData as any).relatedEntityId ||
       false;
+
+    this.entityIds = requestData.entityIds || [];
 
     if (requestData.excluded) {
       if (requestData.excluded.constructor.name === "String") {
@@ -51,10 +55,11 @@ export class RequestSearch {
       !this.label &&
       !this.class &&
       !this.onlyTemplates &&
-      !this.usedTemplate
+      !this.usedTemplate &&
+      (typeof this.entityIds !== "object" || !this.entityIds.length)
     ) {
       return new BadParams(
-        "label, class, onlyTemplates or usedTemplate has to be set"
+        "label, class, onlyTemplates, usedTemplate or entityIds field has to be set"
       );
     }
 

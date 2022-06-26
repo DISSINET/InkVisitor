@@ -206,7 +206,14 @@ export class SearchQuery {
       const assocEntityIds = await this.getAssociatedEntityIds(
         req.cooccurrenceId
       );
-      this.whereEntityIds(assocEntityIds);
+      if (!req.entityIds) {
+        req.entityIds = [];
+      }
+      req.entityIds = req.entityIds.concat(assocEntityIds);
+    }
+
+    if (req.entityIds) {
+      this.whereEntityIds(req.entityIds);
     }
 
     if (req.class) {
