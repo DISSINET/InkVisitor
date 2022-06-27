@@ -212,7 +212,7 @@ export class SearchQuery {
       req.entityIds = req.entityIds.concat(assocEntityIds);
     }
 
-    if (req.entityIds) {
+    if (req.entityIds && req.entityIds.length) {
       this.whereEntityIds(req.entityIds);
     }
 
