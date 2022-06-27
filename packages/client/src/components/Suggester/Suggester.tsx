@@ -165,12 +165,12 @@ export const Suggester: React.FC<Suggester> = ({
     setSelected(-1);
   };
 
-  interface Row {
+  interface EntityRow {
     data: EntitySuggestionI[];
     index: number;
     style: any;
   }
-  const Row: React.FC<Row> = ({ data, index, style }) => {
+  const EntityRow: React.FC<EntityRow> = ({ data, index, style }) => {
     const suggestion = data[index];
 
     return (
@@ -215,43 +215,58 @@ export const Suggester: React.FC<Suggester> = ({
           itemSize={25}
           width="100%"
         >
-          {Row}
+          {EntityRow}
         </List>
       </>
     );
   };
 
+  interface UserRow {
+    data: UserSuggestionI[];
+    index: number;
+    style: any;
+  }
+  const UserRow: React.FC<UserRow> = ({ data, index, style }) => {
+    const suggestion = data[index];
+
+    return (
+      <StyledSuggestionRow key={index} style={style}>
+        <StyledSuggestionLineActions isSelected={selected === index}>
+          <FaPlayCircle
+            color={theme.color["black"]}
+            onClick={() => {
+              onPick(suggestion);
+            }}
+          />
+        </StyledSuggestionLineActions>
+        <StyledSuggestionLineTag isSelected={selected === index}>
+          <StyledTagWrapper>
+            <Tag
+              fullWidth
+              propId={suggestion.id}
+              label={suggestion.label}
+              category={"U"}
+            />
+          </StyledTagWrapper>
+        </StyledSuggestionLineTag>
+        <StyledSuggestionLineIcons isSelected={selected === index}>
+          {suggestion.icons}
+        </StyledSuggestionLineIcons>
+      </StyledSuggestionRow>
+    );
+  };
+
   const renderUserSuggestions = () => {
     return (
-      <>
-        {(suggestions as UserSuggestionI[])
-          // .filter((s, si) => si < MAXSUGGESTIONDISPLAYED)
-          .map((suggestion, si) => (
-            <StyledSuggestionRow key={si}>
-              <StyledSuggestionLineActions isSelected={selected === si}>
-                <FaPlayCircle
-                  color={theme.color["black"]}
-                  onClick={() => {
-                    onPick(suggestion);
-                  }}
-                />
-              </StyledSuggestionLineActions>
-              <StyledSuggestionLineTag isSelected={selected === si}>
-                <StyledTagWrapper>
-                  <Tag
-                    fullWidth
-                    propId={suggestion.id}
-                    label={suggestion.label}
-                    category={"U"}
-                  />
-                </StyledTagWrapper>
-              </StyledSuggestionLineTag>
-              <StyledSuggestionLineIcons isSelected={selected === si}>
-                {suggestion.icons}
-              </StyledSuggestionLineIcons>
-            </StyledSuggestionRow>
-          ))}
-      </>
+      <List
+        itemData={suggestions as UserSuggestionI[]}
+        height={200}
+        itemCount={suggestions.length}
+        itemSize={25}
+        width="100%"
+      >
+        {UserRow}
+      </List>
     );
   };
 
