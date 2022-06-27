@@ -24,8 +24,10 @@ import {
   StyledSuggestionLineActions,
   StyledSuggestionLineIcons,
   StyledSuggestionLineTag,
+  StyledSuggestionRow,
   StyledTagWrapper,
 } from "./SuggesterStyles";
+import { FixedSizeList as List } from "react-window";
 
 export interface EntitySuggestionI {
   id: string;
@@ -163,41 +165,58 @@ export const Suggester: React.FC<Suggester> = ({
     setSelected(-1);
   };
 
+  interface Row {
+    data: EntitySuggestionI[];
+    index: number;
+    style: any;
+  }
+  const Row: React.FC<Row> = ({ data, index, style }) => {
+    const suggestion = data[index];
+
+    return (
+      <StyledSuggestionRow key={index} style={style}>
+        <StyledSuggestionLineActions isSelected={selected === index}>
+          {suggestion.status !== EntityStatus.Discouraged && (
+            <FaPlayCircle
+              color={theme.color["black"]}
+              onClick={() => {
+                onPick(suggestion);
+              }}
+            />
+          )}
+        </StyledSuggestionLineActions>
+        <StyledSuggestionLineTag isSelected={selected === index}>
+          <StyledTagWrapper>
+            <Tag
+              fullWidth
+              propId={suggestion.id}
+              label={suggestion.label}
+              status={suggestion.status}
+              ltype={suggestion.ltype}
+              tooltipDetail={suggestion.detail}
+              category={suggestion.category}
+            />
+          </StyledTagWrapper>
+        </StyledSuggestionLineTag>
+        <StyledSuggestionLineIcons isSelected={selected === index}>
+          {suggestion.icons}
+        </StyledSuggestionLineIcons>
+      </StyledSuggestionRow>
+    );
+  };
+
   const renderEntitySuggestions = () => {
     return (
       <>
-        {(suggestions as EntitySuggestionI[])
-          .filter((s, si) => si < MAXSUGGESTIONDISPLAYED)
-          .map((suggestion, si) => (
-            <React.Fragment key={si}>
-              <StyledSuggestionLineActions isSelected={selected === si}>
-                {suggestion.status !== EntityStatus.Discouraged && (
-                  <FaPlayCircle
-                    color={theme.color["black"]}
-                    onClick={() => {
-                      onPick(suggestion);
-                    }}
-                  />
-                )}
-              </StyledSuggestionLineActions>
-              <StyledSuggestionLineTag isSelected={selected === si}>
-                <StyledTagWrapper>
-                  <Tag
-                    fullWidth
-                    propId={suggestion.id}
-                    label={suggestion.label}
-                    status={suggestion.status}
-                    ltype={suggestion.ltype}
-                    tooltipDetail={suggestion.detail}
-                    category={suggestion.category}
-                  />
-                </StyledTagWrapper>
-              </StyledSuggestionLineTag>
-              <StyledSuggestionLineIcons isSelected={selected === si}>
-                {suggestion.icons}
-              </StyledSuggestionLineIcons>
-            </React.Fragment>
-          ))}
+        <List
+          itemData={suggestions as EntitySuggestionI[]}
+          height={200}
+          itemCount={suggestions.length}
+          itemSize={25}
+          width="100%"
+        >
+          {Row}
+        </List>
       </>
     );
   };
@@ -206,9 +225,9 @@ export const Suggester: React.FC<Suggester> = ({
     return (
       <>
         {(suggestions as UserSuggestionI[])
-          .filter((s, si) => si < MAXSUGGESTIONDISPLAYED)
+          // .filter((s, si) => si < MAXSUGGESTIONDISPLAYED)
           .map((suggestion, si) => (
-            <React.Fragment key={si}>
+            <StyledSuggestionRow key={si}>
               <StyledSuggestionLineActions isSelected={selected === si}>
                 <FaPlayCircle
                   color={theme.color["black"]}
@@ -230,7 +249,7 @@ export const Suggester: React.FC<Suggester> = ({
               <StyledSuggestionLineIcons isSelected={selected === si}>
                 {suggestion.icons}
               </StyledSuggestionLineIcons>
-            </React.Fragment>
+            </StyledSuggestionRow>
           ))}
       </>
     );

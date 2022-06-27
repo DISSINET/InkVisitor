@@ -62,10 +62,10 @@ export const StyledRelativePosition = styled.div`
   max-width: 24rem;
   display: grid;
 
-  grid-template-columns: 2.5rem auto 3rem;
+  /* grid-template-columns: 2.5rem auto 3rem;
   grid-template-rows: auto;
   grid-auto-flow: row;
-  align-items: center;
+  align-items: center; */
   min-height: 3rem;
   padding-bottom: ${space1};
 
@@ -74,6 +74,11 @@ export const StyledRelativePosition = styled.div`
   }
 `;
 
+export const StyledSuggestionRow = styled.div`
+  display: grid;
+  grid-template-columns: 2.5rem auto 3rem;
+  align-items: center;
+`;
 export const StyledSuggestionLineActions = styled.div<Column>`
   display: grid;
   align-items: center;
