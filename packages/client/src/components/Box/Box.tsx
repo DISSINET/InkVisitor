@@ -1,3 +1,4 @@
+import { ButtonGroup } from "components/ButtonGroup/ButtonGroup";
 import React, { ReactNode, useState } from "react";
 import { animated, useSpring } from "react-spring";
 import { springConfig } from "Theme/constants";
@@ -18,7 +19,7 @@ interface BoxProps {
   height?: number;
   noPadding?: boolean;
   isExpanded?: boolean;
-  button?: ReactNode;
+  button?: ReactNode | ReactNode[];
   children?: ReactNode;
 }
 
@@ -53,7 +54,9 @@ export const Box: React.FC<BoxProps> = ({
         {!hideContent && (
           <animated.div style={animatedExpand}>{label}</animated.div>
         )}
-        <StyledButtonWrap>{button && button}</StyledButtonWrap>
+        <StyledButtonWrap>
+          {button && <ButtonGroup>{button}</ButtonGroup>}
+        </StyledButtonWrap>
       </StyledHead>
       <StyledContent
         color={color}

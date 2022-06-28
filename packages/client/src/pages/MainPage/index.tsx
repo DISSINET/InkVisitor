@@ -15,6 +15,7 @@ import ScrollHandler from "hooks/ScrollHandler";
 import React, { useState } from "react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
+import { BiHide, BiShow } from "react-icons/bi";
 import { IoMdClose } from "react-icons/io";
 import { RiMenuFoldFill, RiMenuUnfoldFill } from "react-icons/ri";
 import { useQuery, useQueryClient } from "react-query";
@@ -220,7 +221,7 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
       icon={firstPanelExpanded ? <RiMenuFoldFill /> : <RiMenuUnfoldFill />}
     />
   );
-  const fourthPanelButton = () => (
+  const hideFourthPanelButton = () => (
     <Button
       onClick={() => {
         if (fourthPanelExpanded) {
@@ -237,6 +238,42 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
   );
 
   const [userCustomizationOpen, setUserCustomizationOpen] = useState(false);
+
+  const [hiddenBox, setHiddenBox] = useState<
+    false | "search" | "bookmarks" | "templates"
+  >(false);
+
+  const hideBoxButton = (boxToHide: "search" | "bookmarks" | "templates") => {
+    const isThisBoxHidden = hiddenBox === boxToHide;
+    return (
+      <>
+        {fourthPanelExpanded && (
+          <Button
+            inverted
+            icon={isThisBoxHidden ? <BiShow /> : <BiHide />}
+            onClick={() =>
+              isThisBoxHidden ? setHiddenBox(false) : setHiddenBox(boxToHide)
+            }
+          />
+        )}
+      </>
+    );
+  };
+
+  const hiddenBoxHeight: number = 34;
+
+  const getFourthPanelBoxHeight = (
+    box: "search" | "bookmarks" | "templates"
+  ) => {
+    const thisBoxIsHidden = hiddenBox === box;
+    if (!hiddenBox) {
+      return heightContent / 3;
+    } else if (thisBoxIsHidden) {
+      return hiddenBoxHeight;
+    } else {
+      return (heightContent - hiddenBoxHeight) / 2;
+    }
+  };
 
   return (
     <>
@@ -332,29 +369,29 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
               width={fourthPanelExpanded ? panelWidths[3] : collapsedPanelWidth}
             >
               <Box
-                height={heightContent / 3}
+                height={getFourthPanelBoxHeight("search")}
                 label="Search"
                 color="white"
                 isExpanded={fourthPanelExpanded}
-                button={fourthPanelButton()}
+                button={[hideBoxButton("search"), hideFourthPanelButton()]}
               >
                 <MemoizedEntitySearchBox />
               </Box>
               <Box
-                height={heightContent / 3}
+                height={getFourthPanelBoxHeight("bookmarks")}
                 label="Bookmarks"
                 color="white"
                 isExpanded={fourthPanelExpanded}
-                button={fourthPanelButton()}
+                button={[hideBoxButton("bookmarks"), hideFourthPanelButton()]}
               >
                 <MemoizedEntityBookmarkBox />
               </Box>
               <Box
-                height={heightContent / 3}
+                height={getFourthPanelBoxHeight("templates")}
                 label="Templates"
                 color="white"
                 isExpanded={fourthPanelExpanded}
-                button={fourthPanelButton()}
+                button={[hideBoxButton("templates"), hideFourthPanelButton()]}
               >
                 <MemoizedTemplateListBox />
               </Box>
