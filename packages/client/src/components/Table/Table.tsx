@@ -140,7 +140,6 @@ export const Table: React.FC<Table> = ({
       <StyledTableContainer>
         <StyledTable
           {...getTableProps()}
-          className="table table-rounded is-striped is-hoverable is-fullwidth"
           noBorder={noBorder}
         >
           {!disableHeader && data.length > 0 && (
