@@ -62,10 +62,6 @@ export const StyledRelativePosition = styled.div`
   max-width: 24rem;
   display: grid;
 
-  /* grid-template-columns: 2.5rem auto 3rem;
-  grid-template-rows: auto;
-  grid-auto-flow: row;
-  align-items: center; */
   min-height: 3rem;
   padding-bottom: ${space1};
 

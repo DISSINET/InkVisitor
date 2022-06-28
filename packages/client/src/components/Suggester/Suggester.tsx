@@ -1,13 +1,14 @@
 import { EntityClass, EntityStatus } from "@shared/enums";
 import { IOption } from "@shared/types";
-import { Button, Dropdown, Input, Loader, Tag, TypeBar } from "components";
+import { Button, Dropdown, Input, Loader, TypeBar } from "components";
 import useKeypress from "hooks/useKeyPress";
 import React, { useState } from "react";
 import { DragObjectWithType, DropTargetMonitor, useDrop } from "react-dnd";
-import { FaPlayCircle, FaPlus } from "react-icons/fa";
+import { FaPlus } from "react-icons/fa";
 import { MdCancel } from "react-icons/md";
 import { OptionTypeBase, ValueType } from "react-select";
 import { toast } from "react-toastify";
+import { FixedSizeList as List } from "react-window";
 import { DropdownAny } from "Theme/constants";
 import theme from "Theme/theme";
 import { ItemTypes } from "types";
@@ -21,13 +22,14 @@ import {
   StyledSuggesterButton,
   StyledSuggesterList,
   StyledSuggestionCancelButton,
-  StyledSuggestionLineActions,
-  StyledSuggestionLineIcons,
-  StyledSuggestionLineTag,
-  StyledSuggestionRow,
-  StyledTagWrapper,
 } from "./SuggesterStyles";
-import { FixedSizeList as List } from "react-window";
+import {
+  createItemData,
+  EntityItemData,
+  MemoizedEntityRow,
+  MemoizedUserRow,
+  UserItemData,
+} from "./SuggestionRow/SuggestionRow";
 
 export interface EntitySuggestionI {
   id: string;
@@ -165,107 +167,32 @@ export const Suggester: React.FC<Suggester> = ({
     setSelected(-1);
   };
 
-  interface EntityRow {
-    data: EntitySuggestionI[];
-    index: number;
-    style: any;
-  }
-  const EntityRow: React.FC<EntityRow> = ({ data, index, style }) => {
-    const suggestion = data[index];
-
-    return (
-      <StyledSuggestionRow key={index} style={style}>
-        <StyledSuggestionLineActions isSelected={selected === index}>
-          {suggestion.status !== EntityStatus.Discouraged && (
-            <FaPlayCircle
-              color={theme.color["black"]}
-              onClick={() => {
-                onPick(suggestion);
-              }}
-            />
-          )}
-        </StyledSuggestionLineActions>
-        <StyledSuggestionLineTag isSelected={selected === index}>
-          <StyledTagWrapper>
-            <Tag
-              fullWidth
-              propId={suggestion.id}
-              label={suggestion.label}
-              status={suggestion.status}
-              ltype={suggestion.ltype}
-              tooltipDetail={suggestion.detail}
-              category={suggestion.category}
-            />
-          </StyledTagWrapper>
-        </StyledSuggestionLineTag>
-        <StyledSuggestionLineIcons isSelected={selected === index}>
-          {suggestion.icons}
-        </StyledSuggestionLineIcons>
-      </StyledSuggestionRow>
-    );
-  };
-
   const renderEntitySuggestions = () => {
-    return (
-      <>
-        <List
-          itemData={suggestions as EntitySuggestionI[]}
-          height={200}
-          itemCount={suggestions.length}
-          itemSize={25}
-          width="100%"
-        >
-          {EntityRow}
-        </List>
-      </>
-    );
-  };
-
-  interface UserRow {
-    data: UserSuggestionI[];
-    index: number;
-    style: any;
-  }
-  const UserRow: React.FC<UserRow> = ({ data, index, style }) => {
-    const suggestion = data[index];
-
-    return (
-      <StyledSuggestionRow key={index} style={style}>
-        <StyledSuggestionLineActions isSelected={selected === index}>
-          <FaPlayCircle
-            color={theme.color["black"]}
-            onClick={() => {
-              onPick(suggestion);
-            }}
-          />
-        </StyledSuggestionLineActions>
-        <StyledSuggestionLineTag isSelected={selected === index}>
-          <StyledTagWrapper>
-            <Tag
-              fullWidth
-              propId={suggestion.id}
-              label={suggestion.label}
-              category={"U"}
-            />
-          </StyledTagWrapper>
-        </StyledSuggestionLineTag>
-        <StyledSuggestionLineIcons isSelected={selected === index}>
-          {suggestion.icons}
-        </StyledSuggestionLineIcons>
-      </StyledSuggestionRow>
-    );
-  };
-
-  const renderUserSuggestions = () => {
+    const itemData = createItemData(suggestions, onPick, selected);
     return (
       <List
-        itemData={suggestions as UserSuggestionI[]}
+        itemData={itemData as EntityItemData}
         height={200}
         itemCount={suggestions.length}
         itemSize={25}
         width="100%"
       >
-        {UserRow}
+        {MemoizedEntityRow}
+      </List>
+    );
+  };
+
+  const renderUserSuggestions = () => {
+    const itemData = createItemData(suggestions, onPick, selected);
+    return (
+      <List
+        itemData={itemData as UserItemData}
+        height={200}
+        itemCount={suggestions.length}
+        itemSize={25}
+        width="100%"
+      >
+        {MemoizedUserRow}
       </List>
     );
   };
@@ -341,8 +268,8 @@ export const Suggester: React.FC<Suggester> = ({
             onMouseOut={() => setIsHovered(false)}
           >
             <StyledRelativePosition>
-              {suggesterType === "entity" && <>{renderEntitySuggestions()}</>}
-              {suggesterType === "user" && <>{renderUserSuggestions()}</>}
+              {suggesterType === "entity" && renderEntitySuggestions()}
+              {suggesterType === "user" && renderUserSuggestions()}
               <Loader size={30} show={isFetching} />
             </StyledRelativePosition>
             <SuggesterKeyPress
