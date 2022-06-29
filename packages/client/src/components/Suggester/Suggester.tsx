@@ -176,6 +176,7 @@ export const Suggester: React.FC<Suggester> = ({
         itemCount={suggestions.length}
         itemSize={25}
         width="100%"
+        overscanCount={20}
       >
         {MemoizedEntityRow}
       </List>
@@ -191,6 +192,7 @@ export const Suggester: React.FC<Suggester> = ({
         itemCount={suggestions.length}
         itemSize={25}
         width="100%"
+        overscanCount={20}
       >
         {MemoizedUserRow}
       </List>

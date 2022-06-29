@@ -22,6 +22,7 @@ export const EntitySearchResults: React.FC<EntitySearchResults> = ({
           itemData={data}
           itemSize={25}
           width="100%"
+          overscanCount={20}
         >
           {MemoizedRow}
         </List>
