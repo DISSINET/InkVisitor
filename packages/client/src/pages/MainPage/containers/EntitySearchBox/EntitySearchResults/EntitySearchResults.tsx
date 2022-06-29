@@ -1,6 +1,7 @@
 import { IResponseEntity } from "@shared/types";
 import React, { useMemo } from "react";
 import { areEqual, FixedSizeList as List } from "react-window";
+import { scrollOverscanCount } from "Theme/constants";
 import { EntityTag } from "../../EntityTag/EntityTag";
 import { StyledResultItem } from "../EntitySearchBoxStyles";
 import { StyledRow } from "./EntitySearchResultsStyles";
@@ -22,7 +23,7 @@ export const EntitySearchResults: React.FC<EntitySearchResults> = ({
           itemData={data}
           itemSize={25}
           width="100%"
-          overscanCount={20}
+          overscanCount={scrollOverscanCount}
         >
           {MemoizedRow}
         </List>

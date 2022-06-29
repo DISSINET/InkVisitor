@@ -6,6 +6,7 @@ export const wildCardChar = "*";
 
 export const rootTerritoryId = "T0";
 export const excludedSuggesterEntities = [EntityClass.Value];
+export const scrollOverscanCount = 20;
 
 // layout
 export const heightHeader = 70;
