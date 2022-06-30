@@ -13,6 +13,7 @@ import { RiMenuFoldFill, RiMenuUnfoldFill } from "react-icons/ri";
 import { useQuery, useQueryClient } from "react-query";
 import { toast } from "react-toastify";
 import { setFirstPanelExpanded } from "redux/features/layout/firstPanelExpandedSlice";
+import { setFourthPanelBoxesOpened } from "redux/features/layout/fourthPanelBoxesOpenedSlice";
 import { setFourthPanelExpanded } from "redux/features/layout/fourthPanelExpandedSlice";
 import { setUsername } from "redux/features/usernameSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
@@ -167,7 +168,19 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
             inverted
             icon={isThisBoxHidden ? <BiShow /> : <BiHide />}
             onClick={() =>
-              isThisBoxHidden ? setHiddenBox(false) : setHiddenBox(boxToHide)
+              isThisBoxHidden
+                ? dispatch(
+                    setFourthPanelBoxesOpened({
+                      ...fourthPanelBoxesOpened,
+                      [boxToHide]: true,
+                    })
+                  )
+                : dispatch(
+                    setFourthPanelBoxesOpened({
+                      ...fourthPanelBoxesOpened,
+                      [boxToHide]: false,
+                    })
+                  )
             }
           />
         )}
