@@ -1,14 +1,6 @@
 import api from "api";
-import LogoInkvisitor from "assets/logos/inkvisitor-full.svg";
-import {
-  Box,
-  Button,
-  ButtonGroup,
-  Header,
-  Panel,
-  PanelSeparator,
-  Toast,
-} from "components";
+
+import { Box, Button, Header, Panel, PanelSeparator, Toast } from "components";
 import { MemoizedFooter } from "components/Footer/Footer";
 import { useSearchParams } from "hooks";
 import ScrollHandler from "hooks/ScrollHandler";
@@ -29,98 +21,18 @@ import {
   heightFooter,
   heightHeader,
 } from "Theme/constants";
-import packageJson from "../../../package.json";
 import { UserListModal } from "./containers";
 import { MemoizedEntityBookmarkBox } from "./containers/EntityBookmarkBox/EntityBookmarkBox";
 import { MemoizedEntityDetailBox } from "./containers/EntityDetailBox/EntityDetailBox";
 import { MemoizedEntitySearchBox } from "./containers/EntitySearchBox/EntitySearchBox";
+import { LeftHeader, RightHeader } from "./containers/Header/Header";
 import { MemoizedLoginModal } from "./containers/LoginModal/LoginModal";
 import { MemoizedStatementEditorBox } from "./containers/StatementEditorBox/StatementEditorBox";
 import { MemoizedStatementListBox } from "./containers/StatementsListBox/StatementListBox";
 import { MemoizedTemplateListBox } from "./containers/TemplateListBox/TemplateListBox";
 import { MemoizedTerritoryTreeBox } from "./containers/TerritoryTreeBox/TerritoryTreeBox";
 import { UserCustomizationModal } from "./containers/UserCustomizationModal/UserCustomizationModal";
-import {
-  StyledFaUserAlt,
-  StyledHeader,
-  StyledHeaderLogo,
-  StyledHeaderTag,
-  StyledPage,
-  StyledPanelWrap,
-  StyledText,
-  StyledUser,
-  StyledUserBox,
-  StyledUsername,
-} from "./MainPageStyles";
-
-const LeftHeader = React.memo(({}) => {
-  const env = (process.env.ROOT_URL || "").replace(/apps\/inkvisitor[-]?/, "");
-  const versionText = `v. ${packageJson.version} 
-  ${
-    ["production", ""].indexOf(env) === -1
-      ? `| ${env} | built: ${process.env.BUILD_TIMESTAMP}`
-      : ""
-  }`;
-
-  return (
-    <StyledHeader>
-      <StyledHeaderLogo
-        height={heightHeader - 10}
-        src={LogoInkvisitor}
-        alt="Inkvisitor Logo"
-      />
-      <StyledHeaderTag
-        onClick={async () => {
-          await navigator.clipboard.writeText(versionText);
-          toast.info("Inkvisitor version copied to clipboard");
-        }}
-      >
-        {versionText}
-      </StyledHeaderTag>
-    </StyledHeader>
-  );
-});
-
-interface RightHeaderProps {
-  setUserCustomizationOpen: (arg0: boolean) => void;
-  handleUsersModalClick: () => void;
-  handleLogOut: () => void;
-  userName: string;
-  userRole: string;
-}
-
-const RightHeader: React.FC<RightHeaderProps> = ({
-  setUserCustomizationOpen,
-  handleUsersModalClick,
-  handleLogOut,
-  userName,
-  userRole,
-}) => {
-  return (
-    <StyledUserBox>
-      <StyledUser>
-        <StyledText>logged as</StyledText>
-        <StyledFaUserAlt
-          size={14}
-          onClick={() => setUserCustomizationOpen(true)}
-        />
-        <StyledUsername onClick={() => setUserCustomizationOpen(true)}>
-          {userName}
-        </StyledUsername>
-      </StyledUser>
-      <ButtonGroup>
-        {userRole == "admin" && (
-          <Button
-            label="Manage Users"
-            color="info"
-            onClick={() => handleUsersModalClick()}
-          />
-        )}
-        <Button label="Log Out" color="danger" onClick={() => handleLogOut()} />
-      </ButtonGroup>
-    </StyledUserBox>
-  );
-};
+import { StyledPage, StyledPanelWrap } from "./MainPageStyles";
 
 interface MainPage {
   size: number[];
@@ -140,7 +52,10 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
 
   const isLoggedIn = api.isLoggedIn();
   const dispatch = useAppDispatch();
-  const username = useAppSelector((state) => state.username);
+  const username: string = useAppSelector((state) => state.username);
+  const fourthPanelBoxesOpened: { [key: string]: boolean } = useAppSelector(
+    (state) => state.layout.fourthPanelBoxesOpened
+  );
   const userId = localStorage.getItem("userid");
   const userRole = localStorage.getItem("userrole");
 
@@ -244,7 +159,7 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
   >(false);
 
   const hideBoxButton = (boxToHide: "search" | "bookmarks" | "templates") => {
-    const isThisBoxHidden = hiddenBox === boxToHide;
+    const isThisBoxHidden = !fourthPanelBoxesOpened[boxToHide];
     return (
       <>
         {fourthPanelExpanded && (
