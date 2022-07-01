@@ -21,6 +21,7 @@ import {
   collapsedPanelWidth,
   heightFooter,
   heightHeader,
+  hiddenBoxHeight,
 } from "Theme/constants";
 import { UserListModal } from "./containers";
 import { MemoizedEntityBookmarkBox } from "./containers/EntityBookmarkBox/EntityBookmarkBox";
@@ -166,7 +167,7 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
         {fourthPanelExpanded && (
           <Button
             inverted
-            icon={isThisBoxHidden ? <BiShow /> : <BiHide />}
+            icon={isThisBoxHidden ? <BiHide /> : <BiShow />}
             onClick={() =>
               isThisBoxHidden
                 ? dispatch(
@@ -186,21 +187,6 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
         )}
       </>
     );
-  };
-
-  const hiddenBoxHeight: number = 34;
-
-  const getFourthPanelBoxHeight = (
-    box: "search" | "bookmarks" | "templates"
-  ) => {
-    const thisBoxIsHidden = hiddenBox === box;
-    if (!hiddenBox) {
-      return heightContent / 3;
-    } else if (thisBoxIsHidden) {
-      return hiddenBoxHeight;
-    } else {
-      return (heightContent - hiddenBoxHeight) / 2;
-    }
   };
 
   return (
@@ -297,7 +283,9 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
               width={fourthPanelExpanded ? panelWidths[3] : collapsedPanelWidth}
             >
               <Box
-                height={getFourthPanelBoxHeight("search")}
+                height={
+                  fourthPanelBoxesOpened["search"] ? undefined : hiddenBoxHeight
+                }
                 label="Search"
                 color="white"
                 isExpanded={fourthPanelExpanded}
@@ -306,7 +294,11 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
                 <MemoizedEntitySearchBox />
               </Box>
               <Box
-                height={getFourthPanelBoxHeight("bookmarks")}
+                height={
+                  fourthPanelBoxesOpened["bookmarks"]
+                    ? undefined
+                    : hiddenBoxHeight
+                }
                 label="Bookmarks"
                 color="white"
                 isExpanded={fourthPanelExpanded}
@@ -315,7 +307,11 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
                 <MemoizedEntityBookmarkBox />
               </Box>
               <Box
-                height={getFourthPanelBoxHeight("templates")}
+                height={
+                  fourthPanelBoxesOpened["templates"]
+                    ? undefined
+                    : hiddenBoxHeight
+                }
                 label="Templates"
                 color="white"
                 isExpanded={fourthPanelExpanded}
