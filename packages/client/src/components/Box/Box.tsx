@@ -19,7 +19,7 @@ interface BoxProps {
   height?: number;
   noPadding?: boolean;
   isExpanded?: boolean;
-  button?: ReactNode | ReactNode[];
+  button?: ReactNode[];
   children?: ReactNode;
 }
 
@@ -55,7 +55,13 @@ export const Box: React.FC<BoxProps> = ({
           <animated.div style={animatedExpand}>{label}</animated.div>
         )}
         <StyledButtonWrap>
-          {button && <ButtonGroup>{button}</ButtonGroup>}
+          {button && (
+            <ButtonGroup>
+              {button.map((b, key) => (
+                <React.Fragment key={key}>{b}</React.Fragment>
+              ))}
+            </ButtonGroup>
+          )}
         </StyledButtonWrap>
       </StyledHead>
       <StyledContent

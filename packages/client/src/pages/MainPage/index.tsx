@@ -27,7 +27,10 @@ import { UserListModal } from "./containers";
 import { MemoizedEntityBookmarkBox } from "./containers/EntityBookmarkBox/EntityBookmarkBox";
 import { MemoizedEntityDetailBox } from "./containers/EntityDetailBox/EntityDetailBox";
 import { MemoizedEntitySearchBox } from "./containers/EntitySearchBox/EntitySearchBox";
-import { LeftHeader, RightHeader } from "./containers/Header/Header";
+import {
+  LeftHeader,
+  RightHeader,
+} from "./containers/MainPageHeader/MainPageHeader";
 import { MemoizedLoginModal } from "./containers/LoginModal/LoginModal";
 import { MemoizedStatementEditorBox } from "./containers/StatementEditorBox/StatementEditorBox";
 import { MemoizedStatementListBox } from "./containers/StatementsListBox/StatementListBox";
@@ -35,6 +38,8 @@ import { MemoizedTemplateListBox } from "./containers/TemplateListBox/TemplateLi
 import { MemoizedTerritoryTreeBox } from "./containers/TerritoryTreeBox/TerritoryTreeBox";
 import { UserCustomizationModal } from "./containers/UserCustomizationModal/UserCustomizationModal";
 import { StyledPage, StyledPanelWrap } from "./MainPageStyles";
+
+type FourthPanelBoxes = "search" | "bookmarks" | "templates";
 
 interface MainPage {
   size: number[];
@@ -156,11 +161,7 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
 
   const [userCustomizationOpen, setUserCustomizationOpen] = useState(false);
 
-  const [hiddenBox, setHiddenBox] = useState<
-    false | "search" | "bookmarks" | "templates"
-  >(false);
-
-  const hideBoxButton = (boxToHide: "search" | "bookmarks" | "templates") => {
+  const hideBoxButton = (boxToHide: FourthPanelBoxes) => {
     const isThisBoxHidden = !fourthPanelBoxesOpened[boxToHide];
     return (
       <>
@@ -187,6 +188,14 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
         )}
       </>
     );
+  };
+
+  const getFourthPanelBoxHeight = (box: FourthPanelBoxes) => {
+    const isThisBoxHidden = !fourthPanelBoxesOpened[box];
+    const openBoxesCount = Object.values(fourthPanelBoxesOpened).filter(
+      (b) => b === true
+    );
+    console.log(openBoxesCount.length);
   };
 
   return (
@@ -226,7 +235,7 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
                 height={heightContent}
                 label="Territories"
                 isExpanded={firstPanelExpanded}
-                button={firstPanelButton()}
+                button={[firstPanelButton()]}
                 noPadding
               >
                 <MemoizedTerritoryTreeBox />
@@ -250,7 +259,7 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
                 <Box
                   height={heightContent / 2 + 20}
                   label="Detail"
-                  button={
+                  button={[
                     detailId && (
                       <Button
                         inverted
@@ -259,8 +268,8 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
                           setDetailId("");
                         }}
                       />
-                    )
-                  }
+                    ),
+                  ]}
                 >
                   <MemoizedEntityDetailBox />
                 </Box>

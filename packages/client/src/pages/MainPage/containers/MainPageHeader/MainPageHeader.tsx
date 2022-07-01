@@ -9,7 +9,7 @@ import {
   StyledUser,
   StyledUserBox,
   StyledUsername,
-} from "./HeaderStyles";
+} from "./MainPageHeaderStyles";
 import packageJson from "../../../../../package.json";
 import { heightHeader } from "Theme/constants";
 import LogoInkvisitor from "assets/logos/inkvisitor-full.svg";
