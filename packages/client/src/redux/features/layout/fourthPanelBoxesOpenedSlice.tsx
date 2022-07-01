@@ -1,10 +1,14 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
-const initialState: { [key: string]: boolean } = {
+const initObject = {
   search: true,
   bookmarks: true,
   templates: true,
 };
+const storageObject = localStorage.getItem("fourthPanelBoxesOpened");
+const initialState: { [key: string]: boolean } = storageObject
+  ? JSON.parse(storageObject)
+  : initObject;
 
 const fourthPanelBoxesOpenedSlice = createSlice({
   name: "fourthPanelBoxesOpened",

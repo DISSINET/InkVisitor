@@ -161,6 +161,27 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
 
   const [userCustomizationOpen, setUserCustomizationOpen] = useState(false);
 
+  const handleHideBoxButtonClick = (
+    boxToHide: FourthPanelBoxes,
+    isThisBoxHidden: boolean
+  ) => {
+    if (isThisBoxHidden) {
+      const newObject = {
+        ...fourthPanelBoxesOpened,
+        [boxToHide]: true,
+      };
+      dispatch(setFourthPanelBoxesOpened(newObject));
+      localStorage.setItem("fourthPanelBoxesOpened", JSON.stringify(newObject));
+    } else {
+      const newObject = {
+        ...fourthPanelBoxesOpened,
+        [boxToHide]: false,
+      };
+      dispatch(setFourthPanelBoxesOpened(newObject));
+      localStorage.setItem("fourthPanelBoxesOpened", JSON.stringify(newObject));
+    }
+  };
+
   const hideBoxButton = (boxToHide: FourthPanelBoxes) => {
     const isThisBoxHidden = !fourthPanelBoxesOpened[boxToHide];
     return (
@@ -169,21 +190,7 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
           <Button
             inverted
             icon={isThisBoxHidden ? <BiHide /> : <BiShow />}
-            onClick={() =>
-              isThisBoxHidden
-                ? dispatch(
-                    setFourthPanelBoxesOpened({
-                      ...fourthPanelBoxesOpened,
-                      [boxToHide]: true,
-                    })
-                  )
-                : dispatch(
-                    setFourthPanelBoxesOpened({
-                      ...fourthPanelBoxesOpened,
-                      [boxToHide]: false,
-                    })
-                  )
-            }
+            onClick={() => handleHideBoxButtonClick(boxToHide, isThisBoxHidden)}
           />
         )}
       </>
