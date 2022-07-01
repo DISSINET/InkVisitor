@@ -51,19 +51,19 @@ export const EntitySearchBox: React.FC = () => {
     );
   }, [debouncedValues]);
 
-  const { data: cooccurrenceEntity } = useQuery(
-    ["co-occurrence", searchData.cooccurrenceId],
-    async () => {
-      if (searchData?.cooccurrenceId) {
-        const res = await api.entitiesGet(searchData.cooccurrenceId);
-        return res.data;
+  const { data: cooccurrenceEntity, isFetching: cooccurrenceIsFetching } =
+    useQuery(
+      ["co-occurrence", searchData.cooccurrenceId],
+      async () => {
+        if (searchData?.cooccurrenceId) {
+          const res = await api.entitiesGet(searchData.cooccurrenceId);
+          return res.data;
+        }
+      },
+      {
+        enabled: !!searchData?.cooccurrenceId,
       }
-      return "";
-    },
-    {
-      enabled: !!searchData?.cooccurrenceId,
-    }
-  );
+    );
 
   const {
     status,
@@ -216,10 +216,10 @@ export const EntitySearchBox: React.FC = () => {
           inputWidth={114}
         />
       </StyledRow>
-      {(cooccurrenceEntity || isFetching) && (
+      {(cooccurrenceEntity || cooccurrenceIsFetching) && (
         <StyledRow>
           <StyledTagLoaderWrap>
-            <Loader size={26} show={isFetching} />
+            <Loader size={26} show={cooccurrenceIsFetching} />
           </StyledTagLoaderWrap>
           {cooccurrenceEntity && (
             <EntityTag
@@ -245,9 +245,7 @@ export const EntitySearchBox: React.FC = () => {
       <StyledResultsWrapper>
         {/* RESULTS */}
         {sortedEntities.length > 0 && (
-          <StyledRow>
-            <EntitySearchResults results={sortedEntities} />
-          </StyledRow>
+          <EntitySearchResults results={sortedEntities} />
         )}
         <Loader show={isFetching} />
       </StyledResultsWrapper>
