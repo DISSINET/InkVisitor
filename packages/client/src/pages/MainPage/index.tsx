@@ -190,12 +190,23 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
     );
   };
 
-  const getFourthPanelBoxHeight = (box: FourthPanelBoxes) => {
+  const getFourthPanelBoxHeight = (box: FourthPanelBoxes): number => {
     const isThisBoxHidden = !fourthPanelBoxesOpened[box];
     const openBoxesCount = Object.values(fourthPanelBoxesOpened).filter(
       (b) => b === true
     );
-    console.log(openBoxesCount.length);
+
+    if (isThisBoxHidden) {
+      return hiddenBoxHeight;
+    } else {
+      if (openBoxesCount.length === 3) {
+        return heightContent / 3;
+      } else if (openBoxesCount.length === 2) {
+        return (heightContent - hiddenBoxHeight) / 2;
+      } else {
+        return heightContent - 2 * hiddenBoxHeight;
+      }
+    }
   };
 
   return (
@@ -292,9 +303,7 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
               width={fourthPanelExpanded ? panelWidths[3] : collapsedPanelWidth}
             >
               <Box
-                height={
-                  fourthPanelBoxesOpened["search"] ? undefined : hiddenBoxHeight
-                }
+                height={getFourthPanelBoxHeight("search")}
                 label="Search"
                 color="white"
                 isExpanded={fourthPanelExpanded}
@@ -303,11 +312,7 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
                 <MemoizedEntitySearchBox />
               </Box>
               <Box
-                height={
-                  fourthPanelBoxesOpened["bookmarks"]
-                    ? undefined
-                    : hiddenBoxHeight
-                }
+                height={getFourthPanelBoxHeight("bookmarks")}
                 label="Bookmarks"
                 color="white"
                 isExpanded={fourthPanelExpanded}
@@ -316,11 +321,7 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
                 <MemoizedEntityBookmarkBox />
               </Box>
               <Box
-                height={
-                  fourthPanelBoxesOpened["templates"]
-                    ? undefined
-                    : hiddenBoxHeight
-                }
+                height={getFourthPanelBoxHeight("templates")}
                 label="Templates"
                 color="white"
                 isExpanded={fourthPanelExpanded}
