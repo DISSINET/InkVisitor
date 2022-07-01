@@ -20,6 +20,7 @@ import React, { useMemo, useState } from "react";
 import { FaPlus } from "react-icons/fa";
 import { useMutation, useQuery, useQueryClient } from "react-query";
 import { toast } from "react-toastify";
+import { useAppSelector } from "redux/hooks";
 import {
   StyledContent,
   StyledFolderList,
@@ -29,6 +30,10 @@ import { EntityBookmarkFolder } from "./EntityBookmarkFolder/EntityBookmarkFolde
 
 export const EntityBookmarkBox: React.FC = () => {
   const queryClient = useQueryClient();
+
+  const fourthPanelBoxesOpened: { [key: string]: boolean } = useAppSelector(
+    (state) => state.layout.fourthPanelBoxesOpened
+  );
 
   const [editingFolder, setEditingFolder] = useState<string | false>(false);
   const [removingFolder, setRemovingFolder] = useState<string | false>(false);
@@ -49,7 +54,7 @@ export const EntityBookmarkBox: React.FC = () => {
       res.data.sort((a, b) => (a.name > b.name ? 1 : -1));
       return res.data;
     },
-    { enabled: api.isLoggedIn() }
+    { enabled: api.isLoggedIn() && fourthPanelBoxesOpened["bookmarks"] }
   );
 
   const removingFolderName = useMemo(() => {

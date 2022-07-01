@@ -286,9 +286,3 @@ export const classesPropValue = [
   EntityClass.Territory,
   EntityClass.Resource,
 ];
-
-export interface FourthPanelBoxesOpened {
-  search: boolean;
-  bookmarks: boolean;
-  templates: boolean;
-}
