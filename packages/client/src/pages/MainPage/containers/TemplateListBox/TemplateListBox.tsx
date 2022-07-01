@@ -8,6 +8,7 @@ import {
   ButtonGroup,
   Dropdown,
   Input,
+  Loader,
   Modal,
   ModalContent,
   ModalFooter,
@@ -25,6 +26,7 @@ import { FaPlus, FaTrash } from "react-icons/fa";
 import { useMutation, useQuery, useQueryClient } from "react-query";
 import { OptionTypeBase, ValueType } from "react-select";
 import { toast } from "react-toastify";
+import { useAppSelector } from "redux/hooks";
 import { DropdownItem } from "types";
 import { EntityTag } from "..";
 import { StyledContent } from "../EntityBookmarkBox/EntityBookmarkBoxStyles";
@@ -49,6 +51,10 @@ export const TemplateListBox: React.FC<TemplateListBox> = ({}) => {
   const [filterByClass, setFilterByClass] =
     useState<DropdownItem>(allEntityOption);
   const [filterByLabel, setFilterByLabel] = useState<string>("");
+
+  const fourthPanelBoxesOpened: { [key: string]: boolean } = useAppSelector(
+    (state) => state.layout.fourthPanelBoxesOpened
+  );
 
   const { detailId, setDetailId, setStatementId } = useSearchParams();
   const queryClient = useQueryClient();
@@ -76,7 +82,7 @@ export const TemplateListBox: React.FC<TemplateListBox> = ({}) => {
       return templates;
     },
     {
-      enabled: api.isLoggedIn(),
+      enabled: api.isLoggedIn() && fourthPanelBoxesOpened["templates"],
       initialData: [],
     }
   );
@@ -277,6 +283,7 @@ export const TemplateListBox: React.FC<TemplateListBox> = ({}) => {
                 </React.Fragment>
               );
             })}
+          <Loader show={isFetchingTemplates} size={40} />
         </StyledTemplateSectionList>
       </StyledTemplateSection>
 

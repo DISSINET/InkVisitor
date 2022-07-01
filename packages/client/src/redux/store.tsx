@@ -6,6 +6,7 @@ import treeInitializeSlice from "./features/territoryTree/treeInitializeSlice";
 import selectedTerritoryPathSlice from "./features/territoryTree/selectedTerritoryPathSlice";
 import firstPanelExpandedSlice from "./features/layout/firstPanelExpandedSlice";
 import fourthPanelExpandedSlice from "./features/layout/fourthPanelExpandedSlice";
+import fourthPanelBoxesOpenedSlice from "./features/layout/fourthPanelBoxesOpenedSlice";
 import layoutWidthSlice from "./features/layout/layoutWidthSlice";
 import panelWidthsSlice from "./features/layout/panelWidthsSlice";
 import separatorXPositionSlice from "./features/layout/separatorXPositionSlice";
@@ -37,6 +38,7 @@ const store: Store = configureStore({
       separatorXPosition: separatorXPositionSlice,
       firstPanelExpanded: firstPanelExpandedSlice,
       fourthPanelExpanded: fourthPanelExpandedSlice,
+      fourthPanelBoxesOpened: fourthPanelBoxesOpenedSlice,
     }),
   },
 });
