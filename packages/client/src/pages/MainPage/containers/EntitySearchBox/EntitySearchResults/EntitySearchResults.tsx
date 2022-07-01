@@ -8,17 +8,20 @@ import { StyledRow } from "./EntitySearchResultsStyles";
 
 interface EntitySearchResults {
   results?: IResponseEntity[];
+  height?: number;
 }
 export const EntitySearchResults: React.FC<EntitySearchResults> = ({
   results,
+  height = 180,
 }) => {
   const data = useMemo(() => (results ? results : []), [results]);
+  console.log(height);
 
   return (
     <>
       {results?.length && (
         <List
-          height={180}
+          height={height}
           itemCount={results.length}
           itemData={data}
           itemSize={25}

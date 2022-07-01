@@ -9,10 +9,10 @@ import { IRequestSearch } from "@shared/types/request-search";
 import api from "api";
 import { Button, Dropdown, Input, Loader, TypeBar } from "components";
 import { useDebounce } from "hooks";
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useRef, useState } from "react";
 import { FaUnlink } from "react-icons/fa";
 import { useQuery } from "react-query";
-import { OptionsType, OptionTypeBase, ValueType } from "react-select";
+import { OptionTypeBase, ValueType } from "react-select";
 import { wildCardChar } from "Theme/constants";
 import { EntitySuggester, EntityTag } from "..";
 import {
@@ -42,6 +42,8 @@ export const EntitySearchBox: React.FC = () => {
     useState<ValueType<OptionTypeBase, any>>(allEntities);
   const [searchData, setSearchData] = useState<IRequestSearch>(initValues);
   const debouncedValues = useDebounce<IRequestSearch>(searchData, debounceTime);
+
+  const resultsRef = useRef<HTMLDivElement>(null);
 
   // check whether the search should be executed
   const validSearch = useMemo(() => {
@@ -143,6 +145,14 @@ export const EntitySearchBox: React.FC = () => {
     return options;
   }, [templates]);
 
+  const getResultsHeight = () => {
+    if (resultsRef.current) {
+      const rect = resultsRef.current.getBoundingClientRect();
+      const height = rect["height"];
+      return height;
+    }
+  };
+
   return (
     <StyledBoxContent>
       <StyledRow>
@@ -242,10 +252,13 @@ export const EntitySearchBox: React.FC = () => {
         </StyledRow>
       )}
 
-      <StyledResultsWrapper>
+      <StyledResultsWrapper ref={resultsRef}>
         {/* RESULTS */}
         {sortedEntities.length > 0 && (
-          <EntitySearchResults results={sortedEntities} />
+          <EntitySearchResults
+            results={sortedEntities}
+            height={getResultsHeight()}
+          />
         )}
         <Loader show={isFetching} />
       </StyledResultsWrapper>
