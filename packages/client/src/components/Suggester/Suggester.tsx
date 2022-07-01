@@ -9,7 +9,7 @@ import { MdCancel } from "react-icons/md";
 import { OptionTypeBase, ValueType } from "react-select";
 import { toast } from "react-toastify";
 import { FixedSizeList as List } from "react-window";
-import { DropdownAny } from "Theme/constants";
+import { DropdownAny, scrollOverscanCount } from "Theme/constants";
 import theme from "Theme/theme";
 import { ItemTypes } from "types";
 import { SuggesterKeyPress } from "./SuggesterKeyPress";
@@ -73,8 +73,6 @@ interface Suggester {
   cleanOnSelect?: boolean;
   isWrongDropCategory?: boolean;
 }
-
-const MAXSUGGESTIONDISPLAYED = 10;
 
 export const Suggester: React.FC<Suggester> = ({
   marginTop,
@@ -176,6 +174,7 @@ export const Suggester: React.FC<Suggester> = ({
         itemCount={suggestions.length}
         itemSize={25}
         width="100%"
+        overscanCount={scrollOverscanCount}
       >
         {MemoizedEntityRow}
       </List>
@@ -191,6 +190,7 @@ export const Suggester: React.FC<Suggester> = ({
         itemCount={suggestions.length}
         itemSize={25}
         width="100%"
+        overscanCount={scrollOverscanCount}
       >
         {MemoizedUserRow}
       </List>

@@ -30,6 +30,8 @@ export const StyledTemplateSectionHeader = styled.div`
 `;
 
 export const StyledTemplateSectionList = styled.div`
+  position: relative;
+  min-height: 5rem;
   > div {
     padding: ${({ theme }) => theme.space["1"]};
   }

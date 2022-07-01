@@ -1,52 +1,55 @@
 import { IResponseEntity } from "@shared/types";
-import { Table } from "components";
 import React, { useMemo } from "react";
-import { Cell, Column } from "react-table";
+import { areEqual, FixedSizeList as List } from "react-window";
+import { scrollOverscanCount } from "Theme/constants";
 import { EntityTag } from "../../EntityTag/EntityTag";
-import { StyledResultItem, StyledResults } from "../EntitySearchBoxStyles";
+import { StyledResultItem } from "../EntitySearchBoxStyles";
+import { StyledRow } from "./EntitySearchResultsStyles";
 
 interface EntitySearchResults {
   results?: IResponseEntity[];
+  height?: number;
 }
 export const EntitySearchResults: React.FC<EntitySearchResults> = ({
   results,
+  height = 180,
 }) => {
   const data = useMemo(() => (results ? results : []), [results]);
-
-  const columns: Column<{}>[] = React.useMemo(
-    () => [
-      {
-        Header: "entity",
-        accesor: "data",
-        Cell: ({ row }: Cell) => {
-          const entity = row.original as IResponseEntity;
-          return (
-            <div style={{ display: "grid" }}>
-              <StyledResultItem>
-                <EntityTag
-                  actant={entity}
-                  tooltipPosition="left center"
-                  fullWidth
-                />
-              </StyledResultItem>
-            </div>
-          );
-        },
-      },
-    ],
-    []
-  );
+  console.log(height);
 
   return (
-    <StyledResults>
-      <Table
-        entityTitle={{ singular: "Result", plural: "Results" }}
-        columns={columns}
-        data={data}
-        perPage={10}
-        disableHeader
-        noBorder
-      />
-    </StyledResults>
+    <>
+      {results?.length && (
+        <List
+          height={height}
+          itemCount={results.length}
+          itemData={data}
+          itemSize={25}
+          width="100%"
+          overscanCount={scrollOverscanCount}
+        >
+          {MemoizedRow}
+        </List>
+      )}
+    </>
   );
 };
+
+interface Row {
+  data: IResponseEntity[];
+  index: number;
+  style: any;
+}
+const Row: React.FC<Row> = ({ data, index, style }) => {
+  const entity = data[index];
+
+  return (
+    <StyledRow style={style}>
+      <StyledResultItem>
+        <EntityTag actant={entity} tooltipPosition="left center" fullWidth />
+      </StyledResultItem>
+    </StyledRow>
+  );
+};
+
+export const MemoizedRow = React.memo(Row, areEqual);
