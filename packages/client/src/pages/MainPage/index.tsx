@@ -196,7 +196,9 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
       (b) => b === true
     );
 
-    if (isThisBoxHidden) {
+    if (!fourthPanelExpanded) {
+      return heightContent / 3;
+    } else if (isThisBoxHidden) {
       return hiddenBoxHeight;
     } else {
       if (openBoxesCount.length === 3) {
