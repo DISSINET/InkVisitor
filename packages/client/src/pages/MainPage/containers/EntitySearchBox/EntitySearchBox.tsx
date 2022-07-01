@@ -9,10 +9,11 @@ import { IRequestSearch } from "@shared/types/request-search";
 import api from "api";
 import { Button, Dropdown, Input, Loader, TypeBar } from "components";
 import { useDebounce } from "hooks";
-import React, { useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { FaUnlink } from "react-icons/fa";
 import { useQuery } from "react-query";
 import { OptionTypeBase, ValueType } from "react-select";
+import { useAppSelector } from "redux/hooks";
 import { wildCardChar } from "Theme/constants";
 import { EntitySuggester, EntityTag } from "..";
 import {
@@ -44,6 +45,9 @@ export const EntitySearchBox: React.FC = () => {
   const debouncedValues = useDebounce<IRequestSearch>(searchData, debounceTime);
 
   const resultsRef = useRef<HTMLDivElement>(null);
+  const fourthPanelBoxesOpened: { [key: string]: boolean } = useAppSelector(
+    (state) => state.layout.fourthPanelBoxesOpened
+  );
 
   // check whether the search should be executed
   const validSearch = useMemo(() => {
@@ -145,13 +149,17 @@ export const EntitySearchBox: React.FC = () => {
     return options;
   }, [templates]);
 
-  const getResultsHeight = () => {
+  const [resultsHeight, setResultsHeight] = useState(0);
+
+  useEffect(() => {
     if (resultsRef.current) {
       const rect = resultsRef.current.getBoundingClientRect();
       const height = rect["height"];
-      return height;
+      setResultsHeight(height);
     }
-  };
+  }, [resultsRef.current, fourthPanelBoxesOpened]);
+
+  const getResultsHeight = () => {};
 
   return (
     <StyledBoxContent>
@@ -257,7 +265,7 @@ export const EntitySearchBox: React.FC = () => {
         {sortedEntities.length > 0 && (
           <EntitySearchResults
             results={sortedEntities}
-            height={getResultsHeight()}
+            height={resultsHeight}
           />
         )}
         <Loader show={isFetching} />
