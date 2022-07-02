@@ -277,7 +277,7 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
               >
                 <MemoizedStatementListBox />
               </Box>
-              {detailIdArray.length && (
+              {detailIdArray.length > 0 && (
                 <Box
                   height={heightContent / 2 + 20}
                   label="Detail"
