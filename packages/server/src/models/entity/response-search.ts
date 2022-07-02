@@ -12,7 +12,8 @@ import { getEntityClass } from "@models/factory";
  * SearchQuery is customized builder for search queries, allowing to build query by chaining prepared filters
  */
 export class SearchQuery {
-  usedLabel?: string;
+  usedLabel?: string; // used for additional sorting
+  retainedIdsOrder?: string[]; // used for additional sorting - to respect provided entityIds
 
   connection: Connection;
   query: RTable<any>;
@@ -202,6 +203,10 @@ export class SearchQuery {
    * @param req
    */
   async fromRequest(req: RequestSearch): Promise<void> {
+    if (req.entityIds) {
+      this.retainedIdsOrder = req.entityIds;
+    }
+
     if (req.cooccurrenceId) {
       const assocEntityIds = await this.getAssociatedEntityIds(
         req.cooccurrenceId
@@ -260,10 +265,13 @@ export class ResponseSearch {
   async prepare(httpRequest: Request): Promise<ResponseEntity[]> {
     const query = new SearchQuery(httpRequest.db.connection);
     await query.fromRequest(this.request);
-    const entities = sortByWordMatch(
-      sortByLength(await query.do()),
-      query.usedLabel
-    );
+    let entities = await query.do();
+
+    if (query.retainedIdsOrder) {
+      entities = sortByRequiredOrder(entities, query.retainedIdsOrder);
+    } else {
+      entities = sortByWordMatch(sortByLength(entities), query.usedLabel);
+    }
 
     let out: ResponseEntity[] = [];
     for (const entityData of entities) {
@@ -280,9 +288,9 @@ export class ResponseSearch {
  * DEPRECATED
  * Sort retrieved entities by label distance or length of the entity label.
  * In case of empty label only the latter will be used (distance will be 0).
- * @param entities
- * @param label
- * @returns
+ * @param entities original unsorted entities
+ * @param label original wanted label
+ * @returns sorted entities list
  */
 export function sort(entities: IEntity[], label: string = ""): IEntity[] {
   const indexMap: Record<number, IEntity[]> = {};
@@ -314,8 +322,8 @@ export function sort(entities: IEntity[], label: string = ""): IEntity[] {
 
 /**
  * Sort entities by length
- * @param entities
- * @returns
+ * @param entities original unsorted entities
+ * @returns sorted entities list
  */
 export function sortByLength(entities: IEntity[]) {
   return entities.sort((a, b) => a.label.length - b.label.length);
@@ -323,9 +331,9 @@ export function sortByLength(entities: IEntity[]) {
 
 /**
  * Prioritize entities with exact word-match
- * @param entities
- * @param usedLabel
- * @returns
+ * @param entities original unsorted entities
+ * @param usedLabel original label
+ * @returns sorted entities list
  */
 export function sortByWordMatch(
   entities: IEntity[],
@@ -352,4 +360,24 @@ export function sortByWordMatch(
   }
 
   return sortedExact.concat(sortedSubstring);
+}
+
+/**
+ * Returns entities in wanted order, ignoring ids not in the wanted list
+ * @param entities original unsorted entities
+ * @param wantedOrder list of ids
+ * @returns sorted entities list
+ */
+export function sortByRequiredOrder(
+  entities: IEntity[],
+  wantedOrder: string[]
+): IEntity[] {
+  const newList: IEntity[] = [];
+  for (const id of wantedOrder) {
+    const found = entities.find((e) => e.id === id);
+    if (found) {
+      newList.push(found);
+    }
+  }
+  return newList;
 }
