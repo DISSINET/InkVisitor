@@ -1,10 +1,16 @@
+import entities from "@modules/entities";
 import { Db } from "@service/RethinkDB";
 import { deleteEntities } from "@service/shorthands";
 import { EntityClass } from "@shared/enums";
 import { IEntity } from "@shared/types";
 import Entity from "./entity";
 import { prepareEntity } from "./entity.test";
-import { SearchQuery, sortByLength, sortByWordMatch } from "./response-search";
+import {
+  SearchQuery,
+  sortByLength,
+  sortByRequiredOrder,
+  sortByWordMatch,
+} from "./response-search";
 
 describe("Response search - advanced label search", function () {
   let db: Db;
@@ -81,15 +87,15 @@ describe("Response search - advanced label search", function () {
 
 describe("test sorting", function () {
   const entitites: IEntity[] = [
-    new Entity({ label: "one" }),
-    new Entity({ label: "three" }),
-    new Entity({ label: "one hundred and six" }),
-    new Entity({ label: "five" }),
-    new Entity({ label: "six" }),
-    new Entity({ label: "seven" }),
-    new Entity({ label: "eight" }),
-    new Entity({ label: "eleven" }),
-    new Entity({ label: "twenty-one" }),
+    new Entity({ id: "1", label: "one" }),
+    new Entity({ id: "2", label: "three" }),
+    new Entity({ id: "3", label: "one hundred and six" }),
+    new Entity({ id: "4", label: "five" }),
+    new Entity({ id: "5", label: "six" }),
+    new Entity({ id: "6", label: "seven" }),
+    new Entity({ id: "7", label: "eight" }),
+    new Entity({ id: "8", label: "eleven" }),
+    new Entity({ id: "9", label: "twenty-one" }),
   ];
 
   describe("sortByLength", () => {
@@ -141,6 +147,25 @@ describe("test sorting", function () {
 
     it("should return fourth entity as the one without matching words but it is stored on lowest index", function () {
       expect(sortedLabels[3]).toEqual("three");
+    });
+  });
+
+  describe("sortByRequiredOrder with empty wanted list", () => {
+    it("should return empty list", function () {
+      const sorted = sortByRequiredOrder(entitites, []);
+      expect(sorted).toEqual([]);
+    });
+  });
+
+  describe("sortByRequiredOrder with non empty", () => {
+    it("should return first and last entity in expected order", function () {
+      const sorted = sortByRequiredOrder(
+        entitites,
+        entitites.map((e) => e.id).reverse()
+      );
+      expect(sorted).toHaveLength(entitites.length);
+      expect(sorted[0].id).toEqual(entitites[entitites.length - 1].id);
+      expect(sorted[sorted.length - 1].id).toEqual(entitites[0].id);
     });
   });
 });
