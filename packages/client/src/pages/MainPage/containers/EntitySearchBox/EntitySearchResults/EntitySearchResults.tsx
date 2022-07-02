@@ -15,7 +15,6 @@ export const EntitySearchResults: React.FC<EntitySearchResults> = ({
   height = 180,
 }) => {
   const data = useMemo(() => (results ? results : []), [results]);
-  console.log(height);
 
   return (
     <>

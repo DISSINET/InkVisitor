@@ -1,4 +1,5 @@
 import { EntityClass } from "@shared/enums";
+import { IResponseEntity } from "@shared/types";
 import api from "api";
 import { Tooltip, TypeBar } from "components";
 import React, { MouseEventHandler } from "react";
@@ -11,31 +12,17 @@ import {
 } from "./EntityDetailTabStyles";
 
 interface EntityDetailTab {
-  entityId: string;
+  entity: IResponseEntity;
   onClick?: MouseEventHandler<HTMLElement>;
   onClose?: () => void;
   isSelected?: boolean;
 }
 export const EntityDetailTab: React.FC<EntityDetailTab> = ({
-  entityId,
+  entity,
   onClick,
   onClose,
   isSelected = false,
 }) => {
-  const {
-    status,
-    data: entity,
-    error,
-    isFetching,
-  } = useQuery(
-    ["entity", entityId],
-    async () => {
-      const res = await api.detailGet(entityId);
-      return res.data;
-    },
-    { enabled: !!entityId && api.isLoggedIn() }
-  );
-
   return (
     <StyledTab isSelected={isSelected}>
       <Tooltip

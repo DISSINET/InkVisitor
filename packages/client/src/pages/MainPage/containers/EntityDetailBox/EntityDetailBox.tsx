@@ -1,5 +1,8 @@
+import { IResponseEntity } from "@shared/types";
+import api from "api";
 import { useSearchParams } from "hooks";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
+import { useQuery } from "react-query";
 import { EntityDetail } from "./EntityDetail/EntityDetail";
 import { StyledTabGroup } from "./EntityDetailBoxStyles";
 import { EntityDetailTab } from "./EntityDetailTab/EntityDetailTab";
@@ -19,17 +22,32 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
     }
   }, []);
 
+  const [entities, setEntities] = useState<IResponseEntity[]>([]);
+
+  const { status, data, error, isFetching } = useQuery(
+    ["search", detailIdArray],
+    async () => {
+      const res = await api.entitiesSearch({ entityIds: detailIdArray });
+      setEntities(res.data);
+      return res.data;
+    },
+    {
+      enabled: api.isLoggedIn() && detailIdArray.length > 0,
+    }
+  );
+
   return (
     <>
       <StyledTabGroup>
-        {detailIdArray.length > 0 &&
-          detailIdArray.map((entityId, key) => (
+        {entities &&
+          entities.length > 0 &&
+          entities?.map((entity, key) => (
             <EntityDetailTab
               key={key}
-              entityId={entityId}
-              onClick={() => setSelectedDetailId(entityId)}
-              onClose={() => removeDetailId(entityId)}
-              isSelected={selectedDetailId === entityId}
+              entity={entity}
+              onClick={() => setSelectedDetailId(entity.id)}
+              onClose={() => removeDetailId(entity.id)}
+              isSelected={selectedDetailId === entity.id}
             />
           ))}
       </StyledTabGroup>
