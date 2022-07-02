@@ -203,7 +203,7 @@ export class SearchQuery {
    * @param req
    */
   async fromRequest(req: RequestSearch): Promise<void> {
-    if (req.entityIds) {
+    if (req.entityIds?.length) {
       this.retainedIdsOrder = req.entityIds;
     }
 
@@ -217,7 +217,7 @@ export class SearchQuery {
       req.entityIds = req.entityIds.concat(assocEntityIds);
     }
 
-    if (req.entityIds && req.entityIds.length) {
+    if (req.entityIds?.length) {
       this.whereEntityIds(req.entityIds);
     }
 
