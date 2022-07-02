@@ -20,8 +20,13 @@ import {
   IResponseAdministration,
   IResponseGeneric,
 } from "@shared/types";
-import mailer from "@service/mailer";
+import mailer, {
+  passwordResetTemplate,
+  testTemplate,
+  userCreatedTemplate,
+} from "@service/mailer";
 import { ResponseUser } from "@models/user/response";
+import { domainName, hostUrl } from "@common/functions";
 
 export default Router()
   .post(
@@ -116,11 +121,16 @@ export default Router()
       const result = await user.save(request.db.connection);
 
       if (result.inserted === 1) {
+        const hash = "123";
         try {
-          await mailer.sendNewUser(user.email, {
-            login: user.name,
-            password: rawpassword,
-          });
+          await mailer.sendTemplate(
+            user.email,
+            userCreatedTemplate(
+              user.name,
+              domainName(),
+              `${hostUrl()}/activate?hash=${hash}`
+            )
+          );
         } catch (e) {
           throw new EmailError(
             "please check the logs",
@@ -258,12 +268,16 @@ export default Router()
 
       console.log(`Password reset for ${user.email}: ${raw}`);
 
+      const hash = "123";
       try {
-        await mailer.sendPasswordReset(user.email, {
-          login: user.name,
-          email: user.email,
-          password: raw,
-        });
+        await mailer.sendTemplate(
+          user.email,
+          passwordResetTemplate(
+            user.name,
+            domainName(),
+            `${hostUrl()}/password_reset?hash=${hash}`
+          )
+        );
       } catch (e) {
         throw new EmailError("please check the logs", (e as Error).toString());
       }
@@ -283,10 +297,7 @@ export default Router()
       }
 
       try {
-        await mailer.sendTest(email, {
-          name: user.name,
-          email: user.email,
-        });
+        await mailer.sendTemplate(email, testTemplate(domainName()));
       } catch (e) {
         throw new EmailError("please check the logs", (e as Error).toString());
       }

@@ -20,6 +20,7 @@ import { validateJwt } from "@common/auth";
 import compression from "compression";
 
 import "@models/events/register";
+import mailer, { userCreateTemplate } from "@service/mailer";
 
 const server = express();
 
