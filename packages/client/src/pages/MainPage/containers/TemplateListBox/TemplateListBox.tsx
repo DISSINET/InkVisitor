@@ -56,7 +56,7 @@ export const TemplateListBox: React.FC<TemplateListBox> = ({}) => {
     (state) => state.layout.fourthPanelBoxesOpened
   );
 
-  const { detailId, removeDetailId, setStatementId, appendDetailId } =
+  const { detailIdArray, removeDetailId, setStatementId, appendDetailId } =
     useSearchParams();
   const queryClient = useQueryClient();
   const {
@@ -108,7 +108,7 @@ export const TemplateListBox: React.FC<TemplateListBox> = ({}) => {
     async (entityId: string) => await api.entityDelete(entityId),
     {
       onSuccess: () => {
-        if (removeEntityId && detailId.includes(removeEntityId)) {
+        if (removeEntityId && detailIdArray.includes(removeEntityId)) {
           removeDetailId(removeEntityId);
         }
         entityToRemove &&
