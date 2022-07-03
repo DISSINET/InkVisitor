@@ -27,14 +27,22 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
   const { status, data, error, isFetching } = useQuery(
     ["search", detailIdArray],
     async () => {
-      const res = await api.entitiesSearch({ entityIds: detailIdArray });
-      setEntities(res.data);
-      return res.data;
+      if (detailIdArray.length > entities.length) {
+        const res = await api.entitiesSearch({ entityIds: detailIdArray });
+        setEntities(res.data);
+        return res.data;
+      }
     },
     {
       enabled: api.isLoggedIn() && detailIdArray.length > 0,
     }
   );
+
+  const handleClose = (entityId: string) => {
+    const newEntities = entities.filter((e) => e.id !== entityId);
+    setEntities(newEntities);
+    removeDetailId(entityId);
+  };
 
   return (
     <>
@@ -46,7 +54,7 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
               key={key}
               entity={entity}
               onClick={() => setSelectedDetailId(entity.id)}
-              onClose={() => removeDetailId(entity.id)}
+              onClose={() => handleClose(entity.id)}
               isSelected={selectedDetailId === entity.id}
             />
           ))}
