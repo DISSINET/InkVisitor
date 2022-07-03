@@ -24,7 +24,7 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
 
   const [entities, setEntities] = useState<IResponseEntity[]>([]);
 
-  const { status, data, error, isFetching } = useQuery(
+  const {} = useQuery(
     ["search", detailIdArray],
     async () => {
       if (detailIdArray.length > entities.length) {
