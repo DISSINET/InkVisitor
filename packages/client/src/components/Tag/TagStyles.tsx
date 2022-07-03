@@ -5,7 +5,7 @@ interface StyledTagWrapper {
   borderStyle: "solid" | "dashed" | "dotted";
   status: string;
   ltype: string;
-  isEmpty?: boolean;
+  dragDisabled?: boolean;
 }
 export const StyledTagWrapper = styled.div<StyledTagWrapper>`
   display: inline-flex;
@@ -16,7 +16,7 @@ export const StyledTagWrapper = styled.div<StyledTagWrapper>`
   border-radius: ${({ theme }) => theme.borderRadius["sm"]};
   margin-right: ${({ theme, hasMarginRight }) =>
     hasMarginRight && theme.space[1]};
-  cursor: ${({ isEmpty }) => (isEmpty ? "default" : "move")};
+  cursor: ${({ dragDisabled }) => (dragDisabled ? "default" : "move")};
   border-style: ${({ theme, ltype }) =>
     "solid solid solid " + theme.borderStyle[ltype]};
   color: ${({ theme }) => theme.color["black"]};

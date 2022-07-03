@@ -17,6 +17,8 @@ interface EntityTag {
   moveFn?: (dragIndex: number, hoverIndex: number) => void;
   isSelected?: boolean;
   disableTooltip?: boolean;
+  disableDoubleClick?: boolean;
+  disableDrag?: boolean;
   tooltipPosition?: PopupPosition | PopupPosition[];
   updateOrderFn?: (item: DragItem) => void;
   lvl?: number;
@@ -36,6 +38,8 @@ export const EntityTag: React.FC<EntityTag> = ({
   moveFn,
   isSelected,
   disableTooltip = false,
+  disableDrag = false,
+  disableDoubleClick = false,
   tooltipPosition,
   updateOrderFn,
   lvl,
@@ -63,6 +67,8 @@ export const EntityTag: React.FC<EntityTag> = ({
       invertedLabel={isSelected}
       index={index}
       disableTooltip={disableTooltip}
+      disableDoubleClick={disableDoubleClick}
+      disableDrag={disableDrag}
       tooltipPosition={tooltipPosition}
       updateOrderFn={updateOrderFn}
       parentId={parentId}
