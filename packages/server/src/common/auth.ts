@@ -3,6 +3,7 @@ import { sign as signJwt } from "jsonwebtoken";
 import { IUser } from "@shared/types/user";
 import jwt, { secretType } from "express-jwt";
 import { Request } from "express";
+import { v1 as uuid } from "uuid";
 
 export function hashPassword(rawPassword: string): string {
   return bcrypt.hashSync(rawPassword, 10);
@@ -10,6 +11,10 @@ export function hashPassword(rawPassword: string): string {
 
 export function generateRandomString(len: number): string {
   return Math.random().toString(36).slice(-len);
+}
+
+export function generateUuid(): string {
+  return uuid();
 }
 
 export function checkPassword(
