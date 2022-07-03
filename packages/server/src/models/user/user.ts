@@ -14,7 +14,7 @@ import {
 } from "@models/common";
 import { UserRole, UserRoleMode } from "@shared/enums";
 import { ModelNotValidError } from "@shared/types/errors";
-import { generateRandomString, hashPassword } from "@common/auth";
+import { generateRandomString, generateUuid, hashPassword } from "@common/auth";
 import { regExpEscape } from "@common/functions";
 import { nonenumerable } from "@common/decorators";
 
@@ -117,6 +117,8 @@ export default class User implements IDbModel, IUser {
   storedTerritories: StoredTerritory[] = [];
   rights: UserRight[] = [];
 
+  hash?: string = "";
+
   static table = "users";
 
   constructor(data: Record<string, any>) {
@@ -189,6 +191,12 @@ export default class User implements IDbModel, IUser {
     const raw = generateRandomString(10);
     this.password = hashPassword(raw);
     return raw;
+  }
+
+  generateHash(): string {
+    // should be unique - time based uuid
+    this.hash = generateUuid();
+    return this.hash;
   }
 
   static async getUser(

@@ -212,6 +212,36 @@ export default Router()
       }
     })
   )
+  .patch(
+    "/:userId/active",
+    asyncRouteHandler<IResponseGeneric>(async (request: Request) => {
+      const userId = request.params.userId;
+      const hash = request.query.hash;
+
+      if (!userId || !hash) {
+        throw new BadParams("both userId and hash is required");
+      }
+
+      const existingUser = await User.getUser(request.db.connection, userId);
+      if (!existingUser || existingUser.hash !== hash) {
+        throw new UserDoesNotExits(UserDoesNotExits.message, userId);
+      }
+
+      const result = await existingUser.update(request.db.connection, {
+        active: true,
+        hash: null,
+      });
+      console.log(result);
+      if (!result.replaced && !result.unchanged) {
+        throw new InternalServerError(`cannot update user ${userId}`);
+      }
+
+      return {
+        result: true,
+        message: "User activated",
+      };
+    })
+  )
   .get(
     "/:userId/bookmarks",
     asyncRouteHandler<IResponseBookmarkFolder[]>(async (request: Request) => {
