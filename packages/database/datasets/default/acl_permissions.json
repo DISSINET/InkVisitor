@@ -46,6 +46,16 @@
   },
   {
     "controller": "users",
+    "route": "active",
+    "roles": ["*"]
+  },
+  {
+    "controller": "users",
+    "route": "password",
+    "roles": ["*"]
+  },
+  {
+    "controller": "users",
     "route": "bookmarksGet",
     "roles": ["*"]
   },
