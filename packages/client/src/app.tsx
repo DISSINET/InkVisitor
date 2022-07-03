@@ -1,6 +1,8 @@
 import api from "api";
 import { SearchParamsProvider } from "hooks/useParamsContext";
 import { useWindowSize } from "hooks/useWindowSize";
+import ActivatePage from "pages/Activate";
+import PasswordResetPage from "pages/PasswordReset";
 import React, { useEffect, Profiler } from "react";
 import { Helmet } from "react-helmet";
 import { QueryClient, QueryClientProvider } from "react-query";
@@ -132,6 +134,20 @@ export const App: React.FC = () => {
                     )}
                   />
                 ) : null}
+                <Route
+                  path="/activate"
+                  exact
+                  render={(props) => (
+                    <ActivatePage {...props} size={[width, height]} />
+                  )}
+                />
+                <Route
+                  path="/password_reset"
+                  exact
+                  render={(props) => (
+                    <PasswordResetPage {...props} size={[width, height]} />
+                  )}
+                />
               </Switch>
             </SearchParamsProvider>
           </BrowserRouter>

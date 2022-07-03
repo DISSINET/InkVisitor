@@ -444,7 +444,7 @@ export const UserListModal: React.FC<UserListModal> = ({
                 tooltip="reset password"
                 color="warning"
                 onClick={() => {
-                  api.resetPassword(userId);
+                  api.resetPasswordAdmin(userId);
                 }}
               />
             </ButtonGroup>
