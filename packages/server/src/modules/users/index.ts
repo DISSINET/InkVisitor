@@ -12,7 +12,7 @@ import {
   UserDoesNotExits,
   UserNotActiveError,
 } from "@shared/types/errors";
-import { checkPassword, generateAccessToken } from "@common/auth";
+import { checkPassword, generateAccessToken, hashPassword } from "@common/auth";
 import { asyncRouteHandler } from "..";
 import {
   IResponseBookmarkFolder,
@@ -213,32 +213,68 @@ export default Router()
     })
   )
   .patch(
-    "/:userId/active",
+    "/active",
     asyncRouteHandler<IResponseGeneric>(async (request: Request) => {
-      const userId = request.params.userId;
-      const hash = request.query.hash;
-
-      if (!userId || !hash) {
-        throw new BadParams("both userId and hash is required");
+      const hash = (request.query.hash as string) || "";
+      if (!hash) {
+        throw new BadParams("hash is required");
       }
 
-      const existingUser = await User.getUser(request.db.connection, userId);
-      if (!existingUser || existingUser.hash !== hash) {
-        throw new UserDoesNotExits(UserDoesNotExits.message, userId);
+      const existingUser = await User.getUserByHash(
+        request.db.connection,
+        hash
+      );
+      if (!existingUser) {
+        throw new UserDoesNotExits(UserDoesNotExits.message, "");
       }
 
       const result = await existingUser.update(request.db.connection, {
         active: true,
-        hash: null,
       });
-      console.log(result);
-      if (!result.replaced && !result.unchanged) {
-        throw new InternalServerError(`cannot update user ${userId}`);
+      if (!result.replaced) {
+        throw new InternalServerError(`cannot update user ${existingUser.id}`);
       }
 
       return {
         result: true,
         message: "User activated",
+      };
+    })
+  )
+  .patch(
+    "/password",
+    asyncRouteHandler<IResponseGeneric>(async (request: Request) => {
+      const hash = (request.query.hash as string) || "";
+      if (!hash) {
+        throw new BadParams("hash is required");
+      }
+
+      const password = request.body.password;
+      const passwordRepeat = request.body.passwordRepeat;
+
+      if (password !== passwordRepeat) {
+        throw new BadParams("Passwords do not match");
+      }
+
+      const existingUser = await User.getUserByHash(
+        request.db.connection,
+        hash
+      );
+      if (!existingUser) {
+        throw new UserDoesNotExits("Invalid hash", "");
+      }
+
+      const result = await existingUser.update(request.db.connection, {
+        hash: null,
+        password: hashPassword(password),
+      });
+      if (!result.replaced) {
+        throw new InternalServerError(`cannot update user ${existingUser.id}`);
+      }
+
+      return {
+        result: true,
+        message: "Password changed",
       };
     })
   )
