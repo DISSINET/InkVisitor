@@ -1,9 +1,7 @@
 import { EntityClass } from "@shared/enums";
 import { IResponseEntity } from "@shared/types";
-import api from "api";
 import { Tooltip, TypeBar } from "components";
 import React, { MouseEventHandler } from "react";
-import { useQuery } from "react-query";
 import {
   StyledCgClose,
   StyledClose,
@@ -23,18 +21,16 @@ export const EntityDetailTab: React.FC<EntityDetailTab> = ({
   onClose,
   isSelected = false,
 }) => {
+  const tabLabel = entity?.label || entity?.data.text || "no label";
   return (
     <StyledTab isSelected={isSelected}>
-      <Tooltip
-        disabled={!entity?.label && !entity?.data.text}
-        label={entity?.label || entity?.data.text}
-      >
+      <Tooltip label={tabLabel}>
         <StyledLabel
           isItalic={entity?.class === EntityClass.Statement}
           onClick={onClick}
         >
           {entity?.class && <TypeBar entityLetter={entity?.class} noMargin />}
-          {!entity ? "..." : entity.label || entity.data.text || "no label"}
+          {!entity ? "..." : tabLabel}
         </StyledLabel>
       </Tooltip>
       <StyledClose onClick={onClose}>
