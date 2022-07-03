@@ -26,6 +26,8 @@ export const separatorXPercentPosition = 42;
 // BOXES
 export const hiddenBoxHeight = 34;
 
+export const maxTabCount = 20;
+
 // animations
 export const springConfig: { [key: string]: {} } = {
   panelExpand: { tension: 195, friction: 31 },

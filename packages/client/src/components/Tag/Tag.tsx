@@ -1,6 +1,6 @@
 import { Tooltip } from "components";
 import { useSearchParams } from "hooks";
-import React, { ReactNode, useEffect, useRef } from "react";
+import React, { ReactNode, useEffect, useMemo, useRef } from "react";
 import {
   DragSourceMonitor,
   DropTargetMonitor,
@@ -15,7 +15,6 @@ import { dndHoverFn } from "utils";
 import {
   ButtonWrapper,
   StyledEntityTag,
-  StyledItalic,
   StyledLabel,
   StyledTagWrapper,
   StyledTooltipSeparator,
@@ -41,6 +40,7 @@ interface TagProps {
   moveFn?: (dragIndex: number, hoverIndex: number) => void;
   disableTooltip?: boolean;
   disableDoubleClick?: boolean;
+  disableDrag?: boolean;
   tooltipPosition?: PopupPosition | PopupPosition[];
   updateOrderFn?: (item: DragItem) => void;
   lvl?: number;
@@ -71,13 +71,14 @@ export const Tag: React.FC<TagProps> = ({
   tooltipPosition = "right top",
   disableTooltip = false,
   disableDoubleClick = false,
+  disableDrag = false,
   updateOrderFn = () => {},
   statementsCount,
   isFavorited = false,
   isTemplate = false,
   lvl,
 }) => {
-  const { setDetailId } = useSearchParams();
+  const { appendDetailId } = useSearchParams();
   const dispatch = useAppDispatch();
   const draggedTerritory: DraggedTerritoryItem = useAppSelector(
     (state) => state.territoryTree.draggedTerritory
@@ -94,6 +95,11 @@ export const Tag: React.FC<TagProps> = ({
     },
   });
 
+  const canDrag = useMemo(
+    () => category !== "X" && !disableDrag,
+    [category, disableDrag]
+  );
+
   const [{ isDragging }, drag] = useDrag({
     item: { type: ItemTypes.TAG, id: propId, index, category },
     collect: (monitor: DragSourceMonitor) => ({
@@ -102,7 +108,7 @@ export const Tag: React.FC<TagProps> = ({
     end: (item: DragItem | undefined, monitor: DragSourceMonitor) => {
       if (item && item.index !== index) updateOrderFn(item);
     },
-    canDrag: category !== "X",
+    canDrag: canDrag,
   });
 
   useEffect(() => {
@@ -128,7 +134,7 @@ export const Tag: React.FC<TagProps> = ({
     e.stopPropagation();
     e.nativeEvent.stopImmediatePropagation();
 
-    !disableDoubleClick && setDetailId(propId);
+    !disableDoubleClick && appendDetailId(propId);
   };
 
   const getShortTag = () => {
@@ -144,7 +150,7 @@ export const Tag: React.FC<TagProps> = ({
         <StyledTooltipSeparator>
           <StyledTagWrapper
             ref={ref}
-            isEmpty={category === "X"}
+            dragDisabled={!canDrag}
             status={status}
             ltype={ltype}
             borderStyle={borderStyle}
@@ -193,7 +199,7 @@ export const Tag: React.FC<TagProps> = ({
             <StyledTooltipSeparator>
               <StyledTagWrapper
                 ref={ref}
-                isEmpty={category === "X"}
+                dragDisabled={!canDrag}
                 borderStyle={borderStyle}
                 status={status}
                 ltype={ltype}
