@@ -258,7 +258,7 @@ class Api {
   /*
     This request will restart the password of the user with userId and send the new password to his email address
   */
-  async resetPassword(
+  async resetPasswordAdmin(
     userId: string
   ): Promise<AxiosResponse<IResponseGeneric>> {
     try {
@@ -515,6 +515,36 @@ class Api {
   ): Promise<AxiosResponse<IResponseGeneric>> {
     try {
       const response = await this.connection.put(`/acls/${permissionId}`, data);
+      return response;
+    } catch (err: any | AxiosError) {
+      throw { ...err.response.data };
+    }
+  }
+
+  async activate(hash: string): Promise<AxiosResponse<IResponseGeneric>> {
+    try {
+      const response = await this.connection.patch(
+        `/users/active?hash=${hash}`
+      );
+      return response;
+    } catch (err: any | AxiosError) {
+      throw { ...err.response.data };
+    }
+  }
+
+  async resetPassword(
+    hash: string,
+    password: string,
+    passwordRepeat: string
+  ): Promise<AxiosResponse<IResponseGeneric>> {
+    try {
+      const response = await this.connection.patch(
+        `/users/password?hash=${hash}`,
+        {
+          password,
+          passwordRepeat,
+        }
+      );
       return response;
     } catch (err: any | AxiosError) {
       throw { ...err.response.data };
