@@ -111,17 +111,19 @@ export default Router()
     asyncRouteHandler<IResponseGeneric>(async (request: Request) => {
       const userData = request.body as IUser;
 
+      // force empty password + inactive status
+      delete userData.password;
+      userData.active = false;
+
       const user = new User(userData);
       if (!user.isValid()) {
         throw new ModelNotValidError("invalid model");
       }
 
-      const rawpassword = user.generatePassword();
-      user.active = true;
+      const hash = user.generateHash();
       const result = await user.save(request.db.connection);
 
       if (result.inserted === 1) {
-        const hash = "123";
         try {
           await mailer.sendTemplate(
             user.email,
