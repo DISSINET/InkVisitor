@@ -3,29 +3,15 @@ import { EntityClass } from "@shared/enums";
 import { IEntity } from "@shared/types";
 import { IRequestSearch } from "@shared/types/request-search";
 import api from "api";
-import {
-  Button,
-  ButtonGroup,
-  Dropdown,
-  Input,
-  Loader,
-  Modal,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
-  TypeBar,
-} from "components";
+import { Button, Dropdown, Input, Loader, TypeBar } from "components";
 
-import { useSearchParams } from "hooks";
-import React, { useMemo, useState } from "react";
+import React, { useState } from "react";
 import { FaPlus, FaTrash } from "react-icons/fa";
-import { useMutation, useQuery, useQueryClient } from "react-query";
+import { useQuery } from "react-query";
 import { OptionTypeBase, ValueType } from "react-select";
-import { toast } from "react-toastify";
 import { useAppSelector } from "redux/hooks";
 import { DropdownItem } from "types";
 import { EntityTag } from "..";
-import { StyledContent } from "../EntityBookmarkBox/EntityBookmarkBoxStyles";
 import {
   StyledBoxContent,
   StyledTemplateFilter,
@@ -37,11 +23,11 @@ import {
   StyledTemplateSectionList,
 } from "./TemplateListBoxStyles";
 import { TemplateListCreateModal } from "./TemplateListCreateModal/TemplateListCreateModal";
+import { TemplateListRemoveModal } from "./TemplateListRemoveModal/TemplateListRemoveModal";
 
 interface TemplateListBox {}
 export const TemplateListBox: React.FC<TemplateListBox> = ({}) => {
   // FILTER;
-
   const allEntityOption = { value: "all", label: "all" };
   const allEntityOptions = [allEntityOption, ...entitiesDict] as any;
 
@@ -53,8 +39,6 @@ export const TemplateListBox: React.FC<TemplateListBox> = ({}) => {
     (state) => state.layout.fourthPanelBoxesOpened
   );
 
-  const { detailIdArray, removeDetailId } = useSearchParams();
-  const queryClient = useQueryClient();
   const {
     status,
     data: templatesData,
@@ -84,24 +68,6 @@ export const TemplateListBox: React.FC<TemplateListBox> = ({}) => {
     }
   );
 
-  const templateRemoveMutation = useMutation(
-    async (entityId: string) => await api.entityDelete(entityId),
-    {
-      onSuccess: () => {
-        if (removeEntityId && detailIdArray.includes(removeEntityId)) {
-          removeDetailId(removeEntityId);
-        }
-        entityToRemove &&
-          toast.warning(
-            `Template [${entityToRemove.class}]${entityToRemove.label} was removed`
-          );
-        setRemoveEntityId(false);
-        queryClient.invalidateQueries(["templates"]);
-        queryClient.invalidateQueries(["entity"]);
-      },
-    }
-  );
-
   // CREATE MODAL
   const [showCreateModal, setShowCreateModal] = useState<boolean>(false);
 
@@ -113,33 +79,9 @@ export const TemplateListBox: React.FC<TemplateListBox> = ({}) => {
   const [showRemoveModal, setShowRemoveModal] = useState<boolean>(false);
   const [removeEntityId, setRemoveEntityId] = useState<string | false>(false);
 
-  const entityToRemove: false | IEntity = useMemo(() => {
-    if (removeEntityId) {
-      const templateToBeRemoved = templatesData?.find(
-        (template: IEntity) => template.id === removeEntityId
-      );
-      return templateToBeRemoved || false;
-    } else {
-      return false;
-    }
-  }, [removeEntityId]);
-
   const handleAskRemoveTemplate = (templateId: string) => {
     setShowRemoveModal(true);
     setRemoveEntityId(templateId);
-  };
-
-  const handleRemoveTemplateCancel = () => {
-    setRemoveEntityId(false);
-    setShowRemoveModal(false);
-  };
-  // TODO: fix - lifecycle - removeEntityId is 2x, not work with shortcuts
-  const handleRemoveTemplateAccept = () => {
-    setShowRemoveModal(false);
-    if (removeEntityId) {
-      templateRemoveMutation.mutate(removeEntityId);
-    }
-    setRemoveEntityId(false);
   };
 
   return (
@@ -228,46 +170,13 @@ export const TemplateListBox: React.FC<TemplateListBox> = ({}) => {
         showCreateModal={showCreateModal}
         setShowCreateModal={setShowCreateModal}
       />
-      <Modal
-        key="remove"
-        showModal={showRemoveModal}
-        width="thin"
-        onEnterPress={() => {
-          handleRemoveTemplateAccept();
-        }}
-        onClose={() => {
-          handleRemoveTemplateCancel();
-        }}
-      >
-        <ModalHeader title="Remove Template" />
-        <ModalContent>
-          <StyledContent>
-            Remove template entity?
-            {entityToRemove && <EntityTag actant={entityToRemove} />}
-          </StyledContent>
-        </ModalContent>
-        <ModalFooter>
-          <ButtonGroup>
-            <Button
-              key="cancel"
-              label="Cancel"
-              color="greyer"
-              inverted
-              onClick={() => {
-                handleRemoveTemplateCancel();
-              }}
-            />
-            <Button
-              key="remove"
-              label="Remove"
-              color="danger"
-              onClick={() => {
-                handleRemoveTemplateAccept();
-              }}
-            />
-          </ButtonGroup>
-        </ModalFooter>
-      </Modal>
+      <TemplateListRemoveModal
+        showRemoveModal={showRemoveModal}
+        setShowRemoveModal={setShowRemoveModal}
+        removeEntityId={removeEntityId}
+        setRemoveEntityId={setRemoveEntityId}
+        templatesData={templatesData}
+      />
     </StyledBoxContent>
   );
 };
