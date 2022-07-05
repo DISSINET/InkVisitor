@@ -123,7 +123,7 @@ export const TemplateListBox: React.FC<TemplateListBox> = ({}) => {
   );
 
   // CREATE MODAL
-  const [createModal, setCreateModal] = useState<boolean>(false);
+  const [showCreateModal, setShowCreateModal] = useState<boolean>(false);
   const [createModalEntityClass, setCreateModalEntityClass] =
     useState<DropdownItem>(entitiesDict[0]);
   const [createModalEntityLabel, setCreateModalEntityLabel] =
@@ -131,7 +131,7 @@ export const TemplateListBox: React.FC<TemplateListBox> = ({}) => {
   const [createModalEntityDetail, setCreateModalEntityDetail] =
     useState<string>("");
   const handleCloseCreateModal = () => {
-    setCreateModal(false);
+    setShowCreateModal(false);
     resetCreateModal();
   };
 
@@ -142,7 +142,7 @@ export const TemplateListBox: React.FC<TemplateListBox> = ({}) => {
   };
 
   const handleAskCreateTemplate = () => {
-    setCreateModal(true);
+    setShowCreateModal(true);
   };
 
   const handleCreateTemplate = () => {
@@ -155,7 +155,7 @@ export const TemplateListBox: React.FC<TemplateListBox> = ({}) => {
   };
 
   // REMOVE MODAL
-  const [removeModal, setRemoveModal] = useState<boolean>(false);
+  const [showRemoveModal, setShowRemoveModal] = useState<boolean>(false);
   const [removeEntityId, setRemoveEntityId] = useState<string | false>(false);
 
   const entityToRemove: false | IEntity = useMemo(() => {
@@ -170,16 +170,16 @@ export const TemplateListBox: React.FC<TemplateListBox> = ({}) => {
   }, [removeEntityId]);
 
   const handleAskRemoveTemplate = (templateId: string) => {
-    setRemoveModal(true);
+    setShowRemoveModal(true);
     setRemoveEntityId(templateId);
   };
 
   const handleRemoveTemplateCancel = () => {
     setRemoveEntityId(false);
-    setRemoveModal(false);
+    setShowRemoveModal(false);
   };
   const handleRemoveTemplateAccept = () => {
-    setRemoveModal(false);
+    setShowRemoveModal(false);
     if (removeEntityId) {
       templateRemoveMutation.mutate(removeEntityId);
     }
@@ -289,11 +289,11 @@ export const TemplateListBox: React.FC<TemplateListBox> = ({}) => {
       </StyledTemplateSection>
 
       <Modal
-        showModal={createModal}
+        showModal={showCreateModal}
         width="thin"
         key="create"
         onEnterPress={() => {
-          //handleCreateTemplate();
+          handleCreateTemplate();
         }}
         onClose={() => {
           handleCloseCreateModal();
@@ -301,7 +301,6 @@ export const TemplateListBox: React.FC<TemplateListBox> = ({}) => {
       >
         <ModalHeader title="Create Template" />
         <ModalContent>
-          {/* <StyledContent> */}
           <ModalInputForm>
             <ModalInputLabel>{"Entity type: "}</ModalInputLabel>
             <ModalInputWrap>
@@ -317,6 +316,7 @@ export const TemplateListBox: React.FC<TemplateListBox> = ({}) => {
                 width={80}
                 entityDropdown
                 disableTyping
+                autoFocus
               />
               <TypeBar entityLetter={createModalEntityClass.value} />
             </ModalInputWrap>
@@ -328,7 +328,6 @@ export const TemplateListBox: React.FC<TemplateListBox> = ({}) => {
                   setCreateModalEntityLabel(newType)
                 }
                 changeOnType
-                autoFocus
               />
             </ModalInputWrap>
             <ModalInputLabel>{"Detail: "}</ModalInputLabel>
@@ -342,7 +341,6 @@ export const TemplateListBox: React.FC<TemplateListBox> = ({}) => {
               />
             </ModalInputWrap>
           </ModalInputForm>
-          {/* </StyledContent> */}
         </ModalContent>
         <ModalFooter>
           <ButtonGroup>
@@ -368,16 +366,16 @@ export const TemplateListBox: React.FC<TemplateListBox> = ({}) => {
       </Modal>
       <Modal
         key="remove"
-        showModal={removeModal}
+        showModal={showRemoveModal}
         width="thin"
         onEnterPress={() => {
-          //handleCreateTemplate();
+          handleRemoveTemplateAccept();
         }}
         onClose={() => {
-          handleCloseCreateModal();
+          handleRemoveTemplateCancel();
         }}
       >
-        <ModalHeader title="Create Template" />
+        <ModalHeader title="Remove Template" />
         <ModalContent>
           <StyledContent>
             Remove template entity?
