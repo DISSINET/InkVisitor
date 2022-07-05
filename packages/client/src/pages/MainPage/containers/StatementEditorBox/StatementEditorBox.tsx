@@ -84,8 +84,13 @@ const classesTags = [
 ];
 
 export const StatementEditorBox: React.FC = () => {
-  const { statementId, setStatementId, detailId, territoryId, setTerritoryId } =
-    useSearchParams();
+  const {
+    statementId,
+    setStatementId,
+    territoryId,
+    setTerritoryId,
+    selectedDetailId,
+  } = useSearchParams();
 
   const queryClient = useQueryClient();
 
@@ -99,7 +104,6 @@ export const StatementEditorBox: React.FC = () => {
     ["statement", statementId],
     async () => {
       const res = await api.statementGet(statementId);
-
       return res.data;
     },
     { enabled: !!statementId && api.isLoggedIn() }
@@ -490,7 +494,7 @@ export const StatementEditorBox: React.FC = () => {
     },
     {
       onSuccess: (data, variables) => {
-        if (detailId === statementId) {
+        if (selectedDetailId === statementId) {
           queryClient.invalidateQueries(["entity"]);
         }
         if (statement && statement.isTemplate) {
@@ -556,22 +560,26 @@ export const StatementEditorBox: React.FC = () => {
                 </StyledEditorHeaderInputWrap>
               </div>
             </StyledEditorStatementInfo>
-            <StyledBreadcrumbWrap>
-              {territoryPath &&
-                territoryPath.map((territory: string, key: number) => {
-                  return (
-                    <React.Fragment key={key}>
-                      <StatementListBreadcrumbItem territoryId={territory} />
-                    </React.Fragment>
-                  );
-                })}
-              {territoryData && (
-                <React.Fragment key={territoryData.id}>
-                  <StatementListBreadcrumbItem territoryId={territoryData.id} />
-                </React.Fragment>
-              )}
-              <Loader size={20} show={isFetchingTerritory} />
-            </StyledBreadcrumbWrap>
+            {!statement.isTemplate && (
+              <StyledBreadcrumbWrap>
+                {territoryPath &&
+                  territoryPath.map((territory: string, key: number) => {
+                    return (
+                      <React.Fragment key={key}>
+                        <StatementListBreadcrumbItem territoryId={territory} />
+                      </React.Fragment>
+                    );
+                  })}
+                {territoryData && (
+                  <React.Fragment key={territoryData.id}>
+                    <StatementListBreadcrumbItem
+                      territoryId={territoryData.id}
+                    />
+                  </React.Fragment>
+                )}
+                <Loader size={20} show={isFetchingTerritory} />
+              </StyledBreadcrumbWrap>
+            )}
           </StyledEditorPreSection>
           {userCanEdit && (
             <StyledEditorPreSection>
