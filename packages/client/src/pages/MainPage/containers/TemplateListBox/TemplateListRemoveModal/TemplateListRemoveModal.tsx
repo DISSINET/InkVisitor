@@ -16,15 +16,11 @@ import { StyledContent } from "../../EntityBookmarkBox/EntityBookmarkBoxStyles";
 import { EntityTag } from "../../EntityTag/EntityTag";
 
 interface TemplateListRemoveModal {
-  showRemoveModal: boolean;
-  setShowRemoveModal: React.Dispatch<React.SetStateAction<boolean>>;
   removeEntityId: string | false;
   setRemoveEntityId: (value: React.SetStateAction<string | false>) => void;
   templatesData: IResponseEntity[] | undefined;
 }
 export const TemplateListRemoveModal: React.FC<TemplateListRemoveModal> = ({
-  showRemoveModal,
-  setShowRemoveModal,
   removeEntityId,
   setRemoveEntityId,
   templatesData,
@@ -54,7 +50,6 @@ export const TemplateListRemoveModal: React.FC<TemplateListRemoveModal> = ({
           toast.warning(
             `Template [${entityToRemove.class}]${entityToRemove.label} was removed`
           );
-        setRemoveEntityId(false);
         queryClient.invalidateQueries(["templates"]);
         queryClient.invalidateQueries(["entity"]);
       },
@@ -63,12 +58,9 @@ export const TemplateListRemoveModal: React.FC<TemplateListRemoveModal> = ({
 
   const handleRemoveTemplateCancel = () => {
     setRemoveEntityId(false);
-    setShowRemoveModal(false);
   };
 
-  // TODO: fix - lifecycle - removeEntityId is 2x, not work with shortcuts
   const handleRemoveTemplateAccept = () => {
-    setShowRemoveModal(false);
     if (removeEntityId) {
       templateRemoveMutation.mutate(removeEntityId);
     }
@@ -78,7 +70,7 @@ export const TemplateListRemoveModal: React.FC<TemplateListRemoveModal> = ({
   return (
     <Modal
       key="remove"
-      showModal={showRemoveModal}
+      showModal={removeEntityId !== false}
       width="thin"
       onEnterPress={() => {
         handleRemoveTemplateAccept();

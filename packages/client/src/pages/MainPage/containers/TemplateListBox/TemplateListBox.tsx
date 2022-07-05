@@ -76,11 +76,9 @@ export const TemplateListBox: React.FC<TemplateListBox> = ({}) => {
   };
 
   // REMOVE MODAL
-  const [showRemoveModal, setShowRemoveModal] = useState<boolean>(false);
   const [removeEntityId, setRemoveEntityId] = useState<string | false>(false);
 
   const handleAskRemoveTemplate = (templateId: string) => {
-    setShowRemoveModal(true);
     setRemoveEntityId(templateId);
   };
 
@@ -171,8 +169,6 @@ export const TemplateListBox: React.FC<TemplateListBox> = ({}) => {
         setShowCreateModal={setShowCreateModal}
       />
       <TemplateListRemoveModal
-        showRemoveModal={showRemoveModal}
-        setShowRemoveModal={setShowRemoveModal}
         removeEntityId={removeEntityId}
         setRemoveEntityId={setRemoveEntityId}
         templatesData={templatesData}
