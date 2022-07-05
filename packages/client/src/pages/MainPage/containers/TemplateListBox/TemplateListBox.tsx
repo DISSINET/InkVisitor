@@ -1,5 +1,5 @@
 import { entitiesDict } from "@shared/dictionaries";
-import { EntityClass, UserRole } from "@shared/enums";
+import { EntityClass } from "@shared/enums";
 import { IEntity } from "@shared/types";
 import { IRequestSearch } from "@shared/types/request-search";
 import api from "api";
@@ -13,13 +13,9 @@ import {
   ModalContent,
   ModalFooter,
   ModalHeader,
-  ModalInputForm,
-  ModalInputLabel,
-  ModalInputWrap,
   TypeBar,
 } from "components";
 
-import { CEntity, CStatement } from "constructors";
 import { useSearchParams } from "hooks";
 import React, { useMemo, useState } from "react";
 import { FaPlus, FaTrash } from "react-icons/fa";
@@ -40,6 +36,7 @@ import {
   StyledTemplateSectionHeader,
   StyledTemplateSectionList,
 } from "./TemplateListBoxStyles";
+import { TemplateListCreateModal } from "./TemplateListCreateModal/TemplateListCreateModal";
 
 interface TemplateListBox {}
 export const TemplateListBox: React.FC<TemplateListBox> = ({}) => {
@@ -56,8 +53,7 @@ export const TemplateListBox: React.FC<TemplateListBox> = ({}) => {
     (state) => state.layout.fourthPanelBoxesOpened
   );
 
-  const { detailIdArray, removeDetailId, setStatementId, appendDetailId } =
-    useSearchParams();
+  const { detailIdArray, removeDetailId } = useSearchParams();
   const queryClient = useQueryClient();
   const {
     status,
@@ -88,22 +84,6 @@ export const TemplateListBox: React.FC<TemplateListBox> = ({}) => {
     }
   );
 
-  const templateCreateMutation = useMutation(
-    async (newEntity: IEntity) => await api.entityCreate(newEntity),
-    {
-      onSuccess: (data, variables) => {
-        toast.info(
-          `Template [${variables.class}]${variables.label} was created`
-        );
-        queryClient.invalidateQueries(["templates"]);
-        if (variables.class === EntityClass.Statement) {
-          setStatementId(variables.id);
-        } else {
-          appendDetailId(variables.id);
-        }
-      },
-    }
-  );
   const templateRemoveMutation = useMutation(
     async (entityId: string) => await api.entityDelete(entityId),
     {
@@ -124,34 +104,9 @@ export const TemplateListBox: React.FC<TemplateListBox> = ({}) => {
 
   // CREATE MODAL
   const [showCreateModal, setShowCreateModal] = useState<boolean>(false);
-  const [createModalEntityClass, setCreateModalEntityClass] =
-    useState<DropdownItem>(entitiesDict[0]);
-  const [createModalEntityLabel, setCreateModalEntityLabel] =
-    useState<string>("");
-  const [createModalEntityDetail, setCreateModalEntityDetail] =
-    useState<string>("");
-  const handleCloseCreateModal = () => {
-    setShowCreateModal(false);
-    resetCreateModal();
-  };
-
-  const resetCreateModal = () => {
-    setCreateModalEntityLabel("");
-    setCreateModalEntityDetail("");
-    setCreateModalEntityClass(entitiesDict[0]);
-  };
 
   const handleAskCreateTemplate = () => {
     setShowCreateModal(true);
-  };
-
-  const handleCreateTemplate = () => {
-    if (createModalEntityClass.value === EntityClass.Statement) {
-      handleCreateNewStatementTemplate();
-    } else {
-      handleCreateNewEntityTemplate();
-    }
-    handleCloseCreateModal();
   };
 
   // REMOVE MODAL
@@ -178,33 +133,13 @@ export const TemplateListBox: React.FC<TemplateListBox> = ({}) => {
     setRemoveEntityId(false);
     setShowRemoveModal(false);
   };
+  // TODO: fix - lifecycle - removeEntityId is 2x, not work with shortcuts
   const handleRemoveTemplateAccept = () => {
     setShowRemoveModal(false);
     if (removeEntityId) {
       templateRemoveMutation.mutate(removeEntityId);
     }
     setRemoveEntityId(false);
-  };
-
-  const handleCreateNewStatementTemplate = () => {
-    const newTemplate = CStatement(
-      localStorage.getItem("userrole") as UserRole,
-      undefined,
-      createModalEntityLabel,
-      createModalEntityDetail
-    );
-    newTemplate.isTemplate = true;
-    templateCreateMutation.mutate(newTemplate);
-  };
-  const handleCreateNewEntityTemplate = () => {
-    const newTemplate = CEntity(
-      createModalEntityClass.value as EntityClass,
-      createModalEntityLabel,
-      localStorage.getItem("userrole") as UserRole,
-      createModalEntityDetail
-    );
-    newTemplate.isTemplate = true;
-    templateCreateMutation.mutate(newTemplate);
   };
 
   return (
@@ -238,7 +173,7 @@ export const TemplateListBox: React.FC<TemplateListBox> = ({}) => {
                   onChange={(option: ValueType<OptionTypeBase, any>) => {
                     setFilterByClass(option as DropdownItem);
                   }}
-                  width={80}
+                  width="full"
                   entityDropdown
                   disableTyping
                 />
@@ -255,6 +190,7 @@ export const TemplateListBox: React.FC<TemplateListBox> = ({}) => {
                 value={filterByLabel}
                 onChangeFn={(newType: string) => setFilterByLabel(newType)}
                 changeOnType
+                width="full"
                 autoFocus
               />
             </StyledTemplateFilterInputValue>
@@ -288,82 +224,10 @@ export const TemplateListBox: React.FC<TemplateListBox> = ({}) => {
         </StyledTemplateSectionList>
       </StyledTemplateSection>
 
-      <Modal
-        showModal={showCreateModal}
-        width="thin"
-        key="create"
-        onEnterPress={() => {
-          handleCreateTemplate();
-        }}
-        onClose={() => {
-          handleCloseCreateModal();
-        }}
-      >
-        <ModalHeader title="Create Template" />
-        <ModalContent>
-          <ModalInputForm>
-            <ModalInputLabel>{"Entity type: "}</ModalInputLabel>
-            <ModalInputWrap>
-              <Dropdown
-                value={{
-                  label: createModalEntityClass.label,
-                  value: createModalEntityClass.value,
-                }}
-                options={entitiesDict}
-                onChange={(option: ValueType<OptionTypeBase, any>) => {
-                  setCreateModalEntityClass(option as DropdownItem);
-                }}
-                width={80}
-                entityDropdown
-                disableTyping
-                autoFocus
-              />
-              <TypeBar entityLetter={createModalEntityClass.value} />
-            </ModalInputWrap>
-            <ModalInputLabel>{"Label: "}</ModalInputLabel>
-            <ModalInputWrap>
-              <Input
-                value={createModalEntityLabel}
-                onChangeFn={(newType: string) =>
-                  setCreateModalEntityLabel(newType)
-                }
-                changeOnType
-              />
-            </ModalInputWrap>
-            <ModalInputLabel>{"Detail: "}</ModalInputLabel>
-            <ModalInputWrap>
-              <Input
-                value={createModalEntityDetail}
-                onChangeFn={(newType: string) =>
-                  setCreateModalEntityDetail(newType)
-                }
-                changeOnType
-              />
-            </ModalInputWrap>
-          </ModalInputForm>
-        </ModalContent>
-        <ModalFooter>
-          <ButtonGroup>
-            <Button
-              key="cancel"
-              label="Cancel"
-              color="greyer"
-              inverted
-              onClick={() => {
-                handleCloseCreateModal();
-              }}
-            />
-            <Button
-              key="submit"
-              label="Create"
-              color="info"
-              onClick={() => {
-                handleCreateTemplate();
-              }}
-            />
-          </ButtonGroup>
-        </ModalFooter>
-      </Modal>
+      <TemplateListCreateModal
+        showCreateModal={showCreateModal}
+        setShowCreateModal={setShowCreateModal}
+      />
       <Modal
         key="remove"
         showModal={showRemoveModal}
