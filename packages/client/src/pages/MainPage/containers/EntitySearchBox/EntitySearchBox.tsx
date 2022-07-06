@@ -79,6 +79,12 @@ export const EntitySearchBox: React.FC = () => {
   } = useQuery(
     ["search", debouncedValues],
     async () => {
+      if (debouncedValues.usedTemplate === "Any") {
+        const { usedTemplate, ...filters } = debouncedValues;
+        filters.onlyTemplates = true;
+        const res = await api.entitiesSearch(filters);
+        return res.data;
+      }
       const res = await api.entitiesSearch(debouncedValues);
       return res.data;
     },
