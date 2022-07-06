@@ -6,7 +6,7 @@ export const wildCardChar = "*";
 
 export const rootTerritoryId = "T0";
 export const excludedSuggesterEntities = [EntityClass.Value];
-export const scrollOverscanCount = 20;
+export const scrollOverscanCount = 0;
 
 // layout
 export const heightHeader = 70;
@@ -26,7 +26,7 @@ export const separatorXPercentPosition = 42;
 // BOXES
 export const hiddenBoxHeight = 34;
 
-export const maxTabCount = 20;
+export const maxTabCount = 10;
 
 // animations
 export const springConfig: { [key: string]: {} } = {
