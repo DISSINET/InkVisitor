@@ -53,6 +53,9 @@ export const TemplateListBox: React.FC<TemplateListBox> = ({}) => {
       if (filterByClass.value !== "all") {
         filters.class = filterByClass.value as EntityClass;
       }
+      if (filterByLabel.length) {
+        filters.label = filterByLabel + "*";
+      }
 
       const res = await api.entitiesSearch(filters);
 
@@ -145,6 +148,7 @@ export const TemplateListBox: React.FC<TemplateListBox> = ({}) => {
                     actant={templateEntity}
                     propId={templateEntity.id}
                     fullWidth
+                    tooltipPosition="left center"
                     button={
                       <Button
                         tooltip="remove template"

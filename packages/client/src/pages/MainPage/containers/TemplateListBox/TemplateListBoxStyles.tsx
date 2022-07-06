@@ -31,11 +31,12 @@ export const StyledTemplateSectionHeader = styled.div`
 
 export const StyledTemplateSectionList = styled.div`
   position: relative;
-  min-height: 7rem;
+  min-height: 5rem;
   width: 100%;
   overflow: hidden;
   display: inline-flex;
   flex-wrap: wrap;
+
   > div {
     padding: ${({ theme }) => theme.space[1]};
   }
