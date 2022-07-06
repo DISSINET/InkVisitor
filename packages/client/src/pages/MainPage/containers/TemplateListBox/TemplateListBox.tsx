@@ -148,6 +148,7 @@ export const TemplateListBox: React.FC<TemplateListBox> = ({}) => {
                     actant={templateEntity}
                     propId={templateEntity.id}
                     fullWidth
+                    tooltipPosition="left center"
                     button={
                       <Button
                         tooltip="remove template"
