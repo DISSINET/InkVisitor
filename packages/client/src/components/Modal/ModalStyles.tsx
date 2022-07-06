@@ -56,7 +56,6 @@ export const StyledCard = styled(animated.div)<Card>`
   display: flex;
   flex-direction: column;
   max-height: calc(100vh - 40px);
-  /* overflow: hidden; */
   z-index: 50;
   background-color: ${({ theme }) => theme.color["gray"][100]};
   color: ${({ theme }) => theme.color["black"]};
@@ -89,12 +88,13 @@ export const StyledCardTitle = styled.h2`
 `;
 interface StyledCardBody {
   column?: boolean;
+  enableScroll: boolean;
 }
 export const StyledCardBody = styled.section<StyledCardBody>`
   display: flex;
   flex-direction: ${({ column }) => (column ? "column" : "row")};
   padding: ${space5} ${space7};
-  overflow: auto;
+  overflow: ${({ enableScroll }) => (enableScroll ? "auto" : "initial")};
 
   font-size: ${({ theme }) => theme.fontSize["sm"]};
 `;

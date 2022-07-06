@@ -487,7 +487,7 @@ export const UserListModal: React.FC<UserListModal> = ({
         loading={false}
       />
       <ModalHeader title={"Manage Users"} />
-      <ModalContent>
+      <ModalContent enableScroll>
         <StyledTableWrapper>
           <StyledTable {...getTableProps()}>
             <StyledTHead>
