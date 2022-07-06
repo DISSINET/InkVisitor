@@ -53,8 +53,9 @@ export const TemplateListBox: React.FC<TemplateListBox> = ({}) => {
       if (filterByClass.value !== "all") {
         filters.class = filterByClass.value as EntityClass;
       }
-      filters.label = filterByLabel;
-      console.log(filters);
+      if (filterByLabel.length) {
+        filters.label = filterByLabel + "*";
+      }
 
       const res = await api.entitiesSearch(filters);
 
