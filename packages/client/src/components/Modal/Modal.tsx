@@ -95,9 +95,18 @@ export const ModalHeader: FC<ModalHeader> = ({ title, color }) => {
 interface ModalContent {
   column?: boolean;
   children?: ReactNode;
+  enableScroll?: boolean;
 }
-export const ModalContent: FC<ModalContent> = ({ children, column }) => {
-  return <StyledCardBody column={column}>{children}</StyledCardBody>;
+export const ModalContent: FC<ModalContent> = ({
+  children,
+  column,
+  enableScroll = false,
+}) => {
+  return (
+    <StyledCardBody column={column} enableScroll={enableScroll}>
+      {children}
+    </StyledCardBody>
+  );
 };
 
 interface ModalFooter {

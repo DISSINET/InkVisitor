@@ -1,10 +1,9 @@
 import styled from "styled-components";
 
 export const StyledTableWrapper = styled.div`
-  display: block;
+  display: flex;
+  flex-direction: column;
   width: 100%;
-  overflow-x: scroll;
-  overflow-y: visible;
 `;
 
 export const StyledTable = styled.table`
