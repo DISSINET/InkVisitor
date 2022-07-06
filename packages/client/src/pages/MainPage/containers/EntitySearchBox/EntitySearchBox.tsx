@@ -35,7 +35,7 @@ const defaultOption = {
 };
 const anyTemplate: DropdownItem = {
   value: "Any",
-  label: "Any template",
+  label: "IS TEMPLATE",
   info: "",
 };
 
