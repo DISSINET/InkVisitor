@@ -94,6 +94,7 @@ export const StyledCardBody = styled.section<StyledCardBody>`
   display: flex;
   flex-direction: ${({ column }) => (column ? "column" : "row")};
   padding: ${space5} ${space7};
+  overflow: auto;
 
   font-size: ${({ theme }) => theme.fontSize["sm"]};
 `;
