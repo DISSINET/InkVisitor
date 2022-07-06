@@ -40,7 +40,7 @@ const debounceTime: number = 100;
 export const EntitySearchBox: React.FC = () => {
   const [classOption, setClassOption] = useState<DropdownItem>(defaultOption);
   const [templateOption, setTemplateOption] =
-    useState<ValueType<OptionTypeBase, any>>(allEntities);
+    useState<ValueType<OptionTypeBase, any>>(defaultOption);
   const [searchData, setSearchData] = useState<IRequestSearch>(initValues);
   const debouncedValues = useDebounce<IRequestSearch>(searchData, debounceTime);
 
@@ -135,8 +135,14 @@ export const EntitySearchBox: React.FC = () => {
     { enabled: api.isLoggedIn() }
   );
 
+  const anyTemplate: DropdownItem = {
+    value: "Any",
+    label: "Any template",
+    info: "",
+  };
+
   const templateOptions: DropdownItem[] = useMemo(() => {
-    const options: DropdownItem[] = [allEntities];
+    const options: DropdownItem[] = [anyTemplate];
 
     if (templates) {
       templates.forEach((template) => {
@@ -159,15 +165,12 @@ export const EntitySearchBox: React.FC = () => {
     }
   }, [resultsRef.current, fourthPanelBoxesOpened]);
 
-  const getResultsHeight = () => {};
-
   return (
     <StyledBoxContent>
       <StyledRow>
         <StyledRowHeader>Label (at least 2 characters)</StyledRowHeader>
         <Input
           width={150}
-          // placeholder="label (at least 2 characters)"
           placeholder="search"
           changeOnType
           onChangeFn={(value: string) => {
@@ -201,7 +204,7 @@ export const EntitySearchBox: React.FC = () => {
         <Dropdown
           placeholder={""}
           width={150}
-          options={templateOptions}
+          options={[defaultOption].concat(templateOptions)}
           value={templateOption}
           onChange={(option: ValueType<OptionTypeBase, any>) => {
             setTemplateOption(option);
