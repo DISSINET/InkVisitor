@@ -29,10 +29,14 @@ const initValues: IRequestSearch = {
   label: "",
   cooccurrenceId: "",
 };
-
 const defaultOption = {
   label: "*",
   value: "",
+};
+const anyTemplate: DropdownItem = {
+  value: "Any",
+  label: "Any template",
+  info: "",
 };
 
 const debounceTime: number = 100;
@@ -141,21 +145,22 @@ export const EntitySearchBox: React.FC = () => {
     { enabled: api.isLoggedIn() }
   );
 
-  const anyTemplate: DropdownItem = {
-    value: "Any",
-    label: "Any template",
-    info: "",
-  };
-
   const templateOptions: DropdownItem[] = useMemo(() => {
     const options: DropdownItem[] = [anyTemplate];
 
     if (templates) {
       templates.forEach((template) => {
-        options.push({
-          value: template.id,
-          label: template.label,
-        });
+        if (template.label.length > 20) {
+          options.push({
+            value: template.id,
+            label: template.label.substring(0, 20) + "...",
+          });
+        } else {
+          options.push({
+            value: template.id,
+            label: template.label,
+          });
+        }
       });
     }
     return options;
