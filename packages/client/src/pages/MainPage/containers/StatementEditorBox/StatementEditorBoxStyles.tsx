@@ -173,7 +173,7 @@ export const StyledBreadcrumbWrap = styled.div`
   flex-wrap: wrap;
   min-height: 2rem;
   position: relative;
-  margin-top: ${({ theme }) => theme.space[6]};
+  margin-top: ${({ theme }) => theme.space[2]};
 `;
 
 export const StyledEditorStatementInfo = styled.div`
@@ -188,13 +188,17 @@ export const StyledHeaderTagWrap = styled.div`
   display: inline-flex;
   overflow: hidden;
   margin-right: ${({ theme }) => theme.space[3]};
+  margin-bottom: ${({ theme }) => theme.space[2]};
 `;
 export const StyledEditorStatementInfoLabel = styled.div`
   display: flex;
   align-items: center;
   margin-right: ${({ theme }) => theme.space[1]};
+  margin-bottom: ${({ theme }) => theme.space[2]};
 `;
-export const StyledEditorHeaderInputWrap = styled.div``;
+export const StyledEditorHeaderInputWrap = styled.div`
+  margin-bottom: ${({ theme }) => theme.space[2]};
+`;
 
 export const StyledEditorContentRow = styled.div``;
 export const StyledEditorContentRowLabel = styled.div`
