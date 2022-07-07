@@ -25,6 +25,7 @@ interface StyledSelect {
   isOneOptionSingleSelect?: boolean;
   suggester?: boolean;
   entityDropdown?: boolean;
+  wildCardChar?: boolean;
 }
 export const StyledSelect = styled(Select)`
   display: inline-flex;
@@ -81,9 +82,9 @@ export const StyledSelect = styled(Select)`
   .react-select__single-value {
     font-size: ${({ theme }) => theme.fontSize["xs"]};
     top: 50%;
-    margin-left: ${({ theme, entityDropdown }) =>
-      entityDropdown ? theme.space[3] : theme.space[2]};
-    margin-top: ${({ entityDropdown }) => (entityDropdown ? "1px" : 0)};
+    margin-left: ${({ theme, entityDropdown, wildCardChar }) =>
+      entityDropdown && !wildCardChar ? theme.space[3] : theme.space[2]};
+    margin-top: 1px;
 
     color: ${({ theme }) => theme.color["primary"]};
     vertical-align: middle;
