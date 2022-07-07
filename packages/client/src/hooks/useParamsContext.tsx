@@ -82,7 +82,7 @@ export const SearchParamsProvider = ({
         setDetailId(newDetailIdArray.join(arrJoinChar));
         setSelectedDetailId(id);
       } else {
-        toast.error("Maximum tab count reached!");
+        toast.info("Maximum tab count reached");
       }
     } else {
       setSelectedDetailId(id);
