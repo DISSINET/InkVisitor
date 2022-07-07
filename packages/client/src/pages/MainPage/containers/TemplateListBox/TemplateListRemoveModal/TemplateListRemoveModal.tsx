@@ -29,6 +29,7 @@ export const TemplateListRemoveModal: React.FC<TemplateListRemoveModal> = ({
   const { detailIdArray, removeDetailId } = useSearchParams();
 
   const entityToRemove: false | IEntity = useMemo(() => {
+    console.log(removeEntityId);
     if (removeEntityId) {
       const templateToBeRemoved = templatesData?.find(
         (template: IEntity) => template.id === removeEntityId
