@@ -6,7 +6,6 @@ export const StyledContent = styled.div`
   flex-direction: column;
   align-items: start;
   padding-left: 1rem;
-  background-color: ${({ theme }) => theme.color["white"]};
 `;
 
 export const StyledHeader = styled.div`

@@ -106,6 +106,7 @@ export const EntitySuggester: React.FC<EntitySuggesterI> = ({
               detail: s.detail,
               status: s.status,
               ltype: s.data.logicalType,
+              isTemplate: s.isTemplate,
               id: s.id,
               icons: icons,
             };

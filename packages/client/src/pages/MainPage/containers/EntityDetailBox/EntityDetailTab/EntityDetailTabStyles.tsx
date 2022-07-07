@@ -64,3 +64,9 @@ export const StyledItalic = styled.i`
   display: flex;
   align-items: center;
 `;
+interface StyledTypeWrapper {
+  isTemplate?: boolean;
+}
+export const StyledTypeWrapper = styled.div<StyledTypeWrapper>`
+  margin-top: ${({ isTemplate }) => (isTemplate ? "3px" : 0)};
+`;
