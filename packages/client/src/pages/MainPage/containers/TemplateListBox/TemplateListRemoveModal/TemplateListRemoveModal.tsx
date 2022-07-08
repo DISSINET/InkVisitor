@@ -13,34 +13,22 @@ import { useSearchParams } from "hooks";
 import React, { useMemo } from "react";
 import { useMutation, useQueryClient } from "react-query";
 import { toast } from "react-toastify";
-import { StyledContent } from "../../EntityBookmarkBox/EntityBookmarkBoxStyles";
-import { EntityTag } from "../../EntityTag/EntityTag";
+import { EntityTag } from "../..";
+import { StyledModalContent } from "../TemplateListBoxStyles";
 
 interface TemplateListRemoveModal {
   removeEntityId: string | false;
   setRemoveEntityId: (value: React.SetStateAction<string | false>) => void;
-  templatesData: IResponseEntity[] | undefined;
+  entityToRemove: false | IEntity;
 }
 export const TemplateListRemoveModal: React.FC<TemplateListRemoveModal> = ({
-  removeEntityId,
+  removeEntityId = false,
   setRemoveEntityId,
-  templatesData,
+  entityToRemove,
 }) => {
   const queryClient = useQueryClient();
   const { detailIdArray, removeDetailId, statementId, selectedDetailId } =
     useSearchParams();
-
-  const entityToRemove: false | IEntity = useMemo(() => {
-    console.log(removeEntityId);
-    if (removeEntityId) {
-      const templateToBeRemoved = templatesData?.find(
-        (template: IEntity) => template.id === removeEntityId
-      );
-      return templateToBeRemoved || false;
-    } else {
-      return false;
-    }
-  }, [removeEntityId]);
 
   const templateRemoveMutation = useMutation(
     async (entityId: string) => await api.entityDelete(entityId),
@@ -51,7 +39,7 @@ export const TemplateListRemoveModal: React.FC<TemplateListRemoveModal> = ({
         }
         entityToRemove &&
           toast.warning(
-            `Template [${entityToRemove.class}]${entityToRemove.label} was removed`
+            `Template [${entityToRemove.class}]: ${entityToRemove.label} was removed`
           );
         queryClient.invalidateQueries(["templates"]);
         if (selectedDetailId) {
@@ -66,39 +54,35 @@ export const TemplateListRemoveModal: React.FC<TemplateListRemoveModal> = ({
           queryClient.invalidateQueries("statement-templates");
         }
         queryClient.invalidateQueries(["entity"]);
+        setRemoveEntityId(false);
       },
     }
   );
-
-  const handleRemoveTemplateCancel = () => {
-    setRemoveEntityId(false);
-  };
 
   const handleRemoveTemplateAccept = () => {
     if (removeEntityId) {
       templateRemoveMutation.mutate(removeEntityId);
     }
-    setRemoveEntityId(false);
   };
 
   return (
     <Modal
       key="remove"
-      showModal={removeEntityId !== false}
+      showModal={entityToRemove !== false}
       width="thin"
       onEnterPress={() => {
         handleRemoveTemplateAccept();
       }}
       onClose={() => {
-        handleRemoveTemplateCancel();
+        setRemoveEntityId(false);
       }}
     >
       <ModalHeader title="Remove Template" />
       <ModalContent>
-        <StyledContent>
+        <StyledModalContent>
           Remove template entity?
           {entityToRemove && <EntityTag actant={entityToRemove} />}
-        </StyledContent>
+        </StyledModalContent>
       </ModalContent>
       <ModalFooter>
         <ButtonGroup>
@@ -108,7 +92,7 @@ export const TemplateListRemoveModal: React.FC<TemplateListRemoveModal> = ({
             color="greyer"
             inverted
             onClick={() => {
-              handleRemoveTemplateCancel();
+              setRemoveEntityId(false);
             }}
           />
           <Button
