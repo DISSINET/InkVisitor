@@ -26,7 +26,8 @@ export const TemplateListRemoveModal: React.FC<TemplateListRemoveModal> = ({
   templatesData,
 }) => {
   const queryClient = useQueryClient();
-  const { detailIdArray, removeDetailId } = useSearchParams();
+  const { detailIdArray, removeDetailId, statementId, selectedDetailId } =
+    useSearchParams();
 
   const entityToRemove: false | IEntity = useMemo(() => {
     console.log(removeEntityId);
@@ -52,6 +53,14 @@ export const TemplateListRemoveModal: React.FC<TemplateListRemoveModal> = ({
             `Template [${entityToRemove.class}]${entityToRemove.label} was removed`
           );
         queryClient.invalidateQueries(["templates"]);
+        if (selectedDetailId) {
+          // TODO: control if selectedDetail is same class as statement
+          queryClient.invalidateQueries("entity-templates");
+        }
+        if (statementId) {
+          // TODO: check if template is statement
+          queryClient.invalidateQueries("statement-templates");
+        }
         queryClient.invalidateQueries(["entity"]);
       },
     }

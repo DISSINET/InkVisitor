@@ -40,7 +40,7 @@ import { JSONExplorer } from "../../JSONExplorer/JSONExplorer";
 import { StyledHeading } from "../../LoginModal/LoginModalStyles";
 import { PropGroup } from "../../PropGroup/PropGroup";
 import { ApplyTemplateModal } from "../ApplyTemplateModal/ApplyTemplateModal";
-import { CreateTemplateModal } from "../CreateTemplateModal/CreateTemplateModal";
+import { EntityDetailCreateTemplateModal } from "../EntityDetailCreateTemplateModal/EntityDetailCreateTemplateModal";
 import {
   StyledDetailContentRow,
   StyledDetailContentRowLabel,
@@ -1339,7 +1339,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
         setTemplateToApply={setTemplateToApply}
       />
 
-      <CreateTemplateModal
+      <EntityDetailCreateTemplateModal
         setCreateTemplateModal={setCreateTemplateModal}
         entity={entity}
         showModal={createTemplateModal}

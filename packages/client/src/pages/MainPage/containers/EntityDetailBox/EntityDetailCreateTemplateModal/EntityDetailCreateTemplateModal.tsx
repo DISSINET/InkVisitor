@@ -13,6 +13,7 @@ import {
   ModalInputForm,
 } from "components";
 import { DStatement, DEntity } from "constructors";
+import { useSearchParams } from "hooks";
 import React, { useState } from "react";
 import { UseMutationResult, useQueryClient } from "react-query";
 import { toast } from "react-toastify";
@@ -23,7 +24,7 @@ import {
   StyledDetailContentRowValue,
 } from "../EntityDetailBoxStyles";
 
-interface CreateTemplateModal {
+interface EntityDetailCreateTemplateModal {
   showModal: boolean;
   entity?: IEntity;
   userCanEdit: boolean;
@@ -35,7 +36,9 @@ interface CreateTemplateModal {
     unknown
   >;
 }
-export const CreateTemplateModal: React.FC<CreateTemplateModal> = ({
+export const EntityDetailCreateTemplateModal: React.FC<
+  EntityDetailCreateTemplateModal
+> = ({
   entity,
   showModal = false,
   userCanEdit,
@@ -44,6 +47,8 @@ export const CreateTemplateModal: React.FC<CreateTemplateModal> = ({
 }) => {
   const queryClient = useQueryClient();
   const [createTemplateLabel, setCreateTemplateLabel] = useState<string>("");
+
+  const { statementId } = useSearchParams();
 
   const handleCreateTemplate = () => {
     // create template as a copy of the entity
@@ -60,11 +65,16 @@ export const CreateTemplateModal: React.FC<CreateTemplateModal> = ({
       templateEntity.isTemplate = true;
       templateEntity.usedTemplate = "";
       templateEntity.label = createTemplateLabel;
-      api.entityCreate(templateEntity);
 
+      // TODO: move to mutation!
+      api.entityCreate(templateEntity);
       setTimeout(() => {
         queryClient.invalidateQueries(["templates"]);
+        if (statementId) {
+          queryClient.invalidateQueries("statement-templates");
+        }
       }, 1000);
+      // ------------------------------------------------------
       updateEntityMutation.mutate({ usedTemplate: templateEntity.id });
 
       setCreateTemplateModal(false);
@@ -107,6 +117,7 @@ export const CreateTemplateModal: React.FC<CreateTemplateModal> = ({
                     setCreateTemplateLabel(newLabel);
                   }}
                   changeOnType
+                  autoFocus
                 />
               </StyledDetailContentRowValue>
             </StyledDetailContentRow>
