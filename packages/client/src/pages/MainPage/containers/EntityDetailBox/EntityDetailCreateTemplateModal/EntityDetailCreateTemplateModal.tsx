@@ -15,7 +15,7 @@ import {
 import { DStatement, DEntity } from "constructors";
 import { useSearchParams } from "hooks";
 import React, { useState } from "react";
-import { UseMutationResult, useQueryClient } from "react-query";
+import { useMutation, UseMutationResult, useQueryClient } from "react-query";
 import { toast } from "react-toastify";
 import {
   StyledDetailForm,
@@ -48,7 +48,30 @@ export const EntityDetailCreateTemplateModal: React.FC<
   const queryClient = useQueryClient();
   const [createTemplateLabel, setCreateTemplateLabel] = useState<string>("");
 
-  const { statementId } = useSearchParams();
+  const { statementId, selectedDetailId } = useSearchParams();
+
+  const templateCreateMutation = useMutation(
+    async (templateEntity: IEntity) => await api.entityCreate(templateEntity),
+    {
+      onSuccess: (data, variables) => {
+        queryClient.invalidateQueries(["templates"]);
+        if (statementId && variables.class === EntityClass.Statement) {
+          queryClient.invalidateQueries("statement-templates");
+        }
+        if (selectedDetailId) {
+          queryClient.invalidateQueries("entity-templates");
+        }
+        updateEntityMutation.mutate({ usedTemplate: variables.id });
+
+        setCreateTemplateModal(false);
+        setCreateTemplateLabel("");
+
+        toast.info(
+          `Template [${variables.class}]: "${variables.label}" created from entity "${entity?.label}"`
+        );
+      },
+    }
+  );
 
   const handleCreateTemplate = () => {
     // create template as a copy of the entity
@@ -66,23 +89,7 @@ export const EntityDetailCreateTemplateModal: React.FC<
       templateEntity.usedTemplate = "";
       templateEntity.label = createTemplateLabel;
 
-      // TODO: move to mutation!
-      api.entityCreate(templateEntity);
-      setTimeout(() => {
-        queryClient.invalidateQueries(["templates"]);
-        if (statementId) {
-          queryClient.invalidateQueries("statement-templates");
-        }
-      }, 1000);
-      // ------------------------------------------------------
-      updateEntityMutation.mutate({ usedTemplate: templateEntity.id });
-
-      setCreateTemplateModal(false);
-      setCreateTemplateLabel("");
-
-      toast.info(
-        `Template "${templateEntity.label}" created from entity "${entity.label}"`
-      );
+      templateCreateMutation.mutate(templateEntity);
     }
   };
 

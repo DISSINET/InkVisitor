@@ -27,7 +27,7 @@ export const EntityDetailTab: React.FC<EntityDetailTab> = ({
     <StyledTab isSelected={isSelected}>
       <Tooltip label={tabLabel}>
         <StyledLabel
-          isItalic={entity?.class === EntityClass.Statement}
+          isItalic={entity?.class === EntityClass.Statement && !entity?.label}
           onClick={onClick}
         >
           {entity?.class && (

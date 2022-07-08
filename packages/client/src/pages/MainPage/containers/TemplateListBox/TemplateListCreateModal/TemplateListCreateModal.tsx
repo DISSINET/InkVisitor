@@ -33,7 +33,8 @@ export const TemplateListCreateModal: React.FC<TemplateListCreateModal> = ({
   setShowCreateModal,
 }) => {
   const queryClient = useQueryClient();
-  const { setStatementId, appendDetailId } = useSearchParams();
+  const { setStatementId, statementId, appendDetailId, selectedDetailId } =
+    useSearchParams();
 
   const [createModalEntityClass, setCreateModalEntityClass] =
     useState<DropdownItem>(entitiesDict[0]);
@@ -58,9 +59,12 @@ export const TemplateListCreateModal: React.FC<TemplateListCreateModal> = ({
     {
       onSuccess: (data, variables) => {
         toast.info(
-          `Template [${variables.class}]${variables.label} was created`
+          `Template [${variables.class}]: "${variables.label}" was created`
         );
         queryClient.invalidateQueries(["templates"]);
+        if (selectedDetailId) {
+          queryClient.invalidateQueries("entity-templates");
+        }
         if (variables.class === EntityClass.Statement) {
           setStatementId(variables.id);
         } else {
