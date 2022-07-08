@@ -4,13 +4,14 @@ import api from "api";
 import {
   Button,
   ButtonGroup,
+  Loader,
   Modal,
   ModalContent,
   ModalFooter,
   ModalHeader,
 } from "components";
 import { useSearchParams } from "hooks";
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useMutation, useQueryClient } from "react-query";
 import { toast } from "react-toastify";
 import { EntityTag } from "../..";
@@ -29,6 +30,12 @@ export const TemplateListRemoveModal: React.FC<TemplateListRemoveModal> = ({
   const queryClient = useQueryClient();
   const { detailIdArray, removeDetailId, statementId, selectedDetailId } =
     useSearchParams();
+
+  const [showModal, setShowModal] = useState(false);
+
+  useEffect(() => {
+    setShowModal(true);
+  }, []);
 
   const templateRemoveMutation = useMutation(
     async (entityId: string) => await api.entityDelete(entityId),
@@ -68,7 +75,7 @@ export const TemplateListRemoveModal: React.FC<TemplateListRemoveModal> = ({
   return (
     <Modal
       key="remove"
-      showModal={entityToRemove !== false}
+      showModal={showModal}
       width="thin"
       onEnterPress={() => {
         handleRemoveTemplateAccept();
@@ -105,6 +112,7 @@ export const TemplateListRemoveModal: React.FC<TemplateListRemoveModal> = ({
           />
         </ButtonGroup>
       </ModalFooter>
+      <Loader show={templateRemoveMutation.isLoading} />
     </Modal>
   );
 };

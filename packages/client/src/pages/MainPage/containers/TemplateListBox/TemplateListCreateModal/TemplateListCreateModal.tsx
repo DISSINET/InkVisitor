@@ -7,6 +7,7 @@ import {
   ButtonGroup,
   Dropdown,
   Input,
+  Loader,
   Modal,
   ModalContent,
   ModalFooter,
@@ -70,6 +71,7 @@ export const TemplateListCreateModal: React.FC<TemplateListCreateModal> = ({
         } else {
           appendDetailId(variables.id);
         }
+        handleCloseCreateModal();
       },
     }
   );
@@ -101,7 +103,6 @@ export const TemplateListCreateModal: React.FC<TemplateListCreateModal> = ({
     } else {
       handleCreateNewEntityTemplate();
     }
-    handleCloseCreateModal();
   };
 
   return (
@@ -180,6 +181,7 @@ export const TemplateListCreateModal: React.FC<TemplateListCreateModal> = ({
           />
         </ButtonGroup>
       </ModalFooter>
+      <Loader show={templateCreateMutation.isLoading} />
     </Modal>
   );
 };

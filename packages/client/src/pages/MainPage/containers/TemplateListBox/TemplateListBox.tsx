@@ -183,11 +183,13 @@ export const TemplateListBox: React.FC<TemplateListBox> = ({}) => {
         showCreateModal={showCreateModal}
         setShowCreateModal={setShowCreateModal}
       />
-      <TemplateListRemoveModal
-        removeEntityId={removeEntityId}
-        setRemoveEntityId={setRemoveEntityId}
-        entityToRemove={entityToRemove}
-      />
+      {removeEntityId && (
+        <TemplateListRemoveModal
+          removeEntityId={removeEntityId}
+          setRemoveEntityId={setRemoveEntityId}
+          entityToRemove={entityToRemove}
+        />
+      )}
     </StyledBoxContent>
   );
 };
