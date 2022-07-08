@@ -1,3 +1,4 @@
+import { EntityClass } from "@shared/enums";
 import { IEntity, IResponseEntity } from "@shared/types";
 import api from "api";
 import {
@@ -44,7 +45,7 @@ export const TemplateListRemoveModal: React.FC<TemplateListRemoveModal> = ({
   const templateRemoveMutation = useMutation(
     async (entityId: string) => await api.entityDelete(entityId),
     {
-      onSuccess: () => {
+      onSuccess: (data, variables) => {
         if (removeEntityId && detailIdArray.includes(removeEntityId)) {
           removeDetailId(removeEntityId);
         }
@@ -54,11 +55,14 @@ export const TemplateListRemoveModal: React.FC<TemplateListRemoveModal> = ({
           );
         queryClient.invalidateQueries(["templates"]);
         if (selectedDetailId) {
-          // TODO: control if selectedDetail is same class as statement
+          // TODO: check if entity class is the same as opened detail
           queryClient.invalidateQueries("entity-templates");
         }
-        if (statementId) {
-          // TODO: check if template is statement
+        if (
+          statementId &&
+          entityToRemove &&
+          entityToRemove.class === EntityClass.Statement
+        ) {
           queryClient.invalidateQueries("statement-templates");
         }
         queryClient.invalidateQueries(["entity"]);
