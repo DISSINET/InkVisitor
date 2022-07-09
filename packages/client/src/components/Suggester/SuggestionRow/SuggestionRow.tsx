@@ -63,6 +63,7 @@ const EntityRow: React.FC<EntityRow> = ({ data, index, style }) => {
             ltype={suggestion.ltype}
             tooltipDetail={suggestion.detail}
             category={suggestion.category}
+            isTemplate={suggestion.isTemplate}
           />
         </StyledTagWrapper>
       </StyledSuggestionLineTag>

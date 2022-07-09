@@ -67,3 +67,8 @@ export const StyledTemplateFilter = styled.div`
     padding: ${({ theme }) => theme.space[2]};
   }
 `;
+
+export const StyledModalContent = styled.div`
+  display: flex;
+  flex-direction: column;
+`;

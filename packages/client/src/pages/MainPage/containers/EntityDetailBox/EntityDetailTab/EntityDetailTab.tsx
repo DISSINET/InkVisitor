@@ -7,6 +7,7 @@ import {
   StyledClose,
   StyledLabel,
   StyledTab,
+  StyledTypeWrapper,
 } from "./EntityDetailTabStyles";
 
 interface EntityDetailTab {
@@ -26,10 +27,16 @@ export const EntityDetailTab: React.FC<EntityDetailTab> = ({
     <StyledTab isSelected={isSelected}>
       <Tooltip label={tabLabel}>
         <StyledLabel
-          isItalic={entity?.class === EntityClass.Statement}
+          isItalic={entity?.class === EntityClass.Statement && !entity?.label}
           onClick={onClick}
         >
-          {entity?.class && <TypeBar entityLetter={entity?.class} noMargin />}
+          {entity?.class && (
+            <TypeBar
+              entityLetter={entity?.class}
+              isTemplate={entity.isTemplate}
+              noMargin
+            />
+          )}
           {!entity ? "..." : tabLabel}
         </StyledLabel>
       </Tooltip>

@@ -493,12 +493,15 @@ export const StatementEditorBox: React.FC = () => {
       await api.entityUpdate(statementId, changes);
     },
     {
-      onSuccess: (data, variables) => {
+      onSuccess: (data, variables: any) => {
         if (selectedDetailId === statementId) {
           queryClient.invalidateQueries(["entity"]);
         }
         if (statement && statement.isTemplate) {
           queryClient.invalidateQueries(["templates"]);
+        }
+        if (variables.label !== undefined) {
+          queryClient.invalidateQueries("detail-tab-entities");
         }
         queryClient.invalidateQueries(["statement"]);
         queryClient.invalidateQueries(["territory"]);
@@ -516,6 +519,9 @@ export const StatementEditorBox: React.FC = () => {
         queryClient.invalidateQueries(["entity"]);
         queryClient.invalidateQueries(["statement"]);
         queryClient.invalidateQueries(["territory"]);
+        if (variables.text !== undefined) {
+          queryClient.invalidateQueries("detail-tab-entities");
+        }
       },
     }
   );

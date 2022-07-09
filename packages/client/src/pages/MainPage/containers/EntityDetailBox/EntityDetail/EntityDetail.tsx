@@ -40,7 +40,7 @@ import { JSONExplorer } from "../../JSONExplorer/JSONExplorer";
 import { StyledHeading } from "../../LoginModal/LoginModalStyles";
 import { PropGroup } from "../../PropGroup/PropGroup";
 import { ApplyTemplateModal } from "../ApplyTemplateModal/ApplyTemplateModal";
-import { CreateTemplateModal } from "../CreateTemplateModal/CreateTemplateModal";
+import { EntityDetailCreateTemplateModal } from "../EntityDetailCreateTemplateModal/EntityDetailCreateTemplateModal";
 import {
   StyledDetailContentRow,
   StyledDetailContentRowLabel,
@@ -222,9 +222,9 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
           queryClient.invalidateQueries("statement");
         }
         if (
-          variables.references ||
-          variables.detail ||
-          variables.label ||
+          variables.references !== undefined ||
+          variables.detail !== undefined ||
+          variables.label !== undefined ||
           variables.status ||
           variables.data?.logicalType
         ) {
@@ -233,6 +233,9 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
           }
           queryClient.invalidateQueries("territory");
           queryClient.invalidateQueries("bookmarks");
+        }
+        if (variables.label !== undefined) {
+          queryClient.invalidateQueries("detail-tab-entities");
         }
         if (entity?.isTemplate) {
           queryClient.invalidateQueries("templates");
@@ -1339,7 +1342,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
         setTemplateToApply={setTemplateToApply}
       />
 
-      <CreateTemplateModal
+      <EntityDetailCreateTemplateModal
         setCreateTemplateModal={setCreateTemplateModal}
         entity={entity}
         showModal={createTemplateModal}
