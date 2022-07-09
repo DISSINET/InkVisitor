@@ -1,16 +1,15 @@
 import styled from "styled-components";
 
 export const StyledTableWrapper = styled.div`
-  display: flex;
+  display: block;
   width: 100%;
-  justify-content: center;
   overflow-x: auto;
   overflow-y: auto;
 `;
 
 export const StyledTable = styled.table`
   border-collapse: collapse;
-  /* width: 100%; */
+  width: 100%;
   border-spacing: 0;
   border: 1px solid transparent;
 `;
@@ -43,19 +42,15 @@ export const StyledTr = styled.tr<StyledTr>`
 
   td:first-child {
     padding-left: ${({ theme }) => theme.space[2]};
-    padding-right: ${({ theme }) => theme.space[2]};π
+    padding-right: ${({ theme }) => theme.space[2]};
   }
   td:not(:last-child) {
     width: 1%;
-    padding-right: ${({ theme }) => theme.space[8]};
   }
   td,
   th {
     padding-left: ${({ theme }) => theme.space[3]};
     padding-right: ${({ theme }) => theme.space[3]};
-  }
-  :hover {
-    background-color: ${({ theme }) => theme.color["gray"][100]};
   }
 `;
 
@@ -121,9 +116,9 @@ export const StyledUserEditorRowValue = styled.div`
 
 export const StyledUserEditorForm = styled.div`
   display: inline-flex;
-  padding-top: 1rem;
   width: 100%;
+  padding-right: ${({ theme }) => theme.space[6]};
   input {
-    margin-right: ${({ theme }) => theme.space[3]};
+    margin: 0 ${({ theme }) => theme.space[3]};
   }
 `;
