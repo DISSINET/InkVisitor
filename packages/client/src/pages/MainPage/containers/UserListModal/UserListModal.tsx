@@ -1,6 +1,6 @@
 import { userRoleDict } from "@shared/dictionaries";
 import { EntityClass, UserRole, UserRoleMode } from "@shared/enums";
-import { IResponseUser, IUserRight } from "@shared/types";
+import { IResponseUser, IUser, IUserRight } from "@shared/types";
 import api from "api";
 import {
   Button,
@@ -13,9 +13,15 @@ import {
   ModalHeader,
   Submit,
 } from "components";
-import { StyledInputWrapper } from "components/Suggester/SuggesterStyles";
 import React, { useCallback, useMemo, useState } from "react";
-import { FaKey, FaPlus, FaTrashAlt, FaUnlink } from "react-icons/fa";
+import {
+  FaKey,
+  FaPlus,
+  FaToggleOff,
+  FaToggleOn,
+  FaTrashAlt,
+  FaUnlink,
+} from "react-icons/fa";
 import {
   RiUserSearchFill,
   RiUserSettingsFill,
@@ -426,25 +432,40 @@ export const UserListModal: React.FC<UserListModal> = ({
             rights,
             territoryRights: territoryActants,
           } = row.original as any;
+          const active = (row.original as IUser).active;
           return (
             <ButtonGroup noMarginRight>
-              {userId !== localStorage.getItem("userid") && (
-                <Button
-                  key="r"
-                  icon={<FaTrashAlt size={14} />}
-                  color="danger"
-                  tooltip="delete"
-                  onClick={() => {
-                    setRemovingUserId(userId);
-                  }}
-                />
-              )}
+              <Button
+                key="r"
+                icon={<FaTrashAlt size={14} />}
+                color="danger"
+                tooltip="delete"
+                disabled={userId === localStorage.getItem("userid")}
+                onClick={() => {
+                  setRemovingUserId(userId);
+                }}
+              />
               <Button
                 icon={<FaKey size={14} />}
                 tooltip="reset password"
                 color="warning"
                 onClick={() => {
-                  api.resetPasswordAdmin(userId);
+                  api
+                    .resetPasswordAdmin(userId)
+                    .then((data) => toast.success(data.data.message));
+                }}
+              />
+              <Button
+                icon={
+                  active ? <FaToggleOn size={14} /> : <FaToggleOff size={14} />
+                }
+                color={active ? "success" : "danger"}
+                tooltip={active ? "set inactive" : "set active"}
+                onClick={() => {
+                  userMutation.mutate({
+                    id: userId,
+                    active: !active,
+                  });
                 }}
               />
             </ButtonGroup>

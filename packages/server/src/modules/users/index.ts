@@ -352,6 +352,7 @@ export default Router()
 
       return {
         result: true,
+        message: "Email with the new password has been sent",
       };
     })
   )
