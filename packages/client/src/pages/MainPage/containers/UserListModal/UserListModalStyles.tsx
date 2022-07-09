@@ -4,12 +4,15 @@ export const StyledTableWrapper = styled.div`
   display: flex;
   flex-direction: column;
   width: 100%;
+  overflow-x: auto;
+  overflow-y: auto;
 `;
 
 export const StyledTable = styled.table`
   border-collapse: collapse;
   width: 100%;
   border-spacing: 0;
+  border: 1px solid transparent;
 `;
 export const StyledTHead = styled.thead`
   font-size: ${({ theme }) => theme.fontSize["sm"]};
@@ -69,7 +72,6 @@ export const StyledTerritoryColumnAllLabel = styled.div``;
 export const StyledTerritoryList = styled.div`
   display: block;
 
-  padding-bottom: ${({ theme }) => theme.space[2]};
   padding-top: ${({ theme }) => theme.space[2]};
 `;
 export const StyledTerritoryListItem = styled.div`
