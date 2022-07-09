@@ -5,7 +5,7 @@ import { IRequestSearch } from "@shared/types/request-search";
 import api from "api";
 import { Button, Dropdown, Input, Loader, TypeBar } from "components";
 
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { FaPlus, FaTrash } from "react-icons/fa";
 import { useQuery } from "react-query";
 import { OptionTypeBase, ValueType } from "react-select";
@@ -84,6 +84,17 @@ export const TemplateListBox: React.FC<TemplateListBox> = ({}) => {
   const handleAskRemoveTemplate = (templateId: string) => {
     setRemoveEntityId(templateId);
   };
+
+  const entityToRemove: false | IEntity = useMemo(() => {
+    if (removeEntityId) {
+      const templateToBeRemoved = templatesData?.find(
+        (template: IEntity) => template.id === removeEntityId
+      );
+      return templateToBeRemoved || false;
+    } else {
+      return false;
+    }
+  }, [removeEntityId]);
 
   return (
     <StyledBoxContent>
@@ -172,11 +183,13 @@ export const TemplateListBox: React.FC<TemplateListBox> = ({}) => {
         showCreateModal={showCreateModal}
         setShowCreateModal={setShowCreateModal}
       />
-      <TemplateListRemoveModal
-        removeEntityId={removeEntityId}
-        setRemoveEntityId={setRemoveEntityId}
-        templatesData={templatesData}
-      />
+      {removeEntityId && (
+        <TemplateListRemoveModal
+          removeEntityId={removeEntityId}
+          setRemoveEntityId={setRemoveEntityId}
+          entityToRemove={entityToRemove}
+        />
+      )}
     </StyledBoxContent>
   );
 };

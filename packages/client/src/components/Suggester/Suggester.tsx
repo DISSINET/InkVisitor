@@ -39,6 +39,7 @@ export interface EntitySuggestionI {
   status: EntityStatus;
   category: string;
   color: string;
+  isTemplate?: boolean;
   icons?: React.ReactNode[];
 }
 export interface UserSuggestionI {
@@ -166,7 +167,11 @@ export const Suggester: React.FC<Suggester> = ({
   };
 
   const renderEntitySuggestions = () => {
-    const itemData = createItemData(suggestions, onPick, selected);
+    const itemData = createItemData(
+      suggestions as EntitySuggestionI[],
+      onPick,
+      selected
+    );
     return (
       <List
         itemData={itemData as EntityItemData}

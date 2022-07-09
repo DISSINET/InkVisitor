@@ -13,8 +13,9 @@ import {
   ModalInputForm,
 } from "components";
 import { DStatement, DEntity } from "constructors";
+import { useSearchParams } from "hooks";
 import React, { useState } from "react";
-import { UseMutationResult, useQueryClient } from "react-query";
+import { useMutation, UseMutationResult, useQueryClient } from "react-query";
 import { toast } from "react-toastify";
 import {
   StyledDetailForm,
@@ -23,7 +24,7 @@ import {
   StyledDetailContentRowValue,
 } from "../EntityDetailBoxStyles";
 
-interface CreateTemplateModal {
+interface EntityDetailCreateTemplateModal {
   showModal: boolean;
   entity?: IEntity;
   userCanEdit: boolean;
@@ -35,7 +36,9 @@ interface CreateTemplateModal {
     unknown
   >;
 }
-export const CreateTemplateModal: React.FC<CreateTemplateModal> = ({
+export const EntityDetailCreateTemplateModal: React.FC<
+  EntityDetailCreateTemplateModal
+> = ({
   entity,
   showModal = false,
   userCanEdit,
@@ -44,6 +47,31 @@ export const CreateTemplateModal: React.FC<CreateTemplateModal> = ({
 }) => {
   const queryClient = useQueryClient();
   const [createTemplateLabel, setCreateTemplateLabel] = useState<string>("");
+
+  const { statementId, selectedDetailId } = useSearchParams();
+
+  const templateCreateMutation = useMutation(
+    async (templateEntity: IEntity) => await api.entityCreate(templateEntity),
+    {
+      onSuccess: (data, variables) => {
+        queryClient.invalidateQueries(["templates"]);
+        if (statementId && variables.class === EntityClass.Statement) {
+          queryClient.invalidateQueries("statement-templates");
+        }
+        if (selectedDetailId) {
+          queryClient.invalidateQueries("entity-templates");
+        }
+        updateEntityMutation.mutate({ usedTemplate: variables.id });
+
+        setCreateTemplateModal(false);
+        setCreateTemplateLabel("");
+
+        toast.info(
+          `Template [${variables.class}]: "${variables.label}" created from entity "${entity?.label}"`
+        );
+      },
+    }
+  );
 
   const handleCreateTemplate = () => {
     // create template as a copy of the entity
@@ -60,19 +88,8 @@ export const CreateTemplateModal: React.FC<CreateTemplateModal> = ({
       templateEntity.isTemplate = true;
       templateEntity.usedTemplate = "";
       templateEntity.label = createTemplateLabel;
-      api.entityCreate(templateEntity);
 
-      setTimeout(() => {
-        queryClient.invalidateQueries(["templates"]);
-      }, 1000);
-      updateEntityMutation.mutate({ usedTemplate: templateEntity.id });
-
-      setCreateTemplateModal(false);
-      setCreateTemplateLabel("");
-
-      toast.info(
-        `Template "${templateEntity.label}" created from entity "${entity.label}"`
-      );
+      templateCreateMutation.mutate(templateEntity);
     }
   };
 
@@ -107,6 +124,7 @@ export const CreateTemplateModal: React.FC<CreateTemplateModal> = ({
                     setCreateTemplateLabel(newLabel);
                   }}
                   changeOnType
+                  autoFocus
                 />
               </StyledDetailContentRowValue>
             </StyledDetailContentRow>

@@ -31,7 +31,7 @@ interface StyledEntityTag {
 export const StyledEntityTag = styled.div<StyledEntityTag>`
   background: ${({ color, isTemplate, theme }) =>
     isTemplate
-      ? `linear-gradient(-45deg, ${theme.color[color]} 0%, ${theme.color[color]} 50%, transparent 50%)`
+      ? `linear-gradient(-45deg, ${theme.color[color]} 0%, ${theme.color[color]} 50%, ${theme.color["gray"][100]} 50%)`
       : theme.color[color]};
   display: flex;
   justify-content: center;
