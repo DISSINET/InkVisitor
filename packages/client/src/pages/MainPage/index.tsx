@@ -23,7 +23,6 @@ import {
   heightHeader,
   hiddenBoxHeight,
 } from "Theme/constants";
-import { UserListModal } from "./containers";
 import { MemoizedEntityBookmarkBox } from "./containers/EntityBookmarkBox/EntityBookmarkBox";
 import { MemoizedEntityDetailBox } from "./containers/EntityDetailBox/EntityDetailBox";
 import { MemoizedEntitySearchBox } from "./containers/EntitySearchBox/EntitySearchBox";
@@ -235,7 +234,6 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
             isLoggedIn ? (
               <RightHeader
                 setUserCustomizationOpen={setUserCustomizationOpen}
-                handleUsersModalClick={handleUsersModalClick}
                 handleLogOut={handleLogOut}
                 userName={user ? user.name : ""}
                 userRole={userRole || ""}
@@ -340,10 +338,6 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
               </Box>
             </Panel>
           </StyledPanelWrap>
-          <UserListModal
-            isOpen={userAdministrationModalOpen}
-            onCloseFn={handleUsersModalCancelClick}
-          />
           {user && userCustomizationOpen && (
             <UserCustomizationModal
               user={user}

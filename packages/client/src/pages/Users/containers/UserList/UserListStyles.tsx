@@ -116,9 +116,9 @@ export const StyledUserEditorRowValue = styled.div`
 
 export const StyledUserEditorForm = styled.div`
   display: inline-flex;
+  padding-top: 1rem;
   width: 100%;
-  padding-right: ${({ theme }) => theme.space[6]};
   input {
-    margin: 0 ${({ theme }) => theme.space[3]};
+    margin-right: ${({ theme }) => theme.space[3]};
   }
 `;
