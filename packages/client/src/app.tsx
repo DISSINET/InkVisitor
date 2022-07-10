@@ -24,6 +24,7 @@ import GlobalStyle from "Theme/global";
 import AclPage from "./pages/Acl";
 import MainPage from "./pages/MainPage";
 import theme from "./Theme/theme";
+import NotFoundPage from "pages/NotFound";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -158,6 +159,7 @@ export const App: React.FC = () => {
                     <PasswordResetPage {...props} size={[width, height]} />
                   )}
                 />
+                <Route component={NotFoundPage} />
               </Switch>
             </SearchParamsProvider>
           </BrowserRouter>
