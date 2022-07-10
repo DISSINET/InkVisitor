@@ -170,7 +170,7 @@ const AclPage: React.FC<AclPage> = ({ size }) => {
           </Box>
         )}
         <Toast />
-        <Footer height={heightFooter} />
+        <Footer />
       </StyledPage>
     </>
   );

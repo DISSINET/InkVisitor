@@ -51,7 +51,7 @@ const ActivatePage: React.FC<ActivationPage> = ({ size }) => {
         />
         <Box css={{ textAlign: "center" }}>Activating...</Box>
         <Toast />
-        <Footer height={heightFooter} />
+        <Footer />
       </StyledPage>
     </>
   );
