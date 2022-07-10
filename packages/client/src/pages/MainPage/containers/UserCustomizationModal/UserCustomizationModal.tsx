@@ -16,12 +16,12 @@ import {
   ModalInputWrap,
   Tag,
 } from "components";
+import { EntitySuggester } from "components/Advanced";
 import React, { useMemo, useState } from "react";
 import { FaUnlink } from "react-icons/fa";
 import { useMutation, useQuery, useQueryClient } from "react-query";
 import { OptionTypeBase, ValueType } from "react-select";
 import { toast } from "react-toastify";
-import { EntitySuggester } from "..";
 import { AttributeButtonGroup } from "../AttributeButtonGroup/AttributeButtonGroup";
 import {
   StyledRightsHeading,

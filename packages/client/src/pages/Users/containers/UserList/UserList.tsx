@@ -1,7 +1,4 @@
 import React, { useCallback, useMemo, useState } from "react";
-import { useMutation, useQuery, useQueryClient } from "react-query";
-import { Cell, Column, Row, useTable } from "react-table";
-import { toast } from "react-toastify";
 import {
   FaKey,
   FaToggleOff,
@@ -14,6 +11,9 @@ import {
   RiUserSettingsFill,
   RiUserStarFill,
 } from "react-icons/ri";
+import { useMutation, useQuery, useQueryClient } from "react-query";
+import { Cell, Column, Row, useTable } from "react-table";
+import { toast } from "react-toastify";
 
 import { userRoleDict } from "@shared/dictionaries";
 import { EntityClass, UserRole, UserRoleMode } from "@shared/enums";
@@ -22,8 +22,8 @@ import api from "api";
 import { Button, ButtonGroup, Input, Loader, Submit } from "components";
 import { StyledPanelWrap } from "pages/Users/UsersPageStyles";
 import { AttributeButtonGroup } from "../../../MainPage/containers/AttributeButtonGroup/AttributeButtonGroup";
-import { EntitySuggester } from "../../../MainPage/containers/EntitySuggester/EntitySuggester";
 
+import { EntitySuggester, EntityTag } from "components/Advanced";
 import {
   StyledTable,
   StyledTableWrapper,
@@ -39,7 +39,6 @@ import {
 } from "./UserListStyles";
 import { UserListTableRow } from "./UserListTableRow/UserListTableRow";
 import { UsersUtils } from "./UsersUtils";
-import { EntityTag } from "components/Advanced";
 
 interface UserList {}
 

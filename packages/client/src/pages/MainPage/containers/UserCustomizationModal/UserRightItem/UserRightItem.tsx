@@ -1,7 +1,7 @@
 import api from "api";
+import { EntityTag } from "components/Advanced";
 import React from "react";
 import { useQuery } from "react-query";
-import { EntityTag } from "../..";
 import { StyledRightItem } from "./UserRightItemStyles";
 
 interface UserRightItem {

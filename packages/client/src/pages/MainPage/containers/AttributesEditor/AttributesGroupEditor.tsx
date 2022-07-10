@@ -1,31 +1,42 @@
-import React, { SetStateAction, useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 
-import { MdSettings } from "react-icons/md";
-import { EntityClass } from "@shared/enums";
 import {
-  Tooltip,
+  certaintyDict,
+  elvlDict,
+  logicDict,
+  moodDict,
+  moodVariantsDict,
+  operatorDict,
+  partitivityDict,
+  virtualityDict,
+} from "@shared/dictionaries";
+import { EntityClass } from "@shared/enums";
+import { IEntity } from "@shared/types";
+import {
   Button,
-  Modal,
-  ModalHeader,
-  ModalContent,
-  ModalFooter,
   ButtonGroup,
   Loader,
+  Modal,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+  Tooltip,
 } from "components";
+import { EntitySuggester, EntityTag } from "components/Advanced";
+import { FaUnlink } from "react-icons/fa";
+import { MdSettings } from "react-icons/md";
+import {
+  AttributeData,
+  Entities,
+  PropAttributeFilter,
+  PropAttributeGroup,
+  PropAttributeGroupDataObject,
+  PropAttributeName,
+} from "types";
 import {
   StyledAttributeModalHeaderIcon,
   StyledAttributeModalHeaderWrapper,
 } from "./AttributesEditorStyles";
-import { TooltipAttributeRow } from "./TooltipAttributeRow/TooltipAttributeRow";
-import { TooltipBooleanRow } from "./TooltipBooleanRow/TooltipBooleanRow";
-import {
-  AttributeData,
-  PropAttributeFilter,
-  PropAttributeGroupDataObject,
-  PropAttributeName,
-  Entities,
-  PropAttributeGroup,
-} from "types";
 import { AttributesForm } from "./AttributesForm";
 import {
   StyledColumnHeading,
@@ -36,19 +47,8 @@ import {
   StyledTooltipGrid,
   StyledTooltipHeading,
 } from "./AttributesGroupEditorStyles";
-import {
-  elvlDict,
-  logicDict,
-  moodDict,
-  moodVariantsDict,
-  virtualityDict,
-  partitivityDict,
-  operatorDict,
-  certaintyDict,
-} from "@shared/dictionaries";
-import { IEntity } from "@shared/types";
-import { EntitySuggester, EntityTag } from "..";
-import { FaUnlink } from "react-icons/fa";
+import { TooltipAttributeRow } from "./TooltipAttributeRow/TooltipAttributeRow";
+import { TooltipBooleanRow } from "./TooltipBooleanRow/TooltipBooleanRow";
 
 interface AttributesGroupEditor {
   modalTitle: string;

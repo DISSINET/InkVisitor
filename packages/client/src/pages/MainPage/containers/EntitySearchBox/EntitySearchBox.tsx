@@ -1,13 +1,10 @@
-import {
-  allEntities,
-  DropdownItem,
-  entitiesDict,
-} from "@shared/dictionaries/entity";
+import { DropdownItem, entitiesDict } from "@shared/dictionaries/entity";
 import { EntityClass } from "@shared/enums";
 import { IEntity, IOption } from "@shared/types";
 import { IRequestSearch } from "@shared/types/request-search";
 import api from "api";
 import { Button, Dropdown, Input, Loader, TypeBar } from "components";
+import { EntitySuggester, EntityTag } from "components/Advanced";
 import { useDebounce } from "hooks";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { FaUnlink } from "react-icons/fa";
@@ -15,7 +12,6 @@ import { useQuery } from "react-query";
 import { OptionTypeBase, ValueType } from "react-select";
 import { useAppSelector } from "redux/hooks";
 import { wildCardChar } from "Theme/constants";
-import { EntitySuggester, EntityTag } from "..";
 import {
   StyledBoxContent,
   StyledResultsWrapper,

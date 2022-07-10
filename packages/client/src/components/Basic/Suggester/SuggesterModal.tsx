@@ -16,7 +16,7 @@ import {
   Tag,
   TypeBar,
 } from "components";
-import { EntitySuggester } from "pages/MainPage/containers";
+import { EntitySuggester } from "components/Advanced";
 import React, { useState } from "react";
 import { FaUnlink } from "react-icons/fa";
 import { useQuery } from "react-query";

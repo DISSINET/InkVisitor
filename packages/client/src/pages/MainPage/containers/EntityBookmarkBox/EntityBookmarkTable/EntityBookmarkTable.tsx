@@ -1,10 +1,10 @@
 import { IEntity, IResponseBookmarkFolder } from "@shared/types";
 import { Button } from "components";
+import { EntityTag } from "components/Advanced";
 import update from "immutability-helper";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { FaUnlink } from "react-icons/fa";
 import { Cell, Column, Row, useTable } from "react-table";
-import { EntityTag } from "../..";
 import { EntityBookmarkTableRow } from "./EntityBookmarkTableRow";
 import { StyledTable, StyledTagWrap } from "./EntityBookmarkTableStyles";
 

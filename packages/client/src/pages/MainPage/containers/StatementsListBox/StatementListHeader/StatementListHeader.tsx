@@ -7,6 +7,7 @@ import {
 import api from "api";
 import { AxiosResponse } from "axios";
 import { Button, ButtonGroup } from "components";
+import { EntitySuggester } from "components/Advanced";
 import { CStatement } from "constructors";
 import { useSearchParams } from "hooks";
 import React, { useEffect, useState } from "react";
@@ -15,7 +16,6 @@ import { UseMutationResult, useQuery, useQueryClient } from "react-query";
 import { useAppSelector } from "redux/hooks";
 import theme from "Theme/theme";
 import { collectTerritoryChildren, searchTree } from "utils";
-import { EntitySuggester } from "../..";
 import { StatementListBreadcrumbItem } from "./StatementListBreadcrumbItem/StatementListBreadcrumbItem";
 import {
   StyledButtons,
