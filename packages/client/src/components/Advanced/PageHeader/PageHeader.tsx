@@ -9,8 +9,8 @@ import {
   StyledUser,
   StyledUserBox,
   StyledUsername,
-} from "./MainPageHeaderStyles";
-import packageJson from "../../../../../package.json";
+} from "./PageHeaderStyles";
+import packageJson from "../../../../package.json";
 import { heightHeader } from "Theme/constants";
 import LogoInkvisitor from "assets/logos/inkvisitor-full.svg";
 import { toast } from "react-toastify";

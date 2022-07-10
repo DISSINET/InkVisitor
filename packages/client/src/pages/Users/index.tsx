@@ -1,19 +1,14 @@
 import api from "api";
-
 import { Box, Header, MemoizedFooter, Toast } from "components";
-
 import { UserList } from "./containers";
 import React, { useState } from "react";
-import { useQuery, useQueryClient } from "react-query";
+import { useMutation, useQuery, useQueryClient } from "react-query";
 import { toast } from "react-toastify";
 import { setUsername } from "redux/features/usernameSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { heightFooter, heightHeader } from "Theme/constants";
-import {
-  LeftHeader,
-  RightHeader,
-} from "../MainPage/containers/MainPageHeader/MainPageHeader";
 import { StyledPage } from "./UsersPageStyles";
+import { LeftHeader, RightHeader } from "components/advanced";
 
 interface UsersPageProps {
   size: number[];
@@ -48,12 +43,13 @@ const UsersPage: React.FC<UsersPageProps> = ({ size }) => {
     { enabled: !!userId && api.isLoggedIn() }
   );
 
-  const handleLogOut = () => {
-    api.signOut();
-    dispatch(setUsername(""));
-    queryClient.removeQueries();
-    toast.success("You've been successfully logged out!");
-  };
+  const logOutMutation = useMutation(async () => await api.signOut(), {
+    onSuccess: (data, variables) => {
+      dispatch(setUsername(""));
+      queryClient.removeQueries();
+      toast.success("You've been successfully logged out!");
+    },
+  });
 
   const environmentName = (process.env.ROOT_URL || "").replace(
     /apps\/inkvisitor[-]?/,
@@ -78,7 +74,7 @@ const UsersPage: React.FC<UsersPageProps> = ({ size }) => {
           right={
             <RightHeader
               setUserCustomizationOpen={setMainPageRedirect}
-              handleLogOut={handleLogOut}
+              handleLogOut={logOutMutation.mutate}
               userName={user ? user.name : ""}
               userRole={userRole || ""}
             />

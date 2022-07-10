@@ -9,6 +9,7 @@ import {
   PanelSeparator,
   Toast,
 } from "components";
+import { LeftHeader, RightHeader } from "components/advanced";
 
 import { useSearchParams } from "hooks";
 import ScrollHandler from "hooks/ScrollHandler";
@@ -33,10 +34,6 @@ import { MemoizedEntityBookmarkBox } from "./containers/EntityBookmarkBox/Entity
 import { MemoizedEntityDetailBox } from "./containers/EntityDetailBox/EntityDetailBox";
 import { MemoizedEntitySearchBox } from "./containers/EntitySearchBox/EntitySearchBox";
 import { MemoizedLoginModal } from "./containers/LoginModal/LoginModal";
-import {
-  LeftHeader,
-  RightHeader,
-} from "./containers/MainPageHeader/MainPageHeader";
 import { MemoizedStatementEditorBox } from "./containers/StatementEditorBox/StatementEditorBox";
 import { MemoizedStatementListBox } from "./containers/StatementsListBox/StatementListBox";
 import { MemoizedTemplateListBox } from "./containers/TemplateListBox/TemplateListBox";
@@ -140,6 +137,7 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
   );
   const hideFourthPanelButton = () => (
     <Button
+      key="hide"
       onClick={() => {
         if (fourthPanelExpanded) {
           dispatch(setFourthPanelExpanded(false));
@@ -183,6 +181,7 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
       <>
         {fourthPanelExpanded && (
           <Button
+            key={boxToHide}
             inverted
             icon={isThisBoxHidden ? <BiHide /> : <BiShow />}
             onClick={() => handleHideBoxButtonClick(boxToHide, isThisBoxHidden)}
