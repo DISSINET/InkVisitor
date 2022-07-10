@@ -20,5 +20,4 @@ export const DefaultFooter = ({ ...args }) => {
 };
 DefaultFooter.args = {
   color: "primary",
-  height: 30,
 };

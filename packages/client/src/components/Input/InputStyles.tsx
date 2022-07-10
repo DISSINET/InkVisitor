@@ -49,12 +49,12 @@ export const StyledInput = styled.input<IValueStyle>`
   resize: none;
   :hover {
     border-color: ${({ theme }) => theme.color["info"]};
-    border-width: 1.5px;
+    border-width: ${({ theme }) => theme.borderWidth[1]};
   }
   :focus {
     outline: 0;
     border-color: ${({ theme }) => theme.color["info"]};
-    border-width: 1.5px;
+    border-width: ${({ theme }) => theme.borderWidth[1]};
   }
 `;
 export const StyledSelect = styled.select<IValueStyle>`

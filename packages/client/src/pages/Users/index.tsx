@@ -1,6 +1,6 @@
 import api from "api";
 
-import { Header, Toast } from "components";
+import { Box, Header, Toast } from "components";
 import { MemoizedFooter } from "components/Footer/Footer";
 import { UserList } from "./containers";
 import React, { useState } from "react";
@@ -84,7 +84,9 @@ const UsersPage: React.FC<UsersPageProps> = ({ size }) => {
             />
           }
         />
-        <UserList />
+        <Box>
+          <UserList />
+        </Box>
         <Toast />
         <MemoizedFooter height={heightFooter} />
       </StyledPage>

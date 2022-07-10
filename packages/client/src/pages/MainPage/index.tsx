@@ -100,8 +100,6 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
     { enabled: !!userId && api.isLoggedIn() }
   );
 
-  const [userAdministrationModalOpen, setUserAdministrationModalOpen] =
-    useState<boolean>(false);
   const handleLogOut = () => {
     api.signOut();
     dispatch(setUsername(""));
@@ -110,14 +108,6 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
     setDetailId("");
     setStatementId("");
     setTerritoryId("");
-  };
-
-  const handleUsersModalClick = () => {
-    setUserAdministrationModalOpen(true);
-  };
-
-  const handleUsersModalCancelClick = () => {
-    setUserAdministrationModalOpen(false);
   };
 
   const environmentName = (process.env.ROOT_URL || "").replace(

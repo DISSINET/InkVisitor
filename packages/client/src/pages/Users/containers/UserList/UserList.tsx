@@ -449,20 +449,6 @@ export const UserList: React.FC<UserList> = React.memo(({}) => {
     <StyledPanelWrap>
       {data && (
         <>
-          <Submit
-            title={`Delete User ${removingUser ? removingUser.name : ""}`}
-            text={`Do you really want do delete User ${
-              removingUser ? removingUser.name : ""
-            }?`}
-            show={removingUser != false}
-            onSubmit={() => {
-              removeUser();
-            }}
-            onCancel={() => {
-              setRemovingUserId(false);
-            }}
-            loading={false}
-          />
           <StyledTableWrapper>
             <StyledTable {...getTableProps()}>
               <StyledTHead>
@@ -494,6 +480,20 @@ export const UserList: React.FC<UserList> = React.memo(({}) => {
           <UsersUtils />
         </>
       )}
+      <Submit
+        title={`Delete User ${removingUser ? removingUser.name : ""}`}
+        text={`Do you really want do delete User ${
+          removingUser ? removingUser.name : ""
+        }?`}
+        show={removingUser != false}
+        onSubmit={() => {
+          removeUser();
+        }}
+        onCancel={() => {
+          setRemovingUserId(false);
+        }}
+        loading={false}
+      />
       <Loader show={isFetching} />
     </StyledPanelWrap>
   );

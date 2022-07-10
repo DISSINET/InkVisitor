@@ -14,8 +14,7 @@ export const StyledPage = styled.div<StyledPage>`
 
 interface StyledPanelWrap {}
 export const StyledPanelWrap = styled.div`
-  padding: 3rem;
   display: flex;
   flex-direction: column;
-  flex: 1;
+  /* flex: 1; */
 `;
