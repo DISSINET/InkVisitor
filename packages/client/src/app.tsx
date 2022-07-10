@@ -3,6 +3,7 @@ import { SearchParamsProvider } from "hooks/useParamsContext";
 import { useWindowSize } from "hooks/useWindowSize";
 import ActivatePage from "pages/Activate";
 import PasswordResetPage from "pages/PasswordReset";
+import UsersPage from "pages/Users";
 import React, { useEffect, Profiler } from "react";
 import { Helmet } from "react-helmet";
 import { QueryClient, QueryClientProvider } from "react-query";
@@ -55,7 +56,7 @@ export const App: React.FC = () => {
   const [width, height] = useWindowSize();
   const dispatch = useAppDispatch();
 
-  useEffect(() => {}, []);
+  const isLoggedIn = api.isLoggedIn();
 
   useEffect(() => {
     if (width > 0 && height > 0) {
@@ -125,7 +126,7 @@ export const App: React.FC = () => {
                     </Profiler>
                   )}
                 />
-                {api.isLoggedIn() ? (
+                {isLoggedIn && (
                   <Route
                     path="/acl"
                     exact
@@ -133,7 +134,16 @@ export const App: React.FC = () => {
                       <AclPage {...props} size={[width, height]} />
                     )}
                   />
-                ) : null}
+                )}
+                {isLoggedIn && (
+                  <Route
+                    path="/users"
+                    exact
+                    render={(props) => (
+                      <UsersPage {...props} size={[width, height]} />
+                    )}
+                  />
+                )}
                 <Route
                   path="/activate"
                   exact

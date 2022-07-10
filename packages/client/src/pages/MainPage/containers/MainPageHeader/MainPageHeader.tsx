@@ -14,6 +14,7 @@ import packageJson from "../../../../../package.json";
 import { heightHeader } from "Theme/constants";
 import LogoInkvisitor from "assets/logos/inkvisitor-full.svg";
 import { toast } from "react-toastify";
+import { useHistory } from "react-router";
 
 export const LeftHeader = React.memo(({}) => {
   const env = (process.env.ROOT_URL || "").replace(/apps\/inkvisitor[-]?/, "");
@@ -45,41 +46,67 @@ export const LeftHeader = React.memo(({}) => {
 
 interface RightHeaderProps {
   setUserCustomizationOpen: (arg0: boolean) => void;
-  handleUsersModalClick: () => void;
   handleLogOut: () => void;
   userName: string;
   userRole: string;
 }
 
-export const RightHeader: React.FC<RightHeaderProps> = ({
-  setUserCustomizationOpen,
-  handleUsersModalClick,
-  handleLogOut,
-  userName,
-  userRole,
-}) => {
-  return (
-    <StyledUserBox>
-      <StyledUser>
-        <StyledText>logged as</StyledText>
-        <StyledFaUserAlt
-          size={14}
-          onClick={() => setUserCustomizationOpen(true)}
-        />
-        <StyledUsername onClick={() => setUserCustomizationOpen(true)}>
-          {userName}
-        </StyledUsername>
-      </StyledUser>
-      <ButtonGroup>
-        {userRole == "admin" && (
-          <Button
-            label="Manage Users"
-            color="info"
-            onClick={() => handleUsersModalClick()}
+interface IPage {
+  label: string;
+  color: "info" | "success" | "danger" | "warning";
+  href: string;
+  admin?: boolean;
+}
+
+const pages: IPage[] = [
+  {
+    label: "Main",
+    color: "info",
+    href: "/",
+    admin: false,
+  },
+  {
+    label: "Manage Users",
+    color: "info",
+    href: "/users",
+    admin: true,
+  },
+];
+
+export const RightHeader: React.FC<RightHeaderProps> = React.memo(
+  ({ setUserCustomizationOpen, handleLogOut, userName, userRole }) => {
+    const history = useHistory();
+
+    return (
+      <StyledUserBox>
+        <StyledUser>
+          <StyledText>logged as</StyledText>
+          <StyledFaUserAlt
+            size={14}
+            onClick={() => setUserCustomizationOpen(true)}
           />
-        )}
-        <Button label="Log Out" color="danger" onClick={() => handleLogOut()} />
-      </ButtonGroup>
-    </StyledUserBox>
-  );
-};
+          <StyledUsername onClick={() => setUserCustomizationOpen(true)}>
+            {userName}
+          </StyledUsername>
+        </StyledUser>
+        <ButtonGroup>
+          {pages
+            .filter((p) => !p.admin || userRole === "admin")
+            .filter((p) => history.location.pathname !== p.href)
+            .map((p) => (
+              <Button
+                label={p.label}
+                color={p.color}
+                onClick={() => history.push(p.href)}
+              />
+            ))}
+          <Button
+            label="Log Out"
+            color="danger"
+            onClick={() => handleLogOut()}
+          />
+        </ButtonGroup>
+      </StyledUserBox>
+    );
+  }
+);
