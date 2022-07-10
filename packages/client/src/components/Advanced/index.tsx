@@ -1,4 +1,5 @@
+import { EmptyTag } from "./EmptyTag/EmptyTag";
 import { EntitySuggester } from "./EntitySuggester/EntitySuggester";
 import { EntityTag } from "./EntityTag/EntityTag";
 
-export { EntitySuggester, EntityTag };
+export { EmptyTag, EntitySuggester, EntityTag };

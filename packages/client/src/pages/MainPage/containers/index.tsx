@@ -1,5 +1,4 @@
 import { ActionModal } from "./ActionModal/ActionModal";
-import { EmptyTag } from "./EmptyTag/EmptyTag";
 import { EntityBookmarkBox } from "./EntityBookmarkBox/EntityBookmarkBox";
 import { EntityDetailBox } from "./EntityDetailBox/EntityDetailBox";
 import { EntitySearchBox } from "./EntitySearchBox/EntitySearchBox";
@@ -15,7 +14,6 @@ import { UserOptionsModal } from "./UserOptionsModal/UserOptionsModal";
 export {
   EntitySearchBox,
   EntityDetailBox,
-  EmptyTag,
   ActionModal,
   EntityBookmarkBox,
   StatementEditorBox,
