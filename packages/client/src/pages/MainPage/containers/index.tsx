@@ -4,7 +4,7 @@ import { EmptyTag } from "./EmptyTag/EmptyTag";
 import { EntityBookmarkBox } from "./EntityBookmarkBox/EntityBookmarkBox";
 import { EntityDetailBox } from "./EntityDetailBox/EntityDetailBox";
 import { EntitySuggester } from "./EntitySuggester/EntitySuggester";
-import { EntityTag } from "./EntityTag/EntityTag";
+import { EntityTag } from "components/Advanced";
 import { LoginModal } from "./LoginModal/LoginModal";
 import { StatementEditorBox } from "./StatementEditorBox/StatementEditorBox";
 import { StatementListBox } from "./StatementsListBox/StatementListBox";

@@ -23,7 +23,7 @@ import { Button, ButtonGroup, Input, Loader, Submit } from "components";
 import { StyledPanelWrap } from "pages/Users/UsersPageStyles";
 import { AttributeButtonGroup } from "../../../MainPage/containers/AttributeButtonGroup/AttributeButtonGroup";
 import { EntitySuggester } from "../../../MainPage/containers/EntitySuggester/EntitySuggester";
-import { EntityTag } from "../../../MainPage/containers/EntityTag/EntityTag";
+
 import {
   StyledTable,
   StyledTableWrapper,
@@ -39,6 +39,7 @@ import {
 } from "./UserListStyles";
 import { UserListTableRow } from "./UserListTableRow/UserListTableRow";
 import { UsersUtils } from "./UsersUtils";
+import { EntityTag } from "components/Advanced";
 
 interface UserList {}
 

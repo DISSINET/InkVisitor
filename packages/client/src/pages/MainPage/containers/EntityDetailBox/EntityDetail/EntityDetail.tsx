@@ -18,6 +18,7 @@ import {
   Submit,
   TypeBar,
 } from "components";
+import { EntityTag } from "components/Advanced";
 import { CMetaProp } from "constructors";
 import { useSearchParams } from "hooks";
 import React, { useEffect, useMemo, useState } from "react";
@@ -34,7 +35,6 @@ import {
 import { AttributeButtonGroup } from "../../AttributeButtonGroup/AttributeButtonGroup";
 import { AuditTable } from "../../AuditTable/AuditTable";
 import { EntityReferenceTable } from "../../EntityReferenceTable/EntityReferenceTable";
-import { EntityTag } from "../../EntityTag/EntityTag";
 import { JSONExplorer } from "../../JSONExplorer/JSONExplorer";
 import { PropGroup } from "../../PropGroup/PropGroup";
 import { ApplyTemplateModal } from "../ApplyTemplateModal/ApplyTemplateModal";

@@ -1,7 +1,6 @@
 import { IEntity, IProp } from "@shared/types";
-import { EmptyTag } from "pages/MainPage/containers";
+import { EmptyTag, EntityTag } from "pages/MainPage/containers";
 import React from "react";
-import { EntityTag } from "../../../EntityTag/EntityTag";
 import {
   StyledPropGridRow,
   StyledPropGroup,
