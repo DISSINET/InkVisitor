@@ -4,6 +4,7 @@ import { EntitySuggester } from "./EntitySuggester/EntitySuggester";
 import { EntityTag } from "./EntityTag/EntityTag";
 import { Page } from "./Page/Page";
 import { LeftHeader, RightHeader } from "./PageHeader/PageHeader";
+import { UserCustomizationModal } from "./UserCustomizationModal/UserCustomizationModal";
 
 export {
   AttributeButtonGroup,
@@ -13,4 +14,5 @@ export {
   Page,
   LeftHeader,
   RightHeader,
+  UserCustomizationModal,
 };

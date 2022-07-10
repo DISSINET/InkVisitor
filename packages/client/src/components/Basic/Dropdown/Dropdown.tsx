@@ -90,7 +90,7 @@ export const Dropdown: React.FC<Dropdown> = ({
         isDisabled={disabled || isOneOptionSingleSelect}
         isOneOptionSingleSelect={isOneOptionSingleSelect}
         entityDropdown={entityDropdown}
-        wildCardChar={(value as IOption).label === "*"}
+        wildCardChar={(value as IOption)?.label === "*"}
         className="react-select-container"
         classNamePrefix="react-select"
         placeholder={placeholder}

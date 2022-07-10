@@ -9,8 +9,11 @@ import {
   PanelSeparator,
   Toast,
 } from "components";
-import { LeftHeader, RightHeader } from "components/advanced";
-
+import {
+  LeftHeader,
+  RightHeader,
+  UserCustomizationModal,
+} from "components/advanced";
 import { useSearchParams } from "hooks";
 import ScrollHandler from "hooks/ScrollHandler";
 import React, { useState } from "react";
@@ -38,7 +41,6 @@ import { MemoizedStatementEditorBox } from "./containers/StatementEditorBox/Stat
 import { MemoizedStatementListBox } from "./containers/StatementsListBox/StatementListBox";
 import { MemoizedTemplateListBox } from "./containers/TemplateListBox/TemplateListBox";
 import { MemoizedTerritoryTreeBox } from "./containers/TerritoryTreeBox/TerritoryTreeBox";
-import { UserCustomizationModal } from "./containers/UserCustomizationModal/UserCustomizationModal";
 import { StyledPage, StyledPanelWrap } from "./MainPageStyles";
 
 type FourthPanelBoxes = "search" | "bookmarks" | "templates";

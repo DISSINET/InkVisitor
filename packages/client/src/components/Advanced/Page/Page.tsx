@@ -1,9 +1,13 @@
 import { Header, MemoizedFooter, Toast } from "components";
-import React from "react";
+import React, { useState } from "react";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { heightFooter, heightHeader } from "Theme/constants";
 import { StyledPage } from "./PageStyles";
-import { LeftHeader, RightHeader } from "components/advanced";
+import {
+  LeftHeader,
+  RightHeader,
+  UserCustomizationModal,
+} from "components/advanced";
 import { useMutation, useQuery, useQueryClient } from "react-query";
 import api from "api";
 import { setUsername } from "redux/features/usernameSlice";
@@ -54,6 +58,8 @@ export const Page: React.FC<Page> = ({ children }) => {
     },
   });
 
+  const [userCustomizationOpen, setUserCustomizationOpen] = useState(false);
+
   return (
     <StyledPage layoutWidth={layoutWidth}>
       <Header
@@ -80,6 +86,13 @@ export const Page: React.FC<Page> = ({ children }) => {
 
       <Toast />
       <MemoizedFooter height={heightFooter} />
+
+      {user && userCustomizationOpen && (
+        <UserCustomizationModal
+          user={user}
+          onClose={() => setUserCustomizationOpen(false)}
+        />
+      )}
     </StyledPage>
   );
 };
