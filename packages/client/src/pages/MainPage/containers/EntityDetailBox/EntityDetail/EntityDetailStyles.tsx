@@ -97,3 +97,13 @@ export const StyledDetailSectionEntityList = styled.div`
     padding: 0.25rem;
   }
 `;
+
+export const StyledUsedAsHeading = styled.div`
+  display: flex;
+  margin-right: auto;
+`;
+export const StyledUsedAsTitle = styled.div`
+  padding-left: ${({ theme }) => theme.space[2]};
+  margin-bottom: ${({ theme }) => theme.space[1]};
+  color: ${({ theme }) => theme.color["info"]};
+`;
