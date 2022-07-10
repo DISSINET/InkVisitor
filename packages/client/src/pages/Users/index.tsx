@@ -1,6 +1,3 @@
-import { DndProvider } from "react-dnd";
-import { HTML5Backend } from "react-dnd-html5-backend";
-
 import api from "api";
 
 import { Header, Toast } from "components";
@@ -87,9 +84,7 @@ const UsersPage: React.FC<UsersPageProps> = ({ size }) => {
             />
           }
         />
-        <DndProvider backend={HTML5Backend}>
-          <UserList />
-        </DndProvider>
+        <UserList />
         <Toast />
         <MemoizedFooter height={heightFooter} />
       </StyledPage>

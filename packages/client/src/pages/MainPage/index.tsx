@@ -241,110 +241,108 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
             ) : undefined
           }
         />
-        <DndProvider backend={HTML5Backend}>
-          <ScrollHandler />
-          <StyledPanelWrap>
-            {separatorXPosition > 0 && <PanelSeparator />}
-            {/* FIRST PANEL */}
-            <Panel
-              width={firstPanelExpanded ? panelWidths[0] : collapsedPanelWidth}
+        <ScrollHandler />
+        <StyledPanelWrap>
+          {separatorXPosition > 0 && <PanelSeparator />}
+          {/* FIRST PANEL */}
+          <Panel
+            width={firstPanelExpanded ? panelWidths[0] : collapsedPanelWidth}
+          >
+            <Box
+              height={heightContent}
+              label="Territories"
+              isExpanded={firstPanelExpanded}
+              button={[firstPanelButton()]}
+              noPadding
             >
-              <Box
-                height={heightContent}
-                label="Territories"
-                isExpanded={firstPanelExpanded}
-                button={[firstPanelButton()]}
-                noPadding
-              >
-                <MemoizedTerritoryTreeBox />
-              </Box>
-            </Panel>
-            {/* SECOND PANEL */}
-            <Panel
-              width={
-                firstPanelExpanded
-                  ? panelWidths[1]
-                  : panelWidths[1] + panelWidths[0] - collapsedPanelWidth
-              }
+              <MemoizedTerritoryTreeBox />
+            </Box>
+          </Panel>
+          {/* SECOND PANEL */}
+          <Panel
+            width={
+              firstPanelExpanded
+                ? panelWidths[1]
+                : panelWidths[1] + panelWidths[0] - collapsedPanelWidth
+            }
+          >
+            <Box
+              height={detailId ? heightContent / 2 - 20 : heightContent}
+              label="Statements"
             >
+              <MemoizedStatementListBox />
+            </Box>
+            {detailId && (
               <Box
-                height={detailId ? heightContent / 2 - 20 : heightContent}
-                label="Statements"
+                height={heightContent / 2 + 20}
+                label="Detail"
+                button={[
+                  detailId && (
+                    <Button
+                      inverted
+                      icon={<IoMdClose />}
+                      onClick={() => {
+                        setDetailId("");
+                      }}
+                    />
+                  ),
+                ]}
               >
-                <MemoizedStatementListBox />
+                <MemoizedEntityDetailBox />
               </Box>
-              {detailId && (
-                <Box
-                  height={heightContent / 2 + 20}
-                  label="Detail"
-                  button={[
-                    detailId && (
-                      <Button
-                        inverted
-                        icon={<IoMdClose />}
-                        onClick={() => {
-                          setDetailId("");
-                        }}
-                      />
-                    ),
-                  ]}
-                >
-                  <MemoizedEntityDetailBox />
-                </Box>
-              )}
-            </Panel>
-            {/* THIRD PANEL */}
-            <Panel
-              width={
-                fourthPanelExpanded
-                  ? panelWidths[2]
-                  : panelWidths[2] + panelWidths[3] - collapsedPanelWidth
-              }
+            )}
+          </Panel>
+          {/* THIRD PANEL */}
+          <Panel
+            width={
+              fourthPanelExpanded
+                ? panelWidths[2]
+                : panelWidths[2] + panelWidths[3] - collapsedPanelWidth
+            }
+          >
+            <Box height={heightContent} label="Editor">
+              <MemoizedStatementEditorBox />
+            </Box>
+          </Panel>
+          {/* FOURTH PANEL */}
+          <Panel
+            width={fourthPanelExpanded ? panelWidths[3] : collapsedPanelWidth}
+          >
+            <Box
+              height={getFourthPanelBoxHeight("search")}
+              label="Search"
+              color="white"
+              isExpanded={fourthPanelExpanded}
+              button={[hideBoxButton("search"), hideFourthPanelButton()]}
             >
-              <Box height={heightContent} label="Editor">
-                <MemoizedStatementEditorBox />
-              </Box>
-            </Panel>
-            {/* FOURTH PANEL */}
-            <Panel
-              width={fourthPanelExpanded ? panelWidths[3] : collapsedPanelWidth}
+              <MemoizedEntitySearchBox />
+            </Box>
+            <Box
+              height={getFourthPanelBoxHeight("bookmarks")}
+              label="Bookmarks"
+              color="white"
+              isExpanded={fourthPanelExpanded}
+              button={[hideBoxButton("bookmarks"), hideFourthPanelButton()]}
             >
-              <Box
-                height={getFourthPanelBoxHeight("search")}
-                label="Search"
-                color="white"
-                isExpanded={fourthPanelExpanded}
-                button={[hideBoxButton("search"), hideFourthPanelButton()]}
-              >
-                <MemoizedEntitySearchBox />
-              </Box>
-              <Box
-                height={getFourthPanelBoxHeight("bookmarks")}
-                label="Bookmarks"
-                color="white"
-                isExpanded={fourthPanelExpanded}
-                button={[hideBoxButton("bookmarks"), hideFourthPanelButton()]}
-              >
-                <MemoizedEntityBookmarkBox />
-              </Box>
-              <Box
-                height={getFourthPanelBoxHeight("templates")}
-                label="Templates"
-                color="white"
-                isExpanded={fourthPanelExpanded}
-                button={[hideBoxButton("templates"), hideFourthPanelButton()]}
-              >
-                <MemoizedTemplateListBox />
-              </Box>
-            </Panel>
-          </StyledPanelWrap>
-          {user && userCustomizationOpen && (
-            <UserCustomizationModal
-              user={user}
-              onClose={() => setUserCustomizationOpen(false)}
-            />
-          )}
-        </DndProvider>
+              <MemoizedEntityBookmarkBox />
+            </Box>
+            <Box
+              height={getFourthPanelBoxHeight("templates")}
+              label="Templates"
+              color="white"
+              isExpanded={fourthPanelExpanded}
+              button={[hideBoxButton("templates"), hideFourthPanelButton()]}
+            >
+              <MemoizedTemplateListBox />
+            </Box>
+          </Panel>
+        </StyledPanelWrap>
+        {user && userCustomizationOpen && (
+          <UserCustomizationModal
+            user={user}
+            onClose={() => setUserCustomizationOpen(false)}
+          />
+        )}
 
         <Toast />
         <MemoizedFooter height={heightFooter} />
