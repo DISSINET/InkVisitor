@@ -1,6 +1,6 @@
 import { IEntity, IProp } from "@shared/types";
 import { AttributeIcon, Button } from "components";
-import { EntitySuggester, EntityTag } from "components/Advanced";
+import { EntitySuggester, EntityTag } from "components/advanced";
 import React, { useEffect, useRef, useState } from "react";
 import {
   DragSourceMonitor,

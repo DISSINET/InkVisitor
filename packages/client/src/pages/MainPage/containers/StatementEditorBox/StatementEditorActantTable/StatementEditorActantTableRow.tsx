@@ -11,7 +11,7 @@ import {
   AttributeButtonGroup,
   EntitySuggester,
   EntityTag,
-} from "components/Advanced";
+} from "components/advanced";
 import { useSearchParams } from "hooks";
 import React, { useCallback, useEffect, useRef } from "react";
 import {

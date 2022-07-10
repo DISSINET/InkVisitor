@@ -2,7 +2,7 @@ import { EntityClass, EntityStatus, Language } from "@shared/enums";
 import { IEntity } from "@shared/types";
 import api from "api";
 import { Button, Loader } from "components";
-import { EntityTag } from "components/Advanced";
+import { EntityTag } from "components/advanced";
 import { useSearchParams } from "hooks";
 import React from "react";
 import { BsArrow90DegLeft, BsArrowRightShort } from "react-icons/bs";

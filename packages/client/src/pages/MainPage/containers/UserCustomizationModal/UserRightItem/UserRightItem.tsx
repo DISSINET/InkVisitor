@@ -1,5 +1,5 @@
 import api from "api";
-import { EntityTag } from "components/Advanced";
+import { EntityTag } from "components/advanced";
 import React from "react";
 import { useQuery } from "react-query";
 import { StyledRightItem } from "./UserRightItemStyles";

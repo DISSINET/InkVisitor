@@ -7,7 +7,7 @@ import {
   IStatementActant,
   IStatementAction,
 } from "@shared/types";
-import { EmptyTag, EntityTag } from "components/Advanced";
+import { EmptyTag, EntityTag } from "components/advanced";
 import React from "react";
 import { ColumnInstance, Row } from "react-table";
 import { StatementListRowExpandedPropGroup } from "./StatementListRowExpandedPropGroup";

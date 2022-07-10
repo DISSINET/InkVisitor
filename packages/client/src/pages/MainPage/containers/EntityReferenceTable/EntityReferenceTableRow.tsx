@@ -1,7 +1,7 @@
 import { EntityClass } from "@shared/enums";
 import { IEntity, IReference } from "@shared/types";
 import { Button } from "components";
-import { EntitySuggester, EntityTag } from "components/Advanced";
+import { EntitySuggester, EntityTag } from "components/advanced";
 import React from "react";
 import { FaExternalLinkAlt, FaTrashAlt, FaUnlink } from "react-icons/fa";
 import {

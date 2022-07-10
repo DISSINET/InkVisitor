@@ -7,7 +7,7 @@ import {
 import api from "api";
 import { AxiosResponse } from "axios";
 import { Button, ButtonGroup } from "components";
-import { EntitySuggester } from "components/Advanced";
+import { EntitySuggester } from "components/advanced";
 import { CStatement } from "constructors";
 import { useSearchParams } from "hooks";
 import React, { useEffect, useState } from "react";

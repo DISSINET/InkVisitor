@@ -21,7 +21,7 @@ import {
   ModalInputForm,
   MultiInput,
 } from "components";
-import { EntitySuggester, EntityTag } from "components/Advanced";
+import { EntitySuggester, EntityTag } from "components/advanced";
 import { CProp, CStatementActant, CStatementAction } from "constructors";
 import { useSearchParams } from "hooks";
 import React, { useEffect, useMemo, useState } from "react";

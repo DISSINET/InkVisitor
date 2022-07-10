@@ -1,7 +1,7 @@
 import { UsedInPosition } from "@shared/enums";
 import { IEntity, IResponseUsedInMetaProp } from "@shared/types";
 import { Table } from "components";
-import { EntityTag } from "components/Advanced";
+import { EntityTag } from "components/advanced";
 import React, { useMemo } from "react";
 import { Cell, Column } from "react-table";
 import {

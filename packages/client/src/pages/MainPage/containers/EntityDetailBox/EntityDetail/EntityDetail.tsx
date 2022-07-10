@@ -18,7 +18,7 @@ import {
   Submit,
   TypeBar,
 } from "components";
-import { AttributeButtonGroup, EntityTag } from "components/Advanced";
+import { AttributeButtonGroup, EntityTag } from "components/advanced";
 import { CMetaProp } from "constructors";
 import { useSearchParams } from "hooks";
 import React, { useEffect, useMemo, useState } from "react";

@@ -16,7 +16,7 @@ import {
   ModalInputWrap,
   Tag,
 } from "components";
-import { AttributeButtonGroup, EntitySuggester } from "components/Advanced";
+import { AttributeButtonGroup, EntitySuggester } from "components/advanced";
 import React, { useMemo, useState } from "react";
 import { FaUnlink } from "react-icons/fa";
 import { useMutation, useQuery, useQueryClient } from "react-query";

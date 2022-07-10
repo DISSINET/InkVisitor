@@ -9,7 +9,7 @@ import {
   ModalHeader,
   ModalInputForm,
 } from "components";
-import { EntityTag } from "components/Advanced";
+import { EntityTag } from "components/advanced";
 import React from "react";
 import { UseMutationResult } from "react-query";
 import { toast } from "react-toastify";

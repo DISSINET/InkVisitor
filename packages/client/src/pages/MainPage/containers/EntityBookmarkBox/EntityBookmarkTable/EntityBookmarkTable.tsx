@@ -1,6 +1,6 @@
 import { IEntity, IResponseBookmarkFolder } from "@shared/types";
 import { Button } from "components";
-import { EntityTag } from "components/Advanced";
+import { EntityTag } from "components/advanced";
 import update from "immutability-helper";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { FaUnlink } from "react-icons/fa";

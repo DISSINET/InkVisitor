@@ -4,7 +4,7 @@ import { IEntity, IOption } from "@shared/types";
 import { IRequestSearch } from "@shared/types/request-search";
 import api from "api";
 import { Button, Dropdown, Input, Loader, TypeBar } from "components";
-import { EntitySuggester, EntityTag } from "components/Advanced";
+import { EntitySuggester, EntityTag } from "components/advanced";
 import { useDebounce } from "hooks";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { FaUnlink } from "react-icons/fa";

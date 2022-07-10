@@ -7,7 +7,7 @@ import {
   AttributeButtonGroup,
   EntitySuggester,
   EntityTag,
-} from "components/Advanced";
+} from "components/advanced";
 import { StyledPanelWrap } from "pages/Users/UsersPageStyles";
 import React, { useCallback, useMemo, useState } from "react";
 import {

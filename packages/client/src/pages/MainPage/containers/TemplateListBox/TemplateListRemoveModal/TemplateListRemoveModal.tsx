@@ -10,7 +10,7 @@ import {
   ModalFooter,
   ModalHeader,
 } from "components";
-import { EntityTag } from "components/Advanced";
+import { EntityTag } from "components/advanced";
 import { useSearchParams } from "hooks";
 import React, { useEffect, useState } from "react";
 import { useMutation, useQueryClient } from "react-query";
