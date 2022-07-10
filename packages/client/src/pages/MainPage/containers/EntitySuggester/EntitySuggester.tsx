@@ -7,7 +7,7 @@ import {
 } from "@shared/enums";
 import { IEntity, IOption } from "@shared/types";
 import api from "api";
-import { EntitySuggestionI, Suggester } from "components/Suggester/Suggester";
+import { Suggester } from "components";
 import { CEntity, CStatement, CTerritoryActant } from "constructors";
 import { useDebounce, useSearchParams } from "hooks";
 import React, { useEffect, useState } from "react";
@@ -16,7 +16,7 @@ import { FaHome } from "react-icons/fa";
 import { useMutation, useQuery } from "react-query";
 import { OptionTypeBase, ValueType } from "react-select";
 import { DropdownAny, rootTerritoryId, wildCardChar } from "Theme/constants";
-import { Entities } from "types";
+import { Entities, EntitySuggestionI } from "types";
 
 interface EntitySuggesterI {
   categoryTypes: EntityClass[];

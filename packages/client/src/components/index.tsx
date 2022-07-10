@@ -1,11 +1,11 @@
-import { Box } from "components/Box/Box";
-import { Button } from "components/Button/Button";
-import { ButtonGroup } from "components/ButtonGroup/ButtonGroup";
-import { Dropdown } from "components/Dropdown/Dropdown";
-import { Footer } from "components/Footer/Footer";
-import { Header } from "components/Header/Header";
-import { Input } from "components/Input/Input";
-import { Loader } from "components/Loader/Loader";
+import { Box } from "./Basic/Box/Box";
+import { Button } from "./Basic/Button/Button";
+import { ButtonGroup } from "./Basic/ButtonGroup/ButtonGroup";
+import { Dropdown } from "./Basic/Dropdown/Dropdown";
+import { Footer } from "./Basic/Footer/Footer";
+import { Header } from "./Basic/Header/Header";
+import { Input } from "./Basic/Input/Input";
+import { Loader } from "./Basic/Loader/Loader";
 import {
   Modal,
   ModalCard,
@@ -15,20 +15,21 @@ import {
   ModalInputForm,
   ModalInputLabel,
   ModalInputWrap,
-} from "components/Modal/Modal";
-import { MultiInput } from "components/MultiInput/MultiInput";
-import { Panel } from "components/Panel/Panel";
-import { Submit } from "components/Submit/Submit";
-import { Suggester } from "components/Suggester/Suggester";
-import { Tag } from "components/Tag/Tag";
-import { TagGroup } from "components/TagGroup/TagGroup";
-import { Toast } from "components/Toast/Toast";
-import { Tooltip } from "components/Tooltip/Tooltip";
-import { AttributeIcon } from "./AttributeIcon/AttributeIcon";
-import { Checkbox } from "./Checkbox/Checkbox";
-import { PanelSeparator } from "./PanelSeparator/PanelSeparator";
-import { Table } from "./Table/Table";
-import { TypeBar } from "./TypeBar/TypeBar";
+} from "./Basic/Modal/Modal";
+import { MultiInput } from "./Basic/MultiInput/MultiInput";
+import { Panel } from "./Basic/Panel/Panel";
+import { Submit } from "./Basic/Submit/Submit";
+import { Suggester } from "./Basic/Suggester/Suggester";
+import { Tag } from "./Basic/Tag/Tag";
+import { TagGroup } from "./Basic/TagGroup/TagGroup";
+import { Toast } from "./Basic/Toast/Toast";
+import { Tooltip } from "./Basic/Tooltip/Tooltip";
+import { AttributeIcon } from "./Basic/AttributeIcon/AttributeIcon";
+import { Checkbox } from "./Basic/Checkbox/Checkbox";
+import { PanelSeparator } from "./Basic/PanelSeparator/PanelSeparator";
+import { Table } from "./Basic/Table/Table";
+import { TypeBar } from "./Basic/TypeBar/TypeBar";
+import { MemoizedFooter } from "components/Basic/Footer/Footer";
 
 export {
   AttributeIcon,
@@ -56,6 +57,7 @@ export {
   ModalInputForm,
   ModalInputLabel,
   ModalInputWrap,
+  MemoizedFooter,
   Submit,
   TypeBar,
   PanelSeparator,

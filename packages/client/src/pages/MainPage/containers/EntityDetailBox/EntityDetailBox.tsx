@@ -16,15 +16,15 @@ import {
   Loader,
   MultiInput,
   Submit,
+  TypeBar,
 } from "components";
-import { StyledHeading, StyledUsedInTitle } from "components/Table/TableStyles";
-import { StyledTypeBar } from "components/TypeBar/TypeBarStyles";
+
 import { CMetaProp } from "constructors";
 import { useSearchParams } from "hooks";
 import React, { useEffect, useMemo, useState } from "react";
 import { FaPlus, FaRegCopy } from "react-icons/fa";
 import { useMutation, useQuery, useQueryClient } from "react-query";
-import { ValueType, OptionTypeBase } from "react-select";
+import { OptionTypeBase, ValueType } from "react-select";
 import { toast } from "react-toastify";
 import { DraggedPropRowCategory, PropAttributeFilter } from "types";
 import { EntityTag } from "..";
@@ -48,6 +48,8 @@ import {
   StyledDetailSectionHeader,
   StyledDetailWrapper,
   StyledFormWrapper,
+  StyledUsedAsHeading,
+  StyledUsedAsTitle,
 } from "./EntityDetailBoxStyles";
 import { EntityDetailHeaderRow } from "./EntityDetailHeaderRow/EntityDetailHeaderRow";
 import { EntityDetailMetaPropsTable } from "./EntityDetailUsedInTable/EntityDetailMetaPropsTable/EntityDetailMetaPropsTable";
@@ -545,9 +547,7 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
                               entityDropdown
                               disableTyping
                             />
-                            <StyledTypeBar
-                              entity={`entity${entity.class}`}
-                            ></StyledTypeBar>
+                            <TypeBar entityLetter={`entity${entity.class}`} />
                           </div>
                         </StyledDetailContentRowValue>
                       </StyledDetailContentRow>
@@ -1221,11 +1221,11 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
               {/* used as template */}
               {entity.isTemplate && entity.usedAsTemplate && (
                 <StyledDetailSectionContentUsedIn key="as template">
-                  <StyledHeading>
-                    <StyledUsedInTitle>
+                  <StyledUsedAsHeading>
+                    <StyledUsedAsTitle>
                       <b>{entity.usedAsTemplate.length}</b> As a template
-                    </StyledUsedInTitle>
-                  </StyledHeading>
+                    </StyledUsedAsTitle>
+                  </StyledUsedAsHeading>
                   <StyledDetailSectionEntityList>
                     {entity.usedAsTemplate.map((entityId) => (
                       <React.Fragment key={entityId}>

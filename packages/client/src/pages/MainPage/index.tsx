@@ -1,7 +1,15 @@
 import api from "api";
 
-import { Box, Button, Header, Panel, PanelSeparator, Toast } from "components";
-import { MemoizedFooter } from "components/Footer/Footer";
+import {
+  Box,
+  Button,
+  Header,
+  MemoizedFooter,
+  Panel,
+  PanelSeparator,
+  Toast,
+} from "components";
+
 import { useSearchParams } from "hooks";
 import ScrollHandler from "hooks/ScrollHandler";
 import React, { useState } from "react";
