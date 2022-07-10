@@ -1,8 +1,8 @@
 import { Button } from "components";
 import React from "react";
-import { StyledPropButtonGroup } from "./../StatementEditorBox/StatementEditorBoxStyles";
+import { StyledPropButtonGroup } from "./AttributeButtonGroupStyles";
 
-interface IAttributeButtonGroup {
+interface AttributeButtonGroup {
   options: {
     longValue: string;
     shortValue: string;
@@ -13,7 +13,7 @@ interface IAttributeButtonGroup {
   noMargin?: boolean;
 }
 
-export const AttributeButtonGroup: React.FC<IAttributeButtonGroup> = ({
+export const AttributeButtonGroup: React.FC<AttributeButtonGroup> = ({
   options = [],
   disabled = false,
   noMargin = false,

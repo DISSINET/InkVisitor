@@ -1,3 +1,14 @@
+import { userRoleDict } from "@shared/dictionaries";
+import { EntityClass, UserRole, UserRoleMode } from "@shared/enums";
+import { IResponseUser, IUser, IUserRight } from "@shared/types";
+import api from "api";
+import { Button, ButtonGroup, Input, Loader, Submit } from "components";
+import {
+  AttributeButtonGroup,
+  EntitySuggester,
+  EntityTag,
+} from "components/Advanced";
+import { StyledPanelWrap } from "pages/Users/UsersPageStyles";
 import React, { useCallback, useMemo, useState } from "react";
 import {
   FaKey,
@@ -14,16 +25,6 @@ import {
 import { useMutation, useQuery, useQueryClient } from "react-query";
 import { Cell, Column, Row, useTable } from "react-table";
 import { toast } from "react-toastify";
-
-import { userRoleDict } from "@shared/dictionaries";
-import { EntityClass, UserRole, UserRoleMode } from "@shared/enums";
-import { IResponseUser, IUser, IUserRight } from "@shared/types";
-import api from "api";
-import { Button, ButtonGroup, Input, Loader, Submit } from "components";
-import { StyledPanelWrap } from "pages/Users/UsersPageStyles";
-import { AttributeButtonGroup } from "../../../MainPage/containers/AttributeButtonGroup/AttributeButtonGroup";
-
-import { EntitySuggester, EntityTag } from "components/Advanced";
 import {
   StyledTable,
   StyledTableWrapper,

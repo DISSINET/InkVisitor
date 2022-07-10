@@ -7,7 +7,11 @@ import {
   IStatementActant,
 } from "@shared/types";
 import { AttributeIcon, Button, ButtonGroup } from "components";
-import { EntitySuggester, EntityTag } from "components/Advanced";
+import {
+  AttributeButtonGroup,
+  EntitySuggester,
+  EntityTag,
+} from "components/Advanced";
 import { useSearchParams } from "hooks";
 import React, { useCallback, useEffect, useRef } from "react";
 import {
@@ -29,7 +33,6 @@ import {
   ItemTypes,
 } from "types";
 import { dndHoverFn } from "utils";
-import { AttributeButtonGroup } from "../../AttributeButtonGroup/AttributeButtonGroup";
 import AttributesEditor from "../../AttributesEditor/AttributesEditor";
 import { PropGroup } from "../../PropGroup/PropGroup";
 import {
