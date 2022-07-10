@@ -1,22 +1,9 @@
-import { userRoleDict } from "@shared/dictionaries";
-import { EntityClass, UserRole, UserRoleMode } from "@shared/enums";
-import { IResponseUser, IUser, IUserRight } from "@shared/types";
-import api from "api";
-import {
-  Button,
-  ButtonGroup,
-  Input,
-  Loader,
-  Modal,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
-  Submit,
-} from "components";
 import React, { useCallback, useMemo, useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "react-query";
+import { Cell, Column, Row, useTable } from "react-table";
+import { toast } from "react-toastify";
 import {
   FaKey,
-  FaPlus,
   FaToggleOff,
   FaToggleOn,
   FaTrashAlt,
@@ -27,12 +14,16 @@ import {
   RiUserSettingsFill,
   RiUserStarFill,
 } from "react-icons/ri";
-import { useMutation, useQuery, useQueryClient } from "react-query";
-import { Cell, Column, Row, useTable } from "react-table";
-import { toast } from "react-toastify";
-import { AttributeButtonGroup } from "../AttributeButtonGroup/AttributeButtonGroup";
-import { EntitySuggester } from "../EntitySuggester/EntitySuggester";
-import { EntityTag } from "../EntityTag/EntityTag";
+
+import { userRoleDict } from "@shared/dictionaries";
+import { EntityClass, UserRole, UserRoleMode } from "@shared/enums";
+import { IResponseUser, IUser, IUserRight } from "@shared/types";
+import api from "api";
+import { Button, ButtonGroup, Input, Loader, Submit } from "components";
+import { StyledPanelWrap } from "pages/Users/UsersPageStyles";
+import { AttributeButtonGroup } from "../../../MainPage/containers/AttributeButtonGroup/AttributeButtonGroup";
+import { EntitySuggester } from "../../../MainPage/containers/EntitySuggester/EntitySuggester";
+import { EntityTag } from "../../../MainPage/containers/EntityTag/EntityTag";
 import {
   StyledTable,
   StyledTableWrapper,
@@ -42,26 +33,16 @@ import {
   StyledTerritoryListItem,
   StyledTh,
   StyledTHead,
-  StyledUserEditorForm,
   StyledUserNameColumn,
   StyledUserNameColumnIcon,
   StyledUserNameColumnText,
-} from "./UserListModalStyles";
+} from "./UserListStyles";
 import { UserListTableRow } from "./UserListTableRow/UserListTableRow";
+import { UsersUtils } from "./UsersUtils";
 
-interface UserListModal {
-  isOpen: boolean;
-  onCloseFn: Function;
-}
+interface UserList {}
 
-export const UserListModal: React.FC<UserListModal> = ({
-  isOpen,
-  onCloseFn,
-}) => {
-  const [newUserName, setNewUserName] = useState<string>("");
-  const [newUserEmail, setNewUserEmail] = useState<string>("");
-  const [testEmail, setTestEmail] = useState<string>("");
-
+export const UserList: React.FC<UserList> = React.memo(({}) => {
   const [removingUserId, setRemovingUserId] = useState<false | string>("");
 
   const queryClient = useQueryClient();
@@ -72,24 +53,12 @@ export const UserListModal: React.FC<UserListModal> = ({
       const res = await api.administrationGet();
       return res.data.users.sort((a, b) => (a.id > b.id ? 1 : -1));
     },
-    { enabled: api.isLoggedIn() && isOpen }
+    { enabled: api.isLoggedIn() }
   );
 
   const removingUser = useMemo(() => {
     return removingUserId ? data?.find((d) => d.id === removingUserId) : false;
   }, [removingUserId]);
-
-  const validNewUserName = useMemo(() => {
-    return (
-      newUserName.length > 3 && !data?.find((user) => user.name === newUserName)
-    );
-  }, [newUserName, data]);
-
-  const validNewUserEmail = useMemo(() => {
-    const re =
-      /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-    return re.test(String(newUserEmail).toLowerCase());
-  }, [newUserEmail, data]);
 
   const userMutation = useMutation(
     async (userChanges: any) =>
@@ -100,21 +69,6 @@ export const UserListModal: React.FC<UserListModal> = ({
       },
     }
   );
-
-  const createNewUser = async () => {
-    const res: any = await api.usersCreate({
-      name: newUserName,
-      email: newUserEmail,
-    });
-    if (res?.status === 200) {
-      toast.success(`User ${newUserName} created!`);
-    } else {
-      toast.warning(`problem creating user!`);
-    }
-    setNewUserName("");
-    setNewUserEmail("");
-    queryClient.invalidateQueries("users");
-  };
 
   const removeUser = async () => {
     if (removingUser) {
@@ -492,7 +446,40 @@ export const UserListModal: React.FC<UserListModal> = ({
   });
 
   return (
-    <Modal showModal={isOpen} onClose={() => onCloseFn()} width={"full"}>
+    <StyledPanelWrap>
+      {data && (
+        <>
+          <StyledTableWrapper>
+            <StyledTable {...getTableProps()}>
+              <StyledTHead>
+                {headerGroups.map((headerGroup, key) => (
+                  <tr {...headerGroup.getHeaderGroupProps()} key={key}>
+                    {headerGroup.headers.map((column, key) => (
+                      <StyledTh {...column.getHeaderProps()} key={key}>
+                        {column.render("Header")}
+                      </StyledTh>
+                    ))}
+                  </tr>
+                ))}
+              </StyledTHead>
+              <tbody {...getTableBodyProps()}>
+                {rows.map((row: Row, i: number) => {
+                  prepareRow(row);
+                  return (
+                    <UserListTableRow
+                      index={i}
+                      row={row}
+                      {...row.getRowProps()}
+                    />
+                  );
+                })}
+              </tbody>
+            </StyledTable>
+          </StyledTableWrapper>
+
+          <UsersUtils />
+        </>
+      )}
       <Submit
         title={`Delete User ${removingUser ? removingUser.name : ""}`}
         text={`Do you really want do delete User ${
@@ -507,98 +494,7 @@ export const UserListModal: React.FC<UserListModal> = ({
         }}
         loading={false}
       />
-      <ModalHeader title={"Manage Users"} />
-      <ModalContent enableScroll>
-        <StyledTableWrapper>
-          <StyledTable {...getTableProps()}>
-            <StyledTHead>
-              {headerGroups.map((headerGroup, key) => (
-                <tr {...headerGroup.getHeaderGroupProps()} key={key}>
-                  {headerGroup.headers.map((column, key) => (
-                    <StyledTh {...column.getHeaderProps()} key={key}>
-                      {column.render("Header")}
-                    </StyledTh>
-                  ))}
-                </tr>
-              ))}
-            </StyledTHead>
-            <tbody {...getTableBodyProps()}>
-              {rows.map((row: Row, i: number) => {
-                prepareRow(row);
-                return (
-                  <UserListTableRow
-                    index={i}
-                    row={row}
-                    {...row.getRowProps()}
-                  />
-                );
-              })}
-            </tbody>
-          </StyledTable>
-        </StyledTableWrapper>
-        <Loader show={isFetching} />
-      </ModalContent>
-      <ModalFooter>
-        <StyledUserEditorForm>
-          <Input
-            width={200}
-            value={newUserName}
-            placeholder="username"
-            changeOnType
-            onChangeFn={async (newValue: string) => {
-              setNewUserName(newValue);
-            }}
-          />
-          <Input
-            width={200}
-            value={newUserEmail}
-            placeholder="email"
-            changeOnType
-            onChangeFn={async (newValue: string) => {
-              setNewUserEmail(newValue);
-            }}
-          />
-          <Button
-            key="add"
-            disabled={!(validNewUserEmail && validNewUserName)}
-            icon={<FaPlus size={14} />}
-            tooltip="create user"
-            color="primary"
-            label="new user"
-            onClick={() => {
-              createNewUser();
-            }}
-          />
-        </StyledUserEditorForm>
-        <ButtonGroup>
-          <Input
-            width={200}
-            value={testEmail}
-            placeholder="test email"
-            changeOnType
-            onChangeFn={async (newValue: string) => {
-              setTestEmail(newValue);
-            }}
-          />
-          <Button
-            tooltip="Test email will be sent to your email"
-            color="primary"
-            label="test email"
-            onClick={() =>
-              api.testEmail(testEmail).then((data) => {
-                toast.success(data.data.message);
-              })
-            }
-          />
-          <Button
-            key="close"
-            label="Close"
-            color="primary"
-            inverted
-            onClick={() => onCloseFn()}
-          />
-        </ButtonGroup>
-      </ModalFooter>
-    </Modal>
+      <Loader show={isFetching} />
+    </StyledPanelWrap>
   );
-};
+});

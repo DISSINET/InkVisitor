@@ -1,4 +1,4 @@
-import { ButtonGroup } from "components/ButtonGroup/ButtonGroup";
+import { ButtonGroup } from "components";
 import React, { ReactNode, useState } from "react";
 import { animated, useSpring } from "react-spring";
 import { springConfig } from "Theme/constants";

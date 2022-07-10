@@ -82,7 +82,7 @@ const PasswordResetPage: React.FC<PasswordResetPage> = ({ size }) => {
           </StyledContentWrap>
         </Box>
         <Toast />
-        <Footer height={heightFooter} />
+        <Footer />
       </StyledPage>
     </>
   );

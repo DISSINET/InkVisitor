@@ -11,7 +11,7 @@ import { toast } from "react-toastify";
 import { FixedSizeList as List } from "react-window";
 import { DropdownAny, scrollOverscanCount } from "Theme/constants";
 import theme from "Theme/theme";
-import { ItemTypes } from "types";
+import { EntitySuggestionI, ItemTypes, UserSuggestionI } from "types";
 import { SuggesterKeyPress } from "./SuggesterKeyPress";
 import { SuggesterModal } from "./SuggesterModal";
 import {
@@ -30,23 +30,6 @@ import {
   MemoizedUserRow,
   UserItemData,
 } from "./SuggestionRow/SuggestionRow";
-
-export interface EntitySuggestionI {
-  id: string;
-  label: string;
-  detail: string;
-  ltype: string;
-  status: EntityStatus;
-  category: string;
-  color: string;
-  isTemplate?: boolean;
-  icons?: React.ReactNode[];
-}
-export interface UserSuggestionI {
-  id: string;
-  label: string;
-  icons?: React.ReactNode[];
-}
 
 interface Suggester {
   marginTop?: boolean;

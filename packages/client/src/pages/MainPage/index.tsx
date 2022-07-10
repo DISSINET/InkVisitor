@@ -1,12 +1,18 @@
 import api from "api";
 
-import { Box, Button, Header, Panel, PanelSeparator, Toast } from "components";
-import { MemoizedFooter } from "components/Footer/Footer";
+import {
+  Box,
+  Button,
+  Header,
+  MemoizedFooter,
+  Panel,
+  PanelSeparator,
+  Toast,
+} from "components";
+
 import { useSearchParams } from "hooks";
 import ScrollHandler from "hooks/ScrollHandler";
 import React, { useState } from "react";
-import { DndProvider } from "react-dnd";
-import { HTML5Backend } from "react-dnd-html5-backend";
 import { BiHide, BiShow } from "react-icons/bi";
 import { IoMdClose } from "react-icons/io";
 import { RiMenuFoldFill, RiMenuUnfoldFill } from "react-icons/ri";
@@ -23,15 +29,14 @@ import {
   heightHeader,
   hiddenBoxHeight,
 } from "Theme/constants";
-import { UserListModal } from "./containers";
 import { MemoizedEntityBookmarkBox } from "./containers/EntityBookmarkBox/EntityBookmarkBox";
 import { MemoizedEntityDetailBox } from "./containers/EntityDetailBox/EntityDetailBox";
 import { MemoizedEntitySearchBox } from "./containers/EntitySearchBox/EntitySearchBox";
+import { MemoizedLoginModal } from "./containers/LoginModal/LoginModal";
 import {
   LeftHeader,
   RightHeader,
 } from "./containers/MainPageHeader/MainPageHeader";
-import { MemoizedLoginModal } from "./containers/LoginModal/LoginModal";
 import { MemoizedStatementEditorBox } from "./containers/StatementEditorBox/StatementEditorBox";
 import { MemoizedStatementListBox } from "./containers/StatementsListBox/StatementListBox";
 import { MemoizedTemplateListBox } from "./containers/TemplateListBox/TemplateListBox";
@@ -101,8 +106,6 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
     { enabled: !!userId && api.isLoggedIn() }
   );
 
-  const [userAdministrationModalOpen, setUserAdministrationModalOpen] =
-    useState<boolean>(false);
   const handleLogOut = () => {
     api.signOut();
     dispatch(setUsername(""));
@@ -111,14 +114,6 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
     clearAllDetailIds();
     setStatementId("");
     setTerritoryId("");
-  };
-
-  const handleUsersModalClick = () => {
-    setUserAdministrationModalOpen(true);
-  };
-
-  const handleUsersModalCancelClick = () => {
-    setUserAdministrationModalOpen(false);
   };
 
   const environmentName = (process.env.ROOT_URL || "").replace(
@@ -235,7 +230,6 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
             isLoggedIn ? (
               <RightHeader
                 setUserCustomizationOpen={setUserCustomizationOpen}
-                handleUsersModalClick={handleUsersModalClick}
                 handleLogOut={handleLogOut}
                 userName={user ? user.name : ""}
                 userRole={userRole || ""}
@@ -243,114 +237,108 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
             ) : undefined
           }
         />
-        <DndProvider backend={HTML5Backend}>
-          <ScrollHandler />
-          <StyledPanelWrap>
-            {separatorXPosition > 0 && <PanelSeparator />}
-            {/* FIRST PANEL */}
-            <Panel
-              width={firstPanelExpanded ? panelWidths[0] : collapsedPanelWidth}
+        <ScrollHandler />
+        <StyledPanelWrap>
+          {separatorXPosition > 0 && <PanelSeparator />}
+          {/* FIRST PANEL */}
+          <Panel
+            width={firstPanelExpanded ? panelWidths[0] : collapsedPanelWidth}
+          >
+            <Box
+              height={heightContent}
+              label="Territories"
+              isExpanded={firstPanelExpanded}
+              button={[firstPanelButton()]}
+              noPadding
             >
-              <Box
-                height={heightContent}
-                label="Territories"
-                isExpanded={firstPanelExpanded}
-                button={[firstPanelButton()]}
-                noPadding
-              >
-                <MemoizedTerritoryTreeBox />
-              </Box>
-            </Panel>
-            {/* SECOND PANEL */}
-            <Panel
-              width={
-                firstPanelExpanded
-                  ? panelWidths[1]
-                  : panelWidths[1] + panelWidths[0] - collapsedPanelWidth
+              <MemoizedTerritoryTreeBox />
+            </Box>
+          </Panel>
+          {/* SECOND PANEL */}
+          <Panel
+            width={
+              firstPanelExpanded
+                ? panelWidths[1]
+                : panelWidths[1] + panelWidths[0] - collapsedPanelWidth
+            }
+          >
+            <Box
+              height={
+                detailIdArray.length ? heightContent / 2 - 20 : heightContent
               }
+              label="Statements"
             >
+              <MemoizedStatementListBox />
+            </Box>
+            {detailIdArray.length > 0 && (
               <Box
-                height={
-                  detailIdArray.length ? heightContent / 2 - 20 : heightContent
-                }
-                label="Statements"
+                height={heightContent / 2 + 20}
+                label="Detail"
+                button={[
+                  <Button
+                    inverted
+                    icon={<IoMdClose />}
+                    onClick={() => {
+                      clearAllDetailIds();
+                    }}
+                  />,
+                ]}
               >
-                <MemoizedStatementListBox />
+                <MemoizedEntityDetailBox />
               </Box>
-              {detailIdArray.length > 0 && (
-                <Box
-                  height={heightContent / 2 + 20}
-                  label="Detail"
-                  button={[
-                    <Button
-                      inverted
-                      icon={<IoMdClose />}
-                      onClick={() => {
-                        clearAllDetailIds();
-                      }}
-                    />,
-                  ]}
-                >
-                  <MemoizedEntityDetailBox />
-                </Box>
-              )}
-            </Panel>
-            {/* THIRD PANEL */}
-            <Panel
-              width={
-                fourthPanelExpanded
-                  ? panelWidths[2]
-                  : panelWidths[2] + panelWidths[3] - collapsedPanelWidth
-              }
+            )}
+          </Panel>
+          {/* THIRD PANEL */}
+          <Panel
+            width={
+              fourthPanelExpanded
+                ? panelWidths[2]
+                : panelWidths[2] + panelWidths[3] - collapsedPanelWidth
+            }
+          >
+            <Box height={heightContent} label="Editor">
+              <MemoizedStatementEditorBox />
+            </Box>
+          </Panel>
+          {/* FOURTH PANEL */}
+          <Panel
+            width={fourthPanelExpanded ? panelWidths[3] : collapsedPanelWidth}
+          >
+            <Box
+              height={getFourthPanelBoxHeight("search")}
+              label="Search"
+              color="white"
+              isExpanded={fourthPanelExpanded}
+              button={[hideBoxButton("search"), hideFourthPanelButton()]}
             >
-              <Box height={heightContent} label="Editor">
-                <MemoizedStatementEditorBox />
-              </Box>
-            </Panel>
-            {/* FOURTH PANEL */}
-            <Panel
-              width={fourthPanelExpanded ? panelWidths[3] : collapsedPanelWidth}
+              <MemoizedEntitySearchBox />
+            </Box>
+            <Box
+              height={getFourthPanelBoxHeight("bookmarks")}
+              label="Bookmarks"
+              color="white"
+              isExpanded={fourthPanelExpanded}
+              button={[hideBoxButton("bookmarks"), hideFourthPanelButton()]}
             >
-              <Box
-                height={getFourthPanelBoxHeight("search")}
-                label="Search"
-                color="white"
-                isExpanded={fourthPanelExpanded}
-                button={[hideBoxButton("search"), hideFourthPanelButton()]}
-              >
-                <MemoizedEntitySearchBox />
-              </Box>
-              <Box
-                height={getFourthPanelBoxHeight("bookmarks")}
-                label="Bookmarks"
-                color="white"
-                isExpanded={fourthPanelExpanded}
-                button={[hideBoxButton("bookmarks"), hideFourthPanelButton()]}
-              >
-                <MemoizedEntityBookmarkBox />
-              </Box>
-              <Box
-                height={getFourthPanelBoxHeight("templates")}
-                label="Templates"
-                color="white"
-                isExpanded={fourthPanelExpanded}
-                button={[hideBoxButton("templates"), hideFourthPanelButton()]}
-              >
-                <MemoizedTemplateListBox />
-              </Box>
-            </Panel>
-          </StyledPanelWrap>
-          <UserListModal
-            isOpen={userAdministrationModalOpen}
-            onCloseFn={handleUsersModalCancelClick}
+              <MemoizedEntityBookmarkBox />
+            </Box>
+            <Box
+              height={getFourthPanelBoxHeight("templates")}
+              label="Templates"
+              color="white"
+              isExpanded={fourthPanelExpanded}
+              button={[hideBoxButton("templates"), hideFourthPanelButton()]}
+            >
+              <MemoizedTemplateListBox />
+            </Box>
+          </Panel>
+        </StyledPanelWrap>
+        {user && userCustomizationOpen && (
+          <UserCustomizationModal
+            user={user}
+            onClose={() => setUserCustomizationOpen(false)}
           />
-          {user && userCustomizationOpen && (
-            <UserCustomizationModal
-              user={user}
-              onClose={() => setUserCustomizationOpen(false)}
-            />
-          )}
-        </DndProvider>
+        )}
 
         <Toast />
         <MemoizedFooter height={heightFooter} />

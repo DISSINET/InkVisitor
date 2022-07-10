@@ -1,10 +1,10 @@
 import { EntityStatus } from "@shared/enums";
-import { Tag } from "components/Tag/Tag";
+
 import memoize from "memoize-one";
 import React from "react";
 import { FaPlayCircle } from "react-icons/fa";
 import theme from "Theme/theme";
-import { EntitySuggestionI, UserSuggestionI } from "../Suggester";
+
 import {
   StyledSuggestionLineActions,
   StyledSuggestionLineIcons,
@@ -13,6 +13,8 @@ import {
   StyledTagWrapper,
 } from "../SuggesterStyles";
 import { areEqual } from "react-window";
+import { Tag } from "components";
+import { EntitySuggestionI, UserSuggestionI } from "types";
 
 export const createItemData = memoize(
   (
