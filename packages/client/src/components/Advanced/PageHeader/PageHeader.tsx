@@ -93,8 +93,9 @@ export const RightHeader: React.FC<RightHeaderProps> = React.memo(
           {pages
             .filter((p) => !p.admin || userRole === "admin")
             .filter((p) => history.location.pathname !== p.href)
-            .map((p) => (
+            .map((p, key) => (
               <Button
+                key={key}
                 label={p.label}
                 color={p.color}
                 onClick={() => history.push(p.href)}
