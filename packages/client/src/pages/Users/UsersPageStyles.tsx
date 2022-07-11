@@ -1,12 +1,17 @@
 import styled from "styled-components";
 
-interface StyledContent {
-  height?: number;
-}
+interface StyledContent {}
 export const StyledContent = styled.div<StyledContent>`
   width: 100%;
-  height: ${({ height }) => (height ? height : "")};
+  width: 120rem;
   display: flex;
-  align-items: center;
   flex-direction: column;
+  align-items: center;
+  justify-content: center;
+`;
+
+export const StyledWrapper = styled.div`
+  width: 100%;
+  display: flex;
+  justify-content: center;
 `;

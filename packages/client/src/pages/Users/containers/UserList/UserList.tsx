@@ -40,9 +40,11 @@ import {
 import { UserListTableRow } from "./UserListTableRow/UserListTableRow";
 import { UsersUtils } from "./UsersUtils";
 
-interface UserList {}
+interface UserList {
+  heightContent?: number;
+}
 
-export const UserList: React.FC<UserList> = React.memo(({}) => {
+export const UserList: React.FC<UserList> = React.memo(({ heightContent }) => {
   const [removingUserId, setRemovingUserId] = useState<false | string>("");
 
   const queryClient = useQueryClient();
@@ -476,7 +478,6 @@ export const UserList: React.FC<UserList> = React.memo(({}) => {
               </tbody>
             </StyledTable>
           </StyledTableWrapper>
-
           <UsersUtils />
         </>
       )}

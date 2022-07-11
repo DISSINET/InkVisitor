@@ -10,11 +10,17 @@ export const StyledTableWrapper = styled.div`
 
 export const StyledTable = styled.table`
   border-collapse: collapse;
-  /* width: 100%; */
+  width: 100%;
   border-spacing: 0;
   border: 1px solid transparent;
 `;
 export const StyledTHead = styled.thead`
+  font-size: ${({ theme }) => theme.fontSize["sm"]};
+  border-width: ${({ theme }) => theme.borderWidth[1]};
+  border-style: solid;
+  border-color: ${({ theme }) => theme.color["gray"][400]};
+  background-color: ${({ theme }) => theme.color["gray"][100]};
+  color: ${({ theme }) => theme.color["gray"][700]};
   font-size: ${({ theme }) => theme.fontSize["sm"]};
 `;
 export const StyledTh = styled.th`
@@ -22,9 +28,8 @@ export const StyledTh = styled.th`
   font-style: italic;
   font-weight: ${({ theme }) => theme.fontWeight["light"]};
   padding-bottom: ${({ theme }) => theme.space[2]};
-  padding-left: ${({ theme }) => theme.space[3]};
-  padding-right: ${({ theme }) => theme.space[3]};
   color: ${({ theme }) => theme.color["info"]};
+  padding: ${({ theme }) => `${theme.space[2]} ${theme.space[4]}`};
 `;
 
 interface StyledTr {
@@ -46,7 +51,7 @@ export const StyledTr = styled.tr<StyledTr>`
     padding-right: ${({ theme }) => theme.space[2]};π
   }
   td:not(:last-child) {
-    width: 1%;
+    /* width: 1%; */
     padding-right: ${({ theme }) => theme.space[8]};
   }
   td,
@@ -129,11 +134,9 @@ export const StyledUserEditorForm = styled.div`
 `;
 
 export const StyledUtils = styled.div`
-  position: absolute;
-  bottom: 0;
   display: flex;
-  justify-content: space-around;
+  justify-content: space-between;
   align-items: center;
-  background-color: ${({ theme }) => theme.color["blue"][200]};
+  background-color: ${({ theme }) => theme.color["blue"][50]};
   width: 100%;
 `;
