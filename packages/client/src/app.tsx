@@ -141,9 +141,7 @@ export const App: React.FC = () => {
                     <Route
                       path="/acl"
                       exact
-                      render={(props) => (
-                        <AclPage {...props} size={[width, height]} />
-                      )}
+                      render={(props) => <AclPage {...props} />}
                     />
                   )}
                   {isLoggedIn && (
@@ -156,16 +154,12 @@ export const App: React.FC = () => {
                   <Route
                     path="/activate"
                     exact
-                    render={(props) => (
-                      <ActivatePage {...props} size={[width, height]} />
-                    )}
+                    render={(props) => <ActivatePage {...props} />}
                   />
                   <Route
                     path="/password_reset"
                     exact
-                    render={(props) => (
-                      <PasswordResetPage {...props} size={[width, height]} />
-                    )}
+                    render={(props) => <PasswordResetPage {...props} />}
                   />
                   <Route component={NotFoundPage} />
                 </Switch>

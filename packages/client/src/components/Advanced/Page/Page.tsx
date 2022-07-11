@@ -17,10 +17,12 @@ import { toast } from "react-toastify";
 interface Page {
   children?: React.ReactNode;
   logOutCleanUp?: () => void;
+  disableRightHeader?: boolean;
 }
 export const Page: React.FC<Page> = ({
   children,
   logOutCleanUp = () => {},
+  disableRightHeader = false,
 }) => {
   const isLoggedIn = api.isLoggedIn();
   const dispatch = useAppDispatch();
@@ -32,6 +34,7 @@ export const Page: React.FC<Page> = ({
   const layoutWidth: number = useAppSelector(
     (state) => state.layout.layoutWidth
   );
+  // TODO: add APP background and add StyledContent with this height prop
   const contentHeight: number = useAppSelector(
     (state) => state.layout.contentHeight
   );
@@ -56,7 +59,7 @@ export const Page: React.FC<Page> = ({
         return false;
       }
     },
-    { enabled: !!userId && api.isLoggedIn() }
+    { enabled: !!userId && api.isLoggedIn() && !disableRightHeader }
   );
 
   const logOutMutation = useMutation(async () => await api.signOut(), {
@@ -84,12 +87,16 @@ export const Page: React.FC<Page> = ({
         }
         left={<LeftHeader />}
         right={
-          <RightHeader
-            setUserCustomizationOpen={() => setUserCustomizationOpen(true)}
-            handleLogOut={logOutMutation.mutate}
-            userName={user ? user.name : ""}
-            userRole={userRole || ""}
-          />
+          <>
+            {!disableRightHeader && (
+              <RightHeader
+                setUserCustomizationOpen={() => setUserCustomizationOpen(true)}
+                handleLogOut={logOutMutation.mutate}
+                userName={user ? user.name : ""}
+                userRole={userRole || ""}
+              />
+            )}
+          </>
         }
       />
 
