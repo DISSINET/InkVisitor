@@ -6,6 +6,7 @@ interface StyledPage {
 }
 export const StyledPage = styled.div<StyledPage>`
   width: ${({ layoutWidth }) => layoutWidth};
+  /* TODO: check min width init settings */
   min-width: ${layoutWidthBreakpoint};
   height: 100vh;
   display: flex;

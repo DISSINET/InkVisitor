@@ -8,7 +8,6 @@ import {
   EntitySuggester,
   EntityTag,
 } from "components/advanced";
-import { StyledPanelWrap } from "pages/Users/UsersPageStyles";
 import React, { useCallback, useMemo, useState } from "react";
 import {
   FaKey,
@@ -447,7 +446,7 @@ export const UserList: React.FC<UserList> = React.memo(({}) => {
   });
 
   return (
-    <StyledPanelWrap>
+    <>
       {data && (
         <>
           <StyledTableWrapper>
@@ -481,6 +480,7 @@ export const UserList: React.FC<UserList> = React.memo(({}) => {
           <UsersUtils />
         </>
       )}
+
       <Submit
         title={`Delete User ${removingUser ? removingUser.name : ""}`}
         text={`Do you really want do delete User ${
@@ -496,6 +496,6 @@ export const UserList: React.FC<UserList> = React.memo(({}) => {
         loading={false}
       />
       <Loader show={isFetching} />
-    </StyledPanelWrap>
+    </>
   );
 });
