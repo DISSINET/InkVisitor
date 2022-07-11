@@ -1,5 +1,9 @@
 import styled from "styled-components";
-import { layoutWidthBreakpoint } from "Theme/constants";
+import {
+  heightFooter,
+  heightHeader,
+  layoutWidthBreakpoint,
+} from "Theme/constants";
 
 interface StyledPage {
   layoutWidth: number;
@@ -15,13 +19,26 @@ export const StyledPage = styled.div<StyledPage>`
 
 interface StyledContent {
   height?: number;
+  horizontalCenter: boolean;
+  verticalCenter: boolean;
 }
 export const StyledContent = styled.div<StyledContent>`
   width: 100%;
   height: ${({ height }) => (height ? height : "")};
   overflow: hidden;
   display: flex;
-  justify-content: center;
+  justify-content: ${({ horizontalCenter }) =>
+    horizontalCenter ? "center" : ""};
+
+  align-items: ${({ verticalCenter }) => (verticalCenter ? "center" : "")};
+
   position: relative;
   background-color: ${({ theme }) => theme.color["gray"]["200"]};
+`;
+interface StyledVerticalCenterTransform {
+  verticalCenter: boolean;
+}
+export const StyledVerticalCenterTransform = styled.div<StyledVerticalCenterTransform>`
+  transform: ${({ verticalCenter }) =>
+    verticalCenter ? `translateY(-${heightHeader - heightFooter / 2}px)` : ""};
 `;

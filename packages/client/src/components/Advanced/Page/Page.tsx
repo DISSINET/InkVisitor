@@ -2,7 +2,11 @@ import { Header, MemoizedFooter, Toast } from "components";
 import React, { useState } from "react";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { heightFooter, heightHeader } from "Theme/constants";
-import { StyledContent, StyledPage } from "./PageStyles";
+import {
+  StyledContent,
+  StyledPage,
+  StyledVerticalCenterTransform,
+} from "./PageStyles";
 import {
   LeftHeader,
   MemoizedLoginModal,
@@ -18,11 +22,13 @@ interface Page {
   children?: React.ReactNode;
   logOutCleanUp?: () => void;
   disableRightHeader?: boolean;
+  centeredContent?: boolean;
 }
 export const Page: React.FC<Page> = ({
   children,
   logOutCleanUp = () => {},
   disableRightHeader = false,
+  centeredContent = false,
 }) => {
   const isLoggedIn = api.isLoggedIn();
   const dispatch = useAppDispatch();
@@ -100,7 +106,19 @@ export const Page: React.FC<Page> = ({
         }
       />
 
-      <StyledContent height={contentHeight}>{children}</StyledContent>
+      <StyledContent
+        height={contentHeight}
+        horizontalCenter={centeredContent}
+        verticalCenter={centeredContent}
+      >
+        {centeredContent ? (
+          <StyledVerticalCenterTransform verticalCenter={centeredContent}>
+            {children}
+          </StyledVerticalCenterTransform>
+        ) : (
+          <>{children}</>
+        )}
+      </StyledContent>
 
       <MemoizedFooter height={heightFooter} />
 

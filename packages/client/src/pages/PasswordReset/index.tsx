@@ -1,9 +1,8 @@
 import api from "api";
-import { Box, Button, Input, Panel } from "components";
+import { Box, Button, Input } from "components";
 import { Page } from "components/advanced";
 import React, { useState } from "react";
 import { toast } from "react-toastify";
-import { useAppSelector } from "redux/hooks";
 import {
   StyledButtonWrap,
   StyledContentWrap,
@@ -26,12 +25,8 @@ const PasswordResetPage: React.FC<PasswordResetPage> = ({}) => {
     toast.success(response.data.message);
   };
 
-  const layoutWidth: number = useAppSelector(
-    (state) => state.layout.layoutWidth
-  );
-
   return (
-    <Page disableRightHeader>
+    <Page disableRightHeader centeredContent>
       <StyledContentWrap>
         {activated && <Box>Account activated. Please set your password</Box>}
         <StyledHeading>{"Reset password"}</StyledHeading>
