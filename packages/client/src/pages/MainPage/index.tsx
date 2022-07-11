@@ -1,39 +1,16 @@
-import api from "api";
-
-import {
-  Box,
-  Button,
-  Header,
-  MemoizedFooter,
-  Panel,
-  PanelSeparator,
-  Toast,
-} from "components";
-import {
-  LeftHeader,
-  MemoizedLoginModal,
-  RightHeader,
-  UserCustomizationModal,
-} from "components/advanced";
+import { Box, Button, Panel, PanelSeparator } from "components";
+import { Page } from "components/advanced";
 import { useSearchParams } from "hooks";
 import ScrollHandler from "hooks/ScrollHandler";
-import React, { useState } from "react";
+import React from "react";
 import { BiHide, BiShow } from "react-icons/bi";
 import { IoMdClose } from "react-icons/io";
 import { RiMenuFoldFill, RiMenuUnfoldFill } from "react-icons/ri";
-import { useQuery, useQueryClient } from "react-query";
-import { toast } from "react-toastify";
 import { setFirstPanelExpanded } from "redux/features/layout/firstPanelExpandedSlice";
 import { setFourthPanelBoxesOpened } from "redux/features/layout/fourthPanelBoxesOpenedSlice";
 import { setFourthPanelExpanded } from "redux/features/layout/fourthPanelExpandedSlice";
-import { setUsername } from "redux/features/usernameSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
-import {
-  collapsedPanelWidth,
-  heightFooter,
-  heightHeader,
-  hiddenBoxHeight,
-} from "Theme/constants";
+import { collapsedPanelWidth, hiddenBoxHeight } from "Theme/constants";
 import { MemoizedEntityBookmarkBox } from "./containers/EntityBookmarkBox/EntityBookmarkBox";
 import { MemoizedEntityDetailBox } from "./containers/EntityDetailBox/EntityDetailBox";
 import { MemoizedEntitySearchBox } from "./containers/EntitySearchBox/EntitySearchBox";
@@ -41,15 +18,13 @@ import { MemoizedStatementEditorBox } from "./containers/StatementEditorBox/Stat
 import { MemoizedStatementListBox } from "./containers/StatementsListBox/StatementListBox";
 import { MemoizedTemplateListBox } from "./containers/TemplateListBox/TemplateListBox";
 import { MemoizedTerritoryTreeBox } from "./containers/TerritoryTreeBox/TerritoryTreeBox";
-import { StyledPage, StyledPanelWrap } from "./MainPageStyles";
+import { StyledPanelWrap } from "./MainPageStyles";
 
 type FourthPanelBoxes = "search" | "bookmarks" | "templates";
 
-interface MainPage {
-  size: number[];
-}
+interface MainPage {}
 
-const MainPage: React.FC<MainPage> = ({ size }) => {
+const MainPage: React.FC<MainPage> = ({}) => {
   const {
     detailIdArray,
     statementId,
@@ -59,16 +34,11 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
     clearAllDetailIds,
   } = useSearchParams();
 
-  const [width, height] = size;
-
-  const isLoggedIn = api.isLoggedIn();
   const dispatch = useAppDispatch();
-  const username: string = useAppSelector((state) => state.username);
+
   const fourthPanelBoxesOpened: { [key: string]: boolean } = useAppSelector(
     (state) => state.layout.fourthPanelBoxesOpened
   );
-  const userId = localStorage.getItem("userid");
-  const userRole = localStorage.getItem("userrole");
 
   const firstPanelExpanded: boolean = useAppSelector(
     (state) => state.layout.firstPanelExpanded
@@ -79,48 +49,21 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
   const layoutWidth: number = useAppSelector(
     (state) => state.layout.layoutWidth
   );
+  const contentHeight: number = useAppSelector(
+    (state) => state.layout.contentHeight
+  );
   const panelWidths: number[] = useAppSelector(
     (state) => state.layout.panelWidths
   );
   const separatorXPosition: number = useAppSelector(
     (state) => state.layout.separatorXPosition
   );
-  const queryClient = useQueryClient();
 
-  const {
-    status: statusUser,
-    data: user,
-    error: errorUser,
-    isFetching: isFetchingUser,
-  } = useQuery(
-    ["user", username],
-    async () => {
-      if (userId) {
-        const res = await api.usersGet(userId);
-        return res.data;
-      } else {
-        return false;
-      }
-    },
-    { enabled: !!userId && api.isLoggedIn() }
-  );
-
-  const handleLogOut = () => {
-    api.signOut();
-    dispatch(setUsername(""));
-    toast.success("You've been successfully logged out!");
-    queryClient.removeQueries();
+  const logOutCleanUp = () => {
     clearAllDetailIds();
     setStatementId("");
     setTerritoryId("");
   };
-
-  const environmentName = (process.env.ROOT_URL || "").replace(
-    /apps\/inkvisitor[-]?/,
-    ""
-  );
-
-  const heightContent = height - heightHeader - heightFooter;
 
   const firstPanelButton = () => (
     <Button
@@ -153,8 +96,6 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
       icon={fourthPanelExpanded ? <RiMenuUnfoldFill /> : <RiMenuFoldFill />}
     />
   );
-
-  const [userCustomizationOpen, setUserCustomizationOpen] = useState(false);
 
   const handleHideBoxButtonClick = (
     boxToHide: FourthPanelBoxes,
@@ -200,44 +141,23 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
     );
 
     if (!fourthPanelExpanded) {
-      return heightContent / 3;
+      return contentHeight / 3;
     } else if (isThisBoxHidden) {
       return hiddenBoxHeight;
     } else {
       if (openBoxesCount.length === 3) {
-        return heightContent / 3;
+        return contentHeight / 3;
       } else if (openBoxesCount.length === 2) {
-        return (heightContent - hiddenBoxHeight) / 2;
+        return (contentHeight - hiddenBoxHeight) / 2;
       } else {
-        return heightContent - 2 * hiddenBoxHeight;
+        return contentHeight - 2 * hiddenBoxHeight;
       }
     }
   };
 
   return (
     <>
-      <StyledPage layoutWidth={layoutWidth}>
-        <Header
-          height={heightHeader}
-          paddingY={0}
-          paddingX={10}
-          color={
-            ["production", ""].indexOf(environmentName) === -1
-              ? environmentName
-              : "primary"
-          }
-          left={<LeftHeader />}
-          right={
-            isLoggedIn ? (
-              <RightHeader
-                setUserCustomizationOpen={setUserCustomizationOpen}
-                handleLogOut={handleLogOut}
-                userName={user ? user.name : ""}
-                userRole={userRole || ""}
-              />
-            ) : undefined
-          }
-        />
+      <Page logOutCleanUp={logOutCleanUp}>
         <ScrollHandler />
         <StyledPanelWrap>
           {separatorXPosition > 0 && <PanelSeparator />}
@@ -246,7 +166,7 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
             width={firstPanelExpanded ? panelWidths[0] : collapsedPanelWidth}
           >
             <Box
-              height={heightContent}
+              height={contentHeight}
               label="Territories"
               isExpanded={firstPanelExpanded}
               button={[firstPanelButton()]}
@@ -265,7 +185,7 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
           >
             <Box
               height={
-                detailIdArray.length ? heightContent / 2 - 20 : heightContent
+                detailIdArray.length ? contentHeight / 2 - 20 : contentHeight
               }
               label="Statements"
             >
@@ -273,7 +193,7 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
             </Box>
             {detailIdArray.length > 0 && (
               <Box
-                height={heightContent / 2 + 20}
+                height={contentHeight / 2 + 20}
                 label="Detail"
                 button={[
                   <Button
@@ -297,7 +217,7 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
                 : panelWidths[2] + panelWidths[3] - collapsedPanelWidth
             }
           >
-            <Box height={heightContent} label="Editor">
+            <Box height={contentHeight} label="Editor">
               <MemoizedStatementEditorBox />
             </Box>
           </Panel>
@@ -334,18 +254,7 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
             </Box>
           </Panel>
         </StyledPanelWrap>
-
-        <Toast />
-        <MemoizedFooter height={heightFooter} />
-
-        {user && userCustomizationOpen && (
-          <UserCustomizationModal
-            user={user}
-            onClose={() => setUserCustomizationOpen(false)}
-          />
-        )}
-        {!isLoggedIn && <MemoizedLoginModal />}
-      </StyledPage>
+      </Page>
     </>
   );
 };

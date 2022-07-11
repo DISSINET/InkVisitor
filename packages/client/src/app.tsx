@@ -19,6 +19,8 @@ import { setLayoutWidth } from "redux/features/layout/layoutWidthSlice";
 import { setPanelWidths } from "redux/features/layout/panelWidthsSlice";
 import { setSeparatorXPosition } from "redux/features/layout/separatorXPositionSlice";
 import {
+  heightFooter,
+  heightHeader,
   layoutWidthBreakpoint,
   minLayoutWidth,
   percentPanelWidths,
@@ -29,6 +31,7 @@ import AclPage from "./pages/Acl";
 import MainPage from "./pages/MainPage";
 import theme from "./Theme/theme";
 import NotFoundPage from "pages/NotFound";
+import { setContentHeight } from "redux/features/layout/contentHeightSlice";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -58,10 +61,16 @@ const clockPerformance = (
 };
 
 export const App: React.FC = () => {
-  const [width, height] = useWindowSize();
   const dispatch = useAppDispatch();
 
   const isLoggedIn = api.isLoggedIn();
+
+  const [width, height] = useWindowSize();
+
+  useEffect(() => {
+    const heightContent = height - heightHeader - heightFooter;
+    dispatch(setContentHeight(heightContent));
+  }, [height]);
 
   useEffect(() => {
     if (width > 0 && height > 0) {
@@ -99,10 +108,6 @@ export const App: React.FC = () => {
       const fourthPanel =
         Math.floor(onePercent * percentPanelWidths[3] * 10) / 10;
 
-      // const panels = percentPanelWidths.map(
-      //   (percentPanelWidth) =>
-      //     Math.floor(onePercent * percentPanelWidth * 10) / 10
-      // );
       const panels = [firstPanel, secondPanel, thirdPanel, fourthPanel];
       dispatch(setPanelWidths(panels));
       dispatch(setSeparatorXPosition(panels[0] + panels[1]));
@@ -128,7 +133,7 @@ export const App: React.FC = () => {
                     exact
                     render={(props) => (
                       <Profiler id="test" onRender={clockPerformance}>
-                        <MainPage {...props} size={[width, height]} />
+                        <MainPage {...props} />
                       </Profiler>
                     )}
                   />
@@ -145,9 +150,7 @@ export const App: React.FC = () => {
                     <Route
                       path="/users"
                       exact
-                      render={(props) => (
-                        <UsersPage {...props} size={[width, height]} />
-                      )}
+                      render={(props) => <UsersPage {...props} />}
                     />
                   )}
                   <Route

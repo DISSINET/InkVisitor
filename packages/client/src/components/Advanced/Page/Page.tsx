@@ -16,8 +16,12 @@ import { toast } from "react-toastify";
 
 interface Page {
   children?: React.ReactNode;
+  logOutCleanUp?: () => void;
 }
-export const Page: React.FC<Page> = ({ children }) => {
+export const Page: React.FC<Page> = ({
+  children,
+  logOutCleanUp = () => {},
+}) => {
   const isLoggedIn = api.isLoggedIn();
   const dispatch = useAppDispatch();
   const queryClient = useQueryClient();
@@ -27,6 +31,9 @@ export const Page: React.FC<Page> = ({ children }) => {
 
   const layoutWidth: number = useAppSelector(
     (state) => state.layout.layoutWidth
+  );
+  const contentHeight: number = useAppSelector(
+    (state) => state.layout.contentHeight
   );
 
   const environmentName = (process.env.ROOT_URL || "").replace(
@@ -57,6 +64,8 @@ export const Page: React.FC<Page> = ({ children }) => {
       dispatch(setUsername(""));
       queryClient.removeQueries();
       toast.success("You've been successfully logged out!");
+      //
+      logOutCleanUp();
     },
   });
 
@@ -76,7 +85,7 @@ export const Page: React.FC<Page> = ({ children }) => {
         left={<LeftHeader />}
         right={
           <RightHeader
-            setUserCustomizationOpen={() => {}}
+            setUserCustomizationOpen={() => setUserCustomizationOpen(true)}
             handleLogOut={logOutMutation.mutate}
             userName={user ? user.name : ""}
             userRole={userRole || ""}
@@ -86,7 +95,6 @@ export const Page: React.FC<Page> = ({ children }) => {
 
       {children}
 
-      <Toast />
       <MemoizedFooter height={heightFooter} />
 
       {user && userCustomizationOpen && (
@@ -96,6 +104,7 @@ export const Page: React.FC<Page> = ({ children }) => {
         />
       )}
       {!isLoggedIn && <MemoizedLoginModal />}
+      <Toast />
     </StyledPage>
   );
 };

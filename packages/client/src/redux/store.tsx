@@ -14,6 +14,7 @@ import draggedTerritorySlice from "./features/territoryTree/draggedTerritorySlic
 import selectedTerritoryPathSlice from "./features/territoryTree/selectedTerritoryPathSlice";
 import treeInitializeSlice from "./features/territoryTree/treeInitializeSlice";
 import usernameSlice from "./features/usernameSlice";
+import contentHeightSlice from "./features/layout/contentHeightSlice";
 
 const store: Store = configureStore({
   reducer: {
@@ -33,6 +34,7 @@ const store: Store = configureStore({
     }),
     layout: combineReducers({
       layoutWidth: layoutWidthSlice,
+      contentHeight: contentHeightSlice,
       panelWidths: panelWidthsSlice,
       separatorXPosition: separatorXPositionSlice,
       firstPanelExpanded: firstPanelExpandedSlice,
