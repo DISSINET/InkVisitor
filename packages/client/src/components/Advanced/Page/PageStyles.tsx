@@ -21,5 +21,7 @@ export const StyledContent = styled.div<StyledContent>`
   height: ${({ height }) => (height ? height : "")};
   overflow: hidden;
   display: flex;
+  justify-content: center;
   position: relative;
+  background-color: ${({ theme }) => theme.color["gray"]["200"]};
 `;

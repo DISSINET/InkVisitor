@@ -1,9 +1,9 @@
 import api from "api";
-import { Box } from "components";
 import { Page } from "components/advanced";
 import React, { useState } from "react";
 import { useQuery } from "react-query";
 import { Redirect } from "react-router-dom";
+import { StyledText } from "./ActivateStyles";
 
 interface ActivationPage {}
 
@@ -24,7 +24,7 @@ const ActivatePage: React.FC<ActivationPage> = ({}) => {
 
   return (
     <Page disableRightHeader>
-      <Box css={{ textAlign: "center" }}>Activating...</Box>
+      <StyledText>{"Activating..."}</StyledText>
     </Page>
   );
 };
