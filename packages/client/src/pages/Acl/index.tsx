@@ -1,4 +1,5 @@
 import { userRoleDict } from "@shared/dictionaries";
+import { UserRole } from "@shared/enums";
 import { IResponsePermission, RequestPermissionUpdate } from "@shared/types";
 import api from "api";
 import { Box, Button, Footer, Header, Toast } from "components";
@@ -7,7 +8,7 @@ import { useQuery } from "react-query";
 import { toast } from "react-toastify";
 import { setUsername } from "redux/features/usernameSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
-import { heightFooter, heightHeader } from "Theme/constants";
+import { heightHeader } from "Theme/constants";
 import {
   StyledFaUserAlt,
   StyledPage,
@@ -21,12 +22,14 @@ interface AclPage {
   size: number[];
 }
 
-const initialData: IResponsePermission = {
-  id: "",
-  controller: "",
-  method: "",
-  roles: [],
-};
+const initialData: IResponsePermission[] = [
+  {
+    id: "",
+    controller: "",
+    route: "",
+    roles: [],
+  },
+];
 
 const AclPage: React.FC<AclPage> = ({ size }) => {
   const isLoggedIn = api.isLoggedIn();
@@ -61,16 +64,18 @@ const AclPage: React.FC<AclPage> = ({ size }) => {
     await api.updatePermission(permissionId, data);
   };
 
-  const ctrls = (data as IResponsePermission[])?.reduce<
-    Record<string, Record<string, IResponsePermission>>
-  >((acc, current) => {
-    if (!acc[current.controller]) {
-      acc[current.controller] = {};
-    }
+  const ctrls = data
+    ? (data as IResponsePermission[]).reduce<
+        Record<string, Record<string, IResponsePermission>>
+      >((acc, current) => {
+        if (!acc[current.controller]) {
+          acc[current.controller] = {};
+        }
 
-    acc[current.controller][current.method] = current;
-    return acc;
-  }, {});
+        acc[current.controller][current.route] = current;
+        return acc;
+      }, {})
+    : {};
 
   return (
     <>
@@ -134,7 +139,7 @@ const AclPage: React.FC<AclPage> = ({ size }) => {
                     handleSave(ctrls[currentCtrlName][currentMethod].id, {
                       roles: Array.from(
                         e.target.selectedOptions,
-                        (option) => option.value
+                        (option) => option.value as UserRole
                       ),
                     })
                   }
