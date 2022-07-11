@@ -2,7 +2,7 @@ import { Header, MemoizedFooter, Toast } from "components";
 import React, { useState } from "react";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { heightFooter, heightHeader } from "Theme/constants";
-import { StyledPage } from "./PageStyles";
+import { StyledContent, StyledPage } from "./PageStyles";
 import {
   LeftHeader,
   MemoizedLoginModal,
@@ -100,7 +100,7 @@ export const Page: React.FC<Page> = ({
         }
       />
 
-      {children}
+      <StyledContent height={contentHeight}>{children}</StyledContent>
 
       <MemoizedFooter height={heightFooter} />
 

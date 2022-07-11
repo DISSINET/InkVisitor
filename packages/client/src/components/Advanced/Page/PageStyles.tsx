@@ -12,3 +12,14 @@ export const StyledPage = styled.div<StyledPage>`
   display: flex;
   flex-direction: column;
 `;
+
+interface StyledContent {
+  height?: number;
+}
+export const StyledContent = styled.div<StyledContent>`
+  width: 100%;
+  height: ${({ height }) => (height ? height : "")};
+  overflow: hidden;
+  display: flex;
+  position: relative;
+`;
