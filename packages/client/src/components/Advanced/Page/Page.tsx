@@ -42,7 +42,7 @@ export const Page: React.FC<Page> = ({
   const layoutWidth: number = useAppSelector(
     (state) => state.layout.layoutWidth
   );
-  // TODO: add APP background and add StyledContent with this height prop
+
   const contentHeight: number = useAppSelector(
     (state) => state.layout.contentHeight
   );

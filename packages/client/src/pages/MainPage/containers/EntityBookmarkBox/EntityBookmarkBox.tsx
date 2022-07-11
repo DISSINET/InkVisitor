@@ -226,7 +226,12 @@ export const EntityBookmarkBox: React.FC = () => {
       <Loader show={isFetching} />
 
       {/* edit modal */}
-      <Modal key="new-bookmar-modal" showModal={!!editingFolder} width="thin">
+      <Modal
+        key="new-bookmar-modal"
+        showModal={!!editingFolder}
+        width="thin"
+        onEnterPress={() => acceptEditingFolderMutation.mutate()}
+      >
         <ModalHeader title="Bookmark Folder" />
         <ModalContent>
           <Input
@@ -236,9 +241,6 @@ export const EntityBookmarkBox: React.FC = () => {
             value={editingFolderName}
             changeOnType
             autoFocus
-            onEnterPressFn={() => {
-              acceptEditingFolderMutation.mutate();
-            }}
           />
         </ModalContent>
 
@@ -272,6 +274,7 @@ export const EntityBookmarkBox: React.FC = () => {
         onClose={() => {
           cancelCreatingFolder();
         }}
+        onEnterPress={() => createFolderMutation.mutate()}
       >
         <ModalHeader title="Bookmark Folder" />
         <ModalContent>
@@ -282,9 +285,6 @@ export const EntityBookmarkBox: React.FC = () => {
             value={editingFolderName}
             changeOnType
             autoFocus
-            onEnterPressFn={() => {
-              createFolderMutation.mutate();
-            }}
           />
         </ModalContent>
 
