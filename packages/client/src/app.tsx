@@ -1,10 +1,8 @@
-import React, { useEffect, Profiler } from "react";
+import React, { Profiler, useEffect } from "react";
 import { Helmet } from "react-helmet";
 import { QueryClient, QueryClientProvider } from "react-query";
 import { ReactQueryDevtools } from "react-query/devtools";
 import { BrowserRouter, Route, Switch } from "react-router-dom";
-import { DndProvider } from "react-dnd";
-import { HTML5Backend } from "react-dnd-html5-backend";
 import { useAppDispatch } from "redux/hooks";
 import { ThemeProvider } from "styled-components";
 
@@ -15,6 +13,8 @@ import ActivatePage from "pages/Activate";
 import PasswordResetPage from "pages/PasswordReset";
 import UsersPage from "pages/Users";
 
+import NotFoundPage from "pages/NotFound";
+import { setContentHeight } from "redux/features/layout/contentHeightSlice";
 import { setLayoutWidth } from "redux/features/layout/layoutWidthSlice";
 import { setPanelWidths } from "redux/features/layout/panelWidthsSlice";
 import { setSeparatorXPosition } from "redux/features/layout/separatorXPositionSlice";
@@ -30,8 +30,6 @@ import GlobalStyle from "Theme/global";
 import AclPage from "./pages/Acl";
 import MainPage from "./pages/MainPage";
 import theme from "./Theme/theme";
-import NotFoundPage from "pages/NotFound";
-import { setContentHeight } from "redux/features/layout/contentHeightSlice";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -124,48 +122,47 @@ export const App: React.FC = () => {
         <GlobalStyle />
         <QueryClientProvider client={queryClient}>
           <ReactQueryDevtools initialIsOpen={false} />
-          <DndProvider backend={HTML5Backend}>
-            <BrowserRouter basename={process.env.ROOT_URL}>
-              <SearchParamsProvider>
-                <Switch>
-                  <Route
-                    path="/"
-                    exact
-                    render={(props) => (
-                      <Profiler id="test" onRender={clockPerformance}>
-                        <MainPage {...props} />
-                      </Profiler>
-                    )}
-                  />
-                  {isLoggedIn && (
-                    <Route
-                      path="/acl"
-                      exact
-                      render={(props) => <AclPage {...props} />}
-                    />
+
+          <BrowserRouter basename={process.env.ROOT_URL}>
+            <SearchParamsProvider>
+              <Switch>
+                <Route
+                  path="/"
+                  exact
+                  render={(props) => (
+                    <Profiler id="test" onRender={clockPerformance}>
+                      <MainPage {...props} />
+                    </Profiler>
                   )}
-                  {isLoggedIn && (
-                    <Route
-                      path="/users"
-                      exact
-                      render={(props) => <UsersPage {...props} />}
-                    />
-                  )}
+                />
+                {isLoggedIn && (
                   <Route
-                    path="/activate"
+                    path="/acl"
                     exact
-                    render={(props) => <ActivatePage {...props} />}
+                    render={(props) => <AclPage {...props} />}
                   />
+                )}
+                {isLoggedIn && (
                   <Route
-                    path="/password_reset"
+                    path="/users"
                     exact
-                    render={(props) => <PasswordResetPage {...props} />}
+                    render={(props) => <UsersPage {...props} />}
                   />
-                  <Route component={NotFoundPage} />
-                </Switch>
-              </SearchParamsProvider>
-            </BrowserRouter>
-          </DndProvider>
+                )}
+                <Route
+                  path="/activate"
+                  exact
+                  render={(props) => <ActivatePage {...props} />}
+                />
+                <Route
+                  path="/password_reset"
+                  exact
+                  render={(props) => <PasswordResetPage {...props} />}
+                />
+                <Route component={NotFoundPage} />
+              </Switch>
+            </SearchParamsProvider>
+          </BrowserRouter>
         </QueryClientProvider>
       </ThemeProvider>
     </>
