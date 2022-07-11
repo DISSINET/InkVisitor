@@ -1,16 +1,16 @@
-import { Box } from "components";
 import { Page } from "components/advanced";
 import React from "react";
 import { UserList } from "./containers";
+import { StyledContent } from "./UsersPageStyles";
 
 interface UsersPageProps {}
 
 const UsersPage: React.FC<UsersPageProps> = ({}) => {
   return (
     <Page>
-      <Box>
+      <StyledContent>
         <UserList />
-      </Box>
+      </StyledContent>
     </Page>
   );
 };

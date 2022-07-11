@@ -5,7 +5,7 @@ import { FaPlus } from "react-icons/fa";
 
 import api from "api";
 import { Button, ButtonGroup, Input } from "components";
-import { StyledUserEditorForm } from "./UserListStyles";
+import { StyledUserEditorForm, StyledUtils } from "./UserListStyles";
 
 interface UsersUtils {}
 
@@ -42,7 +42,7 @@ export const UsersUtils: React.FC<UsersUtils> = React.memo(({}) => {
   }, [newUserName]);
 
   return (
-    <>
+    <StyledUtils>
       <StyledUserEditorForm>
         <Input
           width={200}
@@ -97,6 +97,6 @@ export const UsersUtils: React.FC<UsersUtils> = React.memo(({}) => {
           />
         </ButtonGroup>
       </StyledUserEditorForm>
-    </>
+    </StyledUtils>
   );
 });

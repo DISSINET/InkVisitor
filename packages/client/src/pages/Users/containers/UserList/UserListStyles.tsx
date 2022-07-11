@@ -120,10 +120,20 @@ export const StyledUserEditorRowValue = styled.div`
 `;
 
 export const StyledUserEditorForm = styled.div`
-  display: inline-flex;
-  padding-top: 1rem;
-  width: 100%;
+  display: flex;
+  padding: 1rem;
+
   input {
     margin-right: ${({ theme }) => theme.space[3]};
   }
+`;
+
+export const StyledUtils = styled.div`
+  position: absolute;
+  bottom: 0;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  background-color: ${({ theme }) => theme.color["blue"][200]};
+  width: 100%;
 `;
