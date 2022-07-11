@@ -11,6 +11,7 @@ import {
 } from "components";
 import {
   LeftHeader,
+  MemoizedLoginModal,
   RightHeader,
   UserCustomizationModal,
 } from "components/advanced";
@@ -36,7 +37,6 @@ import {
 import { MemoizedEntityBookmarkBox } from "./containers/EntityBookmarkBox/EntityBookmarkBox";
 import { MemoizedEntityDetailBox } from "./containers/EntityDetailBox/EntityDetailBox";
 import { MemoizedEntitySearchBox } from "./containers/EntitySearchBox/EntitySearchBox";
-import { MemoizedLoginModal } from "./containers/LoginModal/LoginModal";
 import { MemoizedStatementEditorBox } from "./containers/StatementEditorBox/StatementEditorBox";
 import { MemoizedStatementListBox } from "./containers/StatementsListBox/StatementListBox";
 import { MemoizedTemplateListBox } from "./containers/TemplateListBox/TemplateListBox";
@@ -334,15 +334,16 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
             </Box>
           </Panel>
         </StyledPanelWrap>
+
+        <Toast />
+        <MemoizedFooter height={heightFooter} />
+
         {user && userCustomizationOpen && (
           <UserCustomizationModal
             user={user}
             onClose={() => setUserCustomizationOpen(false)}
           />
         )}
-
-        <Toast />
-        <MemoizedFooter height={heightFooter} />
         {!isLoggedIn && <MemoizedLoginModal />}
       </StyledPage>
     </>

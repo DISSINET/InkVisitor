@@ -5,6 +5,7 @@ import { heightFooter, heightHeader } from "Theme/constants";
 import { StyledPage } from "./PageStyles";
 import {
   LeftHeader,
+  MemoizedLoginModal,
   RightHeader,
   UserCustomizationModal,
 } from "components/advanced";
@@ -17,6 +18,7 @@ interface Page {
   children?: React.ReactNode;
 }
 export const Page: React.FC<Page> = ({ children }) => {
+  const isLoggedIn = api.isLoggedIn();
   const dispatch = useAppDispatch();
   const queryClient = useQueryClient();
   const username: string = useAppSelector((state) => state.username);
@@ -93,6 +95,7 @@ export const Page: React.FC<Page> = ({ children }) => {
           onClose={() => setUserCustomizationOpen(false)}
         />
       )}
+      {!isLoggedIn && <MemoizedLoginModal />}
     </StyledPage>
   );
 };
