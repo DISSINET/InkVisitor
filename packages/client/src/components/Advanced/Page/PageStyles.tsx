@@ -35,10 +35,3 @@ export const StyledContent = styled.div<StyledContent>`
   position: relative;
   background-color: ${({ theme }) => theme.color["gray"]["200"]};
 `;
-interface StyledVerticalCenterTransform {
-  verticalCenter: boolean;
-}
-export const StyledVerticalCenterTransform = styled.div<StyledVerticalCenterTransform>`
-  transform: ${({ verticalCenter }) =>
-    verticalCenter ? `translateY(-${heightHeader - heightFooter / 2}px)` : ""};
-`;

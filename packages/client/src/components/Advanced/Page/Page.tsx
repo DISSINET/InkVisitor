@@ -12,11 +12,7 @@ import { toast } from "react-toastify";
 import { setUsername } from "redux/features/usernameSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { heightFooter, heightHeader } from "Theme/constants";
-import {
-  StyledContent,
-  StyledPage,
-  StyledVerticalCenterTransform,
-} from "./PageStyles";
+import { StyledContent, StyledPage } from "./PageStyles";
 
 interface Page {
   children?: React.ReactNode;
@@ -111,13 +107,7 @@ export const Page: React.FC<Page> = ({
         horizontalCenter={centeredContent}
         verticalCenter={centeredContent}
       >
-        {centeredContent ? (
-          <StyledVerticalCenterTransform verticalCenter={centeredContent}>
-            {children}
-          </StyledVerticalCenterTransform>
-        ) : (
-          <>{children}</>
-        )}
+        {children}
       </StyledContent>
 
       <MemoizedFooter height={heightFooter} />
