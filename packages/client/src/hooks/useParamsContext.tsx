@@ -48,9 +48,12 @@ export const SearchParamsProvider = ({
   children: ReactElement;
 }) => {
   const history = useHistory();
-  const { hash } = useLocation();
+  const { hash, search } = useLocation();
   const params = new URLSearchParams(hash.substring(1));
   const parsedParams = Object.fromEntries(params);
+
+  const paramsSearch = new URLSearchParams(search);
+  const parsedParamsSearch = Object.fromEntries(paramsSearch);
 
   const [territoryId, setTerritoryId] = useState<string>(
     typeof parsedParams.territory === "string" ? parsedParams.territory : ""
@@ -127,15 +130,12 @@ export const SearchParamsProvider = ({
     territoryId
       ? params.set("territory", territoryId)
       : params.delete("territory");
-
     statementId
       ? params.set("statement", statementId)
       : params.delete("statement");
-
     selectedDetailId
       ? params.set("selectedDetail", selectedDetailId)
       : params.delete("selectedDetail");
-
     detailId ? params.set("detail", detailId) : params.delete("detail");
 
     handleHistoryPush();
@@ -164,11 +164,13 @@ export const SearchParamsProvider = ({
 
   useEffect(() => {
     // Should be only change from the url => add state to switch of listener
-    return history.listen((location: any) => {
-      setDisablePush(true);
-      handleLocationChange(location);
-      setDisablePush(false);
-    });
+    if (!parsedParamsSearch.hash) {
+      return history.listen((location: any) => {
+        setDisablePush(true);
+        handleLocationChange(location);
+        setDisablePush(false);
+      });
+    }
   }, [history]);
 
   return (
