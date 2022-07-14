@@ -30,6 +30,8 @@ import GlobalStyle from "Theme/global";
 import AclPage from "./pages/Acl";
 import MainPage from "./pages/MainPage";
 import theme from "./Theme/theme";
+import { DndProvider } from "react-dnd";
+import { HTML5Backend } from "react-dnd-html5-backend";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -66,12 +68,14 @@ export const App: React.FC = () => {
   const [width, height] = useWindowSize();
 
   useEffect(() => {
-    const heightContent = height - heightHeader - heightFooter;
-    dispatch(setContentHeight(heightContent));
+    if (height > 0) {
+      const heightContent = height - heightHeader - heightFooter;
+      dispatch(setContentHeight(heightContent));
+    }
   }, [height]);
 
   useEffect(() => {
-    if (width > 0 && height > 0) {
+    if (width > 0) {
       const layoutWidth =
         width < layoutWidthBreakpoint ? minLayoutWidth : width;
       dispatch(setLayoutWidth(layoutWidth));
@@ -122,47 +126,48 @@ export const App: React.FC = () => {
         <GlobalStyle />
         <QueryClientProvider client={queryClient}>
           <ReactQueryDevtools initialIsOpen={false} />
-
-          <BrowserRouter basename={process.env.ROOT_URL}>
-            <SearchParamsProvider>
-              <Switch>
-                <Route
-                  path="/"
-                  exact
-                  render={(props) => (
-                    <Profiler id="test" onRender={clockPerformance}>
-                      <MainPage {...props} />
-                    </Profiler>
+          <DndProvider backend={HTML5Backend}>
+            <BrowserRouter basename={process.env.ROOT_URL}>
+              <SearchParamsProvider>
+                <Switch>
+                  <Route
+                    path="/"
+                    exact
+                    render={(props) => (
+                      <Profiler id="test" onRender={clockPerformance}>
+                        <MainPage {...props} />
+                      </Profiler>
+                    )}
+                  />
+                  {isLoggedIn && (
+                    <Route
+                      path="/acl"
+                      exact
+                      render={(props) => <AclPage {...props} />}
+                    />
                   )}
-                />
-                {isLoggedIn && (
+                  {isLoggedIn && (
+                    <Route
+                      path="/users"
+                      exact
+                      render={(props) => <UsersPage {...props} />}
+                    />
+                  )}
                   <Route
-                    path="/acl"
+                    path="/activate"
                     exact
-                    render={(props) => <AclPage {...props} />}
+                    render={(props) => <ActivatePage {...props} />}
                   />
-                )}
-                {isLoggedIn && (
                   <Route
-                    path="/users"
+                    path="/password_reset"
                     exact
-                    render={(props) => <UsersPage {...props} />}
+                    render={(props) => <PasswordResetPage {...props} />}
                   />
-                )}
-                <Route
-                  path="/activate"
-                  exact
-                  render={(props) => <ActivatePage {...props} />}
-                />
-                <Route
-                  path="/password_reset"
-                  exact
-                  render={(props) => <PasswordResetPage {...props} />}
-                />
-                <Route component={NotFoundPage} />
-              </Switch>
-            </SearchParamsProvider>
-          </BrowserRouter>
+                  <Route component={NotFoundPage} />
+                </Switch>
+              </SearchParamsProvider>
+            </BrowserRouter>
+          </DndProvider>
         </QueryClientProvider>
       </ThemeProvider>
     </>
