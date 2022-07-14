@@ -122,15 +122,6 @@ export const SearchParamsProvider = ({
     }
   };
 
-  // useEffect(() => {
-  //   setDisableHistoryListener(true);
-  //   params.delete("detail");
-  //   detailIdArray.forEach((id) => params.append("detail", id));
-
-  //   handleHistoryPush();
-  //   setDisableHistoryListener(false);
-  // }, [detailIdArray]);
-
   useEffect(() => {
     // Change from the inside of the app to this state
     territoryId
