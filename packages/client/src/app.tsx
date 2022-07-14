@@ -50,14 +50,14 @@ const clockPerformance = (
   startTime: any,
   commitTime: any
 ) => {
-  // console.log({
-  //   profilerId,
-  //   mode,
-  //   actualTime,
-  //   baseTime,
-  //   startTime,
-  //   commitTime,
-  // });
+  console.log({
+    profilerId,
+    mode,
+    actualTime,
+    baseTime,
+    startTime,
+    commitTime,
+  });
 };
 
 export const App: React.FC = () => {
@@ -134,9 +134,9 @@ export const App: React.FC = () => {
                     path="/"
                     exact
                     render={(props) => (
-                      <Profiler id="test" onRender={clockPerformance}>
-                        <MainPage {...props} />
-                      </Profiler>
+                      // <Profiler id="test" onRender={clockPerformance}>
+                      <MainPage {...props} />
+                      // </Profiler>
                     )}
                   />
                   {isLoggedIn && (
