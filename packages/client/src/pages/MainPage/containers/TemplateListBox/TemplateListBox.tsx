@@ -5,13 +5,13 @@ import { IRequestSearch } from "@shared/types/request-search";
 import api from "api";
 import { Button, Dropdown, Input, Loader, TypeBar } from "components";
 
+import { EntityTag } from "components/advanced";
 import React, { useMemo, useState } from "react";
 import { FaPlus, FaTrash } from "react-icons/fa";
 import { useQuery } from "react-query";
 import { OptionTypeBase, ValueType } from "react-select";
 import { useAppSelector } from "redux/hooks";
 import { DropdownItem } from "types";
-import { EntityTag } from "..";
 import {
   StyledBoxContent,
   StyledTemplateFilter,

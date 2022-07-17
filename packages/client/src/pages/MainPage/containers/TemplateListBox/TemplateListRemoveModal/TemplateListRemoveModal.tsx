@@ -1,5 +1,5 @@
 import { EntityClass } from "@shared/enums";
-import { IEntity, IResponseEntity } from "@shared/types";
+import { IEntity } from "@shared/types";
 import api from "api";
 import {
   Button,
@@ -10,11 +10,11 @@ import {
   ModalFooter,
   ModalHeader,
 } from "components";
+import { EntityTag } from "components/advanced";
 import { useSearchParams } from "hooks";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useMutation, useQueryClient } from "react-query";
 import { toast } from "react-toastify";
-import { EntityTag } from "../..";
 import { StyledModalContent } from "../TemplateListBoxStyles";
 
 interface TemplateListRemoveModal {

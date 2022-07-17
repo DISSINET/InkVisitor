@@ -20,17 +20,12 @@ import {
   ModalHeader,
   Tooltip,
 } from "components";
+import { EntitySuggester, EntityTag } from "components/advanced";
 import React, { useMemo, useState } from "react";
 import { FaUnlink } from "react-icons/fa";
 import { MdSettings } from "react-icons/md";
 import { excludedSuggesterEntities } from "Theme/constants";
-import {
-  AttributeData,
-  PropAttributeFilter,
-  Entities,
-  PropAttributeName,
-} from "types";
-import { EntitySuggester, EntityTag } from "..";
+import { AttributeData, Entities, PropAttributeName } from "types";
 import {
   StyledAttributeModalHeaderIcon,
   StyledAttributeModalHeaderWrapper,
