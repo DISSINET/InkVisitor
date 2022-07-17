@@ -2,6 +2,7 @@ import { EntityClass } from "@shared/enums";
 import { IBookmarkFolder, IResponseBookmarkFolder } from "@shared/types";
 import api from "api";
 import { ButtonGroup, Button, Tooltip } from "components";
+import { EntitySuggester } from "components/advanced";
 import React, { useState } from "react";
 import { useDrop, DragObjectWithType, DropTargetMonitor } from "react-dnd";
 import {
@@ -14,7 +15,6 @@ import {
 } from "react-icons/fa";
 import { useMutation, useQueryClient } from "react-query";
 import { DragItem, ItemTypes } from "types";
-import { EntitySuggester } from "../../EntitySuggester/EntitySuggester";
 import { EntityBookmarkTable } from "../EntityBookmarkTable/EntityBookmarkTable";
 import {
   StyledFolderContent,

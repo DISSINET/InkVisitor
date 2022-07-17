@@ -18,7 +18,7 @@ import {
   Submit,
   TypeBar,
 } from "components";
-import { StyledUsedInTitle } from "components/Table/TableStyles";
+import { AttributeButtonGroup, EntityTag } from "components/advanced";
 import { CMetaProp } from "constructors";
 import { useSearchParams } from "hooks";
 import React, { useEffect, useMemo, useState } from "react";
@@ -32,21 +32,18 @@ import {
   DropdownItem,
   PropAttributeFilter,
 } from "types";
-import { AttributeButtonGroup } from "../../AttributeButtonGroup/AttributeButtonGroup";
 import { AuditTable } from "../../AuditTable/AuditTable";
 import { EntityReferenceTable } from "../../EntityReferenceTable/EntityReferenceTable";
-import { EntityTag } from "../../EntityTag/EntityTag";
 import { JSONExplorer } from "../../JSONExplorer/JSONExplorer";
-import { StyledHeading } from "../../LoginModal/LoginModalStyles";
 import { PropGroup } from "../../PropGroup/PropGroup";
 import { ApplyTemplateModal } from "../ApplyTemplateModal/ApplyTemplateModal";
-import { EntityDetailCreateTemplateModal } from "../EntityDetailCreateTemplateModal/EntityDetailCreateTemplateModal";
 import {
   StyledDetailContentRow,
   StyledDetailContentRowLabel,
   StyledDetailContentRowValue,
   StyledDetailForm,
 } from "../EntityDetailBoxStyles";
+import { EntityDetailCreateTemplateModal } from "../EntityDetailCreateTemplateModal/EntityDetailCreateTemplateModal";
 import { EntityDetailHeaderRow } from "../EntityDetailHeaderRow/EntityDetailHeaderRow";
 import { EntityDetailMetaPropsTable } from "../EntityDetailUsedInTable/EntityDetailMetaPropsTable/EntityDetailMetaPropsTable";
 import { EntityDetailStatementPropsTable } from "../EntityDetailUsedInTable/EntityDetailStatementPropsTable/EntityDetailStatementPropsTable";
@@ -60,6 +57,8 @@ import {
   StyledDetailSectionHeader,
   StyledDetailWrapper,
   StyledFormWrapper,
+  StyledUsedAsHeading,
+  StyledUsedAsTitle,
 } from "./EntityDetailStyles";
 
 const allowedEntityChangeClasses = [
@@ -1227,11 +1226,11 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
               {/* used as template */}
               {entity.isTemplate && entity.usedAsTemplate && (
                 <StyledDetailSectionContentUsedIn key="as template">
-                  <StyledHeading>
-                    <StyledUsedInTitle>
+                  <StyledUsedAsHeading>
+                    <StyledUsedAsTitle>
                       <b>{entity.usedAsTemplate.length}</b> As a template
-                    </StyledUsedInTitle>
-                  </StyledHeading>
+                    </StyledUsedAsTitle>
+                  </StyledUsedAsHeading>
                   <StyledDetailSectionEntityList>
                     {entity.usedAsTemplate.map((entityId) => (
                       <React.Fragment key={entityId}>

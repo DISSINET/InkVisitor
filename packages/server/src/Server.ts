@@ -53,7 +53,15 @@ server.use(profilerMiddleware);
 server.use(dbMiddleware);
 
 // uncomment this to enable auth
-server.use(validateJwt().unless({ path: [/api\/v1\/users\/signin/] }));
+server.use(
+  validateJwt().unless({
+    path: [
+      /api\/v1\/users\/signin/,
+      /api\/v1\/users\/active/,
+      /api\/v1\/users\/password/,
+    ],
+  })
+);
 server.use(customizeRequest);
 
 // Routing

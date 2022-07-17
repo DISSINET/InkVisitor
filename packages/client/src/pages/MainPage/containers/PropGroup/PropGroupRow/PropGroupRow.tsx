@@ -1,5 +1,6 @@
 import { IEntity, IProp } from "@shared/types";
 import { AttributeIcon, Button } from "components";
+import { EntitySuggester, EntityTag } from "components/advanced";
 import React, { useEffect, useRef, useState } from "react";
 import {
   DragSourceMonitor,
@@ -12,17 +13,16 @@ import { setDraggedPropRow } from "redux/features/rowDnd/draggedPropRowSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { excludedSuggesterEntities } from "Theme/constants";
 import {
-  PropAttributeFilter,
-  PropAttributeGroupDataObject,
   classesPropType,
   classesPropValue,
   DraggedPropRowCategory,
   DraggedPropRowItem,
   DragItem,
   ItemTypes,
+  PropAttributeFilter,
+  PropAttributeGroupDataObject,
 } from "types";
 import { dndHoverFn } from "utils";
-import { EntitySuggester, EntityTag } from "../..";
 import { AttributesGroupEditor } from "../../AttributesEditor/AttributesGroupEditor";
 import {
   StyledFaGripVertical,

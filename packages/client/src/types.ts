@@ -286,3 +286,19 @@ export const classesPropValue = [
   EntityClass.Territory,
   EntityClass.Resource,
 ];
+
+export interface EntitySuggestionI {
+  id: string;
+  label: string;
+  detail: string;
+  ltype: string;
+  status: EntityStatus;
+  category: string;
+  color: string;
+  icons?: React.ReactNode[];
+}
+export interface UserSuggestionI {
+  id: string;
+  label: string;
+  icons?: React.ReactNode[];
+}

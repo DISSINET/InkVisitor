@@ -12,7 +12,7 @@ import {
   UserDoesNotExits,
   UserNotActiveError,
 } from "@shared/types/errors";
-import { checkPassword, generateAccessToken } from "@common/auth";
+import { checkPassword, generateAccessToken, hashPassword } from "@common/auth";
 import { asyncRouteHandler } from "..";
 import {
   IResponseBookmarkFolder,
@@ -20,8 +20,13 @@ import {
   IResponseAdministration,
   IResponseGeneric,
 } from "@shared/types";
-import mailer from "@service/mailer";
+import mailer, {
+  passwordResetTemplate,
+  testTemplate,
+  userCreatedTemplate,
+} from "@service/mailer";
 import { ResponseUser } from "@models/user/response";
+import { domainName, hostUrl } from "@common/functions";
 
 export default Router()
   .post(
@@ -106,21 +111,28 @@ export default Router()
     asyncRouteHandler<IResponseGeneric>(async (request: Request) => {
       const userData = request.body as IUser;
 
+      // force empty password + inactive status
+      delete userData.password;
+      userData.active = false;
+
       const user = new User(userData);
       if (!user.isValid()) {
         throw new ModelNotValidError("invalid model");
       }
 
-      const rawpassword = user.generatePassword();
-      user.active = true;
+      const hash = user.generateHash();
       const result = await user.save(request.db.connection);
 
       if (result.inserted === 1) {
         try {
-          await mailer.sendNewUser(user.email, {
-            login: user.name,
-            password: rawpassword,
-          });
+          await mailer.sendTemplate(
+            user.email,
+            userCreatedTemplate(
+              user.name,
+              domainName(),
+              `${hostUrl()}/activate?hash=${hash}`
+            )
+          );
         } catch (e) {
           throw new EmailError(
             "please check the logs",
@@ -202,6 +214,72 @@ export default Router()
       }
     })
   )
+  .patch(
+    "/active",
+    asyncRouteHandler<IResponseGeneric>(async (request: Request) => {
+      const hash = (request.query.hash as string) || "";
+      if (!hash) {
+        throw new BadParams("hash is required");
+      }
+
+      const existingUser = await User.getUserByHash(
+        request.db.connection,
+        hash
+      );
+      if (!existingUser) {
+        throw new UserDoesNotExits(UserDoesNotExits.message, "");
+      }
+
+      const result = await existingUser.update(request.db.connection, {
+        active: true,
+      });
+      if (!result.replaced) {
+        throw new InternalServerError(`cannot update user ${existingUser.id}`);
+      }
+
+      return {
+        result: true,
+        message: "User activated",
+      };
+    })
+  )
+  .patch(
+    "/password",
+    asyncRouteHandler<IResponseGeneric>(async (request: Request) => {
+      const hash = (request.query.hash as string) || "";
+      if (!hash) {
+        throw new BadParams("hash is required");
+      }
+
+      const password = request.body.password;
+      const passwordRepeat = request.body.passwordRepeat;
+
+      if (password !== passwordRepeat) {
+        throw new BadParams("Passwords do not match");
+      }
+
+      const existingUser = await User.getUserByHash(
+        request.db.connection,
+        hash
+      );
+      if (!existingUser) {
+        throw new UserDoesNotExits("Invalid hash", "");
+      }
+
+      const result = await existingUser.update(request.db.connection, {
+        hash: null,
+        password: hashPassword(password),
+      });
+      if (!result.replaced) {
+        throw new InternalServerError(`cannot update user ${existingUser.id}`);
+      }
+
+      return {
+        result: true,
+        message: "Password changed",
+      };
+    })
+  )
   .get(
     "/:userId/bookmarks",
     asyncRouteHandler<IResponseBookmarkFolder[]>(async (request: Request) => {
@@ -258,18 +336,23 @@ export default Router()
 
       console.log(`Password reset for ${user.email}: ${raw}`);
 
+      const hash = "123";
       try {
-        await mailer.sendPasswordReset(user.email, {
-          login: user.name,
-          email: user.email,
-          password: raw,
-        });
+        await mailer.sendTemplate(
+          user.email,
+          passwordResetTemplate(
+            user.name,
+            domainName(),
+            `${hostUrl()}/password_reset?hash=${hash}`
+          )
+        );
       } catch (e) {
         throw new EmailError("please check the logs", (e as Error).toString());
       }
 
       return {
         result: true,
+        message: "Email with the new password has been sent",
       };
     })
   )
@@ -283,10 +366,7 @@ export default Router()
       }
 
       try {
-        await mailer.sendTest(email, {
-          name: user.name,
-          email: user.email,
-        });
+        await mailer.sendTemplate(email, testTemplate(domainName()));
       } catch (e) {
         throw new EmailError("please check the logs", (e as Error).toString());
       }
