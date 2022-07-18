@@ -3,7 +3,7 @@ import { IProp, IResponseStatement } from "@shared/types";
 import { AttributeIcon, Button, ButtonGroup } from "components";
 import { EntitySuggester, EntityTag } from "components/advanced";
 import { useSearchParams } from "hooks";
-import React, { useCallback, useEffect, useRef } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   DragSourceMonitor,
   DropTargetMonitor,
@@ -146,6 +146,8 @@ export const StatementEditorActionTableRow: React.FC<
     );
   };
 
+  const [modalOpen, setModalOpen] = useState<boolean>(false);
+
   const renderButtonsCell = () => {
     const { action, sAction } = row.values.data;
     const propOriginId = row.values.data.sAction.action;
@@ -154,6 +156,8 @@ export const StatementEditorActionTableRow: React.FC<
       <ButtonGroup noMarginRight>
         {sAction && (
           <AttributesEditor
+            modalOpen={modalOpen}
+            setModalOpen={setModalOpen}
             modalTitle={`Action attribute`}
             actant={action}
             disabledAllAttributes={!userCanEdit}
@@ -220,6 +224,7 @@ export const StatementEditorActionTableRow: React.FC<
             inverted={true}
             noBorder
             icon={sAction.bundleOperator}
+            onClick={() => setModalOpen(true)}
           />
         )}
       </ButtonGroup>

@@ -51,6 +51,9 @@ interface StatementEditorAttributes {
   disabledAllAttributes?: boolean;
   disabledOpenModal?: boolean;
   userCanEdit?: boolean;
+
+  modalOpen: boolean;
+  setModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const AttributesEditor: React.FC<StatementEditorAttributes> = ({
@@ -65,9 +68,10 @@ const AttributesEditor: React.FC<StatementEditorAttributes> = ({
   disabledAllAttributes = false,
   disabledOpenModal = false,
   userCanEdit = false,
+  modalOpen,
+  setModalOpen,
 }) => {
   const [modalData, setModalData] = useState<AttributeData>(data);
-  const [modalOpen, setModalOpen] = useState<boolean>(false);
 
   const somethingWasUpdated = useMemo(() => {
     return JSON.stringify(data) !== JSON.stringify(modalData);
