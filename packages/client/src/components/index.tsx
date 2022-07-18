@@ -1,11 +1,11 @@
-import { Box } from "./Classic/Box/Box";
-import { Button } from "./Classic/Button/Button";
-import { ButtonGroup } from "./Classic/ButtonGroup/ButtonGroup";
-import { Dropdown } from "./Classic/Dropdown/Dropdown";
-import { Footer, MemoizedFooter } from "./Classic/Footer/Footer";
-import { Header } from "./Classic/Header/Header";
-import { Input } from "./Classic/Input/Input";
-import { Loader } from "./Classic/Loader/Loader";
+import { Box } from "./Basic/Box/Box";
+import { Button } from "./Basic/Button/Button";
+import { ButtonGroup } from "./Basic/ButtonGroup/ButtonGroup";
+import { Dropdown } from "./Basic/Dropdown/Dropdown";
+import { Footer, MemoizedFooter } from "./Basic/Footer/Footer";
+import { Header } from "./Basic/Header/Header";
+import { Input } from "./Basic/Input/Input";
+import { Loader } from "./Basic/Loader/Loader";
 import {
   Modal,
   ModalCard,
@@ -15,20 +15,20 @@ import {
   ModalInputForm,
   ModalInputLabel,
   ModalInputWrap,
-} from "./Classic/Modal/Modal";
-import { MultiInput } from "./Classic/MultiInput/MultiInput";
-import { Panel } from "./Classic/Panel/Panel";
-import { Submit } from "./Classic/Submit/Submit";
-import { Suggester } from "./Classic/Suggester/Suggester";
-import { Tag } from "./Classic/Tag/Tag";
-import { TagGroup } from "./Classic/TagGroup/TagGroup";
-import { Toast } from "./Classic/Toast/Toast";
-import { Tooltip } from "./Classic/Tooltip/Tooltip";
-import { AttributeIcon } from "./Classic/AttributeIcon/AttributeIcon";
-import { Checkbox } from "./Classic/Checkbox/Checkbox";
-import { PanelSeparator } from "./Classic/PanelSeparator/PanelSeparator";
-import { Table } from "./Classic/Table/Table";
-import { TypeBar } from "./Classic/TypeBar/TypeBar";
+} from "./Basic/Modal/Modal";
+import { MultiInput } from "./Basic/MultiInput/MultiInput";
+import { Panel } from "./Basic/Panel/Panel";
+import { Submit } from "./Basic/Submit/Submit";
+import { Suggester } from "./Basic/Suggester/Suggester";
+import { Tag } from "./Basic/Tag/Tag";
+import { TagGroup } from "./Basic/TagGroup/TagGroup";
+import { Toast } from "./Basic/Toast/Toast";
+import { Tooltip } from "./Basic/Tooltip/Tooltip";
+import { AttributeIcon } from "./Basic/AttributeIcon/AttributeIcon";
+import { Checkbox } from "./Basic/Checkbox/Checkbox";
+import { PanelSeparator } from "./Basic/PanelSeparator/PanelSeparator";
+import { Table } from "./Basic/Table/Table";
+import { TypeBar } from "./Basic/TypeBar/TypeBar";
 
 export {
   AttributeIcon,
