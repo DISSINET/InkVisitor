@@ -1,6 +1,6 @@
 import api from "api";
 import { Box, Button, Input } from "components";
-import { Page } from "components/advanced";
+import { Page } from "components/AAA";
 import React, { useState } from "react";
 import { toast } from "react-toastify";
 import {

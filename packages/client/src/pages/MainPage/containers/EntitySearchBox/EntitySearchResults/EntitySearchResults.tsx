@@ -1,5 +1,5 @@
 import { IResponseEntity } from "@shared/types";
-import { EntityTag } from "components/advanced";
+import { EntityTag } from "components/AAA";
 import React, { useMemo } from "react";
 import { areEqual, FixedSizeList as List } from "react-window";
 import { scrollOverscanCount } from "Theme/constants";

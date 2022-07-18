@@ -3,7 +3,7 @@ import { UserRole } from "@shared/enums";
 import { IResponsePermission, RequestPermissionUpdate } from "@shared/types";
 import api from "api";
 import { Box } from "components";
-import { Page } from "components/advanced";
+import { Page } from "components/AAA";
 import React, { useState } from "react";
 import { useQuery } from "react-query";
 

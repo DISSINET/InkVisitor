@@ -2,7 +2,7 @@ import { UserRoleMode } from "@shared/enums";
 import { IEntity, ITerritory } from "@shared/types";
 import { IParentTerritory } from "@shared/types/territory";
 import api from "api";
-import { EntityTag } from "components/advanced";
+import { EntityTag } from "components/AAA";
 import { useSearchParams } from "hooks";
 import update from "immutability-helper";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
