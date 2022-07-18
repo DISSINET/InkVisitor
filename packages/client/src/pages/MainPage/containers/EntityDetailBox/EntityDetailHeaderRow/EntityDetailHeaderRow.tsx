@@ -2,7 +2,7 @@ import { EntityClass, UserRole } from "@shared/enums";
 import { IEntity } from "@shared/types";
 import api from "api";
 import { ButtonGroup, Button } from "components";
-import { EntityTag } from "components/advanced";
+import { EntityTag } from "components/AAA";
 import { DEntity } from "constructors";
 import { useSearchParams } from "hooks";
 import React from "react";

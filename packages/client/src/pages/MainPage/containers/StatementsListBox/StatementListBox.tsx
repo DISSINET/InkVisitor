@@ -15,7 +15,7 @@ import {
   TagGroup,
   Tooltip,
 } from "components";
-import { EntityTag } from "components/advanced";
+import { EntityTag } from "components/AAA";
 import { CStatement, DStatement } from "constructors";
 import { useSearchParams } from "hooks";
 import React, { useEffect, useMemo, useState } from "react";

@@ -1,7 +1,7 @@
 import { EntityClass } from "@shared/enums";
 import { IProp, IResponseStatement } from "@shared/types";
 import { AttributeIcon, Button, ButtonGroup } from "components";
-import { EntitySuggester, EntityTag } from "components/advanced";
+import { EntitySuggester, EntityTag } from "components/AAA";
 import { useSearchParams } from "hooks";
 import React, { useCallback, useEffect, useRef } from "react";
 import {

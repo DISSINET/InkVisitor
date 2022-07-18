@@ -2,7 +2,7 @@ import { EntityClass } from "@shared/enums";
 import { IBookmarkFolder, IResponseBookmarkFolder } from "@shared/types";
 import api from "api";
 import { ButtonGroup, Button, Tooltip } from "components";
-import { EntitySuggester } from "components/advanced";
+import { EntitySuggester } from "components/AAA";
 import React, { useState } from "react";
 import { useDrop, DragObjectWithType, DropTargetMonitor } from "react-dnd";
 import {

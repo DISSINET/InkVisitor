@@ -22,7 +22,7 @@ import {
   ModalHeader,
   Tooltip,
 } from "components";
-import { EntitySuggester, EntityTag } from "components/advanced";
+import { EntitySuggester, EntityTag } from "components/AAA";
 import { FaUnlink } from "react-icons/fa";
 import { MdSettings } from "react-icons/md";
 import {

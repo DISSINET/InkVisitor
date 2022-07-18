@@ -1,7 +1,7 @@
 import { IEntity } from "@shared/types";
 import { IResponseUsedInStatementProps } from "@shared/types/response-detail";
 import { Button, Table } from "components";
-import { EntityTag } from "components/advanced";
+import { EntityTag } from "components/AAA";
 import { useSearchParams } from "hooks";
 import React, { useMemo } from "react";
 import { FaEdit } from "react-icons/fa";

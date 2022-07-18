@@ -1,5 +1,5 @@
 import { Box, Button, Panel, PanelSeparator } from "components";
-import { Page } from "components/advanced";
+import { Page } from "components/AAA";
 import { useSearchParams } from "hooks";
 import ScrollHandler from "hooks/ScrollHandler";
 import React from "react";
