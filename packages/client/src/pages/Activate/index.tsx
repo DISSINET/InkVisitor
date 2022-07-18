@@ -1,5 +1,5 @@
 import api from "api";
-import { Page } from "components/AAA";
+import { Page } from "components/advanced";
 import React, { useState } from "react";
 import { useQuery } from "react-query";
 import { Redirect } from "react-router-dom";

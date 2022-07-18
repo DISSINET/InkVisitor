@@ -7,7 +7,7 @@ import {
   AttributeButtonGroup,
   EntitySuggester,
   EntityTag,
-} from "components/AAA";
+} from "components/advanced";
 import React, { useCallback, useMemo, useState } from "react";
 import {
   FaKey,
