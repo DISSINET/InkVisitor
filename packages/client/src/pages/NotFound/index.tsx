@@ -1,4 +1,4 @@
-import { Page } from "components/AAA";
+import { Page } from "components/advanced";
 import React from "react";
 import {
   StyledContentWrapper,

@@ -5,7 +5,7 @@ import {
   MemoizedLoginModal,
   RightHeader,
   UserCustomizationModal,
-} from "components/AAA";
+} from "components/advanced";
 import React, { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "react-query";
 import { toast } from "react-toastify";
