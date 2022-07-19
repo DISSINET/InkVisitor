@@ -92,6 +92,7 @@ export const SearchParamsProvider = ({
     }
   };
 
+  // TODO: remove detail id from state array
   const removeDetailId = (id: string) => {
     const detailIdArray = getDetailIdArray();
     const index = detailIdArray.indexOf(id);
