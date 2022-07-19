@@ -4,6 +4,7 @@ import { Button } from "components";
 import { EntitySuggester, EntityTag } from "components/advanced";
 import React from "react";
 import { FaExternalLinkAlt, FaTrashAlt, FaUnlink } from "react-icons/fa";
+import { excludedSuggesterEntities } from "Theme/constants";
 import {
   StyledReferencesListButtons,
   StyledReferencesListColumn,
@@ -113,6 +114,7 @@ export const EntityReferenceTableRow: React.FC<EntityReferenceTableRow> = ({
                   handleChangeValue(reference.id, newSelectedId);
                 }}
                 categoryTypes={[EntityClass.Value]}
+                excludedEntities={excludedSuggesterEntities}
               />
             </div>
           )
