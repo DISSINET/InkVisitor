@@ -60,7 +60,7 @@ export const EntitySuggester: React.FC<EntitySuggesterI> = ({
     error: errorStatement,
     isFetching: isFetchingStatement,
   } = useQuery(
-    ["suggestion", debouncedTyped, selectedCategory],
+    ["suggestion", debouncedTyped, selectedCategory, excludedEntities],
     async () => {
       const resSuggestions = await api.entitiesSearch({
         label: debouncedTyped + wildCardChar,
@@ -116,7 +116,7 @@ export const EntitySuggester: React.FC<EntitySuggesterI> = ({
         !!selectedCategory &&
         !excludedEntities
           .map((key) => key.valueOf())
-          .includes(selectedCategory.value) &&
+          .includes(selectedCategory?.value) &&
         api.isLoggedIn(),
     }
   );
