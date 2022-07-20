@@ -80,7 +80,6 @@ export const EntitySuggester: React.FC<EntitySuggesterI> = ({
         }
       });
       return resSuggestions.data
-        .filter((s) => s.status !== EntityStatus.Discouraged)
         .filter((s) =>
           filterEditorRights && userRole !== UserRole.Admin
             ? s.right === UserRoleMode.Write
