@@ -170,7 +170,7 @@ export const EntitySearchBox: React.FC = () => {
       const height = rect["height"];
       setResultsHeight(height);
     }
-  }, [resultsRef.current, fourthPanelBoxesOpened]);
+  }, [resultsRef, fourthPanelBoxesOpened, validSearch]);
 
   return (
     <StyledBoxContent>
