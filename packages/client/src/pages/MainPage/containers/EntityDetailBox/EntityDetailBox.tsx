@@ -2,13 +2,15 @@ import { IResponseEntity } from "@shared/types";
 import api from "api";
 import { useSearchParams } from "hooks";
 import React, { useEffect, useState } from "react";
-import { useQuery } from "react-query";
+import { useQuery, useQueryClient } from "react-query";
 import { EntityDetail } from "./EntityDetail/EntityDetail";
 import { StyledTabGroup } from "./EntityDetailBoxStyles";
 import { EntityDetailTab } from "./EntityDetailTab/EntityDetailTab";
 
 interface EntityDetailBox {}
 export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
+  const queryClient = useQueryClient();
+
   const {
     detailIdArray,
     removeDetailId,
@@ -24,12 +26,29 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
 
   const [entities, setEntities] = useState<IResponseEntity[]>([]);
 
-  const {} = useQuery(
+  // Refetch Conditions:
+  // detailIdArray.length > 0 && entities.length < detailIdArray.length
+  // (nebude fungovat kdyz bude mensi o dva a otevru novy tab)
+
+  const refetchEnabled = (): boolean => {
+    if (detailIdArray.length > 0 && detailIdArray.length < entities.length) {
+      if (entities.filter((e) => !detailIdArray.includes(e.id)).length > 0) {
+        // ONLY when entities is lower count and new entity appear in detailIdArray
+        return true;
+      } else {
+        return false;
+      }
+    } else {
+      return false;
+    }
+  };
+
+  const { data } = useQuery(
     ["detail-tab-entities", detailIdArray],
     async () => {
       if (detailIdArray.length > entities.length) {
         const res = await api.entitiesSearch({ entityIds: detailIdArray });
-        setEntities(res.data);
+        console.log("get Entities");
         return res.data;
       }
     },
@@ -38,9 +57,24 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
     }
   );
 
+  useEffect(() => {
+    if (data) {
+      console.log("setEntities");
+      setEntities(data);
+    }
+  }, [data]);
+
+  useEffect(() => {
+    if (detailIdArray.length > 0 && detailIdArray.length < entities.length) {
+      console.log("reset enabled");
+      // TODO: discover what happened
+      // const newEntities = entities.filter((e) => e.id !== entityId);
+      // setEntities(newEntities);
+      queryClient.invalidateQueries(["detail-tab-entities", detailIdArray]);
+    }
+  }, [detailIdArray]);
+
   const handleClose = (entityId: string) => {
-    const newEntities = entities.filter((e) => e.id !== entityId);
-    setEntities(newEntities);
     removeDetailId(entityId);
   };
 
