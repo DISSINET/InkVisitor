@@ -30,6 +30,7 @@ export const StyledResultsWrapper = styled.div`
   max-width: 100%;
   overflow-y: scroll;
   position: relative;
+  background-color: pink;
 `;
 export const StyledResults = styled.div`
   display: inline-flex;
