@@ -7,10 +7,9 @@ import {
   IStatementActant,
   IStatementAction,
 } from "@shared/types";
-import { EmptyTag } from "pages/MainPage/containers";
+import { EmptyTag, EntityTag } from "components/advanced";
 import React from "react";
 import { ColumnInstance, Row } from "react-table";
-import { EntityTag } from "../../../EntityTag/EntityTag";
 import { StatementListRowExpandedPropGroup } from "./StatementListRowExpandedPropGroup";
 import {
   StyledActantWithPropsWrap,
