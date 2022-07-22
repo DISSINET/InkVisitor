@@ -1,13 +1,10 @@
-import * as nodemailer from "nodemailer";
-import Email from "email-templates";
-import nodemailerSendgrid from "nodemailer-sendgrid";
-const path = require("path");
+import sendgrid from "@sendgrid/mail";
 
-// codenames for template-file names
-export enum EmailTpl {
-  Test = "test",
-  PasswordReset = "password_reset",
-  AccountCreated = "new_user",
+// ids for sendgrid templates
+export enum TplIds {
+  UserCreated = "d-5b941a639a544c848f11240dfc3fc565",
+  PasswordReset = "d-a67dbe3a40234b6b8dc929f559553fe3",
+  Test = "d-382f8760c7be4ec4aba6bd8caf252eed",
 }
 
 // codenames for email subjects
@@ -17,8 +14,55 @@ export enum EmailSubject {
   AccountCreated = "Account created",
 }
 
+interface DynamicTplRequest {
+  id: TplIds;
+  data: any;
+  subject: EmailSubject;
+}
+
+export function userCreatedTemplate(
+  username: string,
+  domain: string,
+  link: string
+): DynamicTplRequest {
+  return {
+    id: TplIds.UserCreated,
+    data: {
+      username,
+      domain,
+      link,
+    },
+    subject: EmailSubject.AccountCreated,
+  };
+}
+
+export function passwordResetTemplate(
+  username: string,
+  domain: string,
+  link: string
+): DynamicTplRequest {
+  return {
+    id: TplIds.PasswordReset,
+    data: {
+      username,
+      domain,
+      link,
+    },
+    subject: EmailSubject.PasswordReset,
+  };
+}
+
+export function testTemplate(domain: string): DynamicTplRequest {
+  return {
+    id: TplIds.Test,
+    data: {
+      domain,
+    },
+    subject: EmailSubject.Test,
+  };
+}
+
 class Mailer {
-  nodeTransporter: nodemailer.Transporter;
   devMode: boolean = true;
 
   constructor() {
@@ -26,91 +70,29 @@ class Mailer {
       this.devMode = false;
     }
 
-    this.nodeTransporter = nodemailer.createTransport(
-      nodemailerSendgrid({
-        apiKey: process.env.NODEMAILER_API_KEY || "",
-      })
-    );
+    sendgrid.setApiKey(process.env.NODEMAILER_API_KEY || "");
 
     console.log(`[Mailer]: prepared${this.devMode ? " (dev mode)" : ""}`);
   }
 
-  /**
-   * sends test template to chosen address
-   * @param recipient
-   * @param data
-   * @returns
-   */
-  sendTest(recipient: string, data: any): Promise<any> {
-    const email = new Email({
-      message: {
-        from: process.env.MAILER_SENDER,
-      },
-      send: !this.devMode,
-      preview: this.devMode,
-      transport: this.nodeTransporter,
-    });
+  async sendTemplate(recipient: string, tpl: DynamicTplRequest): Promise<void> {
+    if (this.devMode) {
+      console.log(`[Mailer] dev sendTemplate: ${tpl.subject} -> ${recipient}`);
+      console.log("Data: ", JSON.stringify(tpl.data, null, 4));
+      return;
+    }
 
-    return email.send({
-      template: path.join(__dirname, "emails", EmailTpl.Test),
-      message: {
+    try {
+      sendgrid.send({
         to: recipient,
-        subject: EmailSubject.Test,
-      },
-      locals: data,
-    });
-  }
-
-  /**
-   * sends password reset template
-   * @param recipient
-   * @param data
-   * @returns
-   */
-  sendPasswordReset(recipient: string, data: any): Promise<any> {
-    const email = new Email({
-      message: {
-        from: process.env.MAILER_SENDER,
-      },
-      send: !this.devMode,
-      preview: this.devMode,
-      transport: this.nodeTransporter,
-    });
-
-    return email.send({
-      template: path.join(__dirname, "emails", EmailTpl.PasswordReset),
-      message: {
-        to: recipient,
-        subject: EmailSubject.PasswordReset,
-      },
-      locals: data,
-    });
-  }
-
-  /**
-   * sends new-user template
-   * @param recipient
-   * @param data
-   * @returns
-   */
-  sendNewUser(recipient: string, data: any): Promise<any> {
-    const email = new Email({
-      message: {
-        from: process.env.MAILER_SENDER,
-      },
-      send: !this.devMode,
-      preview: this.devMode,
-      transport: this.nodeTransporter,
-    });
-
-    return email.send({
-      template: path.join(__dirname, "emails", EmailTpl.AccountCreated),
-      message: {
-        to: recipient,
-        subject: EmailSubject.AccountCreated,
-      },
-      locals: data,
-    });
+        from: process.env.MAILER_SENDER || "",
+        subject: tpl.subject,
+        templateId: tpl.id,
+        dynamicTemplateData: tpl.data,
+      });
+    } catch (e) {
+      throw new Error(`Email error for template ${tpl.subject}: ${e}`);
+    }
   }
 }
 

@@ -13,7 +13,7 @@ describe("Territories get query", function () {
   describe("Empty param", () => {
     it("should return a BadParams error wrapped in IResponseGeneric", (done) => {
       return request(app)
-        .get(`${apiPath}/territories/get`)
+        .get(`${apiPath}/territories`)
         .set("authorization", "Bearer " + supertestConfig.token)
         .expect(testErroneousResponse.bind(undefined, new BadParams("")))
         .then(() => done());
@@ -22,10 +22,13 @@ describe("Territories get query", function () {
   describe("Wrong param", () => {
     it("should return a TerritoryDoesNotExits error wrapped in IResponseGeneric", (done) => {
       return request(app)
-        .get(`${apiPath}/territories/get/123`)
+        .get(`${apiPath}/territories/123`)
         .set("authorization", "Bearer " + supertestConfig.token)
         .expect(
-          testErroneousResponse.bind(undefined, new TerritoryDoesNotExits("", ""))
+          testErroneousResponse.bind(
+            undefined,
+            new TerritoryDoesNotExits("", "")
+          )
         )
         .then(() => done());
     });
@@ -66,7 +69,7 @@ describe("Territories get query", function () {
       await createEntity(db, statement2);
 
       await request(app)
-        .get(`${apiPath}/territories/get/${testTerritoryId}`)
+        .get(`${apiPath}/territories/${testTerritoryId}`)
         .set("authorization", "Bearer " + supertestConfig.token)
         .expect(200)
         .expect((res) => {

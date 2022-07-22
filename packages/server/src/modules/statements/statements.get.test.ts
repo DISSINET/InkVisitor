@@ -23,7 +23,7 @@ describe("Statements get", function () {
   describe("Empty param", () => {
     it("should return a BadParams error wrapped in IResponseGeneric", (done) => {
       return request(app)
-        .get(`${apiPath}/statements/get`)
+        .get(`${apiPath}/statements`)
         .set("authorization", "Bearer " + supertestConfig.token)
         .expect(testErroneousResponse.bind(undefined, new BadParams("")))
         .then(() => done());
@@ -32,7 +32,7 @@ describe("Statements get", function () {
   describe("Wrong param", () => {
     it("should return a StatementDoesNotExits error wrapped in IResponseGeneric", (done) => {
       return request(app)
-        .get(`${apiPath}/statements/get/invalidId12345`)
+        .get(`${apiPath}/statements/invalidId12345`)
         .set("authorization", "Bearer " + supertestConfig.token)
         .expect(
           testErroneousResponse.bind(
@@ -53,7 +53,7 @@ describe("Statements get", function () {
         new Statement({ id: randomId, data: { territory: { id: "2" } } })
       );
       await request(app)
-        .get(`${apiPath}/statements/get/${randomId}`)
+        .get(`${apiPath}/statements/${randomId}`)
         .set("authorization", "Bearer " + supertestConfig.token)
         .expect(200)
         .expect(testValidStatement);

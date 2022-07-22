@@ -30,8 +30,15 @@ export const StyledTemplateSectionHeader = styled.div`
 `;
 
 export const StyledTemplateSectionList = styled.div`
+  position: relative;
+  min-height: 5rem;
+  width: 100%;
+  overflow: hidden;
+  display: inline-flex;
+  flex-wrap: wrap;
+
   > div {
-    padding: ${({ theme }) => theme.space["1"]};
+    padding: ${({ theme }) => theme.space[1]};
   }
 `;
 
@@ -59,4 +66,9 @@ export const StyledTemplateFilter = styled.div`
     width: 100%;
     padding: ${({ theme }) => theme.space[2]};
   }
+`;
+
+export const StyledModalContent = styled.div`
+  display: flex;
+  flex-direction: column;
 `;

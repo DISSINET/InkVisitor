@@ -7,7 +7,7 @@ import EntitiesRouter from "@modules/entities";
 import AuditsRouter from "@modules/audits";
 import TerritoriesRouter from "@modules/territories";
 import UsersRouter from "@modules/users";
-import AclRouter from "@modules/acl";
+import AclRouter from "@modules/acls";
 import StatementsRouter from "@modules/statements";
 import TreeRouter from "@modules/tree";
 import StatsRouter from "@modules/stats";
@@ -53,7 +53,15 @@ server.use(profilerMiddleware);
 server.use(dbMiddleware);
 
 // uncomment this to enable auth
-server.use(validateJwt().unless({ path: [/api\/v1\/users\/signin/] }));
+server.use(
+  validateJwt().unless({
+    path: [
+      /api\/v1\/users\/signin/,
+      /api\/v1\/users\/active/,
+      /api\/v1\/users\/password/,
+    ],
+  })
+);
 server.use(customizeRequest);
 
 // Routing

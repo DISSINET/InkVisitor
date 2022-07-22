@@ -2,7 +2,7 @@
  * type of the /user endpoint response
  */
 
-import { IEntity, IStatement } from ".";
+import { IEntity } from ".";
 import { UserRoleMode } from "../enums";
 
 export interface IResponseEntity extends IEntity {

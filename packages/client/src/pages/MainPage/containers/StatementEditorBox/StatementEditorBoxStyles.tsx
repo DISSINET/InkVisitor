@@ -101,30 +101,6 @@ export const StyledPropsActantList = styled(StyledGrid)<StyledPropsActantList>`
   width: 100%;
 `;
 
-interface StyledPropButtonGroup {
-  leftMargin?: boolean;
-  rightMargin?: boolean;
-  border?: boolean;
-  round?: boolean;
-  width?: number;
-}
-export const StyledPropButtonGroup = styled.div<StyledPropButtonGroup>`
-  margin-left: ${({ theme, leftMargin }) =>
-    leftMargin ? theme.space[3] : theme.space[0]};
-  margin-right: ${({ theme, rightMargin }) =>
-    rightMargin ? theme.space[3] : theme.space[0]};
-  vertical-align: middle;
-  display: inline-flex;
-  border-radius: ${({ round }) => (round ? "8px" : "0")};
-  border: ${({ border }) => (border ? "1px" : 0)} solid
-    ${({ theme }) => theme.color["gray"][600]};
-
-  button:disabled,
-  button[disabled] {
-    //background-color: ${({ theme }) => theme.color["gray"][1000]};
-  }
-`;
-
 interface StyledPropLineColumn {
   padded?: boolean;
   lastSecondLevel?: boolean;
@@ -173,6 +149,7 @@ export const StyledBreadcrumbWrap = styled.div`
   flex-wrap: wrap;
   min-height: 2rem;
   position: relative;
+  margin-top: ${({ theme }) => theme.space[2]};
 `;
 
 export const StyledEditorStatementInfo = styled.div`
@@ -181,12 +158,21 @@ export const StyledEditorStatementInfo = styled.div`
   align-items: center;
   overflow: hidden;
   max-width: 100%;
+`;
+
+export const StyledHeaderTagWrap = styled.div`
+  display: inline-flex;
+  overflow: hidden;
+  margin-right: ${({ theme }) => theme.space[3]};
   margin-bottom: ${({ theme }) => theme.space[2]};
 `;
 export const StyledEditorStatementInfoLabel = styled.div`
   display: flex;
   align-items: center;
   margin-right: ${({ theme }) => theme.space[1]};
+  margin-bottom: ${({ theme }) => theme.space[2]};
+`;
+export const StyledEditorHeaderInputWrap = styled.div`
   margin-bottom: ${({ theme }) => theme.space[2]};
 `;
 
@@ -232,13 +218,4 @@ export const StyledEditorTemplateSection = styled.div`
       padding: ${({ theme }) => theme.space[2]};
     }
   }
-`;
-export const StyledHeaderTagWrap = styled.div`
-  display: inline-flex;
-  overflow: hidden;
-  margin-bottom: ${({ theme }) => theme.space[2]};
-  margin-right: ${({ theme }) => theme.space[3]};
-`;
-export const StyledEditorHeaderInputWrap = styled.div`
-  margin-bottom: ${({ theme }) => theme.space[2]};
 `;

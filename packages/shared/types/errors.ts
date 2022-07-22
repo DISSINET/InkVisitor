@@ -190,7 +190,7 @@ class TerritoriesBrokenError extends CustomError {
 }
 
 /**
- * TerrytoryInvalidMove will be thrown during tree/moveTerritory request, while violating some constraint
+ * TerrytoryInvalidMove will be thrown during tree/id/position request, while violating some constraint
  */
 class TerrytoryInvalidMove extends CustomError {
   public static code = 500;
