@@ -4,6 +4,7 @@
   "scripts": {
     "build": "tsc --build tsconfig.prod.json",
     "lint": "tslint --project \"tsconfig.json\"",
+    "start": "node -r module-alias/register ./dist/server/src",
     "start:production": "node -r module-alias/register ./dist/server/src --env=production",
     "start:sandbox": "node -r module-alias/register ./dist/server/src --env=sandbox",
     "start:staging": "node -r module-alias/register ./dist/server/src --env=staging",
