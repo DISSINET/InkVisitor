@@ -29,7 +29,7 @@ jobs:
         run: docker-compose build inkvisitor-staging
 
       - name: Save docker-compose stack
-        run: docker save -o inkvisitor-staging.tar
+        run: docker save -o inkvisitor-staging.tar inkvisitor:staging
 
       - name: Cache inkvisitor-staging.tar
         uses: actions/cache@v2
