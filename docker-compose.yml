@@ -30,8 +30,6 @@ services:
       options:
         max-size: "10m"
         max-file: "2"
-    env_file:
-      - ./packages/server/env/.env.development
     ports:
       - "3000:3000"
     volumes:
@@ -52,8 +50,6 @@ services:
       options:
         max-size: "10m"
         max-file: "2"
-    env_file:
-      - ./packages/server/env/.env.production
     ports:
       - "3000:3000"
     volumes:
@@ -74,8 +70,6 @@ services:
       options:
         max-size: "10m"
         max-file: "2"
-    env_file:
-      - ./packages/server/env/.env.staging
     ports:
       - "3011:3000"
     volumes:
@@ -96,8 +90,6 @@ services:
       options:
         max-size: "10m"
         max-file: "2"
-    env_file:
-      - ./packages/server/env/.env.sandbox
     ports:
       - "3012:3000"
     volumes:
@@ -118,8 +110,6 @@ services:
       options:
         max-size: "10m"
         max-file: "2"
-    env_file:
-      - ./packages/server/env/.env.data-import
     ports:
       - "3013:3000"
     volumes:
