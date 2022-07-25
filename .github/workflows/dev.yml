@@ -13,4 +13,5 @@ jobs:
     steps:
       - name: Checkout InkVisitor
         uses: actions/checkout@v2
+      - name: Run docker-compose stack
         run: docker-compose build inkvisitor-staging
