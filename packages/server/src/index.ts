@@ -4,7 +4,6 @@ import fs from "fs";
 import https from "https";
 import http from "http";
 import server from "./Server";
-import logger from "@common/Logger";
 import { prepareTreeCache } from "@service/treeCache";
 import "@service/mailer";
 
@@ -28,8 +27,8 @@ import "@service/mailer";
   }
 
   httpServer.listen(port, () => {
-    logger.info(
-      `${useHttps ? "https" : "http"} server listening at port ${port}`
+    console.log(
+      `[Server] ${useHttps ? "https" : "http"} server listening at port ${port}`
     );
   });
 })();
