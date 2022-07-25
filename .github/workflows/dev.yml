@@ -1,0 +1,16 @@
+name: deploy test
+
+on:
+  push:
+    branches:
+      - update-docs
+
+jobs:
+  staging:
+    name: Deploy to staging environment
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout InkVisitor
+        uses: actions/checkout@v2
+        run: docker-compose build inkvisitor-staging
