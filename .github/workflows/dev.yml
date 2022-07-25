@@ -6,12 +6,94 @@ on:
       - update-docs
 
 jobs:
-  staging:
+  staging-build:
     name: Deploy to staging environment
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
       - name: Checkout InkVisitor
         uses: actions/checkout@v2
-      - name: Run docker-compose stack
+
+      - uses: actions/checkout@v2
+        # Pull the latest image to build, and avoid caching pull-only images.
+        # (docker pull is faster than caching in most cases.)
+        - run: docker-compose pull
+
+        # In this step, this action saves a list of existing images,
+        # the cache is created without them in the post run.
+        # It also restores the cache if it exists.
+      - uses: satackey/action-docker-layer-caching@v0.0.11
+        # Ignore the failure of a step and avoid terminating the job.
+        continue-on-error: true
+
+      - name: Run docker build task
         run: docker-compose build inkvisitor-staging
+
+      - name: Save docker-compose stack
+        run:  docker save -o inkvisitor-staging.tar
+
+      - name: Cache inkvisitor-staging.tar
+        uses: actions/cache@v2
+        env:
+          cache-name: inkvisitor-staging.tar
+        with:
+          path: inkvisitor-staging.tar
+          key: ${{ env.cache-name }}
+          restore-keys: ${{ env.cache-name }}
+
+  stagingdeploy:
+    needs: staging-build
+    name: Deploy to staging environment
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout InkVisitor
+        uses: actions/checkout@v2
+
+      - name: Restore cache
+        uses: actions/cache@v2
+        with:
+          path: inkvisitor-staging.tar
+          key: inkvisitor-staging.tar
+
+      - name: Install SSH Key
+        uses: shimataro/ssh-key-action@v2
+        with:
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          known_hosts: ${{ secrets.KNOWN_HOSTS }}
+
+      - name: Create env file for server
+        run: |
+          touch packages/server/env/.env.staging
+          echo "$SERVER_ENV" >> packages/server/env/.env.staging
+        env:
+          SERVER_ENV: ${{secrets.SERVER_ENV_STAGING}}
+
+      - name: Update packages
+        run: |
+          sudo apt-get update
+
+      - name: Install OpenVPN
+        run: |
+          sudo apt install -y openvpn openvpn-systemd-resolved
+
+      - name: Prepare OpenVPN creds file
+        run: |
+          touch pass.txt
+          echo ${{ secrets.VPN_USER }} >> pass.txt
+          echo ${{ secrets.VPN_PASS }} >> pass.txt
+
+      - name: Pull OpenVPN Config
+        run: |
+          curl https://it.muni.cz/media/3404274/muni-main-linux.ovpn -o muni-linux.ovpn
+
+      - name: Connect to VPN and deploy
+        run: |
+          sudo openvpn --config muni-linux.ovpn --auth-user-pass pass.txt --daemon
+          sleep 10s
+
+      - name: Deploy backend
+        run: scp inkvisitor-staging.tar ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/var/www/html/apps/inkvisitor-staging
+
+      - name: Deploy frontend
+        run: ./deploy-frontend-staging.sh ${{ secrets.SSH_USER }} ${{ secrets.SSH_HOST }}
