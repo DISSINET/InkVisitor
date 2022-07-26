@@ -14,31 +14,35 @@ jobs:
       - name: Checkout InkVisitor
         uses: actions/checkout@v2
 
+      - name: Create env file for client
+        run: |
+          touch packages/client/env/.env.staging
+          echo "$CLIENT_ENV" >> packages/client/env/.env.staging
+        env:
+          CLIENT_ENV: ${{secrets.CLIENT_ENV}}
+
+      - name: Generate certificates
+        run: |
+          mkdir -p ./packages/server/secret
+          openssl req -x509 -newkey rsa:2048 -nodes -out ./packages/server/secret/cert.pem -keyout ./packages/server/secret/key.pem -days 365 -subj "/C=FR/O=krkr/OU=Domain Control Validated/CN=*"
+
       # Pull the latest image to build, and avoid caching pull-only images.
       # (docker pull is faster than caching in most cases.)
       - run: docker-compose pull
-
-      # In this step, this action saves a list of existing images,
-      # the cache is created without them in the post run.
-      # It also restores the cache if it exists.
-      - uses: satackey/action-docker-layer-caching@v0.0.11
-        # Ignore the failure of a step and avoid terminating the job.
-        continue-on-error: true
 
       - name: Run docker build task
         run: docker-compose build inkvisitor-staging
 
       - name: Save docker-compose stack
-        run: docker save -o inkvisitor-staging.tar inkvisitor:staging
+        run: docker save inkvisitor:staging | gzip > inkvisitor-staging.tar.gz
 
-      - name: Cache inkvisitor-staging.tar
+      - name: Cache image.tar
         uses: actions/cache@v2
         env:
-          cache-name: inkvisitor-staging.tar
+          cache-name: inkvisitor-staging-${{ github.sha }}.tar.gz
         with:
-          path: inkvisitor-staging.tar
+          path: inkvisitor-staging.tar.gz
           key: ${{ env.cache-name }}
-          restore-keys: ${{ env.cache-name }}
 
   stagingdeploy:
     needs: staging-build
@@ -51,9 +55,11 @@ jobs:
 
       - name: Restore cache
         uses: actions/cache@v2
+        env:
+          cache-name: inkvisitor-staging-${{ github.sha }}.tar.gz
         with:
-          path: inkvisitor-staging.tar
-          key: inkvisitor-staging.tar
+          path: inkvisitor-staging.tar.gz
+          key: ${{ env.cache-name }}
 
       - name: Install SSH Key
         uses: shimataro/ssh-key-action@v2
@@ -83,16 +89,17 @@ jobs:
           echo ${{ secrets.VPN_PASS }} >> pass.txt
 
       - name: Pull OpenVPN Config
-        run: |
-          curl https://it.muni.cz/media/3404274/muni-main-linux.ovpn -o muni-linux.ovpn
+        run: curl https://it.muni.cz/media/3404274/muni-main-linux.ovpn -o muni-linux.ovpn
 
       - name: Connect to VPN and deploy
-        run: |
-          sudo openvpn --config muni-linux.ovpn --auth-user-pass pass.txt --daemon
-          sleep 10s
+        run: sudo openvpn --config muni-linux.ovpn --auth-user-pass pass.txt --daemon
 
-      - name: Deploy backend
-        run: scp inkvisitor-staging.tar ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/var/www/html/apps/inkvisitor-staging
+      - name: Wait for a VPN connection
+        timeout-minutes: 2
+        run: until ping -c1 ${{ secrets.SSH_HOST }}; do sleep 2; done
 
-      - name: Deploy frontend
-        run: ./deploy-frontend-staging.sh ${{ secrets.SSH_USER }} ${{ secrets.SSH_HOST }}
+      - name: Upload image
+        run: scp inkvisitor-staging.tar.gz ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/var/www/html/apps
+
+      - name: Load image
+        run: ssh -tt ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}  -- "sh -c 'podman-compose -f /var/www/html/apps/docker-compose.yml stop inkvisitor-staging && podman load -i /var/www/html/apps/inkvisitor-staging.tar.gz && podman-compose -f /var/www/html/apps/docker-compose.yml up -d inkvisitor-staging'"
