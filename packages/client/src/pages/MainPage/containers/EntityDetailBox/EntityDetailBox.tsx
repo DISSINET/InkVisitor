@@ -2,21 +2,21 @@ import { IResponseEntity } from "@shared/types";
 import api from "api";
 import { useSearchParams } from "hooks";
 import React, { useEffect, useState } from "react";
-import { useQuery, useQueryClient } from "react-query";
+import { useQuery } from "react-query";
 import { EntityDetail } from "./EntityDetail/EntityDetail";
 import { StyledTabGroup } from "./EntityDetailBoxStyles";
 import { EntityDetailTab } from "./EntityDetailTab/EntityDetailTab";
 
 interface EntityDetailBox {}
 export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
-  const queryClient = useQueryClient();
-
   const {
     detailIdArray,
     removeDetailId,
     selectedDetailId,
     setSelectedDetailId,
   } = useSearchParams();
+
+  // TODO: create error lifecycle of removing non existing from URL and selecting next one to open in tab
 
   useEffect(() => {
     if (!selectedDetailId && detailIdArray.length) {
@@ -26,31 +26,11 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
 
   const [entities, setEntities] = useState<IResponseEntity[]>([]);
 
-  // Refetch Conditions:
-  // detailIdArray.length > 0 && entities.length < detailIdArray.length
-  // (nebude fungovat kdyz bude mensi o dva a otevru novy tab)
-
-  const refetchEnabled = (): boolean => {
-    if (detailIdArray.length > 0 && detailIdArray.length < entities.length) {
-      if (entities.filter((e) => !detailIdArray.includes(e.id)).length > 0) {
-        // ONLY when entities is lower count and new entity appear in detailIdArray
-        return true;
-      } else {
-        return false;
-      }
-    } else {
-      return false;
-    }
-  };
-
   const { data } = useQuery(
     ["detail-tab-entities", detailIdArray],
     async () => {
-      if (detailIdArray.length > entities.length) {
-        const res = await api.entitiesSearch({ entityIds: detailIdArray });
-        console.log("get Entities");
-        return res.data;
-      }
+      const res = await api.entitiesSearch({ entityIds: detailIdArray });
+      return res.data;
     },
     {
       enabled: api.isLoggedIn() && detailIdArray.length > 0,
@@ -59,22 +39,17 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
 
   useEffect(() => {
     if (data) {
-      console.log("setEntities");
-      setEntities(data);
+      if (JSON.stringify(data) !== JSON.stringify(entities)) {
+        setEntities(data);
+      }
     }
   }, [data]);
 
-  useEffect(() => {
-    if (detailIdArray.length > 0 && detailIdArray.length < entities.length) {
-      console.log("reset enabled");
-      // TODO: discover what happened
-      // const newEntities = entities.filter((e) => e.id !== entityId);
-      // setEntities(newEntities);
-      queryClient.invalidateQueries(["detail-tab-entities", detailIdArray]);
-    }
-  }, [detailIdArray]);
-
   const handleClose = (entityId: string) => {
+    const newEntities: IResponseEntity[] = entities.filter(
+      (e) => e.id !== entityId
+    );
+    setEntities(newEntities);
     removeDetailId(entityId);
   };
 

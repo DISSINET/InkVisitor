@@ -92,25 +92,29 @@ export const SearchParamsProvider = ({
     }
   };
 
-  // TODO: remove detail id from state array
   const removeDetailId = (id: string) => {
     const detailIdArray = getDetailIdArray();
     const index = detailIdArray.indexOf(id);
 
-    if (selectedDetailId === id) {
-      if (index + 1 === detailIdArray.length) {
-        if (detailIdArray.length > 1) {
-          setSelectedDetailId(detailIdArray[detailIdArray.length - 2]);
+    if (index > -1) {
+      // ID exists in query array
+      if (selectedDetailId === id) {
+        if (index + 1 === detailIdArray.length) {
+          // ID to remove is the last one
+          if (detailIdArray.length > 1) {
+            setSelectedDetailId(detailIdArray[detailIdArray.length - 2]);
+          } else {
+            setSelectedDetailId("");
+          }
         } else {
-          clearAllDetailIds();
+          // ID to remove is NOT the last one
+          setSelectedDetailId(detailIdArray[index + 1]);
         }
-      } else {
-        setSelectedDetailId(detailIdArray[index + 1]);
       }
-    }
 
-    const newIds = detailIdArray.filter((detailId) => detailId !== id);
-    setDetailId(newIds.join(arrJoinChar));
+      const newIds = detailIdArray.filter((detailId) => detailId !== id);
+      setDetailId(newIds.join(arrJoinChar));
+    }
   };
 
   const clearAllDetailIds = () => {
@@ -137,6 +141,7 @@ export const SearchParamsProvider = ({
     selectedDetailId
       ? params.set("selectedDetail", selectedDetailId)
       : params.delete("selectedDetail");
+
     detailId ? params.set("detail", detailId) : params.delete("detail");
 
     handleHistoryPush();
@@ -165,7 +170,7 @@ export const SearchParamsProvider = ({
 
   useEffect(() => {
     // Should be only change from the url => add state to switch of listener
-    // this condition is for redirect - don't use our lifecycle when params are set by search query
+    // this condition is for redirect - don't use our lifecycle when params are set by search query (?)
     if (!parsedParamsSearch.hash) {
       return history.listen((location: any) => {
         setDisablePush(true);

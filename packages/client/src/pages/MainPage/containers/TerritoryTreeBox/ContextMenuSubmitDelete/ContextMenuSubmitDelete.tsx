@@ -35,8 +35,6 @@ export const ContextMenuSubmitDelete: React.FC<ContextMenuSubmitDelete> = ({
         if (territoryId === territoryActant.id) {
           setTerritoryId("");
         }
-        console.log(territoryActant.id);
-        console.log(detailIdArray);
         if (detailIdArray.includes(territoryActant.id)) {
           removeDetailId(territoryActant.id);
         }

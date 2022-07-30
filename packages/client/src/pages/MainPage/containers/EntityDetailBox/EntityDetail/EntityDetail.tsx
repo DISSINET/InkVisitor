@@ -74,6 +74,7 @@ interface EntityDetail {
   detailId: string;
 }
 export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
+  // TODO: move fetch entity to EntityDetailBox component? => when invalid selected ID, reselect first in multitab
   const {
     status,
     data: entity,
@@ -94,6 +95,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
     territoryId,
     setTerritoryId,
     removeDetailId,
+    setSelectedDetailId,
   } = useSearchParams();
 
   const [createTemplateModal, setCreateTemplateModal] =
@@ -437,6 +439,8 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
   useEffect(() => {
     if (error && (error as any).error === "EntityDoesNotExist") {
       removeDetailId(detailId);
+      setSelectedDetailId("");
+      // TODO: select first tab when multitabs
     }
   }, [error]);
 
