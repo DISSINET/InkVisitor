@@ -2,6 +2,7 @@ import { EntityClass, UserRole, UserRoleMode } from "@shared/enums";
 import {
   IResponseGeneric,
   IResponseTerritory,
+  IResponseTree,
   IStatement,
 } from "@shared/types";
 import api from "api";
@@ -52,26 +53,13 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
   const queryClient = useQueryClient();
   const { territoryId } = useSearchParams();
 
-  const {
-    status,
-    data: treeData,
-    error,
-    isFetching,
-  } = useQuery(
-    ["tree"],
-    async () => {
-      const res = await api.treeGet();
-      return res.data;
-    },
-    { enabled: api.isLoggedIn() }
-  );
+  const treeData: IResponseTree | undefined = queryClient.getQueryData("tree");
 
   const [excludedMoveTerritories, setExcludedMoveTerritories] = useState<
     string[]
   >([territoryId]);
 
   useEffect(() => {
-    //const toExclude = [territoryId];
     const toExclude = [territoryId];
     if (treeData) {
       const currentTerritory = searchTree(treeData, territoryId);
@@ -126,10 +114,10 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
     <StyledHeader>
       <StyledHeaderBreadcrumbRow>
         {selectedTerritoryPath &&
-          selectedTerritoryPath.map((territory: string, key: number) => {
+          selectedTerritoryPath.map((territoryId: string, key: number) => {
             return (
               <React.Fragment key={key}>
-                <StatementListBreadcrumbItem territoryId={territory} />
+                <StatementListBreadcrumbItem territoryId={territoryId} />
               </React.Fragment>
             );
           })}
