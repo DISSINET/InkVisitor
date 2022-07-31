@@ -10,7 +10,7 @@ services:
         max-size: "10m"
         max-file: "2"
     volumes:
-      - database:/data
+      - ./database:/data
     networks:
       - inkvisitor
     ports:
@@ -36,7 +36,7 @@ services:
     ports:
       - "3000:3000"
     volumes:
-      - inkvisitor-production-client:/app/client/dist
+      - ./inkvisitor-production-client:/app/client/dist
     networks:
       - inkvisitor
 
@@ -59,29 +59,32 @@ services:
     ports:
       - "3011:3000"
     volumes:
-      - inkvisitor-staging-client:/app/client/dist
+      - ./inkvisitor-staging-client:/app/client/dist
+    networks:
+      - inkvisitor
+
+  inkvisitor-data-import:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        ENV: data-import
+    image: inkvisitor:data-import
+    container_name: inkvisitor-data-import
+    restart: always
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "2"
+    # needs to be present when building
+    # env_file:
+    #  - ./packages/server/env/.env.data-import
+    ports:
+      - "3011:3000"
+    volumes:
+      - ./inkvisitor-data-import-client:/app/client/dist
     networks:
       - inkvisitor
 
 networks:
   inkvisitor:
-
-volumes:
-  database:
-    driver: local
-    driver_opts:
-      type: "none"
-      o: "bind"
-      device: "/inkvisitor-database"
-  inkvisitor-production-client:
-    driver: local
-    driver_opts:
-      type: "none"
-      o: "bind"
-      device: "/inkvisitor-production-client"
-  inkvisitor-staging-client:
-    driver: local
-    driver_opts:
-      type: "none"
-      o: "bind"
-      device: "/inkvisitor-staging-client"
