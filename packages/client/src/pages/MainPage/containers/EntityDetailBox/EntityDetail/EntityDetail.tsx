@@ -96,6 +96,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
     setTerritoryId,
     removeDetailId,
     setSelectedDetailId,
+    detailIdArray,
   } = useSearchParams();
 
   const [createTemplateModal, setCreateTemplateModal] =
@@ -439,8 +440,9 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
   useEffect(() => {
     if (error && (error as any).error === "EntityDoesNotExist") {
       removeDetailId(detailId);
-      setSelectedDetailId("");
-      // TODO: select first tab when multitabs
+      if (detailIdArray.length) {
+        setSelectedDetailId(detailIdArray[0]);
+      }
     }
   }, [error]);
 

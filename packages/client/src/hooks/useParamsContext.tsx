@@ -96,23 +96,24 @@ export const SearchParamsProvider = ({
     const detailIdArray = getDetailIdArray();
     const index = detailIdArray.indexOf(id);
 
-    if (index > -1) {
-      // ID exists in query array
-      if (selectedDetailId === id) {
-        if (index + 1 === detailIdArray.length) {
-          // ID to remove is the last one
-          if (detailIdArray.length > 1) {
-            setSelectedDetailId(detailIdArray[detailIdArray.length - 2]);
-          } else {
-            setSelectedDetailId("");
-          }
+    if (selectedDetailId === id) {
+      if (index + 1 === detailIdArray.length) {
+        // ID to remove is the last one
+        if (detailIdArray.length > 1) {
+          setSelectedDetailId(detailIdArray[detailIdArray.length - 2]);
         } else {
-          // ID to remove is NOT the last one
-          setSelectedDetailId(detailIdArray[index + 1]);
+          setSelectedDetailId("");
         }
+      } else {
+        // ID to remove is NOT the last one
+        setSelectedDetailId(detailIdArray[index + 1]);
       }
+    }
 
+    if (index > -1) {
+      // console.log(detailIdArray);
       const newIds = detailIdArray.filter((detailId) => detailId !== id);
+      // console.log(newIds);
       setDetailId(newIds.join(arrJoinChar));
     }
   };
@@ -142,6 +143,7 @@ export const SearchParamsProvider = ({
       ? params.set("selectedDetail", selectedDetailId)
       : params.delete("selectedDetail");
 
+    // console.log(detailId);
     detailId ? params.set("detail", detailId) : params.delete("detail");
 
     handleHistoryPush();

@@ -14,6 +14,7 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
     removeDetailId,
     selectedDetailId,
     setSelectedDetailId,
+    appendDetailId,
   } = useSearchParams();
 
   // TODO: create error lifecycle of removing non existing from URL and selecting next one to open in tab
@@ -21,6 +22,8 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
   useEffect(() => {
     if (!selectedDetailId && detailIdArray.length) {
       setSelectedDetailId(detailIdArray[0]);
+    } else if (selectedDetailId && !detailIdArray.length) {
+      appendDetailId(selectedDetailId);
     }
   }, []);
 
@@ -41,6 +44,9 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
     if (data) {
       if (JSON.stringify(data) !== JSON.stringify(entities)) {
         setEntities(data);
+      }
+      if (data.length < detailIdArray.length) {
+        // TODO: remove non existing IDs from array
       }
     }
   }, [data]);
