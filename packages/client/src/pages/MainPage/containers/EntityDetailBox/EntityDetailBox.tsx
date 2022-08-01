@@ -17,15 +17,13 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
     appendDetailId,
   } = useSearchParams();
 
-  // TODO: create error lifecycle of removing non existing from URL and selecting next one to open in tab
-
   useEffect(() => {
     if (!selectedDetailId && detailIdArray.length) {
       setSelectedDetailId(detailIdArray[0]);
-    } else if (selectedDetailId && !detailIdArray.length) {
+    } else if (selectedDetailId && !detailIdArray.includes(selectedDetailId)) {
       appendDetailId(selectedDetailId);
     }
-  }, []);
+  }, [selectedDetailId, detailIdArray]);
 
   const [entities, setEntities] = useState<IResponseEntity[]>([]);
 
@@ -46,7 +44,13 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
         setEntities(data);
       }
       if (data.length < detailIdArray.length) {
-        // TODO: remove non existing IDs from array
+        const idsFromData = data.map((d) => d.id);
+        const idsToClear = detailIdArray.filter(
+          (detailId) => !idsFromData.includes(detailId)
+        );
+        if (idsToClear.length) {
+          idsToClear.forEach((id) => removeDetailId(id));
+        }
       }
     }
   }, [data]);
