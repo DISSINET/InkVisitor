@@ -158,7 +158,7 @@ export const Suggester: React.FC<Suggester> = ({
     return (
       <List
         itemData={itemData as EntityItemData}
-        height={200}
+        height={suggestions.length > 7 ? 200 : suggestions.length * 25}
         itemCount={suggestions.length}
         itemSize={25}
         width="100%"
@@ -174,7 +174,7 @@ export const Suggester: React.FC<Suggester> = ({
     return (
       <List
         itemData={itemData as UserItemData}
-        height={200}
+        height={suggestions.length > 7 ? 200 : suggestions.length * 25}
         itemCount={suggestions.length}
         itemSize={25}
         width="100%"
