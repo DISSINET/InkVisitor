@@ -133,11 +133,10 @@ export const TerritoryTreeContextMenu: React.FC<TerritoryTreeContextMenu> = ({
                 onMenuClose();
               }}
             />
-            {(right === UserRoleMode.Admin ||
+            {((right === UserRoleMode.Admin && empty) ||
               (right === UserRoleMode.Write && empty)) && (
               <Button
                 key="delete"
-                // disabled={territoryActant}
                 tooltip="delete territory"
                 icon={<FaTrashAlt size={14} />}
                 color="danger"
