@@ -62,12 +62,7 @@ export const StyledRelativePosition = styled.div`
   max-width: 24rem;
   display: grid;
 
-  min-height: 3rem;
-  padding-bottom: ${space1};
-
-  > div {
-    padding-top: ${space1};
-  }
+  min-height: 2.8rem;
 `;
 
 export const StyledSuggestionRow = styled.div`
