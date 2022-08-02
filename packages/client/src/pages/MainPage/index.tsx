@@ -18,15 +18,19 @@ import { MemoizedStatementEditorBox } from "./containers/StatementEditorBox/Stat
 import { MemoizedStatementListBox } from "./containers/StatementsListBox/StatementListBox";
 import { MemoizedTemplateListBox } from "./containers/TemplateListBox/TemplateListBox";
 import { MemoizedTerritoryTreeBox } from "./containers/TerritoryTreeBox/TerritoryTreeBox";
-import { StyledPanelWrap } from "./MainPageStyles";
 
 type FourthPanelBoxes = "search" | "bookmarks" | "templates";
 
 interface MainPage {}
 
 const MainPage: React.FC<MainPage> = ({}) => {
-  const { detailIdArray, setStatementId, setTerritoryId, clearAllDetailIds } =
-    useSearchParams();
+  const {
+    detailIdArray,
+    setStatementId,
+    setTerritoryId,
+    clearAllDetailIds,
+    selectedDetailId,
+  } = useSearchParams();
 
   const dispatch = useAppDispatch();
 
@@ -184,7 +188,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
           >
             <MemoizedStatementListBox />
           </Box>
-          {detailIdArray.length > 0 && (
+          {(selectedDetailId || detailIdArray.length > 0) && (
             <Box
               height={contentHeight / 2 + 20}
               label="Detail"

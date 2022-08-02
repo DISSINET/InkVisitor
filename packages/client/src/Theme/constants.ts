@@ -26,7 +26,7 @@ export const separatorXPercentPosition = 42;
 // BOXES
 export const hiddenBoxHeight = 34;
 
-export const maxTabCount = 20;
+export const maxTabCount = 10;
 
 // animations
 export const springConfig: { [key: string]: {} } = {

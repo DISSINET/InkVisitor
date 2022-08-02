@@ -10,10 +10,7 @@ export const StyledBoxContent = styled.div`
 export const StyledTemplateSection = styled.div`
   position: relative;
   padding: ${({ theme }) => theme.space[6]};
-  border-bottom-width: ${({ theme }) => theme.borderWidth[1]};
-  border-bottom-color: ${({ theme }) => theme.color["gray"][500]};
   background-color: ${({ theme }) => theme.color["white"]};
-  border-bottom-style: solid;
   :hover {
     background-color: ${({ theme }) => theme.color["gray"][100]};
   }
