@@ -74,7 +74,6 @@ interface EntityDetail {
   detailId: string;
 }
 export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
-  // TODO: move fetch entity to EntityDetailBox component? => when invalid selected ID, reselect first in multitab
   const {
     status,
     data: entity,
@@ -543,7 +542,6 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
                                   (option as IOption).value as EntityClass
                                 );
                                 setShowTypeSubmit(true);
-                                // TODO: submit modal => change category mutation
                               }}
                               width={76}
                               entityDropdown
