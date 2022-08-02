@@ -35,7 +35,7 @@ import {
 
 interface TerritoryTreeNode {
   territory: ITerritory;
-  children: any;
+  children: IResponseTreeTerritoryComponent[];
   lvl: number;
   statementsCount: number;
   initExpandedNodes?: string[];
