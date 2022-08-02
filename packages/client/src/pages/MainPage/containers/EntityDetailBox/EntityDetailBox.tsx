@@ -14,32 +14,51 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
     removeDetailId,
     selectedDetailId,
     setSelectedDetailId,
+    appendDetailId,
   } = useSearchParams();
 
   useEffect(() => {
     if (!selectedDetailId && detailIdArray.length) {
       setSelectedDetailId(detailIdArray[0]);
+    } else if (selectedDetailId && !detailIdArray.includes(selectedDetailId)) {
+      appendDetailId(selectedDetailId);
     }
-  }, []);
+  }, [selectedDetailId, detailIdArray]);
 
   const [entities, setEntities] = useState<IResponseEntity[]>([]);
 
-  const {} = useQuery(
+  const { data } = useQuery(
     ["detail-tab-entities", detailIdArray],
     async () => {
-      if (detailIdArray.length > entities.length) {
-        const res = await api.entitiesSearch({ entityIds: detailIdArray });
-        setEntities(res.data);
-        return res.data;
-      }
+      const res = await api.entitiesSearch({ entityIds: detailIdArray });
+      return res.data;
     },
     {
       enabled: api.isLoggedIn() && detailIdArray.length > 0,
     }
   );
 
+  useEffect(() => {
+    if (data) {
+      if (JSON.stringify(data) !== JSON.stringify(entities)) {
+        setEntities(data);
+      }
+      if (data.length < detailIdArray.length) {
+        const idsFromData = data.map((d) => d.id);
+        const idsToClear = detailIdArray.filter(
+          (detailId) => !idsFromData.includes(detailId)
+        );
+        if (idsToClear.length) {
+          idsToClear.forEach((id) => removeDetailId(id));
+        }
+      }
+    }
+  }, [data]);
+
   const handleClose = (entityId: string) => {
-    const newEntities = entities.filter((e) => e.id !== entityId);
+    const newEntities: IResponseEntity[] = entities.filter(
+      (e) => e.id !== entityId
+    );
     setEntities(newEntities);
     removeDetailId(entityId);
   };

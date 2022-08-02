@@ -98,18 +98,24 @@ export const SearchParamsProvider = ({
 
     if (selectedDetailId === id) {
       if (index + 1 === detailIdArray.length) {
+        // ID to remove is the last one
         if (detailIdArray.length > 1) {
           setSelectedDetailId(detailIdArray[detailIdArray.length - 2]);
         } else {
-          clearAllDetailIds();
+          setSelectedDetailId("");
         }
       } else {
+        // ID to remove is NOT the last one
         setSelectedDetailId(detailIdArray[index + 1]);
       }
     }
 
-    const newIds = detailIdArray.filter((detailId) => detailId !== id);
-    setDetailId(newIds.join(arrJoinChar));
+    if (index > -1) {
+      // console.log(detailIdArray);
+      const newIds = detailIdArray.filter((detailId) => detailId !== id);
+      // console.log(newIds);
+      setDetailId(newIds.join(arrJoinChar));
+    }
   };
 
   const clearAllDetailIds = () => {
@@ -136,6 +142,8 @@ export const SearchParamsProvider = ({
     selectedDetailId
       ? params.set("selectedDetail", selectedDetailId)
       : params.delete("selectedDetail");
+
+    // console.log(detailId);
     detailId ? params.set("detail", detailId) : params.delete("detail");
 
     handleHistoryPush();
@@ -164,7 +172,7 @@ export const SearchParamsProvider = ({
 
   useEffect(() => {
     // Should be only change from the url => add state to switch of listener
-    // this condition is for redirect - don't use our lifecycle when params by set by search query
+    // this condition is for redirect - don't use our lifecycle when params are set by search query (?)
     if (!parsedParamsSearch.hash) {
       return history.listen((location: any) => {
         setDisablePush(true);

@@ -21,7 +21,7 @@ export const ContextMenuSubmitDelete: React.FC<ContextMenuSubmitDelete> = ({
   }, []);
 
   const queryClient = useQueryClient();
-  const { territoryId, setTerritoryId, detailId, removeDetailId } =
+  const { territoryId, setTerritoryId, detailIdArray, removeDetailId } =
     useSearchParams();
 
   const deleteTerritoryMutation = useMutation(
@@ -29,15 +29,14 @@ export const ContextMenuSubmitDelete: React.FC<ContextMenuSubmitDelete> = ({
     {
       onSuccess: () => {
         toast.info(`Territory [${territoryActant.label}] deleted!`);
-        queryClient.invalidateQueries("tree");
-        queryClient.invalidateQueries("statement");
-        queryClient.invalidateQueries("bookmarks");
         if (territoryId === territoryActant.id) {
           setTerritoryId("");
         }
-        if (detailId.includes(territoryActant.id)) {
-          removeDetailId(territoryActant.id);
-        }
+        removeDetailId(territoryActant.id);
+        // queryClient.invalidateQueries("detail-tab-entities");
+        queryClient.invalidateQueries("tree");
+        queryClient.invalidateQueries("statement");
+        queryClient.invalidateQueries("bookmarks");
         onClose();
       },
       onError: () => {
