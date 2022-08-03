@@ -18,7 +18,7 @@ import { OptionTypeBase, ValueType } from "react-select";
 import { DropdownAny, rootTerritoryId, wildCardChar } from "Theme/constants";
 import { Entities, EntitySuggestionI } from "types";
 
-interface EntitySuggesterI {
+interface EntitySuggester {
   categoryTypes: EntityClass[];
   onSelected: Function;
   placeholder?: string;
@@ -32,7 +32,7 @@ interface EntitySuggesterI {
   filterEditorRights?: boolean;
 }
 
-export const EntitySuggester: React.FC<EntitySuggesterI> = ({
+export const EntitySuggester: React.FC<EntitySuggester> = ({
   categoryTypes,
   onSelected,
   placeholder = "",
