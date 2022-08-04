@@ -59,8 +59,14 @@ export const StatementListBox: React.FC = () => {
     (state) => state.statementList.rowsExpanded
   );
 
-  const { territoryId, setTerritoryId, statementId, setStatementId } =
-    useSearchParams();
+  const {
+    territoryId,
+    setTerritoryId,
+    statementId,
+    setStatementId,
+    detailIdArray,
+    removeDetailId,
+  } = useSearchParams();
 
   const [showSubmit, setShowSubmit] = useState(false);
   const [statementToDelete, setStatementToDelete] = useState<IStatement>();
@@ -135,11 +141,14 @@ export const StatementListBox: React.FC = () => {
       await api.entityDelete(sId);
     },
     {
-      onSuccess: () => {
+      onSuccess: (data, sId) => {
         toast.info(`Statement removed!`);
         queryClient.invalidateQueries("territory").then(() => {
           setStatementId("");
         });
+        if (detailIdArray.includes(sId)) {
+          removeDetailId(sId);
+        }
       },
     }
   );
