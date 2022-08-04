@@ -1,3 +1,4 @@
+import { EntityClass, UserRoleMode } from "@shared/enums";
 import {
   IEntity,
   IOption,
@@ -6,8 +7,36 @@ import {
   IStatementActant,
   IStatementAction,
 } from "@shared/types";
+import api from "api";
+import {
+  Button,
+  ButtonGroup,
+  Dropdown,
+  Input,
+  Loader,
+  Modal,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+  ModalInputForm,
+  MultiInput,
+} from "components";
+import { EntitySuggester, EntityTag } from "components/advanced";
+import { CProp, CStatementActant, CStatementAction } from "constructors";
+import { useSearchParams } from "hooks";
 import React, { useEffect, useMemo, useState } from "react";
+import { FaUnlink } from "react-icons/fa";
+import { UseMutationResult, useQuery, useQueryClient } from "react-query";
+import { toast } from "react-toastify";
 import { excludedSuggesterEntities } from "Theme/constants";
+import { DropdownItem } from "types";
+import { AuditTable } from "../../AuditTable/AuditTable";
+import { StyledContent } from "../../EntityBookmarkBox/EntityBookmarkBoxStyles";
+import { EntityReferenceTable } from "../../EntityReferenceTable/EntityReferenceTable";
+import { JSONExplorer } from "../../JSONExplorer/JSONExplorer";
+import { StatementListBreadcrumbItem } from "../../StatementsListBox/StatementListHeader/StatementListBreadcrumbItem/StatementListBreadcrumbItem";
+import { StatementEditorActantTable } from "../StatementEditorActantTable/StatementEditorActantTable";
+import { StatementEditorActionTable } from "../StatementEditorActionTable/StatementEditorActionTable";
 import {
   StyledBreadcrumbWrap,
   StyledEditorActantTableWrapper,
@@ -26,35 +55,6 @@ import {
   StyledTagsList,
   StyledTagsListItem,
 } from "./../StatementEditorBoxStyles";
-import {
-  Button,
-  ButtonGroup,
-  Dropdown,
-  Input,
-  Loader,
-  Modal,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
-  ModalInputForm,
-  MultiInput,
-} from "components";
-import { EntitySuggester, EntityTag } from "components/advanced";
-import { EntityClass, Order, UserRoleMode } from "@shared/enums";
-import { FaUnlink } from "react-icons/fa";
-import { toast } from "react-toastify";
-import { AuditTable } from "../../AuditTable/AuditTable";
-import { StyledContent } from "../../EntityBookmarkBox/EntityBookmarkBoxStyles";
-import { EntityReferenceTable } from "../../EntityReferenceTable/EntityReferenceTable";
-import { JSONExplorer } from "../../JSONExplorer/JSONExplorer";
-import { StatementListBreadcrumbItem } from "../../StatementsListBox/StatementListHeader/StatementListBreadcrumbItem/StatementListBreadcrumbItem";
-import { StatementEditorActantTable } from "../StatementEditorActantTable/StatementEditorActantTable";
-import { StatementEditorActionTable } from "../StatementEditorActionTable/StatementEditorActionTable";
-import { useSearchParams } from "hooks";
-import { useMutation, useQuery, useQueryClient } from "react-query";
-import api from "api";
-import { CStatementAction, CStatementActant, CProp } from "constructors";
-import { DropdownItem } from "types";
 
 const classesActants = [
   EntityClass.Statement,
@@ -84,10 +84,22 @@ const classesTags = [
 
 interface StatementEditor {
   statement: IResponseStatement;
+  updateStatementMutation: UseMutationResult<void, unknown, object, unknown>;
+  updateStatementDataMutation: UseMutationResult<
+    void,
+    unknown,
+    object,
+    unknown
+  >;
+  moveStatementMutation: UseMutationResult<void, unknown, string, unknown>;
 }
-export const StatementEditor: React.FC<StatementEditor> = ({ statement }) => {
-  const { statementId, territoryId, setTerritoryId, selectedDetailId } =
-    useSearchParams();
+export const StatementEditor: React.FC<StatementEditor> = ({
+  statement,
+  updateStatementMutation,
+  updateStatementDataMutation,
+  moveStatementMutation,
+}) => {
+  const { statementId, territoryId, setTerritoryId } = useSearchParams();
 
   const queryClient = useQueryClient();
 
@@ -462,61 +474,6 @@ export const StatementEditor: React.FC<StatementEditor> = ({ statement }) => {
     }
   };
 
-  // MUTATIONS
-  const updateStatementMutation = useMutation(
-    async (changes: object) => {
-      await api.entityUpdate(statementId, changes);
-    },
-    {
-      onSuccess: (data, variables: any) => {
-        if (selectedDetailId === statementId) {
-          queryClient.invalidateQueries(["entity"]);
-        }
-        if (statement && statement.isTemplate) {
-          queryClient.invalidateQueries(["templates"]);
-        }
-        if (variables.label !== undefined) {
-          queryClient.invalidateQueries("detail-tab-entities");
-        }
-        queryClient.invalidateQueries(["statement"]);
-        queryClient.invalidateQueries(["territory"]);
-      },
-    }
-  );
-  const updateStatementDataMutation = useMutation(
-    async (changes: object) => {
-      await api.entityUpdate(statementId, {
-        data: changes,
-      });
-    },
-    {
-      onSuccess: (data, variables: any) => {
-        queryClient.invalidateQueries(["entity"]);
-        queryClient.invalidateQueries(["statement"]);
-        queryClient.invalidateQueries(["territory"]);
-        if (variables.text !== undefined) {
-          queryClient.invalidateQueries("detail-tab-entities");
-        }
-      },
-    }
-  );
-
-  const moveStatementMutation = useMutation(
-    async (newTerritoryId: string) => {
-      await api.entityUpdate(statementId, {
-        data: { territory: { id: newTerritoryId, order: Order.First } },
-      });
-    },
-    {
-      onSuccess: (data, variables) => {
-        setTerritoryId(variables);
-        queryClient.invalidateQueries("statement");
-        queryClient.invalidateQueries("tree");
-        queryClient.invalidateQueries("territory");
-      },
-    }
-  );
-
   return (
     <>
       <div style={{ marginBottom: "4rem" }} key={statement.id}>
@@ -827,13 +784,6 @@ export const StatementEditor: React.FC<StatementEditor> = ({ statement }) => {
           </ButtonGroup>
         </ModalFooter>
       </Modal>
-
-      <Loader
-        show={
-          updateStatementMutation.isLoading ||
-          updateStatementDataMutation.isLoading
-        }
-      />
     </>
   );
 };
