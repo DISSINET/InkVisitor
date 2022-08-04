@@ -33,7 +33,7 @@ export const ContextMenuSubmitDelete: React.FC<ContextMenuSubmitDelete> = ({
           setTerritoryId("");
         }
         removeDetailId(territoryActant.id);
-        // queryClient.invalidateQueries("detail-tab-entities");
+        queryClient.invalidateQueries("detail-tab-entities");
         queryClient.invalidateQueries("tree");
         queryClient.invalidateQueries("statement");
         queryClient.invalidateQueries("bookmarks");

@@ -231,7 +231,9 @@ export const StatementEditorBox: React.FC = () => {
 
   // refetch audit when statement changes
   useEffect(() => {
-    queryClient.invalidateQueries("audit");
+    if (statement) {
+      queryClient.invalidateQueries("audit");
+    }
   }, [statement]);
 
   // stores territory id

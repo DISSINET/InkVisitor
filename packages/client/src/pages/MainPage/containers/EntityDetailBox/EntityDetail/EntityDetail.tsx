@@ -75,6 +75,16 @@ interface EntityDetail {
 }
 export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
   const {
+    statementId,
+    setStatementId,
+    territoryId,
+    setTerritoryId,
+    removeDetailId,
+    setSelectedDetailId,
+    detailIdArray,
+    selectedDetailId,
+  } = useSearchParams();
+  const {
     status,
     data: entity,
     error,
@@ -87,16 +97,6 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
     },
     { enabled: !!detailId && api.isLoggedIn() }
   );
-
-  const {
-    statementId,
-    setStatementId,
-    territoryId,
-    setTerritoryId,
-    removeDetailId,
-    setSelectedDetailId,
-    detailIdArray,
-  } = useSearchParams();
 
   const [createTemplateModal, setCreateTemplateModal] =
     useState<boolean>(false);
@@ -136,7 +136,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
     error: templateError,
     isFetching: isFetchingTemplates,
   } = useQuery(
-    ["entity-templates", "templates", entity?.class, detailId],
+    ["entity-templates", "templates", entity?.class],
     async () => {
       const res = await api.entitiesSearch({
         onlyTemplates: true,
@@ -274,7 +274,6 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
         toast.info(`Entity removed!`);
 
         // hide selected territory if T removed
-
         if (
           entity &&
           entity.class == EntityClass.Territory &&
@@ -297,6 +296,8 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
         }
 
         queryClient.invalidateQueries("tree");
+
+        removeDetailId(entityId);
       },
     }
   );
@@ -1307,7 +1308,6 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
         submitLabel="Remove"
         onSubmit={() => {
           deleteEntityMutation.mutate(detailId);
-          removeDetailId(detailId);
         }}
         onCancel={() => setShowRemoveSubmit(false)}
         show={showRemoveSubmit}
