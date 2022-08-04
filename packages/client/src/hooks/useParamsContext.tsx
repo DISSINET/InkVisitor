@@ -96,31 +96,32 @@ export const SearchParamsProvider = ({
     const detailIdArray = getDetailIdArray();
     const index = detailIdArray.indexOf(id);
 
+    const newIds = detailIdArray
+      .filter((detailId) => detailId !== id)
+      .join(arrJoinChar);
+
     if (selectedDetailId === id) {
       if (index + 1 === detailIdArray.length) {
         // ID to remove is the last one
         if (detailIdArray.length > 1) {
           setSelectedDetailId(detailIdArray[detailIdArray.length - 2]);
+          setDetailId(newIds);
         } else {
-          setSelectedDetailId("");
+          clearAllDetailIds();
         }
       } else {
         // ID to remove is NOT the last one
         setSelectedDetailId(detailIdArray[index + 1]);
+        setDetailId(newIds);
       }
-    }
-
-    if (index > -1) {
-      // console.log(detailIdArray);
-      const newIds = detailIdArray.filter((detailId) => detailId !== id);
-      // console.log(newIds);
-      setDetailId(newIds.join(arrJoinChar));
+    } else {
+      setDetailId(newIds);
     }
   };
 
   const clearAllDetailIds = () => {
-    setDetailId("");
     setSelectedDetailId("");
+    setDetailId("");
   };
 
   const handleHistoryPush = () => {
@@ -139,11 +140,10 @@ export const SearchParamsProvider = ({
     statementId
       ? params.set("statement", statementId)
       : params.delete("statement");
+
     selectedDetailId
       ? params.set("selectedDetail", selectedDetailId)
       : params.delete("selectedDetail");
-
-    // console.log(detailId);
     detailId ? params.set("detail", detailId) : params.delete("detail");
 
     handleHistoryPush();
