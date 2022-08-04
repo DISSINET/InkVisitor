@@ -111,9 +111,7 @@ export const SearchParamsProvider = ({
     }
 
     if (index > -1) {
-      // console.log(detailIdArray);
       const newIds = detailIdArray.filter((detailId) => detailId !== id);
-      // console.log(newIds);
       setDetailId(newIds.join(arrJoinChar));
     }
   };

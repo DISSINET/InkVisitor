@@ -18,12 +18,12 @@ import { toast } from "react-toastify";
 import { StyledModalContent } from "../TemplateListBoxStyles";
 
 interface TemplateListRemoveModal {
-  removeEntityId: string | false;
+  removeEntityId: string;
   setRemoveEntityId: (value: React.SetStateAction<string | false>) => void;
   entityToRemove: false | IEntity;
 }
 export const TemplateListRemoveModal: React.FC<TemplateListRemoveModal> = ({
-  removeEntityId = false,
+  removeEntityId,
   setRemoveEntityId,
   entityToRemove,
 }) => {
@@ -41,7 +41,7 @@ export const TemplateListRemoveModal: React.FC<TemplateListRemoveModal> = ({
     async (entityId: string) => await api.entityDelete(entityId),
     {
       onSuccess: (data, variables) => {
-        if (removeEntityId && detailIdArray.includes(removeEntityId)) {
+        if (detailIdArray.includes(removeEntityId)) {
           removeDetailId(removeEntityId);
         }
         entityToRemove &&
@@ -67,9 +67,7 @@ export const TemplateListRemoveModal: React.FC<TemplateListRemoveModal> = ({
   );
 
   const handleRemoveTemplateAccept = () => {
-    if (removeEntityId) {
-      templateRemoveMutation.mutate(removeEntityId);
-    }
+    templateRemoveMutation.mutate(removeEntityId);
   };
 
   return (
