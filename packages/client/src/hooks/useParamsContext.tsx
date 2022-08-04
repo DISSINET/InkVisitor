@@ -107,8 +107,6 @@ export const SearchParamsProvider = ({
           setSelectedDetailId(detailIdArray[detailIdArray.length - 2]);
           setDetailId(newIds);
         } else {
-          // setSelectedDetailId("");
-          // setDetailId(newIds);
           clearAllDetailIds();
         }
       } else {

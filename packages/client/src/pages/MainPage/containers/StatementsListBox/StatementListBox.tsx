@@ -143,13 +143,13 @@ export const StatementListBox: React.FC = () => {
     {
       onSuccess: (data, sId) => {
         toast.info(`Statement removed!`);
-        queryClient.invalidateQueries("territory").then(() => {
-          setStatementId("");
-        });
         if (detailIdArray.includes(sId)) {
           removeDetailId(sId);
           queryClient.invalidateQueries("detail-tab-entities");
         }
+        queryClient.invalidateQueries("territory").then(() => {
+          setStatementId("");
+        });
       },
     }
   );
