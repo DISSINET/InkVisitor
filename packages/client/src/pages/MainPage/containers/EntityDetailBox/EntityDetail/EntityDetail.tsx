@@ -190,6 +190,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
 
   // refetch audit when statement changes
   useEffect(() => {
+    // FIX: move to specific changes
     queryClient.invalidateQueries("audit");
   }, [entity]);
 
