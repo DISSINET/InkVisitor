@@ -148,6 +148,7 @@ export const StatementListBox: React.FC = () => {
         });
         if (detailIdArray.includes(sId)) {
           removeDetailId(sId);
+          queryClient.invalidateQueries("detail-tab-entities");
         }
       },
     }

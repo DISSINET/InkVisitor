@@ -43,6 +43,7 @@ export const TemplateListRemoveModal: React.FC<TemplateListRemoveModal> = ({
       onSuccess: (data, variables) => {
         if (detailIdArray.includes(removeEntityId)) {
           removeDetailId(removeEntityId);
+          queryClient.invalidateQueries("detail-tab-entities");
         }
         entityToRemove &&
           toast.warning(

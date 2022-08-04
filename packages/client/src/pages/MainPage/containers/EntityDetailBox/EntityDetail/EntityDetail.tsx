@@ -269,12 +269,12 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
     (entityId: string) => api.entityDelete(entityId),
     {
       onSuccess: async (data, entityId) => {
+        removeDetailId(entityId);
         setShowRemoveSubmit(false);
 
         toast.info(`Entity removed!`);
 
         // hide selected territory if T removed
-
         if (
           entity &&
           entity.class == EntityClass.Territory &&
@@ -1307,7 +1307,6 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
         submitLabel="Remove"
         onSubmit={() => {
           deleteEntityMutation.mutate(detailId);
-          removeDetailId(detailId);
         }}
         onCancel={() => setShowRemoveSubmit(false)}
         show={showRemoveSubmit}
