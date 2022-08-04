@@ -104,9 +104,11 @@ export const SearchParamsProvider = ({
       if (index + 1 === detailIdArray.length) {
         // ID to remove is the last one
         if (detailIdArray.length > 1) {
+          // More than one tab opened
           setSelectedDetailId(detailIdArray[detailIdArray.length - 2]);
           setDetailId(newIds);
         } else {
+          // Only one tab opened
           clearAllDetailIds();
         }
       } else {
