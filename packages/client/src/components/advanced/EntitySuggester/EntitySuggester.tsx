@@ -21,7 +21,7 @@ import { Entities, EntityDragItem, EntitySuggestionI } from "types";
 
 interface EntitySuggester {
   categoryTypes: ExtendedEntityClass[];
-  onSelected: (id: string, isTemplate?: boolean) => void;
+  onSelected: (id: string, isTemplate: boolean) => void;
   placeholder?: string;
   disableCreate?: boolean;
   disableWildCard?: boolean;
@@ -150,7 +150,7 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
     async (newActant: IEntity) => await api.entityCreate(newActant),
     {
       onSuccess: (data, variables) => {
-        onSelected(variables.id);
+        onSelected(variables.id, false);
         handleClean();
         if (openDetailOnCreate) {
           appendDetailId(variables.id);

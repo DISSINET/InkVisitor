@@ -1,9 +1,10 @@
-import { EntityClass, UserRoleMode } from "@shared/enums";
+import { EntityClass, UserRole, UserRoleMode } from "@shared/enums";
 import {
   IEntity,
   IOption,
   IReference,
   IResponseStatement,
+  IStatement,
   IStatementActant,
   IStatementAction,
 } from "@shared/types";
@@ -22,7 +23,13 @@ import {
   MultiInput,
 } from "components";
 import { EntitySuggester, EntityTag } from "components/advanced";
-import { CProp, CStatementActant, CStatementAction } from "constructors";
+import {
+  CProp,
+  CStatementActant,
+  CStatementAction,
+  DEntity,
+  DStatement,
+} from "constructors";
 import { useSearchParams } from "hooks";
 import React, { useEffect, useMemo, useState } from "react";
 import { FaUnlink } from "react-icons/fa";
@@ -266,19 +273,58 @@ export const StatementEditor: React.FC<StatementEditor> = ({
     );
   }, [statement]);
 
-  // actions
-  const addAction = (newActionId: string) => {
-    // if (entity.isTemplate && !S.isTemplate) => DTemplate to entity => assign new entity ID to actions
-    if (!statement.isTemplate) {
-      // create new entity from template
+  const {
+    status: allTemplatesStatus,
+    data: allTemplates,
+    error: allTemplatesError,
+    isFetching: allTemplatesIsFetching,
+  } = useQuery(
+    ["templates"],
+    async () => {
+      const res = await api.entitiesSearch({ onlyTemplates: true });
+      return res.data;
+    },
+    {
+      enabled: api.isLoggedIn(),
+      initialData: [],
     }
-    const newStatementAction = CStatementAction(newActionId);
+  );
 
-    const newData = {
-      actions: [...statement.data.actions, newStatementAction],
-    };
+  // actions
+  const addAction = (newActionId: string, isTemplate: boolean) => {
+    if (isTemplate && !statement.isTemplate) {
+      // create new entity from template
+      const userRole = localStorage.getItem("userrole") as UserRole;
+      const templateEntity = allTemplates?.find(
+        (template) => template.id === newActionId
+      );
+      if (templateEntity) {
+        const newEntity =
+          templateEntity.class === EntityClass.Statement
+            ? DStatement(templateEntity as IStatement, userRole)
+            : DEntity(templateEntity as IEntity, userRole);
 
-    updateStatementDataMutation.mutate(newData);
+        newEntity.isTemplate = false;
+        newEntity.usedTemplate = "";
+
+        // TODO: move to mutation
+        api.entityCreate(newEntity);
+
+        const newStatementAction = CStatementAction(newEntity.id);
+        const newData = {
+          actions: [...statement.data.actions, newStatementAction],
+        };
+        updateStatementDataMutation.mutate(newData);
+      }
+    } else {
+      const newStatementAction = CStatementAction(newActionId);
+
+      const newData = {
+        actions: [...statement.data.actions, newStatementAction],
+      };
+
+      updateStatementDataMutation.mutate(newData);
+    }
   };
 
   const addActant = (newStatementActantId: string) => {
@@ -591,8 +637,8 @@ export const StatementEditor: React.FC<StatementEditor> = ({
               <EntitySuggester
                 territoryActants={territoryActants}
                 openDetailOnCreate
-                onSelected={(newSelectedId: string) => {
-                  addAction(newSelectedId);
+                onSelected={(newSelectedId: string, isTemplate: boolean) => {
+                  addAction(newSelectedId, isTemplate);
                 }}
                 categoryTypes={[EntityClass.Action]}
                 excludedEntities={excludedSuggesterEntities}

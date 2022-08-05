@@ -39,7 +39,7 @@ import { TooltipBooleanRow } from "./TooltipBooleanRow/TooltipBooleanRow";
 
 interface StatementEditorAttributes {
   modalTitle: string;
-  actant?: IEntity;
+  entity?: IEntity;
   data: AttributeData;
   handleUpdate: (
     data: AttributeData | { actant: string } | { action: string }
@@ -58,7 +58,7 @@ interface StatementEditorAttributes {
 
 const AttributesEditor: React.FC<StatementEditorAttributes> = ({
   modalTitle,
-  actant,
+  entity,
   data,
   handleUpdate,
   updateActantId = () => {},
@@ -191,7 +191,7 @@ const AttributesEditor: React.FC<StatementEditorAttributes> = ({
         />
         <ModalContent>
           <StyledContentWrap
-            color={actant ? Entities[actant.class].color : undefined}
+            color={entity ? Entities[entity.class].color : undefined}
           >
             <AttributesForm
               modalData={modalData}
@@ -201,10 +201,10 @@ const AttributesEditor: React.FC<StatementEditorAttributes> = ({
                 setModalData(newModalData);
               }}
             />
-            {actant ? (
+            {entity ? (
               <StyledEntityWrap>
                 <EntityTag
-                  entity={actant}
+                  entity={entity}
                   fullWidth
                   button={
                     userCanEdit && (
