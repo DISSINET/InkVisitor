@@ -21,7 +21,7 @@ import { Entities, EntityDragItem, EntitySuggestionI } from "types";
 
 interface EntitySuggester {
   categoryTypes: ExtendedEntityClass[];
-  onSelected: Function;
+  onSelected: (id: string, isTemplate?: boolean) => void;
   placeholder?: string;
   disableCreate?: boolean;
   disableWildCard?: boolean;
@@ -197,13 +197,13 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
   };
 
   const handlePick = (newPicked: EntitySuggestionI) => {
-    onSelected(newPicked.id);
+    onSelected(newPicked.id, newPicked.isTemplate);
     handleClean();
   };
   const handleDropped = (newDropped: EntityDragItem) => {
     const droppedCategory = newDropped.category;
     if (categoryTypes.includes(droppedCategory)) {
-      onSelected(newDropped.id);
+      onSelected(newDropped.id, newDropped.isTemplate);
     }
     handleClean();
   };

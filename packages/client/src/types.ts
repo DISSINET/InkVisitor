@@ -298,9 +298,10 @@ export interface EntitySuggestionI {
   detail: string;
   ltype: string;
   status: EntityStatus;
-  category: string;
+  category: EntityClass;
   color: string;
   icons?: React.ReactNode[];
+  isTemplate: boolean;
 }
 export interface UserSuggestionI {
   id: string;

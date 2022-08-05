@@ -1,12 +1,11 @@
 import { IResponseUser } from "@shared/types";
 import api from "api";
 import { Suggester } from "components";
-import { UserSuggestionI } from "components/Suggester/Suggester";
 import { useDebounce } from "hooks";
 import React, { useState } from "react";
-import { DragObjectWithType } from "react-dnd";
 import { useQuery, useQueryClient } from "react-query";
 import { OptionTypeBase, ValueType } from "react-select";
+import { UserSuggestionI } from "types";
 
 interface UserSuggester {
   placeholder?: string;

@@ -222,7 +222,7 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
                 <div>
                   <EntitySuggester
                     categoryTypes={[EntityClass.Territory]}
-                    onSelected={(selected: any) =>
+                    onSelected={(selected: string) =>
                       handleChange("defaultTerritory", selected)
                     }
                     inputWidth={104}

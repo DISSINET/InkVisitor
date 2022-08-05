@@ -109,6 +109,7 @@ const UserRow: React.FC<UserRow> = ({ data, index, style }) => {
             fullWidth
             propId={suggestion.id}
             label={suggestion.label}
+            // TODO: create type for UserCategory
             category={"U"}
           />
         </StyledTagWrapper>
