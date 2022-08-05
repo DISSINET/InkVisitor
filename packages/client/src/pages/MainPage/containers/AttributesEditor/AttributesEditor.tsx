@@ -204,7 +204,7 @@ const AttributesEditor: React.FC<StatementEditorAttributes> = ({
             {actant ? (
               <StyledEntityWrap>
                 <EntityTag
-                  actant={actant}
+                  entity={actant}
                   fullWidth
                   button={
                     userCanEdit && (

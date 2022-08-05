@@ -61,7 +61,7 @@ export const EntityDetailHeaderRow: React.FC<EntityDetailHeaderRow> = ({
     <StyledActantHeaderRow>
       <StyledTagWrap>
         <EntityTag
-          actant={entity}
+          entity={entity}
           propId={entity.id}
           tooltipText={entity.data.text}
           fullWidth

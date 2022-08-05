@@ -637,7 +637,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
                           </StyledDetailContentRowLabel>
                           <StyledDetailContentRowValue>
                             <EntityTag
-                              actant={entity.entities[entity.data.parent.id]}
+                              entity={entity.entities[entity.data.parent.id]}
                               disableDoubleClick={
                                 entity.data.parent.id === rootTerritoryId
                               }
@@ -664,7 +664,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
                           </StyledDetailContentRowLabel>
                           <StyledDetailContentRowValue>
                             <EntityTag
-                              actant={entity.entities[entity.data.territory.id]}
+                              entity={entity.entities[entity.data.territory.id]}
                             />
                           </StyledDetailContentRowValue>
                         </StyledDetailContentRow>
@@ -1128,7 +1128,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
                           </StyledDetailContentRowLabel>
                           <StyledDetailContentRowValue>
                             <EntityTag
-                              actant={entity.entities[entity.usedTemplate]}
+                              entity={entity.entities[entity.usedTemplate]}
                             />
                           </StyledDetailContentRowValue>
                         </StyledDetailContentRow>
@@ -1240,7 +1240,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
                   <StyledDetailSectionEntityList>
                     {entity.usedAsTemplate.map((entityId) => (
                       <React.Fragment key={entityId}>
-                        <EntityTag actant={entity.entities[entityId]} />
+                        <EntityTag entity={entity.entities[entityId]} />
                       </React.Fragment>
                     ))}
                   </StyledDetailSectionEntityList>

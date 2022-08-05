@@ -2,6 +2,7 @@ import {
   EntityClass,
   EntityExtension,
   EntityStatus,
+  ExtendedEntityClass,
   UserRole,
   UserRoleMode,
 } from "@shared/enums";
@@ -16,10 +17,10 @@ import { FaHome } from "react-icons/fa";
 import { useMutation, useQuery } from "react-query";
 import { OptionTypeBase, ValueType } from "react-select";
 import { DropdownAny, rootTerritoryId, wildCardChar } from "Theme/constants";
-import { Entities, EntitySuggestionI } from "types";
+import { Entities, EntityDragItem, EntitySuggestionI } from "types";
 
 interface EntitySuggester {
-  categoryTypes: EntityClass[];
+  categoryTypes: ExtendedEntityClass[];
   onSelected: Function;
   placeholder?: string;
   disableCreate?: boolean;
@@ -199,7 +200,7 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
     onSelected(newPicked.id);
     handleClean();
   };
-  const handleDropped = (newDropped: any) => {
+  const handleDropped = (newDropped: EntityDragItem) => {
     const droppedCategory = newDropped.category;
     if (categoryTypes.includes(droppedCategory)) {
       onSelected(newDropped.id);
@@ -249,7 +250,7 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
       onPick={(newPicked: EntitySuggestionI) => {
         handlePick(newPicked);
       }}
-      onDrop={(newDropped: DragObjectWithType) => {
+      onDrop={(newDropped: EntityDragItem) => {
         handleDropped(newDropped);
       }}
       onHover={(newHoverred: DragObjectWithType) => {

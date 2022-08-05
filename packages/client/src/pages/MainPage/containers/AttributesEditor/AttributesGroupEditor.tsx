@@ -312,7 +312,7 @@ export const AttributesGroupEditor: React.FC<AttributesGroupEditor> = ({
               {propTypeActant ? (
                 <StyledEntityWrap>
                   <EntityTag
-                    actant={propTypeActant}
+                    entity={propTypeActant}
                     fullWidth
                     button={
                       <Button
@@ -372,7 +372,7 @@ export const AttributesGroupEditor: React.FC<AttributesGroupEditor> = ({
               {propValueActant ? (
                 <StyledEntityWrap>
                   <EntityTag
-                    actant={propValueActant}
+                    entity={propValueActant}
                     fullWidth
                     tooltipPosition="left center"
                     button={

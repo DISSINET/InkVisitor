@@ -11,6 +11,7 @@ import {
   Operator,
   Partitivity,
   Virtuality,
+  ExtendedEntityClass,
 } from "@shared/enums";
 
 export const Colors = [
@@ -137,6 +138,10 @@ export type DragItem = {
   id: string;
   type: string;
 };
+export interface EntityDragItem extends DragItem {
+  category: ExtendedEntityClass;
+  isTemplate: boolean;
+}
 export interface DraggedTerritoryItem {
   id?: string;
   parentId?: string;

@@ -111,7 +111,7 @@ export const StatementEditorActionTableRow: React.FC<
     return action ? (
       <EntityTag
         // fullWidth
-        actant={action}
+        entity={action}
         button={
           userCanEdit && (
             <Button
@@ -159,7 +159,7 @@ export const StatementEditorActionTableRow: React.FC<
             modalOpen={modalOpen}
             setModalOpen={setModalOpen}
             modalTitle={`Action attribute`}
-            actant={action}
+            entity={action}
             disabledAllAttributes={!userCanEdit}
             data={{
               elvl: sAction.elvl,

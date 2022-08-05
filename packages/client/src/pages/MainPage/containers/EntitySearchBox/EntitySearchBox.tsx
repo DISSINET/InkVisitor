@@ -253,7 +253,7 @@ export const EntitySearchBox: React.FC = () => {
           </StyledTagLoaderWrap>
           {cooccurrenceEntity && (
             <EntityTag
-              actant={cooccurrenceEntity}
+              entity={cooccurrenceEntity}
               tooltipPosition={"left center"}
               button={
                 <Button

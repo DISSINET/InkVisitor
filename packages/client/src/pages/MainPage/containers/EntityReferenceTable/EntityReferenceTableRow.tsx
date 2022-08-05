@@ -42,7 +42,7 @@ export const EntityReferenceTableRow: React.FC<EntityReferenceTableRow> = ({
         {resource ? (
           <StyledTagWrapper>
             <EntityTag
-              actant={resource}
+              entity={resource}
               fullWidth
               button={
                 !disabled && (
@@ -86,7 +86,7 @@ export const EntityReferenceTableRow: React.FC<EntityReferenceTableRow> = ({
         {value ? (
           <StyledTagWrapper>
             <EntityTag
-              actant={value}
+              entity={value}
               fullWidth
               button={
                 !disabled && (

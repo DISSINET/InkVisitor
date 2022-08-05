@@ -156,7 +156,7 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
           </div>
           {propTypeEntity ? (
             <EntityTag
-              actant={propTypeEntity}
+              entity={propTypeEntity}
               fullWidth
               tooltipPosition="right center"
               button={
@@ -213,7 +213,7 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
         <StyledPropLineColumn isTag={propValueEntity ? true : false}>
           {propValueEntity ? (
             <EntityTag
-              actant={propValueEntity}
+              entity={propValueEntity}
               fullWidth
               tooltipPosition="right center"
               button={

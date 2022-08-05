@@ -134,7 +134,7 @@ export const StatementEditorActantTableRow: React.FC<
     return actant ? (
       <StyledTagWrapper>
         <EntityTag
-          actant={actant}
+          entity={actant}
           // fullWidth
           button={
             userCanEdit && (
@@ -241,7 +241,7 @@ export const StatementEditorActantTableRow: React.FC<
             modalOpen={modalOpen}
             setModalOpen={setModalOpen}
             modalTitle={`Actant involvement`}
-            actant={actant}
+            entity={actant}
             disabledAllAttributes={!userCanEdit}
             userCanEdit={userCanEdit}
             data={{

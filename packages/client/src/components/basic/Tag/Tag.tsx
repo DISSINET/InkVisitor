@@ -1,3 +1,4 @@
+import { EntityExtension, ExtendedEntityClass } from "@shared/enums";
 import { Tooltip } from "components";
 import { useSearchParams } from "hooks";
 import React, { ReactNode, useEffect, useMemo, useRef } from "react";
@@ -10,7 +11,12 @@ import {
 import { PopupPosition } from "reactjs-popup/dist/types";
 import { setDraggedTerritory } from "redux/features/territoryTree/draggedTerritorySlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
-import { DraggedTerritoryItem, DragItem, Entities, ItemTypes } from "types";
+import {
+  DraggedTerritoryItem,
+  Entities,
+  EntityDragItem,
+  ItemTypes,
+} from "types";
 import { dndHoverFn } from "utils";
 import {
   ButtonWrapper,
@@ -27,7 +33,7 @@ interface TagProps {
   labelItalic?: boolean;
   tooltipDetail?: string;
   tooltipText?: string;
-  category?: string;
+  category?: ExtendedEntityClass;
   status?: string;
   ltype?: string;
   mode?: "selected" | "disabled" | "invalid" | false;
@@ -42,7 +48,7 @@ interface TagProps {
   disableDoubleClick?: boolean;
   disableDrag?: boolean;
   tooltipPosition?: PopupPosition | PopupPosition[];
-  updateOrderFn?: (item: DragItem) => void;
+  updateOrderFn?: (item: EntityDragItem) => void;
   lvl?: number;
   statementsCount?: number;
   isFavorited?: boolean;
@@ -57,7 +63,7 @@ export const Tag: React.FC<TagProps> = ({
   labelItalic = false,
   tooltipDetail,
   tooltipText,
-  category = "X",
+  category = EntityExtension.Empty,
   status = "1",
   ltype = "1",
   mode = false,
@@ -88,7 +94,7 @@ export const Tag: React.FC<TagProps> = ({
 
   const [, drop] = useDrop({
     accept: ItemTypes.TAG,
-    hover(item: DragItem, monitor: DropTargetMonitor) {
+    hover(item: EntityDragItem, monitor: DropTargetMonitor) {
       if (moveFn && draggedTerritory && draggedTerritory.lvl === lvl) {
         dndHoverFn(item, index, monitor, ref, moveFn);
       }
@@ -96,16 +102,16 @@ export const Tag: React.FC<TagProps> = ({
   });
 
   const canDrag = useMemo(
-    () => category !== "X" && !disableDrag,
+    () => category !== EntityExtension.Empty && !disableDrag,
     [category, disableDrag]
   );
 
   const [{ isDragging }, drag] = useDrag({
-    item: { type: ItemTypes.TAG, id: propId, index, category },
+    item: { type: ItemTypes.TAG, id: propId, index, category, isTemplate },
     collect: (monitor: DragSourceMonitor) => ({
       isDragging: monitor.isDragging(),
     }),
-    end: (item: DragItem | undefined, monitor: DragSourceMonitor) => {
+    end: (item: EntityDragItem | undefined, monitor: DragSourceMonitor) => {
       if (item && item.index !== index) updateOrderFn(item);
     },
     canDrag: canDrag,
