@@ -18,6 +18,7 @@ export enum EntityExtension {
 
 export enum RelationType {
   Superclass = "SC",
+  SuperordinateLocation = "SOL",
   Synonym = "S",
   Antonym = "A",
   Troponym = "T",
@@ -25,8 +26,8 @@ export enum RelationType {
   SubjectActantReciprocal = "SAR",
   ActionEventEquivalent = "AEE",
   Related = "RE",
-  Class = "C",
-  Identity = "I",
+  Classification = "C",
+  Identityfication = "I",
 }
 
 export type ExtendedEntityClass = EntityClass | EntityExtension;

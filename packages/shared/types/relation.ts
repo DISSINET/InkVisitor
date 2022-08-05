@@ -1,4 +1,5 @@
 import {
+  Certainty,
   EntityClass,
   Logic,
   Mood,
@@ -10,10 +11,10 @@ import {
 export interface IRelation {
   id: string;
   type: RelationType;
-  entities: [string, string];
+  entities: [];
 }
 
-export interface IRelationSuperClassRelation extends IRelation {
+export interface IRelationSuperClassification extends IRelation {
   type: RelationType.Superclass;
 }
 export interface IRelationSynonym extends IRelation {
@@ -37,120 +38,146 @@ export interface IRelationActionEventEquivalent extends IRelation {
 export interface IRelationRelated extends IRelation {
   type: RelationType.Related;
 }
-export interface IRelationClass extends IRelation {
-  type: RelationType.Class;
-  statement?: string;
+export interface IRelationClassification extends IRelation {
+  type: RelationType.Classification;
 }
-export interface IRelationIdentity extends IRelation {
-  type: RelationType.Identity;
-  statement?: string;
+export interface IRelationIdentityfication extends IRelation {
+  type: RelationType.Identityfication;
   logic: Logic;
-  mood: Mood[];
-  moodvariant: MoodVariant;
-  bundleOperator: Operator;
-  bundleStart: boolean;
-  bundleEnd: boolean;
+  certainty: Certainty;
 }
 
 /**
  * Relation Rules
  */
 
-const RelationRules = {};
+type RelationRule = {
+  allowedEntitiesPattern: EntityClass[][];
+  allowedSameEntityClassesOnly: boolean;
+  asymmetrical: boolean;
+  multiple: boolean;
+  cloudType: boolean;
+  treeType: boolean;
+  attributes: any[];
+};
+
+const RelationRules: { [key: string]: RelationRule } = {};
 
 RelationRules[RelationType.Superclass] = {
-  allowedEntities: [
-    [EntityClass.Action, EntityClass.Concept],
-    [EntityClass.Action, EntityClass.Concept],
+  allowedEntitiesPattern: [
+    [EntityClass.Action, EntityClass.Action],
+    [EntityClass.Concept, EntityClass.Concept],
   ],
-  sameClass: true,
-  symmetrical: false,
+  allowedSameEntityClassesOnly: true,
+  asymmetrical: true,
+  multiple: true,
+  cloudType: false,
+  treeType: true,
+  attributes: [],
+};
+RelationRules[RelationType.SuperordinateLocation] = {
+  allowedEntitiesPattern: [[EntityClass.Location, EntityClass.Location]],
+  allowedSameEntityClassesOnly: true,
+  asymmetrical: true,
+  multiple: true,
+  cloudType: false,
+  treeType: true,
+  attributes: [],
 };
 RelationRules[RelationType.Synonym] = {
-  allowedEntities: [
-    [EntityClass.Action, EntityClass.Concept],
-    [EntityClass.Action, EntityClass.Concept],
-  ],
-  sameClass: true,
-  symmetrical: true,
+  allowedEntitiesPattern: [[EntityClass.Action], [EntityClass.Concept]],
+  allowedSameEntityClassesOnly: true,
+  asymmetrical: false,
+  multiple: true,
+  cloudType: true,
+  treeType: false,
+  attributes: [],
 };
 RelationRules[RelationType.Antonym] = {
-  allowedEntities: [
-    [EntityClass.Action, EntityClass.Concept],
-    [EntityClass.Action, EntityClass.Concept],
+  allowedEntitiesPattern: [
+    [EntityClass.Action, EntityClass.Action],
+    [EntityClass.Concept, EntityClass.Concept],
   ],
-  sameClass: true,
-  symmetrical: true,
+  allowedSameEntityClassesOnly: true,
+  asymmetrical: false,
+  multiple: true,
+  cloudType: false,
+  treeType: false,
+  attributes: [],
 };
 RelationRules[RelationType.Troponym] = {
-  allowedEntities: [[EntityClass.Action], [EntityClass.Action]],
-  sameClass: true,
-  symmetrical: true,
+  allowedEntitiesPattern: [[EntityClass.Action]],
+  allowedSameEntityClassesOnly: true,
+  asymmetrical: false,
+  multiple: true,
+  cloudType: true,
+  treeType: false,
+  attributes: [],
 };
 RelationRules[RelationType.PropertyReciprocal] = {
-  allowedEntities: [[EntityClass.Concept], [EntityClass.Concept]],
-  sameClass: true,
-  symmetrical: true,
+  allowedEntitiesPattern: [[EntityClass.Concept, EntityClass.Concept]],
+  allowedSameEntityClassesOnly: true,
+  asymmetrical: false,
+  multiple: false,
+  cloudType: false,
+  treeType: false,
+  attributes: [],
 };
 RelationRules[RelationType.SubjectActantReciprocal] = {
-  allowedEntities: [[EntityClass.Action], [EntityClass.Action]],
-  sameClass: true,
-  symmetrical: true,
+  allowedEntitiesPattern: [[EntityClass.Action, EntityClass.Action]],
+  allowedSameEntityClassesOnly: true,
+  asymmetrical: false,
+  multiple: false,
+  cloudType: false,
+  treeType: false,
+  attributes: [],
 };
 RelationRules[RelationType.ActionEventEquivalent] = {
-  allowedEntities: [
+  allowedEntitiesPattern: [
     [EntityClass.Action, EntityClass.Concept],
-    [EntityClass.Action, EntityClass.Concept],
+    [EntityClass.Concept, EntityClass.Action],
   ],
-  sameClass: true,
-  symmetrical: true,
+  allowedSameEntityClassesOnly: true,
+  asymmetrical: false,
+  multiple: false,
+  cloudType: false,
+  treeType: false,
+  attributes: [],
 };
 RelationRules[RelationType.Related] = {
-  sameClass: false,
-  symmetrical: true,
+  allowedEntitiesPattern: [], // any combination is allowed
+  allowedSameEntityClassesOnly: true,
+  asymmetrical: false,
+  multiple: true,
+  cloudType: false,
+  treeType: false,
+  attributes: [],
 };
-RelationRules[RelationType.Class] = {
-  allowedEntities: [
-    [
-      EntityClass.Person,
-      EntityClass.Location,
-      EntityClass.Object,
-      EntityClass.Group,
-      EntityClass.Event,
-      EntityClass.Statement,
-      EntityClass.Territory,
-      EntityClass.Resource,
-    ],
-    [EntityClass.Concept],
+RelationRules[RelationType.Classification] = {
+  allowedEntitiesPattern: [
+    [EntityClass.Person, EntityClass.Concept],
+    [EntityClass.Location, EntityClass.Concept],
+    [EntityClass.Object, EntityClass.Concept],
+    [EntityClass.Group, EntityClass.Concept],
+    [EntityClass.Event, EntityClass.Concept],
+    [EntityClass.Statement, EntityClass.Concept],
+    [EntityClass.Territory, EntityClass.Concept],
+    [EntityClass.Resource, EntityClass.Concept],
   ],
-  sameClass: true,
-  symmetrical: true,
+  allowedSameEntityClassesOnly: true,
+  asymmetrical: true,
+  multiple: true,
+  cloudType: false,
+  treeType: true,
+  attributes: [],
 };
-RelationRules[RelationType.Identity] = {
-  allowedEntities: [
-    [
-      EntityClass.Person,
-      EntityClass.Location,
-      EntityClass.Object,
-      EntityClass.Group,
-      EntityClass.Event,
-      EntityClass.Statement,
-      EntityClass.Territory,
-      EntityClass.Resource,
-    ],
-    [
-      [
-        EntityClass.Person,
-        EntityClass.Location,
-        EntityClass.Object,
-        EntityClass.Group,
-        EntityClass.Event,
-        EntityClass.Statement,
-        EntityClass.Territory,
-        EntityClass.Resource,
-      ],
-    ],
-  ],
-  sameClass: true,
-  symmetrical: false,
+
+RelationRules[RelationType.Identityfication] = {
+  allowedEntitiesPattern: [], // any combination is allowed
+  allowedSameEntityClassesOnly: true,
+  asymmetrical: false,
+  multiple: true,
+  cloudType: true,
+  treeType: false,
+  attributes: [Logic, Certainty],
 };
