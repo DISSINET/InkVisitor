@@ -62,11 +62,11 @@ export interface IStatementActant {
   bundleStart: boolean;
   bundleEnd: boolean;
   props: IProp[];
-  classes: IStatementClass[];
-  identifications: IStatementIdentity[];
+  classifications: IStatementClassification[];
+  identifications: IStatementIdentification[];
 }
 
-export interface IStatementClass {
+export interface IStatementClassification {
   id: string;
   entityId: string;
   elvl: Elvl;
@@ -76,7 +76,7 @@ export interface IStatementClass {
   moodvariant: MoodVariant;
 }
 
-export interface IStatementIdentity {
+export interface IStatementIdentification {
   id: string;
   entityId: string;
   elvl: Elvl;
