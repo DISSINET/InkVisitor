@@ -2,7 +2,7 @@
  * Very extensive object showing all the details about one actant
  */
 
-import { IEntity, IResponseEntity, IStatement } from ".";
+import { IEntity, IRelation, IResponseEntity, IStatement } from ".";
 import { UsedInPosition } from "../enums";
 
 export interface IResponseDetail extends IResponseEntity {
@@ -11,6 +11,7 @@ export interface IResponseDetail extends IResponseEntity {
   usedInStatementProps: IResponseUsedInStatementProps[]; // all statements, where the detail id is used in props
   usedInMetaProps: IResponseUsedInMetaProp<UsedInPosition>[]; // all entities, where the detail id is used in props (entity.props[])
   usedAsTemplate?: string[];
+  relations: IRelation[];
 }
 
 export interface IResponseUsedInStatement<PositionEnum> {
