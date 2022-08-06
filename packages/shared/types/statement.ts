@@ -28,7 +28,7 @@ export interface IStatement extends IEntity {
 export interface IStatementData {
   text: string;
   territory?: {
-    id: string;
+    territoryId: string;
     order: number;
   };
   actions: IStatementAction[];
@@ -38,7 +38,7 @@ export interface IStatementData {
 
 export interface IStatementAction {
   id: string;
-  action: string;
+  actionId: string;
   elvl: Elvl;
   certainty: Certainty;
   logic: Logic;
@@ -52,7 +52,7 @@ export interface IStatementAction {
 
 export interface IStatementActant {
   id: string;
-  actant: string;
+  entityId: string;
   position: Position;
   elvl: Elvl;
   logic: Logic;
