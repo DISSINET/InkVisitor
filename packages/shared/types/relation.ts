@@ -41,8 +41,8 @@ export interface IRelationRelated extends IRelation {
 export interface IRelationClassification extends IRelation {
   type: RelationType.Classification;
 }
-export interface IRelationIdentityfication extends IRelation {
-  type: RelationType.Identityfication;
+export interface IRelationIdentification extends IRelation {
+  type: RelationType.Identification;
   logic: Logic;
   certainty: Certainty;
 }
@@ -86,7 +86,7 @@ RelationRules[RelationType.SuperordinateLocation] = {
 };
 RelationRules[RelationType.Synonym] = {
   allowedEntitiesPattern: [[EntityClass.Action], [EntityClass.Concept]],
-  allowedSameEntityClassesOnly: true,
+  allowedSameEntityClassesOnly: false,
   asymmetrical: false,
   multiple: true,
   cloudType: true,
@@ -137,7 +137,7 @@ RelationRules[RelationType.ActionEventEquivalent] = {
     [EntityClass.Action, EntityClass.Concept],
     [EntityClass.Concept, EntityClass.Action],
   ],
-  allowedSameEntityClassesOnly: true,
+  allowedSameEntityClassesOnly: false,
   asymmetrical: false,
   multiple: false,
   cloudType: false,
@@ -146,7 +146,7 @@ RelationRules[RelationType.ActionEventEquivalent] = {
 };
 RelationRules[RelationType.Related] = {
   allowedEntitiesPattern: [], // any combination is allowed
-  allowedSameEntityClassesOnly: true,
+  allowedSameEntityClassesOnly: false,
   asymmetrical: false,
   multiple: true,
   cloudType: false,
@@ -164,7 +164,7 @@ RelationRules[RelationType.Classification] = {
     [EntityClass.Territory, EntityClass.Concept],
     [EntityClass.Resource, EntityClass.Concept],
   ],
-  allowedSameEntityClassesOnly: true,
+  allowedSameEntityClassesOnly: false,
   asymmetrical: true,
   multiple: true,
   cloudType: false,
@@ -172,9 +172,9 @@ RelationRules[RelationType.Classification] = {
   attributes: [],
 };
 
-RelationRules[RelationType.Identityfication] = {
+RelationRules[RelationType.Identification] = {
   allowedEntitiesPattern: [], // any combination is allowed
-  allowedSameEntityClassesOnly: true,
+  allowedSameEntityClassesOnly: false,
   asymmetrical: false,
   multiple: true,
   cloudType: true,
