@@ -27,7 +27,7 @@ export enum RelationType {
   ActionEventEquivalent = "AEE",
   Related = "RE",
   Classification = "C",
-  Identityfication = "I",
+  Identification = "I",
 }
 
 export type ExtendedEntityClass = EntityClass | EntityExtension;
