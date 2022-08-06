@@ -11,40 +11,50 @@ import {
 export interface IRelation {
   id: string;
   type: RelationType;
-  entities: [];
+  entities: string[];
 }
 
-export interface IRelationSuperClassification extends IRelation {
+export interface IRelationSuperClass extends IRelation {
   type: RelationType.Superclass;
+  entities: [string, string];
 }
 export interface IRelationSynonym extends IRelation {
   type: RelationType.Synonym;
+  entities: string[];
 }
 export interface IRelationAntonym extends IRelation {
   type: RelationType.Antonym;
+  entities: [string, string];
 }
 export interface IRelationTroponym extends IRelation {
   type: RelationType.Troponym;
+  entities: string[];
 }
 export interface IRelationPropertyReciprocal extends IRelation {
   type: RelationType.PropertyReciprocal;
+  entities: [string, string];
 }
 export interface IRelationSubjectActantReciprocal extends IRelation {
   type: RelationType.SubjectActantReciprocal;
+  entities: [string, string];
 }
 export interface IRelationActionEventEquivalent extends IRelation {
   type: RelationType.ActionEventEquivalent;
+  entities: [string, string];
 }
 export interface IRelationRelated extends IRelation {
   type: RelationType.Related;
+  entities: [string, string];
 }
 export interface IRelationClassification extends IRelation {
   type: RelationType.Classification;
+  entities: [string, string];
 }
 export interface IRelationIdentification extends IRelation {
   type: RelationType.Identification;
   logic: Logic;
   certainty: Certainty;
+  entities: string[];
 }
 
 /**
