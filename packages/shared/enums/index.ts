@@ -30,6 +30,24 @@ export enum RelationType {
   Identification = "I",
 }
 
+export function isValidRelationType(input: RelationType): boolean {
+  return (
+    [
+      RelationType.Superclass,
+      RelationType.SuperordinateLocation,
+      RelationType.Synonym,
+      RelationType.Antonym,
+      RelationType.Troponym,
+      RelationType.PropertyReciprocal,
+      RelationType.SubjectActantReciprocal,
+      RelationType.ActionEventEquivalent,
+      RelationType.Related,
+      RelationType.Classification,
+      RelationType.Identification,
+    ].indexOf(input) !== -1
+  );
+}
+
 export type ExtendedEntityClass = EntityClass | EntityExtension;
 
 export function isValidEntityClass(input: EntityClass): boolean {
