@@ -36,7 +36,6 @@ export class TerritoryData implements IModel {
     if (!data) {
       return;
     }
-
     fillFlatObject(this, data);
 
     if (data.parent) {
@@ -93,7 +92,7 @@ class Territory extends Entity implements ITerritory {
 
       const wantedOrder = this.data.parent.order;
       this.data.parent.order = Entity.determineOrder(wantedOrder, childs);
-    } else if (this.id !== "T0") {
+    } else if (this.id !== "T0" && !this.isTemplate) {
       return {
         deleted: 0,
         first_error: "cannot create territory without a parent",
