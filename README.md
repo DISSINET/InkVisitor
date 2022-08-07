@@ -86,6 +86,29 @@ For more information see [database package](./packages/database)
 
 Package containing typescript definitions, types and enums, that should be available to both client & server.
 
+## Deploy
+
+For standalone deployment of each package, please refer to respective `README.md` files. No matter the approach, the database should be started first.
+
+### Docker
+
+1. Install [docker](https://docs.docker.com/get-docker/).
+2. Install [docker-compose tool](https://docs.docker.com/compose/install/)
+3. Prepare `.env` files for servers listed under `env_file` sections. Check server's [README.md](./packages/server/README.md) and [example.env](./packages/server/env/example.env) files.
+4. Prepare `.env` files for clients identified by `ENV` variable under `build -> args` section. Check server's [README.md](./packages/server/README.md) files and [example.env](./packages/server/env/example.env) files.
+4. Run the database - either as a service or containerized using `docker-compose up -d database`
+5. Build app image (will be done also in next step if not available) `docker-compose build-inkvisitor` (or `inkvisitor-<env>`)
+6. Run the containerized app `docker-compose up inkvisitor` (or `inkvisitor-<env>`)
+
+### Firewall
+
+Make sure the ports required by each application are not blocked. Required ports are listed in [docker-compose.yml](./docker-compose.yml). Examples:
+
+1. [ufw](https://help.ubuntu.com/community/UFW): `ufw allow <port>`
+2. [firewalld](https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/7/html/security_guide/sec-using_firewalls): `firewall-cmd --zone=public --permanent --add-port=<port>/tcp`
+
+Setup for additional system specific features (reverse proxies etc) are beyond the scope of this readme.
+
 ## Authentication Example
 
 ```shell

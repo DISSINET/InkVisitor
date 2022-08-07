@@ -14,8 +14,8 @@ services:
     networks:
       - inkvisitor
     ports:
-      - "8080:8080"
-      - "28015:28015"
+      - "8080:8080" # required only for public access
+      - "28015:28015" # dashboard - required only for public access
 
   inkvisitor-production:
     build:
@@ -30,9 +30,8 @@ services:
       options:
         max-size: "10m"
         max-file: "2"
-    # needs to be present when building
-    # env_file:
-    #  - ./packages/server/env/.env.production
+    env_file:
+      - ./packages/server/env/.env.production
     ports:
       - "3000:3000"
     volumes:
@@ -53,9 +52,8 @@ services:
       options:
         max-size: "10m"
         max-file: "2"
-    # needs to be present when building
-    # env_file:
-    #  - ./packages/server/env/.env.staging
+    env_file:
+      - ./packages/server/env/.env.staging
     ports:
       - "3011:3000"
     volumes:
@@ -76,9 +74,8 @@ services:
       options:
         max-size: "10m"
         max-file: "2"
-    # needs to be present when building
-    # env_file:
-    #  - ./packages/server/env/.env.data-import
+    env_file:
+      - ./packages/server/env/.env.data-import
     ports:
       - "3011:3000"
     volumes:
