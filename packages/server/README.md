@@ -3,26 +3,31 @@
 The application located in /packages/server is the api for inkVisitor project.
 It uses express + express router as a base.
 
-Server supports different enviroments - supported by `.env-<env>` files and appropriade `npm` scripts.
+Server supports different enviroments - supported by `.env-<env>` files and appropriade `yarn` scripts.
+Production build expects environment variables to be passed in container context, but you can override this by setting variable `ENV_FILE`.
+
+### Env variables
+
+See [example.env](./env/example.env) file for description of variables.
 
 ## Development
 
-You should normally use `development` environment.
+You should normally use `development` environment - run in nodemon context for livereload.
 
-- (`npm install`)
-- `npm run start:<env>`
+1. `yarn`
+2. `yarn run start:development`
 
 ## Test
 
-- `npm run test` will use `jest` framework to test everything, or
-- `npm run test <regexp>` to test only selected functions (regexp should match `describe` or `it` statements)
+- `yarn run test` will use `jest` framework to test everything, or
+- `yarn run test <regexp>` to test only selected functions (regexp should match `describe` or `it` statements)
 
 ## Build & run
 
 Build transpiles typescript files to javascript.
 
-- `npm run build`
-- `npm run pm2:<env>` to run the built application.
+1. `yarn run build`
+2. `ENV_FILE=<env> yarn run start` to run the built application with loaded `.env.<env>` file.
 
 Make sure to have appropriate `.env.<env>` file accessible.
 
@@ -31,22 +36,17 @@ Make sure to have appropriate `.env.<env>` file accessible.
 1. Build the server app.
 2. Use provided script in root directory `./deploy-backend-<env>.sh`. This script will copy the `dist` directory to target, run `npm install` and start the app with `pm2` library.
 
-## TBD
-
-Current development will target (next to new features) the following:
-
-- adhere to REST conventions
-- increase test coverage
-- add swagger api doc
-- switch to cookie based authentication, keep jwt for api access
-
 ## Postman
 
 Please refer to exported [postman collection](./postman/inkvisitor_api.postman_collection.json) file to explore the api and available endpoints.
 
-## Security
+## Authorization
 
 Api uses JWT tokens to authenticate the user. With this the session is controlled by token which makes the development faster, makes api easier for testing but exposes several problems, mainly token expiration question and/or session invalidation. As mentioned avove, the jwt should be replaced by cookie session in the future. Token based authorization, hovewer, should still be available.
+
+Utility script for generating new jwt tokens:
+
+`yarn run jwt`
 
 ## Errors
 
