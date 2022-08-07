@@ -2,7 +2,7 @@
 
 ## Deployment
 
-[![deploy staging](https://github.com/DISSINET/InkVisitor/actions/workflows/merge_to_master.yml/badge.svg?branch=dev)](https://github.com/DISSINET/InkVisitor/actions/workflows/merge_to_master.yml)
+[![deploy staging](https://github.com/DISSINET/InkVisitor/actions/workflows/dev.yml/badge.svg?branch=dev)](https://github.com/DISSINET/InkVisitor/actions/workflows/dev.yml)
 
 ## Description
 
