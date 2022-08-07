@@ -1,0 +1,9 @@
+.git
+.idea
+.github
+**/node_modules
+**/dist
+**/build
+packages/database
+data
+docs

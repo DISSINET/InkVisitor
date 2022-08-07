@@ -30,16 +30,24 @@ server.use(
 );
 
 server.use(cors());
+
+if (process.env.STATIC_PATH !== "") {
+  server.use(
+    process.env.STATIC_PATH as string,
+    express.static("../client/dist")
+  );
+}
+
 server.use(express.json());
 server.use(express.urlencoded({ extended: true }));
 
 // Show routes called in console during development
-if (process.env.NODE_ENV === "devel") {
+if (process.env.NODE_ENV === "development") {
   server.use(morgan("dev"));
 }
 
 // Securing
-if (process.env.NODE_ENV === "prod") {
+if (process.env.NODE_ENV === "production") {
   server.use(helmet());
 }
 
