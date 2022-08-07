@@ -1,7 +1,7 @@
 import dotenv from "dotenv";
 
 // will load .env.development by default
-if (!process.env.NODE_ENV || process.env.ENV_FILE != "") {
+if (!process.env.NODE_ENV || !!process.env.ENV_FILE) {
   console.log(
     `[Settings] loading .env file: .env.${
       process.env.ENV_FILE || "development"
