@@ -30,8 +30,9 @@ services:
       options:
         max-size: "10m"
         max-file: "2"
-    env_file:
-      - ./packages/server/env/.env.production
+    # needs to be present when building
+    # env_file:
+    #  - ./packages/server/env/.env.production
     ports:
       - "3000:3000"
     volumes:
@@ -52,8 +53,9 @@ services:
       options:
         max-size: "10m"
         max-file: "2"
-    env_file:
-      - ./packages/server/env/.env.staging
+    # needs to be present when building
+    # env_file:
+    #  - ./packages/server/env/.env.staging
     ports:
       - "3011:3000"
     volumes:
@@ -74,8 +76,9 @@ services:
       options:
         max-size: "10m"
         max-file: "2"
-    env_file:
-      - ./packages/server/env/.env.data-import
+    # needs to be present when building
+    # env_file:
+    #  - ./packages/server/env/.env.data-import
     ports:
       - "3011:3000"
     volumes:
