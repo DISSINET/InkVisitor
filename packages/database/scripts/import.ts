@@ -5,7 +5,12 @@ import { r, RConnectionOptions, Connection } from "rethinkdb-ts";
 import tunnel from "tunnel-ssh";
 import { Server } from "net";
 import readline from "readline";
-import { parseArgs, prepareDbConnection, TableSchema } from "./import-utils";
+import {
+  parseArgs,
+  prepareDbConnection,
+  DbSchema,
+  TableSchema,
+} from "./import-utils";
 import { auditsIndexes, entitiesIndexes } from "./indexes";
 
 const [datasetId, env] = parseArgs();
@@ -15,21 +20,10 @@ if (!envData) {
   throw new Error(`Cannot load env file env/.env.${env}`);
 }
 
-const datasets: Record<string, TableSchema[]> = {
-  all: [
-    {
-      name: "acl_permissions",
-      data: require("../datasets/default/acl_permissions.json"),
-      transform: function () {},
-    },
-    {
-      name: "entities",
-      data: require("../datasets/all/entities.json"),
-      transform: function () {},
-      indexes: entitiesIndexes,
-    },
-    {
-      name: "users",
+const datasets: Record<string, DbSchema> = {
+  all: {
+    users: {
+      tableName: "users",
       data: require("../datasets/default/users.json"),
       transform: function () {
         this.data = this.data.map((user: IUser) => {
@@ -38,8 +32,19 @@ const datasets: Record<string, TableSchema[]> = {
         });
       },
     },
-    {
-      name: "audits",
+    aclPermissions: {
+      tableName: "acl_permissions",
+      data: require("../datasets/default/acl_permissions.json"),
+      transform: function () {},
+    },
+    entities: {
+      tableName: "entities",
+      data: require("../datasets/all/entities.json"),
+      transform: function () {},
+      indexes: entitiesIndexes,
+    },
+    audits: {
+      tableName: "audits",
       data: require("../datasets/all/audits.json"),
       transform: function () {
         this.data = this.data.map((audit: IAudit) => {
@@ -49,21 +54,16 @@ const datasets: Record<string, TableSchema[]> = {
       },
       indexes: auditsIndexes,
     },
-  ],
-  empty: [
-    {
-      name: "acl_permissions",
-      data: require("../datasets/default/acl_permissions.json"),
+    relations: {
+      tableName: "relations",
+      data: require("../datasets/all/relations.json"),
       transform: function () {},
+      indexes: auditsIndexes,
     },
-    {
-      name: "entities",
-      data: require("../datasets/empty/entities.json"),
-      transform: function () {},
-      indexes: entitiesIndexes,
-    },
-    {
-      name: "users",
+  },
+  empty: {
+    users: {
+      tableName: "users",
       data: require("../datasets/default/users.json"),
       transform: function () {
         this.data = this.data.map((user: IUser) => {
@@ -72,8 +72,19 @@ const datasets: Record<string, TableSchema[]> = {
         });
       },
     },
-    {
-      name: "audits",
+    aclPermissions: {
+      tableName: "acl_permissions",
+      data: require("../datasets/default/acl_permissions.json"),
+      transform: function () {},
+    },
+    entities: {
+      tableName: "entities",
+      data: require("../datasets/empty/entities.json"),
+      transform: function () {},
+      indexes: entitiesIndexes,
+    },
+    audits: {
+      tableName: "audits",
       data: require("../datasets/empty/audits.json"),
       transform: function () {
         this.data = this.data.map((audit: IAudit) => {
@@ -83,21 +94,16 @@ const datasets: Record<string, TableSchema[]> = {
       },
       indexes: auditsIndexes,
     },
-  ],
-  allparsed: [
-    {
-      name: "acl_permissions",
-      data: require("../datasets/default/acl_permissions.json"),
+    relations: {
+      tableName: "relations",
+      data: require("../datasets/empty/relations.json"),
       transform: function () {},
+      indexes: auditsIndexes,
     },
-    {
-      name: "entities",
-      data: require("../datasets/all-parsed/entities.json"),
-      transform: function () {},
-      indexes: entitiesIndexes,
-    },
-    {
-      name: "users",
+  },
+  allparsed: {
+    users: {
+      tableName: "users",
       data: require("../datasets/all-parsed/users.json"),
       transform: function () {
         this.data = this.data.map((user: IUser) => {
@@ -106,8 +112,19 @@ const datasets: Record<string, TableSchema[]> = {
         });
       },
     },
-    {
-      name: "audits",
+    aclPermissions: {
+      tableName: "acl_permissions",
+      data: require("../datasets/default/acl_permissions.json"),
+      transform: function () {},
+    },
+    entities: {
+      tableName: "entities",
+      data: require("../datasets/all-parsed/entities.json"),
+      transform: function () {},
+      indexes: entitiesIndexes,
+    },
+    audits: {
+      tableName: "audits",
       data: require("../datasets/all-parsed/audits.json"),
       transform: function () {
         this.data = this.data.map((audit: IAudit) => {
@@ -117,10 +134,16 @@ const datasets: Record<string, TableSchema[]> = {
       },
       indexes: auditsIndexes,
     },
-  ],
+    relations: {
+      tableName: "relations",
+      data: require("../datasets/empty/relations.json"),
+      transform: function () {},
+      indexes: auditsIndexes,
+    },
+  },
 };
 
-const config: RConnectionOptions & { tables: TableSchema[] } = {
+const config: RConnectionOptions & { tables: DbSchema } = {
   timeout: 5,
   db: envData.DB_NAME,
   host: envData.DB_HOST,
@@ -133,21 +156,21 @@ const importTable = async (
   table: TableSchema,
   conn: Connection
 ): Promise<void> => {
-  await r.tableCreate(table.name).run(conn);
+  await r.tableCreate(table.tableName).run(conn);
   if (table.indexes) {
     for (const i in table.indexes) {
-      await table.indexes[i](r.table(table.name)).run(conn);
+      await table.indexes[i](r.table(table.tableName)).run(conn);
     }
   }
 
-  console.log(`Table ${table.name} created`);
+  console.log(`Table ${table.tableName} created`);
 
   table.transform();
 
-  await r.table(table.name).insert(table.data).run(conn);
+  await r.table(table.tableName).insert(table.data).run(conn);
 
-  const itemsImported = await r.table(table.name).count().run(conn);
-  console.log(`Imported ${itemsImported} entries to table ${table.name}`);
+  const itemsImported = await r.table(table.tableName).count().run(conn);
+  console.log(`Imported ${itemsImported} entries to table ${table.tableName}`);
 
   return;
 };
@@ -157,8 +180,8 @@ const importData = async () => {
 
   console.log(`***importing dataset ${datasetId}***\n`);
 
-  for (const table of config.tables) {
-    await importTable(table, conn);
+  for (const tableConfig of Object.values(config.tables)) {
+    await importTable(tableConfig, conn);
   }
 
   console.log("Closing connection");
