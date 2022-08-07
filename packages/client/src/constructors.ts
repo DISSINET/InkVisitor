@@ -295,3 +295,35 @@ export const CReference = (
   resource: resourceId,
   value: valueId,
 });
+
+export const CTemplateEntity = (
+  entity: IEntity,
+  templateLabel: string,
+  templateDetail?: string
+): IEntity => {
+  const userRole = localStorage.getItem("userrole") as UserRole;
+  const templateEntity =
+    entity.class === EntityClass.Statement
+      ? DStatement(entity as IStatement, userRole)
+      : DEntity(entity as IEntity, userRole);
+
+  if (entity.class === EntityClass.Statement) {
+    delete templateEntity.data["territory"];
+  }
+  if (entity.class === EntityClass.Territory) {
+    templateEntity.data["parent"] = false;
+  }
+
+  templateEntity.isTemplate = true;
+  templateEntity.usedTemplate = "";
+  templateEntity.label = templateLabel;
+
+  if (templateDetail) {
+    templateEntity.detail = templateDetail;
+  }
+
+  console.log("created entity template");
+  console.log(templateEntity);
+
+  return templateEntity;
+};

@@ -164,6 +164,7 @@ class TreeCache {
 
     newTree.createParentMap(
       territoriesData
+        .filter((td) => !td.isTemplate)
         .sort(TreeCreator.sortTerritories)
         .map((td) => new Territory({ ...td }))
     );
