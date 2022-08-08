@@ -84,7 +84,7 @@ const hasParent = (
 ): boolean => {
   const child = mockTerritories.find((t) => t.id === childId);
   if (child) {
-    return child.data.parent && child.data.parent.id === parentId;
+    return child.data.parent && child.data.parent.territoryId === parentId;
   }
   return false;
 };
@@ -109,7 +109,8 @@ describe("Tree get", function () {
     const randSuffix = "tree-get" + Math.random().toString();
     const territories = await createMockTree(db, randSuffix);
     const statements = await createMockStatements(db, territories);
-    const statementsTerritoryId = statements[0].data.territory?.id || "";
+    const statementsTerritoryId =
+      statements[0].data.territory?.territoryId || "";
     const additionalEmptyTerritory = new Territory({
       id: `empty-ter--${randSuffix}`,
       data: {

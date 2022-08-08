@@ -29,7 +29,7 @@ export class TreeCreator {
       }
 
       const parentId: string = territory.data.parent
-        ? territory.data.parent.id
+        ? territory.data.parent.territoryId
         : "";
       if (!this.parentMap[parentId]) {
         this.parentMap[parentId] = [];
@@ -125,11 +125,11 @@ export class TreeCreator {
   static async countStatements(db: Db): Promise<Record<string, number>> {
     const statements = (
       await getEntitiesDataByClass<IStatement>(db, EntityClass.Statement)
-    ).filter((s) => s.data.territory && s.data.territory.id);
+    ).filter((s) => s.data.territory && s.data.territory.territoryId);
     const statementsCountMap: Record<string, number> = {}; // key is territoryid
     for (const statement of statements) {
       if (statement.data.territory) {
-        const terId = statement.data.territory.id;
+        const terId = statement.data.territory.territoryId;
         if (!statementsCountMap[terId]) {
           statementsCountMap[terId] = 0;
         }

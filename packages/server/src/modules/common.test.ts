@@ -1,9 +1,13 @@
-import Audit from "@models/audit/audit";
 import "@models/events/register";
 import Statement from "@models/statement/statement";
 import Territory from "@models/territory/territory";
 import { Db } from "@service/RethinkDB";
-import { createEntity, deleteEntities } from "@service/shorthands";
+import {
+  createEntity,
+  deleteAudits,
+  deleteEntities,
+  deleteRelations,
+} from "@service/shorthands";
 import {
   Certainty,
   Elvl,
@@ -19,7 +23,6 @@ import { IResponseGeneric, IStatement, IStatementAction } from "@shared/types";
 import { CustomError } from "@shared/types/errors";
 import { ITerritory } from "@shared/types/index";
 import { errorTypes } from "@shared/types/response-generic";
-import { r as rethink } from "rethinkdb-ts";
 import "ts-jest";
 
 describe("common", function () {
@@ -70,7 +73,7 @@ export function getITerritoryMock(): ITerritory {
 
 export function getIStatementActionMock(): IStatementAction {
   return {
-    action: "action",
+    actionId: "action",
     bundleEnd: false,
     bundleStart: false,
     certainty: Certainty.Empty,
@@ -93,7 +96,7 @@ export function getIStatementMock(): IStatement {
       actants: [],
       tags: [],
       territory: {
-        id: "id",
+        territoryId: "id",
         order: 0,
       },
       text: "text",
@@ -175,11 +178,7 @@ export async function createMockStatements(
 
 export async function clean(db: Db): Promise<void> {
   await deleteEntities(db);
-
-  await db.close();
-}
-
-export async function clearAudits(db: Db): Promise<void> {
-  await rethink.table(Audit.table).delete().run(db.connection);
+  await deleteAudits(db);
+  await deleteRelations(db);
   await db.close();
 }

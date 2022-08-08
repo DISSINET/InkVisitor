@@ -18,7 +18,7 @@ import {
 } from "@models/common";
 
 export class PropSpec implements IPropSpec, IModel {
-  id: string = "";
+  entityId: string = "";
   elvl: Elvl = Elvl.Textual;
   logic: Logic = Logic.Positive;
   virtuality: Virtuality = Virtuality.Reality;
