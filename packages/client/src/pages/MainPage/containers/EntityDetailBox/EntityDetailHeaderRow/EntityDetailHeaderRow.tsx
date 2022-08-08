@@ -126,7 +126,9 @@ export const EntityDetailHeaderRow: React.FC<EntityDetailHeaderRow> = ({
             label="open"
             onClick={() => {
               setStatementId(entity.id);
-              setTerritoryId(entity.data.territory.id);
+              if (!entity.isTemplate) {
+                setTerritoryId(entity.data.territory.id);
+              }
             }}
           />
         )}

@@ -676,6 +676,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                 categoryTypes={classesActants}
                 placeholder={"add new actant"}
                 excludedEntities={excludedSuggesterEntities}
+                isInsideTemplate={statement.isTemplate}
               />
             )}
           </StyledEditorSectionContent>

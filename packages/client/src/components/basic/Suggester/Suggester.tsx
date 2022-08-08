@@ -31,7 +31,7 @@ import {
 } from "./SuggesterStyles";
 import {
   createItemData,
-  EntityItemData,
+  SuggestionRowEntityItemData,
   MemoizedEntityRow,
 } from "./SuggestionRow/SuggestionRow";
 
@@ -59,6 +59,7 @@ interface Suggester {
   onCancel?: () => void;
   cleanOnSelect?: boolean;
   isWrongDropCategory?: boolean;
+  isInsideTemplate: boolean;
 }
 
 export const Suggester: React.FC<Suggester> = ({
@@ -84,10 +85,12 @@ export const Suggester: React.FC<Suggester> = ({
   onCancel = () => {},
   isFetching,
   isWrongDropCategory,
+  isInsideTemplate = false,
 }) => {
   const [{ isOver }, dropRef] = useDrop({
     accept: ItemTypes.TAG,
     drop: (item: EntityDragItem) => {
+      // TODO: if template and not in template => duplicate to entity, if template in template => ask in modal
       onDrop(item);
     },
     hover: (item: EntityDragItem) => {
@@ -100,14 +103,14 @@ export const Suggester: React.FC<Suggester> = ({
   const [selected, setSelected] = useState(-1);
   const [isFocused, setIsFocused] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
-  const [showModal, setShowModal] = useState(false);
+  const [showCreateModal, setShowCreateModal] = useState(false);
 
   useKeypress(
     "Escape",
     () => {
-      if (!showModal && isFocused) onCancel();
+      if (!showCreateModal && isFocused) onCancel();
     },
-    [showModal, isFocused]
+    [showCreateModal, isFocused]
   );
 
   const onTypeFn = (newType: string) => {
@@ -122,7 +125,7 @@ export const Suggester: React.FC<Suggester> = ({
         category.value === EntityClass.Statement ||
         category.value === EntityClass.Territory
       ) {
-        setShowModal(true);
+        setShowCreateModal(true);
       } else {
         onCreate({
           label: typed,
@@ -130,6 +133,7 @@ export const Suggester: React.FC<Suggester> = ({
         });
       }
     } else if (selected > -1) {
+      // TODO: if template inside nonTemplate => duplicate to entity, if template inside template => show modal
       onPick(suggestions[selected].entity);
     } else {
       toast.info("Fill at least 1 character");
@@ -144,7 +148,7 @@ export const Suggester: React.FC<Suggester> = ({
         category.value === EntityClass.Statement ||
         category.value === EntityClass.Territory
       ) {
-        setShowModal(true);
+        setShowCreateModal(true);
       } else {
         onCreate({
           label: typed,
@@ -158,14 +162,15 @@ export const Suggester: React.FC<Suggester> = ({
   };
 
   const renderEntitySuggestions = () => {
-    const itemData = createItemData(
+    const itemData: SuggestionRowEntityItemData = createItemData(
       suggestions as EntitySuggestion[],
       onPick,
-      selected
+      selected,
+      isInsideTemplate
     );
     return (
       <List
-        itemData={itemData as EntityItemData}
+        itemData={itemData as SuggestionRowEntityItemData}
         height={suggestions.length > 7 ? 200 : suggestions.length * 25}
         itemCount={suggestions.length}
         itemSize={25}
@@ -265,14 +270,14 @@ export const Suggester: React.FC<Suggester> = ({
         ) : null}
       </StyledSuggester>
 
-      {showModal && (
+      {showCreateModal && (
         <SuggesterCreateModal
           show={true}
           typed={typed}
           category={category}
           categories={categories.slice(1)}
           onCreate={onCreate}
-          closeModal={() => setShowModal(false)}
+          closeModal={() => setShowCreateModal(false)}
         />
       )}
     </>

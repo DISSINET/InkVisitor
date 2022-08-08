@@ -16,7 +16,7 @@ import { FaHome } from "react-icons/fa";
 import { useMutation, useQuery } from "react-query";
 import { OptionTypeBase, ValueType } from "react-select";
 import { DropdownAny, rootTerritoryId, wildCardChar } from "Theme/constants";
-import { EntityColors, EntityDragItem, EntitySuggestion } from "types";
+import { EntityDragItem } from "types";
 
 interface EntitySuggester {
   categoryTypes: ExtendedEntityClass[];
@@ -246,18 +246,10 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
         handleCreate(newCreated);
       }}
       onPick={(newPicked: IEntity) => {
-        if (isInsideTemplate) {
-          // TODO
-        } else {
-          handlePick(newPicked);
-        }
+        handlePick(newPicked);
       }}
       onDrop={(newDropped: EntityDragItem) => {
-        if (isInsideTemplate) {
-          // TODO
-        } else {
-          handleDropped(newDropped);
-        }
+        handleDropped(newDropped);
       }}
       onHover={(newHoverred: EntityDragItem) => {
         handleHoverred(newHoverred);
@@ -265,6 +257,7 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
       isWrongDropCategory={isWrongDropCategory}
       disableCreate={disableCreate}
       inputWidth={inputWidth}
+      isInsideTemplate={isInsideTemplate}
     />
   ) : (
     <div />

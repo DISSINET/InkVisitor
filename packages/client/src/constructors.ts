@@ -327,8 +327,5 @@ export const CTemplateEntity = (
     templateEntity.detail = templateDetail;
   }
 
-  console.log("created entity template");
-  console.log(templateEntity);
-
   return templateEntity;
 };
