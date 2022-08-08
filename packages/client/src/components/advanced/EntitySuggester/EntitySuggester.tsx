@@ -12,7 +12,6 @@ import { Suggester } from "components";
 import { CEntity, CStatement, CTerritoryActant } from "constructors";
 import { useDebounce, useSearchParams } from "hooks";
 import React, { useEffect, useState } from "react";
-import { DragObjectWithType } from "react-dnd";
 import { FaHome } from "react-icons/fa";
 import { useMutation, useQuery } from "react-query";
 import { OptionTypeBase, ValueType } from "react-select";
@@ -32,6 +31,7 @@ interface EntitySuggester {
   excludedActantIds?: string[];
   filterEditorRights?: boolean;
   isInsideTemplate?: boolean;
+  disableTemplatesAccept?: boolean;
 }
 
 export const EntitySuggester: React.FC<EntitySuggester> = ({
@@ -47,6 +47,7 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
   filterEditorRights = false,
   excludedActantIds = [],
   isInsideTemplate = false,
+  disableTemplatesAccept = false,
 }) => {
   const [typed, setTyped] = useState<string>("");
   const debouncedTyped = useDebounce(typed, 100);
@@ -203,9 +204,9 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
     onSelected(newPicked.id, newPicked.isTemplate);
     handleClean();
   };
+
   const handleDropped = (newDropped: EntityDragItem) => {
-    const droppedCategory = newDropped.category;
-    if (categoryTypes.includes(droppedCategory)) {
+    if (!isWrongDropCategory) {
       onSelected(newDropped.id, newDropped.isTemplate);
     }
     handleClean();
@@ -213,9 +214,12 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
 
   const [isWrongDropCategory, setIsWrongDropCategory] = useState(false);
 
-  const handleHoverred = (newHoverred: any) => {
+  const handleHoverred = (newHoverred: EntityDragItem) => {
     const hoverredCategory = newHoverred.category;
-    if (!categoryTypes.includes(hoverredCategory)) {
+    if (
+      !categoryTypes.includes(hoverredCategory) ||
+      (disableTemplatesAccept && newHoverred.isTemplate)
+    ) {
       setIsWrongDropCategory(true);
     } else {
       setIsWrongDropCategory(false);
@@ -264,7 +268,7 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
           handleDropped(newDropped);
         }
       }}
-      onHover={(newHoverred: DragObjectWithType) => {
+      onHover={(newHoverred: EntityDragItem) => {
         handleHoverred(newHoverred);
       }}
       isWrongDropCategory={isWrongDropCategory}

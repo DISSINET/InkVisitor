@@ -560,6 +560,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
           <StyledEditorPreSection>
             {"Move to territory: "}
             <EntitySuggester
+              disableTemplatesAccept
               filterEditorRights
               inputWidth={96}
               disableCreate
