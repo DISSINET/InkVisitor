@@ -155,7 +155,7 @@ export const App: React.FC = () => {
                     path="/password_reset"
                     render={(props) => <PasswordResetPage {...props} />}
                   />
-                  <Route component={NotFoundPage} />
+                  <Route path="*" component={NotFoundPage} />
                 </Switch>
               </SearchParamsProvider>
             </BrowserRouter>
