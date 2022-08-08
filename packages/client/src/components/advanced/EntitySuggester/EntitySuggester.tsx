@@ -93,25 +93,15 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
           excludedActantIds.length ? !excludedActantIds.includes(s.id) : s
         )
         .map((entity: IEntity) => {
-          const category = EntityColors[entity.class];
           const icons: React.ReactNode[] = [];
 
           if (territoryActants?.includes(entity.id)) {
             icons.push(<FaHome key={entity.id} color="" />);
           }
-          const { label, detail, status, data, isTemplate, id } = entity;
 
           return {
-            color: category.color,
-            entityClass: entity.class,
-            label: label,
-            detail: detail,
-            status: status,
-            ltype: data.logicalType,
-            isTemplate: isTemplate ? isTemplate : false,
-            id: id,
-            icons: icons,
             entity: entity,
+            icons: icons,
           };
         });
     },
@@ -166,12 +156,12 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
 
   const handleCreate = async (newCreated: {
     label: string;
-    category: EntityClass;
-    detail: string;
+    entityClass: EntityClass;
+    detail?: string;
     territoryId?: string;
   }) => {
     if (
-      newCreated.category === EntityClass.Statement &&
+      newCreated.entityClass === EntityClass.Statement &&
       newCreated.territoryId
     ) {
       const newStatement = CStatement(
@@ -181,7 +171,7 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
         newCreated.detail
       );
       actantsCreateMutation.mutate(newStatement);
-    } else if (newCreated.category === EntityClass.Territory) {
+    } else if (newCreated.entityClass === EntityClass.Territory) {
       const newActant = CTerritoryActant(
         newCreated.label,
         newCreated.territoryId ? newCreated.territoryId : rootTerritoryId,
@@ -192,7 +182,7 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
       actantsCreateMutation.mutate(newActant);
     } else {
       const newActant = CEntity(
-        newCreated.category,
+        newCreated.entityClass,
         newCreated.label,
         localStorage.getItem("userrole") as UserRole,
         newCreated.detail
@@ -201,8 +191,8 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
     }
   };
 
-  const handlePick = (newPicked: EntitySuggestionI) => {
-    onSelected(newPicked.id, newPicked.isTemplate);
+  const handlePick = (newPicked: IEntity) => {
+    onSelected(newPicked.id, newPicked.isTemplate || false);
     handleClean();
   };
 
@@ -249,13 +239,13 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
       }}
       onCreate={(newCreated: {
         label: string;
-        category: EntityClass;
-        detail: string;
+        entityClass: EntityClass;
+        detail?: string;
         territoryId?: string;
       }) => {
         handleCreate(newCreated);
       }}
-      onPick={(newPicked: EntitySuggestionI) => {
+      onPick={(newPicked: IEntity) => {
         if (isInsideTemplate) {
           // TODO
         } else {

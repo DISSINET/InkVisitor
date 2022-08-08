@@ -1,5 +1,6 @@
+import { entitiesDictKeys } from "@shared/dictionaries";
 import { EntityClass, EntityStatus } from "@shared/enums";
-import { IOption } from "@shared/types";
+import { IEntity, IOption } from "@shared/types";
 import { Button, Dropdown, Input, Loader, TypeBar } from "components";
 import useKeypress from "hooks/useKeyPress";
 import React, { useState } from "react";
@@ -11,7 +12,12 @@ import { toast } from "react-toastify";
 import { FixedSizeList as List } from "react-window";
 import { DropdownAny, scrollOverscanCount } from "Theme/constants";
 import theme from "Theme/theme";
-import { EntitySuggestionI, ItemTypes } from "types";
+import {
+  EntityDragItem,
+  EntitySuggestionI,
+  ItemTypes,
+  SuggesterItemToCreate,
+} from "types";
 import { SuggesterKeyPress } from "./SuggesterKeyPress";
 import { SuggesterModal } from "./SuggesterModal";
 import {
@@ -46,11 +52,11 @@ interface Suggester {
   // events
   onType: (newType: string) => void;
   onChangeCategory: (selectedOption: ValueType<OptionTypeBase, any>) => void;
-  onCreate?: Function;
-  onPick: Function;
-  onDrop?: Function;
-  onHover?: Function;
-  onCancel?: Function;
+  onCreate?: (item: SuggesterItemToCreate) => void;
+  onPick: (entity: IEntity) => void;
+  onDrop?: (item: EntityDragItem) => void;
+  onHover?: (item: EntityDragItem) => void;
+  onCancel?: () => void;
   cleanOnSelect?: boolean;
   isWrongDropCategory?: boolean;
 }
@@ -81,10 +87,10 @@ export const Suggester: React.FC<Suggester> = ({
 }) => {
   const [{ isOver }, dropRef] = useDrop({
     accept: ItemTypes.TAG,
-    drop: (item: DragObjectWithType) => {
+    drop: (item: EntityDragItem) => {
       onDrop(item);
     },
-    hover: (item: DragObjectWithType) => {
+    hover: (item: EntityDragItem) => {
       onHover && onHover(item);
     },
     collect: (monitor: DropTargetMonitor) => ({
@@ -118,10 +124,13 @@ export const Suggester: React.FC<Suggester> = ({
       ) {
         setShowModal(true);
       } else {
-        onCreate({ label: typed, category: category.value });
+        onCreate({
+          label: typed,
+          entityClass: entitiesDictKeys[category.value as EntityClass].value,
+        });
       }
     } else if (selected > -1) {
-      onPick(suggestions[selected]);
+      onPick(suggestions[selected].entity);
     } else {
       toast.info("Fill at least 1 character");
     }
@@ -137,7 +146,10 @@ export const Suggester: React.FC<Suggester> = ({
       ) {
         setShowModal(true);
       } else {
-        onCreate({ label: typed, category: category.value });
+        onCreate({
+          label: typed,
+          entityClass: entitiesDictKeys[category.value as EntityClass].value,
+        });
       }
     } else {
       toast.info("Fill at least 1 character");

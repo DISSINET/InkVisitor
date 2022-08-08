@@ -23,6 +23,7 @@ import { useQuery } from "react-query";
 import { OptionTypeBase, ValueType } from "react-select";
 import { toast } from "react-toastify";
 import { DropdownAny } from "Theme/constants";
+import { SuggesterItemToCreate } from "types";
 import { StyledContent, StyledNote } from "./SuggesterStyles";
 
 interface SuggesterModal {
@@ -30,8 +31,8 @@ interface SuggesterModal {
   typed: string;
   category: IOption;
   categories: IOption[];
-  onCreate: Function;
-  closeModal: Function;
+  onCreate: (item: SuggesterItemToCreate) => void;
+  closeModal: () => void;
 }
 export const SuggesterModal: React.FC<SuggesterModal> = ({
   show = false,
@@ -54,7 +55,7 @@ export const SuggesterModal: React.FC<SuggesterModal> = ({
   const handleCreateActant = () => {
     onCreate({
       label: label,
-      category: selectedCategory.value,
+      entityClass: selectedCategory.value,
       detail: detail,
       territoryId: territoryId,
     });

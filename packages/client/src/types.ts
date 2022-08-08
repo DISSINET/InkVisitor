@@ -281,14 +281,12 @@ export const classesPropValue = [
 ];
 
 export interface EntitySuggestionI {
-  id: string;
-  label: string;
-  detail: string;
-  ltype: string;
-  status: EntityStatus;
-  entityClass: EntityClass;
-  color: string;
-  icons?: React.ReactNode[];
-  isTemplate: boolean;
   entity: IEntity;
+  icons?: React.ReactNode[];
+}
+export interface SuggesterItemToCreate {
+  label: string;
+  entityClass: EntityClass;
+  detail?: string;
+  territoryId?: string;
 }
