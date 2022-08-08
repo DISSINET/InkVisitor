@@ -1,19 +1,17 @@
-import {
-  allEntities,
-  DropdownItem,
-  entitiesDict,
-} from "@shared/dictionaries/entity";
+import { DropdownItem, entitiesDict } from "@shared/dictionaries/entity";
 import { EntityClass } from "@shared/enums";
 import { IEntity, IOption } from "@shared/types";
-import api, { IFilterEntities } from "api";
+import { IRequestSearch } from "@shared/types/request-search";
+import api from "api";
 import { Button, Dropdown, Input, Loader, TypeBar } from "components";
+import { EntitySuggester, EntityTag } from "components/advanced";
 import { useDebounce } from "hooks";
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { FaUnlink } from "react-icons/fa";
 import { useQuery } from "react-query";
-import { OptionsType, OptionTypeBase, ValueType } from "react-select";
+import { OptionTypeBase, ValueType } from "react-select";
+import { useAppSelector } from "redux/hooks";
 import { wildCardChar } from "Theme/constants";
-import { EntitySuggester, EntityTag } from "..";
 import {
   StyledBoxContent,
   StyledResultsWrapper,
@@ -23,14 +21,18 @@ import {
 } from "./EntitySearchBoxStyles";
 import { EntitySearchResults } from "./EntitySearchResults/EntitySearchResults";
 
-const initValues: IFilterEntities = {
+const initValues: IRequestSearch = {
   label: "",
   cooccurrenceId: "",
 };
-
 const defaultOption = {
   label: "*",
   value: "",
+};
+const anyTemplate: DropdownItem = {
+  value: "Any",
+  label: "IS TEMPLATE",
+  info: "",
 };
 
 const debounceTime: number = 100;
@@ -38,11 +40,13 @@ const debounceTime: number = 100;
 export const EntitySearchBox: React.FC = () => {
   const [classOption, setClassOption] = useState<DropdownItem>(defaultOption);
   const [templateOption, setTemplateOption] =
-    useState<ValueType<OptionTypeBase, any>>(allEntities);
-  const [searchData, setSearchData] = useState<IFilterEntities>(initValues);
-  const debouncedValues = useDebounce<IFilterEntities>(
-    searchData,
-    debounceTime
+    useState<ValueType<OptionTypeBase, any>>(defaultOption);
+  const [searchData, setSearchData] = useState<IRequestSearch>(initValues);
+  const debouncedValues = useDebounce<IRequestSearch>(searchData, debounceTime);
+
+  const resultsRef = useRef<HTMLDivElement>(null);
+  const fourthPanelBoxesOpened: { [key: string]: boolean } = useAppSelector(
+    (state) => state.layout.fourthPanelBoxesOpened
   );
 
   // check whether the search should be executed
@@ -53,19 +57,19 @@ export const EntitySearchBox: React.FC = () => {
     );
   }, [debouncedValues]);
 
-  const { data: cooccurrenceEntity } = useQuery(
-    ["co-occurrence", searchData.cooccurrenceId],
-    async () => {
-      if (searchData?.cooccurrenceId) {
-        const res = await api.entitiesGet(searchData.cooccurrenceId);
-        return res.data;
+  const { data: cooccurrenceEntity, isFetching: cooccurrenceIsFetching } =
+    useQuery(
+      ["co-occurrence", searchData.cooccurrenceId],
+      async () => {
+        if (searchData?.cooccurrenceId) {
+          const res = await api.entitiesGet(searchData.cooccurrenceId);
+          return res.data;
+        }
+      },
+      {
+        enabled: !!searchData?.cooccurrenceId,
       }
-      return "";
-    },
-    {
-      enabled: !!searchData?.cooccurrenceId,
-    }
-  );
+    );
 
   const {
     status,
@@ -75,6 +79,12 @@ export const EntitySearchBox: React.FC = () => {
   } = useQuery(
     ["search", debouncedValues],
     async () => {
+      if (debouncedValues.usedTemplate === "Any") {
+        const { usedTemplate, ...filters } = debouncedValues;
+        filters.onlyTemplates = true;
+        const res = await api.entitiesSearch(filters);
+        return res.data;
+      }
       const res = await api.entitiesSearch(debouncedValues);
       return res.data;
     },
@@ -128,22 +138,39 @@ export const EntitySearchBox: React.FC = () => {
       );
       return templates;
     },
-    { enabled: api.isLoggedIn(), retry: 2 }
+    { enabled: api.isLoggedIn() }
   );
 
   const templateOptions: DropdownItem[] = useMemo(() => {
-    const options: DropdownItem[] = [allEntities];
+    const options: DropdownItem[] = [anyTemplate];
 
     if (templates) {
       templates.forEach((template) => {
-        options.push({
-          value: template.id,
-          label: template.label,
-        });
+        if (template.label.length > 20) {
+          options.push({
+            value: template.id,
+            label: template.label.substring(0, 20) + "...",
+          });
+        } else {
+          options.push({
+            value: template.id,
+            label: template.label,
+          });
+        }
       });
     }
     return options;
   }, [templates]);
+
+  const [resultsHeight, setResultsHeight] = useState(0);
+
+  useEffect(() => {
+    if (resultsRef.current) {
+      const rect = resultsRef.current.getBoundingClientRect();
+      const height = rect["height"];
+      setResultsHeight(height);
+    }
+  }, [resultsRef, fourthPanelBoxesOpened, validSearch]);
 
   return (
     <StyledBoxContent>
@@ -151,11 +178,12 @@ export const EntitySearchBox: React.FC = () => {
         <StyledRowHeader>Label (at least 2 characters)</StyledRowHeader>
         <Input
           width={150}
-          // placeholder="label (at least 2 characters)"
           placeholder="search"
           changeOnType
           onChangeFn={(value: string) => {
-            handleChange({ label: value + wildCardChar });
+            value.length
+              ? handleChange({ label: value + wildCardChar })
+              : handleChange({ label: value });
           }}
         />
       </StyledRow>
@@ -185,7 +213,7 @@ export const EntitySearchBox: React.FC = () => {
         <Dropdown
           placeholder={""}
           width={150}
-          options={templateOptions}
+          options={[defaultOption].concat(templateOptions)}
           value={templateOption}
           onChange={(option: ValueType<OptionTypeBase, any>) => {
             setTemplateOption(option);
@@ -218,10 +246,10 @@ export const EntitySearchBox: React.FC = () => {
           inputWidth={114}
         />
       </StyledRow>
-      {(cooccurrenceEntity || isFetching) && (
+      {(cooccurrenceEntity || cooccurrenceIsFetching) && (
         <StyledRow>
           <StyledTagLoaderWrap>
-            <Loader size={26} show={isFetching} />
+            <Loader size={26} show={cooccurrenceIsFetching} />
           </StyledTagLoaderWrap>
           {cooccurrenceEntity && (
             <EntityTag
@@ -244,15 +272,18 @@ export const EntitySearchBox: React.FC = () => {
         </StyledRow>
       )}
 
-      <StyledResultsWrapper>
+      <StyledResultsWrapper ref={resultsRef}>
         {/* RESULTS */}
         {sortedEntities.length > 0 && (
-          <StyledRow>
-            <EntitySearchResults results={sortedEntities} />
-          </StyledRow>
+          <EntitySearchResults
+            results={sortedEntities}
+            height={resultsHeight}
+          />
         )}
         <Loader show={isFetching} />
       </StyledResultsWrapper>
     </StyledBoxContent>
   );
 };
+
+export const MemoizedEntitySearchBox = React.memo(EntitySearchBox);

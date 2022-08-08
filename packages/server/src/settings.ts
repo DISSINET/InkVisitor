@@ -1,21 +1,19 @@
 import dotenv from "dotenv";
-import commandLineArgs from "command-line-args";
 
-// Setup command line options
-const options = commandLineArgs([
-  {
-    name: "env",
-    alias: "e",
-    defaultValue: "development",
-    type: String,
-  },
-]);
+// will load .env.development by default
+if (!process.env.NODE_ENV || !!process.env.ENV_FILE) {
+  console.log(
+    `[Settings] loading .env file: .env.${
+      process.env.ENV_FILE || "development"
+    }`
+  );
 
-// Set the env file
-const result2 = dotenv.config({
-  path: `./env/.env.${options.env}`,
-});
+  // Set the env file
+  const result = dotenv.config({
+    path: `./env/.env.${process.env.ENV_FILE || "development"}`,
+  });
 
-if (result2.error) {
-  throw result2.error;
+  if (result.error) {
+    throw result.error;
+  }
 }

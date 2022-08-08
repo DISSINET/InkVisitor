@@ -1,80 +1,42 @@
-import api from "api";
-import LogoInkvisitor from "assets/logos/inkvisitor-full.svg";
-import {
-  Box,
-  Button,
-  ButtonGroup,
-  Footer,
-  Header,
-  Panel,
-  PanelSeparator,
-  Toast,
-} from "components";
+import { Box, Button, Panel, PanelSeparator } from "components";
+import { Page } from "components/advanced";
 import { useSearchParams } from "hooks";
 import ScrollHandler from "hooks/ScrollHandler";
-import React, { useState } from "react";
-import { DndProvider } from "react-dnd";
-import { HTML5Backend } from "react-dnd-html5-backend";
+import React from "react";
+import { BiHide, BiShow } from "react-icons/bi";
 import { IoMdClose } from "react-icons/io";
 import { RiMenuFoldFill, RiMenuUnfoldFill } from "react-icons/ri";
-import { useQuery, useQueryClient } from "react-query";
-import { toast } from "react-toastify";
 import { setFirstPanelExpanded } from "redux/features/layout/firstPanelExpandedSlice";
+import { setFourthPanelBoxesOpened } from "redux/features/layout/fourthPanelBoxesOpenedSlice";
 import { setFourthPanelExpanded } from "redux/features/layout/fourthPanelExpandedSlice";
-import { setUsername } from "redux/features/usernameSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
-import {
-  collapsedPanelWidth,
-  heightFooter,
-  heightHeader,
-} from "Theme/constants";
-import packageJson from "../../../package.json";
-import {
-  EntityBookmarkBox,
-  EntitySearchBox,
-  EntityDetailBox,
-  LoginModal,
-  StatementEditorBox,
-  StatementListBox,
-  TerritoryTreeBox,
-  UserListModal,
-  TemplateListBox,
-} from "./containers";
-import { UserCustomizationModal } from "./containers/UserCustomizationModal/UserCustomizationModal";
-import {
-  StyledFaUserAlt,
-  StyledHeader,
-  StyledHeaderLogo,
-  StyledHeaderTag,
-  StyledPage,
-  StyledPanelWrap,
-  StyledText,
-  StyledUser,
-  StyledUserBox,
-  StyledUsername,
-} from "./MainPageStyles";
+import { collapsedPanelWidth, hiddenBoxHeight } from "Theme/constants";
+import { MemoizedEntityBookmarkBox } from "./containers/EntityBookmarkBox/EntityBookmarkBox";
+import { MemoizedEntityDetailBox } from "./containers/EntityDetailBox/EntityDetailBox";
+import { MemoizedEntitySearchBox } from "./containers/EntitySearchBox/EntitySearchBox";
+import { MemoizedStatementEditorBox } from "./containers/StatementEditorBox/StatementEditorBox";
+import { MemoizedStatementListBox } from "./containers/StatementsListBox/StatementListBox";
+import { MemoizedTemplateListBox } from "./containers/TemplateListBox/TemplateListBox";
+import { MemoizedTerritoryTreeBox } from "./containers/TerritoryTreeBox/TerritoryTreeBox";
 
-interface MainPage {
-  size: number[];
-}
+type FourthPanelBoxes = "search" | "bookmarks" | "templates";
 
-const MainPage: React.FC<MainPage> = ({ size }) => {
+interface MainPage {}
+
+const MainPage: React.FC<MainPage> = ({}) => {
   const {
-    detailId,
-    setDetailId,
-    statementId,
+    detailIdArray,
     setStatementId,
-    territoryId,
     setTerritoryId,
+    clearAllDetailIds,
+    selectedDetailId,
   } = useSearchParams();
 
-  const [width, height] = size;
-
-  const isLoggedIn = api.isLoggedIn();
   const dispatch = useAppDispatch();
-  const username = useAppSelector((state) => state.username);
-  const userId = localStorage.getItem("userid");
-  const userRole = localStorage.getItem("userrole");
+
+  const fourthPanelBoxesOpened: { [key: string]: boolean } = useAppSelector(
+    (state) => state.layout.fourthPanelBoxesOpened
+  );
 
   const firstPanelExpanded: boolean = useAppSelector(
     (state) => state.layout.firstPanelExpanded
@@ -85,58 +47,21 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
   const layoutWidth: number = useAppSelector(
     (state) => state.layout.layoutWidth
   );
+  const contentHeight: number = useAppSelector(
+    (state) => state.layout.contentHeight
+  );
   const panelWidths: number[] = useAppSelector(
     (state) => state.layout.panelWidths
   );
   const separatorXPosition: number = useAppSelector(
     (state) => state.layout.separatorXPosition
   );
-  const queryClient = useQueryClient();
 
-  const {
-    status: statusUser,
-    data: user,
-    error: errorUser,
-    isFetching: isFetchingUser,
-  } = useQuery(
-    ["user", username],
-    async () => {
-      if (userId) {
-        const res = await api.usersGet(userId);
-        return res.data;
-      } else {
-        return false;
-      }
-    },
-    { enabled: !!userId && api.isLoggedIn(), retry: 2 }
-  );
-
-  const [userAdministrationModalOpen, setUserAdministrationModalOpen] =
-    useState<boolean>(false);
-  const handleLogOut = () => {
-    api.signOut();
-    dispatch(setUsername(""));
-    toast.success("You've been successfully logged out!");
-    queryClient.removeQueries();
-    setDetailId("");
+  const logOutCleanUp = () => {
+    clearAllDetailIds();
     setStatementId("");
     setTerritoryId("");
   };
-
-  const handleUsersModalClick = () => {
-    setUserAdministrationModalOpen(true);
-  };
-
-  const handleUsersModalCancelClick = () => {
-    setUserAdministrationModalOpen(false);
-  };
-
-  const environmentName = (process.env.ROOT_URL || "").replace(
-    /apps\/inkvisitor[-]?/,
-    ""
-  );
-
-  const heightContent = height - heightHeader - heightFooter;
 
   const firstPanelButton = () => (
     <Button
@@ -153,8 +78,9 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
       icon={firstPanelExpanded ? <RiMenuFoldFill /> : <RiMenuUnfoldFill />}
     />
   );
-  const fourthPanelButton = () => (
+  const hideFourthPanelButton = () => (
     <Button
+      key="hide"
       onClick={() => {
         if (fourthPanelExpanded) {
           dispatch(setFourthPanelExpanded(false));
@@ -169,192 +95,162 @@ const MainPage: React.FC<MainPage> = ({ size }) => {
     />
   );
 
-  const [userCustomizationOpen, setUserCustomizationOpen] = useState(false);
+  const handleHideBoxButtonClick = (
+    boxToHide: FourthPanelBoxes,
+    isThisBoxHidden: boolean
+  ) => {
+    if (isThisBoxHidden) {
+      const newObject = {
+        ...fourthPanelBoxesOpened,
+        [boxToHide]: true,
+      };
+      dispatch(setFourthPanelBoxesOpened(newObject));
+      localStorage.setItem("fourthPanelBoxesOpened", JSON.stringify(newObject));
+    } else {
+      const newObject = {
+        ...fourthPanelBoxesOpened,
+        [boxToHide]: false,
+      };
+      dispatch(setFourthPanelBoxesOpened(newObject));
+      localStorage.setItem("fourthPanelBoxesOpened", JSON.stringify(newObject));
+    }
+  };
 
-  const versionText = `v. ${packageJson.version} 
-  ${
-    ["production", ""].indexOf(environmentName) === -1
-      ? `| ${environmentName} | built: ${process.env.BUILD_TIMESTAMP}`
-      : ""
-  }`;
+  const hideBoxButton = (boxToHide: FourthPanelBoxes) => {
+    const isThisBoxHidden = !fourthPanelBoxesOpened[boxToHide];
+    return (
+      <>
+        {fourthPanelExpanded && (
+          <Button
+            key={boxToHide}
+            inverted
+            icon={isThisBoxHidden ? <BiHide /> : <BiShow />}
+            onClick={() => handleHideBoxButtonClick(boxToHide, isThisBoxHidden)}
+          />
+        )}
+      </>
+    );
+  };
+
+  const getFourthPanelBoxHeight = (box: FourthPanelBoxes): number => {
+    const isThisBoxHidden = !fourthPanelBoxesOpened[box];
+    const openBoxesCount = Object.values(fourthPanelBoxesOpened).filter(
+      (b) => b === true
+    );
+
+    if (!fourthPanelExpanded) {
+      return contentHeight / 3;
+    } else if (isThisBoxHidden) {
+      return hiddenBoxHeight;
+    } else {
+      if (openBoxesCount.length === 3) {
+        return contentHeight / 3;
+      } else if (openBoxesCount.length === 2) {
+        return (contentHeight - hiddenBoxHeight) / 2;
+      } else {
+        return contentHeight - 2 * hiddenBoxHeight;
+      }
+    }
+  };
 
   return (
     <>
-      <StyledPage layoutWidth={layoutWidth}>
-        <Header
-          height={heightHeader}
-          paddingY={0}
-          paddingX={10}
-          color={
-            ["production", ""].indexOf(environmentName) === -1
-              ? environmentName
-              : "primary"
+      <ScrollHandler />
+      <Page logOutCleanUp={logOutCleanUp}>
+        {separatorXPosition > 0 && <PanelSeparator />}
+        {/* FIRST PANEL */}
+        <Panel
+          width={firstPanelExpanded ? panelWidths[0] : collapsedPanelWidth}
+        >
+          <Box
+            height={contentHeight}
+            label="Territories"
+            isExpanded={firstPanelExpanded}
+            button={[firstPanelButton()]}
+            noPadding
+          >
+            <MemoizedTerritoryTreeBox />
+          </Box>
+        </Panel>
+        {/* SECOND PANEL */}
+        <Panel
+          width={
+            firstPanelExpanded
+              ? panelWidths[1]
+              : panelWidths[1] + panelWidths[0] - collapsedPanelWidth
           }
-          left={
-            <StyledHeader>
-              <StyledHeaderLogo
-                height={heightHeader - 10}
-                src={LogoInkvisitor}
-                alt="React Logo"
-              />
-              <StyledHeaderTag
-                onClick={async () => {
-                  await navigator.clipboard.writeText(versionText);
-                  toast.info("Inkvisitor version copied to clipboard");
-                }}
-              >
-                {versionText}
-              </StyledHeaderTag>
-            </StyledHeader>
-          }
-          right={
-            <div>
-              {isLoggedIn && (
-                <StyledUserBox>
-                  <StyledUser>
-                    <StyledText>logged as</StyledText>
-                    <StyledFaUserAlt
-                      size={14}
-                      onClick={() => setUserCustomizationOpen(true)}
-                    />
-                    <StyledUsername
-                      onClick={() => setUserCustomizationOpen(true)}
-                    >
-                      {user ? user.name : ""}
-                    </StyledUsername>
-                  </StyledUser>
-                  <ButtonGroup>
-                    {userRole == "admin" && (
-                      <Button
-                        label="Manage Users"
-                        color="info"
-                        onClick={() => handleUsersModalClick()}
-                      />
-                    )}
-                    <Button
-                      label="Log Out"
-                      color="danger"
-                      onClick={() => handleLogOut()}
-                    />
-                  </ButtonGroup>
-                </StyledUserBox>
-              )}
-            </div>
-          }
-        />
-        <DndProvider backend={HTML5Backend}>
-          <ScrollHandler />
-          <StyledPanelWrap>
-            {separatorXPosition > 0 && <PanelSeparator />}
-            {/* FIRST PANEL */}
-            <Panel
-              width={firstPanelExpanded ? panelWidths[0] : collapsedPanelWidth}
+        >
+          <Box
+            height={
+              detailIdArray.length ? contentHeight / 2 - 20 : contentHeight
+            }
+            label="Statements"
+          >
+            <MemoizedStatementListBox />
+          </Box>
+          {(selectedDetailId || detailIdArray.length > 0) && (
+            <Box
+              height={contentHeight / 2 + 20}
+              label="Detail"
+              button={[
+                <Button
+                  inverted
+                  icon={<IoMdClose />}
+                  onClick={() => {
+                    clearAllDetailIds();
+                  }}
+                />,
+              ]}
             >
-              <Box
-                height={heightContent}
-                label="Territories"
-                isExpanded={firstPanelExpanded}
-                button={firstPanelButton()}
-                noPadding
-              >
-                <TerritoryTreeBox />
-              </Box>
-            </Panel>
-            {/* SECOND PANEL */}
-            <Panel
-              width={
-                firstPanelExpanded
-                  ? panelWidths[1]
-                  : panelWidths[1] + panelWidths[0] - collapsedPanelWidth
-              }
-            >
-              <Box
-                height={detailId ? heightContent / 2 - 20 : heightContent}
-                label="Statements"
-              >
-                <StatementListBox />
-              </Box>
-              {detailId && (
-                <Box
-                  height={heightContent / 2 + 20}
-                  label="Detail"
-                  button={
-                    detailId && (
-                      <Button
-                        inverted
-                        icon={<IoMdClose />}
-                        onClick={() => {
-                          setDetailId("");
-                        }}
-                      />
-                    )
-                  }
-                >
-                  <EntityDetailBox />
-                </Box>
-              )}
-            </Panel>
-            {/* THIRD PANEL */}
-            <Panel
-              width={
-                fourthPanelExpanded
-                  ? panelWidths[2]
-                  : panelWidths[2] + panelWidths[3] - collapsedPanelWidth
-              }
-            >
-              <Box height={heightContent} label="Editor">
-                <StatementEditorBox />
-              </Box>
-            </Panel>
-            {/* FOURTH PANEL */}
-            <Panel
-              width={fourthPanelExpanded ? panelWidths[3] : collapsedPanelWidth}
-            >
-              <Box
-                height={heightContent / 3}
-                label="Search"
-                color="white"
-                isExpanded={fourthPanelExpanded}
-                button={fourthPanelButton()}
-              >
-                <EntitySearchBox />
-              </Box>
-              <Box
-                height={heightContent / 3}
-                label="Bookmarks"
-                color="white"
-                isExpanded={fourthPanelExpanded}
-                button={fourthPanelButton()}
-              >
-                <EntityBookmarkBox />
-              </Box>
-              <Box
-                height={heightContent / 3}
-                label="Templates"
-                color="white"
-                isExpanded={fourthPanelExpanded}
-                button={fourthPanelButton()}
-              >
-                <TemplateListBox />
-              </Box>
-            </Panel>
-          </StyledPanelWrap>
-          <UserListModal
-            isOpen={userAdministrationModalOpen}
-            onCloseFn={handleUsersModalCancelClick}
-          />
-          {user && userCustomizationOpen && (
-            <UserCustomizationModal
-              user={user}
-              onClose={() => setUserCustomizationOpen(false)}
-            />
+              <MemoizedEntityDetailBox />
+            </Box>
           )}
-        </DndProvider>
-
-        <Toast />
-        <Footer height={heightFooter} />
-        {!isLoggedIn && <LoginModal />}
-      </StyledPage>
+        </Panel>
+        {/* THIRD PANEL */}
+        <Panel
+          width={
+            fourthPanelExpanded
+              ? panelWidths[2]
+              : panelWidths[2] + panelWidths[3] - collapsedPanelWidth
+          }
+        >
+          <Box height={contentHeight} label="Editor">
+            <MemoizedStatementEditorBox />
+          </Box>
+        </Panel>
+        {/* FOURTH PANEL */}
+        <Panel
+          width={fourthPanelExpanded ? panelWidths[3] : collapsedPanelWidth}
+        >
+          <Box
+            height={getFourthPanelBoxHeight("search")}
+            label="Search"
+            color="white"
+            isExpanded={fourthPanelExpanded}
+            button={[hideBoxButton("search"), hideFourthPanelButton()]}
+          >
+            <MemoizedEntitySearchBox />
+          </Box>
+          <Box
+            height={getFourthPanelBoxHeight("bookmarks")}
+            label="Bookmarks"
+            color="white"
+            isExpanded={fourthPanelExpanded}
+            button={[hideBoxButton("bookmarks"), hideFourthPanelButton()]}
+          >
+            <MemoizedEntityBookmarkBox />
+          </Box>
+          <Box
+            height={getFourthPanelBoxHeight("templates")}
+            label="Templates"
+            color="white"
+            isExpanded={fourthPanelExpanded}
+            button={[hideBoxButton("templates"), hideFourthPanelButton()]}
+          >
+            <MemoizedTemplateListBox />
+          </Box>
+        </Panel>
+      </Page>
     </>
   );
 };

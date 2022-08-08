@@ -122,7 +122,7 @@ describe("Tree get", function () {
     await createEntity(db, additionalEmptyTerritory);
 
     await request(app)
-      .get(`${apiPath}/tree/get`)
+      .get(`${apiPath}/tree`)
       .set("authorization", "Bearer " + supertestConfig.token)
       .expect(200)
       .expect(testCorrectRootTerritory.bind(undefined, territories))

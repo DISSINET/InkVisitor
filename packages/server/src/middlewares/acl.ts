@@ -55,7 +55,12 @@ class Acl {
 
   public async validate(req: Request): Promise<CustomError | null> {
     const permission = await this.getPermission(req);
-    if (permission?.route === "signin") {
+    console.log(permission);
+    if (
+      permission?.route === "signin" ||
+      permission?.route === "active" ||
+      permission?.route === "password"
+    ) {
       return null;
     }
 

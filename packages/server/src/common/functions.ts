@@ -51,3 +51,27 @@ export function timeout(mseconds: number): Promise<void> {
 export function regExpEscape(literal: string) {
   return literal.replace(/[-[\]{}()*+!<=:?.\/\\^$|#,]/g, "\\$&");
 }
+
+/**
+ * Function returns readable domain name
+ * @returns
+ */
+export function domainName(): string {
+  if (!process.env.DOMAIN) {
+    throw new Error("env variable DOMAIN is required");
+  }
+
+  return process.env.DOMAIN;
+}
+
+/**
+ * Function returns DOMAIN env variable prefixed with schema
+ * @returns
+ */
+export function hostUrl(): string {
+  if (!process.env.DOMAIN) {
+    throw new Error("env variable DOMAIN is required");
+  }
+
+  return `https://${process.env.DOMAIN}`;
+}

@@ -1,8 +1,9 @@
-import { EntityStatus, EntityClass, Language } from "@shared/enums";
+import { EntityClass, EntityStatus, Language } from "@shared/enums";
+import { IEntity } from "@shared/types";
 import api from "api";
 import { Button, Loader } from "components";
+import { EntityTag } from "components/advanced";
 import { useSearchParams } from "hooks";
-import { EntityTag } from "pages/MainPage/containers";
 import React from "react";
 import { BsArrow90DegLeft, BsArrowRightShort } from "react-icons/bs";
 import { useQuery } from "react-query";
@@ -14,7 +15,7 @@ import { StyledItemBox } from "./StatementListBreadcrumbItemStyles";
 interface StatementListBreadcrumbItem {
   territoryId: string;
 }
-const initialData = {
+const initialData: IEntity = {
   id: "",
   class: EntityClass.Territory,
   data: {},
@@ -22,6 +23,7 @@ const initialData = {
   detail: "",
   status: EntityStatus.Approved,
   language: Language.Empty,
+  references: [],
   props: [],
   notes: [],
 };

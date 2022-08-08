@@ -1,7 +1,12 @@
 import { UserRoleMode } from "@shared/enums";
-import { IEntity, ITerritory } from "@shared/types";
+import {
+  IEntity,
+  IResponseTreeTerritoryComponent,
+  ITerritory,
+} from "@shared/types";
 import { IParentTerritory } from "@shared/types/territory";
 import api from "api";
+import { EntityTag } from "components/advanced";
 import { useSearchParams } from "hooks";
 import update from "immutability-helper";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
@@ -18,7 +23,6 @@ import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { rootTerritoryId } from "Theme/constants";
 import theme from "Theme/theme";
 import { DraggedTerritoryItem, DragItem } from "types";
-import { EntityTag } from "../..";
 import { TerritoryTreeContextMenu } from "../TerritoryTreeContextMenu/TerritoryTreeContextMenu";
 import {
   StyledChildrenWrap,
@@ -31,7 +35,7 @@ import {
 
 interface TerritoryTreeNode {
   territory: ITerritory;
-  children: any;
+  children: IResponseTreeTerritoryComponent[];
   lvl: number;
   statementsCount: number;
   initExpandedNodes?: string[];
@@ -67,7 +71,9 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
 
   const [isExpanded, setIsExpanded] = useState(false);
   const [contextMenuOpen, setContextMenuOpen] = useState(false);
-  const [childTerritories, setChildTerritories] = useState<any[]>([]);
+  const [childTerritories, setChildTerritories] = useState<
+    IResponseTreeTerritoryComponent[]
+  >([]);
   const animatedStyle = useSpring({
     opacity: contextMenuOpen ? 0.6 : 1,
     display: "inline-flex",
@@ -313,23 +319,25 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
       <StyledChildrenWrap noIndent={lvl === 0}>
         {!hideChildTerritories &&
           isExpanded &&
-          childTerritories.map((child: any, key: number) => (
-            <TerritoryTreeNode
-              key={`${key}_${child.id}`}
-              territory={child.territory}
-              children={child.children}
-              right={child.right}
-              lvl={child.lvl}
-              statementsCount={child.statementsCount}
-              initExpandedNodes={initExpandedNodes}
-              propId={child.id}
-              index={key}
-              empty={child.empty}
-              moveFn={moveChildFn}
-              storedTerritories={storedTerritories}
-              updateUserMutation={updateUserMutation}
-            />
-          ))}
+          childTerritories.map(
+            (child: IResponseTreeTerritoryComponent, key: number) => (
+              <TerritoryTreeNode
+                key={`${key}_${child.territory.id}`}
+                territory={child.territory}
+                children={child.children}
+                right={child.right}
+                lvl={child.lvl}
+                statementsCount={child.statementsCount}
+                initExpandedNodes={initExpandedNodes}
+                propId={child.territory.id}
+                index={key}
+                empty={child.empty}
+                moveFn={moveChildFn}
+                storedTerritories={storedTerritories}
+                updateUserMutation={updateUserMutation}
+              />
+            )
+          )}
       </StyledChildrenWrap>
     </>
   );

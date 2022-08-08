@@ -37,6 +37,7 @@ export const StyledAttributeModalHeaderIcon = styled.div`
 export const StyledEntityWrap = styled.div`
   display: inline-flex;
   overflow: hidden;
+  max-width: 100%;
   margin-top: 1.5rem;
 `;
 export const StyledSuggesterWrap = styled.div`
