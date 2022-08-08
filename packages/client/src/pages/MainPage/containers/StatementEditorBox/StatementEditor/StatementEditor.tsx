@@ -106,7 +106,8 @@ export const StatementEditor: React.FC<StatementEditor> = ({
   updateStatementDataMutation,
   moveStatementMutation,
 }) => {
-  const { statementId, territoryId, setTerritoryId } = useSearchParams();
+  const { statementId, territoryId, setTerritoryId, appendDetailId } =
+    useSearchParams();
 
   const queryClient = useQueryClient();
 
@@ -295,26 +296,25 @@ export const StatementEditor: React.FC<StatementEditor> = ({
     if (isTemplate && !statement.isTemplate) {
       // create new entity from template
       const userRole = localStorage.getItem("userrole") as UserRole;
-      const templateEntity = allTemplates?.find(
-        (template) => template.id === newActionId
-      );
-      if (templateEntity) {
-        const newEntity =
-          templateEntity.class === EntityClass.Statement
-            ? DStatement(templateEntity as IStatement, userRole)
-            : DEntity(templateEntity as IEntity, userRole);
+      if (isTemplate) {
+        const templateEntity = allTemplates?.find(
+          (template) => template.id === newActionId
+        );
+        if (templateEntity) {
+          const newEntity =
+            templateEntity.class === EntityClass.Statement
+              ? DStatement(templateEntity as IStatement, userRole, true)
+              : DEntity(templateEntity as IEntity, userRole, true);
 
-        newEntity.isTemplate = false;
-        newEntity.usedTemplate = "";
-
-        // TODO: move to mutation
-        api.entityCreate(newEntity);
-
-        const newStatementAction = CStatementAction(newEntity.id);
-        const newData = {
-          actions: [...statement.data.actions, newStatementAction],
-        };
-        updateStatementDataMutation.mutate(newData);
+          // TODO: move to mutation
+          api.entityCreate(newEntity);
+          // onSuccess
+          const newStatementAction = CStatementAction(newEntity.id);
+          const newData = {
+            actions: [...statement.data.actions, newStatementAction],
+          };
+          updateStatementDataMutation.mutate(newData);
+        }
       }
     } else {
       const newStatementAction = CStatementAction(newActionId);

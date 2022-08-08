@@ -31,6 +31,7 @@ interface EntitySuggester {
   excludedEntities?: EntityClass[];
   excludedActantIds?: string[];
   filterEditorRights?: boolean;
+  isInsideTemplate?: boolean;
 }
 
 export const EntitySuggester: React.FC<EntitySuggester> = ({
@@ -45,6 +46,7 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
   excludedEntities = [],
   filterEditorRights = false,
   excludedActantIds = [],
+  isInsideTemplate = false,
 }) => {
   const [typed, setTyped] = useState<string>("");
   const debouncedTyped = useDebounce(typed, 100);
@@ -248,10 +250,18 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
         handleCreate(newCreated);
       }}
       onPick={(newPicked: EntitySuggestionI) => {
-        handlePick(newPicked);
+        if (isInsideTemplate) {
+          // TODO
+        } else {
+          handlePick(newPicked);
+        }
       }}
       onDrop={(newDropped: EntityDragItem) => {
-        handleDropped(newDropped);
+        if (isInsideTemplate) {
+          // TODO
+        } else {
+          handleDropped(newDropped);
+        }
       }}
       onHover={(newHoverred: DragObjectWithType) => {
         handleHoverred(newHoverred);

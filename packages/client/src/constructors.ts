@@ -129,13 +129,14 @@ export const CStatement = (
 // duplicate statement
 export const DStatement = (
   statement: IStatement,
-  userRole: UserRole
+  userRole: UserRole,
+  templateToEntity?: boolean
 ): IStatement => {
   const duplicatedStatement: IStatement = {
     id: uuidv4(),
     class: EntityClass.Statement,
     data: { ...statement.data },
-    label: statement.label + " [COPY OF]",
+    label: statement.label + templateToEntity ? "" : " [COPY OF]",
     detail: statement.detail,
     language: statement.language,
     notes: statement.notes,
@@ -148,11 +149,11 @@ export const DStatement = (
   };
 
   if (statement.isTemplate) {
-    duplicatedStatement.isTemplate = statement.isTemplate;
+    duplicatedStatement.isTemplate = templateToEntity ? false : true;
   }
-  if (statement.usedTemplate) {
-    duplicatedStatement.usedTemplate = statement.usedTemplate;
-  }
+  duplicatedStatement.usedTemplate = templateToEntity
+    ? statement.id
+    : statement.usedTemplate;
 
   duplicatedStatement.data.actants.forEach((a) => {
     a.id = uuidv4();
@@ -169,12 +170,16 @@ export const DStatement = (
 };
 
 // duplicate entity
-export const DEntity = (entity: IEntity, userRole: UserRole): IEntity => {
+export const DEntity = (
+  entity: IEntity,
+  userRole: UserRole,
+  templateToEntity?: boolean
+): IEntity => {
   const duplicatedEntity: IEntity = {
     id: uuidv4(),
     class: entity.class,
     data: entity.data,
-    label: entity.label + " [COPY OF]",
+    label: `${entity.label}${templateToEntity ? "" : " [COPY OF]"}`,
     detail: entity.detail,
     language: entity.language,
     notes: entity.notes,
@@ -187,11 +192,11 @@ export const DEntity = (entity: IEntity, userRole: UserRole): IEntity => {
   };
 
   if (entity.isTemplate) {
-    duplicatedEntity.isTemplate = entity.isTemplate;
+    duplicatedEntity.isTemplate = templateToEntity ? false : true;
   }
-  if (entity.usedTemplate) {
-    duplicatedEntity.usedTemplate = entity.usedTemplate;
-  }
+  duplicatedEntity.usedTemplate = templateToEntity
+    ? entity.id
+    : entity.usedTemplate;
   duplicatedEntity.references.forEach((r) => (r.id = uuidv4()));
 
   return duplicatedEntity;
