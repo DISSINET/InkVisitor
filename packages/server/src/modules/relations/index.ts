@@ -1,18 +1,5 @@
-import { mergeDeep } from "@common/functions";
-import { ResponseEntity, ResponseEntityDetail } from "@models/entity/response";
-import Audit from "@models/audit/audit";
-import { getEntityClass } from "@models/factory";
-import { findEntityById } from "@service/shorthands";
+import { IResponseGeneric } from "@shared/types";
 import {
-  IEntity,
-  IResponseEntity,
-  IResponseDetail,
-  IResponseGeneric,
-  IResponseSearch,
-  RequestSearch,
-} from "@shared/types";
-import {
-  EntityDoesNotExist,
   BadParams,
   InternalServerError,
   ModelNotValidError,
@@ -22,8 +9,6 @@ import {
 import Relation from "@models/relation/relation";
 import { Request, Router } from "express";
 import { asyncRouteHandler } from "../index";
-import { ResponseSearch } from "@models/entity/response-search";
-import { IRequestSearch } from "@shared/types/request-search";
 
 export default Router()
   .post(
@@ -91,6 +76,37 @@ export default Router()
         };
       } else {
         throw new InternalServerError(`cannot update relation ${id}`);
+      }
+    })
+  )
+  .delete(
+    "/:relationId",
+    asyncRouteHandler<IResponseGeneric>(async (request: Request) => {
+      const id = request.params.relationId;
+
+      if (!id) {
+        throw new BadParams("relation id has to be set");
+      }
+
+      const existing = await Relation.getById(request, id);
+      if (!existing) {
+        throw RelationDoesNotExist.forId(id);
+      }
+
+      if (!existing.canBeDeletedByUser(request.getUserOrFail())) {
+        throw new PermissionDeniedError(
+          "relation cannot be deleted by current user"
+        );
+      }
+
+      const result = await existing.delete(request.db.connection);
+
+      if (result.deleted === 1) {
+        return {
+          result: true,
+        };
+      } else {
+        throw new InternalServerError(`cannot delete relation ${id}`);
       }
     })
   );
