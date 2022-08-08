@@ -280,7 +280,7 @@ export const classesPropValue = [
   EntityClass.Resource,
 ];
 
-export interface EntitySuggestionI {
+export interface EntitySuggestion {
   entity: IEntity;
   icons?: React.ReactNode[];
 }

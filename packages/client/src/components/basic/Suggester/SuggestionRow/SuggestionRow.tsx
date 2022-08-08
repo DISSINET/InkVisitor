@@ -14,12 +14,12 @@ import {
 } from "../SuggesterStyles";
 import { areEqual } from "react-window";
 import { Tag } from "components";
-import { EntitySuggestionI } from "types";
+import { EntitySuggestion } from "types";
 import { IEntity } from "@shared/types";
 
 export const createItemData = memoize(
   (
-    items: EntitySuggestionI[],
+    items: EntitySuggestion[],
     onPick: (entity: IEntity) => void,
     selected: number
   ) => ({
@@ -30,7 +30,7 @@ export const createItemData = memoize(
 );
 
 export type EntityItemData = {
-  items: EntitySuggestionI[];
+  items: EntitySuggestion[];
   onPick: (entity: IEntity) => void;
   selected: number;
 };

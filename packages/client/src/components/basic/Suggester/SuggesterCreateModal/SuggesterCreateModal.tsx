@@ -24,9 +24,9 @@ import { OptionTypeBase, ValueType } from "react-select";
 import { toast } from "react-toastify";
 import { DropdownAny } from "Theme/constants";
 import { SuggesterItemToCreate } from "types";
-import { StyledContent, StyledNote } from "./SuggesterStyles";
+import { StyledContent, StyledNote } from "./SuggesterCreateModalStyles";
 
-interface SuggesterModal {
+interface SuggesterCreateModal {
   show?: boolean;
   typed: string;
   category: IOption;
@@ -34,7 +34,7 @@ interface SuggesterModal {
   onCreate: (item: SuggesterItemToCreate) => void;
   closeModal: () => void;
 }
-export const SuggesterModal: React.FC<SuggesterModal> = ({
+export const SuggesterCreateModal: React.FC<SuggesterCreateModal> = ({
   show = false,
   typed,
   category,

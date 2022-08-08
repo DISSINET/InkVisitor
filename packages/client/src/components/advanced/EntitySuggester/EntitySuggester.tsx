@@ -16,7 +16,7 @@ import { FaHome } from "react-icons/fa";
 import { useMutation, useQuery } from "react-query";
 import { OptionTypeBase, ValueType } from "react-select";
 import { DropdownAny, rootTerritoryId, wildCardChar } from "Theme/constants";
-import { EntityColors, EntityDragItem, EntitySuggestionI } from "types";
+import { EntityColors, EntityDragItem, EntitySuggestion } from "types";
 
 interface EntitySuggester {
   categoryTypes: ExtendedEntityClass[];

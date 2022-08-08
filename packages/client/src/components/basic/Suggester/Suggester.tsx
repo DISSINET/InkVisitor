@@ -1,10 +1,10 @@
 import { entitiesDictKeys } from "@shared/dictionaries";
-import { EntityClass, EntityStatus } from "@shared/enums";
+import { EntityClass } from "@shared/enums";
 import { IEntity, IOption } from "@shared/types";
 import { Button, Dropdown, Input, Loader, TypeBar } from "components";
 import useKeypress from "hooks/useKeyPress";
 import React, { useState } from "react";
-import { DragObjectWithType, DropTargetMonitor, useDrop } from "react-dnd";
+import { DropTargetMonitor, useDrop } from "react-dnd";
 import { FaPlus } from "react-icons/fa";
 import { MdCancel } from "react-icons/md";
 import { OptionTypeBase, ValueType } from "react-select";
@@ -14,12 +14,12 @@ import { DropdownAny, scrollOverscanCount } from "Theme/constants";
 import theme from "Theme/theme";
 import {
   EntityDragItem,
-  EntitySuggestionI,
+  EntitySuggestion,
   ItemTypes,
   SuggesterItemToCreate,
 } from "types";
+import { SuggesterCreateModal } from "./SuggesterCreateModal/SuggesterCreateModal";
 import { SuggesterKeyPress } from "./SuggesterKeyPress";
-import { SuggesterModal } from "./SuggesterModal";
 import {
   StyledAiOutlineWarning,
   StyledInputWrapper,
@@ -37,7 +37,7 @@ import {
 
 interface Suggester {
   marginTop?: boolean;
-  suggestions: EntitySuggestionI[];
+  suggestions: EntitySuggestion[];
   placeholder?: string; // text to display when typed === ""
   typed: string; // input value
   category: IOption; // selected category
@@ -159,7 +159,7 @@ export const Suggester: React.FC<Suggester> = ({
 
   const renderEntitySuggestions = () => {
     const itemData = createItemData(
-      suggestions as EntitySuggestionI[],
+      suggestions as EntitySuggestion[],
       onPick,
       selected
     );
@@ -266,7 +266,7 @@ export const Suggester: React.FC<Suggester> = ({
       </StyledSuggester>
 
       {showModal && (
-        <SuggesterModal
+        <SuggesterCreateModal
           show={true}
           typed={typed}
           category={category}
