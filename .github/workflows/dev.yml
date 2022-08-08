@@ -145,6 +145,7 @@ jobs:
       - name: Load image
         run: |
           ssh -tt ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}  -- "sh -c '
+          rm -rf /var/tmp/docker-tar* &&
           podman rm inkvisitor-staging --force || true && 
           podman rm inkvisitor-data-import --force || true && 
           podman load -i /var/www/html/apps/inkvisitor-staging.tar.gz && 

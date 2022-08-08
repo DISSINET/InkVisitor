@@ -502,7 +502,7 @@ class Api {
 
   async getAclPermissions(): Promise<AxiosResponse<IResponsePermission[]>> {
     try {
-      const response = await this.connection.get(`/acl/index`);
+      const response = await this.connection.get(`/acls`);
       return response;
     } catch (err: any | AxiosError) {
       throw { ...err.response.data };
