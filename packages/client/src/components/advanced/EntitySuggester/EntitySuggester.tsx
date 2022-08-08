@@ -106,9 +106,10 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
             detail: s.detail,
             status: s.status,
             ltype: s.data.logicalType,
-            isTemplate: s.isTemplate,
+            isTemplate: s.isTemplate ? s.isTemplate : false,
             id: s.id,
             icons: icons,
+            entity: entity,
           };
         });
     },

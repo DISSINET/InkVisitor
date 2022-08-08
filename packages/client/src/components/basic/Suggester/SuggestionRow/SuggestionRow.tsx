@@ -14,14 +14,10 @@ import {
 } from "../SuggesterStyles";
 import { areEqual } from "react-window";
 import { Tag } from "components";
-import { EntitySuggestionI, UserSuggestionI } from "types";
+import { EntitySuggestionI } from "types";
 
 export const createItemData = memoize(
-  (
-    items: EntitySuggestionI[] | UserSuggestionI[],
-    onPick: Function,
-    selected: number
-  ) => ({
+  (items: EntitySuggestionI[], onPick: Function, selected: number) => ({
     items,
     onPick,
     selected,
@@ -77,48 +73,3 @@ const EntityRow: React.FC<EntityRow> = ({ data, index, style }) => {
 };
 
 export const MemoizedEntityRow = React.memo(EntityRow, areEqual);
-
-export type UserItemData = {
-  items: UserSuggestionI[];
-  onPick: Function;
-  selected: number;
-};
-
-interface UserRow {
-  data: UserItemData;
-  index: number;
-  style: any;
-}
-const UserRow: React.FC<UserRow> = ({ data, index, style }) => {
-  const { items, onPick, selected } = data;
-  const suggestion = items[index];
-
-  return (
-    <StyledSuggestionRow key={index} style={style}>
-      <StyledSuggestionLineActions isSelected={selected === index}>
-        <FaPlayCircle
-          color={theme.color["black"]}
-          onClick={() => {
-            onPick(suggestion);
-          }}
-        />
-      </StyledSuggestionLineActions>
-      <StyledSuggestionLineTag isSelected={selected === index}>
-        <StyledTagWrapper>
-          <Tag
-            fullWidth
-            propId={suggestion.id}
-            label={suggestion.label}
-            // TODO: create type for UserCategory
-            category={"U"}
-          />
-        </StyledTagWrapper>
-      </StyledSuggestionLineTag>
-      <StyledSuggestionLineIcons isSelected={selected === index}>
-        {suggestion.icons}
-      </StyledSuggestionLineIcons>
-    </StyledSuggestionRow>
-  );
-};
-
-export const MemoizedUserRow = React.memo(UserRow, areEqual);

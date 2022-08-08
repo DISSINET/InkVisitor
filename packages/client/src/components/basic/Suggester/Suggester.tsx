@@ -11,7 +11,7 @@ import { toast } from "react-toastify";
 import { FixedSizeList as List } from "react-window";
 import { DropdownAny, scrollOverscanCount } from "Theme/constants";
 import theme from "Theme/theme";
-import { EntitySuggestionI, ItemTypes, UserSuggestionI } from "types";
+import { EntitySuggestionI, ItemTypes } from "types";
 import { SuggesterKeyPress } from "./SuggesterKeyPress";
 import { SuggesterModal } from "./SuggesterModal";
 import {
@@ -27,14 +27,11 @@ import {
   createItemData,
   EntityItemData,
   MemoizedEntityRow,
-  MemoizedUserRow,
-  UserItemData,
 } from "./SuggestionRow/SuggestionRow";
 
 interface Suggester {
   marginTop?: boolean;
-  suggesterType?: "entity" | "user";
-  suggestions: EntitySuggestionI[] | UserSuggestionI[];
+  suggestions: EntitySuggestionI[];
   placeholder?: string; // text to display when typed === ""
   typed: string; // input value
   category: IOption; // selected category
@@ -60,7 +57,6 @@ interface Suggester {
 
 export const Suggester: React.FC<Suggester> = ({
   marginTop,
-  suggesterType = "entity",
   suggestions = [],
   placeholder = "",
   typed,
@@ -169,22 +165,6 @@ export const Suggester: React.FC<Suggester> = ({
     );
   };
 
-  const renderUserSuggestions = () => {
-    const itemData = createItemData(suggestions, onPick, selected);
-    return (
-      <List
-        itemData={itemData as UserItemData}
-        height={suggestions.length > 7 ? 200 : suggestions.length * 25}
-        itemCount={suggestions.length}
-        itemSize={25}
-        width="100%"
-        overscanCount={scrollOverscanCount}
-      >
-        {MemoizedUserRow}
-      </List>
-    );
-  };
-
   return (
     <>
       <StyledSuggester marginTop={marginTop}>
@@ -256,8 +236,7 @@ export const Suggester: React.FC<Suggester> = ({
             onMouseOut={() => setIsHovered(false)}
           >
             <StyledRelativePosition>
-              {suggesterType === "entity" && renderEntitySuggestions()}
-              {suggesterType === "user" && renderUserSuggestions()}
+              {renderEntitySuggestions()}
               <Loader size={30} show={isFetching} />
             </StyledRelativePosition>
             <SuggesterKeyPress

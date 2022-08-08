@@ -302,9 +302,5 @@ export interface EntitySuggestionI {
   color: string;
   icons?: React.ReactNode[];
   isTemplate: boolean;
-}
-export interface UserSuggestionI {
-  id: string;
-  label: string;
-  icons?: React.ReactNode[];
+  entity: IEntity;
 }
