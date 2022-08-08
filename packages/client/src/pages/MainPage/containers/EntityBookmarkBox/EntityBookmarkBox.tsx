@@ -20,6 +20,7 @@ import React, { useMemo, useState } from "react";
 import { FaPlus } from "react-icons/fa";
 import { useMutation, useQuery, useQueryClient } from "react-query";
 import { toast } from "react-toastify";
+import { useAppSelector } from "redux/hooks";
 import {
   StyledContent,
   StyledFolderList,
@@ -29,6 +30,10 @@ import { EntityBookmarkFolder } from "./EntityBookmarkFolder/EntityBookmarkFolde
 
 export const EntityBookmarkBox: React.FC = () => {
   const queryClient = useQueryClient();
+
+  const fourthPanelBoxesOpened: { [key: string]: boolean } = useAppSelector(
+    (state) => state.layout.fourthPanelBoxesOpened
+  );
 
   const [editingFolder, setEditingFolder] = useState<string | false>(false);
   const [removingFolder, setRemovingFolder] = useState<string | false>(false);
@@ -45,11 +50,11 @@ export const EntityBookmarkBox: React.FC = () => {
   } = useQuery(
     ["bookmarks"],
     async () => {
-      const res = await api.bookmarksGet(false);
+      const res = await api.bookmarksGet("me");
       res.data.sort((a, b) => (a.name > b.name ? 1 : -1));
       return res.data;
     },
-    { enabled: api.isLoggedIn() }
+    { enabled: api.isLoggedIn() && fourthPanelBoxesOpened["bookmarks"] }
   );
 
   const removingFolderName = useMemo(() => {
@@ -115,7 +120,7 @@ export const EntityBookmarkBox: React.FC = () => {
             return b;
           }
         });
-        await api.usersUpdate(false, {
+        await api.usersUpdate("me", {
           bookmarks: newBookmarksAfterEdit,
         });
       }
@@ -137,7 +142,7 @@ export const EntityBookmarkBox: React.FC = () => {
         const newBookmarksAfterRemove = newBookmarks.filter(
           (b) => b.id !== removingFolder
         );
-        await api.usersUpdate(false, {
+        await api.usersUpdate("me", {
           bookmarks: newBookmarksAfterRemove,
         });
       }
@@ -169,7 +174,7 @@ export const EntityBookmarkBox: React.FC = () => {
         const newBookmarks: IBookmarkFolder[] | false = getBookmarksCopy();
         if (newBookmarks) {
           newBookmarks.push(newBookmarkFolder);
-          await api.usersUpdate(false, { bookmarks: newBookmarks });
+          await api.usersUpdate("me", { bookmarks: newBookmarks });
         }
       }
     },
@@ -221,7 +226,12 @@ export const EntityBookmarkBox: React.FC = () => {
       <Loader show={isFetching} />
 
       {/* edit modal */}
-      <Modal key="new-bookmar-modal" showModal={!!editingFolder} width="thin">
+      <Modal
+        key="new-bookmar-modal"
+        showModal={!!editingFolder}
+        width="thin"
+        onEnterPress={() => acceptEditingFolderMutation.mutate()}
+      >
         <ModalHeader title="Bookmark Folder" />
         <ModalContent>
           <Input
@@ -231,9 +241,6 @@ export const EntityBookmarkBox: React.FC = () => {
             value={editingFolderName}
             changeOnType
             autoFocus
-            onEnterPressFn={() => {
-              acceptEditingFolderMutation.mutate();
-            }}
           />
         </ModalContent>
 
@@ -267,6 +274,7 @@ export const EntityBookmarkBox: React.FC = () => {
         onClose={() => {
           cancelCreatingFolder();
         }}
+        onEnterPress={() => createFolderMutation.mutate()}
       >
         <ModalHeader title="Bookmark Folder" />
         <ModalContent>
@@ -277,9 +285,6 @@ export const EntityBookmarkBox: React.FC = () => {
             value={editingFolderName}
             changeOnType
             autoFocus
-            onEnterPressFn={() => {
-              createFolderMutation.mutate();
-            }}
           />
         </ModalContent>
 
@@ -324,3 +329,5 @@ export const EntityBookmarkBox: React.FC = () => {
     </StyledContent>
   );
 };
+
+export const MemoizedEntityBookmarkBox = React.memo(EntityBookmarkBox);

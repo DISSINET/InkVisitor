@@ -6,8 +6,8 @@ import {
   IStatementAction,
 } from "@shared/types";
 import { Button, Table, TagGroup, Tooltip } from "components";
+import { EntityTag } from "components/advanced";
 import { useSearchParams } from "hooks";
-import { EntityTag } from "pages/MainPage/containers/EntityTag/EntityTag";
 import React, { useMemo } from "react";
 import { FaEdit } from "react-icons/fa";
 import { Cell, Column } from "react-table";

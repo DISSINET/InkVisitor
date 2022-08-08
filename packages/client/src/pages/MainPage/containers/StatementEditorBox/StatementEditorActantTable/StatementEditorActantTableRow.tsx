@@ -7,8 +7,13 @@ import {
   IStatementActant,
 } from "@shared/types";
 import { AttributeIcon, Button, ButtonGroup } from "components";
+import {
+  AttributeButtonGroup,
+  EntitySuggester,
+  EntityTag,
+} from "components/advanced";
 import { useSearchParams } from "hooks";
-import React, { useCallback, useEffect, useRef } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   DragSourceMonitor,
   DropTargetMonitor,
@@ -28,8 +33,6 @@ import {
   ItemTypes,
 } from "types";
 import { dndHoverFn } from "utils";
-import { EntitySuggester, EntityTag } from "../..";
-import { AttributeButtonGroup } from "../../AttributeButtonGroup/AttributeButtonGroup";
 import AttributesEditor from "../../AttributesEditor/AttributesEditor";
 import { PropGroup } from "../../PropGroup/PropGroup";
 import {
@@ -219,6 +222,8 @@ export const StatementEditorActantTableRow: React.FC<
     );
   };
 
+  const [modalOpen, setModalOpen] = useState<boolean>(false);
+
   const renderAttributesCell = () => {
     const {
       actant,
@@ -233,6 +238,8 @@ export const StatementEditorActantTableRow: React.FC<
       <ButtonGroup noMarginRight>
         {sActant && (
           <AttributesEditor
+            modalOpen={modalOpen}
+            setModalOpen={setModalOpen}
             modalTitle={`Actant involvement`}
             actant={actant}
             disabledAllAttributes={!userCanEdit}
@@ -299,6 +306,7 @@ export const StatementEditorActantTableRow: React.FC<
             inverted={true}
             noBorder
             icon={sActant.bundleOperator}
+            onClick={() => setModalOpen(true)}
           />
         )}
       </ButtonGroup>

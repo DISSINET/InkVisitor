@@ -9,7 +9,7 @@ export class CustomError extends Error {
   public static code: number = 400; // html code
   public loggable: boolean = false; // errors could be logged into console as warn messages
   public log: string = ""; // same as first constructor argument - wont be thrown in realtime, but it will be printed as warning
-  public title: string = "";
+  public title: string = ""; // represents the error class in readable form
 
   // the following is commented, it should be inherited from base Error
   //public name: string = ""; // Stands for class name, replaces default 'Error' string from parent constructor
@@ -190,7 +190,7 @@ class TerritoriesBrokenError extends CustomError {
 }
 
 /**
- * TerrytoryInvalidMove will be thrown during tree/moveTerritory request, while violating some constraint
+ * TerrytoryInvalidMove will be thrown during tree/id/position request, while violating some constraint
  */
 class TerrytoryInvalidMove extends CustomError {
   public static code = 500;
@@ -237,6 +237,21 @@ class InvalidDeleteError extends CustomError {
 }
 
 /**
+ * EmailError will be thrown in case of error occured in mail module
+ */
+class EmailError extends CustomError {
+  public static code = 500;
+  public static title = "Email cannot be sent";
+  public static message = "Unknow error while sending the email";
+  loggable = true;
+
+  constructor(m: string, internalMessage: string) {
+    super(m);
+    this.log = internalMessage;;
+  }
+}
+
+/**
  * RelationDoesNotExist will be thrown when attempting to remove/update the relation entry, which does not exist
  */
 class RelationDoesNotExist extends CustomError {
@@ -279,6 +294,7 @@ const allErrors: Record<string, any> = {
   TerritoryDoesNotExits,
   TerrytoryInvalidMove,
   StatementInvalidMove,
+  EmailError,
   RelationDoesNotExist,
 };
 
@@ -312,5 +328,6 @@ export {
   TerritoryDoesNotExits,
   TerrytoryInvalidMove,
   StatementInvalidMove,
+  EmailError,
   RelationDoesNotExist,
 };

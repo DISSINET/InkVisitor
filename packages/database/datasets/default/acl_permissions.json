@@ -46,6 +46,16 @@
   },
   {
     "controller": "users",
+    "route": "active",
+    "roles": ["*"]
+  },
+  {
+    "controller": "users",
+    "route": "password",
+    "roles": ["*"]
+  },
+  {
+    "controller": "users",
     "route": "bookmarksGet",
     "roles": ["*"]
   },
@@ -63,6 +73,11 @@
     "controller": "users",
     "route": "update",
     "roles": ["*"]
+  },
+  {
+    "controller": "users",
+    "route": "/me/emails/test",
+    "roles": ["admin"]
   },
   {
     "controller": "entities",
@@ -87,21 +102,6 @@
   {
     "controller": "entities",
     "route": "search",
-    "roles": ["*"]
-  },
-  {
-    "controller": "entities",
-    "route": "get",
-    "roles": ["*"]
-  },
-  {
-    "controller": "entities",
-    "route": "getMore",
-    "roles": ["*"]
-  },
-  {
-    "controller": "audits",
-    "route": "get",
     "roles": ["*"]
   },
   {

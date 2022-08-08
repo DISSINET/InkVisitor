@@ -514,7 +514,13 @@ class Statement extends Entity implements IStatement {
       .run(db);
 
     return statements.sort((a, b) => {
-      return a.data.territory.order - b.data.territory.order;
+      if (!a.data.territory) {
+        return 1;
+      } else if (!b.data.territory) {
+        return -1;
+      } else {
+        return a.data.territory.order - b.data.territory.order;
+      }
     });
   }
 
