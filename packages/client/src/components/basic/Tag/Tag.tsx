@@ -13,7 +13,7 @@ import { setDraggedTerritory } from "redux/features/territoryTree/draggedTerrito
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import {
   DraggedTerritoryItem,
-  Entities,
+  EntityColors,
   EntityDragItem,
   ItemTypes,
 } from "types";
@@ -129,7 +129,7 @@ export const Tag: React.FC<TagProps> = ({
 
   const renderEntityTag = () => (
     <StyledEntityTag
-      color={Entities[entityClass].color}
+      color={EntityColors[entityClass].color}
       isTemplate={isTemplate}
     >
       {entityClass}

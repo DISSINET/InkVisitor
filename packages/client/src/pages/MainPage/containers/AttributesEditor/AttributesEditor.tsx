@@ -25,7 +25,7 @@ import React, { useMemo, useState } from "react";
 import { FaUnlink } from "react-icons/fa";
 import { MdSettings } from "react-icons/md";
 import { excludedSuggesterEntities } from "Theme/constants";
-import { AttributeData, Entities, PropAttributeName } from "types";
+import { AttributeData, EntityColors, PropAttributeName } from "types";
 import {
   StyledAttributeModalHeaderIcon,
   StyledAttributeModalHeaderWrapper,
@@ -191,7 +191,7 @@ const AttributesEditor: React.FC<StatementEditorAttributes> = ({
         />
         <ModalContent>
           <StyledContentWrap
-            color={entity ? Entities[entity.class].color : undefined}
+            color={entity ? EntityColors[entity.class].color : undefined}
           >
             <AttributesForm
               modalData={modalData}

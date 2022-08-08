@@ -27,7 +27,7 @@ import { FaUnlink } from "react-icons/fa";
 import { MdSettings } from "react-icons/md";
 import {
   AttributeData,
-  Entities,
+  EntityColors,
   PropAttributeFilter,
   PropAttributeGroup,
   PropAttributeGroupDataObject,
@@ -284,7 +284,7 @@ export const AttributesGroupEditor: React.FC<AttributesGroupEditor> = ({
         />
         <ModalContent>
           <StyledGridColumns>
-            <StyledColumnWrap color={Entities[EntityClass.Statement].color}>
+            <StyledColumnWrap color={EntityColors[EntityClass.Statement].color}>
               <StyledColumnHeading>Statement</StyledColumnHeading>
 
               <AttributesForm
@@ -297,7 +297,7 @@ export const AttributesGroupEditor: React.FC<AttributesGroupEditor> = ({
             <StyledColumnWrap
               color={
                 propTypeActant
-                  ? Entities[propTypeActant.class].color
+                  ? EntityColors[propTypeActant.class].color
                   : undefined
               }
             >
@@ -358,7 +358,7 @@ export const AttributesGroupEditor: React.FC<AttributesGroupEditor> = ({
             <StyledColumnWrap
               color={
                 propValueActant
-                  ? Entities[propValueActant.class].color
+                  ? EntityColors[propValueActant.class].color
                   : undefined
               }
             >

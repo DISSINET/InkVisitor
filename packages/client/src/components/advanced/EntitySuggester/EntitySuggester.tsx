@@ -16,7 +16,7 @@ import { FaHome } from "react-icons/fa";
 import { useMutation, useQuery } from "react-query";
 import { OptionTypeBase, ValueType } from "react-select";
 import { DropdownAny, rootTerritoryId, wildCardChar } from "Theme/constants";
-import { Entities, EntityDragItem, EntitySuggestionI } from "types";
+import { EntityColors, EntityDragItem, EntitySuggestionI } from "types";
 
 interface EntitySuggester {
   categoryTypes: ExtendedEntityClass[];
@@ -93,7 +93,7 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
           excludedActantIds.length ? !excludedActantIds.includes(s.id) : s
         )
         .map((entity: IEntity) => {
-          const category = Entities[entity.class];
+          const category = EntityColors[entity.class];
           const icons: React.ReactNode[] = [];
 
           if (territoryActants?.includes(entity.id)) {
@@ -216,7 +216,7 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
   const [isWrongDropCategory, setIsWrongDropCategory] = useState(false);
 
   const handleHoverred = (newHoverred: EntityDragItem) => {
-    const hoverredCategory = newHoverred.category;
+    const hoverredCategory = newHoverred.entityClass;
     if (
       !categoryTypes.includes(hoverredCategory) ||
       (disableTemplatesAccept && newHoverred.isTemplate)

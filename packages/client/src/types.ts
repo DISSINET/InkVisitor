@@ -39,82 +39,68 @@ export const Colors = [
   "entityV",
 ];
 
-interface ICategory {
+interface IEntityColor {
   entityClass: ExtendedEntityClass;
-  label: string;
   color: typeof Colors[number];
 }
 
 // Use for colors, for dropdowns use entity.ts dictionary
-export const Entities: { [key: string]: ICategory } = {
+export const EntityColors: { [key: string]: IEntityColor } = {
   T: {
     entityClass: EntityClass.Territory,
-    label: "Territory",
     color: "entityT",
   },
   R: {
     entityClass: EntityClass.Resource,
-    label: "Resource",
     color: "entityR",
   },
   A: {
     entityClass: EntityClass.Action,
-    label: "Action",
     color: "entityA",
   },
   S: {
     entityClass: EntityClass.Statement,
-    label: "Statement",
     color: "entityS",
   },
   C: {
     entityClass: EntityClass.Concept,
-    label: "Concept",
     color: "entityC",
   },
   E: {
     entityClass: EntityClass.Event,
-    label: "Event",
     color: "entityE",
   },
   G: {
     entityClass: EntityClass.Group,
-    label: "Group",
     color: "entityG",
   },
   L: {
     entityClass: EntityClass.Location,
-    label: "Location",
     color: "entityL",
   },
   O: {
     entityClass: EntityClass.Object,
-    label: "Object",
     color: "entityO",
   },
   P: {
     entityClass: EntityClass.Person,
-    label: "Person",
     color: "entityP",
   },
   V: {
     entityClass: EntityClass.Value,
-    label: "Value",
     color: "entityV",
   },
   X: {
     entityClass: EntityExtension.Empty,
-    label: "unset",
     color: "white",
   },
   all: {
     entityClass: EntityExtension.Any,
-    label: "*",
     color: "white",
   },
 };
 
-export type EntityKeys = keyof typeof Entities;
+export type EntityKeys = keyof typeof EntityColors;
 
 export interface Node {
   id: string;
