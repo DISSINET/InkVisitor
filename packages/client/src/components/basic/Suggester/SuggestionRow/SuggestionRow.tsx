@@ -38,6 +38,7 @@ interface EntityRow {
 const EntityRow: React.FC<EntityRow> = ({ data, index, style }) => {
   const { items, onPick, selected } = data;
   const suggestion = items[index];
+  const { entity } = suggestion;
 
   return (
     <StyledSuggestionRow key={index} style={style}>
@@ -60,7 +61,7 @@ const EntityRow: React.FC<EntityRow> = ({ data, index, style }) => {
             status={suggestion.status}
             ltype={suggestion.ltype}
             tooltipDetail={suggestion.detail}
-            category={suggestion.category}
+            entityClass={suggestion.entityClass}
             isTemplate={suggestion.isTemplate}
           />
         </StyledTagWrapper>

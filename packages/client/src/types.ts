@@ -12,7 +12,9 @@ import {
   Partitivity,
   Virtuality,
   ExtendedEntityClass,
+  EntityExtension,
 } from "@shared/enums";
+import { IEntity } from "@shared/types";
 
 export const Colors = [
   "black",
@@ -37,76 +39,76 @@ export const Colors = [
   "entityV",
 ];
 
-interface IEntity {
-  id: string;
+interface ICategory {
+  entityClass: ExtendedEntityClass;
   label: string;
   color: typeof Colors[number];
 }
 
 // Use for colors, for dropdowns use entity.ts dictionary
-export const Entities: { [key: string]: IEntity } = {
+export const Entities: { [key: string]: ICategory } = {
   T: {
-    id: "T",
+    entityClass: EntityClass.Territory,
     label: "Territory",
     color: "entityT",
   },
   R: {
-    id: "R",
+    entityClass: EntityClass.Resource,
     label: "Resource",
     color: "entityR",
   },
   A: {
-    id: "A",
+    entityClass: EntityClass.Action,
     label: "Action",
     color: "entityA",
   },
   S: {
-    id: "S",
+    entityClass: EntityClass.Statement,
     label: "Statement",
     color: "entityS",
   },
   C: {
-    id: "C",
+    entityClass: EntityClass.Concept,
     label: "Concept",
     color: "entityC",
   },
   E: {
-    id: "E",
+    entityClass: EntityClass.Event,
     label: "Event",
     color: "entityE",
   },
   G: {
-    id: "G",
+    entityClass: EntityClass.Group,
     label: "Group",
     color: "entityG",
   },
   L: {
-    id: "L",
+    entityClass: EntityClass.Location,
     label: "Location",
     color: "entityL",
   },
   O: {
-    id: "O",
+    entityClass: EntityClass.Object,
     label: "Object",
     color: "entityO",
   },
   P: {
-    id: "P",
+    entityClass: EntityClass.Person,
     label: "Person",
     color: "entityP",
   },
   V: {
-    id: "V",
+    entityClass: EntityClass.Value,
     label: "Value",
     color: "entityV",
   },
   X: {
-    id: "X",
+    entityClass: EntityExtension.Empty,
     label: "unset",
     color: "white",
   },
   all: {
-    id: "all",
+    entityClass: EntityExtension.Any,
     label: "*",
     color: "white",
   },
@@ -139,7 +141,7 @@ export type DragItem = {
   type: string;
 };
 export interface EntityDragItem extends DragItem {
-  category: ExtendedEntityClass;
+  entityClass: ExtendedEntityClass;
   isTemplate: boolean;
 }
 export interface DraggedTerritoryItem {
@@ -298,7 +300,7 @@ export interface EntitySuggestionI {
   detail: string;
   ltype: string;
   status: EntityStatus;
-  category: EntityClass;
+  entityClass: EntityClass;
   color: string;
   icons?: React.ReactNode[];
   isTemplate: boolean;

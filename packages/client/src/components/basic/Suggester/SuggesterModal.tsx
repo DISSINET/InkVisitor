@@ -151,7 +151,7 @@ export const SuggesterModal: React.FC<SuggesterModal> = ({
                     <Tag
                       propId={territory.id}
                       label={territory.label}
-                      category={territory.class}
+                      entityClass={territory.class}
                       tooltipPosition={"left center"}
                       button={
                         <Button

@@ -1,4 +1,3 @@
-import { EntityClass } from "@shared/enums";
 import {
   IEntity,
   IResponseEntity,

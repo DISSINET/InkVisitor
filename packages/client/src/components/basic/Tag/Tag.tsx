@@ -33,7 +33,7 @@ interface TagProps {
   labelItalic?: boolean;
   tooltipDetail?: string;
   tooltipText?: string;
-  category?: ExtendedEntityClass;
+  entityClass?: ExtendedEntityClass;
   status?: string;
   ltype?: string;
   mode?: "selected" | "disabled" | "invalid" | false;
@@ -63,7 +63,7 @@ export const Tag: React.FC<TagProps> = ({
   labelItalic = false,
   tooltipDetail,
   tooltipText,
-  category = EntityExtension.Empty,
+  entityClass = EntityExtension.Empty,
   status = "1",
   ltype = "1",
   mode = false,
@@ -102,12 +102,12 @@ export const Tag: React.FC<TagProps> = ({
   });
 
   const canDrag = useMemo(
-    () => category !== EntityExtension.Empty && !disableDrag,
-    [category, disableDrag]
+    () => entityClass !== EntityExtension.Empty && !disableDrag,
+    [entityClass, disableDrag]
   );
 
   const [{ isDragging }, drag] = useDrag({
-    item: { type: ItemTypes.TAG, id: propId, index, category, isTemplate },
+    item: { type: ItemTypes.TAG, id: propId, index, entityClass, isTemplate },
     collect: (monitor: DragSourceMonitor) => ({
       isDragging: monitor.isDragging(),
     }),
@@ -128,8 +128,11 @@ export const Tag: React.FC<TagProps> = ({
   drag(drop(ref));
 
   const renderEntityTag = () => (
-    <StyledEntityTag color={Entities[category].color} isTemplate={isTemplate}>
-      {category}
+    <StyledEntityTag
+      color={Entities[entityClass].color}
+      isTemplate={isTemplate}
+    >
+      {entityClass}
     </StyledEntityTag>
   );
   const renderButton = () => (

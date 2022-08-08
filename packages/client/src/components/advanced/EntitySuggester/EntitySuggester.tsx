@@ -92,23 +92,24 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
         .filter((s) =>
           excludedActantIds.length ? !excludedActantIds.includes(s.id) : s
         )
-        .map((s: IEntity) => {
-          const entity = Entities[s.class];
+        .map((entity: IEntity) => {
+          const category = Entities[entity.class];
           const icons: React.ReactNode[] = [];
 
-          if (territoryActants?.includes(s.id)) {
-            icons.push(<FaHome key={s.id} color="" />);
+          if (territoryActants?.includes(entity.id)) {
+            icons.push(<FaHome key={entity.id} color="" />);
           }
+          const { label, detail, status, data, isTemplate, id } = entity;
 
           return {
-            color: entity.color,
-            category: s.class,
-            label: s.label,
-            detail: s.detail,
-            status: s.status,
-            ltype: s.data.logicalType,
-            isTemplate: s.isTemplate ? s.isTemplate : false,
-            id: s.id,
+            color: category.color,
+            entityClass: entity.class,
+            label: label,
+            detail: detail,
+            status: status,
+            ltype: data.logicalType,
+            isTemplate: isTemplate ? isTemplate : false,
+            id: id,
             icons: icons,
             entity: entity,
           };
