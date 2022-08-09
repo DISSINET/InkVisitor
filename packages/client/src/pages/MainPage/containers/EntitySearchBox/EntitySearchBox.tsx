@@ -225,6 +225,7 @@ export const EntitySearchBox: React.FC = () => {
       <StyledRow>
         <StyledRowHeader>Limit by co-occurrence</StyledRowHeader>
         <EntitySuggester
+          disableTemplatesAccept
           categoryTypes={[
             EntityClass.Statement,
             EntityClass.Action,

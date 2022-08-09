@@ -226,6 +226,7 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
                       handleChange("defaultTerritory", selected)
                     }
                     inputWidth={104}
+                    disableTemplatesAccept
                   />
                 </div>
               )}

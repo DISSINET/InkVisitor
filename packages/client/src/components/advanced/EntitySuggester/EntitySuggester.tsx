@@ -98,6 +98,7 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
         .filter((s) =>
           excludedActantIds.length ? !excludedActantIds.includes(s.id) : s
         )
+        .filter((s) => (disableTemplatesAccept ? !s.isTemplate : s))
         .map((entity: IEntity) => {
           const icons: React.ReactNode[] = [];
 
