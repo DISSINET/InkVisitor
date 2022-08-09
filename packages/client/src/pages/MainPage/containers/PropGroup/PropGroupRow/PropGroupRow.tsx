@@ -194,6 +194,7 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
               categoryTypes={classesPropType}
               inputWidth={90}
               excludedEntities={excludedSuggesterEntities}
+              isInsideTemplate={isInsideTemplate}
             />
           )}
           <StyledPropButtonGroup>
@@ -251,6 +252,7 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
               categoryTypes={classesPropValue}
               inputWidth={90}
               excludedEntities={excludedSuggesterEntities}
+              isInsideTemplate={isInsideTemplate}
             />
           )}
           <StyledPropButtonGroup>

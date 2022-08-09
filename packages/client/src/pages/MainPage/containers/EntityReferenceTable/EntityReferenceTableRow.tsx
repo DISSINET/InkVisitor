@@ -22,6 +22,7 @@ interface EntityReferenceTableRow {
   handleChangeResource: (refId: string, newResource: string) => void;
   handleChangeValue: (refId: string, newValue: string) => void;
   openDetailOnCreate?: boolean;
+  isInsideTemplate: boolean;
 }
 
 export const EntityReferenceTableRow: React.FC<EntityReferenceTableRow> = ({
@@ -34,6 +35,7 @@ export const EntityReferenceTableRow: React.FC<EntityReferenceTableRow> = ({
   handleChangeResource,
   handleChangeValue,
   openDetailOnCreate = false,
+  isInsideTemplate = false,
 }) => {
   return (
     <React.Fragment>
@@ -70,6 +72,7 @@ export const EntityReferenceTableRow: React.FC<EntityReferenceTableRow> = ({
                   handleChangeResource(reference.id, newSelectedId);
                 }}
                 categoryTypes={[EntityClass.Resource]}
+                isInsideTemplate={isInsideTemplate}
               />
             </div>
           )
@@ -115,6 +118,7 @@ export const EntityReferenceTableRow: React.FC<EntityReferenceTableRow> = ({
                 }}
                 categoryTypes={[EntityClass.Value]}
                 excludedEntities={excludedSuggesterEntities}
+                isInsideTemplate={isInsideTemplate}
               />
             </div>
           )

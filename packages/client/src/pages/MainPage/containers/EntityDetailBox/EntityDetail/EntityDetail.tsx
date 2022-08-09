@@ -1168,6 +1168,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
                   onChange={(newValues: IReference[]) => {
                     updateEntityMutation.mutate({ references: newValues });
                   }}
+                  isInsideTemplate={entity.isTemplate || false}
                 />
               </StyledDetailSectionContent>
             </StyledDetailSection>

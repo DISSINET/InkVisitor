@@ -644,6 +644,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                 updateStatementMutation.mutate({ references: newReferences });
               }}
               disabled={!userCanEdit}
+              isInsideTemplate={statement.isTemplate || false}
             />
           </StyledEditorSectionContent>
         </StyledEditorSection>

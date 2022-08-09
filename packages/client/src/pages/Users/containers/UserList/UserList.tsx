@@ -241,6 +241,7 @@ export const UserList: React.FC<UserList> = React.memo(({ heightContent }) => {
               {userRole !== UserRole.Admin ? (
                 <React.Fragment>
                   <EntitySuggester
+                    disableTemplatesAccept
                     disableCreate
                     onSelected={(newSelectedId: string) => {
                       addRightToUser(userId, newSelectedId, "read");
@@ -317,6 +318,7 @@ export const UserList: React.FC<UserList> = React.memo(({ heightContent }) => {
                 userRole === UserRole.Editor ? (
                   <React.Fragment>
                     <EntitySuggester
+                      disableTemplatesAccept
                       disableCreate
                       onSelected={(newSelectedId: string) => {
                         addRightToUser(userId, newSelectedId, "write");
