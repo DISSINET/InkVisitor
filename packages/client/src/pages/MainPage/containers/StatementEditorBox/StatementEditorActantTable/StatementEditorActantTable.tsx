@@ -155,6 +155,7 @@ export const StatementEditorActantTable: React.FC<
                   updateProp={updateProp}
                   removeProp={removeProp}
                   movePropToIndex={movePropToIndex}
+                  isInsideTemplate={statement.isTemplate || false}
                   {...row.getRowProps()}
                 />
               );

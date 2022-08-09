@@ -68,6 +68,7 @@ interface AttributesGroupEditor {
   disabledAllAttributes?: boolean;
   disabledOpenModal?: boolean;
   userCanEdit?: boolean;
+  isInsideTemplate: boolean;
 }
 
 export const AttributesGroupEditor: React.FC<AttributesGroupEditor> = ({
@@ -88,6 +89,7 @@ export const AttributesGroupEditor: React.FC<AttributesGroupEditor> = ({
   disabledOpenModal = false,
   statementId,
   userCanEdit,
+  isInsideTemplate = false,
 }) => {
   const [modalData, setModalData] =
     useState<PropAttributeGroupDataObject>(data);
@@ -350,6 +352,7 @@ export const AttributesGroupEditor: React.FC<AttributesGroupEditor> = ({
                       categoryTypes={classesPropType}
                       inputWidth={"full"}
                       excludedEntities={excludedSuggesterEntities}
+                      isInsideTemplate={isInsideTemplate}
                     />
                   </StyledSuggesterWrap>
                 )
@@ -411,6 +414,7 @@ export const AttributesGroupEditor: React.FC<AttributesGroupEditor> = ({
                       categoryTypes={classesPropValue}
                       inputWidth={"full"}
                       excludedEntities={excludedSuggesterEntities}
+                      isInsideTemplate={isInsideTemplate}
                     />
                   </StyledSuggesterWrap>
                 )

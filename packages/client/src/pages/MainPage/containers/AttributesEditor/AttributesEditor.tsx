@@ -37,7 +37,7 @@ import { AttributesForm } from "./AttributesForm";
 import { TooltipAttributeRow } from "./TooltipAttributeRow/TooltipAttributeRow";
 import { TooltipBooleanRow } from "./TooltipBooleanRow/TooltipBooleanRow";
 
-interface StatementEditorAttributes {
+interface AttributesEditor {
   modalTitle: string;
   entity?: IEntity;
   data: AttributeData;
@@ -54,9 +54,10 @@ interface StatementEditorAttributes {
 
   modalOpen: boolean;
   setModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  isInsideTemplate: boolean;
 }
 
-const AttributesEditor: React.FC<StatementEditorAttributes> = ({
+const AttributesEditor: React.FC<AttributesEditor> = ({
   modalTitle,
   entity,
   data,
@@ -70,6 +71,7 @@ const AttributesEditor: React.FC<StatementEditorAttributes> = ({
   userCanEdit = false,
   modalOpen,
   setModalOpen,
+  isInsideTemplate = false,
 }) => {
   const [modalData, setModalData] = useState<AttributeData>(data);
 
@@ -231,6 +233,7 @@ const AttributesEditor: React.FC<StatementEditorAttributes> = ({
                     }}
                     categoryTypes={classEntitiesActant}
                     excludedEntities={excludedSuggesterEntities}
+                    isInsideTemplate={isInsideTemplate}
                   />
                 </StyledSuggesterWrap>
               )

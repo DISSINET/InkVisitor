@@ -1207,6 +1207,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
                           value: ["elvl", "logic", "virtuality", "partitivity"],
                         } as PropAttributeFilter
                       }
+                      isInsideTemplate={entity.isTemplate || false}
                     />
                   </tbody>
                 </table>

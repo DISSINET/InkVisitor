@@ -41,6 +41,7 @@ interface StatementEditorActionTableRow {
   handleClick: Function;
   visibleColumns: ColumnInstance<{}>[];
   updateActionsMutation: UseMutationResult<any, unknown, object, unknown>;
+  isInsideTemplate: boolean;
 }
 
 export const StatementEditorActionTableRow: React.FC<
@@ -59,6 +60,7 @@ export const StatementEditorActionTableRow: React.FC<
   updateActionsMutation,
   handleClick = () => {},
   visibleColumns,
+  isInsideTemplate = false,
 }) => {
   const { statementId, territoryId } = useSearchParams();
 
@@ -180,6 +182,7 @@ export const StatementEditorActionTableRow: React.FC<
             userCanEdit={userCanEdit}
             classEntitiesActant={[EntityClass.Action]}
             loading={updateActionsMutation.isLoading}
+            isInsideTemplate={statement.isTemplate || false}
           />
         )}
         {userCanEdit && (
@@ -265,6 +268,7 @@ export const StatementEditorActionTableRow: React.FC<
             userCanEdit={userCanEdit}
             openDetailOnCreate={false}
             category={category}
+            isInsideTemplate={isInsideTemplate}
           />
         );
       }

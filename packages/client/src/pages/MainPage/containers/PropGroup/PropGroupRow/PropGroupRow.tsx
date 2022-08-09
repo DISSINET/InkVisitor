@@ -53,6 +53,7 @@ interface PropGroupRow {
   category: DraggedPropRowCategory;
 
   disabledAttributes?: PropAttributeFilter;
+  isInsideTemplate: boolean;
 }
 
 export const PropGroupRow: React.FC<PropGroupRow> = ({
@@ -73,6 +74,7 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
   itemType,
   category,
   disabledAttributes = {} as PropAttributeFilter,
+  isInsideTemplate = false,
 }) => {
   const propTypeEntity: IEntity = entities[prop.type.id];
   const propValueEntity: IEntity = entities[prop.value.id];
@@ -316,6 +318,7 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
                 updateProp(prop.id, statementPropObject);
               }}
               userCanEdit={userCanEdit}
+              isInsideTemplate={isInsideTemplate}
             />
 
             {(level === 1 || level === 2) && (

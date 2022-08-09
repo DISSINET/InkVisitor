@@ -173,6 +173,7 @@ export const SuggesterCreateModal: React.FC<SuggesterCreateModal> = ({
                     />
                   ) : (
                     <EntitySuggester
+                      disableTemplatesAccept
                       filterEditorRights
                       inputWidth={96}
                       disableCreate
