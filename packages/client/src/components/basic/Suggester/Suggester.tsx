@@ -29,6 +29,7 @@ import {
   StyledSuggesterList,
   StyledSuggestionCancelButton,
 } from "./SuggesterStyles";
+import { SuggesterTemplateModal } from "./SuggesterTemplateModal/SuggesterTemplateModal";
 import {
   createItemData,
   SuggestionRowEntityItemData,
@@ -111,7 +112,9 @@ export const Suggester: React.FC<Suggester> = ({
   const [selected, setSelected] = useState(-1);
   const [isFocused, setIsFocused] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
+
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showTemplateModal, setShowTemplateModal] = useState(false);
 
   useKeypress(
     "Escape",
@@ -288,12 +291,18 @@ export const Suggester: React.FC<Suggester> = ({
 
       {showCreateModal && (
         <SuggesterCreateModal
-          show={true}
           typed={typed}
           category={category}
           categories={categories.slice(1)}
           onCreate={onCreate}
           closeModal={() => setShowCreateModal(false)}
+        />
+      )}
+      {showTemplateModal && (
+        <SuggesterTemplateModal
+          onClose={() => setShowTemplateModal(false)}
+          onUse={() => console.log("using template")}
+          onDuplicate={() => console.log("duplicating template")}
         />
       )}
     </>

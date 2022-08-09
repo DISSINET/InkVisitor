@@ -17,7 +17,7 @@ import {
   TypeBar,
 } from "components";
 import { EntitySuggester } from "components/advanced";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { FaUnlink } from "react-icons/fa";
 import { useQuery } from "react-query";
 import { OptionTypeBase, ValueType } from "react-select";
@@ -27,7 +27,6 @@ import { SuggesterItemToCreate } from "types";
 import { StyledContent, StyledNote } from "./SuggesterCreateModalStyles";
 
 interface SuggesterCreateModal {
-  show?: boolean;
   typed: string;
   category: IOption;
   categories: IOption[];
@@ -35,13 +34,18 @@ interface SuggesterCreateModal {
   closeModal: () => void;
 }
 export const SuggesterCreateModal: React.FC<SuggesterCreateModal> = ({
-  show = false,
   typed,
   category,
   categories,
   onCreate,
   closeModal,
 }) => {
+  const [showModal, setShowModal] = useState(false);
+
+  useEffect(() => {
+    setShowModal(true);
+  }, []);
+
   const [selectedCategory, setSelectedCategory] = useState<any>(
     category.value !== DropdownAny ? category : categories[0]
   );
@@ -82,7 +86,7 @@ export const SuggesterCreateModal: React.FC<SuggesterCreateModal> = ({
 
   return (
     <Modal
-      showModal={show}
+      showModal={showModal}
       width="thin"
       onEnterPress={() => {
         if (selectedCategory.value === "S" && !territoryId) {

@@ -255,7 +255,8 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
     const hoverredCategory = newHoverred.entityClass;
     if (
       !categoryTypes.includes(hoverredCategory) ||
-      (disableTemplatesAccept && newHoverred.isTemplate)
+      (disableTemplatesAccept && newHoverred.isTemplate) ||
+      newHoverred.isDiscouraged
     ) {
       setIsWrongDropCategory(true);
     } else {
