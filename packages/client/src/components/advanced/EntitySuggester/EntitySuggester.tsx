@@ -29,6 +29,7 @@ interface EntitySuggester {
   onSelected: (id: string) => void;
   placeholder?: string;
   disableCreate?: boolean;
+  disableDuplicate?: boolean;
   disableWildCard?: boolean;
   inputWidth?: number | "full";
   openDetailOnCreate?: boolean;
@@ -45,6 +46,7 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
   onSelected,
   placeholder = "",
   disableCreate,
+  disableDuplicate = false,
   inputWidth,
   disableWildCard = false,
   openDetailOnCreate = false,
@@ -229,7 +231,7 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
   };
 
   const handlePick = (newPicked: IEntity, duplicate?: boolean) => {
-    if (duplicate) {
+    if (duplicate && !disableDuplicate) {
       handleDuplicate(newPicked);
     } else {
       onSelected(newPicked.id);
@@ -239,7 +241,7 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
 
   const handleDropped = (newDropped: EntityDragItem, duplicate?: boolean) => {
     if (!isWrongDropCategory) {
-      if (duplicate) {
+      if (duplicate && !disableDuplicate) {
         newDropped.entity && handleDuplicate(newDropped.entity);
       } else {
         onSelected(newDropped.id);
