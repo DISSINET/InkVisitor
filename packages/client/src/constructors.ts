@@ -190,6 +190,9 @@ export const DEntity = (
         ? EntityStatus.Approved
         : EntityStatus.Pending,
   };
+  if (entity.class === EntityClass.Territory) {
+    entity.data.parent = {};
+  }
 
   if (entity.isTemplate) {
     duplicatedEntity.isTemplate = templateToEntity ? false : true;

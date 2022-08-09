@@ -39,6 +39,7 @@ interface EntitySuggester {
   filterEditorRights?: boolean;
   isInsideTemplate?: boolean;
   disableTemplatesAccept?: boolean;
+  territoryParentId?: string;
 }
 
 export const EntitySuggester: React.FC<EntitySuggester> = ({
@@ -56,6 +57,7 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
   excludedActantIds = [],
   isInsideTemplate = false,
   disableTemplatesAccept = false,
+  territoryParentId,
 }) => {
   const [typed, setTyped] = useState<string>("");
   const debouncedTyped = useDebounce(typed, 100);
@@ -217,9 +219,11 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
         localStorage.getItem("userrole") as UserRole,
         true
       );
-      console.log("Duplicating territory");
-      // TODO: modal to choose parent!!!
-      // actantsCreateMutation.mutate(newTerritory);
+
+      if (territoryParentId) {
+        newTerritory.data.parent.id = territoryParentId;
+        actantsCreateMutation.mutate(newTerritory);
+      }
     } else {
       const newEntity = DEntity(
         templateToDuplicate as IEntity,
@@ -253,11 +257,13 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
   const [isWrongDropCategory, setIsWrongDropCategory] = useState(false);
 
   const handleHoverred = (newHoverred: EntityDragItem) => {
+    // TODO: add to show icon conditions!
     const hoverredCategory = newHoverred.entityClass;
     if (
       !categoryTypes.includes(hoverredCategory) ||
       (disableTemplatesAccept && newHoverred.isTemplate) ||
-      newHoverred.isDiscouraged
+      newHoverred.isDiscouraged ||
+      (newHoverred.entityClass === EntityClass.Territory && !territoryParentId)
     ) {
       setIsWrongDropCategory(true);
     } else {

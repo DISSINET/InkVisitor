@@ -13,7 +13,7 @@ import {
   StyledTagWrapper,
 } from "../SuggesterStyles";
 import { areEqual } from "react-window";
-import { Tag } from "components";
+import { Tag, Tooltip } from "components";
 import { EntitySuggestion } from "types";
 import { IEntity } from "@shared/types";
 import { ImInsertTemplate } from "react-icons/im";
@@ -53,6 +53,7 @@ const EntityRow: React.FC<EntityRow> = ({ data, index, style }) => {
             // onPick nonTemplate entity
             onPick(entity);
           }}
+          style={{ marginLeft: "0.5rem" }}
         />
       );
     } else if (entity.isTemplate && !isInsideTemplate) {
@@ -63,32 +64,41 @@ const EntityRow: React.FC<EntityRow> = ({ data, index, style }) => {
             // onPick template inside nonTemplate
             onPick(entity, true);
           }}
+          style={{ marginLeft: "0.5rem" }}
         />
       );
     } else if (entity.isTemplate && isInsideTemplate) {
       return (
-        <>
+        <div>
           <FaPlayCircle
-            color={theme.color["warning"]}
+            color={theme.color["info"]}
             onClick={() => {
               // onPick duplicate template to entity
               onPick(entity, true);
             }}
+            style={{ marginLeft: "0.5rem" }}
           />
           <ImInsertTemplate
-            color={theme.color["danger"]}
+            color={theme.color["black"]}
             onClick={() => {
               // onPick template entity
               onPick(entity);
             }}
+            style={{ marginLeft: "0.5rem" }}
           />
-        </>
+        </div>
       );
     }
   };
 
+  const entityIsTemplate = entity.isTemplate || false;
+
   return (
-    <StyledSuggestionRow key={index} style={style}>
+    <StyledSuggestionRow
+      key={index}
+      style={style}
+      twoIcons={entityIsTemplate && isInsideTemplate}
+    >
       <StyledSuggestionLineActions isSelected={selected === index}>
         {isNotDiscouraged && <>{renderIcons()}</>}
       </StyledSuggestionLineActions>

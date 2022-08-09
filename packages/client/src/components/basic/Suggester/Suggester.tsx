@@ -114,7 +114,7 @@ export const Suggester: React.FC<Suggester> = ({
   const [{ isOver }, dropRef] = useDrop({
     accept: ItemTypes.TAG,
     drop: (item: EntityDragItem) => {
-      if (!item.isDiscouraged) {
+      if (!item.isDiscouraged && !isWrongDropCategory) {
         if (!item.isTemplate) {
           onDrop(item);
         } else if (item.isTemplate && !isInsideTemplate) {

@@ -594,6 +594,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                 excludedEntities={excludedSuggesterEntities}
                 placeholder={"add new action"}
                 isInsideTemplate={statement.isTemplate}
+                territoryParentId={statement.data.territory?.id}
               />
             )}
           </StyledEditorSectionContent>
@@ -627,6 +628,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                 placeholder={"add new actant"}
                 excludedEntities={excludedSuggesterEntities}
                 isInsideTemplate={statement.isTemplate}
+                territoryParentId={statement.data.territory?.id}
               />
             )}
           </StyledEditorSectionContent>
@@ -697,6 +699,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                 excludedEntities={excludedSuggesterEntities}
                 excludedActantIds={statement.data.tags}
                 isInsideTemplate={statement.isTemplate}
+                territoryParentId={statement.data.territory?.id}
               />
             )}
           </StyledEditorSectionContent>
