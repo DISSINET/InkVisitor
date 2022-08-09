@@ -88,33 +88,15 @@ export const Suggester: React.FC<Suggester> = ({
   isWrongDropCategory,
   isInsideTemplate = false,
 }) => {
-  const [{ isOver }, dropRef] = useDrop({
-    accept: ItemTypes.TAG,
-    drop: (item: EntityDragItem) => {
-      if (!item.isDiscouraged) {
-        if (!item.isTemplate) {
-          onDrop(item);
-        } else if (item.isTemplate && !isInsideTemplate) {
-          onDrop(item, true);
-        } else if (item.isTemplate && isInsideTemplate) {
-          // TODO: openModal
-          console.log("Opening modal use / duplicate");
-        }
-      }
-    },
-    hover: (item: EntityDragItem) => {
-      onHover && onHover(item);
-    },
-    collect: (monitor: DropTargetMonitor) => ({
-      isOver: !!monitor.isOver(),
-    }),
-  });
   const [selected, setSelected] = useState(-1);
   const [isFocused, setIsFocused] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
 
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showTemplateModal, setShowTemplateModal] = useState(false);
+  const [tempDropItem, setTempDropItem] = useState<EntityDragItem | false>(
+    false
+  );
 
   useKeypress(
     "Escape",
@@ -128,6 +110,28 @@ export const Suggester: React.FC<Suggester> = ({
     setSelected(-1);
     onType(newType);
   };
+
+  const [{ isOver }, dropRef] = useDrop({
+    accept: ItemTypes.TAG,
+    drop: (item: EntityDragItem) => {
+      if (!item.isDiscouraged) {
+        if (!item.isTemplate) {
+          onDrop(item);
+        } else if (item.isTemplate && !isInsideTemplate) {
+          onDrop(item, true);
+        } else if (item.isTemplate && isInsideTemplate) {
+          setTempDropItem(item);
+          setShowTemplateModal(true);
+        }
+      }
+    },
+    hover: (item: EntityDragItem) => {
+      onHover && onHover(item);
+    },
+    collect: (monitor: DropTargetMonitor) => ({
+      isOver: !!monitor.isOver(),
+    }),
+  });
 
   const handleEnterPress = () => {
     if (selected === -1 && typed.length > 0) {
@@ -152,6 +156,8 @@ export const Suggester: React.FC<Suggester> = ({
           onPick(entity, true);
         } else if (entity.isTemplate && isInsideTemplate) {
           // TODO: open modal to ask use / duplicate
+          // setTempDropItem(entity);
+          setShowTemplateModal(true);
         }
       }
     } else {
@@ -300,9 +306,22 @@ export const Suggester: React.FC<Suggester> = ({
       )}
       {showTemplateModal && (
         <SuggesterTemplateModal
-          onClose={() => setShowTemplateModal(false)}
-          onUse={() => console.log("using template")}
-          onDuplicate={() => console.log("duplicating template")}
+          onClose={() => {
+            setTempDropItem(false);
+            setShowTemplateModal(false);
+          }}
+          onUse={() => {
+            {
+              tempDropItem && onDrop(tempDropItem);
+              setTempDropItem(false);
+              setShowTemplateModal(false);
+            }
+          }}
+          onDuplicate={() => {
+            tempDropItem && onDrop(tempDropItem, true);
+            setTempDropItem(false);
+            setShowTemplateModal(false);
+          }}
         />
       )}
     </>

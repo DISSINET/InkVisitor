@@ -124,18 +124,19 @@ export enum ItemTypes {
 export type DragItem = {
   index: number;
   id: string;
-  type: string;
+  type: ItemTypes;
 };
 export interface EntityDragItem extends DragItem {
+  entity: IEntity | false;
   entityClass: ExtendedEntityClass;
   isTemplate: boolean;
   isDiscouraged: boolean;
 }
 export interface DraggedTerritoryItem {
+  index?: number;
   id?: string;
   parentId?: string;
   lvl?: number;
-  index?: number;
 }
 export enum DraggedPropRowCategory {
   ACTANT = "ACTANT",
@@ -143,10 +144,10 @@ export enum DraggedPropRowCategory {
   META_PROP = "META_PROP",
 }
 export interface DraggedPropRowItem {
+  index?: number;
   id?: string;
   parentId?: string;
   lvl?: number;
-  index?: number;
   category?: DraggedPropRowCategory;
 }
 export interface DraggedActantRowItem {

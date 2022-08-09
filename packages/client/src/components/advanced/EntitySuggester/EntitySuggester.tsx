@@ -239,9 +239,7 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
   const handleDropped = (newDropped: EntityDragItem, duplicate?: boolean) => {
     if (!isWrongDropCategory) {
       if (duplicate) {
-        // TODO: getTemplate from query
-        // handleDuplicate(newDropped);
-        console.log("handle duplicate dropped");
+        newDropped.entity && handleDuplicate(newDropped.entity);
       } else {
         onSelected(newDropped.id);
         handleClean();

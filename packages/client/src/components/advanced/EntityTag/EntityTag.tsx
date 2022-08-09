@@ -59,6 +59,7 @@ export const EntityTag: React.FC<EntityTag> = ({
       tooltipDetail={entity.detail}
       isTemplate={entity.isTemplate}
       isDiscouraged={entity.status === EntityStatus.Discouraged}
+      entity={entity}
       tooltipText={tooltipText}
       showOnly={showOnly}
       button={button}

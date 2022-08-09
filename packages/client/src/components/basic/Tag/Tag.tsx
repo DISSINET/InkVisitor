@@ -1,4 +1,5 @@
 import { EntityExtension, ExtendedEntityClass } from "@shared/enums";
+import { IEntity } from "@shared/types";
 import { Tooltip } from "components";
 import { useSearchParams } from "hooks";
 import React, { ReactNode, useEffect, useMemo, useRef } from "react";
@@ -36,6 +37,8 @@ interface TagProps {
   entityClass?: ExtendedEntityClass;
   status?: string;
   ltype?: string;
+  entity?: IEntity;
+
   mode?: "selected" | "disabled" | "invalid" | false;
   borderStyle?: "solid" | "dashed" | "dotted";
   button?: ReactNode;
@@ -67,6 +70,7 @@ export const Tag: React.FC<TagProps> = ({
   entityClass = EntityExtension.Empty,
   status = "1",
   ltype = "1",
+  entity,
   mode = false,
   borderStyle = "solid",
   button,
@@ -116,6 +120,7 @@ export const Tag: React.FC<TagProps> = ({
       entityClass,
       isTemplate,
       isDiscouraged,
+      entity: entity || false,
     },
     collect: (monitor: DragSourceMonitor) => ({
       isDragging: monitor.isDragging(),

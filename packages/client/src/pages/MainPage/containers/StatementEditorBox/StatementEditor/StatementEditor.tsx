@@ -1,10 +1,9 @@
-import { EntityClass, UserRole, UserRoleMode } from "@shared/enums";
+import { EntityClass, UserRoleMode } from "@shared/enums";
 import {
   IEntity,
   IOption,
   IReference,
   IResponseStatement,
-  IStatement,
   IStatementActant,
   IStatementAction,
 } from "@shared/types";
@@ -23,13 +22,7 @@ import {
   MultiInput,
 } from "components";
 import { EntitySuggester, EntityTag } from "components/advanced";
-import {
-  CProp,
-  CStatementActant,
-  CStatementAction,
-  DEntity,
-  DStatement,
-} from "constructors";
+import { CProp, CStatementActant, CStatementAction } from "constructors";
 import { useSearchParams } from "hooks";
 import React, { useEffect, useMemo, useState } from "react";
 import { FaUnlink } from "react-icons/fa";
@@ -273,23 +266,6 @@ export const StatementEditor: React.FC<StatementEditor> = ({
       statement.right === UserRoleMode.Write
     );
   }, [statement]);
-
-  const {
-    status: allTemplatesStatus,
-    data: allTemplates,
-    error: allTemplatesError,
-    isFetching: allTemplatesIsFetching,
-  } = useQuery(
-    ["templates"],
-    async () => {
-      const res = await api.entitiesSearch({ onlyTemplates: true });
-      return res.data;
-    },
-    {
-      enabled: api.isLoggedIn(),
-      initialData: [],
-    }
-  );
 
   // actions
   const addAction = (newActionId: string) => {
@@ -617,6 +593,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                 categoryTypes={[EntityClass.Action]}
                 excludedEntities={excludedSuggesterEntities}
                 placeholder={"add new action"}
+                isInsideTemplate={statement.isTemplate}
               />
             )}
           </StyledEditorSectionContent>
@@ -718,6 +695,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                 placeholder={"add new tag"}
                 excludedEntities={excludedSuggesterEntities}
                 excludedActantIds={statement.data.tags}
+                isInsideTemplate={statement.isTemplate}
               />
             )}
           </StyledEditorSectionContent>
