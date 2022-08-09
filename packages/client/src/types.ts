@@ -129,6 +129,7 @@ export type DragItem = {
 export interface EntityDragItem extends DragItem {
   entityClass: ExtendedEntityClass;
   isTemplate: boolean;
+  isDiscouraged: boolean;
 }
 export interface DraggedTerritoryItem {
   id?: string;

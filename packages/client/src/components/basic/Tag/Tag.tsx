@@ -53,6 +53,7 @@ interface TagProps {
   statementsCount?: number;
   isFavorited?: boolean;
   isTemplate?: boolean;
+  isDiscouraged?: boolean;
   disabled?: boolean;
 }
 
@@ -82,6 +83,7 @@ export const Tag: React.FC<TagProps> = ({
   statementsCount,
   isFavorited = false,
   isTemplate = false,
+  isDiscouraged = false,
   lvl,
 }) => {
   const { appendDetailId } = useSearchParams();
@@ -107,7 +109,14 @@ export const Tag: React.FC<TagProps> = ({
   );
 
   const [{ isDragging }, drag] = useDrag({
-    item: { type: ItemTypes.TAG, id: propId, index, entityClass, isTemplate },
+    item: {
+      type: ItemTypes.TAG,
+      id: propId,
+      index,
+      entityClass,
+      isTemplate,
+      isDiscouraged,
+    },
     collect: (monitor: DragSourceMonitor) => ({
       isDragging: monitor.isDragging(),
     }),

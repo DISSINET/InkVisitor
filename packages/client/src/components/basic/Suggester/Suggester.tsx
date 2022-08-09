@@ -90,14 +90,15 @@ export const Suggester: React.FC<Suggester> = ({
   const [{ isOver }, dropRef] = useDrop({
     accept: ItemTypes.TAG,
     drop: (item: EntityDragItem) => {
-      // TODO: isDiscouraged?!!!!
-      if (!item.isTemplate) {
-        onDrop(item);
-      } else if (item.isTemplate && !isInsideTemplate) {
-        onDrop(item, true);
-      } else if (item.isTemplate && isInsideTemplate) {
-        // TODO: openModal
-        console.log("Opening modal use / duplicate");
+      if (!item.isDiscouraged) {
+        if (!item.isTemplate) {
+          onDrop(item);
+        } else if (item.isTemplate && !isInsideTemplate) {
+          onDrop(item, true);
+        } else if (item.isTemplate && isInsideTemplate) {
+          // TODO: openModal
+          console.log("Opening modal use / duplicate");
+        }
       }
     },
     hover: (item: EntityDragItem) => {
@@ -140,7 +141,6 @@ export const Suggester: React.FC<Suggester> = ({
         });
       }
     } else if (selected > -1) {
-      // TODO: if template inside nonTemplate => duplicate to entity, if template inside template => show modal, else onPick
       const entity = suggestions[selected].entity;
       if (entity.status !== EntityStatus.Discouraged) {
         if (!entity.isTemplate) {
