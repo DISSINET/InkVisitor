@@ -19,12 +19,7 @@ import { IEntity } from "@shared/types";
 import { ImInsertTemplate } from "react-icons/im";
 
 export const createItemData = memoize(
-  (
-    items: EntitySuggestion[],
-    onPick: (entity: IEntity) => void,
-    selected: number,
-    isInsideTemplate: boolean
-  ) => ({
+  (items, onPick, selected, isInsideTemplate): SuggestionRowEntityItemData => ({
     items,
     onPick,
     selected,
@@ -34,7 +29,7 @@ export const createItemData = memoize(
 
 export type SuggestionRowEntityItemData = {
   items: EntitySuggestion[];
-  onPick: (entity: IEntity) => void;
+  onPick: (entity: IEntity, duplicate?: boolean) => void;
   selected: number;
   isInsideTemplate: boolean;
 };
@@ -49,52 +44,53 @@ const EntityRow: React.FC<EntityRow> = ({ data, index, style }) => {
   const { entity, icons } = items[index];
   const isNotDiscouraged = entity.status !== EntityStatus.Discouraged;
 
-  return (
-    <StyledSuggestionRow key={index} style={style}>
-      <StyledSuggestionLineActions isSelected={selected === index}>
-        {!entity.isTemplate && isNotDiscouraged && (
+  const renderIcons = () => {
+    if (!entity.isTemplate) {
+      return (
+        <FaPlayCircle
+          color={theme.color["black"]}
+          onClick={() => {
+            // onPick nonTemplate entity
+            onPick(entity);
+          }}
+        />
+      );
+    } else if (entity.isTemplate && !isInsideTemplate) {
+      return (
+        <FaPlayCircle
+          color={theme.color["info"]}
+          onClick={() => {
+            // onPick template inside nonTemplate
+            onPick(entity, true);
+          }}
+        />
+      );
+    } else if (entity.isTemplate && isInsideTemplate) {
+      return (
+        <>
           <FaPlayCircle
-            color={theme.color["black"]}
+            color={theme.color["warning"]}
             onClick={() => {
-              // onPick nonTemplate entity
+              // onPick duplicate template to entity
+              onPick(entity, true);
+            }}
+          />
+          <ImInsertTemplate
+            color={theme.color["danger"]}
+            onClick={() => {
+              // onPick template entity
               onPick(entity);
             }}
           />
-        )}
+        </>
+      );
+    }
+  };
 
-        {/* NOT INSIDE TEMPLATE */}
-        {/* TODO: Icon for entity.isTemplate => duplicate to entity (the same one?) */}
-        {entity.isTemplate && !isInsideTemplate && isNotDiscouraged && (
-          <FaPlayCircle
-            color={theme.color["info"]}
-            onClick={() => {
-              // onTemplatePick(entity);
-              console.log("Duplicate to entity");
-            }}
-          />
-        )}
-
-        {/* INSIDE TEMPLATE */}
-        {/* TODO: Icon for is template inside template => use template */}
-        {entity.isTemplate && isInsideTemplate && isNotDiscouraged && (
-          <>
-            <FaPlayCircle
-              color={theme.color["warning"]}
-              onClick={() => {
-                // TODO: duplicate to entity
-                // onTemplatePick(entity);
-                console.log("Duplicate to entity");
-              }}
-            />
-            <ImInsertTemplate
-              color={theme.color["danger"]}
-              onClick={() => {
-                // onPick template entity
-                onPick(entity);
-              }}
-            />
-          </>
-        )}
+  return (
+    <StyledSuggestionRow key={index} style={style}>
+      <StyledSuggestionLineActions isSelected={selected === index}>
+        {isNotDiscouraged && <>{renderIcons()}</>}
       </StyledSuggestionLineActions>
       <StyledSuggestionLineTag isSelected={selected === index}>
         <StyledTagWrapper>

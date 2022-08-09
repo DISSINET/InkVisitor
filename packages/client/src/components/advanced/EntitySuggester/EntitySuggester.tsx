@@ -6,10 +6,16 @@ import {
   UserRole,
   UserRoleMode,
 } from "@shared/enums";
-import { IEntity, IOption } from "@shared/types";
+import { IEntity, IOption, IStatement, ITerritory } from "@shared/types";
 import api from "api";
 import { Suggester } from "components";
-import { CEntity, CStatement, CTerritoryActant } from "constructors";
+import {
+  CEntity,
+  CStatement,
+  CTerritoryActant,
+  DEntity,
+  DStatement,
+} from "constructors";
 import { useDebounce, useSearchParams } from "hooks";
 import React, { useEffect, useState } from "react";
 import { FaHome } from "react-icons/fa";
@@ -20,7 +26,7 @@ import { EntityDragItem } from "types";
 
 interface EntitySuggester {
   categoryTypes: ExtendedEntityClass[];
-  onSelected: (id: string, isTemplate: boolean) => void;
+  onSelected: (id: string) => void;
   placeholder?: string;
   disableCreate?: boolean;
   disableWildCard?: boolean;
@@ -142,10 +148,11 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
   }, [categoryTypes]);
 
   const actantsCreateMutation = useMutation(
-    async (newActant: IEntity) => await api.entityCreate(newActant),
+    async (newActant: IEntity | IStatement | ITerritory) =>
+      await api.entityCreate(newActant),
     {
       onSuccess: (data, variables) => {
-        onSelected(variables.id, false);
+        onSelected(variables.id);
         handleClean();
         if (openDetailOnCreate) {
           appendDetailId(variables.id);
@@ -154,7 +161,7 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
     }
   );
 
-  const handleCreate = async (newCreated: {
+  const handleCreate = (newCreated: {
     label: string;
     entityClass: EntityClass;
     detail?: string;
@@ -172,35 +179,74 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
       );
       actantsCreateMutation.mutate(newStatement);
     } else if (newCreated.entityClass === EntityClass.Territory) {
-      const newActant = CTerritoryActant(
+      const newTerritory = CTerritoryActant(
         newCreated.label,
         newCreated.territoryId ? newCreated.territoryId : rootTerritoryId,
         -1,
         localStorage.getItem("userrole") as UserRole,
         newCreated.detail
       );
-      actantsCreateMutation.mutate(newActant);
+      actantsCreateMutation.mutate(newTerritory);
     } else {
-      const newActant = CEntity(
+      const newEntity = CEntity(
         newCreated.entityClass,
         newCreated.label,
         localStorage.getItem("userrole") as UserRole,
         newCreated.detail
       );
-      actantsCreateMutation.mutate(newActant);
+      actantsCreateMutation.mutate(newEntity);
     }
   };
 
-  const handlePick = (newPicked: IEntity) => {
-    onSelected(newPicked.id, newPicked.isTemplate || false);
-    handleClean();
+  const handleDuplicate = (
+    templateToDuplicate: IEntity | IStatement | ITerritory
+  ) => {
+    if (templateToDuplicate.class === EntityClass.Statement) {
+      const newStatement = DStatement(
+        templateToDuplicate as IStatement,
+        localStorage.getItem("userrole") as UserRole,
+        true
+      );
+      actantsCreateMutation.mutate(newStatement);
+    } else if (templateToDuplicate.class === EntityClass.Territory) {
+      const newTerritory = DEntity(
+        templateToDuplicate as IEntity,
+        localStorage.getItem("userrole") as UserRole,
+        true
+      );
+      console.log("Duplicating territory");
+      // TODO: modal to choose parent!!!
+      // actantsCreateMutation.mutate(newTerritory);
+    } else {
+      const newEntity = DEntity(
+        templateToDuplicate as IEntity,
+        localStorage.getItem("userrole") as UserRole,
+        true
+      );
+      actantsCreateMutation.mutate(newEntity);
+    }
   };
 
-  const handleDropped = (newDropped: EntityDragItem) => {
+  const handlePick = (newPicked: IEntity, duplicate?: boolean) => {
+    if (duplicate) {
+      handleDuplicate(newPicked);
+    } else {
+      onSelected(newPicked.id);
+      handleClean();
+    }
+  };
+
+  const handleDropped = (newDropped: EntityDragItem, duplicate?: boolean) => {
     if (!isWrongDropCategory) {
-      onSelected(newDropped.id, newDropped.isTemplate);
+      if (duplicate) {
+        // TODO: getTemplate from query
+        // handleDuplicate(newDropped);
+        console.log("handle duplicate dropped");
+      } else {
+        onSelected(newDropped.id);
+        handleClean();
+      }
     }
-    handleClean();
   };
 
   const [isWrongDropCategory, setIsWrongDropCategory] = useState(false);
@@ -245,11 +291,11 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
       }) => {
         handleCreate(newCreated);
       }}
-      onPick={(newPicked: IEntity) => {
-        handlePick(newPicked);
+      onPick={(newPicked: IEntity, duplicate?: boolean) => {
+        handlePick(newPicked, duplicate);
       }}
-      onDrop={(newDropped: EntityDragItem) => {
-        handleDropped(newDropped);
+      onDrop={(newDropped: EntityDragItem, duplicate?: boolean) => {
+        handleDropped(newDropped, duplicate);
       }}
       onHover={(newHoverred: EntityDragItem) => {
         handleHoverred(newHoverred);

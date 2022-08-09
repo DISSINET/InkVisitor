@@ -292,39 +292,12 @@ export const StatementEditor: React.FC<StatementEditor> = ({
   );
 
   // actions
-  const addAction = (newActionId: string, isTemplate: boolean) => {
-    if (isTemplate && !statement.isTemplate) {
-      // create new entity from template
-      const userRole = localStorage.getItem("userrole") as UserRole;
-      if (isTemplate) {
-        const templateEntity = allTemplates?.find(
-          (template) => template.id === newActionId
-        );
-        if (templateEntity) {
-          const newEntity =
-            templateEntity.class === EntityClass.Statement
-              ? DStatement(templateEntity as IStatement, userRole, true)
-              : DEntity(templateEntity as IEntity, userRole, true);
-
-          // TODO: move to mutation
-          api.entityCreate(newEntity);
-          // onSuccess
-          const newStatementAction = CStatementAction(newEntity.id);
-          const newData = {
-            actions: [...statement.data.actions, newStatementAction],
-          };
-          updateStatementDataMutation.mutate(newData);
-        }
-      }
-    } else {
-      const newStatementAction = CStatementAction(newActionId);
-
-      const newData = {
-        actions: [...statement.data.actions, newStatementAction],
-      };
-
-      updateStatementDataMutation.mutate(newData);
-    }
+  const addAction = (newActionId: string) => {
+    const newStatementAction = CStatementAction(newActionId);
+    const newData = {
+      actions: [...statement.data.actions, newStatementAction],
+    };
+    updateStatementDataMutation.mutate(newData);
   };
 
   const addActant = (newStatementActantId: string) => {
@@ -638,8 +611,8 @@ export const StatementEditor: React.FC<StatementEditor> = ({
               <EntitySuggester
                 territoryActants={territoryActants}
                 openDetailOnCreate
-                onSelected={(newSelectedId: string, isTemplate: boolean) => {
-                  addAction(newSelectedId, isTemplate);
+                onSelected={(newSelectedId: string) => {
+                  addAction(newSelectedId);
                 }}
                 categoryTypes={[EntityClass.Action]}
                 excludedEntities={excludedSuggesterEntities}

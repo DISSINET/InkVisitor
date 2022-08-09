@@ -1,5 +1,5 @@
 import { entitiesDictKeys } from "@shared/dictionaries";
-import { EntityClass } from "@shared/enums";
+import { EntityClass, EntityStatus } from "@shared/enums";
 import { IEntity, IOption } from "@shared/types";
 import { Button, Dropdown, Input, Loader, TypeBar } from "components";
 import useKeypress from "hooks/useKeyPress";
@@ -52,11 +52,11 @@ interface Suggester {
   // events
   onType: (newType: string) => void;
   onChangeCategory: (selectedOption: ValueType<OptionTypeBase, any>) => void;
-  onCreate?: (item: SuggesterItemToCreate) => void;
-  onPick: (entity: IEntity) => void;
-  onDrop?: (item: EntityDragItem) => void;
-  onHover?: (item: EntityDragItem) => void;
-  onCancel?: () => void;
+  onCreate: (item: SuggesterItemToCreate) => void;
+  onPick: (entity: IEntity, duplicate?: boolean) => void;
+  onDrop: (item: EntityDragItem, duplicate?: boolean) => void;
+  onHover: (item: EntityDragItem) => void;
+  onCancel: () => void;
   cleanOnSelect?: boolean;
   isWrongDropCategory?: boolean;
   isInsideTemplate: boolean;
@@ -78,11 +78,11 @@ export const Suggester: React.FC<Suggester> = ({
   // events
   onType,
   onChangeCategory,
-  onCreate = () => {},
+  onCreate,
   onPick,
-  onDrop = () => {},
+  onDrop,
   onHover,
-  onCancel = () => {},
+  onCancel,
   isFetching,
   isWrongDropCategory,
   isInsideTemplate = false,
@@ -90,8 +90,15 @@ export const Suggester: React.FC<Suggester> = ({
   const [{ isOver }, dropRef] = useDrop({
     accept: ItemTypes.TAG,
     drop: (item: EntityDragItem) => {
-      // TODO: if template and not in template => duplicate to entity, if template in template => ask in modal
-      onDrop(item);
+      // TODO: isDiscouraged?!!!!
+      if (!item.isTemplate) {
+        onDrop(item);
+      } else if (item.isTemplate && !isInsideTemplate) {
+        onDrop(item, true);
+      } else if (item.isTemplate && isInsideTemplate) {
+        // TODO: openModal
+        console.log("Opening modal use / duplicate");
+      }
     },
     hover: (item: EntityDragItem) => {
       onHover && onHover(item);
@@ -133,8 +140,17 @@ export const Suggester: React.FC<Suggester> = ({
         });
       }
     } else if (selected > -1) {
-      // TODO: if template inside nonTemplate => duplicate to entity, if template inside template => show modal
-      onPick(suggestions[selected].entity);
+      // TODO: if template inside nonTemplate => duplicate to entity, if template inside template => show modal, else onPick
+      const entity = suggestions[selected].entity;
+      if (entity.status !== EntityStatus.Discouraged) {
+        if (!entity.isTemplate) {
+          onPick(entity);
+        } else if (entity.isTemplate && !isInsideTemplate) {
+          onPick(entity, true);
+        } else if (entity.isTemplate && isInsideTemplate) {
+          // TODO: open modal to ask use / duplicate
+        }
+      }
     } else {
       toast.info("Fill at least 1 character");
     }
