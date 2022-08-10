@@ -69,6 +69,7 @@ interface AttributesGroupEditor {
   disabledOpenModal?: boolean;
   userCanEdit?: boolean;
   isInsideTemplate: boolean;
+  territoryParentId?: string;
 }
 
 export const AttributesGroupEditor: React.FC<AttributesGroupEditor> = ({
@@ -90,6 +91,7 @@ export const AttributesGroupEditor: React.FC<AttributesGroupEditor> = ({
   statementId,
   userCanEdit,
   isInsideTemplate = false,
+  territoryParentId,
 }) => {
   const [modalData, setModalData] =
     useState<PropAttributeGroupDataObject>(data);
@@ -353,6 +355,7 @@ export const AttributesGroupEditor: React.FC<AttributesGroupEditor> = ({
                       inputWidth={"full"}
                       excludedEntities={excludedSuggesterEntities}
                       isInsideTemplate={isInsideTemplate}
+                      territoryParentId={territoryParentId}
                     />
                   </StyledSuggesterWrap>
                 )
@@ -415,6 +418,7 @@ export const AttributesGroupEditor: React.FC<AttributesGroupEditor> = ({
                       inputWidth={"full"}
                       excludedEntities={excludedSuggesterEntities}
                       isInsideTemplate={isInsideTemplate}
+                      territoryParentId={territoryParentId}
                     />
                   </StyledSuggesterWrap>
                 )

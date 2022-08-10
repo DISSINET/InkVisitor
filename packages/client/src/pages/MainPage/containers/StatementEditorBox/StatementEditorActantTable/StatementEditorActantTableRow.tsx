@@ -56,6 +56,7 @@ interface StatementEditorActantTableRow {
   statement: IResponseStatement;
   classEntitiesActant: EntityClass[];
   updateStatementDataMutation: UseMutationResult<any, unknown, object, unknown>;
+  territoryParentId?: string;
 }
 
 export const StatementEditorActantTableRow: React.FC<
@@ -75,6 +76,7 @@ export const StatementEditorActantTableRow: React.FC<
   updateProp,
   removeProp,
   movePropToIndex,
+  territoryParentId,
 }) => {
   const isInsideTemplate = statement.isTemplate || false;
   const { statementId, territoryId } = useSearchParams();
@@ -167,6 +169,7 @@ export const StatementEditorActantTableRow: React.FC<
           openDetailOnCreate
           excludedEntities={excludedSuggesterEntities}
           isInsideTemplate={isInsideTemplate}
+          territoryParentId={territoryParentId}
         />
       )
     );
@@ -265,6 +268,7 @@ export const StatementEditorActantTableRow: React.FC<
             classEntitiesActant={classEntitiesActant}
             loading={updateStatementDataMutation.isLoading}
             isInsideTemplate={isInsideTemplate}
+            territoryParentId={territoryParentId}
           />
         )}
         {userCanEdit && (
@@ -351,6 +355,7 @@ export const StatementEditorActantTableRow: React.FC<
             openDetailOnCreate={false}
             category={category}
             isInsideTemplate={isInsideTemplate}
+            territoryParentId={territoryParentId}
           />
         );
       }

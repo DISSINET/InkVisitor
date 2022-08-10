@@ -126,12 +126,10 @@ export const StatementEditor: React.FC<StatementEditor> = ({
     error,
     isFetching,
   } = useQuery(
-    ["territoryActants", statement?.data?.territory?.id],
+    ["territoryActants", statement.data.territory?.id],
     async () => {
-      if (statement?.data?.territory?.id) {
-        const res = await api.entityIdsInTerritory(
-          statement?.data.territory.id
-        );
+      if (statement.data.territory?.id) {
+        const res = await api.entityIdsInTerritory(statement.data.territory.id);
         return res.data;
       } else {
         return [];
@@ -139,7 +137,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
     },
     {
       initialData: [],
-      enabled: !!statement?.data?.territory?.id && api.isLoggedIn(),
+      enabled: !!statement.data.territory?.id && api.isLoggedIn(),
     }
   );
 
@@ -231,7 +229,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
 
   // stores territory id
   const statementTerritoryId: string | undefined = useMemo(() => {
-    return statement?.data?.territory?.id;
+    return statement.data.territory?.id;
   }, [statement]);
 
   useEffect(() => {
@@ -580,6 +578,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                 updateProp={updateProp}
                 removeProp={removeProp}
                 movePropToIndex={movePropToIndex}
+                territoryParentId={statementTerritoryId}
               />
             </StyledEditorActantTableWrapper>
 
@@ -594,7 +593,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                 excludedEntities={excludedSuggesterEntities}
                 placeholder={"add new action"}
                 isInsideTemplate={statement.isTemplate}
-                territoryParentId={statement.data.territory?.id}
+                territoryParentId={statementTerritoryId}
               />
             )}
           </StyledEditorSectionContent>
@@ -615,6 +614,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                 updateProp={updateProp}
                 removeProp={removeProp}
                 movePropToIndex={movePropToIndex}
+                territoryParentId={statementTerritoryId}
               />
             </StyledEditorActantTableWrapper>
             {userCanEdit && (
@@ -628,7 +628,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                 placeholder={"add new actant"}
                 excludedEntities={excludedSuggesterEntities}
                 isInsideTemplate={statement.isTemplate}
-                territoryParentId={statement.data.territory?.id}
+                territoryParentId={statementTerritoryId}
               />
             )}
           </StyledEditorSectionContent>
@@ -647,6 +647,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
               }}
               disabled={!userCanEdit}
               isInsideTemplate={statement.isTemplate || false}
+              territoryParentId={statementTerritoryId}
             />
           </StyledEditorSectionContent>
         </StyledEditorSection>
@@ -699,7 +700,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                 excludedEntities={excludedSuggesterEntities}
                 excludedActantIds={statement.data.tags}
                 isInsideTemplate={statement.isTemplate}
-                territoryParentId={statement.data.territory?.id}
+                territoryParentId={statementTerritoryId}
               />
             )}
           </StyledEditorSectionContent>

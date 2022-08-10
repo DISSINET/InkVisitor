@@ -36,6 +36,7 @@ interface PropGroup {
   category: DraggedPropRowCategory;
   disabledAttributes?: PropAttributeFilter;
   isInsideTemplate: boolean;
+  territoryParentId?: string;
 }
 
 export const PropGroup: React.FC<PropGroup> = ({
@@ -55,6 +56,7 @@ export const PropGroup: React.FC<PropGroup> = ({
   category,
   disabledAttributes = {} as PropAttributeFilter,
   isInsideTemplate,
+  territoryParentId,
 }) => {
   // territory query
   const {
@@ -105,6 +107,7 @@ export const PropGroup: React.FC<PropGroup> = ({
             category={category}
             disabledAttributes={disabledAttributes}
             isInsideTemplate={isInsideTemplate}
+            territoryParentId={territoryParentId}
           />
           {/* 2nd level */}
           <SecondLevelPropGroup
@@ -147,6 +150,7 @@ export const PropGroup: React.FC<PropGroup> = ({
             category={category}
             disabledAttributes={disabledAttributes}
             isInsideTemplate={isInsideTemplate}
+            territoryParentId={territoryParentId}
           />
           {/* 3rd level */}
           <ThirdLevelPropGroup
@@ -189,6 +193,7 @@ export const PropGroup: React.FC<PropGroup> = ({
             category={category}
             disabledAttributes={disabledAttributes}
             isInsideTemplate={isInsideTemplate}
+            territoryParentId={territoryParentId}
           />
         </React.Fragment>
       );

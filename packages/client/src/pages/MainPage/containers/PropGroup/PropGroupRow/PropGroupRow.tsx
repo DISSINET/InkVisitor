@@ -54,6 +54,7 @@ interface PropGroupRow {
 
   disabledAttributes?: PropAttributeFilter;
   isInsideTemplate: boolean;
+  territoryParentId?: string;
 }
 
 export const PropGroupRow: React.FC<PropGroupRow> = ({
@@ -75,6 +76,7 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
   category,
   disabledAttributes = {} as PropAttributeFilter,
   isInsideTemplate = false,
+  territoryParentId,
 }) => {
   const propTypeEntity: IEntity = entities[prop.type.id];
   const propValueEntity: IEntity = entities[prop.value.id];
@@ -195,6 +197,7 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
               inputWidth={90}
               excludedEntities={excludedSuggesterEntities}
               isInsideTemplate={isInsideTemplate}
+              territoryParentId={territoryParentId}
             />
           )}
           <StyledPropButtonGroup>
@@ -253,6 +256,7 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
               inputWidth={90}
               excludedEntities={excludedSuggesterEntities}
               isInsideTemplate={isInsideTemplate}
+              territoryParentId={territoryParentId}
             />
           )}
           <StyledPropButtonGroup>
@@ -321,6 +325,7 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
               }}
               userCanEdit={userCanEdit}
               isInsideTemplate={isInsideTemplate}
+              territoryParentId={territoryParentId}
             />
 
             {(level === 1 || level === 2) && (

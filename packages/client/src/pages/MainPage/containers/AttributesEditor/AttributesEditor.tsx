@@ -55,6 +55,7 @@ interface AttributesEditor {
   modalOpen: boolean;
   setModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
   isInsideTemplate: boolean;
+  territoryParentId?: string;
 }
 
 const AttributesEditor: React.FC<AttributesEditor> = ({
@@ -72,6 +73,7 @@ const AttributesEditor: React.FC<AttributesEditor> = ({
   modalOpen,
   setModalOpen,
   isInsideTemplate = false,
+  territoryParentId,
 }) => {
   const [modalData, setModalData] = useState<AttributeData>(data);
 
@@ -234,6 +236,7 @@ const AttributesEditor: React.FC<AttributesEditor> = ({
                     categoryTypes={classEntitiesActant}
                     excludedEntities={excludedSuggesterEntities}
                     isInsideTemplate={isInsideTemplate}
+                    territoryParentId={territoryParentId}
                   />
                 </StyledSuggesterWrap>
               )
