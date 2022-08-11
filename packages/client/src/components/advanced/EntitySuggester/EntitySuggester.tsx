@@ -314,6 +314,7 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
       disableCreate={disableCreate}
       inputWidth={inputWidth}
       isInsideTemplate={isInsideTemplate}
+      territoryParentId={territoryParentId}
     />
   ) : (
     <div />

@@ -61,6 +61,7 @@ interface Suggester {
   cleanOnSelect?: boolean;
   isWrongDropCategory?: boolean;
   isInsideTemplate: boolean;
+  territoryParentId?: string;
 }
 
 export const Suggester: React.FC<Suggester> = ({
@@ -87,6 +88,7 @@ export const Suggester: React.FC<Suggester> = ({
   isFetching,
   isWrongDropCategory,
   isInsideTemplate = false,
+  territoryParentId,
 }) => {
   const [selected, setSelected] = useState(-1);
   const [isFocused, setIsFocused] = useState(false);
@@ -191,7 +193,8 @@ export const Suggester: React.FC<Suggester> = ({
       suggestions as EntitySuggestion[],
       onPick,
       selected,
-      isInsideTemplate
+      isInsideTemplate,
+      territoryParentId
     );
     return (
       <List

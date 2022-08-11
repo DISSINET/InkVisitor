@@ -1,4 +1,4 @@
-import { EntityStatus } from "@shared/enums";
+import { EntityClass, EntityStatus } from "@shared/enums";
 
 import memoize from "memoize-one";
 import React from "react";
@@ -19,11 +19,18 @@ import { IEntity } from "@shared/types";
 import { ImInsertTemplate } from "react-icons/im";
 
 export const createItemData = memoize(
-  (items, onPick, selected, isInsideTemplate): SuggestionRowEntityItemData => ({
+  (
     items,
     onPick,
     selected,
     isInsideTemplate,
+    territoryParentId
+  ): SuggestionRowEntityItemData => ({
+    items,
+    onPick,
+    selected,
+    isInsideTemplate,
+    territoryParentId,
   })
 );
 
@@ -32,6 +39,7 @@ export type SuggestionRowEntityItemData = {
   onPick: (entity: IEntity, duplicate?: boolean) => void;
   selected: number;
   isInsideTemplate: boolean;
+  territoryParentId: string;
 };
 
 interface EntityRow {
@@ -40,10 +48,11 @@ interface EntityRow {
   style: any;
 }
 const EntityRow: React.FC<EntityRow> = ({ data, index, style }) => {
-  const { items, onPick, selected, isInsideTemplate } = data;
+  const { items, onPick, selected, isInsideTemplate, territoryParentId } = data;
   const { entity, icons } = items[index];
   const isNotDiscouraged = entity.status !== EntityStatus.Discouraged;
-  // newHoverred.entityClass === EntityClass.Territory && !territoryParentId
+  const territoryWithoutParent =
+    entity.class === EntityClass.Territory && !territoryParentId;
 
   const renderIcons = () => {
     if (!entity.isTemplate) {
@@ -59,26 +68,32 @@ const EntityRow: React.FC<EntityRow> = ({ data, index, style }) => {
       );
     } else if (entity.isTemplate && !isInsideTemplate) {
       return (
-        <FaPlayCircle
-          color={theme.color["info"]}
-          onClick={() => {
-            // onPick template inside nonTemplate
-            onPick(entity, true);
-          }}
-          style={{ marginLeft: "0.5rem" }}
-        />
+        <>
+          {!territoryWithoutParent && (
+            <FaPlayCircle
+              color={theme.color["info"]}
+              onClick={() => {
+                // onPick template inside nonTemplate
+                onPick(entity, true);
+              }}
+              style={{ marginLeft: "0.5rem" }}
+            />
+          )}
+        </>
       );
     } else if (entity.isTemplate && isInsideTemplate) {
       return (
         <div>
-          <FaPlayCircle
-            color={theme.color["info"]}
-            onClick={() => {
-              // onPick duplicate template to entity
-              onPick(entity, true);
-            }}
-            style={{ marginLeft: "0.5rem" }}
-          />
+          {!territoryWithoutParent && (
+            <FaPlayCircle
+              color={theme.color["info"]}
+              onClick={() => {
+                // onPick duplicate template to entity
+                onPick(entity, true);
+              }}
+              style={{ marginLeft: "0.5rem" }}
+            />
+          )}
           <ImInsertTemplate
             color={theme.color["black"]}
             onClick={() => {
@@ -98,7 +113,7 @@ const EntityRow: React.FC<EntityRow> = ({ data, index, style }) => {
     <StyledSuggestionRow
       key={index}
       style={style}
-      twoIcons={entityIsTemplate && isInsideTemplate}
+      twoIcons={entityIsTemplate && isInsideTemplate && !territoryWithoutParent}
     >
       <StyledSuggestionLineActions isSelected={selected === index}>
         {isNotDiscouraged && <>{renderIcons()}</>}
