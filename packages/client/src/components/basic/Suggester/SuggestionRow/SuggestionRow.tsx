@@ -63,7 +63,7 @@ const EntityRow: React.FC<EntityRow> = ({ data, index, style }) => {
             // onPick nonTemplate entity
             onPick(entity);
           }}
-          style={{ marginLeft: "0.5rem" }}
+          style={{ marginLeft: "0.5rem", cursor: "pointer" }}
         />
       );
     } else if (entity.isTemplate && !isInsideTemplate) {
@@ -76,7 +76,7 @@ const EntityRow: React.FC<EntityRow> = ({ data, index, style }) => {
                 // onPick template inside nonTemplate
                 onPick(entity, true);
               }}
-              style={{ marginLeft: "0.5rem" }}
+              style={{ marginLeft: "0.5rem", cursor: "pointer" }}
             />
           )}
         </>
@@ -91,7 +91,7 @@ const EntityRow: React.FC<EntityRow> = ({ data, index, style }) => {
                 // onPick duplicate template to entity
                 onPick(entity, true);
               }}
-              style={{ marginLeft: "0.5rem" }}
+              style={{ marginLeft: "0.5rem", cursor: "pointer" }}
             />
           )}
           <ImInsertTemplate
@@ -100,7 +100,7 @@ const EntityRow: React.FC<EntityRow> = ({ data, index, style }) => {
               // onPick template entity
               onPick(entity);
             }}
-            style={{ marginLeft: "0.5rem" }}
+            style={{ marginLeft: "0.5rem", cursor: "pointer" }}
           />
         </div>
       );

@@ -7,7 +7,15 @@ import {
 } from "@shared/dictionaries";
 import { allEntities } from "@shared/dictionaries/entity";
 import { EntityClass, Language, UserRoleMode } from "@shared/enums";
-import { IAction, IEntity, IOption, IProp, IReference } from "@shared/types";
+import {
+  IAction,
+  IEntity,
+  IOption,
+  IProp,
+  IReference,
+  IResponseDetail,
+  IResponseEntity,
+} from "@shared/types";
 import api from "api";
 import {
   Button,
@@ -481,6 +489,32 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
     return "entity";
   }, [entity]);
 
+  const isTerritoryWithParent = (entity: IResponseDetail): boolean => {
+    return (
+      entity.class === EntityClass.Territory &&
+      entity.data.parent &&
+      Object.keys(entity.entities).includes(entity.data.parent.id)
+    );
+  };
+
+  const isStatementWithTerritory = (entity: IResponseDetail): boolean => {
+    return (
+      entity.class === EntityClass.Statement &&
+      entity.data.territory &&
+      Object.keys(entity.entities).includes(entity.data.territory.id)
+    );
+  };
+
+  const getTerritoryId = (entity: IResponseDetail) => {
+    if (isTerritoryWithParent(entity)) {
+      return entity.entities[entity.data.parent.id].id;
+    } else if (isStatementWithTerritory(entity)) {
+      return entity.entities[entity.data.territory.id].id;
+    } else {
+      return undefined;
+    }
+  };
+
   return (
     <>
       {entity && (
@@ -626,49 +660,41 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
                     </StyledDetailContentRow>
 
                     {/* territory parent */}
-                    {entity.class === EntityClass.Territory &&
-                      entity.data.parent &&
-                      Object.keys(entity.entities).includes(
-                        entity.data.parent.id
-                      ) && (
-                        <StyledDetailContentRow>
-                          <StyledDetailContentRowLabel>
-                            Parent Territory
-                          </StyledDetailContentRowLabel>
-                          <StyledDetailContentRowValue>
-                            <EntityTag
-                              entity={entity.entities[entity.data.parent.id]}
-                              disableDoubleClick={
-                                entity.data.parent.id === rootTerritoryId
-                              }
-                              disableDrag={
-                                entity.data.parent.id === rootTerritoryId
-                              }
-                              disableTooltip={
-                                entity.data.parent.id === rootTerritoryId
-                              }
-                            />
-                          </StyledDetailContentRowValue>
-                        </StyledDetailContentRow>
-                      )}
+                    {isTerritoryWithParent(entity) && (
+                      <StyledDetailContentRow>
+                        <StyledDetailContentRowLabel>
+                          Parent Territory
+                        </StyledDetailContentRowLabel>
+                        <StyledDetailContentRowValue>
+                          <EntityTag
+                            entity={entity.entities[entity.data.parent.id]}
+                            disableDoubleClick={
+                              entity.data.parent.id === rootTerritoryId
+                            }
+                            disableDrag={
+                              entity.data.parent.id === rootTerritoryId
+                            }
+                            disableTooltip={
+                              entity.data.parent.id === rootTerritoryId
+                            }
+                          />
+                        </StyledDetailContentRowValue>
+                      </StyledDetailContentRow>
+                    )}
 
                     {/* statement  terriroty */}
-                    {entity.class === EntityClass.Statement &&
-                      entity.data.territory &&
-                      Object.keys(entity.entities).includes(
-                        entity.data.territory.id
-                      ) && (
-                        <StyledDetailContentRow>
-                          <StyledDetailContentRowLabel>
-                            Territory
-                          </StyledDetailContentRowLabel>
-                          <StyledDetailContentRowValue>
-                            <EntityTag
-                              entity={entity.entities[entity.data.territory.id]}
-                            />
-                          </StyledDetailContentRowValue>
-                        </StyledDetailContentRow>
-                      )}
+                    {isStatementWithTerritory(entity) && (
+                      <StyledDetailContentRow>
+                        <StyledDetailContentRowLabel>
+                          Territory
+                        </StyledDetailContentRowLabel>
+                        <StyledDetailContentRowValue>
+                          <EntityTag
+                            entity={entity.entities[entity.data.territory.id]}
+                          />
+                        </StyledDetailContentRowValue>
+                      </StyledDetailContentRow>
+                    )}
                     <StyledDetailContentRow>
                       <StyledDetailContentRowLabel>
                         Status
@@ -1209,6 +1235,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
                         } as PropAttributeFilter
                       }
                       isInsideTemplate={entity.isTemplate || false}
+                      territoryParentId={getTerritoryId(entity)}
                     />
                   </tbody>
                 </table>

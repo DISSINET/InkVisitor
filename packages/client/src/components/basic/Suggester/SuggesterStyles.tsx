@@ -80,8 +80,6 @@ export const StyledSuggestionLineActions = styled.div<Column>`
   width: 100%;
   background-color: ${({ theme, isSelected }) =>
     isSelected ? theme.color["blue"][100] : "transparent"};
-
-  cursor: pointer;
 `;
 export const StyledSuggestionLineTag = styled.div<Column>`
   display: grid;
