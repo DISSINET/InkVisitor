@@ -43,6 +43,7 @@ const EntityRow: React.FC<EntityRow> = ({ data, index, style }) => {
   const { items, onPick, selected, isInsideTemplate } = data;
   const { entity, icons } = items[index];
   const isNotDiscouraged = entity.status !== EntityStatus.Discouraged;
+  // newHoverred.entityClass === EntityClass.Territory && !territoryParentId
 
   const renderIcons = () => {
     if (!entity.isTemplate) {

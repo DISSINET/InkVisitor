@@ -28,9 +28,6 @@ interface EntitySuggester {
   categoryTypes: ExtendedEntityClass[];
   onSelected: (id: string) => void;
   placeholder?: string;
-  disableCreate?: boolean;
-  disableDuplicate?: boolean;
-  disableWildCard?: boolean;
   inputWidth?: number | "full";
   openDetailOnCreate?: boolean;
   territoryActants?: string[];
@@ -38,26 +35,31 @@ interface EntitySuggester {
   excludedActantIds?: string[];
   filterEditorRights?: boolean;
   isInsideTemplate?: boolean;
-  disableTemplatesAccept?: boolean;
   territoryParentId?: string;
+
+  disableCreate?: boolean;
+  disableDuplicate?: boolean;
+  disableWildCard?: boolean;
+  disableTemplatesAccept?: boolean;
 }
 
 export const EntitySuggester: React.FC<EntitySuggester> = ({
   categoryTypes,
   onSelected,
   placeholder = "",
-  disableCreate,
-  disableDuplicate = false,
   inputWidth,
-  disableWildCard = false,
   openDetailOnCreate = false,
   territoryActants,
   excludedEntities = [],
   filterEditorRights = false,
   excludedActantIds = [],
   isInsideTemplate = false,
-  disableTemplatesAccept = false,
   territoryParentId,
+
+  disableCreate,
+  disableDuplicate = false,
+  disableWildCard = false,
+  disableTemplatesAccept = false,
 }) => {
   const [typed, setTyped] = useState<string>("");
   const debouncedTyped = useDebounce(typed, 100);
@@ -81,13 +83,13 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
         class:
           selectedCategory?.value === DropdownAny
             ? false
-            : selectedCategory.value,
+            : selectedCategory?.value,
         excluded: excludedEntities.length ? excludedEntities : undefined,
       });
 
       const suggestions = resSuggestions.data;
       suggestions.sort((a, b) => {
-        if (a.status == EntityStatus.Discouraged) {
+        if (a.status === EntityStatus.Discouraged) {
           return 1;
         } else {
           return -1;
@@ -103,6 +105,7 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
           excludedActantIds.length ? !excludedActantIds.includes(s.id) : s
         )
         .filter((s) => (disableTemplatesAccept ? !s.isTemplate : s))
+        .filter((s) => categoryTypes.includes(s.class))
         .map((entity: IEntity) => {
           const icons: React.ReactNode[] = [];
 
@@ -214,13 +217,12 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
       );
       actantsCreateMutation.mutate(newStatement);
     } else if (templateToDuplicate.class === EntityClass.Territory) {
-      const newTerritory = DEntity(
-        templateToDuplicate as IEntity,
-        localStorage.getItem("userrole") as UserRole,
-        true
-      );
-
       if (territoryParentId) {
+        const newTerritory = DEntity(
+          templateToDuplicate as IEntity,
+          localStorage.getItem("userrole") as UserRole,
+          true
+        );
         newTerritory.data.parent.id = territoryParentId;
         actantsCreateMutation.mutate(newTerritory);
       }
@@ -288,7 +290,7 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
       onType={(newType: string) => {
         setTyped(newType);
       }}
-      onChangeCategory={(option: ValueType<OptionTypeBase, any>) => {
+      onChangeCategory={(option: ValueType<OptionTypeBase, any> | null) => {
         setSelectedCategory(option);
       }}
       onCreate={(newCreated: {
