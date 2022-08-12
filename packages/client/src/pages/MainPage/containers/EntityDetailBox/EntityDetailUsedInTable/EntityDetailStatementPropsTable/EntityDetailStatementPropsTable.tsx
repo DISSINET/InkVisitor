@@ -28,7 +28,7 @@ export const EntityDetailStatementPropsTable: React.FC<
     return (
       <StyledTableTextGridCell>
         <StyledTagWrap>
-          <EntityTag fullWidth actant={entity} />
+          <EntityTag fullWidth entity={entity} />
         </StyledTagWrap>
       </StyledTableTextGridCell>
     );
@@ -47,7 +47,7 @@ export const EntityDetailStatementPropsTable: React.FC<
               {entity && (
                 <EntityTag
                   key={entity.id}
-                  actant={entity}
+                  entity={entity}
                   tooltipText={entity.label}
                 />
               )}

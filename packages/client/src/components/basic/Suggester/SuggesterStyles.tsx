@@ -64,21 +64,22 @@ export const StyledRelativePosition = styled.div`
 
   min-height: 2.8rem;
 `;
-
-export const StyledSuggestionRow = styled.div`
+interface StyledSuggestionRow {
+  twoIcons: boolean;
+}
+export const StyledSuggestionRow = styled.div<StyledSuggestionRow>`
   display: grid;
-  grid-template-columns: 2.5rem auto 3rem;
+  grid-template-columns: ${({ twoIcons }) => (twoIcons ? "5rem" : "2.5rem")} auto 3rem;
   align-items: center;
 `;
 export const StyledSuggestionLineActions = styled.div<Column>`
   display: grid;
+  justify-content: flex-start;
   align-items: center;
-  justify-content: center;
   height: 100%;
+  width: 100%;
   background-color: ${({ theme, isSelected }) =>
     isSelected ? theme.color["blue"][100] : "transparent"};
-
-  cursor: pointer;
 `;
 export const StyledSuggestionLineTag = styled.div<Column>`
   display: grid;
@@ -102,13 +103,4 @@ export const StyledTagWrapper = styled.div`
 export const StyledAiOutlineWarning = styled(AiOutlineWarning)`
   margin-top: 0.1rem;
   margin-left: 0.5rem;
-`;
-export const StyledContent = styled.div`
-  display: flex;
-  flex-direction: column;
-`;
-export const StyledNote = styled.i`
-  margin-top: ${({ theme }) => theme.space[2]};
-  font-size: ${({ theme }) => theme.fontSize["xs"]};
-  text-align: right;
 `;

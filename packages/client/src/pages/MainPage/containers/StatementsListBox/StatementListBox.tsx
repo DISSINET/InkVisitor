@@ -303,7 +303,7 @@ export const StatementListBox: React.FC = () => {
       actantObject && (
         <EntityTag
           key={key}
-          actant={actantObject}
+          entity={actantObject}
           showOnly="entity"
           tooltipPosition="bottom center"
         />
@@ -323,7 +323,7 @@ export const StatementListBox: React.FC = () => {
           <div style={{ marginTop: "4px", display: "flex" }}>
             <EntityTag
               key={key}
-              actant={actantObject}
+              entity={actantObject}
               tooltipPosition="bottom center"
             />
           </div>
@@ -348,7 +348,7 @@ export const StatementListBox: React.FC = () => {
           const statement = row.original as IStatement;
           return (
             <EntityTag
-              actant={statement as IEntity}
+              entity={statement as IEntity}
               showOnly="entity"
               tooltipText={statement.data.text}
             />

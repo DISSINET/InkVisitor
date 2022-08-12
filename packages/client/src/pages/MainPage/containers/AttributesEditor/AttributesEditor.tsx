@@ -25,7 +25,7 @@ import React, { useMemo, useState } from "react";
 import { FaUnlink } from "react-icons/fa";
 import { MdSettings } from "react-icons/md";
 import { excludedSuggesterEntities } from "Theme/constants";
-import { AttributeData, Entities, PropAttributeName } from "types";
+import { AttributeData, EntityColors, PropAttributeName } from "types";
 import {
   StyledAttributeModalHeaderIcon,
   StyledAttributeModalHeaderWrapper,
@@ -37,9 +37,9 @@ import { AttributesForm } from "./AttributesForm";
 import { TooltipAttributeRow } from "./TooltipAttributeRow/TooltipAttributeRow";
 import { TooltipBooleanRow } from "./TooltipBooleanRow/TooltipBooleanRow";
 
-interface StatementEditorAttributes {
+interface AttributesEditor {
   modalTitle: string;
-  actant?: IEntity;
+  entity?: IEntity;
   data: AttributeData;
   handleUpdate: (
     data: AttributeData | { actant: string } | { action: string }
@@ -54,11 +54,13 @@ interface StatementEditorAttributes {
 
   modalOpen: boolean;
   setModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  isInsideTemplate: boolean;
+  territoryParentId?: string;
 }
 
-const AttributesEditor: React.FC<StatementEditorAttributes> = ({
+const AttributesEditor: React.FC<AttributesEditor> = ({
   modalTitle,
-  actant,
+  entity,
   data,
   handleUpdate,
   updateActantId = () => {},
@@ -70,6 +72,8 @@ const AttributesEditor: React.FC<StatementEditorAttributes> = ({
   userCanEdit = false,
   modalOpen,
   setModalOpen,
+  isInsideTemplate = false,
+  territoryParentId,
 }) => {
   const [modalData, setModalData] = useState<AttributeData>(data);
 
@@ -191,7 +195,7 @@ const AttributesEditor: React.FC<StatementEditorAttributes> = ({
         />
         <ModalContent>
           <StyledContentWrap
-            color={actant ? Entities[actant.class].color : undefined}
+            color={entity ? EntityColors[entity.class].color : undefined}
           >
             <AttributesForm
               modalData={modalData}
@@ -201,10 +205,10 @@ const AttributesEditor: React.FC<StatementEditorAttributes> = ({
                 setModalData(newModalData);
               }}
             />
-            {actant ? (
+            {entity ? (
               <StyledEntityWrap>
                 <EntityTag
-                  actant={actant}
+                  entity={entity}
                   fullWidth
                   button={
                     userCanEdit && (
@@ -231,6 +235,8 @@ const AttributesEditor: React.FC<StatementEditorAttributes> = ({
                     }}
                     categoryTypes={classEntitiesActant}
                     excludedEntities={excludedSuggesterEntities}
+                    isInsideTemplate={isInsideTemplate}
+                    territoryParentId={territoryParentId}
                   />
                 </StyledSuggesterWrap>
               )

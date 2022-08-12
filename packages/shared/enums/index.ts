@@ -14,6 +14,7 @@ export enum EntityClass {
 
 export enum EntityExtension {
   Any = "*",
+  Empty = "X",
 }
 
 export type ExtendedEntityClass = EntityClass | EntityExtension;

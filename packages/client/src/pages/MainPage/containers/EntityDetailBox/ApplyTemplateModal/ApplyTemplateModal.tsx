@@ -74,7 +74,7 @@ export const ApplyTemplateModal: React.FC<ApplyTemplateModal> = ({
       <ModalContent>
         <StyledContent>
           <ModalInputForm>{`Apply template?`}</ModalInputForm>
-          <div>{templateToApply && <EntityTag actant={templateToApply} />}</div>
+          <div>{templateToApply && <EntityTag entity={templateToApply} />}</div>
           {/* here goes the info about template #951 */}
         </StyledContent>
       </ModalContent>

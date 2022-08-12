@@ -2,48 +2,64 @@ import {
   EntityClass,
   EntityExtension,
   EntityStatus,
+  ExtendedEntityClass,
   UserRole,
   UserRoleMode,
 } from "@shared/enums";
-import { IEntity, IOption } from "@shared/types";
+import { IEntity, IOption, IStatement, ITerritory } from "@shared/types";
 import api from "api";
 import { Suggester } from "components";
-import { CEntity, CStatement, CTerritoryActant } from "constructors";
+import {
+  CEntity,
+  CStatement,
+  CTerritoryActant,
+  DEntity,
+  DStatement,
+} from "constructors";
 import { useDebounce, useSearchParams } from "hooks";
 import React, { useEffect, useState } from "react";
-import { DragObjectWithType } from "react-dnd";
 import { FaHome } from "react-icons/fa";
 import { useMutation, useQuery } from "react-query";
 import { OptionTypeBase, ValueType } from "react-select";
 import { DropdownAny, rootTerritoryId, wildCardChar } from "Theme/constants";
-import { Entities, EntitySuggestionI } from "types";
+import { EntityDragItem } from "types";
 
-interface EntitySuggesterI {
-  categoryTypes: EntityClass[];
-  onSelected: Function;
+interface EntitySuggester {
+  categoryTypes: ExtendedEntityClass[];
+  onSelected: (id: string) => void;
   placeholder?: string;
-  disableCreate?: boolean;
-  disableWildCard?: boolean;
   inputWidth?: number | "full";
   openDetailOnCreate?: boolean;
   territoryActants?: string[];
   excludedEntities?: EntityClass[];
   excludedActantIds?: string[];
   filterEditorRights?: boolean;
+  isInsideTemplate?: boolean;
+  territoryParentId?: string;
+
+  disableCreate?: boolean;
+  disableDuplicate?: boolean;
+  disableWildCard?: boolean;
+  disableTemplatesAccept?: boolean;
 }
 
-export const EntitySuggester: React.FC<EntitySuggesterI> = ({
+export const EntitySuggester: React.FC<EntitySuggester> = ({
   categoryTypes,
   onSelected,
   placeholder = "",
-  disableCreate,
   inputWidth,
-  disableWildCard = false,
   openDetailOnCreate = false,
   territoryActants,
   excludedEntities = [],
   filterEditorRights = false,
   excludedActantIds = [],
+  isInsideTemplate = false,
+  territoryParentId,
+
+  disableCreate,
+  disableDuplicate = false,
+  disableWildCard = false,
+  disableTemplatesAccept = false,
 }) => {
   const [typed, setTyped] = useState<string>("");
   const debouncedTyped = useDebounce(typed, 100);
@@ -67,13 +83,13 @@ export const EntitySuggester: React.FC<EntitySuggesterI> = ({
         class:
           selectedCategory?.value === DropdownAny
             ? false
-            : selectedCategory.value,
+            : selectedCategory?.value,
         excluded: excludedEntities.length ? excludedEntities : undefined,
       });
 
       const suggestions = resSuggestions.data;
       suggestions.sort((a, b) => {
-        if (a.status == EntityStatus.Discouraged) {
+        if (a.status === EntityStatus.Discouraged) {
           return 1;
         } else {
           return -1;
@@ -88,23 +104,17 @@ export const EntitySuggester: React.FC<EntitySuggesterI> = ({
         .filter((s) =>
           excludedActantIds.length ? !excludedActantIds.includes(s.id) : s
         )
-        .map((s: IEntity) => {
-          const entity = Entities[s.class];
+        .filter((s) => (disableTemplatesAccept ? !s.isTemplate : s))
+        .filter((s) => categoryTypes.includes(s.class))
+        .map((entity: IEntity) => {
           const icons: React.ReactNode[] = [];
 
-          if (territoryActants?.includes(s.id)) {
-            icons.push(<FaHome key={s.id} color="" />);
+          if (territoryActants?.includes(entity.id)) {
+            icons.push(<FaHome key={entity.id} color="" />);
           }
 
           return {
-            color: entity.color,
-            category: s.class,
-            label: s.label,
-            detail: s.detail,
-            status: s.status,
-            ltype: s.data.logicalType,
-            isTemplate: s.isTemplate,
-            id: s.id,
+            entity: entity,
             icons: icons,
           };
         });
@@ -146,7 +156,8 @@ export const EntitySuggester: React.FC<EntitySuggesterI> = ({
   }, [categoryTypes]);
 
   const actantsCreateMutation = useMutation(
-    async (newActant: IEntity) => await api.entityCreate(newActant),
+    async (newActant: IEntity | IStatement | ITerritory) =>
+      await api.entityCreate(newActant),
     {
       onSuccess: (data, variables) => {
         onSelected(variables.id);
@@ -158,14 +169,14 @@ export const EntitySuggester: React.FC<EntitySuggesterI> = ({
     }
   );
 
-  const handleCreate = async (newCreated: {
+  const handleCreate = (newCreated: {
     label: string;
-    category: EntityClass;
-    detail: string;
+    entityClass: EntityClass;
+    detail?: string;
     territoryId?: string;
   }) => {
     if (
-      newCreated.category === EntityClass.Statement &&
+      newCreated.entityClass === EntityClass.Statement &&
       newCreated.territoryId
     ) {
       const newStatement = CStatement(
@@ -175,43 +186,86 @@ export const EntitySuggester: React.FC<EntitySuggesterI> = ({
         newCreated.detail
       );
       actantsCreateMutation.mutate(newStatement);
-    } else if (newCreated.category === EntityClass.Territory) {
-      const newActant = CTerritoryActant(
+    } else if (newCreated.entityClass === EntityClass.Territory) {
+      const newTerritory = CTerritoryActant(
         newCreated.label,
         newCreated.territoryId ? newCreated.territoryId : rootTerritoryId,
         -1,
         localStorage.getItem("userrole") as UserRole,
         newCreated.detail
       );
-      actantsCreateMutation.mutate(newActant);
+      actantsCreateMutation.mutate(newTerritory);
     } else {
-      const newActant = CEntity(
-        newCreated.category,
+      const newEntity = CEntity(
+        newCreated.entityClass,
         newCreated.label,
         localStorage.getItem("userrole") as UserRole,
         newCreated.detail
       );
-      actantsCreateMutation.mutate(newActant);
+      actantsCreateMutation.mutate(newEntity);
     }
   };
 
-  const handlePick = (newPicked: EntitySuggestionI) => {
-    onSelected(newPicked.id);
-    handleClean();
-  };
-  const handleDropped = (newDropped: any) => {
-    const droppedCategory = newDropped.category;
-    if (categoryTypes.includes(droppedCategory)) {
-      onSelected(newDropped.id);
+  const handleDuplicate = (
+    templateToDuplicate: IEntity | IStatement | ITerritory
+  ) => {
+    if (templateToDuplicate.class === EntityClass.Statement) {
+      const newStatement = DStatement(
+        templateToDuplicate as IStatement,
+        localStorage.getItem("userrole") as UserRole,
+        true
+      );
+      actantsCreateMutation.mutate(newStatement);
+    } else if (templateToDuplicate.class === EntityClass.Territory) {
+      if (territoryParentId) {
+        const newTerritory = DEntity(
+          templateToDuplicate as IEntity,
+          localStorage.getItem("userrole") as UserRole,
+          true
+        );
+        newTerritory.data.parent.id = territoryParentId;
+        actantsCreateMutation.mutate(newTerritory);
+      }
+    } else {
+      const newEntity = DEntity(
+        templateToDuplicate as IEntity,
+        localStorage.getItem("userrole") as UserRole,
+        true
+      );
+      actantsCreateMutation.mutate(newEntity);
     }
-    handleClean();
+  };
+
+  const handlePick = (newPicked: IEntity, duplicate?: boolean) => {
+    if (duplicate && !disableDuplicate) {
+      handleDuplicate(newPicked);
+    } else {
+      onSelected(newPicked.id);
+      handleClean();
+    }
+  };
+
+  const handleDropped = (newDropped: EntityDragItem, duplicate?: boolean) => {
+    if (!isWrongDropCategory) {
+      if (duplicate && !disableDuplicate) {
+        newDropped.entity && handleDuplicate(newDropped.entity);
+      } else {
+        onSelected(newDropped.id);
+        handleClean();
+      }
+    }
   };
 
   const [isWrongDropCategory, setIsWrongDropCategory] = useState(false);
 
-  const handleHoverred = (newHoverred: any) => {
-    const hoverredCategory = newHoverred.category;
-    if (!categoryTypes.includes(hoverredCategory)) {
+  const handleHoverred = (newHoverred: EntityDragItem) => {
+    const hoverredCategory = newHoverred.entityClass;
+    if (
+      !categoryTypes.includes(hoverredCategory) ||
+      (disableTemplatesAccept && newHoverred.isTemplate) ||
+      newHoverred.isDiscouraged ||
+      (newHoverred.entityClass === EntityClass.Territory && !territoryParentId)
+    ) {
       setIsWrongDropCategory(true);
     } else {
       setIsWrongDropCategory(false);
@@ -235,29 +289,31 @@ export const EntitySuggester: React.FC<EntitySuggesterI> = ({
       onType={(newType: string) => {
         setTyped(newType);
       }}
-      onChangeCategory={(option: ValueType<OptionTypeBase, any>) => {
+      onChangeCategory={(option: ValueType<OptionTypeBase, any> | null) => {
         setSelectedCategory(option);
       }}
       onCreate={(newCreated: {
         label: string;
-        category: EntityClass;
-        detail: string;
+        entityClass: EntityClass;
+        detail?: string;
         territoryId?: string;
       }) => {
         handleCreate(newCreated);
       }}
-      onPick={(newPicked: EntitySuggestionI) => {
-        handlePick(newPicked);
+      onPick={(newPicked: IEntity, duplicate?: boolean) => {
+        handlePick(newPicked, duplicate);
       }}
-      onDrop={(newDropped: DragObjectWithType) => {
-        handleDropped(newDropped);
+      onDrop={(newDropped: EntityDragItem, duplicate?: boolean) => {
+        handleDropped(newDropped, duplicate);
       }}
-      onHover={(newHoverred: DragObjectWithType) => {
+      onHover={(newHoverred: EntityDragItem) => {
         handleHoverred(newHoverred);
       }}
       isWrongDropCategory={isWrongDropCategory}
       disableCreate={disableCreate}
       inputWidth={inputWidth}
+      isInsideTemplate={isInsideTemplate}
+      territoryParentId={territoryParentId}
     />
   ) : (
     <div />

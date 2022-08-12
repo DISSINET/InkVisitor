@@ -9,7 +9,9 @@ import { Tag, Button } from "components";
 
 const queryClient = new QueryClient();
 
-const entityIds: string[] = Object.entries(Entities).map((e) => e[1].id);
+const entityIds: string[] = Object.entries(Entities).map(
+  (e) => e[1].entityClass
+);
 
 export default {
   title: "Tag",
@@ -17,7 +19,7 @@ export default {
     info: { inline: true },
   },
   args: {
-    category: Entities["T"].id,
+    category: Entities["T"].entityClass,
     borderStyle: "solid",
     label: "",
     detail: "",
@@ -54,7 +56,7 @@ export const TagWithLabelAndButton = ({ ...args }) => {
   );
 };
 TagWithLabelAndButton.args = {
-  category: Entities["E"].id,
+  category: Entities["E"].entityClass,
   label: "entity label",
 };
 
@@ -64,7 +66,7 @@ export const TagWithVeryLongLabel = ({ ...args }) => {
   );
 };
 TagWithVeryLongLabel.args = {
-  category: Entities["P"].id,
+  category: Entities["P"].entityClass,
   label: "entity label entity label entity label",
   disableTooltip: false,
 };
