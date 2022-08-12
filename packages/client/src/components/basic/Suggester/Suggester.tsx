@@ -1,9 +1,10 @@
+import { entitiesDictKeys } from "@shared/dictionaries";
 import { EntityClass, EntityStatus } from "@shared/enums";
-import { IOption } from "@shared/types";
+import { IEntity, IOption } from "@shared/types";
 import { Button, Dropdown, Input, Loader, TypeBar } from "components";
 import useKeypress from "hooks/useKeyPress";
 import React, { useState } from "react";
-import { DragObjectWithType, DropTargetMonitor, useDrop } from "react-dnd";
+import { DropTargetMonitor, useDrop } from "react-dnd";
 import { FaPlus } from "react-icons/fa";
 import { MdCancel } from "react-icons/md";
 import { OptionTypeBase, ValueType } from "react-select";
@@ -11,9 +12,14 @@ import { toast } from "react-toastify";
 import { FixedSizeList as List } from "react-window";
 import { DropdownAny, scrollOverscanCount } from "Theme/constants";
 import theme from "Theme/theme";
-import { EntitySuggestionI, ItemTypes, UserSuggestionI } from "types";
+import {
+  EntityDragItem,
+  EntitySuggestion,
+  ItemTypes,
+  SuggesterItemToCreate,
+} from "types";
+import { SuggesterCreateModal } from "./SuggesterCreateModal/SuggesterCreateModal";
 import { SuggesterKeyPress } from "./SuggesterKeyPress";
-import { SuggesterModal } from "./SuggesterModal";
 import {
   StyledAiOutlineWarning,
   StyledInputWrapper,
@@ -23,18 +29,16 @@ import {
   StyledSuggesterList,
   StyledSuggestionCancelButton,
 } from "./SuggesterStyles";
+import { SuggesterTemplateModal } from "./SuggesterTemplateModal/SuggesterTemplateModal";
 import {
   createItemData,
-  EntityItemData,
+  SuggestionRowEntityItemData,
   MemoizedEntityRow,
-  MemoizedUserRow,
-  UserItemData,
 } from "./SuggestionRow/SuggestionRow";
 
 interface Suggester {
   marginTop?: boolean;
-  suggesterType?: "entity" | "user";
-  suggestions: EntitySuggestionI[] | UserSuggestionI[];
+  suggestions: EntitySuggestion[];
   placeholder?: string; // text to display when typed === ""
   typed: string; // input value
   category: IOption; // selected category
@@ -49,18 +53,19 @@ interface Suggester {
   // events
   onType: (newType: string) => void;
   onChangeCategory: (selectedOption: ValueType<OptionTypeBase, any>) => void;
-  onCreate?: Function;
-  onPick: Function;
-  onDrop?: Function;
-  onHover?: Function;
-  onCancel?: Function;
+  onCreate: (item: SuggesterItemToCreate) => void;
+  onPick: (entity: IEntity, duplicate?: boolean) => void;
+  onDrop: (item: EntityDragItem, duplicate?: boolean) => void;
+  onHover: (item: EntityDragItem) => void;
+  onCancel: () => void;
   cleanOnSelect?: boolean;
   isWrongDropCategory?: boolean;
+  isInsideTemplate: boolean;
+  territoryParentId?: string;
 }
 
 export const Suggester: React.FC<Suggester> = ({
   marginTop,
-  suggesterType = "entity",
   suggestions = [],
   placeholder = "",
   typed,
@@ -75,43 +80,60 @@ export const Suggester: React.FC<Suggester> = ({
   // events
   onType,
   onChangeCategory,
-  onCreate = () => {},
+  onCreate,
   onPick,
-  onDrop = () => {},
+  onDrop,
   onHover,
-  onCancel = () => {},
+  onCancel,
   isFetching,
   isWrongDropCategory,
+  isInsideTemplate = false,
+  territoryParentId,
 }) => {
-  const [{ isOver }, dropRef] = useDrop({
-    accept: ItemTypes.TAG,
-    drop: (item: DragObjectWithType) => {
-      onDrop(item);
-    },
-    hover: (item: DragObjectWithType) => {
-      onHover && onHover(item);
-    },
-    collect: (monitor: DropTargetMonitor) => ({
-      isOver: !!monitor.isOver(),
-    }),
-  });
   const [selected, setSelected] = useState(-1);
   const [isFocused, setIsFocused] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
-  const [showModal, setShowModal] = useState(false);
+
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showTemplateModal, setShowTemplateModal] = useState(false);
+  const [tempDropItem, setTempDropItem] = useState<EntityDragItem | false>(
+    false
+  );
 
   useKeypress(
     "Escape",
     () => {
-      if (!showModal && isFocused) onCancel();
+      if (!showCreateModal && isFocused) onCancel();
     },
-    [showModal, isFocused]
+    [showCreateModal, isFocused]
   );
 
   const onTypeFn = (newType: string) => {
     setSelected(-1);
     onType(newType);
   };
+
+  const [{ isOver }, dropRef] = useDrop({
+    accept: ItemTypes.TAG,
+    drop: (item: EntityDragItem) => {
+      if (!isWrongDropCategory) {
+        if (!item.isTemplate) {
+          onDrop(item);
+        } else if (item.isTemplate && !isInsideTemplate) {
+          onDrop(item, true);
+        } else if (item.isTemplate && isInsideTemplate) {
+          setTempDropItem(item);
+          setShowTemplateModal(true);
+        }
+      }
+    },
+    hover: (item: EntityDragItem) => {
+      onHover && onHover(item);
+    },
+    collect: (monitor: DropTargetMonitor) => ({
+      isOver: !!monitor.isOver(),
+    }),
+  });
 
   const handleEnterPress = () => {
     if (selected === -1 && typed.length > 0) {
@@ -120,12 +142,26 @@ export const Suggester: React.FC<Suggester> = ({
         category.value === EntityClass.Statement ||
         category.value === EntityClass.Territory
       ) {
-        setShowModal(true);
+        setShowCreateModal(true);
       } else {
-        onCreate({ label: typed, category: category.value });
+        onCreate({
+          label: typed,
+          entityClass: entitiesDictKeys[category.value as EntityClass].value,
+        });
       }
     } else if (selected > -1) {
-      onPick(suggestions[selected]);
+      const entity = suggestions[selected].entity;
+      if (entity.status !== EntityStatus.Discouraged) {
+        if (!entity.isTemplate) {
+          onPick(entity);
+        } else if (entity.isTemplate && !isInsideTemplate) {
+          onPick(entity, true);
+        } else if (entity.isTemplate && isInsideTemplate) {
+          // TODO: open modal to ask use / duplicate
+          // setTempDropItem(entity);
+          setShowTemplateModal(true);
+        }
+      }
     } else {
       toast.info("Fill at least 1 character");
     }
@@ -139,9 +175,12 @@ export const Suggester: React.FC<Suggester> = ({
         category.value === EntityClass.Statement ||
         category.value === EntityClass.Territory
       ) {
-        setShowModal(true);
+        setShowCreateModal(true);
       } else {
-        onCreate({ label: typed, category: category.value });
+        onCreate({
+          label: typed,
+          entityClass: entitiesDictKeys[category.value as EntityClass].value,
+        });
       }
     } else {
       toast.info("Fill at least 1 character");
@@ -150,14 +189,16 @@ export const Suggester: React.FC<Suggester> = ({
   };
 
   const renderEntitySuggestions = () => {
-    const itemData = createItemData(
-      suggestions as EntitySuggestionI[],
+    const itemData: SuggestionRowEntityItemData = createItemData(
+      suggestions as EntitySuggestion[],
       onPick,
-      selected
+      selected,
+      isInsideTemplate,
+      territoryParentId
     );
     return (
       <List
-        itemData={itemData as EntityItemData}
+        itemData={itemData as SuggestionRowEntityItemData}
         height={suggestions.length > 7 ? 200 : suggestions.length * 25}
         itemCount={suggestions.length}
         itemSize={25}
@@ -165,22 +206,6 @@ export const Suggester: React.FC<Suggester> = ({
         overscanCount={scrollOverscanCount}
       >
         {MemoizedEntityRow}
-      </List>
-    );
-  };
-
-  const renderUserSuggestions = () => {
-    const itemData = createItemData(suggestions, onPick, selected);
-    return (
-      <List
-        itemData={itemData as UserItemData}
-        height={suggestions.length > 7 ? 200 : suggestions.length * 25}
-        itemCount={suggestions.length}
-        itemSize={25}
-        width="100%"
-        overscanCount={scrollOverscanCount}
-      >
-        {MemoizedUserRow}
       </List>
     );
   };
@@ -256,8 +281,7 @@ export const Suggester: React.FC<Suggester> = ({
             onMouseOut={() => setIsHovered(false)}
           >
             <StyledRelativePosition>
-              {suggesterType === "entity" && renderEntitySuggestions()}
-              {suggesterType === "user" && renderUserSuggestions()}
+              {renderEntitySuggestions()}
               <Loader size={30} show={isFetching} />
             </StyledRelativePosition>
             <SuggesterKeyPress
@@ -274,14 +298,33 @@ export const Suggester: React.FC<Suggester> = ({
         ) : null}
       </StyledSuggester>
 
-      {showModal && (
-        <SuggesterModal
-          show={true}
+      {showCreateModal && (
+        <SuggesterCreateModal
           typed={typed}
           category={category}
           categories={categories.slice(1)}
           onCreate={onCreate}
-          closeModal={() => setShowModal(false)}
+          closeModal={() => setShowCreateModal(false)}
+        />
+      )}
+      {showTemplateModal && (
+        <SuggesterTemplateModal
+          onClose={() => {
+            setTempDropItem(false);
+            setShowTemplateModal(false);
+          }}
+          onUse={() => {
+            {
+              tempDropItem && onDrop(tempDropItem);
+              setTempDropItem(false);
+              setShowTemplateModal(false);
+            }
+          }}
+          onDuplicate={() => {
+            tempDropItem && onDrop(tempDropItem, true);
+            setTempDropItem(false);
+            setShowTemplateModal(false);
+          }}
         />
       )}
     </>

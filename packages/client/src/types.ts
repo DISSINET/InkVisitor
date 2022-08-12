@@ -11,7 +11,10 @@ import {
   Operator,
   Partitivity,
   Virtuality,
+  ExtendedEntityClass,
+  EntityExtension,
 } from "@shared/enums";
+import { IEntity } from "@shared/types";
 
 export const Colors = [
   "black",
@@ -36,82 +39,68 @@ export const Colors = [
   "entityV",
 ];
 
-interface IEntity {
-  id: string;
-  label: string;
+interface IEntityColor {
+  entityClass: ExtendedEntityClass;
   color: typeof Colors[number];
 }
 
 // Use for colors, for dropdowns use entity.ts dictionary
-export const Entities: { [key: string]: IEntity } = {
+export const EntityColors: { [key: string]: IEntityColor } = {
   T: {
-    id: "T",
-    label: "Territory",
+    entityClass: EntityClass.Territory,
     color: "entityT",
   },
   R: {
-    id: "R",
-    label: "Resource",
+    entityClass: EntityClass.Resource,
     color: "entityR",
   },
   A: {
-    id: "A",
-    label: "Action",
+    entityClass: EntityClass.Action,
     color: "entityA",
   },
   S: {
-    id: "S",
-    label: "Statement",
+    entityClass: EntityClass.Statement,
     color: "entityS",
   },
   C: {
-    id: "C",
-    label: "Concept",
+    entityClass: EntityClass.Concept,
     color: "entityC",
   },
   E: {
-    id: "E",
-    label: "Event",
+    entityClass: EntityClass.Event,
     color: "entityE",
   },
   G: {
-    id: "G",
-    label: "Group",
+    entityClass: EntityClass.Group,
     color: "entityG",
   },
   L: {
-    id: "L",
-    label: "Location",
+    entityClass: EntityClass.Location,
     color: "entityL",
   },
   O: {
-    id: "O",
-    label: "Object",
+    entityClass: EntityClass.Object,
     color: "entityO",
   },
   P: {
-    id: "P",
-    label: "Person",
+    entityClass: EntityClass.Person,
     color: "entityP",
   },
   V: {
-    id: "V",
-    label: "Value",
+    entityClass: EntityClass.Value,
     color: "entityV",
   },
   X: {
-    id: "X",
-    label: "unset",
+    entityClass: EntityExtension.Empty,
     color: "white",
   },
   all: {
-    id: "all",
-    label: "*",
+    entityClass: EntityExtension.Any,
     color: "white",
   },
 };
 
-export type EntityKeys = keyof typeof Entities;
+export type EntityKeys = keyof typeof EntityColors;
 
 export interface Node {
   id: string;
@@ -135,13 +124,19 @@ export enum ItemTypes {
 export type DragItem = {
   index: number;
   id: string;
-  type: string;
+  type: ItemTypes;
 };
+export interface EntityDragItem extends DragItem {
+  entity: IEntity | false;
+  entityClass: ExtendedEntityClass;
+  isTemplate: boolean;
+  isDiscouraged: boolean;
+}
 export interface DraggedTerritoryItem {
+  index?: number;
   id?: string;
   parentId?: string;
   lvl?: number;
-  index?: number;
 }
 export enum DraggedPropRowCategory {
   ACTANT = "ACTANT",
@@ -149,10 +144,10 @@ export enum DraggedPropRowCategory {
   META_PROP = "META_PROP",
 }
 export interface DraggedPropRowItem {
+  index?: number;
   id?: string;
   parentId?: string;
   lvl?: number;
-  index?: number;
   category?: DraggedPropRowCategory;
 }
 export interface DraggedActantRowItem {
@@ -287,18 +282,13 @@ export const classesPropValue = [
   EntityClass.Resource,
 ];
 
-export interface EntitySuggestionI {
-  id: string;
-  label: string;
-  detail: string;
-  ltype: string;
-  status: EntityStatus;
-  category: string;
-  color: string;
+export interface EntitySuggestion {
+  entity: IEntity;
   icons?: React.ReactNode[];
 }
-export interface UserSuggestionI {
-  id: string;
+export interface SuggesterItemToCreate {
   label: string;
-  icons?: React.ReactNode[];
+  entityClass: EntityClass;
+  detail?: string;
+  territoryId?: string;
 }

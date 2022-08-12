@@ -99,7 +99,8 @@ export const StatementEditor: React.FC<StatementEditor> = ({
   updateStatementDataMutation,
   moveStatementMutation,
 }) => {
-  const { statementId, territoryId, setTerritoryId } = useSearchParams();
+  const { statementId, territoryId, setTerritoryId, appendDetailId } =
+    useSearchParams();
 
   const queryClient = useQueryClient();
 
@@ -125,12 +126,10 @@ export const StatementEditor: React.FC<StatementEditor> = ({
     error,
     isFetching,
   } = useQuery(
-    ["territoryActants", statement?.data?.territory?.id],
+    ["territoryActants", statement.data.territory?.id],
     async () => {
-      if (statement?.data?.territory?.id) {
-        const res = await api.entityIdsInTerritory(
-          statement?.data.territory.id
-        );
+      if (statement.data.territory?.id) {
+        const res = await api.entityIdsInTerritory(statement.data.territory.id);
         return res.data;
       } else {
         return [];
@@ -138,7 +137,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
     },
     {
       initialData: [],
-      enabled: !!statement?.data?.territory?.id && api.isLoggedIn(),
+      enabled: !!statement.data.territory?.id && api.isLoggedIn(),
     }
   );
 
@@ -225,14 +224,12 @@ export const StatementEditor: React.FC<StatementEditor> = ({
 
   // refetch audit when statement changes
   useEffect(() => {
-    if (statement) {
-      queryClient.invalidateQueries("audit");
-    }
+    queryClient.invalidateQueries("audit");
   }, [statement]);
 
   // stores territory id
   const statementTerritoryId: string | undefined = useMemo(() => {
-    return statement?.data?.territory?.id;
+    return statement.data.territory?.id;
   }, [statement]);
 
   useEffect(() => {
@@ -263,76 +260,68 @@ export const StatementEditor: React.FC<StatementEditor> = ({
 
   const userCanEdit: boolean = useMemo(() => {
     return (
-      !!statement &&
-      (statement.right === UserRoleMode.Admin ||
-        statement.right === UserRoleMode.Write)
+      statement.right === UserRoleMode.Admin ||
+      statement.right === UserRoleMode.Write
     );
   }, [statement]);
 
   // actions
   const addAction = (newActionId: string) => {
-    if (statement) {
-      const newStatementAction = CStatementAction(newActionId);
-
-      const newData = {
-        actions: [...statement.data.actions, newStatementAction],
-      };
-      updateStatementDataMutation.mutate(newData);
-    }
+    const newStatementAction = CStatementAction(newActionId);
+    const newData = {
+      actions: [...statement.data.actions, newStatementAction],
+    };
+    updateStatementDataMutation.mutate(newData);
   };
 
   const addActant = (newStatementActantId: string) => {
-    if (statement) {
-      const newStatementActant = CStatementActant();
-      newStatementActant.actant = newStatementActantId;
-      const newData = {
-        actants: [...statement.data.actants, newStatementActant],
-      };
-      updateStatementDataMutation.mutate(newData);
-    }
+    const newStatementActant = CStatementActant();
+    newStatementActant.actant = newStatementActantId;
+    const newData = {
+      actants: [...statement.data.actants, newStatementActant],
+    };
+    updateStatementDataMutation.mutate(newData);
   };
 
   // Props handling
   const addProp = (originId: string) => {
-    if (statement) {
-      const newProp = CProp();
-      const newStatementData = { ...statement.data };
+    const newProp = CProp();
+    const newStatementData = { ...statement.data };
 
-      [...newStatementData.actants, ...newStatementData.actions].forEach(
-        (actant: IStatementActant | IStatementAction) => {
-          const actantId = "actant" in actant ? actant.actant : actant.action;
-          // adding 1st level prop
-          if (actantId === originId) {
-            actant.props = [...actant.props, newProp];
+    [...newStatementData.actants, ...newStatementData.actions].forEach(
+      (actant: IStatementActant | IStatementAction) => {
+        const actantId = "actant" in actant ? actant.actant : actant.action;
+        // adding 1st level prop
+        if (actantId === originId) {
+          actant.props = [...actant.props, newProp];
+        }
+        // adding 2nd level prop
+        actant.props.forEach((prop1, pi1) => {
+          if (prop1.id == originId) {
+            actant.props[pi1].children = [
+              ...actant.props[pi1].children,
+              newProp,
+            ];
           }
-          // adding 2nd level prop
-          actant.props.forEach((prop1, pi1) => {
-            if (prop1.id == originId) {
-              actant.props[pi1].children = [
-                ...actant.props[pi1].children,
+
+          // adding 3rd level prop
+          actant.props[pi1].children.forEach((prop2, pi2) => {
+            if (prop2.id == originId) {
+              actant.props[pi1].children[pi2].children = [
+                ...actant.props[pi1].children[pi2].children,
                 newProp,
               ];
             }
-
-            // adding 3rd level prop
-            actant.props[pi1].children.forEach((prop2, pi2) => {
-              if (prop2.id == originId) {
-                actant.props[pi1].children[pi2].children = [
-                  ...actant.props[pi1].children[pi2].children,
-                  newProp,
-                ];
-              }
-            });
           });
-        }
-      );
+        });
+      }
+    );
 
-      updateStatementDataMutation.mutate(newStatementData);
-    }
+    updateStatementDataMutation.mutate(newStatementData);
   };
 
   const updateProp = (propId: string, changes: any) => {
-    if (statement && propId) {
+    if (propId) {
       const newStatementData = { ...statement.data };
 
       // this is probably an overkill
@@ -372,7 +361,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
   };
 
   const removeProp = (propId: string) => {
-    if (statement && propId) {
+    if (propId) {
       const newStatementData = { ...statement.data };
 
       [...newStatementData.actants, ...newStatementData.actions].forEach(
@@ -445,30 +434,28 @@ export const StatementEditor: React.FC<StatementEditor> = ({
     oldIndex: number,
     newIndex: number
   ) => {
-    if (statement) {
-      const { actions, actants, ...dataWithoutActants } = statement.data;
-      changeOrder(propId, actions, oldIndex, newIndex);
-      changeOrder(propId, actants, oldIndex, newIndex);
+    const { actions, actants, ...dataWithoutActants } = statement.data;
+    changeOrder(propId, actions, oldIndex, newIndex);
+    changeOrder(propId, actants, oldIndex, newIndex);
 
-      const newStatementData = {
-        actions,
-        actants,
-        ...dataWithoutActants,
-      };
+    const newStatementData = {
+      actions,
+      actants,
+      ...dataWithoutActants,
+    };
 
-      updateStatementDataMutation.mutate(newStatementData);
-    }
+    updateStatementDataMutation.mutate(newStatementData);
   };
 
   //tags
   const addTag = (tagId: string) => {
-    if (statement && tagId) {
+    if (tagId) {
       const newData = { tags: [...statement.data.tags, tagId] };
       updateStatementDataMutation.mutate(newData);
     }
   };
   const removeTag = (tagId: string) => {
-    if (statement && tagId) {
+    if (tagId) {
       const newData = { tags: statement.data.tags.filter((p) => p !== tagId) };
       updateStatementDataMutation.mutate(newData);
     }
@@ -480,7 +467,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
         <StyledEditorPreSection>
           <StyledEditorStatementInfo>
             <StyledHeaderTagWrap>
-              <EntityTag actant={statement} fullWidth />
+              <EntityTag entity={statement} fullWidth />
             </StyledHeaderTagWrap>
             <div style={{ display: "flex" }}>
               <StyledEditorStatementInfoLabel>
@@ -516,10 +503,11 @@ export const StatementEditor: React.FC<StatementEditor> = ({
             </StyledBreadcrumbWrap>
           )}
         </StyledEditorPreSection>
-        {userCanEdit && (
+        {userCanEdit && !statement.isTemplate && (
           <StyledEditorPreSection>
             {"Move to territory: "}
             <EntitySuggester
+              disableTemplatesAccept
               filterEditorRights
               inputWidth={96}
               disableCreate
@@ -590,6 +578,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                 updateProp={updateProp}
                 removeProp={removeProp}
                 movePropToIndex={movePropToIndex}
+                territoryParentId={statementTerritoryId}
               />
             </StyledEditorActantTableWrapper>
 
@@ -603,6 +592,8 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                 categoryTypes={[EntityClass.Action]}
                 excludedEntities={excludedSuggesterEntities}
                 placeholder={"add new action"}
+                isInsideTemplate={statement.isTemplate}
+                territoryParentId={statementTerritoryId}
               />
             )}
           </StyledEditorSectionContent>
@@ -623,6 +614,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                 updateProp={updateProp}
                 removeProp={removeProp}
                 movePropToIndex={movePropToIndex}
+                territoryParentId={statementTerritoryId}
               />
             </StyledEditorActantTableWrapper>
             {userCanEdit && (
@@ -635,6 +627,8 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                 categoryTypes={classesActants}
                 placeholder={"add new actant"}
                 excludedEntities={excludedSuggesterEntities}
+                isInsideTemplate={statement.isTemplate}
+                territoryParentId={statementTerritoryId}
               />
             )}
           </StyledEditorSectionContent>
@@ -652,6 +646,8 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                 updateStatementMutation.mutate({ references: newReferences });
               }}
               disabled={!userCanEdit}
+              isInsideTemplate={statement.isTemplate || false}
+              territoryParentId={statementTerritoryId}
             />
           </StyledEditorSectionContent>
         </StyledEditorSection>
@@ -667,7 +663,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                   tagActant && (
                     <StyledTagsListItem key={tag}>
                       <EntityTag
-                        actant={tagActant}
+                        entity={tagActant}
                         fullWidth
                         tooltipPosition="left top"
                         button={
@@ -703,6 +699,8 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                 placeholder={"add new tag"}
                 excludedEntities={excludedSuggesterEntities}
                 excludedActantIds={statement.data.tags}
+                isInsideTemplate={statement.isTemplate}
+                territoryParentId={statementTerritoryId}
               />
             )}
           </StyledEditorSectionContent>
@@ -756,7 +754,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
           <StyledContent>
             <ModalInputForm>{`Apply template?`}</ModalInputForm>
             <div>
-              {templateToApply && <EntityTag actant={templateToApply} />}
+              {templateToApply && <EntityTag entity={templateToApply} />}
             </div>
             {/* here goes the info about template #951 */}
           </StyledContent>

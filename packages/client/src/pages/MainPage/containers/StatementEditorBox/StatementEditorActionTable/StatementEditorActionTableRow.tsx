@@ -41,6 +41,7 @@ interface StatementEditorActionTableRow {
   handleClick: Function;
   visibleColumns: ColumnInstance<{}>[];
   updateActionsMutation: UseMutationResult<any, unknown, object, unknown>;
+  territoryParentId?: string;
 }
 
 export const StatementEditorActionTableRow: React.FC<
@@ -59,7 +60,9 @@ export const StatementEditorActionTableRow: React.FC<
   updateActionsMutation,
   handleClick = () => {},
   visibleColumns,
+  territoryParentId,
 }) => {
+  const isInsideTemplate = statement.isTemplate || false;
   const { statementId, territoryId } = useSearchParams();
 
   const dropRef = useRef<HTMLTableRowElement>(null);
@@ -111,7 +114,7 @@ export const StatementEditorActionTableRow: React.FC<
     return action ? (
       <EntityTag
         // fullWidth
-        actant={action}
+        entity={action}
         button={
           userCanEdit && (
             <Button
@@ -141,6 +144,8 @@ export const StatementEditorActionTableRow: React.FC<
           categoryTypes={[EntityClass.Action]}
           excludedEntities={excludedSuggesterEntities}
           placeholder={"add new action"}
+          isInsideTemplate={isInsideTemplate}
+          territoryParentId={territoryParentId}
         />
       )
     );
@@ -159,7 +164,7 @@ export const StatementEditorActionTableRow: React.FC<
             modalOpen={modalOpen}
             setModalOpen={setModalOpen}
             modalTitle={`Action attribute`}
-            actant={action}
+            entity={action}
             disabledAllAttributes={!userCanEdit}
             data={{
               elvl: sAction.elvl,
@@ -180,6 +185,8 @@ export const StatementEditorActionTableRow: React.FC<
             userCanEdit={userCanEdit}
             classEntitiesActant={[EntityClass.Action]}
             loading={updateActionsMutation.isLoading}
+            isInsideTemplate={isInsideTemplate}
+            territoryParentId={territoryParentId}
           />
         )}
         {userCanEdit && (
@@ -265,6 +272,8 @@ export const StatementEditorActionTableRow: React.FC<
             userCanEdit={userCanEdit}
             openDetailOnCreate={false}
             category={category}
+            isInsideTemplate={isInsideTemplate}
+            territoryParentId={territoryParentId}
           />
         );
       }

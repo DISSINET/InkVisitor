@@ -1,4 +1,3 @@
-import { EntityClass } from "@shared/enums";
 import {
   IEntity,
   IResponseEntity,
@@ -13,6 +12,8 @@ import {
   IResponseTree,
   IResponseUser,
   RequestPermissionUpdate,
+  IStatement,
+  ITerritory,
 } from "@shared/types";
 import * as errors from "@shared/types/errors";
 import { IRequestSearch } from "@shared/types/request-search";
@@ -341,7 +342,7 @@ class Api {
   }
 
   async entityCreate(
-    newEntityData: IEntity
+    newEntityData: IEntity | IStatement | ITerritory
   ): Promise<AxiosResponse<IResponseGeneric>> {
     try {
       const response = await this.connection.post(`/entities`, newEntityData);

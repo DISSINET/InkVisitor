@@ -17,30 +17,35 @@ import {
   TypeBar,
 } from "components";
 import { EntitySuggester } from "components/advanced";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { FaUnlink } from "react-icons/fa";
 import { useQuery } from "react-query";
 import { OptionTypeBase, ValueType } from "react-select";
 import { toast } from "react-toastify";
 import { DropdownAny } from "Theme/constants";
-import { StyledContent, StyledNote } from "./SuggesterStyles";
+import { SuggesterItemToCreate } from "types";
+import { StyledContent, StyledNote } from "./SuggesterCreateModalStyles";
 
-interface SuggesterModal {
-  show?: boolean;
+interface SuggesterCreateModal {
   typed: string;
   category: IOption;
   categories: IOption[];
-  onCreate: Function;
-  closeModal: Function;
+  onCreate: (item: SuggesterItemToCreate) => void;
+  closeModal: () => void;
 }
-export const SuggesterModal: React.FC<SuggesterModal> = ({
-  show = false,
+export const SuggesterCreateModal: React.FC<SuggesterCreateModal> = ({
   typed,
   category,
   categories,
   onCreate,
   closeModal,
 }) => {
+  const [showModal, setShowModal] = useState(false);
+
+  useEffect(() => {
+    setShowModal(true);
+  }, []);
+
   const [selectedCategory, setSelectedCategory] = useState<any>(
     category.value !== DropdownAny ? category : categories[0]
   );
@@ -54,7 +59,7 @@ export const SuggesterModal: React.FC<SuggesterModal> = ({
   const handleCreateActant = () => {
     onCreate({
       label: label,
-      category: selectedCategory.value,
+      entityClass: selectedCategory.value,
       detail: detail,
       territoryId: territoryId,
     });
@@ -81,7 +86,7 @@ export const SuggesterModal: React.FC<SuggesterModal> = ({
 
   return (
     <Modal
-      showModal={show}
+      showModal={showModal}
       width="thin"
       onEnterPress={() => {
         if (selectedCategory.value === "S" && !territoryId) {
@@ -151,7 +156,7 @@ export const SuggesterModal: React.FC<SuggesterModal> = ({
                     <Tag
                       propId={territory.id}
                       label={territory.label}
-                      category={territory.class}
+                      entityClass={territory.class}
                       tooltipPosition={"left center"}
                       button={
                         <Button
@@ -168,6 +173,7 @@ export const SuggesterModal: React.FC<SuggesterModal> = ({
                     />
                   ) : (
                     <EntitySuggester
+                      disableTemplatesAccept
                       filterEditorRights
                       inputWidth={96}
                       disableCreate

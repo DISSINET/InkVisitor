@@ -51,7 +51,7 @@ export const StatementListRowExpanded: React.FC<StatementListRowExpanded> = ({
         {resourceEntity ? (
           <StyledReferenceColumn marginRight>
             <EntityTag
-              actant={resourceEntity}
+              entity={resourceEntity}
               tooltipPosition="bottom center"
               fullWidth
             />
@@ -64,7 +64,7 @@ export const StatementListRowExpanded: React.FC<StatementListRowExpanded> = ({
         {valueEntity ? (
           <StyledReferenceColumn>
             <EntityTag
-              actant={valueEntity}
+              entity={valueEntity}
               tooltipPosition="bottom center"
               fullWidth
             />
@@ -83,7 +83,7 @@ export const StatementListRowExpanded: React.FC<StatementListRowExpanded> = ({
         {actantId && (
           <StyledActantWrap key={key}>
             <EntityTag
-              actant={entities[actantId]}
+              entity={entities[actantId]}
               tooltipPosition="bottom center"
               fullWidth
             />

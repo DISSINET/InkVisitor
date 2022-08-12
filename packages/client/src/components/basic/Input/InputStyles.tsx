@@ -97,6 +97,7 @@ export const StyledSelectReadonly = styled.input<IValueStyle>`
 `;
 
 export const StyledTextArea = styled.textarea<IValueStyle>`
+  font-family: inherit;
   text-align: left;
   color: ${({ inverted, theme }) =>
     inverted ? theme.color["white"] : theme.color["primary"]};
