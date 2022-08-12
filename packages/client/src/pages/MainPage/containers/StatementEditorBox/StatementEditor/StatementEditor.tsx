@@ -503,7 +503,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
             </StyledBreadcrumbWrap>
           )}
         </StyledEditorPreSection>
-        {userCanEdit && (
+        {userCanEdit && !statement.isTemplate && (
           <StyledEditorPreSection>
             {"Move to territory: "}
             <EntitySuggester
