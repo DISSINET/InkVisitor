@@ -259,7 +259,6 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
   const [isWrongDropCategory, setIsWrongDropCategory] = useState(false);
 
   const handleHoverred = (newHoverred: EntityDragItem) => {
-    // TODO: add to show icon conditions!
     const hoverredCategory = newHoverred.entityClass;
     if (
       !categoryTypes.includes(hoverredCategory) ||

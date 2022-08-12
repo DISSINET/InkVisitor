@@ -17,6 +17,7 @@ import { Tag, Tooltip } from "components";
 import { EntitySuggestion } from "types";
 import { IEntity } from "@shared/types";
 import { ImInsertTemplate } from "react-icons/im";
+import { BiDuplicate } from "react-icons/bi";
 
 export const createItemData = memoize(
   (
@@ -70,8 +71,8 @@ const EntityRow: React.FC<EntityRow> = ({ data, index, style }) => {
       return (
         <>
           {!territoryWithoutParent && (
-            <FaPlayCircle
-              color={theme.color["info"]}
+            <BiDuplicate
+              color={theme.color["black"]}
               onClick={() => {
                 // onPick template inside nonTemplate
                 onPick(entity, true);
@@ -85,8 +86,8 @@ const EntityRow: React.FC<EntityRow> = ({ data, index, style }) => {
       return (
         <div>
           {!territoryWithoutParent && (
-            <FaPlayCircle
-              color={theme.color["info"]}
+            <BiDuplicate
+              color={theme.color["black"]}
               onClick={() => {
                 // onPick duplicate template to entity
                 onPick(entity, true);
