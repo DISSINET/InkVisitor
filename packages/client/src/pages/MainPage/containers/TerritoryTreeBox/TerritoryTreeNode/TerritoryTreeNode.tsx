@@ -128,7 +128,7 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
     async (item: DragItem) => {
       if (territory.data.parent && item.index !== -1) {
         const parent = territory.data.parent as IParentTerritory;
-        await api.treeMoveTerritory(item.id, parent.id, item.index);
+        await api.treeMoveTerritory(item.id, parent.territoryId, item.index);
       }
     },
     {
@@ -217,7 +217,7 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
     if (
       draggedTerritory.parentId &&
       draggedTerritory.parentId !==
-        (territory.data.parent as IParentTerritory).id &&
+        (territory.data.parent as IParentTerritory).territoryId &&
       draggedTerritory.parentId !== propId
     ) {
       if (draggedTerritory.lvl && draggedTerritory.lvl > lvl) {
@@ -279,7 +279,7 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
                 <animated.div style={animatedStyle}>
                   <EntityTag
                     actant={territoryActant}
-                    parentId={parent.id}
+                    parentId={parent.territoryId}
                     lvl={lvl}
                     isSelected={isSelected}
                     propId={propId}
