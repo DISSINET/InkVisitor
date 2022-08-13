@@ -19,8 +19,8 @@ export const StatementListRowExpandedPropGroup: React.FC<
   return (
     <StyledPropGroup>
       {props.map((prop, key) => {
-        const propTypeEntity: IEntity = entities[prop.type.id];
-        const propValueEntity: IEntity = entities[prop.value.id];
+        const propTypeEntity: IEntity = entities[prop.type.entityId];
+        const propValueEntity: IEntity = entities[prop.value.entityId];
         return (
           <React.Fragment key={key}>
             <StyledPropGridRow level={level}>

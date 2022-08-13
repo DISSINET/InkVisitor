@@ -1,3 +1,4 @@
+import { Position } from "@shared/enums";
 import { IEntity, IResponseTree, IStatement } from "@shared/types";
 import { DropTargetMonitor, XYCoord } from "react-dnd";
 import { DragItem } from "types";
@@ -9,53 +10,53 @@ export const findPositionInStatement = (
 ) => {
   if (
     statement.data.actants
-      .filter((a) => a.position === "s")
-      .find((a) => a.actant === actant.id)
+      .filter((a) => a.position === Position.Subject)
+      .find((a) => a.entityId === actant.id)
   ) {
     return "subject";
   } else if (
     statement.data.actants
-      .filter((a) => a.position === "a1")
-      .find((a) => a.actant === actant.id)
+      .filter((a) => a.position === Position.Actant1)
+      .find((a) => a.entityId === actant.id)
   ) {
     return "actant1";
   } else if (
     statement.data.actants
-      .filter((a) => a.position === "a2")
-      .find((a) => a.actant === actant.id)
+      .filter((a) => a.position === Position.Actant2)
+      .find((a) => a.entityId === actant.id)
   ) {
     return "actant2";
   } else if (
     statement.data.actants
-      .filter((a) => a.position === "p")
-      .find((a) => a.actant === actant.id)
+      .filter((a) => a.position === Position.PseudoActant)
+      .find((a) => a.entityId === actant.id)
   ) {
     return "pseudo-actant";
   } else if (statement.data.tags.find((t) => t === actant.id)) {
     return "tag";
-  } else if (statement.data.territory?.id === actant.id) {
+  } else if (statement.data.territory?.territoryId === actant.id) {
     return "territory";
   } else if (
     statement.data.actants.find((act) =>
-      act.props.find((p) => p.value.id === actant.id)
+      act.props.find((p) => p.value.entityId === actant.id)
     )
   ) {
     return "actant property value";
   } else if (
     statement.data.actants.find((act) =>
-      act.props.find((p) => p.type.id === actant.id)
+      act.props.find((p) => p.type.entityId === actant.id)
     )
   ) {
     return "actant property type";
   } else if (
     statement.data.actions.find((act) =>
-      act.props.find((p) => p.value.id === actant.id)
+      act.props.find((p) => p.value.entityId === actant.id)
     )
   ) {
     return "action property value";
   } else if (
     statement.data.actions.find((act) =>
-      act.props.find((p) => p.type.id === actant.id)
+      act.props.find((p) => p.type.entityId === actant.id)
     )
   ) {
     return "action property type";

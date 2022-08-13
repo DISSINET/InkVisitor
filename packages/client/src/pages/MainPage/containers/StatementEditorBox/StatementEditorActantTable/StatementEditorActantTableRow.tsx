@@ -146,7 +146,7 @@ export const StatementEditorActantTableRow: React.FC<
                 inverted={true}
                 onClick={() => {
                   updateActant(sActant.id, {
-                    actant: "",
+                    entityId: "",
                   });
                 }}
               />
@@ -159,7 +159,7 @@ export const StatementEditorActantTableRow: React.FC<
         <EntitySuggester
           onSelected={(newSelectedId: string) => {
             updateActant(sActant.id, {
-              actant: newSelectedId,
+              entityId: newSelectedId,
             });
           }}
           categoryTypes={classEntitiesActant}
@@ -233,7 +233,7 @@ export const StatementEditorActantTableRow: React.FC<
       sActant: IStatementActant | any;
     } = row.values.data;
 
-    const propOriginId = row.values.data.sActant.actant;
+    const propOriginId = row.values.data.sActant.enityId;
     return (
       <ButtonGroup noMarginRight>
         {sActant && (
@@ -380,7 +380,7 @@ export const StatementEditorActantTableRow: React.FC<
         draggedActantRow.category === DraggedPropRowCategory.ACTANT
       ) &&
         renderPropGroup(
-          row.values.data.sActant.actant,
+          row.values.data.sActant.entityId,
           row.values.data.sActant.props,
           DraggedPropRowCategory.ACTANT
         )}

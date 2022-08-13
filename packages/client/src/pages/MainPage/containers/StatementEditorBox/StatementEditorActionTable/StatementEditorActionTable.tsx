@@ -39,7 +39,7 @@ export const StatementEditorActionTable: React.FC<
 
   useEffect(() => {
     const filteredActions = statement.data.actions.map((sAction, key) => {
-      const action = statement.entities[sAction.action];
+      const action = statement.entities[sAction.actionId];
       return { id: key, data: { action, sAction } };
     });
     setFilteredActions(filteredActions);

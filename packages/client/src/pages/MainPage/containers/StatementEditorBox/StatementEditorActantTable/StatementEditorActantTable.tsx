@@ -46,7 +46,7 @@ export const StatementEditorActantTable: React.FC<
 
   useMemo(() => {
     const filteredActants = statement.data.actants.map((sActant, key) => {
-      const actant = statement.entities[sActant.actant];
+      const actant = statement.entities[sActant.entityId];
       return { id: key, data: { actant, sActant } };
     });
     setFilteredActants(filteredActants);

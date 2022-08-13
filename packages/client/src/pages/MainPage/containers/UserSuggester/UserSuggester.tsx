@@ -1,7 +1,6 @@
 import { IResponseUser } from "@shared/types";
 import api from "api";
 import { Suggester } from "components";
-import { UserSuggestionI } from "components/Suggester/Suggester";
 import { useDebounce } from "hooks";
 import React, { useState } from "react";
 import { DragObjectWithType } from "react-dnd";
@@ -49,7 +48,7 @@ export const UserSuggester: React.FC<UserSuggester> = ({
     setTyped("");
   };
 
-  const handlePick = (newPicked: UserSuggestionI) => {
+  const handlePick = (newPicked: any) => {
     console.log(newPicked);
   };
 
@@ -70,7 +69,7 @@ export const UserSuggester: React.FC<UserSuggester> = ({
         setTyped(newType);
       }}
       onChangeCategory={(option: ValueType<OptionTypeBase, any>) => {}}
-      onPick={(newPicked: UserSuggestionI) => {
+      onPick={(newPicked: any) => {
         handlePick(newPicked);
       }}
       inputWidth={inputWidth}

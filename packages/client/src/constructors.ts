@@ -20,7 +20,7 @@ import {
   IProp,
   IReference,
   IRelation,
-  IRelationIdentity,
+  IRelationIdentification,
   IStatement,
   IStatementActant,
   IStatementAction,
@@ -47,14 +47,14 @@ export const CProp = (): IProp => ({
   children: [],
 
   type: {
-    id: "",
+    entityId: "",
     elvl: Elvl.Textual,
     logic: Logic.Positive,
     virtuality: Virtuality.Reality,
     partitivity: Partitivity.Unison,
   },
   value: {
-    id: "",
+    entityId: "",
     elvl: Elvl.Textual,
     logic: Logic.Positive,
     virtuality: Virtuality.Reality,
@@ -75,14 +75,14 @@ export const CMetaProp = (): IProp => ({
   children: [],
 
   type: {
-    id: "",
+    entityId: "",
     elvl: Elvl.Inferential,
     logic: Logic.Positive,
     virtuality: Virtuality.Reality,
     partitivity: Partitivity.Unison,
   },
   value: {
-    id: "",
+    entityId: "",
     elvl: Elvl.Inferential,
     logic: Logic.Positive,
     virtuality: Virtuality.Reality,
@@ -121,7 +121,7 @@ export const CStatement = (
     newStatement.data = {
       ...newStatement.data,
       territory: {
-        id: territoryId,
+        territoryId: territoryId,
         order: -1,
       },
     };
@@ -216,7 +216,7 @@ export const DProps = (oldProps: IProp[]): IProp[] => {
 
 export const CStatementActant = (): IStatementActant => ({
   id: uuidv4(),
-  actant: "",
+  entityId: "",
   position: Position.Subject,
   elvl: Elvl.Textual,
   logic: Logic.Positive,
@@ -226,11 +226,13 @@ export const CStatementActant = (): IStatementActant => ({
   bundleStart: false,
   bundleEnd: false,
   props: [],
+  classifications: [],
+  identifications: [],
 });
 
 export const CStatementAction = (actionId: string): IStatementAction => ({
   id: uuidv4(),
-  action: actionId,
+  actionId: actionId,
   certainty: Certainty.Empty,
   elvl: Elvl.Textual,
   logic: Logic.Positive,
@@ -256,7 +258,7 @@ export const CTerritoryActant = (
   language: Language.Latin,
   notes: [],
   data: {
-    parent: { id: parentId, order: parentOrder },
+    parent: { territoryId: parentId, order: parentOrder },
   },
   status:
     userRole === UserRole.Admin ? EntityStatus.Approved : EntityStatus.Pending,
@@ -302,14 +304,10 @@ export const CReference = (
 export const CRelationIdentity = (
   entity1: string = "",
   entity2: string = ""
-): IRelationIdentity => ({
+): IRelationIdentification => ({
   id: uuidv4(),
-  entities: [entity1, entity2],
-  type: RelationType.Identity,
+  entityIds: [entity1, entity2],
+  type: RelationType.Identification,
   logic: Logic.Positive,
-  mood: [Mood.Indication],
-  moodvariant: MoodVariant.Realis,
-  bundleOperator: Operator.And,
-  bundleStart: false,
-  bundleEnd: false,
+  certainty: Certainty.Certain,
 });
