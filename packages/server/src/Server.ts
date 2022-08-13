@@ -32,7 +32,7 @@ server.use(
 
 server.use(cors());
 
-if (process.env.STATIC_PATH !== "") {
+if (process.env.STATIC_PATH && process.env.STATIC_PATH !== "") {
   server.use(
     process.env.STATIC_PATH as string,
     express.static("../client/dist")
