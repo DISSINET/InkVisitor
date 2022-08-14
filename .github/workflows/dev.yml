@@ -42,44 +42,8 @@ jobs:
           path: inkvisitor-staging.tar.gz
           key: inkvisitor-staging-${{ github.sha }}.tar.gz
 
-  staging-data-import:
-    name: Build the data-import docker image
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    steps:
-      - name: Checkout InkVisitor
-        uses: actions/checkout@v2
-
-      - name: Create env file for client
-        run: |
-          touch packages/client/env/.env.data-import
-          echo "$CLIENT_ENV" >> packages/client/env/.env.data-import
-        env:
-          CLIENT_ENV: ${{secrets.CLIENT_ENV_DATAIMPORT}}
-
-      - name: Generate certificates
-        run: |
-          mkdir -p ./packages/server/secret
-          openssl req -x509 -newkey rsa:2048 -nodes -out ./packages/server/secret/cert.pem -keyout ./packages/server/secret/key.pem -days 365 -subj "/C=FR/O=krkr/OU=Domain Control Validated/CN=*"
-
-      # Pull the latest image to build, and avoid caching pull-only images.
-      # (docker pull is faster than caching in most cases.)
-      - run: docker-compose pull
-
-      - name: Run docker build task
-        run: docker-compose build inkvisitor-data-import
-
-      - name: Save docker-compose stack
-        run: docker save inkvisitor:data-import | gzip > inkvisitor-data-import.tar.gz
-
-      - name: Cache image.tar
-        uses: actions/cache@v2
-        with:
-          path: inkvisitor-data-import.tar.gz
-          key: inkvisitor-data-import-${{ github.sha }}.tar.gz
-
   deploy:
-    needs: [staging-build, staging-data-import]
+    needs: [staging-build]
     name: Deploy to staging environment
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -92,12 +56,6 @@ jobs:
         with:
           path: inkvisitor-staging.tar.gz
           key: inkvisitor-staging-${{ github.sha }}.tar.gz
-
-      - name: Restore cache
-        uses: actions/cache@v2
-        with:
-          path: inkvisitor-data-import.tar.gz
-          key: inkvisitor-data-import-${{ github.sha }}.tar.gz
 
       - name: Install SSH Key
         uses: shimataro/ssh-key-action@v2
@@ -139,17 +97,11 @@ jobs:
       - name: Upload image staging
         run: scp inkvisitor-staging.tar.gz ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/var/www/html/apps
 
-      - name: Upload image data-import
-        run: scp inkvisitor-data-import.tar.gz ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/var/www/html/apps
-
       - name: Load image
         run: |
           ssh -tt ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}  -- "sh -c '
           rm -rf /var/tmp/docker-tar* &&
           podman rm inkvisitor-staging --force || true && 
-          podman rm inkvisitor-data-import --force || true && 
           podman load -i /var/www/html/apps/inkvisitor-staging.tar.gz && 
-          podman load -i /var/www/html/apps/inkvisitor-data-import.tar.gz && 
           podman-compose -f /var/www/html/apps/docker-compose.yml up -d inkvisitor-staging &&
-          podman-compose -f /var/www/html/apps/docker-compose.yml up -d inkvisitor-data-import
           '"
