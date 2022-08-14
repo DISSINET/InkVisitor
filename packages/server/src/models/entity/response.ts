@@ -14,7 +14,11 @@ import Entity from "./entity";
 import Statement from "@models/statement/statement";
 import { nonenumerable } from "@common/decorators";
 import { Connection } from "rethinkdb-ts";
-import { IResponseUsedInStatementProps } from "@shared/types/response-detail";
+import {
+  IResponseUsedInStatementClassification,
+  IResponseUsedInStatementIdentification,
+  IResponseUsedInStatementProps,
+} from "@shared/types/response-detail";
 
 export class ResponseEntity extends Entity implements IResponseEntity {
   @nonenumerable
@@ -48,6 +52,8 @@ export class ResponseEntityDetail
   usedInStatementProps: IResponseUsedInStatementProps[];
   usedInMetaProps: IResponseUsedInMetaProp<UsedInPosition>[];
   usedAsTemplate?: string[] | undefined;
+  usedInStatementIdentification: IResponseUsedInStatementIdentification[] = [];
+  usedInStatementClassification: IResponseUsedInStatementClassification[] = [];
 
   relations: IRelation[] = [];
 
