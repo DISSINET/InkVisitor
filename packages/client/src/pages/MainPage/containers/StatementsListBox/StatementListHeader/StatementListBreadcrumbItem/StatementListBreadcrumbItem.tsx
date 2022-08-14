@@ -54,7 +54,7 @@ export const StatementListBreadcrumbItem: React.FC<
         <StyledItemBox>
           <BsArrowRightShort />
           <EntityTag
-            actant={territoryData ? territoryData : initialData}
+            entity={territoryData ? territoryData : initialData}
             button={
               paramsTerritoryId !== territoryId && (
                 <Button

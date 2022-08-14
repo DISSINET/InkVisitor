@@ -87,7 +87,7 @@ export const TemplateListRemoveModal: React.FC<TemplateListRemoveModal> = ({
       <ModalContent>
         <StyledModalContent>
           Remove template entity?
-          {entityToRemove && <EntityTag actant={entityToRemove} />}
+          {entityToRemove && <EntityTag entity={entityToRemove} />}
         </StyledModalContent>
       </ModalContent>
       <ModalFooter>

@@ -1,4 +1,3 @@
-import { EntityClass } from "@shared/enums";
 import {
   IEntity,
   IResponseEntity,
@@ -13,6 +12,8 @@ import {
   IResponseTree,
   IResponseUser,
   RequestPermissionUpdate,
+  IStatement,
+  ITerritory,
   IRelation,
 } from "@shared/types";
 import * as errors from "@shared/types/errors";
@@ -342,7 +343,7 @@ class Api {
   }
 
   async entityCreate(
-    newEntityData: IEntity
+    newEntityData: IEntity | IStatement | ITerritory
   ): Promise<AxiosResponse<IResponseGeneric>> {
     try {
       const response = await this.connection.post(`/entities`, newEntityData);
@@ -503,7 +504,7 @@ class Api {
 
   async getAclPermissions(): Promise<AxiosResponse<IResponsePermission[]>> {
     try {
-      const response = await this.connection.get(`/acl/index`);
+      const response = await this.connection.get(`/acls`);
       return response;
     } catch (err: any | AxiosError) {
       throw { ...err.response.data };

@@ -1,3 +1,5 @@
+import { EntityExtension, ExtendedEntityClass } from "@shared/enums";
+import { IEntity } from "@shared/types";
 import { Tooltip } from "components";
 import { useSearchParams } from "hooks";
 import React, { ReactNode, useEffect, useMemo, useRef } from "react";
@@ -10,7 +12,12 @@ import {
 import { PopupPosition } from "reactjs-popup/dist/types";
 import { setDraggedTerritory } from "redux/features/territoryTree/draggedTerritorySlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
-import { DraggedTerritoryItem, DragItem, Entities, ItemTypes } from "types";
+import {
+  DraggedTerritoryItem,
+  EntityColors,
+  EntityDragItem,
+  ItemTypes,
+} from "types";
 import { dndHoverFn } from "utils";
 import {
   ButtonWrapper,
@@ -27,9 +34,11 @@ interface TagProps {
   labelItalic?: boolean;
   tooltipDetail?: string;
   tooltipText?: string;
-  category?: string;
+  entityClass?: ExtendedEntityClass;
   status?: string;
   ltype?: string;
+  entity?: IEntity;
+
   mode?: "selected" | "disabled" | "invalid" | false;
   borderStyle?: "solid" | "dashed" | "dotted";
   button?: ReactNode;
@@ -42,11 +51,12 @@ interface TagProps {
   disableDoubleClick?: boolean;
   disableDrag?: boolean;
   tooltipPosition?: PopupPosition | PopupPosition[];
-  updateOrderFn?: (item: DragItem) => void;
+  updateOrderFn?: (item: EntityDragItem) => void;
   lvl?: number;
   statementsCount?: number;
   isFavorited?: boolean;
   isTemplate?: boolean;
+  isDiscouraged?: boolean;
   disabled?: boolean;
 }
 
@@ -57,9 +67,10 @@ export const Tag: React.FC<TagProps> = ({
   labelItalic = false,
   tooltipDetail,
   tooltipText,
-  category = "X",
+  entityClass = EntityExtension.Empty,
   status = "1",
   ltype = "1",
+  entity,
   mode = false,
   borderStyle = "solid",
   button,
@@ -76,6 +87,7 @@ export const Tag: React.FC<TagProps> = ({
   statementsCount,
   isFavorited = false,
   isTemplate = false,
+  isDiscouraged = false,
   lvl,
 }) => {
   const { appendDetailId } = useSearchParams();
@@ -88,7 +100,7 @@ export const Tag: React.FC<TagProps> = ({
 
   const [, drop] = useDrop({
     accept: ItemTypes.TAG,
-    hover(item: DragItem, monitor: DropTargetMonitor) {
+    hover(item: EntityDragItem, monitor: DropTargetMonitor) {
       if (moveFn && draggedTerritory && draggedTerritory.lvl === lvl) {
         dndHoverFn(item, index, monitor, ref, moveFn);
       }
@@ -96,16 +108,24 @@ export const Tag: React.FC<TagProps> = ({
   });
 
   const canDrag = useMemo(
-    () => category !== "X" && !disableDrag,
-    [category, disableDrag]
+    () => entityClass !== EntityExtension.Empty && !disableDrag,
+    [entityClass, disableDrag]
   );
 
   const [{ isDragging }, drag] = useDrag({
-    item: { type: ItemTypes.TAG, id: propId, index, category },
+    item: {
+      type: ItemTypes.TAG,
+      id: propId,
+      index,
+      entityClass,
+      isTemplate,
+      isDiscouraged,
+      entity: entity || false,
+    },
     collect: (monitor: DragSourceMonitor) => ({
       isDragging: monitor.isDragging(),
     }),
-    end: (item: DragItem | undefined, monitor: DragSourceMonitor) => {
+    end: (item: EntityDragItem | undefined, monitor: DragSourceMonitor) => {
       if (item && item.index !== index) updateOrderFn(item);
     },
     canDrag: canDrag,
@@ -122,8 +142,11 @@ export const Tag: React.FC<TagProps> = ({
   drag(drop(ref));
 
   const renderEntityTag = () => (
-    <StyledEntityTag color={Entities[category].color} isTemplate={isTemplate}>
-      {category}
+    <StyledEntityTag
+      color={EntityColors[entityClass].color}
+      isTemplate={isTemplate}
+    >
+      {entityClass}
     </StyledEntityTag>
   );
   const renderButton = () => (

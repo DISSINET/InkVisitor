@@ -24,7 +24,7 @@ export const UserRightItem: React.FC<UserRightItem> = ({ territoryId }) => {
 
   return (
     <StyledRightItem>
-      {territoryData && <EntityTag actant={territoryData} />}
+      {territoryData && <EntityTag entity={territoryData} />}
     </StyledRightItem>
   );
 };

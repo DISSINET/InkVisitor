@@ -35,7 +35,7 @@ export const EntityDetailStatementsTable: React.FC<
       actantObject && (
         <EntityTag
           key={key}
-          actant={actantObject}
+          entity={actantObject}
           showOnly="entity"
           tooltipPosition="right center"
         />
@@ -58,7 +58,7 @@ export const EntityDetailStatementsTable: React.FC<
               {entity && (
                 <EntityTag
                   key={entity.id}
-                  actant={entity}
+                  entity={entity}
                   showOnly="entity"
                   tooltipText={entity.label}
                 />

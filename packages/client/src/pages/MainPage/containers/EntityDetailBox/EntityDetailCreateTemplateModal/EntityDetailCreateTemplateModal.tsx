@@ -12,7 +12,7 @@ import {
   ModalHeader,
   ModalInputForm,
 } from "components";
-import { DStatement, DEntity } from "constructors";
+import { DStatement, DEntity, CTemplateEntity } from "constructors";
 import { useSearchParams } from "hooks";
 import React, { useState } from "react";
 import { useMutation, UseMutationResult, useQueryClient } from "react-query";
@@ -76,19 +76,7 @@ export const EntityDetailCreateTemplateModal: React.FC<
   const handleCreateTemplate = () => {
     // create template as a copy of the entity
     if (entity) {
-      const userRole = localStorage.getItem("userrole") as UserRole;
-      const templateEntity =
-        entity.class === EntityClass.Statement
-          ? DStatement(entity as IStatement, userRole)
-          : DEntity(entity as IEntity, userRole);
-
-      if (entity.class === EntityClass.Statement) {
-        delete templateEntity.data["territory"];
-      }
-      templateEntity.isTemplate = true;
-      templateEntity.usedTemplate = "";
-      templateEntity.label = createTemplateLabel;
-
+      const templateEntity = CTemplateEntity(entity, createTemplateLabel);
       templateCreateMutation.mutate(templateEntity);
     }
   };

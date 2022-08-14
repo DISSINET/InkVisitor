@@ -27,7 +27,7 @@ import { FaUnlink } from "react-icons/fa";
 import { MdSettings } from "react-icons/md";
 import {
   AttributeData,
-  Entities,
+  EntityColors,
   PropAttributeFilter,
   PropAttributeGroup,
   PropAttributeGroupDataObject,
@@ -68,6 +68,8 @@ interface AttributesGroupEditor {
   disabledAllAttributes?: boolean;
   disabledOpenModal?: boolean;
   userCanEdit?: boolean;
+  isInsideTemplate: boolean;
+  territoryParentId?: string;
 }
 
 export const AttributesGroupEditor: React.FC<AttributesGroupEditor> = ({
@@ -88,6 +90,8 @@ export const AttributesGroupEditor: React.FC<AttributesGroupEditor> = ({
   disabledOpenModal = false,
   statementId,
   userCanEdit,
+  isInsideTemplate = false,
+  territoryParentId,
 }) => {
   const [modalData, setModalData] =
     useState<PropAttributeGroupDataObject>(data);
@@ -284,7 +288,7 @@ export const AttributesGroupEditor: React.FC<AttributesGroupEditor> = ({
         />
         <ModalContent>
           <StyledGridColumns>
-            <StyledColumnWrap color={Entities[EntityClass.Statement].color}>
+            <StyledColumnWrap color={EntityColors[EntityClass.Statement].color}>
               <StyledColumnHeading>Statement</StyledColumnHeading>
 
               <AttributesForm
@@ -297,7 +301,7 @@ export const AttributesGroupEditor: React.FC<AttributesGroupEditor> = ({
             <StyledColumnWrap
               color={
                 propTypeActant
-                  ? Entities[propTypeActant.class].color
+                  ? EntityColors[propTypeActant.class].color
                   : undefined
               }
             >
@@ -312,7 +316,7 @@ export const AttributesGroupEditor: React.FC<AttributesGroupEditor> = ({
               {propTypeActant ? (
                 <StyledEntityWrap>
                   <EntityTag
-                    actant={propTypeActant}
+                    entity={propTypeActant}
                     fullWidth
                     button={
                       <Button
@@ -350,6 +354,8 @@ export const AttributesGroupEditor: React.FC<AttributesGroupEditor> = ({
                       categoryTypes={classesPropType}
                       inputWidth={"full"}
                       excludedEntities={excludedSuggesterEntities}
+                      isInsideTemplate={isInsideTemplate}
+                      territoryParentId={territoryParentId}
                     />
                   </StyledSuggesterWrap>
                 )
@@ -358,7 +364,7 @@ export const AttributesGroupEditor: React.FC<AttributesGroupEditor> = ({
             <StyledColumnWrap
               color={
                 propValueActant
-                  ? Entities[propValueActant.class].color
+                  ? EntityColors[propValueActant.class].color
                   : undefined
               }
             >
@@ -372,7 +378,7 @@ export const AttributesGroupEditor: React.FC<AttributesGroupEditor> = ({
               {propValueActant ? (
                 <StyledEntityWrap>
                   <EntityTag
-                    actant={propValueActant}
+                    entity={propValueActant}
                     fullWidth
                     tooltipPosition="left center"
                     button={
@@ -411,6 +417,8 @@ export const AttributesGroupEditor: React.FC<AttributesGroupEditor> = ({
                       categoryTypes={classesPropValue}
                       inputWidth={"full"}
                       excludedEntities={excludedSuggesterEntities}
+                      isInsideTemplate={isInsideTemplate}
+                      territoryParentId={territoryParentId}
                     />
                   </StyledSuggesterWrap>
                 )

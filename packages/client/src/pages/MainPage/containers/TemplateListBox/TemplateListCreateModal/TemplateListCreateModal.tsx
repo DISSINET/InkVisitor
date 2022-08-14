@@ -17,7 +17,7 @@ import {
   ModalInputWrap,
   TypeBar,
 } from "components";
-import { CEntity, CStatement } from "constructors";
+import { CEntity, CStatement, CTemplateEntity } from "constructors";
 import { useSearchParams } from "hooks";
 import React, { useState } from "react";
 import { useMutation, useQueryClient } from "react-query";
@@ -81,33 +81,36 @@ export const TemplateListCreateModal: React.FC<TemplateListCreateModal> = ({
     }
   );
 
-  const handleCreateNewStatementTemplate = () => {
+  const handleCreateNewStatementTemplate = (): IEntity => {
     const newTemplate = CStatement(
       localStorage.getItem("userrole") as UserRole,
       undefined,
       createModalEntityLabel,
       createModalEntityDetail
     );
-    newTemplate.isTemplate = true;
-    templateCreateMutation.mutate(newTemplate);
+    return newTemplate;
   };
-  const handleCreateNewEntityTemplate = () => {
+  const handleCreateNewEntityTemplate = (): IEntity => {
     const newTemplate = CEntity(
       createModalEntityClass.value as EntityClass,
       createModalEntityLabel,
       localStorage.getItem("userrole") as UserRole,
       createModalEntityDetail
     );
-    newTemplate.isTemplate = true;
-    templateCreateMutation.mutate(newTemplate);
+    return newTemplate;
   };
 
   const handleCreateTemplate = () => {
-    if (createModalEntityClass.value === EntityClass.Statement) {
-      handleCreateNewStatementTemplate();
-    } else {
-      handleCreateNewEntityTemplate();
-    }
+    const entity =
+      createModalEntityClass.value === EntityClass.Statement
+        ? handleCreateNewStatementTemplate()
+        : handleCreateNewEntityTemplate();
+    const templateEntity = CTemplateEntity(
+      entity,
+      createModalEntityLabel,
+      createModalEntityDetail
+    );
+    templateCreateMutation.mutate(templateEntity);
   };
 
   return (

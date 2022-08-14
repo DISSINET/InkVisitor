@@ -15,6 +15,8 @@ interface EntityReferenceTable {
   onChange: (newRefefences: IReference[]) => void;
   disabled: boolean;
   openDetailOnCreate?: boolean;
+  isInsideTemplate: boolean;
+  territoryParentId?: string;
 }
 
 export const EntityReferenceTable: React.FC<EntityReferenceTable> = ({
@@ -23,11 +25,11 @@ export const EntityReferenceTable: React.FC<EntityReferenceTable> = ({
   onChange,
   disabled = true,
   openDetailOnCreate,
+  isInsideTemplate,
+  territoryParentId,
 }) => {
   const sendChanges = (newValues: IReference[]) => {
-    // if (JSON.stringify(newValues) !== JSON.stringify(displayValues)) {
     onChange(newValues);
-    // }
   };
 
   const handleChangeResource = (refId: string, newReSourceId: string) => {
@@ -90,6 +92,8 @@ export const EntityReferenceTable: React.FC<EntityReferenceTable> = ({
                 handleChangeResource={handleChangeResource}
                 handleChangeValue={handleChangeValue}
                 openDetailOnCreate={openDetailOnCreate}
+                isInsideTemplate={isInsideTemplate}
+                territoryParentId={territoryParentId}
               />
             );
           })}

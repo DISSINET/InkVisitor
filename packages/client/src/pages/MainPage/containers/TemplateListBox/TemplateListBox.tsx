@@ -156,7 +156,7 @@ export const TemplateListBox: React.FC<TemplateListBox> = ({}) => {
               return (
                 <React.Fragment key={templateEntity.id + ti}>
                   <EntityTag
-                    actant={templateEntity}
+                    entity={templateEntity}
                     propId={templateEntity.id}
                     fullWidth
                     tooltipPosition="left center"

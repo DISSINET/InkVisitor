@@ -56,6 +56,7 @@ interface StatementEditorActantTableRow {
   statement: IResponseStatement;
   classEntitiesActant: EntityClass[];
   updateStatementDataMutation: UseMutationResult<any, unknown, object, unknown>;
+  territoryParentId?: string;
 }
 
 export const StatementEditorActantTableRow: React.FC<
@@ -75,7 +76,9 @@ export const StatementEditorActantTableRow: React.FC<
   updateProp,
   removeProp,
   movePropToIndex,
+  territoryParentId,
 }) => {
+  const isInsideTemplate = statement.isTemplate || false;
   const { statementId, territoryId } = useSearchParams();
 
   const dropRef = useRef<HTMLTableRowElement>(null);
@@ -134,7 +137,7 @@ export const StatementEditorActantTableRow: React.FC<
     return actant ? (
       <StyledTagWrapper>
         <EntityTag
-          actant={actant}
+          entity={actant}
           // fullWidth
           button={
             userCanEdit && (
@@ -165,6 +168,8 @@ export const StatementEditorActantTableRow: React.FC<
           categoryTypes={classEntitiesActant}
           openDetailOnCreate
           excludedEntities={excludedSuggesterEntities}
+          isInsideTemplate={isInsideTemplate}
+          territoryParentId={territoryParentId}
         />
       )
     );
@@ -241,7 +246,7 @@ export const StatementEditorActantTableRow: React.FC<
             modalOpen={modalOpen}
             setModalOpen={setModalOpen}
             modalTitle={`Actant involvement`}
-            actant={actant}
+            entity={actant}
             disabledAllAttributes={!userCanEdit}
             userCanEdit={userCanEdit}
             data={{
@@ -262,6 +267,8 @@ export const StatementEditorActantTableRow: React.FC<
             }}
             classEntitiesActant={classEntitiesActant}
             loading={updateStatementDataMutation.isLoading}
+            isInsideTemplate={isInsideTemplate}
+            territoryParentId={territoryParentId}
           />
         )}
         {userCanEdit && (
@@ -347,6 +354,8 @@ export const StatementEditorActantTableRow: React.FC<
             userCanEdit={userCanEdit}
             openDetailOnCreate={false}
             category={category}
+            isInsideTemplate={isInsideTemplate}
+            territoryParentId={territoryParentId}
           />
         );
       }

@@ -25,31 +25,23 @@ export const ShortTagGroup = () => {
     <TagGroup>
       <Tag
         propId="0"
-        category={Entities["R"].id}
-        color={Entities["R"].color}
+        entityClass={Entities["R"].entityClass}
         label="R entity label"
-        short
       />
       <Tag
         propId="1"
-        category={Entities["O"].id}
-        color={Entities["O"].color}
+        entityClass={Entities["O"].entityClass}
         label="O entity label"
-        short
       />
       <Tag
         propId="2"
-        category={Entities["S"].id}
-        color={Entities["S"].color}
+        entityClass={Entities["S"].entityClass}
         label="S entity label"
-        short
       />
       <Tag
         propId="3"
-        category={Entities["E"].id}
-        color={Entities["E"].color}
+        entityClass={Entities["E"].entityClass}
         label="E entity label"
-        short
       />
     </TagGroup>
   );
@@ -59,38 +51,28 @@ export const OversizedShortTagGroup = () => {
     <TagGroup>
       <Tag
         propId="0"
-        category={Entities["R"].id}
-        color={Entities["R"].color}
+        entityClass={Entities["R"].entityClass}
         label="R entity label"
-        short
       />
       <Tag
         propId="1"
-        category={Entities["O"].id}
-        color={Entities["O"].color}
+        entityClass={Entities["O"].entityClass}
         label="O entity label"
-        short
       />
       <Tag
         propId="2"
-        category={Entities["S"].id}
-        color={Entities["S"].color}
+        entityClass={Entities["S"].entityClass}
         label="S entity label"
-        short
       />
       <Tag
         propId="3"
-        category={Entities["E"].id}
-        color={Entities["E"].color}
+        entityClass={Entities["E"].entityClass}
         label="E entity label"
-        short
       />
       <Tag
         propId="4"
-        category={Entities["S"].id}
-        color={Entities["S"].color}
+        entityClass={Entities["S"].entityClass}
         label="S entity label"
-        short
       />
     </TagGroup>
   );
