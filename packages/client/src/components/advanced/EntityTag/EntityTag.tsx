@@ -1,3 +1,4 @@
+import { EntityStatus } from "@shared/enums";
 import { IEntity } from "@shared/types";
 import { Tag } from "components";
 import React, { ReactNode } from "react";
@@ -5,7 +6,7 @@ import { PopupPosition } from "reactjs-popup/dist/types";
 import { DragItem } from "types";
 
 interface EntityTag {
-  actant: IEntity;
+  entity: IEntity;
   tooltipText?: string;
   parentId?: string;
   mode?: "selected" | "disabled" | "invalid" | false;
@@ -27,7 +28,7 @@ interface EntityTag {
 }
 
 export const EntityTag: React.FC<EntityTag> = ({
-  actant,
+  entity,
   tooltipText,
   parentId,
   showOnly,
@@ -46,22 +47,24 @@ export const EntityTag: React.FC<EntityTag> = ({
   statementsCount,
   isFavorited,
 }) => {
-  const classId = actant.class;
+  const classId = entity.class;
 
   return (
     <Tag
-      propId={actant.id}
-      label={actant.label || actant.data.text || "no label"}
-      labelItalic={actant.label === ""}
-      status={actant.status}
-      ltype={actant?.data?.logicalType ?? "1"}
-      tooltipDetail={actant.detail}
-      isTemplate={actant.isTemplate}
+      propId={entity.id}
+      label={entity.label || entity.data.text || "no label"}
+      labelItalic={entity.label === ""}
+      status={entity.status}
+      ltype={entity?.data?.logicalType ?? "1"}
+      tooltipDetail={entity.detail}
+      isTemplate={entity.isTemplate}
+      isDiscouraged={entity.status === EntityStatus.Discouraged}
+      entity={entity}
       tooltipText={tooltipText}
       showOnly={showOnly}
       button={button}
       moveFn={moveFn}
-      category={classId}
+      entityClass={classId}
       mode={mode}
       borderStyle="solid"
       invertedLabel={isSelected}

@@ -133,37 +133,29 @@ export const App: React.FC = () => {
                   <Route
                     path="/"
                     exact
-                    render={(props) => (
-                      // <Profiler id="test" onRender={clockPerformance}>
-                      <MainPage {...props} />
-                      // </Profiler>
-                    )}
+                    render={(props) => <MainPage {...props} />}
                   />
                   {isLoggedIn && (
                     <Route
                       path="/acl"
-                      exact
                       render={(props) => <AclPage {...props} />}
                     />
                   )}
                   {isLoggedIn && (
                     <Route
                       path="/users"
-                      exact
                       render={(props) => <UsersPage {...props} />}
                     />
                   )}
                   <Route
                     path="/activate"
-                    exact
                     render={(props) => <ActivatePage {...props} />}
                   />
                   <Route
                     path="/password_reset"
-                    exact
                     render={(props) => <PasswordResetPage {...props} />}
                   />
-                  <Route component={NotFoundPage} />
+                  <Route path="*" component={NotFoundPage} />
                 </Switch>
               </SearchParamsProvider>
             </BrowserRouter>

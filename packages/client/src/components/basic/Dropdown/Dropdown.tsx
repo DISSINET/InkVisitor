@@ -14,7 +14,7 @@ import {
 } from "react-select";
 import { OptionProps } from "react-select/src/types";
 import { DropdownAny } from "Theme/constants";
-import { DropdownItem, Entities } from "types";
+import { DropdownItem, EntityColors } from "types";
 import {
   StyledEntityValue,
   StyledFaChevronDown,
@@ -166,7 +166,7 @@ const Option = ({ ...props }: OptionProps | any): React.ReactElement => {
         <>
           {props.value && props.value !== DropdownAny ? (
             <components.Option {...props}>
-              <StyledEntityValue color={Entities[props.value].color}>
+              <StyledEntityValue color={EntityColors[props.value].color}>
                 {props.label}
               </StyledEntityValue>
             </components.Option>

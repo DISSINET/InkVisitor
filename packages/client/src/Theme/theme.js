@@ -51,7 +51,7 @@ export default {
 
     staging: "#911111",
     "data-import": "#99004C",
-    development: "#00994C",
+    development: "#6174C2",
     sandbox: "#CB6E17",
 
     entityC: "#83BCB6",

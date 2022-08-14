@@ -28,7 +28,7 @@ export const StatementListRowExpandedPropGroup: React.FC<
                 <StyledTagWrap marginRight>
                   <EntityTag
                     fullWidth
-                    actant={propTypeEntity}
+                    entity={propTypeEntity}
                     tooltipPosition="bottom center"
                   />
                 </StyledTagWrap>
@@ -41,7 +41,7 @@ export const StatementListRowExpandedPropGroup: React.FC<
                 <StyledTagWrap>
                   <EntityTag
                     fullWidth
-                    actant={propValueEntity}
+                    entity={propValueEntity}
                     tooltipPosition="bottom center"
                   />
                 </StyledTagWrap>

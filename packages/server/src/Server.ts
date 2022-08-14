@@ -83,7 +83,7 @@ const acl = new Acl();
 routerV1.use(acl.authorize);
 
 //routerV1.use('/statements', StatementRouter);
-routerV1.use("/acl", AclRouter);
+routerV1.use("/acls", AclRouter);
 routerV1.use("/users", UsersRouter);
 routerV1.use("/entities", EntitiesRouter);
 routerV1.use("/audits", AuditsRouter);

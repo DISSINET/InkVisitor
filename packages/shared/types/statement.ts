@@ -12,7 +12,6 @@ import {
   Operator,
   Language,
 } from "../enums";
-import { IReference } from "./reference";
 
 export interface IStatement extends IEntity {
   id: string;

@@ -278,7 +278,7 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
                 </StyledIconWrap>
                 <animated.div style={animatedStyle}>
                   <EntityTag
-                    actant={territoryActant}
+                    entity={territoryActant}
                     parentId={parent.territoryId}
                     lvl={lvl}
                     isSelected={isSelected}

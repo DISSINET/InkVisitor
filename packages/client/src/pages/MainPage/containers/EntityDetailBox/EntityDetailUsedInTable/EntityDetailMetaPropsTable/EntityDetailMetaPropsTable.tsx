@@ -24,7 +24,7 @@ export const EntityDetailMetaPropsTable: React.FC<
     return (
       <StyledTableTextGridCell>
         <StyledTagWrap>
-          <EntityTag fullWidth actant={entity} />
+          <EntityTag fullWidth entity={entity} />
         </StyledTagWrap>
       </StyledTableTextGridCell>
     );

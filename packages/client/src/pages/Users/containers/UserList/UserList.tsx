@@ -241,6 +241,7 @@ export const UserList: React.FC<UserList> = React.memo(({ heightContent }) => {
               {userRole !== UserRole.Admin ? (
                 <React.Fragment>
                   <EntitySuggester
+                    disableTemplatesAccept
                     disableCreate
                     onSelected={(newSelectedId: string) => {
                       addRightToUser(userId, newSelectedId, "read");
@@ -258,7 +259,7 @@ export const UserList: React.FC<UserList> = React.memo(({ heightContent }) => {
                         return territoryActant && territoryActant.territory ? (
                           <StyledTerritoryListItem key={right.territory}>
                             <EntityTag
-                              actant={territoryActant.territory}
+                              entity={territoryActant.territory}
                               button={
                                 <Button
                                   key="d"
@@ -317,6 +318,7 @@ export const UserList: React.FC<UserList> = React.memo(({ heightContent }) => {
                 userRole === UserRole.Editor ? (
                   <React.Fragment>
                     <EntitySuggester
+                      disableTemplatesAccept
                       disableCreate
                       onSelected={(newSelectedId: string) => {
                         addRightToUser(userId, newSelectedId, "write");
@@ -335,7 +337,7 @@ export const UserList: React.FC<UserList> = React.memo(({ heightContent }) => {
                             territoryActant.territory ? (
                             <StyledTerritoryListItem key={right.territory}>
                               <EntityTag
-                                actant={territoryActant.territory}
+                                entity={territoryActant.territory}
                                 button={
                                   <Button
                                     key="d"

@@ -203,7 +203,7 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
                 <Tag
                   propId={territory.id}
                   label={territory.label}
-                  category={territory.class}
+                  entityClass={territory.class}
                   tooltipPosition={"left center"}
                   button={
                     <Button
@@ -222,10 +222,11 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
                 <div>
                   <EntitySuggester
                     categoryTypes={[EntityClass.Territory]}
-                    onSelected={(selected: any) =>
+                    onSelected={(selected: string) =>
                       handleChange("defaultTerritory", selected)
                     }
                     inputWidth={104}
+                    disableTemplatesAccept
                   />
                 </div>
               )}

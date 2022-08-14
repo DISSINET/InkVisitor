@@ -170,6 +170,7 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
         {"Move to parent:\xa0"}
         <div>
           <EntitySuggester
+            disableTemplatesAccept
             filterEditorRights
             inputWidth={96}
             disableCreate

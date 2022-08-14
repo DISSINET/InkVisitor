@@ -19,6 +19,7 @@ interface StatementEditorActionTable {
   updateProp: (propId: string, changes: any) => void;
   removeProp: (propId: string) => void;
   movePropToIndex: (propId: string, oldIndex: number, newIndex: number) => void;
+  territoryParentId?: string;
 }
 export const StatementEditorActionTable: React.FC<
   StatementEditorActionTable
@@ -32,6 +33,7 @@ export const StatementEditorActionTable: React.FC<
   updateProp,
   removeProp,
   movePropToIndex,
+  territoryParentId,
 }) => {
   const [filteredActions, setFilteredActions] = useState<
     FilteredActionObject[]
@@ -133,6 +135,7 @@ export const StatementEditorActionTable: React.FC<
                 updateProp={updateProp}
                 removeProp={removeProp}
                 movePropToIndex={movePropToIndex}
+                territoryParentId={territoryParentId}
                 {...row.getRowProps()}
               />
             );
