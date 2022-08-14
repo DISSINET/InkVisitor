@@ -10,6 +10,10 @@ export interface IRelationSuperClass extends IRelation {
   type: RelationType.Superclass;
   entityIds: [string, string];
 }
+export interface IRelationSuperordinateLocation extends IRelation {
+  type: RelationType.SuperordinateLocation;
+  entityIds: [string, string];
+}
 export interface IRelationSynonym extends IRelation {
   type: RelationType.Synonym;
   entityIds: string[];
@@ -46,7 +50,7 @@ export interface IRelationIdentification extends IRelation {
   type: RelationType.Identification;
   logic: Logic;
   certainty: Certainty;
-  entityIds: string[];
+  entityIds: [string, string];
 }
 
 /**
