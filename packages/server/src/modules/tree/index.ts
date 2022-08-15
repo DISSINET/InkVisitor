@@ -89,9 +89,9 @@ export default Router()
       if (!territoryData.data.parent) {
         // root territory cannot be moved - or not yet implemented
         throw new TerrytoryInvalidMove("cannot move root territory");
-      } else if (territoryData.data.parent.id !== parentId) {
+      } else if (territoryData.data.parent.territoryId !== parentId) {
         // change parent of the territory
-        territoryData.data.parent.id = parentId;
+        territoryData.data.parent.territoryId = parentId;
         territoryData.data.parent.order = -1;
       } else {
         const currentIndex = childsArray.findIndex(

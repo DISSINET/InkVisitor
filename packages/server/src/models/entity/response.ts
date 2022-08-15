@@ -3,6 +3,7 @@ import { UsedInPosition, UserRoleMode } from "@shared/enums";
 import {
   IEntity,
   IProp,
+  IRelation,
   IResponseDetail,
   IResponseEntity,
   IResponseUsedInMetaProp,
@@ -13,7 +14,11 @@ import Entity from "./entity";
 import Statement from "@models/statement/statement";
 import { nonenumerable } from "@common/decorators";
 import { Connection } from "rethinkdb-ts";
-import { IResponseUsedInStatementProps } from "@shared/types/response-detail";
+import {
+  IResponseUsedInStatementClassification,
+  IResponseUsedInStatementIdentification,
+  IResponseUsedInStatementProps,
+} from "@shared/types/response-detail";
 
 export class ResponseEntity extends Entity implements IResponseEntity {
   @nonenumerable
@@ -47,6 +52,10 @@ export class ResponseEntityDetail
   usedInStatementProps: IResponseUsedInStatementProps[];
   usedInMetaProps: IResponseUsedInMetaProp<UsedInPosition>[];
   usedAsTemplate?: string[] | undefined;
+  usedInStatementIdentification: IResponseUsedInStatementIdentification[] = [];
+  usedInStatementClassification: IResponseUsedInStatementClassification[] = [];
+
+  relations: IRelation[] = [];
 
   // map of entity ids that should be populated in subsequent methods and used in fetching
   // real entities in populateEntitiesMap method
@@ -134,8 +143,12 @@ export class ResponseEntityDetail
     let actantValid = false;
 
     for (const prop of props) {
-      if (prop.type.id === this.id || prop.value.id === this.id) {
-        this.addUsedInMetaProp(actant.id, prop.value.id, prop.type.id);
+      if (prop.type.entityId === this.id || prop.value.entityId === this.id) {
+        this.addUsedInMetaProp(
+          actant.id,
+          prop.value.entityId,
+          prop.type.entityId
+        );
         actantValid = true;
       }
 
@@ -173,13 +186,13 @@ export class ResponseEntityDetail
   walkStatementsDataEntities(statements: IStatement[]) {
     for (const statement of statements) {
       for (const action of statement.data.actions) {
-        if (action.action === this.id) {
+        if (action.actionId === this.id) {
           this.addUsedInStatement(statement, UsedInPosition.Action);
         }
       }
 
       for (const actant of statement.data.actants) {
-        if (actant.actant === this.id) {
+        if (actant.entityId === this.id) {
           this.addUsedInStatement(statement, UsedInPosition.Actant);
         }
       }
@@ -205,10 +218,10 @@ export class ResponseEntityDetail
 
     this.entities[statement.id] = statement;
     statement.data.actants.forEach((actant) => {
-      this.postponedEntities[actant.actant] = undefined;
+      this.postponedEntities[actant.entityId] = undefined;
     });
     statement.data.actions.forEach((action) => {
-      this.postponedEntities[action.action] = undefined;
+      this.postponedEntities[action.actionId] = undefined;
     });
   }
 
@@ -221,7 +234,7 @@ export class ResponseEntityDetail
       for (const action of statement.data.actions) {
         this.walkStatementDataRecursiveProps(
           statement,
-          action.action,
+          action.actionId,
           action.props
         );
       }
@@ -229,7 +242,7 @@ export class ResponseEntityDetail
       for (const actant of statement.data.actants) {
         this.walkStatementDataRecursiveProps(
           statement,
-          actant.actant,
+          actant.entityId,
           actant.props
         );
       }
@@ -248,12 +261,12 @@ export class ResponseEntityDetail
     props: IProp[]
   ) {
     for (const prop of props) {
-      if (prop.type.id === this.id || prop.value.id === this.id) {
+      if (prop.type.entityId === this.id || prop.value.entityId === this.id) {
         this.addUsedInStatementProp(
           statement.id,
           originId,
-          prop.type.id,
-          prop.value.id
+          prop.type.entityId,
+          prop.value.entityId
         );
       }
 

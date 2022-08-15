@@ -27,7 +27,7 @@ export interface IProp {
 }
 
 export interface IPropSpec {
-  id: string;
+  entityId: string;
   elvl: Elvl;
   logic: Logic;
   virtuality: Virtuality;

@@ -252,6 +252,21 @@ class EmailError extends CustomError {
 }
 
 /**
+ * RelationDoesNotExist will be thrown when attempting to remove/update the relation entry, which does not exist
+ */
+class RelationDoesNotExist extends CustomError {
+  public static code = 400;
+  public static title = "Cannot get Relation entry";
+  public static message = "Relation $1 does not exist";
+
+  static forId(id: string): RelationDoesNotExist {
+    return new RelationDoesNotExist(
+      RelationDoesNotExist.message.replace("$1", id)
+    );
+  }
+}
+
+/**
  * UnknownError works as a backup
  */
 class UnknownError extends CustomError {
@@ -280,6 +295,7 @@ const allErrors: Record<string, any> = {
   TerrytoryInvalidMove,
   StatementInvalidMove,
   EmailError,
+  RelationDoesNotExist,
 };
 
 export interface IErrorSignature {
@@ -313,4 +329,5 @@ export {
   TerrytoryInvalidMove,
   StatementInvalidMove,
   EmailError,
+  RelationDoesNotExist,
 };

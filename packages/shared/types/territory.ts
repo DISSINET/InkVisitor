@@ -9,6 +9,6 @@ export interface ITerritory extends IEntity {
 }
 
 export interface IParentTerritory {
-  id: string; // '' in case of root
+  territoryId: string; // '' in case of root
   order: number;
 }

@@ -1,7 +1,6 @@
 import "ts-jest";
 import { Db } from "@service/RethinkDB";
-import { clearAudits } from "@modules/common.test";
-import { IAudit } from "@shared/types";
+import { clean } from "@modules/common.test";
 import Audit from "./audit";
 import { ResponseAudit } from "./response";
 
@@ -28,7 +27,7 @@ describe("test Audit.save", function () {
 
       expect(audit.id).not.toBe("");
 
-      await clearAudits(db);
+      await clean(db);
     });
   });
 });
@@ -51,7 +50,7 @@ describe("test ResponseAudit.getFirstForEntity", function () {
     await a2.save(db.connection);
   });
 
-  afterAll(async () => await clearAudits(db));
+  afterAll(async () => await clean(db));
 
   it("should return exactly the first audit entry", async () => {
     const response = new ResponseAudit(entityId);
@@ -81,7 +80,7 @@ describe("test ResponseAudit.getLastNForEntity", function () {
     await a2.save(db.connection);
   });
 
-  afterAll(async () => await clearAudits(db));
+  afterAll(async () => await clean(db));
 
   it("should return both entries", async () => {
     const response = new ResponseAudit(entityId);

@@ -34,11 +34,47 @@ import User from "@models/user/user";
 import { EventMapSingle, EventTypes } from "@models/events/types";
 import treeCache from "@service/treeCache";
 import Prop from "@models/prop/prop";
-import e from "express";
+import { IStatementClassification } from "@shared/types/statement";
+
+export class StatementClassification implements IStatementClassification {
+  id: string = "";
+  entityId: string = "";
+  elvl: Elvl = Elvl.Textual;
+  logic: Logic = Logic.Positive;
+  certainty: Certainty = Certainty.AlmostCertain;
+  mood: Mood[] = [];
+  moodvariant: MoodVariant = MoodVariant.Irrealis;
+
+  constructor(data: UnknownObject) {
+    if (!data) {
+      return;
+    }
+
+    fillFlatObject(this, data);
+  }
+}
+
+export class StatementIdentification implements IStatementClassification {
+  id: string = "";
+  entityId: string = "";
+  elvl: Elvl = Elvl.Textual;
+  logic: Logic = Logic.Positive;
+  certainty: Certainty = Certainty.AlmostCertain;
+  mood: Mood[] = [];
+  moodvariant: MoodVariant = MoodVariant.Irrealis;
+
+  constructor(data: UnknownObject) {
+    if (!data) {
+      return;
+    }
+
+    fillFlatObject(this, data);
+  }
+}
 
 export class StatementActant implements IStatementActant, IModel {
   id = "";
-  actant = "";
+  entityId = "";
   position: Position = Position.Subject;
   elvl: Elvl = Elvl.Textual;
   logic: Logic = Logic.Positive;
@@ -48,6 +84,9 @@ export class StatementActant implements IStatementActant, IModel {
   bundleStart: boolean = false;
   bundleEnd: boolean = false;
   props: Prop[] = [];
+
+  classifications: StatementClassification[] = [];
+  identifications: StatementIdentification[] = [];
 
   constructor(data: UnknownObject) {
     if (!data) {
@@ -70,7 +109,7 @@ export class StatementActant implements IStatementActant, IModel {
 }
 
 export class StatementTerritory {
-  id = "";
+  territoryId = "";
   order = -1;
 
   constructor(data: UnknownObject) {
@@ -87,7 +126,7 @@ export class StatementTerritory {
   isValid(): boolean {
     // order is optional, it will be fixed in underlaying call to
     // Entity.determineOrder
-    if (this.id === "") {
+    if (this.territoryId === "") {
       return false;
     }
 
@@ -97,7 +136,7 @@ export class StatementTerritory {
 
 export class StatementAction implements IStatementAction {
   id = "";
-  action: string = "";
+  actionId: string = "";
   elvl: Elvl = Elvl.Textual;
   certainty: Certainty = Certainty.Empty;
   logic: Logic = Logic.Positive;
@@ -218,14 +257,14 @@ class Statement extends Entity implements IStatement {
     if (
       user.role === UserRole.Editor &&
       this.data.territory &&
-      this.data.territory.id === "T0"
+      this.data.territory.territoryId === "T0"
     ) {
       return true;
     }
 
     if (this.data.territory) {
       const closestRight = treeCache.getRightForTerritory(
-        this.data.territory.id,
+        this.data.territory.territoryId,
         user.rights
       );
       if (!closestRight) {
@@ -247,7 +286,7 @@ class Statement extends Entity implements IStatement {
 
     if (this.data.territory) {
       return !!treeCache.getRightForTerritory(
-        this.data.territory.id,
+        this.data.territory.territoryId,
         user.rights
       );
     } else {
@@ -303,9 +342,9 @@ class Statement extends Entity implements IStatement {
     ) {
       const territoryData = (updateData["data"] as any).territory;
       if (territoryData.id) {
-        this.data.territory.id = territoryData.id;
+        this.data.territory.territoryId = territoryData.id;
       }
-      if (!this.data.territory.id) {
+      if (!this.data.territory.territoryId) {
         throw new InternalServerError("territory id has to be set");
       }
 
@@ -343,7 +382,9 @@ class Statement extends Entity implements IStatement {
     if (this.data.territory) {
       const list: IStatement[] = await rethink
         .table(Entity.table)
-        .getAll(this.data.territory.id, { index: DbIndex.StatementTerritory })
+        .getAll(this.data.territory.territoryId, {
+          index: DbIndex.StatementTerritory,
+        })
         .run(db);
 
       const out: Record<number, IStatement> = {};
@@ -377,7 +418,7 @@ class Statement extends Entity implements IStatement {
 
     //  get ids from Statement.data.actions, Statement.data.actions.props ( + childs)
     this.data.actions.forEach((a) => {
-      entitiesIds[a.action] = null;
+      entitiesIds[a.actionId] = null;
       if (a.props) {
         Entity.extractIdsFromProps(a.props).forEach((element) => {
           entitiesIds[element] = null;
@@ -387,14 +428,14 @@ class Statement extends Entity implements IStatement {
 
     // get ids from Statement.data.actants, Statement.data.actants.props ( + childs)
     this.data.actants.forEach((a) => {
-      entitiesIds[a.actant] = null;
+      entitiesIds[a.entityId] = null;
       Entity.extractIdsFromProps(a.props).forEach((element) => {
         entitiesIds[element] = null;
       });
     });
 
     if (this.data.territory) {
-      entitiesIds[this.data.territory.id] = null;
+      entitiesIds[this.data.territory.territoryId] = null;
     }
 
     Entity.extractIdsFromReferences(this.references).forEach((element) => {
@@ -413,7 +454,7 @@ class Statement extends Entity implements IStatement {
     actantIdToUnlink: string
   ): Promise<boolean> {
     const indexToRemove = this.data.actants.findIndex(
-      (a) => a.actant === actantIdToUnlink
+      (a) => a.entityId === actantIdToUnlink
     );
     if (indexToRemove === -1) {
       return false;
@@ -431,7 +472,7 @@ class Statement extends Entity implements IStatement {
     actantIdToUnlink: string
   ): Promise<boolean> {
     const indexToRemove = this.data.actions.findIndex(
-      (a) => a.action === actantIdToUnlink
+      (a) => a.actionId === actantIdToUnlink
     );
     if (indexToRemove === -1) {
       return false;
@@ -539,7 +580,7 @@ class Statement extends Entity implements IStatement {
     const entityIds: string[] = [];
 
     (statements as IStatement[]).forEach((s) => {
-      const ids = s.data.actants.map((a) => a.actant);
+      const ids = s.data.actants.map((a) => a.entityId);
       entityIds.push(...ids);
     });
 

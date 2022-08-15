@@ -14,6 +14,7 @@ import {
   RequestPermissionUpdate,
   IStatement,
   ITerritory,
+  IRelation,
 } from "@shared/types";
 import * as errors from "@shared/types/errors";
 import { IRequestSearch } from "@shared/types/request-search";
@@ -545,6 +546,51 @@ class Api {
           password,
           passwordRepeat,
         }
+      );
+      return response;
+    } catch (err: any | AxiosError) {
+      throw { ...err.response.data };
+    }
+  }
+
+  /**
+   * Relations
+   */
+  async relationUpdate(
+    relationId: string,
+    changes: object
+  ): Promise<AxiosResponse<IResponseGeneric>> {
+    try {
+      const response = await this.connection.put(
+        `/relations/update/${relationId}`,
+        changes
+      );
+      return response;
+    } catch (err: any | AxiosError) {
+      throw { ...err.response.data };
+    }
+  }
+
+  async relationCreate(
+    newRelation: IRelation
+  ): Promise<AxiosResponse<IResponseGeneric>> {
+    try {
+      const response = await this.connection.post(
+        `/relations/create`,
+        newRelation
+      );
+      return response;
+    } catch (err: any | AxiosError) {
+      throw { ...err.response.data };
+    }
+  }
+
+  async relationDelete(
+    relationId: string
+  ): Promise<AxiosResponse<IResponseGeneric>> {
+    try {
+      const response = await this.connection.delete(
+        `/relations/delete/${relationId}`
       );
       return response;
     } catch (err: any | AxiosError) {

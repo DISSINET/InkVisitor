@@ -18,7 +18,7 @@ describe("Territory constructor test", function () {
   describe("ok data", () => {
     const fullData = getITerritoryMock();
     fullData.data.parent = {
-      id: "2",
+      territoryId: "2",
       order: -1,
     };
     const fullTerritory = new Territory(fullData);

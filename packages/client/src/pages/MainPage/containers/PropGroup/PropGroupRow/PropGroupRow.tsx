@@ -78,8 +78,8 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
   isInsideTemplate = false,
   territoryParentId,
 }) => {
-  const propTypeEntity: IEntity = entities[prop.type.id];
-  const propValueEntity: IEntity = entities[prop.value.id];
+  const propTypeEntity: IEntity = entities[prop.type.entityId];
+  const propValueEntity: IEntity = entities[prop.value.entityId];
 
   const draggedPropRow: DraggedPropRowItem = useAppSelector(
     (state) => state.rowDnd.draggedPropRow

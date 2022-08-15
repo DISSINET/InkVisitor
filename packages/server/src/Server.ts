@@ -5,6 +5,7 @@ import cors from "cors";
 import { apiPath } from "@common/constants";
 import EntitiesRouter from "@modules/entities";
 import AuditsRouter from "@modules/audits";
+import RelationsRouter from "@modules/relations";
 import TerritoriesRouter from "@modules/territories";
 import UsersRouter from "@modules/users";
 import AclRouter from "@modules/acls";
@@ -31,7 +32,7 @@ server.use(
 
 server.use(cors());
 
-if (process.env.STATIC_PATH !== "") {
+if (process.env.STATIC_PATH && process.env.STATIC_PATH !== "") {
   server.use(
     process.env.STATIC_PATH as string,
     express.static("../client/dist")
@@ -86,6 +87,7 @@ routerV1.use("/acls", AclRouter);
 routerV1.use("/users", UsersRouter);
 routerV1.use("/entities", EntitiesRouter);
 routerV1.use("/audits", AuditsRouter);
+routerV1.use("/relations", RelationsRouter);
 routerV1.use("/territories", TerritoriesRouter);
 routerV1.use("/statements", StatementsRouter);
 routerV1.use("/tree", TreeRouter);

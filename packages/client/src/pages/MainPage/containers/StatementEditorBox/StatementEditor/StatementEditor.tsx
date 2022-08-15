@@ -126,10 +126,10 @@ export const StatementEditor: React.FC<StatementEditor> = ({
     error,
     isFetching,
   } = useQuery(
-    ["territoryActants", statement.data.territory?.id],
+    ["territoryActants", statement.data.territory?.territoryId],
     async () => {
-      if (statement.data.territory?.id) {
-        const res = await api.entityIdsInTerritory(statement.data.territory.id);
+      if (statement.data.territory?.territoryId) {
+        const res = await api.entityIdsInTerritory(statement.data.territory.territoryId);
         return res.data;
       } else {
         return [];
@@ -137,7 +137,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
     },
     {
       initialData: [],
-      enabled: !!statement.data.territory?.id && api.isLoggedIn(),
+      enabled: !!statement.data.territory?.territoryId && api.isLoggedIn(),
     }
   );
 
@@ -229,7 +229,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
 
   // stores territory id
   const statementTerritoryId: string | undefined = useMemo(() => {
-    return statement.data.territory?.id;
+    return statement.data.territory?.territoryId;
   }, [statement]);
 
   useEffect(() => {
@@ -276,7 +276,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
 
   const addActant = (newStatementActantId: string) => {
     const newStatementActant = CStatementActant();
-    newStatementActant.actant = newStatementActantId;
+    newStatementActant.entityId = newStatementActantId;
     const newData = {
       actants: [...statement.data.actants, newStatementActant],
     };
@@ -290,7 +290,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
 
     [...newStatementData.actants, ...newStatementData.actions].forEach(
       (actant: IStatementActant | IStatementAction) => {
-        const actantId = "actant" in actant ? actant.actant : actant.action;
+        const actantId = "entityId" in actant ? actant.entityId : actant.actionId;
         // adding 1st level prop
         if (actantId === originId) {
           actant.props = [...actant.props, newProp];

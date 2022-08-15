@@ -155,8 +155,8 @@ describe("test Entity.update", function () {
       // new value
       expect(existingEntityData.data.text).toEqual(newTextValue);
       //  territory data from the save call
-      expect(existingEntityData.data.territory?.id).toEqual(
-        entity.data.territory?.id
+      expect(existingEntityData.data.territory?.territoryId).toEqual(
+        entity.data.territory?.territoryId
       );
       // actants field should be replaced
       expect(existingEntityData.data.actants).toHaveLength(1);
@@ -221,11 +221,11 @@ describe("test Entity.determineOrder", function () {
 describe("test Entity.getEntitiesIds", function () {
   describe("one id used repeatedly", function () {
     const [id, instance] = prepareEntity();
-    instance.props[0].value.id = id;
-    instance.props[0].type.id = id;
-    instance.props[0].children[0].value.id = id;
-    instance.props[0].children[0].children[0].type.id = id;
-    instance.props[0].children[0].children[0].children[0].value.id = id;
+    instance.props[0].value.entityId = id;
+    instance.props[0].type.entityId = id;
+    instance.props[0].children[0].value.entityId = id;
+    instance.props[0].children[0].children[0].type.entityId = id;
+    instance.props[0].children[0].children[0].children[0].value.entityId = id;
 
     const idList = instance.getEntitiesIds();
     it("should return only one element", () => {
@@ -237,11 +237,11 @@ describe("test Entity.getEntitiesIds", function () {
     const [id, instance] = prepareEntity();
     const id2 = id + "2";
 
-    instance.props[0].value.id = id;
-    instance.props[0].type.id = id2;
-    instance.props[0].children[0].value.id = id;
-    instance.props[0].children[0].children[0].type.id = id2;
-    instance.props[0].children[0].children[0].children[0].value.id = id2;
+    instance.props[0].value.entityId = id;
+    instance.props[0].type.entityId = id2;
+    instance.props[0].children[0].value.entityId = id;
+    instance.props[0].children[0].children[0].type.entityId = id2;
+    instance.props[0].children[0].children[0].children[0].value.entityId = id2;
 
     const idList = instance.getEntitiesIds();
     it("should return both elements", () => {

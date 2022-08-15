@@ -174,7 +174,7 @@ export const StatementListRowExpanded: React.FC<StatementListRowExpanded> = ({
       // ACTIONS
       const actionObjects = actions.map(
         (sAction: IStatementAction, key: number) => {
-          const action = entities[sAction.action];
+          const action = entities[sAction.actionId];
           return { key, data: { sAction, action } };
         }
       );
@@ -183,7 +183,7 @@ export const StatementListRowExpanded: React.FC<StatementListRowExpanded> = ({
       const subjectObjects = actants
         .filter((a: IStatementActant) => a.position === "s")
         .map((sSubject: IStatementActant, key) => {
-          const subject = entities[sSubject.actant];
+          const subject = entities[sSubject.entityId];
           return { key, data: { sSubject, subject } };
         });
 
@@ -191,7 +191,7 @@ export const StatementListRowExpanded: React.FC<StatementListRowExpanded> = ({
       const actantObjects = actants
         .filter((a: IStatementActant) => a.position !== "s")
         .map((sActant: IStatementActant, key: number) => {
-          const actant = entities[sActant.actant];
+          const actant = entities[sActant.entityId];
           return {
             key,
             data: {

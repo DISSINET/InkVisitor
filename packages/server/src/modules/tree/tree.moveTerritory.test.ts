@@ -17,11 +17,11 @@ describe("Tree moveTerritory", function () {
 
       let lvl11 = await findEntityById<ITerritory>(db, `lvl1-1-${randSuffix}`);
       let lvl12 = await findEntityById<ITerritory>(db, `lvl1-2-${randSuffix}`);
-      expect(lvl11.data.parent ? lvl11.data.parent.id : "").toEqual(
+      expect(lvl11.data.parent ? lvl11.data.parent.territoryId : "").toEqual(
         `root-${randSuffix}`
       );
       expect(lvl11.data.parent ? lvl11.data.parent.order : 0).toEqual(1);
-      expect(lvl12.data.parent ? lvl12.data.parent.id : "").toEqual(
+      expect(lvl12.data.parent ? lvl12.data.parent.territoryId : "").toEqual(
         `root-${randSuffix}`
       );
       expect(lvl12.data.parent ? lvl12.data.parent.order : 0).toEqual(2);
@@ -38,11 +38,11 @@ describe("Tree moveTerritory", function () {
 
       lvl11 = await findEntityById<ITerritory>(db, `lvl1-1-${randSuffix}`);
       lvl12 = await findEntityById<ITerritory>(db, `lvl1-2-${randSuffix}`);
-      expect(lvl11.data.parent ? lvl11.data.parent.id : "").toEqual(
+      expect(lvl11.data.parent ? lvl11.data.parent.territoryId : "").toEqual(
         `root-${randSuffix}`
       );
       expect(lvl11.data.parent ? lvl11.data.parent.order : 0).toEqual(2);
-      expect(lvl12.data.parent ? lvl12.data.parent.id : "").toEqual(
+      expect(lvl12.data.parent ? lvl12.data.parent.territoryId : "").toEqual(
         `root-${randSuffix}`
       );
       expect(lvl12.data.parent ? lvl12.data.parent.order : 0).toEqual(1.5);
