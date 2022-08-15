@@ -176,16 +176,29 @@ const importTable = async (
 };
 
 const importData = async () => {
-  const conn = await prepareDbConnection(config);
+  const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout,
+  });
 
-  console.log(`***importing dataset ${datasetId}***\n`);
+  rl.question(`Using db ${config.db}. Continue? y/n\n`, async (result) => {
+    if (result.toLowerCase() !== "y") {
+      process.exit(0);
+    }
 
-  for (const tableConfig of Object.values(config.tables)) {
-    await importTable(tableConfig, conn);
-  }
+    rl.close();
 
-  console.log("Closing connection");
-  await conn.close({ noreplyWait: true });
+    const conn = await prepareDbConnection(config);
+
+    console.log(`***importing dataset ${datasetId}***\n`);
+
+    for (const tableConfig of Object.values(config.tables)) {
+      await importTable(tableConfig, conn);
+    }
+
+    console.log("Closing connection");
+    await conn.close({ noreplyWait: true });
+  });
 };
 
 (async () => {
