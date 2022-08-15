@@ -103,5 +103,5 @@ jobs:
           rm -rf /var/tmp/docker-tar* &&
           podman rm inkvisitor-staging --force || true && 
           podman load -i /var/www/html/apps/inkvisitor-staging.tar.gz && 
-          podman-compose -f /var/www/html/apps/docker-compose.yml up -d inkvisitor-staging &&
+          podman-compose -f /var/www/html/apps/docker-compose.yml up -d inkvisitor-staging
           '"
