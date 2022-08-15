@@ -18,15 +18,15 @@ describe("test ResponseEntityDetail.walkEntityProps", function () {
   });
   const prop = new Prop({});
   prop.type = new PropSpec({});
-  prop.type.id = baseEntity.id;
+  prop.type.entityId = baseEntity.id;
   prop.value = new PropSpec({});
-  prop.value.id = baseEntity.id;
+  prop.value.entityId = baseEntity.id;
 
   const children = new Prop({});
   children.type = new PropSpec({});
-  children.type.id = childEntity.id;
+  children.type.entityId = childEntity.id;
   children.value = new PropSpec({});
-  children.value.id = childEntity.id;
+  children.value.entityId = childEntity.id;
 
   prop.children.push(children);
   linkedEntity.props.push(prop);
@@ -55,7 +55,7 @@ describe("test ResponseEntityDetail.walkEntityProps", function () {
 
     it("should add to postponedEntities map", () => {
       const keys = Object.keys(response.postponedEntities);
-      expect(keys).toEqual([prop.type.id]);
+      expect(keys).toEqual([prop.type.entityId]);
     });
   });
 
@@ -155,7 +155,7 @@ describe("test ResponseEntityDetail.walkStatementsDataProps", function () {
   describe("linked via actions.props.value", () => {
     const [, statement1] = prepareStatement();
     const response = new ResponseEntityDetail(entity);
-    statement1.data.actions[0].props[0].value.id = entity.id;
+    statement1.data.actions[0].props[0].value.entityId = entity.id;
 
     response.walkStatementsDataProps([statement1]);
 
@@ -174,7 +174,7 @@ describe("test ResponseEntityDetail.walkStatementsDataProps", function () {
   describe("linked via actions.props.type", () => {
     const [, statement1] = prepareStatement();
     const response = new ResponseEntityDetail(entity);
-    statement1.data.actions[0].props[0].type.id = entity.id;
+    statement1.data.actions[0].props[0].type.entityId = entity.id;
 
     response.walkStatementsDataProps([statement1]);
 
@@ -193,7 +193,7 @@ describe("test ResponseEntityDetail.walkStatementsDataProps", function () {
   describe("linked via actions.props.type in 1st lvl", () => {
     const [, statement1] = prepareStatement();
     const response = new ResponseEntityDetail(entity);
-    statement1.data.actions[0].props[0].children[0].type.id = entity.id;
+    statement1.data.actions[0].props[0].children[0].type.entityId = entity.id;
 
     response.walkStatementsDataProps([statement1]);
 
@@ -212,7 +212,7 @@ describe("test ResponseEntityDetail.walkStatementsDataProps", function () {
   describe("linked via actions.props.type in 3rd lvl", () => {
     const [, statement1] = prepareStatement();
     const response = new ResponseEntityDetail(entity);
-    statement1.data.actions[0].props[0].children[0].children[0].children[0].type.id =
+    statement1.data.actions[0].props[0].children[0].children[0].children[0].type.entityId =
       entity.id;
 
     response.walkStatementsDataProps([statement1]);
@@ -234,9 +234,9 @@ describe("test ResponseEntityDetail.walkStatementsDataProps", function () {
     const [, statement2] = prepareStatement();
 
     const response = new ResponseEntityDetail(entity);
-    statement1.data.actions[0].props[0].children[0].children[0].children[0].type.id =
+    statement1.data.actions[0].props[0].children[0].children[0].children[0].type.entityId =
       entity.id;
-    statement2.data.actions[0].props[0].value.id = entity.id;
+    statement2.data.actions[0].props[0].value.entityId = entity.id;
 
     response.walkStatementsDataProps([statement1, statement2]);
 

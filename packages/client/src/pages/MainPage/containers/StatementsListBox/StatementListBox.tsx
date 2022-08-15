@@ -232,11 +232,15 @@ export const StatementListBox: React.FC = () => {
           ((
             statements[index - 1].data.territory as {
               order: number;
-              id: string;
+              territoryId: string;
             }
           ).order +
-            (statements[index].data.territory as { order: number; id: string })
-              .order) /
+            (
+              statements[index].data.territory as {
+                order: number;
+                territoryId: string;
+              }
+            ).order) /
           2;
       }
     }
@@ -246,8 +250,9 @@ export const StatementListBox: React.FC = () => {
         localStorage.getItem("userrole") as UserRole,
         territoryId
       );
-      (newStatement.data.territory as { order: number; id: string }).order =
-        newOrder;
+      (
+        newStatement.data.territory as { order: number; territoryId: string }
+      ).order = newOrder;
 
       actantsCreateMutation.mutate(newStatement);
     }
@@ -264,8 +269,12 @@ export const StatementListBox: React.FC = () => {
         // whether row is moving top-bottom direction
         const topDown =
           statementToMove.data.territory.order <
-          (statements[index].data.territory as { id: string; order: number })
-            .order;
+          (
+            statements[index].data.territory as {
+              territoryId: string;
+              order: number;
+            }
+          ).order;
 
         const thisOrder = statementToMove.data.territory.order;
         let allOrders: number[] = statements.map((s) =>
@@ -288,7 +297,7 @@ export const StatementListBox: React.FC = () => {
         const res = await api.entityUpdate(statementToMove.id, {
           data: {
             territory: {
-              id: statementToMove.data.territory.id,
+              id: statementToMove.data.territory.territoryId,
               order: allOrders[index],
             },
           },

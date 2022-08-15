@@ -10,6 +10,7 @@ import {
   Operator,
   Partitivity,
   Position,
+  RelationType,
   UserRole,
   Virtuality,
 } from "@shared/enums";
@@ -18,6 +19,8 @@ import {
   IEntity,
   IProp,
   IReference,
+  IRelation,
+  IRelationIdentification,
   IStatement,
   IStatementActant,
   IStatementAction,
@@ -33,7 +36,7 @@ export const CBookmarkFolder = (bookmarkName: string): IBookmarkFolder => ({
 
 export const CProp = (): IProp => ({
   id: uuidv4(),
-  elvl: Elvl.Inferential,
+  elvl: Elvl.Textual,
   certainty: Certainty.Empty,
   logic: Logic.Positive,
   mood: [Mood.Indication],
@@ -44,15 +47,15 @@ export const CProp = (): IProp => ({
   children: [],
 
   type: {
-    id: "",
-    elvl: Elvl.Inferential,
+    entityId: "",
+    elvl: Elvl.Textual,
     logic: Logic.Positive,
     virtuality: Virtuality.Reality,
     partitivity: Partitivity.Unison,
   },
   value: {
-    id: "",
-    elvl: Elvl.Inferential,
+    entityId: "",
+    elvl: Elvl.Textual,
     logic: Logic.Positive,
     virtuality: Virtuality.Reality,
     partitivity: Partitivity.Unison,
@@ -72,14 +75,14 @@ export const CMetaProp = (): IProp => ({
   children: [],
 
   type: {
-    id: "",
+    entityId: "",
     elvl: Elvl.Inferential,
     logic: Logic.Positive,
     virtuality: Virtuality.Reality,
     partitivity: Partitivity.Unison,
   },
   value: {
-    id: "",
+    entityId: "",
     elvl: Elvl.Inferential,
     logic: Logic.Positive,
     virtuality: Virtuality.Reality,
@@ -118,7 +121,7 @@ export const CStatement = (
     newStatement.data = {
       ...newStatement.data,
       territory: {
-        id: territoryId,
+        territoryId: territoryId,
         order: -1,
       },
     };
@@ -221,7 +224,7 @@ export const DProps = (oldProps: IProp[]): IProp[] => {
 
 export const CStatementActant = (): IStatementActant => ({
   id: uuidv4(),
-  actant: "",
+  entityId: "",
   position: Position.Subject,
   elvl: Elvl.Textual,
   logic: Logic.Positive,
@@ -231,11 +234,13 @@ export const CStatementActant = (): IStatementActant => ({
   bundleStart: false,
   bundleEnd: false,
   props: [],
+  classifications: [],
+  identifications: [],
 });
 
 export const CStatementAction = (actionId: string): IStatementAction => ({
   id: uuidv4(),
-  action: actionId,
+  actionId: actionId,
   certainty: Certainty.Empty,
   elvl: Elvl.Textual,
   logic: Logic.Positive,
@@ -261,7 +266,7 @@ export const CTerritoryActant = (
   language: Language.Latin,
   notes: [],
   data: {
-    parent: { id: parentId, order: parentOrder },
+    parent: { territoryId: parentId, order: parentOrder },
   },
   status:
     userRole === UserRole.Admin ? EntityStatus.Approved : EntityStatus.Pending,
@@ -302,6 +307,17 @@ export const CReference = (
   id: uuidv4(),
   resource: resourceId,
   value: valueId,
+});
+
+export const CRelationIdentity = (
+  entity1: string = "",
+  entity2: string = ""
+): IRelationIdentification => ({
+  id: uuidv4(),
+  entityIds: [entity1, entity2],
+  type: RelationType.Identification,
+  logic: Logic.Positive,
+  certainty: Certainty.Certain,
 });
 
 export const CTemplateEntity = (

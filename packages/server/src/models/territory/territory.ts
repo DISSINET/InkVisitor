@@ -9,7 +9,7 @@ import treeCache from "@service/treeCache";
 import { nonenumerable } from "@common/decorators";
 
 export class TerritoryParent implements IParentTerritory, IModel {
-  id = "";
+  territoryId = "";
   order = -1;
 
   constructor(data: UnknownObject) {
@@ -21,7 +21,7 @@ export class TerritoryParent implements IParentTerritory, IModel {
   }
 
   isValid(): boolean {
-    if (this.id === "") {
+    if (this.territoryId === "") {
       return false;
     }
 
@@ -86,7 +86,7 @@ class Territory extends Entity implements ITerritory {
       // get count of future siblings and move current territory to last
       // position
       const childs = await this.findChilds.call(
-        new Territory({ id: this.data.parent.id }),
+        new Territory({ id: this.data.parent.territoryId }),
         db
       );
 
@@ -121,7 +121,7 @@ class Territory extends Entity implements ITerritory {
       if (parentData.id) {
         parentId = parentData.id;
       } else if (this.data.parent) {
-        parentId = this.data.parent.id;
+        parentId = this.data.parent.territoryId;
       } else {
         throw new InternalServerError("parent for category must be set");
       }
@@ -232,7 +232,7 @@ class Territory extends Entity implements ITerritory {
     }
 
     const closestRight = treeCache.getRightForTerritory(
-      this.data.parent.id,
+      this.data.parent.territoryId,
       user.rights
     );
 
@@ -264,7 +264,7 @@ class Territory extends Entity implements ITerritory {
     const entityIds = entity.getEntitiesIds.call(this);
 
     if (this.data.parent) {
-      entityIds.push(this.data.parent.id);
+      entityIds.push(this.data.parent.territoryId);
     }
 
     return entityIds;

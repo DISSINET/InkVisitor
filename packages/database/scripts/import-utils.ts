@@ -1,15 +1,21 @@
 import {
   Connection,
-  IndexChangeResult,
   RConnectionOptions,
-  RDatum,
   r,
   RValue,
   RTable,
 } from "rethinkdb-ts";
 
+export interface DbSchema {
+  users: TableSchema;
+  aclPermissions: TableSchema;
+  entities: TableSchema;
+  audits: TableSchema;
+  relations: TableSchema;
+}
+
 export interface TableSchema {
-  name: RValue<string>;
+  tableName: RValue<string>;
   data: any;
   transform: () => void;
   indexes?: ((table: RTable) => any)[];
@@ -41,7 +47,6 @@ export const prepareDbConnection = async (
     console.log(`Database not dropped ('${config.db}'). Does not exist?`);
   }
 
-  // Recreate the database
   try {
     await r.dbCreate(config.db as RValue<string>).run(conn);
     console.log("Database created");

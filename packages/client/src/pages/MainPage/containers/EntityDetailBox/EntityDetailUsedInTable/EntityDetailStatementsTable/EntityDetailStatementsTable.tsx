@@ -74,7 +74,7 @@ export const EntityDetailStatementsTable: React.FC<
             row.original as IResponseUsedInStatement<UsedInPosition>;
           const subjectIds = useCase.statement.data.actants
             .filter((a: IStatementActant) => a.position === "s")
-            .map((a: IStatementActant) => a.actant);
+            .map((a: IStatementActant) => a.entityId);
 
           const subjectObjects = subjectIds.map((actantId: string) => {
             return entities[actantId];
@@ -118,7 +118,7 @@ export const EntityDetailStatementsTable: React.FC<
           const useCase =
             row.original as IResponseUsedInStatement<UsedInPosition>;
           const { actions } = useCase.statement.data;
-          const actionIds = actions.map((a: IStatementAction) => a.action);
+          const actionIds = actions.map((a: IStatementAction) => a.actionId);
           const actionObjects = actionIds.map((actionId: string) => {
             return entities[actionId];
           });
@@ -166,7 +166,7 @@ export const EntityDetailStatementsTable: React.FC<
 
           const actantIds = useCase.statement.data.actants
             .filter((a: IStatementActant) => a.position !== "s")
-            .map((a: IStatementActant) => a.actant);
+            .map((a: IStatementActant) => a.entityId);
           const isOversized = actantIds.length > 4;
 
           const actantObjects = actantIds.map((actantId: string) => {
