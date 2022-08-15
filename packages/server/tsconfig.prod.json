@@ -10,5 +10,5 @@
     "files": true
   },
   "files": ["./src/custom.request.d.ts"],
-  "exclude": ["spec", "src/**/*.mock.ts", "src/public/"]
+  "exclude": ["spec", "src/**/*.test.ts", "src/public/"]
 }
