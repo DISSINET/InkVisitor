@@ -23,6 +23,7 @@ const INITIAL_CONTEXT = {
   appendDetailId: UNINITIALISED,
   removeDetailId: UNINITIALISED,
   clearAllDetailIds: UNINITIALISED,
+  cleanAllParams: UNINITIALISED,
 };
 interface SearchParamsContext {
   territoryId: string;
@@ -35,6 +36,7 @@ interface SearchParamsContext {
   appendDetailId: (id: string) => void;
   removeDetailId: (id: string) => void;
   clearAllDetailIds: () => void;
+  cleanAllParams: () => void;
 }
 const SearchParamsContext = createContext<SearchParamsContext>(INITIAL_CONTEXT);
 
@@ -134,6 +136,12 @@ export const SearchParamsProvider = ({
     }
   };
 
+  const cleanAllParams = () => {
+    clearAllDetailIds();
+    setStatementId("");
+    setTerritoryId("");
+  };
+
   useEffect(() => {
     // Change from the inside of the app to this state
     territoryId
@@ -197,6 +205,7 @@ export const SearchParamsProvider = ({
         appendDetailId,
         removeDetailId,
         clearAllDetailIds,
+        cleanAllParams,
       }}
     >
       {children}

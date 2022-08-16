@@ -1,5 +1,5 @@
 import { Button, ButtonGroup } from "components";
-import React from "react";
+import React, { useState } from "react";
 import {
   StyledFaUserAlt,
   StyledHeader,
@@ -7,14 +7,14 @@ import {
   StyledHeaderTag,
   StyledText,
   StyledUser,
-  StyledUserBox,
+  StyledRightHeader,
   StyledUsername,
 } from "./PageHeaderStyles";
 import packageJson from "../../../../package.json";
 import { heightHeader } from "Theme/constants";
 import LogoInkvisitor from "assets/logos/inkvisitor-full.svg";
 import { toast } from "react-toastify";
-import { useHistory } from "react-router";
+import { useHistory, useLocation } from "react-router";
 
 export const LeftHeader = React.memo(({}) => {
   const env = (process.env.ROOT_URL || "").replace(/apps\/inkvisitor[-]?/, "");
@@ -52,6 +52,7 @@ interface RightHeaderProps {
 }
 
 interface IPage {
+  id: "main" | "users";
   label: string;
   color: "info" | "success" | "danger" | "warning";
   href: string;
@@ -60,12 +61,14 @@ interface IPage {
 
 const pages: IPage[] = [
   {
+    id: "main",
     label: "Main",
     color: "info",
     href: "/",
     admin: false,
   },
   {
+    id: "users",
     label: "Manage Users",
     color: "info",
     href: "/users",
@@ -76,9 +79,11 @@ const pages: IPage[] = [
 export const RightHeader: React.FC<RightHeaderProps> = React.memo(
   ({ setUserCustomizationOpen, handleLogOut, userName, userRole }) => {
     const history = useHistory();
+    const location = useLocation();
+    const [tempLocation, setTempLocation] = useState<string | false>(false);
 
     return (
-      <StyledUserBox>
+      <StyledRightHeader>
         <StyledUser>
           <StyledText>logged as</StyledText>
           <StyledFaUserAlt
@@ -98,7 +103,18 @@ export const RightHeader: React.FC<RightHeaderProps> = React.memo(
                 key={key}
                 label={p.label}
                 color={p.color}
-                onClick={() => history.push(p.href)}
+                onClick={() => {
+                  if (p.id === "users") {
+                    setTempLocation(location.hash);
+                    history.push(p.href);
+                  } else if (p.id === "main") {
+                    setTempLocation(false);
+                    history.push({
+                      pathname: "/",
+                      hash: tempLocation ? tempLocation : "",
+                    });
+                  }
+                }}
               />
             ))}
           <Button
@@ -107,7 +123,7 @@ export const RightHeader: React.FC<RightHeaderProps> = React.memo(
             onClick={() => handleLogOut()}
           />
         </ButtonGroup>
-      </StyledUserBox>
+      </StyledRightHeader>
     );
   }
 );

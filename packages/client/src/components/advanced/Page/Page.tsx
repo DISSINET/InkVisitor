@@ -6,6 +6,7 @@ import {
   RightHeader,
   UserCustomizationModal,
 } from "components/advanced";
+import { useSearchParams } from "hooks";
 import React, { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "react-query";
 import { toast } from "react-toastify";
@@ -16,13 +17,11 @@ import { StyledContent, StyledPage } from "./PageStyles";
 
 interface Page {
   children?: React.ReactNode;
-  logOutCleanUp?: () => void;
   disableRightHeader?: boolean;
   centeredContent?: boolean;
 }
 export const Page: React.FC<Page> = ({
   children,
-  logOutCleanUp = () => {},
   disableRightHeader = false,
   centeredContent = false,
 }) => {
@@ -32,6 +31,7 @@ export const Page: React.FC<Page> = ({
   const username: string = useAppSelector((state) => state.username);
   const userId = localStorage.getItem("userid");
   const userRole = localStorage.getItem("userrole");
+  const { cleanAllParams } = useSearchParams();
 
   const layoutWidth: number = useAppSelector(
     (state) => state.layout.layoutWidth
@@ -70,7 +70,7 @@ export const Page: React.FC<Page> = ({
       queryClient.removeQueries();
       toast.success("You've been successfully logged out!");
       //
-      logOutCleanUp();
+      cleanAllParams();
     },
   });
 

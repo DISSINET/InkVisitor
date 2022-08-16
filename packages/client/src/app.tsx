@@ -32,6 +32,7 @@ import MainPage from "./pages/MainPage";
 import theme from "./Theme/theme";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
+import { Page } from "components/advanced";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -129,34 +130,36 @@ export const App: React.FC = () => {
           <DndProvider backend={HTML5Backend}>
             <BrowserRouter basename={process.env.ROOT_URL}>
               <SearchParamsProvider>
-                <Switch>
-                  <Route
-                    path="/"
-                    exact
-                    render={(props) => <MainPage {...props} />}
-                  />
-                  {isLoggedIn && (
+                <Page>
+                  <Switch>
                     <Route
-                      path="/acl"
-                      render={(props) => <AclPage {...props} />}
+                      path="/"
+                      exact
+                      render={(props) => <MainPage {...props} />}
                     />
-                  )}
-                  {isLoggedIn && (
+                    {isLoggedIn && (
+                      <Route
+                        path="/acl"
+                        render={(props) => <AclPage {...props} />}
+                      />
+                    )}
+                    {isLoggedIn && (
+                      <Route
+                        path="/users"
+                        render={(props) => <UsersPage {...props} />}
+                      />
+                    )}
                     <Route
-                      path="/users"
-                      render={(props) => <UsersPage {...props} />}
+                      path="/activate"
+                      render={(props) => <ActivatePage {...props} />}
                     />
-                  )}
-                  <Route
-                    path="/activate"
-                    render={(props) => <ActivatePage {...props} />}
-                  />
-                  <Route
-                    path="/password_reset"
-                    render={(props) => <PasswordResetPage {...props} />}
-                  />
-                  <Route path="*" component={NotFoundPage} />
-                </Switch>
+                    <Route
+                      path="/password_reset"
+                      render={(props) => <PasswordResetPage {...props} />}
+                    />
+                    <Route path="*" component={NotFoundPage} />
+                  </Switch>
+                </Page>
               </SearchParamsProvider>
             </BrowserRouter>
           </DndProvider>

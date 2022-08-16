@@ -7,13 +7,11 @@ interface UsersPageProps {}
 
 const UsersPage: React.FC<UsersPageProps> = ({}) => {
   return (
-    <Page>
-      <div style={{ width: "100%", display: "flex", justifyContent: "center" }}>
-        <StyledContent>
-          <UserList />
-        </StyledContent>
-      </div>
-    </Page>
+    <div style={{ width: "100%", display: "flex", justifyContent: "center" }}>
+      <StyledContent>
+        <UserList />
+      </StyledContent>
+    </div>
   );
 };
 
