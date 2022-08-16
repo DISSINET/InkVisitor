@@ -61,7 +61,6 @@ class ModelNotValidError extends CustomError {
   public static code = 400;
   public static title = "Model not valid";
   public static message = "Invalid request data";
-  loggable = true;
 }
 
 /**
@@ -247,7 +246,7 @@ class EmailError extends CustomError {
 
   constructor(m: string, internalMessage: string) {
     super(m);
-    this.log = internalMessage;;
+    this.log = internalMessage;
   }
 }
 

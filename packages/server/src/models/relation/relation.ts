@@ -10,7 +10,7 @@ export default class Relation implements IRelation, IDbModel {
   static table = "relations";
 
   id: string = "";
-  type: RelationType = RelationType.Superclass;
+  type: RelationType = RelationType.Unknown;
   entityIds: string[] = [];
 
   constructor(data: UnknownObject) {

@@ -59,7 +59,7 @@ export default Router()
         throw RelationDoesNotExist.forId(id);
       }
 
-      const model = new Relation(data);
+      const model = new Relation({ ...data, id });
       if (!model.isValid()) {
         throw new ModelNotValidError("");
       }

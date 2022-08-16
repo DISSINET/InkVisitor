@@ -1,6 +1,8 @@
+import Acl from "@middlewares/acl";
 import "@models/events/register";
 import Statement from "@models/statement/statement";
 import Territory from "@models/territory/territory";
+import User from "@models/user/user";
 import { Db } from "@service/RethinkDB";
 import {
   createEntity,
@@ -23,6 +25,7 @@ import { IResponseGeneric, IStatement, IStatementAction } from "@shared/types";
 import { CustomError } from "@shared/types/errors";
 import { ITerritory } from "@shared/types/index";
 import { errorTypes } from "@shared/types/response-generic";
+import { IRequest } from "src/custom.request";
 import "ts-jest";
 
 describe("common", function () {
@@ -31,6 +34,16 @@ describe("common", function () {
 
 export const successfulGenericResponse: IResponseGeneric = {
   result: true,
+};
+
+export const newMockRequest = (db: Db): IRequest => {
+  return {
+    acl: new Acl(),
+    db: db,
+    getUserOrFail: () => {
+      return new User({});
+    },
+  };
 };
 
 export function testErroneousResponse(
