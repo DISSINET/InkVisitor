@@ -18,6 +18,7 @@ export enum EntityExtension {
 }
 
 export enum RelationType {
+  Unknown = "",
   Superclass = "SC",
   SuperordinateLocation = "SOL",
   Synonym = "S",

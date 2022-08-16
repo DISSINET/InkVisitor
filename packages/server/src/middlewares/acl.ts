@@ -47,7 +47,6 @@ class Acl {
         roles: [],
       });
       await newPermission.save(req.db.connection);
-      console.log(`[Acl]: creating entry for ${ctrl}/${route}`);
     }
 
     return permission;
@@ -55,7 +54,6 @@ class Acl {
 
   public async validate(req: Request): Promise<CustomError | null> {
     const permission = await this.getPermission(req);
-    console.log(permission);
     if (
       permission?.route === "signin" ||
       permission?.route === "active" ||
