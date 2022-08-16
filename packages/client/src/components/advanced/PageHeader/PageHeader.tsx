@@ -97,7 +97,7 @@ export const RightHeader: React.FC<RightHeaderProps> = React.memo(
         <ButtonGroup>
           {pages
             .filter((p) => !p.admin || userRole === "admin")
-            .filter((p) => history.location.pathname !== p.href)
+            .filter((p) => location.pathname !== p.href)
             .map((p, key) => (
               <Button
                 key={key}

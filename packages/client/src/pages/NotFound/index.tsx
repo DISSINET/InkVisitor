@@ -1,4 +1,3 @@
-import { Page } from "components/advanced";
 import React from "react";
 import {
   StyledContentWrapper,
@@ -8,12 +7,10 @@ import {
 
 const NotFoundPage: React.FC<any> = ({}) => {
   return (
-    <Page disableRightHeader centeredContent>
-      <StyledContentWrapper>
-        <StyledError>404</StyledError>
-        <StyledText>Page not found</StyledText>
-      </StyledContentWrapper>
-    </Page>
+    <StyledContentWrapper>
+      <StyledError>404</StyledError>
+      <StyledText>Page not found</StyledText>
+    </StyledContentWrapper>
   );
 };
 

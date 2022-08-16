@@ -9,6 +9,7 @@ import {
 import { useSearchParams } from "hooks";
 import React, { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "react-query";
+import { useLocation } from "react-router";
 import { toast } from "react-toastify";
 import { setUsername } from "redux/features/usernameSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
@@ -17,14 +18,8 @@ import { StyledContent, StyledPage } from "./PageStyles";
 
 interface Page {
   children?: React.ReactNode;
-  disableRightHeader?: boolean;
-  centeredContent?: boolean;
 }
-export const Page: React.FC<Page> = ({
-  children,
-  disableRightHeader = false,
-  centeredContent = false,
-}) => {
+export const Page: React.FC<Page> = ({ children }) => {
   const isLoggedIn = api.isLoggedIn();
   const dispatch = useAppDispatch();
   const queryClient = useQueryClient();
@@ -45,6 +40,13 @@ export const Page: React.FC<Page> = ({
     /apps\/inkvisitor[-]?/,
     ""
   );
+
+  const location = useLocation();
+  const centeredContent = location.pathname === "/password_reset";
+  const disableRightHeader: boolean =
+    location.pathname !== "/users" &&
+    location.pathname !== "/acl" &&
+    location.pathname !== "/";
 
   const {
     status: statusUser,

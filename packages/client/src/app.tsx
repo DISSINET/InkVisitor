@@ -2,7 +2,7 @@ import React, { Profiler, useEffect } from "react";
 import { Helmet } from "react-helmet";
 import { QueryClient, QueryClientProvider } from "react-query";
 import { ReactQueryDevtools } from "react-query/devtools";
-import { BrowserRouter, Route, Switch } from "react-router-dom";
+import { BrowserRouter, Route, Switch, useLocation } from "react-router-dom";
 import { useAppDispatch } from "redux/hooks";
 import { ThemeProvider } from "styled-components";
 
