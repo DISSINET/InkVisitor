@@ -238,7 +238,7 @@ export const StatementEditorActantTableRow: React.FC<
       sActant: IStatementActant | any;
     } = row.values.data;
 
-    const propOriginId = row.values.data.sActant.enityId;
+    const propOriginId = row.values.data.sActant.entityId;
     return (
       <ButtonGroup noMarginRight>
         {sActant && (
