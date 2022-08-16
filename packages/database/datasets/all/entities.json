@@ -149544,7 +149544,7 @@
       "actions": [
         {
           "id": "c0b367b0-3cb0-492b-a306-31eea4d87c0b",
-          "action": "A0067",
+          "actionId": "A0067",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -149556,13 +149556,13 @@
           "props": []
         }
       ],
-      "territory": { "id": "T107-1", "order": 0 },
+      "territory": { "territoryId": "T107-1", "order": 0 },
       "tags": [],
       "text": "Quaternus imbriviaturarum Beltrami Salvagnii, civita­tis Mediolani Porte Nove notarii",
       "actants": [
         {
           "id": "b12c4b12-8c1f-46bd-b9ec-04cd519294fe",
-          "actant": "R0006_P0213",
+          "entityId": "R0006_P0213",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -149575,7 +149575,7 @@
         },
         {
           "id": "e75d1f72-ebe5-4721-b660-fa4cf14e97bb",
-          "actant": "T107-1",
+          "entityId": "T107-1",
           "position": "a1",
           "elvl": "1",
           "logic": "1",
@@ -149641,7 +149641,7 @@
       "actions": [
         {
           "id": "308a9af9-0fee-4fe0-9db2-f60284567f1e",
-          "action": "A0093",
+          "actionId": "A0093",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -149653,13 +149653,13 @@
           "props": []
         }
       ],
-      "territory": { "id": "T107-1", "order": 1 },
+      "territory": { "territoryId": "T107-1", "order": 1 },
       "tags": [],
       "text": "Beltrami Salvagnii, civita­tis Mediolani Porte Nove notarii",
       "actants": [
         {
           "id": "ad7943c0-675e-4d87-b01a-7fbdffd7efc5",
-          "actant": "R0006_P0213",
+          "entityId": "R0006_P0213",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -149672,7 +149672,7 @@
         },
         {
           "id": "00a8f166-51a6-4c21-aed3-653b8b680f18",
-          "actant": "R0010_C0398",
+          "entityId": "R0010_C0398",
           "position": "a1",
           "elvl": "1",
           "logic": "1",
@@ -149685,7 +149685,7 @@
         },
         {
           "id": "2ecbd931-2efc-43c2-b7df-605ef7888541",
-          "actant": "R0007_L0036",
+          "entityId": "R0007_L0036",
           "position": "a2",
           "elvl": "1",
           "logic": "1",
@@ -149751,7 +149751,7 @@
       "actions": [
         {
           "id": "d7a4c523-2690-4e99-a7d1-dab9c58f79b1",
-          "action": "A0093",
+          "actionId": "A0093",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -149763,13 +149763,13 @@
           "props": []
         }
       ],
-      "territory": { "id": "T107-1", "order": 2 },
+      "territory": { "territoryId": "T107-1", "order": 2 },
       "tags": [],
       "text": "Beltrami Salvagnii, civita­tis Mediolani Porte Nove notarii",
       "actants": [
         {
           "id": "c997e2aa-2b13-40bd-8837-1bb80fb6d26e",
-          "actant": "R0006_P0213",
+          "entityId": "R0006_P0213",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -149782,7 +149782,7 @@
         },
         {
           "id": "662224e9-d199-4067-baf3-2c14aa890583",
-          "actant": "R0010_C0316",
+          "entityId": "R0010_C0316",
           "position": "a1",
           "elvl": "1",
           "logic": "1",
@@ -149795,7 +149795,7 @@
         },
         {
           "id": "7a44912f-89f1-4134-b293-48d935a30884",
-          "actant": "R0010_C0062",
+          "entityId": "R0010_C0062",
           "position": "a2",
           "elvl": "1",
           "logic": "1",
@@ -149861,7 +149861,7 @@
       "actions": [
         {
           "id": "0f8789f5-d26b-4f5a-92a3-60f4c1b623bd",
-          "action": "A0055",
+          "actionId": "A0055",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -149873,13 +149873,13 @@
           "props": []
         }
       ],
-      "territory": { "id": "T107-1", "order": 3 },
+      "territory": { "territoryId": "T107-1", "order": 3 },
       "tags": [],
       "text": "factarum coram fratribus Guidone de Cochenato et Raynerio de Pirovano",
       "actants": [
         {
           "id": "3ef3bba9-a7a9-4ea4-a85f-5b1648a66f68",
-          "actant": "R0006_P0092",
+          "entityId": "R0006_P0092",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -149892,7 +149892,7 @@
         },
         {
           "id": "90e1cd4b-3657-487e-9760-d03a146c7b16",
-          "actant": "R0006_P0183",
+          "entityId": "R0006_P0183",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -149905,7 +149905,7 @@
         },
         {
           "id": "3ed4dd94-335a-4fc3-a847-b9c5dd2e9309",
-          "actant": "T107",
+          "entityId": "T107",
           "position": "a1",
           "elvl": "1",
           "logic": "1",
@@ -149971,7 +149971,7 @@
       "actions": [
         {
           "id": "b6c8c6a1-9bbd-4a33-9a34-102bb29991b7",
-          "action": "A0093",
+          "actionId": "A0093",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -149983,13 +149983,13 @@
           "props": []
         }
       ],
-      "territory": { "id": "T107-1", "order": 4 },
+      "territory": { "territoryId": "T107-1", "order": 4 },
       "tags": [],
       "text": "ordinis Predicatorum",
       "actants": [
         {
           "id": "c74d0a46-c372-4e39-84a4-38ec87ad39a6",
-          "actant": "R0006_P0092",
+          "entityId": "R0006_P0092",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -150002,7 +150002,7 @@
         },
         {
           "id": "0d790df2-dfcd-4e1e-a00d-f233c825b5ed",
-          "actant": "R0010_C0321",
+          "entityId": "R0010_C0321",
           "position": "a1",
           "elvl": "1",
           "logic": "1",
@@ -150015,7 +150015,7 @@
         },
         {
           "id": "6a8c9f49-168e-4d47-85a3-8864734885be",
-          "actant": "R0010_C0059",
+          "entityId": "R0010_C0059",
           "position": "a2",
           "elvl": "1",
           "logic": "1",
@@ -150081,7 +150081,7 @@
       "actions": [
         {
           "id": "062ec9da-bc3f-4f6f-ab6b-ca76993b4922",
-          "action": "A0093",
+          "actionId": "A0093",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -150093,13 +150093,13 @@
           "props": []
         }
       ],
-      "territory": { "id": "T107-1", "order": 5 },
+      "territory": { "territoryId": "T107-1", "order": 5 },
       "tags": [],
       "text": "ordinis Predicatorum",
       "actants": [
         {
           "id": "7ab15795-d4aa-4a01-ac4b-6708b5e993e1",
-          "actant": "R0006_P0183",
+          "entityId": "R0006_P0183",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -150112,7 +150112,7 @@
         },
         {
           "id": "50974537-8363-47ae-a6eb-95bc2e22b0a4",
-          "actant": "R0010_C0321",
+          "entityId": "R0010_C0321",
           "position": "a1",
           "elvl": "1",
           "logic": "1",
@@ -150125,7 +150125,7 @@
         },
         {
           "id": "e9e3d952-1262-4515-a291-03fde652da36",
-          "actant": "R0010_C0059",
+          "entityId": "R0010_C0059",
           "position": "a2",
           "elvl": "1",
           "logic": "1",
@@ -150191,7 +150191,7 @@
       "actions": [
         {
           "id": "73f2fd38-2f26-4375-8d6b-d55769c4232d",
-          "action": "A0093",
+          "actionId": "A0093",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -150203,13 +150203,13 @@
           "props": []
         }
       ],
-      "territory": { "id": "T107-1", "order": 6 },
+      "territory": { "territoryId": "T107-1", "order": 6 },
       "tags": [],
       "text": "inquisi­toribus hereticorum",
       "actants": [
         {
           "id": "bea23a3e-fa0b-46b9-8ffd-de34153dae6b",
-          "actant": "R0006_P0092",
+          "entityId": "R0006_P0092",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -150222,7 +150222,7 @@
         },
         {
           "id": "0178157b-570c-48c9-922e-2122513dd12d",
-          "actant": "R0010_C0316",
+          "entityId": "R0010_C0316",
           "position": "a1",
           "elvl": "1",
           "logic": "1",
@@ -150235,7 +150235,7 @@
         },
         {
           "id": "3ce655b3-14b5-4a36-9de0-5e34078c83b0",
-          "actant": "R0010_C0060",
+          "entityId": "R0010_C0060",
           "position": "a2",
           "elvl": "1",
           "logic": "1",
@@ -150301,7 +150301,7 @@
       "actions": [
         {
           "id": "cd92f881-ac78-4438-9c07-c9088e13a023",
-          "action": "A0093",
+          "actionId": "A0093",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -150313,13 +150313,13 @@
           "props": []
         }
       ],
-      "territory": { "id": "T107-1", "order": 7 },
+      "territory": { "territoryId": "T107-1", "order": 7 },
       "tags": [],
       "text": "inquisi­toribus hereticorum",
       "actants": [
         {
           "id": "7406829c-3a72-4a64-8223-a9177f99de91",
-          "actant": "R0006_P0183",
+          "entityId": "R0006_P0183",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -150332,7 +150332,7 @@
         },
         {
           "id": "67cf7c1e-0f9c-4b16-8e8c-6acdf100c891",
-          "actant": "R0010_C0316",
+          "entityId": "R0010_C0316",
           "position": "a1",
           "elvl": "1",
           "logic": "1",
@@ -150345,7 +150345,7 @@
         },
         {
           "id": "9ce45c7e-86fe-4102-9b66-47aa6f18276e",
-          "actant": "R0010_C0060",
+          "entityId": "R0010_C0060",
           "position": "a2",
           "elvl": "1",
           "logic": "1",
@@ -150411,7 +150411,7 @@
       "actions": [
         {
           "id": "f5de399a-d860-4e4f-97dd-d5f717265c93",
-          "action": "A0173",
+          "actionId": "A0173",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -150423,13 +150423,13 @@
           "props": []
         }
       ],
-      "territory": { "id": "T107-1", "order": 8 },
+      "territory": { "territoryId": "T107-1", "order": 8 },
       "tags": [],
       "text": "Cum defferente fama et accusante clamore ad nos fratres Guidonem de Cochenate et Raynerium de Pirovano ordinis Predicatorum pervenerit",
       "actants": [
         {
           "id": "95dc81e7-a42b-45ae-b3be-ba4efbb4de9a",
-          "actant": "R0009_G0007",
+          "entityId": "R0009_G0007",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -150442,7 +150442,7 @@
         },
         {
           "id": "3a4eeaa7-6d1f-4f78-afcb-da2a10871f3c",
-          "actant": "R0006_P0092",
+          "entityId": "R0006_P0092",
           "position": "a1",
           "elvl": "1",
           "logic": "1",
@@ -150455,7 +150455,7 @@
         },
         {
           "id": "7176acd8-cb55-4321-820a-28362eedf98f",
-          "actant": "R0006_P0183",
+          "entityId": "R0006_P0183",
           "position": "a1",
           "elvl": "1",
           "logic": "1",
@@ -150468,7 +150468,7 @@
         },
         {
           "id": "9e99fe7a-9c76-40ca-855d-c3b3269f400d",
-          "actant": "T107-1-00-010\n#T107-1-00-011\n#T107-1-00-012\n#T107-1-00-013\n#T107-1-00-014\n#T107-1-00-015",
+          "entityId": "T107-1-00-010\n#T107-1-00-011\n#T107-1-00-012\n#T107-1-00-013\n#T107-1-00-014\n#T107-1-00-015",
           "position": "a2",
           "elvl": "1",
           "logic": "1",
@@ -150532,7 +150532,7 @@
       "actions": [
         {
           "id": "72d050e1-aab2-4115-8905-09e75d989b69",
-          "action": "",
+          "actionId": "",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -150600,7 +150600,7 @@
       "actions": [
         {
           "id": "71c4e4c5-9c57-4793-81d4-035dcb0aab9b",
-          "action": "A0093",
+          "actionId": "A0093",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -150612,13 +150612,13 @@
           "props": []
         }
       ],
-      "territory": { "id": "T107-1", "order": 10 },
+      "territory": { "territoryId": "T107-1", "order": 10 },
       "tags": [],
       "text": "in­quisitores heretice pravitatis in Lombardia et Marchia Ianuensi",
       "actants": [
         {
           "id": "91dd75e8-df33-4dc8-9525-7718fc6da83f",
-          "actant": "R0006_P0092",
+          "entityId": "R0006_P0092",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -150631,7 +150631,7 @@
         },
         {
           "id": "e511dfc2-0c99-4992-9391-7f614877410a",
-          "actant": "R0010_C0316",
+          "entityId": "R0010_C0316",
           "position": "a1",
           "elvl": "1",
           "logic": "1",
@@ -150644,7 +150644,7 @@
         },
         {
           "id": "907fe97f-8fb7-4ef1-985f-d0e558c03c41",
-          "actant": "R0010_C0072",
+          "entityId": "R0010_C0072",
           "position": "a2",
           "elvl": "1",
           "logic": "1",
@@ -150737,7 +150737,7 @@
       "actions": [
         {
           "id": "98cb8708-0a59-4a27-9629-9ddfa518cfdb",
-          "action": "A0093",
+          "actionId": "A0093",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -150749,13 +150749,13 @@
           "props": []
         }
       ],
-      "territory": { "id": "T107-1", "order": 11 },
+      "territory": { "territoryId": "T107-1", "order": 11 },
       "tags": [],
       "text": "in­quisitores heretice pravitatis in Lombardia et Marchia Ianuensi",
       "actants": [
         {
           "id": "b0af050a-087a-4197-93d1-84d85c1e1130",
-          "actant": "R0006_P0183",
+          "entityId": "R0006_P0183",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -150768,7 +150768,7 @@
         },
         {
           "id": "4899b72e-2c98-4d20-91bc-aafe23607226",
-          "actant": "R0010_C0316",
+          "entityId": "R0010_C0316",
           "position": "a1",
           "elvl": "1",
           "logic": "1",
@@ -150781,7 +150781,7 @@
         },
         {
           "id": "465f4bc7-8def-41c2-a6cd-c8fe19f79db4",
-          "actant": "R0010_C0072",
+          "entityId": "R0010_C0072",
           "position": "a2",
           "elvl": "1",
           "logic": "1",
@@ -150847,7 +150847,7 @@
       "actions": [
         {
           "id": "5b565986-01a2-4b9a-8b5d-5c7acec61761",
-          "action": "A0172",
+          "actionId": "A0172",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -150859,13 +150859,13 @@
           "props": []
         }
       ],
-      "territory": { "id": "T107-1", "order": 12 },
+      "territory": { "territoryId": "T107-1", "order": 12 },
       "tags": [],
       "text": "quod quedam persone tam mares quam femine que alias tanquam suspecte de heresi",
       "actants": [
         {
           "id": "bd737854-9175-4fbc-99d2-13e044496d8f",
-          "actant": "R0009_G0007",
+          "entityId": "R0009_G0007",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -150878,7 +150878,7 @@
         },
         {
           "id": "e08ba32d-1f0e-43de-9727-26709d97b72e",
-          "actant": "R0009_G0008",
+          "entityId": "R0009_G0008",
           "position": "a1",
           "elvl": "1",
           "logic": "1",
@@ -150891,7 +150891,7 @@
         },
         {
           "id": "0b2f8716-0e5a-4f98-b6ab-62cb7542670d",
-          "actant": "R0010_C0001",
+          "entityId": "R0010_C0001",
           "position": "a2",
           "elvl": "1",
           "logic": "1",
@@ -150957,7 +150957,7 @@
       "actions": [
         {
           "id": "56be016d-9e51-4e72-b470-96d600c2d53d",
-          "action": "A0173",
+          "actionId": "A0173",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -150969,13 +150969,13 @@
           "props": []
         }
       ],
-      "territory": { "id": "T107-1", "order": 13 },
+      "territory": { "territoryId": "T107-1", "order": 13 },
       "tags": [],
       "text": "et infamate",
       "actants": [
         {
           "id": "1ad7bfce-458b-4fd8-984d-44a8dc1003ba",
-          "actant": "R0009_G0007",
+          "entityId": "R0009_G0007",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -150988,7 +150988,7 @@
         },
         {
           "id": "82f8e05c-2955-4c40-a0ca-9ed5f5a368fd",
-          "actant": "R0009_G0008",
+          "entityId": "R0009_G0008",
           "position": "a1",
           "elvl": "1",
           "logic": "1",
@@ -151001,7 +151001,7 @@
         },
         {
           "id": "b464e148-391b-4274-8df0-90cf9b250d7b",
-          "actant": "R0010_C0001",
+          "entityId": "R0010_C0001",
           "position": "a2",
           "elvl": "1",
           "logic": "1",
@@ -151067,7 +151067,7 @@
       "actions": [
         {
           "id": "5422a191-b48e-4abf-a43d-5cbea587b4cc",
-          "action": "A0120",
+          "actionId": "A0120",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -151079,13 +151079,13 @@
           "props": []
         }
       ],
-      "territory": { "id": "T107-1", "order": 14 },
+      "territory": { "territoryId": "T107-1", "order": 14 },
       "tags": [],
       "text": "citate fuerant per diversos inquisitores",
       "actants": [
         {
           "id": "ef78bd10-0f5a-458a-ad6d-698f9a9e4595",
-          "actant": "R0009_G0007",
+          "entityId": "R0009_G0007",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -151098,7 +151098,7 @@
         },
         {
           "id": "14d13aa8-d368-4b14-a73c-d857e5d57cee",
-          "actant": "R0009_G0008",
+          "entityId": "R0009_G0008",
           "position": "a1",
           "elvl": "1",
           "logic": "1",
@@ -151111,7 +151111,7 @@
         },
         {
           "id": "1e6f0c10-6026-4a10-94f9-4bf1e32eff2a",
-          "actant": "T107-1-00-010",
+          "entityId": "T107-1-00-010",
           "position": "a2",
           "elvl": "1",
           "logic": "1",
@@ -151124,7 +151124,7 @@
         },
         {
           "id": "cabbdeb7-e3a1-409c-bd94-1604fd1b655d",
-          "actant": "T107-1-00-011",
+          "entityId": "T107-1-00-011",
           "position": "a2",
           "elvl": "1",
           "logic": "1",
@@ -151190,7 +151190,7 @@
       "actions": [
         {
           "id": "b4d471f0-bf39-4083-bd5b-360ea817ac9a",
-          "action": "A0018",
+          "actionId": "A0018",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -151202,13 +151202,13 @@
           "props": []
         }
       ],
-      "territory": { "id": "T107-1", "order": 15 },
+      "territory": { "territoryId": "T107-1", "order": 15 },
       "tags": [],
       "text": "et abiuraverunt omnem heresim coram eis",
       "actants": [
         {
           "id": "d1aa742c-3118-4bc8-9343-b48ad83a4f1d",
-          "actant": "R0009_G0007",
+          "entityId": "R0009_G0007",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -151221,7 +151221,7 @@
         },
         {
           "id": "6c4fec55-5c76-4a88-af79-56f356d0e246",
-          "actant": "R0009_G0008",
+          "entityId": "R0009_G0008",
           "position": "a1",
           "elvl": "1",
           "logic": "1",
@@ -151234,7 +151234,7 @@
         },
         {
           "id": "336932d0-89c5-4f96-a7af-e10de5dde2cc",
-          "actant": "R0010_C0001",
+          "entityId": "R0010_C0001",
           "position": "a2",
           "elvl": "1",
           "logic": "1",
@@ -151300,7 +151300,7 @@
       "actions": [
         {
           "id": "f23a3af8-9c66-410f-9677-08f40189a038",
-          "action": "A0174",
+          "actionId": "A0174",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -151312,13 +151312,13 @@
           "props": []
         }
       ],
-      "territory": { "id": "T107-1", "order": 16 },
+      "territory": { "territoryId": "T107-1", "order": 16 },
       "tags": [],
       "text": "post dictas abiurationes longo tempore fecerunt oculta con­venticula et congregationes multarum personarum tam masculorum quam feminarum",
       "actants": [
         {
           "id": "27c7c3b7-3d13-410c-97e8-f0c18e698752",
-          "actant": "R0009_G0007",
+          "entityId": "R0009_G0007",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -151384,7 +151384,7 @@
       "actions": [
         {
           "id": "f005c73f-d584-432f-90a6-a5aaa1a374f9",
-          "action": "A0175",
+          "actionId": "A0175",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -151396,13 +151396,13 @@
           "props": []
         }
       ],
-      "territory": { "id": "T107-1", "order": 17 },
+      "territory": { "territoryId": "T107-1", "order": 17 },
       "tags": [],
       "text": "et etiam predicationes",
       "actants": [
         {
           "id": "bb00586e-4f9e-4511-9169-6d740c10af2c",
-          "actant": "R0009_G0007",
+          "entityId": "R0009_G0007",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -151468,7 +151468,7 @@
       "actions": [
         {
           "id": "6fae5ea2-8af8-499b-97d2-122db22a0c61",
-          "action": "A0167",
+          "actionId": "A0167",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -151480,13 +151480,13 @@
           "props": []
         }
       ],
-      "territory": { "id": "T107-1", "order": 18 },
+      "territory": { "territoryId": "T107-1", "order": 18 },
       "tags": [],
       "text": "in­quisitionem contra eos facere incepimus",
       "actants": [
         {
           "id": "d55b9e89-6578-4bef-bf84-b8dc09aeb5b8",
-          "actant": "R0006_P0092",
+          "entityId": "R0006_P0092",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -151499,7 +151499,7 @@
         },
         {
           "id": "13142bdc-3317-47c4-82d5-1b91e608cbc2",
-          "actant": "R0006_P0183",
+          "entityId": "R0006_P0183",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -151512,7 +151512,7 @@
         },
         {
           "id": "8c24d673-0d7a-4816-babc-a7219f032fae",
-          "actant": "R0009_G0007",
+          "entityId": "R0009_G0007",
           "position": "a1",
           "elvl": "1",
           "logic": "1",
@@ -151525,7 +151525,7 @@
         },
         {
           "id": "9d9eac59-d664-4e2c-9944-2b08765c8f2f",
-          "actant": "T107-1-00-010\n#T107-1-00-011\n#T107-1-00-012\n#T107-1-00-013\n#T107-1-00-014\n#T107-1-00-015",
+          "entityId": "T107-1-00-010\n#T107-1-00-011\n#T107-1-00-012\n#T107-1-00-013\n#T107-1-00-014\n#T107-1-00-015",
           "position": "a2",
           "elvl": "1",
           "logic": "1",
@@ -151591,7 +151591,7 @@
       "actions": [
         {
           "id": "b3ac60c2-db74-40c6-a182-04bfad1a39b2",
-          "action": "A0164",
+          "actionId": "A0164",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -151603,13 +151603,13 @@
           "props": []
         }
       ],
-      "territory": { "id": "T107-1-01", "order": 19 },
+      "territory": { "territoryId": "T107-1-01", "order": 19 },
       "tags": [],
       "text": "",
       "actants": [
         {
           "id": "755f7fbc-32b6-431d-ac99-8ce3afc1f562",
-          "actant": "R0006_P0216",
+          "entityId": "R0006_P0216",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -151622,7 +151622,7 @@
         },
         {
           "id": "2000b1e8-2241-431a-aa66-9841fc0d3b58",
-          "actant": "T107-1-01",
+          "entityId": "T107-1-01",
           "position": "a1",
           "elvl": "1",
           "logic": "1",
@@ -151688,7 +151688,7 @@
       "actions": [
         {
           "id": "ff857bbc-bcb0-4f45-9afa-58a1fa4b1961",
-          "action": "A0055",
+          "actionId": "A0055",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -151700,13 +151700,13 @@
           "props": []
         }
       ],
-      "territory": { "id": "T107-1-01", "order": 20 },
+      "territory": { "territoryId": "T107-1-01", "order": 20 },
       "tags": [],
       "text": "",
       "actants": [
         {
           "id": "cfdccc05-5e25-4d6e-a5c9-3177f335d2a9",
-          "actant": "R0006_P0092",
+          "entityId": "R0006_P0092",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -151719,7 +151719,7 @@
         },
         {
           "id": "74e74e78-33fa-4cd4-8d3e-e09132f6a7a3",
-          "actant": "T107-1-01",
+          "entityId": "T107-1-01",
           "position": "a1",
           "elvl": "1",
           "logic": "1",
@@ -151785,7 +151785,7 @@
       "actions": [
         {
           "id": "d0adcf3a-61a9-4bdb-ae35-edda9823e436",
-          "action": "A0093",
+          "actionId": "A0093",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -151797,13 +151797,13 @@
           "props": []
         }
       ],
-      "territory": { "id": "T107-1-01", "order": 21 },
+      "territory": { "territoryId": "T107-1-01", "order": 21 },
       "tags": [],
       "text": "Abiuratio et obligatio Andree Saramite",
       "actants": [
         {
           "id": "ca7a7911-55ff-4f34-830e-53837d18fed8",
-          "actant": "T107-1-01",
+          "entityId": "T107-1-01",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -151816,7 +151816,7 @@
         },
         {
           "id": "1cd902c3-eb18-4b1b-a575-a71d9984d8b8",
-          "actant": "R0010_C0335",
+          "entityId": "R0010_C0335",
           "position": "a1",
           "elvl": "1",
           "logic": "1",
@@ -151829,7 +151829,7 @@
         },
         {
           "id": "7f908d6e-6197-42dc-8b09-6ac1049fd7e2",
-          "actant": "R0010_C0076",
+          "entityId": "R0010_C0076",
           "position": "a2",
           "elvl": "1",
           "logic": "1",
@@ -151842,7 +151842,7 @@
         },
         {
           "id": "a7c405d6-293d-4d74-ad90-a73a6a92495b",
-          "actant": "R0010_C0077",
+          "entityId": "R0010_C0077",
           "position": "a2",
           "elvl": "1",
           "logic": "1",
@@ -151908,7 +151908,7 @@
       "actions": [
         {
           "id": "a558deb4-8219-4562-8d0c-66c61dffbb1e",
-          "action": "A0093",
+          "actionId": "A0093",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -151920,13 +151920,13 @@
           "props": []
         }
       ],
-      "territory": { "id": "T107-1-01", "order": 22 },
+      "territory": { "territoryId": "T107-1-01", "order": 22 },
       "tags": [],
       "text": "Andreas filius quondam Girardi Saramite",
       "actants": [
         {
           "id": "dd90a419-3e9c-4791-91f6-9a94f4737460",
-          "actant": "R0006_P0086",
+          "entityId": "R0006_P0086",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -151939,7 +151939,7 @@
         },
         {
           "id": "1fa5cc13-0c62-44a6-a2db-a552c04f9982",
-          "actant": "R0010_C0288",
+          "entityId": "R0010_C0288",
           "position": "a1",
           "elvl": "1",
           "logic": "1",
@@ -151952,7 +151952,7 @@
         },
         {
           "id": "24b64069-2cc3-432d-a588-a6dfb0c89c5c",
-          "actant": "R0006_P0216",
+          "entityId": "R0006_P0216",
           "position": "a2",
           "elvl": "1",
           "logic": "1",
@@ -152018,7 +152018,7 @@
       "actions": [
         {
           "id": "5c5b99d9-136e-4a40-b29f-646cca14185e",
-          "action": "A0108",
+          "actionId": "A0108",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -152030,13 +152030,13 @@
           "props": []
         }
       ],
-      "territory": { "id": "T107-1-01", "order": 23 },
+      "territory": { "territoryId": "T107-1-01", "order": 23 },
       "tags": [],
       "text": "quondam",
       "actants": [
         {
           "id": "3607ff10-95df-4f19-bfa1-382905eb7600",
-          "actant": "R0006_P0086",
+          "entityId": "R0006_P0086",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -152049,7 +152049,7 @@
         },
         {
           "id": "2766772e-fe8e-4817-accf-79ad95efaf97",
-          "actant": "NA",
+          "entityId": "NA",
           "position": "a1",
           "elvl": "1",
           "logic": "1",
@@ -152062,7 +152062,7 @@
         },
         {
           "id": "3545e289-65d0-47d9-b7f8-efcce46d63e9",
-          "actant": "NA",
+          "entityId": "NA",
           "position": "a2",
           "elvl": "1",
           "logic": "1",
@@ -152128,7 +152128,7 @@
       "actions": [
         {
           "id": "4724065c-db24-456b-8c36-1615d4375c56",
-          "action": "A0093",
+          "actionId": "A0093",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -152140,13 +152140,13 @@
           "props": []
         }
       ],
-      "territory": { "id": "T107-1-01", "order": 24 },
+      "territory": { "territoryId": "T107-1-01", "order": 24 },
       "tags": [],
       "text": "civitatis Mediolani burgi Porte Cumane foris",
       "actants": [
         {
           "id": "491b2d8c-6b24-4843-8289-42bceb9090f3",
-          "actant": "R0006_P0216",
+          "entityId": "R0006_P0216",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -152159,7 +152159,7 @@
         },
         {
           "id": "14bac33d-4d38-498d-a901-ef3ba7250576",
-          "actant": "R0010_C0398",
+          "entityId": "R0010_C0398",
           "position": "a1",
           "elvl": "1",
           "logic": "1",
@@ -152172,7 +152172,7 @@
         },
         {
           "id": "f9309ac2-6ce6-452b-b9d7-593d474c29ee",
-          "actant": "R0007_L0035",
+          "entityId": "R0007_L0035",
           "position": "a2",
           "elvl": "1",
           "logic": "1",
@@ -152238,7 +152238,7 @@
       "actions": [
         {
           "id": "cf5cb95e-19ac-4349-ba89-eb1bc9969c31",
-          "action": "A0120",
+          "actionId": "A0120",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -152250,13 +152250,13 @@
           "props": []
         }
       ],
-      "territory": { "id": "T107-1-01", "order": 25 },
+      "territory": { "territoryId": "T107-1-01", "order": 25 },
       "tags": [],
       "text": "citatus et requisitus per Balgarrum de Mon­teorfano",
       "actants": [
         {
           "id": "1aa48456-d0ea-4b3c-a277-4ed3d254b27b",
-          "actant": "R0006_P0216",
+          "entityId": "R0006_P0216",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -152269,7 +152269,7 @@
         },
         {
           "id": "7a9b2dc8-56d5-4533-a220-dda6e4168192",
-          "actant": "R0006_P0029",
+          "entityId": "R0006_P0029",
           "position": "a1",
           "elvl": "1",
           "logic": "1",
@@ -152335,7 +152335,7 @@
       "actions": [
         {
           "id": "e31c4e34-573a-4ccb-a98d-367b989a445b",
-          "action": "A0093",
+          "actionId": "A0093",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -152347,13 +152347,13 @@
           "props": []
         }
       ],
-      "territory": { "id": "T107-1-01", "order": 26 },
+      "territory": { "territoryId": "T107-1-01", "order": 26 },
       "tags": [],
       "text": "servitorem communis Mediolani et officii inquisitionis hereti­ce pravitatis",
       "actants": [
         {
           "id": "45e6aa1e-e9c4-4b8f-b939-61c8d554d678",
-          "actant": "R0010_C0070",
+          "entityId": "R0010_C0070",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -152366,7 +152366,7 @@
         },
         {
           "id": "39792a25-6926-4c59-9fa2-b1f8d042c362",
-          "actant": "R0010_C0297",
+          "entityId": "R0010_C0297",
           "position": "a1",
           "elvl": "1",
           "logic": "1",
@@ -152379,7 +152379,7 @@
         },
         {
           "id": "3d76e4a2-d751-47f9-9dfc-150fd44b1f4e",
-          "actant": "R0006_P0029",
+          "entityId": "R0006_P0029",
           "position": "a2",
           "elvl": "1",
           "logic": "1",
@@ -152445,7 +152445,7 @@
       "actions": [
         {
           "id": "ff7bf78b-77f7-43b8-a09c-292ff24ed323",
-          "action": "A0157",
+          "actionId": "A0157",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -152457,13 +152457,13 @@
           "props": []
         }
       ],
-      "territory": { "id": "T107-1-01", "order": 27 },
+      "territory": { "territoryId": "T107-1-01", "order": 27 },
       "tags": [],
       "text": "de mandato fratris Guidonis de Cochenato",
       "actants": [
         {
           "id": "501d2739-39c9-40c6-bd40-e634277d321b",
-          "actant": "R0006_P0092",
+          "entityId": "R0006_P0092",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -152476,7 +152476,7 @@
         },
         {
           "id": "8be8bc30-a4ed-4077-a1c5-53482c7c83dd",
-          "actant": "R0006_P0029",
+          "entityId": "R0006_P0029",
           "position": "a1",
           "elvl": "1",
           "logic": "1",
@@ -152489,7 +152489,7 @@
         },
         {
           "id": "d0294395-d6d1-4636-87aa-1b8843f770a0",
-          "actant": "T107-1-01-005",
+          "entityId": "T107-1-01-005",
           "position": "a2",
           "elvl": "1",
           "logic": "1",
@@ -152555,7 +152555,7 @@
       "actions": [
         {
           "id": "801224c8-3386-4f17-ad40-1808ab76c255",
-          "action": "A0121",
+          "actionId": "A0121",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -152567,13 +152567,13 @@
           "props": []
         }
       ],
-      "territory": { "id": "T107-1-01", "order": 28 },
+      "territory": { "territoryId": "T107-1-01", "order": 28 },
       "tags": [],
       "text": "comparuit coram suprascripto fratre Guidone inquisitore",
       "actants": [
         {
           "id": "241ab802-46a7-4277-983d-286088e4758b",
-          "actant": "R0006_P0216",
+          "entityId": "R0006_P0216",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -152586,7 +152586,7 @@
         },
         {
           "id": "469a4507-44d2-40e1-8dc6-3c556e1bf991",
-          "actant": "R0006_P0092",
+          "entityId": "R0006_P0092",
           "position": "a1",
           "elvl": "1",
           "logic": "1",
@@ -152652,7 +152652,7 @@
       "actions": [
         {
           "id": "4c434fde-c3d4-4f97-a14b-ba49b00df50c",
-          "action": "A0018",
+          "actionId": "A0018",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -152664,13 +152664,13 @@
           "props": []
         }
       ],
-      "territory": { "id": "T107-1-01", "order": 29 },
+      "territory": { "territoryId": "T107-1-01", "order": 29 },
       "tags": [],
       "text": "et abiuravit omnem heresim, cre­dentiam, receptationem et defensionem et favorem heretice pravitatis cuiuscumque secte",
       "actants": [
         {
           "id": "3ffc4e1f-17d8-4013-9c82-c9b70d5f7493",
-          "actant": "R0006_P0216",
+          "entityId": "R0006_P0216",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -152683,7 +152683,7 @@
         },
         {
           "id": "395ee942-54ee-4bf6-a157-3b49ec50ee28",
-          "actant": "R0006_P0092",
+          "entityId": "R0006_P0092",
           "position": "a1",
           "elvl": "1",
           "logic": "1",
@@ -152696,7 +152696,7 @@
         },
         {
           "id": "62de33f6-5b4c-41a0-b3a1-e9c628139f61",
-          "actant": "R0010_C0001",
+          "entityId": "R0010_C0001",
           "position": "a2",
           "elvl": "1",
           "logic": "1",
@@ -152762,7 +152762,7 @@
       "actions": [
         {
           "id": "03a43e07-a98c-4b35-a626-1611ebb55783",
-          "action": "A0176",
+          "actionId": "A0176",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -152774,13 +152774,13 @@
           "props": []
         }
       ],
-      "territory": { "id": "T107-1-01", "order": 30 },
+      "territory": { "territoryId": "T107-1-01", "order": 30 },
       "tags": [],
       "text": "Iuravit quoque manutenere fidem catholicam et ipsam fidem et catholicos defendere suo posse",
       "actants": [
         {
           "id": "4894865c-b09e-4083-8d0f-2ed69caa71c3",
-          "actant": "R0006_P0216",
+          "entityId": "R0006_P0216",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -152793,7 +152793,7 @@
         },
         {
           "id": "d2f7bbd1-b149-47c9-8a90-12a0555ddcd2",
-          "actant": "R0006_P0092",
+          "entityId": "R0006_P0092",
           "position": "a1",
           "elvl": "1",
           "logic": "1",
@@ -152806,7 +152806,7 @@
         },
         {
           "id": "5125996e-f462-447f-bd97-d8426aea7878",
-          "actant": "R0010_C0066",
+          "entityId": "R0010_C0066",
           "position": "a2",
           "elvl": "1",
           "logic": "1",
@@ -152872,7 +152872,7 @@
       "actions": [
         {
           "id": "ca7f5f0c-7464-43d2-8d59-a33ded0b53e5",
-          "action": "A0176",
+          "actionId": "A0176",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -152884,13 +152884,13 @@
           "props": []
         }
       ],
-      "territory": { "id": "T107-1-01", "order": 31 },
+      "territory": { "territoryId": "T107-1-01", "order": 31 },
       "tags": [],
       "text": "ac persequi hereticos et credentes, fautores et defensores eorum",
       "actants": [
         {
           "id": "26323d16-3a2f-487d-b16c-6e85f263ef40",
-          "actant": "R0006_P0216",
+          "entityId": "R0006_P0216",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -152903,7 +152903,7 @@
         },
         {
           "id": "e5dcf8b4-7d91-493f-a029-9e5ff6175ad1",
-          "actant": "R0006_P0092",
+          "entityId": "R0006_P0092",
           "position": "a1",
           "elvl": "1",
           "logic": "1",
@@ -152916,7 +152916,7 @@
         },
         {
           "id": "ea4e34bc-9697-47e4-ba55-c00dc19ab99f",
-          "actant": "R0010_C0067",
+          "entityId": "R0010_C0067",
           "position": "a2",
           "elvl": "1",
           "logic": "1",
@@ -152982,7 +152982,7 @@
       "actions": [
         {
           "id": "5744548b-7626-4bdf-91b8-5c9f4c78e597",
-          "action": "A0176",
+          "actionId": "A0176",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -152994,13 +152994,13 @@
           "props": []
         }
       ],
-      "territory": { "id": "T107-1-01", "order": 32 },
+      "territory": { "territoryId": "T107-1-01", "order": 32 },
       "tags": [],
       "text": "insuper dicere veritatem de se et de aliis tam vivis quam defunctis",
       "actants": [
         {
           "id": "91626771-886f-4187-ad6a-2b79ff3e10e6",
-          "actant": "R0006_P0216",
+          "entityId": "R0006_P0216",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -153013,7 +153013,7 @@
         },
         {
           "id": "a1f06a54-d2f8-4668-8619-bc77f3a9b6bd",
-          "actant": "R0006_P0092",
+          "entityId": "R0006_P0092",
           "position": "a1",
           "elvl": "1",
           "logic": "1",
@@ -153026,7 +153026,7 @@
         },
         {
           "id": "cbca4cb3-812e-411c-828f-ea9674b92750",
-          "actant": "R0010_C0068",
+          "entityId": "R0010_C0068",
           "position": "a2",
           "elvl": "1",
           "logic": "1",
@@ -153092,7 +153092,7 @@
       "actions": [
         {
           "id": "725a01ca-57e5-4c5e-8804-42062b40afff",
-          "action": "A0122",
+          "actionId": "A0122",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -153104,13 +153104,13 @@
           "props": []
         }
       ],
-      "territory": { "id": "T107-1-01", "order": 33 },
+      "territory": { "territoryId": "T107-1-01", "order": 33 },
       "tags": [],
       "text": "... predictus Andreas obligavit se et omnia sua bona pignori, presentia et futura, predicto inquisitori ...",
       "actants": [
         {
           "id": "c24b827d-53f1-41a4-8f64-23fc9f358f0b",
-          "actant": "R0006_P0216",
+          "entityId": "R0006_P0216",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -153123,7 +153123,7 @@
         },
         {
           "id": "042414eb-9898-472c-acc2-6d6363fbdafc",
-          "actant": "R0006_P0092",
+          "entityId": "R0006_P0092",
           "position": "a1",
           "elvl": "1",
           "logic": "1",
@@ -153136,7 +153136,7 @@
         },
         {
           "id": "c685b695-1220-4d48-9a95-8b7b2e747d47",
-          "actant": "R0010_C0038",
+          "entityId": "R0010_C0038",
           "position": "a2",
           "elvl": "1",
           "logic": "1",
@@ -153149,7 +153149,7 @@
         },
         {
           "id": "72250e09-9356-42a9-a977-efd11282d04f",
-          "actant": "R0010_C0069",
+          "entityId": "R0010_C0069",
           "position": "a2",
           "elvl": "1",
           "logic": "1",
@@ -153215,7 +153215,7 @@
       "actions": [
         {
           "id": "c26df08f-4e57-4f8b-ada7-61490aa05d6d",
-          "action": "A0179",
+          "actionId": "A0179",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -153227,13 +153227,13 @@
           "props": []
         }
       ],
-      "territory": { "id": "T107-1-01", "order": 34 },
+      "territory": { "territoryId": "T107-1-01", "order": 34 },
       "tags": [],
       "text": "Actum Mediolani in domo fratrum Predicatorum, in camera ubi fit officium inquisitionis heretice pravitatis, coram suprascripto fratre Gui­done inquisitore",
       "actants": [
         {
           "id": "6c4721ef-4559-48de-840b-ba9798e45bd3",
-          "actant": "T107-1-01",
+          "entityId": "T107-1-01",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -153246,7 +153246,7 @@
         },
         {
           "id": "2a56e62b-9642-4651-9c56-e55eb1fdd411",
-          "actant": "R0006_P0092",
+          "entityId": "R0006_P0092",
           "position": "a1",
           "elvl": "1",
           "logic": "1",
@@ -153312,7 +153312,7 @@
       "actions": [
         {
           "id": "1f2fee1a-041c-4c1e-9fd4-6ec6249e0dea",
-          "action": "A0086",
+          "actionId": "A0086",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -153324,13 +153324,13 @@
           "props": []
         }
       ],
-      "territory": { "id": "T107-1-01", "order": 35 },
+      "territory": { "territoryId": "T107-1-01", "order": 35 },
       "tags": [],
       "text": "Interfuerunt ibi testes, vocati et rogati, frater Petrus de Marcellinis et frater Guillelmus de Carcano et frater Anselminus de Ca­stano, omnes ordinis fratrum Predicatorum",
       "actants": [
         {
           "id": "c9c1ece6-1c68-4c8c-a16e-cb4aecbbfda6",
-          "actant": "R0006_P0174",
+          "entityId": "R0006_P0174",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -153343,7 +153343,7 @@
         },
         {
           "id": "0bfa21ea-e341-49ab-9b89-8db48306901a",
-          "actant": "R0006_P0097",
+          "entityId": "R0006_P0097",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -153356,7 +153356,7 @@
         },
         {
           "id": "9d3af5c9-a516-478a-a5e1-4431f1998109",
-          "actant": "R0006_P0020",
+          "entityId": "R0006_P0020",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -153369,7 +153369,7 @@
         },
         {
           "id": "a98521e4-6090-4b6b-a318-abe845fb3b32",
-          "actant": "T107-1-01",
+          "entityId": "T107-1-01",
           "position": "a1",
           "elvl": "1",
           "logic": "1",
@@ -153435,7 +153435,7 @@
       "actions": [
         {
           "id": "e34ec5d4-941c-4b46-b012-aa5ff054dfb6",
-          "action": "A0181",
+          "actionId": "A0181",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -153447,13 +153447,13 @@
           "props": []
         }
       ],
-      "territory": { "id": "T107-1-01", "order": 36 },
+      "territory": { "territoryId": "T107-1-01", "order": 36 },
       "tags": [],
       "text": "Traditum per Beltramum Salvagnium, communis Mediolani, Porte Nove, notarium officii inquisitionis",
       "actants": [
         {
           "id": "528b13ac-5b24-4f0b-85da-5c891fc09583",
-          "actant": "T107-1-01",
+          "entityId": "T107-1-01",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -153466,7 +153466,7 @@
         },
         {
           "id": "c6a19a5f-24dd-4a6a-b7ab-94609ea58625",
-          "actant": "R0006_P0213",
+          "entityId": "R0006_P0213",
           "position": "a1",
           "elvl": "1",
           "logic": "1",
@@ -153532,7 +153532,7 @@
       "actions": [
         {
           "id": "0bb15a91-4219-4601-9a50-634ce1ed3e83",
-          "action": "A0093",
+          "actionId": "A0093",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -153544,13 +153544,13 @@
           "props": []
         }
       ],
-      "territory": { "id": "T107-1-01", "order": 37 },
+      "territory": { "territoryId": "T107-1-01", "order": 37 },
       "tags": [],
       "text": "communis Mediolani, Porte Nove",
       "actants": [
         {
           "id": "8944fedd-73fc-4103-866f-5a568604f5e8",
-          "actant": "R0006_P0213",
+          "entityId": "R0006_P0213",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -153563,7 +153563,7 @@
         },
         {
           "id": "82afc821-837c-4b38-a119-76ff84c9bcd5",
-          "actant": "R0010_C0398",
+          "entityId": "R0010_C0398",
           "position": "a1",
           "elvl": "1",
           "logic": "1",
@@ -153576,7 +153576,7 @@
         },
         {
           "id": "203946f1-be20-4c23-9b15-25a283e87006",
-          "actant": "R0007_L0036",
+          "entityId": "R0007_L0036",
           "position": "a2",
           "elvl": "1",
           "logic": "1",
@@ -153642,7 +153642,7 @@
       "actions": [
         {
           "id": "55716915-fb5c-4664-83a8-eeeb670eafd1",
-          "action": "A0093",
+          "actionId": "A0093",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -153654,13 +153654,13 @@
           "props": []
         }
       ],
-      "territory": { "id": "T107-1-02", "order": 38 },
+      "territory": { "territoryId": "T107-1-02", "order": 38 },
       "tags": [],
       "text": "Dictum suprascripti Andree",
       "actants": [
         {
           "id": "67bdc822-154f-44f0-90d9-3bf2c2733a6b",
-          "actant": "T107-1-02",
+          "entityId": "T107-1-02",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -153673,7 +153673,7 @@
         },
         {
           "id": "313b1813-bf2a-41fa-bea3-b4b64e0d062a",
-          "actant": "R0010_C0335",
+          "entityId": "R0010_C0335",
           "position": "a1",
           "elvl": "1",
           "logic": "1",
@@ -153686,7 +153686,7 @@
         },
         {
           "id": "122a1858-81f7-4a0f-b381-4b1c2a8019fc",
-          "actant": "R0010_C0073",
+          "entityId": "R0010_C0073",
           "position": "a2",
           "elvl": "1",
           "logic": "1",
@@ -153752,7 +153752,7 @@
       "actions": [
         {
           "id": "29373997-842f-4bc7-9e27-38c6ccaeedd0",
-          "action": "A0164",
+          "actionId": "A0164",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -153764,13 +153764,13 @@
           "props": []
         }
       ],
-      "territory": { "id": "T107-1-02", "order": 39 },
+      "territory": { "territoryId": "T107-1-02", "order": 39 },
       "tags": [],
       "text": "Dictum suprascripti Andree",
       "actants": [
         {
           "id": "0d5a6995-1c0c-4d50-bfe7-2ca3e50e4261",
-          "actant": "R0006_P0216",
+          "entityId": "R0006_P0216",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -153783,7 +153783,7 @@
         },
         {
           "id": "77db6c4b-2b7b-4e20-af76-fc8cc645d8fd",
-          "actant": "T107-1-02",
+          "entityId": "T107-1-02",
           "position": "a1",
           "elvl": "1",
           "logic": "1",
@@ -153849,7 +153849,7 @@
       "actions": [
         {
           "id": "c58e807b-7df5-4a5c-a70a-c851c511d596",
-          "action": "A0055",
+          "actionId": "A0055",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -153861,13 +153861,13 @@
           "props": []
         }
       ],
-      "territory": { "id": "T107-1-02", "order": 40 },
+      "territory": { "territoryId": "T107-1-02", "order": 40 },
       "tags": [],
       "text": "Interrogatus dictus Andreas Saramita a suprascripto fratre Gui­done inquisitore",
       "actants": [
         {
           "id": "56732bbd-1b0b-4045-bcf5-dcaab525635b",
-          "actant": "R0006_P0092",
+          "entityId": "R0006_P0092",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -153880,7 +153880,7 @@
         },
         {
           "id": "bc32aa16-4b13-44e0-be1d-a035ed6e5d0b",
-          "actant": "T107-1-02",
+          "entityId": "T107-1-02",
           "position": "a1",
           "elvl": "1",
           "logic": "1",
@@ -153946,7 +153946,7 @@
       "actions": [
         {
           "id": "4e246e1a-ad0c-4c8f-90b8-8abf084f0812",
-          "action": "A0126",
+          "actionId": "A0126",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -153958,13 +153958,13 @@
           "props": []
         }
       ],
-      "territory": { "id": "T107-1-02", "order": 41 },
+      "territory": { "territoryId": "T107-1-02", "order": 41 },
       "tags": [],
       "text": "Interrogatus dictus Andreas Saramita a suprascripto fratre Gui­done inquisitore",
       "actants": [
         {
           "id": "1057f135-bfd7-490f-accc-e4a2a79d7cb7",
-          "actant": "R0006_P0216",
+          "entityId": "R0006_P0216",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -153977,7 +153977,7 @@
         },
         {
           "id": "9407af91-6a2d-4835-8a25-56040dd414ea",
-          "actant": "R0006_P0092",
+          "entityId": "R0006_P0092",
           "position": "a1",
           "elvl": "1",
           "logic": "1",
@@ -153990,7 +153990,7 @@
         },
         {
           "id": "938a2710-338c-4f1d-b063-7ff853774099",
-          "actant": "T107-1-02-007",
+          "entityId": "T107-1-02-007",
           "position": "a2",
           "elvl": "1",
           "logic": "1",
@@ -154056,7 +154056,7 @@
       "actions": [
         {
           "id": "90128e0b-b9ea-4eac-81e3-5503d4f09f81",
-          "action": "A0098",
+          "actionId": "A0098",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -154068,13 +154068,13 @@
           "props": []
         }
       ],
-      "territory": { "id": "T107-1-02", "order": 42 },
+      "territory": { "territoryId": "T107-1-02", "order": 42 },
       "tags": [],
       "text": "sub debito prestiti iuramenti",
       "actants": [
         {
           "id": "259ac440-cdc7-4f22-95b9-b43bfb38962b",
-          "actant": "R0006_P0216",
+          "entityId": "R0006_P0216",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -154140,7 +154140,7 @@
       "actions": [
         {
           "id": "2e46cba8-8d40-4d77-9273-793ee0c879a1",
-          "action": "A0122",
+          "actionId": "A0122",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -154152,13 +154152,13 @@
           "props": []
         }
       ],
-      "territory": { "id": "T107-1-02", "order": 43 },
+      "territory": { "territoryId": "T107-1-02", "order": 43 },
       "tags": [],
       "text": "et penis quibus modo et alias teneatur et est inquisitionis officio obligatus",
       "actants": [
         {
           "id": "2e294926-c887-4138-9dce-f29a37637de0",
-          "actant": "R0006_P0216",
+          "entityId": "R0006_P0216",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -154171,7 +154171,7 @@
         },
         {
           "id": "22cba7b2-afd0-4777-976d-3206ff622d58",
-          "actant": "R0006_P0092",
+          "entityId": "R0006_P0092",
           "position": "a1",
           "elvl": "2",
           "logic": "1",
@@ -154184,7 +154184,7 @@
         },
         {
           "id": "19db9ad7-bb96-4ea6-9982-9eb17f4f4051",
-          "actant": "R0010_C0087",
+          "entityId": "R0010_C0087",
           "position": "a2",
           "elvl": "1",
           "logic": "1",
@@ -154250,7 +154250,7 @@
       "actions": [
         {
           "id": "5f358be7-6f3d-411e-ada5-8a90905555f9",
-          "action": "A0190 #A0222 #A0223",
+          "actionId": "A0190 #A0222 #A0223",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -154262,13 +154262,13 @@
           "props": []
         }
       ],
-      "territory": { "id": "T107-1-02", "order": 44 },
+      "territory": { "territoryId": "T107-1-02", "order": 44 },
       "tags": [],
       "text": "si unquam ha­buerat familiaritatem vel notitiam seu amicitiam alicuius heretici vel heretice alicuius secte veteris vel nove",
       "actants": [
         {
           "id": "79152ea3-159a-46c2-bc7d-50c808cc7c2f",
-          "actant": "R0006_P0216",
+          "entityId": "R0006_P0216",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -154281,7 +154281,7 @@
         },
         {
           "id": "edbfcc61-186e-4838-9d1e-02b1079edb78",
-          "actant": "R0010_C0208",
+          "entityId": "R0010_C0208",
           "position": "a1",
           "elvl": "1",
           "logic": "1",
@@ -154347,7 +154347,7 @@
       "actions": [
         {
           "id": "05b82709-47f0-4bd8-88b4-d1c4c97149bb",
-          "action": "A0080",
+          "actionId": "A0080",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -154359,13 +154359,13 @@
           "props": []
         }
       ],
-      "territory": { "id": "T107-1-02", "order": 45 },
+      "territory": { "territoryId": "T107-1-02", "order": 45 },
       "tags": [],
       "text": "respondit",
       "actants": [
         {
           "id": "d8ca093f-f1ed-4f75-8856-6bb6610fc646",
-          "actant": "R0006_P0216",
+          "entityId": "R0006_P0216",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -154378,7 +154378,7 @@
         },
         {
           "id": "cedbebae-e7a0-43bb-87e5-f7797fb0e233",
-          "actant": "R0006_P0092",
+          "entityId": "R0006_P0092",
           "position": "a1",
           "elvl": "1",
           "logic": "1",
@@ -154391,7 +154391,7 @@
         },
         {
           "id": "9cd3ce6a-261d-4c1a-9412-41fe833e6b29",
-          "actant": "T107-1-02-009",
+          "entityId": "T107-1-02-009",
           "position": "a2",
           "elvl": "1",
           "logic": "1",
@@ -154457,7 +154457,7 @@
       "actions": [
         {
           "id": "e9bafe76-6c10-44a5-a14c-1f53f8828f0a",
-          "action": "A0190 #A0222 #A0223",
+          "actionId": "A0190 #A0222 #A0223",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -154469,13 +154469,13 @@
           "props": []
         }
       ],
-      "territory": { "id": "T107-1-02", "order": 46 },
+      "territory": { "territoryId": "T107-1-02", "order": 46 },
       "tags": [],
       "text": "non",
       "actants": [
         {
           "id": "cff6bab9-981f-473d-932c-9d5e92023cd7",
-          "actant": "R0006_P0216",
+          "entityId": "R0006_P0216",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -154488,7 +154488,7 @@
         },
         {
           "id": "b0d0cd01-0c62-44cb-a6c7-2170d3e2eabc",
-          "actant": "R0010_C0208",
+          "entityId": "R0010_C0208",
           "position": "a1",
           "elvl": "1",
           "logic": "1",
@@ -154554,7 +154554,7 @@
       "actions": [
         {
           "id": "04c7bf0f-2fb0-469f-bd1c-b62b929244a1",
-          "action": "A0126",
+          "actionId": "A0126",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -154566,13 +154566,13 @@
           "props": []
         }
       ],
-      "territory": { "id": "T107-1-02", "order": 47 },
+      "territory": { "territoryId": "T107-1-02", "order": 47 },
       "tags": [],
       "text": "Interrogatus",
       "actants": [
         {
           "id": "90d153fa-875c-49ad-af62-a64594f0d9c4",
-          "actant": "R0006_P0216",
+          "entityId": "R0006_P0216",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -154585,7 +154585,7 @@
         },
         {
           "id": "ee621c12-a9f2-4050-aefb-28f08f7b20a1",
-          "actant": "R0006_P0092",
+          "entityId": "R0006_P0092",
           "position": "a1",
           "elvl": "1",
           "logic": "1",
@@ -154598,7 +154598,7 @@
         },
         {
           "id": "983bf198-9d9b-4a9a-aaac-38bbc11d3cd0",
-          "actant": "T107-1-02-011",
+          "entityId": "T107-1-02-011",
           "position": "a2",
           "elvl": "1",
           "logic": "1",
@@ -154664,7 +154664,7 @@
       "actions": [
         {
           "id": "9cb969a8-4dd7-4142-8229-33c2777abf17",
-          "action": "A0192",
+          "actionId": "A0192",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -154676,13 +154676,13 @@
           "props": []
         }
       ],
-      "territory": { "id": "T107-1-02", "order": 48 },
+      "territory": { "territoryId": "T107-1-02", "order": 48 },
       "tags": [],
       "text": "si aliquis de parentela sua tam ex parte patris \nquam ex parte matris fuerit hereticus vel heretica vel eorum credens",
       "actants": [
         {
           "id": "e3491d27-f3fb-4a6a-b77d-8051a05bab4d",
-          "actant": "R0009_G0009",
+          "entityId": "R0009_G0009",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -154695,7 +154695,7 @@
         },
         {
           "id": "a70809d4-0b0e-4de9-8cbb-9c02da691831",
-          "actant": "R0010_C0006",
+          "entityId": "R0010_C0006",
           "position": "a1",
           "elvl": "1",
           "logic": "1",
@@ -154708,7 +154708,7 @@
         },
         {
           "id": "703d8341-9306-4d35-8ec3-cd2c74c5641d",
-          "actant": "R0010_C0019",
+          "entityId": "R0010_C0019",
           "position": "a1",
           "elvl": "1",
           "logic": "1",
@@ -154774,7 +154774,7 @@
       "actions": [
         {
           "id": "4b6955da-7d67-4ecc-af01-19c3d4be3007",
-          "action": "A0080",
+          "actionId": "A0080",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -154786,13 +154786,13 @@
           "props": []
         }
       ],
-      "territory": { "id": "T107-1-02", "order": 49 },
+      "territory": { "territoryId": "T107-1-02", "order": 49 },
       "tags": [],
       "text": "respondit",
       "actants": [
         {
           "id": "7a693fcf-bc17-44cf-9a8c-55b1f12587e7",
-          "actant": "R0006_P0216",
+          "entityId": "R0006_P0216",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -154805,7 +154805,7 @@
         },
         {
           "id": "198ea339-ac92-4acb-9820-c464418d09d0",
-          "actant": "R0006_P0092",
+          "entityId": "R0006_P0092",
           "position": "a1",
           "elvl": "1",
           "logic": "1",
@@ -154818,7 +154818,7 @@
         },
         {
           "id": "fd287396-6ba9-44ec-aabf-ed91bd1d0f3a",
-          "actant": "T107-1-02-013",
+          "entityId": "T107-1-02-013",
           "position": "a2",
           "elvl": "1",
           "logic": "1",
@@ -154884,7 +154884,7 @@
       "actions": [
         {
           "id": "f477da3c-83b2-4974-8d97-a8a8adaaf4dc",
-          "action": "A0192",
+          "actionId": "A0192",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -154896,13 +154896,13 @@
           "props": []
         }
       ],
-      "territory": { "id": "T107-1-02", "order": 50 },
+      "territory": { "territoryId": "T107-1-02", "order": 50 },
       "tags": [],
       "text": "non",
       "actants": [
         {
           "id": "f440cb87-7537-44ed-b3bb-94235022588d",
-          "actant": "R0009_G0009",
+          "entityId": "R0009_G0009",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -154915,7 +154915,7 @@
         },
         {
           "id": "a2bab05c-2bba-400f-8882-679f44ed56d3",
-          "actant": "R0010_C0006",
+          "entityId": "R0010_C0006",
           "position": "a1",
           "elvl": "1",
           "logic": "1",
@@ -154928,7 +154928,7 @@
         },
         {
           "id": "74abb6e5-e364-4c67-b8cb-e24459ab0d4d",
-          "actant": "R0010_C0019",
+          "entityId": "R0010_C0019",
           "position": "a1",
           "elvl": "1",
           "logic": "1",
@@ -154994,7 +154994,7 @@
       "actions": [
         {
           "id": "e149762c-1cc9-4475-9965-e2da91e81c2f",
-          "action": "A0126",
+          "actionId": "A0126",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -155006,13 +155006,13 @@
           "props": []
         }
       ],
-      "territory": { "id": "T107-1-02", "order": 51 },
+      "territory": { "territoryId": "T107-1-02", "order": 51 },
       "tags": [],
       "text": "Interrogatus",
       "actants": [
         {
           "id": "44c78479-e3dc-473f-9747-7f852bed2d6e",
-          "actant": "R0006_P0216",
+          "entityId": "R0006_P0216",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -155025,7 +155025,7 @@
         },
         {
           "id": "6a8ca94c-e848-4e3b-b8e7-7bfdcebc0c3c",
-          "actant": "R0006_P0092",
+          "entityId": "R0006_P0092",
           "position": "a1",
           "elvl": "1",
           "logic": "1",
@@ -155038,7 +155038,7 @@
         },
         {
           "id": "a57057ba-1341-4de0-8609-69cda591142c",
-          "actant": "T107-1-02-015",
+          "entityId": "T107-1-02-015",
           "position": "a2",
           "elvl": "1",
           "logic": "1",
@@ -155104,7 +155104,7 @@
       "actions": [
         {
           "id": "d20b7198-ed50-4656-8ed4-7e26dda30a57",
-          "action": "A0162",
+          "actionId": "A0162",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -155116,13 +155116,13 @@
           "props": []
         }
       ],
-      "territory": { "id": "T107-1-02", "order": 52 },
+      "territory": { "territoryId": "T107-1-02", "order": 52 },
       "tags": [],
       "text": "si cognovit Guillelmam, sepultam apud monaste­rium Clarevalis, in vita illius Guillelme,",
       "actants": [
         {
           "id": "fa54a2ad-e77e-491c-9aa7-e7d3ab87a72a",
-          "actant": "R0006_P0216",
+          "entityId": "R0006_P0216",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -155135,7 +155135,7 @@
         },
         {
           "id": "de1a5674-6faa-46d4-91f9-cd19a3f9e7f4",
-          "actant": "R0006_P0218",
+          "entityId": "R0006_P0218",
           "position": "a1",
           "elvl": "1",
           "logic": "1",
@@ -155201,7 +155201,7 @@
       "actions": [
         {
           "id": "d76c3b3d-3f00-40b1-ba88-aa94d010815a",
-          "action": "A0108",
+          "actionId": "A0108",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -155213,13 +155213,13 @@
           "props": []
         }
       ],
-      "territory": { "id": "T107-1-02", "order": 53 },
+      "territory": { "territoryId": "T107-1-02", "order": 53 },
       "tags": [],
       "text": "sepultam",
       "actants": [
         {
           "id": "aa7d9aed-cc2b-4872-b053-4454a89da91c",
-          "actant": "R0006_P0218",
+          "entityId": "R0006_P0218",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -155285,7 +155285,7 @@
       "actions": [
         {
           "id": "c71126e2-80d3-4c96-9ef9-0c12a6f19330",
-          "action": "A0187",
+          "actionId": "A0187",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -155297,13 +155297,13 @@
           "props": []
         }
       ],
-      "territory": { "id": "T107-1-02", "order": 54 },
+      "territory": { "territoryId": "T107-1-02", "order": 54 },
       "tags": [],
       "text": "sepultam apud monaste­rium Clarevalis",
       "actants": [
         {
           "id": "6df8de18-416f-4e13-9332-30db260fcdf8",
-          "actant": "R0011_O0005",
+          "entityId": "R0011_O0005",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -155316,7 +155316,7 @@
         },
         {
           "id": "0815f695-3abb-4a69-8f89-c4676025ccc9",
-          "actant": "R0007_L0056",
+          "entityId": "R0007_L0056",
           "position": "a1",
           "elvl": "1",
           "logic": "1",
@@ -155382,7 +155382,7 @@
       "actions": [
         {
           "id": "b5fcf1c0-fac3-4564-9bca-87a92aa2e77a",
-          "action": "A0080",
+          "actionId": "A0080",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -155394,13 +155394,13 @@
           "props": []
         }
       ],
-      "territory": { "id": "T107-1-02", "order": 55 },
+      "territory": { "territoryId": "T107-1-02", "order": 55 },
       "tags": [],
       "text": "respondit",
       "actants": [
         {
           "id": "097095d4-8f39-479d-8a6f-f377d16e8b73",
-          "actant": "R0006_P0216",
+          "entityId": "R0006_P0216",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -155413,7 +155413,7 @@
         },
         {
           "id": "dfa6759c-fdd0-4400-abe5-422062820ea4",
-          "actant": "R0006_P0092",
+          "entityId": "R0006_P0092",
           "position": "a1",
           "elvl": "1",
           "logic": "1",
@@ -155426,7 +155426,7 @@
         },
         {
           "id": "a978a602-b5c3-406f-ad75-8c8b4298397f",
-          "actant": "T107-1-02-017",
+          "entityId": "T107-1-02-017",
           "position": "a2",
           "elvl": "1",
           "logic": "1",
@@ -155492,7 +155492,7 @@
       "actions": [
         {
           "id": "fbf54964-5267-4099-87c0-49b228f282b1",
-          "action": "A0162",
+          "actionId": "A0162",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -155504,13 +155504,13 @@
           "props": []
         }
       ],
-      "territory": { "id": "T107-1-02", "order": 56 },
+      "territory": { "territoryId": "T107-1-02", "order": 56 },
       "tags": [],
       "text": "quod sic",
       "actants": [
         {
           "id": "8ccd0dce-59bd-44ef-846d-6918791c52b7",
-          "actant": "R0006_P0216",
+          "entityId": "R0006_P0216",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -155523,7 +155523,7 @@
         },
         {
           "id": "e00b2f48-2b8f-4a4b-bcaa-0ec29d95e9f5",
-          "actant": "R0006_P0218",
+          "entityId": "R0006_P0218",
           "position": "a1",
           "elvl": "1",
           "logic": "1",
@@ -155589,7 +155589,7 @@
       "actions": [
         {
           "id": "2ae5e510-3217-4537-903c-35db161361a7",
-          "action": "A0032",
+          "actionId": "A0032",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -155601,13 +155601,13 @@
           "props": []
         }
       ],
-      "territory": { "id": "T107-1-02", "order": 57 },
+      "territory": { "territoryId": "T107-1-02", "order": 57 },
       "tags": [],
       "text": "et invenit quod ita erat",
       "actants": [
         {
           "id": "3e272d96-0e54-480a-9cd3-4c1cd8a962df",
-          "actant": "R0006_P0216",
+          "entityId": "R0006_P0216",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -155620,7 +155620,7 @@
         },
         {
           "id": "1ae39ff5-8fde-4d63-a719-f036363ec8a9",
-          "actant": "T107-1-02-017.6",
+          "entityId": "T107-1-02-017.6",
           "position": "a1",
           "elvl": "1",
           "logic": "1",
@@ -155686,7 +155686,7 @@
       "actions": [
         {
           "id": "a4b4cd86-c5d1-487e-84d0-ef45b9c13fd1",
-          "action": "A0106",
+          "actionId": "A0106",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -155698,13 +155698,13 @@
           "props": []
         }
       ],
-      "territory": { "id": "T107-1-02", "order": 58 },
+      "territory": { "territoryId": "T107-1-02", "order": 58 },
       "tags": [],
       "text": "quod fuit filia quondam regis Boemie, ut dicebatur",
       "actants": [
         {
           "id": "0630ff28-6181-4b54-ae72-07478064df77",
-          "actant": "R0006_P0218",
+          "entityId": "R0006_P0218",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -155717,7 +155717,7 @@
         },
         {
           "id": "9a01c5f3-cb73-4fc8-9bc6-dd2f679f6be2",
-          "actant": "R0006_P0222",
+          "entityId": "R0006_P0222",
           "position": "a1",
           "elvl": "1",
           "logic": "1",
@@ -155785,7 +155785,7 @@
       "actions": [
         {
           "id": "16e9d0f8-60df-4b78-a76b-818faf37f8a0",
-          "action": "A0146",
+          "actionId": "A0146",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -155824,13 +155824,13 @@
           ]
         }
       ],
-      "territory": { "id": "T107-1-02", "order": 59 },
+      "territory": { "territoryId": "T107-1-02", "order": 59 },
       "tags": [],
       "text": "ipse Andreas ivit usque ad regem Boemie",
       "actants": [
         {
           "id": "09dbcb69-d403-4da6-a129-9641700a771f",
-          "actant": "R0006_P0216",
+          "entityId": "R0006_P0216",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -155896,7 +155896,7 @@
       "actions": [
         {
           "id": "fbb2a6fd-122a-4d50-a2ec-9b9d997aeba5",
-          "action": "A0057",
+          "actionId": "A0057",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -155908,13 +155908,13 @@
           "props": []
         }
       ],
-      "territory": { "id": "T107-1-02", "order": 60 },
+      "territory": { "territoryId": "T107-1-02", "order": 60 },
       "tags": [],
       "text": "et invenit re­gem mortuum et invenit quod ita erat",
       "actants": [
         {
           "id": "eca0ef33-f713-42c6-a3df-9da2e4f75fb2",
-          "actant": "R0006_P0216",
+          "entityId": "R0006_P0216",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -155927,7 +155927,7 @@
         },
         {
           "id": "a6637b02-b474-4fa4-b7ac-585e94ae4ca4",
-          "actant": "R0006_P0222",
+          "entityId": "R0006_P0222",
           "position": "a1",
           "elvl": "1",
           "logic": "1",
@@ -155993,7 +155993,7 @@
       "actions": [
         {
           "id": "d46fe7d7-0202-4e05-b631-ebe491743293",
-          "action": "A0126",
+          "actionId": "A0126",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -156005,13 +156005,13 @@
           "props": []
         }
       ],
-      "territory": { "id": "T107-1-02", "order": 61 },
+      "territory": { "territoryId": "T107-1-02", "order": 61 },
       "tags": [],
       "text": "Interrogatus ipse Andreas",
       "actants": [
         {
           "id": "5f5dbc41-36ef-4fa2-b55c-94ede125d62e",
-          "actant": "R0006_P0216",
+          "entityId": "R0006_P0216",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -156024,7 +156024,7 @@
         },
         {
           "id": "c8c58fab-9920-4f47-a51b-0cc49f81dd51",
-          "actant": "R0006_P0092",
+          "entityId": "R0006_P0092",
           "position": "a1",
           "elvl": "1",
           "logic": "1",
@@ -156037,7 +156037,7 @@
         },
         {
           "id": "8ec09317-0ebe-449f-8556-6fed80fcb1db",
-          "actant": "T107-1-02-025",
+          "entityId": "T107-1-02-025",
           "position": "a2",
           "elvl": "1",
           "logic": "1",
@@ -156103,7 +156103,7 @@
       "actions": [
         {
           "id": "fbcd4f95-2aa6-4ee0-8f97-1eadbb8ea693",
-          "action": "A0082 #A0221",
+          "actionId": "A0082 #A0221",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -156115,13 +156115,13 @@
           "props": []
         }
       ],
-      "territory": { "id": "T107-1-02", "order": 62 },
+      "territory": { "territoryId": "T107-1-02", "order": 62 },
       "tags": [],
       "text": "si scit vel audivit",
       "actants": [
         {
           "id": "81c3007b-2813-4153-8bf7-aa9233a5a657",
-          "actant": "R0006_P0216",
+          "entityId": "R0006_P0216",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -156134,7 +156134,7 @@
         },
         {
           "id": "64ed8c9a-95cd-4aad-8b3f-f5d96d33ded8",
-          "actant": "T107-1-02-026",
+          "entityId": "T107-1-02-026",
           "position": "a1",
           "elvl": "1",
           "logic": "1",
@@ -156200,7 +156200,7 @@
       "actions": [
         {
           "id": "1ef743fe-8229-405c-9f3c-5cf82fd9c7bb",
-          "action": "A0199",
+          "actionId": "A0199",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -156212,13 +156212,13 @@
           "props": []
         }
       ],
-      "territory": { "id": "T107-1-02", "order": 63 },
+      "territory": { "territoryId": "T107-1-02", "order": 63 },
       "tags": [],
       "text": "quod illa Guillelma \nfecerit aliquod miraculum in vita sua",
       "actants": [
         {
           "id": "120a26f0-8a1c-4ff3-a034-4a45cd785e32",
-          "actant": "R0006_P0218",
+          "entityId": "R0006_P0218",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -156231,7 +156231,7 @@
         },
         {
           "id": "0259ed8d-7e8b-4ae4-98ef-aed4afd80297",
-          "actant": "R0010_C0109",
+          "entityId": "R0010_C0109",
           "position": "a1",
           "elvl": "1",
           "logic": "1",
@@ -156297,7 +156297,7 @@
       "actions": [
         {
           "id": "bb3da973-21b7-4fea-8709-a396f0f8f23b",
-          "action": "A0080",
+          "actionId": "A0080",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -156309,13 +156309,13 @@
           "props": []
         }
       ],
-      "territory": { "id": "T107-1-02", "order": 64 },
+      "territory": { "territoryId": "T107-1-02", "order": 64 },
       "tags": [],
       "text": "respondit",
       "actants": [
         {
           "id": "607e1e7b-999e-4302-bc10-931e4bb24c80",
-          "actant": "R0006_P0216",
+          "entityId": "R0006_P0216",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -156328,7 +156328,7 @@
         },
         {
           "id": "5f71679d-83c8-4f32-85ca-8a676d0959d0",
-          "actant": "R0006_P0092",
+          "entityId": "R0006_P0092",
           "position": "a1",
           "elvl": "1",
           "logic": "1",
@@ -156341,7 +156341,7 @@
         },
         {
           "id": "23c30d35-ebaa-4aa2-9fcf-fc0da226fc4e",
-          "actant": "T107-1-02-028",
+          "entityId": "T107-1-02-028",
           "position": "a2",
           "elvl": "1",
           "logic": "1",
@@ -156407,7 +156407,7 @@
       "actions": [
         {
           "id": "af7f70b9-a6b1-444e-8678-0d3b50ca266c",
-          "action": "A0199",
+          "actionId": "A0199",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -156419,13 +156419,13 @@
           "props": []
         }
       ],
-      "territory": { "id": "T107-1-02", "order": 65 },
+      "territory": { "territoryId": "T107-1-02", "order": 65 },
       "tags": [],
       "text": "quod sic, et spetialiter in magistrum Beltramum de Ferno de quodam signo quod ipse magister habebat in oculo, et in Albertonum de Novate de fistula una quam ipse habebat",
       "actants": [
         {
           "id": "621c8f33-e475-4097-a054-b73c4c5af862",
-          "actant": "R0006_P0218",
+          "entityId": "R0006_P0218",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -156438,7 +156438,7 @@
         },
         {
           "id": "93a33d01-6fc6-4863-88e3-7547641654e2",
-          "actant": "R0010_C0109",
+          "entityId": "R0010_C0109",
           "position": "a1",
           "elvl": "1",
           "logic": "1",
@@ -156451,7 +156451,7 @@
         },
         {
           "id": "9a432482-25c2-417a-999e-f6f48a020ce3",
-          "actant": "R0006_P0038",
+          "entityId": "R0006_P0038",
           "position": "a2",
           "elvl": "1",
           "logic": "1",
@@ -156464,7 +156464,7 @@
         },
         {
           "id": "6369a64f-3e63-415b-a0eb-e9c2cbfda17d",
-          "actant": "R0006_P0002",
+          "entityId": "R0006_P0002",
           "position": "a2",
           "elvl": "1",
           "logic": "1",
@@ -156477,7 +156477,7 @@
         },
         {
           "id": "199797bc-1ff8-4ce2-88c1-ba16e82be8b2",
-          "actant": "R0009_G0001",
+          "entityId": "R0009_G0001",
           "position": "a2",
           "elvl": "2",
           "logic": "1",
@@ -156543,7 +156543,7 @@
       "actions": [
         {
           "id": "d4e193ee-4da0-4866-99d1-e2e192b4e2b3",
-          "action": "A0126",
+          "actionId": "A0126",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -156555,13 +156555,13 @@
           "props": []
         }
       ],
-      "territory": { "id": "T107-1-02", "order": 66 },
+      "territory": { "territoryId": "T107-1-02", "order": 66 },
       "tags": [],
       "text": "Interrogatus ipse Andreas",
       "actants": [
         {
           "id": "f04c4932-dfb8-433b-bd8b-5c4d29909a31",
-          "actant": "R0006_P0216",
+          "entityId": "R0006_P0216",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -156574,7 +156574,7 @@
         },
         {
           "id": "b660871c-499b-46f2-a63e-40aa12fcee5f",
-          "actant": "R0006_P0092",
+          "entityId": "R0006_P0092",
           "position": "a1",
           "elvl": "1",
           "logic": "1",
@@ -156587,7 +156587,7 @@
         },
         {
           "id": "aad3b957-7675-4b6a-92f9-ad700d933e27",
-          "actant": "T107-1-02-030",
+          "entityId": "T107-1-02-030",
           "position": "a2",
           "elvl": "1",
           "logic": "1",
@@ -156653,7 +156653,7 @@
       "actions": [
         {
           "id": "91ab2698-db7e-4020-b99f-fe5d1aad142b",
-          "action": "A0082 #A0221",
+          "actionId": "A0082 #A0221",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -156665,13 +156665,13 @@
           "props": []
         }
       ],
-      "territory": { "id": "T107-1-02", "order": 67 },
+      "territory": { "territoryId": "T107-1-02", "order": 67 },
       "tags": [],
       "text": "si scit vel audivit",
       "actants": [
         {
           "id": "4769e0d8-2da8-4d41-aa5e-ed739d14d5b2",
-          "actant": "R0006_P0216",
+          "entityId": "R0006_P0216",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -156684,7 +156684,7 @@
         },
         {
           "id": "c5b5bef9-9c97-45b6-8db2-dcecbb2368ca",
-          "actant": "T107-1-02-031",
+          "entityId": "T107-1-02-031",
           "position": "a1",
           "elvl": "1",
           "logic": "1",
@@ -156697,7 +156697,7 @@
         },
         {
           "id": "cbae05e1-b72f-4938-a328-15fb594f7004",
-          "actant": "NA",
+          "entityId": "NA",
           "position": "a2",
           "elvl": "1",
           "logic": "1",
@@ -156763,7 +156763,7 @@
       "actions": [
         {
           "id": "63e71336-810c-4619-bbb4-aa5aa1e0d305",
-          "action": "A0199",
+          "actionId": "A0199",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -156775,13 +156775,13 @@
           "props": []
         }
       ],
-      "territory": { "id": "T107-1-02", "order": 68 },
+      "territory": { "territoryId": "T107-1-02", "order": 68 },
       "tags": [],
       "text": "quod ipsa Guillelma \nfecerit aliqua miracula post mortem suam",
       "actants": [
         {
           "id": "4948ac42-2b80-405e-aa6a-2733879f36cb",
-          "actant": "R0006_P0219",
+          "entityId": "R0006_P0219",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -156794,7 +156794,7 @@
         },
         {
           "id": "8aa2e4be-b4fc-4301-8efc-f8837d039edf",
-          "actant": "R0010_C0109",
+          "entityId": "R0010_C0109",
           "position": "a1",
           "elvl": "1",
           "logic": "1",
@@ -156860,7 +156860,7 @@
       "actions": [
         {
           "id": "5139a688-03f0-4412-bf68-b329fb37c903",
-          "action": "A0080",
+          "actionId": "A0080",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -156872,13 +156872,13 @@
           "props": []
         }
       ],
-      "territory": { "id": "T107-1-02", "order": 69 },
+      "territory": { "territoryId": "T107-1-02", "order": 69 },
       "tags": [],
       "text": "respondit",
       "actants": [
         {
           "id": "e9562e53-9c8e-4982-ab97-aaecc1d5acdd",
-          "actant": "R0006_P0216",
+          "entityId": "R0006_P0216",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -156891,7 +156891,7 @@
         },
         {
           "id": "60aa3c40-48e1-4630-8f98-2d1f96f065f4",
-          "actant": "R0006_P0092",
+          "entityId": "R0006_P0092",
           "position": "a1",
           "elvl": "1",
           "logic": "1",
@@ -156904,7 +156904,7 @@
         },
         {
           "id": "9bdc61ac-7ce3-49ee-a27d-e80861127322",
-          "actant": "T107-1-02-033\n#T107-1-02-035",
+          "entityId": "T107-1-02-033\n#T107-1-02-035",
           "position": "a2",
           "elvl": "1",
           "logic": "1",
@@ -156970,7 +156970,7 @@
       "actions": [
         {
           "id": "a924a63d-c37f-403b-937b-1c74e224aa9b",
-          "action": "A0221",
+          "actionId": "A0221",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -156982,13 +156982,13 @@
           "props": []
         }
       ],
-      "territory": { "id": "T107-1-02", "order": 70 },
+      "territory": { "territoryId": "T107-1-02", "order": 70 },
       "tags": [],
       "text": "quod ipse audivit",
       "actants": [
         {
           "id": "4163370b-8848-4b08-95a8-feadca5bb8e5",
-          "actant": "R0006_P0216",
+          "entityId": "R0006_P0216",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -157001,7 +157001,7 @@
         },
         {
           "id": "3decdc97-2352-4eba-8880-787d06fca040",
-          "actant": "T107-1-02-035",
+          "entityId": "T107-1-02-035",
           "position": "a1",
           "elvl": "1",
           "logic": "1",
@@ -157067,7 +157067,7 @@
       "actions": [
         {
           "id": "fd8f95a2-e97d-4390-8b39-a201d730d80f",
-          "action": "A0202",
+          "actionId": "A0202",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -157079,13 +157079,13 @@
           "props": []
         }
       ],
-      "territory": { "id": "T107-1-02", "order": 71 },
+      "territory": { "territoryId": "T107-1-02", "order": 71 },
       "tags": [],
       "text": "de quibusdam dominabus que voverunt illi sancte Guillelme ... et spetialiter domina Petra uxor Thomaxii Oldegardi et domina Catella uxor Leonis Oldegardi",
       "actants": [
         {
           "id": "8574f879-9025-4e3c-b626-ebb715c8641f",
-          "actant": "R0006_P0168",
+          "entityId": "R0006_P0168",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -157098,7 +157098,7 @@
         },
         {
           "id": "b7c8459a-f1a8-4191-99df-0d4a7847edc0",
-          "actant": "R0006_P0122",
+          "entityId": "R0006_P0122",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -157111,7 +157111,7 @@
         },
         {
           "id": "a1728f60-d217-4a64-9275-b572d5662505",
-          "actant": "R0009_G0010",
+          "entityId": "R0009_G0010",
           "position": "s",
           "elvl": "2",
           "logic": "1",
@@ -157124,7 +157124,7 @@
         },
         {
           "id": "e954ba33-1feb-476f-bd62-5cef464259cb",
-          "actant": "R0006_P0219",
+          "entityId": "R0006_P0219",
           "position": "a1",
           "elvl": "1",
           "logic": "1",
@@ -157190,7 +157190,7 @@
       "actions": [
         {
           "id": "12db86c4-2779-4166-8c0a-b038c6b76b0c",
-          "action": "A0199",
+          "actionId": "A0199",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -157202,13 +157202,13 @@
           "props": []
         }
       ],
-      "territory": { "id": "T107-1-02", "order": 72 },
+      "territory": { "territoryId": "T107-1-02", "order": 72 },
       "tags": [],
       "text": "et precibus illius obtinuerunt a deo quod ipse petebant et spetialiter domina Petra uxor Thomaxii Oldegardi et domina Catella uxor Leonis Oldegardi",
       "actants": [
         {
           "id": "fb3f5f89-eb42-4f94-ac7a-d019809c3f0c",
-          "actant": "R0006_P0219",
+          "entityId": "R0006_P0219",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -157221,7 +157221,7 @@
         },
         {
           "id": "84afa881-73ff-4c88-a7fb-a5b94d051fbe",
-          "actant": "R0010_C0109",
+          "entityId": "R0010_C0109",
           "position": "a1",
           "elvl": "1",
           "logic": "1",
@@ -157234,7 +157234,7 @@
         },
         {
           "id": "327d0849-180d-4a1a-b2ae-f8b67eac943d",
-          "actant": "R0006_P0168",
+          "entityId": "R0006_P0168",
           "position": "a2",
           "elvl": "1",
           "logic": "1",
@@ -157247,7 +157247,7 @@
         },
         {
           "id": "47789021-5c9d-43a3-87e6-bf6e8b66a5d9",
-          "actant": "R0006_P0122",
+          "entityId": "R0006_P0122",
           "position": "a2",
           "elvl": "1",
           "logic": "1",
@@ -157260,7 +157260,7 @@
         },
         {
           "id": "30e53212-ca64-4952-86b9-a110d514b489",
-          "actant": "R0009_G0010",
+          "entityId": "R0009_G0010",
           "position": "a2",
           "elvl": "2",
           "logic": "1",
@@ -157326,7 +157326,7 @@
       "actions": [
         {
           "id": "a71a7425-93d4-4275-9370-f6e0297390a7",
-          "action": "A0126",
+          "actionId": "A0126",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -157338,13 +157338,13 @@
           "props": []
         }
       ],
-      "territory": { "id": "T107-1-02", "order": 73 },
+      "territory": { "territoryId": "T107-1-02", "order": 73 },
       "tags": [],
       "text": "Interrogatus",
       "actants": [
         {
           "id": "6d62e940-cf01-44a8-ae1e-4233f3ea148b",
-          "actant": "R0006_P0216",
+          "entityId": "R0006_P0216",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -157357,7 +157357,7 @@
         },
         {
           "id": "474c198d-b43d-45fa-8636-a4a0c64ef2ff",
-          "actant": "R0006_P0092",
+          "entityId": "R0006_P0092",
           "position": "a1",
           "elvl": "1",
           "logic": "1",
@@ -157370,7 +157370,7 @@
         },
         {
           "id": "8912dea0-2427-4d7f-9223-1c7894d2b91f",
-          "actant": "T107-1-02-037",
+          "entityId": "T107-1-02-037",
           "position": "a2",
           "elvl": "1",
           "logic": "1",
@@ -157436,7 +157436,7 @@
       "actions": [
         {
           "id": "7b4764d1-206a-4436-bd0f-40666837f287",
-          "action": "A0221",
+          "actionId": "A0221",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -157448,13 +157448,13 @@
           "props": []
         }
       ],
-      "territory": { "id": "T107-1-02", "order": 74 },
+      "territory": { "territoryId": "T107-1-02", "order": 74 },
       "tags": [],
       "text": "si unquam audivit",
       "actants": [
         {
           "id": "06965bc8-f77f-4257-8e1f-122a029c6d95",
-          "actant": "R0006_P0216",
+          "entityId": "R0006_P0216",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -157467,7 +157467,7 @@
         },
         {
           "id": "569d8e69-27a8-4270-8bf8-1719c3cd060d",
-          "actant": "T107-1-02-038",
+          "entityId": "T107-1-02-038",
           "position": "a1",
           "elvl": "1",
           "logic": "1",
@@ -157533,7 +157533,7 @@
       "actions": [
         {
           "id": "6ed375ad-db6b-4df9-a2b5-97c6958f02a5",
-          "action": "A0220",
+          "actionId": "A0220",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -157545,13 +157545,13 @@
           "props": []
         }
       ],
-      "territory": { "id": "T107-1-02", "order": 75 },
+      "territory": { "territoryId": "T107-1-02", "order": 75 },
       "tags": [],
       "text": "quod ipsa Guillelma diceret",
       "actants": [
         {
           "id": "62461efb-6d46-4335-bde2-4bd5f457ad87",
-          "actant": "R0006_P0218",
+          "entityId": "R0006_P0218",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -157564,7 +157564,7 @@
         },
         {
           "id": "021db6fa-c20a-4c14-b6b1-868721dabe7a",
-          "actant": "T107-1-02-039",
+          "entityId": "T107-1-02-039",
           "position": "a1",
           "elvl": "1",
           "logic": "1",
@@ -157630,7 +157630,7 @@
       "actions": [
         {
           "id": "d556e2af-319b-4c3b-b107-e44825c3e406",
-          "action": "A0195",
+          "actionId": "A0195",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -157642,13 +157642,13 @@
           "props": []
         }
       ],
-      "territory": { "id": "T107-1-02", "order": 76 },
+      "territory": { "territoryId": "T107-1-02", "order": 76 },
       "tags": [],
       "text": "se  esse Spiritum sanctum",
       "actants": [
         {
           "id": "594470f0-0a2f-41d3-ab79-89349ac81482",
-          "actant": "R0006_P0218",
+          "entityId": "R0006_P0218",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -157661,7 +157661,7 @@
         },
         {
           "id": "57fc951d-4df6-43a5-8167-45070227301a",
-          "actant": "R0010_C0112",
+          "entityId": "R0010_C0112",
           "position": "a1",
           "elvl": "1",
           "logic": "1",
@@ -157727,7 +157727,7 @@
       "actions": [
         {
           "id": "fbc60769-e997-4cf1-9d52-f95fa258af82",
-          "action": "A0080",
+          "actionId": "A0080",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -157739,13 +157739,13 @@
           "props": []
         }
       ],
-      "territory": { "id": "T107-1-02", "order": 77 },
+      "territory": { "territoryId": "T107-1-02", "order": 77 },
       "tags": [],
       "text": "respondit",
       "actants": [
         {
           "id": "fc9bc5a0-3714-4769-b4fe-67a9a4a7458c",
-          "actant": "R0006_P0216",
+          "entityId": "R0006_P0216",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -157758,7 +157758,7 @@
         },
         {
           "id": "872f3813-1b75-449e-9f61-7391a2f8fa72",
-          "actant": "R0006_P0092",
+          "entityId": "R0006_P0092",
           "position": "a1",
           "elvl": "1",
           "logic": "1",
@@ -157771,7 +157771,7 @@
         },
         {
           "id": "e3cec113-b831-47ac-818d-ad686786fa8e",
-          "actant": "T107-1-02-041",
+          "entityId": "T107-1-02-041",
           "position": "a2",
           "elvl": "1",
           "logic": "1",
@@ -157837,7 +157837,7 @@
       "actions": [
         {
           "id": "36b382f1-abe5-4d20-b328-6920020b1ef2",
-          "action": "A0221",
+          "actionId": "A0221",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -157849,13 +157849,13 @@
           "props": []
         }
       ],
-      "territory": { "id": "T107-1-02", "order": 78 },
+      "territory": { "territoryId": "T107-1-02", "order": 78 },
       "tags": [],
       "text": "non",
       "actants": [
         {
           "id": "daaee083-2685-4bda-960a-c54c7f6c0310",
-          "actant": "R0006_P0216",
+          "entityId": "R0006_P0216",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -157868,7 +157868,7 @@
         },
         {
           "id": "2dbfa38a-0298-4032-988b-fa1ae1e714eb",
-          "actant": "T107-1-02-042",
+          "entityId": "T107-1-02-042",
           "position": "a1",
           "elvl": "1",
           "logic": "1",
@@ -157934,7 +157934,7 @@
       "actions": [
         {
           "id": "4c83f0bb-3985-4800-8885-4108aad193b6",
-          "action": "A0220",
+          "actionId": "A0220",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -157946,13 +157946,13 @@
           "props": []
         }
       ],
-      "territory": { "id": "T107-1-02", "order": 79 },
+      "territory": { "territoryId": "T107-1-02", "order": 79 },
       "tags": [],
       "text": "non",
       "actants": [
         {
           "id": "042a15bd-e66e-4e1b-9251-9657186a922e",
-          "actant": "R0006_P0218",
+          "entityId": "R0006_P0218",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -157965,7 +157965,7 @@
         },
         {
           "id": "ea4578c4-6078-4423-b2bb-713dc163cea3",
-          "actant": "T107-1-02-043",
+          "entityId": "T107-1-02-043",
           "position": "a1",
           "elvl": "1",
           "logic": "1",
@@ -158031,7 +158031,7 @@
       "actions": [
         {
           "id": "a4f259fb-4169-49c2-b6f4-6d5c2c6ca914",
-          "action": "A0195",
+          "actionId": "A0195",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -158043,13 +158043,13 @@
           "props": []
         }
       ],
-      "territory": { "id": "T107-1-02", "order": 80 },
+      "territory": { "territoryId": "T107-1-02", "order": 80 },
       "tags": [],
       "text": "non",
       "actants": [
         {
           "id": "f6a895ce-66ae-4073-b311-7cd654373e37",
-          "actant": "R0006_P0218",
+          "entityId": "R0006_P0218",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -158062,7 +158062,7 @@
         },
         {
           "id": "93132f3d-63e7-4190-9fd1-ee5843e2ed2d",
-          "actant": "R0010_C0112",
+          "entityId": "R0010_C0112",
           "position": "a1",
           "elvl": "1",
           "logic": "1",
@@ -158128,7 +158128,7 @@
       "actions": [
         {
           "id": "b239e7de-9082-42d5-bbe1-b1e47383f723",
-          "action": "A0126",
+          "actionId": "A0126",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -158140,13 +158140,13 @@
           "props": []
         }
       ],
-      "territory": { "id": "T107-1-02", "order": 81 },
+      "territory": { "territoryId": "T107-1-02", "order": 81 },
       "tags": [],
       "text": "Interrogatus",
       "actants": [
         {
           "id": "01ecbe05-f5e1-4ba2-9a2c-ada4f0fc23ed",
-          "actant": "R0006_P0216",
+          "entityId": "R0006_P0216",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -158159,7 +158159,7 @@
         },
         {
           "id": "05c0406f-fc0a-4ad9-b0c6-520b2a74af81",
-          "actant": "R0006_P0092",
+          "entityId": "R0006_P0092",
           "position": "a1",
           "elvl": "1",
           "logic": "1",
@@ -158172,7 +158172,7 @@
         },
         {
           "id": "ae21fcd2-fa08-4343-aa01-56e615a6338f",
-          "actant": "T107-1-02-045",
+          "entityId": "T107-1-02-045",
           "position": "a2",
           "elvl": "1",
           "logic": "1",
@@ -158238,7 +158238,7 @@
       "actions": [
         {
           "id": "cbcfde18-0200-4ccf-a3ff-983b7c9af0b8",
-          "action": "A0082 #A0221",
+          "actionId": "A0082 #A0221",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -158250,13 +158250,13 @@
           "props": []
         }
       ],
-      "territory": { "id": "T107-1-02", "order": 82 },
+      "territory": { "territoryId": "T107-1-02", "order": 82 },
       "tags": [],
       "text": "si scit vel audivit",
       "actants": [
         {
           "id": "34e19963-2200-4570-9419-f87ae9c781e6",
-          "actant": "R0006_P0216",
+          "entityId": "R0006_P0216",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -158269,7 +158269,7 @@
         },
         {
           "id": "49817591-9970-40f5-bbbb-7ff97c9d608f",
-          "actant": "T107-1-02-046",
+          "entityId": "T107-1-02-046",
           "position": "a1",
           "elvl": "1",
           "logic": "1",
@@ -158335,7 +158335,7 @@
       "actions": [
         {
           "id": "e9087670-4a8d-48a9-b913-7f063c27c9ea",
-          "action": "A0220 #A0032",
+          "actionId": "A0220 #A0032",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -158347,13 +158347,13 @@
           "props": []
         }
       ],
-      "territory": { "id": "T107-1-02", "order": 83 },
+      "territory": { "territoryId": "T107-1-02", "order": 83 },
       "tags": [],
       "text": "quod aliqua persona diceret vel crederet",
       "actants": [
         {
           "id": "4fa0f674-5218-41aa-b2b0-22feb926a822",
-          "actant": "T107-1-02-047",
+          "entityId": "T107-1-02-047",
           "position": "a1",
           "elvl": "1",
           "logic": "1",
@@ -158419,7 +158419,7 @@
       "actions": [
         {
           "id": "66b1fdd5-4b8b-467f-8da5-a789f2a54a93",
-          "action": "A0195",
+          "actionId": "A0195",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -158431,13 +158431,13 @@
           "props": []
         }
       ],
-      "territory": { "id": "T107-1-02", "order": 84 },
+      "territory": { "territoryId": "T107-1-02", "order": 84 },
       "tags": [],
       "text": "in vita ipsius Guillelme vel post mortem eius quod ipsa Guillelma esset Spiritus sanctus",
       "actants": [
         {
           "id": "7b24f25e-945f-420b-a36d-cfdb1bf5d743",
-          "actant": "R0006_P0218",
+          "entityId": "R0006_P0218",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -158450,7 +158450,7 @@
         },
         {
           "id": "393df8bb-5ee3-4a66-b745-5443ddf95bb2",
-          "actant": "R0006_P0219",
+          "entityId": "R0006_P0219",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -158463,7 +158463,7 @@
         },
         {
           "id": "2fba6a61-a27e-4d73-9fd9-a5930cb6dd79",
-          "actant": "R0010_C0112",
+          "entityId": "R0010_C0112",
           "position": "a1",
           "elvl": "1",
           "logic": "1",
@@ -158529,7 +158529,7 @@
       "actions": [
         {
           "id": "aa699ad3-809e-411b-9720-bb7d43ed3d64",
-          "action": "A0080",
+          "actionId": "A0080",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -158541,13 +158541,13 @@
           "props": []
         }
       ],
-      "territory": { "id": "T107-1-02", "order": 85 },
+      "territory": { "territoryId": "T107-1-02", "order": 85 },
       "tags": [],
       "text": "respondit",
       "actants": [
         {
           "id": "96ebe3c1-fd7d-4888-b9d6-9b8eca84ff7c",
-          "actant": "R0006_P0216",
+          "entityId": "R0006_P0216",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -158560,7 +158560,7 @@
         },
         {
           "id": "a30ceec2-432c-4c5c-a2db-6e16b4158542",
-          "actant": "R0006_P0092",
+          "entityId": "R0006_P0092",
           "position": "a1",
           "elvl": "1",
           "logic": "1",
@@ -158573,7 +158573,7 @@
         },
         {
           "id": "9c3baf06-89da-43be-8f5b-abb7850de7f7",
-          "actant": "T107-1-02-049",
+          "entityId": "T107-1-02-049",
           "position": "a2",
           "elvl": "1",
           "logic": "1",
@@ -158639,7 +158639,7 @@
       "actions": [
         {
           "id": "01ef802a-1a74-41cb-b0f4-03642d9cb7a7",
-          "action": "A0022",
+          "actionId": "A0022",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -158651,13 +158651,13 @@
           "props": []
         }
       ],
-      "territory": { "id": "T107-1-02", "order": 86 },
+      "territory": { "territoryId": "T107-1-02", "order": 86 },
       "tags": [],
       "text": "quod ipse bene audivit a sorore Mayfreda de Pirovano et a sorore Meliore de Saramitis ... et a domina Ricadona, matre ipsius Andree",
       "actants": [
         {
           "id": "e0bee6a9-d7ff-456a-b9f6-c58a58c48a73",
-          "actant": "R0006_P0216",
+          "entityId": "R0006_P0216",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -158670,7 +158670,7 @@
         },
         {
           "id": "8b6c9991-6b8f-4209-94ef-3f1e30fa6ed3",
-          "actant": "R0006_P0215",
+          "entityId": "R0006_P0215",
           "position": "a1",
           "elvl": "1",
           "logic": "1",
@@ -158683,7 +158683,7 @@
         },
         {
           "id": "20cfe64f-390d-4c77-b87d-0da6d4c91df9",
-          "actant": "R0006_P0147",
+          "entityId": "R0006_P0147",
           "position": "a1",
           "elvl": "1",
           "logic": "1",
@@ -158696,7 +158696,7 @@
         },
         {
           "id": "0483fe85-9b33-4167-a440-1153aae8dbf1",
-          "actant": "R0006_P0185",
+          "entityId": "R0006_P0185",
           "position": "a1",
           "elvl": "1",
           "logic": "1",
@@ -158709,7 +158709,7 @@
         },
         {
           "id": "112240b7-f088-45e9-9b99-fff1ba5b9c09",
-          "actant": "T107-1-02-052",
+          "entityId": "T107-1-02-052",
           "position": "a2",
           "elvl": "1",
           "logic": "1",
@@ -158775,7 +158775,7 @@
       "actions": [
         {
           "id": "da85c798-9e92-40e8-a027-236ae7e841a5",
-          "action": "A0093",
+          "actionId": "A0093",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -158787,13 +158787,13 @@
           "props": []
         }
       ],
-      "territory": { "id": "T107-1-02", "order": 87 },
+      "territory": { "territoryId": "T107-1-02", "order": 87 },
       "tags": [],
       "text": "Meliore de Saramitis, sorore dicti Andree testis",
       "actants": [
         {
           "id": "543f6020-d5d1-4b7a-b14b-67e286d25d9e",
-          "actant": "R0006_P0216",
+          "entityId": "R0006_P0216",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -158806,7 +158806,7 @@
         },
         {
           "id": "24009747-ccff-4056-a49d-7481b9bdf6b1",
-          "actant": "R0010_C0299",
+          "entityId": "R0010_C0299",
           "position": "a1",
           "elvl": "1",
           "logic": "1",
@@ -158819,7 +158819,7 @@
         },
         {
           "id": "a3364891-a1cc-4354-8c39-afa8126fc452",
-          "actant": "R0006_P0147",
+          "entityId": "R0006_P0147",
           "position": "a2",
           "elvl": "1",
           "logic": "1",
@@ -158885,7 +158885,7 @@
       "actions": [
         {
           "id": "0ef08190-b1e7-4dc1-8888-3cbf2fd50d8f",
-          "action": "A0093",
+          "actionId": "A0093",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -158897,13 +158897,13 @@
           "props": []
         }
       ],
-      "territory": { "id": "T107-1-02", "order": 88 },
+      "territory": { "territoryId": "T107-1-02", "order": 88 },
       "tags": [],
       "text": "et a domina Ricadona, matre ipsius Andree",
       "actants": [
         {
           "id": "7c9c307f-b8be-4ef2-90a9-f19a50a5a244",
-          "actant": "R0006_P0216",
+          "entityId": "R0006_P0216",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -158916,7 +158916,7 @@
         },
         {
           "id": "d7629b22-f3f4-4113-894d-7313f2ea5a83",
-          "actant": "R0010_C0293",
+          "entityId": "R0010_C0293",
           "position": "a1",
           "elvl": "1",
           "logic": "1",
@@ -158929,7 +158929,7 @@
         },
         {
           "id": "e1c53fdb-2035-45d6-ad4b-2e9ec9df27a0",
-          "actant": "R0006_P0185",
+          "entityId": "R0006_P0185",
           "position": "a2",
           "elvl": "1",
           "logic": "1",
@@ -158995,7 +158995,7 @@
       "actions": [
         {
           "id": "708e9fe9-bd38-4d3b-94ad-11522003af8c",
-          "action": "A0032",
+          "actionId": "A0032",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -159007,13 +159007,13 @@
           "props": []
         }
       ],
-      "territory": { "id": "T107-1-02", "order": 89 },
+      "territory": { "territoryId": "T107-1-02", "order": 89 },
       "tags": [],
       "text": "quod ipse domine credebant",
       "actants": [
         {
           "id": "8acc17c8-6457-452b-b545-27f5fea69e1d",
-          "actant": "R0006_P0215",
+          "entityId": "R0006_P0215",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -159026,7 +159026,7 @@
         },
         {
           "id": "1592823a-ad88-43b8-804b-8c0d2f65ec13",
-          "actant": "R0006_P0147",
+          "entityId": "R0006_P0147",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -159039,7 +159039,7 @@
         },
         {
           "id": "c25b4561-2fa6-4171-b944-aa0e7943ee44",
-          "actant": "R0006_P0185",
+          "entityId": "R0006_P0185",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -159052,7 +159052,7 @@
         },
         {
           "id": "96f19021-2a6c-4a8b-8a5b-bb2966409e7d",
-          "actant": "T107-1-02-053",
+          "entityId": "T107-1-02-053",
           "position": "a1",
           "elvl": "1",
           "logic": "1",
@@ -159118,7 +159118,7 @@
       "actions": [
         {
           "id": "fa750abf-c40d-422d-a289-a0da0e24c173",
-          "action": "A0195",
+          "actionId": "A0195",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -159130,13 +159130,13 @@
           "props": []
         }
       ],
-      "territory": { "id": "T107-1-02", "order": 90 },
+      "territory": { "territoryId": "T107-1-02", "order": 90 },
       "tags": [],
       "text": "quod ipsa Guillelma esset Spiritus sanctus",
       "actants": [
         {
           "id": "7bd7ddf3-3910-43c8-a52a-d33cd96639c1",
-          "actant": "R0006_P0223",
+          "entityId": "R0006_P0223",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -159149,7 +159149,7 @@
         },
         {
           "id": "01c00c09-7a54-4468-a940-495bcb390ee0",
-          "actant": "R0010_C0112",
+          "entityId": "R0010_C0112",
           "position": "a1",
           "elvl": "1",
           "logic": "1",
@@ -159215,7 +159215,7 @@
       "actions": [
         {
           "id": "84e20fd1-0ab1-47d0-9b87-adeffb283a89",
-          "action": "A0126",
+          "actionId": "A0126",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -159227,13 +159227,13 @@
           "props": []
         }
       ],
-      "territory": { "id": "T107-1-02", "order": 91 },
+      "territory": { "territoryId": "T107-1-02", "order": 91 },
       "tags": [],
       "text": "Interrogatus",
       "actants": [
         {
           "id": "6c8dd746-edea-417c-a144-88d27f512bfd",
-          "actant": "R0006_P0216",
+          "entityId": "R0006_P0216",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -159246,7 +159246,7 @@
         },
         {
           "id": "04c08e52-6959-4526-958f-c515ed3b3d44",
-          "actant": "R0006_P0092",
+          "entityId": "R0006_P0092",
           "position": "a1",
           "elvl": "1",
           "logic": "1",
@@ -159259,7 +159259,7 @@
         },
         {
           "id": "41045e92-db40-4bce-9668-942c872c299f",
-          "actant": "T107-1-02-055",
+          "entityId": "T107-1-02-055",
           "position": "a2",
           "elvl": "1",
           "logic": "1",
@@ -159325,7 +159325,7 @@
       "actions": [
         {
           "id": "696db80a-5296-4dc5-962e-fad6062f2f8b",
-          "action": "A0033",
+          "actionId": "A0033",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -159337,13 +159337,13 @@
           "props": []
         }
       ],
-      "territory": { "id": "T107-1-02", "order": 92 },
+      "territory": { "territoryId": "T107-1-02", "order": 92 },
       "tags": [],
       "text": "si ipse credit",
       "actants": [
         {
           "id": "a3014139-714b-4711-9788-46c3350d7fc0",
-          "actant": "R0006_P0216",
+          "entityId": "R0006_P0216",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -159356,7 +159356,7 @@
         },
         {
           "id": "a795e84d-cf40-4563-8de9-1713f0580780",
-          "actant": "T107-1-02-056",
+          "entityId": "T107-1-02-056",
           "position": "a1",
           "elvl": "1",
           "logic": "1",
@@ -159422,7 +159422,7 @@
       "actions": [
         {
           "id": "ab6ef35c-f10e-40cc-a39b-c8eac583b5c0",
-          "action": "A0195",
+          "actionId": "A0195",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -159434,13 +159434,13 @@
           "props": []
         }
       ],
-      "territory": { "id": "T107-1-02", "order": 93 },
+      "territory": { "territoryId": "T107-1-02", "order": 93 },
       "tags": [],
       "text": "quod hoc credere sit hereticum",
       "actants": [
         {
           "id": "9fdde56d-6780-4258-9ae9-acdba7cf728a",
-          "actant": "T107-1-02-053",
+          "entityId": "T107-1-02-053",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -159453,7 +159453,7 @@
         },
         {
           "id": "44c2dd94-c1bf-47f1-958b-f501846cf962",
-          "actant": "R0010_C0001",
+          "entityId": "R0010_C0001",
           "position": "a1",
           "elvl": "1",
           "logic": "1",
@@ -159519,7 +159519,7 @@
       "actions": [
         {
           "id": "a8f3e49c-2294-4143-8324-f3a1db380fcb",
-          "action": "A0080",
+          "actionId": "A0080",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -159531,13 +159531,13 @@
           "props": []
         }
       ],
-      "territory": { "id": "T107-1-02", "order": 94 },
+      "territory": { "territoryId": "T107-1-02", "order": 94 },
       "tags": [],
       "text": "respon­dit",
       "actants": [
         {
           "id": "60bf2948-a437-4874-8d82-fe267cc20ef3",
-          "actant": "R0006_P0216",
+          "entityId": "R0006_P0216",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -159550,7 +159550,7 @@
         },
         {
           "id": "4787e4b3-441c-4584-bddb-eb20e6900f96",
-          "actant": "R0006_P0092",
+          "entityId": "R0006_P0092",
           "position": "a1",
           "elvl": "1",
           "logic": "1",
@@ -159563,7 +159563,7 @@
         },
         {
           "id": "ac474ee0-6122-4f60-9019-3b6219901e71",
-          "actant": "T107-1-02-058",
+          "entityId": "T107-1-02-058",
           "position": "a2",
           "elvl": "1",
           "logic": "1",
@@ -159629,7 +159629,7 @@
       "actions": [
         {
           "id": "5755679c-8265-4add-a9c9-ed50622a4c2f",
-          "action": "A0033",
+          "actionId": "A0033",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -159641,13 +159641,13 @@
           "props": []
         }
       ],
-      "territory": { "id": "T107-1-02", "order": 95 },
+      "territory": { "territoryId": "T107-1-02", "order": 95 },
       "tags": [],
       "text": "quod credit bene",
       "actants": [
         {
           "id": "caadef10-0ffe-4338-a33f-c7a2a57f07ca",
-          "actant": "R0006_P0216",
+          "entityId": "R0006_P0216",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -159660,7 +159660,7 @@
         },
         {
           "id": "bd8fb3d9-89c3-42d9-aa6b-ab9c8e2ca29e",
-          "actant": "T107-1-02-059",
+          "entityId": "T107-1-02-059",
           "position": "a1",
           "elvl": "1",
           "logic": "1",
@@ -159726,7 +159726,7 @@
       "actions": [
         {
           "id": "b4a1c71a-9b70-4c3e-b988-aab3c400a2ab",
-          "action": "A0195",
+          "actionId": "A0195",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -159738,13 +159738,13 @@
           "props": []
         }
       ],
-      "territory": { "id": "T107-1-02", "order": 96 },
+      "territory": { "territoryId": "T107-1-02", "order": 96 },
       "tags": [],
       "text": "quod hoc credere sit hereticum et magna heresis",
       "actants": [
         {
           "id": "826b262e-53b2-4956-9160-037158b981e7",
-          "actant": "T107-1-02-053",
+          "entityId": "T107-1-02-053",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -159757,7 +159757,7 @@
         },
         {
           "id": "6623d56a-61ba-40cb-8ea3-0ae086c37c09",
-          "actant": "R0010_C0001",
+          "entityId": "R0010_C0001",
           "position": "a1",
           "elvl": "1",
           "logic": "1",
@@ -159823,7 +159823,7 @@
       "actions": [
         {
           "id": "0943be27-8724-469f-b15d-5af425407d36",
-          "action": "A0126",
+          "actionId": "A0126",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -159835,13 +159835,13 @@
           "props": []
         }
       ],
-      "territory": { "id": "T107-1-02", "order": 97 },
+      "territory": { "territoryId": "T107-1-02", "order": 97 },
       "tags": [],
       "text": "Interrogatus dictus Andreas",
       "actants": [
         {
           "id": "0547614a-ab9a-4b7a-8b2f-e6b087afad77",
-          "actant": "R0006_P0216",
+          "entityId": "R0006_P0216",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -159854,7 +159854,7 @@
         },
         {
           "id": "78821a6d-d465-4b30-bd40-67ceff7e1110",
-          "actant": "R0006_P0092",
+          "entityId": "R0006_P0092",
           "position": "a1",
           "elvl": "1",
           "logic": "1",
@@ -159867,7 +159867,7 @@
         },
         {
           "id": "29db9567-b36f-452e-b5a5-4041c3dc7f81",
-          "actant": "T107-1-02-061",
+          "entityId": "T107-1-02-061",
           "position": "a2",
           "elvl": "1",
           "logic": "1",
@@ -159933,7 +159933,7 @@
       "actions": [
         {
           "id": "7386e4ee-2513-47d2-a257-f89299b6a32e",
-          "action": "A0037 #A0225 #A0218",
+          "actionId": "A0037 #A0225 #A0218",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -159945,13 +159945,13 @@
           "props": []
         }
       ],
-      "territory": { "id": "T107-1-02", "order": 98 },
+      "territory": { "territoryId": "T107-1-02", "order": 98 },
       "tags": [],
       "text": "si unquam dixit, denuntiavit vel revellavit aliquid de predictis alicui inquisitori hereticorum",
       "actants": [
         {
           "id": "c11490e0-11f1-4919-9115-34ebdb3a4858",
-          "actant": "R0006_P0216",
+          "entityId": "R0006_P0216",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -159964,7 +159964,7 @@
         },
         {
           "id": "7bea319f-ecd8-474f-b868-a3af044caf41",
-          "actant": "R0009_G0011",
+          "entityId": "R0009_G0011",
           "position": "a1",
           "elvl": "1",
           "logic": "1",
@@ -159977,7 +159977,7 @@
         },
         {
           "id": "874b2474-4c9f-4d23-9281-1a07cdbbf554",
-          "actant": "T107-1-02-052",
+          "entityId": "T107-1-02-052",
           "position": "a2",
           "elvl": "1",
           "logic": "1",
@@ -160043,7 +160043,7 @@
       "actions": [
         {
           "id": "65fc517c-30a0-429f-97fd-b5f73c316ad2",
-          "action": "A0080",
+          "actionId": "A0080",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -160055,13 +160055,13 @@
           "props": []
         }
       ],
-      "territory": { "id": "T107-1-02", "order": 99 },
+      "territory": { "territoryId": "T107-1-02", "order": 99 },
       "tags": [],
       "text": "respondit",
       "actants": [
         {
           "id": "0eff1ad6-852f-4283-a858-e4a053384544",
-          "actant": "R0006_P0216",
+          "entityId": "R0006_P0216",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -160074,7 +160074,7 @@
         },
         {
           "id": "7d648547-1d38-4b4e-b563-d13d034fc55b",
-          "actant": "R0006_P0092",
+          "entityId": "R0006_P0092",
           "position": "a1",
           "elvl": "1",
           "logic": "1",
@@ -160087,7 +160087,7 @@
         },
         {
           "id": "8a25dd3e-af3c-48b3-be11-6b33f1c1766b",
-          "actant": "T107-1-02-062",
+          "entityId": "T107-1-02-062",
           "position": "a2",
           "elvl": "1",
           "logic": "1",
@@ -160100,7 +160100,7 @@
         },
         {
           "id": "a24c1984-00ea-43ff-ba42-eb6ee67e61fe",
-          "actant": "T107-1-02-063",
+          "entityId": "T107-1-02-063",
           "position": "a2",
           "elvl": "1",
           "logic": "1",
@@ -160166,7 +160166,7 @@
       "actions": [
         {
           "id": "3299a375-ca6d-432f-8a8d-5da69e74ccc0",
-          "action": "A0037 #A0225 #A0218",
+          "actionId": "A0037 #A0225 #A0218",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -160178,13 +160178,13 @@
           "props": []
         }
       ],
-      "territory": { "id": "T107-1-02", "order": 100 },
+      "territory": { "territoryId": "T107-1-02", "order": 100 },
       "tags": [],
       "text": "quod non",
       "actants": [
         {
           "id": "c7577fce-3214-4c83-9cf4-56d153c5885b",
-          "actant": "R0006_P0216",
+          "entityId": "R0006_P0216",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -160197,7 +160197,7 @@
         },
         {
           "id": "99e92065-9450-4f6e-bbb2-39042e161358",
-          "actant": "R0006_P0092",
+          "entityId": "R0006_P0092",
           "position": "a1",
           "elvl": "1",
           "logic": "1",
@@ -160210,7 +160210,7 @@
         },
         {
           "id": "b7fb20a0-26bc-45b0-b0a2-800a9300b790",
-          "actant": "T107-1-02-052",
+          "entityId": "T107-1-02-052",
           "position": "a2",
           "elvl": "1",
           "logic": "1",
@@ -160276,7 +160276,7 @@
       "actions": [
         {
           "id": "3c2779b2-e18d-4fb9-9a85-04f183f5e9e9",
-          "action": "A0037 #A0225 #A0218",
+          "actionId": "A0037 #A0225 #A0218",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -160288,13 +160288,13 @@
           "props": []
         }
       ],
-      "territory": { "id": "T107-1-02", "order": 101 },
+      "territory": { "territoryId": "T107-1-02", "order": 101 },
       "tags": [],
       "text": "nisi postquam fuit requisitus super hoc ab inquisitoribus",
       "actants": [
         {
           "id": "ffaa5d67-b308-47a1-8b93-64e859782dc4",
-          "actant": "R0006_P0216",
+          "entityId": "R0006_P0216",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -160307,7 +160307,7 @@
         },
         {
           "id": "759a0f16-6efe-4e84-a2a1-c9e6a317d447",
-          "actant": "R0009_G0011",
+          "entityId": "R0009_G0011",
           "position": "a1",
           "elvl": "1",
           "logic": "1",
@@ -160320,7 +160320,7 @@
         },
         {
           "id": "c56ebb3e-0167-4934-ba2c-5f6e29709a59",
-          "actant": "T107-1-02-052",
+          "entityId": "T107-1-02-052",
           "position": "a2",
           "elvl": "1",
           "logic": "1",
@@ -160386,7 +160386,7 @@
       "actions": [
         {
           "id": "cc5d5662-c17a-4afb-90aa-84f6225ee991",
-          "action": "A0140",
+          "actionId": "A0140",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -160398,13 +160398,13 @@
           "props": []
         }
       ],
-      "territory": { "id": "T107-1-02", "order": 102 },
+      "territory": { "territoryId": "T107-1-02", "order": 102 },
       "tags": [],
       "text": "fuit requisitus super hoc ab inquisitoribus",
       "actants": [
         {
           "id": "6b33d47d-d765-474d-8cb6-3ee23e757da6",
-          "actant": "R0006_P0216",
+          "entityId": "R0006_P0216",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -160417,7 +160417,7 @@
         },
         {
           "id": "f26be46c-5376-4ec0-a82c-08f59080317b",
-          "actant": "R0009_G0011",
+          "entityId": "R0009_G0011",
           "position": "a1",
           "elvl": "1",
           "logic": "1",
@@ -160430,7 +160430,7 @@
         },
         {
           "id": "f816a893-a621-48f5-b1f0-2f097128a755",
-          "actant": "T107-1-02-052",
+          "entityId": "T107-1-02-052",
           "position": "a2",
           "elvl": "1",
           "logic": "1",
@@ -160496,7 +160496,7 @@
       "actions": [
         {
           "id": "114d6bea-becf-491e-83ca-a9d82a3d00b3",
-          "action": "A0126",
+          "actionId": "A0126",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -160508,13 +160508,13 @@
           "props": []
         }
       ],
-      "territory": { "id": "T107-1-02", "order": 103 },
+      "territory": { "territoryId": "T107-1-02", "order": 103 },
       "tags": [],
       "text": "Interrogatus",
       "actants": [
         {
           "id": "a435e0b4-ac7f-47a9-b246-0702c12fbf33",
-          "actant": "R0006_P0216",
+          "entityId": "R0006_P0216",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -160527,7 +160527,7 @@
         },
         {
           "id": "161a718b-b4e2-42f2-8df8-50f6dbe2c460",
-          "actant": "R0006_P0092",
+          "entityId": "R0006_P0092",
           "position": "a1",
           "elvl": "1",
           "logic": "1",
@@ -160540,7 +160540,7 @@
         },
         {
           "id": "48a38873-357e-4cbc-a326-984ea8556b3a",
-          "actant": "T107-1-02-065",
+          "entityId": "T107-1-02-065",
           "position": "a2",
           "elvl": "1",
           "logic": "1",
@@ -160606,7 +160606,7 @@
       "actions": [
         {
           "id": "b6b14b82-53e5-4dd9-bc61-c2b14b0d234e",
-          "action": "A0212",
+          "actionId": "A0212",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -160618,13 +160618,13 @@
           "props": []
         }
       ],
-      "territory": { "id": "T107-1-02", "order": 104 },
+      "territory": { "territoryId": "T107-1-02", "order": 104 },
       "tags": [],
       "text": "si dicte mater et soror sui Andree mortue sunt in il­lo errore vel si fuerunt absolute",
       "actants": [
         {
           "id": "e19c6695-1eef-49bb-ade6-9971b147d2dc",
-          "actant": "R0006_P0147",
+          "entityId": "R0006_P0147",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -160637,7 +160637,7 @@
         },
         {
           "id": "780648ee-2452-4812-a5ed-1884156fdd5b",
-          "actant": "R0006_P0185",
+          "entityId": "R0006_P0185",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -160650,7 +160650,7 @@
         },
         {
           "id": "e3a6a14a-25bb-4f59-97ae-31c6cbd56ce8",
-          "actant": "NA",
+          "entityId": "NA",
           "position": "a1",
           "elvl": "1",
           "logic": "1",
@@ -160663,7 +160663,7 @@
         },
         {
           "id": "928e3cab-a39e-4a59-a411-70638b4e73dc",
-          "actant": "NA",
+          "entityId": "NA",
           "position": "a2",
           "elvl": "1",
           "logic": "1",
@@ -160729,7 +160729,7 @@
       "actions": [
         {
           "id": "3b91c7c0-5f5a-4e61-ba2c-b853044529cb",
-          "action": "A0080",
+          "actionId": "A0080",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -160741,13 +160741,13 @@
           "props": []
         }
       ],
-      "territory": { "id": "T107-1-02", "order": 105 },
+      "territory": { "territoryId": "T107-1-02", "order": 105 },
       "tags": [],
       "text": "respondit",
       "actants": [
         {
           "id": "54cd69ad-69f4-48f2-b481-a2cc44941660",
-          "actant": "R0006_P0216",
+          "entityId": "R0006_P0216",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -160760,7 +160760,7 @@
         },
         {
           "id": "d8049da7-0f44-4636-9d8f-3509a992b536",
-          "actant": "R0006_P0092",
+          "entityId": "R0006_P0092",
           "position": "a1",
           "elvl": "1",
           "logic": "1",
@@ -160773,7 +160773,7 @@
         },
         {
           "id": "df54133f-5032-44df-b806-7b98a6ebab5a",
-          "actant": "T107-1-02-067",
+          "entityId": "T107-1-02-067",
           "position": "a2",
           "elvl": "1",
           "logic": "1",
@@ -160786,7 +160786,7 @@
         },
         {
           "id": "330d5d8c-c735-4f5a-b90c-71a3422fe101",
-          "actant": "T107-1-02-068",
+          "entityId": "T107-1-02-068",
           "position": "a2",
           "elvl": "1",
           "logic": "1",
@@ -160799,7 +160799,7 @@
         },
         {
           "id": "e7d4fcd4-52d8-4365-aedd-3ff3665fd10b",
-          "actant": "T107-1-02-071",
+          "entityId": "T107-1-02-071",
           "position": "a2",
           "elvl": "1",
           "logic": "1",
@@ -160865,7 +160865,7 @@
       "actions": [
         {
           "id": "8d552ed4-1400-4486-b840-a0c29c7d0b1b",
-          "action": "A0212",
+          "actionId": "A0212",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -160877,13 +160877,13 @@
           "props": []
         }
       ],
-      "territory": { "id": "T107-1-02", "order": 106 },
+      "territory": { "territoryId": "T107-1-02", "order": 106 },
       "tags": [],
       "text": "quod non sunt mortue in illo errore",
       "actants": [
         {
           "id": "d3746051-8ad0-44b8-ba17-68db532ae582",
-          "actant": "R0006_P0147",
+          "entityId": "R0006_P0147",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -160896,7 +160896,7 @@
         },
         {
           "id": "3f8fae49-abe0-497b-acac-2cabf6fbb24c",
-          "actant": "R0006_P0185",
+          "entityId": "R0006_P0185",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -160909,7 +160909,7 @@
         },
         {
           "id": "d78dd640-56fb-4bff-bffa-24cf8fc65a25",
-          "actant": "NA",
+          "entityId": "NA",
           "position": "a1",
           "elvl": "1",
           "logic": "1",
@@ -160922,7 +160922,7 @@
         },
         {
           "id": "87b76646-29ee-44d6-b23f-5625b14deac8",
-          "actant": "NA",
+          "entityId": "NA",
           "position": "a2",
           "elvl": "1",
           "logic": "1",
@@ -160988,7 +160988,7 @@
       "actions": [
         {
           "id": "9333d1dc-9d43-46bf-a84d-e5ef33a2a83b",
-          "action": "A0214",
+          "actionId": "A0214",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -161000,13 +161000,13 @@
           "props": []
         }
       ],
-      "territory": { "id": "T107-1-02", "order": 107 },
+      "territory": { "territoryId": "T107-1-02", "order": 107 },
       "tags": [],
       "text": "sed bene fuerunt absolute a fratre Mayfredo de Dovaria",
       "actants": [
         {
           "id": "be44fded-7ced-4968-9993-2f1073dd2f94",
-          "actant": "R0006_P0147",
+          "entityId": "R0006_P0147",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -161019,7 +161019,7 @@
         },
         {
           "id": "18641b17-7a92-4364-8d41-ffe855b26c1a",
-          "actant": "R0006_P0185",
+          "entityId": "R0006_P0185",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -161032,7 +161032,7 @@
         },
         {
           "id": "c7228e63-daab-47d6-b8f5-3e7d2ba4d8a2",
-          "actant": "R0006_P0143",
+          "entityId": "R0006_P0143",
           "position": "a1",
           "elvl": "1",
           "logic": "1",
@@ -161098,7 +161098,7 @@
       "actions": [
         {
           "id": "282a732e-0226-4642-8807-d12bdc437857",
-          "action": "A0093",
+          "actionId": "A0093",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -161110,13 +161110,13 @@
           "props": []
         }
       ],
-      "territory": { "id": "T107-1-02", "order": 108 },
+      "territory": { "territoryId": "T107-1-02", "order": 108 },
       "tags": [],
       "text": "Mayfredo de Dovaria, ordinis Predicatorum",
       "actants": [
         {
           "id": "1728713f-cd9b-408b-aebf-4b9c5c7927c0",
-          "actant": "R0006_P0143",
+          "entityId": "R0006_P0143",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -161129,7 +161129,7 @@
         },
         {
           "id": "5968c42a-9d82-4535-9c1d-744fd86f53c4",
-          "actant": "R0010_C0321",
+          "entityId": "R0010_C0321",
           "position": "a1",
           "elvl": "1",
           "logic": "1",
@@ -161142,7 +161142,7 @@
         },
         {
           "id": "449afebc-5681-4e1a-87b7-3b993a65d0c8",
-          "actant": "R0010_C0059",
+          "entityId": "R0010_C0059",
           "position": "a2",
           "elvl": "1",
           "logic": "1",
@@ -161208,7 +161208,7 @@
       "actions": [
         {
           "id": "b621f950-c08c-43f1-a6a7-62b0d88e3fe3",
-          "action": "A0093",
+          "actionId": "A0093",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -161220,13 +161220,13 @@
           "props": []
         }
       ],
-      "territory": { "id": "T107-1-02", "order": 109 },
+      "territory": { "territoryId": "T107-1-02", "order": 109 },
       "tags": [],
       "text": "Mayfredo de Dovaria ... tunc inquisitore",
       "actants": [
         {
           "id": "35f26d47-3050-4a57-9a93-02192b73e7f7",
-          "actant": "R0006_P0143",
+          "entityId": "R0006_P0143",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -161239,7 +161239,7 @@
         },
         {
           "id": "cb7973ed-6381-4b28-a00b-56b61a931e1c",
-          "actant": "R0010_C0316",
+          "entityId": "R0010_C0316",
           "position": "a1",
           "elvl": "1",
           "logic": "1",
@@ -161252,7 +161252,7 @@
         },
         {
           "id": "f622ec30-4555-49c8-b656-61314236c975",
-          "actant": "R0010_C0121",
+          "entityId": "R0010_C0121",
           "position": "a2",
           "elvl": "1",
           "logic": "1",
@@ -161318,7 +161318,7 @@
       "actions": [
         {
           "id": "928290ce-e75d-46d5-b541-48e16368d430",
-          "action": "A0215",
+          "actionId": "A0215",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -161330,13 +161330,13 @@
           "props": []
         }
       ],
-      "territory": { "id": "T107-1-02", "order": 110 },
+      "territory": { "territoryId": "T107-1-02", "order": 110 },
       "tags": [],
       "text": "et revocaverunt errorem suum",
       "actants": [
         {
           "id": "06a559e4-7527-42dc-ad53-024133a49545",
-          "actant": "R0006_P0147",
+          "entityId": "R0006_P0147",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -161349,7 +161349,7 @@
         },
         {
           "id": "95437e7f-4563-4813-93e5-fb27c83a09e0",
-          "actant": "R0006_P0185",
+          "entityId": "R0006_P0185",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -161362,7 +161362,7 @@
         },
         {
           "id": "381d549a-f386-4fbb-a064-401cc557db8e",
-          "actant": "R0006_P0143",
+          "entityId": "R0006_P0143",
           "position": "a1",
           "elvl": "1",
           "logic": "1",
@@ -161375,7 +161375,7 @@
         },
         {
           "id": "ea9bd006-ca5f-423b-859a-9a6b049d6fdc",
-          "actant": "R0010_C0122",
+          "entityId": "R0010_C0122",
           "position": "a2",
           "elvl": "1",
           "logic": "1",
@@ -161441,7 +161441,7 @@
       "actions": [
         {
           "id": "c3ef01f7-25b1-4c70-8a47-e0813cc48779",
-          "action": "A0126",
+          "actionId": "A0126",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -161453,13 +161453,13 @@
           "props": []
         }
       ],
-      "territory": { "id": "T107-1-02", "order": 111 },
+      "territory": { "territoryId": "T107-1-02", "order": 111 },
       "tags": [],
       "text": "Interrogatus",
       "actants": [
         {
           "id": "11405256-d5c0-4aa5-97a7-a133c8afa12c",
-          "actant": "R0006_P0216",
+          "entityId": "R0006_P0216",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -161472,7 +161472,7 @@
         },
         {
           "id": "739457d0-b676-4bff-9a63-544887da4597",
-          "actant": "R0006_P0092",
+          "entityId": "R0006_P0092",
           "position": "a1",
           "elvl": "1",
           "logic": "1",
@@ -161485,7 +161485,7 @@
         },
         {
           "id": "f434d05c-e006-4261-9e1b-c8c44d83fc78",
-          "actant": "T107-1-02-073",
+          "entityId": "T107-1-02-073",
           "position": "a2",
           "elvl": "1",
           "logic": "1",
@@ -161551,7 +161551,7 @@
       "actions": [
         {
           "id": "acacdcb3-f6d7-4842-b72f-8f7eedc21a20",
-          "action": "A0082 #A0221",
+          "actionId": "A0082 #A0221",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -161563,13 +161563,13 @@
           "props": []
         }
       ],
-      "territory": { "id": "T107-1-02", "order": 112 },
+      "territory": { "territoryId": "T107-1-02", "order": 112 },
       "tags": [],
       "text": "si scit vel audivit",
       "actants": [
         {
           "id": "23ac01b9-96f5-4713-805f-a98454f1cfd8",
-          "actant": "R0006_P0216",
+          "entityId": "R0006_P0216",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -161582,7 +161582,7 @@
         },
         {
           "id": "132a0dfd-ef50-4da7-af95-3757ee00ae0d",
-          "actant": "T107-1-02-074",
+          "entityId": "T107-1-02-074",
           "position": "a1",
           "elvl": "1",
           "logic": "1",
@@ -161648,7 +161648,7 @@
       "actions": [
         {
           "id": "ec0564d1-c77d-4988-add0-732633aea693",
-          "action": "A0226 #A0227",
+          "actionId": "A0226 #A0227",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -161660,13 +161660,13 @@
           "props": []
         }
       ],
-      "territory": { "id": "T107-1-02", "order": 113 },
+      "territory": { "territoryId": "T107-1-02", "order": 113 },
       "tags": [],
       "text": "quod, postquam ille domine fuerunt absolute antequam morerentur, vel etiam dicta soror Mayfreda vel aliqua earum recidivaverint in eodem errore vel perseveraverint in eun­dem errorem",
       "actants": [
         {
           "id": "1cbf264e-a41e-409a-b197-3c84e7d5aa78",
-          "actant": "R0006_P0147",
+          "entityId": "R0006_P0147",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -161679,7 +161679,7 @@
         },
         {
           "id": "42960210-a5f0-42fb-93d0-fbcf3b986e80",
-          "actant": "R0006_P0185",
+          "entityId": "R0006_P0185",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -161692,7 +161692,7 @@
         },
         {
           "id": "7a44f1c0-d90e-4745-873a-e48514191780",
-          "actant": "R0006_P0215",
+          "entityId": "R0006_P0215",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -161705,7 +161705,7 @@
         },
         {
           "id": "6180783b-3a4f-43a2-9c8b-c2f5d13e679b",
-          "actant": "T107-1-02-053",
+          "entityId": "T107-1-02-053",
           "position": "a1",
           "elvl": "1",
           "logic": "1",
@@ -161771,7 +161771,7 @@
       "actions": [
         {
           "id": "2fd62670-8297-48de-b926-7ae23e9a7e3e",
-          "action": "A0108",
+          "actionId": "A0108",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -161783,13 +161783,13 @@
           "props": []
         }
       ],
-      "territory": { "id": "", "order": 114 },
+      "territory": { "territoryId": "", "order": 114 },
       "tags": [],
       "text": "morerentur",
       "actants": [
         {
           "id": "0febc505-4adf-4f77-9290-9e71ca4c9022",
-          "actant": "R0006_P0147",
+          "entityId": "R0006_P0147",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -161802,7 +161802,7 @@
         },
         {
           "id": "82280411-97e6-47df-98de-3bcf112cf78b",
-          "actant": "R0006_P0185",
+          "entityId": "R0006_P0185",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -161815,7 +161815,7 @@
         },
         {
           "id": "8b713f34-2620-4fbc-a869-b1da6586bb70",
-          "actant": "R0006_P0215",
+          "entityId": "R0006_P0215",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -161881,7 +161881,7 @@
       "actions": [
         {
           "id": "bfd78f50-7c77-4413-93c4-6cbce5b8a10c",
-          "action": "A0080",
+          "actionId": "A0080",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -161893,13 +161893,13 @@
           "props": []
         }
       ],
-      "territory": { "id": "T107-1-02", "order": 115 },
+      "territory": { "territoryId": "T107-1-02", "order": 115 },
       "tags": [],
       "text": "respondit",
       "actants": [
         {
           "id": "a1d9fa55-d395-40ca-9456-2ea071537c3f",
-          "actant": "R0006_P0216",
+          "entityId": "R0006_P0216",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -161912,7 +161912,7 @@
         },
         {
           "id": "a0e63f93-cc37-4cce-a693-917a88fe7594",
-          "actant": "R0006_P0092",
+          "entityId": "R0006_P0092",
           "position": "a1",
           "elvl": "1",
           "logic": "1",
@@ -161925,7 +161925,7 @@
         },
         {
           "id": "9b4a80bd-9903-4701-9041-56eb14d4e57e",
-          "actant": "T107-1-02-077",
+          "entityId": "T107-1-02-077",
           "position": "a2",
           "elvl": "1",
           "logic": "1",
@@ -161938,7 +161938,7 @@
         },
         {
           "id": "f15c4614-f07d-4937-8511-0424ebd8b7c7",
-          "actant": "T107-1-02-080",
+          "entityId": "T107-1-02-080",
           "position": "a2",
           "elvl": "1",
           "logic": "1",
@@ -162004,7 +162004,7 @@
       "actions": [
         {
           "id": "59a11398-4d9a-4c5a-b753-db1bb99c70dc",
-          "action": "A0082 #A0221",
+          "actionId": "A0082 #A0221",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -162016,13 +162016,13 @@
           "props": []
         }
       ],
-      "territory": { "id": "T107-1-02", "order": 116 },
+      "territory": { "territoryId": "T107-1-02", "order": 116 },
       "tags": [],
       "text": "non",
       "actants": [
         {
           "id": "ee6be45a-a512-46d8-bf91-2929d1a10092",
-          "actant": "R0006_P0216",
+          "entityId": "R0006_P0216",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -162035,7 +162035,7 @@
         },
         {
           "id": "b14a3347-15be-41ea-be6a-4eb6eac214dd",
-          "actant": "T107-1-02-074",
+          "entityId": "T107-1-02-074",
           "position": "a1",
           "elvl": "1",
           "logic": "1",
@@ -162101,7 +162101,7 @@
       "actions": [
         {
           "id": "b63428b9-3b05-4801-9677-0f669c79f5ee",
-          "action": "A0238",
+          "actionId": "A0238",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -162113,13 +162113,13 @@
           "props": []
         }
       ],
-      "territory": { "id": "T107-1-02", "order": 117 },
+      "territory": { "territoryId": "T107-1-02", "order": 117 },
       "tags": [],
       "text": "nec de ipsis aliquid postea audivit nec scivit",
       "actants": [
         {
           "id": "75ffed90-291f-4dfe-acc4-a5bb5197c8f6",
-          "actant": "R0006_P0216",
+          "entityId": "R0006_P0216",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -162132,7 +162132,7 @@
         },
         {
           "id": "7dffb16e-b729-43d5-bcfc-d55247a5b5ca",
-          "actant": "R0006_P0147",
+          "entityId": "R0006_P0147",
           "position": "a1",
           "elvl": "1",
           "logic": "1",
@@ -162145,7 +162145,7 @@
         },
         {
           "id": "96ac1b9c-413d-4d8f-bbd3-eb75033a31e7",
-          "actant": "R0006_P0185",
+          "entityId": "R0006_P0185",
           "position": "a1",
           "elvl": "1",
           "logic": "1",
@@ -162158,7 +162158,7 @@
         },
         {
           "id": "3923ef1b-80df-4fb1-8a5e-0e12eb83b923",
-          "actant": "R0006_P0215",
+          "entityId": "R0006_P0215",
           "position": "a1",
           "elvl": "2",
           "logic": "1",
@@ -162171,7 +162171,7 @@
         },
         {
           "id": "71e966fc-f217-495e-94e9-5181e8ac6d1c",
-          "actant": "R0010_C0123",
+          "entityId": "R0010_C0123",
           "position": "a2",
           "elvl": "1",
           "logic": "1",
@@ -162237,7 +162237,7 @@
       "actions": [
         {
           "id": "bd79c4da-c6cf-4f08-bae8-66e115b3d88a",
-          "action": "A0179",
+          "actionId": "A0179",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -162249,13 +162249,13 @@
           "props": []
         }
       ],
-      "territory": { "id": "T107-1-02", "order": 118 },
+      "territory": { "territoryId": "T107-1-02", "order": 118 },
       "tags": [],
       "text": "Actum Mediolani in domo fratrum Predicatorum, in camera ubi fit officium inquisitionis heretice pravitatis, Actum Mediolani in domo fratrum Predicatorum, in camera ubi fit officium inquisitionis heretice pravitatis, coram suprascripto fratre Guidone inquisitore ... Die mercurii .XX. mensis iulii, .MCCC., indictione .XIII.",
       "actants": [
         {
           "id": "30a5c326-c5c0-4241-962a-e4452d325d29",
-          "actant": "T107-1-02",
+          "entityId": "T107-1-02",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -162268,7 +162268,7 @@
         },
         {
           "id": "098b6d1a-e994-4ad6-aaee-cea9f07698a8",
-          "actant": "R0006_P0092",
+          "entityId": "R0006_P0092",
           "position": "a1",
           "elvl": "1",
           "logic": "1",
@@ -162334,7 +162334,7 @@
       "actions": [
         {
           "id": "308d88c9-b3ad-488f-a6ad-9607bc9c67c1",
-          "action": "A0086",
+          "actionId": "A0086",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -162346,13 +162346,13 @@
           "props": []
         }
       ],
-      "territory": { "id": "T107-1-02", "order": 119 },
+      "territory": { "territoryId": "T107-1-02", "order": 119 },
       "tags": [],
       "text": "Interfuerunt ibi testes, vocati et rogati, fratres Petrus de Marcellinis et Ambrosius Poronus et Anselminus de Casta­no",
       "actants": [
         {
           "id": "403c6ddd-e8fc-4f5a-b2c8-b113b3351a75",
-          "actant": "R0006_P0174",
+          "entityId": "R0006_P0174",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -162365,7 +162365,7 @@
         },
         {
           "id": "0fcc9d2a-9113-4c1e-97e6-cd4820dcc9b9",
-          "actant": "R0006_P0011",
+          "entityId": "R0006_P0011",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -162378,7 +162378,7 @@
         },
         {
           "id": "2fc83822-4431-452a-a08f-9fbe93ff4240",
-          "actant": "R0006_P0020",
+          "entityId": "R0006_P0020",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -162391,7 +162391,7 @@
         },
         {
           "id": "f1edf725-fbf5-46de-b40b-0f781aed77f8",
-          "actant": "T107-1-02",
+          "entityId": "T107-1-02",
           "position": "a1",
           "elvl": "1",
           "logic": "1",
@@ -162457,7 +162457,7 @@
       "actions": [
         {
           "id": "7ac08a7b-ee89-4127-ac68-2034e0999fd1",
-          "action": "A0093",
+          "actionId": "A0093",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -162469,13 +162469,13 @@
           "props": []
         }
       ],
-      "territory": { "id": "T107-1-02", "order": 120 },
+      "territory": { "territoryId": "T107-1-02", "order": 120 },
       "tags": [],
       "text": "omnes ordinis Predicatorum",
       "actants": [
         {
           "id": "2254d23a-30f0-4eff-a24c-e737eca8fb23",
-          "actant": "R0006_P0174",
+          "entityId": "R0006_P0174",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -162488,7 +162488,7 @@
         },
         {
           "id": "e4ab1a1d-0b9d-4b56-834f-22716a393aa9",
-          "actant": "R0006_P0011",
+          "entityId": "R0006_P0011",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -162501,7 +162501,7 @@
         },
         {
           "id": "6f5121c9-a363-40b2-b94b-16554d343679",
-          "actant": "R0006_P0020",
+          "entityId": "R0006_P0020",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -162514,7 +162514,7 @@
         },
         {
           "id": "994b6c93-0c8c-4c4f-8b23-a675d4221e36",
-          "actant": "R0010_C0321",
+          "entityId": "R0010_C0321",
           "position": "a1",
           "elvl": "1",
           "logic": "1",
@@ -162527,7 +162527,7 @@
         },
         {
           "id": "82b9c9a8-c8a4-47f4-8511-ec641636bfe0",
-          "actant": "R0010_C0059",
+          "entityId": "R0010_C0059",
           "position": "a2",
           "elvl": "1",
           "logic": "1",
@@ -162593,7 +162593,7 @@
       "actions": [
         {
           "id": "5b16093a-14d7-451a-a569-33f91d814ec3",
-          "action": "A0181",
+          "actionId": "A0181",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -162605,13 +162605,13 @@
           "props": []
         }
       ],
-      "territory": { "id": "T107-1-02", "order": 121 },
+      "territory": { "territoryId": "T107-1-02", "order": 121 },
       "tags": [],
       "text": "Traditum per suprascriptum notarium",
       "actants": [
         {
           "id": "f99f13af-029c-485d-9e3d-cafa5231768c",
-          "actant": "T107-1-02",
+          "entityId": "T107-1-02",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -162624,7 +162624,7 @@
         },
         {
           "id": "b559ef73-cb87-497a-9a8c-9ee26944a633",
-          "actant": "R0006_P0213",
+          "entityId": "R0006_P0213",
           "position": "a1",
           "elvl": "2",
           "logic": "1",
@@ -162690,7 +162690,7 @@
       "actions": [
         {
           "id": "2d077501-e3ee-4e73-80b2-33d9f8c8319a",
-          "action": "A0093",
+          "actionId": "A0093",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -162702,13 +162702,13 @@
           "props": []
         }
       ],
-      "territory": { "id": "", "order": 122 },
+      "territory": { "territoryId": "", "order": 122 },
       "tags": [],
       "text": "Precepta facta suprascripto Andree",
       "actants": [
         {
           "id": "ee81844c-768a-41cb-a1de-16603f7dd777",
-          "actant": "T107-1-03",
+          "entityId": "T107-1-03",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -162721,7 +162721,7 @@
         },
         {
           "id": "81e84171-fd68-4204-a7d2-b4f9dc8a0dda",
-          "actant": "R0010_C0335",
+          "entityId": "R0010_C0335",
           "position": "a1",
           "elvl": "1",
           "logic": "1",
@@ -162734,7 +162734,7 @@
         },
         {
           "id": "d6ef73b9-f95a-42c7-acfb-1ff9790e083f",
-          "actant": "R0010_C0130",
+          "entityId": "R0010_C0130",
           "position": "a2",
           "elvl": "1",
           "logic": "1",
@@ -162800,7 +162800,7 @@
       "actions": [
         {
           "id": "9e51c1de-bec0-41e1-bc20-fa78eebb882f",
-          "action": "A0164",
+          "actionId": "A0164",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -162812,13 +162812,13 @@
           "props": []
         }
       ],
-      "territory": { "id": "T107-1-03", "order": 123 },
+      "territory": { "territoryId": "T107-1-03", "order": 123 },
       "tags": [],
       "text": "NS",
       "actants": [
         {
           "id": "8715db2b-8ea3-4904-a823-0119c76dc606",
-          "actant": "R0006_P0216",
+          "entityId": "R0006_P0216",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -162831,7 +162831,7 @@
         },
         {
           "id": "7112b128-aa51-4a87-b094-b6cbe402bbd9",
-          "actant": "T107-1-03",
+          "entityId": "T107-1-03",
           "position": "a1",
           "elvl": "1",
           "logic": "1",
@@ -162897,7 +162897,7 @@
       "actions": [
         {
           "id": "91065f89-aba1-4ce1-94a5-639e09623dea",
-          "action": "A0086",
+          "actionId": "A0086",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -162909,13 +162909,13 @@
           "props": []
         }
       ],
-      "territory": { "id": "T107-1-03", "order": 124 },
+      "territory": { "territoryId": "T107-1-03", "order": 124 },
       "tags": [],
       "text": "presentibus suprascriptis testibus",
       "actants": [
         {
           "id": "aa84c5d5-cde9-49c4-82eb-03fbe0c3d0b8",
-          "actant": "R0006_P0174",
+          "entityId": "R0006_P0174",
           "position": "s",
           "elvl": "2",
           "logic": "1",
@@ -162928,7 +162928,7 @@
         },
         {
           "id": "0c231a70-3131-42f4-a903-04980c9acc9f",
-          "actant": "R0006_P0011",
+          "entityId": "R0006_P0011",
           "position": "s",
           "elvl": "2",
           "logic": "1",
@@ -162941,7 +162941,7 @@
         },
         {
           "id": "05f135bf-adf4-474a-b254-d916b2e118f8",
-          "actant": "R0006_P0020",
+          "entityId": "R0006_P0020",
           "position": "s",
           "elvl": "2",
           "logic": "1",
@@ -162954,7 +162954,7 @@
         },
         {
           "id": "72333a16-4bcc-4349-a3ee-1592c2644352",
-          "actant": "T107-1-03",
+          "entityId": "T107-1-03",
           "position": "a1",
           "elvl": "1",
           "logic": "1",
@@ -163020,7 +163020,7 @@
       "actions": [
         {
           "id": "50aa1adf-7b30-4995-a89c-32c43cb7773e",
-          "action": "A0055",
+          "actionId": "A0055",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -163032,13 +163032,13 @@
           "props": []
         }
       ],
-      "territory": { "id": "T107-1-03", "order": 125 },
+      "territory": { "territoryId": "T107-1-03", "order": 125 },
       "tags": [],
       "text": "dictus fra­ter Guido inquisitor, ut supra",
       "actants": [
         {
           "id": "0cde47c1-3385-46ae-b267-e225470536f6",
-          "actant": "R0006_P0092",
+          "entityId": "R0006_P0092",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -163051,7 +163051,7 @@
         },
         {
           "id": "9dcb09aa-4c32-45ac-95f6-4465149bba62",
-          "actant": "T107-1-03",
+          "entityId": "T107-1-03",
           "position": "a1",
           "elvl": "1",
           "logic": "1",
@@ -163117,7 +163117,7 @@
       "actions": [
         {
           "id": "2c09bbef-3e2b-4444-9b76-6618ba9349cd",
-          "action": "A0228",
+          "actionId": "A0228",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -163129,13 +163129,13 @@
           "props": []
         }
       ],
-      "territory": { "id": "T107-1-03", "order": 126 },
+      "territory": { "territoryId": "T107-1-03", "order": 126 },
       "tags": [],
       "text": "precepit suprascripto Andree Saramite",
       "actants": [
         {
           "id": "ab481f7e-23b3-4707-9feb-6c5fff5f6796",
-          "actant": "R0006_P0092",
+          "entityId": "R0006_P0092",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -163148,7 +163148,7 @@
         },
         {
           "id": "96aab724-6b2a-4e6d-91b7-cc996d5c27f5",
-          "actant": "R0006_P0216",
+          "entityId": "R0006_P0216",
           "position": "a1",
           "elvl": "1",
           "logic": "1",
@@ -163214,7 +163214,7 @@
       "actions": [
         {
           "id": "72a03975-f1a1-4cc8-95dd-3c4577fee102",
-          "action": "A0098",
+          "actionId": "A0098",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -163226,13 +163226,13 @@
           "props": []
         }
       ],
-      "territory": { "id": "T107-1-03", "order": 127 },
+      "territory": { "territoryId": "T107-1-03", "order": 127 },
       "tags": [],
       "text": "sub iuramento",
       "actants": [
         {
           "id": "ffed231b-0ffd-4507-84de-c3d202693bb8",
-          "actant": "R0006_P0216",
+          "entityId": "R0006_P0216",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -163298,7 +163298,7 @@
       "actions": [
         {
           "id": "b8407ab3-0c53-46b7-aa0f-89ce9d63db68",
-          "action": "A0122",
+          "actionId": "A0122",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -163310,13 +163310,13 @@
           "props": []
         }
       ],
-      "territory": { "id": "T107-1-03", "order": 128 },
+      "territory": { "territoryId": "T107-1-03", "order": 128 },
       "tags": [],
       "text": "et penis quibus tenetur officio obligatus",
       "actants": [
         {
           "id": "40fb9b75-5a31-4fb7-9ac1-4bb3564d92e6",
-          "actant": "R0006_P0216",
+          "entityId": "R0006_P0216",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -163329,7 +163329,7 @@
         },
         {
           "id": "f34dbbb3-36b2-490c-a348-255ababa45e1",
-          "actant": "R0010_C0131",
+          "entityId": "R0010_C0131",
           "position": "a1",
           "elvl": "1",
           "logic": "1",
@@ -163342,7 +163342,7 @@
         },
         {
           "id": "3fc7000f-c9bd-4f72-adf6-d232c0ddc5a5",
-          "actant": "R0010_C0087",
+          "entityId": "R0010_C0087",
           "position": "a2",
           "elvl": "1",
           "logic": "1",
@@ -163408,7 +163408,7 @@
       "actions": [
         {
           "id": "ee97beb0-21e0-41c9-92cd-c7fc7c55cd43",
-          "action": "",
+          "actionId": "",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -163420,13 +163420,13 @@
           "props": []
         }
       ],
-      "territory": { "id": "T107-1-03", "order": 129 },
+      "territory": { "territoryId": "T107-1-03", "order": 129 },
       "tags": [],
       "text": "quod non debeat dicere nec revellare nec annuntiare alicui persone aliquid de eo quod ipse dixit in predicto suo dicto coram suprascripto inquisi­tore",
       "actants": [
         {
           "id": "15b13fe8-ed3f-4e8b-959f-812742ade355",
-          "actant": "R0006_P0216",
+          "entityId": "R0006_P0216",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -163492,7 +163492,7 @@
       "actions": [
         {
           "id": "caf9d115-b611-410a-9331-130ebf5d8c87",
-          "action": "A0121",
+          "actionId": "A0121",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -163504,13 +163504,13 @@
           "props": []
         }
       ],
-      "territory": { "id": "T107-1-03", "order": 130 },
+      "territory": { "territoryId": "T107-1-03", "order": 130 },
       "tags": [],
       "text": "et quod die crastina, inmediate post missam, debeat comparere coram suprascripto inquisitore apud Sanctum Eustorgium",
       "actants": [
         {
           "id": "ea6449b8-4408-4943-adb9-4bb2a10e0319",
-          "actant": "R0006_P0216",
+          "entityId": "R0006_P0216",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -163576,7 +163576,7 @@
       "actions": [
         {
           "id": "83e3de8e-0f78-4727-b854-9a494c7ab860",
-          "action": "A0179",
+          "actionId": "A0179",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -163588,13 +163588,13 @@
           "props": []
         }
       ],
-      "territory": { "id": "T107-1-03", "order": 131 },
+      "territory": { "territoryId": "T107-1-03", "order": 131 },
       "tags": [],
       "text": "Actum ut supra, suprascripto anno et die",
       "actants": [
         {
           "id": "fad19a83-e2ca-4009-88d8-3ed20cf6dd82",
-          "actant": "T107-1-03",
+          "entityId": "T107-1-03",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -163607,7 +163607,7 @@
         },
         {
           "id": "5f6cc3ab-c07a-4c7d-863c-3d09e1535981",
-          "actant": "R0006_P0092",
+          "entityId": "R0006_P0092",
           "position": "a1",
           "elvl": "2",
           "logic": "1",
@@ -163673,7 +163673,7 @@
       "actions": [
         {
           "id": "6bfac39c-fe9c-4b0a-9e08-0fcf3550ef7a",
-          "action": "A0181",
+          "actionId": "A0181",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -163685,13 +163685,13 @@
           "props": []
         }
       ],
-      "territory": { "id": "T107-1-03", "order": 132 },
+      "territory": { "territoryId": "T107-1-03", "order": 132 },
       "tags": [],
       "text": "NS",
       "actants": [
         {
           "id": "3d71f8ae-b8a3-40c1-be84-10d416df1854",
-          "actant": "T107-1-03",
+          "entityId": "T107-1-03",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -163704,7 +163704,7 @@
         },
         {
           "id": "12de568b-6bf5-47ea-ab6e-90ac5a2b6da5",
-          "actant": "R0006_P0213",
+          "entityId": "R0006_P0213",
           "position": "a1",
           "elvl": "2",
           "logic": "1",
@@ -163770,7 +163770,7 @@
       "actions": [
         {
           "id": "14c9f36a-2db7-4011-9794-ffeb2a4b0b3c",
-          "action": "A0093",
+          "actionId": "A0093",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -163782,13 +163782,13 @@
           "props": []
         }
       ],
-      "territory": { "id": "", "order": 133 },
+      "territory": { "territoryId": "", "order": 133 },
       "tags": [],
       "text": "Abiuratio et obligatio Bellacare uxoris ser Bonadei Karentani",
       "actants": [
         {
           "id": "92401a33-e9ec-4b88-87e1-6c1c8eebb584",
-          "actant": "T107-1-04",
+          "entityId": "T107-1-04",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -163801,7 +163801,7 @@
         },
         {
           "id": "168e8bb4-a6b8-4291-920b-5b15330c993e",
-          "actant": "R0010_C0335",
+          "entityId": "R0010_C0335",
           "position": "a1",
           "elvl": "1",
           "logic": "1",
@@ -163814,7 +163814,7 @@
         },
         {
           "id": "f9b318d1-1151-4cbe-8921-99a9170af675",
-          "actant": "R0010_C0076",
+          "entityId": "R0010_C0076",
           "position": "a2",
           "elvl": "1",
           "logic": "1",
@@ -163827,7 +163827,7 @@
         },
         {
           "id": "7a471c1e-7839-4232-9ebb-7733dac6f237",
-          "actant": "R0010_C0077",
+          "entityId": "R0010_C0077",
           "position": "a2",
           "elvl": "1",
           "logic": "1",
@@ -163893,7 +163893,7 @@
       "actions": [
         {
           "id": "09dbef85-6754-4eab-be98-ddce10486e2d",
-          "action": "A0164",
+          "actionId": "A0164",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -163905,13 +163905,13 @@
           "props": []
         }
       ],
-      "territory": { "id": "", "order": 134 },
+      "territory": { "territoryId": "", "order": 134 },
       "tags": [],
       "text": "Abiuratio et obligatio Bellacare",
       "actants": [
         {
           "id": "a834a1f6-7ec7-4c0c-a4eb-14571885908a",
-          "actant": "R0006_P0033",
+          "entityId": "R0006_P0033",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -163924,7 +163924,7 @@
         },
         {
           "id": "5cebf70c-2aa2-48ba-94f8-e6da3e4741f6",
-          "actant": "T107-1-04",
+          "entityId": "T107-1-04",
           "position": "a1",
           "elvl": "1",
           "logic": "1",
@@ -163990,7 +163990,7 @@
       "actions": [
         {
           "id": "dd578743-0846-41eb-afc8-d0c4ddcb7bcd",
-          "action": "A0087",
+          "actionId": "A0087",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -164002,13 +164002,13 @@
           "props": []
         }
       ],
-      "territory": { "id": "", "order": 135 },
+      "territory": { "territoryId": "", "order": 135 },
       "tags": [],
       "text": "Bellacare uxoris ser Bonadei Karentani",
       "actants": [
         {
           "id": "9526a31e-e3c5-4da0-85c6-a4e8a66eb2b9",
-          "actant": "R0006_P0033",
+          "entityId": "R0006_P0033",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -164021,7 +164021,7 @@
         },
         {
           "id": "0a1438f8-0892-4d1e-a64d-99347dd624d5",
-          "actant": "R0006_P0047",
+          "entityId": "R0006_P0047",
           "position": "a1",
           "elvl": "1",
           "logic": "1",
@@ -164087,7 +164087,7 @@
       "actions": [
         {
           "id": "63c0739d-2e8f-49e9-8eaa-e90f4c9de128",
-          "action": "A0093",
+          "actionId": "A0093",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -164099,13 +164099,13 @@
           "props": []
         }
       ],
-      "territory": { "id": "", "order": 136 },
+      "territory": { "territoryId": "", "order": 136 },
       "tags": [],
       "text": "ser Bonadei Karentani",
       "actants": [
         {
           "id": "b9c8f04b-ea34-4c91-8d43-d7280272ab9c",
-          "actant": "R0006_P0047",
+          "entityId": "R0006_P0047",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -164118,7 +164118,7 @@
         },
         {
           "id": "85614ba8-1fea-4b7e-8795-50dc849051f0",
-          "actant": "R0010_C0329",
+          "entityId": "R0010_C0329",
           "position": "a1",
           "elvl": "1",
           "logic": "1",
@@ -164131,7 +164131,7 @@
         },
         {
           "id": "8c3a82fc-95c8-4f9c-8405-0103dd8c465c",
-          "actant": "R0010_C0195",
+          "entityId": "R0010_C0195",
           "position": "a2",
           "elvl": "1",
           "logic": "1",
@@ -164197,7 +164197,7 @@
       "actions": [
         {
           "id": "dc4d3da3-c6b7-404f-b69b-e26836136252",
-          "action": "A0093",
+          "actionId": "A0093",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -164209,13 +164209,13 @@
           "props": []
         }
       ],
-      "territory": { "id": "", "order": 137 },
+      "territory": { "territoryId": "", "order": 137 },
       "tags": [],
       "text": "Bellacara uxor ser Bonadei Karentani, civitatis Mediolani Porte Romane",
       "actants": [
         {
           "id": "585967d7-cad8-4149-b453-f30e6c5e74ba",
-          "actant": "R0006_P0033",
+          "entityId": "R0006_P0033",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -164228,7 +164228,7 @@
         },
         {
           "id": "b6a0ba45-2eeb-4940-93d2-78e8d7ef0f4e",
-          "actant": "R0010_C0398",
+          "entityId": "R0010_C0398",
           "position": "a1",
           "elvl": "1",
           "logic": "1",
@@ -164241,7 +164241,7 @@
         },
         {
           "id": "4b8e46a4-f86e-4fdc-9d15-f82fffa87f51",
-          "actant": "R0007_L0038",
+          "entityId": "R0007_L0038",
           "position": "a2",
           "elvl": "1",
           "logic": "1",
@@ -164307,7 +164307,7 @@
       "actions": [
         {
           "id": "714e29eb-304e-438e-bd5f-7c73b1852fec",
-          "action": "A0093",
+          "actionId": "A0093",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -164319,13 +164319,13 @@
           "props": []
         }
       ],
-      "territory": { "id": "", "order": 138 },
+      "territory": { "territoryId": "", "order": 138 },
       "tags": [],
       "text": "NA",
       "actants": [
         {
           "id": "7bcf5b70-947d-4e11-bf16-89228bb38c96",
-          "actant": "R0006_P0047",
+          "entityId": "R0006_P0047",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -164338,7 +164338,7 @@
         },
         {
           "id": "2b18e16b-f652-4f9d-aa95-431ff611c43b",
-          "actant": "R0010_C0398",
+          "entityId": "R0010_C0398",
           "position": "a1",
           "elvl": "1",
           "logic": "1",
@@ -164351,7 +164351,7 @@
         },
         {
           "id": "990f4d18-0f9c-48e1-b7c4-ab710ca6d9fa",
-          "actant": "R0007_L0038",
+          "entityId": "R0007_L0038",
           "position": "a2",
           "elvl": "1",
           "logic": "1",
@@ -164417,7 +164417,7 @@
       "actions": [
         {
           "id": "41d5273a-2ce7-41b2-b3a9-d6c3ed0baa6c",
-          "action": "A0120",
+          "actionId": "A0120",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -164429,13 +164429,13 @@
           "props": []
         }
       ],
-      "territory": { "id": "", "order": 139 },
+      "territory": { "territoryId": "", "order": 139 },
       "tags": [],
       "text": "citata per Balgarrum de Monteorfano",
       "actants": [
         {
           "id": "a87e6931-38b8-48f9-b75d-216be1b0425e",
-          "actant": "R0006_P0033",
+          "entityId": "R0006_P0033",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -164448,7 +164448,7 @@
         },
         {
           "id": "192edffb-a6ab-4112-8c26-3852210abcc2",
-          "actant": "R0006_P0029",
+          "entityId": "R0006_P0029",
           "position": "a1",
           "elvl": "1",
           "logic": "1",
@@ -164514,7 +164514,7 @@
       "actions": [
         {
           "id": "038e8062-1121-4b72-845e-b19ca3fe5fe4",
-          "action": "A0093",
+          "actionId": "A0093",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -164526,13 +164526,13 @@
           "props": []
         }
       ],
-      "territory": { "id": "", "order": 140 },
+      "territory": { "territoryId": "", "order": 140 },
       "tags": [],
       "text": "servitorem officii in­ quisitionis heretice pravitatis",
       "actants": [
         {
           "id": "7bb1e4cf-0411-41b2-b412-1f5ef4b311ed",
-          "actant": "R0010_C0131",
+          "entityId": "R0010_C0131",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -164545,7 +164545,7 @@
         },
         {
           "id": "8169953a-3208-45fe-8149-dff10c756efb",
-          "actant": "R0010_C0297",
+          "entityId": "R0010_C0297",
           "position": "a1",
           "elvl": "1",
           "logic": "1",
@@ -164558,7 +164558,7 @@
         },
         {
           "id": "74c3f989-0f93-4d74-8956-57ccc04c24f6",
-          "actant": "R0006_P0029",
+          "entityId": "R0006_P0029",
           "position": "a2",
           "elvl": "1",
           "logic": "1",
@@ -164626,7 +164626,7 @@
       "actions": [
         {
           "id": "24412a6e-e77f-4c93-b2c3-9f795929ecf8",
-          "action": "A0157",
+          "actionId": "A0157",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -164638,13 +164638,13 @@
           "props": []
         }
       ],
-      "territory": { "id": "", "order": 141 },
+      "territory": { "territoryId": "", "order": 141 },
       "tags": [],
       "text": "de mandato fratris Guidonis de Coche­nato ordinis Predicatorum, inquisitoris heretice pravitatis in Lombar­dia et Marchia Ianuensi auctoritate sedis apostolice deputati",
       "actants": [
         {
           "id": "cae136bc-d994-4fbb-8217-0631e2975d47",
-          "actant": "R0006_P0092",
+          "entityId": "R0006_P0092",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -164657,7 +164657,7 @@
         },
         {
           "id": "2afeab38-dbc5-4d5f-8213-66d7caabf164",
-          "actant": "R0006_P0029",
+          "entityId": "R0006_P0029",
           "position": "a1",
           "elvl": "1",
           "logic": "1",
@@ -164670,7 +164670,7 @@
         },
         {
           "id": "8957cc9c-2217-43d9-9f15-9b87103bf2a4",
-          "actant": "T107-1-04-006",
+          "entityId": "T107-1-04-006",
           "position": "a2",
           "elvl": "1",
           "logic": "1",
@@ -164736,7 +164736,7 @@
       "actions": [
         {
           "id": "72f0dbdc-cf1a-4762-9cca-06629c9a8146",
-          "action": "A0121",
+          "actionId": "A0121",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -164748,13 +164748,13 @@
           "props": []
         }
       ],
-      "territory": { "id": "", "order": 142 },
+      "territory": { "territoryId": "", "order": 142 },
       "tags": [],
       "text": "comparuit coram suprascripto fratre Guidone inquisitore",
       "actants": [
         {
           "id": "e6496a72-48fa-44c3-8883-340c8df66d2a",
-          "actant": "R0006_P0033",
+          "entityId": "R0006_P0033",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -164767,7 +164767,7 @@
         },
         {
           "id": "aaa47478-dbab-4a8c-8d58-6eb12a9db438",
-          "actant": "R0006_P0092",
+          "entityId": "R0006_P0092",
           "position": "a1",
           "elvl": "1",
           "logic": "1",
@@ -164833,7 +164833,7 @@
       "actions": [
         {
           "id": "a02c2780-4ed6-495d-a271-d3e0f2434f3f",
-          "action": "A0055",
+          "actionId": "A0055",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -164845,13 +164845,13 @@
           "props": []
         }
       ],
-      "territory": { "id": "", "order": 143 },
+      "territory": { "territoryId": "", "order": 143 },
       "tags": [],
       "text": "suprascripto fratre Guidone inquisitore",
       "actants": [
         {
           "id": "b05d40cc-50a8-46b3-a578-a3878314cab3",
-          "actant": "R0006_P0092",
+          "entityId": "R0006_P0092",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -164864,7 +164864,7 @@
         },
         {
           "id": "c16012b7-99de-47ab-b25b-c8943e4112ca",
-          "actant": "T107-1-04",
+          "entityId": "T107-1-04",
           "position": "a1",
           "elvl": "1",
           "logic": "1",
@@ -164930,7 +164930,7 @@
       "actions": [
         {
           "id": "53890781-7581-45da-8997-3305a3d7dd7a",
-          "action": "A0018",
+          "actionId": "A0018",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -164942,13 +164942,13 @@
           "props": []
         }
       ],
-      "territory": { "id": "", "order": 144 },
+      "territory": { "territoryId": "", "order": 144 },
       "tags": [],
       "text": "et abiuravit omnem heresim",
       "actants": [
         {
           "id": "bad13cb1-ca7c-4118-aaa4-c02c1248ec04",
-          "actant": "R0006_P0033",
+          "entityId": "R0006_P0033",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -164961,7 +164961,7 @@
         },
         {
           "id": "0ea60893-c453-4aef-8046-2e9aaf95eced",
-          "actant": "R0010_C0001",
+          "entityId": "R0010_C0001",
           "position": "a1",
           "elvl": "1",
           "logic": "1",
@@ -165027,7 +165027,7 @@
       "actions": [
         {
           "id": "4a659e63-0451-4c1c-a59b-b299f5c62369",
-          "action": "A0176",
+          "actionId": "A0176",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -165039,13 +165039,13 @@
           "props": []
         }
       ],
-      "territory": { "id": "", "order": 145 },
+      "territory": { "territoryId": "", "order": 145 },
       "tags": [],
       "text": "iuravit quoque dicere veritatem de se et de aliis de hiis que pertinent ad officium inquisitionis, et cetera, in omnibus et per omnia secundum modum et formam officii inquisitionis heretice pra­vitatis superius scriptam et sibi diligenter expositam et expressam et ei ad intelligendum datam",
       "actants": [
         {
           "id": "c1b2c308-82b2-4b0a-bc10-71d33da9c202",
-          "actant": "R0006_P0033",
+          "entityId": "R0006_P0033",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -165058,7 +165058,7 @@
         },
         {
           "id": "ca2c9f8f-6ede-4f29-b580-9fb2ec762bf4",
-          "actant": "R0010_C0196",
+          "entityId": "R0010_C0196",
           "position": "a1",
           "elvl": "1",
           "logic": "1",
@@ -165124,7 +165124,7 @@
       "actions": [
         {
           "id": "cce48e36-b92a-46c6-84b0-dbc8d828ea11",
-          "action": "A0122",
+          "actionId": "A0122",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -165136,13 +165136,13 @@
           "props": []
         }
       ],
-      "territory": { "id": "", "order": 146 },
+      "territory": { "territoryId": "", "order": 146 },
       "tags": [],
       "text": "sub pena librarum .XXV. imperialium et cetera, salvis tamen omnibus aliis cautionibus et obligationibus per eam factis et prestitis dicto officio inquisitionis",
       "actants": [
         {
           "id": "4a314e1e-3eec-4103-b56e-c28fdf400596",
-          "actant": "R0006_P0033",
+          "entityId": "R0006_P0033",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -165155,7 +165155,7 @@
         },
         {
           "id": "da25d2db-75d2-48ab-a8be-29cc9bf879b2",
-          "actant": "R0010_C0003",
+          "entityId": "R0010_C0003",
           "position": "a1",
           "elvl": "1",
           "logic": "1",
@@ -165168,7 +165168,7 @@
         },
         {
           "id": "28bd81d5-832a-49ec-9021-b4184cfca690",
-          "actant": "R0006_P0092",
+          "entityId": "R0006_P0092",
           "position": "a1",
           "elvl": "2",
           "logic": "1",
@@ -165181,7 +165181,7 @@
         },
         {
           "id": "9573f68c-e83b-4022-8006-690e7a638a89",
-          "actant": "R0010_C0128",
+          "entityId": "R0010_C0128",
           "position": "a2",
           "elvl": "1",
           "logic": "1",
@@ -165247,7 +165247,7 @@
       "actions": [
         {
           "id": "c32e03c1-87f4-4f57-b3ce-8e85a9fe7a77",
-          "action": "A0179",
+          "actionId": "A0179",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -165259,13 +165259,13 @@
           "props": []
         }
       ],
-      "territory": { "id": "", "order": 147 },
+      "territory": { "territoryId": "", "order": 147 },
       "tags": [],
       "text": "Actum in ecclesia Sancti Eustorgii fratrum Predicatorum de Me­diolano ... suprascripto anno et indictione, die martis .XXVI. mensis iulii",
       "actants": [
         {
           "id": "5ae4bc61-37aa-477f-8791-2643db8ddc16",
-          "actant": "T107-1-04",
+          "entityId": "T107-1-04",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -165278,7 +165278,7 @@
         },
         {
           "id": "0ecf0f14-869a-4fa0-a532-2a9fb107db1a",
-          "actant": "R0006_P0092",
+          "entityId": "R0006_P0092",
           "position": "a1",
           "elvl": "2",
           "logic": "1",
@@ -165344,7 +165344,7 @@
       "actions": [
         {
           "id": "a6dddfad-ede8-48fb-aeda-e0dd16fe1ded",
-          "action": "A0086",
+          "actionId": "A0086",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -165356,13 +165356,13 @@
           "props": []
         }
       ],
-      "territory": { "id": "", "order": 148 },
+      "territory": { "territoryId": "", "order": 148 },
       "tags": [],
       "text": "Interfuerunt ibi testes vocati et rogati, fratres Petrus de Marcellinis et Leonardus Pergamensis, ambo ordinis Predicatorum conventus Mediolani",
       "actants": [
         {
           "id": "b5cb8c10-1901-4c27-9955-f4b9e0f53e90",
-          "actant": "R0006_P0174",
+          "entityId": "R0006_P0174",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -165375,7 +165375,7 @@
         },
         {
           "id": "fc493797-f58b-4df8-aad4-2a1f8a28a224",
-          "actant": "R0006_P0128",
+          "entityId": "R0006_P0128",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -165388,7 +165388,7 @@
         },
         {
           "id": "af38d411-19b4-44e0-a4eb-f4e4eb9214cb",
-          "actant": "T107-1-04",
+          "entityId": "T107-1-04",
           "position": "a1",
           "elvl": "1",
           "logic": "1",
@@ -165454,7 +165454,7 @@
       "actions": [
         {
           "id": "924e1485-610c-4783-b70e-0e8b9388aebc",
-          "action": "A0181",
+          "actionId": "A0181",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -165466,13 +165466,13 @@
           "props": []
         }
       ],
-      "territory": { "id": "", "order": 149 },
+      "territory": { "territoryId": "", "order": 149 },
       "tags": [],
       "text": "Traditum per Beltramum Salvagnium notarium dicti officii",
       "actants": [
         {
           "id": "54bf790d-2b07-4345-b96c-09a23dc14f95",
-          "actant": "T107-1-04",
+          "entityId": "T107-1-04",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -165485,7 +165485,7 @@
         },
         {
           "id": "1a5adf40-e254-4f69-bced-ef2aefc78eac",
-          "actant": "R0006_P0213",
+          "entityId": "R0006_P0213",
           "position": "a1",
           "elvl": "1",
           "logic": "1",
@@ -165551,7 +165551,7 @@
       "actions": [
         {
           "id": "bcd3c72b-fb26-4fee-b9ac-ad93b4b6f92d",
-          "action": "",
+          "actionId": "",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -165563,13 +165563,13 @@
           "props": []
         }
       ],
-      "territory": { "id": "", "order": 150 },
+      "territory": { "territoryId": "", "order": 150 },
       "tags": [],
       "text": "",
       "actants": [
         {
           "id": "cb9d7137-97e5-4ed0-b025-57162773401f",
-          "actant": "R0006_P0128",
+          "entityId": "R0006_P0128",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -165582,7 +165582,7 @@
         },
         {
           "id": "c2a26754-28a2-47fc-a016-6d5e85509ce5",
-          "actant": "R0006_P0174",
+          "entityId": "R0006_P0174",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -165648,7 +165648,7 @@
       "actions": [
         {
           "id": "3e0dd9db-d699-4488-850f-f6632ffa9bf4",
-          "action": "",
+          "actionId": "",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -165660,7 +165660,7 @@
           "props": []
         }
       ],
-      "territory": { "id": "", "order": 151 },
+      "territory": { "territoryId": "", "order": 151 },
       "tags": [],
       "text": "",
       "actants": []
@@ -165718,7 +165718,7 @@
       "actions": [
         {
           "id": "2b6ddd71-2549-4361-8f21-3a1aaae8b379",
-          "action": "",
+          "actionId": "",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -165730,7 +165730,7 @@
           "props": []
         }
       ],
-      "territory": { "id": "", "order": 152 },
+      "territory": { "territoryId": "", "order": 152 },
       "tags": [],
       "text": "",
       "actants": []
@@ -165788,7 +165788,7 @@
       "actions": [
         {
           "id": "98d48e15-537a-4351-a5fa-3e1e399f4f6d",
-          "action": "",
+          "actionId": "",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -165800,7 +165800,7 @@
           "props": []
         }
       ],
-      "territory": { "id": "", "order": 153 },
+      "territory": { "territoryId": "", "order": 153 },
       "tags": [],
       "text": "",
       "actants": []
@@ -165858,7 +165858,7 @@
       "actions": [
         {
           "id": "c40e3b54-aad6-4488-9fa9-1cb05fb7bd33",
-          "action": "",
+          "actionId": "",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -165870,7 +165870,7 @@
           "props": []
         }
       ],
-      "territory": { "id": "", "order": 154 },
+      "territory": { "territoryId": "", "order": 154 },
       "tags": [],
       "text": "",
       "actants": []
@@ -165928,7 +165928,7 @@
       "actions": [
         {
           "id": "bdb54913-31a1-4e1b-bfa0-28f38c517ff7",
-          "action": "",
+          "actionId": "",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -165940,7 +165940,7 @@
           "props": []
         }
       ],
-      "territory": { "id": "", "order": 155 },
+      "territory": { "territoryId": "", "order": 155 },
       "tags": [],
       "text": "",
       "actants": []
@@ -165998,7 +165998,7 @@
       "actions": [
         {
           "id": "6234bfa5-c141-4cf7-9703-3ef205cdd4f6",
-          "action": "",
+          "actionId": "",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -166010,7 +166010,7 @@
           "props": []
         }
       ],
-      "territory": { "id": "", "order": 156 },
+      "territory": { "territoryId": "", "order": 156 },
       "tags": [],
       "text": "",
       "actants": []
@@ -166068,7 +166068,7 @@
       "actions": [
         {
           "id": "c2f4873b-4732-4b82-abe8-e752a3ba7d9b",
-          "action": "",
+          "actionId": "",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -166080,7 +166080,7 @@
           "props": []
         }
       ],
-      "territory": { "id": "", "order": 157 },
+      "territory": { "territoryId": "", "order": 157 },
       "tags": [],
       "text": "",
       "actants": []
@@ -166138,7 +166138,7 @@
       "actions": [
         {
           "id": "d0e4f986-e108-4ab7-a305-10fe0dc3b075",
-          "action": "",
+          "actionId": "",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -166150,7 +166150,7 @@
           "props": []
         }
       ],
-      "territory": { "id": "", "order": 158 },
+      "territory": { "territoryId": "", "order": 158 },
       "tags": [],
       "text": "",
       "actants": []
@@ -166208,7 +166208,7 @@
       "actions": [
         {
           "id": "d7c1a052-0552-4558-83d5-8b47d29770af",
-          "action": "",
+          "actionId": "",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -166220,7 +166220,7 @@
           "props": []
         }
       ],
-      "territory": { "id": "", "order": 159 },
+      "territory": { "territoryId": "", "order": 159 },
       "tags": [],
       "text": "",
       "actants": []
@@ -166278,7 +166278,7 @@
       "actions": [
         {
           "id": "eba0f3dd-dbfa-48a8-9927-f24ba9fef13d",
-          "action": "",
+          "actionId": "",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -166290,7 +166290,7 @@
           "props": []
         }
       ],
-      "territory": { "id": "", "order": 160 },
+      "territory": { "territoryId": "", "order": 160 },
       "tags": [],
       "text": "",
       "actants": []
@@ -166348,7 +166348,7 @@
       "actions": [
         {
           "id": "b08ee292-da88-414b-9a00-e33dfb1492b7",
-          "action": "",
+          "actionId": "",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -166360,7 +166360,7 @@
           "props": []
         }
       ],
-      "territory": { "id": "", "order": 161 },
+      "territory": { "territoryId": "", "order": 161 },
       "tags": [],
       "text": "",
       "actants": []
@@ -166418,7 +166418,7 @@
       "actions": [
         {
           "id": "9eee4c81-cf3d-4b4c-9a57-556f2366645f",
-          "action": "",
+          "actionId": "",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -166430,7 +166430,7 @@
           "props": []
         }
       ],
-      "territory": { "id": "", "order": 162 },
+      "territory": { "territoryId": "", "order": 162 },
       "tags": [],
       "text": "",
       "actants": []
@@ -166488,7 +166488,7 @@
       "actions": [
         {
           "id": "31f5f946-a05a-4a00-8a39-9d1695863a96",
-          "action": "",
+          "actionId": "",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -166500,7 +166500,7 @@
           "props": []
         }
       ],
-      "territory": { "id": "", "order": 163 },
+      "territory": { "territoryId": "", "order": 163 },
       "tags": [],
       "text": "",
       "actants": []
@@ -166558,7 +166558,7 @@
       "actions": [
         {
           "id": "cb08c461-43e3-408e-a5e5-2ea65a7f701b",
-          "action": "",
+          "actionId": "",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -166570,7 +166570,7 @@
           "props": []
         }
       ],
-      "territory": { "id": "", "order": 164 },
+      "territory": { "territoryId": "", "order": 164 },
       "tags": [],
       "text": "",
       "actants": []
@@ -166628,7 +166628,7 @@
       "actions": [
         {
           "id": "cfa4f674-fd30-4c78-8f97-08f43bbf2834",
-          "action": "",
+          "actionId": "",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -166640,7 +166640,7 @@
           "props": []
         }
       ],
-      "territory": { "id": "", "order": 165 },
+      "territory": { "territoryId": "", "order": 165 },
       "tags": [],
       "text": "",
       "actants": []
@@ -166698,7 +166698,7 @@
       "actions": [
         {
           "id": "d9accdda-ce1a-4e8f-b86c-5ce13af285f2",
-          "action": "",
+          "actionId": "",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -166710,7 +166710,7 @@
           "props": []
         }
       ],
-      "territory": { "id": "", "order": 166 },
+      "territory": { "territoryId": "", "order": 166 },
       "tags": [],
       "text": "",
       "actants": []
@@ -166768,7 +166768,7 @@
       "actions": [
         {
           "id": "e52176b5-6fcc-4e0a-a12a-ae622ff3c834",
-          "action": "",
+          "actionId": "",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -166780,7 +166780,7 @@
           "props": []
         }
       ],
-      "territory": { "id": "", "order": 167 },
+      "territory": { "territoryId": "", "order": 167 },
       "tags": [],
       "text": "",
       "actants": []
@@ -166838,7 +166838,7 @@
       "actions": [
         {
           "id": "82321b34-0948-452f-af2a-3c2b8d7f7347",
-          "action": "",
+          "actionId": "",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -166850,7 +166850,7 @@
           "props": []
         }
       ],
-      "territory": { "id": "", "order": 168 },
+      "territory": { "territoryId": "", "order": 168 },
       "tags": [],
       "text": "",
       "actants": []
@@ -166908,7 +166908,7 @@
       "actions": [
         {
           "id": "e6f6f9f1-f3dd-4f01-9560-702d2b41b12f",
-          "action": "",
+          "actionId": "",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -166920,7 +166920,7 @@
           "props": []
         }
       ],
-      "territory": { "id": "", "order": 169 },
+      "territory": { "territoryId": "", "order": 169 },
       "tags": [],
       "text": "",
       "actants": []
@@ -166978,7 +166978,7 @@
       "actions": [
         {
           "id": "6a04bdaa-34d6-4abe-a077-66cce4601200",
-          "action": "",
+          "actionId": "",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -166990,7 +166990,7 @@
           "props": []
         }
       ],
-      "territory": { "id": "", "order": 170 },
+      "territory": { "territoryId": "", "order": 170 },
       "tags": [],
       "text": "",
       "actants": []
@@ -167048,7 +167048,7 @@
       "actions": [
         {
           "id": "52c851f4-a20c-4552-8eb4-b5b0742b0aa7",
-          "action": "",
+          "actionId": "",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -167060,7 +167060,7 @@
           "props": []
         }
       ],
-      "territory": { "id": "", "order": 171 },
+      "territory": { "territoryId": "", "order": 171 },
       "tags": [],
       "text": "",
       "actants": []
@@ -167118,7 +167118,7 @@
       "actions": [
         {
           "id": "89887d92-b999-4b74-b742-695813be85cc",
-          "action": "",
+          "actionId": "",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -167130,7 +167130,7 @@
           "props": []
         }
       ],
-      "territory": { "id": "", "order": 172 },
+      "territory": { "territoryId": "", "order": 172 },
       "tags": [],
       "text": "",
       "actants": []
@@ -167188,7 +167188,7 @@
       "actions": [
         {
           "id": "3977cf48-5c05-4cdd-b8c6-1d8e8f59b9d5",
-          "action": "",
+          "actionId": "",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -167200,7 +167200,7 @@
           "props": []
         }
       ],
-      "territory": { "id": "", "order": 173 },
+      "territory": { "territoryId": "", "order": 173 },
       "tags": [],
       "text": "",
       "actants": []
@@ -167258,7 +167258,7 @@
       "actions": [
         {
           "id": "302fb354-d801-472d-a93a-45cc93474b3c",
-          "action": "",
+          "actionId": "",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -167270,7 +167270,7 @@
           "props": []
         }
       ],
-      "territory": { "id": "", "order": 174 },
+      "territory": { "territoryId": "", "order": 174 },
       "tags": [],
       "text": "",
       "actants": []
@@ -167328,7 +167328,7 @@
       "actions": [
         {
           "id": "23efae53-c630-4d22-a523-3728306c0e03",
-          "action": "",
+          "actionId": "",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -167340,7 +167340,7 @@
           "props": []
         }
       ],
-      "territory": { "id": "", "order": 175 },
+      "territory": { "territoryId": "", "order": 175 },
       "tags": [],
       "text": "",
       "actants": []
@@ -167398,7 +167398,7 @@
       "actions": [
         {
           "id": "fbc62d56-e160-4d5d-ba9a-d22b6be133ca",
-          "action": "",
+          "actionId": "",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -167410,7 +167410,7 @@
           "props": []
         }
       ],
-      "territory": { "id": "", "order": 176 },
+      "territory": { "territoryId": "", "order": 176 },
       "tags": [],
       "text": "",
       "actants": []
@@ -167468,7 +167468,7 @@
       "actions": [
         {
           "id": "65cfeafb-4e22-4e81-900d-a80092d5e509",
-          "action": "",
+          "actionId": "",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -167480,7 +167480,7 @@
           "props": []
         }
       ],
-      "territory": { "id": "", "order": 177 },
+      "territory": { "territoryId": "", "order": 177 },
       "tags": [],
       "text": "",
       "actants": []
@@ -167538,7 +167538,7 @@
       "actions": [
         {
           "id": "6c7b2b12-e539-4881-9683-7230c628e1c9",
-          "action": "",
+          "actionId": "",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -167550,7 +167550,7 @@
           "props": []
         }
       ],
-      "territory": { "id": "", "order": 178 },
+      "territory": { "territoryId": "", "order": 178 },
       "tags": [],
       "text": "",
       "actants": []
@@ -167608,7 +167608,7 @@
       "actions": [
         {
           "id": "b0a147a9-7705-4faa-a828-434036df13ec",
-          "action": "",
+          "actionId": "",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -167620,7 +167620,7 @@
           "props": []
         }
       ],
-      "territory": { "id": "", "order": 179 },
+      "territory": { "territoryId": "", "order": 179 },
       "tags": [],
       "text": "",
       "actants": []
@@ -167678,7 +167678,7 @@
       "actions": [
         {
           "id": "316adf88-5325-450c-8d6e-ffc8b36b23f7",
-          "action": "",
+          "actionId": "",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -167690,7 +167690,7 @@
           "props": []
         }
       ],
-      "territory": { "id": "", "order": 180 },
+      "territory": { "territoryId": "", "order": 180 },
       "tags": [],
       "text": "",
       "actants": []
@@ -167748,7 +167748,7 @@
       "actions": [
         {
           "id": "feb762fd-1157-4227-ab30-31288875009d",
-          "action": "",
+          "actionId": "",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -167760,7 +167760,7 @@
           "props": []
         }
       ],
-      "territory": { "id": "", "order": 181 },
+      "territory": { "territoryId": "", "order": 181 },
       "tags": [],
       "text": "",
       "actants": []
@@ -167818,7 +167818,7 @@
       "actions": [
         {
           "id": "fc41b49b-b6d4-428d-ab1b-1b488861f8f0",
-          "action": "",
+          "actionId": "",
           "elvl": "1",
           "certainty": "0",
           "logic": "1",
@@ -167830,7 +167830,7 @@
           "props": []
         }
       ],
-      "territory": { "id": "", "order": 182 },
+      "territory": { "territoryId": "", "order": 182 },
       "tags": [],
       "text": "",
       "actants": []

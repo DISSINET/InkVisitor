@@ -529,7 +529,7 @@ class Statement extends Entity implements IStatement {
         class: EntityClass.Statement,
       })
       .filter((row: RDatum) => {
-        return row("data")("territory")("id").eq(territoryId);
+        return row("data")("territory")("territoryId").eq(territoryId);
       })
       .run(db);
 
@@ -609,20 +609,20 @@ class Statement extends Entity implements IStatement {
           row("data")("actions").contains((action: RDatum) =>
             action("props").contains((entry: RDatum) =>
               rethink.or(
-                entry("value")("id").eq(entityId),
-                entry("type")("id").eq(entityId),
+                entry("value")("entityId").eq(entityId),
+                entry("type")("entityId").eq(entityId),
                 entry("children").contains((ch1: RDatum) =>
                   rethink.or(
-                    ch1("value")("id").eq(entityId),
-                    ch1("type")("id").eq(entityId),
+                    ch1("value")("entityId").eq(entityId),
+                    ch1("type")("entityId").eq(entityId),
                     ch1("children").contains((ch2: RDatum) =>
                       rethink.or(
-                        ch2("value")("id").eq(entityId),
-                        ch2("type")("id").eq(entityId),
+                        ch2("value")("entityId").eq(entityId),
+                        ch2("type")("entityId").eq(entityId),
                         ch2("children").contains((ch3: RDatum) =>
                           rethink.or(
-                            ch3("value")("id").eq(entityId),
-                            ch3("type")("id").eq(entityId)
+                            ch3("value")("entityId").eq(entityId),
+                            ch3("type")("entityId").eq(entityId)
                           )
                         )
                       )
@@ -635,20 +635,20 @@ class Statement extends Entity implements IStatement {
           row("data")("actants").contains((actant: RDatum) =>
             actant("props").contains((prop: RDatum) =>
               rethink.or(
-                prop("value")("id").eq(entityId),
-                prop("type")("id").eq(entityId),
+                prop("value")("entityId").eq(entityId),
+                prop("type")("entityId").eq(entityId),
                 prop("children").contains((ch1: RDatum) =>
                   rethink.or(
-                    ch1("value")("id").eq(entityId),
-                    ch1("type")("id").eq(entityId),
+                    ch1("value")("entityId").eq(entityId),
+                    ch1("type")("entityId").eq(entityId),
                     ch1("children").contains((ch2: RDatum) =>
                       rethink.or(
-                        ch2("value")("id").eq(entityId),
-                        ch2("type")("id").eq(entityId),
+                        ch2("value")("entityId").eq(entityId),
+                        ch2("type")("entityId").eq(entityId),
                         ch2("children").contains((ch3: RDatum) =>
                           rethink.or(
-                            ch3("value")("id").eq(entityId),
-                            ch3("type")("id").eq(entityId)
+                            ch3("value")("entityId").eq(entityId),
+                            ch3("type")("entityId").eq(entityId)
                           )
                         )
                       )
@@ -686,9 +686,9 @@ class Statement extends Entity implements IStatement {
       .filter((row: RDatum) => {
         return rethink.and(
           row("data")("actants").contains((entry: RDatum) =>
-            entry("actant").eq(actantId)
+            entry("entityId").eq(actantId)
           ),
-          row("data")("territory")("id").eq("T0")
+          row("data")("territory")("territoryId").eq("T0")
         );
       })
       .run(db);
@@ -710,7 +710,7 @@ class Statement extends Entity implements IStatement {
         .filter({ class: EntityClass.Statement })
         .filter((row: any) => {
           return row("data")("actants").contains((actantElement: any) =>
-            actantElement("actant").eq(actantId)
+            actantElement("entityId").eq(actantId)
           );
         })
         .run(db);
@@ -735,7 +735,7 @@ class Statement extends Entity implements IStatement {
         .filter({ class: EntityClass.Statement })
         .filter((row: any) => {
           return row("data")("actions").contains((actantElement: any) =>
-            actantElement("action").eq(actantId)
+            actantElement("actionId").eq(actantId)
           );
         })
         .run(db);

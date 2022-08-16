@@ -174,7 +174,7 @@ class Territory extends Entity implements ITerritory {
       .filter((territory: RDatum) => {
         return rethink.and(
           territory("data")("parent").typeOf().eq("OBJECT"),
-          territory("data")("parent")("id").eq(this.id)
+          territory("data")("parent")("territoryId").eq(this.id)
         );
       })
       .run(db);

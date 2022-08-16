@@ -92,7 +92,7 @@ describe("Statement validate test", function () {
         data: {
           text: "text",
           territory: {
-            id: "id",
+            territoryId: "id",
             order: 1,
           },
           actions: [],
