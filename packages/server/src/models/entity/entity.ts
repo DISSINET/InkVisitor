@@ -145,20 +145,20 @@ export default class Entity implements IEntity, IDbModel {
       .filter((row: RDatum) => {
         return row("props").contains((entry: RDatum) =>
           rethink.or(
-            entry("value")("id").eq(entityId),
-            entry("type")("id").eq(entityId),
+            entry("value")("entityId").eq(entityId),
+            entry("type")("entityId").eq(entityId),
             entry("children").contains((ch1: RDatum) =>
               rethink.or(
-                ch1("value")("id").eq(entityId),
-                ch1("type")("id").eq(entityId),
+                ch1("value")("entityId").eq(entityId),
+                ch1("type")("entityId").eq(entityId),
                 ch1("children").contains((ch2: RDatum) =>
                   rethink.or(
-                    ch2("value")("id").eq(entityId),
-                    ch2("type")("id").eq(entityId),
+                    ch2("value")("entityId").eq(entityId),
+                    ch2("type")("entityId").eq(entityId),
                     ch2("children").contains((ch3: RDatum) =>
                       rethink.or(
-                        ch3("value")("id").eq(entityId),
-                        ch3("type")("id").eq(entityId)
+                        ch3("value")("entityId").eq(entityId),
+                        ch3("type")("entityId").eq(entityId)
                       )
                     )
                   )

@@ -43,7 +43,7 @@ describe("Territory validate test", function () {
         label: "label",
         data: {
           parent: {
-            id: "2",
+            territoryId: "2",
             order: 1,
           },
         },
