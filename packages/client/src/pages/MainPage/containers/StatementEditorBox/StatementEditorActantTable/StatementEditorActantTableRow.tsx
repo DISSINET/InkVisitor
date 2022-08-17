@@ -6,6 +6,10 @@ import {
   IResponseStatement,
   IStatementActant,
 } from "@shared/types";
+import {
+  IStatementClassification,
+  IStatementIdentification,
+} from "@shared/types/statement";
 import { AttributeIcon, Button, ButtonGroup } from "components";
 import {
   AttributeButtonGroup,
@@ -390,6 +394,29 @@ export const StatementEditorActantTableRow: React.FC<
     [statement]
   );
 
+  const renderClassifications = (
+    classifications: IStatementClassification[]
+  ) => {
+    return (
+      <p>
+        {classifications.map((classification, key) => {
+          return <div key={key}>{"classification"}</div>;
+        })}
+      </p>
+    );
+  };
+  const renderIdentifications = (
+    identifications: IStatementIdentification[]
+  ) => {
+    return (
+      <p>
+        {identifications.map((identification, key) => {
+          return <div key={key}>{"identification"}</div>;
+        })}
+      </p>
+    );
+  };
+
   return (
     <React.Fragment key={index}>
       <StyledTr
@@ -420,6 +447,8 @@ export const StatementEditorActantTableRow: React.FC<
           row.values.data.sActant.props,
           DraggedPropRowCategory.ACTANT
         )}
+      {renderClassifications(row.values.data.sActant.classifications)}
+      {renderIdentifications(row.values.data.sActant.identifications)}
     </React.Fragment>
   );
 };
