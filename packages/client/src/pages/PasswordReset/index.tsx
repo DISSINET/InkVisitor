@@ -1,14 +1,14 @@
 import api from "api";
 import { Box, Button, Input } from "components";
-import { Page } from "components/advanced";
 import React, { useState } from "react";
 import { toast } from "react-toastify";
 import {
   StyledButtonWrap,
-  StyledContentWrap,
+  StyledBoxWrap,
   StyledFaLock,
   StyledHeading,
   StyledInputRow,
+  StyledContent,
 } from "./PasswordResetStyles";
 
 interface PasswordResetPage {}
@@ -26,35 +26,37 @@ const PasswordResetPage: React.FC<PasswordResetPage> = ({}) => {
   };
 
   return (
-    <StyledContentWrap>
-      {activated && <Box>Account activated. Please set your password</Box>}
-      <StyledHeading>{"Reset password"}</StyledHeading>
-      <StyledInputRow>
-        <StyledFaLock size={14} />
-        <Input
-          placeholder="password"
-          password
-          onChangeFn={(text: string) => setPassword(text)}
-          value={password}
-          changeOnType
-          noBorder
-        />
-      </StyledInputRow>
-      <StyledInputRow>
-        <StyledFaLock size={14} />
-        <Input
-          placeholder="password repeat"
-          password
-          onChangeFn={(text: string) => setPasswordRepeat(text)}
-          value={passwordRepeat}
-          changeOnType
-          noBorder
-        />
-      </StyledInputRow>
-      <StyledButtonWrap>
-        <Button fullWidth label="Submit" color="success" onClick={submit} />
-      </StyledButtonWrap>
-    </StyledContentWrap>
+    <StyledContent>
+      <StyledBoxWrap>
+        {activated && <Box>Account activated. Please set your password</Box>}
+        <StyledHeading>{"Reset password"}</StyledHeading>
+        <StyledInputRow>
+          <StyledFaLock size={14} />
+          <Input
+            placeholder="password"
+            password
+            onChangeFn={(text: string) => setPassword(text)}
+            value={password}
+            changeOnType
+            noBorder
+          />
+        </StyledInputRow>
+        <StyledInputRow>
+          <StyledFaLock size={14} />
+          <Input
+            placeholder="password repeat"
+            password
+            onChangeFn={(text: string) => setPasswordRepeat(text)}
+            value={passwordRepeat}
+            changeOnType
+            noBorder
+          />
+        </StyledInputRow>
+        <StyledButtonWrap>
+          <Button fullWidth label="Submit" color="success" onClick={submit} />
+        </StyledButtonWrap>
+      </StyledBoxWrap>
+    </StyledContent>
   );
 };
 

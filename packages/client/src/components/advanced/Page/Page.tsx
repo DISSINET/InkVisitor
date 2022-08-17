@@ -14,7 +14,7 @@ import { toast } from "react-toastify";
 import { setUsername } from "redux/features/usernameSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { heightFooter, heightHeader } from "Theme/constants";
-import { StyledContent, StyledPage } from "./PageStyles";
+import { StyledPageContent, StyledPage } from "./PageStyles";
 
 interface Page {
   children?: React.ReactNode;
@@ -42,7 +42,6 @@ export const Page: React.FC<Page> = ({ children }) => {
   );
 
   const location = useLocation();
-  const centeredContent = location.pathname === "/password_reset";
   const disableRightHeader: boolean =
     location.pathname !== "/users" &&
     location.pathname !== "/acl" &&
@@ -104,13 +103,7 @@ export const Page: React.FC<Page> = ({ children }) => {
         }
       />
 
-      <StyledContent
-        height={contentHeight}
-        horizontalCenter={centeredContent}
-        verticalCenter={centeredContent}
-      >
-        {children}
-      </StyledContent>
+      <StyledPageContent height={contentHeight}>{children}</StyledPageContent>
 
       <MemoizedFooter height={heightFooter} />
 
