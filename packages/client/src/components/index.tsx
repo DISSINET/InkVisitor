@@ -26,7 +26,6 @@ import { Toast } from "./basic/Toast/Toast";
 import { Tooltip } from "./basic/Tooltip/Tooltip";
 import { AttributeIcon } from "./basic/AttributeIcon/AttributeIcon";
 import { Checkbox } from "./basic/Checkbox/Checkbox";
-import { PanelSeparator } from "./basic/PanelSeparator/PanelSeparator";
 import { Table } from "./basic/Table/Table";
 import { TypeBar } from "./basic/TypeBar/TypeBar";
 
@@ -59,6 +58,5 @@ export {
   MemoizedFooter,
   Submit,
   TypeBar,
-  PanelSeparator,
   Tooltip,
 };
