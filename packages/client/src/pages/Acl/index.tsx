@@ -52,7 +52,7 @@ const AclPage: React.FC<AclPage> = ({}) => {
     : {};
 
   return (
-    <Page>
+    <>
       {Object.keys(ctrls).map((ctrlName) => (
         <div
           key={ctrlName}
@@ -122,7 +122,7 @@ const AclPage: React.FC<AclPage> = ({}) => {
           )}
         </Box>
       )}
-    </Page>
+    </>
   );
 };
 

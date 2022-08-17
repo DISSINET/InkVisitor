@@ -17,21 +17,14 @@ export const StyledPage = styled.div<StyledPage>`
   flex-direction: column;
 `;
 
-interface StyledContent {
+interface StyledPageContent {
   height?: number;
-  horizontalCenter: boolean;
-  verticalCenter: boolean;
 }
-export const StyledContent = styled.div<StyledContent>`
+export const StyledPageContent = styled.div<StyledPageContent>`
   width: 100%;
   height: ${({ height }) => (height ? height : "")};
   overflow: hidden;
   display: flex;
-  justify-content: ${({ horizontalCenter }) =>
-    horizontalCenter ? "center" : ""};
-
-  align-items: ${({ verticalCenter }) => (verticalCenter ? "center" : "")};
-
   position: relative;
   background-color: ${({ theme }) => theme.color["gray"]["200"]};
 `;
