@@ -6,7 +6,7 @@ export interface IRelation {
   entityIds: string[];
 }
 
-export interface IRelationSuperClass extends IRelation {
+export interface IRelationSuperclass extends IRelation {
   type: RelationType.Superclass;
   entityIds: [string, string];
 }

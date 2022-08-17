@@ -22,7 +22,7 @@ export interface IResponseTagInfo extends IResponseEntity {
 
 // these are full of entity ids
 
-// for C, A: Find all IRelationSuperClass relations, where the entity is at the 1st position and then repeat the same with the entity on the 2nd position, return the chain of entity ids
+// for C, A: Find all IRelationSuperclass relations, where the entity is at the 1st position and then repeat the same with the entity on the 2nd position, return the chain of entity ids
 // for PLOGESTR: Find all  IRelationClassification relations, where the entity is at the 1st position, and take the C at the second position as the first element of the chain. Then repeat the procedure mentioned above for the C
 // this is not a tree! branches are dividing and merging on both sides, it is more a graph
 // e.g, O:icecream -> C:icecream -> C:sweet -> C:food -> C: everything,
