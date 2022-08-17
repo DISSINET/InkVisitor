@@ -5,6 +5,7 @@ import { EntityTag } from "./EntityTag/EntityTag";
 import { LoginModal, MemoizedLoginModal } from "./LoginModal/LoginModal";
 import { Page } from "./Page/Page";
 import { LeftHeader, RightHeader } from "./PageHeader/PageHeader";
+import { PanelSeparator } from "./PanelSeparator/PanelSeparator";
 import { UserCustomizationModal } from "./UserCustomizationModal/UserCustomizationModal";
 
 export {
@@ -12,10 +13,11 @@ export {
   EmptyTag,
   EntitySuggester,
   EntityTag,
+  LoginModal,
+  MemoizedLoginModal,
   Page,
   LeftHeader,
   RightHeader,
+  PanelSeparator,
   UserCustomizationModal,
-  LoginModal,
-  MemoizedLoginModal,
 };
