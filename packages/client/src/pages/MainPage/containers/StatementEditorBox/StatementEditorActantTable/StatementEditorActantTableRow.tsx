@@ -295,6 +295,32 @@ export const StatementEditorActantTableRow: React.FC<
             }}
           />
         )}
+        {userCanEdit && (
+          <Button
+            key="c"
+            icon={<FaPlus />}
+            label="c"
+            color="plain"
+            inverted={true}
+            tooltip="add classification"
+            onClick={() => {
+              console.log("adding Classification");
+            }}
+          />
+        )}
+        {userCanEdit && (
+          <Button
+            key="i"
+            icon={<FaPlus />}
+            label="i"
+            color="plain"
+            inverted={true}
+            tooltip="add identification"
+            onClick={() => {
+              console.log("adding Identification");
+            }}
+          />
+        )}
         {sActant.logic == "2" && (
           <Button
             key="neg"
@@ -303,6 +329,7 @@ export const StatementEditorActantTableRow: React.FC<
             inverted={true}
             noBorder
             icon={<AttributeIcon attributeName={"negation"} />}
+            onClick={() => setModalOpen(true)}
           />
         )}
         {sActant.bundleOperator && (

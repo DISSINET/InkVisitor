@@ -221,6 +221,7 @@ export const StatementEditorActionTableRow: React.FC<
             inverted={true}
             noBorder
             icon={<AttributeIcon attributeName={"negation"} />}
+            onClick={() => setModalOpen(true)}
           />
         )}
         {sAction.bundleOperator && (

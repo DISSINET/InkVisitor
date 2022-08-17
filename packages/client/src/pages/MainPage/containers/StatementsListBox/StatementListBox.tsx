@@ -370,7 +370,7 @@ export const StatementListBox: React.FC = () => {
           const subjectIds: string[] = row.values.data?.actants
             ? row.values.data.actants
                 .filter((a: any) => a.position === "s")
-                .map((a: any) => a.actant)
+                .map((a: any) => a.entityId)
             : [];
 
           const subjectObjects = subjectIds.map(
@@ -416,7 +416,7 @@ export const StatementListBox: React.FC = () => {
         Header: "Actions",
         Cell: ({ row }: Cell) => {
           const actionIds = row.values.data?.actions
-            ? row.values.data.actions.map((a: any) => a.action)
+            ? row.values.data.actions.map((a: any) => a.actionId)
             : [];
 
           const actionObjects: IAction[] = actionIds.map(
@@ -464,7 +464,7 @@ export const StatementListBox: React.FC = () => {
           const actantIds = row.values.data?.actants
             ? row.values.data.actants
                 .filter((a: any) => a.position !== "s")
-                .map((a: any) => a.actant)
+                .map((a: any) => a.entityId)
             : [];
           const isOversized = actantIds.length > 4;
 
