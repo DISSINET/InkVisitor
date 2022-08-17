@@ -22,7 +22,7 @@ import {
   IRelationPropertyReciprocal,
   IRelationRelated,
   IRelationSubjectActantReciprocal,
-  IRelationSuperClass,
+  IRelationSuperclass,
   IRelationSynonym,
   IRelationTroponym,
 } from "./relation";
@@ -87,7 +87,7 @@ export type {
   IRelationPropertyReciprocal,
   IRelationRelated,
   IRelationSubjectActantReciprocal,
-  IRelationSuperClass,
+  IRelationSuperclass,
   IRelationSynonym,
   IRelationTroponym,
   IStatementData,
