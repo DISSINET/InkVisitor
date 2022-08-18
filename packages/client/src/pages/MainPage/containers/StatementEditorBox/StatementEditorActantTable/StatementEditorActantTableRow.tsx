@@ -41,6 +41,8 @@ import { dndHoverFn } from "utils";
 import AttributesEditor from "../../AttributesEditor/AttributesEditor";
 import { PropGroup } from "../../PropGroup/PropGroup";
 import {
+  StyledGrid,
+  StyledGridColumn,
   StyledTagWrapper,
   StyledTd,
   StyledTr,
@@ -147,7 +149,7 @@ export const StatementEditorActantTableRow: React.FC<
       <StyledTagWrapper>
         <EntityTag
           entity={actant}
-          // fullWidth
+          fullWidth
           button={
             userCanEdit && (
               <Button
@@ -424,16 +426,16 @@ export const StatementEditorActantTableRow: React.FC<
 
   return (
     <React.Fragment key={index}>
-      <StyledTr ref={dropRef} opacity={opacity}>
+      <StyledGrid ref={dropRef} style={{ opacity }}>
         {userCanEdit && (
-          <td ref={dragRef} style={{ cursor: "move" }}>
+          <StyledGridColumn ref={dragRef} style={{ cursor: "move" }}>
             <FaGripVertical />
-          </td>
+          </StyledGridColumn>
         )}
-        <StyledTd>{renderActantCell()}</StyledTd>
-        <StyledTd>{renderPositionCell()}</StyledTd>
-        <StyledTd>{renderAttributesCell()}</StyledTd>
-      </StyledTr>
+        <StyledGridColumn>{renderActantCell()}</StyledGridColumn>
+        <StyledGridColumn>{renderPositionCell()}</StyledGridColumn>
+        <StyledGridColumn>{renderAttributesCell()}</StyledGridColumn>
+      </StyledGrid>
 
       {!(
         draggedActantRow.category &&

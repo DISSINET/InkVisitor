@@ -10,7 +10,7 @@ import {
   StyledReferencesListColumn,
   StyledReferenceValuePartLabel,
   StyledTagWrapper,
-} from "./EntityReferenceInputStyles";
+} from "./EntityReferenceTableStyles";
 
 interface EntityReferenceTableRow {
   reference: IReference;

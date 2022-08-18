@@ -202,6 +202,7 @@ export const PropGroup: React.FC<PropGroup> = ({
   );
 
   return props.length > 0 ? (
+    // TODO: change to no table elements
     <tr>
       <td colSpan={4}>
         <React.Fragment key={originId}>

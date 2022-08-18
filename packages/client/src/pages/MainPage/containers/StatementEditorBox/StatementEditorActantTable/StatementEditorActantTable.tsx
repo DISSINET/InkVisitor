@@ -120,10 +120,6 @@ export const StatementEditorActantTable: React.FC<
     [filteredActants]
   );
 
-  if (rows.length > 0) {
-    console.log(rows);
-  }
-
   return (
     <>
       {filteredActants.length > 0 &&
@@ -167,7 +163,6 @@ export const StatementEditorActantTable: React.FC<
               prepareRow(row);
               return (
                 <StatementEditorActantTableRow
-                  handleClick={handleRowClick}
                   index={i}
                   row={row}
                   statement={statement}
