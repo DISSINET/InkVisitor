@@ -12,6 +12,7 @@ import {
 } from "./StatementEditorActantTableStyles";
 
 interface FilteredActantObject {
+  id: number;
   data: { actant: IEntity | undefined; sActant: IStatementActant };
 }
 interface StatementEditorActantTable {
@@ -47,10 +48,12 @@ export const StatementEditorActantTable: React.FC<
   >([]);
 
   useMemo(() => {
-    const filteredActants = statement.data.actants.map((sActant, key) => {
-      const actant = statement.entities[sActant.entityId];
-      return { id: key, data: { actant, sActant } };
-    });
+    const filteredActants: FilteredActantObject[] = statement.data.actants.map(
+      (sActant, key) => {
+        const actant = statement.entities[sActant.entityId];
+        return { id: key, data: { actant, sActant } };
+      }
+    );
     setFilteredActants(filteredActants);
   }, [statement]);
 
