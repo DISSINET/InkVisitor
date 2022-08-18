@@ -1,7 +1,12 @@
 import styled from "styled-components";
 
-interface StyledContent {}
-export const StyledContent = styled.div<StyledContent>`
+export const StyledContent = styled.div`
+  width: 100%;
+  display: flex;
+  justify-content: center;
+`;
+interface StyledBoxWrap {}
+export const StyledBoxWrap = styled.div<StyledBoxWrap>`
   width: 100%;
   width: 120rem;
   display: flex;

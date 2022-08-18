@@ -6,32 +6,27 @@ import {
   RightHeader,
   UserCustomizationModal,
 } from "components/advanced";
+import { useSearchParams } from "hooks";
 import React, { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "react-query";
+import { useLocation } from "react-router";
 import { toast } from "react-toastify";
 import { setUsername } from "redux/features/usernameSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { heightFooter, heightHeader } from "Theme/constants";
-import { StyledContent, StyledPage } from "./PageStyles";
+import { StyledPageContent, StyledPage } from "./PageStyles";
 
 interface Page {
   children?: React.ReactNode;
-  logOutCleanUp?: () => void;
-  disableRightHeader?: boolean;
-  centeredContent?: boolean;
 }
-export const Page: React.FC<Page> = ({
-  children,
-  logOutCleanUp = () => {},
-  disableRightHeader = false,
-  centeredContent = false,
-}) => {
+export const Page: React.FC<Page> = ({ children }) => {
   const isLoggedIn = api.isLoggedIn();
   const dispatch = useAppDispatch();
   const queryClient = useQueryClient();
   const username: string = useAppSelector((state) => state.username);
   const userId = localStorage.getItem("userid");
   const userRole = localStorage.getItem("userrole");
+  const { cleanAllParams } = useSearchParams();
 
   const layoutWidth: number = useAppSelector(
     (state) => state.layout.layoutWidth
@@ -45,6 +40,12 @@ export const Page: React.FC<Page> = ({
     /apps\/inkvisitor[-]?/,
     ""
   );
+
+  const location = useLocation();
+  const disableRightHeader: boolean =
+    location.pathname !== "/users" &&
+    location.pathname !== "/acl" &&
+    location.pathname !== "/";
 
   const {
     status: statusUser,
@@ -70,7 +71,7 @@ export const Page: React.FC<Page> = ({
       queryClient.removeQueries();
       toast.success("You've been successfully logged out!");
       //
-      logOutCleanUp();
+      cleanAllParams();
     },
   });
 
@@ -102,13 +103,7 @@ export const Page: React.FC<Page> = ({
         }
       />
 
-      <StyledContent
-        height={contentHeight}
-        horizontalCenter={centeredContent}
-        verticalCenter={centeredContent}
-      >
-        {children}
-      </StyledContent>
+      <StyledPageContent height={contentHeight}>{children}</StyledPageContent>
 
       <MemoizedFooter height={heightFooter} />
 

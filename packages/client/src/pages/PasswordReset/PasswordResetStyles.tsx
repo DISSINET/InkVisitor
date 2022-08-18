@@ -3,7 +3,14 @@ import styled from "styled-components";
 
 export const StyledButtonWrap = styled.div``;
 
-export const StyledContentWrap = styled.div`
+export const StyledContent = styled.div`
+  height: 100%;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+`;
+export const StyledBoxWrap = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
