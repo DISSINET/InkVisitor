@@ -48,7 +48,6 @@ export interface IRelationClassification extends IRelation {
 }
 export interface IRelationIdentification extends IRelation {
   type: RelationType.Identification;
-  logic: Logic;
   certainty: Certainty;
   entityIds: [string, string];
 }
