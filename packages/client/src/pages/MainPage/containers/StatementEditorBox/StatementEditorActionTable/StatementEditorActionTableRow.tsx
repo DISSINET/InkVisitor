@@ -155,7 +155,7 @@ export const StatementEditorActionTableRow: React.FC<
 
   const renderButtonsCell = () => {
     const { action, sAction } = row.values.data;
-    const propOriginId = row.values.data.sAction.action;
+    const propOriginId = row.values.data.sAction.actionId;
 
     return (
       <ButtonGroup noMarginRight>

@@ -32,7 +32,7 @@ export const StyledUsername = styled.div`
   cursor: pointer;
   font-weight: ${({ theme }) => theme.fontWeight["bold"]};
 `;
-export const StyledUserBox = styled.div`
+export const StyledRightHeader = styled.div`
   display: flex;
 `;
 export const StyledUser = styled.div`

@@ -1,14 +1,14 @@
 import api from "api";
 import { Box, Button, Input } from "components";
-import { Page } from "components/advanced";
 import React, { useState } from "react";
 import { toast } from "react-toastify";
 import {
   StyledButtonWrap,
-  StyledContentWrap,
+  StyledBoxWrap,
   StyledFaLock,
   StyledHeading,
   StyledInputRow,
+  StyledContent,
 } from "./PasswordResetStyles";
 
 interface PasswordResetPage {}
@@ -26,8 +26,8 @@ const PasswordResetPage: React.FC<PasswordResetPage> = ({}) => {
   };
 
   return (
-    <Page disableRightHeader centeredContent>
-      <StyledContentWrap>
+    <StyledContent>
+      <StyledBoxWrap>
         {activated && <Box>Account activated. Please set your password</Box>}
         <StyledHeading>{"Reset password"}</StyledHeading>
         <StyledInputRow>
@@ -55,8 +55,8 @@ const PasswordResetPage: React.FC<PasswordResetPage> = ({}) => {
         <StyledButtonWrap>
           <Button fullWidth label="Submit" color="success" onClick={submit} />
         </StyledButtonWrap>
-      </StyledContentWrap>
-    </Page>
+      </StyledBoxWrap>
+    </StyledContent>
   );
 };
 

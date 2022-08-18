@@ -281,7 +281,6 @@ export const StatementListBox: React.FC = () => {
           s.data.territory ? s.data.territory.order : 0
         );
         allOrders.sort((a, b) => (a && b ? (a > b ? 1 : -1) : 0));
-        const thisIndex = allOrders.indexOf(thisOrder);
 
         allOrders = allOrders.filter((o) => o !== thisOrder);
         allOrders.splice(index, 0, thisOrder);
@@ -297,7 +296,7 @@ export const StatementListBox: React.FC = () => {
         const res = await api.entityUpdate(statementToMove.id, {
           data: {
             territory: {
-              id: statementToMove.data.territory.territoryId,
+              territoryId: statementToMove.data.territory.territoryId,
               order: allOrders[index],
             },
           },
