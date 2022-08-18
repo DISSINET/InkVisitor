@@ -185,5 +185,5 @@ RelationRules[RelationType.Identification] = {
   multiple: true,
   cloudType: true,
   treeType: false,
-  attributes: [Logic, Certainty],
+  attributes: [Certainty],
 };
