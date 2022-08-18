@@ -1,20 +1,14 @@
 import { EntityClass } from "@shared/enums";
-import { IEntity, IResponseStatement, IStatementActant } from "@shared/types";
+import { IResponseStatement, IStatementActant } from "@shared/types";
 import update from "immutability-helper";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import { UseMutationResult } from "react-query";
-import { Column, Row, useExpanded, useTable } from "react-table";
+import { Column, useExpanded, useTable } from "react-table";
 import { FilteredActantObject } from "types";
 import { StatementEditorActantTableRow } from "./StatementEditorActantTableRow";
-import {
-  StyledTable,
-  StyledTh,
-  StyledTHead,
-} from "./StatementEditorActantTableStyles";
 
 interface StatementEditorActantTable {
   statement: IResponseStatement;
-  statementId: string;
   userCanEdit?: boolean;
   classEntitiesActant: EntityClass[];
   updateStatementDataMutation: UseMutationResult<any, unknown, object, unknown>;
@@ -28,7 +22,6 @@ export const StatementEditorActantTable: React.FC<
   StatementEditorActantTable
 > = ({
   statement,
-  statementId,
   userCanEdit = false,
   classEntitiesActant,
   updateStatementDataMutation,
@@ -144,46 +137,6 @@ export const StatementEditorActantTable: React.FC<
             />
           );
         })}
-      {/* {rows.length > 0 && (
-        <StyledTable {...getTableProps()}>
-          <StyledTHead>
-            {headerGroups.map((headerGroup, key) => (
-              <tr {...headerGroup.getHeaderGroupProps()} key={key}>
-                <th></th>
-                {headerGroup.headers.map((column, key) => (
-                  <StyledTh {...column.getHeaderProps()} key={key}>
-                    {column.render("Header")}
-                  </StyledTh>
-                ))}
-              </tr>
-            ))}
-          </StyledTHead>
-          <tbody {...getTableBodyProps()}>
-            {rows.map((row: Row, i: number) => {
-              prepareRow(row);
-              return (
-                <StatementEditorActantTableRow
-                  index={i}
-                  row={row}
-                  statement={statement}
-                  moveRow={moveRow}
-                  userCanEdit={userCanEdit}
-                  updateOrderFn={updateActantsOrder}
-                  visibleColumns={visibleColumns}
-                  classEntitiesActant={classEntitiesActant}
-                  updateStatementDataMutation={updateStatementDataMutation}
-                  addProp={addProp}
-                  updateProp={updateProp}
-                  removeProp={removeProp}
-                  movePropToIndex={movePropToIndex}
-                  territoryParentId={territoryParentId}
-                  {...row.getRowProps()}
-                />
-              );
-            })}
-          </tbody>
-        </StyledTable>
-      )} */}
     </>
   );
 };

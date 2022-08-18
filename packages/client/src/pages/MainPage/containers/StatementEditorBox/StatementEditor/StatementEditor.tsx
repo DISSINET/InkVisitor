@@ -129,7 +129,9 @@ export const StatementEditor: React.FC<StatementEditor> = ({
     ["territoryActants", statement.data.territory?.territoryId],
     async () => {
       if (statement.data.territory?.territoryId) {
-        const res = await api.entityIdsInTerritory(statement.data.territory.territoryId);
+        const res = await api.entityIdsInTerritory(
+          statement.data.territory.territoryId
+        );
         return res.data;
       } else {
         return [];
@@ -290,7 +292,8 @@ export const StatementEditor: React.FC<StatementEditor> = ({
 
     [...newStatementData.actants, ...newStatementData.actions].forEach(
       (actant: IStatementActant | IStatementAction) => {
-        const actantId = "entityId" in actant ? actant.entityId : actant.actionId;
+        const actantId =
+          "entityId" in actant ? actant.entityId : actant.actionId;
         // adding 1st level prop
         if (actantId === originId) {
           actant.props = [...actant.props, newProp];
@@ -572,7 +575,6 @@ export const StatementEditor: React.FC<StatementEditor> = ({
               <StatementEditorActionTable
                 userCanEdit={userCanEdit}
                 statement={statement}
-                statementId={statementId}
                 updateActionsMutation={updateStatementDataMutation}
                 addProp={addProp}
                 updateProp={updateProp}
@@ -607,7 +609,6 @@ export const StatementEditor: React.FC<StatementEditor> = ({
               <StatementEditorActantTable
                 statement={statement}
                 userCanEdit={userCanEdit}
-                statementId={statementId}
                 classEntitiesActant={classesActants}
                 updateStatementDataMutation={updateStatementDataMutation}
                 addProp={addProp}

@@ -9,9 +9,7 @@ import { StatementEditorActionTableRow } from "./StatementEditorActionTableRow";
 
 interface StatementEditorActionTable {
   statement: IResponseStatement;
-  statementId: string;
   userCanEdit?: boolean;
-  handleRowClick?: Function;
   updateActionsMutation: UseMutationResult<any, unknown, object, unknown>;
   addProp: (originId: string) => void;
   updateProp: (propId: string, changes: any) => void;
@@ -23,9 +21,7 @@ export const StatementEditorActionTable: React.FC<
   StatementEditorActionTable
 > = ({
   statement,
-  statementId,
   userCanEdit = false,
-  handleRowClick = () => {},
   updateActionsMutation,
   addProp,
   updateProp,
