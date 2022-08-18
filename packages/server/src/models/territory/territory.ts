@@ -118,8 +118,8 @@ class Territory extends Entity implements ITerritory {
     if (updateData["data"] && (updateData["data"] as any)["parent"]) {
       const parentData = (updateData["data"] as any)["parent"];
       let parentId: string;
-      if (parentData.id) {
-        parentId = parentData.id;
+      if (parentData.territoryId) {
+        parentId = parentData.territoryId;
       } else if (this.data.parent) {
         parentId = this.data.parent.territoryId;
       } else {
@@ -127,7 +127,7 @@ class Territory extends Entity implements ITerritory {
       }
 
       this.data.parent = new TerritoryParent({
-        id: parentId,
+        territoryId: parentId,
         order: Entity.determineOrder(parentData.order, this._siblings),
       });
       parentData.order = this.data.parent.order;

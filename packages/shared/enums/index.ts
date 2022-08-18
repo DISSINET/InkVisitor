@@ -228,4 +228,5 @@ export enum DbIndex {
   StatementEntities = "statement_entities",
   AuditEntityId = "entityId",
   EntityUsedTemplate = "usedTemplate",
+  PropsRecursive = "props.recursive",
 }
