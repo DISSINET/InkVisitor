@@ -34,6 +34,7 @@ import {
   DraggedActantRowItem,
   DraggedPropRowCategory,
   DragItem,
+  FilteredActantObject,
   ItemTypes,
 } from "types";
 import { dndHoverFn } from "utils";
@@ -46,7 +47,8 @@ import {
 } from "./StatementEditorActantTableStyles";
 
 interface StatementEditorActantTableRow {
-  row: any;
+  // row: any;
+  filteredActant: FilteredActantObject;
   index: number;
   moveRow: (dragIndex: number, hoverIndex: number) => void;
   userCanEdit?: boolean;
@@ -55,7 +57,6 @@ interface StatementEditorActantTableRow {
   updateProp: (propId: string, changes: any) => void;
   removeProp: (propId: string) => void;
   movePropToIndex: (propId: string, oldIndex: number, newIndex: number) => void;
-  handleClick: Function;
   visibleColumns: ColumnInstance<{}>[];
   statement: IResponseStatement;
   classEntitiesActant: EntityClass[];
@@ -66,13 +67,13 @@ interface StatementEditorActantTableRow {
 export const StatementEditorActantTableRow: React.FC<
   StatementEditorActantTableRow
 > = ({
-  row,
+  // row,
+  filteredActant,
   index,
   moveRow,
   statement,
   userCanEdit = false,
   updateOrderFn,
-  handleClick = () => {},
   visibleColumns,
   classEntitiesActant,
   updateStatementDataMutation,
@@ -96,7 +97,11 @@ export const StatementEditorActantTableRow: React.FC<
   });
 
   const [{ isDragging }, drag, preview] = useDrag({
-    item: { type: ItemTypes.ACTANT_ROW, index, id: row.values.id },
+    item: {
+      type: ItemTypes.ACTANT_ROW,
+      index,
+      id: filteredActant.id.toString(),
+    },
     collect: (monitor: DragSourceMonitor) => ({
       isDragging: monitor.isDragging(),
     }),
@@ -135,9 +140,9 @@ export const StatementEditorActantTableRow: React.FC<
       actant,
       sActant,
     }: {
-      actant: IEntity;
-      sActant: IStatementActant | any;
-    } = row.values.data;
+      actant?: IEntity;
+      sActant: IStatementActant;
+    } = filteredActant.data;
     return actant ? (
       <StyledTagWrapper>
         <EntityTag
@@ -180,7 +185,7 @@ export const StatementEditorActantTableRow: React.FC<
   };
 
   const renderPositionCell = () => {
-    const { sActant } = row.values.data;
+    const { sActant } = filteredActant.data;
     return (
       <AttributeButtonGroup
         disabled={!userCanEdit}
@@ -238,11 +243,11 @@ export const StatementEditorActantTableRow: React.FC<
       actant,
       sActant,
     }: {
-      actant: IEntity;
-      sActant: IStatementActant | any;
-    } = row.values.data;
+      actant?: IEntity;
+      sActant: IStatementActant;
+    } = filteredActant.data;
 
-    const propOriginId = row.values.data.sActant.entityId;
+    const propOriginId = filteredActant.data.sActant.entityId;
     return (
       <ButtonGroup noMarginRight>
         {sActant && (
@@ -255,7 +260,7 @@ export const StatementEditorActantTableRow: React.FC<
             userCanEdit={userCanEdit}
             data={{
               elvl: sActant.elvl,
-              certainty: sActant.certainty,
+              // certainty: sActant.certainty,
               logic: sActant.logic,
               virtuality: sActant.virtuality,
               partitivity: sActant.partitivity,
@@ -283,7 +288,7 @@ export const StatementEditorActantTableRow: React.FC<
             inverted={true}
             tooltip="remove actant row"
             onClick={() => {
-              removeActant(row.values.data.sActant.id);
+              removeActant(filteredActant.data.sActant.id);
             }}
           />
         )}
@@ -419,15 +424,7 @@ export const StatementEditorActantTableRow: React.FC<
 
   return (
     <React.Fragment key={index}>
-      <StyledTr
-        ref={dropRef}
-        opacity={opacity}
-        isOdd={Boolean(index % 2)}
-        isSelected={row.values.id === statementId}
-        onClick={() => {
-          handleClick(row.values.id);
-        }}
-      >
+      <StyledTr ref={dropRef} opacity={opacity}>
         {userCanEdit && (
           <td ref={dragRef} style={{ cursor: "move" }}>
             <FaGripVertical />
@@ -443,12 +440,12 @@ export const StatementEditorActantTableRow: React.FC<
         draggedActantRow.category === DraggedPropRowCategory.ACTANT
       ) &&
         renderPropGroup(
-          row.values.data.sActant.entityId,
-          row.values.data.sActant.props,
+          filteredActant.data.sActant.entityId,
+          filteredActant.data.sActant.props,
           DraggedPropRowCategory.ACTANT
         )}
-      {renderClassifications(row.values.data.sActant.classifications)}
-      {renderIdentifications(row.values.data.sActant.identifications)}
+      {renderClassifications(filteredActant.data.sActant.classifications)}
+      {renderIdentifications(filteredActant.data.sActant.identifications)}
     </React.Fragment>
   );
 };

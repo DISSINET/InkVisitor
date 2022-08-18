@@ -17,8 +17,6 @@ export const StyledTh = styled.th`
 `;
 
 interface StyledTr {
-  isOdd?: boolean;
-  isSelected?: boolean;
   opacity?: number;
 }
 export const StyledTr = styled.tr<StyledTr>`

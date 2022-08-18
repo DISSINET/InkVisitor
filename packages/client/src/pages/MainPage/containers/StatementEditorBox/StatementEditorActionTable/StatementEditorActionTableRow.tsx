@@ -38,7 +38,6 @@ interface StatementEditorActionTableRow {
   updateProp: (propId: string, changes: any) => void;
   removeProp: (propId: string) => void;
   movePropToIndex: (propId: string, oldIndex: number, newIndex: number) => void;
-  handleClick: Function;
   visibleColumns: ColumnInstance<{}>[];
   updateActionsMutation: UseMutationResult<any, unknown, object, unknown>;
   territoryParentId?: string;
@@ -58,7 +57,6 @@ export const StatementEditorActionTableRow: React.FC<
   removeProp,
   movePropToIndex,
   updateActionsMutation,
-  handleClick = () => {},
   visibleColumns,
   territoryParentId,
 }) => {
@@ -284,15 +282,7 @@ export const StatementEditorActionTableRow: React.FC<
 
   return (
     <React.Fragment key={index}>
-      <StyledTr
-        ref={dropRef}
-        opacity={opacity}
-        isOdd={Boolean(index % 2)}
-        isSelected={row.values.id === statementId}
-        onClick={() => {
-          handleClick(row.values.id);
-        }}
-      >
+      <StyledTr ref={dropRef} opacity={opacity}>
         {userCanEdit && (
           <td ref={dragRef} style={{ cursor: "move" }}>
             <FaGripVertical />

@@ -3,12 +3,10 @@ import update from "immutability-helper";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { UseMutationResult } from "react-query";
 import { Column, Row, useExpanded, useTable } from "react-table";
+import { FilteredActionObject } from "types";
 import { StyledTable } from "../StatementEditorActionTable/StatementEditorActionTableStyles";
 import { StatementEditorActionTableRow } from "./StatementEditorActionTableRow";
 
-interface FilteredActionObject {
-  data: { action: IEntity | undefined; sAction: IStatementAction };
-}
 interface StatementEditorActionTable {
   statement: IResponseStatement;
   statementId: string;
@@ -40,10 +38,12 @@ export const StatementEditorActionTable: React.FC<
   >([]);
 
   useEffect(() => {
-    const filteredActions = statement.data.actions.map((sAction, key) => {
-      const action = statement.entities[sAction.actionId];
-      return { id: key, data: { action, sAction } };
-    });
+    const filteredActions: FilteredActionObject[] = statement.data.actions.map(
+      (sAction, key) => {
+        const action = statement.entities[sAction.actionId];
+        return { id: key, data: { action, sAction } };
+      }
+    );
     setFilteredActions(filteredActions);
   }, [statement]);
 
@@ -122,7 +122,6 @@ export const StatementEditorActionTable: React.FC<
             prepareRow(row);
             return (
               <StatementEditorActionTableRow
-                handleClick={handleRowClick}
                 index={i}
                 row={row}
                 statement={statement}

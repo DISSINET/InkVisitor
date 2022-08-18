@@ -14,7 +14,7 @@ import {
   ExtendedEntityClass,
   EntityExtension,
 } from "@shared/enums";
-import { IEntity } from "@shared/types";
+import { IEntity, IStatementActant, IStatementAction } from "@shared/types";
 
 export const Colors = [
   "black",
@@ -291,4 +291,13 @@ export interface SuggesterItemToCreate {
   entityClass: EntityClass;
   detail?: string;
   territoryId?: string;
+}
+
+export interface FilteredActantObject {
+  id: number;
+  data: { actant?: IEntity; sActant: IStatementActant };
+}
+export interface FilteredActionObject {
+  id: number;
+  data: { action?: IEntity; sAction: IStatementAction };
 }

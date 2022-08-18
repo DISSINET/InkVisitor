@@ -4,6 +4,7 @@ import update from "immutability-helper";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { UseMutationResult } from "react-query";
 import { Column, Row, useExpanded, useTable } from "react-table";
+import { FilteredActantObject } from "types";
 import { StatementEditorActantTableRow } from "./StatementEditorActantTableRow";
 import {
   StyledTable,
@@ -11,15 +12,10 @@ import {
   StyledTHead,
 } from "./StatementEditorActantTableStyles";
 
-interface FilteredActantObject {
-  id: number;
-  data: { actant: IEntity | undefined; sActant: IStatementActant };
-}
 interface StatementEditorActantTable {
   statement: IResponseStatement;
   statementId: string;
   userCanEdit?: boolean;
-  handleRowClick?: Function;
   classEntitiesActant: EntityClass[];
   updateStatementDataMutation: UseMutationResult<any, unknown, object, unknown>;
   addProp: (originId: string) => void;
@@ -34,7 +30,6 @@ export const StatementEditorActantTable: React.FC<
   statement,
   statementId,
   userCanEdit = false,
-  handleRowClick = () => {},
   classEntitiesActant,
   updateStatementDataMutation,
   addProp,
@@ -125,9 +120,35 @@ export const StatementEditorActantTable: React.FC<
     [filteredActants]
   );
 
+  if (rows.length > 0) {
+    console.log(rows);
+  }
+
   return (
     <>
-      {rows.length > 0 && (
+      {filteredActants.length > 0 &&
+        filteredActants.map((sActant, key) => {
+          return (
+            <StatementEditorActantTableRow
+              key={key}
+              index={key}
+              filteredActant={sActant}
+              statement={statement}
+              moveRow={moveRow}
+              userCanEdit={userCanEdit}
+              updateOrderFn={updateActantsOrder}
+              visibleColumns={visibleColumns}
+              classEntitiesActant={classEntitiesActant}
+              updateStatementDataMutation={updateStatementDataMutation}
+              addProp={addProp}
+              updateProp={updateProp}
+              removeProp={removeProp}
+              movePropToIndex={movePropToIndex}
+              territoryParentId={territoryParentId}
+            />
+          );
+        })}
+      {/* {rows.length > 0 && (
         <StyledTable {...getTableProps()}>
           <StyledTHead>
             {headerGroups.map((headerGroup, key) => (
@@ -167,7 +188,7 @@ export const StatementEditorActantTable: React.FC<
             })}
           </tbody>
         </StyledTable>
-      )}
+      )} */}
     </>
   );
 };
