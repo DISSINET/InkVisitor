@@ -100,6 +100,8 @@ jobs:
       - name: Load image
         run: |
           ssh -tt ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}  -- "sh -c '
+          podman container prune -f &&
+          podman image prune -f &&
           rm -rf /var/tmp/docker-tar* &&
           podman rm inkvisitor-staging --force || true && 
           podman load -i /var/www/html/apps/inkvisitor-staging.tar.gz && 

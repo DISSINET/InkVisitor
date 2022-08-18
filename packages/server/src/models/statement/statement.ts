@@ -341,8 +341,8 @@ class Statement extends Entity implements IStatement {
       this.data.territory
     ) {
       const territoryData = (updateData["data"] as any).territory;
-      if (territoryData.id) {
-        this.data.territory.territoryId = territoryData.id;
+      if (territoryData.territoryId) {
+        this.data.territory.territoryId = territoryData.territoryId;
       }
       if (!this.data.territory.territoryId) {
         throw new InternalServerError("territory id has to be set");
@@ -389,12 +389,12 @@ class Statement extends Entity implements IStatement {
 
       const out: Record<number, IStatement> = {};
 
-      for (const ter of list) {
-        if (ter.id === this.id) {
+      for (const sibling of list) {
+        if (sibling.id === this.id) {
           continue;
         }
-        if (ter.data.territory) {
-          out[ter.data.territory.order] = ter;
+        if (sibling.data.territory) {
+          out[sibling.data.territory.order] = sibling;
         }
       }
 
