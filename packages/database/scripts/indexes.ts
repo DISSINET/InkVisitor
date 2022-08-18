@@ -5,24 +5,27 @@ const entitiesIndexes: ((table: RTable) => any)[] = [
   // if the prop object is missing value/type/children attrs, this wont work! model should handle this
   (table: RTable) =>
     table.indexCreate(
-      "props.recursive",
+      DbIndex.PropsRecursive,
       r
         .row("props")
         .concatMap((prop: RDatum) =>
           r
-            .expr([prop("value")("id"), prop("type")("id")])
+            .expr([prop("value")("entityId"), prop("type")("entityId")])
             .add(
               prop("children").concatMap((ch1: RDatum) =>
                 r
-                  .expr([ch1("value")("id"), ch1("type")("id")])
+                  .expr([ch1("value")("entityId"), ch1("type")("entityId")])
                   .add(
                     ch1("children").concatMap((ch2: RDatum) =>
                       r
-                        .expr([ch2("value")("id"), ch2("type")("id")])
+                        .expr([
+                          ch2("value")("entityId"),
+                          ch2("type")("entityId"),
+                        ])
                         .add(
                           ch2("children").concatMap((ch3: RDatum) => [
-                            ch3("value")("id"),
-                            ch3("type")("id"),
+                            ch3("value")("entityId"),
+                            ch3("type")("entityId"),
                           ]) as RValue
                         )
                     ) as RValue
@@ -37,7 +40,7 @@ const entitiesIndexes: ((table: RTable) => any)[] = [
   (table: RTable) =>
     table.indexCreate(
       DbIndex.StatementTerritory,
-      r.row("data")("territory")("id")
+      r.row("data")("territory")("territoryId")
     ),
   (table: RTable) =>
     table.indexCreate(
@@ -45,11 +48,11 @@ const entitiesIndexes: ((table: RTable) => any)[] = [
       function (row: RDatum) {
         return row("data")("actions")
           .map(function (a: RDatum) {
-            return a("action");
+            return a("actionId");
           })
           .add(
             row("data")("actants").map(function (a: RDatum) {
-              return a("actant");
+              return a("entityId");
             }) as any,
             row("data")("tags").map(function (t: RDatum) {
               return t;
