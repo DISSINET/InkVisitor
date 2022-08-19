@@ -44,12 +44,9 @@ import {
   StyledGrid,
   StyledGridColumn,
   StyledTagWrapper,
-  StyledTd,
-  StyledTr,
 } from "./StatementEditorActantTableStyles";
 
 interface StatementEditorActantTableRow {
-  // row: any;
   filteredActant: FilteredActantObject;
   index: number;
   moveRow: (dragIndex: number, hoverIndex: number) => void;

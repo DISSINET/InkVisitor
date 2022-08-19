@@ -1,10 +1,9 @@
-import { IEntity, IResponseStatement, IStatementAction } from "@shared/types";
+import { IResponseStatement, IStatementAction } from "@shared/types";
 import update from "immutability-helper";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { UseMutationResult } from "react-query";
-import { Column, Row, useExpanded, useTable } from "react-table";
+import { Column, useExpanded, useTable } from "react-table";
 import { FilteredActionObject } from "types";
-import { StyledTable } from "../StatementEditorActionTable/StatementEditorActionTableStyles";
 import { StatementEditorActionTableRow } from "./StatementEditorActionTableRow";
 
 interface StatementEditorActionTable {
@@ -112,7 +111,7 @@ export const StatementEditorActionTable: React.FC<
 
   return (
     <>
-      <StyledTable {...getTableProps()}>
+      {/* <StyledTable {...getTableProps()}>
         <tbody {...getTableBodyProps()}>
           {rows.map((row: Row, i: number) => {
             prepareRow(row);
@@ -136,7 +135,28 @@ export const StatementEditorActionTable: React.FC<
             );
           })}
         </tbody>
-      </StyledTable>
+      </StyledTable> */}
+
+      {filteredActions.length > 0 &&
+        filteredActions.map((filteredAction, key) => {
+          return (
+            <StatementEditorActionTableRow
+              index={key}
+              filteredAction={filteredAction}
+              statement={statement}
+              moveRow={moveRow}
+              userCanEdit={userCanEdit}
+              updateOrderFn={updateActionOrder}
+              visibleColumns={visibleColumns}
+              updateActionsMutation={updateActionsMutation}
+              addProp={addProp}
+              updateProp={updateProp}
+              removeProp={removeProp}
+              movePropToIndex={movePropToIndex}
+              territoryParentId={territoryParentId}
+            />
+          );
+        })}
     </>
   );
 };

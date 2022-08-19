@@ -20,15 +20,19 @@ import {
   DraggedActantRowItem,
   DraggedPropRowCategory,
   DragItem,
+  FilteredActionObject,
   ItemTypes,
 } from "types";
 import { dndHoverFn } from "utils";
 import AttributesEditor from "../../AttributesEditor/AttributesEditor";
 import { PropGroup } from "../../PropGroup/PropGroup";
-import { StyledTd, StyledTr } from "./StatementEditorActionTableStyles";
+import {
+  StyledGrid,
+  StyledGridColumn,
+} from "./StatementEditorActionTableStyles";
 
 interface StatementEditorActionTableRow {
-  row: any;
+  filteredAction: FilteredActionObject;
   index: number;
   moveRow: (dragIndex: number, hoverIndex: number) => void;
   statement: IResponseStatement;
@@ -46,7 +50,7 @@ interface StatementEditorActionTableRow {
 export const StatementEditorActionTableRow: React.FC<
   StatementEditorActionTableRow
 > = ({
-  row,
+  filteredAction,
   index,
   moveRow,
   statement,
@@ -93,7 +97,11 @@ export const StatementEditorActionTableRow: React.FC<
   });
 
   const [{ isDragging }, drag, preview] = useDrag({
-    item: { type: ItemTypes.ACTION_ROW, index, id: row.values.id },
+    item: {
+      type: ItemTypes.ACTION_ROW,
+      index,
+      id: filteredAction.id.toString(),
+    },
     collect: (monitor: DragSourceMonitor) => ({
       isDragging: monitor.isDragging(),
     }),
@@ -108,10 +116,10 @@ export const StatementEditorActionTableRow: React.FC<
   drag(dragRef);
 
   const renderActionCell = () => {
-    const { action, sAction } = row.values.data;
+    const { action, sAction } = filteredAction.data;
     return action ? (
       <EntityTag
-        // fullWidth
+        fullWidth
         entity={action}
         button={
           userCanEdit && (
@@ -152,8 +160,8 @@ export const StatementEditorActionTableRow: React.FC<
   const [modalOpen, setModalOpen] = useState<boolean>(false);
 
   const renderButtonsCell = () => {
-    const { action, sAction } = row.values.data;
-    const propOriginId = row.values.data.sAction.actionId;
+    const { action, sAction } = filteredAction.data;
+    const propOriginId = filteredAction.data.sAction.actionId;
 
     return (
       <ButtonGroup noMarginRight>
@@ -195,7 +203,7 @@ export const StatementEditorActionTableRow: React.FC<
             inverted={true}
             tooltip="remove action row"
             onClick={() => {
-              removeAction(row.values.data.sAction.id);
+              removeAction(filteredAction.data.sAction.id);
             }}
           />
         )}
@@ -282,23 +290,23 @@ export const StatementEditorActionTableRow: React.FC<
 
   return (
     <React.Fragment key={index}>
-      <StyledTr ref={dropRef} opacity={opacity}>
+      <StyledGrid ref={dropRef} style={{ opacity }}>
         {userCanEdit && (
           <td ref={dragRef} style={{ cursor: "move" }}>
             <FaGripVertical />
           </td>
         )}
-        <StyledTd>{renderActionCell()}</StyledTd>
-        <StyledTd>{renderButtonsCell()}</StyledTd>
-      </StyledTr>
+        <StyledGridColumn>{renderActionCell()}</StyledGridColumn>
+        <StyledGridColumn>{renderButtonsCell()}</StyledGridColumn>
+      </StyledGrid>
 
       {!(
         draggedActantRow.category &&
         draggedActantRow.category === DraggedPropRowCategory.ACTION
       ) &&
         renderPropGroup(
-          row.values.data.sAction.action,
-          row.values.data.sAction.props,
+          filteredAction.data.sAction.actionId,
+          filteredAction.data.sAction.props,
           DraggedPropRowCategory.ACTION
         )}
     </React.Fragment>

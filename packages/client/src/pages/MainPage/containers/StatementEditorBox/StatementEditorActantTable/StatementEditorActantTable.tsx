@@ -116,12 +116,12 @@ export const StatementEditorActantTable: React.FC<
   return (
     <>
       {filteredActants.length > 0 &&
-        filteredActants.map((sActant, key) => {
+        filteredActants.map((filteredActant, key) => {
           return (
             <StatementEditorActantTableRow
               key={key}
               index={key}
-              filteredActant={sActant}
+              filteredActant={filteredActant}
               statement={statement}
               moveRow={moveRow}
               userCanEdit={userCanEdit}
