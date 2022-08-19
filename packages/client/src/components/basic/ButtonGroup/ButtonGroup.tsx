@@ -5,9 +5,11 @@ interface ButtonGroup {
   noMarginRight?: boolean;
   column?: boolean;
   marginBottom?: boolean;
+  height?: number;
 }
 export const ButtonGroup = styled.div<ButtonGroup>`
   display: flex;
+  height: ${({ height }) => (height ? `${height / 10}rem` : "")};
   flex-direction: ${({ column }) => (column ? "column" : "row")};
   margin-bottom: ${({ marginBottom, theme }) =>
     marginBottom ? theme.space[2] : ""};

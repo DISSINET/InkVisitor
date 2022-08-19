@@ -131,7 +131,7 @@ export const StatementEditorActionTableRow: React.FC<
               color="plain"
               onClick={() => {
                 updateAction(sAction.id, {
-                  action: "",
+                  actionId: "",
                 });
               }}
             />
@@ -186,7 +186,7 @@ export const StatementEditorActionTableRow: React.FC<
               updateAction(sAction.id, newData);
             }}
             updateActantId={(newId: string) => {
-              updateAction(sAction.id, { action: newId });
+              updateAction(sAction.id, { actionId: newId });
             }}
             userCanEdit={userCanEdit}
             classEntitiesActant={[EntityClass.Action]}

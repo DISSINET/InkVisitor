@@ -248,7 +248,7 @@ export const StatementEditorActantTableRow: React.FC<
 
     const propOriginId = filteredActant.data.sActant.entityId;
     return (
-      <ButtonGroup noMarginRight>
+      <ButtonGroup noMarginRight height={19}>
         {sActant && (
           <AttributesEditor
             modalOpen={modalOpen}
@@ -259,7 +259,6 @@ export const StatementEditorActantTableRow: React.FC<
             userCanEdit={userCanEdit}
             data={{
               elvl: sActant.elvl,
-              // certainty: sActant.certainty,
               logic: sActant.logic,
               virtuality: sActant.virtuality,
               partitivity: sActant.partitivity,
@@ -271,7 +270,7 @@ export const StatementEditorActantTableRow: React.FC<
               updateActant(sActant.id, newData);
             }}
             updateActantId={(newId: string) => {
-              updateActant(sActant.id, { actant: newId });
+              updateActant(sActant.id, { entityId: newId });
             }}
             classEntitiesActant={classEntitiesActant}
             loading={updateStatementDataMutation.isLoading}

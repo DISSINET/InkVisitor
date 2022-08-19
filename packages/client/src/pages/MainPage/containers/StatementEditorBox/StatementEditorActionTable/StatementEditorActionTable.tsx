@@ -111,32 +111,6 @@ export const StatementEditorActionTable: React.FC<
 
   return (
     <>
-      {/* <StyledTable {...getTableProps()}>
-        <tbody {...getTableBodyProps()}>
-          {rows.map((row: Row, i: number) => {
-            prepareRow(row);
-            return (
-              <StatementEditorActionTableRow
-                index={i}
-                row={row}
-                statement={statement}
-                moveRow={moveRow}
-                userCanEdit={userCanEdit}
-                updateOrderFn={updateActionOrder}
-                visibleColumns={visibleColumns}
-                updateActionsMutation={updateActionsMutation}
-                addProp={addProp}
-                updateProp={updateProp}
-                removeProp={removeProp}
-                movePropToIndex={movePropToIndex}
-                territoryParentId={territoryParentId}
-                {...row.getRowProps()}
-              />
-            );
-          })}
-        </tbody>
-      </StyledTable> */}
-
       {filteredActions.length > 0 &&
         filteredActions.map((filteredAction, key) => {
           return (
