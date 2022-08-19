@@ -292,9 +292,9 @@ export const StatementEditorActionTableRow: React.FC<
     <React.Fragment key={index}>
       <StyledGrid ref={dropRef} style={{ opacity }}>
         {userCanEdit && (
-          <td ref={dragRef} style={{ cursor: "move" }}>
+          <StyledGridColumn ref={dragRef} style={{ cursor: "move" }}>
             <FaGripVertical />
-          </td>
+          </StyledGridColumn>
         )}
         <StyledGridColumn>{renderActionCell()}</StyledGridColumn>
         <StyledGridColumn>{renderButtonsCell()}</StyledGridColumn>

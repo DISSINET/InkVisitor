@@ -115,6 +115,7 @@ export const StatementEditorActionTable: React.FC<
         filteredActions.map((filteredAction, key) => {
           return (
             <StatementEditorActionTableRow
+              key={key}
               index={key}
               filteredAction={filteredAction}
               statement={statement}
