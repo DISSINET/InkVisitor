@@ -22,7 +22,13 @@ import {
   MultiInput,
 } from "components";
 import { EntitySuggester, EntityTag } from "components/advanced";
-import { CProp, CStatementActant, CStatementAction } from "constructors";
+import {
+  CClassification,
+  CIdentification,
+  CProp,
+  CStatementActant,
+  CStatementAction,
+} from "constructors";
 import { useSearchParams } from "hooks";
 import React, { useEffect, useMemo, useState } from "react";
 import { FaUnlink } from "react-icons/fa";
@@ -323,6 +329,32 @@ export const StatementEditor: React.FC<StatementEditor> = ({
     updateStatementDataMutation.mutate(newStatementData);
   };
 
+  const addClassification = (originId: string) => {
+    const newClassification = CClassification();
+    const newStatementData = { ...statement.data };
+
+    [...newStatementData.actants].forEach((actant: IStatementActant) => {
+      if (actant.entityId === originId) {
+        actant.classifications = [...actant.classifications, newClassification];
+      }
+    });
+
+    updateStatementDataMutation.mutate(newStatementData);
+  };
+
+  const addIdentification = (originId: string) => {
+    const newIdentification = CIdentification();
+    const newStatementData = { ...statement.data };
+
+    [...newStatementData.actants].forEach((actant: IStatementActant) => {
+      if (actant.entityId === originId) {
+        actant.identifications = [...actant.identifications, newIdentification];
+      }
+    });
+
+    updateStatementDataMutation.mutate(newStatementData);
+  };
+
   const updateProp = (propId: string, changes: any) => {
     if (propId) {
       const newStatementData = { ...statement.data };
@@ -616,6 +648,8 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                 removeProp={removeProp}
                 movePropToIndex={movePropToIndex}
                 territoryParentId={statementTerritoryId}
+                addClassification={addClassification}
+                addIdentification={addIdentification}
               />
             </StyledEditorActantTableWrapper>
             {userCanEdit && (

@@ -61,6 +61,8 @@ interface StatementEditorActantTableRow {
   classEntitiesActant: EntityClass[];
   updateStatementDataMutation: UseMutationResult<any, unknown, object, unknown>;
   territoryParentId?: string;
+  addClassification: (originId: string) => void;
+  addIdentification: (originId: string) => void;
 }
 
 export const StatementEditorActantTableRow: React.FC<
@@ -81,6 +83,8 @@ export const StatementEditorActantTableRow: React.FC<
   removeProp,
   movePropToIndex,
   territoryParentId,
+  addClassification,
+  addIdentification,
 }) => {
   const isInsideTemplate = statement.isTemplate || false;
   const { statementId, territoryId } = useSearchParams();
@@ -311,7 +315,7 @@ export const StatementEditorActantTableRow: React.FC<
             inverted={true}
             tooltip="add classification"
             onClick={() => {
-              console.log("adding Classification");
+              addClassification(propOriginId);
             }}
           />
         )}
@@ -324,7 +328,7 @@ export const StatementEditorActantTableRow: React.FC<
             inverted={true}
             tooltip="add identification"
             onClick={() => {
-              console.log("adding Identification");
+              addIdentification(propOriginId);
             }}
           />
         )}
@@ -401,22 +405,24 @@ export const StatementEditorActantTableRow: React.FC<
     classifications: IStatementClassification[]
   ) => {
     return (
-      <p>
+      <div>
         {classifications.map((classification, key) => {
+          console.log(classification);
           return <div key={key}>{"classification"}</div>;
         })}
-      </p>
+      </div>
     );
   };
   const renderIdentifications = (
     identifications: IStatementIdentification[]
   ) => {
     return (
-      <p>
+      <div>
         {identifications.map((identification, key) => {
+          console.log(identification);
           return <div key={key}>{"identification"}</div>;
         })}
-      </p>
+      </div>
     );
   };
 

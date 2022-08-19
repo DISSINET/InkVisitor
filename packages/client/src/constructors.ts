@@ -26,6 +26,10 @@ import {
   IStatementAction,
   ITerritory,
 } from "@shared/types";
+import {
+  IStatementClassification,
+  IStatementIdentification,
+} from "@shared/types/statement";
 import { v4 as uuidv4 } from "uuid";
 
 export const CBookmarkFolder = (bookmarkName: string): IBookmarkFolder => ({
@@ -60,6 +64,26 @@ export const CProp = (): IProp => ({
     virtuality: Virtuality.Reality,
     partitivity: Partitivity.Unison,
   },
+});
+
+export const CClassification = (): IStatementClassification => ({
+  id: uuidv4(),
+  entityId: "",
+  elvl: Elvl.Textual,
+  logic: Logic.Positive,
+  certainty: Certainty.Empty,
+  mood: [Mood.Indication],
+  moodvariant: MoodVariant.Realis,
+});
+
+export const CIdentification = (): IStatementIdentification => ({
+  id: uuidv4(),
+  entityId: "",
+  elvl: Elvl.Textual,
+  logic: Logic.Positive,
+  certainty: Certainty.Empty,
+  mood: [Mood.Indication],
+  moodvariant: MoodVariant.Realis,
 });
 
 export const CMetaProp = (): IProp => ({

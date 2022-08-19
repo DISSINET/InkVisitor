@@ -17,6 +17,8 @@ interface StatementEditorActantTable {
   removeProp: (propId: string) => void;
   movePropToIndex: (propId: string, oldIndex: number, newIndex: number) => void;
   territoryParentId?: string;
+  addClassification: (originId: string) => void;
+  addIdentification: (originId: string) => void;
 }
 export const StatementEditorActantTable: React.FC<
   StatementEditorActantTable
@@ -30,6 +32,8 @@ export const StatementEditorActantTable: React.FC<
   removeProp,
   movePropToIndex,
   territoryParentId,
+  addClassification,
+  addIdentification,
 }) => {
   const [filteredActants, setFilteredActants] = useState<
     FilteredActantObject[]
@@ -134,6 +138,8 @@ export const StatementEditorActantTable: React.FC<
               removeProp={removeProp}
               movePropToIndex={movePropToIndex}
               territoryParentId={territoryParentId}
+              addClassification={addClassification}
+              addIdentification={addIdentification}
             />
           );
         })}
