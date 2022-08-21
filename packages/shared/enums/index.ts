@@ -30,6 +30,8 @@ export enum RelationType {
   Related = "RE",
   Classification = "C",
   Identification = "I",
+  Holonymy = "H",
+  Implication = "IM",
 }
 
 export function isValidRelationType(input: RelationType): boolean {

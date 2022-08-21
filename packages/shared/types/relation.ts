@@ -52,6 +52,15 @@ export interface IRelationIdentification extends IRelation {
   entityIds: [string, string];
 }
 
+export interface IRelationHolonymy extends IRelation {
+  type: RelationType.Holonymy;
+  entityIds: [string, string];
+}
+export interface IRelationImplication extends IRelation {
+  type: RelationType.Holonymy;
+  entityIds: [string, string];
+}
+
 /**
  * Relation Rules
  */
@@ -185,4 +194,24 @@ RelationRules[RelationType.Identification] = {
   cloudType: true,
   treeType: false,
   attributes: [Certainty],
+};
+
+RelationRules[RelationType.Holonymy] = {
+  allowedEntitiesPattern: [[EntityClass.Concept, EntityClass.Concept]],
+  allowedSameEntityClassesOnly: true,
+  asymmetrical: true,
+  multiple: true,
+  cloudType: false,
+  treeType: true,
+  attributes: [],
+};
+
+RelationRules[RelationType.Implication] = {
+  allowedEntitiesPattern: [[EntityClass.Action, EntityClass.Action]],
+  allowedSameEntityClassesOnly: true,
+  asymmetrical: true,
+  multiple: true,
+  cloudType: false,
+  treeType: true,
+  attributes: [],
 };
