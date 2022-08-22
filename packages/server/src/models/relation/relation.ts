@@ -1,7 +1,8 @@
 import { IDbModel, UnknownObject, fillFlatObject } from "@models/common";
 import { r as rethink, Connection, WriteResult } from "rethinkdb-ts";
 import { IRelation } from "@shared/types";
-import { isValidRelationType, RelationType, UserRole } from "@shared/enums";
+import { RelationType, UserRole } from "@shared/enums";
+import { isValidRelationType } from "@shared/enums/validators";
 import { InternalServerError } from "@shared/types/errors";
 import User from "@models/user/user";
 import { IRequest } from "src/custom.request";

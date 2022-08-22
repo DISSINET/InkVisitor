@@ -2,7 +2,8 @@
  * Deprecated
  */
 
-import { EntityClass, isValidEntityClass } from "../enums";
+import { EntityClass } from "../enums";
+import { isValidEntityClass } from "../enums/validators";
 import { BadParams } from "./errors";
 
 export interface IRequestSearch {
