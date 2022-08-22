@@ -40,6 +40,8 @@ import {
 import { dndHoverFn } from "utils";
 import AttributesEditor from "../../AttributesEditor/AttributesEditor";
 import { PropGroup } from "../../PropGroup/PropGroup";
+import { StatementEditorActantClassifications } from "./StatementEditorActantClassifications/StatementEditorActantClassifications";
+import { StatementEditorActantIdentifications } from "./StatementEditorActantIdentifications/StatementEditorActantIdentifications";
 import {
   StyledCI,
   StyledCIGrid,
@@ -402,263 +404,6 @@ export const StatementEditorActantTableRow: React.FC<
     [statement]
   );
 
-  // TODO: useCallback
-  const renderClassifications = (
-    classifications: IStatementClassification[]
-  ) => {
-    const {
-      actant,
-      sActant,
-    }: {
-      actant?: IEntity;
-      sActant: IStatementActant;
-    } = filteredActant.data;
-
-    return (
-      <>
-        {classifications.length > 0 && (
-          <StyledCI>
-            <StyledCIHeading>Classifications:</StyledCIHeading>
-            {classifications.map((classification, key) => {
-              const entity = statement.entities[classification.entityId];
-              const [classificationModalOpen, setClassificationModalOpen] =
-                useState(false);
-              return (
-                <StyledCIGrid key={key}>
-                  {entity ? (
-                    <StyledTagWrapper>
-                      <EntityTag
-                        entity={entity}
-                        fullWidth
-                        button={
-                          userCanEdit && (
-                            <Button
-                              key="d"
-                              tooltip="unlink classification"
-                              icon={<FaUnlink />}
-                              color="plain"
-                              inverted={true}
-                              onClick={() => {
-                                updateActant(sActant.id, {
-                                  classifications: classifications.map((c) =>
-                                    c.id === classification.id
-                                      ? { ...c, entityId: "" }
-                                      : { ...c }
-                                  ),
-                                });
-                              }}
-                            />
-                          )
-                        }
-                      />
-                    </StyledTagWrapper>
-                  ) : (
-                    <EntitySuggester
-                      categoryTypes={[EntityClass.Concept]}
-                      onSelected={(newSelectedId: string) => {
-                        const newClassifications: IStatementClassification[] =
-                          classifications.map((c) =>
-                            c.id === classification.id
-                              ? { ...c, entityId: newSelectedId }
-                              : { ...c }
-                          );
-                        updateActant(sActant.id, {
-                          classifications: newClassifications,
-                        });
-                      }}
-                      openDetailOnCreate
-                      isInsideTemplate={isInsideTemplate}
-                    />
-                  )}
-                  <ButtonGroup>
-                    <AttributesEditor
-                      modalOpen={classificationModalOpen}
-                      setModalOpen={setClassificationModalOpen}
-                      modalTitle={`Classification`}
-                      entity={entity}
-                      disabledAllAttributes={!userCanEdit}
-                      userCanEdit={userCanEdit}
-                      data={{
-                        elvl: classification.elvl,
-                        logic: classification.logic,
-                        certainty: classification.certainty,
-                        mood: classification.mood,
-                        moodvariant: classification.moodvariant,
-                      }}
-                      handleUpdate={(newData) => {
-                        updateActant(sActant.id, {
-                          classifications: classifications.map((c) =>
-                            c.id === classification.id
-                              ? { ...c, ...newData }
-                              : { ...c }
-                          ),
-                        });
-                      }}
-                      updateActantId={(newId: string) => {
-                        updateActant(sActant.id, {
-                          classifications: classifications.map((c) =>
-                            c.id === classification.id
-                              ? { ...c, entityId: newId }
-                              : { ...c }
-                          ),
-                        });
-                      }}
-                      classEntitiesActant={[EntityClass.Concept]}
-                      loading={updateStatementDataMutation.isLoading}
-                      isInsideTemplate={isInsideTemplate}
-                      territoryParentId={territoryParentId}
-                    />
-                    {userCanEdit && (
-                      <Button
-                        key="d"
-                        icon={<FaTrashAlt />}
-                        color="plain"
-                        inverted={true}
-                        tooltip="remove classification row"
-                        onClick={() => {
-                          updateActant(sActant.id, {
-                            classifications: classifications.filter(
-                              (c) => c.id !== classification.id
-                            ),
-                          });
-                        }}
-                      />
-                    )}
-                  </ButtonGroup>
-                </StyledCIGrid>
-              );
-            })}
-          </StyledCI>
-        )}
-      </>
-    );
-  };
-
-  const renderIdentifications = (
-    identifications: IStatementIdentification[]
-  ) => {
-    const { actant, sActant } = filteredActant.data;
-    const [identificationModalOpen, setIdentificationModalOpen] =
-      useState(false);
-    return (
-      <>
-        {identifications.length > 0 && (
-          <StyledCI>
-            <StyledCIHeading>Identifications:</StyledCIHeading>
-            {identifications.length > 0 &&
-              identifications.map((identification, key) => {
-                const entity = statement.entities[identification.entityId];
-                return (
-                  <StyledCIGrid key={key}>
-                    {entity ? (
-                      <StyledTagWrapper>
-                        <EntityTag
-                          entity={entity}
-                          fullWidth
-                          button={
-                            userCanEdit && (
-                              <Button
-                                key="d"
-                                tooltip="unlink identification"
-                                icon={<FaUnlink />}
-                                color="plain"
-                                inverted={true}
-                                onClick={() => {
-                                  updateActant(sActant.id, {
-                                    identifications: identifications.map((c) =>
-                                      c.id === identification.id
-                                        ? { ...c, entityId: "" }
-                                        : { ...c }
-                                    ),
-                                  });
-                                }}
-                              />
-                            )
-                          }
-                        />
-                      </StyledTagWrapper>
-                    ) : (
-                      <EntitySuggester
-                        categoryTypes={classEntitiesActant}
-                        onSelected={(newSelectedId: string) => {
-                          const newIdentifications: IStatementIdentification[] =
-                            identifications.map((c) =>
-                              c.id === identification.id
-                                ? { ...c, entityId: newSelectedId }
-                                : { ...c }
-                            );
-                          updateActant(sActant.id, {
-                            identifications: newIdentifications,
-                          });
-                        }}
-                        openDetailOnCreate
-                        isInsideTemplate={isInsideTemplate}
-                      />
-                    )}
-                    <ButtonGroup>
-                      <AttributesEditor
-                        modalOpen={identificationModalOpen}
-                        setModalOpen={setIdentificationModalOpen}
-                        modalTitle={`Identification`}
-                        entity={entity}
-                        disabledAllAttributes={!userCanEdit}
-                        userCanEdit={userCanEdit}
-                        data={{
-                          elvl: identification.elvl,
-                          logic: identification.logic,
-                          certainty: identification.certainty,
-                          mood: identification.mood,
-                          moodvariant: identification.moodvariant,
-                        }}
-                        handleUpdate={(newData) => {
-                          updateActant(sActant.id, {
-                            identifications: identifications.map((c) =>
-                              c.id === identification.id
-                                ? { ...c, ...newData }
-                                : { ...c }
-                            ),
-                          });
-                        }}
-                        updateActantId={(newId: string) => {
-                          updateActant(sActant.id, {
-                            identifications: identifications.map((c) =>
-                              c.id === identification.id
-                                ? { ...c, entityId: newId }
-                                : { ...c }
-                            ),
-                          });
-                        }}
-                        classEntitiesActant={[EntityClass.Concept]}
-                        loading={updateStatementDataMutation.isLoading}
-                        isInsideTemplate={isInsideTemplate}
-                        territoryParentId={territoryParentId}
-                      />
-                      {userCanEdit && (
-                        <Button
-                          key="d"
-                          icon={<FaTrashAlt />}
-                          color="plain"
-                          inverted={true}
-                          tooltip="remove identification row"
-                          onClick={() => {
-                            updateActant(sActant.id, {
-                              identifications: identifications.filter(
-                                (c) => c.id !== identification.id
-                              ),
-                            });
-                          }}
-                        />
-                      )}
-                    </ButtonGroup>
-                  </StyledCIGrid>
-                );
-              })}
-          </StyledCI>
-        )}
-      </>
-    );
-  };
-
   return (
     <React.Fragment key={index}>
       <StyledGrid ref={dropRef} style={{ opacity }}>
@@ -681,8 +426,27 @@ export const StatementEditorActantTableRow: React.FC<
           filteredActant.data.sActant.props,
           DraggedPropRowCategory.ACTANT
         )}
-      {renderClassifications(filteredActant.data.sActant.classifications)}
-      {renderIdentifications(filteredActant.data.sActant.identifications)}
+      <StatementEditorActantClassifications
+        classifications={filteredActant.data.sActant.classifications}
+        sActant={filteredActant.data.sActant}
+        statement={statement}
+        territoryParentId={territoryParentId}
+        isInsideTemplate={isInsideTemplate}
+        updateActant={updateActant}
+        updateStatementDataMutation={updateStatementDataMutation}
+        userCanEdit={userCanEdit}
+      />
+      <StatementEditorActantIdentifications
+        identifications={filteredActant.data.sActant.identifications}
+        sActant={filteredActant.data.sActant}
+        statement={statement}
+        territoryParentId={territoryParentId}
+        isInsideTemplate={isInsideTemplate}
+        updateActant={updateActant}
+        updateStatementDataMutation={updateStatementDataMutation}
+        userCanEdit={userCanEdit}
+        classEntitiesActant={classEntitiesActant}
+      />
     </React.Fragment>
   );
 };

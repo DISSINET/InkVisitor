@@ -49,4 +49,5 @@ export const StyledCIGrid = styled.div`
   grid-template-columns: auto 4rem;
   width: fit-content;
   max-width: 100%;
+  align-items: center;
 `;
