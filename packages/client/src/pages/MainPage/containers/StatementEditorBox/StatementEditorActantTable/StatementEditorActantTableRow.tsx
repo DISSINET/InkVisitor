@@ -59,7 +59,6 @@ interface StatementEditorActantTableRow {
   updateProp: (propId: string, changes: any) => void;
   removeProp: (propId: string) => void;
   movePropToIndex: (propId: string, oldIndex: number, newIndex: number) => void;
-  visibleColumns: ColumnInstance<{}>[];
   statement: IResponseStatement;
   classEntitiesActant: EntityClass[];
   updateStatementDataMutation: UseMutationResult<any, unknown, object, unknown>;
@@ -71,14 +70,12 @@ interface StatementEditorActantTableRow {
 export const StatementEditorActantTableRow: React.FC<
   StatementEditorActantTableRow
 > = ({
-  // row,
   filteredActant,
   index,
   moveRow,
   statement,
   userCanEdit = false,
   updateOrderFn,
-  visibleColumns,
   classEntitiesActant,
   updateStatementDataMutation,
   addProp,

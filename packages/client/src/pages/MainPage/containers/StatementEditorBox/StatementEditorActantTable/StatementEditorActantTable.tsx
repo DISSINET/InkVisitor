@@ -3,7 +3,6 @@ import { IResponseStatement, IStatementActant } from "@shared/types";
 import update from "immutability-helper";
 import React, { useCallback, useMemo, useState } from "react";
 import { UseMutationResult } from "react-query";
-import { Column, useExpanded, useTable } from "react-table";
 import { FilteredActantObject } from "types";
 import { StatementEditorActantTableRow } from "./StatementEditorActantTableRow";
 
@@ -60,48 +59,6 @@ export const StatementEditorActantTable: React.FC<
     }
   };
 
-  const columns: Column<{}>[] = useMemo(() => {
-    return [
-      {
-        Header: "ID",
-        accessor: "id",
-      },
-      {
-        Header: "",
-        accessor: "data",
-      },
-      {
-        Header: "",
-        id: "position",
-      },
-      {
-        id: "Attributes",
-      },
-    ];
-  }, [filteredActants, updateStatementDataMutation.isLoading]);
-
-  const getRowId = useCallback((row) => {
-    return row.id;
-  }, []);
-  const {
-    getTableProps,
-    getTableBodyProps,
-    headerGroups,
-    rows,
-    prepareRow,
-    visibleColumns,
-  } = useTable(
-    {
-      columns,
-      data: filteredActants,
-      getRowId,
-      initialState: {
-        hiddenColumns: ["id"],
-      },
-    },
-    useExpanded
-  );
-
   const moveRow = useCallback(
     (dragIndex: number, hoverIndex: number) => {
       const dragRecord = filteredActants[dragIndex];
@@ -130,7 +87,6 @@ export const StatementEditorActantTable: React.FC<
               moveRow={moveRow}
               userCanEdit={userCanEdit}
               updateOrderFn={updateActantsOrder}
-              visibleColumns={visibleColumns}
               classEntitiesActant={classEntitiesActant}
               updateStatementDataMutation={updateStatementDataMutation}
               addProp={addProp}

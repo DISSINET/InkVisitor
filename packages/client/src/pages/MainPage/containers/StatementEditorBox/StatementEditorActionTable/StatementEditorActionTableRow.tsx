@@ -42,7 +42,6 @@ interface StatementEditorActionTableRow {
   updateProp: (propId: string, changes: any) => void;
   removeProp: (propId: string) => void;
   movePropToIndex: (propId: string, oldIndex: number, newIndex: number) => void;
-  visibleColumns: ColumnInstance<{}>[];
   updateActionsMutation: UseMutationResult<any, unknown, object, unknown>;
   territoryParentId?: string;
 }
@@ -61,7 +60,6 @@ export const StatementEditorActionTableRow: React.FC<
   removeProp,
   movePropToIndex,
   updateActionsMutation,
-  visibleColumns,
   territoryParentId,
 }) => {
   const isInsideTemplate = statement.isTemplate || false;

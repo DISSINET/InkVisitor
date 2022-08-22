@@ -1,8 +1,7 @@
 import { IResponseStatement, IStatementAction } from "@shared/types";
 import update from "immutability-helper";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { UseMutationResult } from "react-query";
-import { Column, useExpanded, useTable } from "react-table";
 import { FilteredActionObject } from "types";
 import { StatementEditorActionTableRow } from "./StatementEditorActionTableRow";
 
@@ -70,45 +69,6 @@ export const StatementEditorActionTable: React.FC<
     [filteredActions]
   );
 
-  const columns: Column<{}>[] = useMemo(() => {
-    return [
-      {
-        Header: "ID",
-        accessor: "id",
-      },
-      {
-        Header: "Action",
-        accessor: "data",
-      },
-      {
-        id: "Attributes & Buttons",
-      },
-    ];
-  }, [filteredActions, updateActionsMutation.isLoading]);
-
-  const getRowId = useCallback((row) => {
-    return row.id;
-  }, []);
-
-  const {
-    getTableProps,
-    getTableBodyProps,
-    headerGroups,
-    rows,
-    prepareRow,
-    visibleColumns,
-  } = useTable(
-    {
-      columns,
-      data: filteredActions,
-      getRowId,
-      initialState: {
-        hiddenColumns: ["id"],
-      },
-    },
-    useExpanded
-  );
-
   return (
     <>
       {filteredActions.length > 0 &&
@@ -122,7 +82,6 @@ export const StatementEditorActionTable: React.FC<
               moveRow={moveRow}
               userCanEdit={userCanEdit}
               updateOrderFn={updateActionOrder}
-              visibleColumns={visibleColumns}
               updateActionsMutation={updateActionsMutation}
               addProp={addProp}
               updateProp={updateProp}
