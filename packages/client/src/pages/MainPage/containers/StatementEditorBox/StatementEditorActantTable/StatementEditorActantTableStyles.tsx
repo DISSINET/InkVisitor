@@ -10,7 +10,6 @@ export const StyledGrid = styled.div<StyledGrid>`
   padding-left: ${({ theme }) => theme.space[0]};
   grid-template-columns: 2rem auto auto auto;
   width: fit-content;
-  grid-template-rows: auto;
   grid-auto-flow: row;
   padding-bottom: ${({ theme }) => theme.space[1]};
   max-width: 100%;
@@ -33,4 +32,18 @@ export const StyledTagWrapper = styled.div`
 export const StyledMarkerWrap = styled.div`
   margin-left: ${({ theme }) => `${theme.space[1]}`};
   color: ${({ theme }) => theme.color["success"]};
+`;
+
+export const StyledCIHeading = styled.p`
+  font-weight: ${({ theme }) => theme.fontWeight.light};
+  font-size: ${({ theme }) => theme.fontSize["sm"]};
+  color: ${({ theme }) => theme.color["info"]};
+  text-align: left;
+`;
+export const StyledCIGrid = styled.div`
+  margin-bottom: 0.5rem;
+  display: grid;
+  grid-template-columns: auto 2rem;
+  width: fit-content;
+  max-width: 100%;
 `;

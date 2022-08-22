@@ -41,6 +41,8 @@ import { dndHoverFn } from "utils";
 import AttributesEditor from "../../AttributesEditor/AttributesEditor";
 import { PropGroup } from "../../PropGroup/PropGroup";
 import {
+  StyledCIGrid,
+  StyledCIHeading,
   StyledGrid,
   StyledGridColumn,
   StyledTagWrapper,
@@ -401,28 +403,184 @@ export const StatementEditorActantTableRow: React.FC<
     [statement]
   );
 
+  // TODO: useCallback
   const renderClassifications = (
     classifications: IStatementClassification[]
   ) => {
+    const {
+      actant,
+      sActant,
+    }: {
+      actant?: IEntity;
+      sActant: IStatementActant;
+    } = filteredActant.data;
+
     return (
-      <div>
-        {classifications.map((classification, key) => {
-          console.log(classification);
-          return <div key={key}>{"classification"}</div>;
-        })}
-      </div>
+      <>
+        {classifications.length > 0 && (
+          <div style={{ display: "flex", flexDirection: "column" }}>
+            <StyledCIHeading>Classifications:</StyledCIHeading>
+            {classifications.map((classification, key) => {
+              const entity = statement.entities[classification.entityId];
+              return (
+                <StyledCIGrid key={key}>
+                  {entity ? (
+                    <StyledTagWrapper>
+                      <EntityTag
+                        entity={entity}
+                        fullWidth
+                        button={
+                          userCanEdit && (
+                            <Button
+                              key="d"
+                              tooltip="unlink classification"
+                              icon={<FaUnlink />}
+                              color="plain"
+                              inverted={true}
+                              onClick={() => {
+                                updateActant(sActant.id, {
+                                  classifications: classifications.map((c) =>
+                                    c.id === classification.id
+                                      ? { ...c, entityId: "" }
+                                      : { ...c }
+                                  ),
+                                });
+                              }}
+                            />
+                          )
+                        }
+                      />
+                    </StyledTagWrapper>
+                  ) : (
+                    <EntitySuggester
+                      categoryTypes={[EntityClass.Concept]}
+                      onSelected={(newSelectedId: string) => {
+                        const newClassifications: IStatementClassification[] =
+                          classifications.map((c) =>
+                            c.id === classification.id
+                              ? { ...c, entityId: newSelectedId }
+                              : { ...c }
+                          );
+                        updateActant(sActant.id, {
+                          classifications: newClassifications,
+                        });
+                      }}
+                      openDetailOnCreate
+                      isInsideTemplate={isInsideTemplate}
+                    />
+                  )}
+                  <ButtonGroup>
+                    {/* TODO: ATTRIBUTES EDITOR */}
+                    {userCanEdit && (
+                      <Button
+                        key="d"
+                        icon={<FaTrashAlt />}
+                        color="plain"
+                        inverted={true}
+                        tooltip="remove classification row"
+                        onClick={() => {
+                          updateActant(sActant.id, {
+                            classifications: classifications.filter(
+                              (c) => c.id !== classification.id
+                            ),
+                          });
+                        }}
+                      />
+                    )}
+                  </ButtonGroup>
+                </StyledCIGrid>
+              );
+            })}
+          </div>
+        )}
+      </>
     );
   };
+
   const renderIdentifications = (
     identifications: IStatementIdentification[]
   ) => {
+    const { actant, sActant } = filteredActant.data;
     return (
-      <div>
-        {identifications.map((identification, key) => {
-          console.log(identification);
-          return <div key={key}>{"identification"}</div>;
-        })}
-      </div>
+      <>
+        {identifications.length > 0 && (
+          <div>
+            <StyledCIHeading>Identifications:</StyledCIHeading>
+            {identifications.length > 0 &&
+              identifications.map((identification, key) => {
+                const entity = statement.entities[identification.entityId];
+                return (
+                  <StyledCIGrid key={key}>
+                    {entity ? (
+                      <StyledTagWrapper>
+                        <EntityTag
+                          entity={entity}
+                          fullWidth
+                          button={
+                            userCanEdit && (
+                              <Button
+                                key="d"
+                                tooltip="unlink identification"
+                                icon={<FaUnlink />}
+                                color="plain"
+                                inverted={true}
+                                onClick={() => {
+                                  updateActant(sActant.id, {
+                                    identifications: identifications.map((c) =>
+                                      c.id === identification.id
+                                        ? { ...c, entityId: "" }
+                                        : { ...c }
+                                    ),
+                                  });
+                                }}
+                              />
+                            )
+                          }
+                        />
+                      </StyledTagWrapper>
+                    ) : (
+                      <EntitySuggester
+                        categoryTypes={classEntitiesActant}
+                        onSelected={(newSelectedId: string) => {
+                          const newIdentifications: IStatementIdentification[] =
+                            identifications.map((c) =>
+                              c.id === identification.id
+                                ? { ...c, entityId: newSelectedId }
+                                : { ...c }
+                            );
+                          updateActant(sActant.id, {
+                            identifications: newIdentifications,
+                          });
+                        }}
+                        openDetailOnCreate
+                        isInsideTemplate={isInsideTemplate}
+                      />
+                    )}
+                    <ButtonGroup>
+                      {/* TODO: ATTRIBUTES EDITOR */}
+                      {userCanEdit && (
+                        <Button
+                          key="d"
+                          icon={<FaTrashAlt />}
+                          color="plain"
+                          inverted={true}
+                          tooltip="remove identification row"
+                          onClick={() => {
+                            updateActant(sActant.id, {
+                              identifications: identifications.filter(
+                                (c) => c.id !== identification.id
+                              ),
+                            });
+                          }}
+                        />
+                      )}
+                    </ButtonGroup>
+                  </StyledCIGrid>
+                );
+              })}
+          </div>
+        )}
+      </>
     );
   };
 
