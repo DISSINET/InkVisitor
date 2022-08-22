@@ -6,10 +6,6 @@ import {
   IResponseStatement,
   IStatementActant,
 } from "@shared/types";
-import {
-  IStatementClassification,
-  IStatementIdentification,
-} from "@shared/types/statement";
 import { AttributeIcon, Button, ButtonGroup } from "components";
 import {
   AttributeButtonGroup,
@@ -26,7 +22,6 @@ import {
 } from "react-dnd";
 import { FaGripVertical, FaPlus, FaTrashAlt, FaUnlink } from "react-icons/fa";
 import { UseMutationResult } from "react-query";
-import { ColumnInstance } from "react-table";
 import { setDraggedActantRow } from "redux/features/rowDnd/draggedActantRowSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { excludedSuggesterEntities } from "Theme/constants";
@@ -43,11 +38,9 @@ import { PropGroup } from "../../PropGroup/PropGroup";
 import { StatementEditorActantClassifications } from "./StatementEditorActantClassifications/StatementEditorActantClassifications";
 import { StatementEditorActantIdentifications } from "./StatementEditorActantIdentifications/StatementEditorActantIdentifications";
 import {
-  StyledCI,
-  StyledCIGrid,
-  StyledCIHeading,
   StyledGrid,
   StyledGridColumn,
+  StyledRow,
   StyledTagWrapper,
 } from "./StatementEditorActantTableStyles";
 
@@ -405,7 +398,7 @@ export const StatementEditorActantTableRow: React.FC<
   );
 
   return (
-    <React.Fragment key={index}>
+    <StyledRow key={index}>
       <StyledGrid ref={dropRef} style={{ opacity }}>
         {userCanEdit && (
           <StyledGridColumn ref={dragRef} style={{ cursor: "move" }}>
@@ -426,27 +419,35 @@ export const StatementEditorActantTableRow: React.FC<
           filteredActant.data.sActant.props,
           DraggedPropRowCategory.ACTANT
         )}
-      <StatementEditorActantClassifications
-        classifications={filteredActant.data.sActant.classifications}
-        sActant={filteredActant.data.sActant}
-        statement={statement}
-        territoryParentId={territoryParentId}
-        isInsideTemplate={isInsideTemplate}
-        updateActant={updateActant}
-        updateStatementDataMutation={updateStatementDataMutation}
-        userCanEdit={userCanEdit}
-      />
-      <StatementEditorActantIdentifications
-        identifications={filteredActant.data.sActant.identifications}
-        sActant={filteredActant.data.sActant}
-        statement={statement}
-        territoryParentId={territoryParentId}
-        isInsideTemplate={isInsideTemplate}
-        updateActant={updateActant}
-        updateStatementDataMutation={updateStatementDataMutation}
-        userCanEdit={userCanEdit}
-        classEntitiesActant={classEntitiesActant}
-      />
-    </React.Fragment>
+
+      {!(
+        draggedActantRow.category &&
+        draggedActantRow.category === DraggedPropRowCategory.ACTANT
+      ) && (
+        <>
+          <StatementEditorActantClassifications
+            classifications={filteredActant.data.sActant.classifications}
+            sActant={filteredActant.data.sActant}
+            statement={statement}
+            territoryParentId={territoryParentId}
+            isInsideTemplate={isInsideTemplate}
+            updateActant={updateActant}
+            updateStatementDataMutation={updateStatementDataMutation}
+            userCanEdit={userCanEdit}
+          />
+          <StatementEditorActantIdentifications
+            identifications={filteredActant.data.sActant.identifications}
+            sActant={filteredActant.data.sActant}
+            statement={statement}
+            territoryParentId={territoryParentId}
+            isInsideTemplate={isInsideTemplate}
+            updateActant={updateActant}
+            updateStatementDataMutation={updateStatementDataMutation}
+            userCanEdit={userCanEdit}
+            classEntitiesActant={classEntitiesActant}
+          />
+        </>
+      )}
+    </StyledRow>
   );
 };

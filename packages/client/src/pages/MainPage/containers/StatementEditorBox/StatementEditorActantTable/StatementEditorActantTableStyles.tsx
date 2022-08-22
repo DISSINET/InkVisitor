@@ -1,5 +1,8 @@
 import styled from "styled-components";
 
+export const StyledRow = styled.div`
+  margin-bottom: 1rem;
+`;
 interface StyledGrid {
   tempDisabled?: boolean;
 }
@@ -35,14 +38,16 @@ export const StyledMarkerWrap = styled.div`
 `;
 
 export const StyledCI = styled.div`
-  margin-left: 2rem;
+  margin-left: 2.5rem;
   margin-right: ${({ theme }) => theme.space[1]};
 `;
 export const StyledCIHeading = styled.p`
   font-weight: ${({ theme }) => theme.fontWeight.light};
   font-size: ${({ theme }) => theme.fontSize["sm"]};
-  color: ${({ theme }) => theme.color["info"]};
+  color: ${({ theme }) => theme.color["success"]};
   text-align: left;
+  font-style: italic;
+  padding-left: ${({ theme }) => theme.space[2]};
 `;
 export const StyledCIGrid = styled.div`
   margin-bottom: 0.5rem;
