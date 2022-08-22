@@ -36,6 +36,7 @@ export const StyledMarkerWrap = styled.div`
 
 export const StyledCI = styled.div`
   margin-left: 2rem;
+  margin-right: ${({ theme }) => theme.space[1]};
 `;
 export const StyledCIHeading = styled.p`
   font-weight: ${({ theme }) => theme.fontWeight.light};
@@ -46,7 +47,7 @@ export const StyledCIHeading = styled.p`
 export const StyledCIGrid = styled.div`
   margin-bottom: 0.5rem;
   display: grid;
-  grid-template-columns: auto 4rem;
+  grid-template-columns: auto auto;
   width: fit-content;
   max-width: 100%;
   align-items: center;

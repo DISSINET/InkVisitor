@@ -4,7 +4,7 @@ import {
   IStatementActant,
   IStatementClassification,
 } from "@shared/types/statement";
-import { Button, ButtonGroup } from "components";
+import { AttributeIcon, Button, ButtonGroup } from "components";
 import { EntitySuggester, EntityTag } from "components/advanced";
 import AttributesEditor from "pages/MainPage/containers/AttributesEditor/AttributesEditor";
 import React, { useState } from "react";
@@ -147,6 +147,17 @@ export const StatementEditorActantClassifications: React.FC<
                           ),
                         });
                       }}
+                    />
+                  )}
+                  {classification.logic === "2" && (
+                    <Button
+                      key="neg"
+                      tooltip="Negative logic"
+                      color="success"
+                      inverted={true}
+                      noBorder
+                      icon={<AttributeIcon attributeName={"negation"} />}
+                      onClick={() => setClassificationModalOpen(true)}
                     />
                   )}
                 </ButtonGroup>
