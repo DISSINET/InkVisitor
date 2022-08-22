@@ -1,7 +1,7 @@
 import entities from "@modules/entities";
 import { Db } from "@service/RethinkDB";
 import { deleteEntities } from "@service/shorthands";
-import { EntityClass } from "@shared/enums";
+import { EntityEnums } from "@shared/enums";
 import { IEntity } from "@shared/types";
 import Entity from "./entity";
 import { prepareEntity } from "./entity.test";
@@ -19,12 +19,12 @@ describe("Response search - advanced label search", function () {
   const [, nameEntity] = prepareEntity();
   nameEntity.label = "Evelín Teměř Jr.";
   nameEntity.id = `${nameEntity.label}-${nameEntity.id}`;
-  nameEntity.class = EntityClass.Person;
+  nameEntity.class = EntityEnums.Class.Person;
 
   const [, eventEntity] = prepareEntity();
   eventEntity.label = "TRP yyyy-mm-dd: during";
   eventEntity.id = `${eventEntity.label}-${eventEntity.id}`;
-  eventEntity.class = EntityClass.Event;
+  eventEntity.class = EntityEnums.Class.Event;
 
   beforeAll(async () => {
     db = new Db();

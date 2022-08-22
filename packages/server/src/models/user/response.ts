@@ -1,6 +1,6 @@
 import Entity from "@models/entity/entity";
 import { findEntityById } from "@service/shorthands";
-import { UserRole } from "@shared/enums";
+import { UserEnums } from "@shared/enums";
 import {
   IBookmarkFolder,
   IResponseBookmarkFolder,
@@ -20,7 +20,7 @@ export class ResponseUser implements IResponseUser {
   email: string;
   name: string;
   password?: string;
-  role: UserRole;
+  role: UserEnums.Role;
   options: IUserOptions;
   rights: IUserRight[];
   active: boolean;

@@ -1,48 +1,49 @@
-import { EntityClass, RelationType } from ".";
+import { EntityEnums, RelationEnums } from ".";
 
-/**
- * Validates RelationType value
- * @param input 
- * @returns 
- */
- export function isValidRelationType(input: RelationType): boolean {
+export namespace EnumValidators {
+  /**
+   * Validates RelationEnums.Type value
+   * @param input 
+   * @returns 
+   */
+  export function IsValidRelationType(input: RelationEnums.Type): boolean {
     return (
       [
-        RelationType.Superclass,
-        RelationType.SuperordinateLocation,
-        RelationType.Synonym,
-        RelationType.Antonym,
-        RelationType.Troponym,
-        RelationType.PropertyReciprocal,
-        RelationType.SubjectActantReciprocal,
-        RelationType.ActionEventEquivalent,
-        RelationType.Related,
-        RelationType.Classification,
-        RelationType.Identification,
+        RelationEnums.Type.Superclass,
+        RelationEnums.Type.SuperordinateLocation,
+        RelationEnums.Type.Synonym,
+        RelationEnums.Type.Antonym,
+        RelationEnums.Type.Troponym,
+        RelationEnums.Type.PropertyReciprocal,
+        RelationEnums.Type.SubjectActantReciprocal,
+        RelationEnums.Type.ActionEventEquivalent,
+        RelationEnums.Type.Related,
+        RelationEnums.Type.Classification,
+        RelationEnums.Type.Identification,
       ].indexOf(input) !== -1
     );
   }
 
   /**
-   * Validates EntityClass value
+   * Validates EntityEnums.Class value
    * @param input 
    * @returns 
    */
-  export function isValidEntityClass(input: EntityClass): boolean {
+  export function IsValidEntityClass(input: EntityEnums.Class): boolean {
     return (
       [
-        EntityClass.Action,
-        EntityClass.Territory,
-        EntityClass.Statement,
-        EntityClass.Resource,
-        EntityClass.Person,
-        EntityClass.Group,
-        EntityClass.Object,
-        EntityClass.Concept,
-        EntityClass.Location,
-        EntityClass.Value,
-        EntityClass.Event,
+        EntityEnums.Class.Action,
+        EntityEnums.Class.Territory,
+        EntityEnums.Class.Statement,
+        EntityEnums.Class.Resource,
+        EntityEnums.Class.Person,
+        EntityEnums.Class.Group,
+        EntityEnums.Class.Object,
+        EntityEnums.Class.Concept,
+        EntityEnums.Class.Location,
+        EntityEnums.Class.Value,
+        EntityEnums.Class.Event,
       ].indexOf(input) !== -1
     );
   }
-  
+}

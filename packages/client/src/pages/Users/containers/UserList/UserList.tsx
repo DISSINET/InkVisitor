@@ -1,5 +1,5 @@
 import { userRoleDict } from "@shared/dictionaries";
-import { EntityClass, UserRole, UserRoleMode } from "@shared/enums";
+import { EntityEnums, UserEnums } from "@shared/enums";
 import { IResponseUser, IUser, IUserRight } from "@shared/types";
 import api from "api";
 import { Button, ButtonGroup, Input, Loader, Submit } from "components";
@@ -94,7 +94,7 @@ export const UserList: React.FC<UserList> = React.memo(({ heightContent }) => {
       const newRights: IUserRight[] = [
         ...oldUser.rights.filter((right) => right.territory !== territoryId),
       ];
-      newRights.push({ territory: territoryId, mode: mode as UserRoleMode });
+      newRights.push({ territory: territoryId, mode: mode as UserEnums.RoleMode });
       userMutation.mutate({ id: userId, rights: newRights });
     }
   };
@@ -238,7 +238,7 @@ export const UserList: React.FC<UserList> = React.memo(({ heightContent }) => {
 
           return (
             <StyledTerritoryColumn>
-              {userRole !== UserRole.Admin ? (
+              {userRole !== UserEnums.Role.Admin ? (
                 <React.Fragment>
                   <EntitySuggester
                     disableTemplatesAccept
@@ -246,7 +246,7 @@ export const UserList: React.FC<UserList> = React.memo(({ heightContent }) => {
                     onSelected={(newSelectedId: string) => {
                       addRightToUser(userId, newSelectedId, "read");
                     }}
-                    categoryTypes={[EntityClass.Territory]}
+                    categoryTypes={[EntityEnums.Class.Territory]}
                     placeholder={"assign a territory"}
                   />
                   <StyledTerritoryList>
@@ -314,8 +314,8 @@ export const UserList: React.FC<UserList> = React.memo(({ heightContent }) => {
 
           return (
             <StyledTerritoryColumn>
-              {userRole !== UserRole.Admin ? (
-                userRole === UserRole.Editor ? (
+              {userRole !== UserEnums.Role.Admin ? (
+                userRole === UserEnums.Role.Editor ? (
                   <React.Fragment>
                     <EntitySuggester
                       disableTemplatesAccept
@@ -323,7 +323,7 @@ export const UserList: React.FC<UserList> = React.memo(({ heightContent }) => {
                       onSelected={(newSelectedId: string) => {
                         addRightToUser(userId, newSelectedId, "write");
                       }}
-                      categoryTypes={[EntityClass.Territory]}
+                      categoryTypes={[EntityEnums.Class.Territory]}
                       placeholder={"assign a territory"}
                     />
                     <StyledTerritoryList>
@@ -486,9 +486,8 @@ export const UserList: React.FC<UserList> = React.memo(({ heightContent }) => {
 
       <Submit
         title={`Delete User ${removingUser ? removingUser.name : ""}`}
-        text={`Do you really want do delete User ${
-          removingUser ? removingUser.name : ""
-        }?`}
+        text={`Do you really want do delete User ${removingUser ? removingUser.name : ""
+          }?`}
         show={removingUser != false}
         onSubmit={() => {
           removeUser();

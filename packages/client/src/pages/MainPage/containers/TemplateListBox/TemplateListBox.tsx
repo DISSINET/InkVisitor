@@ -1,5 +1,5 @@
 import { entitiesDict } from "@shared/dictionaries";
-import { EntityClass } from "@shared/enums";
+import { EntityEnums } from "@shared/enums";
 import { IEntity } from "@shared/types";
 import { IRequestSearch } from "@shared/types/request-search";
 import api from "api";
@@ -25,8 +25,8 @@ import {
 import { TemplateListCreateModal } from "./TemplateListCreateModal/TemplateListCreateModal";
 import { TemplateListRemoveModal } from "./TemplateListRemoveModal/TemplateListRemoveModal";
 
-interface TemplateListBox {}
-export const TemplateListBox: React.FC<TemplateListBox> = ({}) => {
+interface TemplateListBox { }
+export const TemplateListBox: React.FC<TemplateListBox> = ({ }) => {
   // FILTER;
   const allEntityOption = { value: "all", label: "all" };
   const allEntityOptions = [allEntityOption, ...entitiesDict] as any;
@@ -51,7 +51,7 @@ export const TemplateListBox: React.FC<TemplateListBox> = ({}) => {
         onlyTemplates: true,
       };
       if (filterByClass.value !== "all") {
-        filters.class = filterByClass.value as EntityClass;
+        filters.class = filterByClass.value as EntityEnums.Class;
       }
       if (filterByLabel.length) {
         filters.label = filterByLabel + "*";

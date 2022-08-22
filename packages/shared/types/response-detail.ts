@@ -3,7 +3,7 @@
  */
 
 import { IEntity, IRelation, IResponseEntity, IStatement } from ".";
-import { UsedInPosition } from "../enums";
+import { EntityEnums } from "../enums";
 import {
   IStatementClassification,
   IStatementIdentification,
@@ -11,9 +11,9 @@ import {
 
 export interface IResponseDetail extends IResponseEntity {
   entities: { [key: string]: IEntity }; // all entities from IStatement and entityIds...
-  usedInStatement: IResponseUsedInStatement<UsedInPosition>[]; // all statements, where the detail id is used as an actant, action, or tag
+  usedInStatement: IResponseUsedInStatement<EntityEnums.UsedInPosition>[]; // all statements, where the detail id is used as an actant, action, or tag
   usedInStatementProps: IResponseUsedInStatementProps[]; // all statements, where the detail id is used in props
-  usedInMetaProps: IResponseUsedInMetaProp<UsedInPosition>[]; // all entities, where the detail id is used in props (entity.props[])
+  usedInMetaProps: IResponseUsedInMetaProp<EntityEnums.UsedInPosition>[]; // all entities, where the detail id is used in props (entity.props[])
 
   usedInStatementIdentification: IResponseUsedInStatementIdentification[];
   usedInStatementClassification: IResponseUsedInStatementClassification[];

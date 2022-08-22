@@ -1,11 +1,13 @@
-export enum UserRole {
-    Admin = "admin",
-    Editor = "editor",
-    Viewer = "viewer",
-}
+export namespace UserEnums {
+    export enum Role {
+        Admin = "admin",
+        Editor = "editor",
+        Viewer = "viewer",
+    }
 
-export enum UserRoleMode {
-    Write = "write",
-    Read = "read",
-    Admin = "admin",
+    export enum RoleMode {
+        Write = "write",
+        Read = "read",
+        Admin = "admin",
+    }
 }

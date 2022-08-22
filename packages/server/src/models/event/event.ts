@@ -1,10 +1,10 @@
 import Entity from "@models/entity/entity";
 import { fillFlatObject, IModel, UnknownObject } from "@models/common";
-import { EntityClass, EntityLogicalType } from "@shared/enums";
+import { EntityEnums } from "@shared/enums";
 import { IEvent } from "@shared/types";
 
 class EventData implements IModel {
-  logicalType: EntityLogicalType = EntityLogicalType.Definite;
+  logicalType: EntityEnums.LogicalType = EntityEnums.LogicalType.Definite;
 
   constructor(data: UnknownObject) {
     if (!data) {
@@ -20,7 +20,7 @@ class EventData implements IModel {
 }
 
 class Event extends Entity implements IEvent {
-  class: EntityClass.Event = EntityClass.Event; // just default
+  class: EntityEnums.Class.Event = EntityEnums.Class.Event; // just default
   data: EventData;
 
   constructor(data: UnknownObject) {
@@ -34,7 +34,7 @@ class Event extends Entity implements IEvent {
   }
 
   isValid(): boolean {
-    if (this.class !== EntityClass.Event) {
+    if (this.class !== EntityEnums.Class.Event) {
       return false;
     }
 

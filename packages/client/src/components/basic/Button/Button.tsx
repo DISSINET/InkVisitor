@@ -1,4 +1,4 @@
-import { Operator } from "@shared/enums";
+import { EntityEnums } from "@shared/enums";
 import { Tooltip } from "components";
 import React, { MouseEventHandler } from "react";
 import { Colors } from "types";
@@ -7,7 +7,7 @@ import { StyledButton, StyledButtonLabel } from "./ButtonStyles";
 interface ButtonProps {
   tooltip?: string;
   label?: string;
-  icon?: JSX.Element | Operator;
+  icon?: JSX.Element | EntityEnums.Operator;
   inverted?: boolean;
   noBorder?: boolean;
   textRegular?: boolean;

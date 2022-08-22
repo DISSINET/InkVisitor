@@ -1,10 +1,10 @@
 import { IEntity, IResponseEntity } from ".";
-import { Certainty, Logic, UserRoleMode } from "../enums";
+import { EntityEnums, UserEnums } from "../enums";
 
 export interface IResponseEntityTooltip extends IResponseEntity {
   // usedCount?: number;
   // usedIn?: IStatement[];
-  right?: UserRoleMode;
+  right?: UserEnums.RoleMode;
   entities: { [key: string]: IEntity }; //  all entities mentioned in relations
 
   // C, A
@@ -46,6 +46,6 @@ export type IResponseEntityTooltipIdentifications = IResponseIdentification[];
 
 export type IResponseIdentification = {
   entityId: string;
-  logic: Logic;
-  certainty: Certainty;
+  logic: EntityEnums.Logic;
+  certainty: EntityEnums.Certainty;
 };

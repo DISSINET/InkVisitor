@@ -1,5 +1,5 @@
 import { entitiesDict } from "@shared/dictionaries";
-import { EntityClass, UserRole } from "@shared/enums";
+import { EntityEnums, UserEnums } from "@shared/enums";
 import { IEntity } from "@shared/types";
 import api from "api";
 import {
@@ -70,7 +70,7 @@ export const TemplateListCreateModal: React.FC<TemplateListCreateModal> = ({
         if (selectedDetailId) {
           queryClient.invalidateQueries("entity-templates");
         }
-        if (variables.class === EntityClass.Statement) {
+        if (variables.class === EntityEnums.Class.Statement) {
           setStatementId(variables.id);
         } else {
           appendDetailId(variables.id);
@@ -83,7 +83,7 @@ export const TemplateListCreateModal: React.FC<TemplateListCreateModal> = ({
 
   const handleCreateNewStatementTemplate = (): IEntity => {
     const newTemplate = CStatement(
-      localStorage.getItem("userrole") as UserRole,
+      localStorage.getItem("userrole") as UserEnums.Role,
       undefined,
       createModalEntityLabel,
       createModalEntityDetail
@@ -92,9 +92,9 @@ export const TemplateListCreateModal: React.FC<TemplateListCreateModal> = ({
   };
   const handleCreateNewEntityTemplate = (): IEntity => {
     const newTemplate = CEntity(
-      createModalEntityClass.value as EntityClass,
+      createModalEntityClass.value as EntityEnums.Class,
       createModalEntityLabel,
-      localStorage.getItem("userrole") as UserRole,
+      localStorage.getItem("userrole") as UserEnums.Role,
       createModalEntityDetail
     );
     return newTemplate;
@@ -102,7 +102,7 @@ export const TemplateListCreateModal: React.FC<TemplateListCreateModal> = ({
 
   const handleCreateTemplate = () => {
     const entity =
-      createModalEntityClass.value === EntityClass.Statement
+      createModalEntityClass.value === EntityEnums.Class.Statement
         ? handleCreateNewStatementTemplate()
         : handleCreateNewEntityTemplate();
     const templateEntity = CTemplateEntity(

@@ -1,10 +1,8 @@
-import { EntityClass, EntityStatus } from "@shared/enums";
-
+import { EntityEnums } from "@shared/enums";
 import memoize from "memoize-one";
 import React from "react";
 import { FaPlayCircle } from "react-icons/fa";
 import theme from "Theme/theme";
-
 import {
   StyledSuggestionLineActions,
   StyledSuggestionLineIcons,
@@ -13,7 +11,7 @@ import {
   StyledTagWrapper,
 } from "../SuggesterStyles";
 import { areEqual } from "react-window";
-import { Tag, Tooltip } from "components";
+import { Tag } from "components";
 import { EntitySuggestion } from "types";
 import { IEntity } from "@shared/types";
 import { ImInsertTemplate } from "react-icons/im";
@@ -51,9 +49,9 @@ interface EntityRow {
 const EntityRow: React.FC<EntityRow> = ({ data, index, style }) => {
   const { items, onPick, selected, isInsideTemplate, territoryParentId } = data;
   const { entity, icons } = items[index];
-  const isNotDiscouraged = entity.status !== EntityStatus.Discouraged;
+  const isNotDiscouraged = entity.status !== EntityEnums.Status.Discouraged;
   const territoryWithoutParent =
-    entity.class === EntityClass.Territory && !territoryParentId;
+    entity.class === EntityEnums.Class.Territory && !territoryParentId;
 
   const renderIcons = () => {
     if (!entity.isTemplate) {

@@ -6,7 +6,7 @@ import { clean } from "@modules/common.test";
 import { findEntityById } from "@service/shorthands";
 import { IStatement } from "@shared/types";
 import Prop from "@models/prop/prop";
-import { Order } from "@shared/enums";
+import { EntityEnums } from "@shared/enums";
 
 export const prepareEntity = (): [string, Entity] => {
   const entityId = Math.random().toString();
@@ -204,7 +204,7 @@ describe("test Entity.determineOrder", function () {
   });
 
   describe("when wanting last position", () => {
-    const wantedIndex = Order.Last;
+    const wantedIndex = EntityEnums.Order.Last;
     const siblings: Record<number, unknown> = { [-1]: true, 0: true, 1: true };
     const values = Object.keys(siblings)
       .map((v) => parseInt(v))

@@ -4,7 +4,7 @@ import Statement, {
   StatementAction,
 } from "@models/statement/statement";
 import { ResponseEntityDetail } from "./response";
-import { EntityClass, UsedInPosition } from "@shared/enums";
+import { EntityEnums } from "@shared/enums";
 import Prop, { PropSpec } from "@models/prop/prop";
 import Entity from "./entity";
 import { prepareStatement } from "@models/statement/statement.test";
@@ -14,7 +14,7 @@ describe("test ResponseEntityDetail.walkEntityProps", function () {
   const childEntity = new Entity({ id: "2" });
   const linkedEntity = new Entity({
     id: "3",
-    class: EntityClass.Statement,
+    class: EntityEnums.Class.Statement,
   });
   const prop = new Prop({});
   prop.type = new PropSpec({});
@@ -97,7 +97,7 @@ describe("test ResponseEntityDetail.walkStatementsDataEntities", function () {
       const foundEntry = response.usedInStatement.find(
         (u) =>
           u.statement.id === statement1.id &&
-          u.position === UsedInPosition.Action
+          u.position === EntityEnums.UsedInPosition.Action
       );
       expect(!!foundEntry).toBeTruthy();
     });
@@ -118,7 +118,7 @@ describe("test ResponseEntityDetail.walkStatementsDataEntities", function () {
       const foundEntry = response.usedInStatement.find(
         (u) =>
           u.statement.id === statement1.id &&
-          u.position === UsedInPosition.Actant
+          u.position === EntityEnums.UsedInPosition.Actant
       );
       expect(!!foundEntry).toBeTruthy();
     });
@@ -138,7 +138,7 @@ describe("test ResponseEntityDetail.walkStatementsDataEntities", function () {
     it("should add entry to usedInStatement under Tag position", () => {
       const foundEntry = response.usedInStatement.find(
         (u) =>
-          u.statement.id === statement1.id && u.position === UsedInPosition.Tag
+          u.statement.id === statement1.id && u.position === EntityEnums.UsedInPosition.Tag
       );
       expect(!!foundEntry).toBeTruthy();
     });

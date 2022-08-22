@@ -1,4 +1,4 @@
-import { EntityClass } from "@shared/enums";
+import { EntityEnums } from "@shared/enums";
 import { IResponseEntity } from "@shared/types";
 import { Tooltip, TypeBar } from "components";
 import React, { MouseEventHandler } from "react";
@@ -7,7 +7,6 @@ import {
   StyledClose,
   StyledLabel,
   StyledTab,
-  StyledTypeWrapper,
 } from "./EntityDetailTabStyles";
 
 interface EntityDetailTab {
@@ -27,7 +26,7 @@ export const EntityDetailTab: React.FC<EntityDetailTab> = ({
     <StyledTab isSelected={isSelected}>
       <Tooltip label={tabLabel}>
         <StyledLabel
-          isItalic={entity?.class === EntityClass.Statement && !entity?.label}
+          isItalic={entity?.class === EntityEnums.Class.Statement && !entity?.label}
           onClick={onClick}
         >
           {entity?.class && (

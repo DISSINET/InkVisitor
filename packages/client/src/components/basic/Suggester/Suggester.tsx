@@ -1,5 +1,5 @@
 import { entitiesDictKeys } from "@shared/dictionaries";
-import { EntityClass, EntityStatus } from "@shared/enums";
+import { EntityEnums } from "@shared/enums";
 import { IEntity, IOption } from "@shared/types";
 import { Button, Dropdown, Input, Loader, TypeBar } from "components";
 import useKeypress from "hooks/useKeyPress";
@@ -139,19 +139,19 @@ export const Suggester: React.FC<Suggester> = ({
     if (selected === -1 && typed.length > 0) {
       if (
         category.value === DropdownAny ||
-        category.value === EntityClass.Statement ||
-        category.value === EntityClass.Territory
+        category.value === EntityEnums.Class.Statement ||
+        category.value === EntityEnums.Class.Territory
       ) {
         setShowCreateModal(true);
       } else {
         onCreate({
           label: typed,
-          entityClass: entitiesDictKeys[category.value as EntityClass].value,
+          entityClass: entitiesDictKeys[category.value as EntityEnums.Class].value,
         });
       }
     } else if (selected > -1) {
       const entity = suggestions[selected].entity;
-      if (entity.status !== EntityStatus.Discouraged) {
+      if (entity.status !== EntityEnums.Status.Discouraged) {
         if (!entity.isTemplate) {
           onPick(entity);
         } else if (entity.isTemplate && !isInsideTemplate) {
@@ -172,14 +172,14 @@ export const Suggester: React.FC<Suggester> = ({
     if (typed.length > 0) {
       if (
         category.value === DropdownAny ||
-        category.value === EntityClass.Statement ||
-        category.value === EntityClass.Territory
+        category.value === EntityEnums.Class.Statement ||
+        category.value === EntityEnums.Class.Territory
       ) {
         setShowCreateModal(true);
       } else {
         onCreate({
           label: typed,
-          entityClass: entitiesDictKeys[category.value as EntityClass].value,
+          entityClass: entitiesDictKeys[category.value as EntityEnums.Class].value,
         });
       }
     } else {

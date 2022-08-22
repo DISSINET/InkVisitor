@@ -1,4 +1,4 @@
-import { EntityClass, UserRole } from "@shared/enums";
+import { EntityEnums, UserEnums } from "@shared/enums";
 import { IEntity } from "@shared/types";
 import api from "api";
 import { ButtonGroup, Button } from "components";
@@ -52,7 +52,7 @@ export const EntityDetailHeaderRow: React.FC<EntityDetailHeaderRow> = ({
   const duplicateEntity = (entityToDuplicate: IEntity) => {
     const newEntity = DEntity(
       entityToDuplicate,
-      localStorage.getItem("userrole") as UserRole
+      localStorage.getItem("userrole") as UserEnums.Role
     );
     duplicateEntityMutation.mutate(newEntity);
   };
@@ -68,7 +68,7 @@ export const EntityDetailHeaderRow: React.FC<EntityDetailHeaderRow> = ({
         />
       </StyledTagWrap>
       <ButtonGroup style={{ marginTop: "1rem" }}>
-        {entity.class !== EntityClass.Statement && userCanEdit && (
+        {entity.class !== EntityEnums.Class.Statement && userCanEdit && (
           <Button
             icon={<FaClone size={14} />}
             color="primary"
@@ -116,7 +116,7 @@ export const EntityDetailHeaderRow: React.FC<EntityDetailHeaderRow> = ({
             queryClient.invalidateQueries(["entity"]);
           }}
         />
-        {entity.class === EntityClass.Statement && (
+        {entity.class === EntityEnums.Class.Statement && (
           <Button
             key="edit"
             icon={<FaEdit size={14} />}

@@ -1,24 +1,14 @@
 import { IEntity, IProp } from "./";
 import {
-  EntityClass,
-  Certainty,
-  Elvl,
-  Position,
-  Logic,
-  Mood,
-  MoodVariant,
-  Virtuality,
-  Partitivity,
-  Operator,
-  Language,
+  EntityEnums,
 } from "../enums";
 
 export interface IStatement extends IEntity {
   id: string;
-  class: EntityClass.Statement;
+  class: EntityEnums.Class.Statement;
   label: string;
   detail: string;
-  language: Language;
+  language: EntityEnums.Language;
   props: IProp[];
   notes: string[];
   data: IStatementData;
@@ -38,12 +28,12 @@ export interface IStatementData {
 export interface IStatementAction {
   id: string;
   actionId: string;
-  elvl: Elvl;
-  certainty: Certainty;
-  logic: Logic;
-  mood: Mood[];
-  moodvariant: MoodVariant;
-  bundleOperator: Operator;
+  elvl: EntityEnums.Elvl;
+  certainty: EntityEnums.Certainty;
+  logic: EntityEnums.Logic;
+  mood: EntityEnums.Mood[];
+  moodvariant: EntityEnums.MoodVariant;
+  bundleOperator: EntityEnums.Operator;
   bundleStart: boolean;
   bundleEnd: boolean;
   props: IProp[];
@@ -52,12 +42,12 @@ export interface IStatementAction {
 export interface IStatementActant {
   id: string;
   entityId: string;
-  position: Position;
-  elvl: Elvl;
-  logic: Logic;
-  virtuality: Virtuality;
-  partitivity: Partitivity;
-  bundleOperator: Operator;
+  position: EntityEnums.Position;
+  elvl: EntityEnums.Elvl;
+  logic: EntityEnums.Logic;
+  virtuality: EntityEnums.Virtuality;
+  partitivity: EntityEnums.Partitivity;
+  bundleOperator: EntityEnums.Operator;
   bundleStart: boolean;
   bundleEnd: boolean;
   props: IProp[];
@@ -68,19 +58,19 @@ export interface IStatementActant {
 export interface IStatementClassification {
   id: string;
   entityId: string;
-  elvl: Elvl;
-  logic: Logic;
-  certainty: Certainty;
-  mood: Mood[];
-  moodvariant: MoodVariant;
+  elvl: EntityEnums.Elvl;
+  logic: EntityEnums.Logic;
+  certainty: EntityEnums.Certainty;
+  mood: EntityEnums.Mood[];
+  moodvariant: EntityEnums.MoodVariant;
 }
 
 export interface IStatementIdentification {
   id: string;
   entityId: string;
-  elvl: Elvl;
-  logic: Logic;
-  certainty: Certainty;
-  mood: Mood[];
-  moodvariant: MoodVariant;
+  elvl: EntityEnums.Elvl;
+  logic: EntityEnums.Logic;
+  certainty: EntityEnums.Certainty;
+  mood: EntityEnums.Mood[];
+  moodvariant: EntityEnums.MoodVariant;
 }

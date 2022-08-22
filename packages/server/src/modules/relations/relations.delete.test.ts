@@ -10,7 +10,7 @@ import { apiPath } from "@common/constants";
 import app from "../../Server";
 import { supertestConfig } from "..";
 import Relation from "@models/relation/relation";
-import { RelationType } from "@shared/enums";
+import { RelationEnums } from "@shared/enums";
 
 describe("Relations delete", function () {
   describe("bad id", () => {
@@ -30,7 +30,7 @@ describe("Relations delete", function () {
       const db = new Db();
       await db.initDb();
 
-      const relationEntry = new Relation({ type: RelationType.Superclass });
+      const relationEntry = new Relation({ type: RelationEnums.Type.Superclass });
       await relationEntry.save(db.connection);
 
       await request(app)

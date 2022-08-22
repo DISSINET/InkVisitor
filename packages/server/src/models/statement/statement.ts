@@ -12,19 +12,9 @@ import {
   IModel,
 } from "@models/common";
 import {
-  EntityClass,
-  Certainty,
-  Elvl,
-  Position,
-  Logic,
-  Mood,
-  MoodVariant,
-  Virtuality,
-  Partitivity,
-  Operator,
-  UserRole,
-  UserRoleMode,
-  DbIndex,
+  EntityEnums,
+  UserEnums,
+  DbEnums,
 } from "@shared/enums";
 
 import Entity from "@models/entity/entity";
@@ -39,11 +29,11 @@ import { IStatementClassification } from "@shared/types/statement";
 export class StatementClassification implements IStatementClassification {
   id: string = "";
   entityId: string = "";
-  elvl: Elvl = Elvl.Textual;
-  logic: Logic = Logic.Positive;
-  certainty: Certainty = Certainty.AlmostCertain;
-  mood: Mood[] = [];
-  moodvariant: MoodVariant = MoodVariant.Irrealis;
+  elvl: EntityEnums.Elvl = EntityEnums.Elvl.Textual;
+  logic: EntityEnums.Logic = EntityEnums.Logic.Positive;
+  certainty: EntityEnums.Certainty = EntityEnums.Certainty.AlmostCertain;
+  mood: EntityEnums.Mood[] = [];
+  moodvariant: EntityEnums.MoodVariant = EntityEnums.MoodVariant.Irrealis;
 
   constructor(data: UnknownObject) {
     if (!data) {
@@ -57,11 +47,11 @@ export class StatementClassification implements IStatementClassification {
 export class StatementIdentification implements IStatementClassification {
   id: string = "";
   entityId: string = "";
-  elvl: Elvl = Elvl.Textual;
-  logic: Logic = Logic.Positive;
-  certainty: Certainty = Certainty.AlmostCertain;
-  mood: Mood[] = [];
-  moodvariant: MoodVariant = MoodVariant.Irrealis;
+  elvl: EntityEnums.Elvl = EntityEnums.Elvl.Textual;
+  logic: EntityEnums.Logic = EntityEnums.Logic.Positive;
+  certainty: EntityEnums.Certainty = EntityEnums.Certainty.AlmostCertain;
+  mood: EntityEnums.Mood[] = [];
+  moodvariant: EntityEnums.MoodVariant = EntityEnums.MoodVariant.Irrealis;
 
   constructor(data: UnknownObject) {
     if (!data) {
@@ -75,12 +65,12 @@ export class StatementIdentification implements IStatementClassification {
 export class StatementActant implements IStatementActant, IModel {
   id = "";
   entityId = "";
-  position: Position = Position.Subject;
-  elvl: Elvl = Elvl.Textual;
-  logic: Logic = Logic.Positive;
-  virtuality: Virtuality = Virtuality.Reality;
-  partitivity: Partitivity = Partitivity.Unison;
-  bundleOperator: Operator = Operator.And;
+  position: EntityEnums.Position = EntityEnums.Position.Subject;
+  elvl: EntityEnums.Elvl = EntityEnums.Elvl.Textual;
+  logic: EntityEnums.Logic = EntityEnums.Logic.Positive;
+  virtuality: EntityEnums.Virtuality = EntityEnums.Virtuality.Reality;
+  partitivity: EntityEnums.Partitivity = EntityEnums.Partitivity.Unison;
+  bundleOperator: EntityEnums.Operator = EntityEnums.Operator.And;
   bundleStart: boolean = false;
   bundleEnd: boolean = false;
   props: Prop[] = [];
@@ -93,7 +83,7 @@ export class StatementActant implements IStatementActant, IModel {
       return;
     }
 
-    // TODO: If admin ? model.status = EntityStatus.Approved : model.status = EntityStatus.Pending
+    // TODO: If admin ? model.status = EntityEnums.Status.Approved : model.status = EntityEnums.Status.Pending
 
     fillFlatObject(this, data);
     fillArray<Prop>(this.props, Prop, data.props);
@@ -137,12 +127,12 @@ export class StatementTerritory {
 export class StatementAction implements IStatementAction {
   id = "";
   actionId: string = "";
-  elvl: Elvl = Elvl.Textual;
-  certainty: Certainty = Certainty.Empty;
-  logic: Logic = Logic.Positive;
-  mood: Mood[] = [Mood.Indication];
-  moodvariant: MoodVariant = MoodVariant.Realis;
-  bundleOperator: Operator = Operator.And;
+  elvl: EntityEnums.Elvl = EntityEnums.Elvl.Textual;
+  certainty: EntityEnums.Certainty = EntityEnums.Certainty.Empty;
+  logic: EntityEnums.Logic = EntityEnums.Logic.Positive;
+  mood: EntityEnums.Mood[] = [EntityEnums.Mood.Indication];
+  moodvariant: EntityEnums.MoodVariant = EntityEnums.MoodVariant.Realis;
+  bundleOperator: EntityEnums.Operator = EntityEnums.Operator.And;
   bundleStart: boolean = false;
   bundleEnd: boolean = false;
   props: Prop[] = [];
@@ -172,7 +162,7 @@ export class StatementAction implements IStatementAction {
 
 export class StatementData implements IModel, IStatementData {
   text = "";
-  territory? = new StatementTerritory({});
+  territory?= new StatementTerritory({});
   actions: StatementAction[] = [];
   actants: StatementActant[] = [];
   tags: string[] = [];
@@ -222,7 +212,7 @@ export class StatementData implements IModel, IStatementData {
 }
 
 class Statement extends Entity implements IStatement {
-  class: EntityClass.Statement = EntityClass.Statement;
+  class: EntityEnums.Class.Statement = EntityEnums.Class.Statement;
   data: StatementData;
 
   constructor(data: UnknownObject) {
@@ -240,7 +230,7 @@ class Statement extends Entity implements IStatement {
    * @returns boolean result
    */
   isValid(): boolean {
-    if (this.class != EntityClass.Statement) {
+    if (this.class != EntityEnums.Class.Statement) {
       return false;
     }
 
@@ -249,13 +239,13 @@ class Statement extends Entity implements IStatement {
 
   canBeEditedByUser(user: User): boolean {
     // admin role has always the right
-    if (user.role === UserRole.Admin) {
+    if (user.role === UserEnums.Role.Admin) {
       return true;
     }
 
     // editors should be able to access META statements
     if (
-      user.role === UserRole.Editor &&
+      user.role === UserEnums.Role.Editor &&
       this.data.territory &&
       this.data.territory.territoryId === "T0"
     ) {
@@ -271,8 +261,8 @@ class Statement extends Entity implements IStatement {
         return false;
       }
       return (
-        closestRight.mode === UserRoleMode.Admin ||
-        closestRight.mode === UserRoleMode.Write
+        closestRight.mode === UserEnums.RoleMode.Admin ||
+        closestRight.mode === UserEnums.RoleMode.Write
       );
     }
     return true;
@@ -280,7 +270,7 @@ class Statement extends Entity implements IStatement {
 
   canBeViewedByUser(user: User): boolean {
     // admin role has always the right
-    if (user.role === UserRole.Admin) {
+    if (user.role === UserEnums.Role.Admin) {
       return true;
     }
 
@@ -296,7 +286,7 @@ class Statement extends Entity implements IStatement {
 
   canBeDeletedByUser(user: User): boolean {
     // admin role has always the right
-    if (user.role === UserRole.Admin) {
+    if (user.role === UserEnums.Role.Admin) {
       return true;
     }
 
@@ -383,7 +373,7 @@ class Statement extends Entity implements IStatement {
       const list: IStatement[] = await rethink
         .table(Entity.table)
         .getAll(this.data.territory.territoryId, {
-          index: DbIndex.StatementTerritory,
+          index: DbEnums.Indexes.StatementTerritory,
         })
         .run(db);
 
@@ -526,7 +516,7 @@ class Statement extends Entity implements IStatement {
     const statements = await rethink
       .table(Entity.table)
       .filter({
-        class: EntityClass.Statement,
+        class: EntityEnums.Class.Statement,
       })
       .filter((row: RDatum) => {
         return row("data")("territory")("territoryId").eq(territoryId);
@@ -551,7 +541,7 @@ class Statement extends Entity implements IStatement {
   ): Promise<IStatement[]> {
     const statements = await rethink
       .table(Entity.table)
-      .getAll(entityId, { index: DbIndex.StatementEntities })
+      .getAll(entityId, { index: DbEnums.Indexes.StatementEntities })
       .run(db);
 
     return statements.sort((a, b) => {
@@ -602,7 +592,7 @@ class Statement extends Entity implements IStatement {
     const statements = await rethink
       .table(Entity.table)
       .filter({
-        class: EntityClass.Statement,
+        class: EntityEnums.Class.Statement,
       })
       .filter((row: RDatum) => {
         return rethink.or(
@@ -681,7 +671,7 @@ class Statement extends Entity implements IStatement {
     const statements = await rethink
       .table(Entity.table)
       .filter({
-        class: EntityClass.Statement,
+        class: EntityEnums.Class.Statement,
       })
       .filter((row: RDatum) => {
         return rethink.and(
@@ -707,7 +697,7 @@ class Statement extends Entity implements IStatement {
     ): Promise<void> => {
       const linkedToActant = await rethink
         .table(Entity.table)
-        .filter({ class: EntityClass.Statement })
+        .filter({ class: EntityEnums.Class.Statement })
         .filter((row: any) => {
           return row("data")("actants").contains((actantElement: any) =>
             actantElement("entityId").eq(actantId)
@@ -722,7 +712,7 @@ class Statement extends Entity implements IStatement {
 
       const linkedToProps = await rethink
         .table(Entity.table)
-        .filter({ class: EntityClass.Statement })
+        .filter({ class: EntityEnums.Class.Statement })
         .filter((row: any) => {
           return row("data")("props").contains((actantElement: any) =>
             actantElement("origin").eq(actantId)
@@ -732,7 +722,7 @@ class Statement extends Entity implements IStatement {
 
       const linkedToActions = await rethink
         .table(Entity.table)
-        .filter({ class: EntityClass.Statement })
+        .filter({ class: EntityEnums.Class.Statement })
         .filter((row: any) => {
           return row("data")("actions").contains((actantElement: any) =>
             actantElement("actionId").eq(actantId)

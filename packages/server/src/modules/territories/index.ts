@@ -2,7 +2,7 @@ import Statement from "@models/statement/statement";
 import { ResponseTerritory } from "@models/territory/response";
 import Territory from "@models/territory/territory";
 import { findEntityById } from "@service/shorthands";
-import { EntityClass } from "@shared/enums";
+import { EntityEnums } from "@shared/enums";
 import { IResponseTerritory, IStatement, ITerritory } from "@shared/types";
 import {
   BadParams,
@@ -25,7 +25,7 @@ export default Router()
         request.db,
         territoryId
       );
-      if (!territory || territory.class !== EntityClass.Territory) {
+      if (!territory || territory.class !== EntityEnums.Class.Territory) {
         throw new TerritoryDoesNotExits(
           `territory ${territoryId} was not found`,
           territoryId
@@ -58,7 +58,7 @@ export default Router()
         request.db,
         territoryId
       );
-      if (!territory || territory.class !== EntityClass.Territory) {
+      if (!territory || territory.class !== EntityEnums.Class.Territory) {
         throw new TerritoryDoesNotExits(
           `territory ${territoryId} was not found`,
           territoryId
