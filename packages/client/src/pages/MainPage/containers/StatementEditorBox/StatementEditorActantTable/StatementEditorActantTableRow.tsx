@@ -41,6 +41,7 @@ import { dndHoverFn } from "utils";
 import AttributesEditor from "../../AttributesEditor/AttributesEditor";
 import { PropGroup } from "../../PropGroup/PropGroup";
 import {
+  StyledCI,
   StyledCIGrid,
   StyledCIHeading,
   StyledGrid,
@@ -241,7 +242,8 @@ export const StatementEditorActantTableRow: React.FC<
     );
   };
 
-  const [modalOpen, setModalOpen] = useState<boolean>(false);
+  const [actantAttributesModalOpen, setActantAttributesModalOpen] =
+    useState<boolean>(false);
 
   const renderAttributesCell = () => {
     const {
@@ -257,8 +259,8 @@ export const StatementEditorActantTableRow: React.FC<
       <ButtonGroup noMarginRight height={19}>
         {sActant && (
           <AttributesEditor
-            modalOpen={modalOpen}
-            setModalOpen={setModalOpen}
+            modalOpen={actantAttributesModalOpen}
+            setModalOpen={setActantAttributesModalOpen}
             modalTitle={`Actant involvement`}
             entity={actant}
             disabledAllAttributes={!userCanEdit}
@@ -342,7 +344,7 @@ export const StatementEditorActantTableRow: React.FC<
             inverted={true}
             noBorder
             icon={<AttributeIcon attributeName={"negation"} />}
-            onClick={() => setModalOpen(true)}
+            onClick={() => setActantAttributesModalOpen(true)}
           />
         )}
         {sActant.bundleOperator && (
@@ -353,7 +355,7 @@ export const StatementEditorActantTableRow: React.FC<
             inverted={true}
             noBorder
             icon={sActant.bundleOperator}
-            onClick={() => setModalOpen(true)}
+            onClick={() => setActantAttributesModalOpen(true)}
           />
         )}
       </ButtonGroup>
@@ -418,10 +420,12 @@ export const StatementEditorActantTableRow: React.FC<
     return (
       <>
         {classifications.length > 0 && (
-          <div style={{ display: "flex", flexDirection: "column" }}>
+          <StyledCI>
             <StyledCIHeading>Classifications:</StyledCIHeading>
             {classifications.map((classification, key) => {
               const entity = statement.entities[classification.entityId];
+              const [classificationModalOpen, setClassificationModalOpen] =
+                useState(false);
               return (
                 <StyledCIGrid key={key}>
                   {entity ? (
@@ -470,7 +474,43 @@ export const StatementEditorActantTableRow: React.FC<
                     />
                   )}
                   <ButtonGroup>
-                    {/* TODO: ATTRIBUTES EDITOR */}
+                    <AttributesEditor
+                      modalOpen={classificationModalOpen}
+                      setModalOpen={setClassificationModalOpen}
+                      modalTitle={`Classification`}
+                      entity={entity}
+                      disabledAllAttributes={!userCanEdit}
+                      userCanEdit={userCanEdit}
+                      data={{
+                        elvl: classification.elvl,
+                        logic: classification.logic,
+                        certainty: classification.certainty,
+                        mood: classification.mood,
+                        moodvariant: classification.moodvariant,
+                      }}
+                      handleUpdate={(newData) => {
+                        updateActant(sActant.id, {
+                          classifications: classifications.map((c) =>
+                            c.id === classification.id
+                              ? { ...c, ...newData }
+                              : { ...c }
+                          ),
+                        });
+                      }}
+                      updateActantId={(newId: string) => {
+                        updateActant(sActant.id, {
+                          classifications: classifications.map((c) =>
+                            c.id === classification.id
+                              ? { ...c, entityId: newId }
+                              : { ...c }
+                          ),
+                        });
+                      }}
+                      classEntitiesActant={[EntityClass.Concept]}
+                      loading={updateStatementDataMutation.isLoading}
+                      isInsideTemplate={isInsideTemplate}
+                      territoryParentId={territoryParentId}
+                    />
                     {userCanEdit && (
                       <Button
                         key="d"
@@ -491,7 +531,7 @@ export const StatementEditorActantTableRow: React.FC<
                 </StyledCIGrid>
               );
             })}
-          </div>
+          </StyledCI>
         )}
       </>
     );
@@ -501,10 +541,12 @@ export const StatementEditorActantTableRow: React.FC<
     identifications: IStatementIdentification[]
   ) => {
     const { actant, sActant } = filteredActant.data;
+    const [identificationModalOpen, setIdentificationModalOpen] =
+      useState(false);
     return (
       <>
         {identifications.length > 0 && (
-          <div>
+          <StyledCI>
             <StyledCIHeading>Identifications:</StyledCIHeading>
             {identifications.length > 0 &&
               identifications.map((identification, key) => {
@@ -557,7 +599,43 @@ export const StatementEditorActantTableRow: React.FC<
                       />
                     )}
                     <ButtonGroup>
-                      {/* TODO: ATTRIBUTES EDITOR */}
+                      <AttributesEditor
+                        modalOpen={identificationModalOpen}
+                        setModalOpen={setIdentificationModalOpen}
+                        modalTitle={`Identification`}
+                        entity={entity}
+                        disabledAllAttributes={!userCanEdit}
+                        userCanEdit={userCanEdit}
+                        data={{
+                          elvl: identification.elvl,
+                          logic: identification.logic,
+                          certainty: identification.certainty,
+                          mood: identification.mood,
+                          moodvariant: identification.moodvariant,
+                        }}
+                        handleUpdate={(newData) => {
+                          updateActant(sActant.id, {
+                            identifications: identifications.map((c) =>
+                              c.id === identification.id
+                                ? { ...c, ...newData }
+                                : { ...c }
+                            ),
+                          });
+                        }}
+                        updateActantId={(newId: string) => {
+                          updateActant(sActant.id, {
+                            identifications: identifications.map((c) =>
+                              c.id === identification.id
+                                ? { ...c, entityId: newId }
+                                : { ...c }
+                            ),
+                          });
+                        }}
+                        classEntitiesActant={[EntityClass.Concept]}
+                        loading={updateStatementDataMutation.isLoading}
+                        isInsideTemplate={isInsideTemplate}
+                        territoryParentId={territoryParentId}
+                      />
                       {userCanEdit && (
                         <Button
                           key="d"
@@ -578,7 +656,7 @@ export const StatementEditorActantTableRow: React.FC<
                   </StyledCIGrid>
                 );
               })}
-          </div>
+          </StyledCI>
         )}
       </>
     );

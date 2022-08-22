@@ -34,6 +34,9 @@ export const StyledMarkerWrap = styled.div`
   color: ${({ theme }) => theme.color["success"]};
 `;
 
+export const StyledCI = styled.div`
+  margin-left: 2rem;
+`;
 export const StyledCIHeading = styled.p`
   font-weight: ${({ theme }) => theme.fontWeight.light};
   font-size: ${({ theme }) => theme.fontSize["sm"]};
@@ -43,7 +46,7 @@ export const StyledCIHeading = styled.p`
 export const StyledCIGrid = styled.div`
   margin-bottom: 0.5rem;
   display: grid;
-  grid-template-columns: auto 2rem;
+  grid-template-columns: auto 4rem;
   width: fit-content;
   max-width: 100%;
 `;
