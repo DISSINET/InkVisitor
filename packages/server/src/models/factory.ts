@@ -1,5 +1,5 @@
 import { UnknownObject } from "./common";
-import { EntityClass } from "@shared/enums";
+import { EntityEnums } from "@shared/enums";
 import Territory from "./territory/territory";
 import Statement from "./statement/statement";
 import Resource from "./resource/resource";
@@ -19,28 +19,28 @@ export function getEntityClass(data: UnknownObject): Entity {
     throw new ModelNotValidError("bad input data for factory");
   }
 
-  switch (data.class as EntityClass) {
-    case EntityClass.Territory:
+  switch (data.class as EntityEnums.Class) {
+    case EntityEnums.Class.Territory:
       return new Territory(data);
-    case EntityClass.Statement:
+    case EntityEnums.Class.Statement:
       return new Statement(data);
-    case EntityClass.Person:
+    case EntityEnums.Class.Person:
       return new Person(data);
-    case EntityClass.Group:
+    case EntityEnums.Class.Group:
       return new Group(data);
-    case EntityClass.Object:
+    case EntityEnums.Class.Object:
       return new ObjectEntity(data);
-    case EntityClass.Concept:
+    case EntityEnums.Class.Concept:
       return new Concept(data);
-    case EntityClass.Location:
+    case EntityEnums.Class.Location:
       return new Location(data);
-    case EntityClass.Value:
+    case EntityEnums.Class.Value:
       return new Value(data);
-    case EntityClass.Event:
+    case EntityEnums.Class.Event:
       return new Event(data);
-    case EntityClass.Resource:
+    case EntityEnums.Class.Resource:
       return new Resource(data);
-    case EntityClass.Action:
+    case EntityEnums.Class.Action:
       return new Action(data);
     default:
       throw new ModelNotValidError("unknown class");

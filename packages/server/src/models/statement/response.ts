@@ -1,19 +1,19 @@
 import { Request } from "express";
-import { UserRoleMode } from "@shared/enums";
+import { UserEnums } from "@shared/enums";
 import { IEntity, IResponseStatement } from "@shared/types";
 import { Connection } from "rethinkdb-ts";
 import Statement from "./statement";
 
 export class ResponseStatement extends Statement implements IResponseStatement {
   entities: { [key: string]: IEntity };
-  right: UserRoleMode = UserRoleMode.Read;
+  right: UserEnums.RoleMode = UserEnums.RoleMode.Read;
 
   constructor(entity: IEntity) {
     super({});
     for (const key of Object.keys(entity)) {
       (this as any)[key] = (entity as any)[key];
     }
-    
+
     this.entities = {};
   }
 

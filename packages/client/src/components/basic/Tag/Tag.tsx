@@ -1,4 +1,4 @@
-import { EntityExtension, ExtendedEntityClass } from "@shared/enums";
+import { EntityEnums } from "@shared/enums";
 import { IEntity } from "@shared/types";
 import { Tooltip } from "components";
 import { useSearchParams } from "hooks";
@@ -34,7 +34,7 @@ interface TagProps {
   labelItalic?: boolean;
   tooltipDetail?: string;
   tooltipText?: string;
-  entityClass?: ExtendedEntityClass;
+  entityClass?: EntityEnums.ExtendedClass;
   status?: string;
   ltype?: string;
   entity?: IEntity;
@@ -67,7 +67,7 @@ export const Tag: React.FC<TagProps> = ({
   labelItalic = false,
   tooltipDetail,
   tooltipText,
-  entityClass = EntityExtension.Empty,
+  entityClass = EntityEnums.Extension.Empty,
   status = "1",
   ltype = "1",
   entity,
@@ -83,7 +83,7 @@ export const Tag: React.FC<TagProps> = ({
   disableTooltip = false,
   disableDoubleClick = false,
   disableDrag = false,
-  updateOrderFn = () => {},
+  updateOrderFn = () => { },
   statementsCount,
   isFavorited = false,
   isTemplate = false,
@@ -108,7 +108,7 @@ export const Tag: React.FC<TagProps> = ({
   });
 
   const canDrag = useMemo(
-    () => entityClass !== EntityExtension.Empty && !disableDrag,
+    () => entityClass !== EntityEnums.Extension.Empty && !disableDrag,
     [entityClass, disableDrag]
   );
 

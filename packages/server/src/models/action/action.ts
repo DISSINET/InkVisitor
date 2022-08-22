@@ -1,5 +1,5 @@
 import { fillFlatObject, UnknownObject, IModel } from "@models/common";
-import { EntityClass, EntityStatus } from "@shared/enums";
+import { EntityEnums } from "@shared/enums";
 import Entity from "@models/entity/entity";
 import { IAction } from "@shared/types";
 import { ActionEntity, ActionValency } from "@shared/types/action";
@@ -15,7 +15,7 @@ class ActionData implements IModel {
     a2: [],
     s: [],
   };
-  status: EntityStatus = EntityStatus.Pending;
+  status: EntityEnums.Status = EntityEnums.Status.Pending;
 
   constructor(data: UnknownObject) {
     if (!data) {
@@ -34,7 +34,7 @@ class ActionData implements IModel {
 }
 
 class Action extends Entity implements IAction {
-  class: EntityClass.Action = EntityClass.Action; // just default
+  class: EntityEnums.Class.Action = EntityEnums.Class.Action; // just default
   data: ActionData;
 
   constructor(data: UnknownObject) {
@@ -48,7 +48,7 @@ class Action extends Entity implements IAction {
   }
 
   isValid(): boolean {
-    if (this.class !== EntityClass.Action) {
+    if (this.class !== EntityEnums.Class.Action) {
       return false;
     }
 

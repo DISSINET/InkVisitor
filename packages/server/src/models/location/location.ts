@@ -1,10 +1,10 @@
 import Entity from "@models/entity/entity";
 import { fillFlatObject, IModel, UnknownObject } from "@models/common";
-import { EntityClass, EntityLogicalType } from "@shared/enums";
+import { EntityEnums } from "@shared/enums";
 import { ILocation } from "@shared/types";
 
 class LocationData implements IModel {
-  logicalType: EntityLogicalType = EntityLogicalType.Definite;
+  logicalType: EntityEnums.LogicalType = EntityEnums.LogicalType.Definite;
 
   constructor(data: UnknownObject) {
     if (!data) {
@@ -20,7 +20,7 @@ class LocationData implements IModel {
 }
 
 class Location extends Entity implements ILocation {
-  class: EntityClass.Location = EntityClass.Location; // just default
+  class: EntityEnums.Class.Location = EntityEnums.Class.Location; // just default
   data: LocationData;
 
   constructor(data: UnknownObject) {
@@ -34,7 +34,7 @@ class Location extends Entity implements ILocation {
   }
 
   isValid(): boolean {
-    if (this.class !== EntityClass.Location) {
+    if (this.class !== EntityEnums.Class.Location) {
       return false;
     }
 

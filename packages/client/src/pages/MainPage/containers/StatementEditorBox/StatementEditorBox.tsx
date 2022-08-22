@@ -1,4 +1,4 @@
-import { Order } from "@shared/enums";
+import { EntityEnums } from "@shared/enums";
 import api from "api";
 import { Loader } from "components";
 import { useSearchParams } from "hooks";
@@ -80,7 +80,7 @@ export const StatementEditorBox: React.FC = () => {
   const moveStatementMutation = useMutation(
     async (newTerritoryId: string) => {
       await api.entityUpdate(statementId, {
-        data: { territory: { id: newTerritoryId, order: Order.First } },
+        data: { territory: { id: newTerritoryId, order: EntityEnums.Order.First } },
       });
     },
     {

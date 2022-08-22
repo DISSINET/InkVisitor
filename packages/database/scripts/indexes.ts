@@ -1,11 +1,11 @@
-import { DbIndex } from "@shared/enums";
 import { r, RDatum, RTable, RValue } from "rethinkdb-ts";
+import { DbEnums } from "@shared/enums"
 
 const entitiesIndexes: ((table: RTable) => any)[] = [
   // if the prop object is missing value/type/children attrs, this wont work! model should handle this
   (table: RTable) =>
     table.indexCreate(
-      DbIndex.PropsRecursive,
+      DbEnums.Indexes.PropsRecursive,
       r
         .row("props")
         .concatMap((prop: RDatum) =>
@@ -36,15 +36,15 @@ const entitiesIndexes: ((table: RTable) => any)[] = [
         .distinct(),
       { multi: true }
     ),
-  (table: RTable) => table.indexCreate(DbIndex.Class),
+  (table: RTable) => table.indexCreate(DbEnums.Indexes.Class),
   (table: RTable) =>
     table.indexCreate(
-      DbIndex.StatementTerritory,
+      DbEnums.Indexes.StatementTerritory,
       r.row("data")("territory")("territoryId")
     ),
   (table: RTable) =>
     table.indexCreate(
-      DbIndex.StatementEntities,
+      DbEnums.Indexes.StatementEntities,
       function (row: RDatum) {
         return row("data")("actions")
           .map(function (a: RDatum) {
@@ -63,11 +63,11 @@ const entitiesIndexes: ((table: RTable) => any)[] = [
         multi: true,
       }
     ),
-  (table: RTable) => table.indexCreate(DbIndex.EntityUsedTemplate),
+  (table: RTable) => table.indexCreate(DbEnums.Indexes.EntityUsedTemplate),
 ];
 
 const auditsIndexes: ((table: RTable) => any)[] = [
-  (table: RTable) => table.indexCreate(DbIndex.AuditEntityId),
+  (table: RTable) => table.indexCreate(DbEnums.Indexes.AuditEntityId),
 ];
 
 export { entitiesIndexes, auditsIndexes };

@@ -1,4 +1,4 @@
-import { EntityClass, EntityStatus, Language } from "@shared/enums";
+import { EntityEnums } from "@shared/enums";
 import { IEntity } from "@shared/types";
 import api from "api";
 import { Button, Loader } from "components";
@@ -17,12 +17,12 @@ interface StatementListBreadcrumbItem {
 }
 const initialData: IEntity = {
   id: "",
-  class: EntityClass.Territory,
+  class: EntityEnums.Class.Territory,
   data: {},
   label: "",
   detail: "",
-  status: EntityStatus.Approved,
-  language: Language.Empty,
+  status: EntityEnums.Status.Approved,
+  language: EntityEnums.Language.Empty,
   references: [],
   props: [],
   notes: [],

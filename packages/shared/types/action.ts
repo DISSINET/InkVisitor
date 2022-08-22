@@ -1,9 +1,9 @@
-import { EntityClass, EntityStatus } from "../enums";
+import { EntityEnums } from "../enums";
 import { IEntity } from "./entity";
 
 // TODO
 export interface IAction extends IEntity {
-  class: EntityClass.Action;
+  class: EntityEnums.Class.Action;
   data: {
     valencies: ActionValency;
     entities: ActionEntity;

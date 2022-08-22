@@ -6,7 +6,7 @@ import {
   languageDict,
 } from "@shared/dictionaries";
 import { allEntities } from "@shared/dictionaries/entity";
-import { EntityClass, Language, UserRoleMode } from "@shared/enums";
+import { EntityEnums, UserEnums } from "@shared/enums";
 import {
   IAction,
   IEntity,
@@ -14,7 +14,6 @@ import {
   IProp,
   IReference,
   IResponseDetail,
-  IResponseEntity,
 } from "@shared/types";
 import api from "api";
 import {
@@ -70,12 +69,12 @@ import {
 } from "./EntityDetailStyles";
 
 const allowedEntityChangeClasses = [
-  EntityClass.Value,
-  EntityClass.Person,
-  EntityClass.Event,
-  EntityClass.Group,
-  EntityClass.Location,
-  EntityClass.Object,
+  EntityEnums.Class.Value,
+  EntityEnums.Class.Person,
+  EntityEnums.Class.Event,
+  EntityEnums.Class.Group,
+  EntityEnums.Class.Location,
+  EntityEnums.Class.Object,
 ];
 
 interface EntityDetail {
@@ -110,7 +109,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
     useState<boolean>(false);
 
   const [showRemoveSubmit, setShowRemoveSubmit] = useState(false);
-  const [selectedEntityType, setSelectedEntityType] = useState<EntityClass>();
+  const [selectedEntityType, setSelectedEntityType] = useState<EntityEnums.Class>();
   const [showTypeSubmit, setShowTypeSubmit] = useState(false);
   const [usedInPage, setUsedInPage] = useState<number>(0);
   const statementsPerPage = 20;
@@ -209,14 +208,14 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
   }, []);
 
   const userCanAdmin: boolean = useMemo(() => {
-    return !!entity && entity.right === UserRoleMode.Admin;
+    return !!entity && entity.right === UserEnums.RoleMode.Admin;
   }, [entity]);
 
   const userCanEdit: boolean = useMemo(() => {
     return (
       !!entity &&
-      (entity.right === UserRoleMode.Admin ||
-        entity.right === UserRoleMode.Write)
+      (entity.right === UserEnums.RoleMode.Admin ||
+        entity.right === UserEnums.RoleMode.Write)
     );
   }, [entity]);
 
@@ -238,7 +237,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
           variables.status ||
           variables.data?.logicalType
         ) {
-          if (entity?.class === EntityClass.Territory) {
+          if (entity?.class === EntityEnums.Class.Territory) {
             queryClient.invalidateQueries("tree");
           }
           queryClient.invalidateQueries("territory");
@@ -262,7 +261,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
         setShowTypeSubmit(false);
         queryClient.invalidateQueries(["entity"]);
         queryClient.invalidateQueries("statement");
-        if (variables === EntityClass.Territory) {
+        if (variables === EntityEnums.Class.Territory) {
           queryClient.invalidateQueries("tree");
         }
         queryClient.invalidateQueries("territory");
@@ -285,7 +284,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
         // hide selected territory if T removed
         if (
           entity &&
-          entity.class == EntityClass.Territory &&
+          entity.class == EntityEnums.Class.Territory &&
           entity.id === territoryId
         ) {
           setTerritoryId("");
@@ -296,7 +295,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
         // hide editor box if the removed entity was also opened in the editor
         if (
           entity &&
-          entity.class == EntityClass.Statement &&
+          entity.class == EntityEnums.Class.Statement &&
           entity.id === statementId
         ) {
           setStatementId("");
@@ -476,13 +475,13 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
   const actantMode = useMemo(() => {
     const actantClass = entity?.class;
     if (actantClass) {
-      if (actantClass === EntityClass.Action) {
+      if (actantClass === EntityEnums.Class.Action) {
         return "action";
-      } else if (actantClass === EntityClass.Territory) {
+      } else if (actantClass === EntityEnums.Class.Territory) {
         return "territory";
-      } else if (actantClass === EntityClass.Resource) {
+      } else if (actantClass === EntityEnums.Class.Resource) {
         return "resource";
-      } else if (actantClass === EntityClass.Concept) {
+      } else if (actantClass === EntityEnums.Class.Concept) {
         return "concept";
       }
     }
@@ -491,7 +490,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
 
   const isTerritoryWithParent = (entity: IResponseDetail): boolean => {
     return (
-      entity.class === EntityClass.Territory &&
+      entity.class === EntityEnums.Class.Territory &&
       entity.data.parent &&
       Object.keys(entity.entities).includes(entity.data.parent.id)
     );
@@ -499,7 +498,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
 
   const isStatementWithTerritory = (entity: IResponseDetail): boolean => {
     return (
-      entity.class === EntityClass.Statement &&
+      entity.class === EntityEnums.Class.Statement &&
       entity.data.territory &&
       Object.keys(entity.entities).includes(entity.data.territory.id)
     );
@@ -575,7 +574,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
                                 option: ValueType<OptionTypeBase, any>
                               ) => {
                                 setSelectedEntityType(
-                                  (option as IOption).value as EntityClass
+                                  (option as IOption).value as EntityEnums.Class
                                 );
                                 setShowTypeSubmit(true);
                               }}
@@ -766,7 +765,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
                           )}
                           onChange={(newValue: any) => {
                             updateEntityMutation.mutate({
-                              language: newValue.value || Language.Empty,
+                              language: newValue.value || EntityEnums.Language.Empty,
                             });
                           }}
                         />
@@ -878,8 +877,8 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
                                     entities: {
                                       s: newValue
                                         ? (newValue as string[]).map(
-                                            (v: any) => v.value
-                                          )
+                                          (v: any) => v.value
+                                        )
                                         : [],
                                       a1: entity.data.entities.a1,
                                       a2: entity.data.entities.a2,
@@ -950,8 +949,8 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
                                     entities: {
                                       a1: newValue
                                         ? (newValue as string[]).map(
-                                            (v: any) => v.value
-                                          )
+                                          (v: any) => v.value
+                                        )
                                         : [],
                                       s: entity.data.entities.s,
                                       a2: entity.data.entities.a2,
@@ -1024,8 +1023,8 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
                                     entities: {
                                       a2: newValue
                                         ? (newValue as string[]).map(
-                                            (v: any) => v.value
-                                          )
+                                          (v: any) => v.value
+                                        )
                                         : [],
                                       s: entity.data.entities.s,
                                       a1: entity.data.entities.a1,
@@ -1345,9 +1344,8 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
       />
       <Submit
         title="Change entity type"
-        text={`Changing entity type to: [${
-          selectedEntityType ? entitiesDictKeys[selectedEntityType].label : ""
-        }]. You may loose some values. Do you want to continue?`}
+        text={`Changing entity type to: [${selectedEntityType ? entitiesDictKeys[selectedEntityType].label : ""
+          }]. You may loose some values. Do you want to continue?`}
         submitLabel="Continue"
         onSubmit={() => {
           if (selectedEntityType) {

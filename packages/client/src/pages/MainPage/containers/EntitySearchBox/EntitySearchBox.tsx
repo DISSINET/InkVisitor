@@ -1,5 +1,5 @@
 import { DropdownItem, entitiesDict } from "@shared/dictionaries/entity";
-import { EntityClass } from "@shared/enums";
+import { EntityEnums } from "@shared/enums";
 import { IEntity, IOption } from "@shared/types";
 import { IRequestSearch } from "@shared/types/request-search";
 import api from "api";
@@ -227,17 +227,17 @@ export const EntitySearchBox: React.FC = () => {
         <EntitySuggester
           disableTemplatesAccept
           categoryTypes={[
-            EntityClass.Statement,
-            EntityClass.Action,
-            EntityClass.Territory,
-            EntityClass.Resource,
-            EntityClass.Person,
-            EntityClass.Group,
-            EntityClass.Object,
-            EntityClass.Concept,
-            EntityClass.Location,
-            EntityClass.Value,
-            EntityClass.Event,
+            EntityEnums.Class.Statement,
+            EntityEnums.Class.Action,
+            EntityEnums.Class.Territory,
+            EntityEnums.Class.Resource,
+            EntityEnums.Class.Person,
+            EntityEnums.Class.Group,
+            EntityEnums.Class.Object,
+            EntityEnums.Class.Concept,
+            EntityEnums.Class.Location,
+            EntityEnums.Class.Value,
+            EntityEnums.Class.Event,
           ]}
           onSelected={(newSelectedId: string) => {
             handleChange({ cooccurrenceId: newSelectedId });

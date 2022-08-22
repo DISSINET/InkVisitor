@@ -1,4 +1,4 @@
-import { EntityClass, UserRole, UserRoleMode } from "@shared/enums";
+import { EntityEnums, UserEnums } from "@shared/enums";
 import { ITerritory, IParentTerritory } from "@shared/types/territory";
 import { r as rethink, Connection, WriteResult, RDatum } from "rethinkdb-ts";
 import { fillFlatObject, UnknownObject, IModel } from "@models/common";
@@ -53,7 +53,7 @@ export class TerritoryData implements IModel {
 }
 
 class Territory extends Entity implements ITerritory {
-  class: EntityClass.Territory = EntityClass.Territory;
+  class: EntityEnums.Class.Territory = EntityEnums.Class.Territory;
   data: TerritoryData;
 
   @nonenumerable
@@ -70,7 +70,7 @@ class Territory extends Entity implements ITerritory {
   }
 
   isValid(): boolean {
-    if (this.class !== EntityClass.Territory) {
+    if (this.class !== EntityEnums.Class.Territory) {
       return false;
     }
 
@@ -169,7 +169,7 @@ class Territory extends Entity implements ITerritory {
     const list: ITerritory[] = await rethink
       .table(Territory.table)
       .filter({
-        class: EntityClass.Territory,
+        class: EntityEnums.Class.Territory,
       })
       .filter((territory: RDatum) => {
         return rethink.and(
@@ -191,7 +191,7 @@ class Territory extends Entity implements ITerritory {
 
   canBeViewedByUser(user: User): boolean {
     // admin role has always the right
-    if (user.role === UserRole.Admin) {
+    if (user.role === UserEnums.Role.Admin) {
       return true;
     }
 
@@ -200,7 +200,7 @@ class Territory extends Entity implements ITerritory {
 
   canBeEditedByUser(user: User): boolean {
     // admin role has always the right
-    if (user.role === UserRole.Admin) {
+    if (user.role === UserEnums.Role.Admin) {
       return true;
     }
 
@@ -211,8 +211,8 @@ class Territory extends Entity implements ITerritory {
     }
 
     return (
-      closestRight.mode === UserRoleMode.Admin ||
-      closestRight.mode === UserRoleMode.Write
+      closestRight.mode === UserEnums.RoleMode.Admin ||
+      closestRight.mode === UserEnums.RoleMode.Write
     );
   }
 
@@ -223,7 +223,7 @@ class Territory extends Entity implements ITerritory {
     }
 
     // admin role has always the right
-    if (user.role === UserRole.Admin) {
+    if (user.role === UserEnums.Role.Admin) {
       return true;
     }
 
@@ -241,14 +241,14 @@ class Territory extends Entity implements ITerritory {
     }
 
     return (
-      closestRight.mode === UserRoleMode.Admin ||
-      closestRight.mode === UserRoleMode.Write
+      closestRight.mode === UserEnums.RoleMode.Admin ||
+      closestRight.mode === UserEnums.RoleMode.Write
     );
   }
 
   canBeDeletedByUser(user: User): boolean {
     // admin role has always the right
-    if (user.role === UserRole.Admin) {
+    if (user.role === UserEnums.Role.Admin) {
       return true;
     }
 

@@ -1,5 +1,5 @@
 import { userRoleDict } from "@shared/dictionaries";
-import { UserRole } from "@shared/enums";
+import { UserEnums } from "@shared/enums";
 import { IResponsePermission, RequestPermissionUpdate } from "@shared/types";
 import api from "api";
 import { Box } from "components";
@@ -7,7 +7,7 @@ import { Page } from "components/advanced";
 import React, { useState } from "react";
 import { useQuery } from "react-query";
 
-interface AclPage {}
+interface AclPage { }
 
 const initialData: IResponsePermission[] = [
   {
@@ -18,7 +18,7 @@ const initialData: IResponsePermission[] = [
   },
 ];
 
-const AclPage: React.FC<AclPage> = ({}) => {
+const AclPage: React.FC<AclPage> = ({ }) => {
   const [currentCtrlName, setCtrl] = useState("");
   const [currentMethod, setMethod] = useState("");
 
@@ -40,15 +40,15 @@ const AclPage: React.FC<AclPage> = ({}) => {
 
   const ctrls = data
     ? (data as IResponsePermission[]).reduce<
-        Record<string, Record<string, IResponsePermission>>
-      >((acc, current) => {
-        if (!acc[current.controller]) {
-          acc[current.controller] = {};
-        }
+      Record<string, Record<string, IResponsePermission>>
+    >((acc, current) => {
+      if (!acc[current.controller]) {
+        acc[current.controller] = {};
+      }
 
-        acc[current.controller][current.route] = current;
-        return acc;
-      }, {})
+      acc[current.controller][current.route] = current;
+      return acc;
+    }, {})
     : {};
 
   return (
@@ -88,7 +88,7 @@ const AclPage: React.FC<AclPage> = ({}) => {
                   handleSave(ctrls[currentCtrlName][currentMethod].id, {
                     roles: Array.from(
                       e.target.selectedOptions,
-                      (option) => option.value as UserRole
+                      (option) => option.value as UserEnums.Role
                     ),
                   })
                 }

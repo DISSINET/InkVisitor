@@ -1,10 +1,6 @@
 import {
-  EntityClass,
-  EntityExtension,
-  EntityStatus,
-  ExtendedEntityClass,
-  UserRole,
-  UserRoleMode,
+  EntityEnums,
+  UserEnums,
 } from "@shared/enums";
 import { IEntity, IOption, IStatement, ITerritory } from "@shared/types";
 import api from "api";
@@ -25,13 +21,13 @@ import { DropdownAny, rootTerritoryId, wildCardChar } from "Theme/constants";
 import { EntityDragItem } from "types";
 
 interface EntitySuggester {
-  categoryTypes: ExtendedEntityClass[];
+  categoryTypes: EntityEnums.ExtendedClass[];
   onSelected: (id: string) => void;
   placeholder?: string;
   inputWidth?: number | "full";
   openDetailOnCreate?: boolean;
   territoryActants?: string[];
-  excludedEntities?: EntityClass[];
+  excludedEntities?: EntityEnums.Class[];
   excludedActantIds?: string[];
   filterEditorRights?: boolean;
   isInsideTemplate?: boolean;
@@ -89,7 +85,7 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
 
       const suggestions = resSuggestions.data;
       suggestions.sort((a, b) => {
-        if (a.status === EntityStatus.Discouraged) {
+        if (a.status === EntityEnums.Status.Discouraged) {
           return 1;
         } else {
           return -1;
@@ -97,8 +93,8 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
       });
       return resSuggestions.data
         .filter((s) =>
-          filterEditorRights && userRole !== UserRole.Admin
-            ? s.right === UserRoleMode.Write
+          filterEditorRights && userRole !== UserEnums.Role.Admin
+            ? s.right === UserEnums.RoleMode.Write
             : s
         )
         .filter((s) =>
@@ -145,7 +141,7 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
     });
     if (categories.length > 1 && !disableWildCard) {
       categories.unshift({
-        label: EntityExtension.Any,
+        label: EntityEnums.Extension.Any,
         value: DropdownAny,
       });
     }
@@ -171,27 +167,27 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
 
   const handleCreate = (newCreated: {
     label: string;
-    entityClass: EntityClass;
+    entityClass: EntityEnums.Class;
     detail?: string;
     territoryId?: string;
   }) => {
     if (
-      newCreated.entityClass === EntityClass.Statement &&
+      newCreated.entityClass === EntityEnums.Class.Statement &&
       newCreated.territoryId
     ) {
       const newStatement = CStatement(
-        localStorage.getItem("userrole") as UserRole,
+        localStorage.getItem("userrole") as UserEnums.Role,
         newCreated.territoryId,
         newCreated.label,
         newCreated.detail
       );
       actantsCreateMutation.mutate(newStatement);
-    } else if (newCreated.entityClass === EntityClass.Territory) {
+    } else if (newCreated.entityClass === EntityEnums.Class.Territory) {
       const newTerritory = CTerritoryActant(
         newCreated.label,
         newCreated.territoryId ? newCreated.territoryId : rootTerritoryId,
         -1,
-        localStorage.getItem("userrole") as UserRole,
+        localStorage.getItem("userrole") as UserEnums.Role,
         newCreated.detail
       );
       actantsCreateMutation.mutate(newTerritory);
@@ -199,7 +195,7 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
       const newEntity = CEntity(
         newCreated.entityClass,
         newCreated.label,
-        localStorage.getItem("userrole") as UserRole,
+        localStorage.getItem("userrole") as UserEnums.Role,
         newCreated.detail
       );
       actantsCreateMutation.mutate(newEntity);
@@ -209,18 +205,18 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
   const handleDuplicate = (
     templateToDuplicate: IEntity | IStatement | ITerritory
   ) => {
-    if (templateToDuplicate.class === EntityClass.Statement) {
+    if (templateToDuplicate.class === EntityEnums.Class.Statement) {
       const newStatement = DStatement(
         templateToDuplicate as IStatement,
-        localStorage.getItem("userrole") as UserRole,
+        localStorage.getItem("userrole") as UserEnums.Role,
         true
       );
       actantsCreateMutation.mutate(newStatement);
-    } else if (templateToDuplicate.class === EntityClass.Territory) {
+    } else if (templateToDuplicate.class === EntityEnums.Class.Territory) {
       if (territoryParentId) {
         const newTerritory = DEntity(
           templateToDuplicate as IEntity,
-          localStorage.getItem("userrole") as UserRole,
+          localStorage.getItem("userrole") as UserEnums.Role,
           true
         );
         newTerritory.data.parent.id = territoryParentId;
@@ -229,7 +225,7 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
     } else {
       const newEntity = DEntity(
         templateToDuplicate as IEntity,
-        localStorage.getItem("userrole") as UserRole,
+        localStorage.getItem("userrole") as UserEnums.Role,
         true
       );
       actantsCreateMutation.mutate(newEntity);
@@ -264,7 +260,7 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
       !categoryTypes.includes(hoverredCategory) ||
       (disableTemplatesAccept && newHoverred.isTemplate) ||
       newHoverred.isDiscouraged ||
-      (newHoverred.entityClass === EntityClass.Territory && !territoryParentId)
+      (newHoverred.entityClass === EntityEnums.Class.Territory && !territoryParentId)
     ) {
       setIsWrongDropCategory(true);
     } else {
@@ -294,7 +290,7 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
       }}
       onCreate={(newCreated: {
         label: string;
-        entityClass: EntityClass;
+        entityClass: EntityEnums.Class;
         detail?: string;
         territoryId?: string;
       }) => {

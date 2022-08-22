@@ -1,13 +1,13 @@
-import { Logic } from "../enums";
+import { EntityEnums } from "../enums";
 
 export const logicDict = [
   {
-    value: Logic.Positive,
+    value: EntityEnums.Logic.Positive,
     label: "positive",
     info: "",
   },
   {
-    value: Logic.Negative,
+    value: EntityEnums.Logic.Negative,
     label: "negative",
     info: "",
   },

@@ -1,5 +1,5 @@
 import { languageDict, userRoleDict } from "@shared/dictionaries";
-import { EntityClass, Language, UserRole, UserRoleMode } from "@shared/enums";
+import { EntityEnums, UserEnums } from "@shared/enums";
 import { IResponseUser } from "@shared/types";
 import api from "api";
 import {
@@ -36,17 +36,17 @@ interface DataObject {
   email: string;
   defaultLanguage: {
     label: string;
-    value: Language;
+    value: EntityEnums.Language;
   } | null;
   searchLanguages:
-    | (
-        | {
-            label: string;
-            value: Language;
-          }
-        | undefined
-      )[]
-    | null;
+  | (
+    | {
+      label: string;
+      value: EntityEnums.Language;
+    }
+    | undefined
+  )[]
+  | null;
   defaultTerritory: string | null;
 }
 interface UserCustomizationModal {
@@ -55,7 +55,7 @@ interface UserCustomizationModal {
 }
 export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
   user,
-  onClose = () => {},
+  onClose = () => { },
 }) => {
   const { options, name, email, role, rights } = useMemo(() => user, [user]);
 
@@ -126,7 +126,7 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
         name: data.name,
         email: data.email,
         options: {
-          defaultLanguage: data.defaultLanguage?.value || Language.Empty,
+          defaultLanguage: data.defaultLanguage?.value || EntityEnums.Language.Empty,
           searchLanguages: data.searchLanguages?.map((sL) => sL?.value),
           defaultTerritory: data.defaultTerritory,
         },
@@ -135,11 +135,11 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
   };
 
   const readRights = useMemo(
-    () => rights.filter((r) => r.mode === UserRoleMode.Read),
+    () => rights.filter((r) => r.mode === UserEnums.RoleMode.Read),
     [rights]
   );
   const writeRights = useMemo(
-    () => rights.filter((r) => r.mode === UserRoleMode.Write),
+    () => rights.filter((r) => r.mode === UserEnums.RoleMode.Write),
     [rights]
   );
 
@@ -193,7 +193,7 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
                   handleChange("searchLanguages", selectedOption)
                 }
                 options={languageDict.filter(
-                  (lang) => lang.value !== Language.Empty
+                  (lang) => lang.value !== EntityEnums.Language.Empty
                 )}
               />
             </ModalInputWrap>
@@ -221,7 +221,7 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
               ) : (
                 <div>
                   <EntitySuggester
-                    categoryTypes={[EntityClass.Territory]}
+                    categoryTypes={[EntityEnums.Class.Territory]}
                     onSelected={(selected: string) =>
                       handleChange("defaultTerritory", selected)
                     }
@@ -247,19 +247,19 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
                       longValue: userRoleDict[0].label,
                       shortValue: userRoleDict[0].label,
                       selected: role === userRoleDict[0].value,
-                      onClick: () => {},
+                      onClick: () => { },
                     },
                     {
                       longValue: userRoleDict[1].label,
                       shortValue: userRoleDict[1].label,
                       selected: role === userRoleDict[1].value,
-                      onClick: () => {},
+                      onClick: () => { },
                     },
                     {
                       longValue: userRoleDict[2].label,
                       shortValue: userRoleDict[2].label,
                       selected: role === userRoleDict[2].value,
-                      onClick: () => {},
+                      onClick: () => { },
                     },
                   ]}
                 />
@@ -268,20 +268,20 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
             <StyledUserRightHeading>{"read"}</StyledUserRightHeading>
             <StyledUserRightItem>
               <StyledRightsWrap>
-                {role !== UserRole.Admin
+                {role !== UserEnums.Role.Admin
                   ? readRights.map((right, key) => (
-                      <UserRightItem key={key} territoryId={right.territory} />
-                    ))
+                    <UserRightItem key={key} territoryId={right.territory} />
+                  ))
                   : "all"}
               </StyledRightsWrap>
             </StyledUserRightItem>
             <StyledUserRightHeading>{"write"}</StyledUserRightHeading>
             <StyledUserRightItem>
               <StyledRightsWrap>
-                {role !== UserRole.Admin
+                {role !== UserEnums.Role.Admin
                   ? writeRights.map((right, key) => (
-                      <UserRightItem key={key} territoryId={right.territory} />
-                    ))
+                    <UserRightItem key={key} territoryId={right.territory} />
+                  ))
                   : "all"}
               </StyledRightsWrap>
             </StyledUserRightItem>

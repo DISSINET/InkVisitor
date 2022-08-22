@@ -1,4 +1,4 @@
-import { Position } from "@shared/enums";
+import { EntityEnums } from "@shared/enums";
 import { IEntity, IResponseTree, IStatement } from "@shared/types";
 import { DropTargetMonitor, XYCoord } from "react-dnd";
 import { DragItem } from "types";
@@ -10,25 +10,25 @@ export const findPositionInStatement = (
 ) => {
   if (
     statement.data.actants
-      .filter((a) => a.position === Position.Subject)
+      .filter((a) => a.position === EntityEnums.Position.Subject)
       .find((a) => a.entityId === actant.id)
   ) {
     return "subject";
   } else if (
     statement.data.actants
-      .filter((a) => a.position === Position.Actant1)
+      .filter((a) => a.position === EntityEnums.Position.Actant1)
       .find((a) => a.entityId === actant.id)
   ) {
     return "actant1";
   } else if (
     statement.data.actants
-      .filter((a) => a.position === Position.Actant2)
+      .filter((a) => a.position === EntityEnums.Position.Actant2)
       .find((a) => a.entityId === actant.id)
   ) {
     return "actant2";
   } else if (
     statement.data.actants
-      .filter((a) => a.position === Position.PseudoActant)
+      .filter((a) => a.position === EntityEnums.Position.PseudoActant)
       .find((a) => a.entityId === actant.id)
   ) {
     return "pseudo-actant";

@@ -1,5 +1,5 @@
 import { Request } from "express";
-import { UsedInPosition, UserRoleMode } from "@shared/enums";
+import { EntityEnums, UserEnums } from "@shared/enums";
 import {
   IEntity,
   IProp,
@@ -24,7 +24,7 @@ export class ResponseEntity extends Entity implements IResponseEntity {
   @nonenumerable
   originalEntity: Entity;
 
-  right: UserRoleMode = UserRoleMode.Read;
+  right: UserEnums.RoleMode = UserEnums.RoleMode.Read;
 
   constructor(entity: Entity) {
     super({});
@@ -45,12 +45,11 @@ export class ResponseEntity extends Entity implements IResponseEntity {
 
 export class ResponseEntityDetail
   extends ResponseEntity
-  implements IResponseDetail
-{
+  implements IResponseDetail {
   entities: { [key: string]: IEntity };
-  usedInStatement: IResponseUsedInStatement<UsedInPosition>[];
+  usedInStatement: IResponseUsedInStatement<EntityEnums.UsedInPosition>[];
   usedInStatementProps: IResponseUsedInStatementProps[];
-  usedInMetaProps: IResponseUsedInMetaProp<UsedInPosition>[];
+  usedInMetaProps: IResponseUsedInMetaProp<EntityEnums.UsedInPosition>[];
   usedAsTemplate?: string[] | undefined;
   usedInStatementIdentification: IResponseUsedInStatementIdentification[] = [];
   usedInStatementClassification: IResponseUsedInStatementClassification[] = [];
@@ -187,19 +186,19 @@ export class ResponseEntityDetail
     for (const statement of statements) {
       for (const action of statement.data.actions) {
         if (action.actionId === this.id) {
-          this.addUsedInStatement(statement, UsedInPosition.Action);
+          this.addUsedInStatement(statement, EntityEnums.UsedInPosition.Action);
         }
       }
 
       for (const actant of statement.data.actants) {
         if (actant.entityId === this.id) {
-          this.addUsedInStatement(statement, UsedInPosition.Actant);
+          this.addUsedInStatement(statement, EntityEnums.UsedInPosition.Actant);
         }
       }
 
       for (const tag of statement.data.tags) {
         if (tag === this.id) {
-          this.addUsedInStatement(statement, UsedInPosition.Tag);
+          this.addUsedInStatement(statement, EntityEnums.UsedInPosition.Tag);
         }
       }
     }
@@ -210,7 +209,7 @@ export class ResponseEntityDetail
    * @param statement
    * @param position
    */
-  addUsedInStatement(statement: IStatement, position: UsedInPosition) {
+  addUsedInStatement(statement: IStatement, position: EntityEnums.UsedInPosition) {
     this.usedInStatement.push({
       statement,
       position,

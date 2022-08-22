@@ -1,4 +1,4 @@
-import { EntityStatus } from "@shared/enums";
+import { EntityEnums } from "@shared/enums";
 import { IEntity } from "@shared/types";
 import { Tag } from "components";
 import React, { ReactNode } from "react";
@@ -58,7 +58,7 @@ export const EntityTag: React.FC<EntityTag> = ({
       ltype={entity?.data?.logicalType ?? "1"}
       tooltipDetail={entity.detail}
       isTemplate={entity.isTemplate}
-      isDiscouraged={entity.status === EntityStatus.Discouraged}
+      isDiscouraged={entity.status === EntityEnums.Status.Discouraged}
       entity={entity}
       tooltipText={tooltipText}
       showOnly={showOnly}

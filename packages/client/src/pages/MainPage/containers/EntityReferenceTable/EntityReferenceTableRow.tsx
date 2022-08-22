@@ -1,4 +1,4 @@
-import { EntityClass } from "@shared/enums";
+import { EntityEnums } from "@shared/enums";
 import { IEntity, IReference } from "@shared/types";
 import { Button } from "components";
 import { EntitySuggester, EntityTag } from "components/advanced";
@@ -73,7 +73,7 @@ export const EntityReferenceTableRow: React.FC<EntityReferenceTableRow> = ({
                 onSelected={(newSelectedId: string) => {
                   handleChangeResource(reference.id, newSelectedId);
                 }}
-                categoryTypes={[EntityClass.Resource]}
+                categoryTypes={[EntityEnums.Class.Resource]}
                 isInsideTemplate={isInsideTemplate}
                 territoryParentId={territoryParentId}
               />
@@ -119,7 +119,7 @@ export const EntityReferenceTableRow: React.FC<EntityReferenceTableRow> = ({
                 onSelected={(newSelectedId: string) => {
                   handleChangeValue(reference.id, newSelectedId);
                 }}
-                categoryTypes={[EntityClass.Value]}
+                categoryTypes={[EntityEnums.Class.Value]}
                 excludedEntities={excludedSuggesterEntities}
                 isInsideTemplate={isInsideTemplate}
                 territoryParentId={territoryParentId}

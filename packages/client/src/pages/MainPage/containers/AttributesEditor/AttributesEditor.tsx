@@ -8,7 +8,7 @@ import {
   partitivityDict,
   virtualityDict,
 } from "@shared/dictionaries";
-import { EntityClass } from "@shared/enums";
+import { EntityEnums } from "@shared/enums";
 import { IEntity } from "@shared/types";
 import {
   Button,
@@ -45,7 +45,7 @@ interface AttributesEditor {
     data: AttributeData | { actant: string } | { action: string }
   ) => void;
   updateActantId?: (newId: string) => void;
-  classEntitiesActant?: EntityClass[];
+  classEntitiesActant?: EntityEnums.Class[];
   loading: boolean;
   disabledAttributes?: PropAttributeName[];
   disabledAllAttributes?: boolean;
@@ -63,7 +63,7 @@ const AttributesEditor: React.FC<AttributesEditor> = ({
   entity,
   data,
   handleUpdate,
-  updateActantId = () => {},
+  updateActantId = () => { },
   classEntitiesActant = [],
   loading,
   disabledAttributes = [] as PropAttributeName[],
