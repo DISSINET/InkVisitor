@@ -49,12 +49,12 @@ export class ResponseEntityDetail
   extends ResponseEntity
   implements IResponseDetail {
   entities: { [key: string]: IEntity };
-  usedInStatement: IResponseUsedInStatement<EntityEnums.UsedInPosition>[];
+  usedInStatements: IResponseUsedInStatement<EntityEnums.UsedInPosition>[];
   usedInStatementProps: IResponseUsedInStatementProps[];
   usedInMetaProps: IResponseUsedInMetaProp<EntityEnums.UsedInPosition>[];
   usedAsTemplate?: string[] | undefined;
-  usedInStatementIdentification: IResponseUsedInStatementIdentification[];
-  usedInStatementClassification: IResponseUsedInStatementClassification[];
+  usedInStatementIdentifications: IResponseUsedInStatementIdentification[];
+  usedInStatementClassifications: IResponseUsedInStatementClassification[];
 
   relations: IRelation[] = [];
 
@@ -66,11 +66,11 @@ export class ResponseEntityDetail
   constructor(entity: Entity) {
     super(entity);
     this.entities = {};
-    this.usedInStatement = [];
+    this.usedInStatements = [];
     this.usedInStatementProps = [];
     this.usedInMetaProps = [];
-    this.usedInStatementClassification = [];
-    this.usedInStatementIdentification = [];
+    this.usedInStatementClassifications = [];
+    this.usedInStatementIdentifications = [];
 
     for (const key of this.originalEntity.getEntitiesIds()) {
       this.postponedEntities[key] = undefined;
@@ -113,9 +113,9 @@ export class ResponseEntityDetail
   }
 
   /**
-   * Loads entries for usedInStatementIdentification and usedInStatementClassification fields
+   * Loads entries for usedInStatementIdentifications and usedInStatementClassifications fields
    * Needs to be called after walkStatementsDataEntities, since it uses also populated 
-   * entries in usedInStatement field
+   * entries in usedInStatements field
    * @param statements 
    */
   async populateRelations(statements: IStatement[]): Promise<void> {
@@ -141,7 +141,7 @@ export class ResponseEntityDetail
       }
     }
 
-    this.usedInStatement
+    this.usedInStatements
       .filter(us => us.position === EntityEnums.UsedInPosition.Actant)
       .forEach(us => {
         us.statement.data.actants.filter(a => a.entityId === this.id).forEach(a => {
@@ -163,7 +163,7 @@ export class ResponseEntityDetail
    * @param data 
    */
   addToClassifications(sID: string, actantEID: string, relationEID: string, data: IStatementClassification) {
-    this.usedInStatementClassification.push({
+    this.usedInStatementClassifications.push({
       statementId: sID,
       actantEntityId: actantEID,
       relationEntityId: relationEID,
@@ -179,7 +179,7 @@ export class ResponseEntityDetail
    * @param data 
    */
   addToIdentifications(sID: string, actantEID: string, relationEID: string, data: IStatementIdentification) {
-    this.usedInStatementIdentification.push({
+    this.usedInStatementIdentifications.push({
       statementId: sID,
       actantEntityId: actantEID,
       relationEntityId: relationEID,
@@ -285,12 +285,12 @@ export class ResponseEntityDetail
   }
 
   /**
-   * Adds statement to usedInStatement & entities fields
+   * Adds statement to usedInStatements & entities fields
    * @param statement
    * @param position
    */
   addUsedInStatement(statement: IStatement, position: EntityEnums.UsedInPosition) {
-    this.usedInStatement.push({
+    this.usedInStatements.push({
       statement,
       position,
     });
@@ -329,7 +329,7 @@ export class ResponseEntityDetail
   }
 
   /**
-   * Adds statement to usedInStatement & entities fields
+   * Adds statement to usedInStatements & entities fields
    * @param statement
    * @param originId
    * @param props

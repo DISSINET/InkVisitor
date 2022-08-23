@@ -93,8 +93,8 @@ describe("test ResponseEntityDetail.walkStatementsDataEntities", function () {
 
     response.walkStatementsDataEntities([statement1]);
 
-    it("should add entry to usedInStatement under Action position", () => {
-      const foundEntry = response.usedInStatement.find(
+    it("should add entry to usedInStatements under Action position", () => {
+      const foundEntry = response.usedInStatements.find(
         (u) =>
           u.statement.id === statement1.id &&
           u.position === EntityEnums.UsedInPosition.Action
@@ -114,8 +114,8 @@ describe("test ResponseEntityDetail.walkStatementsDataEntities", function () {
 
     response.walkStatementsDataEntities([statement1]);
 
-    it("should add entry to usedInStatement under Actant position", () => {
-      const foundEntry = response.usedInStatement.find(
+    it("should add entry to usedInStatements under Actant position", () => {
+      const foundEntry = response.usedInStatements.find(
         (u) =>
           u.statement.id === statement1.id &&
           u.position === EntityEnums.UsedInPosition.Actant
@@ -135,8 +135,8 @@ describe("test ResponseEntityDetail.walkStatementsDataEntities", function () {
 
     response.walkStatementsDataEntities([statement1]);
 
-    it("should add entry to usedInStatement under Tag position", () => {
-      const foundEntry = response.usedInStatement.find(
+    it("should add entry to usedInStatements under Tag position", () => {
+      const foundEntry = response.usedInStatements.find(
         (u) =>
           u.statement.id === statement1.id && u.position === EntityEnums.UsedInPosition.Tag
       );

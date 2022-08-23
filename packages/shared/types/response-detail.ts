@@ -11,12 +11,12 @@ import {
 
 export interface IResponseDetail extends IResponseEntity {
   entities: { [key: string]: IEntity }; // all entities from IStatement and entityIds...
-  usedInStatement: IResponseUsedInStatement<EntityEnums.UsedInPosition>[]; // all statements, where the detail id is used as an actant, action, or tag
+  usedInStatements: IResponseUsedInStatement<EntityEnums.UsedInPosition>[]; // all statements, where the detail id is used as an actant, action, or tag
   usedInStatementProps: IResponseUsedInStatementProps[]; // all statements, where the detail id is used in props
   usedInMetaProps: IResponseUsedInMetaProp<EntityEnums.UsedInPosition>[]; // all entities, where the detail id is used in props (entity.props[])
 
-  usedInStatementIdentification: IResponseUsedInStatementIdentification[];
-  usedInStatementClassification: IResponseUsedInStatementClassification[];
+  usedInStatementIdentifications: IResponseUsedInStatementIdentification[];
+  usedInStatementClassifications: IResponseUsedInStatementClassification[];
 
   usedAsTemplate?: string[];
   relations: IRelation[];
