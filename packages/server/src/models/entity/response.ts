@@ -19,6 +19,8 @@ import {
   IResponseUsedInStatementIdentification,
   IResponseUsedInStatementProps,
 } from "@shared/types/response-detail";
+import { IRequest } from "src/custom.request";
+import { IStatementClassification, IStatementIdentification } from "@shared/types/statement";
 
 export class ResponseEntity extends Entity implements IResponseEntity {
   @nonenumerable
@@ -38,7 +40,7 @@ export class ResponseEntity extends Entity implements IResponseEntity {
    * Loads additional fields to satisfy the IResponseDetail interface
    * @param req
    */
-  async prepare(request: Request) {
+  async prepare(request: IRequest) {
     this.right = this.originalEntity.getUserRoleMode(request.getUserOrFail());
   }
 }
@@ -51,8 +53,8 @@ export class ResponseEntityDetail
   usedInStatementProps: IResponseUsedInStatementProps[];
   usedInMetaProps: IResponseUsedInMetaProp<EntityEnums.UsedInPosition>[];
   usedAsTemplate?: string[] | undefined;
-  usedInStatementIdentification: IResponseUsedInStatementIdentification[] = [];
-  usedInStatementClassification: IResponseUsedInStatementClassification[] = [];
+  usedInStatementIdentification: IResponseUsedInStatementIdentification[];
+  usedInStatementClassification: IResponseUsedInStatementClassification[];
 
   relations: IRelation[] = [];
 
@@ -67,6 +69,8 @@ export class ResponseEntityDetail
     this.usedInStatement = [];
     this.usedInStatementProps = [];
     this.usedInMetaProps = [];
+    this.usedInStatementClassification = [];
+    this.usedInStatementIdentification = [];
 
     for (const key of this.originalEntity.getEntitiesIds()) {
       this.postponedEntities[key] = undefined;
@@ -77,34 +81,110 @@ export class ResponseEntityDetail
    * Loads additional fields to satisfy the IResponseDetail interface
    * @param req
    */
-  async prepare(req: Request): Promise<void> {
+  async prepare(req: IRequest): Promise<void> {
     super.prepare(req);
 
-    // find entities in which at least one props reference equals this.id
-    const usedInEntityProps = await Entity.findUsedInProps(
-      req.db.connection,
-      this.id
-    );
+    const conn = req.db.connection
 
-    for (const entity of usedInEntityProps) {
+    // find entities in which at least one props reference equals this.id
+    for (const entity of await Entity.findUsedInProps(conn, this.id)) {
       this.walkEntityProps(entity, entity.props);
     }
 
     this.walkStatementsDataEntities(
-      await Statement.findByDataEntityId(req.db.connection, this.id)
+      await Statement.findByDataEntityId(conn, this.id)
     );
 
     this.walkStatementsDataProps(
-      await Statement.findByDataPropsId(req.db.connection, this.id)
+      await Statement.findByDataPropsId(conn, this.id)
     );
 
     if (this.usedTemplate) {
       this.postponedEntities[this.usedTemplate] = undefined;
     }
 
-    await this.populateEntitiesMap(req.db.connection);
+    await this.populateRelations(
+      await Statement.findByDataActantsCI(conn, this.id)
+    );
 
-    await this.processTemplateData(req.db.connection);
+    await this.populateEntitiesMap(conn);
+
+    await this.processTemplateData(conn);
+  }
+
+  /**
+   * Loads entries for usedInStatementIdentification and usedInStatementClassification fields
+   * Needs to be called after walkStatementsDataEntities, since it uses also populated 
+   * entries in usedInStatement field
+   * @param statements 
+   */
+  async populateRelations(statements: IStatement[]): Promise<void> {
+    for (const statement of statements) {
+      for (const actant of statement.data.actants) {
+        if (actant.classifications) {
+          for (const classData of actant.classifications) {
+            if (classData.entityId === this.id) {
+              this.addToClassifications(statement.id, actant.entityId, this.id, classData)
+              this.postponedEntities[statement.id] = undefined;
+            }
+          }
+        }
+
+        if (actant.identifications) {
+          for (const identification of actant.identifications) {
+            if (identification.entityId === this.id) {
+              this.addToIdentifications(statement.id, actant.entityId, this.id, identification)
+              this.postponedEntities[statement.id] = undefined;
+            }
+          }
+        }
+      }
+    }
+
+    this.usedInStatement
+      .filter(us => us.position === EntityEnums.UsedInPosition.Actant)
+      .forEach(us => {
+        us.statement.data.actants.filter(a => a.entityId === this.id).forEach(a => {
+          if (a.classifications) {
+            a.classifications.forEach(c => this.addToClassifications(us.statement.id, this.id, this.id, c))
+          }
+          if (a.identifications) {
+            a.identifications?.forEach(i => this.addToIdentifications(us.statement.id, this.id, this.id, i))
+          }
+        })
+      })
+  }
+
+  /**
+   * Shorthand function for adding IResponseUsedInStatementClassification entries
+   * @param sID 
+   * @param actantEID 
+   * @param relationEID 
+   * @param data 
+   */
+  addToClassifications(sID: string, actantEID: string, relationEID: string, data: IStatementClassification) {
+    this.usedInStatementClassification.push({
+      statementId: sID,
+      actantEntityId: actantEID,
+      relationEntityId: relationEID,
+      data,
+    });
+  }
+
+  /**
+   * Shorthand function for adding usedInStatementIdentification entries
+   * @param sID 
+   * @param actantEID 
+   * @param relationEID 
+   * @param data 
+   */
+  addToIdentifications(sID: string, actantEID: string, relationEID: string, data: IStatementIdentification) {
+    this.usedInStatementIdentification.push({
+      statementId: sID,
+      actantEntityId: actantEID,
+      relationEntityId: relationEID,
+      data,
+    });
   }
 
   /**
